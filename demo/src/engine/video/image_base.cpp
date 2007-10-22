@@ -177,7 +177,7 @@ void ImageMemory::CopyFromTexture(TexSheet* texture) {
 
 
 
-void ImageMemory::CopyFromImage(BaseImageTexture* img) {
+void ImageMemory::CopyFromImage(BaseTexture* img) {
 	// First copy the image's entire texture sheet to memory
 	CopyFromTexture(img->texture_sheet);
 
@@ -516,10 +516,10 @@ bool ImageMemory::_SaveJpgImage(const std::string& filename) const {
 } // bool ImageMemory::_SaveJpgImage(const std::string& file_name) const
 
 // -----------------------------------------------------------------------------
-// BaseImageTexture class
+// BaseTexture class
 // -----------------------------------------------------------------------------
 
-BaseImageTexture::BaseImageTexture() :
+BaseTexture::BaseTexture() :
 	texture_sheet(NULL),
 	width(0),
 	height(0),
@@ -535,7 +535,7 @@ BaseImageTexture::BaseImageTexture() :
 
 
 
-BaseImageTexture::BaseImageTexture(int32 width_, int32 height_) :
+BaseTexture::BaseTexture(int32 width_, int32 height_) :
 	texture_sheet(NULL),
 	width(width_),
 	height(height_),
@@ -551,7 +551,7 @@ BaseImageTexture::BaseImageTexture(int32 width_, int32 height_) :
 
 
 
-BaseImageTexture::BaseImageTexture(TexSheet* texture_sheet_, int32 width_, int32 height_) :
+BaseTexture::BaseTexture(TexSheet* texture_sheet_, int32 width_, int32 height_) :
 	texture_sheet(texture_sheet_),
 	width(width_),
 	height(height_),
@@ -567,7 +567,7 @@ BaseImageTexture::BaseImageTexture(TexSheet* texture_sheet_, int32 width_, int32
 
 
 
-BaseImageTexture::~BaseImageTexture() {
+BaseTexture::~BaseTexture() {
 	if (ref_count > 0) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "destructor invoked when the object had a reference count greater than zero: " << ref_count << endl;
 	}
@@ -578,7 +578,7 @@ BaseImageTexture::~BaseImageTexture() {
 // -----------------------------------------------------------------------------
 
 ImageTexture::ImageTexture(const string& filename_, const string& tags_, int32 width_, int32 height_) :
-	BaseImageTexture(width_, height_),
+	BaseTexture(width_, height_),
 	filename(filename_),
 	tags(tags_)
 {
@@ -593,7 +593,7 @@ ImageTexture::ImageTexture(const string& filename_, const string& tags_, int32 w
 
 
 ImageTexture::ImageTexture(TexSheet* texture_sheet_, const string& filename_, const string& tags_, int32 width_, int32 height_) :
-	BaseImageTexture(texture_sheet_, width_, height_),
+	BaseTexture(texture_sheet_, width_, height_),
 	filename(filename_),
 	tags(tags_)
 {
@@ -609,11 +609,10 @@ ImageTexture::ImageTexture(TexSheet* texture_sheet_, const string& filename_, co
 
 ImageTexture::~ImageTexture() {
 	// Search the map of images in the TextureManager for this instance and remove it
-	for (map<string, ImageTexture*>::iterator i = (TextureManager->_images.begin()); i != (TextureManager->_images.end()); i++) {
-		if (i->second == this) {
-			TextureManager->_images.erase(i);
-			return;
-		}
+	map<string, ImageTexture*>::iterator finder = TextureManager->_images.find(filename + tags);
+	if (finder != TextureManager->_images.end()) {
+		TextureManager->_images.erase(finder);
+		return;
 	}
 
 	IF_PRINT_WARNING(VIDEO_DEBUG) << "could not find ImageTexture to erase in TextureController container" << endl;

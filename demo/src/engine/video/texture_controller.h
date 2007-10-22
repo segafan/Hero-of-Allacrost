@@ -167,7 +167,7 @@ private:
 	*** compatible texture sheets. Second, if the image is very large (either height or width of the image exceeds 512 pixels), it will
 	*** merit having its own un-shared texture sheet.
 	**/
-	private_video::TexSheet* _InsertImageInTexSheet(private_video::BaseImageTexture* image, private_video::ImageMemory& load_info, bool is_static);
+	private_video::TexSheet* _InsertImageInTexSheet(private_video::BaseTexture* image, private_video::ImageMemory& load_info, bool is_static);
 
 	/** \brief Iterate through all currently loaded images and if they belong to the specified TexSheet, reload them into it
 	*** \param sheet A pointer to the TexSheet whose images we wish to reload

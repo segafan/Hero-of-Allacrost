@@ -217,20 +217,17 @@ FixedTexSheet::FixedTexSheet(int32 sheet_width, int32 sheet_height, GLuint sheet
 	int32 num_blocks = _block_width * _block_height;
 	_blocks = new FixedTexNode[num_blocks];
 
-	// Initialize linked list of open blocks... which, at this point is all the blocks!
+	// Construct the linked list of open blocks
 	_open_list_head = &_blocks[0];
 	_open_list_tail = &_blocks[num_blocks - 1];
 
-	// Now initialize all the blocks to proper values
 	for (int32 i = 0; i < num_blocks - 1; ++i) {
-		_blocks[i].next  = &_blocks[i + 1];
 		_blocks[i].image = NULL;
+		_blocks[i].next = &_blocks[i + 1];
 		_blocks[i].block_index = i;
 	}
 
-	_blocks[num_blocks - 1].next  = NULL;
-	_blocks[num_blocks - 1].image = NULL;
-	_blocks[num_blocks - 1].block_index = num_blocks - 1;
+	_open_list_tail->next = NULL;
 }
 
 
@@ -244,7 +241,7 @@ FixedTexSheet::~FixedTexSheet() {
 
 
 
-bool FixedTexSheet::AddTexture(BaseImageTexture* img, ImageMemory& data) {
+bool FixedTexSheet::AddTexture(BaseTexture* img, ImageMemory& data) {
 	if (InsertTexture(img) == false)
 		return false;
 
@@ -255,95 +252,72 @@ bool FixedTexSheet::AddTexture(BaseImageTexture* img, ImageMemory& data) {
 	}
 
 	return true;
-} // bool FixedTexSheet::AddTexture(BaseImageTexture *img)
+} // bool FixedTexSheet::AddTexture(BaseTexture *img)
 
 
 
-bool FixedTexSheet::InsertTexture(BaseImageTexture* img) {
+bool FixedTexSheet::InsertTexture(BaseTexture* img) {
 	if (img == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
 		return false;
 	}
 
-	// Check that there is at least one block left on the open list
-	if (_open_list_head == NULL)
-		return false;
+	// Retrieve the node from the head of the list to use for this texture
+	FixedTexNode* node = _RemoveOpenNode();
+	if (node == NULL) // This condition indicates that there are no remaining free nodes on the open list
+		return false; 
 
-	// Otherwise, get and remove the head of the open list
-
-	FixedTexNode *node = _open_list_head;
-	_open_list_head = _open_list_head->next;
-
-	if (_open_list_head == NULL) {
-		// This must mean we just removed the last open block, so
-		// set the tail to NULL as well
-		_open_list_tail = NULL;
-	}
-	else {
-		// Since this is the new head, it's prev pointer should be NULL
-		_open_list_head->prev = NULL;
-	}
-
-	node->next = NULL;
-
-	// Check if there's already an image allocated at this block.
-	// If so, we have to notify GameVideo that we're ejecting
-	// this image out of memory to make place for the new one
-
-	if (node->image) {
-		RemoveTexture(node->image);
+	// Check if there's already an image allocated at this block (an image was freed earlier, but not removed)
+	// If so, we must now remove it from memory
+	/** \bug I have no idea why, but it seems that when the open list is made empty, the image pointer is non-NULL
+	*** even though it should be...
+	**/
+	if (node->image != NULL) {
+		// TODO: TextureManager needs to have the image element removed from its map containers
 		node->image = NULL;
 	}
 
-	// Calculate the actual pixel coordinates given this node's
-	// block index
-
+	// Calculate the texture's pixel coordinates in the sheet given this node's block index
 	img->x = _texture_width  * (node->block_index % _block_width);
 	img->y = _texture_height * (node->block_index / _block_width);
 
 	// Calculate the u,v coordinates
+	float sheet_width = static_cast<float>(width);
+	float sheet_height = static_cast<float>(height);
 
-	float sheet_width = (float) width;
-	float sheet_height = (float) height;
-
-	img->u1 = float(img->x + 0.5f)               / sheet_width;
-	img->u2 = float(img->x + img->width - 0.5f)  / sheet_width;
-	img->v1 = float(img->y + 0.5f)               / sheet_height;
-	img->v2 = float(img->y + img->height - 0.5f) / sheet_height;
+	img->u1 = static_cast<float>(img->x + 0.5f) / sheet_width;
+	img->u2 = static_cast<float>(img->x + img->width - 0.5f) / sheet_width;
+	img->v1 = static_cast<float>(img->y + 0.5f) / sheet_height;
+	img->v2 = static_cast<float>(img->y + img->height - 0.5f) / sheet_height;
 
 	img->texture_sheet = this;
-} // bool FixedTexSheet::InsertTexture(BaseImageTexture* img)
+	node->image = img;
+	return true;
+} // bool FixedTexSheet::InsertTexture(BaseTexture* img)
 
 
 
-void FixedTexSheet::RemoveTexture(BaseImageTexture *img) {
+void FixedTexSheet::RemoveTexture(BaseTexture *img) {
 	if (img == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
 		return;
 	}
 
-	// Translate x,y coordinates into a block index
 	int32 block_index = _CalculateBlockIndex(img);
 
 	// Check to make sure the block is actually owned by this image
 	if (_blocks[block_index].image != img) {
-		// Error, the block that the image thinks it owns is actually not
-		// owned by that image
-
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: tried to remove a fixed block not owned by this Image" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "tried to remove a fixed block not owned by the image" << endl;
+		return;
 	}
 
-	// Set the image to NULL to indicate that this block is completely free
 	_blocks[block_index].image = NULL;
-
-	// Remove block from the open list
-	_DeleteNode(block_index);
+	_AddOpenNode(&_blocks[block_index]);
 }
 
 
 
-void FixedTexSheet::FreeTexture(BaseImageTexture *img) {
+void FixedTexSheet::FreeTexture(BaseTexture *img) {
 	if (img == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
 		return;
@@ -351,20 +325,47 @@ void FixedTexSheet::FreeTexture(BaseImageTexture *img) {
 
 	int32 block_index = _CalculateBlockIndex(img);
 
-	FixedTexNode *node = &_blocks[block_index];
+	// Check to make sure the block is actually owned by this image
+	if (_blocks[block_index].image != img) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "tried to remove a fixed block not owned by the image" << endl;
+		return;
+	}
 
-	if (_open_list_tail != NULL) {
-		// Simply append to end of list
-		_open_list_tail->next = node;
-		node->prev = _open_list_tail;
-		node->next = NULL;
-		_open_list_tail = node;
+	// Unliked the RemoveTexture call, we do not set the block's image to NULL here
+	_AddOpenNode(&_blocks[block_index]);
+}
+
+
+
+void FixedTexSheet::RestoreTexture(BaseTexture *img) {
+	if (img == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
+		return;
 	}
-	else {
-		// Special case: empty list
-		_open_list_head = _open_list_tail = node;
-		node->next = node->prev = NULL;
+
+	// Go through the list of open nodes and find the node with this image
+	FixedTexNode* last = NULL;
+	FixedTexNode* now = _open_list_head;
+
+	while (now != NULL) {
+		// If we found the texture, update the list so that the containing node temporarily becomes 
+		// the head of the open list, then remove that node from the list head
+		if (now->image == img) {
+			if (last != NULL) {
+				last = now->next;
+				now->next = _open_list_head;
+				_open_list_head = now;
+			}
+
+			_RemoveOpenNode();
+			return;
+		}
+
+		last = now;
+		now = now->next;
 	}
+
+	IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to restore, texture was not found in open list" << endl;
 }
 
 
@@ -372,7 +373,7 @@ void FixedTexSheet::FreeTexture(BaseImageTexture *img) {
 uint32 FixedTexSheet::GetNumberTextures() {
 	uint32 num_blocks = 0;
 
-	for (uint32 i = 0; i < _block_width * _block_height; i++) {
+	for (int32 i = 0; i < _block_width * _block_height; i++) {
 		if (_blocks[i].image != NULL) {
 			num_blocks++;
 		}
@@ -383,7 +384,7 @@ uint32 FixedTexSheet::GetNumberTextures() {
 
 
 
-int32 FixedTexSheet::_CalculateBlockIndex(BaseImageTexture* img) {
+int32 FixedTexSheet::_CalculateBlockIndex(BaseTexture* img) {
 	int32 block_x = img->x / _texture_width;
 	int32 block_y = img->y / _texture_height;
 
@@ -392,33 +393,35 @@ int32 FixedTexSheet::_CalculateBlockIndex(BaseImageTexture* img) {
 
 
 
-void FixedTexSheet::_DeleteNode(int32 block_index) {
-	if (block_index >= _block_width * _block_height)
-		return;
-
-	FixedTexNode *node = &_blocks[block_index];
-
-	if (node->prev && node->next) { // Node is somewhere in the middle of the list
-		node->prev->next = node->next;
-	}
-	else if (node->prev) { // Node is the tail of the list
-		node->prev->next = NULL;
-		_open_list_tail = node->prev;
-	}
-	else if (node->next) { // Node is the head of the list
-		
-		_open_list_head = node->next;
-		node->next->prev = NULL;
+void FixedTexSheet::_AddOpenNode(FixedTexNode* node) {
+	if (_open_list_tail != NULL) {
+		_open_list_tail->next = node;
+		_open_list_tail = node;
+		_open_list_tail->next = NULL;
 	}
 	else {
-		// Node is the only element in the list
-		_open_list_head = NULL;
+		_open_list_head = node;
+		_open_list_tail = node;
+		_open_list_tail->next = NULL;
+	}
+}
+
+
+
+FixedTexNode* FixedTexSheet::_RemoveOpenNode() {
+	if (_open_list_head == NULL)
+		return NULL;
+
+	FixedTexNode* node = _open_list_head;
+	_open_list_head = _open_list_head->next;
+	node->next = NULL;
+
+	// This condition means we just removed the last open block, so set the tail pointer to NULL as well
+	if (_open_list_head == NULL) {
 		_open_list_tail = NULL;
 	}
 
-	// Just for good measure, clear out this node's pointers
-	node->prev = NULL;
-	node->next = NULL;
+	return node;
 }
 
 // -----------------------------------------------------------------------------
@@ -444,7 +447,7 @@ VariableTexSheet::~VariableTexSheet() {
 
 
 
-bool VariableTexSheet::AddTexture(BaseImageTexture* img, ImageMemory& data) {
+bool VariableTexSheet::AddTexture(BaseTexture* img, ImageMemory& data) {
 	if (InsertTexture(img) == false)
 		return false;
 
@@ -455,11 +458,11 @@ bool VariableTexSheet::AddTexture(BaseImageTexture* img, ImageMemory& data) {
 	}
 
 	return true;
-} // bool VariableTexSheet::Insert(BaseImageTexture *img)
+} // bool VariableTexSheet::Insert(BaseTexture *img)
 
 
 
-bool VariableTexSheet::InsertTexture(BaseImageTexture* img) {
+bool VariableTexSheet::InsertTexture(BaseTexture* img) {
 	if (img == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
 		return false;
@@ -520,7 +523,7 @@ bool VariableTexSheet::InsertTexture(BaseImageTexture* img) {
 	// this image out of memory to make place for the new one
 
 	// Update blocks
-	set<BaseImageTexture*> remove_images;
+	set<BaseTexture*> remove_images;
 
 	for(int32 y = block_y; y < block_y + h; y++) {
 		for(int32 x = block_x; x < block_x + w; x++) {
@@ -538,7 +541,7 @@ bool VariableTexSheet::InsertTexture(BaseImageTexture* img) {
 		}
 	}
 
-	for(set<BaseImageTexture*>::iterator i = remove_images.begin(); i != remove_images.end(); i++) {
+	for(set<BaseTexture*>::iterator i = remove_images.begin(); i != remove_images.end(); i++) {
 		RemoveTexture(*i);
 	}
 
@@ -560,14 +563,14 @@ bool VariableTexSheet::InsertTexture(BaseImageTexture* img) {
 	img->texture_sheet = this;
 
 	return true;
-} // bool VariableTexSheet::InsertTexture(BaseImageTexture* img)
+} // bool VariableTexSheet::InsertTexture(BaseTexture* img)
 
 
 
 uint32 VariableTexSheet::GetNumberTextures() {
-	set<BaseImageTexture*> textures;
+	set<BaseTexture*> textures;
 
-	for (uint32 i = 0; i < _block_width * _block_height; i++) {
+	for (int32 i = 0; i < _block_width * _block_height; i++) {
 		if (_blocks[i].image != NULL && textures.find(_blocks[i].image) != textures.end()) {
 			textures.insert(_blocks[i].image);
 		}
@@ -578,7 +581,7 @@ uint32 VariableTexSheet::GetNumberTextures() {
 
 
 
-void VariableTexSheet::_SetBlockProperties(BaseImageTexture* img, bool change_free, bool change_image, bool free, BaseImageTexture* new_image) {
+void VariableTexSheet::_SetBlockProperties(BaseTexture* img, bool change_free, bool change_image, bool free, BaseTexture* new_image) {
 	if (img == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
 		return;

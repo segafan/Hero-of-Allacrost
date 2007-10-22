@@ -21,11 +21,11 @@
 *** - <b>ImageMemory</b> is a class used for loading and manipulating raw
 *** image data stored in a system side buffer (ie not in texture memory)
 ***
-*** - <b>BaseImageTexture</b> describes a sub-rectangle contained within a
+*** - <b>BaseTexture</b> describes a sub-rectangle contained within a
 *** texture sheet. In other words, it can essentially be viewed as a pointer
 *** to an image's location in texture memory. It is an abstract class.
 ***
-*** - <b>ImageTexture</b> derives from BaseImageTexture and adds a filename
+*** - <b>ImageTexture</b> derives from BaseTexture and adds a filename
 *** and tag information to the member data. This is used to internally
 *** represent an image that has been loaded from a file and any special
 *** properties of that image data.
@@ -117,7 +117,7 @@ public:
 	***
 	*** This function effectively copies an image (in video memory) to a system-side memory buffer
 	**/
-	void CopyFromImage(BaseImageTexture* img);
+	void CopyFromImage(BaseTexture* img);
 
 private:
 	/** \brief Loads raw image data from a PNG file and stores the data in the class members
@@ -167,17 +167,17 @@ private:
 *** \note Although this class is not abstract, typically we do not create any
 *** instances of it. Instead, we create instances of its derivative classes.
 *** ***************************************************************************/
-class BaseImageTexture {
+class BaseTexture {
 	friend class GameVideo;
 
 public:
-	BaseImageTexture();
+	BaseTexture();
 
-	BaseImageTexture(int32 width_, int32 height_);
+	BaseTexture(int32 width_, int32 height_);
 
-	BaseImageTexture(TexSheet* texture_sheet_, int32 width_, int32 height_);
+	BaseTexture(TexSheet* texture_sheet_, int32 width_, int32 height_);
 
-	virtual ~BaseImageTexture();
+	virtual ~BaseTexture();
 
 	// ---------- Public members
 
@@ -218,9 +218,9 @@ public:
 		{ ref_count++; }
 
 private:
-	BaseImageTexture(const BaseImageTexture& copy);
-	BaseImageTexture& operator=(const BaseImageTexture& copy);
-}; // class BaseImageTexture
+	BaseTexture(const BaseTexture& copy);
+	BaseTexture& operator=(const BaseTexture& copy);
+}; // class BaseTexture
 
 
 /** ****************************************************************************
@@ -244,7 +244,7 @@ private:
 *** new operator, and the copy constructor and copy assignment operator are kept
 *** private to avoid complex reference management requirements.
 *** ***************************************************************************/
-class ImageTexture : public BaseImageTexture {
+class ImageTexture : public BaseTexture {
 public:
 	ImageTexture(const std::string& filename_, const std::string& tags_, int32 width_, int32 height_);
 
@@ -284,7 +284,7 @@ public:
 private:
 	ImageTexture(const ImageTexture& copy);
 	ImageTexture& operator=(const ImageTexture& copy);
-}; // class ImageTexture : public BaseImageTexture
+}; // class ImageTexture : public BaseTexture
 
 } // namespace private_video
 

@@ -106,10 +106,10 @@ public:
 	*** \param data The image's pixel data to place in the sheet
 	*** \return Success/failure
 	***
-	*** \note The BaseImageTexture object which is passed into this function will have its
+	*** \note The BaseTexture object which is passed into this function will have its
 	*** properties modified once it is successfully added to the texture sheet.
 	**/
-	virtual bool AddTexture(BaseImageTexture* img, ImageMemory& data) = 0;
+	virtual bool AddTexture(BaseTexture* img, ImageMemory& data) = 0;
 
 	/** \brief Inserts a new texture into the tex sheet
 	*** \param img A pointer to the new image to insert
@@ -122,12 +122,12 @@ public:
 	*** function is usually followed by a call to a function which will modify the
 	*** image data at the inserted textures location (CopyRect, CopyScreenRect).
 	**/
-	virtual bool InsertTexture(BaseImageTexture* img) = 0;
+	virtual bool InsertTexture(BaseTexture* img) = 0;
 
 	/** \brief Removes an image texture from the texture sheet's memory manager
 	*** \param img The image to remove
 	**/
-	virtual void RemoveTexture(BaseImageTexture* img) = 0;
+	virtual void RemoveTexture(BaseTexture* img) = 0;
 	
 	/** \brief Marks the texture as free
 	*** \param img The image to mark as free
@@ -135,12 +135,12 @@ public:
 	*** restored from the free state so that it does not have to be re-fetched
 	*** from the hard disk.
 	**/
-	virtual void FreeTexture(BaseImageTexture* img) = 0;
+	virtual void FreeTexture(BaseTexture* img) = 0;
 	
 	/** \brief Restores a texture which was previously freed
 	*** \param img The image to mark as used
 	**/
-	virtual void RestoreTexture(BaseImageTexture* img) = 0;
+	virtual void RestoreTexture(BaseTexture* img) = 0;
 
 	//! \brief Returns the number of textures that are contained on this texture sheet
 	virtual uint32 GetNumberTextures() = 0;
@@ -165,7 +165,7 @@ public:
 	*** whether it is overwriting occupied space within the texture sheet. This can lead
 	*** to image corruption. It also does not make any attempt to indicate that the copied
 	*** area is now occupied; that must be done externally by the caller (through the use
-	*** of creating a new BaseImageTexture class).
+	*** of creating a new BaseTexture class).
 	**/
 	bool CopyRect(int32 x, int32 y, private_video::ImageMemory& data);
 
@@ -179,7 +179,7 @@ public:
 	*** whether it is overwriting occupied space within the texture sheet. This can lead
 	*** to image corruption. It also does not make any attempt to indicate that the copied
 	*** area is now occupied; that must be done externally by the caller (through the use
-	*** of creating a new BaseImageTexture class).
+	*** of creating a new BaseTexture class).
 	**/
 	bool CopyScreenRect(int32 x, int32 y, const ScreenRect &screen_rect);
 
@@ -221,21 +221,18 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief Represents a node in a doubly-linked list of texture blocks
+*** \brief Represents a node in a linked list of texture blocks
 ***
 *** This class is used by the FixedTexSheet class to manage its allocated
-*** texture blocks. The list is doubly linked to allow for O(1) removal.
+*** texture blocks.
 *** ***************************************************************************/
 class FixedTexNode {
 public:
 	//! \brief The image that belongs to the block
-	BaseImageTexture* image;
+	BaseTexture* image;
 	
 	//! \brief The next node in the list
 	FixedTexNode* next;
-	
-	//! \brief The previous node in the list
-	FixedTexNode* prev;
 	
 	//! \brief The block index
 	int32 block_index;
@@ -287,16 +284,15 @@ public:
 
 	//! \name Methods inherited from TexSheet
 	//@{
-	bool AddTexture(BaseImageTexture* img, ImageMemory& data);
+	bool AddTexture(BaseTexture* img, ImageMemory& data);
 
-	bool InsertTexture(BaseImageTexture* img);
+	bool InsertTexture(BaseTexture* img);
 	
-	void RemoveTexture(BaseImageTexture* img);
+	void RemoveTexture(BaseTexture* img);
 	
-	void FreeTexture(BaseImageTexture* img);
+	void FreeTexture(BaseTexture* img);
 	
-	void RestoreTexture(BaseImageTexture* img)
-		{ _DeleteNode(_CalculateBlockIndex(img)); }
+	void RestoreTexture(BaseTexture* img);
 
 	uint32 GetNumberTextures();
 	//@}
@@ -321,12 +317,17 @@ private:
 	*** \param img The image to look for
 	*** \return The block index for that image
 	**/
-	int32 _CalculateBlockIndex(BaseImageTexture* img);
-	
-	/** \brief Grabs the block index based off of the image
-	*** \param block_index The node in the list to delete
+	int32 _CalculateBlockIndex(BaseTexture* img);
+
+	/** \brief Adds a node onto the tail of the open list
+	*** \param node A pointer to the node to add to the open list
 	**/
-	void _DeleteNode(int32 block_index);
+	void _AddOpenNode(FixedTexNode* node);
+
+	/** \brief Removes a node from the head of the open list to be used
+	*** \return A pointer to the node to use, or NULL if no nodes were available
+	**/
+	FixedTexNode* _RemoveOpenNode();
 }; // class FixedTexSheet : public TexSheet
 
 
@@ -339,7 +340,7 @@ public:
 		image(NULL), free(true) {}
 
 	//! \brief A pointer to the image
-	BaseImageTexture* image;
+	BaseTexture* image;
 	
 	//! \brief Set to true if the image is freed
 	bool free;
@@ -370,17 +371,17 @@ public:
 
 	//! \name Methods inherited from TexSheet
 	//@{
-	bool AddTexture(BaseImageTexture* img, ImageMemory& data);
+	bool AddTexture(BaseTexture* img, ImageMemory& data);
 
-	bool InsertTexture(BaseImageTexture* img);
+	bool InsertTexture(BaseTexture* img);
 	
-	void RemoveTexture(BaseImageTexture* img)
+	void RemoveTexture(BaseTexture* img)
 		{ _SetBlockProperties(img, true, true, true, NULL); }
 	
-	void FreeTexture(BaseImageTexture* img)
+	void FreeTexture(BaseTexture* img)
 		{ _SetBlockProperties(img, true, false, true, NULL); }
 	
-	void RestoreTexture(BaseImageTexture* img)
+	void RestoreTexture(BaseTexture* img)
 		{ _SetBlockProperties(img, true, false, false, NULL); }
 
 	uint32 GetNumberTextures();
@@ -395,7 +396,7 @@ private:
 	*** \param free The block's free status
 	*** \param new_image The new image to use if changeImage is true
 	**/
-	void _SetBlockProperties(BaseImageTexture* img, bool change_free, bool change_image, bool free, BaseImageTexture* new_image);
+	void _SetBlockProperties(BaseTexture* img, bool change_free, bool change_image, bool free, BaseTexture* new_image);
 	
 	/** \brief The list of 16x16 pixel blocks in the sheet.
 	*** The size of this structure is: (sheet_width / 16) * (sheet_height / 16)
