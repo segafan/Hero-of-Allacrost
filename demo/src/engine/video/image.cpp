@@ -460,7 +460,7 @@ void ImageDescriptor::DEBUG_PrintInfo() {
 
 
 
-void ImageDescriptor::_RemoveTextureReference(private_video::BaseTexture* texture, bool null_base_ptr) {
+void ImageDescriptor::_RemoveTextureReference(private_video::BaseTexture* texture) {
 	if (texture == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL argument passed to function" << endl;
 		return;
@@ -482,8 +482,7 @@ void ImageDescriptor::_RemoveTextureReference(private_video::BaseTexture* textur
 		delete texture;
 	}
 
-	if (null_base_ptr == true)
-		_texture = NULL;
+	_texture = NULL;
 }
 
 
