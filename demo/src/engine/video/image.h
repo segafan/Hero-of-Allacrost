@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -121,6 +121,10 @@ public:
 	bool IsGrayScale() const
 		{ return _grayscale; }
 
+	virtual void EnableGrayScale() = 0;
+
+	virtual void DisableGrayScale() = 0;
+
 	/** \brief Enables or disables the image's static property
 	*** \param is_static If true, the image will be made static
 	**/
@@ -230,7 +234,7 @@ public:
 
 protected:
 	/** \brief A pointer to the texture used by the image
-	*** The purpose of this member is for the ImageDescriptor class to be able to manage 
+	*** The purpose of this member is for the ImageDescriptor class to be able to manage
 	**/
 	private_video::BaseTexture* _texture;
 
@@ -258,14 +262,13 @@ protected:
 	//! \brief True if this image is grayscale.
 	bool _grayscale;
 
-	/** \brief Removes a reference to a texture, and frees or deletes it if it has no remaining references
-	*** \param texture A pointer to the texture to remove a reference from
+	/** \brief Removes a reference to _texture, and frees or deletes it if it has no remaining references
 	***
-	*** After calling this function, you should make sure to set the pointer that you passed in as an argument
-	*** to be NULL or immediately re-assign it to point to another texture object. Failing to observe this
-	*** can lead to devastating problems, such as referring to freed memory.
+	*** This method will set _texture to NULL before returning. If your derived class has a duplicate texture
+	*** pointer (ie, ImageTexture pointer for StillImage class), you should make sure to set that member to
+	*** NULL as well.
 	**/
-	void _RemoveTextureReference(private_video::BaseTexture* texture);
+	void _RemoveTextureReference();
 
 	/** \brief Draws the OpenGL texture referred to by the object on the screen
 	*** \param draw_color A non-NULL pointer to an array of four valid Color objects
@@ -505,13 +508,13 @@ public:
 	*** \param trim The number of frame images to "ignore" from the multi image (default == 0)
 	*** \return True if the animation was successfully constructed from the loaded multi image
 	***
-	*** The trim factor is useful for indicating if any of the final frames in a multi image 
+	*** The trim factor is useful for indicating if any of the final frames in a multi image
 	*** contain no relevant image data that we are interested in. For example, if we have a
 	*** multi image with 2 rows and 4 columns of frames, but only the first 6 frames (the entire
 	*** top row, and the left-most two frames in the bottom row) are valid, we would set the trim
 	*** factor to two. Obviously, trim must be less than frame_rows * frame_cols, otherwise we
 	*** can't load even a single frame.
-	*** 
+	***
 	*** The timings vector must have a minimum size of (frame_rows * frame_cols - trim) so that each
 	*** frame we will add has a timing value associated with it. The timings vector may be larger
 	*** than this minimum size, but only the first (frame_rows * frame_cols - trim) elements will
@@ -577,7 +580,7 @@ public:
 	*** \param frame The still image to use as the frame image.
 	*** \param frame_time The amount of millseconds to display the frame.
 	*** \return True on success, false on failure.
-	*** 
+	***
 	*** The frame argument should have at least one element prepared. Passing a StillImage
 	*** that does not contain any image data will result in failure for this call.
 	**/
@@ -597,10 +600,10 @@ public:
 	uint32 GetCurrentFrameIndex() const
 		{ return _frame_index; }
 
-	/** \brief Returns a pointer to the StillImage at a specified frame. 
+	/** \brief Returns a pointer to the StillImage at a specified frame.
 	*** \param index index of the frame you want
 	*** \return A pointer to the image at that index, or NULL if the index parameter was invalid
-	*** 
+	***
 	*** Using this function is dangerous since it provides direct access to an image frame.
 	*** If you find yourself in constant need of using this function, think twice about
 	*** what you are doing.
@@ -785,6 +788,12 @@ public:
 	void SetDimensions(float width, float height)
 		{ SetWidth(width); SetHeight(height); }
 
+	void EnableGrayScale()
+		{}
+
+	void DisableGrayScale()
+		{}
+
 	void SetUVCoordinates(float u1, float v1, float u2, float v2)
 		{}
 
@@ -800,7 +809,7 @@ public:
 	*** \param br The bottom right vertex color
 	**/
 	void SetVertexColors(const Color& tl, const Color& tr, const Color& bl, const Color& br);
-	
+
 	/** \brief Adds a new image element to the composite image
 	*** \param img The image to add to the composite image.
 	*** \param x_offset The x offset of the composite image.
