@@ -148,7 +148,7 @@ class Editor: public QMainWindow
 
 		//! \name Tileset Menu Item Slots
 		//! \brief These slots process selection for their item in the Tileset menu.
-		void _TileSetEditWalkability();
+		void _TileSetEdit();
 
 		//! \name Map Menu Item Slots
 		//! \brief These slots process selection for their item in the Map menu.
@@ -225,7 +225,7 @@ class Editor: public QMainWindow
 		QActionGroup* _mode_group;
 		QActionGroup* _edit_group;
 
-		QAction* _edit_walkability_action;
+		QAction* _edit_tileset_action;
 		
 		QAction* _map_properties_action;
 		QAction* _select_music_action;

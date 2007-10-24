@@ -147,11 +147,11 @@ void Editor::_TileSetEnableActions()
 {
 	if(_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
-		_edit_walkability_action->setEnabled(true);
+		_edit_tileset_action->setEnabled(true);
 	}
 	else
 	{
-		_edit_walkability_action->setEnabled(false);
+		_edit_tileset_action->setEnabled(false);
 	}
 } // _TileSetEnableActions
 
@@ -484,10 +484,8 @@ void Editor::_TileEditUL()
 		_ed_scrollview->_layer_edit = UPPER_LAYER;
 } // _TileEditUL()
 
-void Editor::_TileSetEditWalkability()
+void Editor::_TileSetEdit()
 {
-	//QMessageBox::about(this, "Walkability Editor!","Replace with the walkability editor!");
-
 	TilesetEditor* tilesetEditor = new TilesetEditor(this,"tileset_editor",true);
 	if(tilesetEditor->exec() == QDialog::Accepted){
 
@@ -500,7 +498,7 @@ void Editor::_TileSetEditWalkability()
 
 	delete tilesetEditor;
 
-} // _TileSetEditWalkability
+} // _TileSetEdit
 
 void Editor::_MapSelectMusic()
 {
@@ -838,10 +836,10 @@ void Editor::_CreateActions()
 	
 	// Create tileset actions related to the Tileset Menu
 	
-	_edit_walkability_action = new QAction("Edit &Walkability", this);
-	_edit_walkability_action->setStatusTip("Lets the user paint walkability on the tileset");
+	_edit_tileset_action = new QAction("Edit &Tileset", this);
+	_edit_tileset_action->setStatusTip("Lets the user paint walkability on the tileset");
 	//_edit_walkability_action->setCheckable(true);
-	connect(_edit_walkability_action, SIGNAL(triggered()), this, SLOT(_TileSetEditWalkability()));
+	connect(_edit_tileset_action, SIGNAL(triggered()), this, SLOT(_TileSetEdit()));
 
 	// Create menu actions related to the Map menu
 
@@ -915,7 +913,7 @@ void Editor::_CreateMenus()
 	
 	// tileset menu creation
 	_tileset_menu = menuBar()->addMenu("Tile&set");
-	_tileset_menu->addAction(_edit_walkability_action);
+	_tileset_menu->addAction(_edit_tileset_action);
 	_tileset_menu->setTearOffEnabled(true);
 	connect(_tileset_menu, SIGNAL(aboutToShow()), this, SLOT(_TileSetEnableActions()));
 

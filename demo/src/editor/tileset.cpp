@@ -21,6 +21,11 @@ using namespace hoa_video;
 using namespace hoa_script;
 using namespace hoa_editor;
 
+Tileset::Tileset():tileset_name(""),table(NULL)
+{
+
+}
+
 Tileset::Tileset(QWidget* parent, const QString& name)
 {	
 	// Create filename from name.
