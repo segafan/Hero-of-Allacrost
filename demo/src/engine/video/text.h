@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,16 +120,16 @@ class TextStyle {
 public:
 	TextStyle() :
 		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK) , color(Color::white) {}
-	
+
 	TextStyle(Color col) :
 		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), color(col) {}
-	
+
 	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style) :
 		font(fnt), shadow_style(style), color(Color::white) {}
-	
+
 	TextStyle(std::string fnt, Color col = Color::white, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK) :
 		font(fnt), shadow_style(style), color(col) {}
-	
+
 	TextStyle(TEXT_SHADOW_STYLE style, Color col = Color::white) :
 		font("default"), shadow_style(style), color(col) {}
 
@@ -278,6 +278,12 @@ public:
 	 */
 	bool SetAlignment(int8 alignment);
 
+	void EnableGrayScale()
+		{}
+
+	void DisableGrayScale()
+		{}
+
 	//! \brief Sets width of the image
 	virtual void SetWidth(float width)
 		{ _width = width; }
@@ -344,7 +350,7 @@ private:
 	/** \brief Realigns text to a horizontal alignment
 	**/
 	void _Realign();
-	
+
 	/** \brief The string this was constructed from (for reloading)
 	**/
 	hoa_utils::ustring _string;

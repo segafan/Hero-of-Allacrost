@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,10 +50,17 @@ ImageDescriptor::ImageDescriptor() :
 
 
 ImageDescriptor::~ImageDescriptor() {
-	if (_texture == NULL)
-		return;
+	// The destructor for the inherited class should have disabled grayscale mode
+	// If it didn't, the grayscale image might not have been properly dereferenced
+	// and/or removed from texture memory
+	if (_grayscale == true)
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "grayscale mode was still enabled when destructor was invoked -- possible memory leak" << endl;
 
+	// Remove the reference to the original, colored texture
+	if (_texture != NULL)
+		_RemoveTextureReference();
 
+	_texture = NULL;
 }
 
 
@@ -104,29 +111,12 @@ ImageDescriptor& ImageDescriptor::operator=(const ImageDescriptor& copy) {
 	_color[3] = copy._color[3];
 
 
-	// Update the reference to the old image texture and possibly free it from texture memory
-	// Case 1: We previously pointed to a valid image texture and the copy does not point to the same texture
+	// Update the reference to the previous image texturee
 	if (_texture != NULL && copy._texture != _texture) {
-		if (_texture->RemoveReference() == true) {
-			_texture->texture_sheet->RemoveTexture(_texture);
-
-			// If the image exceeds 512 in either width or height, it has an un-shared texture sheet, which we
-			// should now delete that the image is being removed
-			if (_texture->width > 512 || _texture->height > 512) {
-				// Remove the image and texture sheet completely
-				TextureManager->_RemoveSheet(_texture->texture_sheet);
-			}
-
-			// TODO: Free/Restore ability for textures needs further testing
-// 			else {
-// 				// Otherise simply mark the image as free in the texture sheet
-// 				_texture->texture_sheet->FreeTexture(_texture);
-// 			}
-			delete _texture;
-		}
+		_RemoveTextureReference();
 	}
-	// Case 2: The original image texture was NULL and the copy is not NULL, so increment the reference
-	else if (copy._texture != NULL) {
+
+	if (copy._texture != NULL) {
 		 copy._texture->AddReference();
 	}
 
@@ -143,7 +133,7 @@ void ImageDescriptor::Clear() {
 // 		DisableGrayScale();
 
 	if (_texture != NULL)
-		_RemoveTextureReference(_texture);
+		_RemoveTextureReference();
 
 	_texture = NULL;
 	_width = 0.0f;
@@ -370,7 +360,7 @@ bool ImageDescriptor::SaveMultiImage(const vector<StillImage*>& images, const st
 
 	// Initially, we need to grab the Image pointer of the first StillImage, the texture ID of its TextureSheet owner,
 	// and malloc enough memory for the entire sheet so that we can copy over the texture sheet from video memory to
-	// system memory. 
+	// system memory.
 	ImageTexture* img = images[0]->_image_texture;
 	GLuint tex_id = img->texture_sheet->tex_id;
 
@@ -460,26 +450,26 @@ void ImageDescriptor::DEBUG_PrintInfo() {
 
 
 
-void ImageDescriptor::_RemoveTextureReference(private_video::BaseTexture* texture) {
-	if (texture == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL argument passed to function" << endl;
+void ImageDescriptor::_RemoveTextureReference() {
+	if (_texture == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "_texture member was NULL upon method invocation" << endl;
 		return;
 	}
 
-	if (texture->RemoveReference() == true) {
-		texture->texture_sheet->RemoveTexture(texture);
+	if (_texture->RemoveReference() == true) {
+		_texture->texture_sheet->RemoveTexture(_texture);
 
 		// If the image exceeds 512 in either width or height, it has an un-shared texture sheet, which we
 		// should now delete that the image is being removed
-		if (texture->width > 512 || texture->height > 512) {
-			TextureManager->_RemoveSheet(texture->texture_sheet);
+		if (_texture->width > 512 || _texture->height > 512) {
+			TextureManager->_RemoveSheet(_texture->texture_sheet);
 		}
 // 		else {
-// 
+//
 // 			// TODO: Otherise simply mark the image as free in the texture sheet
 // // 			texture->texture_sheet->FreeTexture(texture);
 // 		}
-		delete texture;
+		delete _texture;
 	}
 
 	_texture = NULL;
@@ -846,7 +836,7 @@ void StillImage::Clear() {
 bool StillImage::Load(const string& filename) {
 	// Delete everything previously stored in here
 	if (_image_texture != NULL) {
-		_RemoveTextureReference(_texture);
+		_RemoveTextureReference();
 		_image_texture = NULL;
 	}
 
@@ -932,9 +922,8 @@ bool StillImage::Load(const string& filename) {
 
 		delete gray_image;
 		TextureManager->_images.erase(_filename);
-		_RemoveTextureReference(_image_texture);
+		_RemoveTextureReference(); // sets _texture to NULL
 		_image_texture = NULL;
-		_texture = NULL;
 		free(img_data.pixels);
 		img_data.pixels = NULL;
 		return false;
@@ -973,7 +962,7 @@ void StillImage::Draw(const Color& draw_color) const {
 	// Used to determine if the image color should be modulated by any degree due to screen fading effects
 	float modulation = VideoManager->_screen_fader.GetFadeModulation();
 	bool skip_modulation = (draw_color == Color::white && IsFloatEqual(modulation, 1.0f));
-	
+
 	Context& current_context = VideoManager->_current_context;
 
 	// Calculate x and y draw offsets due to any screen shaking effects
@@ -1017,7 +1006,7 @@ void StillImage::Draw(const Color& draw_color) const {
 	else {
 		Color modulated_colors[4];
 		Color fade_color(modulation, modulation, modulation, 1.0f);
-		
+
 		fade_color = draw_color * fade_color;
 		modulated_colors[0] = _color[0] * fade_color;
 		modulated_colors[1] = _color[1] * fade_color;
@@ -1025,7 +1014,7 @@ void StillImage::Draw(const Color& draw_color) const {
 		modulated_colors[3] = _color[3] * fade_color;
 		_DrawTexture(modulated_colors);
 	}
-	
+
 	glPopMatrix();
 } // void StillImage::Draw(const Color& draw_color) const
 
@@ -1069,14 +1058,14 @@ void StillImage::EnableGrayScale() {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "grayscale mode was already enabled" << endl;
 		return;
 	}
-	
+
 	_grayscale = true;
 
 	// 1. If no image texture is available we are done here (when Load() is next called, grayscale will automatically be enabled)
 	if (_image_texture == NULL) {
 		return;
 	}
-	
+
 	// 2. Check if a grayscale version of this image already exists in texture memory and if so, update the ImageTexture pointer and reference
 	map<string, ImageTexture*>::iterator img_iter = TextureManager->_images.find(_filename + _image_texture->tags + "<G>");
 	if (img_iter != TextureManager->_images.end()) {
@@ -1141,7 +1130,7 @@ void StillImage::DisableGrayScale() {
 	}
 
 	// Remove the reference to the grayscale version and grab the reference to the original color image
-	_RemoveTextureReference(_image_texture);
+	_RemoveTextureReference();
 
 	// No reference change is needed for the color image, since the color texture did not have a reference
 	// decrement when the grayscale version was enabled
@@ -1360,7 +1349,7 @@ bool AnimatedImage::AddFrame(const string& frame, uint32 frame_time) {
 	if (img.Load(frame, _width, _height) == false) {
 		return false;
 	}
-	
+
 	AnimationFrame new_frame;
 	new_frame.frame_time = frame_time;
 	new_frame.image = img;
@@ -1379,7 +1368,7 @@ bool AnimatedImage::AddFrame(const StillImage& frame, uint32 frame_time) {
 	AnimationFrame new_frame;
 	new_frame.image = frame;
 	new_frame.frame_time = frame_time;
-	
+
 	_frames.push_back(new_frame);
 	return true;
 }
@@ -1476,7 +1465,7 @@ void CompositeImage::Draw(const Color& draw_color) const {
 		VideoManager->_current_context.coordinate_system.GetHorizontalDirection();
 	float y_align_offset = ((VideoManager->_current_context.y_align + 1) * _height) * 0.5f * -
 		VideoManager->_current_context.coordinate_system.GetVerticalDirection();
-	
+
 	// Save the draw cursor position as we move to draw each element
 	glPushMatrix();
 
@@ -1497,31 +1486,31 @@ void CompositeImage::Draw(const Color& draw_color) const {
 		else {
 			x_off = _elements[i].x_offset;
 		}
- 
+
 		if (VideoManager->_current_context.y_flip) {
 			y_off = _height - _elements[i].y_offset - _elements[i].image.GetHeight();
 		}
 		else {
 			y_off = _elements[i].y_offset;
 		}
- 
+
 		x_off += x_shake;
 		y_off += y_shake;
- 
+
 		glPushMatrix();
 		VideoManager->MoveRelative(x_off * VideoManager->_current_context.coordinate_system.GetHorizontalDirection(),
 			y_off * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
- 
+
 		float x_scale = _elements[i].image.GetWidth();
 		float y_scale = _elements[i].image.GetHeight();
- 
+
 		if (VideoManager->_current_context.coordinate_system.GetHorizontalDirection() < 0.0f)
 			x_scale = -x_scale;
 		if (VideoManager->_current_context.coordinate_system.GetVerticalDirection() < 0.0f)
 			y_scale = -y_scale;
- 
+
 		glScalef(x_scale, y_scale, 1.0f);
- 
+
 		if (skip_modulation)
 			_elements[i].image._DrawTexture(_color);
 		else {
@@ -1649,28 +1638,28 @@ void CompositeImage::AddImage(const StillImage& img, float x_offset, float y_off
 // 		IF_PRINT_WARNING(VIDEO_DEBUG) << "either the tiles or indeces vector function arguments were empty" << endl;
 // 		return;
 // 	}
-// 
+//
 // 	for (uint32 i = 1; i < tiles.size(); i++) {
 // 		if (tiles[0]._width != tiles[i]._width || tiles[0]._height != tiles[i]._height) {
 // 			IF_PRINT_WARNING(VIDEO_DEBUG) << "images within the tiles argument had unequal dimensions" << endl;
 // 			return;
 // 		}
 // 	}
-// 
+//
 // 	for (uint32 i = 1; i < indeces.size(); i++) {
 // 		if (indeces[0].size() != indeces[i].size()) {
 // 			IF_PRINT_WARNING(VIDEO_DEBUG) << "the row sizes in the indices 2D vector argument did not match" << endl;
 // 			return;
 // 		}
 // 	}
-// 
+//
 // 	Clear();
-// 
+//
 // 	// Set the members of the composite image that we are about to construct
 // 	_width  = static_cast<float>(indeces[0].size()) * tiles[0]._width;
 // 	_height = static_cast<float>(indeces.size()) * tiles[0]._height;
 // 	_is_static = tiles[0]._is_static;
-// 
+//
 // 	// Add each tile at the image at the appropriate offset
 // 	for (uint32 y = 0; y < indeces.size(); ++y) {
 // 		for (uint32 x = 0; x < indeces[0].size(); ++x) {

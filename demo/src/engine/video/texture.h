@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,12 +63,12 @@ const GLuint INVALID_TEXTURE_ID = 0xFFFFFFFF;
 //! \brief Represents the different image sizes that a texture sheet can hold
 enum TexSheetType {
 	VIDEO_TEXSHEET_INVALID = -1,
-	
+
 	VIDEO_TEXSHEET_32x32 = 0,
 	VIDEO_TEXSHEET_32x64 = 1,
 	VIDEO_TEXSHEET_64x64 = 2,
 	VIDEO_TEXSHEET_ANY = 3,
-	
+
 	VIDEO_TEXSHEET_TOTAL = 4
 };
 
@@ -97,7 +97,7 @@ public:
 	**/
 	TexSheet(int32 sheet_width, int32 sheet_height, GLuint sheet_id, TexSheetType sheet_type, bool sheet_static);
 
-	~TexSheet();
+	virtual ~TexSheet();
 
 	// ---------- Public methods
 
@@ -128,7 +128,7 @@ public:
 	*** \param img The image to remove
 	**/
 	virtual void RemoveTexture(BaseTexture* img) = 0;
-	
+
 	/** \brief Marks the texture as free
 	*** \param img The image to mark as free
 	*** \note Marking an image as free does not delete it. The image may be later
@@ -136,7 +136,7 @@ public:
 	*** from the hard disk.
 	**/
 	virtual void FreeTexture(BaseTexture* img) = 0;
-	
+
 	/** \brief Restores a texture which was previously freed
 	*** \param img The image to mark as used
 	**/
@@ -149,7 +149,7 @@ public:
 	*** \return Success/failure
 	**/
 	bool Unload();
-	
+
 	/** \brief Reloads all the images into the sheet and reallocates OpenGL memory
 	*** \return Success/failure
 	**/
@@ -230,10 +230,10 @@ class FixedTexNode {
 public:
 	//! \brief The image that belongs to the block
 	BaseTexture* image;
-	
+
 	//! \brief The next node in the list
 	FixedTexNode* next;
-	
+
 	//! \brief The block index
 	int32 block_index;
 }; // class FixedTexNode
@@ -287,11 +287,11 @@ public:
 	bool AddTexture(BaseTexture* img, ImageMemory& data);
 
 	bool InsertTexture(BaseTexture* img);
-	
+
 	void RemoveTexture(BaseTexture* img);
-	
+
 	void FreeTexture(BaseTexture* img);
-	
+
 	void RestoreTexture(BaseTexture* img);
 
 	uint32 GetNumberTextures();
@@ -300,13 +300,13 @@ public:
 private:
 	//! \brief The width and height of each texture block, in number of pixels
 	int32 _texture_width, _texture_height;
-	
+
 	//! \brief Head of the list of open texture blocks
 	FixedTexNode* _open_list_head;
 
 	//! \brief Tail of the list of open memory blocks
 	FixedTexNode* _open_list_tail;
-	
+
 	/** \brief A pointer to an array of blocks which is indexed like a 2D array
 	*** For example, blocks[x + y * width]->image would tell us which image is
 	*** currently allocated at spot (x,y).
@@ -341,7 +341,7 @@ public:
 
 	//! \brief A pointer to the image
 	BaseTexture* image;
-	
+
 	//! \brief Set to true if the image is freed
 	bool free;
 }; // class VariableTexNode
@@ -374,13 +374,13 @@ public:
 	bool AddTexture(BaseTexture* img, ImageMemory& data);
 
 	bool InsertTexture(BaseTexture* img);
-	
+
 	void RemoveTexture(BaseTexture* img)
 		{ _SetBlockProperties(img, NULL, true); _textures.erase(img); }
-	
+
 	void FreeTexture(BaseTexture* img)
 		{ _SetBlockProperties(img, img, true); }
-	
+
 	void RestoreTexture(BaseTexture* img)
 		{ _SetBlockProperties(img, img, false); }
 
