@@ -22,7 +22,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;&#x0D;&#x0A;"
+				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\tileset_editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\tileset_editor_moc.cpp&quot;&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -428,6 +428,10 @@
 			</File>
 			<File
 				RelativePath=".\src\editor\tileset_editor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\editor\tileset_editor_moc.cpp"
 				>
 			</File>
 			<File

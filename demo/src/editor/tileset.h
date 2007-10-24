@@ -48,6 +48,8 @@ const int TILE_HEIGHT = 32;
 class Tileset
 {
 	public:
+		//! Default constructor
+		Tileset();
 		//! Tileset constructor. Name needs to be the name of the tileset, not the filename.
 		Tileset(QWidget* parent, const QString& name);
 		//! Tileset destructor.
