@@ -391,39 +391,39 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 	}
 
 	// Add standing frames to animations
-	animations[0].AddFrame(frames[0], frame_speed);
-	animations[1].AddFrame(frames[6], frame_speed);
-	animations[2].AddFrame(frames[12], frame_speed);
-	animations[3].AddFrame(frames[18], frame_speed);
+	animations[ANIM_STANDING_SOUTH].AddFrame(frames[0], frame_speed);
+	animations[ANIM_STANDING_NORTH].AddFrame(frames[6], frame_speed);
+	animations[ANIM_STANDING_WEST].AddFrame(frames[12], frame_speed);
+	animations[ANIM_STANDING_EAST].AddFrame(frames[18], frame_speed);
 
 	// Add walking frames to animations
-	animations[4].AddFrame(frames[1], frame_speed);
-	animations[4].AddFrame(frames[2], frame_speed);
-	animations[4].AddFrame(frames[3], frame_speed);
-	animations[4].AddFrame(frames[1], frame_speed);
-	animations[4].AddFrame(frames[4], frame_speed);
-	animations[4].AddFrame(frames[5], frame_speed);
+	animations[ANIM_WALKING_SOUTH].AddFrame(frames[1], frame_speed);
+	animations[ANIM_WALKING_SOUTH].AddFrame(frames[2], frame_speed);
+	animations[ANIM_WALKING_SOUTH].AddFrame(frames[3], frame_speed);
+	animations[ANIM_WALKING_SOUTH].AddFrame(frames[1], frame_speed);
+	animations[ANIM_WALKING_SOUTH].AddFrame(frames[4], frame_speed);
+	animations[ANIM_WALKING_SOUTH].AddFrame(frames[5], frame_speed);
 
-	animations[5].AddFrame(frames[7], frame_speed);
-	animations[5].AddFrame(frames[8], frame_speed);
-	animations[5].AddFrame(frames[9], frame_speed);
-	animations[5].AddFrame(frames[7], frame_speed);
-	animations[5].AddFrame(frames[10], frame_speed);
-	animations[5].AddFrame(frames[11], frame_speed);
+	animations[ANIM_WALKING_NORTH].AddFrame(frames[7], frame_speed);
+	animations[ANIM_WALKING_NORTH].AddFrame(frames[8], frame_speed);
+	animations[ANIM_WALKING_NORTH].AddFrame(frames[9], frame_speed);
+	animations[ANIM_WALKING_NORTH].AddFrame(frames[7], frame_speed);
+	animations[ANIM_WALKING_NORTH].AddFrame(frames[10], frame_speed);
+	animations[ANIM_WALKING_NORTH].AddFrame(frames[11], frame_speed);
 
-	animations[6].AddFrame(frames[13], frame_speed);
-	animations[6].AddFrame(frames[14], frame_speed);
-	animations[6].AddFrame(frames[15], frame_speed);
-	animations[6].AddFrame(frames[13], frame_speed);
-	animations[6].AddFrame(frames[16], frame_speed);
-	animations[6].AddFrame(frames[17], frame_speed);
+	animations[ANIM_WALKING_WEST].AddFrame(frames[13], frame_speed);
+	animations[ANIM_WALKING_WEST].AddFrame(frames[14], frame_speed);
+	animations[ANIM_WALKING_WEST].AddFrame(frames[15], frame_speed);
+	animations[ANIM_WALKING_WEST].AddFrame(frames[13], frame_speed);
+	animations[ANIM_WALKING_WEST].AddFrame(frames[16], frame_speed);
+	animations[ANIM_WALKING_WEST].AddFrame(frames[17], frame_speed);
 
-	animations[7].AddFrame(frames[19], frame_speed);
-	animations[7].AddFrame(frames[20], frame_speed);
-	animations[7].AddFrame(frames[21], frame_speed);
-	animations[7].AddFrame(frames[19], frame_speed);
-	animations[7].AddFrame(frames[22], frame_speed);
-	animations[7].AddFrame(frames[23], frame_speed);
+	animations[ANIM_WALKING_EAST].AddFrame(frames[19], frame_speed);
+	animations[ANIM_WALKING_EAST].AddFrame(frames[20], frame_speed);
+	animations[ANIM_WALKING_EAST].AddFrame(frames[21], frame_speed);
+	animations[ANIM_WALKING_EAST].AddFrame(frames[19], frame_speed);
+	animations[ANIM_WALKING_EAST].AddFrame(frames[22], frame_speed);
+	animations[ANIM_WALKING_EAST].AddFrame(frames[23], frame_speed);
 
 	return true;
 } // bool MapSprite::LoadStandardAnimations(std::string filename)
