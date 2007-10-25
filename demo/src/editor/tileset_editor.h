@@ -22,6 +22,7 @@
 #include "video.h"
 
 #include <QDialog>
+#include <QGLWidget>
 #include <QMessageBox>
 #include <QAction>
 #include <QLabel>
@@ -33,6 +34,29 @@ using std::vector;
 
 namespace hoa_editor
 {
+
+
+
+class OverlayGrid : public QGLWidget
+{
+public:
+	OverlayGrid();
+	~OverlayGrid();
+
+	//! This is the current tileset that is being edited.
+	Tileset*	tileset;
+
+protected:
+	void paintGL();
+	void resizeGL(int w,int h);
+	void initializeGL();
+
+
+private:
+
+};
+
+
 
 class TilesetEditor : public QDialog
 {
@@ -62,13 +86,8 @@ private :
 	//! A layout to manage all the labels, spinboxes, and listviews.
 	QGridLayout* _dia_layout;
 
-	//! A label to show the tileset
-	QLabel*	_tileset_label;
-
-	//! The current tileset that is loaded and being edited.
-	Tileset*	_current_tileset;
-
-
+	//! This is the grid that is shown over the tileset for walkability
+	OverlayGrid*	_walkability_grid;
 };
 
 
