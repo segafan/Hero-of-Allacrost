@@ -314,14 +314,14 @@ bool ImageDescriptor::SaveMultiImage(const vector<StillImage*>& images, const st
 	}
 
 	// Check that all the images are non-NULL and are of the same size
-	int32 img_width = images[0]->_width;
-	int32 img_height = images[0]->_height;
+	float img_width = images[0]->_width;
+	float img_height = images[0]->_height;
 	for (uint32 i = 0; i < images.size(); i++) {
 		if (images[i] == NULL || images[i]->_image_texture == NULL) {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL StillImage or ImageElement was present in images vector argument when saving file: " << filename << endl;
 			return false;
 		}
-		if (images[i]->_width != img_width || images[i]->_height != img_height) {
+		if (IsFloatEqual(images[i]->_width, img_width) == false || IsFloatEqual(images[i]->_height, img_height)) {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "images contained in vector argument did not share the same dimensions" << endl;
 			return false;
 		}
@@ -674,28 +674,34 @@ void ImageDescriptor::_GetJpgImageInfo(const std::string& filename, uint32& rows
 bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &filename,
 	const uint32 grid_rows, const uint32 grid_cols)
 {
-	std::string tags;
 	uint32 current_image;
 	uint32 x, y;
 
 	bool need_load = false;
 
-	// Check if we have loaded all the sub-images. If any single sub-image is not loaded, then
-	// we must re-load the entire multi-image file
-	for (x = 0; x < grid_rows && need_load == false; x++) {
-		for (y = 0; y < grid_cols && need_load == false; y++) {
-			tags = "<X" + NumberToString(x) + "_" + NumberToString(grid_rows) + ">";
-			tags += "<Y" + NumberToString(y) + "_" + NumberToString(grid_cols) + ">";
+	// 1D vectors storing info for each image element
+	vector<std::string> tags;
+	vector<bool> loaded;
 
-			// This sub image was not found, so exit this loop immediately
-			if (TextureManager->_images.find(filename + tags) == TextureManager->_images.end()) {
+	// Construct the tags for each image element and figure out which elements are not
+	// already in texture memory and need to be loaded
+	for (x = 0; x < grid_rows; x++) {
+		for (y = 0; y < grid_cols; y++) {
+			tags.push_back("<X" + NumberToString(x) + "_" + NumberToString(grid_rows) + ">" +
+				"<Y" + NumberToString(y) + "_" + NumberToString(grid_cols) + ">");
+
+			if (TextureManager->_images.find(filename + tags.back()) == TextureManager->_images.end()) {
+				loaded.push_back(false);
 				need_load = true;
+			}
+			else {
+				loaded.push_back(true);
 			}
 		}
 	}
 
-	// If not all the images are loaded, then load the multi image from disk and create enough memory to copy
-	// over individual sub-image elements from it
+	// If the image elements are not all loaded, then load the multi image file
+	// from disk and create enough memory to copy over individual sub-image elements from it
 	ImageMemory multi_image;
 	ImageMemory sub_image;
 	if (need_load) {
@@ -716,22 +722,19 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 	}
 
 	// One by one, get the subimages
+	current_image = 0;
 	for (x = 0; x < grid_rows; x++) {
 		for (y = 0; y < grid_cols; y++) {
-			tags = "<X" + NumberToString(x) + "_" + NumberToString(grid_rows) + ">";
-			tags += "<Y" + NumberToString(y) + "_" + NumberToString(grid_cols) + ">";
-
-			current_image = x * grid_cols + y;
-
 			ImageTexture* img;
 
 			// If this image already exists in a texture sheet somewhere, add a reference to it
 			// and add a new ImageElement to the current StillImage
-			if (TextureManager->_images.find(filename + tags) != TextureManager->_images.end()) {
-				img = TextureManager->_images[filename + tags];
+			if (loaded[current_image] == true) {
+				img = TextureManager->_images[filename + tags[current_image]];
 
 				if (img == NULL) {
-					IF_PRINT_WARNING(VIDEO_DEBUG) << "a NULL image was found in the TextureManager's _images container" << endl;
+					IF_PRINT_WARNING(VIDEO_DEBUG) << "a NULL image was found in the TextureManager's _images container "
+						<< "-- aborting multi image load operation" << endl;
 
 					free(multi_image.pixels);
 					free(sub_image.pixels);
@@ -740,12 +743,13 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 					return false;
 				}
 
-				// TEMP: Free/Restore feature removed
+				// TEMP: Free/Restore texture feature removed until further testing can be done
 // 				// If ref count is zero, it means this image was freed, but not removed, so restore it
 // 				if (img->ref_count == 0) {
 // 					img->texture_sheet->RestoreTexture(img);
 // 				}
 
+				images.at(current_image)._filename = filename;
 				images.at(current_image)._texture = img;
 				images.at(current_image)._image_texture = img;
 			}
@@ -760,13 +764,14 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 						multi_image.width + y * multi_image.width / grid_cols) * 4, 4 * sub_image.width);
 				}
 
-				img = new ImageTexture(filename, tags, sub_image.width, sub_image.height);
+				img = new ImageTexture(filename, tags[current_image], sub_image.width, sub_image.height);
 
 				// Try to insert the image in a texture sheet
 				TexSheet* sheet = TextureManager->_InsertImageInTexSheet(img, sub_image, images.at(current_image)._is_static);
 
 				if (sheet == NULL) {
-					IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextureController::_InsertImageInTexSheet failed" << endl;
+					IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextureController::_InsertImageInTexSheet failed -- " <<
+						"aborting multi image load operation" << endl;
 
 					free(multi_image.pixels);
 					free(sub_image.pixels);
@@ -776,7 +781,7 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 					return false;
 				}
 
-				TextureManager->_images[filename + tags] = img;
+				TextureManager->_images[filename + tags[current_image]] = img;
 
 				images.at(current_image)._texture = img;
 				images.at(current_image)._image_texture = img;
@@ -786,8 +791,13 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 
 			// Finally, do a grayscale conversion for the image if grayscale mode is enabled
 			if (images.at(current_image)._grayscale) {
+				// Set _grayscale to false so that the call doesn't think that the grayscale image is already loaded
+				// It will be set back to true by the EnableGrayScale call
+				images.at(current_image)._grayscale = false;
 				images.at(current_image).EnableGrayScale();
 			}
+
+			current_image++;
 		} // for (y = 0; y < grid_cols; y++)
 	} // for (x = 0; x < grid_rows; x++)
 
