@@ -479,11 +479,13 @@ void ImageDescriptor::_RemoveTextureReference() {
 
 void ImageDescriptor::_DrawTexture(const Color* draw_color) const {
 	// Array of the four vertexes defined on the 2D plane for glDrawArrays()
-	static const float vert_coords[] = {
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		1.0f, 1.0f,
-		0.0f, 1.0f,
+	// This is no longer const, because when tiling the background for the menu's
+	// sometimes you need to draw part of a texture
+	float vert_coords[] = {
+		_u1, _v1,
+		_u2, _v1,
+		_u2, _v2,
+		_u1, _v2,
 	};
 
 	// If no color array was passed, use the image's own vertex colors
@@ -511,10 +513,10 @@ void ImageDescriptor::_DrawTexture(const Color* draw_color) const {
 		// Set the texture coordinates
 		float s0, s1, t0, t1;
 
-		s0 = _texture->u1 + _u1 * (_texture->u2 - _texture->u1);
-		s1 = _texture->u1 + _u2 * (_texture->u2 - _texture->u1);
-		t0 = _texture->v1 + _v1 * (_texture->v2 - _texture->v1);
-		t1 = _texture->v1 + _v2 * (_texture->v2 - _texture->v1);
+		s0 = _texture->u1 + (_u1 * (_texture->u2 - _texture->u1));
+		s1 = _texture->u1 + (_u2 * (_texture->u2 - _texture->u1));
+		t0 = _texture->v1 + (_v1 * (_texture->v2 - _texture->v1));
+		t1 = _texture->v1 + (_v2 * (_texture->v2 - _texture->v1));
 
 		// Swap x texture coordinates if x flipping is enabled
 		if (VideoManager->_current_context.x_flip) {
@@ -1466,15 +1468,15 @@ void CompositeImage::Draw(const Color& draw_color) const {
 	float modulation = VideoManager->_screen_fader.GetFadeModulation();
 	Color fade_color(modulation, modulation, modulation, 1.0f);
 
-	float x_shake = VideoManager->_x_shake * (VideoManager->_current_context.coordinate_system.GetRight() -
-		VideoManager->_current_context.coordinate_system.GetLeft()) / 1024.0f;
-	float y_shake = VideoManager->_y_shake * (VideoManager->_current_context.coordinate_system.GetTop() -
-		VideoManager->_current_context.coordinate_system.GetBottom()) / 768.0f;
+	CoordSys coord_sys = VideoManager->_current_context.coordinate_system;
+
+	float x_shake = VideoManager->_x_shake * (coord_sys.GetRight() - coord_sys.GetLeft()) / 1024.0f;
+	float y_shake = VideoManager->_y_shake * (coord_sys.GetTop() - coord_sys.GetBottom()) / 768.0f;
 
 	float x_align_offset = ((VideoManager->_current_context.x_align + 1) * _width) * 0.5f * -
-		VideoManager->_current_context.coordinate_system.GetHorizontalDirection();
+		coord_sys.GetHorizontalDirection();
 	float y_align_offset = ((VideoManager->_current_context.y_align + 1) * _height) * 0.5f * -
-		VideoManager->_current_context.coordinate_system.GetVerticalDirection();
+		coord_sys.GetVerticalDirection();
 
 	// Save the draw cursor position as we move to draw each element
 	glPushMatrix();
@@ -1508,15 +1510,15 @@ void CompositeImage::Draw(const Color& draw_color) const {
 		y_off += y_shake;
 
 		glPushMatrix();
-		VideoManager->MoveRelative(x_off * VideoManager->_current_context.coordinate_system.GetHorizontalDirection(),
-			y_off * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
+		VideoManager->MoveRelative(x_off * coord_sys.GetHorizontalDirection(),
+			y_off * coord_sys.GetVerticalDirection());
 
 		float x_scale = _elements[i].image.GetWidth();
 		float y_scale = _elements[i].image.GetHeight();
 
-		if (VideoManager->_current_context.coordinate_system.GetHorizontalDirection() < 0.0f)
+		if (coord_sys.GetHorizontalDirection() < 0.0f)
 			x_scale = -x_scale;
-		if (VideoManager->_current_context.coordinate_system.GetVerticalDirection() < 0.0f)
+		if (coord_sys.GetVerticalDirection() < 0.0f)
 			y_scale = -y_scale;
 
 		glScalef(x_scale, y_scale, 1.0f);
