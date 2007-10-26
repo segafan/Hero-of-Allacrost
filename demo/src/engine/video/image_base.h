@@ -210,8 +210,7 @@ public:
 	/** \brief Decrements the reference count by one
 	*** \return True if there are no more references to the image
 	**/
-	bool RemoveReference()
-		{ ref_count--; if (ref_count <= 0) return true; else return false; }
+	bool RemoveReference();
 
 	//! \brief Increments the reference count by one
 	void AddReference()

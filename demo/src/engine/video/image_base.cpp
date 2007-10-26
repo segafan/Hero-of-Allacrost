@@ -573,6 +573,21 @@ BaseTexture::~BaseTexture() {
 	}
 }
 
+
+
+bool BaseTexture::RemoveReference() {
+	ref_count--;
+
+	if (ref_count < 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "texture ref_count member is now negative: " << ref_count << endl;
+		return true;
+	}
+	else if (ref_count == 0)
+		return true;
+	else
+		return false;
+}
+
 // -----------------------------------------------------------------------------
 // ImageTexture class
 // -----------------------------------------------------------------------------

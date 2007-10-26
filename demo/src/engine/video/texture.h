@@ -375,8 +375,7 @@ public:
 
 	bool InsertTexture(BaseTexture* img);
 
-	void RemoveTexture(BaseTexture* img)
-		{ _SetBlockProperties(img, NULL, true); _textures.erase(img); }
+	void RemoveTexture(BaseTexture* img);
 
 	void FreeTexture(BaseTexture* img)
 		{ _SetBlockProperties(img, img, true); }
