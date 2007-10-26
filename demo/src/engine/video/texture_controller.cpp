@@ -55,7 +55,17 @@ TextureController::~TextureController() {
 	}
 }
 
+void TextureController::RemoveImage(ImageTexture *img)
+{
+	map<string, ImageTexture *>::iterator finder = this->_images.find(img->filename + img->tags);
+	if (finder != _images.end())
+	{
+		_images.erase(finder);
+		return;
+	}
 
+	IF_PRINT_WARNING(VIDEO_DEBUG) << "could not find ImageTexture to erase in TextureController container" << endl;
+}
 
 bool TextureController::SingletonInitialize() {
 	// Create a default set of texture sheets
@@ -262,6 +272,7 @@ bool TextureController::_SaveTempTextures() {
 
 		// Check that this is a temporary texture and if so, save it to disk as a .png file
 		if (image->tags.find("<T>") != string::npos) {
+			IF_PRINT_DEBUG(VIDEO_DEBUG) << " saving temporary texture " << image->filename << endl;
 			ImageMemory buffer;
 			buffer.CopyFromImage(image);
 			if (buffer.SaveImage("img/temp/" + image->filename + ".png", true) == false) {
@@ -484,6 +495,7 @@ bool TextureController::_ReloadImagesToSheet(TexSheet* sheet) {
 		// Reload a normal image file
 		else {
 			std::string fname = img->filename;
+			IF_PRINT_DEBUG(VIDEO_DEBUG) << " Reloading image " << fname << endl;
 
 			// Check if it is a temporary image, and if so retrieve it from the img/temp directory
 			if (img->tags.find("<T>", 0) != img->tags.npos) {

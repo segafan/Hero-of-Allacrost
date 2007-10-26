@@ -75,7 +75,9 @@ void RotatePoint(float& x, float& y, float angle) {
 // GameVideo class
 //-----------------------------------------------------------------------------
 
-GameVideo::GameVideo() {
+GameVideo::GameVideo() :
+	_initialized(false)
+{
 	_target = VIDEO_TARGET_SDL_WINDOW;
 	_x_cursor = 0;
 	_y_cursor = 0;
@@ -132,6 +134,10 @@ GameVideo::~GameVideo() {
 
 
 bool GameVideo::SingletonInitialize() {
+	// check to see if the singleton is already initialized
+	if (this->_initialized)
+		return true;
+
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
 		PRINT_ERROR << "SDL video initialization failed" << endl;
 		return false;
@@ -224,6 +230,8 @@ bool GameVideo::SingletonInitialize() {
 		PRINT_ERROR << "_rectangle_image could not be created" << endl;
 		return false;
 	}
+
+	this->_initialized = true;
 
 	return true;
 } // bool GameVideo::SingletonInitialize()
@@ -772,6 +780,7 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 
 	// Create a new ImageTexture with a unique filename for this newly captured screen
 	ImageTexture* new_image = new ImageTexture("capture_screen" + NumberToString(capture_id), "<T>", viewport_dimensions[2], viewport_dimensions[3]);
+	new_image->AddReference();
 
 	// Create a texture sheet of an appropriate size that can retain the capture
 	TexSheet* temp_sheet = TextureManager->_CreateTexSheet(RoundUpPow2(viewport_dimensions[2]), RoundUpPow2(viewport_dimensions[3]), VIDEO_TEXSHEET_ANY, false);
@@ -798,9 +807,6 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 		screen_image.Clear();
 		return screen_image;
 	}
-
-	TextureManager->_images["captured_screen" + NumberToString(capture_id) + "<T>"] = new_image;
-	new_image->AddReference();
 
 	// Store the image element to the saved image (with a flipped y axis)
 	screen_image._image_texture = new_image;
