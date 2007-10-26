@@ -623,14 +623,8 @@ ImageTexture::ImageTexture(TexSheet* texture_sheet_, const string& filename_, co
 
 
 ImageTexture::~ImageTexture() {
-	// Search the map of images in the TextureManager for this instance and remove it
-	map<string, ImageTexture*>::iterator finder = TextureManager->_images.find(filename + tags);
-	if (finder != TextureManager->_images.end()) {
-		TextureManager->_images.erase(finder);
-		return;
-	}
-
-	IF_PRINT_WARNING(VIDEO_DEBUG) << "could not find ImageTexture to erase in TextureController container" << endl;
+	// Remove this instance from the texture manager
+	TextureManager->RemoveImage(this);
 }
 
 } // namespace private_video

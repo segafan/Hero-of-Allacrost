@@ -76,6 +76,10 @@ public:
 	**/
 	bool ReloadTextures();
 
+	/** \brief Removes the given image from the list of images in the TextureController
+	 **/
+	void RemoveImage(hoa_video::private_video::ImageTexture *img);
+
 	//! \brief Cycles forward to show the next texture sheet
 	void DEBUG_NextTexSheet();
 

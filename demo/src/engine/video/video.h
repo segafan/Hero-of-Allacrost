@@ -863,6 +863,9 @@ private:
 	//! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
 	std::stack<private_video::Context> _context_stack;
 
+	//! check to see if the VideoManager has already been setup.
+	bool _initialized;
+
 	//-- Private methods ------------------------------------------------------
 
 	/** \brief converts VIDEO_DRAW_LEFT or VIDEO_DRAW_RIGHT flags to a numerical offset
