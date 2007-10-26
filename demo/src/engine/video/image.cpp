@@ -883,6 +883,7 @@ bool StillImage::Load(const string& filename) {
 		if (IsFloatEqual(_height, 0.0f))
 			_height = static_cast<float>(_image_texture->height);
 
+		_texture->AddReference();
 		return true;
 	}
 

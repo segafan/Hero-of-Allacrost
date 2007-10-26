@@ -44,6 +44,8 @@ TextureController::~TextureController() {
 	// Invoking the ImageTexture destructor will erase the entry in the _images map that corresponds to that object
 	// Thus the map will decrement in size by one on every iteration through this loop
 	while (_images.empty() == false) {
+		// TEMP: for debugging
+// 		cout << "image name: " << (*_images.begin()).first << ", ref_count: " << (*_images.begin()).second->ref_count << endl;
 		delete (*_images.begin()).second;
 	}
 

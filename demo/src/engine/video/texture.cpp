@@ -545,6 +545,12 @@ bool VariableTexSheet::InsertTexture(BaseTexture* img) {
 } // bool VariableTexSheet::InsertTexture(BaseTexture* img)
 
 
+void VariableTexSheet::RemoveTexture(BaseTexture* img) {
+	_SetBlockProperties(img, NULL, true);
+	_textures.erase(img);
+}
+
+
 
 void VariableTexSheet::_SetBlockProperties(BaseTexture* tex, BaseTexture* new_tex, bool free) {
 	if (tex == NULL) {
