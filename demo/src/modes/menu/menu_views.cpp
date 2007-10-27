@@ -81,6 +81,8 @@ void CharacterWindow::Draw() {
 	float x, y, w, h;
 	GetPosition(x,y);
 	GetDimensions(w,h);
+	// Adjust the current position to make it look better
+	y += 5;
 
 	GlobalCharacter *character = GlobalManager->GetCharacter(_char_id);
 

@@ -202,6 +202,9 @@ void MenuMode::Reset() {
 	_equip_window.Show();
 	_formation_window.Show();
 
+	_inventory_window.Activate(true);
+	_active_window = &_inventory_window;
+
 	// Setup OptionBoxes
 	_SetupMainOptionBox();
 	_SetupInventoryOptionBox();
@@ -213,197 +216,14 @@ void MenuMode::Reset() {
 	_SetupFormationOptionBox();
 } // void MenuMode::Reset()
 
-
-
-void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
-	// Set all the default options
-	ob->SetFont("default");
-	ob->SetCellSize(115.0f, 50.0f);
-	ob->SetPosition(142.0f, 85.0f);
-	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	ob->SetSelectMode(VIDEO_SELECT_SINGLE);
-	ob->SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	ob->SetCursorOffset(-52.0f, -20.0f);
-}
-
-
-
-void MenuMode::_SetupMainOptionBox() {
-	// Setup the main options box
-	_SetupOptionBoxCommonSettings(&_main_options);
-	_main_options.SetSize(MAIN_SIZE, 1);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Inventory"));
-	options.push_back(MakeUnicodeString("Skills"));
-	options.push_back(MakeUnicodeString("Equip"));
-	options.push_back(MakeUnicodeString("Status"));
-	options.push_back(MakeUnicodeString("Save"));
-	options.push_back(MakeUnicodeString("Formation"));
-	options.push_back(MakeUnicodeString("Exit"));
-
-	// Add strings and set default selection.
-	_main_options.SetOptions(options);
-	_main_options.SetSelection(MAIN_INVENTORY);
-}
-
-
-
-void MenuMode::_SetupInventoryOptionBox() {
-	// Setup the option box
-	_SetupOptionBoxCommonSettings(&_menu_inventory);
-	_menu_inventory.SetSize(INV_SIZE, 1);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Use"));
-	options.push_back(MakeUnicodeString("Sort"));
-	options.push_back(MakeUnicodeString("Back"));
-
-	// Add strings and set default selection.
-	_menu_inventory.SetOptions(options);
-	_menu_inventory.SetSelection(INV_USE);
-}
-
-
-
-void MenuMode::_SetupSkillsOptionBox() {
-	// Setup the option box
-	_SetupOptionBoxCommonSettings(&_menu_skills);
-	_menu_skills.SetSize(SKILLS_SIZE, 1);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Use"));
-	options.push_back(MakeUnicodeString("Back"));
-
-	// Add strings and set default selection.
-	_menu_skills.SetOptions(options);
-	_menu_skills.SetSelection(SKILLS_USE);
-}
-
-
-
-void MenuMode::_SetupEquipOptionBox() {
-	// Setup the status option box
-	_SetupOptionBoxCommonSettings(&_menu_equip);
-	_menu_equip.SetCellSize(150.0f, 50.0f);
-	_menu_equip.SetSize(EQUIP_SIZE, 1);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Equip"));
-	options.push_back(MakeUnicodeString("Remove"));
-	options.push_back(MakeUnicodeString("Back"));
-
-	// Add strings and set default selection.
-	_menu_equip.SetOptions(options);
-	_menu_equip.SetSelection(EQUIP_EQUIP);
-
-}
-
-
-
-void MenuMode::_SetupStatusOptionBox() {
-	// Setup the status option box
-	_SetupOptionBoxCommonSettings(&_menu_status);
-	_menu_status.SetSize(STATUS_SIZE, 1);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("View"));
-	options.push_back(MakeUnicodeString("Back"));
-
-	// Add strings and set default selection.
-	_menu_status.SetOptions(options);
-	_menu_status.SetSelection(STATUS_VIEW);
-}
-
-
-
-void MenuMode::_SetupOptionsOptionBox() {
-	// Setup the options option box
-	_SetupOptionBoxCommonSettings(&_menu_options);
-	_menu_options.SetSize(OPTIONS_SIZE, 1);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Edit"));
-	options.push_back(MakeUnicodeString("Save"));
-	options.push_back(MakeUnicodeString("Back"));
-
-	// Add strings and set default selection.
-	_menu_options.SetOptions(options);
-	_menu_options.SetSelection(OPTIONS_EDIT);
-}
-
-
-
-void MenuMode::_SetupFormationOptionBox() {
-	// setup the save options box
-	_SetupOptionBoxCommonSettings(&_menu_formation);
-	_menu_formation.SetSize(FORMATION_SIZE, 1);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Switch"));
-	options.push_back(MakeUnicodeString("Back"));
-
-	// Add strings and set default selection.
-	_menu_formation.SetOptions(options);
-	_menu_formation.SetSelection(FORMATION_SWITCH);
-}
-
-
-
-void MenuMode::_SetupSaveOptionBox() {
-	// setup the save options box
-	_SetupOptionBoxCommonSettings(&_menu_save);
-	_menu_save.SetSize(SAVE_SIZE, 1);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Save"));
-	options.push_back(MakeUnicodeString("Back"));
-
-	// Add strings and set default selection.
-	_menu_save.SetOptions(options);
-	_menu_save.SetSelection(SAVE_SAVE);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // MenuMode class -- Update Code
 ////////////////////////////////////////////////////////////////////////////////
 
 void MenuMode::Update() {
-	// See if inventory window is active
-	//FIX ME: Use a var to track active window and switch?
-
-	if (_inventory_window.IsActive()) {
-		//Update inventory window
-		_inventory_window.Update();
-		return;
-	}
-	else if (_status_window.IsActive()) {
-		// Update status window.
-		_status_window.Update();
-		return;
-	}
-	else if (_skills_window.IsActive()) {
-		// Update skills window
-		_skills_window.Update();
-		return;
-	}
-	else if (_equip_window.IsActive()) {
-		// Update equipment window
-		_equip_window.Update();
-		return;
-	}
-	else if (_formation_window.IsActive()) {
-		// Update formation window
-		_formation_window.Update();
+	if (_active_window->IsActive())
+	{
+		_active_window->Update();
 		return;
 	}
 
@@ -479,6 +299,7 @@ void MenuMode::Update() {
 				cerr << "MENU: ERROR: Invalid menu showing!" << endl;
 				break;
 		} // switch (_current_menu_showing)
+		_GetNextActiveWindow();
 	} // if VIDEO_OPTION_CONFIRM
 	
 	_current_menu->Update();
@@ -487,7 +308,6 @@ void MenuMode::Update() {
 ////////////////////////////////////////////////////////////////////////////////
 // MenuMode class -- Draw Code
 ////////////////////////////////////////////////////////////////////////////////
-
 void MenuMode::Draw() {
 	// Draw the saved screen background
 	// For that, set the system coordinates to the size of the window (same with the save-screen)
@@ -570,6 +390,376 @@ void MenuMode::Draw() {
 	// Draw currently active options box
 	_current_menu->Draw();
 } // void MenuMode::Draw()
+
+
+//FIX ME:  Adjust for new layout
+void MenuMode::_HandleMainMenu() {
+	switch (_main_options.GetSelection()) {
+		case MAIN_INVENTORY:
+			_current_menu_showing = SHOW_INVENTORY;
+			_current_menu = &_menu_inventory;
+			break;
+
+		case MAIN_SKILLS:
+			_current_menu_showing = SHOW_SKILLS;
+			_current_menu = &_menu_skills;
+			break;
+
+		/*case MAIN_OPTIONS:
+			_current_menu_showing = SHOW_OPTIONS;
+			_current_menu = &_menu_options;
+			break;*/
+
+		case MAIN_FORMATION:
+			_current_menu_showing = SHOW_FORMATION;
+			_current_menu = &_menu_formation;
+			break;
+
+		case MAIN_STATUS:
+			_current_menu_showing = SHOW_STATUS;
+			_current_menu = &_menu_status;
+			break;
+
+		case MAIN_EQUIP:
+			_current_menu_showing = SHOW_EQUIP;
+			_current_menu = &_menu_equip;
+			break;
+
+		case MAIN_SAVE:
+			_current_menu_showing = SHOW_SAVE;
+			_current_menu = &_menu_save;
+			break;
+
+		case MAIN_EXIT:
+			ModeManager->Pop();
+			break;
+
+		default:
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleMainMenu()" << endl;
+			break;
+	}
+} // void MenuMode::_HandleMainMenu()
+
+void MenuMode::_HandleInventoryMenu() {
+	switch (_menu_inventory.GetSelection()) {
+		case INV_USE:
+			if (GlobalManager->GetInventory()->size() == 0)
+				return;
+			_inventory_window.Activate(true);
+			break;
+
+		case INV_SORT:
+			// TODO: Handle the sort inventory comand
+			cout << "MENU: Inventory sort command!" << endl;
+			break;
+
+		case INV_BACK:
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+
+		default:
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleInventoryMenu()" << endl;
+			break;
+	}
+}
+
+void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
+	// Set all the default options
+	ob->SetFont("default");
+	ob->SetCellSize(115.0f, 50.0f);
+	ob->SetPosition(142.0f, 85.0f);
+	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	ob->SetSelectMode(VIDEO_SELECT_SINGLE);
+	ob->SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	ob->SetCursorOffset(-52.0f, -20.0f);
+}
+
+
+
+void MenuMode::_SetupMainOptionBox() {
+	// Setup the main options box
+	_SetupOptionBoxCommonSettings(&_main_options);
+	_main_options.SetSize(MAIN_SIZE, 1);
+
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Inventory"));
+	options.push_back(MakeUnicodeString("Skills"));
+	options.push_back(MakeUnicodeString("Equip"));
+	options.push_back(MakeUnicodeString("Status"));
+	options.push_back(MakeUnicodeString("Save"));
+	options.push_back(MakeUnicodeString("Formation"));
+	options.push_back(MakeUnicodeString("Exit"));
+
+	// Add strings and set default selection.
+	_main_options.SetOptions(options);
+	_main_options.SetSelection(MAIN_INVENTORY);
+}
+
+
+
+void MenuMode::_SetupInventoryOptionBox() {
+	// Setup the option box
+	_SetupOptionBoxCommonSettings(&_menu_inventory);
+	_menu_inventory.SetSize(INV_SIZE, 1);
+
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Use"));
+	options.push_back(MakeUnicodeString("Sort"));
+	options.push_back(MakeUnicodeString("Back"));
+
+	// Add strings and set default selection.
+	_menu_inventory.SetOptions(options);
+	_menu_inventory.SetSelection(INV_USE);
+}
+
+
+
+void MenuMode::_SetupSkillsOptionBox() {
+	// Setup the option box
+	_SetupOptionBoxCommonSettings(&_menu_skills);
+	_menu_skills.SetSize(SKILLS_SIZE, 1);
+
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Use"));
+	options.push_back(MakeUnicodeString("Back"));
+
+	// Add strings and set default selection.
+	_menu_skills.SetOptions(options);
+	_menu_skills.SetSelection(SKILLS_USE);
+}
+
+void MenuMode::_SetupStatusOptionBox() {
+	// Setup the status option box
+	_SetupOptionBoxCommonSettings(&_menu_status);
+	_menu_status.SetSize(STATUS_SIZE, 1);
+
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("View"));
+	options.push_back(MakeUnicodeString("Back"));
+
+	// Add strings and set default selection.
+	_menu_status.SetOptions(options);
+	_menu_status.SetSelection(STATUS_VIEW);
+}
+
+
+
+void MenuMode::_SetupOptionsOptionBox() {
+	// Setup the options option box
+	_SetupOptionBoxCommonSettings(&_menu_options);
+	_menu_options.SetSize(OPTIONS_SIZE, 1);
+
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Edit"));
+	options.push_back(MakeUnicodeString("Save"));
+	options.push_back(MakeUnicodeString("Back"));
+
+	// Add strings and set default selection.
+	_menu_options.SetOptions(options);
+	_menu_options.SetSelection(OPTIONS_EDIT);
+}
+
+void MenuMode::_SetupSaveOptionBox() {
+	// setup the save options box
+	_SetupOptionBoxCommonSettings(&_menu_save);
+	_menu_save.SetSize(SAVE_SIZE, 1);
+
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Save"));
+	options.push_back(MakeUnicodeString("Back"));
+
+	// Add strings and set default selection.
+	_menu_save.SetOptions(options);
+	_menu_save.SetSelection(SAVE_SAVE);
+}
+
+void MenuMode::_SetupFormationOptionBox() {
+	// setup the save options box
+	_SetupOptionBoxCommonSettings(&_menu_formation);
+	_menu_formation.SetSize(FORMATION_SIZE, 1);
+
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Switch"));
+	options.push_back(MakeUnicodeString("Back"));
+
+	// Add strings and set default selection.
+	_menu_formation.SetOptions(options);
+	_menu_formation.SetSelection(FORMATION_SWITCH);
+}
+
+void MenuMode::_SetupEquipOptionBox() {
+	// Setup the status option box
+	_SetupOptionBoxCommonSettings(&_menu_equip);
+	_menu_equip.SetCellSize(150.0f, 50.0f);
+	_menu_equip.SetSize(EQUIP_SIZE, 1);
+
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Equip"));
+	options.push_back(MakeUnicodeString("Remove"));
+	options.push_back(MakeUnicodeString("Back"));
+
+	// Add strings and set default selection.
+	_menu_equip.SetOptions(options);
+	_menu_equip.SetSelection(EQUIP_EQUIP);
+
+}
+
+
+void MenuMode::_HandleSkillsMenu() {
+	switch (_menu_skills.GetSelection()) {
+		case SKILLS_BACK:
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+
+		case SKILLS_USE:
+			_skills_window.Activate(true);
+			break;
+
+		default:
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleSkillsMenu()" << endl;
+			break;
+	}
+}
+
+
+void MenuMode::_HandleStatusMenu() {
+	switch (_menu_status.GetSelection()) {
+		case STATUS_VIEW:
+			_status_window.Activate(true);
+			break;
+
+		case STATUS_BACK:
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+
+		default:
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleStatusMenu()" << endl;
+			break;
+	}
+}
+	
+void MenuMode::_HandleOptionsMenu() {
+	switch (_menu_options.GetSelection()) {
+		case OPTIONS_EDIT:
+			// TODO: Handle the Options - Edit command
+			cout << "MENU: Options - Edit command!" << endl;
+			break;
+
+		case OPTIONS_SAVE:
+			// TODO: Handle the Options - Save command
+			cout << "MENU: Options - Save command!" << endl;
+			break;
+
+		case OPTIONS_BACK:
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+
+		default:
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleOptionsMenu()" << endl;
+			break;
+	}
+}
+
+
+
+void MenuMode::_HandleFormationMenu() {
+	switch (_menu_formation.GetSelection()) {
+		case FORMATION_SWITCH:
+			_formation_window.Activate(true);
+			break;
+
+		case FORMATION_BACK:
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+
+		default:
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleFormationMenu()" << endl;
+			break;
+	}
+}
+
+
+
+void MenuMode::_HandleSaveMenu() {
+	string file_name;
+	switch (_menu_save.GetSelection()) {
+		case SAVE_SAVE:
+			// TODO: Handle Save - Save command
+			cout << "MENU: Save - Save command!" << endl;
+			file_name = "dat/saved_game.lua";
+			GlobalManager->SaveGame(file_name);
+			break;
+
+		case SAVE_BACK:
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+
+		default:
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleSaveMenu()" << endl;
+	}
+}
+
+void MenuMode::_HandleEquipMenu() {
+	switch (_menu_equip.GetSelection()) {
+		case EQUIP_EQUIP:
+			_equip_window.Activate(true);
+			break;
+
+		case EQUIP_REMOVE:
+			// TODO: Handle the remove command
+			cout << "MENU: Equip - Remove command!" << endl;
+			break;
+
+		case EQUIP_BACK:
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+
+		default:
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleEquipMenu()" << endl;
+			break;
+	}
+}
+
+
+
+void MenuMode::_GetNextActiveWindow()
+{ 
+	switch (_current_menu_showing)
+	{
+	case SHOW_MAIN:
+	case SHOW_INVENTORY:
+		_active_window = &_inventory_window;
+		break;
+	case SHOW_EQUIP:
+		_active_window = &_equip_window;
+		break;
+	case SHOW_SKILLS:
+		_active_window = &_skills_window;
+		break;
+	case SHOW_FORMATION:
+		_active_window = &_formation_window;
+		break;
+	case SHOW_STATUS:
+		_active_window = &_status_window;
+		break;
+	}
+}
 
 
 //FIX ME:  Make dynamic, move category id and select state enums to this class
@@ -849,207 +1039,7 @@ void MenuMode::_DrawBottomMenu() {
 } // void MenuMode::_DrawBottomMenu()
 
 
-
-//FIX ME:  Adjust for new layout
-void MenuMode::_HandleMainMenu() {
-	switch (_main_options.GetSelection()) {
-		case MAIN_INVENTORY:
-			_current_menu_showing = SHOW_INVENTORY;
-			_current_menu = &_menu_inventory;
-			break;
-
-		case MAIN_SKILLS:
-			_current_menu_showing = SHOW_SKILLS;
-			_current_menu = &_menu_skills;
-			break;
-
-		/*case MAIN_OPTIONS:
-			_current_menu_showing = SHOW_OPTIONS;
-			_current_menu = &_menu_options;
-			break;*/
-
-		case MAIN_FORMATION:
-			_current_menu_showing = SHOW_FORMATION;
-			_current_menu = &_menu_formation;
-			break;
-
-		case MAIN_STATUS:
-			_current_menu_showing = SHOW_STATUS;
-			_current_menu = &_menu_status;
-			break;
-
-		case MAIN_EQUIP:
-			_current_menu_showing = SHOW_EQUIP;
-			_current_menu = &_menu_equip;
-			break;
-
-		case MAIN_SAVE:
-			_current_menu_showing = SHOW_SAVE;
-			_current_menu = &_menu_save;
-			break;
-
-		case MAIN_EXIT:
-			ModeManager->Pop();
-			break;
-
-		default:
-			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleMainMenu()" << endl;
-			break;
-	}
-} // void MenuMode::_HandleMainMenu()
-
-
-
-void MenuMode::_HandleStatusMenu() {
-	switch (_menu_status.GetSelection()) {
-		case STATUS_VIEW:
-			_status_window.Activate(true);
-			break;
-
-		case STATUS_BACK:
-			_current_menu_showing = SHOW_MAIN;
-			_current_menu = &_main_options;
-			break;
-
-		default:
-			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleStatusMenu()" << endl;
-			break;
-	}
-}
-
-
-
-void MenuMode::_HandleFormationMenu() {
-	switch (_menu_formation.GetSelection()) {
-		case FORMATION_SWITCH:
-			_formation_window.Activate(true);
-			break;
-
-		case FORMATION_BACK:
-			_current_menu_showing = SHOW_MAIN;
-			_current_menu = &_main_options;
-			break;
-
-		default:
-			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleFormationMenu()" << endl;
-			break;
-	}
-}
-
-
-
-void MenuMode::_HandleInventoryMenu() {
-	switch (_menu_inventory.GetSelection()) {
-		case INV_USE:
-			if (GlobalManager->GetInventory()->size() == 0)
-				return;
-			_inventory_window.Activate(true);
-			break;
-
-		case INV_SORT:
-			// TODO: Handle the sort inventory comand
-			cout << "MENU: Inventory sort command!" << endl;
-			break;
-
-		case INV_BACK:
-			_current_menu_showing = SHOW_MAIN;
-			_current_menu = &_main_options;
-			break;
-
-		default:
-			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleInventoryMenu()" << endl;
-			break;
-	}
-}
-
-
-
-void MenuMode::_HandleSkillsMenu() {
-	switch (_menu_skills.GetSelection()) {
-		case SKILLS_BACK:
-			_current_menu_showing = SHOW_MAIN;
-			_current_menu = &_main_options;
-			break;
-
-		case SKILLS_USE:
-			_skills_window.Activate(true);
-			break;
-
-		default:
-			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleSkillsMenu()" << endl;
-			break;
-	}
-}
-
-
-
-void MenuMode::_HandleEquipMenu() {
-	switch (_menu_equip.GetSelection()) {
-		case EQUIP_EQUIP:
-			_equip_window.Activate(true);
-			break;
-
-		case EQUIP_REMOVE:
-			// TODO: Handle the remove command
-			cout << "MENU: Equip - Remove command!" << endl;
-			break;
-
-		case EQUIP_BACK:
-			_current_menu_showing = SHOW_MAIN;
-			_current_menu = &_main_options;
-			break;
-
-		default:
-			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleEquipMenu()" << endl;
-			break;
-	}
-}
-
-
-
-void MenuMode::_HandleOptionsMenu() {
-	switch (_menu_options.GetSelection()) {
-		case OPTIONS_EDIT:
-			// TODO: Handle the Options - Edit command
-			cout << "MENU: Options - Edit command!" << endl;
-			break;
-
-		case OPTIONS_SAVE:
-			// TODO: Handle the Options - Save command
-			cout << "MENU: Options - Save command!" << endl;
-			break;
-
-		case OPTIONS_BACK:
-			_current_menu_showing = SHOW_MAIN;
-			_current_menu = &_main_options;
-			break;
-
-		default:
-			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleOptionsMenu()" << endl;
-			break;
-	}
-}
-
-
-
-void MenuMode::_HandleSaveMenu() {
-	string file_name;
-	switch (_menu_save.GetSelection()) {
-		case SAVE_SAVE:
-			// TODO: Handle Save - Save command
-			cout << "MENU: Save - Save command!" << endl;
-			file_name = "dat/saved_game.lua";
-			GlobalManager->SaveGame(file_name);
-			break;
-
-		case SAVE_BACK:
-			_current_menu_showing = SHOW_MAIN;
-			_current_menu = &_main_options;
-			break;
-
-		default:
-			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleSaveMenu()" << endl;
-	}
-}
+void _DrawItemListHeader()
+{ }
 
 } // namespace hoa_menu

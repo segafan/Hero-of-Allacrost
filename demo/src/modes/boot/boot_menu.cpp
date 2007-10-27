@@ -37,6 +37,11 @@ _is_windowed(windowed)
 
 	// Init the menu window if it's not available yet
 	_InitWindow();
+
+	if (!_is_windowed)
+	{
+		_current_menu.SetCellSize(120, 20);
+	}
 }
 
 

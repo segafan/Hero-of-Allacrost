@@ -1616,11 +1616,11 @@ void CompositeImage::AddImage(const StillImage& img, float x_offset, float y_off
 	new_image.SetDimensions(img.GetWidth(), img.GetHeight());
 
 	// Determine if the width or height of the composite image has grown from adding this new element
-	float max_x = x_offset + new_image.GetWidth();
+	float max_x = x_offset + new_image.GetWidth() * u2;
 	if (max_x > _width)
 		_width = max_x;
 
-	float max_y = y_offset + new_image.GetHeight();
+	float max_y = y_offset + new_image.GetHeight() * v2;
 	if (max_y > _height)
 		_height = max_y;
 } // void CompositeImage::AddImage(const StillImage& img, float x_offset, float y_offset, float u1, float v1, float u2, float v2)

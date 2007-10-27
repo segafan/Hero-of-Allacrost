@@ -205,6 +205,11 @@ private:
 	private_menu::SkillsWindow _skills_window;
 	private_menu::EquipWindow _equip_window;
 	private_menu::FormationWindow _formation_window;
+
+	/** \brief The currently active window
+	 **/
+	hoa_video::MenuWindow *_active_window;
+
 //	private_menu::SaveWindow _save_window;
 
 	// FIXME
@@ -269,6 +274,13 @@ private:
 	void _HandleFormationMenu();
 	void _HandleSaveMenu();
 	void _HandleEquipMenu();
+	//@}
+
+	/** \name Active Window Functions
+	*** \brief Handles finding the next active window
+	**/
+	//@{
+	void _GetNextActiveWindow();
 	//@}
 
 	//! \brief Draws the bottom part of the menu mode.

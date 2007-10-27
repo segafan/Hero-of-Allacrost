@@ -174,6 +174,11 @@ public:
 	*** \param frame_time The time that has elapsed since the previous frame, in milliseconds.
 	**/
 	void Update(uint32 frame_time);
+	/** \brief This version is for the subclasses of menu window (allows us to use a single MenuWindow variable
+	*** to track the active window.
+	**/
+	virtual void Update()
+		{ }
 
 	//! \brief Draws the menu window to the screen.
 	void Draw();
@@ -241,6 +246,12 @@ public:
 	ScreenRect GetScissorRect() const
 		{ return _scissor_rect; }
 	//@}
+
+	/** \brief Indicates whether the window is in the active context
+	*** \return True always here, subclasses can override to change the behaviour
+	**/
+	virtual bool IsActive()
+		{ return true; }
 
 private:
 	//! \brief The current id of this object.
