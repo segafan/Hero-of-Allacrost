@@ -692,12 +692,12 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 			tags.push_back("<X" + NumberToString(x) + "_" + NumberToString(grid_rows) + ">" +
 				"<Y" + NumberToString(y) + "_" + NumberToString(grid_cols) + ">");
 
-			if (TextureManager->_images.find(filename + tags.back()) == TextureManager->_images.end()) {
-				loaded.push_back(false);
-				need_load = true;
+			if (TextureManager->ContainsImage(filename + tags.back())) {
+				loaded.push_back(true);
 			}
 			else {
-				loaded.push_back(true);
+				loaded.push_back(false);
+				need_load = true;
 			}
 		}
 	}
@@ -732,7 +732,7 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 			// If this image already exists in a texture sheet somewhere, add a reference to it
 			// and add a new ImageElement to the current StillImage
 			if (loaded[current_image] == true) {
-				img = TextureManager->_images[filename + tags[current_image]];
+				img = TextureManager->GetImage(filename + tags[current_image]);
 
 				if (img == NULL) {
 					IF_PRINT_WARNING(VIDEO_DEBUG) << "a NULL image was found in the TextureManager's _images container "
@@ -744,12 +744,6 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 					sub_image.pixels = NULL;
 					return false;
 				}
-
-				// TEMP: Free/Restore texture feature removed until further testing can be done
-// 				// If ref count is zero, it means this image was freed, but not removed, so restore it
-// 				if (img->ref_count == 0) {
-// 					img->texture_sheet->RestoreTexture(img);
-// 				}
 
 				images.at(current_image)._filename = filename;
 				images.at(current_image)._texture = img;
@@ -783,7 +777,7 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 					return false;
 				}
 
-				TextureManager->_images[filename + tags[current_image]] = img;
+				TextureManager->AddImage(img);
 
 				images.at(current_image)._texture = img;
 				images.at(current_image)._image_texture = img;
@@ -860,22 +854,13 @@ bool StillImage::Load(const string& filename) {
 	}
 
 	// 1. Check if an image with the same filename has already been loaded. If so, point to that and increment its reference
-	map<string, ImageTexture*>::iterator i = TextureManager->_images.find(_filename);
-	if (i != TextureManager->_images.end()) {
-		_image_texture = i->second;
+	if ((_image_texture = TextureManager->GetImage(_filename)) != NULL) {
 		_texture = _image_texture;
 
 		if (_image_texture == NULL) {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "recovered a NULL image inside the TextureManager's image map: " << _filename << endl;
 			return false;
 		}
-
-		// TEMP: free/restore feature removed
-// 		// If the following condition is true, it means this image was freed but not removed from the texture sheet
-// 		// So, we must restore it
-// 		if (_image_texture->ref_count == 0) {
-// 			_image_texture->texture_sheet->RestoreTexture(_image_texture);
-// 		}
 
 		// If the width or height of this object is 0.0, use the pixel width/height of the image texture
 		if (IsFloatEqual(_width, 0.0f))
@@ -910,7 +895,7 @@ bool StillImage::Load(const string& filename) {
 		return false;
 	}
 
-	TextureManager->_images[_filename] = _image_texture;
+	TextureManager->AddImage(_image_texture);
 	_image_texture->AddReference();
 
 	// If width or height members are zero, set them to the dimensions of the image data (which are in number of pixels)
@@ -933,8 +918,8 @@ bool StillImage::Load(const string& filename) {
 	if (TextureManager->_InsertImageInTexSheet(gray_image, img_data, _is_static) == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextureController::_InsertImageInTexSheet() failed for file: " << _filename << endl;
 
+		TextureManager->RemoveImage(gray_image);
 		delete gray_image;
-		TextureManager->_images.erase(_filename);
 		_RemoveTextureReference(); // sets _texture to NULL
 		_image_texture = NULL;
 		free(img_data.pixels);
@@ -944,7 +929,7 @@ bool StillImage::Load(const string& filename) {
 
 	_image_texture = gray_image;
 	_texture = _image_texture;
-	TextureManager->_images[_filename + "<G>"] = gray_image;
+	TextureManager->AddImage(gray_image);
 	_image_texture->AddReference();
 
 	free(img_data.pixels);
@@ -1080,11 +1065,9 @@ void StillImage::EnableGrayScale() {
 	}
 
 	// 2. Check if a grayscale version of this image already exists in texture memory and if so, update the ImageTexture pointer and reference
-	map<string, ImageTexture*>::iterator img_iter = TextureManager->_images.find(_filename + _image_texture->tags + "<G>");
-	if (img_iter != TextureManager->_images.end()) {
+	if ((_image_texture = TextureManager->GetImage(_filename + _image_texture->tags + "<G>")) != NULL) {
 		// NOTE: We do not decrement the reference to the colored image, because we want to guarantee that
 		// it remains referenced in texture memory while its grayscale counterpart is being used
-		_image_texture = img_iter->second;
 		_texture = _image_texture;
 		_image_texture->AddReference();
 		return;
@@ -1109,7 +1092,7 @@ void StillImage::EnableGrayScale() {
 		return;
 	}
 
-	TextureManager->_images[new_img->filename + new_img->tags] = new_img;
+	TextureManager->AddImage(new_img);
 	_image_texture = new_img;
 	_texture = _image_texture;
 	_image_texture->AddReference();
@@ -1135,9 +1118,8 @@ void StillImage::DisableGrayScale() {
 		return;
 	}
 
-	map<string, ImageTexture*>::iterator img_iter = TextureManager->_images.find(_image_texture->filename +
-		_image_texture->tags.substr(0, _image_texture->tags.length() - 3));
-	if (img_iter == TextureManager->_images.end()) {
+	string search_key = _image_texture->filename + _image_texture->tags.substr(0, _image_texture->tags.length() - 3);
+	if ((_image_texture = TextureManager->GetImage(search_key)) == NULL) {
 		PRINT_WARNING << "non-grayscale version of image was not found in texture memory" << endl;
 		return;
 	}
@@ -1147,7 +1129,6 @@ void StillImage::DisableGrayScale() {
 
 	// No reference change is needed for the color image, since the color texture did not have a reference
 	// decrement when the grayscale version was enabled
-	_image_texture = img_iter->second;
 	_texture = _image_texture;
 } // void StillImage::DisableGrayScale()
 
