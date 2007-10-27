@@ -598,11 +598,11 @@ ImageTexture::ImageTexture(const string& filename_, const string& tags_, int32 w
 	tags(tags_)
 {
 	if (VIDEO_DEBUG) {
-		if (TextureManager->_images.find(filename + tags) != TextureManager->_images.end())
+		if (TextureManager->ContainsImage(filename + tags))
 			PRINT_WARNING << "constructor invoked when ImageTexture was already referenced for: " << filename << tags << endl;
 	}
 
-	TextureManager->_images[filename + tags] = this;
+	TextureManager->AddImage(this);
 }
 
 
@@ -613,11 +613,11 @@ ImageTexture::ImageTexture(TexSheet* texture_sheet_, const string& filename_, co
 	tags(tags_)
 {
 	if (VIDEO_DEBUG) {
-		if (TextureManager->_images.find(filename + tags) != TextureManager->_images.end())
+		if (TextureManager->ContainsImage(filename + tags))
 			PRINT_WARNING << "constructor invoked when ImageTexture was already referenced for: " << filename << tags << endl;
 	}
 
-	TextureManager->_images[filename + tags] = this;
+	TextureManager->AddImage(this);
 }
 
 

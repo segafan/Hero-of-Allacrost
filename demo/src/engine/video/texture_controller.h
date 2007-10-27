@@ -76,6 +76,18 @@ public:
 	**/
 	bool ReloadTextures();
 
+	/** \brief Adds an image to the list of images in the TextureController
+	 **/
+	void AddImage(hoa_video::private_video::ImageTexture *img);
+
+	/** \brief Searchs for the given image name in the list of images
+	 **/
+	bool ContainsImage(std::string name);
+
+	/** \brief Return the image stored under the given filename
+	 **/
+	hoa_video::private_video::ImageTexture *GetImage(std::string name);
+
 	/** \brief Removes the given image from the list of images in the TextureController
 	 **/
 	void RemoveImage(hoa_video::private_video::ImageTexture *img);

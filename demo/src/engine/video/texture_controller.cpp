@@ -56,8 +56,6 @@ TextureController::~TextureController() {
 	}
 }
 
-
-
 bool TextureController::SingletonInitialize() {
 	// Create a default set of texture sheets
 	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false) == NULL) {
@@ -83,9 +81,6 @@ bool TextureController::SingletonInitialize() {
 
 	return true;
 }
-
-
-
 
 bool TextureController::UnloadTextures() {
 	bool success = true;
@@ -170,19 +165,30 @@ bool TextureController::ReloadTextures() {
 	return success;
 }
 
+void TextureController::AddImage(ImageTexture *img)
+{
+	this->_images[img->filename + img->tags] = img; 
+}
 
+bool TextureController::ContainsImage(string name)
+{ 
+	return this->_images.find(name) != this->_images.end(); 
+}
 
-void TextureController::RemoveImage(ImageTexture *img) {
+ImageTexture *TextureController::GetImage(string name)
+{ 
+	return this->_images[name]; 
+}
+
+void TextureController::RemoveImage(ImageTexture *img)
+{
 	map<string, ImageTexture *>::iterator finder = this->_images.find(img->filename + img->tags);
-	if (finder != _images.end()) {
+	if (finder != _images.end())
+	{
 		_images.erase(finder);
 		return;
 	}
-
-	IF_PRINT_WARNING(VIDEO_DEBUG) << "could not find ImageTexture to erase in TextureController container" << endl;
 }
-
-
 
 void TextureController::DEBUG_NextTexSheet() {
 	_debug_current_sheet++;
