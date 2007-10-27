@@ -72,6 +72,7 @@ ShopActionWindow::ShopActionWindow() {
 	text_box.SetOwner(this);
 	text_box.SetPosition(25.0f, 85.0f);
 	text_box.SetDimensions(150.0f, 65.0f);
+	text_box.SetTextStyle(TextStyle());
 	text_box.SetDisplaySpeed(30);
 	text_box.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	text_box.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);

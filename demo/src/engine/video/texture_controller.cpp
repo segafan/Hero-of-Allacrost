@@ -47,7 +47,6 @@ TextureController::~TextureController() {
 		ImageTexture* img = (*_images.begin()).second;
 		img->texture_sheet->RemoveTexture(img);
 		delete img;
-		_images.erase(_images.begin());
 	}
 
 	IF_PRINT_DEBUG(VIDEO_DEBUG) << "Deleting all remaining texture sheets, a total of: " << _tex_sheets.size() << endl;
@@ -177,6 +176,8 @@ bool TextureController::ContainsImage(string name)
 
 ImageTexture *TextureController::GetImage(string name)
 { 
+	if (_images.find(name) == _images.end())
+		return NULL;
 	return this->_images[name]; 
 }
 

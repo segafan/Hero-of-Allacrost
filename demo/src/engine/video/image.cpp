@@ -1065,7 +1065,10 @@ void StillImage::EnableGrayScale() {
 	}
 
 	// 2. Check if a grayscale version of this image already exists in texture memory and if so, update the ImageTexture pointer and reference
-	if ((_image_texture = TextureManager->GetImage(_filename + _image_texture->tags + "<G>")) != NULL) {
+	string search_key = _filename + _image_texture->tags + "<G>";
+	string tags = _image_texture->tags;
+	ImageTexture *temp_texture = _image_texture;
+	if ((_image_texture = TextureManager->GetImage(search_key)) != NULL) {
 		// NOTE: We do not decrement the reference to the colored image, because we want to guarantee that
 		// it remains referenced in texture memory while its grayscale counterpart is being used
 		_texture = _image_texture;
@@ -1075,10 +1078,10 @@ void StillImage::EnableGrayScale() {
 
 	// 3. If no grayscale version exists, create a copy of the image, convert it to grayscale, and add the gray copy to texture memory
 	ImageMemory gray_img;
-	gray_img.CopyFromImage(_image_texture);
+	gray_img.CopyFromImage(temp_texture);
 	gray_img.ConvertToGrayscale();
 
-	ImageTexture* new_img = new ImageTexture(_image_texture->filename, _image_texture->tags + "<G>", gray_img.width, gray_img.height);
+	ImageTexture* new_img = new ImageTexture(_filename, tags + "<G>", gray_img.width, gray_img.height);
 
 	if (TextureManager->_InsertImageInTexSheet(new_img, gray_img, _is_static) == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to insert new grayscale image into texture sheet" << endl;
@@ -1102,7 +1105,6 @@ void StillImage::EnableGrayScale() {
 		gray_img.pixels = NULL;
 	}
 } // void StillImage::EnableGrayScale()
-
 
 
 void StillImage::DisableGrayScale() {
