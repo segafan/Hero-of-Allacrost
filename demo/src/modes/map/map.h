@@ -461,6 +461,9 @@ private:
 	**/
 	std::vector<hoa_video::AnimatedImage*> _animated_tile_images;
 
+	//! \brief Icon which appears over NPCs who have unread dialogue
+	hoa_video::AnimatedImage _new_dialogue_icon;
+
 	//! \brief The music that the map will need to make use of.
 	std::vector<hoa_audio::MusicDescriptor> _music;
 

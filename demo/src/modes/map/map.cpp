@@ -87,13 +87,11 @@ MapMode::MapMode(string filename) :
 	_Load();
 
 	// TEMP: Load dialogue icon
-	if (private_map::new_dialogue_icon.GetNumFrames() == 0) {
-		private_map::new_dialogue_icon.SetDimensions(2, 2);
-		std::vector<uint32> timings(16, 100);
+	_new_dialogue_icon.SetDimensions(2, 2);
+	vector<uint32> timings(16, 100);
 
-		if (private_map::new_dialogue_icon.LoadFromFrameSize("img/misc/dialogue_icon.png", timings, 32, 32) == false)
-			IF_PRINT_WARNING(MAP_DEBUG) << "new dialogue icon load failure" << endl;
-	}
+	if (_new_dialogue_icon.LoadFromFrameSize("img/misc/dialogue_icon.png", timings, 32, 32) == false)
+		IF_PRINT_WARNING(MAP_DEBUG) << "new dialogue icon load failure" << endl;
 }
 
 

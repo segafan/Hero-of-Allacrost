@@ -44,9 +44,10 @@ TextureController::~TextureController() {
 	// Invoking the ImageTexture destructor will erase the entry in the _images map that corresponds to that object
 	// Thus the map will decrement in size by one on every iteration through this loop
 	while (_images.empty() == false) {
-		// TEMP: for debugging
-// 		cout << "image name: " << (*_images.begin()).first << ", ref_count: " << (*_images.begin()).second->ref_count << endl;
-		delete (*_images.begin()).second;
+		ImageTexture* img = (*_images.begin()).second;
+		img->texture_sheet->RemoveTexture(img);
+		delete img;
+		_images.erase(_images.begin());
 	}
 
 	IF_PRINT_DEBUG(VIDEO_DEBUG) << "Deleting all remaining texture sheets, a total of: " << _tex_sheets.size() << endl;
@@ -55,17 +56,7 @@ TextureController::~TextureController() {
 	}
 }
 
-void TextureController::RemoveImage(ImageTexture *img)
-{
-	map<string, ImageTexture *>::iterator finder = this->_images.find(img->filename + img->tags);
-	if (finder != _images.end())
-	{
-		_images.erase(finder);
-		return;
-	}
 
-	IF_PRINT_WARNING(VIDEO_DEBUG) << "could not find ImageTexture to erase in TextureController container" << endl;
-}
 
 bool TextureController::SingletonInitialize() {
 	// Create a default set of texture sheets
@@ -177,6 +168,18 @@ bool TextureController::ReloadTextures() {
 		VideoManager->_light_overlay = _CreateBlankGLTexture(1024, 1024);
 
 	return success;
+}
+
+
+
+void TextureController::RemoveImage(ImageTexture *img) {
+	map<string, ImageTexture *>::iterator finder = this->_images.find(img->filename + img->tags);
+	if (finder != _images.end()) {
+		_images.erase(finder);
+		return;
+	}
+
+	IF_PRINT_WARNING(VIDEO_DEBUG) << "could not find ImageTexture to erase in TextureController container" << endl;
 }
 
 

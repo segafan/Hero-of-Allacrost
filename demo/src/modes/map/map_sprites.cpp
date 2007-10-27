@@ -38,9 +38,6 @@ namespace hoa_map {
 
 namespace private_map {
 
-// Initialized in MapMode constructor
-hoa_video::AnimatedImage new_dialogue_icon;
-
 // ****************************************************************************
 // ********************* VirtualSprite Class Functions ************************
 // ****************************************************************************
@@ -137,7 +134,7 @@ void VirtualSprite::Update() {
 		icon_alpha = 0;
 	_dialogue_icon_color.SetAlpha( icon_alpha );
 
-	new_dialogue_icon.Update();
+	MapMode::_current_map->_new_dialogue_icon.Update();
 	if (!updatable) {
 		return;
 	}
@@ -221,7 +218,7 @@ void VirtualSprite::Draw() {
 	if (HasDialogue()) {
 		if (IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons() && seen_all_dialogue == false) {
 			VideoManager->MoveRelative(0, -GetImgHeight());
-			new_dialogue_icon.Draw(_dialogue_icon_color);
+			MapMode::_current_map->_new_dialogue_icon.Draw(_dialogue_icon_color);
 		}
 	}
 }
