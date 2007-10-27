@@ -43,14 +43,14 @@ namespace private_shop {
 ShopActionWindow::ShopActionWindow() {
 	// (1) Initialize the window
 	MenuWindow::Create(200, 600, ~VIDEO_MENU_EDGE_RIGHT);
-	MenuWindow::SetPosition(112, 854);
+	MenuWindow::SetPosition(112, 684);
 	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
 	MenuWindow::Show();
 
 	// (2) Initialize the list of actions
 	options.SetOwner(this);
-	options.SetPosition(25.0f, 400.0f);
+	options.SetPosition(25.0f, 600.0f);
 	options.SetSize(1, 5); // One column, numerous rows
 	options.SetCellSize(150.0f, 50.0f);
 	options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -429,7 +429,7 @@ void ObjectSellListWindow::Draw() {
 ObjectInfoWindow::ObjectInfoWindow() {
 	// (1) Create the info window in the bottom right-hand section of the screen
 	MenuWindow::Create(600, 216, ~VIDEO_MENU_EDGE_TOP);
-	MenuWindow::SetPosition(312, 470);
+	MenuWindow::SetPosition(312, 300);
 	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
 	MenuWindow::Show();
