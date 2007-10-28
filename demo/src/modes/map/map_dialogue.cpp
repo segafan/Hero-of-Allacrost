@@ -350,9 +350,13 @@ void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 time, int32
 	_options.push_back(NULL);
 	_line_count++;
 	if (action >= 0) {
+		// Place out global table on top of the stack
+		MapMode::_loading_map->_map_script.OpenTable(MapMode::_loading_map->_map_namespace, true);
 		MapMode::_loading_map->_map_script.OpenTable("map_functions");
 		ScriptObject* new_action = new ScriptObject();
 		*new_action = MapMode::_loading_map->_map_script.ReadFunctionPointer(action);
+		// clean up our additions to the stack
+		MapMode::_loading_map->_map_script.CloseTable();
 		MapMode::_loading_map->_map_script.CloseTable();
 		_actions.push_back(new_action);
 	}

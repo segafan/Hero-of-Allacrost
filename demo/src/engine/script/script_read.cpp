@@ -299,8 +299,8 @@ object ReadScriptDescriptor::ReadFunctionPointer(int32 key) {
 // Table Operation Functions
 //-----------------------------------------------------------------------------
 
-void ReadScriptDescriptor::OpenTable(const string& table_name) {
-	if (_open_tables.size() == 0) { // Fetch the table from the global space
+void ReadScriptDescriptor::OpenTable(const string& table_name, bool use_global) {
+	if (_open_tables.size() == 0 || use_global) { // Fetch the table from the global space
 		lua_getglobal(_lstack, table_name.c_str());
 		if (!lua_istable(_lstack, STACK_TOP)) {
 			_error_messages << "* OpenTable() failed because the data retrieved was not a table "
@@ -374,6 +374,11 @@ uint32 ReadScriptDescriptor::GetTableSize(const string& table_name) {
 	return size;
 }
 
+void ReadScriptDescriptor::ClearStack(uint32 levels_to_clear) {
+	_open_tables.clear();
+	for (uint32 i = 0; i < levels_to_clear; ++i)
+		lua_remove(_lstack, 0);
+}
 
 
 uint32 ReadScriptDescriptor::GetTableSize(int32 table_name) {

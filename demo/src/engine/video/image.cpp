@@ -844,6 +844,8 @@ bool StillImage::Load(const string& filename) {
 	if (_image_texture != NULL) {
 		_RemoveTextureReference();
 		_image_texture = NULL;
+		_width = 0.0f;
+		_height = 0.0f;
 	}
 
 	_filename = filename;
