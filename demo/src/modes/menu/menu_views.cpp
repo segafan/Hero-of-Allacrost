@@ -463,7 +463,7 @@ StatusWindow::StatusWindow() : _char_select_active(false) {
 	for (uint32 i = 0; i < partysize; i++) {
 		ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(i));
 		portrait.SetStatic(true);
-		portrait.Load("img/portraits/menu/" + ch->GetFilename() + "_large.png", 150, 350);
+		portrait.Load("img/portraits/menu/" + ch->GetFilename() + "_large.png");
 		_full_portraits.push_back(portrait);
 	}
 
@@ -606,9 +606,12 @@ void StatusWindow::Draw() {
 	VideoManager->Text()->Draw(MakeUnicodeString(oeva.str()));
 
 	//Draw character full body portrait
-	VideoManager->Move(735, 145);
+	VideoManager->Move(855, 145);
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP);
 
 	_full_portraits[_char_select.GetSelection()].Draw();
+
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
 	_char_select.Draw();
 } // void StatusWindow::Draw()

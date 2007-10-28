@@ -476,6 +476,9 @@ private:
 	//! \brief Container for map zones, used for various purposes such as spawning of enemies
 	std::vector<private_map::MapZone*> _zones;
 
+	//! \brief store the namespace of the current map
+	std::string _map_namespace;
+
 	// -------------------- Battle Data Retained by the Map
 
 	/** \brief A container for the various foes which may appear on this map.

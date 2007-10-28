@@ -259,7 +259,10 @@ public:
 	**/
 	//@{
 	//! \param table_name The name of the table to open
-	void OpenTable(const std::string& table_name);
+	//! \param use_global This overrides the open_tables vector, the reason for this is
+	//! when a function is called from lua, any open tables are no longer on the stack passed to the function
+	//! so to start a new chain of open tables we have to ignore the open tables vector
+	void OpenTable(const std::string& table_name, bool use_global = false);
 
 	/** \param table_name The integer key of the table to open
 	*** \note This function will only work when there is at least one other table already open
@@ -285,6 +288,9 @@ public:
 
 	//! \brief Returns the number of elements stored in the most recently opened table
 	uint32 GetTableSize();
+
+	//! \brief Emptys all values off the lua stack
+	void ClearStack(uint32 levels_to_clear);
 
 	/** \brief Fills a vector with all of the keys of a table
 	*** \param table_name The name of the table to open and retrieve the keys from

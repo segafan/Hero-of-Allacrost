@@ -161,6 +161,13 @@ void MapMode::_Load() {
 		return;
 	}
 	
+	// open the map tablespace (named after the map filename)
+	// first see if the filename has an extension, and then strip the directories
+	int32 period = _map_filename.find(".");
+	int32 last_slash = _map_filename.find_last_of("/");
+	_map_namespace = _map_filename.substr(last_slash + 1, period - (last_slash + 1));
+	_map_script.OpenTable(_map_namespace);
+
 	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
 	if (_location_graphic.Load("img/menus/locations/" + _map_script.ReadString("location_filename")) == false) {
 		cerr << "MAP ERROR: failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
@@ -223,9 +230,14 @@ void MapMode::_Load() {
 	}
 
 	// ---------- (5) Call the map script's load function
-	ScriptCallFunction<void>(_map_script.GetLuaState(), "Load", this);
+	ScriptObject map_table(luabind::from_stack(_map_script.GetLuaState(), hoa_script::private_script::STACK_TOP));
+	ScriptObject function = map_table["Load"];
+	ScriptCallFunction<void>(function, this);
+
 	_update_function = _map_script.ReadFunctionPointer("Update");
 	_draw_function = _map_script.ReadFunctionPointer("Draw");
+
+	_map_script.CloseAllTables();
 
 	// ---------- (6) Load the saved states of all the objects
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
@@ -440,7 +452,7 @@ void MapMode::Update() {
 
 	// ---------- (1) Call the map's update script function
 	ScriptCallFunction<void>(_update_function);
-
+	
 	// ---------- (2) Process user input
 	if (_ignore_input == false) {
 		if (_map_state == DIALOGUE)
