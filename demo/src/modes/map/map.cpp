@@ -388,6 +388,7 @@ void MapMode::_LoadTiles() {
 			return;
 		}
 
+		tileset_script.OpenTable(tileset_filenames[i]);
 		tileset_script.OpenTable("animated_tiles");
 		for (uint32 j = 1; j <= tileset_script.GetTableSize(); j++) {
 			animation_info.clear();
@@ -411,6 +412,7 @@ void MapMode::_LoadTiles() {
 
 			tile_animations.insert(make_pair(first_frame_index, new_animation));
 		}
+		tileset_script.CloseTable();
 		tileset_script.CloseTable();
 		tileset_script.CloseFile();
 	} // for (uint32 i = 0; i < tileset_filenames.size(); i++)
