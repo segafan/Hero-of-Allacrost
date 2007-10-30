@@ -1,4 +1,7 @@
-
+local ns = {}
+setmetatable(ns, {__index = _G})
+desert_cave_wall2 = ns;
+setfenv(1, ns);
 
 file_name = "dat/tilesets/desert_cave_walls2.lua"
 image = "img/tilesets/desert_cave_walls2.png"

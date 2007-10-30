@@ -19,7 +19,9 @@
 ------------------------------------------------------------------------------]]
 
 -- All item definitions are stored in this table
-items = {}
+if (items == nil) then
+   items = {}
+end
 
 -- -----------------------------------------------------------------------------
 -- IDs 1-1000 are reserved for healing potions

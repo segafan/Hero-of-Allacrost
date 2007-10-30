@@ -16,7 +16,9 @@
 ------------------------------------------------------------------------------]]
 
 -- All armor definitions are stored in this table
-armor = {}
+if (armor == nil) then
+   armor = {}
+end
 
 armor[30001] = {
 	name = "Karlate Breastplate",

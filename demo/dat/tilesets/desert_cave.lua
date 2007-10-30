@@ -1,4 +1,8 @@
 -- Desert Cave Tileset datasheet
+local ns = {}
+setmetatable(ns, {__index = _G})
+desert_cave = ns;
+setfenv(1, ns);
 
 file_name = "dat/tilesets/desert_cave.lua"
 image = "img/tilesets/desert_cave.png"
