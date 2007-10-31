@@ -54,7 +54,8 @@ Editor::Editor() : QMainWindow()
 	// set the window icon
 	setWindowIcon(QIcon("img/logos/program_icon.bmp"));
 
-	
+	// Create the video engine's singleton
+	VideoManager = GameVideo::SingletonCreate();
 } // Editor constructor
 
 Editor::~Editor()
@@ -65,6 +66,9 @@ Editor::~Editor()
 		delete _ed_tabs;
 	delete _ed_splitter;
 	delete _undo_stack;
+
+	GameScript::SingletonDestroy();
+	GameVideo::SingletonDestroy();
 } // Editor destructor
 
 
@@ -1191,7 +1195,7 @@ void EditorScrollView::Resize(int width, int height)
 	_map->SetWidth(width);
 } // Resize(...)
 
-std::vector<int32>& EditorScrollView::GetCurrentLayer()
+vector<int32>& EditorScrollView::GetCurrentLayer()
 {
 	return _map->GetLayer(_layer_edit);
 }
@@ -1560,18 +1564,15 @@ void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index)
 			QMessageBox::warning(this, "Loading File...",
 				QString("ERROR: could not open dat/tilesets/autotiling.lua for reading!"));
 
-		if (read_data.DoesTableExist(it->second) == true)
-		{
-			read_data.OpenTable(it->second);
-			int32 random_index = RandomBoundedInteger(1, static_cast<int32>(read_data.GetTableSize()));
-			read_data.OpenTable(random_index);
-			string tileset_name = read_data.ReadString(1);
-			tile_index = read_data.ReadInt(2);
-			read_data.CloseTable();
-			tileset_num = _map->tileset_names.findIndex(
-				QString::fromStdString(tileset_name));
-			read_data.CloseTable();
-		} // autotileable group exists
+		read_data.OpenTable(it->second);
+		int32 random_index = RandomBoundedInteger(1, static_cast<int32>(read_data.GetTableSize()));
+		read_data.OpenTable(random_index);
+		string tileset_name = read_data.ReadString(1);
+		tile_index = read_data.ReadInt(2);
+		read_data.CloseTable();
+		tileset_num = _map->tileset_names.findIndex(
+			QString::fromStdString(tileset_name));
+		read_data.CloseTable();
 
 		read_data.CloseFile();
 
@@ -1645,7 +1646,7 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 	
 
 	// Now figure out what groups the existing tiles belong to.
-	for (int i = 0; i < existing_tiles.size(); i++)
+	for (unsigned int i = 0; i < existing_tiles.size(); i++)
 	{
 		int32 multiplier    = existing_tiles[i] / 256;
 		int32 tileset_index = existing_tiles[i] % 256;
@@ -1686,6 +1687,7 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 	if (pattern != INVALID_PATTERN)
 	{
 		transition_group = tile_group + "_" + transition_group;
+		//cerr << transition_group << endl;
 		
 		// Set up for opening autotiling.lua.
 		ReadScriptDescriptor read_data;
@@ -1695,46 +1697,58 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 
 		// Extract the correct transition tile from autotiling.lua as determined by
 		// _CheckForTransitionPattern(...).
-		if (read_data.DoesTableExist(transition_group) == true)
-		{
+		//if (read_data.DoesTableExist(transition_group) == true)
+		//{
 			read_data.OpenTable(transition_group);
 
 			switch (pattern)
 			{
 				case NW_BORDER_PATTERN:
+					//cerr << "nw_border" << endl;
 					read_data.OpenTable(1);
 					break;
 				case N_BORDER_PATTERN:
+					//cerr << "n_border" << endl;
 					read_data.OpenTable(2);
 					break;
 				case NE_BORDER_PATTERN:
+					//cerr << "ne_border" << endl;
 					read_data.OpenTable(3);
 					break;
 				case E_BORDER_PATTERN:
+					//cerr << "e_border" << endl;
 					read_data.OpenTable(4);
 					break;
 				case SE_BORDER_PATTERN:
+					//cerr << "se_border" << endl;
 					read_data.OpenTable(5);
 					break;
 				case S_BORDER_PATTERN:
+					//cerr << "s_border" << endl;
 					read_data.OpenTable(6);
 					break;
 				case SW_BORDER_PATTERN:
+					//cerr << "sw_border" << endl;
 					read_data.OpenTable(7);
 					break;
 				case W_BORDER_PATTERN:
+					//cerr << "w_border" << endl;
 					read_data.OpenTable(8);
 					break;
 				case NW_CORNER_PATTERN:
+					//cerr << "nw_corner" << endl;
 					read_data.OpenTable(9);
 					break;
 				case NE_CORNER_PATTERN:
+					//cerr << "ne_corner" << endl;
 					read_data.OpenTable(10);
 					break;
 				case SE_CORNER_PATTERN:
+					//cerr << "se_corner" << endl;
 					read_data.OpenTable(11);
 					break;
 				case SW_CORNER_PATTERN:
+					//cerr << "sw_corner" << endl;
 					read_data.OpenTable(12);
 					break;
 				default: // should never get here
@@ -1755,7 +1769,7 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 
 			// Border/transition tiles may also have variations, so randomize them.
 			_AutotileRandomize(tileset_num, tile_index);
-		} // make sure the selected transition tiles exist
+		//} // make sure the selected transition tiles exist
 		
 		read_data.CloseFile();
 	} // make sure a transition pattern exists
@@ -1768,6 +1782,25 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	// and technically should never happen.
 
 	if (
+	    (surrounding_groups[0] == surrounding_groups[1] || surrounding_groups[0] == "none") &&
+	    (surrounding_groups[2] == surrounding_groups[1] || surrounding_groups[2] == "none") &&
+	    (surrounding_groups[1] != current_group && surrounding_groups[1] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[3] == current_group ||
+		 surrounding_groups[3] == "none" ||
+		 surrounding_groups[3] == surrounding_groups[1]) &&
+	    (surrounding_groups[4] == current_group ||
+		 surrounding_groups[4] == "none" ||
+		 surrounding_groups[4] == surrounding_groups[1]) &&
+	    //(surrounding_groups[5] != surrounding_groups[1]) &&
+	    //(surrounding_groups[7] != surrounding_groups[1]) &&
+	    (surrounding_groups[6] != surrounding_groups[1])) 
+	{
+		border_group = surrounding_groups[1];
+		return N_BORDER_PATTERN;
+	} // check for the northern border pattern
+
+	else if (
 	    (surrounding_groups[1] == surrounding_groups[0]) &&
 	    (surrounding_groups[3] == surrounding_groups[0]) &&
 	    (surrounding_groups[0] != current_group && surrounding_groups[0] != "none" &&
@@ -1779,21 +1812,6 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 		border_group = surrounding_groups[0];
 		return NW_BORDER_PATTERN;
 	} // check for the northwestern border pattern
-
-	else if (
-	    (surrounding_groups[0] == surrounding_groups[1] || surrounding_groups[0] == "none") &&
-	    (surrounding_groups[2] == surrounding_groups[1] || surrounding_groups[2] == "none") &&
-	    (surrounding_groups[1] != current_group && surrounding_groups[1] != "none" &&
-	     current_group != "none") &&
-	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
-	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
-	    (surrounding_groups[5] != surrounding_groups[1]) &&
-	    (surrounding_groups[6] != surrounding_groups[1]) &&
-	    (surrounding_groups[7] != surrounding_groups[1])) 
-	{
-		border_group = surrounding_groups[1];
-		return N_BORDER_PATTERN;
-	} // check for the northern border pattern
 
 	else if (
 	    (surrounding_groups[1] == surrounding_groups[2]) &&
@@ -1813,15 +1831,38 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	    (surrounding_groups[7] == surrounding_groups[4] || surrounding_groups[7] == "none") &&
 	    (surrounding_groups[4] != current_group && surrounding_groups[4] != "none" &&
 	     current_group != "none") &&
-	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
-	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
-	    (surrounding_groups[0] != surrounding_groups[4]) &&
-	    (surrounding_groups[3] != surrounding_groups[4]) &&
-	    (surrounding_groups[5] != surrounding_groups[4])) 
+	    (surrounding_groups[1] == current_group ||
+		 surrounding_groups[1] == "none" ||
+		 surrounding_groups[1] == surrounding_groups[4]) &&
+	    (surrounding_groups[6] == current_group ||
+		 surrounding_groups[6] == "none" ||
+		 surrounding_groups[6] == surrounding_groups[4]) &&
+	    //(surrounding_groups[0] != surrounding_groups[4]) &&
+	    //(surrounding_groups[5] != surrounding_groups[4]) &&
+	    (surrounding_groups[3] != surrounding_groups[4])) 
 	{
 		border_group = surrounding_groups[4];
 		return E_BORDER_PATTERN;
 	} // check for the eastern border pattern
+
+	else if (
+	    (surrounding_groups[7] == surrounding_groups[6] || surrounding_groups[7] == "none") &&
+	    (surrounding_groups[5] == surrounding_groups[6] || surrounding_groups[5] == "none") &&
+	    (surrounding_groups[6] != current_group && surrounding_groups[6] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[3] == current_group ||
+		 surrounding_groups[3] == "none" ||
+		 surrounding_groups[3] == surrounding_groups[6]) &&
+	    (surrounding_groups[4] == current_group ||
+		 surrounding_groups[4] == "none" ||
+		 surrounding_groups[4] == surrounding_groups[6]) &&
+	    //(surrounding_groups[2] != surrounding_groups[6]) &&
+	    //(surrounding_groups[0] != surrounding_groups[6]) &&
+	    (surrounding_groups[1] != surrounding_groups[6])) 
+	{
+		border_group = surrounding_groups[6];
+		return S_BORDER_PATTERN;
+	} // check for the southern border pattern
 
 	else if (
 	    (surrounding_groups[4] == surrounding_groups[7]) &&
@@ -1835,21 +1876,6 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 		border_group = surrounding_groups[7];
 		return SE_BORDER_PATTERN;
 	} // check for the southeastern border pattern
-
-	else if (
-	    (surrounding_groups[7] == surrounding_groups[6] || surrounding_groups[7] == "none") &&
-	    (surrounding_groups[5] == surrounding_groups[6] || surrounding_groups[5] == "none") &&
-	    (surrounding_groups[6] != current_group && surrounding_groups[6] != "none" &&
-	     current_group != "none") &&
-	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
-	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
-	    (surrounding_groups[2] != surrounding_groups[6]) &&
-	    (surrounding_groups[1] != surrounding_groups[6]) &&
-	    (surrounding_groups[0] != surrounding_groups[6])) 
-	{
-		border_group = surrounding_groups[6];
-		return S_BORDER_PATTERN;
-	} // check for the southern border pattern
 
 	else if (
 	    (surrounding_groups[3] == surrounding_groups[5]) &&
@@ -1869,11 +1895,15 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	    (surrounding_groups[5] == surrounding_groups[3] || surrounding_groups[5] == "none") &&
 	    (surrounding_groups[3] != current_group && surrounding_groups[3] != "none" &&
 	     current_group != "none") &&
-	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
-	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
-	    (surrounding_groups[2] != surrounding_groups[3]) &&
-	    (surrounding_groups[4] != surrounding_groups[3]) &&
-	    (surrounding_groups[7] != surrounding_groups[3])) 
+	    (surrounding_groups[1] == current_group ||
+		 surrounding_groups[1] == "none" ||
+		 surrounding_groups[1] == surrounding_groups[3]) &&
+	    (surrounding_groups[6] == current_group ||
+		 surrounding_groups[6] == "none" ||
+		 surrounding_groups[6] == surrounding_groups[3]) &&
+	    //(surrounding_groups[2] != surrounding_groups[3]) &&
+	    //(surrounding_groups[7] != surrounding_groups[3]) &&
+	    (surrounding_groups[4] != surrounding_groups[3])) 
 	{
 		border_group = surrounding_groups[3];
 		return W_BORDER_PATTERN;
