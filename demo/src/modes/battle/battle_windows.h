@@ -345,6 +345,12 @@ private:
 	//! \brief Items won from battle (<ID, quantity>)
 	std::map<hoa_global::GlobalObject*, int32> _victory_items;
 
+	//! \brief the winning music
+	std::string _winning_music;
+
+	//! \brief the losing music
+	std::string _losing_music;
+
 	// ----- Private methods
 	//! \brief Tallies up the xp, money, and items earned from killing the enemies
 	void _TallyXPMoneyAndItems();

@@ -893,6 +893,11 @@ bool MusicDescriptor::LoadAudio(const std::string& filename, AUDIO_LOAD load_typ
 
 void MusicDescriptor::Play() {
 	if (AudioManager->_active_music == this) {
+		// This is slightly hacky, the real reason and when map mode returns to the top of the mode stack
+		// _data is null for some reason.  So when GetState is called the check for _data changes the _state to
+		// AUDIO_STATE_STOPPED, but the music is still playing.  This fixes that, but we should find the real reason.
+		if (AudioManager->_active_music->_state != AUDIO_STATE_PLAYING)
+			AudioManager->_active_music->_state = AUDIO_STATE_PLAYING;
 		return;
 	}
 	else if (AudioManager->_active_music != NULL) {

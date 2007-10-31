@@ -462,7 +462,7 @@ void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect
 
 		// (2): Draw the text depending on the display mode and whether or not the gradual display is finished
 		if (_finished || _mode == VIDEO_TEXT_INSTANT) {
-			TextManager->Draw(_text[line]);
+			TextManager->Draw(_text[line], _text_style);
 		}
 
 		else if (_mode == VIDEO_TEXT_CHAR) {
