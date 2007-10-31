@@ -811,7 +811,11 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 	// Store the image element to the saved image (with a flipped y axis)
 	screen_image._image_texture = new_image;
 	screen_image._texture = new_image;
-	screen_image.SetUVCoordinates(0.0f, 1.0f, 1.0f, 0.0f);
+
+	// Vertically flip the texture image by swapping the v coordinates, since OpenGL returns the image upside down in the CopyScreenRect call
+	float temp = new_image->v1;
+	new_image->v1 = new_image->v2;
+	new_image->v2 = temp;
 
 	if (CheckGLError() == true) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occurred: " << CreateGLErrorString() << endl;
