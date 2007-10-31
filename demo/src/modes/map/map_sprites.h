@@ -98,9 +98,6 @@ const uint32 ANIM_WALKING_WEST   = 6;
 const uint32 ANIM_WALKING_EAST   = 7;
 //@}
 
-//! \brief An animated icon used to indicate which sprites have unseen dialogue
-extern hoa_video::AnimatedImage new_dialogue_icon;
-
 /** ****************************************************************************
 *** \brief An invisible and possible mobile sprite on a map
 ***
