@@ -892,7 +892,10 @@ bool MusicDescriptor::LoadAudio(const std::string& filename, AUDIO_LOAD load_typ
 
 
 void MusicDescriptor::Play() {
-	if (AudioManager->_active_music != this && AudioManager->_active_music != NULL) {
+	if (AudioManager->_active_music == this) {
+		return;
+	}
+	else if (AudioManager->_active_music != NULL) {
 		AudioManager->_active_music->Stop();
 	}
 
