@@ -79,7 +79,8 @@ BattleMode::BattleMode() :
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
 	_active_action(NULL),
-	_next_monster_location_index(0)
+	_next_monster_location_index(0),
+	_default_music("mus/Confrontation.ogg")
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
@@ -119,8 +120,8 @@ BattleMode::~BattleMode() {
 		current_battle = NULL;
 	}
 
-	for (uint32 i = 0; i < _battle_music.size(); i++)
-		_battle_music[i].FreeAudio();
+	for (map<string, MusicDescriptor>::iterator i = _battle_music.begin(); i != _battle_music.end(); i++)
+		i->second.FreeAudio();
 
 	// Delete all character and enemy actors
 	for (deque<BattleCharacter*>::iterator i = _character_actors.begin(); i != _character_actors.end(); i++) {
@@ -159,13 +160,19 @@ void BattleMode::Reset() {
 
 	// Load the default battle music track if no other music has been added
 	if (_battle_music.empty()) {
-		_battle_music.push_back(MusicDescriptor());
-		if (_battle_music.back().LoadAudio("mus/Confrontation.ogg") == false) {
+		_battle_music[_default_music] = MusicDescriptor();
+		if (_battle_music[_default_music].LoadAudio(_default_music) == false) {
 			PRINT_ERROR << "failed to load default battle theme music" << endl;
 		}
+		_battle_music[_default_music].Play();
+		_current_music = _default_music;
 	}
-
-	_battle_music.back().Play();
+	else
+	{
+		map<string, MusicDescriptor>::iterator i = _battle_music.begin();
+		i->second.Play();
+		_current_music = i->first;
+	}
 
 	if (_initialized == false) {
 		_Initialize();
@@ -217,9 +224,25 @@ void BattleMode::AddMusic(const string& music_filename) {
 		return;
 	}
 
-	_battle_music.push_back(MusicDescriptor());
-	if (_battle_music.back().LoadAudio(music_filename) == false) {
+	if (_battle_music.find(music_filename) != _battle_music.end())
+		// music is already loaded, just return
+		return;
+		
+
+	_battle_music[music_filename] = MusicDescriptor();
+	if (_battle_music[music_filename].LoadAudio(music_filename) == false) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load music file: " << music_filename << endl;
+	}
+}
+
+void BattleMode::PlayMusic(const string &music_filename)
+{
+	if (_battle_music.find(music_filename) != _battle_music.end())
+	{
+		// music is already loaded, play first piece
+		map<string, MusicDescriptor>::iterator i = _battle_music.begin();
+		i->second.Play();
+		_current_music = i->first;
 	}
 }
 
@@ -341,7 +364,7 @@ void BattleMode::_Initialize() {
 
 
 void BattleMode::_ShutDown() {
-	_battle_music.back().Stop();
+	_battle_music[_current_music].Stop();
 
 	// This call will clear the input state
 	InputManager->EventHandler();

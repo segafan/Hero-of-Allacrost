@@ -1,6 +1,6 @@
 local ns = {}
 setmetatable(ns, {__index = _G})
-desert_cave_wall = ns;
+desert_cave_walls = ns;
 setfenv(1, ns);
 
 file_name = "dat/tilesets/desert_cave_walls.lua"

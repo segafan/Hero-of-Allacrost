@@ -167,6 +167,11 @@ public:
 	void WriteUStringVector(const int32 key, std::vector<std::string> &vect);
 	//@}
 
+	/** \brief Write out the namespace header
+	*** \param the name of the namespace for this lua file.
+	**/
+	void WriteNamespace(const std::string &ns);
+
 	/** \name Table Write Functions
 	*** \brief These functions write the beginning and ends of Lua tables
 	*** \param key The name of the table to write.

@@ -258,7 +258,7 @@ void OptionBox::Draw() {
 							if (edge < left_edge)
 								left_edge = edge;
 
-							VideoManager->Text()->Draw(text);
+							TextManager->Draw(text, TextStyle(_font));
 						}
 
 						break;

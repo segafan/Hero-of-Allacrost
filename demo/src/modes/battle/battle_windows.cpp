@@ -573,7 +573,10 @@ void ActionWindow::_ConstructActionInformation() {
 // FinishWindow class
 // /////////////////////////////////////////////////////////////////////////////
 
-FinishWindow::FinishWindow() {
+FinishWindow::FinishWindow() :
+	_winning_music("mus/Allacrost_Fanfare.ogg"),
+	_losing_music("mus/Allacrost_Intermission.ogg")
+{
 	// TODO: declare the MenuSkin to be used
 	//Just like the ones in Menu Mode
 	float start_x = (1024 - 800) / 2 + 144;
@@ -582,7 +585,8 @@ FinishWindow::FinishWindow() {
 	/*if (MenuWindow::Create(848.0f, 632.0f) == false) {
 		cerr << "BATTLE ERROR: In FinishWindow constructor, the call to MenuWindow::Create() failed" << endl;
 	}*/
-	//MenuWindow::SetPosition(512.0f, 384.0f);
+	MenuWindow::Create(480.0f, 560.0f);
+	MenuWindow::SetPosition(start_x, start_y);
 	//MenuWindow::SetPosition(start_x, start_y - 50.0f);
 	//MenuWindow::Show();
 	//MenuWindow::Hide();
@@ -630,6 +634,7 @@ FinishWindow::FinishWindow() {
 	_finish_outcome.SetPosition(512, 0);
 	_finish_outcome.SetDimensions(400, 100);
 	_finish_outcome.SetDisplaySpeed(30);
+	_finish_outcome.SetTextStyle(TextStyle());
 	_finish_outcome.SetDisplayMode(VIDEO_TEXT_REVEAL);
 	_finish_outcome.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
@@ -650,6 +655,10 @@ FinishWindow::FinishWindow() {
 	_lose_options.SetCursorOffset(-60.0f, 25.0f);
 	_lose_options.SetSelection(0);
 	_lose_options.SetOwner(this);
+
+	// make sure the battle has our music
+	current_battle->AddMusic(_winning_music);
+	current_battle->AddMusic(_losing_music);
 }
 
 
@@ -683,15 +692,13 @@ void FinishWindow::Initialize(bool victory) {
 
 	if (victory) {
 		_state = FINISH_WIN_ANNOUNCE;
-		current_battle->AddMusic("mus/Allacrost_Fanfare.ogg");
-		current_battle->_battle_music.back().Play();
+		current_battle->PlayMusic(_winning_music);
 		_finish_outcome.SetDisplayText("The heroes are victorious!");
 		_TallyXPMoneyAndItems();
 	}
 	else {
 		_state = FINISH_LOSE_ANNOUNCE;
-		current_battle->AddMusic("mus/Allacrost_Intermission.ogg");
-		current_battle->_battle_music.back().Play();
+		current_battle->PlayMusic(_losing_music);
 		_finish_outcome.SetDisplayText("The heroes have been defeated...");
 	}
 }
@@ -1007,6 +1014,8 @@ void FinishWindow::Draw() {
 			break;
 		case FINISH_LOSE_CONFIRM:
 			_DrawLoseConfirm();
+			break;
+		case FINISH_WIN_COMPLETE:
 			break;
 		case FINISH_INVALID:
 		case FINISH_TOTAL:

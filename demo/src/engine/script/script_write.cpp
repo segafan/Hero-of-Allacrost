@@ -365,6 +365,14 @@ void WriteScriptDescriptor::WriteUStringVector(const int32 key, std::vector<stri
 	WriteStringVector(key, vect);
 }
 
+void WriteScriptDescriptor::WriteNamespace(const string &ns)
+{
+	_outfile << "local ns = {};" << endl;
+	_outfile << "setmetatable(ns, {__index = _G});" << endl;
+	_outfile << ns << " = ns;" << endl;
+	_outfile << "setfenv(1, ns);" << endl;
+}
+
 //-----------------------------------------------------------------------------
 // Table Write Functions
 //-----------------------------------------------------------------------------

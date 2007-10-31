@@ -187,6 +187,9 @@ public:
 	**/
 	void AddMusic(const std::string& music_filename);
 
+	//! \brief Plays the specified piece of music
+	void PlayMusic(const std::string &music_filename);
+
 	// TODO: Some of the public methods below should probably not be public...
 
 
@@ -265,7 +268,7 @@ private:
 	*** The first element in this vector is the primary battle track. For most battles, only a primary track
 	*** is required. However, some battles may require additional tracks to toggle between.
 	**/
-	std::vector<hoa_audio::MusicDescriptor> _battle_music;
+	std::map<std::string, hoa_audio::MusicDescriptor> _battle_music;
 
 	//! \name Battle Background Data
 	//@{
@@ -421,6 +424,12 @@ private:
 
 	//! \brief An Index to the (x,y) location of the next created monster (MONSTER_LOCATIONS array)
 	int32 _next_monster_location_index;
+
+	//! \brief The default battle music to play during battles
+	std::string _default_music;
+
+	//! \brief The currently playing music
+	std::string _current_music;
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
 
