@@ -16,10 +16,10 @@
 
 #include "tileset.h"
 
-using namespace std;
 using namespace hoa_video;
 using namespace hoa_script;
 using namespace hoa_editor;
+using namespace std;
 
 Tileset::Tileset():tileset_name(""),table(NULL)
 {
@@ -37,7 +37,7 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	tiles.resize(256);
 	for (int i = 0; i < 256; i++)
 		tiles[i].SetDimensions(1.0f, 1.0f);
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, std::string(img_filename.toAscii()), 16, 16) == false)
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false)
 		qDebug("LoadMultiImage failed to load tileset " + img_filename);
 
 	// Set up the table.
@@ -81,8 +81,10 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 
 	// Set up for reading the tileset definition file.
 	ReadScriptDescriptor read_data;
-	if (read_data.OpenFile(std::string(dat_filename.toAscii())) == false)
+	if (read_data.OpenFile(string(dat_filename.toAscii())) == false)
 		QMessageBox::warning(parent, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(dat_filename));
+
+	read_data.OpenTable(string(tileset_name.toAscii()));
 
 	// Read in walkability information.
 	if (read_data.DoesTableExist("walkability") == true)
@@ -124,8 +126,8 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	read_data.OpenTable("animated_tiles");
 	for (uint32 i = 1; i <= animated_table_size; i++) 
 	{
-		_animated_tiles.push_back(std::vector<AnimatedTileData>());
-		std::vector<AnimatedTileData>& tiles = _animated_tiles.back();
+		_animated_tiles.push_back(vector<AnimatedTileData>());
+		vector<AnimatedTileData>& tiles = _animated_tiles.back();
 		// Calculate loop end: an animated tile is comprised of a tile id and a time, so the loop end
 		// is really half the table size.
 		uint32 tile_count = read_data.GetTableSize(i) / 2;
@@ -141,6 +143,8 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	}
 	read_data.CloseTable();*/
 
+	read_data.CloseTable();
+
 	read_data.CloseFile();
 } // Tileset constructor
 
@@ -150,8 +154,8 @@ Tileset::~Tileset()
 } // TilesetTable destructor
 
 /*void Tileset::Save() {
-	std::string dat_filename = "dat/tilesets/" + std::string(tileset_name.toAscii()) + ".lua";
-	std::string img_filename = "img/tilesets/" + std::string(tileset_name.toAscii()) + ".png";
+	string dat_filename = "dat/tilesets/" + string(tileset_name.toAscii()) + ".lua";
+	string img_filename = "img/tilesets/" + string(tileset_name.toAscii()) + ".png";
 	WriteScriptDescriptor write_data;
 
 	// Write global infos
@@ -177,7 +181,7 @@ Tileset::~Tileset()
 	// Write animated tiles
 	write_data.BeginTable("animated_tiles");
 	for(int i=0;i<_animated_tiles.size();i++) {
-		std::vector<int32> data;
+		vector<int32> data;
 		for(int c=0;c<_animated_tiles[i].size();c++) {
 			data.push_back(_animated_tiles[i][c].tile_id);
 			data.push_back(_animated_tiles[i][c].time);

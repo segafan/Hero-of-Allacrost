@@ -56,16 +56,12 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 		_upper_layer.push_back(-1);
 	} // -1 is used for no tiles
 	// -1 is used for no tiles
-
-	// Create the video engine's singleton
-	VideoManager = GameVideo::SingletonCreate();
 } // Grid constructor
 
 Grid::~Grid()
 {
 	// FIXME
 //	VideoManager->DeleteImage();
-	GameVideo::SingletonDestroy();
 } // Grid destructor
 
 
@@ -118,7 +114,7 @@ void Grid::SetGridOn(bool value)
 	updateGL();
 } // SetGridOn(...)
 
-std::vector<int32>& Grid::GetLayer(LAYER_TYPE layer) 
+vector<int32>& Grid::GetLayer(LAYER_TYPE layer) 
 {
 	switch(layer) {
 		case LOWER_LAYER:
@@ -151,8 +147,10 @@ void Grid::LoadMap()
 	ReadScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
-	if (!read_data.OpenFile(std::string(_file_name.toAscii())))
+	if (!read_data.OpenFile(string(_file_name.toAscii())))
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
+
+	read_data.OpenTable(string(_file_name.section('/', -1).remove(".lua").toAscii()));
 
 	tileset_names.clear();
 	tilesets.clear();
@@ -250,6 +248,8 @@ void Grid::LoadMap()
 		read_data.CloseTable();
 	}
 
+	read_data.CloseTable();
+
 	_grid_on = true;        // grid lines default to on
 	_ll_on   = true;        // lower layer default to on
 	_ml_on   = true;        // middle layer default to off
@@ -267,13 +267,10 @@ void Grid::SaveMap()
 	int tileset_index;
 	int tile_index;
 	
-	if (write_data.OpenFile(std::string(_file_name.toAscii())) == false) {
+	if (write_data.OpenFile(string(_file_name.toAscii())) == false) {
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
 		return;
 	}
-
-	write_data.WriteComment(std::string(_file_name.toAscii()));
-	write_data.InsertNewLine();
 
 	write_data.WriteComment("A reference to the C++ MapMode object that was created with this file");
 	write_data.WriteLine("map = {}\n");
@@ -292,7 +289,7 @@ void Grid::SaveMap()
 	write_data.WriteComment("The music files used as background music on this map.");
 	write_data.BeginTable("music_filenames");
 	if (_music_file != "None")
-		write_data.WriteString(1, std::string(_music_file.toAscii()));
+		write_data.WriteString(1, string(_music_file.toAscii()));
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
@@ -499,7 +496,8 @@ void Grid::paintGL()
 					tile_index = *it % (tileset_index * 256);
 				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
-			col = ++col % _width;
+			col++;
+			col %= _width;
 			if (col == 0)
 				VideoManager->MoveRelative(-_width + 1, 1.0f);
 			else
@@ -523,7 +521,8 @@ void Grid::paintGL()
 					tile_index = *it % (tileset_index * 256);
 				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
-			col = ++col % _width;
+			col++;
+			col %= _width;
 			if (col == 0)
 				VideoManager->MoveRelative(-_width + 1, 1.0f);
 			else
@@ -547,7 +546,8 @@ void Grid::paintGL()
 					tile_index = *it % (tileset_index * 256);
 				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
-			col = ++col % _width;
+			col++;
+			col %= _width;
 			if (col == 0)
 				VideoManager->MoveRelative(-_width + 1, 1.0f);
 			else
