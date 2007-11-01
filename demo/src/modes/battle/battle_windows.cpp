@@ -672,7 +672,7 @@ FinishWindow::~FinishWindow() {
 	_xp_and_money_window.Destroy();
 	_items_window.Destroy();
 
-	//MenuWindow::Destroy();
+	MenuWindow::Destroy();
 }
 
 

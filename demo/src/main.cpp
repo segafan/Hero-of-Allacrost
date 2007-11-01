@@ -124,21 +124,25 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	if (VideoManager->Text()->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18, VIDEO_TEXT_SHADOW_BLACK, 1, -2, true) == false) {
-		throw Exception("Failed to load the 'Switchblade Romance' font as 'default, size 18'", __FILE__, __LINE__, __FUNCTION__);
+	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "default", 18, VIDEO_TEXT_SHADOW_BLACK, 1, -2, true) == false) {
+		throw Exception("Failed to load the 'Junicode Regular' font as 'default, size 18'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	if (VideoManager->Text()->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 24, VIDEO_TEXT_SHADOW_BLACK) == false) {
-		throw Exception("Failed to load the 'Switchblade Romance' font as 'map, size 24'", __FILE__, __LINE__, __FUNCTION__);
+	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "map", 22, VIDEO_TEXT_SHADOW_BLACK, 1, -2) == false) {
+		throw Exception("Failed to load the 'Junicode Regular' font as 'map, size 24'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	if (VideoManager->Text()->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20, VIDEO_TEXT_SHADOW_BLACK, 1, -2) == false) {
-		throw Exception("Failed to load the 'Switchblade Romance' font as 'battle, size 20'", __FILE__, __LINE__, __FUNCTION__);
+	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "battle", 20, VIDEO_TEXT_SHADOW_BLACK, 1, -2) == false) {
+		throw Exception("Failed to load the 'Junicode Regular' font as 'battle, size 20'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
 	// Font used to show damage received / given in battle mode
-	if (VideoManager->Text()->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle_dmg", 24, VIDEO_TEXT_SHADOW_BLACK, 1, -2) == false) {
-		throw Exception("Failed to load the 'Switchblade Romance' font as 'battle_dmg, size 24'", __FILE__, __LINE__, __FUNCTION__);
+	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "battle_dmg", 24, VIDEO_TEXT_SHADOW_BLACK, 1, -2) == false) {
+		throw Exception("Failed to load the 'Junicode Regular' font as 'battle_dmg, size 24'", __FILE__, __LINE__, __FUNCTION__);
+	}
+
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "title", 24, VIDEO_TEXT_SHADOW_BLACK, 1, -2) == false) {
+		throw Exception("Failed to load the 'Libertine' font as 'title, size 24'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
 	if (AudioManager->SingletonInitialize() == false) {
