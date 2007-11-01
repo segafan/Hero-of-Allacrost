@@ -149,14 +149,6 @@ bool GameAudio::SingletonInitialize() {
 
 
 GameAudio::~GameAudio() {
-	// We shouldn't have any descriptors registered by the time the destructor was invoked -- check that this is true
-	if (_registered_sounds.empty() == false) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "SoundDescriptor objects were still registered when destructor was invoked" << endl;
-	}
-	if (_registered_music.empty() == false) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "MusicDescriptor objects were still registered when destructor was invoked" << endl;
-	}
-
 	// Delete any active audio effects
 	for (list<AudioEffect*>::iterator i = _audio_effects.begin(); i != _audio_effects.end(); i++) {
 		delete (*i);
@@ -174,6 +166,14 @@ GameAudio::~GameAudio() {
 		delete (*i);
 	}
 	_audio_sources.clear();
+
+	// We shouldn't have any descriptors registered now -- check that this is true
+	if (_registered_sounds.empty() == false) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "SoundDescriptor objects were still registered when destructor was invoked" << endl;
+	}
+	if (_registered_music.empty() == false) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "MusicDescriptor objects were still registered when destructor was invoked" << endl;
+	}
 
 	alcMakeContextCurrent(0);
 	alcDestroyContext(_context);
