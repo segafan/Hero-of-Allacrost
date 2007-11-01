@@ -607,11 +607,11 @@ void StatusWindow::Draw() {
 
 	//Draw character full body portrait
 	VideoManager->Move(855, 145);
-	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP);
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, 0);
 
 	_full_portraits[_char_select.GetSelection()].Draw();
 
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
 	_char_select.Draw();
 } // void StatusWindow::Draw()
@@ -632,6 +632,7 @@ SkillsWindow::SkillsWindow() : _active_box(SKILL_ACTIVE_NONE) {
 	_description.SetDisplaySpeed(30);
 	_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_description.SetTextStyle(TextStyle());
 
 } // SkillsWindow::SkillsWindow()
 
@@ -662,7 +663,8 @@ void SkillsWindow::_InitSkillsList() {
 	_skills_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 
 	_UpdateSkillList();
-	_skills_list.SetSelection(0);
+	if (_skills_list.GetNumberOptions() > 0)
+		_skills_list.SetSelection(0);
 	_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
 
@@ -866,7 +868,10 @@ void SkillsWindow::_UpdateSkillList() {
 			_skills_list.SetSize(1,skillsize);
 
 			for (uint32 i = 0; i < skillsize; i++) {
-				tempstr = MakeStandardString(skills->at(i)->GetName()) + "		" + NumberToString(skills->at(i)->GetSPRequired()) + " SP";
+				tempstr = MakeStandardString(skills->at(i)->GetName());
+				for (uint32 j = tempstr.length(); j < 40; ++j)
+					tempstr += " ";
+				tempstr += NumberToString(skills->at(i)->GetSPRequired()) + " SP";
 				options.push_back(MakeUnicodeString(tempstr));
 			}
 		break;
