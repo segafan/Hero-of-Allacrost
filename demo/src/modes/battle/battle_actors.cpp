@@ -159,7 +159,7 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, flo
 	BattleActor(character, x_origin, y_origin)
 {
 	if (_stamina_icon.Load("img/icons/actors/characters/" + character->GetFilename() + ".png", 45, 45) == false)
-		cerr << "oh noes" << endl;
+		cerr << "Unable to load stamina icon for " << character->GetFilename() << endl;
 
 	_state = ACTOR_IDLE;
 } // BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin)

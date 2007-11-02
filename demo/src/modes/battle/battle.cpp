@@ -289,7 +289,7 @@ void BattleMode::_Initialize() {
 
 	for (uint32 i = 0; i < active_party->GetPartySize(); i++) {
 		GlobalCharacter* new_character = dynamic_cast<GlobalCharacter*>(active_party->GetActorAtIndex(i));
-		BattleCharacter* new_actor = new BattleCharacter(new_character, 256, 320);
+		BattleCharacter* new_actor = new BattleCharacter(new_character, PLAYER_LOCATIONS[i][0], PLAYER_LOCATIONS[i][1]);
 		_character_actors.push_back(new_actor);
 	}
 

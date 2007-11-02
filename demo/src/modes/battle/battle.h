@@ -74,6 +74,11 @@ const float MONSTER_LOCATIONS[][2] = {
 	{ 730.0f, 768.0f - 600.0f }
 };
 
+const float PLAYER_LOCATIONS[][2] = {
+	{ 256.0f, 320.0f },
+	{ 150.0f, 270.0f }
+};
+
 
 /** \name Action Type Constants
 *** \brief Identifications for the types of actions a player's characters may perform
