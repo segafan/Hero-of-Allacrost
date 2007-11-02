@@ -244,13 +244,6 @@ upper_layer[37] = { -1, 131, 18, 19, 24, 25, 8, 9, -1, -1, 233, 234, -1, -1, -1,
 upper_layer[38] = { -1, -1, -1, -1, 40, 41, 24, 25, 4, -1, -1, -1, -1, -1, -1, -1, -1, 16, 17, 128, 196, 197, 198, -1, -1, -1, -1, -1, 115, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 upper_layer[39] = { -1, -1, -1, -1, -1, -1, 40, 41, 20, 21, -1, -1, -1, -1, -1, -1, -1, 32, -1, -1, 212, 213, 214, -1, -1, -1, -1, -1, -1, 20, 21, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 
-map_functions = {}
--- Creates a new shop mode instance
-map_functions[0] = function()
-	local shop = hoa_shop.ShopMode();
-	ModeManager:Push(shop);
-end
-
 function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
@@ -302,7 +295,7 @@ function Load(m)
 	dialogue:AddText("Laila, what's wrong? You have a worried look on your face.", 1000, -1, -1); --Line 0
 	dialogue:AddText("You're going into the cave again, aren't you?", 2, -1, -1); --Line 1
 	dialogue:AddOption("Well......yes, I intend to...", 1000, 2, -1);
-	dialogue:AddOption("No, of course not...", 1000, 7, -1);
+	dialogue:AddOption("No, of course not...", 1000, 8, -1);
 	
 	--Yes
 	dialogue:AddText("Its dangerous in there! Why do you always do these types of reckless things?!", 2, -1, -1); --Line 2
@@ -310,13 +303,27 @@ function Load(m)
 	dialogue:AddText("I know that you're worried about me and I appreciate it, but you need to stop doing this.", 1000, -1, -1); --Line 4
 	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay? Turn back if things are looking risky and make sure to stock up on healing potions.", 2, -1, -1); --Line 5
 	dialogue:AddText("Will do. Thanks Laila.", 1000, -1, -1); --Line 6
-	dialogue:EndDialogue();
+	dialogue:AddText("You know Claudius, I could be of assistance to you in the cave, may I come and help you?", 2, -1, -1); --Line 7
+	dialogue:AddOption("No way, you could be hurt!", 1000, 11 , -1);
+	dialogue:AddOption("Your help would be great!", 1000, 13 , -1);
 	
 	--No
-	dialogue:AddText("Oh good. I was worried you were...", 2, -1,-1); --Line 7
-	dialogue:AddText("Please tell me if you are Cladius, just so I can know...", 2, -1, -1); --Line 8
-	dialogue:AddText("Of course, I promise.", 1000, -1, -1); --Line 9
+	dialogue:AddText("Oh good. I was worried you were...", 2, -1,-1); --Line 8
+	dialogue:AddText("Please tell me if you are Cladius, just so I can know...", 2, -1, -1); --Line 9
+	dialogue:AddText("Of course, I promise.", 1000, -1, -1); --Line 10
+	dialogue:EndDialogue();
+	
+	-- Rejected
+	dialogue:AddText("Oh....ok then, you remember to be careful.", 2, -1, -1); -- Line 11
+	dialogue:AddText("I will Laila", 1000, -1, -1); -- Line 12
+	dialogue:EndDialogue();
+	
+	-- Add to party
+	dialogue:AddText("Great, I'll be sure to help you any way I can.", 2, -1, 1); --  Line 13
+	dialogue:AddText("Laila has joined the party.", 2, -1, -1); -- Line 14
 	sprite:AddDialogue(dialogue);
+	
+	laila = sprite;
 
 	action = hoa_map.ActionAnimate(sprite);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
@@ -626,4 +633,16 @@ end
 
 function Draw()
 	map:_DrawMapLayers();
+end
+
+map_functions = {}
+-- Creates a new shop mode instance
+map_functions[0] = function()
+	local shop = hoa_shop.ShopMode();
+	ModeManager:Push(shop);
+end
+
+map_functions[1] = function()
+   GlobalManager:AddCharacter(hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA);
+   laila:SetVisible(false);
 end

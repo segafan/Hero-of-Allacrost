@@ -658,6 +658,7 @@ void BindEngineToLua() {
 	global_table["ScriptManager"]    = hoa_script::ScriptManager;
 	global_table["SystemManager"]    = hoa_system::SystemManager;
 	global_table["VideoManager"]     = hoa_video::VideoManager;
+	global_table["GlobalManager"]	 = hoa_global::GlobalManager;
 
 } // void BindEngineToLua()
 

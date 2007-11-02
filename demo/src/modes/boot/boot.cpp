@@ -593,7 +593,7 @@ void BootMode::_OnNewGame() {
 	_SaveSettingsFile();
 
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
-	GlobalManager->AddCharacter(GLOBAL_CHARACTER_LAILA);
+	//GlobalManager->AddCharacter(GLOBAL_CHARACTER_LAILA);
 	GlobalManager->AddToInventory(1, 2);
 	GlobalManager->SetDrunes(250);
 
