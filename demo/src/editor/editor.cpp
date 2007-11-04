@@ -1239,16 +1239,19 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 					multiplier = _map->tileset_names.findIndex(tileset_name);
 				} // calculate index of current tileset
 				
+					cerr << "tileset_num: " << multiplier << endl;
+					cerr << "tileset_index: " << tileset_index << endl;
 				// perform randomization for autotiles
+				assert(multiplier != -1);
 				_AutotileRandomize(multiplier, tileset_index);
 
 				// Record information for undo/redo action.
 				_tile_indeces.push_back(_tile_index);
 				_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-				_modified_tiles.push_back(static_cast<int32> (tileset_index + multiplier * 256));
+				_modified_tiles.push_back(tileset_index + multiplier * 256);
 					
 				// Paint the tile.
-				GetCurrentLayer()[_tile_index] = static_cast<int32> (tileset_index + multiplier * 256);
+				GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
 			} // left mouse button was pressed
 			break;
 		} // edit mode PAINT_TILE
@@ -1320,7 +1323,10 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 						multiplier = _map->tileset_names.findIndex(tileset_name);
 					} // calculate index of current tileset
 
+					cerr << "tileset_num: " << multiplier << endl;
+					cerr << "tileset_index: " << tileset_index << endl;
 					// perform randomization for autotiles
+					assert(multiplier != -1);
 					_AutotileRandomize(multiplier, tileset_index);
 
 					// Record information for undo/redo action.
@@ -1768,6 +1774,7 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 			read_data.CloseTable();
 
 			// Border/transition tiles may also have variations, so randomize them.
+			assert(tileset_num != -1);
 			_AutotileRandomize(tileset_num, tile_index);
 		//} // make sure the selected transition tiles exist
 		
