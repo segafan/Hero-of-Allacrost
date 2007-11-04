@@ -96,6 +96,10 @@ const uint32 ANIM_WALKING_SOUTH  = 4;
 const uint32 ANIM_WALKING_NORTH  = 5;
 const uint32 ANIM_WALKING_WEST   = 6;
 const uint32 ANIM_WALKING_EAST   = 7;
+const uint32 ANIM_RUNNING_SOUTH  = 8;
+const uint32 ANIM_RUNNING_NORTH  = 9;
+const uint32 ANIM_RUNNING_WEST   = 10;
+const uint32 ANIM_RUNNING_EAST   = 11;
 //@}
 
 /** ****************************************************************************
@@ -128,6 +132,9 @@ public:
 	*** the sprite is <i>trying</i> to move in a certain direction.
 	**/
 	bool moving;
+
+	//! \brief Set to true when the sprite is running rather than just walking
+	bool is_running;
 
 	/** \brief When set to true, indicates that the object exists on the sky object layer (default = false).
 	*** This member is necessary for collision detection purposes. When a sprite needs to detect
@@ -303,6 +310,9 @@ public:
 	//! \brief Holds the previous value of VirtualSprite#moving from the last call to MapSprite#Update().
 	bool was_moving;
 
+	//! \brief Set to true if the sprite has running animations loaded
+	bool has_running_anim;
+
 	/** \brief The sound that will play when the sprite walks.
 	*** This member references the MapMode#_map_sounds vector as the sound to play. If this member
 	*** is less than zero, no sound is played when the object is walking.
@@ -339,6 +349,12 @@ public:
 	*** \return False if there was a problem loading the sprite.
 	**/
 	bool LoadStandardAnimations(std::string filename);
+
+	/** \brief Loads the image containing the running animations for the sprite
+	*** \param filename The name of the image file
+	*** \return False if the animations were not created successfully.
+	**/
+	bool LoadRunningAnimations(std::string filename);
 
 	//! \brief Updates the sprite's position and state.
 	virtual void Update();

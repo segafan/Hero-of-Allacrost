@@ -371,6 +371,7 @@ function Load(m)
 	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprite:SetDirection(hoa_map.MapMode.EAST);
 	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
+	sprite:LoadRunningAnimations("img/sprites/map/claudius_run.png");
 	sprite:SetFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
 	-- Set the camera to focus on the player's sprite
