@@ -62,7 +62,6 @@ MapMode::MapMode(string filename) :
 	_map_state(EXPLORE),
 	_lastID(1000),
 	_ignore_input(false),
-	_running(false),
 	_run_forever(false),
 	_run_disabled(false),
 	_run_stamina(10000)
@@ -450,7 +449,6 @@ void MapMode::_LoadTiles() {
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update() {
 	_time_elapsed = SystemManager->GetUpdateTime();
-	_running = false;
 
 	// ---------- (1) Call the map's update script function
 	ScriptCallFunction<void>(_update_function);
@@ -511,19 +509,21 @@ void MapMode::_HandleInputExplore() {
 		return;
 	}
 
-	// If the player is trying to run, update the stamina amount
+	// Allow the player to run if they hav enough stamina, and update the stamina amount
+	_camera->is_running = false;
 	if (InputManager->CancelState() == true && _run_disabled == false) {
 		if (_run_forever) {
-			_running = true;
+			_camera->is_running = true;
 		}
 		else if (_run_stamina > _time_elapsed * 2) {
 			_run_stamina -= (_time_elapsed * 2);
-			_running = true;
+			_camera->is_running = true;
 		}
 		else {
 			_run_stamina = 0;
 		}
 	}
+	// Regenerate the stamina at 1/2 the consumption rate
 	else if (_run_stamina < 10000) {
 		_run_stamina += _time_elapsed;
 		if (_run_stamina > 10000)
@@ -555,8 +555,6 @@ void MapMode::_HandleInputExplore() {
 				chest->Use();
 			}
 		}
-
-
 	}
 
 	// Detect and handle movement input from the user

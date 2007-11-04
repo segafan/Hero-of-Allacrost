@@ -356,9 +356,6 @@ private:
 	//! \brief While true, all user input commands to map mode are ignored
 	bool _ignore_input;
 
-	//! \brief If true, the player's sprite is running
-	bool _running;
-
 	//! \brief If true, the player's stamina will not drain as they run
 	bool _run_forever;
 

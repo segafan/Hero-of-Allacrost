@@ -268,6 +268,7 @@ function Load(m)
 	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprite:SetDirection(8);
 	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
+	sprite:LoadRunningAnimations("img/sprites/map/claudius_run.png");
 	sprite:SetFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
 
@@ -288,6 +289,7 @@ function Load(m)
 	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/laila_walk.png");
+	sprite:LoadRunningAnimations("img/sprites/map/laila_run.png");
 	sprite:SetFacePortrait("img/portraits/map/laila.png");
 
 	dialogue = hoa_map.MapDialogue();

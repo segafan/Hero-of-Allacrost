@@ -371,7 +371,6 @@ void BindEngineToLua() {
 			.def(constructor<const std::string&>())
 			.def_readwrite("_camera", &MapMode::_camera)
 			.def_readwrite("_ignore_input", &MapMode::_ignore_input)
-			.def_readwrite("_running", &MapMode::_running)
 			.def_readwrite("_run_forever", &MapMode::_run_forever)
 			.def_readwrite("_run_disabled", &MapMode::_run_disabled)
 			.def_readwrite("_run_stamina", &MapMode::_run_stamina)
@@ -520,6 +519,7 @@ void BindEngineToLua() {
 			.def("GetWalkSound", &MapSprite::GetWalkSound)
 			.def("GetCurrentAnimation", &MapSprite::GetCurrentAnimation)
 			.def("LoadStandardAnimations", &MapSprite::LoadStandardAnimations)
+			.def("LoadRunningAnimations", &MapSprite::LoadRunningAnimations)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

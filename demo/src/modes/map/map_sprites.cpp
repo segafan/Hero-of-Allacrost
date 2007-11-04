@@ -158,8 +158,8 @@ void VirtualSprite::Update() {
 		float tmp_y = y_offset;
 
 		float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
-		// If this object is the map's focused and the player is running, increase the distance moved
-		if (MapMode::_current_map->_camera == this && MapMode::_current_map->_running == true)
+		// Double the distance to move if the sprite is running
+		if (is_running == true)
 			distance_moved *= 2.0f;
 		// If the movement is diagonal, decrease the lateral movement distance by sin(45 degress)
 		if (direction & DIAGONAL_MOVEMENT)
@@ -347,6 +347,7 @@ void VirtualSprite::SetRandomDirection() {
 // Constructor for critical class members. Other members are initialized via support functions
 MapSprite::MapSprite() :
 	was_moving(false),
+	has_running_anim(false),
 	walk_sound(-1),
 	current_animation(ANIM_STANDING_SOUTH)
 {
@@ -370,7 +371,6 @@ MapSprite::~MapSprite() {
 
 // Load in the appropriate images and other data for the sprite
 bool MapSprite::LoadStandardAnimations(std::string filename) {
-
 	// The speed to display each frame in the walking animation
 	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
 
@@ -424,6 +424,58 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 
 	return true;
 } // bool MapSprite::LoadStandardAnimations(std::string filename)
+
+
+
+bool MapSprite::LoadRunningAnimations(std::string filename) {
+	// The speed to display each frame in the running animation
+	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
+
+	// Prepare to add the four running animations
+	for (uint8 i = 0; i < 4; i++)
+		animations.push_back(AnimatedImage());
+
+	// Load the multi-image, containing 24 frames total
+	vector<StillImage> frames(24);
+	for (uint8 i = 0; i < 24; i++)
+		frames[i].SetDimensions(img_half_width * 2, img_height);
+
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, filename, 4, 6) == false) {
+		return false;
+	}
+
+	// Add walking frames to animations
+	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[1], frame_speed);
+	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[2], frame_speed);
+	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[3], frame_speed);
+	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[1], frame_speed);
+	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[4], frame_speed);
+	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[5], frame_speed);
+
+	animations[ANIM_RUNNING_NORTH].AddFrame(frames[7], frame_speed);
+	animations[ANIM_RUNNING_NORTH].AddFrame(frames[8], frame_speed);
+	animations[ANIM_RUNNING_NORTH].AddFrame(frames[9], frame_speed);
+	animations[ANIM_RUNNING_NORTH].AddFrame(frames[7], frame_speed);
+	animations[ANIM_RUNNING_NORTH].AddFrame(frames[10], frame_speed);
+	animations[ANIM_RUNNING_NORTH].AddFrame(frames[11], frame_speed);
+
+	animations[ANIM_RUNNING_WEST].AddFrame(frames[13], frame_speed);
+	animations[ANIM_RUNNING_WEST].AddFrame(frames[14], frame_speed);
+	animations[ANIM_RUNNING_WEST].AddFrame(frames[15], frame_speed);
+	animations[ANIM_RUNNING_WEST].AddFrame(frames[13], frame_speed);
+	animations[ANIM_RUNNING_WEST].AddFrame(frames[16], frame_speed);
+	animations[ANIM_RUNNING_WEST].AddFrame(frames[17], frame_speed);
+
+	animations[ANIM_RUNNING_EAST].AddFrame(frames[19], frame_speed);
+	animations[ANIM_RUNNING_EAST].AddFrame(frames[20], frame_speed);
+	animations[ANIM_RUNNING_EAST].AddFrame(frames[21], frame_speed);
+	animations[ANIM_RUNNING_EAST].AddFrame(frames[19], frame_speed);
+	animations[ANIM_RUNNING_EAST].AddFrame(frames[22], frame_speed);
+	animations[ANIM_RUNNING_EAST].AddFrame(frames[23], frame_speed);
+
+	has_running_anim = true;
+	return true;
+} // bool MapSprite::LoadRunningAnimations(std::string filename)
 
 
 // Updates the state of the sprite
@@ -482,6 +534,10 @@ void MapSprite::Update() {
 		else {
 			cerr << "MAP ERROR: could not find proper movement animation to draw" << endl;
 		}
+
+		// Increasing the animation index by four from the walking animations leads to the running animations
+		if (is_running && has_running_anim)
+			current_animation += 4;
 
 		// If the direction of movement changed in mid-flight, update the animation timer on the
 		// new animated image to reflect the old, so the walking animations do not appear to
