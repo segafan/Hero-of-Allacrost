@@ -23,7 +23,6 @@ using namespace std;
 
 Tileset::Tileset():tileset_name(""),table(NULL)
 {
-
 }
 
 Tileset::Tileset(QWidget* parent, const QString& name)
@@ -150,6 +149,10 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 
 Tileset::~Tileset()
 {
+	for (std::vector<hoa_video::StillImage>::iterator it = tiles.begin();
+	     it != tiles.end(); it++)
+		(*it).Clear();
+	tiles.clear();
 	delete table;
 } // TilesetTable destructor
 
