@@ -2,6 +2,7 @@ EXTRA_DIST = MANUAL configure dat doc img mus snd
 AM_CPPFLAGS = -DDATADIR=\"$(datadir)/allacrost\"
 ACLOCAL_AMFLAGS = -I m4
 INCLUDES = \
+   `$(LUA_CONFIG) --include` \
 	-I/usr/include/SDL \
 	-I/usr/include/AL \
 	-I$(top_srcdir)/src \
