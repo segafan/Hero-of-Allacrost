@@ -23,7 +23,8 @@ if test "x$enable_optimize" = "xyes"; then
     AC_MSG_RESULT(yes)
     CXXFLAGS="$CXXFLAGS -O3"
 else
-    AC_MSG_RESULT(no)
+    AC_MSG_RESULT(yes)
+    CXXFLAGS="$CXXFLAGS -O0"
 fi
 
 dnl Check for debugging option.
@@ -106,8 +107,10 @@ AC_CHECK_LIB([m], [log], [], \
 
 AC_PATH_PROGS([LUA_CONFIG], [lua-config])
 if test "x$LUA_CONFIG" != "xno" -a -x "$LUA_CONFIG"; then
-	LUA_CFLAGS="`$LUA_CONFIG --include`"
-	CXXFLAGS="$CXXFLAGS $LUA_CFLAGS"
+	:
+else
+	echo "Could not find lua-config. Check that Lua 5.0 is properly installed on your system"
+	exit -1
 fi
 
 dnl Check for header files.
