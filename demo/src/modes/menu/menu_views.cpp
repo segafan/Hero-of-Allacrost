@@ -60,7 +60,7 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character) {
 	_char_id = character->GetID();
 
 	_portrait.SetStatic(true);
-	_portrait.Load("img/portraits/map/" + character->GetFilename() + ".png", 100, 100);
+	_portrait.Load("img/portraits/menu/" + character->GetFilename() + "_small.png", 100, 100);
 } // void CharacterWindow::SetCharacter(GlobalCharacter *character)
 
 
