@@ -43,6 +43,16 @@ AudioInput::AudioInput() :
 	_play_time(0.0f)
 {}
 
+/* Some quick macros for byte swapping. SDL has some nice fast asm methods, so we'll use those */
+#ifdef __BIG_ENDIAN__
+#define SWAP_U32_FROM_LITTLE(x) { x = SDL_Swap32(x); }
+#define SWAP_U16_FROM_LITTLE(x) { x = SDL_Swap16(x); }
+#else
+// not a big-endian system - no byte swapping needed
+#define SWAP_U32_FROM_LITTLE(x) { }
+#define SWAP_U16_FROM_LITTLE(x) { }
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 // WavFile class methods
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,10 +61,6 @@ bool WavFile::Initialize() {
 	uint32 size;
 
 	char buffer[4];
-
-	#ifdef __BIG_ENDIAN__ // Temporary variables needed for byte swapping on big endian machines
-		uint8 e1, e2, e3, e4;
-	#endif
 
 	_file_input.open(_filename.c_str(), std::ios::binary);
 	if (_file_input.fail()) {
@@ -72,13 +78,7 @@ bool WavFile::Initialize() {
 	// Get chunk size (file size - 8) -- 4 bytes
 	_file_input.read(buffer, 4);
 	memcpy(&size, buffer, 4);
-	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		e1 = size & 255;
-  		e2 = (size >> 8) & 255;
-  		e3 = (size >> 16) & 255;
-  		e4 = (size >> 24) & 255;
-  		size = (static_cast<uint32>(e1) << 24) + (static_cast<uint32>(e2) << 16) + (static_cast<uint32>(e3) << 8) + e4;
-	#endif
+	SWAP_U32_FROM_LITTLE(size);
 
 	// Check format to be "WAVE" -- 4 bytes
 	_file_input.read(buffer, 4);
@@ -97,13 +97,7 @@ bool WavFile::Initialize() {
 	// Check subchunk size (to be 16) -- 4 bytes
 	_file_input.read(buffer, 4);
 	memcpy(&size, buffer, 4);
-	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		e1 = size & 255;
-		e2 = (size >> 8) & 255;
-		e3 = (size >> 16) & 255;
-		e4 = (size >> 24) & 255;
-		size = (static_cast<uint32>(e1) << 24) + (static_cast<uint32>(e2) << 16) + (static_cast<uint32>(e3) << 8) + e4;
-	#endif
+	SWAP_U32_FROM_LITTLE(size);
 	if (size != 16) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because subchunk size was not equal to 16" << endl;
 		return false;
@@ -113,13 +107,7 @@ bool WavFile::Initialize() {
 	_file_input.read(buffer, 2);
 	size = 0;
 	memcpy(&size, buffer, 2);
-	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		e1 = size & 255;
-		e2 = (size >> 8) & 255;
-		e3 = (size >> 16) & 255;
-		e4 = (size >> 24) & 255;
-		size = (static_cast<uint32>(e1) << 24) + (static_cast<uint32>(e2) << 16) + (static_cast<uint32>(e3) << 8) + e4;
-	#endif
+	SWAP_U32_FROM_LITTLE(size);
 	if (size != 1) { // PCM == 1
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because audio format was not PCM" << endl;
 		return false;
@@ -128,11 +116,7 @@ bool WavFile::Initialize() {
 	// Get the number of channels (only mono and stereo supported) -- 2 bytes
 	_file_input.read(buffer, 2);
 	memcpy(&_number_channels, buffer, 2);
-	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		e1 = _number_channels & 255;
-		e2 = (_number_channels >> 8) & 255;
-		_number_channels = (static_cast<uint16>(e1) << 8) + e2;
-	#endif
+	SWAP_U16_FROM_LITTLE(_number_channels);
 	if (_number_channels != 1 && _number_channels != 2) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because number of channels was neither mono nor stereo" << endl;
 		return false;
@@ -141,43 +125,27 @@ bool WavFile::Initialize() {
 	// Get sample rate (usually 11025, 22050, or 44100 Hz) -- 4 bytes
 	_file_input.read(buffer, 4);
 	memcpy(&_samples_per_second, buffer, 4);
-	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		e1 = _samples_per_second & 255;
-		e2 = (_samples_per_second >> 8) & 255;
-		e3 = (_samples_per_second >> 16) & 255;
-		e4 = (_samples_per_second >> 24) & 255;
-		_samples_per_second = (static_cast<uint32>(e1) << 24) + (static_cast<uint32>(e2) << 16) + (static_cast<uint32>(e3) << 8) + e4;
-	#endif
+	SWAP_U32_FROM_LITTLE(_samples_per_second);
 
 	// Get byte rate -- 4 bytes
 	uint32 byte_rate;
 	_file_input.read(buffer, 4);
 	memcpy(&byte_rate, buffer, 4);
-	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		e1 = byte_rate & 255;
-		e2 = (byte_rate >> 8) & 255;
-		e3 = (byte_rate >> 16) & 255;
-		e4 = (byte_rate >> 24) & 255;
-		byte_rate = (static_cast<uint32>(e1) << 24) + (static_cast<uint32>(e2) << 16) + (static_cast<uint32>(e3) << 8) + e4;
-	#endif
+	SWAP_U32_FROM_LITTLE(byte_rate);
 
 	// Get block alignment (channels * bits_per_sample / 8) -- 2 bytes
 	_file_input.read(buffer, 2);
 	memcpy(&_sample_size, buffer, 2);
-	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		e1 = _sample_size & 255;
-		e2 = (_sample_size >> 8) & 255;
-		_sample_size = (static_cast<uint16>(e1) << 8) + e2;
-	#endif
+	SWAP_U16_FROM_LITTLE(_sample_size);
 
 	// Get bits per sample -- 2 bytes
 	_file_input.read(buffer, 2);
 	memcpy(&_bits_per_sample, buffer, 2);
-	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		e1 = _bits_per_sample & 255;
-		e2 = (_bits_per_sample >> 8) & 255;
-		_bits_per_sample = (static_cast<uint16>(e1) << 8) + e2;
-	#endif
+	SWAP_U16_FROM_LITTLE(_bits_per_sample);
+	if (_sample_size != (_number_channels * _bits_per_sample)/8) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because WAV file was internally inconsistent (block alignment should have been " << ((_number_channels * _bits_per_sample) / 8) << ", was " << _sample_size << ")" << endl;
+		return false;
+	}
 
 	// Check subchunk 2 ID (to be "data") -- 4 bytes
 	_file_input.read(buffer, 4);
@@ -189,14 +157,8 @@ bool WavFile::Initialize() {
 	// Check subchunk 2 size -- 4 bytes
 	_file_input.read(buffer, 4);
 	memcpy(&_data_size, buffer, 4);
-	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		e1 = _data_size & 255;
-		e2 = (_data_size >> 8) & 255;
-		e3 = (_data_size >> 16) & 255;
-		e4 = (_data_size >> 24) & 255;
-		_data_size = (static_cast<uint32>(e1) << 24) + (static_cast<uint32>(e2) << 16) + (static_cast<uint32>(e3) << 8) + e4;
-	#endif
-
+	SWAP_U32_FROM_LITTLE(_data_size);
+	
 	_data_init = _file_input.tellg();
 	_total_number_samples = _data_size / _sample_size;
 	_play_time = static_cast<float>(_total_number_samples) / static_cast<float>(_samples_per_second);
@@ -230,7 +192,7 @@ uint32 WavFile::Read(uint8* buffer, uint32 size, bool& end) {
 	{
 		uint8 tmp;
 		// iterate through
-		for (uint32 i = 0; i < size; i += 2)
+		for (uint32 i = 0; i < read * _sample_size; i += 2)
 		{
 			tmp = buffer[i];
 			buffer[i] = buffer[i + 1];
