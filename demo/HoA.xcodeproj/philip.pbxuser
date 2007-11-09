@@ -9,9 +9,9 @@
 		};
 	};
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
-		activeBuildConfigurationName = Debug;
-		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
-		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
+		activeBuildConfigurationName = Release;
+		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
+		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
 		addToTargets = (
 			D4D1BA480B02B1DB0052BF1E /* Editor */,
 		);
@@ -175,8 +175,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 214376766;
-			PBXWorkspaceStateSaveDate = 214376766;
+			PBXPerProjectTemplateStateSaveDate = 216283362;
+			PBXWorkspaceStateSaveDate = 216283362;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -391,7 +391,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {854, 8960}}";
 			sepNavSelRange = "{6483, 0}";
-			sepNavVisRect = "{{0, 2551}, {653, 149}}";
+			sepNavVisRect = "{{0, 4312}, {711, 645}}";
 			sepNavWindowFrame = "{{130, 4}, {750, 774}}";
 		};
 	};
@@ -448,10 +448,10 @@
 	};
 	D43080DE0AF982F800A5173A /* Allacrost */ = {
 		isa = PBXExecutable;
-		activeArgIndex = 1;
+		activeArgIndex = 2147483647;
 		activeArgIndices = (
 			NO,
-			YES,
+			NO,
 		);
 		argumentStrings = (
 			"-d audio",
@@ -515,9 +515,9 @@
 	};
 	D44096360C45E37300E58975 /* script.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {740, 3724}}";
+			sepNavIntBoundsRect = "{{0, 0}, {740, 3892}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 1307}, {711, 645}}";
+			sepNavVisRect = "{{0, 67}, {711, 645}}";
 			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
 		};
 	};
@@ -645,9 +645,9 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {956, 25158}}";
-			sepNavSelRange = "{56324, 0}";
-			sepNavVisRect = "{{0, 23074}, {672, 263}}";
+			sepNavIntBoundsRect = "{{0, 0}, {956, 27678}}";
+			sepNavSelRange = "{57842, 0}";
+			sepNavVisRect = "{{0, 23314}, {711, 617}}";
 			sepNavWindowFrame = "{{0, 32}, {750, 746}}";
 		};
 	};
@@ -817,7 +817,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {896, 6174}}";
 			sepNavSelRange = "{6477, 0}";
-			sepNavVisRect = "{{1, 346}, {711, 429}}";
+			sepNavVisRect = "{{0, 2293}, {711, 429}}";
 			sepNavWindowFrame = "{{518, 204}, {750, 558}}";
 		};
 	};
