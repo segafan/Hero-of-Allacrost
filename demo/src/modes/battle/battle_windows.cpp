@@ -1030,7 +1030,7 @@ void FinishWindow::Draw() {
 void FinishWindow::_DrawAnnounceWin() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(512.0f, 384.0f);
-	VideoManager->Text()->Draw("MAJOR PWNAGE!!!!");
+	VideoManager->Text()->Draw("VICTORY!!");
 }
 
 
