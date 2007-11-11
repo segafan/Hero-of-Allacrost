@@ -596,6 +596,7 @@ void BootMode::_OnNewGame() {
 	//GlobalManager->AddCharacter(GLOBAL_CHARACTER_LAILA);
 	GlobalManager->AddToInventory(1, 2);
 	GlobalManager->SetDrunes(250);
+	GlobalManager->SetLocation(MakeUnicodeString("dat/maps/demo_town.lua"));
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1000); // Fade to black over the course of one second
@@ -915,7 +916,7 @@ void BootMode::Update() {
 		if (!VideoManager->IsFading()) {
 			ModeManager->Pop();
 			try {
-				MapMode *MM = new MapMode("dat/maps/demo_town.lua");
+				MapMode *MM = new MapMode(MakeStandardString(GlobalManager->GetLocationName()));
 				ModeManager->Push(MM);
 			} catch (luabind::error e) {
 				cerr << "Map::_Load -- Error loading map dat/maps/demo_town.lua, returning to BootMode." << endl;

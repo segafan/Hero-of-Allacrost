@@ -630,7 +630,6 @@ FinishWindow::FinishWindow() :
 
 	_state = FINISH_INVALID;
 
-	TextBox box;
 	_finish_outcome.SetPosition(512, 0);
 	_finish_outcome.SetDimensions(400, 100);
 	_finish_outcome.SetDisplaySpeed(30);

@@ -135,10 +135,10 @@ void TextBox::Draw() {
 	float text_xpos, text_ypos;
 
 	// Determine the vertical position of the text based on the alignment
-	if (_yalign == VIDEO_Y_TOP) {
+	if (_text_yalign == VIDEO_Y_TOP) {
 		text_ypos = top;
 	}
-	else if (_yalign == VIDEO_Y_CENTER) {
+	else if (_text_yalign == VIDEO_Y_CENTER) {
 		text_ypos = top - (VideoManager->_current_context.coordinate_system.GetVerticalDirection() * (_height - text_height) * 0.5f);
 	}
 	else { // (_yalign == VIDEO_Y_BOTTOM)
@@ -357,8 +357,6 @@ int32 TextBox::_CalculateTextHeight() {
 	else
 		return _font_properties->height + _font_properties->line_skip * (static_cast<int32>(_text.size()) - 1);
 }
-
-
 
 void TextBox::_AddLine(const ustring& line) {
 	// perform word wrapping in a loop until all the text is added

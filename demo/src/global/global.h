@@ -361,6 +361,13 @@ public:
 	**/
 	void SetLocation(const hoa_utils::ustring& location_name, const std::string& location_graphic_filename);
 
+	/** \brief Set the location
+	*** \param this is really only used when starting a new game, as we don't know the what the location graphic is yet
+	*** the location graphic filename is loaded during map loading.
+	**/
+	void SetLocation(const hoa_utils::ustring& location_name)
+		{ _location_name = location_name; }
+
 	/** \brief Saves all global data to a saved game file
 	*** \param filename The filename of the saved game file where to write the data to
 	*** \return True if the game was successfully saved, false if it was not

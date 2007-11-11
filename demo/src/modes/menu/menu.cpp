@@ -49,7 +49,9 @@ MenuMode* MenuMode::_instance = NULL;
 // MenuMode class -- Initialization and Destruction Code
 ////////////////////////////////////////////////////////////////////////////////
 
-MenuMode::MenuMode(ustring locale_name, string locale_image) {
+MenuMode::MenuMode(ustring locale_name, string locale_image) :
+	_confirm_window(NULL)
+{
 	if (MENU_DEBUG)
 		cout << "MENU: MenuMode constructor invoked." << endl;
 
@@ -179,6 +181,9 @@ MenuMode::~MenuMode() {
 	_menu_sounds["cancel"].FreeAudio();
 
 	_instance = NULL;
+
+	if (_confirm_window != NULL)
+		delete _confirm_window;
 } // MenuMode::~MenuMode()
 
 
@@ -221,6 +226,30 @@ void MenuMode::Reset() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void MenuMode::Update() {
+	// check to see if confirm window is still going
+	if (_confirm_window != NULL)
+	{
+		_confirm_window->Update();
+		// play sounds for the confirm window
+		if (InputManager->ConfirmPress())
+			_menu_sounds["confirm"].Play();
+		else if (InputManager->CancelPress())
+			_menu_sounds["cancel"].Play();
+		if (_confirm_window->Result() == CONFIRM_RESULT_YES)
+		{
+			// overwrite save
+			delete _confirm_window;
+			_confirm_window = NULL;
+			GlobalManager->SaveGame(string("dat/saved_game.lua"));
+		}
+		else if (_confirm_window->Result() == CONFIRM_RESULT_CANCEL || _confirm_window->Result() == CONFIRM_RESULT_NO)
+		{
+			delete _confirm_window;
+			_confirm_window = NULL;
+		}
+		return;
+	}
+
 	if (_active_window->IsActive())
 	{
 		_active_window->Update();
@@ -368,7 +397,7 @@ void MenuMode::Draw() {
 			break;
 
 		/*case SHOW_OPTIONS:
-			//_HandleOptionsMenu();
+			_HandleOptionsMenu();
 			break;*/
 
 		case SHOW_SAVE:
@@ -378,9 +407,6 @@ void MenuMode::Draw() {
 			break;
 	} // switch draw_window
 
-	//FIX ME:  Test
-
-
 	// Draw character windows
 	_character_window0.Draw();
 	_character_window1.Draw();
@@ -389,6 +415,10 @@ void MenuMode::Draw() {
 
 	// Draw currently active options box
 	_current_menu->Draw();
+
+	// Draw confirm window if it's active
+	if (_confirm_window != NULL)
+		_confirm_window->Draw();
 } // void MenuMode::Draw()
 
 
@@ -699,9 +729,14 @@ void MenuMode::_HandleSaveMenu() {
 	switch (_menu_save.GetSelection()) {
 		case SAVE_SAVE:
 			// TODO: Handle Save - Save command
-			cout << "MENU: Save - Save command!" << endl;
 			file_name = "dat/saved_game.lua";
-			GlobalManager->SaveGame(file_name);
+			if (DoesFileExist(file_name))
+			{
+				// Show confirm dialogue window
+				_confirm_window = new OverwriteConfirmWindow("Saved game file already exists, overwrite?");
+			}
+			else
+				GlobalManager->SaveGame(file_name);
 			break;
 
 		case SAVE_BACK:
