@@ -495,8 +495,8 @@ void Grid::paintGL()
 					tile_index = *it;
 				else  // Don't divide by 0
 					tile_index = *it % (tileset_index * 256);
-				cerr << "grid tileset_index: " << tileset_index << endl;
-				cerr << "grid tile_index: " << tile_index << endl;
+				//cerr << "grid tileset_index: " << tileset_index << endl;
+				//cerr << "grid tile_index: " << tile_index << endl;
 				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
 			col++;
