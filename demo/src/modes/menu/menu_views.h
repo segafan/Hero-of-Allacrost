@@ -527,6 +527,29 @@ private:
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 }; // class OverwriteConfirmWindow
 
+/** **************************************************************************
+*** \brief A window to display a message to the player
+*** Displays a message to the user in the center of the screen
+*** **************************************************************************/
+class MessageWindow : public hoa_video::MenuWindow
+{
+public:
+	MessageWindow(const std::string &message, float w, float h);
+	~MessageWindow();
+
+	//! \brief Standard Window Functions
+	//@{
+	void Draw();
+	//@}
+
+private:
+	//! \brief the message to display
+	std::string _message;
+
+	//! \brief used to display the message
+	hoa_video::TextBox _textbox;
+}; // class MessageWindow
+
 
 /*!
 * \brief Converts a vector of GlobalItem*, etc. to a vector of GlobalObjects*
