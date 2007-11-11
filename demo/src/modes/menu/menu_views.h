@@ -102,7 +102,14 @@ enum FORM_ACTIVE_OPTION {
 	FORM_ACTIVE_SIZE = 3
 };
 
-
+//! \brief Possible values from the confirm window
+enum CONFIRM_RESULT
+{
+	CONFIRM_RESULT_YES = 0,
+	CONFIRM_RESULT_NO = 1,
+	CONFIRM_RESULT_NOTHING = 2,
+	CONFIRM_RESULT_CANCEL = 3,
+};
 
 /** ****************************************************************************
 *** \brief Represents an individual character window
@@ -480,6 +487,45 @@ private:
 	void _InitCharSelect();
 
 }; // class FormationWindow : public hoa_video::MenuWindow
+
+/** **************************************************************************
+*** \brief The window that is displayed if the save game file already exits
+*** Gives the player the chance to choose to overwrite the save game file
+*** or to stop the save process
+*** **************************************************************************/
+class OverwriteConfirmWindow : public hoa_video::MenuWindow
+{
+public:
+	OverwriteConfirmWindow(const std::string &message);
+
+	~OverwriteConfirmWindow();
+	
+	//! \brief Standard Window Functions
+	//@{
+	void Update();
+	void Draw();
+	//@}
+
+	//! \brief Returns what the user selected in the window, true = yes, false = no
+	CONFIRM_RESULT Result()
+	{ return _option; }
+
+private:
+	//! what is displayed in this window
+	std::string _message;
+
+	//! Has an option been selected?
+	CONFIRM_RESULT _option;
+
+	//! Response from the user
+	hoa_video::OptionBox _yes_no;
+
+	//! used to display the message
+	hoa_video::TextBox _textbox;
+
+	//! \brief A map of the sounds used while in MenuMode
+	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
+}; // class OverwriteConfirmWindow
 
 
 /*!

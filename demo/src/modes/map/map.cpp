@@ -250,6 +250,9 @@ void MapMode::_Load() {
 	for (uint32 i = 0; i < _sky_objects.size(); i++) {
 		_sky_objects[i]->LoadSaved();
 	}
+
+	// ------------ (7) Set values in the global manager so when the game is saved it has necessary information
+	GlobalManager->SetLocation(MakeUnicodeString(_map_filename), _location_graphic.GetFilename());
 } // void MapMode::_Load()
 
 

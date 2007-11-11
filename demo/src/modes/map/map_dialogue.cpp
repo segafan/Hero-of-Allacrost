@@ -66,6 +66,7 @@ DialogueManager::DialogueManager() {
 	_display_textbox.SetTextStyle(TextStyle("map"));
 	_display_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
 	_display_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_display_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
 	VideoManager->PopState();
 }

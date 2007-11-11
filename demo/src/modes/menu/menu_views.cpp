@@ -1432,6 +1432,81 @@ void FormationWindow::Activate(bool new_status) {
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// OverwriteConfirm Window Class
+////////////////////////////////////////////////////////////////////////////////
+
+OverwriteConfirmWindow::OverwriteConfirmWindow(const string &message) :
+	_message(message),
+	_option(CONFIRM_RESULT_NOTHING)
+{
+	float start_x = (1024 - 400) / 2;
+	float start_y = (768 - 400) / 2;
+
+	MenuWindow::Create(355.0f, 100.0f);
+	MenuWindow::SetPosition(start_x, start_y);
+	MenuWindow::Show();
+
+	vector<ustring> text;
+	text.push_back(MakeUnicodeString("Yes"));
+	text.push_back(MakeUnicodeString("No"));
+	_yes_no.SetOptions(text);
+	_yes_no.SetCellSize(100.0f, 50.0f);
+	_yes_no.SetPosition(100, 70);
+	_yes_no.SetSize(2, 1);
+	_yes_no.SetFont("default");
+	_yes_no.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_yes_no.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_yes_no.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_yes_no.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_yes_no.SetCursorOffset(-60.0f, -40.0f);
+	_yes_no.SetSelection(0);
+	_yes_no.SetOwner(this);
+
+	_textbox.SetPosition(30, 0);
+	_textbox.SetDimensions(355, 50);
+	_textbox.SetTextStyle(TextStyle());
+	_textbox.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_textbox.SetDisplayText(_message);
+	_textbox.SetOwner(this);
+}
+
+OverwriteConfirmWindow::~OverwriteConfirmWindow()
+{
+	MenuWindow::Destroy();
+}
+
+void OverwriteConfirmWindow::Update()
+{
+	if (InputManager->ConfirmPress())
+	{
+		int32 selection = _yes_no.GetSelection();
+		switch (selection)
+		{
+		case 0:
+			_option = CONFIRM_RESULT_YES;
+			break;
+		case 1:
+			_option = CONFIRM_RESULT_NO;
+			break;
+		}
+	}
+	else if (InputManager->LeftPress())
+		_yes_no.HandleLeftKey();
+	else if (InputManager->RightPress())
+		_yes_no.HandleRightKey();
+	else if (InputManager->CancelPress())
+		_option = CONFIRM_RESULT_CANCEL;
+}
+
+void OverwriteConfirmWindow::Draw()
+{
+	MenuWindow::Draw();
+	_yes_no.Draw();
+	_textbox.Draw();
+}
+
 } // namespace private_menu
 
 } // namespace hoa_menu

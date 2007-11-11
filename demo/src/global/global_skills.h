@@ -297,7 +297,7 @@ public:
 	void MenuExecute(GlobalCharacter* target, GlobalCharacter* instigator);
 
 	/** \name Class member access functions
-	*** \note No set functiosn are defined because the class members should only be defined
+	*** \note No set functions are defined because the class members should only be defined
 	*** by the Lua script.
 	**/
 	//@{

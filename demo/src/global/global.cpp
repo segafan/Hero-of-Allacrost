@@ -594,7 +594,6 @@ bool GameGlobal::SaveGame(string& filename) {
 	// ----- (1) Save simple play data
 	file.InsertNewLine();
 	file.WriteString("location_name", MakeStandardString(_location_name));
-	file.WriteString("location_graphic", _location_graphic.GetFilename());
 	file.WriteUInt("play_hours", SystemManager->GetPlayHours());
 	file.WriteUInt("play_minutes", SystemManager->GetPlayMinutes());
 	file.WriteUInt("play_seconds", SystemManager->GetPlaySeconds());
@@ -657,11 +656,6 @@ bool GameGlobal::LoadGame(const string& filename) {
 
 	// ----- (1) Load play data
 	_location_name = MakeUnicodeString(file.ReadString("location_name"));
-	if (_location_graphic.Load(file.ReadString("location_graphic")) == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GameGlobal::LoadGame() failed to load the location graphic: "
-				<< _location_graphic.GetFilename() << endl;
-	}
 	uint8 hours, minutes, seconds;
 	hours = file.ReadUInt("play_hours");
 	minutes = file.ReadUInt("play_minutes");
