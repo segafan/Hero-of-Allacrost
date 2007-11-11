@@ -50,7 +50,8 @@ MenuMode* MenuMode::_instance = NULL;
 ////////////////////////////////////////////////////////////////////////////////
 
 MenuMode::MenuMode(ustring locale_name, string locale_image) :
-	_confirm_window(NULL)
+	_confirm_window(NULL),
+	_message_window(NULL)
 {
 	if (MENU_DEBUG)
 		cout << "MENU: MenuMode constructor invoked." << endl;
@@ -184,6 +185,9 @@ MenuMode::~MenuMode() {
 
 	if (_confirm_window != NULL)
 		delete _confirm_window;
+
+	if (_message_window != NULL)
+		delete _message_window;
 } // MenuMode::~MenuMode()
 
 
@@ -226,6 +230,19 @@ void MenuMode::Reset() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void MenuMode::Update() {
+	
+	// check the message window
+	if (_message_window != NULL)
+	{
+		_message_window->Update();
+		if (InputManager->ConfirmPress() || InputManager->CancelPress())
+		{
+			delete _message_window;
+			_message_window = NULL;
+		}
+		return;
+	}
+
 	// check to see if confirm window is still going
 	if (_confirm_window != NULL)
 	{
@@ -241,6 +258,7 @@ void MenuMode::Update() {
 			delete _confirm_window;
 			_confirm_window = NULL;
 			GlobalManager->SaveGame(string("dat/saved_game.lua"));
+			_message_window = new MessageWindow("Your game has been saved.", 250.0f, 50.0f);
 		}
 		else if (_confirm_window->Result() == CONFIRM_RESULT_CANCEL || _confirm_window->Result() == CONFIRM_RESULT_NO)
 		{
@@ -419,6 +437,10 @@ void MenuMode::Draw() {
 	// Draw confirm window if it's active
 	if (_confirm_window != NULL)
 		_confirm_window->Draw();
+
+	// Draw message window if it's active
+	if (_message_window != NULL)
+		_message_window->Draw();
 } // void MenuMode::Draw()
 
 
@@ -736,7 +758,10 @@ void MenuMode::_HandleSaveMenu() {
 				_confirm_window = new OverwriteConfirmWindow("Saved game file already exists, overwrite?");
 			}
 			else
+			{
 				GlobalManager->SaveGame(file_name);
+				_message_window = new MessageWindow("Your game has been saved.", 250.0f, 50.0f);
+			}
 			break;
 
 		case SAVE_BACK:
@@ -1074,7 +1099,7 @@ void MenuMode::_DrawBottomMenu() {
 } // void MenuMode::_DrawBottomMenu()
 
 
-void _DrawItemListHeader()
+void MenuMode::_DrawItemListHeader()
 { }
 
 } // namespace hoa_menu
