@@ -372,7 +372,7 @@ public:
 	*** \param filename The filename of the saved game file where to write the data to
 	*** \return True if the game was successfully saved, false if it was not
 	**/
-	bool SaveGame(std::string& filename);
+	bool SaveGame(const std::string& filename);
 
 	/** \brief Loads all global data from a saved game file
 	*** \param filename The filename of the saved game file where to read the data from

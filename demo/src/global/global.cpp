@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
+sa////////////////////////////////////////////////////////////////////////////////
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
@@ -585,7 +585,7 @@ void GameGlobal::SetLocation(const hoa_utils::ustring& location_name, const std:
 
 
 
-bool GameGlobal::SaveGame(string& filename) {
+bool GameGlobal::SaveGame(const string& filename) {
 	WriteScriptDescriptor file;
 	if (file.OpenFile(filename) == false) {
 		return false;
