@@ -112,6 +112,8 @@ GameGlobal::~GameGlobal() {
 	_arm_armor_script.CloseFile();
 	_leg_armor_script.CloseFile();
 	_attack_skills_script.CloseFile();
+	_defend_skills_script.CloseFile();
+	_support_skills_script.CloseFile();
 }
 
 
@@ -152,6 +154,16 @@ bool GameGlobal::SingletonInitialize() {
 		return false;
 	}
 	_attack_skills_script.OpenTable("skills");
+
+	if (_support_skills_script.OpenFile("dat/skills/support.lua") == false) {
+		return false;
+	}
+	_support_skills_script.OpenTable("skills");
+
+	if (_defend_skills_script.OpenFile("dat/skills/defense.lua") == false) {
+		return false;
+	}
+	_defend_skills_script.OpenTable("skills");
 
 	return true;
 }
