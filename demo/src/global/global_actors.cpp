@@ -418,6 +418,30 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 
 	// If a new experience level has been gained, we must retrieve the growth data for the new experience level
 	if (_experience_level_gained) {
+		_character_owner->_experience_level += 1;
+		_experience_level_gained = false;
+		_DetermineNextLevelExperience();
+
+		ReadScriptDescriptor character_script;
+		if (character_script.OpenFile("dat/actors/characters.lua") == false) {
+			PRINT_ERROR << "failed to open the characters.lua script file when the character reached a new experience level" << endl;
+			return;
+		}
+
+		try {
+			ScriptCallFunction<void>(character_script.GetLuaState(), "DetermineGrowth", this->_character_owner);
+			_ConstructPeriodicGrowth();
+			_CheckForGrowth();
+		}
+		catch (luabind::error e) {
+			ScriptManager->HandleLuaError(e);
+		}
+		catch (luabind::cast_failed e) {
+			ScriptManager->HandleCastError(e);
+		}
+
+		character_script.CloseFile();
+
 		// Add any newly learned skills
 		for (uint32 i = 0; i < _skills_learned.size(); i++) {
 			GlobalSkill* skill = _skills_learned[i];
@@ -444,28 +468,8 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 					break;
 			}
 		}
-	
-		_character_owner->_experience_level += 1;
-		_experience_level_gained = false;
-		_DetermineNextLevelExperience();
-
-		ReadScriptDescriptor character_script;
-		if (character_script.OpenFile("dat/characters.lua") == false) {
-			PRINT_ERROR << "failed to open the characters.lua script file when the character reached a new experience level" << endl;
-			return;
-		}
-
-		try {
-			ScriptCallFunction<void>(character_script.GetLuaState(), "DetermineGrowth", this);
-			_ConstructPeriodicGrowth();
-			_CheckForGrowth();
-		}
-		catch (luabind::error e) {
-			ScriptManager->HandleLuaError(e);
-		}
-		catch (luabind::cast_failed e) {
-			ScriptManager->HandleCastError(e);
-		}
+		// skills have been given out, clean out the vector
+		_skills_learned.clear();
 	} // if (_experience_level_gained)
 } // void GlobalCharacterGrowth::AcknowledgeGrowth()
 
@@ -721,7 +725,7 @@ void GlobalCharacterGrowth::_DetermineNextLevelExperience() {
 	uint32 new_xp = 0; // Temporary variable for holding the new experience milestone
 
 	// TODO: implement a real algorithm for determining the next experience goal
-	new_xp = _experience_for_last_level + 50;
+	new_xp = _experience_for_next_level + 20;
 
 	_experience_for_last_level = _experience_for_next_level;
 	_experience_for_next_level = new_xp;

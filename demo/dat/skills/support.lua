@@ -16,4 +16,17 @@ end
 -- IDs 20001-30000 are reserved for support skills
 -- -----------------------------------------------------------------------------
 
--- skills[20001] = {}
+skills[20001] = {
+   name = "Refresh",
+   description = "Assist a party member restoring some hp.",
+   sp_required = 2,
+   warmup_time = 1500,
+   cooldown_time = 2,
+   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
+   target_ally = true,
+   
+   BattleExecute = function(target, instigator)
+      target:AddHitPoints(hoa_utils.RandomBoundedInteger(30,50));
+      AudioManager:PlaySound("snd/heal.wav");
+   end
+}

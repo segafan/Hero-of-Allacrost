@@ -53,6 +53,25 @@ skills[2] = {
 	end
 }
 
+skills[3] = {
+   name = "Quick Shot",
+   description = "A quick, weak crossbow attack.",
+   sp_required = 0,
+   warmup_time = 1000,
+   cooldown_time = 0,
+   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+   target_ally = false,
+   
+   BattleExecute = function(target, instigator)
+      if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
+         target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
+         AudioManager:PlaySound("snd/crossbow.ogg");
+      else
+         AudioManager:PlaySound("snd/crossbow-miss.ogg");
+      end     
+   end
+}
+
 
 -- Enemy attack skills
 skills[100] = {

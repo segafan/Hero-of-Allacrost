@@ -144,6 +144,13 @@ void BattleActor::TakeDamage(int32 damage) {
 	}
 }
 
+void BattleActor::AddHitPoints(int32 hp)
+{
+	if (hp < 0)
+		return;
+
+	GetActor()->AddHitPoints(hp);
+}
 
 
 void BattleActor::TEMP_ResetAttackTimer() {

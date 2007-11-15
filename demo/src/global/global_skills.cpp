@@ -137,6 +137,10 @@ GlobalSkill::GlobalSkill(uint32 id) :
 		return;
 	}
 
+	// make sure the script is open
+	if (!skill_script->IsFileOpen())
+		skill_script->OpenFile();
+
 	// Load the skill properties from the script
 	if (skill_script->DoesTableExist(_id) == false) {
 		if (GLOBAL_DEBUG)

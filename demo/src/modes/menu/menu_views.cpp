@@ -118,7 +118,7 @@ void CharacterWindow::Draw() {
 	// XP to level up
 	VideoManager->MoveRelative(0, 20);
 	ostringstream os_xp;
-	os_xp << character->GetExperienceForNextLevel();
+	os_xp << (character->GetExperienceForNextLevel() - character->GetExperiencePoints());
 	std::string xp = std::string("XP To Next: ") + os_xp.str();
 	VideoManager->Text()->Draw(MakeUnicodeString(xp));
 

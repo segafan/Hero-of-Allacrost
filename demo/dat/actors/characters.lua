@@ -174,7 +174,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 		}
 	},
 
-	skills = { [1] = 1, [2] = 2 }
+	skills = { [1] = 3, [3] = 20001 }
 } -- characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA]
 
 
