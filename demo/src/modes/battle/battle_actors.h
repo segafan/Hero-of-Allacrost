@@ -233,7 +233,7 @@ public:
 	//@}
 
 	//! \brief Restores some the given hp to the actor
-	void BattleActor::AddHitPoints(int32 hp);
+	void AddHitPoints(int32 hp);
 
 	//! \brief Resets the attack timer for the animation
 	void TEMP_ResetAttackTimer();
