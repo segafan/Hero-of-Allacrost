@@ -28,5 +28,10 @@ skills[20001] = {
    BattleExecute = function(target, instigator)
       target:AddHitPoints(hoa_utils.RandomBoundedInteger(30,50));
       AudioManager:PlaySound("snd/heal.wav");
+   end,
+   
+   MenuExecute = function(target, instigator)
+      target:AddHitPoints(hoa_utils.RandomBoundedInteger(30,50));
+      AudioManager:PlaySound("snd/heal.wav");
    end
 }

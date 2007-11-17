@@ -620,7 +620,10 @@ void StatusWindow::Draw() {
 // SkillsWindow Class
 ////////////////////////////////////////////////////////////////////////////////
 
-SkillsWindow::SkillsWindow() : _active_box(SKILL_ACTIVE_NONE) {
+SkillsWindow::SkillsWindow() : 
+	_active_box(SKILL_ACTIVE_NONE),
+	_char_skillset(0)
+{
 	// Init option boxes
 	_InitCharSelect();
 	_InitSkillsList();
@@ -658,7 +661,7 @@ void SkillsWindow::_InitSkillsList() {
 	_skills_list.SetPosition(500.0f, 170.0f);
 	_skills_list.SetFont("default");
 	_skills_list.SetCursorOffset(-52.0f, -20.0f);
-	_skills_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_skills_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_skills_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_skills_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 
@@ -666,6 +669,16 @@ void SkillsWindow::_InitSkillsList() {
 	if (_skills_list.GetNumberOptions() > 0)
 		_skills_list.SetSelection(0);
 	_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+	// setup the cost option box
+	_skill_cost_list.SetCellSize(180.0f, 30.0f);
+	_skill_cost_list.SetPosition(800.0f, 170.0f);
+	_skill_cost_list.SetFont("default");
+	_skill_cost_list.SetCursorOffset(-52.0f, -20.0f);
+	_skill_cost_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_skill_cost_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_skill_cost_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_skill_cost_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
 
 
@@ -769,8 +782,13 @@ void SkillsWindow::Update() {
 	switch (_active_box) {
 		case SKILL_ACTIVE_CHAR_APPLY:
 			// Handle skill application
-			if (event == VIDEO_OPTION_CONFIRM) {
-				//TODO Use Skill
+			if (event == VIDEO_OPTION_CONFIRM) 
+			{
+				GlobalSkill *skill = _GetCurrentSkill();
+				GlobalCharacter* target = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+				GlobalCharacter* instigator = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_skillset));
+				skill->MenuExecute(target, instigator);
+				instigator->SubtractSkillPoints(skill->GetSPRequired());
 				MenuMode::_instance->_menu_sounds["confirm"].Play();
 			}
 			else if (event == VIDEO_OPTION_CANCEL) {
@@ -800,11 +818,16 @@ void SkillsWindow::Update() {
 		case SKILL_ACTIVE_LIST:
 			// Choose skill
 			if (event == VIDEO_OPTION_CONFIRM) {
-/*				_active_box = SKILL_ACTIVE_CHAR_APPLY;
-				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
-				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::_instance->_menu_sounds["confirm"].Play();*/
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				GlobalSkill *skill = _GetCurrentSkill();
+				if (skill->IsExecutableInMenu())
+				{
+					_active_box = SKILL_ACTIVE_CHAR_APPLY;
+					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
+					_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+					MenuMode::_instance->_menu_sounds["confirm"].Play();
+				}
+				else
+					MenuMode::_instance->_menu_sounds["cancel"].Play();
 			}
 			else if (event == VIDEO_OPTION_CANCEL) {
 				_active_box = SKILL_ACTIVE_CATEGORY;
@@ -840,50 +863,118 @@ void SkillsWindow::Update() {
 
 	_UpdateSkillList();
 
-	if (_skills_list.GetNumberOptions() > 0 &&
-	    _skills_list.GetSelection() >= 0 &&
-	    _skills_list.GetNumberOptions() > _skills_list.GetSelection()) {
-		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
-		std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
-		GlobalSkill* skill = skills->at(_skills_list.GetSelection());
-		_description.SetDisplayText( skill->GetDescription() );
+	if (_skills_list.GetNumberOptions() > 0 && _skills_list.GetSelection() >= 0 && _skills_list.GetNumberOptions() > _skills_list.GetSelection()) 
+	{		
+		GlobalSkill *skill = _GetCurrentSkill();
+		string desc = MakeStandardString(skill->GetName()) + "\n\n" + MakeStandardString(skill->GetDescription());
+		_description.SetDisplayText(MakeUnicodeString(desc));
 	}
 } // void SkillsWindow::Update()
 
+GlobalSkill *SkillsWindow::_GetCurrentSkill()
+{
+	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_skillset));
+
+	vector<GlobalSkill *> *menu_skills = new vector<GlobalSkill *>();
+	vector<GlobalSkill *> *battle_skills = new vector<GlobalSkill *>();
+	vector<GlobalSkill *> *all_skills = new vector<GlobalSkill *>();
+
+	_BuildMenuBattleSkillLists(ch->GetAttackSkills(), menu_skills, battle_skills, all_skills);
+	_BuildMenuBattleSkillLists(ch->GetDefenseSkills(), menu_skills, battle_skills, all_skills);
+	_BuildMenuBattleSkillLists(ch->GetSupportSkills(), menu_skills, battle_skills, all_skills);
+
+	GlobalSkill *skill;
+	switch (_skills_categories.GetSelection())
+	{
+	case SKILL_ALL:
+		skill = all_skills->at(_skills_list.GetSelection());
+		break;
+	case SKILL_BATTLE:
+		skill = battle_skills->at(_skills_list.GetSelection());
+		break;
+	case SKILL_FIELD:
+		skill = menu_skills->at(_skills_list.GetSelection());
+		break;
+	}
+
+	return skill;
+}
 
 
 void SkillsWindow::_UpdateSkillList() {
 	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
-	std::vector<ustring> options;
+	vector<ustring> options;
+	vector<ustring> cost_options;
 
-	//FIX ME Need new categories
-	std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
-	uint32 skillsize = skills->size();
+	vector<GlobalSkill *> *menu_skills = new vector<GlobalSkill *>();
+	vector<GlobalSkill *> *battle_skills = new vector<GlobalSkill *>();
+	vector<GlobalSkill *> *all_skills = new vector<GlobalSkill *>();
 
-	string tempstr = "";
+	_BuildMenuBattleSkillLists(ch->GetAttackSkills(), menu_skills, battle_skills, all_skills);
+	_BuildMenuBattleSkillLists(ch->GetDefenseSkills(), menu_skills, battle_skills, all_skills);
+	_BuildMenuBattleSkillLists(ch->GetSupportSkills(), menu_skills, battle_skills, all_skills);
+
+	vector<GlobalSkill *>::iterator i;
 
 	switch (_skills_categories.GetSelection()) {
 		case SKILL_ALL:
-		case SKILL_BATTLE:
-			_skills_list.SetSize(1,skillsize);
+			_skills_list.SetSize(1, all_skills->size());
+			_skill_cost_list.SetSize(1, all_skills->size());
 
-			for (uint32 i = 0; i < skillsize; i++) {
-				tempstr = MakeStandardString(skills->at(i)->GetName());
-				for (uint32 j = tempstr.length(); j < 40; ++j)
-					tempstr += " ";
-				tempstr += NumberToString(skills->at(i)->GetSPRequired()) + " SP";
-				options.push_back(MakeUnicodeString(tempstr));
+			for (i = all_skills->begin(); i != all_skills->end(); ++i)
+			{
+				options.push_back((*i)->GetName());
+				string cost = NumberToString((*i)->GetSPRequired()) + " SP";
+				cost_options.push_back(MakeUnicodeString(cost));
 			}
-		break;
+			break;
+		case SKILL_BATTLE:
+			_skills_list.SetSize(1,battle_skills->size());
+			_skill_cost_list.SetSize(1, battle_skills->size());
 
+			for (i = battle_skills->begin(); i != battle_skills->end(); ++i)
+			{
+				options.push_back((*i)->GetName());
+				string cost = NumberToString((*i)->GetSPRequired()) + " SP";
+				cost_options.push_back(MakeUnicodeString(cost));
+			}
+			break;
 		case SKILL_FIELD:
+			_skills_list.SetSize(1, menu_skills->size());
+			_skill_cost_list.SetSize(1, menu_skills->size());
+
+			for (i = menu_skills->begin(); i != menu_skills->end(); ++i)
+			{
+				options.push_back((*i)->GetName());
+				string cost = NumberToString((*i)->GetSPRequired()) + " SP";
+				cost_options.push_back(MakeUnicodeString(cost));
+			}
+			break;
 		default:
 			_skills_list.SetSize(1,0);
 	}
 
 	_skills_list.SetOptions(options);
+	_skill_cost_list.SetOptions(cost_options);
+
+	delete menu_skills;
+	delete battle_skills;
+	delete all_skills;
 }
 
+void SkillsWindow::_BuildMenuBattleSkillLists(vector<GlobalSkill *> *skill_list,
+		vector<GlobalSkill *> *field, vector<GlobalSkill *> *battle, vector<GlobalSkill *> *all)
+{
+	vector<GlobalSkill *>::iterator i;
+	for (i = skill_list->begin(); i != skill_list->end(); ++i)
+	{
+		if ((*i)->IsExecutableInBattle())
+			battle->push_back(*i);
+		if ((*i)->IsExecutableInMenu())
+			field->push_back(*i);
+		all->push_back(*i);
+	}
+}
 
 
 void SkillsWindow::Draw() {
@@ -893,6 +984,8 @@ void SkillsWindow::Draw() {
 	_char_select.Draw();
 	_skills_categories.Draw();
 	_skills_list.Draw();
+	_skill_cost_list.Draw();
+	_description.Draw();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

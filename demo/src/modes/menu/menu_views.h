@@ -339,6 +339,9 @@ private:
 	//! The skills list option box
 	hoa_video::OptionBox _skills_list;
 
+	//! The skill SP cost option box
+	hoa_video::OptionBox _skill_cost_list;
+
 	//! TextBox that holds the selected skill's description
 	hoa_video::TextBox _description;
 
@@ -360,10 +363,20 @@ private:
 	*/
 	void _InitCharSelect();
 
+	//! \brief Returns the currently selected skill
+	hoa_global::GlobalSkill *_GetCurrentSkill();
+
 	/*!
 	* \brief Sets up the skills that comprise the different categories
 	*/
 	void _UpdateSkillList();
+
+	hoa_utils::ustring _BuildSkillListText(const hoa_global::GlobalSkill * skill);
+
+	//! \brief parses the 3 skill lists of the global character and sorts them according to use (menu/battle)
+	void _BuildMenuBattleSkillLists(std::vector<hoa_global::GlobalSkill *> *skill_list,
+		std::vector<hoa_global::GlobalSkill *> *field, std::vector<hoa_global::GlobalSkill *> *battle,
+		std::vector<hoa_global::GlobalSkill *> *all);
 
 }; //class SkillsWindow : public hoa_video::MenuWindow
 
