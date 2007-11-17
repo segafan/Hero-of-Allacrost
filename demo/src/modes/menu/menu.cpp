@@ -844,19 +844,7 @@ void MenuMode::_DrawBottomMenu() {
 		} // if ITEM_ACTIVE_LIST
 	} // if SHOW_INVENTORY
 	else if (_current_menu_showing == SHOW_SKILLS ) {
-		if (_skills_window._active_box == SKILL_ACTIVE_LIST) {
-			GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_skills_window._char_select.GetSelection()));
-			std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
-			GlobalSkill* skill = skills->at(_skills_window._skills_list.GetSelection());
-
-			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
-
-			VideoManager->Move(100, 600);
-			VideoManager->MoveRelative(65, 0);
-			VideoManager->Text()->Draw(skill->GetName());
-			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
-			_skills_window._description.Draw();
-		} // if SKILL_ACTIVE_LIST
+		// nothing to do here atm
 	} // if SHOW_SKILLS
 	else if (_current_menu_showing == SHOW_EQUIP) {
 		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_equip_window._char_select.GetSelection()));

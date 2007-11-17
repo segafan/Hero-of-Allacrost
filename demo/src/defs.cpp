@@ -265,6 +265,8 @@ void BindEngineToLua() {
 			.def("SetAgility", &GlobalActor::SetAgility)
 			.def("SetEvade", &GlobalActor::SetEvade)
 
+			.def("AddHitPoints", &GlobalActor::AddHitPoints)
+
 			.def("IsAlive", &GlobalActor::IsAlive)
 // 			.def("EquipWeapon", &GlobalActor::EquipWeapon)
 // 			.def("EquipArmor", &GlobalActor::EquipArmor)
@@ -357,7 +359,7 @@ void BindEngineToLua() {
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_utils")
 	[
-		def("RandomBoundedInteger", (int32(*)(void)) &hoa_utils::RandomBoundedInteger)
+		def("RandomBoundedInteger", &hoa_utils::RandomBoundedInteger)
 	];
 	}
 

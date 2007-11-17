@@ -75,7 +75,7 @@ void OptionBox::Update(uint32 frame_time) {
 
 void OptionBox::Draw() {
 	// Do nothing if the option box is not properly initialized
-	if (_initialized == false) {
+	if (!IsInitialized(_initialization_errors)) {
 		return;
 	}
 
