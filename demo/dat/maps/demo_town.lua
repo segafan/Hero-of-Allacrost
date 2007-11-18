@@ -603,25 +603,22 @@ function Load(m)
 	exit_zone:AddSection(hoa_map.ZoneSection(118, 30, 119, 40));
 	map:_AddZone(exit_zone);
 
-	-- Create an example chest filled with 2 potions and an Karlate Sword
-	chest = hoa_map.ChestObject("img/misc/chest1.png");
-	chest:SetObjectID( 12 );
+	-- Create an example chest filled with 2 potions and a Karlate Sword
+	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
+	chest:SetObjectID(12);
 	chest:SetContext(1);
 	chest:SetXPosition(111, 0);
 	chest:SetYPosition(34, 0);
-	chest:AddDrunes( 100 );
-	chest:AddObject( 1, 2 ); 	-- Adds 2 potions (ID: 1)
-	chest:AddObject( 10001, 1 );  	-- Adds 1 Karlate Sword (ID: 10001)
-	chest:AddObject( 20001, 1 );  	-- Adds 1 Karlate Sword (ID: 10001)
-	chest:AddObject( 20002, 1 );  	-- Adds 1 Karlate Sword (ID: 10001)40001
-	chest:AddObject( 40001, 1 );  	-- Adds 1 Karlate Sword (ID: 10001)40001
-	chest:AddObject( 40002, 1 );  	-- Adds 1 Karlate Sword (ID: 10001)40001
-	chest:AddObject( 30001, 1 );  	-- Adds 1 Karlate Sword (ID: 10001)40001
-	chest:AddObject( 30002, 1 );  	-- Adds 1 Karlate Sword (ID: 10001)40001
+	chest:AddDrunes(100);
+	chest:AddObject(1, 2);     -- Adds 2 potions (ID: 1)
+	chest:AddObject(10001, 1);  	-- Adds 1 Karlate Sword (ID: 10001)
+	chest:AddObject(20001, 1);  	-- Adds 1 Karlate Sword (ID: 10001)
+	chest:AddObject(20002, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
+	chest:AddObject(40001, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
+	chest:AddObject(40002, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
+	chest:AddObject(30001, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
+	chest:AddObject(30002, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
 	map:_AddGroundObject(chest); 	-- Adds to the ground objects
-
-	--That's all there is to a default chest the Image sizes and Collision rectangles
-	--are set to the image size, you can resize them just like you would with a sprite.
 end -- function Load()
 
 function Update()

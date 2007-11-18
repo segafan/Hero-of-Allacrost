@@ -33,7 +33,7 @@ const uint8 PHYSICAL_TYPE = 0;
 const uint8 VIRTUAL_TYPE = 1;
 const uint8 SPRITE_TYPE = 2;
 const uint8 ENEMY_TYPE = 3;
-const uint8 CHEST_TYPE = 4;
+const uint8 TREASURE_TYPE = 4;
 //@}
 
 /** ****************************************************************************
@@ -319,10 +319,10 @@ public:
 	~PhysicalObject();
 
 	//! \brief Updates the object's animation frames if it is animated.
-	void Update();
+	virtual void Update();
 
 	//! \brief Draws the object to the screen, if it is visible.
-	void Draw();
+	virtual void Draw();
 
 	/** \name Lua Access Functions
 	*** These functions are specifically written for Lua binding, to enable Lua to access the
@@ -343,53 +343,52 @@ public:
 	//@}
 }; // class PhysicalObject : public MapObject
 
+
 /** ****************************************************************************
- *** \brief Represents an physical object which can give other objects to the player when activated
- ***
- *** This class acts as an optionnaly hidden object that has to be found before
- *** being able to activate. When activated it will transfer its content to the
- *** player's inventory.
- ***
- *** ***************************************************************************/
-class ChestObject : public PhysicalObject {
+*** \brief Represents a treasure on the map which the player may open
+***
+*** This class acts as an optionnaly hidden object that has to be found before
+*** being able to activate. When activated it will transfer its content to the
+*** player's inventory.
+***
+*** Image files for treasure are single row multi images where the frame ordering
+*** goes from closed, to opening, to open. This means each map treasure has exactly
+*** three animations, although the closed and open animations are usually single
+*** frame images.
+***
+*** \todo Add support for more treasure features, such as locked chests, chests which
+*** trigger a battle, etc.
+*** ***************************************************************************/
+class MapTreasure : public PhysicalObject {
+	friend class TreasureMenu;
 public:
-	/** \name ChestObject defaults constants
- 	*** These constants are used to identify the default settings of a ChestObject
-	**/
-	//@{
-	static const uint8 NB_FRAMES_CLOSED_DEFAULT;
-	static const uint8 NB_FRAMES_OPENING_DEFAULT;
-
-	static const uint32 HIDE_FORCE_DEFAULT;
-	//@}
-
-	//! Values indicating which animation is which, should not be changed!
+	//! \brief Values for defining the 3 possible treasure animations
 	enum {
-		  CLOSED_CHEST_ANIM = 0
-  		, OPENING_CHEST_ANIM = 1
+		CLOSED_ANIM = 0,
+		OPENING_ANIM = 1,
+		OPEN_ANIM = 2
 	};
 
-	//! Values indicating the state of the chest in a save file
+	//! \brief The values pertaining to a treasure's state as a GlobalEvent
 	enum {
-		  CHEST_UNUSED = 0
-		, CHEST_USED = 1
+		TREASURE_UNUSED = 0,
+		TREASURE_EMPTY = 1
 	};
 
-
-	/** \brief Creates a ChestObject
-	*** \param image_file An image file in the form of a 1 row strip
-	*** \param nb_frames_closed The number of frames to use as the closed chest animation
-	*** \param nb_frames_opening The number of frames to use as the opening chest animation (taken after the closed animation in the strip)
-	*** \param hide_force The number of sensing force required to show the chest. 0 = not hidden
+	/** \brief Creates a MapTreasure
+	*** \param image_file An image file in the form of a one row strip
+	*** \param num_total_frames The total number of frame images in the multi image file
+	*** \param num_closed_frames The number of frames to use as the closed animation (default value == 1)
+	*** \param num_open_frames The number of frames to use as the open animation (default value == 1)
+	*** \note The opening animation will be created based on the total number of frames in the image file
+	*** subtracted by the number of closed and open frames. If this value is zero, then the opening animation
+	*** will simply be the same as the open animation
 	**/
-	ChestObject( std::string image_file,
-	             uint8 nb_frames_closed = NB_FRAMES_CLOSED_DEFAULT,
-	             uint8 nb_frames_opening = NB_FRAMES_OPENING_DEFAULT,
-	             uint32 hide_force = HIDE_FORCE_DEFAULT );
+	MapTreasure(std::string image_file, uint8 num_total_frames, uint8 num_closed_frames = 1, uint8 num_open_frames = 1);
 
-	~ChestObject();
+	~MapTreasure();
 
-	//! This loads the saved state of the chest
+	//! \brief Loads the state of the chest from the event group corresponding to the current map
 	void LoadSaved();
 
 	/** \name Lua Access Functions
@@ -398,61 +397,40 @@ public:
  	**/
 	//@{
 
-	/** \brief Applies a number of sensing force to the object to make it appear
-	*** \param force_applied The amount of sensing forced applied
-	*** \return false if the object is still hidden, true if it was discovered
+	//! \brief Indicates if the treasure contains any
+	bool IsEmpty() const
+		{ return _empty; }
+
+	/** \brief Adds an object to the contents of the MapTreasure
+	*** \param id The id of the GlobalObject to add
+	*** \param number The number of the object to add (default == 1)
+	*** \throw Exception An Exception object if nothing could be added to the treasure
 	**/
-	bool UpdateHideForce( uint32 force_applied );
+	bool AddObject(uint32 id, uint32 number = 1);
 
-	//! Sets the hiding force required to discover the object
-	void SetHidingForce( uint32 force )
-		{ _hide_force = force; }
-
-	//! Returns the hiding force left in order to discover the object
-	uint32 GetHidingForce() const
-		{ return _hide_force; }
-
-	//! Indicates if the object is hidden or not
-	bool IsHidden() const
-		{ return _hide_force > 0; }
-
-	//! Indicates if the object was used by the player
-	bool IsUsed() const
-		{ return _objects_list.empty(); }
-
-	/** \brief Adds an object tot he contents of the ChestObject
-	*** \param id The id of the object to add
-	*** \param number The number of the object to add
-	*** \return false if the id is not valid
+	/** \brief Adds a number of drunes to be the chest's contents
+	*** \note The overflow condition is not checked here: we just assume it will never occur
 	**/
-	bool AddObject( uint32 id, uint32 number );
-
-	//! Adds drunes to be contained in the chest
-	//! \note The overflow condition is not checked here: we just assume it will never occur
-	void AddDrunes( uint32 amount )
+	void AddDrunes(uint32 amount)
 		{ _drunes += amount; }
 
-	//! Transfers the ChestObject's content to the player's inventory
-	void Use();
+	//! \brief Opens the treasure, which changes the active animation and initializes the treasure menu
+	void Open();
 
-	//! Clears the content of the chest and opens it (used when loading)
-	void Clear()
-		{ _objects_list.clear(); SetCurrentAnimation( OPENING_CHEST_ANIM ); }
-
+	//! \brief Changes the current animation if it has finished looping
+	void Update();
 	//@}
+
 private:
+	//! \brief Set to true if the contents of the treasure have been emptied out
+	bool _empty;
 
-
-	//! The remaining hiding force of the object
-	uint32 _hide_force;
-
-	//! The number of drunes contained in the chest
+	//! \brief The number of drunes contained in the chest
 	uint32 _drunes;
 
-	//! The list of objects given to the player upon activation
-	std::vector< hoa_global::GlobalObject* > _objects_list;
-
-}; // class ChestObject : public PhysicalObject
+	//! \brief The list of objects given to the player upon activation
+	std::vector<hoa_global::GlobalObject*> _objects_list;
+}; // class MapTreasure : public PhysicalObject
 
 } // namespace private_map
 

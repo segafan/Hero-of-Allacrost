@@ -42,7 +42,221 @@ namespace hoa_map {
 namespace private_map {
 
 // ****************************************************************************
-// *********************** MapDialogue Class Functions ************************
+// ***** TreasureMenu class methods
+// ****************************************************************************
+
+TreasureMenu::TreasureMenu() :
+	_treasure(NULL)
+{
+	_action_window.Create(512, 64, ~VIDEO_MENU_EDGE_BOTTOM);
+	_action_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_action_window.SetPosition(512, 488);
+	_action_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+
+	_list_window.Create(512, 192);
+	_list_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_list_window.SetPosition(512, 544);
+	_list_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+	
+	_detail_window.Create(480, 128);
+	_detail_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_detail_window.SetPosition(512, 196);
+	_detail_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+
+	_list_options.SetCellSize(480.0f, 32.0f);
+	_list_options.SetSize(1, 6);
+	_list_options.SetPosition(32.0f, 32.0f);
+	_list_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_list_options.SetPosition(32.0f, 32.0f);
+	_list_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_list_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_list_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_list_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_list_options.SetCursorOffset(-60.0f, -40.0f);
+	_list_options.SetSelection(0);
+	_list_options.SetOwner(&_list_window);
+
+	_action_options.AddOption(MakeUnicodeString("View details"));
+	_action_options.AddOption(MakeUnicodeString("Return to map"));
+	_action_options.SetCellSize(100.0f, 32.0f);
+	_action_options.SetSize(4, 1);
+	_action_options.SetPosition(32.0f, 32.0f);
+	_action_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_action_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_action_options.SetCursorOffset(-60.0f, -40.0f);
+	_action_options.SetSelection(0);
+	_action_options.SetOwner(&_action_window);
+}
+
+
+
+TreasureMenu::~TreasureMenu() {
+	_list_window.Destroy();
+	_detail_window.Destroy();
+	_action_window.Destroy();
+
+	if (_treasure != NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "_treasure member was not NULL upon class destruction. Treasure contents may not have "
+			<< "been added to player's inventory" << endl;
+	}
+}
+
+
+
+void TreasureMenu::Initialize(MapTreasure* treasure) {
+	if (treasure == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
+		return;
+	}
+
+	if (_treasure != NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "_treasure member was not NULL when method was called" << endl;
+		return;
+	}
+
+	_treasure = treasure;
+
+	if (_treasure->_drunes != 0) {
+		_list_options.AddOption(MakeUnicodeString(NumberToString(_treasure->_drunes) + " drunes"));
+	}
+
+	for (uint32 i = 0; i < _treasure->_objects_list.size(); i++) {
+		_list_options.AddOption(_treasure->_objects_list[i]->GetName());
+	}
+
+	_selection = ACTION_SELECTED;
+	_action_window.Show();
+	_list_window.Show();
+}
+
+
+
+void TreasureMenu::Reset() {
+	// Add the drunes to the player's inventory
+	GlobalManager->AddDrunes(_treasure->_drunes);
+
+	// Add the items to the player's inventory
+	for (uint32 i = 0; i < _treasure->_objects_list.size(); i++) {
+		GlobalManager->AddToInventory(_treasure->_objects_list[i]);
+	}
+
+	_treasure->_drunes = 0;
+	_treasure->_objects_list.clear();
+	_treasure = NULL;
+
+	_action_window.Hide();
+	_list_window.Hide();
+	_detail_window.Hide();
+	_list_options.ClearOptions();
+}
+
+
+
+void TreasureMenu::Update() {
+	_action_window.Update();
+	_list_window.Update();
+	_detail_window.Update();
+	_action_options.Update();
+	_list_options.Update();
+
+	// Don't process user input until after the treasure opening animation is finished
+	if (_treasure->current_animation != MapTreasure::OPEN_ANIM) {
+		return;
+	}
+
+	if (_selection == ACTION_SELECTED)
+		_UpdateAction();
+	else if (_selection == LIST_SELECTED)
+		_UpdateList();
+	else if (_selection == DETAIL_SELECTED)
+		_UpdateDetail();
+	else
+		IF_PRINT_WARNING(MAP_DEBUG) << "unknown selection state: " << _selection << endl;
+}
+
+
+
+void TreasureMenu::_UpdateAction() {
+	if (InputManager->ConfirmPress()) {
+		if (_action_options.GetSelection() == 0) // "View details" action
+			_selection = LIST_SELECTED;
+		else if (_action_options.GetSelection() == 1) // "Return to map" action
+			Reset();
+		else
+			IF_PRINT_WARNING(MAP_DEBUG) << "unhandled action selection in OptionBox: " << _action_options.GetSelection() << endl;
+	}
+
+	else if (InputManager->LeftPress())
+		_action_options.HandleLeftKey();
+
+	else if (InputManager->RightPress())
+		_action_options.HandleRightKey();
+}
+
+
+
+void TreasureMenu::_UpdateList() {
+	if (InputManager->ConfirmPress()) {
+		_detail_window.Show();
+		_selection = DETAIL_SELECTED;
+	}
+
+	else if (InputManager->CancelPress()) {
+		_selection = ACTION_SELECTED;
+	}
+
+	else if (InputManager->UpPress()) {
+		_list_options.HandleUpKey();
+	}
+
+	else if (InputManager->DownPress()) {
+		_list_options.HandleDownKey();
+	}
+}
+
+
+
+void TreasureMenu::_UpdateDetail() {
+	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
+		_selection = LIST_SELECTED;
+		_detail_window.Hide();
+	}
+}
+
+
+
+void TreasureMenu::Draw() {
+	// We wait until the treasure is fully open before displaying the menu. The chest will eventually move to the open animation
+	// so long as the Update() method continues to be called on it (which MapMode should always do)
+	if (_treasure->current_animation != MapTreasure::OPEN_ANIM) {
+		return;
+	}
+
+	_action_window.Draw();
+	_action_options.Draw();
+
+	_list_window.Draw();
+	_list_options.Draw();
+
+	if (_selection != DETAIL_SELECTED)
+		return;
+		
+
+	_detail_window.Draw();
+	// Draw the contents of the window based on the current selection
+	if (_list_options.GetSelection() == 0 && _treasure->_drunes != 0) { // Special case where the user wanted to view details about the drunes
+		TextManager->Draw("DRUNES");
+		return;
+	}
+
+	// Otherwise, we're drawing details about a GlobalObject, so retrieve the icon, name, and description
+	TextManager->Draw("OBJECT");
+}
+
+// ****************************************************************************
+// ***** DialogueManager class methods
 // ****************************************************************************
 
 DialogueManager::DialogueManager() {

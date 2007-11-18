@@ -710,7 +710,7 @@ private:
 	uint32 _frame_counter;
 
 	/** \brief The number of times to loop the animation frames.
-	*** A negative value zero indicates to loop forever, which is the default.
+	*** A negative value indicates to loop forever, which is the default.
 	**/
 	int32 _number_loops;
 

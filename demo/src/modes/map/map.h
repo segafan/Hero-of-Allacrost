@@ -271,7 +271,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::MapFrame;
 	friend class private_map::MapObject;
 	friend class private_map::PhysicalObject;
-	friend class private_map::ChestObject;
+	friend class private_map::MapTreasure;
 	friend class private_map::VirtualSprite;
 	friend class private_map::MapSprite;
 	friend class private_map::EnemySprite;
@@ -324,6 +324,9 @@ private:
 
 	//! \brief The name of the map, as it will be read by the player in the game.
 	hoa_utils::ustring _map_name;
+
+	//! \brief A pointer to the object containing all of the event information for the map
+	hoa_global::GlobalEventGroup* _map_event_group;
 
 	//! \brief Holds an image that represents an outline of the location, used primarily in MenuMode
 	hoa_video::StillImage _location_graphic;
@@ -470,6 +473,9 @@ private:
 	//! \brief This keeps a pointer to the active dialogue.
 	private_map::DialogueManager* _dialogue_manager;
 
+	//! \brief Class member object which processes all information related to treasure discovery
+	private_map::TreasureMenu* _treasure_menu;
+
 	//! \brief Container for map zones, used for various purposes such as spawning of enemies
 	std::vector<private_map::MapZone*> _zones;
 
@@ -553,8 +559,7 @@ private:
 	// -------------------- Lua Binding Functions
 	/** \name Lua Access Functions
 	*** These methods exist not to allow outside C++ classes to access map data, but instead to
-	*** allow Lua to make function calls to examine and modify the map's state. All of these
-	*** methods are bound in the implementation of the MapMode::BindToLua() function.
+	*** allow Lua to make function calls to examine and modify the map's state.
 	**/
 	//@{
 	void _AddGroundObject(private_map::MapObject *obj);
