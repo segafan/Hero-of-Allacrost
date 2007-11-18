@@ -474,7 +474,8 @@ StatusWindow::StatusWindow() : _char_select_active(false) {
 
 
 StatusWindow::~StatusWindow() {
-	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
+	// FIXME: Why was this here?  Do we need to delete the portraits?
+	// uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
 }
 
 // Activate/deactivate window
@@ -587,7 +588,7 @@ void StatusWindow::Draw() {
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ofort;
-	ofort << "XP to Next: " << ch->GetFortitude();
+	ofort << "Fortitude: " << ch->GetFortitude();
 	VideoManager->Text()->Draw(MakeUnicodeString(ofort.str()));
 
 	VideoManager->MoveRelative(0, 25);
