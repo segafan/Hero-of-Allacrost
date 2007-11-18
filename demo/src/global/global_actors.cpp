@@ -849,17 +849,17 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 
 	// (5): Create the character's initial skill set, if requested
 	if (initial) {
-		// The keys to the skills table indicate the skill id, the value is the level required to add the skill
-		vector<int32> skill_ids;
-		uint32 level_required;
+		// The keys to the skills table indicate the level, the value is the skill id
+		vector<uint32> skill_levels;
+		uint32 skill_id;
 		char_script.OpenTable("skills");
-		char_script.ReadTableKeys(skill_ids);
+		char_script.ReadTableKeys(skill_levels);
 
 		// Only add the skills for which the experience level requirements are met
-		for (uint32 i = 0; i < skill_ids.size(); i++) {
-			level_required = char_script.ReadUInt(skill_ids[i]);
-			if (level_required <= _experience_level) {
-				AddSkill(static_cast<uint32>(skill_ids[i]));
+		for (uint32 i = 0; i < skill_levels.size(); i++) {
+			skill_id = char_script.ReadUInt(skill_levels[i]);
+			if (skill_levels[i] <= _experience_level) {
+				AddSkill(skill_id);
 			}
 		}
 
