@@ -484,20 +484,13 @@ void BindEngineToLua() {
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ChestObject, PhysicalObject>("ChestObject")
-			.def(constructor<std::string>())
+		class_<MapTreasure, PhysicalObject>("MapTreasure")
 			.def(constructor<std::string, uint8>())
-			.def(constructor<std::string, uint8, uint8>())
-			.def(constructor<std::string,uint8, uint8, uint32>())
-			.def("AddObject", &ChestObject::AddObject)
-			.def("AddDrunes", &ChestObject::AddDrunes)
-			.def("UpdateHideForce", &ChestObject::UpdateHideForce)
-			.def("SetHidingForce", &ChestObject::SetHidingForce)
-			.def("GetHidingForce", &ChestObject::GetHidingForce)
-			.def("IsHidden", &ChestObject::IsHidden)
-			.def("IsUsed", &ChestObject::IsUsed)
-			.def("Use", &ChestObject::Use)
-			.def("Clear", &ChestObject::Clear)
+			.def(constructor<std::string, uint8, uint8, uint8>())
+			.def("AddObject", &MapTreasure::AddObject)
+			.def("AddDrunes", &MapTreasure::AddDrunes)
+			.def("IsEmpty", &MapTreasure::IsEmpty)
+			.def("Open", &MapTreasure::Open)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

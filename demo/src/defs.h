@@ -252,12 +252,13 @@ namespace hoa_map {
 
 		class MapObject;
 		class PhysicalObject;
-		class ChestObject;
+		class MapTreasure;
 
 		class VirtualSprite;
 		class MapSprite;
 		class EnemySprite;
 
+		class TreasureMenu;
 		class DialogueManager;
 		class MapDialogue;
 

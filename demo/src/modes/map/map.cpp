@@ -68,7 +68,18 @@ MapMode::MapMode(string filename) :
 {
 	if (MAP_DEBUG)
 		cout << "MAP: MapMode constructor invoked" << endl;
+
 	_loading_map = this;
+
+	// Modify the filename so that is only consists of alphanumeric characters and underscores, and thus will be a valid identifier name in Lua
+	string event_group_name = _map_filename;
+	std::replace(event_group_name.begin(), event_group_name.end(), '/', '_');
+	std::replace(event_group_name.begin(), event_group_name.end(), '.', '_');
+
+	if (GlobalManager->DoesEventGroupExist(event_group_name) == false) {
+		GlobalManager->AddNewEventGroup(event_group_name);
+	}
+	_map_event_group = GlobalManager->GetEventGroup(event_group_name);
 
 	mode_type = MODE_MANAGER_MAP_MODE;
 	_virtual_focus = new VirtualSprite();
@@ -79,6 +90,7 @@ MapMode::MapMode(string filename) :
 	_virtual_focus->SetVisible(false);
 
 	_dialogue_manager = new DialogueManager();
+	_treasure_menu = new TreasureMenu();
 
 	_intro_timer.Initialize(7000, 0, this);
 
@@ -130,6 +142,7 @@ MapMode::~MapMode() {
 	delete(_virtual_focus);
 
 	delete(_dialogue_manager);
+	delete(_treasure_menu);
 
 	_map_script.CloseFile();
 }
@@ -155,7 +168,13 @@ void MapMode::Reset() {
 
 // Loads the map from a Lua file.
 void MapMode::_Load() {
-	// ---------- (1) Open map script file and read in basic map properties and tile definitions
+	// ---------- (1) Create a new GlobalEvent group for this map, if one does not already exist
+	string group_name = _map_filename;
+
+	
+
+
+	// ---------- (2) Open map script file and read in basic map properties and tile definitions
 	if (_map_script.OpenFile(_map_filename) == false) {
 		return;
 	}
@@ -196,10 +215,10 @@ void MapMode::_Load() {
 		return;
 	}
 
-	// ---------- (2) Initialize all of the tile and grid mappings
+	// ---------- (3) Initialize all of the tile and grid mappings
 	_LoadTiles();
 
-	// ---------- (3) Load map sounds and music
+	// ---------- (4) Load map sounds and music
 	vector<string> sound_filenames;
 	_map_script.ReadStringVector("sound_filenames", sound_filenames);
 	
@@ -221,14 +240,14 @@ void MapMode::_Load() {
 		}
 	}
 
-	// ---------- (4) Construct all enemies that may appear on this map
+	// ---------- (5) Construct all enemies that may appear on this map
 	vector<int32> enemy_ids;
 	_map_script.ReadIntVector("enemy_ids", enemy_ids);
 	for (uint32 i = 0; i < enemy_ids.size(); i++) {
 		_enemies.push_back(new GlobalEnemy(enemy_ids[i]));
 	}
 
-	// ---------- (5) Call the map script's load function
+	// ---------- (6) Call the map script's load function
 	ScriptObject map_table(luabind::from_stack(_map_script.GetLuaState(), hoa_script::private_script::STACK_TOP));
 	ScriptObject function = map_table["Load"];
 	ScriptCallFunction<void>(function, this);
@@ -238,7 +257,7 @@ void MapMode::_Load() {
 
 	_map_script.CloseAllTables();
 
-	// ---------- (6) Load the saved states of all the objects
+	// ---------- (7) Load the saved states of all the objects
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		_ground_objects[i]->LoadSaved();
 	}
@@ -251,7 +270,7 @@ void MapMode::_Load() {
 		_sky_objects[i]->LoadSaved();
 	}
 
-	// ------------ (7) Set values in the global manager so when the game is saved it has necessary information
+	// ------------ (8) Set values in the global manager so when the game is saved it has necessary information
 	GlobalManager->SetLocation(MakeUnicodeString(_map_filename), _location_graphic.GetFilename());
 } // void MapMode::_Load()
 
@@ -460,6 +479,8 @@ void MapMode::Update() {
 	if (_ignore_input == false) {
 		if (_map_state == DIALOGUE)
 			_dialogue_manager->Update();
+		else if (_treasure_menu->IsActive())
+			_treasure_menu->Update();
 		else
 			_HandleInputExplore();
 	}
@@ -551,11 +572,11 @@ void MapMode::_HandleInputExplore() {
 				return;
 			}
 		}
-		else if ( obj && obj->GetType() == CHEST_TYPE ) {
-			ChestObject *chest = reinterpret_cast<ChestObject*>(obj);
+		else if (obj && obj->GetType() == TREASURE_TYPE) {
+			MapTreasure* chest = reinterpret_cast<MapTreasure*>(obj);
 
-			if( !chest->IsHidden() ) {
-				chest->Use();
+			if (chest->IsEmpty() == false) {
+				chest->Open();
 			}
 		}
 	}
@@ -1248,6 +1269,10 @@ void MapMode::_DrawGUI() {
 	VideoManager->DrawRectangle(200, 10, Color::black);
 	VideoManager->DrawRectangle(200 * fill_size, 10, Color(0.133f, 0.455f, 0.133f, 1.0f));
 	VideoManager->PopState();
+
+	// ---------- (3) Draw the treasure menu
+	if (_treasure_menu->IsActive() == true)
+		_treasure_menu->Draw();
 } // void MapMode::_DrawGUI()
 
 

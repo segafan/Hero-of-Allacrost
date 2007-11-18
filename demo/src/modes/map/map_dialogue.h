@@ -38,6 +38,97 @@ enum DIALOGUE_STATE {
 
 
 /** ***************************************************************************************
+*** \brief Displays the contents of a discovered treasure in a menu window
+***
+*** An instance of this class is defined in the MapMode class. Typically you should only
+*** need to operate on this instance and not create any additional instances of the treasure
+*** menu. Upon opening a treasure chest or other treasure-containing map object, this menu
+*** should appear and list the amount of drunes found, if any, a list of the icon and name of
+*** each GlobalObject found (items, equipment, etc), a smaller sub-window for displaying
+*** detailed information about highlighted entries, and a confirmation option so that the
+*** user may exit the menu. For certain 
+***
+*** To use this class do the following steps:
+***
+*** -# Call the Initialize method to show the menu with the treasure argument passed
+*** -# Call the Update method to process user input and update the menu's appearance
+*** -# Call the Draw method to draw the menu to the screen
+*** -# Call the Reset method to hide the menu and add the treasure's contents to the player's
+***    inventory.
+***
+*** \todo Allow the player to use or equip selected treasure objects directly from the
+*** action menu.
+*** **************************************************************************************/
+class TreasureMenu {
+public:
+	//! \brief The possible sub-windows that are selected. Used for determining how to process user input.
+	enum SELECTION {
+		ACTION_SELECTED = 0,
+		LIST_SELECTED = 1,
+		DETAIL_SELECTED = 2
+	};
+
+	TreasureMenu();
+
+	~TreasureMenu();
+
+	/** \brief Un-hides the menu window and initializes it to display the contents of a new treasure
+	*** \param treasure A pointer to the treasure to display the contents of
+	**/
+	void Initialize(MapTreasure* treasure);
+
+	//! \brief Hides the window and adds the treasure's contents to the player's inventory
+	void Reset();
+
+	//! \brief Returns true if the treasure menu is active and user input should be processed through it
+	bool IsActive() const
+		{ return (_treasure != NULL); }
+
+	//! \brief Processes input events from the user and updates the showing/hiding progress of the window
+	void Update();
+
+	/** \brief Draws the window to the screen
+	*** \note If the Initialize method has not been called with a valid treasure pointer beforehand, this
+	*** method will print a warning and it will not draw anything to the screen.
+	**/
+	void Draw();
+
+private:
+	//! \brief A window which contains options for viewing, using, or equipping inventory, or for exiting the menu
+	hoa_video::MenuWindow _action_window;
+
+	//! \brief The window which lists all of the drunes and inventory objects contained in the treasure
+	hoa_video::MenuWindow _list_window;
+
+	//! \brief A smaller window for displaying detailed information about the selected entry in the _list_otpions
+	hoa_video::MenuWindow _detail_window;
+
+	//! \brief The available actions that a user can currently take. Displayed in the _action_window.
+	hoa_video::OptionBox _action_options;
+
+	//! \brief The icon + name of all drunes and inventory objects earned. Displayed in the _list_window
+	hoa_video::OptionBox _list_options;
+
+	//! \brief A pointer to the treasure object to display the contents of
+	MapTreasure* _treasure;
+
+	//! \brief The currently selected sub-window for processing user input
+	SELECTION _selection;
+
+	// ---------- Private methods
+
+	//! \brief Processes user input when the action sub-window is selected
+	void _UpdateAction();
+
+	//! \brief Processes user input when the list sub-window is selected
+	void _UpdateList();
+
+	//! \brief Processes user input when the detail sub-window is selected
+	void _UpdateDetail();
+}; // class TreasureMenu
+
+
+/** ***************************************************************************************
 *** \brief Stores a single OptionBox instance and contains methods and members to update/draw it.
 ***
 *** This class is used only by the MapDialogue class. It creates an instance of 

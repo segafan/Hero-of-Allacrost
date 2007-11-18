@@ -25,7 +25,7 @@
 #include "system.h"
 #include "global.h"
 
-#include <algorithm> //For std::replace in the ChestObject saving code
+#include <algorithm> //For std::replace in the MapTreasure saving code
 
 using namespace std;
 using namespace hoa_utils;
@@ -117,183 +117,132 @@ void PhysicalObject::Draw() {
 }
 
 // *****************************************************************************
-// *********************** ChestObject Class Functions *************************
+// *********************** MapTreasure Class Functions *************************
 // *****************************************************************************
 
-// These constants are used to identify the default settings of a ChestObject
-const uint8 ChestObject::NB_FRAMES_CLOSED_DEFAULT = 1;
-const uint8 ChestObject::NB_FRAMES_OPENING_DEFAULT = 3;;
-
-const uint32 ChestObject::HIDE_FORCE_DEFAULT = 0;	//! By default a ChestObject will not be hidden
-
-
-ChestObject::ChestObject( std::string image_file, uint8 nb_frames_closed, uint8 nb_frames_opening, uint32 hide_force )
-	: _hide_force( hide_force ), _drunes( 0 )
+MapTreasure::MapTreasure(string image_file, uint8 num_total_frames, uint8 num_closed_frames, uint8 num_open_frames) :
+	_empty(false),
+	_drunes(0)
 {
-	MapObject::_object_type = CHEST_TYPE;
-
-	const uint32 DEFAULT_FRAME_TIME = 10;
-
+	MapObject::_object_type = TREASURE_TYPE;
+	const uint32 DEFAULT_FRAME_TIME = 10; // The default number of milliseconds for frame animations
 	std::vector<StillImage> frames;
 
-	//--(1)-- Load a 1 row image strip of the length of all the needed frames
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, image_file, 1, nb_frames_closed + nb_frames_opening) == false ) {
+	// (1) Load a the single row, multi column multi image containing all the treasure frames
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, image_file, 1, num_total_frames) == false ) {
 		cerr << "File: " << filename << " could not be loaded correctly." << endl;
-		exit( 1 );
+		// TODO: throw exception
+		return;
+	}
+	// Update the frame image sizes to work in the MapMode coordinate system
+	for (uint32 i = 0; i < frames.size(); i++) {
+		frames[i].SetWidth(frames[i].GetWidth() / HALF_TILE_COLS);
+		frames[i].SetHeight(frames[i].GetHeight() / HALF_TILE_COLS);
 	}
 
-	//--(2)-- Update the frames size to the map coords size
-	for( size_t i = 0; i < frames.size(); ++i ) {
-		frames[i].SetWidth( frames[i].GetWidth() / HALF_TILE_COLS );
-		//Why ho why does it work like this!! It's so counter-intuitive
-		frames[i].SetHeight( frames[i].GetHeight() / HALF_TILE_COLS );
+	// (2) Now that we know the total number of frames in the image, make sure the frame count arguments make sense
+	if (num_closed_frames == 0 || num_open_frames == 0 || num_closed_frames >= num_total_frames || num_open_frames >= num_total_frames) {
+		// TODO: throw exception
+		return;
 	}
 
-	//--(3)-- Create the two needed animations
+	// (3) Dissect the frames and create the closed, opening, and open animations Create the close and opening animations for the chest
 	hoa_video::AnimatedImage closed_anim;
-	closed_anim.SetNumberLoops( 0 );
-
-	//Make sure that a frame number was set
-	if( nb_frames_closed > 0 ) {
-		for( uint8 i = 0; i < nb_frames_closed; ++i ) {
-			closed_anim.AddFrame( frames[ i ], DEFAULT_FRAME_TIME );
-		}
+	for (uint8 i = 0; i < num_closed_frames; i++) {
+		closed_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
 	}
-	else {
-		//Check if the other animation has frames set and use it instead
-		if( nb_frames_opening > 0 ) {
-			for( uint8 i = 0; i < nb_frames_opening; ++i ) {
-				closed_anim.AddFrame( frames[ i ], DEFAULT_FRAME_TIME );
-			}
-		} else {
-			//No frames set, we can't do anything
-			cerr << "File: " << filename << " could not be loaded correctly. No frames set as closed ChestObject animation." << endl;
-			exit( 1 );
-		}
+
+	hoa_video::AnimatedImage open_anim;
+	for (uint8 i = num_total_frames - num_open_frames; i < num_total_frames; i++) {
+		open_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
 	}
 
 	hoa_video::AnimatedImage opening_anim;
-	opening_anim.SetNumberLoops( 0 );
-
-	//Make sure that a frame number was set
-	if( nb_frames_opening > 0 ) {
-		for( uint8 i = nb_frames_closed; i < ( nb_frames_opening + nb_frames_closed ); ++i ) {
-			opening_anim.AddFrame( frames[ i ], DEFAULT_FRAME_TIME );
-		}
-	} else {
-		//Check if the other animation has frames set and use it instead
-		if( nb_frames_closed > 0 ) {
-			for( uint8 i = 0; i < nb_frames_closed; ++i ) {
-				opening_anim.AddFrame( frames[ i ], DEFAULT_FRAME_TIME );
-			}
-		} else {
-			//No frames set, we can't do anything
-			cerr << "File: " << filename << " could not be loaded correctly. No frames set as opening ChestObject animation." << endl;
-			exit( 1 );
+	opening_anim.SetNumberLoops(0); // Only loop the opening animation once, not infinitely
+	if (num_total_frames - num_closed_frames - num_open_frames <= 0) {
+		opening_anim = open_anim;
+	}
+	else {
+		for (uint8 i = 0 + num_closed_frames; i < num_total_frames - num_open_frames; i++) {
+			opening_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
 		}
 	}
 
-	//--(4)-- Add the animations to the parent PhysicalObject
-	AddAnimation( closed_anim );
-	AddAnimation( opening_anim );
+	AddAnimation(closed_anim);
+	AddAnimation(opening_anim);
+	AddAnimation(open_anim);
 
-	//--(5)-- Set the parent's MapObject params
-	SetCollHalfWidth( frames[0].GetWidth() / 2.0f );
-	SetCollHeight( frames[0].GetHeight() );
-}
+	// (4) Set the collision rectangle according to the dimensions of the first frame
+	SetCollHalfWidth(frames[0].GetWidth() / 2.0f);
+	SetCollHeight(frames[0].GetHeight());
+} // MapTreasure::MapTreasure(string image_file, uint8 num_closed_frames = 1, uint8 num_open_frames = 1)
 
-ChestObject::~ChestObject() {
-	for( size_t i = 0; i < _objects_list.size(); ++i ) {
+
+
+MapTreasure::~MapTreasure() {
+	for (uint32 i = 0; i < _objects_list.size(); i++) {
 		delete _objects_list[i];
 	}
 }
 
-bool ChestObject::UpdateHideForce( uint32 force_applied ) {
-	if( _hide_force - force_applied < 0 ) {
-		_hide_force = 0;
-		return true;
-	}
-	else {
-		_hide_force -= force_applied;
-		return false;
+
+
+void MapTreasure::LoadSaved() {
+	//Add an event in the group having the ObjectID of the chest as name
+	string event_name = "chest_" + NumberToString(GetObjectID());
+	if (MapMode::_loading_map->_map_event_group->DoesEventExist(event_name)) {
+		if (MapMode::_loading_map->_map_event_group->GetEvent(event_name) == TREASURE_EMPTY) {
+			// Clear()?
+		}
 	}
 }
 
 
 
-bool ChestObject::AddObject( uint32 id, uint32 number ) {
-	hoa_global::GlobalObject * obj = GlobalCreateNewObject( id, number );
+bool MapTreasure::AddObject(uint32 id, uint32 number) {
+	hoa_global::GlobalObject* obj = GlobalCreateNewObject(id, number);
 
-	if( !obj )
-	{
-		if( MAP_DEBUG )
-			cerr << "MAP WARNING: ChestObject::AddObject() called with invalid item id" << endl;
+	if (obj == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "invalid object id argument passed to function" << endl;
 		return false;
 	}
-	else {
-		_objects_list.push_back( obj );
-	}
+
+	_objects_list.push_back(obj);
 	return true;
 }
 
 
 
-void ChestObject::Use() {
-
-	//TODO: Create a class to show items gained in the map code
-	if( !IsUsed() ) {
-		//Add the items to the player's inventory
-		for( size_t i = 0; i < _objects_list.size(); ++i ) {
-			GlobalManager->AddToInventory( _objects_list[i] );
-		}
-
-		//Add the drunes to the player's inventory
-		GlobalManager->AddDrunes( _drunes );
-
-		SetCurrentAnimation( OPENING_CHEST_ANIM );
-
-		_objects_list.clear();
-
-		//Create an Event Group called "path_to_map_file_lua_chests"
-		std::string group_name = MapMode::_current_map->_map_filename + "_chests";
-		std::replace( group_name.begin(), group_name.end(), '/', '_' );
-		std::replace( group_name.begin(), group_name.end(), '.', '_' );
-
-		if( !GlobalManager->DoesEventGroupExist( group_name ) ) {
-			GlobalManager->AddNewEventGroup( group_name );
-		}
-
-		//Add an event in the group having the ObjectID of the chest as name
-		std::string event_name;
-		DataToString( event_name, GetObjectID() );
-		if( GlobalManager->DoesEventExist( group_name, event_name ) ) {
-			GlobalManager->GetEventGroup( group_name )->SetEvent( event_name, CHEST_USED );
-		} else {
-			GlobalManager->GetEventGroup( group_name )->AddNewEvent( event_name, CHEST_USED );
-		}
+void MapTreasure::Update() {
+	PhysicalObject::Update();
+	if (current_animation == OPENING_ANIM && animations[OPENING_ANIM].IsLoopsFinished() == true) {
+		SetCurrentAnimation(OPEN_ANIM);
 	}
 }
 
 
 
-void ChestObject::LoadSaved() {
-	//Check for an Event Group called "path_to_map_file_lua_chests"
-	std::string group_name = MapMode::_loading_map->_map_filename + "_chests";
-	std::replace( group_name.begin(), group_name.end(), '/', '_' );
-	std::replace( group_name.begin(), group_name.end(), '.', '_' );
-
-	if( GlobalManager->DoesEventGroupExist( group_name ) ) {
-		//Add an event in the group having the ObjectID of the chest as name
-		std::string event_name;
-		DataToString( event_name, GetObjectID() );
-		if( GlobalManager->DoesEventExist( group_name, event_name ) ) {
-			if( GlobalManager->GetEventValue( group_name, event_name ) == CHEST_USED ) {
-				Clear();
-			}
-		}
+void MapTreasure::Open() {
+	if (_empty == true) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to open an empty map treasure" << endl;
+		return;
 	}
-}
 
+	SetCurrentAnimation(OPENING_ANIM);
+
+	// Add an event to the map group indicating that the chest has now been opened
+	string event_name = "chest_" + NumberToString(GetObjectID());
+
+	if (MapMode::_current_map->_map_event_group->DoesEventExist(event_name) == true) {
+		MapMode::_current_map->_map_event_group->SetEvent(event_name, TREASURE_EMPTY);
+	}
+	else {
+		MapMode::_current_map->_map_event_group->AddNewEvent(event_name, TREASURE_EMPTY);
+	}
+
+	// Initialize the treasure menu to display the contents of the open treasure
+	MapMode::_current_map->_treasure_menu->Initialize(this);
+}
 
 } // namespace private_map
 
