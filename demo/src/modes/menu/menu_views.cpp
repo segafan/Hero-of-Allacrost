@@ -573,7 +573,7 @@ void StatusWindow::Draw() {
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream next;
-	next << "XP to Next: " << ch->GetExperienceForNextLevel();
+	next << "XP to Next: " << (ch->GetExperienceForNextLevel() - ch->GetExperiencePoints());
 	VideoManager->Text()->Draw(MakeUnicodeString(next.str()));
 
 	VideoManager->MoveRelative(0, 25);
