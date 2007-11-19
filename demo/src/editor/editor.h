@@ -138,6 +138,7 @@ class Editor: public QMainWindow
 		//{@LayerCommand
 		void _TileLayerFill();
 		void _TileLayerClear();
+		void _TileToggleSelect();
 		void _TileModePaint();
 		void _TileModeMove();
 		void _TileModeDelete();
@@ -216,6 +217,7 @@ class Editor: public QMainWindow
 		QAction* _redo_action;
 		QAction* _layer_fill_action;
 		QAction* _layer_clear_action;
+		QAction* _toggle_select_action;
 		QAction* _mode_paint_action;
 		QAction* _mode_move_action;
 		QAction* _mode_delete_action;
@@ -244,6 +246,8 @@ class Editor: public QMainWindow
 
 		//! Grid toggle view switch.
 		bool _grid_on;
+		//! Selection rectangle toggle view switch.
+		bool _select_on;
 		//! Lower layer toggle view switch.
 		bool _ll_on;
 		//! Middle layer toggle view switch.

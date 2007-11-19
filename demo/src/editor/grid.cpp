@@ -44,6 +44,7 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	// Default properties
 	_changed = false;       // map has not yet been modified
 	_grid_on = true;        // grid lines default to on
+	_select_on = false;     // selection rectangle default to off
 	_ll_on = true;          // lower layer default to on
 	_ml_on = false;         // middle layer default to off
 	_ul_on = false;         // upper layer default to off
@@ -114,6 +115,12 @@ void Grid::SetGridOn(bool value)
 	_grid_on = value;
 	updateGL();
 } // SetGridOn(...)
+
+void Grid::SetSelectOn(bool value)
+{
+	_select_on = value;
+	updateGL();
+} // SetSelectOn(...)
 
 vector<int32>& Grid::GetLayer(LAYER_TYPE layer) 
 {
@@ -459,7 +466,7 @@ void Grid::SaveMap()
 
 
 
-// ********** Protected slots **********
+// ********** Protected functions **********
 
 void Grid::initializeGL()
 {
@@ -558,6 +565,14 @@ void Grid::paintGL()
 		} // iterate through upper layer
 	} // upper layer must be viewable
 
+	// If selection rectangle mode is on, draw it
+	if (_select_on)
+	{
+		Color blue_selection(0.0f, 0.0f, 255.0f, 0.5f);
+		VideoManager->Move(0.0f, 0.0f);
+		VideoManager->DrawRectangle(1.0f, 1.0f, blue_selection);
+	} // selection rectangle must be viewable
+
 	// If grid is toggled on, draw it
 	if (_grid_on)
 		VideoManager->DrawGrid(0.0f, 0.0f, 1.0f, 1.0f, Color::black);
@@ -568,3 +583,4 @@ void Grid::resizeGL(int w, int h)
 	VideoManager->SetResolution(w, h);
 	VideoManager->ApplySettings();
 } // resizeGL(...)
+

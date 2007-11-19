@@ -40,6 +40,7 @@ Editor::Editor() : QMainWindow()
 
 	// initialize viewing items
 	_grid_on = false;
+	_select_on = false;
 	_ll_on = false;
 	_ml_on = false;
 	_ul_on = false;
@@ -124,6 +125,7 @@ void Editor::_TilesEnableActions()
 		_redo_action->setText("Redo " + _undo_stack->redoText());
 		_layer_fill_action->setEnabled(true);
 		_layer_clear_action->setEnabled(true);
+		_toggle_select_action->setEnabled(true);
 		_mode_paint_action->setEnabled(true);
 		_mode_move_action->setEnabled(true);
 		_mode_delete_action->setEnabled(true);
@@ -137,6 +139,7 @@ void Editor::_TilesEnableActions()
 		_redo_action->setEnabled(false);
 		_layer_fill_action->setEnabled(false);
 		_layer_clear_action->setEnabled(false);
+		_toggle_select_action->setEnabled(false);
 		_mode_paint_action->setEnabled(false);
 		_mode_move_action->setEnabled(false);
 		_mode_delete_action->setEnabled(false);
@@ -452,6 +455,16 @@ void Editor::_TileLayerClear()
 	_ed_scrollview->_map->updateGL();
 } // _TileLayerClear()
 
+void Editor::_TileToggleSelect()
+{
+	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+	{
+		_select_on = !_select_on;
+		_toggle_select_action->setChecked(_select_on);
+		_ed_scrollview->_map->SetSelectOn(_select_on);
+	} // map must exist in order to view things on it
+} // _TileToggleSelect()
+
 void Editor::_TileModePaint()
 {
 	if (_ed_scrollview != NULL)
@@ -729,7 +742,7 @@ void Editor::_CreateActions()
 	_open_action->setStatusTip("Open an existing map");
 	connect(_open_action, SIGNAL(triggered()), this, SLOT(_FileOpen()));
 	
-	_save_as_action = new QAction("&Save As...", this);
+	_save_as_action = new QAction("Save &As...", this);
 	_save_as_action->setStatusTip("Save the map with another name");
 	connect(_save_as_action, SIGNAL(triggered()), this, SLOT(_FileSaveAs()));
 	
@@ -791,7 +804,14 @@ void Editor::_CreateActions()
 	_layer_clear_action = new QAction("&Clear layer", this);
 	_layer_clear_action->setStatusTip("Clears current layer from any tiles");
 	connect(_layer_clear_action, SIGNAL(triggered()), this, SLOT(_TileLayerClear()));
-	
+
+	_toggle_select_action = new QAction(
+		QIcon("img/misc/editor-tools/stock-tool-rect-select-22.png"),
+		"Marquee &Select", this);
+	_toggle_select_action->setStatusTip("Rectangularly select tiles on the map");
+	_toggle_select_action->setCheckable(true);
+	connect(_toggle_select_action, SIGNAL(triggered()), this, SLOT(_TileToggleSelect()));
+
 	_mode_paint_action = new QAction(
 		QIcon("img/misc/editor-tools/stock-tool-pencil-22.png"),
 		"&Paint mode", this);
@@ -822,7 +842,7 @@ void Editor::_CreateActions()
 	_edit_ll_action->setCheckable(true);
 	connect(_edit_ll_action, SIGNAL(triggered()), this, SLOT(_TileEditLL()));
 	
-	_edit_ml_action = new QAction("Edit &middle layer", this);
+	_edit_ml_action = new QAction("Edit m&iddle layer", this);
 	_edit_ml_action->setStatusTip("Makes middle layer of the map current");
 	_edit_ml_action->setCheckable(true);
 	connect(_edit_ml_action, SIGNAL(triggered()), this, SLOT(_TileEditML()));
@@ -904,6 +924,8 @@ void Editor::_CreateMenus()
 	_tiles_menu->addSeparator();
 	_tiles_menu->addAction(_layer_fill_action);
 	_tiles_menu->addAction(_layer_clear_action);
+	_tiles_menu->addSeparator();
+	_tiles_menu->addAction(_toggle_select_action);
 	_tiles_menu->addSeparator()->setText("Editing Mode");
 	_tiles_menu->addAction(_mode_paint_action);
 	_tiles_menu->addAction(_mode_move_action);
@@ -941,7 +963,8 @@ void Editor::_CreateToolbars()
 	_tiles_toolbar->addSeparator();
 	_tiles_toolbar->addAction(_mode_paint_action);
 	_tiles_toolbar->addAction(_mode_delete_action);
-
+	_tiles_toolbar->addSeparator();
+	_tiles_toolbar->addAction(_toggle_select_action);
 } // _CreateToolbars()
 
 bool Editor::_EraseOK()
@@ -1205,8 +1228,8 @@ vector<int32>& EditorScrollView::GetCurrentLayer()
 void EditorScrollView::mouseMoveEvent(QMouseEvent *evt)
 {
 	// Display mouse position.
-	(static_cast<Editor*> (topLevelWidget()))->statusBar()->showMessage(
-		QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
+	//(static_cast<Editor*> (topLevelWidget()))->statusBar()->showMessage(
+	//	QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
 } // mouseMoveEvent(...)
 
 void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
@@ -1288,6 +1311,10 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 				"ERROR: Invalid tile editing mode!");
 	} // switch on tile editing mode
 
+	// Display mouse position.
+	(static_cast<Editor*> (topLevelWidget()))->statusBar()->showMessage(
+		QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
+
 	// Draw the changes
 	_map->updateGL();
 } // contentsMousePressEvent(...)
@@ -1368,6 +1395,10 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 				QMessageBox::warning(this, "Tile editing mode",
 					"ERROR: Invalid tile editing mode!");
 		} // switch on tile editing mode
+
+		// Display mouse position.
+		(static_cast<Editor*> (topLevelWidget()))->statusBar()->showMessage(
+			QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
 	} // mouse has moved to a new tile position
 
 	// Draw the changes.
