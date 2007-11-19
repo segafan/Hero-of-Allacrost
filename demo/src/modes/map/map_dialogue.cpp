@@ -244,8 +244,13 @@ void TreasureMenu::_UpdateList() {
 
 void TreasureMenu::_UpdateDetail() {
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
-		_selection = LIST_SELECTED;
-		_list_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		if (_detail_textbox.IsFinished() == false) {
+			_detail_textbox.ForceFinish();
+		}
+		else {
+			_selection = LIST_SELECTED;
+			_list_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		}
 	}
 }
 
@@ -258,41 +263,45 @@ void TreasureMenu::Draw() {
 		return;
 	}
 
+	VideoManager->PushState();
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+
 	_action_window.Draw();
+
+	VideoManager->Move(280.0f, 500.0f);
+	TextManager->Draw("Treasure Contents");
+
 	_action_options.Draw();
 
 	_list_window.Draw();
 
-	if (_selection != DETAIL_SELECTED) {
-		_list_options.Draw();
-		return;
-	}
+	if (_selection == DETAIL_SELECTED) {
+		uint32 list_selection = _list_options.GetSelection();
+		bool drunes_selected = (_treasure->_drunes != 0 && list_selection == 0);
 
-	// The detail view is selected if we have reached this point
-	uint32 list_selection = _list_options.GetSelection();
-	bool drunes_selected = (_treasure->_drunes != 0 && list_selection == 0);
-
-	VideoManager->PushState();
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-
-	// Move to the upper left corner and draw either "Drunes" or the name of the selected object
-	VideoManager->Move(280.0f, 590.0f);
-	if (drunes_selected)
-		TextManager->Draw("Drunes");
-	else
-		TextManager->Draw(_treasure->_objects_list[list_selection]->GetName());
-
-	// Move to the upper right corner and draw the object icon
-	if (drunes_selected == false) {
-		VideoManager->Move(680.0f, 620.0f);
-		if (_treasure->_drunes != 0) // The object list of the treasure does not contain drunes, so we have to decrement the vector index here
+		// Decrement list selection if we have drunes so that it can be used to index the treasure object list
+		if (_treasure->_drunes != 0)
 			list_selection--;
-		_treasure->_objects_list[list_selection]->GetIconImage().Draw();
+
+		// Move to the upper left corner and draw either "Drunes" or the name of the selected object
+		VideoManager->Move(280.0f, 590.0f);
+		if (drunes_selected)
+			TextManager->Draw("Drunes");
+		else
+			TextManager->Draw(_treasure->_objects_list[list_selection]->GetName());
+
+		// Move to the upper right corner and draw the object icon
+		if (drunes_selected == false) {
+			VideoManager->Move(680.0f, 620.0f);
+			_treasure->_objects_list[list_selection]->GetIconImage().Draw();
+		}
+		_detail_textbox.Draw();
+	}
+	else {
+		_list_options.Draw();
 	}
 
 	VideoManager->PopState();
-
-	_detail_textbox.Draw();
 }
 
 // ****************************************************************************
@@ -301,7 +310,7 @@ void TreasureMenu::Draw() {
 
 DialogueManager::DialogueManager() {
 	_state = DIALOGUE_STATE_NORMAL;
-	
+
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
 // 	MenuWindow::Create(1024.0f, 256.0f);
@@ -346,18 +355,18 @@ void DialogueManager::Update() {
 		_display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
 		last_dialogue = _current_dialogue;
 	}
-	
+
 	// During option selection mode.
 	if (_state == DIALOGUE_STATE_OPTION) {
-		// Check for option selections. If a selection was made, Update() returns the index to the next line of dialogue, otherwise -1 indicates no selection was made. 
+		// Check for option selections. If a selection was made, Update() returns the index to the next line of dialogue, otherwise -1 indicates no selection was made.
 		next_line = _current_option->Update();
 		// If next_line is greater than -1, a selection was made.
 		if( next_line != -1 )
-		{ 
-			finish_line = true; 
+		{
+			finish_line = true;
 		}
 	}
-	
+
 	// During dialogue text display mode.
 	if (_state == DIALOGUE_STATE_NORMAL) {
 		_display_textbox.Update(MapMode::_current_map->_time_elapsed);
@@ -377,7 +386,7 @@ void DialogueManager::Update() {
 				// If the line is not yet finished displaying, display the rest of the text
 				if (!_display_textbox.IsFinished()) {
 					_display_textbox.ForceFinish();
-				} 
+				}
 				// Otherwise, finish this line
 				else {
 					// Check for dialogue options
@@ -397,7 +406,7 @@ void DialogueManager::Update() {
 	}
 
 	// If the line has been finished, process the post-line action if it exists and move on to the next line
-	if (finish_line == true) {	
+	if (finish_line == true) {
 		if (_current_dialogue->GetCurrentAction() != NULL) {
 			try {
 				ScriptCallFunction<void>(*(_current_dialogue->GetCurrentAction()));
@@ -405,14 +414,14 @@ void DialogueManager::Update() {
 				ScriptManager->HandleLuaError(e);
 			}
 		}
-	
+
 		// Move to the next line of dialogue
 		if (_current_dialogue->ReadNextLine(next_line) == true) {
 			time_remaining = _current_dialogue->GetCurrentTime();
 			_display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
 			_state = DIALOGUE_STATE_NORMAL;
 		}
-		
+
 		// This dialogue is finished, restore game state as necessary
 		else {
 			//The is no more line, the dialogue is over
@@ -425,8 +434,8 @@ void DialogueManager::Update() {
 			}
 			_current_dialogue = NULL;
 			last_dialogue = NULL;
-			_state = DIALOGUE_STATE_NORMAL; 
-		} 
+			_state = DIALOGUE_STATE_NORMAL;
+		}
 	}
 } // void DialogueManager::Update()
 
@@ -443,7 +452,7 @@ void DialogueManager::Draw() {
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 	VideoManager->MoveRelative(120.0f, -10.0f);
-	
+
 	VirtualSprite* speaker = NULL;
 	if(_state == DIALOGUE_STATE_NORMAL) {
 		_display_textbox.Draw(); // Display dialogue text
@@ -451,7 +460,7 @@ void DialogueManager::Draw() {
 	}
 	if(_state == DIALOGUE_STATE_OPTION) {
 		_current_option->Draw(); // Display options
-		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_all_objects[_current_option->GetCurrentSpeaker()]); 
+		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_all_objects[_current_option->GetCurrentSpeaker()]);
 	}
 	VideoManager->Text()->Draw(speaker->name, TextStyle("map"));
 	if (speaker->face_portrait != NULL) {
@@ -462,8 +471,8 @@ void DialogueManager::Draw() {
 } // void DialogueManager::Draw()
 
 
-	
-	
+
+
 
 
 // ******************************************************************************
@@ -492,23 +501,23 @@ bool DialogueOptionBox::AddOption(std::string text, uint32 speaker_id, int32 nex
 {
 	if(_options.AddOption(MakeUnicodeString(text))) {
 		_next_line_index.push_back(next_line);
-			
+
 		// TODO Add support for actions
-		
+
 		_speaker = speaker_id;
-		_size++; 
+		_size++;
 		_options.SetSize(1, _size);
 		_options.SetSelection(0);
 
 		return true;
 	}
-	else { return false; } //ERROR	
+	else { return false; } //ERROR
 }
 
 int32 DialogueOptionBox::Update()
 {
 	// clear OptionBox events
-	_options.Update(); 
+	_options.Update();
 
 	// If the confirm key is pressed, return the selection information
 	if (InputManager->ConfirmPress()) {
@@ -518,11 +527,11 @@ int32 DialogueOptionBox::Update()
 		_options.SetSelection(0); // Reset selection
 		return selection;
 	}
-	// If the cancel key is pressed, redisplay the current line. 
+	// If the cancel key is pressed, redisplay the current line.
 	if (InputManager->CancelPress()) {
 		return _current_dialogue->GetCurrentLine();
 	}
-	
+
 	if (InputManager->UpPress()) {
 		_options.HandleUpKey();
 	}
@@ -530,14 +539,14 @@ int32 DialogueOptionBox::Update()
 	if (InputManager->DownPress()) {
 		_options.HandleDownKey();
 	}
-	return -1;		
+	return -1;
 }
 
 void DialogueOptionBox::Draw()
 {
 	_options.Draw();
 }
-	
+
 
 // ****************************************************************************
 // *********************** MapDialogue Class Functions ************************
@@ -583,7 +592,7 @@ bool MapDialogue::ReadNextLine(int32 line) {
 		_current_line = 0;
 		IncrementTimesSeen();
 		if((static_cast<int32>(_seen) >= _max_views) && (_max_views != -1)) {
-			_active = false; 
+			_active = false;
 		}
 		if (_owner != NULL) {
 			_owner->UpdateSeenDialogue();
@@ -621,7 +630,7 @@ void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 time, int32
 }
 
 void MapDialogue::AddOption(std::string text, uint32 speaker_id, int32 next_line, int32 action)
-{	
+{
 	int32 current_line = _line_count -1; // Current line that options will belong to.
 
 	// If the line the options will be added to currently has no options, create a new instance of the DialogueOptionBox class to store the options in.
@@ -630,9 +639,9 @@ void MapDialogue::AddOption(std::string text, uint32 speaker_id, int32 next_line
 		DialogueOptionBox* option =  new DialogueOptionBox();
 		option->SetCurrentDialogue(this);
 		_options[current_line] = option;
-		
+
 	}
-	
+
 	_options[current_line]->AddOption(text, speaker_id, next_line, action);
 }
 
