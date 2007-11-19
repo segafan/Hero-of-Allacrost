@@ -83,7 +83,7 @@ public:
 	*** \param frame_time The amount of milliseconds that have transpired since the last frame.
 	*** This must be called every frame in order to update the gradual display of text.
 	**/
-	void Update(uint32 frame_time);
+	void Update(uint32 frame_time = hoa_system::SystemManager->GetUpdateTime());
 
 	/** \brief Renders the textbox to the screen back buffer.
 	*** Note that the rendering is not affected by any draw flags or coordinate system settings,.

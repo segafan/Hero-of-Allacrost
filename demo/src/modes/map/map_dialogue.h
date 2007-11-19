@@ -43,10 +43,10 @@ enum DIALOGUE_STATE {
 *** An instance of this class is defined in the MapMode class. Typically you should only
 *** need to operate on this instance and not create any additional instances of the treasure
 *** menu. Upon opening a treasure chest or other treasure-containing map object, this menu
-*** should appear and list the amount of drunes found, if any, a list of the icon and name of
-*** each GlobalObject found (items, equipment, etc), a smaller sub-window for displaying
-*** detailed information about highlighted entries, and a confirmation option so that the
-*** user may exit the menu. For certain 
+*** should appear and list the amount of drunes found (if any), a list of the icon and name of
+*** each GlobalObject found (items, equipment, etc), and a smaller sub-window for displaying
+*** action options. The user may also select to view detailed information about a particular
+*** entry
 ***
 *** To use this class do the following steps:
 ***
@@ -58,6 +58,9 @@ enum DIALOGUE_STATE {
 ***
 *** \todo Allow the player to use or equip selected treasure objects directly from the
 *** action menu.
+***
+*** \todo Support scissoring in the list window so that the option list or detail text does
+*** not exceed the window boundary.
 *** **************************************************************************************/
 class TreasureMenu {
 public:
@@ -100,14 +103,14 @@ private:
 	//! \brief The window which lists all of the drunes and inventory objects contained in the treasure
 	hoa_video::MenuWindow _list_window;
 
-	//! \brief A smaller window for displaying detailed information about the selected entry in the _list_otpions
-	hoa_video::MenuWindow _detail_window;
-
 	//! \brief The available actions that a user can currently take. Displayed in the _action_window.
 	hoa_video::OptionBox _action_options;
 
 	//! \brief The icon + name of all drunes and inventory objects earned. Displayed in the _list_window
 	hoa_video::OptionBox _list_options;
+
+	//! \brief A textbox that displays the detailed information about a selected treasure
+	hoa_video::TextBox _detail_textbox;
 
 	//! \brief A pointer to the treasure object to display the contents of
 	MapTreasure* _treasure;
@@ -123,7 +126,7 @@ private:
 	//! \brief Processes user input when the list sub-window is selected
 	void _UpdateList();
 
-	//! \brief Processes user input when the detail sub-window is selected
+	//! \brief Processes user input when the detailed view of a treasure object is selected
 	void _UpdateDetail();
 }; // class TreasureMenu
 
