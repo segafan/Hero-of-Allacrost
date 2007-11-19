@@ -66,6 +66,7 @@ class Grid: public QGLWidget
 		void SetMLOn(bool value);           // sets middle layer on/off
 		void SetULOn(bool value);           // sets upper layer on/off
 		void SetGridOn(bool value);         // sets grid on/off
+		void SetSelectOn(bool value);       // sets grid on/off
 
 		std::vector<int32>& GetLayer(LAYER_TYPE layer);
 
@@ -119,6 +120,8 @@ class Grid: public QGLWidget
 		bool _changed;
 		//! When TRUE the grid between tiles is displayed.
 		bool _grid_on;
+		//! When TRUE the rectangle of chosen tiles is displayed.
+		bool _select_on;
 		//! When TRUE the lower layer of tiles is displayed.
 		bool _ll_on;
 		//! When TRUE the middle layer of tiles is displayed.
