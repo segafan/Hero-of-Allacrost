@@ -57,45 +57,48 @@ TreasureMenu::TreasureMenu() :
 	_list_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
 	_list_window.SetPosition(512, 544);
 	_list_window.SetDisplayMode(VIDEO_MENU_INSTANT);
-	
-	_detail_window.Create(480, 128);
-	_detail_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
-	_detail_window.SetPosition(512, 196);
-	_detail_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
-
-	_list_options.SetCellSize(480.0f, 32.0f);
-	_list_options.SetSize(1, 6);
-	_list_options.SetPosition(32.0f, 32.0f);
-	_list_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_list_options.SetPosition(32.0f, 32.0f);
-	_list_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	_list_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_list_options.SetSelectMode(VIDEO_SELECT_SINGLE);
-	_list_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_list_options.SetCursorOffset(-60.0f, -40.0f);
-	_list_options.SetSelection(0);
-	_list_options.SetOwner(&_list_window);
 
 	_action_options.AddOption(MakeUnicodeString("View details"));
 	_action_options.AddOption(MakeUnicodeString("Return to map"));
-	_action_options.SetCellSize(100.0f, 32.0f);
-	_action_options.SetSize(4, 1);
-	_action_options.SetPosition(32.0f, 32.0f);
+	_action_options.SetCellSize(150.0f, 32.0f);
+	_action_options.SetSize(2, 1);
+	_action_options.SetPosition(20.0f, 20.0f);
 	_action_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_action_options.SetCursorOffset(-60.0f, -40.0f);
+	_action_options.SetCursorOffset(-50.0f, -25.0f);
+	_action_options.SetFont("default");
 	_action_options.SetSelection(0);
 	_action_options.SetOwner(&_action_window);
+
+	_list_options.SetCellSize(470.0f, 32.0f);
+	_list_options.SetSize(1, 6);
+	_list_options.SetPosition(20.0f, 20.0f);
+	_list_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_list_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_list_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_list_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_list_options.SetCursorOffset(-50.0f, -25.0f);
+	_list_options.SetFont("default");
+	_list_options.SetOwner(&_list_window);
+	// NOTE: this currently does not work. It will show no text
+// 	_list_options.Scissoring(true, true);
+
+	_detail_textbox.SetPosition(20.0f, 92.0f);
+	_detail_textbox.SetDimensions(470.0f, 100.0f);
+	_detail_textbox.SetDisplaySpeed(50);
+	_detail_textbox.SetTextStyle(TextStyle());
+	_detail_textbox.SetDisplayMode(VIDEO_TEXT_REVEAL);
+	_detail_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_detail_textbox.SetOwner(&_list_window);
 }
 
 
 
 TreasureMenu::~TreasureMenu() {
-	_list_window.Destroy();
-	_detail_window.Destroy();
 	_action_window.Destroy();
+	_list_window.Destroy();
 
 	if (_treasure != NULL) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "_treasure member was not NULL upon class destruction. Treasure contents may not have "
@@ -123,8 +126,12 @@ void TreasureMenu::Initialize(MapTreasure* treasure) {
 	}
 
 	for (uint32 i = 0; i < _treasure->_objects_list.size(); i++) {
-		_list_options.AddOption(_treasure->_objects_list[i]->GetName());
+		_list_options.AddOption(_treasure->_objects_list[i]->GetName() + MakeUnicodeString("<R>x") +
+			MakeUnicodeString(NumberToString(_treasure->_objects_list[i]->GetCount())));
 	}
+	_list_options.SetSelection(0);
+	_action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	_list_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 
 	_selection = ACTION_SELECTED;
 	_action_window.Show();
@@ -142,13 +149,13 @@ void TreasureMenu::Reset() {
 		GlobalManager->AddToInventory(_treasure->_objects_list[i]);
 	}
 
+	_treasure->_empty = true;
 	_treasure->_drunes = 0;
 	_treasure->_objects_list.clear();
 	_treasure = NULL;
 
 	_action_window.Hide();
 	_list_window.Hide();
-	_detail_window.Hide();
 	_list_options.ClearOptions();
 }
 
@@ -157,9 +164,9 @@ void TreasureMenu::Reset() {
 void TreasureMenu::Update() {
 	_action_window.Update();
 	_list_window.Update();
-	_detail_window.Update();
 	_action_options.Update();
 	_list_options.Update();
+	_detail_textbox.Update();
 
 	// Don't process user input until after the treasure opening animation is finished
 	if (_treasure->current_animation != MapTreasure::OPEN_ANIM) {
@@ -180,8 +187,11 @@ void TreasureMenu::Update() {
 
 void TreasureMenu::_UpdateAction() {
 	if (InputManager->ConfirmPress()) {
-		if (_action_options.GetSelection() == 0) // "View details" action
+		if (_action_options.GetSelection() == 0) { // "View details" action
 			_selection = LIST_SELECTED;
+			_action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_list_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		}
 		else if (_action_options.GetSelection() == 1) // "Return to map" action
 			Reset();
 		else
@@ -198,13 +208,27 @@ void TreasureMenu::_UpdateAction() {
 
 
 void TreasureMenu::_UpdateList() {
+	// TODO: Implement treasure detail window
 	if (InputManager->ConfirmPress()) {
-		_detail_window.Show();
 		_selection = DETAIL_SELECTED;
+		_list_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+		uint32 list_selection = _list_options.GetSelection();
+		if (_treasure->_drunes != 0 && list_selection == 0) { // If true, the drunes are selected
+			_detail_textbox.SetDisplayText(MakeUnicodeString("With the additional " + NumberToString(_treasure->_drunes) + " drunes found in this treasure added," +
+				"the party will hold a total of " + NumberToString(_treasure->_drunes + GlobalManager->GetDrunes()) + " drunes."));
+		}
+		else { // Otherwise, a GlobalObject is selected
+			if (_treasure->_drunes != 0)
+				list_selection--;
+			_detail_textbox.SetDisplayText(_treasure->_objects_list[list_selection]->GetDescription());
+		}
 	}
 
 	else if (InputManager->CancelPress()) {
 		_selection = ACTION_SELECTED;
+		_action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		_list_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 	}
 
 	else if (InputManager->UpPress()) {
@@ -221,7 +245,7 @@ void TreasureMenu::_UpdateList() {
 void TreasureMenu::_UpdateDetail() {
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 		_selection = LIST_SELECTED;
-		_detail_window.Hide();
+		_list_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 	}
 }
 
@@ -238,21 +262,37 @@ void TreasureMenu::Draw() {
 	_action_options.Draw();
 
 	_list_window.Draw();
-	_list_options.Draw();
 
-	if (_selection != DETAIL_SELECTED)
-		return;
-		
-
-	_detail_window.Draw();
-	// Draw the contents of the window based on the current selection
-	if (_list_options.GetSelection() == 0 && _treasure->_drunes != 0) { // Special case where the user wanted to view details about the drunes
-		TextManager->Draw("DRUNES");
+	if (_selection != DETAIL_SELECTED) {
+		_list_options.Draw();
 		return;
 	}
 
-	// Otherwise, we're drawing details about a GlobalObject, so retrieve the icon, name, and description
-	TextManager->Draw("OBJECT");
+	// The detail view is selected if we have reached this point
+	uint32 list_selection = _list_options.GetSelection();
+	bool drunes_selected = (_treasure->_drunes != 0 && list_selection == 0);
+
+	VideoManager->PushState();
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+
+	// Move to the upper left corner and draw either "Drunes" or the name of the selected object
+	VideoManager->Move(280.0f, 590.0f);
+	if (drunes_selected)
+		TextManager->Draw("Drunes");
+	else
+		TextManager->Draw(_treasure->_objects_list[list_selection]->GetName());
+
+	// Move to the upper right corner and draw the object icon
+	if (drunes_selected == false) {
+		VideoManager->Move(680.0f, 620.0f);
+		if (_treasure->_drunes != 0) // The object list of the treasure does not contain drunes, so we have to decrement the vector index here
+			list_selection--;
+		_treasure->_objects_list[list_selection]->GetIconImage().Draw();
+	}
+
+	VideoManager->PopState();
+
+	_detail_textbox.Draw();
 }
 
 // ****************************************************************************
