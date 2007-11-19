@@ -192,7 +192,11 @@ void MapTreasure::LoadSaved() {
 	string event_name = "chest_" + NumberToString(GetObjectID());
 	if (MapMode::_loading_map->_map_event_group->DoesEventExist(event_name)) {
 		if (MapMode::_loading_map->_map_event_group->GetEvent(event_name) == TREASURE_EMPTY) {
-			// Clear()?
+			SetCurrentAnimation(OPEN_ANIM);
+			_drunes = 0;
+			for (uint32 i = 0; i < _objects_list.size(); i++)
+				delete _objects_list[i];
+			_empty = true;
 		}
 	}
 }

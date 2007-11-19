@@ -70,7 +70,7 @@ ShopActionWindow::ShopActionWindow() {
 
 	// (3) Initialize the financial text box
 	text_box.SetOwner(this);
-	text_box.SetPosition(25.0f, 85.0f);
+	text_box.SetPosition(25.0f, 120.0f);
 	text_box.SetDimensions(150.0f, 65.0f);
 	text_box.SetTextStyle(TextStyle());
 	text_box.SetDisplaySpeed(30);
@@ -159,11 +159,11 @@ void ShopActionWindow::UpdateFinanceText() {
 	if (current_shop != NULL) {
 		text_box.SetDisplayText(MakeUnicodeString(
 			  "Funds:  " + NumberToString(GlobalManager->GetDrunes()) +
-			"\nCosts:  " + NumberToString(current_shop->GetPurchaseCost()) +
-			"\nRefund: " + NumberToString(current_shop->GetSalesRevenue()) +
+			"\nCosts:  " + (current_shop->GetPurchaseCost() == 0 ? "" : "-") + NumberToString(current_shop->GetPurchaseCost()) +
+			"\nSales:  " + NumberToString(current_shop->GetSalesRevenue()) +
 			"\nTotal:  " + NumberToString(current_shop->GetTotalRemaining())
 		));
-	} // if
+	}
 }
 
 
@@ -290,7 +290,7 @@ void ObjectListWindow::Update() {
 void ObjectListWindow::Draw() {
 	MenuWindow::Draw();
 
-	if (current_shop->_state == SHOP_STATE_LIST && hide_options == false && option_text.empty() == false) {	
+	if (current_shop->_state == SHOP_STATE_LIST && hide_options == false && option_text.empty() == false) {
 		object_list.Draw();
 	}
 }
@@ -413,7 +413,7 @@ void ObjectSellListWindow::UpdateSellList() {
 void ObjectSellListWindow::Draw() {
 	MenuWindow::Draw();
 
-	if (current_shop->_state == SHOP_STATE_SELL) {	
+	if (current_shop->_state == SHOP_STATE_SELL) {
 		if (hide_options == false && option_text.empty() == false) {
 			object_list.Draw();
 			VideoManager->Move(375, 640);
@@ -625,7 +625,7 @@ void ConfirmWindow::Update() {
 
 
 void ConfirmWindow::Draw() {
-	if (current_shop->_state == SHOP_STATE_CONFIRM) {	
+	if (current_shop->_state == SHOP_STATE_CONFIRM) {
 		MenuWindow::Draw();
 		options.Draw();
 		VideoManager->PushState();

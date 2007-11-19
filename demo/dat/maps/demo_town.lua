@@ -296,33 +296,32 @@ function Load(m)
 	--dialogue:SetMaxViews(1);
 	dialogue:AddText("Laila, what's wrong? You have a worried look on your face.", 1000, -1, -1); --Line 0
 	dialogue:AddText("You're going into the cave again, aren't you?", 2, -1, -1); --Line 1
-	dialogue:AddOption("Well......yes, I intend to...", 1000, 2, -1);
+	dialogue:AddOption("Yes, I intend to...", 1000, 2, -1);
 	dialogue:AddOption("No, of course not...", 1000, 8, -1);
 	
 	--Yes
-	dialogue:AddText("Its dangerous in there! Why do you always do these types of reckless things?!", 2, -1, -1); --Line 2
-	dialogue:AddText("Laila, if I want to be capable on the battlefield I have to fight some real battles. Not doing this type of training is what would truly be reckless. You understand that, don't you?", 1000, -1, -1); --Line 3
+	dialogue:AddText("But why? Its dangerous in there!", 2, -1, -1); --Line 2
+	dialogue:AddText("Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?", 1000, -1, -1); --Line 3
 	dialogue:AddText("I know that you're worried about me and I appreciate it, but you need to stop doing this.", 1000, -1, -1); --Line 4
-	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay? Turn back if things are looking risky and make sure to stock up on healing potions.", 2, -1, -1); --Line 5
+	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay?", 2, -1, -1); --Line 5
 	dialogue:AddText("Will do. Thanks Laila.", 1000, -1, -1); --Line 6
-	dialogue:AddText("You know Claudius, I could be of assistance to you in the cave, may I come and help you?", 2, -1, -1); --Line 7
-	dialogue:AddOption("No way, you could be hurt!", 1000, 11 , -1);
-	dialogue:AddOption("Your help would be great!", 1000, 13 , -1);
+	dialogue:AddText("You know Claudius, I could be of assistance to you in the cave. May I come with you?", 2, -1, -1); --Line 7
+	dialogue:AddOption("No way, you could be hurt!", 1000, 10 , -1);
+	dialogue:AddOption("Your help would be great!", 1000, 12 , -1);
 	
 	--No
-	dialogue:AddText("Oh good. I was worried you were...", 2, -1,-1); --Line 8
-	dialogue:AddText("Please tell me if you are Cladius, just so I can know...", 2, -1, -1); --Line 9
-	dialogue:AddText("Of course, I promise.", 1000, -1, -1); --Line 10
+	dialogue:AddText("Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know...", 2, -1,-1); --Line 8
+	dialogue:AddText("Of course, I promise.", 1000, -1, -1); --Line 9
 	dialogue:EndDialogue();
 	
 	-- Rejected
-	dialogue:AddText("Oh....ok then, you remember to be careful.", 2, -1, -1); -- Line 11
-	dialogue:AddText("I will Laila", 1000, -1, -1); -- Line 12
+	dialogue:AddText("Oh....ok then. You remember to be careful.", 2, -1, -1); -- Line 10
+	dialogue:AddText("I will Laila.", 1000, -1, -1); -- Line 11
 	dialogue:EndDialogue();
 	
 	-- Add to party
-	dialogue:AddText("Great, I'll be sure to help you any way I can.", 2, -1, 1); --  Line 13
-	dialogue:AddText("Laila has joined the party.", 2, -1, -1); -- Line 14
+	dialogue:AddText("Great, I'll be sure to help you any way I can.", 2, -1, 1); --  Line 12, Laila added to party and map sprite removed
+	dialogue:AddText("Laila has joined the party.", 2, -1, -1); -- Line 13
 	sprite:AddDialogue(dialogue);
 	
 	laila = sprite;
@@ -373,7 +372,7 @@ function Load(m)
 
 	dialogue = hoa_map.MapDialogue();
 	dialogue:AddText("Hey there son, how's the training going?", 3, -1, -1);
-	dialogue:AddText("Pretty well. The enemies I am fighting in the cave aren't too tough.", 1000, -1, -1);
+	dialogue:AddText("Pretty well. The enemies in the cave aren't too tough.", 1000, -1, -1);
 	dialogue:AddText("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.", 3, -1, -1);
 	sprite:AddDialogue(dialogue);
 
@@ -406,13 +405,13 @@ function Load(m)
 
 	dialogue = hoa_map.MapDialogue();
 	dialogue:SetMaxViews(1);
-	dialogue:AddText("Oh, Claudius? What seems to be the matter?", 4, -1, -1);
+	dialogue:AddText("Oh, Claudius? You seemed puzzled.", 4, -1, -1);
 	dialogue:AddText("There are odd little icons above people's heads. What do they mean?", 1000, -1, -1);
-	dialogue:AddText("Oh, that. That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've heard everything that they've had to say, the icon will disappear.", 4, -1, -1);
+	dialogue:AddText("That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear.", 4, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("And remember that a person may have more than one dialogue, so if the icon doesn't disappear after speaking to a person, speak to them once more.", 4, -1, -1);
+	dialogue:AddText("And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more.", 4, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionPathMove(sprite);
@@ -442,7 +441,7 @@ function Load(m)
 
 	dialogue = hoa_map.MapDialogue();
 	dialogue:AddText("Hello, would you happen to know why it seems impossible to enter any of these houses?", 1000, -1, -1);
-	dialogue:AddText("Ah, well the game designers are still working on decorating the interiors, so they had to lock the doors to make sure that no one soiled the place before they were finished. Hopefully they'll be ready for us by the time the next demo rolls around.", 6, -1, -1);
+	dialogue:AddText("Ah, well the game designers are still working on decorating the interiors, so they had to lock the doors to make sure that no one soiled the place before they were finished.", 6, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionPathMove(sprite);
