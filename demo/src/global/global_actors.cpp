@@ -391,9 +391,9 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 
 	// Add all growth stats to the character actor
 	if (_hit_points_growth != 0)
-		_character_owner->AddHitPoints(_hit_points_growth);
+		_character_owner->AddMaxHitPoints(_hit_points_growth);
 	if (_skill_points_growth != 0)
-		_character_owner->AddSkillPoints(_skill_points_growth);
+		_character_owner->AddMaxSkillPoints(_skill_points_growth);
 	if (_strength_growth != 0)
 		_character_owner->AddStrength(_strength_growth);
 	if (_vigor_growth != 0)
