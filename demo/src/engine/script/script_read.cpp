@@ -333,7 +333,7 @@ void ReadScriptDescriptor::OpenTable(int32 table_name) {
 	}
 	
 	lua_pushnumber(_lstack, table_name);
-	lua_gettable(_lstack, STACK_TOP - 1);
+	lua_gettable(_lstack, STACK_TOP - 1); // sometimes, this line will cause a major b0rk and kill Allacrost silently
 	if (!lua_istable(_lstack, STACK_TOP)) {
 		_error_messages << "* OpenTable() failed because the data retrieved was not a table "
 				<< "or did not exist for the table element key " << table_name << endl;

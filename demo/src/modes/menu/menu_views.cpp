@@ -904,6 +904,7 @@ GlobalSkill *SkillsWindow::_GetCurrentSkill()
 
 void SkillsWindow::_UpdateSkillList() {
 	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+	assert(ch);
 	vector<ustring> options;
 	vector<ustring> cost_options;
 

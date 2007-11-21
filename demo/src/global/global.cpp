@@ -969,7 +969,7 @@ void GameGlobal::_SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEven
 			file.WriteLine(", ", false);
 		file.WriteLine("[\"" + i->first + "\"] = " + NumberToString(i->second), false);
 	}
-	file.WriteLine("\t}");
+	file.WriteLine("\t},");
 } // GameGlobal::_SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEventGroup* event_group)
 
 
