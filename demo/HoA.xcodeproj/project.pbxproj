@@ -40,10 +40,10 @@
 		4999AC7B0AF407BE004DD3A3 /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC480AF407BE004DD3A3 /* input.cpp */; };
 		4999AC7D0AF407BE004DD3A3 /* mode_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */; };
 		4999AC810AF407BE004DD3A3 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4E0AF407BE004DD3A3 /* system.cpp */; };
-		49BAAD210CE2450D00383FC1 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB160BAF28B700013185 /* dat */; };
-		49BAAD220CE2450D00383FC1 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB320BAF28B800013185 /* img */; };
-		49BAAD230CE2450D00383FC1 /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
-		49BAAD240CE2450D00383FC1 /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
+		49A1AC660CF4381D00AF23FE /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB160BAF28B700013185 /* dat */; };
+		49A1AC670CF4381D00AF23FE /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB320BAF28B800013185 /* img */; };
+		49A1AC680CF4381D00AF23FE /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
+		49A1AC690CF4381D00AF23FE /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
 		49BDC4260AF540AE00940A6C /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4250AF540AE00940A6C /* SDL_net.framework */; };
 		49BDC4480AF540E400940A6C /* SDL_net.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4250AF540AE00940A6C /* SDL_net.framework */; };
 		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
@@ -761,10 +761,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49BAAD210CE2450D00383FC1 /* dat in Resources */,
-				49BAAD220CE2450D00383FC1 /* img in Resources */,
-				49BAAD230CE2450D00383FC1 /* mus in Resources */,
-				49BAAD240CE2450D00383FC1 /* snd in Resources */,
+				49A1AC660CF4381D00AF23FE /* dat in Resources */,
+				49A1AC670CF4381D00AF23FE /* img in Resources */,
+				49A1AC680CF4381D00AF23FE /* mus in Resources */,
+				49A1AC690CF4381D00AF23FE /* snd in Resources */,
 				4941A7520AC1D9A200D65B8E /* mac_logo.icns in Resources */,
 				49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */,
 			);
@@ -921,6 +921,8 @@
 					"$(inherited)",
 					"$(SOURCE_ROOT)/../allacrost-dep/frameworks",
 				);
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SOURCE_ROOT)/../allacrost-dep/include",
@@ -954,6 +956,8 @@
 					"$(inherited)",
 					"$(SOURCE_ROOT)/../allacrost-dep/frameworks",
 				);
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SOURCE_ROOT)/../allacrost-dep/include",
