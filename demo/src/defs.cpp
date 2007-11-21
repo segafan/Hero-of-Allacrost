@@ -161,6 +161,13 @@ void BindEngineToLua() {
 			.def("RemoveFromInventory", (void (GameGlobal::*)(uint32)) &GameGlobal::RemoveFromInventory)
 			.def("IncrementObjectCount", &GameGlobal::IncrementObjectCount)
 			.def("DecrementObjectCount", &GameGlobal::DecrementObjectCount)
+			.def("DoesEventGroupExist", &GameGlobal::DoesEventGroupExist)
+			.def("DoesEventExist", &GameGlobal::DoesEventExist)
+			.def("AddNewEventGroup", &GameGlobal::AddNewEventGroup)
+			.def("GetEventGroup", &GameGlobal::GetEventGroup)
+			.def("GetEventValue", &GameGlobal::GetEventValue)
+			.def("GetNumberEventGroups", &GameGlobal::GetNumberEventGroups)
+			.def("GetNumberEvents", &GameGlobal::GetNumberEvents)
 
 			// Namespace constants
 			.enum_("constants") [
@@ -209,6 +216,17 @@ void BindEngineToLua() {
 				value("GLOBAL_TARGET_ACTOR", GLOBAL_TARGET_ACTOR),
 				value("GLOBAL_TARGET_PARTY", GLOBAL_TARGET_PARTY)
 			]
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalEventGroup>("GlobalEventGroup")
+			.def("DoesEventExist", &GlobalEventGroup::DoesEventExist)
+			.def("AddNewEvent", &GlobalEventGroup::AddNewEvent)
+			.def("GetEvent", &GlobalEventGroup::GetEvent)
+			.def("SetEvent", &GlobalEventGroup::SetEvent)
+			.def("GetNumberEvents", &GlobalEventGroup::GetNumberEvents)
+			.def("GetGroupName", &GlobalEventGroup::GetGroupName)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
@@ -381,6 +399,7 @@ void BindEngineToLua() {
 			.def_readwrite("_run_forever", &MapMode::_run_forever)
 			.def_readwrite("_run_disabled", &MapMode::_run_disabled)
 			.def_readwrite("_run_stamina", &MapMode::_run_stamina)
+			.def_readonly("_map_event_group", &MapMode::_map_event_group)
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
 			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
 			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
@@ -658,7 +677,7 @@ void BindEngineToLua() {
 	global_table["ScriptManager"]    = hoa_script::ScriptManager;
 	global_table["SystemManager"]    = hoa_system::SystemManager;
 	global_table["VideoManager"]     = hoa_video::VideoManager;
-	global_table["GlobalManager"]	 = hoa_global::GlobalManager;
+	global_table["GlobalManager"]    = hoa_global::GlobalManager;
 
 } // void BindEngineToLua()
 
