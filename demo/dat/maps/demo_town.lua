@@ -244,6 +244,9 @@ upper_layer[37] = { -1, 131, 18, 19, 24, 25, 8, 9, -1, -1, 233, 234, -1, -1, -1,
 upper_layer[38] = { -1, -1, -1, -1, 40, 41, 24, 25, 4, -1, -1, -1, -1, -1, -1, -1, -1, 16, 17, 128, 196, 197, 198, -1, -1, -1, -1, -1, 115, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 upper_layer[39] = { -1, -1, -1, -1, -1, -1, 40, 41, 20, 21, -1, -1, -1, -1, -1, -1, -1, 32, -1, -1, 212, 213, 214, -1, -1, -1, -1, -1, -1, 20, 21, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 
+-- Other global variables for the map script to use
+laila = nil; -- Pointer to Laila's map sprite
+
 function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
@@ -325,6 +328,10 @@ function Load(m)
 	sprite:AddDialogue(dialogue);
 	
 	laila = sprite;
+	-- If Laila previously joined the party in the saved game, remove her sprite
+	if (map._map_event_group:DoesEventExist("laila_joined") == true) then
+		map_functions[1]();
+	end
 
 	action = hoa_map.ActionAnimate(sprite);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
@@ -634,13 +641,23 @@ function Draw()
 end
 
 map_functions = {}
+
 -- Creates a new shop mode instance
 map_functions[0] = function()
 	local shop = hoa_shop.ShopMode();
 	ModeManager:Push(shop);
 end
 
+-- Add's Laila to the party and removes her sprite from the map
 map_functions[1] = function()
-   GlobalManager:AddCharacter(hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA);
-   laila:SetVisible(false);
+	if (map._map_event_group:DoesEventExist("laila_joined") == false) then
+		map._map_event_group:AddNewEvent("laila_joined", 1);
+		GlobalManager:AddCharacter(hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA);
+	end	
+
+	laila:SetVisible(false);
+	laila:SetNoCollision(true);
+	laila:SetUpdatable(false);
+	laila:SetXPosition(0, 0.0);
+	laila:SetXPosition(0, 0.0);	
 end

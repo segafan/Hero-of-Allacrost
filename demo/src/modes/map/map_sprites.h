@@ -254,9 +254,6 @@ public:
 	*** These methods are used to add and control which dialogue should the sprite speak.
 	**/
 	//@{
-	void AddAction(SpriteAction* act)
-		{ act->SetSprite(this); actions.push_back(act); }
-
 	void AddDialogue(MapDialogue* md)
 		{ dialogues.push_back(md); md->SetOwner(this); if (md->HasAlreadySeen() == false) seen_all_dialogue = false; }
 
@@ -271,7 +268,8 @@ public:
 		{ if (static_cast<uint16>(dialogue) >= dialogues.size()) return; else _current_dialogue = dialogue; }
 
 	void NextDialogue()
-		{ do { _current_dialogue++; if (static_cast<uint16>(_current_dialogue) >= dialogues.size()) _current_dialogue = 0; } while (dialogues[_current_dialogue]->isActive() == false); }
+		{ do { _current_dialogue++; if (static_cast<uint16>(_current_dialogue) >= dialogues.size()) _current_dialogue = 0; }
+			while (dialogues[_current_dialogue]->isActive() == false); }
 
 	int16 GetNumDialogues() const
 		{ return dialogues.size(); }
@@ -282,6 +280,12 @@ public:
 	bool IsShowingDialogueIcon() const
 		{ return _show_dialogue_icon; }
 	//@}
+
+	/** \brief Adds a new action for the sprite to process onto the end of the sprite's action list
+	*** \param act A pointer to the instantiated SpriteAction object to use
+	**/
+	void AddAction(SpriteAction* act)
+		{ act->SetSprite(this); actions.push_back(act); }
 
 	/** \brief This static class function returns the opposite direction of the direction given in parameter.
 	*** \note This is mostly used as an helper function to make sprites face each other.
