@@ -106,12 +106,6 @@ AC_CHECK_LIB([m], [log], [], \
 	 exit -1])
 
 AC_PATH_PROGS([LUA_CONFIG], [lua-config])
-if test "x$LUA_CONFIG" != "xno" -a -x "$LUA_CONFIG"; then
-	:
-else
-	echo "Could not find lua-config. Check that Lua 5.0 is properly installed on your system"
-	exit -1
-fi
 
 dnl Check for header files.
 AC_HEADER_DIRENT
