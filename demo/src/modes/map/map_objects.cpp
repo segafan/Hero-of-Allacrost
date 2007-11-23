@@ -196,6 +196,7 @@ void MapTreasure::LoadSaved() {
 			_drunes = 0;
 			for (uint32 i = 0; i < _objects_list.size(); i++)
 				delete _objects_list[i];
+			_objects_list.clear();
 			_empty = true;
 		}
 	}
