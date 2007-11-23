@@ -163,7 +163,6 @@ void MapMode::Reset() {
 	}
 
 	_intro_timer.Run();
-	_time_elapsed = 0;
 }
 
 

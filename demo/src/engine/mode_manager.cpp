@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,9 +37,9 @@ bool MODE_MANAGER_DEBUG = false;
 
 GameMode::GameMode() {
 	if (MODE_MANAGER_DEBUG) cout << "MODE MANAGER: GameMode constructor invoked" << endl;
-	
+
 	// The value of this member should later be replaced by the child class
-	mode_type = MODE_MANAGER_DUMMY_MODE; 
+	mode_type = MODE_MANAGER_DUMMY_MODE;
 }
 
 GameMode::GameMode(uint8 mt) {
@@ -148,9 +148,6 @@ GameMode* GameModeManager::GetTop() {
 
 // Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
 void GameModeManager::Update() {
-	// Call the Update function on the top stack mode (the active game mode)
-	_game_stack.back()->Update();
-
 	// If a Push() or Pop() function was called, we need to adjust the state of the game stack.
 	if (_state_change == true) {
 		// Pop however many game modes we need to from the top of the stack
@@ -186,7 +183,13 @@ void GameModeManager::Update() {
 
 		// Call the system manager and tell it that the active game mode changed so it can update timers accordingly
 		SystemManager->ExamineSystemTimers();
+
+		// Re-initialize the game update timer so that the new active game mode does not begin with any update time to process
+		SystemManager->InitializeUpdateTimer();
 	} // if (_state_change == true)
+
+	// Call the Update function on the top stack mode (the active game mode)
+	_game_stack.back()->Update();
 }
 
 
