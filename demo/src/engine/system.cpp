@@ -141,7 +141,7 @@ void SystemTimer::_UpdateTimer() {
 		_times_completed++;
 
 		// Checks if infinite looping is enabled
-		if (_number_loops < 0) { 
+		if (_number_loops < 0) {
 			_time_expired -= _duration;
 		}
 		// Checks if the number of loops have expired
@@ -224,10 +224,8 @@ void GameSystem::InitializeTimers() {
 
 
 void GameSystem::UpdateTimers() {
-	uint32 tmp;
-
-	// ----- (1): Update the simple game timer
-	tmp = _last_update;
+	// ----- (1): Update the update game timer
+	uint32 tmp = _last_update;
 	_last_update = SDL_GetTicks();
 	_update_time = _last_update - tmp;
 
@@ -261,7 +259,7 @@ void GameSystem::ExamineSystemTimers() {
 		timer_mode = (*i)->GetModeOwner();
 		if (timer_mode == NULL)
 			continue;
-		
+
 		if (timer_mode == active_mode)
 			(*i)->Run();
 		else

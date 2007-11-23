@@ -78,12 +78,12 @@ namespace private_system {
 *** or other parts of the code. The operation of this class is also integrated
 *** with the GameSystem class, which routinely updates and manageds its timers.
 *** The features of this timing mechanism include:
-*** 
+***
 *** - automatically updates its timing every frame
 *** - allowance to loop for an arbitrary number of times, or for infinity
 *** - optional use of an auto-pausing feature for when the timer should cease
-*** 
-*** \note The auto-pausing mechanism can only be utilized by game mode timers. 
+***
+*** \note The auto-pausing mechanism can only be utilized by game mode timers.
 *** The way it works is by detecting when the active game mode has changed and
 *** pausing all timers which do not belong to the AGM and un-pausing all timers
 *** which do belong to the AGM. The requirement to use the auto-pausing feature
@@ -104,7 +104,7 @@ public:
 	//! \note This constructor automatically invokes the Initialize() method with its arguments
 	SystemTimer(uint32 duration, int32 number_loops = 0, hoa_mode_manager::GameMode* mode_owner = NULL) :
 		_state(SYSTEM_TIMER_INITIAL) { Initialize(duration, number_loops, mode_owner); }
-	
+
 	~SystemTimer();
 
 	/** \brief Initializes the critical members of the system timer class
@@ -238,6 +238,14 @@ public:
 	**/
 	void InitializeTimers();
 
+	/** \brief Initializes the game update timer
+	***
+	*** This function should typically only be called when the active game mode is changed. This ensures that
+	*** the active game mode's execution begins with only 1 millisecond of time expired instead of several.
+	**/
+	void InitializeUpdateTimer()
+		{ _last_update = SDL_GetTicks(); _update_time = 1; }
+
 	/** \brief Updates the game timer variables.
 	***
 	*** This function should only be called <b>once</b> for each cycle through the main game loop. Since
@@ -352,7 +360,7 @@ class SystemThread {
 
 public:
 	bool SpawnThread(int (*func)(void *));
-	
+
 }; // class SystemThread
 
 } // namepsace hoa_system
