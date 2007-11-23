@@ -163,6 +163,7 @@ void MapMode::Reset() {
 	}
 
 	_intro_timer.Run();
+	_time_elapsed = 0;
 }
 
 
@@ -171,14 +172,14 @@ void MapMode::_Load() {
 	// ---------- (1) Create a new GlobalEvent group for this map, if one does not already exist
 	string group_name = _map_filename;
 
-	
+
 
 
 	// ---------- (2) Open map script file and read in basic map properties and tile definitions
 	if (_map_script.OpenFile(_map_filename) == false) {
 		return;
 	}
-	
+
 	// open the map tablespace (named after the map filename)
 	// first see if the filename has an extension, and then strip the directories
 	int32 period = _map_filename.find(".");
@@ -221,7 +222,7 @@ void MapMode::_Load() {
 	// ---------- (4) Load map sounds and music
 	vector<string> sound_filenames;
 	_map_script.ReadStringVector("sound_filenames", sound_filenames);
-	
+
 	for (uint32 i = 0; i < sound_filenames.size(); i++) {
 		_sounds.push_back(SoundDescriptor());
 		if (_sounds.back().LoadAudio(sound_filenames[i]) == false) {
@@ -474,7 +475,7 @@ void MapMode::Update() {
 
 	// ---------- (1) Call the map's update script function
 	ScriptCallFunction<void>(_update_function);
-	
+
 	// ---------- (2) Process user input
 	if (_ignore_input == false) {
 		if (_map_state == DIALOGUE)
