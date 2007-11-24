@@ -171,9 +171,6 @@ void MapMode::_Load() {
 	// ---------- (1) Create a new GlobalEvent group for this map, if one does not already exist
 	string group_name = _map_filename;
 
-
-
-
 	// ---------- (2) Open map script file and read in basic map properties and tile definitions
 	if (_map_script.OpenFile(_map_filename) == false) {
 		return;
@@ -479,7 +476,7 @@ void MapMode::Update() {
 	if (_ignore_input == false) {
 		if (_map_state == DIALOGUE)
 			_dialogue_manager->Update();
-		else if (_treasure_menu->IsActive())
+		else if (_treasure_menu->IsActive() == true)
 			_treasure_menu->Update();
 		else
 			_HandleInputExplore();
@@ -490,19 +487,21 @@ void MapMode::Update() {
 		_animated_tile_images[i]->Update();
 	}
 
-	// ---------- (4) Update all objects on the map
-	for( uint32 i = 0; i < _zones.size(); i++ ) {
-		_zones[i]->Update();
-	}
+	// ---------- (4) Update all zones and objects on the map
+	if (_treasure_menu->IsActive() == false) {
+		for( uint32 i = 0; i < _zones.size(); i++ ) {
+			_zones[i]->Update();
+		}
 
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		_ground_objects[i]->Update();
-	}
-	for (uint32 i = 0; i < _pass_objects.size(); i++) {
-		_pass_objects[i]->Update();
-	}
-	for (uint32 i = 0; i < _sky_objects.size(); i++) {
-		_sky_objects[i]->Update();
+		for (uint32 i = 0; i < _ground_objects.size(); i++) {
+			_ground_objects[i]->Update();
+		}
+		for (uint32 i = 0; i < _pass_objects.size(); i++) {
+			_pass_objects[i]->Update();
+		}
+		for (uint32 i = 0; i < _sky_objects.size(); i++) {
+			_sky_objects[i]->Update();
+		}
 	}
 
 	// ---------- (5) Sort the objects so they are in the correct draw order ********
@@ -533,7 +532,7 @@ void MapMode::_HandleInputExplore() {
 		return;
 	}
 
-	// Allow the player to run if they hav enough stamina, and update the stamina amount
+	// Allow the player to run if they have enough stamina, and update the stamina amount
 	_camera->is_running = false;
 	if (InputManager->CancelState() == true && _run_disabled == false) {
 		if (_run_forever) {

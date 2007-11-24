@@ -617,6 +617,26 @@ function Load(m)
 	-- Finally, add the zone to the map
 	map:_AddZone(ezone);
 
+	-- Add a treasure about half-way through the cave
+	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
+	chest:SetObjectID(500);
+	chest:SetContext(1);
+	chest:SetXPosition(20, 0);
+	chest:SetYPosition(62, 0);
+	chest:AddDrunes(175);
+	chest:AddObject(1, 1); -- Adds 1 Healing Potion
+	chest:AddObject(30002, 1); -- Adds 1 Leather Chain Mail
+	map:_AddGroundObject(chest);
+
+	-- Add a second treasure with a few potions just before the boss encounter
+	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
+	chest:SetObjectID(501);
+	chest:SetContext(1);
+	chest:SetXPosition(62, 0);
+	chest:SetYPosition(40, 0);
+	chest:AddObject(1, 3); -- Adds 3 Healing Potions
+	map:_AddGroundObject(chest);
+
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
 	-- Add a section to the zone to enable the user to exit the map

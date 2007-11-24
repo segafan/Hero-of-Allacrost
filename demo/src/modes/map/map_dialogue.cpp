@@ -18,6 +18,7 @@
 #include "audio.h"
 #include "video.h"
 #include "input.h"
+#include "mode_manager.h"
 #include "script.h"
 #include "global.h"
 #include "menu.h"
@@ -32,6 +33,7 @@ using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_input;
+using namespace hoa_mode_manager;
 using namespace hoa_script;
 using namespace hoa_system;
 using namespace hoa_global;
@@ -58,10 +60,11 @@ TreasureMenu::TreasureMenu() :
 	_list_window.SetPosition(512, 544);
 	_list_window.SetDisplayMode(VIDEO_MENU_INSTANT);
 
+	_action_options.AddOption(MakeUnicodeString("Return"));
 	_action_options.AddOption(MakeUnicodeString("View details"));
-	_action_options.AddOption(MakeUnicodeString("Return to map"));
+	_action_options.AddOption(MakeUnicodeString("Open menu"));
 	_action_options.SetCellSize(150.0f, 32.0f);
-	_action_options.SetSize(2, 1);
+	_action_options.SetSize(3, 1);
 	_action_options.SetPosition(20.0f, 20.0f);
 	_action_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -136,18 +139,34 @@ void TreasureMenu::Initialize(MapTreasure* treasure) {
 	_selection = ACTION_SELECTED;
 	_action_window.Show();
 	_list_window.Show();
+
+	// Add the drunes to the player's inventory
+	GlobalManager->AddDrunes(_treasure->_drunes);
+
+	// Add the items to the player's inventory. Note that the AddToInventory call will delete the
+	// pointer that it is given if that type of object already exists in the inventory. Because we
+	// still require all of the object pointers to remain in memory while the menu is being displayed,
+	// we check if an object exists in the inventory, increment the inventory count if it does, and
+	// keep a record that we must delete the object once the menu is closed
+	for (uint32 i = 0; i < _treasure->_objects_list.size(); i++) {
+		GlobalObject* obj = _treasure->_objects_list[i];
+		if (GlobalManager->IsObjectInInventory(obj->GetID() == true)) {
+			GlobalManager->IncrementObjectCount(obj->GetID(), obj->GetCount());
+			_objects_to_delete.push_back(obj);
+		}
+		else {
+			GlobalManager->AddToInventory(_treasure->_objects_list[i]);
+		}
+	}
 }
 
 
 
 void TreasureMenu::Reset() {
-	// Add the drunes to the player's inventory
-	GlobalManager->AddDrunes(_treasure->_drunes);
-
-	// Add the items to the player's inventory
-	for (uint32 i = 0; i < _treasure->_objects_list.size(); i++) {
-		GlobalManager->AddToInventory(_treasure->_objects_list[i]);
+	for (uint32 i = 0; i < _objects_to_delete.size(); i++) {
+		delete _objects_to_delete[i];
 	}
+	_objects_to_delete.clear();
 
 	_treasure->_empty = true;
 	_treasure->_drunes = 0;
@@ -170,6 +189,7 @@ void TreasureMenu::Update() {
 
 	// Don't process user input until after the treasure opening animation is finished
 	if (_treasure->current_animation != MapTreasure::OPEN_ANIM) {
+		_treasure->Update();
 		return;
 	}
 
@@ -187,13 +207,19 @@ void TreasureMenu::Update() {
 
 void TreasureMenu::_UpdateAction() {
 	if (InputManager->ConfirmPress()) {
-		if (_action_options.GetSelection() == 0) { // "View details" action
+		if (_action_options.GetSelection() == 0) { // "Return" action
+			Reset();
+		}
+		else if (_action_options.GetSelection() == 1) { // "View details" action
 			_selection = LIST_SELECTED;
 			_action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 			_list_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		}
-		else if (_action_options.GetSelection() == 1) // "Return to map" action
-			Reset();
+		else if (_action_options.GetSelection() == 2) { // "Open menu" action
+			MenuMode* MM = new MenuMode(MapMode::_current_map->_map_name, MapMode::_current_map->_location_graphic.GetFilename());
+			ModeManager->Push(MM);
+			return;
+		}
 		else
 			IF_PRINT_WARNING(MAP_DEBUG) << "unhandled action selection in OptionBox: " << _action_options.GetSelection() << endl;
 	}
@@ -216,7 +242,7 @@ void TreasureMenu::_UpdateList() {
 		uint32 list_selection = _list_options.GetSelection();
 		if (_treasure->_drunes != 0 && list_selection == 0) { // If true, the drunes are selected
 			_detail_textbox.SetDisplayText(MakeUnicodeString("With the additional " + NumberToString(_treasure->_drunes) + " drunes found in this treasure added," +
-				"the party will hold a total of " + NumberToString(_treasure->_drunes + GlobalManager->GetDrunes()) + " drunes."));
+				"the party now holds a total of " + NumberToString(GlobalManager->GetDrunes()) + " drunes."));
 		}
 		else { // Otherwise, a GlobalObject is selected
 			if (_treasure->_drunes != 0)

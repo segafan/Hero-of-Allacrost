@@ -276,6 +276,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::MapSprite;
 	friend class private_map::EnemySprite;
 	friend class private_map::DialogueManager;
+	friend class private_map::TreasureMenu;
 	friend class private_map::MapDialogue;
 	friend class private_map::SpriteAction;
 	friend class private_map::ActionPathMove;
