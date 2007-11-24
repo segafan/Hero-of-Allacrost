@@ -33,7 +33,7 @@ armor[20001] = {
 
 armor[20002] = {
 	name = "Cobalt Helm",
-	description = "A small helmet composed of a secret colbalt based alloy.",
+	description = "A small helmet composed of a secret cobalt based alloy.",
 	icon = "img/icons/armor/cobalt_helm.png",
 	physical_defense = 8,
 	metaphysical_defense = 4,

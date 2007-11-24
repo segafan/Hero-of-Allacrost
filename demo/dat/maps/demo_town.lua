@@ -603,28 +603,21 @@ function Load(m)
 	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);
 
-	-- Create a zone for exiting the map, to be used as a trigger
-	exit_zone = hoa_map.MapZone();
-	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
-	exit_zone:AddSection(hoa_map.ZoneSection(118, 30, 119, 40));
-	map:_AddZone(exit_zone);
-
-	-- Create an example chest filled with 2 potions and a Karlate Sword
+	-- Add a treasure just near the town's exit zone
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
 	chest:SetObjectID(12);
 	chest:SetContext(1);
 	chest:SetXPosition(111, 0);
 	chest:SetYPosition(34, 0);
 	chest:AddDrunes(100);
-	chest:AddObject(1, 2);     -- Adds 2 potions (ID: 1)
-	chest:AddObject(10001, 1);  	-- Adds 1 Karlate Sword (ID: 10001)
-	chest:AddObject(20001, 1);  	-- Adds 1 Karlate Sword (ID: 10001)
-	chest:AddObject(20002, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
-	chest:AddObject(40001, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
-	chest:AddObject(40002, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
-	chest:AddObject(30001, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
-	chest:AddObject(30002, 1);  	-- Adds 1 Karlate Sword (ID: 10001)40001
-	map:_AddGroundObject(chest); 	-- Adds to the ground objects
+	chest:AddObject(1, 2); -- Adds 2 Healing Potions
+	map:_AddGroundObject(chest);
+
+	-- Create a zone for exiting the map, to be used as a trigger
+	exit_zone = hoa_map.MapZone();
+	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
+	exit_zone:AddSection(hoa_map.ZoneSection(118, 30, 119, 40));
+	map:_AddZone(exit_zone);
 end -- function Load()
 
 function Update()
