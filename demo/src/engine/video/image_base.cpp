@@ -42,10 +42,12 @@ ImageMemory::ImageMemory() :
 
 
 ImageMemory::~ImageMemory() {
+// Winter Knight - I commented this out because it was causing double free
+// segfaults when ImageMemory objects were copied via copy constructor.
 	if (pixels != NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "pixels member was not NULL upon object destruction" << endl;
-		free(pixels);
-		pixels = NULL;
+//		free(pixels);
+//		pixels = NULL;
 	}
 }
 
