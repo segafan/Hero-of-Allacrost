@@ -21,7 +21,7 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
-TextBox::TextBox() 
+TextBox::TextBox()
 : _width(0.0f),
   _height(0.0f),
   _display_speed(0.0f),
@@ -317,9 +317,9 @@ void TextBox::_ReformatText() {
 			cerr << text_height << ") in a window of lower height (" << _height << ")" << endl;
 		}
 	}
-
-
 } // void TextBox::_ReformatText()
+
+
 
 void TextBox::SetDisplayText(const string &text) {
 	ustring wstr = MakeUnicodeString(text);

@@ -43,73 +43,53 @@ using namespace hoa_shop::private_shop;
 namespace hoa_shop {
 
 bool SHOP_DEBUG = false;
+ShopMode* private_shop::current_shop = NULL;
 
-namespace private_shop {
 
-ShopMode* current_shop = NULL;
-
-} // namespace private_shop
 
 ShopMode::ShopMode() {
-	if (SHOP_DEBUG)
-		cout << "SHOP: ShopMode constructor invoked" << endl;
+	mode_type = MODE_MANAGER_SHOP_MODE;
+	private_shop::current_shop = this;
 
+	_state = SHOP_STATE_ACTION;
 	_purchases_cost = 0;
 	_sales_revenue = 0;
 
-	mode_type = MODE_MANAGER_SHOP_MODE;
-	private_shop::current_shop = this;
-	_state = SHOP_STATE_ACTION;
-	
 	try {
 		_saved_screen = VideoManager->CaptureScreen();
 	}
-	catch(Exception e) {
-		cerr << e.ToString() << endl;
+	catch (Exception e) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << e.ToString() << endl;
 	}
 }
 
 
 
 ShopMode::~ShopMode() {
-	if (SHOP_DEBUG)
-		cout << "SHOP: ShopMode destructor invoked" << endl;
-
-	for (uint32 i = 0; i < _all_objects.size(); i++) {
-		delete(_all_objects[i]);
+	for (uint32 i = 0; i < _buy_objects.size(); i++) {
+		delete(_buy_objects[i]);
 	}
-	_all_objects.clear();
+	_buy_objects.clear();
 
 	private_shop::current_shop = NULL;
 }
 
 
-// Called whenever ShopMode is put on top of the stack
+// Called whenever ShopMode is put on top of the game mode stack
 void ShopMode::Reset() {
 	// Setup video engine constructs
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
-	VideoManager->Text()->SetDefaultFont("default");
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->Text()->SetDefaultFont("default");
 	VideoManager->Text()->SetDefaultTextColor(Color::white);
 
-	// Temporary code
-	_all_objects.clear();
-	_all_objects.push_back(new GlobalItem(1));
-	_all_objects.push_back(new GlobalWeapon(10001));
-	_all_objects.push_back(new GlobalWeapon(10002));
-	_all_objects.push_back(new GlobalArmor(20002));
-	_all_objects.push_back(new GlobalArmor(30002));
-	_all_objects.push_back(new GlobalArmor(40002));
-	_all_objects.push_back(new GlobalArmor(50001));
-	// End temp code
-
-	_all_objects_quantities.clear();
-	for (uint32 ctr = 0; ctr < _all_objects.size(); ctr++) {
-		_all_objects_quantities.push_back(0);
+	_buy_objects_quantities.clear();
+	for (uint32 ctr = 0; ctr < _buy_objects.size(); ctr++) {
+		_buy_objects_quantities.push_back(0);
 	}
 
-	std::map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
-	std::map<uint32, GlobalObject*>::iterator iter;
+	map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
+	map<uint32, GlobalObject*>::iterator iter;
 
 	_sell_objects_quantities.clear();
 	for (iter = inv->begin(); iter != inv->end(); iter++) {
@@ -117,15 +97,13 @@ void ShopMode::Reset() {
 	}
 
 	_action_window.UpdateFinanceText();
-
-	_list_window.RefreshList();
-
+	_buy_window.RefreshList();
 	_sell_window.UpdateSellList();
+
 	if (_sell_window.object_list.GetNumberOptions() > 0) {
 		_sell_window.object_list.SetSelection(0);
 	}
 
-	SoundDescriptor snd;
 	_shop_sounds["confirm"] = SoundDescriptor();
 	_shop_sounds["cancel"] = SoundDescriptor();
 	_shop_sounds["coins"] = SoundDescriptor();
@@ -144,8 +122,8 @@ void ShopMode::Update() {
 		case SHOP_STATE_ACTION:
 			_action_window.Update();
 			break;
-		case SHOP_STATE_LIST:
-			_list_window.Update();
+		case SHOP_STATE_BUY:
+			_buy_window.Update();
 			break;
 		case SHOP_STATE_SELL:
 			_sell_window.Update();
@@ -153,56 +131,69 @@ void ShopMode::Update() {
 		case SHOP_STATE_CONFIRM:
 			_confirm_window.Update();
 			break;
+		case SHOP_STATE_PROMPT:
+			_prompt_window.Update();
+			break;
 		default:
-			if (SHOP_DEBUG)
-				cerr << "SHOP WARNING: invalid shop state: " << _state << ", reseting to initial state" << endl;
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << ", reseting to initial state" << endl;
 			_state = SHOP_STATE_ACTION;
-			return;
+			break;
 	} // switch (shop_state)
-} // void ShopMode::Update()
+}
 
 
 
 void ShopMode::Draw() {
 	// Draw the background image
-	// For that, set the system coordinates to the size of the window (same with the saved-screen)
+	// Set the system coordinates to the size of the window (same with the saved-screen)
 	int32 width = VideoManager->GetScreenWidth();
 	int32 height = VideoManager->GetScreenHeight();
 	VideoManager->SetCoordSys(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
 
-	VideoManager->Move(0,0);
+	VideoManager->Move(0, 0);
 	_saved_screen.Draw();
-	
-	// Restore the Coordinate system (that one will be shop mode coodinate system?)
+
+	// Restore the standard shop coordinate system before drawing the shop windows
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 
 	_action_window.Draw();
 	_info_window.Draw();
-	_sell_window.Draw();
-	_list_window.Draw();
-	_confirm_window.Draw();
+
+	// Determine if we should draw the buy window, sell window, or an empty menu window
+	// NOTE: we should never see both buy and sell states in the state/saved_state member.
+	if (_state == SHOP_STATE_BUY || _saved_state == SHOP_STATE_BUY) {
+		_buy_window.Draw();
+	}
+	else if (_state == SHOP_STATE_SELL || _saved_state == SHOP_STATE_SELL) {
+		_sell_window.Draw();
+	}
+	else {
+		_buy_window.MenuWindow::Draw();
+	}
+
+	if (_state == SHOP_STATE_CONFIRM) {
+		_confirm_window.Draw();
+	}
+	else if (_state == SHOP_STATE_PROMPT) {
+		_prompt_window.Draw();
+	}
 }
 
 
 
 void ShopMode::AddObject(uint32 object_id) {
 	if (object_id == 0 || object_id > 60000) {
-		if (SHOP_DEBUG)
-			cerr << "SHOP WARNING: attempted to add object with invalid id: " << object_id << endl;
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object with invalid id: " << object_id << endl;
 		return;
 	}
 
 	if (_object_map.find(object_id) != _object_map.end()) {
-		if (SHOP_DEBUG)
-			cerr << "SHOP WARNING: attempted to add object that was already in the object list: " << object_id << endl;
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object that was already in the object list: " << object_id << endl;
 		return;
 	}
 
 	_object_map.insert(make_pair(object_id, 0));
-}
-
-uint32 ShopMode::GetTotalRemaining() {
-	return GlobalManager->GetDrunes() - _purchases_cost + _sales_revenue;
+	_buy_objects.push_back(GlobalCreateNewObject(object_id, 1));
 }
 
 } // namespace hoa_shop

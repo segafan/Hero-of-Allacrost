@@ -15,6 +15,13 @@
 *** This code contains classes that represent and manage the various menu
 *** windows when the player is in shop mode. The list of wares for sale and
 *** shop actions (buy/sell) are two examples of shop menu windows.
+***
+*** \todo I (Roots) think that we should combine the buy and sell windows into
+*** one, since each window is the same size and only the contents of that window
+*** change between buy and sell. It should help us re-use code.
+***
+*** \todo The confirm and prompt windows should also be combined since they are
+*** about the same size.
 *** ***************************************************************************/
 
 #ifndef __SHOP_WINDOWS_HEADER__
@@ -30,10 +37,15 @@ namespace hoa_shop {
 namespace private_shop {
 
 /** ****************************************************************************
-*** \brief Represents the top window in shop mode which contains the main shop actions
+*** \brief Represents the main window in shop mode which contains the shop actions
 ***
 *** Shop actions include "buy", "sell", etc. This window also contains financial
-*** information about the party and the current purchases.
+*** information about the party and marked purchases. This window is located on
+*** the left side of all of the shop menus.
+***
+*** \todo Retrieve the name and location graphic of the most recent map mode
+*** (highest on the game stack) for when the user enters menu mode through shop
+*** mode.
 *** ***************************************************************************/
 class ShopActionWindow : public hoa_video::MenuWindow {
 public:
@@ -53,32 +65,34 @@ public:
 	/** \brief The list of options for what the player may do in shop mode
 	*** Each option includes the name of the object and its price.
 	**/
-	hoa_video::OptionBox options;
+	hoa_video::OptionBox action_options;
 
 	//! \brief Prints financial information in the bottom of the window
-	hoa_video::TextBox text_box;
+	hoa_video::TextBox finance_text;
 }; // class ShopActionWindow : public hoa_video::MenuWindow
 
 
 /** ****************************************************************************
 *** \brief A window containing a list of objects and their price
 ***
-***
+*** \todo Allow the player to browse via object category (all, items, weapons,
+*** etc).
 *** ***************************************************************************/
-class ObjectListWindow : public hoa_video::MenuWindow {
+class BuyListWindow : public hoa_video::MenuWindow {
 public:
-	ObjectListWindow();
+	BuyListWindow();
 
-	~ObjectListWindow();
+	~BuyListWindow();
 
 	// -------------------- Class Methods
 
-	//! \brief Removes all object entries from the list
+	//! \brief Removes all entries from the list of objects for sale
 	void Clear();
 
 	/** \brief Adds a new entry to the option box
 	*** \param name The name of the object for this entry
 	*** \param price The price of the object in this entry
+	*** \param quantity The maximum quantity of this object that are available to buy
 	**/
 	void AddEntry(hoa_utils::ustring name, uint32 price, uint32 quantity);
 
@@ -99,14 +113,11 @@ public:
 	//! \brief When set to true, the OptionBox will not be drawn for this window
 	bool hide_options;
 
-	//! \brief Contains the text that forms each option in the list
-	std::vector<hoa_utils::ustring> option_text;
-
 	/** \brief Contains the list of objects for sale
 	*** Each option includes the name of the object and its price.
 	**/
 	hoa_video::OptionBox object_list;
-}; // class ObjectListWindow : public hoa_video::MenuWindow
+}; // class BuyListWindow : public hoa_video::MenuWindow
 
 
 /** ****************************************************************************
@@ -114,11 +125,11 @@ public:
 ***
 ***
 *** ***************************************************************************/
-class ObjectSellListWindow : public hoa_video::MenuWindow {
+class SellListWindow : public hoa_video::MenuWindow {
 public:
-	ObjectSellListWindow();
+	SellListWindow();
 
-	~ObjectSellListWindow();
+	~SellListWindow();
 
 	// -------------------- Class Methods
 
@@ -155,7 +166,7 @@ public:
 	hoa_video::OptionBox object_list;
 
 	hoa_video::TextBox list_header;
-}; // class ObjectSellListWindow : public hoa_video::MenuWindow
+}; // class SellListWindow : public hoa_video::MenuWindow
 
 
 /** ****************************************************************************
@@ -215,6 +226,31 @@ public:
 	//! \brief Options for the user to confirm or reject the sale
 	hoa_video::OptionBox options;
 }; // class ConfirmWindow : public hoa_video::MenuWindow
+
+
+
+/** ****************************************************************************
+*** \brief Displays a small window presenting the user with information
+***
+*** This is typically used to indicate a user's incorrect action. For example,
+*** when they try to go to the sell menu when their inventory is empty, or they
+*** try to make a transaction with no sales or purchases.
+*** ***************************************************************************/
+class PromptWindow : public hoa_video::MenuWindow {
+public:
+	PromptWindow();
+
+	~PromptWindow();
+
+	//! \brief Processes user input
+	void Update();
+
+	//! \brief Draws the window and the object properties contained within
+	void Draw();
+
+	//! \brief The text to prompt the user with
+	hoa_video::TextBox prompt_text;
+}; // class PromptWindow : public hoa_video::MenuWindow
 
 } // namespace private_shop
 

@@ -13,8 +13,15 @@
 *** \brief   Header file for shop mode interface.
 ***
 *** This code provides an interface for the user to purchase wares from a
-*** merchant. This mode is usually entered from a map after discussing with a
+*** merchant. This mode is usually entered from a map after speaking with a
 *** store owner.
+***
+*** \todo Allow shops to have a status flag indicating if their prices (for buy
+*** and for sale) are higher or lower than the common prices.
+***
+*** \todo Implement feature for shops to have limited quantity of wares to buy,
+*** as well as the ability to re-generate more quantities as the time passes
+*** between shops.
 *** ***************************************************************************/
 
 #ifndef __SHOP_HEADER__
@@ -33,6 +40,18 @@ extern bool SHOP_DEBUG;
 
 namespace private_shop {
 
+//! \brief Used to indicate what window has control of user input
+enum SHOP_STATE {
+	SHOP_STATE_INVALID   = -1,
+	SHOP_STATE_ACTION    =  0,
+	SHOP_STATE_BUY       =  1,
+	SHOP_STATE_SELL      =  2,
+	SHOP_STATE_CONFIRM   =  3,
+	SHOP_STATE_PROMPT    =  4,
+	SHOP_STATE_TOTAL     =  5
+};
+
+
 /** \brief A pointer to the currently active shop mode
 *** This is used by the various shop classes so that they can refer back to the main class from which
 *** they are a part of. This member is initially set to NULL. It is set whenever the ShopMode
@@ -40,17 +59,8 @@ namespace private_shop {
 **/
 extern ShopMode* current_shop;
 
-//! \brief Used to indicate what window has control of user input
-enum SHOP_STATE {
-	SHOP_STATE_INVALID       = -1,
-	SHOP_STATE_ACTION        =  0,
-	SHOP_STATE_LIST          =  1,
-	SHOP_STATE_SELL          =  2,
-	SHOP_STATE_CONFIRM       =  3,
-	SHOP_STATE_TOTAL         =  4,
-};
-
 } // namespace private_shop
+
 
 /** ****************************************************************************
 *** \brief Handles the game execution while the player is shopping.
@@ -61,13 +71,19 @@ enum SHOP_STATE {
 *** background image is of size 1024x768, and a 800x600 arrangement of windows
 *** is drawn ontop of the middle of that image.
 ***
+*** \note Shop states are a little confusing because of prompt/confirmation
+*** windows. These windows appear when, for instance, the player attempts an
+*** invalid operation (buy x0 quantity of an item). When this occurs, we make
+*** the prompt window the current state, but also save the buy state because
+*** we still want to draw the list of wares to purchase.
 *** ***************************************************************************/
 class ShopMode : public hoa_mode_manager::GameMode {
 	friend class private_shop::ShopActionWindow;
-	friend class private_shop::ObjectListWindow;
-	friend class private_shop::ObjectSellListWindow;
+	friend class private_shop::BuyListWindow;
+	friend class private_shop::SellListWindow;
 	friend class private_shop::ObjectInfoWindow;
 	friend class private_shop::ConfirmWindow;
+	friend class private_shop::PromptWindow;
 public:
 	ShopMode();
 
@@ -85,10 +101,6 @@ public:
 	//! \brief Handles the drawing of everything on the shop menu and makes sub-draw function calls as appropriate.
 	void Draw();
 
-	uint32 GetPurchaseCost() 	{return _purchases_cost;}
-	uint32 GetSalesRevenue() 	{return _sales_revenue;}
-	uint32 GetTotalRemaining();
-
 	/** \brief Adds a new object for the shop to sell
 	*** \param object_id The id number of the object to add
 	***
@@ -97,9 +109,25 @@ public:
 	**/
 	void AddObject(uint32 object_id);
 
+	//! \name Class member access functions
+	//@{
+	uint32 GetPurchaseCost()
+		{ return _purchases_cost; }
+
+	uint32 GetSalesRevenue()
+		{ return _sales_revenue; }
+
+	//! \brief Returns the quantity: current drunes - total costs + total sales
+	uint32 GetTotalRemaining()
+		{ return hoa_global::GlobalManager->GetDrunes() - _purchases_cost + _sales_revenue; }
+	//@}
+
 private:
-	//! \brief Keeps track of what windows are open to determine how to handle user input
+	//! \brief Keeps track of what windows are open to determine how to handle user input.
 	private_shop::SHOP_STATE _state;
+
+	//! \brief Use to retain the previous value of the _state member
+	private_shop::SHOP_STATE _saved_state;
 
 	//! \brief The total cost of all marked purchases.
 	uint32 _purchases_cost;
@@ -110,19 +138,19 @@ private:
 	//! \brief An image of the last frame shown on the screen before ShopMode was created.
 	hoa_video::StillImage _saved_screen;
 
-	/** \brief Contains the ids of all objects which are sold in the shop
-	*** The map key is the object id and the value is not used for anything.
+	/** \brief Contains the ids of all objects which are sold in this shop
+	*** The map key is the object id and the value is not used for anything (currently).
 	**/
 	std::map<uint32, uint32> _object_map;
 
 	//! \brief A map of the sounds used in shop mode
 	std::map<std::string, hoa_audio::SoundDescriptor> _shop_sounds;
 
-	/** \brief Contains all of the items
+	/** \brief Contains all of the objects
 	*** \note This container is temporary, and will be replaced with multiple containers (for each
 	*** type of object) at a later time.
 	**/
-	std::vector<hoa_global::GlobalObject*> _all_objects;
+	std::vector<hoa_global::GlobalObject*> _buy_objects;
 
 	/** \brief Contains all of the items
 	*** \note This container is temporary, and will be replaced with multiple containers (for each
@@ -132,32 +160,46 @@ private:
 
 	/** \brief Contains quantities corresponding to _all_objects
 	**/
-	std::vector<int> _all_objects_quantities;
+	std::vector<uint32> _buy_objects_quantities;
 
 	/** \brief Contains quantities corresponding to current inventory
 	**/
-	std::vector<int> _sell_objects_quantities;
+	std::vector<uint32> _sell_objects_quantities;
 
-	//! \name Menu Windows in Shop Mode
+	//! \name Shopping menu windows
 	//@{
 	//! \brief The top window containing the shop actions (buy, sell, etc).
 	private_shop::ShopActionWindow _action_window;
 
 	//! \brief The window containing the list of wares for sale
-	private_shop::ObjectListWindow _list_window;
+	private_shop::BuyListWindow _buy_window;
 
 	//! \brief The window containing the list of wares for sale
-	private_shop::ObjectSellListWindow _sell_window;
+	private_shop::SellListWindow _sell_window;
 
 	//! \brief The window that provides a detailed description of the selected object in the list window
 	private_shop::ObjectInfoWindow _info_window;
 
-	//! \brief A window to confirm the purchase of an object
+	//! \brief A window to confirm various information about user requested actions
 	private_shop::ConfirmWindow _confirm_window;
 
+	//! \brief A window to prompt the user with information about their action or selection
+	private_shop::PromptWindow _prompt_window;
 	//@}
-}; // class ShopMode : public hoa_mode_manager::GameMode
 
+	// ---------- Private methods
+	/** \brief Saves the current state and then changes the current state
+	*** \param new_state The new state to make the current shop state
+	*** \note Only use this function to change the state if you intend to
+	*** return to the saved state when the new state finishes.
+	**/
+	void _PushAndSetState(private_shop::SHOP_STATE new_state)
+		{ _saved_state = _state; _state = new_state; }
+
+	//! \brief Retrieves the previously saved state
+	void _PopState()
+		{ _state = _saved_state; _saved_state = private_shop::SHOP_STATE_INVALID; }
+}; // class ShopMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_shop
 
