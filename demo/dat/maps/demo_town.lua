@@ -638,6 +638,13 @@ map_functions = {}
 -- Creates a new shop mode instance
 map_functions[0] = function()
 	local shop = hoa_shop.ShopMode();
+	shop:AddObject(1);
+	shop:AddObject(10001);
+	shop:AddObject(10002);
+	shop:AddObject(20002);
+	shop:AddObject(30002);
+	shop:AddObject(40002);
+	shop:AddObject(50001);
 	ModeManager:Push(shop);
 end
 

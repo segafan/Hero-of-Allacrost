@@ -327,6 +327,7 @@ void OptionBox::Draw() {
 
 void OptionBox::ClearOptions() {
 	_options.clear();
+	_number_options = 0;
 }
 
 
