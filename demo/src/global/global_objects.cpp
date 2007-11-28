@@ -200,15 +200,22 @@ void GlobalItem::BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_
 		return;
 	}
 
-	if (_count == 0) {
+	//NOTE: Item number is decremented when the action is chosen so that way if you only have 1
+	//of an item, two chracters can't use the same one if their turns immediately follow each other
+	//This if statement is invalid
+	/*if (_count == 0) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL WARNING: GlobalItem::BattleUse() failed because the count of the item "
 				<< "was set to zero for item: " << _id << endl;
 		return;
-	}
+	}*/
 
 	ScriptCallFunction<void>(*_battle_use_function, target, instigator);
-	_count--;
+	
+	if (!_count)
+	{
+		GlobalManager->RemoveFromInventory(_id);
+	}
 } // void GlobalItem::BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator)
 
 

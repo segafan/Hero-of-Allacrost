@@ -760,7 +760,6 @@ void BattleMode::SetPerformingAction(bool is_performing, BattleAction* se) {
 
 			//FIX ME Use char and enemy stats
 			source->ResetWaitTime();
-			_active_action = NULL;
 		}
 		else {
 			cerr << "Invalid IBattleActor pointer in SetPerformingScript()" << endl;
@@ -797,7 +796,15 @@ void BattleMode::RemoveActionsForActor(BattleActor * actor) {
 	}
 }
 
-
+void BattleMode::NotifyOfActorDeath(BattleActor *actor)
+{
+	RemoveActionsForActor(actor);
+	if (!actor->IsEnemy() && (((BattleActor *)(_selected_character)) == actor))
+	{
+		_selected_character = NULL;
+		_action_window->Reset();
+	}
+}
 
 void BattleMode::FreezeTimers() {
 	// Pause scripts
@@ -925,7 +932,7 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 				return i;
 			}
 		}
-		for (uint32 i = 0; i <= _selected_target_index; ++i) {
+		for (int32 i = 0; i <= _selected_target_index; ++i) {
 			if (_enemy_actors[i]->IsAlive()) {
 				return i;
 			}

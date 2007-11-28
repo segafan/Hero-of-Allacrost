@@ -208,6 +208,11 @@ public:
 	//! \brief Remove all scripted events for an actor
 	void RemoveActionsForActor(hoa_battle::private_battle::BattleActor* actor);
 
+	//! \brief Handles any changes to the mode's state in response to an actor's death
+	// NOTE: Could expand into a generic notify function that can handle multiple types of
+	// messages
+	void NotifyOfActorDeath(hoa_battle::private_battle::BattleActor* actor);
+
 	//! \brief Returns all player actors
 	std::deque<private_battle::BattleCharacter*> GetCharacters() const
 		{ return _character_actors; }

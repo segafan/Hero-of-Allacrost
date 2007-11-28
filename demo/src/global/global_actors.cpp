@@ -29,6 +29,17 @@ using namespace hoa_script;
 
 namespace hoa_global {
 
+
+std::string GetTargetTypeText(int globalTargetType, int globalTargetAlly)
+{
+	static std::string TargetTypeText[GLOBAL_TARGET_TOTAL][2] = 
+	{{"Single Point", "Single Point"},
+	 {"Single Enemy", "Single Ally"},
+	 {"All Enemies", "All Allies"}};
+
+	return TargetTypeText[globalTargetType][globalTargetAlly];
+}
+
 // -----------------------------------------------------------------------------
 // GlobalAttackPoint class
 // -----------------------------------------------------------------------------

@@ -60,11 +60,27 @@ BattleAction::BattleAction(BattleActor* source, BattleActor* target, GlobalAttac
 void BattleAction::Update() {
 	if (_warm_up_time.IsRunning()) {
 		//float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
-		float offset = SystemManager->GetUpdateTime() * (100.f / _warm_up_time.GetDuration());
+		float offset = SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_READY - STAMINA_LOCATION_SELECT) / _warm_up_time.GetDuration());
 		_source->SetStaminaIconLocation(_source->GetStaminaIconLocation() + offset);
 	}
 
 	// TODO: Any warm up animations
+}
+
+void BattleAction::VerifyValidTarget(BattleActor* &target)
+{
+	if (target->IsAlive() || !target->IsEnemy())
+		return;
+
+	uint32 index = current_battle->GetIndexOfNextAliveEnemy(true);
+	
+	if (index == INVALID_BATTLE_ACTOR_INDEX)
+	{
+		cerr << "BATTLE ERROR: BattleAction::VerifyValidTarget could not find a valid target.  How did we get to this stage?" << endl;
+		return;
+	}
+
+	target = current_battle->GetEnemyActorAt(index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,6 +102,8 @@ SkillAction::SkillAction(BattleActor* source, BattleActor* target, GlobalSkill* 
 
 
 void SkillAction::RunScript() {
+	VerifyValidTarget(_target);
+
 	if (_skill->GetTargetType() == GLOBAL_TARGET_PARTY) {
 		if (_target->IsEnemy()) {
 			BattleEnemy* enemy;
@@ -145,6 +163,8 @@ ItemAction::ItemAction(BattleActor* source, BattleActor* target, GlobalItem* ite
 
 
 void ItemAction::RunScript() {
+	VerifyValidTarget(_target);
+
 	if (_item->GetTargetType() == GLOBAL_TARGET_PARTY) {
 		if (_target->IsEnemy()) {
 			BattleEnemy* enemy;
