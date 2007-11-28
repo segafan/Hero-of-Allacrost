@@ -317,7 +317,7 @@ private:
 	int32 _selected_character_index;
 
 	//! \brief Argument selector
-	uint32 _selected_target_index;
+	int32 _selected_target_index;
 
 	//! \brief The current character that is selected by the player
 	private_battle::BattleCharacter* _selected_character;
