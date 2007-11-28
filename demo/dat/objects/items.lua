@@ -36,12 +36,12 @@ items[1] = {
 	standard_price = 60,
 
 	BattleUse = function(target, instigator)
-		target:SetHitPoints(target:GetHitPoints() + 100);
+		target:AddHitPoints(100);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
 	MenuUse = function(target)
-		target:SetHitPoints(target:GetHitPoints() + 100);
+		target:AddHitPoints(100);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end
 }

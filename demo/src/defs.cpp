@@ -651,6 +651,8 @@ void BindEngineToLua() {
 			.def("GetPhysicalDefense", &BattleActor::GetPhysicalDefense)
 			.def("GetCombatEvade", &BattleActor::GetCombatEvade)
 			.def("TakeDamage", &BattleActor::TakeDamage)
+			.def("GetActor", &BattleActor::GetActor)
+			.def("AddHitPoints", &BattleActor::AddHitPoints)
 	];
 	} // End using battle mode namespaces
 
