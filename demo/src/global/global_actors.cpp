@@ -755,9 +755,9 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	// (1): Attempt to open the characters script file
 	ReadScriptDescriptor char_script;
 	if (char_script.OpenFile("dat/actors/characters.lua") == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalCharacter constructor could not create a new character because "
-				<< "the script file dat/actors/character.lua did not open succesfully" << endl;
+		IF_PRINT_DEBUG(GLOBAL_DEBUG) << "GLOBAL ERROR: GlobalCharacter constructor could not "
+			<< "create a new character because the script file dat/actors/character.lua did "
+			<< "not open succesfully" << endl;
 		// Set the character's ID to zero since this is now an invalid character object
 		_id = 0;
 		return;
