@@ -420,8 +420,8 @@ template <class T> T ReadScriptDescriptor::_ReadData(const std::string &key, T d
 		luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 
 		if (!o) {
-			_error_messages << "* _ReadData() was unable to access the global variable: " << key << std::endl;
-			_error_messages << " Type: " << luabind::type(o) << std::endl;
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "unable to access the global variable: " << key
+			<< "   Type: " << luabind::type(o) << std::endl;
 			return default_value;
 		}
 
@@ -431,7 +431,7 @@ template <class T> T ReadScriptDescriptor::_ReadData(const std::string &key, T d
 			return ret_val;
 		}
 		catch (...) {
-			_error_messages << "* _ReadData() was unable to cast value to correct type for global variable: " << key << std::endl;
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "unable to cast value to correct type for global variable: " << key << std::endl;
 			return default_value;
 		}
 	}
@@ -439,8 +439,8 @@ template <class T> T ReadScriptDescriptor::_ReadData(const std::string &key, T d
 	else { // Variable is a member of a table
 		luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 		if (luabind::type(o) != LUA_TTABLE) {
-			_error_messages << "* _ReadData() failed because the top of the stack was not a table when trying to read variable: " << key << std::endl;
-			_error_messages << " Type: " << luabind::type(o) << std::endl;
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the top of the stack was not a table when trying to read variable: " << key
+			<< "   Type: " << luabind::type(o) << std::endl;
 			return default_value;
 		}
 
@@ -448,7 +448,7 @@ template <class T> T ReadScriptDescriptor::_ReadData(const std::string &key, T d
 			return luabind::object_cast<T>(o[key]);
 		}
 		catch (...) {
-			_error_messages << "* _ReadData() was unable to access the table variable: " << key << std::endl;
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "unable to access the table variable: " << key << std::endl;
 			return default_value;
 		}
 	}
@@ -459,14 +459,14 @@ template <class T> T ReadScriptDescriptor::_ReadData(const std::string &key, T d
 
 template <class T> T ReadScriptDescriptor::_ReadData(int32 key, T default_value) {
 	if (_open_tables.size() == 0) {
-		_error_messages << "* _ReadData() failed because no tables were open when trying to access the table variable: "
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because no tables were open when trying to access the table variable: "
 			<< key << std::endl;
 		return default_value;
 	}
 
 	luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 	if (luabind::type(o) != LUA_TTABLE) {
-		_error_messages << "* _ReadData() failed because the top of the stack was not a table when trying to read variable: "
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the top of the stack was not a table when trying to read variable: "
 			<< key << std::endl;
 		return default_value;
 	}
@@ -475,8 +475,7 @@ template <class T> T ReadScriptDescriptor::_ReadData(int32 key, T default_value)
 		return luabind::object_cast<T>(o[key]);
 	}
 	catch (...) {
-		_error_messages << "* _ReadData() was unable to access the table variable: "
-			<< key << std::endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "unable to access the table variable: " << key << std::endl;
 		return default_value;
 	}
 
@@ -496,7 +495,7 @@ template <class T> void ReadScriptDescriptor::_ReadDataVector(const std::string&
 
 template <class T> void ReadScriptDescriptor::_ReadDataVector(int32 key, std::vector<T>& vect) {
 	if (_open_tables.size() == 0) {
-		_error_messages << "* _ReadDataVector() failed because no tables were open when trying to access the table variable: "
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because no tables were open when trying to access the table variable: "
 			<< key << std::endl;;
 		return;
 	}
@@ -513,7 +512,7 @@ template <class T> void ReadScriptDescriptor::_ReadDataVectorHelper(std::vector<
 	luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 
 	if (luabind::type(o) != LUA_TTABLE) {
-		_error_messages << "* _ReadDataVectorHelper() failed because the top of the stack was not a table" << std::endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the top of the stack was not a table" << std::endl;
 		return;
 	}
 	
@@ -523,7 +522,7 @@ template <class T> void ReadScriptDescriptor::_ReadDataVectorHelper(std::vector<
 			vect.push_back(luabind::object_cast<T>((*it)));
 		}
 		catch (...) {
-			_error_messages << "* _ReadDataVectorHelper() failed due to a type cast failure when reading the table" << std::endl;
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed due to a type cast failure when reading the table" << std::endl;
 		}
 	}
 } // template <class T> void ReadScriptDescriptor::_ReadDataVectorHelper(std::vector<T>& vect)
@@ -534,14 +533,14 @@ template <class T> void ReadScriptDescriptor::_ReadTableKeys(std::vector<T>& key
 	keys.clear();
 
 	if (_open_tables.size() == 0) {
-		_error_messages << "* _ReadTableKeys() failed because there were no open tables to get the keys of" << std::endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because there were no open tables to get the keys of" << std::endl;
 		return;
 	}
 
 	luabind::object table(luabind::from_stack(_lstack, private_script::STACK_TOP));
 
 	if (luabind::type(table) != LUA_TTABLE) {
-		_error_messages << "* _ReadTableKeys() failed because the top of the stack was not a table" << std::endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the top of the stack was not a table" << std::endl;
 		return;
 	}
 
@@ -550,7 +549,7 @@ template <class T> void ReadScriptDescriptor::_ReadTableKeys(std::vector<T>& key
 			keys.push_back(luabind::object_cast<T>(i.key()));
 		}
 		catch (...) {
-			_error_messages << "* _ReadTableKeys() failed due to a type cast failure when retrieving a table key" << std::endl;
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed due to a type cast failure when retrieving a table key" << std::endl;
 			keys.clear();
 			return;
 		}

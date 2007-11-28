@@ -29,9 +29,8 @@ namespace hoa_script {
 
 ReadScriptDescriptor::~ReadScriptDescriptor() {
 	if (IsFileOpen()) {
-		if (SCRIPT_DEBUG)
-			cerr << "SCRIPT WARNING: ReadScriptDescriptor destructor was called when file was still open: "
-				<< _filename << endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) <<
+		"ReadScriptDescriptor destructor was called when file was still open: " << endl;
 		CloseFile();
 	}
 	
@@ -106,12 +105,11 @@ bool ReadScriptDescriptor::OpenFile() {
 
 void ReadScriptDescriptor::CloseFile() {
 	if (IsFileOpen() == false) {
-		if (SCRIPT_DEBUG)
-			cerr << "SCRIPT ERROR: ReadScriptDescriptor::CloseFile() could not close the "
-				<< "file because it was not open." << endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "could not close the file because it was not open." << endl;
 		return;
 	}
 
+	// Probably not needed. Script errors should be printed immediately.
 	if (SCRIPT_DEBUG && IsErrorDetected()) {
 		cerr << "SCRIPT WARNING: In ReadScriptDescriptor::CloseFile(), the file " << _filename
 			<< " had error messages remaining. They are as follows:" << endl;
@@ -154,14 +152,14 @@ bool ReadScriptDescriptor::_DoesDataExist(const string& key, int32 type) {
 
 bool ReadScriptDescriptor::_DoesDataExist(int32 key, int32 type) {
 	if (_open_tables.size() == 0) {
-		_error_messages << "* _DoesDataExist() failed because no tables were open when trying to "
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because no tables were open when trying to "
 			<< "examine the table member: " << key << endl;
 		return false;
 	}
 
 	luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 	if (luabind::type(o) != LUA_TTABLE) {
-		_error_messages << "* _DoesDataExist() failed because the top of the stack was not "
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the top of the stack was not "
 			<< "a table when trying to check for the table member: " << key << endl;
 		return false;
 	}
@@ -243,13 +241,13 @@ object ReadScriptDescriptor::ReadFunctionPointer(const string& key) {
 		luabind::object o(from_stack(_lstack, STACK_TOP));
 
 		if (!o) {
-			_error_messages << "* ReadFunctionPointer() failed because it was unable to access the function "
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because it was unable to access the function "
 				<< "for the global key: " << key << endl;
 			return luabind::object();
 		}
 
 		if (type(o) != LUA_TFUNCTION) {
-			_error_messages << "* ReadFunctionPointer() failed because the data retrieved was not a function "
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the data retrieved was not a function "
 				<< "for the global key: " << key << endl;
 			return luabind::object();
 		}
@@ -260,13 +258,13 @@ object ReadScriptDescriptor::ReadFunctionPointer(const string& key) {
 	else { // The function should be an element of the most recently opened table
 		luabind::object o(from_stack(_lstack, STACK_TOP));
 		if (type(o) != LUA_TTABLE) {
-			_error_messages << "* ReadFunctionPointer() failed because the top of the stack was not a table "
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the top of the stack was not a table "
 				<< "for the table element key: " << key << endl;
 			return luabind::object();
 		}
 	
 		if (type(o[key]) != LUA_TFUNCTION) {
-			_error_messages << "* ReadFunctionPointer() failed because the data retrieved was not a function "
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the data retrieved was not a function "
 				<< "for the table element key: " << key << endl;
 			return luabind::object();
 		}
@@ -281,13 +279,13 @@ object ReadScriptDescriptor::ReadFunctionPointer(int32 key) {
 	// Fucntion is always a table element for integer keys
 	luabind::object o(from_stack(_lstack, STACK_TOP));
 	if (type(o) != LUA_TTABLE) {
-		_error_messages << "* _ReadFunctionPointer() failed because the top of the stack was not a table "
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the top of the stack was not a table "
 			<< "for the table element key: " << key << endl;
 		return o;
 	}
 
 	if (type(o[key]) != LUA_TFUNCTION) {
-		_error_messages << "* _ReadFunctionPointer() failed because the data retrieved was not a function "
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the data retrieved was not a function "
 			<< "for the table element key: " << key << endl;
 		return o;
 	}
@@ -303,7 +301,7 @@ void ReadScriptDescriptor::OpenTable(const string& table_name, bool use_global) 
 	if (_open_tables.size() == 0 || use_global) { // Fetch the table from the global space
 		lua_getglobal(_lstack, table_name.c_str());
 		if (!lua_istable(_lstack, STACK_TOP)) {
-			_error_messages << "* OpenTable() failed because the data retrieved was not a table "
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the data retrieved was not a table "
 				<< "or did not exist for the global key " << table_name << endl;
 			return;
 		}
@@ -314,7 +312,7 @@ void ReadScriptDescriptor::OpenTable(const string& table_name, bool use_global) 
 		lua_pushstring(_lstack, table_name.c_str());
 		lua_gettable(_lstack, STACK_TOP - 1);
 		if (!lua_istable(_lstack, STACK_TOP)) {
-			_error_messages << "* OpenTable() failed because the data retrieved was not a table "
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the data retrieved was not a table "
 				<< "or did not exist for the table element key " << table_name << endl;
 			return;
 		}
@@ -327,15 +325,22 @@ void ReadScriptDescriptor::OpenTable(const string& table_name, bool use_global) 
 void ReadScriptDescriptor::OpenTable(int32 table_name) {
 	// At least one table must be open to use a numerical key
 	if (_open_tables.size() == 0) {
-		_error_messages << "* OpenTable() failed because there were no tables open when trying "
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because there were no tables open when trying "
 				<< "to open the with the element key " << table_name << endl;
 		return;
 	}
 	
 	lua_pushnumber(_lstack, table_name);
+
+	if (!lua_istable(_lstack, STACK_TOP - 1)) {
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "about to fail because STACK_TOP - 1 is not a "
+		<< "table, or the table does not exist for the table element key: " << table_name << endl;
+	}
+	
 	lua_gettable(_lstack, STACK_TOP - 1); // sometimes, this line will cause a major b0rk and kill Allacrost silently
+
 	if (!lua_istable(_lstack, STACK_TOP)) {
-		_error_messages << "* OpenTable() failed because the data retrieved was not a table "
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the data retrieved was not a table "
 				<< "or did not exist for the table element key " << table_name << endl;
 		return;
 	}
@@ -347,7 +352,7 @@ void ReadScriptDescriptor::OpenTable(int32 table_name) {
 
 void ReadScriptDescriptor::CloseTable() {
 	if (_open_tables.size() == 0) {
-		_error_messages << "* CloseTable() failed because there were no open tables to close" << endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because there were no open tables to close" << endl;
 		return;
 	}
 
@@ -395,7 +400,7 @@ uint32 ReadScriptDescriptor::GetTableSize(int32 table_name) {
 // Attempts to get the size of the most recently opened table
 uint32 ReadScriptDescriptor::GetTableSize() {
 	if (_open_tables.size() == 0) {
-		_error_messages << "* GetTableSize() failed because there were no open tables to get the size of" << endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because there were no open tables to get the size of" << endl;
 		return 0;
 	}
 
@@ -407,7 +412,7 @@ uint32 ReadScriptDescriptor::GetTableSize() {
 
 	if (type(o) != LUA_TTABLE)
 	{
-		_error_messages << "* GetTableSize() failed because the top of the stack is not a table." << endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the top of the stack is not a table." << endl;
 		return 0;
 	}
 
