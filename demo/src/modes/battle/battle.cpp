@@ -635,12 +635,7 @@ void BattleMode::_SelectNextTarget(bool forward_direction) {
 	{
 		if (_action_window->_action_target_ally == true)
 		{
-			_selected_target_index++;
-
-			if (_selected_target_index >= _character_actors.size())
-			{
-				_selected_target_index = 0;
-			}
+			_selected_target_index = (_selected_target_index + 1) % _character_actors.size();
 			_selected_target = _character_actors[_selected_target_index];
 		}
 		else
@@ -657,7 +652,7 @@ void BattleMode::_SelectNextTarget(bool forward_direction) {
 		{
 			_selected_target_index--;
 
-			if (_selected_target_index == 0)
+			if (_selected_target_index < 0)
 			{
 				_selected_target_index = _character_actors.size() - 1;
 			}
