@@ -68,10 +68,10 @@ ActionWindow::ActionWindow() {
 
 	// Setup options for VIEW_ACTION_CATEGORY
 	vector<ustring> category_options;
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/attack.png>\n\nAttack"));
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/defend.png>\n\nDefend"));
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/support.png>\n\nSupport"));
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/item.png>\n\nItem"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/attack.png>\nAttack"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/defend.png>\nDefend"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/support.png>\nSupport"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/item.png>\nItem"));
 
 	_action_category_list.SetOptions(category_options);
 	_action_category_list.SetPosition(50.0f, 120.0f);
@@ -162,6 +162,7 @@ void ActionWindow::Reset() {
 	_state = VIEW_INVALID;
 	_character = NULL;
 	_selected_action_category = 0;
+	_action_category_list.SetSelection(0);
 	_selected_action = 0;
 	_action_target_type = GLOBAL_TARGET_INVALID;
 	_action_target_ally = false;
@@ -257,6 +258,8 @@ void ActionWindow::_UpdateActionSelection() {
 			if (BATTLE_DEBUG)
 				cerr << "BATTLE WARNING: In ActionWindow::_UpdateActionSelection(), selected action category was invalid" << endl;
 		}
+
+		_ConstructTargetInformation();
 	}
 	else if (InputManager->MenuPress()) {
 		_selected_action = _action_selection_list.GetSelection();
@@ -288,7 +291,7 @@ void ActionWindow::_UpdateTargetSelection() {
 			GlobalItem* item = GetSelectedItem();
 			// NOTE: Don't know if decrementing the item count is the best approach to use here.
 			// We decrement the count now so that if the next character wants to use items, they know
-			// how many are available to use. If the current chararacter uses the item, then the decrement stays.
+			// how many are available to use. If the current character uses the item, then the decrement stays.
 			// If count == 0, then it's removed from inventory...if item is not used (i.e. battle ends before use),
 			// it is incremented back.
 			item->DecrementCount(1);
@@ -310,21 +313,28 @@ void ActionWindow::_UpdateTargetSelection() {
 		return;
 	}
 
+	//CD NOTE: We've removed the _ConstructTargetInformation calls from here
+	//because we need to do it every frame.  If we have a character selected
+	//as our target for using something like a healing potion, and he gets hit,
+	//we need to update his HP to reflect what it is after the hit.  With the
+	//below logic, his info won't be refreshed until we change targets
 	if (InputManager->UpPress() || InputManager->DownPress()) {
 		BattleActor* previous_target = current_battle->_selected_target;
 		current_battle->_SelectNextTarget(InputManager->UpPress());
-		if (previous_target != current_battle->_selected_target) {
+		/*if (previous_target != current_battle->_selected_target) {
 			_ConstructTargetInformation();
-		}
+		}*/
 	}
 	else if (InputManager->LeftPress() || InputManager->RightPress()
 		&& _action_target_type == GLOBAL_TARGET_ATTACK_POINT) {
 		uint32 previous_ap = current_battle->_selected_attack_point;
 		current_battle->_SelectNextAttackPoint(InputManager->RightPress());
-		if (previous_ap != current_battle->_selected_attack_point) {
+		/*if (previous_ap != current_battle->_selected_attack_point) {
 			_ConstructTargetInformation();
-		}
+		}*/
 	}
+
+	_ConstructTargetInformation();
 } // void ActionWindow::_UpdateTargetSelection()
 
 
@@ -420,8 +430,9 @@ void ActionWindow::_DrawTargetSelection() {
 	VideoManager->Move(640.0f, 125.0f);
 	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	VideoManager->Text()->Draw(MakeUnicodeString("Target Information"));
-	VideoManager->MoveRelative(0.0f, -40.0f);
+	VideoManager->MoveRelative(100.0f, -30.0f);
 	_target_information.Draw();
+	VideoManager->Text()->Draw(_target_information.GetString());
 }
 
 
@@ -430,8 +441,9 @@ void ActionWindow::_DrawActionInformation() {
 	VideoManager->Move(640.0f, 125.0f);
 	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	VideoManager->Text()->Draw(MakeUnicodeString("Action Information"));
-	VideoManager->MoveRelative(0.0f, -40.0f);
-	_action_information.Draw();
+	VideoManager->MoveRelative(100.0f, -30.0f);
+	//_action_information.Draw();
+	VideoManager->Text()->Draw(_action_information.GetString());
 }
 
 // ----- OTHER METHODS
@@ -552,17 +564,17 @@ void ActionWindow::_ConstructActionInformation() {
 	if (_selected_action_category == ACTION_TYPE_ITEM) {
 		action_text = MakeUnicodeString("Name: ") + GetSelectedItem()->GetName() +
 			MakeUnicodeString("\nCurrent Quantity: " + NumberToString(GetSelectedItem()->GetCount())) +
-			MakeUnicodeString("\nTarget Type: TODO");
+			MakeUnicodeString("\nTarget Type: ") + MakeUnicodeString(GetTargetTypeText(GetSelectedItem()->GetTargetType(), GetSelectedItem()->IsTargetAlly()));
 	}
 
-	else if (_selected_action_category == ACTION_TYPE_ATTACK
+	else/* if (_selected_action_category == ACTION_TYPE_ATTACK
 			|| _selected_action_category == ACTION_TYPE_DEFEND
-			|| _selected_action_category == ACTION_TYPE_SUPPORT)
+			|| _selected_action_category == ACTION_TYPE_SUPPORT)*/
 	{
 		// TODO: add warm-up and cool-down times (in seconds), and description
 		action_text = MakeUnicodeString("Name: ") + GetSelectedSkill()->GetName() +
 			MakeUnicodeString("\nSP Required: " + NumberToString(GetSelectedSkill()->GetSPRequired())) +
-			MakeUnicodeString("\nTarget Type: TODO");
+			MakeUnicodeString("\nTarget Type: ") + MakeUnicodeString(GetTargetTypeText(GetSelectedSkill()->GetTargetType(), GetSelectedSkill()->IsTargetAlly()));
 	}
 
 	//VideoManager->Text()->SetDefaultTextColor(Color::white);
@@ -1186,7 +1198,7 @@ void FinishWindow::_DrawWinSkills()
 			VideoManager->MoveRelative(0, -20);
 		}
 
-		VideoManager->MoveRelative(-190, -5 + (20 * skills_learned->size()) - 97);
+		VideoManager->MoveRelative(-190, -5 + (20 * (float)(skills_learned->size())) - 140);
 	}
 }
 

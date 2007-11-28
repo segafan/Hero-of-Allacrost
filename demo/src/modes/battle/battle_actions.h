@@ -51,6 +51,9 @@ public:
 	//! \brief Updates the script
 	void Update();
 
+	//! \brief Makes sure the the target is valid, and if not it selects a new one
+	void VerifyValidTarget(BattleActor* &target);
+
 	//! \brief Executes the script
 	virtual void RunScript() = 0;
 

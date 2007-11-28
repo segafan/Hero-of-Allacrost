@@ -130,7 +130,6 @@ void BattleActor::TakeDamage(int32 damage) {
 	if (static_cast<uint32>(_damage_dealt) >= GetActor()->GetHitPoints()) { // Was it a killing blow?
 		GetActor()->SetHitPoints(0);
 		GetWaitTime()->Reset();
-		current_battle->RemoveActionsForActor(this);
 		_state = ACTOR_DEAD;
 
 		if (IsEnemy() == true) {
@@ -138,6 +137,8 @@ void BattleActor::TakeDamage(int32 damage) {
 			std::vector<StillImage>& sprite_frames = *(enemy->GetActor()->GetBattleSpriteFrames());
 			sprite_frames[3].EnableGrayScale();
 		}
+
+		current_battle->NotifyOfActorDeath(this);
 	}
 	else {
 		GetActor()->SubtractHitPoints(_damage_dealt);
@@ -180,7 +181,7 @@ BattleCharacter::~BattleCharacter() {
 
 void BattleCharacter::Update() {
 	if (_state == ACTOR_IDLE && GetWaitTime()->IsRunning())
-		_stamina_icon_location += SystemManager->GetUpdateTime() * (300.0f / _wait_time.GetDuration());
+		_stamina_icon_location += SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_SELECT - STAMINA_LOCATION_BOTTOM) / _wait_time.GetDuration());
 		//_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
 
 	if (_state == ACTOR_ACTING) {
