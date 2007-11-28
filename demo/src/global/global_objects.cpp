@@ -207,7 +207,7 @@ void GlobalItem::BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_
 		return;
 	}
 
-	ScriptCallFunction<void>(*_battle_use_function, target, instigator);
+	ScriptCallFunction<void>(*_battle_use_function, target->GetActor(), instigator);
 	_count--;
 } // void GlobalItem::BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator)
 
