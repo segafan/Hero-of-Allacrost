@@ -61,9 +61,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind_Debug.lib"
+				LinkIncremental="2"
+				IgnoreDefaultLibraryNames="MSVCRT, LIBCMT"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				LinkTimeCodeGeneration="1"
+				LinkTimeCodeGeneration="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -141,7 +143,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
 				IgnoreAllDefaultLibraries="false"
-				IgnoreDefaultLibraryNames=""
+				IgnoreDefaultLibraryNames="LIBCMT"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
