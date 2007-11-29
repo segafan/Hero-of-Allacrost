@@ -132,10 +132,20 @@ void BattleActor::TakeDamage(int32 damage) {
 		GetWaitTime()->Reset();
 		_state = ACTOR_DEAD;
 
-		if (IsEnemy() == true) {
-			BattleEnemy* enemy = dynamic_cast<BattleEnemy*>(this);
+		//FIXME: This is going to change when we switch to map sprites
+		//CD: We need to consolidate the ways enemy and character battle
+		//anims are retrieved and updated.  There's no reason we should be
+		//doing two different things depending on which it is.
+		if (IsEnemy())
+		{
+			BattleEnemy* enemy = (BattleEnemy*)(this);
 			std::vector<StillImage>& sprite_frames = *(enemy->GetActor()->GetBattleSpriteFrames());
 			sprite_frames[3].EnableGrayScale();
+		}
+		else
+		{
+			BattleCharacter* character = (BattleCharacter*)(this);
+			character->GetActor()->RetrieveBattleAnimation("idle")->GetCurrentFrame()->EnableGrayScale();
 		}
 
 		current_battle->NotifyOfActorDeath(this);
@@ -191,13 +201,19 @@ void BattleCharacter::Update() {
 	else
 		SetXLocation(GetXOrigin()); // Restore original place
 
-	GetActor()->RetrieveBattleAnimation("idle")->Update();
+	//If he's dead, we freeze him on his last frame
+	if (IsAlive())
+		GetActor()->RetrieveBattleAnimation("idle")->Update();
 }
 
 
 
 void BattleCharacter::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+
+	// Draw the character sprite
+	VideoManager->Move(_x_location, _y_location);
+	GetActor()->RetrieveBattleAnimation("idle")->Draw();
 
 	if (IsAlive()) {
 		// Draw the actor selector image if this character is currently selected
@@ -206,8 +222,8 @@ void BattleCharacter::DrawSprite() {
 			current_battle->_actor_selection_image.Draw();
 		}
 		// Draw the character sprite
-		VideoManager->Move(_x_location, _y_location);
-		GetActor()->RetrieveBattleAnimation("idle")->Draw();
+		//VideoManager->Move(_x_location, _y_location);
+		//GetActor()->RetrieveBattleAnimation("idle")->Draw();
 
 		if (this == current_battle->_selected_target) {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
@@ -229,7 +245,8 @@ void BattleCharacter::DrawSprite() {
 		}
 	}
 	else {
-		// TODO: draw the "incapacitated" character here
+	//	VideoManager->Move(_x_location, _y_location);
+	//	sprite_frames[3].Draw();
 	}
 } // void BattleCharacter::DrawSprite()
 

@@ -151,6 +151,20 @@ void ActionWindow::Initialize(BattleCharacter* character) {
 		_action_category_list.EnableOption(2, false);
 	if (GlobalManager->GetInventoryItems()->empty())
 		_action_category_list.EnableOption(3, false);
+	else
+	{
+		//We do this if in case someone is already queued to use the last item in our inventory
+		_action_category_list.EnableOption(3, false);
+		std::vector<GlobalItem*>* items = GlobalManager->GetInventoryItems();
+		for (uint32 i = 0; i < items->size(); ++i)
+		{
+			if((*items)[i]->GetCount())
+			{
+				_action_category_list.EnableOption(3, true);
+				break;
+			}
+		}
+	}
 
 	_action_selection_list.ClearOptions();
 } // void ActionWindow::Initialize(BattleCharacter* character)
@@ -200,7 +214,7 @@ void ActionWindow::Update() {
 
 
 void ActionWindow::_UpdateActionCategory() {
-	_action_category_list.Update();
+	_action_category_list.Update(SystemManager->GetUpdateTime());
 
 	if (InputManager->LeftPress()) {
 		_action_category_list.HandleLeftKey();
@@ -227,7 +241,7 @@ void ActionWindow::_UpdateActionCategory() {
 
 
 void ActionWindow::_UpdateActionSelection() {
-	_action_selection_list.Update();
+	_action_selection_list.Update(SystemManager->GetUpdateTime());
 
 	if (InputManager->UpPress()) {
 		_action_selection_list.HandleUpKey();

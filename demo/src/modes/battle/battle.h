@@ -199,7 +199,7 @@ public:
 
 
 	//! \brief Sets whether an action is being performed or not, and what that action is
-	void SetPerformingAction(bool is_performing, private_battle::BattleAction* se);
+	//void SetPerformingAction(bool is_performing, private_battle::BattleAction* se);
 
 	//! \brief Added a scripted event to the queue
 	void AddBattleActionToQueue(private_battle::BattleAction* event)
@@ -243,7 +243,10 @@ public:
 
 	uint32 GetIndexOfFirstIdleCharacter() const;
 
-	//! \brief Useful for item and skill targeting
+	//! \brief Useful for item and skill targeting for enemies
+	uint32 GetIndexOfNextAliveCharacter(bool move_upward) const;
+
+	//! \brief Useful for item and skill targeting for characters
 	uint32 GetIndexOfNextAliveEnemy(bool move_upward) const;
 
 	//! \brief Returns the player actor at the deque location 'index'
@@ -261,8 +264,8 @@ public:
 	// This may become more complicated if it is done in a wierd graphical manner
 	void SwapCharacters(private_battle::BattleCharacter * ActorToRemove, private_battle::BattleCharacter * ActorToAdd);
 
-	private_battle::BattleAction* GetActiveAction()
-		{ return _active_action; }
+	/*private_battle::BattleAction* GetActiveAction()
+		{ return _active_action; }*/
 
 private:
 	//! \brief When set to true, all preparations have been made and the battle is ready to begin
@@ -423,7 +426,7 @@ private:
 	//! \name Action Processing
 	//@{
 	//! \brief The actor action currently being performed. Set to NULL if no action is being performed.
-	private_battle::BattleAction* _active_action;
+	//private_battle::BattleAction* _active_action;
 
 	//! \brief A FIFO queue of actor actions to perform
 	std::list<private_battle::BattleAction*> _action_queue;
@@ -455,9 +458,18 @@ private:
 	//! \brief Shutdown the battle mode
 	void _ShutDown();
 
+	//! \brief Revives all dead characters to 1 HP...used in _Shutdown()
+	void _ReviveCharacters();
+
+	//! \brief Handles updating all our queued scripts and marks them for removal if they run
+	void _UpdateScripts();
+
+	//! \brief Any scripts marked for removal are removed from the queue
+	void _CleanupActionQueue();
+
 	//! \brief Returns true if an actor is performing an action
-	bool _IsExecutingAction() const
-		{ return (_active_action != NULL); }
+	/*bool _IsExecutingAction() const
+		{ return (_active_action != NULL); }*/
 
 	//! \brief Returns the number of enemies that are still alive in the battle
 	uint32 _NumberEnemiesAlive() const;

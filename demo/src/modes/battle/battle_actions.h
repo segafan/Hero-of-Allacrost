@@ -52,13 +52,23 @@ public:
 	void Update();
 
 	//! \brief Makes sure the the target is valid, and if not it selects a new one
-	void VerifyValidTarget(BattleActor* &target);
+	void VerifyValidTarget(BattleActor* source, BattleActor* &target);
 
 	//! \brief Executes the script
 	virtual void RunScript() = 0;
 
 	//! \brief Returns true if this action consumes an item
 	virtual bool IsItemAction() const = 0;
+
+	//! \brief Sets _should_be_removed to true so this action will be removed from the queue
+	void MarkForRemoval()
+		{ _should_be_removed = true; }
+
+	/*! \brief Returns the value of _should_be_removed
+	 *	\return If true, the action should be removed from the queue
+	 */
+	bool ShouldBeRemoved()
+		{ return _should_be_removed; }
 
 	//! \name Class member access functions
 	//@{
@@ -89,6 +99,9 @@ protected:
 
 	//! \brief The amount of time to wait to execute the script
 	hoa_system::SystemTimer _warm_up_time;
+
+	//! \brief If true, the script needs to be removed
+	bool _should_be_removed;
 }; // class BattleAction
 
 
