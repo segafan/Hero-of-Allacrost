@@ -32,6 +32,6 @@ skills[20001] = {
    
    MenuExecute = function(target, instigator)
       target:AddHitPoints(hoa_utils.RandomBoundedInteger(30,50));
-      AudioManager:PlaySound("snd/heal.wav");
+      AudioManager:PlaySound("snd/heal_spell.wav");
    end
 }
