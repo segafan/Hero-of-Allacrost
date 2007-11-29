@@ -227,7 +227,7 @@ void BattleMode::AddMusic(const string& music_filename) {
 	if (_battle_music.find(music_filename) != _battle_music.end())
 		// music is already loaded, just return
 		return;
-		
+
 
 	_battle_music[music_filename] = MusicDescriptor();
 	if (_battle_music[music_filename].LoadAudio(music_filename) == false) {
@@ -281,7 +281,7 @@ void BattleMode::_Initialize() {
 	// (1): Construct all character battle actors from the active party
 	GlobalParty* active_party = GlobalManager->GetActiveParty();
 	if (active_party->GetPartySize() == 0) {
-		if (BATTLE_DEBUG) 
+		if (BATTLE_DEBUG)
 			cerr << "BATTLE ERROR: In BattleMode::_Initialize(), the size of the active party was zero" << endl;
 		ModeManager->Pop(); // Self-destruct the battle mode
 		return;
@@ -378,12 +378,10 @@ void BattleMode::_ShutDown() {
 //Bring all dead people back with 1 HP
 void BattleMode::_ReviveCharacters()
 {
-	std::deque<BattleCharacter*>& party = GetCharacters();
-
-	for (uint32 i = 0; i < party.size(); ++i)
+	for (uint32 i = 0; i < _character_actors.size(); ++i)
 	{
-		if (!party[i]->IsAlive())
-			party[i]->GetActor()->SetHitPoints(1);
+		if (!_character_actors[i]->IsAlive())
+			_character_actors[i]->GetActor()->SetHitPoints(1);
 	}
 }
 
@@ -443,7 +441,6 @@ void BattleMode::Update() {
 
 void BattleMode::_UpdateScripts()
 {
-	bool ran_script = false;
 	BattleAction* se;
 	std::list<private_battle::BattleAction*>::iterator it;
 
@@ -455,7 +452,7 @@ void BattleMode::_UpdateScripts()
 			continue;
 
 		se->Update();
-		
+
 		if (se->GetWarmUpTime()->IsFinished())// && !_IsExecutingAction())
 		{
 			//SetPerformingAction(true, se);
@@ -679,11 +676,11 @@ void BattleMode::_SelectNextTarget(bool forward_direction) {
 			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
 			_selected_target = (_selected_target_index == INVALID_BATTLE_ACTOR_INDEX) ? NULL : _enemy_actors[_selected_target_index];
 		}
-			
+
 	}
 
 	else {
-		
+
 		if (_action_window->_action_target_ally == true)
 		{
 			_selected_target_index--;
@@ -698,7 +695,7 @@ void BattleMode::_SelectNextTarget(bool forward_direction) {
 		{
 			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
 			_selected_target = (_selected_target_index == INVALID_BATTLE_ACTOR_INDEX) ? NULL : _enemy_actors[_selected_target_index];
-		}	
+		}
 	}
 
 	if (previous_target != _selected_target_index)
@@ -942,7 +939,7 @@ uint32 BattleMode::GetIndexOfFirstIdleCharacter() const {
 			return i;
 		}
 	}
-	
+
 	return INVALID_BATTLE_ACTOR_INDEX;
 }
 
@@ -972,7 +969,7 @@ uint32 BattleMode::GetIndexOfNextAliveCharacter(bool move_upward) const
 				return i;
 			}
 		}
-		
+
 		// This should never be reached
 		return INVALID_BATTLE_ACTOR_INDEX;
 	}
@@ -988,7 +985,7 @@ uint32 BattleMode::GetIndexOfNextAliveCharacter(bool move_upward) const
 				return i;
 			}
 		}
-		
+
 		// This should never be reached
 		return INVALID_BATTLE_ACTOR_INDEX;
 	}
@@ -1006,7 +1003,7 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 				return i;
 			}
 		}
-		
+
 		// This should never be reached
 		return INVALID_BATTLE_ACTOR_INDEX;
 	}
@@ -1022,7 +1019,7 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 				return i;
 			}
 		}
-		
+
 		// This should never be reached
 		return INVALID_BATTLE_ACTOR_INDEX;
 	}
