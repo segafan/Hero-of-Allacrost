@@ -67,7 +67,7 @@ private:
 	std::vector<hoa_video::StillImage> _boot_images;
 
 	//! Credits screen window
-	CreditsScreen _credits_screen;
+	private_boot::CreditsScreen _credits_screen;
 
 	//! Welcome screen window
 	WelcomeScreen _welcome_screen;

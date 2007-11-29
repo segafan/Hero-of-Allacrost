@@ -26,9 +26,11 @@ using namespace hoa_script;
 
 namespace hoa_boot {
 
+namespace private_boot {
+
 CreditsScreen::CreditsScreen() :
 	_visible(false),
-	_text_offset_y(0.0f)
+	_scroll_offset(0.0f)
 {
 	// Init the background window
 	_window.Create(1024.0f, 600.0f);
@@ -36,38 +38,39 @@ CreditsScreen::CreditsScreen() :
 	_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 	_window.Hide();
 
-	// Load the credits from the Lua file
+	// Load the credits text from the Lua file
 	ReadScriptDescriptor credits_file;
 	if (credits_file.OpenFile("dat/credits.lua") == false) {
-		cerr << "BOOT ERROR: failed to open the credits file" << endl;
-		exit(1);
+		IF_PRINT_WARNING(BOOT_DEBUG) << "failed to open the Lua credits file" << endl;
 	}
 	_credits_text = MakeUnicodeString(credits_file.ReadString("credits_text"));
 	credits_file.CloseFile();
+
+	// Use the default text style for the credits
+	_credits_rendered.SetStyle(TextStyle());
 }
 
 
-CreditsScreen::~CreditsScreen()
-{
+
+CreditsScreen::~CreditsScreen() {
 	_window.Destroy();
 }
 
 
-// Draws the credits window on the screen if it is set visible
-void CreditsScreen::Draw()
-{
-	// Draw the background window
+
+void CreditsScreen::Draw() {
 	_window.Draw();
-	if (_window.GetState() != VIDEO_MENU_STATE_SHOWN) // Don't draw any text until the window is ready for drawing
+	// Don't draw any text until the window is fully shown
+	if (_window.GetState() != VIDEO_MENU_STATE_SHOWN)
 		return;
 
 	// Set clip region for the text and draw the visible part of it
-	VideoManager->Move(512.0f, 384.0f + _text_offset_y);
+	VideoManager->Move(512.0f, 384.0f + _scroll_offset);
 	VideoManager->SetScissorRect(_window.GetScissorRect());
 	VideoManager->EnableScissoring();
 
 	// Fade in the text by setting new color with alpha value below 1.0f
-	float color_alpha = _text_offset_y * 0.025f;
+	float color_alpha = _scroll_offset * 0.025f;
 	if (color_alpha > 1.0f)
 		color_alpha = 1.0f;
 	Color modulated(1.0f, 1.0f, 1.0f, color_alpha);
@@ -80,43 +83,31 @@ void CreditsScreen::Draw()
 }
 
 
-// Updates the credits window
-void CreditsScreen::UpdateWindow(int32 frameTime)
-{
-	_window.Update(frameTime);
-	float delta = static_cast<float>(frameTime) * 0.02f;
-	_text_offset_y += delta; // Update text offset
+
+void CreditsScreen::Update(uint32 time) {
+	_window.Update(time);
+	_scroll_offset += static_cast<float>(time) * 0.02f; // Update the scroll offset
 }
 
 
-// Shows the credits window
-void CreditsScreen::Show()
-{
+
+void CreditsScreen::Show() {
 	_window.Show();
 	_visible = true;
-	_text_offset_y = 0.0f; // Reset the text offset
-	VideoManager->Text()->SetDefaultFont("default"); // Reset font
-	VideoManager->Text()->SetDefaultTextColor(Color::white); // Reset text color
+	_scroll_offset = 0.0f;
 	_credits_rendered.SetText(_credits_text);
 }
 
 
-// Hides the credits window
-void CreditsScreen::Hide()
-{
+
+void CreditsScreen::Hide() {
 	_window.Hide();
 	_visible = false;
 
-	// Explicit clear textures when leaving credits mode
+	// Remove rendered text image from memory. We reconstruct it if the credits are shown once more.
 	_credits_rendered.Clear();
 }
 
+} // namespace private_boot
 
-// Returns true if the credits window is set visible at the moment
-bool CreditsScreen::IsVisible()
-{
-	return _visible;
-}
-
-
-} // end hoa_boot
+} // namespace hoa_boot

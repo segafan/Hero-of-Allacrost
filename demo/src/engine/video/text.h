@@ -29,6 +29,7 @@ namespace hoa_video {
 //! \brief The singleton pointer for the instance of the text supervisor
 extern TextSupervisor* TextManager;
 
+
 //! \brief Styles for setting the type of text shadows.
 enum TEXT_SHADOW_STYLE {
 	VIDEO_TEXT_SHADOW_INVALID = -1,
@@ -50,7 +51,6 @@ enum TEXT_SHADOW_STYLE {
 };
 
 
-
 /** ****************************************************************************
 *** \brief A structure to hold properties about a particular font glyph
 *** ***************************************************************************/
@@ -59,23 +59,14 @@ public:
 	//! \brief The index of the GL texture for this glyph.
 	GLuint texture;
 
-	//! \brief The width of the glyph in pixels.
-	int32 width;
+	//! \brief The width and height of the glyph in pixels.
+	int32 width, height;
 
-	//! \brief The height of the glyph in pixels.
-	int32 height;
+	//! \brief The mininum x and y pixel coordinates of the glyph in texture space (refer to TTF_GlyphMetrics).
+	int min_x, min_y;
 
-	//! \brief The minx of the glyph in pixels (see TTF_GlyphMetrics).
-	int min_x;
-
-	//! \brief The miny of the glyph in pixels (see TTF_GlyphMetrics).
-	int min_y;
-
-	//! \brief The maxx of the glyph in texture space (see TTF_GlyphMetrics).
-	float max_x;
-
-	//! \brief The maxy of the glyph in texture space (see TTF_GlyphMetrics).
-	float max_y;
+	//! \brief The maximum x and y pixel coordinates of the glyph in texture space (refer to TTF_GlyphMetrics).
+	float max_x, max_y;
 
 	//! \brief The amount of space between glyphs.
 	int32 advance;
@@ -119,10 +110,10 @@ public:
 class TextStyle {
 public:
 	TextStyle() :
-		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK) , color(Color::white) {}
+		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), color(Color::white) {}
 
-	TextStyle(Color col) :
-		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), color(col) {}
+	TextStyle(Color c) :
+		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), color(c) {}
 
 	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style) :
 		font(fnt), shadow_style(style), color(Color::white) {}
@@ -136,25 +127,24 @@ public:
 	//! \brief The string font name
 	std::string font;
 
-	//! \brief The x offset of the shadow
-	int32 shadow_offset_x;
-
-	//! \brief The y offset of the shadow
-	int32 shadow_offset_y;
+	//! \brief The x and y offsets of the shadow
+	int32 shadow_offset_x, shadow_offset_y;
 
 	//! \brief The enum representing the shadow style
 	TEXT_SHADOW_STYLE shadow_style;
 
-	//! \brief The text color
+	//! \brief The color of the text
 	Color color;
-};
+}; // class TextStyle
+
 
 namespace private_video {
 
 /** ****************************************************************************
 *** \brief Represents an image of rendered text stored in a texture sheet
-*** A text specific subclass of the BaseImage subclass, contains a
-*** string and style needed to render a piece of text.
+***
+*** A text specific class derived from the BaseImage class, it contains a
+*** unicode string and text style needed to render a piece of text.
 *** ***************************************************************************/
 class TextImageTexture : public private_video::BaseTexture {
 public:

@@ -25,51 +25,53 @@
 
 namespace hoa_boot {
 
-// TODO: this should all be defined in the private_boot namespace
+namespace private_boot {
 
 /** ****************************************************************************
-*** \brief Provides for everything that is needed for displaying the game credits.
-***
-*** This class is used only in boot mode.
-*** *****************************************************************************/
-class CreditsScreen
-{
+*** \brief Provides for everything that is needed for displaying the game credits
+*** ***************************************************************************/
+class CreditsScreen {
 public:
 	CreditsScreen();
 
 	~CreditsScreen();
 
-	//! Draws the credits window on the screen if it is set visible
+	//! \brief Draws the credits window on the screen if it is set visible
 	void Draw();
 
-	//! Updates the credits window
-	void UpdateWindow(int32 frame_time);
+	/** \brief Updates the credits window
+	*** \param time The number of milliseconds to update the credits screen by
+	**/
+	void Update(uint32 time);
 
-	//! Shows the credits window
+	//! \brief Shows the credits window
 	void Show();
 
-	//! Hides the credits window
+	//! \brief Hides the credits window
 	void Hide();
 
-	//! Returns true if the credits window is set visible at the moment
-	bool IsVisible();
+	//! \brief Returns true if the credits window is visible (not hidden)
+	bool IsVisible()
+		{ return _visible; }
 
 private:
-	//! Window for the screen
+	//! \brief The MenuWindow for the credits backdrop
 	hoa_video::MenuWindow _window;
 
-	//! Is the window visible or not
-	bool _visible;
-
-	//! Text Y offset
-	float _text_offset_y;
-
-	//! Text to be displayed
+	//! \brief Retains the credits text to be displayed
 	hoa_utils::ustring _credits_text;
 
-	//! Rendered text string
+	//! \brief The rendered text of the credits
 	hoa_video::RenderedText _credits_rendered;
-};
+
+	//! \brief Is the window visible or not
+	bool _visible;
+
+	//! \brief The vertical offset for the scrolling credits text
+	float _scroll_offset;
+}; // class CreditsScreen
+
+} // namespace private_boot
 
 } // namespace hoa_boot
 

@@ -9,7 +9,7 @@
 
 /** ****************************************************************************
 *** \file    text.cpp
-*** \author  Raj Sharma, roos@allacrost.org
+*** \author  Lindsay Roberts, linds@allacrost.org
 *** \brief   Source file for text rendering
 ***
 *** This code makes use of the SDL_ttf font library for representing fonts,
