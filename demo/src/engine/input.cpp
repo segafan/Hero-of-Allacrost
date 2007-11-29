@@ -162,7 +162,11 @@ bool GameInput::SingletonInitialize() {
 	_joystick.pause        = static_cast<uint8>(input_map_data.ReadInt("pause"));
 	_joystick.quit         = static_cast<uint8>(input_map_data.ReadInt("quit"));
 	input_map_data.CloseTable();
-	input_map_data.CloseTable();			
+	input_map_data.CloseTable();
+	
+	// TEMP - WinterKnight - These should be selectable by the end user. For now, they are just hard-coded.
+	_joystick.x_axis = 0;
+	_joystick.y_axis = 1;
 
 	if (input_map_data.IsErrorDetected()) {
 		cerr << "INPUT: an error occured while trying to retrieve joystick mapping information "
@@ -657,7 +661,54 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 // Handles all joystick events for the game
 void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 	if (js_event.type == SDL_JOYAXISMOTION) {
-		if (js_event.jaxis.axis == 0) { // X-axis motion
+		if (js_event.jaxis.axis == _joystick.x_axis) {
+			if (js_event.jaxis.value < -JOYAXIS_THRESHOLD) {
+				if (!_left_state) {
+					_left_state = true;
+					_left_press = true;
+				}
+			}
+			else {
+				_left_state = false;
+				_left_press = false;
+			}
+			
+			if (js_event.jaxis.value > JOYAXIS_THRESHOLD) {
+				if (!_right_state) {
+					_right_state = true;
+					_right_press = true;
+				}
+			}
+			else {
+				_right_state = false;
+				_right_press = false;
+			}
+		}
+		else if (js_event.jaxis.axis == _joystick.y_axis) {
+			if (js_event.jaxis.value < -JOYAXIS_THRESHOLD) {
+				if (!_up_state) {
+					_up_state = true;
+					_up_press = true;
+				}
+			}
+			else {
+				_up_state = false;
+				_up_press = false;
+			}
+
+			if (js_event.jaxis.value > JOYAXIS_THRESHOLD) {
+				if (!_down_state) {
+					_down_state = true;
+					_down_press = true;
+				}
+			}
+			else {
+				_down_state = false;
+				_down_press = false;
+			}
+		}
+
+/*		if (js_event.jaxis.axis == 0) { // X-axis motion
 			if (_joyaxis_x_first == true) {
 				_joystick.x_current_peak = js_event.jaxis.value;
 				_joyaxis_x_first = false;
@@ -674,8 +725,8 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			if (abs(js_event.jaxis.value) > abs(_joystick.y_current_peak)) {
 				_joystick.y_current_peak = js_event.jaxis.value;
 			}
-		}
-	} // if (js_event.type == SDL_JOYAXISMOTION)
+		} */
+	}// if (js_event.type == SDL_JOYAXISMOTION)
 	else if (js_event.type == SDL_JOYBUTTONDOWN) {
 
 		_any_key_press = true;

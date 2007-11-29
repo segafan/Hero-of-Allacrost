@@ -139,6 +139,10 @@ public:
 	int16 x_current_peak;
 	int16 y_current_peak;
 	//@}
+	
+	//! \brief Identify which axes to use for x and y.
+	int8 x_axis;
+	int8 y_axis;
 
 	friend class GameInput;
 }; // class JoystickState
