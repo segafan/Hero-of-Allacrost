@@ -147,19 +147,16 @@ void ActionWindow::Initialize(BattleCharacter* character) {
 	_action_category_list.EnableOption(0, !_character->GetActor()->GetAttackSkills()->empty());
 	_action_category_list.EnableOption(1, !_character->GetActor()->GetDefenseSkills()->empty());
 	_action_category_list.EnableOption(2, !_character->GetActor()->GetSupportSkills()->empty());
-	_action_category_list.EnableOption(3, !GlobalManager->GetInventoryItems()->empty());
-	else
+
+	//We do this if in case someone is already queued to use the last item in our inventory
+	_action_category_list.EnableOption(3, false);
+	std::vector<GlobalItem*>* items = GlobalManager->GetInventoryItems();
+	for (uint32 i = 0; i < items->size(); ++i)
 	{
-		//We do this if in case someone is already queued to use the last item in our inventory
-		_action_category_list.EnableOption(3, false);
-		std::vector<GlobalItem*>* items = GlobalManager->GetInventoryItems();
-		for (uint32 i = 0; i < items->size(); ++i)
+		if((*items)[i]->GetCount())
 		{
-			if((*items)[i]->GetCount())
-			{
-				_action_category_list.EnableOption(3, true);
-				break;
-			}
+			_action_category_list.EnableOption(3, true);
+			break;
 		}
 	}
 
