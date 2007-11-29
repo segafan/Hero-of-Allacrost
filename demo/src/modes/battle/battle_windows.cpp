@@ -200,6 +200,8 @@ void ActionWindow::Update() {
 
 
 void ActionWindow::_UpdateActionCategory() {
+	_action_category_list.Update();
+
 	if (InputManager->LeftPress()) {
 		_action_category_list.HandleLeftKey();
 	}
@@ -225,6 +227,8 @@ void ActionWindow::_UpdateActionCategory() {
 
 
 void ActionWindow::_UpdateActionSelection() {
+	_action_selection_list.Update();
+
 	if (InputManager->UpPress()) {
 		_action_selection_list.HandleUpKey();
 	}
@@ -319,7 +323,7 @@ void ActionWindow::_UpdateTargetSelection() {
 	//we need to update his HP to reflect what it is after the hit.  With the
 	//below logic, his info won't be refreshed until we change targets
 	if (InputManager->UpPress() || InputManager->DownPress()) {
-		BattleActor* previous_target = current_battle->_selected_target;
+//		BattleActor* previous_target = current_battle->_selected_target;
 		current_battle->_SelectNextTarget(InputManager->UpPress());
 		/*if (previous_target != current_battle->_selected_target) {
 			_ConstructTargetInformation();
@@ -327,7 +331,7 @@ void ActionWindow::_UpdateTargetSelection() {
 	}
 	else if (InputManager->LeftPress() || InputManager->RightPress()
 		&& _action_target_type == GLOBAL_TARGET_ATTACK_POINT) {
-		uint32 previous_ap = current_battle->_selected_attack_point;
+//		uint32 previous_ap = current_battle->_selected_attack_point;
 		current_battle->_SelectNextAttackPoint(InputManager->RightPress());
 		/*if (previous_ap != current_battle->_selected_attack_point) {
 			_ConstructTargetInformation();
