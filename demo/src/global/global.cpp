@@ -603,7 +603,10 @@ bool GameGlobal::SaveGame(const string& filename) {
 		return false;
 	}
 
-	// ----- (1) Save simple play data
+	// ----- (1) Write out namespace information
+	file.WriteNamespace("save_game1");
+
+	// ----- (2) Save simple play data
 	file.InsertNewLine();
 	file.WriteString("location_name", MakeStandardString(_location_name));
 	file.WriteUInt("play_hours", SystemManager->GetPlayHours());
@@ -611,7 +614,7 @@ bool GameGlobal::SaveGame(const string& filename) {
 	file.WriteUInt("play_seconds", SystemManager->GetPlaySeconds());
 	file.WriteUInt("drunes", _drunes);
 
-	// ----- (2) Save the inventory (object id + object count pairs)
+	// ----- (3) Save the inventory (object id + object count pairs)
 	// NOTE: This does not save any weapons/armor that are equipped on the characters. That data
 	// is stored alongside the character data when it is saved
 	_SaveInventory(file, "items", _inventory_items);
@@ -623,7 +626,7 @@ bool GameGlobal::SaveGame(const string& filename) {
 	_SaveInventory(file, "shards", _inventory_shards);
 	_SaveInventory(file, "key_items", _inventory_key_items);
 
-	// ----- (3) Save character data
+	// ----- (4) Save character data
 	file.InsertNewLine();
 	file.WriteLine("characters = {");
 	// First save the order of the characters in the party
@@ -662,9 +665,11 @@ bool GameGlobal::SaveGame(const string& filename) {
 
 bool GameGlobal::LoadGame(const string& filename) {
 	ReadScriptDescriptor file;
-	if (file.OpenFile(filename) == false) {
+	if (file.OpenFile(filename, true) == false) {
 		return false;
 	}
+	// open the namespace that the save game is encapsulated in.
+	file.OpenTable("save_game1");
 
 	// ----- (1) Load play data
 	_location_name = MakeUnicodeString(file.ReadString("location_name"));

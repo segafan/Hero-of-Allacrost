@@ -76,6 +76,7 @@ public:
 	**/
 	//@{
 	virtual bool OpenFile(const std::string& file_name);
+	virtual bool OpenFile(const std::string& file_name, bool force_reload);
 	virtual bool OpenFile();
 	virtual void CloseFile();
 	//@}

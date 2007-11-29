@@ -150,7 +150,7 @@ void TreasureMenu::Initialize(MapTreasure* treasure) {
 	// keep a record that we must delete the object once the menu is closed
 	for (uint32 i = 0; i < _treasure->_objects_list.size(); i++) {
 		GlobalObject* obj = _treasure->_objects_list[i];
-		if (GlobalManager->IsObjectInInventory(obj->GetID() == true)) {
+		if (GlobalManager->IsObjectInInventory(obj->GetID()) == true) {
 			GlobalManager->IncrementObjectCount(obj->GetID(), obj->GetCount());
 			_objects_to_delete.push_back(obj);
 		}
