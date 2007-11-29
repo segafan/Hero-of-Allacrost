@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,6 +57,9 @@ namespace private_video {
 ***
 *** \note All of the members of this class are public, so you must be careful
 *** not to assign them to an incorrect value.
+***
+*** \todo Write copy constructor and copy assignment operator to avoid double
+*** memory frees
 *** ***************************************************************************/
 class ImageMemory {
 public:
@@ -92,7 +95,7 @@ public:
 	/** \brief Converts the image data to grayscale format
 	*** \note Calling this function when the image data is already grayscaled will create the
 	*** exact same grayscaled image, but still take CPU time to do the conversion. There is
-	*** no way 
+	*** no way
 	*** \note You can not convert from grayscale back to the original image. If you wish to
 	*** do that, you must re-load or otherwise re-create the original.
 	**/
@@ -230,7 +233,7 @@ private:
 *** ImageTexture objects created, using the concatenated filename and tags of
 *** each object as the map key. When creating a new ImageTexture object, you
 *** should generally do the following:
-*** 
+***
 *** -# First make sure that the filename + tags is not already located in the
 ***    image map in the TextureController class
 *** -# Invoke the class constructor if the map search found no matching entry
