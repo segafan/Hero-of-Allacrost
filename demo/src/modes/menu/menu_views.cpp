@@ -163,8 +163,7 @@ void InventoryWindow::_InitInventoryItems() {
 	_inventory_items.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_inventory_items.SetSize( 1, 6 );
 	_inventory_items.Scissoring( true, false );
-	//_inventory_items.TEMP_OverideScissorring(true);
-
+	
 	// Update the item text
 	_UpdateItemText();
 	if (_inventory_items.GetNumberOptions() > 0) {
@@ -232,7 +231,7 @@ void InventoryWindow::_InitCategory() {
 // Activates/deactivates inventory window
 void InventoryWindow::Activate(bool new_status) {
 	// Set new status
-	if (_inventory_items.GetNumberOptions() > 0 && new_status) {
+	if (new_status) {
 		_active_box = ITEM_ACTIVE_CATEGORY;
 		// Update cursor state
 		_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -241,6 +240,7 @@ void InventoryWindow::Activate(bool new_status) {
 		//FIX ME: Play N/A noise
 		_active_box = ITEM_ACTIVE_NONE;
 		_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+		_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 	}
 }
 
@@ -895,6 +895,10 @@ GlobalSkill *SkillsWindow::_GetCurrentSkill()
 		break;
 	case SKILL_FIELD:
 		skill = menu_skills->at(_skills_list.GetSelection());
+		break;
+	default:
+		skill = NULL;
+		cerr << "MENU ERROR: Invalid skill type in SkillsWindow::_GetCurrentSkill()" << endl;
 		break;
 	}
 
