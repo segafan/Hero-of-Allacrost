@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,30 +35,23 @@ TextSupervisor* TextManager = NULL;
 
 namespace private_video {
 
-// *****************************************************************************
-// ********************************** TextImageTexture ***********************************
-// *****************************************************************************
+// -----------------------------------------------------------------------------
+// TextImageTexture class
+// -----------------------------------------------------------------------------
 
-TextImageTexture::TextImageTexture(const hoa_utils::ustring &string_, const TextStyle &style_) :
+TextImageTexture::TextImageTexture(const hoa_utils::ustring& string_, const TextStyle& style_) :
 	BaseTexture(),
 	string(string_),
 	style(style_)
 {
-
-	// Use image smoothing
+	// Enable image smoothing for text
 	smooth = true;
-
 	LoadFontProperties();
 }
 
 
 
 TextImageTexture::~TextImageTexture() {
-	if (TextureManager->_text_images.empty()) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "TextureManager's _text_images container was empty upon destructor invocation" << endl;
-		return;
-	}
-
 	if (TextureManager->_IsTextImageRegistered(this)) {
 		TextureManager->_text_images.erase(this);
 		return;
@@ -66,26 +59,22 @@ TextImageTexture::~TextImageTexture() {
 }
 
 
-bool TextImageTexture::LoadFontProperties()
-{
-	if (style.shadow_style == VIDEO_TEXT_SHADOW_INVALID)
-	{
+
+void TextImageTexture::LoadFontProperties() {
+	if (style.shadow_style == VIDEO_TEXT_SHADOW_INVALID) {
 		FontProperties *fp = TextManager->GetFontProperties(style.font);
-		if (!fp)
-		{
-			if (VIDEO_DEBUG)
-				cerr << "TextImageTexture::LoadFontProperties(): Invalid font '" << style.font << "'." << endl;
-			return false;
+		if (fp == NULL) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid font '" << style.font << "'" << endl;
 		}
-		style.shadow_style    = fp->shadow_style;
+		style.shadow_style = fp->shadow_style;
 		style.shadow_offset_x = fp->shadow_x;
 		style.shadow_offset_y = fp->shadow_y;
 	}
-	return true;
 }
 
-bool TextImageTexture::Regenerate()
-{
+
+
+bool TextImageTexture::Regenerate() {
 	if (texture_sheet) {
 		texture_sheet->RemoveTexture(this);
 		TextureManager->_RemoveSheet(texture_sheet);
@@ -94,64 +83,54 @@ bool TextImageTexture::Regenerate()
 
 	ImageMemory buffer;
 
-	if (!TextManager->_RenderText(string, style, buffer))
+	if (TextManager->_RenderText(string, style, buffer) == false)
 		return false;
-	
-	width  = buffer.width;
+
+	width = buffer.width;
 	height = buffer.height;
 
-	TexSheet *sheet = TextureManager->_InsertImageInTexSheet(this, buffer, true);
-	if(!sheet)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: TextImageTexture::Regenerate(): TextureManager::_InsertImageInTexSheet() returned NULL!" << endl;
-
+	TexSheet* sheet = TextureManager->_InsertImageInTexSheet(this, buffer, true);
+	if (sheet == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextureManager::_InsertImageInTexSheet() returned NULL" << endl;
 		free(buffer.pixels);
 		buffer.pixels = NULL;
 		return false;
 	}
 
 	texture_sheet = sheet;
-
-	if (buffer.pixels) {
-		free(buffer.pixels);
-		buffer.pixels = NULL;
-	}
+	free(buffer.pixels);
+	buffer.pixels = NULL;
 
 	return true;
 }
 
-bool TextImageTexture::Reload()
-{
-	// Check if indeed already loaded. If not - create texture sheet entry.
-	if (!texture_sheet)
+
+
+bool TextImageTexture::Reload() {
+	// Regenerate text image if it is not already loaded in a texture sheet
+	if (texture_sheet == NULL)
 		return Regenerate();
 
 	ImageMemory buffer;
 
-	if (!TextManager->_RenderText(string, style, buffer))
+	if (TextManager->_RenderText(string, style, buffer) == false)
 		return false;
-	
-	if (!texture_sheet->CopyRect(x, y, buffer))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: sheet->CopyRect() failed in TextImageTexture::Reload()!" << endl;
+
+	if (texture_sheet->CopyRect(x, y, buffer) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextureSheet::CopyRect() failed" << endl;
 		free(buffer.pixels);
 		buffer.pixels = NULL;
 		return false;
 	}
 
-	if (buffer.pixels) {
-		free(buffer.pixels);
-		buffer.pixels = NULL;
-	}
-
+	free(buffer.pixels);
+	buffer.pixels = NULL;
 	return true;
 }
 
-// *****************************************************************************
-// ****************************** TextImageElement *********************************
-// *****************************************************************************
+// -----------------------------------------------------------------------------
+// TextImageElement class
+// -----------------------------------------------------------------------------
 
 TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 	float u2_, float v2_, float width_, float height_) :
@@ -203,13 +182,9 @@ TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, fl
 
 } // namespace private_video
 
-// *****************************************************************************
-// ********************************* RenderedText *********************************
-// *****************************************************************************
-
-//-----------------------------------------------------------------------------
-// RenderedText::DefaultConstructor: Constructs empty RenderedText
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// RenderedText class
+// -----------------------------------------------------------------------------
 
 RenderedText::RenderedText() :
 	ImageDescriptor(),
@@ -219,189 +194,127 @@ RenderedText::RenderedText() :
 	_grayscale = false;
 }
 
-//-----------------------------------------------------------------------------
-// RenderedText::ustring-Constructor: Constructs and renders RenderedText with String
-//-----------------------------------------------------------------------------
 
-RenderedText::RenderedText(const ustring &string, TextStyle style, int8 alignment) {
-	Clear();
+
+RenderedText::RenderedText(const ustring& string, TextStyle style, int8 alignment) :
+	ImageDescriptor(),
+	_string(string),
+	_style(style)
+{
 	_grayscale = false;
-	_string = string;
-	_style = style;
+	Clear();
 	SetAlignment(alignment);
 	_Regenerate();
 }
 
-//-----------------------------------------------------------------------------
-// RenderedText::sstring-Constructor: Constructs and renders RenderedText with String
-//-----------------------------------------------------------------------------
 
-RenderedText::RenderedText(const std::string &string, TextStyle style, int8 alignment)  {
-	Clear();
+
+RenderedText::RenderedText(const string& string, TextStyle style, int8 alignment) :
+	ImageDescriptor(),
+	_string(MakeUnicodeString(string)),
+	_style(style)
+{
 	_grayscale = false;
-	_string = MakeUnicodeString(string);
-	_style = style;
+	Clear();
 	SetAlignment(alignment);
 	_Regenerate();
 }
 
-//-----------------------------------------------------------------------------
-// RenderedText::CopyConstructor: Copies state variables and increases ref counts.
-//-----------------------------------------------------------------------------
 
-RenderedText::RenderedText(const RenderedText &other) 
-{
-	// Chain to overriden copy constructor
-	*this = other;
-}
 
-//-----------------------------------------------------------------------------
-// RenderedText::operator=: Copies state variables and increases ref counts.
-//-----------------------------------------------------------------------------
+RenderedText::RenderedText(const RenderedText& copy) {
+	// Copy all RenderedText members
+	_string = copy._string;
+	_text_sections = copy._text_sections;
+	_alignment = copy._alignment;
+	_style = copy._style;
 
-RenderedText &RenderedText::operator=(const RenderedText &other)
-{
-	// Copy values from other RenderedText manually
-	_string        = other._string;
-	_text_sections = other._text_sections;
-	_alignment     = other._alignment;
-	_width         = other._width;
-	_height        = other._height;
-	_style         = other._style;
-
-	memcpy(_color, other._color, sizeof(_color));
-
-	// Increase ref count for all text sections
-	// as this RenderedText now also points to them
-	std::vector<TextImageElement>::iterator it;
-	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
-	{
-		if (it->image)
-			it->image->AddReference();
+	// Increment the reference count for all TextImageTexture objects
+	std::vector<TextImageElement>::iterator i;
+	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
+		if (i->image != NULL)
+			i->image->AddReference();
 	}
-	
+}
+
+
+
+RenderedText &RenderedText::operator=(const RenderedText& copy) {
+	// Handle the case were a dumbass assigns an object to itself
+	if (this == &copy) {
+		return *this;
+	}
+
+	// Copy all RenderedText members
+	_string = copy._string;
+	_text_sections = copy._text_sections;
+	_alignment = copy._alignment;
+	_style = copy._style;
+
+	// Increment the reference count for all TextImageTexture objects
+	std::vector<TextImageElement>::iterator i;
+	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
+		if (i->image != NULL)
+			i->image->AddReference();
+	}
+
 	return *this;
 }
 
-//-----------------------------------------------------------------------------
-// ~RenderedText: Decrements ref counts on contained timages
-//-----------------------------------------------------------------------------
 
-RenderedText::~RenderedText()
-{
-	_ClearImages();
-}
-
-//-----------------------------------------------------------------------------
-// Clear: Decrements ref counts on contained timages, clears contained text
-//-----------------------------------------------------------------------------
 
 void RenderedText::Clear() {
 	ImageDescriptor::Clear();
 	_string.clear();
 	_ClearImages();
-
-	SetColor(Color::white);
 }
 
 
-//-----------------------------------------------------------------------------
-// SetAlignment: Sets the horizontal text alignment of a RenderedText
-//-----------------------------------------------------------------------------
 
-bool RenderedText::SetAlignment(int8 alignment)
-{
-	switch (alignment)
-	{
+void RenderedText::Draw() const {
+	// TODO
+}
+
+
+
+void RenderedText::Draw(const Color& draw_color) const {
+	// TODO
+}
+
+
+
+void RenderedText::SetAlignment(int8 alignment) {
+	switch (alignment) {
 		case ALIGN_LEFT:
 		case ALIGN_CENTER:
 		case ALIGN_RIGHT:
-			if (_alignment != alignment)
-			{
+			if (_alignment != alignment) {
 				_alignment = alignment;
 				_Realign();
 			}
-			return true;
-			break;
+			return;
 		default:
-			if (VIDEO_DEBUG)
-				cerr << "VIDEO: " << __FUNCTION__ << ": alignment wasn't a valid constant." << endl;
-			return false;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "bad value for alignment argument: " << alignment << endl;
+			return;
 	}
 }
 
-//-----------------------------------------------------------------------------
-// SetText: Sets the contained text in a RenderedText and re-renders
-//-----------------------------------------------------------------------------
 
-void RenderedText::SetText(const ustring &string)
-{
-	_string = string;
-	_Regenerate();
-}
-
-//-----------------------------------------------------------------------------
-// SetText: std::string edition
-//-----------------------------------------------------------------------------
-
-void RenderedText::SetText(const std::string &string) {
-	SetText(MakeUnicodeString(string));
-}
-
-//-----------------------------------------------------------------------------
-// GetStyle: Gets the current text style
-//-----------------------------------------------------------------------------
-
-TextStyle RenderedText::GetStyle() const
-{
-	return _style;
-}
-
-//-----------------------------------------------------------------------------
-// SetStyle: Sets the text style and regenerates.
-//-----------------------------------------------------------------------------
-
-void RenderedText::SetStyle(TextStyle style)
-{
-	_style = style;
-	_Regenerate();
-}
-
-//-----------------------------------------------------------------------------
-// _ClearImages: Decrements reference counts on all contained timages
-//-----------------------------------------------------------------------------
-
-void RenderedText::_ClearImages()
-{
-	_text_sections.clear();
-	
-	_width  = 0;
-	_height = 0;
-}
-
-//-----------------------------------------------------------------------------
-// _Regenerate: (Re)Renders and aligns contained text
-//-----------------------------------------------------------------------------
 
 void RenderedText::_Regenerate() {
 	_ClearImages();
 
-	if(_string.empty())
-	{
+	if (_string.empty())
+		return;
+
+	FontProperties* fp = TextManager->GetFontProperties(_style.font);
+	if (TextManager->IsFontValid(_style.font) == false || fp == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid font or font properties" << endl;
 		return;
 	}
 
-	FontProperties *fp;
-	if (!TextManager->IsFontValid(_style.font)
-	|| ((fp = TextManager->GetFontProperties(_style.font)) == NULL))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "RenderedText::_Regenerate(): Video engine contains invalid font." << endl;
-		return;
-	}
-
-	uint16 newline = '\n';
-	std::vector<uint16 *> line_array;
+	const uint16 newline = '\n';
+	std::vector<uint16*> line_array;
 
 	TextManager->_CacheGlyphs(_string.c_str(), fp);
 
@@ -409,16 +322,13 @@ void RenderedText::_Regenerate() {
 	uint16 *reformatted_text = new uint16[_string.size() + 1];
 	uint16 *reform_iter = reformatted_text;
 	uint16 *last_line = reformatted_text;
-	for (char_iter = _string.c_str(); *char_iter; ++char_iter)
-	{
-		if (*char_iter == newline)
-		{
+	for (char_iter = _string.c_str(); *char_iter; ++char_iter) {
+		if (*char_iter == newline) {
 			*reform_iter++ = '\0';
 			line_array.push_back(last_line);
 			last_line = reform_iter;
 		}
-		else
-		{
+		else {
 			*reform_iter++ = *char_iter;
 		}
 	}
@@ -427,20 +337,17 @@ void RenderedText::_Regenerate() {
 
 	std::vector<uint16 *>::iterator line_iter;
 
-	Color old_color       = _style.color;
+	Color old_color = _style.color;
 	int32 shadow_offset_x = 0;
 	int32 shadow_offset_y = 0;
-	Color shadow_color    = TextManager->_GetTextShadowColor(fp);
+	Color shadow_color = TextManager->_GetTextShadowColor(fp);
 
-	float total_height = static_cast<float>( (line_array.size() - 1) * fp->line_skip );
+	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
 
-	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
-	{
+	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter) {
 		TextImageTexture *timage = new TextImageTexture(*line_iter, _style);
-		if (!timage->Regenerate())
-		{
-			if (VIDEO_DEBUG)
-			{
+		if (!timage->Regenerate()) {
+			if (VIDEO_DEBUG) {
 				cerr << "RenderedText::_Regenerate(): Failed to render TextImageTexture" << endl;
 			}
 		}
@@ -452,15 +359,13 @@ void RenderedText::_Regenerate() {
 		TextImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(timage->width), static_cast<float>(timage->height), _color);
 
 		// if text shadows are enabled, add a shadow version
-		if (timage->style.shadow_style != VIDEO_TEXT_SHADOW_NONE)
-		{
+		if (timage->style.shadow_style != VIDEO_TEXT_SHADOW_NONE) {
 			shadow_offset_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()) * timage->style.shadow_offset_x;
 			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection())   * timage->style.shadow_offset_y;
 
 			TextImageElement shadow_element = element;
 			shadow_element.x_offset += shadow_offset_x;
 			shadow_element.y_offset += shadow_offset_y;
-
 
 			// Line offsets must be set to be retained
 			// after lines are aligned
@@ -490,26 +395,24 @@ void RenderedText::_Regenerate() {
 		// Increase height by the font specified line height
 		_height += fp->line_skip;
 	}
+
 	delete[] reformatted_text;
 	_Realign();
-}
+} // void RenderedText::_Regenerate()
 
-//-----------------------------------------------------------------------------
-// _Realign: (Re)Aligns all text items to set alignment
-//-----------------------------------------------------------------------------
 
-void RenderedText::_Realign()
-{
-	std::vector<TextImageElement>::iterator it;
-	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
-	{
-		it->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * ( (_width - it->width) / 2.0f) + it->x_line_offset;
+
+void RenderedText::_Realign() {
+	vector<TextImageElement>::iterator i;
+	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
+		i->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() *
+			((_width - i->width) / 2.0f) + i->x_line_offset;
 	}
 }
 
-//-----------------------------------------------------------------------------
-// TextSupervisor class font and text methods
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// TextSupervisor class
+// -----------------------------------------------------------------------------
 
 TextSupervisor::TextSupervisor()
 {}
@@ -613,7 +516,7 @@ void TextSupervisor::SetDefaultFont(const std::string& font_name) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because no font existed by the name: " << font_name << endl;
 		return;
 	}
-	
+
 	VideoManager->_current_context.font = font_name;
 }
 
@@ -630,7 +533,7 @@ FontProperties* TextSupervisor::GetFontProperties(const std::string& font_name) 
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed becase argument was invalid for font name: " << font_name << endl;
 		return NULL;
 	}
-	
+
 	return _font_map[font_name];
 }
 
@@ -647,7 +550,7 @@ void TextSupervisor::SetFontShadowStyle(const std::string& font_name, TEXT_SHADO
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because the properties were NULL for for font: " << font_name << endl;
 		return;
 	}
-	
+
 	font->shadow_style = style;
 }
 
@@ -658,7 +561,7 @@ void TextSupervisor::SetFontShadowOffsets(const std::string& font_name, int32 x,
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid font_name argument: " << font_name << endl;
 		return;
 	}
-	
+
 	FontProperties *font = _font_map[font_name];
 	if (font == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to retrieve font properties for font: " << font_name << endl;
@@ -770,12 +673,12 @@ int32 TextSupervisor::CalculateTextWidth(const std::string& font_name, const hoa
 		return -1;
 	}
 
-	int32 width;	
+	int32 width;
 	if (TTF_SizeUNICODE(_font_map[font_name]->ttf_font, text.c_str(), &width, NULL) == -1) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_SizeUNICODE failed with TTF error: " << TTF_GetError() << endl;
 		return -1;
 	}
-		
+
 	return width;
 }
 
@@ -787,12 +690,12 @@ int32 TextSupervisor::CalculateTextWidth(const std::string& font_name, const std
 		return -1;
 	}
 
-	int32 width;	
+	int32 width;
 	if (TTF_SizeText(_font_map[font_name]->ttf_font, text.c_str(), &width, NULL) == -1) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_SizeText failed with TTF error: " << TTF_GetError() << endl;
 		return -1;
 	}
-		
+
 	return width;
 }
 
@@ -806,7 +709,7 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 	static const uint16 fallbackglyph = '?'; // fall back to this glyph if one does not exist
 
 	TTF_Font * font = fp->ttf_font;
-	
+
 	SDL_Surface *initial = NULL;
 	SDL_Surface *intermediary = NULL;
 	int32 w,h;
@@ -822,7 +725,7 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 			continue;
 
 		initial = TTF_RenderGlyph_Blended(font, character, color);
-		
+
 		if(!initial)
 		{
 			if(VIDEO_DEBUG)
@@ -840,7 +743,7 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 		}
 
 		w = RoundUpPow2(initial->w + 1);
-		h = RoundUpPow2(initial->h + 1);	
+		h = RoundUpPow2(initial->h + 1);
 
 		uint32 rmask, gmask, bmask, amask;
 
@@ -856,9 +759,9 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 			gmask = 0x0000ff00;
 			bmask = 0x00ff0000;
 			amask = 0xff000000;
-		#endif	
+		#endif
 
-		intermediary = SDL_CreateRGBSurface(0, w, h, 32, 
+		intermediary = SDL_CreateRGBSurface(0, w, h, 32,
 				rmask, gmask, bmask, amask);
 
 		if(!intermediary)
@@ -889,7 +792,7 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 				cerr << "VIDEO ERROR: glGetError() true after glGenTextures() in CacheGlyphs()!" << endl;
 			return false;
 		}
-		
+
 		TextureManager->_BindTexture(texture);
 		if(VideoManager->CheckGLError())
 		{
@@ -907,18 +810,18 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 		for (uint32 j = 0; j < num_bytes; j += 4)
 		{
 			((uint8*)intermediary->pixels)[j+3] = ((uint8*)intermediary->pixels)[j+2];
-			
+
 			((uint8*)intermediary->pixels)[j+0] = 0xff;
 			((uint8*)intermediary->pixels)[j+1] = 0xff;
 			((uint8*)intermediary->pixels)[j+2] = 0xff;
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, 
+		glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA,
 					 GL_UNSIGNED_BYTE, intermediary->pixels );
 		SDL_UnlockSurface(intermediary);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
 		if(VideoManager->CheckGLError())
@@ -972,14 +875,14 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 bool TextSupervisor::_DrawTextHelper(const uint16 *uText, FontProperties *fp, Color color) {
 	if(_font_map.empty())
 		return false;
-		
+
 	// empty string, do nothing
 	if (*uText == 0)
 		return true;
-		
+
 	if (!fp)
 		return false;
-	
+
 	glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_BLEND);
 
@@ -1015,28 +918,28 @@ bool TextSupervisor::_DrawTextHelper(const uint16 *uText, FontProperties *fp, Co
 	Color textColor = color * modulation;
 
 	int xpos = 0;
-	
+
 	GLfloat tex_coords[8];
 	GLint vertices[8];
-	
+
 	glEnableClientState ( GL_VERTEX_ARRAY );
 	glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
-	
+
 	glVertexPointer ( 2, GL_INT, 0, vertices );
 	glTexCoordPointer ( 2, GL_FLOAT, 0, tex_coords );
 
 	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
 	{
 		FontGlyph * glyphinfo = (*fp->glyph_cache)[*glyph];
-		
-		int xhi = glyphinfo->width; 
+
+		int xhi = glyphinfo->width;
 		int yhi = glyphinfo->height;
-		
+
 		if(cs.GetHorizontalDirection() < 0.0f)
 			xhi = -xhi;
 		if(cs.GetVerticalDirection() < 0.0f)
 			yhi = -yhi;
-			
+
 		float tx, ty;
 		tx = glyphinfo->max_x;
 		ty = glyphinfo->max_y;
@@ -1044,7 +947,7 @@ bool TextSupervisor::_DrawTextHelper(const uint16 *uText, FontProperties *fp, Co
 		int minx, miny;
 		minx = glyphinfo->min_x * (int)cs.GetHorizontalDirection() + xpos;
 		miny = glyphinfo->min_y * (int)cs.GetVerticalDirection();
-		
+
 		TextureManager->_BindTexture(glyphinfo->texture);
 
 		if(VideoManager->CheckGLError())
@@ -1053,7 +956,7 @@ bool TextSupervisor::_DrawTextHelper(const uint16 *uText, FontProperties *fp, Co
 				cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in _DrawTextHelper!" << endl;
 			return false;
 		}
-		
+
 		vertices[0] = minx;
 		vertices[1] = miny;
 		vertices[2] = minx + xhi;
@@ -1070,7 +973,7 @@ bool TextSupervisor::_DrawTextHelper(const uint16 *uText, FontProperties *fp, Co
 		tex_coords[5] = 0.0f;
 		tex_coords[6] = 0.0f;
 		tex_coords[7] = 0.0f;
-		
+
 		glColor4fv((GLfloat*)&textColor);
 		glDrawArrays(GL_QUADS, 0, 4);
 
@@ -1081,7 +984,7 @@ bool TextSupervisor::_DrawTextHelper(const uint16 *uText, FontProperties *fp, Co
 	glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
 
 	glPopMatrix();
-	
+
 	if (VideoManager->_fog_intensity > 0.0f)
 		glEnable(GL_FOG);
 
@@ -1134,7 +1037,7 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring &string, TextStyle &style, I
 		static const int gmask = 0x0000ff00;
 		static const int bmask = 0x00ff0000;
 		static const int amask = 0xff000000;
-	#endif	
+	#endif
 
 	if (TTF_SizeUNICODE(font, string.c_str(), &line_w, &line_h) == -1)
 	{
@@ -1166,7 +1069,7 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring &string, TextStyle &style, I
 			line_start_x = first_glyphinfo->min_x;
 	}
 
-	// TTF_SizeUNICODE underestimates line width as a 
+	// TTF_SizeUNICODE underestimates line width as a
 	// result of its micro positioning
 	if (calc_line_width > line_w)
 		line_w = calc_line_width;

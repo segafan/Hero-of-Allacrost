@@ -160,13 +160,13 @@ public:
 	//! \brief The string represented
 	hoa_utils::ustring string;
 
-	//! \brief The font/color/etc.
+	//! \brief The text style of the rendered string
 	TextStyle style;
 
 	// ---------- Public methods
 
 	//! \brief Loads the properties of the internal font
-	bool LoadFontProperties();
+	void LoadFontProperties();
 
 	//! \brief Generate a text texture and add to a texture sheet
 	bool Regenerate();
@@ -233,46 +233,50 @@ public:
 	RenderedText();
 
 	//! \brief Constructs rendered string of specified ustring
-	RenderedText(const hoa_utils::ustring &string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
+	RenderedText(const hoa_utils::ustring& string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
 
 	//! \brief Constructs rendered string of specified std::string
-	RenderedText(const std::string        &string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
+	RenderedText(const std::string& string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
 
 	//! \brief Copy constructor increases contained reference counts
-	RenderedText(const RenderedText &other);
+	RenderedText(const RenderedText& copy);
 
-	//! \brief Clone operator increases contained reference counts
-	RenderedText &operator=(const RenderedText &other);
+	//! \brief Copy assignment operator increases contained reference counts
+	RenderedText& operator=(const RenderedText& copy);
 
 	//! \brief Destructs RenderedText, lowering reference counts on all contained timages.
-	~RenderedText();
+	~RenderedText()
+		{ _ClearImages(); }
+
+	// ---------- Public methods
 
 	//! \brief Clears the image by resetting its properties
 	void Clear();
 
-	void Draw() const {}
+	//! \brief Draws the rendered text to the screen
+	void Draw() const;
 
-	void Draw(const Color& draw_color) const {}
+	/** \brief Draws the rendered text to the screen with a color modulation
+	*** \param draw_color The color to modulate the text by
+	**/
+	void Draw(const Color& draw_color) const;
 
-	//! \name Class Member Set Functions
-	//@{
-	//! \brief Sets the text contained
-	void SetText(const hoa_utils::ustring &string);
+	/** \brief Sets the horizontal text alignment
+	*** \param alignment The alignment type: ALIGN_CENTER, ALIGN_LEFT or ALIGN_RIGHT.
+	**/
+	void SetAlignment(int8 alignment);
 
-	//! \brief Sets the text (std::string version)
-	void SetText(const std::string &string);
-
-	/** \brief Sets horizontal text alignment
-	 *  \param alignment The alignment - ALIGN_CENTER,
-	 *         ALIGN_LEFT or ALIGN_RIGHT.
-	 */
-	bool SetAlignment(int8 alignment);
-
+	//! \brief Dervied from ImageDescriptor, this method is not used by RenderedText
 	void EnableGrayScale()
 		{}
 
+	//! \brief Dervied from ImageDescriptor, this method is not used by RenderedText
 	void DisableGrayScale()
 		{}
+
+	//! \brief Sets image to static/animated
+	virtual void SetStatic(bool is_static)
+		{ _is_static = is_static; }
 
 	//! \brief Sets width of the image
 	virtual void SetWidth(float width)
@@ -286,12 +290,9 @@ public:
 	virtual void SetDimensions(float width, float height)
 		{ _width  = width; _height = height; }
 
+	//! \brief Dervied from ImageDescriptor, this method is not used by RenderedText
 	void SetUVCoordinates(float u1, float v1, float u2, float v2)
 		{}
-
-	//! \brief Sets image to static/animated
-	virtual void SetStatic(bool is_static)
-		{ _is_static = is_static; }
 
 	//! \brief Sets the color for the image (for all four verteces).
 	void SetColor(const Color &color)
@@ -305,56 +306,52 @@ public:
 	**/
 	void SetVertexColors(const Color &tl, const Color &tr, const Color &bl, const Color &br)
 		{ _color[0] = tl; _color[1] = tr; _color[2] = bl; _color[3] = br; }
-	//@}
 
-	//! \name Class Member Get Functions
+	//! \brief Sets the text contained
+	void SetText(const hoa_utils::ustring &string)
+		{ _string = string; _Regenerate(); }
+
+	//! \brief Sets the text (std::string version)
+	void SetText(const std::string &string)
+		{ SetText(hoa_utils::MakeUnicodeString(string)); }
+
+	//! \brief Sets the texts style - regenerating text if present.
+	void SetStyle(TextStyle style)
+		{ _style = style; _Regenerate(); }
+
+	//! \name Class Member Access Functions
 	//@{
-	//! \brief Returns the filename of the image.
 	hoa_utils::ustring GetString() const
 		{ return _string; }
 
-	/** \brief Returns the color of a particular vertex
-	*** \param c The Color object to place the color in.
-	*** \param index The vertex index of the color to fetch
-	*** \note If an invalid index value is used, the function will return with no warning.
-	**/
-	void GetVertexColor(Color &c, uint8 index)
-		{ if (index > 3) return; else c = _color[index]; }
+	TextStyle GetStyle() const
+		{ return _style; }
 	//@}
 
-	//! \brief Returns the text's style.
-	TextStyle GetStyle() const;
-
-	//! \brief Sets the texts style - regenerating text if present.
-	void SetStyle(TextStyle style);
-
 private:
-	/** \brief Clears all rendered text, decreasing ref count.
-	**/
-	void _ClearImages();
-
-	/** \brief Regenerates the string textures.
-	**/
-	void _Regenerate();
-
-	/** \brief Realigns text to a horizontal alignment
-	**/
-	void _Realign();
-
-	/** \brief The string this was constructed from (for reloading)
-	**/
+	//! \brief The unicode string of the text to render
 	hoa_utils::ustring _string;
-
-	/** The TextImage elements representing rendered text
-	**  portions, usually lines.
-	**/
-	std::vector<private_video::TextImageElement> _text_sections;
 
 	//! \brief The horizontal text alignment
 	int8 _alignment;
 
-	//! \brief The style of the text contained
+	//! \brief The style to render the text in
 	TextStyle _style;
+
+	//! \brief The TextImage elements representing rendered text portions, usually lines.
+	std::vector<private_video::TextImageElement> _text_sections;
+
+	// ---------- Private methods
+
+	//! \brief Removes all rendered images of text and decreases the texture reference counts
+	void _ClearImages()
+		{ _text_sections.clear(); _width = 0; _height = 0; }
+
+	//! \brief Regenerates the texture images for the text
+	void _Regenerate();
+
+	//! \brief Realigns the text to its horizontal alignment type
+	void _Realign();
 }; // class RenderedText : public ImageDescriptor
 
 
