@@ -987,7 +987,6 @@ void SkillsWindow::Draw() {
 	_skills_categories.Draw();
 	_skills_list.Draw();
 	_skill_cost_list.Draw();
-	_description.Draw();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
