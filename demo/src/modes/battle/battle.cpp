@@ -78,7 +78,7 @@ BattleMode::BattleMode() :
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
-	_active_action(NULL),
+	//_active_action(NULL),
 	_next_monster_location_index(0),
 	_default_music("mus/Confrontation.ogg")
 {
@@ -366,11 +366,25 @@ void BattleMode::_Initialize() {
 void BattleMode::_ShutDown() {
 	_battle_music[_current_music].Stop();
 
+	_ReviveCharacters();
+
 	// This call will clear the input state
 	InputManager->EventHandler();
 
 	// Remove this BattleMode instance from the game stack
 	ModeManager->Pop();
+}
+
+//Bring all dead people back with 1 HP
+void BattleMode::_ReviveCharacters()
+{
+	std::deque<BattleCharacter*>& party = GetCharacters();
+
+	for (uint32 i = 0; i < party.size(); ++i)
+	{
+		if (!party[i]->IsAlive())
+			party[i]->GetActor()->SetHitPoints(1);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -408,35 +422,8 @@ void BattleMode::Update() {
 
 	// ----- (3): Execute any scripts that are sitting in the queue
 	if (_action_queue.size()) {
-		std::list<private_battle::BattleAction*>::iterator it;
-		bool ran_script = false;
-		BattleAction* se;
-		//for (uint8 i = 0; i < _action_queue.size(); i++)
-		for (it = _action_queue.begin(); it != _action_queue.end(); it++)
-		{
-			se = (*it);//_action_queue.front();
-			se->Update();
-			//(*it).Update();
-			//se._warm_up_time -= SystemManager->GetUpdateTime();
-			if (se->GetWarmUpTime()->IsFinished() && !_IsExecutingAction())
-			{
-				SetPerformingAction(true, se);
-				se->RunScript();
-				ran_script = true;
-				//Later have battle mode call UpdateActiveBattleAction instead
-				//_action_queue.pop_front();
-			}
-		}
-
-		//Do this out here so iterator doesnt get screwed up mid-loop
-		if (ran_script)
-		{
-			//If we used an item, immediately reconstruct the action list
-			//This way if an item is used
-			//if (se->GetItem())
-
-			SetPerformingAction(false, NULL);
-		}
+		_UpdateScripts();
+		_CleanupActionQueue();
 	} // if (_action_queue.size())
 
 	// ----- (4): Try to select an idle character if no character is currently selected
@@ -453,6 +440,55 @@ void BattleMode::Update() {
 	if (_action_window->GetState() != VIEW_INVALID)
 		_action_window->Update();
 } // void BattleMode::Update()
+
+void BattleMode::_UpdateScripts()
+{
+	bool ran_script = false;
+	BattleAction* se;
+	std::list<private_battle::BattleAction*>::iterator it;
+
+	for (it = _action_queue.begin(); it != _action_queue.end(); it++)
+	{
+		se = (*it);
+
+		if (se->ShouldBeRemoved())
+			continue;
+
+		se->Update();
+		
+		if (se->GetWarmUpTime()->IsFinished())// && !_IsExecutingAction())
+		{
+			//SetPerformingAction(true, se);
+			se->RunScript();
+			//ran_script = true;
+			//Later have battle mode call UpdateActiveBattleAction instead
+			//_action_queue.pop_front();
+		}
+	}
+
+	//Do this out here so iterator doesnt get screwed up mid-loop
+	/*if (ran_script)
+	{
+		SetPerformingAction(false, NULL);
+	}*/
+}
+
+void BattleMode::_CleanupActionQueue()
+{
+	std::list<private_battle::BattleAction*>::iterator it;
+
+	for (it = _action_queue.begin(); it != _action_queue.end();)
+	{
+		if ((*it)->ShouldBeRemoved())
+		{
+			it = _action_queue.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // BattleMode class -- draw methods
@@ -736,11 +772,12 @@ uint32 BattleMode::_NumberCharactersAlive() const {
 
 
 
-void BattleMode::SetPerformingAction(bool is_performing, BattleAction* se) {
+/*void BattleMode::SetPerformingAction(bool is_performing, BattleAction* se) {
 	// Check if a script has just ended. Set the script to stop performing and pop the script from the front of the queue
-	// ANDY: Only one script will be running at a time, so only need to check the incoming bool
+	// CD: Only one script will be running at a time, so only need to check the incoming bool
 
-	if (is_performing == false) {
+	if (is_performing == false)
+	{
 		// Remove the first scripted event from the queue
 		// _action_queue.front().GetSource() is always either BattleEnemy or BattleCharacter
 		//IBattleActor * source = dynamic_cast<IBattleActor*>(_action_queue.front().GetSource());
@@ -748,38 +785,38 @@ void BattleMode::SetPerformingAction(bool is_performing, BattleAction* se) {
 		BattleActor* source = (*_active_action).GetSource();
 		if (source) {
 			source->SetState(ACTOR_IDLE);
-
-			std::list<private_battle::BattleAction*>::iterator it = _action_queue.begin();
-			while (it != _action_queue.end()) {
-				if ((*it) == _active_action) {
-					_action_queue.erase(it);
-					break;
-				}
-				it++;
-			}
-
-			//FIX ME Use char and enemy stats
+			//FIXME Use char and enemy stats
 			source->ResetWaitTime();
 		}
+
+		//	std::list<private_battle::BattleAction*>::iterator it = _action_queue.begin();
+		//	while (it != _action_queue.end()) {
+		//		if ((*it) == _active_action) {
+		//			_action_queue.erase(it);
+		//			break;
+		//		}
+		//		it++;
+		//	}
+		}
 		else {
-			cerr << "Invalid IBattleActor pointer in SetPerformingScript()" << endl;
+			cerr << "Invalid BattleActor pointer in SetPerformingScript()" << endl;
 			SystemManager->ExitGame();
 		}
 	}
-	else {// if (is_performing)
+	else
+	{
 		if (se == NULL) {
-			cerr << "Invalid IBattleActor pointer in SetPerformingScript()" << endl;
+			cerr << "Invalid BattleActor pointer in SetPerformingScript()" << endl;
 			SystemManager->ExitGame();
 		}
 	}
 
 	_active_action = se;
-}
+}*/
 
 
 
 void BattleMode::RemoveActionsForActor(BattleActor * actor) {
-//void BattleMode::RemoveScriptedEventsForActor(IBattleActor * actor) {
 	std::list<private_battle::BattleAction*>::iterator it = _action_queue.begin();
 
 	while (it != _action_queue.end()) {
@@ -788,11 +825,10 @@ void BattleMode::RemoveActionsForActor(BattleActor * actor) {
 				ItemAction* action = dynamic_cast<ItemAction*>(*it);
 				action->GetItem()->IncrementCount(1);
 			}
-			it = _action_queue.erase(it);	//remove this location
+			//it = _action_queue.erase(it);	//remove this location
+			(*it)->MarkForRemoval();
 		}
-		else {
-			it++;
-		}
+		it++;
 	}
 }
 
@@ -923,7 +959,40 @@ uint32 BattleMode::GetIndexOfCharacter(BattleCharacter* const actor) const {
 	return INVALID_BATTLE_ACTOR_INDEX;
 }
 
-
+uint32 BattleMode::GetIndexOfNextAliveCharacter(bool move_upward) const
+{
+	if (move_upward) {
+		for (uint32 i = _selected_target_index + 1; i < _character_actors.size(); i++) {
+			if (_character_actors[i]->IsAlive()) {
+				return i;
+			}
+		}
+		for (int32 i = 0; i <= _selected_target_index; ++i) {
+			if (_character_actors[i]->IsAlive()) {
+				return i;
+			}
+		}
+		
+		// This should never be reached
+		return INVALID_BATTLE_ACTOR_INDEX;
+	}
+	else {
+		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; i--) {
+			if (_character_actors[i]->IsAlive()) {
+				return i;
+			}
+		}
+		for (int32 i = static_cast<int32>(_character_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); i--) {
+			if (_character_actors[i]->IsAlive())
+			{
+				return i;
+			}
+		}
+		
+		// This should never be reached
+		return INVALID_BATTLE_ACTOR_INDEX;
+	}
+}
 
 uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 	if (move_upward) {

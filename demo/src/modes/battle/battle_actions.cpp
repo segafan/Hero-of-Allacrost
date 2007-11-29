@@ -48,7 +48,8 @@ namespace private_battle {
 BattleAction::BattleAction(BattleActor* source, BattleActor* target, GlobalAttackPoint* attack_point) :
 	_source(source),
 	_target(target),
-	_attack_point(attack_point)
+	_attack_point(attack_point),
+	_should_be_removed(false)
 {
 	if ((source == NULL || target == NULL) && BATTLE_DEBUG) {
 		cerr << "BATTLE ERROR: BattleAction constructor recieved NULL source and/or target" << endl;
@@ -67,20 +68,35 @@ void BattleAction::Update() {
 	// TODO: Any warm up animations
 }
 
-void BattleAction::VerifyValidTarget(BattleActor* &target)
+void BattleAction::VerifyValidTarget(BattleActor* source, BattleActor* &target)
 {
-	if (target->IsAlive() || !target->IsEnemy())
+	//If the target is alive or if we're targeting someone on our team, do nothing
+	//If we're targeting a teammate we do nothing in case it's a revive skill or something
+	if (target->IsAlive() || (source->IsEnemy() == target->IsEnemy()))
 		return;
 
-	uint32 index = current_battle->GetIndexOfNextAliveEnemy(true);
-	
-	if (index == INVALID_BATTLE_ACTOR_INDEX)
+	uint32 index;
+
+	if (source->IsEnemy())
 	{
-		cerr << "BATTLE ERROR: BattleAction::VerifyValidTarget could not find a valid target.  How did we get to this stage?" << endl;
-		return;
+		index = current_battle->GetIndexOfNextAliveCharacter(true);
+		if (index == INVALID_BATTLE_ACTOR_INDEX)
+		{
+			cerr << "BATTLE ERROR: BattleAction::VerifyValidTarget could not find a valid target.  How did we get to this stage?" << endl;
+			return;
+		}
+		target = current_battle->GetPlayerCharacterAt(index);
 	}
-
-	target = current_battle->GetEnemyActorAt(index);
+	else
+	{
+		index = current_battle->GetIndexOfNextAliveEnemy(true);
+		if (index == INVALID_BATTLE_ACTOR_INDEX)
+		{
+			cerr << "BATTLE ERROR: BattleAction::VerifyValidTarget could not find a valid target.  How did we get to this stage?" << endl;
+			return;
+		}
+		target = current_battle->GetEnemyActorAt(index);
+	}	
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +118,7 @@ SkillAction::SkillAction(BattleActor* source, BattleActor* target, GlobalSkill* 
 
 
 void SkillAction::RunScript() {
-	VerifyValidTarget(_target);
+	VerifyValidTarget(_source, _target);
 
 	if (_skill->GetTargetType() == GLOBAL_TARGET_PARTY) {
 		if (_target->IsEnemy()) {
@@ -136,11 +152,12 @@ void SkillAction::RunScript() {
 	}
 
 	_source->GetActor()->SubtractSkillPoints(_skill->GetSPRequired());
+	_should_be_removed = true;
 
 	// FIX ME temporary code!!!
 	if (_source) {
-		//_source->TEMP_ResetAttackTimer();
 		_source->ResetWaitTime();
+		_source->SetState(ACTOR_IDLE);
 	}
 } // void SkillAction::RunScript()
 
@@ -163,7 +180,7 @@ ItemAction::ItemAction(BattleActor* source, BattleActor* target, GlobalItem* ite
 
 
 void ItemAction::RunScript() {
-	VerifyValidTarget(_target);
+	VerifyValidTarget(_source, _target);
 
 	if (_item->GetTargetType() == GLOBAL_TARGET_PARTY) {
 		if (_target->IsEnemy()) {
@@ -196,10 +213,12 @@ void ItemAction::RunScript() {
 			GlobalManager->RemoveFromInventory(_item->GetID());
 	}
 
+	_should_be_removed = true;
+
 	// FIX ME temporary code!!!
 	if (_source) {
-		//_source->TEMP_ResetAttackTimer();
 		_source->ResetWaitTime();
+		_source->SetState(ACTOR_IDLE);
 	}
 } // void ItemAction::RunScript()
 
