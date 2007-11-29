@@ -143,14 +143,11 @@ void ActionWindow::Initialize(BattleCharacter* character) {
 	_state = VIEW_ACTION_CATEGORY;
 
 	// Disable action categories which have no skills, or where the inventory is empty
-	if (_character->GetActor()->GetAttackSkills()->empty())
-		_action_category_list.EnableOption(0, false);
-	if (_character->GetActor()->GetDefenseSkills()->empty())
-		_action_category_list.EnableOption(1, false);
-	if (_character->GetActor()->GetSupportSkills()->empty())
-		_action_category_list.EnableOption(2, false);
-	if (GlobalManager->GetInventoryItems()->empty())
-		_action_category_list.EnableOption(3, false);
+	// Enable action categories which have skills. Enable inventory if player has items.
+	_action_category_list.EnableOption(0, !_character->GetActor()->GetAttackSkills()->empty());
+	_action_category_list.EnableOption(1, !_character->GetActor()->GetDefenseSkills()->empty());
+	_action_category_list.EnableOption(2, !_character->GetActor()->GetSupportSkills()->empty());
+	_action_category_list.EnableOption(3, !GlobalManager->GetInventoryItems()->empty());
 	else
 	{
 		//We do this if in case someone is already queued to use the last item in our inventory
