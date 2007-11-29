@@ -211,7 +211,7 @@ void MenuMode::Reset() {
 	_equip_window.Show();
 	_formation_window.Show();
 
-	_inventory_window.Activate(true);
+	_inventory_window.Activate(false);
 	_active_window = &_inventory_window;
 
 	// Setup OptionBoxes
@@ -844,7 +844,7 @@ void MenuMode::_DrawBottomMenu() {
 		} // if ITEM_ACTIVE_LIST
 	} // if SHOW_INVENTORY
 	else if (_current_menu_showing == SHOW_SKILLS ) {
-		// nothing to do here atm
+		_skills_window._description.Draw();
 	} // if SHOW_SKILLS
 	else if (_current_menu_showing == SHOW_EQUIP) {
 		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_equip_window._char_select.GetSelection()));
