@@ -944,7 +944,7 @@ void BootMode::Update() {
 	BootMenu::UpdateWindow(time_elapsed);
 
 	// Update the credits window (because it may be hiding/showing!)
-	_credits_screen.UpdateWindow(time_elapsed);
+	_credits_screen.Update(time_elapsed);
 
 	//CD: Handle key press here, just like any other time
 	if (_welcome_screen.IsVisible())
