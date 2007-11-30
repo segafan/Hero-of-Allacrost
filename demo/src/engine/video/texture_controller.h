@@ -46,9 +46,9 @@ class TextureController : public hoa_utils::Singleton<TextureController> {
 	friend class ImageDescriptor;
 	friend class StillImage;
 	friend class private_video::ImageTexture;
-	friend class private_video::TextImageTexture;
+	friend class private_video::TextTexture;
 	friend class TextSupervisor;
-	friend class RenderedText;
+	friend class TextImage;
 	friend class private_video::TexSheet;
 	friend class private_video::FixedTexSheet;
 	friend class private_video::VariableTexSheet;
@@ -111,7 +111,7 @@ private:
 	std::map<std::string, private_video::ImageTexture*> _images;
 
 	//! \brief A STL set containing all of the text images currently being managed by this class
-	std::set<private_video::TextImageTexture*> _text_images;
+	std::set<private_video::TextTexture*> _text_images;
 
 	//! \brief An index to _tex_sheets of the current texture sheet being shown in debug mode. -1 indicates no sheet
 	int32 _debug_current_sheet;
@@ -199,18 +199,18 @@ private:
 
 	//! \name Text Image Operations
 	//@{
-	/** \brief Determines if a TextImageTexture is already registered and maintainted by the texture controller
-	*** \param img A pointer to the TextImageTexture to check for
-	*** \return True if the TextImageTexture is already registered, false if it is not
+	/** \brief Determines if a TextTexture is already registered and maintainted by the texture controller
+	*** \param img A pointer to the TextTexture to check for
+	*** \return True if the TextTexture is already registered, false if it is not
 	**/
-	bool _IsTextImageRegistered(private_video::TextImageTexture* img)
+	bool _IsTextTextureRegistered(private_video::TextTexture* img)
 		{ if (_text_images.find(img) == _text_images.end()) return false; else return true; }
 
-	/** \brief Registers a TextImageTexture to be managed by the internal set
-	*** \param img A pointer to the TextImageTexture to register
-	*** \note The function make sure that it does not register any TextImageTexture more than once
+	/** \brief Registers a TextTexture to be managed by the internal set
+	*** \param img A pointer to the TextTexture to register
+	*** \note The function make sure that it does not register any TextTexture more than once
 	**/
-	void _RegisterTextImage(private_video::TextImageTexture* img);
+	void _RegisterTextTexture(private_video::TextTexture* img);
 	//@}
 
 	/** \brief Displays the currently selected texture sheet.

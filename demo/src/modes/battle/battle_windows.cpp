@@ -104,16 +104,16 @@ ActionWindow::ActionWindow() {
 	// Setup rendered text
 	TextStyle battle_style("battle", Color(1.0f, 1.0f, 0.0f, 0.8f));
 
-	_skill_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
+	_skill_selection_header.SetAlignment(TextImage::ALIGN_LEFT);
 	_skill_selection_header.SetStyle(battle_style);
-	_item_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
+	_item_selection_header.SetAlignment(TextImage::ALIGN_LEFT);
 	_item_selection_header.SetStyle(battle_style);
 
 	battle_style.color = Color::white;
-	_action_information.SetAlignment(RenderedText::ALIGN_LEFT);
+	_action_information.SetAlignment(TextImage::ALIGN_LEFT);
 	_action_information.SetStyle(battle_style);
 
-	_target_information.SetAlignment(RenderedText::ALIGN_LEFT);
+	_target_information.SetAlignment(TextImage::ALIGN_LEFT);
 	_target_information.SetStyle(battle_style);
 	
 	_skill_selection_header.SetText("Skill                          SP");

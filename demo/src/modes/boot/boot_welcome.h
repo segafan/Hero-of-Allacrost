@@ -60,10 +60,10 @@ private:
 	bool _visible;
 
 	//! Rendered text header string
-	hoa_video::RenderedText _welcome_header_rendered;
+	hoa_video::TextImage _welcome_header_rendered;
 
 	//! Rendered text body string
-	hoa_video::RenderedText _welcome_body_rendered;
+	hoa_video::TextImage _welcome_body_rendered;
 
 	//! Text header to be displayed
 	std::string _welcome_text_header;

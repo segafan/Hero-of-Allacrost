@@ -541,10 +541,10 @@ bool TextureController::_ReloadImagesToSheet(TexSheet* sheet) {
 	}
 
 	// Regenerate all font textures
-	for (set<TextImageTexture*>::iterator i = _text_images.begin(); i != _text_images.end(); i++) {
+	for (set<TextTexture*>::iterator i = _text_images.begin(); i != _text_images.end(); i++) {
 		if ((*i)->texture_sheet == sheet) {
 			if ((*i)->Reload() == false) {
-				IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to reload a TextImageTexture" << endl;
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to reload a TextTexture" << endl;
 				success = false;
 			}
 		}
@@ -555,9 +555,9 @@ bool TextureController::_ReloadImagesToSheet(TexSheet* sheet) {
 
 
 
-void TextureController::_RegisterTextImage(TextImageTexture* img) {
-	if (_IsTextImageRegistered(img) == true) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempted to register an already registered TextImageTexture" << endl;
+void TextureController::_RegisterTextTexture(TextTexture* img) {
+	if (_IsTextTextureRegistered(img) == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempted to register an already registered TextTexture" << endl;
 		return;
 	}
 	_text_images.insert(img);

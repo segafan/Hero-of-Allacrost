@@ -36,10 +36,10 @@ TextSupervisor* TextManager = NULL;
 namespace private_video {
 
 // -----------------------------------------------------------------------------
-// TextImageTexture class
+// TextTexture class
 // -----------------------------------------------------------------------------
 
-TextImageTexture::TextImageTexture(const hoa_utils::ustring& string_, const TextStyle& style_) :
+TextTexture::TextTexture(const hoa_utils::ustring& string_, const TextStyle& style_) :
 	BaseTexture(),
 	string(string_),
 	style(style_)
@@ -51,8 +51,8 @@ TextImageTexture::TextImageTexture(const hoa_utils::ustring& string_, const Text
 
 
 
-TextImageTexture::~TextImageTexture() {
-	if (TextureManager->_IsTextImageRegistered(this)) {
+TextTexture::~TextTexture() {
+	if (TextureManager->_IsTextTextureRegistered(this)) {
 		TextureManager->_text_images.erase(this);
 		return;
 	}
@@ -60,7 +60,7 @@ TextImageTexture::~TextImageTexture() {
 
 
 
-void TextImageTexture::LoadFontProperties() {
+void TextTexture::LoadFontProperties() {
 	if (style.shadow_style == VIDEO_TEXT_SHADOW_INVALID) {
 		FontProperties *fp = TextManager->GetFontProperties(style.font);
 		if (fp == NULL) {
@@ -74,7 +74,7 @@ void TextImageTexture::LoadFontProperties() {
 
 
 
-bool TextImageTexture::Regenerate() {
+bool TextTexture::Regenerate() {
 	if (texture_sheet) {
 		texture_sheet->RemoveTexture(this);
 		TextureManager->_RemoveSheet(texture_sheet);
@@ -106,7 +106,7 @@ bool TextImageTexture::Regenerate() {
 
 
 
-bool TextImageTexture::Reload() {
+bool TextTexture::Reload() {
 	// Regenerate text image if it is not already loaded in a texture sheet
 	if (texture_sheet == NULL)
 		return Regenerate();
@@ -129,10 +129,10 @@ bool TextImageTexture::Reload() {
 }
 
 // -----------------------------------------------------------------------------
-// TextImageElement class
+// TextBlock class
 // -----------------------------------------------------------------------------
 
-TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+TextBlock::TextBlock(TextTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 	float u2_, float v2_, float width_, float height_) :
 	image(image_),
 	width(width_),
@@ -156,7 +156,7 @@ TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, fl
 
 
 
-TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+TextBlock::TextBlock(TextTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 		float u2_, float v2_, float width_, float height_, Color color_[4]) :
 	image(image_),
 	width(width_),
@@ -183,10 +183,10 @@ TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, fl
 } // namespace private_video
 
 // -----------------------------------------------------------------------------
-// RenderedText class
+// TextImage class
 // -----------------------------------------------------------------------------
 
-RenderedText::RenderedText() :
+TextImage::TextImage() :
 	ImageDescriptor(),
 	_alignment(ALIGN_CENTER)
 {
@@ -196,7 +196,7 @@ RenderedText::RenderedText() :
 
 
 
-RenderedText::RenderedText(const ustring& string, TextStyle style, int8 alignment) :
+TextImage::TextImage(const ustring& string, TextStyle style, int8 alignment) :
 	ImageDescriptor(),
 	_string(string),
 	_style(style)
@@ -209,7 +209,7 @@ RenderedText::RenderedText(const ustring& string, TextStyle style, int8 alignmen
 
 
 
-RenderedText::RenderedText(const string& string, TextStyle style, int8 alignment) :
+TextImage::TextImage(const string& string, TextStyle style, int8 alignment) :
 	ImageDescriptor(),
 	_string(MakeUnicodeString(string)),
 	_style(style)
@@ -222,15 +222,15 @@ RenderedText::RenderedText(const string& string, TextStyle style, int8 alignment
 
 
 
-RenderedText::RenderedText(const RenderedText& copy) {
-	// Copy all RenderedText members
+TextImage::TextImage(const TextImage& copy) {
+	// Copy all TextImage members
 	_string = copy._string;
 	_text_sections = copy._text_sections;
 	_alignment = copy._alignment;
 	_style = copy._style;
 
-	// Increment the reference count for all TextImageTexture objects
-	std::vector<TextImageElement>::iterator i;
+	// Increment the reference count for all TextTexture objects
+	std::vector<TextBlock>::iterator i;
 	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
 		if (i->image != NULL)
 			i->image->AddReference();
@@ -239,20 +239,20 @@ RenderedText::RenderedText(const RenderedText& copy) {
 
 
 
-RenderedText &RenderedText::operator=(const RenderedText& copy) {
+TextImage &TextImage::operator=(const TextImage& copy) {
 	// Handle the case were a dumbass assigns an object to itself
 	if (this == &copy) {
 		return *this;
 	}
 
-	// Copy all RenderedText members
+	// Copy all TextImage members
 	_string = copy._string;
 	_text_sections = copy._text_sections;
 	_alignment = copy._alignment;
 	_style = copy._style;
 
-	// Increment the reference count for all TextImageTexture objects
-	std::vector<TextImageElement>::iterator i;
+	// Increment the reference count for all TextTexture objects
+	std::vector<TextBlock>::iterator i;
 	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
 		if (i->image != NULL)
 			i->image->AddReference();
@@ -263,7 +263,7 @@ RenderedText &RenderedText::operator=(const RenderedText& copy) {
 
 
 
-void RenderedText::Clear() {
+void TextImage::Clear() {
 	ImageDescriptor::Clear();
 	_string.clear();
 	_ClearImages();
@@ -271,19 +271,26 @@ void RenderedText::Clear() {
 
 
 
-void RenderedText::Draw() const {
-	// TODO
+void TextImage::Draw() const {
+// 	for (uint32 i = 0; i < _text_sections.size(); ++i)
+// 		_DrawTexture(_text_sections[i].image);
 }
 
 
 
-void RenderedText::Draw(const Color& draw_color) const {
-	// TODO
+void TextImage::Draw(const Color& draw_color) const {
+	// Don't draw anything if this image is completely transparent (invisible)
+	if (IsFloatEqual(draw_color[3], 0.0f) == true) {
+		return;
+	}
+
+// 	for (uint32 i = 0; i < _text_sections.size(); ++i)
+// 		_DrawTexture(_text_sections[i].image);
 }
 
 
 
-void RenderedText::SetAlignment(int8 alignment) {
+void TextImage::SetAlignment(int8 alignment) {
 	switch (alignment) {
 		case ALIGN_LEFT:
 		case ALIGN_CENTER:
@@ -301,7 +308,7 @@ void RenderedText::SetAlignment(int8 alignment) {
 
 
 
-void RenderedText::_Regenerate() {
+void TextImage::_Regenerate() {
 	_ClearImages();
 
 	if (_string.empty())
@@ -313,15 +320,16 @@ void RenderedText::_Regenerate() {
 		return;
 	}
 
-	const uint16 newline = '\n';
-	std::vector<uint16*> line_array;
-
 	TextManager->_CacheGlyphs(_string.c_str(), fp);
 
-	const uint16 *char_iter;
-	uint16 *reformatted_text = new uint16[_string.size() + 1];
-	uint16 *reform_iter = reformatted_text;
-	uint16 *last_line = reformatted_text;
+	// 1) Dissect the unicode string into an array of lines of text
+	const uint16 newline = '\n';
+	const uint16* char_iter;
+	std::vector<uint16*> line_array;
+	uint16* reformatted_text = new uint16[_string.size() + 1];
+	uint16* reform_iter = reformatted_text;
+	uint16* last_line = reformatted_text;
+
 	for (char_iter = _string.c_str(); *char_iter; ++char_iter) {
 		if (*char_iter == newline) {
 			*reform_iter++ = '\0';
@@ -335,40 +343,37 @@ void RenderedText::_Regenerate() {
 	line_array.push_back(last_line);
 	*reform_iter = '\0';
 
-	std::vector<uint16 *>::iterator line_iter;
-
-	Color old_color = _style.color;
+	// 2) Determine the text's properties
 	int32 shadow_offset_x = 0;
 	int32 shadow_offset_y = 0;
 	Color shadow_color = TextManager->_GetTextShadowColor(fp);
-
 	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
 
+	// 3) Iterate through each line of text and render a TextTexture for each one
+	std::vector<uint16*>::iterator line_iter;
 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter) {
-		TextImageTexture *timage = new TextImageTexture(*line_iter, _style);
-		if (!timage->Regenerate()) {
-			if (VIDEO_DEBUG) {
-				cerr << "RenderedText::_Regenerate(): Failed to render TextImageTexture" << endl;
-			}
+		TextTexture* texture = new TextTexture(*line_iter, _style);
+		texture->AddReference();
+		if (texture->Regenerate() == false) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextTexture::_Regenerate() failed" << endl;
 		}
 
-		// Increment the reference count
-		timage->AddReference();
-		float y_offset = total_height + _height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection();
-		y_offset += (fp->line_skip - timage->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection();
-		TextImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(timage->width), static_cast<float>(timage->height), _color);
+		float y_offset = total_height + (_height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection()) +
+			((fp->line_skip - texture->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
+		TextBlock element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
 
-		// if text shadows are enabled, add a shadow version
-		if (timage->style.shadow_style != VIDEO_TEXT_SHADOW_NONE) {
-			shadow_offset_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()) * timage->style.shadow_offset_x;
-			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection())   * timage->style.shadow_offset_y;
+		// 4) If text shadows are enabled, copy the text texture and modify its properties to create a shadow version
+		if (texture->style.shadow_style != VIDEO_TEXT_SHADOW_NONE) {
+			texture->AddReference();
 
-			TextImageElement shadow_element = element;
+			shadow_offset_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()) * texture->style.shadow_offset_x;
+			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection()) * texture->style.shadow_offset_y;
+
+			TextBlock shadow_element = element;
 			shadow_element.x_offset += shadow_offset_x;
 			shadow_element.y_offset += shadow_offset_y;
 
-			// Line offsets must be set to be retained
-			// after lines are aligned
+			// Line offsets must be set to be retained after lines are aligned
 			shadow_element.x_line_offset = static_cast<float>(shadow_offset_x);
 			shadow_element.y_line_offset = static_cast<float>(shadow_offset_y);
 
@@ -378,32 +383,27 @@ void RenderedText::_Regenerate() {
 			shadow_element.color[3] = shadow_color * _color[3];
 
 			_text_sections.push_back(shadow_element);
-
-			// Increment reference count to reflect use in shadow texture
-			timage->AddReference();
 		}
 
-		TextureManager->_RegisterTextImage(timage);
-
-		// And to our internal vector
+		TextureManager->_RegisterTextTexture(texture);
 		_text_sections.push_back(element);
 
-		// Set width to timage width, if wider
-		if (timage->width > _width)
-			_width = static_cast<float>(timage->width);
+		// Resize the TextImage width if this line is wider than the current width
+		if (texture->width > _width)
+			_width = static_cast<float>(texture->width);
 
 		// Increase height by the font specified line height
 		_height += fp->line_skip;
-	}
+	} // for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
 
 	delete[] reformatted_text;
 	_Realign();
-} // void RenderedText::_Regenerate()
+} // void TextImage::_Regenerate()
 
 
 
-void RenderedText::_Realign() {
-	vector<TextImageElement>::iterator i;
+void TextImage::_Realign() {
+	vector<TextBlock>::iterator i;
 	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
 		i->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() *
 			((_width - i->width) / 2.0f) + i->x_line_offset;

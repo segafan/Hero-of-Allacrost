@@ -90,8 +90,8 @@ void WelcomeScreen::Show()
 	_visible = true;
 	VideoManager->Text()->SetDefaultFont("default"); // Reset font
 
-	_welcome_header_rendered = RenderedText(_welcome_text_header);
-	_welcome_body_rendered   = RenderedText(_welcome_text_body, TextStyle(), RenderedText::ALIGN_LEFT);
+	_welcome_header_rendered = TextImage(_welcome_text_header);
+	_welcome_body_rendered   = TextImage(_welcome_text_body, TextStyle(), TextImage::ALIGN_LEFT);
 }
 
 

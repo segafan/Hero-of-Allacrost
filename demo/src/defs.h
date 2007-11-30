@@ -87,7 +87,7 @@ namespace hoa_video {
 	class TextSupervisor;
 	class FontGlyph;
 	class FontProperties;
-	class RenderedText;
+	class TextImage;
 
 	class GUISupervisor;
 	class MenuWindow;
@@ -114,8 +114,8 @@ namespace hoa_video {
 
 		class BaseTexture;
 		class ImageTexture;
-		class TextImageTexture;
-		class TextImageElement;
+		class TextTexture;
+		class TextBlock;
 		class AnimationFrame;
 		class ImageElement;
 
