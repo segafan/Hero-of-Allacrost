@@ -858,14 +858,9 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 	return true;
 } // TextSupervisor::CacheGlyphs()
 
-//-----------------------------------------------------------------------------
-// _DrawTextHelper: since there are two DrawText functions (one for unicode and
-//                 one for non-unicode), this private function is used to
-//                 do all the work so that code doesn't have to be duplicated.
-//                 Either text or uText is valid string and the other is NULL.
-//-----------------------------------------------------------------------------
 
-bool TextSupervisor::_DrawTextHelper(const uint16 *uText, FontProperties *fp, Color color) {
+
+bool TextSupervisor::_DrawTextHelper(const uint16 s*uText, FontProperties *fp, Color color) {
 	if(_font_map.empty())
 		return false;
 
@@ -992,18 +987,30 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, I
 	FontProperties* fp = _font_map[style.font];
 	TTF_Font* font = fp->ttf_font;
 
-	if (font == NULL ) {
+	if (font == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "font of TextStyle argument '" << style.font << "' was invalid" << endl;
 		return false;
 	}
 
 	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
+	// Endian-dependent bit masks for the different color channels
+	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		static const int rmask = 0xFF000000;
+		static const int gmask = 0x00FF0000;
+		static const int bmask = 0x0000FF00;
+		static const int amask = 0x000000FF;
+	#else
+		static const int rmask = 0x000000FF;
+		static const int gmask = 0x0000FF00;
+		static const int bmask = 0x00FF0000;
+		static const int amask = 0xFF000000;
+	#endif
 
-	SDL_Surface *initial      = NULL;
-	SDL_Surface *intermediary = NULL;
+	SDL_Surface* initial = NULL;
+	SDL_Surface* intermediary = NULL;
 
+	// Width and height of each line of text
 	int32 line_w, line_h;
-
 	// Minimum Y value of the line
 	int32 min_y = 0;
 	// Calculated line width
@@ -1011,95 +1018,73 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, I
 	// Pixels left of '0' the first character extends, if any
 	int32 line_start_x = 0;
 
-	const uint16 *char_ptr;
-
-	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		static const int rmask = 0xff000000;
-		static const int gmask = 0x00ff0000;
-		static const int bmask = 0x0000ff00;
-		static const int amask = 0x000000ff;
-	#else
-		static const int rmask = 0x000000ff;
-		static const int gmask = 0x0000ff00;
-		static const int bmask = 0x00ff0000;
-		static const int amask = 0xff000000;
-	#endif
-
-	if (TTF_SizeUNICODE(font, string.c_str(), &line_w, &line_h) == -1)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: TTF_SizeUNICODE() returned NULL in _RenderText()!" << endl;
+	if (TTF_SizeUNICODE(font, string.c_str(), &line_w, &line_h) == -1) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_SizeUNICODE() failed" << endl;
 		return false;
 	}
 
 	_CacheGlyphs(string.c_str(), fp);
 
-	for (char_ptr = string.c_str(); *char_ptr; ++char_ptr)
-	{
-		FontGlyph * glyphinfo = (*fp->glyph_cache)[*char_ptr];
-
+	// Calculate the width of the width and minimum y value of the text
+	const uint16* char_ptr;
+	for (char_ptr = string.c_str(); *char_ptr != '\0'; ++char_ptr) {
+		FontGlyph* glyphinfo = (*fp->glyph_cache)[*char_ptr];
 		if (glyphinfo->top_y < min_y)
 			min_y = glyphinfo->top_y;
 		calc_line_width += glyphinfo->advance;
 	}
 
-	// Minimum y off by one pixel in some cases.
+	// Subtract one pixel from the minimum y value (TODO: explain why)
 	min_y -= 1;
 
-	// First character, check if it starts left of 0
+	// Check if the first character starts left of pixel 0, and set
 	char_ptr = string.c_str();
-	if (*char_ptr)
-	{
-		FontGlyph * first_glyphinfo = (*fp->glyph_cache)[*char_ptr];
+	if (*char_ptr) {
+		FontGlyph* first_glyphinfo = (*fp->glyph_cache)[*char_ptr];
 		if (first_glyphinfo->min_x < 0)
 			line_start_x = first_glyphinfo->min_x;
 	}
 
-	// TTF_SizeUNICODE underestimates line width as a
-	// result of its micro positioning
+	// TTF_SizeUNICODE can underestimate line width as a result of its micro positioning.
+	// Check if this condition is true and if so, set the line width appropriately.
 	if (calc_line_width > line_w)
 		line_w = calc_line_width;
 
-	// Adjust line sizes by negative starting offsets if present
+	// Adjust line dimensions by negative starting offsets if present
 	line_w -= line_start_x;
 	line_h -= min_y;
 
-	uint8 *intermed_buf = (uint8 *) calloc(line_w * line_h, 4);
+	// Allocate enough memory for the entire text surface to reside on
+	uint8* intermed_buf = static_cast<uint8*>(calloc(line_w * line_h, 4));
 	intermediary = SDL_CreateRGBSurfaceFrom(intermed_buf, line_w, line_h, 32, line_w * 4, rmask, gmask, bmask, amask);
-
-	if (!intermediary)
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in _RenderText()!" << endl;
+	if (intermediary == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_CreateRGBSurfaceFrom() failed" << endl;
 		return false;
 	}
 
+	// Go through the string and render each glyph one by one
 	SDL_Rect surf_target;
 	int32 xpos = -line_start_x;
 	int32 ypos = -min_y;
-	for (char_ptr = string.c_str(); *char_ptr; ++char_ptr)
-	{
-		FontGlyph * glyphinfo = (*fp->glyph_cache)[*char_ptr];
+	for (char_ptr = string.c_str(); *char_ptr != '\0'; ++char_ptr) {
+		FontGlyph* glyphinfo = (*fp->glyph_cache)[*char_ptr];
 
+		// Render the glyph
 		initial = TTF_RenderGlyph_Blended(font, *char_ptr, color);
-
-		if(!initial)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderGlyph_Blended() returned NULL in _RenderText()!" << endl;
+		if (initial == NULL) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderGlyph_Blended() failed" << endl;
 			return false;
 		}
 
 		surf_target.x = xpos + glyphinfo->min_x;
 		surf_target.y = ypos + glyphinfo->top_y;
 
-		if (SDL_BlitSurface(initial, NULL, intermediary, &surf_target) < 0)
-		{
+		// Add the glyph to the end of the rendered string
+		if (SDL_BlitSurface(initial, NULL, intermediary, &surf_target) < 0) {
 			SDL_FreeSurface(initial);
 			SDL_FreeSurface(intermediary);
 			free(intermed_buf);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in _RenderText()! (" << SDL_GetError() << ")" << endl;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed, SDL error: " << SDL_GetError() << endl;
 			return false;
 		}
 		SDL_FreeSurface(initial);
