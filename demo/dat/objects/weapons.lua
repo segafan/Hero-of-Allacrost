@@ -45,3 +45,51 @@ weapons[10002] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	slots = 0
 }
+
+-- -----------------------------------------------------------------------------
+-- IDs 10501-11000 are reserved for crossbows
+-- -----------------------------------------------------------------------------
+
+weapons[10501] = {
+	name = "Quick Crossbow",
+	description = "A lightweight but effective crossbow.",
+	icon = "img/icons/weapons/quick-crossbow.png",
+	physical_attack = 9,
+	metaphysical_attack = 0,
+	standard_price = 100,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	slots = 0
+}
+
+weapons[10502] = {
+	name = "Standard Crossbow",
+	description = "Standard Karlate issued equipment. A crossbow designed for accuraccy and ease of use.",
+	icon = "img/icons/weapons/standard-crossbow.png",
+	physical_attack = 13,
+	metaphysical_attack = 0,
+	standard_price = 140,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	slots = 0
+}
+
+weapons[10503] = {
+	name = "Reinforced Crossbow",
+	description = "An improved version of the standard Karlate crossbow.",
+	icon = "img/icons/weapons/reinforced-crossbow.png",
+	physical_attack = 17,
+	metaphysical_attack = 0,
+	standard_price = 290,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	slots = 0
+}
+
+weapons[10504] = {
+	name = "Arbalest",
+	description = "Heavy crossbow designed for battle with large monsters.",
+	icon = "img/icons/weapons/arbalest.png",
+	physical_attack = 21,
+	metaphysical_attack = 0,
+	standard_price = 440,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	slots = 0
+}
