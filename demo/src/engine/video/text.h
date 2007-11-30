@@ -411,8 +411,12 @@ public:
 	*** \note If there are no fonts loaded, this method will return an empty string
 	**/
 	const std::string& GetDefaultFont() const;
-	const TextStyle& GetDefaultStyle() const {return _default_style;};
-	TextStyle& GetDefaultStyle() {return _default_style;};
+
+	const TextStyle& GetDefaultStyle() const
+		{ return _default_style; }
+
+	TextStyle& GetDefaultStyle()
+		{ return _default_style; }
 
 	/** \brief Sets the default font to use for text rendering
 	*** \param font_name The name of the pre-loaded font to set as the default
@@ -422,7 +426,9 @@ public:
 	*** mode is enabled.
 	**/
 	void SetDefaultFont(const std::string& font_name);
-	void SetDefaultStyle(TextStyle style) {_default_style = style;};
+
+	void SetDefaultStyle(TextStyle style)
+		{ _default_style = style; }
 
 	/** \brief Sets the default shadow style to use for a specified font
 	*** \param font_name The reference name of the font to set the shadow style for
@@ -463,10 +469,6 @@ public:
 	**/
 	void Draw(const hoa_utils::ustring& text);
 	void Draw(const hoa_utils::ustring& text, const TextStyle& style);
-// 	void Draw(const hoa_utils::ustring& text, std::string font_name);
-// 	void Draw(const hoa_utils::ustring& text, Color& color);
-// 	void Draw(const hoa_utils::ustring& text, std::string font_name);
-// 	void Draw(const hoa_utils::ustring& text, std::string font_name, Color& color);
 
 	/** \brief Renders and draws a string of text to the screen
 	*** \param text The text string to draw in standard format

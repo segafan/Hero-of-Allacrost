@@ -82,7 +82,6 @@ bool TextTexture::Regenerate() {
 	}
 
 	ImageMemory buffer;
-
 	if (TextManager->_RenderText(string, style, buffer) == false)
 		return false;
 
@@ -511,6 +510,19 @@ bool TextSupervisor::LoadFont(const string& filename, const string& font_name, u
 
 
 
+const std::string& TextSupervisor::GetDefaultFont() const {
+	return VideoManager->_current_context.font;
+}
+
+Color TextSupervisor::GetDefaultTextColor() const {
+	return VideoManager->_current_context.text_color;
+}
+
+
+void TextSupervisor::SetDefaultTextColor(const Color& color) {
+	VideoManager->_current_context.text_color = color;
+}
+
 void TextSupervisor::SetDefaultFont(const std::string& font_name) {
 	if (_font_map.find(font_name) == _font_map.end()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because no font existed by the name: " << font_name << endl;
@@ -518,12 +530,6 @@ void TextSupervisor::SetDefaultFont(const std::string& font_name) {
 	}
 
 	VideoManager->_current_context.font = font_name;
-}
-
-
-
-const string& TextSupervisor::GetDefaultFont() const {
-	return VideoManager->_current_context.font;
 }
 
 
@@ -574,21 +580,10 @@ void TextSupervisor::SetFontShadowOffsets(const std::string& font_name, int32 x,
 
 
 
-Color TextSupervisor::GetDefaultTextColor() const {
-	return VideoManager->_current_context.text_color;
-}
-
-
-
-void TextSupervisor::SetDefaultTextColor(const Color& color) {
-	VideoManager->_current_context.text_color = color;
-}
-
-
-
 void TextSupervisor::Draw(const ustring& text) {
 	Draw(text, _default_style);
 }
+
 
 
 void TextSupervisor::Draw(const ustring& text, const TextStyle& style) {
@@ -747,8 +742,7 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 
 		uint32 rmask, gmask, bmask, amask;
 
-			// SDL interprets each pixel as a 32-bit number, so our masks must depend
-			// on the endianness (byte order) of the machine
+		// SDL interprets each pixel as a 32-bit number, so our masks depend on the endianness (byte order) of the machine
 		#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 			rmask = 0xff000000;
 			gmask = 0x00ff0000;
@@ -761,8 +755,7 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 			amask = 0xff000000;
 		#endif
 
-		intermediary = SDL_CreateRGBSurface(0, w, h, 32,
-				rmask, gmask, bmask, amask);
+		intermediary = SDL_CreateRGBSurface(0, w, h, 32, rmask, gmask, bmask, amask);
 
 		if(!intermediary)
 		{
@@ -995,19 +988,12 @@ bool TextSupervisor::_DrawTextHelper(const uint16 *uText, FontProperties *fp, Co
 
 
 
-//-----------------------------------------------------------------------------
-// _RenderText: Renders a given unicode string and TextStyle to a pixel array
-//-----------------------------------------------------------------------------
+bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, ImageMemory& buffer) {
+	FontProperties* fp = _font_map[style.font];
+	TTF_Font* font = fp->ttf_font;
 
-bool TextSupervisor::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageMemory &buffer)
-{
-	FontProperties * fp = _font_map[style.font];
-	TTF_Font * font     = fp->ttf_font;
-
-	if (!font)
-	{
-		if (VIDEO_DEBUG)
-			cerr << "TextSupervisor::_RenderText(): font '" << style.font << "' not valid." << endl;
+	if (font == NULL ) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "font of TextStyle argument '" << style.font << "' was invalid" << endl;
 		return false;
 	}
 
@@ -1129,8 +1115,7 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring &string, TextStyle &style, I
 	};
 
 	uint32 num_bytes = intermediary->w * intermediary->h * 4;
-	for (uint32 j = 0; j < num_bytes; j += 4)
-	{
+	for (uint32 j = 0; j < num_bytes; j += 4) {
 		((uint8*)intermediary->pixels)[j+3] = ((uint8*)intermediary->pixels)[j+2];
 		((uint8*)intermediary->pixels)[j+0] = color_mult[0];
 		((uint8*)intermediary->pixels)[j+1] = color_mult[1];
@@ -1145,15 +1130,15 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring &string, TextStyle &style, I
 	SDL_FreeSurface(intermediary);
 
 	return true;
-}
+} // bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, ImageMemory& buffer)
 
 
 
-Color TextSupervisor::_GetTextShadowColor(FontProperties *fp) {
+Color TextSupervisor::_GetTextShadowColor(FontProperties* fp) {
 	Color shadow_color;
 
 	if (fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
-		switch( fp->shadow_style) {
+		switch (fp->shadow_style) {
 			case VIDEO_TEXT_SHADOW_DARK:
 				shadow_color = Color::black;
 				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
@@ -1175,8 +1160,7 @@ Color TextSupervisor::_GetTextShadowColor(FontProperties *fp) {
 					1.0f - VideoManager->_current_context.text_color[2], VideoManager->_current_context.text_color[3] * 0.5f);
 				break;
 			default:
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: Unknown text shadow style (" << fp->shadow_style << ") -  TextSupervisor::_GetTextShadowColor()" << endl;
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown text shadow style: " << fp->shadow_style << endl;
 				break;
 		}
 	}
