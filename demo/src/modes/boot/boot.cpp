@@ -609,10 +609,11 @@ void BootMode::_OnNewGame() {
 void BootMode::_OnLoadGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Loading game." << endl;
 
-	if (DoesFileExist("dat/saved_game.lua")) {
+	string filename = GlobalManager->GetSavePath() + "saved_game.lua";
+	if (DoesFileExist(filename)) {
 		_SaveSettingsFile();
 		
-		GlobalManager->LoadGame("dat/saved_game.lua");
+		GlobalManager->LoadGame(filename);
 		_fade_out = true;
 		VideoManager->FadeScreen(Color::black, 1000);
 //		_boot_music.at(0).SetFadeOutTime(500); // Fade out the music

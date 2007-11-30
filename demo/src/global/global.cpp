@@ -13,6 +13,13 @@
 *** \brief   Source file for the global game manager
 *** ***************************************************************************/
 
+#if defined _WIN32
+#include <shlobj.h>
+#elif defined __linux__
+#include <sys/types.h>
+#include <pwd.h>
+#endif
+
 #include <iostream>
 
 #include "utils.h"
@@ -595,6 +602,32 @@ void GameGlobal::SetLocation(const hoa_utils::ustring& location_name, const std:
 	}
 }
 
+const std::string GameGlobal::GetSavePath() const
+{
+#if defined _WIN32
+	TCHAR path[MAX_PATH];
+
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, path)))
+	{
+		string ret = string(path) + "/.allacrost/";
+		if (!DoesFileExist(ret))
+			MakeDirectory(ret);
+		return ret;
+	}
+#elif defined __linux__
+	passwd *pw = getpwuid(getuid());
+	if (pw)
+	{
+		string ret = string(pw->pw_dir) + "/.allacrost";
+		if (!DoesFileExist(ret))
+			MakeDirectory(ret);
+		return ret;
+	}
+#elif defined __MACH__
+	
+#endif
+	return "dat/";
+}
 
 
 bool GameGlobal::SaveGame(const string& filename) {
