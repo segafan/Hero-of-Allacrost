@@ -15,7 +15,7 @@
 
 #if defined _WIN32
 #include <shlobj.h>
-#elif defined __linux__
+#else
 #include <sys/types.h>
 #include <pwd.h>
 #endif
