@@ -1144,92 +1144,107 @@ void EquipWindow::Update() {
 	uint32 event = active_option->GetEvent();
 	active_option->Update();
 	switch (_active_box) {
-		//Choose character
-		case EQUIP_ACTIVE_CHAR:
-			if (event == VIDEO_OPTION_CONFIRM) {
-				_active_box = EQUIP_ACTIVE_SELECT;
-				_char_select.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
-				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::_instance->_menu_sounds["confirm"].Play();
-			}
-			else if (event == VIDEO_OPTION_CANCEL) {
-				Activate(false);
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
-			}
+	//Choose character
+	case EQUIP_ACTIVE_CHAR:
+		if (event == VIDEO_OPTION_CONFIRM) {
+			_active_box = EQUIP_ACTIVE_SELECT;
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
+			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			MenuMode::_instance->_menu_sounds["confirm"].Play();
+		}
+		else if (event == VIDEO_OPTION_CANCEL) {
+			Activate(false);
+			MenuMode::_instance->_menu_sounds["cancel"].Play();
+		}
 		break;
 
-		//Choose equipment to replace
-		case EQUIP_ACTIVE_SELECT:
-			if (event == VIDEO_OPTION_CONFIRM) {
-				_active_box = EQUIP_ACTIVE_LIST;
-				_UpdateEquipList();
-				if (_equip_list.GetNumberOptions() > 0) {
-					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_equip_list.SetSelection(0);
-					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					MenuMode::_instance->_menu_sounds["confirm"].Play();
-				}
-				else {
-					_active_box = EQUIP_ACTIVE_SELECT;
-					MenuMode::_instance->_menu_sounds["cancel"].Play();
-				}
-			}
-			else if (event == VIDEO_OPTION_CANCEL) {
-				_active_box = EQUIP_ACTIVE_CHAR;
-				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	//Choose equipment to replace
+	case EQUIP_ACTIVE_SELECT:
+		if (event == VIDEO_OPTION_CONFIRM) {
+			_active_box = EQUIP_ACTIVE_LIST;
+			_UpdateEquipList();
+			if (_equip_list.GetNumberOptions() > 0) {
 				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				_equip_list.SetSelection(0);
+				_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				MenuMode::_instance->_menu_sounds["confirm"].Play();
+			}
+			else {
+				_active_box = EQUIP_ACTIVE_SELECT;
 				MenuMode::_instance->_menu_sounds["cancel"].Play();
 			}
+		}
+		else if (event == VIDEO_OPTION_CANCEL) {
+			_active_box = EQUIP_ACTIVE_CHAR;
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			MenuMode::_instance->_menu_sounds["cancel"].Play();
+		}
 		break;
 
-		//Choose replacement
-		case EQUIP_ACTIVE_LIST:
-			if (event == VIDEO_OPTION_CONFIRM) {
-				GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
-				uint32 id_num;
+	//Choose replacement
+	case EQUIP_ACTIVE_LIST:
+		if (event == VIDEO_OPTION_CONFIRM) {
+			GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+			uint32 id_num;
 
-				switch ( _equip_select.GetSelection() ) {
-					case EQUIP_WEAPON:
-						id_num = GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection())->GetID();
-						GlobalManager->AddToInventory(ch->EquipWeapon((GlobalWeapon*)GlobalManager->RetrieveFromInventory(id_num)));
-					break;
+			switch ( _equip_select.GetSelection() ) {
+			case EQUIP_WEAPON:
+			{	GlobalWeapon* wpn = GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection());
+				if (wpn->GetUsableBy() == ch->GetID()) {
+					id_num = wpn->GetID();
+					GlobalManager->AddToInventory(ch->EquipWeapon((GlobalWeapon*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				break;}
 
-					case EQUIP_HEADGEAR:
-						id_num = GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection())->GetID();
-						GlobalManager->AddToInventory(ch->EquipHeadArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
-					break;
+			case EQUIP_HEADGEAR:
+			{	GlobalArmor* hlm = GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection());
+				if (hlm->GetUsableBy() == ch->GetID()) {
+					id_num = hlm->GetID();
+					GlobalManager->AddToInventory(ch->EquipHeadArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				break;}
 
-					case EQUIP_BODYARMOR:
-						id_num = GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection())->GetID();
-						GlobalManager->AddToInventory(ch->EquipTorsoArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
-					break;
+			case EQUIP_BODYARMOR:
+			{	GlobalArmor* arm = GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection());
+				if (arm->GetUsableBy() == ch->GetID()) {
+					id_num = arm->GetID();
+					GlobalManager->AddToInventory(ch->EquipTorsoArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				break;}
 
-					case EQUIP_OFFHAND:
-						id_num = GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection())->GetID();
-						GlobalManager->AddToInventory(ch->EquipArmArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
-					break;
+			case EQUIP_OFFHAND:
+			{	GlobalArmor* shld = GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection());
+				if (shld->GetUsableBy() == ch->GetID()) {
+					id_num = shld->GetID();
+					GlobalManager->AddToInventory(ch->EquipArmArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				break;}
 
-					case EQUIP_LEGGINGS:
-						id_num = GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection())->GetID();
-						GlobalManager->AddToInventory(ch->EquipLegArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
-					break;
+			case EQUIP_LEGGINGS:
+			{	GlobalArmor* lgs = GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection());
+				if (lgs->GetUsableBy() == ch->GetID()) {
+					id_num = lgs->GetID();
+					GlobalManager->AddToInventory(ch->EquipLegArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				break;}
 
-					default:
-						cout << "MENU ERROR: _equip_select.GetSelection value is invalid: " << _equip_select.GetSelection() << endl;
-					break;
-				} // switch _equip_select.GetSelection()
+			default:
+				cout << "MENU ERROR: _equip_select.GetSelection value is invalid: " << _equip_select.GetSelection() << endl;
+				break;
+			} // switch _equip_select.GetSelection()
 
-				_active_box = EQUIP_ACTIVE_SELECT;
-				_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::_instance->_menu_sounds["confirm"].Play();
-			} // if VIDEO_OPTION_CONFIRM
-			else if (event == VIDEO_OPTION_CANCEL) {
-				_active_box = EQUIP_ACTIVE_SELECT;
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
-				_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			} // else if VIDEO_OPTION_CANCEL
+			_active_box = EQUIP_ACTIVE_SELECT;
+			_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			MenuMode::_instance->_menu_sounds["confirm"].Play();
+		} // if VIDEO_OPTION_CONFIRM
+		else if (event == VIDEO_OPTION_CANCEL) {
+			_active_box = EQUIP_ACTIVE_SELECT;
+			MenuMode::_instance->_menu_sounds["cancel"].Play();
+			_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		} // else if VIDEO_OPTION_CANCEL
 		break;
 	} // switch _active_box
 
