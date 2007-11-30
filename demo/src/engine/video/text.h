@@ -146,14 +146,14 @@ namespace private_video {
 *** A text specific class derived from the BaseImage class, it contains a
 *** unicode string and text style needed to render a piece of text.
 *** ***************************************************************************/
-class TextImageTexture : public private_video::BaseTexture {
+class TextTexture : public private_video::BaseTexture {
 public:
 	/** \brief Constructor defaults image as the first one in a texture sheet.
 	*** \note The actual sheet where the image is located will be determined later.
 	**/
-	TextImageTexture(const hoa_utils::ustring& string_, const TextStyle& style_);
+	TextTexture(const hoa_utils::ustring& string_, const TextStyle& style_);
 
-	~TextImageTexture();
+	~TextTexture();
 
 	// ---------- Public members
 
@@ -175,27 +175,27 @@ public:
 	bool Reload();
 
 private:
-	TextImageTexture(const TextImageTexture& copy);
-	TextImageTexture& operator=(const TextImageTexture& copy);
-}; // class TextImageTexture : public private_video::BaseImage
+	TextTexture(const TextTexture& copy);
+	TextTexture& operator=(const TextTexture& copy);
+}; // class TextTexture : public private_video::BaseImage
 
 
 /** ****************************************************************************
 *** \brief A text specific subclass of the BaseImageElement subclass.
 *** ***************************************************************************/
-class TextImageElement {
+class TextBlock {
 public:
 	//! \brief Constructor defaulting the element to have white vertices and disabled blending.
-	TextImageElement(TextImageTexture* image_, float x_offset_, float y_offset_, float u1_, float v1_,
+	TextBlock(TextTexture* image_, float x_offset_, float y_offset_, float u1_, float v1_,
 		float u2_, float v2_, float width_, float height_);
 
-	TextImageElement(TextImageTexture* image_, float x_offset_, float y_offset_, float u1_, float v1_,
+	TextBlock(TextTexture* image_, float x_offset_, float y_offset_, float u1_, float v1_,
 		float u2_, float v2_, float width_, float height_, Color color_[4]);
 
 	// ---------- Public members
 
 	//! \brief The image that is being referenced by this object.
-	TextImageTexture* image;
+	TextTexture* image;
 
 	float width, height;
 
@@ -212,15 +212,15 @@ public:
 	bool blend;
 
 	bool unichrome_vertices;
-}; // class TextImageElement : public private_video::BaseImageElement
+}; // class TextBlock : public private_video::BaseImageElement
 
 } // namespace private_video
 
 /** ****************************************************************************
 *** \brief Represents a rendered text string
-*** RenderedText is a compound image containing each line of a text string.
+*** TextImage is a compound image containing each line of a text string.
 *** ***************************************************************************/
-class RenderedText : public ImageDescriptor {
+class TextImage : public ImageDescriptor {
 	friend class GameVideo;
 public:
 	enum align {
@@ -230,22 +230,22 @@ public:
 	};
 
 	//! \brief Construct empty text object
-	RenderedText();
+	TextImage();
 
 	//! \brief Constructs rendered string of specified ustring
-	RenderedText(const hoa_utils::ustring& string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
+	TextImage(const hoa_utils::ustring& string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
 
 	//! \brief Constructs rendered string of specified std::string
-	RenderedText(const std::string& string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
+	TextImage(const std::string& string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
 
 	//! \brief Copy constructor increases contained reference counts
-	RenderedText(const RenderedText& copy);
+	TextImage(const TextImage& copy);
 
 	//! \brief Copy assignment operator increases contained reference counts
-	RenderedText& operator=(const RenderedText& copy);
+	TextImage& operator=(const TextImage& copy);
 
-	//! \brief Destructs RenderedText, lowering reference counts on all contained timages.
-	~RenderedText()
+	//! \brief Destructs TextImage, lowering reference counts on all contained timages.
+	~TextImage()
 		{ _ClearImages(); }
 
 	// ---------- Public methods
@@ -266,11 +266,11 @@ public:
 	**/
 	void SetAlignment(int8 alignment);
 
-	//! \brief Dervied from ImageDescriptor, this method is not used by RenderedText
+	//! \brief Dervied from ImageDescriptor, this method is not used by TextImage
 	void EnableGrayScale()
 		{}
 
-	//! \brief Dervied from ImageDescriptor, this method is not used by RenderedText
+	//! \brief Dervied from ImageDescriptor, this method is not used by TextImage
 	void DisableGrayScale()
 		{}
 
@@ -290,7 +290,7 @@ public:
 	virtual void SetDimensions(float width, float height)
 		{ _width  = width; _height = height; }
 
-	//! \brief Dervied from ImageDescriptor, this method is not used by RenderedText
+	//! \brief Dervied from ImageDescriptor, this method is not used by TextImage
 	void SetUVCoordinates(float u1, float v1, float u2, float v2)
 		{}
 
@@ -329,6 +329,9 @@ public:
 	//@}
 
 private:
+	//! \brief The texture that contains the rendered text
+	private_video::TextTexture* _text_texture;
+
 	//! \brief The unicode string of the text to render
 	hoa_utils::ustring _string;
 
@@ -338,8 +341,8 @@ private:
 	//! \brief The style to render the text in
 	TextStyle _style;
 
-	//! \brief The TextImage elements representing rendered text portions, usually lines.
-	std::vector<private_video::TextImageElement> _text_sections;
+	//! \brief The TextTexture elements representing rendered text portions, usually lines.
+	std::vector<private_video::TextBlock> _text_sections;
 
 	// ---------- Private methods
 
@@ -352,7 +355,7 @@ private:
 
 	//! \brief Realigns the text to its horizontal alignment type
 	void _Realign();
-}; // class RenderedText : public ImageDescriptor
+}; // class TextImage : public ImageDescriptor
 
 
 
@@ -360,8 +363,8 @@ class TextSupervisor : public hoa_utils::Singleton<TextSupervisor> {
 	friend class GameVideo;
 	friend class TextureController;
 
-	friend class private_video::TextImageTexture;
-	friend class RenderedText;
+	friend class private_video::TextTexture;
+	friend class TextImage;
 
 public:
 	TextSupervisor();

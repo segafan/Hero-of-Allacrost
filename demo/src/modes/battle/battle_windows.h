@@ -213,19 +213,19 @@ private:
 	//! \brief A vector containing the icons used for representing each action category
 	std::vector<hoa_video::StillImage> _action_category_icons;
 
-	//! \name RenderedText objects
+	//! \name TextImage objects
 	//@{
 	//! \brief Rendered text of "Skill     SP" as a header for the skill selection list
-	hoa_video::RenderedText _skill_selection_header;
+	hoa_video::TextImage _skill_selection_header;
 
 	//! \brief Rendered text of "Item     QTY" as a header for the item selection list
-	hoa_video::RenderedText _item_selection_header;
+	hoa_video::TextImage _item_selection_header;
 
 	//! \brief Rendered text that contains information about the currently selected action
-	hoa_video::RenderedText _action_information;
+	hoa_video::TextImage _action_information;
 
 	//! \brief Rendered text that contains information about the currently selected target
-	hoa_video::RenderedText _target_information;
+	hoa_video::TextImage _target_information;
 	//@}
 
 	// ----- Private methods

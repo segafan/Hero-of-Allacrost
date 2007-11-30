@@ -31,7 +31,7 @@
 *** properties of that image data.
 ***
 *** \note There are more derived classes from this set in other areas of the
-*** code. In particular, there is a TextImageTexture and TextImageElement class
+*** code. In particular, there is a TextTexture and TextBlock class
 *** defined in the text.h header file.
 *** ***************************************************************************/
 

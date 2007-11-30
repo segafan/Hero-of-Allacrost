@@ -62,7 +62,7 @@ private:
 	hoa_utils::ustring _credits_text;
 
 	//! \brief The rendered text of the credits
-	hoa_video::RenderedText _credits_rendered;
+	hoa_video::TextImage _credits_rendered;
 
 	//! \brief Is the window visible or not
 	bool _visible;

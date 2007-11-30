@@ -84,7 +84,7 @@ public:
 
 protected:
 	//! \brief The rendered text for the name of the action
-	hoa_video::RenderedText _script_name;
+	hoa_video::TextImage _script_name;
 
 	//! \brief The actor whom is initiating this action
 	BattleActor* _source;

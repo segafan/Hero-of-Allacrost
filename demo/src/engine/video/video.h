@@ -211,7 +211,7 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class ImageDescriptor;
 	friend class StillImage;
 	friend class CompositeImage;
-	friend class RenderedText;
+	friend class TextImage;
 
 public:
 	~GameVideo();
