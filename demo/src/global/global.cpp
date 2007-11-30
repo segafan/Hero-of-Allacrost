@@ -618,13 +618,20 @@ const std::string GameGlobal::GetSavePath() const
 	passwd *pw = getpwuid(getuid());
 	if (pw)
 	{
-		string ret = string(pw->pw_dir) + "/.allacrost";
+		string ret = string(pw->pw_dir) + "/.allacrost/";
 		if (!DoesFileExist(ret))
 			MakeDirectory(ret);
 		return ret;
 	}
 #elif defined __MACH__
-	
+	passwd *pw = getpwuid(getuid());
+	if (pw)
+	{
+		string ret = string(pw->pw_dir) + "/Library/Application Support/allacrost/";
+		if (!DoesFileExist(ret))
+			MakeDirectory(ret);
+		return ret;
+	}
 #endif
 	return "dat/";
 }
