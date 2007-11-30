@@ -257,7 +257,8 @@ void MenuMode::Update() {
 			// overwrite save
 			delete _confirm_window;
 			_confirm_window = NULL;
-			GlobalManager->SaveGame(string("dat/saved_game.lua"));
+			string filename = GlobalManager->GetSavePath() + "saved_game.lua";
+			GlobalManager->SaveGame(filename);
 			_message_window = new MessageWindow("Your game has been saved.", 250.0f, 50.0f);
 		}
 		else if (_confirm_window->Result() == CONFIRM_RESULT_CANCEL || _confirm_window->Result() == CONFIRM_RESULT_NO)
@@ -751,7 +752,7 @@ void MenuMode::_HandleSaveMenu() {
 	switch (_menu_save.GetSelection()) {
 		case SAVE_SAVE:
 			// TODO: Handle Save - Save command
-			file_name = "dat/saved_game.lua";
+			file_name = GlobalManager->GetSavePath() + "saved_game.lua";
 			if (DoesFileExist(file_name))
 			{
 				// Show confirm dialogue window
