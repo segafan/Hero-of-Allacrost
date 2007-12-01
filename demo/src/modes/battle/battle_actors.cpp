@@ -71,7 +71,7 @@ void BattleActor::ConstructInformation(hoa_utils::ustring& info, int32 ap_index)
 
 	// Add character's name and attack point name if viable
 	info += GetActor()->GetName();
-	if (ap_index > 0 && static_cast<uint32>(ap_index) < GetActor()->GetAttackPoints()->size()) {
+	if (ap_index >= 0 && static_cast<uint32>(ap_index) < GetActor()->GetAttackPoints()->size()) {
 		info += MakeUnicodeString(" - ") + GetActor()->GetAttackPoints()->at(ap_index)->GetName();
 	}
 	info += MakeUnicodeString("\n");
@@ -190,11 +190,20 @@ BattleCharacter::~BattleCharacter() {
 
 
 void BattleCharacter::Update() {
-	if (_state == ACTOR_IDLE && GetWaitTime()->IsRunning())
-		_stamina_icon_location += SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_SELECT - STAMINA_LOCATION_BOTTOM) / _wait_time.GetDuration());
-		//_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
-
-	if (_state == ACTOR_ACTING) {
+	if (_state == ACTOR_IDLE)
+	{
+		if (_wait_time.IsRunning())
+		{
+			_stamina_icon_location += SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_SELECT - STAMINA_LOCATION_BOTTOM) / _wait_time.GetDuration());
+		}
+		else if (_wait_time.IsFinished())
+		{
+			_state = ACTOR_AWAITING_TURN;
+			current_battle->AddToTurnQueue(this);
+		}
+	}
+	else if (_state == ACTOR_ACTING)
+	{
 		if ((_x_location - _x_origin) < 50)
 			_x_location += 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
 	}
@@ -393,7 +402,8 @@ bool BattleEnemy::operator<(const BattleEnemy & other) const {
 
 
 void BattleEnemy::Update() {
-	if (_state == ACTOR_IDLE) {
+	if (_state == ACTOR_IDLE)
+	{
 		if (_wait_time.IsFinished()) { // Indicates that the idle state is now finished
 			_stamina_icon_location = STAMINA_LOCATION_SELECT;
 			_state = ACTOR_WARM_UP;

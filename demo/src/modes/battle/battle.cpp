@@ -426,12 +426,7 @@ void BattleMode::Update() {
 
 	// ----- (4): Try to select an idle character if no character is currently selected
 	if (_selected_character == NULL) {
-		_selected_character_index = GetIndexOfFirstIdleCharacter();
-		if (_selected_character_index != static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX)) {
-			_selected_character = GetPlayerCharacterAt(_selected_character_index);
-			_selected_character->GetWaitTime()->Pause();
-			_action_window->Initialize(_selected_character);
-		}
+		_ActivateNextCharacter();
 	}
 
 	// ----- (5): Update the action window if the player is making an action or target selection
@@ -642,6 +637,18 @@ void BattleMode::_DrawStaminaBar() {
 // BattleMode class -- miscellaneous Code
 ////////////////////////////////////////////////////////////////////////////////
 
+void BattleMode::_ActivateNextCharacter()
+{
+	_selected_character_index = GetIndexOfNextIdleCharacter(_selected_character);
+	if (_selected_character_index != static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX))
+	{
+		_selected_character = GetPlayerCharacterAt(_selected_character_index);
+		_selected_character->SetState(ACTOR_AWAITING_TURN);
+		//_selected_character->GetWaitTime()->Pause();
+		_action_window->Initialize(_selected_character);
+	}
+}
+
 void BattleMode::_SetInitialTarget() {
 	if (_action_window->_action_target_ally == true) {
 		_selected_target = GetPlayerCharacterAt(0);
@@ -837,6 +844,12 @@ void BattleMode::NotifyOfActorDeath(BattleActor *actor)
 		_selected_character = NULL;
 		_action_window->Reset();
 	}
+
+	BattleCharacter *character = dynamic_cast<BattleCharacter*>(actor);
+	if (character)
+	{
+		RemoveFromTurnQueue(character);
+	}
 }
 
 void BattleMode::FreezeTimers() {
@@ -898,6 +911,25 @@ void BattleMode::SwapCharacters(BattleCharacter* ActorToRemove, BattleCharacter 
 }
 
 
+void BattleMode::AddToTurnQueue(BattleCharacter* character)
+{
+	_characters_awaiting_turn.push_back(character);
+}
+
+void BattleMode::RemoveFromTurnQueue(BattleCharacter *character)
+{
+	std::list<private_battle::BattleCharacter*>::iterator it;
+
+	for (it = _characters_awaiting_turn.begin(); it != _characters_awaiting_turn.end(); it++)
+	{
+		if ((*it) == character)
+		{
+			_characters_awaiting_turn.erase(it);
+			break;
+		}
+	}
+}
+
 
 uint32 BattleMode::GetIndexOfFirstAliveEnemy() const {
 	std::deque<private_battle::BattleEnemy*>::const_iterator it = _enemy_actors.begin();
@@ -927,19 +959,51 @@ uint32 BattleMode::GetIndexOfLastAliveEnemy() const {
 
 
 
-uint32 BattleMode::GetIndexOfFirstIdleCharacter() const {
+uint32 BattleMode::GetIndexOfNextIdleCharacter(BattleCharacter *ignore) const
+{
 	BattleCharacter* character;
-	deque<BattleCharacter*>::const_iterator it = _character_actors.begin();
 
-	for (uint32 i = 0; it != _character_actors.end(); i++, it++) {
-		character = (*it);
-		//You MUST check to see if the wait time has expired...we don't want the action
-		//window appearing if no one is ready to take action
-		if (character->GetState() == ACTOR_IDLE && character->GetWaitTime()->IsFinished()) {
-			return i;
+	if (!_characters_awaiting_turn.size())
+	{
+		return INVALID_BATTLE_ACTOR_INDEX;
+	}	
+	else if (_characters_awaiting_turn.size() == 1 || !ignore)
+	{
+		character = _characters_awaiting_turn.front();
+	}
+	else
+	{
+		std::list<BattleCharacter*>::const_iterator it2;
+		//Find our guy in the waiting queue
+		for (it2 = _characters_awaiting_turn.begin(); it2 != _characters_awaiting_turn.end(); it2++)
+		{
+			if ((*it2) == ignore)
+			{
+				break;
+			}
+		}
+
+		//Grab the guy after him
+		if ((++it2) != _characters_awaiting_turn.end())
+		{
+			character = (*it2);
+		}
+		//Loop around if he's at the end of the list
+		else
+		{
+			character = _characters_awaiting_turn.front();
 		}
 	}
 
+	std::deque<BattleCharacter*>::const_iterator it = _character_actors.begin();
+	for (uint32 i = 0; it != _character_actors.end(); i++, it++)
+	{
+		if ((*it) == character)
+		{
+			return i;
+		}
+	}
+	
 	return INVALID_BATTLE_ACTOR_INDEX;
 }
 
