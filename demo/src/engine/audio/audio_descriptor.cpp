@@ -742,7 +742,12 @@ void AudioDescriptor::_SetSourceProperties() {
 	
 	// Set looping (source has looping disabled by default, so only need to check the true case)
 	if (_looping) {
-		alSourcei(_source->source, AL_LOOPING, AL_TRUE);
+		// This next line causes a bug to happen on windows (and Mac as well I'm guessing with streaming sounds
+		// If looping is set to true on a streaming source, then none of the buffers queued on the source will ever be marked 
+		// as processed and this is why the first chunk of music would repeat over and over, it was looping the first buffer.
+		// I'm not sure how commenting out this line will affect static sounds, but everything seems to run pretty good without any
+		// sound glitches, please test this on other 
+		//alSourcei(_source->source, AL_LOOPING, AL_TRUE);
 		if (AudioManager->CheckALError()) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "setting a source to loop failed: " << AudioManager->CreateALErrorString() << endl;
 		}
@@ -886,7 +891,7 @@ MusicDescriptor::MusicDescriptor(const MusicDescriptor& copy) :
 
 bool MusicDescriptor::LoadAudio(const std::string& filename, AUDIO_LOAD load_type, uint32 stream_buffer_size) {
 	// FIXME: set to static until streaming is fixed
-	return AudioDescriptor::LoadAudio(filename, AUDIO_LOAD_STATIC, stream_buffer_size);
+	return AudioDescriptor::LoadAudio(filename, load_type, stream_buffer_size);
 }
 
 
