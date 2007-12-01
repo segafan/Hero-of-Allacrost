@@ -360,15 +360,13 @@ private:
 
 
 class TextSupervisor : public hoa_utils::Singleton<TextSupervisor> {
+	friend class hoa_utils::Singleton<TextSupervisor>;
 	friend class GameVideo;
 	friend class TextureController;
-
 	friend class private_video::TextTexture;
 	friend class TextImage;
 
 public:
-	TextSupervisor();
-
 	~TextSupervisor();
 
 	bool SingletonInitialize();
@@ -397,6 +395,9 @@ public:
 	***
 	*** If the argument name is invalid (i.e. no font with that reference name exists), this method will do
 	*** nothing more than print out a warning message if running in debug mode.
+	***
+	*** \todo Implement this function. Its not available yet because of potential problems with lingering references to the
+	*** font (in TextStyle objects, or elswhere)
 	**/
 // 	void FreeFont(const std::string& font_name);
 
@@ -492,7 +493,12 @@ public:
 	//@}
 
 private:
-	//! \brief The default font, set to empty string if no fonts are loaded
+	TextSupervisor()
+		{}
+
+	// ---------- Private members
+
+	//! \brief The default font, set to an empty string if no fonts are loaded
 	std::string _default_font;
 
 	//! \brief The default color to render text in
@@ -501,15 +507,20 @@ private:
 	//! \brief The default text style
 	TextStyle _default_style;
 
-	//! STL map containing properties for each font (includeing TTF_Font *)
+	/** \brief A container for properties for each font which has been loaded
+	*** The key to the map is the font's name
+	**/
 	std::map<std::string, FontProperties*> _font_map;
 
+	// ---------- Private methods
+
 	/** \brief does the actual work of drawing text
-	 *
-	 *  \param uText  Pointer to a unicode string holding the text to draw
-	 * \return success/failure
-	 */
-	bool _DrawTextHelper(const uint16 *const uText, FontProperties *fp, Color color);
+	***
+	*** \param text A pointer to a unicode string holding the text to draw
+	*** \param fp A pointer to the properties of the font to use in drawing the text
+	*** \param text_color The color to render the text in
+	**/
+	void _DrawTextHelper(const uint16* const text, FontProperties* fp, Color text_color);
 
 	/** Renders a given unicode string and TextStyle to a pixel array
 	 * \param string The ustring to render

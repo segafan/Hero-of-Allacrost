@@ -14,6 +14,10 @@
 ***
 *** This code makes use of the SDL_ttf font library for representing fonts,
 *** font glyphs, and text.
+*** 
+*** \note Normally the int data type should not be used in Allacrost code,
+*** however it is used periodically throughout this file as the SDL_ttf library
+*** requests integer arguments.
 *** ***************************************************************************/
 
 #include <cassert>
@@ -413,14 +417,9 @@ void TextImage::_Realign() {
 // TextSupervisor class
 // -----------------------------------------------------------------------------
 
-TextSupervisor::TextSupervisor()
-{}
-
-
-
 TextSupervisor::~TextSupervisor() {
-	// Remove all loaded fonts and shutdown the font library
-	for (map<string, FontProperties*>::iterator i = _font_map.begin(); i!= _font_map.end(); i++) {
+	// Remove all loaded fonts and cached glyphs, then shutdown the SDL_ttf library
+	for (map<string, FontProperties*>::iterator i = _font_map.begin(); i != _font_map.end(); i++) {
 		FontProperties* fp = i->second;
 
 		if (fp->ttf_font)
@@ -447,7 +446,7 @@ bool TextSupervisor::SingletonInitialize() {
 		return false;
 	}
 
-	if (LoadFont("img/fonts/tarnhalo.ttf", "debug_font", 16) == false) {
+	if (LoadFont("img/fonts/junicode_regular.ttf", "debug_font", 16) == false) {
 		PRINT_ERROR << "could not load the debug font" << endl;
 		TTF_Quit();
 		return false;
@@ -475,14 +474,12 @@ bool TextSupervisor::LoadFont(const string& filename, const string& font_name, u
 	// Attempt to load the font
 	TTF_Font* font = TTF_OpenFont(filename.c_str(), size);
 	if (font == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "TTF_OpenFont() failed to load the font file: " << filename << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_OpenFont() failed to load the font file: " << filename << endl;
 		return false;
 	}
 
-	// Create a new FontProperties object for this font
+	// Create a new FontProperties object for this font and set all of the properties according to SDL_ttf
 	FontProperties* fp = new FontProperties;
-
-	// Set all of the font's properties
 	fp->ttf_font = font;
 	fp->height = TTF_FontHeight(font);
 	fp->line_skip = TTF_FontLineSkip(font);
@@ -499,7 +496,7 @@ bool TextSupervisor::LoadFont(const string& filename, const string& font_name, u
 		fp->shadow_y = y_offset;
 	}
 
-	// Set the shadow style and create the glyph cache
+	// Set the shadow style and create the glyph cache for the font
 	fp->shadow_style = style;
 	fp->glyph_cache = new std::map<uint16, FontGlyph*>;
 
@@ -514,18 +511,17 @@ const std::string& TextSupervisor::GetDefaultFont() const {
 	return VideoManager->_current_context.font;
 }
 
+
+
 Color TextSupervisor::GetDefaultTextColor() const {
 	return VideoManager->_current_context.text_color;
 }
 
 
-void TextSupervisor::SetDefaultTextColor(const Color& color) {
-	VideoManager->_current_context.text_color = color;
-}
 
 void TextSupervisor::SetDefaultFont(const std::string& font_name) {
 	if (_font_map.find(font_name) == _font_map.end()) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because no font existed by the name: " << font_name << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
 		return;
 	}
 
@@ -534,9 +530,15 @@ void TextSupervisor::SetDefaultFont(const std::string& font_name) {
 
 
 
+void TextSupervisor::SetDefaultTextColor(const Color& color) {
+	VideoManager->_current_context.text_color = color;
+}
+
+
+
 FontProperties* TextSupervisor::GetFontProperties(const std::string& font_name) {
 	if (IsFontValid(font_name) == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed becase argument was invalid for font name: " << font_name << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
 		return NULL;
 	}
 
@@ -547,13 +549,13 @@ FontProperties* TextSupervisor::GetFontProperties(const std::string& font_name) 
 
 void TextSupervisor::SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STYLE style) {
 	if (IsFontValid(font_name) == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because the properties could not be found for font: " << font_name << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
 		return;
 	}
 
 	FontProperties* font = _font_map[font_name];
 	if (font == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because the properties were NULL for for font: " << font_name << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "font properties were NULL for for font: " << font_name << endl;
 		return;
 	}
 
@@ -564,13 +566,13 @@ void TextSupervisor::SetFontShadowStyle(const std::string& font_name, TEXT_SHADO
 
 void TextSupervisor::SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y) {
 	if (IsFontValid(font_name) == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid font_name argument: " << font_name << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
 		return;
 	}
 
 	FontProperties *font = _font_map[font_name];
 	if (font == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to retrieve font properties for font: " << font_name << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "font properties were NULL for for font: " << font_name << endl;
 		return;
 	}
 
@@ -638,19 +640,13 @@ void TextSupervisor::Draw(const ustring& text, const TextStyle& style) {
 			VideoManager->MoveRelative(VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * fp->shadow_x, 0.0f);
 			VideoManager->MoveRelative(0.0f, VideoManager->_current_context.coordinate_system.GetVerticalDirection() * fp->shadow_y);
 
-			if (_DrawTextHelper(buffer, fp, shadow_color) == false) {
-				VideoManager->PopState();
-				return;
-			}
+			_DrawTextHelper(buffer, fp, shadow_color);
 
 			glPopMatrix();
 		}
 
 		// Now draw the text itself
-		if (_DrawTextHelper(buffer, fp, style.color) == false) {
-			VideoManager->PopState();
-			return;
-		}
+		_DrawTextHelper(buffer, fp, style.color);
 
 		glPopMatrix();
 		VideoManager->MoveRelative(0, -line_skip * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
@@ -860,99 +856,88 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 
 
 
-bool TextSupervisor::_DrawTextHelper(const uint16 s*uText, FontProperties *fp, Color color) {
-	if(_font_map.empty())
-		return false;
+void TextSupervisor::_DrawTextHelper(const uint16* const text, FontProperties* fp, Color text_color) {
+	if (*text == 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid argument, empty string" << endl;
+		return;
+	}
 
-	// empty string, do nothing
-	if (*uText == 0)
-		return true;
-
-	if (!fp)
-		return false;
+	if (fp == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid argument, NULL font properties" << endl;
+		return;
+	}
 
 	glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_BLEND);
 
-	CoordSys &cs = VideoManager->_current_context.coordinate_system;
+	CoordSys& cs = VideoManager->_current_context.coordinate_system;
 
-	_CacheGlyphs(uText, fp);
-
+	_CacheGlyphs(text, fp);
+	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_FOG);
-
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.1f);
 
 	glPushMatrix();
 
-	int fontwidth;
-	int fontheight;
-	if(TTF_SizeUNICODE(fp->ttf_font, uText, &fontwidth, &fontheight) != 0)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: TTF_SizeUNICODE() returned NULL in _DrawTextHelper()!" << endl;
-		return false;
+	int font_width, font_height;
+	if (TTF_SizeUNICODE(fp->ttf_font, text, &font_width, &font_height) != 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_SizeUNICODE() failed" << endl;
+		return;
 	}
 
-	float xoff = ((VideoManager->_current_context.x_align+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
-	float yoff = ((VideoManager->_current_context.y_align+1) * fontheight) * .5f * -cs.GetVerticalDirection();
+	float xoff = ((VideoManager->_current_context.x_align + 1) * font_width) * 0.5f * -cs.GetHorizontalDirection();
+	float yoff = ((VideoManager->_current_context.y_align + 1) * font_height) * 0.5f * -cs.GetVerticalDirection();
 
 	VideoManager->MoveRelative(xoff, yoff);
 
 	float modulation = VideoManager->_screen_fader.GetFadeModulation();
-	Color textColor = color * modulation;
+	Color final_color = text_color * modulation;
 
-	int xpos = 0;
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	GLfloat tex_coords[8];
 	GLint vertices[8];
+	GLfloat tex_coords[8];
+	glVertexPointer(2, GL_INT, 0, vertices);
+	glTexCoordPointer(2, GL_FLOAT, 0, tex_coords);
 
-	glEnableClientState ( GL_VERTEX_ARRAY );
-	glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
+	// Iterate through each character in the string and render the character glyphs one at a time
+	int xpos = 0;
+	for (const uint16* glyph = text; *glyph != 0; glyph++) {
+		FontGlyph* glyph_info = (*fp->glyph_cache)[*glyph];
 
-	glVertexPointer ( 2, GL_INT, 0, vertices );
-	glTexCoordPointer ( 2, GL_FLOAT, 0, tex_coords );
+		int x_hi = glyph_info->width;
+		int y_hi = glyph_info->height;
+		if (cs.GetHorizontalDirection() < 0.0f)
+			x_hi = -x_hi;
+		if (cs.GetVerticalDirection() < 0.0f)
+			y_hi = -y_hi;
 
-	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
-	{
-		FontGlyph * glyphinfo = (*fp->glyph_cache)[*glyph];
-
-		int xhi = glyphinfo->width;
-		int yhi = glyphinfo->height;
-
-		if(cs.GetHorizontalDirection() < 0.0f)
-			xhi = -xhi;
-		if(cs.GetVerticalDirection() < 0.0f)
-			yhi = -yhi;
+		int min_x, min_y;
+		min_x = glyph_info->min_x * static_cast<int>(cs.GetHorizontalDirection()) + xpos;
+		min_y = glyph_info->min_y * static_cast<int>(cs.GetVerticalDirection());
 
 		float tx, ty;
-		tx = glyphinfo->max_x;
-		ty = glyphinfo->max_y;
+		tx = glyph_info->max_x;
+		ty = glyph_info->max_y;
 
-		int minx, miny;
-		minx = glyphinfo->min_x * (int)cs.GetHorizontalDirection() + xpos;
-		miny = glyphinfo->min_y * (int)cs.GetVerticalDirection();
-
-		TextureManager->_BindTexture(glyphinfo->texture);
-
-		if(VideoManager->CheckGLError())
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in _DrawTextHelper!" << endl;
-			return false;
+		TextureManager->_BindTexture(glyph_info->texture);
+		if (VideoManager->CheckGLError()) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "OpenGL error detected: " << VideoManager->CreateGLErrorString() << endl;
+			return;
 		}
 
-		vertices[0] = minx;
-		vertices[1] = miny;
-		vertices[2] = minx + xhi;
-		vertices[3] = miny;
-		vertices[4] = minx + xhi;
-		vertices[5] = miny + yhi;
-		vertices[6] = minx;
-		vertices[7] = miny + yhi;
+		vertices[0] = min_x;
+		vertices[1] = min_y;
+		vertices[2] = min_x + x_hi;
+		vertices[3] = min_y;
+		vertices[4] = min_x + x_hi;
+		vertices[5] = min_y + y_hi;
+		vertices[6] = min_x;
+		vertices[7] = min_y + y_hi;
 		tex_coords[0] = 0.0f;
 		tex_coords[1] = ty;
 		tex_coords[2] = tx;
@@ -962,24 +947,20 @@ bool TextSupervisor::_DrawTextHelper(const uint16 s*uText, FontProperties *fp, C
 		tex_coords[6] = 0.0f;
 		tex_coords[7] = 0.0f;
 
-		glColor4fv((GLfloat*)&textColor);
+		glColor4fv((GLfloat*)&final_color);
 		glDrawArrays(GL_QUADS, 0, 4);
 
-		xpos += glyphinfo->advance;
-	}
+		xpos += glyph_info->advance;
+	} // for (const uint16* glyph = text; *glyph != 0; glyph++)
 
-	glDisableClientState ( GL_VERTEX_ARRAY );
-	glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
-
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glPopMatrix();
 
 	if (VideoManager->_fog_intensity > 0.0f)
 		glEnable(GL_FOG);
-
 	glDisable(GL_ALPHA_TEST);
-
-	return true;
-}
+} // void TextSupervisor::_DrawTextHelper(const uint16* const text, FontProperties* fp, Color color)
 
 
 
