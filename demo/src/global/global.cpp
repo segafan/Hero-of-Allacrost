@@ -609,7 +609,7 @@ const std::string GameGlobal::GetSavePath() const
 
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, path)))
 	{
-		string ret = string(path) + "/.allacrost/";
+		string ret = string(path) + "/Allacrost/";
 		if (!DoesFileExist(ret))
 			MakeDirectory(ret);
 		return ret;
@@ -627,7 +627,7 @@ const std::string GameGlobal::GetSavePath() const
 	passwd *pw = getpwuid(getuid());
 	if (pw)
 	{
-		string ret = string(pw->pw_dir) + "/Library/Application Support/allacrost/";
+		string ret = string(pw->pw_dir) + "/Library/Application Support/Allacrost/";
 		if (!DoesFileExist(ret))
 			MakeDirectory(ret);
 		return ret;
