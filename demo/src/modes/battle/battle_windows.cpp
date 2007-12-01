@@ -116,8 +116,8 @@ ActionWindow::ActionWindow() {
 	_target_information.SetAlignment(TextImage::ALIGN_LEFT);
 	_target_information.SetStyle(battle_style);
 	
-	_skill_selection_header.SetText("Skill                          SP");
-	_item_selection_header.SetText("Item                          QTY");
+	_skill_selection_header.SetText("Skill                                                  SP");
+	_item_selection_header.SetText("Item                                                  QTY");
 
 	Reset();
 } // ActionWindow::ActionWindow()
@@ -213,11 +213,11 @@ void ActionWindow::_UpdateActionCategory() {
 	if (InputManager->LeftPress()) {
 		_action_category_list.HandleLeftKey();
 	}
-	if (InputManager->RightPress()) {
+	else if (InputManager->RightPress()) {
 		_action_category_list.HandleRightKey();
 	}
 	
-	if (InputManager->ConfirmPress() ) {
+	else if (InputManager->ConfirmPress() ) {
 		_action_category_list.HandleConfirmKey();
 		if (_action_category_list.GetEvent() == VIDEO_OPTION_CONFIRM) {
 			_selected_action_category = static_cast<uint32>(_action_category_list.GetSelection());
@@ -228,8 +228,12 @@ void ActionWindow::_UpdateActionCategory() {
 			// TODO: Play a sound to indicate the selection was invalid
 		}
 	}
-	// TODO: implement cancel press ... what should it do?
-	// else if (InputManager->CancelPress()) { ... }
+	// Pick the next charcter who is not the current character
+	else if (InputManager->CancelPress())
+	{
+		Reset();
+		current_battle->_ActivateNextCharacter();
+	}
 }
 
 
@@ -291,6 +295,8 @@ void ActionWindow::_UpdateTargetSelection() {
 	if (InputManager->CancelPress()) {
 		_target_information.Clear();
 		_state = VIEW_ACTION_SELECTION;
+		current_battle->_selected_target = NULL;
+		return;
 	}
 	else if (InputManager->ConfirmPress()) {
 		vector<GlobalAttackPoint*>* attack_points = current_battle->_selected_target->GetActor()->GetAttackPoints();
@@ -312,9 +318,11 @@ void ActionWindow::_UpdateTargetSelection() {
 		}
 		current_battle->AddBattleActionToQueue(new_event);
 		current_battle->_selected_character->SetState(ACTOR_WARM_UP);
+
+		current_battle->RemoveFromTurnQueue(current_battle->_selected_character);
 		current_battle->_selected_target = NULL;
 		current_battle->_selected_character = NULL;
-		current_battle->_selected_character_index = current_battle->GetIndexOfFirstIdleCharacter();
+		current_battle->_selected_character_index = current_battle->GetIndexOfNextIdleCharacter();
 		current_battle->_selected_attack_point = 0;
 
 		Reset();
@@ -426,10 +434,12 @@ void ActionWindow::_DrawActionSelection() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
 	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	if (_selected_action_category != ACTION_TYPE_ITEM) {
-		_skill_selection_header.Draw();
+		//_skill_selection_header.Draw();
+		VideoManager->Text()->Draw(_skill_selection_header.GetString());
 	}
 	else {
-		_item_selection_header.Draw();
+		//_item_selection_header.Draw();
+		VideoManager->Text()->Draw(_item_selection_header.GetString());
 	}
 
 	// Draw the list of actions

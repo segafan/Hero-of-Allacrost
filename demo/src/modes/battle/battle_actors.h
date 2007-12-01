@@ -35,22 +35,23 @@ namespace private_battle {
 
 //! \brief Represents the possible states that a BattleActor may be in
 enum ACTOR_STATE {
-	ACTOR_INVALID    = -1,
+	ACTOR_INVALID		= -1,
 	//! Actor is recovering stamina so they can execute another action
-	ACTOR_IDLE       =  0,
+	ACTOR_IDLE			=  0,
+	ACTOR_AWAITING_TURN =  1,
 	//! Actor has selected an action and is preparing to execute it
-	ACTOR_WARM_UP    =  1,
+	ACTOR_WARM_UP		=  2,
 	//! Actor is prepared to execute action and is waiting their turn to act
-	ACTOR_READY      =  2,
+	ACTOR_READY			=  3,
 	//! Actor is in the process of executing their selected action
-	ACTOR_ACTING     =  3,
+	ACTOR_ACTING		=  4,
 	//! Actor is finished with action execution and recovering
-	ACTOR_COOL_DOWN  =  4,
+	ACTOR_COOL_DOWN		=  5,
 	//! Actor has perished and is inactive in battle
-	ACTOR_DEAD       =  5,
+	ACTOR_DEAD			=  6,
 	//! Actor is in some state of paralysis and can not act nor recover stamina
-	ACTOR_PARALYZED  =  6,
-	ACTOR_TOTAL      =  7
+	ACTOR_PARALYZED		=  7,
+	ACTOR_TOTAL			=  8
 };
 
 //! \brief Constants for the significant locations along the stamina meter

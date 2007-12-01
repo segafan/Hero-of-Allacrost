@@ -241,7 +241,11 @@ public:
 
 	uint32 GetIndexOfLastAliveEnemy() const;
 
-	uint32 GetIndexOfFirstIdleCharacter() const;
+	/*!
+	 * \brief Grabs the enxt idle character based on how long they have been waiting
+	 * \param ignore We should ignore this character
+	 */
+	uint32 GetIndexOfNextIdleCharacter(hoa_battle::private_battle::BattleCharacter *ignore = NULL) const;
 
 	//! \brief Useful for item and skill targeting for enemies
 	uint32 GetIndexOfNextAliveCharacter(bool move_upward) const;
@@ -263,6 +267,12 @@ public:
 	//! \brief Swap a character from _player_actors to _player_actors_in_battle
 	// This may become more complicated if it is done in a wierd graphical manner
 	void SwapCharacters(private_battle::BattleCharacter * ActorToRemove, private_battle::BattleCharacter * ActorToAdd);
+
+	//! \brief Adds a player to the end of the queue when he is ready to take a turn
+	void AddToTurnQueue(private_battle::BattleCharacter *character);
+
+	//! \brief Removes the given character from the turn queue
+	void RemoveFromTurnQueue(private_battle::BattleCharacter *character);
 
 	/*private_battle::BattleAction* GetActiveAction()
 		{ return _active_action; }*/
@@ -433,6 +443,9 @@ private:
 
 	//! \brief Contains actions which are processed over a period of time
 	std::list<private_battle::BattleAction*> _action_residual;
+
+	//! \brief Contains all the characters who are awaiting their turn
+	std::list<private_battle::BattleCharacter*> _characters_awaiting_turn;
 	//@}
 
 	//! \brief An Index to the (x,y) location of the next created monster (MONSTER_LOCATIONS array)
@@ -478,6 +491,9 @@ private:
 	*** \note This function only counts the characters on the screen, not characters in the party reserves
 	**/
 	uint32 _NumberCharactersAlive() const;
+
+	//! \brief Picks the next character who should take his turn
+	void _ActivateNextCharacter();
 
 	/** \brief Selects the initial target for an action to take effect on
 	*** This is only used for characters to select an initial target, but not for enemies.
