@@ -358,7 +358,19 @@ private:
 }; // class TextImage : public ImageDescriptor
 
 
-
+/** ****************************************************************************
+*** \brief A helper class to the video engine to manage all text rendering
+***
+*** This class is a singleton and it is both created and destroyed by the GameVideo
+*** class. TextSupervisor is essentially an extension of the GameVideo singleton
+*** class which handles all font and text related operations.
+*** 
+*** \note The singleton name of this class is "TextManager"
+*** 
+*** \note When the API user needs to access methods of this class, the recommended
+*** way for doing so is to call "VideoManager->Text()->MethodName()". 
+*** VideoManager->Text() returns the singleton pointer to this class.
+*** ***************************************************************************/
 class TextSupervisor : public hoa_utils::Singleton<TextSupervisor> {
 	friend class hoa_utils::Singleton<TextSupervisor>;
 	friend class GameVideo;
@@ -369,6 +381,9 @@ class TextSupervisor : public hoa_utils::Singleton<TextSupervisor> {
 public:
 	~TextSupervisor();
 
+	/** \brief Initialzies the SDL_ttf library and loads a debug_font
+	*** \return True if all initializations were successful, or false if there was an error
+	**/
 	bool SingletonInitialize();
 
 	//! \name Font manipulation methods
@@ -399,7 +414,7 @@ public:
 	*** \todo Implement this function. Its not available yet because of potential problems with lingering references to the
 	*** font (in TextStyle objects, or elswhere)
 	**/
-// 	void FreeFont(const std::string& font_name);
+	void FreeFont(const std::string& font_name);
 
 	/** \brief Returns true if a font of a certain reference name exists
 	*** \param font_name The reference name of the font to check
@@ -408,28 +423,11 @@ public:
 	bool IsFontValid(const std::string& font_name)
 		{ return (_font_map.find(font_name) != _font_map.end()); }
 
-	/** \brief Gets the name of the current default font used for text rendering
-	*** \note If there are no fonts loaded, this method will return an empty string
+	/** \brief Get the font properties for a loaded font
+	*** \param font_name The name reference of the loaded font
+	*** \return A pointer to the FontProperties object with the requested data, or NULL if the properties could not be fetched
 	**/
-	const std::string& GetDefaultFont() const;
-
-	const TextStyle& GetDefaultStyle() const
-		{ return _default_style; }
-
-	TextStyle& GetDefaultStyle()
-		{ return _default_style; }
-
-	/** \brief Sets the default font to use for text rendering
-	*** \param font_name The name of the pre-loaded font to set as the default
-	***
-	*** If the argument does not have valid font data associated with it, no
-	*** change will be made and a warning message will be printed if debug
-	*** mode is enabled.
-	**/
-	void SetDefaultFont(const std::string& font_name);
-
-	void SetDefaultStyle(TextStyle style)
-		{ _default_style = style; }
+	FontProperties* GetFontProperties(const std::string& font_name);
 
 	/** \brief Sets the default shadow style to use for a specified font
 	*** \param font_name The reference name of the font to set the shadow style for
@@ -446,50 +444,72 @@ public:
 	*** by an offset of one eight of the font's height.
 	**/
 	void SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y);
-
-	// NOTE: Make this function private
-	/** \brief Get the font properties for a previously loaded font
-	*** \param font_name The name reference of the loaded font
-	*** \return A pointer to the FontProperties object with the requested data, or NULL if the properties could not be fetched.
-	**/
-	FontProperties* GetFontProperties(const std::string& font_name);
 	//@}
 
-	//! \brief Text manipulation methods
+	//! \name Text methods
 	//@{
-	//! \brief Returns the current default color for rendering text
-	Color GetDefaultTextColor() const;
-
-	/** \brief Sets the default color to render text in
-	*** \param color The color to set the text to
-	**/
-	void SetDefaultTextColor(const Color& color);
-
-	/** \brief Renders and draws a string of text to the screen
+	/** \brief Renders and draws a unicode string of text to the screen in the default text style
 	*** \param text The text string to draw in unicode format
 	**/
-	void Draw(const hoa_utils::ustring& text);
+	void Draw(const hoa_utils::ustring& text)
+		{ Draw(text, _default_style); }
+
+	/** \brief Renders and draws a string of text to the screen in a desired text style
+	*** \param text The text string to draw in unicode format
+	*** \param style A reference to the TextStyle to use for drawing the string
+	**/
 	void Draw(const hoa_utils::ustring& text, const TextStyle& style);
 
-	/** \brief Renders and draws a string of text to the screen
+	/** \brief Renders and draws a standard string of text to the screen in the default text style
 	*** \param text The text string to draw in standard format
 	**/
 	void Draw(const std::string& text)
 		{ Draw(hoa_utils::MakeUnicodeString(text)); }
 
-	/** \brief Calculates what the width would be of a rendered string of text
+	/** \brief Renders and draws a standard string of text to the screen in a desired text style
+	*** \param text The text string to draw in standard format
+	*** \param style A reference to the TextStyle to use for drawing the string
+	**/
+	void Draw(const std::string& text, const TextStyle& style)
+		{ Draw(hoa_utils::MakeUnicodeString(text), style); }
+
+	/** \brief Calculates what the width would be for a unicode string of text if it were rendered
 	*** \param font_name The reference name of the font to use for the calculation
 	*** \param text The text string in unicode format
 	*** \return The width of the text as it would be rendered, or -1 if there was an error
-	 */
+	**/
 	int32 CalculateTextWidth(const std::string& font_name, const hoa_utils::ustring& text);
 
-	/** \brief calculates the width of the given text if it were rendered with the given font
+	/** \brief Calculates what the width would be for a standard string of text if it were rendered
 	*** \param font_name The reference name of the font to use for the calculation
 	*** \param text The text string in standard format
 	*** \return The width of the text as it would be rendered, or -1 if there was an error
 	**/
 	int32 CalculateTextWidth(const std::string& font_name, const std::string& text);
+	//@}
+
+	//! \name Class member access methods
+	//@{
+	/** \brief Gets the name of the current default font used for text rendering
+	*** \note If there are no fonts loaded, this method will return an empty string
+	**/
+	const std::string& GetDefaultFont() const;
+
+	const TextStyle& GetDefaultStyle() const
+		{ return _default_style; }
+
+	Color GetDefaultTextColor() const;
+
+	/** \brief Sets the default font to use for text rendering
+	*** \param font_name The name of the pre-loaded font to set as the default
+	*** \note If the argument does not have valid font data associated with it, no change will be made
+	**/
+	void SetDefaultFont(const std::string& font_name);
+
+	void SetDefaultStyle(TextStyle style)
+		{ _default_style = style; }
+
+	void SetDefaultTextColor(const Color& color);
 	//@}
 
 private:
@@ -508,41 +528,41 @@ private:
 	TextStyle _default_style;
 
 	/** \brief A container for properties for each font which has been loaded
-	*** The key to the map is the font's name
+	*** The key to the map is the font name.
 	**/
 	std::map<std::string, FontProperties*> _font_map;
 
 	// ---------- Private methods
 
-	/** \brief does the actual work of drawing text
-	***
+	/** \brief Retrieves the color for a shadow based on the current text color and a shadow style
+	*** \param fp A pointer to the FontProperties object which contains the shadow style to use
+	*** \return The color of the shadow
+	**/
+	Color _GetTextShadowColor(FontProperties *fp);
+
+	/** \brief Caches glyph information and textures for rendering
+	*** \param text A pointer to the unicode string holding the characters (glyphs) to cache
+	*** \param fp A pointer to the FontProperties representing the font being used in rendering the font
+	**/
+	void _CacheGlyphs(const uint16* text, FontProperties* fp);
+
+	/** \brief Draws text to the screen using OpenGL commands
 	*** \param text A pointer to a unicode string holding the text to draw
 	*** \param fp A pointer to the properties of the font to use in drawing the text
 	*** \param text_color The color to render the text in
+	***
+	*** This class assists the public Draw methods. This method is intended for drawing only
+	*** a single line of text in a single color (it does not account for shadows).
 	**/
 	void _DrawTextHelper(const uint16* const text, FontProperties* fp, Color text_color);
 
-	/** Renders a given unicode string and TextStyle to a pixel array
-	 * \param string The ustring to render
-	 * \param style  The text style to render
-	 * \param buffer The pixel array to render to
-	 */
+	/** \brief Renders a unicode string with a given TextStyle to a pixel array
+	*** \param string The unicdoe string to render
+	*** \param style The text style to render the string in
+	*** \param buffer A reference to the pixel array where to place the rendered string to
+	*** \return True if the string was rendered successfully, or false if it was not
+	**/
 	bool _RenderText(hoa_utils::ustring& string, TextStyle& style, private_video::ImageMemory& buffer);
-
-	/** \brief caches glyph info and textures for rendering
-	 *
-	 *  \param uText  Pointer to a unicode string holding the glyphs to cache
-	 *  \param fp     Pointer to the internal FontProperties class representing the font
-	 * \return success/failure
-	 */
-	bool _CacheGlyphs(const uint16 *uText, FontProperties *fp);
-
-	/** \brief retrieves the shadow color based on the current color and shadow style
-	 *
-	 *  \param fp     Pointer to the internal FontProperties class representing the font
-	 * \return the shadow color
-	 */
-	Color _GetTextShadowColor(FontProperties *fp);
 }; // class TextSupervisor : public hoa_utils::Singleton
 
 }  // namespace hoa_video

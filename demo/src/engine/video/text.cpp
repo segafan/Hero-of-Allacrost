@@ -507,31 +507,13 @@ bool TextSupervisor::LoadFont(const string& filename, const string& font_name, u
 
 
 
-const std::string& TextSupervisor::GetDefaultFont() const {
-	return VideoManager->_current_context.font;
-}
-
-
-
-Color TextSupervisor::GetDefaultTextColor() const {
-	return VideoManager->_current_context.text_color;
-}
-
-
-
-void TextSupervisor::SetDefaultFont(const std::string& font_name) {
+void TextSupervisor::FreeFont(const std::string& font_name) {
 	if (_font_map.find(font_name) == _font_map.end()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
 		return;
 	}
 
-	VideoManager->_current_context.font = font_name;
-}
-
-
-
-void TextSupervisor::SetDefaultTextColor(const Color& color) {
-	VideoManager->_current_context.text_color = color;
+	// TODO: implement the rest of this function
 }
 
 
@@ -582,12 +564,6 @@ void TextSupervisor::SetFontShadowOffsets(const std::string& font_name, int32 x,
 
 
 
-void TextSupervisor::Draw(const ustring& text) {
-	Draw(text, _default_style);
-}
-
-
-
 void TextSupervisor::Draw(const ustring& text, const TextStyle& style) {
 	if (text.empty()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "empty string was passed to function" << endl;
@@ -600,29 +576,17 @@ void TextSupervisor::Draw(const ustring& text, const TextStyle& style) {
 	}
 
 	FontProperties* fp = _font_map[style.font];
-	if (fp == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font properties were invalid for font: " << style.font << endl;
-		return;
-	}
-
-	TTF_Font* font = fp->ttf_font;
-	if (font == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because TTF_Font was invalid in font proproperties for font: " << style.font << endl;
-		return;
-	}
-
 	VideoManager->PushState();
 
-	int32 line_skip = fp->line_skip;
-	// NOTE Optimization: something seems to be wrong with ustring, using a buffer instead
+	// Break the string into lines and render the shadow and text for each line
 	uint16 buffer[2048];
-	uint16 newline('\n');
+	const uint16 NEWLINE = '\n';
 	size_t last_line = 0;
-
 	do {
+		// Find the next new line character in the string and save the line
 		size_t next_line;
 		for (next_line = last_line; next_line < text.length(); next_line++) {
-			if (text[next_line] == newline)
+			if (text[next_line] == NEWLINE)
 				break;
 
 			buffer[next_line - last_line] = text[next_line];
@@ -630,26 +594,26 @@ void TextSupervisor::Draw(const ustring& text, const TextStyle& style) {
 		buffer[next_line - last_line] = 0;
 		last_line = next_line + 1;
 
+		// If this line is empty, skip on to the next one
+		if (buffer[0] == 0)
+			continue;
+
+		// Save the draw cursor position before drawing this text
 		glPushMatrix();
 
 		// If text shadows are enabled, draw the shadow first
 		if (fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
-			Color shadow_color = _GetTextShadowColor(fp);
-
 			glPushMatrix();
 			VideoManager->MoveRelative(VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * fp->shadow_x, 0.0f);
 			VideoManager->MoveRelative(0.0f, VideoManager->_current_context.coordinate_system.GetVerticalDirection() * fp->shadow_y);
-
-			_DrawTextHelper(buffer, fp, shadow_color);
-
+			_DrawTextHelper(buffer, fp, _GetTextShadowColor(fp));
 			glPopMatrix();
 		}
 
-		// Now draw the text itself
+		// Now draw the text itself, restore the position of the draw cursor, and move the draw cursor one line down
 		_DrawTextHelper(buffer, fp, style.color);
-
 		glPopMatrix();
-		VideoManager->MoveRelative(0, -line_skip * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
+		VideoManager->MoveRelative(0, -fp->line_skip * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
 
 	} while (last_line < text.length());
 
@@ -692,167 +656,195 @@ int32 TextSupervisor::CalculateTextWidth(const std::string& font_name, const std
 
 
 
-bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
-	if (!fp)
-		return false;
+const std::string& TextSupervisor::GetDefaultFont() const {
+	return VideoManager->_current_context.font;
+}
 
-	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
-	static const uint16 fallbackglyph = '?'; // fall back to this glyph if one does not exist
 
-	TTF_Font * font = fp->ttf_font;
 
-	SDL_Surface *initial = NULL;
-	SDL_Surface *intermediary = NULL;
-	int32 w,h;
+Color TextSupervisor::GetDefaultTextColor() const {
+	return VideoManager->_current_context.text_color;
+}
+
+
+
+void TextSupervisor::SetDefaultFont(const std::string& font_name) {
+	if (_font_map.find(font_name) == _font_map.end()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
+		return;
+	}
+	VideoManager->_current_context.font = font_name;
+}
+
+
+
+void TextSupervisor::SetDefaultTextColor(const Color& color) {
+	VideoManager->_current_context.text_color = color;
+}
+
+
+
+Color TextSupervisor::_GetTextShadowColor(FontProperties* fp) {
+	Color shadow_color;
+
+	if (fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
+		switch (fp->shadow_style) {
+			case VIDEO_TEXT_SHADOW_DARK:
+				shadow_color = Color::black;
+				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
+				break;
+			case VIDEO_TEXT_SHADOW_LIGHT:
+				shadow_color = Color::white;
+				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
+				break;
+			case VIDEO_TEXT_SHADOW_BLACK:
+				shadow_color = Color::black;
+				shadow_color[3] = VideoManager->_current_context.text_color[3];
+				break;
+			case VIDEO_TEXT_SHADOW_COLOR:
+				shadow_color = VideoManager->_current_context.text_color;
+				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
+				break;
+			case VIDEO_TEXT_SHADOW_INVCOLOR:
+				shadow_color = Color(1.0f - VideoManager->_current_context.text_color[0], 1.0f - VideoManager->_current_context.text_color[1],
+					1.0f - VideoManager->_current_context.text_color[2], VideoManager->_current_context.text_color[3] * 0.5f);
+				break;
+			default:
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown text shadow style: " << fp->shadow_style << endl;
+				break;
+		}
+	}
+
+	return shadow_color;
+}
+
+
+
+void TextSupervisor::_CacheGlyphs(const uint16* text, FontProperties* fp) {
+	if (fp == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "FontProperties argument was null" << endl;
+		return;
+	}
+
+	// Empty string means there are no glyphs to cache
+	if (*text == 0) {
+		return;
+	}
+
+	static const SDL_Color glyph_color = { 0xFF, 0xFF, 0xFF, 0xFF }; // Opaque white color
+	static const uint16 fall_back_glyph = '?'; // If we can't cache a particular glyph, we fall back to this one
+
+	// SDL interprets each pixel as a 32-bit number, so our masks depend on the endianness of the machine
+	uint32 rmask, gmask, bmask, amask;
+	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		rmask = 0xff000000;
+		gmask = 0x00ff0000;
+		bmask = 0x0000ff00;
+		amask = 0x000000ff;
+	#else
+		rmask = 0x000000ff;
+		gmask = 0x0000ff00;
+		bmask = 0x00ff0000;
+		amask = 0xff000000;
+	#endif
+
+	TTF_Font* font = fp->ttf_font;
+	SDL_Surface* initial = NULL;
+	SDL_Surface* intermediary = NULL;
+	int32 w, h;
 	GLuint texture;
 
-	for(const uint16 * character_ptr = uText; *character_ptr != 0; ++character_ptr)
-	{
-		// Reference for legibility
-		const uint16 &character = *character_ptr;
+	// Go through each character in the string and cache those glyphs that have not already been cached
+	for (const uint16* character_ptr = text; *character_ptr != 0; ++character_ptr) {
+		// A reference for legibility
+		const uint16& character = *character_ptr;
 
-		// Check if glyph already cached
-		if(fp->glyph_cache->find(character) != fp->glyph_cache->end())
+		// Check if glyph already cached. If so, move on to the next character
+		if (fp->glyph_cache->find(character) != fp->glyph_cache->end())
 			continue;
 
-		initial = TTF_RenderGlyph_Blended(font, character, color);
-
-		if(!initial)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in CacheGlyphs(), resorting to fallback" << endl;
-			initial = TTF_RenderGlyph_Blended(font, fallbackglyph, color);
-			if (!fallbackglyph)
-			{
-				if (VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() could not render fallback glyph, aborting!" << endl;
-				return false;
+		// Attempt to create the initial SDL_Surface that contains the rendered glyph
+		initial = TTF_RenderGlyph_Blended(font, character, glyph_color);
+		if (initial == NULL) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderGlyph_Blended() failed, resorting to fall back glyph: '?'" << endl;
+			initial = TTF_RenderGlyph_Blended(font, fall_back_glyph, glyph_color);
+			if (initial == NULL) {
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderGlyph_Blended() failed for fall back glyph, aborting glyph caching" << endl;
+				return;
 			}
-			// TEMP
-			//cerr << "VIDEO ERROR (Probably a problem from SDL_ttf): " << TTF_GetError() << endl;
-			//return false;
 		}
 
 		w = RoundUpPow2(initial->w + 1);
 		h = RoundUpPow2(initial->h + 1);
-
-		uint32 rmask, gmask, bmask, amask;
-
-		// SDL interprets each pixel as a 32-bit number, so our masks depend on the endianness (byte order) of the machine
-		#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-			rmask = 0xff000000;
-			gmask = 0x00ff0000;
-			bmask = 0x0000ff00;
-			amask = 0x000000ff;
-		#else
-			rmask = 0x000000ff;
-			gmask = 0x0000ff00;
-			bmask = 0x00ff0000;
-			amask = 0xff000000;
-		#endif
-
+		
 		intermediary = SDL_CreateRGBSurface(0, w, h, 32, rmask, gmask, bmask, amask);
-
-		if(!intermediary)
-		{
+		if (intermediary == NULL) {
 			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in CacheGlyphs()!" << endl;
-			return false;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_CreateRGBSurface() failed" << endl;
+			return;
 		}
 
 
-		if(SDL_BlitSurface(initial, 0, intermediary, 0) < 0)
-		{
+		if (SDL_BlitSurface(initial, 0, intermediary, 0) < 0) {
 			SDL_FreeSurface(initial);
 			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in CacheGlyphs()!" << endl;
-			return false;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed" << endl;
+			return;
 		}
 
 		glGenTextures(1, &texture);
-		if(VideoManager->CheckGLError())
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glGenTextures() in CacheGlyphs()!" << endl;
-			return false;
-		}
-
 		TextureManager->_BindTexture(texture);
-		if(VideoManager->CheckGLError())
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glBindTexture() in CacheGlyphs()!" << endl;
-			return false;
-		}
+
 
 		SDL_LockSurface(intermediary);
 
 		uint32 num_bytes = w * h * 4;
-
-		for (uint32 j = 0; j < num_bytes; j += 4)
-		{
-			((uint8*)intermediary->pixels)[j+3] = ((uint8*)intermediary->pixels)[j+2];
-
-			((uint8*)intermediary->pixels)[j+0] = 0xff;
-			((uint8*)intermediary->pixels)[j+1] = 0xff;
-			((uint8*)intermediary->pixels)[j+2] = 0xff;
+		for (uint32 j = 0; j < num_bytes; j += 4) {
+			(static_cast<uint8*>(intermediary->pixels))[j+3] = (static_cast<uint8*>(intermediary->pixels))[j+2];
+			(static_cast<uint8*>(intermediary->pixels))[j+0] = 0xff;
+			(static_cast<uint8*>(intermediary->pixels))[j+1] = 0xff;
+			(static_cast<uint8*>(intermediary->pixels))[j+2] = 0xff;
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA,
-					 GL_UNSIGNED_BYTE, intermediary->pixels );
+		glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, intermediary->pixels );
 		SDL_UnlockSurface(intermediary);
-
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-
-		if(VideoManager->CheckGLError())
-		{
+		if (VideoManager->CheckGLError()) {
 			SDL_FreeSurface(initial);
 			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in CacheGlyphs()!" << endl;
-			return false;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error was detected: " << VideoManager->CreateGLErrorString() << endl;
+			return;
 		}
 
 		int minx, maxx;
 		int miny, maxy;
 		int advance;
-
-		if(TTF_GlyphMetrics(font, character, &minx, &maxx, &miny, &maxy, &advance))
-		{
+		if (TTF_GlyphMetrics(font, character, &minx, &maxx, &miny, &maxy, &advance) != 0) {
 			SDL_FreeSurface(initial);
 			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in CacheGlyphs()!" << endl;
-			return false;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_GlyphMetrics() failed" << endl;
+			return;
 		}
 
-		FontGlyph * glyph = new FontGlyph;
+		FontGlyph* glyph = new FontGlyph;
 		glyph->texture = texture;
 		glyph->min_x = minx;
 		glyph->min_y = miny;
 		glyph->top_y = fp->ascent - maxy;
 		glyph->width = initial->w + 1;
 		glyph->height = initial->h + 1;
-		glyph->max_x = (float)(((double)initial->w + 1) / ((double)w));
-		glyph->max_y = (float)(((double)initial->h + 1) / ((double)h));
+		glyph->max_x = static_cast<float>(initial->w + 1) / static_cast<float>(w);
+		glyph->max_y = static_cast<float>(initial->h + 1) / static_cast<float>(h);
 		glyph->advance = advance;
 
-		fp->glyph_cache->insert(std::pair<uint16, FontGlyph *>(character, glyph));
+		fp->glyph_cache->insert(pair<uint16, FontGlyph*>(character, glyph));
 
 		SDL_FreeSurface(initial);
 		SDL_FreeSurface(intermediary);
 	}
-	return true;
-} // TextSupervisor::CacheGlyphs()
+} // void TextSupervisor::_CacheGlyphs(const uint16* text, FontProperties* fp)
 
 
 
@@ -1097,41 +1089,5 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, I
 
 	return true;
 } // bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, ImageMemory& buffer)
-
-
-
-Color TextSupervisor::_GetTextShadowColor(FontProperties* fp) {
-	Color shadow_color;
-
-	if (fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
-		switch (fp->shadow_style) {
-			case VIDEO_TEXT_SHADOW_DARK:
-				shadow_color = Color::black;
-				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
-				break;
-			case VIDEO_TEXT_SHADOW_LIGHT:
-				shadow_color = Color::white;
-				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
-				break;
-			case VIDEO_TEXT_SHADOW_BLACK:
-				shadow_color = Color::black;
-				shadow_color[3] = VideoManager->_current_context.text_color[3];
-				break;
-			case VIDEO_TEXT_SHADOW_COLOR:
-				shadow_color = VideoManager->_current_context.text_color;
-				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
-				break;
-			case VIDEO_TEXT_SHADOW_INVCOLOR:
-				shadow_color = Color(1.0f - VideoManager->_current_context.text_color[0], 1.0f - VideoManager->_current_context.text_color[1],
-					1.0f - VideoManager->_current_context.text_color[2], VideoManager->_current_context.text_color[3] * 0.5f);
-				break;
-			default:
-				IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown text shadow style: " << fp->shadow_style << endl;
-				break;
-		}
-	}
-
-	return shadow_color;
-}
 
 }  // namespace hoa_video
