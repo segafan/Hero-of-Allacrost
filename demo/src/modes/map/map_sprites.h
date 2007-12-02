@@ -254,8 +254,7 @@ public:
 	*** These methods are used to add and control which dialogue should the sprite speak.
 	**/
 	//@{
-	void AddDialogue(MapDialogue* md)
-		{ dialogues.push_back(md); md->SetOwner(this); if (md->HasAlreadySeen() == false) seen_all_dialogue = false; }
+	void AddDialogue(MapDialogue* md);
 
 	bool HasDialogue() const
 		//{ return (dialogues.size() > 0); }
@@ -269,7 +268,7 @@ public:
 
 	void NextDialogue()
 		{ do { _current_dialogue++; if (static_cast<uint16>(_current_dialogue) >= dialogues.size()) _current_dialogue = 0; }
-			while (dialogues[_current_dialogue]->isActive() == false); }
+			while (dialogues[_current_dialogue]->IsActive() == false); }
 
 	int16 GetNumDialogues() const
 		{ return dialogues.size(); }

@@ -352,6 +352,9 @@ public:
 	void IncrementTimesSeen()
 		{ _seen++; }
 
+	void SetTimesSeen(uint32 times)
+		{ _seen = times; }
+
 	//! \brief This sets the max number of times a dialogue can be viewed by the player.
 	void SetMaxViews(int32 views)
 		{ _max_views = views; }
@@ -374,8 +377,8 @@ public:
 	int32 GetTimesSeen() const
 		{ return _seen; }
 
-	//! \brief Return true if this dialogue is active.(IE _seen is still less than _max_views)
-	bool isActive() const
+	//! \brief Return true if this dialogue is active (_seen is still less than _max_views).
+	bool IsActive() const
 		{ return _active; }
 
 	//! \brief Returns a bool that indicates whether a dialogue is blocked (ignores user input)
@@ -385,6 +388,12 @@ public:
 	//! \brief Returns true if a dialogue should load the saved state of the dialogue speakers at the end of the dialogue.
 	bool IsSaving() const
 		{ return _save_state; }
+
+	const std::string& GetEventName() const
+		{ return _event_name; }
+
+	void SetEventName(std::string name)
+		{ _event_name = name; }
 
 	//! \brief Returns the owner of the VirtualSprite object which owns the current dialogue.
 	VirtualSprite* GetOwner() const
@@ -450,6 +459,9 @@ private:
 
 	//! \brief Declares whether or not to reset the status of map sprites after the dialogue completes.
 	bool _save_state;
+
+	//! \brief The event name for this dialogue, usually of the form "s##_d##"
+	std::string _event_name;
 
 	//! \brief The sprite, if any, which "owns" this dialogue (ie the dialogue can only be initiated by talking to the owner)
 	VirtualSprite* _owner;

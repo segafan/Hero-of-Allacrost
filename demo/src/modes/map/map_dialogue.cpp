@@ -617,6 +617,7 @@ bool MapDialogue::ReadNextLine(int32 line) {
 	if (_current_line >= _text.size()) {
 		_current_line = 0;
 		IncrementTimesSeen();
+		MapMode::_current_map->_map_event_group->SetEvent(_event_name, _seen);
 		if((static_cast<int32>(_seen) >= _max_views) && (_max_views != -1)) {
 			_active = false;
 		}

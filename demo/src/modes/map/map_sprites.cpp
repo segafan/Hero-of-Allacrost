@@ -72,10 +72,35 @@ VirtualSprite::~VirtualSprite() {
 	}
 	actions.clear();
 
-	for(uint32 i = 0; i < dialogues.size(); ++i) {
+	// Update the seen events for all dialogues
+	for (uint32 i = 0; i < dialogues.size(); ++i) {
+		string event_name = "s" + NumberToString(object_id) + "_d" + NumberToString(dialogues.size() - 1);
+		MapMode::_current_map->_map_event_group->SetEvent(event_name, dialogues[i]->GetTimesSeen());
 		delete dialogues[i];
 	}
 	dialogues.clear();
+}
+
+
+
+void VirtualSprite::AddDialogue(MapDialogue* md) {
+	dialogues.push_back(md);
+	md->SetOwner(this);
+
+	// Look up the event for this dialogue to see whether it has already been read or not
+	string event_name = "s" + NumberToString(object_id) + "_d" + NumberToString(dialogues.size() - 1);
+	md->SetEventName(event_name);
+	GlobalEventGroup& event_group = *(MapMode::_loading_map->_map_event_group);
+
+	if (event_group.DoesEventExist(event_name) == false) {
+		event_group.AddNewEvent(event_name, 0);
+		seen_all_dialogue = false;
+	}
+	else {
+		md->SetTimesSeen(event_group.GetEvent(event_name));
+		if (md->HasAlreadySeen() == false)
+			seen_all_dialogue = false;
+	}
 }
 
 
@@ -94,7 +119,7 @@ void VirtualSprite::UpdateSeenDialogue() {
 void VirtualSprite::UpdateActiveDialogue() {
 	// Check all dialogues for any that are still active.
 	for (size_t i = 0; i < dialogues.size(); i++) {
-		if(dialogues[i]->isActive()) {
+		if(dialogues[i]->IsActive()) {
 			has_active_dialogue = true;
 			return;
 		}
@@ -129,12 +154,13 @@ uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 void VirtualSprite::Update() {
 	//Update the alpha of the dialogue icon according to it's distance from the player to make it fade away
 	const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
-	float icon_alpha = 1.0f - ( abs( ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation() ) + abs( ComputeYLocation() - MapMode::_current_map->_camera->ComputeYLocation() ) ) / DIALOGUE_ICON_VISIBLE_RANGE;
-	if( icon_alpha < 0 )
+	float icon_alpha = 1.0f - (abs( ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + abs(ComputeYLocation() -
+		MapMode::_current_map->_camera->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
+	if (icon_alpha < 0)
 		icon_alpha = 0;
-	_dialogue_icon_color.SetAlpha( icon_alpha );
-
+	_dialogue_icon_color.SetAlpha(icon_alpha);
 	MapMode::_current_map->_new_dialogue_icon.Update();
+
 	if (!updatable) {
 		return;
 	}
