@@ -74,13 +74,15 @@ BattleMode::BattleMode() :
 	_selected_character(NULL),
 	_selected_target(NULL),
 	_selected_attack_point(0),
-	_finish_window(NULL),
+	//_finish_window(NULL),
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
 	//_active_action(NULL),
 	_next_monster_location_index(0),
-	_default_music("mus/Confrontation.ogg")
+	_default_music("mus/Confrontation.ogg"),
+	_winning_music("mus/Allacrost_Fanfare.ogg"),
+	_losing_music("mus/Allacrost_Intermission.ogg")
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
@@ -108,7 +110,16 @@ BattleMode::BattleMode() :
 	if (_character_bars.Load("img/menus/battle_character_bars.png") == false)
 		cerr << "BATTLE ERROR: Failed to load character bars image" << endl;
 
-	_action_window = new ActionWindow();
+	if (_bottom_menu_image.Load("img/menus/battle_bottom_menu.png", 1024, 128) == false)
+		cerr << "BATTLE ERROR: Failed to load bottom menu image: " << endl;
+
+	if (_swap_icon.Load("img/icons/battle/swap_icon.png", 35, 30) == false)
+		cerr << "BATTLE ERROR: Failed to load swap icon: " << endl;
+
+	if (_swap_card.Load("img/icons/battle/swap_card.png", 25, 37) == false)
+		cerr << "BATTLE ERROR: Failed to load swap card: " << endl;
+
+	_action_window;// = new ActionWindow();
 	_TEMP_LoadTestData();
 } // BattleMode::BattleMode()
 
@@ -128,6 +139,7 @@ BattleMode::~BattleMode() {
 		delete *i;
 	}
 	_character_actors.clear();
+	_characters_awaiting_turn.clear();
 
 	for (deque<BattleEnemy*>::iterator i = _enemy_actors.begin(); i != _enemy_actors.end(); i++) {
 		delete *i;
@@ -145,9 +157,9 @@ BattleMode::~BattleMode() {
 	_action_queue.clear();
 
 	// Delete all GUI objects that are allocated
-	delete(_action_window);
-	if (_finish_window)
-		delete(_finish_window);
+	//delete(_action_window);
+	//if (_finish_window)
+	//	delete(_finish_window);
 } // BattleMode::~BattleMode()
 
 
@@ -253,22 +265,7 @@ void BattleMode::_TEMP_LoadTestData() {
 	if (_battle_background.Load("img/backdrops/battle/desert_cave.png", SCREEN_LENGTH * TILE_SIZE, SCREEN_HEIGHT * TILE_SIZE) == false) {
 		cerr << "BATTLE ERROR: Failed to load background image: " << endl;
 		_ShutDown();
-	}
-
-	if (_bottom_menu_image.Load("img/menus/battle_bottom_menu.png", 1024, 128) == false) {
-		cerr << "BATTLE ERROR: Failed to load bottom menu image: " << endl;
-		_ShutDown();
-	}
-
-	if (_swap_icon.Load("img/icons/battle/swap_icon.png", 35, 30) == false) {
-		cerr << "BATTLE ERROR: Failed to load swap icon: " << endl;
-		_ShutDown();
-	}
-
-	if (_swap_card.Load("img/icons/battle/swap_card.png", 25, 37) == false) {
-		cerr << "BATTLE ERROR: Failed to load swap card: " << endl;
-		_ShutDown();
-	}
+	}	
 }
 
 
@@ -395,15 +392,28 @@ void BattleMode::Update() {
 
 	// ----- (1): If the battle is over, only execute this small block of update code
 	if (_battle_over) {
-		if (!_finish_window/*_finish_window->GetState() == FINISH_INVALID*/) { // Indicates that the battle has just now finished
-			_finish_window = new FinishWindow();
-			_action_window->Reset();
-			_finish_window->Initialize(_victorious_battle);
+		if (/*!_finish_window*/_finish_window.GetState() == FINISH_INVALID) { // Indicates that the battle has just now finished
+			//_finish_window = new FinishWindow();
+			// make sure the battle has our music
+			if (_victorious_battle)
+			{
+				AddMusic(_winning_music);
+				PlayMusic(_winning_music);
+			}
+			else
+			{
+				AddMusic(_losing_music);
+				PlayMusic(_losing_music);
+			}
+			
+			_action_window.Reset();
+			_finish_window.Initialize(_victorious_battle);
+
 		}
 
 		// The FinishWindow::Update() function handles all update code when a battle is over.
 		// The call to shut down battle mode is also made from within this call.
-		_finish_window->Update();
+		_finish_window.Update();
 
 		// Do not update other battle code if the battle has already ended
 		return;
@@ -419,19 +429,27 @@ void BattleMode::Update() {
 	_attack_point_indicator.Update();
 
 	// ----- (3): Execute any scripts that are sitting in the queue
-	if (_action_queue.size()) {
+	if (_action_queue.size())
+	{
 		_UpdateScripts();
 		_CleanupActionQueue();
 	} // if (_action_queue.size())
 
 	// ----- (4): Try to select an idle character if no character is currently selected
-	if (_selected_character == NULL) {
+	if (_selected_character == NULL)
+	{
 		_ActivateNextCharacter();
 	}
 
 	// ----- (5): Update the action window if the player is making an action or target selection
-	if (_action_window->GetState() != VIEW_INVALID)
-		_action_window->Update();
+	if (_action_window.GetState() != VIEW_INVALID)
+		_action_window.Update();
+
+	// ----- (6): Cleanup any lingering damage text
+	if (_damage_text_list.size())
+	{
+		_RemoveExpiredDamageText();
+	}
 } // void BattleMode::Update()
 
 void BattleMode::_UpdateScripts()
@@ -500,14 +518,15 @@ void BattleMode::Draw() {
 	_DrawBackgroundVisuals();
 	_DrawBottomMenu();
 	_DrawSprites();
+	_DrawDamageTextList();
 	_DrawStaminaBar();
 
-	if (_action_window->GetState() != VIEW_INVALID) {
-		_action_window->Draw();
+	if (_action_window.GetState() != VIEW_INVALID) {
+		_action_window.Draw();
 	}
 
 	if (_battle_over) {
-		_finish_window->Draw();
+		_finish_window.Draw();
 	}
 } // void BattleMode::Draw()
 
@@ -569,6 +588,18 @@ void BattleMode::_DrawSprites() {
 } // void BattleMode::_DrawSprites()
 
 
+void BattleMode::_DrawDamageTextList()
+{
+	if (!_damage_text_list.size())
+		return;
+
+	std::list<DamageText*>::const_iterator it = _damage_text_list.begin();
+
+	for (; it != _damage_text_list.end(); ++it)
+	{
+		(*it)->Draw();
+	}
+}
 
 void BattleMode::_DrawStaminaBar() {
 	// ----- (1): Draw the stamina bar
@@ -577,8 +608,8 @@ void BattleMode::_DrawStaminaBar() {
 	_stamina_meter.Draw();
 
 	// ----- (2): Determine the draw order of all stamina icons and whether or not they are selected
-	GLOBAL_TARGET target_type = _action_window->GetActionTargetType();
-	bool target_character = _action_window->IsActionTargetAlly();
+	GLOBAL_TARGET target_type = _action_window.GetActionTargetType();
+	bool target_character = _action_window.IsActionTargetAlly();
 	std::vector<BattleActor*> live_actors;
 
 	//FIX ME Below is the logic that should be used...requires change to UpdateTargetSelection code
@@ -645,12 +676,12 @@ void BattleMode::_ActivateNextCharacter()
 		_selected_character = GetPlayerCharacterAt(_selected_character_index);
 		_selected_character->SetState(ACTOR_AWAITING_TURN);
 		//_selected_character->GetWaitTime()->Pause();
-		_action_window->Initialize(_selected_character);
+		_action_window.Initialize(_selected_character);
 	}
 }
 
 void BattleMode::_SetInitialTarget() {
-	if (_action_window->_action_target_ally == true) {
+	if (_action_window._action_target_ally == true) {
 		_selected_target = GetPlayerCharacterAt(0);
 		_selected_target_index = 0;
 		_selected_attack_point = 0;
@@ -673,7 +704,7 @@ void BattleMode::_SelectNextTarget(bool forward_direction) {
 	uint32 previous_target = _selected_target_index;
 	if (forward_direction)
 	{
-		if (_action_window->_action_target_ally == true)
+		if (_action_window._action_target_ally == true)
 		{
 			_selected_target_index = (_selected_target_index + 1) % _character_actors.size();
 			_selected_target = _character_actors[_selected_target_index];
@@ -688,7 +719,7 @@ void BattleMode::_SelectNextTarget(bool forward_direction) {
 
 	else {
 
-		if (_action_window->_action_target_ally == true)
+		if (_action_window._action_target_ally == true)
 		{
 			_selected_target_index--;
 
@@ -842,7 +873,7 @@ void BattleMode::NotifyOfActorDeath(BattleActor *actor)
 	if (!actor->IsEnemy() && (((BattleActor *)(_selected_character)) == actor))
 	{
 		_selected_character = NULL;
-		_action_window->Reset();
+		_action_window.Reset();
 	}
 
 	BattleCharacter *character = dynamic_cast<BattleCharacter*>(actor);
@@ -1088,5 +1119,43 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 		return INVALID_BATTLE_ACTOR_INDEX;
 	}
 } // uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const
+
+
+void BattleMode::AddDamageText(hoa_utils::ustring text, uint32 duration, float x, float y)
+{
+	_damage_text_list.push_front(new DamageText(text, duration, x, y));
+}
+
+void BattleMode::_RemoveExpiredDamageText()
+{
+	std::list<DamageText*>::iterator it;
+
+	for (it = _damage_text_list.begin(); it != _damage_text_list.end();)
+	{
+		if ((*it)->GetTimer()->IsFinished())
+		{
+			it = _damage_text_list.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DamageText class
+////////////////////////////////////////////////////////////////////////////////
+
+
+void DamageText::Draw()
+{
+	VideoManager->Text()->SetDefaultFont("battle_dmg");
+	VideoManager->Text()->SetDefaultTextColor(Color::red);
+	VideoManager->Move(_x_pos, _y_pos + ( _timer.GetTimeExpired() / 35.0f ));
+	VideoManager->Text()->Draw(_text);
+	VideoManager->Text()->SetDefaultFont("battle");
+}
 
 } // namespace hoa_battle

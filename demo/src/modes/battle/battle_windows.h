@@ -230,6 +230,18 @@ private:
 
 	// ----- Private methods
 
+	//! \brief Sets up the action category option box and images
+	void _InitActionCategoryList();
+
+	//! \brief Sets up the selection list option box
+	void _InitActionSelectionList();
+	
+	//! \brief Initializes Skill/SP and Item/Qty headers for the action selection lists
+	void _InitSelectionHeaders();
+
+	//! \brief Initializes action and target information text objects
+	void _InitInformationText();
+
 	//! \brief Handles update processing when the _state member is VIEW_ACTION_CATEGORY
 	void _UpdateActionCategory();
 
@@ -345,13 +357,27 @@ private:
 	//! \brief Items won from battle (<ID, quantity>)
 	std::map<hoa_global::GlobalObject*, int32> _victory_items;
 
-	//! \brief the winning music
-	std::string _winning_music;
-
-	//! \brief the losing music
-	std::string _losing_music;
-
 	// ----- Private methods
+	/*!
+	 * \brief Creates 4 character windows
+	 * \param start_x The x coordinate for the upper left corner of the window
+	 * \param start_y The y coordinate for the upper left corner of the window
+	 */
+	void _InitCharacterWindows(float start_x, float start_y);
+
+	/*!
+	 * \brief Creates _xp_and_money_window and _items_window
+	 * \param start_x The x coordinate for the upper left corner of the window
+	 * \param start_y The y coordinate for the upper left corner of the window
+	 */
+	void _InitSpoilsWindows(float start_x, float start_y);
+
+	//! \brief Sets up the OptionBox for things like retrying the battle
+	void _InitLoseOptions();
+
+	//! \brief Either victory or death
+	void _InitVictoryText();
+
 	//! \brief Tallies up the xp, money, and items earned from killing the enemies
 	void _TallyXPMoneyAndItems();
 

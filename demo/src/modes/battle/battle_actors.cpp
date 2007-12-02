@@ -55,9 +55,9 @@ BattleActor::BattleActor(GlobalActor* actor, float x_origin, float y_origin) :
 	_x_origin(x_origin),
 	_y_origin(y_origin),
 	_x_location(x_origin),
-	_y_location(y_origin),
-	_total_time_damaged(0),
-	_damage_dealt(0)
+	_y_location(y_origin)
+	//_total_time_damaged(0),
+	//_damage_dealt(0)
 {
 	// Reset attack timer, TEMP CODE!!!!
 	_TEMP_attack_animation_timer.Initialize(0);
@@ -118,16 +118,26 @@ void BattleActor::ResetWaitTime() {
 
 
 void BattleActor::TakeDamage(int32 damage) {
-	_total_time_damaged = 1;
+	//_total_time_damaged = 1;
+	uint32 damage_dealt = 0;
+	ustring text;
 
-	if (damage <= 0) {
-		_damage_dealt = RandomBoundedInteger(1, 5);
+	if (damage <= 0)
+	{
+		//_damage_dealt = RandomBoundedInteger(1, 5);
+		text = MakeUnicodeString("Miss");
 	}
-	else {
-		_damage_dealt = damage + static_cast<uint32>(RandomBoundedInteger(0, 4));
+	else
+	{
+		damage_dealt = damage + static_cast<uint32>(RandomBoundedInteger(0, 4));
+		text = MakeUnicodeString(NumberToString(damage_dealt));
 	}
 
-	if (static_cast<uint32>(_damage_dealt) >= GetActor()->GetHitPoints()) { // Was it a killing blow?
+	current_battle->AddDamageText(text, 3000, GetXLocation() + 40.0f, GetYLocation() + 100.0f);
+
+	// Was it a killing blow?
+	if (/*static_cast<uint32>(_damage_dealt)*/damage_dealt >= GetActor()->GetHitPoints())
+	{
 		GetActor()->SetHitPoints(0);
 		GetWaitTime()->Reset();
 		_state = ACTOR_DEAD;
@@ -135,7 +145,7 @@ void BattleActor::TakeDamage(int32 damage) {
 		//FIXME: This is going to change when we switch to map sprites
 		//CD: We need to consolidate the ways enemy and character battle
 		//anims are retrieved and updated.  There's no reason we should be
-		//doing two different things depending on which it is.
+		//doing two different things for each.
 		if (IsEnemy())
 		{
 			BattleEnemy* enemy = (BattleEnemy*)(this);
@@ -150,8 +160,9 @@ void BattleActor::TakeDamage(int32 damage) {
 
 		current_battle->NotifyOfActorDeath(this);
 	}
-	else {
-		GetActor()->SubtractHitPoints(_damage_dealt);
+	else
+	{
+		GetActor()->SubtractHitPoints(damage_dealt);
 	}
 }
 
@@ -240,7 +251,7 @@ void BattleCharacter::DrawSprite() {
 		}
 
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
-		if (_total_time_damaged > 0) {
+		/*if (_total_time_damaged > 0) {
 			_total_time_damaged += SystemManager->GetUpdateTime();
 			VideoManager->Text()->SetDefaultFont("battle_dmg");
 			VideoManager->Text()->SetDefaultTextColor(Color::red);
@@ -251,7 +262,7 @@ void BattleCharacter::DrawSprite() {
 			if (_total_time_damaged > 3000) { // Show it for three seconds
 				_total_time_damaged = 0;
 			}
-		}
+		}*/
 	}
 	else {
 	//	VideoManager->Move(_x_location, _y_location);
@@ -473,7 +484,7 @@ void BattleEnemy::DrawSprite() {
 		}
 
 		// Draw the attack point indicator if necessary
-		if (this == current_battle->_selected_target && current_battle->_action_window->GetActionTargetType() == GLOBAL_TARGET_ATTACK_POINT) {
+		if (this == current_battle->_selected_target && current_battle->_action_window.GetActionTargetType() == GLOBAL_TARGET_ATTACK_POINT) {
 			VideoManager->PushState();
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 			std::vector<GlobalAttackPoint*>& attack_points = *(GetActor()->GetAttackPoints());
@@ -488,7 +499,7 @@ void BattleEnemy::DrawSprite() {
 	}
 
 	// TEMP: Determine if enemy needs to have red damage text drawn next to it
-	if (_total_time_damaged > 0) {
+	/*if (_total_time_damaged > 0) {
 		_total_time_damaged += SystemManager->GetUpdateTime();
 
 		VideoManager->Text()->SetDefaultFont("battle_dmg");
@@ -500,7 +511,7 @@ void BattleEnemy::DrawSprite() {
 		if (_total_time_damaged > 3000) {
 			_total_time_damaged = 0;
 		}
-	}
+	}*/
 } // void BattleEnemy::DrawSprite()
 
 

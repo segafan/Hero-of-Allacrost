@@ -263,11 +263,11 @@ protected:
 
 	//! \brief Variable for tracking time (ms) on how long to show the damage text
 	//FIX ME this has to go
-	uint32 _total_time_damaged;
+	//uint32 _total_time_damaged;
 
 	//! \brief How much damage was dealt on the last strike
 	//FIX ME this has to go unless we have good cause for it
-	uint32 _damage_dealt;
+	//uint32 _damage_dealt;
 
 	//! \brief The actor's icon for the stamina meter
 	hoa_video::StillImage _stamina_icon;

@@ -123,6 +123,60 @@ public:
 
 } // namespace private_battle
 
+
+/** ****************************************************************************
+*** \brief Represents the floating text above a BattleActor when he takes damage
+***
+*** Theoretically this could be used to display other timed text above the actor's
+*** head, like "Poisoned" when he becomes so.
+*** ***************************************************************************/
+class DamageText
+{
+public:
+	/*!
+	 * \brief Should be the only constructor used
+	 * \param text The text to be drawn
+	 * \param duration How long the text should be displayed
+	 * \param x Initial x coordinate of the text
+	 * \param y Initial y coordinate of the text
+	 */
+	DamageText(hoa_utils::ustring text, uint32 duration, float x, float y) :
+		_text(text),
+		_timer(duration),
+		_x_pos(x),
+		_y_pos(y)
+	{
+		_timer.Run();
+	}
+
+	//! \brief Destructor does nothing
+	~DamageText()
+	{ }
+
+	//! \brief Renders the text ot the screen
+	void Draw();
+
+	/*!
+	 * \brief Gets the text's timer
+	 * \return Pointer to the object's timer
+	 */
+	const hoa_system::SystemTimer* GetTimer() const
+	{ return &_timer; }
+
+private:
+	//! \brief Default constructor should not be used
+	DamageText() { }
+
+	//! The text that will be rendered
+	hoa_utils::ustring _text;
+	//! To keep track of how long to show the text
+	hoa_system::SystemTimer _timer;
+	//! Starting x position for drawing
+	float _x_pos;
+	//! Starting y position for drawing
+	float _y_pos;
+};
+
 /** ****************************************************************************
 *** \brief Manages all objects, events, and scenes that occur in a battle
 ***
@@ -274,6 +328,15 @@ public:
 	//! \brief Removes the given character from the turn queue
 	void RemoveFromTurnQueue(private_battle::BattleCharacter *character);
 
+	/*!
+	 * \brief Adds a new DamageText object used for displaying damage suffered in battle
+	 * \param text Text to display
+	 * \param duration How long it should be displayed
+	 * \param x Initial x coordinate of the text
+	 * \param y Initial y coordinate of the text
+	 */
+	void AddDamageText(hoa_utils::ustring text, uint32 duration, float x, float y);
+
 	/*private_battle::BattleAction* GetActiveAction()
 		{ return _active_action; }*/
 
@@ -358,13 +421,13 @@ private:
 	*** Located at the bottom right hand corner of the screen, this window is only visible when the player is
 	*** actively selecting an action for a character.
 	**/
-	private_battle::ActionWindow* _action_window;
+	private_battle::ActionWindow _action_window;
 
 	/** \brief Window which presents information and options after a battle is concluded
 	*** Located at the center of the screen, this window only appears after one party in the battle has defeated
 	*** the other.
 	**/
-	private_battle::FinishWindow* _finish_window;
+	private_battle::FinishWindow _finish_window;
 	//@}
 
 	//! \name Battle GUI Images
@@ -457,6 +520,15 @@ private:
 	//! \brief The currently playing music
 	std::string _current_music;
 
+	//! \brief the winning music
+	std::string _winning_music;
+
+	//! \brief the losing music
+	std::string _losing_music;
+
+	//! \brief List of all DamageText objects currently active
+	std::list<DamageText*> _damage_text_list;
+
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
 
 	/** \brief Loads images and other hard-coded data for the battle
@@ -479,6 +551,11 @@ private:
 
 	//! \brief Any scripts marked for removal are removed from the queue
 	void _CleanupActionQueue();
+
+	/*!
+	 * \brief Removes the specified DamageText object
+	 */
+	void _RemoveExpiredDamageText();
 
 	//! \brief Returns true if an actor is performing an action
 	/*bool _IsExecutingAction() const
@@ -532,6 +609,9 @@ private:
 	*** For example, the actor selector image and any visible action effects like magic.
 	**/
 	void _DrawSprites();
+
+	//! \brief Render any damage text that exists
+	void _DrawDamageTextList();
 
 	/** \brief Draws the universal stamina bar and the icons of the present actors
 	**/
