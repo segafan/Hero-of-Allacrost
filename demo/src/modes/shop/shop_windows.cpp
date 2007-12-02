@@ -250,7 +250,7 @@ void BuyListWindow::Update() {
 			current_shop->_prompt_window.Show();
 			current_shop->_prompt_window.prompt_text.SetDisplayText(MakeUnicodeString(
 				"No quantity for this selection was made. Use the right and left commands to increment "
-				"or decrement the amount of this object to purchase")
+				"or decrement the amount of this object to purchase.")
 			);
 		}
 		else {
@@ -363,7 +363,7 @@ void SellListWindow::Clear() {
 
 
 void SellListWindow::AddEntry(hoa_utils::ustring name, uint32 count, uint32 price, uint32 sell_count) {
-	string text = MakeStandardString(name) + "<R>" + NumberToString(count) + "      " + NumberToString(sell_count) + "       " + NumberToString(price);
+	string text = MakeStandardString(name) + "<R>" + NumberToString(count) + "      x" + NumberToString(sell_count) + "       " + NumberToString(price);
 	option_text.push_back(MakeUnicodeString(text));
 }
 
@@ -375,12 +375,24 @@ void SellListWindow::Update() {
 
 	if (InputManager->ConfirmPress()) {
 		object_list.HandleConfirmKey();
-		hide_options = true;
-		object_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-		current_shop->_state = SHOP_STATE_CONFIRM;
-		current_shop->_confirm_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-		current_shop->_confirm_window.Show();
-		current_shop->_shop_sounds["confirm"].Play();
+		int32 x = object_list.GetSelection();
+
+		if (current_shop->_sell_objects_quantities[x] == 0) {
+			current_shop->_PushAndSetState(SHOP_STATE_PROMPT);
+			current_shop->_prompt_window.Show();
+			current_shop->_prompt_window.prompt_text.SetDisplayText(MakeUnicodeString(
+				"No quantity for this selection was made. Use the right and left commands to increment "
+				"or decrement the amount of this object to offer for sale.")
+			);
+		}
+		else {
+			hide_options = true;
+			object_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			current_shop->_state = SHOP_STATE_CONFIRM;
+			current_shop->_confirm_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			current_shop->_confirm_window.Show();
+			current_shop->_shop_sounds["confirm"].Play();
+		}
 	}
 	else if (InputManager->CancelPress()) {
 		hide_options = true;
@@ -448,7 +460,7 @@ void SellListWindow::Draw() {
 	if (hide_options == false && object_list.GetNumberOptions() != 0) {
 		object_list.Draw();
 		VideoManager->Move(375, 640);
-		VideoManager->Text()->Draw(MakeUnicodeString("Item                                     Inv   Sell   Price"));
+		VideoManager->Text()->Draw(MakeUnicodeString("Item                                                                     Inv   Sell   Price"));
 	}
 }
 

@@ -186,32 +186,16 @@ private:
 class TextBlock {
 public:
 	//! \brief Constructor defaulting the element to have white vertices and disabled blending.
-	TextBlock(TextTexture* image_, float x_offset_, float y_offset_, float u1_, float v1_,
-		float u2_, float v2_, float width_, float height_);
-
-	TextBlock(TextTexture* image_, float x_offset_, float y_offset_, float u1_, float v1_,
-		float u2_, float v2_, float width_, float height_, Color color_[4]);
+	TextBlock(TextTexture* tex)
+		{ texture = tex; }
 
 	// ---------- Public members
 
 	//! \brief The image that is being referenced by this object.
-	TextTexture* image;
-
-	float width, height;
-
-	float u1, v1, u2, v2;
-
-	//! \brief The draw position offsets of the element
-	float x_offset, y_offset;
+	TextTexture* texture;
 
 	//! \brief The x and y offsets from the line proper
 	float x_line_offset, y_line_offset;
-
-	Color color[4];
-
-	bool blend;
-
-	bool unichrome_vertices;
 }; // class TextBlock : public private_video::BaseImageElement
 
 } // namespace private_video

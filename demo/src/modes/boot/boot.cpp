@@ -493,9 +493,9 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 	// TEMP: these options are for debugign purposes only and should be removed for releases
-	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
-	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
-	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
+// 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
+// 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
+// 	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
 }
 
 
