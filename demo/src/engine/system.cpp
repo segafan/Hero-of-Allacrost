@@ -74,7 +74,11 @@ SystemTimer::~SystemTimer() {
 void SystemTimer::Initialize(uint32 duration, int32 number_loops, hoa_mode_manager::GameMode* mode_owner) {
 	// If the state is invalid, this is the first time that this timer has been initialized and we need to pass it
 	// along to the SystemManager
-	if (_state == SYSTEM_TIMER_INVALID) {
+	// CD: Rather than checking state, it would make more sense to check and see if it has an owner
+	// If it does, then we don't add it here b/c the owner will update it.  Otherwise, system will have to update it
+	// Also, the owner should technically be any object, not just a game mode
+	if (_state == SYSTEM_TIMER_INVALID)
+	{
 		SystemManager->_system_timers.insert(this);
 	}
 

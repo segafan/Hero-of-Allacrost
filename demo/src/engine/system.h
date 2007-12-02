@@ -103,7 +103,7 @@ public:
 
 	//! \note This constructor automatically invokes the Initialize() method with its arguments
 	SystemTimer(uint32 duration, int32 number_loops = 0, hoa_mode_manager::GameMode* mode_owner = NULL) :
-		_state(SYSTEM_TIMER_INITIAL) { Initialize(duration, number_loops, mode_owner); }
+		_state(SYSTEM_TIMER_INVALID) { Initialize(duration, number_loops, mode_owner); }
 
 	~SystemTimer();
 

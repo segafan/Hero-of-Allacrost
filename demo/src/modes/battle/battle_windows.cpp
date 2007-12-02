@@ -47,14 +47,37 @@ namespace private_battle {
 // *****************************************************************************
 
 ActionWindow::ActionWindow() {
+	//CD: Like FinishWindow, we should move all this to Initialize()
+
 	// TODO: declare the MenuSkin to be used
 	if (MenuWindow::Create(512.0f, 128.0f) == false) {
 		cerr << "BATTLE ERROR: In ActionWindow constructor, the call to MenuWindow::Create() failed" << endl;
 	}
 	MenuWindow::SetPosition(512.0f, 128.0f);
-	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);	
+
+	// Setup options for VIEW_ACTION_CATEGORY
+	_InitActionCategoryList();
+
+	// Setup options for VIEW_ACTION_SELECTION
+	_InitActionSelectionList();
+
+	// Setup options for VIEW_TARGET_SELECTION and VIEW_ACTION_INFORMATION
+	_InitSelectionHeaders();
+
+	// Setup rendered text
+	_InitInformationText();
+
+	Reset();
+} // ActionWindow::ActionWindow()
 
 
+ActionWindow::~ActionWindow() {
+	MenuWindow::Destroy();
+}
+
+void ActionWindow::_InitActionCategoryList()
+{
 	// NOTE: may need to set the dimensions of these images to 45, 45
 	_action_category_icons.resize(4);
 	bool success = true;
@@ -66,7 +89,6 @@ ActionWindow::ActionWindow() {
 		cerr << "BATTLE ERROR: In ActionWindow constructor, failed to load an action category icon" << endl;
 	}
 
-	// Setup options for VIEW_ACTION_CATEGORY
 	vector<ustring> category_options;
 	category_options.push_back(MakeUnicodeString("<img/icons/battle/attack.png>\nAttack"));
 	category_options.push_back(MakeUnicodeString("<img/icons/battle/defend.png>\nDefend"));
@@ -85,8 +107,11 @@ ActionWindow::ActionWindow() {
 	_action_category_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_action_category_list.SetSelection(0);
 	_action_category_list.SetOwner(this);
+}
 
-	// Setup options for VIEW_ACTION_SELECTION
+
+void ActionWindow::_InitActionSelectionList()
+{
 	_action_selection_list.SetPosition(128.0f, 120.0f);
 	_action_selection_list.SetCursorOffset(-50.0f, 25.0f);
 	_action_selection_list.SetCellSize(300.0f, 35.0f);
@@ -96,39 +121,32 @@ ActionWindow::ActionWindow() {
 	_action_selection_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_selection_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_action_selection_list.SetOwner(this);
+}
+	
 
-	// Setup options for VIEW_TARGET_SELECTION
-
-	// Setup options for VIEW_ACTION_INFORMATION
-
-	// Setup rendered text
+void ActionWindow::_InitSelectionHeaders()
+{
 	TextStyle battle_style("battle", Color(1.0f, 1.0f, 0.0f, 0.8f));
 
 	_skill_selection_header.SetAlignment(TextImage::ALIGN_LEFT);
 	_skill_selection_header.SetStyle(battle_style);
 	_item_selection_header.SetAlignment(TextImage::ALIGN_LEFT);
 	_item_selection_header.SetStyle(battle_style);
+	_skill_selection_header.SetText("Skill                                                  SP");
+	_item_selection_header.SetText("Item                                                  Qty");
+}
 
-	battle_style.color = Color::white;
+
+void ActionWindow::_InitInformationText()
+{
+	TextStyle battle_style("battle", Color::white);
+
 	_action_information.SetAlignment(TextImage::ALIGN_LEFT);
 	_action_information.SetStyle(battle_style);
 
 	_target_information.SetAlignment(TextImage::ALIGN_LEFT);
 	_target_information.SetStyle(battle_style);
-	
-	_skill_selection_header.SetText("Skill                                                  SP");
-	_item_selection_header.SetText("Item                                                  QTY");
-
-	Reset();
-} // ActionWindow::ActionWindow()
-
-
-
-ActionWindow::~ActionWindow() {
-	MenuWindow::Destroy();
 }
-
-
 
 void ActionWindow::Initialize(BattleCharacter* character) {
 	_character = character;
@@ -452,7 +470,7 @@ void ActionWindow::_DrawTargetSelection() {
 	VideoManager->Move(640.0f, 125.0f);
 	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	VideoManager->Text()->Draw(MakeUnicodeString("Target Information"));
-	VideoManager->MoveRelative(100.0f, -30.0f);
+	VideoManager->MoveRelative(120.0f, -30.0f);
 	_target_information.Draw();
 	VideoManager->Text()->Draw(_target_information.GetString());
 }
@@ -463,7 +481,7 @@ void ActionWindow::_DrawActionInformation() {
 	VideoManager->Move(640.0f, 125.0f);
 	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	VideoManager->Text()->Draw(MakeUnicodeString("Action Information"));
-	VideoManager->MoveRelative(100.0f, -30.0f);
+	VideoManager->MoveRelative(120.0f, -30.0f);
 	//_action_information.Draw();
 	VideoManager->Text()->Draw(_action_information.GetString());
 }
@@ -607,54 +625,19 @@ void ActionWindow::_ConstructActionInformation() {
 // FinishWindow class
 // /////////////////////////////////////////////////////////////////////////////
 
-FinishWindow::FinishWindow() :
-	_winning_music("mus/Allacrost_Fanfare.ogg"),
-	_losing_music("mus/Allacrost_Intermission.ogg")
+FinishWindow::FinishWindow()
 {
+	//CD: We should really move all this to Initialize() instead
+
 	// TODO: declare the MenuSkin to be used
 	//Just like the ones in Menu Mode
 	float start_x = (1024 - 800) / 2 + 144;
 	float start_y = 768 - ((768 - 600) / 2 + 15);
-	//if (MenuWindow::Create(512.0f, 256.0f) == false) {
-	/*if (MenuWindow::Create(848.0f, 632.0f) == false) {
+	
+	if (!MenuWindow::Create(480.0f, 560.0f))
 		cerr << "BATTLE ERROR: In FinishWindow constructor, the call to MenuWindow::Create() failed" << endl;
-	}*/
-	MenuWindow::Create(480.0f, 560.0f);
+
 	MenuWindow::SetPosition(start_x, start_y);
-	//MenuWindow::SetPosition(start_x, start_y - 50.0f);
-	//MenuWindow::Show();
-	//MenuWindow::Hide();
-
-	//Create xp and money window
-	//_xp_and_money_window.Create(848.0f, 72.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);
-	_xp_and_money_window.Create(480.0f, 72.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);
-	_xp_and_money_window.SetPosition(start_x, start_y + 50.0f);
-	_xp_and_money_window.Show();
-
-	//Create character windows
-	_character_window[0].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[0].SetPosition(start_x, start_y - 12.0f);
-	_character_window[0].Show();
-
-	_character_window[1].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[1].SetPosition(start_x, start_y - 12.0f - 140.0f);
-	_character_window[1].Show();
-
-	_character_window[2].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[2].SetPosition(start_x, start_y - 11.0f - 140.0f * 2.0f);
-	_character_window[2].Show();
-
-	_character_window[3].Create(480.0f, 140.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);//~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[3].SetPosition(start_x, start_y - 10.0f - 140.0f * 3.0f);
-	_character_window[3].Show();
-
-	//Create items window
-	//_items_window.Create(848.0f, 560.0f, ~VIDEO_MENU_EDGE_TOP, VIDEO_MENU_EDGE_TOP);
-	//_items_window.SetPosition(start_x, start_y - 18.0f);
-	//_items_window.Show();
-	_items_window.Create(480.0f, 560.0f, ~VIDEO_MENU_EDGE_TOP, VIDEO_MENU_EDGE_TOP);
-	_items_window.SetPosition(start_x, start_y - 13.0f);
-	_items_window.Show();
 
 	for (int32 i = 0; i < 4; ++i)
 	{
@@ -664,34 +647,14 @@ FinishWindow::FinishWindow() :
 
 	_state = FINISH_INVALID;
 
-	_finish_outcome.SetPosition(512, 0);
-	_finish_outcome.SetDimensions(400, 100);
-	_finish_outcome.SetDisplaySpeed(30);
-	_finish_outcome.SetTextStyle(TextStyle());
-	_finish_outcome.SetDisplayMode(VIDEO_TEXT_REVEAL);
-	_finish_outcome.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-
-	vector<ustring> lose_text;
-	lose_text.push_back(MakeUnicodeString("Retry the battle"));
-	lose_text.push_back(MakeUnicodeString("Load from last save point"));
-	lose_text.push_back(MakeUnicodeString("Return to main menu"));
-	lose_text.push_back(MakeUnicodeString("Exit the game"));
-	_lose_options.SetOptions(lose_text);
-	_lose_options.SetCellSize(128.0f, 50.0f);
-	_lose_options.SetPosition(270.0f, 130.0f);
-	_lose_options.SetSize(1, 4);
-	_lose_options.SetFont("battle");
-	_lose_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_lose_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_lose_options.SetSelectMode(VIDEO_SELECT_SINGLE);
-	_lose_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_lose_options.SetCursorOffset(-60.0f, 25.0f);
-	_lose_options.SetSelection(0);
-	_lose_options.SetOwner(this);
-
-	// make sure the battle has our music
-	current_battle->AddMusic(_winning_music);
-	current_battle->AddMusic(_losing_music);
+	//Create character windows
+	_InitCharacterWindows(start_x, start_y);
+	//Create items and xp & money window
+	_InitSpoilsWindows(start_x, start_y);
+	//Initalize victory text (but don't set the string yet)
+	_InitVictoryText();
+	//Retry, quit, etc.
+	_InitLoseOptions();
 }
 
 
@@ -725,15 +688,77 @@ void FinishWindow::Initialize(bool victory) {
 
 	if (victory) {
 		_state = FINISH_WIN_ANNOUNCE;
-		current_battle->PlayMusic(_winning_music);
 		_finish_outcome.SetDisplayText("The heroes are victorious!");
 		_TallyXPMoneyAndItems();
 	}
 	else {
 		_state = FINISH_LOSE_ANNOUNCE;
-		current_battle->PlayMusic(_losing_music);
 		_finish_outcome.SetDisplayText("The heroes have been defeated...");
 	}
+}
+
+void FinishWindow::_InitCharacterWindows(float start_x, float start_y)
+{
+	_character_window[0].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_character_window[0].SetPosition(start_x, start_y - 12.0f);
+	_character_window[0].Show();
+
+	_character_window[1].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_character_window[1].SetPosition(start_x, start_y - 12.0f - 140.0f);
+	_character_window[1].Show();
+
+	_character_window[2].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_character_window[2].SetPosition(start_x, start_y - 11.0f - 140.0f * 2.0f);
+	_character_window[2].Show();
+
+	_character_window[3].Create(480.0f, 140.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);//~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_character_window[3].SetPosition(start_x, start_y - 10.0f - 140.0f * 3.0f);
+	_character_window[3].Show();
+}
+
+
+void FinishWindow::_InitSpoilsWindows(float start_x, float start_y)
+{
+	_xp_and_money_window.Create(480.0f, 72.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);
+	_xp_and_money_window.SetPosition(start_x, start_y + 50.0f);
+	_xp_and_money_window.Show();
+
+	_items_window.Create(480.0f, 560.0f, ~VIDEO_MENU_EDGE_TOP, VIDEO_MENU_EDGE_TOP);
+	_items_window.SetPosition(start_x, start_y - 13.0f);
+	_items_window.Show();
+}
+
+
+void FinishWindow::_InitLoseOptions()
+{
+	vector<ustring> lose_text;
+	lose_text.push_back(MakeUnicodeString("Retry the battle"));
+	lose_text.push_back(MakeUnicodeString("Load from last save point"));
+	lose_text.push_back(MakeUnicodeString("Return to main menu"));
+	lose_text.push_back(MakeUnicodeString("Exit the game"));
+	_lose_options.SetOptions(lose_text);
+	_lose_options.SetCellSize(128.0f, 50.0f);
+	_lose_options.SetPosition(270.0f, 130.0f);
+	_lose_options.SetSize(1, 4);
+	_lose_options.SetFont("battle");
+	_lose_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_lose_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_lose_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_lose_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_lose_options.SetCursorOffset(-60.0f, 25.0f);
+	_lose_options.SetSelection(0);
+	_lose_options.SetOwner(this);
+}
+
+
+void FinishWindow::_InitVictoryText()
+{
+	_finish_outcome.SetPosition(512, 0);
+	_finish_outcome.SetDimensions(400, 100);
+	_finish_outcome.SetDisplaySpeed(30);
+	_finish_outcome.SetTextStyle(TextStyle());
+	_finish_outcome.SetDisplayMode(VIDEO_TEXT_REVEAL);
+	_finish_outcome.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 }
 
 // ----- Tallies all the stuff we've won (xp, money, items)
