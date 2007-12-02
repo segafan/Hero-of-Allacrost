@@ -131,58 +131,6 @@ bool TextTexture::Reload() {
 	return true;
 }
 
-// -----------------------------------------------------------------------------
-// TextBlock class
-// -----------------------------------------------------------------------------
-
-TextBlock::TextBlock(TextTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
-	float u2_, float v2_, float width_, float height_) :
-	image(image_),
-	width(width_),
-	height(height_),
-	u1(u1_),
-	v1(v1_),
-	u2(u2_),
-	v2(v2_),
-	x_offset(x_offset_),
-	y_offset(y_offset_),
-	x_line_offset(0.0f),
-	y_line_offset(0.0f),
-	blend(false),
-	unichrome_vertices(true)
-{
-	color[0] = Color::white;
-	color[1] = Color::white;
-	color[2] = Color::white;
-	color[3] = Color::white;
-}
-
-
-
-TextBlock::TextBlock(TextTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
-		float u2_, float v2_, float width_, float height_, Color color_[4]) :
-	image(image_),
-	width(width_),
-	height(height_),
-	u1(u1_),
-	v1(v1_),
-	u2(u2_),
-	v2(v2_),
-	x_offset(x_offset_),
-	y_offset(y_offset_),
-	x_line_offset(0.0f),
-	y_line_offset(0.0f),
-	blend(false),
-	unichrome_vertices(true)
-{
-	color[0] = color_[0];
-	color[1] = color_[1];
-	color[2] = color_[2];
-	color[3] = color_[3];
-
-	// TODO: check the color argument to determine value to set blend and unichrome_vertices
-}
-
 } // namespace private_video
 
 // -----------------------------------------------------------------------------
@@ -235,8 +183,8 @@ TextImage::TextImage(const TextImage& copy) {
 	// Increment the reference count for all TextTexture objects
 	std::vector<TextBlock>::iterator i;
 	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
-		if (i->image != NULL)
-			i->image->AddReference();
+		if (i->texture != NULL)
+			i->texture->AddReference();
 	}
 }
 
@@ -257,8 +205,8 @@ TextImage &TextImage::operator=(const TextImage& copy) {
 	// Increment the reference count for all TextTexture objects
 	std::vector<TextBlock>::iterator i;
 	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
-		if (i->image != NULL)
-			i->image->AddReference();
+		if (i->texture != NULL)
+			i->texture->AddReference();
 	}
 
 	return *this;
@@ -350,7 +298,7 @@ void TextImage::_Regenerate() {
 	int32 shadow_offset_x = 0;
 	int32 shadow_offset_y = 0;
 	Color shadow_color = TextManager->_GetTextShadowColor(fp);
-	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
+// 	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
 
 	// 3) Iterate through each line of text and render a TextTexture for each one
 	std::vector<uint16*>::iterator line_iter;
@@ -361,10 +309,11 @@ void TextImage::_Regenerate() {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextTexture::_Regenerate() failed" << endl;
 		}
 
-		float y_offset = total_height + (_height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection()) +
-			((fp->line_skip - texture->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
-		TextBlock element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
-
+// 		float y_offset = total_height + (_height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection()) +
+// 			((fp->line_skip - texture->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
+		TextBlock element(texture);
+// 		TextBlock element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
+//		float x_offset_, float y_offset_, float u1_, float v1_, float u2_, float v2_, float width_, float height_
 		// 4) If text shadows are enabled, copy the text texture and modify its properties to create a shadow version
 		if (texture->style.shadow_style != VIDEO_TEXT_SHADOW_NONE) {
 			texture->AddReference();
@@ -373,17 +322,17 @@ void TextImage::_Regenerate() {
 			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection()) * texture->style.shadow_offset_y;
 
 			TextBlock shadow_element = element;
-			shadow_element.x_offset += shadow_offset_x;
-			shadow_element.y_offset += shadow_offset_y;
+// 			shadow_element.x_offset += shadow_offset_x;
+// 			shadow_element.y_offset += shadow_offset_y;
 
 			// Line offsets must be set to be retained after lines are aligned
 			shadow_element.x_line_offset = static_cast<float>(shadow_offset_x);
 			shadow_element.y_line_offset = static_cast<float>(shadow_offset_y);
 
-			shadow_element.color[0] = shadow_color * _color[0];
-			shadow_element.color[1] = shadow_color * _color[1];
-			shadow_element.color[2] = shadow_color * _color[2];
-			shadow_element.color[3] = shadow_color * _color[3];
+// 			shadow_element.color[0] = shadow_color * _color[0];
+// 			shadow_element.color[1] = shadow_color * _color[1];
+// 			shadow_element.color[2] = shadow_color * _color[2];
+// 			shadow_element.color[3] = shadow_color * _color[3];
 
 			_text_sections.push_back(shadow_element);
 		}
@@ -408,8 +357,8 @@ void TextImage::_Regenerate() {
 void TextImage::_Realign() {
 	vector<TextBlock>::iterator i;
 	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
-		i->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() *
-			((_width - i->width) / 2.0f) + i->x_line_offset;
+// 		i->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() *
+// 			((_width - i->width) / 2.0f) + i->x_line_offset;
 	}
 }
 
@@ -595,8 +544,10 @@ void TextSupervisor::Draw(const ustring& text, const TextStyle& style) {
 		last_line = next_line + 1;
 
 		// If this line is empty, skip on to the next one
-		if (buffer[0] == 0)
+		if (buffer[0] == 0) {
+			VideoManager->MoveRelative(0, -fp->line_skip * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
 			continue;
+		}
 
 		// Save the draw cursor position before drawing this text
 		glPushMatrix();
