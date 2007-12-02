@@ -55,9 +55,9 @@ video_SOURCES = \
 	$(VIDEO_DIR)/textbox.cpp \
 	$(VIDEO_DIR)/textbox.h \
 	$(VIDEO_DIR)/texture.cpp \
-	$(VIDEO_DIR)/texutre.h \
+	$(VIDEO_DIR)/texture.h \
 	$(VIDEO_DIR)/texture_controller.cpp \
-	$(VIDEO_DIR)/texutre_controller.h \
+	$(VIDEO_DIR)/texture_controller.h \
 	$(VIDEO_DIR)/video.cpp \
 	$(VIDEO_DIR)/video.h
 
