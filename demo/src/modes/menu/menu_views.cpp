@@ -1340,6 +1340,7 @@ void EquipWindow::_UpdateEquipList() {
 		options.push_back(ch->GetArmArmorEquipped()->GetName());
 		options.push_back(ch->GetLegArmorEquipped()->GetName());
 
+		_equip_select.SetSize(1, 5);
 		_equip_select.SetOptions(options);
 	}
 
@@ -1620,6 +1621,8 @@ void OverwriteConfirmWindow::Draw()
 	_textbox.Draw();
 }
 
+} // namespace private_menu
+
 MessageWindow::MessageWindow(const string &message, float w, float h) :
 	_message(message)
 {
@@ -1649,7 +1652,5 @@ void MessageWindow::Draw()
 	MenuWindow::Draw();
 	_textbox.Draw();
 }
-
-} // namespace private_menu
 
 } // namespace hoa_menu

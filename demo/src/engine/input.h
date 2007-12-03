@@ -278,6 +278,10 @@ private:
 	bool _joyaxis_y_first;
 	//@}
 
+	/** \brief Most recent SDL event
+	 **/
+	SDL_Event _event;
+
 	/** \brief Processes all keyboard input event
 	*** \param key_event The event to process
 	**/
@@ -489,6 +493,11 @@ public:
 	int32 GetRightSelectKey() const { return _key.right_select; }
 	int32 GetPauseKey() const { return _key.pause; }
 	//@}
+
+	/** \brief Returns the most recent event retrieved from SDL
+	 **/
+	SDL_Event GetMostRecentEvent()
+	{ return _event; }
 
 }; // class GameInput
 

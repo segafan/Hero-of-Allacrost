@@ -65,7 +65,10 @@ BootMode::BootMode() :
 	_fade_out(false),
 	_main_menu(0, false, this),
 	_latest_version(true),
-	_has_modified_settings(false)
+	_has_modified_settings(false),
+	_key_setting_function(NULL),
+	_joy_setting_function(NULL),
+	_message_window(NULL)
 {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
@@ -160,6 +163,9 @@ BootMode::~BootMode() {
 
 	for (uint32 i = 0; i < _boot_sounds.size(); i++)
 		_boot_sounds[i].FreeAudio();
+
+	if (_message_window != NULL)
+		delete _message_window;
 }
 
 
@@ -378,108 +384,124 @@ uint8 BootMode::_WaitJoyPress() {
 
 
 // Redefines a key to be mapped to another command. Waits for keypress using _WaitKeyPress()
-void BootMode::_RedefineUpKey() {
-	InputManager->SetUpKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineUpKey() 
+{ 
+	_key_setting_function = &GameInput::SetUpKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineDownKey() {
-	InputManager->SetDownKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineDownKey() 
+{ 
+	_key_setting_function = &GameInput::SetDownKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineLeftKey() {
-	InputManager->SetLeftKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineLeftKey() 
+{ 
+	_key_setting_function = &GameInput::SetLeftKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineRightKey() {
-	InputManager->SetRightKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineRightKey() 
+{ 
+	_key_setting_function = &GameInput::SetRightKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineConfirmKey() {
-	InputManager->SetConfirmKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineConfirmKey() 
+{ 
+	_key_setting_function = &GameInput::SetConfirmKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineCancelKey() {
-	InputManager->SetCancelKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineCancelKey() 
+{ 
+	_key_setting_function = &GameInput::SetCancelKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineMenuKey() {
-	InputManager->SetMenuKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineMenuKey() 
+{ 
+	_key_setting_function = &GameInput::SetMenuKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineSwapKey() {
-	InputManager->SetSwapKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineSwapKey() 
+{ 
+	_key_setting_function = &GameInput::SetSwapKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineLeftSelectKey() {
-	InputManager->SetLeftSelectKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineLeftSelectKey() 
+{ 
+	_key_setting_function = &GameInput::SetLeftSelectKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineRightSelectKey() {
-	InputManager->SetRightSelectKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefineRightSelectKey() 
+{ 
+	_key_setting_function = &GameInput::SetRightSelectKey; 
+	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefinePauseKey() {
-	InputManager->SetPauseKey(_WaitKeyPress());
-	_has_modified_settings = true;
-	_UpdateKeySettings();
+void BootMode::_RedefinePauseKey() 
+{ 
+	_key_setting_function = &GameInput::SetPauseKey; 
+	_ShowMessageWindow(false);
 }
 
 
 // Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
-void BootMode::_RedefineConfirmJoy() {
-	InputManager->SetConfirmJoy(_WaitJoyPress());
-	_has_modified_settings = true;
-	_UpdateJoySettings();
+void BootMode::_RedefineConfirmJoy() 
+{ 
+	_joy_setting_function = &GameInput::SetConfirmJoy; 
+	_ShowMessageWindow(true);
 }
-void BootMode::_RedefineCancelJoy() {
-	InputManager->SetCancelJoy(_WaitJoyPress());
-	_has_modified_settings = true;
-	_UpdateJoySettings();
+
+void BootMode::_RedefineCancelJoy() 
+{ 
+	_joy_setting_function = &GameInput::SetCancelJoy; 
+	_ShowMessageWindow(true);
 }
-void BootMode::_RedefineMenuJoy() {
-	InputManager->SetMenuJoy(_WaitJoyPress());
-	_has_modified_settings = true;
-	_UpdateJoySettings();
+
+void BootMode::_RedefineMenuJoy() 
+{ 
+	_joy_setting_function = &GameInput::SetMenuJoy; 
+	_ShowMessageWindow(true);
 }
-void BootMode::_RedefineSwapJoy() {
-	InputManager->SetSwapJoy(_WaitJoyPress());
-	_has_modified_settings = true;
-	_UpdateJoySettings();
+
+void BootMode::_RedefineSwapJoy() 
+{ 
+	_joy_setting_function = &GameInput::SetSwapJoy; 
+	_ShowMessageWindow(true);
 }
-void BootMode::_RedefineLeftSelectJoy() {
-	InputManager->SetLeftSelectJoy(_WaitJoyPress());
-	_has_modified_settings = true;
-	_UpdateJoySettings();
+
+void BootMode::_RedefineLeftSelectJoy() 
+{ 
+	_joy_setting_function = &GameInput::SetLeftSelectJoy; 
+	_ShowMessageWindow(true);
 }
-void BootMode::_RedefineRightSelectJoy() {
-	InputManager->SetRightSelectJoy(_WaitJoyPress());
-	_has_modified_settings = true;
-	_UpdateJoySettings();
+
+void BootMode::_RedefineRightSelectJoy() 
+{ 
+	_joy_setting_function = &GameInput::SetRightSelectJoy; 
+	_ShowMessageWindow(true);
 }
-void BootMode::_RedefinePauseJoy() {
-	InputManager->SetPauseJoy(_WaitJoyPress());
-	_has_modified_settings = true;
-	_UpdateJoySettings();
+
+void BootMode::_RedefinePauseJoy() 
+{ 
+	_joy_setting_function = &GameInput::SetPauseJoy; 
+	_ShowMessageWindow(true);
+}
+
+void BootMode::_ShowMessageWindow(bool joystick)
+{ 
+	string message = "";
+	if (joystick)
+		message = "Please press a new joystick button.";
+	else
+		message = "Please press a new key.";
+	_message_window = new hoa_menu::MessageWindow(message, 250.0f, 50.0f); 
 }
 
 
@@ -973,6 +995,35 @@ void BootMode::Update() {
 		return;
 	}
 
+	// Check for waiting keypresses or joystick button presses
+	if (_joy_setting_function != NULL)
+	{
+		if (InputManager->AnyKeyPress())
+		{
+			(InputManager->*_joy_setting_function)(InputManager->GetMostRecentEvent().jbutton.button);
+			_joy_setting_function = NULL;
+			_has_modified_settings = true;
+			_UpdateJoySettings();
+			delete _message_window;
+			_message_window = NULL;
+			return;
+		}
+	}
+
+	if (_key_setting_function != NULL)
+	{
+		if (InputManager->AnyKeyPress())
+		{
+			(InputManager->*_key_setting_function)(InputManager->GetMostRecentEvent().key.keysym.sym);
+			_key_setting_function = NULL;
+			_has_modified_settings = true;
+			_UpdateKeySettings();
+			delete _message_window;
+			_message_window = NULL;
+			return;
+		}
+	}
+
 	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
 	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible())
 	{
@@ -1047,6 +1098,9 @@ void BootMode::Update() {
 // Draws our next frame to the video back buffer
 void BootMode::Draw() {
 
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+
 	// If we're animating logo at the moment, handle all drawing in there and simply return
 	if (_logo_animating)
 	{
@@ -1077,6 +1131,12 @@ void BootMode::Draw() {
 	VideoManager->Text()->Draw("Tech Demo");
 	VideoManager->MoveRelative(730.0f, 0.0f);
 	VideoManager->Text()->Draw("Copyright (C) 2004 - 2007 The Allacrost Project");
+
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->Move(0, 0);
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
+	if (_message_window != NULL)
+		_message_window->Draw();
 }
 
 

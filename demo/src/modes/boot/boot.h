@@ -32,6 +32,8 @@
 #include "boot_credits.h"
 #include "boot_welcome.h"
 
+#include "menu_views.h"
+
 //! All calls to boot mode are wrapped in this namespace.
 namespace hoa_boot {
 
@@ -90,8 +92,17 @@ private:
 	//! 'Key Settings' menu
 	BootMenu _key_settings_menu;
 
+	//! The function to call when a new key has been pressed (if we're waiting for one.)
+	void (hoa_input::GameInput::*_key_setting_function)(const SDLKey &);
+
 	//! 'Joystick Settings' menu
 	BootMenu _joy_settings_menu;
+
+	//! Displays the select a key window.
+	hoa_menu::MessageWindow *_message_window;
+
+	//! The function to call when a new joystick button has been pressed (if we're waiting for one.)
+	void (hoa_input::GameInput::*_joy_setting_function)(uint8 button);
 
 	//! 'Resolution switcher' menu
 	BootMenu _resolution_menu;
@@ -179,6 +190,10 @@ private:
 	void _RedefineRightSelectJoy();
 	void _RedefinePauseJoy();
 	//@}
+
+	/** \brief init's the message window to display while waiting for a new key or joystick button press
+	 **/
+	void _ShowMessageWindow(bool joystick);
 
 	/**
 	*** \brief Setups the corresponding menu (initialize menu members, set callbacks)
