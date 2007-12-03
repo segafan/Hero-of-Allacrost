@@ -315,6 +315,7 @@ void GameInput::EventHandler() {
 
 	// Loops until there are no remaining events to process
 	while (SDL_PollEvent(&event)) {
+		_event = event;
 		if (event.type == SDL_QUIT) {
 			// Quit the game without question if the active game mode is BootMode or QuitMode
 			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE

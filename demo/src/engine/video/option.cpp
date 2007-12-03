@@ -529,10 +529,6 @@ void OptionBox::HandleRightKey() {
 
 
 void OptionBox::HandleConfirmKey() {
-	// Ignore input while scrolling, or if an event has already been logged
-	if (_scrolling || _event || _options[_selection].disabled)
-		return;
-
 	// Abort if an invalid option is selected
 	if (_selection < 0 || _selection >= _number_options) {
 		if (VIDEO_DEBUG)
@@ -540,6 +536,10 @@ void OptionBox::HandleConfirmKey() {
 				<< "was selected: " << _selection << endl;
 		return;
 	}
+
+	// Ignore input while scrolling, or if an event has already been logged
+	if (_scrolling || _event || _options[_selection].disabled)
+		return;
 
 	// Case #1: switch the position of two different options
 	if (_switching && _first_selection >= 0 && _selection != _first_selection) {
@@ -781,7 +781,10 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 				offset -= _number_columns;
 			else if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_SHIFTED) {
 				if (_vertical_wrap_mode != VIDEO_WRAP_MODE_NONE) // Make sure vertical wrapping is accepted
-					offset -= _number_options;
+				{
+					offset = 0;
+					_selection++;
+				}
 				else
 					return false;
 			}

@@ -540,9 +540,27 @@ private:
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 }; // class OverwriteConfirmWindow
 
+/*!
+* \brief Converts a vector of GlobalItem*, etc. to a vector of GlobalObjects*
+* \return the same vector, with elements of type GlobalObject*
+*/
+template <class T> std::vector<hoa_global::GlobalObject*> InventoryWindow::_GetItemVector(std::vector<T*>* inv) {
+	std::vector<hoa_global::GlobalObject*> obj_vector;
+
+	for (typename std::vector<T*>::iterator i = inv->begin(); i != inv->end(); i++) {
+		obj_vector.push_back( *i );
+	}
+	
+	return obj_vector;
+}
+
+} // namespace private_menu
+
 /** **************************************************************************
 *** \brief A window to display a message to the player
 *** Displays a message to the user in the center of the screen
+*** This class is not private because it's a handy message box and 
+*** it could be used else where.
 *** **************************************************************************/
 class MessageWindow : public hoa_video::MenuWindow
 {
@@ -562,23 +580,6 @@ private:
 	//! \brief used to display the message
 	hoa_video::TextBox _textbox;
 }; // class MessageWindow
-
-
-/*!
-* \brief Converts a vector of GlobalItem*, etc. to a vector of GlobalObjects*
-* \return the same vector, with elements of type GlobalObject*
-*/
-template <class T> std::vector<hoa_global::GlobalObject*> InventoryWindow::_GetItemVector(std::vector<T*>* inv) {
-	std::vector<hoa_global::GlobalObject*> obj_vector;
-
-	for (typename std::vector<T*>::iterator i = inv->begin(); i != inv->end(); i++) {
-		obj_vector.push_back( *i );
-	}
-	
-	return obj_vector;
-}
-
-} // namespace private_menu
 
 } // namespace hoa_menu
 
