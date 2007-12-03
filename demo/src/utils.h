@@ -580,6 +580,10 @@ bool DoesFileExist(const std::string& file_name);
 **/
 bool MoveFile(const std::string& source_name, const std::string& destination_name);
 
+/** \brief same as move, but leaves the source file and there is no return value
+ **/
+void CopyFile(const std::string& source, const std::string& destination);
+
 /** \brief Removes all files present in a directory
 *** \param dir_name The name of the directory to clean (e.g. "img/screnshots")
 *** \return True upon success, false upon failure

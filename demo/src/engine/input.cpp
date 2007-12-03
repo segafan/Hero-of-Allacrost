@@ -32,6 +32,7 @@ using namespace hoa_mode_manager;
 using namespace hoa_system;
 using namespace hoa_quit;
 using namespace hoa_pause;
+using namespace hoa_global;
 using namespace hoa_input::private_input;
 
 using namespace hoa_battle;
@@ -121,7 +122,9 @@ bool GameInput::SingletonInitialize() {
 	}
 
 	// Loads saved settings to setup the key and joystick configurations
-	string in_filename = "dat/config/settings.lua";
+	string in_filename = GlobalManager->GetSavePath() + "settings.lua";
+	if (!DoesFileExist(in_filename))
+		in_filename = "dat/config/settings.lua";
 	ReadScriptDescriptor input_map_data;
 	if (input_map_data.OpenFile(in_filename) == false) {
 		cerr << "INPUT ERROR: failed to open data file for reading: "
