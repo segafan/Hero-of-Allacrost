@@ -156,6 +156,8 @@ BootMode::BootMode() :
 
 // The destructor frees all used music, sounds, and images.
 BootMode::~BootMode() {
+	_SaveSettingsFile();
+
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
 
 	for (uint32 i = 0; i < _boot_music.size(); i++)
@@ -345,7 +347,10 @@ void BootMode::_EndOpeningAnimation() {
 	
 	// Load the settings file for reading in the welcome variable
 	ReadScriptDescriptor settings_lua;
-	if (!settings_lua.OpenFile("dat/config/settings.lua")) {
+	string file = GlobalManager->GetSavePath() + "settings.lua";
+	if (!DoesFileExist(file))
+		file = "dat/config/settings.lua";
+	if (!settings_lua.OpenFile(file)) {
 		cout << "BOOT ERROR: failed to load the settings file!" << endl;
 	}
 	settings_lua.OpenTable("settings");
@@ -886,8 +891,12 @@ void BootMode::_SaveSettingsFile() {
 		return;
 
 	// Load the settings file for reading in the original data
+	string file = GlobalManager->GetSavePath() + "settings.lua";
+	if (!DoesFileExist(file))
+		CopyFile(string("dat/config/settings.lua"), file);
+		
 	ModifyScriptDescriptor settings_lua;
-	if (!settings_lua.OpenFile("dat/config/settings.lua")) {
+	if (!settings_lua.OpenFile(file)) {
 		cout << "BOOT ERROR: failed to load the settings file!" << endl;
 	}
 

@@ -23,8 +23,10 @@
 	#include <dirent.h>
 #endif
 
+#include <fstream>
 #include <sys/stat.h>
 #include "socket.h"
+
 
 using namespace std;
 using namespace hoa_socket;
@@ -448,6 +450,14 @@ bool MoveFile(const std::string& source_name, const std::string& destination_nam
 	return (rename(source_name.c_str(), destination_name.c_str()) == 0);
 }
 
+void CopyFile(const std::string& source, const std::string& destination)
+{
+	if (DoesFileExist(destination))
+		remove(destination.c_str());
+	ifstream src(source.c_str());
+	ofstream dst(destination.c_str());
+	dst << src.rdbuf();
+}
 
 
 bool MakeDirectory(const std::string& dir_name) {
