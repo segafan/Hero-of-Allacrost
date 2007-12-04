@@ -389,6 +389,10 @@ MapSprite::~MapSprite() {
 		face_portrait = NULL;
 	}
 
+	// Free animations
+	for (vector<AnimatedImage>::iterator i = animations.begin(); i != animations.end(); ++i)
+		(*i).Clear();
+
 // 	for (uint32 i = 0; i < dialogues.size(); i++) {
 // 		delete(dialogues[i]);
 // 	}

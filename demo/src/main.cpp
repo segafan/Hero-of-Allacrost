@@ -25,6 +25,10 @@
 *** -# Update the game status based on how much time expired from the last update.
 *** ***************************************************************************/
 
+#include <iostream>
+#include <ctime>
+#include <cmath>
+#include <string>
 #include <ctime>
 #ifdef __MACH__
 	#include <unistd.h>
@@ -39,10 +43,6 @@
 #include "audio_stream.h"
 #include "audio.h"
 #include "audio_descriptor.h"
-#include <iostream>
-#include <ctime>
-#include <cmath>
-#include <string>
 #include "video.h"
 #include "input.h"
 #include "script.h"

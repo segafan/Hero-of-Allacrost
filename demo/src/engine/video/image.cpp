@@ -1165,6 +1165,9 @@ void AnimatedImage::Clear() {
 	ImageDescriptor::Clear();
 	_frame_index = 0;
 	_frame_counter = 0;
+	// clear all animation frame images
+	for (vector<AnimationFrame>::iterator i = _frames.begin(); i != _frames.end(); ++i)
+		(*i).image.Clear();
 	_frames.clear();
 	_number_loops = -1;
 	_loop_counter = 0;

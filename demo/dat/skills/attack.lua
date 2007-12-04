@@ -28,7 +28,7 @@ skills[1] = {
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
 		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
-			target:TakeDamage(instigator:GetPhysicalAttack() + 32 - target:GetPhysicalDefense());
+			target:TakeDamage(instigator:GetPhysicalAttack() + 15 - target:GetPhysicalDefense());
 		end
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
@@ -47,7 +47,7 @@ skills[2] = {
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
 		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
-			target:TakeDamage(instigator:GetPhysicalAttack() + 45 - target:GetPhysicalDefense());
+			target:TakeDamage(instigator:GetPhysicalAttack() + 25 - target:GetPhysicalDefense());
 		end
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
@@ -64,7 +64,7 @@ skills[3] = {
    
    BattleExecute = function(target, instigator)
       if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
-         target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
+         target:TakeDamage(instigator:GetPhysicalAttack() + 8 - target:GetPhysicalDefense());
          AudioManager:PlaySound("snd/crossbow.ogg");
       else
          AudioManager:PlaySound("snd/crossbow-miss.ogg");
