@@ -74,14 +74,14 @@ public:
 			return col;
 		}
 
-	Color &operator *= (const Color &c)
-	{ 
-		_colors[0] *= c._colors[0];
-		_colors[1] *= c._colors[1];
-		_colors[2] *= c._colors[2];
-		_colors[3] *= c._colors[3];
-		return *this;
-	}
+	Color& operator *= (const Color &c)
+		{
+			_colors[0] *= c._colors[0];
+			_colors[1] *= c._colors[1];
+			_colors[2] *= c._colors[2];
+			_colors[3] *= c._colors[3];
+			return *this;
+		}
 
 	Color operator * (const Color &c) const
 		{ return Color(_colors[0] * c._colors[0], _colors[1] * c._colors[1], _colors[2] * c._colors[2], _colors[3] * c._colors[3]); }
@@ -92,15 +92,26 @@ public:
 	/** \note No checking of array bounds are done here for efficiency reasons. If safety is a concern, use the
 	*** class member access functions instead.
 	**/
-	float &operator[](int32 i)
+	float& operator[](int32 i)
 		{ return _colors[i]; }
 
 	/** \note No checking of array bounds are done here for efficiency reasons. If safety is a concern, use the
 	*** class member access functions instead.
 	**/
-	const float &operator[](int32 i) const
+	const float& operator[](int32 i) const
 		{ return _colors[i]; }
 	//@}
+
+	/** \brief Converts the 0.0f to 1.0f floating point color values to 0 to 255 uint8 values
+	*** \return An array of four uint8 values ranging from 0 to 255
+	**/
+	void ConvertToNumerics(uint8& red, uint8& green, uint8& blue, uint8& alpha)
+		{
+			red = static_cast<uint8>(_colors[0] * 0xFF);
+			green = static_cast<uint8>(_colors[1] * 0xFF);
+			blue = static_cast<uint8>(_colors[2] * 0xFF);
+			alpha = static_cast<uint8>(_colors[3] * 0xFF);
+		}
 
 	//! \brief Class member access functions
 	//@{

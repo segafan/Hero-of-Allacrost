@@ -477,6 +477,46 @@ void ImageDescriptor::_RemoveTextureReference() {
 
 
 
+void ImageDescriptor::_DrawOrientation() const {
+	Context& current_context = VideoManager->_current_context;
+
+	// Calculate x and y draw offsets due to any screen shaking effects
+	float x_shake = VideoManager->_x_shake * (current_context.coordinate_system.GetRight() - current_context.coordinate_system.GetLeft()) / 1024.0f;
+	float y_shake = VideoManager->_y_shake * (current_context.coordinate_system.GetTop() - current_context.coordinate_system.GetBottom()) / 768.0f;
+
+	// TODO: I honestly have no idea what this is >_>
+	float x_align_offset = ((current_context.x_align + 1) * _width) * 0.5f * -current_context.coordinate_system.GetHorizontalDirection();
+	float y_align_offset = ((current_context.y_align + 1) * _height) * 0.5f * -current_context.coordinate_system.GetVerticalDirection();
+
+	VideoManager->MoveRelative(x_align_offset, y_align_offset);
+
+	// x/y draw offsets, which are a function of the flip draw flags, screen shaking, and the orientation of the current coordinate system
+	float x_off = 0.0f, y_off = 0.0f;
+
+	if (current_context.x_flip) {
+		x_off = _width;
+	}
+	if (current_context.y_flip) {
+		y_off = _height;
+	}
+	x_off += x_shake;
+	y_off += y_shake;
+
+	VideoManager->MoveRelative(x_off * current_context.coordinate_system.GetHorizontalDirection(), y_off * current_context.coordinate_system.GetVerticalDirection());
+
+	// x/y scale degrees
+	float x_scale = _width;
+	float y_scale = _height;
+
+	if (current_context.coordinate_system.GetHorizontalDirection() < 0.0f)
+		x_scale = -x_scale;
+	if (current_context.coordinate_system.GetVerticalDirection() < 0.0f)
+		y_scale = -y_scale;
+	glScalef(x_scale, y_scale, 1.0f);
+}
+
+
+
 void ImageDescriptor::_DrawTexture(const Color* draw_color) const {
 	// Array of the four vertexes defined on the 2D plane for glDrawArrays()
 	// This is no longer const, because when tiling the background for the menu's
@@ -959,53 +999,18 @@ void StillImage::Draw(const Color& draw_color) const {
 		return;
 	}
 
-	// Used to determine if the image color should be modulated by any degree due to screen fading effects
-	float modulation = VideoManager->_screen_fader.GetFadeModulation();
-	bool skip_modulation = (draw_color == Color::white && IsFloatEqual(modulation, 1.0f));
-
-	Context& current_context = VideoManager->_current_context;
-
-	// Calculate x and y draw offsets due to any screen shaking effects
-	float x_shake = VideoManager->_x_shake * (current_context.coordinate_system.GetRight() - current_context.coordinate_system.GetLeft()) / 1024.0f;
-	float y_shake = VideoManager->_y_shake * (current_context.coordinate_system.GetTop() - current_context.coordinate_system.GetBottom()) / 768.0f;
-
-	// TODO: I honestly have no idea what this is >_>
-	float x_align_offset = ((current_context.x_align + 1) * _width) * 0.5f * -current_context.coordinate_system.GetHorizontalDirection();
-	float y_align_offset = ((current_context.y_align + 1) * _height) * 0.5f * -current_context.coordinate_system.GetVerticalDirection();
-
-	// Save the draw cursor position so we can restore it after the image is drawn in the correct location
 	glPushMatrix();
-	VideoManager->MoveRelative(x_align_offset, y_align_offset);
+	_DrawOrientation();
 
-	// x/y draw offsets, which are a function of the flip draw flags, screen shaking, and the orientation of the current coordinate system
-	float x_off = 0.0f, y_off = 0.0f;
-
-	if (current_context.x_flip) {
-		x_off = _width;
-	}
-	if (current_context.y_flip) {
-		y_off = _height;
-	}
-	x_off += x_shake;
-	y_off += y_shake;
-	VideoManager->MoveRelative(x_off * current_context.coordinate_system.GetHorizontalDirection(), y_off * current_context.coordinate_system.GetVerticalDirection());
-
-	// x/y scale degrees
-	float x_scale = _width;
-	float y_scale = _height;
-
-	if (current_context.coordinate_system.GetHorizontalDirection() < 0.0f)
-		x_scale = -x_scale;
-	if (current_context.coordinate_system.GetVerticalDirection() < 0.0f)
-		y_scale = -y_scale;
-	glScalef(x_scale, y_scale, 1.0f);
-
+	float modulation = VideoManager->_screen_fader.GetFadeModulation();
+	// Used to determine if the image color should be modulated by any degree due to screen fading effects
+	bool skip_modulation = (draw_color == Color::white && IsFloatEqual(modulation, 1.0f));
 	if (skip_modulation) {
 		_DrawTexture(_color);
 	}
 	else {
-		Color modulated_colors[4];
 		Color fade_color(modulation, modulation, modulation, 1.0f);
+		Color modulated_colors[4];
 
 		fade_color = draw_color * fade_color;
 		modulated_colors[0] = _color[0] * fade_color;

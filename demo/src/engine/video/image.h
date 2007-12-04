@@ -270,6 +270,16 @@ protected:
 	**/
 	void _RemoveTextureReference();
 
+	/** \brief A draw helper function which adjusts the draw orientation (translation and scaling)
+	***
+	*** \note This method modifies the draw cursor position and does not restore it before finishing. Therefore
+	*** under most circumstances, you will want to call VideoManager->PushState()/PopState(), or
+	*** glPushMatrix()/glPopMatrix() before and after calling this function. The latter is preferred due to the
+	*** lower cost of the call, but some circumstances may require using the former when more state information
+	*** needs to be retained.
+	**/
+	void _DrawOrientation() const;
+
 	/** \brief Draws the OpenGL texture referred to by the object on the screen
 	*** \param draw_color A non-NULL pointer to an array of four valid Color objects
 	***
