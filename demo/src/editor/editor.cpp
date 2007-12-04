@@ -1225,13 +1225,6 @@ vector<int32>& EditorScrollView::GetCurrentLayer()
 
 // ********** Protected functions **********
 
-void EditorScrollView::mouseMoveEvent(QMouseEvent *evt)
-{
-	// Display mouse position.
-	//(static_cast<Editor*> (topLevelWidget()))->statusBar()->showMessage(
-	//	QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
-} // mouseMoveEvent(...)
-
 void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 {
 	// don't draw outside the map
@@ -1242,14 +1235,23 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 	_tile_index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 	_map->SetChanged(true);
 
+	// get reference to Editor
+	Editor* editor = static_cast<Editor*> (topLevelWidget());
+	
+	// record the location of the beginning of the selection rectangle
+	if (evt->button() == Qt::LeftButton && editor->_select_on == true)
+	{
+		_first_corner_index = _tile_index;
+		_map->GetLayer(SELECT_LAYER)[_tile_index] = 1;
+	} // selection mode is on
+				
 	switch (_tile_mode)
 	{
 		case PAINT_TILE: // start painting tiles
 		{
-			if (evt->button() == Qt::LeftButton)
+			if (evt->button() == Qt::LeftButton && editor->_select_on == false)
 			{
 				// get reference to current tileset
-				Editor* editor = static_cast<Editor*> (topLevelWidget());
 				Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
 				QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
 
@@ -1262,8 +1264,8 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 					multiplier = _map->tileset_names.findIndex(tileset_name);
 				} // calculate index of current tileset
 				
-					//cerr << "tileset_num: " << multiplier << endl;
-					//cerr << "tileset_index: " << tileset_index << endl;
+				//cerr << "tileset_num: " << multiplier << endl;
+				//cerr << "tileset_index: " << tileset_index << endl;
 				// perform randomization for autotiles
 				assert(multiplier != -1);
 				_AutotileRandomize(multiplier, tileset_index);
@@ -1275,7 +1277,8 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 					
 				// Paint the tile.
 				GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
-			} // left mouse button was pressed
+			} // left mouse button was pressed and selection mode is not on
+
 			break;
 		} // edit mode PAINT_TILE
 
@@ -1287,11 +1290,8 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 
 		case DELETE_TILE: // start deleting tiles
 		{
-			if (evt->button() == Qt::LeftButton)
+			if (evt->button() == Qt::LeftButton && editor->_select_on == false)
 			{
-				// FIXME: Is file_index going to be used?? If not, no reason for this call
-				//int file_index = GetCurrentLayer()[_tile_index];
-
 				// Record information for undo/redo action.
 				_tile_indeces.push_back(_tile_index);
 				_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
@@ -1302,7 +1302,8 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 
 				// FIXME: No longer needed (I think...)
 				//_RemoveIfUnused(file_index);
-			} // left mouse button was pressed
+			} // left mouse button was pressed and selection mode is not on
+
 			break;
 		} // edit mode DELETE_TILE
 
@@ -1312,7 +1313,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 	} // switch on tile editing mode
 
 	// Display mouse position.
-	(static_cast<Editor*> (topLevelWidget()))->statusBar()->showMessage(
+	editor->statusBar()->showMessage(
 		QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
 
 	// Draw the changes
@@ -1326,18 +1327,50 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 		(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
 		return;
 
+	// get reference to Editor
+	Editor* editor = static_cast<Editor*> (topLevelWidget());
+	
 	int32 index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 	if (index != _tile_index)
 	{
 		_tile_index = index;
+		
+		if (evt->state() == Qt::LeftButton && editor->_select_on == true)
+		{
+			// Calculate the actual selection rectangle here, otherwise it's just
+			// like selecting individual tiles...
+			int x_old = _first_corner_index % _map->GetWidth();
+			int y_old = _first_corner_index / _map->GetWidth();
+			int x_new = _tile_index % _map->GetWidth();
+			int y_new = _tile_index / _map->GetWidth();
+			
+			// Swap the coordinates around so *_old is always smaller than *_new.
+			int temp;
+			if (x_old > x_new)
+			{
+				temp = x_old;
+				x_old = x_new;
+				x_new = temp;
+			}
+			if (y_old > y_new)
+			{
+				temp = y_old;
+				y_old = y_new;
+				y_new = temp;
+			}
+			
+			for (int y = y_old; y <= y_new; y++)
+				for (int x = x_old; x <= x_new; x++)
+					_map->GetLayer(SELECT_LAYER)[y * _map->GetWidth() + x] = 1;
+		} // left mouse button was pressed and selection mode is on
+
 		switch (_tile_mode)
 		{
 			case PAINT_TILE: // continue painting tiles
 			{
-				if (evt->state() == Qt::LeftButton)
+				if (evt->state() == Qt::LeftButton && editor->_select_on == false)
 				{
 					// get reference to current tileset
-					Editor* editor = static_cast<Editor*> (topLevelWidget());
 					Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
 					QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
 
@@ -1362,7 +1395,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 					_modified_tiles.push_back(tileset_index + multiplier * 256);
 
 					GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
-				} // left mouse button was pressed
+				} // left mouse button was pressed and selection mode is not on
+
 				break;
 			} // edit mode PAINT_TILE
 
@@ -1373,11 +1407,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 
 			case DELETE_TILE: // continue deleting tiles
 			{
-				if (evt->state() == Qt::LeftButton)
+				if (evt->state() == Qt::LeftButton && editor->_select_on == false)
 				{
-					// NOTE: file_index is not being used here...
-					//int file_index = GetCurrentLayer()[_tile_index];
-
 					// Record information for undo/redo action.
 					_tile_indeces.push_back(_tile_index);
 					_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
@@ -1387,7 +1418,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 					GetCurrentLayer()[_tile_index] = -1;
 
 					// FIXME: _RemoveIfUnused(file_index);
-				} // left mouse button was pressed
+				} // left mouse button was pressed and selection mode is not on
+
 				break;
 			} // edit mode DELETE_TILE
 
@@ -1397,7 +1429,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 		} // switch on tile editing mode
 
 		// Display mouse position.
-		(static_cast<Editor*> (topLevelWidget()))->statusBar()->showMessage(
+		editor->statusBar()->showMessage(
 			QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
 	} // mouse has moved to a new tile position
 
@@ -1407,17 +1439,54 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 
 void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 {
-	// Should already be finished painting or deleting tiles.
-
-	_tile_index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
-
+	vector<int32>::iterator it;    // used to iterate over an entire layer
 	// get reference to Editor so we can access the undo stack
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
+
+	_tile_index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 	
 	switch (_tile_mode)
 	{
 		case PAINT_TILE: // wrap up painting tiles
 		{
+			if (editor->_select_on == true)
+			{
+				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
+				for (int i = 0; i < select_layer.size(); i++)
+				{
+					// Works because the selection layer and the current layer are the same size.
+					if (select_layer[i] != -1)
+					{
+						// get reference to current tileset
+						Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
+						QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
+
+						// put selected tile from tileset into tile array at correct position
+						int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
+						int32 multiplier = _map->tileset_names.findIndex(tileset_name);
+						if (multiplier == -1)
+						{
+							_map->tileset_names.append(tileset_name);
+							multiplier = _map->tileset_names.findIndex(tileset_name);
+						} // calculate index of current tileset
+
+						//cerr << "tileset_num: " << multiplier << endl;
+						//cerr << "tileset_index: " << tileset_index << endl;
+						// perform randomization for autotiles
+						assert(multiplier != -1);
+						_AutotileRandomize(multiplier, tileset_index);
+
+						// Record information for undo/redo action.
+						_tile_indeces.push_back(i);
+						_previous_tiles.push_back(GetCurrentLayer()[i]);
+						_modified_tiles.push_back(tileset_index + multiplier * 256);
+
+						GetCurrentLayer()[i] = tileset_index + multiplier * 256;
+					} // only paint a tile if it is selected
+				} // iterate over selection layer
+			} // only if painting a bunch of tiles
+			
+			// Push command onto the undo stack.
 			LayerCommand* paint_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles,
 				_layer_edit, editor, "Paint");
 			editor->_undo_stack->push(paint_command);
@@ -1443,6 +1512,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 			layer[_tile_index] = layer[_move_source_index];
 			layer[_move_source_index] = -1;
 			
+			// Push command onto the undo stack.
 			LayerCommand* move_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles,
 				_layer_edit, editor, "Move");
 			editor->_undo_stack->push(move_command);
@@ -1454,6 +1524,26 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 		
 		case DELETE_TILE: // wrap up deleting tiles
 		{
+			if (editor->_select_on == true)
+			{
+				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
+				for (int i = 0; i < select_layer.size(); i++)
+				{
+					// Works because the selection layer and the current layer are the same size.
+					if (select_layer[i] != -1)
+					{
+						// Record information for undo/redo action.
+						_tile_indeces.push_back(i);
+						_previous_tiles.push_back(GetCurrentLayer()[i]);
+						_modified_tiles.push_back(-1);
+
+						// Delete the tile.
+						GetCurrentLayer()[i] = -1;
+					} // only delete a tile if it is selected
+				} // iterate over selection layer
+			} // only if deleting a bunch of tiles
+		
+			// Push command onto undo stack.
 			LayerCommand* delete_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles,
 				_layer_edit, editor, "Delete");
 			editor->_undo_stack->push(delete_command);
@@ -1467,6 +1557,11 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 			QMessageBox::warning(this, "Tile editing mode",
 				"ERROR: Invalid tile editing mode!");
 	} // switch on tile editing mode
+
+	// Clear the selection layer.
+	vector<int32>& select_layer = _map->GetLayer(SELECT_LAYER);
+	for (it = select_layer.begin(); it != select_layer.end(); it++)
+		*it = -1;
 
 	// Draw the changes
 	_map->updateGL();
