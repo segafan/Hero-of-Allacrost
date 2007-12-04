@@ -38,7 +38,8 @@ enum LAYER_TYPE
 	LOWER_LAYER   = 0,
 	MIDDLE_LAYER  = 1,
 	UPPER_LAYER   = 2,
-	TOTAL_LAYER   = 3
+	SELECT_LAYER  = 3,
+	TOTAL_LAYER   = 4
 };
 
 LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy);
@@ -135,6 +136,10 @@ class Grid: public QGLWidget
 		std::vector<int32> _middle_layer;
 		//! A vector of tiles in the upper layer.
 		std::vector<int32> _upper_layer;
+		//! A vector of tiles in the selection rectangle. Exists only in the editor,
+		//! not the game. Acts similarly to an actual layer as far as drawing
+		//! is concerned.
+		std::vector<int32> _select_layer;
 
 		//! Stores the background music file.
 		QString _music_file;

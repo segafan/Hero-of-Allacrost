@@ -55,6 +55,7 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 		_lower_layer.push_back(-1);
 		_middle_layer.push_back(-1);
 		_upper_layer.push_back(-1);
+		_select_layer.push_back(-1);
 	} // -1 is used for no tiles
 	// -1 is used for no tiles
 } // Grid constructor
@@ -131,6 +132,8 @@ vector<int32>& Grid::GetLayer(LAYER_TYPE layer)
 			return _middle_layer;
 		case UPPER_LAYER:
 			return _upper_layer;
+		case SELECT_LAYER:
+			return _select_layer;
 		case INVALID_LAYER:
 			/* FALLTHRU */
 		case TOTAL_LAYER:
@@ -570,7 +573,19 @@ void Grid::paintGL()
 	{
 		Color blue_selection(0.0f, 0.0f, 255.0f, 0.5f);
 		VideoManager->Move(0.0f, 0.0f);
-		VideoManager->DrawRectangle(1.0f, 1.0f, blue_selection);
+		col = 0;
+		for (it = _select_layer.begin(); it != _select_layer.end(); it++)
+		{
+			// a tile exists to draw
+			if (*it != -1)
+				VideoManager->DrawRectangle(1.0f, 1.0f, blue_selection);
+			col++;
+			col %= _width;
+			if (col == 0)
+				VideoManager->MoveRelative(-_width + 1, 1.0f);
+			else
+				VideoManager->MoveRelative(1.0f, 0.0f);
+		} // iterate through selection layer
 	} // selection rectangle must be viewable
 
 	// If grid is toggled on, draw it

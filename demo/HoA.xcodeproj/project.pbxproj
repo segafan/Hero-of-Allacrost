@@ -52,6 +52,7 @@
 		D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
 		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
 		D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
+		D413E04E0CFFEA4400D5FAB4 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D413E04D0CFFEA4400D5FAB4 /* OpenAL.framework */; };
 		D41AC1DB0C4C7C980097B042 /* script_write.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440963B0C45E37300E58975 /* script_write.cpp */; };
 		D41AC1DC0C4C7C9F0097B042 /* script_read.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096390C45E37300E58975 /* script_read.cpp */; };
 		D41AC1DD0C4C7CA60097B042 /* script_modify.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096370C45E37300E58975 /* script_modify.cpp */; };
@@ -133,7 +134,6 @@
 		D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110400C58546800ADC969 /* audio_descriptor.cpp */; };
 		D4F1104C0C58548B00ADC969 /* audio_input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110460C58548B00ADC969 /* audio_input.cpp */; };
 		D4F1104E0C58548B00ADC969 /* audio_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110480C58548B00ADC969 /* audio_stream.cpp */; };
-		D4F110790C5855CC00ADC969 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F110780C5855CC00ADC969 /* OpenAL.framework */; };
 		D4F68AA00BD72266009F6973 /* Qt3Support.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68A9F0BD72266009F6973 /* Qt3Support.framework */; };
 		D4F68AA40BD72276009F6973 /* QtCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA30BD72276009F6973 /* QtCore.framework */; };
 		D4F68AA80BD72280009F6973 /* QtGui.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA70BD7227F009F6973 /* QtGui.framework */; };
@@ -255,6 +255,7 @@
 		D407F7EA0BADECF300848C43 /* shop.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop.h; sourceTree = "<group>"; };
 		D407F7EB0BADECF300848C43 /* shop_windows.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop_windows.cpp; sourceTree = "<group>"; };
 		D407F7EC0BADECF300848C43 /* shop_windows.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop_windows.h; sourceTree = "<group>"; };
+		D413E04D0CFFEA4400D5FAB4 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = /System/Library/Frameworks/OpenAL.framework; sourceTree = "<absolute>"; };
 		D438C7970C9117300032F79E /* texture_controller.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = texture_controller.cpp; sourceTree = "<group>"; };
 		D438C79A0C9117400032F79E /* image_base.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = image_base.cpp; sourceTree = "<group>"; };
 		D438C79D0C9117650032F79E /* image_base.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = image_base.h; sourceTree = "<group>"; };
@@ -274,7 +275,6 @@
 		D468098E0C1E6E31009F76A9 /* QtSql.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtSql.framework; path = /Library/Frameworks/QtSql.framework; sourceTree = "<absolute>"; };
 		D46809920C1E6E4E009F76A9 /* QtNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtNetwork.framework; path = /Library/Frameworks/QtNetwork.framework; sourceTree = "<absolute>"; };
 		D46809960C1E6E66009F76A9 /* QtXml.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtXml.framework; path = /Library/Frameworks/QtXml.framework; sourceTree = "<absolute>"; };
-		D46809A70C1E703C009F76A9 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = "macosx-contrib/lib"; sourceTree = "<group>"; };
 		D49850D20C82AEA50067770B /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = texture.cpp; sourceTree = "<group>"; };
 		D49850D30C82AEA50067770B /* texture.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = texture.h; sourceTree = "<group>"; };
 		D49D57010C65B1C1006E6ABA /* audio_effects.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_effects.cpp; sourceTree = "<group>"; };
@@ -337,7 +337,6 @@
 		D4F110470C58548B00ADC969 /* audio_input.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_input.h; sourceTree = "<group>"; };
 		D4F110480C58548B00ADC969 /* audio_stream.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_stream.cpp; sourceTree = "<group>"; };
 		D4F110490C58548B00ADC969 /* audio_stream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_stream.h; sourceTree = "<group>"; };
-		D4F110780C5855CC00ADC969 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = /System/Library/Frameworks/OpenAL.framework; sourceTree = "<absolute>"; };
 		D4F68A9F0BD72266009F6973 /* Qt3Support.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Qt3Support.framework; path = /Library/Frameworks/Qt3Support.framework; sourceTree = "<absolute>"; };
 		D4F68AA30BD72276009F6973 /* QtCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtCore.framework; path = /Library/Frameworks/QtCore.framework; sourceTree = "<absolute>"; };
 		D4F68AA70BD7227F009F6973 /* QtGui.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtGui.framework; path = /Library/Frameworks/QtGui.framework; sourceTree = "<absolute>"; };
@@ -354,7 +353,7 @@
 				4941A71B0AC1D8B300D65B8E /* SDL_ttf.framework in Frameworks */,
 				49BDC4260AF540AE00940A6C /* SDL_net.framework in Frameworks */,
 				4941A71C0AC1D8B300D65B8E /* SDL.framework in Frameworks */,
-				D4F110790C5855CC00ADC969 /* OpenAL.framework in Frameworks */,
+				D413E04E0CFFEA4400D5FAB4 /* OpenAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,7 +381,6 @@
 		4941A49F0AC1D76400D65B8E = {
 			isa = PBXGroup;
 			children = (
-				D4F0F4330CDE7CD000EFE9B0 /* tileset_editor.moc.cpp */,
 				D404C6E80B02FCEC00827A19 /* Temporary Source Files */,
 				4941A4BC0AC1D7B300D65B8E /* Source Files */,
 				4941A4BD0AC1D7BA00D65B8E /* Resources */,
@@ -403,7 +401,6 @@
 		4941A4BB0AC1D7AF00D65B8E /* Linkings */ = {
 			isa = PBXGroup;
 			children = (
-				D46809A70C1E703C009F76A9 /* lib */,
 				49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */,
 				D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */,
 				4941A7120AC1D87200D65B8E /* Frameworks */,
@@ -532,8 +529,8 @@
 		4941A7120AC1D87200D65B8E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D413E04D0CFFEA4400D5FAB4 /* OpenAL.framework */,
 				D40748300C6E8615008A25BD /* Vorbis.framework */,
-				D4F110780C5855CC00ADC969 /* OpenAL.framework */,
 				D46809960C1E6E66009F76A9 /* QtXml.framework */,
 				D46809920C1E6E4E009F76A9 /* QtNetwork.framework */,
 				D468098E0C1E6E31009F76A9 /* QtSql.framework */,
@@ -604,6 +601,7 @@
 		D404C6E80B02FCEC00827A19 /* Temporary Source Files */ = {
 			isa = PBXGroup;
 			children = (
+				D4F0F4330CDE7CD000EFE9B0 /* tileset_editor.moc.cpp */,
 				D404C6E90B02FD3E00827A19 /* editor.moc.cpp */,
 				D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */,
 			);
