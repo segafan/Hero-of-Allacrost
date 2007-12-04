@@ -127,6 +127,9 @@ void ModifyScriptDescriptor::CommitChanges(bool leave_closed) {
 		return;
 	}
 
+	// setup the iterator
+	_open_tables_iterator = _open_tables.begin();
+
 	// Write the global tables to the file. This in turn will write all other tables that are members of
 	// the global tables, or members of those tables, and so on.
 	object globals(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
@@ -153,8 +156,6 @@ void ModifyScriptDescriptor::_CommitTable(WriteScriptDescriptor& file, const lua
 	int32 num_key = 0;    // Holds the current numeric key
 	string str_key = "";  // Holds the current string key
 
-	static vector<string>::iterator t = _open_tables.begin();
-
 	for (luabind::iterator it(table), end; it != end; ++it) {
 		try {
 			num_key = object_cast<int32>(it.key());
@@ -164,17 +165,17 @@ void ModifyScriptDescriptor::_CommitTable(WriteScriptDescriptor& file, const lua
 			key_is_numeric = false;
 		}
 
-		if (key_is_numeric && t == _open_tables.end())
+		if (key_is_numeric && _open_tables_iterator == _open_tables.end())
 		{
 			cerr << "ModifyScriptDescriptor::_CommitTable: reached numeric key before writing out open tables" << endl;
 			return;
 		}
-		else if (!key_is_numeric && t != _open_tables.end())
+		else if (!key_is_numeric && _open_tables_iterator != _open_tables.end())
 		{
-			if (str_key == (*t))
+			if (str_key == (*_open_tables_iterator))
 			{
 				file.BeginTable(str_key);
-				t++;
+				_open_tables_iterator++;
 				_CommitTable(file, object(*it));
 				file.EndTable();
 				return;

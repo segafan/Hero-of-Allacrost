@@ -115,7 +115,7 @@ void BootMenu::SetWindowed(bool windowed)
 	{
 		_current_menu.SetFont("default");
 		_current_menu.SetCellSize(210.0f, 50.0f);
-		_current_menu.SetPosition(512.0f, 200.0f);
+		_current_menu.SetPosition(150.0f, 200.0f);
 		_current_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 		_current_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 		_current_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -303,9 +303,9 @@ void BootMenu::_InitWindow()
 	if (_menu_window == 0)
 	{
 		_menu_window = new hoa_video::MenuWindow();
-		_menu_window->Create(1024.0f, 400.0f);
-		_menu_window->SetPosition(0.0f, 560.0f);
-		_menu_window->SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+		_menu_window->Create(250.0f, 400.0f);
+		_menu_window->SetPosition(387.0f, 560.0f);
+		_menu_window->SetDisplayMode(VIDEO_MENU_INSTANT);
 		_menu_window->Hide(); // Hide on by default
 	}
 }

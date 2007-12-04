@@ -435,11 +435,18 @@ bool Probability(uint32 chance) {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool DoesFileExist(const std::string& file_name) {
+	// Modified to use platform specific code because on windows stat does not work on directories,
+	// but on POSIX compliant systems it does, and GetFileAttributes works for both folders and
+	// directories on win32
+#ifdef _WIN32
+	return GetFileAttributes(file_name.c_str()) != INVALID_FILE_ATTRIBUTES;
+#else
 	struct stat buf;
 	if (stat(file_name.c_str(), &buf) == 0)
 		return true;
 	else
 		return false;
+#endif
 }
 
 
