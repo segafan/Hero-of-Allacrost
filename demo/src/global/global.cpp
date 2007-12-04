@@ -602,7 +602,7 @@ void GameGlobal::SetLocation(const hoa_utils::ustring& location_name, const std:
 	}
 }
 
-const std::string GameGlobal::GetSavePath() const
+const std::string GameGlobal::GetSavePath(bool for_settings_path) const
 {
 #if defined _WIN32
 	TCHAR path[MAX_PATH];
@@ -627,7 +627,11 @@ const std::string GameGlobal::GetSavePath() const
 	passwd *pw = getpwuid(getuid());
 	if (pw)
 	{
-		string ret = string(pw->pw_dir) + "/Library/Application Support/Allacrost/";
+		string ret = "";
+		if (!for_settings_path)
+			ret = string(pw->pw_dir) + "/Library/Application Support/Allacrost/";
+		else
+			ret = string(pw->pw_dir) + "/Library/Preferences/Allacrost/";
 		if (!DoesFileExist(ret))
 			MakeDirectory(ret);
 		return ret;

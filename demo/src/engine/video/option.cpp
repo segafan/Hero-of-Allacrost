@@ -186,10 +186,11 @@ void OptionBox::Draw() {
 			_SetupAlignment(xalign, yalign, bounds, x, y);
 
 			Option &op = _options.at(index);
-			if (op.disabled)
+			/*if (op.disabled)
 				VideoManager->Text()->SetDefaultTextColor(Color::gray);
 			else
 				VideoManager->Text()->SetDefaultTextColor(Color::white);
+			*/
 
 			// Iterate through all option elements in the current option
 			for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++) {
@@ -257,8 +258,10 @@ void OptionBox::Draw() {
 
 							if (edge < left_edge)
 								left_edge = edge;
-
-							TextManager->Draw(text, TextStyle(_font));
+							TextStyle ts(_font);
+							if (op.disabled)
+								ts.color = Color::gray;
+							TextManager->Draw(text, ts);
 						}
 
 						break;

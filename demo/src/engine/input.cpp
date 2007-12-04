@@ -122,7 +122,7 @@ bool GameInput::SingletonInitialize() {
 	}
 
 	// Loads saved settings to setup the key and joystick configurations
-	string in_filename = GlobalManager->GetSavePath() + "settings.lua";
+	string in_filename = GlobalManager->GetSavePath(true) + "settings.lua";
 	if (!DoesFileExist(in_filename))
 		in_filename = "dat/config/settings.lua";
 	ReadScriptDescriptor input_map_data;

@@ -376,7 +376,7 @@ public:
 
 	/** \brief Finds the OS specific path to save the game in
 	 **/
-	const std::string GetSavePath() const;
+	const std::string GetSavePath(bool for_settings_file) const;
 
 	/** \brief Loads all global data from a saved game file
 	*** \param filename The filename of the saved game file where to read the data from

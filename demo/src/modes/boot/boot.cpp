@@ -174,7 +174,7 @@ BootMode::~BootMode() {
 // Resets appropriate class members.
 void BootMode::Reset() {
 	// Set the coordinate system that BootMode uses
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->DisableFog(); // Turn off any remaining fog
 	VideoManager->Text()->SetDefaultTextColor(Color::white);
@@ -347,7 +347,7 @@ void BootMode::_EndOpeningAnimation() {
 	
 	// Load the settings file for reading in the welcome variable
 	ReadScriptDescriptor settings_lua;
-	string file = GlobalManager->GetSavePath() + "settings.lua";
+	string file = GlobalManager->GetSavePath(true) + "settings.lua";
 	if (!DoesFileExist(file))
 		file = "dat/config/settings.lua";
 	if (!settings_lua.OpenFile(file)) {
@@ -519,6 +519,10 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
+
+	string path = GlobalManager->GetSavePath(false) + "saved_game.lua";
+	if (!DoesFileExist(path))
+		_main_menu.EnableOption(1, false);
 	// TEMP: these options are for debugign purposes only and should be removed for releases
 // 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 // 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
@@ -617,8 +621,6 @@ void BootMode::_SetupResolutionMenu() {
 void BootMode::_OnNewGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
 
-	_SaveSettingsFile();
-
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 	//GlobalManager->AddCharacter(GLOBAL_CHARACTER_LAILA);
 	GlobalManager->AddToInventory(1, 2);
@@ -636,10 +638,8 @@ void BootMode::_OnNewGame() {
 void BootMode::_OnLoadGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Loading game." << endl;
 
-	string filename = GlobalManager->GetSavePath() + "saved_game.lua";
-	if (DoesFileExist(filename)) {
-		_SaveSettingsFile();
-		
+	string filename = GlobalManager->GetSavePath(true) + "saved_game.lua";
+	if (DoesFileExist(filename)) {		
 		GlobalManager->LoadGame(filename);
 		_fade_out = true;
 		VideoManager->FadeScreen(Color::black, 1000);
@@ -663,13 +663,9 @@ void BootMode::_OnCredits() {
 	_credits_screen.Show();
 }
 
-
 // 'Quit' confirmed
-void BootMode::_OnQuit() {
-	// Save settings before quitting
-	_SaveSettingsFile();
-	SystemManager->ExitGame();
-}
+void BootMode::_OnQuit() 
+{ SystemManager->ExitGame(); }
 
 // Battle debug confirmed
 void BootMode::_OnBattleDebug() {
@@ -891,7 +887,7 @@ void BootMode::_SaveSettingsFile() {
 		return;
 
 	// Load the settings file for reading in the original data
-	string file = GlobalManager->GetSavePath() + "settings.lua";
+	string file = GlobalManager->GetSavePath(true) + "settings.lua";
 	if (!DoesFileExist(file))
 		CopyFile(string("dat/config/settings.lua"), file);
 		
@@ -906,7 +902,7 @@ void BootMode::_SaveSettingsFile() {
 	settings_lua.ModifyInt("video_settings.screen_resx", VideoManager->GetScreenWidth());
 	settings_lua.ModifyInt("video_settings.screen_resy", VideoManager->GetScreenHeight());
 	settings_lua.ModifyString("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
-	settings_lua.ModifyFloat("video_settings.brightness", VideoManager->GetGamma());
+	//settings_lua.ModifyFloat("video_settings.brightness", VideoManager->GetGamma());
 
 	// audio
 	settings_lua.ModifyFloat("audio_settings.music_vol", AudioManager->GetMusicVolume());
@@ -930,10 +926,14 @@ void BootMode::_SaveSettingsFile() {
 	settings_lua.ModifyInt("joystick_settings.swap", InputManager->GetSwapJoy());
 	settings_lua.ModifyInt("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
 	settings_lua.ModifyInt("joystick_settings.right_select", InputManager->GetRightSelectJoy());
-	settings_lua.ModifyInt("joystick_settings.pause", InputManager->GetPauseJoy());
+	settings_lua.ModifyInt("joystick_settings.pause", InputManager->GetPauseJoy());	
+
 	// and save it!
 	settings_lua.CommitChanges();
 	settings_lua.CloseTable();
+	settings_lua.CloseFile();
+
+	_has_modified_settings = false;
 }
 
 
@@ -1079,6 +1079,11 @@ void BootMode::Update() {
 			_boot_sounds.at(1).Play(); // Play cancel sound here as well
 		}
 
+		// check to see if settings need to be saved (if we're exiting from the key or joystick
+		// settings menu
+		if (_has_modified_settings)
+			_SaveSettingsFile();
+
 		// Otherwise the cancel was given for the main menu
 		_current_menu->CancelPressed();
 
@@ -1108,7 +1113,7 @@ void BootMode::Update() {
 void BootMode::Draw() {
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
 
 	// If we're animating logo at the moment, handle all drawing in there and simply return
 	if (_logo_animating)
@@ -1143,7 +1148,7 @@ void BootMode::Draw() {
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	VideoManager->Move(0, 0);
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
+	VideoManager->SetCoordSys(0.0f, 1023.0f, 767.0f, 0.0f);
 	if (_message_window != NULL)
 		_message_window->Draw();
 }

@@ -180,6 +180,11 @@ private:
 	template <class T> void _AddNewData(const std::string& key, T value);
 	template <class T> void _AddNewData(int32 key, T value);
 	//@}
+
+	/** \brief vector<string> iterator used to iterate over the list of open tables
+	 ** This is stored here because it needs to persist over multiple function calls.
+	 **/
+	std::vector<std::string>::iterator _open_tables_iterator;
 }; // class ModifyScriptDescriptor
 
 //-----------------------------------------------------------------------------
