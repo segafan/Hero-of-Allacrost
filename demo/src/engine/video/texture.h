@@ -337,13 +337,13 @@ private:
 class VariableTexNode {
 public:
 	VariableTexNode() :
-		image(NULL), free(true) {}
+		image(NULL), free_image(true) {}
 
 	//! \brief A pointer to the image
 	BaseTexture* image;
 
 	//! \brief Set to true if the image is freed
-	bool free;
+	bool free_image;
 }; // class VariableTexNode
 
 

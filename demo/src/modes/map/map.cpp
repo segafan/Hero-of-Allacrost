@@ -144,6 +144,9 @@ MapMode::~MapMode() {
 	delete(_dialogue_manager);
 	delete(_treasure_menu);
 
+	// free dialogue icon
+	_new_dialogue_icon.Clear();
+
 	_map_script.CloseFile();
 }
 

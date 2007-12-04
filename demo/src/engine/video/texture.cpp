@@ -470,7 +470,7 @@ bool VariableTexSheet::InsertTexture(BaseTexture* img) {
 	// Don't allow insertions into a texture sheet containing a texture larger than 512x512.
 	// Texture sheets with this property may only be used by one texture at a time
 	if (_block_width > 32 || _block_height > 32) { // 32 blocks == 512 pixels
-		if (_blocks[0].free == false)
+		if (_blocks[0].free_image == false)
 			return false;
 	}
 
@@ -489,7 +489,7 @@ bool VariableTexSheet::InsertTexture(BaseTexture* img) {
 			bool continue_neighbor_search = true;
 			for (int32 dy = 0; dy < h && continue_neighbor_search; dy++) {
 				for (int32 dx = 0; dx < w; dx++) {
-					if (_blocks[(x + dx) + ((y + dy) * _block_width)].free == false) {
+					if (_blocks[(x + dx) + ((y + dy) * _block_width)].free_image == false) {
 						furthest_blocker = x + dx;
 						continue_neighbor_search = false;
 						break;
@@ -521,7 +521,7 @@ bool VariableTexSheet::InsertTexture(BaseTexture* img) {
 				RemoveTexture(_blocks[index].image);
 			}
 
-			_blocks[index].free = false;
+			_blocks[index].free_image = false;
 			_blocks[index].image = img;
 		}
 	}
@@ -574,7 +574,7 @@ void VariableTexSheet::_SetBlockProperties(BaseTexture* tex, BaseTexture* new_te
 		for (int32 x = block_x; x < block_x + w; x++) {
 			int32 index = x + y * _block_width;
 			if (_blocks[index].image == tex) {
-				_blocks[index].free = free;
+				_blocks[index].free_image = free;
 				_blocks[index].image = new_tex;
 			}
 		}
