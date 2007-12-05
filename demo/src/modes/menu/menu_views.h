@@ -568,6 +568,10 @@ public:
 	MessageWindow(const std::string &message, float w, float h);
 	~MessageWindow();
 
+	//! \brief Set the text to display in the window
+	void SetText(const std::string &message)
+	{ _message = message; _textbox.SetDisplayText(message); }
+
 	//! \brief Standard Window Functions
 	//@{
 	void Draw();

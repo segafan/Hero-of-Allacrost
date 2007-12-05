@@ -68,7 +68,7 @@ BootMode::BootMode() :
 	_has_modified_settings(false),
 	_key_setting_function(NULL),
 	_joy_setting_function(NULL),
-	_message_window(NULL)
+	_message_window(string(""), 210.0f, 35.0f)
 {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
@@ -151,6 +151,9 @@ BootMode::BootMode() :
 
 	// Set the main menu as our currently selected menu
 	_current_menu = &_main_menu;
+
+	// make sure message window is not visible
+	_message_window.Hide();
 }
 
 
@@ -166,8 +169,8 @@ BootMode::~BootMode() {
 	for (uint32 i = 0; i < _boot_sounds.size(); i++)
 		_boot_sounds[i].FreeAudio();
 
-	if (_message_window != NULL)
-		delete _message_window;
+	_key_setting_function = 0;
+	_joy_setting_function = 0;
 }
 
 
@@ -391,113 +394,152 @@ uint8 BootMode::_WaitJoyPress() {
 // Redefines a key to be mapped to another command. Waits for keypress using _WaitKeyPress()
 void BootMode::_RedefineUpKey() 
 { 
-	_key_setting_function = &GameInput::SetUpKey; 
+	_key_setting_function = &BootMode::_SetUpKey; 
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefineDownKey() 
 { 
-	_key_setting_function = &GameInput::SetDownKey; 
+	_key_setting_function = &BootMode::_SetDownKey;
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefineLeftKey() 
 { 
-	_key_setting_function = &GameInput::SetLeftKey; 
+	_key_setting_function = &BootMode::_SetLeftKey; 
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefineRightKey() 
 { 
-	_key_setting_function = &GameInput::SetRightKey; 
+	_key_setting_function = &BootMode::_SetRightKey; 
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefineConfirmKey() 
 { 
-	_key_setting_function = &GameInput::SetConfirmKey; 
+	_key_setting_function = &BootMode::_SetConfirmKey; 
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefineCancelKey() 
 { 
-	_key_setting_function = &GameInput::SetCancelKey; 
+	_key_setting_function = &BootMode::_SetCancelKey; 
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefineMenuKey() 
 { 
-	_key_setting_function = &GameInput::SetMenuKey; 
+	_key_setting_function = &BootMode::_SetMenuKey; 
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefineSwapKey() 
 { 
-	_key_setting_function = &GameInput::SetSwapKey; 
+	_key_setting_function = &BootMode::_SetSwapKey; 
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefineLeftSelectKey() 
 { 
-	_key_setting_function = &GameInput::SetLeftSelectKey; 
+	_key_setting_function = &BootMode::_SetLeftSelectKey; 
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefineRightSelectKey() 
 { 
-	_key_setting_function = &GameInput::SetRightSelectKey; 
+	_key_setting_function = &BootMode::_SetRightSelectKey; 
 	_ShowMessageWindow(false);
 }
 
 void BootMode::_RedefinePauseKey() 
 { 
-	_key_setting_function = &GameInput::SetPauseKey; 
+	_key_setting_function = &BootMode::_SetPauseKey; 
 	_ShowMessageWindow(false);
 }
+
+// Pass through functions (required for the function pointer, see header file for details)
+void BootMode::_SetUpKey(const SDLKey &key)
+{ InputManager->SetUpKey(key); }
+void BootMode::_SetDownKey(const SDLKey &key)
+{ InputManager->SetDownKey(key); }
+void BootMode::_SetLeftKey(const SDLKey &key)
+{ InputManager->SetLeftKey(key); }
+void BootMode::_SetRightKey(const SDLKey &key)
+{ InputManager->SetRightKey(key); }
+void BootMode::_SetConfirmKey(const SDLKey &key)
+{ InputManager->SetConfirmKey(key); }
+void BootMode::_SetCancelKey(const SDLKey &key)
+{ InputManager->SetCancelKey(key); }
+void BootMode::_SetMenuKey(const SDLKey &key)
+{ InputManager->SetMenuKey(key); }
+void BootMode::_SetSwapKey(const SDLKey &key)
+{ InputManager->SetSwapKey(key); }
+void BootMode::_SetLeftSelectKey(const SDLKey &key)
+{ InputManager->SetLeftSelectKey(key); }
+void BootMode::_SetRightSelectKey(const SDLKey &key)
+{ InputManager->SetRightSelectKey(key); }
+void BootMode::_SetPauseKey(const SDLKey &key)
+{ InputManager->SetPauseKey(key); }
 
 
 // Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
 void BootMode::_RedefineConfirmJoy() 
 { 
-	_joy_setting_function = &GameInput::SetConfirmJoy; 
+	_joy_setting_function = &BootMode::_SetConfirmJoy; 
 	_ShowMessageWindow(true);
 }
 
 void BootMode::_RedefineCancelJoy() 
 { 
-	_joy_setting_function = &GameInput::SetCancelJoy; 
+	_joy_setting_function = &BootMode::_SetCancelJoy; 
 	_ShowMessageWindow(true);
 }
 
 void BootMode::_RedefineMenuJoy() 
 { 
-	_joy_setting_function = &GameInput::SetMenuJoy; 
+	_joy_setting_function = &BootMode::_SetMenuJoy; 
 	_ShowMessageWindow(true);
 }
 
 void BootMode::_RedefineSwapJoy() 
 { 
-	_joy_setting_function = &GameInput::SetSwapJoy; 
+	_joy_setting_function = &BootMode::_SetSwapJoy; 
 	_ShowMessageWindow(true);
 }
 
 void BootMode::_RedefineLeftSelectJoy() 
 { 
-	_joy_setting_function = &GameInput::SetLeftSelectJoy; 
+	_joy_setting_function = &BootMode::_SetLeftSelectJoy; 
 	_ShowMessageWindow(true);
 }
 
 void BootMode::_RedefineRightSelectJoy() 
 { 
-	_joy_setting_function = &GameInput::SetRightSelectJoy; 
+	_joy_setting_function = &BootMode::_SetRightSelectJoy; 
 	_ShowMessageWindow(true);
 }
 
 void BootMode::_RedefinePauseJoy() 
 { 
-	_joy_setting_function = &GameInput::SetPauseJoy; 
+	_joy_setting_function = &BootMode::_SetPauseJoy; 
 	_ShowMessageWindow(true);
 }
+
+void BootMode::_SetConfirmJoy(uint8 button)
+{ InputManager->SetConfirmJoy(button); }
+void BootMode::_SetCancelJoy(uint8 button)
+{ InputManager->SetCancelJoy(button); }
+void BootMode::_SetMenuJoy(uint8 button)
+{ InputManager->SetMenuJoy(button); }
+void BootMode::_SetSwapJoy(uint8 button)
+{ InputManager->SetSwapJoy(button); }
+void BootMode::_SetLeftSelectJoy(uint8 button)
+{ InputManager->SetLeftSelectJoy(button); }
+void BootMode::_SetRightSelectJoy(uint8 button)
+{ InputManager->SetRightSelectJoy(button); }
+void BootMode::_SetPauseJoy(uint8 button)
+{ InputManager->SetPauseJoy(button); }
 
 void BootMode::_ShowMessageWindow(bool joystick)
 { 
@@ -506,7 +548,8 @@ void BootMode::_ShowMessageWindow(bool joystick)
 		message = "Please press a new joystick button.";
 	else
 		message = "Please press a new key.";
-	_message_window = new hoa_menu::MessageWindow(message, 250.0f, 50.0f); 
+	_message_window.SetText(message);
+	_message_window.Show();
 }
 
 
@@ -1009,12 +1052,11 @@ void BootMode::Update() {
 	{
 		if (InputManager->AnyKeyPress())
 		{
-			(InputManager->*_joy_setting_function)(InputManager->GetMostRecentEvent().jbutton.button);
+			(this->*_joy_setting_function)(InputManager->GetMostRecentEvent().jbutton.button);
 			_joy_setting_function = NULL;
 			_has_modified_settings = true;
 			_UpdateJoySettings();
-			delete _message_window;
-			_message_window = NULL;
+			_message_window.Hide();
 			return;
 		}
 	}
@@ -1023,12 +1065,11 @@ void BootMode::Update() {
 	{
 		if (InputManager->AnyKeyPress())
 		{
-			(InputManager->*_key_setting_function)(InputManager->GetMostRecentEvent().key.keysym.sym);
+			(this->*_key_setting_function)(InputManager->GetMostRecentEvent().key.keysym.sym);
 			_key_setting_function = NULL;
 			_has_modified_settings = true;
 			_UpdateKeySettings();
-			delete _message_window;
-			_message_window = NULL;
+			_message_window.Hide();
 			return;
 		}
 	}
@@ -1149,8 +1190,7 @@ void BootMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	VideoManager->Move(0, 0);
 	VideoManager->SetCoordSys(0.0f, 1023.0f, 767.0f, 0.0f);
-	if (_message_window != NULL)
-		_message_window->Draw();
+	_message_window.Draw();
 }
 
 
