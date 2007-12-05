@@ -93,16 +93,16 @@ private:
 	BootMenu _key_settings_menu;
 
 	//! The function to call when a new key has been pressed (if we're waiting for one.)
-	void (hoa_input::GameInput::*_key_setting_function)(const SDLKey &);
+	void (BootMode::*_key_setting_function)(const SDLKey &);
 
 	//! 'Joystick Settings' menu
 	BootMenu _joy_settings_menu;
 
 	//! Displays the select a key window.
-	hoa_menu::MessageWindow *_message_window;
+	hoa_menu::MessageWindow _message_window;
 
 	//! The function to call when a new joystick button has been pressed (if we're waiting for one.)
-	void (hoa_input::GameInput::*_joy_setting_function)(uint8 button);
+	void (BootMode::*_joy_setting_function)(uint8 button);
 
 	//! 'Resolution switcher' menu
 	BootMenu _resolution_menu;
@@ -179,6 +179,24 @@ private:
 	//@}
 
 	/**
+	*** \brief Pass through functions to the InputManager, because on windows having the function pointers point
+	*** directly to the InputManager caused heap corruption.
+	**/
+	//@{
+	void _SetUpKey(const SDLKey &key);
+	void _SetDownKey(const SDLKey &key);
+	void _SetLeftKey(const SDLKey &key);
+	void _SetRightKey(const SDLKey &key);
+	void _SetConfirmKey(const SDLKey &key);
+	void _SetCancelKey(const SDLKey &key);
+	void _SetMenuKey(const SDLKey &key);
+	void _SetSwapKey(const SDLKey &key);
+	void _SetLeftSelectKey(const SDLKey &key);
+	void _SetRightSelectKey(const SDLKey &key);
+	void _SetPauseKey(const SDLKey &key);
+	//@}
+
+	/**
 	*** \brief Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
 	**/
 	//@{
@@ -189,6 +207,20 @@ private:
 	void _RedefineLeftSelectJoy();
 	void _RedefineRightSelectJoy();
 	void _RedefinePauseJoy();
+	//@}
+
+	/**
+	*** \brief Pass through functions to the InputManager, because on windows having the function pointers point
+	*** directly to the InputManager caused heap corruption.
+	**/
+	//@{
+	void _SetConfirmJoy(uint8 button);
+	void _SetCancelJoy(uint8 button);
+	void _SetMenuJoy(uint8 button);
+	void _SetSwapJoy(uint8 button);
+	void _SetLeftSelectJoy(uint8 button);
+	void _SetRightSelectJoy(uint8 button);
+	void _SetPauseJoy(uint8 button);
 	//@}
 
 	/** \brief init's the message window to display while waiting for a new key or joystick button press

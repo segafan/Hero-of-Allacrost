@@ -776,9 +776,9 @@ void FinishWindow::_TallyXPMoneyAndItems()
 		_victory_xp += ge->GetExperiencePoints();
 		ge->DetermineDroppedObjects(objects);
 
-		for (uint32 i = 0; i < objects.size(); ++i)
+		for (uint32 j = 0; j < objects.size(); ++j)
 		{
-			iter = _victory_items.find(objects[i]);
+			iter = _victory_items.find(objects[j]);
 			if (iter != _victory_items.end())
 			{
 				iter->second++;

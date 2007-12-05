@@ -496,7 +496,7 @@ public:
 
 	/** \brief Returns the most recent event retrieved from SDL
 	 **/
-	SDL_Event GetMostRecentEvent()
+	const SDL_Event &GetMostRecentEvent() const
 	{ return _event; }
 
 }; // class GameInput
