@@ -92,9 +92,9 @@ BattleMode::BattleMode() :
 	if (_stamina_icon_selected.Load("img/menus/stamina_icon_selected.png", 45, 45) == false)
 		cerr << "BATTLE ERROR: Failed to load stamina icon selected image" << endl;
 
-	if (_attack_point_indicator.LoadFromFrameSize("img/icons/battle/attack_point_target.png", vector<uint32>(4, 10), 16, 16) == false) {
+	_attack_point_indicator.SetDimensions(16, 16);
+	if (_attack_point_indicator.LoadFromFrameGrid("img/icons/battle/attack_point_target.png", vector<uint32>(4, 10), 1, 4) == false)
 		cerr << "BATTLE ERROR: Failed to load attack point indicator." << endl;
-	}
 
 	//Load the universal time meter image
 	if (_stamina_meter.Load("img/menus/stamina_bar.png", 10, 512) == false)
@@ -156,10 +156,12 @@ BattleMode::~BattleMode() {
 	}
 	_action_queue.clear();
 
-	// Delete all GUI objects that are allocated
-	//delete(_action_window);
-	//if (_finish_window)
-	//	delete(_finish_window);
+	for (std::list<DamageText*>::iterator it = _damage_text_list.begin(); it != _damage_text_list.end(); ++it)
+	{
+		delete *it;
+	}
+	_damage_text_list.clear();
+
 } // BattleMode::~BattleMode()
 
 
