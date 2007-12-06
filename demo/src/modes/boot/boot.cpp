@@ -53,7 +53,6 @@ bool BOOT_DEBUG = false;
 
 // Initialize static members here
 bool BootMode::_logo_animating = true;
-uint32 welcome = 0;
 
 
 // ****************************************************************************
@@ -356,13 +355,13 @@ void BootMode::_EndOpeningAnimation() {
 	if (!settings_lua.OpenFile(file)) {
 		cout << "BOOT ERROR: failed to load the settings file!" << endl;
 	}
+
 	settings_lua.OpenTable("settings");
-	welcome = settings_lua.ReadInt("welcome");
-	settings_lua.CloseFile();
-	if (welcome) {
+	if (settings_lua.ReadInt("welcome") == 1) {
 		_welcome_screen.Show();
 	}
-
+	settings_lua.CloseTable();
+	settings_lua.CloseFile();
 	_logo_animating = false;
 }
 
@@ -940,6 +939,7 @@ void BootMode::_SaveSettingsFile() {
 	}
 
 	// Write the current settings into the .lua file
+	settings_lua.ModifyInt("settings.welcome", 0);
 	// video
 	settings_lua.OpenTable("settings");
 	settings_lua.ModifyInt("video_settings.screen_resx", VideoManager->GetScreenWidth());
@@ -970,6 +970,8 @@ void BootMode::_SaveSettingsFile() {
 	settings_lua.ModifyInt("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
 	settings_lua.ModifyInt("joystick_settings.right_select", InputManager->GetRightSelectJoy());
 	settings_lua.ModifyInt("joystick_settings.pause", InputManager->GetPauseJoy());	
+
+	
 
 	// and save it!
 	settings_lua.CommitChanges();
@@ -1027,21 +1029,11 @@ void BootMode::Update() {
 		if (InputManager->AnyKeyPress())
 		{
 			_boot_sounds.at(0).Play();
-			welcome = 0;
 			_welcome_screen.Hide();
 
-			// Read in the settings file for writing back the welcome variable
-			string line = "";
-			fstream settings_file("dat/config/settings.lua");
-			if (settings_file.is_open()) {
-				while (!settings_file.eof() && line != "welcome = 1;")
-					getline(settings_file, line);
-				settings_file.seekp(-3, ios::cur);
-				settings_file.put('0');
-				settings_file.close();
-			}
-			else
-				cout << "BOOT ERROR: failed to load the settings file!" << endl;
+			// save the settings (automatically changes the welcome variable to 0
+			_has_modified_settings = true;
+			_SaveSettingsFile();
 		}
 
 		return;
