@@ -57,8 +57,6 @@ void TEMP_HandlePause();
 //! An internal namespace to be used only within the input code.
 namespace private_input {
 
-//! The threshold value we use to partition the range of joystick values into on and off
-const int16 JOYAXIS_THRESHOLD = 8192;
 
 /** ***************************************************************************
 *** \brief Retains information about the user-defined key settings.
@@ -143,6 +141,9 @@ public:
 	//! \brief Identify which axes to use for x and y.
 	int8 x_axis;
 	int8 y_axis;
+	
+	//! \brief The threshold value we use to partition the range of joystick values into on and off
+	uint16 threshold;
 
 	friend class GameInput;
 }; // class JoystickState

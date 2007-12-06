@@ -161,14 +161,16 @@ bool GameInput::SingletonInitialize() {
 	_joystick.left_select  = static_cast<uint8>(input_map_data.ReadInt("left_select"));
 	_joystick.right_select = static_cast<uint8>(input_map_data.ReadInt("right_select"));
 	_joystick.pause        = static_cast<uint8>(input_map_data.ReadInt("pause"));
+
+	// WinterKnight: These are hidden settings. You can change them by editing settings.lua,
+	// but they are not available in the options menu at this time.
 	_joystick.quit         = static_cast<uint8>(input_map_data.ReadInt("quit"));
+	_joystick.x_axis       = static_cast<uint8>(input_map_data.ReadInt("x_axis"));
+	_joystick.y_axis       = static_cast<uint8>(input_map_data.ReadInt("y_axis"));
+	_joystick.threshold    = static_cast<uint16>(input_map_data.ReadInt("threshold"));
 	input_map_data.CloseTable();
 	input_map_data.CloseTable();
 	
-	// TEMP - WinterKnight - These should be selectable by the end user. For now, they are just hard-coded.
-	_joystick.x_axis = 0;
-	_joystick.y_axis = 1;
-
 	if (input_map_data.IsErrorDetected()) {
 		cerr << "INPUT: an error occured while trying to retrieve joystick mapping information "
 			<< "from file: " << in_filename << endl;
@@ -375,9 +377,10 @@ void GameInput::EventHandler() {
 	} // while (SDL_PollEvent(&event)
 
 	// Compare the current and previous peak joystick axis values to detect movement events
-	if (_joystick.js != NULL) {
+/*	if (_joystick.js != NULL) {
 		// ******************************* X-Axis Movment *************************************
 		// Check for a x-axis boundary change from left to center or right
+		int JOYAXIS_THRESHOLD = _joystick.threshold;
 		if ((_joystick.x_previous_peak <= -JOYAXIS_THRESHOLD) &&
 		    (_joystick.x_current_peak > -JOYAXIS_THRESHOLD)) {
 			_left_state = false;
@@ -459,7 +462,7 @@ void GameInput::EventHandler() {
 		// Reset first axis motion detectors for next event processing loop
 		_joyaxis_x_first = true;
 		_joyaxis_y_first = true;
-	} // (_joystick.js != NULL)
+	} // (_joystick.js != NULL) */
 } // void GameInput::EventHandler()
 
 
@@ -664,7 +667,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 	if (js_event.type == SDL_JOYAXISMOTION) {
 		if (js_event.jaxis.axis == _joystick.x_axis) {
-			if (js_event.jaxis.value < -JOYAXIS_THRESHOLD) {
+			if (js_event.jaxis.value < -_joystick.threshold) {
 				if (!_left_state) {
 					_left_state = true;
 					_left_press = true;
@@ -675,7 +678,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 				_left_press = false;
 			}
 			
-			if (js_event.jaxis.value > JOYAXIS_THRESHOLD) {
+			if (js_event.jaxis.value > _joystick.threshold) {
 				if (!_right_state) {
 					_right_state = true;
 					_right_press = true;
@@ -687,7 +690,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			}
 		}
 		else if (js_event.jaxis.axis == _joystick.y_axis) {
-			if (js_event.jaxis.value < -JOYAXIS_THRESHOLD) {
+			if (js_event.jaxis.value < -_joystick.threshold) {
 				if (!_up_state) {
 					_up_state = true;
 					_up_press = true;
@@ -698,7 +701,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 				_up_press = false;
 			}
 
-			if (js_event.jaxis.value > JOYAXIS_THRESHOLD) {
+			if (js_event.jaxis.value > _joystick.threshold) {
 				if (!_down_state) {
 					_down_state = true;
 					_down_press = true;

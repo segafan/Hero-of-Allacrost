@@ -785,6 +785,7 @@ void BootMode::_OnSoundLeft() {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() - 0.1f);
 	_UpdateAudioOptions();
 	_boot_sounds.at(4).Play(); // Play a sound for user to hear new volume level.
+	_has_modified_settings = true;
 }
 
 
@@ -793,6 +794,7 @@ void BootMode::_OnSoundRight() {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() + 0.1f);
 	_UpdateAudioOptions();
 	_boot_sounds.at(4).Play(); // Play a sound for user to hear new volume level
+	_has_modified_settings = true;
 }
 
 
@@ -800,6 +802,7 @@ void BootMode::_OnSoundRight() {
 void BootMode::_OnMusicLeft() {
 	AudioManager->SetMusicVolume(AudioManager->GetMusicVolume() - 0.1f);
 	_UpdateAudioOptions();
+	_has_modified_settings = true;
 }
 
 
@@ -807,6 +810,7 @@ void BootMode::_OnMusicLeft() {
 void BootMode::_OnMusicRight() {
 	AudioManager->SetMusicVolume(AudioManager->GetMusicVolume() + 0.1f);
 	_UpdateAudioOptions();
+	_has_modified_settings = true;
 }
 
 // Resolution setters
