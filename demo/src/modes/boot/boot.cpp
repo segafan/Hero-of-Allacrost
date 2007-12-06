@@ -349,9 +349,7 @@ void BootMode::_EndOpeningAnimation() {
 	
 	// Load the settings file for reading in the welcome variable
 	ReadScriptDescriptor settings_lua;
-	string file = GlobalManager->GetSavePath(true) + "settings.lua";
-	if (!DoesFileExist(file))
-		file = "dat/config/settings.lua";
+	string file = GlobalManager->GetSettingsFile();
 	if (!settings_lua.OpenFile(file)) {
 		cout << "BOOT ERROR: failed to load the settings file!" << endl;
 	}
@@ -777,8 +775,8 @@ void BootMode::_OnVideoMode() {
 	// Toggle fullscreen / windowed
 	VideoManager->ToggleFullscreen();
 	VideoManager->ApplySettings();
-
 	_UpdateVideoOptions();
+	_has_modified_settings = true;
 }
 
 
@@ -817,6 +815,7 @@ void BootMode::_SetResolution(int32 width, int32 height) {
 	VideoManager->ApplySettings();
 	_current_menu = &_video_options_menu; // return back to video options
 	_UpdateVideoOptions();
+	_has_modified_settings = true;
 }
 
 void BootMode::_OnResolution640x480() {
@@ -943,8 +942,10 @@ void BootMode::_SaveSettingsFile() {
 	// video
 	settings_lua.OpenTable("settings");
 	settings_lua.ModifyInt("video_settings.screen_resx", VideoManager->GetScreenWidth());
+	PRINT_DEBUG << "Saving screen width as: " << VideoManager->GetScreenWidth() << endl;
 	settings_lua.ModifyInt("video_settings.screen_resy", VideoManager->GetScreenHeight());
-	settings_lua.ModifyString("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
+	PRINT_DEBUG << "Saving screen height as: " << VideoManager->GetScreenHeight() << endl;
+	settings_lua.ModifyBool("video_settings.full_screen", VideoManager->IsFullscreen());
 	//settings_lua.ModifyFloat("video_settings.brightness", VideoManager->GetGamma());
 
 	// audio
@@ -1114,8 +1115,7 @@ void BootMode::Update() {
 
 		// check to see if settings need to be saved (if we're exiting from the key or joystick
 		// settings menu
-		if (_has_modified_settings)
-			_SaveSettingsFile();
+		_SaveSettingsFile();
 
 		// Otherwise the cancel was given for the main menu
 		_current_menu->CancelPressed();

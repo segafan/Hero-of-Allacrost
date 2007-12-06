@@ -641,6 +641,21 @@ const std::string GameGlobal::GetSavePath(bool for_settings_path) const
 }
 
 
+const std::string GameGlobal::GetSettingsFile() const
+{
+	std::string settings_file;
+	
+	settings_file = GetSavePath(true) + "settings.lua";
+	if (!DoesFileExist(settings_file)) {
+		settings_file = "dat/config/settings.lua";
+		if (!DoesFileExist(settings_file)) {
+			PRINT_ERROR << "settings.lua file not found." << std::endl;
+		}
+	}
+	return settings_file;
+}
+
+
 bool GameGlobal::SaveGame(const string& filename) {
 	WriteScriptDescriptor file;
 	if (file.OpenFile(filename) == false) {

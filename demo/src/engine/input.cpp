@@ -21,7 +21,7 @@
 #include "system.h"
 #include "quit.h"
 #include "pause.h"
-#include "battle.h"
+#include "battle.h" // WK - input code should be mode agnostic.
 
 using namespace std;
 
@@ -122,9 +122,7 @@ bool GameInput::SingletonInitialize() {
 	}
 
 	// Loads saved settings to setup the key and joystick configurations
-	string in_filename = GlobalManager->GetSavePath(true) + "settings.lua";
-	if (!DoesFileExist(in_filename))
-		in_filename = "dat/config/settings.lua";
+	string in_filename = GlobalManager->GetSettingsFile();
 	ReadScriptDescriptor input_map_data;
 	if (input_map_data.OpenFile(in_filename) == false) {
 		cerr << "INPUT ERROR: failed to open data file for reading: "
@@ -197,7 +195,7 @@ bool GameInput::SingletonInitialize() {
 // Loads the default key settings from the lua file and sets them back
 bool GameInput::RestoreDefaultKeys() {
 	// Load the settings file
-	string in_filename = "dat/config/settings.lua";
+	string in_filename = GlobalManager->GetSettingsFile();
 	ReadScriptDescriptor settings_file;
 	if (!settings_file.OpenFile(in_filename)) {
 		cerr << "INPUT ERROR: failed to open data file for reading: " << in_filename << endl;
@@ -231,7 +229,7 @@ bool GameInput::RestoreDefaultKeys() {
 bool GameInput::RestoreDefaultJoyButtons()
 {
 	// Load the settings file
-	string in_filename = "dat/config/settings.lua";
+	string in_filename = GlobalManager->GetSettingsFile();
 	ReadScriptDescriptor settings_file;
 	if (settings_file.OpenFile(in_filename) == false) {
 		cerr << "INPUT ERROR: failed to open data file for reading: " << in_filename << endl;
