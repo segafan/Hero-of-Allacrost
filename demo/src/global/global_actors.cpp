@@ -480,7 +480,13 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 			}
 		}
 		// skills have been given out, clean out the vector
-		_skills_learned.clear();
+		//CD: Negatory!  Leeave the vector as is.  I need it in order to display the
+		// correct stuff in the skills learned window in FinishWindow.  I will clear it
+		// myself from there.  Not only that, but if they level up multiple times, I need
+		// to save the whole list so I can show all the skills they learned across
+		// multiple levels.  If this were called, they would never know they learned a skill
+		// at level 3 because they jumped to level 4 in the same battle
+		//_skills_learned.clear();
 	} // if (_experience_level_gained)
 } // void GlobalCharacterGrowth::AcknowledgeGrowth()
 

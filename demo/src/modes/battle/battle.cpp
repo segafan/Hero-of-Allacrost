@@ -380,7 +380,10 @@ void BattleMode::_ReviveCharacters()
 	for (uint32 i = 0; i < _character_actors.size(); ++i)
 	{
 		if (!_character_actors[i]->IsAlive())
+		{
+			_character_actors[i]->GetActor()->RetrieveBattleAnimation("idle")->GetCurrentFrame()->DisableGrayScale();
 			_character_actors[i]->GetActor()->SetHitPoints(1);
+		}
 	}
 }
 
