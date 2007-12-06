@@ -471,7 +471,7 @@ void ActionWindow::_DrawTargetSelection() {
 	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	VideoManager->Text()->Draw(MakeUnicodeString("Target Information"));
 	VideoManager->MoveRelative(120.0f, -30.0f);
-	_target_information.Draw();
+	//_target_information.Draw();
 	VideoManager->Text()->Draw(_target_information.GetString());
 }
 
@@ -786,12 +786,28 @@ void FinishWindow::_TallyXPMoneyAndItems()
 			}
 			else
 			{
-				_victory_items.insert(make_pair(objects[i], 1));
+				_victory_items.insert(make_pair(objects[j], 1));
 			}
 		}
 	}
 
-	_victory_xp /= current_battle->GetNumberOfEnemies();
+	uint32 num_alive_characters = 0;
+	for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); ++i)
+	{
+		if (current_battle->GetPlayerCharacterAt(i)->IsAlive())
+		{
+			++num_alive_characters;
+		}
+	}
+	_victory_xp /= num_alive_characters;
+}
+
+void FinishWindow::_ClearLearnedSkills()
+{
+	for (uint32 i = 0; i < _characters.size(); ++i)
+	{
+		_character_growths[i]->GetSkillsLearned()->clear();
+	}
 }
 
 // ----- UPDATE METHODS
@@ -866,6 +882,7 @@ void FinishWindow::_UpdateWinWaitForOK()
 				break;
 			case FINISH_WIN_SHOW_SKILLS:
 				_state = FINISH_WIN_SHOW_SPOILS;
+				_ClearLearnedSkills(); //so we don't render them every battle
 				break;
 			case FINISH_WIN_SHOW_SPOILS:
 				_state = FINISH_WIN_COUNTDOWN_SPOILS;
@@ -901,33 +918,36 @@ void FinishWindow::_UpdateWinGrowth() {
 
 	for (uint32 i = 0; i < _characters.size(); ++i)
 	{
-		if (_characters[i]->AddExperiencePoints(xp_to_add))
+		if (_characters[i]->IsAlive())
 		{
-			do {
-				//Record growth stats for each character for rendering
-				//HP
-				_growth_gained[i][0] += _character_growths[i]->GetHitPointsGrowth();
-				//SP
-				_growth_gained[i][1] += _character_growths[i]->GetSkillPointsGrowth();
-				//STR
-				_growth_gained[i][2] += _character_growths[i]->GetStrengthGrowth();
-				//VIG
-				_growth_gained[i][3] += _character_growths[i]->GetVigorGrowth();
-				//FOR
-				_growth_gained[i][4] += _character_growths[i]->GetFortitudeGrowth();
-				//PRO
-				_growth_gained[i][5] += _character_growths[i]->GetProtectionGrowth();
-				//AGI
-				_growth_gained[i][6] += _character_growths[i]->GetAgilityGrowth();
-				//EVD
-				_growth_gained[i][7] += _character_growths[i]->GetEvadeGrowth();
+			if (_characters[i]->AddExperiencePoints(xp_to_add))
+			{
+				do {
+					//Record growth stats for each character for rendering
+					//HP
+					_growth_gained[i][0] += _character_growths[i]->GetHitPointsGrowth();
+					//SP
+					_growth_gained[i][1] += _character_growths[i]->GetSkillPointsGrowth();
+					//STR
+					_growth_gained[i][2] += _character_growths[i]->GetStrengthGrowth();
+					//VIG
+					_growth_gained[i][3] += _character_growths[i]->GetVigorGrowth();
+					//FOR
+					_growth_gained[i][4] += _character_growths[i]->GetFortitudeGrowth();
+					//PRO
+					_growth_gained[i][5] += _character_growths[i]->GetProtectionGrowth();
+					//AGI
+					_growth_gained[i][6] += _character_growths[i]->GetAgilityGrowth();
+					//EVD
+					_growth_gained[i][7] += _character_growths[i]->GetEvadeGrowth();
 
-				if (_character_growths[i]->IsExperienceLevelGained())
-				{
-					//Play Sound
-				}
-				_character_growths[i]->AcknowledgeGrowth();
-			} while(_character_growths[i]->IsGrowthDetected());
+					if (_character_growths[i]->IsExperienceLevelGained())
+					{
+						//Play Sound
+					}
+					_character_growths[i]->AcknowledgeGrowth();
+				} while(_character_growths[i]->IsGrowthDetected());
+			}
 		}
 	}
 

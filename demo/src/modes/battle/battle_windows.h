@@ -381,6 +381,9 @@ private:
 	//! \brief Tallies up the xp, money, and items earned from killing the enemies
 	void _TallyXPMoneyAndItems();
 
+	//! \brief Use this to clear learned skills after they've been shown so that they don't render every battle
+	void _ClearLearnedSkills();
+
 	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_WIN
 	void _UpdateAnnounceWin();
 
