@@ -748,6 +748,7 @@ void FinishWindow::_InitLoseOptions()
 	_lose_options.SetCursorOffset(-60.0f, 25.0f);
 	_lose_options.SetSelection(0);
 	_lose_options.SetOwner(this);
+	_lose_options.EnableOption(0, false);
 }
 
 
