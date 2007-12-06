@@ -942,9 +942,7 @@ void BootMode::_SaveSettingsFile() {
 	// video
 	settings_lua.OpenTable("settings");
 	settings_lua.ModifyInt("video_settings.screen_resx", VideoManager->GetScreenWidth());
-	PRINT_DEBUG << "Saving screen width as: " << VideoManager->GetScreenWidth() << endl;
 	settings_lua.ModifyInt("video_settings.screen_resy", VideoManager->GetScreenHeight());
-	PRINT_DEBUG << "Saving screen height as: " << VideoManager->GetScreenHeight() << endl;
 	settings_lua.ModifyBool("video_settings.full_screen", VideoManager->IsFullscreen());
 	//settings_lua.ModifyFloat("video_settings.brightness", VideoManager->GetGamma());
 
