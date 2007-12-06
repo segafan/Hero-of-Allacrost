@@ -15,6 +15,7 @@
 *** ***************************************************************************/
 
 #include "system.h"
+#include "global.h"
 #include "audio.h"
 #include "script.h"
 
@@ -189,7 +190,7 @@ bool GameSystem::SingletonInitialize() {
 
 	ReadScriptDescriptor settings_data;
 
-	if (settings_data.OpenFile("dat/config/settings.lua") == false) {
+	if (settings_data.OpenFile(hoa_global::GlobalManager->GetSettingsFile()) == false) {
 		cerr << "SYSTEM ERROR: failed to load settings from data file" << endl;
 		return false;
 	}

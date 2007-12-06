@@ -19,6 +19,7 @@
 #include <math.h>
 #include <vector>
 
+#include "global.h"
 #include "utils.h"
 #include "video.h"
 #include "context.h"
@@ -148,8 +149,9 @@ bool GameVideo::SingletonInitialize() {
 	int32 settings_width;
 	int32 settings_height;
 	bool settings_fullscreen;
-	static const char* settings_filename = "dat/config/settings.lua";
-
+	std::string settings_filename;
+	
+	settings_filename = hoa_global::GlobalManager->GetSettingsFile();
 	if (video_settings_script.OpenFile(settings_filename) == false) {
 		PRINT_ERROR << "failed to open the video settings script: " << settings_filename << endl;
 		return false;
@@ -171,13 +173,13 @@ bool GameVideo::SingletonInitialize() {
 
 	if (video_info) {
 		// Set the resolution to be the highest possible (lower than the user one)
-		if (video_info->current_w > settings_width && video_info->current_h > settings_height) {
+		if (video_info->current_w >= settings_width && video_info->current_h >= settings_height) {
 			SetResolution(settings_width, settings_height);
 		}
-		else if (video_info->current_w > 1024 && video_info->current_h > 768) {
+		else if (video_info->current_w >= 1024 && video_info->current_h >= 768) {
 			SetResolution(1024, 768);
 		}
-		else if (video_info->current_w > 800 && video_info->current_h > 600) {
+		else if (video_info->current_w >= 800 && video_info->current_h >= 600) {
 			SetResolution(800, 600);
 		}
 		else {
