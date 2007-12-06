@@ -181,22 +181,69 @@ private:
 
 
 /** ****************************************************************************
-*** \brief A text specific subclass of the BaseImageElement subclass.
+*** \brief An element used as a portion of a full rendered block of text.
+***
+*** This class represents a block (usually a single line) of rendered text that
+*** is stored by the TextImage class as a portion, or element, that makes up
+*** a rendered block of text. This class managed a pointer to a TextTexture
+*** object that refers to the rendered line of text as it is stored in texture
+*** memory.
 *** ***************************************************************************/
-class TextBlock {
+class TextElement : public ImageDescriptor {
 public:
-	//! \brief Constructor defaulting the element to have white vertices and disabled blending.
-	TextBlock(TextTexture* tex)
-		{ texture = tex; }
+	TextElement();
+
+	TextElement(TextTexture* texture);
+
+	~TextElement();
 
 	// ---------- Public members
 
 	//! \brief The image that is being referenced by this object.
-	TextTexture* texture;
+	TextTexture* text_texture;
 
 	//! \brief The x and y offsets from the line proper
 	float x_line_offset, y_line_offset;
-}; // class TextBlock : public private_video::BaseImageElement
+
+	// ---------- Public methods
+
+	void Clear();
+
+	void Draw() const;
+
+	void Draw(const Color& draw_color) const;
+
+	void EnableGrayScale()
+		{}
+
+	void DisableGrayScale()
+		{}
+
+	/** \brief Sets the texture used by the class and modifies the width and height members
+	*** \param texture A pointer to the TextTexture object that this class object should manage
+	***
+	*** Because it is rare that the user needs to define a custom width/height for the text (since
+	*** scaled text looks so poor), this function also automatically sets the _width and _height members
+	*** to the translated value of the width and height of the TextTexture in the current coordinate system
+	*** (current context) in which this function call is made. Passing a NULL argument will deallocate any
+	*** texture resources and set the width/height to zero.
+	***
+	*** \note This function will invoke the AddReference() method for the argument object if it is not NULL.
+	**/
+	void SetTexture(TextTexture* texture);
+
+	void SetStatic(bool is_static)
+		{ _is_static = is_static; }
+
+	void SetWidth(float width)
+		{ _width = width; }
+
+	void SetHeight(float height)
+		{ _height = height; }
+
+	void SetDimensions(float width, float height)
+		{ SetWidth(width); SetHeight(height); }
+}; // class TextElement : public ImageDescriptor
 
 } // namespace private_video
 
@@ -222,15 +269,9 @@ public:
 	//! \brief Constructs rendered string of specified std::string
 	TextImage(const std::string& string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
 
-	//! \brief Copy constructor increases contained reference counts
-	TextImage(const TextImage& copy);
-
-	//! \brief Copy assignment operator increases contained reference counts
-	TextImage& operator=(const TextImage& copy);
-
 	//! \brief Destructs TextImage, lowering reference counts on all contained timages.
 	~TextImage()
-		{ _ClearImages(); }
+		{ Clear(); }
 
 	// ---------- Public methods
 
@@ -297,7 +338,7 @@ public:
 
 	//! \brief Sets the text (std::string version)
 	void SetText(const std::string &string)
-		{ SetText(hoa_utils::MakeUnicodeString(string)); }
+		{ SetText(hoa_utils::MakeUnicodeString(string)); _Regenerate(); }
 
 	//! \brief Sets the texts style - regenerating text if present.
 	void SetStyle(TextStyle style)
@@ -326,13 +367,9 @@ private:
 	TextStyle _style;
 
 	//! \brief The TextTexture elements representing rendered text portions, usually lines.
-	std::vector<private_video::TextBlock> _text_sections;
+	std::vector<private_video::TextElement> _text_sections;
 
 	// ---------- Private methods
-
-	//! \brief Removes all rendered images of text and decreases the texture reference counts
-	void _ClearImages()
-		{ _text_sections.clear(); _width = 0; _height = 0; }
 
 	//! \brief Regenerates the texture images for the text
 	void _Regenerate();

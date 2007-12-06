@@ -69,10 +69,8 @@ TextTexture::TextTexture(const hoa_utils::ustring& string_, const TextStyle& sty
 
 
 TextTexture::~TextTexture() {
-	if (TextureManager->_IsTextTextureRegistered(this)) {
-		TextureManager->_text_images.erase(this);
-		return;
-	}
+	// Remove this instance from the texture manager
+	TextureManager->_text_images.erase(this);
 }
 
 
@@ -144,6 +142,114 @@ bool TextTexture::Reload() {
 	return true;
 }
 
+// -----------------------------------------------------------------------------
+// TextElement class
+// -----------------------------------------------------------------------------
+
+TextElement::TextElement() :
+	ImageDescriptor(),
+	text_texture(NULL)
+{}
+
+
+
+TextElement::TextElement(TextTexture* texture) :
+	ImageDescriptor(),
+	text_texture(texture)
+{
+	SetTexture(texture);
+}
+
+
+
+TextElement::~TextElement() {
+	Clear();
+}
+
+
+
+void TextElement::Clear() {
+	ImageDescriptor::Clear(); // This call will remove the texture reference for us
+	text_texture = NULL;
+}
+
+
+
+void TextElement::Draw() const {
+	// If real lighting is enabled, draw images normally since the light overlay
+	// will take care of the modulation. If not, (i.e. no overlay is being used)
+	// then pass the light color so the vertex colors can do the modulation
+	if (VideoManager->_uses_lights == false && (VideoManager->_light_color != Color::white))
+		Draw(VideoManager->_light_color);
+	else
+		Draw(Color::white);
+}
+
+
+
+void TextElement::Draw(const Color& draw_color) const {
+	// Don't draw anything if this image is completely transparent (invisible)
+	if (IsFloatEqual(draw_color[3], 0.0f) == true) {
+		return;
+	}
+
+	glPushMatrix();
+	_DrawOrientation();
+
+	float modulation = VideoManager->_screen_fader.GetFadeModulation();
+	// Used to determine if the image color should be modulated by any degree due to screen fading effects
+	bool skip_modulation = (draw_color == Color::white && IsFloatEqual(modulation, 1.0f));
+	if (skip_modulation) {
+		_DrawTexture(_color);
+	}
+	else {
+		Color fade_color(modulation, modulation, modulation, 1.0f);
+		Color modulated_colors[4];
+
+		fade_color = draw_color * fade_color;
+		modulated_colors[0] = _color[0] * fade_color;
+		modulated_colors[1] = _color[1] * fade_color;
+		modulated_colors[2] = _color[2] * fade_color;
+		modulated_colors[3] = _color[3] * fade_color;
+		_DrawTexture(modulated_colors);
+	}
+
+	glPopMatrix();
+} // void TextElement::Draw(const Color& draw_color) const
+
+
+
+void TextElement::SetTexture(TextTexture* texture) {
+	// Do nothing if the texture pointer is not going to change
+	if (text_texture == texture) {
+		return;
+	}
+
+	// Remove references and possibly delete the existing texture
+	if (text_texture != NULL) {
+		_RemoveTextureReference();
+
+		text_texture = NULL;
+		_texture = NULL;
+	}
+
+	// Set the new
+	if (texture == NULL) {
+		text_texture = NULL;
+		_texture = NULL;
+		_width = 0.0f;
+		_height = 0.0f;
+	}
+	else {
+		texture->AddReference();
+		text_texture = texture;
+		_texture = texture;
+
+		_width = texture->width;
+		_height = texture->height;
+	}
+}
+
 } // namespace private_video
 
 // -----------------------------------------------------------------------------
@@ -152,10 +258,9 @@ bool TextTexture::Reload() {
 
 TextImage::TextImage() :
 	ImageDescriptor(),
-	_alignment(ALIGN_CENTER)
+	_alignment(ALIGN_LEFT)
 {
 	Clear();
-	_grayscale = false;
 }
 
 
@@ -165,7 +270,6 @@ TextImage::TextImage(const ustring& string, TextStyle style, int8 alignment) :
 	_string(string),
 	_style(style)
 {
-	_grayscale = false;
 	Clear();
 	SetAlignment(alignment);
 	_Regenerate();
@@ -178,7 +282,6 @@ TextImage::TextImage(const string& string, TextStyle style, int8 alignment) :
 	_string(MakeUnicodeString(string)),
 	_style(style)
 {
-	_grayscale = false;
 	Clear();
 	SetAlignment(alignment);
 	_Regenerate();
@@ -186,58 +289,23 @@ TextImage::TextImage(const string& string, TextStyle style, int8 alignment) :
 
 
 
-TextImage::TextImage(const TextImage& copy) {
-	// Copy all TextImage members
-	_string = copy._string;
-	_text_sections = copy._text_sections;
-	_alignment = copy._alignment;
-	_style = copy._style;
-
-	// Increment the reference count for all TextTexture objects
-	std::vector<TextBlock>::iterator i;
-	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
-		if (i->texture != NULL)
-			i->texture->AddReference();
-	}
-}
-
-
-
-TextImage &TextImage::operator=(const TextImage& copy) {
-	// Handle the case were a dumbass assigns an object to itself
-	if (this == &copy) {
-		return *this;
-	}
-
-	// Copy all TextImage members
-	_string = copy._string;
-	_text_sections = copy._text_sections;
-	_alignment = copy._alignment;
-	_style = copy._style;
-
-	// Increment the reference count for all TextTexture objects
-	std::vector<TextBlock>::iterator i;
-	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
-		if (i->texture != NULL)
-			i->texture->AddReference();
-	}
-
-	return *this;
-}
-
-
-
 void TextImage::Clear() {
 	ImageDescriptor::Clear();
 	_string.clear();
-	_ClearImages();
+	_text_sections.clear();
+	_width = 0;
+	_height = 0;
 }
 
 
 
 void TextImage::Draw() const {
-// 	for (uint32 i = 0; i < _text_sections.size(); ++i)
-// 		_DrawTexture(_text_sections[i].image);
+	glPushMatrix();
+	for (uint32 i = 0; i < _text_sections.size(); ++i) {
+		_text_sections[i].Draw();
+		VideoManager->MoveRelative(0.0f, TextManager->GetFontProperties(_style.font)->line_skip);
+	}
+	glPopMatrix();
 }
 
 
@@ -248,8 +316,12 @@ void TextImage::Draw(const Color& draw_color) const {
 		return;
 	}
 
-// 	for (uint32 i = 0; i < _text_sections.size(); ++i)
-// 		_DrawTexture(_text_sections[i].image);
+	glPushMatrix();
+	for (uint32 i = 0; i < _text_sections.size(); ++i) {
+		_text_sections[i].Draw(draw_color);
+		VideoManager->MoveRelative(0.0f, TextManager->GetFontProperties(_style.font)->line_skip);
+	}
+	glPopMatrix();
 }
 
 
@@ -273,7 +345,9 @@ void TextImage::SetAlignment(int8 alignment) {
 
 
 void TextImage::_Regenerate() {
-	_ClearImages();
+	_width = 0;
+	_height = 0;
+	_text_sections.clear();
 
 	if (_string.empty())
 		return;
@@ -308,67 +382,104 @@ void TextImage::_Regenerate() {
 	*reform_iter = '\0';
 
 	// 2) Determine the text's properties
-	int32 shadow_offset_x = 0;
-	int32 shadow_offset_y = 0;
 	Color shadow_color = TextManager->_GetTextShadowColor(fp);
 // 	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
 
 	// 3) Iterate through each line of text and render a TextTexture for each one
-	std::vector<uint16*>::iterator line_iter;
+	vector<uint16*>::iterator line_iter;
 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter) {
-		TextTexture* texture = new TextTexture(*line_iter, _style);
-		texture->AddReference();
-		if (texture->Regenerate() == false) {
-			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextTexture::_Regenerate() failed" << endl;
+		TextElement new_element;
+		// If this line is only a newline character, create an empty TextElement object
+		if (**line_iter == newline) {
+			new_element.SetDimensions(0.0f, fp->line_skip);
 		}
-
-// 		float y_offset = total_height + (_height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection()) +
-// 			((fp->line_skip - texture->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
-		TextBlock element(texture);
-// 		TextBlock element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
-//		float x_offset_, float y_offset_, float u1_, float v1_, float u2_, float v2_, float width_, float height_
-		// 4) If text shadows are enabled, copy the text texture and modify its properties to create a shadow version
-		if (texture->style.shadow_style != VIDEO_TEXT_SHADOW_NONE) {
+		// Otherwise, create a new TextTexture to be managed by the new element
+		else {
+			TextTexture* texture = new TextTexture(*line_iter, _style);
+			if (texture->Regenerate() == false) {
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextTexture::_Regenerate() failed" << endl;
+			}
 			texture->AddReference();
+			TextureManager->_RegisterTextTexture(texture);
 
-			shadow_offset_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()) * texture->style.shadow_offset_x;
-			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection()) * texture->style.shadow_offset_y;
+			// Resize the TextImage width if this line is wider than the current width
+			if (texture->width > _width)
+				_width = static_cast<float>(texture->width);
 
-			TextBlock shadow_element = element;
-// 			shadow_element.x_offset += shadow_offset_x;
-// 			shadow_element.y_offset += shadow_offset_y;
-
-			// Line offsets must be set to be retained after lines are aligned
-			shadow_element.x_line_offset = static_cast<float>(shadow_offset_x);
-			shadow_element.y_line_offset = static_cast<float>(shadow_offset_y);
-
-// 			shadow_element.color[0] = shadow_color * _color[0];
-// 			shadow_element.color[1] = shadow_color * _color[1];
-// 			shadow_element.color[2] = shadow_color * _color[2];
-// 			shadow_element.color[3] = shadow_color * _color[3];
-
-			_text_sections.push_back(shadow_element);
+			new_element.SetTexture(texture);
 		}
 
-		TextureManager->_RegisterTextTexture(texture);
-		_text_sections.push_back(element);
+// float y_offset = total_height + (_height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection()) +
+// 			((fp->line_skip - texture->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
+// 		TextElement element(texture);
+// // 		TextElement element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
+// //		float x_offset_, float y_offset_, float u1_, float v1_, float u2_, float v2_, float width_, float height_
 
-		// Resize the TextImage width if this line is wider than the current width
-		if (texture->width > _width)
-			_width = static_cast<float>(texture->width);
+		_text_sections.push_back(new_element);
 
 		// Increase height by the font specified line height
 		_height += fp->line_skip;
-	} // for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
+	}
 
 	delete[] reformatted_text;
 	_Realign();
+
+// 	// 3) Iterate through each line of text and render a TextTexture for each one
+// 	std::vector<uint16*>::iterator line_iter;
+// 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter) {
+// 		TextTexture* texture = new TextTexture(*line_iter, _style);
+// 		texture->AddReference();
+// 		if (texture->Regenerate() == false) {
+// 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextTexture::_Regenerate() failed" << endl;
+// 		}
+// 
+// // 		float y_offset = total_height + (_height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection()) +
+// // 			((fp->line_skip - texture->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
+// 		TextElement element(texture);
+// // 		TextElement element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
+// //		float x_offset_, float y_offset_, float u1_, float v1_, float u2_, float v2_, float width_, float height_
+// 		// 4) If text shadows are enabled, copy the text texture and modify its properties to create a shadow version
+// 		if (texture->style.shadow_style != VIDEO_TEXT_SHADOW_NONE) {
+// 			texture->AddReference();
+// 
+// 			shadow_offset_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()) * texture->style.shadow_offset_x;
+// 			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection()) * texture->style.shadow_offset_y;
+// 
+// 			TextElement shadow_element = element;
+// // 			shadow_element.x_offset += shadow_offset_x;
+// // 			shadow_element.y_offset += shadow_offset_y;
+// 
+// 			// Line offsets must be set to be retained after lines are aligned
+// 			shadow_element.x_line_offset = static_cast<float>(shadow_offset_x);
+// 			shadow_element.y_line_offset = static_cast<float>(shadow_offset_y);
+// 
+// // 			shadow_element.color[0] = shadow_color * _color[0];
+// // 			shadow_element.color[1] = shadow_color * _color[1];
+// // 			shadow_element.color[2] = shadow_color * _color[2];
+// // 			shadow_element.color[3] = shadow_color * _color[3];
+// 
+// 			_text_sections.push_back(shadow_element);
+// 		}
+// 
+// 		TextureManager->_RegisterTextTexture(texture);
+// 		_text_sections.push_back(element);
+// 
+// 		// Resize the TextImage width if this line is wider than the current width
+// 		if (texture->width > _width)
+// 			_width = static_cast<float>(texture->width);
+// 
+// 		// Increase height by the font specified line height
+// 		_height += fp->line_skip;
+// 	} // for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
+// 
+// 	delete[] reformatted_text;
+// 	_Realign();
 } // void TextImage::_Regenerate()
 
 
 
 void TextImage::_Realign() {
-	vector<TextBlock>::iterator i;
+	vector<TextElement>::iterator i;
 	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
 // 		i->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() *
 // 			((_width - i->width) / 2.0f) + i->x_line_offset;
