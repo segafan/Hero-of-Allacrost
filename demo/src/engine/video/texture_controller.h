@@ -76,22 +76,6 @@ public:
 	**/
 	bool ReloadTextures();
 
-	/** \brief Adds an image to the list of images in the TextureController
-	 **/
-	void AddImage(hoa_video::private_video::ImageTexture *img);
-
-	/** \brief Searchs for the given image name in the list of images
-	 **/
-	bool ContainsImage(std::string name);
-
-	/** \brief Return the image stored under the given filename
-	 **/
-	hoa_video::private_video::ImageTexture *GetImage(std::string name);
-
-	/** \brief Removes the given image from the list of images in the TextureController
-	 **/
-	void RemoveImage(hoa_video::private_video::ImageTexture *img);
-
 	//! \brief Cycles forward to show the next texture sheet
 	void DEBUG_NextTexSheet();
 
@@ -192,25 +176,50 @@ private:
 	bool _ReloadImagesToSheet(private_video::TexSheet* sheet);
 	//@}
 
-	//! \name Image Operations
+	//! \name Image Texture Operations
 	//@{
+	/** \brief Adds an image texture to the map registery
+	*** \param img A pointer to the ImageTexture to add with its filename and tags members correctly set
+	**/
+	void _RegisterImageTexture(hoa_video::private_video::ImageTexture* img);
 
+	/** \brief Removes an image texture from the map registery
+	*** \param img A pointer to the ImageTexture to remove with its filename and tags members correctly set
+	**/
+	void _UnregisterImageTexture(hoa_video::private_video::ImageTexture *img);
+
+	/** \brief Determines if an ImageTexture is currently registered
+	*** \param nametag The filename + tag string data to use as the map key
+	*** \return True if the ImageTexture is already registered, false if it is not
+	**/
+	bool _IsImageTextureRegistered(const std::string& nametag) const
+		{ return (_images.find(nametag) != _images.end()); }
+
+	/** \brief Return the ImageTexture stored under the given nametag (filename + tag)
+	*** \return A pointer to the registered ImageTexture object, or NULL if the nametag could not be found
+	 **/
+	hoa_video::private_video::ImageTexture* _GetImageTexture(std::string nametag)
+		{ if (_IsImageTextureRegistered(nametag) == true) return _images[nametag]; else return NULL; }
 	//@}
 
-	//! \name Text Image Operations
+	//! \name Text Texture Operations
 	//@{
+	/** \brief Adds a TextTexture object to the map registery
+	*** \param text A pointer to the TextTexture to add
+	**/
+	void _RegisterTextTexture(private_video::TextTexture* tex);
+
+	/** \brief Removes a TextTexture object from the map registery
+	*** \param text A pointer to the TextTexture to remove
+	**/
+	void _UnregisterTextTexture(private_video::TextTexture* tex);
+
 	/** \brief Determines if a TextTexture is already registered and maintainted by the texture controller
-	*** \param img A pointer to the TextTexture to check for
+	*** \param tex A pointer to the TextTexture to check for
 	*** \return True if the TextTexture is already registered, false if it is not
 	**/
-	bool _IsTextTextureRegistered(private_video::TextTexture* img)
-		{ if (_text_images.find(img) == _text_images.end()) return false; else return true; }
-
-	/** \brief Registers a TextTexture to be managed by the internal set
-	*** \param img A pointer to the TextTexture to register
-	*** \note The function make sure that it does not register any TextTexture more than once
-	**/
-	void _RegisterTextTexture(private_video::TextTexture* img);
+	bool _IsTextTextureRegistered(private_video::TextTexture* tex) const
+		{ return (_text_images.find(tex) != _text_images.end()); }
 	//@}
 
 	/** \brief Displays the currently selected texture sheet.

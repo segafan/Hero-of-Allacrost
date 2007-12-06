@@ -70,7 +70,7 @@ namespace hoa_video {
 *** size.
 ***
 *** \note The copy constructor and copy assignement operator ensure that the
-*** reference to the image texure being used is updated appropriately. The
+*** reference to the texture being used is updated appropriately. The
 *** derived classes should not require the implementation of a copy constructor
 *** or assignment operator, at least not for the purposes of proper reference
 *** counting.

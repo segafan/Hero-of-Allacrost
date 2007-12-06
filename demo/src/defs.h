@@ -115,7 +115,7 @@ namespace hoa_video {
 		class BaseTexture;
 		class ImageTexture;
 		class TextTexture;
-		class TextBlock;
+		class TextElement;
 		class AnimationFrame;
 		class ImageElement;
 

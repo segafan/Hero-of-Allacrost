@@ -55,6 +55,8 @@ TextureController::~TextureController() {
 	}
 }
 
+
+
 bool TextureController::SingletonInitialize() {
 	// Create a default set of texture sheets
 	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false) == NULL) {
@@ -80,6 +82,8 @@ bool TextureController::SingletonInitialize() {
 
 	return true;
 }
+
+
 
 bool TextureController::UnloadTextures() {
 	bool success = true;
@@ -164,32 +168,7 @@ bool TextureController::ReloadTextures() {
 	return success;
 }
 
-void TextureController::AddImage(ImageTexture *img)
-{
-	this->_images[img->filename + img->tags] = img; 
-}
 
-bool TextureController::ContainsImage(string name)
-{ 
-	return this->_images.find(name) != this->_images.end(); 
-}
-
-ImageTexture *TextureController::GetImage(string name)
-{ 
-	if (_images.find(name) == _images.end())
-		return NULL;
-	return this->_images[name]; 
-}
-
-void TextureController::RemoveImage(ImageTexture *img)
-{
-	map<string, ImageTexture *>::iterator finder = this->_images.find(img->filename + img->tags);
-	if (finder != _images.end())
-	{
-		_images.erase(finder);
-		return;
-	}
-}
 
 void TextureController::DEBUG_NextTexSheet() {
 	_debug_current_sheet++;
@@ -555,12 +534,68 @@ bool TextureController::_ReloadImagesToSheet(TexSheet* sheet) {
 
 
 
-void TextureController::_RegisterTextTexture(TextTexture* img) {
-	if (_IsTextTextureRegistered(img) == true) {
+void TextureController::_RegisterImageTexture(ImageTexture* img) {
+	if (img == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL argument passed to function" << endl;
+		return;
+	}
+
+	string nametag = img->filename + img->tags;
+	if (_IsImageTextureRegistered(nametag) == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "this ImageTexture was already registered: " << nametag << endl;
+		return;
+	}
+
+	_images[nametag] = img;
+}
+
+
+
+void TextureController::_UnregisterImageTexture(ImageTexture* img) {
+	if (img == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL argument passed to function" << endl;
+		return;
+	}
+
+	string nametag = img->filename + img->tags;
+	std::map<std::string, private_video::ImageTexture*>::iterator img_iter = _images.find(nametag);
+	if (img_iter == _images.end()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "this ImageTexture was not registered: " << nametag << endl;
+		return;
+	}
+	_images.erase(img_iter);
+}
+
+
+
+void TextureController::_RegisterTextTexture(TextTexture* tex) {
+	if (tex == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL argument passed to function" << endl;
+		return;
+	}
+
+	if (_IsTextTextureRegistered(tex) == true) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempted to register an already registered TextTexture" << endl;
 		return;
 	}
-	_text_images.insert(img);
+
+	_text_images.insert(tex);
+}
+
+
+
+void TextureController::_UnregisterTextTexture(TextTexture* tex) {
+	if (tex == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL argument passed to function" << endl;
+		return;
+	}
+
+	std::set<private_video::TextTexture*>::iterator tex_iter = _text_images.find(tex);
+	if (tex_iter == _text_images.end()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "TextTexture was not registered" << endl;
+		return;
+	}
+	_text_images.erase(tex_iter);
 }
 
 
