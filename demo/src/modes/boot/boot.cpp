@@ -564,7 +564,7 @@ void BootMode::_SetupMainMenu() {
 	if (!DoesFileExist(path))
 		_main_menu.EnableOption(1, false);
 	// TEMP: these options are for debugign purposes only and should be removed for releases
-// 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
+ 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 // 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
 // 	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
 }
@@ -927,7 +927,6 @@ void BootMode::_UpdateJoySettings() {
 void BootMode::_SaveSettingsFile() {
 
 	// No need to save the settings if we haven't edited anything!
-	// TODO: Uncomment the next line when the lua tables are saved correctly!
 	if (!_has_modified_settings)
 		return;
 
