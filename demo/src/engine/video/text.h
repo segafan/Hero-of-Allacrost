@@ -367,7 +367,7 @@ private:
 	TextStyle _style;
 
 	//! \brief The TextTexture elements representing rendered text portions, usually lines.
-	std::vector<private_video::TextElement> _text_sections;
+	std::vector<private_video::TextElement*> _text_sections;
 
 	// ---------- Private methods
 
