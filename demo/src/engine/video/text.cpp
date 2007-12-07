@@ -352,8 +352,9 @@ void TextImage::_Regenerate() {
 	_height = 0;
 	for (uint32 i = 0; i < _text_sections.size(); i++) {
 		delete _text_sections[i];
-		_text_sections[i] = NULL;
 	}
+
+	_text_sections.clear();
 
 	if (_string.empty())
 		return;
