@@ -63,11 +63,11 @@ bool BootMode::_logo_animating = true;
 BootMode::BootMode() :
 	_fade_out(false),
 	_main_menu(0, false, this),
-	_latest_version(true),
-	_has_modified_settings(false),
 	_key_setting_function(NULL),
 	_joy_setting_function(NULL),
-	_message_window(string(""), 210.0f, 35.0f)
+	_message_window(string(""), 210.0f, 35.0f),
+	_latest_version(true),
+	_has_modified_settings(false)
 {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;

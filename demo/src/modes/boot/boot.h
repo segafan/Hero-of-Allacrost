@@ -92,17 +92,17 @@ private:
 	//! 'Key Settings' menu
 	BootMenu _key_settings_menu;
 
-	//! The function to call when a new key has been pressed (if we're waiting for one.)
-	void (BootMode::*_key_setting_function)(const SDLKey &);
-
 	//! 'Joystick Settings' menu
 	BootMenu _joy_settings_menu;
 
-	//! Displays the select a key window.
-	hoa_menu::MessageWindow _message_window;
+	//! The function to call when a new key has been pressed (if we're waiting for one.)
+	void (BootMode::*_key_setting_function)(const SDLKey &);
 
 	//! The function to call when a new joystick button has been pressed (if we're waiting for one.)
 	void (BootMode::*_joy_setting_function)(uint8 button);
+
+	//! Displays the select a key window.
+	hoa_menu::MessageWindow _message_window;
 
 	//! 'Resolution switcher' menu
 	BootMenu _resolution_menu;
