@@ -198,14 +198,14 @@ void ModifyScriptDescriptor::_CommitTable(WriteScriptDescriptor& file, const lua
 			case LUA_TNUMBER:
 				try {
 					if (key_is_numeric)
-						file.WriteInt(num_key, object_cast<int32>(*it));
-					else
-						file.WriteInt(str_key, object_cast<int32>(*it));
-				} catch (...) {
-					if (key_is_numeric)
 						file.WriteFloat(num_key, object_cast<float>(*it));
 					else
 						file.WriteFloat(str_key, object_cast<float>(*it));
+				} catch (...) {
+					if (key_is_numeric)
+						file.WriteInt(num_key, object_cast<int32>(*it));
+					else
+						file.WriteInt(str_key, object_cast<int32>(*it));
 				}
 				break;
 			case LUA_TSTRING:
