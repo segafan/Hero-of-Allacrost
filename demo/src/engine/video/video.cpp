@@ -19,7 +19,6 @@
 #include <math.h>
 #include <vector>
 
-#include "global.h"
 #include "utils.h"
 #include "video.h"
 #include "context.h"
@@ -151,7 +150,7 @@ bool GameVideo::SingletonInitialize() {
 	bool settings_fullscreen;
 	std::string settings_filename;
 	
-	settings_filename = hoa_global::GlobalManager->GetSettingsFile();
+	settings_filename = "dat/config/settings.lua";
 	if (video_settings_script.OpenFile(settings_filename) == false) {
 		PRINT_ERROR << "failed to open the video settings script: " << settings_filename << endl;
 		return false;
