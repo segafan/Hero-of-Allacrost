@@ -465,6 +465,9 @@ private:
 	//! \brief Icon which appears over NPCs who have unread dialogue
 	hoa_video::AnimatedImage _new_dialogue_icon;
 
+	//! \brief Image which underlays the stamina bar for "running"
+	hoa_video::StillImage _stamina_bar_background;
+
 	//! \brief The music that the map will need to make use of.
 	std::vector<hoa_audio::MusicDescriptor> _music;
 
