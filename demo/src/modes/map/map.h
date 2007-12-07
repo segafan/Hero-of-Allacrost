@@ -468,6 +468,9 @@ private:
 	//! \brief Image which underlays the stamina bar for "running"
 	hoa_video::StillImage _stamina_bar_background;
 
+	//! \brief Image which overlays the stamina bar to show that the player has unlimited running
+	hoa_video::StillImage _stamina_bar_infinite_overlay;
+
 	//! \brief The music that the map will need to make use of.
 	std::vector<hoa_audio::MusicDescriptor> _music;
 

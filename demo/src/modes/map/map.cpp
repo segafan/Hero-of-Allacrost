@@ -104,8 +104,11 @@ MapMode::MapMode(string filename) :
 	if (_new_dialogue_icon.LoadFromFrameSize("img/misc/dialogue_icon.png", timings, 32, 32) == false)
 		IF_PRINT_WARNING(MAP_DEBUG) << "new dialogue icon load failure" << endl;
 
-	if (_stamina_bar_background.Load("img/misc/stamina-bar-background.png", 227, 24) == false)
-		IF_PRINT_WARNING(MAP_DEBUG) << "new run-stamina bar background image load failure" << endl;
+	if (_stamina_bar_background.Load("img/misc/stamina_bar_background.png", 227, 24) == false)
+		IF_PRINT_WARNING(MAP_DEBUG) << "run-stamina bar background image load failure" << endl;
+		
+	if (_stamina_bar_infinite_overlay.Load("img/misc/stamina_bar_infinite_overlay.png", 227, 24) == false)
+		IF_PRINT_WARNING(MAP_DEBUG) << "run-stamina bar infinity image load failure" << endl;
 }
 
 
@@ -1319,6 +1322,17 @@ void MapMode::_DrawGUI() {
 	if ((200 * fill_size) >= 6){  //Only do this if the bar is at least 4 pixels long
 	VideoManager->Move(802, 733); //bright yellow highlight
 	VideoManager->DrawRectangle((200 * fill_size) - 4, 1, Color(0.937f, 1.0f, 0.725f, 1.0f));
+	}
+
+
+
+	if (_run_forever){ //then display this fact to the player
+	//first change the video mode so we can do alpha channels
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+
+	//then draw the infinity symbol
+	VideoManager->Move(780, 747);
+	_stamina_bar_infinite_overlay.Draw();
 	}
 	
 	VideoManager->PopState();
