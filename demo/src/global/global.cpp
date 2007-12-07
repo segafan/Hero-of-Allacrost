@@ -614,15 +614,6 @@ const std::string GameGlobal::GetSavePath(bool for_settings_path) const
 			MakeDirectory(ret);
 		return ret;
 	}
-#elif defined __linux__
-	passwd *pw = getpwuid(getuid());
-	if (pw)
-	{
-		string ret = string(pw->pw_dir) + "/.allacrost/";
-		if (!DoesFileExist(ret))
-			MakeDirectory(ret);
-		return ret;
-	}
 #elif defined __MACH__
 	passwd *pw = getpwuid(getuid());
 	if (pw)
@@ -632,6 +623,15 @@ const std::string GameGlobal::GetSavePath(bool for_settings_path) const
 			ret = string(pw->pw_dir) + "/Library/Application Support/Allacrost/";
 		else
 			ret = string(pw->pw_dir) + "/Library/Preferences/Allacrost/";
+		if (!DoesFileExist(ret))
+			MakeDirectory(ret);
+		return ret;
+	}
+#else // Linux, BSD
+	passwd *pw = getpwuid(getuid());
+	if (pw)
+	{
+		string ret = string(pw->pw_dir) + "/.allacrost/";
 		if (!DoesFileExist(ret))
 			MakeDirectory(ret);
 		return ret;

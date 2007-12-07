@@ -817,8 +817,6 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 					return false;
 				}
 
-// 				TextureManager->_RegisterImageTexture(img);
-
 				images.at(current_image)._texture = img;
 				images.at(current_image)._image_texture = img;
 			}
@@ -937,7 +935,6 @@ bool StillImage::Load(const string& filename) {
 		return false;
 	}
 
-// 	TextureManager->_RegisterImageTexture(_image_texture);
 	_image_texture->AddReference();
 
 	// If width or height members are zero, set them to the dimensions of the image data (which are in number of pixels)
@@ -971,7 +968,6 @@ bool StillImage::Load(const string& filename) {
 
 	_image_texture = gray_image;
 	_texture = _image_texture;
-// 	TextureManager->_RegisterImageTexture(gray_image);
 	_image_texture->AddReference();
 
 	free(img_data.pixels);
@@ -1102,7 +1098,6 @@ void StillImage::EnableGrayScale() {
 		return;
 	}
 
-// 	TextureManager->_RegisterImageTexture(new_img);
 	_image_texture = new_img;
 	_texture = _image_texture;
 	_image_texture->AddReference();
