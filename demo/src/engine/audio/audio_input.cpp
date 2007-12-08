@@ -286,7 +286,7 @@ uint32 OggFile::Read(uint8* buffer, uint32 size, bool& end) {
 		_read_buffer_position += read;
 	}
 
-	while (read < size * _sample_size && !end) {
+	while ((read < (size * _sample_size)) && !end) {
 		_read_buffer_position = 0;
 		int32 num_bytes_read = 0;
 

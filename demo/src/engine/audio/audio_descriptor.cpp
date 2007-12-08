@@ -660,28 +660,21 @@ void AudioDescriptor::_Update() {
 	
 	// If any buffers have finished playing, attempt to refill them
 	if (buffers_processed > 0) {
-		while (buffers_processed > 0) {
-			ALuint buffer_finished;
-			alSourceUnqueueBuffers(_source->source, 1, &buffer_finished);
-			if (AudioManager->CheckALError()) {
-				IF_PRINT_WARNING(AUDIO_DEBUG) << "unqueuing a source failed: " << AudioManager->CreateALErrorString() << endl;
-			}
+		ALuint buffer_finished;
+		alSourceUnqueueBuffers(_source->source, 1, &buffer_finished);
+		if (AudioManager->CheckALError()) {
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "unqueuing a source failed: " << AudioManager->CreateALErrorString() << endl;
+		}
 
-			uint32 size = _stream->FillBuffer(_data, _stream_buffer_size);
-			if (size > 0) { // Make sure that there is data available to fill
-				alBufferData(buffer_finished, _format, _data, size * _input->GetSampleSize(), _input->GetSamplesPerSecond());
-				if (AudioManager->CheckALError()) {
-					IF_PRINT_WARNING(AUDIO_DEBUG) << "buffering data failed: " << AudioManager->CreateALErrorString() << endl;
-				}
-				alSourceQueueBuffers(_source->source, 1, &buffer_finished);
-				if (AudioManager->CheckALError()) {
-					IF_PRINT_WARNING(AUDIO_DEBUG) << "queueing a source failed: " << AudioManager->CreateALErrorString() << endl;
-				}
-			}
-			
-			alGetSourcei(_source->source, AL_BUFFERS_PROCESSED, &buffers_processed);
+		uint32 size = _stream->FillBuffer(_data, _stream_buffer_size);
+		if (size > 0) { // Make sure that there is data available to fill
+			alBufferData(buffer_finished, _format, _data, size * _input->GetSampleSize(), _input->GetSamplesPerSecond());
 			if (AudioManager->CheckALError()) {
-				IF_PRINT_WARNING(AUDIO_DEBUG) << "getting a processed source failed: " << AudioManager->CreateALErrorString() << endl;
+				IF_PRINT_WARNING(AUDIO_DEBUG) << "buffering data failed: " << AudioManager->CreateALErrorString() << endl;
+			}
+			alSourceQueueBuffers(_source->source, 1, &buffer_finished);
+			if (AudioManager->CheckALError()) {
+				IF_PRINT_WARNING(AUDIO_DEBUG) << "queueing a source failed: " << AudioManager->CreateALErrorString() << endl;
 			}
 		}
 		
