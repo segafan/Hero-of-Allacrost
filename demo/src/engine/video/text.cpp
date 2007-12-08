@@ -268,10 +268,9 @@ TextImage::TextImage() :
 TextImage::TextImage(const ustring& string, TextStyle style, int8 alignment) :
 	ImageDescriptor(),
 	_string(string),
+	_alignment(alignment),
 	_style(style)
 {
-	Clear();
-	SetAlignment(alignment);
 	_Regenerate();
 }
 
@@ -280,11 +279,47 @@ TextImage::TextImage(const ustring& string, TextStyle style, int8 alignment) :
 TextImage::TextImage(const string& string, TextStyle style, int8 alignment) :
 	ImageDescriptor(),
 	_string(MakeUnicodeString(string)),
+	_alignment(alignment),
 	_style(style)
 {
-	Clear();
-	SetAlignment(alignment);
 	_Regenerate();
+}
+
+
+
+TextImage::TextImage(const TextImage& copy) :
+	ImageDescriptor(copy),
+	_string(copy._string),
+	_alignment(copy._alignment),
+	_style(copy._style)
+{
+	for (uint32 i = 0; i < copy._text_sections.size(); i++) {
+		_text_sections.push_back(new TextElement(*(copy._text_sections[i])));
+	}
+}
+
+
+
+TextImage& TextImage::operator=(const TextImage& copy) {
+	// Handle the case were a dumbass assigns an object to itself
+	if (this == &copy) {
+		return *this;
+	}
+
+	// Remove references to any existing text sections
+	for (uint32 i = 0; i < _text_sections.size(); i++) {
+		delete _text_sections[i];
+	}
+	_text_sections.clear();
+
+	_string = copy._string;
+	_alignment = copy._alignment;
+	_style = copy._style;
+	for (uint32 i = 0; i < copy._text_sections.size(); i++) {
+		_text_sections.push_back(new TextElement(*(copy._text_sections[i])));
+	}
+
+	return *this;
 }
 
 
@@ -306,7 +341,7 @@ void TextImage::Draw() const {
 	glPushMatrix();
 	for (uint32 i = 0; i < _text_sections.size(); ++i) {
 		_text_sections[i]->Draw();
-		VideoManager->MoveRelative(0.0f, TextManager->GetFontProperties(_style.font)->line_skip);
+		VideoManager->MoveRelative(0.0f, -TextManager->GetFontProperties(_style.font)->line_skip);
 	}
 	glPopMatrix();
 }
@@ -350,14 +385,16 @@ void TextImage::SetAlignment(int8 alignment) {
 void TextImage::_Regenerate() {
 	_width = 0;
 	_height = 0;
+
 	for (uint32 i = 0; i < _text_sections.size(); i++) {
 		delete _text_sections[i];
 	}
-
 	_text_sections.clear();
 
-	if (_string.empty())
+	if (_string.empty()) {
+		PRINT_DEBUG << "empty string, returning" << endl;
 		return;
+	}
 
 	FontProperties* fp = TextManager->GetFontProperties(_style.font);
 	if (TextManager->IsFontValid(_style.font) == false || fp == NULL) {
@@ -388,13 +425,16 @@ void TextImage::_Regenerate() {
 	line_array.push_back(last_line);
 	*reform_iter = '\0';
 
+// 	PRINT_DEBUG << "# of lines: " << line_array.size() << endl;
+
 	// 2) Determine the text's properties
 	Color shadow_color = TextManager->_GetTextShadowColor(fp);
-// 	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
+	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
 
 	// 3) Iterate through each line of text and render a TextTexture for each one
 	vector<uint16*>::iterator line_iter;
 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter) {
+// 		cout << MakeStandardString(*line_iter) << endl;
 		TextElement* new_element = new TextElement();
 		// If this line is only a newline character, create an empty TextElement object
 		if (**line_iter == newline) {
@@ -412,7 +452,7 @@ void TextImage::_Regenerate() {
 			if (texture->width > _width)
 				_width = static_cast<float>(texture->width);
 
-			new_element->SetTexture(texture);
+			new_element->SetTexture(texture); // Automatically adds a reference to texture
 		}
 
 // float y_offset = total_height + (_height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection()) +
@@ -430,19 +470,8 @@ void TextImage::_Regenerate() {
 	delete[] reformatted_text;
 	_Realign();
 
-// 	// 3) Iterate through each line of text and render a TextTexture for each one
-// 	std::vector<uint16*>::iterator line_iter;
-// 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter) {
-// 		TextTexture* texture = new TextTexture(*line_iter, _style);
-// 		if (texture->Regenerate() == false) {
-// 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextTexture::_Regenerate() failed" << endl;
-// 		}
-// 
-// // 		float y_offset = total_height + (_height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection()) +
-// // 			((fp->line_skip - texture->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
-// 		TextElement element(texture);
-// // 		TextElement element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
-// //		float x_offset_, float y_offset_, float u1_, float v1_, float u2_, float v2_, float width_, float height_
+// 		TextElement element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
+
 // 		// 4) If text shadows are enabled, copy the text texture and modify its properties to create a shadow version
 // 		if (texture->style.shadow_style != VIDEO_TEXT_SHADOW_NONE) {
 // 
@@ -464,20 +493,6 @@ void TextImage::_Regenerate() {
 // 
 // 			_text_sections.push_back(shadow_element);
 // 		}
-// 
-// 		TextureManager->_RegisterTextTexture(texture);
-// 		_text_sections.push_back(element);
-// 
-// 		// Resize the TextImage width if this line is wider than the current width
-// 		if (texture->width > _width)
-// 			_width = static_cast<float>(texture->width);
-// 
-// 		// Increase height by the font specified line height
-// 		_height += fp->line_skip;
-// 	} // for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
-// 
-// 	delete[] reformatted_text;
-// 	_Realign();
 } // void TextImage::_Regenerate()
 
 
@@ -485,8 +500,8 @@ void TextImage::_Regenerate() {
 void TextImage::_Realign() {
 	vector<TextElement*>::iterator i;
 	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
-// 		i->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() *
-// 			((_width - i->width) / 2.0f) + i->x_line_offset;
+// 		(*i)->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() *
+// 			((_width - i->width) / 2.0f) + (*i)->x_line_offset;
 	}
 }
 
