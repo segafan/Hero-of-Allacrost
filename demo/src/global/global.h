@@ -374,14 +374,6 @@ public:
 	**/
 	bool SaveGame(const std::string& filename);
 
-	/** \brief Finds the OS specific path to save the game in
-	 **/
-	const std::string GetSavePath(bool for_settings_file) const;
-	
-	/** \brief Finds the settings.lua file to load settings from
-	 **/
-	const std::string GetSettingsFile() const;
-
 	/** \brief Loads all global data from a saved game file
 	*** \param filename The filename of the saved game file where to read the data from
 	*** \return True if the game was successfully loaded, false if it was not

@@ -190,7 +190,7 @@ bool GameSystem::SingletonInitialize() {
 
 	ReadScriptDescriptor settings_data;
 
-	if (settings_data.OpenFile(hoa_global::GlobalManager->GetSettingsFile()) == false) {
+	if (settings_data.OpenFile(GetSettingsFilename()) == false) {
 		cerr << "SYSTEM ERROR: failed to load settings from data file" << endl;
 		return false;
 	}

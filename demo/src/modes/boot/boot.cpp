@@ -349,7 +349,7 @@ void BootMode::_EndOpeningAnimation() {
 	
 	// Load the settings file for reading in the welcome variable
 	ReadScriptDescriptor settings_lua;
-	string file = GlobalManager->GetSettingsFile();
+	string file = GetSettingsFilename();
 	if (!settings_lua.OpenFile(file)) {
 		PRINT_WARNING << "failed to load the boot settings file" << endl;
 	}
@@ -560,7 +560,7 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 
-	string path = GlobalManager->GetSavePath(false) + "saved_game.lua";
+	string path = GetUserDataPath(false) + "saved_game.lua";
 	if (!DoesFileExist(path))
 		_main_menu.EnableOption(1, false);
 	// TEMP: these options are for debugign purposes only and should be removed for releases
@@ -678,7 +678,7 @@ void BootMode::_OnNewGame() {
 void BootMode::_OnLoadGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Loading game." << endl;
 
-	string filename = GlobalManager->GetSavePath(true) + "saved_game.lua";
+	string filename = GetUserDataPath(true) + "saved_game.lua";
 	if (DoesFileExist(filename)) {		
 		GlobalManager->LoadGame(filename);
 		_fade_out = true;
@@ -931,7 +931,7 @@ void BootMode::_SaveSettingsFile() {
 		return;
 
 	// Load the settings file for reading in the original data
-	string file = GlobalManager->GetSavePath(true) + "settings.lua";
+	string file = GetUserDataPath(true) + "settings.lua";
 	if (!DoesFileExist(file))
 		CopyFile(string("dat/config/settings.lua"), file);
 		

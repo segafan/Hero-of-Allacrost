@@ -603,6 +603,23 @@ bool MakeDirectory(const std::string& dir_name);
 bool RemoveDirectory(const std::string& dir_name);
 //@}
 
+
+//! \name User directory and settings paths
+//@{
+/** \brief Finds the OS specific directory path to save and retrieve user data
+*** \param user_files If true, retrieves the path for user created content files. If false,
+*** retrieves the path for application settings. Default value is true.
+*** \note Only OS X systems make any use of the user_files parameter.
+**/
+const std::string GetUserDataPath(bool user_files = true);
+
+/** \brief Retrieves the path and filename of the settings file to use
+*** \return A string with the settings filename, or an empty string if the settings file could not be found
+**/
+const std::string GetSettingsFilename();
+//@}
+
+
 //! \name Version Checking Functions
 //@{
 /** \brief Checks version against a remote server
@@ -611,14 +628,14 @@ bool RemoveDirectory(const std::string& dir_name);
 *** This function will return true to indicate that the user is using the latest
 *** version OR that an error occured.
 **/
-bool IsLatestVersion ();
+bool IsLatestVersion();
 
 /** \brief Gets newest version
 *** \return A string containing the version information of the latest version
 ***
 *** This should only be called after a call to IsLatestVersion()
 **/
-std::string GetLatestVersion ();
+std::string GetLatestVersion();
 //@}
 
 } // namespace hoa_utils
