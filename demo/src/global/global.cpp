@@ -13,13 +13,6 @@
 *** \brief   Source file for the global game manager
 *** ***************************************************************************/
 
-#if defined _WIN32
-#include <shlobj.h>
-#else
-#include <sys/types.h>
-#include <pwd.h>
-#endif
-
 #include <iostream>
 
 #include "utils.h"
@@ -602,58 +595,6 @@ void GameGlobal::SetLocation(const hoa_utils::ustring& location_name, const std:
 	}
 }
 
-const std::string GameGlobal::GetSavePath(bool for_settings_path) const
-{
-#if defined _WIN32
-	TCHAR path[MAX_PATH];
-
-	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, path)))
-	{
-		string ret = string(path) + "/Allacrost/";
-		if (!DoesFileExist(ret))
-			MakeDirectory(ret);
-		return ret;
-	}
-#elif defined __MACH__
-	passwd *pw = getpwuid(getuid());
-	if (pw)
-	{
-		string ret = "";
-		if (!for_settings_path)
-			ret = string(pw->pw_dir) + "/Library/Application Support/Allacrost/";
-		else
-			ret = string(pw->pw_dir) + "/Library/Preferences/Allacrost/";
-		if (!DoesFileExist(ret))
-			MakeDirectory(ret);
-		return ret;
-	}
-#else // Linux, BSD
-	passwd *pw = getpwuid(getuid());
-	if (pw)
-	{
-		string ret = string(pw->pw_dir) + "/.allacrost/";
-		if (!DoesFileExist(ret))
-			MakeDirectory(ret);
-		return ret;
-	}
-#endif
-	return "dat/";
-}
-
-
-const std::string GameGlobal::GetSettingsFile() const
-{
-	std::string settings_file;
-	
-	settings_file = GetSavePath(true) + "settings.lua";
-	if (!DoesFileExist(settings_file)) {
-		settings_file = "dat/config/settings.lua";
-		if (!DoesFileExist(settings_file)) {
-			PRINT_ERROR << "settings.lua file not found." << std::endl;
-		}
-	}
-	return settings_file;
-}
 
 
 bool GameGlobal::SaveGame(const string& filename) {

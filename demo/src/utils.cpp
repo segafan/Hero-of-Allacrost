@@ -19,8 +19,11 @@
 // dealing with directories, hence the need for conditional includes
 #ifdef _WIN32
 	#include <direct.h>
+	#include <shlobj.h>
 #else
 	#include <dirent.h>
+	#include <sys/types.h>
+	#include <pwd.h>
 #endif
 
 #include <fstream>
@@ -438,15 +441,15 @@ bool DoesFileExist(const std::string& file_name) {
 	// Modified to use platform specific code because on windows stat does not work on directories,
 	// but on POSIX compliant systems it does, and GetFileAttributes works for both folders and
 	// directories on win32
-#ifdef _WIN32
-	return GetFileAttributes(file_name.c_str()) != INVALID_FILE_ATTRIBUTES;
-#else
-	struct stat buf;
-	if (stat(file_name.c_str(), &buf) == 0)
-		return true;
-	else
-		return false;
-#endif
+	#ifdef _WIN32
+		return GetFileAttributes(file_name.c_str()) != INVALID_FILE_ATTRIBUTES;
+	#else
+		struct stat buf;
+		if (stat(file_name.c_str(), &buf) == 0)
+			return true;
+		else
+			return false;
+	#endif
 }
 
 
@@ -457,14 +460,16 @@ bool MoveFile(const std::string& source_name, const std::string& destination_nam
 	return (rename(source_name.c_str(), destination_name.c_str()) == 0);
 }
 
-void CopyFile(const std::string& source, const std::string& destination)
-{
+
+
+void CopyFile(const std::string& source, const std::string& destination) {
 	if (DoesFileExist(destination))
 		remove(destination.c_str());
 	ifstream src(source.c_str());
 	ofstream dst(destination.c_str());
 	dst << src.rdbuf();
 }
+
 
 
 bool MakeDirectory(const std::string& dir_name) {
@@ -569,8 +574,7 @@ bool CleanDirectory(const std::string& dir_name) {
 
 
 
-bool RemoveDirectory(const std::string& dir_name)
-{
+bool RemoveDirectory(const std::string& dir_name) {
 	// Don't do anything if the directory doesn't exist
 	struct stat buf;
 	int32 i = stat(dir_name.c_str(), &buf);
@@ -589,6 +593,64 @@ bool RemoveDirectory(const std::string& dir_name)
 	}
 
 	return true;
+}
+
+
+
+const std::string GetUserDataPath(bool user_files) {
+	#if defined _WIN32
+		TCHAR path[MAX_PATH];
+
+		if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, path))) {
+			string user_path = string(path) + "/Allacrost/";
+			if (DoesFileExist(user_path) == false)
+				MakeDirectory(user_path);
+			return user_path;
+		}
+
+	#elif defined __MACH__
+		passwd *pw = getpwuid(getuid());
+		if (pw) {
+			string path = "";
+			if (user_files)
+				path = string(pw->pw_dir) + "/Library/Application Support/Allacrost/";
+			else
+				path = string(pw->pw_dir) + "/Library/Preferences/Allacrost/";
+			if (DoesFileExist(path) == false)
+				MakeDirectory(path);
+			return path;
+		}
+
+	#else // Linux, BSD, other POSIX systems
+		passwd *pw = getpwuid(getuid());
+		if (pw) {
+			string path = string(pw->pw_dir) + "/.allacrost/";
+			if (DoesFileExist(path) == false)
+				MakeDirectory(path);
+			return path;
+		}
+	#endif
+
+	// Default path if a specific solution could not be found. Note that this path may
+	// not be writable by the user since it could be installed in administrator/root space
+	PRINT_WARNING << "could not idenfity user path, defaulting to system path" << endl;
+	return "dat/";
+}
+
+
+
+const std::string GetSettingsFilename() {
+	std::string settings_file;
+	
+	settings_file = GetUserDataPath(true) + "settings.lua";
+	if (DoesFileExist(settings_file) == false) {
+		settings_file = "dat/config/settings.lua";
+		if (DoesFileExist(settings_file) == false) {
+			PRINT_WARNING << "settings.lua file not found." << endl;
+		}
+	}
+
+	return settings_file;
 }
 
 #define VERSION_HOST "rabidtinker.mine.nu"
