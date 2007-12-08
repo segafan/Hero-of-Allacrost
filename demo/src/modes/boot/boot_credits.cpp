@@ -66,7 +66,9 @@ void CreditsScreen::Draw() {
 
 	// Set clip region for the text and draw the visible part of it
 	VideoManager->Move(512.0f, 384.0f + _scroll_offset);
-	VideoManager->SetScissorRect(_window.GetScissorRect());
+	// TODO: This returns a bad scissor rect, video engine bug likely
+// 	VideoManager->SetScissorRect(_window.GetScissorRect());
+	VideoManager->SetScissorRect(ScreenRect(0, 50, 1024, 550));
 	VideoManager->EnableScissoring();
 
 	// Fade in the text by setting new color with alpha value below 1.0f
@@ -86,7 +88,7 @@ void CreditsScreen::Draw() {
 
 void CreditsScreen::Update(uint32 time) {
 	_window.Update(time);
-	_scroll_offset += static_cast<float>(time) * 0.02f; // Update the scroll offset
+	_scroll_offset += static_cast<float>(time) * 0.025f; // Update the scroll offset
 }
 
 
