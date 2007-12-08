@@ -1036,128 +1036,126 @@ void TextSupervisor::_DrawTextHelper(const uint16* const text, FontProperties* f
 
 
 bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, ImageMemory& buffer) {
-	// Commented code block below to eventually replace this entire function
-/*
-	FontProperties* fp = _font_map[style.font];
-	TTF_Font* font = fp->ttf_font;
+// 	FontProperties* fp = _font_map[style.font];
+// 	TTF_Font* font = fp->ttf_font;
+// 
+// 	if (font == NULL) {
+// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "font of TextStyle argument '" << style.font << "' was invalid" << endl;
+// 		return false;
+// 	}
+// 
+// 	// Boolean to indicate whether we are also rendering a shadow along with the text
+// 	bool render_shadow = (style.shadow_style != VIDEO_TEXT_SHADOW_NONE);
+// 	// The surface which will contain the final rendered text
+// 	SDL_Surface* target_surface = NULL;
+// 	// A surface used for temporarily holding rendered contents that are to eventually be transferred to the target surface
+// 	SDL_Surface* source_surface = NULL;
+// 	// Used to indicate the destination coordinates when blitting a source surface to a target
+// 	SDL_Rect dest_coords;
+// 	// The memory location where the pixel data will be stored
+// 	uint8* pixel_buffer = NULL;
+// 	// The pixel dimensions of the final text that is to be rendered
+// 	int32 text_width, text_height;
+// 	// The color of the text to render in (converted to SDL's color system)
+// 	SDL_Color text_color;
+// 	style.color.ConvertToNumerics(text_color.r, text_color.g, text_color.b, text_color.unused);
+// 
+// 	_CacheGlyphs(string.c_str(), fp); // Make sure that all glyphs to be used in the string are cached
+// 
+// 	// (1) Determine what the dimensions of the final rendered image will be
+// 	if (TTF_SizeUNICODE(font, string.c_str(), &text_width, &text_height) == -1) {
+// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_SizeUNICODE() failed: " << TTF_GetError() << endl;
+// 		return false;
+// 	}
+// 	if (text_width == 0 || text_height == 0) {
+// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "text dimensions determined to be zero (width, height): " << text_width << ", " << text_height << endl;
+// 		return false;
+// 	}
+// 
+// 	if (render_shadow) {
+// 		text_width += abs(style.shadow_offset_x);
+// 		text_height += abs(style.shadow_offset_y);
+// 	}
+// 
+// 	// (2) Using the now known dimensions, create the RGBA pixel buffer and target surface object
+// 	pixel_buffer = static_cast<uint8*>(calloc(text_width * text_height, 4));
+// 	target_surface = SDL_CreateRGBSurfaceFrom(pixel_buffer, text_width, text_height, 32, text_width * 4, RMASK, GMASK, BMASK, AMASK);
+// 	if (target_surface == NULL) {
+// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_CreateRGBSurfaceFrom() failed:" << SDL_GetError() << endl;
+// 		free(pixel_buffer);
+// 		return false;
+// 	}
+// 
+// 	// (3) Render the text shadow first and determine the coordinates of where to place it within the target surface
+// // 	if (render_shadow) {
+// // 		SDL_Color shadow_color;
+// // 		//some Color object\\ConvertToNumerics(shadow_color.r, shadow_color.g, shadow_color.b, shadow_color.unused);
+// // 		
+// // 		source_surface = TTF_RenderUNICODE_Blended(font, string.c_str(), shadow_color);
+// // 		if (source_surface == NULL) {
+// // 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderUNICODE_Blended() failed: " << TTF_GetError() << endl;
+// // 			SDL_FreeSurface(target_surface);
+// // 			free(pixel_buffer);
+// // 			return false;
+// // 		}
+// // 
+// // 		if (style.shadow_offset_x <= 0)
+// // 			dest_coords.x = 0;
+// // 		else
+// // 			dest_coords.x = style.shadow_offset_x;
+// // 
+// // 		if (style.shadow_offset_y <= 0)
+// // 			dest_coords.y = 0;
+// // 		else
+// // 			dest_coords.y = style.shadow_offset_y;
+// // 
+// // 		if (SDL_BlitSurface(source_surface, NULL, target_surface, &dest_coords) != 0) {
+// // 			SDL_FreeSurface(source_surface);
+// // 			SDL_FreeSurface(target_surface);
+// // 			free(pixel_buffer);
+// // 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed, SDL error: " << SDL_GetError() << endl;
+// // 			return false;
+// // 		}
+// // 
+// // 		SDL_FreeSurface(source_surface);
+// // 	}
+// 
+// 	// (4) Render the text, determine its destination coordinates, and blit it to the target surface
+// 	source_surface = TTF_RenderUNICODE_Blended(font, string.c_str(), text_color);
+// 	if (source_surface == NULL) {
+// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderUNICODE_Blended() failed: " << TTF_GetError() << endl;
+// 		SDL_FreeSurface(target_surface);
+// 		free(pixel_buffer);
+// 		return false;
+// 	}
+// 
+// 	if (render_shadow && style.shadow_offset_x <= 0)
+// 		dest_coords.x = style.shadow_offset_x;
+// 	else
+// 		dest_coords.x = 0;
+// 
+// 	if (render_shadow && style.shadow_offset_y <= 0)
+// 		dest_coords.y = style.shadow_offset_y;
+// 	else
+// 		dest_coords.y = 0;
+// 
+// 	if (SDL_BlitSurface(source_surface, NULL, target_surface, &dest_coords) != 0) {
+// 		SDL_FreeSurface(source_surface);
+// 		SDL_FreeSurface(target_surface);
+// 		free(pixel_buffer);
+// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed, SDL error: " << SDL_GetError() << endl;
+// 		return false;
+// 	}
+// 
+// 	// (5) Free surface objects and initialize the ImageMemory argument reference with the pixel dimensions and data
+// 	SDL_FreeSurface(source_surface);
+// 	SDL_FreeSurface(target_surface);
+// 
+// 	buffer.width = text_width;
+// 	buffer.height = text_height;
+// 	buffer.pixels = pixel_buffer;
+// 	return true;
 
-	if (font == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "font of TextStyle argument '" << style.font << "' was invalid" << endl;
-		return false;
-	}
-
-	// Boolean to indicate whether we are also rendering a shadow along with the text
-	bool render_shadow = (style.shadow_style != VIDEO_TEXT_SHADOW_NONE);
-	// The surface which will contain the final rendered text
-	SDL_Surface* target_surface = NULL;
-	// A surface used for temporarily holding rendered contents that are to eventually be transferred to the target surface
-	SDL_Surface* source_surface = NULL;
-	// Used to indicate the destination coordinates when blitting a source surface to a target
-	SDL_Rect dest_coords;
-	// The memory location where the pixel data will be stored
-	uint8* pixel_buffer = NULL;
-	// The pixel dimensions of the final text that is to be rendered
-	int32 text_width, text_height;
-	// The color of the text to render in (converted to SDL's color system)
-	SDL_Color text_color;
-	style.color.ConvertToNumerics(text_color.r, text_color.g, text_color.b, text_color.unused);
-
-	_CacheGlyphs(string.c_str(), fp); // Make sure that all glyphs to be used in the string are cached
-
-	// (1) Determine what the dimensions of the final rendered image will be
-	if (TTF_SizeUNICODE(font, string.c_str(), &text_width, &text_height) == -1) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_SizeUNICODE() failed: " << TTF_GetError() << endl;
-		return false;
-	}
-	if (text_width == 0 || text_height == 0) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "text dimensions determined to be zero (width, height): " << text_width << ", " << text_height << endl;
-		return false;
-	}
-
-	if (render_shadow) {
-		text_width += abs(style.shadow_offset_x);
-		text_height += abs(style.shadow_offset_y);
-	}
-
-	// (2) Using the now known dimensions, create the RGBA pixel buffer and target surface object
-	pixel_buffer = static_cast<uint8*>(calloc(text_width * text_height, 4));
-	target_surface = SDL_CreateRGBSurfaceFrom(pixel_buffer, text_width, text_height, 32, text_width * 4, RMASK, GMASK, BMASK, AMASK);
-	if (target_surface == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_CreateRGBSurfaceFrom() failed:" << SDL_GetError() << endl;
-		free(pixel_buffer);
-		return false;
-	}
-
-	// (3) Render the text shadow first and determine the coordinates of where to place it within the target surface
-	if (render_shadow) {
-		SDL_Color shadow_color;
-		//some Color object\\ConvertToNumerics(shadow_color.r, shadow_color.g, shadow_color.b, shadow_color.unused);
-		
-		source_surface = TTF_RenderUNICODE_Blended(font, string.c_str(), shadow_color);
-		if (source_surface == NULL) {
-			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderUNICODE_Blended() failed: " << TTF_GetError() << endl;
-			SDL_FreeSurface(target_surface);
-			free(pixel_buffer);
-			return false;
-		}
-
-		if (style.shadow_offset_x <= 0)
-			dest_coords.x = 0;
-		else
-			dest_coords.x = style.shadow_offset_x;
-
-		if (style.shadow_offset_y <= 0)
-			dest_coords.y = 0;
-		else
-			dest_coords.y = style.shadow_offset_y;
-
-		if (SDL_BlitSurface(source_surface, NULL, target_surface, &dest_coords) != 0) {
-			SDL_FreeSurface(source_surface);
-			SDL_FreeSurface(target_surface);
-			free(pixel_buffer);
-			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed, SDL error: " << SDL_GetError() << endl;
-			return false;
-		}
-
-		SDL_FreeSurface(source_surface);
-	}
-
-	// (4) Render the text, determine its destination coordinates, and blit it to the target surface
-	source_surface = TTF_RenderUNICODE_Blended(font, string.c_str(), text_color);
-	if (source_surface == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderUNICODE_Blended() failed: " << TTF_GetError() << endl;
-		SDL_FreeSurface(target_surface);
-		free(pixel_buffer);
-		return false;
-	}
-
-	if (render_shadow && style.shadow_offset_x <= 0)
-		dest_coords.x = style.shadow_offset_x;
-	else
-		dest_coords.x = 0;
-
-	if (render_shadow && style.shadow_offset_y <= 0)
-		dest_coords.y = style.shadow_offset_y;
-	else
-		dest_coords.y = 0;
-
-	if (SDL_BlitSurface(source_surface, NULL, target_surface, &dest_coords) != 0) {
-		SDL_FreeSurface(source_surface);
-		SDL_FreeSurface(target_surface);
-		free(pixel_buffer);
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed, SDL error: " << SDL_GetError() << endl;
-		return false;
-	}
-
-	// (5) Free surface objects and initialize the ImageMemory argument reference with the pixel dimensions and data
-	SDL_FreeSurface(source_surface);
-	SDL_FreeSurface(target_surface);
-
-	buffer.width = text_width;
-	buffer.height = text_height;
-	buffer.pixels = pixel_buffer;
-	return true;
-*/
 
 	FontProperties* fp = _font_map[style.font];
 	TTF_Font* font = fp->ttf_font;
