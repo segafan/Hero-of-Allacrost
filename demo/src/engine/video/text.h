@@ -202,7 +202,7 @@ public:
 	//! \brief The image that is being referenced by this object.
 	TextTexture* text_texture;
 
-	//! \brief The x and y offsets from the line proper
+	//! \brief The x and y offsets from the line proper.
 	float x_line_offset, y_line_offset;
 
 	// ---------- Public methods
@@ -272,6 +272,9 @@ public:
 	//! \brief Destructs TextImage, lowering reference counts on all contained timages.
 	~TextImage()
 		{ Clear(); }
+
+	TextImage(const TextImage& copy);
+	TextImage& operator=(const TextImage& copy);
 
 	// ---------- Public methods
 
@@ -354,9 +357,6 @@ public:
 	//@}
 
 private:
-	//! \brief The texture that contains the rendered text
-	private_video::TextTexture* _text_texture;
-
 	//! \brief The unicode string of the text to render
 	hoa_utils::ustring _string;
 

@@ -351,13 +351,13 @@ void BootMode::_EndOpeningAnimation() {
 	ReadScriptDescriptor settings_lua;
 	string file = GlobalManager->GetSettingsFile();
 	if (!settings_lua.OpenFile(file)) {
-		cout << "BOOT ERROR: failed to load the settings file!" << endl;
+		PRINT_WARNING << "failed to load the boot settings file" << endl;
 	}
 
 	settings_lua.OpenTable("settings");
-	if (settings_lua.ReadInt("welcome") == 1) {
+// 	if (settings_lua.ReadInt("welcome") == 1) {
 		_welcome_screen.Show();
-	}
+// 	}
 	settings_lua.CloseTable();
 	settings_lua.CloseFile();
 	_logo_animating = false;

@@ -33,21 +33,21 @@ WelcomeScreen::WelcomeScreen() :
                     "(press any key to continue)"),
 	_welcome_text_body(
 "Command Name    Default Key Map    General Purpose\n\n"
-"Up                  'up arrow'            Move sprite or cursor upwards\n\n"
-"Down               'down arrow'       Move sprite or cursor downwards\n\n"
-"Left                 'left arrow'         Move sprite or cursor to the left\n\n"
-"Right               'right arrow'        Move sprite or cursor to the right\n\n"
-"Confirm             'f'                     Confirm an action or menu command\n\n"
-"Cancel              'd'                     Cancel an action or menu command\n\n"
-"Menu                's'                     Display the main menu\n\n"
-"Swap                'a'                     Swap the character being displayed\n\n"
-"Left Select         'w'                     Select multiple targets or page scroll up\n\n"
-"Right Select        'e'                     Select multiple targets or page scroll down\n\n"
-"Pause               'spacebar'            Pause/unpause the game\n\n"
-"Quit                'ESC'                 Quit the game\n\n"
-"Fullscreen          'Ctrl+f'              Toggles between full screen mode and windowed mode\n\n"
-"Quit                'Ctrl+q'              Quit the game\n\n"
-"FPS Display         'Ctrl+r'       Toggles display of the frames per second in the upper right hand\n\n"
+"Up                  'up arrow'            Move sprite or cursor upwards\n"
+"Down               'down arrow'       Move sprite or cursor downwards\n"
+"Left                 'left arrow'         Move sprite or cursor to the left\n"
+"Right               'right arrow'        Move sprite or cursor to the right\n"
+"Confirm             'f'                     Confirm an action or menu command\n"
+"Cancel              'd'                     Cancel an action or menu command\n"
+"Menu                's'                     Display the main menu\n"
+"Swap                'a'                     Swap the character being displayed\n"
+"Left Select         'w'                     Select multiple targets or page scroll up\n"
+"Right Select        'e'                     Select multiple targets or page scroll down\n"
+"Pause               'spacebar'            Pause/unpause the game\n"
+"Quit                'ESC'                 Quit the game\n"
+"Fullscreen          'Ctrl+f'              Toggles between full screen mode and windowed mode\n"
+"Quit                'Ctrl+q'              Quit the game\n"
+"FPS Display         'Ctrl+r'       Toggles display of the frames per second in the upper right hand\n"
 "Screenshot         'Ctrl+s'              Takes a screenshot and saves it to 'screenshot.jpg'")
 
 {
@@ -72,12 +72,12 @@ void WelcomeScreen::Draw()
 		
 	if (_window.GetState() != VIDEO_MENU_STATE_SHOWN) // Don't draw any text until the window is ready for drawing
 		return;
-
+	
 	// Set clip region for the text and draw the visible part of it
 	VideoManager->SetDrawFlags(VIDEO_Y_TOP, 0);
-	VideoManager->Move(512.0f, 570.0f);
+	VideoManager->Move(512.0f, 600.0f);
 	_welcome_header_rendered.Draw();
-	VideoManager->Move(512.0f, 504.0f);
+	VideoManager->Move(512.0f, 550.0f);
 	_welcome_body_rendered.Draw();
 	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 }
