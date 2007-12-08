@@ -109,10 +109,10 @@ GameVideo::GameVideo() :
 	_current_context.y_align = -1;
 	_current_context.x_flip = 0;
 	_current_context.y_flip = 0;
-	_current_context.coordinate_system = CoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	_current_context.coordinate_system = CoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
 	_current_context.text_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	_current_context.viewport = ScreenRect(0, 0, 100, 100);
-	_current_context.scissor_rectangle = ScreenRect(0, 0, 1024, 768);
+	_current_context.scissor_rectangle = ScreenRect(0, 0, 1023, 767);
 	_current_context.scissoring_enabled = false;
 
 	strcpy(_next_temp_file, "00000000");

@@ -341,7 +341,7 @@ void TextImage::Draw() const {
 	glPushMatrix();
 	for (uint32 i = 0; i < _text_sections.size(); ++i) {
 		_text_sections[i]->Draw();
-		VideoManager->MoveRelative(0.0f, -TextManager->GetFontProperties(_style.font)->line_skip);
+		VideoManager->MoveRelative(0.0f, TextManager->GetFontProperties(_style.font)->line_skip * -VideoManager->_current_context.coordinate_system.GetVerticalDirection());
 	}
 	glPopMatrix();
 }
@@ -357,7 +357,7 @@ void TextImage::Draw(const Color& draw_color) const {
 	glPushMatrix();
 	for (uint32 i = 0; i < _text_sections.size(); ++i) {
 		_text_sections[i]->Draw(draw_color);
-		VideoManager->MoveRelative(0.0f, TextManager->GetFontProperties(_style.font)->line_skip);
+		VideoManager->MoveRelative(0.0f, TextManager->GetFontProperties(_style.font)->line_skip * -VideoManager->_current_context.coordinate_system.GetVerticalDirection());
 	}
 	glPopMatrix();
 }
@@ -392,7 +392,6 @@ void TextImage::_Regenerate() {
 	_text_sections.clear();
 
 	if (_string.empty()) {
-		PRINT_DEBUG << "empty string, returning" << endl;
 		return;
 	}
 
@@ -1168,7 +1167,7 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, I
 		return false;
 	}
 
-	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
+	static const SDL_Color white_color = { 0xFF, 0xFF, 0xFF, 0xFF };
 
 	SDL_Surface* initial = NULL;
 	SDL_Surface* intermediary = NULL;
@@ -1234,7 +1233,7 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, I
 		FontGlyph* glyphinfo = (*fp->glyph_cache)[*char_ptr];
 
 		// Render the glyph
-		initial = TTF_RenderGlyph_Blended(font, *char_ptr, color);
+		initial = TTF_RenderGlyph_Blended(font, *char_ptr, white_color);
 		if (initial == NULL) {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderGlyph_Blended() failed" << endl;
 			return false;

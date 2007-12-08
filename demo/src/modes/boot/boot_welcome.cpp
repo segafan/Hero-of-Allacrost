@@ -33,22 +33,22 @@ WelcomeScreen::WelcomeScreen() :
                     "(press any key to continue)"),
 	_welcome_text_body(
 "Command Name    Default Key Map    General Purpose\n\n"
-"Up                  'up arrow'            Move sprite or cursor upwards\n"
-"Down               'down arrow'       Move sprite or cursor downwards\n"
-"Left                 'left arrow'         Move sprite or cursor to the left\n"
-"Right               'right arrow'        Move sprite or cursor to the right\n"
-"Confirm             'f'                     Confirm an action or menu command\n"
-"Cancel              'd'                     Cancel an action or menu command\n"
-"Menu                's'                     Display the main menu\n"
-"Swap                'a'                     Swap the character being displayed\n"
-"Left Select         'w'                     Select multiple targets or page scroll up\n"
-"Right Select        'e'                     Select multiple targets or page scroll down\n"
-"Pause               'spacebar'            Pause/unpause the game\n"
-"Quit                'ESC'                 Quit the game\n"
-"Fullscreen          'Ctrl+f'              Toggles between full screen mode and windowed mode\n"
-"Quit                'Ctrl+q'              Quit the game\n"
-"FPS Display         'Ctrl+r'       Toggles display of the frames per second in the upper right hand\n"
-"Screenshot         'Ctrl+s'              Takes a screenshot and saves it to 'screenshot.jpg'")
+"Up              'up arrow'         Move sprite or cursor upwards\n"
+"Down            'down arrow'       Move sprite or cursor downwards\n"
+"Left            'left arrow'       Move sprite or cursor to the left\n"
+"Right           'right arrow'      Move sprite or cursor to the right\n"
+"Confirm         'f'                Confirm an action or menu command\n"
+"Cancel          'd'                Cancel an action or menu command\n"
+"Menu            's'                Display the main menu\n"
+"Swap            'a'                Swap the character being displayed\n"
+"Left Select     'w'                Select multiple targets or page scroll up\n"
+"Right Select    'e'                Select multiple targets or page scroll down\n"
+"Pause           'spacebar'         Pause/unpause the game\n"
+"Quit            'ESC'              Quit the game\n"
+"Fullscreen      'Ctrl+f'           Toggles between full screen mode and windowed mode\n"
+"Quit            'Ctrl+q'           Quit the game\n"
+"FPS Display     'Ctrl+r'           Toggles display of the frames per second in the upper right hand\n"
+"Screenshot      'Ctrl+s'           Takes a screenshot")
 
 {
 	// Init the background window
