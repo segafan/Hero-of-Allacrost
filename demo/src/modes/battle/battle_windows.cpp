@@ -26,6 +26,7 @@
 #include "battle.h"
 #include "battle_actors.h"
 #include "battle_windows.h"
+#include "boot.h"
 
 using namespace std;
 
@@ -1032,7 +1033,9 @@ void FinishWindow::_UpdateAnnounceLose() {
 
 void FinishWindow::_UpdateLoseConfirm() {
 	if (_lose_options.GetSelection() == 2) {
-		ModeManager->SingletonInitialize(); // Removes all game modes and returns to boot mode
+		// Remove all game modes on the stack and return to boot mode
+		ModeManager->PopAll();
+		ModeManager->Push(new hoa_boot::BootMode());
 	}
 	else {
 		SystemManager->ExitGame();
