@@ -32,24 +32,23 @@ WelcomeScreen::WelcomeScreen() :
         "If you have not read the MANUAL, the game controls follow:\n"
                     "(press any key to continue)"),
 	_welcome_text_body(
-"Command Name    Default Key Map    General Purpose\n\n"
-"Up              'up arrow'         Move sprite or cursor upwards\n"
-"Down            'down arrow'       Move sprite or cursor downwards\n"
-"Left            'left arrow'       Move sprite or cursor to the left\n"
-"Right           'right arrow'      Move sprite or cursor to the right\n"
-"Confirm         'f'                Confirm an action or menu command\n"
-"Cancel          'd'                Cancel an action or menu command\n"
-"Menu            's'                Display the main menu\n"
-"Swap            'a'                Swap the character being displayed\n"
-"Left Select     'w'                Select multiple targets or page scroll up\n"
-"Right Select    'e'                Select multiple targets or page scroll down\n"
-"Pause           'spacebar'         Pause/unpause the game\n"
-"Quit            'ESC'              Quit the game\n"
-"Fullscreen      'Ctrl+f'           Toggles between full screen mode and windowed mode\n"
-"Quit            'Ctrl+q'           Quit the game\n"
-"FPS Display     'Ctrl+r'           Toggles display of the frames per second in the upper right hand\n"
-"Screenshot      'Ctrl+s'           Takes a screenshot")
-
+"Command Name       Default Key Map       General Purpose\n\n"
+"Up                          up arrow                  Move sprite or cursor upwards\n"
+"Down                      down arrow              Move sprite or cursor downwards\n"
+"Left                        left arrow                 Move sprite or cursor to the left\n"
+"Right                      right arrow                Move sprite or cursor to the right\n"
+"Confirm                   F                           Confirm an action or menu command\n"
+"Cancel                     D                           Cancel an action or menu command\n"
+"Menu                      S                            Display the main menu\n"
+"Swap                       A                            Swap the character being displayed\n"
+"Left Select               W                           Select multiple targets or page scroll up\n"
+"Right Select              E                            Select multiple targets or page scroll down\n"
+"Pause                      spacebar                    Pause/unpause the game\n"
+"Quit                       ESC                         Quit the game\n"
+"Fullscreen                Ctrl+F                     Toggles between full screen mode and windowed mode\n"
+"Quit                       Ctrl+Q                     Quit the game\n"
+"FPS Display              Ctrl+R                     Toggles display of the frames per second drawn\n"
+"Screenshot               Ctrl+S                      Takes a screenshot")
 {
 	// Init the background window
 	_window.Create(1024.0f, 600.0f);
@@ -74,12 +73,15 @@ void WelcomeScreen::Draw()
 		return;
 	
 	// Set clip region for the text and draw the visible part of it
-	VideoManager->SetDrawFlags(VIDEO_Y_TOP, 0);
+	VideoManager->PushState();
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_TOP, 0);
 	VideoManager->Move(512.0f, 600.0f);
 	_welcome_header_rendered.Draw();
-	VideoManager->Move(512.0f, 550.0f);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->Move(220.0f, 530.0f);
 	_welcome_body_rendered.Draw();
 	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
+	VideoManager->PopState();
 }
 
 
@@ -91,7 +93,7 @@ void WelcomeScreen::Show()
 	VideoManager->Text()->SetDefaultFont("default"); // Reset font
 
 	_welcome_header_rendered = TextImage(_welcome_text_header);
-	_welcome_body_rendered   = TextImage(_welcome_text_body, TextStyle(), TextImage::ALIGN_LEFT);
+	_welcome_body_rendered   = TextImage(_welcome_text_body, TextStyle());
 }
 
 

@@ -355,9 +355,9 @@ void BootMode::_EndOpeningAnimation() {
 	}
 
 	settings_lua.OpenTable("settings");
-// 	if (settings_lua.ReadInt("welcome") == 1) {
+	if (settings_lua.ReadInt("welcome") == 1) {
 		_welcome_screen.Show();
-// 	}
+	}
 	settings_lua.CloseTable();
 	settings_lua.CloseFile();
 	_logo_animating = false;
@@ -564,7 +564,7 @@ void BootMode::_SetupMainMenu() {
 	if (!DoesFileExist(path))
 		_main_menu.EnableOption(1, false);
 	// TEMP: these options are for debugign purposes only and should be removed for releases
- 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
+// 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 // 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
 // 	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
 }
