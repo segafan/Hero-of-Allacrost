@@ -241,18 +241,14 @@ void TextElement::SetTexture(TextTexture* texture) {
 // -----------------------------------------------------------------------------
 
 TextImage::TextImage() :
-	ImageDescriptor(),
-	_alignment(ALIGN_LEFT)
-{
-	Clear();
-}
+	ImageDescriptor()
+{}
 
 
 
-TextImage::TextImage(const ustring& string, TextStyle style, int8 alignment) :
+TextImage::TextImage(const ustring& string, TextStyle style) :
 	ImageDescriptor(),
 	_string(string),
-	_alignment(alignment),
 	_style(style)
 {
 	_Regenerate();
@@ -260,10 +256,9 @@ TextImage::TextImage(const ustring& string, TextStyle style, int8 alignment) :
 
 
 
-TextImage::TextImage(const string& string, TextStyle style, int8 alignment) :
+TextImage::TextImage(const string& string, TextStyle style) :
 	ImageDescriptor(),
 	_string(MakeUnicodeString(string)),
-	_alignment(alignment),
 	_style(style)
 {
 	_Regenerate();
@@ -274,7 +269,6 @@ TextImage::TextImage(const string& string, TextStyle style, int8 alignment) :
 TextImage::TextImage(const TextImage& copy) :
 	ImageDescriptor(copy),
 	_string(copy._string),
-	_alignment(copy._alignment),
 	_style(copy._style)
 {
 	for (uint32 i = 0; i < copy._text_sections.size(); i++) {
@@ -297,7 +291,6 @@ TextImage& TextImage::operator=(const TextImage& copy) {
 	_text_sections.clear();
 
 	_string = copy._string;
-	_alignment = copy._alignment;
 	_style = copy._style;
 	for (uint32 i = 0; i < copy._text_sections.size(); i++) {
 		_text_sections.push_back(new TextElement(*(copy._text_sections[i])));
@@ -344,24 +337,6 @@ void TextImage::Draw(const Color& draw_color) const {
 		VideoManager->MoveRelative(0.0f, TextManager->GetFontProperties(_style.font)->line_skip * -VideoManager->_current_context.coordinate_system.GetVerticalDirection());
 	}
 	glPopMatrix();
-}
-
-
-
-void TextImage::SetAlignment(int8 alignment) {
-	switch (alignment) {
-		case ALIGN_LEFT:
-		case ALIGN_CENTER:
-		case ALIGN_RIGHT:
-			if (_alignment != alignment) {
-				_alignment = alignment;
-				_Realign();
-			}
-			return;
-		default:
-			IF_PRINT_WARNING(VIDEO_DEBUG) << "bad value for alignment argument: " << alignment << endl;
-			return;
-	}
 }
 
 
@@ -448,8 +423,6 @@ void TextImage::_Regenerate() {
 	}
 
 	delete[] reformatted_text;
-	_Realign();
-
 // 		TextElement element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
 
 // 		// 4) If text shadows are enabled, copy the text texture and modify its properties to create a shadow version
@@ -463,8 +436,6 @@ void TextImage::_Regenerate() {
 // // 			shadow_element.y_offset += shadow_offset_y;
 // 
 // 			// Line offsets must be set to be retained after lines are aligned
-// 			shadow_element.x_line_offset = static_cast<float>(shadow_offset_x);
-// 			shadow_element.y_line_offset = static_cast<float>(shadow_offset_y);
 // 
 // // 			shadow_element.color[0] = shadow_color * _color[0];
 // // 			shadow_element.color[1] = shadow_color * _color[1];
@@ -474,16 +445,6 @@ void TextImage::_Regenerate() {
 // 			_text_sections.push_back(shadow_element);
 // 		}
 } // void TextImage::_Regenerate()
-
-
-
-void TextImage::_Realign() {
-	vector<TextElement*>::iterator i;
-	for (i = _text_sections.begin(); i != _text_sections.end(); ++i) {
-// 		(*i)->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() *
-// 			((_width - i->width) / 2.0f) + (*i)->x_line_offset;
-	}
-}
 
 // -----------------------------------------------------------------------------
 // TextSupervisor class

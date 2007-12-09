@@ -193,9 +193,6 @@ public:
 	//! \brief The image that is being referenced by this object.
 	TextTexture* text_texture;
 
-	//! \brief The x and y offsets from the line proper.
-	float x_line_offset, y_line_offset;
-
 	// ---------- Public methods
 
 	void Clear();
@@ -245,20 +242,14 @@ public:
 class TextImage : public ImageDescriptor {
 	friend class GameVideo;
 public:
-	enum align {
-		ALIGN_LEFT   = 0,
-		ALIGN_CENTER = 1,
-		ALIGN_RIGHT  = 2,
-	};
-
 	//! \brief Construct empty text object
 	TextImage();
 
 	//! \brief Constructs rendered string of specified ustring
-	TextImage(const hoa_utils::ustring& string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
+	TextImage(const hoa_utils::ustring& string, TextStyle style = TextStyle());
 
 	//! \brief Constructs rendered string of specified std::string
-	TextImage(const std::string& string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
+	TextImage(const std::string& string, TextStyle style = TextStyle());
 
 	//! \brief Destructs TextImage, lowering reference counts on all contained timages.
 	~TextImage()
@@ -279,11 +270,6 @@ public:
 	*** \param draw_color The color to modulate the text by
 	**/
 	void Draw(const Color& draw_color) const;
-
-	/** \brief Sets the horizontal text alignment
-	*** \param alignment The alignment type: ALIGN_CENTER, ALIGN_LEFT or ALIGN_RIGHT.
-	**/
-	void SetAlignment(int8 alignment);
 
 	//! \brief Dervied from ImageDescriptor, this method is not used by TextImage
 	void EnableGrayScale()
@@ -351,9 +337,6 @@ private:
 	//! \brief The unicode string of the text to render
 	hoa_utils::ustring _string;
 
-	//! \brief The horizontal text alignment
-	int8 _alignment;
-
 	//! \brief The style to render the text in
 	TextStyle _style;
 
@@ -364,9 +347,6 @@ private:
 
 	//! \brief Regenerates the texture images for the text
 	void _Regenerate();
-
-	//! \brief Realigns the text to its horizontal alignment type
-	void _Realign();
 }; // class TextImage : public ImageDescriptor
 
 

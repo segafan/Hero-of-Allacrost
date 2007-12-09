@@ -95,6 +95,7 @@ credits_text =
 
 	"Additional Artwork\n\n" ..
 	"Adam Black (indigoshift) - concept art\n" ..
+	"Blake Heatly (KaelisEbonrai) - inventory icons\n" ..
 	"Chris Hopp (fydo) - map sprite animations\n" ..
 	"Chris Luspo (Venndetta1) - concept art\n" ..
 	"Francisco Munoz (fmunoz) - inventory icons\n" ..
