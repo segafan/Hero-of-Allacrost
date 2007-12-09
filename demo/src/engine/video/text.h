@@ -90,12 +90,6 @@ public:
 	//! \brief The height above and below baseline of font
 	int32 ascent, descent;
 
-	//! \brief The x and y offsets of the text shadow.
-	int32 shadow_x, shadow_y;
-
-	//! \brief The style of the text shadow.
-	TEXT_SHADOW_STYLE shadow_style;
-
 	//! \brief A pointer to SDL_TTF's font structure.
 	TTF_Font* ttf_font;
 
@@ -164,9 +158,6 @@ public:
 	TextStyle style;
 
 	// ---------- Public methods
-
-	//! \brief Loads the properties of the internal font
-	void LoadFontProperties();
 
 	//! \brief Generate a text texture and add to a texture sheet
 	bool Regenerate();
