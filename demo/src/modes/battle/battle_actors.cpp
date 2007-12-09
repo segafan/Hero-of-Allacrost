@@ -107,6 +107,9 @@ float BattleActor::GetCombatEvade() {
 	return GetActor()->GetEvade();
 }
 
+uint32 BattleActor::GetCombatAgility()
+{ return GetActor()->GetAgility(); }
+
 
 
 void BattleActor::ResetWaitTime() {

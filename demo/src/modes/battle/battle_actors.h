@@ -187,6 +187,8 @@ public:
 
 	virtual float GetCombatEvade();
 
+	virtual uint32 GetCombatAgility();
+
 	private_battle::ACTOR_STATE GetState() const
 		{ return _state; }
 

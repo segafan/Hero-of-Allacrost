@@ -650,6 +650,7 @@ void BindEngineToLua() {
 			.def("GetPhysicalAttack", &BattleActor::GetPhysicalAttack)
 			.def("GetPhysicalDefense", &BattleActor::GetPhysicalDefense)
 			.def("GetCombatEvade", &BattleActor::GetCombatEvade)
+			.def("GetCombatAgility", &BattleActor::GetCombatAgility)
 			.def("TakeDamage", &BattleActor::TakeDamage)
 			.def("GetActor", &BattleActor::GetActor)
 			.def("AddHitPoints", &BattleActor::AddHitPoints)

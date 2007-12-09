@@ -142,6 +142,9 @@ public:
 
 	bool SingletonInitialize ();
 
+	//! \brief Creates the start BootMode and places it on the stack
+	void LoadInitialMode();
+
 	//! \brief Increments by one the number of game modes to pop off the stack
 	void Pop();
 

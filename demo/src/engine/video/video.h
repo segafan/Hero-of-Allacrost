@@ -222,6 +222,12 @@ public:
 	**/
 	bool SingletonInitialize();
 
+	//! \brief Delayed setup calls, that require data from the settings file.
+	//@{
+	void SetInitialResolution(int32 width, int32 height);
+	bool FinalizeInitialization();
+	//@}
+
 	// ---------- General methods
 
 	/** \brief Sets the target window environment where the video engine will be used

@@ -142,7 +142,10 @@ void SkillAction::RunScript() {
 	else {
 		//CD: We don't check for alive or dead here...what if it's a resurrect spell?
 	//	if (_target->IsAlive()) {
-		_skill->BattleExecute(_target, _source);
+		try
+		{ _skill->BattleExecute(_target, _source); } 
+		catch (luabind::error err)
+		{ ScriptManager->HandleLuaError(err); }
 	//	}
 
 		// TODO: what to do if the target is dead? Find a new target? Cancel?

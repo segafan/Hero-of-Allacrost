@@ -153,24 +153,24 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 
 	growth_stats = {
 		[1] = {
-			hit_points = 14.0,
-			skill_points = 4.0,
-			strength = 8.0,
-			vigor = 1.0,
-			fortitude = 8.0,
+			hit_points = 8.0,
+			skill_points = 10.0,
+			strength = 3.0,
+			vigor = 2.0,
+			fortitude = 4.0,
 			protection = 3.0,
-			agility = 5.0,
-			evade = 2.0
+			agility = 4.0,
+			evade = 4.0
 		},
 		[4] = {
-			hit_points = 14.0,
-			skill_points = 4.0,
-			strength = 8.0,
-			vigor = 1.0,
-			fortitude = 8.0,
+			hit_points = 8.0,
+			skill_points = 10.0,
+			strength = 3.0,
+			vigor = 2.0,
+			fortitude = 4.0,
 			protection = 3.0,
-			agility = 5.0,
-			evade = 2.0
+			agility = 4.0,
+			evade = 4.0
 		}
 	},
 
