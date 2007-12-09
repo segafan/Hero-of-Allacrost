@@ -147,4 +147,66 @@ skills[103] = {
 	end
 }
 
+skills[104] = {
+   name = "Drake attack",
+   sp_required = 0,
+   warmup_time = 900,
+   cooldown_time = 0,
+   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+   target_ally = false,
+   
+   BattleExecute = function(target, instigator)
+		--If the random float is bigger, then we landed the hit
+		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
+		end
+	end
+}
 
+skills[105] = {
+   name = "Deceleon attack",
+   sp_required = 0,
+   warmup_time = 900,
+   cooldown_time = 0,
+   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+   target_ally = false,
+   
+   BattleExecute = function(target, instigator)
+		--If the random float is bigger, then we landed the hit
+		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
+		end
+	end
+}
+
+skills[106] = {
+   name = "Nagaruda attack",
+   sp_required = 0,
+   warmup_time = 1400,
+   cooldown_time = 0,
+   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+   target_ally = false,
+   
+   BattleExecute = function(target, instigator)
+		--If the random float is bigger, then we landed the hit
+		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 30 - target:GetPhysicalDefense());
+		end
+	end
+}
+
+skills[107] = {
+   name = "Aurum Drakueli attack",
+   sp_required = 0,
+   warmup_time = 900,
+   cooldown_time = 0,
+   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+   target_ally = false,
+   
+   BattleExecute = function(target, instigator)
+		--If the random float is bigger, then we landed the hit
+		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
+		end
+	end
+}
