@@ -20,6 +20,10 @@ if (armor == nil) then
    armor = {}
 end
 
+-- -----------------------------------------------------------------------------
+-- IDs 50001-50500 are reserved for greaves
+-- -----------------------------------------------------------------------------
+
 armor[50001] = {
 	name = "Karlate Greaves",
 	description = "Standard Karlate issued equipment. Light metal alloy protects the legs while minimizing the negative impact on movement.",
@@ -30,3 +34,30 @@ armor[50001] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	slots = 0
 }
+
+-- -----------------------------------------------------------------------------
+-- IDs 50501-51000 are reserved for light footwear
+-- -----------------------------------------------------------------------------
+
+armor[50501] = {
+	name = "Leather Sandals",
+	description = "Light footwear that while fashionable, was not designed for battle and affords very poor protection for the user.",
+	icon = "img/icons/armor/leather_sandals.png",
+	physical_defense = 1,
+	metaphysical_defense = 1,
+	standard_price = 80,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	slots = 0
+}
+
+armor[50502] = {
+	name = "Leather Boots",
+	description = "Comfortable leather that protects the entire foot and lower region of the shin.",
+	icon = "img/icons/armor/leather_boots.png",
+	physical_defense = 3,
+	metaphysical_defense = 1,
+	standard_price = 120,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	slots = 0
+}
+

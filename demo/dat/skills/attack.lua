@@ -55,7 +55,7 @@ skills[2] = {
 
 skills[3] = {
    name = "Quick Shot",
-   description = "A quick, weak crossbow attack.",
+   description = "A quick but weak crossbow attack.",
    sp_required = 0,
    warmup_time = 1000,
    cooldown_time = 0,
@@ -67,7 +67,7 @@ skills[3] = {
          target:TakeDamage(instigator:GetPhysicalAttack() + 8 - target:GetPhysicalDefense());
          AudioManager:PlaySound("snd/crossbow.ogg");
       else
-         AudioManager:PlaySound("snd/crossbow-miss.ogg");
+         AudioManager:PlaySound("snd/crossbow_miss.ogg");
       end     
    end
 }

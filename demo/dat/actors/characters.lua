@@ -103,17 +103,17 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 		experience_points = 0,
 		max_hit_points = 45,
 		max_skill_points = 25,
-		strength = 11,
-		vigor = 4,
-		fortitude = 14,
-		protection = 6,
-		agility = 32,
-		evade = 4.0,
+		strength = 9,
+		vigor = 7,
+		fortitude = 12,
+		protection = 10,
+		agility = 36,
+		evade = 5.0,
 		weapon = 10501,
-		head_armor = 20001,
-		torso_armor = 30001,
-		arm_armor = 40001,
-		leg_armor = 50001
+		head_armor = 20501,
+		torso_armor = 30501,
+		arm_armor = 40501,
+		leg_armor = 50501
 	},
 
 	attack_points = {

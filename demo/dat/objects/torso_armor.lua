@@ -20,6 +20,10 @@ if (armor == nil) then
    armor = {}
 end
 
+-- -----------------------------------------------------------------------------
+-- IDs 30001-30500 are reserved for plate mail
+-- -----------------------------------------------------------------------------
+
 armor[30001] = {
 	name = "Karlate Breastplate",
 	description = "Standard Karlate issued equipment. Effectively protects the torso from most types of attack.",
@@ -38,6 +42,22 @@ armor[30002] = {
 	physical_defense = 14,
 	metaphysical_defense = 3,
 	standard_price = 320,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS + hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
 	slots = 0
 }
+
+-- -----------------------------------------------------------------------------
+-- IDs 30501-31000 are reserved for cloths and dresses
+-- -----------------------------------------------------------------------------
+
+armor[30501] = {
+	name = "Willow Dress",
+	description = "A comfortable dress that does not restrict the user's movement. Woven out of surprisingly tough materials.",
+	icon = "img/icons/armor/willow_dress.png",
+	physical_defense = 6,
+	metaphysical_defense = 4,
+	standard_price = 90,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	slots = 0
+}
+

@@ -1191,41 +1191,56 @@ void EquipWindow::Update() {
 			switch ( _equip_select.GetSelection() ) {
 			case EQUIP_WEAPON:
 			{	GlobalWeapon* wpn = GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection());
-				if (wpn->GetUsableBy() == ch->GetID()) {
+				if (wpn->GetUsableBy() & ch->GetID()) {
 					id_num = wpn->GetID();
 					GlobalManager->AddToInventory(ch->EquipWeapon((GlobalWeapon*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else {
+					MenuMode::_instance->_menu_sounds["cancel"].Play();
 				}
 				break;}
 
 			case EQUIP_HEADGEAR:
 			{	GlobalArmor* hlm = GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection());
-				if (hlm->GetUsableBy() == ch->GetID()) {
+				if (hlm->GetUsableBy() & ch->GetID()) {
 					id_num = hlm->GetID();
 					GlobalManager->AddToInventory(ch->EquipHeadArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else {
+					MenuMode::_instance->_menu_sounds["cancel"].Play();
 				}
 				break;}
 
 			case EQUIP_BODYARMOR:
 			{	GlobalArmor* arm = GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection());
-				if (arm->GetUsableBy() == ch->GetID()) {
+				if (arm->GetUsableBy() & ch->GetID()) {
 					id_num = arm->GetID();
 					GlobalManager->AddToInventory(ch->EquipTorsoArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else {
+					MenuMode::_instance->_menu_sounds["cancel"].Play();
 				}
 				break;}
 
 			case EQUIP_OFFHAND:
 			{	GlobalArmor* shld = GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection());
-				if (shld->GetUsableBy() == ch->GetID()) {
+				if (shld->GetUsableBy() & ch->GetID()) {
 					id_num = shld->GetID();
 					GlobalManager->AddToInventory(ch->EquipArmArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else {
+					MenuMode::_instance->_menu_sounds["cancel"].Play();
 				}
 				break;}
 
 			case EQUIP_LEGGINGS:
 			{	GlobalArmor* lgs = GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection());
-				if (lgs->GetUsableBy() == ch->GetID()) {
+				if (lgs->GetUsableBy() & ch->GetID()) {
 					id_num = lgs->GetID();
 					GlobalManager->AddToInventory(ch->EquipLegArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else {
+					MenuMode::_instance->_menu_sounds["cancel"].Play();
 				}
 				break;}
 

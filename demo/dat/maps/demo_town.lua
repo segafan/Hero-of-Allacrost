@@ -639,14 +639,14 @@ map_functions = {}
 -- Creates a new shop mode instance
 map_functions[0] = function()
 	local shop = hoa_shop.ShopMode();
-	shop:AddObject(1);
-	shop:AddObject(10002);
-	shop:AddObject(10502);
-	shop:AddObject(10503);
-	shop:AddObject(20002);
-	shop:AddObject(30002);
-	shop:AddObject(40002);
-	shop:AddObject(50001);
+	shop:AddObject(1); -- Healing Potion
+	shop:AddObject(10002); -- Iron Sword
+	shop:AddObject(10502); -- Standard Crossbow
+	shop:AddObject(20002); -- Cobalt Helm
+	shop:AddObject(20502); -- Winged Circlet
+	shop:AddObject(30002); -- Leather Chain Mail
+	shop:AddObject(40002); -- Phoenix Shield
+	shop:AddObject(50502); -- Leather Boots
 	ModeManager:Push(shop);
 end
 
