@@ -80,9 +80,7 @@ GameModeManager::~GameModeManager() {
 }
 
 
-// Empties out the game stack and then initializes it.
-// BootMode being placed on the stack has been delayed till after the settings
-// are loaded.
+// Deletes any game modes on the stack or the push stack and resets all counters
 bool GameModeManager::SingletonInitialize() {
 	// Delete any game modes on the stack
 	while (_game_stack.size() != 0) {
@@ -102,9 +100,9 @@ bool GameModeManager::SingletonInitialize() {
 	return true;
 }
 
+
 // Delayed till after settings are read, because boot mode loads gui stuff
-void GameModeManager::LoadInitialMode()
-{
+void GameModeManager::LoadInitialMode() {
 	// Create a new BootMode and push it onto the true game stack immediately
 	BootMode* BM = new BootMode();
 	_game_stack.push_back(BM);
@@ -117,7 +115,6 @@ void GameModeManager::Pop() {
 	_pop_count++;
 	_state_change = true;
 }
-
 
 
 // Pop off all game modes
