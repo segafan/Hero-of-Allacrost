@@ -258,7 +258,10 @@ template <class T> void WriteScriptDescriptor::_WriteDataVector(const std::strin
 	}
 	else {
 		_WriteTablePath();
-		_outfile << '.' << key << " = { ";
+		if (hoa_utils::IsStringNumeric(key))
+			_outfile << "[" << key << "] = { ";
+		else
+			_outfile << '.' << key << " = { ";
 	}
 
 	_outfile << vect[0];

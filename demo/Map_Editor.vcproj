@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="Map Editor"
 	ProjectGUID="{A93BAE19-0D23-4237-83B6-01CAB0358D37}"
 	RootNamespace="Map Editor"
@@ -185,62 +185,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\engine\audio\audio.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\audio\audio_descriptor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\audio\audio_effects.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\audio\audio_input.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\audio\audio_stream.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\battle\battle.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\battle\battle_actions.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\battle\battle_actors.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\battle\battle_windows.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\boot\boot.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\boot\boot_credits.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\boot\boot_menu.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\boot\boot_welcome.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\defs.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\editor\editor.cpp"
 				>
 			</File>
@@ -258,22 +202,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\fade.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\global\global.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\global\global_actors.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\global\global_objects.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\global\global_skills.cpp"
 				>
 			</File>
 			<File
@@ -297,51 +225,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\input.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\engine\video\interpolator.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\modes\map\map.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_actions.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_dialogue.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_objects.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_sprites.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_zones.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\menu\menu.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\menu\menu_views.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\engine\video\menu_window.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\mode_manager.cpp"
 				>
 			</File>
 			<File
@@ -358,18 +246,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\particle_system.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\pause.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\quit.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\scene.cpp"
 				>
 			</File>
 			<File
@@ -393,19 +269,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\modes\shop\shop.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\shop\shop_windows.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\engine\socket.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\system.cpp"
 				>
 			</File>
 			<File
@@ -451,58 +315,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\engine\audio\audio.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\audio\audio_descriptor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\audio\audio_effects.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\audio\audio_input.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\audio\audio_stream.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\battle\battle.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\battle\battle_actions.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\battle\battle_actors.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\battle\battle_windows.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\boot\boot.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\boot\boot_credits.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\boot\boot_menu.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\boot\boot_welcome.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\engine\video\color.h"
 				>
 			</File>
@@ -523,22 +335,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\global\global.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\global\global_actors.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\global\global_objects.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\global\global_skills.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\editor\grid.h"
 				>
 			</File>
@@ -556,30 +352,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\interpolator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_actions.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_dialogue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_objects.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_sprites.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\map\map_zones.h"
 				>
 			</File>
 			<File
@@ -612,18 +384,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\particle_system.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\pause.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\quit.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\scene.h"
 				>
 			</File>
 			<File
