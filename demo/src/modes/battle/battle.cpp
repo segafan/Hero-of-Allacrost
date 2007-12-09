@@ -71,6 +71,8 @@ BattleMode::BattleMode() :
 	_initialized(false),
 	_battle_over(false),
 	_victorious_battle(false),
+	_selected_character_index(0),
+	_selected_target_index(0),
 	_selected_character(NULL),
 	_selected_target(NULL),
 	_selected_attack_point(0),
