@@ -110,28 +110,28 @@ public:
 class TextStyle {
 public:
 	TextStyle() :
-		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), color(Color::white) {}
+		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), shadow_offset_x(1), shadow_offset_y(-2), color(Color::white) {}
 
 	TextStyle(Color c) :
-		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), color(c) {}
+		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), shadow_offset_x(1), shadow_offset_y(-2), color(c) {}
 
 	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style) :
-		font(fnt), shadow_style(style), color(Color::white) {}
+		font(fnt), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2), color(Color::white) {}
 
 	TextStyle(std::string fnt, Color col = Color::white, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK) :
-		font(fnt), shadow_style(style), color(col) {}
+		font(fnt), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2), color(col) {}
 
 	TextStyle(TEXT_SHADOW_STYLE style, Color col = Color::white) :
-		font("default"), shadow_style(style), color(col) {}
+		font("default"), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2), color(col) {}
 
 	//! \brief The string font name
 	std::string font;
 
-	//! \brief The x and y offsets of the shadow
-	int32 shadow_offset_x, shadow_offset_y;
-
 	//! \brief The enum representing the shadow style
 	TEXT_SHADOW_STYLE shadow_style;
+
+	//! \brief The x and y offsets of the shadow
+	int32 shadow_offset_x, shadow_offset_y;
 
 	//! \brief The color of the text
 	Color color;
@@ -414,17 +414,11 @@ public:
 	*** \param font_name The name which to refer to the font after it is loaded
 	*** \param size The point size to set the font after it is loaded
 	*** \param style The default shadow style for this font (default value = VIDEO_TEXT_SHADOW_NONE)
-	*** \param x_offset The x shadow offset for this font in number of pixels (default value = 0)
-	*** \param y_offset The y shadow offset for this font in number of pixels (default value = 0)
 	*** \param make_default If set to true, this font will be made the default font if it is loaded successfully (default value = false)
 	*** \return True if the font was successfully loaded, or false if there was an error
-	***
-	*** \note If both the x and y offset arguments are zero, the offset value will instead be set to 1/8th of the font's height
-	*** to the right in the x direction, and down in the y direction. This is done because a shadow with a (0, 0) offset is not
-	*** valid (the shadow will be completely obscured by the text itself).
 	**/
 	bool LoadFont(const std::string& filename, const std::string& font_name, uint32 size, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_NONE,
-		 int32 x_offset = 0, int32 y_offset = 0, bool make_default = false);
+		bool make_default = false);
 
 	/** \brief Removes a loaded font from memory and frees up associated resources
 	*** \param font_name The reference name of the font to unload
@@ -449,22 +443,6 @@ public:
 	*** \return A pointer to the FontProperties object with the requested data, or NULL if the properties could not be fetched
 	**/
 	FontProperties* GetFontProperties(const std::string& font_name);
-
-	/** \brief Sets the default shadow style to use for a specified font
-	*** \param font_name The reference name of the font to set the shadow style for
-	*** \param style The shadow style desired for this font
-	**/
-	void SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STYLE style);
-
-	/** \brief Sets the default x and y shadow offsets to use for a specified font
-	*** \param font_name The reference name of the font to set the shadow offsets for
-	*** \param x The x offset in number of pixels
-	*** \param y The y offset in number of pixels
-	***
-	*** By default, all font shadows are slightly to the right and to the bottom of the text,
-	*** by an offset of one eight of the font's height.
-	**/
-	void SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y);
 	//@}
 
 	//! \name Text methods
@@ -556,10 +534,10 @@ private:
 	// ---------- Private methods
 
 	/** \brief Retrieves the color for a shadow based on the current text color and a shadow style
-	*** \param fp A pointer to the FontProperties object which contains the shadow style to use
+	*** \param style The text style that would be used to generate the shadow for the text
 	*** \return The color of the shadow
 	**/
-	Color _GetTextShadowColor(FontProperties *fp);
+	Color _GetTextShadowColor(const TextStyle& style) const;
 
 	/** \brief Caches glyph information and textures for rendering
 	*** \param text A pointer to the unicode string holding the characters (glyphs) to cache

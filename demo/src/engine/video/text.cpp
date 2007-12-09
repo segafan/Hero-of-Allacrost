@@ -424,16 +424,13 @@ void TextImage::_Regenerate() {
 	line_array.push_back(last_line);
 	*reform_iter = '\0';
 
-// 	PRINT_DEBUG << "# of lines: " << line_array.size() << endl;
-
 	// 2) Determine the text's properties
-	Color shadow_color = TextManager->_GetTextShadowColor(fp);
-	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
+// 	Color shadow_color = TextManager->_GetTextShadowColor(fp);
+// 	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
 
 	// 3) Iterate through each line of text and render a TextTexture for each one
 	vector<uint16*>::iterator line_iter;
 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter) {
-// 		cout << MakeStandardString(*line_iter) << endl;
 		TextElement* new_element = new TextElement();
 		// If this line is only a newline character, create an empty TextElement object
 		if (**line_iter == newline) {
@@ -548,8 +545,7 @@ bool TextSupervisor::SingletonInitialize() {
 
 
 
-bool TextSupervisor::LoadFont(const string& filename, const string& font_name, uint32 size, TEXT_SHADOW_STYLE style,
-	int32 x_offset, int32 y_offset, bool make_default)
+bool TextSupervisor::LoadFont(const string& filename, const string& font_name, uint32 size, TEXT_SHADOW_STYLE style, bool make_default)
 {
 	// Make sure that the font name is not already taken
 	if (IsFontValid(font_name) == true) {
@@ -577,18 +573,7 @@ bool TextSupervisor::LoadFont(const string& filename, const string& font_name, u
 	fp->ascent = TTF_FontAscent(font);
 	fp->descent = TTF_FontDescent(font);
 
-	// Set default shadow. If both offsets are zero, set the shadow offset to be 1/8th the height of the font
-	if (x_offset == 0 && y_offset == 0) {
-		fp->shadow_x = max(fp->height / 8, 1);
-		fp->shadow_y = -fp->shadow_x;
-	}
-	else {
-		fp->shadow_x = x_offset;
-		fp->shadow_y = y_offset;
-	}
-
-	// Set the shadow style and create the glyph cache for the font
-	fp->shadow_style = style;
+	// Create the glyph cache for the font and add it to the font map
 	fp->glyph_cache = new std::map<uint16, FontGlyph*>;
 
 	_font_map[font_name] = fp;
@@ -616,41 +601,6 @@ FontProperties* TextSupervisor::GetFontProperties(const std::string& font_name) 
 	}
 
 	return _font_map[font_name];
-}
-
-
-
-void TextSupervisor::SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STYLE style) {
-	if (IsFontValid(font_name) == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
-		return;
-	}
-
-	FontProperties* font = _font_map[font_name];
-	if (font == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "font properties were NULL for for font: " << font_name << endl;
-		return;
-	}
-
-	font->shadow_style = style;
-}
-
-
-
-void TextSupervisor::SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y) {
-	if (IsFontValid(font_name) == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
-		return;
-	}
-
-	FontProperties *font = _font_map[font_name];
-	if (font == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "font properties were NULL for for font: " << font_name << endl;
-		return;
-	}
-
-	font->shadow_x = x;
-	font->shadow_y = y;
 }
 
 
@@ -697,9 +647,9 @@ void TextSupervisor::Draw(const ustring& text, const TextStyle& style) {
 		// If text shadows are enabled, draw the shadow first
 		if (fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
 			glPushMatrix();
-			VideoManager->MoveRelative(VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * fp->shadow_x, 0.0f);
-			VideoManager->MoveRelative(0.0f, VideoManager->_current_context.coordinate_system.GetVerticalDirection() * fp->shadow_y);
-			_DrawTextHelper(buffer, fp, _GetTextShadowColor(fp));
+			VideoManager->MoveRelative(VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * style.shadow_offset_x, 0.0f);
+			VideoManager->MoveRelative(0.0f, VideoManager->_current_context.coordinate_system.GetVerticalDirection() * style.shadow_offset_y);
+			_DrawTextHelper(buffer, fp, _GetTextShadowColor(style));
 			glPopMatrix();
 		}
 
@@ -777,35 +727,36 @@ void TextSupervisor::SetDefaultTextColor(const Color& color) {
 
 
 
-Color TextSupervisor::_GetTextShadowColor(FontProperties* fp) {
+Color TextSupervisor::_GetTextShadowColor(const TextStyle& style) const {
 	Color shadow_color;
 
-	if (fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
-		switch (fp->shadow_style) {
-			case VIDEO_TEXT_SHADOW_DARK:
-				shadow_color = Color::black;
-				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
-				break;
-			case VIDEO_TEXT_SHADOW_LIGHT:
-				shadow_color = Color::white;
-				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
-				break;
-			case VIDEO_TEXT_SHADOW_BLACK:
-				shadow_color = Color::black;
-				shadow_color[3] = VideoManager->_current_context.text_color[3];
-				break;
-			case VIDEO_TEXT_SHADOW_COLOR:
-				shadow_color = VideoManager->_current_context.text_color;
-				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
-				break;
-			case VIDEO_TEXT_SHADOW_INVCOLOR:
-				shadow_color = Color(1.0f - VideoManager->_current_context.text_color[0], 1.0f - VideoManager->_current_context.text_color[1],
-					1.0f - VideoManager->_current_context.text_color[2], VideoManager->_current_context.text_color[3] * 0.5f);
-				break;
-			default:
-				IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown text shadow style: " << fp->shadow_style << endl;
-				break;
-		}
+	if (style.shadow_style == VIDEO_TEXT_SHADOW_NONE) {
+		return shadow_color;
+	}
+
+	switch (style.shadow_style) {
+		case VIDEO_TEXT_SHADOW_DARK:
+			shadow_color = Color::black;
+			shadow_color[3] = style.color[3] * 0.5f;
+			break;
+		case VIDEO_TEXT_SHADOW_LIGHT:
+			shadow_color = Color::white;
+			shadow_color[3] = style.color[3] * 0.5f;
+			break;
+		case VIDEO_TEXT_SHADOW_BLACK:
+			shadow_color = Color::black;
+			shadow_color[3] = style.color[3];
+			break;
+		case VIDEO_TEXT_SHADOW_COLOR:
+			shadow_color = style.color;
+			shadow_color[3] = style.color[3] * 0.5f;
+			break;
+		case VIDEO_TEXT_SHADOW_INVCOLOR:
+			shadow_color = Color(1.0f - style.color[0], 1.0f - style.color[1], 1.0f - style.color[2], style.color[3] * 0.5f);
+			break;
+		default:
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown text shadow style: " << style.shadow_style << endl;
+			break;
 	}
 
 	return shadow_color;
@@ -1085,41 +1036,41 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, I
 // 		free(pixel_buffer);
 // 		return false;
 // 	}
-// 
-// 	// (3) Render the text shadow first and determine the coordinates of where to place it within the target surface
-// // 	if (render_shadow) {
-// // 		SDL_Color shadow_color;
-// // 		//some Color object\\ConvertToNumerics(shadow_color.r, shadow_color.g, shadow_color.b, shadow_color.unused);
-// // 		
-// // 		source_surface = TTF_RenderUNICODE_Blended(font, string.c_str(), shadow_color);
-// // 		if (source_surface == NULL) {
-// // 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderUNICODE_Blended() failed: " << TTF_GetError() << endl;
-// // 			SDL_FreeSurface(target_surface);
-// // 			free(pixel_buffer);
-// // 			return false;
-// // 		}
-// // 
-// // 		if (style.shadow_offset_x <= 0)
-// // 			dest_coords.x = 0;
-// // 		else
-// // 			dest_coords.x = style.shadow_offset_x;
-// // 
-// // 		if (style.shadow_offset_y <= 0)
-// // 			dest_coords.y = 0;
-// // 		else
-// // 			dest_coords.y = style.shadow_offset_y;
-// // 
-// // 		if (SDL_BlitSurface(source_surface, NULL, target_surface, &dest_coords) != 0) {
-// // 			SDL_FreeSurface(source_surface);
-// // 			SDL_FreeSurface(target_surface);
-// // 			free(pixel_buffer);
-// // 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed, SDL error: " << SDL_GetError() << endl;
-// // 			return false;
-// // 		}
-// // 
-// // 		SDL_FreeSurface(source_surface);
-// // 	}
-// 
+
+	// (3) Render the text shadow first and determine the coordinates of where to place it within the target surface
+// 	if (render_shadow) {
+// 		SDL_Color shadow_color;
+// 		//some Color object\\ConvertToNumerics(shadow_color.r, shadow_color.g, shadow_color.b, shadow_color.unused);
+//
+// 		source_surface = TTF_RenderUNICODE_Blended(font, string.c_str(), shadow_color);
+// 		if (source_surface == NULL) {
+// 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderUNICODE_Blended() failed: " << TTF_GetError() << endl;
+// 			SDL_FreeSurface(target_surface);
+// 			free(pixel_buffer);
+// 			return false;
+// 		}
+//
+// 		if (style.shadow_offset_x <= 0)
+// 			dest_coords.x = 0;
+// 		else
+// 			dest_coords.x = style.shadow_offset_x;
+//
+// 		if (style.shadow_offset_y <= 0)
+// 			dest_coords.y = 0;
+// 		else
+// 			dest_coords.y = style.shadow_offset_y;
+//
+// 		if (SDL_BlitSurface(source_surface, NULL, target_surface, &dest_coords) != 0) {
+// 			SDL_FreeSurface(source_surface);
+// 			SDL_FreeSurface(target_surface);
+// 			free(pixel_buffer);
+// 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed, SDL error: " << SDL_GetError() << endl;
+// 			return false;
+// 		}
+//
+// 		SDL_FreeSurface(source_surface);
+// 	}
+
 // 	// (4) Render the text, determine its destination coordinates, and blit it to the target surface
 // 	source_surface = TTF_RenderUNICODE_Blended(font, string.c_str(), text_color);
 // 	if (source_surface == NULL) {
@@ -1128,6 +1079,10 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, I
 // 		free(pixel_buffer);
 // 		return false;
 // 	}
+// 	PRINT_DEBUG << "Source surface properties" << endl;
+// 
+// 	cout << "Shadow offets (x,y): " << style.shadow_offset_x << ", " << style.shadow_offset_y << endl;
+// 
 // 
 // 	if (render_shadow && style.shadow_offset_x <= 0)
 // 		dest_coords.x = style.shadow_offset_x;
