@@ -15,7 +15,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 
 	initial_stats = {
 		experience_level = 1,
-		experience_points = 50,
+		experience_points = 0,
 		max_hit_points = 60,
 		max_skill_points = 15,
 		strength = 12,
@@ -68,24 +68,24 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 
 	growth_stats = {
 		[1] = {
-			hit_points = 14.0,
-			skill_points = 4.0,
-			strength = 8.0,
+			hit_points = 5.0,
+			skill_points = 1.0,
+			strength = 2.0,
 			vigor = 1.0,
-			fortitude = 8.0,
-			protection = 3.0,
-			agility = 5.0,
-			evade = 2.0
+			fortitude = 2.0,
+			protection = 1.0,
+			agility = 1.0,
+			evade = 1.0
 		},
 		[4] = {
-			hit_points = 14.0,
-			skill_points = 4.0,
-			strength = 8.0,
-			vigor = 1.0,
-			fortitude = 8.0,
-			protection = 3.0,
-			agility = 5.0,
-			evade = 2.0
+			hit_points = 5.0,
+			skill_points = 2.0,
+			strength = 3.0,
+			vigor = 2.0,
+			fortitude = 3.0,
+			protection = 1.0,
+			agility = 1.0,
+			evade = 1.0
 		}
 	},
 
@@ -100,7 +100,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 
 	initial_stats = {
 		experience_level = 1,
-		experience_points = 30,
+		experience_points = 0,
 		max_hit_points = 45,
 		max_skill_points = 25,
 		strength = 11,
@@ -153,24 +153,24 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 
 	growth_stats = {
 		[1] = {
-			hit_points = 8.0,
-			skill_points = 10.0,
-			strength = 3.0,
-			vigor = 2.0,
-			fortitude = 4.0,
-			protection = 3.0,
-			agility = 4.0,
-			evade = 4.0
+			hit_points = 5.0,
+			skill_points = 1.0,
+			strength = 2.0,
+			vigor = 1.0,
+			fortitude = 2.0,
+			protection = 1.0,
+			agility = 1.0,
+			evade = 1.0
 		},
 		[4] = {
-			hit_points = 8.0,
-			skill_points = 10.0,
+			hit_points = 5.0,
+			skill_points = 2.0,
 			strength = 3.0,
 			vigor = 2.0,
-			fortitude = 4.0,
-			protection = 3.0,
-			agility = 4.0,
-			evade = 4.0
+			fortitude = 3.0,
+			protection = 1.0,
+			agility = 1.0,
+			evade = 1.0
 		}
 	},
 

@@ -742,7 +742,8 @@ void GlobalCharacterGrowth::_DetermineNextLevelExperience() {
 	uint32 new_xp = 0; // Temporary variable for holding the new experience milestone
 
 	// TODO: implement a real algorithm for determining the next experience goal
-	new_xp = _experience_for_next_level * 1.15 + 60;
+	uint32 base_xp = _character_owner->GetExperienceLevel() * 40;
+	new_xp = GaussianRandomValue(base_xp, base_xp/10.0f);
 
 	_experience_for_last_level = _experience_for_next_level;
 	_experience_for_next_level = new_xp;
