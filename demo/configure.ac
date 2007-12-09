@@ -23,7 +23,7 @@ if test "x$enable_optimize" = "xyes"; then
     AC_MSG_RESULT(yes)
     CXXFLAGS="$CXXFLAGS -O3"
 else
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
     CXXFLAGS="$CXXFLAGS -O0"
 fi
 
