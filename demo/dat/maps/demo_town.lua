@@ -372,7 +372,7 @@ function Load(m)
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/marcus_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/marcus.png");
@@ -442,7 +442,7 @@ function Load(m)
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc01_walk.png");
 
@@ -483,7 +483,7 @@ function Load(m)
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc02_walk.png");
 
@@ -516,7 +516,7 @@ function Load(m)
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.FAST_SPEED);
+	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/boy_npc01_walk.png");
 
@@ -567,7 +567,7 @@ function Load(m)
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/girl_npc02_walk.png");
 
@@ -590,7 +590,7 @@ function Load(m)
 	sprite:SetCollHeight(2.0);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(150.0);
+	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/woman_npc02_walk.png");
 
