@@ -196,7 +196,6 @@ bool ReadScriptDescriptor::_CheckDataType(int32 type, luabind::object& obj_check
 		if (type == INTEGER_TYPE) {
 			try {
 				luabind::object_cast<int32>(obj_check);
-				lua_pop(_lstack, 1);
 				return true;
 			}
 			catch (...) {
@@ -206,7 +205,6 @@ bool ReadScriptDescriptor::_CheckDataType(int32 type, luabind::object& obj_check
 		else if (type == UINTEGER_TYPE) {
 			try {
 				luabind::object_cast<uint32>(obj_check);
-				lua_pop(_lstack, 1);
 				return true;
 			}
 			catch (...) {
@@ -216,7 +214,6 @@ bool ReadScriptDescriptor::_CheckDataType(int32 type, luabind::object& obj_check
 		else if (type == FLOAT_TYPE) {
 			try {
 				luabind::object_cast<float>(obj_check);
-				lua_pop(_lstack, 1);
 				return true;
 			}
 			catch (...) {
