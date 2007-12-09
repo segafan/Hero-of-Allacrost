@@ -135,7 +135,7 @@ GameVideo::~GameVideo() {
 
 bool GameVideo::SingletonInitialize() {
 	// check to see if the singleton is already initialized
-	if (this->_initialized)
+	if (_initialized)
 		return true;
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
@@ -146,8 +146,9 @@ bool GameVideo::SingletonInitialize() {
 	return true;
 } // bool GameVideo::SingletonInitialize()
 
-bool GameVideo::FinalizeInitialization()
-{
+
+
+bool GameVideo::FinalizeInitialization() {
 	// Create instances of the various sub-systems
 	TextureManager = TextureController::SingletonCreate();
 	TextManager = TextSupervisor::SingletonCreate();
@@ -184,12 +185,13 @@ bool GameVideo::FinalizeInitialization()
 		return false;
 	}
 
-	this->_initialized = true;
+	_initialized = true;
 	return true;
 }
 
-void GameVideo::SetInitialResolution(int32 width, int32 height)
-{
+
+
+void GameVideo::SetInitialResolution(int32 width, int32 height) {
 	// Get the current system color depth and resolution
 	const SDL_VideoInfo* video_info(0);
 	video_info = SDL_GetVideoInfo();
