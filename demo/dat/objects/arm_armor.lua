@@ -20,6 +20,10 @@ if (armor == nil) then
    armor = {}
 end
 
+-- -----------------------------------------------------------------------------
+-- IDs 40001-40500 are reserved for shields
+-- -----------------------------------------------------------------------------
+
 armor[40001] = {
 	name = "Karlate Shield",
 	description = "Standard Karlate issued equipment. Strong wooden oak protects from all but the heaviest of assaults.",
@@ -41,3 +45,19 @@ armor[40002] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	slots = 0
 }
+
+-- -----------------------------------------------------------------------------
+-- IDs 40501-41000 are reserved for bracelets
+-- -----------------------------------------------------------------------------
+
+armor[40501] = {
+	name = "Stone Bracelet",
+	description = "A bracelet crafted out of soft limestone.",
+	icon = "img/icons/armor/stone_bracelet.png",
+	physical_defense = 4,
+	metaphysical_defense = 1,
+	standard_price = 130,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	slots = 0
+}
+

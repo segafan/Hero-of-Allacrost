@@ -170,8 +170,8 @@ void ShopActionWindow::UpdateFinanceText() {
 	if (current_shop != NULL) {
 		finance_text.SetDisplayText(MakeUnicodeString(
 			  "Funds:  " + NumberToString(GlobalManager->GetDrunes()) +
-			"\nCosts:  " + NumberToString(current_shop->GetPurchaseCost()) +
-			"\nSales:  " + NumberToString(current_shop->GetSalesRevenue()) +
+			"\nCosts: " + (current_shop->GetPurchaseCost() == 0 ? " " : "-") + NumberToString(current_shop->GetPurchaseCost()) +
+			"\nSales: " + (current_shop->GetSalesRevenue() == 0 ? " " : "+") + NumberToString(current_shop->GetSalesRevenue()) +
 			"\nTotal:  " + NumberToString(current_shop->GetTotalRemaining())
 		));
 	}

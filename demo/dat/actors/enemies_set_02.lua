@@ -129,7 +129,7 @@ enemies[102] = {
 	},
 
 	drop_objects = {
-		{ 10001, 0.10, 1 } -- Karlate sword
+		{ 20502, 0.10, 1 } -- Winged Circlet
 	}
 }
 
@@ -345,7 +345,7 @@ enemies[105] = {
 	},
 
 	drop_objects = {
-		{ 10001, 0.05, 1 } -- Karlate sword
+		{ 10503, 0.05, 1 } -- Reinforced crossbow
 	}
 }
 

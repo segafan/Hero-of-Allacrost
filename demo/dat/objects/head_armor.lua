@@ -20,6 +20,10 @@ if (armor == nil) then
    armor = {}
 end
 
+-- -----------------------------------------------------------------------------
+-- IDs 20001-20500 are reserved for helmets
+-- -----------------------------------------------------------------------------
+
 armor[20001] = {
 	name = "Karlate Helmet",
 	description = "Standard Karlate issued equipment. Battle worn but still reliable head protection.",
@@ -39,5 +43,31 @@ armor[20002] = {
 	metaphysical_defense = 4,
 	standard_price = 140,
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	slots = 0
+}
+
+-- -----------------------------------------------------------------------------
+-- IDs 20501-21000 are reserved for head dresses
+-- -----------------------------------------------------------------------------
+
+armor[20501] = {
+	name = "Butterfly Pins",
+	description = "A feminine head ornament that offers little effective protection.",
+	icon = "img/icons/armor/butterfly_pins.png",
+	physical_defense = 2,
+	metaphysical_defense = 4,
+	standard_price = 60,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	slots = 0
+}
+
+armor[20502] = {
+	name = "Winged Circlet",
+	description = "A circlet imbued with a small magical presence, which wards off evil from its bearer.",
+	icon = "img/icons/armor/winged_circlet.png",
+	physical_defense = 5,
+	metaphysical_defense = 10,
+	standard_price = 140,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
 	slots = 0
 }
