@@ -86,7 +86,7 @@ map_grid[48] = { 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 
 map_grid[49] = { 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 map_grid[50] = { 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 map_grid[51] = { 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-map_grid[52] = { 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 }
+map_grid[52] = { 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 }
 map_grid[53] = { 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 }
 map_grid[54] = { 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 }
 map_grid[55] = { 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 }
@@ -372,7 +372,7 @@ function Load(m)
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/marcus_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/marcus.png");
@@ -405,7 +405,7 @@ function Load(m)
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/vanica_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/vanica.png");
@@ -427,7 +427,8 @@ function Load(m)
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(38, 60);
 	sprite:AddAction(action);
-	action = hoa_map.ActionRandomMove(sprite);
+	action = hoa_map.ActionPathMove(sprite);
+	action:SetDestination(35, 48);
 	sprite:AddAction(action);
 	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);
@@ -461,7 +462,7 @@ function Load(m)
 	action:SetDestination(60, 54);
 	sprite:AddAction(action);
 	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(68, 62);
+	action:SetDestination(62, 62);
 	sprite:AddAction(action);
 	action = hoa_map.ActionAnimate(sprite);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1500);
@@ -510,13 +511,13 @@ function Load(m)
 	sprite:SetName("Torl");
 	sprite:SetObjectID(8);
 	sprite:SetContext(1);
-	sprite:SetXPosition(32, 0.5);
-	sprite:SetYPosition(28, 0.5);
+	sprite:SetXPosition(40, 0.5);
+	sprite:SetYPosition(20, 0.5);
 	sprite:SetCollHalfWidth(0.95);
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/boy_npc01_walk.png");
 
@@ -590,7 +591,7 @@ function Load(m)
 	sprite:SetCollHeight(2.0);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/woman_npc02_walk.png");
 
