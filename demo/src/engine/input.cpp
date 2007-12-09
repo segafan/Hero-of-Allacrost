@@ -316,11 +316,9 @@ void GameInput::EventHandler() {
 		}
 		else if (event.type == SDL_KEYUP || event.type == SDL_KEYDOWN) {
 			_KeyEventHandler(event.key);
-			break;
 		}
 		else {
 			_JoystickEventHandler(event);
-			break;
 		}
 	} // while (SDL_PollEvent(&event)
 
@@ -632,7 +630,6 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			}
 			else {
 				_left_state = false;
-				_left_press = false;
 			}
 			
 			if (js_event.jaxis.value > _joystick.threshold) {
@@ -643,7 +640,6 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			}
 			else {
 				_right_state = false;
-				_right_press = false;
 			}
 		}
 		else if (js_event.jaxis.axis == _joystick.y_axis) {
@@ -655,7 +651,6 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			}
 			else {
 				_up_state = false;
-				_up_press = false;
 			}
 
 			if (js_event.jaxis.value > _joystick.threshold) {
@@ -666,7 +661,6 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			}
 			else {
 				_down_state = false;
-				_down_press = false;
 			}
 		}
 
