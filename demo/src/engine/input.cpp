@@ -121,64 +121,13 @@ bool GameInput::SingletonInitialize() {
 		return false;
 	}
 
-	// Loads saved settings to setup the key and joystick configurations
-	string in_filename = GetSettingsFilename();
-	ReadScriptDescriptor input_map_data;
-	if (input_map_data.OpenFile(in_filename) == false) {
-		cerr << "INPUT ERROR: failed to open data file for reading: "
-		     << in_filename << endl;
-		return false;
-	}
+	return true;
+}
 
-	input_map_data.OpenTable("settings");
-	input_map_data.OpenTable("key_settings");
-	_key.up           = static_cast<SDLKey>(input_map_data.ReadInt("up"));
-	_key.down         = static_cast<SDLKey>(input_map_data.ReadInt("down"));
-	_key.left         = static_cast<SDLKey>(input_map_data.ReadInt("left"));
-	_key.right        = static_cast<SDLKey>(input_map_data.ReadInt("right"));
-	_key.confirm      = static_cast<SDLKey>(input_map_data.ReadInt("confirm"));
-	_key.cancel       = static_cast<SDLKey>(input_map_data.ReadInt("cancel"));
-	_key.menu         = static_cast<SDLKey>(input_map_data.ReadInt("menu"));
-	_key.swap         = static_cast<SDLKey>(input_map_data.ReadInt("swap"));
-	_key.left_select  = static_cast<SDLKey>(input_map_data.ReadInt("left_select"));
-	_key.right_select = static_cast<SDLKey>(input_map_data.ReadInt("right_select"));
-	_key.pause        = static_cast<SDLKey>(input_map_data.ReadInt("pause"));
-	input_map_data.CloseTable();
-
-	if (input_map_data.IsErrorDetected()) {
-		cerr << "INPUT ERROR: failure while trying to retrieve key map "
-			<< "information from file: " << in_filename << endl;
-		cerr << input_map_data.GetErrorMessages() << endl;
-		return false;
-	}
-
-	input_map_data.OpenTable("joystick_settings");
-	_joystick.joy_index    = static_cast<int32>(input_map_data.ReadInt("index"));
-	_joystick.confirm      = static_cast<uint8>(input_map_data.ReadInt("confirm"));
-	_joystick.cancel       = static_cast<uint8>(input_map_data.ReadInt("cancel"));
-	_joystick.menu         = static_cast<uint8>(input_map_data.ReadInt("menu"));
-	_joystick.swap         = static_cast<uint8>(input_map_data.ReadInt("swap"));
-	_joystick.left_select  = static_cast<uint8>(input_map_data.ReadInt("left_select"));
-	_joystick.right_select = static_cast<uint8>(input_map_data.ReadInt("right_select"));
-	_joystick.pause        = static_cast<uint8>(input_map_data.ReadInt("pause"));
-
-	// WinterKnight: These are hidden settings. You can change them by editing settings.lua,
-	// but they are not available in the options menu at this time.
-	_joystick.quit         = static_cast<uint8>(input_map_data.ReadInt("quit"));
-	_joystick.x_axis       = static_cast<uint8>(input_map_data.ReadInt("x_axis"));
-	_joystick.y_axis       = static_cast<uint8>(input_map_data.ReadInt("y_axis"));
-	_joystick.threshold    = static_cast<uint16>(input_map_data.ReadInt("threshold"));
-	input_map_data.CloseTable();
-	input_map_data.CloseTable();
-	
-	if (input_map_data.IsErrorDetected()) {
-		cerr << "INPUT: an error occured while trying to retrieve joystick mapping information "
-			<< "from file: " << in_filename << endl;
-		cerr << input_map_data.GetErrorMessages() << endl;
-		return false;
-	}
-	input_map_data.CloseFile();
-
+// This is no longer inside SingletonInitialize because we need to load the lua settings 
+// before initializing the joysticks.
+void GameInput::InitializeJoysticks()
+{
 	// Attempt to initialize and setup the joystick system
 	if (SDL_NumJoysticks() == 0) { // No joysticks found
 		SDL_JoystickEventState(SDL_IGNORE);
@@ -189,8 +138,6 @@ bool GameInput::SingletonInitialize() {
 		// TODO: need to allow user to specify which joystick to open, if multiple exist
 		_joystick.js = SDL_JoystickOpen(_joystick.joy_index);
 	}
-
-	return true;
 }
 
 
@@ -248,6 +195,7 @@ bool GameInput::RestoreDefaultJoyButtons()
 	_joystick.left_select  = static_cast<uint8>(settings_file.ReadInt("left_select"));
 	_joystick.right_select = static_cast<uint8>(settings_file.ReadInt("right_select"));
 	_joystick.pause        = static_cast<uint8>(settings_file.ReadInt("pause"));
+	_joystick.quit		   = static_cast<uint8>(settings_file.ReadInt("quit"));
 	settings_file.CloseTable();
 	settings_file.CloseTable();
 
@@ -506,7 +454,16 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			}
 			else if (key_event.keysym.sym == SDLK_s) {
 				// Take a screenshot of the current game
-				VideoManager->MakeScreenshot();
+				static uint32 i = 1;
+				string path = "";
+				while (true)
+				{
+					path = hoa_utils::GetUserDataPath() + "screenshot_" + NumberToString<uint32>(i) + ".jpg";
+					if (!DoesFileExist(path))
+						break;
+					i++;
+				}
+				VideoManager->MakeScreenshot(path);
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_t) {

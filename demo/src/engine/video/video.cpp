@@ -143,59 +143,11 @@ bool GameVideo::SingletonInitialize() {
 		return false;
 	}
 
-	// Load in the user's video configuration settings from a script file
-	hoa_script::ReadScriptDescriptor video_settings_script;
-	int32 settings_width;
-	int32 settings_height;
-	bool settings_fullscreen;
-	std::string settings_filename;
-	
-	settings_filename = "dat/config/settings.lua";
-	if (video_settings_script.OpenFile(settings_filename) == false) {
-		PRINT_ERROR << "failed to open the video settings script: " << settings_filename << endl;
-		return false;
-	}
+	return true;
+} // bool GameVideo::SingletonInitialize()
 
-	video_settings_script.OpenTable("settings");
-	video_settings_script.OpenTable("video_settings");
-	settings_width = video_settings_script.ReadInt("screen_resx");
-	settings_height = video_settings_script.ReadInt("screen_resy");
-	settings_fullscreen = video_settings_script.ReadBool("full_screen");
-	video_settings_script.CloseTable();
-	video_settings_script.CloseTable();
-
-	video_settings_script.CloseFile();
-
-	// Get the current system color depth and resolution
-	const SDL_VideoInfo* video_info(0);
-	video_info = SDL_GetVideoInfo();
-
-	if (video_info) {
-		// Set the resolution to be the highest possible (lower than the user one)
-		if (video_info->current_w >= settings_width && video_info->current_h >= settings_height) {
-			SetResolution(settings_width, settings_height);
-		}
-		else if (video_info->current_w >= 1024 && video_info->current_h >= 768) {
-			SetResolution(1024, 768);
-		}
-		else if (video_info->current_w >= 800 && video_info->current_h >= 600) {
-			SetResolution(800, 600);
-		}
-		else {
-			SetResolution(640, 480);
-		}
-	}
-	else {
-		// Default resoltion if we could not retrieve the resolution of the user
-		SetResolution(settings_width, settings_height);
-	}
-
-	SetFullscreen(settings_fullscreen);
-
-	if (ApplySettings() == false) {
-		return false;
-	}
-	
+bool GameVideo::FinalizeInitialization()
+{
 	// Create instances of the various sub-systems
 	TextureManager = TextureController::SingletonCreate();
 	TextManager = TextSupervisor::SingletonCreate();
@@ -233,9 +185,35 @@ bool GameVideo::SingletonInitialize() {
 	}
 
 	this->_initialized = true;
-
 	return true;
-} // bool GameVideo::SingletonInitialize()
+}
+
+void GameVideo::SetInitialResolution(int32 width, int32 height)
+{
+	// Get the current system color depth and resolution
+	const SDL_VideoInfo* video_info(0);
+	video_info = SDL_GetVideoInfo();
+
+	if (video_info) {
+		// Set the resolution to be the highest possible (lower than the user one)
+		if (video_info->current_w >= width && video_info->current_h >= height) {
+			SetResolution(width, height);
+		}
+		else if (video_info->current_w >= 1024 && video_info->current_h >= 768) {
+			SetResolution(1024, 768);
+		}
+		else if (video_info->current_w >= 800 && video_info->current_h >= 600) {
+			SetResolution(800, 600);
+		}
+		else {
+			SetResolution(640, 480);
+		}
+	}
+	else {
+		// Default resoltion if we could not retrieve the resolution of the user
+		SetResolution(width, height);
+	}
+}
 
 //-----------------------------------------------------------------------------
 // GameVideo class - General methods

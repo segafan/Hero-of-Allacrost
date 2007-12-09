@@ -96,6 +96,96 @@ void QuitAllacrost() {
 	GameVideo::SingletonDestroy();
 } // void QuitAllacrost()
 
+// Reads in all of the settings and sets the values in the according game manager's
+bool LoadSettings()
+{
+	ReadScriptDescriptor settings;
+	if (settings.OpenFile(GetSettingsFilename()) == false)
+		return false;
+
+	settings.OpenTable("settings");
+	settings.OpenTable("key_settings");
+	InputManager->SetUpKey(static_cast<SDLKey>(settings.ReadInt("up")));
+	InputManager->SetDownKey(static_cast<SDLKey>(settings.ReadInt("down")));
+	InputManager->SetLeftKey(static_cast<SDLKey>(settings.ReadInt("left")));
+	InputManager->SetRightKey(static_cast<SDLKey>(settings.ReadInt("right")));
+	InputManager->SetConfirmKey(static_cast<SDLKey>(settings.ReadInt("confirm")));
+	InputManager->SetCancelKey(static_cast<SDLKey>(settings.ReadInt("cancel")));
+	InputManager->SetMenuKey(static_cast<SDLKey>(settings.ReadInt("menu")));
+	InputManager->SetSwapKey(static_cast<SDLKey>(settings.ReadInt("swap")));
+	InputManager->SetLeftSelectKey(static_cast<SDLKey>(settings.ReadInt("left_select")));
+	InputManager->SetRightSelectKey(static_cast<SDLKey>(settings.ReadInt("right_select")));
+	InputManager->SetLeftSelectKey(static_cast<SDLKey>(settings.ReadInt("pause")));
+	settings.CloseTable();
+
+	if (settings.IsErrorDetected()) {
+		cerr << "SETTINGS LOAD ERROR: failure while trying to retrieve key map "
+			<< "information from file: " << GetSettingsFilename() << endl;
+		cerr << settings.GetErrorMessages() << endl;
+		return false;
+	}
+
+	settings.OpenTable("joystick_settings");
+	InputManager->SetJoyIndex(static_cast<int32>(settings.ReadInt("index")));
+	InputManager->SetConfirmJoy(static_cast<uint8>(settings.ReadInt("confirm")));
+	InputManager->SetCancelJoy(static_cast<uint8>(settings.ReadInt("cancel")));
+	InputManager->SetMenuJoy(static_cast<uint8>(settings.ReadInt("menu")));
+	InputManager->SetSwapJoy(static_cast<uint8>(settings.ReadInt("swap")));
+	InputManager->SetLeftSelectJoy(static_cast<uint8>(settings.ReadInt("left_select")));
+	InputManager->SetRightSelectJoy(static_cast<uint8>(settings.ReadInt("right_select")));
+	InputManager->SetPauseJoy(static_cast<uint8>(settings.ReadInt("pause")));
+
+	// WinterKnight: These are hidden settings. You can change them by editing settings.lua,
+	// but they are not available in the options menu at this time.
+	InputManager->SetQuitJoy(static_cast<uint8>(settings.ReadInt("quit")));
+	if (settings.DoesIntExist("x_axis"))
+		InputManager->SetXAxisJoy(static_cast<int8>(settings.ReadInt("x_axis")));
+	if (settings.DoesIntExist("y_axis"))
+		InputManager->SetYAxisJoy(static_cast<int8>(settings.ReadInt("y_axis")));
+	if (settings.DoesIntExist("threshold"))
+		InputManager->SetThresholdJoy(static_cast<uint16>(settings.ReadInt("threshold")));
+	settings.CloseTable();
+	
+	if (settings.IsErrorDetected()) {
+		cerr << "SETTINGS LOAD ERROR: an error occured while trying to retrieve joystick mapping information "
+			<< "from file: " << GetSettingsFilename() << endl;
+		cerr << settings.GetErrorMessages() << endl;
+		return false;
+	}
+
+	// Load video settings
+	settings.OpenTable("video_settings");
+	bool fullscreen = settings.ReadBool("full_screen");
+	int32 resx = settings.ReadInt("screen_resx");
+	int32 resy = settings.ReadInt("screen_resy");
+	VideoManager->SetInitialResolution(resx, resy);
+	VideoManager->SetFullscreen(fullscreen);
+	settings.CloseTable();
+
+	if (settings.IsErrorDetected()) {
+		cerr << "SETTINGS LOAD ERROR: failure while trying to retrieve video settings "
+			<< "information from file: " << GetSettingsFilename() << endl;
+		cerr << settings.GetErrorMessages() << endl;
+		return false;
+	}
+
+	// Load Audio settings
+	settings.OpenTable("audio_settings");
+	AudioManager->SetMusicVolume(static_cast<float>(settings.ReadFloat("music_vol")));
+	AudioManager->SetSoundVolume(static_cast<float>(settings.ReadFloat("sound_vol")));
+	settings.CloseAllTables();
+
+	if (settings.IsErrorDetected()) {
+		cerr << "SETTINGS LOAD ERROR: failure while trying to retrieve audio settings "
+			<< "information from file: " << GetSettingsFilename() << endl;
+		cerr << settings.GetErrorMessages() << endl;
+		return false;
+	}
+
+	settings.CloseFile();
+
+	return true;
+}
 
 /** \brief Initializes all engine components and makes other preparations for the game to start
 *** \return True if the game engine was initialized successfully, false if an unrecoverable error occured
@@ -120,6 +210,37 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("ERROR: unable to initialize VideoManager", __FILE__, __LINE__, __FUNCTION__);
 	}
 
+	if (AudioManager->SingletonInitialize() == false) {
+		throw Exception("ERROR: unable to initialize AudioManager", __FILE__, __LINE__, __FUNCTION__);
+	}
+
+	if (ScriptManager->SingletonInitialize() == false) {
+		throw Exception("ERROR: unable to initialize ScriptManager", __FILE__, __LINE__, __FUNCTION__);
+	}
+	hoa_defs::BindEngineToLua();
+
+	if (SystemManager->SingletonInitialize() == false) {
+		throw Exception("ERROR: unable to initialize SystemManager", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (InputManager->SingletonInitialize() == false) {
+		throw Exception("ERROR: unable to initialize InputManager", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (GlobalManager->SingletonInitialize() == false) {
+		throw Exception("ERROR: unable to initialize GlobalManager", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (ModeManager->SingletonInitialize() == false) {
+		throw Exception("ERROR: unable to initialize ModeManager", __FILE__, __LINE__, __FUNCTION__);
+	}
+
+	// Load all the settings from lua
+	if (LoadSettings() == false)
+		throw Exception("ERROR: Unable to load settings file", __FILE__, __LINE__, __FUNCTION__);
+	// Delayed initialization calls to the managers
+	InputManager->InitializeJoysticks();
+	if (VideoManager->ApplySettings() == false)
+		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
+	if (VideoManager->FinalizeInitialization() == false)
+		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
 	if (VideoManager->GUI()->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
 		throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
 	}
@@ -145,27 +266,7 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("Failed to load the 'Libertine' font as 'title, size 24'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	if (AudioManager->SingletonInitialize() == false) {
-		throw Exception("ERROR: unable to initialize AudioManager", __FILE__, __LINE__, __FUNCTION__);
-	}
-
-	if (ScriptManager->SingletonInitialize() == false) {
-		throw Exception("ERROR: unable to initialize ScriptManager", __FILE__, __LINE__, __FUNCTION__);
-	}
-	hoa_defs::BindEngineToLua();
-
-	if (SystemManager->SingletonInitialize() == false) {
-		throw Exception("ERROR: unable to initialize SystemManager", __FILE__, __LINE__, __FUNCTION__);
-	}
-	if (InputManager->SingletonInitialize() == false) {
-		throw Exception("ERROR: unable to initialize InputManager", __FILE__, __LINE__, __FUNCTION__);
-	}
-	if (GlobalManager->SingletonInitialize() == false) {
-		throw Exception("ERROR: unable to initialize GlobalManager", __FILE__, __LINE__, __FUNCTION__);
-	}
-	if (ModeManager->SingletonInitialize() == false) {
-		throw Exception("ERROR: unable to initialize ModeManager", __FILE__, __LINE__, __FUNCTION__);
-	}
+	ModeManager->LoadInitialMode();
 
 	// Set the window title and icon name
 	SDL_WM_SetCaption("Hero of Allacrost", "Hero of Allacrost");
@@ -195,8 +296,6 @@ void InitializeEngine() throw (Exception) {
 	SystemManager->InitializeTimers();
 
 } // void InitializeEngine()
-
-
 
 // Every great game begins with a single function :)
 int main(int argc, char *argv[]) {

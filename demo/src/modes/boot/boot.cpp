@@ -973,11 +973,8 @@ void BootMode::_SaveSettingsFile() {
 	settings_lua.ModifyInt("joystick_settings.right_select", InputManager->GetRightSelectJoy());
 	settings_lua.ModifyInt("joystick_settings.pause", InputManager->GetPauseJoy());	
 
-	
-
 	// and save it!
 	settings_lua.CommitChanges();
-	settings_lua.CloseTable();
 	settings_lua.CloseFile();
 
 	_has_modified_settings = false;

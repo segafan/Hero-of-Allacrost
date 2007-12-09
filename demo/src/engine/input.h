@@ -308,6 +308,9 @@ public:
 
 	bool SingletonInitialize ();
 
+	//! \brief Initialize the joysticks with SDL, delayed because we need info from the lua settings file first.
+	void InitializeJoysticks();
+
 	/** \brief Loads the default key settings from the lua file and sets them back
 	*** \return Returns false if the settings file couldn't be read
 	**/
@@ -469,6 +472,7 @@ public:
 	*** \param	key New button for the action
 	**/
 	//@{
+	void SetJoyIndex(int32 joy_index) { _joystick.joy_index = joy_index; }
 	void SetConfirmJoy(uint8 button) { _SetNewJoyButton(_joystick.confirm, button); }
 	void SetCancelJoy(uint8 button) { _SetNewJoyButton(_joystick.cancel, button); }
 	void SetMenuJoy(uint8 button) { _SetNewJoyButton(_joystick.menu, button); }
@@ -476,6 +480,10 @@ public:
 	void SetLeftSelectJoy(uint8 button) { _SetNewJoyButton(_joystick.left_select, button); }
 	void SetRightSelectJoy(uint8 button) { _SetNewJoyButton(_joystick.right_select, button); }
 	void SetPauseJoy(uint8 button) { _SetNewJoyButton(_joystick.pause, button); }
+	void SetQuitJoy(uint8 button) { _SetNewJoyButton(_joystick.quit, button); }
+	void SetXAxisJoy(int8 axis) { _joystick.x_axis = axis; }
+	void SetYAxisJoy(int8 axis) { _joystick.y_axis = axis; }
+	void SetThresholdJoy(int16 threshold) { _joystick.threshold = threshold; }
 	//@}
 
 	/** \name   Returns currently set keys' virtual key codes (SDLKeys)

@@ -188,29 +188,6 @@ bool GameSystem::SingletonInitialize() {
 // 	bindtextdomain(PACKAGE, DATADIR);
 // 	textdomain(PACKAGE);
 
-	ReadScriptDescriptor settings_data;
-
-	if (settings_data.OpenFile(GetSettingsFilename()) == false) {
-		cerr << "SYSTEM ERROR: failed to load settings from data file" << endl;
-		return false;
-	}
-
-	settings_data.OpenTable("settings");
-	settings_data.OpenTable("video_settings");
-// 	SetFullScreen(settings_data.ReadBool("full_screen"));
-	settings_data.CloseTable();
-
-	settings_data.OpenTable("audio_settings");
-	AudioManager->SetMusicVolume(settings_data.ReadFloat("music_vol"));
-	AudioManager->SetSoundVolume(settings_data.ReadFloat("sound_vol"));
-	settings_data.CloseTable();
-	settings_data.CloseTable();
-
-	if (settings_data.IsErrorDetected()) {
-		cerr << "SETTINGS WARNING: some errors occured during read operations from data file:" << endl;
-		cerr << settings_data.GetErrorMessages() << endl;
-	}
-	settings_data.CloseFile();
 	return true;
 }
 
