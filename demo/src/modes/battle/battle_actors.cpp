@@ -522,7 +522,13 @@ void BattleEnemy::DrawSprite() {
 void BattleEnemy::_DecideAction() {
 	// TEMP: this selects the first skill the enemy has and the first character as a target. Needs to be changed
 	// changed to choose random character
-	int32 target = RandomBoundedInteger(0, current_battle->GetCharacters().size() - 1);
+	// changed again so laila get's attacked less.
+	uint32 rand = RandomBoundedInteger(0, 100);
+	int32 target;
+	if (rand < 70)
+		target = 0;
+	else
+		target = 1;
 	GlobalSkill* skill = GetActor()->GetSkills()->begin()->second;
 	BattleAction* action = new SkillAction(this, current_battle->GetPlayerCharacterAt(target), skill);
 	current_battle->AddBattleActionToQueue(action);

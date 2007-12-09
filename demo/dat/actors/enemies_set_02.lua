@@ -195,7 +195,7 @@ enemies[103] = {
 	},
 
 	skills = {
-		[1] = 1
+		[1] = 104
 	},
 
 	drop_objects = {
@@ -264,7 +264,7 @@ enemies[104] = {
 	},
 
 	skills = {
-		[1] = 1
+		[1] = 106
 	},
 
 	drop_objects = {
@@ -341,7 +341,7 @@ enemies[105] = {
 	},
 
 	skills = {
-		[1] = 1, [2] = 1
+		[1] = 105
 	},
 
 	drop_objects = {
@@ -411,7 +411,7 @@ enemies[106] = {
 	},
 
 	skills = {
-		[1] = 1, [2] = 1
+		[1] = 107
 	},
 
 	drop_objects = {

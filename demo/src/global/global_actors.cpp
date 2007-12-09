@@ -1091,19 +1091,12 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	enemy_data.CloseTable();
 
 	// (8): Add the set of skills to the enemy
-	vector<int32> skill_ids;
+	vector<int32> skill_levels;
 	enemy_data.OpenTable("skills");
-	enemy_data.ReadTableKeys(skill_ids);
-	for (uint32 i = 0; i < skill_ids.size(); i++) {
-		uint32 skill = static_cast<uint32>(skill_ids[i]);
-		if (_skill_set.find(skill) == _skill_set.end()) {
-			_skill_set.insert(make_pair(skill, enemy_data.ReadUInt(skill)));
-		}
-		else {
-			if (GLOBAL_DEBUG)
-				cerr << "GLOBAL WARNING: GlobalEnemy constructor tried to add a skill to the "
-					<< "skill set multiple times" << endl;
-		}
+	enemy_data.ReadTableKeys(skill_levels);
+	for (uint32 i = 0; i < skill_levels.size(); i++) {
+		uint32 skill_id = enemy_data.ReadUInt(skill_levels[i]);
+		_skill_set[skill_id] = skill_levels[i];
 	}
 	enemy_data.CloseTable();
 
