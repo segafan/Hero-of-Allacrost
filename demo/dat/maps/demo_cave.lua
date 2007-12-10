@@ -603,7 +603,6 @@ function Load(m)
 	enemy:AddEnemy(4);
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(4);
-	enemy:AddEnemy(101);
 	enemy:AddEnemy(2);
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
