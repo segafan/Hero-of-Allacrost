@@ -787,6 +787,10 @@ void FinishWindow::_TallyXPMoneyAndItems()
 				_victory_items.insert(make_pair(objects[j], 1));
 			}
 		}
+		// also add 1 SP per enemy to each character in the party
+		GlobalParty *party = GlobalManager->GetActiveParty();
+		for (int i = 0; i < party->GetPartySize(); ++i)
+			party->GetActorAtIndex(i)->AddSkillPoints(1);
 	}
 
 	uint32 num_alive_characters = 0;
