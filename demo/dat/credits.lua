@@ -45,7 +45,7 @@ credits_text =
 	"Jamie Bremaneson (Jam) - sound composer\n" ..
 	"Joe Rouse (Loodwig) - soundtrack composer\n" ..
 	"Ryan Reilly (Rain) - music and sound lead, soundtrack composer\n" ..
-	"Samuel Justice (sam_justice) - sound composer\n\n" ..
+	"Samuel Justice (sam_justice) - sound composer\n" ..
 	"Zhe Zhou (shizeet) - sound composer\n" ..
 	"\n\n" ..
 
@@ -56,14 +56,14 @@ credits_text =
 
 	"Team Managers\n\n" ..
 	"Emre Motan (emrebfg)\n" ..
-	"Matt Gallivan (Gallivan)\n\n" ..
+	"Matt Gallivan (Gallivan)\n" ..
 	"\n\n" ..
 
 	"Online Services\n\n" ..
 	"Daniel Steuernol (Steu) - wiki support\n" ..
 	"Emre Motan (emrebfg) - website content, forum administration\n" ..
         "Heikki Naski (raging_hog) - content management system\n" ..
-	"Matt Gallivan (Gallivan) - administration\n\n" ..
+	"Matt Gallivan (Gallivan) - administration\n" ..
 	"Matthew James (nunvuru) - website design\n" ..
 	"\n\n" ..
 
@@ -84,6 +84,7 @@ credits_text =
 -- Additional credit level
 	"Additional Programming\n\n" ..
 	"Aaron Smith (Etherstar) - audio engine\n" ..
+	"Brandon Barnes (Winter Knight) - game engine, game modes\n" ..
 	"Corey Hoffstein (visage) - battle code\n" ..
 	"DongHa Lee (MoOshiCow) - internationalization\n" ..
 	"Farooq Mela (CamelJockey) - video engine\n" ..
