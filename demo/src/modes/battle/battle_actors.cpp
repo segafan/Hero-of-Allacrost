@@ -523,12 +523,18 @@ void BattleEnemy::_DecideAction() {
 	// TEMP: this selects the first skill the enemy has and the first character as a target. Needs to be changed
 	// changed to choose random character
 	// changed again so laila get's attacked less.
+	// this is a hack and needs to be fixed, won't work when there is more people in the party
 	uint32 rand = RandomBoundedInteger(0, 100);
 	int32 target;
 	if (rand < 70)
 		target = 0;
 	else
-		target = 1;
+	{
+		if (GlobalManager->GetActiveParty()->GetPartySize() > 1)
+			target = 1;
+		else
+			target = 0;
+	}
 	GlobalSkill* skill = GetActor()->GetSkills()->begin()->second;
 	BattleAction* action = new SkillAction(this, current_battle->GetPlayerCharacterAt(target), skill);
 	current_battle->AddBattleActionToQueue(action);
