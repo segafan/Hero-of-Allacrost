@@ -427,11 +427,14 @@ void BattleMode::Update() {
 	} // if (_battle_over)
 
 	// ----- (2): Update the state of all battle actors and graphics
-	for (uint8 i = 0; i < _character_actors.size(); i++) {
-		_character_actors[i]->Update();
-	}
-	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
-		_enemy_actors[i]->Update();
+	if (_selected_character == NULL) {  // TEMP: for implementing non-active battle mode, find better way to do so
+		UnFreezeTimers();  // TEMP: also for non-active battle mode
+		for (uint8 i = 0; i < _character_actors.size(); i++) {
+			_character_actors[i]->Update();
+		}
+		for (uint8 i = 0; i < _enemy_actors.size(); i++) {
+			_enemy_actors[i]->Update();
+		}
 	}
 	_attack_point_indicator.Update();
 
@@ -684,6 +687,7 @@ void BattleMode::_ActivateNextCharacter()
 		_selected_character->SetState(ACTOR_AWAITING_TURN);
 		//_selected_character->GetWaitTime()->Pause();
 		_action_window.Initialize(_selected_character);
+		FreezeTimers(); // TEMP: for non-active battle mode
 	}
 }
 

@@ -101,8 +101,9 @@ const uint32 MAX_INIT_WAIT_TIME = 8000;
 const uint32 ITEM_WARM_UP_TIME = 1000;
 
 //! True if we are using active battle mode (i.e. timers do not pause when player is making choices
-//FIX ME should be handled via the options menu
-const bool ACTIVE_BATTLE_MODE = false;
+// FIXME: should be handled via the options menu
+// FIXME: never used
+//const bool ACTIVE_BATTLE_MODE = false;
 
 /** \brief Finds the average experience level of all members in the party
 *** \return A floating point value representing the average level|
