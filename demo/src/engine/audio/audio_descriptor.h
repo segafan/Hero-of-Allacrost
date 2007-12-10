@@ -63,7 +63,10 @@ enum AUDIO_LOAD {
 namespace private_audio {
 
 //! \brief The default buffer size (in bytes) for streaming buffers
-const uint32 DEFAULT_BUFFER_SIZE = 16384;
+const uint32 DEFAULT_BUFFER_SIZE = 8192;
+
+//! \brief The number of buffers to use for streaming audio descriptors
+const uint32 NUMBER_STREAMING_BUFFERS = 4;
 
 /** ****************************************************************************
 *** \brief Represents an OpenAL buffer

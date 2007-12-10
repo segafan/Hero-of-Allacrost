@@ -230,14 +230,14 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 
 	// Stream the audio from the file data
 	else if (load_type == AUDIO_LOAD_STREAM_FILE) {
-		_buffer = new AudioBuffer[2]; // For streaming we need to use 2 buffers
+		_buffer = new AudioBuffer[NUMBER_STREAMING_BUFFERS]; // For streaming we need to use multiple buffers
 		_stream = new AudioStream(_input, _looping);
 		_stream_buffer_size = stream_buffer_size;
 
 		_data = new uint8[_stream_buffer_size * _input->GetSampleSize()];
 
 		// Attempt to acquire a source for the new audio to use
-		_AcquireSource ();
+		_AcquireSource();
 		if (_source == NULL) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
 		}
@@ -245,7 +245,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 
 	// Allocate memory for the audio data to remain in and stream it from that location
 	else if (load_type == AUDIO_LOAD_STREAM_MEMORY) {
-		_buffer = new AudioBuffer[2]; // For streaming we need to use 2 buffers
+		_buffer = new AudioBuffer[NUMBER_STREAMING_BUFFERS]; // For streaming we need to use multiple buffers
 		_stream = new AudioStream(_input, _looping);
 		_stream_buffer_size = stream_buffer_size;
 
@@ -257,7 +257,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		delete temp_input;
 
 		// Attempt to acquire a source for the new audio to use
-		_AcquireSource ();
+		_AcquireSource();
 		if (_source == NULL) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
 		}
@@ -656,7 +656,7 @@ void AudioDescriptor::_Update() {
 	alGetSourcei(_source->source, AL_BUFFERS_PROCESSED, &buffers_processed);
 	if (AudioManager->CheckALError()) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "getting processed sources failed: " << AudioManager->CreateALErrorString() << endl;
-	}	
+	}
 	
 	// If any buffers have finished playing, attempt to refill them
 	if (buffers_processed > 0) {
@@ -773,29 +773,19 @@ void AudioDescriptor::_PrepareStreamingBuffers() {
 		Stop();
 	}
 	alSourcei(_source->source, AL_BUFFER, 0);
-	
-	// Refill the first buffer
-	uint32 read = _stream->FillBuffer(_data, _stream_buffer_size);
-	if (read > 0) {
-		_buffer[0].FillBuffer(_data, _format, read * _input->GetSampleSize(), _input->GetSamplesPerSecond());
-		if (_source != NULL)
-			alSourceQueueBuffers(_source->source, 1, &_buffer[0].buffer);
+
+	// Fill each buffer with audio data
+	for (uint32 i = 0; i < NUMBER_STREAMING_BUFFERS; i++) {
+		uint32 read = _stream->FillBuffer(_data, _stream_buffer_size);
+		if (read > 0) {
+			_buffer[i].FillBuffer(_data, _format, read * _input->GetSampleSize(), _input->GetSamplesPerSecond());
+			if (_source != NULL)
+				alSourceQueueBuffers(_source->source, 1, &_buffer[i].buffer);
+		}
 	}
 	
 	if (AudioManager->CheckALError()) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "filling the first buffer failed: " << AudioManager->CreateALErrorString() << endl;
-	}
-
-	// Refill the second buffer
-	read = _stream->FillBuffer(_data, _stream_buffer_size);
-	if (read > 0) {
-		_buffer[1].FillBuffer(_data, _format, read * _input->GetSampleSize(), _input->GetSamplesPerSecond());
-		if (_source != NULL)
-			alSourceQueueBuffers(_source->source, 1, &_buffer[1].buffer);
-	}
-
-	if (AudioManager->CheckALError()) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "filling the second buffer failed: " << AudioManager->CreateALErrorString() << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to fill all buffers: " << AudioManager->CreateALErrorString() << endl;
 	}
 
 	if (was_playing) {
