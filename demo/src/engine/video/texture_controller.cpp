@@ -264,7 +264,7 @@ bool TextureController::_SaveTempTextures() {
 			IF_PRINT_DEBUG(VIDEO_DEBUG) << " saving temporary texture " << image->filename << endl;
 			ImageMemory buffer;
 			buffer.CopyFromImage(image);
-			string path = GetUserDataPath();
+			string path = GetUserDataPath(true);
 			if (buffer.SaveImage(path + image->filename + ".png", true) == false) {
 				success = false;
 				IF_PRINT_WARNING(VIDEO_DEBUG) << "call to ImageMemory::SaveImage() failed" << endl;
