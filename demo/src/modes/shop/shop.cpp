@@ -83,6 +83,9 @@ void ShopMode::Reset() {
 	VideoManager->Text()->SetDefaultFont("default");
 	VideoManager->Text()->SetDefaultTextColor(Color::white);
 
+	_purchases_cost = 0;
+	_sales_revenue = 0;
+
 	_buy_objects_quantities.clear();
 	for (uint32 ctr = 0; ctr < _buy_objects.size(); ctr++) {
 		_buy_objects_quantities.push_back(0);
