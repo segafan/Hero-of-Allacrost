@@ -112,7 +112,7 @@ public:
 	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style) :
 		font(fnt), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2), color(Color::white) {}
 
-	TextStyle(std::string fnt, Color col = Color::white, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK) :
+	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK, Color col = Color::white) :
 		font(fnt), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2), color(col) {}
 
 	TextStyle(TEXT_SHADOW_STYLE style, Color col = Color::white) :

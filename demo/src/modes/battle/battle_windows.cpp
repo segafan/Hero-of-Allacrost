@@ -127,7 +127,7 @@ void ActionWindow::_InitActionSelectionList()
 
 void ActionWindow::_InitSelectionHeaders()
 {
-	TextStyle battle_style("battle", Color(1.0f, 1.0f, 0.0f, 0.8f));
+	TextStyle battle_style("battle", VIDEO_TEXT_SHADOW_DARK, Color(1.0f, 1.0f, 0.0f, 0.8f));
 
 	_skill_selection_header.SetStyle(battle_style);
 	_item_selection_header.SetStyle(battle_style);
@@ -138,7 +138,7 @@ void ActionWindow::_InitSelectionHeaders()
 
 void ActionWindow::_InitInformationText()
 {
-	TextStyle battle_style("battle", Color::white);
+	TextStyle battle_style("battle", VIDEO_TEXT_SHADOW_DARK, Color::white);
 
 	_action_information.SetStyle(battle_style);
 
@@ -746,6 +746,7 @@ void FinishWindow::_InitLoseOptions()
 	_lose_options.SetSelection(0);
 	_lose_options.SetOwner(this);
 	_lose_options.EnableOption(0, false);
+	_lose_options.EnableOption(1, false);
 }
 
 
