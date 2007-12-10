@@ -560,7 +560,7 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 
-	string path = GetUserDataPath(false) + "saved_game.lua";
+	string path = GetUserDataPath(true) + "saved_game.lua";
 	if (!DoesFileExist(path))
 		_main_menu.EnableOption(1, false);
 	// TEMP: these options are for debugign purposes only and should be removed for releases
@@ -931,7 +931,7 @@ void BootMode::_SaveSettingsFile() {
 		return;
 
 	// Load the settings file for reading in the original data
-	string file = GetUserDataPath(true) + "settings.lua";
+	string file = GetUserDataPath(false) + "settings.lua";
 	if (!DoesFileExist(file))
 		CopyFile(string("dat/config/settings.lua"), file);
 		

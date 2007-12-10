@@ -456,7 +456,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				string path = "";
 				while (true)
 				{
-					path = hoa_utils::GetUserDataPath() + "screenshot_" + NumberToString<uint32>(i) + ".jpg";
+					path = hoa_utils::GetUserDataPath(true) + "screenshot_" + NumberToString<uint32>(i) + ".jpg";
 					if (!DoesFileExist(path))
 						break;
 					i++;

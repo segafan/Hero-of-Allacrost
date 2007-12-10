@@ -642,7 +642,7 @@ const std::string GetUserDataPath(bool user_files) {
 const std::string GetSettingsFilename() {
 	std::string settings_file;
 	
-	settings_file = GetUserDataPath(true) + "settings.lua";
+	settings_file = GetUserDataPath(false) + "settings.lua";
 	if (DoesFileExist(settings_file) == false) {
 		settings_file = "dat/config/settings.lua";
 		if (DoesFileExist(settings_file) == false) {
