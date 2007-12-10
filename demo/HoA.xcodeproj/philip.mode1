@@ -185,7 +185,48 @@
 	<key>Notifications</key>
 	<array/>
 	<key>OpenEditors</key>
-	<array/>
+	<array>
+		<dict>
+			<key>Content</key>
+			<dict>
+				<key>PBXProjectModuleGUID</key>
+				<string>D4C64DD60D0CFED60035EA04</string>
+				<key>PBXProjectModuleLabel</key>
+				<string>battle.cpp</string>
+				<key>PBXSplitModuleInNavigatorKey</key>
+				<dict>
+					<key>Split0</key>
+					<dict>
+						<key>PBXProjectModuleGUID</key>
+						<string>D4C64DD70D0CFED60035EA04</string>
+						<key>PBXProjectModuleLabel</key>
+						<string>battle.cpp</string>
+						<key>_historyCapacity</key>
+						<integer>0</integer>
+						<key>bookmark</key>
+						<string>D4C64DD80D0CFED60035EA04</string>
+						<key>history</key>
+						<array>
+							<string>D4C64DD20D0CFE6C0035EA04</string>
+						</array>
+					</dict>
+					<key>SplitCount</key>
+					<string>1</string>
+				</dict>
+				<key>StatusBarVisibility</key>
+				<true/>
+			</dict>
+			<key>Geometry</key>
+			<dict>
+				<key>Frame</key>
+				<string>{{0, 20}, {750, 461}}</string>
+				<key>PBXModuleWindowStatusBarHidden2</key>
+				<false/>
+				<key>RubberWindowFrame</key>
+				<string>35 189 750 502 0 0 1280 778 </string>
+			</dict>
+		</dict>
+	</array>
 	<key>PerspectiveWidths</key>
 	<array>
 		<integer>-1</integer>
@@ -261,13 +302,14 @@
 								<string>D4D1BA640B02B27F0052BF1E</string>
 								<string>4941A68E0AC1D86400D65B8E</string>
 								<string>4941A68F0AC1D86400D65B8E</string>
+								<string>4941A6940AC1D86400D65B8E</string>
 								<string>1C37FBAC04509CD000000102</string>
 								<string>1C37FAAC04509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>31</integer>
+									<integer>30</integer>
 									<integer>25</integer>
 									<integer>23</integer>
 									<integer>5</integer>
@@ -276,7 +318,7 @@
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 328}, {187, 338}}</string>
+							<string>{{0, 213}, {187, 338}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -516,10 +558,11 @@
 		<string>D4C64DB10D0CDE630035EA04</string>
 		<string>D4C64DB20D0CDE630035EA04</string>
 		<string>D4F7165E0B06B36400361DA9</string>
-		<string>1CD10A99069EF8BA00B06720</string>
 		<string>D4C64DAD0D0CDE630035EA04</string>
 		<string>1C0AD2B3069F1EA900FABCE6</string>
 		<string>/Users/philip/allacrost/demo/HoA.xcodeproj</string>
+		<string>D4C64DD60D0CFED60035EA04</string>
+		<string>1CD10A99069EF8BA00B06720</string>
 	</array>
 	<key>WindowString</key>
 	<string>590 381 690 397 0 0 1280 778 </string>
@@ -723,7 +766,7 @@
 			<key>WindowToolGUID</key>
 			<string>1CD10A99069EF8BA00B06720</string>
 			<key>WindowToolIsVisible</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>FirstTimeWindowDisplayed</key>
