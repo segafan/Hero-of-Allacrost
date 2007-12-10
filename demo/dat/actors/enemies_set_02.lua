@@ -48,7 +48,7 @@ enemies[101] = {
 			name = "Trunk",
 			x_position = 58,
 			y_position = 36,
-			fortitude_modifier = 10,
+			fortitude_modifier = 0,
 			protection_modifier = 0,
 			evade_modifier = 0.0
 		},

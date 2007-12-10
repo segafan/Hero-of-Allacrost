@@ -185,7 +185,7 @@
 		4931EC140BAF28B900013185 /* mus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = mus; sourceTree = "<group>"; };
 		4931EC1A0BAF28B900013185 /* snd */ = {isa = PBXFileReference; lastKnownFileType = folder; path = snd; sourceTree = "<group>"; };
 		493D9E440B9C9FFD00DF1F52 /* map_zones.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = map_zones.h; sourceTree = "<group>"; };
-		4941A4B00AC1D77500D65B8E /* Allacrost.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Allacrost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4941A4B00AC1D77500D65B8E /* Allacrost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Allacrost.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4941A6470AC1D86300D65B8E /* defs.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
 		4941A68B0AC1D86400D65B8E /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		4941A68C0AC1D86400D65B8E /* main_options.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = main_options.cpp; sourceTree = "<group>"; };
