@@ -53,12 +53,10 @@ void TEMP_HandlePause()
 	if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
 	{
 		current_battle->FreezeTimers();
-		in_battle_mode = true;
 	}
-	else if (in_battle_mode)
+	else if (ModeManager->GetGameType(1) == MODE_MANAGER_BATTLE_MODE)
 	{
 		current_battle->UnFreezeTimers();
-		in_battle_mode = false;
 	}
 }
 
