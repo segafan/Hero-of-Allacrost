@@ -68,7 +68,7 @@ credits_text =
 	"\n\n" ..
 
 	"Story\n\n" ..
-	"Brian Aloisi (Bryan Aloisi) - writer, editor\n" ..
+	"Brian Aloisi (Brian Aloisi) - writer, editor\n" ..
 	"Tim Hargreaves (Balthazar) - editor\n" ..
 	"Tyler Olsen (Roots) - author\n" ..
 	"\n\n" ..
