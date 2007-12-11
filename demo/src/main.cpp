@@ -266,8 +266,6 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("Failed to load the 'Libertine' font as 'title, size 24'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	ModeManager->LoadInitialMode();
-
 	// Set the window title and icon name
 	SDL_WM_SetCaption("Hero of Allacrost", "Hero of Allacrost");
 
@@ -294,8 +292,8 @@ void InitializeEngine() throw (Exception) {
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 
 	SystemManager->InitializeTimers();
-
 } // void InitializeEngine()
+
 
 // Every great game begins with a single function :)
 int main(int argc, char *argv[]) {
@@ -344,6 +342,8 @@ int main(int argc, char *argv[]) {
 		#endif
 		return EXIT_FAILURE;
 	}
+
+	ModeManager->Push(new BootMode());
 
 	try {
 		// This is the main loop for the game. The loop iterates once for every frame drawn to the screen.

@@ -15,7 +15,6 @@
 
 #include "mode_manager.h"
 #include "system.h"
-#include "boot.h"
 
 using namespace std;
 
@@ -101,15 +100,6 @@ bool GameModeManager::SingletonInitialize() {
 }
 
 
-// Delayed till after settings are read, because boot mode loads gui stuff
-void GameModeManager::LoadInitialMode() {
-	// Create a new BootMode and push it onto the true game stack immediately
-	BootMode* BM = new BootMode();
-	_game_stack.push_back(BM);
-	_state_change = true;
-}
-
-
 // Free the top mode on the stack and pop it off
 void GameModeManager::Pop() {
 	_pop_count++;
@@ -191,8 +181,8 @@ void GameModeManager::Update() {
 
 		// Make sure there is a game mode on the stack, otherwise we'll get a segementation fault.
 		if (_game_stack.empty()) {
-			cerr << "MODE MANAGER ERROR: Game stack is empty! Now re-initializing boot mode." << endl;
-			SingletonInitialize();
+			PRINT_WARNING << "game stack is empty, exiting application" << endl;
+			SystemManager->ExitGame();
 		}
 
 		// Call the newly active game mode's Reset() function to re-initialize the game mode

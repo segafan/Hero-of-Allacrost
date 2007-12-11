@@ -27,6 +27,8 @@
 #include "global.h"
 #include "script.h"
 #include "battle.h"
+#include "pause.h"
+#include "quit.h"
 
 using namespace std;
 
@@ -38,6 +40,8 @@ using namespace hoa_input;
 using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_script;
+using namespace hoa_pause;
+using namespace hoa_quit;
 
 using namespace hoa_battle::private_battle;
 
@@ -121,7 +125,7 @@ BattleMode::BattleMode() :
 	if (_swap_card.Load("img/icons/battle/swap_card.png", 25, 37) == false)
 		cerr << "BATTLE ERROR: Failed to load swap card: " << endl;
 
-	_action_window;// = new ActionWindow();
+// 	_action_window;// = new ActionWindow();
 	_TEMP_LoadTestData();
 } // BattleMode::BattleMode()
 
@@ -193,6 +197,8 @@ void BattleMode::Reset() {
 	if (_initialized == false) {
 		_Initialize();
 	}
+
+	UnFreezeTimers();
 } // void BattleMode::Reset()
 
 
@@ -394,6 +400,17 @@ void BattleMode::_ReviveCharacters()
 ////////////////////////////////////////////////////////////////////////////////
 
 void BattleMode::Update() {
+	if (InputManager->QuitPress()) {
+		FreezeTimers();
+		ModeManager->Push(new QuitMode());
+		return;
+	}
+	else if (InputManager->PausePress()) {
+		FreezeTimers();
+		ModeManager->Push(new PauseMode());
+		return;
+	}
+
 	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberCharactersAlive() == 0);
 	_victorious_battle = (_NumberEnemiesAlive() == 0);
 

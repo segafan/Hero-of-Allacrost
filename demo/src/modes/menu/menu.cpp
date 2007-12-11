@@ -26,6 +26,8 @@
 #include "system.h"
 #include "input.h"
 #include "global.h"
+#include "pause.h"
+#include "quit.h"
 
 using namespace std;
 
@@ -36,6 +38,8 @@ using namespace hoa_system;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
 using namespace hoa_global;
+using namespace hoa_pause;
+using namespace hoa_quit;
 
 using namespace hoa_menu::private_menu;
 
@@ -230,7 +234,15 @@ void MenuMode::Reset() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void MenuMode::Update() {
-	
+	if (InputManager->QuitPress() == true) {
+		ModeManager->Push(new QuitMode());
+		return;
+	}
+	else if (InputManager->PausePress() == true) {
+		ModeManager->Push(new PauseMode());
+		return;
+	}
+
 	// check the message window
 	if (_message_window != NULL)
 	{

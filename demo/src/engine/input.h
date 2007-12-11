@@ -48,15 +48,8 @@ extern GameInput* InputManager;
 //! Determines whether the code in the hoa_input namespace should print debug statements or not.
 extern bool INPUT_DEBUG;
 
-/* \brief Handles pausing/unpausing for battle mode (special case)
-* \note Placed here so it's visible from QuitMode as well
-*/
-void TEMP_HandlePause();
-
-
 //! An internal namespace to be used only within the input code.
 namespace private_input {
-
 
 /** ***************************************************************************
 *** \brief Retains information about the user-defined key settings.
@@ -187,9 +180,8 @@ public:
 ***
 *** \note This class is a singleton.
 *** 
-*** \note Pause and quit events are handled automatically in this class, so there are no 
-*** means available for you to detect nor handle the. However, you can determine what happens
-*** to the audio on a pause or quit event (see the file settings.h for information on that).
+*** \note Unlike other inputs, pause and quit events are only monitored by presses and have no
+*** state or release methods.
 ***
 *** \note Keep in mind that these events are \b not mutually exclusive (an up press and a down 
 *** press may be registered at the same time). This class does not attempt to give one
@@ -215,7 +207,6 @@ private:
 
 	//! Holds the current user-defined joystick settings
 	private_input::JoystickState _joystick;
-
 
 	//! Any key (or joystick button) pressed
 	bool _any_key_press;
@@ -253,6 +244,8 @@ private:
 	bool _swap_press;
 	bool _left_select_press;
 	bool _right_select_press;
+	bool _pause_press;
+	bool _quit_press;
 	//@}
 
 	/** \name  Input Release Members
@@ -331,7 +324,6 @@ public:
 	**/
 	bool AnyKeyRelease();
 
-	void TogglePause();
 	/** \brief Examines the SDL queue for all user input events and calls appropriate sub-functions.
 	***
 	*** This function handles all the meta keyboard events (events when a modifier key like Ctrl or
@@ -347,166 +339,297 @@ public:
 	*** \return True if the input event key/button is being held down
 	**/
 	//@{
-	bool UpState() 
+	bool UpState() const
 		{ return _up_state; }
-	bool DownState() 
+
+	bool DownState() const
 		{ return _down_state; }
-	bool LeftState() 
+
+	bool LeftState() const
 		{ return _left_state; }
-	bool RightState() 
+
+	bool RightState() const
 		{ return _right_state; }
-	bool ConfirmState() 
+
+	bool ConfirmState() const
 		{ return _confirm_state; }
-	bool CancelState() 
+
+	bool CancelState() const
 		{ return _cancel_state; }
-	bool MenuState() 
+
+	bool MenuState() const
 		{ return _menu_state; }
-	bool SwapState() 
+
+	bool SwapState() const
 		{ return _swap_state; }
-	bool LeftSelectState() 
+
+	bool LeftSelectState() const
 		{ return _left_select_state; }
-	bool RightSelectState() 
+
+	bool RightSelectState() const
 		{ return _right_select_state; }
 	//@}
 
-	/** \name   Input press member access functions
+	/** \name Input press member access functions
 	*** \return True if the input event key/button has just been pressed
 	**/
 	//@{
-	bool UpPress() 
+	bool UpPress() const
 		{ return _up_press; }
-	bool DownPress() 
+
+	bool DownPress() const
 		{ return _down_press; }
-	bool LeftPress() 
+
+	bool LeftPress() const
 		{ return _left_press; }
-	bool RightPress() 
+
+	bool RightPress() const
 		{ return _right_press; }
-	bool ConfirmPress() 
+
+	bool ConfirmPress() const
 		{ return _confirm_press; }
-	bool CancelPress() 
+
+	bool CancelPress() const
 		{ return _cancel_press; }
-	bool MenuPress() 
+
+	bool MenuPress() const
 		{ return _menu_press; }
-	bool SwapPress() 
+
+	bool SwapPress() const
 		{ return _swap_press; }
-	bool LeftSelectPress() 
+
+	bool LeftSelectPress() const
 		{ return _left_select_press; }
-	bool RightSelectPress() 
+
+	bool RightSelectPress() const
 		{ return _right_select_press; }
+
+	bool PausePress() const
+		{ return _pause_press; }
+
+	bool QuitPress() const
+		{ return _quit_press; }
 	//@}
 
-	/** \name   Input release member access functions
+	/** \name Input release member access functions
 	*** \return True if the input event key/button has just been released
 	**/
 	//@{
-	bool UpRelease() 
+	bool UpRelease() const
 		{ return _up_release; }
-	bool DownRelease() 
+
+	bool DownRelease() const
 		{ return _down_release; }
-	bool LeftRelease() 
+
+	bool LeftRelease() const
 		{ return _left_release; }
-	bool RightRelease() 
+
+	bool RightRelease() const
 		{ return _right_release; }
-	bool ConfirmRelease() 
+
+	bool ConfirmRelease() const
 		{ return _confirm_release; }
-	bool CancelRelease() 
+
+	bool CancelRelease() const
 		{ return _cancel_release; }
-	bool MenuRelease() 
+
+	bool MenuRelease() const
 		{ return _menu_release; }
-	bool SwapRelease() 
+
+	bool SwapRelease() const
 		{ return _swap_release; }
-	bool LeftSelectRelease() 
+
+	bool LeftSelectRelease() const
 		{ return _left_select_release; }
-	bool RightSelectRelease() 
+
+	bool RightSelectRelease() const
 		{ return _right_select_release; }
 	//@}
 
-	/** \name   Currently set key names' access functions
-	*** \return Name of the key in char* format
+	/** \name Key name access functions
+	*** \return Name of the key in std::string format
 	**/
 	//@{
-	std::string GetUpKeyName() const { return SDL_GetKeyName(_key.up); }
-	std::string GetDownKeyName() const { return SDL_GetKeyName(_key.down); }
-	std::string GetLeftKeyName() const { return SDL_GetKeyName(_key.left); }
-	std::string GetRightKeyName() const { return SDL_GetKeyName(_key.right); }
-	std::string GetConfirmKeyName() const { return SDL_GetKeyName(_key.confirm); }
-	std::string GetCancelKeyName() const { return SDL_GetKeyName(_key.cancel); }
-	std::string GetMenuKeyName() const { return SDL_GetKeyName(_key.menu); }
-	std::string GetSwapKeyName() const { return SDL_GetKeyName(_key.swap); }
-	std::string GetLeftSelectKeyName() const { return SDL_GetKeyName(_key.left_select); }
-	std::string GetRightSelectKeyName() const { return SDL_GetKeyName(_key.right_select); }
-	std::string GetPauseKeyName() const { return SDL_GetKeyName(_key.pause); }
+	std::string GetUpKeyName() const
+		{ return SDL_GetKeyName(_key.up); }
+
+	std::string GetDownKeyName() const
+		{ return SDL_GetKeyName(_key.down); }
+
+	std::string GetLeftKeyName() const
+		{ return SDL_GetKeyName(_key.left); }
+
+	std::string GetRightKeyName() const
+		{ return SDL_GetKeyName(_key.right); }
+
+	std::string GetConfirmKeyName() const
+		{ return SDL_GetKeyName(_key.confirm); }
+
+	std::string GetCancelKeyName() const
+		{ return SDL_GetKeyName(_key.cancel); }
+
+	std::string GetMenuKeyName() const
+		{ return SDL_GetKeyName(_key.menu); }
+
+	std::string GetSwapKeyName() const
+		{ return SDL_GetKeyName(_key.swap); }
+
+	std::string GetLeftSelectKeyName() const
+		{ return SDL_GetKeyName(_key.left_select); }
+
+	std::string GetRightSelectKeyName() const
+		{ return SDL_GetKeyName(_key.right_select); }
+
+	std::string GetPauseKeyName() const
+		{ return SDL_GetKeyName(_key.pause); }
 	//@}
 
-	/** \name   Currently set joystick buttons' access functions
+	/** \name Joystick button handle access functions
 	*** \return Joystick button number for the action
 	**/
 	//@{
-	int32 GetConfirmJoy() const { return _joystick.confirm; }
-	int32 GetCancelJoy() const { return _joystick.cancel; }
-	int32 GetMenuJoy() const { return _joystick.menu; }
-	int32 GetSwapJoy() const { return _joystick.swap; }
-	int32 GetLeftSelectJoy() const { return _joystick.left_select; }
-	int32 GetRightSelectJoy() const { return _joystick.right_select; }
-	int32 GetPauseJoy() const { return _joystick.pause; }
+	int32 GetConfirmJoy() const
+		{ return _joystick.confirm; }
+
+	int32 GetCancelJoy() const
+		{ return _joystick.cancel; }
+
+	int32 GetMenuJoy() const
+		{ return _joystick.menu; }
+
+	int32 GetSwapJoy() const
+		{ return _joystick.swap; }
+
+	int32 GetLeftSelectJoy() const
+		{ return _joystick.left_select; }
+
+	int32 GetRightSelectJoy() const
+		{ return _joystick.right_select; }
+
+	int32 GetPauseJoy() const
+		{ return _joystick.pause; }
 	//@}	
 
-	/** \name   Sets new keymappings
-	*** \param	key New key for the action
+	/** \name Key re-mapping functions
+	*** \paramkey New key for the action
 	**/
 	//@{
-	void SetUpKey(const SDLKey & key) { _SetNewKey(_key.up, key); }
-	void SetDownKey(const SDLKey & key) { _SetNewKey(_key.down, key); }
-	void SetLeftKey(const SDLKey & key) { _SetNewKey(_key.left, key); }
-	void SetRightKey(const SDLKey & key) { _SetNewKey(_key.right, key); }
-	void SetConfirmKey(const SDLKey & key) { _SetNewKey(_key.confirm, key); }
-	void SetCancelKey(const SDLKey & key) { _SetNewKey(_key.cancel, key); }
-	void SetMenuKey(const SDLKey & key) { _SetNewKey(_key.menu, key); }
-	void SetSwapKey(const SDLKey & key) { _SetNewKey(_key.swap, key); }
-	void SetLeftSelectKey(const SDLKey & key) { _SetNewKey(_key.left_select, key); }
-	void SetRightSelectKey(const SDLKey & key) { _SetNewKey(_key.right_select, key); }
-	void SetPauseKey(const SDLKey & key) { _SetNewKey(_key.pause, key); }
+	void SetUpKey(const SDLKey& key)
+		{ _SetNewKey(_key.up, key); }
+
+	void SetDownKey(const SDLKey& key)
+		{ _SetNewKey(_key.down, key); }
+
+	void SetLeftKey(const SDLKey& key)
+		{ _SetNewKey(_key.left, key); }
+
+	void SetRightKey(const SDLKey& key)
+		{ _SetNewKey(_key.right, key); }
+
+	void SetConfirmKey(const SDLKey& key)
+		{ _SetNewKey(_key.confirm, key); }
+
+	void SetCancelKey(const SDLKey& key)
+		{ _SetNewKey(_key.cancel, key); }
+
+	void SetMenuKey(const SDLKey& key)
+		{ _SetNewKey(_key.menu, key); }
+
+	void SetSwapKey(const SDLKey& key)
+		{ _SetNewKey(_key.swap, key); }
+
+	void SetLeftSelectKey(const SDLKey& key)
+		{ _SetNewKey(_key.left_select, key); }
+
+	void SetRightSelectKey(const SDLKey& key)
+		{ _SetNewKey(_key.right_select, key); }
+
+	void SetPauseKey(const SDLKey& key)
+		{ _SetNewKey(_key.pause, key); }
 	//@}
 
-	/** \name   Sets new joystick buttons
+	/** \name Joystick button re-mapping functions
 	*** \param	key New button for the action
 	**/
 	//@{
-	void SetJoyIndex(int32 joy_index) { _joystick.joy_index = joy_index; }
-	void SetConfirmJoy(uint8 button) { _SetNewJoyButton(_joystick.confirm, button); }
-	void SetCancelJoy(uint8 button) { _SetNewJoyButton(_joystick.cancel, button); }
-	void SetMenuJoy(uint8 button) { _SetNewJoyButton(_joystick.menu, button); }
-	void SetSwapJoy(uint8 button) { _SetNewJoyButton(_joystick.swap, button); }
-	void SetLeftSelectJoy(uint8 button) { _SetNewJoyButton(_joystick.left_select, button); }
-	void SetRightSelectJoy(uint8 button) { _SetNewJoyButton(_joystick.right_select, button); }
-	void SetPauseJoy(uint8 button) { _SetNewJoyButton(_joystick.pause, button); }
-	void SetQuitJoy(uint8 button) { _SetNewJoyButton(_joystick.quit, button); }
-	void SetXAxisJoy(int8 axis) { _joystick.x_axis = axis; }
-	void SetYAxisJoy(int8 axis) { _joystick.y_axis = axis; }
-	void SetThresholdJoy(int16 threshold) { _joystick.threshold = threshold; }
+	void SetJoyIndex(int32 joy_index)
+		{ _joystick.joy_index = joy_index; }
+
+	void SetConfirmJoy(uint8 button)
+		{ _SetNewJoyButton(_joystick.confirm, button); }
+
+	void SetCancelJoy(uint8 button)
+		{ _SetNewJoyButton(_joystick.cancel, button); }
+
+	void SetMenuJoy(uint8 button)
+		{ _SetNewJoyButton(_joystick.menu, button); }
+
+	void SetSwapJoy(uint8 button)
+		{ _SetNewJoyButton(_joystick.swap, button); }
+
+	void SetLeftSelectJoy(uint8 button)
+		{ _SetNewJoyButton(_joystick.left_select, button); }
+
+	void SetRightSelectJoy(uint8 button)
+		{ _SetNewJoyButton(_joystick.right_select, button); }
+
+	void SetPauseJoy(uint8 button)
+		{ _SetNewJoyButton(_joystick.pause, button); }
+
+	void SetQuitJoy(uint8 button)
+		{ _SetNewJoyButton(_joystick.quit, button); }
+
+	void SetXAxisJoy(int8 axis)
+		{ _joystick.x_axis = axis; }
+
+	void SetYAxisJoy(int8 axis)
+		{ _joystick.y_axis = axis; }
+
+	void SetThresholdJoy(int16 threshold)
+		{ _joystick.threshold = threshold; }
 	//@}
 
 	/** \name   Returns currently set keys' virtual key codes (SDLKeys)
 	*** \return Integer according to the currently set key
 	**/
 	//@{
-	int32 GetUpKey() const { return _key.up; }
-	int32 GetDownKey() const { return _key.down; }
-	int32 GetLeftKey() const { return _key.left; }
-	int32 GetRightKey() const { return _key.right; }
-	int32 GetConfirmKey() const { return _key.confirm; }
-	int32 GetCancelKey() const { return _key.cancel; }
-	int32 GetMenuKey() const { return _key.menu; }
-	int32 GetSwapKey() const { return _key.swap; }
-	int32 GetLeftSelectKey() const { return _key.left_select; }
-	int32 GetRightSelectKey() const { return _key.right_select; }
-	int32 GetPauseKey() const { return _key.pause; }
+	int32 GetUpKey() const
+		{ return _key.up; }
+
+	int32 GetDownKey() const
+		{ return _key.down; }
+
+	int32 GetLeftKey() const
+		{ return _key.left; }
+
+	int32 GetRightKey() const
+		{ return _key.right; }
+
+	int32 GetConfirmKey() const
+		{ return _key.confirm; }
+
+	int32 GetCancelKey() const
+		{ return _key.cancel; }
+
+	int32 GetMenuKey() const
+		{ return _key.menu; }
+
+	int32 GetSwapKey() const
+		{ return _key.swap; }
+
+	int32 GetLeftSelectKey() const
+		{ return _key.left_select; }
+
+	int32 GetRightSelectKey() const
+		{ return _key.right_select; }
+
+	int32 GetPauseKey() const
+		{ return _key.pause; }
 	//@}
 
-	/** \brief Returns the most recent event retrieved from SDL
-	 **/
-	const SDL_Event &GetMostRecentEvent() const
-	{ return _event; }
+	//! \brief Returns the most recent event retrieved from SDL
+	const SDL_Event& GetMostRecentEvent() const
+		{ return _event; }
 
 }; // class GameInput
 

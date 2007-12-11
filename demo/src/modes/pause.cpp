@@ -20,6 +20,7 @@
 #include "video.h"
 #include "input.h"
 #include "system.h"
+#include "quit.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -28,6 +29,7 @@ using namespace hoa_video;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
 using namespace hoa_system;
+using namespace hoa_quit;
 
 namespace hoa_pause {
 
@@ -96,9 +98,18 @@ void PauseMode::Reset() {
 
 
 // The true logic is all handled in GameSystem::KeyEventHandler() instead of this function.
-void PauseMode::Update() { 
+void PauseMode::Update() {
 	// Don't eat up 100% of the CPU time when we're in pause mode
 	SDL_Delay(50);
+
+	if (InputManager->QuitPress() == true) {
+		ModeManager->Push(new QuitMode());
+		return;
+	}
+	else if (InputManager->PausePress() == true) {
+		ModeManager->Pop();
+		return;
+	}
 }
 
 
