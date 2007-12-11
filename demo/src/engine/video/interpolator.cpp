@@ -17,7 +17,6 @@
 #include <cstdarg>
 #include <math.h>
 
-#include "utils.h"
 #include "video.h"
 
 using namespace std;

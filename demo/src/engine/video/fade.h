@@ -18,6 +18,7 @@
 
 #include "defs.h"
 #include "utils.h"
+
 #include "color.h"
 
 namespace hoa_video {

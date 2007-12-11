@@ -15,12 +15,10 @@
 
 #include <iostream>
 
-#include "utils.h"
-#include "global.h"
-
 #include "video.h"
-#include "script.h"
 #include "system.h"
+
+#include "global.h"
 
 using namespace std;
 

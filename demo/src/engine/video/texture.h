@@ -41,9 +41,6 @@
 #ifndef __TEXTURE_HEADER__
 #define __TEXTURE_HEADER__
 
-#include "defs.h"
-#include "utils.h"
-
 // OpenGL includes
 #ifdef __APPLE__
 	#include <OpenGL/gl.h>
@@ -52,6 +49,9 @@
 	#include <GL/gl.h>
 	#include <GL/glu.h>
 #endif
+
+#include "defs.h"
+#include "utils.h"
 
 namespace hoa_video {
 

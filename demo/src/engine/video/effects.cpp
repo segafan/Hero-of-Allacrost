@@ -7,7 +7,6 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "utils.h"
 #include "video.h"
 
 using namespace std;

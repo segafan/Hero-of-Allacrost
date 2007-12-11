@@ -18,6 +18,7 @@
 
 #include "utils.h"
 #include "defs.h"
+
 #include "video.h"
 
 namespace hoa_map {

@@ -12,7 +12,6 @@
 #include <cstdarg>
 #include <math.h>
 
-#include "utils.h"
 #include "fade.h"
 #include "video.h"
 

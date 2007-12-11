@@ -7,9 +7,10 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "video.h"
+
 #include "particle_system.h"
 #include "particle_keyframe.h"
-#include "video.h"
 
 using namespace std;
 using namespace hoa_utils;

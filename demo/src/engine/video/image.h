@@ -48,6 +48,7 @@
 
 #include "defs.h"
 #include "utils.h"
+
 #include "image_base.h"
 #include "color.h"
 #include "texture.h"

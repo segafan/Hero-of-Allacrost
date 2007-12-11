@@ -25,6 +25,8 @@
 #include "defs.h"
 #include "utils.h"
 
+#include "video.h"
+
 namespace hoa_global {
 
 /** \name Target Types

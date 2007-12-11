@@ -11,14 +11,16 @@
 #include <sstream>
 
 #include "utils.h"
+
 #include "audio.h"
 #include "video.h"
 #include "input.h"
 #include "system.h"
+
 #include "global.h"
+
 #include "mode_manager.h"
 #include "menu.h"
-
 #include "shop.h"
 #include "shop_windows.h"
 

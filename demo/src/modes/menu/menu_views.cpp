@@ -17,16 +17,11 @@
 #include <iostream>
 #include <sstream>
 
-#include "utils.h"
-
 #include "audio.h"
-#include "video.h"
-#include "global.h"
 #include "input.h"
 #include "system.h"
 
 #include "menu.h"
-#include "menu_views.h"
 
 using namespace std;
 using namespace hoa_menu::private_menu;

@@ -21,16 +21,19 @@
 
 #include "defs.h"
 #include "utils.h"
-#include "shop.h"
 
 #include "audio.h"
 #include "video.h"
 #include "input.h"
 #include "system.h"
+
 #include "global.h"
+
 #include "mode_manager.h"
 #include "pause.h"
 #include "quit.h"
+
+#include "shop.h"
 
 using namespace std;
 using namespace hoa_utils;

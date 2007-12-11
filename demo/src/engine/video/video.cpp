@@ -19,10 +19,7 @@
 #include <math.h>
 #include <vector>
 
-#include "utils.h"
 #include "video.h"
-#include "context.h"
-#include "gui.h"
 #include "script.h"
 
 using namespace std;

@@ -28,10 +28,10 @@
 #include "defs.h"
 
 #include "video.h"
-#include "gui.h"
-#include "mode_manager.h"
+
 #include "global.h"
 
+#include "mode_manager.h"
 #include "menu_views.h"
 
 //! \brief All calls to menu mode are wrapped in this namespace.

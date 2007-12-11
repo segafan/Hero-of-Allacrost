@@ -13,18 +13,18 @@
 *** \brief   Source file for map mode interface.
 *** ***************************************************************************/
 
-#include "utils.h"
+#include "audio.h"
+#include "script.h"
+#include "input.h"
+#include "system.h"
+
+#include "global.h"
+
 #include "map.h"
 #include "map_objects.h"
 #include "map_sprites.h"
 #include "map_dialogue.h"
 #include "map_zones.h"
-#include "audio.h"
-#include "video.h"
-#include "global.h"
-#include "script.h"
-#include "input.h"
-#include "system.h"
 #include "battle.h"
 #include "menu.h"
 #include "pause.h"

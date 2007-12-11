@@ -28,13 +28,15 @@
 
 #include "utils.h"
 #include "defs.h"
+
 #include "video.h"
 #include "audio.h"
-#include "global.h"
-#include "global_actors.h"
-#include "mode_manager.h"
 #include "system.h"
 
+#include "global.h"
+#include "global_actors.h"
+
+#include "mode_manager.h"
 #include "battle_actions.h"
 #include "battle_actors.h"
 #include "battle_windows.h"

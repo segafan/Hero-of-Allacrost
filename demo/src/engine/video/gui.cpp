@@ -7,9 +7,8 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "utils.h"
-#include "gui.h"
 #include "video.h"
+#include "gui.h"
 
 using namespace std;
 using namespace hoa_utils;

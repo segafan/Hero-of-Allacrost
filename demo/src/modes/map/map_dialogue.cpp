@@ -16,13 +16,13 @@
 #include "utils.h"
 
 #include "audio.h"
-#include "video.h"
 #include "input.h"
-#include "mode_manager.h"
-#include "script.h"
-#include "global.h"
-#include "menu.h"
 
+#include "global.h"
+
+#include "mode_manager.h"
+
+#include "menu.h"
 #include "map_dialogue.h"
 #include "map.h"
 #include "map_objects.h"

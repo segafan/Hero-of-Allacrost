@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="Allacrost"
 	ProjectGUID="{090248BB-5514-4846-A563-695576F3D685}"
 	RootNamespace="Allacrost"
@@ -49,6 +49,8 @@
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 				DisableSpecificWarnings="4996;4005;4800;4267;4355;4288;4290"
+				ShowIncludes="false"
+				EnablePREfast="false"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -261,10 +263,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\editor\editor.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\engine\video\fade.h"
 				>
 			</File>
@@ -282,10 +280,6 @@
 			</File>
 			<File
 				RelativePath=".\src\global\global_skills.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\editor\grid.h"
 				>
 			</File>
 			<File
@@ -446,14 +440,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\texture_controller.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\editor\tile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\editor\tileset.h"
 				>
 			</File>
 			<File

@@ -29,8 +29,10 @@
 
 #include "defs.h"
 #include "utils.h"
-#include "global.h"
+
 #include "video.h"
+
+#include "global.h"
 
 namespace hoa_shop {
 

@@ -14,17 +14,18 @@
 *** ***************************************************************************/
 
 #include "utils.h"
+
+#include "audio.h"
+#include "system.h"
+
+#include "global.h"
+
 #include "map.h"
 #include "map_sprites.h"
 #include "map_objects.h"
 #include "map_dialogue.h"
 #include "map_actions.h"
 
-#include "audio.h"
-#include "video.h"
-#include "script.h"
-#include "system.h"
-#include "global.h"
 
 using namespace std;
 using namespace hoa_utils;

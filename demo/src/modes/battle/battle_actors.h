@@ -23,11 +23,9 @@
 
 #include "utils.h"
 #include "defs.h"
-#include "mode_manager.h"
-#include "global.h"
+
+#include "global_skills.h"
 #include "global_actors.h"
-#include "video.h"
-#include "audio.h"
 
 namespace hoa_battle {
 

@@ -7,12 +7,6 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "particle_manager.h"
-#include "particle_effect.h"
-#include "particle_system.h"
-#include "particle_keyframe.h"
-#include "video.h"
-#include "script.h"
 #include <iostream>
 
 extern "C" {
@@ -21,6 +15,13 @@ extern "C" {
 	#include <lualib.h>
 }
 
+#include "video.h"
+#include "script.h"
+
+#include "particle_manager.h"
+#include "particle_effect.h"
+#include "particle_system.h"
+#include "particle_keyframe.h"
 
 using namespace std;
 using namespace hoa_script;

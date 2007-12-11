@@ -13,13 +13,14 @@
  * \brief   Source file for scene mode interface.
  *****************************************************************************/
 
-#include "utils.h"
 #include <iostream>
-#include "scene.h"
+
 #include "audio.h"
 #include "video.h"
 #include "input.h"
 #include "system.h"
+
+#include "scene.h"
 
 using namespace std;
 using namespace hoa_mode_manager;

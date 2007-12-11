@@ -23,9 +23,11 @@
 #ifndef __SCENE_HEADER__
 #define __SCENE_HEADER__
 
-#include "utils.h"
 #include <string>
+
+#include "utils.h"
 #include "defs.h"
+
 #include "mode_manager.h"
 
 //! All calls to scene mode are wrapped in this namespace.

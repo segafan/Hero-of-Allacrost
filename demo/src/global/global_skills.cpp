@@ -15,12 +15,11 @@
 
 #include <iostream>
 
-#include "utils.h"
 #include "video.h"
-#include "script.h"
-#include "battle_actors.h"
 
 #include "global.h"
+
+#include "battle_actors.h"
 
 using namespace std;
 

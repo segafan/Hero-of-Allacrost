@@ -19,6 +19,7 @@
 #include "grid.h"
 #include "tileset.h"
 #include "tileset_editor.h"
+#include "skill_editor.h"
 
 #include <QApplication>
 #include <QCheckBox>
@@ -112,6 +113,7 @@ class Editor: public QMainWindow
 		void _TilesEnableActions();
 		void _TileSetEnableActions();
 		void _MapMenuSetup();
+		void _ScriptMenuSetup();
 		//@}
 
 		//! \name File Menu Item Slots
@@ -158,6 +160,12 @@ class Editor: public QMainWindow
 		void _MapProperties();
 		//@}
 
+		//! \name Script Menu Item Slots
+		//! \brief These slots handle the events for the script menu
+		//{@
+		void _ScriptEditSkills();
+		//@}
+
 		//! \name Help Menu Item Slots
 		//! \brief These slots process selection for their item in the Help menu.
 		//{@
@@ -190,6 +198,7 @@ class Editor: public QMainWindow
 		QMenu* _map_menu;
 		QMenu* _help_menu;
 		QMenu* _tileset_menu;
+		QMenu* _script_menu;
 		//@}
 
 		//! \name Application Toolbars
@@ -231,6 +240,8 @@ class Editor: public QMainWindow
 		
 		QAction* _map_properties_action;
 		QAction* _select_music_action;
+
+		QAction* _edit_skill_action;
 
 		QAction* _help_action;
 		QAction* _about_action;

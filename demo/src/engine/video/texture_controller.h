@@ -20,11 +20,6 @@
 #ifndef __TEXTURE_CONTROLLER_HEADER__
 #define __TEXTURE_CONTROLLER_HEADER__
 
-#include "defs.h"
-#include "utils.h"
-#include "texture.h"
-#include "image_base.h"
-
 // OpenGL includes
 #ifdef __APPLE__
 	#include <OpenGL/gl.h>
@@ -33,6 +28,12 @@
 	#include <GL/gl.h>
 	#include <GL/glu.h>
 #endif
+
+#include "defs.h"
+#include "utils.h"
+
+#include "texture.h"
+#include "image_base.h"
 
 namespace hoa_video {
 

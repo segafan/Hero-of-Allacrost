@@ -13,7 +13,6 @@
 *** \brief   Source file for the welcome screen, copied from boot_credits.cpp
 *** ***************************************************************************/
 
-#include "video.h"
 #include "script.h"
 
 #include "boot_welcome.h"

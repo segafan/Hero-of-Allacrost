@@ -18,11 +18,10 @@
 ***
 *** \note This code uses the OpenAL audio library. See http://www.openal.com/
 *** ***************************************************************************/
+#include <iostream>
 
 #include "audio.h"
 #include "system.h"
-
-#include <iostream>
 
 using namespace std;
 using namespace hoa_utils;

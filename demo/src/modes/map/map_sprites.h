@@ -18,7 +18,9 @@
 
 #include "utils.h"
 #include "defs.h"
+
 #include "video.h"
+
 #include "map_actions.h"
 #include "map_dialogue.h"
 #include "map_objects.h"

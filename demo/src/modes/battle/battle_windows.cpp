@@ -13,19 +13,9 @@
 *** \brief   Source file for battle menu windows
 *** ***************************************************************************/
 
-#include "utils.h"
-#include "defs.h"
-
-#include "audio.h"
-#include "video.h"
 #include "input.h"
-#include "mode_manager.h"
-#include "system.h"
-#include "global.h"
 
 #include "battle.h"
-#include "battle_actors.h"
-#include "battle_windows.h"
 #include "boot.h"
 
 using namespace std;

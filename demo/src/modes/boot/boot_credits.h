@@ -21,7 +21,6 @@
 #include <string>
 
 #include "video.h"
-#include "text.h"
 
 namespace hoa_boot {
 

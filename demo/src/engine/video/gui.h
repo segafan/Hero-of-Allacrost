@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "utils.h"
+
 #include "screen_rect.h"
 #include "image.h"
 #include "text.h"

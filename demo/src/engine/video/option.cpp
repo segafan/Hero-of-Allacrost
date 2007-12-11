@@ -9,8 +9,6 @@
 
 #include <sstream>
 
-#include "utils.h"
-
 #include "option.h"
 #include "video.h"
 

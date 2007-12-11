@@ -29,10 +29,11 @@
 #include "defs.h"
 #include "utils.h"
 
-#include "mode_manager.h"
 #include "script.h"
 #include "video.h"
-#include "gui.h"
+
+#include "mode_manager.h"
+
 
 //! All calls to map mode are wrapped in this namespace.
 namespace hoa_map {
