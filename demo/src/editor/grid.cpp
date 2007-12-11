@@ -475,6 +475,9 @@ void Grid::initializeGL()
 {
 	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
 	VideoManager->SingletonInitialize();
+	// changed because allacrost had to delay some video loading code
+	VideoManager->ApplySettings();
+	VideoManager->FinalizeInitialization();
 	VideoManager->ToggleFPS();
 } // initializeGL()
 
