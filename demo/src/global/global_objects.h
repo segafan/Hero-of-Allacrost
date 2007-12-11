@@ -22,10 +22,12 @@
 
 #include "defs.h"
 #include "utils.h"
-#include "image.h"
+
+#include "video.h"
 #include "script.h"
 
 #include "global_actors.h"
+#include "battle_actors.h"
 
 namespace hoa_global {
 

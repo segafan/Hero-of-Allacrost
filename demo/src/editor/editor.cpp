@@ -176,6 +176,11 @@ void Editor::_MapMenuSetup()
 	} // map does not exist, can't modify it*/
 } // _MapMenuSetup()
 
+void Editor::_ScriptMenuSetup()
+{
+	cout << "Test!" << endl;
+} // _ScriptMenuSetup
+
 void Editor::_FileNew()
 {
 	if (_EraseOK())
@@ -704,6 +709,13 @@ void Editor::_MapProperties()
 	delete props;
 } // _MapProperties()
 
+void Editor::_ScriptEditSkills()
+{
+	SkillEditor *skill_editor = new SkillEditor(this, "skill_editor");
+	skill_editor->exec();
+	delete skill_editor;
+}
+
 void Editor::_HelpHelp()
 {
 	statusBar()->showMessage(tr("See http://allacrost.sourceforge.net/wiki/index.php/Code_Documentation#Map_Editor_Documentation for more details"), 10000);
@@ -876,6 +888,11 @@ void Editor::_CreateActions()
 	connect(_map_properties_action, SIGNAL(triggered()), this, SLOT(_MapProperties()));
 
 
+	// Create menu actions related to the Script menu
+	_edit_skill_action = new QAction("Edit S&kills", this);
+	_edit_skill_action->setStatusTip("Add/Edit skills");
+	connect(_edit_skill_action, SIGNAL(triggered()), this, SLOT(_ScriptEditSkills()));
+
 
 	// Create menu actions related to the Help menu
 
@@ -948,6 +965,12 @@ void Editor::_CreateMenus()
 	_map_menu->addAction(_select_music_action);
 	_map_menu->addAction(_map_properties_action);
 	connect(_map_menu, SIGNAL(aboutToShow()), this, SLOT(_MapMenuSetup()));
+
+	// script menu creation
+	_script_menu = menuBar()->addMenu("&Script");
+	_script_menu->addAction(_edit_skill_action);
+	_script_menu->setTearOffEnabled(true);
+	connect(_script_menu, SIGNAL(aboutToShow()), this, SLOT(_ScriptMenuSetup()));
 
 	// help menu creation
 	_help_menu = menuBar()->addMenu("&Help");

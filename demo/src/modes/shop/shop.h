@@ -29,7 +29,9 @@
 
 #include "defs.h"
 #include "utils.h"
+
 #include "global.h"
+
 #include "mode_manager.h"
 #include "shop_windows.h"
 

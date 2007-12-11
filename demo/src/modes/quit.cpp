@@ -15,7 +15,6 @@
 
 #include <iostream>
 
-#include "utils.h"
 #include "audio.h"
 #include "video.h"
 #include "input.h"

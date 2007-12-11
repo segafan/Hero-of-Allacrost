@@ -23,9 +23,8 @@
 #include <cassert>
 #include <cstdarg>
 #include <math.h>
-#include "utils.h"
+
 #include "video.h"
-#include "gui.h"
 
 using namespace std;
 using namespace hoa_utils;

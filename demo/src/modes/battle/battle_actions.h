@@ -24,9 +24,9 @@
 #include "utils.h"
 #include "defs.h"
 
-#include "global.h"
 #include "video.h"
-#include "audio.h"
+
+#include "global.h"
 
 namespace hoa_battle {
 

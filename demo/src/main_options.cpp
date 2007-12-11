@@ -15,13 +15,17 @@
 
 #include "utils.h"
 #include "defs.h"
+
 #include "audio.h"
 #include "video.h"
 #include "script.h"
-#include "mode_manager.h"
 #include "input.h"
 #include "system.h"
+
 #include "global.h"
+
+#include "mode_manager.h"
+
 #include "main_options.h"
 
 using namespace std;

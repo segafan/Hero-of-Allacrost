@@ -9,10 +9,9 @@
 
 #include <sstream>
 
-#include "utils.h"
 #include "video.h"
+
 #include "textbox.h"
-#include "menu_window.h"
 
 using namespace std;
 using namespace hoa_utils;

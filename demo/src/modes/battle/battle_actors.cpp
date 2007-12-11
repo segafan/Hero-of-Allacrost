@@ -18,16 +18,10 @@
 #include <iostream>
 #include <sstream>
 
-#include "utils.h"
-#include "audio.h"
-#include "video.h"
 #include "input.h"
-#include "system.h"
-#include "global.h"
 #include "script.h"
+
 #include "battle.h"
-#include "battle_actors.h"
-#include "battle_actions.h"
 
 using namespace std;
 

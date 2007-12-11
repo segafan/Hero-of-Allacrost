@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "utils.h"
+
 #include "gui.h"
 
 namespace hoa_video {

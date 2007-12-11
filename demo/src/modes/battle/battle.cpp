@@ -18,14 +18,10 @@
 #include <iostream>
 #include <sstream>
 
-#include "utils.h"
-#include "audio.h"
-#include "video.h"
-#include "input.h"
-#include "mode_manager.h"
-#include "system.h"
-#include "global.h"
 #include "script.h"
+#include "input.h"
+
+#include "mode_manager.h"
 #include "battle.h"
 #include "pause.h"
 #include "quit.h"

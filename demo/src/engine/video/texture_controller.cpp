@@ -13,10 +13,9 @@
 *** \brief   Source file for texture management code
 *** ***************************************************************************/
 
-#include "utils.h"
-#include "texture_controller.h"
 #include "video.h"
-#include "gui.h"
+
+#include "texture_controller.h"
 
 using namespace std;
 using namespace hoa_utils;

@@ -16,10 +16,8 @@
 #include <cstdarg>
 #include <math.h>
 
-#include "utils.h"
 #include "image_base.h"
 #include "video.h"
-#include "gui.h"
 
 using namespace std;
 using namespace hoa_utils;

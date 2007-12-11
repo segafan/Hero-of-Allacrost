@@ -13,8 +13,6 @@
 *** \brief   Source file for Allacrost utility code.
 *** ***************************************************************************/
 
-#include "utils.h"
-
 // Headers included for directory manipulation. Windows has its own way of
 // dealing with directories, hence the need for conditional includes
 #ifdef _WIN32
@@ -25,9 +23,11 @@
 	#include <sys/types.h>
 	#include <pwd.h>
 #endif
-
 #include <fstream>
 #include <sys/stat.h>
+
+#include "utils.h"
+
 #include "socket.h"
 
 

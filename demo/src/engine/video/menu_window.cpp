@@ -9,9 +9,7 @@
 
 #include <sstream>
 
-#include "utils.h"
 #include "video.h"
-#include "gui.h"
 #include "menu_window.h"
 
 using namespace std;

@@ -13,25 +13,21 @@
  * \brief   Source file for boot mode interface.
  *****************************************************************************/
 
-
-#include "utils.h"
 #include <iostream>
 #include <sstream>
-#include "boot.h"
-#include "boot_menu.h"
-#include "boot_credits.h"
+
 #include "audio.h"
-#include "video.h"
 #include "script.h"
-#include "global.h"
-#include "mode_manager.h"
 #include "input.h"
 #include "system.h"
+
+#include "global.h"
+
+#include "boot.h"
 #include "map.h"
 #include "battle.h" // tmp
 #include "menu.h" // even more tmp
 #include "shop.h" // tmp
-#include <fstream> // more more tmp
 
 using namespace std;
 using namespace hoa_boot::private_boot;

@@ -18,12 +18,9 @@
 #include <iostream>
 #include <sstream>
 
-#include "utils.h"
-#include "system.h"
 #include "script.h"
+
 #include "battle.h"
-#include "battle_actions.h"
-#include "battle_actors.h"
 
 using namespace std;
 

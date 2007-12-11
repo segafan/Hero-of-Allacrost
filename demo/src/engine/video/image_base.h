@@ -40,6 +40,7 @@
 
 #include "defs.h"
 #include "utils.h"
+
 #include "color.h"
 #include "texture.h"
 

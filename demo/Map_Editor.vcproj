@@ -22,7 +22,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\tileset_editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\tileset_editor_moc.cpp&quot;&#x0D;&#x0A;"
+				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\tileset_editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\tileset_editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\skill_editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\skill_editor_moc.cpp"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -269,6 +269,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\editor\skill_editor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\editor\skill_editor_moc.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\socket.cpp"
 				>
 			</File>
@@ -416,6 +424,10 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\shop\shop_windows.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\editor\skill_editor.h"
 				>
 			</File>
 			<File

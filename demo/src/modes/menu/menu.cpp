@@ -17,17 +17,15 @@
 #include <iostream>
 #include <sstream>
 
-#include "utils.h"
-
-#include "menu.h"
-#include "audio.h"
-#include "video.h"
-#include "mode_manager.h"
 #include "system.h"
 #include "input.h"
-#include "global.h"
+#include "audio.h"
 #include "pause.h"
 #include "quit.h"
+
+#include "mode_manager.h"
+#include "menu.h"
+
 
 using namespace std;
 

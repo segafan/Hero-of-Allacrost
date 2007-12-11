@@ -38,20 +38,19 @@
 #include "utils.h"
 #include "defs.h"
 
-#include "main_options.h"
-
-#include "audio_stream.h"
 #include "audio.h"
-#include "audio_descriptor.h"
 #include "video.h"
 #include "input.h"
 #include "script.h"
 #include "system.h"
-#include "global.h"
-#include "mode_manager.h"
 
+#include "global.h"
+
+#include "mode_manager.h"
 #include "boot.h"
 #include "map.h"
+#include "main_options.h"
+
 
 using namespace std;
 using namespace hoa_utils;

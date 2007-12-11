@@ -13,7 +13,6 @@
 *** \brief   Source file for the credits screen
 *** ***************************************************************************/
 
-#include "video.h"
 #include "script.h"
 
 #include "boot_credits.h"

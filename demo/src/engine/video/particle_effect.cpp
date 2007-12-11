@@ -7,10 +7,11 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "particle_effect.h"
-#include "particle_system.h"
 #include "video.h"
 #include "script.h"
+
+#include "particle_effect.h"
+#include "particle_system.h"
 
 using namespace std;
 using namespace hoa_script;
