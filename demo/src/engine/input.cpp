@@ -19,9 +19,6 @@
 #include "script_read.h"
 #include "mode_manager.h"
 #include "system.h"
-#include "quit.h"
-#include "pause.h"
-#include "battle.h" // WK - input code should be mode agnostic.
 
 using namespace std;
 
@@ -30,13 +27,7 @@ using namespace hoa_video;
 using namespace hoa_script;
 using namespace hoa_mode_manager;
 using namespace hoa_system;
-using namespace hoa_quit;
-using namespace hoa_pause;
-using namespace hoa_global;
 using namespace hoa_input::private_input;
-
-using namespace hoa_battle;
-using namespace hoa_battle::private_battle;
 
 template<> hoa_input::GameInput* Singleton<hoa_input::GameInput>::_singleton_reference = NULL;
 
@@ -44,21 +35,6 @@ namespace hoa_input {
 
 GameInput* InputManager = NULL;
 bool INPUT_DEBUG = false;
-
-//To determine if we are in battle mode when pausing
-bool in_battle_mode = false;
-
-void TEMP_HandlePause()
-{
-	if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
-	{
-		current_battle->FreezeTimers();
-	}
-	else if (ModeManager->GetGameType(1) == MODE_MANAGER_BATTLE_MODE)
-	{
-		current_battle->UnFreezeTimers();
-	}
-}
 
 // Initializes class members
 GameInput::GameInput() {
@@ -95,11 +71,15 @@ GameInput::GameInput() {
 	_left_select_state    = false;
 	_left_select_press    = false;
 	_left_select_release  = false;
+	
+	_pause_press          = false;
+	_quit_press           = false;
 
 	_joyaxis_x_first      = true;
 	_joyaxis_y_first      = true;
 	_joystick.js          = NULL;
 }
+
 
 
 GameInput::~GameInput() {
@@ -111,6 +91,7 @@ GameInput::~GameInput() {
 	}
 }
 
+
 // Initialize singleton pointers and key/joystick systems.
 bool GameInput::SingletonInitialize() {
 	// Initialize the SDL joystick subsystem
@@ -121,6 +102,7 @@ bool GameInput::SingletonInitialize() {
 
 	return true;
 }
+
 
 // This is no longer inside SingletonInitialize because we need to load the lua settings 
 // before initializing the joysticks.
@@ -215,24 +197,6 @@ bool GameInput::AnyKeyRelease() {
 }
 
 
-
-void GameInput::TogglePause(){
-	// If the current game mode is PauseMode, unpause the game
-	if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
-		ModeManager->Pop();
-		TEMP_HandlePause();
-	}
-	// Otherwise, make PauseMode the active game mode
-	else {
-		PauseMode *PM = new PauseMode();
-
-		TEMP_HandlePause();
-		ModeManager->Push(PM);
-	}
-}
-
-
-
 // Handles all of the event processing for the game.
 void GameInput::EventHandler() {
 	SDL_Event event; // Holds the game event
@@ -262,22 +226,15 @@ void GameInput::EventHandler() {
 	_left_select_press    = false;
 	_left_select_release  = false;
 
+	_pause_press = false;
+	_quit_press = false;
+
 	// Loops until there are no remaining events to process
 	while (SDL_PollEvent(&event)) {
 		_event = event;
 		if (event.type == SDL_QUIT) {
-			// Quit the game without question if the active game mode is BootMode or QuitMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
-				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-				SystemManager->ExitGame();
-			}
-			// Otherwise, we push QuitMode onto the stack
-			else {
-				QuitMode *QM = new QuitMode();
-				TEMP_HandlePause();
-				ModeManager->Push(QM);
-			}
-			return;
+			_quit_press = true;
+			break;
 		}
 		// Check if the window was iconified/minimized or restored
 		else if (event.type == SDL_ACTIVEEVENT) {
@@ -319,94 +276,6 @@ void GameInput::EventHandler() {
 			_JoystickEventHandler(event);
 		}
 	} // while (SDL_PollEvent(&event)
-
-	// Compare the current and previous peak joystick axis values to detect movement events
-/*	if (_joystick.js != NULL) {
-		// ******************************* X-Axis Movment *************************************
-		// Check for a x-axis boundary change from left to center or right
-		int JOYAXIS_THRESHOLD = _joystick.threshold;
-		if ((_joystick.x_previous_peak <= -JOYAXIS_THRESHOLD) &&
-		    (_joystick.x_current_peak > -JOYAXIS_THRESHOLD)) {
-			_left_state = false;
-			_left_release = true;
-			// Check for a right x-axis boundary change
-			if (_joystick.x_current_peak >= JOYAXIS_THRESHOLD) {
-				_right_state = true;
-				_right_press = true;
-			}
-		}
-		// Check for a x-axis boundary change from right to center or left
-		else if ((_joystick.x_previous_peak >= JOYAXIS_THRESHOLD) &&
-		         (_joystick.x_current_peak < JOYAXIS_THRESHOLD)) {
-			_right_state = false;
-			_right_release = true;
-			// Check for a left x-axis boundary change
-			if (_joystick.x_current_peak <= -JOYAXIS_THRESHOLD) {
-				_left_state = true;
-				_left_press = true;
-			}
-		}
-		// Check for a x-axis boundary change from center to left
-		else if ((_joystick.x_current_peak <= -JOYAXIS_THRESHOLD) &&
-		         (_joystick.x_previous_peak > -JOYAXIS_THRESHOLD) &&
-		         (_joystick.x_previous_peak < JOYAXIS_THRESHOLD)) {
-			_left_state = true;
-			_left_press = true;
-		}
-		// Check for a x-axis boundary change from center to right
-		else if ((_joystick.x_current_peak >= JOYAXIS_THRESHOLD) &&
-		         (_joystick.x_previous_peak > -JOYAXIS_THRESHOLD) &&
-		         (_joystick.x_previous_peak > JOYAXIS_THRESHOLD)) {
-			_right_state = true;
-			_right_press = true;
-		}
-
-		// ******************************* Y-Axis Movment *************************************
-		// Check for a y-axis boundary change from up to center or down
-		if ((_joystick.y_previous_peak <= -JOYAXIS_THRESHOLD) &&
-		    (_joystick.y_current_peak > -JOYAXIS_THRESHOLD)) {
-			_up_state = false;
-			_up_release = true;
-			// Check for a down y-axis boundary change
-			if (_joystick.y_current_peak >= JOYAXIS_THRESHOLD) {
-				_down_state = true;
-				_down_press = true;
-			}
-		}
-		// Check for a y-axis boundary change from down to center or up
-		else if ((_joystick.y_previous_peak >= JOYAXIS_THRESHOLD) &&
-		         (_joystick.y_current_peak < JOYAXIS_THRESHOLD)) {
-			_down_state = false;
-			_down_release = true;
-			// Check for an up y-axis boundary change
-			if (_joystick.y_current_peak <= -JOYAXIS_THRESHOLD) {
-				_up_state = true;
-				_up_press = true;
-			}
-		}
-		// Check for a y-axis boundary change from center to up
-		else if ((_joystick.y_current_peak <= -JOYAXIS_THRESHOLD) &&
-		         (_joystick.y_previous_peak > -JOYAXIS_THRESHOLD) &&
-		         (_joystick.y_previous_peak < JOYAXIS_THRESHOLD)) {
-			_up_state = true;
-			_up_press = true;
-		}
-		// Check for a x-axis boundary change from center to down
-		else if ((_joystick.y_current_peak >= JOYAXIS_THRESHOLD) &&
-		         (_joystick.y_previous_peak > -JOYAXIS_THRESHOLD) &&
-		         (_joystick.y_previous_peak < JOYAXIS_THRESHOLD)) {
-			_down_state = true;
-			_down_press = true;
-		}
-
-		// Save previous peak values for the next iteration of event processing
-		_joystick.x_previous_peak = _joystick.x_current_peak;
-		_joystick.y_previous_peak = _joystick.y_current_peak;
-
-		// Reset first axis motion detectors for next event processing loop
-		_joyaxis_x_first = true;
-		_joyaxis_y_first = true;
-	} // (_joystick.js != NULL) */
 } // void GameInput::EventHandler()
 
 
@@ -432,17 +301,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_q) {
-				// Quit the game without question if the current game mode is BootMode or QuitMode
-				if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
-					|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-					SystemManager->ExitGame();
-				}
-				// Otherwise, enter QuitMode
-				else {
-					QuitMode *QM = new QuitMode();
-					TEMP_HandlePause();
-					ModeManager->Push(QM);
-				}
+				_quit_press = true;
 			}
 			else if (key_event.keysym.sym == SDLK_r) {
 				VideoManager->ToggleFPS();
@@ -471,30 +330,13 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			//return;
 		} // endif CTRL pressed
 
-		if (key_event.keysym.sym == SDLK_ESCAPE) // Same story as on Ctrl-Q
-		{
-			// Quit the game without question if the current game mode is BootMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE) {
-					SystemManager->ExitGame();
-			}
-			else {
-				// Cancel QuitMode if it is the active game mode
-				if(ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-					ModeManager->Pop();
-					TEMP_HandlePause();
-				}
-				// Otherwise, enter QuitMode
-				else {
-					QuitMode *QM = new QuitMode();
-					TEMP_HandlePause();
-					ModeManager->Push(QM);
-				}
-			}
-		}
-
 		// Note: a switch-case statement won't work here because Key.up is not an
 		// integer value the compiler will whine and cry about it ;_;
-		if (key_event.keysym.sym == _key.up) {
+		if (key_event.keysym.sym == SDLK_ESCAPE) {
+			_quit_press = true;
+			return;
+		}
+		else if (key_event.keysym.sym == _key.up) {
 			_up_state = true;
 			_up_press = true;
 			return;
@@ -545,12 +387,8 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			return;
 		}
 		else if (key_event.keysym.sym == _key.pause) {
-			// Don't pause if the current game mode is BootMode or QuitMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
-				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-				return;
-			}
-			TogglePause();
+			_pause_press = true;
+			return;
 		}
 	}
 
@@ -558,9 +396,6 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 
 		_any_key_press = false;
 		_any_key_release = true;
-
-		//if (key_event.keysym.mod & KMOD_CTRL) // Don't recognize a key release if ctrl is down
-		//	return;
 
 		if (key_event.keysym.sym == _key.up) {
 			_up_state = false;
@@ -661,26 +496,8 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 				_down_state = false;
 			}
 		}
+	} // if (js_event.type == SDL_JOYAXISMOTION)
 
-/*		if (js_event.jaxis.axis == 0) { // X-axis motion
-			if (_joyaxis_x_first == true) {
-				_joystick.x_current_peak = js_event.jaxis.value;
-				_joyaxis_x_first = false;
-			}
-			else if (abs(js_event.jaxis.value) > abs(_joystick.x_current_peak)) {
-				_joystick.x_current_peak = js_event.jaxis.value;
-			}
-		}
-		else { // Y-axis motion
-			if (_joyaxis_y_first == true) {
-				_joystick.y_current_peak = js_event.jaxis.value;
-				_joyaxis_y_first = false;
-			}
-			if (abs(js_event.jaxis.value) > abs(_joystick.y_current_peak)) {
-				_joystick.y_current_peak = js_event.jaxis.value;
-			}
-		} */
-	}// if (js_event.type == SDL_JOYAXISMOTION)
 	else if (js_event.type == SDL_JOYBUTTONDOWN) {
 
 		_any_key_press = true;
@@ -716,42 +533,16 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			return;
 		}
 		else if (js_event.jbutton.button == _joystick.pause) {
-			// Don't pause if the current game mode is BootMode or QuitMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
-				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-				return;
-			}
-			// If the current game mode is PauseMode, unpause the game
-			else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
-				ModeManager->Pop();
-				TEMP_HandlePause();
-			}
-			// Otherwise, make PauseMode the active game mode
-			else {
-				PauseMode *PM = new PauseMode();
-
-				TEMP_HandlePause();
-				ModeManager->Push(PM);
-			}
+			_pause_press = true;
 			return;
 		}
 		else if (js_event.jbutton.button == _joystick.quit) {
-			// Quit the game without question if the current game mode is BootMode or QuitMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
-				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-				SystemManager->ExitGame();
-			}
-			// Otherwise, enter QuitMode
-			else {
-				QuitMode *QM = new QuitMode();
-				TEMP_HandlePause();
-				ModeManager->Push(QM);
-			}
+			_quit_press = true;
 			return;
 		}
 	} // else if (js_event.type == JOYBUTTONDOWN)
-	else if (js_event.type == SDL_JOYBUTTONUP) {
 
+	else if (js_event.type == SDL_JOYBUTTONUP) {
 		_any_key_press = false;
 		_any_key_release = true;
 
@@ -787,8 +578,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 		}
 	} // else if (js_event.type == JOYBUTTONUP)
 
-	// SDL_JOYBALLMOTION and SDL_JOYHATMOTION are ignored for now. Should we process them?
-
+	// NOTE: SDL_JOYBALLMOTION and SDL_JOYHATMOTION are ignored for now. Should we process them?
 } // void GameInput::_JoystickEventHandler(SDL_Event& js_event)
 
 

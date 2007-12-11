@@ -115,7 +115,12 @@ void QuitMode::Reset() {
 // Restores volume or unpauses audio, then pops itself from the game stack
 void QuitMode::Update() {
 	uint32 time_elapsed = SystemManager->GetUpdateTime();
-	
+
+	if (InputManager->QuitPress() == true) {
+		_QuitGame();
+		return;
+	}
+
 	// Dispatch input to option box
 	
 	if (InputManager->LeftPress())
@@ -235,7 +240,6 @@ void QuitMode::_Cancel() {
 // 			break;
 // 		// Don't need to do anything for case SETTINGS_SAME_VOLUME
 // 	}
-	TEMP_HandlePause();
 	ModeManager->Pop();
 }
 

@@ -985,6 +985,11 @@ void BootMode::_SaveSettingsFile() {
 void BootMode::Update() {
 	uint32 time_elapsed = SystemManager->GetUpdateTime();
 
+	if (InputManager->QuitPress() == true) {
+		SystemManager->ExitGame();
+		return;
+	}
+
 	// Screen is in the process of fading out
 	if (_fade_out)
 	{

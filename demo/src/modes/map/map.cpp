@@ -27,6 +27,8 @@
 #include "system.h"
 #include "battle.h"
 #include "menu.h"
+#include "pause.h"
+#include "quit.h"
 
 using namespace std;
 using namespace hoa_map::private_map;
@@ -41,6 +43,8 @@ using namespace hoa_global;
 using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
+using namespace hoa_pause;
+using namespace hoa_quit;
 
 namespace hoa_map {
 
@@ -476,6 +480,15 @@ void MapMode::_LoadTiles() {
 
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update() {
+	if (InputManager->QuitPress() == true) {
+		ModeManager->Push(new QuitMode());
+		return;
+	}
+	else if (InputManager->PausePress() == true) {
+		ModeManager->Push(new PauseMode());
+		return;
+	}
+
 	_time_elapsed = SystemManager->GetUpdateTime();
 
 	// ---------- (1) Call the map's update script function
