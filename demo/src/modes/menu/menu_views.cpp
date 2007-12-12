@@ -448,7 +448,9 @@ void InventoryWindow::Draw() {
 // StatusWindow Class
 ////////////////////////////////////////////////////////////////////////////////
 
-StatusWindow::StatusWindow() : _char_select_active(false) {
+StatusWindow::StatusWindow() :
+	_char_select_active(false),
+	_char_select(MenuMode::_char_select) {
 	// Get party size for iteration
 	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
 	StillImage portrait;
@@ -509,8 +511,6 @@ void StatusWindow::_InitCharSelect() {
 
 // Updates the status window
 void StatusWindow::Update() {
-	_char_select.SetSelection(MenuMode::_char_selected);
-
 	// check input values
 	if (InputManager->UpPress())
 	{
@@ -530,8 +530,6 @@ void StatusWindow::Update() {
 		MenuMode::_instance->_menu_sounds["cancel"].Play();
 	}
 	_char_select.Update();
-	MenuMode::_char_selected = _char_select.GetSelection();
-
 } // void StatusWindow::Update()
 
 
@@ -539,7 +537,7 @@ void StatusWindow::Update() {
 void StatusWindow::Draw() {
 	MenuWindow::Draw();
 
-	GlobalCharacter* ch =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(MenuMode::_char_selected));
+	GlobalCharacter* ch =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 
 	// Set drawing system
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
@@ -609,7 +607,7 @@ void StatusWindow::Draw() {
 	VideoManager->Move(855, 145);
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, 0);
 
-	_full_portraits[MenuMode::_char_selected].Draw();
+	_full_portraits[_char_select.GetSelection()].Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
@@ -622,6 +620,7 @@ void StatusWindow::Draw() {
 
 SkillsWindow::SkillsWindow() : 
 	_active_box(SKILL_ACTIVE_NONE),
+	_char_select(MenuMode::_char_select),
 	_char_skillset(0)
 {
 	// Init option boxes
@@ -735,8 +734,6 @@ void SkillsWindow::_InitSkillsCategories() {
 
 
 void SkillsWindow::Update() {
-	_char_select.SetSelection(MenuMode::_char_selected);
-
 	OptionBox *active_option = NULL;
 
 	//choose correct menu
@@ -872,7 +869,6 @@ void SkillsWindow::Update() {
 		_description.SetDisplayText(MakeUnicodeString(desc));
 	}
 
-	MenuMode::_char_selected = _char_select.GetSelection();
 } // void SkillsWindow::Update()
 
 GlobalSkill *SkillsWindow::_GetCurrentSkill()
@@ -910,7 +906,7 @@ GlobalSkill *SkillsWindow::_GetCurrentSkill()
 
 
 void SkillsWindow::_UpdateSkillList() {
-	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(MenuMode::_char_selected));
+	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 	assert(ch);
 	vector<ustring> options;
 	vector<ustring> cost_options;
@@ -1001,7 +997,9 @@ void SkillsWindow::Draw() {
 // EquipWindow Class
 ////////////////////////////////////////////////////////////////////////////////
 
-EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE) {
+EquipWindow::EquipWindow() :
+	_char_select(MenuMode::_char_select),
+	_active_box(EQUIP_ACTIVE_NONE) {
 	// Initialize option boxes
 	_InitCharSelect();
 	_InitEquipmentSelect();
@@ -1103,8 +1101,6 @@ void EquipWindow::_InitEquipmentSelect() {
 
 
 void EquipWindow::Update() {
-	_char_select.SetSelection(MenuMode::_char_selected);
-
 	// Points to the active option box
 	OptionBox *active_option = NULL;
 
@@ -1270,13 +1266,12 @@ void EquipWindow::Update() {
 	} // switch _active_box
 
 	_UpdateEquipList();
-	MenuMode::_char_selected = _char_select.GetSelection();
 } // void EquipWindow::Update()
 
 
 
 void EquipWindow::_UpdateEquipList() {
-	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(MenuMode::_char_selected));
+	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 	std::vector<ustring> options;
 
 	if (_active_box == EQUIP_ACTIVE_LIST) {
@@ -1374,7 +1369,6 @@ void EquipWindow::Draw() {
 	MenuWindow::Draw();
 	_UpdateEquipList();
 
-	_char_select.SetSelection(MenuMode::_char_selected);
 	//Draw option boxes
 	_char_select.Draw();
 

@@ -249,7 +249,7 @@ private:
 	bool _char_select_active;
 
 	//! character selection option box
-	hoa_video::OptionBox _char_select;
+	hoa_video::OptionBox & _char_select;
 
 	/*!
 	* \brief initialize character selection option box
@@ -333,7 +333,7 @@ private:
 	uint32 _active_box;
 
 	//! The character select option box
-	hoa_video::OptionBox _char_select;
+	hoa_video::OptionBox & _char_select;
 
 	//! The skills categories option box
 	hoa_video::OptionBox _skills_categories;
@@ -423,7 +423,7 @@ public:
 private:
 
 	//! Character selector
-	hoa_video::OptionBox _char_select;
+	hoa_video::OptionBox & _char_select;
 
 	//! Equipment selector
 	hoa_video::OptionBox _equip_select;
@@ -467,6 +467,8 @@ private:
 *** This window changes party order.
 *** ***************************************************************************/
 class FormationWindow : public hoa_video::MenuWindow {
+	friend class hoa_menu::MenuMode;
+
 public:
 	FormationWindow();
 	~FormationWindow();

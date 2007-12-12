@@ -44,7 +44,7 @@ namespace hoa_menu {
 bool MENU_DEBUG = false;
 
 MenuMode* MenuMode::_instance = NULL;
-uint32 MenuMode::_char_selected = 0;
+OptionBox MenuMode::_char_select;
 
 ////////////////////////////////////////////////////////////////////////////////
 // MenuMode class -- Initialization and Destruction Code
@@ -314,7 +314,8 @@ void MenuMode::Update() {
 	}
 	else if (InputManager->SwapPress()) {
 		// Play Sound
-		_char_selected = (_char_selected + 1) % GlobalManager->GetActiveParty()->GetPartySize();
+		_char_select.SetSelection((_char_select.GetSelection() + 1) %
+			GlobalManager->GetActiveParty()->GetPartySize());
 	}
 
 	// Get the latest event from the current menu
@@ -745,6 +746,7 @@ void MenuMode::_HandleOptionsMenu() {
 void MenuMode::_HandleFormationMenu() {
 	switch (_menu_formation.GetSelection()) {
 		case FORMATION_SWITCH:
+			_formation_window._char_select.SetSelection(0);
 			_formation_window.Activate(true);
 			break;
 
