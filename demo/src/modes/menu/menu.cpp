@@ -44,6 +44,7 @@ namespace hoa_menu {
 bool MENU_DEBUG = false;
 
 MenuMode* MenuMode::_instance = NULL;
+uint32 MenuMode::_char_selected = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // MenuMode class -- Initialization and Destruction Code
@@ -311,6 +312,10 @@ void MenuMode::Update() {
 		// Play Sound
 		_current_menu->HandleRightKey();
 	}
+	else if (InputManager->SwapPress()) {
+		// Play Sound
+		_char_selected = (_char_selected + 1) % GlobalManager->GetActiveParty()->GetPartySize();
+	}
 
 	// Get the latest event from the current menu
 	int32 event = _current_menu->GetEvent();
@@ -359,6 +364,7 @@ void MenuMode::Update() {
 	} // if VIDEO_OPTION_CONFIRM
 	
 	_current_menu->Update();
+	
 } // void MenuMode::Update()
 
 ////////////////////////////////////////////////////////////////////////////////
