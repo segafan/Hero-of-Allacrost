@@ -509,6 +509,8 @@ void StatusWindow::_InitCharSelect() {
 
 // Updates the status window
 void StatusWindow::Update() {
+	_char_select.SetSelection(MenuMode::_char_selected);
+
 	// check input values
 	if (InputManager->UpPress())
 	{
@@ -528,6 +530,8 @@ void StatusWindow::Update() {
 		MenuMode::_instance->_menu_sounds["cancel"].Play();
 	}
 	_char_select.Update();
+	MenuMode::_char_selected = _char_select.GetSelection();
+
 } // void StatusWindow::Update()
 
 
@@ -535,7 +539,7 @@ void StatusWindow::Update() {
 void StatusWindow::Draw() {
 	MenuWindow::Draw();
 
-	GlobalCharacter* ch =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+	GlobalCharacter* ch =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(MenuMode::_char_selected));
 
 	// Set drawing system
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
@@ -605,7 +609,7 @@ void StatusWindow::Draw() {
 	VideoManager->Move(855, 145);
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, 0);
 
-	_full_portraits[_char_select.GetSelection()].Draw();
+	_full_portraits[MenuMode::_char_selected].Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
@@ -731,6 +735,8 @@ void SkillsWindow::_InitSkillsCategories() {
 
 
 void SkillsWindow::Update() {
+	_char_select.SetSelection(MenuMode::_char_selected);
+
 	OptionBox *active_option = NULL;
 
 	//choose correct menu
@@ -865,6 +871,8 @@ void SkillsWindow::Update() {
 		string desc = MakeStandardString(skill->GetName()) + "\n\n" + MakeStandardString(skill->GetDescription());
 		_description.SetDisplayText(MakeUnicodeString(desc));
 	}
+
+	MenuMode::_char_selected = _char_select.GetSelection();
 } // void SkillsWindow::Update()
 
 GlobalSkill *SkillsWindow::_GetCurrentSkill()
@@ -902,7 +910,7 @@ GlobalSkill *SkillsWindow::_GetCurrentSkill()
 
 
 void SkillsWindow::_UpdateSkillList() {
-	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(MenuMode::_char_selected));
 	assert(ch);
 	vector<ustring> options;
 	vector<ustring> cost_options;
@@ -984,6 +992,7 @@ void SkillsWindow::Draw() {
 	//Draw option boxes
 	_char_select.Draw();
 	_skills_categories.Draw();
+	_UpdateSkillList();
 	_skills_list.Draw();
 	_skill_cost_list.Draw();
 }
@@ -1094,6 +1103,8 @@ void EquipWindow::_InitEquipmentSelect() {
 
 
 void EquipWindow::Update() {
+	_char_select.SetSelection(MenuMode::_char_selected);
+
 	// Points to the active option box
 	OptionBox *active_option = NULL;
 
@@ -1259,12 +1270,13 @@ void EquipWindow::Update() {
 	} // switch _active_box
 
 	_UpdateEquipList();
+	MenuMode::_char_selected = _char_select.GetSelection();
 } // void EquipWindow::Update()
 
 
 
 void EquipWindow::_UpdateEquipList() {
-	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(MenuMode::_char_selected));
 	std::vector<ustring> options;
 
 	if (_active_box == EQUIP_ACTIVE_LIST) {
@@ -1360,7 +1372,9 @@ void EquipWindow::_UpdateEquipList() {
 
 void EquipWindow::Draw() {
 	MenuWindow::Draw();
+	_UpdateEquipList();
 
+	_char_select.SetSelection(MenuMode::_char_selected);
 	//Draw option boxes
 	_char_select.Draw();
 

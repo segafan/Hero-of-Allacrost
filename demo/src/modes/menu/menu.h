@@ -223,7 +223,7 @@ private:
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 	
 	//! The selected character
-	uint32 _char_selected;
+	static uint32 _char_selected;
 	
 	//! The selected item/skill/equipment
 	uint32 _item_selected;
