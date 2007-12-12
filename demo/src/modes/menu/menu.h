@@ -223,7 +223,7 @@ private:
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 	
 	//! The selected character
-	static uint32 _char_selected;
+//	static uint32 _char_selected;
 	
 	//! The selected item/skill/equipment
 	uint32 _item_selected;
@@ -249,6 +249,7 @@ private:
 	hoa_video::OptionBox _menu_equip;
 	hoa_video::OptionBox _menu_formation;
 	hoa_video::OptionBox _menu_save;
+	static hoa_video::OptionBox _char_select;
 	//@}
 	
 	//! \brief Functions that initialize the numerous option boxes
