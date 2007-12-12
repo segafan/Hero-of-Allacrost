@@ -24,7 +24,6 @@
 #include "mode_manager.h"
 #include "battle.h"
 #include "pause.h"
-#include "quit.h"
 
 using namespace std;
 
@@ -37,7 +36,6 @@ using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_script;
 using namespace hoa_pause;
-using namespace hoa_quit;
 
 using namespace hoa_battle::private_battle;
 
@@ -398,12 +396,12 @@ void BattleMode::_ReviveCharacters()
 void BattleMode::Update() {
 	if (InputManager->QuitPress()) {
 		FreezeTimers();
-		ModeManager->Push(new QuitMode());
+		ModeManager->Push(new PauseMode(true));
 		return;
 	}
 	else if (InputManager->PausePress()) {
 		FreezeTimers();
-		ModeManager->Push(new PauseMode());
+		ModeManager->Push(new PauseMode(false));
 		return;
 	}
 

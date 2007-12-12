@@ -146,8 +146,6 @@ modes_SOURCES = \
 	$(MODES_DIR)/menu/menu_views.h \
 	$(MODES_DIR)/pause.cpp \
 	$(MODES_DIR)/pause.h \
-	$(MODES_DIR)/quit.cpp \
-	$(MODES_DIR)/quit.h \
 	$(MODES_DIR)/scene.cpp \
 	$(MODES_DIR)/scene.h \
 	$(MODES_DIR)/shop/shop.h \
@@ -163,7 +161,7 @@ BUILT_SOURCES = $(allacrost_editor_MOC)
 CLEANFILES = $(BUILT_SOURCES)
 $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 	$(MOC) -o $@ $<
-allacrost_editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp
+allacrost_editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp $(EDITOR_DIR)/skill_editor.moc.cpp
 allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/editor_main.cpp \
 	$(EDITOR_DIR)/editor.cpp \
@@ -174,6 +172,8 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/tileset.h \
 	$(EDITOR_DIR)/tileset_editor.cpp \
 	$(EDITOR_DIR)/tileset_editor.h \
+	$(EDITOR_DIR)/skill_editor.cpp \
+	$(EDITOR_DIR)/skill_editor.h \
 	$(video_SOURCES) \
 	$(script_SOURCES) \
 	$(ENGINE_DIR)/socket.cpp \

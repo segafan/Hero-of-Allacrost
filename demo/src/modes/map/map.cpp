@@ -28,7 +28,6 @@
 #include "battle.h"
 #include "menu.h"
 #include "pause.h"
-#include "quit.h"
 
 using namespace std;
 using namespace hoa_map::private_map;
@@ -44,7 +43,6 @@ using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
 using namespace hoa_pause;
-using namespace hoa_quit;
 
 namespace hoa_map {
 
@@ -481,11 +479,11 @@ void MapMode::_LoadTiles() {
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update() {
 	if (InputManager->QuitPress() == true) {
-		ModeManager->Push(new QuitMode());
+		ModeManager->Push(new PauseMode(true));
 		return;
 	}
 	else if (InputManager->PausePress() == true) {
-		ModeManager->Push(new PauseMode());
+		ModeManager->Push(new PauseMode(false));
 		return;
 	}
 

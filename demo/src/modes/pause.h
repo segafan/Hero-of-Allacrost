@@ -10,16 +10,10 @@
 /** ****************************************************************************
 *** \file    pause.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for pause mode interface.
+*** \brief   Header file for pause and quit interface.
 ***
-*** This code handles the game event processing and frame drawing when the user
-*** is in pause mode (when the game is paused). In a nut-shell, all this code
-*** does is save a copy of the frame being displayed when the user requests a
-*** pause event, grays that image out, and then renders the text "PAUSED" while
-*** waiting for the user to un-pause the game.
-***
-*** \note When the user enters this mode, the game will sleep for small periods
-*** of time so that the game isn't using up 100% of the CPU.
+*** This code is responsible for managing the game's operation while the game
+*** is in a paused state.
 *** ***************************************************************************/
 
 #ifndef __PAUSE_HEADER__
@@ -27,52 +21,75 @@
 
 #include "utils.h"
 #include "defs.h"
-#include "mode_manager.h"
-#include "video.h"
 
-//! All calls to pause mode are wrapped in this namespace.
+#include "video.h"
+#include "mode_manager.h"
+
+//! \brief All calls to pause mode are wrapped in this namespace.
 namespace hoa_pause {
 
-//! Determines whether the code in the hoa_pause namespace should print debug statements or not.
+//! \brief Determines whether the code in the hoa_pause namespace should print debug statements or not.
 extern bool PAUSE_DEBUG;
 
-/*!****************************************************************************
- * \brief A mode pushed onto the game mode stack when the user pauses the game.
- *
- * This class basically saves the last frame displayed to the screen, grays it
- * out a little, and then renders the text "Paused" in the center of the screen.
- * The game remains paused until the user either presses the pause button again
- * or tries to quit the game.
- *
- * \note 1) During some scenes of the game you might need the audio to be synchronized
- * with the flow of action. If the user tries to pause the game you will want to pause 
- * the audio so the audio doesn't go out of synch with the action. In order to do this, 
- * when you begin such a scene you need to call the SetPauseVolumeAction() function of 
- * the  GameSettings class with the argument SETTINGS_PAUSE_AUDIO. When you are finished 
- * with this type of scene, you must must MUST remember to set this member back to its 
- * original value.
- *****************************************************************************/ 
+/** ****************************************************************************
+*** \brief Handles the game operation during a pause or quit user request
+***
+*** This mode is normally entered when the player inputs a pause or quit command.
+*** This class uses a captured screen image as its background and displays either
+*** the text "PAUSED" or a quit options menu depending on the state that the mode
+*** is set in. The constructor also allows you the option to automatically pause
+*** the audio while the game is in this mode of operation.
+***
+*** When the quit state is active, the player can choose between three options:
+*** - Quit Game         :: Exits the application entirely
+*** - Quit to Main Menu :: Returns to boot mode, emptying the game stack in the process
+*** - Cancel            :: Unpauses the game
+***
+*** \note When the user enters this mode, the game will sleep for small periods
+*** of time so that the application isn't using up 100% of the CPU.
+***
+*** \note If the user inputs a quit event when this mode is active and in the
+*** quit state, the game will exit immediately. If the user inputs a quit event
+*** when the quit state is not active, then the quit state is activated.
+*** ***************************************************************************/
 class PauseMode : public hoa_mode_manager::GameMode {
-private:
-	//! An image of the last frame shown on the screen before PauseMode was called.
-	hoa_video::StillImage _saved_screen;
-
-	/*! \brief Retains the original volume levels when this mode is active.
-	 *  Volume is restored when the mode is destroyed.
-	 */
-	float _saved_music_volume;
-	float _saved_sound_volume;
 public:
-	PauseMode();
+	/** \brief The class constructor determines the state and settings that PauseMode should be created in
+	*** \param quit_state If set to true, the user will be presented with quit options
+	*** \param pause_audio If set to true, the audio is paused when PauseMode becomes active and resumes when it exits.
+	**/
+	PauseMode(bool quit_state, bool pause_audio = false);
+
 	~PauseMode();
 	
-	//! Resets appropriate class members. Called whenever PauseMode is made the active game mode.
+	//! \brief Resets appropriate class members. Called whenever PauseMode is made the active game mode.
 	void Reset();
-	//! Updates the game state by the amount of time that has elapsed
+
+	//! \brief Updates the game state by the amount of time that has elapsed
 	void Update();
-	//! Draws the next frame to be displayed on the screen
+
+	//! \brief Draws the next frame to be displayed on the screen
 	void Draw();
-};
+
+private:
+	//! \brief When true, the player is presented with quit options. When false, "PAUSED" is displayed on the screen
+	bool _quit_state;
+
+	//! \brief Set to true if the audio should be resumed when this mode finishes
+	bool _audio_paused;
+
+	//! \brief A screen capture of the last frame rendered on the screen before PauseMode was invoked
+	hoa_video::StillImage _screen_capture;
+
+	//! \brief The color used to dim the background screen capture image
+	hoa_video::Color _dim_color;
+
+	//! \brief "PAUSED" rendered as an image texture
+	hoa_video::TextImage _paused_text;
+
+	//! \brief The list of selectabled quit options presented to the user while the mode is in the quit state
+	hoa_video::OptionBox _quit_options;
+}; // class PauseMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_pause
 

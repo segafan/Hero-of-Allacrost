@@ -184,7 +184,6 @@ bool EnableDebugging(string vars) {
 			hoa_map::MAP_DEBUG                      = true;
 			hoa_menu::MENU_DEBUG                    = true;
 			hoa_pause::PAUSE_DEBUG                  = true;
-			hoa_quit::QUIT_DEBUG                    = true;
 			hoa_shop::SHOP_DEBUG                    = true;
 			hoa_scene::SCENE_DEBUG                  = true;
 			hoa_utils::UTILS_DEBUG                  = true;
@@ -222,9 +221,6 @@ bool EnableDebugging(string vars) {
 		}
 		else if (args[i] == "pause") {
 			hoa_pause::PAUSE_DEBUG = true;
-		}
-		else if (args[i] == "quit") {
-			hoa_quit::QUIT_DEBUG = true;
 		}
 		else if (args[i] == "scene") {
 			hoa_scene::SCENE_DEBUG = true;

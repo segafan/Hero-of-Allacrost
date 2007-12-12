@@ -16,8 +16,6 @@
 #include "mode_manager.h"
 #include "system.h"
 
-#include "boot.h"
-
 using namespace std;
 
 using namespace hoa_utils;
