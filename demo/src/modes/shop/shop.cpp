@@ -31,7 +31,6 @@
 
 #include "mode_manager.h"
 #include "pause.h"
-#include "quit.h"
 
 #include "shop.h"
 
@@ -45,7 +44,6 @@ using namespace hoa_global;
 using namespace hoa_mode_manager;
 using namespace hoa_shop::private_shop;
 using namespace hoa_pause;
-using namespace hoa_quit;
 
 namespace hoa_shop {
 
@@ -129,11 +127,11 @@ void ShopMode::Reset() {
 
 void ShopMode::Update() {
 	if (InputManager->QuitPress() == true) {
-		ModeManager->Push(new QuitMode());
+		ModeManager->Push(new PauseMode(true));
 		return;
 	}
 	else if (InputManager->PausePress() == true) {
-		ModeManager->Push(new PauseMode());
+		ModeManager->Push(new PauseMode(false));
 		return;
 	}
 

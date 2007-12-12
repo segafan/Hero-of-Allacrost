@@ -281,12 +281,6 @@ namespace hoa_pause {
 	class PauseMode;
 }
 
-// Quit mode declarations, see quit.h/cpp
-namespace hoa_quit {
-	extern bool QUIT_DEBUG;
-	class QuitMode;
-}
-
 // Scene mode declarations, see scene.h/cpp
 namespace hoa_scene {
 	extern bool SCENE_DEBUG;
