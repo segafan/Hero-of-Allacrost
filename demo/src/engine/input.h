@@ -111,34 +111,12 @@ public:
 	uint8 quit;
 	//@}
 
-	//! \name Previous Peak Joystick Axis Values
-	/**
-	***
-	**/
-	//@{
-	//! \brief These variables retain the previous peak value of each joystick axis.
-	int16 x_previous_peak;
-	int16 y_previous_peak;
-	//@}
-
-	//! \name Current Peak Joystick Axis Values
-	/**
-	***
-	**/
-	//@{
-	//! \brief These variables retain the current peak value of each joystick axis.
-	int16 x_current_peak;
-	int16 y_current_peak;
-	//@}
-	
 	//! \brief Identify which axes to use for x and y.
 	int8 x_axis;
 	int8 y_axis;
 	
 	//! \brief The threshold value we use to partition the range of joystick values into on and off
 	uint16 threshold;
-
-	friend class GameInput;
 }; // class JoystickState
 
 } // namespace private_input
