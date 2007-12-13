@@ -21,7 +21,6 @@
 		4941A7060AC1D86400D65B8E /* menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A50AC1D86400D65B8E /* menu.cpp */; };
 		4941A7080AC1D86400D65B8E /* menu_views.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A70AC1D86400D65B8E /* menu_views.cpp */; };
 		4941A70A0AC1D86400D65B8E /* pause.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A90AC1D86400D65B8E /* pause.cpp */; };
-		4941A70C0AC1D86400D65B8E /* quit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6AB0AC1D86400D65B8E /* quit.cpp */; };
 		4941A70E0AC1D86400D65B8E /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6AD0AC1D86400D65B8E /* scene.cpp */; };
 		4941A7100AC1D86400D65B8E /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */; };
 		4941A7140AC1D89300D65B8E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7130AC1D89300D65B8E /* OpenGL.framework */; };
@@ -134,6 +133,8 @@
 		D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110400C58546800ADC969 /* audio_descriptor.cpp */; };
 		D4F1104C0C58548B00ADC969 /* audio_input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110460C58548B00ADC969 /* audio_input.cpp */; };
 		D4F1104E0C58548B00ADC969 /* audio_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110480C58548B00ADC969 /* audio_stream.cpp */; };
+		D4F2EB280D111B4300A2F1D7 /* skill_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */; };
+		D4F2EB2F0D111C7D00A2F1D7 /* skill_editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */; };
 		D4F68AA00BD72266009F6973 /* Qt3Support.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68A9F0BD72266009F6973 /* Qt3Support.framework */; };
 		D4F68AA40BD72276009F6973 /* QtCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA30BD72276009F6973 /* QtCore.framework */; };
 		D4F68AA80BD72280009F6973 /* QtGui.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA70BD7227F009F6973 /* QtGui.framework */; };
@@ -214,8 +215,6 @@
 		4941A6A80AC1D86400D65B8E /* menu_views.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = menu_views.h; sourceTree = "<group>"; };
 		4941A6A90AC1D86400D65B8E /* pause.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = pause.cpp; sourceTree = "<group>"; };
 		4941A6AA0AC1D86400D65B8E /* pause.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = pause.h; sourceTree = "<group>"; };
-		4941A6AB0AC1D86400D65B8E /* quit.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = quit.cpp; sourceTree = "<group>"; };
-		4941A6AC0AC1D86400D65B8E /* quit.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = quit.h; sourceTree = "<group>"; };
 		4941A6AD0AC1D86400D65B8E /* scene.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = scene.cpp; sourceTree = "<group>"; };
 		4941A6AE0AC1D86400D65B8E /* scene.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = scene.h; sourceTree = "<group>"; };
 		4941A6AF0AC1D86400D65B8E /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
@@ -337,6 +336,9 @@
 		D4F110470C58548B00ADC969 /* audio_input.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_input.h; sourceTree = "<group>"; };
 		D4F110480C58548B00ADC969 /* audio_stream.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_stream.cpp; sourceTree = "<group>"; };
 		D4F110490C58548B00ADC969 /* audio_stream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_stream.h; sourceTree = "<group>"; };
+		D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = skill_editor.cpp; sourceTree = "<group>"; };
+		D4F2EB270D111B4300A2F1D7 /* skill_editor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = skill_editor.h; sourceTree = "<group>"; };
+		D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = skill_editor.moc.cpp; path = src/editor/skill_editor.moc.cpp; sourceTree = "<group>"; };
 		D4F68A9F0BD72266009F6973 /* Qt3Support.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Qt3Support.framework; path = /Library/Frameworks/Qt3Support.framework; sourceTree = "<absolute>"; };
 		D4F68AA30BD72276009F6973 /* QtCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtCore.framework; path = /Library/Frameworks/QtCore.framework; sourceTree = "<absolute>"; };
 		D4F68AA70BD7227F009F6973 /* QtGui.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtGui.framework; path = /Library/Frameworks/QtGui.framework; sourceTree = "<absolute>"; };
@@ -458,8 +460,6 @@
 				4941A6A40AC1D86400D65B8E /* menu */,
 				4941A6A90AC1D86400D65B8E /* pause.cpp */,
 				4941A6AA0AC1D86400D65B8E /* pause.h */,
-				4941A6AB0AC1D86400D65B8E /* quit.cpp */,
-				4941A6AC0AC1D86400D65B8E /* quit.h */,
 				4941A6AD0AC1D86400D65B8E /* scene.cpp */,
 				4941A6AE0AC1D86400D65B8E /* scene.h */,
 			);
@@ -601,6 +601,7 @@
 		D404C6E80B02FCEC00827A19 /* Temporary Source Files */ = {
 			isa = PBXGroup;
 			children = (
+				D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */,
 				D4F0F4330CDE7CD000EFE9B0 /* tileset_editor.moc.cpp */,
 				D404C6E90B02FD3E00827A19 /* editor.moc.cpp */,
 				D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */,
@@ -684,6 +685,8 @@
 		D4D1BA640B02B27F0052BF1E /* editor */ = {
 			isa = PBXGroup;
 			children = (
+				D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */,
+				D4F2EB270D111B4300A2F1D7 /* skill_editor.h */,
 				D4EDF4DE0CB477130064919D /* tileset_editor.cpp */,
 				D4EDF4DF0CB477130064919D /* tileset_editor.h */,
 				D4D1BA650B02B27F0052BF1E /* editor.cpp */,
@@ -797,7 +800,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "#!/bin/bash\nif [[ -f /Developer/Tools/Qt/moc ]]; then\n/Developer/Tools/Qt/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/Developer/Tools/Qt/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/Developer/Tools/Qt/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelse\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nfi";
+			shellScript = "#!/bin/bash\nif [[ -f /Developer/Tools/Qt/moc ]]; then\n/Developer/Tools/Qt/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/Developer/Tools/Qt/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/Developer/Tools/Qt/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/Developer/Tools/Qt/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelse\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nfi";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -820,7 +823,6 @@
 				4941A7060AC1D86400D65B8E /* menu.cpp in Sources */,
 				4941A7080AC1D86400D65B8E /* menu_views.cpp in Sources */,
 				4941A70A0AC1D86400D65B8E /* pause.cpp in Sources */,
-				4941A70C0AC1D86400D65B8E /* quit.cpp in Sources */,
 				4941A70E0AC1D86400D65B8E /* scene.cpp in Sources */,
 				4941A7100AC1D86400D65B8E /* utils.cpp in Sources */,
 				4941A7650AC1DCA500D65B8E /* SDLMain.m in Sources */,
@@ -874,19 +876,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4D02B720B0656E500772C78 /* SDLMain.m in Sources */,
-				D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */,
 				D4D1BA6F0B02B27F0052BF1E /* editor_main.cpp in Sources */,
+				D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */,
 				D4D1BA700B02B27F0052BF1E /* grid.cpp in Sources */,
-				D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */,
+				D4F2EB280D111B4300A2F1D7 /* skill_editor.cpp in Sources */,
 				D4D1BA720B02B27F0052BF1E /* tileset.cpp in Sources */,
 				D4EDF4E00CB477130064919D /* tileset_editor.cpp in Sources */,
+				D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */,
+				D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */,
+				D4F2EB2F0D111C7D00A2F1D7 /* skill_editor.moc.cpp in Sources */,
+				D4F0F4340CDE7CD000EFE9B0 /* tileset_editor.moc.cpp in Sources */,
+				D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */,
 				D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */,
 				D41AC1DE0C4C7CAE0097B042 /* script.cpp in Sources */,
 				D41AC1DD0C4C7CA60097B042 /* script_modify.cpp in Sources */,
 				D41AC1DC0C4C7C9F0097B042 /* script_read.cpp in Sources */,
 				D41AC1DB0C4C7C980097B042 /* script_write.cpp in Sources */,
-				D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */,
-				D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */,
 				D4D166730BC0D91400190FC0 /* effects.cpp in Sources */,
 				D4D166740BC0D91400190FC0 /* fade.cpp in Sources */,
 				D4D166760BC0D91400190FC0 /* gui.cpp in Sources */,
@@ -904,7 +909,6 @@
 				D4D166920BC0D91400190FC0 /* video.cpp in Sources */,
 				D438C7990C9117300032F79E /* texture_controller.cpp in Sources */,
 				D438C79C0C9117400032F79E /* image_base.cpp in Sources */,
-				D4F0F4340CDE7CD000EFE9B0 /* tileset_editor.moc.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -985,7 +989,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"../allacrost-dep/frameworks",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-					/Library/Frameworks,
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_DEBUGGING_SYMBOLS = full;
@@ -996,22 +999,10 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				HEADER_SEARCH_PATHS = (
-					"../allacrost-dep/include",
-					/sw/include,
-					/opt/local/include,
-					/usr/local/include,
-					"../allacrost-dep/frameworks/SDL.framework/Headers",
-				);
+				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"../allacrost-dep/lib",
-					/sw/lib,
-					/opt/local/lib,
-					/usr/local/lib,
-					.,
-				);
+				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)\"";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1029,7 +1020,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
-				USER_HEADER_SEARCH_PATHS = /Library/Frameworks/SDL.framework/Headers;
+				USER_HEADER_SEARCH_PATHS = "../allacrost-dep/frameworks/SDL.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1047,7 +1038,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"../allacrost-dep/frameworks",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-					/Library/Frameworks,
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_AUTO_VECTORIZATION = YES;
@@ -1058,20 +1048,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_THREADSAFE_STATICS = NO;
-				HEADER_SEARCH_PATHS = (
-					"../allacrost-dep/include",
-					/sw/include,
-					/opt/local/include,
-					/usr/local/include,
-					"../allacrost-dep/frameworks/SDL.framework/Headers",
-				);
+				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"../allacrost-dep/lib",
-					/opt/local/lib,
-					/usr/local/lib,
-				);
+				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
 				LINK_WITH_STANDARD_LIBRARIES = YES;
 				ONLY_LINK_ESSENTIAL_SYMBOLS = YES;
 				OTHER_LDFLAGS = (
@@ -1091,7 +1071,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
 				STRIP_INSTALLED_PRODUCT = YES;
-				USER_HEADER_SEARCH_PATHS = /Library/Frameworks/SDL.framework/Headers;
+				USER_HEADER_SEARCH_PATHS = "../allacrost-dep/frameworks/SDL.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1102,10 +1082,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					/Library/Frameworks,
-					"../allacrost-dep/frameworks",
-				);
+				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -1113,19 +1090,10 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				HEADER_SEARCH_PATHS = (
-					/usr/local/include,
-					/opt/local/include,
-					/sw/include,
-				);
+				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Editor-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					/usr/local/lib,
-					/opt/local/lib,
-					/sw/lib,
-					.,
-				);
+				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
 				ONLY_LINK_ESSENTIAL_SYMBOLS = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DQT_CLEAN_NAMESPACE",
@@ -1149,7 +1117,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
-				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/SDL.framework/Headers /Library/Frameworks/Qt3Support.framework/Headers /Library/Frameworks/QtCore.framework/Headers /Library/Frameworks/QtGui.framework/Headers /Library/Frameworks/QtOpenGL.framework/Headers";
+				USER_HEADER_SEARCH_PATHS = "../allacrost-dep/frameworks/SDL.framework/Headers ../allacrost-dep/frameworks/Qt3Support.framework/Headers ../allacrost-dep/frameworks/QtCore.framework/Headers ../allacrost-dep/frameworks/QtGui.framework/Headers ../allacrost-dep/frameworks/QtOpenGL.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1160,26 +1128,16 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					/Library/Frameworks,
-					"../allacrost-dep/frameworks",
-				);
+				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				HEADER_SEARCH_PATHS = (
-					"../allacrost-dep/include",
-					/opt/local/include,
-					/sw/include,
-				);
+				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Editor-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"../allacrost-dep/lib",
-					/opt/local/lib,
-				);
+				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
 				ONLY_LINK_ESSENTIAL_SYMBOLS = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DQT_CLEAN_NAMESPACE",
@@ -1202,7 +1160,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
-				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/QtXml.framework/Headers /Library/Frameworks/SDL.framework/Headers /Library/Frameworks/Qt3Support.framework/Headers /Library/Frameworks/QtCore.framework/Headers /Library/Frameworks/QtGui.framework/Headers /Library/Frameworks/QtOpenGL.framework/Headers /Library/Frameworks/QtNetwork.framework/Headers /Library/Frameworks/QtSql.framework/Headers";
+				USER_HEADER_SEARCH_PATHS = "../allacrost-dep/frameworks/QtXml.framework/Headers ../allacrost-dep/frameworks/SDL.framework/Headers ../allacrost-dep/frameworks/Qt3Support.framework/Headers ../allacrost-dep/frameworks/QtCore.framework/Headers ../allacrost-dep/frameworks/QtGui.framework/Headers ../allacrost-dep/frameworks/QtOpenGL.framework/Headers ../allacrost-dep/frameworks/QtNetwork.framework/Headers ../allacrost-dep/frameworks/QtSql.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};

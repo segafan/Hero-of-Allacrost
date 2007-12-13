@@ -9,17 +9,16 @@
 		};
 	};
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
-		activeBuildConfigurationName = Debug;
-		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
-		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
+		activeBuildConfigurationName = Release;
+		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
+		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
-			4941A4AF0AC1D77500D65B8E /* Allacrost */,
+			D4D1BA480B02B1DB0052BF1E /* Editor */,
 		);
 		breakpoints = (
 			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
 			D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */,
 			D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */,
-			D4C64DD40D0CFEC70035EA04 /* battle.cpp:1067 */,
 		);
 		breakpointsGroup = D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */;
 		codeSenseManager = D43082580AF9831800A5173A /* Code sense */;
@@ -84,7 +83,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					22,
 					300,
-					129,
+					129.5835,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXExecutablesDataSource_ActiveFlagID,
@@ -188,18 +187,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 218947128;
-			PBXWorkspaceStateSaveDate = 218947128;
-		};
-		perUserProjectItems = {
-			D4C64DA50D0CDE630035EA04 /* PBXTextBookmark */ = D4C64DA50D0CDE630035EA04 /* PBXTextBookmark */;
-			D4C64DA60D0CDE630035EA04 /* PBXTextBookmark */ = D4C64DA60D0CDE630035EA04 /* PBXTextBookmark */;
-			D4C64DD20D0CFE6C0035EA04 /* PBXBookmark */ = D4C64DD20D0CFE6C0035EA04 /* PBXBookmark */;
-			D4C64DD80D0CFED60035EA04 /* PBXTextBookmark */ = D4C64DD80D0CFED60035EA04 /* PBXTextBookmark */;
-			D4E4AD380D0CCDED0013442B = D4E4AD380D0CCDED0013442B /* PBXBookmark */;
-			D4E4AD3D0D0CDC370013442B = D4E4AD3D0D0CDC370013442B /* PBXBookmark */;
-			D4E4AD460D0CDD2F0013442B = D4E4AD460D0CDD2F0013442B /* PBXTextBookmark */;
-			D4E4AD490D0CDD2F0013442B = D4E4AD490D0CDD2F0013442B /* PBXTextBookmark */;
+			PBXPerProjectTemplateStateSaveDate = 219220999;
+			PBXWorkspaceStateSaveDate = 219220999;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -508,9 +497,9 @@
 	};
 	D43080DE0AF982F800A5173A /* Allacrost */ = {
 		isa = PBXExecutable;
-		activeArgIndex = 0;
+		activeArgIndex = 2147483647;
 		activeArgIndices = (
-			YES,
+			NO,
 			NO,
 		);
 		argumentStrings = (
@@ -635,55 +624,6 @@
 			sepNavVisRect = "{{0, 685}, {711, 645}}";
 			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
 		};
-	};
-	D4C64DA50D0CDE630035EA04 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 4941A6920AC1D86400D65B8E /* battle_actors.cpp */;
-		name = "battle_actors.cpp: 538";
-		rLen = 0;
-		rLoc = 18307;
-		rType = 0;
-		vrLen = 1085;
-		vrLoc = 17253;
-	};
-	D4C64DA60D0CDE630035EA04 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 4941A6900AC1D86400D65B8E /* battle.cpp */;
-		name = "battle.cpp: 434";
-		rLen = 0;
-		rLoc = 15465;
-		rType = 0;
-		vrLen = 926;
-		vrLoc = 14695;
-	};
-	D4C64DD20D0CFE6C0035EA04 /* PBXBookmark */ = {
-		isa = PBXBookmark;
-		fRef = 4941A6900AC1D86400D65B8E /* battle.cpp */;
-	};
-	D4C64DD40D0CFEC70035EA04 /* battle.cpp:1067 */ = {
-		isa = PBXFileBreakpoint;
-		actions = (
-		);
-		breakpointStyle = 0;
-		continueAfterActions = 0;
-		delayBeforeContinue = 0;
-		fileReference = 4941A6900AC1D86400D65B8E /* battle.cpp */;
-		functionName = "BattleMode::GetIndexOfNextAliveCharacter()";
-		hitCount = 1;
-		lineNumber = 1067;
-		location = Allacrost;
-		modificationTime = 218955473.114979;
-		state = 1;
-	};
-	D4C64DD80D0CFED60035EA04 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 4941A6900AC1D86400D65B8E /* battle.cpp */;
-		name = "battle.cpp: 922";
-		rLen = 0;
-		rLoc = 28659;
-		rType = 0;
-		vrLen = 821;
-		vrLoc = 32060;
 	};
 	D4D166250BC0D91300190FC0 /* color.h */ = {
 		uiCtxt = {
@@ -851,7 +791,7 @@
 		hitCount = 1;
 		lineNumber = 627;
 		location = Allacrost;
-		modificationTime = 218955473.114954;
+		modificationTime = 218957895.773126;
 		state = 1;
 	};
 	D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */ = {
@@ -866,7 +806,7 @@
 		hitCount = 1;
 		lineNumber = 646;
 		location = Allacrost;
-		modificationTime = 218955473.11497;
+		modificationTime = 218957895.773167;
 		state = 2;
 	};
 	D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */ = {
@@ -881,7 +821,7 @@
 		hitCount = 1;
 		lineNumber = 588;
 		location = Allacrost;
-		modificationTime = 218955473.114975;
+		modificationTime = 218957895.773176;
 		state = 2;
 	};
 	D4DDE3930C4A15EE00937677 /* battle_actions.cpp */ = {
@@ -891,34 +831,6 @@
 			sepNavVisRect = "{{0, 1094}, {672, 263}}";
 			sepNavWindowFrame = "{{15, 27}, {750, 746}}";
 		};
-	};
-	D4E4AD380D0CCDED0013442B /* PBXBookmark */ = {
-		isa = PBXBookmark;
-		fRef = 4941A6900AC1D86400D65B8E /* battle.cpp */;
-	};
-	D4E4AD3D0D0CDC370013442B /* PBXBookmark */ = {
-		isa = PBXBookmark;
-		fRef = 4941A6920AC1D86400D65B8E /* battle_actors.cpp */;
-	};
-	D4E4AD460D0CDD2F0013442B /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 4941A6920AC1D86400D65B8E /* battle_actors.cpp */;
-		name = "battle_actors.cpp: 538";
-		rLen = 0;
-		rLoc = 18307;
-		rType = 0;
-		vrLen = 980;
-		vrLoc = 17358;
-	};
-	D4E4AD490D0CDD2F0013442B /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 4941A6900AC1D86400D65B8E /* battle.cpp */;
-		name = "battle.cpp: 434";
-		rLen = 0;
-		rLoc = 15465;
-		rType = 0;
-		vrLen = 953;
-		vrLoc = 14668;
 	};
 	D4E561260BB71B53002FB758 /* defs.cpp */ = {
 		uiCtxt = {
