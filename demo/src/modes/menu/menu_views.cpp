@@ -794,6 +794,7 @@ void SkillsWindow::Update() {
 				_active_box = SKILL_ACTIVE_LIST;
 				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				_char_select.SetSelection(_char_skillset);
 				MenuMode::_instance->_menu_sounds["cancel"].Play();
 			}
 			break;
@@ -860,7 +861,8 @@ void SkillsWindow::Update() {
 			break;
 	}
 
-	_UpdateSkillList();
+	if (_active_box != SKILL_ACTIVE_CHAR_APPLY)
+		_UpdateSkillList();
 
 	if (_skills_list.GetNumberOptions() > 0 && _skills_list.GetSelection() >= 0 && _skills_list.GetNumberOptions() > _skills_list.GetSelection()) 
 	{		
@@ -988,7 +990,8 @@ void SkillsWindow::Draw() {
 	//Draw option boxes
 	_char_select.Draw();
 	_skills_categories.Draw();
-	_UpdateSkillList();
+	if (_active_box == SKILL_ACTIVE_NONE)
+		_UpdateSkillList();
 	_skills_list.Draw();
 	_skill_cost_list.Draw();
 }
