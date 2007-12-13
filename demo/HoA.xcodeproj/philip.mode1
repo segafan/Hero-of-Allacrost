@@ -185,48 +185,7 @@
 	<key>Notifications</key>
 	<array/>
 	<key>OpenEditors</key>
-	<array>
-		<dict>
-			<key>Content</key>
-			<dict>
-				<key>PBXProjectModuleGUID</key>
-				<string>D4C64DD60D0CFED60035EA04</string>
-				<key>PBXProjectModuleLabel</key>
-				<string>battle.cpp</string>
-				<key>PBXSplitModuleInNavigatorKey</key>
-				<dict>
-					<key>Split0</key>
-					<dict>
-						<key>PBXProjectModuleGUID</key>
-						<string>D4C64DD70D0CFED60035EA04</string>
-						<key>PBXProjectModuleLabel</key>
-						<string>battle.cpp</string>
-						<key>_historyCapacity</key>
-						<integer>0</integer>
-						<key>bookmark</key>
-						<string>D4C64DD80D0CFED60035EA04</string>
-						<key>history</key>
-						<array>
-							<string>D4C64DD20D0CFE6C0035EA04</string>
-						</array>
-					</dict>
-					<key>SplitCount</key>
-					<string>1</string>
-				</dict>
-				<key>StatusBarVisibility</key>
-				<true/>
-			</dict>
-			<key>Geometry</key>
-			<dict>
-				<key>Frame</key>
-				<string>{{0, 20}, {750, 461}}</string>
-				<key>PBXModuleWindowStatusBarHidden2</key>
-				<false/>
-				<key>RubberWindowFrame</key>
-				<string>35 189 750 502 0 0 1280 778 </string>
-			</dict>
-		</dict>
-	</array>
+	<array/>
 	<key>PerspectiveWidths</key>
 	<array>
 		<integer>-1</integer>
@@ -297,28 +256,22 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
 							<array>
 								<string>4941A49F0AC1D76400D65B8E</string>
+								<string>D404C6E80B02FCEC00827A19</string>
 								<string>4941A4BC0AC1D7B300D65B8E</string>
 								<string>4941A6460AC1D86300D65B8E</string>
 								<string>D4D1BA640B02B27F0052BF1E</string>
-								<string>4941A68E0AC1D86400D65B8E</string>
-								<string>4941A68F0AC1D86400D65B8E</string>
-								<string>4941A6940AC1D86400D65B8E</string>
+								<string>4999AC1A0AF407BD004DD3A3</string>
 								<string>1C37FBAC04509CD000000102</string>
-								<string>1C37FAAC04509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>30</integer>
-									<integer>25</integer>
-									<integer>23</integer>
-									<integer>5</integer>
-									<integer>2</integer>
-									<integer>0</integer>
+									<integer>47</integer>
+									<integer>46</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 213}, {187, 338}}</string>
+							<string>{{0, 631}, {187, 338}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -418,9 +371,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>D4C64DA30D0CDE630035EA04</string>
+				<string>D4F2E8310D11105C00A2F1D7</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>D4C64DA40D0CDE630035EA04</string>
+				<string>D4F2E8320D11105C00A2F1D7</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -555,14 +508,7 @@
 	<key>WindowOrderList</key>
 	<array>
 		<string>D43083E80AF9860800A5173A</string>
-		<string>D4C64DB10D0CDE630035EA04</string>
-		<string>D4C64DB20D0CDE630035EA04</string>
-		<string>D4F7165E0B06B36400361DA9</string>
-		<string>D4C64DAD0D0CDE630035EA04</string>
-		<string>1C0AD2B3069F1EA900FABCE6</string>
 		<string>/Users/philip/allacrost/demo/HoA.xcodeproj</string>
-		<string>D4C64DD60D0CFED60035EA04</string>
-		<string>1CD10A99069EF8BA00B06720</string>
 	</array>
 	<key>WindowString</key>
 	<string>590 381 690 397 0 0 1280 778 </string>
@@ -603,6 +549,8 @@
 							<string>0pt</string>
 						</dict>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXBuildLogShowsTranscriptDefaultKey</key>
@@ -644,7 +592,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>D43083E80AF9860800A5173A</string>
-				<string>D4C64DB60D0CDF3E0035EA04</string>
+				<string>D4F2E82A0D110E7F00A2F1D7</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -766,7 +714,7 @@
 			<key>WindowToolGUID</key>
 			<string>1CD10A99069EF8BA00B06720</string>
 			<key>WindowToolIsVisible</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>FirstTimeWindowDisplayed</key>
@@ -1017,7 +965,7 @@
 			<key>WindowToolGUID</key>
 			<string>1C0AD2B3069F1EA900FABCE6</string>
 			<key>WindowToolIsVisible</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>Identifier</key>
