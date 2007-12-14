@@ -116,6 +116,12 @@ SkillAction::SkillAction(BattleActor* source, BattleActor* target, GlobalSkill* 
 
 void SkillAction::RunScript() {
 	VerifyValidTarget(_source, _target);
+	const ScriptObject* script_function = _skill->GetBattleExecuteFunction();
+	if (script_function == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "selected skill is not executable in battle" << endl;
+		return;
+	}
+	// TODO: Check if SP requirements for skill are met
 
 	if (_skill->GetTargetType() == GLOBAL_TARGET_PARTY) {
 		if (_target->IsEnemy()) {
@@ -123,7 +129,7 @@ void SkillAction::RunScript() {
 			//Loop through all enemies and apply the item
 			for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); i++) {
 				enemy = current_battle->GetEnemyActorAt(i);
-				_skill->BattleExecute(enemy, _source);
+				ScriptCallFunction<void>(*script_function, enemy, _source);
 			}
 		}
 		else { // Target is a character
@@ -131,7 +137,7 @@ void SkillAction::RunScript() {
 			//Loop through all party members and apply
 			for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); i++) {
 				character = current_battle->GetPlayerCharacterAt(i);
-				_skill->BattleExecute(character, _source);
+				ScriptCallFunction<void>(*script_function, character, _source);
 			}
 		}
 	} // if (_skill->GetTargetType() == GLOBAL_TARGET_PARTY)
@@ -140,7 +146,7 @@ void SkillAction::RunScript() {
 		//CD: We don't check for alive or dead here...what if it's a resurrect spell?
 	//	if (_target->IsAlive()) {
 		try
-		{ _skill->BattleExecute(_target, _source); } 
+		{ ScriptCallFunction<void>(*script_function, _target, _source); }
 		catch (luabind::error err)
 		{ ScriptManager->HandleLuaError(err); }
 	//	}
@@ -182,6 +188,11 @@ ItemAction::ItemAction(BattleActor* source, BattleActor* target, GlobalItem* ite
 void ItemAction::RunScript() {
 	VerifyValidTarget(_source, _target);
 
+	const ScriptObject* script_function = _item->GetBattleUseFunction();
+	if (script_function == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "item did not have a battle use function" << endl;
+	}
+
 	if (_item->GetTargetType() == GLOBAL_TARGET_PARTY) {
 		if (_target->IsEnemy()) {
 			BattleEnemy* enemy;
@@ -189,7 +200,8 @@ void ItemAction::RunScript() {
 			for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); i++) {
 				enemy = current_battle->GetEnemyActorAt(i);
 				if (enemy->IsAlive()) {
-					_item->BattleUse(enemy, _source);
+					ScriptCallFunction<void>(*script_function, enemy, _source);
+					_item->DecrementCount();
 				}
 			}
 		}
@@ -199,13 +211,15 @@ void ItemAction::RunScript() {
 			//Loop through all party members and apply
 			for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); i++) {
 				character = current_battle->GetPlayerCharacterAt(i);
-				_item->BattleUse(character, _source);
+				ScriptCallFunction<void>(*script_function, character, _source);
+				_item->DecrementCount();
 			}
 		}
 	} // if (_item->GetTargetType() == GLOBAL_TARGET_PARTY)
 
 	else {
-		_item->BattleUse(_target, _source);
+		ScriptCallFunction<void>(*script_function, _target, _source);
+		_item->DecrementCount();
 	}
 
 	if (_source->IsEnemy() == false) {

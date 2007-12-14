@@ -27,7 +27,6 @@
 #include "script.h"
 
 #include "global_actors.h"
-#include "battle_actors.h"
 
 namespace hoa_global {
 
@@ -202,42 +201,34 @@ public:
 
 	//! \brief Returns true if the item can be used in battle mode
 	bool IsUsableInBattle()
-		{ return ((_usage == GLOBAL_USE_BATTLE) || (_usage == GLOBAL_USE_ALL)); }
+		{ return (_battle_use_function != NULL); }
 
 	//! \brief Returns true if the item can be used in menu mode
 	bool IsUsableInMenu()
-		{ return ((_usage == GLOBAL_USE_MENU) || (_usage == GLOBAL_USE_ALL)); }
-
-	/** \brief Calls the script function which performs the item's use for battle mode
-	*** \param target A pointer to the target of the item
-	*** \param instigator A pointer to the instigator that is using the item
-	**/
-	void BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
-
-	/** \brief Calls the script function which performs the item's use for menu mode
-	*** \param target A pointer to the target of the item
-	**/
-	void MenuUse(GlobalCharacter* target);
+		{ return (_menu_use_function != NULL); }
 
 	//! \name Class Member Access Functions
 	//@{
-	GLOBAL_USE GetUsage() const
-		{ return _usage; }
-
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
 
 	bool IsTargetAlly() const
 		{ return _target_ally; }
+
+	/** \brief Returns a pointer to the ScriptObject of the battle use function
+	*** \note This function will return NULL if the skill is not usable in battle
+	**/
+	const ScriptObject* GetBattleUseFunction() const
+		{ return _battle_use_function; }
+
+	/** \brief Returns a pointer to the ScriptObject of the menu use function
+	*** \note This function will return NULL if the skill is not usable in menus
+	**/
+	const ScriptObject* GetMenuUseFunction() const
+		{ return _menu_use_function; }
 	//@}
 
 private:
-	/** \brief Values to indicate where the item may be used
-	*** Items may only be used in either menu mode or battle mode. If an item is to be used in
-	*** another game mode, then it choose to use either the menu or battle use functions.
-	**/
-	GLOBAL_USE _usage;
-
 	/** \brief The type of target for the item.
 	*** Target types include attack points, actors, and parties. This enum  type is defined in global_skills.h
 	**/

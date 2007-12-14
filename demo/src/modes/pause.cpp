@@ -52,7 +52,7 @@ PauseMode::PauseMode(bool quit_state, bool pause_audio) :
 	mode_type = MODE_MANAGER_PAUSE_MODE;
 
 	// Render the PAUSED string in white text
-	_paused_text.SetStyle(TextStyle("default", VIDEO_TEXT_SHADOW_BLACK, Color::white));
+	_paused_text.SetStyle(TextStyle("default", Color::white, VIDEO_TEXT_SHADOW_BLACK));
 	_paused_text.SetText(MakeUnicodeString("PAUSED"));
 
 	// Initialize the quit options box

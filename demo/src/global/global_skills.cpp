@@ -16,13 +16,9 @@
 #include <iostream>
 
 #include "video.h"
-
 #include "global.h"
 
-#include "battle_actors.h"
-
 using namespace std;
-
 using namespace hoa_utils;
 using namespace hoa_video;
 using namespace hoa_script;
@@ -167,16 +163,6 @@ GlobalSkill::GlobalSkill(uint32 id) :
 		*_menu_execute_function = skill_script->ReadFunctionPointer("MenuExecute");
 	}
 
-	// Determine the skill's usage based on which execution functions are available
-	if (_battle_execute_function != NULL && _menu_execute_function != NULL)
-		_usage = GLOBAL_USE_ALL;
-	else if (_battle_execute_function != NULL && _menu_execute_function == NULL)
-		_usage = GLOBAL_USE_BATTLE;
-	else if (_battle_execute_function == NULL && _menu_execute_function != NULL)
-		_usage = GLOBAL_USE_MENU;
-	else
-		_usage = GLOBAL_USE_INVALID;
-
 	skill_script->CloseTable();
 
 	if (skill_script->IsErrorDetected()) {
@@ -219,7 +205,6 @@ GlobalSkill::GlobalSkill(const GlobalSkill& copy) {
 	_sp_required = copy._sp_required;
 	_warmup_time = copy._warmup_time;
 	_cooldown_time = copy._cooldown_time;
-	_usage = copy._usage;
 	_target_type = copy._target_type;
 	_target_ally = copy._target_ally;
 
@@ -248,7 +233,6 @@ GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy) {
 	_sp_required = copy._sp_required;
 	_warmup_time = copy._warmup_time;
 	_cooldown_time = copy._cooldown_time;
-	_usage = copy._usage;
 	_target_type = copy._target_type;
 	_target_ally = copy._target_ally;
 
@@ -265,45 +249,5 @@ GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy) {
 
 	return *this;
 } // GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy)
-
-
-
-void GlobalSkill::BattleExecute(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
-	if (IsExecutableInBattle() == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalSkill::BattleExecute() failed because battle execution "
-				<< "was not supported by the skill: " << _id << endl;
-		return;
-	}
-
-	if (_sp_required > instigator->GetActor()->GetSkillPoints()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalSkill::BattleExecute() failed because there was an insufficient amount of "
-				<< "skill points to execute the skill: " << _id << endl;
-		return;
-	}
-
-	ScriptCallFunction<void>(*_battle_execute_function, target, instigator);
-}
-
-
-
-void GlobalSkill::MenuExecute(GlobalCharacter* target, GlobalCharacter* instigator) {
-	if (IsExecutableInMenu() == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalSkill::MenuExecute() failed because menu execution "
-				<< "was not supported by the skill: " << _id << endl;
-		return;
-	}
-
-	if (_sp_required > instigator->GetSkillPoints()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalSkill::MenuExecute() failed because there was an insufficient amount of "
-				<< "skill points to execute the skill: " << _id << endl;
-		return;
-	}
-
-	ScriptCallFunction<void>(*_menu_execute_function, target, instigator);
-}
 
 } // namespace hoa_global

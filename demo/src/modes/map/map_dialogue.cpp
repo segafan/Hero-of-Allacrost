@@ -352,7 +352,7 @@ DialogueManager::DialogueManager() {
 	_display_textbox.SetDisplaySpeed(30);
 	_display_textbox.SetPosition(300.0f, 768.0f - 180.0f);
 	_display_textbox.SetDimensions(1024.0f - 300.0f - 60.0f, 180.0f - 70.0f);
-	_display_textbox.SetTextStyle(TextStyle("map", VIDEO_TEXT_SHADOW_LIGHT, Color::black));
+	_display_textbox.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_display_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
 	_display_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_display_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
@@ -488,7 +488,7 @@ void DialogueManager::Draw() {
 		_current_option->Draw(); // Display options
 		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_all_objects[_current_option->GetCurrentSpeaker()]);
 	}
-	VideoManager->Text()->Draw(speaker->name, TextStyle("map", VIDEO_TEXT_SHADOW_LIGHT, Color::black));
+	VideoManager->Text()->Draw(speaker->name, TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	if (speaker->face_portrait != NULL) {
 		VideoManager->MoveRelative(0.0f, -26.0f);
 		speaker->face_portrait->Draw();

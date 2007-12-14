@@ -23,8 +23,7 @@
 
 #include "defs.h"
 #include "utils.h"
-
-#include "global_actors.h"
+#include "global_objects.h"
 
 namespace hoa_global {
 
@@ -276,25 +275,11 @@ public:
 
 	//! \brief Returns true if the skill can be executed in battles
 	bool IsExecutableInBattle() const
-		{ return ((_usage == GLOBAL_USE_BATTLE) || (_usage == GLOBAL_USE_ALL)); }
+		{ return (_battle_execute_function != NULL); }
 
 	//! \brief Returns true if the skill can be executed in menus
 	bool IsExecutableInMenu() const
-		{ return ((_usage == GLOBAL_USE_MENU) || (_usage == GLOBAL_USE_ALL)); }
-	//@
-
-	/** \brief Calls the script function which executes the skill for battles
-	*** \param target A pointer to the target of the skill
-	*** \param instigator A pointer to the instigator whom is executing the skill
-	*** 
-	**/
-	void BattleExecute(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
-
-	/** \brief Calls the script function which executes the skill for menus
-	*** \param target A pointer to the target of the skill
-	*** \param instigator A pointer to the instigator whom is executing the skill
-	**/
-	void MenuExecute(GlobalCharacter* target, GlobalCharacter* instigator);
+		{ return (_menu_execute_function != NULL); }
 
 	/** \name Class member access functions
 	*** \note No set functions are defined because the class members should only be defined
@@ -322,14 +307,23 @@ public:
 	uint32 GetCooldownTime() const
 		{ return _cooldown_time; }
 
-	GLOBAL_USE GetUsage() const
-		{ return _usage; }
-
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
 
 	bool IsTargetAlly() const
 		{ return _target_ally; }
+
+	/** \brief Returns a pointer to the ScriptObject of the battle execution function
+	*** \note This function will return NULL if the skill is not executable in battle
+	**/
+	const ScriptObject* GetBattleExecuteFunction() const
+		{ return _battle_execute_function; }
+
+	/** \brief Returns a pointer to the ScriptObject of the menu execution function
+	*** \note This function will return NULL if the skill is not executable in menus
+	**/
+	const ScriptObject* GetMenuExecuteFunction() const
+		{ return _menu_execute_function; }
 		
 // 	std::vector<GlobalElementalEffect*>& GetElementalEffects() const
 // 		{ return _elemental_effects; }
@@ -371,9 +365,6 @@ private:
 	*** the invoker can recover and begin re-filling their stamina bar. It is acceptable for this member to be zero.
 	**/
 	uint32 _cooldown_time;
-
-	//! \brief Indicates when the skill may be used (in battles, menus, etc.)
-	GLOBAL_USE _usage;
 
 	//! \brief The type of target that the skill is executed upon.
 	GLOBAL_TARGET _target_type;

@@ -16,7 +16,6 @@
 #include <iostream>
 
 #include "video.h"
-
 #include "global.h"
 
 using namespace std;
@@ -93,16 +92,6 @@ GlobalItem::GlobalItem(uint32 id, uint32 count) :
 		*_menu_use_function = script_file.ReadFunctionPointer("MenuUse");
 	}
 
-	// Determine the items's usage based on which use functions are available
-	if (_battle_use_function != NULL && _menu_use_function != NULL)
-		_usage = GLOBAL_USE_ALL;
-	else if (_battle_use_function != NULL && _menu_use_function == NULL)
-		_usage = GLOBAL_USE_BATTLE;
-	else if (_battle_use_function == NULL && _menu_use_function != NULL)
-		_usage = GLOBAL_USE_MENU;
-	else
-		_usage = GLOBAL_USE_INVALID;
-
 	if (_icon_image.Load(icon_file) == false) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL WARNING: GlobalItem constructor failed to load the icon image for the item: " << _id << endl;
@@ -141,7 +130,6 @@ GlobalItem::GlobalItem(const GlobalItem& copy) {
 	_count = copy._count;
 	_price = copy._price;
 	_icon_image = copy._icon_image;
-	_usage = copy._usage;
 	_target_type = copy._target_type;
 	_target_ally = copy._target_ally;
 
@@ -169,7 +157,6 @@ GlobalItem& GlobalItem::operator=(const GlobalItem& copy) {
 	_count = copy._count;
 	_price = copy._price;
 	_icon_image = copy._icon_image;
-	_usage = copy._usage;
 	_target_type = copy._target_type;
 	_target_ally = copy._target_ally;
 
@@ -186,55 +173,6 @@ GlobalItem& GlobalItem::operator=(const GlobalItem& copy) {
 
 	return *this;
 } // GlobalItem& GlobalItemoperator=(const GlobalItem& copy)
-
-
-
-void GlobalItem::BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
-	if (IsUsableInBattle() == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalItem::BattleUse() failed because battle usage "
-				<< "was not supported by the item: " << _id << endl;
-		return;
-	}
-
-	//NOTE: Item number is decremented when the action is chosen so that way if you only have 1
-	//of an item, two chracters can't use the same one if their turns immediately follow each other
-	//This if statement is invalid
-	/*if (_count == 0) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalItem::BattleUse() failed because the count of the item "
-				<< "was set to zero for item: " << _id << endl;
-		return;
-	}*/
-
-	ScriptCallFunction<void>(*_battle_use_function, target, instigator);
-	
-	if (!_count)
-	{
-		GlobalManager->RemoveFromInventory(_id);
-	}
-} // void GlobalItem::BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator)
-
-
-
-void GlobalItem::MenuUse(GlobalCharacter* target) {
-	if (IsUsableInMenu() == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalItem::MenuUse() failed because menu usage "
-				<< "was not supported by the item: " << _id << endl;
-		return;
-	}
-
-	if (_count == 0) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalItem::MenuUse() failed because the count of the item "
-				<< "was set to zero for item: " << _id << endl;
-		return;
-	}
-
-	ScriptCallFunction<void>(*_menu_use_function, target);
-	_count--;
-} // void GlobalItem::MenuUse(GlobalCharacter* target)
 
 // -----------------------------------------------------------------------------
 // GlobalWeapon class

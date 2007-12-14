@@ -117,7 +117,7 @@ void ActionWindow::_InitActionSelectionList()
 
 void ActionWindow::_InitSelectionHeaders()
 {
-	TextStyle battle_style("battle", VIDEO_TEXT_SHADOW_DARK, Color(1.0f, 1.0f, 0.0f, 0.8f));
+	TextStyle battle_style("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK);
 
 	_skill_selection_header.SetStyle(battle_style);
 	_item_selection_header.SetStyle(battle_style);
@@ -128,7 +128,7 @@ void ActionWindow::_InitSelectionHeaders()
 
 void ActionWindow::_InitInformationText()
 {
-	TextStyle battle_style("battle", VIDEO_TEXT_SHADOW_DARK, Color::white);
+	TextStyle battle_style("battle", Color::white, VIDEO_TEXT_SHADOW_DARK);
 
 	_action_information.SetStyle(battle_style);
 
@@ -542,7 +542,7 @@ void ActionWindow::_ConstructActionSelectionList() {
  		for (uint32 i = 0; i < temp_item_list->size(); ++i) {
  			item = temp_item_list->at(i);
 
-			if (item->GetUsage() >= GLOBAL_USE_BATTLE && item->GetCount() > 0) {
+			if (item->IsUsableInBattle() == true && item->GetCount() > 0) {
 				_item_list.push_back(item);
  				items_text.push_back(MakeUnicodeString("<L>") + item->GetName()
  					+ MakeUnicodeString("<R>") + MakeUnicodeString(NumberToString(item->GetCount())));
@@ -779,7 +779,7 @@ void FinishWindow::_TallyXPMoneyAndItems()
 		}
 		// also add 1 SP per enemy to each character in the party
 		GlobalParty *party = GlobalManager->GetActiveParty();
-		for (int i = 0; i < party->GetPartySize(); ++i)
+		for (uint32 i = 0; i < party->GetPartySize(); ++i)
 			party->GetActorAtIndex(i)->AddSkillPoints(1);
 	}
 
