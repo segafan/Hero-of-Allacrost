@@ -352,7 +352,12 @@ void InventoryWindow::Update() {
 				GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 				if (obj->GetObjectType() == GLOBAL_OBJECT_ITEM) {
 					GlobalItem *item = (GlobalItem*)GlobalManager->RetrieveFromInventory(obj->GetID());
-					item->MenuUse(ch);
+					const ScriptObject* script_function = item->GetMenuUseFunction();
+					if (script_function == NULL) {
+						IF_PRINT_WARNING(MENU_DEBUG) << "item did not have a menu use function" << endl;
+					}
+					ScriptCallFunction<void>(*script_function, ch);
+					item->DecrementCount();
 				}
 			} // if VIDEO_OPTION_CONFIRM
 			// Return to item selection
@@ -786,7 +791,18 @@ void SkillsWindow::Update() {
 				GlobalSkill *skill = _GetCurrentSkill();
 				GlobalCharacter* target = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 				GlobalCharacter* instigator = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_skillset));
-				skill->MenuExecute(target, instigator);
+
+				const ScriptObject* script_function = skill->GetMenuExecuteFunction();
+				
+				if (script_function == NULL) {
+					IF_PRINT_WARNING(MENU_DEBUG) << "selected skill may not be executed in menus" << endl;
+					break;
+				}
+				if (skill->GetSPRequired() > instigator->GetSkillPoints()) {
+					IF_PRINT_WARNING(MENU_DEBUG) << "did not have enough skill points to execute skill " << endl;
+					break;
+				}
+				ScriptCallFunction<void>(*script_function, target, instigator);
 				instigator->SubtractSkillPoints(skill->GetSPRequired());
 				MenuMode::_instance->_menu_sounds["confirm"].Play();
 			}

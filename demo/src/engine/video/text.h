@@ -99,36 +99,43 @@ public:
 
 
 /** ****************************************************************************
-*** \brief A class encompassing all options for a text style
+*** \brief A class encompassing all properties that define a text style
 *** ***************************************************************************/
 class TextStyle {
 public:
+	//! \brief No-arg constructor uses default font, white text, and default dark shadow with offets
 	TextStyle() :
-		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), shadow_offset_x(1), shadow_offset_y(-2), color(Color::white) {}
+		font("default"), color(Color::white), shadow_style(VIDEO_TEXT_SHADOW_DARK), shadow_offset_x(1), shadow_offset_y(-2) {}
 
-	TextStyle(Color c) :
-		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), shadow_offset_x(1), shadow_offset_y(-2), color(c) {}
+	//! \brief Constructor requiring a font name, using white text, and optional shadow style and offsets
+	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK, int32 shadow_x = 1, int32 shadow_y = -2) :
+		font(fnt), color(Color::white), shadow_style(style ), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
 
-	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style) :
-		font(fnt), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2), color(Color::white) {}
+	//! \brief Constructor using default font, requiring a color to be defined, and optional shadow style and offsets
+	TextStyle(Color c, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK, int32 shadow_x = 1, int32 shadow_y = -2) :
+		font("default"), color(c), shadow_style(style ), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
 
-	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK, Color col = Color::white) :
-		font(fnt), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2), color(col) {}
+	//! \brief Constructor using default font and white color, and requiring a shadow style with optional shadow offsets
+	TextStyle(TEXT_SHADOW_STYLE style, int32 shadow_x = 1, int32 shadow_y = -2) :
+		font("default"), color(Color::white), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2) {}
 
-	TextStyle(TEXT_SHADOW_STYLE style, Color col = Color::white) :
-		font("default"), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2), color(col) {}
+	//! \brief Full constructor requiring three arguments to be filled: font, color, shadow style, and optionally shadow offsets
+	TextStyle(std::string fnt, Color col, TEXT_SHADOW_STYLE style, int32 shadow_x = 1, int32 shadow_y = -2) :
+		font(fnt),  color(col), shadow_style(style), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
+
+	// ---------- Public members
 
 	//! \brief The string font name
 	std::string font;
+
+	//! \brief The color of the text
+	Color color;
 
 	//! \brief The enum representing the shadow style
 	TEXT_SHADOW_STYLE shadow_style;
 
 	//! \brief The x and y offsets of the shadow
 	int32 shadow_offset_x, shadow_offset_y;
-
-	//! \brief The color of the text
-	Color color;
 }; // class TextStyle
 
 
