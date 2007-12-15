@@ -17,15 +17,12 @@
 
 #include "audio.h"
 #include "system.h"
-
 #include "global.h"
-
 #include "map.h"
 #include "map_sprites.h"
 #include "map_objects.h"
 #include "map_dialogue.h"
 #include "map_actions.h"
-
 
 using namespace std;
 using namespace hoa_utils;
@@ -117,6 +114,8 @@ void VirtualSprite::UpdateSeenDialogue() {
 	seen_all_dialogue = true;
 }
 
+
+
 void VirtualSprite::UpdateActiveDialogue() {
 	// Check all dialogues for any that are still active.
 	for (size_t i = 0; i < dialogues.size(); i++) {
@@ -127,26 +126,26 @@ void VirtualSprite::UpdateActiveDialogue() {
 	}
 	has_active_dialogue = false;
 }
-	
+
+
 
 uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 	switch (direction) {
-	case NORTH:     return SOUTH;
-	case SOUTH:     return NORTH;
-	case WEST:      return EAST;
-	case EAST:      return WEST;
-	case NW_NORTH:  return SE_SOUTH;
-	case NW_WEST:   return SE_EAST;
-	case NE_NORTH:  return SW_SOUTH;
-	case NE_EAST:   return SW_WEST;
-	case SW_SOUTH:  return NE_NORTH;
-	case SW_WEST:   return NE_EAST;
-	case SE_SOUTH:  return NW_NORTH;
-	case SE_EAST:   return NW_WEST;
-	default:
-		if (MAP_DEBUG)
-			cerr << "MAP WARNING: VirtualSprite::CalculateOppositeDirection received invalid direction" << endl;
-		return SOUTH;
+		case NORTH:      return SOUTH;
+		case SOUTH:      return NORTH;
+		case WEST:       return EAST;
+		case EAST:       return WEST;
+		case NW_NORTH:   return SE_SOUTH;
+		case NW_WEST:    return SE_EAST;
+		case NE_NORTH:   return SW_SOUTH;
+		case NE_EAST:    return SW_WEST;
+		case SW_SOUTH:   return NE_NORTH;
+		case SW_WEST:    return NE_EAST;
+		case SE_SOUTH:   return NW_NORTH;
+		case SE_EAST:    return NW_WEST;
+		default:
+			IF_PRINT_WARNING(MAP_DEBUG) << "invalid direction argument: " << direction << endl;
+			return SOUTH;
 	}
 }
 
@@ -393,10 +392,6 @@ MapSprite::~MapSprite() {
 	// Free animations
 	for (vector<AnimatedImage>::iterator i = animations.begin(); i != animations.end(); ++i)
 		(*i).Clear();
-
-// 	for (uint32 i = 0; i < dialogues.size(); i++) {
-// 		delete(dialogues[i]);
-// 	}
 }
 
 
@@ -511,9 +506,6 @@ bool MapSprite::LoadRunningAnimations(std::string filename) {
 
 // Updates the state of the sprite
 void MapSprite::Update() {
-// 	if (!updatable)
-// 		return;
-
 	// Set the sprite's animation to the standing still position if movement has just stopped
 	if (!moving) {
 		if (was_moving) {
@@ -633,6 +625,8 @@ EnemySprite::EnemySprite() :
 	Reset();
 }
 
+
+
 EnemySprite::EnemySprite(std::string file) :
 	_zone(NULL),
 	_color(1.0f, 1.0f, 1.0f, 0.0f),
@@ -674,9 +668,7 @@ void EnemySprite::Reset() {
 
 void EnemySprite::AddEnemy(uint32 enemy_id) {
 	if (_enemy_parties.empty()) {
-		if (MAP_DEBUG) {
-			cerr << "MAP WARNING: In EnemySprite::AddEnemy, can not add new enemy when no parties have been declared" << endl;
-		}
+		IF_PRINT_WARNING(MAP_DEBUG) << "can not add new enemy when no parties have been declared" << endl;
 		return;
 	}
 
@@ -693,8 +685,7 @@ void EnemySprite::AddEnemy(uint32 enemy_id) {
 		}
 
 		if (found == false) {
-			cerr << "MAP WARNING: In EnemySprite::AddEnemy, enemy to add has id " << enemy_id
-				<< ", which does not exist in MapMode::_enemies" << endl;
+			IF_PRINT_WARNING(MAP_DEBUG) << "enemy to add has id " << enemy_id << ", which does not exist in MapMode::_enemies" << endl;
 		}
 	}
 }
@@ -703,7 +694,7 @@ void EnemySprite::AddEnemy(uint32 enemy_id) {
 
 const std::vector<uint32>& EnemySprite::RetrieveRandomParty() {
 	if (_enemy_parties.empty()) {
-		cerr << "MAP ERROR: Called EnemySprite::RetreiveRandomParty when no enemy parties existed!" << endl;
+		PRINT_ERROR << "call invoked when no enemy parties existed" << endl;
 		exit(1);
 	}
 
@@ -713,7 +704,7 @@ const std::vector<uint32>& EnemySprite::RetrieveRandomParty() {
 
 
 void EnemySprite::Update() {
-	if( current_action != -1 ) {
+	if (current_action != -1) {
 		MapSprite::Update();
 		return;
 	}

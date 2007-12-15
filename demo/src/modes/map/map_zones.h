@@ -110,7 +110,8 @@ public:
 	void AddEnemy(EnemySprite* new_enemy, MapMode* map, uint8 count = 1);
 
 	//! \brief Decrements the number of active enemies by one
-	void EnemyDead();
+	void EnemyDead()
+		{ --_active_enemies; }
 
 	//! \brief Gradually spawns enemy sprites in the zone
 	void Update();

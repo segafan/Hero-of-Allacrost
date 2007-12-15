@@ -42,7 +42,7 @@ void MapZone::AddSection(ZoneSection* section) {
 
 bool MapZone::IsInsideZone(uint16 pos_x, uint16 pos_y) {
 	// Verify each section of the zone to make sure the position is in bounds.
-	for (std::vector<ZoneSection>::const_iterator i = _sections.begin(); i != _sections.end(); ++i) {
+	for (vector<ZoneSection>::const_iterator i = _sections.begin(); i != _sections.end(); ++i) {
 		if (pos_x >= i->start_col && pos_x <= i->end_col &&
 			pos_y >= i->start_row && pos_y <= i->end_row )
 		{
@@ -79,8 +79,7 @@ EnemyZone::EnemyZone(uint32 regen_time, bool restrained) :
 void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 	if (count == 0) {
 		// NOTE: The EnemySprite pointer passed in is not deleted in this case
-		if (MAP_DEBUG)
-			cerr << "MAP WARNING: EnemyZone::AddEnemy called with a zero count for the enemy" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "function called with a zero count for the enemy" << endl;
 		return;
 	}
 
@@ -101,12 +100,6 @@ void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 		_enemies.push_back(copy);
 		remaining--;
 	}
-}
-
-
-
-void EnemyZone::EnemyDead() {
-	--_active_enemies;
 }
 
 
