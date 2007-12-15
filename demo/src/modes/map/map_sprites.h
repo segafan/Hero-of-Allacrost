@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    map_sprites.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for map mode sprites.
+*** \brief   Header file for map mode sprite code.
 *** *****************************************************************************/
 
 #ifndef __MAP_SPRITES_HEADER__
@@ -18,12 +18,10 @@
 
 #include "utils.h"
 #include "defs.h"
-
 #include "video.h"
-
+#include "map_objects.h"
 #include "map_actions.h"
 #include "map_dialogue.h"
-#include "map_objects.h"
 #include "map_zones.h"
 
 namespace hoa_map {
@@ -502,14 +500,11 @@ public:
 	void SetTimeToSpawn(uint32 time)
 		{ _time_to_spawn = time; }
 
-	void SetBattleMusicTheme(const std::string & music_theme)
+	void SetBattleMusicTheme(const std::string& music_theme)
 		{ _music_theme = music_theme; }
 
-	void ChangeStateDead() { 
-		Reset(); 
-		if( _zone ) 
-			_zone->EnemyDead(); 
-	}
+	void ChangeStateDead()
+		{ Reset(); if (_zone) _zone->EnemyDead(); }
 
 	void ChangeStateSpawning()
 		{ updatable = true; _state = SPAWNING; no_collision = false; }

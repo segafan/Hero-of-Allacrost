@@ -68,9 +68,6 @@ MapMode::MapMode(string filename) :
 	_run_disabled(false),
 	_run_stamina(10000)
 {
-	if (MAP_DEBUG)
-		cout << "MAP: MapMode constructor invoked" << endl;
-
 	_loading_map = this;
 
 	// Modify the filename so that is only consists of alphanumeric characters and underscores, and thus will be a valid identifier name in Lua
@@ -116,8 +113,6 @@ MapMode::MapMode(string filename) :
 
 
 MapMode::~MapMode() {
-	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked" << endl;
-
 	for (uint32 i = 0; i < _music.size(); i++) {
 		_music[i].FreeAudio();
 	}
