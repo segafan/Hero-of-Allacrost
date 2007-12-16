@@ -95,6 +95,7 @@ engine_SOURCES = \
 	$(ENGINE_DIR)/mode_manager.h \
 	$(ENGINE_DIR)/socket.cpp \
 	$(ENGINE_DIR)/socket.h \
+	$(ENGINE_DIR)/defs_engine.cpp \
 	$(audio_SOURCES) \
 	$(video_SOURCES) \
 	$(script_SOURCES)
@@ -108,10 +109,12 @@ global_SOURCES = \
 	$(GLOBAL_DIR)/global_objects.cpp \
 	$(GLOBAL_DIR)/global_objects.h \
 	$(GLOBAL_DIR)/global_skills.cpp \
-	$(GLOBAL_DIR)/global_skills.h
+	$(GLOBAL_DIR)/global_skills.h \
+	$(GLOBAL_DIR)/defs_global.cpp
 
 MODES_DIR = src/modes
 modes_SOURCES = \
+	$(MODES_DIR)/defs_modes.cpp \
 	$(MODES_DIR)/battle/battle.cpp \
 	$(MODES_DIR)/battle/battle.h \
 	$(MODES_DIR)/battle/battle_actions.cpp \
