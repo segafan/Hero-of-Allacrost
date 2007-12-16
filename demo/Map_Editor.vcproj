@@ -22,7 +22,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\tileset_editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\tileset_editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\skill_editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\skill_editor_moc.cpp"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -185,6 +185,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\global\defs_global.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\editor\editor.cpp"
 				>
 			</File>
@@ -197,11 +201,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\effects.cpp"
+				RelativePath=".\src\engine\video\fade.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\fade.cpp"
+				RelativePath=".\src\global\global.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_actors.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_objects.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_skills.cpp"
 				>
 			</File>
 			<File
@@ -233,7 +249,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\option.cpp"
+				RelativePath=".\src\engine\mode_manager.cpp"
 				>
 			</File>
 			<File
@@ -281,11 +297,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\text.cpp"
+				RelativePath=".\src\engine\system.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\textbox.cpp"
+				RelativePath=".\src\engine\video\text.cpp"
 				>
 			</File>
 			<File
@@ -335,16 +351,58 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\defs.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\editor\editor.h"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC editor.h"
+						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\editor_moc.cpp"
+						AdditionalDependencies=""
+						Outputs="$(ProjectDir)src\editor\editor_moc.cpp"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\engine\video\fade.h"
 				>
 			</File>
 			<File
+				RelativePath=".\src\global\global.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_actors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_objects.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_skills.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\editor\grid.h"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC grid.h"
+						CommandLine="moc $(InputPath) -o $(ProjectDir)\src\editor\grid_moc.cpp"
+						AdditionalDependencies=""
+						Outputs="$(ProjectDir)src\editor\grid_moc.cpp"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\engine\video\gui.h"
@@ -367,23 +425,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\option.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\video\particle.h"
+				RelativePath=".\src\engine\mode_manager.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\engine\video\particle_effect.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\video\particle_emitter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\video\particle_keyframe.h"
 				>
 			</File>
 			<File
@@ -392,10 +438,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\particle_system.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\video\screen_rect.h"
 				>
 			</File>
 			<File
@@ -419,27 +461,30 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\modes\shop\shop.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\shop\shop_windows.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\editor\skill_editor.h"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC skill_editor.h"
+						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\skill_editor_moc.cpp"
+						AdditionalDependencies=""
+						Outputs="$(ProjectDir)src\editor\skill_editor_moc.cpp"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\engine\socket.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\text.h"
+				RelativePath=".\src\engine\system.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\textbox.h"
+				RelativePath=".\src\engine\video\text.h"
 				>
 			</File>
 			<File
@@ -461,6 +506,17 @@
 			<File
 				RelativePath=".\src\editor\tileset_editor.h"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC tileset_editor.h"
+						CommandLine="moc $(InputPath) -o $(ProjectDir)\src\editor\tileset_editor_moc.cpp"
+						AdditionalDependencies=""
+						Outputs="$(ProjectDir)src\editor\tileset_editor_moc.cpp"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\utils.h"
