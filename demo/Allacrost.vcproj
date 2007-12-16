@@ -379,10 +379,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\modes\quit.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\modes\scene.h"
 				>
 			</File>
@@ -523,6 +519,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\engine\defs_engine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\defs_global.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\defs_modes.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\video\effects.cpp"
 				>
 			</File>
@@ -632,10 +640,6 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\pause.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\modes\quit.cpp"
 				>
 			</File>
 			<File
