@@ -57,6 +57,10 @@ Editor::Editor() : QMainWindow()
 
 	// Create the video engine's singleton
 	VideoManager = GameVideo::SingletonCreate();
+
+	// create the skill editor window
+	_skill_editor = new SkillEditor(NULL, "skill_editor");
+	_skill_editor->resize(600,400);
 } // Editor constructor
 
 Editor::~Editor()
@@ -66,6 +70,7 @@ Editor::~Editor()
 	if (_ed_tabs != NULL)
 		delete _ed_tabs;
 	delete _ed_splitter;
+	delete _skill_editor;
 	delete _undo_stack;
 
 	GameScript::SingletonDestroy();
@@ -711,9 +716,7 @@ void Editor::_MapProperties()
 
 void Editor::_ScriptEditSkills()
 {
-	SkillEditor *skill_editor = new SkillEditor(this, "skill_editor");
-	skill_editor->exec();
-	delete skill_editor;
+	_skill_editor->show();
 }
 
 void Editor::_HelpHelp()
@@ -1475,7 +1478,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 			if (editor->_select_on == true)
 			{
 				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
-				for (int i = 0; i < select_layer.size(); i++)
+				for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
 				{
 					// Works because the selection layer and the current layer are the same size.
 					if (select_layer[i] != -1)
@@ -1550,7 +1553,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 			if (editor->_select_on == true)
 			{
 				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
-				for (int i = 0; i < select_layer.size(); i++)
+				for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
 				{
 					// Works because the selection layer and the current layer are the same size.
 					if (select_layer[i] != -1)

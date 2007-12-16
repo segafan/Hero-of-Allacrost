@@ -16,10 +16,7 @@
 #ifndef __EDITOR_HEADER__
 #define __EDITOR_HEADER__
 
-#include "grid.h"
-#include "tileset.h"
-#include "tileset_editor.h"
-#include "skill_editor.h"
+#include <map>
 
 #include <QApplication>
 #include <QCheckBox>
@@ -46,7 +43,10 @@
 #include <QTreeWidget>
 #include <QUndoCommand>
 
-#include <map>
+#include "grid.h"
+#include "tileset.h"
+#include "tileset_editor.h"
+#include "skill_editor.h"
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -252,6 +252,8 @@ class Editor: public QMainWindow
 		QTabWidget* _ed_tabs;
 		//! Used to add scrollbars to the QGLWidget of the map.
 		EditorScrollView* _ed_scrollview;
+		//! The skills editor window
+		SkillEditor *_skill_editor;
 		//! Used as the main widget in the editor since it enables user-sizable sub-widgets.
 		QSplitter* _ed_splitter;
 

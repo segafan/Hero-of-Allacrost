@@ -16,16 +16,25 @@
 #ifndef __SKILL_EDITOR_HEADER__
 #define __SKILL_EDITOR_HEADER__
 
+#include <string>
+#include <vector>
+
 #include "script.h"
+
 #include "global_skills.h"
 
 #include <QDialog>
 #include <QTabWidget>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QGridLayout>
+#include <QLineEdit>
 
 namespace hoa_editor
 {
 
-class SkillEditor : public QDialog
+class SkillEditor : public QWidget
 {
 	//! Macro needed to use Qt's slots and signals
 	Q_OBJECT
@@ -34,9 +43,63 @@ public:
 	SkillEditor(QWidget *parent, const QString &name);
 	~SkillEditor();	
 
+private slots:
+	//! \brief slot to handle tab changes
+	void _ChangeCurrentTab(int index);
+	//! \brief button clicked slots
+	//@{
+	void _LeftButtonClicked();
+	void _RightButtonClicked();
+	//@}
+
 private:
+	//! \brief Loads the skills from the game
+	void _LoadSkills();
+	//! \brief Loads the skills from an individual file
+	//! the ReadScriptDescriptor must already be opened.
+	//! this function closes the script when finished.
+	void _LoadSkills(hoa_script::ReadScriptDescriptor &script, std::vector<hoa_global::GlobalSkill *> &skills, hoa_global::GLOBAL_SKILL type);
+	//! \brief Create the UI for the given tab page.
+	void _CreateTab(hoa_global::GLOBAL_SKILL type, std::vector<hoa_global::GlobalSkill *> skills, QString name);
+	//! \brief Create the buttons at the bottom of the tab
+	void _CreateTabBottomButtons(hoa_global::GLOBAL_SKILL type);
+	//! \brief clean up functions, to delete all the controls on the individual tab pages
+	void _CleanupTab(hoa_global::GLOBAL_SKILL type);
+	//! \brief returns the skill list associated with the current tab
+	std::vector<hoa_global::GlobalSkill *> &_GetCurrentSkillList();
+	//! \brief Reloads the current tab with the currently selected skill
+	void _ReloadTab();
+
 	//! \brief a tab control to hold the tabs for attack skills, support skills, and defense skills
-	QTabWidget *_tab_control;
+	QTabWidget *_tab_skill_groups;
+	//! \brief this is the layout control that the tab control lives in.
+	QHBoxLayout *_hbox;
+	//! \brief vectors to hold the global skills
+	//@{
+	std::vector<hoa_global::GlobalSkill *> _attack_skills;
+	std::vector<hoa_global::GlobalSkill *> _defense_skills;
+	std::vector<hoa_global::GlobalSkill *> _support_skills;
+	//@}
+
+	//! \brief the currently selected tab
+	hoa_global::GLOBAL_SKILL _current_tab;
+
+	//! \brief tab page controls
+	//@{
+	int32 _current_skill_index[3];
+	QVBoxLayout * _tab_vboxes[3];
+	QHBoxLayout * _tab_bottom_hboxes[3];
+	QGridLayout * _gl_layouts[3];
+	QWidget * _tab_pages[3];
+	QPushButton * _left_buttons[3];
+	QPushButton * _right_buttons[3];
+	QPushButton * _save_buttons[3];
+	QPushButton * _new_buttons[3];
+	QSpacerItem * _button_spacers[3];
+	QSpacerItem * _tab_spacers[3];
+	QLabel * _lbl_skill_names[3];
+	QLineEdit * _le_skill_names[3];
+	//@}
 };
 
 } // namespace hoa_editor
