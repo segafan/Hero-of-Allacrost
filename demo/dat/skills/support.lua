@@ -7,7 +7,7 @@
 ------------------------------------------------------------------------------]]
 
 -- All support skills definitions are stored in this table
-if (skill == nil) then
+if (skills == nil) then
    skills = {}
 end
 
