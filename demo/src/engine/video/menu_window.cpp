@@ -38,9 +38,7 @@ MenuWindow::MenuWindow() :
 bool MenuWindow::Create(string skin_name, float w, float h, int32 visible_flags, int32 shared_flags) {
 	_skin = GUIManager->_GetMenuSkin(skin_name);
 	if (_skin == NULL) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: MenuWindow::Create() failed because the requested menu skin was not found: "
-				<< skin_name << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "the requested menu skin was not found: " << skin_name << endl;
 		return false;
 	}
 
@@ -51,9 +49,8 @@ bool MenuWindow::Create(string skin_name, float w, float h, int32 visible_flags,
 
 bool MenuWindow::Create(float w, float h, int32 visible_flags, int32 shared_flags) {
 	if (w <= 0 || h <= 0) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: MenuWindow::Create() failed because an invalid width or height was passed in: "
-				<< "(width = " << w << ", height = " << h << ")" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "width and/or height argument was invalid: "
+			<< "(width = " << w << ", height = " << h << ")" << endl;
 		return false;
 	}
 
@@ -66,15 +63,11 @@ bool MenuWindow::Create(float w, float h, int32 visible_flags, int32 shared_flag
 		_skin = GUIManager->_GetDefaultMenuSkin();
 	}
 	if (_skin == NULL) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: MenuWindow::Create() failed because a default menu skin was unavailable "
-				<< "(no skins were loaded)" << endl;
-			return false;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "a default menu skin was unavailable (no skins were loaded)" << endl;
+		return false;
 	}
 
 	if (_RecreateImage() == false) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: MenuWindow::Create() failed because the window could not be recreated" << endl;
 		return false;
 	}
 
@@ -147,7 +140,7 @@ void MenuWindow::Update(uint32 frame_time) {
 		draw_percent = time;
 	}
 
-	if (draw_percent != 1.0f) {
+	if (IsFloatEqual(draw_percent, 1.0f) == false) {
 		if (_display_mode == VIDEO_MENU_EXPAND_FROM_CENTER) {
 			float left, right, bottom, top;
 			left = 0.0f;
@@ -174,8 +167,7 @@ void MenuWindow::Update(uint32 frame_time) {
 
 void MenuWindow::Draw() {
 	if (_initialized == false) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: MenuWindow::Draw() failed because the menu window was not initialized:\n" << _initialization_errors << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "the menu window was not initialized:\n" << _initialization_errors << endl;
 		return;
 	}
 
@@ -207,8 +199,7 @@ void MenuWindow::Draw() {
 
 void MenuWindow::Show() {
 	if (_initialized == false) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: MenuWindow::Show() failed because the menu window was not initialized:\n" << _initialization_errors << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "the menu window was not initialized:\n" << _initialization_errors << endl;
 		return;
 	}
 
@@ -228,8 +219,7 @@ void MenuWindow::Show() {
 
 void MenuWindow::Hide() {
 	if (_initialized == false) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: MenuWindow::Hide() failed because the menu window was not initialized:\n" << _initialization_errors << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "the menu window was not initialized:\n" << _initialization_errors << endl;
 		return;
 	}
 
@@ -267,16 +257,15 @@ bool MenuWindow::IsInitialized(string& errors) {
 	if (_window_state <= VIDEO_MENU_STATE_INVALID || _window_state >= VIDEO_MENU_STATE_TOTAL)
 		stream << "* Invalid state (" << _window_state << ")" << endl;
 
-	// Check to see a valid image is loaded
-	if (_menu_image.GetWidth() == 0)
-		stream << "* Menu image is not loaded" << endl;
-
 	// Check to see that a valid menu skin is being used
 	if (_skin == NULL)
 		stream << "* No menu skin is assigned" << endl;
 
-	errors = stream.str();
+	// Check to see if the composite image composing the window is valid
+	if (_menu_image.GetWidth() == 0)
+		stream << "* Menu image is not valid" << endl;
 
+	errors = stream.str();
 	if (errors.empty()) {
 		_initialized = true;
 	}
@@ -289,28 +278,27 @@ bool MenuWindow::IsInitialized(string& errors) {
 
 
 
-void MenuWindow::ChangeEdgeVisibleFlags(int32 flags) {
-	_edge_visible_flags = flags;
-	_RecreateImage();
-}
-
-
-
-void MenuWindow::ChangeEdgeSharedFlags(int32 flags) {
-	_edge_shared_flags = flags;
-	_RecreateImage();
-}
-
-
-
-void MenuWindow::ChangeMenuSkin(string& skin_name) {
-	MenuSkin* new_skin = GUIManager->_GetMenuSkin(skin_name);
-	if (new_skin == NULL) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: MenuWindow::ChangeMenuSkin() failed because the skin_name \""
-				<< skin_name << "\" was invalid" << endl;
+void MenuWindow::SetDimensions(float w, float h) {
+	if (w <= 0 || h <= 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "width and/or height argument was invalid: "
+			<< "(width = " << w << ", height = " << h << ")" << endl;
 		return;
 	}
+
+	_width = w;
+	_height = h;
+	_RecreateImage();
+}
+
+
+
+void MenuWindow::SetMenuSkin(string& skin_name) {
+	MenuSkin* new_skin = GUIManager->_GetMenuSkin(skin_name);
+	if (new_skin == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "the skin_name \"" << skin_name << "\" was invalid" << endl;
+		return;
+	}
+
 	_skin = new_skin;
 	_RecreateImage();
 }
@@ -319,8 +307,7 @@ void MenuWindow::ChangeMenuSkin(string& skin_name) {
 
 void MenuWindow::SetDisplayMode(VIDEO_MENU_DISPLAY_MODE mode) {
 	if (mode <= VIDEO_MENU_INVALID || mode >= VIDEO_MENU_TOTAL) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: MenuWindow::SetDisplayMode() failed because an invalid argument was given: " << mode << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid mode argument passed to function: " << mode << endl;
 		return;
 	}
 
@@ -332,9 +319,7 @@ void MenuWindow::SetDisplayMode(VIDEO_MENU_DISPLAY_MODE mode) {
 
 bool MenuWindow::_RecreateImage() {
 	if (_skin == NULL) {
-		if (VIDEO_DEBUG) {
-			cerr << "VIDEO ERROR: In MenuWindow::_RecreateImage(), there was no menu skin set" << endl;
-		}
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "no menu skin set when function was invoked" << endl;
 		return false;
 	}
 
@@ -357,16 +342,12 @@ bool MenuWindow::_RecreateImage() {
 	_inner_height = _height - vertical_border_size;
 
 	if (_inner_width < 0.0f) {
-		if (VIDEO_DEBUG) {
-			cerr << "VIDEO ERROR: In MenuWindow::_RecreateImage(), _inner_width was negative" << endl;
-		}
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "_inner_width was computed as negative" << endl;
 		return false;
 	}
 
 	if (_inner_height < 0.0f) {
-		if (VIDEO_DEBUG) {
-			cerr << "VIDEO ERROR: In MenuWindow::_RecreateImage(), _inner_height was negative" << endl;
-		}
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "_inner_height was computed as negative" << endl;
 		return false;
 	}
 
@@ -411,7 +392,6 @@ bool MenuWindow::_RecreateImage() {
 	_skin->borders[1][1].SetDimensions(left_border_size, top_border_size);
 	_skin->borders[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
 // 	VideoManager->LoadImage(_skin->borders[1][1]);
-
 
 	// If a valid background image is loaded, then tile the interior of the window with it
 	if (background_loaded) {

@@ -139,6 +139,10 @@ public:
 *** image and a background. Menu windows exist to provide a base upon which to
 *** draw text and images that are not a part of the regular game environment.
 ***
+*** \note It is common practice to derive specific windows from this class for
+*** the display of dialogue text, inventory lists, etc. This class is designed
+*** with that practice in mind.
+***
 *** \todo Allow the user to specify an arbitrary amount of time for showing/
 *** hiding the menu window.
 *** ***************************************************************************/
@@ -175,11 +179,12 @@ public:
 	*** \param frame_time The time that has elapsed since the previous frame, in milliseconds.
 	**/
 	void Update(uint32 frame_time);
+
 	/** \brief This version is for the subclasses of menu window (allows us to use a single MenuWindow variable
 	*** to track the active window.
 	**/
 	virtual void Update()
-		{ }
+		{}
 
 	//! \brief Draws the menu window to the screen.
 	void Draw();
@@ -212,30 +217,15 @@ public:
 	**/
 	bool IsInitialized(std::string &errors);
 
-	/** \brief Changes the visible edge flags after the menu window has been created
-	*** \param flags Bit flags to specify which edges are visible and which are not.
-	*** \note This call is somewhat expensive since it has to recreate the menu window image.
+	/** \brief Indicates whether the window is in the active context
+	*** \return True always here, subclasses can override to change the behaviour
 	**/
-	void ChangeEdgeVisibleFlags(int32 flags);
-
-	/** \brief Changes the shared edge flags after the menu window has been created
-	*** \param flags Bit flags to specify which edges are shared with other windows.
-	*** \note This call is somewhat expensive since it has to recreate the menu window image.
-	**/
-	void ChangeEdgeSharedFlags(int32 flags);
-
-	/** \brief Changes which menu skin is used by the window after it has been created
-	*** \param skin_name The name to which the skin is referred by
-	*** \note If the skin_name is invalid, a warning mesage will be printed and no change
-	*** will take place. This call is somewhat expensive since it has to recreate the menu window image.
-	**/
-	void ChangeMenuSkin(std::string& skin_name);
+	virtual bool IsActive()
+		{ return true; }
 
 	//! \name Class Member Access Functions
 	//@{
-	void SetDisplayMode(VIDEO_MENU_DISPLAY_MODE mode);
-
-	void GetDimensions(float &w, float &h) const
+	void GetDimensions(float& w, float& h) const
 		{ w = _width; h = _height; }
 
 	VIDEO_MENU_DISPLAY_MODE GetDisplayMode() const
@@ -244,15 +234,31 @@ public:
 	VIDEO_MENU_STATE GetState() const
 		{ return _window_state; }
 
+	/** \note When the window is in the process of showing or hiding, subsequent calls to this function
+	*** (in between calls to Update()) will yield different results as the active dimensions of the window
+	*** are changing. When the window is fully shown or fully hidden, this function will always return the 
+	*** same scissor rectangle that is reflective of the window's full size.
+	***
+	**/
 	ScreenRect GetScissorRect() const
 		{ return _scissor_rect; }
-	//@}
 
-	/** \brief Indicates whether the window is in the active context
-	*** \return True always here, subclasses can override to change the behaviour
-	**/
-	virtual bool IsActive()
-		{ return true; }
+	//! \note This call is somewhat expensive since it has to recreate the menu window image.
+	void SetDimensions(float w, float h);
+
+	//! \note This call is somewhat expensive since it has to recreate the menu window image.
+	void SetEdgeVisibleFlags(int32 flags)
+		{ _edge_visible_flags = flags; _RecreateImage(); }
+
+	//! \note This call is somewhat expensive since it has to recreate the menu window image.
+	void SetEdgeSharedFlags(int32 flags)
+		{ _edge_shared_flags = flags; _RecreateImage(); }
+
+	//! \note This call is somewhat expensive since it has to recreate the menu window image.
+	void SetMenuSkin(std::string& skin_name);
+
+	void SetDisplayMode(VIDEO_MENU_DISPLAY_MODE mode);
+	//@}
 
 private:
 	//! \brief The current id of this object.
