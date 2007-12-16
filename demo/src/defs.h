@@ -317,6 +317,9 @@ namespace hoa_defs {
 *** ScriptEngine is initialized, otherwise the application will crash.
 **/
 void BindEngineToLua();
+void BindGlobalsToLua();
+void BindModesToLua();
+void BindUtilsToLua();
 
 } // namespace hoa_defs
 

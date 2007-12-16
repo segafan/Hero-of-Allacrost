@@ -216,7 +216,10 @@ void InitializeEngine() throw (Exception) {
 	if (ScriptManager->SingletonInitialize() == false) {
 		throw Exception("ERROR: unable to initialize ScriptManager", __FILE__, __LINE__, __FUNCTION__);
 	}
+	hoa_defs::BindUtilsToLua();
 	hoa_defs::BindEngineToLua();
+	hoa_defs::BindGlobalsToLua();
+	hoa_defs::BindModesToLua();
 
 	if (SystemManager->SingletonInitialize() == false) {
 		throw Exception("ERROR: unable to initialize SystemManager", __FILE__, __LINE__, __FUNCTION__);

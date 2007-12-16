@@ -667,7 +667,7 @@ protected:
 class GlobalCharacterGrowth {
 	friend class GameGlobal;
 	friend class GlobalCharacter;
-	friend void hoa_defs::BindEngineToLua();
+	friend void hoa_defs::BindGlobalsToLua();
 
 public:
 	GlobalCharacterGrowth(GlobalCharacter* owner);
