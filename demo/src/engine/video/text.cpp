@@ -341,10 +341,11 @@ void TextImage::Draw(const Color& draw_color) const {
 
 
 void TextImage::_Regenerate() {
-	const uint16 NEWLINE = '\n';
+	const uint16 NEW_LINE = '\n';
+	const uint16 END_STRING = '\0';
+
 	_width = 0;
 	_height = 0;
-
 	for (uint32 i = 0; i < _text_sections.size(); i++) {
 		delete _text_sections[i];
 	}
@@ -369,8 +370,8 @@ void TextImage::_Regenerate() {
 	uint16* last_line = reformatted_text;
 
 	for (const uint16* char_iter = _string.c_str(); *char_iter; ++char_iter) {
-		if (*char_iter == NEWLINE) {
-			*text_iter++ = '\0';
+		if (*char_iter == NEW_LINE) {
+			*text_iter++ = END_STRING;
 			line_array.push_back(last_line);
 			last_line = text_iter;
 		}
@@ -379,18 +380,14 @@ void TextImage::_Regenerate() {
 		}
 	}
 	line_array.push_back(last_line);
-	*text_iter = '\0';
+	*text_iter = END_STRING;
 
-	// 2) Determine the text's properties
-// 	Color shadow_color = TextManager->_GetTextShadowColor(fp);
-// 	float total_height = static_cast<float>((line_array.size() - 1) * fp->line_skip);
-
-	// 3) Iterate through each line of text and render a TextTexture for each one
+	// 2) Iterate through each line of text and render a TextTexture for each one
 	vector<uint16*>::iterator line_iter;
 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter) {
 		TextElement* new_element = new TextElement();
-		// If this line is only a newline character, create an empty TextElement object
-		if (**line_iter == NEWLINE) {
+		// If this line is only a newline character or is an empty string, create an empty TextElement object
+		if (**line_iter == NEW_LINE || **line_iter == END_STRING) {
 			new_element->SetDimensions(0.0f, fp->line_skip);
 		}
 		// Otherwise, create a new TextTexture to be managed by the new element
@@ -408,13 +405,6 @@ void TextImage::_Regenerate() {
 
 			new_element->SetTexture(texture); // Automatically adds a reference to texture
 		}
-
-// float y_offset = total_height + (_height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection()) +
-// 			((fp->line_skip - texture->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
-// 		TextElement element(texture);
-// // 		TextElement element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
-// //		float x_offset_, float y_offset_, float u1_, float v1_, float u2_, float v2_, float width_, float height_
-
 		_text_sections.push_back(new_element);
 
 		// Increase height by the font specified line height
@@ -422,27 +412,6 @@ void TextImage::_Regenerate() {
 	}
 
 	delete[] reformatted_text;
-// 		TextElement element(texture, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(texture->width), static_cast<float>(texture->height), _color);
-
-// 		// 4) If text shadows are enabled, copy the text texture and modify its properties to create a shadow version
-// 		if (texture->style.shadow_style != VIDEO_TEXT_SHADOW_NONE) {
-// 
-// 			shadow_offset_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()) * texture->style.shadow_offset_x;
-// 			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection()) * texture->style.shadow_offset_y;
-// 
-// 			TextElement shadow_element = element;
-// // 			shadow_element.x_offset += shadow_offset_x;
-// // 			shadow_element.y_offset += shadow_offset_y;
-// 
-// 			// Line offsets must be set to be retained after lines are aligned
-// 
-// // 			shadow_element.color[0] = shadow_color * _color[0];
-// // 			shadow_element.color[1] = shadow_color * _color[1];
-// // 			shadow_element.color[2] = shadow_color * _color[2];
-// // 			shadow_element.color[3] = shadow_color * _color[3];
-// 
-// 			_text_sections.push_back(shadow_element);
-// 		}
 } // void TextImage::_Regenerate()
 
 // -----------------------------------------------------------------------------
@@ -931,131 +900,6 @@ void TextSupervisor::_DrawTextHelper(const uint16* const text, FontProperties* f
 
 
 bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, ImageMemory& buffer) {
-// 	FontProperties* fp = _font_map[style.font];
-// 	TTF_Font* font = fp->ttf_font;
-// 
-// 	if (font == NULL) {
-// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "font of TextStyle argument '" << style.font << "' was invalid" << endl;
-// 		return false;
-// 	}
-// 
-// 	// Boolean to indicate whether we are also rendering a shadow along with the text
-// 	bool render_shadow = (style.shadow_style != VIDEO_TEXT_SHADOW_NONE);
-// 	// The surface which will contain the final rendered text
-// 	SDL_Surface* target_surface = NULL;
-// 	// A surface used for temporarily holding rendered contents that are to eventually be transferred to the target surface
-// 	SDL_Surface* source_surface = NULL;
-// 	// Used to indicate the destination coordinates when blitting a source surface to a target
-// 	SDL_Rect dest_coords;
-// 	// The memory location where the pixel data will be stored
-// 	uint8* pixel_buffer = NULL;
-// 	// The pixel dimensions of the final text that is to be rendered
-// 	int32 text_width, text_height;
-// 	// The color of the text to render in (converted to SDL's color system)
-// 	SDL_Color text_color;
-// 	style.color.ConvertToNumerics(text_color.r, text_color.g, text_color.b, text_color.unused);
-// 
-// 	_CacheGlyphs(string.c_str(), fp); // Make sure that all glyphs to be used in the string are cached
-// 
-// 	// (1) Determine what the dimensions of the final rendered image will be
-// 	if (TTF_SizeUNICODE(font, string.c_str(), &text_width, &text_height) == -1) {
-// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_SizeUNICODE() failed: " << TTF_GetError() << endl;
-// 		return false;
-// 	}
-// 	if (text_width == 0 || text_height == 0) {
-// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "text dimensions determined to be zero (width, height): " << text_width << ", " << text_height << endl;
-// 		cout << "STRING:" << MakeStandardString(string) << ": size = " << string.size() << " empty? " << string.empty() << endl;
-// 		return false;
-// 	}
-// 
-// 	if (render_shadow) {
-// 		text_width += abs(style.shadow_offset_x);
-// 		text_height += abs(style.shadow_offset_y);
-// 	}
-// 
-// 	// (2) Using the now known dimensions, create the RGBA pixel buffer and target surface object
-// 	pixel_buffer = static_cast<uint8*>(calloc(text_width * text_height, 4));
-// 	target_surface = SDL_CreateRGBSurfaceFrom(pixel_buffer, text_width, text_height, 32, text_width * 4, RMASK, GMASK, BMASK, AMASK);
-// 	if (target_surface == NULL) {
-// 		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_CreateRGBSurfaceFrom() failed:" << SDL_GetError() << endl;
-// 		free(pixel_buffer);
-// 		return false;
-// 	}
-// 
-// 	// (3) Render the text shadow first and determine the coordinates of where to place it within the target surface
-// 	if (render_shadow) {
-// 		SDL_Color shadow_color;
-// 		//some Color object\\ConvertToNumerics(shadow_color.r, shadow_color.g, shadow_color.b, shadow_color.unused);
-// 
-// 		source_surface = TTF_RenderUNICODE_Blended(font, string.c_str(), shadow_color);
-// 		if (source_surface == NULL) {
-// 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderUNICODE_Blended() failed: " << TTF_GetError() << endl;
-// 			SDL_FreeSurface(target_surface);
-// 			free(pixel_buffer);
-// 			return false;
-// 		}
-// 
-// 		if (style.shadow_offset_x <= 0)
-// 			dest_coords.x = 0;
-// 		else
-// 			dest_coords.x = style.shadow_offset_x;
-// 
-// 		if (style.shadow_offset_y <= 0)
-// 			dest_coords.y = 0;
-// 		else
-// 			dest_coords.y = style.shadow_offset_y;
-// 
-// 		if (SDL_BlitSurface(source_surface, NULL, target_surface, &dest_coords) != 0) {
-// 			SDL_FreeSurface(source_surface);
-// 			SDL_FreeSurface(target_surface);
-// 			free(pixel_buffer);
-// 			IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed, SDL error: " << SDL_GetError() << endl;
-// 			return false;
-// 		}
-// 
-// 		SDL_FreeSurface(source_surface);
-// 	}
-/*
-	// (4) Render the text, determine its destination coordinates, and blit it to the target surface
-	source_surface = TTF_RenderUNICODE_Blended(font, string.c_str(), text_color);
-	if (source_surface == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_RenderUNICODE_Blended() failed: " << TTF_GetError() << endl;
-		SDL_FreeSurface(target_surface);
-		free(pixel_buffer);
-		return false;
-	}
-	PRINT_DEBUG << "Source surface properties" << endl;
-
-	cout << "Shadow offets (x,y): " << style.shadow_offset_x << ", " << style.shadow_offset_y << endl;
-
-
-	if (render_shadow && style.shadow_offset_x <= 0)
-		dest_coords.x = style.shadow_offset_x;
-	else
-		dest_coords.x = 0;
-
-	if (render_shadow && style.shadow_offset_y <= 0)
-		dest_coords.y = style.shadow_offset_y;
-	else
-		dest_coords.y = 0;
-
-	if (SDL_BlitSurface(source_surface, NULL, target_surface, &dest_coords) != 0) {
-		SDL_FreeSurface(source_surface);
-		SDL_FreeSurface(target_surface);
-		free(pixel_buffer);
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to SDL_BlitSurface() failed, SDL error: " << SDL_GetError() << endl;
-		return false;
-	}
-
-	// (5) Free surface objects and initialize the ImageMemory argument reference with the pixel dimensions and data
-	SDL_FreeSurface(source_surface);
-	SDL_FreeSurface(target_surface);
-
-	buffer.width = text_width;
-	buffer.height = text_height;
-	buffer.pixels = pixel_buffer;
-	return true;*/
-
 	FontProperties* fp = _font_map[style.font];
 	TTF_Font* font = fp->ttf_font;
 
@@ -1098,7 +942,7 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, I
 	min_y -= 1;
 
 	// Check if the first character starts left of pixel 0, and set
-	char_ptr = string.c_str();
+// 	char_ptr = string.c_str();
 	if (*char_ptr) {
 		FontGlyph* first_glyphinfo = (*fp->glyph_cache)[*char_ptr];
 		if (first_glyphinfo->min_x < 0)

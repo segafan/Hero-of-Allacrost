@@ -102,15 +102,17 @@ public:
 		{ return _colors[i]; }
 	//@}
 
-	/** \brief Converts the 0.0f to 1.0f floating point color values to 0 to 255 uint8 values
-	*** \return An array of four uint8 values ranging from 0 to 255
+	/** \brief Converts the color into a SDL_Color structure
+	*** \return A new SDL_Color with the four uint8 values ranging from 0 to 255
 	**/
-	void ConvertToNumerics(uint8& red, uint8& green, uint8& blue, uint8& alpha)
+	SDL_Color CreateSDLColor()
 		{
-			red = static_cast<uint8>(_colors[0] * 0xFF);
-			green = static_cast<uint8>(_colors[1] * 0xFF);
-			blue = static_cast<uint8>(_colors[2] * 0xFF);
-			alpha = static_cast<uint8>(_colors[3] * 0xFF);
+			SDL_Color sdl_color;
+			sdl_color.r = static_cast<uint8>(_colors[0] * 0xFF);
+			sdl_color.g = static_cast<uint8>(_colors[1] * 0xFF);
+			sdl_color.b = static_cast<uint8>(_colors[2] * 0xFF);
+			sdl_color.unused = static_cast<uint8>(_colors[3] * 0xFF);
+			return sdl_color;
 		}
 
 	//! \brief Class member access functions
