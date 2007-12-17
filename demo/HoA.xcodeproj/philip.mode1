@@ -256,22 +256,23 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
 							<array>
 								<string>4941A49F0AC1D76400D65B8E</string>
-								<string>D404C6E80B02FCEC00827A19</string>
 								<string>4941A4BC0AC1D7B300D65B8E</string>
 								<string>4941A6460AC1D86300D65B8E</string>
-								<string>D4D1BA640B02B27F0052BF1E</string>
 								<string>4999AC1A0AF407BD004DD3A3</string>
 								<string>1C37FBAC04509CD000000102</string>
+								<string>D4B00CAE0D15F18000A5DBB1</string>
+								<string>D4B00DE30D15F27500A5DBB1</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>47</integer>
-									<integer>46</integer>
+									<integer>37</integer>
+									<integer>34</integer>
+									<integer>32</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 631}, {187, 338}}</string>
+							<string>{{0, 1118}, {187, 338}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -371,9 +372,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>D4F2E8310D11105C00A2F1D7</string>
+				<string>D4B00DDA0D15F1BA00A5DBB1</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>D4F2E8320D11105C00A2F1D7</string>
+				<string>D4B00DDB0D15F1BA00A5DBB1</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -508,6 +509,7 @@
 	<key>WindowOrderList</key>
 	<array>
 		<string>D43083E80AF9860800A5173A</string>
+		<string>1C0AD2B3069F1EA900FABCE6</string>
 		<string>/Users/philip/allacrost/demo/HoA.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
@@ -592,7 +594,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>D43083E80AF9860800A5173A</string>
-				<string>D4F2E82A0D110E7F00A2F1D7</string>
+				<string>D4B00DDC0D15F1BA00A5DBB1</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -634,8 +636,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {246, 327}}</string>
-											<string>{{246, 0}, {467, 327}}</string>
+											<string>{{0, 0}, {243, 327}}</string>
+											<string>{{243, 0}, {470, 327}}</string>
 										</array>
 									</dict>
 									<key>VerticalSplitView</key>
@@ -698,14 +700,14 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1CD10A99069EF8BA00B06720</string>
-				<string>D4C64DA70D0CDE630035EA04</string>
+				<string>D411481B0D15DAE0005F0A3F</string>
 				<string>1C162984064C10D400B95A72</string>
-				<string>D4C64DA80D0CDE630035EA04</string>
-				<string>D4C64DA90D0CDE630035EA04</string>
-				<string>D4C64DAA0D0CDE630035EA04</string>
-				<string>D4C64DAB0D0CDE630035EA04</string>
-				<string>D4C64DAC0D0CDE630035EA04</string>
-				<string>D4C64DAD0D0CDE630035EA04</string>
+				<string>D411481C0D15DAE0005F0A3F</string>
+				<string>D411481D0D15DAE0005F0A3F</string>
+				<string>D411481E0D15DAE0005F0A3F</string>
+				<string>D411481F0D15DAE0005F0A3F</string>
+				<string>D41148200D15DAE0005F0A3F</string>
+				<string>D41148210D15DAE0005F0A3F</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debug</string>
@@ -859,7 +861,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>D4F7165E0B06B36400361DA9</string>
-				<string>D4C64DAE0D0CDE630035EA04</string>
+				<string>D41148220D15DAE0005F0A3F</string>
 				<string>1C78EAAC065D492600B07095</string>
 			</array>
 			<key>WindowString</key>
@@ -954,9 +956,9 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C0AD2B3069F1EA900FABCE6</string>
-				<string>D4C64DAF0D0CDE630035EA04</string>
+				<string>D4B00DDD0D15F1BA00A5DBB1</string>
 				<string>1CD0528B0623707200166675</string>
-				<string>D4C64DB00D0CDE630035EA04</string>
+				<string>D4B00DDE0D15F1BA00A5DBB1</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.run</string>
@@ -965,7 +967,7 @@
 			<key>WindowToolGUID</key>
 			<string>1C0AD2B3069F1EA900FABCE6</string>
 			<key>WindowToolIsVisible</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>Identifier</key>

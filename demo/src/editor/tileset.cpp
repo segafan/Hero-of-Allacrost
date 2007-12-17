@@ -151,7 +151,7 @@ Tileset::~Tileset()
 {
 	for (std::vector<hoa_video::StillImage>::iterator it = tiles.begin();
 	     it != tiles.end(); it++)
-		(*it).Clear();
+		 (*it).Clear();
 	tiles.clear();
 	delete table;
 } // TilesetTable destructor
