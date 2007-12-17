@@ -183,7 +183,12 @@ allacrost_editor_SOURCES = \
 	$(ENGINE_DIR)/socket.h \
 	src/defs.h \
 	src/utils.cpp \
-	src/utils.h
+	src/utils.h \
+	$(global_SOURCES) \
+	$(ENGINE_DIR)/mode_manager.cpp \
+	$(ENGINE_DIR)/mode_manager.h \
+	$(ENGINE_DIR)/system.cpp \
+	$(ENGINE_DIR)/system.h
 nodist_allacrost_editor_SOURCES = $(allacrost_editor_MOC)
 allacrost_editor_LDADD = $(QT_GUILINK) $(QT_LDADD)
 else
