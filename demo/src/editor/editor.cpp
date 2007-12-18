@@ -21,7 +21,8 @@ using namespace hoa_editor;
 using namespace hoa_video;
 using namespace std;
 
-Editor::Editor() : QMainWindow()
+Editor::Editor() : QMainWindow(),
+	_skill_editor(NULL)
 {
 	// create the undo stack
 	_undo_stack = new QUndoStack();
@@ -58,9 +59,6 @@ Editor::Editor() : QMainWindow()
 	// Create the video engine's singleton
 	VideoManager = GameVideo::SingletonCreate();
 
-	// create the skill editor window
-	_skill_editor = new SkillEditor(NULL, "skill_editor");
-	_skill_editor->resize(600,400);
 } // Editor constructor
 
 Editor::~Editor()
@@ -70,7 +68,8 @@ Editor::~Editor()
 	if (_ed_tabs != NULL)
 		delete _ed_tabs;
 	delete _ed_splitter;
-	delete _skill_editor;
+	if (_skill_editor != NULL)
+		delete _skill_editor;
 	delete _undo_stack;
 
 	GameScript::SingletonDestroy();
@@ -716,6 +715,12 @@ void Editor::_MapProperties()
 
 void Editor::_ScriptEditSkills()
 {
+	if (_skill_editor == NULL)
+	{
+		// create the skill editor window
+		_skill_editor = new SkillEditor(NULL, "skill_editor");
+		_skill_editor->resize(600,400);
+	}
 	_skill_editor->show();
 }
 
@@ -1728,8 +1733,9 @@ void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index)
 		string tileset_name = read_data.ReadString(1);
 		tile_index = read_data.ReadInt(2);
 		read_data.CloseTable();
-		tileset_num = _map->tileset_names.findIndex(
-			QString::fromStdString(tileset_name));
+		QString search = QString::fromStdString(tileset_name);
+		tileset_num = _map->tileset_names.findIndex(search);
+			//QString::fromStdString(tileset_name));
 		read_data.CloseTable();
 
 		read_data.CloseFile();
