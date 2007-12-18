@@ -199,7 +199,42 @@ void VirtualSprite::Update() {
 
 		// Determine if the sprite may move to this new Y position
 		if (MapMode::_current_map->_DetectCollision(this)) {
+			// Determine if we can slide on an object
+			if( direction & (SOUTH | NORTH)) {
+				//Start from a sprite's size away and get closer testing collision each time
+				for( float i = 0; i < coll_half_width * 2; i += 0.1f ) {
+					x_offset = tmp_x - ( coll_half_width * 2 ) + i;
+					if (MapMode::_current_map->_DetectCollision(this)) {
+						//Try the other way, can't go that way
+						x_offset = tmp_x + ( coll_half_width * 2 ) - i;
+						if (MapMode::_current_map->_DetectCollision(this)) {
+							//Still can't slide, reset
+							x_offset = tmp_x;
+						}
+						else {
+							x_offset = tmp_x + distance_moved;
+							break;
+						}
+					}
+					else {
+						x_offset = tmp_x - distance_moved;
+						break;
+					}
+				}
+				
+				// Roll-over X position offsets if necessary
+				while (x_offset < 0.0f) {
+					x_position -= 1;
+					x_offset += 1.0f;
+				}
+				while (x_offset > 1.0f) {
+					x_position += 1;
+					x_offset -= 1.0f;
+				}
+			}
+			
 			y_offset = tmp_y;
+			
 		}
 		else {
 			// Roll-over Y position offsets if necessary
@@ -222,6 +257,40 @@ void VirtualSprite::Update() {
 
 		// Determine if the sprite may move to this new X position
 		if (MapMode::_current_map->_DetectCollision(this)) {
+			// Determine if we can slide on an object
+			if( direction & (WEST | EAST)) {
+				//Start from a sprite's size away and get closer testing collision each time
+				for( float i = 0; i < coll_height; i += 0.1f ) {
+					y_offset = tmp_y - coll_height + i;
+					if (MapMode::_current_map->_DetectCollision(this)) {
+						//Try the other way, can't go that way
+						y_offset = tmp_y + coll_height - i;
+						if (MapMode::_current_map->_DetectCollision(this)) {
+							//Still can't slide, reset
+							y_offset = tmp_y;
+						}
+						else {
+							y_offset = tmp_y + distance_moved;
+							break;
+						}
+					}
+					else {
+						y_offset = tmp_y - distance_moved;
+						break;
+					}
+				}
+				
+				// Roll-over Y position offsets if necessary
+				while (y_offset < 0.0f) {
+					y_position -= 1;
+					y_offset += 1.0f;
+				}
+				while (y_offset > 1.0f) {
+					y_position += 1;
+					y_offset -= 1.0f;
+				}
+			}
+			
 			x_offset = tmp_x;
 		}
 		else {
