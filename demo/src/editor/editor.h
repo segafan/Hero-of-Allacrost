@@ -44,9 +44,8 @@
 #include <QUndoCommand>
 
 #include "grid.h"
-#include "tileset.h"
-#include "tileset_editor.h"
 #include "skill_editor.h"
+#include "tileset_editor.h"
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -111,7 +110,7 @@ class Editor: public QMainWindow
 		void _FileMenuSetup();
 		void _ViewMenuSetup();
 		void _TilesEnableActions();
-		void _TileSetEnableActions();
+		void _TilesetMenuSetup();
 		void _MapMenuSetup();
 		void _ScriptMenuSetup();
 		//@}
@@ -133,6 +132,7 @@ class Editor: public QMainWindow
 		void _ViewToggleLL();
 		void _ViewToggleML();
 		void _ViewToggleUL();
+		void _ViewTextures();
 		//@}
 
 		//! \name Tiles Menu Item Slots
@@ -151,7 +151,9 @@ class Editor: public QMainWindow
 
 		//! \name Tileset Menu Item Slots
 		//! \brief These slots process selection for their item in the Tileset menu.
-		void _TileSetEdit();
+		//{@
+		void _TilesetEdit();
+		//@}
 
 		//! \name Map Menu Item Slots
 		//! \brief These slots process selection for their item in the Map menu.
@@ -161,7 +163,7 @@ class Editor: public QMainWindow
 		//@}
 
 		//! \name Script Menu Item Slots
-		//! \brief These slots handle the events for the script menu
+		//! \brief These slots handle the events for the Script menu
 		//{@
 		void _ScriptEditSkills();
 		//@}
@@ -221,6 +223,7 @@ class Editor: public QMainWindow
 		QAction* _toggle_ll_action;
 		QAction* _toggle_ml_action;
 		QAction* _toggle_ul_action;
+		QAction* _view_textures_action;
 
 		QAction* _undo_action;
 		QAction* _redo_action;
@@ -274,6 +277,9 @@ class Editor: public QMainWindow
 
 class MapPropertiesDialog: public QDialog
 {
+	//! Macro needed to use Qt's slots and signals.
+	Q_OBJECT
+	
 	public:
 		//! \name MapPropertiesDialog constructor
 		//! \brief A constructor for the MapPropertiesDialog class. This class is used in 2 instances:
@@ -296,6 +302,11 @@ class MapPropertiesDialog: public QDialog
 		//! Needed for accessing map properties.
 		friend class Editor;
 		friend class EditorScrollView;
+
+	private slots:
+		//! This slot enables or disables the OK push button of this dialog depending
+		//! on whether any tilesets are checked or not.
+		void _EnableOKButton();
 
 	private:
 		//! A tree for showing all available tilesets.
@@ -386,6 +397,16 @@ class EditorScrollView: public Q3ScrollView
 		//@}
 
 	private:
+		//! \name Tile Editing Functions
+		//! \brief These functions perform the gritty details of tile modification
+		//!        such as painting, deleting, and moving.
+		//! \param index The index on the map/grid of the tile to modify.
+		//{@
+		void _PaintTile(int32 index);
+		//void _MoveTile(int32 index);
+		void _DeleteTile(int32 index);
+		//@}
+
 		//! \name Autotiling Functions
 		//! \brief These functions perform all the nitty gritty details associated
 		//!        with autotiling. _AutotileRandomize randomizes tiles being painted
@@ -430,6 +451,12 @@ class EditorScrollView: public Q3ScrollView
 		int32 _first_corner_index;
 		//! Stores source index of the moved tile.
 		int32 _move_source_index;
+		//! Moving tiles has 2 phases to it when using the selection rectangle
+		//! and hence moving more than one tile at a time. This determines which phase
+		//! is in effect: false is the first phase, when the user creates the
+		//! selection rectangle; true is the second phase, when the user clicks on
+		//! the rectangle and moves it to another location.
+		bool _moving;
 		
 		//! \name Tile Vectors
 		//! \brief The following three vectors are used to know how to perform undo and redo operations

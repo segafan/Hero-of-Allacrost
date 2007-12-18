@@ -17,9 +17,7 @@
 #ifndef __TILESET_EDITOR_HEADER__
 #define __TILESET_EDITOR_HEADER__
 
-#include "script.h"
-#include "tileset.h"
-#include "video.h"
+#include <vector>
 
 #include <QDialog>
 #include <QGLWidget>
@@ -29,7 +27,9 @@
 #include <QPushButton>
 #include <QGridLayout>
 #include <QFileDialog>
-#include <vector>
+
+#include "tileset.h"
+
 using std::vector;
 
 namespace hoa_editor
