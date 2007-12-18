@@ -10,8 +10,8 @@
 	};
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
 		activeBuildConfigurationName = Debug;
-		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
-		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
+		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
+		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
 			D4D1BA480B02B1DB0052BF1E /* Editor */,
 		);
@@ -19,10 +19,6 @@
 			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
 			D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */,
 			D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */,
-			D41148150D15DA7A005F0A3F /* tileset.cpp:39 */,
-			D41148260D15DCAB005F0A3F /* image.cpp:289 */,
-			D41148280D15DE57005F0A3F /* image.cpp:744 */,
-			D411482C0D15E1FA005F0A3F /* image.cpp:836 */,
 		);
 		breakpointsGroup = D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */;
 		codeSenseManager = D43082580AF9831800A5173A /* Code sense */;
@@ -191,8 +187,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 219543319;
-			PBXWorkspaceStateSaveDate = 219543319;
+			PBXPerProjectTemplateStateSaveDate = 219651755;
+			PBXWorkspaceStateSaveDate = 219651755;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -473,10 +469,6 @@
 			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
 			D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */,
 			D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */,
-			D41148150D15DA7A005F0A3F /* tileset.cpp:39 */,
-			D41148260D15DCAB005F0A3F /* image.cpp:289 */,
-			D41148280D15DE57005F0A3F /* image.cpp:744 */,
-			D411482C0D15E1FA005F0A3F /* image.cpp:836 */,
 		);
 	};
 	D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {
@@ -502,66 +494,6 @@
 			sepNavVisRect = "{{0, 8180}, {711, 429}}";
 			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
 		};
-	};
-	D41148150D15DA7A005F0A3F /* tileset.cpp:39 */ = {
-		isa = PBXFileBreakpoint;
-		actions = (
-		);
-		breakpointStyle = 0;
-		continueAfterActions = 0;
-		delayBeforeContinue = 0;
-		fileReference = D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */;
-		functionName = "Tileset::Tileset()";
-		hitCount = 1;
-		lineNumber = 39;
-		location = Editor;
-		modificationTime = 219543813.70347;
-		state = 1;
-	};
-	D41148260D15DCAB005F0A3F /* image.cpp:289 */ = {
-		isa = PBXFileBreakpoint;
-		actions = (
-		);
-		breakpointStyle = 0;
-		continueAfterActions = 0;
-		delayBeforeContinue = 0;
-		fileReference = D4D1662E0BC0D91300190FC0 /* image.cpp */;
-		functionName = "ImageDescriptor::LoadMultiImageFromElementGrid()";
-		hitCount = 1;
-		lineNumber = 289;
-		location = Editor;
-		modificationTime = 219543813.703475;
-		state = 1;
-	};
-	D41148280D15DE57005F0A3F /* image.cpp:744 */ = {
-		isa = PBXFileBreakpoint;
-		actions = (
-		);
-		breakpointStyle = 0;
-		continueAfterActions = 0;
-		delayBeforeContinue = 0;
-		fileReference = D4D1662E0BC0D91300190FC0 /* image.cpp */;
-		functionName = "ImageDescriptor::_LoadMultiImage()";
-		hitCount = 1;
-		lineNumber = 744;
-		location = Editor;
-		modificationTime = 219543813.703497;
-		state = 1;
-	};
-	D411482C0D15E1FA005F0A3F /* image.cpp:836 */ = {
-		isa = PBXFileBreakpoint;
-		actions = (
-		);
-		breakpointStyle = 0;
-		continueAfterActions = 0;
-		delayBeforeContinue = 0;
-		fileReference = D4D1662E0BC0D91300190FC0 /* image.cpp */;
-		functionName = "ImageDescriptor::_LoadMultiImage()";
-		hitCount = 1;
-		lineNumber = 836;
-		location = Editor;
-		modificationTime = 219543813.703504;
-		state = 1;
 	};
 	D43080DE0AF982F800A5173A /* Allacrost */ = {
 		isa = PBXExecutable;
@@ -808,9 +740,9 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {956, 30268}}";
-			sepNavSelRange = "{1881, 0}";
-			sepNavVisRect = "{{0, 406}, {711, 617}}";
+			sepNavIntBoundsRect = "{{0, 0}, {956, 30310}}";
+			sepNavSelRange = "{58890, 0}";
+			sepNavVisRect = "{{0, 23804}, {711, 617}}";
 			sepNavWindowFrame = "{{0, 32}, {750, 746}}";
 		};
 	};
@@ -850,7 +782,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {764, 2772}}";
 			sepNavSelRange = "{1410, 0}";
-			sepNavVisRect = "{{0, 408}, {672, 263}}";
+			sepNavVisRect = "{{0, 409}, {672, 263}}";
 			sepNavWindowFrame = "{{528, 6}, {750, 558}}";
 		};
 	};
@@ -873,7 +805,7 @@
 		functionName = "AudioDescriptor::_Update()";
 		hitCount = 1;
 		lineNumber = 627;
-		modificationTime = 219543819.106762;
+		modificationTime = 219547158.8644601;
 		state = 1;
 	};
 	D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */ = {
@@ -888,7 +820,7 @@
 		hitCount = 1;
 		lineNumber = 646;
 		location = Allacrost;
-		modificationTime = 219543813.70346;
+		modificationTime = 219546707.680499;
 		state = 2;
 	};
 	D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */ = {
@@ -903,7 +835,7 @@
 		hitCount = 1;
 		lineNumber = 588;
 		location = Allacrost;
-		modificationTime = 219543813.703465;
+		modificationTime = 219546707.680505;
 		state = 2;
 	};
 	D4DDE3930C4A15EE00937677 /* battle_actions.cpp */ = {

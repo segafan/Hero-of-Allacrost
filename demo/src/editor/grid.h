@@ -17,15 +17,10 @@
 #ifndef __GRID_HEADER__
 #define __GRID_HEADER__
 
-#include "utils.h"
-#include "defs.h"
-#include "script.h"
-#include "video.h"
-
-#include "tileset.h"
-
 #include <QGLWidget>
 #include <QStringList>
+
+#include "tileset.h"
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -67,7 +62,8 @@ class Grid: public QGLWidget
 		void SetMLOn(bool value);           // sets middle layer on/off
 		void SetULOn(bool value);           // sets upper layer on/off
 		void SetGridOn(bool value);         // sets grid on/off
-		void SetSelectOn(bool value);       // sets grid on/off
+		void SetSelectOn(bool value);       // sets selection layer on/off
+		void SetTexturesOn(bool value);     // sets textures on/off
 
 		std::vector<int32>& GetLayer(LAYER_TYPE layer);
 
@@ -123,6 +119,8 @@ class Grid: public QGLWidget
 		bool _grid_on;
 		//! When TRUE the rectangle of chosen tiles is displayed.
 		bool _select_on;
+		//! When TRUE the texture sheets are displayed.
+		bool _textures_on;
 		//! When TRUE the lower layer of tiles is displayed.
 		bool _ll_on;
 		//! When TRUE the middle layer of tiles is displayed.

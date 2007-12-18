@@ -56,9 +56,8 @@ Editor::Editor() : QMainWindow(),
 	// set the window icon
 	setWindowIcon(QIcon("img/logos/program_icon.bmp"));
 
-	// Create the video engine's singleton
+	// create the video engine's singleton
 	VideoManager = GameVideo::SingletonCreate();
-
 } // Editor constructor
 
 Editor::~Editor()
@@ -111,6 +110,7 @@ void Editor::_ViewMenuSetup()
 		_toggle_ll_action->setEnabled(true);
 		_toggle_ml_action->setEnabled(true);
 		_toggle_ul_action->setEnabled(true);
+		_view_textures_action->setEnabled(true);
 	} // map must exist in order to set view options
 	else
 	{
@@ -118,6 +118,7 @@ void Editor::_ViewMenuSetup()
 		_toggle_ll_action->setEnabled(false);
 		_toggle_ml_action->setEnabled(false);
 		_toggle_ul_action->setEnabled(false);
+		_view_textures_action->setEnabled(false);
 	} // map does not exist, can't view it*/
 } // _ViewMenuSetup()
 
@@ -153,18 +154,13 @@ void Editor::_TilesEnableActions()
 	} // map does not exist, can't paint it*/
 } // _TilesEnableActions()
 
-
-void Editor::_TileSetEnableActions()
+void Editor::_TilesetMenuSetup()
 {
-	if(_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
-	{
+	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 		_edit_tileset_action->setEnabled(true);
-	}
 	else
-	{
 		_edit_tileset_action->setEnabled(false);
-	}
-} // _TileSetEnableActions
+} // _TilesetMenuSetup
 
 void Editor::_MapMenuSetup()
 {
@@ -395,6 +391,18 @@ void Editor::_ViewToggleUL()
 	} // map must exist in order to view things on it
 } // _ViewToggleUL()
 
+void Editor::_ViewTextures()
+{
+	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+	{
+		// FIXME: either this will work or it will have to go into
+		// the QOpenGL Draw() function in grid.cpp and you will
+		// need some additional variables in grid.h to enable it.
+		VideoManager->Textures()->DEBUG_NextTexSheet();
+		_ed_scrollview->_map->SetTexturesOn(true);
+	} // map must exist in order to view things on it
+} // _ViewTextures()
+
 void Editor::_TileLayerFill()
 {
 	// get reference to current tileset
@@ -477,19 +485,58 @@ void Editor::_TileToggleSelect()
 void Editor::_TileModePaint()
 {
 	if (_ed_scrollview != NULL)
+	{
+		// Clear the selection layer.
+		if (_ed_scrollview->_moving == true && _select_on == true)
+		{
+			vector<int32>::iterator it;    // used to iterate over an entire layer
+			vector<int32>& select_layer = _ed_scrollview->_map->GetLayer(SELECT_LAYER);
+			for (it = select_layer.begin(); it != select_layer.end(); it++)
+				*it = -1;
+		} // clears when selected tiles were going to be moved but
+		  // user changed their mind in the midst of the move operation
+
 		_ed_scrollview->_tile_mode = PAINT_TILE;
+		_ed_scrollview->_moving = false;
+	} // scrollview must exist in order to switch modes
 } // _TileModePaint()
 
 void Editor::_TileModeMove()
 {
 	if (_ed_scrollview != NULL)
+	{
+		// Clear the selection layer.
+		if (_ed_scrollview->_moving == true && _select_on == true)
+		{
+			vector<int32>::iterator it;    // used to iterate over an entire layer
+			vector<int32>& select_layer = _ed_scrollview->_map->GetLayer(SELECT_LAYER);
+			for (it = select_layer.begin(); it != select_layer.end(); it++)
+				*it = -1;
+		} // clears when selected tiles were going to be moved but
+		  // user changed their mind in the midst of the move operation
+
 		_ed_scrollview->_tile_mode = MOVE_TILE;
+		_ed_scrollview->_moving = false;
+	} // scrollview must exist in order to switch modes
 } // _TileModeMove()
 
 void Editor::_TileModeDelete()
 {
 	if (_ed_scrollview != NULL)
+	{
+		// Clear the selection layer.
+		if (_ed_scrollview->_moving == true && _select_on == true)
+		{
+			vector<int32>::iterator it;    // used to iterate over an entire layer
+			vector<int32>& select_layer = _ed_scrollview->_map->GetLayer(SELECT_LAYER);
+			for (it = select_layer.begin(); it != select_layer.end(); it++)
+				*it = -1;
+		} // clears when selected tiles were going to be moved but
+		  // user changed their mind in the midst of the move operation
+
 		_ed_scrollview->_tile_mode = DELETE_TILE;
+		_ed_scrollview->_moving = false;
+	} // scrollview must exist in order to switch modes
 } // _TileModeDelete()
 
 void Editor::_TileEditLL()
@@ -510,32 +557,32 @@ void Editor::_TileEditUL()
 		_ed_scrollview->_layer_edit = UPPER_LAYER;
 } // _TileEditUL()
 
-void Editor::_TileSetEdit()
+void Editor::_TilesetEdit()
 {
-	TilesetEditor* tilesetEditor = new TilesetEditor(this,"tileset_editor",true);
-	if(tilesetEditor->exec() == QDialog::Accepted){
-
-
-
-	}
-	else{
+	TilesetEditor* tileset_editor = new TilesetEditor(this, "tileset_editor", true);
+	
+	if (tileset_editor->exec() == QDialog::Accepted)
+	{
+	} // only process results if user selected okay
+	else
 		statusBar()->showMessage("Properties not modified!", 5000);
-	}
 
-	delete tilesetEditor;
-
-} // _TileSetEdit
+	delete tileset_editor;
+} // _TilesetEdit
 
 void Editor::_MapSelectMusic()
 {
-	if(_ed_scrollview == NULL)
+	if (_ed_scrollview == NULL)
 		return;
 
 	MusicDialog* music = new MusicDialog(this, "music_dialog", _ed_scrollview->_map->GetMusic());
-	if(music->exec() == QDialog::Accepted) {
+
+	if (music->exec() == QDialog::Accepted)
+	{
 		_ed_scrollview->_map->SetMusic(music->GetSelectedFile());
 		_ed_scrollview->_map->SetChanged(true);
-	}
+	} // only process results if user selected okay
+
 	delete music;
 } // _MapSelectMusic()
 
@@ -722,6 +769,9 @@ void Editor::_ScriptEditSkills()
 		_skill_editor->resize(600,400);
 	}
 	_skill_editor->show();
+	//SkillEditor *skill_editor = new SkillEditor(this, "skill_editor");
+	//skill_editor->exec();
+	//delete skill_editor;
 }
 
 void Editor::_HelpHelp()
@@ -800,6 +850,11 @@ void Editor::_CreateActions()
 	_toggle_ul_action->setStatusTip("Switches the upper layer on and off");
 	_toggle_ul_action->setCheckable(true);
 	connect(_toggle_ul_action, SIGNAL(triggered()), this, SLOT(_ViewToggleUL()));
+
+	_view_textures_action = new QAction("&Texture sheets", this);
+	_view_textures_action->setShortcut(tr("Ctrl+T"));
+	_view_textures_action->setStatusTip("Cycles through the video engine's texture sheets");
+	connect(_view_textures_action, SIGNAL(triggered()), this, SLOT(_ViewTextures()));
 
 
 
@@ -883,7 +938,7 @@ void Editor::_CreateActions()
 	_edit_tileset_action = new QAction("Edit &Tileset", this);
 	_edit_tileset_action->setStatusTip("Lets the user paint walkability on the tileset");
 	//_edit_walkability_action->setCheckable(true);
-	connect(_edit_tileset_action, SIGNAL(triggered()), this, SLOT(_TileSetEdit()));
+	connect(_edit_tileset_action, SIGNAL(triggered()), this, SLOT(_TilesetEdit()));
 
 	// Create menu actions related to the Map menu
 
@@ -938,7 +993,9 @@ void Editor::_CreateMenus()
 	_view_menu->addAction(_toggle_ll_action);
 	_view_menu->addAction(_toggle_ml_action);
 	_view_menu->addAction(_toggle_ul_action);
-	_view_menu->setCheckable(true);
+	_view_menu->addSeparator();
+	_view_menu->addAction(_view_textures_action);
+//	_view_menu->setCheckable(true);
 	_view_menu->setTearOffEnabled(true);
 	connect(_view_menu, SIGNAL(aboutToShow()), this, SLOT(_ViewMenuSetup()));
 
@@ -966,7 +1023,7 @@ void Editor::_CreateMenus()
 	_tileset_menu = menuBar()->addMenu("Tile&set");
 	_tileset_menu->addAction(_edit_tileset_action);
 	_tileset_menu->setTearOffEnabled(true);
-	connect(_tileset_menu, SIGNAL(aboutToShow()), this, SLOT(_TileSetEnableActions()));
+	connect(_tileset_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesetMenuSetup()));
 
 	// map menu creation
 	_map_menu = menuBar()->addMenu("&Map");
@@ -1033,7 +1090,8 @@ bool Editor::_EraseOK()
   MapPropertiesDialog class functions follow
 ************************/
 
-MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, bool prop)
+MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name,
+	bool prop)
 	: QDialog(parent, (const char*) name)
 {
 	setCaption("Map Properties...");
@@ -1054,8 +1112,8 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, b
 	_cancel_pbut   = new QPushButton("Cancel", this);
 	_ok_pbut       = new QPushButton("OK", this);
 	_cancel_pbut->setDefault(true);
-	// TODO: connect the OK push button to a signal and slot such that it is
-	// disabled if no tilesets are selected
+	// at construction no tilesets are checked, disable ok button
+	_ok_pbut->setEnabled(false);
 	connect(_ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
 	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
 
@@ -1064,23 +1122,30 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, b
 	_tileset_tree = new QTreeWidget(this);
 	_tileset_tree->setColumnCount(1);
 	_tileset_tree->setHeaderLabels(QStringList("Tilesets"));
+	connect(_tileset_tree, SIGNAL(itemSelectionChanged()), this,
+		SLOT(_EnableOKButton()));
 	QList<QTreeWidgetItem*> tilesets;
-	// Start the loop at 2 to skip over . (present working directory) and .. (parent directory).
+
+	// Start the loop at 2 to skip over . (present working directory)
+	// and .. (parent directory).
 	for (uint32 i = 2; i < tileset_dir.count(); i++)
 	{
-		tilesets.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(tileset_dir[i].remove(".png"))));
+		tilesets.append(new QTreeWidgetItem((QTreeWidget*)0,
+			QStringList(tileset_dir[i].remove(".png"))));
 		tilesets.back()->setCheckState(0, Qt::Unchecked);  // enables checkboxes
+		
 		if (prop)
 		{
 			// get reference to the Editor
 			Editor* editor = static_cast<Editor*> (parent);
 
-			// Iterate through the names of the tabs to see which ones in the list are already present and set
-			// their checkbox appropriately.
+			// Iterate through the names of the tabs to see which ones in the
+			// list are already present and set their checkbox appropriately.
 			for (int j = 0; j < editor->_ed_tabs->count(); j++)
 				if (tilesets.back()->text(0) == editor->_ed_tabs->tabText(j))
 				{
 					tilesets.back()->setCheckState(0, Qt::Checked);
+					_ok_pbut->setEnabled(true);
 					break;
 				} // the two tileset names must match in order to set the checkbox
 		} // user wants to edit the map's properties
@@ -1121,11 +1186,33 @@ MapPropertiesDialog::~MapPropertiesDialog()
 
 
 
+// ********** Private slot **********
+
+void MapPropertiesDialog::_EnableOKButton()
+{
+	// Disable the ok button if no tilesets are checked, otherwise enable it.
+	int num_items = _tileset_tree->topLevelItemCount();
+	for (int i = 0; i < num_items; i++)
+	{
+		if (_tileset_tree->topLevelItem(i)->checkState(0) == Qt::Checked)
+		{
+			_ok_pbut->setEnabled(true);
+			return;
+		} // at least one tileset must be checked in order to enable push button
+	} // iterate through all items in the _tileset_tree
+
+	// If this point is reached, no tilesets are checked.
+	_ok_pbut->setEnabled(false);
+} // _EnableOKButton()
+
+
+
 /************************
   MusicDialog class functions follow
 ************************/
 
-MusicDialog::MusicDialog(QWidget* parent, const QString& name, const QString& selected_music)
+MusicDialog::MusicDialog(QWidget* parent, const QString& name,
+	const QString& selected_music)
 	: QDialog(parent, name)
 {
 	setCaption("Select map music");
@@ -1145,7 +1232,7 @@ MusicDialog::MusicDialog(QWidget* parent, const QString& name, const QString& se
 	_dia_layout->addWidget(_cancel_pbut, 2, 1);
 
 	_PopulateMusicList(selected_music);
-} // MusicDialog::MusicDialog
+} // MusicDialog constructor
 
 MusicDialog::~MusicDialog()
 {
@@ -1154,7 +1241,19 @@ MusicDialog::~MusicDialog()
 	delete _select_label;
 	delete _music_list;
 	delete _dia_layout;
-} // MusicDialog::~MusicDialog
+} // MusicDialog destructor
+
+QString MusicDialog::GetSelectedFile()
+{
+	if (_music_list->currentItem() == 0)
+		return QString("None");
+
+	return QString("mus/" + _music_list->currentItem()->text(0));
+} // GetSelectedFile()
+
+
+
+// ********** Private function **********
 
 void MusicDialog::_PopulateMusicList(const QString& selected_str)
 {
@@ -1179,15 +1278,7 @@ void MusicDialog::_PopulateMusicList(const QString& selected_str)
 		music.first()->setSelected(true);
 
 	_music_list->insertTopLevelItems(0, music);
-} // MusicDialog::_PopulateMusicList
-
-QString MusicDialog::GetSelectedFile()
-{
-	if (_music_list->currentItem() == 0)
-		return QString("None");
-
-	return QString("mus/" + _music_list->currentItem()->text(0));
-} // MusicDialog::GetSelectedFile
+} // _PopulateMusicList(...)
 
 
 
@@ -1195,14 +1286,17 @@ QString MusicDialog::GetSelectedFile()
   EditorScrollView class functions follow
 ************************/
 
-EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int width, int height)
-	: Q3ScrollView(parent, (const char*) name, Qt::WNoAutoErase|Qt::WStaticContents)
+EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
+	int width, int height)
+	: Q3ScrollView(parent, (const char*) name,
+		             Qt::WNoAutoErase|Qt::WStaticContents)
 {
 	setMouseTracking(true);
 	
 	// Set default editing modes.
 	_tile_mode  = PAINT_TILE;
 	_layer_edit = LOWER_LAYER;
+	_moving     = false;
 	
 	// Clear the undo/redo vectors.
 	_tile_indeces.clear();
@@ -1252,7 +1346,9 @@ void EditorScrollView::Resize(int width, int height)
 vector<int32>& EditorScrollView::GetCurrentLayer()
 {
 	return _map->GetLayer(_layer_edit);
-}
+} // GetCurrentLayer()
+
+
 
 // ********** Protected functions **********
 
@@ -1263,14 +1359,18 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 		(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
 		return;
 
-	_tile_index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
-	_map->SetChanged(true);
-
 	// get reference to Editor
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
 	
+	_map->SetChanged(true);
+
+	// record location of pressed tile
+	_tile_index = static_cast<int32>
+		(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+
 	// record the location of the beginning of the selection rectangle
-	if (evt->button() == Qt::LeftButton && editor->_select_on == true)
+	if (evt->button() == Qt::LeftButton && editor->_select_on == true &&
+			_moving == false)
 	{
 		_first_corner_index = _tile_index;
 		_map->GetLayer(SELECT_LAYER)[_tile_index] = 1;
@@ -1281,34 +1381,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 		case PAINT_TILE: // start painting tiles
 		{
 			if (evt->button() == Qt::LeftButton && editor->_select_on == false)
-			{
-				// get reference to current tileset
-				Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
-				QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
-
-				// put selected tile from tileset into tile array at correct position
-				int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
-				int32 multiplier = _map->tileset_names.findIndex(tileset_name);
-				if (multiplier == -1)
-				{
-					_map->tileset_names.append(tileset_name);
-					multiplier = _map->tileset_names.findIndex(tileset_name);
-				} // calculate index of current tileset
-				
-				//cerr << "tileset_num: " << multiplier << endl;
-				//cerr << "tileset_index: " << tileset_index << endl;
-				// perform randomization for autotiles
-				assert(multiplier != -1);
-				_AutotileRandomize(multiplier, tileset_index);
-
-				// Record information for undo/redo action.
-				_tile_indeces.push_back(_tile_index);
-				_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-				_modified_tiles.push_back(tileset_index + multiplier * 256);
-					
-				// Paint the tile.
-				GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
-			} // left mouse button was pressed and selection mode is not on
+				_PaintTile(_tile_index);
 
 			break;
 		} // edit mode PAINT_TILE
@@ -1316,24 +1389,15 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 		case MOVE_TILE: // start moving a tile
 		{
 			_move_source_index = _tile_index;
+			if (editor->_select_on == false)
+				_moving = true;
 			break;
 		} // edit mode MOVE_TILE
 
 		case DELETE_TILE: // start deleting tiles
 		{
 			if (evt->button() == Qt::LeftButton && editor->_select_on == false)
-			{
-				// Record information for undo/redo action.
-				_tile_indeces.push_back(_tile_index);
-				_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-				_modified_tiles.push_back(-1);
-
-				// Delete the tile.
-				GetCurrentLayer()[_tile_index] = -1;
-
-				// FIXME: No longer needed (I think...)
-				//_RemoveIfUnused(file_index);
-			} // left mouse button was pressed and selection mode is not on
+				_DeleteTile(_tile_index);
 
 			break;
 		} // edit mode DELETE_TILE
@@ -1345,9 +1409,10 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 
 	// Display mouse position.
 	editor->statusBar()->showMessage(
-		QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
+		QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(
+			evt->y() / TILE_HEIGHT));
 
-	// Draw the changes
+	// Draw the changes.
 	_map->updateGL();
 } // contentsMousePressEvent(...)
 
@@ -1361,12 +1426,15 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 	// get reference to Editor
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
 	
-	int32 index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
-	if (index != _tile_index)
+	int32 index = static_cast<int32>
+		(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+
+	if (index != _tile_index)  // user has moved onto another tile
 	{
 		_tile_index = index;
 		
-		if (evt->state() == Qt::LeftButton && editor->_select_on == true)
+		if (evt->state() == Qt::LeftButton && editor->_select_on == true &&
+				_moving == false)
 		{
 			// Calculate the actual selection rectangle here, otherwise it's just
 			// like selecting individual tiles...
@@ -1400,33 +1468,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			case PAINT_TILE: // continue painting tiles
 			{
 				if (evt->state() == Qt::LeftButton && editor->_select_on == false)
-				{
-					// get reference to current tileset
-					Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
-					QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
-
-					// put selected tile from tileset into tile array at correct position
-					int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
-					int32 multiplier = _map->tileset_names.findIndex(tileset_name);
-					if (multiplier == -1)
-					{
-						_map->tileset_names.append(tileset_name);
-						multiplier = _map->tileset_names.findIndex(tileset_name);
-					} // calculate index of current tileset
-
-					//cerr << "tileset_num: " << multiplier << endl;
-					//cerr << "tileset_index: " << tileset_index << endl;
-					// perform randomization for autotiles
-					assert(multiplier != -1);
-					_AutotileRandomize(multiplier, tileset_index);
-
-					// Record information for undo/redo action.
-					_tile_indeces.push_back(_tile_index);
-					_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-					_modified_tiles.push_back(tileset_index + multiplier * 256);
-
-					GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
-				} // left mouse button was pressed and selection mode is not on
+					_PaintTile(_tile_index);
 
 				break;
 			} // edit mode PAINT_TILE
@@ -1439,17 +1481,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			case DELETE_TILE: // continue deleting tiles
 			{
 				if (evt->state() == Qt::LeftButton && editor->_select_on == false)
-				{
-					// Record information for undo/redo action.
-					_tile_indeces.push_back(_tile_index);
-					_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-					_modified_tiles.push_back(-1);
-
-					// Delete the tile.
-					GetCurrentLayer()[_tile_index] = -1;
-
-					// FIXME: _RemoveIfUnused(file_index);
-				} // left mouse button was pressed and selection mode is not on
+					_DeleteTile(_tile_index);
 
 				break;
 			} // edit mode DELETE_TILE
@@ -1461,7 +1493,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 
 		// Display mouse position.
 		editor->statusBar()->showMessage(
-			QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
+			QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(
+				evt->y() / TILE_HEIGHT));
 	} // mouse has moved to a new tile position
 
 	// Draw the changes.
@@ -1471,11 +1504,10 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 {
 	vector<int32>::iterator it;    // used to iterate over an entire layer
+
 	// get reference to Editor so we can access the undo stack
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
 
-	_tile_index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
-	
 	switch (_tile_mode)
 	{
 		case PAINT_TILE: // wrap up painting tiles
@@ -1485,41 +1517,16 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
 				for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
 				{
-					// Works because the selection layer and the current layer are the same size.
+					// Works because the selection layer and the current layer
+					// are the same size.
 					if (select_layer[i] != -1)
-					{
-						// get reference to current tileset
-						Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
-						QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
-
-						// put selected tile from tileset into tile array at correct position
-						int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
-						int32 multiplier = _map->tileset_names.findIndex(tileset_name);
-						if (multiplier == -1)
-						{
-							_map->tileset_names.append(tileset_name);
-							multiplier = _map->tileset_names.findIndex(tileset_name);
-						} // calculate index of current tileset
-
-						//cerr << "tileset_num: " << multiplier << endl;
-						//cerr << "tileset_index: " << tileset_index << endl;
-						// perform randomization for autotiles
-						assert(multiplier != -1);
-						_AutotileRandomize(multiplier, tileset_index);
-
-						// Record information for undo/redo action.
-						_tile_indeces.push_back(i);
-						_previous_tiles.push_back(GetCurrentLayer()[i]);
-						_modified_tiles.push_back(tileset_index + multiplier * 256);
-
-						GetCurrentLayer()[i] = tileset_index + multiplier * 256;
-					} // only paint a tile if it is selected
+						_PaintTile(i);
 				} // iterate over selection layer
 			} // only if painting a bunch of tiles
 			
 			// Push command onto the undo stack.
-			LayerCommand* paint_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles,
-				_layer_edit, editor, "Paint");
+			LayerCommand* paint_command = new LayerCommand(_tile_indeces,
+				_previous_tiles, _modified_tiles, _layer_edit, editor, "Paint");
 			editor->_undo_stack->push(paint_command);
 			_tile_indeces.clear();
 			_previous_tiles.clear();
@@ -1529,27 +1536,41 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 		
 		case MOVE_TILE: // wrap up moving tiles
 		{
-			vector<int32>& layer = GetCurrentLayer();
-			
-			// Record information for undo/redo action.
-			_tile_indeces.push_back(_move_source_index);
-			_previous_tiles.push_back(layer[_move_source_index]);
-			_modified_tiles.push_back(-1);
-			_tile_indeces.push_back(_tile_index);
-			_previous_tiles.push_back(layer[_tile_index]);
-			_modified_tiles.push_back(layer[_move_source_index]);
+			if (_moving == true)
+			{
+				// record location of released tile
+				_tile_index = static_cast<int32>
+					(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 
-			// Perform the move.
-			layer[_tile_index] = layer[_move_source_index];
-			layer[_move_source_index] = -1;
-			
-			// Push command onto the undo stack.
-			LayerCommand* move_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles,
-				_layer_edit, editor, "Move");
-			editor->_undo_stack->push(move_command);
-			_tile_indeces.clear();
-			_previous_tiles.clear();
-			_modified_tiles.clear();
+				if (editor->_select_on == false)
+				{
+					vector<int32>& layer = GetCurrentLayer();
+
+					// Record information for undo/redo action.
+					_tile_indeces.push_back(_move_source_index);
+					_previous_tiles.push_back(layer[_move_source_index]);
+					_modified_tiles.push_back(-1);
+					_tile_indeces.push_back(_tile_index);
+					_previous_tiles.push_back(layer[_tile_index]);
+					_modified_tiles.push_back(layer[_move_source_index]);
+
+					// Perform the move.
+					layer[_tile_index] = layer[_move_source_index];
+					layer[_move_source_index] = -1;
+				} // only moving one tile at a time
+				else
+				{
+				} // moving a bunch of tiles at once
+
+				// Push command onto the undo stack.
+				LayerCommand* move_command = new LayerCommand(_tile_indeces,
+					_previous_tiles, _modified_tiles, _layer_edit, editor, "Move");
+				editor->_undo_stack->push(move_command);
+				_tile_indeces.clear();
+				_previous_tiles.clear();
+				_modified_tiles.clear();
+			} // moving tiles and not selecting them
+
 			break;
 		} // edit mode MOVE_TILE
 		
@@ -1560,23 +1581,16 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
 				for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
 				{
-					// Works because the selection layer and the current layer are the same size.
+					// Works because the selection layer and the current layer
+					// are the same size.
 					if (select_layer[i] != -1)
-					{
-						// Record information for undo/redo action.
-						_tile_indeces.push_back(i);
-						_previous_tiles.push_back(GetCurrentLayer()[i]);
-						_modified_tiles.push_back(-1);
-
-						// Delete the tile.
-						GetCurrentLayer()[i] = -1;
-					} // only delete a tile if it is selected
+						_DeleteTile(i);
 				} // iterate over selection layer
 			} // only if deleting a bunch of tiles
 		
 			// Push command onto undo stack.
-			LayerCommand* delete_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles,
-				_layer_edit, editor, "Delete");
+			LayerCommand* delete_command = new LayerCommand(_tile_indeces,
+				_previous_tiles, _modified_tiles, _layer_edit, editor, "Delete");
 			editor->_undo_stack->push(delete_command);
 			_tile_indeces.clear();
 			_previous_tiles.clear();
@@ -1590,11 +1604,19 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 	} // switch on tile editing mode
 
 	// Clear the selection layer.
-	vector<int32>& select_layer = _map->GetLayer(SELECT_LAYER);
-	for (it = select_layer.begin(); it != select_layer.end(); it++)
-		*it = -1;
+	if ((_tile_mode != MOVE_TILE || _moving == true) && editor->_select_on == true)
+	{
+		vector<int32>& select_layer = _map->GetLayer(SELECT_LAYER);
+		for (it = select_layer.begin(); it != select_layer.end(); it++)
+			*it = -1;
+	} // clears when not moving tiles or when moving tiles and not selecting them
 
-	// Draw the changes
+	if (editor->_select_on == true && _moving == false)
+		_moving = true;
+	else
+		_moving = false;
+
+	// Draw the changes.
 	_map->updateGL();
 } // contentsMouseReleaseEvent(...)
 
@@ -1714,6 +1736,47 @@ void EditorScrollView::_ContextDeleteColumn()
 
 // ********** Private functions **********
 
+void EditorScrollView::_PaintTile(int32 index)
+{
+	// get reference to current tileset
+	Editor* editor = static_cast<Editor*> (topLevelWidget());
+	Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
+	QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
+
+	// put selected tile from tileset into tile array at correct position
+	int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
+	int32 multiplier = _map->tileset_names.findIndex(tileset_name);
+	if (multiplier == -1)
+	{
+		_map->tileset_names.append(tileset_name);
+		multiplier = _map->tileset_names.findIndex(tileset_name);
+	} // calculate index of current tileset
+
+	//cerr << "tileset_num: " << multiplier << endl;
+	//cerr << "tileset_index: " << tileset_index << endl;
+	// perform randomization for autotiles
+	//assert(multiplier != -1);
+	_AutotileRandomize(multiplier, tileset_index);
+
+	// Record information for undo/redo action.
+	_tile_indeces.push_back(index);
+	_previous_tiles.push_back(GetCurrentLayer()[index]);
+	_modified_tiles.push_back(tileset_index + multiplier * 256);
+
+	GetCurrentLayer()[index] = tileset_index + multiplier * 256;
+} // _PaintTile(...)
+
+void EditorScrollView::_DeleteTile(int32 index)
+{
+	// Record information for undo/redo action.
+	_tile_indeces.push_back(index);
+	_previous_tiles.push_back(GetCurrentLayer()[index]);
+	_modified_tiles.push_back(-1);
+
+	// Delete the tile.
+	GetCurrentLayer()[index] = -1;
+} // _DeleteTile(...)
+
 void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index)
 {
 	map<int, string>::iterator it = _map->tilesets[tileset_num]->
@@ -1733,9 +1796,8 @@ void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index)
 		string tileset_name = read_data.ReadString(1);
 		tile_index = read_data.ReadInt(2);
 		read_data.CloseTable();
-		QString search = QString::fromStdString(tileset_name);
-		tileset_num = _map->tileset_names.findIndex(search);
-			//QString::fromStdString(tileset_name));
+		tileset_num = _map->tileset_names.findIndex(
+			QString::fromStdString(tileset_name));
 		read_data.CloseTable();
 
 		read_data.CloseFile();
@@ -2168,3 +2230,4 @@ void LayerCommand::redo()
 		_editor->_ed_scrollview->_map->GetLayer(_edited_layer)[_tile_indeces[i]] = _modified_tiles[i];
 	_editor->_ed_scrollview->_map->updateGL();
 } // redo()
+

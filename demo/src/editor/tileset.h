@@ -17,16 +17,16 @@
 #ifndef __TILESET_HEADER__
 #define __TILESET_HEADER__
 
-#include "utils.h"
+#include <QImageReader>
+#include <QMessageBox>
+#include <QRect>
+#include <Q3Table>
+#include <QVariant>
+
 #include "defs.h"
 #include "script.h"
+#include "utils.h"
 #include "video.h"
-
-#include <QMessageBox>
-#include <Q3Table>
-#include <QImageReader>
-#include <QRect>
-#include <QVariant>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor

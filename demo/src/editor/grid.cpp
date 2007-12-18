@@ -123,6 +123,12 @@ void Grid::SetSelectOn(bool value)
 	updateGL();
 } // SetSelectOn(...)
 
+void Grid::SetTexturesOn(bool value)
+{
+	_textures_on = value;
+	updateGL();
+} // SetTexturesOn(...)
+
 vector<int32>& Grid::GetLayer(LAYER_TYPE layer) 
 {
 	switch(layer) {
@@ -594,6 +600,9 @@ void Grid::paintGL()
 	// If grid is toggled on, draw it
 	if (_grid_on)
 		VideoManager->DrawGrid(0.0f, 0.0f, 1.0f, 1.0f, Color::black);
+
+	if (_textures_on)
+		VideoManager->Textures()->DEBUG_ShowTexSheet();
 } // paintGL()
 
 void Grid::resizeGL(int w, int h)

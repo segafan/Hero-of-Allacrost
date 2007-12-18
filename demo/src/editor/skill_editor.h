@@ -19,10 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "script.h"
-
-#include "global_skills.h"
-
 #include <QDialog>
 #include <QTabWidget>
 #include <QPushButton>
@@ -30,6 +26,9 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QLineEdit>
+
+#include "global_skills.h"
+#include "script.h"
 
 namespace hoa_editor
 {
