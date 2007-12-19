@@ -326,8 +326,8 @@ void GameVideo::Display(uint32 frame_time) {
 	if (_fps_display)
 		DrawFPS(frame_time);
 
-	if (TextureManager->_debug_current_sheet >= 0)
-		TextureManager->_DEBUG_ShowTexSheet();
+	if (TextureManager->debug_current_sheet >= 0)
+		TextureManager->DEBUG_ShowTexSheet();
 
 	PopState();
 

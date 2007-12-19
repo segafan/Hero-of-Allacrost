@@ -395,9 +395,6 @@ void Editor::_ViewTextures()
 {
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
-		// FIXME: either this will work or it will have to go into
-		// the QOpenGL Draw() function in grid.cpp and you will
-		// need some additional variables in grid.h to enable it.
 		VideoManager->Textures()->DEBUG_NextTexSheet();
 		_ed_scrollview->_map->SetTexturesOn(true);
 	} // map must exist in order to view things on it
@@ -1122,7 +1119,7 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name,
 	_tileset_tree = new QTreeWidget(this);
 	_tileset_tree->setColumnCount(1);
 	_tileset_tree->setHeaderLabels(QStringList("Tilesets"));
-	connect(_tileset_tree, SIGNAL(itemSelectionChanged()), this,
+	connect(_tileset_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this,
 		SLOT(_EnableOKButton()));
 	QList<QTreeWidgetItem*> tilesets;
 
@@ -1541,11 +1538,10 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 				// record location of released tile
 				_tile_index = static_cast<int32>
 					(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+				vector<int32>& layer = GetCurrentLayer();
 
 				if (editor->_select_on == false)
 				{
-					vector<int32>& layer = GetCurrentLayer();
-
 					// Record information for undo/redo action.
 					_tile_indeces.push_back(_move_source_index);
 					_previous_tiles.push_back(layer[_move_source_index]);
@@ -1560,6 +1556,26 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 				} // only moving one tile at a time
 				else
 				{
+					vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
+					for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
+					{
+						// Works because the selection layer and the current layer
+						// are the same size.
+						if (select_layer[i] != -1)
+						{
+							// Record information for undo/redo action.
+							_tile_indeces.push_back(i);
+							_previous_tiles.push_back(layer[i]);
+							_modified_tiles.push_back(-1);
+							_tile_indeces.push_back(i + _tile_index - _move_source_index);
+							_previous_tiles.push_back(layer[i + _tile_index - _move_source_index]);
+							_modified_tiles.push_back(layer[i]);
+
+							// Perform the move.
+							layer[i + _tile_index - _move_source_index] = layer[i];
+							layer[i] = -1;
+						} // only if current tile is selected
+					} // iterate over selection layer
 				} // moving a bunch of tiles at once
 
 				// Push command onto the undo stack.

@@ -50,6 +50,13 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		table->setRowHeight(i, TILE_HEIGHT);
 	for (int i = 0; i < table->numCols(); i++)
 		table->setColumnWidth(i, TILE_WIDTH);
+//	table = new QTableWidget(16, 16);
+//	table->verticalHeader()->hide();
+//	table->horizontalHeader()->hide();
+//	for (int i = 0; i < table->rowCount(); i++)
+//		table->verticalHeader()->resizeSection(i, TILE_HEIGHT);
+//	for (int i = 0; i < table->columnCount(); i++)
+//		table->horizontalHeader()->resizeSection(i, TILE_WIDTH);
 
 	// Read in tiles and create table items.
 	// FIXME: this is one ugly hack. It loads each individual tile's image and puts it into a table. But each
@@ -72,6 +79,10 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 			{
 				QPixmap tile_pixmap = variant.value<QPixmap>();
 				table->setPixmap(row, col, tile_pixmap);
+// Uncomment below for QTableWidget/View, comment out avove
+//				QTableWidgetItem* tile = new QTableWidgetItem();
+//				tile->setData(Qt::DecorationRole, variant);
+//				table->setItem(row, col, tile);
 			} // image of the tile must not be null
 			else
 				qDebug(QString("%1").arg(reader.error()));

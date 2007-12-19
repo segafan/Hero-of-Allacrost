@@ -266,7 +266,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>37</integer>
+									<integer>61</integer>
 									<integer>22</integer>
 									<integer>19</integer>
 									<integer>5</integer>
@@ -275,7 +275,7 @@
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 493}, {187, 338}}</string>
+							<string>{{0, 823}, {187, 338}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -375,9 +375,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>D41143AC0D16045F000C0448</string>
+				<string>D4EA50B70D18D26F00B584B0</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>D41143AD0D16045F000C0448</string>
+				<string>D4EA50B80D18D26F00B584B0</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -512,11 +512,6 @@
 	<key>WindowOrderList</key>
 	<array>
 		<string>D43083E80AF9860800A5173A</string>
-		<string>D41143B80D16045F000C0448</string>
-		<string>D41143B90D16045F000C0448</string>
-		<string>D4F7165E0B06B36400361DA9</string>
-		<string>1CD10A99069EF8BA00B06720</string>
-		<string>D41143B40D16045F000C0448</string>
 		<string>1C0AD2B3069F1EA900FABCE6</string>
 		<string>/Users/philip/allacrost/demo/HoA.xcodeproj</string>
 	</array>
@@ -559,6 +554,8 @@
 							<string>0pt</string>
 						</dict>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXBuildLogShowsTranscriptDefaultKey</key>
@@ -600,7 +597,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>D43083E80AF9860800A5173A</string>
-				<string>D41143C10D16203E000C0448</string>
+				<string>D4EA509A0D18C53200B584B0</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -962,9 +959,9 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C0AD2B3069F1EA900FABCE6</string>
-				<string>D41143B60D16045F000C0448</string>
+				<string>D4EA509B0D18C53200B584B0</string>
 				<string>1CD0528B0623707200166675</string>
-				<string>D41143B70D16045F000C0448</string>
+				<string>D4EA509C0D18C53200B584B0</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.run</string>
