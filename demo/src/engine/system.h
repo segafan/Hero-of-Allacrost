@@ -32,6 +32,21 @@
 
 #include "mode_manager.h"
 
+#define NO_THREADS 0
+#define SDL_THREADS 1
+
+/* Set this to NO_THREADS to disable threads. Set this to SDL_THREADS to use
+ * SDL Threads. */
+#define THREAD_TYPE SDL_THREADS
+
+#if (THREAD_TYPE == SDL_THREADS)
+	#include <SDL/SDL_thread.h>
+	#include <SDL/SDL_mutex.h>
+	typedef SDL_Thread Thread;
+#else
+	typedef int Thread;
+#endif
+
 //! All calls to the system engine are wrapped in this namespace.
 namespace hoa_system {
 
@@ -356,10 +371,24 @@ private:
 	std::set<SystemTimer*> _system_timers;
 }; // class GameSystem : public hoa_utils::Singleton<GameSystem>
 
+
+template <class T> struct generic_class_func_info
+{
+	static int SpawnThread_Intermediate(void * vptr) {
+		((((generic_class_func_info <T> *) vptr)->myclass)->*(((generic_class_func_info <T> *) vptr)->func))();
+		return 0;
+	}
+
+	T * myclass;
+	void (T::*func)();
+};
+
+
 class SystemThread {
 
 public:
-	bool SpawnThread(int (*func)(void *));
+	template <class T> Thread * SpawnThread(void (T::*)(), T *);
+	void WaitForThread(Thread * thread);
 
 }; // class SystemThread
 

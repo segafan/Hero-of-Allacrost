@@ -20,19 +20,6 @@
 
 #include "global.h"
 
-#define NO_THREADS 0
-#define SDL_THREADS 1
-
-/* Set this to NO_THREADS to disable threads. Set this to SDL_THREADS to use
- * SDL Threads. */
-#define THREAD_TYPE SDL_THREADS
-
-#if (THREAD_TYPE == SDL_THREADS)
-	#include <SDL/SDL_thread.h>
-	#include <SDL/SDL_mutex.h>
-#endif
-
-
 using namespace std;
 
 using namespace hoa_utils;
@@ -268,20 +255,38 @@ void GameSystem::SetLanguage(std::string lang) {
 	_language = lang;
 }
 
-bool SystemThread::SpawnThread(int (*func)(void *)) {
-#if (THREAD_TYPE == SDL_THREADS)
-	SDL_Thread * thread;
 
-	thread = SDL_CreateThread(func, NULL);
+template <class T> Thread * SystemThread::SpawnThread(void (T::*func)(), T * myclass) {
+#if (THREAD_TYPE == SDL_THREADS)
+	Thread * thread;
+	generic_class_func_info <T> gen;
+	gen.func = func;
+	gen.myclass = myclass;
+
+	// Winter Knight: There is a potential, but unlikely race condition here.
+	// If gen's location on the stack gets overwritten before  myclass->*func
+	// gets called in SpawnThread_Intermediate, then it will result in a segfault.
+	thread = SDL_CreateThread(gen.SpawnThread_Intermediate, &gen);
 	if (thread == NULL) {
 		PRINT_ERROR << "Unable to create thread: " << SDL_GetError() << std::endl;
-		return false;
+		return NULL;
 	}
+	return thread;
 #elif (THREAD_TYPE == NO_THREADS)
-	func();
+	(myclass->*func)();
+	return 1;
+#else
+	PRINT_ERROR << "Invalid THREAD_TYPE." << std::endl;
+	return 0;
 #endif
+}
 
-	return true;
+
+void SystemThread::WaitForThread(Thread * thread)
+{
+#if (THREAD_TYPE == SDL_THREADS)
+	SDL_WaitThread(thread, NULL);
+#endif
 }
 
 } // namespace hoa_system
