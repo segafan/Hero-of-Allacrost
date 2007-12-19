@@ -17,10 +17,12 @@
 #ifndef __TILESET_HEADER__
 #define __TILESET_HEADER__
 
+//#include <QHeaderView>
 #include <QImageReader>
 #include <QMessageBox>
 #include <QRect>
 #include <Q3Table>
+//#include <QTableWidgetItem>
 #include <QVariant>
 
 #include "defs.h"

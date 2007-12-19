@@ -31,7 +31,7 @@ TextureController* TextureManager = NULL;
 
 TextureController::TextureController() :
 	_last_tex_id(INVALID_TEXTURE_ID),
-	_debug_current_sheet(-1),
+	debug_current_sheet(-1),
 	_debug_num_tex_switches(0)
 {}
 
@@ -170,20 +170,99 @@ bool TextureController::ReloadTextures() {
 
 
 void TextureController::DEBUG_NextTexSheet() {
-	_debug_current_sheet++;
+	debug_current_sheet++;
 
-	if (_debug_current_sheet >= static_cast<int32>(_tex_sheets.size()))
-		_debug_current_sheet = -1;  // Disables texture sheet display
+	if (debug_current_sheet >= static_cast<int32>(_tex_sheets.size()))
+		debug_current_sheet = -1;  // Disables texture sheet display
 }
 
 
 
 void TextureController::DEBUG_PrevTexSheet() {
-	_debug_current_sheet--;
+	debug_current_sheet--;
 
-	if (_debug_current_sheet < -1)
-		_debug_current_sheet = static_cast<int32>(_tex_sheets.size()) - 1;
+	if (debug_current_sheet < -1)
+		debug_current_sheet = static_cast<int32>(_tex_sheets.size()) - 1;
 }
+
+
+
+void TextureController::DEBUG_ShowTexSheet() {
+	// Value less than zero means we shouldn't show any texture sheets
+	if (debug_current_sheet < 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "function was called when debug_current_sheet was not a positive value" << endl;
+		return;
+	}
+
+	if (_tex_sheets.empty()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "there were no texture sheets available to show" << endl;
+		return;
+	}
+
+	// If we were viewing a particular texture sheet and it happened to get deleted, we change
+	// to look at a different sheet
+	int32 num_sheets = static_cast<uint32>(_tex_sheets.size());
+
+	if (debug_current_sheet >= num_sheets) {
+		debug_current_sheet = num_sheets - 1;
+	}
+
+	TexSheet *sheet = _tex_sheets[debug_current_sheet];
+	if (sheet == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "discovered a NULL texture sheet in _tex_sheets container" << endl;
+		return;
+	}
+
+	VideoManager->PushState();
+	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+
+	glPushMatrix();
+	VideoManager->Move(0.0f,0.0f);
+	glScalef(sheet->width / 2, sheet->height / 2, 1.0f);
+
+	sheet->DEBUG_Draw();
+
+	glPopMatrix();
+
+	TextManager->SetDefaultFont("debug_font");
+	char buf[200];
+
+	VideoManager->Move(20, VideoManager->_current_context.coordinate_system.GetTop() - 30);
+	TextManager->Draw("Current Texture sheet:");
+
+	sprintf(buf, "  Sheet:   %d", debug_current_sheet);
+	VideoManager->MoveRelative(0, -20);
+	TextManager->Draw(buf);
+
+	VideoManager->MoveRelative(0, -20);
+	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
+	TextManager->Draw(buf);
+
+	if (sheet->type == VIDEO_TEXSHEET_32x32)
+		sprintf(buf, "  Type:    32x32");
+	else if (sheet->type == VIDEO_TEXSHEET_32x64)
+		sprintf(buf, "  Type:    32x64");
+	else if (sheet->type == VIDEO_TEXSHEET_64x64)
+		sprintf(buf, "  Type:    64x64");
+	else if (sheet->type == VIDEO_TEXSHEET_ANY)
+		sprintf(buf, "  Type:    Any size");
+	else
+		sprintf(buf, "  Type:    Unknown");
+
+	VideoManager->MoveRelative(0, -20);
+	TextManager->Draw(buf);
+
+	sprintf(buf, "  Static:  %d", sheet->is_static);
+	VideoManager->MoveRelative(0, -20);
+	TextManager->Draw(buf);
+
+	sprintf(buf, "  TexID:   %d", sheet->tex_id);
+	VideoManager->MoveRelative(0, -20);
+	TextManager->Draw(buf);
+
+	VideoManager->PopState();
+} // void TextureController::DEBUG_ShowTexSheet()
 
 
 
@@ -598,83 +677,5 @@ void TextureController::_UnregisterTextTexture(TextTexture* tex) {
 	_text_images.erase(tex_iter);
 }
 
-
-
-void TextureController::_DEBUG_ShowTexSheet() {
-	// Value less than zero means we shouldn't show any texture sheets
-	if (_debug_current_sheet < 0) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "function was called when _debug_current_sheet was not a positive value" << endl;
-		return;
-	}
-
-	if (_tex_sheets.empty()) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "there were no texture sheets available to show" << endl;
-		return;
-	}
-
-	// If we were viewing a particular texture sheet and it happened to get deleted, we change
-	// to look at a different sheet
-	int32 num_sheets = static_cast<uint32>(_tex_sheets.size());
-
-	if (_debug_current_sheet >= num_sheets) {
-		_debug_current_sheet = num_sheets - 1;
-	}
-
-	TexSheet *sheet = _tex_sheets[_debug_current_sheet];
-	if (sheet == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "discovered a NULL texture sheet in _tex_sheets container" << endl;
-		return;
-	}
-
-	VideoManager->PushState();
-	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
-
-	glPushMatrix();
-	VideoManager->Move(0.0f,0.0f);
-	glScalef(sheet->width / 2, sheet->height / 2, 1.0f);
-
-	sheet->DEBUG_Draw();
-
-	glPopMatrix();
-
-	TextManager->SetDefaultFont("debug_font");
-	char buf[200];
-
-	VideoManager->Move(20, VideoManager->_current_context.coordinate_system.GetTop() - 30);
-	TextManager->Draw("Current Texture sheet:");
-
-	sprintf(buf, "  Sheet:   %d", _debug_current_sheet);
-	VideoManager->MoveRelative(0, -20);
-	TextManager->Draw(buf);
-
-	VideoManager->MoveRelative(0, -20);
-	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
-	TextManager->Draw(buf);
-
-	if (sheet->type == VIDEO_TEXSHEET_32x32)
-		sprintf(buf, "  Type:    32x32");
-	else if (sheet->type == VIDEO_TEXSHEET_32x64)
-		sprintf(buf, "  Type:    32x64");
-	else if (sheet->type == VIDEO_TEXSHEET_64x64)
-		sprintf(buf, "  Type:    64x64");
-	else if (sheet->type == VIDEO_TEXSHEET_ANY)
-		sprintf(buf, "  Type:    Any size");
-	else
-		sprintf(buf, "  Type:    Unknown");
-
-	VideoManager->MoveRelative(0, -20);
-	TextManager->Draw(buf);
-
-	sprintf(buf, "  Static:  %d", sheet->is_static);
-	VideoManager->MoveRelative(0, -20);
-	TextManager->Draw(buf);
-
-	sprintf(buf, "  TexID:   %d", sheet->tex_id);
-	VideoManager->MoveRelative(0, -20);
-	TextManager->Draw(buf);
-
-	VideoManager->PopState();
-} // void TextureController::_DEBUG_ShowTexSheet()
 
 }  // namespace hoa_video

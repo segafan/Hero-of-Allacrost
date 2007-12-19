@@ -83,6 +83,15 @@ public:
 	//! \brief Cycles backward to show the previous texture sheet
 	void DEBUG_PrevTexSheet();
 
+	/** \brief Displays the currently selected texture sheet.
+	*** By using DEBUG_NextTexSheet() and DEBUG_PrevTexSheet(), you can change the current texture sheet so the sheet shown by this function
+	*** cycles through all currently loaded texture sheets.
+	**/
+	void DEBUG_ShowTexSheet();
+
+	//! \brief An index to _tex_sheets of the current texture sheet being shown in debug mode. -1 indicates no sheet
+	int32 debug_current_sheet;
+
 private:
 	~TextureController();
 
@@ -97,9 +106,6 @@ private:
 
 	//! \brief A STL set containing all of the text images currently being managed by this class
 	std::set<private_video::TextTexture*> _text_images;
-
-	//! \brief An index to _tex_sheets of the current texture sheet being shown in debug mode. -1 indicates no sheet
-	int32 _debug_current_sheet;
 
 	//! \brief Keeps track of the number of texture switches per frame
 	uint32 _debug_num_tex_switches;
@@ -222,12 +228,6 @@ private:
 	bool _IsTextTextureRegistered(private_video::TextTexture* tex) const
 		{ return (_text_images.find(tex) != _text_images.end()); }
 	//@}
-
-	/** \brief Displays the currently selected texture sheet.
-	*** By using DEBUG_NextTexSheet() and DEBUG_PrevTexSheet(), you can change the current texture sheet so the sheet shown by this function
-	*** cycles through all currently loaded texture sheets.
-	**/
-	void _DEBUG_ShowTexSheet();
 }; // class TextureController : public hoa_utils::Singleton<TextureController>
 
 } // namespace hoa_video
