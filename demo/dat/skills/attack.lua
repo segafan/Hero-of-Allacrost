@@ -54,22 +54,22 @@ skills[2] = {
 }
 
 skills[3] = {
-   name = "Quick Shot",
-   description = "A quick but weak crossbow attack.",
-   sp_required = 0,
-   warmup_time = 1000,
-   cooldown_time = 0,
-   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
-   target_ally = false,
-   
-   BattleExecute = function(target, instigator)
-      if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
-         target:TakeDamage(instigator:GetPhysicalAttack() + 8 - target:GetPhysicalDefense());
-         AudioManager:PlaySound("snd/crossbow.ogg");
-      else
-         AudioManager:PlaySound("snd/crossbow_miss.ogg");
-      end     
-   end
+	name = "Quick Shot",
+	description = "A quick but weak crossbow attack.",
+	sp_required = 0,
+	warmup_time = 1000,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
+		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 8 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/crossbow.ogg");
+		else
+			AudioManager:PlaySound("snd/crossbow_miss.ogg");
+		end
+	end
 }
 
 

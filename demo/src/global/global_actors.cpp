@@ -1482,6 +1482,14 @@ GlobalActor* GlobalParty::GetActorByID(uint32 id) const {
 		cerr << "GLOBAL WARNING: GlobalParty::GetActorByID() failed to find an actor in the party "
 				<< "with the requested id: " << id << endl;
 	return NULL;
-} // float GlobalParty::AverageExperienceLevel()
+} // GlobalActor* GlobalParty::GetActorByID(uint32 hp)
+
+
+
+void GlobalParty::AddHitPoints(uint32 hp) {
+	for (std::vector<GlobalActor*>::iterator i = _actors.begin(); i != _actors.end(); i++) {
+		(*i)->AddHitPoints(hp);
+	}
+} // void GlobalParty::AddHitPoints(uint32 hp)
 
 } // namespace hoa_global

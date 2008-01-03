@@ -206,6 +206,7 @@ void BindGlobalsToLua()
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalParty>("GlobalParty")
+			.def("AddHitPoints", &GlobalParty::AddHitPoints)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")

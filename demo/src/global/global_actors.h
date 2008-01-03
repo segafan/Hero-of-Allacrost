@@ -1211,6 +1211,8 @@ public:
 	std::vector<GlobalActor*>* GetAllActors()
 		{ return &_actors; }
 
+	void AddHitPoints(uint32 hp);
+
 private:
 	/** \brief The vector of actors that are in this party
 	*** The class will not create nor destroy GlobalActor pointers stored in this data structure.

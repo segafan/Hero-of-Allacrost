@@ -349,16 +349,25 @@ void InventoryWindow::Update() {
 			// Use the item on the chosen character
 			if (event == VIDEO_OPTION_CONFIRM) {
 				GlobalObject* obj = _item_objects[ _inventory_items.GetSelection() ];
-				GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 				if (obj->GetObjectType() == GLOBAL_OBJECT_ITEM) {
 					GlobalItem *item = (GlobalItem*)GlobalManager->RetrieveFromInventory(obj->GetID());
 					const ScriptObject* script_function = item->GetMenuUseFunction();
 					if (script_function == NULL) {
 						IF_PRINT_WARNING(MENU_DEBUG) << "item did not have a menu use function" << endl;
 					}
-					ScriptCallFunction<void>(*script_function, ch);
-					item->DecrementCount();
-				}
+					else {
+						if (item->GetTargetType() == GLOBAL_TARGET_PARTY) {
+							GlobalParty *ch_party = GlobalManager->GetActiveParty();
+							ScriptCallFunction<void>(*script_function, ch_party);
+							item->DecrementCount();
+						} // if GLOBAL_TARGET_PARTY
+						else { // Use on a single character only
+							GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+							ScriptCallFunction<void>(*script_function, ch);
+							item->DecrementCount();
+						}
+					}
+				} // if GLOBAL_OBJECT_ITEM
 			} // if VIDEO_OPTION_CONFIRM
 			// Return to item selection
 			else if (event == VIDEO_OPTION_CANCEL) {

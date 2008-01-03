@@ -195,7 +195,7 @@ void ItemAction::RunScript() {
 
 	if (_item->GetTargetType() == GLOBAL_TARGET_PARTY) {
 		if (_target->IsEnemy()) {
-			BattleEnemy* enemy;
+			BattleActor* enemy;
 			//Loop through enemies and apply the item to each target
 			for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); i++) {
 				enemy = current_battle->GetEnemyActorAt(i);
@@ -207,7 +207,7 @@ void ItemAction::RunScript() {
 		}
 	
 		else {
-			BattleCharacter* character;
+			BattleActor* character;
 			//Loop through all party members and apply
 			for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); i++) {
 				character = current_battle->GetPlayerCharacterAt(i);
