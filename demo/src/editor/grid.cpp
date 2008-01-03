@@ -65,6 +65,7 @@ Grid::~Grid()
 	for (vector<Tileset*>::iterator it = tilesets.begin();it != tilesets.end();
 	     it++)
 		delete *it;
+	VideoManager->SingletonDestroy();
 } // Grid destructor
 
 
@@ -479,9 +480,15 @@ void Grid::SaveMap()
 
 void Grid::initializeGL()
 {
+	//Destroy the video engine
+	VideoManager->SingletonDestroy();
+	//re create the video engine's singleton
+	VideoManager = GameVideo::SingletonCreate();
 	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
+	
 	VideoManager->SingletonInitialize();
 	// changed because allacrost had to delay some video loading code
+		
 	VideoManager->ApplySettings();
 	VideoManager->FinalizeInitialization();
 	VideoManager->ToggleFPS();

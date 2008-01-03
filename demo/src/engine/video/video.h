@@ -288,6 +288,9 @@ public:
 	int32 GetScreenHeight() const
 		{ return _screen_height; }
 
+	bool IsInitialized() const
+		{ return _initialized; }
+	
 	//! \brief Returns true if game is in fullscreen mode, false if it is in windowed mode
 	bool IsFullscreen() const
 		{ return _fullscreen; }
