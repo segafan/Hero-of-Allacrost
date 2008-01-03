@@ -57,7 +57,9 @@ Editor::Editor() : QMainWindow(),
 	setWindowIcon(QIcon("img/logos/program_icon.bmp"));
 
 	// create the video engine's singleton
-	VideoManager = GameVideo::SingletonCreate();
+	// VideoManager = GameVideo::SingletonCreate();
+	// Commented out grid and tileset editor create and destroy VideoManager
+
 } // Editor constructor
 
 Editor::~Editor()
@@ -156,10 +158,10 @@ void Editor::_TilesEnableActions()
 
 void Editor::_TilesetMenuSetup()
 {
-	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
-		_edit_tileset_action->setEnabled(true);
-	else
-		_edit_tileset_action->setEnabled(false);
+	//if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+	//	_edit_tileset_action->setEnabled(true);
+	//else
+	//	_edit_tileset_action->setEnabled(false);
 } // _TilesetMenuSetup
 
 void Editor::_MapMenuSetup()

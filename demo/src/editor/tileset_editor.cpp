@@ -25,33 +25,28 @@ OverlayGrid::OverlayGrid()
 {
 	tileset = new Tileset;		
 	tileset->tiles.resize(1);
+	_overlayInitialized = false;
 }
 
 OverlayGrid::~OverlayGrid()
 {
 	delete tileset;
+	VideoManager->SingletonDestroy();
 }
 void OverlayGrid::paintGL()
 {
+	
 	VideoManager->SetCoordSys(0.0f, VideoManager->GetScreenWidth() / TILE_WIDTH,
 		VideoManager->GetScreenHeight() / TILE_HEIGHT, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
-	VideoManager->Clear(Color::white);
 	
-	
-	
-	
-	
-	
+	VideoManager->Clear(Color::blue);
+		
+	// Draw the tile as one big image
 	tileset->tiles[0].Draw();
 	
-	
-	
-	
-	
-	
+		
 	VideoManager->DrawGrid(0.0f, 0.0f, 0.5f, 0.5f, Color::black);
-
 }
 void OverlayGrid::resizeGL(int w,int h)
 {
@@ -60,14 +55,30 @@ void OverlayGrid::resizeGL(int w,int h)
 }
 void OverlayGrid::initializeGL()
 {
+	// Destroy the video engine
+	VideoManager->SingletonDestroy();
+	// re-create the video engine's singleton
+	VideoManager = GameVideo::SingletonCreate();
 	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
+	
 	VideoManager->SingletonInitialize();
 	// changed because allacrost had to delay some video loading code
+		
 	VideoManager->ApplySettings();
 	VideoManager->FinalizeInitialization();
 	VideoManager->ToggleFPS();
 }
 
+void OverlayGrid::contentsMousePressEvent(QMouseEvent* evt)
+{
+	// don't draw outside the map
+	//if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
+	//	(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
+	//	return;
+
+	//TODO : Check for mouse press events and paint walkability
+
+} // contentsMousePressEvent(...)
 
 //! TilesetEditor Implementation
 
@@ -101,8 +112,7 @@ TilesetEditor::TilesetEditor(QWidget* parent,const QString& name,bool prop)
 	_dia_layout->addWidget(_ok_pbut, 1, 1);
 	_dia_layout->addWidget(_cancel_pbut, 2, 1);
 	_dia_layout->addWidget(_walkability_grid,0,0,3,1);
-	
-	
+		
 }
 
 TilesetEditor::~TilesetEditor()
@@ -129,16 +139,16 @@ void TilesetEditor::_openTDF()
 	QString img_filename = QString("img/tilesets/" + file_name + ".png");
 	QString dat_filename = QString("dat/tilesets/" + file_name + ".lua");
 	
-
 	// Load the tileset image.
+	_walkability_grid->tileset->tiles.clear();
 	_walkability_grid->tileset->tiles.resize(1);
 	
 	_walkability_grid->tileset->tiles[0].SetDimensions(16.0f, 16.0f);
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(_walkability_grid->tileset->tiles, std::string(img_filename.toAscii()), 1, 1) == false)
-		qDebug("LoadMultiImage failed to load tileset " + img_filename);
+	// Load image as still image
+	_walkability_grid->tileset->tiles[0].Load(std::string(img_filename.toAscii()),16,16);
 	
 	
-	
+	_walkability_grid->updateGL();
 	//TODO : Load the tileset definition file
 	//walkability autotiling etc.
 }
