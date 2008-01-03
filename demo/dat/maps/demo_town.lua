@@ -640,12 +640,15 @@ map_functions = {}
 map_functions[0] = function()
 	local shop = hoa_shop.ShopMode();
 	shop:AddObject(1); -- Healing Potion
-	shop:AddObject(10002); -- Iron Sword
-	shop:AddObject(10502); -- Standard Crossbow
-	shop:AddObject(20002); -- Cobalt Helm
+	shop:AddObject(4); -- Healing Stone
+	shop:AddObject(3001); -- Bomb
+	shop:AddObject(3002); -- Super Bomb
+--	shop:AddObject(10002); -- Iron Sword
+--	shop:AddObject(10502); -- Standard Crossbow
+--	shop:AddObject(20002); -- Cobalt Helm
 	shop:AddObject(20502); -- Winged Circlet
 	shop:AddObject(30002); -- Leather Chain Mail
-	shop:AddObject(40002); -- Phoenix Shield
+--	shop:AddObject(40002); -- Phoenix Shield
 	shop:AddObject(50502); -- Leather Boots
 	ModeManager:Push(shop);
 end

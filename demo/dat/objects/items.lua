@@ -36,6 +36,63 @@ items[1] = {
 	standard_price = 60,
 
 	BattleUse = function(target, instigator)
+		target:AddHitPoints(45);
+		AudioManager:PlaySound("snd/potion_drink.wav");
+	end,
+
+	MenuUse = function(target)
+		target:AddHitPoints(45);
+		AudioManager:PlaySound("snd/potion_drink.wav");
+	end
+}
+
+items[2] = {
+	name = "Medium Healing Potion",
+	description = "Restores a moderate amount of hit points to a target.",
+	icon = "img/icons/items/health_potion.png",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
+	target_ally = true,
+	standard_price = 200,
+
+	BattleUse = function(target, instigator)
+		target:AddHitPoints(150);
+		AudioManager:PlaySound("snd/potion_drink.wav");
+	end,
+
+	MenuUse = function(target)
+		target:AddHitPoints(150);
+		AudioManager:PlaySound("snd/potion_drink.wav");
+	end
+}
+
+items[3] = {
+	name = "Blessed Healing Potion",
+	description = "Restores a large amount of hit points to a target.",
+	icon = "img/icons/items/health_potion.png",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
+	target_ally = true,
+	standard_price = 30,
+
+	BattleUse = function(target, instigator)
+		target:AddHitPoints(250);
+		AudioManager:PlaySound("snd/potion_drink.wav");
+	end,
+
+	MenuUse = function(target)
+		target:AddHitPoints(250);
+		AudioManager:PlaySound("snd/potion_drink.wav");
+	end
+}
+
+items[4] = {
+	name = "Healing Stone",
+	description = "Restores a small amount of hit points to all party members.",
+	icon = "img/icons/items/health_potion.png",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
+	target_ally = true,
+	standard_price = 10,
+
+	BattleUse = function(target, instigator)
 		target:AddHitPoints(100);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
@@ -45,7 +102,6 @@ items[1] = {
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end
 }
-
 -- -----------------------------------------------------------------------------
 -- IDs 1001-2000 are reserved for status potions
 -- -----------------------------------------------------------------------------
@@ -57,3 +113,43 @@ items[1] = {
 -- -----------------------------------------------------------------------------
 
 -- items[2001] = {}
+
+-- -----------------------------------------------------------------------------
+-- IDs 3001-3201 are reserved for damaging items
+-- -----------------------------------------------------------------------------
+
+items[3001] = {
+	name = "Bomb",
+	description = "Goes boom on enemy.",
+	icon = "img/icons/items/health_potion.png",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
+	target_ally = false,
+	standard_price = 10,
+
+	BattleUse = function(target, instigator)
+		target:TakeDamage(500);
+		AudioManager:PlaySound("snd/rumble.wav");
+	end,
+
+	MenuUse = function(target)
+		AudioManager:PlaySound("snd/cancel.wav");
+	end
+}
+
+items[3002] = {
+	name = "Super Bomb",
+	description = "Goes boom on enemies.",
+	icon = "img/icons/items/health_potion.png",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
+	target_ally = false,
+	standard_price = 10,
+
+	BattleUse = function(target, instigator)
+		target:TakeDamage(500);
+		AudioManager:PlaySound("snd/rumble.wav");
+	end,
+
+	MenuUse = function(target)
+		AudioManager:PlaySound("snd/cancel.wav");
+	end
+}
