@@ -62,9 +62,6 @@ const uint16 HALF_TILE_COLS = 16;
 const uint16 HALF_TILE_ROWS = 12;
 //@}
 
-//! \brief The number of tiles that are found in a tileset image (512x512 pixel image containing 32x32 pixel tiles)
-const uint32 TILES_PER_TILESET = 256;
-
 /** \name Map State Constants
 *** \brief Constants used for describing the current state of operation during map mode.
 *** These constants are largely used to determine what
@@ -115,7 +112,6 @@ enum MAP_CONTEXT {
 	MAP_CONTEXT_31 = 0x40000000,
 	MAP_CONTEXT_32 = 0x80000000
 };
-
 
 /** ****************************************************************************
 *** \brief Retains information about how the next map frame should be drawn.
@@ -202,46 +198,6 @@ public:
 
 } // namespace private_map
 
-
-/** ****************************************************************************
-*** \brief Represents a single tile on the map.
-***
-*** The images that a tile uses are not stored within this class. They are
-*** stored in the MapMode#_tile_images vector, and this class contains three
-*** indices to images in that vector. This class also does not contain any
-*** information about walkability. That information is kept in a seperate vector
-*** in the MapMode class.
-***
-*** \note The reason that tiles do not contain walkability information is that
-*** each tile is 32x32 pixels, but walkability is defined on a 16x16 granularity,
-*** meaning that there are four "walkable" sections to each tile. Code such as
-*** pathfinding is more simple if all walkability information is kept in a seperate
-*** container.
-***
-*** \note The coordinate system in MapMode is in terms of tiles. Specifically,
-*** the screen is defined to be 32 tile columns wide and 24 tile rows high. Using
-*** 32x32 tile images, this corresponds to a screen resolution of 1024x768, which
-*** is the default screen resolution of Allacrost. The origin [0.0f, 0.0f] is the
-*** top-left corner of the screen and the bottom-right corner coordinates are
-*** [32.0f, 24.0f]. Both map tiles and map objects in Allacrost are drawn on the
-*** screen using the bottom middle of the image as its reference point.
-*** ***************************************************************************/
-class MapTile {
-public:
-	/** \name Tile Layer Indeces
-	*** \brief Indeces to MapMode#_tile_images, mapping to the three tile layers.
-	*** \note A value less than zero means that no image is registered to that tile layer.
-	**/
-	//@{
-	int16 lower_layer, middle_layer, upper_layer;
-	//@}
-
-	MapTile()
-		{ lower_layer = -1; middle_layer = -1; upper_layer = -1; }
-
-	MapTile(int16 lower, int16 middle, int16 upper)
-		{ lower_layer = lower; middle_layer = middle; upper_layer = upper; }
-}; // class MapTile
 
 /** ****************************************************************************
 *** \brief Handles the game execution while the player is exploring maps.
@@ -339,16 +295,6 @@ private:
 	//! \brief The time elapsed since the last Update() call to MapMode.
 	uint32 _time_elapsed;
 
-	/** \brief The number of tile rows in the map.
-	*** This number must be greater than or equal to 24 for the map to be valid.
-	**/
-	uint16 _num_tile_rows;
-
-	/** \brief The number of tile rows in the map.
-	*** This number must be greater than or equal to 32 for the map to be valid.
-	**/
-	uint16 _num_tile_cols;
-
 	/** \brief The number of elements in the map grid
 	*** The number of map grid rows and columns is always equal to twice that of the number of
 	*** tile rows and tile columns.
@@ -395,8 +341,11 @@ private:
 	**/
 	ScriptObject _draw_function;
 
-	//! \brief A 2D vector that contains all of the map's tile objects.
-	std::vector<std::vector<MapTile> > _tile_grid;
+	//! \brief Instance of helper class to map mode. Responsible for tile related operations.
+	private_map::TileManager* _tile_manager;
+
+	//! \brief Instance of helper class to map mode. Responsible for object and sprite related operations.
+// 	ObjectManager* _object_manager;
 
 	/** \brief A 2D vector indicating which spots on the map sprites may walk on.
 	*** This vector is kept seperate from the vector of tiles because each tile
@@ -451,18 +400,6 @@ private:
 	**/
 	private_map::VirtualSprite *_virtual_focus;
 
-	//! \brief Contains the images for all map tiles, both still and animate.
-	std::vector<hoa_video::ImageDescriptor*> _tile_images;
-
-	/** \brief Contains all of the animated tile images used on the map.
-	*** The purpose of this vector is to easily update all tile animations without stepping through the
-	*** _tile_images vector, which contains both still and animated images.
-	***
-	*** \note The elements in this vector point to the same AnimatedImages that are pointed to by _tile_images. Therefore,
-	*** this vector should <b>not</b> have delete invoked on its elements, since delete is already invoked on _tile_images.
-	**/
-	std::vector<hoa_video::AnimatedImage*> _animated_tile_images;
-
 	//! \brief Icon which appears over NPCs who have unread dialogue
 	hoa_video::AnimatedImage _new_dialogue_icon;
 
@@ -500,9 +437,6 @@ private:
 
 	//! \brief Loads all map data as specified in the Lua file that defines the map.
 	void _Load();
-
-	//! \brief A helper function to MapMode::_Load, handles all operations on loading tilesets and tile images
-	void _LoadTiles();
 
 	// -------------------- Update Methods
 
