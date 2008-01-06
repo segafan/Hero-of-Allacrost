@@ -243,6 +243,8 @@ namespace hoa_map {
 
 	namespace private_map {
 		class MapTile;
+		class TileManager;
+
 		class MapFrame;
 		class PathNode;
 

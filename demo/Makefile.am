@@ -133,8 +133,6 @@ modes_SOURCES = \
 	$(MODES_DIR)/boot/boot_welcome.h \
 	$(MODES_DIR)/map/map.cpp \
 	$(MODES_DIR)/map/map.h \
-	$(MODES_DIR)/map/map_zones.cpp \
-	$(MODES_DIR)/map/map_zones.h \
 	$(MODES_DIR)/map/map_actions.cpp \
 	$(MODES_DIR)/map/map_actions.h \
 	$(MODES_DIR)/map/map_dialogue.cpp \
@@ -143,6 +141,10 @@ modes_SOURCES = \
 	$(MODES_DIR)/map/map_objects.h \
 	$(MODES_DIR)/map/map_sprites.cpp \
 	$(MODES_DIR)/map/map_sprites.h \
+	$(MODES_DIR)/map/map_tiles.cpp \
+	$(MODES_DIR)/map/map_tiles.h \
+	$(MODES_DIR)/map/map_zones.cpp \
+	$(MODES_DIR)/map/map_zones.h \
 	$(MODES_DIR)/menu/menu.cpp \
 	$(MODES_DIR)/menu/menu.h \
 	$(MODES_DIR)/menu/menu_views.cpp \
