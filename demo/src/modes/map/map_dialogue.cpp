@@ -453,7 +453,7 @@ void DialogueManager::Update() {
 			// Restore the status of the map sprites
 			if (_current_dialogue->IsSaving()) {
 				for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
-					static_cast<VirtualSprite*>(MapMode::_current_map->_all_objects[_current_dialogue->GetLineSpeaker(i)])->LoadState();
+					static_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetLineSpeaker(i)))->LoadState();
 				}
 			}
 			_current_dialogue = NULL;
@@ -480,11 +480,11 @@ void DialogueManager::Draw() {
 	VirtualSprite* speaker = NULL;
 	if(_state == DIALOGUE_STATE_NORMAL) {
 		_display_textbox.Draw(); // Display dialogue text
-		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_all_objects[_current_dialogue->GetCurrentSpeaker()]);
+		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetCurrentSpeaker()));
 	}
 	if(_state == DIALOGUE_STATE_OPTION) {
 		_current_option->Draw(); // Display options
-		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_all_objects[_current_option->GetCurrentSpeaker()]);
+		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_option->GetCurrentSpeaker()));
 	}
 	VideoManager->Text()->Draw(speaker->name, TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	if (speaker->face_portrait != NULL) {
@@ -640,7 +640,7 @@ void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 time, int32
 	_line_count++;
 	if (action >= 0) {
 		// Place out global table on top of the stack
-		MapMode::_loading_map->_map_script.OpenTable(MapMode::_loading_map->_map_namespace, true);
+		MapMode::_loading_map->_map_script.OpenTable(MapMode::_loading_map->_map_tablespace, true);
 		MapMode::_loading_map->_map_script.OpenTable("map_functions");
 		ScriptObject* new_action = new ScriptObject();
 		*new_action = MapMode::_loading_map->_map_script.ReadFunctionPointer(action);

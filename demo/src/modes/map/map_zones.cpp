@@ -15,9 +15,10 @@
 
 #include "system.h"
 
-#include "map_zones.h"
+#include "map.h"
 #include "map_objects.h"
 #include "map_sprites.h"
+#include "map_zones.h"
 
 extern bool MAP_DEBUG;
 
@@ -138,7 +139,7 @@ void EnemyZone::Update() {
 		_RandomPosition(x, y);
 		_enemies[index]->SetXPosition(x, 0.0f);
 		_enemies[index]->SetYPosition(y, 0.0f);
-		collision = MapMode::_current_map->_DetectCollision(_enemies[index]);
+		collision = MapMode::_current_map->_object_manager->DetectCollision(_enemies[index]);
 	} while (collision && --retries > 0);
 
 	// If there is still a collision, reset the collision info on the enemy and retry on the next frame update

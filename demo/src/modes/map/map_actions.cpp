@@ -41,7 +41,7 @@ namespace private_map {
 void ActionPathMove::Execute() {
 	// TODO: Check if we already have a previously computed path and if it is still valid, use it.
 	if (path.empty()) {
-		MapMode::_current_map->_FindPath(_sprite, path, destination);
+		MapMode::_current_map->_object_manager->FindPath(_sprite, path, destination);
 	}
 
 	if (!path.empty()) {

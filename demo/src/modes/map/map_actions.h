@@ -21,7 +21,7 @@
 
 #include "defs.h"
 #include "utils.h"
-#include "map.h"
+#include "map_objects.h"
 
 namespace hoa_map {
 
