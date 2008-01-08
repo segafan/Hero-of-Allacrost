@@ -145,57 +145,6 @@ public:
 	float left_edge, right_edge, top_edge, bottom_edge;
 }; // class MapFrame
 
-
-/** ****************************************************************************
-*** \brief A container class for node information in pathfinding.
-***
-*** This class is used in the MapMode#_FindPath function to find an optimal
-*** path from a given source to a destination.
-*** *****************************************************************************/
-class PathNode {
-public:
-	/** \brief The coordinates for this node
-	*** These coordinates correspond to the MapMode#_walkable 2D vector, where
-	*** each element is a 16x16 pixel space on the map.
-	**/
-	//@{
-	int16 row, col;
-	//@}
-
-	//! \name Path Scoring Members
-	//@{
-	//! \brief The total score for this node (f = g + h).
-	int16 f_score;
-
-	//! \brief The score for this node relative to the source.
-	int16 g_score;
-
-	//! \brief The Manhattan distance from this node to the destination.
-	int16 h_score;
-	//@}
-
-	//PathNode *parent;
-	int16 parent_row, parent_col;
-
-	PathNode() :
-		row(-1), col(-1), f_score(0), g_score(0), h_score(0), parent_row( 0 ), parent_col( 0 ) {}
-
-	PathNode(int16 r, int16 c) :
-		row(r), col(c), f_score(0), g_score(0), h_score(0), parent_row( 0 ), parent_col( 0 ) {}
-
-	//! \brief Overloaded comparison operator checks that tile.row and tile.col are equal
-	bool operator==(const PathNode& that) const
-		{ return ((this->row == that.row) && (this->col == that.col)); }
-
-	//! \brief Overloaded comparison operator checks that tile.row or tile.col are not equal
-	bool operator!=(const PathNode& that) const
-		{ return ((this->row != that.row) || (this->col != that.col)); }
-
-	//! \brief Overloaded comparison operator only used for path finding. It compares the two f_scores.
-	bool operator<(const PathNode& that) const
-		{ return this->f_score > that.f_score; }
-}; // class PathNode
-
 } // namespace private_map
 
 
@@ -238,6 +187,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::SpriteAction;
 	friend class private_map::ActionPathMove;
 	friend class private_map::EnemyZone;
+	friend class private_map::ObjectManager;
 
 	friend void hoa_defs::BindModesToLua();
 public:
@@ -280,6 +230,9 @@ private:
 	//! \brief The name of the script file that contains the map.
 	std::string _map_filename;
 
+	//! \brief The map's unique name as it is used to identify a Lua table
+	std::string _map_tablespace;
+
 	//! \brief The name of the map, as it will be read by the player in the game.
 	hoa_utils::ustring _map_name;
 
@@ -295,15 +248,6 @@ private:
 	//! \brief The time elapsed since the last Update() call to MapMode.
 	uint32 _time_elapsed;
 
-	/** \brief The number of elements in the map grid
-	*** The number of map grid rows and columns is always equal to twice that of the number of
-	*** tile rows and tile columns.
-	**/
-	uint16 _num_grid_rows, _num_grid_cols;
-
-	//! \brief Holds the most recently generated object ID number
-	uint16 _lastID;
-
 	//! \brief While true, all user input commands to map mode are ignored
 	bool _ignore_input;
 
@@ -318,6 +262,14 @@ private:
 	*** the empty state and 5 seconds to empty from the full state.
 	**/
 	uint32 _run_stamina;
+
+	/** \brief A pointer to the map sprite that the map camera will focus on.
+	*** \note Note that this member is a pointer to a map sprite, not a map object.
+	*** However, this does not mean that the camera is not able to focus on non-sprite
+	*** map objects. The MapMode#_virtual_focus member can be used to emulate that
+	*** focus.
+	**/
+	private_map::VirtualSprite* _camera;
 
 	//! \brief Retains information needed to correctly draw the next map frame.
 	private_map::MapFrame _draw_info;
@@ -345,60 +297,7 @@ private:
 	private_map::TileManager* _tile_manager;
 
 	//! \brief Instance of helper class to map mode. Responsible for object and sprite related operations.
-// 	ObjectManager* _object_manager;
-
-	/** \brief A 2D vector indicating which spots on the map sprites may walk on.
-	*** This vector is kept seperate from the vector of tiles because each tile
-	*** has 4 walkable uint32 bitflags associated with it. Note that sprite objects may
-	*** come in various sizes, so not all sprites may fit through a narrow
-	*** passage way.
-	**/
-	std::vector<std::vector<uint32> > _map_grid;
-
-	/** \brief A map containing pointers to all of the sprites on a map.
-	*** This map does not include a pointer to the MapMode#_camera nor MapMode#_virtual_focus
-	*** sprites. The map key is used as the sprite's unique identifier for the map. Keys
-	*** 1000 and above are reserved for map sprites that correspond to the character's party.
-	**/
-	std::map<uint16, private_map::MapObject*> _all_objects;
-
-	/** \brief A container for all of the map objects located on the ground layer.
-	*** The ground object layer is where most objects and sprites exist in Allacrost.
-	**/
-	std::vector<private_map::MapObject*> _ground_objects;
-
-	/** \brief A container for all of the map objects located on the pass layer.
-	*** The pass object layer is named so because objects on this layer can both be
-	*** walked under or above by objects in the ground object layer. A good example
-	*** of an object that would typically go on this layer would be a bridge. This
-	*** layer usually has very few objects for the map. Also, objects on this layer
-	*** are unaffected by the maps context. In other words, these objects are always
-	*** drawn on the screen, regardless of the current context that the player is in.
-	**/
-	std::vector<private_map::MapObject*> _pass_objects;
-
-	/** \brief A container for all of the map objects located on the sky layer.
-	*** The sky object layer contains the last series of elements that are drawn on
-	*** a map. These objects exist high in the sky above all other tiles and objects.
-	*** Translucent clouds can make good use of this object layer, for instance.
-	**/
-	std::vector<private_map::MapObject*> _sky_objects;
-
-	/** \brief A pointer to the map sprite that the map camera will focus on.
-	*** \note Note that this member is a pointer to a map sprite, not a map object.
-	*** However, this does not mean that the camera is not able to focus on non-sprite
-	*** map objects. The MapMode#_virtual_focus member can be used to emulate that
-	*** focus.
-	**/
-	private_map::VirtualSprite* _camera;
-
-	/** \brief A "virtual sprite" that can serve as a focus point for the camera.
-	*** This sprite is not visible to the player nor does it have any collision
-	*** detection properties. Usually, the camera focuses on the player's sprite
-	*** rather than this object, but it is useful for scripted sequences and other
-	*** things.
-	**/
-	private_map::VirtualSprite *_virtual_focus;
+	private_map::ObjectManager* _object_manager;
 
 	//! \brief Icon which appears over NPCs who have unread dialogue
 	hoa_video::AnimatedImage _new_dialogue_icon;
@@ -421,14 +320,6 @@ private:
 	//! \brief Class member object which processes all information related to treasure discovery
 	private_map::TreasureMenu* _treasure_menu;
 
-	//! \brief Container for map zones, used for various purposes such as spawning of enemies
-	std::vector<private_map::MapZone*> _zones;
-
-	//! \brief store the namespace of the current map
-	std::string _map_namespace;
-
-	// -------------------- Battle Data Retained by the Map
-
 	/** \brief A container for the various foes which may appear on this map.
 	*** These enemies are kept at their initial stats. They are passed to battle mode, where a copy of
 	*** each enemy is made and initialized there.
@@ -445,47 +336,6 @@ private:
 
 	//! \brief Handles user input when the map is in the dialogue state.
 	void _HandleInputDialogue();
-
-	/** \brief Finds the nearest interactable object within a certain distance.
-	*** \param *sprite The sprite who is trying to find its nearest object.
-	*** \return A pointer to the nearest interactable map object, or NULL if no such object was found.
-	***
-	*** An interactable object must be in the same context as the function argument is. For an object
-	*** to be valid, it's collision rectangle must be no greater than 3 grid elements from the sprite's
-	*** "calling" axis, and th
-	***
-	**/
-	private_map::MapObject* _FindNearestObject(const private_map::VirtualSprite* sprite);
-
-	/** \brief Determines if a map sprite's position is invalid because of a collision
-	*** \param sprite A pointer to the map sprite to check
-	*** \return True if a collision was detected, false if one was not
-	***
-	*** This method is invoked by the map sprite who wishes to check for its own collision. The
-	*** collision detection is performed agains three types of obstacles:
-	***
-	*** -# Boundary conditions: where the sprite has walked off the map
-	*** -# Tile collisions: where the sprite's collision rectangle overlaps with an unwalkable map grid tile.
-	*** -# Object collision: where the sprite's collision rectangle overlaps that of another object's,
-	***    where the object is in the same draw layer and context as the original sprite.
-	***
-	*** \note This function does <b>not</b> check if the MapSprite argument has its no_collision member
-	*** set to false, but it <b>does</b> check that of the other MapObjects.
-	**/
-	bool _DetectCollision(private_map::VirtualSprite* sprite);
-
-	/** \brief Finds a path from a sprite's current position to a destination
-	*** \param sprite A pointer of the sprite to find the path for
-	*** \param path A reference to a vector of PathNode objects to store the path
-	*** \param dest The destination coordinates
-	***
-	*** This algorithm uses the A* algorithm to find a path from a source to a destination.
-	*** This function ignores the position of all other objects and only concerns itself with
-	*** which map grid elements are walkable.
-	***
-	*** \note If an error is detected, the function will return an empty path argument.
-	**/
-	void _FindPath(const private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
 
 	// -------------------- Draw Methods
 
@@ -512,23 +362,20 @@ private:
 
 	void _AddZone(private_map::MapZone *zone);
 
-	uint16 _GetGeneratedObjectID()
-		{ return ++_lastID; }
+	void _SetCameraFocus(private_map::VirtualSprite *sprite);
+
+	private_map::VirtualSprite* _GetCameraFocus() const;
+
+	uint16 _GetGeneratedObjectID();
 
 	void _SetMapState(uint8 state)
 		{ _map_state = state; }
-
-	void _SetCameraFocus(private_map::VirtualSprite *sprite)
-		{ _camera = sprite; }
 
 	uint8 _GetMapState() const
 		{ return _map_state; }
 
 	uint32 _GetTimeElapsed() const
 		{ return _time_elapsed; }
-
-	private_map::VirtualSprite* _GetCameraFocus() const
-		{ return _camera; }
 
 	static void _ShowDialogueIcons( bool state )
 		{ _show_dialogue_icons = state; }

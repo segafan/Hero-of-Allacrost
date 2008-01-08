@@ -432,6 +432,199 @@ private:
 	std::vector<hoa_global::GlobalObject*> _objects_list;
 }; // class MapTreasure : public PhysicalObject
 
+
+/** ****************************************************************************
+*** \brief A container class for node information in pathfinding.
+***
+*** This class is used in the MapMode#_FindPath function to find an optimal
+*** path from a given source to a destination.
+*** *****************************************************************************/
+class PathNode {
+public:
+	/** \brief The coordinates for this node
+	*** These coordinates correspond to the MapMode#_walkable 2D vector, where
+	*** each element is a 16x16 pixel space on the map.
+	**/
+	//@{
+	int16 row, col;
+	//@}
+
+	//! \name Path Scoring Members
+	//@{
+	//! \brief The total score for this node (f = g + h).
+	int16 f_score;
+
+	//! \brief The score for this node relative to the source.
+	int16 g_score;
+
+	//! \brief The Manhattan distance from this node to the destination.
+	int16 h_score;
+	//@}
+
+	//PathNode *parent;
+	int16 parent_row, parent_col;
+
+	PathNode() :
+		row(-1), col(-1), f_score(0), g_score(0), h_score(0), parent_row( 0 ), parent_col( 0 ) {}
+
+	PathNode(int16 r, int16 c) :
+		row(r), col(c), f_score(0), g_score(0), h_score(0), parent_row( 0 ), parent_col( 0 ) {}
+
+	//! \brief Overloaded comparison operator checks that tile.row and tile.col are equal
+	bool operator==(const PathNode& that) const
+		{ return ((this->row == that.row) && (this->col == that.col)); }
+
+	//! \brief Overloaded comparison operator checks that tile.row or tile.col are not equal
+	bool operator!=(const PathNode& that) const
+		{ return ((this->row != that.row) || (this->col != that.col)); }
+
+	//! \brief Overloaded comparison operator only used for path finding. It compares the two f_scores.
+	bool operator<(const PathNode& that) const
+		{ return this->f_score > that.f_score; }
+}; // class PathNode
+
+
+/** ****************************************************************************
+*** \brief A helper class to MapMode responsible for all object/sprite data and operations
+***
+*** This class is responsible for loading, updating, and drawing all map objects 
+*** and map sprites, in addition to maintaining the map's collision grid and map
+*** zones.
+*** ***************************************************************************/
+class ObjectManager {
+	friend class hoa_map::MapMode;
+
+public:
+	ObjectManager();
+	~ObjectManager();
+
+	//! \brief Handles all operations on loading tilesets and tile images for the map's Lua file
+	void Load(hoa_script::ReadScriptDescriptor& map_file);
+
+	//! \brief Updates the state of all map objects and zones
+	void Update();
+
+	//! \brief Sorts objects on all three layers according to their draw order
+	void SortObjects();
+
+	/** \brief Draws the various object layers to the screen
+	*** \param frame A pointer to the already computed information required to draw this frame
+	*** \note These functions do not reset the coordinate system and hence depend that the proper coordinate system
+	*** is already set prior to these function calls (0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f). These functions do make
+	*** modifications to the blending draw flag and the draw cursor position which are not restored by the function
+	*** upon its return, so take measures to retain this information before calling these functions if required.
+	**/
+	//@{
+	void DrawGroundObjects(const MapFrame* const frame, const bool second_pass);
+	void DrawPassObjects(const MapFrame* const frame);
+	void DrawSkyObjects(const MapFrame* const frame);
+	//@}
+
+	// TODO
+	// void SwitchContext(MAP_CONTEXT context);
+
+	/** \brief Finds the nearest interactable object within a certain distance.
+	*** \param *sprite The sprite who is trying to find its nearest object.
+	*** \return A pointer to the nearest interactable map object, or NULL if no such object was found.
+	***
+	*** An interactable object must be in the same context as the function argument is. For an object
+	*** to be valid, it's collision rectangle must be no greater than 3 grid elements from the sprite's
+	*** "calling" axis, and th
+	***
+	**/
+	private_map::MapObject* FindNearestObject(const private_map::VirtualSprite* sprite);
+
+	/** \brief Determines if a map sprite's position is invalid because of a collision
+	*** \param sprite A pointer to the map sprite to check
+	*** \return True if a collision was detected, false if one was not
+	***
+	*** This method is invoked by the map sprite who wishes to check for its own collision. The
+	*** collision detection is performed agains three types of obstacles:
+	***
+	*** -# Boundary conditions: where the sprite has walked off the map
+	*** -# Tile collisions: where the sprite's collision rectangle overlaps with an unwalkable map grid tile.
+	*** -# Object collision: where the sprite's collision rectangle overlaps that of another object's,
+	***    where the object is in the same draw layer and context as the original sprite.
+	***
+	*** \note This function does <b>not</b> check if the MapSprite argument has its no_collision member
+	*** set to false, but it <b>does</b> check that of the other MapObjects.
+	**/
+	bool DetectCollision(private_map::VirtualSprite* sprite);
+
+	/** \brief Finds a path from a sprite's current position to a destination
+	*** \param sprite A pointer of the sprite to find the path for
+	*** \param path A reference to a vector of PathNode objects to store the path
+	*** \param dest The destination coordinates
+	***
+	*** This algorithm uses the A* algorithm to find a path from a source to a destination.
+	*** This function ignores the position of all other objects and only concerns itself with
+	*** which map grid elements are walkable.
+	***
+	*** \note If an error is detected, the function will return an empty path argument.
+	**/
+	void FindPath(const private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
+
+	MapObject* GetObject(uint32 object_id);
+
+private:
+	/** \brief The number of rows and columns in the collision gride
+	*** The number of collision grid rows and columns is always equal to twice 
+	*** that of the number of rows and columns of tiles.
+	**/
+	uint16 _num_grid_rows, _num_grid_cols;
+
+	/** \brief A 2D vector indicating which spots on the map sprites may walk on.
+	*** This vector is kept seperate from the vector of tiles because each tile
+	*** has 4 walkable uint32 bitflags associated with it. Note that sprite objects may
+	*** come in various sizes, so not all sprites may fit through a narrow
+	*** passage way.
+	**/
+	std::vector<std::vector<uint32> > _collision_grid;
+
+	//! \brief Holds the most recently generated object ID number
+	uint16 _lastID;
+
+	/** \brief A map containing pointers to all of the sprites on a map.
+	*** This map does not include a pointer to the MapMode#_camera nor MapMode#_virtual_focus
+	*** sprites. The map key is used as the sprite's unique identifier for the map. Keys
+	*** 1000 and above are reserved for map sprites that correspond to the character's party.
+	**/
+	std::map<uint16, MapObject*> _all_objects;
+
+	/** \brief A container for all of the map objects located on the ground layer.
+	*** The ground object layer is where most objects and sprites exist in Allacrost.
+	**/
+	std::vector<MapObject*> _ground_objects;
+
+	/** \brief A container for all of the map objects located on the pass layer.
+	*** The pass object layer is named so because objects on this layer can both be
+	*** walked under or above by objects in the ground object layer. A good example
+	*** of an object that would typically go on this layer would be a bridge. This
+	*** layer usually has very few objects for the map. Also, objects on this layer
+	*** are unaffected by the maps context. In other words, these objects are always
+	*** drawn on the screen, regardless of the current context that the player is in.
+	**/
+	std::vector<private_map::MapObject*> _pass_objects;
+
+	/** \brief A container for all of the map objects located on the sky layer.
+	*** The sky object layer contains the last series of elements that are drawn on
+	*** a map. These objects exist high in the sky above all other tiles and objects.
+	*** Translucent clouds can make good use of this object layer, for instance.
+	**/
+	std::vector<private_map::MapObject*> _sky_objects;
+
+	/** \brief A "virtual sprite" that can serve as a focus point for the camera.
+	*** This sprite is not visible to the player nor does it have any collision
+	*** detection properties. Usually, the camera focuses on the player's sprite
+	*** rather than this object, but it is useful for scripted sequences and other
+	*** things.
+	**/
+	private_map::VirtualSprite *_virtual_focus;
+
+	//! \brief Container for map zones, used for various purposes such as spawning of enemies
+	std::vector<private_map::MapZone*> _zones;
+}; // class ObjectManager
+
 } // namespace private_map
 
 } // namespace hoa_map

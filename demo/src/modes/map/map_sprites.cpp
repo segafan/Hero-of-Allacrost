@@ -198,16 +198,16 @@ void VirtualSprite::Update() {
 			y_offset += distance_moved;
 
 		// Determine if the sprite may move to this new Y position
-		if (MapMode::_current_map->_DetectCollision(this)) {
+		if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
 			// Determine if we can slide on an object
 			if( direction & (SOUTH | NORTH)) {
 				//Start from a sprite's size away and get closer testing collision each time
 				for( float i = 0; i < coll_half_width * 2; i += 0.1f ) {
 					x_offset = tmp_x - ( coll_half_width * 2 ) + i;
-					if (MapMode::_current_map->_DetectCollision(this)) {
+					if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
 						//Try the other way, can't go that way
 						x_offset = tmp_x + ( coll_half_width * 2 ) - i;
-						if (MapMode::_current_map->_DetectCollision(this)) {
+						if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
 							//Still can't slide, reset
 							x_offset = tmp_x;
 						}
@@ -256,16 +256,16 @@ void VirtualSprite::Update() {
 
 
 		// Determine if the sprite may move to this new X position
-		if (MapMode::_current_map->_DetectCollision(this)) {
+		if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
 			// Determine if we can slide on an object
 			if( direction & (WEST | EAST)) {
 				//Start from a sprite's size away and get closer testing collision each time
 				for( float i = 0; i < coll_height; i += 0.1f ) {
 					y_offset = tmp_y - coll_height + i;
-					if (MapMode::_current_map->_DetectCollision(this)) {
+					if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
 						//Try the other way, can't go that way
 						y_offset = tmp_y + coll_height - i;
-						if (MapMode::_current_map->_DetectCollision(this)) {
+						if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
 							//Still can't slide, reset
 							y_offset = tmp_y;
 						}
