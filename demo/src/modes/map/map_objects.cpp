@@ -740,8 +740,6 @@ void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>&
 
 
 MapObject* ObjectManager::GetObject(uint32 object_id) {
-	if (object_id >= _all_objects.size())
-		return NULL;
 	return _all_objects[object_id];
 }
 
