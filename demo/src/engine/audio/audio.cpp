@@ -36,6 +36,7 @@ namespace hoa_audio {
 
 GameAudio* AudioManager = NULL;
 bool AUDIO_DEBUG = false;
+bool AUDIO_ENABLE = true;
 
 
 
@@ -53,6 +54,9 @@ GameAudio::GameAudio () :
 
 
 bool GameAudio::SingletonInitialize() {
+	if (!AUDIO_ENABLE)
+		return true;
+
 	const ALCchar* best_device = 0; // Will store the name of the 'best' device for audio playback
 	ALCint highest_version = 0; // The highest version number found
 	CheckALError(); // Clears errors
@@ -148,6 +152,9 @@ bool GameAudio::SingletonInitialize() {
 
 
 GameAudio::~GameAudio() {
+	if (!AUDIO_ENABLE)
+		return;
+
 	// Delete any active audio effects
 	for (list<AudioEffect*>::iterator i = _audio_effects.begin(); i != _audio_effects.end(); i++) {
 		delete (*i);
@@ -182,6 +189,9 @@ GameAudio::~GameAudio() {
 
 
 void GameAudio::Update() {
+	if (!AUDIO_ENABLE)
+		return;
+
 	for (vector<AudioSource*>::iterator i = _audio_sources.begin(); i != _audio_sources.end(); i++) {
 		if ((*i)->owner != NULL) {
 			(*i)->owner->_Update();

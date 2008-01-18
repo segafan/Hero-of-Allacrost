@@ -154,6 +154,9 @@ AudioDescriptor::AudioDescriptor(const AudioDescriptor& copy) :
 
 
 bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, uint32 stream_buffer_size) {
+	if (!AUDIO_ENABLE)
+		return true;
+
 	// Clean out any audio resources being used before trying to set new ones
 	FreeAudio();
 
@@ -339,6 +342,9 @@ AUDIO_STATE AudioDescriptor::GetState() {
 
 
 void AudioDescriptor::Play() {
+	if (!AUDIO_ENABLE)
+		return;
+
 	if (_source == NULL) {
 		_AcquireSource();
 		if (_source == NULL) {
@@ -368,7 +374,7 @@ void AudioDescriptor::Play() {
 
 
 void AudioDescriptor::Stop() {
-	if (_state == AUDIO_STATE_STOPPED)
+	if (_state == AUDIO_STATE_STOPPED || _state == AUDIO_STATE_UNLOADED)
 		return;
 
 	if (_source == NULL) {
@@ -391,7 +397,7 @@ void AudioDescriptor::Stop() {
 
 
 void AudioDescriptor::Pause() {
-	if (_state == AUDIO_STATE_PAUSED)
+	if (_state == AUDIO_STATE_PAUSED || _state == AUDIO_STATE_UNLOADED)
 		return;
 
 	if (_source == NULL) {
@@ -879,6 +885,9 @@ bool MusicDescriptor::LoadAudio(const std::string& filename, AUDIO_LOAD load_typ
 
 
 void MusicDescriptor::Play() {
+	if (!AUDIO_ENABLE)
+		return;
+
 	if (AudioManager->_active_music == this) {
 		// This is slightly hacky, the real reason and when map mode returns to the top of the mode stack
 		// _data is null for some reason.  So when GetState is called the check for _data changes the _state to
