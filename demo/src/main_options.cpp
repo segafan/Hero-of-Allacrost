@@ -131,6 +131,7 @@ void PrintUsage() {
 	cout << "                       all, audio, battle, boot, data, global, input," << endl;
 	cout << "                       map, mode_manager, pause, quit, scene, system" << endl;
 	cout << "                       utils, video" << endl;
+	cout << "  --disable-audio   :: disables loading and playing audio" << endl;
 	cout << "  --help/-h         :: prints this help menu" << endl;
 	cout << "  --info/-i         :: prints information about the user's system" << endl;
 	cout << "  --reset/-r        :: resets game configuration to use default settings" << endl;
