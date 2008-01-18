@@ -169,9 +169,11 @@ bool LoadSettings()
 	}
 
 	// Load Audio settings
-	settings.OpenTable("audio_settings");
-	AudioManager->SetMusicVolume(static_cast<float>(settings.ReadFloat("music_vol")));
-	AudioManager->SetSoundVolume(static_cast<float>(settings.ReadFloat("sound_vol")));
+	if (AUDIO_ENABLE) {
+		settings.OpenTable("audio_settings");
+		AudioManager->SetMusicVolume(static_cast<float>(settings.ReadFloat("music_vol")));
+		AudioManager->SetSoundVolume(static_cast<float>(settings.ReadFloat("sound_vol")));
+	}
 	settings.CloseAllTables();
 
 	if (settings.IsErrorDetected()) {

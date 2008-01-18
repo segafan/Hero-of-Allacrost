@@ -46,6 +46,9 @@ extern GameAudio* AudioManager;
 //! \brief Determines whether the code in the hoa_audio namespace should print debug statements or not.
 extern bool AUDIO_DEBUG;
 
+//! \brief Enable whether the audio engine should function
+extern bool AUDIO_ENABLE;
+
 namespace private_audio {
 
 //! \brief The maximum default number of audio sources that the engine tries to create

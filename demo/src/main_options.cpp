@@ -61,6 +61,9 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 			}
 			i++;
 		}
+		else if (options[i] == "--disable-audio") {
+			hoa_audio::AUDIO_ENABLE = false;
+		}
 		else if (options[i] == "-h" || options[i] == "--help") {
 			PrintUsage();
 			return_code = 0;
