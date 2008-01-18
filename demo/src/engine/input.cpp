@@ -78,6 +78,9 @@ GameInput::GameInput() {
 	_joyaxis_x_first      = true;
 	_joyaxis_y_first      = true;
 	_joystick.js          = NULL;
+	_joystick.x_axis      = 0;
+	_joystick.y_axis      = 1;
+	_joystick.threshold   = 8192;
 }
 
 
