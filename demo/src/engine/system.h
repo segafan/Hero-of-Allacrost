@@ -392,6 +392,32 @@ public:
 
 }; // class SystemThread
 
+template <class T> Thread * SystemThread::SpawnThread(void (T::*func)(), T * myclass) {
+#if (THREAD_TYPE == SDL_THREADS)
+	Thread * thread;
+	generic_class_func_info <T> gen;
+	gen.func = func;
+	gen.myclass = myclass;
+
+	// Winter Knight: There is a potential, but unlikely race condition here.
+	// If gen's location on the stack gets overwritten before  myclass->*func
+	// gets called in SpawnThread_Intermediate, then it will result in a segfault.
+	thread = SDL_CreateThread(gen.SpawnThread_Intermediate, &gen);
+	if (thread == NULL) {
+		PRINT_ERROR << "Unable to create thread: " << SDL_GetError() << std::endl;
+		return NULL;
+	}
+	return thread;
+#elif (THREAD_TYPE == NO_THREADS)
+	(myclass->*func)();
+	return 1;
+#else
+	PRINT_ERROR << "Invalid THREAD_TYPE." << std::endl;
+	return 0;
+#endif
+}
+
+
 } // namepsace hoa_system
 
 #endif
