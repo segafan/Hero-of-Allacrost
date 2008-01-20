@@ -163,7 +163,7 @@ EDITOR_DIR = src/editor
 EDITOR_BIN = allacrost-editor
 AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS) -DQT_CLEAN_NAMESPACE -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT3_SUPPORT -DQT_SHARED
 BUILT_SOURCES = $(allacrost_editor_MOC)
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES) $(EDITOR_BIN)
 $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 	$(MOC) -o $@ $<
 allacrost_editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp $(EDITOR_DIR)/skill_editor.moc.cpp
