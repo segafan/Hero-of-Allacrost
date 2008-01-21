@@ -139,6 +139,7 @@ void Editor::_TilesEnableActions()
 		_edit_ll_action->setEnabled(true);
 		_edit_ml_action->setEnabled(true);
 		_edit_ul_action->setEnabled(true);
+		_context_sbox->setEnabled(true);
 	} // map must exist in order to paint it
 	else
 	{
@@ -153,6 +154,7 @@ void Editor::_TilesEnableActions()
 		_edit_ll_action->setEnabled(false);
 		_edit_ml_action->setEnabled(false);
 		_edit_ul_action->setEnabled(false);
+		_context_sbox->setEnabled(false);
 	} // map does not exist, can't paint it*/
 } // _TilesEnableActions()
 
@@ -434,13 +436,15 @@ void Editor::_TileLayerFill()
 	} // iterate through the entire layer
 
 	LayerCommand* fill_command = new LayerCommand(indeces, previous, modified,
-		_ed_scrollview->_layer_edit, this, "Fill Layer");
+		_ed_scrollview->_layer_edit, _ed_scrollview->_map->GetContext(), this,
+		"Fill Layer");
 	_undo_stack->push(fill_command);
 	indeces.clear();
 	previous.clear();
 	modified.clear();
 	
 	// Draw the changes.
+	_ed_scrollview->_map->SetChanged(true);
 	_ed_scrollview->_map->updateGL();
 } // _TileLayerFill()
 
@@ -461,13 +465,15 @@ void Editor::_TileLayerClear()
 		*it = -1;
 
 	LayerCommand* clear_command = new LayerCommand(indeces, previous, modified,
-		_ed_scrollview->_layer_edit, this, "Clear Layer");
+		_ed_scrollview->_layer_edit, _ed_scrollview->_map->GetContext(), this,
+		"Clear Layer");
 	_undo_stack->push(clear_command);
 	indeces.clear();
 	previous.clear();
 	modified.clear();
 
 	// Draw the changes.
+	_ed_scrollview->_map->SetChanged(true);
 	_ed_scrollview->_map->updateGL();
 } // _TileLayerClear()
 
@@ -489,7 +495,7 @@ void Editor::_TileModePaint()
 		if (_ed_scrollview->_moving == true && _select_on == true)
 		{
 			vector<int32>::iterator it;    // used to iterate over an entire layer
-			vector<int32>& select_layer = _ed_scrollview->_map->GetLayer(SELECT_LAYER);
+			vector<int32>& select_layer = _ed_scrollview->_map->GetLayer(SELECT_LAYER, 0);
 			for (it = select_layer.begin(); it != select_layer.end(); it++)
 				*it = -1;
 		} // clears when selected tiles were going to be moved but
@@ -508,7 +514,7 @@ void Editor::_TileModeMove()
 		if (_ed_scrollview->_moving == true && _select_on == true)
 		{
 			vector<int32>::iterator it;    // used to iterate over an entire layer
-			vector<int32>& select_layer = _ed_scrollview->_map->GetLayer(SELECT_LAYER);
+			vector<int32>& select_layer = _ed_scrollview->_map->GetLayer(SELECT_LAYER, 0);
 			for (it = select_layer.begin(); it != select_layer.end(); it++)
 				*it = -1;
 		} // clears when selected tiles were going to be moved but
@@ -527,7 +533,7 @@ void Editor::_TileModeDelete()
 		if (_ed_scrollview->_moving == true && _select_on == true)
 		{
 			vector<int32>::iterator it;    // used to iterate over an entire layer
-			vector<int32>& select_layer = _ed_scrollview->_map->GetLayer(SELECT_LAYER);
+			vector<int32>& select_layer = _ed_scrollview->_map->GetLayer(SELECT_LAYER, 0);
 			for (it = select_layer.begin(); it != select_layer.end(); it++)
 				*it = -1;
 		} // clears when selected tiles were going to be moved but
@@ -602,7 +608,7 @@ void Editor::_MapProperties()
 			// Add in the extra columns one by one.
 			for (int col = extra_columns; col > 0; col--)
 			{
-				vector<int32>& lower_layer = _ed_scrollview->_map->GetLayer(LOWER_LAYER);
+				vector<int32>& lower_layer = _ed_scrollview->_map->GetLayer(LOWER_LAYER, _ed_scrollview->_map->GetContext());
 				vector<int32>::iterator it = lower_layer.begin() + map_width;
 				for (int row = 0; row < map_height; row++)
 				{
@@ -610,7 +616,7 @@ void Editor::_MapProperties()
 					it += map_width + 1;
 				} // iterate through the rows of the lower layer
 	
-				vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER);
+				vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER, _ed_scrollview->_map->GetContext());
 				it = middle_layer.begin() + map_width;
 				for (int row = 0; row < map_height; row++)
 				{
@@ -618,7 +624,7 @@ void Editor::_MapProperties()
 					it += map_width + 1;
 				} // iterate through the rows of the middle layer
 	
-				vector<int32>& upper_layer = _ed_scrollview->_map->GetLayer(UPPER_LAYER);
+				vector<int32>& upper_layer = _ed_scrollview->_map->GetLayer(UPPER_LAYER, _ed_scrollview->_map->GetContext());
 				it = upper_layer.begin() + map_width;
 				for (int row = 0; row < map_height; row++)
 				{
@@ -641,7 +647,7 @@ void Editor::_MapProperties()
 			// Delete all the extra columns one by one.
 			for (int col = extra_columns; col > 0; col--)
 			{
-				vector<int32>& lower_layer = _ed_scrollview->_map->GetLayer(LOWER_LAYER);
+				vector<int32>& lower_layer = _ed_scrollview->_map->GetLayer(LOWER_LAYER, _ed_scrollview->_map->GetContext());
 				vector<int32>::iterator it = lower_layer.begin() + map_width - 1;
 				for (int row = 0; row < map_height; row++)
 				{
@@ -649,7 +655,7 @@ void Editor::_MapProperties()
 					it += map_width - 1;
 				} // iterate through the rows of the lower layer
 	
-				vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER);
+				vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER, _ed_scrollview->_map->GetContext());
 				it = middle_layer.begin() + map_width - 1;
 				for (int row = 0; row < map_height; row++)
 				{
@@ -657,7 +663,7 @@ void Editor::_MapProperties()
 					it += map_width - 1;
 				} // iterate through the rows of the middle layer
 	
-				vector<int32>& upper_layer = _ed_scrollview->_map->GetLayer(UPPER_LAYER);
+				vector<int32>& upper_layer = _ed_scrollview->_map->GetLayer(UPPER_LAYER, _ed_scrollview->_map->GetContext());
 				it = upper_layer.begin() + map_width - 1;
 				for (int row = 0; row < map_height; row++)
 				{
@@ -677,9 +683,9 @@ void Editor::_MapProperties()
 			int map_width = _ed_scrollview->_map->GetWidth();
 			int extra_rows = props->GetHeight() - _ed_scrollview->_map->GetHeight();
 	
-			vector<int32>& lower_layer  = _ed_scrollview->_map->GetLayer(LOWER_LAYER);
-			vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER);
-			vector<int32>& upper_layer  = _ed_scrollview->_map->GetLayer(UPPER_LAYER);
+			vector<int32>& lower_layer  = _ed_scrollview->_map->GetLayer(LOWER_LAYER, _ed_scrollview->_map->GetContext());
+			vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER, _ed_scrollview->_map->GetContext());
+			vector<int32>& upper_layer  = _ed_scrollview->_map->GetLayer(UPPER_LAYER, _ed_scrollview->_map->GetContext());
 			lower_layer.insert( lower_layer.end(),  extra_rows * map_width, -1);
 			middle_layer.insert(middle_layer.end(), extra_rows * map_width, -1);
 			upper_layer.insert( upper_layer.end(),  extra_rows * map_width, -1);
@@ -691,9 +697,9 @@ void Editor::_MapProperties()
 			int map_width  = _ed_scrollview->_map->GetWidth();
 			int extra_rows = _ed_scrollview->_map->GetHeight() - props->GetHeight();
 	
-			vector<int32>& lower_layer  = _ed_scrollview->_map->GetLayer(LOWER_LAYER);
-			vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER);
-			vector<int32>& upper_layer  = _ed_scrollview->_map->GetLayer(UPPER_LAYER);
+			vector<int32>& lower_layer  = _ed_scrollview->_map->GetLayer(LOWER_LAYER, _ed_scrollview->_map->GetContext());
+			vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER, _ed_scrollview->_map->GetContext());
+			vector<int32>& upper_layer  = _ed_scrollview->_map->GetLayer(UPPER_LAYER, _ed_scrollview->_map->GetContext());
 			lower_layer.erase( lower_layer.end()  - extra_rows * map_width, lower_layer.end());
 			middle_layer.erase(middle_layer.end() - extra_rows * map_width, middle_layer.end());
 			upper_layer.erase( upper_layer.end()  - extra_rows * map_width, upper_layer.end());
@@ -771,7 +777,7 @@ void Editor::_ScriptEditSkills()
 	//SkillEditor *skill_editor = new SkillEditor(this, "skill_editor");
 	//skill_editor->exec();
 	//delete skill_editor;
-}
+} // _ScriptEditSkills()
 
 void Editor::_HelpHelp()
 {
@@ -792,6 +798,16 @@ void Editor::_HelpAboutQt()
 {
     QMessageBox::aboutQt(this, "HoA Level Editor -- About Qt");
 } // _HelpAboutQt()
+
+void Editor::_SwitchMapContext(int context)
+{
+	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+	{
+		_ed_scrollview->_map->SetContext(context - 1);
+		_ed_scrollview->_map->CreateNewContext();
+		_ed_scrollview->_map->updateGL();
+	} // map must exist in order to change the context
+} // _SwitchMapContext()
 
 
 
@@ -1052,6 +1068,15 @@ void Editor::_CreateToolbars()
 	_tiles_toolbar->addAction(_mode_delete_action);
 	_tiles_toolbar->addSeparator();
 	_tiles_toolbar->addAction(_toggle_select_action);
+	_tiles_toolbar->addSeparator();
+
+	QLabel* context_label = new QLabel("Context:", this);
+	_tiles_toolbar->addWidget(context_label);
+	_context_sbox = new QSpinBox(this);
+	_context_sbox->setMinimum(1);
+	_context_sbox->setMaximum(32);
+	_tiles_toolbar->addWidget(_context_sbox);
+	connect(_context_sbox, SIGNAL(valueChanged(int)), this, SLOT(_SwitchMapContext(int)));
 } // _CreateToolbars()
 
 bool Editor::_EraseOK()
@@ -1344,7 +1369,7 @@ void EditorScrollView::Resize(int width, int height)
 
 vector<int32>& EditorScrollView::GetCurrentLayer()
 {
-	return _map->GetLayer(_layer_edit);
+	return _map->GetLayer(_layer_edit, _map->GetContext());
 } // GetCurrentLayer()
 
 
@@ -1372,7 +1397,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 			_moving == false)
 	{
 		_first_corner_index = _tile_index;
-		_map->GetLayer(SELECT_LAYER)[_tile_index] = 1;
+		_map->GetLayer(SELECT_LAYER, 0)[_tile_index] = 1;
 	} // selection mode is on
 				
 	switch (_tile_mode)
@@ -1459,7 +1484,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			
 			for (int y = y_old; y <= y_new; y++)
 				for (int x = x_old; x <= x_new; x++)
-					_map->GetLayer(SELECT_LAYER)[y * _map->GetWidth() + x] = 1;
+					_map->GetLayer(SELECT_LAYER, 0)[y * _map->GetWidth() + x] = 1;
 		} // left mouse button was pressed and selection mode is on
 
 		switch (_tile_mode)
@@ -1513,7 +1538,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 		{
 			if (editor->_select_on == true)
 			{
-				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
+				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER, 0);
 				for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
 				{
 					// Works because the selection layer and the current layer
@@ -1525,7 +1550,8 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 			
 			// Push command onto the undo stack.
 			LayerCommand* paint_command = new LayerCommand(_tile_indeces,
-				_previous_tiles, _modified_tiles, _layer_edit, editor, "Paint");
+				_previous_tiles, _modified_tiles, _layer_edit,
+				_map->GetContext(), editor, "Paint");
 			editor->_undo_stack->push(paint_command);
 			_tile_indeces.clear();
 			_previous_tiles.clear();
@@ -1558,7 +1584,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 				} // only moving one tile at a time
 				else
 				{
-					vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
+					vector<int32> select_layer = _map->GetLayer(SELECT_LAYER, 0);
 					for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
 					{
 						// Works because the selection layer and the current layer
@@ -1582,7 +1608,8 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 
 				// Push command onto the undo stack.
 				LayerCommand* move_command = new LayerCommand(_tile_indeces,
-					_previous_tiles, _modified_tiles, _layer_edit, editor, "Move");
+					_previous_tiles, _modified_tiles, _layer_edit,
+					_map->GetContext(), editor, "Move");
 				editor->_undo_stack->push(move_command);
 				_tile_indeces.clear();
 				_previous_tiles.clear();
@@ -1596,7 +1623,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 		{
 			if (editor->_select_on == true)
 			{
-				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER);
+				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER, 0);
 				for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
 				{
 					// Works because the selection layer and the current layer
@@ -1608,7 +1635,8 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 		
 			// Push command onto undo stack.
 			LayerCommand* delete_command = new LayerCommand(_tile_indeces,
-				_previous_tiles, _modified_tiles, _layer_edit, editor, "Delete");
+				_previous_tiles, _modified_tiles, _layer_edit,
+				_map->GetContext(), editor, "Delete");
 			editor->_undo_stack->push(delete_command);
 			_tile_indeces.clear();
 			_previous_tiles.clear();
@@ -1624,7 +1652,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 	// Clear the selection layer.
 	if ((_tile_mode != MOVE_TILE || _moving == true) && editor->_select_on == true)
 	{
-		vector<int32>& select_layer = _map->GetLayer(SELECT_LAYER);
+		vector<int32>& select_layer = _map->GetLayer(SELECT_LAYER, 0);
 		for (it = select_layer.begin(); it != select_layer.end(); it++)
 			*it = -1;
 	} // clears when not moving tiles or when moving tiles and not selecting them
@@ -1659,11 +1687,11 @@ void EditorScrollView::_ContextInsertRow()
 	int map_width = _map->GetWidth();
 	int row = _tile_index / map_width;
 	
-	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER);
+	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
 	lower_layer.insert(lower_layer.begin() + row * map_width, map_width, -1);
-	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER);
+	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
 	middle_layer.insert(middle_layer.begin() + row * map_width, map_width, -1);
-	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER);
+	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
 	upper_layer.insert(upper_layer.begin() + row * map_width, map_width, -1);
 	
 	Resize(map_width, _map->GetHeight() + 1);
@@ -1675,7 +1703,7 @@ void EditorScrollView::_ContextInsertColumn()
 	int map_height = _map->GetHeight();
 	int col = _tile_index % map_width;
 	
-	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER);
+	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
 	vector<int32>::iterator it = lower_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
@@ -1683,7 +1711,7 @@ void EditorScrollView::_ContextInsertColumn()
 		it += map_width + 1;
 	} // iterate through the rows of the lower layer
 	
-	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER);
+	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
 	it = middle_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
@@ -1691,7 +1719,7 @@ void EditorScrollView::_ContextInsertColumn()
 		it += map_width + 1;
 	} // iterate through the rows of the middle layer
 	
-	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER);
+	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
 	it = upper_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
@@ -1707,11 +1735,11 @@ void EditorScrollView::_ContextDeleteRow()
 	int map_width = _map->GetWidth();
 	int row = _tile_index / map_width;
 	
-	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER);
+	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
 	lower_layer.erase(lower_layer.begin() + row * map_width, lower_layer.begin() + row * map_width + map_width);
-	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER);
+	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
 	middle_layer.erase(middle_layer.begin() + row * map_width, middle_layer.begin() + row * map_width + map_width);
-	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER);
+	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
 	upper_layer.erase(upper_layer.begin() + row * map_width, upper_layer.begin() + row * map_width + map_width);
 	
 	Resize(map_width, _map->GetHeight() - 1);
@@ -1723,7 +1751,7 @@ void EditorScrollView::_ContextDeleteColumn()
 	int map_height = _map->GetHeight();
 	int col = _tile_index % map_width;
 	
-	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER);
+	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
 	vector<int32>::iterator it = lower_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
@@ -1731,7 +1759,7 @@ void EditorScrollView::_ContextDeleteColumn()
 		it += map_width - 1;
 	} // iterate through the rows of the lower layer
 	
-	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER);
+	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
 	it = middle_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
@@ -1739,7 +1767,7 @@ void EditorScrollView::_ContextDeleteColumn()
 		it += map_width - 1;
 	} // iterate through the rows of the middle layer
 	
-	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER);
+	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
 	it = upper_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
@@ -2224,7 +2252,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 ************************/
 
 LayerCommand::LayerCommand(vector<int32> indeces, vector<int32> previous,
-	vector<int32> modified, LAYER_TYPE layer, Editor* editor,
+	vector<int32> modified, LAYER_TYPE layer, int context, Editor* editor,
 	const QString& text, QUndoCommand* parent)
 	: QUndoCommand(text, parent)
 {
@@ -2232,20 +2260,23 @@ LayerCommand::LayerCommand(vector<int32> indeces, vector<int32> previous,
 	_previous_tiles = previous;
 	_modified_tiles = modified;
 	_edited_layer = layer;
+	_context = context;
 	_editor = editor;
 } // constructor
 
 void LayerCommand::undo()
 {
 	for (int32 i = 0; i < static_cast<int32>(_tile_indeces.size()); i++)
-		_editor->_ed_scrollview->_map->GetLayer(_edited_layer)[_tile_indeces[i]] = _previous_tiles[i];
+		_editor->_ed_scrollview->_map->GetLayer(_edited_layer, _context)
+			[_tile_indeces[i]] = _previous_tiles[i];
 	_editor->_ed_scrollview->_map->updateGL();
 } // undo()
 
 void LayerCommand::redo()
 {
 	for (int32 i = 0; i < static_cast<int32>(_tile_indeces.size()); i++)
-		_editor->_ed_scrollview->_map->GetLayer(_edited_layer)[_tile_indeces[i]] = _modified_tiles[i];
+		_editor->_ed_scrollview->_map->GetLayer(_edited_layer, _context)
+			[_tile_indeces[i]] = _modified_tiles[i];
 	_editor->_ed_scrollview->_map->updateGL();
 } // redo()
 
