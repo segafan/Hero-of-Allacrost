@@ -54,10 +54,12 @@ class Grid: public QGLWidget
 		void SetChanged(bool value);
 		QString GetFileName() const { return _file_name; }
 		void    SetFileName(QString filename); // sets the map's file name
-		int  GetHeight() const { return _height; }
-		int  GetWidth() const {return _width; }
+		int  GetHeight()  const { return _height; }
+		int  GetWidth()   const { return _width; }
+		int  GetContext() const { return _context; }
 		void SetHeight(int height);         // sets the map's height in tiles (rows)
 		void SetWidth(int width);           // sets the map's width in tiles (columns)
+		void SetContext(int context);       // sets the map's active context
 		void SetLLOn(bool value);           // sets lower layer on/off
 		void SetMLOn(bool value);           // sets middle layer on/off
 		void SetULOn(bool value);           // sets upper layer on/off
@@ -65,7 +67,7 @@ class Grid: public QGLWidget
 		void SetSelectOn(bool value);       // sets selection layer on/off
 		void SetTexturesOn(bool value);     // sets textures on/off
 
-		std::vector<int32>& GetLayer(LAYER_TYPE layer);
+		std::vector<int32>& GetLayer(LAYER_TYPE layer, int context);
 
 		/*!
 		 *  \brief Sets the map's background music. Currently the map can only support one music file.
@@ -78,6 +80,14 @@ class Grid: public QGLWidget
 		 *  \return A QString of the music's file name.
 		 */
 		const QString& GetMusic() const;
+
+		/*!
+		 *  \brief Creates a new context layer if the current context (_context)
+		 *         is greater than the number of entries in the layer vectors.
+		 *  \note Assumes that _context has been set to the new context number
+		 *        before this function is called.
+		 */
+		void CreateNewContext();
 
 		/*!
 		 *  \brief Loads a map from a config (lua) file when the user selects Open Map... from the File menu.
@@ -112,6 +122,8 @@ class Grid: public QGLWidget
 		int _height;
 		//! The width of the map in tiles.
 		int _width;
+		//! The active context for editing tiles.
+		int _context;
 
 		//! When TRUE the map has been modified.
 		bool _changed;
@@ -129,11 +141,11 @@ class Grid: public QGLWidget
 		bool _ul_on;
 
 		//! A vector of tiles in the lower layer.
-		std::vector<int32> _lower_layer;
+		std::vector<std::vector<int32> > _lower_layer;
 		//! A vector of tiles in the middle layer.
-		std::vector<int32> _middle_layer;
+		std::vector<std::vector<int32> > _middle_layer;
 		//! A vector of tiles in the upper layer.
-		std::vector<int32> _upper_layer;
+		std::vector<std::vector<int32> > _upper_layer;
 		//! A vector of tiles in the selection rectangle. Exists only in the editor,
 		//! not the game. Acts similarly to an actual layer as far as drawing
 		//! is concerned.

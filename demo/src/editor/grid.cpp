@@ -40,6 +40,7 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	_height = height;
 	_width  = width;
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+	_context = 0;
 
 	// Default properties
 	_changed = false;       // map has not yet been modified
@@ -50,14 +51,15 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	_ul_on = false;         // upper layer default to off
 
 	// Initialize layers
+	vector<int> vect;
 	for (int i = 0; i < _width * _height; i++)
 	{
-		_lower_layer.push_back(-1);
-		_middle_layer.push_back(-1);
-		_upper_layer.push_back(-1);
+		vect.push_back(-1);
 		_select_layer.push_back(-1);
 	} // -1 is used for no tiles
-	// -1 is used for no tiles
+	_lower_layer.push_back(vect);
+	_middle_layer.push_back(vect);
+	_upper_layer.push_back(vect);
 } // Grid constructor
 
 Grid::~Grid()
@@ -93,6 +95,11 @@ void Grid::SetWidth(int width)
 	_width = width;
 	_changed = true;
 } // SetWidth(...)
+
+void Grid::SetContext(int context)
+{
+	_context = context;
+} // SetContext(...)
 
 void Grid::SetLLOn(bool value)
 {
@@ -130,15 +137,15 @@ void Grid::SetTexturesOn(bool value)
 	updateGL();
 } // SetTexturesOn(...)
 
-vector<int32>& Grid::GetLayer(LAYER_TYPE layer) 
+vector<int32>& Grid::GetLayer(LAYER_TYPE layer, int context) 
 {
 	switch(layer) {
 		case LOWER_LAYER:
-			return _lower_layer;
+			return _lower_layer[context];
 		case MIDDLE_LAYER:
-			return _middle_layer;
+			return _middle_layer[context];
 		case UPPER_LAYER:
-			return _upper_layer;
+			return _upper_layer[context];
 		case SELECT_LAYER:
 			return _select_layer;
 		case INVALID_LAYER:
@@ -146,7 +153,7 @@ vector<int32>& Grid::GetLayer(LAYER_TYPE layer)
 		case TOTAL_LAYER:
 			/* FALLTHRU */
 		default:
-			return _lower_layer;
+			return _lower_layer[context];
 	} // switch on the current layer
 } // GetLayer(...)
 
@@ -159,6 +166,21 @@ const QString& Grid::GetMusic() const
 {
 	return _music_file;
 } // GetMusic()
+
+void Grid::CreateNewContext()
+{
+	// Assumes all 3 layers have the same number of contexts.
+	if (static_cast<unsigned>(_context) >= _lower_layer.size())
+	{	
+		_context = _lower_layer.size();  // in case it's greater than
+		vector<int> vect;
+		for (int i = 0; i < _width * _height; i++)
+			vect.push_back(-1);
+		_lower_layer.push_back(vect);
+		_middle_layer.push_back(vect);
+		_upper_layer.push_back(vect);
+	} // only if current context doesn't already exist
+} // CreateNewContext()
 
 void Grid::LoadMap()
 {
@@ -194,7 +216,7 @@ void Grid::LoadMap()
 	{
 		read_data.ReadIntVector(i, vect);
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			_lower_layer.push_back(*it);
+			_lower_layer[0].push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
@@ -204,7 +226,7 @@ void Grid::LoadMap()
 	{
 		read_data.ReadIntVector(i, vect);
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			_middle_layer.push_back(*it);
+			_middle_layer[0].push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
@@ -214,7 +236,7 @@ void Grid::LoadMap()
 	{
 		read_data.ReadIntVector(i, vect);
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			_upper_layer.push_back(*it);
+			_upper_layer[0].push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
@@ -272,13 +294,14 @@ void Grid::LoadMap()
 	_ll_on   = true;        // lower layer default to on
 	_ml_on   = true;        // middle layer default to off
 	_ul_on   = true;        // upper layer default to off
+	_context = 1;           // context default to main context (#1)
 	_changed = false;       // map has not been changed yet
 } // LoadMap()
 
 void Grid::SaveMap()
 {
-	char buffer[5]; // used for converting an int to a string with sprintf
-	int i;          // Lua table index / Loop counter variable
+	char buffer[19]; // used for converting an int to a string with sprintf
+	int i;           // Lua table index / Loop counter variable
 	vector<int32>::iterator it;  // used to iterate through the layers
 	vector<int32> layer_row;     // one row of a layer
 	WriteScriptDescriptor write_data;
@@ -338,11 +361,11 @@ void Grid::SaveMap()
 		for (int32 i = row * _width; i < row * _width + _width; i++)
 		{
 			// Get walkability for lower layer tile.
-			tileset_index = _lower_layer[i] / 256;
+			tileset_index = _lower_layer[0][i] / 256;
 			if (tileset_index == 0)
-				tile_index = _lower_layer[i];
+				tile_index = _lower_layer[0][i];
 			else  // Don't divide by 0
-				tile_index = _lower_layer[i] % (tileset_index * 256);
+				tile_index = _lower_layer[0][i] % (tileset_index * 256);
 			if (tile_index == -1)
 			{
 				ll_vect.push_back(0);
@@ -354,11 +377,11 @@ void Grid::SaveMap()
 				ll_vect = tilesets[tileset_index]->walkability[tile_index];
 
 			// Get walkability for middle layer tile.
-			tileset_index = _middle_layer[i] / 256;
+			tileset_index = _middle_layer[0][i] / 256;
 			if (tileset_index == 0)
-				tile_index = _middle_layer[i];
+				tile_index = _middle_layer[0][i];
 			else  // Don't divide by 0
-				tile_index = _middle_layer[i] % (tileset_index * 256);
+				tile_index = _middle_layer[0][i] % (tileset_index * 256);
 			if (tile_index == -1)
 			{
 				ml_vect.push_back(0);
@@ -370,11 +393,11 @@ void Grid::SaveMap()
 				ml_vect = tilesets[tileset_index]->walkability[tile_index];
 
 			// Get walkability for upper layer tile.
-			tileset_index = _upper_layer[i] / 256;
+			tileset_index = _upper_layer[0][i] / 256;
 			if (tileset_index == 0)
-				tile_index = _upper_layer[i];
+				tile_index = _upper_layer[0][i];
 			else  // Don't divide by 0
-				tile_index = _upper_layer[i] % (tileset_index * 256);
+				tile_index = _upper_layer[0][i] % (tileset_index * 256);
 			if (tile_index == -1)
 			{
 				ul_vect.push_back(0);
@@ -420,7 +443,7 @@ void Grid::SaveMap()
 
 	write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
 	write_data.BeginTable("lower_layer");
-	it = _lower_layer.begin();
+	it = _lower_layer[0].begin();
 	for (int row = 0; row < _height; row++)
 	{
 		for (int col = 0; col < _width; col++)
@@ -437,7 +460,7 @@ void Grid::SaveMap()
 
 	write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
 	write_data.BeginTable("middle_layer");
-	it = _middle_layer.begin();
+	it = _middle_layer[0].begin();
 	for (int row = 0; row < _height; row++)
 	{
 		for (int col = 0; col < _width; col++)
@@ -454,7 +477,7 @@ void Grid::SaveMap()
 
 	write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
 	write_data.BeginTable("upper_layer");
-	it = _upper_layer.begin();
+	it = _upper_layer[0].begin();
 	for (int row = 0; row < _height; row++)
 	{
 		for (int col = 0; col < _width; col++)
@@ -469,6 +492,85 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
+	write_data.WriteComment("All, if any, existing contexts follow.");
+	bool table_started = false;
+	// Iterate through all contexts of all layers.
+	for (int i = 1; i < static_cast<int>(_lower_layer.size()); i++)
+	{
+		it = _lower_layer[i].begin();
+		for (int row = 0; row < _height; row++)
+		{
+			for (int col = 0; col < _width; col++)
+			{
+				if (*it != -1)
+				{
+					if (table_started == false)
+					{
+						sprintf(buffer, "context_%d", i);
+						write_data.BeginTable(buffer);
+						table_started = true;
+					} // create the table if it doesn't already exist
+
+					sprintf(buffer, "[0][%d][%d] = %d", row, col, *it);
+					write_data.WriteLine(buffer, true);
+				} // a valid tile exists so record it
+
+				it++;
+			} // iterate through the columns of the lower layer
+		} // iterate through the rows of the lower layer
+
+		it = _middle_layer[i].begin();
+		for (int row = 0; row < _height; row++)
+		{
+			for (int col = 0; col < _width; col++)
+			{
+				if (*it != -1)
+				{
+					if (table_started == false)
+					{
+						sprintf(buffer, "context_%d", i);
+						write_data.BeginTable(buffer);
+						table_started = true;
+					} // create the table if it doesn't already exist
+
+					sprintf(buffer, "[1][%d][%d] = %d", row, col, *it);
+					write_data.WriteLine(buffer, true);
+				} // a valid tile exists so record it
+
+				it++;
+			} // iterate through the columns of the middle layer
+		} // iterate through the rows of the middle layer
+
+		it = _upper_layer[i].begin();
+		for (int row = 0; row < _height; row++)
+		{
+			for (int col = 0; col < _width; col++)
+			{
+				if (*it != -1)
+				{
+					if (table_started == false)
+					{
+						sprintf(buffer, "context_%d", i);
+						write_data.BeginTable(buffer);
+						table_started = true;
+					} // create the table if it doesn't already exist
+
+					sprintf(buffer, "[2][%d][%d] = %d", row, col, *it);
+					write_data.WriteLine(buffer, true);
+				} // a valid tile exists so record it
+
+				it++;
+			} // iterate through the columns of the upper layer
+		} // iterate through the rows of the upper layer
+
+		if (table_started == true)
+		{
+			write_data.EndTable();
+			write_data.InsertNewLine();
+			table_started = false;
+		} // close the table if it was open
+	} // iterate through all contexts of all layers, assuming all layers have same number of contexts
+
 	write_data.CloseFile();
 
 	_changed = false;
@@ -480,14 +582,13 @@ void Grid::SaveMap()
 
 void Grid::initializeGL()
 {
-	//Destroy the video engine
+	// Destroy the video engine
 	VideoManager->SingletonDestroy();
-	//re create the video engine's singleton
+	// Recreate the video engine's singleton
 	VideoManager = GameVideo::SingletonCreate();
 	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
 	
 	VideoManager->SingletonInitialize();
-	// changed because allacrost had to delay some video loading code
 		
 	VideoManager->ApplySettings();
 	VideoManager->FinalizeInitialization();
@@ -512,7 +613,7 @@ void Grid::paintGL()
 	{
 		VideoManager->Move(0.0f, 0.0f);
 		col = 0;
-		for (it = _lower_layer.begin(); it != _lower_layer.end(); it++)
+		for (it = _lower_layer[_context].begin(); it != _lower_layer[_context].end(); it++)
 		{
 			if (*it != -1)
 			{
@@ -539,7 +640,7 @@ void Grid::paintGL()
 	{
 		VideoManager->Move(0.0f, 0.0f);
 		col = 0;
-		for (it = _middle_layer.begin(); it != _middle_layer.end(); it++)
+		for (it = _middle_layer[_context].begin(); it != _middle_layer[_context].end(); it++)
 		{
 			if (*it != -1)
 			{
@@ -564,7 +665,7 @@ void Grid::paintGL()
 	{
 		VideoManager->Move(0.0f, 0.0f);
 		col = 0;
-		for (it = _upper_layer.begin(); it != _upper_layer.end(); it++)
+		for (it = _upper_layer[_context].begin(); it != _upper_layer[_context].end(); it++)
 		{
 			if (*it != -1)
 			{

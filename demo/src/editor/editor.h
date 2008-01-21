@@ -176,6 +176,8 @@ class Editor: public QMainWindow
 		void _HelpAboutQt();
 		//@}
 		
+		//! This slot switches the map context to the designated one for editing.
+		void _SwitchMapContext(int context);
 	private:
 		//! Helper function to the constructor, creates actions for use by menus
 		//! and toolbars.
@@ -273,6 +275,10 @@ class Editor: public QMainWindow
 		
 		//! The stack that contains the undo and redo operations.
 		QUndoStack* _undo_stack;
+
+		//! The spinbox that allows the user the to change the current map context
+		//! for editing.
+		QSpinBox* _context_sbox;
 }; // class Editor
 
 class MapPropertiesDialog: public QDialog
@@ -473,7 +479,7 @@ class LayerCommand: public QUndoCommand
 {
 	public:
 		LayerCommand(std::vector<int32> indeces, std::vector<int32> previous,
-			std::vector<int32> modified, LAYER_TYPE layer, Editor* editor,
+			std::vector<int32> modified, LAYER_TYPE layer, int context, Editor* editor,
 			const QString& text = "Layer Operation", QUndoCommand* parent = 0);
 
 		//! \name Undo Functions
@@ -500,6 +506,8 @@ class LayerCommand: public QUndoCommand
 		
 		//! Indicates which map layer this command was performed upon.
 		LAYER_TYPE _edited_layer;
+		//! A record of the active context when this command was performed.
+		int _context;
 		//! A reference to the main window so we can get the current map.
 		Editor* _editor;
 }; // class LayerCommand
