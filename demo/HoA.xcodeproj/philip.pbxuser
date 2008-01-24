@@ -9,18 +9,18 @@
 		};
 	};
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
+		activeArchitecture = i386;
 		activeBuildConfigurationName = Debug;
-		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
-		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
+		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
+		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
 		addToTargets = (
-			D4D1BA480B02B1DB0052BF1E /* Editor */,
+			4941A4AF0AC1D77500D65B8E /* Allacrost */,
 		);
 		breakpoints = (
 			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
 			D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */,
 			D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */,
 		);
-		breakpointsGroup = D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */;
 		codeSenseManager = D43082580AF9831800A5173A /* Code sense */;
 		executables = (
 			D43080DE0AF982F800A5173A /* Allacrost */,
@@ -170,8 +170,8 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					200,
-					62,
+					202,
+					60,
 					20,
 					48,
 					43,
@@ -187,8 +187,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 219726717;
-			PBXWorkspaceStateSaveDate = 219726717;
+			PBXPerProjectTemplateStateSaveDate = 222841941;
+			PBXWorkspaceStateSaveDate = 222841941;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -462,15 +462,6 @@
 			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
 		};
 	};
-	D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */ = {
-		isa = XCBreakpointsBucket;
-		name = "Project Breakpoints";
-		objects = (
-			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
-			D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */,
-			D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */,
-		);
-	};
 	D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {711, 429}}";
@@ -497,7 +488,6 @@
 	};
 	D43080DE0AF982F800A5173A /* Allacrost */ = {
 		isa = PBXExecutable;
-		activeArgIndex = 2147483647;
 		activeArgIndices = (
 			NO,
 			NO,
@@ -507,6 +497,7 @@
 			"-i",
 		);
 		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
 		configStateDict = {
 		};
 		customDataFormattersEnabled = 1;
@@ -697,12 +688,12 @@
 	};
 	D4D1BA4A0B02B1DB0052BF1E /* Editor */ = {
 		isa = PBXExecutable;
-		activeArgIndex = 2147483647;
 		activeArgIndices = (
 		);
 		argumentStrings = (
 		);
 		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
 		configStateDict = {
 		};
 		customDataFormattersEnabled = 1;
@@ -757,8 +748,9 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {956, 31500}}";
-			sepNavSelRange = "{11577, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {691, 31430}}";
+			sepNavSelRange = "{1001, 0}";
+			sepNavVisRange = "{1062, 1156}";
 			sepNavVisRect = "{{1, 5369}, {711, 617}}";
 			sepNavWindowFrame = "{{0, 32}, {750, 746}}";
 		};
@@ -817,12 +809,14 @@
 		);
 		breakpointStyle = 0;
 		continueAfterActions = 0;
+		countType = 0;
 		delayBeforeContinue = 0;
 		fileReference = D4F110400C58546800ADC969 /* audio_descriptor.cpp */;
 		functionName = "AudioDescriptor::_Update()";
-		hitCount = 1;
+		hitCount = 0;
+		ignoreCount = 0;
 		lineNumber = 627;
-		modificationTime = 219547158.8644601;
+		modificationTime = 222550233.132123;
 		state = 1;
 	};
 	D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */ = {
@@ -831,13 +825,15 @@
 		);
 		breakpointStyle = 0;
 		continueAfterActions = 0;
+		countType = 0;
 		delayBeforeContinue = 0;
 		fileReference = D4F110400C58546800ADC969 /* audio_descriptor.cpp */;
 		functionName = "AudioDescriptor::_Update()";
-		hitCount = 1;
+		hitCount = 0;
+		ignoreCount = 0;
 		lineNumber = 646;
 		location = Allacrost;
-		modificationTime = 219546707.680499;
+		modificationTime = 222550200.968556;
 		state = 2;
 	};
 	D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */ = {
@@ -846,13 +842,15 @@
 		);
 		breakpointStyle = 0;
 		continueAfterActions = 0;
+		countType = 0;
 		delayBeforeContinue = 0;
 		fileReference = D4F110400C58546800ADC969 /* audio_descriptor.cpp */;
 		functionName = "AudioDescriptor::DEBUG_PrintInfo()";
-		hitCount = 1;
+		hitCount = 0;
+		ignoreCount = 0;
 		lineNumber = 588;
 		location = Allacrost;
-		modificationTime = 219546707.680505;
+		modificationTime = 222550200.9685639;
 		state = 2;
 	};
 	D4DDE3930C4A15EE00937677 /* battle_actions.cpp */ = {
