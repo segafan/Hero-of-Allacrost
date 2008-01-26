@@ -61,6 +61,7 @@ MapMode::MapMode(string filename) :
 	GameMode(),
 	_map_filename(filename),
 	_map_state(EXPLORE),
+	_num_map_contexts(0),
 	_ignore_input(false),
 	_run_forever(false),
 	_run_disabled(false),
@@ -175,8 +176,10 @@ void MapMode::_Load() {
 		cerr << "MAP ERROR: failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
 	}
 
+	_num_map_contexts = _map_script.ReadUInt("num_map_contexts");
+
 	// ---------- (3) Initialize all of the tile and grid mappings
-	_tile_manager->Load(_map_script);
+	_tile_manager->Load(_map_script, this);
 	_object_manager->Load(_map_script);
 
 	// ---------- (4) Load map sounds and music

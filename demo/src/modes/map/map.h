@@ -188,6 +188,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::ActionPathMove;
 	friend class private_map::EnemyZone;
 	friend class private_map::ObjectManager;
+	friend class private_map::TileManager;
 
 	friend void hoa_defs::BindModesToLua();
 public:
@@ -247,6 +248,9 @@ private:
 
 	//! \brief The time elapsed since the last Update() call to MapMode.
 	uint32 _time_elapsed;
+
+	//! \brief The number of contexts for this map (at least 1, at most 32)
+	uint8 _num_map_contexts;
 
 	//! \brief While true, all user input commands to map mode are ignored
 	bool _ignore_input;

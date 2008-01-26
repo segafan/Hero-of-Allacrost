@@ -13,6 +13,7 @@ map_name = "Cave"
 location_filename = "desert_cave.png"
 
 -- The number of rows and columns of tiles that compose the map
+num_map_contexts = 1
 num_tile_cols = 40
 num_tile_rows = 60
 

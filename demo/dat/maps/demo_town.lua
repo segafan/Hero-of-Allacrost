@@ -13,6 +13,7 @@ map_name = "Village"
 location_filename = "mountain_village.png"
 
 -- The number of rows and columns of tiles that compose the map
+num_map_contexts = 1
 num_tile_cols = 60
 num_tile_rows = 40
 

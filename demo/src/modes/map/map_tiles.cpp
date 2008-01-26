@@ -29,7 +29,8 @@ namespace private_map {
 
 TileManager::TileManager() :
 	_num_tile_rows(0),
-	_num_tile_cols(0)
+	_num_tile_cols(0),
+	_current_context(0)
 {}
 
 
@@ -46,15 +47,10 @@ TileManager::~TileManager() {
 
 
 
-void TileManager::Load(ReadScriptDescriptor& map_file) {
-	// Contains all of the tileset filenames used (string does not contain path information or file extensions)
-	vector<string> tileset_filenames;
-	// A container to temporarily retain all tile images loaded for each tileset. Each inner vector contains 256 StillImages
-	vector<vector<StillImage> > tileset_images;
-	// Used to determine whether each tile is used by the map or not. An entry of -1 indicates that particular tile is not used
-	vector<int16> tile_references;
-	// Temporarily holds all animated tile images. The map key is the value of the tile index, before translation
-	map<uint32, AnimatedImage> tile_animations;
+void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instance) {
+	// TODO: Add some more error checking in this function (such as checking for script errors after reading blocks of data from the map file)
+
+	// ---------- (1) Load the map dimensions and do some basic sanity checks
 
 	_num_tile_rows = map_file.ReadInt("num_tile_rows");
 	_num_tile_cols = map_file.ReadInt("num_tile_cols");
@@ -62,98 +58,158 @@ void TileManager::Load(ReadScriptDescriptor& map_file) {
 	// Do some checking to make sure tables are of the proper size
 	// NOTE: we only check that the number of rows are correct, but not the number of columns
 	if (map_file.GetTableSize("lower_layer") != _num_tile_rows) {
-		cerr << "MAP ERROR: In MapMode::_Load(), the lower_layer table had an incorrect number of rows" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "the lower_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
 	}
 	if (map_file.GetTableSize("middle_layer") != _num_tile_rows) {
-		cerr << "MAP ERROR: In MapMode::_Load(), the middle_layer table had an incorrect number of rows" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "the middle_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
 	}
 	if (map_file.GetTableSize("upper_layer") != _num_tile_rows) {
-		cerr << "MAP ERROR: In MapMode::_Load(), the upper_layer table had an incorrect number of rows" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "the upper_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
 	}
 
-	// ---------- (1) Load in the map tileset images and initialize all map tiles
+	// ---------- (2) Load all of the tileset images that are used by this map
 
+	// Contains all of the tileset filenames used (string does not contain path information or file extensions)
+	vector<string> tileset_filenames;
+	// A container to temporarily retain all tile images loaded for each tileset. Each inner vector contains 256 StillImages
+	vector<vector<StillImage> > tileset_images;
+	
 	map_file.ReadStringVector("tileset_filenames", tileset_filenames);
 
-	// Note: each tileset image is 512x512 pixels, yielding 256 32x32 pixel tiles each
 	for (uint32 i = 0; i < tileset_filenames.size(); i++) {
 		// Construct the image filename from the tileset filename and create a new vector to use in the LoadMultiImage call
 		string image_filename = "img/tilesets/" + tileset_filenames[i] + ".png";
 		tileset_images.push_back(vector<StillImage>(TILES_PER_TILESET));
 
+		// The map mode coordinate system uses (2.0, 2.0) for every tile dimension
 		for (uint32 j = 0; j < TILES_PER_TILESET; j++) {
 			tileset_images[i][j].SetDimensions(2.0f, 2.0f);
 		}
 
+		// Note: each tileset image is 512x512 pixels, yielding 256 32x32 pixel tiles each
 		if (ImageDescriptor::LoadMultiImageFromElementGrid(tileset_images[i], image_filename, 16, 16) == false) {
-			cerr << "MAP ERROR: MapMode::_LoadTiles() failed to load tileset image:" << image_filename << endl;
-			return;
+			PRINT_ERROR << "failed to load tileset image: " << image_filename << endl;
+			exit(1);
 		}
 	}
 
-	// ---------- (2) Read in the map tile indeces from all three tile layers
+	// ---------- (3) Read in the map tile indeces from all three tile layers for the base context
+	// The indeces stored for the map layers in this file directly correspond to a location within a tileset. Tilesets contain a total of 256 tiles
+	// each, so 0-255 correspond to the first tileset, 256-511 the second, etc. The tile location within the tileset is also determined by the index,
+	// where the first 16 indeces in the tileset range are the tiles of the first row (left to right), and so on.
 
-	// First create the properly sized 2D grid of map tiles, then read the tile indeces from the map file
+	// Create and add the 2D tile grid for the base context
+	_tile_grid.clear();
+	_tile_grid.push_back(vector<vector<MapTile> >(_num_tile_rows));
 	for (uint32 r = 0; r < _num_tile_rows; r++) {
-		_tile_grid.push_back(vector<MapTile>(_num_tile_cols));
+		_tile_grid[0][r].resize(_num_tile_cols);
 	}
 
-	vector<int32> table_row; // Used to temporarily store a row of integer table data
+	vector<int32> table_row; // Used to temporarily store a row of table indeces
 
-	// Read the lower_layer
+	// Read the base context tables for all three layers
 	map_file.OpenTable("lower_layer");
 	for (uint32 r = 0; r < _num_tile_rows; r++) {
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
 		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[r][c].lower_layer = table_row[c];
+			_tile_grid[0][r][c].lower_layer = table_row[c];
 		}
 	}
 	map_file.CloseTable();
 
-	// Read the middle_layer
 	map_file.OpenTable("middle_layer");
 	for (uint32 r = 0; r < _num_tile_rows; r++) {
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
 		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[r][c].middle_layer = table_row[c];
+			_tile_grid[0][r][c].middle_layer = table_row[c];
 		}
 	}
 	map_file.CloseTable();
 
-	// Read the upper_layer
 	map_file.OpenTable("upper_layer");
 	for (uint32 r = 0; r < _num_tile_rows; r++) {
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
 		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[r][c].upper_layer = table_row[c];
+			_tile_grid[0][r][c].upper_layer = table_row[c];
 		}
 	}
 	map_file.CloseTable();
 
-	// ---------- (3) Determine which tiles in each tileset are referenced in this map
+	// ---------- (4) Create each additional context for the map by loading its table data
 
+	// Load the tile data for each additional map context
+	for (uint32 i = 1; i < map_instance->_num_map_contexts; i++) {
+		string this_context = "context_";
+		if (i < 11) // precede single digit context names with a zero
+			this_context += "0";
+		this_context += NumberToString(i + 1);
+
+		// Initialize this context by making a cop of the #01 map context first, as most contexts re-use many of the same tiles from the 0th context
+		_tile_grid.push_back(_tile_grid[0]);
+
+		// Read the table corresponding to this context and modify each tile accordingly.
+		// The context table is an array of integer data. The size of this array should be divisible by four, as every consecutive group of four integers in
+		// this table represent one tile context element. The first integer corresponds to the tile layer (0 = lower, 1 = middle, 2 = upper), the second
+		// and third represent the row and column of the tile respectively, and the fourth value indicates which tile image should be used for this context.
+		// So if the first four entries in the context table were {0, 12, 26, 180}, this would set the lower layer tile at position (12, 26) to the tile
+		// index 180.
+		vector<int32> context_data;
+		map_file.OpenTable(this_context);
+		map_file.ReadIntVector(this_context, context_data);
+		if (context_data.size() % 4 != 0) {
+			IF_PRINT_WARNING(MAP_DEBUG) << "for context " << this_context << ", context data was not evenly divisible by four (incomplete context data)" << endl;
+			continue;
+		}
+
+		for (uint32 j = 0; j < context_data.size(); j += 4) {
+			switch (context_data[j]) {
+				case 0: // lower layer
+					_tile_grid[i][context_data[j+1]][context_data[j+2]].lower_layer = context_data[j+3];
+					break;
+				case 1: // middle layer
+					_tile_grid[i][context_data[j+1]][context_data[j+2]].middle_layer = context_data[j+3];
+					break;
+				case 2: // upper layer
+					_tile_grid[i][context_data[j+1]][context_data[j+2]].upper_layer = context_data[j+3];
+					break;
+				default:
+					IF_PRINT_WARNING(MAP_DEBUG) << "unknown tile layer index reference when loading map context tiles" << endl;
+					break;
+			}
+		}
+	} // for (uint32 i = 1; i < map_instance->_num_map_contexts; i++)
+
+
+	// ---------- (5) Determine which tiles in each tileset are referenced in this map
+
+	// Used to determine whether each tile is used by the map or not. An entry of -1 indicates that particular tile is not used
+	vector<int16> tile_references;
 	// Set size to be equal to the total number of tiles and initialize all entries to -1 (unreferenced)
 	tile_references.assign(tileset_filenames.size() * TILES_PER_TILESET, -1);
 
-	for (uint32 r = 0; r < _num_tile_rows; r++) {
-		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			if (_tile_grid[r][c].lower_layer >= 0)
-				tile_references[_tile_grid[r][c].lower_layer] = 0;
-			if (_tile_grid[r][c].middle_layer >= 0)
-				tile_references[_tile_grid[r][c].middle_layer] = 0;
-			if (_tile_grid[r][c].upper_layer >= 0)
-				tile_references[_tile_grid[r][c].upper_layer] = 0;
+	for (uint32 i = 0; i < map_instance->_num_map_contexts; i++) {
+		for (uint32 r = 0; r < _num_tile_rows; r++) {
+			for (uint32 c = 0; c < _num_tile_cols; c++) {
+				if (_tile_grid[i][r][c].lower_layer >= 0)
+					tile_references[_tile_grid[i][r][c].lower_layer] = 0;
+				if (_tile_grid[i][r][c].middle_layer >= 0)
+					tile_references[_tile_grid[i][r][c].middle_layer] = 0;
+				if (_tile_grid[i][r][c].upper_layer >= 0)
+					tile_references[_tile_grid[i][r][c].upper_layer] = 0;
+			}
 		}
 	}
 
+	// ---------- (6) Translate the tileset tile indeces into indeces for the vector of tile images
+
 	// Here, we have to convert the original tile indeces defined in the map file into a new form. The original index
-	// indicates the tileset where the tile is used and its location in that tileset. We need to convert those indecs
+	// indicates the tileset where the tile is used and its location in that tileset. We need to convert those indeces
 	// so that they serve as an index to the MapMode::_tile_images vector, where the tile images will soon be stored.
 
 	// Keeps track of the next translated index number to assign
@@ -167,27 +223,32 @@ void TileManager::Load(ReadScriptDescriptor& map_file) {
 	}
 
 	// Now, go back and re-assign all lower, middle, and upper tile layer indeces with the translated indeces
-	for (uint32 r = 0; r < _num_tile_rows; r++) {
-		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			if (_tile_grid[r][c].lower_layer >= 0)
-				_tile_grid[r][c].lower_layer = tile_references[_tile_grid[r][c].lower_layer];
-			if (_tile_grid[r][c].middle_layer >= 0)
-				_tile_grid[r][c].middle_layer = tile_references[_tile_grid[r][c].middle_layer];
-			if (_tile_grid[r][c].upper_layer >= 0)
-				_tile_grid[r][c].upper_layer = tile_references[_tile_grid[r][c].upper_layer];
+	for (uint32 i = 0; i < map_instance->_num_map_contexts; i++) {
+		for (uint32 r = 0; r < _num_tile_rows; r++) {
+			for (uint32 c = 0; c < _num_tile_cols; c++) {
+				if (_tile_grid[i][r][c].lower_layer >= 0)
+					_tile_grid[i][r][c].lower_layer = tile_references[_tile_grid[i][r][c].lower_layer];
+				if (_tile_grid[i][r][c].middle_layer >= 0)
+					_tile_grid[i][r][c].middle_layer = tile_references[_tile_grid[i][r][c].middle_layer];
+				if (_tile_grid[i][r][c].upper_layer >= 0)
+					_tile_grid[i][r][c].upper_layer = tile_references[_tile_grid[i][r][c].upper_layer];
+			}
 		}
 	}
 
-	// ---------- (4) Parse all of the tileset definition files and create any animated tile images that are used
+	// ---------- (7) Parse all of the tileset definition files and create any animated tile images that will be used
 
-	ReadScriptDescriptor tileset_script; // Used to access the tileset definition file
-	vector<uint32> animation_info;   // Temporarily retains the animation data (tile frame indeces and display times)
+	// Used to access the tileset definition file
+	ReadScriptDescriptor tileset_script;
+	// Temporarily retains the animation data (every two elements corresponds to a pair of tile frame index and display time)
+	vector<uint32> animation_info;
+	// Temporarily holds all animated tile images. The map key is the value of the tile index, before reference translation is done in the next step
+	map<uint32, AnimatedImage*> tile_animations;
 
 	for (uint32 i = 0; i < tileset_filenames.size(); i++) {
 		if (tileset_script.OpenFile("dat/tilesets/" + tileset_filenames[i] + ".lua") == false) {
-			cerr << "MAP ERROR: In MapMode::_LoadTiles(), the map failed to load because it could not open a tileset definition file: "
-				<< tileset_script.GetFilename() << endl;
-			return;
+			PRINT_ERROR << "map failed to load because it could not open a tileset definition file: " << tileset_script.GetFilename() << endl;
+			exit(1);
 		}
 
 		tileset_script.OpenTable(tileset_filenames[i]);
@@ -199,27 +260,29 @@ void TileManager::Load(ReadScriptDescriptor& map_file) {
 			// The index of the first frame in the animation. (i * TILES_PER_TILESET) factors in which tileset the frame comes from
 			uint32 first_frame_index = animation_info[0] + (i * TILES_PER_TILESET);
 
-			// Check if this animation is referenced in the map by looking at the first tile frame index. If it is not, continue on to the next animation
+			// If the first tile frame index of this animation was not referenced anywhere in the map, then the animation is unused and
+			// we can safely skip over it and move on to the next one. Otherwise if it is referenced, we have to construct the animated image
 			if (tile_references[first_frame_index] == -1) {
 				continue;
 			}
 
-			AnimatedImage new_animation;
-			new_animation.SetDimensions(2.0f, 2.0f);
+			AnimatedImage* new_animation = new AnimatedImage();
+			new_animation->SetDimensions(2.0f, 2.0f);
 
 			// Each pair of entries in the animation info indicate the tile frame index (k) and the time (k+1)
 			for (uint32 k = 0; k < animation_info.size(); k += 2) {
-				new_animation.AddFrame(tileset_images[i][animation_info[k]], animation_info[k+1]);
+				new_animation->AddFrame(tileset_images[i][animation_info[k]], animation_info[k+1]);
 			}
 
 			tile_animations.insert(make_pair(first_frame_index, new_animation));
 		}
+
 		tileset_script.CloseTable();
 		tileset_script.CloseTable();
 		tileset_script.CloseFile();
 	} // for (uint32 i = 0; i < tileset_filenames.size(); i++)
 
-	// ---------- (5) Add all referenced tiles to the _tile_images vector, in the proper order
+	// ---------- (8) Add all referenced tiles to the _tile_images vector, in the proper order
 
 	for (uint32 i = 0; i < tileset_images.size(); i++) {
 		for (uint32 j = 0; j < TILES_PER_TILESET; j++) {
@@ -233,19 +296,21 @@ void TileManager::Load(ReadScriptDescriptor& map_file) {
 
 				// Add the tile as an AnimatedImage
 				else {
-					AnimatedImage* new_animated_tile = new AnimatedImage(tile_animations[reference]);
-					_tile_images.push_back(new_animated_tile);
-					_animated_tile_images.push_back(new_animated_tile);
+					_tile_images.push_back(tile_animations[reference]);
+					_animated_tile_images.push_back(tile_animations[reference]);
+					tile_animations.erase(reference);
 				}
 			}
 		}
 	}
 
-	// TODO: Retain tile images available in other contexts
+	if (tile_animations.empty() == false) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "one or more tile animations that were created were not added into the map -- this is a memory leak" << endl;
+	}
 
 	// Remove all tileset images. Any tiles which were not added to _tile_images will no longer exist in memory
 	tileset_images.clear();
-}
+} // void TileManager::Load(ReadScriptDescriptor& map_file)
 
 
 
@@ -264,8 +329,8 @@ void TileManager::DrawLowerLayer(const MapFrame* const frame) {
 			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++) {
 		for (uint32 c = static_cast<uint32>(frame->starting_col);
 				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++) {
-			if (_tile_grid[r][c].lower_layer >= 0) { // Draw a tile image if it exists at this location
-				_tile_images[_tile_grid[r][c].lower_layer]->Draw();
+			if (_tile_grid[_current_context][r][c].lower_layer >= 0) { // Draw a tile image if it exists at this location
+				_tile_images[_tile_grid[_current_context][r][c].lower_layer]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}
@@ -282,8 +347,8 @@ void TileManager::DrawMiddleLayer(const MapFrame* const frame) {
 			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++) {
 		for (uint32 c = static_cast<uint32>(frame->starting_col);
 				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++) {
-			if (_tile_grid[r][c].middle_layer >= 0) { // Draw a tile image if it exists at this location
-				_tile_images[_tile_grid[r][c].middle_layer]->Draw();
+			if (_tile_grid[_current_context][r][c].middle_layer >= 0) { // Draw a tile image if it exists at this location
+				_tile_images[_tile_grid[_current_context][r][c].middle_layer]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}
@@ -300,8 +365,8 @@ void TileManager::DrawUpperLayer(const MapFrame* const frame) {
 			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++) {
 		for (uint32 c = static_cast<uint32>(frame->starting_col);
 				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++) {
-			if (_tile_grid[r][c].upper_layer >= 0) { // Draw a tile image if it exists at this location
-				_tile_images[_tile_grid[r][c].upper_layer]->Draw();
+			if (_tile_grid[_current_context][r][c].upper_layer >= 0) { // Draw a tile image if it exists at this location
+				_tile_images[_tile_grid[_current_context][r][c].upper_layer]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}
