@@ -84,8 +84,11 @@ public:
 	TileManager();
 	~TileManager();
 
-	//! \brief Handles all operations on loading tilesets and tile images for the map's Lua file
-	void Load(hoa_script::ReadScriptDescriptor& map_file);
+	/** \brief Handles all operations on loading tilesets and tile images for the map's Lua file
+	*** \param map_file A reference to the Lua file containing the map data. The file should be open before passing the reference
+	*** \param map_instance A pointer to the MapMode object which invoked this function
+	**/
+	void Load(hoa_script::ReadScriptDescriptor& map_file, const MapMode* map_instance);
 
 	//! \brief Updates all animated tile images
 	void Update();
@@ -103,8 +106,6 @@ public:
 	void DrawUpperLayer(const MapFrame* const frame);
 	//@}
 
-	// TODO
-	// void SwitchContext(MAP_CONTEXT context);
 private:
 	/** \brief The number of tile rows in the map.
 	*** This number must be greater than or equal to 24 for the map to be valid.
@@ -116,8 +117,17 @@ private:
 	**/
 	uint16 _num_tile_cols;
 
-	//! \brief A 2D vector that contains all of the map's tile objects.
-	std::vector<std::vector<MapTile> > _tile_grid;
+	/** \brief The current map context in index format
+	*** This member should only ever be equal to 0-31, which corresponds to contexts #01-#32. Note th
+	**/
+	uint8 _current_context;
+
+	/** \brief A 3D vector that contains all of the map's tile objects.
+	*** The outer-most vector corresponds to each map context, hence its size is at least 1 and at most 32.
+	*** The middle vector is the rows of tiles in the map, while the inner-most vector is the columns of tiles.
+	*** The 0th element of the outer vector corresponds to map context #1, 1st element to context #2, and so on.
+	**/
+	std::vector<std::vector<std::vector<MapTile> > > _tile_grid;
 
 	//! \brief Contains the images for all map tiles, both still and animate.
 	std::vector<hoa_video::ImageDescriptor*> _tile_images;
