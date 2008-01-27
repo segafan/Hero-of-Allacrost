@@ -201,7 +201,6 @@ void ItemAction::RunScript() {
 				enemy = current_battle->GetEnemyActorAt(i);
 				if (enemy->IsAlive()) {
 					ScriptCallFunction<void>(*script_function, enemy, _source);
-					_item->DecrementCount();
 				}
 			}
 		}
@@ -212,14 +211,12 @@ void ItemAction::RunScript() {
 			for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); i++) {
 				character = current_battle->GetPlayerCharacterAt(i);
 				ScriptCallFunction<void>(*script_function, character, _source);
-				_item->DecrementCount();
 			}
 		}
 	} // if (_item->GetTargetType() == GLOBAL_TARGET_PARTY)
 
 	else {
 		ScriptCallFunction<void>(*script_function, _target, _source);
-		_item->DecrementCount();
 	}
 
 	if (_source->IsEnemy() == false) {
