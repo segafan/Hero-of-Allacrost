@@ -160,7 +160,6 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 		// So if the first four entries in the context table were {0, 12, 26, 180}, this would set the lower layer tile at position (12, 26) to the tile
 		// index 180.
 		vector<int32> context_data;
-		map_file.OpenTable(this_context);
 		map_file.ReadIntVector(this_context, context_data);
 		if (context_data.size() % 4 != 0) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "for context " << this_context << ", context data was not evenly divisible by four (incomplete context data)" << endl;
