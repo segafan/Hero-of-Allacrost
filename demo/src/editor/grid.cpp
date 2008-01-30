@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2007 by The Allacrost Project
+//            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software 
@@ -300,7 +300,7 @@ void Grid::LoadMap()
 
 void Grid::SaveMap()
 {
-	char buffer[19]; // used for converting an int to a string with sprintf
+	char buffer[10];  // used for converting an int to a string with sprintf
 	int i;           // Lua table index / Loop counter variable
 	vector<int32>::iterator it;  // used to iterate through the layers
 	vector<int32> layer_row;     // one row of a layer
@@ -493,7 +493,7 @@ void Grid::SaveMap()
 	write_data.InsertNewLine();
 
 	write_data.WriteComment("All, if any, existing contexts follow.");
-	bool table_started = false;
+	vector<int32> context_data;  // one vector of ints contains all the context info
 	// Iterate through all contexts of all layers.
 	for (int i = 1; i < static_cast<int>(_lower_layer.size()); i++)
 	{
@@ -504,15 +504,10 @@ void Grid::SaveMap()
 			{
 				if (*it != -1)
 				{
-					if (table_started == false)
-					{
-						sprintf(buffer, "context_%d", i);
-						write_data.BeginTable(buffer);
-						table_started = true;
-					} // create the table if it doesn't already exist
-
-					sprintf(buffer, "[0][%d][%d] = %d", row, col, *it);
-					write_data.WriteLine(buffer, true);
+					context_data.push_back(0);    // lower layer = 0
+					context_data.push_back(row);
+					context_data.push_back(col);
+					context_data.push_back(*it);
 				} // a valid tile exists so record it
 
 				it++;
@@ -526,15 +521,10 @@ void Grid::SaveMap()
 			{
 				if (*it != -1)
 				{
-					if (table_started == false)
-					{
-						sprintf(buffer, "context_%d", i);
-						write_data.BeginTable(buffer);
-						table_started = true;
-					} // create the table if it doesn't already exist
-
-					sprintf(buffer, "[1][%d][%d] = %d", row, col, *it);
-					write_data.WriteLine(buffer, true);
+					context_data.push_back(1);    // middle layer = 1
+					context_data.push_back(row);
+					context_data.push_back(col);
+					context_data.push_back(*it);
 				} // a valid tile exists so record it
 
 				it++;
@@ -548,27 +538,25 @@ void Grid::SaveMap()
 			{
 				if (*it != -1)
 				{
-					if (table_started == false)
-					{
-						sprintf(buffer, "context_%d", i);
-						write_data.BeginTable(buffer);
-						table_started = true;
-					} // create the table if it doesn't already exist
-
-					sprintf(buffer, "[2][%d][%d] = %d", row, col, *it);
-					write_data.WriteLine(buffer, true);
+					context_data.push_back(2);    // upper layer = 2
+					context_data.push_back(row);
+					context_data.push_back(col);
+					context_data.push_back(*it);
 				} // a valid tile exists so record it
 
 				it++;
 			} // iterate through the columns of the upper layer
 		} // iterate through the rows of the upper layer
 
-		if (table_started == true)
+		if (context_data.empty() == false)
 		{
-			write_data.EndTable();
+			if (i < 11)
+				sprintf(buffer, "context_0%d", i);
+			else
+				sprintf(buffer, "context_%d", i);
+			write_data.WriteIntVector(buffer, context_data);
 			write_data.InsertNewLine();
-			table_started = false;
-		} // close the table if it was open
+		} // write the vector if it has data in it
 	} // iterate through all contexts of all layers, assuming all layers have same number of contexts
 
 	write_data.CloseFile();
