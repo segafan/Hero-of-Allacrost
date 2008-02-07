@@ -535,10 +535,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\editor\dialog_boxes_moc.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\engine\video\effects.cpp"
 				>
 			</File>
