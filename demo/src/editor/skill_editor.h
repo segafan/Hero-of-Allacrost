@@ -26,6 +26,9 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QLineEdit>
+#include <QComboBox>
+#include <QButtonGroup>
+#include <QRadioButton>
 
 #include "global_skills.h"
 #include "script.h"
@@ -98,6 +101,22 @@ private:
 	QSpacerItem * _tab_spacers[3];
 	QLabel * _lbl_skill_names[3];
 	QLineEdit * _le_skill_names[3];
+	QLabel * _lbl_description[3];
+	QLineEdit * _le_description[3];
+	QLabel * _lbl_sp_required[3];
+	QLineEdit * _le_sp_required[3];
+	QLabel * _lbl_warmup_time[3];
+	QLineEdit * _le_warmup_time[3];
+	QLabel * _lbl_cooldown_time[3];
+	QLineEdit * _le_cooldown_time[3];
+	QLabel * _lbl_target_type[3];
+	QComboBox * _cb_target_type[3];
+	QLabel * _lbl_target_ally[3];
+	QButtonGroup * _bg_target_ally[3];
+	QRadioButton * _rb_target_ally_true[3];
+	QRadioButton * _rb_target_ally_false[3];
+	QHBoxLayout * _hbox_target_ally[3];
+	QSpacerItem * _target_ally_spacers[3];
 	//@}
 };
 

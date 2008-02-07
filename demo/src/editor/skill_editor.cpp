@@ -17,9 +17,12 @@
 
 using namespace std;
 
+using namespace hoa_utils;
+
 using namespace hoa_script;
 using namespace hoa_global;
 using namespace hoa_editor;
+
 
 SkillEditor::SkillEditor(QWidget *parent, const QString &name)
 : QWidget(parent, static_cast<const char *>(name))
@@ -144,21 +147,108 @@ void SkillEditor::_LoadSkills(ReadScriptDescriptor &script, vector<GlobalSkill *
 void SkillEditor::_CreateTab(GLOBAL_SKILL type, vector<GlobalSkill *>skills, QString tab_name)
 {
 	_gl_layouts[type] = new QGridLayout();
-	// add the skill name label and line edit
+	// add the labels for the different parts of the skill
 	_lbl_skill_names[type] = new QLabel();
 	_lbl_skill_names[type]->setText("Skill Name:");
 	_gl_layouts[type]->addWidget(_lbl_skill_names[type], 0, 0);
+
+	_lbl_description[type] = new QLabel();
+	_lbl_description[type]->setText("Description:");
+	_gl_layouts[type]->addWidget(_lbl_description[type], 1, 0);
+
+	_lbl_sp_required[type] = new QLabel();
+	_lbl_sp_required[type]->setText("SP Required:");
+	_gl_layouts[type]->addWidget(_lbl_sp_required[type], 2, 0);
+
+	_lbl_warmup_time[type] = new QLabel();
+	_lbl_warmup_time[type]->setText("Warmup Time:");
+	_gl_layouts[type]->addWidget(_lbl_warmup_time[type], 2, 2);
+
+	_lbl_cooldown_time[type] = new QLabel();
+	_lbl_cooldown_time[type]->setText("Cooldown Time:");
+	_gl_layouts[type]->addWidget(_lbl_cooldown_time[type], 3, 0);
+
+	_lbl_target_ally[type] = new QLabel();
+	_lbl_target_ally[type]->setText("Target Ally?");
+	_gl_layouts[type]->addWidget(_lbl_target_ally[type], 3, 2);
+
+	_lbl_target_type[type] = new QLabel();
+	_lbl_target_type[type]->setText("Target Type:");
+	_gl_layouts[type]->addWidget(_lbl_target_type[type], 4, 0);
+
+	// add the line edits for the skill
 	_le_skill_names[type] = new QLineEdit();
+	_le_description[type] = new QLineEdit();
+	_le_sp_required[type] = new QLineEdit();
+	_le_warmup_time[type] = new QLineEdit();
+	_le_cooldown_time[type] = new QLineEdit();
+	_cb_target_type[type] = new QComboBox();
+	_bg_target_ally[type] = new QButtonGroup();
+	_rb_target_ally_true[type] = new QRadioButton();
+	_rb_target_ally_false[type] = new QRadioButton();
+	_rb_target_ally_true[type]->setText(QString("true"));
+	_rb_target_ally_false[type]->setText(QString("false"));
+	_bg_target_ally[type]->addButton(_rb_target_ally_true[type]);
+	_bg_target_ally[type]->addButton(_rb_target_ally_false[type]);
+
 	if (_current_skill_index[type] != -1)
 	{
-		string text = MakeStandardString(skills[_current_skill_index[type]]->GetName());
+		GlobalSkill *skill = skills[_current_skill_index[type]];
+		// this skill is enabled so set the text
+		string text = MakeStandardString(skill->GetName());
 		// get the char array from the standard string, because otherwise the QString ends up with
 		// some gibberish text at the beginning of it
 		_le_skill_names[type]->setText(QString(text.c_str()));
+
+		text = MakeStandardString(skill->GetDescription());
+		_le_description[type]->setText(QString(text.c_str()));
+
+		text = NumberToString<uint32>(skill->GetSPRequired());
+		_le_sp_required[type]->setText(QString(text.c_str()));
+
+		text = NumberToString<uint32>(skill->GetWarmupTime());
+		_le_warmup_time[type]->setText(QString(text.c_str()));
+
+		text = NumberToString<uint32>(skill->GetCooldownTime());
+		_le_cooldown_time[type]->setText(QString(text.c_str()));
+
+		if (skill->IsTargetAlly())
+			_rb_target_ally_true[type]->setChecked(true);
+		else
+			_rb_target_ally_false[type]->setChecked(true);
+		_bg_target_ally[type]->setExclusive(true);
+
+		_cb_target_type[type]->insertItem("Attack Point");
+		_cb_target_type[type]->insertItem("Actor");
+		_cb_target_type[type]->insertItem("Party");
+		_cb_target_type[type]->setCurrentIndex(static_cast<int32>(skill->GetTargetType()));
 	}
 	else
+	{
+		// disable the line edits (no skills for this group)
 		_le_skill_names[type]->setDisabled(true);
-	_gl_layouts[type]->addWidget(_le_skill_names[type], 0, 1);
+		_le_description[type]->setDisabled(true);
+		_le_sp_required[type]->setDisabled(true);
+		_le_warmup_time[type]->setDisabled(true);
+		_le_cooldown_time[type]->setDisabled(true);
+		_cb_target_type[type]->setDisabled(true);
+		_rb_target_ally_false[type]->setDisabled(true);
+		_rb_target_ally_true[type]->setDisabled(true);
+	}
+
+	// add above widgets to grid layout
+	_gl_layouts[type]->addWidget(_le_skill_names[type], 0, 1, 1, 3);
+	_gl_layouts[type]->addWidget(_le_description[type], 1, 1, 1, 3);
+	_gl_layouts[type]->addWidget(_le_sp_required[type], 2, 1);
+	_gl_layouts[type]->addWidget(_le_warmup_time[type], 2, 3);
+	_gl_layouts[type]->addWidget(_le_cooldown_time[type], 3, 1);
+	_gl_layouts[type]->addWidget(_cb_target_type[type], 4, 1);
+	_hbox_target_ally[type] = new QHBoxLayout();
+	_hbox_target_ally[type]->addWidget(_rb_target_ally_true[type]);
+	_hbox_target_ally[type]->addWidget(_rb_target_ally_false[type]);
+	_target_ally_spacers[type] = new QSpacerItem(10, 5, QSizePolicy::Expanding);
+	_hbox_target_ally[type]->addItem(_target_ally_spacers[type]);
+	_gl_layouts[type]->addLayout(_hbox_target_ally[type], 3, 3);
 
 	// create the vertical layout for the tab
 	_tab_vboxes[type] = new QVBoxLayout();
@@ -224,7 +314,22 @@ void SkillEditor::_CleanupTab(GLOBAL_SKILL type)
 	delete _button_spacers[type];
 	delete _tab_spacers[type];
 	delete _lbl_skill_names[type];
+	delete _lbl_description[type];
+	delete _lbl_sp_required[type];
+	delete _lbl_warmup_time[type];
+	delete _lbl_cooldown_time[type];
+	delete _lbl_target_type[type];
 	delete _le_skill_names[type];
+	delete _le_description[type];
+	delete _le_sp_required[type];
+	delete _le_warmup_time[type];
+	delete _le_cooldown_time[type];
+	delete _cb_target_type[type];
+	delete _bg_target_ally[type];
+	delete _rb_target_ally_true[type];
+	delete _rb_target_ally_false[type];
+	delete _hbox_target_ally[type];
+	delete _target_ally_spacers[type];
 } // _CleanupTab(GLOBAL_SKILL)
 
 vector<GlobalSkill *> &SkillEditor::_GetCurrentSkillList()
@@ -240,8 +345,27 @@ void SkillEditor::_ReloadTab()
 {
 	GlobalSkill *skill = _GetCurrentSkillList()[_current_skill_index[_current_tab]];
 
-	string text = hoa_utils::MakeStandardString(skill->GetName());
+	string text = MakeStandardString(skill->GetName());
 	_le_skill_names[_current_tab]->setText(QString(text.c_str()));
+	
+	text = MakeStandardString(skill->GetDescription());
+	_le_description[_current_tab]->setText(QString(text.c_str()));
+
+	text = NumberToString<uint32>(skill->GetSPRequired());
+	_le_sp_required[_current_tab]->setText(QString(text.c_str()));
+
+	text = NumberToString<uint32>(skill->GetWarmupTime());
+	_le_warmup_time[_current_tab]->setText(QString(text.c_str()));
+
+	text = NumberToString<uint32>(skill->GetCooldownTime());
+	_le_cooldown_time[_current_tab]->setText(QString(text.c_str()));
+
+	_cb_target_type[_current_tab]->setCurrentIndex(static_cast<int32>(skill->GetTargetType()));
+
+	if (skill->IsTargetAlly())
+		_rb_target_ally_true[_current_tab]->setChecked(true);
+	else
+		_rb_target_ally_false[_current_tab]->setChecked(true);
 	// TODO: as more controls are added to the tab, reload them here.
 }
 
