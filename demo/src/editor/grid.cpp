@@ -302,8 +302,6 @@ void Grid::SaveMap()
 {
 	char buffer[10];  // used for converting an int to a string with sprintf
 	int i;           // Lua table index / Loop counter variable
-	vector<int32>::iterator it;  // used to iterate through the layers
-	vector<int32> layer_row;     // one row of a layer
 	WriteScriptDescriptor write_data;
 	int tileset_index;
 	int tile_index;
@@ -345,104 +343,111 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	// Create vector of 0s.
-	vector<int32> vect_0s(_width, 0);
-
 	write_data.WriteComment("The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables");
 	write_data.WriteComment("Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]");
 	write_data.BeginTable("map_grid");
 	vector<int32> ll_vect;
 	vector<int32> ml_vect;
 	vector<int32> ul_vect;
-	int row = 0;
-	bool twice = false;
-	while (row < _height)
+	// Used to save the northern walkability info of tiles in all layers of
+	// all contexts.
+	vector<int32> map_row_north(_width*2, 0);
+	// Used to save the southern walkability info of tiles in all layers of
+	// all contexts.
+	vector<int32> map_row_south(_width*2, 0);
+	for (int row = 0; row < _height; row++)
 	{
-		for (int32 i = row * _width; i < row * _width + _width; i++)
+		// Iterate through all contexts of all layers, column by column,
+		// row by row.
+		for (int context = 0; context < static_cast<int>(_lower_layer.size());
+		     context++)
 		{
-			// Get walkability for lower layer tile.
-			tileset_index = _lower_layer[0][i] / 256;
-			if (tileset_index == 0)
-				tile_index = _lower_layer[0][i];
-			else  // Don't divide by 0
-				tile_index = _lower_layer[0][i] % (tileset_index * 256);
-			if (tile_index == -1)
+			for (int32 col = row * _width; col < row * _width + _width; col++)
 			{
-				ll_vect.push_back(0);
-				ll_vect.push_back(0);
-				ll_vect.push_back(0);
-				ll_vect.push_back(0);
-			}
-			else
-				ll_vect = tilesets[tileset_index]->walkability[tile_index];
+				// Get walkability for lower layer tile.
+				tileset_index = _lower_layer[context][col] / 256;
+				if (tileset_index == 0)
+					tile_index = _lower_layer[context][col];
+				else  // Don't divide by 0
+					tile_index = _lower_layer[context][col] %
+						(tileset_index * 256);
+				if (tile_index == -1)
+				{
+					ll_vect.push_back(0);
+					ll_vect.push_back(0);
+					ll_vect.push_back(0);
+					ll_vect.push_back(0);
+				}
+				else
+					ll_vect = tilesets[tileset_index]->walkability[tile_index];
 
-			// Get walkability for middle layer tile.
-			tileset_index = _middle_layer[0][i] / 256;
-			if (tileset_index == 0)
-				tile_index = _middle_layer[0][i];
-			else  // Don't divide by 0
-				tile_index = _middle_layer[0][i] % (tileset_index * 256);
-			if (tile_index == -1)
-			{
-				ml_vect.push_back(0);
-				ml_vect.push_back(0);
-				ml_vect.push_back(0);
-				ml_vect.push_back(0);
-			}
-			else
-				ml_vect = tilesets[tileset_index]->walkability[tile_index];
+				// Get walkability for middle layer tile.
+				tileset_index = _middle_layer[context][col] / 256;
+				if (tileset_index == 0)
+					tile_index = _middle_layer[context][col];
+				else  // Don't divide by 0
+					tile_index = _middle_layer[context][col] %
+						(tileset_index * 256);
+				if (tile_index == -1)
+				{
+					ml_vect.push_back(0);
+					ml_vect.push_back(0);
+					ml_vect.push_back(0);
+					ml_vect.push_back(0);
+				}
+				else
+					ml_vect = tilesets[tileset_index]->walkability[tile_index];
 
-			// Get walkability for upper layer tile.
-			tileset_index = _upper_layer[0][i] / 256;
-			if (tileset_index == 0)
-				tile_index = _upper_layer[0][i];
-			else  // Don't divide by 0
-				tile_index = _upper_layer[0][i] % (tileset_index * 256);
-			if (tile_index == -1)
-			{
-				ul_vect.push_back(0);
-				ul_vect.push_back(0);
-				ul_vect.push_back(0);
-				ul_vect.push_back(0);
-			}
-			else
-				ul_vect = tilesets[tileset_index]->walkability[tile_index];
+				// Get walkability for upper layer tile.
+				tileset_index = _upper_layer[context][col] / 256;
+				if (tileset_index == 0)
+					tile_index = _upper_layer[context][col];
+				else  // Don't divide by 0
+					tile_index = _upper_layer[context][col] %
+						(tileset_index * 256);
+				if (tile_index == -1)
+				{
+					ul_vect.push_back(0);
+					ul_vect.push_back(0);
+					ul_vect.push_back(0);
+					ul_vect.push_back(0);
+				}
+				else
+					ul_vect = tilesets[tileset_index]->walkability[tile_index];
 
-			if (twice)
-			{
-				layer_row.push_back(ll_vect[2] | ml_vect[2] | ul_vect[2]);  // SW corner
-				layer_row.push_back(ll_vect[3] | ml_vect[3] | ul_vect[3]);  // SE corner
-			}
-			else
-			{
-				layer_row.push_back(ll_vect[0] | ml_vect[0] | ul_vect[0]);  // NW corner
-				layer_row.push_back(ll_vect[1] | ml_vect[1] | ul_vect[1]);  // NE corner
-			}
-			
-			ll_vect.clear();
-			ml_vect.clear();
-			ul_vect.clear();
-		} // iterate through the columns of the layers
+				// NW corner
+				map_row_north[col % _width * 2]     |=
+					((ll_vect[0] | ml_vect[0] | ul_vect[0]) << context);
+				// NE corner
+				map_row_north[col % _width * 2 + 1] |=
+					((ll_vect[1] | ml_vect[1] | ul_vect[1]) << context);
+				// SW corner
+				map_row_south[col % _width * 2]     |=
+					((ll_vect[2] | ml_vect[2] | ul_vect[2]) << context);
+				// SE corner
+				map_row_south[col % _width * 2 + 1] |=
+					((ll_vect[3] | ml_vect[3] | ul_vect[3]) << context);
 
-		if (twice)
-			sprintf(buffer, "%d", row*2+1);
-		else
-			sprintf(buffer, "%d", row*2);
-		write_data.WriteIntVector(buffer, layer_row);
-		layer_row.clear();
-		if (twice)
-		{
-			twice = false;
-			row++;
-		}
-		else
-			twice = true;
+				ll_vect.clear();
+				ml_vect.clear();
+				ul_vect.clear();
+			} // iterate through the columns of the layers
+		} // iterate through each context
+
+		sprintf(buffer, "%d", row*2);
+		write_data.WriteIntVector(buffer, map_row_north);
+		sprintf(buffer, "%d", row*2+1);
+		write_data.WriteIntVector(buffer, map_row_south);
+		map_row_north.assign(_width*2, 0);
+		map_row_south.assign(_width*2, 0);
 	} // iterate through the rows of the layers
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
 	write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
 	write_data.BeginTable("lower_layer");
+	vector<int32>::iterator it;    // used to iterate through the layers
+	vector<int32> layer_row;       // one row of a layer
 	it = _lower_layer[0].begin();
 	for (int row = 0; row < _height; row++)
 	{
