@@ -193,6 +193,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\editor\dialog_boxes_moc.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\editor\editor.cpp"
 				>
 			</File>
