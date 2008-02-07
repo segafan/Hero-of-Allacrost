@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\editor\dialog_boxes.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\editor\editor.cpp"
 				>
 			</File>
@@ -355,6 +359,20 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\editor\dialog_boxes.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC dialog_boxes.h"
+						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\dialog_boxes_moc.cpp"
+						Outputs="$(ProjectDir)src\editor\dialog_boxes_moc.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\src\editor\editor.h"
 				>
 				<FileConfiguration
@@ -363,7 +381,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="MOC editor.h"
-						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\editor_moc.cpp"
+						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\editor_moc.cpp&#x0D;&#x0A;"
 						AdditionalDependencies=""
 						Outputs="$(ProjectDir)src\editor\editor_moc.cpp"
 					/>
@@ -398,7 +416,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="MOC grid.h"
-						CommandLine="moc $(InputPath) -o $(ProjectDir)\src\editor\grid_moc.cpp"
+						CommandLine="moc $(InputPath) -o $(ProjectDir)\src\editor\grid_moc.cpp&#x0D;&#x0A;"
 						AdditionalDependencies=""
 						Outputs="$(ProjectDir)src\editor\grid_moc.cpp"
 					/>
@@ -469,7 +487,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="MOC skill_editor.h"
-						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\skill_editor_moc.cpp"
+						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\skill_editor_moc.cpp&#x0D;&#x0A;"
 						AdditionalDependencies=""
 						Outputs="$(ProjectDir)src\editor\skill_editor_moc.cpp"
 					/>
@@ -512,7 +530,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="MOC tileset_editor.h"
-						CommandLine="moc $(InputPath) -o $(ProjectDir)\src\editor\tileset_editor_moc.cpp"
+						CommandLine="moc $(InputPath) -o $(ProjectDir)\src\editor\tileset_editor_moc.cpp&#x0D;&#x0A;"
 						AdditionalDependencies=""
 						Outputs="$(ProjectDir)src\editor\tileset_editor_moc.cpp"
 					/>
