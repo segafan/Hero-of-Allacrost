@@ -510,10 +510,59 @@ ObjectInfoWindow::~ObjectInfoWindow() {
 
 void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 	_object = obj;
+	
+	_usableBy.clear();
+	_statVariance.clear();
+	_metaVariance.clear();
+
 	if (obj == NULL) {
 		description.ClearText();
 		properties.ClearText();
 		return;
+	}
+
+	if (obj->GetObjectType() == GLOBAL_OBJECT_WEAPON || 
+	    obj->GetObjectType() == GLOBAL_OBJECT_HEAD_ARMOR || 
+	    obj->GetObjectType() == GLOBAL_OBJECT_TORSO_ARMOR ||
+	    obj->GetObjectType() == GLOBAL_OBJECT_ARM_ARMOR || 
+	    obj->GetObjectType() == GLOBAL_OBJECT_LEG_ARMOR) {
+		uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
+		GlobalCharacter* ch;
+
+		for(uint32 i = 0; i < partysize; i++) {
+			ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(i));
+			if(static_cast<GlobalArmor*>(obj)->GetUsableBy() & ch->GetID()) {
+				int32 variance = 0;
+				int32 metaVariance = 0;
+				switch(obj->GetObjectType()) {
+					case GLOBAL_OBJECT_WEAPON:
+						variance = static_cast<GlobalWeapon*>(obj)->GetPhysicalAttack() - ch->GetWeaponEquipped()->GetPhysicalAttack();
+						metaVariance = static_cast<GlobalWeapon*>(obj)->GetMetaphysicalAttack() - ch->GetWeaponEquipped()->GetMetaphysicalAttack();
+						break;
+					case GLOBAL_OBJECT_ARM_ARMOR:
+						variance = static_cast<GlobalArmor*>(obj)->GetPhysicalDefense() - ch->GetArmArmorEquipped()->GetPhysicalDefense();
+						metaVariance = static_cast<GlobalArmor*>(obj)->GetMetaphysicalDefense() - ch->GetArmArmorEquipped()->GetMetaphysicalDefense();
+						break;
+					case GLOBAL_OBJECT_TORSO_ARMOR:
+						variance = static_cast<GlobalArmor*>(obj)->GetPhysicalDefense() - ch->GetTorsoArmorEquipped()->GetPhysicalDefense();
+						metaVariance = static_cast<GlobalArmor*>(obj)->GetMetaphysicalDefense() - ch->GetTorsoArmorEquipped()->GetMetaphysicalDefense();
+						break;
+					case GLOBAL_OBJECT_HEAD_ARMOR:
+						variance = static_cast<GlobalArmor*>(obj)->GetPhysicalDefense() - ch->GetHeadArmorEquipped()->GetPhysicalDefense();
+						metaVariance = static_cast<GlobalArmor*>(obj)->GetMetaphysicalDefense() - ch->GetHeadArmorEquipped()->GetMetaphysicalDefense();
+					 	break;
+					case GLOBAL_OBJECT_LEG_ARMOR:
+						variance = static_cast<GlobalArmor*>(obj)->GetPhysicalDefense() - ch->GetLegArmorEquipped()->GetPhysicalDefense();
+						metaVariance = static_cast<GlobalArmor*>(obj)->GetMetaphysicalDefense() - ch->GetLegArmorEquipped()->GetMetaphysicalDefense();
+						break;
+					default: break;
+				}	
+				
+				_usableBy.push_back(ch);
+				_statVariance.push_back(variance);
+				_metaVariance.push_back(metaVariance); 
+			}
+		}
 	}
 
 	description.SetDisplayText(_object->GetDescription());
@@ -523,9 +572,8 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 		case GLOBAL_OBJECT_WEAPON:
 			GlobalWeapon *weapon;
 			weapon = dynamic_cast<GlobalWeapon*>(obj);
-			properties.SetDisplayText(
-				"PHYS ATK: " + NumberToString(weapon->GetPhysicalAttack()) + "\n" +
-				"META ATK: " + NumberToString(weapon->GetMetaphysicalAttack())
+			properties.SetDisplayText("PHYS ATK: " + NumberToString(weapon->GetPhysicalAttack()) + "\n" + "META ATK: " + NumberToString(weapon->GetMetaphysicalAttack()) + "\n" +
+				"Equippable by: "
 			);
 			break;
 		case GLOBAL_OBJECT_HEAD_ARMOR:
@@ -534,9 +582,7 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 		case GLOBAL_OBJECT_LEG_ARMOR:
 			GlobalArmor *armor;
 			armor = dynamic_cast<GlobalArmor*>(obj);
-			properties.SetDisplayText(
-				"PHYS DEF: " + NumberToString(armor->GetPhysicalDefense()) + "\n" +
-				"META DEF: " + NumberToString(armor->GetMetaphysicalDefense())
+			properties.SetDisplayText("           DEF: " + NumberToString(armor->GetPhysicalDefense()) + "\n" + "META DEF: " + NumberToString(armor->GetMetaphysicalDefense())
 			);
 			break;
 		default:
@@ -549,7 +595,6 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 
 void ObjectInfoWindow::Draw() {
 	MenuWindow::Draw();
-
 	if (_object == NULL) {
 		return;
 	}
@@ -559,9 +604,37 @@ void ObjectInfoWindow::Draw() {
 	_object->GetIconImage().Draw();
 	VideoManager->MoveRelative(60, 20);
 	VideoManager->Text()->Draw(_object->GetName());
-
+	if(!_usableBy.empty()){
+		VideoManager->Move(335,110);
+		for(uint32 i = 0; i < _usableBy.size(); i++) {
+			
+			VideoManager->Text()->Draw(_usableBy[i]->GetName());
+			VideoManager->MoveRelative(0, -17);
+			if(_statVariance[i] > 0) {
+				VideoManager->Text()->Draw("+" + NumberToString(_statVariance[i]), TextStyle("default", Color::green, VIDEO_TEXT_SHADOW_DARK));
+			}
+			else if(_statVariance[i] == 0) {
+				VideoManager->Text()->Draw("+" + NumberToString(_statVariance[i]), TextStyle("default", Color::gray, VIDEO_TEXT_SHADOW_DARK) );
+			}
+			else if(_statVariance[i] < 0) {
+				VideoManager->Text()->Draw(NumberToString(_statVariance[i]), TextStyle("default", Color::red, VIDEO_TEXT_SHADOW_DARK) );
+			}
+			VideoManager->MoveRelative(35,0);
+			if(_metaVariance[i] > 0) {
+				VideoManager->Text()->Draw("+" + NumberToString(_metaVariance[i]), TextStyle("default", Color::green, VIDEO_TEXT_SHADOW_DARK));
+			}
+			else if(_metaVariance[i] == 0) {
+				VideoManager->Text()->Draw("+" + NumberToString(_metaVariance[i]), TextStyle("default", Color::gray, VIDEO_TEXT_SHADOW_DARK) );
+			}
+			else if(_metaVariance[i] < 0) {
+				VideoManager->Text()->Draw(NumberToString(_metaVariance[i]), TextStyle("default", Color::red, VIDEO_TEXT_SHADOW_DARK) );
+			}
+					
+			VideoManager->MoveRelative(50, 17);
+		}
+	}
 	// Draw the object's description and stats text boxes
-	description.Draw();
+	description.Draw(); 
 	properties.Draw();
 }
 
