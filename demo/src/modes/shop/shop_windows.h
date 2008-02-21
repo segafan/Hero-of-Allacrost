@@ -203,6 +203,19 @@ private:
 	*** object in the player's inventory or anywhere else.
 	**/
 	hoa_global::GlobalObject* _object;
+	
+	//! \brief A vector holding the list of characters capable of equipping the above object.
+	std::vector<hoa_global::GlobalCharacter*> _usableBy;
+
+	/** \brief Vector that holds the +/- variance of stats for equipping above object.
+	*** This vector corresponds with the _usableBy vector above. Each index represents a character
+	*** that is capable of equipping this object.
+	**/
+	std::vector<int32> _statVariance;
+	
+	//! \brief Same as above, but this holds the variance for the meta defense/attack.
+	std::vector<int32> _metaVariance;
+	
 }; // class ObjectInfoWindow : public hoa_video::MenuWindow
 
 
