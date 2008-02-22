@@ -239,7 +239,7 @@ void TreasureMenu::_UpdateList() {
 
 		uint32 list_selection = _list_options.GetSelection();
 		if (_treasure->_drunes != 0 && list_selection == 0) { // If true, the drunes are selected
-			_detail_textbox.SetDisplayText(MakeUnicodeString("With the additional " + NumberToString(_treasure->_drunes) + " drunes found in this treasure added," +
+			_detail_textbox.SetDisplayText(MakeUnicodeString("With the additional " + NumberToString(_treasure->_drunes) + " drunes found in this treasure added, " +
 				"the party now holds a total of " + NumberToString(GlobalManager->GetDrunes()) + " drunes."));
 		}
 		else { // Otherwise, a GlobalObject is selected
