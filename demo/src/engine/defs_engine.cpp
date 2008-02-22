@@ -108,6 +108,15 @@ void BindEngineToLua()
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_system")
 	[
 		class_<GameSystem>("GameSystem")
+			.def("GetUpdateTime", &GameSystem::GetUpdateTime)
+			.def("SetPlayTime", &GameSystem::SetPlayTime)
+			.def("GetPlayHours", &GameSystem::GetPlayHours)
+			.def("GetPlayMinutes", &GameSystem::GetPlayMinutes)
+			.def("GetPlaySeconds", &GameSystem::GetPlaySeconds)
+			.def("GetLanguage", &GameSystem::GetLanguage)
+			.def("SetLanguage", &GameSystem::SetLanguage)
+			.def("NotDone", &GameSystem::NotDone)
+			.def("ExitGame", &GameSystem::ExitGame)
 	];
 
 	} // End using system namespaces
