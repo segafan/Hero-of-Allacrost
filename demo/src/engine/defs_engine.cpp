@@ -82,6 +82,11 @@ void BindEngineToLua()
 		class_<GameModeManager>("GameModeManager")
 			.def("Push", &GameModeManager::Push, adopt(_2))
 			.def("Pop", &GameModeManager::Pop)
+			.def("PopAll", &GameModeManager::PopAll)
+			.def("GetTop", &GameModeManager::GetTop)
+			.def("Get", &GameModeManager::Get)
+			.def("GetGameType", (uint8 (GameModeManager::*)(int))&GameModeManager::GetGameType)
+			.def("GetGameType", (uint8 (GameModeManager::*)())&GameModeManager::GetGameType)
 	];
 
 	} // End using mode manager namespaces
