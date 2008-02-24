@@ -387,7 +387,7 @@ void MapMode::_HandleInputExplore() {
 // Determines things like our starting tiles
 void MapMode::_CalculateDrawInfo() {
 	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
-	// THIS CODE IS TEMPORAL AND NOT COMPLETELY WORKING
+	// THIS CODE IS TEMPORARY AND NOT COMPLETELY WORKING
 
 #ifdef __MAP_CHANGE_1__
 	static float x (_draw_info.tile_x_start);
@@ -474,7 +474,7 @@ void MapMode::_CalculateDrawInfo() {
 	}
 
 	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
-	// THIS CODE IS TEMPORAL AND NOT COMPLETELY WORKING
+	// THIS CODE IS TEMPORARY AND NOT COMPLETELY WORKING
 #ifdef __MAP_CHANGE_1__
 	float y_resolution;
 	float x_resolution;
