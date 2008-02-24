@@ -104,9 +104,24 @@ public:
 /** ****************************************************************************
 *** \brief Represents an OpenAL source
 ***
-*** A source in OpenAL is just what it sounds like it is: a source of audio
-*** playback. Sources have their own set of properties like position, velocity,
-*** etc. Those properties are not managed by this class, but rather by the
+*** OpenAL is designed to take care of the complexity of panning sound to
+*** different speakers; it does this by storing the locations in 3d space of 
+*** both the physical sources that a sound might originate from (for example, 
+*** the point in space where two swords clang together), and also the 3d 
+*** location of the listener's "ears". A source in OpenAL is simply metadata 
+*** about the position of the sound; the actual sound itself comes from audio 
+*** data which is loaded into a buffer, and then played back through one of 
+*** these sources.
+***
+*** This metadata includes properties like position, velocity,
+*** etc. None of these are actually altered by OpenAL; OpenAL does not use
+*** velocity to move the sound sources for us each game tick; rather, it simply
+*** uses these to calculate sound itself (velocity is actually used for 
+*** calculating doppler effects). We are expected to fill these values with 
+*** appropriate position/velocity data to keep them in sync with the game
+*** objects they represent.
+***
+*** Those properties are not managed by this class, but rather by the
 *** AudioDescriptor to which the source is attached. OpenAL (or rather, the
 *** audio hardware) only allows a limited number of audio sources to exist at
 *** one time, so we can't create a source for every piece of audio that is
