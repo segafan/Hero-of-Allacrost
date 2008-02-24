@@ -88,7 +88,7 @@ void AudioStream::Seek(uint32 sample) {
 
 void AudioStream::SetLoopStart(uint32 sample) {
 	if (sample >= _audio_input->GetTotalNumberSamples()) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "tired to set loop start point beyond sample range: " << sample << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set loop start point beyond sample range: " << sample << endl;
 		return;
 	}
 
@@ -99,7 +99,7 @@ void AudioStream::SetLoopStart(uint32 sample) {
 
 void AudioStream::SetLoopEnd(uint32 sample) {
 	if (sample >= _audio_input->GetTotalNumberSamples()) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "tired to set loop end point beyond sample range: " << sample << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set loop end point beyond sample range: " << sample << endl;
 		return;
 	}
 
