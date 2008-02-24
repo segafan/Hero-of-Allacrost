@@ -200,7 +200,7 @@ private:
 	//! \brief Contains information about the Vorbis Ogg file
 	OggVorbis_File _vorbis_file;
 
-	//! \brief Temporal buffer for reading data.
+	//! \brief Temporary buffer for reading data.
 	unsigned char _read_buffer[4096];
 
 	//! \brief Position of previous read data (for the emporal buffer).
