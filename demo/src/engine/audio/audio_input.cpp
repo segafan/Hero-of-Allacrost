@@ -261,7 +261,7 @@ void OggFile::Seek(uint32 cursor) {
 
 	ov_pcm_seek(&_vorbis_file, cursor);
 
-	// Reset the temporal buffer by setting the position to 0
+	// Reset the temporary buffer by setting the position to 0
 	_read_buffer_position = 0;
 	_read_buffer_size = 0;
 }
@@ -273,7 +273,7 @@ uint32 OggFile::Read(uint8* buffer, uint32 size, bool& end) {
 	uint32 read =0;
 	end = false;
 
-	// First get data from the temporal buffer if it holds any
+	// First get data from the temporary buffer if it holds any
 	if (_read_buffer_size > 0) {
 		if (_read_buffer_size > size*_sample_size) {
 			read = size*_sample_size;
