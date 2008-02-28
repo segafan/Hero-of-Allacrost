@@ -260,7 +260,7 @@ function Load(m)
 
 	-- Create the player's sprite
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Claudius");
+	sprite:SetName(hoa_utils.Translate("Claudius"));
 	sprite:SetObjectID(1000);
 	sprite:SetContext(1);
 	sprite:SetXPosition(100, 0.5);
@@ -281,7 +281,7 @@ function Load(m)
 
 	-- Create a NPC sprite
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Laila");
+	sprite:SetName(hoa_utils.Translate("Laila"));
 	sprite:SetObjectID(2);
 	sprite:SetContext(1);
 	sprite:SetXPosition(105, 0.0);
@@ -298,34 +298,66 @@ function Load(m)
 
 	dialogue = hoa_map.MapDialogue();
 	--dialogue:SetMaxViews(1);
-	dialogue:AddText("Laila, what's wrong? You have a worried look on your face.", 1000, -1, -1); --Line 0
-	dialogue:AddText("You're going into the cave again, aren't you?", 2, -1, -1); --Line 1
-	dialogue:AddOption("Yes, I intend to...", 1000, 2, -1);
-	dialogue:AddOption("No, of course not...", 1000, 8, -1);
+	
+	dtext = {
+	  [0] = hoa_utils.Translate("Laila, what's wrong? You have a worried look on your face.");
+	  [1] = hoa_utils.Translate("You're going into the cave again, aren't you?");
+	  --Yes
+	  [2] = hoa_utils.Translate("But why? Its dangerous in there!");
+	  [3] = hoa_utils.Translate("Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?");
+	  [4] = hoa_utils.Translate("I know that you're worried about me and I appreciate it, but you need to stop doing this.");
+	  [5] = hoa_utils.Translate(".....Alright, I'm sorry. Just be careful in there, okay?");
+	  [6] = hoa_utils.Translate("Will do. Thanks Laila.");
+	  [7] = hoa_utils.Translate("You know Claudius, I could be of assistance to you in the cave. May I come with you?");
+	  --No
+	  [8] = hoa_utils.Translate("Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know...");
+	  [9] = hoa_utils.Translate("Of course, I promise.");
+	  -- Rejected
+	 [10] = hoa_utils.Translate("Oh....ok then. You remember to be careful.");
+	 [11] = hoa_utils.Translate("I will Laila.");
+	  -- Add to party
+	 [12] = hoa_utils.Translate("Great, I'll be sure to help you any way I can.");
+	 [13] = hoa_utils.Translate("Laila has joined the party.");
+
+	}
+
+	doption = {
+	 --going into cave?
+	 [0] = hoa_utils.Translate("Yes, I intend to...");
+	 [1] = hoa_utils.Translate("No, of course not...");
+	 --join party?
+	 [2] = hoa_utils.Translate("No way, you could be hurt!");
+	 [3] = hoa_utils.Translate("Your help would be great!");
+	}
+
+	dialogue:AddText(dtext[0], 1000, -1, -1); --Line 0
+	dialogue:AddText(dtext[1], 2, -1, -1); --Line 1
+	dialogue:AddOption(doption[0], 1000, 2, -1);
+	dialogue:AddOption(doption[1], 1000, 8, -1);
 	
 	--Yes
-	dialogue:AddText("But why? Its dangerous in there!", 2, -1, -1); --Line 2
-	dialogue:AddText("Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?", 1000, -1, -1); --Line 3
-	dialogue:AddText("I know that you're worried about me and I appreciate it, but you need to stop doing this.", 1000, -1, -1); --Line 4
-	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay?", 2, -1, -1); --Line 5
-	dialogue:AddText("Will do. Thanks Laila.", 1000, -1, -1); --Line 6
-	dialogue:AddText("You know Claudius, I could be of assistance to you in the cave. May I come with you?", 2, -1, -1); --Line 7
-	dialogue:AddOption("No way, you could be hurt!", 1000, 10 , -1);
-	dialogue:AddOption("Your help would be great!", 1000, 12 , -1);
+	dialogue:AddText(dtext[2], 2, -1, -1); --Line 2
+	dialogue:AddText(dtext[3], 1000, -1, -1); --Line 3
+	dialogue:AddText(dtext[4], 1000, -1, -1); --Line 4
+	dialogue:AddText(dtext[5], 2, -1, -1); --Line 5
+	dialogue:AddText(dtext[6], 1000, -1, -1); --Line 6
+	dialogue:AddText(dtext[7], 2, -1, -1); --Line 7
+	dialogue:AddOption(doption[2], 1000, 10 , -1);
+	dialogue:AddOption(doption[3], 1000, 12 , -1);
 	
 	--No
-	dialogue:AddText("Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know...", 2, -1,-1); --Line 8
-	dialogue:AddText("Of course, I promise.", 1000, -1, -1); --Line 9
+	dialogue:AddText(dtext[8], 2, -1,-1); --Line 8
+	dialogue:AddText(dtext[9], 1000, -1, -1); --Line 9
 	dialogue:EndDialogue();
 	
 	-- Rejected
-	dialogue:AddText("Oh....ok then. You remember to be careful.", 2, -1, -1); -- Line 10
-	dialogue:AddText("I will Laila.", 1000, -1, -1); -- Line 11
+	dialogue:AddText(dtext[10], 2, -1, -1); -- Line 10
+	dialogue:AddText(dtext[11], 1000, -1, -1); -- Line 11
 	dialogue:EndDialogue();
 	
 	-- Add to party
-	dialogue:AddText("Great, I'll be sure to help you any way I can.", 2, -1, 1); --  Line 12, Laila added to party and map sprite removed
-	dialogue:AddText("Laila has joined the party.", 2, -1, -1); -- Line 13
+	dialogue:AddText(dtext[12], 2, -1, 1); --  Line 12, Laila added to party and map sprite removed
+	dialogue:AddText(dtext[13], 2, -1, -1); -- Line 13
 	sprite:AddDialogue(dialogue);
 	
 	laila = sprite;
@@ -364,7 +396,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Marcus");
+	sprite:SetName(hoa_utils.Translate("Marcus"));
 	sprite:SetObjectID(3);
 	sprite:SetContext(1);
 	sprite:SetXPosition(40, 0.7);
@@ -378,10 +410,16 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/marcus_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/marcus.png");
 
+	dtext = {
+	 [0] = hoa_utils.Translate("Hey there son, how's the training going?");
+	 [1] = hoa_utils.Translate("Pretty well. The enemies in the cave aren't too tough.");
+	 [2] = hoa_utils.Translate("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.");
+	}
+
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("Hey there son, how's the training going?", 3, -1, -1);
-	dialogue:AddText("Pretty well. The enemies in the cave aren't too tough.", 1000, -1, -1);
-	dialogue:AddText("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.", 3, -1, -1);
+	dialogue:AddText(dtext[0], 3, -1, -1);
+	dialogue:AddText(dtext[1], 1000, -1, -1);
+	dialogue:AddText(dtext[2], 3, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionPathMove(sprite);
@@ -397,7 +435,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Vanica");
+	sprite:SetName(hoa_utils.Translate("Vanica"));
 	sprite:SetObjectID(4);
 	sprite:SetContext(1);
 	sprite:SetXPosition(38, 0.5);
@@ -411,15 +449,22 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/vanica_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/vanica.png");
 
+	dtext = {
+	 [0] = hoa_utils.Translate("Oh, Claudius? You seemed puzzled.");
+	 [1] = hoa_utils.Translate("There are odd little icons above people's heads. What do they mean?");
+	 [2] = hoa_utils.Translate("That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear.");
+	 [3] = hoa_utils.Translate("And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more.");
+	}
+
 	dialogue = hoa_map.MapDialogue();
 	dialogue:SetMaxViews(1);
-	dialogue:AddText("Oh, Claudius? You seemed puzzled.", 4, -1, -1);
-	dialogue:AddText("There are odd little icons above people's heads. What do they mean?", 1000, -1, -1);
-	dialogue:AddText("That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear.", 4, -1, -1);
+	dialogue:AddText(dtext[0], 4, -1, -1);
+	dialogue:AddText(dtext[1], 1000, -1, -1);
+	dialogue:AddText(dtext[2], 4, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more.", 4, -1, -1);
+	dialogue:AddText(dtext[3], 4, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionPathMove(sprite);
@@ -435,7 +480,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Laine");
+	sprite:SetName(hoa_utils.Translate("Laine"));
 	sprite:SetObjectID(6);
 	sprite:SetContext(1);
 	sprite:SetXPosition(72, 0.5);
@@ -448,9 +493,14 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc01_walk.png");
 
+	dtext = {
+	 [0] = hoa_utils.Translate("Hello, would you happen to know why it seems impossible to enter any of these houses?");
+	 [1] = hoa_utils.Translate("Ah, well the game designers are still working on decorating the interiors, so they had to lock the doors to make sure that no one soiled the place before they were finished.");
+	}
+
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("Hello, would you happen to know why it seems impossible to enter any of these houses?", 1000, -1, -1);
-	dialogue:AddText("Ah, well the game designers are still working on decorating the interiors, so they had to lock the doors to make sure that no one soiled the place before they were finished.", 6, -1, -1);
+	dialogue:AddText(dtext[0], 1000, -1, -1);
+	dialogue:AddText(dtext[1], 6, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionPathMove(sprite);
@@ -476,7 +526,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Alexander");
+	sprite:SetName(hoa_utils.Translate("Alexander"));
 	sprite:SetObjectID(7);
 	sprite:SetContext(1);
 	sprite:SetXPosition(52, 0.5);
@@ -489,8 +539,10 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc02_walk.png");
 
+	dtext = hoa_utils.Translate("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.");
+
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.", 7, -1, -1);
+	dialogue:AddText(dtext, 7, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionPathMove(sprite);
@@ -509,7 +561,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Torl");
+	sprite:SetName(hoa_utils.Translate("Torl"));
 	sprite:SetObjectID(8);
 	sprite:SetContext(1);
 	sprite:SetXPosition(40, 0.5);
@@ -522,8 +574,10 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/boy_npc01_walk.png");
 
+	dtext = hoa_utils.Translate("This village is boring! There's no one I can play with here!");
+
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("This village is boring! There's no one I can play with here!", 8, -1, -1);
+	dialogue:AddText(dtext, 8, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionRandomMove(sprite);
@@ -532,7 +586,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Female Merchant");
+	sprite:SetName(hoa_utils.Translate("Female Merchant"));
 	sprite:SetObjectID(9);
 	sprite:SetContext(1);
 	sprite:SetXPosition(70, 0.5);
@@ -545,8 +599,10 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/woman_npc01_walk.png");
 
+	dtext = hoa_utils.Translate("I have merchandise for sale at affordable prices. Take a look.");
+
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("I have merchandise for sale at affordable prices. Take a look.", 9, -1, 0);
+	dialogue:AddText(dtext, 9, -1, 0);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionAnimate(sprite);
@@ -560,7 +616,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Livia");
+	sprite:SetName(hoa_utils.Translate("Livia"));
 	sprite:SetObjectID(10);
 	sprite:SetContext(1);
 	sprite:SetXPosition(32, 0.5);
@@ -573,8 +629,10 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/girl_npc02_walk.png");
 
+	dtext = hoa_utils.Translate("I'm looking for my brother Torl. I sure hope he doesn't get into any trouble.");
+
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("I'm looking for my brother Torl. I sure hope he doesn't get into any trouble.", 10, -1, -1);
+	dialogue:AddText(dtext, 10, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionRandomMove(sprite);
@@ -583,7 +641,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Octavia");
+	sprite:SetName(hoa_utils.Translate("Octavia"));
 	sprite:SetObjectID(11);
 	sprite:SetContext(1);
 	sprite:SetXPosition(9, 0.5);
@@ -596,8 +654,10 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/woman_npc02_walk.png");
 
+	dtext = hoa_utils.Translate("So much work to do!");
+
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("So much work to do!", 11, -1, -1);
+	dialogue:AddText(dtext, 11, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionRandomMove(sprite);

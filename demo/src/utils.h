@@ -462,6 +462,15 @@ hoa_utils::ustring MakeUnicodeString(const std::string& text);
 *** this may come in use if a ustring contains file information.
 **/
 std::string MakeStandardString(const hoa_utils::ustring& text);
+
+/** \brief Returns a translated string (return value of the gettext() function)
+*** \param text The string that needs to be translated
+*** \return A translated text in the form of a string 
+***
+*** This function is used to call the gettext() function, such that, 
+*** for different language modes different text will be displayed.
+**/
+std::string Translate(const std::string& text);
 //@}
 
 

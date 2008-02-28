@@ -158,7 +158,7 @@ GameSystem::GameSystem() {
 		cout << "SETTINGS: GameSystem constructor invoked" << endl;
 
 	_not_done = true;
-	_language = "en"; // Default language is English
+	SetLanguage("en"); //Default language is English
 }
 
 
@@ -171,7 +171,11 @@ GameSystem::~GameSystem() {
 
 
 bool GameSystem::SingletonInitialize() {
-	// TODO: Initialize the gettext library
+	// Initialize the gettext library
+	setlocale(LC_ALL, "");
+ 	bindtextdomain("allacrost", "./txt");
+ 	textdomain("allacrost");
+
 // 	setlocale(LC_ALL, "");
 // 	bindtextdomain(PACKAGE, DATADIR);
 // 	textdomain(PACKAGE);
@@ -253,6 +257,9 @@ void GameSystem::SetLanguage(std::string lang) {
 //
 // 	cerr << "SETTINGS ERROR: attempt to set unsupported language \"" << lang << "\" failed" << endl;
 	_language = lang;
+
+	// Set language environment variable 
+	setenv ("LANGUAGE", _language.c_str(), 1);
 }
 
 
