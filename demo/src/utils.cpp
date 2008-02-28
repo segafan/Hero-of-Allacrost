@@ -347,6 +347,12 @@ string MakeStandardString(const ustring& text) {
 	return new_str;
 } // string MakeStandardString(const ustring& text)
 
+// Invokes gettext() and translates string (if possible)
+string Translate(const string& text) {
+	string str = string( gettext( text.c_str() ) );
+	return str;
+} // ustring TranslateString(const string& text)
+
 ////////////////////////////////////////////////////////////////////////////////
 ///// Random number generator functions
 ////////////////////////////////////////////////////////////////////////////////
