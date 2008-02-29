@@ -157,9 +157,15 @@ void PauseMode::Update() {
 
 
 void PauseMode::Draw() {
+	// Set the coordinate system for the background and draw
+	float width = _screen_capture.GetWidth();
+	float height = _screen_capture.GetHeight();
+	VideoManager->SetCoordSys(0, width, 0, height);
 	VideoManager->Move(0.0f, 0.0f);
 	_screen_capture.Draw(_dim_color);
 
+	// Re-set the coordinate system for everything else
+	VideoManager->SetCoordSys(0, 1024.0f, 0, 768.0f);
 	if (_quit_state == false) {
 		VideoManager->Move(512.0f, 384.0f);
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
