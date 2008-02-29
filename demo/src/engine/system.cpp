@@ -173,8 +173,8 @@ GameSystem::~GameSystem() {
 bool GameSystem::SingletonInitialize() {
 	// Initialize the gettext library
 	setlocale(LC_ALL, "");
- 	bindtextdomain("allacrost", "./txt");
- 	textdomain("allacrost");
+	bindtextdomain("allacrost", "./txt");
+	textdomain("allacrost");
 
 // 	setlocale(LC_ALL, "");
 // 	bindtextdomain(PACKAGE, DATADIR);
@@ -263,11 +263,36 @@ void GameSystem::SetLanguage(std::string lang) {
 }
 
 
-void SystemThread::WaitForThread(Thread * thread)
-{
+
+void SystemThread::WaitForThread(Thread * thread) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_WaitThread(thread, NULL);
 #endif
 }
+
+Semaphore * SystemThread::CreateSemaphore(int max) {
+#if (THREAD_TYPE == SDL_THREADS)
+	return SDL_CreateSemaphore(max);
+#endif
+}
+
+void SystemThread::DestroySemaphore(Semaphore * s) {
+#if (THREAD_TYPE == SDL_THREADS)
+	SDL_DestroySemaphore(s);
+#endif
+}
+
+void SystemThread::LockThread(Semaphore * s) {
+#if (THREAD_TYPE == SDL_THREADS)
+	SDL_SemWait(s);
+#endif
+}
+
+void SystemThread::UnlockThread(Semaphore * s) {
+#if (THREAD_TYPE == SDL_THREADS)
+	SDL_SemPost(s);
+#endif
+}
+
 
 } // namespace hoa_system

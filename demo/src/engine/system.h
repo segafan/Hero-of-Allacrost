@@ -43,8 +43,10 @@
 	#include <SDL/SDL_thread.h>
 	#include <SDL/SDL_mutex.h>
 	typedef SDL_Thread Thread;
+	typedef SDL_sem Semaphore;
 #else
 	typedef int Thread;
+	typedef int Semaphore;
 #endif
 
 //! All calls to the system engine are wrapped in this namespace.
@@ -390,18 +392,24 @@ public:
 	template <class T> Thread * SpawnThread(void (T::*)(), T *);
 	void WaitForThread(Thread * thread);
 
+	void LockThread(Semaphore *);
+	void UnlockThread(Semaphore *);
+	Semaphore * CreateSemaphore(int max);
+	void DestroySemaphore(Semaphore *);
+
 }; // class SystemThread
 
 template <class T> Thread * SystemThread::SpawnThread(void (T::*func)(), T * myclass) {
 #if (THREAD_TYPE == SDL_THREADS)
 	Thread * thread;
-	generic_class_func_info <T> gen;
+	static generic_class_func_info <T> gen;
 	gen.func = func;
 	gen.myclass = myclass;
 
 	// Winter Knight: There is a potential, but unlikely race condition here.
-	// If gen's location on the stack gets overwritten before  myclass->*func
-	// gets called in SpawnThread_Intermediate, then it will result in a segfault.
+	// gen may be overwritten prematurely if this function, SpawnThread, gets
+	// called a second time before SpawnThread_Intermediate calls myclass->*func
+	// This will result in a segfault.
 	thread = SDL_CreateThread(gen.SpawnThread_Intermediate, &gen);
 	if (thread == NULL) {
 		PRINT_ERROR << "Unable to create thread: " << SDL_GetError() << std::endl;
@@ -416,7 +424,6 @@ template <class T> Thread * SystemThread::SpawnThread(void (T::*func)(), T * myc
 	return 0;
 #endif
 }
-
 
 } // namepsace hoa_system
 
