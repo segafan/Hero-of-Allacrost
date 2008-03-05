@@ -134,19 +134,21 @@ public:
 
 	/** \brief Sets the text for this box to the string passed in.
 	*** \param text The text to display for the textbox
+	*** \param style The style to display the text in (if this optional argument not provided, it uses the current default text style)
 	*** \note If you use a gradual text display mode like VIDEO_TEXT_CHAR, then the text
 	*** will be displayed gradually and when it's done displaying, IsFinished() will return true.
 	*** \note This function checks the text passed in if it's too big for the textbox and inserts
 	*** new lines where appropriate. If the text is so big that it can't fit even with word
 	*** wrapping, an error is printed to the console if debugging is enabled.
 	**/
-	void SetDisplayText(const hoa_utils::ustring& text);
+	void SetDisplayText(const hoa_utils::ustring& text, const TextStyle& style = TextManager->GetDefaultStyle());
 
 	/** \brief A non-unicode version of SetDisplayText().
 	*** \param text The text to be set in the box (a standard non-unicode string).
+	*** \param style The style to display the text in (if this optional argument not provided, it uses the current default text style)
 	*** See the unicode version of SetDisplayText for more details.
 	**/
-	void SetDisplayText(const std::string& text);
+	void SetDisplayText(const std::string& text, const TextStyle& style = TextManager->GetDefaultStyle());
 
 	/** \brief Obtains the width and height of the text box.
 	*** \param w A reference to the variable in which to store the width.
@@ -223,6 +225,9 @@ private:
 
 	//! \brief The number of milliseconds remaining until the gradual text display will be complete.
 	uint32 _end_time;
+
+	//! \brief The rendered image of the text stored in the text box
+	TextImage _text_image;
 
 	//! \brief The text style for this textbox
 	TextStyle _text_style;
