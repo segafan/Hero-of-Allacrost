@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="Allacrost"
 	ProjectGUID="{090248BB-5514-4846-A563-695576F3D685}"
 	RootNamespace="Allacrost"
@@ -64,7 +64,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT&#x0D;&#x0A;/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="shell32.lib user32.lib SDL.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_net.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpegd.lib zdll.lib Luabind_Debug.lib lua50.lib"
+				AdditionalDependencies="shell32.lib user32.lib SDL.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_net.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpegd.lib zdll.lib Luabind_Debug.lib lua50.lib gnu_gettext.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -151,7 +151,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT"
-				AdditionalDependencies="shell32.lib user32.lib SDL.lib SDL_Net.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib lua50.lib"
+				AdditionalDependencies="shell32.lib user32.lib SDL.lib SDL_Net.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib lua50.lib gnu_gettext.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="false"
 				SubSystem="2"
