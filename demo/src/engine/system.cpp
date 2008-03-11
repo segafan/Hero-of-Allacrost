@@ -14,6 +14,10 @@
 *** \brief  Source file for system code management
 *** ***************************************************************************/
 
+#ifdef _WIN32
+	#include "libintl.h"
+	#include <direct.h>
+#endif
 #include "system.h"
 #include "audio.h"
 #include "script.h"
@@ -258,8 +262,14 @@ void GameSystem::SetLanguage(std::string lang) {
 // 	cerr << "SETTINGS ERROR: attempt to set unsupported language \"" << lang << "\" failed" << endl;
 	_language = lang;
 
-	// Set language environment variable 
-	setenv ("LANGUAGE", _language.c_str(), 1);
+
+	/// @TODO, implement a cross-platform wrapper for setenv
+	#ifdef _WIN32
+		SetEnvironmentVariable("LANGUAGE", _language.c_str());
+	#else
+		setenv ("LANGUAGE", _language.c_str(), 1);
+	#endif
+
 }
 
 

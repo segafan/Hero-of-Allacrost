@@ -18,6 +18,7 @@
 #ifdef _WIN32
 	#include <direct.h>
 	#include <shlobj.h>
+	#include "libintl.h"
 #else
 	#include <dirent.h>
 	#include <sys/types.h>
@@ -27,7 +28,6 @@
 #include <sys/stat.h>
 
 #include "utils.h"
-
 #include "socket.h"
 
 
