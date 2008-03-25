@@ -40,9 +40,10 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	_height = height;
 	_width  = width;
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
-	_context = 0;
 
 	// Default properties
+	_context = 0;           // context is set to default base context
+	context_names << "Base";
 	_changed = false;       // map has not yet been modified
 	_grid_on = true;        // grid lines default to on
 	_select_on = false;     // selection rectangle default to off
@@ -202,8 +203,15 @@ void Grid::LoadMap()
 	_width  = read_data.ReadInt("num_tile_cols");
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
 
-	read_data.OpenTable("tileset_filenames");
+	// Base context is default and not saved in the map file.
+	read_data.OpenTable("context_names");
 	uint32 table_size = read_data.GetTableSize();
+	for (uint32 i = 1; i <= table_size; i++)
+		context_names.append(QString(read_data.ReadString(i).c_str()));
+	read_data.CloseTable();
+
+	read_data.OpenTable("tileset_filenames");
+	table_size = read_data.GetTableSize();
 	for (uint32 i = 1; i <= table_size; i++)
 		tileset_names.append(QString(read_data.ReadString(i).c_str()));
 	read_data.CloseTable();
@@ -290,12 +298,12 @@ void Grid::LoadMap()
 
 	read_data.CloseTable();
 
-	_grid_on = true;        // grid lines default to on
-	_ll_on   = true;        // lower layer default to on
-	_ml_on   = true;        // middle layer default to off
-	_ul_on   = true;        // upper layer default to off
-	_context = 1;           // context default to main context (#1)
-	_changed = false;       // map has not been changed yet
+//	_grid_on = true;        // grid lines default to on
+//	_ll_on   = true;        // lower layer default to on
+//	_ml_on   = true;        // middle layer default to off
+//	_ul_on   = true;        // upper layer default to off
+//	_context = 0;           // context default to base context
+//	_changed = false;       // map has not been changed yet
 } // LoadMap()
 
 void Grid::SaveMap()
@@ -321,7 +329,7 @@ void Grid::SaveMap()
 
 	write_data.WriteComment("The sound files used on this map.");
 	write_data.BeginTable("sound_filenames");
-	// TEMP: currently sound_filenames table is not populated with sounds
+	// TODO: currently sound_filenames table is not populated with sounds
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
@@ -332,6 +340,20 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
+	write_data.WriteComment("The names of the contexts used to improve Editor user-friendliness");
+	write_data.BeginTable("context_names");
+	i = 0;
+	// First entry is the default base context. Every map has it, so no need to save it.
+	QStringList::Iterator qit = context_names.begin();
+	qit++;     
+	for (; qit != context_names.end(); ++qit)
+	{
+		i++;
+		write_data.WriteString(i, (*qit).ascii());
+	} // iterate through context_names writing each element
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
 	write_data.WriteComment("The names of the tilesets used, with the path and file extension omitted");
 	write_data.BeginTable("tileset_filenames");
 	i = 0;
@@ -339,7 +361,7 @@ void Grid::SaveMap()
 	{
 		i++;
 		write_data.WriteString(i, (*qit).ascii());
-	} // iterate through tileset_list writing each element
+	} // iterate through tileset_names writing each element
 	write_data.EndTable();
 	write_data.InsertNewLine();
 

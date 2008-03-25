@@ -105,6 +105,10 @@ class Grid: public QGLWidget
 		//! A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage.
 		std::vector<Tileset*> tilesets;
 
+		//! A list containing the names of each context.
+		//! \note Should have a max size of 32. That's the max amount of contexts.
+		QStringList context_names;
+
 	protected:
 		//! \brief Sets up the rendering context of the OpenGL portion of the editor.
 		void initializeGL();
