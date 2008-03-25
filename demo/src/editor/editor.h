@@ -90,6 +90,7 @@ class Editor: public QMainWindow
 		//! Needed for tile editing and accessing the map properties.
 		friend class EditorScrollView;
 		friend class MapPropertiesDialog;
+		friend class ContextPropertiesDialog;
 		friend class LayerCommand;
 		
 
@@ -156,6 +157,7 @@ class Editor: public QMainWindow
 		//{@
 		void _MapSelectMusic();
 		void _MapProperties();
+		void _MapContext();
 		//@}
 
 		//! \name Script Menu Item Slots
@@ -239,6 +241,7 @@ class Editor: public QMainWindow
 
 		QAction* _edit_tileset_action;
 		
+		QAction* _context_properties_action;
 		QAction* _map_properties_action;
 		QAction* _select_music_action;
 
@@ -297,6 +300,7 @@ class EditorScrollView: public Q3ScrollView
 		//! Needed for changing the editing mode and painting, and accessing the map's properties.
 		friend class Editor;
 		friend class MapPropertiesDialog;
+		friend class ContextPropertiesDialog;
 		friend class LayerCommand;
 
 	protected:

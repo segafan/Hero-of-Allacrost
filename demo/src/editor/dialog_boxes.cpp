@@ -99,8 +99,8 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name,
 	_dia_layout->addWidget(_width_label, 2, 0);
 	_dia_layout->addWidget(_width_sbox, 3, 0);
 	_dia_layout->addWidget(_tileset_tree, 0, 1, 5, -1);
-	_dia_layout->addWidget(_cancel_pbut, 6, 1);
-	_dia_layout->addWidget(_ok_pbut, 6, 0);
+	_dia_layout->addWidget(_cancel_pbut, 6, 0);
+	_dia_layout->addWidget(_ok_pbut, 6, 1);
 } // MapPropertiesDialog constructor
 
 MapPropertiesDialog::~MapPropertiesDialog()
@@ -210,4 +210,79 @@ void MusicDialog::_PopulateMusicList(const QString& selected_str)
 
 	_music_list->insertTopLevelItems(0, music);
 } // _PopulateMusicList(...)
+
+
+
+/************************
+  ContextPropertiesDialog class functions follow
+************************/
+
+ContextPropertiesDialog::ContextPropertiesDialog(QWidget* parent, const QString& name)
+	: QDialog(parent, (const char*) name)
+{
+	setCaption("Context Properties...");
+	_name_label = new QLabel("Context name", this);
+	_name_ledit = new QLineEdit(this);
+	connect(_name_ledit, SIGNAL(textEdited(const QString&)), this,
+		SLOT(_EnableOKButton()));
+
+	// Set up the cancel and okay push buttons
+	_cancel_pbut  = new QPushButton("Cancel", this);
+	_ok_pbut      = new QPushButton("OK", this);
+	_cancel_pbut->setDefault(true);
+	// at construction nothing has been entered, disable ok button
+	_ok_pbut->setEnabled(false);
+	connect(_ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
+	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
+
+	// Set up the list of inheritable contexts
+	_context_tree = new QTreeWidget(this);
+	_context_tree->setColumnCount(1);
+	_context_tree->setHeaderLabels(QStringList("Inherit from context:"));
+	QList<QTreeWidgetItem*> contexts;
+
+	// get reference to the Editor
+	Editor* editor = static_cast<Editor*> (parent);
+
+	QStringList context_names = editor->_ed_scrollview->_map->context_names;
+	for (QStringList::Iterator qit = context_names.begin();
+	     qit != context_names.end(); ++qit)
+	{
+		contexts.append(new QTreeWidgetItem((QTreeWidget*)0,
+			QStringList(*qit)));
+	} // loop through all files in the tileset directory
+	_context_tree->insertTopLevelItems(0, contexts);
+
+	// Add all of the aforementioned widgets into a nice-looking grid layout
+	_dia_layout = new QGridLayout(this);
+	_dia_layout->addWidget(_name_label, 0, 0);
+	_dia_layout->addWidget(_name_ledit, 0, 1);
+	_dia_layout->addWidget(_context_tree, 1, 1, 5, -1);
+	_dia_layout->addWidget(_cancel_pbut, 6, 0);
+	_dia_layout->addWidget(_ok_pbut, 6, 1);
+} // ContextPropertiesDialog constructor
+
+ContextPropertiesDialog::~ContextPropertiesDialog()
+{
+	delete _name_label;
+	delete _name_ledit;
+	delete _cancel_pbut;
+	delete _ok_pbut;
+	delete _context_tree;
+	delete _dia_layout;
+} // ContextPropertiesDialog destructor
+
+
+
+// ********** Private slot **********
+
+void ContextPropertiesDialog::_EnableOKButton()
+{
+	// Disable the ok button if the line edit is empty.
+	// The default inheritable context is the base context.
+	if (_name_ledit->text() == "")
+		_ok_pbut->setEnabled(false);
+	else
+		_ok_pbut->setEnabled(true);
+} // _EnableOKButton()
 

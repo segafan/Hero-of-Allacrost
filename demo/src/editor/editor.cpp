@@ -172,11 +172,13 @@ void Editor::_MapMenuSetup()
 	{
 		_select_music_action->setEnabled(true);
 		_map_properties_action->setEnabled(true);
+		_context_properties_action->setEnabled(true);
 	} // map must exist in order to set music
 	else
 	{
 		_select_music_action->setEnabled(false);
 		_map_properties_action->setEnabled(false);
+		_context_properties_action->setEnabled(false);
 	} // map does not exist, can't modify it*/
 } // _MapMenuSetup()
 
@@ -754,6 +756,20 @@ void Editor::_MapProperties()
 	delete props;
 } // _MapProperties()
 
+void Editor::_MapContext()
+{
+	ContextPropertiesDialog* props = new ContextPropertiesDialog(this, "context_properties");
+	
+	if (props->exec() == QDialog::Accepted)
+	{
+		_ed_scrollview->_map->context_names << props->GetName();
+	} // only if the user pressed OK
+	else
+		statusBar()->showMessage("No new context created!", 5000);
+
+	delete props;
+} // _MapContext()
+
 void Editor::_ScriptEditSkills()
 {
 	if (_skill_editor == NULL)
@@ -936,6 +952,8 @@ void Editor::_CreateActions()
 	_edit_group->addAction(_edit_ml_action);
 	_edit_group->addAction(_edit_ul_action);
 	_edit_ll_action->setChecked(true);
+
+
 	
 	// Create tileset actions related to the Tileset Menu
 	
@@ -943,6 +961,7 @@ void Editor::_CreateActions()
 	_edit_tileset_action->setStatusTip("Lets the user paint walkability on the tileset");
 	//_edit_walkability_action->setCheckable(true);
 	connect(_edit_tileset_action, SIGNAL(triggered()), this, SLOT(_TilesetEdit()));
+
 
 	// Create menu actions related to the Map menu
 
@@ -954,11 +973,17 @@ void Editor::_CreateActions()
 	_map_properties_action->setStatusTip("Modify the properties of the map");
 	connect(_map_properties_action, SIGNAL(triggered()), this, SLOT(_MapProperties()));
 
+	_context_properties_action = new QAction("New &Context...", this);
+	_context_properties_action->setStatusTip("Create a new context on the map");
+	connect(_context_properties_action, SIGNAL(triggered()), this, SLOT(_MapContext()));
+
+
 
 	// Create menu actions related to the Script menu
 	_edit_skill_action = new QAction("Edit S&kills", this);
 	_edit_skill_action->setStatusTip("Add/Edit skills");
 	connect(_edit_skill_action, SIGNAL(triggered()), this, SLOT(_ScriptEditSkills()));
+
 
 
 	// Create menu actions related to the Help menu
@@ -1033,6 +1058,7 @@ void Editor::_CreateMenus()
 	_map_menu = menuBar()->addMenu("&Map");
 	_map_menu->addAction(_select_music_action);
 	_map_menu->addAction(_map_properties_action);
+	_map_menu->addAction(_context_properties_action);
 	connect(_map_menu, SIGNAL(aboutToShow()), this, SLOT(_MapMenuSetup()));
 
 	// script menu creation

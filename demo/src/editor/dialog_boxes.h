@@ -104,6 +104,49 @@ private:
 	void _PopulateMusicList(const QString& selected_str);
 }; // class MusicDialog
 
+class ContextPropertiesDialog: public QDialog
+{
+	//! Macro needed to use Qt's slots and signals.
+	Q_OBJECT
+	
+	public:
+		//! \name ContextPropertiesDialog constructor
+		//! \brief A constructor for the ContextPropertiesDialog class. This class is used when creating
+		//!        a new context. The user can give it a name and specify which context to possibly inherit.
+		//! \param parent The widget from which this dialog was invoked.
+		//! \param name The name of this widget.
+		ContextPropertiesDialog(QWidget* parent, const QString& name);
+		~ContextPropertiesDialog();               // destructor
+
+		//! Public accessor to get the context's name from the line edit.
+		QString GetName() const { return _name_ledit->text(); }
+		//! Public accessor to get the tree containing existing contexts.
+		QTreeWidget* GetContextTree() const { return _context_tree; }
+		
+		//! Needed for accessing map properties.
+		friend class Editor;
+		friend class EditorScrollView;
+
+	private slots:
+		//! This slot enables or disables the OK push button of this dialog depending
+		//! on whether the line edit is empty.
+		void _EnableOKButton();
+
+	private:
+		//! A tree for showing all available contexts.
+		QTreeWidget* _context_tree;
+		//! A label used to visually name the line edit.
+		QLabel* _name_label;
+		//! A line edit for entering in the context's name.
+		QLineEdit* _name_ledit;
+		//! A pushbutton for canceling the context dialog.
+		QPushButton* _cancel_pbut;
+		//! A pushbutton for okaying the context dialog.
+		QPushButton* _ok_pbut;
+		//! A layout to manage all the labels, buttons, and line edits.
+		QGridLayout* _dia_layout;
+}; // class ContextPropertiesDialog
+
 } // namespace hoa_editor
 
 #endif

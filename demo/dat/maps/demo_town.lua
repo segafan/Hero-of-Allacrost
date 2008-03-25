@@ -1,5 +1,3 @@
--- /Users/philip/allacrost/demo/dat/maps/lua
-
 local ns = {}
 setmetatable(ns, {__index = _G})
 demo_town = ns;
@@ -13,7 +11,6 @@ map_name = "Village"
 location_filename = "mountain_village.png"
 
 -- The number of rows and columns of tiles that compose the map
-num_map_contexts = 1
 num_tile_cols = 60
 num_tile_rows = 40
 
@@ -23,6 +20,9 @@ sound_filenames = {}
 -- The music files used as background music on this map.
 music_filenames = {}
 music_filenames[1] = "mus/Town_Folk.ogg"
+
+-- The names of the contexts used to improve Editor user-friendliness
+context_names = {}
 
 -- The names of the tilesets used, with the path and file extension omitted
 tileset_filenames = {}
