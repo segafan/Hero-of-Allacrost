@@ -192,6 +192,14 @@ void Editor::_FileNew()
 	if (_EraseOK())
 	{
 		MapPropertiesDialog* new_map = new MapPropertiesDialog(this, "new_map", false);
+		
+		// Used to show the progress of tilesets has been loaded. 
+		QProgressBar* new_map_progressbar = new QProgressBar(this);
+		// Set the progress bar
+		new_map_progressbar->setFixedSize( 300, 40 );
+		new_map_progressbar->setWindowFlags( Qt::Dialog | Qt::FramelessWindowHint );
+		new_map_progressbar->move( this->pos().x() + this->width()/2 - new_map_progressbar->width()/2,
+									this->pos().y() + this->height()/2 - new_map_progressbar->height()/2 );
 
 		if (new_map->exec() == QDialog::Accepted)
 		{
@@ -209,15 +217,19 @@ void Editor::_FileNew()
 
 			QTreeWidget* tilesets = new_map->GetTilesetTree();
 			int num_items = tilesets->topLevelItemCount();
+			// send maxsize to progress bar
+			new_map_progressbar->setMaximum( num_items );
+			new_map_progressbar->show();
 			for (int i = 0; i < num_items; i++)
 			{
 				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
 				{
 					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
-					_ed_scrollview->_map->tilesets.push_back(a_tileset);
+					_ed_scrollview->_map->tilesets.push_back(a_tileset);					
 				} // tileset must be checked
-			} // iterate through all possible tilesets
+				new_map_progressbar->setValue( i+1 );
+			} // iterate through all possible tilesets			
 
 			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
 			_ed_splitter->show();
@@ -238,12 +250,16 @@ void Editor::_FileNew()
 			_ed_scrollview->_layer_edit = LOWER_LAYER;
 			_ed_scrollview->_tile_mode  = PAINT_TILE;
 
+			// Hide progress bar
+			new_map_progressbar->hide();
+
 			_undo_stack->setClean();
 			statusBar()->showMessage("New map created", 5000);
 		} // only if the user pressed OK
 		else
 			statusBar()->showMessage("No map created!", 5000);
 
+		delete new_map_progressbar;
 		delete new_map;
 	} // make sure an unsaved map is not lost
 } // _FileNew()

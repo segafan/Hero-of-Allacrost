@@ -30,6 +30,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QProgressBar>
 #include <Q3ScrollView>
 #include <QSplitter>
 #include <QSpinBox>
