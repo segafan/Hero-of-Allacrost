@@ -191,16 +191,8 @@ void Editor::_FileNew()
 {
 	if (_EraseOK())
 	{
-		MapPropertiesDialog* new_map = new MapPropertiesDialog(this, "new_map", false);
+		MapPropertiesDialog* new_map = new MapPropertiesDialog(this, "new_map", false);	
 		
-		// Used to show the progress of tilesets has been loaded. 
-		QProgressBar* new_map_progressbar = new QProgressBar(this);
-		// Set the progress bar
-		new_map_progressbar->setFixedSize( 300, 40 );
-		new_map_progressbar->setWindowFlags( Qt::Dialog | Qt::FramelessWindowHint );
-		new_map_progressbar->move( this->pos().x() + this->width()/2 - new_map_progressbar->width()/2,
-									this->pos().y() + this->height()/2 - new_map_progressbar->height()/2 );
-
 		if (new_map->exec() == QDialog::Accepted)
 		{
 			if (_ed_scrollview != NULL)
@@ -217,19 +209,28 @@ void Editor::_FileNew()
 
 			QTreeWidget* tilesets = new_map->GetTilesetTree();
 			int num_items = tilesets->topLevelItemCount();
-			// send maxsize to progress bar
-			new_map_progressbar->setMaximum( num_items );
-			new_map_progressbar->show();
+
+			// Used to show the progress of tilesets has been loaded. 
+			QProgressDialog* new_map_progress = 
+				new QProgressDialog( tr( "Loading..." ), NULL, 0, num_items, this, 
+						Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
+
+			// Set the progress bar
+			new_map_progress->move( this->pos().x() + this->width()/2 - new_map_progress->width()/2,
+										this->pos().y() + this->height()/2 - new_map_progress->height()/2 );
+			new_map_progress->show();
+
 			for (int i = 0; i < num_items; i++)
 			{
+				new_map_progress->setValue( i );
 				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
 				{
 					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);					
 				} // tileset must be checked
-				new_map_progressbar->setValue( i+1 );
-			} // iterate through all possible tilesets			
+			} // iterate through all possible tilesets
+			new_map_progress->setValue( num_items );
 
 			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
 			_ed_splitter->show();
@@ -248,18 +249,19 @@ void Editor::_FileNew()
 
 			// Set default edit mode
 			_ed_scrollview->_layer_edit = LOWER_LAYER;
-			_ed_scrollview->_tile_mode  = PAINT_TILE;
-
-			// Hide progress bar
-			new_map_progressbar->hide();
+			_ed_scrollview->_tile_mode  = PAINT_TILE;			
 
 			_undo_stack->setClean();
+
+			// Hide and delete progress bar
+			new_map_progress->hide();
+			delete new_map_progress;
+
 			statusBar()->showMessage("New map created", 5000);
 		} // only if the user pressed OK
 		else
-			statusBar()->showMessage("No map created!", 5000);
-
-		delete new_map_progressbar;
+			statusBar()->showMessage("No map created!", 5000);		
+		
 		delete new_map;
 	} // make sure an unsaved map is not lost
 } // _FileNew()
@@ -289,13 +291,29 @@ void Editor::_FileOpen()
 			_ed_scrollview->_map->SetFileName(file_name);
 			_ed_scrollview->_map->LoadMap();
 
+			// Count for the tileset names
+			int num_items = _ed_scrollview->_map->tileset_names.count();
+			int progress_steps = 0;
+
+			// Used to show the progress of tilesets has been loaded. 
+			QProgressDialog* new_map_progress = 
+				new QProgressDialog( tr( "Loading..." ), NULL, 0, num_items, this, 
+						Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
+
+			// Set the progress bar
+			new_map_progress->move( this->pos().x() + this->width()/2 - new_map_progress->width()/2,
+										this->pos().y() + this->height()/2 - new_map_progress->height()/2 );
+			new_map_progress->show();
+
 			for (QStringList::ConstIterator it = _ed_scrollview->_map->tileset_names.begin();
 				it != _ed_scrollview->_map->tileset_names.end(); it++)
 			{
+				new_map_progress->setValue( progress_steps++ );
 				Tileset* a_tileset = new Tileset(this, *it);
 				_ed_tabs->addTab(a_tileset->table, *it);
 				_ed_scrollview->_map->tilesets.push_back(a_tileset);
 			} // iterate through all tilesets in the map
+			new_map_progress->setValue( num_items );
 
 			_ed_scrollview->resize(_ed_scrollview->_map->GetWidth(), _ed_scrollview->_map->GetHeight());
 			_ed_splitter->show();
@@ -315,6 +333,10 @@ void Editor::_FileOpen()
 			// Set default edit mode
 			_ed_scrollview->_layer_edit = LOWER_LAYER;
 			_ed_scrollview->_tile_mode  = PAINT_TILE;
+
+			// Hide and delete progress bar
+			new_map_progress->hide();
+			delete new_map_progress;
 
 			_undo_stack->setClean();
 			statusBar()->showMessage(QString("Opened \'%1\'").arg(_ed_scrollview->_map->GetFileName()), 5000);
