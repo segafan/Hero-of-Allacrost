@@ -220,31 +220,38 @@ void Grid::LoadMap()
 	// creation of the TilesetTable(s)
 
 	read_data.OpenTable("lower_layer");
+	vector<int32> row_vect;
+	_lower_layer.push_back( row_vect );
 	for (int32 i = 0; i < _height; i++)
 	{
 		read_data.ReadIntVector(i, vect);
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			_lower_layer[0].push_back(*it);
+			_lower_layer.begin()->push_back(*it);
 		vect.clear();
-	} // iterate through the rows of the lower layer
+	} // iterate through the rows of the lower layer	
 	read_data.CloseTable();
 
+	row_vect.clear();
+	_middle_layer.push_back( row_vect );
 	read_data.OpenTable("middle_layer");
 	for (int32 i = 0; i < _height; i++)
 	{
 		read_data.ReadIntVector(i, vect);
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			_middle_layer[0].push_back(*it);
+			_middle_layer.begin()->push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
 
+	row_vect.clear();
+	_upper_layer.push_back( row_vect );
 	read_data.OpenTable("upper_layer");
 	for (int32 i = 0; i < _height; i++)
 	{
 		read_data.ReadIntVector(i, vect);
+		vector<int32> row_vect;
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			_upper_layer[0].push_back(*it);
+			_upper_layer.begin()->push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
