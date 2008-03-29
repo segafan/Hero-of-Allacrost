@@ -169,7 +169,7 @@ public:
 	/**  \brief  Gets the type of a game mode in the stack.
 	***  \return The value of the mode_type member of the GameMode object on the top of the stack.
 	**/
-	uint8 GetGameType(int index);
+	uint8 GetGameType(uint32 index);
 
 	/** \brief Gets a pointer to the top game stack object.
 	*** \return A pointer to the GameMode object on the top of the stack.
@@ -179,7 +179,7 @@ public:
 	/** \brief Gets a pointer to a game stack object.
 	*** \return A pointer to the GameMode object at (index) from the top.
 	**/
-	GameMode* Get(int index);
+	GameMode* Get(uint32 index);
 
 	//! \brief Checks if the game stack needs modes pushed or popped, then calls Update on the active game mode.
 	void Update();

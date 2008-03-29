@@ -398,10 +398,10 @@ private:
 	*** \note This needs to be made defunct. Occurences of it in battle.cpp should
 	*** be replaced with the index of the _selected_character member
 	**/
-	int32 _selected_character_index;
+	uint32 _selected_character_index;
 
 	//! \brief Argument selector
-	int32 _selected_target_index;
+	uint32 _selected_target_index;
 
 	//! \brief The current character that is selected by the player
 	private_battle::BattleCharacter* _selected_character;

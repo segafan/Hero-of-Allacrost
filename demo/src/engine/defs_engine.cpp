@@ -85,7 +85,7 @@ void BindEngineToLua()
 			.def("PopAll", &GameModeManager::PopAll)
 			.def("GetTop", &GameModeManager::GetTop)
 			.def("Get", &GameModeManager::Get)
-			.def("GetGameType", (uint8 (GameModeManager::*)(int))&GameModeManager::GetGameType)
+			.def("GetGameType", (uint8 (GameModeManager::*)(uint32))&GameModeManager::GetGameType)
 			.def("GetGameType", (uint8 (GameModeManager::*)())&GameModeManager::GetGameType)
 	];
 

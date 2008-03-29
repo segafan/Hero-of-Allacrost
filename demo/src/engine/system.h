@@ -337,6 +337,16 @@ public:
 	void ExitGame()
 		{ _not_done = false; }
 
+	//! Threading classes
+	template <class T> Thread * SpawnThread(void (T::*)(), T *);
+	void WaitForThread(Thread * thread);
+
+	void LockThread(Semaphore *);
+	void UnlockThread(Semaphore *);
+	Semaphore * CreateSemaphore(int max);
+	void DestroySemaphore(Semaphore *);
+
+
 private:
 	GameSystem();
 
@@ -386,20 +396,7 @@ template <class T> struct generic_class_func_info
 };
 
 
-class SystemThread {
-
-public:
-	template <class T> Thread * SpawnThread(void (T::*)(), T *);
-	void WaitForThread(Thread * thread);
-
-	void LockThread(Semaphore *);
-	void UnlockThread(Semaphore *);
-	Semaphore * CreateSemaphore(int max);
-	void DestroySemaphore(Semaphore *);
-
-}; // class SystemThread
-
-template <class T> Thread * SystemThread::SpawnThread(void (T::*func)(), T * myclass) {
+template <class T> Thread * GameSystem::SpawnThread(void (T::*func)(), T * myclass) {
 #if (THREAD_TYPE == SDL_THREADS)
 	Thread * thread;
 	static generic_class_func_info <T> gen;

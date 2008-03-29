@@ -1081,7 +1081,7 @@ uint32 BattleMode::GetIndexOfNextAliveCharacter(bool move_upward) const
 				return i;
 			}
 		}
-		for (int32 i = 0; i <= _selected_target_index; ++i) {
+		for (uint32 i = 0; i <= _selected_target_index; ++i) {
 			if (_character_actors[i]->IsAlive()) {
 				return i;
 			}
@@ -1115,7 +1115,7 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 				return i;
 			}
 		}
-		for (int32 i = 0; i <= _selected_target_index; ++i) {
+		for (uint32 i = 0; i <= _selected_target_index; ++i) {
 			if (_enemy_actors[i]->IsAlive()) {
 				return i;
 			}
