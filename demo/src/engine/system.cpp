@@ -274,31 +274,31 @@ void GameSystem::SetLanguage(std::string lang) {
 
 
 
-void SystemThread::WaitForThread(Thread * thread) {
+void GameSystem::WaitForThread(Thread * thread) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_WaitThread(thread, NULL);
 #endif
 }
 
-Semaphore * SystemThread::CreateSemaphore(int max) {
+Semaphore * GameSystem::CreateSemaphore(int max) {
 #if (THREAD_TYPE == SDL_THREADS)
 	return SDL_CreateSemaphore(max);
 #endif
 }
 
-void SystemThread::DestroySemaphore(Semaphore * s) {
+void GameSystem::DestroySemaphore(Semaphore * s) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_DestroySemaphore(s);
 #endif
 }
 
-void SystemThread::LockThread(Semaphore * s) {
+void GameSystem::LockThread(Semaphore * s) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_SemWait(s);
 #endif
 }
 
-void SystemThread::UnlockThread(Semaphore * s) {
+void GameSystem::UnlockThread(Semaphore * s) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_SemPost(s);
 #endif

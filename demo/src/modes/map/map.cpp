@@ -288,7 +288,10 @@ void MapMode::_HandleInputExplore() {
 
 	// Allow the player to run if they have enough stamina, and update the stamina amount
 	_camera->is_running = false;
-	if (InputManager->CancelState() == true && _run_disabled == false) {
+	if (InputManager->CancelState() == true
+		&& (InputManager->UpState() || InputManager->DownState()
+		|| InputManager->LeftState() || InputManager->RightState())
+		&& _run_disabled == false) {
 		if (_run_forever) {
 			_camera->is_running = true;
 		}
