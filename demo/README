@@ -27,5 +27,6 @@ libogg
 libvorbis
 Lua 5.0+ (NOT Lua 5.1+)
 Luabind
+Boost headers
 GNU Gettext
 Qt 4+ (optional for use of the map editor)
