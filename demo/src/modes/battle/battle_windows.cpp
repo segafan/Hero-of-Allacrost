@@ -931,7 +931,7 @@ void FinishWindow::_UpdateWinGrowth() {
 					//AGI
 					_growth_gained[i][6] += _character_growths[i]->GetAgilityGrowth();
 					//EVD
-					_growth_gained[i][7] += _character_growths[i]->GetEvadeGrowth();
+					_growth_gained[i][7] += static_cast<int>(_character_growths[i]->GetEvadeGrowth());
 
 					if (_character_growths[i]->IsExperienceLevelGained())
 					{
