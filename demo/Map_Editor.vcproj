@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="Map Editor"
 	ProjectGUID="{A93BAE19-0D23-4237-83B6-01CAB0358D37}"
 	RootNamespace="Map Editor"
@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind_Debug.lib"
+				AdditionalDependencies="shell32.lib QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib Lua.lib LuaLib.lib LuaBind_d.lib Opengl32.lib glu32.lib libpng13d.lib libjpeg-static-mt-debug.lib gnu_gettext.lib"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="MSVCRT, LIBCMT"
 				GenerateDebugInformation="true"
@@ -101,7 +101,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
+				AdditionalDependencies="shell32.lib QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib Lua.lib LuaLib.lib LuaBind.lib Opengl32.lib glu32.lib libpng13.lib libjpeg-static-mt.lib gnu_gettext.lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="LIBCMT"
 				SubSystem="2"
@@ -370,9 +370,19 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="MOC dialog_boxes.h"
-						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\dialog_boxes_moc.cpp"
-						Outputs="$(ProjectDir)src\editor\dialog_boxes_moc.cpp"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -384,10 +394,20 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="MOC editor.h"
-						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\editor_moc.cpp&#x0D;&#x0A;"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies=""
-						Outputs="$(ProjectDir)src\editor\editor_moc.cpp"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -419,10 +439,20 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="MOC grid.h"
-						CommandLine="moc $(InputPath) -o $(ProjectDir)\src\editor\grid_moc.cpp&#x0D;&#x0A;"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies=""
-						Outputs="$(ProjectDir)src\editor\grid_moc.cpp"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -490,10 +520,20 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="MOC skill_editor.h"
-						CommandLine="moc $(InputPath) -o $(ProjectDir)src\editor\skill_editor_moc.cpp&#x0D;&#x0A;"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies=""
-						Outputs="$(ProjectDir)src\editor\skill_editor_moc.cpp"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -533,10 +573,20 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="MOC tileset_editor.h"
-						CommandLine="moc $(InputPath) -o $(ProjectDir)\src\editor\tileset_editor_moc.cpp&#x0D;&#x0A;"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies=""
-						Outputs="$(ProjectDir)src\editor\tileset_editor_moc.cpp"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC $(InputFileName)"
+						CommandLine="moc -o &quot;$(InputDir)$(InputName)_moc.cpp&quot; &quot;$(InputDir)$(InputFileName)&quot;&#x0D;&#x0A;"
+						Outputs="&quot;$(InputDir)$(InputName)_moc.cpp&quot;"
 					/>
 				</FileConfiguration>
 			</File>

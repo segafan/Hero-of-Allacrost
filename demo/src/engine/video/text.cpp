@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2007 by The Allacrost Project
+//            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software
@@ -228,8 +228,8 @@ void TextElement::SetTexture(TextTexture* texture) {
 		text_texture = texture;
 		_texture = texture;
 
-		_width = texture->width;
-		_height = texture->height;
+		_width = static_cast<float>(texture->width);
+		_height = static_cast<float>(texture->height);
 	}
 }
 
@@ -388,7 +388,7 @@ void TextImage::_Regenerate() {
 		TextElement* new_element = new TextElement();
 		// If this line is only a newline character or is an empty string, create an empty TextElement object
 		if (**line_iter == NEW_LINE || **line_iter == END_STRING) {
-			new_element->SetDimensions(0.0f, fp->line_skip);
+			new_element->SetDimensions(0.0f, static_cast<float>(fp->line_skip));
 		}
 		// Otherwise, create a new TextTexture to be managed by the new element
 		else {

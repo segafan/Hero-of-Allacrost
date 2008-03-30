@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2007 by The Allacrost Project
+//            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software
@@ -219,7 +219,7 @@ void TextureController::DEBUG_ShowTexSheet() {
 
 	glPushMatrix();
 	VideoManager->Move(0.0f,0.0f);
-	glScalef(sheet->width / 2, sheet->height / 2, 1.0f);
+	glScalef(sheet->width / 2.0f, sheet->height / 2.0f, 1.0f);
 
 	sheet->DEBUG_Draw();
 
