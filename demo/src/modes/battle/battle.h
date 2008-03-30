@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2007 by The Allacrost Project
+//            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software and
@@ -398,10 +398,10 @@ private:
 	*** \note This needs to be made defunct. Occurences of it in battle.cpp should
 	*** be replaced with the index of the _selected_character member
 	**/
-	uint32 _selected_character_index;
+	int32 _selected_character_index;
 
 	//! \brief Argument selector
-	uint32 _selected_target_index;
+	int32 _selected_target_index;
 
 	//! \brief The current character that is selected by the player
 	private_battle::BattleCharacter* _selected_character;

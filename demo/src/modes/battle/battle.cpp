@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2007 by The Allacrost Project
+//            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software and
@@ -1081,7 +1081,7 @@ uint32 BattleMode::GetIndexOfNextAliveCharacter(bool move_upward) const
 				return i;
 			}
 		}
-		for (uint32 i = 0; i <= _selected_target_index; ++i) {
+		for (int32 i = 0; i <= _selected_target_index; ++i) {
 			if (_character_actors[i]->IsAlive()) {
 				return i;
 			}
@@ -1115,7 +1115,7 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 				return i;
 			}
 		}
-		for (uint32 i = 0; i <= _selected_target_index; ++i) {
+		for (int32 i = 0; i <= _selected_target_index; ++i) {
 			if (_enemy_actors[i]->IsAlive()) {
 				return i;
 			}

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2007 by The Allacrost Project
+//            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software
@@ -346,8 +346,8 @@ bool ImageDescriptor::SaveMultiImage(const vector<StillImage*>& images, const st
 	// Structure for the image buffer to save
 	ImageMemory save;
 
-	save.height = grid_rows * img_height;
-	save.width = grid_columns * img_width;
+	save.height = static_cast<int32>(grid_rows * img_height);
+	save.width = static_cast<int32>(grid_columns * img_width);
 	save.pixels = malloc(save.width * save.height * 4);
 
 	if (save.pixels == NULL) {
@@ -405,10 +405,10 @@ bool ImageDescriptor::SaveMultiImage(const vector<StillImage*>& images, const st
 
 			// Determine the part of the texture that we are interested in (the part that contains the current image we're saving)
 			uint32 src_offset = img->y * texture.width * 4 + img->x * 4;
-			uint32 dst_offset = x * img_height * img_width * grid_columns * 4 + y * img_width * 4;
+			uint32 dst_offset = static_cast<uint32>(x * img_height * img_width * grid_columns * 4 + y * img_width * 4);
 			uint32 src_bytes = texture.width * 4;
-			uint32 dst_bytes = img_width * grid_columns * 4;
-			uint32 copy_bytes = img_width * 4;
+			uint32 dst_bytes = static_cast<uint32>(img_width * grid_columns * 4);
+			uint32 copy_bytes = static_cast<uint32>(img_width * 4);
 
 			// Copy each row of image pixels over the the save.pixels buffer one at a time
 			for (int32 j = 0; j < img_height; j++) {
