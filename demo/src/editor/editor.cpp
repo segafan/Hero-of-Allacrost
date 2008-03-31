@@ -56,6 +56,9 @@ Editor::Editor() : QMainWindow(),
 	// set the window icon
 	setWindowIcon(QIcon("img/logos/program_icon.bmp"));
 
+	// create error message for exceeding maximum number of contexts
+	_error_max_contexts = new QErrorMessage(this);
+
 	// create the video engine's singleton
 	// VideoManager = GameVideo::SingletonCreate();
 	// Commented out grid and tileset editor create and destroy VideoManager
@@ -139,7 +142,7 @@ void Editor::_TilesEnableActions()
 		_edit_ll_action->setEnabled(true);
 		_edit_ml_action->setEnabled(true);
 		_edit_ul_action->setEnabled(true);
-		_context_sbox->setEnabled(true);
+		_context_cbox->setEnabled(true);
 	} // map must exist in order to paint it
 	else
 	{
@@ -154,7 +157,7 @@ void Editor::_TilesEnableActions()
 		_edit_ll_action->setEnabled(false);
 		_edit_ml_action->setEnabled(false);
 		_edit_ul_action->setEnabled(false);
-		_context_sbox->setEnabled(false);
+		_context_cbox->setEnabled(false);
 	} // map does not exist, can't paint it*/
 } // _TilesEnableActions()
 
@@ -208,29 +211,36 @@ void Editor::_FileNew()
 			_ed_splitter->addWidget(_ed_tabs);
 
 			QTreeWidget* tilesets = new_map->GetTilesetTree();
-			int num_items = tilesets->topLevelItemCount();
+			int num_items     = tilesets->topLevelItemCount();
+			int checked_items = 0;
+			for (int i = 0; i < num_items; i++)
+				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
+					checked_items++;
 
-			// Used to show the progress of tilesets has been loaded. 
+			// Used to show the progress of tilesets that have been loaded. 
 			QProgressDialog* new_map_progress = 
-				new QProgressDialog( tr( "Loading..." ), NULL, 0, num_items, this, 
-						Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
+				new QProgressDialog(tr("Loading tilesets..."), NULL, 0, checked_items, this, 
+				        Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
+			new_map_progress->setWindowModality(Qt::WindowModal);
+			new_map_progress->setWindowTitle(tr("Creating Map..."));
 
-			// Set the progress bar
-			new_map_progress->move( this->pos().x() + this->width()/2 - new_map_progress->width()/2,
-										this->pos().y() + this->height()/2 - new_map_progress->height()/2 );
+			// Set location of and show the progress dialog
+			new_map_progress->move(this->pos().x() + this->width()/2  - new_map_progress->width()/2,
+			                       this->pos().y() + this->height()/2 - new_map_progress->height()/2);
 			new_map_progress->show();
 
+			checked_items = 0;
 			for (int i = 0; i < num_items; i++)
 			{
-				new_map_progress->setValue( i );
 				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
 				{
+					new_map_progress->setValue(checked_items++);
 					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);					
 				} // tileset must be checked
 			} // iterate through all possible tilesets
-			new_map_progress->setValue( num_items );
+			new_map_progress->setValue(checked_items);
 
 			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
 			_ed_splitter->show();
@@ -239,11 +249,20 @@ void Editor::_FileNew()
 			_ll_on   = false;
 			_ml_on   = false;
 			_ul_on   = false;
+			if (_select_on)
+				_TileToggleSelect();
 			_ViewToggleGrid();
 			_ViewToggleLL();
 			_ViewToggleML();
 			_ViewToggleUL();
-			
+
+			// Populate the context combobox
+			// _context_cbox->clear() doesn't work, it seg faults.
+			// I guess it can't have an empty combobox?
+			int count = _context_cbox->count();
+			_context_cbox->addItems(_ed_scrollview->_map->context_names);
+			for (int i = 0; i < count; i++)
+				_context_cbox->removeItem(0);
 			// Enable appropriate actions
 			_TilesEnableActions();
 
@@ -297,35 +316,48 @@ void Editor::_FileOpen()
 
 			// Used to show the progress of tilesets has been loaded. 
 			QProgressDialog* new_map_progress = 
-				new QProgressDialog( tr( "Loading..." ), NULL, 0, num_items, this, 
-						Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
+				new QProgressDialog(tr("Loading tilesets..."), NULL, 0, num_items, this, 
+				        Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
+			new_map_progress->setWindowModality(Qt::WindowModal);
+			new_map_progress->setWindowTitle(tr("Creating Map..."));
 
 			// Set the progress bar
-			new_map_progress->move( this->pos().x() + this->width()/2 - new_map_progress->width()/2,
-										this->pos().y() + this->height()/2 - new_map_progress->height()/2 );
+			new_map_progress->move(this->pos().x() + this->width()/2  - new_map_progress->width()/2,
+			                       this->pos().y() + this->height()/2 - new_map_progress->height()/2);
 			new_map_progress->show();
 
 			for (QStringList::ConstIterator it = _ed_scrollview->_map->tileset_names.begin();
 				it != _ed_scrollview->_map->tileset_names.end(); it++)
 			{
-				new_map_progress->setValue( progress_steps++ );
+				new_map_progress->setValue(progress_steps++);
 				Tileset* a_tileset = new Tileset(this, *it);
 				_ed_tabs->addTab(a_tileset->table, *it);
 				_ed_scrollview->_map->tilesets.push_back(a_tileset);
 			} // iterate through all tilesets in the map
-			new_map_progress->setValue( num_items );
+			new_map_progress->setValue(progress_steps);
 
-			_ed_scrollview->resize(_ed_scrollview->_map->GetWidth(), _ed_scrollview->_map->GetHeight());
+			_ed_scrollview->resize(_ed_scrollview->_map->GetWidth(),
+				_ed_scrollview->_map->GetHeight());
 			_ed_splitter->show();
 
 			_grid_on = false;
 			_ll_on   = false;
 			_ml_on   = false;
 			_ul_on   = false;
+			if (_select_on)
+				_TileToggleSelect();
 			_ViewToggleGrid();
 			_ViewToggleLL();
 			_ViewToggleML();
 			_ViewToggleUL();
+
+			// Populate the context combobox
+			// _context_cbox->clear() doesn't work, it seg faults.
+			// I guess it can't have an empty combobox?
+			int count = _context_cbox->count();
+			_context_cbox->addItems(_ed_scrollview->_map->context_names);
+			for (int i = 0; i < count; i++)
+				_context_cbox->removeItem(0);
 
 			// Enable appropriate actions
 			_TilesEnableActions();
@@ -339,16 +371,19 @@ void Editor::_FileOpen()
 			delete new_map_progress;
 
 			_undo_stack->setClean();
-			statusBar()->showMessage(QString("Opened \'%1\'").arg(_ed_scrollview->_map->GetFileName()), 5000);
+			statusBar()->showMessage(QString("Opened \'%1\'").
+				arg(_ed_scrollview->_map->GetFileName()), 5000);
 		} // file must exist in order to open it
+		else
+			statusBar()->showMessage("No map created!", 5000);		
 	} // make sure an unsaved map is not lost
 } // _FileOpen()
 
 void Editor::_FileSaveAs()
 {
 	// get the file name from the user
-	QString file_name = QFileDialog::getSaveFileName(this, "HoA Level Editor -- File Save",
-		"dat/maps", "Maps (*.lua)");
+	QString file_name = QFileDialog::getSaveFileName(this,
+		"HoA Level Editor -- File Save", "dat/maps", "Maps (*.lua)");
 		
 	if (!file_name.isEmpty())
 	{
@@ -609,7 +644,8 @@ void Editor::_MapSelectMusic()
 	if (_ed_scrollview == NULL)
 		return;
 
-	MusicDialog* music = new MusicDialog(this, "music_dialog", _ed_scrollview->_map->GetMusic());
+	MusicDialog* music = new
+		MusicDialog(this, "music_dialog", _ed_scrollview->_map->GetMusic());
 
 	if (music->exec() == QDialog::Accepted)
 	{
@@ -622,7 +658,8 @@ void Editor::_MapSelectMusic()
 
 void Editor::_MapProperties()
 {
-	MapPropertiesDialog* props = new MapPropertiesDialog(this, "map_properties", true);
+	MapPropertiesDialog* props = new
+		MapPropertiesDialog(this, "map_properties", true);
 	
 	if (props->exec() == QDialog::Accepted)
 	{
@@ -794,19 +831,53 @@ void Editor::_MapProperties()
 	delete props;
 } // _MapProperties()
 
-void Editor::_MapContext()
+void Editor::_MapAddContext()
 {
-	ContextPropertiesDialog* props = new ContextPropertiesDialog(this, "context_properties");
+	if (_ed_scrollview->_map->context_names.size() >= MAX_CONTEXTS)
+	{
+		_error_max_contexts->move(this->pos().x() + this->width()/2  - _error_max_contexts->width()/2,
+		                          this->pos().y() + this->height()/2 - _error_max_contexts->height()/2);
+		_error_max_contexts->showMessage(
+			QString("Maximum number of contexts (%1) reached. No new context will be created.").
+				arg(MAX_CONTEXTS));
+		statusBar()->showMessage("Maximum number of contexts reached. No new context created!", 5000);
+		return;
+	} // don't want more than the max allowable contexts
+
+	ContextPropertiesDialog* props = new
+		ContextPropertiesDialog(this, "context_properties");
 	
 	if (props->exec() == QDialog::Accepted)
 	{
 		_ed_scrollview->_map->context_names << props->GetName();
+		QStringList context_names = _ed_scrollview->_map->context_names;
+
+		// Gets the index of the context to inherit from. Default is the
+		// base context, which is index 0. If no context is selected in the
+		// dialog, use the default, since a new context cannot be created without
+		// inheriting from another.
+		int inherit_context;
+		if (props->GetContextTree()->currentItem() == NULL)
+			inherit_context = 0;
+		else
+			inherit_context = context_names.indexOf(
+				props->GetContextTree()->currentItem()->text(0));
+
+		// Perform the copy from one context to another.
+		_ed_scrollview->_map->CreateNewContext(inherit_context);
+
+		// Add new context to context combobox.
+		_context_cbox->addItem(props->GetName());
+
+		// Switch to newly created context.
+		_context_cbox->setCurrentIndex(context_names.size() - 1);
+		_ed_scrollview->_map->SetContext(context_names.size() - 1);
 	} // only if the user pressed OK
 	else
 		statusBar()->showMessage("No new context created!", 5000);
 
 	delete props;
-} // _MapContext()
+} // _MapAddContext()
 
 void Editor::_ScriptEditSkills()
 {
@@ -846,8 +917,7 @@ void Editor::_SwitchMapContext(int context)
 {
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
-		_ed_scrollview->_map->SetContext(context - 1);
-		_ed_scrollview->_map->CreateNewContext();
+		_ed_scrollview->_map->SetContext(context);
 		_ed_scrollview->_map->updateGL();
 	} // map must exist in order to change the context
 } // _SwitchMapContext()
@@ -1001,19 +1071,20 @@ void Editor::_CreateActions()
 	connect(_edit_tileset_action, SIGNAL(triggered()), this, SLOT(_TilesetEdit()));
 
 
+
 	// Create menu actions related to the Map menu
 
 	_select_music_action = new QAction("&Select map music...", this);
 	_select_music_action->setStatusTip("Choose background music for the map");
 	connect(_select_music_action, SIGNAL(triggered()), this, SLOT(_MapSelectMusic()));
 	
+	_context_properties_action = new QAction("&Add Context...", this);
+	_context_properties_action->setStatusTip("Create a new context on the map");
+	connect(_context_properties_action, SIGNAL(triggered()), this, SLOT(_MapAddContext()));
+
 	_map_properties_action = new QAction("&Properties...", this);
 	_map_properties_action->setStatusTip("Modify the properties of the map");
 	connect(_map_properties_action, SIGNAL(triggered()), this, SLOT(_MapProperties()));
-
-	_context_properties_action = new QAction("New &Context...", this);
-	_context_properties_action->setStatusTip("Create a new context on the map");
-	connect(_context_properties_action, SIGNAL(triggered()), this, SLOT(_MapContext()));
 
 
 
@@ -1062,7 +1133,6 @@ void Editor::_CreateMenus()
 	_view_menu->addAction(_toggle_ul_action);
 	_view_menu->addSeparator();
 	_view_menu->addAction(_view_textures_action);
-//	_view_menu->setCheckable(true);
 	_view_menu->setTearOffEnabled(true);
 	connect(_view_menu, SIGNAL(aboutToShow()), this, SLOT(_ViewMenuSetup()));
 
@@ -1089,20 +1159,19 @@ void Editor::_CreateMenus()
 	// tileset menu creation
 	_tileset_menu = menuBar()->addMenu("Tile&set");
 	_tileset_menu->addAction(_edit_tileset_action);
-	_tileset_menu->setTearOffEnabled(true);
 	connect(_tileset_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesetMenuSetup()));
 
 	// map menu creation
 	_map_menu = menuBar()->addMenu("&Map");
 	_map_menu->addAction(_select_music_action);
-	_map_menu->addAction(_map_properties_action);
 	_map_menu->addAction(_context_properties_action);
+	_map_menu->addSeparator();
+	_map_menu->addAction(_map_properties_action);
 	connect(_map_menu, SIGNAL(aboutToShow()), this, SLOT(_MapMenuSetup()));
 
 	// script menu creation
 	_script_menu = menuBar()->addMenu("&Script");
 	_script_menu->addAction(_edit_skill_action);
-	_script_menu->setTearOffEnabled(true);
 	connect(_script_menu, SIGNAL(aboutToShow()), this, SLOT(_ScriptMenuSetup()));
 
 	// help menu creation
@@ -1125,11 +1194,11 @@ void Editor::_CreateToolbars()
 
 	QLabel* context_label = new QLabel("Context:", this);
 	_tiles_toolbar->addWidget(context_label);
-	_context_sbox = new QSpinBox(this);
-	_context_sbox->setMinimum(1);
-	_context_sbox->setMaximum(32);
-	_tiles_toolbar->addWidget(_context_sbox);
-	connect(_context_sbox, SIGNAL(valueChanged(int)), this, SLOT(_SwitchMapContext(int)));
+	_context_cbox = new QComboBox(this);
+	_context_cbox->addItem("Base");
+	_tiles_toolbar->addWidget(_context_cbox);
+	connect(_context_cbox, SIGNAL(currentIndexChanged(int)), this,
+		SLOT(_SwitchMapContext(int)));
 } // _CreateToolbars()
 
 bool Editor::_EraseOK()
@@ -1315,7 +1384,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 		_tile_index = index;
 		
 		if (evt->state() == Qt::LeftButton && editor->_select_on == true &&
-				_moving == false)
+		    _moving == false)
 		{
 			// Calculate the actual selection rectangle here, otherwise it's just
 			// like selecting individual tiles...
@@ -1514,7 +1583,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 			*it = -1;
 	} // clears when not moving tiles or when moving tiles and not selecting them
 
-	if (editor->_select_on == true && _moving == false)
+	if (editor->_select_on == true && _moving == false && _tile_mode == MOVE_TILE)
 		_moving = true;
 	else
 		_moving = false;
