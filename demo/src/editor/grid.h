@@ -82,12 +82,10 @@ class Grid: public QGLWidget
 		const QString& GetMusic() const;
 
 		/*!
-		 *  \brief Creates a new context layer if the current context (_context)
-		 *         is greater than the number of entries in the layer vectors.
-		 *  \note Assumes that _context has been set to the new context number
-		 *        before this function is called.
+		 *  \brief Creates a new context for each layer.
+		 *  \param inherit_context - the index of the context to inherit from.
 		 */
-		void CreateNewContext();
+		void CreateNewContext(int inherit_context);
 
 		/*!
 		 *  \brief Loads a map from a config (lua) file when the user selects Open Map... from the File menu.

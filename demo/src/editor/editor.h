@@ -23,6 +23,7 @@
 #include <QCloseEvent>
 #include <QComboBox>
 #include <QContextMenuEvent>
+#include <QErrorMessage>
 #include <QFileDialog>
 #include <QLayout>
 #include <QLineEdit>
@@ -77,7 +78,12 @@ enum TRANSITION_PATTERN_TYPE
 	TOTAL_PATTERN     = 12
 };
 
+//! Maximum number of allowable map contexts.
+const int MAX_CONTEXTS = 32;
+
+
 class EditorScrollView;
+
 
 class Editor: public QMainWindow
 {
@@ -158,7 +164,7 @@ class Editor: public QMainWindow
 		//{@
 		void _MapSelectMusic();
 		void _MapProperties();
-		void _MapContext();
+		void _MapAddContext();
 		//@}
 
 		//! \name Script Menu Item Slots
@@ -276,9 +282,12 @@ class Editor: public QMainWindow
 		//! The stack that contains the undo and redo operations.
 		QUndoStack* _undo_stack;
 
-		//! The spinbox that allows the user the to change the current map context
-		//! for editing.
-		QSpinBox* _context_sbox;
+		//! The combobox that allows the user to change the current map context
+		//! for editing. Contains a list of all existing contexts.
+		QComboBox* _context_cbox;
+
+		//! An error dialog for exceeding the maximum allowable number of contexts.
+		QErrorMessage* _error_max_contexts;
 }; // class Editor
 
 class EditorScrollView: public Q3ScrollView

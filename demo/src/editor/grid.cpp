@@ -168,23 +168,18 @@ const QString& Grid::GetMusic() const
 	return _music_file;
 } // GetMusic()
 
-void Grid::CreateNewContext()
+void Grid::CreateNewContext(int inherit_context)
 {
 	// Assumes all 3 layers have the same number of contexts.
-	if (static_cast<unsigned>(_context) >= _lower_layer.size())
-	{	
-		_context = _lower_layer.size();  // in case it's greater than
-		vector<int> vect;
-		for (int i = 0; i < _width * _height; i++)
-			vect.push_back(-1);
-		_lower_layer.push_back(vect);
-		_middle_layer.push_back(vect);
-		_upper_layer.push_back(vect);
-	} // only if current context doesn't already exist
+
+	_lower_layer.push_back(_lower_layer[inherit_context]);
+	_middle_layer.push_back(_middle_layer[inherit_context]);
+	_upper_layer.push_back(_upper_layer[inherit_context]);
 } // CreateNewContext()
 
 void Grid::LoadMap()
 {
+	char buffer[10];  // used for converting an int to a string with sprintf
 	ReadScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
@@ -199,9 +194,14 @@ void Grid::LoadMap()
 	_middle_layer.clear();
 	_upper_layer.clear();
 	
+	int num_contexts = read_data.ReadInt("num_map_contexts");
 	_height = read_data.ReadInt("num_tile_rows");
 	_width  = read_data.ReadInt("num_tile_cols");
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+
+	// Create selection layer
+	for (int i = 0; i < _width * _height; i++)
+		_select_layer.push_back(-1);
 
 	// Base context is default and not saved in the map file.
 	read_data.OpenTable("context_names");
@@ -216,12 +216,15 @@ void Grid::LoadMap()
 		tileset_names.append(QString(read_data.ReadString(i).c_str()));
 	read_data.CloseTable();
 
-	// Loading the tileset images using LoadMultiImage is done in editor.cpp in FileOpen via
-	// creation of the TilesetTable(s)
+	// Loading the tileset images using LoadMultiImage is done in editor.cpp in
+	// FileOpen via creation of the TilesetTable(s)
+
+	vector<int32> row_vect;
+	_lower_layer.push_back(row_vect);
+	_middle_layer.push_back(row_vect);
+	_upper_layer.push_back(row_vect);
 
 	read_data.OpenTable("lower_layer");
-	vector<int32> row_vect;
-	_lower_layer.push_back( row_vect );
 	for (int32 i = 0; i < _height; i++)
 	{
 		read_data.ReadIntVector(i, vect);
@@ -232,7 +235,6 @@ void Grid::LoadMap()
 	read_data.CloseTable();
 
 	row_vect.clear();
-	_middle_layer.push_back( row_vect );
 	read_data.OpenTable("middle_layer");
 	for (int32 i = 0; i < _height; i++)
 	{
@@ -240,20 +242,18 @@ void Grid::LoadMap()
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
 			_middle_layer.begin()->push_back(*it);
 		vect.clear();
-	} // iterate through the rows of the lower layer
+	} // iterate through the rows of the middle layer
 	read_data.CloseTable();
 
 	row_vect.clear();
-	_upper_layer.push_back( row_vect );
 	read_data.OpenTable("upper_layer");
 	for (int32 i = 0; i < _height; i++)
 	{
 		read_data.ReadIntVector(i, vect);
-		vector<int32> row_vect;
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
 			_upper_layer.begin()->push_back(*it);
 		vect.clear();
-	} // iterate through the rows of the lower layer
+	} // iterate through the rows of the upper layer
 	read_data.CloseTable();
 	
 	// The map_grid is 4x as big as the map: 2x in the width and 2x in the height. Starting
@@ -303,14 +303,48 @@ void Grid::LoadMap()
 		read_data.CloseTable();
 	}
 
-	read_data.CloseTable();
+	// Load any existing context data
+	for (int i = 1; i < num_contexts; i++) {
+		if (i < 11)
+			sprintf(buffer, "context_0%d", i);
+		else
+			sprintf(buffer, "context_%d", i);
 
-//	_grid_on = true;        // grid lines default to on
-//	_ll_on   = true;        // lower layer default to on
-//	_ml_on   = true;        // middle layer default to off
-//	_ul_on   = true;        // upper layer default to off
-//	_context = 0;           // context default to base context
-//	_changed = false;       // map has not been changed yet
+		// Initialize this context
+		_lower_layer.push_back(_lower_layer[0]);
+		_middle_layer.push_back(_middle_layer[0]);
+		_upper_layer.push_back(_upper_layer[0]);
+
+		// Read the table corresponding to this context and modify each tile accordingly.
+		// The context table is an array of integer data. The size of this array should be divisible by four, as every consecutive group of four integers in
+		// this table represent one tile context element. The first integer corresponds to the tile layer (0 = lower, 1 = middle, 2 = upper), the second
+		// and third represent the row and column of the tile respectively, and the fourth value indicates which tile image should be used for this context.
+		// So if the first four entries in the context table were {0, 12, 26, 180}, this would set the lower layer tile at position (12, 26) to the tile
+		// index 180.
+		vector<int32> context_data;
+		read_data.ReadIntVector(buffer, context_data);
+		for (int j = 0; j < static_cast<int>(context_data.size()); j += 4) {
+			switch (context_data[j]) {
+				case 0: // lower layer
+					_lower_layer[i][context_data[j+1] * _width + context_data[j+2]] =
+						context_data[j+3];
+					break;
+				case 1: // middle layer
+					_middle_layer[i][context_data[j+1] * _width + context_data[j+2]] =
+						context_data[j+3];
+					break;
+				case 2: // upper layer
+					_upper_layer[i][context_data[j+1] * _width + context_data[j+2]] =
+						context_data[j+3];
+					break;
+				default:
+					qWarning("unknown tile layer index reference when loading map context tiles");
+					break;
+			} // switch on the layers
+		} // iterate through all tiles in this context
+	} // iterate through all existing contexts
+
+	read_data.CloseTable();
 } // LoadMap()
 
 void Grid::SaveMap()
@@ -329,7 +363,8 @@ void Grid::SaveMap()
 	write_data.WriteComment("A reference to the C++ MapMode object that was created with this file");
 	write_data.WriteLine("map = {}\n");
 
-	write_data.WriteComment("The number of rows and columns of tiles that compose the map");
+	write_data.WriteComment("The number of contexts, rows, and columns that compose the map");
+	write_data.WriteInt("num_map_contexts", context_names.size());
 	write_data.WriteInt("num_tile_cols", _width);
 	write_data.WriteInt("num_tile_rows", _height);
 	write_data.InsertNewLine();
@@ -527,16 +562,18 @@ void Grid::SaveMap()
 	write_data.InsertNewLine();
 
 	write_data.WriteComment("All, if any, existing contexts follow.");
+	vector<int32>::iterator base_it;  // used to iterate through the base layers
 	vector<int32> context_data;  // one vector of ints contains all the context info
 	// Iterate through all contexts of all layers.
 	for (int i = 1; i < static_cast<int>(_lower_layer.size()); i++)
 	{
-		it = _lower_layer[i].begin();
+		base_it = _lower_layer[0].begin();
+		it      = _lower_layer[i].begin();
 		for (int row = 0; row < _height; row++)
 		{
 			for (int col = 0; col < _width; col++)
 			{
-				if (*it != -1)
+				if (*it != *base_it)
 				{
 					context_data.push_back(0);    // lower layer = 0
 					context_data.push_back(row);
@@ -544,16 +581,18 @@ void Grid::SaveMap()
 					context_data.push_back(*it);
 				} // a valid tile exists so record it
 
+				base_it++;
 				it++;
 			} // iterate through the columns of the lower layer
 		} // iterate through the rows of the lower layer
 
-		it = _middle_layer[i].begin();
+		base_it = _middle_layer[0].begin();
+		it      = _middle_layer[i].begin();
 		for (int row = 0; row < _height; row++)
 		{
 			for (int col = 0; col < _width; col++)
 			{
-				if (*it != -1)
+				if (*it != *base_it)
 				{
 					context_data.push_back(1);    // middle layer = 1
 					context_data.push_back(row);
@@ -561,16 +600,18 @@ void Grid::SaveMap()
 					context_data.push_back(*it);
 				} // a valid tile exists so record it
 
+				base_it++;
 				it++;
 			} // iterate through the columns of the middle layer
 		} // iterate through the rows of the middle layer
 
-		it = _upper_layer[i].begin();
+		base_it = _upper_layer[0].begin();
+		it      = _upper_layer[i].begin();
 		for (int row = 0; row < _height; row++)
 		{
 			for (int col = 0; col < _width; col++)
 			{
-				if (*it != -1)
+				if (*it != *base_it)
 				{
 					context_data.push_back(2);    // upper layer = 2
 					context_data.push_back(row);
@@ -578,6 +619,7 @@ void Grid::SaveMap()
 					context_data.push_back(*it);
 				} // a valid tile exists so record it
 
+				base_it++;
 				it++;
 			} // iterate through the columns of the upper layer
 		} // iterate through the rows of the upper layer
@@ -590,6 +632,7 @@ void Grid::SaveMap()
 				sprintf(buffer, "context_%d", i);
 			write_data.WriteIntVector(buffer, context_data);
 			write_data.InsertNewLine();
+			context_data.clear();
 		} // write the vector if it has data in it
 	} // iterate through all contexts of all layers, assuming all layers have same number of contexts
 
