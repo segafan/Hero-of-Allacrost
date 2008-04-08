@@ -21,6 +21,7 @@
 #include <QStringList>
 
 #include "tileset.h"
+#include "sprites.h"
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -34,7 +35,17 @@ enum LAYER_TYPE
 	MIDDLE_LAYER  = 1,
 	UPPER_LAYER   = 2,
 	SELECT_LAYER  = 3,
-	TOTAL_LAYER   = 4
+	OBJECT_LAYER  = 4,
+	TOTAL_LAYER   = 5
+};
+
+//! objects in the object layer.
+enum OBJECT_TYPE
+{
+	INVALID_OBJECT = -1,
+	VIRTUAL_SPRITE_OBJECT = 0,
+	SPRITE_OBJECT = 1,
+	TOTAL_OBJECT = 2
 };
 
 LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy);
@@ -63,6 +74,7 @@ class Grid: public QGLWidget
 		void SetLLOn(bool value);           // sets lower layer on/off
 		void SetMLOn(bool value);           // sets middle layer on/off
 		void SetULOn(bool value);           // sets upper layer on/off
+		void SetOLOn(bool value);			// sets object layer on/off
 		void SetGridOn(bool value);         // sets grid on/off
 		void SetSelectOn(bool value);       // sets selection layer on/off
 		void SetTexturesOn(bool value);     // sets textures on/off
@@ -102,6 +114,8 @@ class Grid: public QGLWidget
 		QStringList tileset_names;
 		//! A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage.
 		std::vector<Tileset*> tilesets;
+		//! A vector which contains a pointer to each sprite
+		std::vector<MapSprite* > sprites;
 
 		//! A list containing the names of each context.
 		//! \note Should have a max size of 32. That's the max amount of contexts.
@@ -141,6 +155,8 @@ class Grid: public QGLWidget
 		bool _ml_on;
 		//! When TRUE the upper layer of tiles is displayed.
 		bool _ul_on;
+		//! When TRUE the object layer of tiles is displayed.
+		bool _ol_on;
 
 		//! A vector of tiles in the lower layer.
 		std::vector<std::vector<int32> > _lower_layer;
@@ -148,6 +164,8 @@ class Grid: public QGLWidget
 		std::vector<std::vector<int32> > _middle_layer;
 		//! A vector of tiles in the upper layer.
 		std::vector<std::vector<int32> > _upper_layer;
+		//! A vector of sprites in the object layer.
+		std::vector<int32 > _object_layer;
 		//! A vector of tiles in the selection rectangle. Exists only in the editor,
 		//! not the game. Acts similarly to an actual layer as far as drawing
 		//! is concerned.
