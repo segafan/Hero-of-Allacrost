@@ -3,8 +3,8 @@ setmetatable(ns, {__index = _G})
 desert_cave_water = ns;
 setfenv(1, ns);
 
-file_name = "dat/tilesets/lua"
-image = "img/tilesets/png"
+file_name = "dat/tilesets/desert_cave_water.lua"
+image = "img/tilesets/desert_cave_water.png"
 num_tile_cols = 16
 num_tile_rows = 16
 

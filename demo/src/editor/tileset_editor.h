@@ -9,7 +9,7 @@
 
 /*!****************************************************************************
 * \file    tileset_editor.h
-* \author  Barýþ Soner Uþaklý, blackkknight@hotmail.com
+* \author  Barýþ Soner Uþakl? blackkknight@hotmail.com
 * \brief   Header file for editor's tileset editor dialog
 *****************************************************************************/
 
