@@ -45,6 +45,7 @@ Editor::Editor() : QMainWindow(),
 	_ll_on = false;
 	_ml_on = false;
 	_ul_on = false;
+	_ol_on = false;
 	
 	// create the main widget and layout
 	_ed_splitter = new QSplitter(this);
@@ -115,6 +116,7 @@ void Editor::_ViewMenuSetup()
 		_toggle_ll_action->setEnabled(true);
 		_toggle_ml_action->setEnabled(true);
 		_toggle_ul_action->setEnabled(true);
+		_toggle_ol_action->setEnabled(true);
 		_view_textures_action->setEnabled(true);
 	} // map must exist in order to set view options
 	else
@@ -123,6 +125,7 @@ void Editor::_ViewMenuSetup()
 		_toggle_ll_action->setEnabled(false);
 		_toggle_ml_action->setEnabled(false);
 		_toggle_ul_action->setEnabled(false);
+		_toggle_ol_action->setEnabled(false);
 		_view_textures_action->setEnabled(false);
 	} // map does not exist, can't view it*/
 } // _ViewMenuSetup()
@@ -249,12 +252,14 @@ void Editor::_FileNew()
 			_ll_on   = false;
 			_ml_on   = false;
 			_ul_on   = false;
+			_ol_on	 = false;
 			if (_select_on)
 				_TileToggleSelect();
 			_ViewToggleGrid();
 			_ViewToggleLL();
 			_ViewToggleML();
 			_ViewToggleUL();
+			_ViewToggleOL();
 
 			// Populate the context combobox
 			// _context_cbox->clear() doesn't work, it seg faults.
@@ -344,12 +349,14 @@ void Editor::_FileOpen()
 			_ll_on   = false;
 			_ml_on   = false;
 			_ul_on   = false;
+			_ol_on	 = false;
 			if (_select_on)
 				_TileToggleSelect();
 			_ViewToggleGrid();
 			_ViewToggleLL();
 			_ViewToggleML();
 			_ViewToggleUL();
+			_ViewToggleOL();
 
 			// Populate the context combobox
 			// _context_cbox->clear() doesn't work, it seg faults.
@@ -458,6 +465,16 @@ void Editor::_ViewToggleUL()
 		_ed_scrollview->_map->SetULOn(_ul_on);
 	} // map must exist in order to view things on it
 } // _ViewToggleUL()
+
+void Editor::_ViewToggleOL()
+{
+	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+	{
+		_ol_on = !_ol_on;
+		_toggle_ol_action->setChecked(_ol_on);
+		_ed_scrollview->_map->SetOLOn(_ol_on);
+	} // map must exist in order to view things on it
+} // _ViewToggleOL()
 
 void Editor::_ViewTextures()
 {
@@ -979,6 +996,11 @@ void Editor::_CreateActions()
 	_toggle_ul_action->setCheckable(true);
 	connect(_toggle_ul_action, SIGNAL(triggered()), this, SLOT(_ViewToggleUL()));
 
+	_toggle_ol_action = new QAction("&Object Layer", this);
+	_toggle_ol_action->setStatusTip("Switches the object layer on and off");
+	_toggle_ol_action->setCheckable(true);
+	connect(_toggle_ol_action, SIGNAL(triggered()), this, SLOT(_ViewToggleOL()));
+
 	_view_textures_action = new QAction("&Texture sheets", this);
 	_view_textures_action->setShortcut(tr("Ctrl+T"));
 	_view_textures_action->setStatusTip("Cycles through the video engine's texture sheets");
@@ -1131,6 +1153,7 @@ void Editor::_CreateMenus()
 	_view_menu->addAction(_toggle_ll_action);
 	_view_menu->addAction(_toggle_ml_action);
 	_view_menu->addAction(_toggle_ul_action);
+	_view_menu->addAction(_toggle_ol_action);
 	_view_menu->addSeparator();
 	_view_menu->addAction(_view_textures_action);
 	_view_menu->setTearOffEnabled(true);
