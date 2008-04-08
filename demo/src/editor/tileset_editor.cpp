@@ -9,7 +9,7 @@
 
 /*!****************************************************************************
 * \file    tileset_editor.cpp
-* \author  Barýþ Soner Uþaklý, blackkknight@hotmail.com
+* \author  Barýþ Soner Uþakl? blackkknight@hotmail.com
 * \brief   Source file for editor's tileset editor dialog
 *****************************************************************************/
 #include "tileset_editor.h"

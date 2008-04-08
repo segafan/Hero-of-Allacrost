@@ -224,7 +224,6 @@ void Editor::_FileNew()
 			QProgressDialog* new_map_progress = 
 				new QProgressDialog(tr("Loading tilesets..."), NULL, 0, checked_items, this, 
 				        Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
-			new_map_progress->setWindowModality(Qt::WindowModal);
 			new_map_progress->setWindowTitle(tr("Creating Map..."));
 
 			// Set location of and show the progress dialog
@@ -323,7 +322,6 @@ void Editor::_FileOpen()
 			QProgressDialog* new_map_progress = 
 				new QProgressDialog(tr("Loading tilesets..."), NULL, 0, num_items, this, 
 				        Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
-			new_map_progress->setWindowModality(Qt::WindowModal);
 			new_map_progress->setWindowTitle(tr("Creating Map..."));
 
 			// Set the progress bar
@@ -337,7 +335,7 @@ void Editor::_FileOpen()
 				new_map_progress->setValue(progress_steps++);
 				Tileset* a_tileset = new Tileset(this, *it);
 				_ed_tabs->addTab(a_tileset->table, *it);
-				_ed_scrollview->_map->tilesets.push_back(a_tileset);
+				_ed_scrollview->_map->tilesets.push_back(a_tileset);				
 			} // iterate through all tilesets in the map
 			new_map_progress->setValue(progress_steps);
 
