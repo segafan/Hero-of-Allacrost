@@ -18,6 +18,7 @@
 #include "grid.h"
 
 using namespace hoa_script;
+using namespace hoa_map::private_map;
 using namespace hoa_editor;
 using namespace hoa_video;
 using namespace std;
@@ -50,6 +51,7 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	_ll_on = true;          // lower layer default to on
 	_ml_on = false;         // middle layer default to off
 	_ul_on = false;         // upper layer default to off
+	_ol_on = true;			// object layer default to off
 
 	// Initialize layers
 	vector<int> vect;
@@ -57,6 +59,7 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	{
 		vect.push_back(-1);
 		_select_layer.push_back(-1);
+		_object_layer.push_back(-1);
 	} // -1 is used for no tiles
 	_lower_layer.push_back(vect);
 	_middle_layer.push_back(vect);
@@ -120,6 +123,12 @@ void Grid::SetULOn(bool value)
 	updateGL();
 } // SetULOn(...)
 
+void Grid::SetOLOn(bool value)
+{
+	_ol_on = value;
+	updateGL();
+} // SetOLOn(...)
+
 void Grid::SetGridOn(bool value)
 {
 	_grid_on = value;
@@ -149,6 +158,8 @@ vector<int32>& Grid::GetLayer(LAYER_TYPE layer, int context)
 			return _upper_layer[context];
 		case SELECT_LAYER:
 			return _select_layer;
+		case OBJECT_LAYER:
+			return _object_layer;
 		case INVALID_LAYER:
 			/* FALLTHRU */
 		case TOTAL_LAYER:
@@ -193,6 +204,7 @@ void Grid::LoadMap()
 	_lower_layer.clear();
 	_middle_layer.clear();
 	_upper_layer.clear();
+	_object_layer.clear();
 	
 	int num_contexts = read_data.ReadInt("num_map_contexts");
 	_height = read_data.ReadInt("num_tile_rows");
@@ -254,6 +266,43 @@ void Grid::LoadMap()
 			_upper_layer.begin()->push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the upper layer
+	read_data.CloseTable();
+
+	// Load sprites
+	read_data.OpenTable("sprites");
+	vector<int32> keys;
+	read_data.ReadTableKeys(keys);
+
+	// Create empty sprites
+	for( uint32 i = 0; i < keys.size(); i++ ) {
+		_object_layer.push_back( keys[i] );
+		sprites.push_back(new MapSprite());
+	}
+
+	std::vector<MapSprite* >::iterator it=sprites.begin();
+	for (uint32 i = 0; i < keys.size(); i++)
+	{
+		// Read lua spites and write to sprites vector
+		read_data.OpenTable( keys[i] );		
+		(*it)->SetObjectID( read_data.ReadInt("object_id") );
+		(*it)->SetName( read_data.ReadString("name") );
+		(*it)->SetContext( read_data.ReadInt("context") );
+		(*it)->SetXPosition( read_data.ReadInt("x_position"), read_data.ReadFloat("x_position_offset") );
+		(*it)->SetYPosition( read_data.ReadInt("y_position"), read_data.ReadFloat("y_position_offset") );
+		(*it)->SetCollHalfWidth( read_data.ReadFloat("col_half_width") );
+		(*it)->SetCollHeight( read_data.ReadFloat("col_height") );
+		(*it)->SetImgHalfWidth( read_data.ReadFloat("img_half_width") );
+		(*it)->SetImgHeight( read_data.ReadFloat("img_height") );
+		(*it)->SetMovementSpeed( read_data.ReadFloat("movement_speed") );
+		(*it)->SetDirection( read_data.ReadInt("direction") );
+		(*it)->LoadStandardAnimations( read_data.ReadString("standard_animations") );
+		(*it)->LoadRunningAnimations( read_data.ReadString("running_animations") );
+		(*it)->SetFacePortrait( read_data.ReadString("face_portrait") );		
+		
+		if( it != sprites.end() )
+			it++;
+		read_data.CloseTable();
+	}
 	read_data.CloseTable();
 	
 	// The map_grid is 4x as big as the map: 2x in the width and 2x in the height. Starting
@@ -345,6 +394,7 @@ void Grid::LoadMap()
 	} // iterate through all existing contexts
 
 	read_data.CloseTable();
+
 } // LoadMap()
 
 void Grid::SaveMap()
@@ -725,6 +775,23 @@ void Grid::paintGL()
 		} // iterate through middle layer
 	} // middle layer must be viewable
 
+	// Draw object layer
+	if (_ol_on)
+	{	
+		for ( std::vector<MapSprite* >::iterator sprite = sprites.begin(); sprite != sprites.end(); sprite++ )
+		{
+			if ( (*sprite) != NULL )
+				if ( (*sprite)->GetContext() == _context )
+				{		
+					VideoManager->Move( 
+						( static_cast<float>((*sprite)->x_position) + (*sprite)->x_offset ) / X_POS_FACTOR,
+						( static_cast<float>((*sprite)->y_position) + (*sprite)->y_offset ) / Y_POS_FACTOR
+					);
+					(*sprite)->Draw();
+				} // a sprite exists to draw
+		} // iterate through object layer
+	} // object layer must be viewable
+
 	// Draw upper layer
 	if (_ul_on)
 	{
@@ -748,7 +815,7 @@ void Grid::paintGL()
 			else
 				VideoManager->MoveRelative(1.0f, 0.0f);
 		} // iterate through upper layer
-	} // upper layer must be viewable
+	} // upper layer must be viewable	
 
 	// If selection rectangle mode is on, draw it
 	if (_select_on)

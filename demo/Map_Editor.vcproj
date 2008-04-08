@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="Map Editor"
 	ProjectGUID="{A93BAE19-0D23-4237-83B6-01CAB0358D37}"
 	RootNamespace="Map Editor"
@@ -305,6 +305,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\editor\sprites.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\system.cpp"
 				>
 			</File>
@@ -542,6 +546,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\editor\sprites.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\system.h"
 				>
 			</File>
@@ -555,10 +563,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\texture_controller.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\editor\tile.h"
 				>
 			</File>
 			<File
