@@ -136,6 +136,7 @@ class Editor: public QMainWindow
 		void _ViewToggleLL();
 		void _ViewToggleML();
 		void _ViewToggleUL();
+		void _ViewToggleOL();
 		void _ViewTextures();
 		//@}
 
@@ -230,6 +231,7 @@ class Editor: public QMainWindow
 		QAction* _toggle_ll_action;
 		QAction* _toggle_ml_action;
 		QAction* _toggle_ul_action;
+		QAction* _toggle_ol_action;
 		QAction* _view_textures_action;
 
 		QAction* _undo_action;
@@ -278,6 +280,8 @@ class Editor: public QMainWindow
 		bool _ml_on;
 		//! Upper layer toggle view switch.
 		bool _ul_on;
+		//! Object layer toggle view switch.
+		bool _ol_on;
 		
 		//! The stack that contains the undo and redo operations.
 		QUndoStack* _undo_stack;
