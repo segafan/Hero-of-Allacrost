@@ -181,6 +181,8 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/tileset_editor.h \
 	$(EDITOR_DIR)/skill_editor.cpp \
 	$(EDITOR_DIR)/skill_editor.h \
+	$(EDITOR_DIR)/sprites.cpp \
+	$(EDITOR_DIR)/sprites.h \
 	$(video_SOURCES) \
 	$(script_SOURCES) \
 	$(ENGINE_DIR)/socket.cpp \
