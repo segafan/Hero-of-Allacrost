@@ -20,6 +20,9 @@
 #include "defs.h"
 #include "video.h"
 
+#include <QRectF>
+#include <QPointF>
+
 namespace hoa_editor {
 
 // *********************** SPRITE CONSTANTS **************************
@@ -149,6 +152,9 @@ public:
 	//! \brief Set to true when the sprite is running rather than just walking
 	bool is_running;
 
+	//! \brief Set to selected in the editor
+	bool is_selected;
+
 	/** \brief When set to true, indicates that the object exists on the sky object layer (default = false).
 	*** This member is necessary for collision detection purposes. When a sprite needs to detect
 	*** if it has encountered a collision, that collision must be examined with other objects on
@@ -173,7 +179,7 @@ public:
 	*** in its actions vector, this member should remain negative, otherwise a segmentation fault
 	*** will occur.
 	**/
-	//int8 current_action;
+	int8 current_action;
 
 	// TODO: change how forced action work
 	//int8 forced_action;
@@ -308,6 +314,9 @@ public:
 	//! \brief Draws a dialogue icon over the virtual sprite if it has to.
 	virtual void Draw();
 
+	//! \brief Draws the selection image
+	virtual void DrawSelection()=0;
+
 	/** \name Lua Access Functions
 	*** These functions are specifically written for Lua binding, to enable Lua to access the
 	*** members of this class.
@@ -402,6 +411,18 @@ public:
 
 	float ComputeYLocation() const
 		{ return (static_cast<float>(y_position) + y_offset); }
+
+	float ComputeDrawXLocation() const
+		{ return (static_cast<float>(x_position) - img_half_width) / X_POS_FACTOR + x_offset; }
+
+	float ComputeDrawYLocation() const		
+		{ return (static_cast<float>(y_position) - img_height) / Y_POS_FACTOR + y_offset; }
+
+	QRectF ComputeHoverArea() const
+		{ return QRectF(ComputeDrawXLocation(), ComputeDrawYLocation(), img_half_width, img_height/2); }
+
+	bool IsInHoverArea(float x, float y) const
+	{ return ComputeHoverArea().contains( QPointF(x,y) ); }
 	//@}
 
 	/** \brief Sets the sprite's direction to a random value
@@ -488,6 +509,9 @@ protected:
 	//! \brief This holds the the type of sprite this is.
 	uint8 _object_type;
 
+	//! \brief Selected image for sprite has been selected
+	hoa_video::StillImage _selected_image;
+
 }; // class VirtualSprite : public MapObject
 
 
@@ -557,6 +581,9 @@ public:
 
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	virtual void Draw();
+
+	//! \brief Draws the selection image
+	virtual void DrawSelection();
 
 	/** \name Lua Access Functions
 	*** These functions are specifically written for Lua binding, to enable Lua to access the

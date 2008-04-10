@@ -282,7 +282,7 @@ void Grid::LoadMap()
 		sprites.push_back(new MapSprite());
 	}
 
-	std::vector<MapSprite* >::iterator it=sprites.begin();
+	std::list<MapSprite* >::iterator it=sprites.begin();
 	for (uint32 i = 0; i < keys.size(); i++)
 	{
 		// Read lua spites and write to sprites vector
@@ -781,16 +781,18 @@ void Grid::paintGL()
 	// Draw object layer
 	if (_ol_on)
 	{	
-		for ( std::vector<MapSprite* >::iterator sprite = sprites.begin(); sprite != sprites.end(); sprite++ )
+		for ( std::list<MapSprite* >::iterator sprite = sprites.begin(); sprite != sprites.end(); sprite++ )
 		{
 			if ( (*sprite) != NULL )
 				if ( (*sprite)->GetContext() == _context )
-				{		
-					VideoManager->Move( 
-						( static_cast<float>((*sprite)->x_position) - (*sprite)->img_half_width ) / X_POS_FACTOR + (*sprite)->x_offset,
-						( static_cast<float>((*sprite)->y_position) - (*sprite)->img_height ) / Y_POS_FACTOR + (*sprite)->y_offset
-					);
+				{	
+					VideoManager->Move( (*sprite)->ComputeDrawXLocation() - 0.2f,
+										(*sprite)->ComputeDrawYLocation() + (*sprite)->img_height*3/8 - 0.4f );
+					(*sprite)->DrawSelection();
+					VideoManager->Move( (*sprite)->ComputeDrawXLocation(), (*sprite)->ComputeDrawYLocation() );
 					(*sprite)->Draw();
+					(*sprite)->Update();
+
 				} // a sprite exists to draw
 		} // iterate through object layer
 	} // object layer must be viewable

@@ -36,10 +36,11 @@ VirtualSprite::VirtualSprite() :
 	direction(SOUTH),
 	movement_speed(NORMAL_SPEED),
 	moving(false),
+	is_selected(false),
 	sky_object(false),
 	face_portrait( NULL ),
 	//has_active_dialogue(true),
-	//current_action(-1),
+	current_action(-1),
 	//forced_action(-1),
 	_saved(false)
 	//_current_dialogue(0),
@@ -47,6 +48,7 @@ VirtualSprite::VirtualSprite() :
 	//_dialogue_icon_color(1.0f, 1.0f, 1.0f, 0.0f)
 {
 	//_object_type = VIRTUAL_SPRITE_OBJECT;
+	_selected_image.Load("img/icons/battle/character_selector.png", 1.5f, 1.5f);
 }
 
 
@@ -572,7 +574,7 @@ void MapSprite::Update() {
 		}
 
 		// Determine the correct standing frame to display
-		/*if (current_action == -1) {
+		if (current_action == -1) {
 			if (direction & FACING_NORTH) {
 				current_animation = ANIM_STANDING_NORTH;
 			}
@@ -588,7 +590,7 @@ void MapSprite::Update() {
 			else {
 				cerr << "MAP ERROR: could not find proper standing animation to draw" << endl;
 			}
-		}*/
+		}
 	} // if (!moving)
 
 	// This call will update the sprite's position and perform collision detection
@@ -635,12 +637,17 @@ void MapSprite::Update() {
 
 // Draw the appropriate sprite frame at the correct position on the screen
 void MapSprite::Draw() {
-	//if (MapObject::DrawHelper() == true) {
+	//if (MapObject::DrawHelper() == true) {	
 		animations[current_animation].SetHeight( img_height/2 );
 		animations[current_animation].SetWidth( img_half_width );
 		animations[current_animation].Draw();
 	//	VirtualSprite::Draw();
 	//}
+}
+
+void MapSprite::DrawSelection() {
+	if(is_selected)
+		_selected_image.Draw();
 }
 
 
