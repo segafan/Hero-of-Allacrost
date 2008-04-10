@@ -1378,10 +1378,11 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 	
 	_map->SetChanged(true);
 
+	int16 selection_count = 0;
 	if(_layer_edit != OBJECT_LAYER) {
 		// record location of pressed tile
 		_tile_index = static_cast<int32>
-			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);		
 
 		// record the location of the beginning of the selection rectangle
 		if (evt->button() == Qt::LeftButton && editor->_select_on == true &&
@@ -1392,11 +1393,29 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 		} // selection mode is on
 	} else {
 		// select sprites
+
+		// check for selection amounts
 		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
+			if( (*it)->is_selected == true )
+				selection_count++;
+		
+		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
+		{
 			if( (*it)->IsInHoverArea(static_cast<float>(evt->x())/TILE_WIDTH, static_cast<float>(evt->y())/ TILE_HEIGHT) )
+			{	// in the hovering area
+				
 				(*it)->is_selected = true;
-			else
-				(*it)->is_selected = false;	
+				if(selection_count <= 0)	// the last one selection, if there's 2 more selections, substract it...
+					break;
+				else						// deselect it unless we got the last one selection
+				{
+					selection_count--;
+					(*it)->is_selected = false;
+				}
+			}
+			else	// if not in the hovvering area, deselect it
+				(*it)->is_selected = false;				
+		}
 	}
 				
 	switch (_tile_mode)
