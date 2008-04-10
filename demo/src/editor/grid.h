@@ -114,8 +114,8 @@ class Grid: public QGLWidget
 		QStringList tileset_names;
 		//! A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage.
 		std::vector<Tileset*> tilesets;
-		//! A vector which contains a pointer to each sprite
-		std::vector<MapSprite* > sprites;
+		//! A list which contains a pointer to each sprite, I use list which is because of its efficient.
+		std::list<MapSprite* > sprites;
 
 		//! A list containing the names of each context.
 		//! \note Should have a max size of 32. That's the max amount of contexts.

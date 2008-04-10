@@ -42,6 +42,7 @@
 
 #include "dialog_boxes.h"
 #include "grid.h"
+#include "sprites.h"
 #include "skill_editor.h"
 #include "tileset_editor.h"
 
@@ -152,6 +153,7 @@ class Editor: public QMainWindow
 		void _TileEditLL();
 		void _TileEditML();
 		void _TileEditUL();
+		void _TileEditOL();
 		//@}
 
 		//! \name Tileset Menu Item Slots
@@ -245,6 +247,7 @@ class Editor: public QMainWindow
 		QAction* _edit_ll_action;
 		QAction* _edit_ml_action;
 		QAction* _edit_ul_action;
+		QAction* _edit_ol_action;
 		QActionGroup* _mode_group;
 		QActionGroup* _edit_group;
 
@@ -327,6 +330,7 @@ class EditorScrollView: public Q3ScrollView
 		void contentsMouseMoveEvent(QMouseEvent *evt);
 		void contentsMouseReleaseEvent(QMouseEvent *evt);
 		void contentsContextMenuEvent(QContextMenuEvent *evt);
+		void keyPressEvent(QKeyEvent *evt);
 		//@}
 
 	private slots:

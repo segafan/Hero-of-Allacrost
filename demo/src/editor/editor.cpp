@@ -146,6 +146,7 @@ void Editor::_TilesEnableActions()
 		_edit_ll_action->setEnabled(true);
 		_edit_ml_action->setEnabled(true);
 		_edit_ul_action->setEnabled(true);
+		_edit_ol_action->setEnabled(true);
 		_context_cbox->setEnabled(true);
 	} // map must exist in order to paint it
 	else
@@ -161,6 +162,7 @@ void Editor::_TilesEnableActions()
 		_edit_ll_action->setEnabled(false);
 		_edit_ml_action->setEnabled(false);
 		_edit_ul_action->setEnabled(false);
+		_edit_ol_action->setEnabled(false);
 		_context_cbox->setEnabled(false);
 	} // map does not exist, can't paint it*/
 } // _TilesEnableActions()
@@ -642,6 +644,13 @@ void Editor::_TileEditUL()
 		_ed_scrollview->_layer_edit = UPPER_LAYER;
 } // _TileEditUL()
 
+void Editor::_TileEditOL()
+{
+	if (_ed_scrollview != NULL)
+		_ed_scrollview->_layer_edit = OBJECT_LAYER;
+} // _TileEditOL()
+
+
 void Editor::_TilesetEdit()
 {
 	TilesetEditor* tileset_editor = new TilesetEditor(this, "tileset_editor", true);
@@ -1090,10 +1099,17 @@ void Editor::_CreateActions()
 	_edit_ul_action->setCheckable(true);
 	connect(_edit_ul_action, SIGNAL(triggered()), this, SLOT(_TileEditUL()));
 
+	_edit_ol_action = new QAction("Edit &object layer", this);
+	_edit_ol_action->setShortcut(tr("Ctrl+O"));
+	_edit_ol_action->setStatusTip("Makes object layer of the map current");
+	_edit_ol_action->setCheckable(true);
+	connect(_edit_ol_action, SIGNAL(triggered()), this, SLOT(_TileEditOL()));
+
 	_edit_group = new QActionGroup(this);
 	_edit_group->addAction(_edit_ll_action);
 	_edit_group->addAction(_edit_ml_action);
 	_edit_group->addAction(_edit_ul_action);
+	_edit_group->addAction(_edit_ol_action);
 	_edit_ll_action->setChecked(true);
 
 
@@ -1189,6 +1205,8 @@ void Editor::_CreateMenus()
 	_tiles_menu->addAction(_edit_ll_action);
 	_tiles_menu->addAction(_edit_ml_action);
 	_tiles_menu->addAction(_edit_ul_action);
+	_tiles_menu->addAction(_edit_ol_action);
+
 	_tiles_menu->setTearOffEnabled(true);
 	connect(_tiles_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesEnableActions()));
 	
@@ -1294,6 +1312,8 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
 	// set viewport
 	viewport()->setMouseTracking(true);
 
+	setFocusPolicy(Qt::StrongFocus);
+
 	// Create a new map.
 	_map = new Grid(viewport(), "Untitled", width, height);
 	addChild(_map);	
@@ -1358,17 +1378,26 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 	
 	_map->SetChanged(true);
 
-	// record location of pressed tile
-	_tile_index = static_cast<int32>
-		(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+	if(_layer_edit != OBJECT_LAYER) {
+		// record location of pressed tile
+		_tile_index = static_cast<int32>
+			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 
-	// record the location of the beginning of the selection rectangle
-	if (evt->button() == Qt::LeftButton && editor->_select_on == true &&
-			_moving == false)
-	{
-		_first_corner_index = _tile_index;
-		_map->GetLayer(SELECT_LAYER, 0)[_tile_index] = 1;
-	} // selection mode is on
+		// record the location of the beginning of the selection rectangle
+		if (evt->button() == Qt::LeftButton && editor->_select_on == true &&
+				_moving == false)
+		{
+			_first_corner_index = _tile_index;
+			_map->GetLayer(SELECT_LAYER, 0)[_tile_index] = 1;
+		} // selection mode is on
+	} else {
+		// select sprites
+		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
+			if( (*it)->IsInHoverArea(static_cast<float>(evt->x())/TILE_WIDTH, static_cast<float>(evt->y())/ TILE_HEIGHT) )
+				(*it)->is_selected = true;
+			else
+				(*it)->is_selected = false;	
+	}
 				
 	switch (_tile_mode)
 	{
@@ -1382,9 +1411,12 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 
 		case MOVE_TILE: // start moving a tile
 		{
-			_move_source_index = _tile_index;
-			if (editor->_select_on == false)
-				_moving = true;
+			// select tiles
+			if(_layer_edit != OBJECT_LAYER) {
+				_move_source_index = _tile_index;
+				if (editor->_select_on == false)
+					_moving = true;
+			}
 			break;
 		} // edit mode MOVE_TILE
 
@@ -1421,12 +1453,23 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 		return;
 	}
 
-	
-	
-	int32 index = static_cast<int32>
-		(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+	// Move sprites
+	bool is_object_layer = (_layer_edit == OBJECT_LAYER);
+	if(is_object_layer && evt->buttons() == Qt::LeftButton) {
+		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
+			if( (*it)->is_selected ) {
+				float x = evt->x();
+				float y = evt->y();
+				float x_position = x*2/TILE_WIDTH + (*it)->img_half_width/2;
+				float y_position = y*2/TILE_HEIGHT + (*it)->img_height/2;
+				(*it)->SetXPosition( x_position, 0 );
+				(*it)->SetYPosition( y_position, 0 );
+			}
+	}	
+		int32 index = static_cast<int32>
+			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 
-	if (index != _tile_index)  // user has moved onto another tile
+	if (index != _tile_index && !is_object_layer)  // user has moved onto another tile
 	{
 		_tile_index = index;
 		
@@ -1471,7 +1514,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			} // edit mode PAINT_TILE
 
 			case MOVE_TILE: // continue moving a tile
-			{
+			{				
 				break;
 			} // edit mode MOVE_TILE
 
@@ -1505,6 +1548,8 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 	// get reference to Editor so we can access the undo stack
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
 
+	bool is_object_layer = (_layer_edit == OBJECT_LAYER);
+	if( !is_object_layer )
 	switch (_tile_mode)
 	{
 		case PAINT_TILE: // wrap up painting tiles
@@ -1623,14 +1668,14 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 	} // switch on tile editing mode
 
 	// Clear the selection layer.
-	if ((_tile_mode != MOVE_TILE || _moving == true) && editor->_select_on == true)
+	if ((_tile_mode != MOVE_TILE || _moving == true) && editor->_select_on == true && !is_object_layer )
 	{
 		vector<int32>& select_layer = _map->GetLayer(SELECT_LAYER, 0);
 		for (it = select_layer.begin(); it != select_layer.end(); it++)
 			*it = -1;
 	} // clears when not moving tiles or when moving tiles and not selecting them
 
-	if (editor->_select_on == true && _moving == false && _tile_mode == MOVE_TILE)
+	if (editor->_select_on == true && _moving == false && _tile_mode == MOVE_TILE && !is_object_layer)
 		_moving = true;
 	else
 		_moving = false;
@@ -1654,6 +1699,16 @@ void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 	(static_cast<Editor*> (topLevelWidget()))->statusBar()->clear();
 } // contentsContextMenuEvent(...)
 
+void EditorScrollView::keyPressEvent(QKeyEvent *evt)
+{
+	if(evt->key() == Qt::Key_Delete && _layer_edit == OBJECT_LAYER)
+		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
+		if( (*it)->is_selected ) {
+			_map->sprites.remove(*it);
+			break;	// break is needed for preventing iterator error
+	}
+	
+} // keyPressEvent(...)
 
 
 // ********** Private slots **********
@@ -2220,7 +2275,6 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 
 	return INVALID_PATTERN;
 } // _CheckForTransitionPattern(...)
-
 
 
 /************************
