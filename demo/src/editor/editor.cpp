@@ -977,26 +977,31 @@ void Editor::_CreateActions()
 
 	_toggle_grid_action = new QAction("&Grid", this);
 	_toggle_grid_action->setStatusTip("Switches the grid on and off");
+	_toggle_grid_action->setShortcut(tr("G"));
 	_toggle_grid_action->setCheckable(true);
 	connect(_toggle_grid_action, SIGNAL(triggered()), this, SLOT(_ViewToggleGrid()));
 	
 	_toggle_ll_action = new QAction("&Lower Layer", this);
 	_toggle_ll_action->setStatusTip("Switches the lower layer on and off");
+	_toggle_ll_action->setShortcut(tr("L"));
 	_toggle_ll_action->setCheckable(true);
 	connect(_toggle_ll_action, SIGNAL(triggered()), this, SLOT(_ViewToggleLL()));
 	
 	_toggle_ml_action = new QAction("&Middle Layer", this);
 	_toggle_ml_action->setStatusTip("Switches the middle layer on and off");
+	_toggle_ml_action->setShortcut(tr("M"));
 	_toggle_ml_action->setCheckable(true);
 	connect(_toggle_ml_action, SIGNAL(triggered()), this, SLOT(_ViewToggleML()));
 	
 	_toggle_ul_action = new QAction("&Upper Layer", this);
 	_toggle_ul_action->setStatusTip("Switches the upper layer on and off");
+	_toggle_ul_action->setShortcut(tr("U"));
 	_toggle_ul_action->setCheckable(true);
 	connect(_toggle_ul_action, SIGNAL(triggered()), this, SLOT(_ViewToggleUL()));
 
 	_toggle_ol_action = new QAction("&Object Layer", this);
 	_toggle_ol_action->setStatusTip("Switches the object layer on and off");
+	_toggle_ol_action->setShortcut(tr("O"));
 	_toggle_ol_action->setCheckable(true);
 	connect(_toggle_ol_action, SIGNAL(triggered()), this, SLOT(_ViewToggleOL()));
 
@@ -1009,12 +1014,16 @@ void Editor::_CreateActions()
 
 	// Create menu actions related to the Tiles menu
 
-	_undo_action = new QAction("&Undo", this);
+	_undo_action = new QAction(
+		QIcon("img/misc/editor-tools/arrow-left.png"),
+		"&Undo", this);
 	_undo_action->setShortcut(tr("Ctrl+Z"));
 	_undo_action->setStatusTip("Undoes the previous command");
 	connect(_undo_action, SIGNAL(triggered()), _undo_stack, SLOT(undo()));
 
-	_redo_action = new QAction("&Redo", this);
+	_redo_action = new QAction(
+		QIcon("img/misc/editor-tools/arrow-right.png"),
+		"&Redo", this);
 	_redo_action->setShortcut(tr("Ctrl+Y"));
 	_redo_action->setStatusTip("Redoes the next command");
 	connect(_redo_action, SIGNAL(triggered()), _undo_stack, SLOT(redo()));
@@ -1064,16 +1073,19 @@ void Editor::_CreateActions()
 	_mode_paint_action->setChecked(true);
 	
 	_edit_ll_action = new QAction("Edit &lower layer", this);
+	_edit_ll_action->setShortcut(tr("Ctrl+L"));
 	_edit_ll_action->setStatusTip("Makes lower layer of the map current");
 	_edit_ll_action->setCheckable(true);
 	connect(_edit_ll_action, SIGNAL(triggered()), this, SLOT(_TileEditLL()));
 	
 	_edit_ml_action = new QAction("Edit m&iddle layer", this);
+	_edit_ml_action->setShortcut(tr("Ctrl+M"));
 	_edit_ml_action->setStatusTip("Makes middle layer of the map current");
 	_edit_ml_action->setCheckable(true);
 	connect(_edit_ml_action, SIGNAL(triggered()), this, SLOT(_TileEditML()));
 	
 	_edit_ul_action = new QAction("Edit &upper layer", this);
+	_edit_ul_action->setShortcut(tr("Ctrl+U"));
 	_edit_ul_action->setStatusTip("Makes upper layer of the map current");
 	_edit_ul_action->setCheckable(true);
 	connect(_edit_ul_action, SIGNAL(triggered()), this, SLOT(_TileEditUL()));
@@ -1213,6 +1225,9 @@ void Editor::_CreateToolbars()
 	_tiles_toolbar->addAction(_mode_paint_action);
 	_tiles_toolbar->addAction(_mode_move_action);
 	_tiles_toolbar->addAction(_mode_delete_action);
+	_tiles_toolbar->addSeparator();
+	_tiles_toolbar->addAction(_undo_action);
+	_tiles_toolbar->addAction(_redo_action);
 	_tiles_toolbar->addSeparator();
 	_tiles_toolbar->addAction(_toggle_select_action);
 	_tiles_toolbar->addSeparator();
@@ -1386,11 +1401,6 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 				"ERROR: Invalid tile editing mode!");
 	} // switch on tile editing mode
 
-	// Display mouse position.
-	QString position = QString("Position - x:%1 y:%2").arg(evt->x() / static_cast<float>(TILE_WIDTH), 0, 'f', 1).arg(
-			evt->y() / static_cast<float>(TILE_HEIGHT), 0, 'f', 1);
-	editor->statusBar()->showMessage(position);
-
 	// Draw the changes.
 	_map->updateGL();
 } // contentsMousePressEvent(...)
@@ -1480,7 +1490,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 	} // mouse has moved to a new tile position
 
 	// Display mouse position.
-	QString position = QString("Position - x:%1 y:%2").arg(evt->x() / static_cast<float>(TILE_WIDTH), 0, 'f', 1).arg(
+	QString position = QString("x: %1  y: %2").arg(evt->x() / static_cast<float>(TILE_WIDTH), 0, 'f', 1).arg(
 			evt->y() / static_cast<float>(TILE_HEIGHT), 0, 'f', 1);
 	editor->statusBar()->showMessage(position);
 
