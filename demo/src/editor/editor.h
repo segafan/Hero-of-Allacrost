@@ -92,7 +92,7 @@ class Editor: public QMainWindow
 	
 	public:
 		Editor();                       // constructor
-		~Editor();                      // destructor
+		~Editor();                      // destructor		
 
 		//! Needed for tile editing and accessing the map properties.
 		friend class EditorScrollView;
@@ -104,7 +104,7 @@ class Editor: public QMainWindow
 	protected:
 		//! Handles close and/or quit events.
 		//! \note Reimplemented from QMainWindow.
-		//! \param QCloseEvent* A pointer to a Qt close event.
+		//! \param QCloseEvent* A pointer to a Qt close event.		
 		void closeEvent(QCloseEvent*);
 	
 	private slots:
