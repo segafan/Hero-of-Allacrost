@@ -52,6 +52,9 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	_ml_on = false;         // middle layer default to off
 	_ul_on = false;         // upper layer default to off
 	_ol_on = true;			// object layer default to off
+	
+	// Set mouse tracking
+	setMouseTracking(true);
 
 	// Initialize layers
 	vector<int> vect;
@@ -784,8 +787,8 @@ void Grid::paintGL()
 				if ( (*sprite)->GetContext() == _context )
 				{		
 					VideoManager->Move( 
-						( static_cast<float>((*sprite)->x_position) + (*sprite)->x_offset ) / X_POS_FACTOR,
-						( static_cast<float>((*sprite)->y_position) + (*sprite)->y_offset ) / Y_POS_FACTOR
+						( static_cast<float>((*sprite)->x_position) - (*sprite)->img_half_width ) / X_POS_FACTOR + (*sprite)->x_offset,
+						( static_cast<float>((*sprite)->y_position) - (*sprite)->img_height ) / Y_POS_FACTOR + (*sprite)->y_offset
 					);
 					(*sprite)->Draw();
 				} // a sprite exists to draw

@@ -57,6 +57,9 @@ Editor::Editor() : QMainWindow(),
 	// set the window icon
 	setWindowIcon(QIcon("img/logos/program_icon.bmp"));
 
+	// set mouse tracking
+	//setMouseTracking(true);
+
 	// create error message for exceeding maximum number of contexts
 	_error_max_contexts = new QErrorMessage(this);
 
@@ -89,8 +92,6 @@ void Editor::closeEvent(QCloseEvent*)
 {
     _FileQuit();
 } // closeEvent(...)
-
-
 
 // ********** Private slots **********
 
@@ -1262,8 +1263,6 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
 	: Q3ScrollView(parent, (const char*) name,
 		             Qt::WNoAutoErase|Qt::WStaticContents)
 {
-	setMouseTracking(true);
-	
 	// Set default editing modes.
 	_tile_mode  = PAINT_TILE;
 	_layer_edit = LOWER_LAYER;
@@ -1274,9 +1273,12 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
 	_previous_tiles.clear();
 	_modified_tiles.clear();
 
+	// set viewport
+	viewport()->setMouseTracking(true);
+
 	// Create a new map.
 	_map = new Grid(viewport(), "Untitled", width, height);
-	addChild(_map);
+	addChild(_map);	
 
 	// Create menu actions related to the Context menu.
 	_insert_row_action = new QAction("Insert row", this);
@@ -1327,7 +1329,10 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 {
 	// don't draw outside the map
 	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
-		(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
+		(evt->x() / TILE_WIDTH)  >= _map->GetWidth()  ||
+		evt->x() < 0								  ||
+		evt->y() < 0								  
+		)
 		return;
 
 	// get reference to Editor
@@ -1379,9 +1384,9 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 	} // switch on tile editing mode
 
 	// Display mouse position.
-	editor->statusBar()->showMessage(
-		QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(
-			evt->y() / TILE_HEIGHT));
+	QString position = QString("Position - x:%1 y:%2").arg(evt->x() / static_cast<float>(TILE_WIDTH), 0, 'f', 1).arg(
+			evt->y() / static_cast<float>(TILE_HEIGHT), 0, 'f', 1);
+	editor->statusBar()->showMessage(position);
 
 	// Draw the changes.
 	_map->updateGL();
@@ -1389,13 +1394,21 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 
 void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 {
-	// don't draw outside the map
-	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
-		(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
-		return;
-
 	// get reference to Editor
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
+
+	// don't draw outside the map
+	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
+		(evt->x() / TILE_WIDTH)  >= _map->GetWidth()  ||
+		evt->x() < 0								  ||
+		evt->y() < 0								  
+		) 
+	{
+		editor->statusBar()->clear();
+		return;
+	}
+
+	
 	
 	int32 index = static_cast<int32>
 		(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
@@ -1460,13 +1473,13 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			default:
 				QMessageBox::warning(this, "Tile editing mode",
 					"ERROR: Invalid tile editing mode!");
-		} // switch on tile editing mode
-
-		// Display mouse position.
-		editor->statusBar()->showMessage(
-			QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(
-				evt->y() / TILE_HEIGHT));
+		} // switch on tile editing mode		
 	} // mouse has moved to a new tile position
+
+	// Display mouse position.
+	QString position = QString("Position - x:%1 y:%2").arg(evt->x() / static_cast<float>(TILE_WIDTH), 0, 'f', 1).arg(
+			evt->y() / static_cast<float>(TILE_HEIGHT), 0, 'f', 1);
+	editor->statusBar()->showMessage(position);
 
 	// Draw the changes.
 	_map->updateGL();
@@ -1617,7 +1630,10 @@ void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 {
 	// Don't popup a menu outside the map.
 	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
-		(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
+		(evt->x() / TILE_WIDTH)  >= _map->GetWidth()  ||
+		evt->x() < 0								  ||
+		evt->y() < 0								  
+		) 
 		return;
 
 	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
