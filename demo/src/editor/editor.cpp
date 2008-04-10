@@ -1043,7 +1043,9 @@ void Editor::_CreateActions()
 	_mode_paint_action->setCheckable(true);
 	connect(_mode_paint_action, SIGNAL(triggered()), this, SLOT(_TileModePaint()));
 
-	_mode_move_action = new QAction("&Move mode", this);
+	_mode_move_action = new QAction(
+		QIcon("img/misc/editor-tools/stock-tool-arrow.png"),
+		"&Move mode", this);
 	_mode_move_action->setStatusTip("Switches to move mode to move tiles around on the map");
 	_mode_move_action->setCheckable(true);
 	connect(_mode_move_action, SIGNAL(triggered()), this, SLOT(_TileModeMove()));
@@ -1209,6 +1211,7 @@ void Editor::_CreateToolbars()
 	_tiles_toolbar->addAction(_layer_fill_action);
 	_tiles_toolbar->addSeparator();
 	_tiles_toolbar->addAction(_mode_paint_action);
+	_tiles_toolbar->addAction(_mode_move_action);
 	_tiles_toolbar->addAction(_mode_delete_action);
 	_tiles_toolbar->addSeparator();
 	_tiles_toolbar->addAction(_toggle_select_action);
