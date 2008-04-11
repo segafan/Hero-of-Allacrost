@@ -277,6 +277,8 @@ class Editor: public QMainWindow
 		bool _grid_on;
 		//! Selection rectangle toggle view switch.
 		bool _select_on;
+		//! Textures toggle view switch.
+		bool _textures_on;
 		//! Lower layer toggle view switch.
 		bool _ll_on;
 		//! Middle layer toggle view switch.

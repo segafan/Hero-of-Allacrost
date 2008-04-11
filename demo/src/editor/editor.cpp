@@ -57,9 +57,6 @@ Editor::Editor() : QMainWindow(),
 	// set the window icon
 	setWindowIcon(QIcon("img/logos/program_icon.bmp"));
 
-	// set mouse tracking
-	//setMouseTracking(true);
-
 	// create error message for exceeding maximum number of contexts
 	_error_max_contexts = new QErrorMessage(this);
 
@@ -251,6 +248,7 @@ void Editor::_FileNew()
 			_ed_splitter->show();
 
 			_grid_on = false;
+			_textures_on = true;
 			_ll_on   = false;
 			_ml_on   = false;
 			_ul_on   = false;
@@ -262,6 +260,7 @@ void Editor::_FileNew()
 			_ViewToggleML();
 			_ViewToggleUL();
 			_ViewToggleOL();
+			_ViewTextures();
 
 			// Populate the context combobox
 			// _context_cbox->clear() doesn't work, it seg faults.
@@ -347,6 +346,7 @@ void Editor::_FileOpen()
 			_ed_splitter->show();
 
 			_grid_on = false;
+			_textures_on = true;
 			_ll_on   = false;
 			_ml_on   = false;
 			_ul_on   = false;
@@ -358,6 +358,7 @@ void Editor::_FileOpen()
 			_ViewToggleML();
 			_ViewToggleUL();
 			_ViewToggleOL();
+			_ViewTextures();
 
 			// Populate the context combobox
 			// _context_cbox->clear() doesn't work, it seg faults.
@@ -481,8 +482,12 @@ void Editor::_ViewTextures()
 {
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
-		VideoManager->Textures()->DEBUG_NextTexSheet();
-		_ed_scrollview->_map->SetTexturesOn(true);
+		_textures_on = !_textures_on;
+		if(_textures_on) 
+		{
+			VideoManager->Textures()->DEBUG_NextTexSheet();
+		}
+		_ed_scrollview->_map->SetTexturesOn(_textures_on);
 	} // map must exist in order to view things on it
 } // _ViewTextures()
 
@@ -1050,6 +1055,7 @@ void Editor::_CreateActions()
 	_toggle_select_action = new QAction(
 		QIcon("img/misc/editor-tools/stock-tool-rect-select-22.png"),
 		"Marquee &Select", this);
+	_toggle_select_action->setShortcut(tr("Shift+S"));
 	_toggle_select_action->setStatusTip("Rectangularly select tiles on the map");
 	_toggle_select_action->setCheckable(true);
 	connect(_toggle_select_action, SIGNAL(triggered()), this, SLOT(_TileToggleSelect()));
@@ -1057,13 +1063,15 @@ void Editor::_CreateActions()
 	_mode_paint_action = new QAction(
 		QIcon("img/misc/editor-tools/stock-tool-pencil-22.png"),
 		"&Paint mode", this);
+	_mode_paint_action->setShortcut(tr("Shift+P"));
 	_mode_paint_action->setStatusTip("Switches to paint mode to draw tiles on the map");
 	_mode_paint_action->setCheckable(true);
 	connect(_mode_paint_action, SIGNAL(triggered()), this, SLOT(_TileModePaint()));
 
 	_mode_move_action = new QAction(
 		QIcon("img/misc/editor-tools/stock-tool-arrow.png"),
-		"&Move mode", this);
+		"Mo&ve mode", this);
+	_mode_move_action->setShortcut(tr("Shift+V"));
 	_mode_move_action->setStatusTip("Switches to move mode to move tiles around on the map");
 	_mode_move_action->setCheckable(true);
 	connect(_mode_move_action, SIGNAL(triggered()), this, SLOT(_TileModeMove()));
@@ -1071,6 +1079,7 @@ void Editor::_CreateActions()
 	_mode_delete_action = new QAction(
 		QIcon("img/misc/editor-tools/stock-tool-eraser-22.png"),
 		"&Delete mode", this);
+	_mode_delete_action->setShortcut(tr("Shift+D"));
 	_mode_delete_action->setStatusTip("Switches to delete mode to erase tiles from the map");
 	_mode_delete_action->setCheckable(true);
 	connect(_mode_delete_action, SIGNAL(triggered()), this, SLOT(_TileModeDelete()));
@@ -1082,25 +1091,25 @@ void Editor::_CreateActions()
 	_mode_paint_action->setChecked(true);
 	
 	_edit_ll_action = new QAction("Edit &lower layer", this);
-	_edit_ll_action->setShortcut(tr("Ctrl+L"));
+	_edit_ll_action->setShortcut(tr("Shift+L"));
 	_edit_ll_action->setStatusTip("Makes lower layer of the map current");
 	_edit_ll_action->setCheckable(true);
 	connect(_edit_ll_action, SIGNAL(triggered()), this, SLOT(_TileEditLL()));
 	
-	_edit_ml_action = new QAction("Edit m&iddle layer", this);
-	_edit_ml_action->setShortcut(tr("Ctrl+M"));
+	_edit_ml_action = new QAction("Edit &middle layer", this);
+	_edit_ml_action->setShortcut(tr("Shift+M"));
 	_edit_ml_action->setStatusTip("Makes middle layer of the map current");
 	_edit_ml_action->setCheckable(true);
 	connect(_edit_ml_action, SIGNAL(triggered()), this, SLOT(_TileEditML()));
 	
 	_edit_ul_action = new QAction("Edit &upper layer", this);
-	_edit_ul_action->setShortcut(tr("Ctrl+U"));
+	_edit_ul_action->setShortcut(tr("Shift+U"));
 	_edit_ul_action->setStatusTip("Makes upper layer of the map current");
 	_edit_ul_action->setCheckable(true);
 	connect(_edit_ul_action, SIGNAL(triggered()), this, SLOT(_TileEditUL()));
 
 	_edit_ol_action = new QAction("Edit &object layer", this);
-	_edit_ol_action->setShortcut(tr("Ctrl+O"));
+	_edit_ol_action->setShortcut(tr("Shift+O"));
 	_edit_ol_action->setStatusTip("Makes object layer of the map current");
 	_edit_ol_action->setCheckable(true);
 	connect(_edit_ol_action, SIGNAL(triggered()), this, SLOT(_TileEditOL()));
@@ -1208,7 +1217,7 @@ void Editor::_CreateMenus()
 	_tiles_menu->addAction(_edit_ol_action);
 
 	_tiles_menu->setTearOffEnabled(true);
-	connect(_tiles_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesEnableActions()));
+	connect(_tiles_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesEnableActions()));	
 	
 	// tileset menu creation
 	_tileset_menu = menuBar()->addMenu("Tile&set");
@@ -1312,6 +1321,7 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
 	// set viewport
 	viewport()->setMouseTracking(true);
 
+	// for tracking key events
 	setFocusPolicy(Qt::StrongFocus);
 
 	// Create a new map.
