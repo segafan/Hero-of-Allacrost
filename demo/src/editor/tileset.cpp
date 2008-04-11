@@ -65,17 +65,18 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	// been loaded by the above call to LoadMultiImageFromElementGrid(...). If we could somehow take that info
 	// and put it into a Qt table, that would be ideal.
 	// This piece of code is what takes so long for the editor to load a tileset.
+	// <<FIXED>>: The ugly hack has been fixed, I use the QImage to handle directly to the bits, it's much faster.
+	// Contact me if there's any problem with this fix, eguitarz (dalema22@gmail.com)
 	QRect rectangle;
+	QImage entire_tileset;
+	entire_tileset.load(img_filename, "png");
 	for (int row = 0; row < 16; row++)
 	{
 		for (int col = 0; col < 16; col++)
 		{
-			QImageReader reader(img_filename, "png");
-			rectangle.setRect(col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
-			reader.setClipRect(rectangle);
-			QImage tile_img = reader.read();
-			QVariant variant = tile_img;
-			if (!tile_img.isNull())
+			rectangle.setRect(col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);			
+			QVariant variant = entire_tileset.copy(rectangle);
+			if (!variant.isNull())
 			{
 				QPixmap tile_pixmap = variant.value<QPixmap>();
 				table->setPixmap(row, col, tile_pixmap);
@@ -85,7 +86,7 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 //				table->setItem(row, col, tile);
 			} // image of the tile must not be null
 			else
-				qDebug(QString("%1").arg(reader.error()));
+				qDebug(QString("%1").arg("Image loading error!!"));
 		} // iterate through the columns of the tileset
 	} // iterate through the rows of the tileset
 

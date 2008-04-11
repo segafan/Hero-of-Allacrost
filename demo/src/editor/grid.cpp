@@ -51,7 +51,7 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	_ll_on = true;          // lower layer default to on
 	_ml_on = false;         // middle layer default to off
 	_ul_on = false;         // upper layer default to off
-	_ol_on = true;			// object layer default to off
+	_ol_on = true;			// object layer default to off	
 	
 	// Set mouse tracking
 	setMouseTracking(true);
@@ -743,6 +743,7 @@ void Grid::paintGL()
 				//cerr << "grid tileset_index: " << tileset_index << endl;
 				//cerr << "grid tile_index: " << tile_index << endl;
 				tilesets[tileset_index]->tiles[tile_index].Draw();
+				//tilesets[tileset_index]->walkability
 			} // a tile exists to draw
 			col++;
 			col %= _width;
