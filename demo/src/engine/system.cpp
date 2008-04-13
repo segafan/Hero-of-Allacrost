@@ -15,9 +15,14 @@
 *** ***************************************************************************/
 
 #ifdef _WIN32
-	#include "libintl.h"
 	#include <direct.h>
+	#include <libintl.h>
 #endif
+
+#ifdef __MACH__
+	#include <libintl.h>
+#endif
+
 #include "system.h"
 #include "audio.h"
 #include "script.h"

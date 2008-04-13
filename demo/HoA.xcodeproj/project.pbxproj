@@ -89,6 +89,9 @@
 		D489FC6C0D15FBE3003940F4 /* QtSql.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC650D15FBE3003940F4 /* QtSql.framework */; };
 		D489FC6D0D15FBE3003940F4 /* QtXml.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC660D15FBE3003940F4 /* QtXml.framework */; };
 		D49850D40C82AEA50067770B /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
+		D49A546A0DB28D2E00FBD800 /* sprites.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49A54680DB28D2E00FBD800 /* sprites.cpp */; };
+		D49A54B90DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D49A54B80DB2BD8400FBD800 /* libintl.dylib */; };
+		D49A54BA0DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D49A54B80DB2BD8400FBD800 /* libintl.dylib */; };
 		D49D57020C65B1C1006E6ABA /* audio_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49D57010C65B1C1006E6ABA /* audio_effects.cpp */; };
 		D4B00DD00D15F1A200A5DBB1 /* defs_global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148340D15F029005F0A3F /* defs_global.cpp */; };
 		D4B00DD10D15F1A200A5DBB1 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629640AF50B1F00B6A328 /* global.cpp */; };
@@ -153,6 +156,8 @@
 		D4F2EB280D111B4300A2F1D7 /* skill_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */; };
 		D4F2EB2F0D111C7D00A2F1D7 /* skill_editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */; };
 		D4F71F9C0B06BC8D00361DA9 /* socket.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4500AF5412600940A6C /* socket.h */; };
+		D4F900F40DA2010800F10953 /* dialog_boxes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F900F20DA2010800F10953 /* dialog_boxes.cpp */; };
+		D4F901270DA214E100F10953 /* dialog_boxes.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F901260DA214E100F10953 /* dialog_boxes.moc.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -162,6 +167,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				D49A54BA0DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */,
 				D489F7410D15FB41003940F4 /* SDL.framework in Copy Frameworks */,
 				D489F7420D15FB41003940F4 /* SDL_net.framework in Copy Frameworks */,
 				D489F7430D15FB41003940F4 /* SDL_ttf.framework in Copy Frameworks */,
@@ -175,6 +181,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				D49A54B90DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */,
 				D48901AD0D15FCB1003940F4 /* SDL_ttf.framework in Copy Frameworks */,
 				D48901AC0D15FCA7003940F4 /* SDL.framework in Copy Frameworks */,
 				D48901A40D15FC2E003940F4 /* Qt3Support.framework in Copy Frameworks */,
@@ -292,6 +299,9 @@
 		D489FC660D15FBE3003940F4 /* QtXml.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtXml.framework; path = "../allacrost-dep/frameworks/QtXml.framework"; sourceTree = SOURCE_ROOT; };
 		D49850D20C82AEA50067770B /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = texture.cpp; sourceTree = "<group>"; };
 		D49850D30C82AEA50067770B /* texture.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = texture.h; sourceTree = "<group>"; };
+		D49A54680DB28D2E00FBD800 /* sprites.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sprites.cpp; sourceTree = "<group>"; };
+		D49A54690DB28D2E00FBD800 /* sprites.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sprites.h; sourceTree = "<group>"; };
+		D49A54B80DB2BD8400FBD800 /* libintl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libintl.dylib; path = "../allacrost-dep/lib/libintl.dylib"; sourceTree = SOURCE_ROOT; };
 		D49D57010C65B1C1006E6ABA /* audio_effects.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_effects.cpp; sourceTree = "<group>"; };
 		D49D57030C65B1D2006E6ABA /* audio_effects.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_effects.h; sourceTree = "<group>"; };
 		D4D166250BC0D91300190FC0 /* color.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = color.h; sourceTree = "<group>"; };
@@ -357,6 +367,9 @@
 		D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = skill_editor.cpp; sourceTree = "<group>"; };
 		D4F2EB270D111B4300A2F1D7 /* skill_editor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = skill_editor.h; sourceTree = "<group>"; };
 		D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = skill_editor.moc.cpp; path = src/editor/skill_editor.moc.cpp; sourceTree = "<group>"; };
+		D4F900F20DA2010800F10953 /* dialog_boxes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dialog_boxes.cpp; sourceTree = "<group>"; };
+		D4F900F30DA2010800F10953 /* dialog_boxes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dialog_boxes.h; sourceTree = "<group>"; };
+		D4F901260DA214E100F10953 /* dialog_boxes.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dialog_boxes.moc.cpp; path = src/editor/dialog_boxes.moc.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -397,6 +410,7 @@
 		4941A49F0AC1D76400D65B8E = {
 			isa = PBXGroup;
 			children = (
+				D4F901260DA214E100F10953 /* dialog_boxes.moc.cpp */,
 				D404C6E80B02FCEC00827A19 /* Temporary Source Files */,
 				4941A4BC0AC1D7B300D65B8E /* Source Files */,
 				4941A4BD0AC1D7BA00D65B8E /* Resources */,
@@ -419,6 +433,7 @@
 			children = (
 				49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */,
 				D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */,
+				D49A54B80DB2BD8400FBD800 /* libintl.dylib */,
 				4941A7120AC1D87200D65B8E /* Frameworks */,
 			);
 			name = Linkings;
@@ -702,6 +717,10 @@
 		D4D1BA640B02B27F0052BF1E /* editor */ = {
 			isa = PBXGroup;
 			children = (
+				D49A54680DB28D2E00FBD800 /* sprites.cpp */,
+				D49A54690DB28D2E00FBD800 /* sprites.h */,
+				D4F900F20DA2010800F10953 /* dialog_boxes.cpp */,
+				D4F900F30DA2010800F10953 /* dialog_boxes.h */,
 				D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */,
 				D4F2EB270D111B4300A2F1D7 /* skill_editor.h */,
 				D4EDF4DE0CB477130064919D /* tileset_editor.cpp */,
@@ -728,6 +747,7 @@
 				4941A4AD0AC1D77500D65B8E /* Sources */,
 				4941A4AE0AC1D77500D65B8E /* Frameworks */,
 				4941A4B70AC1D78600D65B8E /* Copy Frameworks */,
+				D49A54B10DB2B7C800FBD800 /* Remap libs */,
 			);
 			buildRules = (
 			);
@@ -747,6 +767,7 @@
 				D4D1BA460B02B1DB0052BF1E /* Sources */,
 				D4D1BA470B02B1DB0052BF1E /* Frameworks */,
 				D4D1BF460B02B69A0052BF1E /* Copy Frameworks */,
+				D49A54A30DB2B38000FBD800 /* Remap libs */,
 			);
 			buildRules = (
 			);
@@ -819,7 +840,37 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "#!/bin/bash\nif [[ -f ../allacrost-dep/moc ]]; then\n../allacrost-dep/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n../allacrost-dep/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n../allacrost-dep/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n../allacrost-dep/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelif [[ -f /Developer/Tools/Qt/moc ]]; then\n/Developer/Tools/Qt/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/Developer/Tools/Qt/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/Developer/Tools/Qt/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/Developer/Tools/Qt/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelse\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nfi";
+			shellScript = "#!/bin/bash\nif [[ -f ../allacrost-dep/moc ]]; then\n../allacrost-dep/moc -o src/editor/dialog_boxes.moc.cpp src/editor/dialog_boxes.h\n../allacrost-dep/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n../allacrost-dep/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n../allacrost-dep/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n../allacrost-dep/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelif [[ -f /Developer/Tools/Qt/moc ]]; then\n/Developer/Tools/Qt/moc -o src/editor/dialog_boxes.moc.cpp src/editor/dialog_boxes.h\n/Developer/Tools/Qt/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/Developer/Tools/Qt/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/Developer/Tools/Qt/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/Developer/Tools/Qt/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelse\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/dialog_boxes.moc.cpp src/editor/dialog_boxes.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nfi";
+		};
+		D49A54A30DB2B38000FBD800 /* Remap libs */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Remap libs";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "install_name_tool -change /usr/local/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.dylib -id libintl.dylib $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change Qt3Support.framework/Versions/4/Qt3Support @executable_path/../Frameworks/Qt3Support.framework/Versions/4/Qt3Support $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtNetwork.framework/Versions/4/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/4/QtNetwork $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtOpenGL.framework/Versions/4/QtOpenGL @executable_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtSql.framework/Versions/4/QtSql @executable_path/../Frameworks/QtSql.framework/Versions/4/QtSql $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtXml.framework/Versions/4/QtXml @executable_path/../Frameworks/QtXml.framework/Versions/4/QtXml $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor";
+			showEnvVarsInLog = 0;
+		};
+		D49A54B10DB2B7C800FBD800 /* Remap libs */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Remap libs";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "install_name_tool -change /usr/local/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.dylib -id libintl.dylib $TARGET_BUILD_DIR/Allacrost.app/Contents/MacOS/Allacrost";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -899,12 +950,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4D02B720B0656E500772C78 /* SDLMain.m in Sources */,
+				D4F900F40DA2010800F10953 /* dialog_boxes.cpp in Sources */,
 				D4D1BA6F0B02B27F0052BF1E /* editor_main.cpp in Sources */,
 				D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */,
 				D4D1BA700B02B27F0052BF1E /* grid.cpp in Sources */,
 				D4F2EB280D111B4300A2F1D7 /* skill_editor.cpp in Sources */,
+				D49A546A0DB28D2E00FBD800 /* sprites.cpp in Sources */,
 				D4D1BA720B02B27F0052BF1E /* tileset.cpp in Sources */,
 				D4EDF4E00CB477130064919D /* tileset_editor.cpp in Sources */,
+				D4F901270DA214E100F10953 /* dialog_boxes.moc.cpp in Sources */,
 				D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */,
 				D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */,
 				D4F2EB2F0D111C7D00A2F1D7 /* skill_editor.moc.cpp in Sources */,
@@ -1016,11 +1070,7 @@
 			buildSettings = {
 				ARCHS = $NATIVE_ARCH;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"../allacrost-dep/frameworks",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_2)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../allacrost-dep/frameworks\"";
 				GCC_DEBUGGING_SYMBOLS = full;
@@ -1036,8 +1086,12 @@
 				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
+				LIBRARY_SEARCH_PATHS = (
+					"../allacrost-dep/lib",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -1051,6 +1105,7 @@
 					"-lvorbisfile",
 					"-lvorbisenc",
 					"-llua",
+					"-lintl",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
@@ -1069,11 +1124,7 @@
 				);
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"../allacrost-dep/frameworks",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_2)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../allacrost-dep/frameworks\"";
 				GCC_AUTO_VECTORIZATION = YES;
@@ -1089,7 +1140,11 @@
 				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
+				LIBRARY_SEARCH_PATHS = (
+					"../allacrost-dep/lib",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
 				LINK_WITH_STANDARD_LIBRARIES = YES;
 				ONLY_LINK_ESSENTIAL_SYMBOLS = YES;
 				OTHER_LDFLAGS = (
@@ -1105,6 +1160,7 @@
 					"-logg",
 					"-lvorbisfile",
 					"-lvorbisenc",
+					"-lintl",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
@@ -1118,24 +1174,28 @@
 		D4D1BA590B02B1DC0052BF1E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"../allacrost-dep/frameworks",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../allacrost-dep/frameworks\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Editor-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
+				LIBRARY_SEARCH_PATHS = (
+					"../allacrost-dep/lib",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
 				ONLY_LINK_ESSENTIAL_SYMBOLS = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DQT_CLEAN_NAMESPACE",
@@ -1154,6 +1214,7 @@
 					"-llualib",
 					"-lz",
 					"-lluabind",
+					"-lintl",
 					"-framework",
 					SDL_net,
 				);
@@ -1170,20 +1231,23 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"../allacrost-dep/frameworks",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../allacrost-dep/frameworks\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Editor-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
+				LIBRARY_SEARCH_PATHS = (
+					"../allacrost-dep/lib",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
 				ONLY_LINK_ESSENTIAL_SYMBOLS = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DQT_CLEAN_NAMESPACE",
@@ -1201,6 +1265,7 @@
 					"-ljpeg",
 					"-llualib",
 					"-lluabind",
+					"-lintl",
 					"-framework",
 					SDL_net,
 				);
