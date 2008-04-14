@@ -100,6 +100,8 @@
 		D4B00DD70D15F1A200A5DBB1 /* global_skills.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629620AF50B1F00B6A328 /* global_skills.cpp */; };
 		D4B00DE00D15F25F00A5DBB1 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4E0AF407BE004DD3A3 /* system.cpp */; };
 		D4B00DE40D15F29F00A5DBB1 /* mode_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */; };
+		D4CD69C30DB3302300FF17CD /* SDL_net.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
+		D4CD69C60DB3331800FF17CD /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
 		D4CE3FB60BC9A11500CA3D30 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB160BAF28B700013185 /* dat */; };
 		D4CE3FB70BC9A11900CA3D30 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB320BAF28B800013185 /* img */; };
 		D4CE3FB80BC9A11D00CA3D30 /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
@@ -182,6 +184,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				D49A54B90DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */,
+				D4CD69C30DB3302300FF17CD /* SDL_net.framework in Copy Frameworks */,
 				D48901AD0D15FCB1003940F4 /* SDL_ttf.framework in Copy Frameworks */,
 				D48901AC0D15FCA7003940F4 /* SDL.framework in Copy Frameworks */,
 				D48901A40D15FC2E003940F4 /* Qt3Support.framework in Copy Frameworks */,
@@ -390,6 +393,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4CD69C60DB3331800FF17CD /* SDL_net.framework in Frameworks */,
 				D48901AF0D15FCD3003940F4 /* SDL_ttf.framework in Frameworks */,
 				D48901AE0D15FCCA003940F4 /* SDL.framework in Frameworks */,
 				D4D1BF450B02B6510052BF1E /* OpenGL.framework in Frameworks */,
@@ -854,7 +858,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "install_name_tool -change /usr/local/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.dylib -id libintl.dylib $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change Qt3Support.framework/Versions/4/Qt3Support @executable_path/../Frameworks/Qt3Support.framework/Versions/4/Qt3Support $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtNetwork.framework/Versions/4/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/4/QtNetwork $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtOpenGL.framework/Versions/4/QtOpenGL @executable_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtSql.framework/Versions/4/QtSql @executable_path/../Frameworks/QtSql.framework/Versions/4/QtSql $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtXml.framework/Versions/4/QtXml @executable_path/../Frameworks/QtXml.framework/Versions/4/QtXml $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor";
+			shellScript = "install_name_tool -change /usr/local/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.dylib -id libintl.dylib $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change Qt3Support.framework/Versions/4/Qt3Support @executable_path/../Frameworks/Qt3Support.framework/Versions/4/Qt3Support $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtNetwork.framework/Versions/4/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/4/QtNetwork $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtOpenGL.framework/Versions/4/QtOpenGL @executable_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtSql.framework/Versions/4/QtSql @executable_path/../Frameworks/QtSql.framework/Versions/4/QtSql $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtXml.framework/Versions/4/QtXml @executable_path/../Frameworks/QtXml.framework/Versions/4/QtXml $TARGET_BUILD_DIR/Editor.app/Contents/MacOS/Editor\ninstall_name_tool -change QtSql.framework/Versions/4/QtSql @executable_path/../Frameworks/QtSql.framework/Versions/4/QtSql $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/Qt3Support.framework/Versions/4/Qt3Support \ninstall_name_tool -change QtXml.framework/Versions/4/QtXml @executable_path/../Frameworks/QtXml.framework/Versions/4/QtXml $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/Qt3Support.framework/Versions/4/Qt3Support \ninstall_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/Qt3Support.framework/Versions/4/Qt3Support \ninstall_name_tool -change QtNetwork.framework/Versions/4/QtNetwork @executable_path/../Frameworks/QtNetwork.framework/Versions/4/QtNetwork $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/Qt3Support.framework/Versions/4/Qt3Support \ninstall_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/Qt3Support.framework/Versions/4/Qt3Support\ninstall_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/QtSql.framework/Versions/4/QtSql\ninstall_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/QtXml.framework/Versions/4/QtXml\ninstall_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/QtGui.framework/Versions/4/QtGui\ninstall_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/QtNetwork.framework/Versions/4/QtNetwork\ninstall_name_tool -change QtGui.framework/Versions/4/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL\ninstall_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore $TARGET_BUILD_DIR/Editor.app/Contents/Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL";
 			showEnvVarsInLog = 0;
 		};
 		D49A54B10DB2B7C800FBD800 /* Remap libs */ = {
@@ -1071,8 +1075,6 @@
 				ARCHS = $NATIVE_ARCH;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../allacrost-dep/frameworks\"";
 				GCC_DEBUGGING_SYMBOLS = full;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -1086,12 +1088,7 @@
 				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"../allacrost-dep/lib",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
+				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -1125,8 +1122,6 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../allacrost-dep/frameworks\"";
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -1140,11 +1135,7 @@
 				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"../allacrost-dep/lib",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
+				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
 				LINK_WITH_STANDARD_LIBRARIES = YES;
 				ONLY_LINK_ESSENTIAL_SYMBOLS = YES;
 				OTHER_LDFLAGS = (
@@ -1178,7 +1169,6 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../allacrost-dep/frameworks\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -1195,7 +1185,6 @@
 					"../allacrost-dep/lib",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
 				ONLY_LINK_ESSENTIAL_SYMBOLS = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DQT_CLEAN_NAMESPACE",
@@ -1215,8 +1204,6 @@
 					"-lz",
 					"-lluabind",
 					"-lintl",
-					"-framework",
-					SDL_net,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
@@ -1232,7 +1219,6 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
 				FRAMEWORK_SEARCH_PATHS = "../allacrost-dep/frameworks";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../allacrost-dep/frameworks\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
@@ -1243,11 +1229,7 @@
 				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
 				INFOPLIST_FILE = "Editor-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"../allacrost-dep/lib",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
+				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
 				ONLY_LINK_ESSENTIAL_SYMBOLS = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DQT_CLEAN_NAMESPACE",
@@ -1266,8 +1248,6 @@
 					"-llualib",
 					"-lluabind",
 					"-lintl",
-					"-framework",
-					SDL_net,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
