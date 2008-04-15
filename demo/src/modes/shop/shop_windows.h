@@ -204,8 +204,17 @@ private:
 	**/
 	hoa_global::GlobalObject* _object;
 	
+	//COMMENT!!!!!
+	bool _is_weapon;
+	bool _is_armor;
+	
 	//! \brief A vector holding the list of characters capable of equipping the above object.
 	std::vector<hoa_global::GlobalCharacter*> _usableBy;
+	
+	//! \brief A vector that holds an icon image for each character in the party.
+	std::vector<hoa_video::StillImage> _character_icons;
+	
+	std::vector<hoa_video::StillImage> _character_icons_bw;
 
 	/** \brief Vector that holds the +/- variance of stats for equipping above object.
 	*** This vector corresponds with the _usableBy vector above. Each index represents a character
@@ -215,6 +224,8 @@ private:
 	
 	//! \brief Same as above, but this holds the variance for the meta defense/attack.
 	std::vector<int32> _metaVariance;
+	
+	void _LoadCharacterIcons();
 	
 }; // class ObjectInfoWindow : public hoa_video::MenuWindow
 
