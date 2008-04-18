@@ -414,7 +414,6 @@
 		4941A49F0AC1D76400D65B8E = {
 			isa = PBXGroup;
 			children = (
-				D4F901260DA214E100F10953 /* dialog_boxes.moc.cpp */,
 				D404C6E80B02FCEC00827A19 /* Temporary Source Files */,
 				4941A4BC0AC1D7B300D65B8E /* Source Files */,
 				4941A4BD0AC1D7BA00D65B8E /* Resources */,
@@ -637,6 +636,7 @@
 		D404C6E80B02FCEC00827A19 /* Temporary Source Files */ = {
 			isa = PBXGroup;
 			children = (
+				D4F901260DA214E100F10953 /* dialog_boxes.moc.cpp */,
 				D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */,
 				D4F0F4330CDE7CD000EFE9B0 /* tileset_editor.moc.cpp */,
 				D404C6E90B02FD3E00827A19 /* editor.moc.cpp */,
