@@ -2019,7 +2019,6 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 	if (pattern != INVALID_PATTERN)
 	{
 		transition_group = tile_group + "_" + transition_group;
-		//cerr << transition_group << endl;
 		
 		// Set up for opening autotiling.lua.
 		ReadScriptDescriptor read_data;
@@ -2029,8 +2028,8 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 
 		// Extract the correct transition tile from autotiling.lua as determined by
 		// _CheckForTransitionPattern(...).
-		//if (read_data.DoesTableExist(transition_group) == true)
-		//{
+		if (read_data.DoesTableExist(transition_group) == true)
+		{
 			read_data.OpenTable(transition_group);
 
 			switch (pattern)
@@ -2100,9 +2099,9 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 			read_data.CloseTable();
 
 			// Border/transition tiles may also have variations, so randomize them.
-			assert(tileset_num != -1);
+			//assert(tileset_num != -1);
 			_AutotileRandomize(tileset_num, tile_index);
-		//} // make sure the selected transition tiles exist
+		} // make sure the selected transition tiles exist
 		
 		read_data.CloseFile();
 	} // make sure a transition pattern exists
