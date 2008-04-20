@@ -13,6 +13,7 @@ dnl Check for programs.
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_INSTALL
+AC_GNU_SOURCE
 CXXFLAGS="-Wall"
 
 dnl Check for compiler optimization option.
@@ -105,6 +106,8 @@ AC_CHECK_LIB([m], [log], [], \
 	[echo "Could not find the math library. Check that it is properly installed on your system"
 	 exit -1])
 
+AM_GNU_GETTEXT([external])
+
 AC_PATH_PROGS([LUA_CONFIG], [lua-config])
 
 dnl Check for header files.
@@ -125,7 +128,7 @@ AC_FUNC_MALLOC
 AC_FUNC_STAT
 AC_CHECK_FUNCS([atexit chdir mkdir rmdir sqrt strcasecmp])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile txt/Makefile.in])
 
 AC_OUTPUT
 

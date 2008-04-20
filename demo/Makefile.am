@@ -1,6 +1,10 @@
-EXTRA_DIST = MANUAL configure dat doc img mus snd
+EXTRA_DIST = ABOUT-NLS AUTHORS COPYING config.rpath configure dat doc img INSTALL MANUAL mus README snd
+
+SUBDIRS = txt
+
 AM_CPPFLAGS = -DDATADIR=\"$(datadir)/allacrost\"
 ACLOCAL_AMFLAGS = -I m4
+
 INCLUDES = \
    `test $(LUA_CONFIG) && $(LUA_CONFIG) --include` \
 	-I/usr/include/SDL \
@@ -175,14 +179,14 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/dialog_boxes.cpp \
 	$(EDITOR_DIR)/grid.cpp \
 	$(EDITOR_DIR)/grid.h \
-	$(EDITOR_DIR)/tileset.cpp \
-	$(EDITOR_DIR)/tileset.h \
-	$(EDITOR_DIR)/tileset_editor.cpp \
-	$(EDITOR_DIR)/tileset_editor.h \
 	$(EDITOR_DIR)/skill_editor.cpp \
 	$(EDITOR_DIR)/skill_editor.h \
 	$(EDITOR_DIR)/sprites.cpp \
 	$(EDITOR_DIR)/sprites.h \
+	$(EDITOR_DIR)/tileset.cpp \
+	$(EDITOR_DIR)/tileset.h \
+	$(EDITOR_DIR)/tileset_editor.cpp \
+	$(EDITOR_DIR)/tileset_editor.h \
 	$(video_SOURCES) \
 	$(script_SOURCES) \
 	$(ENGINE_DIR)/socket.cpp \
@@ -218,10 +222,10 @@ allacrost_SOURCES = \
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 
-data_dirs = dat img mus snd
+datadirs = dat doc img mus snd txt
 find_filter = -name .svn -prune -o -name ".\#*" -o -type d
-find_datadirs = ( cd $(top_srcdir) && find $(data_dirs) $(find_filter) -print )
-find_data = ( cd $(top_srcdir) && find $(data_dirs) $(find_filter) -o -print )
+find_datadirs = ( cd $(top_srcdir) && find $(datadirs) $(find_filter) -print )
+find_data = ( cd $(top_srcdir) && find $(datadirs) $(find_filter) -o -print )
 
 install-data-local:
 	@$(NORMAL_INSTALL)
