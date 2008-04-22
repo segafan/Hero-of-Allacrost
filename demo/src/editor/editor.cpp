@@ -1767,7 +1767,7 @@ void EditorScrollView::_ContextInsertColumn()
 	vector<int32>::iterator it = lower_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
-		lower_layer.insert(it, -1);
+		it = lower_layer.insert(it, -1);
 		it += map_width + 1;
 	} // iterate through the rows of the lower layer
 	
@@ -1775,7 +1775,7 @@ void EditorScrollView::_ContextInsertColumn()
 	it = middle_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
-		middle_layer.insert(it, -1);
+		it = middle_layer.insert(it, -1);
 		it += map_width + 1;
 	} // iterate through the rows of the middle layer
 	
@@ -1783,7 +1783,7 @@ void EditorScrollView::_ContextInsertColumn()
 	it = upper_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
-		upper_layer.insert(it, -1);
+		it = upper_layer.insert(it, -1);
 		it += map_width + 1;
 	} // iterate through the rows of the upper layer
 
@@ -1815,7 +1815,7 @@ void EditorScrollView::_ContextDeleteColumn()
 	vector<int32>::iterator it = lower_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
-		lower_layer.erase(it);
+		it = lower_layer.erase(it);
 		it += map_width - 1;
 	} // iterate through the rows of the lower layer
 	
@@ -1823,7 +1823,7 @@ void EditorScrollView::_ContextDeleteColumn()
 	it = middle_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
-		middle_layer.erase(it);
+		it = middle_layer.erase(it);
 		it += map_width - 1;
 	} // iterate through the rows of the middle layer
 	
@@ -1831,7 +1831,7 @@ void EditorScrollView::_ContextDeleteColumn()
 	it = upper_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
 	{
-		upper_layer.erase(it);
+		it = upper_layer.erase(it);
 		it += map_width - 1;
 	} // iterate through the rows of the upper layer
 
