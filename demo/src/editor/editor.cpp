@@ -1262,6 +1262,7 @@ void Editor::_CreateToolbars()
 	QLabel* context_label = new QLabel("Context:", this);
 	_tiles_toolbar->addWidget(context_label);
 	_context_cbox = new QComboBox(this);
+	_context_cbox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	_context_cbox->addItem("Base");
 	_tiles_toolbar->addWidget(_context_cbox);
 	connect(_context_cbox, SIGNAL(currentIndexChanged(int)), this,
