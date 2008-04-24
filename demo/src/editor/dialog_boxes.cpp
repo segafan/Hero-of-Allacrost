@@ -53,7 +53,7 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name,
 	_tileset_tree = new QTreeWidget(this);
 	_tileset_tree->setColumnCount(1);
 	_tileset_tree->setHeaderLabels(QStringList("Tilesets"));
-	connect(_tileset_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this,
+	connect(_tileset_tree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
 		SLOT(_EnableOKButton()));
 	QList<QTreeWidgetItem*> tilesets;
 
