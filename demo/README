@@ -17,16 +17,17 @@ dat/ img/ mus/ snd/ src/ txt/
 
 Library dependencies (you will need the following in order to compile and run the game):
 autoreconf
-OpenGL
+OpenGL and GLU
 libjpeg
 libpng
 SDL
+SDL_ttf
 SDL_net
 OpenAL
 libogg
 libvorbis
-Lua 5.0+ (NOT Lua 5.1+)
-Luabind
-Boost headers
 GNU Gettext
-Qt 4+ (optional for use of the map editor)
+lua 5.0.x and lualib 5.0.x (NOT lua 5.1+)
+Luabind
+Boost headers (make sure that the boost headers used to compile Luabind are the same version used to compile Allacrost)
+Qt 4+ (only if you wish to compile the map editor)
