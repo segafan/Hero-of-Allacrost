@@ -143,13 +143,13 @@ void Interpolator::Update(uint32 frame_time) {
 
 
 float Interpolator::_FastTransform(float initial_value) {
-	return powf(initial_value, VIDEO_FAST_TRANSFORM_POWER);
+	return pow(initial_value, VIDEO_FAST_TRANSFORM_POWER);
 }
 
 
 
 float Interpolator::_SlowTransform(float initial_value) {
-	return powf(initial_value, VIDEO_SLOW_TRANSFORM_POWER);
+	return pow(initial_value, VIDEO_SLOW_TRANSFORM_POWER);
 }
 
 

@@ -154,7 +154,7 @@ uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 void VirtualSprite::Update() {
 	//Update the alpha of the dialogue icon according to it's distance from the player to make it fade away
 	const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
-	float icon_alpha = 1.0f - (abs( ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + abs(ComputeYLocation() -
+	float icon_alpha = 1.0f - (fabs( ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + fabs(ComputeYLocation() -
 		MapMode::_current_map->_camera->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
 	if (icon_alpha < 0)
 		icon_alpha = 0;
@@ -815,7 +815,7 @@ void EnemySprite::Update() {
 
 				// Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
 				// The order of comparaisons here is important, the NULL check MUST come before the rest or a null pointer exception could happen if no zone is registered
-				if ( _zone == NULL || ( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range 
+				if ( _zone == NULL || ( fabs(xdelta) <= _aggro_range && fabs(ydelta) <= _aggro_range 
 					 && (!_zone->IsRestraining() || _zone->IsInsideZone(MapMode::_current_map->_camera->x_position, MapMode::_current_map->_camera->y_position)) ) )
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)

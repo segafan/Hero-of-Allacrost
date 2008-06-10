@@ -488,8 +488,8 @@ void MapMode::_CalculateDrawInfo() {
 //	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
 	{
 		VideoManager->GetPixelSize(x_resolution, y_resolution);
-		x_resolution = abs(x_resolution);
-		y_resolution = abs(y_resolution);
+		x_resolution = fabs(x_resolution);
+		y_resolution = fabs(y_resolution);
 
 		_draw_info.tile_x_start = FloorToFloatMultiple (_draw_info.tile_x_start, x_resolution);
 		_draw_info.tile_y_start = FloorToFloatMultiple (_draw_info.tile_y_start, y_resolution);
