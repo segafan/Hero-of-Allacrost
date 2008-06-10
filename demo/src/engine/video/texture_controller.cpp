@@ -30,8 +30,8 @@ TextureController* TextureManager = NULL;
 
 
 TextureController::TextureController() :
-	_last_tex_id(INVALID_TEXTURE_ID),
 	debug_current_sheet(-1),
+	_last_tex_id(INVALID_TEXTURE_ID),
 	_debug_num_tex_switches(0)
 {}
 

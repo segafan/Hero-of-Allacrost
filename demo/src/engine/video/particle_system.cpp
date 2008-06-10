@@ -752,8 +752,8 @@ void ParticleSystem::_UpdateParticles(float t, const EffectParameters &params)
 
 		if(_particles[j].damping != 1.0f)
 		{
-			_particles[j].velocity_x *= powf(_particles[j].damping, t);
-			_particles[j].velocity_y *= powf(_particles[j].damping, t);
+			_particles[j].velocity_x *= pow(_particles[j].damping, t);
+			_particles[j].velocity_y *= pow(_particles[j].damping, t);
 		}
 
 		_particles[j].time += t;
