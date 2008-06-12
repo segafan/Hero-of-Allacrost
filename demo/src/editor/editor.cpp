@@ -1923,7 +1923,7 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 	// These booleans are used to know whether the current tile being painted is on the edge of the map.
 	// This will affect the transition/border algorithm.
 	bool top_edge    = (_tile_index - _map->GetWidth()) < 0;
-	bool bottom_edge = (_tile_index + _map->GetWidth()) > (_map->GetWidth() * _map->GetHeight());
+	bool bottom_edge = (_tile_index + _map->GetWidth()) >= (_map->GetWidth() * _map->GetHeight());
 	bool left_edge   = (_tile_index % _map->GetWidth()) == 0;
 	bool right_edge  = (_tile_index & _map->GetWidth()) == (_map->GetWidth() - 1);
 
