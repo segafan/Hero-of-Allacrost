@@ -1849,9 +1849,8 @@ void EditorScrollView::_PaintTile(int32 index)
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
 	Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
 	QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
+	Q3TableSelection selection = table->selection(0);
 
-	// put selected tile from tileset into tile array at correct position
-	int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
 	int32 multiplier = _map->tileset_names.findIndex(tileset_name);
 	if (multiplier == -1)
 	{
@@ -1859,18 +1858,38 @@ void EditorScrollView::_PaintTile(int32 index)
 		multiplier = _map->tileset_names.findIndex(tileset_name);
 	} // calculate index of current tileset
 
-	//cerr << "tileset_num: " << multiplier << endl;
-	//cerr << "tileset_index: " << tileset_index << endl;
-	// perform randomization for autotiles
-	//assert(multiplier != -1);
-	_AutotileRandomize(multiplier, tileset_index);
+	if (selection.isActive() && (selection.numCols() * selection.numRows() > 1)) {
+		// multiple tiles are selected
+		int32 map_row = index / _map->GetWidth();
+		int32 map_col = index % _map->GetWidth();
 
-	// Record information for undo/redo action.
-	_tile_indeces.push_back(index);
-	_previous_tiles.push_back(GetCurrentLayer()[index]);
-	_modified_tiles.push_back(tileset_index + multiplier * 256);
+		// Draw tiles from tileset selection onto map, one tile at a time.
+		for (int32 i = 0; i < selection.numRows() && map_row + i < _map->GetHeight(); i++) {
+			for (int32 j = 0; j < selection.numCols() && map_col + j < _map->GetWidth(); j++) {
+				int32 tileset_index = (selection.topRow() + i) * 16 + (selection.leftCol() + j);
+				_AutotileRandomize(multiplier, tileset_index);
+				GetCurrentLayer()[((map_row + i) * _map->GetWidth()) + map_col + j] = tileset_index + multiplier * 256;
+			}
+		}
+	} else {
+		// a single tile is selected
+		// put selected tile from tileset into tile array at correct position
+		int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
 
-	GetCurrentLayer()[index] = tileset_index + multiplier * 256;
+		//cerr << "tileset_num: " << multiplier << endl;
+		//cerr << "tileset_index: " << tileset_index << endl;
+		// perform randomization for autotiles
+		//assert(multiplier != -1);
+		_AutotileRandomize(multiplier, tileset_index);
+
+		// Record information for undo/redo action.
+		_tile_indeces.push_back(index);
+		_previous_tiles.push_back(GetCurrentLayer()[index]);
+		_modified_tiles.push_back(tileset_index + multiplier * 256);
+
+		GetCurrentLayer()[index] = tileset_index + multiplier * 256;
+	}
+
 } // _PaintTile(...)
 
 void EditorScrollView::_DeleteTile(int32 index)
