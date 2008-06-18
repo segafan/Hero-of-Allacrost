@@ -154,6 +154,27 @@ void EnemyZone::Update() {
 	_active_enemies++;
 } // void EnemyZone::Update()
 
+// *****************************************************************************
+// *********************** ContextZone Class Functions *************************
+// *****************************************************************************
+
+ContextZone::ContextZone(MAP_CONTEXT one, MAP_CONTEXT two) :
+	_context_one(one),
+	_context_two(two)
+{
+	if (_context_one == _context_two) {
+		PRINT_ERROR << "tried to create a ContextZone with two equal context values: " << _context_one << endl;
+		exit(1);
+	}
+}
+
+
+
+void ContextZone::Update()
+{
+	// TODO
+}
+
 } // namespace private_map
 
 } // namespace hoa_map

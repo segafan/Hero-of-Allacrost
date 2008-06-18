@@ -74,7 +74,7 @@ public:
 	*** example of where this is useful is a bridge, which shouldn't simply disappear because the
 	*** player walks inside a nearby home.
 	**/
-	uint32 context;
+	MAP_CONTEXT context;
 
 	/** \brief Coordinates for the object's origin/position.
 	*** The origin of every map object is the bottom center point of the object. These
@@ -199,7 +199,7 @@ public:
 	void SetObjectID(int16 id = 0)
 		{ object_id = id; }
 
-	void SetContext(uint32 ctxt)
+	void SetContext(MAP_CONTEXT ctxt)
 		{ context = ctxt; }
 
 	void SetXPosition(uint16 x, float offset)
@@ -235,7 +235,7 @@ public:
 	int16 GetObjectID() const
 		{ return object_id; }
 
-	uint32 GetContext() const
+	MAP_CONTEXT GetContext() const
 		{ return context; }
 
 	void GetXPosition(uint16 &x, float &offset) const
@@ -487,7 +487,7 @@ public:
 /** ****************************************************************************
 *** \brief A helper class to MapMode responsible for all object/sprite data and operations
 ***
-*** This class is responsible for loading, updating, and drawing all map objects 
+*** This class is responsible for loading, updating, and drawing all map objects
 *** and map sprites, in addition to maintaining the map's collision grid and map
 *** zones.
 *** ***************************************************************************/
@@ -568,7 +568,7 @@ public:
 
 private:
 	/** \brief The number of rows and columns in the collision gride
-	*** The number of collision grid rows and columns is always equal to twice 
+	*** The number of collision grid rows and columns is always equal to twice
 	*** that of the number of rows and columns of tiles.
 	**/
 	uint16 _num_grid_rows, _num_grid_cols;

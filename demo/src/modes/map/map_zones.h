@@ -139,6 +139,58 @@ private:
 	std::vector<EnemySprite*> _enemies;
 }; // class EnemyZone
 
+
+/** ****************************************************************************
+*** \brief Class that represents an area where the active map context may switch
+***
+*** This class actually represents two map zones that are placed directly next
+*** to one another. The two zones represent the border areas for two different
+*** map contexts. When an object is in one zone and moves to the second zone,
+*** that object's active context will change. The center of the object's
+*** collision rectangle is used to determine which of these two border zones
+*** that the object should reside in.
+***
+*** \todo In the future collision detection needs to be accounted for when two
+*** objects are in the context zone but have different active map contexts.
+*** Normally no collision detection is done between objects in different cases,
+*** but context zones need to be an exception to this rule.
+*** ***************************************************************************/
+class ContextZone : public MapZone {
+public:
+	/** \brief The constructor requires the map contexts of the zone to be declared immediately
+	*** \note These two context arguments can not be equal
+	**/
+	ContextZone(MAP_CONTEXT one, MAP_CONTEXT two);
+
+	//! \brief Sets the map zone area for the first context
+	void SetZoneOne(MapZone &_zone)
+		{ _zone_one = _zone; }
+
+	//! \brief Sets the map zone area for the second context
+	void SetZoneTwo(MapZone &_zone)
+		{ _zone_two = _zone; }
+
+	//! \brief Retrieves the map zone area for the first context
+	MapZone& _GetZoneOne()
+		{ return _zone_one; }
+
+	//! \brief Retrieves the map zone area for the first context
+	MapZone& _GetZoneTwo()
+		{ return _zone_two; }
+
+	//! \brief Updates the active contexts of any map objects that exist within the zone
+	void Update();
+
+private:
+	/** \brief The map zones corresponding to the first and second contexts, respectively
+	*** \note These zones should not overlap and should not have any empty space inbetween where the two zones meet
+	**/
+	MapZone _zone_one, _zone_two;
+
+	//! \brief The unequal map contexts that the context zone allows an object to transition to
+	MAP_CONTEXT _context_one, _context_two;
+}; // class ContextZone : public MapZone
+
 } // namespace private_map
 
 } // namespace hoa_map

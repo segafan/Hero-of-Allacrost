@@ -120,16 +120,16 @@ private:
 	/** \brief The current map context in index format
 	*** This member should only ever be equal to 0-31, which corresponds to contexts #01-#32. Note th
 	**/
-	uint8 _current_context;
+	MAP_CONTEXT _current_context;
 
-	/** \brief A 3D vector that contains all of the map's tile objects.
-	*** The outer-most vector corresponds to each map context, hence its size is at least 1 and at most 32.
-	*** The middle vector is the rows of tiles in the map, while the inner-most vector is the columns of tiles.
-	*** The 0th element of the outer vector corresponds to map context #1, 1st element to context #2, and so on.
+	/** \brief A map of 2D vectors that contains all of the map's tile objects.
+	*** Each key-value pair in the std::map represents a map context, thus the size of the std::map is equal to
+	*** number of contexts in the game map. The 2D vector represents the rows and columns of tiles of the map
+	*** respectively.
 	**/
-	std::vector<std::vector<std::vector<MapTile> > > _tile_grid;
+	std::map<MAP_CONTEXT, std::vector<std::vector<MapTile> > > _tile_grid;
 
-	//! \brief Contains the images for all map tiles, both still and animate.
+	//! \brief Contains the images for all map tiles, both still and animated.
 	std::vector<hoa_video::ImageDescriptor*> _tile_images;
 
 	/** \brief Contains all of the animated tile images used on the map.
