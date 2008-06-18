@@ -30,7 +30,7 @@ namespace private_map {
 TileManager::TileManager() :
 	_num_tile_rows(0),
 	_num_tile_cols(0),
-	_current_context(0)
+	_current_context(MAP_CONTEXT_01)
 {}
 
 
@@ -76,7 +76,7 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 	vector<string> tileset_filenames;
 	// A container to temporarily retain all tile images loaded for each tileset. Each inner vector contains 256 StillImages
 	vector<vector<StillImage> > tileset_images;
-	
+
 	map_file.ReadStringVector("tileset_filenames", tileset_filenames);
 
 	for (uint32 i = 0; i < tileset_filenames.size(); i++) {
@@ -103,9 +103,9 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 
 	// Create and add the 2D tile grid for the base context
 	_tile_grid.clear();
-	_tile_grid.push_back(vector<vector<MapTile> >(_num_tile_rows));
+	_tile_grid.insert(make_pair(MAP_CONTEXT_01, vector<vector<MapTile> >(_num_tile_rows)));
 	for (uint32 r = 0; r < _num_tile_rows; r++) {
-		_tile_grid[0][r].resize(_num_tile_cols);
+		_tile_grid[MAP_CONTEXT_01][r].resize(_num_tile_cols);
 	}
 
 	vector<int32> table_row; // Used to temporarily store a row of table indeces
@@ -116,7 +116,7 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
 		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[0][r][c].lower_layer = table_row[c];
+			_tile_grid[MAP_CONTEXT_01][r][c].lower_layer = table_row[c];
 		}
 	}
 	map_file.CloseTable();
@@ -126,7 +126,7 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
 		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[0][r][c].middle_layer = table_row[c];
+			_tile_grid[MAP_CONTEXT_01][r][c].middle_layer = table_row[c];
 		}
 	}
 	map_file.CloseTable();
@@ -136,7 +136,7 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
 		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[0][r][c].upper_layer = table_row[c];
+			_tile_grid[MAP_CONTEXT_01][r][c].upper_layer = table_row[c];
 		}
 	}
 	map_file.CloseTable();
@@ -145,13 +145,14 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 
 	// Load the tile data for each additional map context
 	for (uint32 i = 1; i < map_instance->_num_map_contexts; i++) {
-		string this_context = "context_";
+		MAP_CONTEXT this_context = static_cast<MAP_CONTEXT>(1 << i);
+		string context_name = "context_";
 		if (i < 11) // precede single digit context names with a zero
-			this_context += "0";
-		this_context += NumberToString(i + 1);
+			context_name += "0";
+		context_name += NumberToString(i + 1);
 
 		// Initialize this context by making a cop of the #01 map context first, as most contexts re-use many of the same tiles from the 0th context
-		_tile_grid.push_back(_tile_grid[0]);
+		_tile_grid.insert(make_pair(this_context, _tile_grid[MAP_CONTEXT_01]));
 
 		// Read the table corresponding to this context and modify each tile accordingly.
 		// The context table is an array of integer data. The size of this array should be divisible by four, as every consecutive group of four integers in
@@ -160,7 +161,7 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 		// So if the first four entries in the context table were {0, 12, 26, 180}, this would set the lower layer tile at position (12, 26) to the tile
 		// index 180.
 		vector<int32> context_data;
-		map_file.ReadIntVector(this_context, context_data);
+		map_file.ReadIntVector(context_name, context_data);
 		if (context_data.size() % 4 != 0) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "for context " << this_context << ", context data was not evenly divisible by four (incomplete context data)" << endl;
 			continue;
@@ -169,13 +170,13 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 		for (uint32 j = 0; j < context_data.size(); j += 4) {
 			switch (context_data[j]) {
 				case 0: // lower layer
-					_tile_grid[i][context_data[j+1]][context_data[j+2]].lower_layer = context_data[j+3];
+					_tile_grid[this_context][context_data[j+1]][context_data[j+2]].lower_layer = context_data[j+3];
 					break;
 				case 1: // middle layer
-					_tile_grid[i][context_data[j+1]][context_data[j+2]].middle_layer = context_data[j+3];
+					_tile_grid[this_context][context_data[j+1]][context_data[j+2]].middle_layer = context_data[j+3];
 					break;
 				case 2: // upper layer
-					_tile_grid[i][context_data[j+1]][context_data[j+2]].upper_layer = context_data[j+3];
+					_tile_grid[this_context][context_data[j+1]][context_data[j+2]].upper_layer = context_data[j+3];
 					break;
 				default:
 					IF_PRINT_WARNING(MAP_DEBUG) << "unknown tile layer index reference when loading map context tiles" << endl;
@@ -192,15 +193,15 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 	// Set size to be equal to the total number of tiles and initialize all entries to -1 (unreferenced)
 	tile_references.assign(tileset_filenames.size() * TILES_PER_TILESET, -1);
 
-	for (uint32 i = 0; i < map_instance->_num_map_contexts; i++) {
+	for (map<MAP_CONTEXT, vector<vector<MapTile> > >::iterator i = _tile_grid.begin(); i != _tile_grid.end(); i++) {
 		for (uint32 r = 0; r < _num_tile_rows; r++) {
 			for (uint32 c = 0; c < _num_tile_cols; c++) {
-				if (_tile_grid[i][r][c].lower_layer >= 0)
-					tile_references[_tile_grid[i][r][c].lower_layer] = 0;
-				if (_tile_grid[i][r][c].middle_layer >= 0)
-					tile_references[_tile_grid[i][r][c].middle_layer] = 0;
-				if (_tile_grid[i][r][c].upper_layer >= 0)
-					tile_references[_tile_grid[i][r][c].upper_layer] = 0;
+				if ((i->second)[r][c].lower_layer >= 0)
+					tile_references[(i->second)[r][c].lower_layer] = 0;
+				if ((i->second)[r][c].middle_layer >= 0)
+					tile_references[(i->second)[r][c].middle_layer] = 0;
+				if ((i->second)[r][c].upper_layer >= 0)
+					tile_references[(i->second)[r][c].upper_layer] = 0;
 			}
 		}
 	}
@@ -222,15 +223,15 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 	}
 
 	// Now, go back and re-assign all lower, middle, and upper tile layer indeces with the translated indeces
-	for (uint32 i = 0; i < map_instance->_num_map_contexts; i++) {
+	for (map<MAP_CONTEXT, vector<vector<MapTile> > >::iterator i = _tile_grid.begin(); i != _tile_grid.end(); i++) {
 		for (uint32 r = 0; r < _num_tile_rows; r++) {
 			for (uint32 c = 0; c < _num_tile_cols; c++) {
-				if (_tile_grid[i][r][c].lower_layer >= 0)
-					_tile_grid[i][r][c].lower_layer = tile_references[_tile_grid[i][r][c].lower_layer];
-				if (_tile_grid[i][r][c].middle_layer >= 0)
-					_tile_grid[i][r][c].middle_layer = tile_references[_tile_grid[i][r][c].middle_layer];
-				if (_tile_grid[i][r][c].upper_layer >= 0)
-					_tile_grid[i][r][c].upper_layer = tile_references[_tile_grid[i][r][c].upper_layer];
+				if ((i->second)[r][c].lower_layer >= 0)
+					(i->second)[r][c].lower_layer = tile_references[(i->second)[r][c].lower_layer];
+				if ((i->second)[r][c].middle_layer >= 0)
+					(i->second)[r][c].middle_layer = tile_references[(i->second)[r][c].middle_layer];
+				if ((i->second)[r][c].upper_layer >= 0)
+					(i->second)[r][c].upper_layer = tile_references[(i->second)[r][c].upper_layer];
 			}
 		}
 	}

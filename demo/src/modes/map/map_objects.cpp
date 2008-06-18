@@ -52,7 +52,7 @@ namespace private_map {
 
 MapObject::MapObject() :
 	object_id(-1),
-	context(-1),
+	context(MAP_CONTEXT_01),
 	x_position(-1),
 	y_position(-1),
 	x_offset(0.0f),
@@ -734,7 +734,7 @@ void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>&
 			parent_row = iter->parent_row;
 		}
 	}
-	std::reverse( path.begin(), path.end() );
+	std::reverse(path.begin(), path.end());
 } // void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest)
 
 
