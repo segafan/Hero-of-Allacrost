@@ -29,8 +29,7 @@ namespace private_map {
 
 TileManager::TileManager() :
 	_num_tile_rows(0),
-	_num_tile_cols(0),
-	_current_context(MAP_CONTEXT_01)
+	_num_tile_cols(0)
 {}
 
 
@@ -329,8 +328,8 @@ void TileManager::DrawLowerLayer(const MapFrame* const frame) {
 			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++) {
 		for (uint32 c = static_cast<uint32>(frame->starting_col);
 				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++) {
-			if (_tile_grid[_current_context][r][c].lower_layer >= 0) { // Draw a tile image if it exists at this location
-				_tile_images[_tile_grid[_current_context][r][c].lower_layer]->Draw();
+			if (_tile_grid[MapMode::_current_map->_current_context][r][c].lower_layer >= 0) { // Draw a tile image if it exists at this location
+				_tile_images[_tile_grid[MapMode::_current_map->_current_context][r][c].lower_layer]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}
@@ -347,8 +346,8 @@ void TileManager::DrawMiddleLayer(const MapFrame* const frame) {
 			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++) {
 		for (uint32 c = static_cast<uint32>(frame->starting_col);
 				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++) {
-			if (_tile_grid[_current_context][r][c].middle_layer >= 0) { // Draw a tile image if it exists at this location
-				_tile_images[_tile_grid[_current_context][r][c].middle_layer]->Draw();
+			if (_tile_grid[MapMode::_current_map->_current_context][r][c].middle_layer >= 0) { // Draw a tile image if it exists at this location
+				_tile_images[_tile_grid[MapMode::_current_map->_current_context][r][c].middle_layer]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}
@@ -365,8 +364,8 @@ void TileManager::DrawUpperLayer(const MapFrame* const frame) {
 			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++) {
 		for (uint32 c = static_cast<uint32>(frame->starting_col);
 				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++) {
-			if (_tile_grid[_current_context][r][c].upper_layer >= 0) { // Draw a tile image if it exists at this location
-				_tile_images[_tile_grid[_current_context][r][c].upper_layer]->Draw();
+			if (_tile_grid[MapMode::_current_map->_current_context][r][c].upper_layer >= 0) { // Draw a tile image if it exists at this location
+				_tile_images[_tile_grid[MapMode::_current_map->_current_context][r][c].upper_layer]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}
