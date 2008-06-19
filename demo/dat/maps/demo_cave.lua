@@ -3,12 +3,16 @@ setmetatable(ns, {__index = _G})
 demo_cave = ns;
 setfenv(1, ns);
 
--- A reference to the C++ MapMode object that was created with this file
-map = {}
-
 -- The map name and location graphic
 map_name = "Cave"
 location_filename = "desert_cave.png"
+
+enemy_ids = { 1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106 }
+
+-- Allacrost map editor begin. Do not edit this line. --
+
+-- A reference to the C++ MapMode object that was created with this file
+map = {}
 
 -- The number of rows and columns of tiles that compose the map
 num_map_contexts = 1
@@ -31,9 +35,6 @@ tileset_filenames[1] = "desert_cave_ground"
 tileset_filenames[2] = "desert_cave_walls"
 tileset_filenames[3] = "desert_cave_walls2"
 tileset_filenames[4] = "desert_cave_water"
-
-enemy_ids = { 1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106 }
-
 
 -- The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables
 -- Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]
@@ -348,7 +349,8 @@ upper_layer[57] = { 570, 571, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 70
 upper_layer[58] = { 586, 571, -1, -1, -1, -1, -1, -1, -1, 334, -1, 396, 397, 398, -1, -1, -1, 302, 303, 418, 291, 302, 303, -1, -1, -1, -1, -1, -1, 270, 271, 302, 303, -1, -1, -1, -1, -1, -1, -1 }
 upper_layer[59] = { 287, 351, 382, 380, 381, 382, 383, 348, 349, 350, 383, 412, 413, 414, 415, 382, 383, 318, 319, 319, 418, 318, 319, -1, -1, -1, -1, -1, -1, 286, 287, 318, 319, -1, -1, -1, -1, -1, -1, -1 }
 
-
+-- All, if any, existing contexts follow.
+-- Allacrost map editor end. Do not edit this line. --
 
 function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
