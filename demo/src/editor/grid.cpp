@@ -402,17 +402,77 @@ void Grid::LoadMap()
 
 void Grid::SaveMap()
 {
-	char buffer[10];  // used for converting an int to a string with sprintf
-	int i;           // Lua table index / Loop counter variable
+	const int32 BUFFER_SIZE = 1024;
+	char buffer[BUFFER_SIZE];
+	int i;
 	WriteScriptDescriptor write_data;
 	int tileset_index;
 	int tile_index;
 	
+	ifstream file;
+	string before_text;
+	string after_text;
+	int32 before_pos, after_pos, read_bytes, bytes_to_read;
+	const char * BEFORE_TEXT_MARKER = "-- Allacrost map editor begin. Do not edit this line. --";
+	const char * AFTER_TEXT_MARKER =  "-- Allacrost map editor end. Do not edit this line. --";
+
+	// First, get the non-editor data (such as map scripting) from the file to save, so we don't clobber it.
+	file.open(_file_name.toAscii(), ifstream::in);
+	if (file.is_open()) {
+
+		// Get the positions of the begin and end markers.
+		while(!file.eof()) {
+			file.clear();
+			before_pos = file.tellg();
+			file.getline(buffer, BUFFER_SIZE);
+			if (strstr(buffer, BEFORE_TEXT_MARKER))
+				break;
+		}
+	
+		while (!file.eof()) {
+			file.clear();
+			file.getline(buffer, BUFFER_SIZE);
+			if (strstr(buffer, AFTER_TEXT_MARKER)) {
+				after_pos = file.tellg();
+				break;
+			}
+		}
+	
+		// Save everything before "map editor begin" into before_text
+		file.seekg(0);
+		read_bytes = 0;
+		while (read_bytes < before_pos) {
+			bytes_to_read = before_pos - read_bytes;
+			if (bytes_to_read > BUFFER_SIZE - 1)
+				bytes_to_read = BUFFER_SIZE - 1;
+
+			file.read(buffer, bytes_to_read);
+			buffer[bytes_to_read] = 0;
+			before_text.append(buffer);
+			read_bytes += bytes_to_read;
+		}
+		
+		// Save everything after "map editor end" into after_text
+		file.seekg(after_pos);
+		while (!file.eof()) {
+			file.read(buffer, BUFFER_SIZE - 1);
+			buffer[file.gcount()] = 0;
+			after_text.append(buffer);
+		}
+
+		file.close();
+	}
+
 	if (write_data.OpenFile(string(_file_name.toAscii())) == false) {
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
 		return;
 	}
+	
+	if (!before_text.empty())
+		write_data.WriteLine(before_text, false);
 
+	write_data.WriteLine(BEFORE_TEXT_MARKER);
+	write_data.InsertNewLine();
 	write_data.WriteComment("A reference to the C++ MapMode object that was created with this file");
 	write_data.WriteLine("map = {}\n");
 
@@ -688,6 +748,12 @@ void Grid::SaveMap()
 			context_data.clear();
 		} // write the vector if it has data in it
 	} // iterate through all contexts of all layers, assuming all layers have same number of contexts
+
+	write_data.WriteLine(AFTER_TEXT_MARKER);
+
+	// Write the "after data" if this file is overwriting another
+	if (!after_text.empty())
+		write_data.WriteLine(after_text, false);
 
 	write_data.CloseFile();
 
