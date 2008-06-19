@@ -275,6 +275,11 @@ private:
 	**/
 	private_map::VirtualSprite* _camera;
 
+	/** \brief The currently active map context
+	*** At all times, this should be the same context as the object pointed to by the _camera
+	**/
+	private_map::MAP_CONTEXT _current_context;
+
 	//! \brief Retains information needed to correctly draw the next map frame.
 	private_map::MapFrame _draw_info;
 

@@ -117,11 +117,6 @@ private:
 	**/
 	uint16 _num_tile_cols;
 
-	/** \brief The current map context in index format
-	*** This member should only ever be equal to 0-31, which corresponds to contexts #01-#32. Note th
-	**/
-	MAP_CONTEXT _current_context;
-
 	/** \brief A map of 2D vectors that contains all of the map's tile objects.
 	*** Each key-value pair in the std::map represents a map context, thus the size of the std::map is equal to
 	*** number of contexts in the game map. The 2D vector represents the rows and columns of tiles of the map

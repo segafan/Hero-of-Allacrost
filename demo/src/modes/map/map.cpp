@@ -100,7 +100,7 @@ MapMode::MapMode(string filename) :
 
 	if (_stamina_bar_background.Load("img/misc/stamina_bar_background.png", 227, 24) == false)
 		IF_PRINT_WARNING(MAP_DEBUG) << "run-stamina bar background image load failure" << endl;
-		
+
 	if (_stamina_bar_infinite_overlay.Load("img/misc/stamina_bar_infinite_overlay.png", 227, 24) == false)
 		IF_PRINT_WARNING(MAP_DEBUG) << "run-stamina bar infinity image load failure" << endl;
 }
@@ -228,6 +228,8 @@ void MapMode::_Load() {
 
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update() {
+	_current_context = _camera->GetContext();
+
 	if (InputManager->QuitPress() == true) {
 		ModeManager->Push(new PauseMode(true));
 		return;
@@ -236,6 +238,15 @@ void MapMode::Update() {
 		ModeManager->Push(new PauseMode(false));
 		return;
 	}
+	// TEMP for debugging map contexts
+	else if (InputManager->SwapPress() == true) {
+		if (_camera->GetContext() == MAP_CONTEXT_01)
+			_camera->SetContext(MAP_CONTEXT_02);
+		else
+			_camera->SetContext(MAP_CONTEXT_01);
+		_current_context = _camera->GetContext();
+	}
+
 
 	_time_elapsed = SystemManager->GetUpdateTime();
 
@@ -597,7 +608,7 @@ void MapMode::_DrawGUI() {
 	//VideoManager->DrawRectangle(200, 10, Color::black);
 	//VideoManager->DrawRectangle(200 * fill_size, 10, Color(0.133f, 0.455f, 0.133f, 1.0f));
 	VideoManager->DrawRectangle(200 * fill_size, 10, Color(0.0196f, 0.207f, 0.0196f, 1.0f));
-	
+
 	//code to shade the bar with a faux lighting effect
 	VideoManager->Move(800,739); // dark green
 	VideoManager->DrawRectangle(200 * fill_size, 2, Color(0.274f, 0.298f, 0.274f, 1.0f));
@@ -606,29 +617,29 @@ void MapMode::_DrawGUI() {
 
 	if ((200 * fill_size) >= 4){  //Only do this if the bar is at least 4 pixels long
 	VideoManager->Move(801, 739); //darkish green
-	VideoManager->DrawRectangle((200 * fill_size) -2, 1, Color(0.352f, 0.4f, 0.352f, 1.0f));	
+	VideoManager->DrawRectangle((200 * fill_size) -2, 1, Color(0.352f, 0.4f, 0.352f, 1.0f));
 	}
-	
+
 	if ((200 * fill_size) >= 4){  //Only do this if the bar is at least 4 pixels long
 	VideoManager->Move(801, 738); //medium green
 	VideoManager->DrawRectangle(1, 2, Color(0.0509f, 0.556f, 0.0509f, 1.0f));
-	
+
 	VideoManager->Move(800 + (fill_size * 200 - 2), 738); //medium green //automatically reposition to be at moving endcap
 	VideoManager->DrawRectangle(1, 2, Color(0.0509f, 0.556f, 0.0509f, 1.0f));
 	}
-	
+
 	VideoManager->Move(800, 736); //medium green
 	VideoManager->DrawRectangle(200 * fill_size, 5, Color(0.0509f, 0.556f, 0.0509f, 1.0f));
-	
-	
-	
+
+
+
 	if ((200 * fill_size) >= 4){  //Only do this if the bar is at least 4 pixels long
 	VideoManager->Move(801, 735); //light green
 	VideoManager->DrawRectangle(1, 1, Color(0.419f, 0.894f, 0.0f, 1.0f));
-	
+
 	VideoManager->Move(800 + (fill_size * 200 - 2), 735); //light green //automatically reposition to be at moving endcap
 	VideoManager->DrawRectangle(1, 1, Color(0.419f, 0.894f, 0.0f, 1.0f));
-	
+
 	VideoManager->Move(800, 734); //light green
 	VideoManager->DrawRectangle(200 * fill_size, 2, Color(0.419f, 0.894f, 0.0f, 1.0f));
 	}
@@ -650,7 +661,7 @@ void MapMode::_DrawGUI() {
 	VideoManager->Move(780, 747);
 	_stamina_bar_infinite_overlay.Draw();
 	}
-	
+
 	VideoManager->PopState();
 
 	// ---------- (3) Draw the treasure menu

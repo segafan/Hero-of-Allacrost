@@ -573,13 +573,6 @@ private:
 	**/
 	uint16 _num_grid_rows, _num_grid_cols;
 
-	/** \brief Retains the current context that the map is in
-	*** This is used for collision detection between objects that are in the same context.
-	*** It's also used for objects to determine which bits in the collision grid should be
-	*** examined for determining collisions and pathfinding.
-	**/
-	MAP_CONTEXT _current_context;
-
 	/** \brief A 2D vector indicating which spots on the map sprites may walk on.
 	*** This vector is kept seperate from the vector of tiles because each tile
 	*** has 4 walkable uint32 bitflags associated with it. Note that sprite objects may
