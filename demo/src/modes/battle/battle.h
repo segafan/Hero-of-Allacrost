@@ -338,7 +338,7 @@ public:
 	 * \param x Initial x coordinate of the text
 	 * \param y Initial y coordinate of the text
 	 */
-	void AddDamageText(hoa_utils::ustring text, uint32 duration, float x, float y);
+	void AddDamageText(const hoa_utils::ustring& text, uint32 duration, float x, float y);
 
 	/*private_battle::BattleAction* GetActiveAction()
 		{ return _active_action; }*/
