@@ -1143,7 +1143,7 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 } // uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const
 
 
-void BattleMode::AddDamageText(hoa_utils::ustring text, uint32 duration, float x, float y)
+void BattleMode::AddDamageText(const hoa_utils::ustring& text, uint32 duration, float x, float y)
 {
 	_damage_text_list.push_front(new DamageText(text, duration, x, y));
 }
@@ -1156,6 +1156,7 @@ void BattleMode::_RemoveExpiredDamageText()
 	{
 		if ((*it)->GetTimer()->IsFinished())
 		{
+			delete *it;
 			it = _damage_text_list.erase(it);
 		}
 		else

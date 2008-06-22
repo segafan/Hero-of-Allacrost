@@ -14,6 +14,7 @@
  *          where tiles are painted, edited, etc.
  *****************************************************************************/
 
+#include <sstream>
 #include <iostream>
 #include "grid.h"
 
@@ -193,7 +194,6 @@ void Grid::CreateNewContext(int inherit_context)
 
 void Grid::LoadMap()
 {
-	char buffer[10];  // used for converting an int to a string with sprintf
 	ReadScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
@@ -357,10 +357,13 @@ void Grid::LoadMap()
 
 	// Load any existing context data
 	for (int i = 1; i < num_contexts; i++) {
-		if (i < 11)
-			sprintf(buffer, "context_0%d", i);
-		else
-			sprintf(buffer, "context_%d", i);
+
+		std::stringstream context("context_");
+
+		if (i < 10) {
+			context << "0";
+		}
+		context << i;
 
 		// Initialize this context
 		_lower_layer.push_back(_lower_layer[0]);
@@ -374,7 +377,7 @@ void Grid::LoadMap()
 		// So if the first four entries in the context table were {0, 12, 26, 180}, this would set the lower layer tile at position (12, 26) to the tile
 		// index 180.
 		vector<int32> context_data;
-		read_data.ReadIntVector(buffer, context_data);
+		read_data.ReadIntVector(context.str(), context_data);
 		for (int j = 0; j < static_cast<int>(context_data.size()); j += 4) {
 			switch (context_data[j]) {
 				case 0: // lower layer
