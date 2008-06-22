@@ -343,6 +343,11 @@ vector<GlobalSkill *> &SkillEditor::_GetCurrentSkillList()
 
 void SkillEditor::_ReloadTab()
 {
+
+	if (_GetCurrentSkillList().empty()) {
+		return;
+	}
+
 	GlobalSkill *skill = _GetCurrentSkillList()[_current_skill_index[_current_tab]];
 
 	string text = MakeStandardString(skill->GetName());
