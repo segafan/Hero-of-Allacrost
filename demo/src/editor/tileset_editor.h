@@ -2,14 +2,14 @@
 //            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
 /*!****************************************************************************
 * \file    tileset_editor.h
-* \author  Barýþ Soner Uþakl? blackkknight@hotmail.com
+* \author  Barï¿½ï¿½ Soner Uï¿½akl? blackkknight@hotmail.com
 * \brief   Header file for editor's tileset editor dialog
 *****************************************************************************/
 
@@ -43,12 +43,13 @@ public:
 	~OverlayGrid();
 
 	//! This is the current tileset that is being edited.
-	Tileset*	tileset;
+	Tileset* tileset;
 
 protected:
 	void paintGL();
 	void resizeGL(int w,int h);
 	void initializeGL();
+
 	//! \name Mouse Processing Functions
 	//! \brief Functions to process mouse events on the map.
 	//! \note Reimplemented from QScrollView.
@@ -59,7 +60,7 @@ protected:
 //	void contentsMouseReleaseEvent(QMouseEvent *evt);
 //	void contentsContextMenuEvent(QContextMenuEvent *evt);
 	//@}
-	
+
 
 private:
 	bool	_overlayInitialized;
@@ -88,20 +89,25 @@ private slots:
 private :
 	//! A pushbutton for opening a new tileset
 	QPushButton* _opentileset_pbut;
+
 	//! A pushbutton for canceling the tileset_editor
 	QPushButton* _cancel_pbut;
+
 	//! A pushbutton for okaying the tileset_editor
 	QPushButton* _ok_pbut;
+
 	//! A layout to manage all the labels, spinboxes, and listviews.
 	QGridLayout* _dia_layout;
 
 	//! This is the grid that is shown over the tileset for walkability
-	OverlayGrid*	_walkability_grid;
+	OverlayGrid* _walkability_grid;
+
+	std::vector<bool> _collision_data;
 };
 
 
 } // namespace hoa_editor
 
-#endif 
+#endif
 // __TILESET_EDITOR_HEADER__
 

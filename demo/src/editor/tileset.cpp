@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,24 +21,12 @@ using namespace hoa_script;
 using namespace hoa_editor;
 using namespace std;
 
-Tileset::Tileset():tileset_name(""),table(NULL)
+
+
+Tileset::Tileset(QWidget* parent) :
+	owner(parent),
+	tileset_name("")
 {
-}
-
-Tileset::Tileset(QWidget* parent, const QString& name)
-{	
-	// Create filename from name.
-	tileset_name = name;
-	QString img_filename = QString("img/tilesets/" + name + ".png");
-	QString dat_filename = QString("dat/tilesets/" + name + ".lua");
-
-	// Load the tileset image.
-	tiles.resize(256);
-	for (int i = 0; i < 256; i++)
-		tiles[i].SetDimensions(1.0f, 1.0f);
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false)
-		qDebug("LoadMultiImage failed to load tileset " + img_filename);
-
 	// Set up the table.
 	table = new Q3Table(16, 16);
 	table->setReadOnly(true);
@@ -50,6 +38,54 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		table->setRowHeight(i, TILE_HEIGHT);
 	for (int i = 0; i < table->numCols(); i++)
 		table->setColumnWidth(i, TILE_WIDTH);
+}
+
+
+
+Tileset::Tileset(QWidget* parent, const QString& name) :
+	owner(parent),
+	tileset_name(name)
+{
+	// Set up the table.
+	table = new Q3Table(16, 16);
+	table->setReadOnly(true);
+	table->setShowGrid(false);
+	table->setSelectionMode(Q3Table::Multi);
+	table->setTopMargin(0);
+	table->setLeftMargin(0);
+	for (int i = 0; i < table->numRows(); i++)
+		table->setRowHeight(i, TILE_HEIGHT);
+	for (int i = 0; i < table->numCols(); i++)
+		table->setColumnWidth(i, TILE_WIDTH);
+
+	Load(name);
+}
+
+
+
+Tileset::~Tileset()
+{
+	for (std::vector<hoa_video::StillImage>::iterator it = tiles.begin(); it != tiles.end(); it++)
+		 (*it).Clear();
+	tiles.clear();
+	delete table;
+} // Tileset::~Tileset()
+
+
+
+bool Tileset::Load(const QString& name)
+{
+	// Create filename from name.
+	QString img_filename = QString("img/tilesets/" + name + ".png");
+	QString dat_filename = QString("dat/tilesets/" + name + ".lua");
+
+	// Load the tileset image.
+	tiles.resize(256);
+	for (int i = 0; i < 256; i++)
+		tiles[i].SetDimensions(1.0f, 1.0f);
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false)
+		qDebug("LoadMultiImage failed to load tileset " + img_filename);
+
 //	table = new QTableWidget(16, 16);
 //	table->verticalHeader()->hide();
 //	table->horizontalHeader()->hide();
@@ -74,7 +110,7 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	{
 		for (int col = 0; col < 16; col++)
 		{
-			rectangle.setRect(col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);			
+			rectangle.setRect(col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
 			QVariant variant = entire_tileset.copy(rectangle);
 			if (!variant.isNull())
 			{
@@ -93,7 +129,7 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	// Set up for reading the tileset definition file.
 	ReadScriptDescriptor read_data;
 	if (read_data.OpenFile(string(dat_filename.toAscii())) == false)
-		QMessageBox::warning(parent, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(dat_filename));
+		QMessageBox::warning(owner, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(dat_filename));
 
 	read_data.OpenTable(string(tileset_name.toAscii()));
 
@@ -105,17 +141,22 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		for (int32 i = 0; i < 16; i++)
 		{
 			read_data.OpenTable(i);
-			if (read_data.IsErrorDetected() == false)
+			// Make sure that at least one row exists
+			if (read_data.IsErrorDetected() == true)
 			{
-				for (int32 j = 0; j < 16; j++)
-				{
-					read_data.ReadIntVector(j, vect);
-					if (read_data.IsErrorDetected() == false)
-						walkability[i * 16 + j] = vect;
-					vect.clear();
-				} // iterate through all tiles in a row
 				read_data.CloseTable();
-			} // make sure a row exists
+				read_data.CloseTable();
+				read_data.CloseFile();
+				return false;
+			}
+
+			for (int32 j = 0; j < 16; j++)
+			{
+				read_data.ReadIntVector(j, vect);
+				if (read_data.IsErrorDetected() == false)
+					walkability[i * 16 + j] = vect;
+				vect.clear();
+			} // iterate through all tiles in a row
 		} // iterate through all rows of the walkability table
 		read_data.CloseTable();
 	} // make sure table exists first
@@ -125,17 +166,19 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	{
 		uint32 table_size = read_data.GetTableSize("autotiling");
 		read_data.OpenTable("autotiling");
-		vector<int32> keys;  // will contain the keys (indeces, if you will) of this table's entries
+		vector<int32> keys; // will contain the keys (indeces, if you will) of this table's entries
 		read_data.ReadTableKeys(keys);
 		for (uint32 i = 0; i < table_size; i++)
 			autotileability[keys[i]] = read_data.ReadString(keys[i]);
 		read_data.CloseTable();
 	} // make sure table exists first
 
-/*	// Read in animated tiles.
+	// TODO: editor does not yet have animated tile support
+	/*
+	// Read in animated tiles.
 	uint32 animated_table_size = read_data.GetTableSize("animated_tiles");
 	read_data.OpenTable("animated_tiles");
-	for (uint32 i = 1; i <= animated_table_size; i++) 
+	for (uint32 i = 1; i <= animated_table_size; i++)
 	{
 		_animated_tiles.push_back(vector<AnimatedTileData>());
 		vector<AnimatedTileData>& tiles = _animated_tiles.back();
@@ -143,7 +186,7 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		// is really half the table size.
 		uint32 tile_count = read_data.GetTableSize(i) / 2;
 		read_data.OpenTable(i);
-		for(uint32 index = 1; index <= tile_count; index++) 
+		for(uint32 index = 1; index <= tile_count; index++)
 		{
 			tiles.push_back(AnimatedTileData());
 			AnimatedTileData& tile_data = tiles.back();
@@ -152,21 +195,16 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		}
 		read_data.CloseTable();
 	}
-	read_data.CloseTable();*/
+	read_data.CloseTable();
+	*/
 
 	read_data.CloseTable();
-
 	read_data.CloseFile();
-} // Tileset constructor
 
-Tileset::~Tileset()
-{
-	for (std::vector<hoa_video::StillImage>::iterator it = tiles.begin();
-	     it != tiles.end(); it++)
-		 (*it).Clear();
-	tiles.clear();
-	delete table;
-} // TilesetTable destructor
+	return true;
+} // bool Tileset::Load(const QString& name)
+
+
 
 /*void Tileset::Save() {
 	string dat_filename = "dat/tilesets/" + string(tileset_name.toAscii()) + ".lua";

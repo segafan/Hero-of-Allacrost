@@ -47,9 +47,10 @@ namespace private_map {
 // ************************ MAP CONSTANTS ****************************
 
 /** \name Screen Coordiante System Constants
-*** \brief The number of rows and columns of map grid elements that compose the screen.
-*** These are <b>not</b> the number of tiles that compose the screen. The number of tile
-*** rows and columns that compose a screen are exactly one half of these numbers.
+*** \brief Represents the size of the visible screen in map tiles and the collision grid
+*** Every map tile is 32x32 pixels, and every collision grid element is one quarter of that
+*** area (16x16). Thus the number of collision grid elements that compose the screen are
+*** four times the number of tiles that are visible on the screen.
 **/
 //@{
 const float SCREEN_COLS = 64.0f;
@@ -63,8 +64,7 @@ const uint16 HALF_TILE_ROWS = 12;
 //@}
 
 /** \name Map State Constants
-*** \brief Constants used for describing the current state of operation during map mode.
-*** These constants are largely used to determine what
+*** \brief Constants used for determining the current state of operation during map mode.
 **/
 //@{
 //! \brief The standard state of the map, where the player is free to roam.
@@ -77,6 +77,9 @@ const uint8 OBSERVATION  = 0x04;
 
 /** \name Map Context Constants
 *** \brief Constants used to represent all 32 possible map contexts
+*** Note that only one bit is set for each context. This is done so that the collision
+*** grid for all contexts can be stored in a single integer. This also simplifies the
+*** complexity of collision detection for map sprites.
 **/
 enum MAP_CONTEXT {
 	MAP_CONTEXT_01 = 0x00000001,
