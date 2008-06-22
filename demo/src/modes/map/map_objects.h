@@ -493,6 +493,8 @@ public:
 *** ***************************************************************************/
 class ObjectManager {
 	friend class hoa_map::MapMode;
+	// TEMP for allowing context zones to access all objects
+	friend class hoa_map::private_map::ContextZone;
 
 public:
 	ObjectManager();

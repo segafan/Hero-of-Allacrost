@@ -251,6 +251,13 @@ void BindModesToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
+		class_<ContextZone, MapZone>("ContextZone")
+			.def(constructor<MAP_CONTEXT, MAP_CONTEXT>())
+			.def("AddSection", &ContextZone::AddSection, adopt(_2))
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
 		class_<MapDialogue>("MapDialogue")
 			.def(constructor<>())
 			.def("AddText", &MapDialogue::AddText)

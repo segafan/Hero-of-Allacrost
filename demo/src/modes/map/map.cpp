@@ -238,15 +238,6 @@ void MapMode::Update() {
 		ModeManager->Push(new PauseMode(false));
 		return;
 	}
-	// TEMP for debugging map contexts
-	else if (InputManager->SwapPress() == true) {
-		if (_camera->GetContext() == MAP_CONTEXT_01)
-			_camera->SetContext(MAP_CONTEXT_02);
-		else
-			_camera->SetContext(MAP_CONTEXT_01);
-		_current_context = _camera->GetContext();
-	}
-
 
 	_time_elapsed = SystemManager->GetUpdateTime();
 
