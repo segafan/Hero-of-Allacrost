@@ -194,6 +194,7 @@ void Grid::CreateNewContext(int inherit_context)
 
 void Grid::LoadMap()
 {
+	char buffer[10];                // used to convert ints to strings
 	ReadScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
