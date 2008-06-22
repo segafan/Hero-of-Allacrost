@@ -1922,8 +1922,8 @@ void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index)
 		string tileset_name = read_data.ReadString(1);
 		tile_index = read_data.ReadInt(2);
 		read_data.CloseTable();
-		tileset_num = _map->tileset_names.findIndex(
-			QString::fromStdString(tileset_name));
+		tileset_num = _map->tileset_names.indexOf(
+			QString(tileset_name.c_str()));
 		read_data.CloseTable();
 
 		read_data.CloseFile();
@@ -2113,8 +2113,8 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 			string tileset_name = read_data.ReadString(1);
 			tile_index = read_data.ReadInt(2);
 			read_data.CloseTable();
-			tileset_num = _map->tileset_names.findIndex(
-				QString::fromStdString(tileset_name));
+			tileset_num = _map->tileset_names.indexOf(
+				QString(tileset_name.c_str()));
 
 			read_data.CloseTable();
 
