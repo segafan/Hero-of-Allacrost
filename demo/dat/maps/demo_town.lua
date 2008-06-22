@@ -856,6 +856,17 @@ function Load(m)
 	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
 	exit_zone:AddSection(hoa_map.ZoneSection(118, 30, 119, 40));
 	map:_AddZone(exit_zone);
+
+	-- Create two zones for switching the map context
+	context_zone = hoa_map.ContextZone(1, 2);
+	context_zone:AddSection(hoa_map.ZoneSection(92, 72, 96, 74), true);
+	context_zone:AddSection(hoa_map.ZoneSection(92, 70, 97, 72), false);
+	map:_AddZone(context_zone);
+
+	context_zone = hoa_map.ContextZone(1, 2);
+	context_zone:AddSection(hoa_map.ZoneSection(10, 62, 14, 64), true);
+	context_zone:AddSection(hoa_map.ZoneSection(10, 60, 14, 62), false);
+	map:_AddZone(context_zone);
 end -- function Load()
 
 function Update()

@@ -68,7 +68,6 @@ public:
 	/** \brief Returns true if the position coordinates are located inside the zone
 	*** \param pos_x The x position to check
 	*** \param pos_y The y position to check
-	***
 	**/
 	bool IsInsideZone(uint16 pos_x, uint16 pos_y);
 
@@ -143,17 +142,19 @@ private:
 /** ****************************************************************************
 *** \brief Class that represents an area where the active map context may switch
 ***
-*** This class actually represents two map zones that are placed directly next
-*** to one another. The two zones represent the border areas for two different
-*** map contexts. When an object is in one zone and moves to the second zone,
-*** that object's active context will change. The center of the object's
-*** collision rectangle is used to determine which of these two border zones
-*** that the object should reside in.
+*** This type of zone enables map sprites to transfer betweeen two map contexts.
+*** Each zone section added is labeled as corresponding to one context or the
+*** other. When a sprite stands upon a particular section, their context will
+*** be set to the context of that section.
 ***
 *** \todo In the future collision detection needs to be accounted for when two
 *** objects are in the context zone but have different active map contexts.
 *** Normally no collision detection is done between objects in different cases,
 *** but context zones need to be an exception to this rule.
+***
+*** \bug If the MapZone::AddSection() function is called instead of the ContextZone
+*** specific one, then the _section_contexts vector will be unequal in size to the
+*** _sections vector, and this will likely result in an out of bounds access error.
 *** ***************************************************************************/
 class ContextZone : public MapZone {
 public:
@@ -162,33 +163,27 @@ public:
 	**/
 	ContextZone(MAP_CONTEXT one, MAP_CONTEXT two);
 
-	//! \brief Sets the map zone area for the first context
-	void SetZoneOne(MapZone &_zone)
-		{ _zone_one = _zone; }
-
-	//! \brief Sets the map zone area for the second context
-	void SetZoneTwo(MapZone &_zone)
-		{ _zone_two = _zone; }
-
-	//! \brief Retrieves the map zone area for the first context
-	MapZone& _GetZoneOne()
-		{ return _zone_one; }
-
-	//! \brief Retrieves the map zone area for the first context
-	MapZone& _GetZoneTwo()
-		{ return _zone_two; }
+	/** \brief Adds a new rectangular section to the zone
+	*** \param section The section to add
+	*** \param context True indicates the section belongs to context one, false to context two
+	**/
+	void AddSection(ZoneSection *section, bool context);
 
 	//! \brief Updates the active contexts of any map objects that exist within the zone
 	void Update();
 
 private:
-	/** \brief The map zones corresponding to the first and second contexts, respectively
-	*** \note These zones should not overlap and should not have any empty space inbetween where the two zones meet
-	**/
-	MapZone _zone_one, _zone_two;
-
-	//! \brief The unequal map contexts that the context zone allows an object to transition to
+	//! \brief The different map contexts that the context zone allows an object to transition between
 	MAP_CONTEXT _context_one, _context_two;
+
+	//! \brief Stores the context of each zone section. True indicates context one, false is context two
+	std::vector<bool> _section_contexts;
+
+	/** \brief Determines if a map object is inside the context zone
+	*** \param object A pointer to the map object
+	*** \return The index of the zone section where the object is located, or -1 if it is not in the zone
+	**/
+	int16 _IsInsideZone(MapObject* object);
 }; // class ContextZone : public MapZone
 
 } // namespace private_map

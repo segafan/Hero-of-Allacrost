@@ -187,6 +187,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::SpriteAction;
 	friend class private_map::ActionPathMove;
 	friend class private_map::EnemyZone;
+	friend class private_map::ContextZone;
 	friend class private_map::ObjectManager;
 	friend class private_map::TileManager;
 

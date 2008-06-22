@@ -169,10 +169,49 @@ ContextZone::ContextZone(MAP_CONTEXT one, MAP_CONTEXT two) :
 }
 
 
+void ContextZone::AddSection(ZoneSection* section, bool context) {
+	_sections.push_back(*section);
+	_section_contexts.push_back(context);
+	delete section;
+}
+
+
 
 void ContextZone::Update()
 {
-	// TODO
+	int16 index;
+
+	// For every ground object, if it is within the zone and its current context is equal to either context one or
+	// context two
+	for (std::vector<MapObject*>::iterator i = MapMode::_current_map->_object_manager->_ground_objects.begin();
+		i != MapMode::_current_map->_object_manager->_ground_objects.end(); i++)
+	{
+		// If the object does not have a context equal to one of the two switching contexts, do not examine it further
+		if ((*i)->GetContext() != _context_one && (*i)->GetContext() != _context_two) {
+			continue;
+		}
+
+		// Determine if the object is inside either zone. If so, set their context to that zone's context
+		// (This may resultin no change from the object's current context)
+		index = _IsInsideZone(*i);
+		if (index >= 0) {
+			(*i)->SetContext(_section_contexts[index] ? _context_one : _context_two);
+		}
+	}
+}
+
+
+
+int16 ContextZone::_IsInsideZone(MapObject* object) {
+		// Verify each section of the zone to make sure the position is in bounds.
+	for (uint16 i = 0; i < _sections.size(); i++) {
+		if (object->x_position >= _sections[i].start_col && object->x_position <= _sections[i].end_col &&
+			object->y_position >= _sections[i].start_row && object->y_position <= _sections[i].end_row )
+		{
+			return i;
+		}
+	}
+	return -1;
 }
 
 } // namespace private_map
