@@ -46,6 +46,7 @@ Editor::Editor() : QMainWindow(),
 	_ml_on = false;
 	_ul_on = false;
 	_ol_on = false;
+	_coord_type = 0;
 	
 	// create the main widget and layout
 	_ed_splitter = new QSplitter(this);
@@ -115,6 +116,8 @@ void Editor::_ViewMenuSetup()
 		_toggle_ml_action->setEnabled(true);
 		_toggle_ul_action->setEnabled(true);
 		_toggle_ol_action->setEnabled(true);
+		_coord_tile_action->setEnabled(true);
+		_coord_collision_action->setEnabled(true);
 		_view_textures_action->setEnabled(true);
 	} // map must exist in order to set view options
 	else
@@ -124,6 +127,8 @@ void Editor::_ViewMenuSetup()
 		_toggle_ml_action->setEnabled(false);
 		_toggle_ul_action->setEnabled(false);
 		_toggle_ol_action->setEnabled(false);
+		_coord_tile_action->setEnabled(false);
+		_coord_collision_action->setEnabled(false);
 		_view_textures_action->setEnabled(false);
 	} // map does not exist, can't view it*/
 } // _ViewMenuSetup()
@@ -253,6 +258,7 @@ void Editor::_FileNew()
 			_ml_on   = false;
 			_ul_on   = false;
 			_ol_on	 = false;
+			_coord_type = 0;
 			if (_select_on)
 				_TileToggleSelect();
 			_ViewToggleGrid();
@@ -260,6 +266,7 @@ void Editor::_FileNew()
 			_ViewToggleML();
 			_ViewToggleUL();
 			_ViewToggleOL();
+			_ViewCoordTile();
 			_ViewTextures();
 
 			// Populate the context combobox
@@ -351,6 +358,7 @@ void Editor::_FileOpen()
 			_ml_on   = false;
 			_ul_on   = false;
 			_ol_on	 = false;
+			_coord_type = 0;
 			if (_select_on)
 				_TileToggleSelect();
 			_ViewToggleGrid();
@@ -358,6 +366,7 @@ void Editor::_FileOpen()
 			_ViewToggleML();
 			_ViewToggleUL();
 			_ViewToggleOL();
+			_ViewCoordTile();
 			_ViewTextures();
 
 			// Populate the context combobox
@@ -477,6 +486,20 @@ void Editor::_ViewToggleOL()
 		_ed_scrollview->_map->SetOLOn(_ol_on);
 	} // map must exist in order to view things on it
 } // _ViewToggleOL()
+
+void Editor::_ViewCoordTile()
+{
+	_coord_type = 0;
+	_coord_tile_action->setChecked(true);
+	_coord_collision_action->setChecked(false);
+}
+
+void Editor::_ViewCoordCollision()
+{
+	_coord_type = 1;
+	_coord_collision_action->setChecked(true);
+	_coord_tile_action->setChecked(false);
+}
 
 void Editor::_ViewTextures()
 {
@@ -1018,6 +1041,17 @@ void Editor::_CreateActions()
 	_toggle_ol_action->setShortcut(tr("O"));
 	_toggle_ol_action->setCheckable(true);
 	connect(_toggle_ol_action, SIGNAL(triggered()), this, SLOT(_ViewToggleOL()));
+	
+	_coord_tile_action = new QAction("Tile Coordinates", this);
+	_coord_tile_action->setStatusTip("Switch the coordinate display to tile coordinates");
+	// _coord_tile_action->setShortcut(
+	_coord_tile_action->setCheckable(true);
+	connect(_coord_tile_action, SIGNAL(triggered()), this, SLOT(_ViewCoordTile()));
+
+	_coord_collision_action = new QAction("Collision Coordinates", this);
+	_coord_collision_action->setStatusTip("Switch the coordinate display to collision coordinates");
+	_coord_collision_action->setCheckable(true);
+	connect(_coord_collision_action, SIGNAL(triggered()), this, SLOT(_ViewCoordCollision()));
 
 	_view_textures_action = new QAction("&Texture sheets", this);
 	_view_textures_action->setShortcut(tr("Ctrl+T"));
@@ -1192,6 +1226,9 @@ void Editor::_CreateMenus()
 	_view_menu->addAction(_toggle_ml_action);
 	_view_menu->addAction(_toggle_ul_action);
 	_view_menu->addAction(_toggle_ol_action);
+	_view_menu->addSeparator();
+	_view_menu->addAction(_coord_tile_action);
+	_view_menu->addAction(_coord_collision_action);
 	_view_menu->addSeparator();
 	_view_menu->addAction(_view_textures_action);
 	_view_menu->setTearOffEnabled(true);
@@ -1562,8 +1599,16 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 		} // switch on tile editing mode		
 	} // mouse has moved to a new tile position
 
-	// Display mouse position.
-	QString position = QString("x: %1  y: %2").arg(evt->x() / static_cast<float>(TILE_WIDTH), 0, 'f', 1).arg(
+	// Display mouse position in the format specified by _coord_type
+	QString position;
+	if (editor->_coord_type == 0)
+		position = QString("x: %1  y: %2").arg(static_cast<double>(evt->x() / TILE_WIDTH), 0, 'f', 0).arg(
+			static_cast<double>(evt->y() / TILE_HEIGHT), 0, 'f', 0);
+	else if (editor->_coord_type = 1)
+		position = QString("x: %1  y: %2").arg(static_cast<double>(evt->x() * 2 / TILE_WIDTH), 0, 'f', 0).arg(
+			static_cast<double>(evt->y() * 2 / TILE_HEIGHT), 0, 'f', 0);
+	else
+		position = QString("x: %1  y: %2").arg(evt->x() / static_cast<float>(TILE_WIDTH), 0, 'f', 1).arg(
 			evt->y() / static_cast<float>(TILE_HEIGHT), 0, 'f', 1);
 	editor->statusBar()->showMessage(position);
 
