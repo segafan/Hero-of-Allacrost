@@ -222,6 +222,8 @@ allacrost_SOURCES = \
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 
+bindir = ${prefix}/games
+datarootdir = ${prefix}/share/games
 datadirs = dat doc img mus snd txt
 find_filter = -name .svn -prune -o -name ".\#*" -o -type d
 find_datadirs = ( cd $(top_srcdir) && find $(datadirs) $(find_filter) -print )
