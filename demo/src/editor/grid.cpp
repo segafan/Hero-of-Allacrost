@@ -194,7 +194,6 @@ void Grid::CreateNewContext(int inherit_context)
 
 void Grid::LoadMap()
 {
-	char buffer[10];                // used to convert ints to strings
 	ReadScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
@@ -234,6 +233,43 @@ void Grid::LoadMap()
 
 	// Loading the tileset images using LoadMultiImage is done in editor.cpp in
 	// FileOpen via creation of the TilesetTable(s)
+
+	vector<int32> row_vect;
+	_lower_layer.push_back(row_vect);
+	_middle_layer.push_back(row_vect);
+	_upper_layer.push_back(row_vect);
+
+	read_data.OpenTable("lower_layer");
+	for (int32 i = 0; i < _height; i++)
+	{
+		read_data.ReadIntVector(i, vect);
+		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
+			_lower_layer.begin()->push_back(*it);
+		vect.clear();
+	} // iterate through the rows of the lower layer	
+	read_data.CloseTable();
+
+	row_vect.clear();
+	read_data.OpenTable("middle_layer");
+	for (int32 i = 0; i < _height; i++)
+	{
+		read_data.ReadIntVector(i, vect);
+		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
+			_middle_layer.begin()->push_back(*it);
+		vect.clear();
+	} // iterate through the rows of the middle layer
+	read_data.CloseTable();
+
+	row_vect.clear();
+	read_data.OpenTable("upper_layer");
+	for (int32 i = 0; i < _height; i++)
+	{
+		read_data.ReadIntVector(i, vect);
+		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
+			_upper_layer.begin()->push_back(*it);
+		vect.clear();
+	} // iterate through the rows of the upper layer
+	read_data.CloseTable();
 
 	// Load sprites
 	read_data.OpenTable("sprites");
@@ -320,28 +356,19 @@ void Grid::LoadMap()
 	}
 
 	// Load any existing context data
-	for (int i = 0; i < num_contexts; i++) {
-		if (i < 10)
-			sprintf(buffer, "context_0%d", i+1);
-		else
-			sprintf(buffer, "context_%d", i+1);
+	for (int i = 1; i < num_contexts; i++) {
+
+		std::stringstream context("context_");
+
+		if (i < 10) {
+			context << "0";
+		}
+		context << i;
 
 		// Initialize this context
-		if (i == 0)  // base context
-		{
-			vector<int> vect;
-			for (int k = 0; k < _width * _height; k++)
-				vect.push_back(-1);
-			_lower_layer.push_back(vect);
-			_middle_layer.push_back(vect);
-			_upper_layer.push_back(vect);
-		}
-		else
-		{
-			_lower_layer.push_back(_lower_layer[0]);
-			_middle_layer.push_back(_middle_layer[0]);
-			_upper_layer.push_back(_upper_layer[0]);
-		}
+		_lower_layer.push_back(_lower_layer[0]);
+		_middle_layer.push_back(_middle_layer[0]);
+		_upper_layer.push_back(_upper_layer[0]);
 
 		// Read the table corresponding to this context and modify each tile accordingly.
 		// The context table is an array of integer data. The size of this array should be divisible by four, as every consecutive group of four integers in
@@ -350,7 +377,7 @@ void Grid::LoadMap()
 		// So if the first four entries in the context table were {0, 12, 26, 180}, this would set the lower layer tile at position (12, 26) to the tile
 		// index 180.
 		vector<int32> context_data;
-		read_data.ReadIntVector(buffer, context_data);
+		read_data.ReadIntVector(context.str(), context_data);
 		for (int j = 0; j < static_cast<int>(context_data.size()); j += 4) {
 			switch (context_data[j]) {
 				case 0: // lower layer
@@ -373,6 +400,7 @@ void Grid::LoadMap()
 	} // iterate through all existing contexts
 
 	read_data.CloseTable();
+
 } // LoadMap()
 
 void Grid::SaveMap()
@@ -396,8 +424,6 @@ void Grid::SaveMap()
 	if (file.is_open()) {
 
 		// Get the positions of the begin and end markers.
-		before_pos = 0;
-		after_pos  = 0;
 		while(!file.eof()) {
 			file.clear();
 			before_pos = file.tellg();
@@ -598,12 +624,64 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("All existing contexts follow.");
+	write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
+	write_data.BeginTable("lower_layer");
+	vector<int32>::iterator it;    // used to iterate through the layers
+	vector<int32> layer_row;       // one row of a layer
+	it = _lower_layer[0].begin();
+	for (int row = 0; row < _height; row++)
+	{
+		for (int col = 0; col < _width; col++)
+		{
+			layer_row.push_back(*it);
+			it++;
+		} // iterate through the columns of the lower layer
+		sprintf(buffer, "%d", row);
+		write_data.WriteIntVector(buffer, layer_row);
+		layer_row.clear();
+	} // iterate through the rows of the lower layer
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
+	write_data.BeginTable("middle_layer");
+	it = _middle_layer[0].begin();
+	for (int row = 0; row < _height; row++)
+	{
+		for (int col = 0; col < _width; col++)
+		{
+			layer_row.push_back(*it);
+			it++;
+		} // iterate through the columns of the middle layer
+		sprintf(buffer, "%d", row);
+		write_data.WriteIntVector(buffer, layer_row);
+		layer_row.clear();
+	} // iterate through the rows of the middle layer
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
+	write_data.BeginTable("upper_layer");
+	it = _upper_layer[0].begin();
+	for (int row = 0; row < _height; row++)
+	{
+		for (int col = 0; col < _width; col++)
+		{
+			layer_row.push_back(*it);
+			it++;
+		} // iterate through the columns of the upper layer
+		sprintf(buffer, "%d", row);
+		write_data.WriteIntVector(buffer, layer_row);
+		layer_row.clear();
+	} // iterate through the rows of the upper layer
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	write_data.WriteComment("All, if any, existing contexts follow.");
 	vector<int32>::iterator base_it;  // used to iterate through the base layers
-	vector<int32>::iterator it;       // used to iterate through the other layers
 	vector<int32> context_data;  // one vector of ints contains all the context info
 	// Iterate through all contexts of all layers.
-	for (int i = 0; i < static_cast<int>(_lower_layer.size()); i++)
+	for (int i = 1; i < static_cast<int>(_lower_layer.size()); i++)
 	{
 		base_it = _lower_layer[0].begin();
 		it      = _lower_layer[i].begin();
@@ -611,7 +689,7 @@ void Grid::SaveMap()
 		{
 			for (int col = 0; col < _width; col++)
 			{
-				if (*it != *base_it || i == 0)
+				if (*it != *base_it)
 				{
 					context_data.push_back(0);    // lower layer = 0
 					context_data.push_back(row);
@@ -630,7 +708,7 @@ void Grid::SaveMap()
 		{
 			for (int col = 0; col < _width; col++)
 			{
-				if (*it != *base_it || i == 0)
+				if (*it != *base_it)
 				{
 					context_data.push_back(1);    // middle layer = 1
 					context_data.push_back(row);
@@ -649,7 +727,7 @@ void Grid::SaveMap()
 		{
 			for (int col = 0; col < _width; col++)
 			{
-				if (*it != *base_it || i == 0)
+				if (*it != *base_it)
 				{
 					context_data.push_back(2);    // upper layer = 2
 					context_data.push_back(row);
@@ -664,10 +742,10 @@ void Grid::SaveMap()
 
 		if (context_data.empty() == false)
 		{
-			if (i < 10)
-				sprintf(buffer, "context_0%d", i+1);
+			if (i < 11)
+				sprintf(buffer, "context_0%d", i);
 			else
-				sprintf(buffer, "context_%d", i+1);
+				sprintf(buffer, "context_%d", i);
 			write_data.WriteIntVector(buffer, context_data);
 			write_data.InsertNewLine();
 			context_data.clear();
