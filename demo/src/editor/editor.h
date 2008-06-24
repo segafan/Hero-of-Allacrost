@@ -138,6 +138,8 @@ class Editor: public QMainWindow
 		void _ViewToggleML();
 		void _ViewToggleUL();
 		void _ViewToggleOL();
+		void _ViewCoordTile();
+		void _ViewCoordCollision();
 		void _ViewTextures();
 		//@}
 
@@ -234,6 +236,8 @@ class Editor: public QMainWindow
 		QAction* _toggle_ml_action;
 		QAction* _toggle_ul_action;
 		QAction* _toggle_ol_action;
+		QAction* _coord_tile_action;
+		QAction* _coord_collision_action;
 		QAction* _view_textures_action;
 
 		QAction* _undo_action;
@@ -287,6 +291,8 @@ class Editor: public QMainWindow
 		bool _ul_on;
 		//! Object layer toggle view switch.
 		bool _ol_on;
+		//! Coordinate display type (0 = tile, 1 = collision, 2 = classic)
+		int32 _coord_type;
 		
 		//! The stack that contains the undo and redo operations.
 		QUndoStack* _undo_stack;
