@@ -146,9 +146,9 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 	for (uint32 i = 1; i < map_instance->_num_map_contexts; i++) {
 		MAP_CONTEXT this_context = static_cast<MAP_CONTEXT>(1 << i);
 		string context_name = "context_";
-		if (i < 11) // precede single digit context names with a zero
+		if (i < 10) // precede single digit context names with a zero
 			context_name += "0";
-		context_name += NumberToString(i + 1);
+		context_name += NumberToString(i);
 
 		// Initialize this context by making a cop of the #01 map context first, as most contexts re-use many of the same tiles from the 0th context
 		_tile_grid.insert(make_pair(this_context, _tile_grid[MAP_CONTEXT_01]));
