@@ -14,7 +14,6 @@
  *          where tiles are painted, edited, etc.
  *****************************************************************************/
 
-#include <sstream>
 #include <iostream>
 #include "grid.h"
 
@@ -356,14 +355,12 @@ void Grid::LoadMap()
 	}
 
 	// Load any existing context data
-	for (int i = 1; i < num_contexts; i++) {
-
-		std::stringstream context("context_");
-
-		if (i < 10) {
-			context << "0";
-		}
-		context << i;
+	for (int i = 1; i < num_contexts; i++)
+	{
+		QString context("context_");
+		if (i < 10)
+			context.append("0");
+		context.append(QString("%1").arg(i));
 
 		// Initialize this context
 		_lower_layer.push_back(_lower_layer[0]);
@@ -377,7 +374,7 @@ void Grid::LoadMap()
 		// So if the first four entries in the context table were {0, 12, 26, 180}, this would set the lower layer tile at position (12, 26) to the tile
 		// index 180.
 		vector<int32> context_data;
-		read_data.ReadIntVector(context.str(), context_data);
+		read_data.ReadIntVector(context.toStdString(), context_data);
 		for (int j = 0; j < static_cast<int>(context_data.size()); j += 4) {
 			switch (context_data[j]) {
 				case 0: // lower layer
@@ -400,7 +397,6 @@ void Grid::LoadMap()
 	} // iterate through all existing contexts
 
 	read_data.CloseTable();
-
 } // LoadMap()
 
 void Grid::SaveMap()
@@ -614,10 +610,8 @@ void Grid::SaveMap()
 			} // iterate through the columns of the layers
 		} // iterate through each context
 
-		sprintf(buffer, "%d", row*2);
-		write_data.WriteIntVector(buffer, map_row_north);
-		sprintf(buffer, "%d", row*2+1);
-		write_data.WriteIntVector(buffer, map_row_south);
+		write_data.WriteIntVector(row*2,   map_row_north);
+		write_data.WriteIntVector(row*2+1, map_row_south);
 		map_row_north.assign(_width*2, 0);
 		map_row_south.assign(_width*2, 0);
 	} // iterate through the rows of the layers
@@ -636,8 +630,7 @@ void Grid::SaveMap()
 			layer_row.push_back(*it);
 			it++;
 		} // iterate through the columns of the lower layer
-		sprintf(buffer, "%d", row);
-		write_data.WriteIntVector(buffer, layer_row);
+		write_data.WriteIntVector(row, layer_row);
 		layer_row.clear();
 	} // iterate through the rows of the lower layer
 	write_data.EndTable();
@@ -653,8 +646,7 @@ void Grid::SaveMap()
 			layer_row.push_back(*it);
 			it++;
 		} // iterate through the columns of the middle layer
-		sprintf(buffer, "%d", row);
-		write_data.WriteIntVector(buffer, layer_row);
+		write_data.WriteIntVector(row, layer_row);
 		layer_row.clear();
 	} // iterate through the rows of the middle layer
 	write_data.EndTable();
@@ -670,8 +662,7 @@ void Grid::SaveMap()
 			layer_row.push_back(*it);
 			it++;
 		} // iterate through the columns of the upper layer
-		sprintf(buffer, "%d", row);
-		write_data.WriteIntVector(buffer, layer_row);
+		write_data.WriteIntVector(row, layer_row);
 		layer_row.clear();
 	} // iterate through the rows of the upper layer
 	write_data.EndTable();
@@ -742,11 +733,12 @@ void Grid::SaveMap()
 
 		if (context_data.empty() == false)
 		{
-			if (i < 11)
-				sprintf(buffer, "context_0%d", i);
-			else
-				sprintf(buffer, "context_%d", i);
-			write_data.WriteIntVector(buffer, context_data);
+			QString context("context_");
+			if (i < 10)
+				context.append("0");
+			context.append(QString("%1").arg(i));
+
+			write_data.WriteIntVector(context.toStdString(), context_data);
 			write_data.InsertNewLine();
 			context_data.clear();
 		} // write the vector if it has data in it
