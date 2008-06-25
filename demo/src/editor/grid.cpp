@@ -358,7 +358,7 @@ void Grid::LoadMap()
 	// Load any existing context data
 	for (int i = 1; i < num_contexts; i++)
 	{
-		std::stringstream context;
+		stringstream context;
 		context << "context_";
 		if (i < 10)
 			context << "0";
@@ -735,12 +735,13 @@ void Grid::SaveMap()
 
 		if (context_data.empty() == false)
 		{
-			QString context("context_");
+			stringstream context;
+			context << "context_";
 			if (i < 10)
-				context.append("0");
-			context.append(QString("%1").arg(i));
+				context << "0";
+			context << i;
 
-			write_data.WriteIntVector(context.toStdString(), context_data);
+			write_data.WriteIntVector(context.str(), context_data);
 			write_data.InsertNewLine();
 			context_data.clear();
 		} // write the vector if it has data in it
