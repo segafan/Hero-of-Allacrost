@@ -157,6 +157,7 @@ bool Tileset::Load(const QString& name)
 					walkability[i * 16 + j] = vect;
 				vect.clear();
 			} // iterate through all tiles in a row
+			read_data.CloseTable();
 		} // iterate through all rows of the walkability table
 		read_data.CloseTable();
 	} // make sure table exists first
