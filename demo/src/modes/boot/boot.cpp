@@ -50,6 +50,7 @@ bool BOOT_DEBUG = false;
 // Initialize static members here
 bool BootMode::_logo_animating = true;
 
+ReadScriptDescriptor global;
 
 // ****************************************************************************
 // *************************** GENERAL FUNCTIONS ******************************
@@ -657,11 +658,7 @@ void BootMode::_SetupResolutionMenu() {
 void BootMode::_OnNewGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
 
-	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
-	//GlobalManager->AddCharacter(GLOBAL_CHARACTER_LAILA);
-	GlobalManager->AddToInventory(1, 2);
-	GlobalManager->SetDrunes(250);
-	GlobalManager->SetLocation(MakeUnicodeString("dat/maps/demo_town.lua"));
+	ScriptCallFunction<void>(global.GetLuaState(), "NewGame");
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1000); // Fade to black over the course of one second
@@ -706,7 +703,7 @@ void BootMode::_OnQuit()
 // Battle debug confirmed
 void BootMode::_OnBattleDebug() {
 	ModeManager->Pop();
-	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
+	GlobalManager->AddCharacter(1);
 	BattleMode *BM = new BattleMode();
 	BM->AddEnemy(1);
 	//BM->AddEnemy(1);
@@ -716,7 +713,7 @@ void BootMode::_OnBattleDebug() {
 // Menu debug confirmed
 void BootMode::_OnMenuDebug() {
 	ModeManager->Pop();
-	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
+	GlobalManager->AddCharacter(1);
 	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("The Boot Screen"), "img/menus/locations/desert_cave.png");
 	ModeManager->Push(MM);
 }

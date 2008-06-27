@@ -31,7 +31,7 @@ armor[20001] = {
 	physical_defense = 6,
 	metaphysical_defense = 2,
 	standard_price = 80,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	usable_by = CLAUDIUS,
 	slots = 0
 }
 
@@ -42,7 +42,7 @@ armor[20002] = {
 	physical_defense = 8,
 	metaphysical_defense = 4,
 	standard_price = 140,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	usable_by = CLAUDIUS,
 	slots = 0
 }
 
@@ -57,7 +57,7 @@ armor[20501] = {
 	physical_defense = 2,
 	metaphysical_defense = 4,
 	standard_price = 60,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	usable_by = LAILA,
 	slots = 0
 }
 
@@ -68,6 +68,6 @@ armor[20502] = {
 	physical_defense = 5,
 	metaphysical_defense = 10,
 	standard_price = 140,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	usable_by = LAILA,
 	slots = 0
 }

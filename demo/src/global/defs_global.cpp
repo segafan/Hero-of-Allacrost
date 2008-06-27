@@ -61,13 +61,12 @@ void BindGlobalsToLua()
 			.def("GetEventValue", &GameGlobal::GetEventValue)
 			.def("GetNumberEventGroups", &GameGlobal::GetNumberEventGroups)
 			.def("GetNumberEvents", &GameGlobal::GetNumberEvents)
+			.def("SetLocation", (void(GameGlobal::*)(const std::string&)) &GameGlobal::SetLocation)
 
 			// Namespace constants
 			.enum_("constants") [
 				// Character type constants
 				value("GLOBAL_CHARACTER_INVALID", GLOBAL_CHARACTER_INVALID),
-				value("GLOBAL_CHARACTER_CLAUDIUS", GLOBAL_CHARACTER_CLAUDIUS),
-				value("GLOBAL_CHARACTER_LAILA", GLOBAL_CHARACTER_LAILA),
 				value("GLOBAL_CHARACTER_ALL", GLOBAL_CHARACTER_ALL),
 				// Object type constants
 				value("GLOBAL_OBJECT_INVALID", GLOBAL_OBJECT_INVALID),

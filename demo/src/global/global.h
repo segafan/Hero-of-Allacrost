@@ -367,6 +367,12 @@ public:
 	**/
 	void SetLocation(const hoa_utils::ustring& location_name)
 		{ _location_name = location_name; }
+		
+	/** \brief Sets the location
+	*** \param location_name The string that contains the name of the current map
+	**/
+	void SetLocation(const std::string& location_name)
+		{ _location_name = hoa_utils::MakeUnicodeString(location_name); }
 
 	/** \brief Saves all global data to a saved game file
 	*** \param filename The filename of the saved game file where to write the data to

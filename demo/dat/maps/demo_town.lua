@@ -908,8 +908,8 @@ end
 map_functions[1] = function()
 	if (map._map_event_group:DoesEventExist("laila_joined") == false) then
 		map._map_event_group:AddNewEvent("laila_joined", 1);
-		GlobalManager:AddCharacter(hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA);
-	end	
+		GlobalManager:AddCharacter(LAILA);
+	end
 
 	laila:SetVisible(false);
 	laila:SetNoCollision(true);

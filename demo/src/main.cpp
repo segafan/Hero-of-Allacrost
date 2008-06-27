@@ -222,6 +222,7 @@ void InitializeEngine() throw (Exception) {
 	hoa_defs::BindEngineToLua();
 	hoa_defs::BindGlobalsToLua();
 	hoa_defs::BindModesToLua();
+	hoa_boot::global.OpenFile("dat/global.lua");
 
 	if (SystemManager->SingletonInitialize() == false) {
 		throw Exception("ERROR: unable to initialize SystemManager", __FILE__, __LINE__, __FUNCTION__);
@@ -378,5 +379,6 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	global.CloseFile();
 	return EXIT_SUCCESS;
 } // int main(int argc, char *argv[])
