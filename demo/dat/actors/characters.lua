@@ -9,7 +9,7 @@
 -- All character definitions are stored in this table
 characters = {}
 
-characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
+characters[CLAUDIUS] = {
 	name = "Claudius",
 	filename = "claudius",
 
@@ -90,11 +90,11 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 	},
 
 	skills = { [1] = 1, [2] = 2 }
-} -- characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS]
+} -- characters[CLAUDIUS]
 
 
 
-characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
+characters[LAILA] = {
 	name = "Laila",
 	filename = "laila",
 
@@ -175,7 +175,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 	},
 
 	skills = { [1] = 3, [3] = 20001 }
-} -- characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA]
+} -- characters[LAILA]
 
 
 ------------------------------------------------------------------------------[[

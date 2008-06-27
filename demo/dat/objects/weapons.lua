@@ -31,7 +31,7 @@ weapons[10001] = {
 	physical_attack = 12,
 	metaphysical_attack = 0,
 	standard_price = 120,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	usable_by = CLAUDIUS,
 	slots = 0
 }
 
@@ -42,7 +42,7 @@ weapons[10002] = {
 	physical_attack = 16,
 	metaphysical_attack = 0,
 	standard_price = 250,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	usable_by = CLAUDIUS,
 	slots = 0
 }
 
@@ -57,7 +57,7 @@ weapons[10501] = {
 	physical_attack = 9,
 	metaphysical_attack = 0,
 	standard_price = 100,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	usable_by = LAILA,
 	slots = 0
 }
 
@@ -68,7 +68,7 @@ weapons[10502] = {
 	physical_attack = 13,
 	metaphysical_attack = 0,
 	standard_price = 140,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	usable_by = LAILA,
 	slots = 0
 }
 
@@ -79,7 +79,7 @@ weapons[10503] = {
 	physical_attack = 17,
 	metaphysical_attack = 0,
 	standard_price = 290,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	usable_by = LAILA,
 	slots = 0
 }
 
@@ -90,6 +90,6 @@ weapons[10504] = {
 	physical_attack = 21,
 	metaphysical_attack = 0,
 	standard_price = 440,
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA,
+	usable_by = LAILA,
 	slots = 0
 }
