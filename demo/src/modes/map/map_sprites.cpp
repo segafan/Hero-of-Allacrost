@@ -127,6 +127,12 @@ void VirtualSprite::UpdateActiveDialogue() {
 	has_active_dialogue = false;
 }
 
+void VirtualSprite::ClearDialogues() {
+	for (size_t i = 0; i < dialogues.size(); i++)
+		delete dialogues[i];
+		
+	dialogues.clear();
+}
 
 
 uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
