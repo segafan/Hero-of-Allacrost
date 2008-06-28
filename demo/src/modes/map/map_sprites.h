@@ -266,9 +266,13 @@ public:
 	void SetDialogue(const int16 dialogue)
 		{ if (static_cast<uint16>(dialogue) >= dialogues.size()) return; else _current_dialogue = dialogue; }
 
-	void NextDialogue()
-		{ do { _current_dialogue++; if (static_cast<uint16>(_current_dialogue) >= dialogues.size()) _current_dialogue = 0; }
-			while (dialogues[_current_dialogue]->IsActive() == false); }
+	void NextDialogue() {
+		do {
+			_current_dialogue++;
+			if (static_cast<uint16>(_current_dialogue) >= dialogues.size())
+				_current_dialogue = 0;
+		} while (dialogues[_current_dialogue]->IsActive() == false);
+	}
 
 	int16 GetNumDialogues() const
 		{ return dialogues.size(); }
@@ -279,6 +283,11 @@ public:
 	bool IsShowingDialogueIcon() const
 		{ return _show_dialogue_icon; }
 	//@}
+
+	/** \brief Clears all of this sprites dialogues. Note that this will affect the saved game's
+	*** "s_d??" events.
+	**/
+	void ClearDialogues();
 
 	/** \brief Adds a new action for the sprite to process onto the end of the sprite's action list
 	*** \param act A pointer to the instantiated SpriteAction object to use

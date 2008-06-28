@@ -244,7 +244,8 @@ void Editor::_FileNew()
 					new_map_progress->setValue(checked_items++);
 					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
-					_ed_scrollview->_map->tilesets.push_back(a_tileset);					
+					_ed_scrollview->_map->tilesets.push_back(a_tileset);
+					_ed_scrollview->_map->tileset_names.push_back(a_tileset->tileset_name);
 				} // tileset must be checked
 			} // iterate through all possible tilesets
 			new_map_progress->setValue(checked_items);
@@ -1604,7 +1605,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 	if (editor->_coord_type == 0)
 		position = QString("x: %1  y: %2").arg(static_cast<double>(evt->x() / TILE_WIDTH), 0, 'f', 0).arg(
 			static_cast<double>(evt->y() / TILE_HEIGHT), 0, 'f', 0);
-	else if (editor->_coord_type = 1)
+	else if (editor->_coord_type == 1)
 		position = QString("x: %1  y: %2").arg(static_cast<double>(evt->x() * 2 / TILE_WIDTH), 0, 'f', 0).arg(
 			static_cast<double>(evt->y() * 2 / TILE_HEIGHT), 0, 'f', 0);
 	else
