@@ -18,17 +18,13 @@
 #ifdef _WIN32
 	#include <direct.h>
 	#include <shlobj.h>
-	#include <libintl.h>
 #else
 	#include <dirent.h>
 	#include <sys/types.h>
 	#include <pwd.h>
 #endif
 
-#ifdef __MACH__
-	#include <libintl.h>
-#endif
-
+#include <libintl.h>
 #include <fstream>
 #include <sys/stat.h>
 
