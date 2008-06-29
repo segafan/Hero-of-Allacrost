@@ -16,12 +16,9 @@
 
 #ifdef _WIN32
 	#include <direct.h>
-	#include <libintl.h>
 #endif
 
-#ifdef __MACH__
-	#include <libintl.h>
-#endif
+#include <libintl.h>
 
 #include "system.h"
 #include "audio.h"
