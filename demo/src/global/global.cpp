@@ -112,6 +112,9 @@ GameGlobal::~GameGlobal() {
 	_attack_skills_script.CloseFile();
 	_defend_skills_script.CloseFile();
 	_support_skills_script.CloseFile();
+
+	if (GLOBAL_DEBUG)
+		cout << "GLOBAL: GameGlobal destructor completed" << endl;
 }
 
 
@@ -147,6 +150,11 @@ bool GameGlobal::SingletonInitialize() {
 		return false;
 	}
 	_leg_armor_script.OpenTable("armor");
+
+	if (_effects_script.OpenFile("dat/effects/status.lua") == false) {
+		return false;
+	}
+	_effects_script.OpenTable("status_effects");
 
 	if (_attack_skills_script.OpenFile("dat/skills/attack.lua") == false) {
 		return false;

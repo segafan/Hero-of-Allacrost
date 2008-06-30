@@ -391,6 +391,7 @@ void MapMode::_HandleInputExplore() {
 
 // Determines things like our starting tiles
 void MapMode::_CalculateDrawInfo() {
+	// FIXME
 	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
 	// THIS CODE IS TEMPORARY AND NOT COMPLETELY WORKING
 

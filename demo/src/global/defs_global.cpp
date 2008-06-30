@@ -200,6 +200,7 @@ void BindGlobalsToLua()
 	[
 		class_<GlobalCharacter, GlobalActor>("GlobalCharacter")
 			.def("GetGrowth", &GlobalCharacter::GetGrowth)
+			.def("AddStrength", &GlobalCharacter::AddStrength)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")

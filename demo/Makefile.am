@@ -110,6 +110,8 @@ global_SOURCES = \
 	$(GLOBAL_DIR)/global.h \
 	$(GLOBAL_DIR)/global_actors.cpp \
 	$(GLOBAL_DIR)/global_actors.h \
+	$(GLOBAL_DIR)/global_effects.cpp \
+	$(GLOBAL_DIR)/global_effects.h \
 	$(GLOBAL_DIR)/global_objects.cpp \
 	$(GLOBAL_DIR)/global_objects.h \
 	$(GLOBAL_DIR)/global_skills.cpp \

@@ -24,75 +24,9 @@ using namespace hoa_video;
 using namespace hoa_script;
 
 
-
 namespace hoa_global {
 
 using namespace private_global;
-
-// -----------------------------------------------------------------------------
-// GlobalElementalEffect class
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-// GlobalStatusEffect class
-// -----------------------------------------------------------------------------
-
-bool GlobalStatusEffect::IncrementIntensity(uint8 amount) {
-	// Intensity can not be increased beyond the upper bound "extreme"
-	if (_intensity == GLOBAL_INTENSITY_POS_EXTREME) {
-		return false;
-	}
-
-	if (amount == 0) {
-		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: passed 0 for amount argument to increase intensity of status effect\n");
-		return false;
-	}
-
-	if (amount < 10) {
-		// _intensity += amount;
-		if (_intensity > GLOBAL_INTENSITY_POS_EXTREME) {
-			_intensity = GLOBAL_INTENSITY_POS_EXTREME;
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-	// This is done to protect against the possibility of an overflow condition
-	else {
-		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: amount argument was > 10 to increase intensity of status effect\n");
-
-		if (_intensity != GLOBAL_INTENSITY_POS_EXTREME) {
-			_intensity = GLOBAL_INTENSITY_POS_EXTREME;
-		}
-		return false;
-	}
-} // bool GlobalStatusEffect::IncrementIntensity(uint8 amount)
-
-
-
-bool GlobalStatusEffect::DecrementIntensity(uint8 amount) {
-	if (_intensity == GLOBAL_INTENSITY_INVALID) {
-		return false;
-	}
-
-	if (amount == 0) {
-		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: passed 0 for amount argument to decrease intensity of status effect\n");
-		return false;
-	}
-
-	if (amount <= _intensity) {
-		// _intensity -= amount;
-		return true;
-	}
-	// This is done to protect against the possibility of an overflow condition
-	else {
-		if (_intensity != GLOBAL_INTENSITY_NEUTRAL) {
-			_intensity = GLOBAL_INTENSITY_NEUTRAL;
-		}
-		return false;
-	}
-} // bool GlobalStatusEffect::DecrementIntensity(uint8 amount)
 
 // -----------------------------------------------------------------------------
 // GlobalSkill class
