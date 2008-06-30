@@ -54,6 +54,39 @@ skills[2] = {
 }
 
 skills[3] = {
+	name = "Power Up",
+	description = "Increase strength.",
+	sp_required = 3,
+	warmup_time = 1200,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
+	target_ally = true,
+
+	BattleExecute = function(target, instigator)
+		target:AddNewEffect(1);
+		AudioManager:PlaySound("snd/rumble.wav");
+	end
+}
+
+skills[4] = {
+	name = "Forward Thrust",
+	description = "A quick and daring thrust into an opponent's flesh.",
+	sp_required = 2,
+	warmup_time = 1200,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
+		--If the random float is bigger, then we landed the hit
+		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 10 - target:GetPhysicalDefense());
+		end
+		AudioManager:PlaySound("snd/sword_swipe.wav");
+	end
+}
+
+skills[11] = {
 	name = "Quick Shot",
 	description = "A quick but weak crossbow attack.",
 	sp_required = 0,

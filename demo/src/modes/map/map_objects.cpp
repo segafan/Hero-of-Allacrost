@@ -345,7 +345,9 @@ void ObjectManager::SortObjects(){
 void ObjectManager::DrawGroundObjects(const MapFrame* const frame, const bool second_pass) {
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		if (_ground_objects[i]->draw_on_second_pass == second_pass) {
-			_ground_objects[i]->Draw();
+			if (_ground_objects[i]->context == MapMode::_current_map->_current_context) {
+				_ground_objects[i]->Draw();
+			}
 		}
 	}
 
@@ -355,7 +357,9 @@ void ObjectManager::DrawGroundObjects(const MapFrame* const frame, const bool se
 
 void ObjectManager::DrawPassObjects(const MapFrame* const frame) {
 	for (uint32 i = 0; i < _pass_objects.size(); i++) {
-		_pass_objects[i]->Draw();
+		if (_ground_objects[i]->context == MapMode::_current_map->_current_context) {
+			_pass_objects[i]->Draw();
+		}
 	}
 }
 

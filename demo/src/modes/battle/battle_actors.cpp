@@ -49,7 +49,8 @@ BattleActor::BattleActor(GlobalActor* actor, float x_origin, float y_origin) :
 	_x_origin(x_origin),
 	_y_origin(y_origin),
 	_x_location(x_origin),
-	_y_location(y_origin)
+	_y_location(y_origin),
+	_actor_effects()
 	//_total_time_damaged(0),
 	//_damage_dealt(0)
 {
@@ -101,8 +102,9 @@ float BattleActor::GetCombatEvade() {
 	return GetActor()->GetEvade();
 }
 
-uint32 BattleActor::GetCombatAgility()
-{ return GetActor()->GetAgility(); }
+uint32 BattleActor::GetCombatAgility() {
+	return GetActor()->GetAgility();
+}
 
 
 
@@ -163,8 +165,18 @@ void BattleActor::TakeDamage(int32 damage) {
 	}
 }
 
-void BattleActor::AddHitPoints(int32 hp)
-{
+void BattleActor::AddEffect(hoa_global::GlobalStatusEffect* new_effect) {
+	_actor_effects.push_back(new_effect);
+	ScriptObject* init = new_effect->GetInitFunction();
+	ScriptCallFunction<void>(*init, this);
+}
+
+void BattleActor::AddNewEffect(int id) {
+	hoa_global::GlobalStatusEffect* new_effect = new hoa_global::GlobalStatusEffect(id);
+	AddEffect(new_effect);
+}
+
+void BattleActor::AddHitPoints(int32 hp) {
 	if (hp < 0)
 		return;
 
@@ -188,11 +200,18 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, flo
 		cerr << "Unable to load stamina icon for " << character->GetFilename() << endl;
 
 	_state = ACTOR_IDLE;
+
+//	AddEffect(new GlobalStatusEffect(1));
+//	ScriptObject* init = _actor_effects[_actor_effects.size() - 1]->GetInitFunction();
+//	ScriptCallFunction<void>(*init, character);
 } // BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin)
 
 
 
 BattleCharacter::~BattleCharacter() {
+	for (uint8 counter = 0; counter < _actor_effects.size(); counter++) {
+		delete _actor_effects[counter];
+	}
 }
 
 
@@ -386,7 +405,7 @@ BattleEnemy::BattleEnemy(GlobalEnemy* enemy, float x_origin, float y_origin) :
 	BattleActor(enemy, x_origin, y_origin)
 {
 	if (_stamina_icon.Load("img/icons/actors/enemies/" + _actor->GetFilename() + ".png", 45, 45) == false)
-		cerr << "oh noes" << endl;
+		cerr << "ERROR: In BattleEnemy constructor" << endl;
 
 	_state = ACTOR_IDLE;
 }

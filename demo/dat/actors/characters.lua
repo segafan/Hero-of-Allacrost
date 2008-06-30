@@ -89,7 +89,7 @@ characters[CLAUDIUS] = {
 		}
 	},
 
-	skills = { [1] = 1, [2] = 2 }
+	skills = { [1] = 1, [2] = 2, [3] = 3, [4] = 4 }
 } -- characters[CLAUDIUS]
 
 
@@ -174,7 +174,7 @@ characters[LAILA] = {
 		}
 	},
 
-	skills = { [1] = 3, [3] = 20001 }
+	skills = { [1] = 11, [3] = 20001 }
 } -- characters[LAILA]
 
 

@@ -26,6 +26,7 @@
 
 #include "global_skills.h"
 #include "global_actors.h"
+#include "global_effects.h"
 
 namespace hoa_battle {
 
@@ -63,74 +64,6 @@ const float STAMINA_LOCATION_READY = STAMINA_LOCATION_SELECT + 100.0f;
 //! The top of the stamina bar
 const float STAMINA_LOCATION_TOP    = STAMINA_LOCATION_SELECT + 100.0f;
 //@}
-
-/** ****************************************************************************
-*** \brief Represents postive and negative afflictions that affect actors in battle
-***
-*** \note This class is place holder code right now and is not used. It will be
-*** fleshed out at a later time.
-*** ***************************************************************************/
-class BattleActorEffect {
-public:
-	BattleActorEffect(private_battle::BattleActor* const host)
-		{}
-
-	virtual ~BattleActorEffect()
-		{}
-
-	//! \brief Updates the effect's timer and other status
-	void Update()
-		{}
-
-	//! \brief Removes the effect from its host
-	void CureEffect() const
-		{}
-
-	//! \name BattleActorEffect class member access functionss
-	//@{
-	BattleActor* const GetHost() const
-		{ return _host; }
-
-	hoa_utils::ustring GetEffectName() const
-		{ return _effect_name; }
-
-	const int32 GetModifiedHealthPoints() const
-		{ return _health_points_modifier; }
-
-	const int32 GetModifiedSkillPoints() const
-		{ return _skill_points_modifier; }
-
-	const int32 GetModifiedStrength() const
-		{ return _strength_modifier; }
-
-	const int32 GetModifiedAgility() const
-		{ return _agility_modifier; }
-	//@}
-
-private:
-	//! \brief A pointer to the actor that the effect is afflicting
-	private_battle::BattleActor* _host;
-
-	//! \brief The name of the effect
-	hoa_utils::ustring _effect_name;
-
-	//! \brief The number of milliseconds remaining until the effect is removed
-	uint32 _time_till_expiration;
-
-	//! \brief Enum value to determine the strength of the effect
-	hoa_global::GLOBAL_INTENSITY _intensity;
-
-	/** \name Status modification members
-	*** \brief Members which modifies various properties of the host's status
-	**/
-	//@{
-	int32 _health_points_modifier;
-	int32 _skill_points_modifier;
-	int32 _strength_modifier;
-	int32 _agility_modifier;
-	//@}
-}; // class BattleActorEffect
-
 
 /** ****************************************************************************
 *** \brief An abstract class for representing an acting entity in the battle
@@ -208,6 +141,9 @@ public:
 	float GetStaminaIconLocation()
 		{ return _stamina_icon_location; }
 
+	std::vector<hoa_global::GlobalStatusEffect*> GetActorEffects()
+		{ return _actor_effects; }
+
 	hoa_system::SystemTimer* GetWaitTime()
 		{ return &_wait_time; }
 
@@ -233,8 +169,15 @@ public:
 		{ _stamina_icon_location = location; }
 	//@}
 
-	//! \brief Restores some the given hp to the actor
+	//! \brief Adds a battle effect to the actor's vector
+	void AddEffect(hoa_global::GlobalStatusEffect* new_effect);
+
+	//! \brief Adds a battle effect to the actor's vector
+	void AddNewEffect(int id);
+
+	//! \brief Affect stat modifiers
 	void AddHitPoints(int32 hp);
+	void AddStrength(int32 str)	{_actor->AddStrength(str);}
 
 	//! \brief Resets the attack timer for the animation
 	void TEMP_ResetAttackTimer();
@@ -284,6 +227,9 @@ protected:
 
 	//! \brief Recalculates wait time if agility has changed	
 	void _RecalculateWaitTime();
+
+	//! \brief Contains this actor's battle effects
+	std::vector<hoa_global::GlobalStatusEffect*> _actor_effects;
 }; // class BattleActor
 
 

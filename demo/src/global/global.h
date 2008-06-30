@@ -29,6 +29,7 @@
 
 #include "global_objects.h"
 #include "global_actors.h"
+#include "global_effects.h"
 #include "global_skills.h"
 
 //! \brief All calls to global code are wrapped in this namespace.
@@ -150,6 +151,7 @@ class GameGlobal : public hoa_utils::Singleton<GameGlobal> {
 	friend class GlobalWeapon;
 	friend class GlobalArmor;
 	friend class GlobalSkill;
+	friend class GlobalStatusEffect;
 
 public:
 	~GameGlobal();
@@ -496,6 +498,7 @@ private:
 	hoa_script::ReadScriptDescriptor _leg_armor_script;
 	// hoa_script::ReadScriptDescriptor _shard_script;
 	// hoa_script::ReadScriptDescriptor _key_items_script;
+	hoa_script::ReadScriptDescriptor _effects_script;
 	hoa_script::ReadScriptDescriptor _attack_skills_script;
 	hoa_script::ReadScriptDescriptor _defend_skills_script;
 	hoa_script::ReadScriptDescriptor _support_skills_script;

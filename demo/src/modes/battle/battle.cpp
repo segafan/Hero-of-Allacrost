@@ -120,6 +120,7 @@ BattleMode::BattleMode() :
 		cerr << "BATTLE ERROR: Failed to load swap card: " << endl;
 
 // 	_action_window;// = new ActionWindow();
+	// FIXME: Get rid of this!!!
 	_TEMP_LoadTestData();
 } // BattleMode::BattleMode()
 
@@ -193,6 +194,9 @@ void BattleMode::Reset() {
 	}
 
 	UnFreezeTimers();
+
+	if (BATTLE_DEBUG)
+		cout << "BATTLE: BattleMode Reset() completed" << endl;
 } // void BattleMode::Reset()
 
 

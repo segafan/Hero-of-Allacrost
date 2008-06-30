@@ -27,6 +27,7 @@
 #include "script.h"
 
 #include "global_actors.h"
+#include "global_effects.h"
 
 namespace hoa_global {
 

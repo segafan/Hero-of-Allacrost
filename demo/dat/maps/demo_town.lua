@@ -765,9 +765,9 @@ function Load(m)
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Female Merchant"));
 	sprite:SetObjectID(9);
-	sprite:SetContext(1);
-	sprite:SetXPosition(70, 0.5);
-	sprite:SetYPosition(60, 0.5);
+	sprite:SetContext(2);
+	sprite:SetXPosition(85, 0.5);
+	sprite:SetYPosition(50, 0.5);
 	sprite:SetCollHalfWidth(0.95);
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
