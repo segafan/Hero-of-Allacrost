@@ -16,50 +16,17 @@
 
 #include "tileset.h"
 
+using namespace std;
 using namespace hoa_video;
 using namespace hoa_script;
-using namespace hoa_editor;
-using namespace std;
 
 
+namespace hoa_editor
+{
 
-Tileset::Tileset(QWidget* parent) :
-	owner(parent),
+Tileset::Tileset() :
 	tileset_name("")
-{
-	// Set up the table.
-	table = new Q3Table(16, 16);
-	table->setReadOnly(true);
-	table->setShowGrid(false);
-	table->setSelectionMode(Q3Table::Multi);
-	table->setTopMargin(0);
-	table->setLeftMargin(0);
-	for (int i = 0; i < table->numRows(); i++)
-		table->setRowHeight(i, TILE_HEIGHT);
-	for (int i = 0; i < table->numCols(); i++)
-		table->setColumnWidth(i, TILE_WIDTH);
-}
-
-
-
-Tileset::Tileset(QWidget* parent, const QString& name) :
-	owner(parent),
-	tileset_name(name)
-{
-	// Set up the table.
-	table = new Q3Table(16, 16);
-	table->setReadOnly(true);
-	table->setShowGrid(false);
-	table->setSelectionMode(Q3Table::Multi);
-	table->setTopMargin(0);
-	table->setLeftMargin(0);
-	for (int i = 0; i < table->numRows(); i++)
-		table->setRowHeight(i, TILE_HEIGHT);
-	for (int i = 0; i < table->numCols(); i++)
-		table->setColumnWidth(i, TILE_WIDTH);
-
-	Load(name);
-}
+{}
 
 
 
@@ -68,68 +35,29 @@ Tileset::~Tileset()
 	for (std::vector<hoa_video::StillImage>::iterator it = tiles.begin(); it != tiles.end(); it++)
 		 (*it).Clear();
 	tiles.clear();
-	delete table;
-} // Tileset::~Tileset()
+}
 
 
 
-bool Tileset::Load(const QString& name)
+bool Tileset::Load(const QString& set_name)
 {
-	// Create filename from name.
-	QString img_filename = QString("img/tilesets/" + name + ".png");
-	QString dat_filename = QString("dat/tilesets/" + name + ".lua");
+	tileset_name = set_name;
 
-	// Load the tileset image.
+	// Create filenames from the tileset name
+	QString img_filename = QString("img/tilesets/" + set_name + ".png");
+	QString dat_filename = QString("dat/tilesets/" + set_name + ".lua");
+
+	// Prepare the tile vector and load the tileset image
 	tiles.resize(256);
-	for (int i = 0; i < 256; i++)
+	for (uint32 i = 0; i < 256; i++)
 		tiles[i].SetDimensions(1.0f, 1.0f);
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false)
 		qDebug("LoadMultiImage failed to load tileset " + img_filename);
 
-//	table = new QTableWidget(16, 16);
-//	table->verticalHeader()->hide();
-//	table->horizontalHeader()->hide();
-//	for (int i = 0; i < table->rowCount(); i++)
-//		table->verticalHeader()->resizeSection(i, TILE_HEIGHT);
-//	for (int i = 0; i < table->columnCount(); i++)
-//		table->horizontalHeader()->resizeSection(i, TILE_WIDTH);
-
-	// Read in tiles and create table items.
-	// FIXME: this is one ugly hack. It loads each individual tile's image and puts it into a table. But each
-	// tile's image only exists together with a bunch of other tiles in a tileset image. So we have to split them
-	// up. Qt has no built-in function to split a big image into little ones. This image information has already
-	// been loaded by the above call to LoadMultiImageFromElementGrid(...). If we could somehow take that info
-	// and put it into a Qt table, that would be ideal.
-	// This piece of code is what takes so long for the editor to load a tileset.
-	// <<FIXED>>: The ugly hack has been fixed, I use the QImage to handle directly to the bits, it's much faster.
-	// Contact me if there's any problem with this fix, eguitarz (dalema22@gmail.com)
-	QRect rectangle;
-	QImage entire_tileset;
-	entire_tileset.load(img_filename, "png");
-	for (int row = 0; row < 16; row++)
-	{
-		for (int col = 0; col < 16; col++)
-		{
-			rectangle.setRect(col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
-			QVariant variant = entire_tileset.copy(rectangle);
-			if (!variant.isNull())
-			{
-				QPixmap tile_pixmap = variant.value<QPixmap>();
-				table->setPixmap(row, col, tile_pixmap);
-// Uncomment below for QTableWidget/View, comment out avove
-//				QTableWidgetItem* tile = new QTableWidgetItem();
-//				tile->setData(Qt::DecorationRole, variant);
-//				table->setItem(row, col, tile);
-			} // image of the tile must not be null
-			else
-				qDebug(QString("%1").arg("Image loading error!!"));
-		} // iterate through the columns of the tileset
-	} // iterate through the rows of the tileset
-
 	// Set up for reading the tileset definition file.
 	ReadScriptDescriptor read_data;
 	if (read_data.OpenFile(string(dat_filename.toAscii())) == false)
-		QMessageBox::warning(owner, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(dat_filename));
+		return false;
 
 	read_data.OpenTable(string(tileset_name.toAscii()));
 
@@ -206,8 +134,8 @@ bool Tileset::Load(const QString& name)
 } // bool Tileset::Load(const QString& name)
 
 
-
-/*void Tileset::Save() {
+/*
+void Tileset::Save() {
 	string dat_filename = "dat/tilesets/" + string(tileset_name.toAscii()) + ".lua";
 	string img_filename = "img/tilesets/" + string(tileset_name.toAscii()) + ".png";
 	WriteScriptDescriptor write_data;
@@ -245,4 +173,73 @@ bool Tileset::Load(const QString& name)
 	write_data.EndTable();
 
 	write_data.CloseFile();
-}*/
+}
+*/
+
+
+TilesetTable::TilesetTable() :
+	Tileset()
+{
+	// Set up the QT table
+	table = new Q3Table(16, 16);
+	table->setReadOnly(true);
+	table->setShowGrid(false);
+	table->setSelectionMode(Q3Table::Multi);
+	table->setTopMargin(0);
+	table->setLeftMargin(0);
+	for (int32 i = 0; i < table->numRows(); i++)
+		table->setRowHeight(i, TILE_HEIGHT);
+	for (int32 i = 0; i < table->numCols(); i++)
+		table->setColumnWidth(i, TILE_WIDTH);
+}
+
+
+
+TilesetTable::~TilesetTable()
+{
+	delete table;
+}
+
+
+// TilesetTable::New(const QString& img_filename)
+// {
+// }
+
+
+bool TilesetTable::Load(const QString& set_name)
+{
+	if (Tileset::Load(set_name) == false)
+		return false;
+
+	// Read in tiles and create table items.
+	// FIXME: this is one ugly hack. It loads each individual tile's image and puts it into a table. But each
+	// tile's image only exists together with a bunch of other tiles in a tileset image. So we have to split them
+	// up. Qt has no built-in function to split a big image into little ones. This image information has already
+	// been loaded by the above call to LoadMultiImageFromElementGrid(...). If we could somehow take that info
+	// and put it into a Qt table, that would be ideal.
+	// This piece of code is what takes so long for the editor to load a tileset.
+	// <<FIXED>>: The ugly hack has been fixed, I use the QImage to handle directly to the bits, it's much faster.
+	// Contact me if there's any problem with this fix, eguitarz (dalema22@gmail.com)
+	QRect rectangle;
+	QImage entire_tileset;
+	entire_tileset.load("img/tilesets/" + set_name + ".png", "png");
+	for (uint32 row = 0; row < 16; row++)
+	{
+		for (uint32 col = 0; col < 16; col++)
+		{
+			rectangle.setRect(col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+			QVariant variant = entire_tileset.copy(rectangle);
+			if (!variant.isNull())
+			{
+				QPixmap tile_pixmap = variant.value<QPixmap>();
+				table->setPixmap(row, col, tile_pixmap);
+			}
+			else
+				qDebug(QString("%1").arg("Image loading error!!"));
+		} // iterate through the columns of the tileset
+	} // iterate through the rows of the tileset
+
+	return true;
+}
+
+} // namespace hoa_editor
