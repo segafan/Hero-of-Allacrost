@@ -25,7 +25,7 @@ using namespace hoa_video;
 
 OverlayGrid::OverlayGrid()
 {
-	tileset = new Tileset(this);
+	tileset = new TilesetTable();
 	tileset->tiles.resize(1);
 	_overlayInitialized = false;
 }
@@ -38,6 +38,22 @@ OverlayGrid::~OverlayGrid()
 	VideoManager->SingletonDestroy();
 }
 
+
+
+void OverlayGrid::initializeGL()
+{
+	// Destroy and recreated the video engine
+	VideoManager->SingletonDestroy();
+	VideoManager = GameVideo::SingletonCreate();
+	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
+
+	VideoManager->SingletonInitialize();
+	// changed because allacrost had to delay some video loading code
+
+	VideoManager->ApplySettings();
+	VideoManager->FinalizeInitialization();
+	VideoManager->ToggleFPS();
+}
 
 void OverlayGrid::paintGL()
 {
@@ -62,21 +78,7 @@ void OverlayGrid::resizeGL(int w,int h)
 
 
 
-void OverlayGrid::initializeGL()
-{
-	// Destroy the video engine
-	VideoManager->SingletonDestroy();
-	// re-create the video engine's singleton
-	VideoManager = GameVideo::SingletonCreate();
-	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
 
-	VideoManager->SingletonInitialize();
-	// changed because allacrost had to delay some video loading code
-
-	VideoManager->ApplySettings();
-	VideoManager->FinalizeInitialization();
-	VideoManager->ToggleFPS();
-}
 
 
 

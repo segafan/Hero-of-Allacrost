@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ Editor::Editor() : QMainWindow(),
 	_ul_on = false;
 	_ol_on = false;
 	_coord_type = 0;
-	
+
 	// create the main widget and layout
 	_ed_splitter = new QSplitter(this);
 	_ed_splitter->setOrientation(Qt::Vertical);
@@ -202,14 +202,14 @@ void Editor::_FileNew()
 {
 	if (_EraseOK())
 	{
-		MapPropertiesDialog* new_map = new MapPropertiesDialog(this, "new_map", false);	
-		
+		MapPropertiesDialog* new_map = new MapPropertiesDialog(this, "new_map", false);
+
 		if (new_map->exec() == QDialog::Accepted)
 		{
 			if (_ed_scrollview != NULL)
 				delete _ed_scrollview;
 			_ed_scrollview = new EditorScrollView(NULL, "map", new_map->GetWidth(), new_map->GetHeight());
-			
+
 			if (_ed_tabs != NULL)
 				delete _ed_tabs;
 			_ed_tabs = new QTabWidget();
@@ -225,9 +225,9 @@ void Editor::_FileNew()
 				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
 					checked_items++;
 
-			// Used to show the progress of tilesets that have been loaded. 
-			QProgressDialog* new_map_progress = 
-				new QProgressDialog(tr("Loading tilesets..."), NULL, 0, checked_items, this, 
+			// Used to show the progress of tilesets that have been loaded.
+			QProgressDialog* new_map_progress =
+				new QProgressDialog(tr("Loading tilesets..."), NULL, 0, checked_items, this,
 				        Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
 			new_map_progress->setWindowTitle(tr("Creating Map..."));
 
@@ -242,7 +242,11 @@ void Editor::_FileNew()
 				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
 				{
 					new_map_progress->setValue(checked_items++);
-					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
+					TilesetTable* a_tileset = new TilesetTable();
+					if (a_tileset->Load(tilesets->topLevelItem(i)->text(0)) == false)
+					{
+						// TODO: handle error
+					}
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);
 					_ed_scrollview->_map->tileset_names.push_back(a_tileset->tileset_name);
@@ -282,7 +286,7 @@ void Editor::_FileNew()
 
 			// Set default edit mode
 			_ed_scrollview->_layer_edit = LOWER_LAYER;
-			_ed_scrollview->_tile_mode  = PAINT_TILE;			
+			_ed_scrollview->_tile_mode  = PAINT_TILE;
 
 			_undo_stack->setClean();
 
@@ -293,8 +297,8 @@ void Editor::_FileNew()
 			statusBar()->showMessage("New map created", 5000);
 		} // only if the user pressed OK
 		else
-			statusBar()->showMessage("No map created!", 5000);		
-		
+			statusBar()->showMessage("No map created!", 5000);
+
 		delete new_map;
 	} // make sure an unsaved map is not lost
 } // _FileNew()
@@ -328,9 +332,9 @@ void Editor::_FileOpen()
 			int num_items = _ed_scrollview->_map->tileset_names.count();
 			int progress_steps = 0;
 
-			// Used to show the progress of tilesets has been loaded. 
-			QProgressDialog* new_map_progress = 
-				new QProgressDialog(tr("Loading tilesets..."), NULL, 0, num_items, this, 
+			// Used to show the progress of tilesets has been loaded.
+			QProgressDialog* new_map_progress =
+				new QProgressDialog(tr("Loading tilesets..."), NULL, 0, num_items, this,
 				        Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
 			new_map_progress->setWindowTitle(tr("Creating Map..."));
 
@@ -343,9 +347,10 @@ void Editor::_FileOpen()
 				it != _ed_scrollview->_map->tileset_names.end(); it++)
 			{
 				new_map_progress->setValue(progress_steps++);
-				Tileset* a_tileset = new Tileset(this, *it);
+				TilesetTable* a_tileset = new TilesetTable();
+				a_tileset->Load(*it);
 				_ed_tabs->addTab(a_tileset->table, *it);
-				_ed_scrollview->_map->tilesets.push_back(a_tileset);				
+				_ed_scrollview->_map->tilesets.push_back(a_tileset);
 			} // iterate through all tilesets in the map
 			new_map_progress->setValue(progress_steps);
 
@@ -394,7 +399,7 @@ void Editor::_FileOpen()
 				arg(_ed_scrollview->_map->GetFileName()), 5000);
 		} // file must exist in order to open it
 		else
-			statusBar()->showMessage("No map created!", 5000);		
+			statusBar()->showMessage("No map created!", 5000);
 	} // make sure an unsaved map is not lost
 } // _FileOpen()
 
@@ -403,20 +408,20 @@ void Editor::_FileSaveAs()
 	// get the file name from the user
 	QString file_name = QFileDialog::getSaveFileName(this,
 		"HoA Level Editor -- File Save", "dat/maps", "Maps (*.lua)");
-		
+
 	if (!file_name.isEmpty())
 	{
 		_ed_scrollview->_map->SetFileName(file_name);
 		_FileSave();
 		return;
     } // make sure the file name is not blank
-	
+
 	statusBar()->showMessage("Save abandoned.", 5000);
 } // _FileSaveAs()
 
 void Editor::_FileSave()
 {
-	
+
 	if (_ed_scrollview->_map->GetFileName().isEmpty() ||
 		_ed_scrollview->_map->GetFileName() == "Untitled")
 	{
@@ -507,7 +512,7 @@ void Editor::_ViewTextures()
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
 		_textures_on = !_textures_on;
-		if(_textures_on) 
+		if(_textures_on)
 		{
 			VideoManager->Textures()->DEBUG_NextTexSheet();
 		}
@@ -530,7 +535,7 @@ void Editor::_TileLayerFill()
 	} // calculate index of current tileset
 
 	vector<int32>& current_layer = _ed_scrollview->GetCurrentLayer();
-	
+
 	// Record the information for undo/redo operations.
 	vector<int32> previous = current_layer;
 	vector<int32> modified;
@@ -541,7 +546,7 @@ void Editor::_TileLayerFill()
 	// Fill the layer.
 	for (vector<int32>::iterator iter = current_layer.begin(); iter != current_layer.end(); iter++)
 	{
-		_ed_scrollview->_AutotileRandomize(multiplier, tileset_index);		
+		_ed_scrollview->_AutotileRandomize(multiplier, tileset_index);
 		*iter = tileset_index + multiplier * 256;
 		modified.push_back(tileset_index + multiplier * 256);
 	} // iterate through the entire layer
@@ -553,7 +558,7 @@ void Editor::_TileLayerFill()
 	indeces.clear();
 	previous.clear();
 	modified.clear();
-	
+
 	// Draw the changes.
 	_ed_scrollview->_map->SetChanged(true);
 	_ed_scrollview->_map->updateGL();
@@ -563,7 +568,7 @@ void Editor::_TileLayerClear()
 {
 	vector<int32>::iterator it;    // used to iterate over an entire layer
 	vector<int32>& current_layer = _ed_scrollview->GetCurrentLayer();
-	
+
 	// Record the information for undo/redo operations.
 	vector<int32> previous = current_layer;
 	vector<int32> modified(current_layer.size(), -1);
@@ -683,7 +688,7 @@ void Editor::_TileEditOL()
 void Editor::_TilesetEdit()
 {
 	TilesetEditor* tileset_editor = new TilesetEditor(this, "tileset_editor", true);
-	
+
 	if (tileset_editor->exec() == QDialog::Accepted)
 	{
 	} // only process results if user selected okay
@@ -714,17 +719,17 @@ void Editor::_MapProperties()
 {
 	MapPropertiesDialog* props = new
 		MapPropertiesDialog(this, "map_properties", true);
-	
+
 	if (props->exec() == QDialog::Accepted)
 	{
 		if (_ed_scrollview->_map->GetWidth() < props->GetWidth())
 		{
 			// User wants to make map wider so we must insert columns of tiles at the edge of the map.
-			
+
 			int map_width     = _ed_scrollview->_map->GetWidth();
 			int map_height    = _ed_scrollview->_map->GetHeight();
 			int extra_columns = props->GetWidth() - map_width;
-			
+
 			// Add in the extra columns one by one.
 			for (int col = extra_columns; col > 0; col--)
 			{
@@ -735,7 +740,7 @@ void Editor::_MapProperties()
 					lower_layer.insert(it, -1);
 					it += map_width + 1;
 				} // iterate through the rows of the lower layer
-	
+
 				vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER, _ed_scrollview->_map->GetContext());
 				it = middle_layer.begin() + map_width;
 				for (int row = 0; row < map_height; row++)
@@ -743,7 +748,7 @@ void Editor::_MapProperties()
 					middle_layer.insert(it, -1);
 					it += map_width + 1;
 				} // iterate through the rows of the middle layer
-	
+
 				vector<int32>& upper_layer = _ed_scrollview->_map->GetLayer(UPPER_LAYER, _ed_scrollview->_map->GetContext());
 				it = upper_layer.begin() + map_width;
 				for (int row = 0; row < map_height; row++)
@@ -759,11 +764,11 @@ void Editor::_MapProperties()
 		else if (_ed_scrollview->_map->GetWidth() > props->GetWidth())
 		{
 			// User wants to make map less wide so we must delete columns of tiles from the edge of the map.
-			
+
 			int map_width     = _ed_scrollview->_map->GetWidth();
 			int map_height    = _ed_scrollview->_map->GetHeight();
 			int extra_columns = map_width - props->GetWidth();
-			
+
 			// Delete all the extra columns one by one.
 			for (int col = extra_columns; col > 0; col--)
 			{
@@ -774,7 +779,7 @@ void Editor::_MapProperties()
 					lower_layer.erase(it);
 					it += map_width - 1;
 				} // iterate through the rows of the lower layer
-	
+
 				vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER, _ed_scrollview->_map->GetContext());
 				it = middle_layer.begin() + map_width - 1;
 				for (int row = 0; row < map_height; row++)
@@ -782,7 +787,7 @@ void Editor::_MapProperties()
 					middle_layer.erase(it);
 					it += map_width - 1;
 				} // iterate through the rows of the middle layer
-	
+
 				vector<int32>& upper_layer = _ed_scrollview->_map->GetLayer(UPPER_LAYER, _ed_scrollview->_map->GetContext());
 				it = upper_layer.begin() + map_width - 1;
 				for (int row = 0; row < map_height; row++)
@@ -795,14 +800,14 @@ void Editor::_MapProperties()
 				_ed_scrollview->_map->SetWidth(map_width);
 			} // delete all the extra columns
 		} // delete columns
-		
+
 		if (_ed_scrollview->_map->GetHeight() < props->GetHeight())
 		{
 			// User wants to make map taller so we must insert rows of tiles at the edge of the map.
 
 			int map_width = _ed_scrollview->_map->GetWidth();
 			int extra_rows = props->GetHeight() - _ed_scrollview->_map->GetHeight();
-	
+
 			vector<int32>& lower_layer  = _ed_scrollview->_map->GetLayer(LOWER_LAYER, _ed_scrollview->_map->GetContext());
 			vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER, _ed_scrollview->_map->GetContext());
 			vector<int32>& upper_layer  = _ed_scrollview->_map->GetLayer(UPPER_LAYER, _ed_scrollview->_map->GetContext());
@@ -813,10 +818,10 @@ void Editor::_MapProperties()
 		else if (_ed_scrollview->_map->GetHeight() > props->GetHeight())
 		{
 			// User wants to make map less tall so we must delete rows of tiles from the edge of the map.
-			
+
 			int map_width  = _ed_scrollview->_map->GetWidth();
 			int extra_rows = _ed_scrollview->_map->GetHeight() - props->GetHeight();
-	
+
 			vector<int32>& lower_layer  = _ed_scrollview->_map->GetLayer(LOWER_LAYER, _ed_scrollview->_map->GetContext());
 			vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER, _ed_scrollview->_map->GetContext());
 			vector<int32>& upper_layer  = _ed_scrollview->_map->GetLayer(UPPER_LAYER, _ed_scrollview->_map->GetContext());
@@ -852,7 +857,8 @@ void Editor::_MapProperties()
 			{
 				if (tab_names.contains(tilesets->topLevelItem(i)->text(0)) == false)
 				{
-					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
+					TilesetTable* a_tileset = new TilesetTable();
+					a_tileset->Load(tilesets->topLevelItem(i)->text(0));
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);
 				} // only add a tileset if it isn't already loaded
@@ -900,7 +906,7 @@ void Editor::_MapAddContext()
 
 	ContextPropertiesDialog* props = new
 		ContextPropertiesDialog(this, "context_properties");
-	
+
 	if (props->exec() == QDialog::Accepted)
 	{
 		_ed_scrollview->_map->context_names << props->GetName();
@@ -983,26 +989,26 @@ void Editor::_SwitchMapContext(int context)
 void Editor::_CreateActions()
 {
 	// Create menu actions related to the File menu
-	
+
 	_new_action = new QAction("&New...", this);
 	_new_action->setShortcut(tr("Ctrl+N"));
 	_new_action->setStatusTip("Create a new map");
 	connect(_new_action, SIGNAL(triggered()), this, SLOT(_FileNew()));
-	
+
 	_open_action = new QAction("&Open...", this);
 	_open_action->setShortcut(tr("Ctrl+O"));
 	_open_action->setStatusTip("Open an existing map");
 	connect(_open_action, SIGNAL(triggered()), this, SLOT(_FileOpen()));
-	
+
 	_save_as_action = new QAction("Save &As...", this);
 	_save_as_action->setStatusTip("Save the map with another name");
 	connect(_save_as_action, SIGNAL(triggered()), this, SLOT(_FileSaveAs()));
-	
+
 	_save_action = new QAction("&Save", this);
 	_save_action->setShortcut(tr("Ctrl+S"));
 	_save_action->setStatusTip("Save the map");
 	connect(_save_action, SIGNAL(triggered()), this, SLOT(_FileSave()));
-	
+
 	_quit_action = new QAction("&Quit", this);
 	_quit_action->setShortcut(tr("Ctrl+Q"));
 	_quit_action->setStatusTip("Quits from the editor");
@@ -1018,19 +1024,19 @@ void Editor::_CreateActions()
 	_toggle_grid_action->setShortcut(tr("G"));
 	_toggle_grid_action->setCheckable(true);
 	connect(_toggle_grid_action, SIGNAL(triggered()), this, SLOT(_ViewToggleGrid()));
-	
+
 	_toggle_ll_action = new QAction("&Lower Layer", this);
 	_toggle_ll_action->setStatusTip("Switches the lower layer on and off");
 	_toggle_ll_action->setShortcut(tr("L"));
 	_toggle_ll_action->setCheckable(true);
 	connect(_toggle_ll_action, SIGNAL(triggered()), this, SLOT(_ViewToggleLL()));
-	
+
 	_toggle_ml_action = new QAction("&Middle Layer", this);
 	_toggle_ml_action->setStatusTip("Switches the middle layer on and off");
 	_toggle_ml_action->setShortcut(tr("M"));
 	_toggle_ml_action->setCheckable(true);
 	connect(_toggle_ml_action, SIGNAL(triggered()), this, SLOT(_ViewToggleML()));
-	
+
 	_toggle_ul_action = new QAction("&Upper Layer", this);
 	_toggle_ul_action->setStatusTip("Switches the upper layer on and off");
 	_toggle_ul_action->setShortcut(tr("U"));
@@ -1042,7 +1048,7 @@ void Editor::_CreateActions()
 	_toggle_ol_action->setShortcut(tr("O"));
 	_toggle_ol_action->setCheckable(true);
 	connect(_toggle_ol_action, SIGNAL(triggered()), this, SLOT(_ViewToggleOL()));
-	
+
 	_coord_tile_action = new QAction("Tile Coordinates", this);
 	_coord_tile_action->setStatusTip("Switch the coordinate display to tile coordinates");
 	// _coord_tile_action->setShortcut(
@@ -1118,25 +1124,25 @@ void Editor::_CreateActions()
 	_mode_delete_action->setStatusTip("Switches to delete mode to erase tiles from the map");
 	_mode_delete_action->setCheckable(true);
 	connect(_mode_delete_action, SIGNAL(triggered()), this, SLOT(_TileModeDelete()));
-	
+
 	_mode_group = new QActionGroup(this);
 	_mode_group->addAction(_mode_paint_action);
 	_mode_group->addAction(_mode_move_action);
 	_mode_group->addAction(_mode_delete_action);
 	_mode_paint_action->setChecked(true);
-	
+
 	_edit_ll_action = new QAction("Edit &lower layer", this);
 	_edit_ll_action->setShortcut(tr("Shift+L"));
 	_edit_ll_action->setStatusTip("Makes lower layer of the map current");
 	_edit_ll_action->setCheckable(true);
 	connect(_edit_ll_action, SIGNAL(triggered()), this, SLOT(_TileEditLL()));
-	
+
 	_edit_ml_action = new QAction("Edit &middle layer", this);
 	_edit_ml_action->setShortcut(tr("Shift+M"));
 	_edit_ml_action->setStatusTip("Makes middle layer of the map current");
 	_edit_ml_action->setCheckable(true);
 	connect(_edit_ml_action, SIGNAL(triggered()), this, SLOT(_TileEditML()));
-	
+
 	_edit_ul_action = new QAction("Edit &upper layer", this);
 	_edit_ul_action->setShortcut(tr("Shift+U"));
 	_edit_ul_action->setStatusTip("Makes upper layer of the map current");
@@ -1157,9 +1163,9 @@ void Editor::_CreateActions()
 	_edit_ll_action->setChecked(true);
 
 
-	
+
 	// Create tileset actions related to the Tileset Menu
-	
+
 	_edit_tileset_action = new QAction("Edit &Tileset", this);
 	_edit_tileset_action->setStatusTip("Lets the user paint walkability on the tileset");
 	//_edit_walkability_action->setCheckable(true);
@@ -1172,7 +1178,7 @@ void Editor::_CreateActions()
 	_select_music_action = new QAction("&Select map music...", this);
 	_select_music_action->setStatusTip("Choose background music for the map");
 	connect(_select_music_action, SIGNAL(triggered()), this, SLOT(_MapSelectMusic()));
-	
+
 	_context_properties_action = new QAction("&Add Context...", this);
 	_context_properties_action->setStatusTip("Create a new context on the map");
 	connect(_context_properties_action, SIGNAL(triggered()), this, SLOT(_MapAddContext()));
@@ -1196,11 +1202,11 @@ void Editor::_CreateActions()
 	_help_action->setShortcut(Qt::Key_F1);
 	_help_action->setStatusTip("Brings up help documentation for the editor");
 	connect(_help_action, SIGNAL(triggered()), this, SLOT(_HelpHelp()));
-	
+
 	_about_action = new QAction("&About", this);
 	_about_action->setStatusTip("Brings up information about the editor");
 	connect(_about_action, SIGNAL(triggered()), this, SLOT(_HelpAbout()));
-	
+
 	_about_qt_action = new QAction("About &Qt", this);
 	_about_qt_action->setStatusTip("Brings up information about Qt");
 	connect(_about_qt_action, SIGNAL(triggered()), this, SLOT(_HelpAboutQt()));
@@ -1255,8 +1261,8 @@ void Editor::_CreateMenus()
 	_tiles_menu->addAction(_edit_ol_action);
 
 	_tiles_menu->setTearOffEnabled(true);
-	connect(_tiles_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesEnableActions()));	
-	
+	connect(_tiles_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesEnableActions()));
+
 	// tileset menu creation
 	_tileset_menu = menuBar()->addMenu("Tile&set");
 	_tileset_menu->addAction(_edit_tileset_action);
@@ -1351,7 +1357,7 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
 	_tile_mode  = PAINT_TILE;
 	_layer_edit = LOWER_LAYER;
 	_moving     = false;
-	
+
 	// Clear the undo/redo vectors.
 	_tile_indeces.clear();
 	_previous_tiles.clear();
@@ -1365,7 +1371,7 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
 
 	// Create a new map.
 	_map = new Grid(viewport(), "Untitled", width, height);
-	addChild(_map);	
+	addChild(_map);
 
 	// Create menu actions related to the Context menu.
 	_insert_row_action = new QAction("Insert row", this);
@@ -1380,7 +1386,7 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
 	_delete_column_action = new QAction("Delete column", this);
 	_delete_column_action->setStatusTip("Deletes the currently selected column of tiles from all layers");
 	connect(_delete_column_action, SIGNAL(triggered()), this, SLOT(_ContextDeleteColumn()));
-	
+
 	// Context menu creation.
 	_context_menu = new QMenu(this);
 	_context_menu->addAction(_insert_row_action);
@@ -1418,20 +1424,20 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
 		(evt->x() / TILE_WIDTH)  >= _map->GetWidth()  ||
 		evt->x() < 0								  ||
-		evt->y() < 0								  
+		evt->y() < 0
 		)
 		return;
 
 	// get reference to Editor
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
-	
+
 	_map->SetChanged(true);
 
 	int16 selection_count = 0;
 	if(_layer_edit != OBJECT_LAYER) {
 		// record location of pressed tile
 		_tile_index = static_cast<int32>
-			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);		
+			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 
 		// record the location of the beginning of the selection rectangle
 		if (evt->button() == Qt::LeftButton && editor->_select_on == true &&
@@ -1447,12 +1453,12 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
 			if( (*it)->is_selected == true )
 				selection_count++;
-		
+
 		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
 		{
 			if( (*it)->IsInHoverArea(static_cast<float>(evt->x())/TILE_WIDTH, static_cast<float>(evt->y())/ TILE_HEIGHT) )
 			{	// in the hovering area
-				
+
 				(*it)->is_selected = true;
 				if(selection_count <= 0)	// the last one selection, if there's 2 more selections, substract it...
 					break;
@@ -1463,10 +1469,10 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 				}
 			}
 			else	// if not in the hovvering area, deselect it
-				(*it)->is_selected = false;				
+				(*it)->is_selected = false;
 		}
 	}
-				
+
 	switch (_tile_mode)
 	{
 		case PAINT_TILE: // start painting tiles
@@ -1514,8 +1520,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
 		(evt->x() / TILE_WIDTH)  >= _map->GetWidth()  ||
 		evt->x() < 0								  ||
-		evt->y() < 0								  
-		) 
+		evt->y() < 0
+		)
 	{
 		editor->statusBar()->clear();
 		return;
@@ -1533,14 +1539,14 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 				(*it)->SetXPosition( x_position, 0 );
 				(*it)->SetYPosition( y_position, 0 );
 			}
-	}	
+	}
 		int32 index = static_cast<int32>
 			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 
 	if (index != _tile_index && !is_object_layer)  // user has moved onto another tile
 	{
 		_tile_index = index;
-		
+
 		if (evt->state() == Qt::LeftButton && editor->_select_on == true &&
 		    _moving == false)
 		{
@@ -1550,7 +1556,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			int y_old = _first_corner_index / _map->GetWidth();
 			int x_new = _tile_index % _map->GetWidth();
 			int y_new = _tile_index / _map->GetWidth();
-			
+
 			// Swap the coordinates around so *_old is always smaller than *_new.
 			int temp;
 			if (x_old > x_new)
@@ -1565,7 +1571,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 				y_old = y_new;
 				y_new = temp;
 			}
-			
+
 			for (int y = y_old; y <= y_new; y++)
 				for (int x = x_old; x <= x_new; x++)
 					_map->GetLayer(SELECT_LAYER, 0)[y * _map->GetWidth() + x] = 1;
@@ -1582,7 +1588,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			} // edit mode PAINT_TILE
 
 			case MOVE_TILE: // continue moving a tile
-			{				
+			{
 				break;
 			} // edit mode MOVE_TILE
 
@@ -1597,7 +1603,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			default:
 				QMessageBox::warning(this, "Tile editing mode",
 					"ERROR: Invalid tile editing mode!");
-		} // switch on tile editing mode		
+		} // switch on tile editing mode
 	} // mouse has moved to a new tile position
 
 	// Display mouse position in the format specified by _coord_type
@@ -1641,7 +1647,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 						_PaintTile(i);
 				} // iterate over selection layer
 			} // only if painting a bunch of tiles
-			
+
 			// Push command onto the undo stack.
 			LayerCommand* paint_command = new LayerCommand(_tile_indeces,
 				_previous_tiles, _modified_tiles, _layer_edit,
@@ -1652,7 +1658,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 			_modified_tiles.clear();
 			break;
 		} // edit mode PAINT_TILE
-		
+
 		case MOVE_TILE: // wrap up moving tiles
 		{
 			if (_moving == true)
@@ -1712,7 +1718,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 
 			break;
 		} // edit mode MOVE_TILE
-		
+
 		case DELETE_TILE: // wrap up deleting tiles
 		{
 			if (editor->_select_on == true)
@@ -1726,7 +1732,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 						_DeleteTile(i);
 				} // iterate over selection layer
 			} // only if deleting a bunch of tiles
-		
+
 			// Push command onto undo stack.
 			LayerCommand* delete_command = new LayerCommand(_tile_indeces,
 				_previous_tiles, _modified_tiles, _layer_edit,
@@ -1737,7 +1743,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 			_modified_tiles.clear();
 			break;
 		} // edit mode DELETE_TILE
-		
+
 		default:
 			QMessageBox::warning(this, "Tile editing mode",
 				"ERROR: Invalid tile editing mode!");
@@ -1766,8 +1772,8 @@ void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
 		(evt->x() / TILE_WIDTH)  >= _map->GetWidth()  ||
 		evt->x() < 0								  ||
-		evt->y() < 0								  
-		) 
+		evt->y() < 0
+		)
 		return;
 
 	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
@@ -1783,7 +1789,7 @@ void EditorScrollView::keyPressEvent(QKeyEvent *evt)
 			_map->sprites.remove(*it);
 			break;	// break is needed for preventing iterator error
 	}
-	
+
 } // keyPressEvent(...)
 
 
@@ -1793,14 +1799,14 @@ void EditorScrollView::_ContextInsertRow()
 {
 	int map_width = _map->GetWidth();
 	int row = _tile_index / map_width;
-	
+
 	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
 	lower_layer.insert(lower_layer.begin() + row * map_width, map_width, -1);
 	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
 	middle_layer.insert(middle_layer.begin() + row * map_width, map_width, -1);
 	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
 	upper_layer.insert(upper_layer.begin() + row * map_width, map_width, -1);
-	
+
 	Resize(map_width, _map->GetHeight() + 1);
 } // _ContextInsertRow()
 
@@ -1809,7 +1815,7 @@ void EditorScrollView::_ContextInsertColumn()
 	int map_width = _map->GetWidth();
 	int map_height = _map->GetHeight();
 	int col = _tile_index % map_width;
-	
+
 	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
 	vector<int32>::iterator it = lower_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
@@ -1817,7 +1823,7 @@ void EditorScrollView::_ContextInsertColumn()
 		it = lower_layer.insert(it, -1);
 		it += map_width + 1;
 	} // iterate through the rows of the lower layer
-	
+
 	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
 	it = middle_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
@@ -1825,7 +1831,7 @@ void EditorScrollView::_ContextInsertColumn()
 		it = middle_layer.insert(it, -1);
 		it += map_width + 1;
 	} // iterate through the rows of the middle layer
-	
+
 	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
 	it = upper_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
@@ -1841,14 +1847,14 @@ void EditorScrollView::_ContextDeleteRow()
 {
 	int map_width = _map->GetWidth();
 	int row = _tile_index / map_width;
-	
+
 	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
 	lower_layer.erase(lower_layer.begin() + row * map_width, lower_layer.begin() + row * map_width + map_width);
 	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
 	middle_layer.erase(middle_layer.begin() + row * map_width, middle_layer.begin() + row * map_width + map_width);
 	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
 	upper_layer.erase(upper_layer.begin() + row * map_width, upper_layer.begin() + row * map_width + map_width);
-	
+
 	Resize(map_width, _map->GetHeight() - 1);
 } // _ContextDeleteRow()
 
@@ -1857,7 +1863,7 @@ void EditorScrollView::_ContextDeleteColumn()
 	int map_width = _map->GetWidth();
 	int map_height = _map->GetHeight();
 	int col = _tile_index % map_width;
-	
+
 	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
 	vector<int32>::iterator it = lower_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
@@ -1865,7 +1871,7 @@ void EditorScrollView::_ContextDeleteColumn()
 		it = lower_layer.erase(it);
 		it += map_width - 1;
 	} // iterate through the rows of the lower layer
-	
+
 	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
 	it = middle_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
@@ -1873,7 +1879,7 @@ void EditorScrollView::_ContextDeleteColumn()
 		it = middle_layer.erase(it);
 		it += map_width - 1;
 	} // iterate through the rows of the middle layer
-	
+
 	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
 	it = upper_layer.begin() + col;
 	for (int row = 0; row < map_height; row++)
@@ -2041,7 +2047,7 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 		existing_tiles.push_back(-1);
 		existing_tiles.push_back(-1);
 	} // these tiles don't exist
-	
+
 
 	// Now figure out what groups the existing tiles belong to.
 	for (unsigned int i = 0; i < existing_tiles.size(); i++)
@@ -2077,15 +2083,15 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 
 	// Transition tiles exist only for certain patterns of tiles surrounding the painted tile.
 	// Check for any of these patterns, and if one exists, transition magic begins!
-	
-	string transition_group = "none";  // autotileable grouping for the border tile if it exists 
+
+	string transition_group = "none";  // autotileable grouping for the border tile if it exists
 	TRANSITION_PATTERN_TYPE pattern = _CheckForTransitionPattern(tile_group, existing_groups,
 		transition_group);
-	
+
 	if (pattern != INVALID_PATTERN)
 	{
 		transition_group = tile_group + "_" + transition_group;
-		
+
 		// Set up for opening autotiling.lua.
 		ReadScriptDescriptor read_data;
 		if (read_data.OpenFile("dat/tilesets/autotiling.lua") == false)
@@ -2168,7 +2174,7 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 			//assert(tileset_num != -1);
 			_AutotileRandomize(tileset_num, tile_index);
 		} // make sure the selected transition tiles exist
-		
+
 		read_data.CloseFile();
 	} // make sure a transition pattern exists
 } // _AutotileTransitions(...)
@@ -2192,7 +2198,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 		 surrounding_groups[4] == surrounding_groups[1]) &&
 	    (surrounding_groups[5] != surrounding_groups[1]) &&
 	    (surrounding_groups[7] != surrounding_groups[1]) &&
-	    (surrounding_groups[6] != surrounding_groups[1])) 
+	    (surrounding_groups[6] != surrounding_groups[1]))
 	{
 		border_group = surrounding_groups[1];
 		return N_BORDER_PATTERN;
@@ -2211,7 +2217,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 		 surrounding_groups[6] == surrounding_groups[4]) &&
 	    (surrounding_groups[0] != surrounding_groups[4]) &&
 	    (surrounding_groups[5] != surrounding_groups[4]) &&
-	    (surrounding_groups[3] != surrounding_groups[4])) 
+	    (surrounding_groups[3] != surrounding_groups[4]))
 	{
 		border_group = surrounding_groups[4];
 		return E_BORDER_PATTERN;
@@ -2230,7 +2236,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 		 surrounding_groups[4] == surrounding_groups[6]) &&
 	    (surrounding_groups[2] != surrounding_groups[6]) &&
 	    (surrounding_groups[0] != surrounding_groups[6]) &&
-	    (surrounding_groups[1] != surrounding_groups[6])) 
+	    (surrounding_groups[1] != surrounding_groups[6]))
 	{
 		border_group = surrounding_groups[6];
 		return S_BORDER_PATTERN;
@@ -2249,7 +2255,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 		 surrounding_groups[6] == surrounding_groups[3]) &&
 	    (surrounding_groups[2] != surrounding_groups[3]) &&
 	    (surrounding_groups[7] != surrounding_groups[3]) &&
-	    (surrounding_groups[4] != surrounding_groups[3])) 
+	    (surrounding_groups[4] != surrounding_groups[3]))
 	{
 		border_group = surrounding_groups[3];
 		return W_BORDER_PATTERN;
@@ -2262,7 +2268,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	     current_group != "none") &&
 	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
 	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
-	    (surrounding_groups[7] != surrounding_groups[0])) 
+	    (surrounding_groups[7] != surrounding_groups[0]))
 	{
 		border_group = surrounding_groups[0];
 		return NW_BORDER_PATTERN;
@@ -2275,7 +2281,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	     current_group != "none") &&
 	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
 	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
-	    (surrounding_groups[5] != surrounding_groups[2])) 
+	    (surrounding_groups[5] != surrounding_groups[2]))
 	{
 		border_group = surrounding_groups[2];
 		return NE_BORDER_PATTERN;
@@ -2288,7 +2294,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	     current_group != "none") &&
 	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
 	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
-	    (surrounding_groups[0] != surrounding_groups[7])) 
+	    (surrounding_groups[0] != surrounding_groups[7]))
 	{
 		border_group = surrounding_groups[7];
 		return SE_BORDER_PATTERN;
@@ -2301,7 +2307,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	     current_group != "none") &&
 	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
 	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
-	    (surrounding_groups[2] != surrounding_groups[5])) 
+	    (surrounding_groups[2] != surrounding_groups[5]))
 	{
 		border_group = surrounding_groups[5];
 		return SW_BORDER_PATTERN;
@@ -2316,7 +2322,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	    (surrounding_groups[4] != surrounding_groups[0]) &&
 	    (surrounding_groups[5] != surrounding_groups[0]) &&
 	    (surrounding_groups[6] != surrounding_groups[0]) &&
-	    (surrounding_groups[7] != surrounding_groups[0])) 
+	    (surrounding_groups[7] != surrounding_groups[0]))
 	{
 		border_group = surrounding_groups[0];
 		return NW_CORNER_PATTERN;
@@ -2331,7 +2337,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	    (surrounding_groups[3] != surrounding_groups[2]) &&
 	    (surrounding_groups[5] != surrounding_groups[2]) &&
 	    (surrounding_groups[6] != surrounding_groups[2]) &&
-	    (surrounding_groups[7] != surrounding_groups[2])) 
+	    (surrounding_groups[7] != surrounding_groups[2]))
 	{
 		border_group = surrounding_groups[2];
 		return NE_CORNER_PATTERN;
@@ -2346,7 +2352,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	    (surrounding_groups[1] != surrounding_groups[7]) &&
 	    (surrounding_groups[2] != surrounding_groups[7]) &&
 	    (surrounding_groups[3] != surrounding_groups[7]) &&
-	    (surrounding_groups[5] != surrounding_groups[7])) 
+	    (surrounding_groups[5] != surrounding_groups[7]))
 	{
 		border_group = surrounding_groups[7];
 		return SE_CORNER_PATTERN;
@@ -2361,7 +2367,7 @@ TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const strin
 	    (surrounding_groups[1] != surrounding_groups[5]) &&
 	    (surrounding_groups[2] != surrounding_groups[5]) &&
 	    (surrounding_groups[4] != surrounding_groups[5]) &&
-	    (surrounding_groups[7] != surrounding_groups[5])) 
+	    (surrounding_groups[7] != surrounding_groups[5]))
 	{
 		border_group = surrounding_groups[5];
 		return SW_CORNER_PATTERN;

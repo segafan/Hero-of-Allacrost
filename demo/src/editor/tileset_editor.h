@@ -46,9 +46,9 @@ public:
 	Tileset* tileset;
 
 protected:
-	void paintGL();
-	void resizeGL(int w,int h);
 	void initializeGL();
+	void paintGL();
+	void resizeGL(int w, int h);
 
 	//! \name Mouse Processing Functions
 	//! \brief Functions to process mouse events on the map.
@@ -60,7 +60,6 @@ protected:
 //	void contentsMouseReleaseEvent(QMouseEvent *evt);
 //	void contentsContextMenuEvent(QContextMenuEvent *evt);
 	//@}
-
 
 private:
 	bool	_overlayInitialized;
