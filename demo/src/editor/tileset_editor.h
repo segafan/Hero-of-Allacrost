@@ -7,12 +7,11 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
-* \file    tileset_editor.h
-* \author  Bar�� Soner U�akl? blackkknight@hotmail.com
-* \brief   Header file for editor's tileset editor dialog
-*****************************************************************************/
-
+/** ****************************************************************************
+*** \file    tileset_editor.h
+*** \author  Bar�� Soner U�akl? blackkknight@hotmail.com
+*** \brief   Header file for editor's tileset editor dialog
+*******************************************************************************/
 
 #ifndef __TILESET_EDITOR_HEADER__
 #define __TILESET_EDITOR_HEADER__
@@ -118,7 +117,7 @@ private:
 	//! A layout to manage all the labels, spinboxes, and listviews.
 	QGridLayout* _dia_layout;
 
-	//! \brief The tileset display
+	//! \brief The tileset display, also containing the tileset data itself
 	TilesetDisplay* _tset_display;
 }; // class TilesetEditor : public QDialog
 
