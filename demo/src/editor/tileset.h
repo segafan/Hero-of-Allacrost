@@ -7,12 +7,12 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    tileset.h
- * \author  Philip Vorsilak, gorzuate@allacrost.org
- * \brief   Header file for editor's tileset, used for maintaining a visible
- *          "list" of tiles to select from for painting on a map.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    tileset.h
+*** \author  Philip Vorsilak, gorzuate@allacrost.org
+*** \brief   Header file for editor's tileset, used for maintaining a visible
+***          "list" of tiles to select from for painting on a map.
+*** ***************************************************************************/
 
 #ifndef __TILESET_HEADER__
 #define __TILESET_HEADER__

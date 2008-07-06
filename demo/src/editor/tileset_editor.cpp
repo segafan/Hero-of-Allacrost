@@ -15,9 +15,11 @@
 
 #include "tileset_editor.h"
 
-using namespace hoa_editor;
 using namespace hoa_script;
 using namespace hoa_video;
+
+namespace hoa_editor
+{
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////// TilesetDisplay class
@@ -182,5 +184,4 @@ void TilesetEditor::_OpenFile()
 	_tset_display->updateGL();
 }
 
-
-
+} // namespace hoa_editor
