@@ -31,19 +31,32 @@
 
 #include "tileset.h"
 
-using std::vector;
-
 namespace hoa_editor
 {
 
-class OverlayGrid : public QGLWidget
+/** ****************************************************************************
+*** \brief OpenGL widget display of a tileset within the tileset editor
+***
+*** This class represents the display of an open tileset within the tileset editor.
+*** It is through this class that the user interacts with the open tileset image,
+*** viewing and modifying its properties.
+***
+*** \todo The tileset pointer is really better suited to be a local, but for some
+*** reason when you change it to a local, the app will seg fault when you close
+*** the tileset editor. I believe this is because the destructor of this class
+*** destroys the video engine singleton, and this is done before the tileset
+*** object is destructed (which contain StillImage objects, that need the video
+*** engine to be destroyed properly). Fix this in the future by not creating a
+*** video engine instance for this tileset display.
+*** ***************************************************************************/
+class TilesetDisplay : public QGLWidget
 {
 public:
-	OverlayGrid();
-	~OverlayGrid();
+	TilesetDisplay();
+	~TilesetDisplay();
 
-	//! This is the current tileset that is being edited.
-	Tileset* tileset;
+	//! \brief The current tileset that is being edited.
+	Tileset *tileset;
 
 protected:
 	void initializeGL();
@@ -62,11 +75,17 @@ protected:
 	//@}
 
 private:
-	bool	_overlayInitialized;
-};
+	//! \brief A red, translucent square the size of 1/4th of a tile
+	hoa_video::StillImage _red_square;
+}; // class TilesetDisplay : public QGLWidget
 
 
-
+/** ****************************************************************************
+*** \brief The primary class for the tileset editor
+***
+*** This class contains an instance of a TilesetDisplay, push buttons used for
+*** modifying the properties of the tileset
+*** ***************************************************************************/
 class TilesetEditor : public QDialog
 {
 	//! Macro needed to use Qt's slots and signals.
@@ -79,13 +98,14 @@ public:
 	//! \param parent The widget from which this dialog was invoked.
 	//! \param name The name of this widget.
 	//! \param prop True when accessing an already loaded map's properties, false otherwise.
-	TilesetEditor(QWidget* parent,const QString& name,bool prop);
+	TilesetEditor(QWidget* parent, const QString& name, bool prop);
 	~TilesetEditor();
 
 private slots:
 	//! Loads a TDF file
-	void _openTDF();
-private :
+	void _OpenFile();
+
+private:
 	//! A pushbutton for opening a new tileset
 	QPushButton* _opentileset_pbut;
 
@@ -98,12 +118,9 @@ private :
 	//! A layout to manage all the labels, spinboxes, and listviews.
 	QGridLayout* _dia_layout;
 
-	//! This is the grid that is shown over the tileset for walkability
-	OverlayGrid* _walkability_grid;
-
-	std::vector<bool> _collision_data;
-};
-
+	//! \brief The tileset display
+	TilesetDisplay* _tset_display;
+}; // class TilesetEditor : public QDialog
 
 } // namespace hoa_editor
 
