@@ -66,6 +66,9 @@ public:
 
 	~Tileset();
 
+	bool IsInitialized() const
+		{ return _initialized; }
+
 	/** \brief Creates a new tileset object using only a tileset image
 	*** \param img_filename The path + name of the image file to use for the tileset
 	*** \return True if the tileset image was loaded successfully
@@ -75,10 +78,11 @@ public:
 
 	/** \brief Loads the tileset definition file and stores its data in the class containers
 	*** \param set_name The unique name that identifies the tileset (not a filename)
+	*** \param one_image If true, the tiles vector will contain a single image for the entire tileset
 	*** \return True if the tileset was loaded successfully
 	*** \note This function will clear the previously loaded contents when it is called
 	**/
-	virtual bool Load(const QString& set_name);
+	virtual bool Load(const QString& set_name, bool one_image = false);
 
 	//void Save();
 
@@ -94,7 +98,10 @@ public:
 	//! \brief Contains autotiling information for any autotileable tile.
 	std::map<int, std::string> autotileability;
 
-private:
+protected:
+	//! \brief True if the class is holding valid, loaded tileset data
+	bool _initialized;
+
 	//std::vector<std::vector<AnimatedTileData> > _animated_tiles;
 }; // class Tileset
 

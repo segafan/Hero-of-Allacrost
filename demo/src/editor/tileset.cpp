@@ -25,7 +25,8 @@ namespace hoa_editor
 {
 
 Tileset::Tileset() :
-	tileset_name("")
+	tileset_name(""),
+	_initialized(false)
 {}
 
 
@@ -39,7 +40,7 @@ Tileset::~Tileset()
 
 
 
-bool Tileset::Load(const QString& set_name)
+bool Tileset::Load(const QString& set_name, bool one_image)
 {
 	tileset_name = set_name;
 
@@ -48,16 +49,28 @@ bool Tileset::Load(const QString& set_name)
 	QString dat_filename = QString("dat/tilesets/" + set_name + ".lua");
 
 	// Prepare the tile vector and load the tileset image
-	tiles.resize(256);
-	for (uint32 i = 0; i < 256; i++)
-		tiles[i].SetDimensions(1.0f, 1.0f);
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false)
-		qDebug("LoadMultiImage failed to load tileset " + img_filename);
+	if (one_image == true) {
+		tiles.clear();
+		tiles.resize(1);
+		tiles[0].SetDimensions(16.0f, 16.0f);
+		if (tiles[0].Load(string(img_filename.toAscii()), 16, 16) == false)
+			qDebug("Failed to load tileset image: " + img_filename);
+	}
+	else {
+		tiles.clear();
+		tiles.resize(256);
+		for (uint32 i = 0; i < 256; i++)
+			tiles[i].SetDimensions(1.0f, 1.0f);
+		if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false)
+			qDebug("Failed to load tileset image: " + img_filename);
+	}
 
 	// Set up for reading the tileset definition file.
 	ReadScriptDescriptor read_data;
-	if (read_data.OpenFile(string(dat_filename.toAscii())) == false)
+	if (read_data.OpenFile(string(dat_filename.toAscii())) == false) {
+		_initialized = false;
 		return false;
+	}
 
 	read_data.OpenTable(string(tileset_name.toAscii()));
 
@@ -75,6 +88,7 @@ bool Tileset::Load(const QString& set_name)
 				read_data.CloseTable();
 				read_data.CloseTable();
 				read_data.CloseFile();
+				_initialized = false;
 				return false;
 			}
 
@@ -130,6 +144,7 @@ bool Tileset::Load(const QString& set_name)
 	read_data.CloseTable();
 	read_data.CloseFile();
 
+	_initialized = true;
 	return true;
 } // bool Tileset::Load(const QString& name)
 

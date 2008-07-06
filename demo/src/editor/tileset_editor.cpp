@@ -20,19 +20,20 @@ using namespace hoa_script;
 using namespace hoa_video;
 
 ////////////////////////////////////////////////////////////////////////////////
-////////// OverlayGrid class
+////////// TilesetDisplay class
 ////////////////////////////////////////////////////////////////////////////////
 
-OverlayGrid::OverlayGrid()
+TilesetDisplay::TilesetDisplay()
 {
-	tileset = new TilesetTable();
-	tileset->tiles.resize(1);
-	_overlayInitialized = false;
+	tileset = new Tileset();
+	// Red color with 50% transparency
+	_red_square.SetColor(Color(1.0f, 0.0f, 0.0f, 0.5f));
+	_red_square.SetDimensions(0.5f, 0.5f);
 }
 
 
 
-OverlayGrid::~OverlayGrid()
+TilesetDisplay::~TilesetDisplay()
 {
 	delete tileset;
 	VideoManager->SingletonDestroy();
@@ -40,37 +41,68 @@ OverlayGrid::~OverlayGrid()
 
 
 
-void OverlayGrid::initializeGL()
+void TilesetDisplay::initializeGL()
 {
-	// Destroy and recreated the video engine
+	// Destroy and recreate the video engine
+	// NOTE: This is actually a very bad practice to do. We have to figure out an alternative.
 	VideoManager->SingletonDestroy();
 	VideoManager = GameVideo::SingletonCreate();
 	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
 
 	VideoManager->SingletonInitialize();
-	// changed because allacrost had to delay some video loading code
 
 	VideoManager->ApplySettings();
 	VideoManager->FinalizeInitialization();
 	VideoManager->ToggleFPS();
 }
 
-void OverlayGrid::paintGL()
+
+
+void TilesetDisplay::paintGL()
 {
 	VideoManager->SetCoordSys(0.0f, VideoManager->GetScreenWidth() / TILE_WIDTH,
 		VideoManager->GetScreenHeight() / TILE_HEIGHT, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
-
 	VideoManager->Clear(Color::blue);
 
-	// Draw the tile as one big image
-	tileset->tiles[0].Draw();
+	if (tileset->IsInitialized() == true) {
+		// Draw the tileset as a single image
+		tileset->tiles[0].Draw();
+
+		// Draw transparent red over the unwalkable tile quadrants
+		for (uint32 i = 0; i < 16; i++) {
+			for (uint32 j = 0; j < 16; j++) {
+				VideoManager->Move(j, i);
+
+				if (tileset->walkability[i * 16 + j][0] != 0) {
+					_red_square.Draw();
+				}
+
+				VideoManager->MoveRelative(0.5f, 0.0f);
+				if (tileset->walkability[i * 16 + j][1] != 0) {
+					_red_square.Draw();
+				}
+
+				VideoManager->MoveRelative(-0.5f, 0.5f);
+				if (tileset->walkability[i * 16 + j][2] != 0) {
+					_red_square.Draw();
+				}
+
+				VideoManager->MoveRelative(0.5f, 0.0f);
+				if (tileset->walkability[i * 16 + j][3] != 0) {
+					_red_square.Draw();
+				}
+			}
+		}
+	}
+
+	// Draws the grid that visually seperates each tile in the tileset image
 	VideoManager->DrawGrid(0.0f, 0.0f, 0.5f, 0.5f, Color::black);
 }
 
 
 
-void OverlayGrid::resizeGL(int w,int h)
+void TilesetDisplay::resizeGL(int w,int h)
 {
 	VideoManager->SetResolution(512, 512);
 	VideoManager->ApplySettings();
@@ -78,16 +110,11 @@ void OverlayGrid::resizeGL(int w,int h)
 
 
 
-
-
-
-
-void OverlayGrid::contentsMousePressEvent(QMouseEvent* evt)
+void TilesetDisplay::contentsMousePressEvent(QMouseEvent* evt)
 {
-	// don't draw outside the map
-	//if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
-	//	(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
-	//	return;
+	// Don't process clicks outside of the tileset image
+	if ((evt->x() < 0) || (evt->y() < 0) || evt->x()  >= 16.0f || evt->y() >= 16.0f)
+		return;
 
 	//TODO : Check for mouse press events and paint walkability
 
@@ -100,33 +127,31 @@ void OverlayGrid::contentsMousePressEvent(QMouseEvent* evt)
 TilesetEditor::TilesetEditor(QWidget* parent, const QString& name, bool prop)
 	: QDialog(parent, (const char*)name)
 {
-	setCaption("Tileset Definition File Editor");
+	setCaption("Tileset Editor");
 
 	// Create GUI Items
-	_opentileset_pbut = new QPushButton("Open",this);
+	_opentileset_pbut = new QPushButton("Open", this);
 	_cancel_pbut = new QPushButton("Cancel", this);
 	_ok_pbut = new QPushButton("OK", this);
 	_cancel_pbut->setDefault(true);
 
-	// Create the overlay grid
-	_walkability_grid = new OverlayGrid;
-	_walkability_grid->resize(512,512);
-	_walkability_grid->setFixedWidth(512);
-	_walkability_grid->setFixedHeight(512);
+	// Create the window
+	_tset_display = new TilesetDisplay;
+	_tset_display->resize(512, 512);
+	_tset_display->setFixedWidth(512);
+	_tset_display->setFixedHeight(512);
 
 	// connect button signals
 	connect(_ok_pbut, SIGNAL(released()), this, SLOT(accept()));
 	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
-	connect(_opentileset_pbut, SIGNAL(clicked()), this, SLOT(_openTDF()));
+	connect(_opentileset_pbut, SIGNAL(clicked()), this, SLOT(_OpenFile()));
 
 	// Add all of the aforementioned widgets into a nice-looking grid layout
 	_dia_layout = new QGridLayout(this);
-
 	_dia_layout->addWidget(_opentileset_pbut, 0, 1);
 	_dia_layout->addWidget(_ok_pbut, 1, 1);
 	_dia_layout->addWidget(_cancel_pbut, 2, 1);
-	_dia_layout->addWidget(_walkability_grid,0,0,3,1);
-
+	_dia_layout->addWidget(_tset_display, 0, 0, 3, 1);
 }
 
 
@@ -137,37 +162,24 @@ TilesetEditor::~TilesetEditor()
 	delete _cancel_pbut;
 	delete _ok_pbut;
 	delete _dia_layout;
-	delete _walkability_grid;
+	delete _tset_display;
 }
 
 
 
-void TilesetEditor::_openTDF()
+void TilesetEditor::_OpenFile()
 {
 	// Get the filename to open through the OpenFileName dialog
 	QString file_name = QFileDialog::getOpenFileName(this, "HoA Level Editor -- File Open",
 		"dat/tilesets", "Tilesets (*.lua)");
 
-	// File name will contain only the name of the tileset.
+	// File name will contain only the name of the tileset->
 	int i = file_name.lastIndexOf("/");
 	file_name = file_name.remove(0, i + 1);
 	file_name.chop(4);
 
-	QString img_filename = QString("img/tilesets/" + file_name + ".png");
-	QString dat_filename = QString("dat/tilesets/" + file_name + ".lua");
-
-	// Load the tileset image.
-// 	_walkability_grid->tileset->Load(file_name);
-	_walkability_grid->tileset->tiles.clear();
-	_walkability_grid->tileset->tiles.resize(1);
-
-	_walkability_grid->tileset->tiles[0].SetDimensions(16.0f, 16.0f);
-	// Load image as still image
-	_walkability_grid->tileset->tiles[0].Load(std::string(img_filename.toAscii()),16,16);
-
-	_walkability_grid->updateGL();
-	//TODO : Load the tileset definition file
-	//walkability autotiling etc.
+	_tset_display->tileset->Load(file_name, true);
+	_tset_display->updateGL();
 }
 
 
