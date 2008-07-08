@@ -31,6 +31,8 @@ TilesetDisplay::TilesetDisplay()
 	// Red color with 50% transparency
 	_red_square.SetColor(Color(1.0f, 0.0f, 0.0f, 0.5f));
 	_red_square.SetDimensions(0.5f, 0.5f);
+
+	setMouseTracking(true);
 }
 
 
@@ -104,7 +106,7 @@ void TilesetDisplay::paintGL()
 
 
 
-void TilesetDisplay::resizeGL(int w,int h)
+void TilesetDisplay::resizeGL(int w, int h)
 {
 	VideoManager->SetResolution(512, 512);
 	VideoManager->ApplySettings();
@@ -112,14 +114,32 @@ void TilesetDisplay::resizeGL(int w,int h)
 
 
 
-void TilesetDisplay::contentsMousePressEvent(QMouseEvent* evt)
+void TilesetDisplay::mousePressEvent(QMouseEvent* evt)
 {
 	// Don't process clicks outside of the tileset image
-	if ((evt->x() < 0) || (evt->y() < 0) || evt->x()  >= 16.0f || evt->y() >= 16.0f)
+	if ((evt->x() < 0) || (evt->y() < 0) || evt->x() >= 512 || evt->y() >= 512)
 		return;
 
-	//TODO : Check for mouse press events and paint walkability
+	// Determine which tile the user clicked
+	int32 tile_x, tile_y;
+	tile_x = evt->x() / 32;
+	tile_y = evt->y() / 32;
 
+	// Now determine which quadrant of that tile was clicked, and change it's walkability status
+	if (((evt->x() % 32) < 16) && ((evt->y() % 32) < 16)) { // Upper left quadrant (index 0)
+		tileset->walkability[tile_y * 16 + tile_x][0] = (tileset->walkability[tile_y * 16 + tile_x][0] ? 0 : 1);
+	}
+	else if (((evt->x() % 32) >= 16) && ((evt->y() % 32) < 16)) { // Upper right quadrant (index 1)
+		tileset->walkability[tile_y * 16 + tile_x][1] = (tileset->walkability[tile_y * 16 + tile_x][1] ? 0 : 1);
+	}
+	else if (((evt->x() % 32) < 16) && ((evt->y() % 32) >= 16)) { // Lower left quadrant (index 2)
+		tileset->walkability[tile_y * 16 + tile_x][2] = (tileset->walkability[tile_y * 16 + tile_x][2] ? 0 : 1);
+	}
+	else if (((evt->x() % 32) >= 16) && ((evt->y() % 32) >= 16)) { // Lower right quadrant (index 3)
+		tileset->walkability[tile_y * 16 + tile_x][3] = (tileset->walkability[tile_y * 16 + tile_x][3] ? 0 : 1);
+	}
+
+	updateGL();
 } // contentsMousePressEvent(...)
 
 ////////////////////////////////////////////////////////////////////////////////

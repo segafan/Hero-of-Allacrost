@@ -71,10 +71,11 @@ public:
 
 	/** \brief Creates a new tileset object using only a tileset image
 	*** \param img_filename The path + name of the image file to use for the tileset
+	*** \param one_image If true, the tiles vector will contain a single image for the entire tileset
 	*** \return True if the tileset image was loaded successfully
 	*** \note A tileset image is required to use this function, but nothing else
 	**/
-// 	virtual bool New(const QString& img_filename);
+	virtual bool New(const QString& img_filename, bool one_image = false);
 
 	/** \brief Loads the tileset definition file and stores its data in the class containers
 	*** \param set_name The unique name that identifies the tileset (not a filename)
@@ -84,7 +85,11 @@ public:
 	**/
 	virtual bool Load(const QString& set_name, bool one_image = false);
 
-	//void Save();
+	/** \brief Saves the tileset data to its tileset definition file
+	*** \return True if the save operation was successful
+	***
+	**/
+	bool Save();
 
 	//! \brief The name of the tileset this table is representing.
 	QString tileset_name;

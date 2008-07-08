@@ -44,8 +44,56 @@ Tileset::~Tileset()
 
 
 
+bool Tileset::New(const QString& img_filename, bool one_image)
+{
+	_initialized = false;
+
+	// Retreive the tileset name from the image filename
+	tileset_name = img_filename;
+	tileset_name = tileset_name.remove(0, tileset_name.lastIndexOf("/") + 1);
+	tileset_name.chop(4);
+
+	// Prepare the tile vector and load the tileset image
+	if (one_image == true) {
+		tiles.clear();
+		tiles.resize(1);
+		tiles[0].SetDimensions(16.0f, 16.0f);
+		if (tiles[0].Load(string(img_filename.toAscii()), 16, 16) == false) {
+			qDebug("Failed to load tileset image: " + img_filename);
+			return false;
+		}
+	}
+	else {
+		tiles.clear();
+		tiles.resize(256);
+		for (uint32 i = 0; i < 256; i++)
+			tiles[i].SetDimensions(1.0f, 1.0f);
+		if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false) {
+			qDebug("Failed to load tileset image: " + img_filename);
+			return false;
+		}
+	}
+
+	// Initialize the rest of the tileset data
+	vector<int32> blank_entry(4, 0);
+	for (uint32 i = 0; i < 16; i++) {
+		for (uint32 j = 0; j < 16; j++) {
+			walkability.insert(make_pair(i * 16 + j, blank_entry));
+		}
+	}
+
+	autotileability.clear();
+//	_animated_tiles.clear();
+
+	_initialized = true;
+	return true;
+}
+
+
+
 bool Tileset::Load(const QString& set_name, bool one_image)
 {
+	_initialized = false;
 	tileset_name = set_name;
 
 	// Create filenames from the tileset name
@@ -153,47 +201,70 @@ bool Tileset::Load(const QString& set_name, bool one_image)
 } // bool Tileset::Load(const QString& name)
 
 
-/*
-void Tileset::Save() {
+
+bool Tileset::Save() {
 	string dat_filename = "dat/tilesets/" + string(tileset_name.toAscii()) + ".lua";
 	string img_filename = "img/tilesets/" + string(tileset_name.toAscii()) + ".png";
 	WriteScriptDescriptor write_data;
 
-	// Write global infos
-	write_data.OpenFile(dat_filename); // NOTE: return value of this function should be checked!!!
+	if (write_data.OpenFile(dat_filename) == false) {
+		return false;
+	}
+
+	// Write the localization namespace for the tileset file
+	write_data.WriteNamespace(tileset_name.toStdString());
 	write_data.InsertNewLine();
-	write_data.WriteString("file_name",dat_filename);
-	write_data.WriteString("image",dat_filename);
-	write_data.WriteInt("num_tile_cols",table->numCols());
-	write_data.WriteInt("num_tile_rows",table->numRows());
+
+	// Write basic tileset properties
+	write_data.WriteString("file_name", dat_filename);
+	write_data.WriteString("image", img_filename);
+	write_data.WriteInt("num_tile_cols", 16);
+	write_data.WriteInt("num_tile_rows", 16);
 	write_data.InsertNewLine();
 
 	// Write walkability data
 	write_data.BeginTable("walkability");
-	for(int row=0;row<table->numRows();row++) {
+	for (uint32 row = 0; row < 16; row++) {
 		write_data.BeginTable(row);
-		for(int col=0;col<table->numCols();col++) {
-			write_data.WriteIntVector(col,this->walkability[row*16+col]);
+		for (uint32 col = 0; col < 16; col++) {
+			write_data.WriteIntVector(col, walkability[row * 16 + col]);
 		}
 		write_data.EndTable();
 	}
 	write_data.EndTable();
 
-	// Write animated tiles
-	write_data.BeginTable("animated_tiles");
-	for(int i=0;i<_animated_tiles.size();i++) {
-		vector<int32> data;
-		for(int c=0;c<_animated_tiles[i].size();c++) {
-			data.push_back(_animated_tiles[i][c].tile_id);
-			data.push_back(_animated_tiles[i][c].time);
-		}
-		write_data.WriteIntVector(i+1,data);
-	}
-	write_data.EndTable();
+	// Write animated tile data
+	// TODO: animated tiles not supported in editor yet
+// 	write_data.BeginTable("animated_tiles");
+// 	for (uint32 i = 0; i < _animated_tiles.size(); i++) {
+// 		vector<int32> data;
+// 		for (uint32 c = 0; c <_animated_tiles[i].size(); c++) {
+// 			data.push_back(_animated_tiles[i][c].tile_id);
+// 			data.push_back(_animated_tiles[i][c].time);
+// 		}
+// 		write_data.WriteIntVector(i + 1,data);
+// 	}
+// 	write_data.EndTable();
 
-	write_data.CloseFile();
-}
-*/
+	// Write autotiling data
+	// TODO: autotiling not supported in editor yet
+// 	write_data.BeginTable("autotiling");
+// 	for (map<int, string>::iterator i = autotileability.begin(); i != autotileability.end(); i++) {
+// 		write_data.WriteString((*i).first, (*i).second);
+// 	}
+// 	write_data.EndTable();
+
+	if (write_data.IsErrorDetected() == true) {
+		cerr << "Errors were detected when saving tileset file. The errors include: " << endl;
+		cerr << write_data.GetErrorMessages() << endl;
+		write_data.CloseFile();
+		return false;
+	}
+	else {
+		write_data.CloseFile();
+		return true;
+	}
+} // bool Tileset::Save()
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////// TilesetTable class
