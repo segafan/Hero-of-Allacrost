@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="Allacrost"
 	ProjectGUID="{090248BB-5514-4846-A563-695576F3D685}"
 	RootNamespace="Allacrost"
@@ -271,6 +271,10 @@
 			</File>
 			<File
 				RelativePath=".\src\global\global_actors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_effects.h"
 				>
 			</File>
 			<File
@@ -547,6 +551,10 @@
 			</File>
 			<File
 				RelativePath=".\src\global\global_actors.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_effects.cpp"
 				>
 			</File>
 			<File
