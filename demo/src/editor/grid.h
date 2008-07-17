@@ -61,7 +61,7 @@ class Grid: public QGLWidget
 
 		//! Returns the map's modified status.
 		bool GetChanged() const { return _changed; }
-		//! Sets the map's modified status;
+		//! Sets the map's modified status.
 		void SetChanged(bool value);
 		QString GetFileName() const { return _file_name; }
 		void    SetFileName(QString filename); // sets the map's file name
@@ -110,12 +110,25 @@ class Grid: public QGLWidget
 		 */
 		void SaveMap();
 
+		//! \name Context (Right-Clicking) Modification Functions
+		//! \brief Functions to insert or delete rows or columns from the map.
+		//! \note Currently accessed by right-clicking on the map. Could be used elsewhere if the proper
+		//!       tile index is passed as a parameter.
+		//! \param tile_index An ID (0 - width*height-1) of the tile used to determine the row or column
+		//!                   upon which to perform the operation.
+		//{@
+		void InsertRow(int tile_index);
+		void InsertCol(int tile_index);
+		void DeleteRow(int tile_index);
+		void DeleteCol(int tile_index);
+		//@}
+
 		//! List of the tileset names being used.
 		QStringList tileset_names;
 		//! A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage.
 		std::vector<Tileset*> tilesets;
 		//! A list which contains a pointer to each sprite, I use list which is because of its efficient.
-		std::list<MapSprite* > sprites;
+		std::list<MapSprite*> sprites;
 
 		//! A list containing the names of each context.
 		//! \note Should have a max size of 32. That's the max amount of contexts.

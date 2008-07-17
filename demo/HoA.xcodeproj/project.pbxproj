@@ -41,8 +41,6 @@
 		49A1AC690CF4381D00AF23FE /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
 		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
 		49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */; };
-		D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
-		D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
 		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
 		D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
 		D41148330D15F00E005F0A3F /* defs_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148320D15F00E005F0A3F /* defs_engine.cpp */; };
@@ -64,6 +62,8 @@
 		D44096410C45E37300E58975 /* script_read.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096390C45E37300E58975 /* script_read.cpp */; };
 		D44096430C45E37300E58975 /* script_write.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440963B0C45E37300E58975 /* script_write.cpp */; };
 		D46D59760C8A6C1A0074DFF0 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
+		D47843D80E1B3B0400FD76F7 /* tileset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */; };
+		D47843F90E1B452800FD76F7 /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA680B02B27F0052BF1E /* grid.cpp */; };
 		D48901A40D15FC2E003940F4 /* Qt3Support.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC600D15FBE3003940F4 /* Qt3Support.framework */; };
 		D48901A50D15FC2E003940F4 /* QtCore.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC610D15FBE3003940F4 /* QtCore.framework */; };
 		D48901A60D15FC2E003940F4 /* QtGui.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC620D15FBE3003940F4 /* QtGui.framework */; };
@@ -89,7 +89,6 @@
 		D489FC6C0D15FBE3003940F4 /* QtSql.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC650D15FBE3003940F4 /* QtSql.framework */; };
 		D489FC6D0D15FBE3003940F4 /* QtXml.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC660D15FBE3003940F4 /* QtXml.framework */; };
 		D49850D40C82AEA50067770B /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
-		D49A546A0DB28D2E00FBD800 /* sprites.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49A54680DB28D2E00FBD800 /* sprites.cpp */; };
 		D49A54B90DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D49A54B80DB2BD8400FBD800 /* libintl.dylib */; };
 		D49A54BA0DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D49A54B80DB2BD8400FBD800 /* libintl.dylib */; };
 		D49D57020C65B1C1006E6ABA /* audio_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49D57010C65B1C1006E6ABA /* audio_effects.cpp */; };
@@ -100,13 +99,23 @@
 		D4B00DD70D15F1A200A5DBB1 /* global_skills.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629620AF50B1F00B6A328 /* global_skills.cpp */; };
 		D4B00DE00D15F25F00A5DBB1 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4E0AF407BE004DD3A3 /* system.cpp */; };
 		D4B00DE40D15F29F00A5DBB1 /* mode_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */; };
+		D4B34E5B0E2327270067C913 /* dialog_boxes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F900F20DA2010800F10953 /* dialog_boxes.cpp */; };
+		D4B34E5C0E23272A0067C913 /* skill_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */; };
+		D4B34E5D0E23272D0067C913 /* sprites.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49A54680DB28D2E00FBD800 /* sprites.cpp */; };
+		D4B34E5E0E23272F0067C913 /* tileset_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4EDF4DE0CB477130064919D /* tileset_editor.cpp */; };
+		D4B34E630E2327590067C913 /* dialog_boxes.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F901260DA214E100F10953 /* dialog_boxes.moc.cpp */; };
+		D4B34E640E23275A0067C913 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
+		D4B34E650E23275B0067C913 /* skill_editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */; };
+		D4B34E660E23275C0067C913 /* tileset_editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F0F4330CDE7CD000EFE9B0 /* tileset_editor.moc.cpp */; };
+		D4B34E740E2328540067C913 /* global_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4B34E720E2328540067C913 /* global_effects.cpp */; };
+		D4B34E750E2328540067C913 /* global_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4B34E720E2328540067C913 /* global_effects.cpp */; };
 		D4CD69C30DB3302300FF17CD /* SDL_net.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
 		D4CD69C60DB3331800FF17CD /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
 		D4CE3FB60BC9A11500CA3D30 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB160BAF28B700013185 /* dat */; };
 		D4CE3FB70BC9A11900CA3D30 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB320BAF28B800013185 /* img */; };
 		D4CE3FB80BC9A11D00CA3D30 /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
 		D4CE3FB90BC9A12100CA3D30 /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
-		D4D02B720B0656E500772C78 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4941A7630AC1DCA500D65B8E /* SDLMain.m */; };
+		D4D0FA820E1A02A300B9EC20 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
 		D4D1664E0BC0D91400190FC0 /* effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166290BC0D91300190FC0 /* effects.cpp */; };
 		D4D1664F0BC0D91400190FC0 /* fade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662A0BC0D91300190FC0 /* fade.cpp */; };
 		D4D166510BC0D91400190FC0 /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662C0BC0D91300190FC0 /* gui.cpp */; };
@@ -137,29 +146,20 @@
 		D4D166920BC0D91400190FC0 /* video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166480BC0D91400190FC0 /* video.cpp */; };
 		D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */; };
 		D4D1BA6F0B02B27F0052BF1E /* editor_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA670B02B27F0052BF1E /* editor_main.cpp */; };
-		D4D1BA700B02B27F0052BF1E /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA680B02B27F0052BF1E /* grid.cpp */; };
-		D4D1BA720B02B27F0052BF1E /* tileset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */; };
 		D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */; };
 		D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
 		D4D1BA8B0B02B4400052BF1E /* Editor-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */; };
-		D4D1BF180B02B5F30052BF1E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7670AC1DCDF00D65B8E /* Cocoa.framework */; };
 		D4D1BF450B02B6510052BF1E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7130AC1D89300D65B8E /* OpenGL.framework */; };
 		D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
 		D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */; };
 		D4DDE3940C4A15EE00937677 /* battle_actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DDE3930C4A15EE00937677 /* battle_actions.cpp */; };
 		D4E561270BB71B53002FB758 /* defs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4E561260BB71B53002FB758 /* defs.cpp */; };
 		D4E8089F0D485241006D641C /* map_tiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4E8089D0D485241006D641C /* map_tiles.cpp */; };
-		D4EDF4E00CB477130064919D /* tileset_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4EDF4DE0CB477130064919D /* tileset_editor.cpp */; };
 		D4EE2D640BE85F5B00B7112A /* boot_welcome.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */; };
-		D4F0F4340CDE7CD000EFE9B0 /* tileset_editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F0F4330CDE7CD000EFE9B0 /* tileset_editor.moc.cpp */; };
 		D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110400C58546800ADC969 /* audio_descriptor.cpp */; };
 		D4F1104C0C58548B00ADC969 /* audio_input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110460C58548B00ADC969 /* audio_input.cpp */; };
 		D4F1104E0C58548B00ADC969 /* audio_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110480C58548B00ADC969 /* audio_stream.cpp */; };
-		D4F2EB280D111B4300A2F1D7 /* skill_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */; };
-		D4F2EB2F0D111C7D00A2F1D7 /* skill_editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */; };
 		D4F71F9C0B06BC8D00361DA9 /* socket.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4500AF5412600940A6C /* socket.h */; };
-		D4F900F40DA2010800F10953 /* dialog_boxes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F900F20DA2010800F10953 /* dialog_boxes.cpp */; };
-		D4F901270DA214E100F10953 /* dialog_boxes.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F901260DA214E100F10953 /* dialog_boxes.moc.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -307,6 +307,12 @@
 		D49A54B80DB2BD8400FBD800 /* libintl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libintl.dylib; path = "../allacrost-dep/lib/libintl.dylib"; sourceTree = SOURCE_ROOT; };
 		D49D57010C65B1C1006E6ABA /* audio_effects.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_effects.cpp; sourceTree = "<group>"; };
 		D49D57030C65B1D2006E6ABA /* audio_effects.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_effects.h; sourceTree = "<group>"; };
+		D49FED120E14B7080083CF3E /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
+		D49FEDEB0E14B8EC0083CF3E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		D49FEDEF0E14B94C0083CF3E /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		D4B34E720E2328540067C913 /* global_effects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = global_effects.cpp; sourceTree = "<group>"; };
+		D4B34E730E2328540067C913 /* global_effects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = global_effects.h; sourceTree = "<group>"; };
+		D4D0F94A0E1A021400B9EC20 /* standarddialogs.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = standarddialogs.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4D166250BC0D91300190FC0 /* color.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = color.h; sourceTree = "<group>"; };
 		D4D166260BC0D91300190FC0 /* context.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
 		D4D166270BC0D91300190FC0 /* coord_sys.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = coord_sys.h; sourceTree = "<group>"; };
@@ -397,7 +403,6 @@
 				D48901AF0D15FCD3003940F4 /* SDL_ttf.framework in Frameworks */,
 				D48901AE0D15FCCA003940F4 /* SDL.framework in Frameworks */,
 				D4D1BF450B02B6510052BF1E /* OpenGL.framework in Frameworks */,
-				D4D1BF180B02B5F30052BF1E /* Cocoa.framework in Frameworks */,
 				D489FC670D15FBE3003940F4 /* Qt3Support.framework in Frameworks */,
 				D489FC680D15FBE3003940F4 /* QtCore.framework in Frameworks */,
 				D489FC690D15FBE3003940F4 /* QtGui.framework in Frameworks */,
@@ -427,6 +432,7 @@
 			children = (
 				4941A4B00AC1D77500D65B8E /* Allacrost.app */,
 				D4D1BA490B02B1DB0052BF1E /* Editor.app */,
+				D4D0F94A0E1A021400B9EC20 /* standarddialogs.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -564,6 +570,9 @@
 		4941A7120AC1D87200D65B8E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D49FEDEF0E14B94C0083CF3E /* Carbon.framework */,
+				D49FEDEB0E14B8EC0083CF3E /* AppKit.framework */,
+				D49FED120E14B7080083CF3E /* ApplicationServices.framework */,
 				D489FC600D15FBE3003940F4 /* Qt3Support.framework */,
 				D489FC610D15FBE3003940F4 /* QtCore.framework */,
 				D489FC620D15FBE3003940F4 /* QtGui.framework */,
@@ -584,6 +593,8 @@
 		499629610AF50B1F00B6A328 /* global */ = {
 			isa = PBXGroup;
 			children = (
+				D4B34E720E2328540067C913 /* global_effects.cpp */,
+				D4B34E730E2328540067C913 /* global_effects.h */,
 				D41148340D15F029005F0A3F /* defs_global.cpp */,
 				499629620AF50B1F00B6A328 /* global_skills.cpp */,
 				499629630AF50B1F00B6A328 /* global_objects.h */,
@@ -946,6 +957,7 @@
 				D41148350D15F029005F0A3F /* defs_global.cpp in Sources */,
 				D41148370D15F053005F0A3F /* defs_modes.cpp in Sources */,
 				D4E8089F0D485241006D641C /* map_tiles.cpp in Sources */,
+				D4B34E750E2328540067C913 /* global_effects.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -953,20 +965,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4D02B720B0656E500772C78 /* SDLMain.m in Sources */,
-				D4F900F40DA2010800F10953 /* dialog_boxes.cpp in Sources */,
 				D4D1BA6F0B02B27F0052BF1E /* editor_main.cpp in Sources */,
 				D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */,
-				D4D1BA700B02B27F0052BF1E /* grid.cpp in Sources */,
-				D4F2EB280D111B4300A2F1D7 /* skill_editor.cpp in Sources */,
-				D49A546A0DB28D2E00FBD800 /* sprites.cpp in Sources */,
-				D4D1BA720B02B27F0052BF1E /* tileset.cpp in Sources */,
-				D4EDF4E00CB477130064919D /* tileset_editor.cpp in Sources */,
-				D4F901270DA214E100F10953 /* dialog_boxes.moc.cpp in Sources */,
-				D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */,
-				D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */,
-				D4F2EB2F0D111C7D00A2F1D7 /* skill_editor.moc.cpp in Sources */,
-				D4F0F4340CDE7CD000EFE9B0 /* tileset_editor.moc.cpp in Sources */,
+				D47843F90E1B452800FD76F7 /* grid.cpp in Sources */,
+				D4B34E5B0E2327270067C913 /* dialog_boxes.cpp in Sources */,
+				D4B34E5C0E23272A0067C913 /* skill_editor.cpp in Sources */,
+				D4B34E5D0E23272D0067C913 /* sprites.cpp in Sources */,
+				D4B34E5E0E23272F0067C913 /* tileset_editor.cpp in Sources */,
+				D47843D80E1B3B0400FD76F7 /* tileset.cpp in Sources */,
+				D4D0FA820E1A02A300B9EC20 /* editor.moc.cpp in Sources */,
+				D4B34E630E2327590067C913 /* dialog_boxes.moc.cpp in Sources */,
+				D4B34E640E23275A0067C913 /* grid.moc.cpp in Sources */,
+				D4B34E650E23275B0067C913 /* skill_editor.moc.cpp in Sources */,
+				D4B34E660E23275C0067C913 /* tileset_editor.moc.cpp in Sources */,
 				D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */,
 				D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */,
 				D41AC1DE0C4C7CAE0097B042 /* script.cpp in Sources */,
@@ -997,6 +1008,7 @@
 				D4B00DD70D15F1A200A5DBB1 /* global_skills.cpp in Sources */,
 				D4B00DE00D15F25F00A5DBB1 /* system.cpp in Sources */,
 				D4B00DE40D15F29F00A5DBB1 /* mode_manager.cpp in Sources */,
+				D4B34E740E2328540067C913 /* global_effects.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

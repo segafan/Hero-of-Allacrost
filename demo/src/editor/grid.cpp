@@ -758,6 +758,103 @@ void Grid::SaveMap()
 	_changed = false;
 } // SaveMap()
 
+void Grid::InsertRow(int tile_index)
+{
+	int row = tile_index / _width;
+	
+	for (int i = 0; i < static_cast<int>(context_names.size()); i++)
+	{
+		_lower_layer[i].insert(_lower_layer[i].begin() + row * _width, _width, -1);
+		_middle_layer[i].insert(_middle_layer[i].begin() + row * _width, _width, -1);
+		_upper_layer[i].insert(_upper_layer[i].begin() + row * _width, _width, -1);
+	} // iterate through all contexts
+	
+	_height++;
+	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+} // InsertRow(...)
+
+void Grid::InsertCol(int tile_index)
+{
+	int col = tile_index % _width;
+
+	for (int i = 0; i < static_cast<int>(context_names.size()); i++)
+	{
+		vector<int32>::iterator it = _lower_layer[i].begin() + col;
+		for (int row = 0; row < _height; row++)
+		{
+			it = _lower_layer[i].insert(it, -1);
+			it += _width + 1;
+		} // iterate through the rows of the lower layer
+
+		it = _middle_layer[i].begin() + col;
+		for (int row = 0; row < _height; row++)
+		{
+			it = _middle_layer[i].insert(it, -1);
+			it += _width + 1;
+		} // iterate through the rows of the middle layer
+
+		it = _upper_layer[i].begin() + col;
+		for (int row = 0; row < _height; row++)
+		{
+			it = _upper_layer[i].insert(it, -1);
+			it += _width + 1;
+		} // iterate through the rows of the upper layer
+	} // iterate through all contexts
+
+	_width++;
+	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+} // InsertCol(...)
+
+void Grid::DeleteRow(int tile_index)
+{
+	int row = tile_index / _width;
+
+	for (int i = 0; i < static_cast<int>(context_names.size()); i++)
+	{
+		_lower_layer[i].erase(_lower_layer[i].begin() + row * _width,
+			_lower_layer[i].begin() + row * _width + _width);
+		_middle_layer[i].erase(_middle_layer[i].begin() + row * _width,
+			_middle_layer[i].begin() + row * _width + _width);
+		_upper_layer[i].erase(_upper_layer[i].begin() + row * _width, 
+			_upper_layer[i].begin() + row * _width + _width);
+	} // iterate through all contexts
+
+	_height--;
+	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+} // DeleteRow(...)
+
+void Grid::DeleteCol(int tile_index)
+{
+	int col = tile_index % _width;
+
+	for (int i = 0; i < static_cast<int>(context_names.size()); i++)
+	{
+		vector<int32>::iterator it = _lower_layer[i].begin() + col;
+		for (int row = 0; row < _height; row++)
+		{
+			it = _lower_layer[i].erase(it);
+			it += _width - 1;
+		} // iterate through the rows of the lower layer
+
+		it = _middle_layer[i].begin() + col;
+		for (int row = 0; row < _height; row++)
+		{
+			it = _middle_layer[i].erase(it);
+			it += _width - 1;
+		} // iterate through the rows of the middle layer
+
+		it = _upper_layer[i].begin() + col;
+		for (int row = 0; row < _height; row++)
+		{
+			it = _upper_layer[i].erase(it);
+			it += _width - 1;
+		} // iterate through the rows of the upper layer
+	} // iterate through all contexts
+
+	_width--;
+	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+} // DeleteCol(...)
+
 
 
 // ********** Protected functions **********

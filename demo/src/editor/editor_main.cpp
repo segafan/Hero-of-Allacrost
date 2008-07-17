@@ -25,6 +25,10 @@
 using namespace std;
 using namespace hoa_editor;
 
+#ifdef main
+	#undef main
+#endif
+
 int main(int argc, char **argv)
 {
 #ifndef _WIN32
