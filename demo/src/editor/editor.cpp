@@ -195,7 +195,7 @@ void Editor::_MapMenuSetup()
 
 void Editor::_ScriptMenuSetup()
 {
-	cout << "Test!" << endl;
+	_edit_skill_action->setEnabled(false);
 } // _ScriptMenuSetup
 
 void Editor::_FileNew()
@@ -1797,98 +1797,22 @@ void EditorScrollView::keyPressEvent(QKeyEvent *evt)
 
 void EditorScrollView::_ContextInsertRow()
 {
-	int map_width = _map->GetWidth();
-	int row = _tile_index / map_width;
-
-	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
-	lower_layer.insert(lower_layer.begin() + row * map_width, map_width, -1);
-	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
-	middle_layer.insert(middle_layer.begin() + row * map_width, map_width, -1);
-	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
-	upper_layer.insert(upper_layer.begin() + row * map_width, map_width, -1);
-
-	Resize(map_width, _map->GetHeight() + 1);
+	_map->InsertRow(_tile_index);
 } // _ContextInsertRow()
 
 void EditorScrollView::_ContextInsertColumn()
 {
-	int map_width = _map->GetWidth();
-	int map_height = _map->GetHeight();
-	int col = _tile_index % map_width;
-
-	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
-	vector<int32>::iterator it = lower_layer.begin() + col;
-	for (int row = 0; row < map_height; row++)
-	{
-		it = lower_layer.insert(it, -1);
-		it += map_width + 1;
-	} // iterate through the rows of the lower layer
-
-	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
-	it = middle_layer.begin() + col;
-	for (int row = 0; row < map_height; row++)
-	{
-		it = middle_layer.insert(it, -1);
-		it += map_width + 1;
-	} // iterate through the rows of the middle layer
-
-	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
-	it = upper_layer.begin() + col;
-	for (int row = 0; row < map_height; row++)
-	{
-		it = upper_layer.insert(it, -1);
-		it += map_width + 1;
-	} // iterate through the rows of the upper layer
-
-	Resize(map_width + 1, map_height);
+	_map->InsertCol(_tile_index);
 } // _ContextInsertColumn()
 
 void EditorScrollView::_ContextDeleteRow()
 {
-	int map_width = _map->GetWidth();
-	int row = _tile_index / map_width;
-
-	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
-	lower_layer.erase(lower_layer.begin() + row * map_width, lower_layer.begin() + row * map_width + map_width);
-	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
-	middle_layer.erase(middle_layer.begin() + row * map_width, middle_layer.begin() + row * map_width + map_width);
-	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
-	upper_layer.erase(upper_layer.begin() + row * map_width, upper_layer.begin() + row * map_width + map_width);
-
-	Resize(map_width, _map->GetHeight() - 1);
+	_map->DeleteRow(_tile_index);
 } // _ContextDeleteRow()
 
 void EditorScrollView::_ContextDeleteColumn()
 {
-	int map_width = _map->GetWidth();
-	int map_height = _map->GetHeight();
-	int col = _tile_index % map_width;
-
-	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER, _map->GetContext());
-	vector<int32>::iterator it = lower_layer.begin() + col;
-	for (int row = 0; row < map_height; row++)
-	{
-		it = lower_layer.erase(it);
-		it += map_width - 1;
-	} // iterate through the rows of the lower layer
-
-	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER, _map->GetContext());
-	it = middle_layer.begin() + col;
-	for (int row = 0; row < map_height; row++)
-	{
-		it = middle_layer.erase(it);
-		it += map_width - 1;
-	} // iterate through the rows of the middle layer
-
-	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER, _map->GetContext());
-	it = upper_layer.begin() + col;
-	for (int row = 0; row < map_height; row++)
-	{
-		it = upper_layer.erase(it);
-		it += map_width - 1;
-	} // iterate through the rows of the upper layer
-
-	Resize(map_width - 1, map_height);
+	_map->DeleteCol(_tile_index);
 } // _ContextDeleteColumn()
 
 
