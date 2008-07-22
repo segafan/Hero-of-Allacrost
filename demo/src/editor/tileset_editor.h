@@ -101,18 +101,27 @@ public:
 	~TilesetEditor();
 
 private slots:
-	//! Loads a TDF file
+	//! \brief Creates a new tileset definition file by loading a tileset image
+	void _NewFile();
+
+	//! \brief Loads a TDF file
 	void _OpenFile();
 
+	//! \brief Saves the modified tileset definition file
+	void _SaveFile();
+
 private:
-	//! A pushbutton for opening a new tileset
-	QPushButton* _opentileset_pbut;
+	//! A push button for creating a new tileset
+	QPushButton* _new_pbut;
 
-	//! A pushbutton for canceling the tileset_editor
-	QPushButton* _cancel_pbut;
+	//! A push button for opening an existing tileset
+	QPushButton* _open_pbut;
 
-	//! A pushbutton for okaying the tileset_editor
-	QPushButton* _ok_pbut;
+	//! A push button for saving the current tileset
+	QPushButton* _save_pbut;
+
+	//! A push button for exiting out of the tileset editor
+	QPushButton* _exit_pbut;
 
 	//! A layout to manage all the labels, spinboxes, and listviews.
 	QGridLayout* _dia_layout;
