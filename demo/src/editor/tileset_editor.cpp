@@ -152,10 +152,11 @@ TilesetEditor::TilesetEditor(QWidget* parent, const QString& name, bool prop)
 	setCaption("Tileset Editor");
 
 	// Create GUI Items
-	_opentileset_pbut = new QPushButton("Open", this);
-	_cancel_pbut = new QPushButton("Cancel", this);
-	_ok_pbut = new QPushButton("OK", this);
-	_cancel_pbut->setDefault(true);
+	_new_pbut = new QPushButton("New", this);
+	_open_pbut = new QPushButton("Open", this);
+	_save_pbut = new QPushButton("Save", this);
+	_exit_pbut = new QPushButton("Exit", this);
+	_exit_pbut->setDefault(true);
 
 	// Create the window
 	_tset_display = new TilesetDisplay;
@@ -164,15 +165,17 @@ TilesetEditor::TilesetEditor(QWidget* parent, const QString& name, bool prop)
 	_tset_display->setFixedHeight(512);
 
 	// connect button signals
-	connect(_ok_pbut, SIGNAL(released()), this, SLOT(accept()));
-	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
-	connect(_opentileset_pbut, SIGNAL(clicked()), this, SLOT(_OpenFile()));
+	connect(_new_pbut, SIGNAL(clicked()), this, SLOT(_NewFile()));
+	connect(_open_pbut, SIGNAL(clicked()), this, SLOT(_OpenFile()));
+	connect(_save_pbut, SIGNAL(clicked()), this, SLOT(_SaveFile()));
+	connect(_exit_pbut, SIGNAL(released()), this, SLOT(reject()));
 
 	// Add all of the aforementioned widgets into a nice-looking grid layout
 	_dia_layout = new QGridLayout(this);
-	_dia_layout->addWidget(_opentileset_pbut, 0, 1);
-	_dia_layout->addWidget(_ok_pbut, 1, 1);
-	_dia_layout->addWidget(_cancel_pbut, 2, 1);
+	_dia_layout->addWidget(_new_pbut, 0, 1);
+	_dia_layout->addWidget(_open_pbut, 1, 1);
+	_dia_layout->addWidget(_save_pbut, 2, 1);
+	_dia_layout->addWidget(_exit_pbut, 3, 1);
 	_dia_layout->addWidget(_tset_display, 0, 0, 3, 1);
 }
 
@@ -180,11 +183,24 @@ TilesetEditor::TilesetEditor(QWidget* parent, const QString& name, bool prop)
 
 TilesetEditor::~TilesetEditor()
 {
-	delete _opentileset_pbut;
-	delete _cancel_pbut;
-	delete _ok_pbut;
+	delete _new_pbut;
+	delete _open_pbut;
+	delete _save_pbut;
+	delete _exit_pbut;
 	delete _dia_layout;
 	delete _tset_display;
+}
+
+
+
+void TilesetEditor::_NewFile()
+{
+	// Get the filename to open through the OpenFileName dialog
+	QString file_name = QFileDialog::getOpenFileName(this, "HoA Level Editor -- File Open",
+		"img/tilesets", "Tileset Images (*.png)");
+
+	_tset_display->tileset->New(file_name, true);
+	_tset_display->updateGL();
 }
 
 
@@ -202,6 +218,16 @@ void TilesetEditor::_OpenFile()
 
 	_tset_display->tileset->Load(file_name, true);
 	_tset_display->updateGL();
+}
+
+
+void TilesetEditor::_SaveFile()
+{
+	if (_tset_display->tileset) {
+		if (_tset_display->tileset->Save() == false) {
+			// TODO: print error message
+		}
+	}
 }
 
 } // namespace hoa_editor
