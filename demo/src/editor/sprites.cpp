@@ -142,7 +142,7 @@ uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 
 void VirtualSprite::Update() {
 	//Update the alpha of the dialogue icon according to it's distance from the player to make it fade away
-	const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
+	// const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
 	//float icon_alpha = 1.0f - (abs( ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + abs(ComputeYLocation() -
 	//	MapMode::_current_map->_camera->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
 	//if (icon_alpha < 0)
@@ -169,8 +169,8 @@ void VirtualSprite::Update() {
 
 	if (moving) {
 		// Save the previous sprite's position temporarily
-		float tmp_x = x_offset;
-		float tmp_y = y_offset;
+		//float tmp_x = x_offset;
+		//float tmp_y = y_offset;
 
 		//float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
 		// Double the distance to move if the sprite is running
@@ -210,7 +210,7 @@ void VirtualSprite::Update() {
 						break;
 					}
 				}
-				
+
 				// Roll-over X position offsets if necessary
 				while (x_offset < 0.0f) {
 					x_position -= 1;
@@ -221,9 +221,9 @@ void VirtualSprite::Update() {
 					x_offset -= 1.0f;
 				}
 			}
-			
+
 			y_offset = tmp_y;
-			
+
 		}
 		else {
 			// Roll-over Y position offsets if necessary
@@ -268,7 +268,7 @@ void VirtualSprite::Update() {
 						break;
 					}
 				}
-				
+
 				// Roll-over Y position offsets if necessary
 				while (y_offset < 0.0f) {
 					y_position -= 1;
@@ -279,7 +279,7 @@ void VirtualSprite::Update() {
 					y_offset -= 1.0f;
 				}
 			}
-			
+
 			x_offset = tmp_x;
 		}
 		else {
@@ -637,7 +637,7 @@ void MapSprite::Update() {
 
 // Draw the appropriate sprite frame at the correct position on the screen
 void MapSprite::Draw() {
-	//if (MapObject::DrawHelper() == true) {	
+	//if (MapObject::DrawHelper() == true) {
 		animations[current_animation].SetHeight( img_height/2 );
 		animations[current_animation].SetWidth( img_half_width );
 		animations[current_animation].Draw();

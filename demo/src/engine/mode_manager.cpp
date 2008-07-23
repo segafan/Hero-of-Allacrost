@@ -131,7 +131,7 @@ uint8 GameModeManager::GetGameType() {
 
 // Returns the mode type of a game mode on the stack
 uint8 GameModeManager::GetGameType(uint32 index) {
-	if (static_cast<int>(_game_stack.size()) < index)
+	if (_game_stack.size() < index)
 		return MODE_MANAGER_DUMMY_MODE;
 	else
 		return _game_stack.at(_game_stack.size() - index)->mode_type;
@@ -149,7 +149,7 @@ GameMode* GameModeManager::GetTop() {
 
 // Returns a pointer to a game mode on the stack
 GameMode* GameModeManager::Get(uint32 index) {
-	if (static_cast<int>(_game_stack.size()) < index)
+	if (_game_stack.size() < index)
 		return NULL;
 	else
 		return _game_stack.at(_game_stack.size() - index);

@@ -273,7 +273,7 @@ void BattleMode::_TEMP_LoadTestData() {
 	if (_battle_background.Load("img/backdrops/battle/desert_cave.png", SCREEN_LENGTH * TILE_SIZE, SCREEN_HEIGHT * TILE_SIZE) == false) {
 		cerr << "BATTLE ERROR: Failed to load background image: " << endl;
 		_ShutDown();
-	}	
+	}
 }
 
 
@@ -427,7 +427,7 @@ void BattleMode::Update() {
 				AddMusic(_losing_music);
 				PlayMusic(_losing_music);
 			}
-			
+
 			_action_window.Reset();
 			_finish_window.Initialize(_victorious_battle);
 
@@ -738,7 +738,8 @@ void BattleMode::_SelectNextTarget(bool forward_direction) {
 		else
 		{
 			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
-			_selected_target = (_selected_target_index == INVALID_BATTLE_ACTOR_INDEX) ? NULL : _enemy_actors[_selected_target_index];
+			_selected_target = (static_cast<uint32>(_selected_target_index) == INVALID_BATTLE_ACTOR_INDEX) ?
+				NULL : _enemy_actors[_selected_target_index];
 		}
 
 	}
@@ -758,11 +759,12 @@ void BattleMode::_SelectNextTarget(bool forward_direction) {
 		else
 		{
 			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
-			_selected_target = (_selected_target_index == INVALID_BATTLE_ACTOR_INDEX) ? NULL : _enemy_actors[_selected_target_index];
+			_selected_target = (static_cast<uint32>(_selected_target_index) == INVALID_BATTLE_ACTOR_INDEX) ?
+				NULL : _enemy_actors[_selected_target_index];
 		}
 	}
 
-	if (previous_target != _selected_target_index)
+	if (previous_target != static_cast<uint32>(_selected_target_index))
 		_selected_attack_point = 0;
 } // void BattleMode::_SelectNextTarget(bool forward_direction)
 
@@ -1023,7 +1025,7 @@ uint32 BattleMode::GetIndexOfNextIdleCharacter(BattleCharacter *ignore) const
 	if (!_characters_awaiting_turn.size())
 	{
 		return INVALID_BATTLE_ACTOR_INDEX;
-	}	
+	}
 	else if (_characters_awaiting_turn.size() == 1 || !ignore)
 	{
 		character = _characters_awaiting_turn.front();
@@ -1060,7 +1062,7 @@ uint32 BattleMode::GetIndexOfNextIdleCharacter(BattleCharacter *ignore) const
 			return i;
 		}
 	}
-	
+
 	return INVALID_BATTLE_ACTOR_INDEX;
 }
 

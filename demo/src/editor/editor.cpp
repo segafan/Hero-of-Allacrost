@@ -1421,11 +1421,9 @@ vector<int32>& EditorScrollView::GetCurrentLayer()
 void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 {
 	// don't draw outside the map
-	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
-		(evt->x() / TILE_WIDTH)  >= _map->GetWidth()  ||
-		evt->x() < 0								  ||
-		evt->y() < 0
-		)
+	if ((evt->y() / TILE_HEIGHT) >= static_cast<uint32>(_map->GetHeight()) ||
+		(evt->x() / TILE_WIDTH)  >= static_cast<uint32>(_map->GetWidth()) ||
+		evt->x() < 0 || evt->y() < 0)
 		return;
 
 	// get reference to Editor
@@ -1517,11 +1515,9 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
 
 	// don't draw outside the map
-	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
-		(evt->x() / TILE_WIDTH)  >= _map->GetWidth()  ||
-		evt->x() < 0								  ||
-		evt->y() < 0
-		)
+	if ((evt->y() / TILE_HEIGHT) >= static_cast<uint32>(_map->GetHeight()) ||
+		(evt->x() / TILE_WIDTH)  >= static_cast<uint32>(_map->GetWidth()) ||
+		evt->x() < 0 || evt->y() < 0 )
 	{
 		editor->statusBar()->clear();
 		return;
@@ -1769,11 +1765,9 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 {
 	// Don't popup a menu outside the map.
-	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
-		(evt->x() / TILE_WIDTH)  >= _map->GetWidth()  ||
-		evt->x() < 0								  ||
-		evt->y() < 0
-		)
+	if ((evt->y() / TILE_HEIGHT) >= static_cast<uint32>(_map->GetHeight()) ||
+		(evt->x() / TILE_WIDTH)  >= static_cast<uint32>(_map->GetWidth()) ||
+		evt->x() < 0 || evt->y() < 0)
 		return;
 
 	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
