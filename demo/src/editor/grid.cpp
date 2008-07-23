@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ using namespace std;
 
 namespace hoa_editor
 {
-	LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy) 
+	LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy)
 	{
 		value = static_cast<LAYER_TYPE>(static_cast<int>(value) + 1);
 		return value;
@@ -35,7 +35,7 @@ namespace hoa_editor
 
 Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	: QGLWidget(parent, (const char*) name)
-{	
+{
 	_file_name = name;      // gives the map a name
 
 	// Initial size
@@ -52,8 +52,8 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	_ll_on = true;          // lower layer default to on
 	_ml_on = false;         // middle layer default to off
 	_ul_on = false;         // upper layer default to off
-	_ol_on = true;			// object layer default to off	
-	
+	_ol_on = true;			// object layer default to off
+
 	// Set mouse tracking
 	setMouseTracking(true);
 
@@ -151,7 +151,7 @@ void Grid::SetTexturesOn(bool value)
 	updateGL();
 } // SetTexturesOn(...)
 
-vector<int32>& Grid::GetLayer(LAYER_TYPE layer, int context) 
+vector<int32>& Grid::GetLayer(LAYER_TYPE layer, int context)
 {
 	switch(layer) {
 		case LOWER_LAYER:
@@ -173,12 +173,12 @@ vector<int32>& Grid::GetLayer(LAYER_TYPE layer, int context)
 	} // switch on the current layer
 } // GetLayer(...)
 
-void Grid::SetMusic(const QString& music_file) 
+void Grid::SetMusic(const QString& music_file)
 {
 	_music_file = music_file;
 } // SetMusic(...)
 
-const QString& Grid::GetMusic() const 
+const QString& Grid::GetMusic() const
 {
 	return _music_file;
 } // GetMusic()
@@ -208,7 +208,7 @@ void Grid::LoadMap()
 	_middle_layer.clear();
 	_upper_layer.clear();
 	_object_layer.clear();
-	
+
 	int num_contexts = read_data.ReadInt("num_map_contexts");
 	_height = read_data.ReadInt("num_tile_rows");
 	_width  = read_data.ReadInt("num_tile_cols");
@@ -246,7 +246,7 @@ void Grid::LoadMap()
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
 			_lower_layer.begin()->push_back(*it);
 		vect.clear();
-	} // iterate through the rows of the lower layer	
+	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
 
 	row_vect.clear();
@@ -286,7 +286,7 @@ void Grid::LoadMap()
 	for (uint32 i = 0; i < keys.size(); i++)
 	{
 		// Read lua spites and write to sprites vector
-		read_data.OpenTable( keys[i] );		
+		read_data.OpenTable( keys[i] );
 		(*it)->SetObjectID( read_data.ReadInt("object_id") );
 		(*it)->SetName( read_data.ReadString("name") );
 		(*it)->SetContext( read_data.ReadInt("context") );
@@ -300,14 +300,14 @@ void Grid::LoadMap()
 		(*it)->SetDirection( read_data.ReadInt("direction") );
 		(*it)->LoadStandardAnimations( read_data.ReadString("standard_animations") );
 		(*it)->LoadRunningAnimations( read_data.ReadString("running_animations") );
-		(*it)->SetFacePortrait( read_data.ReadString("face_portrait") );		
-		
+		(*it)->SetFacePortrait( read_data.ReadString("face_portrait") );
+
 		if( it != sprites.end() )
 			it++;
 		read_data.CloseTable();
 	}
 	read_data.CloseTable();
-	
+
 	// The map_grid is 4x as big as the map: 2x in the width and 2x in the height. Starting
 	// with row 0 (and doing the same thing for every row that is a multiple of 2), we take the first 2 entries,
 	// bit-wise AND them, and put them into a temporary vector called walk_temp. We keep doing this for every 2
@@ -409,11 +409,11 @@ void Grid::SaveMap()
 	WriteScriptDescriptor write_data;
 	int tileset_index;
 	int tile_index;
-	
+
 	ifstream file;
 	string before_text;
 	string after_text;
-	int32 before_pos, after_pos, read_bytes, bytes_to_read;
+	int32 before_pos = 0, after_pos = 0, read_bytes, bytes_to_read;
 	const char * BEFORE_TEXT_MARKER = "-- Allacrost map editor begin. Do not edit this line. --";
 	const char * AFTER_TEXT_MARKER =  "-- Allacrost map editor end. Do not edit this line. --";
 
@@ -429,7 +429,7 @@ void Grid::SaveMap()
 			if (strstr(buffer, BEFORE_TEXT_MARKER))
 				break;
 		}
-	
+
 		while (!file.eof()) {
 			file.clear();
 			file.getline(buffer, BUFFER_SIZE);
@@ -438,7 +438,7 @@ void Grid::SaveMap()
 				break;
 			}
 		}
-	
+
 		// Save everything before "map editor begin" into before_text
 		file.seekg(0);
 		read_bytes = 0;
@@ -452,7 +452,7 @@ void Grid::SaveMap()
 			before_text.append(buffer);
 			read_bytes += bytes_to_read;
 		}
-		
+
 		// Save everything after "map editor end" into after_text
 		file.seekg(after_pos);
 		while (!file.eof()) {
@@ -468,7 +468,7 @@ void Grid::SaveMap()
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
 		return;
 	}
-	
+
 	if (!before_text.empty())
 		write_data.WriteLine(before_text, false);
 
@@ -501,7 +501,7 @@ void Grid::SaveMap()
 	i = 0;
 	// First entry is the default base context. Every map has it, so no need to save it.
 	QStringList::Iterator qit = context_names.begin();
-	qit++;     
+	qit++;
 	for (; qit != context_names.end(); ++qit)
 	{
 		i++;
@@ -761,14 +761,14 @@ void Grid::SaveMap()
 void Grid::InsertRow(int tile_index)
 {
 	int row = tile_index / _width;
-	
+
 	for (int i = 0; i < static_cast<int>(context_names.size()); i++)
 	{
 		_lower_layer[i].insert(_lower_layer[i].begin() + row * _width, _width, -1);
 		_middle_layer[i].insert(_middle_layer[i].begin() + row * _width, _width, -1);
 		_upper_layer[i].insert(_upper_layer[i].begin() + row * _width, _width, -1);
 	} // iterate through all contexts
-	
+
 	_height++;
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
 } // InsertRow(...)
@@ -815,7 +815,7 @@ void Grid::DeleteRow(int tile_index)
 			_lower_layer[i].begin() + row * _width + _width);
 		_middle_layer[i].erase(_middle_layer[i].begin() + row * _width,
 			_middle_layer[i].begin() + row * _width + _width);
-		_upper_layer[i].erase(_upper_layer[i].begin() + row * _width, 
+		_upper_layer[i].erase(_upper_layer[i].begin() + row * _width,
 			_upper_layer[i].begin() + row * _width + _width);
 	} // iterate through all contexts
 
@@ -866,9 +866,9 @@ void Grid::initializeGL()
 	// Recreate the video engine's singleton
 	VideoManager = GameVideo::SingletonCreate();
 	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
-	
+
 	VideoManager->SingletonInitialize();
-		
+
 	VideoManager->ApplySettings();
 	VideoManager->FinalizeInitialization();
 	VideoManager->ToggleFPS();
@@ -942,12 +942,12 @@ void Grid::paintGL()
 
 	// Draw object layer
 	if (_ol_on)
-	{	
+	{
 		for ( std::list<MapSprite* >::iterator sprite = sprites.begin(); sprite != sprites.end(); sprite++ )
 		{
 			if ( (*sprite) != NULL )
-				if ( (*sprite)->GetContext() == _context )
-				{	
+				if ( (*sprite)->GetContext() == static_cast<uint32>(_context) )
+				{
 					VideoManager->Move( (*sprite)->ComputeDrawXLocation() - 0.2f,
 										(*sprite)->ComputeDrawYLocation() + (*sprite)->img_height*3/8 - 0.4f );
 					(*sprite)->DrawSelection();
@@ -982,7 +982,7 @@ void Grid::paintGL()
 			else
 				VideoManager->MoveRelative(1.0f, 0.0f);
 		} // iterate through upper layer
-	} // upper layer must be viewable	
+	} // upper layer must be viewable
 
 	// If selection rectangle mode is on, draw it
 	if (_select_on)
