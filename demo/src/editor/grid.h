@@ -71,6 +71,7 @@ class Grid: public QGLWidget
 		void SetHeight(int height);         // sets the map's height in tiles (rows)
 		void SetWidth(int width);           // sets the map's width in tiles (columns)
 		void SetContext(int context);       // sets the map's active context
+		void SetInitialized(bool ready);    // sets the map's ready to be drawn, completely loaded flag
 		void SetLLOn(bool value);           // sets lower layer on/off
 		void SetMLOn(bool value);           // sets middle layer on/off
 		void SetULOn(bool value);           // sets upper layer on/off
@@ -156,6 +157,8 @@ class Grid: public QGLWidget
 
 		//! When TRUE the map has been modified.
 		bool _changed;
+		//! When TRUE the map is ready to be drawn.
+		bool _initialized;
 		//! When TRUE the grid between tiles is displayed.
 		bool _grid_on;
 		//! When TRUE the rectangle of chosen tiles is displayed.

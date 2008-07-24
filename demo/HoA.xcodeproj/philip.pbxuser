@@ -185,8 +185,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 237969249;
-			PBXWorkspaceStateSaveDate = 237969249;
+			PBXPerProjectTemplateStateSaveDate = 238569408;
+			PBXWorkspaceStateSaveDate = 238569408;
 		};
 		perUserProjectItems = {
 			D49A547A0DB29AE400FBD800 /* PBXTextBookmark */ = D49A547A0DB29AE400FBD800 /* PBXTextBookmark */;
@@ -588,8 +588,9 @@
 	};
 	D438C79E0C9117650032F79E /* texture_controller.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {980, 3304}}";
-			sepNavSelRange = "{3312, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {860, 3080}}";
+			sepNavSelRange = "{8663, 0}";
+			sepNavVisRange = "{8291, 846}";
 			sepNavVisRect = "{{0, 769}, {711, 617}}";
 			sepNavWindowFrame = "{{15, 27}, {750, 746}}";
 		};
@@ -709,8 +710,9 @@
 	};
 	D4D1662E0BC0D91300190FC0 /* image.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1016, 23436}}";
-			sepNavSelRange = "{27345, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {908, 23268}}";
+			sepNavSelRange = "{24803, 0}";
+			sepNavVisRange = "{24523, 656}";
 			sepNavVisRect = "{{0, 3922}, {672, 263}}";
 			sepNavWindowFrame = "{{38, 6}, {750, 746}}";
 		};
@@ -754,7 +756,7 @@
 		enableDebugStr = 1;
 		environmentEntries = (
 			{
-				active = YES;
+				active = NO;
 				name = DYLD_PRINT_LIBRARIES;
 				value = 1;
 			},
@@ -804,11 +806,11 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {691, 33446}}";
-			sepNavSelRange = "{6003, 0}";
-			sepNavVisRange = "{4886, 1314}";
+			sepNavIntBoundsRect = "{{0, 0}, {691, 33614}}";
+			sepNavSelRange = "{8195, 0}";
+			sepNavVisRange = "{6831, 1742}";
 			sepNavVisRect = "{{1, 5369}, {711, 617}}";
-			sepNavWindowFrame = "{{3, 4}, {750, 774}}";
+			sepNavWindowFrame = "{{13, 4}, {750, 774}}";
 		};
 	};
 	D4D1BA660B02B27F0052BF1E /* editor.h */ = {
@@ -822,47 +824,47 @@
 	};
 	D4D1BA670B02B27F0052BF1E /* editor_main.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {691, 952}}";
-			sepNavSelRange = "{1579, 0}";
-			sepNavVisRange = "{1188, 823}";
+			sepNavIntBoundsRect = "{{0, 0}, {691, 882}}";
+			sepNavSelRange = "{1003, 0}";
+			sepNavVisRange = "{193, 1050}";
 			sepNavVisRect = "{{0, 0}, {711, 429}}";
 			sepNavWindowFrame = "{{523, 8}, {750, 558}}";
 		};
 	};
 	D4D1BA680B02B27F0052BF1E /* grid.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {944, 14168}}";
-			sepNavSelRange = "{26494, 0}";
-			sepNavVisRange = "{25235, 1442}";
+			sepNavIntBoundsRect = "{{0, 0}, {691, 14420}}";
+			sepNavSelRange = "{28470, 0}";
+			sepNavVisRange = "{26731, 1303}";
 			sepNavVisRect = "{{0, 1466}, {711, 429}}";
 			sepNavWindowFrame = "{{531, 4}, {750, 774}}";
 		};
 	};
 	D4D1BA690B02B27F0052BF1E /* grid.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {691, 2730}}";
-			sepNavSelRange = "{4198, 0}";
-			sepNavVisRange = "{3408, 1759}";
+			sepNavIntBoundsRect = "{{0, 0}, {691, 2772}}";
+			sepNavSelRange = "{2484, 0}";
+			sepNavVisRange = "{1407, 1969}";
 			sepNavVisRect = "{{0, 1526}, {711, 429}}";
 			sepNavWindowFrame = "{{520, 4}, {750, 774}}";
 		};
 	};
 	D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {692, 3444}}";
-			sepNavSelRange = "{7753, 0}";
-			sepNavVisRange = "{0, 1038}";
+			sepNavIntBoundsRect = "{{0, 0}, {710, 4704}}";
+			sepNavSelRange = "{9009, 0}";
+			sepNavVisRange = "{3078, 663}";
 			sepNavVisRect = "{{0, 474}, {711, 429}}";
 			sepNavWindowFrame = "{{528, 6}, {750, 558}}";
 		};
 	};
 	D4D1BA6D0B02B27F0052BF1E /* tileset.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {691, 1820}}";
-			sepNavSelRange = "{4270, 0}";
-			sepNavVisRange = "{0, 1160}";
+			sepNavIntBoundsRect = "{{0, 0}, {691, 1890}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{3169, 1127}";
 			sepNavVisRect = "{{0, 705}, {711, 429}}";
-			sepNavWindowFrame = "{{488, 19}, {750, 558}}";
+			sepNavWindowFrame = "{{79, 48}, {750, 558}}";
 		};
 	};
 	D4DDE3930C4A15EE00937677 /* battle_actions.cpp */ = {

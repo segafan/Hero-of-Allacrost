@@ -246,6 +246,7 @@ void Editor::_FileNew()
 					if (a_tileset->Load(tilesets->topLevelItem(i)->text(0)) == false)
 					{
 						// TODO: handle error
+						qDebug("Tileset::Load() failed");
 					}
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);
@@ -254,6 +255,7 @@ void Editor::_FileNew()
 			} // iterate through all possible tilesets
 			new_map_progress->setValue(checked_items);
 
+			_ed_scrollview->_map->SetInitialized(true);
 			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
 			_ed_splitter->show();
 
@@ -348,12 +350,17 @@ void Editor::_FileOpen()
 			{
 				new_map_progress->setValue(progress_steps++);
 				TilesetTable* a_tileset = new TilesetTable();
-				a_tileset->Load(*it);
+				if (a_tileset->Load(*it) == false)
+				{
+					// TODO: handle error
+					qDebug("Tileset::Load() failed");
+				}
 				_ed_tabs->addTab(a_tileset->table, *it);
 				_ed_scrollview->_map->tilesets.push_back(a_tileset);
 			} // iterate through all tilesets in the map
 			new_map_progress->setValue(progress_steps);
 
+			_ed_scrollview->_map->SetInitialized(true);
 			_ed_scrollview->resize(_ed_scrollview->_map->GetWidth(),
 				_ed_scrollview->_map->GetHeight());
 			_ed_splitter->show();
