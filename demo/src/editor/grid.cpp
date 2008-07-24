@@ -47,6 +47,7 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	_context = 0;           // context is set to default base context
 	context_names << "Base";
 	_changed = false;       // map has not yet been modified
+	_initialized = false;   // prevents drawing the map until after it has been completely loaded
 	_grid_on = true;        // grid lines default to on
 	_select_on = false;     // selection rectangle default to off
 	_ll_on = true;          // lower layer default to on
@@ -73,6 +74,9 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 Grid::~Grid()
 {
 	for (vector<Tileset*>::iterator it = tilesets.begin();it != tilesets.end();
+	     it++)
+		delete *it;
+	for (list<MapSprite*>::iterator it = sprites.begin();it != sprites.end();
 	     it++)
 		delete *it;
 	VideoManager->SingletonDestroy();
@@ -107,6 +111,11 @@ void Grid::SetWidth(int width)
 void Grid::SetContext(int context)
 {
 	_context = context;
+} // SetContext(...)
+
+void Grid::SetInitialized(bool ready)
+{
+	_initialized = ready;
 } // SetContext(...)
 
 void Grid::SetLLOn(bool value)
@@ -881,6 +890,9 @@ void Grid::paintGL()
 	int tileset_index;               // index into the tileset_names vector
 	int tile_index;                  // ranges from 0-255
 
+	if (_initialized == false)
+		return;
+
 	// Setup drawing parameters
 	VideoManager->SetCoordSys(0.0f, VideoManager->GetScreenWidth() / TILE_WIDTH,
 		VideoManager->GetScreenHeight() / TILE_HEIGHT, 0.0f);
@@ -901,8 +913,6 @@ void Grid::paintGL()
 					tile_index = *it;
 				else  // Don't divide by 0
 					tile_index = *it % (tileset_index * 256);
-				//cerr << "grid tileset_index: " << tileset_index << endl;
-				//cerr << "grid tile_index: " << tile_index << endl;
 				tilesets[tileset_index]->tiles[tile_index].Draw();
 				//tilesets[tileset_index]->walkability
 			} // a tile exists to draw
