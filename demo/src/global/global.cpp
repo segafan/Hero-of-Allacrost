@@ -113,6 +113,8 @@ GameGlobal::~GameGlobal() {
 	_defend_skills_script.CloseFile();
 	_support_skills_script.CloseFile();
 
+	_global_script.CloseFile();
+
 	if (GLOBAL_DEBUG)
 		cout << "GLOBAL: GameGlobal destructor completed" << endl;
 }
@@ -121,6 +123,10 @@ GameGlobal::~GameGlobal() {
 
 bool GameGlobal::SingletonInitialize() {
 	// Open up the persistent script files
+	if (_global_script.OpenFile("dat/global.lua") == false) {
+		return false;
+	}
+
 	if (_items_script.OpenFile("dat/objects/items.lua") == false) {
 		return false;
 	}

@@ -40,10 +40,6 @@ namespace hoa_boot {
 //! Determines whether the code in the hoa_boot namespace should print debug statements or not.
 extern bool BOOT_DEBUG;
 
-//! This lua file contains the NewGame function and all lua constants.
-//! It is to remain opened throughout the game, so that various lua files can access the constants.
-extern hoa_script::ReadScriptDescriptor global;
-
 //! An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_boot {
 

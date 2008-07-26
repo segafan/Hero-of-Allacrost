@@ -50,8 +50,6 @@ bool BOOT_DEBUG = false;
 // Initialize static members here
 bool BootMode::_logo_animating = true;
 
-ReadScriptDescriptor global;
-
 // ****************************************************************************
 // *************************** GENERAL FUNCTIONS ******************************
 // ****************************************************************************
@@ -658,7 +656,7 @@ void BootMode::_SetupResolutionMenu() {
 void BootMode::_OnNewGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
 
-	ScriptCallFunction<void>(global.GetLuaState(), "NewGame");
+	GlobalManager->NewGame();
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1000); // Fade to black over the course of one second
