@@ -376,6 +376,10 @@ public:
 	void SetLocation(const std::string& location_name)
 		{ _location_name = hoa_utils::MakeUnicodeString(location_name); }
 
+	//! \brief Executes function NewGame() from global script
+	void NewGame()
+		{ ScriptCallFunction<void>(_global_script.GetLuaState(), "NewGame"); }
+	
 	/** \brief Saves all global data to a saved game file
 	*** \param filename The filename of the saved game file where to write the data to
 	*** \return True if the game was successfully saved, false if it was not
@@ -490,6 +494,7 @@ private:
 
 	//! \brief Script files that retain data for various global constructs
 	//@{
+	hoa_script::ReadScriptDescriptor _global_script;
 	hoa_script::ReadScriptDescriptor _items_script;
 	hoa_script::ReadScriptDescriptor _weapons_script;
 	hoa_script::ReadScriptDescriptor _head_armor_script;
