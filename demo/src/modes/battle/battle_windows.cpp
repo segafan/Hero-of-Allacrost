@@ -350,7 +350,7 @@ void ActionWindow::_UpdateTargetSelection() {
 			_ConstructTargetInformation();
 		}*/
 	}
-	else if (InputManager->LeftPress() || InputManager->RightPress()
+	else if ((InputManager->LeftPress() || InputManager->RightPress())
 		&& _action_target_type == GLOBAL_TARGET_ATTACK_POINT) {
 //		uint32 previous_ap = current_battle->_selected_attack_point;
 		current_battle->_SelectNextAttackPoint(InputManager->RightPress());

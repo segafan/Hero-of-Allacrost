@@ -301,12 +301,15 @@ uint32 OggFile::Read(uint8* buffer, uint32 size, bool& end) {
 			break;
 		}
 		else if (num_bytes_read < 0) { // Indicates a read error occurred
-			if (num_bytes_read == OV_HOLE)
+			if (num_bytes_read == OV_HOLE) {
 				IF_PRINT_WARNING(AUDIO_DEBUG) << "ov_read failed with return code: OV_HOLE" << endl;
-			else if (num_bytes_read == OV_EBADLINK)
+			}
+			else if (num_bytes_read == OV_EBADLINK) {
 				IF_PRINT_WARNING(AUDIO_DEBUG) << "ov_read failed with return code: OV_EBADLINK" << endl;
-			else
+			}
+			else {
 				IF_PRINT_WARNING(AUDIO_DEBUG) << "ov_read failed with return code: " << num_bytes_read << endl;
+			}
 			break;
 		}
 		else {
