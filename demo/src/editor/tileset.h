@@ -19,7 +19,6 @@
 
 //#include <QHeaderView>
 #include <QImageReader>
-#include <QMessageBox>
 #include <QRect>
 #include <Q3Table>
 //#include <QTableWidgetItem>
@@ -65,6 +64,21 @@ public:
 	Tileset();
 
 	~Tileset();
+
+	/** \brief Returns the filename of a tileset image given the tileset's name
+	*** \param tileset_name The name of the tileset (e.g. "mountain_village")
+	**/
+	static QString CreateImageFilename(const QString& tileset_name);
+
+	/** \brief Returns the filename of a tileset definition file given the tileset's name
+	*** \param tileset_name The name of the tileset (e.g. "mountain_village")
+	**/
+	static QString CreateDataFilename(const QString& tileset_name);
+
+	/** \brief Returns the tileset name that corresponds to either an image or data filename
+	*** \param filename The name of the file, which may or may not include the path
+	**/
+	static QString CreateTilesetName(const QString& filename);
 
 	bool IsInitialized() const
 		{ return _initialized; }

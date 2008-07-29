@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@
 
 #include <QGLWidget>
 #include <QStringList>
+#include <QMessageBox>
 
 #include "tileset.h"
 #include "sprites.h"
@@ -53,7 +54,7 @@ LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy);
 class Grid: public QGLWidget
 {
 	Q_OBJECT     // macro needed to use QT's slots and signals
-	
+
 	public:
 		Grid(QWidget *parent = 0, const QString &name = QString("Untitled"),
 			int width = 0, int height = 0); // constructor
