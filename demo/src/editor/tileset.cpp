@@ -44,14 +44,38 @@ Tileset::~Tileset()
 
 
 
+QString Tileset::CreateImageFilename(const QString& tileset_name)
+{
+	return QString("img/tilesets/" + tileset_name + ".png");
+}
+
+
+
+QString Tileset::CreateDataFilename(const QString& tileset_name)
+{
+	return QString("dat/tilesets/" + tileset_name + ".lua");
+}
+
+
+
+QString Tileset::CreateTilesetName(const QString& filename)
+{
+	QString tname = filename;
+	// Remove everything up to and including the final '/' character
+	tname.remove(0, tname.lastIndexOf("/") + 1);
+	// Chop off the appendend four characters the (filename extension)
+	tname.chop(4);
+	return tname;
+}
+
+
+
 bool Tileset::New(const QString& img_filename, bool one_image)
 {
 	_initialized = false;
 
 	// Retreive the tileset name from the image filename
-	tileset_name = img_filename;
-	tileset_name = tileset_name.remove(0, tileset_name.lastIndexOf("/") + 1);
-	tileset_name.chop(4);
+	tileset_name = CreateTilesetName(img_filename);
 
 	// Prepare the tile vector and load the tileset image
 	if (one_image == true) {
@@ -97,24 +121,28 @@ bool Tileset::Load(const QString& set_name, bool one_image)
 	tileset_name = set_name;
 
 	// Create filenames from the tileset name
-	QString img_filename = QString("img/tilesets/" + set_name + ".png");
-	QString dat_filename = QString("dat/tilesets/" + set_name + ".lua");
+	QString img_filename = CreateImageFilename(set_name);
+	QString dat_filename = CreateDataFilename(set_name);
 
 	// Prepare the tile vector and load the tileset image
 	if (one_image == true) {
 		tiles.clear();
 		tiles.resize(1);
 		tiles[0].SetDimensions(16.0f, 16.0f);
-		if (tiles[0].Load(string(img_filename.toAscii()), 16, 16) == false)
+		if (tiles[0].Load(string(img_filename.toAscii()), 16, 16) == false) {
 			qDebug("Failed to load tileset image: " + img_filename);
+			return false;
+		}
 	}
 	else {
 		tiles.clear();
 		tiles.resize(256);
 		for (uint32 i = 0; i < 256; i++)
 			tiles[i].SetDimensions(1.0f, 1.0f);
-		if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false)
+		if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false) {
 			qDebug("Failed to load tileset image: " + img_filename);
+			return false;
+		}
 	}
 
 	// Set up for reading the tileset definition file.
@@ -203,8 +231,8 @@ bool Tileset::Load(const QString& set_name, bool one_image)
 
 
 bool Tileset::Save() {
-	string dat_filename = "dat/tilesets/" + string(tileset_name.toAscii()) + ".lua";
-	string img_filename = "img/tilesets/" + string(tileset_name.toAscii()) + ".png";
+	string dat_filename = string(CreateDataFilename(tileset_name).toAscii());
+	string img_filename = string(CreateImageFilename(tileset_name).toAscii());
 	WriteScriptDescriptor write_data;
 
 	if (write_data.OpenFile(dat_filename) == false) {
@@ -315,7 +343,7 @@ bool TilesetTable::Load(const QString& set_name)
 	// Contact me if there's any problem with this fix, eguitarz (dalema22@gmail.com)
 	QRect rectangle;
 	QImage entire_tileset;
-	entire_tileset.load("img/tilesets/" + set_name + ".png", "png");
+	entire_tileset.load(CreateImageFilename(set_name), "png");
 	for (uint32 row = 0; row < 16; row++)
 	{
 		for (uint32 col = 0; col < 16; col++)
