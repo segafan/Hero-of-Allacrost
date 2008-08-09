@@ -71,21 +71,11 @@ const uint32 GLOBAL_CHARACTER_INVALID     = 0x00000000;
 const uint32 GLOBAL_CHARACTER_ALL         = 0xFFFFFFFF;
 //@}
 
-//CD TODO: Maybe we should move this elsewhere.  Leave it here for now
-/*
-enum GLOBAL_TARGET {
-	GLOBAL_TARGET_INVALID      = -1,
-	GLOBAL_TARGET_ATTACK_POINT =  0,
-	GLOBAL_TARGET_ACTOR        =  1,
-	GLOBAL_TARGET_PARTY        =  2,
-	GLOBAL_TARGET_TOTAL        =  3
-};
-
-* \name TargetTypeText
-* \brief Matrix which holds display text for various target type combos:
-*		Single ally, single enemy, single ally point, single enemy point,
-*		all allies, all enemies
-*/
+/** \name TargetTypeText
+*** \brief Matrix which holds display text for various target type combos:
+*** Single ally, single enemy, single ally point, single enemy point,
+*** all allies, all enemies
+**/
 std::string GetTargetTypeText(int globalTargetType, int globalTargetAlly);
 
 /** ****************************************************************************

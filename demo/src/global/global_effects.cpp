@@ -72,12 +72,6 @@ GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 		exit(1);
 	}
 
-/*
-	if (_icon_image.Load(icon_file) == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalItem constructor failed to load the icon image for the item: " << _id << endl;
-	}
-*/
 	script_file.CloseTable();
 
 	if (script_file.IsErrorDetected()) {

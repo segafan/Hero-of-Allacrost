@@ -71,7 +71,7 @@ items[3] = {
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
 	target_ally = true,
-	standard_price = 30,
+	standard_price = 500,
 
 	BattleUse = function(target, instigator)
 		target:AddHitPoints(250);
@@ -90,7 +90,7 @@ items[4] = {
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
 	target_ally = true,
-	standard_price = 10,
+	standard_price = 1000,
 
 	BattleUse = function(target, instigator)
 		target:AddHitPoints(100);
@@ -120,14 +120,14 @@ items[4] = {
 
 items[3001] = {
 	name = "Bomb",
-	description = "Goes boom on enemy.",
+	description = "Damages one enemy.",
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
 	target_ally = false,
-	standard_price = 10,
+	standard_price = 200,
 
 	BattleUse = function(target, instigator)
-		target:TakeDamage(500);
+		target:TakeDamage(256);
 		AudioManager:PlaySound("snd/rumble.wav");
 	end,
 
@@ -138,11 +138,11 @@ items[3001] = {
 
 items[3002] = {
 	name = "Super Bomb",
-	description = "Goes boom on enemies.",
+	description = "Major damage to all enemies.",
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
 	target_ally = false,
-	standard_price = 10,
+	standard_price = 1000,
 
 	BattleUse = function(target, instigator)
 		target:TakeDamage(500);

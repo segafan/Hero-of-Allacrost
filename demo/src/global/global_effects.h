@@ -207,8 +207,11 @@ private:
 	**/
 	GLOBAL_INTENSITY _intensity;
 
+	//! \brief Initialization script for object
 	ScriptObject* _init;
+	//! \brief Update script for object
 	ScriptObject* _update;
+	//! \brief Removal script for object
 	ScriptObject* _remove;
 }; // class GlobalStatusEffect
 

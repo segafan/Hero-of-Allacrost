@@ -16,9 +16,7 @@ status_effects[1] = {
 	name = "Strength Up",
 	
 	Init = function(target)
-		-- target:TakeDamage(15);
 		target:AddStrength(400);
-		-- AudioManager:PlaySound("snd/rumble.wav");
 	end,
 
 	Update = function(target)
@@ -26,5 +24,20 @@ status_effects[1] = {
 
 	Remove = function(target)
 		target:AddStrength(-400);
+	end
+}
+
+status_effects[2] = {
+	name = "Defense Up",
+	
+	Init = function(target)
+		target:AddFortitude(400);
+	end,
+
+	Update = function(target)
+	end,
+
+	Remove = function(target)
+		target:AddFortitude(-400);
 	end
 }
