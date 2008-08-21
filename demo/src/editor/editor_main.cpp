@@ -21,9 +21,6 @@
 
 #include "editor.h"
 #include "global.h"
-#ifdef _WIN32
-#include <sdl\SDL.h>
-#endif
 
 using namespace std;
 using namespace hoa_editor;
