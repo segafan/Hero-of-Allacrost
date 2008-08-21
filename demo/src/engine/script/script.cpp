@@ -71,7 +71,8 @@ bool GameScript::SingletonInitialize() {
 void GameScript::HandleLuaError(luabind::error& err) {
 	lua_State *state = err.state();
 	cerr << "SCRIPT ERROR: a run-time Lua error has occured with the following error message:\n  " << endl;
-	cerr << lua_tostring(state, lua_gettop(state)) << endl;
+	std::string k = lua_tostring(state, lua_gettop(state)) ;
+	cerr << k << endl;
 	lua_pop(state, 1);
 }
 
