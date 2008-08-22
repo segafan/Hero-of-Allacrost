@@ -36,6 +36,8 @@
 #ifndef __INPUT_HEADER__
 #define __INPUT_HEADER__
 
+#include <SDL/SDL.h>
+
 #include "utils.h"
 #include "defs.h"
 
