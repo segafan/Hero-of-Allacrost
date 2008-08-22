@@ -65,7 +65,13 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <stdint.h> // Using the C header, because the C++ header, <cstdint> is only available in ISO C++0x
+// We include SDL_config.h, which compensates for non ISO C99 compilers.
+// SDL_config.h defines the int??_t types for non ISO C99 compilers,
+// and defines HAVE_STDINT_H for compliant compilers
+#include <SDL/SDL_config.h>
+#ifdef HAVE_STDINT_H
+	#include <stdint.h> // Using the C header, because the C++ header, <cstdint> is only available in ISO C++0x
+#endif
 
 #ifdef __MACH__
 	#include <OpenAL/al.h>
