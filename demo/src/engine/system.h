@@ -26,6 +26,7 @@
 // #include "gettext.h"
 
 #include <set>
+#include <SDL/SDL.h>
 
 #include "utils.h"
 #include "defs.h"

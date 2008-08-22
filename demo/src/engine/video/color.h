@@ -16,6 +16,8 @@
 #ifndef __COLOR_HEADER__
 #define __COLOR_HEADER__
 
+#include <SDL/SDL.h>
+
 #include "defs.h"
 #include "utils.h"
 

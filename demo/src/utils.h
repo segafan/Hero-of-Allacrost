@@ -50,10 +50,9 @@
 #ifndef __UTILS_HEADER__
 #define __UTILS_HEADER__
 
-#include <stdlib.h>
 #include <cstdlib>
 #include <cmath>
-#include <string.h> // For C string manipulation functions like strcmp
+#include <cstring> // For C string manipulation functions like strcmp
 
 #include <iostream>
 #include <string>
@@ -65,6 +64,8 @@
 #include <stack>
 #include <stdexcept>
 #include <sstream>
+
+#include <stdint.h> // Using the C header, because the C++ header, <cstdint> is only available in ISO C++0x
 
 #ifdef __MACH__
 	#include <OpenAL/al.h>
@@ -81,7 +82,6 @@
 	#define strcasecmp stricmp
 #endif
 
-#include <SDL/SDL.h>
 
 /** \name Print Message Helper Macros
 *** These macros assist programmers with writing debug, warning, or error messages that are to be printed to
@@ -109,18 +109,18 @@
 
 /** \name Allacrost Integer Types
 *** \brief These are the integer types used throughout the Allacrost source code.
-*** These types are created by redefining the SDL types (we do not like SDL's type-naming conventions).
+*** These types are created by redefining the ANSI C types.
 *** Use of the standard int, long, etc. is forbidden in Allacrost source code! Don't attempt to use any
 *** 64-bit types either, since a large population of PCs in our target audience are not a 64-bit
 *** architecture.
 **/
 //@{
-typedef Sint32   int32;
-typedef Uint32   uint32;
-typedef Sint16   int16;
-typedef Uint16   uint16;
-typedef Sint8    int8;
-typedef Uint8    uint8;
+typedef int32_t   int32;
+typedef uint32_t  uint32;
+typedef int16_t   int16;
+typedef uint16_t  uint16;
+typedef int8_t    int8;
+typedef uint8_t   uint8;
 //@}
 
 //! Contains utility code used across the entire source code
