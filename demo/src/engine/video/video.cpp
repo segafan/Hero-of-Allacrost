@@ -751,7 +751,7 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 	// Retrieve width/height of the viewport. viewport_dimensions[2] is the width, [3] is the height
 	GLint viewport_dimensions[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
-	screen_image.SetDimensions(viewport_dimensions[2], viewport_dimensions[3]);
+	screen_image.SetDimensions((float)viewport_dimensions[2], (float)viewport_dimensions[3]);
 
 	// Set up the screen rectangle to copy
 	ScreenRect screen_rect(0, viewport_dimensions[3], viewport_dimensions[2], viewport_dimensions[3]);
