@@ -31,9 +31,11 @@ credits_text =
 	"Philip Vorsilak (gorzuate) - game editor\n" ..
 	"Tyler Olsen (Roots) - programming lead, game engine, map code\n" ..
 	"Viljami Korhonen (MindFlayer) - boot code, battle code\n" ..
+	"Wouter Lindenhof (ElonNarai) - game editor\n" ..
 	"\n\n" ..
 
 	"Artwork Team\n\n" ..
+	"Blake Heatly (KaelisEbonrai) - map sprites\b" ..
 	"Brett Steele (Safir-Kreuz) - map sprites, battle sprites, character portraits, location graphics\n" ..
 	"Joe Raucci (Sylon) - battle sprites, old GUI artwork\n" ..
 	"Josiah Tobin (Josiah Tobin) - map tiles\n" ..
@@ -62,7 +64,7 @@ credits_text =
 	"Online Services\n\n" ..
 	"Daniel Steuernol (Steu) - wiki support\n" ..
 	"Emre Motan (emrebfg) - website content, forum administration\n" ..
-        "Heikki Naski (raging_hog) - content management system\n" ..
+	"Heikki Naski (raging_hog) - content management system\n" ..
 	"Matt Gallivan (Gallivan) - administration\n" ..
 	"Matthew James (nunvuru) - website design\n" ..
 	"\n\n" ..
@@ -86,6 +88,7 @@ credits_text =
 	"Aaron Smith (Etherstar) - audio engine\n" ..
 	"Brandon Barnes (Winter Knight) - game engine, game modes\n" ..
 	"Corey Hoffstein (visage) - battle code\n" ..
+	"Dale Ma (eguitarz) - map editor\n" ..
 	"DongHa Lee (MoOshiCow) - internationalization\n" ..
 	"Farooq Mela (CamelJockey) - video engine\n" ..
 	"Kevin Martin (kev82) - video engine, game engine\n" ..
@@ -136,11 +139,11 @@ credits_text =
 	"Adam Lindquist (Zorbfish)\n" ..
 	"(Melchior)\n" ..
 	"(Egan1)\n" ..
-        "\n\n" ..
+	"\n\n" ..
 
 -- Special credit level
-        "Special Thanks\n\n" ..
-        "Daniel Cook (Danc) - Map Tiles\n" ..
-        "The Battle for Wesnoth Development Team - Inventory Icons\n" ..
+	"Special Thanks\n\n" ..
+	"Daniel Cook (Danc) - Map Tiles\n" ..
+	"The Battle for Wesnoth Development Team - Inventory Icons\n" ..
 	"(neoriceisgood) - map monster sprites\n"
 ; -- end credits_text
