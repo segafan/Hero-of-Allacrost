@@ -76,7 +76,7 @@ credits_text =
 	"\n\n" ..
 
 	"Packaging\n\n" ..
-	"Andy Gardner (ChopperDave) - Windows distribution\n" ..
+	"Brandon Barnes (Winter Knight) - Windows distribution\n" ..
 	"Dmitry Marakasov (AMDmi3) - FreeBSD distribution\n" ..
 	"Jorda Polo (ettin) - Debian distribution\n" ..
 	"Philip Vorsilak (gorzuate) - OS X distribution\n" ..
