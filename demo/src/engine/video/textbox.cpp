@@ -82,6 +82,10 @@ void TextBox::Draw() {
 			cerr << "VIDEO WARNING: TextBox::Draw() failed because the textbox was not initialized:\n" << _initialization_errors << endl;
 		return;
 	}
+	
+	// Don't draw text window if parent window is hidden
+	if (_owner && _owner->GetState() == VIDEO_MENU_STATE_HIDDEN)
+		return;
 
 	// Take the following steps to draw the text:
 	//  (1): Save the video engine's context and enable appropriate draw settings

@@ -845,6 +845,7 @@ void BootMode::_OnBrightnessRight() {
 void BootMode::_OnRestoreDefaultKeys() {
 	InputManager->RestoreDefaultKeys();
 	_UpdateKeySettings();
+	_has_modified_settings = true;
 }
 
 
@@ -852,6 +853,7 @@ void BootMode::_OnRestoreDefaultKeys() {
 void BootMode::_OnRestoreDefaultJoyButtons() {
 	InputManager->RestoreDefaultJoyButtons();
 	_UpdateJoySettings();
+	_has_modified_settings = true;
 }
 
 
