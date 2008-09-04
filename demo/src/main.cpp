@@ -114,7 +114,7 @@ bool LoadSettings()
 	InputManager->SetSwapKey(static_cast<SDLKey>(settings.ReadInt("swap")));
 	InputManager->SetLeftSelectKey(static_cast<SDLKey>(settings.ReadInt("left_select")));
 	InputManager->SetRightSelectKey(static_cast<SDLKey>(settings.ReadInt("right_select")));
-	InputManager->SetLeftSelectKey(static_cast<SDLKey>(settings.ReadInt("pause")));
+	InputManager->SetPauseKey(static_cast<SDLKey>(settings.ReadInt("pause")));
 	settings.CloseTable();
 
 	if (settings.IsErrorDetected()) {
