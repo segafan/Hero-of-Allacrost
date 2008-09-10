@@ -872,8 +872,10 @@ function Load(m)
 	map:_AddZone(context_zone);
 
 	context_zone = hoa_map.ContextZone(1, 2);
-	context_zone:AddSection(hoa_map.ZoneSection(10, 62, 14, 64), true);
-	context_zone:AddSection(hoa_map.ZoneSection(10, 60, 14, 62), false);
+	context_zone:AddSection(hoa_map.ZoneSection(10, 60, 13, 62), false);
+	context_zone:AddSection(hoa_map.ZoneSection(10, 63, 13, 64), true);
+	context_zone:AddSection(hoa_map.ZoneSection(8, 60, 9, 62), true);
+	context_zone:AddSection(hoa_map.ZoneSection(14, 60, 15, 62), true);
 	map:_AddZone(context_zone);
 end -- function Load()
 
