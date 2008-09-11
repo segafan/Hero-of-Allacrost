@@ -16,6 +16,7 @@
 #ifndef __MAP_ZONES_HEADER__
 #define __MAP_ZONES_HEADER__
 
+// Allacrost utilities
 #include "utils.h"
 #include "defs.h"
 

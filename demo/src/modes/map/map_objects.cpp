@@ -13,31 +13,39 @@
 *** \brief   Source file for map mode objects.
 *** ***************************************************************************/
 
-#include <algorithm> //For std::replace in the MapTreasure saving code
+//#include <algorithm> // For std::replace in the MapTreasure saving code
 
+// Allacrost utilities
 #include "utils.h"
 
+// Allacrost engines
 #include "audio.h"
 #include "mode_manager.h"
 #include "system.h"
 #include "video.h"
 
+// Allacrost globals
 #include "global.h"
 
+// Other game mode headers
+#include "battle.h"
+
+// Local map mode headers
 #include "map.h"
 #include "map_actions.h"
 #include "map_dialogue.h"
 #include "map_objects.h"
 #include "map_sprites.h"
-#include "battle.h"
+
+
 
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_mode_manager;
-using namespace hoa_video;
 using namespace hoa_script;
 using namespace hoa_system;
+using namespace hoa_video;
 using namespace hoa_global;
 using namespace hoa_battle;
 
@@ -64,33 +72,57 @@ MapObject::MapObject() :
 	updatable(true),
 	visible(true),
 	no_collision(false),
+	sky_object(false),
 	draw_on_second_pass(false)
 {}
 
 
 
-bool MapObject::DrawHelper() {
+bool MapObject::ShouldDraw() {
 	if (visible == false)
+		return false;
+
+	if (context != MapMode::_current_map->_current_context)
 		return false;
 
 	// Store the full x and y position coordinates of the sprite in a single pair of variables
 	float x_pos = static_cast<float>(x_position) + x_offset;
 	float y_pos = static_cast<float>(y_position) + y_offset;
 
-	// ---------- (1) Determine if the sprite is off-screen and if so, don't draw it.
-
-	if (x_pos + img_half_width < MapMode::_current_map->_draw_info.left_edge  ||
-		x_pos - img_half_width > MapMode::_current_map->_draw_info.right_edge ||
-		y_pos - img_height > MapMode::_current_map->_draw_info.bottom_edge    ||
-		y_pos < MapMode::_current_map->_draw_info.top_edge) {
+	// ---------- Determine if the sprite is off-screen and if so, don't draw it.
+	MapRectangle img_rect;
+	GetImageRectangle(img_rect);
+	if (MapRectangle::CheckIntersection(img_rect, MapMode::_current_map->_draw_info.screen_edges) == false)
 		return false;
-	}
 
-	// ---------- (2) Calculate the drawing coordinates and move the drawing cursor
-
-	VideoManager->Move(x_pos - MapMode::_current_map->_draw_info.left_edge, y_pos - MapMode::_current_map->_draw_info.top_edge);
+	// ---------- Move the drawing cursor to the appropriate coordinates for this sprite
+	VideoManager->Move(x_pos - MapMode::_current_map->_draw_info.screen_edges.left, y_pos - MapMode::_current_map->_draw_info.screen_edges.top);
 	return true;
 } // bool MapObject::DrawHelper()
+
+
+
+void MapObject::GetCollisionRectangle(MapRectangle& rect) const {
+	float x_pos = static_cast<float>(x_position) + x_offset;
+	float y_pos = static_cast<float>(y_position) + y_offset;
+
+	rect.left = x_pos - coll_half_width;
+	rect.right = x_pos + coll_half_width;
+	rect.top = y_pos - coll_height;
+	rect.bottom = y_pos;
+}
+
+
+
+void MapObject::GetImageRectangle(MapRectangle& rect) const {
+	float x_pos = static_cast<float>(x_position) + x_offset;
+	float y_pos = static_cast<float>(y_position) + y_offset;
+
+	rect.left = x_pos - img_half_width;
+	rect.right = x_pos + img_half_width;
+	rect.top = y_pos - img_height;
+	rect.bottom = y_pos;
+}
 
 // ****************************************************************************
 // ********************* PhysicalObject Class Functions ***********************
@@ -118,7 +150,7 @@ void PhysicalObject::Update() {
 
 
 void PhysicalObject::Draw() {
-	if (MapObject::DrawHelper() == true)
+	if (MapObject::ShouldDraw() == true)
 		animations[current_animation].Draw();
 }
 
@@ -134,42 +166,45 @@ MapTreasure::MapTreasure(string image_file, uint8 num_total_frames, uint8 num_cl
 	const uint32 DEFAULT_FRAME_TIME = 10; // The default number of milliseconds for frame animations
 	std::vector<StillImage> frames;
 
-	// (1) Load a the single row, multi column multi image containing all the treasure frames
+	// (1) Load a the single row, multiple column multi image containing all of the treasure frames
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, image_file, 1, num_total_frames) == false ) {
-		cerr << "File: " << filename << " could not be loaded correctly." << endl;
+		PRINT_ERROR << "failed to load image file: " << image_file << endl;
 		// TODO: throw exception
 		return;
 	}
+
 	// Update the frame image sizes to work in the MapMode coordinate system
 	for (uint32 i = 0; i < frames.size(); i++) {
-		frames[i].SetWidth(frames[i].GetWidth() / HALF_TILE_COLS);
-		frames[i].SetHeight(frames[i].GetHeight() / HALF_TILE_COLS);
+		frames[i].SetWidth(frames[i].GetWidth() / GRID_LENGTH);
+		frames[i].SetHeight(frames[i].GetHeight() / GRID_LENGTH);
 	}
 
 	// (2) Now that we know the total number of frames in the image, make sure the frame count arguments make sense
-	if (num_closed_frames == 0 || num_open_frames == 0 || num_closed_frames >= num_total_frames || num_open_frames >= num_total_frames) {
+	if (num_open_frames == 0 || num_closed_frames == 0 || num_open_frames + num_closed_frames >= num_total_frames) {
+		PRINT_ERROR << "invalid treasure image for image file: " << image_file << endl;
 		// TODO: throw exception
 		return;
 	}
 
-	// (3) Dissect the frames and create the closed, opening, and open animations Create the close and opening animations for the chest
-	hoa_video::AnimatedImage closed_anim;
+	// (3) Dissect the frames and create the closed, opening, and open animations
+	hoa_video::AnimatedImage closed_anim, opening_anim, open_anim;
+
 	for (uint8 i = 0; i < num_closed_frames; i++) {
 		closed_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
 	}
-
-	hoa_video::AnimatedImage open_anim;
 	for (uint8 i = num_total_frames - num_open_frames; i < num_total_frames; i++) {
 		open_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
 	}
 
-	hoa_video::AnimatedImage opening_anim;
-	opening_anim.SetNumberLoops(0); // Only loop the opening animation once, not infinitely
-	if (num_total_frames - num_closed_frames - num_open_frames <= 0) {
+	// Loop the opening animation only once
+	opening_anim.SetNumberLoops(0);
+
+	// If there are no additional frames for the opening animation, set the opening animation to be the open animation
+	if (num_total_frames - num_closed_frames - num_open_frames == 0) {
 		opening_anim = open_anim;
 	}
 	else {
-		for (uint8 i = 0 + num_closed_frames; i < num_total_frames - num_open_frames; i++) {
+		for (uint8 i = num_closed_frames; i < num_total_frames - num_open_frames; i++) {
 			opening_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
 		}
 	}
@@ -181,7 +216,7 @@ MapTreasure::MapTreasure(string image_file, uint8 num_total_frames, uint8 num_cl
 	// (4) Set the collision rectangle according to the dimensions of the first frame
 	SetCollHalfWidth(frames[0].GetWidth() / 2.0f);
 	SetCollHeight(frames[0].GetHeight());
-} // MapTreasure::MapTreasure(string image_file, uint8 num_closed_frames = 1, uint8 num_open_frames = 1)
+} // MapTreasure::MapTreasure(string image_file, uint8 num_total_frames, uint8 num_closed_frames, uint8 num_open_frames)
 
 
 
@@ -194,11 +229,14 @@ MapTreasure::~MapTreasure() {
 
 
 void MapTreasure::LoadSaved() {
-	//Add an event in the group having the ObjectID of the chest as name
+	// TODO: Change this to "treasure_" instead of "chest_"
 	string event_name = "chest_" + NumberToString(GetObjectID());
+
+	//Add an event in the group having the ObjectID of the chest as name
 	if (MapMode::_loading_map->_map_event_group->DoesEventExist(event_name)) {
-		if (MapMode::_loading_map->_map_event_group->GetEvent(event_name) == TREASURE_EMPTY) {
-			SetCurrentAnimation(OPEN_ANIM);
+		// If the event is non-zero, the treasure has already been opened
+		if (MapMode::_loading_map->_map_event_group->GetEvent(event_name) != 0) {
+			SetCurrentAnimation(TREASURE_OPEN_ANIM);
 			_drunes = 0;
 			for (uint32 i = 0; i < _objects_list.size(); i++)
 				delete _objects_list[i];
@@ -214,7 +252,7 @@ bool MapTreasure::AddObject(uint32 id, uint32 number) {
 	hoa_global::GlobalObject* obj = GlobalCreateNewObject(id, number);
 
 	if (obj == NULL) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "invalid object id argument passed to function" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "invalid object id argument passed to function: " << id << endl;
 		return false;
 	}
 
@@ -226,8 +264,9 @@ bool MapTreasure::AddObject(uint32 id, uint32 number) {
 
 void MapTreasure::Update() {
 	PhysicalObject::Update();
-	if (current_animation == OPENING_ANIM && animations[OPENING_ANIM].IsLoopsFinished() == true) {
-		SetCurrentAnimation(OPEN_ANIM);
+
+	if (current_animation == TREASURE_OPENING_ANIM && animations[TREASURE_OPENING_ANIM].IsLoopsFinished() == true) {
+		SetCurrentAnimation(TREASURE_OPEN_ANIM);
 	}
 }
 
@@ -235,20 +274,21 @@ void MapTreasure::Update() {
 
 void MapTreasure::Open() {
 	if (_empty == true) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to open an empty map treasure" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to open an empty map treasure: " << object_id << endl;
 		return;
 	}
 
-	SetCurrentAnimation(OPENING_ANIM);
+	SetCurrentAnimation(TREASURE_OPENING_ANIM);
 
-	// Add an event to the map group indicating that the chest has now been opened
+	// TODO: Change this to "treasure_" instead of "chest_"
 	string event_name = "chest_" + NumberToString(GetObjectID());
 
+	// Add an event to the map group indicating that the chest has now been opened
 	if (MapMode::_current_map->_map_event_group->DoesEventExist(event_name) == true) {
-		MapMode::_current_map->_map_event_group->SetEvent(event_name, TREASURE_EMPTY);
+		MapMode::_current_map->_map_event_group->SetEvent(event_name, 1);
 	}
 	else {
-		MapMode::_current_map->_map_event_group->AddNewEvent(event_name, TREASURE_EMPTY);
+		MapMode::_current_map->_map_event_group->AddNewEvent(event_name, 1);
 	}
 
 	// Initialize the treasure menu to display the contents of the open treasure
@@ -262,7 +302,7 @@ void MapTreasure::Open() {
 ObjectManager::ObjectManager() :
 	_num_grid_rows(0),
 	_num_grid_cols(0),
-	_lastID(1000)
+	_last_id(1000)
 {
 	_virtual_focus = new VirtualSprite();
 	_virtual_focus->SetXPosition(0, 0.0f);
@@ -290,7 +330,26 @@ ObjectManager::~ObjectManager() {
 
 
 
-void ObjectManager::Load(hoa_script::ReadScriptDescriptor& map_file) {
+MapObject* ObjectManager::GetObject(uint32 object_id) {
+	map<uint16, MapObject*>::iterator i = _all_objects.find(object_id);
+
+	if (i == _all_objects.end())
+		return NULL;
+	else
+		return i->second;
+}
+
+
+
+void ObjectManager::SortObjects() {
+	std::sort(_ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less());
+	std::sort(_pass_objects.begin(), _pass_objects.end(), MapObject_Ptr_Less());
+	std::sort(_sky_objects.begin(), _sky_objects.end(), MapObject_Ptr_Less());
+}
+
+
+
+void ObjectManager::Load(ReadScriptDescriptor& map_file) {
 	// ---------- Construct the collision grid
 	map_file.OpenTable("map_grid");
 	_num_grid_rows = map_file.GetTableSize();
@@ -301,7 +360,7 @@ void ObjectManager::Load(hoa_script::ReadScriptDescriptor& map_file) {
 	map_file.CloseTable();
 	_num_grid_cols = _collision_grid[0].size();
 
-	// ---------- (7) Load the saved states of all the objects
+	// ---------- Load the saved states of all the objects
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		_ground_objects[i]->LoadSaved();
 	}
@@ -316,8 +375,9 @@ void ObjectManager::Load(hoa_script::ReadScriptDescriptor& map_file) {
 }
 
 
+
 void ObjectManager::Update() {
-	for( uint32 i = 0; i < _zones.size(); i++ ) {
+	for (uint32 i = 0; i < _zones.size(); i++) {
 		_zones[i]->Update();
 	}
 
@@ -334,20 +394,10 @@ void ObjectManager::Update() {
 
 
 
-void ObjectManager::SortObjects(){
-	std::sort(_ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less());
-// 	std::sort(_pass_objects.begin(), _pass_objects.end(), MapObject_Ptr_Less());
-// 	std::sort(_sky_objects.begin(), _sky_objects.end(), MapObject_Ptr_Less());
-}
-
-
-
 void ObjectManager::DrawGroundObjects(const MapFrame* const frame, const bool second_pass) {
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		if (_ground_objects[i]->draw_on_second_pass == second_pass) {
-			if (_ground_objects[i]->context == MapMode::_current_map->_current_context) {
-				_ground_objects[i]->Draw();
-			}
+			_ground_objects[i]->Draw();
 		}
 	}
 
@@ -357,9 +407,7 @@ void ObjectManager::DrawGroundObjects(const MapFrame* const frame, const bool se
 
 void ObjectManager::DrawPassObjects(const MapFrame* const frame) {
 	for (uint32 i = 0; i < _pass_objects.size(); i++) {
-		if (_ground_objects[i]->context == MapMode::_current_map->_current_context) {
-			_pass_objects[i]->Draw();
-		}
+		_pass_objects[i]->Draw();
 	}
 }
 
@@ -373,212 +421,236 @@ void ObjectManager::DrawSkyObjects(const MapFrame* const frame) {
 
 
 
-MapObject* ObjectManager::FindNearestObject(const VirtualSprite* sprite) {
-	// The edges of the collision rectangle to check
-	float top, bottom, left, right;
+MapObject* ObjectManager::FindNearestObject(const VirtualSprite* sprite, float search_distance) {
+	// NOTE: We don't check if the argument is NULL here for performance reasons
+	MapRectangle search_area;
 
-	// ---------- (1): Using the sprite's direction, determine the area to check for other objects
+	// ---------- (1) Using the sprite's direction, determine the boundaries of the search area to check for objects
+	sprite->GetCollisionRectangle(search_area);
 	if (sprite->direction & FACING_NORTH) {
-		bottom = sprite->ComputeYLocation() - sprite->coll_height;
-		top = bottom - 3.0f;
-		left = sprite->ComputeXLocation() - sprite->coll_half_width;
-		right = sprite->ComputeXLocation() + sprite->coll_half_width;
+		search_area.bottom = search_area.top;
+		search_area.top = search_area.top - search_distance;
 	}
 	else if (sprite->direction & FACING_SOUTH) {
-		top = sprite->ComputeYLocation();
-		bottom = top + 3.0f;
-		left = sprite->ComputeXLocation() - sprite->coll_half_width;
-		right = sprite->ComputeXLocation() + sprite->coll_half_width;
+		search_area.top = search_area.bottom;
+		search_area.bottom = search_area.bottom + search_distance;
 	}
 	else if (sprite->direction & FACING_WEST) {
-		right = sprite->ComputeXLocation() - sprite->coll_half_width;
-		left = right - 3.0f;
-		bottom = sprite->ComputeYLocation();
-		top = bottom - sprite->coll_height;
+		search_area.right = search_area.left;
+		search_area.left = search_area.left - search_distance;
 	}
 	else if (sprite->direction & FACING_EAST) {
-		left = sprite->ComputeXLocation() + sprite->coll_half_width;
-		right = left + 3.0f;
-		bottom = sprite->ComputeYLocation();
-		top = bottom - sprite->coll_height;
+		search_area.left = search_area.right;
+		search_area.right = search_area.right + search_distance;
 	}
 	else {
-		IF_PRINT_WARNING(MAP_DEBUG) << "sprite was set to invalid direction" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "sprite was set to invalid direction: " << sprite->direction << endl;
 		return NULL;
 	}
 
-	// A vector to contain objects which are valid for the sprite to interact with
-	vector<MapObject*> valid_objects;
-	// A pointer to the object which has been found to be the closest to the sprite within valid_objs
-	MapObject* closest = NULL;
+	// ---------- (2) Go through all objects and determine which (if any) lie within the search area
+	vector<MapObject*> valid_objects; // A vector to hold objects which are inside the search area (either partially or fully)
+	vector<MapObject*>* search_vector = NULL; // A pointer to the vector of objects to search
 
-	// ---------- (2): Go through all objects and determine which (if any) are valid
-	for (map<uint16, MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); i++) {
-		MapObject* obj = i->second;
-		if (obj == sprite) // A sprite can't target itself
+	// Only search the object layer that the sprite resides on. Note that we do not consider searching the pass layer.
+	if (sprite->sky_object == true)
+		search_vector = &_sky_objects;
+	else
+		search_vector = &_ground_objects;
+
+	for (vector<MapObject*>::iterator i = (*search_vector).begin(); i != (*search_vector).end(); i++) {
+		if (*i == sprite) // Don't allow the sprite itself to be considered in the search
 			continue;
 
-		// Objects in different contexts can not interact with one another
-		if ((obj->context & sprite->context) == 0) // Since objects can span multiple context, we check that no contexts are equal
+		// If the object and sprite do not exist in the same context, do not consider the object for the search
+		if (((*i)->context & sprite->context) == 0)
 			continue;
 
-		// Compute the full position coordinates for the object under study
-		float other_x_location = obj->ComputeXLocation();
-		float other_y_location = obj->ComputeYLocation();
-
-		// Verify that the bounding boxes overlap on the horizontal axis
-		if (!(other_x_location - obj->coll_half_width > right || other_x_location + obj->coll_half_width < left)) {
-			// Verify that the bounding boxes overlap on the vertical axis
-			if (!(other_y_location - obj->coll_height > bottom || other_y_location < top )) {
-				// Boxes overlap on both axes, it is a valid interaction
-				valid_objects.push_back(obj);
-			}
-		}
+		MapRectangle object_rect;
+		(*i)->GetCollisionRectangle(object_rect);
+		if (MapRectangle::CheckIntersection(object_rect, search_area) == true)
+			valid_objects.push_back(*i);
 	} // for (map<MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); i++)
 
-	// If there are one or less objects that are valid, then we are done here.
-	if (valid_objects.empty()) {
+	// ---------- (3) Check for early exit conditions
+	if (valid_objects.empty() == true) {
 		return NULL;
 	}
 	else if (valid_objects.size() == 1) {
 		return valid_objects[0];
 	}
 
-	// ---------- (3): Figure out which of the valid objects is the closest to the sprite
-	// NOTE: For simplicity, we simply find which object has the location coordinates which are
-	// closest to the sprite's coordinates using the Manhattan distance.
+	// ---------- (4) Figure out which of the valid objects is the closest to the sprite
+	// NOTE: For simplicity, we use the Manhattan distance to determine which object is the closest
+	MapObject* closest_obj = valid_objects[0];
 
 	// Used to hold the full position coordinates of the sprite
 	float source_x = sprite->ComputeXLocation();
 	float source_y = sprite->ComputeYLocation();
+	// Holds the minimum distance found between the sprite and a valid object
+	float min_distance = fabs(source_x - closest_obj->ComputeXLocation()) +
+		fabs(source_y - closest_obj->ComputeYLocation());
 
-	closest = valid_objects[0];
-	float min_distance = fabs(source_x - closest->ComputeXLocation()) + fabs(source_y - closest->ComputeYLocation());
-
-	// Determine which object's position is closest to the sprite
 	for (uint32 i = 1; i < valid_objects.size(); i++) {
-		float dist = fabs(source_x - valid_objects[i]->ComputeXLocation())
-			+ fabs(source_y - valid_objects[i]->ComputeYLocation());
+		float dist = fabs(source_x - valid_objects[i]->ComputeXLocation()) +
+			fabs(source_y - valid_objects[i]->ComputeYLocation());
 		if (dist < min_distance) {
-			closest = valid_objects[i];
+			closest_obj = valid_objects[i];
 			min_distance = dist;
 		}
 	}
-	return closest;
-} // MapObject* ObjectManager::FindNearestObject(VirtualSprite* sprite)
+	return closest_obj;
+} // MapObject* ObjectManager::FindNearestObject(VirtualSprite* sprite, float search_distance)
+
+
+
+bool ObjectManager::CheckMapCollision(const private_map::MapObject* const obj) {
+	// NOTE: We don't check if the argument is NULL here for performance reasons
+	if (obj->no_collision == true) {
+		return false;
+	}
+
+	MapRectangle coll_rect;
+	obj->GetCollisionRectangle(coll_rect);
+
+	// Check if any part of the object's collision rectangle is outside of the map boundary
+	if (coll_rect.left < 0.0f || coll_rect.right >= static_cast<float>(_num_grid_cols) ||
+		coll_rect.top < 0.0f || coll_rect.bottom >= static_cast<float>(_num_grid_rows)) {
+		return true;
+	}
+
+	// Tile based collision is not done for objects in the sky layer
+	if (obj->sky_object == true) {
+		return false;
+	}
+
+	// Determine if the object's collision rectangle overlaps any unwalkable tiles
+	// Note that because the sprite's collision rectangle was previously determined to be within the map bounds,
+	// the map grid tile indeces referenced in this loop are all valid entries and do not need to be checked.
+	for (uint32 r = static_cast<uint32>(coll_rect.top); r <= static_cast<uint32>(coll_rect.bottom); r++) {
+		for (uint32 c = static_cast<uint32>(coll_rect.left); c <= static_cast<uint32>(coll_rect.right); c++) {
+			// Checks the collision grid at the row-column at the object's current context
+			if ((_collision_grid[r][c] & obj->context) != 0) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+
+
+bool ObjectManager::CheckObjectCollision(const MapRectangle& rect, const private_map::MapObject* const obj) {
+	// NOTE: We don't check if the argument is NULL here for performance reasons
+	MapRectangle obj_rect;
+	obj->GetCollisionRectangle(obj_rect);
+	return MapRectangle::CheckIntersection(rect, obj_rect);
+}
+
+
+
+bool ObjectManager::DoObjectsCollide(const MapObject* const obj1, const MapObject* const obj2) {
+	// NOTE: We don't check if the arguments are NULL here for performance reasons
+
+	// Check if either of the two objects have the no_collision property enabled
+	if (obj1->no_collision == true || obj2->no_collision == true) {
+		return false;
+	}
+
+	// If the two objects are not contained within the same context, they can not overlap
+	if (obj1->context != obj2->context) {
+		return false;
+	}
+
+	MapRectangle rect1, rect2;
+	obj1->GetCollisionRectangle(rect1);
+	obj2->GetCollisionRectangle(rect2);
+
+	return MapRectangle::CheckIntersection(rect1, rect2);
+}
 
 
 
 bool ObjectManager::DetectCollision(VirtualSprite* sprite) {
-	// NOTE: Whether the argument pointer is valid is not checked here, since the object pointer
-	// itself presumably called this function.
+	// NOTE: We don't check if the argument is NULL here for performance reasons
 
-	// The single X,Y floating point coordinates of the sprite
-	float x_location = sprite->ComputeXLocation();
-	float y_location = sprite->ComputeYLocation();
-
-	// The coordinates corresponding to the four sides of the sprite's collision rectangle (cr)
-	float cr_left = x_location - sprite->coll_half_width;
-	float cr_right = x_location + sprite->coll_half_width;
-	float cr_top = y_location - sprite->coll_height;
-	// The bottom of the sprite's collision rectangle is its y_location
-
-	// ---------- (1): Check if the sprite's position has gone out of bounds
-	if (cr_left < 0.0f || cr_top < 0.0f || cr_right >= static_cast<float>(_num_grid_cols) ||
-		y_location >= static_cast<float>(_num_grid_rows)) {
+	// ---------- (1) Check that the sprite does not collide with the map tiles or boundaries
+	if (CheckMapCollision(sprite) == true)
 		return true;
-	}
 
-	// Do not do tile or object based collision detection for this sprite if it has this member set
+	// If the sprite has this property set, no further checks are needed
 	if (sprite->no_collision == true) {
 		return false;
 	}
 
-	// A pointer to the layer of objects to do the collision detection with
-	vector<MapObject*>* objects;
+	// ---------- (2) Determine which set of objects to do collision detection with
+	MapObject* collide_obj = NULL;
+	vector<MapObject*>* objects = NULL; // A pointer to the layer of objects to do the collision detection with
 
-	if (sprite->sky_object == false) { // Do tile collision detection for ground objects only
-
-		// ---------- (2): Determine if the sprite's collision rectangle overlaps any unwalkable tiles
-		// NOTE: Because the sprite's collision rectangle was determined to be within the map bounds,
-		// the map grid tile indeces referenced in this loop are all valid entries.
-		for (uint32 r = static_cast<uint32>(cr_top); r <= static_cast<uint32>(y_location); r++) {
-			for (uint32 c = static_cast<uint32>(cr_left); c <= static_cast<uint32>(cr_right); c++) {
-				if ((_collision_grid[r][c] & sprite->context) > 0) { // Then this overlapping tile is unwalkable
-					return true;
-				}
-			}
-		}
+	if (sprite->sky_object == false)
 		objects = &_ground_objects;
-	}
-	else {
+	else
 		objects = &_sky_objects;
-	}
 
-	// ---------- (3): Determine if two object's collision rectangles overlap
+	// ---------- (3) Check collision areas for all objects matching the layer and context of the sprite
+
+	MapRectangle sprite_rect;
+	sprite->GetCollisionRectangle(sprite_rect);
+
 	for (uint32 i = 0; i < objects->size(); i++) {
-		// Only verify this object if it is not the same object as the sprite
-		if ((*objects)[i]->object_id != sprite->object_id
-			&& !(*objects)[i]->no_collision
-			&& ((*objects)[i]->context & sprite->context) > 0 )
-		{
-			// Compute the full position coordinates of the other object
-			float other_x_location = (*objects)[i]->ComputeXLocation();
-			float other_y_location = (*objects)[i]->ComputeYLocation();;
+		// Check for conditions where we would not want to do collision detection between the two objects
+		if ((*objects)[i]->object_id == sprite->object_id) // Object and sprite are the same
+			continue;
+		if ((*objects)[i]->no_collision == true) // Object has no collision detection property set
+			continue;
+		if (((*objects)[i]->context & sprite->context) == 0) // Sprite and object do not exist in the same context
+			continue;
 
-			// Verify that the bounding boxes overlap on the horizontal axis
-			if (!(other_x_location - (*objects)[i]->coll_half_width > cr_right
-				|| other_x_location + (*objects)[i]->coll_half_width < cr_left)) {
-				// Verify that the bounding boxes overlap on the vertical axis
-				if (!(other_y_location - (*objects)[i]->coll_height > y_location || other_y_location < cr_top )) {
-					// Boxes overlap on both axis, there is a colision
-					if (sprite->GetType() == ENEMY_TYPE && (*objects)[i] == MapMode::_current_map->_camera) {
-						EnemySprite *enemy = reinterpret_cast<EnemySprite*>(sprite);
-						if (enemy->IsHostile()) {
-							enemy->ChangeStateDead();
-							BattleMode *BM = new BattleMode();
-							string enemy_battle_music = enemy->GetBattleMusicTheme();
-							if (enemy_battle_music != "")
-								BM->AddMusic(enemy_battle_music);
-							ModeManager->Push(BM);
-							const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
-							for (uint32 i = 0; i < enemy_party.size(); i++) {
-								BM->AddEnemy(enemy_party[i]);
-							}
-							return false;
-						}
-					}
-
-					if ((*objects)[i]->GetType() == ENEMY_TYPE && sprite == MapMode::_current_map->_camera) {
-						EnemySprite *enemy = reinterpret_cast<EnemySprite*>((*objects)[i]);
-						if (enemy->IsHostile()) {
-							enemy->ChangeStateDead();
-							BattleMode *BM = new BattleMode();
-							string enemy_battle_music = enemy->GetBattleMusicTheme();
-							if (enemy_battle_music != "")
-								BM->AddMusic(enemy_battle_music);
-							ModeManager->Push(BM);
-							const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
-							for (uint32 i = 0; i < enemy_party.size(); i++) {
-								BM->AddEnemy(enemy_party[i]);
-							}
-							return false;
-						}
-					}
-					return true;
-				}
-			}
+		if (CheckObjectCollision(sprite_rect, (*objects)[i]) == true) {
+			collide_obj = (*objects)[i];
+			break;
 		}
 	}
 
-	// No collision was detected
-	return false;
+	if (collide_obj == NULL) {
+		return false;
+	}
+
+	// ---------- (4) If a collision was detected, determine any further appropriate action
+	// TODO: this code needs to be removed, relocated, or improved
+	// Check if the map camera collided with an enemy sprite
+	EnemySprite* enemy = NULL;
+	if (sprite == MapMode::_current_map->_camera && collide_obj->GetType() == ENEMY_TYPE) {
+		enemy = reinterpret_cast<EnemySprite*>(collide_obj);
+	}
+	else if (collide_obj == MapMode::_current_map->_camera && sprite->GetType() == ENEMY_TYPE) {
+		enemy = reinterpret_cast<EnemySprite*>(sprite);
+	}
+	else { // No enemy collision, nothing left to do here but report the collision
+		return true;
+	}
+
+	if (enemy->IsHostile()) {
+		enemy->ChangeStateDead();
+		BattleMode *BM = new BattleMode();
+		string enemy_battle_music = enemy->GetBattleMusicTheme();
+		if (enemy_battle_music != "")
+			BM->AddMusic(enemy_battle_music);
+		ModeManager->Push(BM);
+		const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
+		for (uint32 i = 0; i < enemy_party.size(); i++) {
+			BM->AddEnemy(enemy_party[i]);
+		}
+	}
+
+	return true;
 } // bool ObjectManager::DetectCollision(VirtualSprite* sprite)
 
 
 
-void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest) {
-	// NOTE: Refer to the implementation of the A* algorithm to understand what all these lists and scores are
+void ObjectManager::FindPath(const VirtualSprite* sprite, vector<PathNode>& path, const PathNode& dest) {
+	// NOTE: Refer to the implementation of the A* algorithm to understand what all these lists and score values are for
 	std::vector<PathNode> open_list;
 	std::vector<PathNode> closed_list;
 
@@ -603,23 +675,20 @@ void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>&
 
 	// Check that the source node is not the same as the destination node
 	if (source_node == dest) {
-		if (MAP_DEBUG)
-			cerr << "MAP ERROR: source node is same as destination in MapMode::_FindPath()" << endl;
+		PRINT_ERROR << "source node is same as destination in MapMode::_FindPath()" << endl;
 		return;
 	}
 
 	// Check that the destination is valid for the sprite to move to
 	if ((dest.col - x_span < 0) || (dest.row - y_span < 0) ||
 		(dest.col + x_span >= (_num_grid_cols)) || (dest.row >= (_num_grid_rows))) {
-		if (MAP_DEBUG)
-			cerr << "MAP ERROR: sprite can not move to destination node on path because it exceeds map boundaries" << endl;
+		PRINT_ERROR << "sprite can not move to destination node on path because it exceeds map boundaries" << endl;
 		return;
 	}
 	for (int16 r = dest.row - y_span; r < dest.row; r++) {
 		for (int16 c = dest.col - x_span; c < dest.col + x_span; c++) {
 			if ((_collision_grid[r][c] & sprite->context) > 0) {
-				if (MAP_DEBUG)
-					cerr << "MAP ERROR: sprite can not move to destination node on path because one or more grid tiles are unwalkable" << endl;
+				PRINT_ERROR << "sprite can not move to destination node on path because one or more grid tiles are unwalkable" << endl;
 				return;
 			}
 		}
@@ -671,7 +740,7 @@ void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>&
 				continue;
 			}
 
-			// ---------- (C): Check if the Node is already in the closed list
+			// ---------- (C): Check if the node is already in the closed list
 			if (find(closed_list.begin(), closed_list.end(), nodes[i]) != closed_list.end()) {
 				continue;
 			}
@@ -717,9 +786,8 @@ void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>&
 	} // while (!open_list.empty())
 
 	if (open_list.empty()) {
-		if (MAP_DEBUG)
-			cerr << "MAP ERROR: could not find path to destination" << endl;
-		path.push_back( source_node );
+		IF_PRINT_WARNING(MAP_DEBUG) << "could not find path to destination" << endl;
+		path.push_back(source_node);
 		return;
 	}
 
@@ -740,12 +808,6 @@ void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>&
 	}
 	std::reverse(path.begin(), path.end());
 } // void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest)
-
-
-
-MapObject* ObjectManager::GetObject(uint32 object_id) {
-	return _all_objects[object_id];
-}
 
 } // namespace private_map
 

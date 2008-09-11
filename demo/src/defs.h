@@ -245,6 +245,7 @@ namespace hoa_map {
 		class TileManager;
 		class MapTile;
 
+		class MapRectangle;
 		class MapFrame;
 		class PathNode;
 

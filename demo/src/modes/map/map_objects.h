@@ -16,45 +16,65 @@
 #ifndef __MAP_OBJECTS_HEADER__
 #define __MAP_OBJECTS_HEADER__
 
+// Allacrost utilities
 #include "utils.h"
 #include "defs.h"
 
+// Allacrost engines
 #include "video.h"
 
 namespace hoa_map {
 
 namespace private_map {
 
-/** \name Map Object Type Constants
-*** These constants are used to identify the type of map object or sprite.
-**/
-//@{
-const uint8 PHYSICAL_TYPE = 0;
-const uint8 VIRTUAL_TYPE = 1;
-const uint8 SPRITE_TYPE = 2;
-const uint8 ENEMY_TYPE = 3;
-const uint8 TREASURE_TYPE = 4;
-//@}
+//! \brief Used to identify the type of map object or sprite
+enum MAP_OBJECT_TYPE {
+	PHYSICAL_TYPE = 0,
+	VIRTUAL_TYPE = 1,
+	SPRITE_TYPE = 2,
+	ENEMY_TYPE = 3,
+	TREASURE_TYPE = 4
+};
 
 /** ****************************************************************************
 *** \brief Abstract class that represents objects on a map
 ***
 *** A map object can be anything from a sprite to a tree to a house. To state
-*** it simply, a map object is a map image that is not tiled and may not be fixed
+*** it simply, a map object is a map image that is not tiled and need not be fixed
 *** in place. Map objects are drawn in one of three layers: ground, pass, and sky
-*** object layers. Every map object has a collision rectangle associated with it.
-*** The collision rectangle indicates what parts of the object may not overlap with
-*** other collision rectangles.
+*** object layers.
+
+*** All map objects have both a collision rectangle and an image rectangle.
+*** The collision rectangle indicates what parts of the object may not overlap
+*** with other collision rectangles and unwalkable sections of the map. The image
+*** rectangle determines the size of the object as it is visible on the screen.
+*** The collision rectangle and image rectangles do not need to be the same size.
+*** Typically the collision rectangle is smaller than the image rectangle. It is
+*** also possible to disable both rectangles via special properties that can be
+*** enabled in this class. This would prevent the object from being a factor in
+*** collision detection and/or it would never be drawn to the screen.
+***
+*** State information about map objects may need to be retained upon leaving a
+*** map. For example, a treasure (which is a type of map object) needs to know
+*** whether or not the player has retrieved its contents already so that they
+*** can not be gained a second time. This data is stored in the saved game file
+*** so that even when the player exits the game, the state information can be
+*** retrieved when the application starts again later.
 ***
 *** \note It is advised not to attempt to make map objects with dynamic sizes (i.e.
-*** the various image frames that compose the object are all the same size). In
-*** theory, dynamically sized objects are feasible to implement in maps, but they
-*** are much more vulnerable to bugs
+*** the various image frames that compose the object should all be the same size).
+*** In theory, dynamically sized objects are feasible to implement in maps, but
+*** they are much easier to be subject to bugs and other issues.
 *** ***************************************************************************/
 class MapObject {
 public:
+	MapObject();
+
+	virtual ~MapObject()
+		{}
+
 	/** \brief An identification number for the object as it is represented in the map file.
-	*** Player sprites are assigned object ids from 5000 and above. Technically this means that
+	*** Player sprites are assigned object IDs from 5000 and above. Technically this means that
 	*** a map can have no more than 5000 objects that are not player sprites, but no map should
 	*** need to contain that many objects in the first place. Objects with an ID less than zero
 	*** are invalid.
@@ -67,12 +87,7 @@ public:
 	*** since objects are only drawn if they are in the same context as the map's camera.
 	*** Objects can only interact with one another if they both reside in the same context.
 	***
-	*** \note The default value for this member is -1. A negative context indicates that the
-	*** object is invalid and it does not exist anywhere. Objects with a negative context are never
-	*** drawn to the screen. A value equal to zero indicates that the object is "always in
-	*** context", meaning that the object will be drawn regardless of the current context. An
-	*** example of where this is useful is a bridge, which shouldn't simply disappear because the
-	*** player walks inside a nearby home.
+	*** \note The default value for this member is the base context (context 01).
 	**/
 	MAP_CONTEXT context;
 
@@ -85,7 +100,7 @@ public:
 	*** The position coordinates point to the map grid tile that the object currently occupies
 	*** and may range from 0 to the number of columns or rows of grid tiles on the map. The
 	*** offset member will always range from 0.0f and 1.0f to indicate the exact position of
-	*** the object within that tile.
+	*** the object within that grid tile.
 	**/
 	//@{
 	uint16 x_position, y_position;
@@ -95,11 +110,11 @@ public:
 	/** \brief The half-width and height of the image, in map grid coordinates.
 	*** The half_width member is indeed just that: half the width of the object's image. We keep
 	*** the half width rather than the full width because the origin of the object is its bottom
-	*** center, and it is more convenient to store only half the sprite's width as a result.
+	*** center, and it is more convenient to store only half the sprite's width.
 	***
 	*** \note These members assume that the object retains the same width and height regardless
-	*** of the current animation or image being drawn. If the object's image changes size, the
-	*** API user must remember to change these values accordingly.
+	*** of the current animation frame or image being drawn. If the object's image changes size
+	*** for any reason, the programmer must remember to change these values accordingly.
 	**/
 	float img_half_width, img_height;
 
@@ -107,71 +122,67 @@ public:
 	*** The collision area determines what portion of the map object may not be overlapped
 	*** by other objects or unwalkable regions of the map. The x and y coordinates are
 	*** relative to the origin, so an x value of 0.5f means that the collision rectangle
-	*** extends the length of 1/2 of a tile from the origin on both sides, and a y value
-	*** of 1.0f means that the collision area exists from the origin to 1 tile's length
-	*** above.
+	*** extends the length of 1/2 of a grid element from the origin on both sides, and a y value
+	*** of 1.0f means that the collision area exists from the origin to one grid element above.
 	***
-	*** \note These members should always be positive. Setting these members to zero does *not*
-	*** eliminate collision detection for the object, and therefore they should usually never
-	*** be zero.
+	*** \note These members should always be positive and non-zero. Setting these members to
+	*** zero does <b>not</b> eliminate collision detection for the object.
 	**/
 	float coll_half_width, coll_height;
 
-	//! \brief When set to false, the Update() function will do nothing (default = true).
+	//! \name Object Properties
+	//@{
+	//! \brief When false, the Update() function will do nothing (default == true).
 	bool updatable;
 
-	//! \brief When set to false, the Draw() function will do nothing (default = true).
+	//! \brief When false, the Draw() function will do nothing (default == true).
 	bool visible;
 
-	/** \brief When set to true, the object will not be examined for collision detection (default = false).
-	*** Setting this member to true really has two effects. First, the object may exist anywhere on
-	*** the map, including where the collision rectangles of other objects are located. Second, the
-	*** object is ignored when other objects are performing their collision detection. This property
-	*** is useful for virtual objects or objects with an image but no "physical form" (i.e. ghosts
-	*** that other sprites may walk through). Note that while this member is set to true, the object's
-	*** collision rectangle members are ignored.
-	**/
+	//! \brief When true, the object will not be examined for collision detection (default == false).
 	bool no_collision;
 
-	/** \brief When set to true, objects in the ground object layer will be drawn after the pass objects
-	*** \note This member is only checked for objects that exist in the ground layer. It has no meaning
-	*** for objects in the pass or sky layers.
+	/** \brief When true, indicates that the object exists on the sky object layer (default == false).
+	*** This member is necessary for collision detection purposes. When a sprite needs to detect
+	*** if it has encountered a collision, that collision must be examined with other objects on
+	*** the appropriate layer (the ground/pass layers or the sky layer).
+	**/
+	bool sky_object;
+
+	/** \brief When true, objects in the ground object layer will be drawn after the pass objects
+	*** This member is only checked for objects that exist in the ground layer. It has no meaning
+	*** for objects in the pass or sky layers. Its purpose is so that objects (such as a bridge)
+	*** in the pass layer can be both walked over and walked under by sprites in the ground layer.
 	**/
 	bool draw_on_second_pass;
-
-	std::string filename;
+	//@}
 
 	// ---------- Methods
 
-	MapObject();
-
-	virtual ~MapObject()
-		{}
-
 	/** \brief Updates the state of an object.
-	*** Many map objects may not actually have a use for this function. For example, animated objects like a
-	*** tree automatically have their frames updated by the video engine, so there is no need to
-	*** call this function for it. The function is only called for objects which have the UPDATEABLE bit in
-	*** the MapObject#_status member set.
+	*** Many map objects may not actually have a use for this function. For example, animated objects
+	*** like a tree will automatically have their frames updated by the video engine in the draw
+	*** function. So it is the case that the implementation of this function in derived classes may
+	*** simply do nothing.
 	**/
 	virtual void Update() = 0;
 
 	/** \brief Draws the object to the frame buffer.
 	*** Objects are drawn differently depending on what type of object they are and what their current
-	*** state is. This function is only called for objects that will be visible on the screen when drawn
-	*** and have their VISIBLE bit in the MapObject#_status member set.
+	*** state is. Note that calling this function does not guarantee that the object will be drawn.
+	*** Many implementations of this function in the derived classes first call the ShouldDraw() method
+	*** to determine if the object should be drawn at all.
 	**/
 	virtual void Draw() = 0;
 
-	/** \brief Assists with the drawing of map objects
-	*** \return True if the object should be drawn, or false if it is not visible on the screen.
+	/** \brief Determines if an object should be drawn to the screen.
+	*** \return True if the object should be drawn.
+	*** \note This function also moves the draw cursor to the proper position if the object should be drawn
 	***
 	*** This method performs the common drawing operations of identifying whether or not the object
 	*** is visible on the screen and moving the drawing cursor to its location. The children classes
-	*** of this class may choose to make use of it (or not). All that needs to be done after this
-	*** method returns true is to draw the object's image on the screen.
+	*** of this class may choose to make use of it (or not).
 	**/
-	bool DrawHelper();
+	bool ShouldDraw();
 
 	/** \brief Computes the full floating-point location coordinates of the object
 	*** \return The full x or y coordinate location of the object
@@ -188,12 +199,28 @@ public:
 		{ return (static_cast<float>(y_position) + y_offset); }
 	//@}
 
-	//! Loads the saved state of the object
-	virtual void LoadSaved(){};
+	/** \brief Returns the collision rectangle for the current object
+	*** \param rect A reference to the MapRectangle object to store the collision rectangle data
+	**/
+	void GetCollisionRectangle(MapRectangle& rect) const;
+
+	/** \brief Returns the image rectangle for the current object
+	*** \param rect A reference to the MapRectangle object to store the image rectangle data
+	**/
+	void GetImageRectangle(MapRectangle& rect) const;
+
+	/** \brief Loads the saved state of the object
+	*** This state data is retained in the saved game file. When any map object is created and added
+	*** to the map, this function is called to load any stored state data that there may be. Notice
+	*** that the default implementation of this function does nothing.
+	**/
+	virtual void LoadSaved()
+		{}
 
 	/** \name Lua Access Functions
-	*** These functions are specifically written for Lua binding, to enable Lua to access the
-	*** members of this class.
+	*** These functions are specifically written to enable Lua to access the members of this class.
+	*** C++ code may also choose to use these functions, although all of the members here are public
+	*** so it is not mandatory to do so.
 	**/
 	//@{
 	void SetObjectID(int16 id = 0)
@@ -268,13 +295,13 @@ public:
 	bool IsDrawOnSecondPass() const
 		{ return draw_on_second_pass; }
 
-	uint8 GetType() const
+	MAP_OBJECT_TYPE GetType() const
 		{ return _object_type; }
 	//@}
 
 protected:
-	//! \brief This holds the the type of sprite this is.
-	uint8 _object_type;
+	//! \brief This is used to identify the type of map object for inheriting classes.
+	MAP_OBJECT_TYPE _object_type;
 
 }; // class MapObject
 
@@ -284,7 +311,7 @@ protected:
 *** \note A simple '<' operator cannot be used with the sorting algorithm because it is sorting pointers.
 **/
 struct MapObject_Ptr_Less {
-	const bool operator()(const MapObject * a, const MapObject * b) {
+	const bool operator()(const MapObject* a, const MapObject* b) {
 		return (a->y_position + a->y_offset) < (b->y_position + b->y_offset);
 	}
 };
@@ -294,39 +321,40 @@ struct MapObject_Ptr_Less {
 *** \brief Represents visible objects on the map that have no motion.
 ***
 *** This class represents both still image and animated objects. These objects
-*** are fixed in place and can not move. The object must have at least one
-*** entry in its image vector, otherwise a segmentation fault will occur if the
-*** Update or Draw functions are called.
+*** are usually fixed in place and do not change their position. The object must
+*** have at least one entry in its image vector, otherwise a segmentation fault
+*** will occur if the Update or Draw functions are called.
 ***
-*** \note If the object does not have any animated images, set the updatable
-*** member of this class to false. Forgetting to do this will do no harm, but
-*** it will do an extra function call that it shouldn't need to do.
+*** \note If the object does not have any animated images, set the 'updatable'
+*** member of the base class to false. Forgetting to do this will do no harm, but
+*** it will
 *** ***************************************************************************/
 class PhysicalObject : public MapObject {
 public:
-	//! \brief The index to the animations vector that contains the current image to display
-	uint8 current_animation;
-
-	/** \brief A vector containing all the object's animations.
-	*** Note that these need not be actual animations. An AnimatedImage object may consist
-	*** of only a single frame. Usually an object will only need a single image or animation,
-	*** but a vector is used here in case others are needed.
-	**/
-	std::vector<hoa_video::AnimatedImage> animations;
-
 	PhysicalObject();
 
 	~PhysicalObject();
 
-	//! \brief Updates the object's animation frames if it is animated.
+	/** \brief The index to the animations vector that contains the current image to display
+	*** When modifying this member, take care not to exceed the bounds of the animations vector
+	**/
+	uint8 current_animation;
+
+	/** \brief A vector containing all the object's animations.
+	*** These need not be actual animations. If you just want a still image, add only a single
+	*** frame to the animation. Usually only need a single still image or animation will be
+	*** needed, but a vector is used here in case others are needed.
+	**/
+	std::vector<hoa_video::AnimatedImage> animations;
+
+	//! \brief Updates the object's current animation.
 	virtual void Update();
 
 	//! \brief Draws the object to the screen, if it is visible.
 	virtual void Draw();
 
 	/** \name Lua Access Functions
-	*** These functions are specifically written for Lua binding, to enable Lua to access the
-	*** members of this class.
+	*** These functions are specifically to enable Lua to access the members of this class.
 	**/
 	//@{
 	void AddAnimation(hoa_video::AnimatedImage new_img)
@@ -345,38 +373,28 @@ public:
 
 
 /** ****************************************************************************
-*** \brief Represents a treasure on the map which the player may open
+*** \brief Represents a treasure on the map which the player may access
 ***
-*** This class acts as an optionnaly hidden object that has to be found before
-*** being able to activate. When activated it will transfer its content to the
-*** player's inventory.
+*** A treasure is a specific type of physical object. Treasures may contain
+*** multiple quantities and types of items, weapons, armor, or any other type of
+*** global object. They may additionally contain any amount of drunes (money).
+*** As one would expect, the contents of a treasure can only be retrieved by the
+*** player once. Each treasure object on a map has a simple boolean in the
+*** saved game file to determine whether the treasure has already been retrieved
+*** by the player or not.
 ***
-*** Image files for treasure are single row multi images where the frame ordering
+*** Image files for treasures are single row multi images where the frame ordering
 *** goes from closed, to opening, to open. This means each map treasure has exactly
-*** three animations, although the closed and open animations are usually single
-*** frame images.
+*** three animations. The closed and open animations are usually single frame images.
 ***
 *** \todo Add support for more treasure features, such as locked chests, chests which
 *** trigger a battle, etc.
 *** ***************************************************************************/
 class MapTreasure : public PhysicalObject {
 	friend class TreasureMenu;
+
 public:
-	//! \brief Values for defining the 3 possible treasure animations
-	enum {
-		CLOSED_ANIM = 0,
-		OPENING_ANIM = 1,
-		OPEN_ANIM = 2
-	};
-
-	//! \brief The values pertaining to a treasure's state as a GlobalEvent
-	enum {
-		TREASURE_UNUSED = 0,
-		TREASURE_EMPTY = 1
-	};
-
-	/** \brief Creates a MapTreasure
-	*** \param image_file An image file in the form of a one row strip
+	/** \param image_file The name of the multi image file to load for the treasure
 	*** \param num_total_frames The total number of frame images in the multi image file
 	*** \param num_closed_frames The number of frames to use as the closed animation (default value == 1)
 	*** \param num_open_frames The number of frames to use as the open animation (default value == 1)
@@ -388,19 +406,23 @@ public:
 
 	~MapTreasure();
 
+	//! \brief Defines for all three treasure animations
+	enum {
+		TREASURE_CLOSED_ANIM = 0,
+		TREASURE_OPENING_ANIM = 1,
+		TREASURE_OPEN_ANIM = 2
+	};
+
 	//! \brief Loads the state of the chest from the event group corresponding to the current map
 	void LoadSaved();
 
+	//! \brief Changes the current animation if it has finished looping
+	void Update();
+
 	/** \name Lua Access Functions
-	*** These functions are specifically written for Lua binding, to enable Lua to access the
-	*** members of this class.
+	*** These functions are specifically written to enable Lua to access the members of this class.
  	**/
 	//@{
-
-	//! \brief Indicates if the treasure contains any
-	bool IsEmpty() const
-		{ return _empty; }
-
 	/** \brief Adds an object to the contents of the MapTreasure
 	*** \param id The id of the GlobalObject to add
 	*** \param number The number of the object to add (default == 1)
@@ -414,21 +436,22 @@ public:
 	void AddDrunes(uint32 amount)
 		{ _drunes += amount; }
 
+	//! \brief Indicates if the treasure contains any
+	bool IsEmpty() const
+		{ return _empty; }
+
 	//! \brief Opens the treasure, which changes the active animation and initializes the treasure menu
 	void Open();
-
-	//! \brief Changes the current animation if it has finished looping
-	void Update();
 	//@}
 
 private:
-	//! \brief Set to true if the contents of the treasure have been emptied out
+	//! \brief Set to true when the contents of the treasure have been procured
 	bool _empty;
 
 	//! \brief The number of drunes contained in the chest
 	uint32 _drunes;
 
-	//! \brief The list of objects given to the player upon activation
+	//! \brief The list of objects given to the player upon opening the treasure
 	std::vector<hoa_global::GlobalObject*> _objects_list;
 }; // class MapTreasure : public PhysicalObject
 
@@ -437,13 +460,15 @@ private:
 *** \brief A container class for node information in pathfinding.
 ***
 *** This class is used in the MapMode#_FindPath function to find an optimal
-*** path from a given source to a destination.
-*** *****************************************************************************/
+*** path from a given source to a destination. The path finding algorithm
+*** employed is A* and thus many members of this class are particular to the
+*** implementation of that algorithm.
+*** ***************************************************************************/
 class PathNode {
 public:
-	/** \brief The coordinates for this node
-	*** These coordinates correspond to the MapMode#_walkable 2D vector, where
-	*** each element is a 16x16 pixel space on the map.
+	/** \brief The grid coordinates for this node
+	*** These coordinates correspond to the collision grid, where each element
+	*** is a 16x16 pixel space on the map.
 	**/
 	//@{
 	int16 row, col;
@@ -461,60 +486,74 @@ public:
 	int16 h_score;
 	//@}
 
-	//PathNode *parent;
+	//! \brief The grid coordinates for the parent of this node
 	int16 parent_row, parent_col;
 
-	PathNode() :
-		row(-1), col(-1), f_score(0), g_score(0), h_score(0), parent_row( 0 ), parent_col( 0 ) {}
+	PathNode() : row(-1), col(-1), f_score(0), g_score(0), h_score(0), parent_row(0), parent_col(0)
+		{}
 
-	PathNode(int16 r, int16 c) :
-		row(r), col(c), f_score(0), g_score(0), h_score(0), parent_row( 0 ), parent_col( 0 ) {}
+	PathNode(int16 r, int16 c) : row(r), col(c), f_score(0), g_score(0), h_score(0), parent_row(0), parent_col(0)
+		{}
 
-	//! \brief Overloaded comparison operator checks that tile.row and tile.col are equal
+	//! \brief Overloaded comparison operator checks that row and col members are equal
 	bool operator==(const PathNode& that) const
 		{ return ((this->row == that.row) && (this->col == that.col)); }
 
-	//! \brief Overloaded comparison operator checks that tile.row or tile.col are not equal
+	//! \brief Overloaded comparison operator checks that row or col members are unequal
 	bool operator!=(const PathNode& that) const
 		{ return ((this->row != that.row) || (this->col != that.col)); }
 
-	//! \brief Overloaded comparison operator only used for path finding. It compares the two f_scores.
+	//! \brief Overloaded comparison operator only used for path finding, compares the two f_scores
 	bool operator<(const PathNode& that) const
 		{ return this->f_score > that.f_score; }
 }; // class PathNode
 
 
 /** ****************************************************************************
-*** \brief A helper class to MapMode responsible for all object/sprite data and operations
+*** \brief A helper class to MapMode responsible for management of all object and sprite data
 ***
 *** This class is responsible for loading, updating, and drawing all map objects
 *** and map sprites, in addition to maintaining the map's collision grid and map
-*** zones.
+*** zones. This class contains the implementation of the collision detection
+*** and path finding algorithms.
 *** ***************************************************************************/
 class ObjectManager {
 	friend class hoa_map::MapMode;
-	// TEMP for allowing context zones to access all objects
+	// TEMP: for allowing context zones to access all objects
 	friend class hoa_map::private_map::ContextZone;
 
 public:
 	ObjectManager();
+
 	~ObjectManager();
 
-	//! \brief Handles all operations on loading tilesets and tile images for the map's Lua file
-	void Load(hoa_script::ReadScriptDescriptor& map_file);
-
-	//! \brief Updates the state of all map objects and zones
-	void Update();
+	/** \brief Retrieves a pointer to an object on this map
+	*** \param object_id The id number of the object to retreive
+	*** \return A pointer to the map object, or NULL if no object with that ID was found
+	**/
+	MapObject* GetObject(uint32 object_id);
 
 	//! \brief Sorts objects on all three layers according to their draw order
 	void SortObjects();
 
+	/** \brief Loads the collision grid data and saved state of all map objects
+	*** \param map_file A reference to the open map script file
+	***
+	*** The file must be open prior to making this call and additionally must
+	*** be at the highest level scope (i.e., there are no actively open tables
+	*** in the script descriptor object).
+	**/
+	void Load(hoa_script::ReadScriptDescriptor& map_file);
+
+	//! \brief Updates the state of all map zones and objects
+	void Update();
+
 	/** \brief Draws the various object layers to the screen
-	*** \param frame A pointer to the already computed information required to draw this frame
+	*** \param frame A pointer to the information required to draw this frame
 	*** \note These functions do not reset the coordinate system and hence depend that the proper coordinate system
 	*** is already set prior to these function calls (0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f). These functions do make
-	*** modifications to the blending draw flag and the draw cursor position which are not restored by the function
-	*** upon its return, so take measures to retain this information before calling these functions if required.
+	*** modifications to the draw flags and the draw cursor position, which are not restored by the function
+	*** upon its return. Take measures to retain this information before calling these functions if necessary.
 	**/
 	//@{
 	void DrawGroundObjects(const MapFrame* const frame, const bool second_pass);
@@ -522,19 +561,48 @@ public:
 	void DrawSkyObjects(const MapFrame* const frame);
 	//@}
 
-	// TODO
-	// void SwitchContext(MAP_CONTEXT context);
-
-	/** \brief Finds the nearest interactable object within a certain distance.
-	*** \param *sprite The sprite who is trying to find its nearest object.
-	*** \return A pointer to the nearest interactable map object, or NULL if no such object was found.
+	/** \brief Finds the nearest map object within a certain distance of a sprite
+	*** \param sprite The sprite who is trying to find its nearest object
+	*** \param search_distance The maximum distance to search for an object from the sprite (default == 3.0f)
+	*** \return A pointer to the nearest map object, or NULL if no such object was found.
 	***
 	*** An interactable object must be in the same context as the function argument is. For an object
-	*** to be valid, it's collision rectangle must be no greater than 3 grid elements from the sprite's
-	*** "calling" axis, and th
-	***
+	*** to be valid, it's collision rectangle must be no greater than the search distance (in units of
+	*** collision grid elements) from the sprite's "calling" axis. For example, if the search distance was 3.0f
+	*** and the sprite was facing downwards, this function draws an imaginary rectangle below the sprite of height
+	*** 3.0f and a length equal to the length of the sprite. Any objects that have their collision rectangles intersect
+	*** with any portion of this search area are put on a list of valid objects, and once this list has been fully
+	*** constructed the nearest of these objects will be returned.
 	**/
-	private_map::MapObject* FindNearestObject(const private_map::VirtualSprite* sprite);
+	private_map::MapObject* FindNearestObject(const private_map::VirtualSprite* sprite, float search_distance = 3.0f);
+
+	/** \brief Determines if an object occupies an invalid position on the map
+	*** \param obj A pointer to the map object whose position should be checked
+	*** \return True if the object has collided with
+	***
+	*** The collision condition is true if the object's collision rectangle occupies any space
+	*** outside of the map boundaries or if any of the collision grid tiles occupied by the
+	*** collision rectangle are unwalkable in the object's current context.
+	**/
+	bool CheckMapCollision(const private_map::MapObject* const obj);
+
+	/** \brief Determines if a map object's collision rectangle intersects with a specified map area
+	*** \param rect A reference to the rectangular section of the map to do collision detection with
+	*** \param obj A pointer to a map object
+	*** \return True if the objects collide with one another
+	*** \note This test is "absolute", and does not factor in things such as map contexts or whether or
+	*** not the no_collision property is enabled on the MapObject.
+	**/
+	bool CheckObjectCollision(const MapRectangle& rect, const private_map::MapObject* const obj);
+
+	/** \brief Determines if two map objects have overlapping collision rectangles
+	*** \param obj1 A pointer to a map object
+	*** \param obj2 A pointer to a different map object
+	*** \return True if the objects collide
+	**/
+	bool DoObjectsCollide(const private_map::MapObject* const obj1, const private_map::MapObject* const obj2);
+
+
 
 	/** \brief Determines if a map sprite's position is invalid because of a collision
 	*** \param sprite A pointer to the map sprite to check
@@ -566,25 +634,31 @@ public:
 	**/
 	void FindPath(const private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
 
-	MapObject* GetObject(uint32 object_id);
-
 private:
 	/** \brief The number of rows and columns in the collision gride
 	*** The number of collision grid rows and columns is always equal to twice
-	*** that of the number of rows and columns of tiles.
+	*** that of the number of rows and columns of tiles (stored in the TileManager).
 	**/
 	uint16 _num_grid_rows, _num_grid_cols;
 
-	/** \brief A 2D vector indicating which spots on the map sprites may walk on.
-	*** This vector is kept seperate from the vector of tiles because each tile
-	*** has 4 walkable uint32 bitflags associated with it. Note that sprite objects may
-	*** come in various sizes, so not all sprites may fit through a narrow
-	*** passage way.
+	//! \brief Holds the most recently generated object ID number
+	uint16 _last_id;
+
+	/** \brief A "virtual sprite" that can serve as a focus point for the camera.
+	*** This sprite is not visible to the player nor does it have any collision
+	*** detection properties. Usually, the camera focuses on the player's sprite
+	*** rather than this object, but it is useful for scripted sequences and other
+	*** things.
+	**/
+	private_map::VirtualSprite *_virtual_focus;
+
+	/** \brief A 2D vector indicating which grid element on the map sprites may be occupied by objects.
+	*** Each bit of each element in this grid corresponds to a context. So all together this entire grid
+	*** stores the collision information for all 32 possible map contexts.
 	**/
 	std::vector<std::vector<uint32> > _collision_grid;
 
-	//! \brief Holds the most recently generated object ID number
-	uint16 _lastID;
+
 
 	/** \brief A map containing pointers to all of the sprites on a map.
 	*** This map does not include a pointer to the MapMode#_camera nor MapMode#_virtual_focus
@@ -606,25 +680,17 @@ private:
 	*** are unaffected by the maps context. In other words, these objects are always
 	*** drawn on the screen, regardless of the current context that the player is in.
 	**/
-	std::vector<private_map::MapObject*> _pass_objects;
+	std::vector<MapObject*> _pass_objects;
 
 	/** \brief A container for all of the map objects located on the sky layer.
 	*** The sky object layer contains the last series of elements that are drawn on
 	*** a map. These objects exist high in the sky above all other tiles and objects.
 	*** Translucent clouds can make good use of this object layer, for instance.
 	**/
-	std::vector<private_map::MapObject*> _sky_objects;
+	std::vector<MapObject*> _sky_objects;
 
-	/** \brief A "virtual sprite" that can serve as a focus point for the camera.
-	*** This sprite is not visible to the player nor does it have any collision
-	*** detection properties. Usually, the camera focuses on the player's sprite
-	*** rather than this object, but it is useful for scripted sequences and other
-	*** things.
-	**/
-	private_map::VirtualSprite *_virtual_focus;
-
-	//! \brief Container for map zones, used for various purposes such as spawning of enemies
-	std::vector<private_map::MapZone*> _zones;
+	//! \brief Container for all zones used in this map
+	std::vector<MapZone*> _zones;
 }; // class ObjectManager
 
 } // namespace private_map

@@ -13,11 +13,17 @@
 *** \brief   Source file for map mode sprites.
 *** ***************************************************************************/
 
+// Allacrost utilities
 #include "utils.h"
 
+// Allacrost engines
 #include "audio.h"
 #include "system.h"
+
+// Allacrost globals
 #include "global.h"
+
+// Local map mode headers
 #include "map.h"
 #include "map_sprites.h"
 #include "map_objects.h"
@@ -44,7 +50,6 @@ VirtualSprite::VirtualSprite() :
 	direction(SOUTH),
 	movement_speed(NORMAL_SPEED),
 	moving(false),
-	sky_object(false),
 	face_portrait( NULL ),
 	has_active_dialogue(true),
 	current_action(-1),
@@ -130,7 +135,7 @@ void VirtualSprite::UpdateActiveDialogue() {
 void VirtualSprite::ClearDialogues() {
 	for (size_t i = 0; i < dialogues.size(); i++)
 		delete dialogues[i];
-		
+
 	dialogues.clear();
 }
 
@@ -184,65 +189,113 @@ void VirtualSprite::Update() {
 		}
 	}
 
-	if (moving) {
-		// Save the previous sprite's position temporarily
-		float tmp_x = x_offset;
-		float tmp_y = y_offset;
+	if (moving == false)
+		return;
 
-		float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
-		// Double the distance to move if the sprite is running
-		if (is_running == true)
-			distance_moved *= 2.0f;
-		// If the movement is diagonal, decrease the lateral movement distance by sin(45 degress)
-		if (direction & DIAGONAL_MOVEMENT)
-			distance_moved *= 0.707f;
+	// Save the previous sprite's position temporarily
+	float tmp_x = x_offset;
+	float tmp_y = y_offset;
 
-		// Move the sprite the appropriate distance in the appropriate Y direction
-		if (direction & (NORTH | NORTHWEST | NORTHEAST))
-			y_offset -= distance_moved;
-		else if (direction & (SOUTH | SOUTHWEST | SOUTHEAST))
-			y_offset += distance_moved;
+	float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
+	// Double the distance to move if the sprite is running
+	if (is_running == true)
+		distance_moved *= 2.0f;
+	// If the movement is diagonal, decrease the lateral movement distance by sin(45 degress)
+	if (direction & DIAGONAL_MOVEMENT)
+		distance_moved *= 0.707f;
 
-		// Determine if the sprite may move to this new Y position
-		if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
-			// Determine if we can slide on an object
-			if( direction & (SOUTH | NORTH)) {
-				//Start from a sprite's size away and get closer testing collision each time
-				for( float i = 0; i < coll_half_width * 2; i += 0.1f ) {
-					x_offset = tmp_x - ( coll_half_width * 2 ) + i;
+	// TODO: the code below is very inefficient because first it moves in the y direction and does
+	// full collision detection, then it moves in the x direction and does full collision detection.
+	// I think we should only do collision detection once per move, not twice.
+
+	// Move the sprite the appropriate distance in the appropriate Y direction
+	if (direction & (NORTH | NORTHWEST | NORTHEAST))
+		y_offset -= distance_moved;
+	else if (direction & (SOUTH | SOUTHWEST | SOUTHEAST))
+		y_offset += distance_moved;
+
+	// Determine if the sprite may move to this new Y position
+	if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+		// Determine if we can slide on an object
+		if( direction & (SOUTH | NORTH)) {
+			//Start from a sprite's size away and get closer testing collision each time
+			for( float i = 0; i < coll_half_width * 2; i += 0.1f ) {
+				x_offset = tmp_x - ( coll_half_width * 2 ) + i;
+				if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+					//Try the other way, can't go that way
+					x_offset = tmp_x + ( coll_half_width * 2 ) - i;
 					if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
-						//Try the other way, can't go that way
-						x_offset = tmp_x + ( coll_half_width * 2 ) - i;
-						if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
-							//Still can't slide, reset
-							x_offset = tmp_x;
-						}
-						else {
-							x_offset = tmp_x + distance_moved;
-							break;
-						}
+						//Still can't slide, reset
+						x_offset = tmp_x;
 					}
 					else {
-						x_offset = tmp_x - distance_moved;
+						x_offset = tmp_x + distance_moved;
 						break;
 					}
 				}
-				
-				// Roll-over X position offsets if necessary
-				while (x_offset < 0.0f) {
-					x_position -= 1;
-					x_offset += 1.0f;
-				}
-				while (x_offset > 1.0f) {
-					x_position += 1;
-					x_offset -= 1.0f;
+				else {
+					x_offset = tmp_x - distance_moved;
+					break;
 				}
 			}
-			
-			y_offset = tmp_y;
-			
+
+			// Roll-over X position offsets if necessary
+			while (x_offset < 0.0f) {
+				x_position -= 1;
+				x_offset += 1.0f;
+			}
+			while (x_offset > 1.0f) {
+				x_position += 1;
+				x_offset -= 1.0f;
+			}
 		}
-		else {
+
+		y_offset = tmp_y;
+
+	}
+	else {
+		// Roll-over Y position offsets if necessary
+		while (y_offset < 0.0f) {
+			y_position -= 1;
+			y_offset += 1.0f;
+		}
+		while (y_offset > 1.0f) {
+			y_position += 1;
+			y_offset -= 1.0f;
+		}
+	}
+
+	// Move the sprite the appropriate distance in the appropriate X direction
+	if (direction & (WEST | NORTHWEST | SOUTHWEST))
+		x_offset -= distance_moved;
+	else if (direction & (EAST | NORTHEAST | SOUTHEAST))
+		x_offset += distance_moved;
+
+	// Determine if the sprite may move to this new X position
+	if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+		// Determine if we can slide on an object
+		if( direction & (WEST | EAST)) {
+			//Start from a sprite's size away and get closer testing collision each time
+			for( float i = 0; i < coll_height; i += 0.1f ) {
+				y_offset = tmp_y - coll_height + i;
+				if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+					//Try the other way, can't go that way
+					y_offset = tmp_y + coll_height - i;
+					if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+						//Still can't slide, reset
+						y_offset = tmp_y;
+					}
+					else {
+						y_offset = tmp_y + distance_moved;
+						break;
+					}
+				}
+				else {
+					y_offset = tmp_y - distance_moved;
+					break;
+				}
+			}
+
 			// Roll-over Y position offsets if necessary
 			while (y_offset < 0.0f) {
 				y_position -= 1;
@@ -254,63 +307,19 @@ void VirtualSprite::Update() {
 			}
 		}
 
-		// Move the sprite the appropriate distance in the appropriate X direction
-		if (direction & (WEST | NORTHWEST | SOUTHWEST))
-			x_offset -= distance_moved;
-		else if (direction & (EAST | NORTHEAST | SOUTHEAST))
-			x_offset += distance_moved;
-
-
-		// Determine if the sprite may move to this new X position
-		if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
-			// Determine if we can slide on an object
-			if( direction & (WEST | EAST)) {
-				//Start from a sprite's size away and get closer testing collision each time
-				for( float i = 0; i < coll_height; i += 0.1f ) {
-					y_offset = tmp_y - coll_height + i;
-					if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
-						//Try the other way, can't go that way
-						y_offset = tmp_y + coll_height - i;
-						if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
-							//Still can't slide, reset
-							y_offset = tmp_y;
-						}
-						else {
-							y_offset = tmp_y + distance_moved;
-							break;
-						}
-					}
-					else {
-						y_offset = tmp_y - distance_moved;
-						break;
-					}
-				}
-				
-				// Roll-over Y position offsets if necessary
-				while (y_offset < 0.0f) {
-					y_position -= 1;
-					y_offset += 1.0f;
-				}
-				while (y_offset > 1.0f) {
-					y_position += 1;
-					y_offset -= 1.0f;
-				}
-			}
-			
-			x_offset = tmp_x;
+		x_offset = tmp_x;
+	}
+	else {
+		// Roll-over X position offsets if necessary
+		while (x_offset < 0.0f) {
+			x_position -= 1;
+			x_offset += 1.0f;
 		}
-		else {
-			// Roll-over X position offsets if necessary
-			while (x_offset < 0.0f) {
-				x_position -= 1;
-				x_offset += 1.0f;
-			}
-			while (x_offset > 1.0f) {
-				x_position += 1;
-				x_offset -= 1.0f;
-			}
+		while (x_offset > 1.0f) {
+			x_position += 1;
+			x_offset -= 1.0f;
 		}
-	} // if (moving)
+	}
 } // void VirtualSprite::Update()
 
 
@@ -436,8 +445,7 @@ void VirtualSprite::SetRandomDirection() {
 			SetDirection(SOUTHWEST);
 			break;
 		default:
-			if (MAP_DEBUG)
-				cerr << "MAP WARNING: In VirtualSprite::SetRandomDirection(), invalid direction was picked" << endl;
+			IF_PRINT_WARNING(MAP_DEBUG) << "invalid randomized direction was chosen" << endl;
 	}
 }
 
@@ -653,7 +661,7 @@ void MapSprite::Update() {
 
 // Draw the appropriate sprite frame at the correct position on the screen
 void MapSprite::Draw() {
-	if (MapObject::DrawHelper() == true) {
+	if (MapObject::ShouldDraw() == true) {
 		animations[current_animation].Draw();
 		VirtualSprite::Draw();
 	}
@@ -821,7 +829,7 @@ void EnemySprite::Update() {
 
 				// Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
 				// The order of comparaisons here is important, the NULL check MUST come before the rest or a null pointer exception could happen if no zone is registered
-				if ( _zone == NULL || ( fabs(xdelta) <= _aggro_range && fabs(ydelta) <= _aggro_range 
+				if ( _zone == NULL || ( fabs(xdelta) <= _aggro_range && fabs(ydelta) <= _aggro_range
 					 && (!_zone->IsRestraining() || _zone->IsInsideZone(MapMode::_current_map->_camera->x_position, MapMode::_current_map->_camera->y_position)) ) )
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
@@ -865,7 +873,7 @@ void EnemySprite::Update() {
 
 void EnemySprite::Draw() {
 	// Otherwise, only draw it if it is not in the DEAD state
-	if (_state != DEAD && MapObject::DrawHelper() == true) {
+	if (MapObject::ShouldDraw() == true && _state != DEAD) {
 		animations[current_animation].Draw(_color);
 		return;
 	}

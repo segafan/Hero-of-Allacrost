@@ -13,14 +13,21 @@
 *** \brief   Source file for map mode dialogue.
 *** ***************************************************************************/
 
+// Allacrost utilities
 #include "utils.h"
 
+// Allacrost engines
 #include "audio.h"
 #include "input.h"
 #include "mode_manager.h"
+
+// Allacrost globals
 #include "global.h"
 
+// Other game mode headers
 #include "menu.h"
+
+// Local map mode headers
 #include "map.h"
 #include "map_dialogue.h"
 #include "map_objects.h"
@@ -186,7 +193,7 @@ void TreasureMenu::Update() {
 	_detail_textbox.Update();
 
 	// Don't process user input until after the treasure opening animation is finished
-	if (_treasure->current_animation != MapTreasure::OPEN_ANIM) {
+	if (_treasure->current_animation != MapTreasure::TREASURE_OPEN_ANIM) {
 		_treasure->Update();
 		return;
 	}
@@ -283,7 +290,7 @@ void TreasureMenu::_UpdateDetail() {
 void TreasureMenu::Draw() {
 	// We wait until the treasure is fully open before displaying the menu. The chest will eventually move to the open animation
 	// so long as the Update() method continues to be called on it (which MapMode should always do)
-	if (_treasure->current_animation != MapTreasure::OPEN_ANIM) {
+	if (_treasure->current_animation != MapTreasure::TREASURE_OPEN_ANIM) {
 		return;
 	}
 
