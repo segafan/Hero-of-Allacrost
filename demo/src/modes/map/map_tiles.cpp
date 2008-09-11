@@ -38,13 +38,14 @@ TileManager::TileManager() :
 
 
 TileManager::~TileManager() {
-	// Delete _tile_images but not _animated_tile_images since everything contained in the later should be within the former
-	_tile_grid.clear();
-	_animated_tile_images.clear();
-
+	// Delete all objects in _tile_images but *not* _animated_tile_images.
+	// This is because _animated_tile_images is a subset of _tile_images.
 	for (uint32 i = 0; i < _tile_images.size(); i++)
 		delete(_tile_images[i]);
+
+	_tile_grid.clear();
 	_tile_images.clear();
+	_animated_tile_images.clear();
 }
 
 
@@ -53,12 +54,11 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 	// TODO: Add some more error checking in this function (such as checking for script errors after reading blocks of data from the map file)
 
 	// ---------- (1) Load the map dimensions and do some basic sanity checks
-
 	_num_tile_rows = map_file.ReadInt("num_tile_rows");
 	_num_tile_cols = map_file.ReadInt("num_tile_cols");
 
-	// Do some checking to make sure tables are of the proper size
-	// NOTE: we only check that the number of rows are correct, but not the number of columns
+	// Check to make sure tables are of the proper size
+	// TODO: we only check that the number of rows are correct, but not the number of columns
 	if (map_file.GetTableSize("lower_layer") != _num_tile_rows) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "the lower_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
@@ -76,7 +76,7 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 
 	// Contains all of the tileset filenames used (string does not contain path information or file extensions)
 	vector<string> tileset_filenames;
-	// A container to temporarily retain all tile images loaded for each tileset. Each inner vector contains 256 StillImages
+	// Temporarily retains all tile images loaded for each tileset. Each inner vector contains 256 StillImage objects
 	vector<vector<StillImage> > tileset_images;
 
 	map_file.ReadStringVector("tileset_filenames", tileset_filenames);
@@ -86,12 +86,12 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 		string image_filename = "img/tilesets/" + tileset_filenames[i] + ".png";
 		tileset_images.push_back(vector<StillImage>(TILES_PER_TILESET));
 
-		// The map mode coordinate system uses (2.0, 2.0) for every tile dimension
+		// The map mode coordinate system used corresponds to a tile size of (2.0, 2.0)
 		for (uint32 j = 0; j < TILES_PER_TILESET; j++) {
 			tileset_images[i][j].SetDimensions(2.0f, 2.0f);
 		}
 
-		// Note: each tileset image is 512x512 pixels, yielding 256 32x32 pixel tiles each
+		// Each tileset image is 512x512 pixels, yielding 16 * 16 (== 256) 32x32 pixel tiles each
 		if (ImageDescriptor::LoadMultiImageFromElementGrid(tileset_images[i], image_filename, 16, 16) == false) {
 			PRINT_ERROR << "failed to load tileset image: " << image_filename << endl;
 			exit(1);
@@ -153,7 +153,7 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 			context_name += "0";
 		context_name += NumberToString(i);
 
-		// Initialize this context by making a cop of the #01 map context first, as most contexts re-use many of the same tiles from the 0th context
+		// Initialize this context by making a copy of the base map context first, as most contexts re-use many of the same tiles from the base context
 		_tile_grid.insert(make_pair(this_context, _tile_grid[MAP_CONTEXT_01]));
 
 		// Read the table corresponding to this context and modify each tile accordingly.
@@ -328,10 +328,14 @@ void TileManager::DrawLowerLayer(const MapFrame* const frame) {
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
 	for (uint32 r = static_cast<uint32>(frame->starting_row);
-			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++) {
+			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++)
+		{
 		for (uint32 c = static_cast<uint32>(frame->starting_col);
-				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++) {
-			if (_tile_grid[MapMode::_current_map->_current_context][r][c].lower_layer >= 0) { // Draw a tile image if it exists at this location
+				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++)
+		{
+			// Draw a tile image if it exists at this location
+			if (_tile_grid[MapMode::_current_map->_current_context][r][c].lower_layer >= 0)
+			{
 				_tile_images[_tile_grid[MapMode::_current_map->_current_context][r][c].lower_layer]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
@@ -346,10 +350,14 @@ void TileManager::DrawMiddleLayer(const MapFrame* const frame) {
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
 	for (uint32 r = static_cast<uint32>(frame->starting_row);
-			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++) {
+			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++)
+	{
 		for (uint32 c = static_cast<uint32>(frame->starting_col);
-				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++) {
-			if (_tile_grid[MapMode::_current_map->_current_context][r][c].middle_layer >= 0) { // Draw a tile image if it exists at this location
+				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++)
+		{
+			// Draw a tile image if it exists at this location
+			if (_tile_grid[MapMode::_current_map->_current_context][r][c].middle_layer >= 0)
+			{
 				_tile_images[_tile_grid[MapMode::_current_map->_current_context][r][c].middle_layer]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
@@ -362,12 +370,17 @@ void TileManager::DrawMiddleLayer(const MapFrame* const frame) {
 
 
 void TileManager::DrawUpperLayer(const MapFrame* const frame) {
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
 	for (uint32 r = static_cast<uint32>(frame->starting_row);
-			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++) {
+			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++)
+	{
 		for (uint32 c = static_cast<uint32>(frame->starting_col);
-				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++) {
-			if (_tile_grid[MapMode::_current_map->_current_context][r][c].upper_layer >= 0) { // Draw a tile image if it exists at this location
+				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++)
+		{
+			// Draw a tile image if it exists at this location
+			if (_tile_grid[MapMode::_current_map->_current_context][r][c].upper_layer >= 0)
+			{
 				_tile_images[_tile_grid[MapMode::_current_map->_current_context][r][c].upper_layer]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);

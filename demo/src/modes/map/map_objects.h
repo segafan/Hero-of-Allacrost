@@ -516,6 +516,10 @@ public:
 *** and map sprites, in addition to maintaining the map's collision grid and map
 *** zones. This class contains the implementation of the collision detection
 *** and path finding algorithms.
+***
+*** \todo Each map object is assigned an ID and certain values of IDs are reserved
+*** for different types of map objects. We need to find out what these are and
+*** maintain a list of those ranges here.
 *** ***************************************************************************/
 class ObjectManager {
 	friend class hoa_map::MapMode;
@@ -602,22 +606,17 @@ public:
 	**/
 	bool DoObjectsCollide(const private_map::MapObject* const obj1, const private_map::MapObject* const obj2);
 
-
-
 	/** \brief Determines if a map sprite's position is invalid because of a collision
 	*** \param sprite A pointer to the map sprite to check
 	*** \return True if a collision was detected, false if one was not
 	***
-	*** This method is invoked by the map sprite who wishes to check for its own collision. The
-	*** collision detection is performed agains three types of obstacles:
+	*** This method is invoked by a map sprite who wishes to check for its own collision.
+	*** The collision detection is performed agains three types of obstacles:
 	***
-	*** -# Boundary conditions: where the sprite has walked off the map
-	*** -# Tile collisions: where the sprite's collision rectangle overlaps with an unwalkable map grid tile.
+	*** -# Boundary conditions: where the sprite has walked off the edges of the map
+	*** -# Tile collisions: where the sprite's collision rectangle overlaps with an unwalkable section of the map grid
 	*** -# Object collision: where the sprite's collision rectangle overlaps that of another object's,
 	***    where the object is in the same draw layer and context as the original sprite.
-	***
-	*** \note This function does <b>not</b> check if the MapSprite argument has its no_collision member
-	*** set to false, but it <b>does</b> check that of the other MapObjects.
 	**/
 	bool DetectCollision(private_map::VirtualSprite* sprite);
 
@@ -630,7 +629,7 @@ public:
 	*** This function ignores the position of all other objects and only concerns itself with
 	*** which map grid elements are walkable.
 	***
-	*** \note If an error is detected, the function will return an empty path argument.
+	*** \note If an error is detected, the function will return an empty path vector.
 	**/
 	void FindPath(const private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
 
@@ -658,17 +657,14 @@ private:
 	**/
 	std::vector<std::vector<uint32> > _collision_grid;
 
-
-
 	/** \brief A map containing pointers to all of the sprites on a map.
-	*** This map does not include a pointer to the MapMode#_camera nor MapMode#_virtual_focus
-	*** sprites. The map key is used as the sprite's unique identifier for the map. Keys
-	*** 1000 and above are reserved for map sprites that correspond to the character's party.
+	*** This map does not include a pointer to the _virtual_focus object. The
+	*** sprite's unique identifier integer is used as the map key.
 	**/
 	std::map<uint16, MapObject*> _all_objects;
 
 	/** \brief A container for all of the map objects located on the ground layer.
-	*** The ground object layer is where most objects and sprites exist in Allacrost.
+	*** The ground object layer is where most objects and sprites exist in a typical map.
 	**/
 	std::vector<MapObject*> _ground_objects;
 
@@ -676,9 +672,7 @@ private:
 	*** The pass object layer is named so because objects on this layer can both be
 	*** walked under or above by objects in the ground object layer. A good example
 	*** of an object that would typically go on this layer would be a bridge. This
-	*** layer usually has very few objects for the map. Also, objects on this layer
-	*** are unaffected by the maps context. In other words, these objects are always
-	*** drawn on the screen, regardless of the current context that the player is in.
+	*** layer usually has very few objects for the map.
 	**/
 	std::vector<MapObject*> _pass_objects;
 
