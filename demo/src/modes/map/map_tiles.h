@@ -19,6 +19,7 @@
 #ifndef __MAP_TILES_HEADER__
 #define __MAP_TILES_HEADER__
 
+// Allacrost utilities
 #include "defs.h"
 #include "utils.h"
 

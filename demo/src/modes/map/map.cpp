@@ -13,37 +13,56 @@
 *** \brief   Source file for map mode interface.
 *** ***************************************************************************/
 
+// Allacrost engines
 #include "audio.h"
 #include "script.h"
 #include "input.h"
 #include "system.h"
 
+// Allacrost globals
 #include "global.h"
 
+// Other mode headers
+#include "menu.h"
+#include "pause.h"
+
+// Local map mode headers
 #include "map.h"
 #include "map_dialogue.h"
 #include "map_objects.h"
 #include "map_sprites.h"
 #include "map_tiles.h"
 #include "map_zones.h"
-#include "menu.h"
-#include "pause.h"
+
 
 using namespace std;
-using namespace hoa_map::private_map;
 using namespace hoa_utils;
 using namespace hoa_audio;
-using namespace hoa_video;
+using namespace hoa_input;
 using namespace hoa_mode_manager;
-using namespace hoa_input;
-using namespace hoa_system;
-using namespace hoa_input;
-using namespace hoa_global;
 using namespace hoa_script;
+using namespace hoa_system;
+using namespace hoa_video;
+using namespace hoa_global;
 using namespace hoa_menu;
 using namespace hoa_pause;
+using namespace hoa_map::private_map;
 
 namespace hoa_map {
+
+namespace private_map {
+
+bool MapRectangle::CheckIntersection(const MapRectangle& first, const MapRectangle& second) {
+	if ((first.left > second.right) ||
+		(first.right < second.left) ||
+		(first.top > second.bottom) ||
+		(first.bottom < second.top))
+		return false;
+	else
+		return true;
+}
+
+} // namespace private_map
 
 bool MAP_DEBUG = false;
 // Initialize static class variables
@@ -431,10 +450,10 @@ void MapMode::_CalculateDrawInfo() {
 
 	// ---------- (2) Determine the coordinates for the screen edges on the map grid
 
-	_draw_info.top_edge    = camera_y - HALF_SCREEN_ROWS;
-	_draw_info.bottom_edge = camera_y + HALF_SCREEN_ROWS;
-	_draw_info.left_edge   = camera_x - HALF_SCREEN_COLS;
-	_draw_info.right_edge  = camera_x + HALF_SCREEN_COLS;
+	_draw_info.screen_edges.top    = camera_y - HALF_SCREEN_ROWS;
+	_draw_info.screen_edges.bottom = camera_y + HALF_SCREEN_ROWS;
+	_draw_info.screen_edges.left   = camera_x - HALF_SCREEN_COLS;
+	_draw_info.screen_edges.right  = camera_x + HALF_SCREEN_COLS;
 
 	// ---------- (3) Check for special conditions that modify the drawing state
 
@@ -445,30 +464,30 @@ void MapMode::_CalculateDrawInfo() {
 	if (_draw_info.starting_col < 0) {
 		_draw_info.starting_col = 0;
 		_draw_info.tile_x_start = 1.0f;
-		_draw_info.left_edge = 0.0f;
-		_draw_info.right_edge = SCREEN_COLS;
+		_draw_info.screen_edges.left = 0.0f;
+		_draw_info.screen_edges.right = SCREEN_COLS;
 	}
 	// Camera exceeds the right boundary of the map
 	else if (_draw_info.starting_col + TILE_COLS >= _tile_manager->_num_tile_cols) {
 		_draw_info.starting_col = static_cast<int16>(_tile_manager->_num_tile_cols - TILE_COLS);
 		_draw_info.tile_x_start = 1.0f;
-		_draw_info.right_edge = static_cast<float>(_object_manager->_num_grid_cols);
-		_draw_info.left_edge = _draw_info.right_edge - SCREEN_COLS;
+		_draw_info.screen_edges.right = static_cast<float>(_object_manager->_num_grid_cols);
+		_draw_info.screen_edges.left = _draw_info.screen_edges.right - SCREEN_COLS;
 	}
 
 	// Camera exceeds the top boundary of the map
 	if (_draw_info.starting_row < 0) {
 		_draw_info.starting_row = 0;
 		_draw_info.tile_y_start = 2.0f;
-		_draw_info.top_edge = 0.0f;
-		_draw_info.bottom_edge = SCREEN_ROWS;
+		_draw_info.screen_edges.top = 0.0f;
+		_draw_info.screen_edges.bottom = SCREEN_ROWS;
 	}
 	// Camera exceeds the bottom boundary of the map
 	else if (_draw_info.starting_row + TILE_ROWS >= _tile_manager->_num_tile_rows) {
 		_draw_info.starting_row = static_cast<int16>(_tile_manager->_num_tile_rows - TILE_ROWS);
 		_draw_info.tile_y_start = 2.0f;
-		_draw_info.bottom_edge = static_cast<float>(_object_manager->_num_grid_rows);
-		_draw_info.top_edge = _draw_info.bottom_edge - SCREEN_ROWS;
+		_draw_info.screen_edges.bottom = static_cast<float>(_object_manager->_num_grid_rows);
+		_draw_info.screen_edges.top = _draw_info.screen_edges.bottom - SCREEN_ROWS;
 	}
 
 	// Check for the conditions where the tile images align perfectly with the screen and one less row or column of tiles is drawn
@@ -507,16 +526,16 @@ void MapMode::_CalculateDrawInfo() {
 #if defined(__MAP_CHANGE_1__) && defined(__MAP_CHANGE_2__)
 //	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
 	{
-		_draw_info.left_edge = FloorToFloatMultiple (_draw_info.left_edge, x_resolution);
-		_draw_info.top_edge = FloorToFloatMultiple (_draw_info.top_edge, y_resolution);
+		_draw_info.screen_edges.left = FloorToFloatMultiple (_draw_info.screen_edges.left, x_resolution);
+		_draw_info.screen_edges.top = FloorToFloatMultiple (_draw_info.screen_edges.top, y_resolution);
 
-		if (camera_x - HALF_SCREEN_COLS - _draw_info.left_edge > x_resolution*0.5f)
-			_draw_info.left_edge += x_resolution;
-		if (camera_y - HALF_SCREEN_ROWS - _draw_info.top_edge > y_resolution*0.5f)
-			_draw_info.top_edge += y_resolution;
+		if (camera_x - HALF_SCREEN_COLS - _draw_info.screen_edges.left > x_resolution*0.5f)
+			_draw_info.screen_edges.left += x_resolution;
+		if (camera_y - HALF_SCREEN_ROWS - _draw_info.screen_edges.top > y_resolution*0.5f)
+			_draw_info.screen_edges.top += y_resolution;
 
-		_draw_info.right_edge = _draw_info.left_edge + 2*SCREEN_COLS;
-		_draw_info.bottom_edge = _draw_info.top_edge + 2*SCREEN_ROWS;
+		_draw_info.screen_edges.right = _draw_info.screen_edges.left + 2 * SCREEN_COLS;
+		_draw_info.screen_edges.bottom = _draw_info.screen_edges.top + 2 * SCREEN_ROWS;
 	}
 #endif
 
@@ -526,7 +545,8 @@ void MapMode::_CalculateDrawInfo() {
 // 	printf("# draw rows, cols: [%d, %d]\n", _draw_info.num_draw_rows, _draw_info.num_draw_cols);
 // 	printf("Camera position:   [%f, %f]\n", camera_x, camera_y);
 // 	printf("Tile draw start:   [%f, %f]\n", _draw_info.tile_x_start, _draw_info.tile_y_start);
-// 	printf("Edges (T,D,L,R):   [%f, %f, %f, %f]\n", _draw_info.top_edge, _draw_info.bottom_edge, _draw_info.left_edge, _draw_info.right_edge);
+// 	printf("Edges (T,D,L,R):   [%f, %f, %f, %f]\n", _draw_info.screen_edges.top, _draw_info.screen_edges.bottom,
+// 		_draw_info.screen_edges.left, _draw_info.screen_edges.right);
 } // void MapMode::_CalculateDrawInfo()
 
 
@@ -702,7 +722,7 @@ VirtualSprite* MapMode::_GetCameraFocus() const {
 
 
 uint16 MapMode::_GetGeneratedObjectID() {
-	return ++(_object_manager->_lastID);
+	return ++(_object_manager->_last_id);
 }
 
 } // namespace hoa_map

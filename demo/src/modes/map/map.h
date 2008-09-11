@@ -12,27 +12,30 @@
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Header file for map mode interface.
 ***
-*** This code handles the game event processing and frame drawing when the user
-*** is in map mode (when the user is exploring town or dungeon maps). This
-*** includes handling of tile images, sprites, and events that occur on the map.
+*** This file contains the interface for map mode, active when the player is
+*** exploring town or dungeon maps. The map environments of Allacrost are
+*** quite extensive, thus this code is responsible for processing many things.
+*** This includes handling all tile images, objects, sprites, map events,
+*** dialogue, and more.
 ***
-*** Each individual map is represented by it's own object
-*** of the MapMode class. At this time, the intention is to keep the three most
-*** recently accessed maps in memory so there is no loading time when the player
-*** backtraces his or her steps. When a new map is loaded and there are already
-*** three
+*** Each individual map is represented by it's own object of the MapMode class.
+*** It is our intention in the future to retain more than one map in memory at
+*** once to reduce or eliminate loading times when the player transitions
+*** between maps.
 *** ***************************************************************************/
 
 #ifndef __MAP_HEADER__
 #define __MAP_HEADER__
 
+// Allacrost utilities
 #include "defs.h"
 #include "utils.h"
 
+// Allacrost engines
+#include "mode_manager.h"
 #include "script.h"
 #include "video.h"
 
-#include "mode_manager.h"
 
 
 //! All calls to map mode are wrapped in this namespace.
@@ -50,17 +53,24 @@ namespace private_map {
 *** \brief Represents the size of the visible screen in map tiles and the collision grid
 *** Every map tile is 32x32 pixels, and every collision grid element is one quarter of that
 *** area (16x16). Thus the number of collision grid elements that compose the screen are
-*** four times the number of tiles that are visible on the screen.
+*** four times the number of tiles that are visible on the screen. This also means the number
+*** of rows and columns of grid elements that encompass the screen are twice that of the
+*** number of rows and columns of tiles.
 **/
 //@{
 const float SCREEN_COLS = 64.0f;
 const float SCREEN_ROWS = 48.0f;
 const float HALF_SCREEN_COLS = 32.0f;
 const float HALF_SCREEN_ROWS = 24.0f;
+
 const uint16 TILE_COLS = 32;
 const uint16 TILE_ROWS = 24;
 const uint16 HALF_TILE_COLS = 16;
 const uint16 HALF_TILE_ROWS = 12;
+
+const uint16 TILE_LENGTH = 32;
+const uint16 HALF_TILE_LENGTH = 16;
+const uint16 GRID_LENGTH = 16;
 //@}
 
 /** \name Map State Constants
@@ -82,7 +92,7 @@ const uint8 OBSERVATION  = 0x04;
 *** complexity of collision detection for map sprites.
 **/
 enum MAP_CONTEXT {
-	MAP_CONTEXT_01 = 0x00000001,
+	MAP_CONTEXT_01 = 0x00000001, // Also known as the base context
 	MAP_CONTEXT_02 = 0x00000002,
 	MAP_CONTEXT_03 = 0x00000004,
 	MAP_CONTEXT_04 = 0x00000008,
@@ -116,6 +126,41 @@ enum MAP_CONTEXT {
 	MAP_CONTEXT_32 = 0x80000000
 };
 
+
+/** ****************************************************************************
+*** \brief Represents a rectangular section of a map
+***
+*** This is a small class that is used to represent rectangular map areas. These
+*** areas are used very frequently throughout the map code to check for collision
+*** detection, determining objects that are within a certain radius of one
+*** another, etc.
+*** ***************************************************************************/
+class MapRectangle {
+public:
+	MapRectangle() :
+		left(0.0f), right(0.0f), top(0.0f), bottom(0.0f)
+		{}
+
+	MapRectangle(float l, float r, float t, float b) :
+		left(l), right(r), top(t), bottom(b)
+		{}
+
+	//! \brief The four edges of the rectangle's area
+	float left, right, top, bottom;
+
+	/** \brief Determines if two rectangle objects intersect with one another
+	*** \param first A reference to the first rectangle object
+	*** \param second A reference to the second rectangle object
+	*** \return True if the two rectangles intersect at any location
+	***
+	*** This function assumes that the rectangle objects hold map collision grid
+	*** coordinates, where the top of the rectangle is a smaller number than the
+	*** bottom of the rectangle and the left is a smaller number than the right.
+	**/
+	static bool CheckIntersection(const MapRectangle& first, const MapRectangle& second);
+}; // class MapRectangle
+
+
 /** ****************************************************************************
 *** \brief Retains information about how the next map frame should be drawn.
 ***
@@ -145,7 +190,9 @@ public:
 	*** not they should be drawn on the screen. Note that these are <b>not</b> used as drawing
 	*** cursor positions, but rather are map grid coordinates indicating where the screen edges lie.
 	**/
-	float left_edge, right_edge, top_edge, bottom_edge;
+	MapRectangle screen_edges;
+
+// 	float left_edge, right_edge, top_edge, bottom_edge;
 }; // class MapFrame
 
 } // namespace private_map

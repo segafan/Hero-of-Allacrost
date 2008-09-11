@@ -16,9 +16,14 @@
 #ifndef __MAP_SPRITES_HEADER__
 #define __MAP_SPRITES_HEADER__
 
+// Allacrost utilities
 #include "utils.h"
 #include "defs.h"
+
+// Allacrost engines
 #include "video.h"
+
+// Local map mode headers
 #include "map_objects.h"
 #include "map_actions.h"
 #include "map_dialogue.h"
@@ -136,13 +141,6 @@ public:
 	//! \brief Set to true when the sprite is running rather than just walking
 	bool is_running;
 
-	/** \brief When set to true, indicates that the object exists on the sky object layer (default = false).
-	*** This member is necessary for collision detection purposes. When a sprite needs to detect
-	*** if it has encountered a collision, that collision must be examined with other objects on
-	*** the appropriate layer (the ground or sky layer).
-	**/
-	bool sky_object;
-
 	//! \brief The name of the sprite, as seen by the player in the game.
 	hoa_utils::ustring name;
 
@@ -194,7 +192,7 @@ public:
 	//! \brief Indicates if the icon indicating that there is a dialogue available should be drawn or not.
 	bool _show_dialogue_icon;
 
-	//! \brief Used to fade the dialogue icon according to distance 
+	//! \brief Used to fade the dialogue icon according to distance
 	hoa_video::Color _dialogue_icon_color;
 
 	// -------------------- Public methods
@@ -435,9 +433,12 @@ private:
 	};
 
 public:
+
+	std::string filename;
+
 	//! \brief The default constructor which typically requires that the user make several additional calls to setup the sprite properties
 	EnemySprite();
-	
+
 	//! \brief A constructor for when the enemy sprite is stored in the definition of a single file
 	EnemySprite(std::string file);
 

@@ -16,9 +16,11 @@
 #ifndef __MAP_DIALOGUE_HEADER__
 #define __MAP_DIALOGUE_HEADER__
 
+// Allacrost utilities
 #include "utils.h"
 #include "defs.h"
 
+// Allacrost engines
 #include "script.h"
 #include "video.h"
 
