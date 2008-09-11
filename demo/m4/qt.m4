@@ -108,13 +108,20 @@ if test -n "$QTDIR" ; then
 fi
 
 dnl What to test
-qt4_test_include="QtCore/QCoreApplication"
-qt4_test_la_library="libQtCore.la"
-qt4_test_library="libQtCore.so"
-qt4_windows_test_library="QtCore4.dll"
+if test "x$1" == "xQtOpenGL" ; then
+    qt4_test_include="QtOpenGL/QGLWidget"
+    qt4_test_la_library="libQtOpenGL.la"
+    qt4_test_library="libQtOpenGL.so"
+    qt4_windows_test_library="QtOpenGL4.dll"
+else
+    qt4_test_include="QtCore/QCoreApplication"
+    qt4_test_la_library="libQtCore.la"
+    qt4_test_library="libQtCore.so"
+    qt4_windows_test_library="QtCore4.dll"
+fi
 
 dnl Check for Qt4 headers
-AC_MSG_CHECKING([for Qt4 headers])
+AC_MSG_CHECKING([for $1 headers])
 qt4_incdir="no"
 for it in $qt4_incdirs ; do
     if test -r "$it/$qt4_test_include" ; then
@@ -125,7 +132,7 @@ done
 AC_MSG_RESULT([$qt4_incdir])
 
 dnl Check for Qt4 libraries
-AC_MSG_CHECKING([for Qt4 libraries])
+AC_MSG_CHECKING([for $1 libraries])
 qt4_libdir="no"
 for qt4_check in $qt4_libdirs ; do
     if test -r "$qt4_check/$qt4_test_la_library" ; then
@@ -164,7 +171,7 @@ if test "x$have_qt4" == "xyes"; then
     ifelse([$2], , :, [$2])
 else
     ifelse([$3], , [AC_MSG_FAILURE(dnl
-[Qt4 development libraries not found])],
+[$1 development libraries not found])],
   	   [$3])
 fi
 

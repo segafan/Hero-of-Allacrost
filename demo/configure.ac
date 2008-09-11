@@ -52,16 +52,8 @@ editor_default="no"
 AC_ARG_ENABLE(editor, [  --enable-editor=[no/yes]    will build the map editor [default=no]], , enable_editor=$editor_default)
 if test "x$enable_editor" = "xyes"; then
     AC_MSG_RESULT(yes)
-	HOA_FIND_QT4(HOA_QT4,,)
-    dnl gw_CHECK_QT
-	dnl QT_LIBS="-L/usr/lib/qt4"
-	dnl QT_CFLAGS="-I/usr/include/qt4"
-	dnl LIBS="$LIBS $QT_LIBS"
-	dnl CPPFLAGS="$CPPFLAGS $QT_CFLAGS"
-	dnl AC_CHECK_LIB([Qt3Support], [Q3Table::currentRow], [], [AC_MSG_ERROR([Qt3Support not found])])
-	dnl AC_CHECK_LIB([QtCore], [QDir], [], [AC_MSG_ERROR([QtCore not found])])
-	dnl AC_CHECK_LIB([QtGui], [QCheckBox], [], [AC_MSG_ERROR([QtGui not found])])
-	dnl AC_CHECK_LIB([QtOpenGL], [QGLWidget], [], [AC_MSG_ERROR([QtOpenGL not found])])
+    HOA_FIND_QT4(Qt4,,)
+    HOA_FIND_QT4(QtOpenGL,,)
 else
     AC_MSG_RESULT(no)
 fi
