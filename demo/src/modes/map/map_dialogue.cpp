@@ -485,11 +485,11 @@ void DialogueManager::Draw() {
 	VideoManager->MoveRelative(120.0f, -10.0f);
 
 	VirtualSprite* speaker = NULL;
-	if(_state == DIALOGUE_STATE_NORMAL) {
+	if (_state == DIALOGUE_STATE_NORMAL) {
 		_display_textbox.Draw(); // Display dialogue text
 		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetCurrentSpeaker()));
 	}
-	if(_state == DIALOGUE_STATE_OPTION) {
+	if (_state == DIALOGUE_STATE_OPTION) {
 		_current_option->Draw(); // Display options
 		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_option->GetCurrentSpeaker()));
 	}
