@@ -22,10 +22,7 @@
 #include "map_sprites.h"
 #include "map_zones.h"
 
-extern bool MAP_DEBUG;
-
 using namespace std;
-
 using namespace hoa_utils;
 
 namespace hoa_map {
@@ -33,10 +30,15 @@ namespace hoa_map {
 namespace private_map {
 
 // *****************************************************************************
-// ************************* MapZone Class Functions ***************************
+// ********** MapZone Class Functions
 // *****************************************************************************
 
 void MapZone::AddSection(ZoneSection* section) {
+	if (section == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
+		return;
+	}
+
 	_sections.push_back(*section);
 	delete section;
 }
@@ -46,8 +48,8 @@ void MapZone::AddSection(ZoneSection* section) {
 bool MapZone::IsInsideZone(uint16 pos_x, uint16 pos_y) {
 	// Verify each section of the zone to make sure the position is in bounds.
 	for (vector<ZoneSection>::const_iterator i = _sections.begin(); i != _sections.end(); ++i) {
-		if (pos_x >= i->start_col && pos_x <= i->end_col &&
-			pos_y >= i->start_row && pos_y <= i->end_row )
+		if (pos_x >= i->left_col && pos_x <= i->right_col &&
+			pos_y >= i->top_row && pos_y <= i->bottom_row)
 		{
 			return true;
 		}
@@ -58,16 +60,16 @@ bool MapZone::IsInsideZone(uint16 pos_x, uint16 pos_y) {
 
 
 void MapZone::_RandomPosition(uint16& x, uint16& y) {
-	// Select a ZoneSection randomly
+	// Select a random ZoneSection
 	uint16 i = RandomBoundedInteger(0, _sections.size() - 1);
 
-	// Select a position inside that section
-	x = RandomBoundedInteger(_sections[i].start_col, _sections[i].end_col);
-	y = RandomBoundedInteger(_sections[i].start_row, _sections[i].end_row);
+	// Select a random x and y position inside that section
+	x = RandomBoundedInteger(_sections[i].left_col, _sections[i].right_col);
+	y = RandomBoundedInteger(_sections[i].top_row, _sections[i].bottom_row);
 }
 
 // *****************************************************************************
-// *********************** EnemyZone Class Functions *************************
+// ********** EnemyZone Class Functions
 // *****************************************************************************
 
 EnemyZone::EnemyZone(uint32 regen_time, bool restrained) :
@@ -81,8 +83,7 @@ EnemyZone::EnemyZone(uint32 regen_time, bool restrained) :
 
 void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 	if (count == 0) {
-		// NOTE: The EnemySprite pointer passed in is not deleted in this case
-		IF_PRINT_WARNING(MAP_DEBUG) << "function called with a zero count for the enemy" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "function called with a count argument equal to zero" << endl;
 		return;
 	}
 
@@ -92,28 +93,45 @@ void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 	_enemies.push_back(enemy);
 
 	// Create any additional copies of the enemy and add them as well
-	uint8 remaining = count - 1;
-	while (remaining > 0) {
+	for (uint8 i = 1; i < count; i++) {
 		EnemySprite* copy = new EnemySprite(*enemy);
-		copy->SetObjectID(map->_GetGeneratedObjectID() );
-		//Add a 10% random margin of error to make enemies look less sync'ed
-		copy->SetTimeToChange( (uint32)(copy->GetTimeToChange() * ( 1 + RandomFloat()*10 ) ) );
+		copy->SetObjectID(map->_GetGeneratedObjectID());
+		// Add a 10% random margin of error to make enemies look less synchronized
+		copy->SetTimeToChange(static_cast<uint32>(copy->GetTimeToChange() * (1 + RandomFloat() * 10)));
 		copy->Reset();
 		map->_AddGroundObject(copy);
 		_enemies.push_back(copy);
-		remaining--;
+	}
+}
+
+
+
+void EnemyZone::EnemyDead() {
+	if (_active_enemies == 0) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function called when no enemies were active" << endl;
+	}
+	else {
+		--_active_enemies;
 	}
 }
 
 
 
 void EnemyZone::Update() {
-	// Spawn new enemies only if there is at least one enemy that is not active
-	if (_active_enemies == _enemies.size()) {
-		return;
-	}
+	// When spawning an enemy in a random zone location, sometimes it is occupied by another
+	// object or that section is unwalkable. We try only a few different spawn locations before
+	// giving up and waiting for the next call to Update(). Otherwise this function could
+	// potentially take a noticable amount of time to complete
+	const int8 SPAWN_RETRIES = 5;
 
-	// Return if the regenenration time has not been reached, return
+	if (_enemies.empty() == true)
+		return;
+
+	// Spawn new enemies only if there is at least one enemy that is not active
+	if (_active_enemies == _enemies.size())
+		return;
+
+	// Update the regeneration timer and return if the spawn time has not yet been reached
 	_spawn_timer += hoa_system::SystemManager->GetUpdateTime();
 	if (_spawn_timer < _regen_time) {
 		return;
@@ -128,14 +146,13 @@ void EnemyZone::Update() {
 		}
 	}
 
-	// Used to retain random position coordinates in the zone
-	uint16 x, y;
-	// Number of times to try to place the enemy in the zone (arbitrarly set to 5 tries)
-	int8 retries = 5;
-	// Holds the result of a collision detection check
-	bool collision;
 
-	// Select a random position inside the zone to place the spawning enemy, and make sure that there is no collision
+	uint16 x, y; // Used to retain random position coordinates in the zone
+	int8 retries = SPAWN_RETRIES; // Number of times to try finding a valid spawning location
+	bool collision; // Holds the result of a collision detection check
+
+	// Select a random position inside the zone to place the spawning enemy
+	// If there is a collision, retry a different location
 	_enemies[index]->no_collision = false;
 	do {
 		_RandomPosition(x, y);
@@ -144,20 +161,21 @@ void EnemyZone::Update() {
 		collision = MapMode::_current_map->_object_manager->DetectCollision(_enemies[index]);
 	} while (collision && --retries > 0);
 
-	// If there is still a collision, reset the collision info on the enemy and retry on the next frame update
+	// If we didn't find a suitable spawning location, reset the collision info
+	// on the enemy sprite and we will retry on the next call to this function
 	if (collision) {
 		_enemies[index]->no_collision = true;
-		return;
 	}
-
 	// Otherwise, spawn the enemy and reset the spawn timer
-	_spawn_timer = 0;
-	_enemies[index]->ChangeStateSpawning();
-	_active_enemies++;
+	else {
+		_spawn_timer = 0;
+		_enemies[index]->ChangeStateSpawning();
+		_active_enemies++;
+	}
 } // void EnemyZone::Update()
 
 // *****************************************************************************
-// *********************** ContextZone Class Functions *************************
+// ********** ContextZone Class Functions
 // *****************************************************************************
 
 ContextZone::ContextZone(MAP_CONTEXT one, MAP_CONTEXT two) :
@@ -171,7 +189,13 @@ ContextZone::ContextZone(MAP_CONTEXT one, MAP_CONTEXT two) :
 }
 
 
+
 void ContextZone::AddSection(ZoneSection* section, bool context) {
+	if (section == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
+		return;
+	}
+
 	_sections.push_back(*section);
 	_section_contexts.push_back(context);
 	delete section;
@@ -179,12 +203,10 @@ void ContextZone::AddSection(ZoneSection* section, bool context) {
 
 
 
-void ContextZone::Update()
-{
+void ContextZone::Update() {
 	int16 index;
 
-	// For every ground object, if it is within the zone and its current context is equal to either context one or
-	// context two
+	// Check every ground object and determine if its context should be changed by this zone
 	for (std::vector<MapObject*>::iterator i = MapMode::_current_map->_object_manager->_ground_objects.begin();
 		i != MapMode::_current_map->_object_manager->_ground_objects.end(); i++)
 	{
@@ -193,8 +215,8 @@ void ContextZone::Update()
 			continue;
 		}
 
-		// Determine if the object is inside either zone. If so, set their context to that zone's context
-		// (This may resultin no change from the object's current context)
+		// If the object is inside the zone, set their context to that zone's context
+		// (This may result in no change from the object's current context depending on the zone section)
 		index = _IsInsideZone(*i);
 		if (index >= 0) {
 			(*i)->SetContext(_section_contexts[index] ? _context_one : _context_two);
@@ -205,10 +227,12 @@ void ContextZone::Update()
 
 
 int16 ContextZone::_IsInsideZone(MapObject* object) {
-		// Verify each section of the zone to make sure the position is in bounds.
+	// NOTE: argument is not checked here for performance reasons
+
+	// Check each section of the zone to see if the object is located within
 	for (uint16 i = 0; i < _sections.size(); i++) {
-		if (object->x_position >= _sections[i].start_col && object->x_position <= _sections[i].end_col &&
-			object->y_position >= _sections[i].start_row && object->y_position <= _sections[i].end_row )
+		if (object->x_position >= _sections[i].left_col && object->x_position <= _sections[i].right_col &&
+			object->y_position >= _sections[i].top_row && object->y_position <= _sections[i].bottom_row)
 		{
 			return i;
 		}

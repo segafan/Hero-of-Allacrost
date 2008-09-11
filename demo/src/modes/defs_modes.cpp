@@ -228,10 +228,10 @@ void BindModesToLua()
 	[
 		class_<ZoneSection>("ZoneSection")
 			.def(constructor<uint16, uint16, uint16, uint16>())
-			.def_readwrite("start_row", &ZoneSection::start_row)
-			.def_readwrite("end_row", &ZoneSection::end_row)
-			.def_readwrite("start_col", &ZoneSection::start_col)
-			.def_readwrite("end_col", &ZoneSection::end_col)
+			.def_readwrite("top_row", &ZoneSection::top_row)
+			.def_readwrite("bottom_row", &ZoneSection::bottom_row)
+			.def_readwrite("left_col", &ZoneSection::left_col)
+			.def_readwrite("right_col", &ZoneSection::right_col)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -247,7 +247,9 @@ void BindModesToLua()
 		class_<EnemyZone, MapZone>("EnemyZone")
 			.def(constructor<uint32, bool>())
 			.def("AddEnemy", &EnemyZone::AddEnemy, adopt(_2))
-			.def("IsRestraining", &EnemyZone::IsRestraining)
+			.def("IsRestrained", &EnemyZone::IsRestrained)
+			.def("SetRestrained", &EnemyZone::SetRestrained)
+			.def("SetRegenTime", &EnemyZone::SetRegenTime)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
