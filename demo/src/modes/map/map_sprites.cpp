@@ -163,10 +163,11 @@ uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 
 
 void VirtualSprite::Update() {
-	//Update the alpha of the dialogue icon according to it's distance from the player to make it fade away
+	// Update the alpha of the dialogue icon according to it's distance from the player sprite
 	const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
 	float icon_alpha = 1.0f - (fabs( ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + fabs(ComputeYLocation() -
 		MapMode::_current_map->_camera->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
+
 	if (icon_alpha < 0)
 		icon_alpha = 0;
 	_dialogue_icon_color.SetAlpha(icon_alpha);
@@ -381,7 +382,11 @@ void VirtualSprite::SetFacePortrait(std::string pn) {
 	}
 
 	face_portrait = new StillImage();
-	face_portrait->Load(pn);
+	if (face_portrait->Load(pn) == false) {
+		delete face_portrait;
+		face_portrait = NULL;
+		PRINT_ERROR << "failed to load face portrait" << endl;
+	}
 }
 
 

@@ -45,6 +45,7 @@ TextBox::TextBox(float x, float y, float width, float height, const TEXT_DISPLAY
   _current_time(0),
   _mode(mode)
 {
+	_text_style = TextManager->GetDefaultStyle();
 	SetPosition(x, y);
 	_initialized = false;
 }
@@ -78,11 +79,10 @@ void TextBox::Draw() {
 		return;
 
 	if (_initialized == false) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: TextBox::Draw() failed because the textbox was not initialized:\n" << _initialization_errors << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "function failed because the textbox was not initialized:\n" << _initialization_errors << endl;
 		return;
 	}
-	
+
 	// Don't draw text window if parent window is hidden
 	if (_owner && _owner->GetState() == VIDEO_MENU_STATE_HIDDEN)
 		return;
@@ -200,8 +200,7 @@ void TextBox::SetTextAlignment(int32 xalign, int32 yalign) {
 void TextBox::SetTextStyle(const TextStyle& style) {
 	_font_properties = TextManager->GetFontProperties(style.font);
 	if (_font_properties == NULL) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: TextBox::SetFont() failed because it was passed an invalid font name: " << style.font << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "function failed because it was passed an invalid font name: " << style.font << endl;
 		return;
 	}
 
@@ -214,7 +213,7 @@ void TextBox::SetTextStyle(const TextStyle& style) {
 
 void TextBox::SetDisplayMode(const TEXT_DISPLAY_MODE &mode) {
 	if (mode < VIDEO_TEXT_INSTANT || mode >= VIDEO_TEXT_TOTAL) {
-		cerr << "VIDEO WARNING: TextBox::SetDisplayMode() failed because of an invalid mode argument: " << mode << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "function failed because of an invalid mode argument: " << mode << endl;
 		return;
 	}
 
@@ -235,20 +234,18 @@ void TextBox::SetDisplaySpeed(float display_speed) {
 
 
 
-void TextBox::SetDisplayText(const string &text, const TextStyle& style) {
-	SetDisplayText(MakeUnicodeString(text), style);
+void TextBox::SetDisplayText(const string &text) {
+	SetDisplayText(MakeUnicodeString(text));
 }
 
 
 
-void TextBox::SetDisplayText(const ustring& text, const TextStyle& style) {
+void TextBox::SetDisplayText(const ustring& text) {
 	if (_initialized == false) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: TextBox::SetDisplayText() failed because the textbox was not initialized:\n" << _initialization_errors << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "function failed because the textbox was not initialized:\n" << _initialization_errors << endl;
 		return;
 	}
 
-	_text_style = style;
 	_text_save = text;
 	_ReformatText();
 
@@ -257,7 +254,7 @@ void TextBox::SetDisplayText(const ustring& text, const TextStyle& style) {
 
 	// (3): Determine how much time the text will take to display depending on the display mode, speed, and size of the text
 	_finished = false;
-	switch(_mode) {
+	switch (_mode) {
 		case VIDEO_TEXT_INSTANT:
 			_end_time = 0;
 			// (4): Set finished to true only if the display mode is VIDEO_TEXT_INSTANT

@@ -49,15 +49,16 @@ const float VERY_FAST_SPEED = 75.0f;
 //@}
 
 /** \name Sprite Direction Constants
-*** \brief Constants used for setting and determining sprite directions
+*** \brief Constants used for determining sprite directions
 *** Sprites are allowed to travel in eight different directions, however the sprite itself
 *** can only be facing one of four ways: north, south, east, or west. Because of this, it
 *** is possible to travel, for instance, northwest facing north <i>or</i> northwest facing west.
 *** The "NW_NORTH" constant means that the sprite is traveling to the northwest and is
 *** facing towards the north.
 ***
-*** \note The set of "FACING_DIRECTION" and "MOVING_DIRECTION" constants are only meant to be
-*** used as shorthands. You shouldn't assign the MapSprite#direction member to any of these values.
+*** \note These constants include a series of shorthands (NORTHWEST, FACING_NORTH, LATERAL_MOVEMENT
+*** are a few). You should not assign the MapSprite#direction member to any of these values because
+*** they are not valid directions.
 **/
 //@{
 const uint16 NORTH     = 0x0001;
@@ -90,7 +91,8 @@ const uint16 DIAGONAL_MOVEMENT = NORTHWEST | NORTHEAST | SOUTHWEST | SOUTHEAST;
 /** \name Map Sprite Animation Constants
 *** These constants are used to index the MapSprite#animations vector to display the correct
 *** animation. The first 8 entries in this vector always represent the same sets of animations
-*** for each map sprite.
+*** for each map sprite. Not all sprites have running animations, so the next 4 entries in the
+*** sprite's animation vector are not necessarily running animations.
 **/
 //@{
 const uint32 ANIM_STANDING_SOUTH = 0;
@@ -108,33 +110,40 @@ const uint32 ANIM_RUNNING_EAST   = 11;
 //@}
 
 /** ****************************************************************************
-*** \brief An invisible and possible mobile sprite on a map
+*** \brief A special type of sprite with no physical image
 ***
 *** The VirtualSprite is a special type of MapObject because it has no physical
-*** form (no image). Virtual sprites may be manipulated to move around on the screen,
-*** or they may remain stationary. VirtualSprites do take collision detection into account
+*** form (no image). Virtual sprites may be manipulated to move around on the screen
+*** just like any other sprite. VirtualSprites do take collision detection into account
 *** by default, unless the no_collision member is set to true. Here are some examples of
 *** where virtual sprites may be of use:
 ***
 *** - As a mobile focusing point for the map camera
 *** - As an impassible map location for ground objects in a specific context only
 *** - To set impassible locations for objects in the sky layer
+***
+*** \note The VirtualSprite class serves as a base class for all other types of
+*** sprites.
 *** ***************************************************************************/
 class VirtualSprite : public MapObject {
 public:
+	VirtualSprite();
+
+	~VirtualSprite();
+
 	/** \brief A bit-mask for the sprite's draw orientation and direction vector.
 	*** This member determines both where to move the sprite (8 directions) and
-	*** which way the sprite is facing (4 directions). See the Sprite Directions
-	*** series of constants for the values that this member may be set to.
+	*** which way the sprite is facing (4 directions). See the Sprite direction
+	*** constants for the values that this member may be set to.
 	**/
 	uint16 direction;
 
 	//! \brief The speed at which the sprite moves around the map.
 	float movement_speed;
 
-	/** \brief Set to true when the sprite is currently moving.
-	*** \note This does not necessarily mean that the sprite actually is moving, but rather that
-	*** the sprite is <i>trying</i> to move in a certain direction.
+	/** \brief Set to true when the sprite is currently in motion.
+	*** \note This does not necessarily mean that the sprite actually is moving,
+	*** but rather that the sprite is <i>trying</i> to move in a certain direction.
 	**/
 	bool moving;
 
@@ -144,7 +153,9 @@ public:
 	//! \brief The name of the sprite, as seen by the player in the game.
 	hoa_utils::ustring name;
 
-	//! \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
+	/** \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
+	*** \note Not all sprites have portraits, in which case this member will be NULL
+	**/
 	hoa_video::StillImage* face_portrait;
 
 	//! \brief Set to false if the sprite contains dialogue that has not been seen by the player
@@ -197,9 +208,6 @@ public:
 
 	// -------------------- Public methods
 
-	VirtualSprite();
-
-	~VirtualSprite();
 
 	//! \brief Updates the virtual object's position if it is moving, otherwise does nothing.
 	virtual void Update();
@@ -208,8 +216,7 @@ public:
 	virtual void Draw();
 
 	/** \name Lua Access Functions
-	*** These functions are specifically written for Lua binding, to enable Lua to access the
-	*** members of this class.
+	*** These functions are specifically written to enable Lua to access the members of this class.
 	**/
 	//@{
 	/** \note This method takes into account the current direction when setting the new direction
@@ -317,6 +324,10 @@ public:
 *** ***************************************************************************/
 class MapSprite : public VirtualSprite {
 public:
+	MapSprite();
+
+	~MapSprite();
+
 	//! \brief Holds the previous value of VirtualSprite#moving from the last call to MapSprite#Update().
 	bool was_moving;
 
@@ -350,10 +361,6 @@ public:
 
 	// -------------------------------- Methods --------------------------------
 
-	MapSprite();
-
-	~MapSprite();
-
 	/** \brief Loads the image containing the standard animations for the sprite
 	*** \param filename The name of the image file holding the standard walking animations
 	*** \return False if there was a problem loading the sprite.
@@ -373,8 +380,7 @@ public:
 	virtual void Draw();
 
 	/** \name Lua Access Functions
-	*** These functions are specifically written for Lua binding, to enable Lua to access the
-	*** members of this class.
+	*** These functions are specifically written to enable Lua to access the members of this class.
 	**/
 	//@{
 	void SetName(std::string na)
