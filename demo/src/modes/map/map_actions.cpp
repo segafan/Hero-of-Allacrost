@@ -13,12 +13,13 @@
 *** \brief   Source file for map mode actions.
 *** ***************************************************************************/
 
-#include <iostream>
-
+// Allacrost utilities
 #include "utils.h"
 
+// Allacrost engines
 #include "system.h"
 
+// Local map mode headers
 #include "map.h"
 #include "map_actions.h"
 #include "map_dialogue.h"
@@ -26,7 +27,6 @@
 #include "map_sprites.h"
 
 using namespace std;
-
 using namespace hoa_utils;
 using namespace hoa_system;
 
@@ -35,57 +35,69 @@ namespace hoa_map {
 namespace private_map {
 
 // *****************************************************************************
-// **************************** ActionPathMove *********************************
+// ********** ActionPathMove
 // *****************************************************************************
+
+void ActionPathMove::SetDestination(int16 x, int16 y) {
+	// TODO: should x and y be checked to make sure they are within the map boundaries?
+	destination.col = x;
+	destination.row = y;
+	path.clear();
+}
+
 
 void ActionPathMove::Execute() {
 	// TODO: Check if we already have a previously computed path and if it is still valid, use it.
-	if (path.empty()) {
+	// The code below automatically re-uses a path if there is one without checking if the source
+	// node is the same as the sprite's current position
+
+	if (path.empty() == true) {
 		MapMode::_current_map->_object_manager->FindPath(_sprite, path, destination);
+
+		// If no path could be found, there's nothing more that can be done here
+		if (path.empty() == true)
+			return;
 	}
 
-	if (!path.empty()) {
-		_sprite->moving = true;
-		if (_sprite->y_position > path[current_node].row) { // Need to move north
-			if (_sprite->x_position > path[current_node].col) { // Need to move northwest
-				_sprite->SetDirection(NORTHWEST);
-			}
-			else {
-				if (_sprite->x_position < path[current_node].col) { // Need to move northeast
-					_sprite->SetDirection(NORTHEAST);
-				}
-				else { // Just move north
-					_sprite->SetDirection(NORTH);
-				}
-			}
-		}
-		else if (_sprite->y_position < path[current_node].row) { // Need to move south
-			if (_sprite->x_position > path[current_node].col) // Need to move southwest
-				_sprite->SetDirection(SOUTHWEST);
-			else if (_sprite->x_position < path[current_node].col) // Need to move southeast
-				_sprite->SetDirection(SOUTHEAST);
-			else // Just move south
-				_sprite->SetDirection(SOUTH);
-		}
-		else if (_sprite->x_position > path[current_node].col) { // Need to move west
-			_sprite->SetDirection(WEST);
-		}
-		else if (_sprite->x_position < path[current_node].col) { // Need to move east
-			_sprite->SetDirection(EAST);
-		}
-		else { // The x and y position have reached the node, update to the next node
-			current_node++;
-			if (current_node >= path.size()) { // Destination has been reached
-				current_node = 0;
-				_finished = true;
-				_sprite->moving = false;
-			}
+	// TODO: the code below needs to be optimized. We should only be doing the directional
+	// readjustment after the sprite has reached the next node
+
+	_sprite->moving = true;
+	if (_sprite->y_position > path[current_node].row) { // Need to move toward the north
+		if (_sprite->x_position > path[current_node].col)
+			_sprite->SetDirection(NORTHWEST);
+		else if (_sprite->x_position < path[current_node].col)
+			_sprite->SetDirection(NORTHEAST);
+		else
+			_sprite->SetDirection(NORTH);
+	}
+	else if (_sprite->y_position < path[current_node].row) { // Need to move toward the south
+		if (_sprite->x_position > path[current_node].col)
+			_sprite->SetDirection(SOUTHWEST);
+		else if (_sprite->x_position < path[current_node].col)
+			_sprite->SetDirection(SOUTHEAST);
+		else
+			_sprite->SetDirection(SOUTH);
+	}
+	else if (_sprite->x_position > path[current_node].col) { // Need to move west
+		_sprite->SetDirection(WEST);
+	}
+	else if (_sprite->x_position < path[current_node].col) { // Need to move east
+		_sprite->SetDirection(EAST);
+	}
+	else { // The x and y position have reached the node, update to the next node
+		current_node++;
+		if (current_node >= path.size()) { // Destination has been reached
+			current_node = 0;
+			// TODO: _finished is never set to false in this class...
+			_finished = true;
+			_sprite->moving = false;
 		}
 	}
 } // void ActionPathMove::Execute()
 
 // *****************************************************************************
-// **************************** ActionRandomMove *******************************
+// ********** ActionRandomMove
 // *****************************************************************************
 
 void ActionRandomMove::Execute() {
@@ -101,30 +113,40 @@ void ActionRandomMove::Execute() {
 
 	if (movement_timer >= total_movement_time) {
 		movement_timer = 0;
+		// TODO: _finished is never set to false in this class...
 		_finished = true;
 		_sprite->moving = false;
 	}
 }
 
 // *****************************************************************************
-// ***************************** ActionAnimate *********************************
+// ********** ActionAnimate
 // *****************************************************************************
 
-void ActionAnimate::Execute() {
-	timer += SystemManager->GetUpdateTime();
+void ActionAnimate::Reset() {
+	display_timer = 0;
+	current_frame = 0;
+	loop_count = 0;
+	_finished = false;
+}
 
-	if (timer > display_times[current_frame]) {
-		timer = 0;
+
+
+void ActionAnimate::Execute() {
+	display_timer += SystemManager->GetUpdateTime();
+
+	if (display_timer > frame_times[current_frame]) {
+		display_timer = 0;
 		current_frame++;
 
-		// If we've finished displaying the final frame...
+		// Check if we are past the final frame to display in the loop
 		if (current_frame >= frames.size()) {
 			current_frame = 0;
 
 			// If this animation is not infinitely looped, increment the loop counter
-			if (loops >= 0) {
+			if (number_loops >= 0) {
 				loop_count++;
-				if (loop_count > loops) {
+				if (loop_count > number_loops) {
 					_finished = true;
 					loop_count = 0;
 					return;

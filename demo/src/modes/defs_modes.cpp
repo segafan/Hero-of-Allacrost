@@ -191,9 +191,7 @@ void BindModesToLua()
 		class_<MapSprite, VirtualSprite>("MapSprite")
 			.def(constructor<>())
 			.def("SetName", &MapSprite::SetName)
-			.def("SetWalkSound", &MapSprite::SetWalkSound)
 			.def("SetCurrentAnimation", &MapSprite::SetCurrentAnimation)
-			.def("GetWalkSound", &MapSprite::GetWalkSound)
 			.def("GetCurrentAnimation", &MapSprite::GetCurrentAnimation)
 			.def("LoadStandardAnimations", &MapSprite::LoadStandardAnimations)
 			.def("LoadRunningAnimations", &MapSprite::LoadRunningAnimations)
@@ -296,7 +294,7 @@ void BindModesToLua()
 		class_<ActionAnimate, SpriteAction>("ActionAnimate")
 			.def(constructor<VirtualSprite*>())
 			.def("AddFrame", &ActionAnimate::AddFrame)
-			.def("SetLoops", &ActionAnimate::SetLoops)
+			.def("SetLoopCount", &ActionAnimate::SetLoopCount)
 	];
 	} // End using map mode namespaces
 

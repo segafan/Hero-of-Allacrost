@@ -442,7 +442,7 @@ function Load(m)
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1500);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1500);
-	action:SetLoops(-1);
+	action:SetLoopCount(-1);
 	sprite:AddAction(action);
 	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);
