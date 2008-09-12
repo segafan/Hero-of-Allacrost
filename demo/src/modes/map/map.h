@@ -36,8 +36,6 @@
 #include "script.h"
 #include "video.h"
 
-
-
 //! All calls to map mode are wrapped in this namespace.
 namespace hoa_map {
 
@@ -63,14 +61,14 @@ const float SCREEN_ROWS = 48.0f;
 const float HALF_SCREEN_COLS = 32.0f;
 const float HALF_SCREEN_ROWS = 24.0f;
 
-const uint16 TILE_COLS = 32;
-const uint16 TILE_ROWS = 24;
+const uint16 TILE_COLS = 32; // Number of tile columns that fit on the screen
+const uint16 TILE_ROWS = 24; // Number of tile rows that fit on the screen
 const uint16 HALF_TILE_COLS = 16;
 const uint16 HALF_TILE_ROWS = 12;
 
-const uint16 TILE_LENGTH = 32;
+const uint16 GRID_LENGTH = 16; // Length of a grid element in pixels
+const uint16 TILE_LENGTH = 32; // Length of a tile in pixels
 const uint16 HALF_TILE_LENGTH = 16;
-const uint16 GRID_LENGTH = 16;
 //@}
 
 /** \name Map State Constants
@@ -191,8 +189,6 @@ public:
 	*** cursor positions, but rather are map grid coordinates indicating where the screen edges lie.
 	**/
 	MapRectangle screen_edges;
-
-// 	float left_edge, right_edge, top_edge, bottom_edge;
 }; // class MapFrame
 
 } // namespace private_map
@@ -201,27 +197,36 @@ public:
 /** ****************************************************************************
 *** \brief Handles the game execution while the player is exploring maps.
 ***
-*** This class contains all of the structures that together compose each map, as
-*** well as some other information. The methods provided by this class are those
-*** methods that are either commonly used, or require high performance. Each map
-*** has a Lua script file in which the map data is permanently retained and
-*** various script subroutines exist that modify the map's behavior. Keep in mind
-*** that this class alone does not represent all of the data nor all of the code
-*** that is used in a particular map, as the map's Lua file may retain some of
-*** this information to itself.
+*** This class contains all of the structures that together compose each map.
+*** Each map has a Lua script file in which the map data is permanently retained
+*** and various script subroutines exist that modify the map's behavior. Keep in
+*** mind that this class alone does not represent all of the data nor all of the
+*** code that is used in a particular map, as the map's Lua file likely retains
+*** additional information about the map that is not represented in this class.
 ***
 *** Maps are composed by a series of tiles and objects. Tiles are 32x32 pixel
 *** squares that are adjacent to one another on a map, and together make up the
 *** map's background environment. Objects are variable sized entities that are
 *** usually living, animated creatures (sprites), but may be something static
 *** such as a large tree. Tiles and objects are drawn in multiple interwieving
-*** layers to emulate a 3D environment for the game.
+*** layers to emulate a 3D environment for the game. Additionally each map has
+*** a collision grid composed of 16x16 pixel elements that determine which
+*** quadrants of each tile may be occupied by sprites or other objects.
 ***
-*** \note Although the drawing coordinates are in terms of 32x32 tiles, the rest
-*** of the map follows a 16x16 grid for collision detection, pathfinding, etc.
-*** Because the positions of map objects are defined in terms of this 16x16 grid,
-*** that means that when drawing the images, the position must be converted to
-*** the 32x32 grid.
+*** Another important concept to MapMode is that of contexts. Each map has at
+*** least one context and can have up to a maximum of 32 contexts. Every context
+*** has its own collision grid and its own set of tiles. Map objects and sprites
+*** exist in one of these context and may change their context at any time.
+*** Objects and sprites can not interact with one another when they are not
+*** within the same context, and typically only objects that are in the same
+*** context as the map camera are visible on the screen. You can think of each
+*** context as essentially its own map, and the set of contexts as a set of maps
+*** that work with one another to create a cohesive environment.
+***
+*** Because this game mode is so complex, the MapMode class shares its
+*** responsibilities with several small singleton classes that manage a
+*** particular area of map code, such as tiles or objects. These sub-manager
+*** classes should be viewed as extensions of the MapMode class.
 *** ***************************************************************************/
 class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::MapFrame;
@@ -359,6 +364,12 @@ private:
 	//! \brief Instance of helper class to map mode. Responsible for object and sprite related operations.
 	private_map::ObjectManager* _object_manager;
 
+	//! \brief This keeps a pointer to the active dialogue.
+	private_map::DialogueManager* _dialogue_manager;
+
+	//! \brief Class member object which processes all information related to treasure discovery
+	private_map::TreasureMenu* _treasure_menu;
+
 	//! \brief Icon which appears over NPCs who have unread dialogue
 	hoa_video::AnimatedImage _new_dialogue_icon;
 
@@ -374,28 +385,19 @@ private:
 	//! \brief The sounds that the map needs available to it.
 	std::vector<hoa_audio::SoundDescriptor> _sounds;
 
-	//! \brief This keeps a pointer to the active dialogue.
-	private_map::DialogueManager* _dialogue_manager;
-
-	//! \brief Class member object which processes all information related to treasure discovery
-	private_map::TreasureMenu* _treasure_menu;
-
 	/** \brief A container for the various foes which may appear on this map.
 	*** These enemies are kept at their initial stats. They are passed to battle mode, where a copy of
 	*** each enemy is made and initialized there.
 	**/
 	std::vector<hoa_global::GlobalEnemy*> _enemies;
 
-	//! \brief Loads all map data as specified in the Lua file that defines the map.
+	//! \brief Loads all map data contained in the Lua file that defines the map
 	void _Load();
 
 	// -------------------- Update Methods
 
-	//! \brief Handles user input when the map is in the explore state.
+	//! \brief Handles user input when the map is in the explore state
 	void _HandleInputExplore();
-
-	//! \brief Handles user input when the map is in the dialogue state.
-	void _HandleInputDialogue();
 
 	// -------------------- Draw Methods
 
@@ -410,8 +412,7 @@ private:
 
 	// -------------------- Lua Binding Functions
 	/** \name Lua Access Functions
-	*** These methods exist not to allow outside C++ classes to access map data, but instead to
-	*** allow Lua to make function calls to examine and modify the map's state.
+	*** These methods exist to allow Lua to make function calls to examine and modify the map's state.
 	**/
 	//@{
 	void _AddGroundObject(private_map::MapObject *obj);
@@ -422,14 +423,10 @@ private:
 
 	void _AddZone(private_map::MapZone *zone);
 
-	void _SetCameraFocus(private_map::VirtualSprite *sprite);
-
-	private_map::VirtualSprite* _GetCameraFocus() const;
-
 	uint16 _GetGeneratedObjectID();
 
-	void _SetMapState(uint8 state)
-		{ _map_state = state; }
+	private_map::VirtualSprite* _GetCameraFocus() const
+		{ return _camera; }
 
 	uint8 _GetMapState() const
 		{ return _map_state; }
@@ -437,11 +434,17 @@ private:
 	uint32 _GetTimeElapsed() const
 		{ return _time_elapsed; }
 
-	static void _ShowDialogueIcons( bool state )
-		{ _show_dialogue_icons = state; }
-
 	static bool _IsShowingDialogueIcons()
 		{ return _show_dialogue_icons; }
+
+	void _SetCameraFocus(private_map::VirtualSprite *sprite)
+		{ _camera = sprite; }
+
+	void _SetMapState(uint8 state)
+		{ _map_state = state; }
+
+	static void _ShowDialogueIcons( bool state )
+		{ _show_dialogue_icons = state; }
 	//@}
 }; // class MapMode
 

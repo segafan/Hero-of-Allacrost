@@ -334,12 +334,6 @@ public:
 	//! \brief Set to true if the sprite has running animations loaded
 	bool has_running_anim;
 
-	/** \brief The sound that will play when the sprite walks.
-	*** This member references the MapMode#_map_sounds vector as the sound to play. If this member
-	*** is less than zero, no sound is played when the object is walking.
-	**/
-	int8 walk_sound;
-
 	//! \brief The index to the animations vector containing the current sprite image to display
 	uint8 current_animation;
 
@@ -355,7 +349,6 @@ public:
 	**/
 	//@{
 	bool _saved_was_moving;
-	int8 _saved_walk_sound;
 	uint8 _saved_current_animation;
 	//@}
 
@@ -386,14 +379,8 @@ public:
 	void SetName(std::string na)
 		{ name = hoa_utils::MakeUnicodeString(na); }
 
-	void SetWalkSound(int8 sound)
-		{ walk_sound = sound; }
-
 	void SetCurrentAnimation(uint8 anim)
 		{ current_animation = anim; }
-
-	int8 GetWalkSound() const
-		{ return walk_sound; }
 
 	uint8 GetCurrentAnimation() const
 		{ return current_animation; }
@@ -401,13 +388,13 @@ public:
 
 	/** \brief This method will save the state of a sprite.
 	*** Attributes saved: direction, speed, moving state, name, current action,
-	*** current animation, current walk sound.
+	*** current animation.
 	**/
 	virtual void SaveState();
 
 	/** \brief This method will load the saved state of a sprite.
 	*** Attributes loaded: direction, speed, moving state, name, current action,
-	*** current animation, current walk sound.
+	*** current animation.
 	*** \return false if there was no saved state, true otherwise.
 	**/
 	virtual bool LoadState();

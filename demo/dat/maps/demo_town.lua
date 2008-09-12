@@ -549,7 +549,7 @@ function Load(m)
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1000);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 1000);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
-	action:SetLoops(0);
+	action:SetLoopCount(0);
 	sprite:AddAction(action);
 
 	action = hoa_map.ActionPathMove(sprite);
@@ -562,7 +562,7 @@ function Load(m)
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1000);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
-	action:SetLoops(0);
+	action:SetLoopCount(0);
 	sprite:AddAction(action);
 
 	action = hoa_map.ActionPathMove(sprite);
@@ -783,7 +783,7 @@ function Load(m)
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 2500);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1250);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 2500);
-	action:SetLoops(-1);
+	action:SetLoopCount(-1);
 	sprite:AddAction(action);
 	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);

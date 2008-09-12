@@ -462,7 +462,6 @@ void VirtualSprite::SetRandomDirection() {
 MapSprite::MapSprite() :
 	was_moving(false),
 	has_running_anim(false),
-	walk_sound(-1),
 	current_animation(ANIM_STANDING_SOUTH)
 {
 	MapObject::_object_type = SPRITE_TYPE;
@@ -678,7 +677,6 @@ void MapSprite::SaveState() {
 	VirtualSprite::SaveState();
 
 	_saved_was_moving = was_moving;
-	_saved_walk_sound = walk_sound;
 	_saved_current_animation = current_animation;
 }
 
@@ -689,7 +687,6 @@ bool MapSprite::LoadState() {
 		return false;
 
 	was_moving = _saved_was_moving;
-	walk_sound = _saved_walk_sound;
 	current_animation = _saved_current_animation;
 
 	return true;

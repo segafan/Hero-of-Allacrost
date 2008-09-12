@@ -710,17 +710,6 @@ void MapMode::_AddZone(MapZone *zone) {
 
 
 
-void MapMode::_SetCameraFocus(VirtualSprite *sprite) {
-	_camera = sprite;
-}
-
-
-
-VirtualSprite* MapMode::_GetCameraFocus() const {
-	return _camera;
-}
-
-
 uint16 MapMode::_GetGeneratedObjectID() {
 	return ++(_object_manager->_last_id);
 }
