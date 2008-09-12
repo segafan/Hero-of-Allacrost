@@ -34,7 +34,6 @@
 #include "map_tiles.h"
 #include "map_zones.h"
 
-
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
@@ -71,24 +70,33 @@ MapMode *MapMode::_loading_map = NULL;
 bool MapMode::_show_dialogue_icons = true;
 
 // ****************************************************************************
-// ************************** MapMode Class Functions *************************
-// ****************************************************************************
-// ***************************** GENERAL FUNCTIONS ****************************
+// ********** MapMode Class Functions
 // ****************************************************************************
 
 MapMode::MapMode(string filename) :
 	GameMode(),
 	_map_filename(filename),
-	_map_state(EXPLORE),
+	_map_tablespace(""), // will be properly initialized in the Load() function
+	_map_event_group(NULL),
+	_tile_manager(NULL),
+	_object_manager(NULL),
+	_dialogue_manager(NULL),
+	_treasure_menu(NULL),
 	_num_map_contexts(0),
+	_current_context(MAP_CONTEXT_01),
+	_run_stamina(10000),
+	_map_state(EXPLORE),
 	_ignore_input(false),
 	_run_forever(false),
 	_run_disabled(false),
-	_run_stamina(10000)
+	_time_elapsed(0),
+	_camera(NULL)
 {
+	mode_type = MODE_MANAGER_MAP_MODE;
 	_loading_map = this;
 
-	// Modify the filename so that is only consists of alphanumeric characters and underscores, and thus will be a valid identifier name in Lua
+	// Create the event group name by modifying the filename to consists only of alphanumeric characters and underscores
+	// This will make it a valid identifier name in Lua syntax
 	string event_group_name = _map_filename;
 	std::replace(event_group_name.begin(), event_group_name.end(), '/', '_');
 	std::replace(event_group_name.begin(), event_group_name.end(), '.', '_');
@@ -97,8 +105,6 @@ MapMode::MapMode(string filename) :
 		GlobalManager->AddNewEventGroup(event_group_name);
 	}
 	_map_event_group = GlobalManager->GetEventGroup(event_group_name);
-
-	mode_type = MODE_MANAGER_MAP_MODE;
 
 	_tile_manager = new TileManager();
 	_object_manager = new ObjectManager();
@@ -110,58 +116,53 @@ MapMode::MapMode(string filename) :
 	// TODO: Load the map data in a seperate thread
 	_Load();
 
-	// TEMP: Load dialogue icon
+	// Load miscellaneous map graphics
+	vector<uint32> timings(16, 100); // holds the timing data for the new dialogue animation; 16 frames at 100ms each
 	_new_dialogue_icon.SetDimensions(2, 2);
-	vector<uint32> timings(16, 100);
-
 	if (_new_dialogue_icon.LoadFromFrameSize("img/misc/dialogue_icon.png", timings, 32, 32) == false)
-		IF_PRINT_WARNING(MAP_DEBUG) << "new dialogue icon load failure" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "failed to load the new dialogue icon image" << endl;
 
 	if (_stamina_bar_background.Load("img/misc/stamina_bar_background.png", 227, 24) == false)
-		IF_PRINT_WARNING(MAP_DEBUG) << "run-stamina bar background image load failure" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "failed to load the the stamina bar background image" << endl;
 
 	if (_stamina_bar_infinite_overlay.Load("img/misc/stamina_bar_infinite_overlay.png", 227, 24) == false)
-		IF_PRINT_WARNING(MAP_DEBUG) << "run-stamina bar infinity image load failure" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "failed to load the the stamina bar infinite overlay image" << endl;
 }
 
 
 
 MapMode::~MapMode() {
-	for (uint32 i = 0; i < _music.size(); i++) {
+	for (uint32 i = 0; i < _music.size(); i++)
 		_music[i].FreeAudio();
-	}
+	_music.clear();
 
-	for (uint32 i = 0; i < _sounds.size(); i++) {
+	for (uint32 i = 0; i < _sounds.size(); i++)
 		_sounds[i].FreeAudio();
-	}
+	_sounds.clear();
 
-	// Delete all enemy's created
-	for (uint32 i = 0; i < _enemies.size(); i++) {
+	for (uint32 i = 0; i < _enemies.size(); i++)
 		delete(_enemies[i]);
-	}
+	_enemies.clear();
 
 	delete(_tile_manager);
 	delete(_object_manager);
 	delete(_dialogue_manager);
 	delete(_treasure_menu);
 
-	// free dialogue icon
-	_new_dialogue_icon.Clear();
-
 	_map_script.CloseFile();
 }
 
 
-// Resets appropriate class members.
+
 void MapMode::Reset() {
-	// Reset active video engine properties
+	// Reset video engine context properties
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 
-	// Let all map objects know that this is the current map
+	// Let all other map classes know that this is now the active map
 	MapMode::_current_map = this;
 
-	// ------------ (8) Set values in the global manager so when the game is saved it has necessary information
+	// Make the map location known globally to other code that may need to know this information
 	GlobalManager->SetLocation(MakeUnicodeString(_map_filename), _location_graphic.GetFilename());
 
 	// TEMP: This will need to be scripted later
@@ -173,82 +174,15 @@ void MapMode::Reset() {
 }
 
 
-// Loads the map from a Lua file.
-void MapMode::_Load() {
-	// ---------- (1) Create a new GlobalEvent group for this map, if one does not already exist
-	string group_name = _map_filename;
 
-	// ---------- (2) Open map script file and read in basic map properties and tile definitions
-	if (_map_script.OpenFile(_map_filename) == false) {
-		return;
-	}
-
-	// Open the map tablespace (named after the map filename)
-	// first see if the filename has an extension, and then strip the directories
-	int32 period = _map_filename.find(".");
-	int32 last_slash = _map_filename.find_last_of("/");
-	_map_tablespace = _map_filename.substr(last_slash + 1, period - (last_slash + 1));
-	_map_script.OpenTable(_map_tablespace);
-
-	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
-	if (_location_graphic.Load("img/menus/locations/" + _map_script.ReadString("location_filename")) == false) {
-		cerr << "MAP ERROR: failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
-	}
-
-	_num_map_contexts = _map_script.ReadUInt("num_map_contexts");
-
-	// ---------- (3) Initialize all of the tile and grid mappings
-	_tile_manager->Load(_map_script, this);
-	_object_manager->Load(_map_script);
-
-	// ---------- (4) Load map sounds and music
-	vector<string> sound_filenames;
-	_map_script.ReadStringVector("sound_filenames", sound_filenames);
-
-	for (uint32 i = 0; i < sound_filenames.size(); i++) {
-		_sounds.push_back(SoundDescriptor());
-		if (_sounds.back().LoadAudio(sound_filenames[i]) == false) {
-			cerr << "MAP ERROR: failed to load map sound: " << sound_filenames[i] << endl;
-			return;
-		}
-	}
-
-	vector<string> music_filenames;
-	_map_script.ReadStringVector("music_filenames", music_filenames);
-	for (uint32 i = 0; i < music_filenames.size(); i++) {
-		_music.push_back(MusicDescriptor());
-		if (_music.back().LoadAudio(music_filenames[i]) == false) {
-			cerr << "MAP ERROR: failed to load map music: " << music_filenames[i] << endl;
-			return;
-		}
-	}
-
-	// ---------- (5) Construct all enemies that may appear on this map
-	vector<int32> enemy_ids;
-	_map_script.ReadIntVector("enemy_ids", enemy_ids);
-	for (uint32 i = 0; i < enemy_ids.size(); i++) {
-		_enemies.push_back(new GlobalEnemy(enemy_ids[i]));
-	}
-
-	// ---------- (6) Call the map script's load function
-	ScriptObject map_table(luabind::from_stack(_map_script.GetLuaState(), hoa_script::private_script::STACK_TOP));
-	ScriptObject function = map_table["Load"];
-	ScriptCallFunction<void>(function, this);
-
-	_update_function = _map_script.ReadFunctionPointer("Update");
-	_draw_function = _map_script.ReadFunctionPointer("Draw");
-
-	_map_script.CloseAllTables();
-} // void MapMode::_Load()
-
-// ****************************************************************************
-// **************************** UPDATE FUNCTIONS ******************************
-// ****************************************************************************
-
-// Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update() {
+	// TODO: we need to detect if a battle is about to occur and if so, fade the screen gradually from
+	// map mode into the battle
+
+	// TODO: instead of doing this every frame, see if it can be done only when the _camera pointer is modified
 	_current_context = _camera->GetContext();
 
+	// Process quit and pause events unconditional to the state of map mode
 	if (InputManager->QuitPress() == true) {
 		ModeManager->Push(new PauseMode(true));
 		return;
@@ -260,59 +194,122 @@ void MapMode::Update() {
 
 	_time_elapsed = SystemManager->GetUpdateTime();
 
-	// ---------- (1) Call the map's update script function
+	// ---------- (1) Call the map script's update function
 	ScriptCallFunction<void>(_update_function);
 
-	// ---------- (2) Process user input
+	// ---------- (2) Process additional user input
 	if (_ignore_input == false) {
 		if (_map_state == DIALOGUE)
 			_dialogue_manager->Update();
 		else if (_treasure_menu->IsActive() == true)
 			_treasure_menu->Update();
-		else
+		else if (_map_state == EXPLORE)
 			_HandleInputExplore();
 	}
 
 	// ---------- (3) Update all animated tile images
 	_tile_manager->Update();
 
-	// ---------- (4) Update all zones and objects on the map
+	// ---------- (4) Update all objects on the map
 	if (_treasure_menu->IsActive() == false) {
 		_object_manager->Update();
+		_object_manager->SortObjects();
 	}
-	_object_manager->SortObjects();
 } // void MapMode::Update()
 
 
-// Updates the game status when MapMode is in the 'explore' state
-void MapMode::_HandleInputExplore() {
-	// Do the fade to battle mode
-	// Doing this first should prevent user input
-// 	if (_fade_to_battle_mode) {
-// 		// Only start battle mode once the fade is done.
-// 		if (!VideoManager->IsFading()) {
-// 			// Clear fade instantly
-// 			VideoManager->FadeScreen(Color::clear, 0.0f);
-// 			_fade_to_battle_mode = false;
-// 			BattleMode *BM = new BattleMode();
-// 			ModeManager->Push(BM);
-// 		}
-// 		return;
-// 	}
 
-	// Go to menu mode if the user requested it
+void MapMode::Draw() {
+	_CalculateDrawInfo();
+	ScriptCallFunction<void>(_draw_function);
+	_DrawGUI();
+	if (_map_state == DIALOGUE) {
+		_dialogue_manager->Draw();
+	}
+} // void MapMode::_Draw()
+
+
+
+void MapMode::_Load() {
+	// ---------- (1) Open map script file and read in the basic map properties and tile definitions
+	if (_map_script.OpenFile(_map_filename) == false) {
+		return;
+	}
+
+	// Determine the map's tablespacename and then open it. The tablespace is the name of the map file without
+	// file extension or path information (for example, 'dat/maps/demo.lua' has a tablespace name of 'demo').
+	int32 period = _map_filename.find(".");
+	int32 last_slash = _map_filename.find_last_of("/");
+	_map_tablespace = _map_filename.substr(last_slash + 1, period - (last_slash + 1));
+	_map_script.OpenTable(_map_tablespace);
+
+	// Read the number of map contexts, the name of the map, and load the location graphic image
+	_num_map_contexts = _map_script.ReadUInt("num_map_contexts");
+	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
+	if (_location_graphic.Load("img/menus/locations/" + _map_script.ReadString("location_filename")) == false) {
+		PRINT_ERROR << "failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
+	}
+
+	// ---------- (2) Instruct the sub-manager classes to perform their portion of the load operation
+	_tile_manager->Load(_map_script, this);
+	_object_manager->Load(_map_script);
+
+	// ---------- (3) Load map sounds and music
+	vector<string> sound_filenames;
+	_map_script.ReadStringVector("sound_filenames", sound_filenames);
+
+	for (uint32 i = 0; i < sound_filenames.size(); i++) {
+		_sounds.push_back(SoundDescriptor());
+		if (_sounds.back().LoadAudio(sound_filenames[i]) == false) {
+			PRINT_ERROR << "failed to load map sound: " << sound_filenames[i] << endl;
+			return;
+		}
+	}
+
+	vector<string> music_filenames;
+	_map_script.ReadStringVector("music_filenames", music_filenames);
+	for (uint32 i = 0; i < music_filenames.size(); i++) {
+		_music.push_back(MusicDescriptor());
+		if (_music.back().LoadAudio(music_filenames[i]) == false) {
+			PRINT_ERROR << "failed to load map music: " << music_filenames[i] << endl;
+			return;
+		}
+	}
+
+	// ---------- (4) Create and store all enemies that may appear on this map
+	vector<int32> enemy_ids;
+	_map_script.ReadIntVector("enemy_ids", enemy_ids);
+	for (uint32 i = 0; i < enemy_ids.size(); i++) {
+		_enemies.push_back(new GlobalEnemy(enemy_ids[i]));
+	}
+
+	// ---------- (5) Call the map script's custom load function and get a reference to all other script function pointers
+	ScriptObject map_table(luabind::from_stack(_map_script.GetLuaState(), hoa_script::private_script::STACK_TOP));
+	ScriptObject function = map_table["Load"];
+	ScriptCallFunction<void>(function, this);
+
+	_update_function = _map_script.ReadFunctionPointer("Update");
+	_draw_function = _map_script.ReadFunctionPointer("Draw");
+
+	_map_script.CloseAllTables();
+} // void MapMode::_Load()
+
+
+
+void MapMode::_HandleInputExplore() {
+	// First go to menu mode if the user requested it
 	if (InputManager->MenuPress()) {
 		MenuMode *MM = new MenuMode(_map_name, _location_graphic.GetFilename());
 		ModeManager->Push(MM);
 		return;
 	}
 
-	// Allow the player to run if they have enough stamina, and update the stamina amount
+	// Update the running state of the camera object. Check if the player wishes to continue running and if so,
+	// update the stamina value if the operation is permitted
 	_camera->is_running = false;
-	if (InputManager->CancelState() == true
-		&& (InputManager->UpState() || InputManager->DownState()
-		|| InputManager->LeftState() || InputManager->RightState())
-		&& _run_disabled == false) {
+	if (_run_disabled == false && InputManager->CancelState() == true &&
+		(InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState()))
+	{
 		if (_run_forever) {
 			_camera->is_running = true;
 		}
@@ -331,8 +328,11 @@ void MapMode::_HandleInputExplore() {
 			_run_stamina = 10000;
 	}
 
+	// If the user requested a confirm event, check if there is a nearby object that the player may interact with
+	// Interactions are currently limited to dialogue with sprites and opening of treasures
 	if (InputManager->ConfirmPress()) {
 		MapObject* obj = _object_manager->FindNearestObject(_camera);
+
 		if (obj && (obj->GetType() == VIRTUAL_TYPE || obj->GetType() == SPRITE_TYPE)) {
 			VirtualSprite *sp = reinterpret_cast<VirtualSprite*>(obj);
 
@@ -350,15 +350,15 @@ void MapMode::_HandleInputExplore() {
 			}
 		}
 		else if (obj && obj->GetType() == TREASURE_TYPE) {
-			MapTreasure* chest = reinterpret_cast<MapTreasure*>(obj);
+			MapTreasure* treasure = reinterpret_cast<MapTreasure*>(obj);
 
-			if (chest->IsEmpty() == false) {
-				chest->Open();
+			if (treasure->IsEmpty() == false) {
+				treasure->Open();
 			}
 		}
 	}
 
-	// Detect and handle movement input from the user
+	// Detect movement input from the user
 	if (InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState()) {
 		_camera->moving = true;
 	}
@@ -367,30 +367,25 @@ void MapMode::_HandleInputExplore() {
 	}
 
 	// Determine the direction of movement. Priority of movement is given to: up, down, left, right.
-	// In the case of diagonal movement, the direction that the sprite should face also needs to be
-	// deduced.
+	// In the case of diagonal movement, the direction that the sprite should face also needs to be deduced.
 	if (_camera->moving == true) {
-		if (InputManager->UpState()) {
-			if (InputManager->LeftState()) {
+		if (InputManager->UpState())
+		{
+			if (InputManager->LeftState())
 				_camera->SetDirection(NORTHWEST);
-			}
-			else if (InputManager->RightState()) {
+			else if (InputManager->RightState())
 				_camera->SetDirection(NORTHEAST);
-			}
-			else {
+			else
 				_camera->SetDirection(NORTH);
-			}
 		}
-		else if (InputManager->DownState()) {
-			if (InputManager->LeftState()) {
+		else if (InputManager->DownState())
+		{
+			if (InputManager->LeftState())
 				_camera->SetDirection(SOUTHWEST);
-			}
-			else if (InputManager->RightState()) {
+			else if (InputManager->RightState())
 				_camera->SetDirection(SOUTHEAST);
-			}
-			else {
+			else
 				_camera->SetDirection(SOUTH);
-			}
 		}
 		else if (InputManager->LeftState()) {
 			_camera->SetDirection(WEST);
@@ -401,33 +396,23 @@ void MapMode::_HandleInputExplore() {
 	} // if (_camera->moving == true)
 } // void MapMode::_HandleInputExplore()
 
-// ****************************************************************************
-// **************************** DRAW FUNCTIONS ********************************
-// ****************************************************************************
 
-#define __MAP_CHANGE_1__
-#define __MAP_CHANGE_2__
 
-// Determines things like our starting tiles
 void MapMode::_CalculateDrawInfo() {
-	// FIXME
-	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
-	// THIS CODE IS TEMPORARY AND NOT COMPLETELY WORKING
+	// TODO: these two macros are temporary in trying to solve issues involving misaligned graphics
+	// (tiles, sprites) displayed on the screen. The final solution to this problem remains to be found.
+	#define __MAP_CHANGE_1__
+	#define __MAP_CHANGE_2__
 
 #ifdef __MAP_CHANGE_1__
 	static float x (_draw_info.tile_x_start);
 	static float y (_draw_info.tile_y_start);
-
-//	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
-	{
-		_draw_info.tile_x_start = x;
-		_draw_info.tile_y_start = y;
-	}
+	_draw_info.tile_x_start = x;
+	_draw_info.tile_y_start = y;
 #endif
 
 	// ---------- (1) Set the default starting draw positions for the tiles (top left tile)
 
-	// The camera's position is in terms of the 16x16 grid, which needs to be converted into 32x32 coordinates.
 	float camera_x = _camera->ComputeXLocation();
 	float camera_y = _camera->ComputeYLocation();
 
@@ -457,7 +442,7 @@ void MapMode::_CalculateDrawInfo() {
 
 	// ---------- (3) Check for special conditions that modify the drawing state
 
-	// Usually the map centers on the camera's position, but when the camera becomes close to
+	// Usually the map centers on the camera's position, but when the camera becomes too close to
 	// the edges of the map, we need to modify the drawing properties of the frame.
 
 	// Camera exceeds the left boundary of the map
@@ -498,8 +483,6 @@ void MapMode::_CalculateDrawInfo() {
 		_draw_info.num_draw_rows--;
 	}
 
-	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
-	// THIS CODE IS TEMPORARY AND NOT COMPLETELY WORKING
 #ifdef __MAP_CHANGE_1__
 	float y_resolution;
 	float x_resolution;
@@ -507,36 +490,30 @@ void MapMode::_CalculateDrawInfo() {
 	float x2 (_draw_info.tile_x_start);
 	float y2 (_draw_info.tile_y_start);
 
-//	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
-	{
-		VideoManager->GetPixelSize(x_resolution, y_resolution);
-		x_resolution = fabs(x_resolution);
-		y_resolution = fabs(y_resolution);
+	VideoManager->GetPixelSize(x_resolution, y_resolution);
+	x_resolution = fabs(x_resolution);
+	y_resolution = fabs(y_resolution);
 
-		_draw_info.tile_x_start = FloorToFloatMultiple (_draw_info.tile_x_start, x_resolution);
-		_draw_info.tile_y_start = FloorToFloatMultiple (_draw_info.tile_y_start, y_resolution);
+	_draw_info.tile_x_start = FloorToFloatMultiple(_draw_info.tile_x_start, x_resolution);
+	_draw_info.tile_y_start = FloorToFloatMultiple(_draw_info.tile_y_start, y_resolution);
 
-		if (x2 - _draw_info.tile_x_start > x_resolution*0.5f)
-			_draw_info.tile_x_start += x_resolution;
-		if (y2 - _draw_info.tile_y_start > y_resolution*0.5f)
-			_draw_info.tile_y_start += y_resolution;
-	}
+	if (x2 - _draw_info.tile_x_start > x_resolution * 0.5f)
+		_draw_info.tile_x_start += x_resolution;
+	if (y2 - _draw_info.tile_y_start > y_resolution * 0.5f)
+		_draw_info.tile_y_start += y_resolution;
 #endif
 
 #if defined(__MAP_CHANGE_1__) && defined(__MAP_CHANGE_2__)
-//	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
-	{
-		_draw_info.screen_edges.left = FloorToFloatMultiple (_draw_info.screen_edges.left, x_resolution);
-		_draw_info.screen_edges.top = FloorToFloatMultiple (_draw_info.screen_edges.top, y_resolution);
+	_draw_info.screen_edges.left = FloorToFloatMultiple(_draw_info.screen_edges.left, x_resolution);
+	_draw_info.screen_edges.top = FloorToFloatMultiple(_draw_info.screen_edges.top, y_resolution);
 
-		if (camera_x - HALF_SCREEN_COLS - _draw_info.screen_edges.left > x_resolution*0.5f)
-			_draw_info.screen_edges.left += x_resolution;
-		if (camera_y - HALF_SCREEN_ROWS - _draw_info.screen_edges.top > y_resolution*0.5f)
-			_draw_info.screen_edges.top += y_resolution;
+	if (camera_x - HALF_SCREEN_COLS - _draw_info.screen_edges.left > x_resolution * 0.5f)
+		_draw_info.screen_edges.left += x_resolution;
+	if (camera_y - HALF_SCREEN_ROWS - _draw_info.screen_edges.top > y_resolution * 0.5f)
+		_draw_info.screen_edges.top += y_resolution;
 
-		_draw_info.screen_edges.right = _draw_info.screen_edges.left + 2 * SCREEN_COLS;
-		_draw_info.screen_edges.bottom = _draw_info.screen_edges.top + 2 * SCREEN_ROWS;
-	}
+	_draw_info.screen_edges.right = _draw_info.screen_edges.left + 2 * SCREEN_COLS;
+	_draw_info.screen_edges.bottom = _draw_info.screen_edges.top + 2 * SCREEN_ROWS;
 #endif
 
 	// Comment this out to print out debugging info about each map frame that is drawn
@@ -545,45 +522,31 @@ void MapMode::_CalculateDrawInfo() {
 // 	printf("# draw rows, cols: [%d, %d]\n", _draw_info.num_draw_rows, _draw_info.num_draw_cols);
 // 	printf("Camera position:   [%f, %f]\n", camera_x, camera_y);
 // 	printf("Tile draw start:   [%f, %f]\n", _draw_info.tile_x_start, _draw_info.tile_y_start);
-// 	printf("Edges (T,D,L,R):   [%f, %f, %f, %f]\n", _draw_info.screen_edges.top, _draw_info.screen_edges.bottom,
+// 	printf("Edges (T,B,L,R):   [%f, %f, %f, %f]\n", _draw_info.screen_edges.top, _draw_info.screen_edges.bottom,
 // 		_draw_info.screen_edges.left, _draw_info.screen_edges.right);
 } // void MapMode::_CalculateDrawInfo()
-
-
-// Public draw function called by the main game loop
-void MapMode::Draw() {
-	_CalculateDrawInfo();
-	ScriptCallFunction<void>(_draw_function);
-	_DrawGUI();
-	if (_map_state == DIALOGUE) {
-		_dialogue_manager->Draw();
-	}
-} // void MapMode::_Draw()
 
 
 
 void MapMode::_DrawMapLayers() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 
-	// ---------- (1) Draw the lower tile layer
 	_tile_manager->DrawLowerLayer(&_draw_info);
-	// ---------- (2) Draw the middle tile layer
 	_tile_manager->DrawMiddleLayer(&_draw_info);
-	// ---------- (3) Draw the ground object layer (first pass)
-	_object_manager->DrawGroundObjects(&_draw_info, false);
-	// ---------- (4) Draw the pass object layer
+
+	_object_manager->DrawGroundObjects(&_draw_info, false); // First draw pass of ground objects
 	_object_manager->DrawPassObjects(&_draw_info);
-	// ---------- (5) Draw the ground object layer (second pass)
-	_object_manager->DrawGroundObjects(&_draw_info, true);
-	// ---------- (6) Draw the upper tile layer
+	_object_manager->DrawGroundObjects(&_draw_info, true); // Second draw pass of ground objects
+
 	_tile_manager->DrawUpperLayer(&_draw_info);
-	// ---------- (7) Draw the sky object layer
+
 	_object_manager->DrawSkyObjects(&_draw_info);
 } // void MapMode::_DrawMapLayers()
 
 
 
 void MapMode::_DrawGUI() {
+	// TODO: figure out what this color represents and create an approximate name for it
 	const Color unknown(0.0196f, 0.207f, 0.0196f, 1.0f);
 	const Color lighter_green(0.419f, 0.894f, 0.0f, 1.0f);
 	const Color light_green(0.0196f, 0.207f, 0.0196f, 1.0f);
@@ -595,6 +558,7 @@ void MapMode::_DrawGUI() {
 	// ---------- (1) Draw the introductory location name and graphic if necessary
 	if (_intro_timer.IsFinished() == false) {
 		uint32 time = _intro_timer.GetTimeExpired();
+
 		Color blend(1.0f, 1.0f, 1.0f, 1.0f);
 		if (time < 2000) { // Fade in
 			blend.SetAlpha((static_cast<float>(time) / 2000.0f));
@@ -602,6 +566,7 @@ void MapMode::_DrawGUI() {
 		else if (time > 5000) { // Fade out
 			blend.SetAlpha(1.0f - static_cast<float>(time - 5000) / 2000.0f);
 		}
+
 		VideoManager->PushState();
 		VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
@@ -612,7 +577,8 @@ void MapMode::_DrawGUI() {
 		VideoManager->PopState();
 	}
 
-	// ---------- (2) Draw the run stamina bar in the lower right
+	// ---------- (2) Draw the stamina bar in the lower right corner
+	// TODO: the code in this section needs better comments to explain what each coloring step is doing
 	float fill_size = static_cast<float>(_run_stamina) / 10000.0f;
 
 	VideoManager->PushState();
@@ -624,23 +590,21 @@ void MapMode::_DrawGUI() {
 	_stamina_bar_background.Draw();
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
 
+	// Draw the base color of the bar
 	VideoManager->Move(800, 740);
-	//VideoManager->DrawRectangle(200, 10, Color::black);
-	//VideoManager->DrawRectangle(200 * fill_size, 10, Color(0.133f, 0.455f, 0.133f, 1.0f));
 	VideoManager->DrawRectangle(200 * fill_size, 10, unknown);
 
-	// Code to shade the bar with a faux lighting effect
+	// Shade the bar with a faux lighting effect
 	VideoManager->Move(800,739);
-	VideoManager->DrawRectangle(200 * fill_size, 2, dark_green); // dark green
+	VideoManager->DrawRectangle(200 * fill_size, 2, dark_green);
 	VideoManager->Move(800, 737);
-	VideoManager->DrawRectangle(200 * fill_size, 7, darkish_green); // darkish green
+	VideoManager->DrawRectangle(200 * fill_size, 7, darkish_green);
 
-	if ((200 * fill_size) >= 4) { // Only do this if the bar is at least 4 pixels long
-		VideoManager->Move(801, 739); // darkish green
+	// Only do this if the bar is at least 4 pixels long
+	if ((200 * fill_size) >= 4) {
+		VideoManager->Move(801, 739);
 		VideoManager->DrawRectangle((200 * fill_size) -2, 1, darkish_green);
-	}
 
-	if ((200 * fill_size) >= 4) { // Only do this if the bar is at least 4 pixels long
 		VideoManager->Move(801, 738);
 		VideoManager->DrawRectangle(1, 2, medium_green);
 		VideoManager->Move(800 + (fill_size * 200 - 2), 738); // Automatically reposition to be at moving endcap
@@ -650,7 +614,8 @@ void MapMode::_DrawGUI() {
 	VideoManager->Move(800, 736);
 	VideoManager->DrawRectangle(200 * fill_size, 5, medium_green);
 
-	if ((200 * fill_size) >= 4) { //Only do this if the bar is at least 4 pixels long
+	// Only do this if the bar is at least 4 pixels long
+	if ((200 * fill_size) >= 4) {
 		VideoManager->Move(801, 735);
 		VideoManager->DrawRectangle(1, 1, lighter_green);
 		VideoManager->Move(800 + (fill_size * 200 - 2), 735); // automatically reposition to be at moving endcap
@@ -659,13 +624,13 @@ void MapMode::_DrawGUI() {
 		VideoManager->DrawRectangle(200 * fill_size, 2, lighter_green);
 	}
 
-	if ((200 * fill_size) >= 6) { //Only do this if the bar is at least 4 pixels long
+	// Only do this if the bar is at least 6 pixels long
+	if ((200 * fill_size) >= 6) {
 		VideoManager->Move(802, 733);
 		VideoManager->DrawRectangle((200 * fill_size) - 4, 1, bright_yellow);
 	}
 
 	if (_run_forever) { // Draw the infinity symbol over the stamina bar
-		// Change the video mode so we can do alpha channels
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Move(780, 747);
 		_stamina_bar_infinite_overlay.Draw();
@@ -673,15 +638,12 @@ void MapMode::_DrawGUI() {
 
 	VideoManager->PopState();
 
-	// ---------- (3) Draw the treasure menu
+	// ---------- (3) Draw the treasure menu if necessary
 	if (_treasure_menu->IsActive() == true)
 		_treasure_menu->Draw();
 } // void MapMode::_DrawGUI()
 
 
-// ****************************************************************************
-// ************************* LUA BINDING FUNCTIONS ****************************
-// ****************************************************************************
 
 void MapMode::_AddGroundObject(MapObject *obj) {
 	_object_manager->_ground_objects.push_back(obj);

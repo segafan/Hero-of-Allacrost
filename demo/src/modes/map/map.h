@@ -248,6 +248,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 
 	friend void hoa_defs::BindModesToLua();
 public:
+	//! \param filename The name of the Lua file that retains all data about the map to create
 	MapMode(std::string filename);
 
 	~MapMode();
@@ -255,39 +256,38 @@ public:
 	//! \brief Resets appropriate class members. Called whenever the MapMode object is made the active game mode.
 	void Reset();
 
-	//! \brief Updates the game and calls various sub-update functions depending on the state of map mode.
+	//! \brief Updates the game and calls various sub-update functions depending on the current state of map mode.
 	void Update();
 
-	//! \brief Handles the drawing of everything on the map and makes sub-draw function calls as appropriate.
+	//! \brief The highest level draw function that will call the appropriate lower-level draw functions
 	void Draw();
 
 private:
+	// ----- Members : Names and Identifiers -----
+
 	/** \brief A reference to the current instance of MapMode
-	*** This is used for callbacks from Lua, as well as for map objects to be able to refer to the
-	*** map that they exist in.
+	*** This is used by other map clases to be able to refer to the map that they exist in.
 	**/
 	static MapMode *_current_map;
 
 	/** \brief A reference to the instance of MapMode which most recently had its constructor called
 	*** This is not the same as _current_map, and this pointer should only be used in conjunction with
 	*** loading code. The pointer is only updated when the MapMode constructor is called.
+	***
+	*** \todo The need for this member is questionable. We need to examine if it is absolutely necessary
+	*** to have and if there is a better alternative. Its only use is for the map code that executes
+	*** between creating the new MapMode object and having the Reset function called to make the object
+	*** the current map.
 	**/
 	static MapMode *_loading_map;
 
-	//! \brief Indicates if dialogue icons should be drawn or not.
-	static bool _show_dialogue_icons;
-
-	/** \brief A timer used for when the player first enters the map
-	*** This timer is set to 7000 ms (7 seconds) and is used to display the map's location graphic
-	*** and name at the top center of the screen. The graphic and text are faded in for the first
-	*** two seconds, drawn opaquely for the next three seconds, and faded out in the final two seconds.
-	**/
-	hoa_system::SystemTimer _intro_timer;
-
-	//! \brief The name of the script file that contains the map.
+	//! \brief The name of the Lua file that represents the map
 	std::string _map_filename;
 
-	//! \brief The map's unique name as it is used to identify a Lua table
+	/** \brief The map's unique name as it is used to identify a Lua namespace table
+	*** To avoid Lua naming conflicts between multiple map files, all map data is encompassed within
+	*** a namespace (a Lua table) that is unique to each map.
+	**/
 	std::string _map_tablespace;
 
 	//! \brief The name of the map, as it will be read by the player in the game.
@@ -296,54 +296,25 @@ private:
 	//! \brief A pointer to the object containing all of the event information for the map
 	hoa_global::GlobalEventGroup* _map_event_group;
 
-	//! \brief Holds an image that represents an outline of the location, used primarily in MenuMode
-	hoa_video::StillImage _location_graphic;
-
-	//! \brief Indicates the current state that the map is in, such as when a dialogue is taking place.
-	uint8 _map_state;
-
-	//! \brief The time elapsed since the last Update() call to MapMode.
-	uint32 _time_elapsed;
-
-	//! \brief The number of contexts for this map (at least 1, at most 32)
-	uint8 _num_map_contexts;
-
-	//! \brief While true, all user input commands to map mode are ignored
-	bool _ignore_input;
-
-	//! \brief If true, the player's stamina will not drain as they run
-	bool _run_forever;
-
-	//! \brief While true, the player is not allowed to run at all.
-	bool _run_disabled;
-
-	/** \brief The amount of stamina
-	*** This value ranges from 0 (empty) to 10000 (full). Stamina takes 10 seconds to completely fill from
-	*** the empty state and 5 seconds to empty from the full state.
-	**/
-	uint32 _run_stamina;
-
-	/** \brief A pointer to the map sprite that the map camera will focus on.
-	*** \note Note that this member is a pointer to a map sprite, not a map object.
-	*** However, this does not mean that the camera is not able to focus on non-sprite
-	*** map objects. The MapMode#_virtual_focus member can be used to emulate that
-	*** focus.
-	**/
-	private_map::VirtualSprite* _camera;
-
-	/** \brief The currently active map context
-	*** At all times, this should be the same context as the object pointed to by the _camera
-	**/
-	private_map::MAP_CONTEXT _current_context;
-
-	//! \brief Retains information needed to correctly draw the next map frame.
-	private_map::MapFrame _draw_info;
-
 	/** \brief The interface to the file which contains all the map's stored data and subroutines.
 	*** This class generally performs a large amount of communication with this script continuously.
 	*** The script remains open for as long as the MapMode object exists.
 	**/
 	hoa_script::ReadScriptDescriptor _map_script;
+
+	// ----- Members : Sub-management Objects -----
+
+	//! \brief Instance of helper class to map mode. Responsible for tile related operations.
+	private_map::TileManager* _tile_manager;
+
+	//! \brief Instance of helper class to map mode. Responsible for object and sprite related operations.
+	private_map::ObjectManager* _object_manager;
+
+	//! \brief This keeps a pointer to the active dialogue.
+	private_map::DialogueManager* _dialogue_manager;
+
+	//! \brief Class member object which processes all information related to treasure discovery
+	private_map::TreasureMenu* _treasure_menu;
 
 	/** \brief A script function which assists with the MapMode#Update method
 	*** This function implements any custom update code that the specific map needs to be performed.
@@ -358,17 +329,53 @@ private:
 	**/
 	ScriptObject _draw_function;
 
-	//! \brief Instance of helper class to map mode. Responsible for tile related operations.
-	private_map::TileManager* _tile_manager;
+	// ----- Members : Properties and State -----
 
-	//! \brief Instance of helper class to map mode. Responsible for object and sprite related operations.
-	private_map::ObjectManager* _object_manager;
+	//! \brief The number of contexts for this map (at least 1, at most 32)
+	uint8 _num_map_contexts;
 
-	//! \brief This keeps a pointer to the active dialogue.
-	private_map::DialogueManager* _dialogue_manager;
+	/** \brief The currently active map context
+	*** This is always equal to the context of the object pointed to by the _camera member
+	**/
+	private_map::MAP_CONTEXT _current_context;
 
-	//! \brief Class member object which processes all information related to treasure discovery
-	private_map::TreasureMenu* _treasure_menu;
+	/** \brief The amount of stamina
+	*** This value ranges from 0 (empty) to 10000 (full). Stamina takes 10 seconds to completely fill from
+	*** the empty state and 5 seconds to empty from the full state.
+	**/
+	uint32 _run_stamina;
+
+	//! \brief Indicates the current state that the map is in, such as when a dialogue is taking place.
+	uint8 _map_state;
+
+	//! \brief While true, all user input commands to map mode are ignored
+	bool _ignore_input;
+
+	//! \brief If true, the player's stamina will not drain as they run
+	bool _run_forever;
+
+	//! \brief While true, the player is not allowed to run at all.
+	bool _run_disabled;
+
+	//! \brief Indicates if dialogue icons should be drawn or not.
+	//! \todo I don't think that this needs to be a static member. It should be true by default.
+	static bool _show_dialogue_icons;
+
+	// ----- Members : Map Timing and Graphics -----
+
+	//! \brief The time elapsed since the last Update() call to MapMode.
+	//! \todo Can be removed because the SystemManager contains this same data
+	uint32 _time_elapsed;
+
+	/** \brief A timer used for when the player first enters the map
+	*** This timer is set to 7000 ms (7 seconds) and is used to display the map's location graphic
+	*** and name at the top center of the screen. The graphic and text are faded in for the first
+	*** two seconds, drawn opaquely for the next three seconds, and faded out in the final two seconds.
+	**/
+	hoa_system::SystemTimer _intro_timer;
+
+	//! \brief Holds an image that represents an outline of the location, used primarily in MenuMode
+	hoa_video::StillImage _location_graphic;
 
 	//! \brief Icon which appears over NPCs who have unread dialogue
 	hoa_video::AnimatedImage _new_dialogue_icon;
@@ -379,38 +386,48 @@ private:
 	//! \brief Image which overlays the stamina bar to show that the player has unlimited running
 	hoa_video::StillImage _stamina_bar_infinite_overlay;
 
-	//! \brief The music that the map will need to make use of.
+	// ----- Members : Containers and Other Data -----
+
+	/** \brief A pointer to the map sprite that the map camera will focus on
+	*** \note Note that this member is a pointer to a map sprite, not a map object.
+	*** However, this does not mean that the camera is not able to focus on non-sprite
+	*** map objects. The MapMode#_virtual_focus member can be used to emulate that
+	*** focus.
+	**/
+	private_map::VirtualSprite* _camera;
+
+	//! \brief Retains information needed to correctly draw the next map frame
+	private_map::MapFrame _draw_info;
+
+	//! \brief The music that the map will need to make use of
 	std::vector<hoa_audio::MusicDescriptor> _music;
 
-	//! \brief The sounds that the map needs available to it.
+	//! \brief The sounds that the map needs available to it
 	std::vector<hoa_audio::SoundDescriptor> _sounds;
 
-	/** \brief A container for the various foes which may appear on this map.
-	*** These enemies are kept at their initial stats. They are passed to battle mode, where a copy of
-	*** each enemy is made and initialized there.
+	/** \brief A container for the various foes which may appear on this map
+	*** These enemies are kept at their initial stats. When they are passed to battle mode,
+	*** a copy of each enemy is made and initialized there.
 	**/
 	std::vector<hoa_global::GlobalEnemy*> _enemies;
+
+	// ----- Methods -----
 
 	//! \brief Loads all map data contained in the Lua file that defines the map
 	void _Load();
 
-	// -------------------- Update Methods
-
 	//! \brief Handles user input when the map is in the explore state
 	void _HandleInputExplore();
 
-	// -------------------- Draw Methods
-
-	//! \brief Calculates information about how to draw the next map frame.
+	//! \brief Calculates information about how to draw the next map frame
 	void _CalculateDrawInfo();
 
 	//! \brief Draws all visible map tiles and sprites to the screen
 	void _DrawMapLayers();
 
-	//! \brief Draws all GUI visuals, such as dialogue icons and the run meter
+	//! \brief Draws all GUI visuals, such as dialogue icons and the stamina bar
 	void _DrawGUI();
 
-	// -------------------- Lua Binding Functions
 	/** \name Lua Access Functions
 	*** These methods exist to allow Lua to make function calls to examine and modify the map's state.
 	**/
