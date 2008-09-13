@@ -242,12 +242,13 @@ void Editor::_FileNew()
 				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
 				{
 					new_map_progress->setValue(checked_items++);
+
 					TilesetTable* a_tileset = new TilesetTable();
 					if (a_tileset->Load(tilesets->topLevelItem(i)->text(0)) == false)
-					{
-						// TODO: handle error
-						qDebug("Tileset::Load() failed");
-					}
+						QMessageBox::critical(this, tr("HoA Level Editor"),
+							tr("Failed to load tileset image: " + 
+							   tilesets->topLevelItem(i)->text(0)));
+
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);
 					_ed_scrollview->_map->tileset_names.push_back(a_tileset->tileset_name);
@@ -349,12 +350,12 @@ void Editor::_FileOpen()
 				it != _ed_scrollview->_map->tileset_names.end(); it++)
 			{
 				new_map_progress->setValue(progress_steps++);
+
 				TilesetTable* a_tileset = new TilesetTable();
 				if (a_tileset->Load(*it) == false)
-				{
-					// TODO: handle error
-					qDebug("Tileset::Load() failed");
-				}
+					QMessageBox::critical(this, tr("HoA Level Editor"),
+						tr("Failed to load tileset image: " + *it));
+
 				_ed_tabs->addTab(a_tileset->table, *it);
 				_ed_scrollview->_map->tilesets.push_back(a_tileset);
 			} // iterate through all tilesets in the map
