@@ -32,6 +32,7 @@
 #include "map_objects.h"
 #include "map_sprites.h"
 #include "map_tiles.h"
+#include "map_treasure.h"
 #include "map_zones.h"
 
 using namespace std;

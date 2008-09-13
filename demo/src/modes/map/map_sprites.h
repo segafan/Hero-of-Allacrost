@@ -276,7 +276,7 @@ public:
 			_current_dialogue++;
 			if (static_cast<uint16>(_current_dialogue) >= dialogues.size())
 				_current_dialogue = 0;
-		} while (dialogues[_current_dialogue]->IsActive() == false);
+		} while (dialogues[_current_dialogue]->IsAvailable() == false);
 	}
 
 	int16 GetNumDialogues() const

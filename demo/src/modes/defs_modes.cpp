@@ -33,6 +33,7 @@
 #include "map_dialogue.h"
 #include "map_objects.h"
 #include "map_sprites.h"
+#include "map_treasure.h"
 #include "map_zones.h"
 #include "shop.h"
 
@@ -264,7 +265,7 @@ void BindModesToLua()
 			.def("AddText", &MapDialogue::AddText)
 			.def("AddOption", &MapDialogue::AddOption)
 			.def("SetMaxViews", &MapDialogue::SetMaxViews)
-			.def("GoToLine", &MapDialogue::GoToLine)
+			.def("SetNextLine", &MapDialogue::SetNextLine)
 			.def("EndDialogue", &MapDialogue::EndDialogue)
 	];
 

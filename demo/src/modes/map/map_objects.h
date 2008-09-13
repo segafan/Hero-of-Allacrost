@@ -373,90 +373,6 @@ public:
 
 
 /** ****************************************************************************
-*** \brief Represents a treasure on the map which the player may access
-***
-*** A treasure is a specific type of physical object. Treasures may contain
-*** multiple quantities and types of items, weapons, armor, or any other type of
-*** global object. They may additionally contain any amount of drunes (money).
-*** As one would expect, the contents of a treasure can only be retrieved by the
-*** player once. Each treasure object on a map has a simple boolean in the
-*** saved game file to determine whether the treasure has already been retrieved
-*** by the player or not.
-***
-*** Image files for treasures are single row multi images where the frame ordering
-*** goes from closed, to opening, to open. This means each map treasure has exactly
-*** three animations. The closed and open animations are usually single frame images.
-***
-*** \todo Add support for more treasure features, such as locked chests, chests which
-*** trigger a battle, etc.
-*** ***************************************************************************/
-class MapTreasure : public PhysicalObject {
-	friend class TreasureMenu;
-
-public:
-	/** \param image_file The name of the multi image file to load for the treasure
-	*** \param num_total_frames The total number of frame images in the multi image file
-	*** \param num_closed_frames The number of frames to use as the closed animation (default value == 1)
-	*** \param num_open_frames The number of frames to use as the open animation (default value == 1)
-	*** \note The opening animation will be created based on the total number of frames in the image file
-	*** subtracted by the number of closed and open frames. If this value is zero, then the opening animation
-	*** will simply be the same as the open animation
-	**/
-	MapTreasure(std::string image_file, uint8 num_total_frames, uint8 num_closed_frames = 1, uint8 num_open_frames = 1);
-
-	~MapTreasure();
-
-	//! \brief Defines for all three treasure animations
-	enum {
-		TREASURE_CLOSED_ANIM = 0,
-		TREASURE_OPENING_ANIM = 1,
-		TREASURE_OPEN_ANIM = 2
-	};
-
-	//! \brief Loads the state of the chest from the event group corresponding to the current map
-	void LoadSaved();
-
-	//! \brief Changes the current animation if it has finished looping
-	void Update();
-
-	/** \name Lua Access Functions
-	*** These functions are specifically written to enable Lua to access the members of this class.
- 	**/
-	//@{
-	/** \brief Adds an object to the contents of the MapTreasure
-	*** \param id The id of the GlobalObject to add
-	*** \param number The number of the object to add (default == 1)
-	*** \throw Exception An Exception object if nothing could be added to the treasure
-	**/
-	bool AddObject(uint32 id, uint32 number = 1);
-
-	/** \brief Adds a number of drunes to be the chest's contents
-	*** \note The overflow condition is not checked here: we just assume it will never occur
-	**/
-	void AddDrunes(uint32 amount)
-		{ _drunes += amount; }
-
-	//! \brief Indicates if the treasure contains any
-	bool IsEmpty() const
-		{ return _empty; }
-
-	//! \brief Opens the treasure, which changes the active animation and initializes the treasure menu
-	void Open();
-	//@}
-
-private:
-	//! \brief Set to true when the contents of the treasure have been procured
-	bool _empty;
-
-	//! \brief The number of drunes contained in the chest
-	uint32 _drunes;
-
-	//! \brief The list of objects given to the player upon opening the treasure
-	std::vector<hoa_global::GlobalObject*> _objects_list;
-}; // class MapTreasure : public PhysicalObject
-
-
-/** ****************************************************************************
 *** \brief A container class for node information in pathfinding.
 ***
 *** This class is used in the MapMode#_FindPath function to find an optimal
@@ -691,4 +607,4 @@ private:
 
 } // namespace hoa_map
 
-#endif
+#endif // __MAP_OBJECTS_HEADER__
