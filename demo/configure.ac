@@ -2,7 +2,7 @@ dnl                                               -*- Autoconf -*-
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(Hero of Allacrost - Demo, 0.3.0, roots@allacrost.org, allacrost)
+AC_INIT(Hero of Allacrost - Demo, 0.2.2, roots@allacrost.org, allacrost)
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CANONICAL_TARGET
@@ -48,8 +48,8 @@ CPPFLAGS="$CPPFLAGS $X_CFLAGS"
 
 dnl Check for map editor and Qt.
 AC_MSG_CHECKING(whether to enable usage of map editor)
-editor_default="no"
-AC_ARG_ENABLE(editor, [  --enable-editor=[no/yes]    will build the map editor [default=no]], , enable_editor=$editor_default)
+editor_default="yes"
+AC_ARG_ENABLE(editor, [  --enable-editor=[no/yes]    will build the map editor [default=yes]], , enable_editor=$editor_default)
 if test "x$enable_editor" = "xyes"; then
     AC_MSG_RESULT(yes)
     HOA_FIND_QT4(Qt4,,)
