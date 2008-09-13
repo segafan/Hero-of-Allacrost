@@ -81,7 +81,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					22,
 					300,
-					100,
+					99.58349609375,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXExecutablesDataSource_ActiveFlagID,
@@ -185,14 +185,14 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 242544514;
-			PBXWorkspaceStateSaveDate = 242544514;
+			PBXPerProjectTemplateStateSaveDate = 242972273;
+			PBXWorkspaceStateSaveDate = 242972273;
 		};
 		perUserProjectItems = {
-			D49A547A0DB29AE400FBD800 /* PBXTextBookmark */ = D49A547A0DB29AE400FBD800 /* PBXTextBookmark */;
-			D4F9010E0DA20DA100F10953 /* PBXTextBookmark */ = D4F9010E0DA20DA100F10953 /* PBXTextBookmark */;
-			D4F901130DA20DA100F10953 /* PBXTextBookmark */ = D4F901130DA20DA100F10953 /* PBXTextBookmark */;
-			D4F9011C0DA20ECC00F10953 /* PBXTextBookmark */ = D4F9011C0DA20ECC00F10953 /* PBXTextBookmark */;
+			D49A547A0DB29AE400FBD800 = D49A547A0DB29AE400FBD800 /* PBXTextBookmark */;
+			D4F9010E0DA20DA100F10953 = D4F9010E0DA20DA100F10953 /* PBXTextBookmark */;
+			D4F901130DA20DA100F10953 = D4F901130DA20DA100F10953 /* PBXTextBookmark */;
+			D4F9011C0DA20ECC00F10953 = D4F9011C0DA20ECC00F10953 /* PBXTextBookmark */;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -806,9 +806,9 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {691, 33614}}";
-			sepNavSelRange = "{8195, 0}";
-			sepNavVisRange = "{6831, 1742}";
+			sepNavIntBoundsRect = "{{0, 0}, {720, 33152}}";
+			sepNavSelRange = "{11188, 0}";
+			sepNavVisRange = "{10901, 532}";
 			sepNavVisRect = "{{1, 5369}, {711, 617}}";
 			sepNavWindowFrame = "{{13, 4}, {750, 774}}";
 		};
@@ -833,9 +833,9 @@
 	};
 	D4D1BA680B02B27F0052BF1E /* grid.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {652, 14266}}";
+			sepNavIntBoundsRect = "{{0, 0}, {652, 14168}}";
 			sepNavSelRange = "{28326, 0}";
-			sepNavVisRange = "{27992, 558}";
+			sepNavVisRange = "{28005, 553}";
 			sepNavVisRect = "{{0, 1466}, {711, 429}}";
 			sepNavWindowFrame = "{{531, 4}, {750, 774}}";
 		};
@@ -851,18 +851,18 @@
 	};
 	D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {710, 4704}}";
-			sepNavSelRange = "{9009, 0}";
-			sepNavVisRange = "{3078, 663}";
+			sepNavIntBoundsRect = "{{0, 0}, {710, 5362}}";
+			sepNavSelRange = "{3978, 0}";
+			sepNavVisRange = "{3425, 881}";
 			sepNavVisRect = "{{0, 474}, {711, 429}}";
 			sepNavWindowFrame = "{{528, 6}, {750, 558}}";
 		};
 	};
 	D4D1BA6D0B02B27F0052BF1E /* tileset.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {691, 1890}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{3169, 1127}";
+			sepNavIntBoundsRect = "{{0, 0}, {691, 2170}}";
+			sepNavSelRange = "{996, 0}";
+			sepNavVisRange = "{4661, 836}";
 			sepNavVisRect = "{{0, 705}, {711, 429}}";
 			sepNavWindowFrame = "{{79, 48}, {750, 558}}";
 		};

@@ -129,20 +129,17 @@ bool Tileset::Load(const QString& set_name, bool one_image)
 		tiles.clear();
 		tiles.resize(1);
 		tiles[0].SetDimensions(16.0f, 16.0f);
-		if (tiles[0].Load(string(img_filename.toAscii()), 16, 16) == false) {
-			qDebug("Failed to load tileset image: " + img_filename);
+		if (tiles[0].Load(string(img_filename.toAscii()), 16, 16) == false)
 			return false;
-		}
 	}
 	else {
 		tiles.clear();
 		tiles.resize(256);
 		for (uint32 i = 0; i < 256; i++)
 			tiles[i].SetDimensions(1.0f, 1.0f);
-		if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, string(img_filename.toAscii()), 16, 16) == false) {
-			qDebug("Failed to load tileset image: " + img_filename);
+		if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles,
+		        string(img_filename.toAscii()), 16, 16) == false)
 			return false;
-		}
 	}
 
 	// Set up for reading the tileset definition file.
