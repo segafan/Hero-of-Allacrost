@@ -178,7 +178,7 @@ GameSystem::~GameSystem() {
 
 bool GameSystem::SingletonInitialize() {
 	// Initialize the gettext library
-	setlocale(LC_ALL, "");
+	setlocale(LC_MESSAGES, "");
 	bindtextdomain("allacrost", "./txt");
 	textdomain("allacrost");
 
