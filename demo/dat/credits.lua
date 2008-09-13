@@ -35,7 +35,6 @@ credits_text =
 	"\n\n" ..
 
 	"Artwork Team\n\n" ..
-	"Blake Heatly (KaelisEbonrai) - map sprites\b" ..
 	"Brett Steele (Safir-Kreuz) - map sprites, battle sprites, character portraits, location graphics\n" ..
 	"Joe Raucci (Sylon) - battle sprites, old GUI artwork\n" ..
 	"Josiah Tobin (Josiah Tobin) - map tiles\n" ..

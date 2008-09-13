@@ -1171,9 +1171,9 @@ void BootMode::Draw() {
 	VideoManager->Move(65.0f, 10.0f);
 	VideoManager->Text()->SetDefaultFont("default");
 	VideoManager->Text()->SetDefaultTextColor(Color::gray);
-	VideoManager->Text()->Draw("Tech Demo 0.2.1");
+	VideoManager->Text()->Draw("Tech Demo 0.2.2");
 	VideoManager->MoveRelative(730.0f, 0.0f);
-	VideoManager->Text()->Draw("Copyright (C) 2004 - 2007 The Allacrost Project");
+	VideoManager->Text()->Draw("Copyright (C) 2004 - 2008 The Allacrost Project");
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	VideoManager->Move(0, 0);
