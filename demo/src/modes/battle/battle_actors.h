@@ -73,8 +73,7 @@ class BattleActor {
 public:
 	BattleActor(hoa_global::GlobalActor* actor, float x_origin, float y_origin);
 
-	virtual ~BattleActor()
-		{}
+	virtual ~BattleActor();
 
 	/** \brief Deals a specific amount of damage to the actor
 	*** \param damage The amount of damage to deal
