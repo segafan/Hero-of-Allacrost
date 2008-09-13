@@ -171,10 +171,11 @@ void Editor::_TilesEnableActions()
 
 void Editor::_TilesetMenuSetup()
 {
-	//if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
-	//	_edit_tileset_action->setEnabled(true);
-	//else
-	//	_edit_tileset_action->setEnabled(false);
+	// TODO: temp fix for bug 161: don't edit tilesets if a map is open
+	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+		_edit_tileset_action->setEnabled(false);
+	else
+		_edit_tileset_action->setEnabled(true);
 } // _TilesetMenuSetup
 
 void Editor::_MapMenuSetup()
@@ -1474,44 +1475,47 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 					(*it)->is_selected = false;
 				}
 			}
-			else	// if not in the hovvering area, deselect it
+			else	// if not in the hovering area, deselect it
 				(*it)->is_selected = false;
 		}
 	}
 
-	switch (_tile_mode)
+	if (_layer_edit != OBJECT_LAYER)
 	{
-		case PAINT_TILE: // start painting tiles
+		switch (_tile_mode)
 		{
-			if (evt->button() == Qt::LeftButton && editor->_select_on == false)
-				_PaintTile(_tile_index);
+			case PAINT_TILE: // start painting tiles
+			{
+				if (evt->button() == Qt::LeftButton && editor->_select_on == false)
+					_PaintTile(_tile_index);
 
-			break;
-		} // edit mode PAINT_TILE
+				break;
+			} // edit mode PAINT_TILE
 
-		case MOVE_TILE: // start moving a tile
-		{
-			// select tiles
-			if(_layer_edit != OBJECT_LAYER) {
-				_move_source_index = _tile_index;
-				if (editor->_select_on == false)
-					_moving = true;
-			}
-			break;
-		} // edit mode MOVE_TILE
+			case MOVE_TILE: // start moving a tile
+			{
+				// select tiles
+				if(_layer_edit != OBJECT_LAYER) {
+					_move_source_index = _tile_index;
+					if (editor->_select_on == false)
+						_moving = true;
+				}
+				break;
+			} // edit mode MOVE_TILE
 
-		case DELETE_TILE: // start deleting tiles
-		{
-			if (evt->button() == Qt::LeftButton && editor->_select_on == false)
-				_DeleteTile(_tile_index);
+			case DELETE_TILE: // start deleting tiles
+			{
+				if (evt->button() == Qt::LeftButton && editor->_select_on == false)
+					_DeleteTile(_tile_index);
 
-			break;
-		} // edit mode DELETE_TILE
+				break;
+			} // edit mode DELETE_TILE
 
-		default:
-			QMessageBox::warning(this, "Tile editing mode",
-				"ERROR: Invalid tile editing mode!");
-	} // switch on tile editing mode
+			default:
+				QMessageBox::warning(this, "Tile editing mode",
+					"ERROR: Invalid tile editing mode!");
+		} // switch on tile editing mode
+	} // don't manipulate tiles on the object layer
 
 	// Draw the changes.
 	_map->updateGL();
@@ -1548,6 +1552,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 
 	if (index != _tile_index && !is_object_layer)  // user has moved onto another tile
+	                                               // ignore the object layer
 	{
 		_tile_index = index;
 
@@ -1636,57 +1641,12 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 
 	bool is_object_layer = (_layer_edit == OBJECT_LAYER);
 	if( !is_object_layer )
-	switch (_tile_mode)
 	{
-		case PAINT_TILE: // wrap up painting tiles
+		switch (_tile_mode)
 		{
-			if (editor->_select_on == true)
+			case PAINT_TILE: // wrap up painting tiles
 			{
-				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER, 0);
-				for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
-				{
-					// Works because the selection layer and the current layer
-					// are the same size.
-					if (select_layer[i] != -1)
-						_PaintTile(i);
-				} // iterate over selection layer
-			} // only if painting a bunch of tiles
-
-			// Push command onto the undo stack.
-			LayerCommand* paint_command = new LayerCommand(_tile_indeces,
-				_previous_tiles, _modified_tiles, _layer_edit,
-				_map->GetContext(), editor, "Paint");
-			editor->_undo_stack->push(paint_command);
-			_tile_indeces.clear();
-			_previous_tiles.clear();
-			_modified_tiles.clear();
-			break;
-		} // edit mode PAINT_TILE
-
-		case MOVE_TILE: // wrap up moving tiles
-		{
-			if (_moving == true)
-			{
-				// record location of released tile
-				_tile_index = static_cast<int32>
-					(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
-				vector<int32>& layer = GetCurrentLayer();
-
-				if (editor->_select_on == false)
-				{
-					// Record information for undo/redo action.
-					_tile_indeces.push_back(_move_source_index);
-					_previous_tiles.push_back(layer[_move_source_index]);
-					_modified_tiles.push_back(-1);
-					_tile_indeces.push_back(_tile_index);
-					_previous_tiles.push_back(layer[_tile_index]);
-					_modified_tiles.push_back(layer[_move_source_index]);
-
-					// Perform the move.
-					layer[_tile_index] = layer[_move_source_index];
-					layer[_move_source_index] = -1;
-				} // only moving one tile at a time
-				else
+				if (editor->_select_on == true)
 				{
 					vector<int32> select_layer = _map->GetLayer(SELECT_LAYER, 0);
 					for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
@@ -1694,64 +1654,111 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 						// Works because the selection layer and the current layer
 						// are the same size.
 						if (select_layer[i] != -1)
-						{
-							// Record information for undo/redo action.
-							_tile_indeces.push_back(i);
-							_previous_tiles.push_back(layer[i]);
-							_modified_tiles.push_back(-1);
-							_tile_indeces.push_back(i + _tile_index - _move_source_index);
-							_previous_tiles.push_back(layer[i + _tile_index - _move_source_index]);
-							_modified_tiles.push_back(layer[i]);
-
-							// Perform the move.
-							layer[i + _tile_index - _move_source_index] = layer[i];
-							layer[i] = -1;
-						} // only if current tile is selected
+							_PaintTile(i);
 					} // iterate over selection layer
-				} // moving a bunch of tiles at once
+				} // only if painting a bunch of tiles
 
 				// Push command onto the undo stack.
-				LayerCommand* move_command = new LayerCommand(_tile_indeces,
+				LayerCommand* paint_command = new LayerCommand(_tile_indeces,
 					_previous_tiles, _modified_tiles, _layer_edit,
-					_map->GetContext(), editor, "Move");
-				editor->_undo_stack->push(move_command);
+					_map->GetContext(), editor, "Paint");
+				editor->_undo_stack->push(paint_command);
 				_tile_indeces.clear();
 				_previous_tiles.clear();
 				_modified_tiles.clear();
-			} // moving tiles and not selecting them
+				break;
+			} // edit mode PAINT_TILE
 
-			break;
-		} // edit mode MOVE_TILE
-
-		case DELETE_TILE: // wrap up deleting tiles
-		{
-			if (editor->_select_on == true)
+			case MOVE_TILE: // wrap up moving tiles
 			{
-				vector<int32> select_layer = _map->GetLayer(SELECT_LAYER, 0);
-				for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
+				if (_moving == true)
 				{
-					// Works because the selection layer and the current layer
-					// are the same size.
-					if (select_layer[i] != -1)
-						_DeleteTile(i);
-				} // iterate over selection layer
-			} // only if deleting a bunch of tiles
+					// record location of released tile
+					_tile_index = static_cast<int32>
+						(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+					vector<int32>& layer = GetCurrentLayer();
 
-			// Push command onto undo stack.
-			LayerCommand* delete_command = new LayerCommand(_tile_indeces,
-				_previous_tiles, _modified_tiles, _layer_edit,
-				_map->GetContext(), editor, "Delete");
-			editor->_undo_stack->push(delete_command);
-			_tile_indeces.clear();
-			_previous_tiles.clear();
-			_modified_tiles.clear();
-			break;
-		} // edit mode DELETE_TILE
+					if (editor->_select_on == false)
+					{
+						// Record information for undo/redo action.
+						_tile_indeces.push_back(_move_source_index);
+						_previous_tiles.push_back(layer[_move_source_index]);
+						_modified_tiles.push_back(-1);
+						_tile_indeces.push_back(_tile_index);
+						_previous_tiles.push_back(layer[_tile_index]);
+						_modified_tiles.push_back(layer[_move_source_index]);
 
-		default:
-			QMessageBox::warning(this, "Tile editing mode",
-				"ERROR: Invalid tile editing mode!");
-	} // switch on tile editing mode
+						// Perform the move.
+						layer[_tile_index] = layer[_move_source_index];
+						layer[_move_source_index] = -1;
+					} // only moving one tile at a time
+					else
+					{
+						vector<int32> select_layer = _map->GetLayer(SELECT_LAYER, 0);
+						for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
+						{
+							// Works because the selection layer and the current layer
+							// are the same size.
+							if (select_layer[i] != -1)
+							{
+								// Record information for undo/redo action.
+								_tile_indeces.push_back(i);
+								_previous_tiles.push_back(layer[i]);
+								_modified_tiles.push_back(-1);
+								_tile_indeces.push_back(i + _tile_index - _move_source_index);
+								_previous_tiles.push_back(layer[i + _tile_index - _move_source_index]);
+								_modified_tiles.push_back(layer[i]);
+
+								// Perform the move.
+								layer[i + _tile_index - _move_source_index] = layer[i];
+								layer[i] = -1;
+							} // only if current tile is selected
+						} // iterate over selection layer
+					} // moving a bunch of tiles at once
+
+					// Push command onto the undo stack.
+					LayerCommand* move_command = new LayerCommand(_tile_indeces,
+						_previous_tiles, _modified_tiles, _layer_edit,
+						_map->GetContext(), editor, "Move");
+					editor->_undo_stack->push(move_command);
+					_tile_indeces.clear();
+					_previous_tiles.clear();
+					_modified_tiles.clear();
+				} // moving tiles and not selecting them
+
+				break;
+			} // edit mode MOVE_TILE
+
+			case DELETE_TILE: // wrap up deleting tiles
+			{
+				if (editor->_select_on == true)
+				{
+					vector<int32> select_layer = _map->GetLayer(SELECT_LAYER, 0);
+					for (int32 i = 0; i < static_cast<int32>(select_layer.size()); i++)
+					{
+						// Works because the selection layer and the current layer
+						// are the same size.
+						if (select_layer[i] != -1)
+							_DeleteTile(i);
+					} // iterate over selection layer
+				} // only if deleting a bunch of tiles
+
+				// Push command onto undo stack.
+				LayerCommand* delete_command = new LayerCommand(_tile_indeces,
+					_previous_tiles, _modified_tiles, _layer_edit,
+					_map->GetContext(), editor, "Delete");
+				editor->_undo_stack->push(delete_command);
+				_tile_indeces.clear();
+				_previous_tiles.clear();
+				_modified_tiles.clear();
+				break;
+			} // edit mode DELETE_TILE
+
+			default:
+				QMessageBox::warning(this, "Tile editing mode",
+					"ERROR: Invalid tile editing mode!");
+		} // switch on tile editing mode
+	} // don't manipulate tiles on the object layer
 
 	// Clear the selection layer.
 	if ((_tile_mode != MOVE_TILE || _moving == true) && editor->_select_on == true && !is_object_layer )
@@ -1836,28 +1843,37 @@ void EditorScrollView::_PaintTile(int32 index)
 		multiplier = _map->tileset_names.findIndex(tileset_name);
 	} // calculate index of current tileset
 
-	if (selection.isActive() && (selection.numCols() * selection.numRows() > 1)) {
-		// multiple tiles are selected
+	if (selection.isActive() && (selection.numCols() * selection.numRows() > 1))
+	{
 		int32 map_row = index / _map->GetWidth();
 		int32 map_col = index % _map->GetWidth();
 
 		// Draw tiles from tileset selection onto map, one tile at a time.
-		for (int32 i = 0; i < selection.numRows() && map_row + i < _map->GetHeight(); i++) {
-			for (int32 j = 0; j < selection.numCols() && map_col + j < _map->GetWidth(); j++) {
+		for (int32 i = 0; i < selection.numRows() && map_row + i < _map->GetHeight(); i++)
+		{
+			for (int32 j = 0; j < selection.numCols() && map_col + j < _map->GetWidth(); j++)
+			{
 				int32 tileset_index = (selection.topRow() + i) * 16 + (selection.leftCol() + j);
+				int32 tile = (map_row + i) * _map->GetWidth() + map_col + j;
+				
+				// perform randomization for autotiles
 				_AutotileRandomize(multiplier, tileset_index);
-				GetCurrentLayer()[((map_row + i) * _map->GetWidth()) + map_col + j] = tileset_index + multiplier * 256;
-			}
-		}
-	} else {
-		// a single tile is selected
+				
+				// Record information for undo/redo action.
+				_tile_indeces.push_back(tile);
+				_previous_tiles.push_back(GetCurrentLayer()[tile]);
+				_modified_tiles.push_back(tileset_index + multiplier * 256);
+		
+				GetCurrentLayer()[tile] = tileset_index + multiplier * 256;
+			} // iterate through columns of selection
+		} // iterate through rows of selection
+	} // multiple tiles are selected
+	else
+	{
 		// put selected tile from tileset into tile array at correct position
 		int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
 
-		//cerr << "tileset_num: " << multiplier << endl;
-		//cerr << "tileset_index: " << tileset_index << endl;
 		// perform randomization for autotiles
-		//assert(multiplier != -1);
 		_AutotileRandomize(multiplier, tileset_index);
 
 		// Record information for undo/redo action.
@@ -1866,7 +1882,7 @@ void EditorScrollView::_PaintTile(int32 index)
 		_modified_tiles.push_back(tileset_index + multiplier * 256);
 
 		GetCurrentLayer()[index] = tileset_index + multiplier * 256;
-	}
+	} // a single tile is selected
 
 } // _PaintTile(...)
 
