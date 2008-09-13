@@ -120,23 +120,25 @@ void TilesetDisplay::mousePressEvent(QMouseEvent* evt)
 	if ((evt->x() < 0) || (evt->y() < 0) || evt->x() >= 512 || evt->y() >= 512)
 		return;
 
-	// Determine which tile the user clicked
-	int32 tile_x, tile_y;
-	tile_x = evt->x() / 32;
-	tile_y = evt->y() / 32;
-
-	// Now determine which quadrant of that tile was clicked, and change it's walkability status
-	if (((evt->x() % 32) < 16) && ((evt->y() % 32) < 16)) { // Upper left quadrant (index 0)
-		tileset->walkability[tile_y * 16 + tile_x][0] = (tileset->walkability[tile_y * 16 + tile_x][0] ? 0 : 1);
-	}
-	else if (((evt->x() % 32) >= 16) && ((evt->y() % 32) < 16)) { // Upper right quadrant (index 1)
-		tileset->walkability[tile_y * 16 + tile_x][1] = (tileset->walkability[tile_y * 16 + tile_x][1] ? 0 : 1);
-	}
-	else if (((evt->x() % 32) < 16) && ((evt->y() % 32) >= 16)) { // Lower left quadrant (index 2)
-		tileset->walkability[tile_y * 16 + tile_x][2] = (tileset->walkability[tile_y * 16 + tile_x][2] ? 0 : 1);
-	}
-	else if (((evt->x() % 32) >= 16) && ((evt->y() % 32) >= 16)) { // Lower right quadrant (index 3)
-		tileset->walkability[tile_y * 16 + tile_x][3] = (tileset->walkability[tile_y * 16 + tile_x][3] ? 0 : 1);
+	if (tileset->IsInitialized()) {
+		// Determine which tile the user clicked
+		int32 tile_x, tile_y;
+		tile_x = evt->x() / 32;
+		tile_y = evt->y() / 32;
+	
+		// Now determine which quadrant of that tile was clicked, and change it's walkability status
+		if (((evt->x() % 32) < 16) && ((evt->y() % 32) < 16)) { // Upper left quadrant (index 0)
+			tileset->walkability[tile_y * 16 + tile_x][0] = (tileset->walkability[tile_y * 16 + tile_x][0] ? 0 : 1);
+		}
+		else if (((evt->x() % 32) >= 16) && ((evt->y() % 32) < 16)) { // Upper right quadrant (index 1)
+			tileset->walkability[tile_y * 16 + tile_x][1] = (tileset->walkability[tile_y * 16 + tile_x][1] ? 0 : 1);
+		}
+		else if (((evt->x() % 32) < 16) && ((evt->y() % 32) >= 16)) { // Lower left quadrant (index 2)
+			tileset->walkability[tile_y * 16 + tile_x][2] = (tileset->walkability[tile_y * 16 + tile_x][2] ? 0 : 1);
+		}
+		else if (((evt->x() % 32) >= 16) && ((evt->y() % 32) >= 16)) { // Lower right quadrant (index 3)
+			tileset->walkability[tile_y * 16 + tile_x][3] = (tileset->walkability[tile_y * 16 + tile_x][3] ? 0 : 1);
+		}
 	}
 
 	updateGL();
@@ -199,29 +201,34 @@ void TilesetEditor::_NewFile()
 	QString filename = QFileDialog::getOpenFileName(this, "HoA Level Editor -- File Open",
 		"img/tilesets", "Tileset Images (*.png)");
 
-	if (QFile::exists(Tileset::CreateDataFilename(Tileset::CreateTilesetName(filename)))) {
-		int response = QMessageBox::question(this,
-			tr("Data file exists"),
-			tr("There already exists a data file that corresponds to this tileset image. "
-			"Executing a save operation will overwrite all data in this file. "
-			"Do you wish to continue anyway?"),
-			QMessageBox::Yes,
-			QMessageBox::No
-		);
+	if (filename == "") {
+		return;
+	}
+	else {
+		if (QFile::exists(Tileset::CreateDataFilename(Tileset::CreateTilesetName(filename)))) {
+			int response = QMessageBox::question(this,
+				tr("Data file exists"),
+				tr("There already exists a data file that corresponds to this tileset image. "
+				"Executing a save operation will overwrite all data in this file. "
+				"Do you wish to continue anyway?"),
+				QMessageBox::Yes,
+				QMessageBox::No
+			);
 
-		if (response == QMessageBox::No) {
-			return;
+			if (response == QMessageBox::No) {
+				return;
+			}
 		}
-	}
 
-	if (_tset_display->tileset->New(filename, true) == false) {
-		QMessageBox::information(this,
-			tr("New operation failed"),
-			tr("Failed to create new tileset."),
-			QMessageBox::Ok
-		);
+		if (_tset_display->tileset->New(filename, true) == false) {
+			QMessageBox::information(this,
+				tr("New operation failed"),
+				tr("Failed to create new tileset."),
+				QMessageBox::Ok
+			);
+		}
+		_tset_display->updateGL();
 	}
-	_tset_display->updateGL();
 }
 
 
@@ -251,7 +258,7 @@ void TilesetEditor::_OpenFile()
 
 void TilesetEditor::_SaveFile()
 {
-	if (_tset_display->tileset) {
+	if (_tset_display->tileset->IsInitialized()) {
 		if (_tset_display->tileset->Save() == false) {
 			QMessageBox::information(this,
 				tr("Save operation failed"),
@@ -259,6 +266,9 @@ void TilesetEditor::_SaveFile()
 				QMessageBox::Ok
 			);
 		}
+	}
+	else {
+		// we don't actually need to do anything else, if there's no data, just don't save it!
 	}
 }
 

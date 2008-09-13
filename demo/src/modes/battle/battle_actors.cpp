@@ -60,6 +60,15 @@ BattleActor::BattleActor(GlobalActor* actor, float x_origin, float y_origin) :
 }
 
 
+BattleActor::~BattleActor() {
+	ScriptObject* remove;
+
+	for (uint32 ctr = 0; ctr < _actor_effects.size(); ctr++) {
+		remove = _actor_effects[ctr]->GetRemoveFunction();
+		ScriptCallFunction<void>(*remove, this);
+		delete(_actor_effects[ctr]);
+	}
+}
 
 void BattleActor::ConstructInformation(hoa_utils::ustring& info, int32 ap_index) {
 	info.clear();
@@ -209,9 +218,6 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, flo
 
 
 BattleCharacter::~BattleCharacter() {
-	for (uint8 counter = 0; counter < _actor_effects.size(); counter++) {
-		delete _actor_effects[counter];
-	}
 }
 
 

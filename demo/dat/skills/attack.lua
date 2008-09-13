@@ -30,6 +30,7 @@ skills[1] = {
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 5 - target:GetPhysicalDefense());
 		end
+		instigator:AddNewEffect(1);
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
