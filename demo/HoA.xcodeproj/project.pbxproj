@@ -64,6 +64,7 @@
 		D46D59760C8A6C1A0074DFF0 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
 		D47843D80E1B3B0400FD76F7 /* tileset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */; };
 		D47843F90E1B452800FD76F7 /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA680B02B27F0052BF1E /* grid.cpp */; };
+		D47FF3810E7B9A0A00423A0C /* map_treasure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D47FF3800E7B9A0A00423A0C /* map_treasure.cpp */; };
 		D48901A40D15FC2E003940F4 /* Qt3Support.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC600D15FBE3003940F4 /* Qt3Support.framework */; };
 		D48901A50D15FC2E003940F4 /* QtCore.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC610D15FBE3003940F4 /* QtCore.framework */; };
 		D48901A60D15FC2E003940F4 /* QtGui.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC620D15FBE3003940F4 /* QtGui.framework */; };
@@ -290,6 +291,8 @@
 		D440963A0C45E37300E58975 /* script_read.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = script_read.h; sourceTree = "<group>"; };
 		D440963B0C45E37300E58975 /* script_write.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = script_write.cpp; sourceTree = "<group>"; };
 		D440963C0C45E37300E58975 /* script_write.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = script_write.h; sourceTree = "<group>"; };
+		D47FF3800E7B9A0A00423A0C /* map_treasure.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = map_treasure.cpp; sourceTree = "<group>"; };
+		D47FF3820E7B9A1800423A0C /* map_treasure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = map_treasure.h; sourceTree = "<group>"; };
 		D489F6BB0D15FA13003940F4 /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = "../allacrost-dep/frameworks/SDL_net.framework"; sourceTree = SOURCE_ROOT; };
 		D489F6BC0D15FA13003940F4 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = "../allacrost-dep/frameworks/SDL_ttf.framework"; sourceTree = SOURCE_ROOT; };
 		D489F6BD0D15FA13003940F4 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = "../allacrost-dep/frameworks/SDL.framework"; sourceTree = SOURCE_ROOT; };
@@ -538,6 +541,8 @@
 		4941A69B0AC1D86400D65B8E /* map */ = {
 			isa = PBXGroup;
 			children = (
+				D47FF3820E7B9A1800423A0C /* map_treasure.h */,
+				D47FF3800E7B9A0A00423A0C /* map_treasure.cpp */,
 				D4E8089D0D485241006D641C /* map_tiles.cpp */,
 				D4E8089E0D485241006D641C /* map_tiles.h */,
 				D440962E0C45E30100E58975 /* map_sprites.h */,
@@ -958,6 +963,7 @@
 				D41148370D15F053005F0A3F /* defs_modes.cpp in Sources */,
 				D4E8089F0D485241006D641C /* map_tiles.cpp in Sources */,
 				D4B34E750E2328540067C913 /* global_effects.cpp in Sources */,
+				D47FF3810E7B9A0A00423A0C /* map_treasure.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -14,7 +14,6 @@
 		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
 		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
-			D4D1BA480B02B1DB0052BF1E /* Editor */,
 			4941A4AF0AC1D77500D65B8E /* Allacrost */,
 		);
 		breakpoints = (
