@@ -258,6 +258,7 @@ namespace hoa_map {
 
 		class DialogueManager;
 		class MapDialogue;
+		class DialogueOptionBox;
 
 		class SpriteAction;
 		class ActionPathMove;

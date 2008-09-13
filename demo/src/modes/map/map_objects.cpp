@@ -13,8 +13,6 @@
 *** \brief   Source file for map mode objects.
 *** ***************************************************************************/
 
-//#include <algorithm> // For std::replace in the MapTreasure saving code
-
 // Allacrost utilities
 #include "utils.h"
 
@@ -55,7 +53,7 @@ namespace private_map {
 
 
 // *****************************************************************************
-// ************************ MapObject Class Functions **************************
+// ********** MapObject Class Functions
 // *****************************************************************************
 
 MapObject::MapObject() :
@@ -125,7 +123,7 @@ void MapObject::GetImageRectangle(MapRectangle& rect) const {
 }
 
 // ****************************************************************************
-// ********************* PhysicalObject Class Functions ***********************
+// ********** PhysicalObject Class Functions
 // ****************************************************************************
 
 PhysicalObject::PhysicalObject() :
@@ -155,148 +153,7 @@ void PhysicalObject::Draw() {
 }
 
 // *****************************************************************************
-// *********************** MapTreasure Class Functions *************************
-// *****************************************************************************
-
-MapTreasure::MapTreasure(string image_file, uint8 num_total_frames, uint8 num_closed_frames, uint8 num_open_frames) :
-	_empty(false),
-	_drunes(0)
-{
-	MapObject::_object_type = TREASURE_TYPE;
-	const uint32 DEFAULT_FRAME_TIME = 10; // The default number of milliseconds for frame animations
-	std::vector<StillImage> frames;
-
-	// (1) Load a the single row, multiple column multi image containing all of the treasure frames
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, image_file, 1, num_total_frames) == false ) {
-		PRINT_ERROR << "failed to load image file: " << image_file << endl;
-		// TODO: throw exception
-		return;
-	}
-
-	// Update the frame image sizes to work in the MapMode coordinate system
-	for (uint32 i = 0; i < frames.size(); i++) {
-		frames[i].SetWidth(frames[i].GetWidth() / GRID_LENGTH);
-		frames[i].SetHeight(frames[i].GetHeight() / GRID_LENGTH);
-	}
-
-	// (2) Now that we know the total number of frames in the image, make sure the frame count arguments make sense
-	if (num_open_frames == 0 || num_closed_frames == 0 || num_open_frames + num_closed_frames >= num_total_frames) {
-		PRINT_ERROR << "invalid treasure image for image file: " << image_file << endl;
-		// TODO: throw exception
-		return;
-	}
-
-	// (3) Dissect the frames and create the closed, opening, and open animations
-	hoa_video::AnimatedImage closed_anim, opening_anim, open_anim;
-
-	for (uint8 i = 0; i < num_closed_frames; i++) {
-		closed_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
-	}
-	for (uint8 i = num_total_frames - num_open_frames; i < num_total_frames; i++) {
-		open_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
-	}
-
-	// Loop the opening animation only once
-	opening_anim.SetNumberLoops(0);
-
-	// If there are no additional frames for the opening animation, set the opening animation to be the open animation
-	if (num_total_frames - num_closed_frames - num_open_frames == 0) {
-		opening_anim = open_anim;
-	}
-	else {
-		for (uint8 i = num_closed_frames; i < num_total_frames - num_open_frames; i++) {
-			opening_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
-		}
-	}
-
-	AddAnimation(closed_anim);
-	AddAnimation(opening_anim);
-	AddAnimation(open_anim);
-
-	// (4) Set the collision rectangle according to the dimensions of the first frame
-	SetCollHalfWidth(frames[0].GetWidth() / 2.0f);
-	SetCollHeight(frames[0].GetHeight());
-} // MapTreasure::MapTreasure(string image_file, uint8 num_total_frames, uint8 num_closed_frames, uint8 num_open_frames)
-
-
-
-MapTreasure::~MapTreasure() {
-	for (uint32 i = 0; i < _objects_list.size(); i++) {
-		delete _objects_list[i];
-	}
-}
-
-
-
-void MapTreasure::LoadSaved() {
-	// TODO: Change this to "treasure_" instead of "chest_"
-	string event_name = "chest_" + NumberToString(GetObjectID());
-
-	//Add an event in the group having the ObjectID of the chest as name
-	if (MapMode::_loading_map->_map_event_group->DoesEventExist(event_name)) {
-		// If the event is non-zero, the treasure has already been opened
-		if (MapMode::_loading_map->_map_event_group->GetEvent(event_name) != 0) {
-			SetCurrentAnimation(TREASURE_OPEN_ANIM);
-			_drunes = 0;
-			for (uint32 i = 0; i < _objects_list.size(); i++)
-				delete _objects_list[i];
-			_objects_list.clear();
-			_empty = true;
-		}
-	}
-}
-
-
-
-bool MapTreasure::AddObject(uint32 id, uint32 number) {
-	hoa_global::GlobalObject* obj = GlobalCreateNewObject(id, number);
-
-	if (obj == NULL) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "invalid object id argument passed to function: " << id << endl;
-		return false;
-	}
-
-	_objects_list.push_back(obj);
-	return true;
-}
-
-
-
-void MapTreasure::Update() {
-	PhysicalObject::Update();
-
-	if (current_animation == TREASURE_OPENING_ANIM && animations[TREASURE_OPENING_ANIM].IsLoopsFinished() == true) {
-		SetCurrentAnimation(TREASURE_OPEN_ANIM);
-	}
-}
-
-
-
-void MapTreasure::Open() {
-	if (_empty == true) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to open an empty map treasure: " << object_id << endl;
-		return;
-	}
-
-	SetCurrentAnimation(TREASURE_OPENING_ANIM);
-
-	// TODO: Change this to "treasure_" instead of "chest_"
-	string event_name = "chest_" + NumberToString(GetObjectID());
-
-	// Add an event to the map group indicating that the chest has now been opened
-	if (MapMode::_current_map->_map_event_group->DoesEventExist(event_name) == true) {
-		MapMode::_current_map->_map_event_group->SetEvent(event_name, 1);
-	}
-	else {
-		MapMode::_current_map->_map_event_group->AddNewEvent(event_name, 1);
-	}
-
-	// Initialize the treasure menu to display the contents of the open treasure
-	MapMode::_current_map->_treasure_menu->Initialize(this);
-}
-
-// *****************************************************************************
-// ********************** ObjectManager Class Functions ************************
+// ********** ObjectManager Class Functions
 // *****************************************************************************
 
 ObjectManager::ObjectManager() :

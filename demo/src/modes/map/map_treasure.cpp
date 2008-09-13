@@ -1,0 +1,474 @@
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004-2008 by The Allacrost Project
+//                         All Rights Reserved
+//
+// This code is licensed under the GNU GPL version 2. It is free software
+// and you may modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/** ****************************************************************************
+*** \file    map_treasure.cpp
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Source file for map mode treasures.
+*** ***************************************************************************/
+
+// Allacrost engines
+#include "input.h"
+#include "mode_manager.h"
+#include "video.h"
+
+// Allacrost globals
+#include "global.h"
+
+// Other mode headers
+#include "menu.h"
+
+// Local map mode headers
+#include "map.h"
+#include "map_treasure.h"
+
+using namespace std;
+using namespace hoa_utils;
+using namespace hoa_input;
+using namespace hoa_mode_manager;
+using namespace hoa_video;
+using namespace hoa_global;
+using namespace hoa_menu;
+
+namespace hoa_map {
+
+namespace private_map {
+
+// *****************************************************************************
+// ********** MapTreasure Class Functions
+// *****************************************************************************
+
+MapTreasure::MapTreasure(string image_file, uint8 num_total_frames, uint8 num_closed_frames, uint8 num_open_frames) :
+	_empty(false),
+	_drunes(0)
+{
+	MapObject::_object_type = TREASURE_TYPE;
+	const uint32 DEFAULT_FRAME_TIME = 10; // The default number of milliseconds for frame animations
+	std::vector<StillImage> frames;
+
+	// (1) Load a the single row, multiple column multi image containing all of the treasure frames
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, image_file, 1, num_total_frames) == false ) {
+		PRINT_ERROR << "failed to load image file: " << image_file << endl;
+		// TODO: throw exception
+		return;
+	}
+
+	// Update the frame image sizes to work in the MapMode coordinate system
+	for (uint32 i = 0; i < frames.size(); i++) {
+		frames[i].SetWidth(frames[i].GetWidth() / GRID_LENGTH);
+		frames[i].SetHeight(frames[i].GetHeight() / GRID_LENGTH);
+	}
+
+	// (2) Now that we know the total number of frames in the image, make sure the frame count arguments make sense
+	if (num_open_frames == 0 || num_closed_frames == 0 || num_open_frames + num_closed_frames >= num_total_frames) {
+		PRINT_ERROR << "invalid treasure image for image file: " << image_file << endl;
+		// TODO: throw exception
+		return;
+	}
+
+	// (3) Dissect the frames and create the closed, opening, and open animations
+	hoa_video::AnimatedImage closed_anim, opening_anim, open_anim;
+
+	for (uint8 i = 0; i < num_closed_frames; i++) {
+		closed_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
+	}
+	for (uint8 i = num_total_frames - num_open_frames; i < num_total_frames; i++) {
+		open_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
+	}
+
+	// Loop the opening animation only once
+	opening_anim.SetNumberLoops(0);
+
+	// If there are no additional frames for the opening animation, set the opening animation to be the open animation
+	if (num_total_frames - num_closed_frames - num_open_frames == 0) {
+		opening_anim = open_anim;
+	}
+	else {
+		for (uint8 i = num_closed_frames; i < num_total_frames - num_open_frames; i++) {
+			opening_anim.AddFrame(frames[i], DEFAULT_FRAME_TIME);
+		}
+	}
+
+	AddAnimation(closed_anim);
+	AddAnimation(opening_anim);
+	AddAnimation(open_anim);
+
+	// (4) Set the collision rectangle according to the dimensions of the first frame
+	SetCollHalfWidth(frames[0].GetWidth() / 2.0f);
+	SetCollHeight(frames[0].GetHeight());
+} // MapTreasure::MapTreasure(string image_file, uint8 num_total_frames, uint8 num_closed_frames, uint8 num_open_frames)
+
+
+
+MapTreasure::~MapTreasure() {
+	for (uint32 i = 0; i < _objects_list.size(); i++) {
+		delete _objects_list[i];
+	}
+}
+
+
+
+void MapTreasure::LoadSaved() {
+	// TODO: Change this to "treasure_" instead of "chest_"
+	string event_name = "chest_" + NumberToString(GetObjectID());
+
+	//Add an event in the group having the ObjectID of the chest as name
+	if (MapMode::_loading_map->_map_event_group->DoesEventExist(event_name)) {
+		// If the event is non-zero, the treasure has already been opened
+		if (MapMode::_loading_map->_map_event_group->GetEvent(event_name) != 0) {
+			SetCurrentAnimation(TREASURE_OPEN_ANIM);
+			_drunes = 0;
+			for (uint32 i = 0; i < _objects_list.size(); i++)
+				delete _objects_list[i];
+			_objects_list.clear();
+			_empty = true;
+		}
+	}
+}
+
+
+
+bool MapTreasure::AddObject(uint32 id, uint32 number) {
+	hoa_global::GlobalObject* obj = GlobalCreateNewObject(id, number);
+
+	if (obj == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "invalid object id argument passed to function: " << id << endl;
+		return false;
+	}
+
+	_objects_list.push_back(obj);
+	return true;
+}
+
+
+
+void MapTreasure::Update() {
+	PhysicalObject::Update();
+
+	if (current_animation == TREASURE_OPENING_ANIM && animations[TREASURE_OPENING_ANIM].IsLoopsFinished() == true) {
+		SetCurrentAnimation(TREASURE_OPEN_ANIM);
+	}
+}
+
+
+
+void MapTreasure::Open() {
+	if (_empty == true) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to open an empty map treasure: " << object_id << endl;
+		return;
+	}
+
+	SetCurrentAnimation(TREASURE_OPENING_ANIM);
+
+	// TODO: Change this to "treasure_" instead of "chest_"
+	string event_name = "chest_" + NumberToString(GetObjectID());
+
+	// Add an event to the map group indicating that the chest has now been opened
+	if (MapMode::_current_map->_map_event_group->DoesEventExist(event_name) == true) {
+		MapMode::_current_map->_map_event_group->SetEvent(event_name, 1);
+	}
+	else {
+		MapMode::_current_map->_map_event_group->AddNewEvent(event_name, 1);
+	}
+
+	// Initialize the treasure menu to display the contents of the open treasure
+	MapMode::_current_map->_treasure_menu->Initialize(this);
+}
+
+// ****************************************************************************
+// ***** TreasureMenu class methods
+// ****************************************************************************
+
+TreasureMenu::TreasureMenu() :
+	_treasure(NULL),
+	_selection(ACTION_SELECTED)
+{
+	// Create the menu windows and option boxes used for the treasure menu and
+	// align them at the appropriate locations on the screen
+	_action_window.Create(512, 64, ~VIDEO_MENU_EDGE_BOTTOM);
+	_action_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_action_window.SetPosition(512, 488);
+	_action_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+
+	_list_window.Create(512, 192);
+	_list_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_list_window.SetPosition(512, 544);
+	_list_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+
+	_action_options.AddOption(MakeUnicodeString("Done"));
+	_action_options.AddOption(MakeUnicodeString("View"));
+	_action_options.AddOption(MakeUnicodeString("Menu"));
+	_action_options.SetCellSize(150.0f, 32.0f);
+	_action_options.SetSize(3, 1);
+	_action_options.SetPosition(20.0f, 20.0f);
+	_action_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_action_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_action_options.SetCursorOffset(-50.0f, -25.0f);
+	_action_options.SetFont("default");
+	_action_options.SetSelection(0);
+	_action_options.SetOwner(&_action_window);
+
+	_list_options.SetCellSize(470.0f, 32.0f);
+	_list_options.SetSize(1, 6);
+	_list_options.SetPosition(20.0f, 20.0f);
+	_list_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_list_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_list_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_list_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_list_options.SetCursorOffset(-50.0f, -25.0f);
+	_list_options.SetFont("default");
+	_list_options.SetOwner(&_list_window);
+	// TODO: this currently does not work (text will be blank). Re-enable it once
+	// the scissoring bug is fixed in the video engine
+// 	_list_options.Scissoring(true, true);
+
+	_detail_textbox.SetPosition(20.0f, 92.0f);
+	_detail_textbox.SetDimensions(470.0f, 100.0f);
+	_detail_textbox.SetDisplaySpeed(50);
+	_detail_textbox.SetTextStyle(TextStyle());
+	_detail_textbox.SetDisplayMode(VIDEO_TEXT_REVEAL);
+	_detail_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_detail_textbox.SetOwner(&_list_window);
+} // TreasureMenu::TreasureMenu()
+
+
+
+TreasureMenu::~TreasureMenu() {
+	_action_window.Destroy();
+	_list_window.Destroy();
+}
+
+
+
+void TreasureMenu::Initialize(MapTreasure* treasure) {
+	if (treasure == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
+		return;
+	}
+
+	if (_treasure != NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "_treasure member was not NULL when method was called" << endl;
+		return;
+	}
+
+	_treasure = treasure;
+
+	// Construct the object list, including any drunes that were contained within the treasure
+	if (_treasure->_drunes != 0) {
+		_list_options.AddOption(MakeUnicodeString(NumberToString(_treasure->_drunes) + " drunes"));
+	}
+
+	for (uint32 i = 0; i < _treasure->_objects_list.size(); i++) {
+		_list_options.AddOption(_treasure->_objects_list[i]->GetName() + MakeUnicodeString("<R>x") +
+			MakeUnicodeString(NumberToString(_treasure->_objects_list[i]->GetCount())));
+	}
+
+	_action_options.SetSelection(0);
+	_action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	_list_options.SetSelection(0);
+	_list_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+	_selection = ACTION_SELECTED;
+	_action_window.Show();
+	_list_window.Show();
+
+	// Immediately add the drunes  and objects to the player's inventory
+	GlobalManager->AddDrunes(_treasure->_drunes);
+
+	// The AddToInventory function will delete the pointer that it is given if that type of object
+	// already exists in the inventory. Because we still require all of the object pointers to remain in
+	// memory while the menu is being displayed, we check if an object exists in the inventory, increment
+	// the inventory count if it does, and keep a record that we must delete the object once the menu is closed
+	for (uint32 i = 0; i < _treasure->_objects_list.size(); i++) {
+		GlobalObject* obj = _treasure->_objects_list[i];
+		if (GlobalManager->IsObjectInInventory(obj->GetID()) == false) {
+			GlobalManager->AddToInventory(_treasure->_objects_list[i]);
+		}
+		else {
+			GlobalManager->IncrementObjectCount(obj->GetID(), obj->GetCount());
+			_objects_to_delete.push_back(obj);
+		}
+	}
+} // void TreasureMenu::Initialize(MapTreasure* treasure)
+
+
+
+void TreasureMenu::Update() {
+	_action_window.Update();
+	_list_window.Update();
+	_action_options.Update();
+	_list_options.Update();
+	_detail_textbox.Update();
+
+	// Update the treasure opening animation if it is not yet finished and refuse to
+	// process user input until it is complete
+	if (_treasure->current_animation != MapTreasure::TREASURE_OPEN_ANIM) {
+		_treasure->Update();
+		return;
+	}
+
+	// Update the menu according to which sub-window is currently selected
+	if (_selection == ACTION_SELECTED)
+		_UpdateAction();
+	else if (_selection == LIST_SELECTED)
+		_UpdateList();
+	else if (_selection == DETAIL_SELECTED)
+		_UpdateDetail();
+	else
+		IF_PRINT_WARNING(MAP_DEBUG) << "unknown selection state: " << _selection << endl;
+}
+
+
+
+void TreasureMenu::Draw() {
+	// We wait until the treasure is fully open before displaying any part of the menu
+	if (_treasure->current_animation != MapTreasure::TREASURE_OPEN_ANIM) {
+		return;
+	}
+
+	VideoManager->PushState();
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+
+	_action_window.Draw();
+
+	VideoManager->Move(280.0f, 500.0f);
+	TextManager->Draw("Treasure Contents");
+
+	_action_options.Draw();
+	_list_window.Draw();
+
+	if (_selection == DETAIL_SELECTED) {
+		uint32 list_selection = _list_options.GetSelection();
+		bool drunes_selected = (_treasure->_drunes != 0 && list_selection == 0);
+
+		// Decrement list selection if we have drunes so that it can be used to index the treasure object list
+		if (_treasure->_drunes != 0)
+			list_selection--;
+
+		// Move to the upper left corner and draw either "Drunes" or the name of the selected object
+		VideoManager->Move(280.0f, 590.0f);
+		if (drunes_selected)
+			TextManager->Draw("Drunes");
+		else
+			TextManager->Draw(_treasure->_objects_list[list_selection]->GetName());
+
+		// Move to the upper right corner and draw the object icon
+		if (drunes_selected == false) {
+			VideoManager->Move(680.0f, 620.0f);
+			_treasure->_objects_list[list_selection]->GetIconImage().Draw();
+		}
+		_detail_textbox.Draw();
+	}
+	else {
+		_list_options.Draw();
+	}
+
+	VideoManager->PopState();
+} // void TreasureMenu::Draw()
+
+
+
+void TreasureMenu::Finish() {
+	for (uint32 i = 0; i < _objects_to_delete.size(); i++) {
+		delete _objects_to_delete[i];
+	}
+	_objects_to_delete.clear();
+
+	_treasure->_empty = true;
+	_treasure->_drunes = 0;
+	_treasure->_objects_list.clear();
+	_treasure = NULL;
+
+	_action_window.Hide();
+	_list_window.Hide();
+	_list_options.ClearOptions();
+}
+
+
+
+void TreasureMenu::_UpdateAction() {
+	if (InputManager->ConfirmPress()) {
+		if (_action_options.GetSelection() == 0) { // "Done" action
+			Finish();
+		}
+		else if (_action_options.GetSelection() == 1) { // "View" action
+			_selection = LIST_SELECTED;
+			_action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_list_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		}
+		else if (_action_options.GetSelection() == 2) { // "Menu" action
+			MenuMode* MM = new MenuMode(MapMode::_current_map->_map_name, MapMode::_current_map->_location_graphic.GetFilename());
+			ModeManager->Push(MM);
+			return;
+		}
+		else
+			IF_PRINT_WARNING(MAP_DEBUG) << "unhandled action selection in OptionBox: " << _action_options.GetSelection() << endl;
+	}
+
+	else if (InputManager->LeftPress())
+		_action_options.HandleLeftKey();
+
+	else if (InputManager->RightPress())
+		_action_options.HandleRightKey();
+}
+
+
+
+void TreasureMenu::_UpdateList() {
+	if (InputManager->ConfirmPress()) {
+		_selection = DETAIL_SELECTED;
+		_list_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+		uint32 list_selection = _list_options.GetSelection();
+		if (list_selection == 0 && _treasure->_drunes != 0) { // If true, the drunes have been selected
+			_detail_textbox.SetDisplayText(MakeUnicodeString("With the additional " + NumberToString(_treasure->_drunes) +
+			" drunes found in this treasure added, the party now holds a total of " + NumberToString(GlobalManager->GetDrunes())
+			+ " drunes."));
+		}
+		else { // Otherwise, a GlobalObject is selected
+			if (_treasure->_drunes != 0)
+				list_selection--;
+			_detail_textbox.SetDisplayText(_treasure->_objects_list[list_selection]->GetDescription());
+		}
+	}
+
+	else if (InputManager->CancelPress()) {
+		_selection = ACTION_SELECTED;
+		_action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		_list_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	}
+
+	else if (InputManager->UpPress()) {
+		_list_options.HandleUpKey();
+	}
+
+	else if (InputManager->DownPress()) {
+		_list_options.HandleDownKey();
+	}
+}
+
+
+
+void TreasureMenu::_UpdateDetail() {
+	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
+		if (_detail_textbox.IsFinished() == false) {
+			_detail_textbox.ForceFinish();
+		}
+		else {
+			_selection = LIST_SELECTED;
+			_list_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		}
+	}
+}
+
+} // namespace private_map
+
+} // namespace hoa_map
