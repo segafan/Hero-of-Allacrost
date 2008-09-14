@@ -127,6 +127,7 @@ class Editor: public QMainWindow
 		void _FileOpen();
 		void _FileSaveAs();
 		void _FileSave();
+		void _FileClose();
 		void _FileQuit();
 		//@}
 
@@ -229,6 +230,7 @@ class Editor: public QMainWindow
 		QAction* _open_action;
 		QAction* _save_as_action;
 		QAction* _save_action;
+		QAction* _close_action;
 		QAction* _quit_action;
 
 		QAction* _toggle_grid_action;

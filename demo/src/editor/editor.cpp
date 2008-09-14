@@ -99,12 +99,14 @@ void Editor::_FileMenuSetup()
 	{
 		_save_as_action->setEnabled(true);
 		_save_action->setEnabled(_ed_scrollview->_map->GetChanged());
-	} // map must exist in order to save or resize it
+		_close_action->setEnabled(true);
+	} // map must exist in order to save or close it
 	else
 	{
 		_save_as_action->setEnabled(false);
 		_save_action->setEnabled(false);
-	} // map does not exist, can't save or resize it*/
+		_close_action->setEnabled(false);
+	} // map does not exist, can't save or close it
 } // _FileMenuSetup()
 
 void Editor::_ViewMenuSetup()
@@ -285,6 +287,7 @@ void Editor::_FileNew()
 			_context_cbox->addItems(_ed_scrollview->_map->context_names);
 			for (int i = 0; i < count; i++)
 				_context_cbox->removeItem(0);
+
 			// Enable appropriate actions
 			_TilesEnableActions();
 
@@ -444,6 +447,36 @@ void Editor::_FileSave()
 	statusBar()->showMessage(QString("Saved \'%1\' successfully!").
 		arg(_ed_scrollview->_map->GetFileName()), 5000);
 } // _FileSave()
+
+void Editor::_FileClose()
+{
+	// Checks to see if the map is unsaved.
+	if (_EraseOK())
+	{
+		if (_ed_scrollview != NULL)
+		{
+			delete _ed_scrollview;
+			_ed_scrollview = NULL;
+			_undo_stack->clear();
+			
+			// Clear the context combobox
+			// _context_cbox->clear() doesn't work, it seg faults.
+			// I guess it can't have an empty combobox?
+			int count = _context_cbox->count();
+			for (int i = 0; i < count; i++)
+				_context_cbox->removeItem(0);
+
+			// Enable appropriate actions
+			_TilesEnableActions();
+		} // scrollview must exist first
+		
+		if (_ed_tabs != NULL)
+		{
+			delete _ed_tabs;
+			_ed_tabs = NULL;
+		} // tabs must exist first
+	} // make sure an unsaved map is not lost
+} // _FileClose()
 
 void Editor::_FileQuit()
 {
@@ -1017,11 +1050,15 @@ void Editor::_CreateActions()
 	_save_action->setShortcut(tr("Ctrl+S"));
 	_save_action->setStatusTip("Save the map");
 	connect(_save_action, SIGNAL(triggered()), this, SLOT(_FileSave()));
+	
+	_close_action = new QAction("&Close", this);
+	_close_action->setShortcut(tr("Ctrl+W"));
+	_close_action->setStatusTip("Close the map");
+	connect(_close_action, SIGNAL(triggered()), this, SLOT(_FileClose()));
 
 	_quit_action = new QAction("&Quit", this);
 	_quit_action->setShortcut(tr("Ctrl+Q"));
 	_quit_action->setStatusTip("Quits from the editor");
-	//_quit_action->setMenuRole(QAction::QuitRole);
 	connect(_quit_action, SIGNAL(triggered()), this, SLOT(_FileQuit()));
 
 
@@ -1060,7 +1097,6 @@ void Editor::_CreateActions()
 
 	_coord_tile_action = new QAction("Tile Coordinates", this);
 	_coord_tile_action->setStatusTip("Switch the coordinate display to tile coordinates");
-	// _coord_tile_action->setShortcut(
 	_coord_tile_action->setCheckable(true);
 	connect(_coord_tile_action, SIGNAL(triggered()), this, SLOT(_ViewCoordTile()));
 
@@ -1231,6 +1267,7 @@ void Editor::_CreateMenus()
 	_file_menu->addAction(_save_action);
 	_file_menu->addAction(_save_as_action);
 	_file_menu->addSeparator();
+	_file_menu->addAction(_close_action);
 	_file_menu->addAction(_quit_action);
 	connect(_file_menu, SIGNAL(aboutToShow()), this, SLOT(_FileMenuSetup()));
 
@@ -1328,7 +1365,7 @@ bool Editor::_EraseOK()
 	{
 	    if (_ed_scrollview->_map->GetChanged())
 		{
-			switch(QMessageBox::warning(this, "Unsaved File", "The document contains unsaved changes\n"
+			switch(QMessageBox::warning(this, "Unsaved File", "The document contains unsaved changes!\n"
 				"Do you want to save the changes before proceeding?", "&Save", "&Discard", "Cancel",
 				0,		// Enter == button 0
         		2))		// Escape == button 2
@@ -1408,7 +1445,9 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
 EditorScrollView::~EditorScrollView()
 {
 	delete _map;
+	_map = NULL;
 	delete _context_menu;
+	_context_menu = NULL;
 } // EditorScrollView destructor
 
 void EditorScrollView::Resize(int width, int height)

@@ -201,13 +201,10 @@ void TilesetEditor::_NewFile()
 	QString filename = QFileDialog::getOpenFileName(this, "HoA Level Editor -- File Open",
 		"img/tilesets", "Tileset Images (*.png)");
 
-	if (filename == "") {
-		return;
-	}
-	else {
+	if (!filename.isEmpty())
+	{
 		if (QFile::exists(Tileset::CreateDataFilename(Tileset::CreateTilesetName(filename)))) {
-			int response = QMessageBox::question(this,
-				tr("Data file exists"),
+			int response = QMessageBox::question(this, tr("HoA Level Editor"),
 				tr("There already exists a data file that corresponds to this tileset image. "
 				"Executing a save operation will overwrite all data in this file. "
 				"Do you wish to continue anyway?"),
@@ -215,20 +212,16 @@ void TilesetEditor::_NewFile()
 				QMessageBox::No
 			);
 
-			if (response == QMessageBox::No) {
+			if (response == QMessageBox::No)
 				return;
-			}
 		}
 
-		if (_tset_display->tileset->New(filename, true) == false) {
-			QMessageBox::information(this,
-				tr("New operation failed"),
-				tr("Failed to create new tileset."),
-				QMessageBox::Ok
-			);
-		}
+		if (_tset_display->tileset->New(filename, true) == false)
+			QMessageBox::warning(this, tr("HoA Level Editor"),
+				tr("Failed to create new tileset."));
+
 		_tset_display->updateGL();
-	}
+	} // there must be a file specified for loading
 }
 
 
@@ -239,37 +232,30 @@ void TilesetEditor::_OpenFile()
 	QString file_name = QFileDialog::getOpenFileName(this, "HoA Level Editor -- File Open",
 		"dat/tilesets", "Tilesets (*.lua)");
 
-	// File name will contain only the name of the tileset->
-	int i = file_name.lastIndexOf("/");
-	file_name = file_name.remove(0, i + 1);
-	file_name.chop(4);
+	if (!file_name.isEmpty())
+	{
+		// The tileset loading function takes just the name of the tileset
+		// as an argument, so strip the file name accordingly.
+		int i = file_name.lastIndexOf("/");
+		file_name = file_name.remove(0, i + 1);
+		file_name.chop(4);
 
-	if (_tset_display->tileset->Load(file_name, true) == false) {
-		QMessageBox::information(this,
-			tr("Load operation failed"),
-			tr("Failed to load exisiting tileset."),
-			QMessageBox::Ok
-		);
-	}
+		if (_tset_display->tileset->Load(file_name, true) == false)
+			QMessageBox::warning(this, tr("HoA Level Editor"),
+				tr("Failed to load existing tileset."));
 
-	_tset_display->updateGL();
+		_tset_display->updateGL();
+	} // file must exist in order to open it
 }
 
 
 void TilesetEditor::_SaveFile()
 {
-	if (_tset_display->tileset->IsInitialized()) {
-		if (_tset_display->tileset->Save() == false) {
-			QMessageBox::information(this,
-				tr("Save operation failed"),
-				tr("Failed to save data to tileset definition file."),
-				QMessageBox::Ok
-			);
-		}
-	}
-	else {
-		// we don't actually need to do anything else, if there's no data, just don't save it!
-	}
+	// Data must exist in order to save it
+	if (_tset_display->tileset->IsInitialized())
+		if (_tset_display->tileset->Save() == false)
+			QMessageBox::warning(this, tr("HoA Level Editor"),
+				tr("Failed to save data to tileset definition file."));
 }
 
 } // namespace hoa_editor
