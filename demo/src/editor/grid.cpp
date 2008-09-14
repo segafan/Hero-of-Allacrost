@@ -769,6 +769,7 @@ void Grid::SaveMap()
 
 void Grid::InsertRow(int tile_index)
 {
+#if !defined(WIN32)
 	int row = tile_index / _width;
 
 	for (int i = 0; i < static_cast<int>(context_names.size()); i++)
@@ -780,10 +781,12 @@ void Grid::InsertRow(int tile_index)
 
 	_height++;
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+#endif
 } // InsertRow(...)
 
 void Grid::InsertCol(int tile_index)
 {
+#if !defined(WIN32)
 	int col = tile_index % _width;
 
 	for (int i = 0; i < static_cast<int>(context_names.size()); i++)
@@ -812,10 +815,12 @@ void Grid::InsertCol(int tile_index)
 
 	_width++;
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+#endif
 } // InsertCol(...)
 
 void Grid::DeleteRow(int tile_index)
 {
+#if !defined(WIN32)
 	int row = tile_index / _width;
 
 	for (int i = 0; i < static_cast<int>(context_names.size()); i++)
@@ -830,10 +835,12 @@ void Grid::DeleteRow(int tile_index)
 
 	_height--;
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+#endif
 } // DeleteRow(...)
 
 void Grid::DeleteCol(int tile_index)
 {
+#if !defined(WIN32)
 	int col = tile_index % _width;
 
 	for (int i = 0; i < static_cast<int>(context_names.size()); i++)
@@ -862,6 +869,7 @@ void Grid::DeleteCol(int tile_index)
 
 	_width--;
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+#endif
 } // DeleteCol(...)
 
 
