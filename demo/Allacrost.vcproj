@@ -334,6 +334,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\map\map_treasure.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\map\map_zones.h"
 				>
 			</File>
@@ -615,6 +619,10 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\map\map_tiles.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\map\map_treasure.cpp"
 				>
 			</File>
 			<File
