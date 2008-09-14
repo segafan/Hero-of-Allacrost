@@ -764,6 +764,7 @@ void Editor::_MapProperties()
 
 	if (props->exec() == QDialog::Accepted)
 	{
+#if !defined(WIN32)
 		if (_ed_scrollview->_map->GetWidth() < props->GetWidth())
 		{
 			// User wants to make map wider so we must insert columns of tiles at the edge of the map.
@@ -876,6 +877,7 @@ void Editor::_MapProperties()
 		_ed_scrollview->_map->SetHeight(props->GetHeight());
 		_ed_scrollview->_map->resize(props->GetWidth() * TILE_WIDTH, props->GetHeight() * TILE_HEIGHT);
 		_ed_scrollview->resize(props->GetWidth() * TILE_WIDTH, props->GetHeight() * TILE_HEIGHT);
+#endif
 
 
 
