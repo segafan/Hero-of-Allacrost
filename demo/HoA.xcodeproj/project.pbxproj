@@ -1266,6 +1266,7 @@
 					"-llualib",
 					"-lluabind",
 					"-lintl",
+					"-headerpad_max_install_names",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
