@@ -398,7 +398,7 @@ bool GameVideo::ApplySettings() {
 			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
-			SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 0);
+			SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
 
 			if (SDL_SetVideoMode(_temp_width, _temp_height, 0, flags) == false) {
 				IF_PRINT_WARNING(VIDEO_DEBUG) << "SDL_SetVideoMode() failed with error: " << SDL_GetError() << endl;
