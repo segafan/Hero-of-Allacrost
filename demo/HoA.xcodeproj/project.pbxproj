@@ -40,7 +40,6 @@
 		49A1AC680CF4381D00AF23FE /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
 		49A1AC690CF4381D00AF23FE /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
 		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
-		49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */; };
 		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
 		D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
 		D41148330D15F00E005F0A3F /* defs_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148320D15F00E005F0A3F /* defs_engine.cpp */; };
@@ -243,7 +242,6 @@
 		4941A6B00AC1D86400D65B8E /* utils.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		4941A7130AC1D89300D65B8E /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		4941A7510AC1D9A200D65B8E /* mac_logo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = mac_logo.icns; path = img/logos/mac_logo.icns; sourceTree = "<group>"; };
-		4941A7620AC1DCA500D65B8E /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDLMain.h; path = src/SDLMain.h; sourceTree = "<group>"; };
 		4941A7630AC1DCA500D65B8E /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = SDLMain.m; path = src/SDLMain.m; sourceTree = "<group>"; };
 		4941A7670AC1DCDF00D65B8E /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		499629620AF50B1F00B6A328 /* global_skills.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = global_skills.cpp; sourceTree = "<group>"; };
@@ -264,7 +262,7 @@
 		4999AC4F0AF407BE004DD3A3 /* system.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = system.h; sourceTree = "<group>"; };
 		49BDC4500AF5412600940A6C /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
 		49BDC4510AF5412600940A6C /* socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socket.cpp; sourceTree = "<group>"; };
-		49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = "Allacrost-Info.plist"; sourceTree = "<group>"; };
+		49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "Allacrost-Info.plist"; sourceTree = "<group>"; };
 		D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = editor.moc.cpp; path = src/editor/editor.moc.cpp; sourceTree = "<group>"; };
 		D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grid.moc.cpp; path = src/editor/grid.moc.cpp; sourceTree = "<group>"; };
 		D407F7E90BADECF300848C43 /* shop.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop.cpp; sourceTree = "<group>"; };
@@ -351,7 +349,7 @@
 		D4D166480BC0D91400190FC0 /* video.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = video.cpp; sourceTree = "<group>"; };
 		D4D166490BC0D91400190FC0 /* video.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = video.h; sourceTree = "<group>"; };
 		D4D1BA490B02B1DB0052BF1E /* Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Editor.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Editor-Info.plist"; sourceTree = "<group>"; };
+		D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Editor-Info.plist"; sourceTree = "<group>"; };
 		D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = editor.cpp; sourceTree = "<group>"; };
 		D4D1BA660B02B27F0052BF1E /* editor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = editor.h; sourceTree = "<group>"; };
 		D4D1BA670B02B27F0052BF1E /* editor_main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = editor_main.cpp; sourceTree = "<group>"; };
@@ -454,7 +452,6 @@
 		4941A4BC0AC1D7B300D65B8E /* Source Files */ = {
 			isa = PBXGroup;
 			children = (
-				4941A7620AC1DCA500D65B8E /* SDLMain.h */,
 				4941A7630AC1DCA500D65B8E /* SDLMain.m */,
 				4941A6460AC1D86300D65B8E /* src */,
 			);
@@ -827,7 +824,6 @@
 				49A1AC680CF4381D00AF23FE /* mus in Resources */,
 				49A1AC690CF4381D00AF23FE /* snd in Resources */,
 				4941A7520AC1D9A200D65B8E /* mac_logo.icns in Resources */,
-				49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1193,10 +1189,13 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
+				HEADER_SEARCH_PATHS = (
+					"../allacrost-dep/include",
+					/Library/Frameworks/QtGui.framework/Headers/,
+				);
 				INFOPLIST_FILE = "Editor-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
@@ -1241,10 +1240,13 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = "../allacrost-dep/include";
+				HEADER_SEARCH_PATHS = (
+					"../allacrost-dep/include",
+					/Library/Frameworks/QtGui.framework/Headers/,
+				);
 				INFOPLIST_FILE = "Editor-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "../allacrost-dep/lib";
