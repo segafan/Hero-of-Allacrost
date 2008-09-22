@@ -426,10 +426,42 @@ void Grid::SaveMap()
 	const char * BEFORE_TEXT_MARKER = "-- Allacrost map editor begin. Do not edit this line. --";
 	const char * AFTER_TEXT_MARKER =  "-- Allacrost map editor end. Do not edit this line. --";
 
+// This is separated into Win32 and other because this is a workaround for a bug
+// that only affects Windows, and we are so very near release date.
+// The windows version will probably work for Linux and Mac too
 	// First, get the non-editor data (such as map scripting) from the file to save, so we don't clobber it.
 	file.open(_file_name.toAscii(), ifstream::in);
 	if (file.is_open()) {
+		
+#ifdef WIN32
+		while(!file.eof()) {
+			file.clear();
+			file.getline(buffer, BUFFER_SIZE);
+			if (strstr(buffer, BEFORE_TEXT_MARKER))
+				break;
+			else {
+				before_text.append(buffer);
+				before_text.push_back('\n');
+			}
+		}
+		
+		while (!file.eof()) {
+			file.clear();
+			file.getline(buffer, BUFFER_SIZE);
+			if (strstr(buffer, AFTER_TEXT_MARKER))
+				break;
+		}
+		
+		while (!file.eof()) {
+			file.clear();
+			file.getline(buffer, BUFFER_SIZE);
+			if (!file.eof()) {
+				after_text.append(buffer);
+				after_text.push_back('\n');
+			}
+		}
 
+#else
 		// Get the positions of the begin and end markers.
 		while(!file.eof()) {
 			file.clear();
@@ -470,6 +502,7 @@ void Grid::SaveMap()
 			after_text.append(buffer);
 		}
 
+#endif
 		file.close();
 	}
 
