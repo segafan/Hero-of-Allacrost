@@ -109,7 +109,7 @@ MapMode::MapMode(string filename) :
 
 	_tile_manager = new TileManager();
 	_object_manager = new ObjectManager();
-	_dialogue_manager = new DialogueManager();
+	_dialogue_manager = new DialogueWindow();
 	_treasure_menu = new TreasureMenu();
 
 	_intro_timer.Initialize(7000, 0, this);
@@ -344,7 +344,7 @@ void MapMode::_HandleInputExplore() {
 				sp->moving = false;
 				sp->current_action = -1;
 				sp->SetDirection(VirtualSprite::CalculateOppositeDirection(_camera->GetDirection()));
-				_dialogue_manager->SetCurrentDialogue(sp->GetCurrentDialogue());
+				_dialogue_manager->BeginDialogue(sp->GetCurrentDialogue());
 				sp->NextDialogue();
 				_map_state = DIALOGUE;
 				return;
@@ -373,18 +373,18 @@ void MapMode::_HandleInputExplore() {
 		if (InputManager->UpState())
 		{
 			if (InputManager->LeftState())
-				_camera->SetDirection(NORTHWEST);
+				_camera->SetDirection(MOVING_NORTHWEST);
 			else if (InputManager->RightState())
-				_camera->SetDirection(NORTHEAST);
+				_camera->SetDirection(MOVING_NORTHEAST);
 			else
 				_camera->SetDirection(NORTH);
 		}
 		else if (InputManager->DownState())
 		{
 			if (InputManager->LeftState())
-				_camera->SetDirection(SOUTHWEST);
+				_camera->SetDirection(MOVING_SOUTHWEST);
 			else if (InputManager->RightState())
-				_camera->SetDirection(SOUTHEAST);
+				_camera->SetDirection(MOVING_SOUTHEAST);
 			else
 				_camera->SetDirection(SOUTH);
 		}

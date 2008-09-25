@@ -86,7 +86,7 @@ enum DIALOGUE_STATE {
 *** \todo MapDialogues need to be made more generic. They should not require a
 *** speaker ID (ie we can have a "narrator" of sorts), they should not require
 *** a portrait, and they should not be contained within the VirtualSprite class.
-*** Dialogues should be retained by the DialogueManager class and sprites should
+*** Dialogues should be retained by the DialogueWindow class and sprites should
 *** reference these dialogues via a dialogue ID as appropriate.
 *** ***************************************************************************/
 class MapDialogue {
@@ -112,14 +112,13 @@ public:
 
 	/** \brief Adds an option to the most recently added line of text
 	*** \param text The text for this particular option
-	*** \param speaker_id The object ID of the speaker of the set of options
 	*** \param next_line The index value of the next line of dialogue to display should this option be selected
 	*** (default value of -1 indicates to just continue on to the standard next line)
 	*** \param action An integer key to the map_functions table in the map file that contains the
 	*** script function to execute should this option be selected
 	*** (default value of -1 indicates that no action is to occur.)
 	***/
-	void AddOption(std::string text, uint32 speaker_id, int32 next_line = -1, int32 action = -1);
+	void AddOption(std::string text, int32 next_line = -1, int32 action = -1);
 
 	/** \brief Proceeds the dialogue forward to display the next line
 	*** \param line Index value of the next line of dialogue to read. This value defaults to -1,
@@ -294,8 +293,19 @@ private:
 
 
 /** ***************************************************************************************
-*** \brief Stores a single OptionBox instance and contains methods and members to update/draw it.
+*** \brief A wrapper around the OptionBox class specific to the needs of dialogues
 ***
+*** When the player reads a dialogue he or she may be presented at some point with a
+*** small number of options, one of which the player must select. The selected option
+*** determines the path that the dialogue will take, which may include an entire series
+*** of scripted events and sequences. The presentation of that list of options in a
+*** dialogue is the responsibility of this class.
+***
+*** Instances of this class are populated as needed within the MapDialogue class. The
+*** class acts as a high level wrapper for the OptionBox class (part of the video engine's
+*** GUI system). For each option, the class also contains an index to the next line of
+*** dialogue that should be read and an optional pointer to a script function to execute.
+*** 
 *** This class is used only by the MapDialogue class. It creates an instance of
 *** the OptionBox class which is located in the video engine GUI. Using the
 *** AddOption method, the OptionBox is populated. There are also methods to
@@ -307,60 +317,70 @@ public:
 	DialogueOptionBox();
 	~DialogueOptionBox();
 
-	/** \brief This method adds an option to the OptionBox
-	*** \param text The text of this particular option.
-	*** \param speaker_id The object ID of the speaker of the set of options. (Should correspond to a VirtualSprite or derived class.)
-	*** \param next_line An integer value of the next line of dialogue should this option be selected.
-	*** \param action An integer key to the map_functions table in the map file that contains the script function to execute when this line complese. (Less than 0 indicates no action is to occur.)
+	/** \brief Adds a new option to the OptionBox
+	*** \param text The text for the new option (should be brief)
+	*** \param next_line An integer index of the next line of dialogue should this option be selected.
+	*** \param action An integer key to the map_functions table in the map file that contains the script
+	*** function to execute when this option is select. A negative value indicates no action is to occur.
 	***/
-	bool AddOption(std::string text, uint32 speaker_id, int32 next_line, int32 action = -1);
+	void AddOption(std::string text, int32 next_line, int32 action = -1);
 
-	//! \brief Calls upon the OptionBox update to check for key presses/selections.
+	//! \brief Processes user input and updates the state of the option box (cursor blinking or option scrolling)
 	int32 Update();
 
-	//! \brief Calls upon the OptionBox draw function.
+	//! \brief Draws the OptionBox object
 	void Draw();
 
-	//! \brief Returns the speaker who owns the Options
-	uint32 GetCurrentSpeaker() { return _speaker; }
-
-	//! \brief Sets the dialogue that the option belongs to.
-	void SetCurrentDialogue(MapDialogue* dialogue) {_current_dialogue = dialogue;}
+	//! \brief Returns the option that is currently selected in the option box (-1 if nothing selected)
+	int32 GetSelectedOption() const
+		{ return _options.GetSelection(); }
 
 private:
-	//! \brief Stores the dialogue that the options belong to.
-	MapDialogue* _current_dialogue;
-
-	//! \brief The size of the option box(number of options.)
-	uint32 _size;
-
-	//! \brief The speaker of the options
-	uint32 _speaker;
-
-	//! \brief Instance of the OptionBox class.
+	//! \brief The instance of the OptionBox class
 	hoa_video::OptionBox _options;
 
-	//! \brief A list of optional events that may occur after each line.
-	std::vector<ScriptObject*> _actions;
+	/** \brief A index containing the next line of dialogue that should follow each option
+	*** This is an index into the lines container for the MapDialogue object that is using this set of options.
+	**/
+	std::vector<int32> _next_lines;
 
-	//! \brief A index containing the line of dialogue each option is directed to.
-	std::vector<int32> _next_line_index;
+	/** \brief An optional script event that may occur after each line
+	*** A NULL entry indicates that no option is to occur.
+	**/
+	std::vector<ScriptObject*> _actions;
 }; // class DialogueOptionBox
 
 
 /** ****************************************************************************
-*** \brief A display for managing and displaying dialogue on maps
+*** \brief Manages and displays dialogue on maps
 ***
 *** The MapMode class creates an instance of this class to handle all dialogue
-*** processing. This includes the visual display of dialogue as well as handling
-*** user input and processing of any scripted sequences that should appear with
-*** the dialogue.
+*** processing that occurs on maps.. This includes containing the dialogue objects,
+*** handling user input, processing of script actions, and visual display of the
+*** dialogue.
+***
+*** \todo Replace the background image member with just the parchment paper image
+*** and use the inherited menu window object to replace the background image.
+***
+*** \todo Modify so that the current line and line options are displayed in the
+*** same window.
+***
+*** \todo Add support so that the player may backtrack through lines in a
+*** dialogue (without re-processing selected options or previous script actions).
 *** ***************************************************************************/
-class DialogueManager : public hoa_video::MenuWindow {
+class DialogueWindow : public hoa_video::MenuWindow {
 public:
-	DialogueManager();
+	DialogueWindow();
 
-	~DialogueManager();
+	~DialogueWindow();
+
+	/** \brief Prepares the dialogue manager to begin processing a new dialogue
+	*** \param dialogue A pointer to the dialogue to begin
+	**/
+	void BeginDialogue(MapDialogue* dialogue);
+
+	//! \brief Immediately ends any dialogue that is taking place
+	void EndDialogue();
 
 	//! \brief Updates the state of the conversation
 	void Update();
@@ -368,49 +388,46 @@ public:
 	//! \brief Draws the dialogue window, text, portraits, and other related visuals to the screen
 	void Draw();
 
-	//! \brief Sets the dialogue state.
-	void SetDialogueState(DIALOGUE_STATE state)
-		{ _state = state; }
-
-	//! \brief Returns the state the dialogue is currently in.
-	DIALOGUE_STATE GetDialogueState()
+	//! \name Class member access functions
+	//@{
+	DIALOGUE_STATE GetDialogueState() const
 		{ return _state; }
 
-	//! \brief Updates the current dialogue.
-	void SetCurrentDialogue(MapDialogue* dialogue)
-		{ _current_dialogue = dialogue; }
-
-	//! \brief Clears the current dialogue.
-	void ClearDialogue()
-		{ _current_dialogue = NULL; }
-
-	//! \brief Returns the current dialogue.
 	MapDialogue* GetCurrentDialogue() const
 		{ return _current_dialogue; }
 
+	DialogueOptionBox* GetCurrentOptions() const
+		{ return _current_options; }
+	
+	int32 GetDisplayTime() const
+		{ return _display_time; }
+	//@}
 
 private:
-	//! \brief Keeps track of whether dialogue is in text mode or option mode.
+	//! \brief Retains the current state of the dialogue
 	DIALOGUE_STATE _state;
-
-	//! \brief A pointer to the current set of options
-	DialogueOptionBox* _current_option;
-
-	//! \brief A pointer to the current speaker.
-	VirtualSprite* _current_speaker;
 
 	//! \brief A pointer to the current piece of dialogue that is active
 	MapDialogue* _current_dialogue;
 
+	//! \brief A pointer to the current set of options
+	DialogueOptionBox* _current_options;
+
+	//! \brief A pointer to the current speaker.
+	int32 _display_time;
+
+	//! \brief Contains every single dialogue that can occur on this map
+	std::vector<MapDialogue*> _dialogues;
+
 	//! \brief A background image used in map dialogue
 	hoa_video::StillImage _background_image;
 
-	//! \brief The nameplate image used along with the dialogue box image.
+	//! \brief The nameplate image used along with the dialogue box image
 	hoa_video::StillImage _nameplate_image;
 
 	//! \brief The textbox used for rendering the dialogue text
 	hoa_video::TextBox _display_textbox;
-}; // class DialogueManager : public hoa_video::MenuWindow
+}; // class DialogueWindow : public hoa_video::MenuWindow
 
 } // namespace private_map
 

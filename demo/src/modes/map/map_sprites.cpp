@@ -47,17 +47,23 @@ namespace private_map {
 // ****************************************************************************
 
 VirtualSprite::VirtualSprite() :
+	face_portrait(NULL),
 	direction(SOUTH),
 	movement_speed(NORMAL_SPEED),
 	moving(false),
-	face_portrait( NULL ),
+	is_running(false),
+	seen_all_dialogue(true),
 	has_active_dialogue(true),
+	_current_dialogue(0),
+	_show_dialogue_icon(true),
+	_dialogue_icon_color(1.0f, 1.0f, 1.0f, 0.0f),
 	current_action(-1),
 	forced_action(-1),
 	_saved(false),
-	_current_dialogue(0),
-	_show_dialogue_icon(true),
-	_dialogue_icon_color(1.0f, 1.0f, 1.0f, 0.0f)
+	_saved_direction(0),
+	_saved_movement_speed(0.0f),
+	_saved_moving(false),
+	_saved_current_action(-1)
 {
 	MapObject::_object_type = VIRTUAL_TYPE;
 }
@@ -202,7 +208,7 @@ void VirtualSprite::Update() {
 	if (is_running == true)
 		distance_moved *= 2.0f;
 	// If the movement is diagonal, decrease the lateral movement distance by sin(45 degress)
-	if (direction & DIAGONAL_MOVEMENT)
+	if (direction & MOVING_DIAGONALLY)
 		distance_moved *= 0.707f;
 
 	// TODO: the code below is very inefficient because first it moves in the y direction and does
@@ -210,9 +216,9 @@ void VirtualSprite::Update() {
 	// I think we should only do collision detection once per move, not twice.
 
 	// Move the sprite the appropriate distance in the appropriate Y direction
-	if (direction & (NORTH | NORTHWEST | NORTHEAST))
+	if (direction & (NORTH | MOVING_NORTHWEST | MOVING_NORTHEAST))
 		y_offset -= distance_moved;
-	else if (direction & (SOUTH | SOUTHWEST | SOUTHEAST))
+	else if (direction & (SOUTH | MOVING_SOUTHWEST | MOVING_SOUTHEAST))
 		y_offset += distance_moved;
 
 	// Determine if the sprite may move to this new Y position
@@ -267,9 +273,9 @@ void VirtualSprite::Update() {
 	}
 
 	// Move the sprite the appropriate distance in the appropriate X direction
-	if (direction & (WEST | NORTHWEST | SOUTHWEST))
+	if (direction & (WEST | MOVING_NORTHWEST | MOVING_SOUTHWEST))
 		x_offset -= distance_moved;
-	else if (direction & (EAST | NORTHEAST | SOUTHEAST))
+	else if (direction & (EAST | MOVING_NORTHEAST | MOVING_SOUTHEAST))
 		x_offset += distance_moved;
 
 	// Determine if the sprite may move to this new X position
@@ -344,25 +350,25 @@ void VirtualSprite::SetDirection(uint16 dir) {
 	}
 
 	// Otherwise the direction is diagonal, and we must figure out which way the sprite should face.
-	if (dir & NORTHWEST) {
+	if (dir & MOVING_NORTHWEST) {
 		if (direction & (FACING_NORTH | FACING_EAST))
 			direction = NW_NORTH;
 		else
 			direction = NW_WEST;
 	}
-	else if (dir & SOUTHWEST) {
+	else if (dir & MOVING_SOUTHWEST) {
 		if (direction & (FACING_SOUTH | FACING_EAST))
 			direction = SW_SOUTH;
 		else
 			direction = SW_WEST;
 	}
-	else if (dir & NORTHEAST) {
+	else if (dir & MOVING_NORTHEAST) {
 		if (direction & (FACING_NORTH | FACING_WEST))
 			direction = NE_NORTH;
 		else
 			direction = NE_EAST;
 	}
-	else if (dir & SOUTHEAST) {
+	else if (dir & MOVING_SOUTHEAST) {
 		if (direction & (FACING_SOUTH | FACING_WEST))
 			direction = SE_SOUTH;
 		else
@@ -397,26 +403,20 @@ void VirtualSprite::SaveState() {
 	_saved_direction = direction;
 	_saved_movement_speed = movement_speed;
 	_saved_moving = moving;
-	_saved_name = name;
 	_saved_current_action = current_action;
-	// TEMP
-	//updatable = false;
 }
 
 
 
-bool VirtualSprite::LoadState() {
+bool VirtualSprite::RestoreState() {
 	if (_saved == false)
 		return false;
 
+	_saved = false;
 	 direction = _saved_direction;
 	 movement_speed = _saved_movement_speed;
 	 moving = _saved_moving;
-	 name = _saved_name;
 	 current_action = _saved_current_action;
-
-	// TEMP
-	//updatable = true;
 
 	 return true;
 }
@@ -438,16 +438,16 @@ void VirtualSprite::SetRandomDirection() {
 			SetDirection(WEST);
 			break;
 		case 5:
-			SetDirection(NORTHEAST);
+			SetDirection(MOVING_NORTHEAST);
 			break;
 		case 6:
-			SetDirection(NORTHWEST);
+			SetDirection(MOVING_NORTHWEST);
 			break;
 		case 7:
-			SetDirection(SOUTHEAST);
+			SetDirection(MOVING_SOUTHEAST);
 			break;
 		case 8:
-			SetDirection(SOUTHWEST);
+			SetDirection(MOVING_SOUTHWEST);
 			break;
 		default:
 			IF_PRINT_WARNING(MAP_DEBUG) << "invalid randomized direction was chosen" << endl;
@@ -683,7 +683,7 @@ void MapSprite::SaveState() {
 
 
 bool MapSprite::LoadState() {
-	if (!VirtualSprite::LoadState())
+	if (!VirtualSprite::RestoreState())
 		return false;
 
 	was_moving = _saved_was_moving;
@@ -843,13 +843,13 @@ void EnemySprite::Update() {
 					else if (ydelta > -0.5 && ydelta < 0.5 && xdelta < 0)
 						SetDirection(EAST);
 					else if (xdelta < 0 && ydelta < 0)
-						SetDirection(SOUTHEAST);
+						SetDirection(MOVING_SOUTHEAST);
 					else if (xdelta < 0 && ydelta > 0)
-						SetDirection(NORTHEAST);
+						SetDirection(MOVING_NORTHEAST);
 					else if (xdelta > 0 && ydelta < 0)
-						SetDirection(SOUTHWEST);
+						SetDirection(MOVING_SOUTHWEST);
 					else
-						SetDirection(NORTHWEST);
+						SetDirection(MOVING_NORTHWEST);
 				}
 				// If the sprite is not within the aggression range, pick a random direction to move
 				else {
