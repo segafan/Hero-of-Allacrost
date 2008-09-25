@@ -256,7 +256,7 @@ namespace hoa_map {
 		class MapSprite;
 		class EnemySprite;
 
-		class DialogueManager;
+		class DialogueWindow;
 		class MapDialogue;
 		class DialogueOptionBox;
 

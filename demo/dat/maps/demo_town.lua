@@ -509,8 +509,8 @@ function Load(m)
 
 	dialogue:AddText(dtext[0], 1000, -1, -1); --Line 0
 	dialogue:AddText(dtext[1], 2, -1, -1); --Line 1
-	dialogue:AddOption(doption[0], 1000, 2, -1);
-	dialogue:AddOption(doption[1], 1000, 8, -1);
+	dialogue:AddOption(doption[0], 2, -1);
+	dialogue:AddOption(doption[1], 8, -1);
 	
 	--Yes
 	dialogue:AddText(dtext[2], 2, -1, -1); --Line 2
@@ -519,8 +519,8 @@ function Load(m)
 	dialogue:AddText(dtext[5], 2, -1, -1); --Line 5
 	dialogue:AddText(dtext[6], 1000, -1, -1); --Line 6
 	dialogue:AddText(dtext[7], 2, -1, -1); --Line 7
-	dialogue:AddOption(doption[2], 1000, 10 , -1);
-	dialogue:AddOption(doption[3], 1000, 12 , -1);
+	dialogue:AddOption(doption[2], 10 , -1);
+	dialogue:AddOption(doption[3], 12 , -1);
 	
 	--No
 	dialogue:AddText(dtext[8], 2, -1,-1); --Line 8

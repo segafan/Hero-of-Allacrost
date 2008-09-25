@@ -65,17 +65,17 @@ void ActionPathMove::Execute() {
 	_sprite->moving = true;
 	if (_sprite->y_position > path[current_node].row) { // Need to move toward the north
 		if (_sprite->x_position > path[current_node].col)
-			_sprite->SetDirection(NORTHWEST);
+			_sprite->SetDirection(MOVING_NORTHWEST);
 		else if (_sprite->x_position < path[current_node].col)
-			_sprite->SetDirection(NORTHEAST);
+			_sprite->SetDirection(MOVING_NORTHEAST);
 		else
 			_sprite->SetDirection(NORTH);
 	}
 	else if (_sprite->y_position < path[current_node].row) { // Need to move toward the south
 		if (_sprite->x_position > path[current_node].col)
-			_sprite->SetDirection(SOUTHWEST);
+			_sprite->SetDirection(MOVING_SOUTHWEST);
 		else if (_sprite->x_position < path[current_node].col)
-			_sprite->SetDirection(SOUTHEAST);
+			_sprite->SetDirection(MOVING_SOUTHEAST);
 		else
 			_sprite->SetDirection(SOUTH);
 	}

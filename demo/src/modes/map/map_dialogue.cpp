@@ -106,18 +106,16 @@ void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 time, int32
 
 
 
-void MapDialogue::AddOption(std::string text, uint32 speaker_id, int32 next_line, int32 action) {
+void MapDialogue::AddOption(string text, int32 next_line, int32 action) {
 	int32 current_line = _line_count - 1; // Current line that options will belong to.
 
 	// If the line the options will be added to currently has no options, create a new instance of the DialogueOptionBox class to store the options in.
-	if (_options[current_line] == NULL )
-	{
+	if (_options[current_line] == NULL) {
 		DialogueOptionBox* option = new DialogueOptionBox();
-		option->SetCurrentDialogue(this);
 		_options[current_line] = option;
 	}
 
-	_options[current_line]->AddOption(text, speaker_id, next_line, action);
+	_options[current_line]->AddOption(text, next_line, action);
 }
 
 
@@ -165,57 +163,80 @@ bool MapDialogue::ReadNextLine(int32 line) {
 // ********** DialogueOptionBox Functions
 // ******************************************************************************
 
-DialogueOptionBox::DialogueOptionBox() :
-	_size(0), // Initialize as empty OptionBox
-	_speaker(0)
-{
+DialogueOptionBox::DialogueOptionBox() {
 	// Initialize the option box attributes.
 	_options.SetCellSize(500.0f, 25.0f);
-	_options.SetSize(1, 0);
-	_options.SetPosition(325.0f, 574.0f);
+	_options.SetSize(1, 4);
+	_options.SetPosition(325.0f, 620.0f);
 	_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_options.SetFont("map");
 	_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_options.SetCursorOffset(-55.0f, -25.0f);
 	_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_NONE);
+	_options.SetSelection(0);
 }
 
-DialogueOptionBox::~DialogueOptionBox()
-{}
 
-bool DialogueOptionBox::AddOption(std::string text, uint32 speaker_id, int32 next_line, int32 action)
-{
-	if(_options.AddOption(MakeUnicodeString(text))) {
-		_next_line_index.push_back(next_line);
 
-		// TODO Add support for actions
-
-		_speaker = speaker_id;
-		_size++;
-		_options.SetSize(1, _size);
-		_options.SetSelection(0);
-
-		return true;
+DialogueOptionBox::~DialogueOptionBox() {
+	for (uint32 i = 0; i < _actions.size(); i++) {
+		if (_actions[i] != NULL)
+			delete _actions[i];
 	}
-	else { return false; } //ERROR
 }
 
-int32 DialogueOptionBox::Update()
-{
-	// clear OptionBox events
+
+
+void DialogueOptionBox::AddOption(string text, int32 next_line, int32 action) {
+	// TODO: we need to figure out what is the real max limit number of options we can have, make a constant for it, and use that here
+	if (_options.GetNumberOptions() >= 4) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "dialogue option box already contains too many options. The new option will not be added." << endl;
+		return;
+	}
+
+	_options.AddOption(MakeUnicodeString(text));
+	_next_lines.push_back(next_line);
+
+	if (action < 0) {
+		_actions.push_back(NULL);
+	}
+	else {
+		MapMode::_loading_map->_map_script.OpenTable(MapMode::_loading_map->_map_tablespace, true);
+		MapMode::_loading_map->_map_script.OpenTable("map_functions");
+
+		ScriptObject* new_action = new ScriptObject();
+		*new_action = MapMode::_loading_map->_map_script.ReadFunctionPointer(action);
+		_actions.push_back(new_action);
+
+		MapMode::_loading_map->_map_script.CloseTable();
+		MapMode::_loading_map->_map_script.CloseTable();
+	}
+
+	// TODO: removing this line causes no option to be selected (even though the constructor set the selection to zero). This is a problem with
+	// the option box class that needs to be fixed, and then this line should be removed
+	_options.SetSelection(0);
+}
+
+
+
+int32 DialogueOptionBox::Update() {
 	_options.Update();
 
-	// If the confirm key is pressed, return the selection information
+	// Execute any action for the current selection, then return the next line of dialogue for this selection
 	if (InputManager->ConfirmPress()) {
 		_options.HandleConfirmKey();
-		// Get selection and determine/return the next line of dialogue.
-		int32 selection = _next_line_index[_options.GetSelection()];
-		_options.SetSelection(0); // Reset selection
-		return selection;
-	}
-	// If the cancel key is pressed, redisplay the current line.
-	if (InputManager->CancelPress()) {
-		return _current_dialogue->GetCurrentLine();
+
+		if (_actions[_options.GetSelection()] != NULL) {
+			try {
+				ScriptCallFunction<void>(*(_actions[_options.GetSelection()]));
+			} catch (luabind::error& e) {
+				ScriptManager->HandleLuaError(e);
+			}
+		}
+
+		int32 next_line = _next_lines[_options.GetSelection()];
+		_options.SetSelection(0); // Reset the selection to the top option
+		return next_line;
 	}
 
 	if (InputManager->UpPress()) {
@@ -225,21 +246,26 @@ int32 DialogueOptionBox::Update()
 	if (InputManager->DownPress()) {
 		_options.HandleDownKey();
 	}
+
 	return -1;
 }
 
-void DialogueOptionBox::Draw()
-{
+
+
+void DialogueOptionBox::Draw() {
 	_options.Draw();
 }
 
 // ****************************************************************************
-// ***** DialogueManager class methods
+// ***** DialogueWindow class methods
 // ****************************************************************************
 
-DialogueManager::DialogueManager() {
-	_state = DIALOGUE_STATE_NORMAL;
-
+DialogueWindow::DialogueWindow() :
+	_state(DIALOGUE_STATE_NORMAL),
+	_current_dialogue(NULL),
+	_current_options(NULL),
+	_display_time(0)
+{
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
 // 	MenuWindow::Create(1024.0f, 256.0f);
@@ -264,78 +290,105 @@ DialogueManager::DialogueManager() {
 }
 
 
-DialogueManager::~DialogueManager() {
+DialogueWindow::~DialogueWindow() {
 // 	MenuWindow::Destroy();
 //_display_textbox.SetDisplayText(_current_dialogue->GetLine());
 }
 
 
-void DialogueManager::Update() {
-	static int32 time_remaining = 0;          // The time that remains for the display of the current line
-	static MapDialogue* last_dialogue = NULL; // Used to detect if this is the first update to a new piece of dialogue
-	bool finish_line = false;		  // When set to true, indicates that the current line of dialogue is finished
-	int32 next_line = -1;			  // Used to store an index to the next line of dialogue to be displayed.
 
-	if (_current_dialogue == NULL)
+void DialogueWindow::BeginDialogue(MapDialogue* dialogue) {
+	if (dialogue == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
 		return;
-
-	if (_current_dialogue != last_dialogue) {
-		time_remaining = _current_dialogue->GetCurrentTime();
-		_display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
-		last_dialogue = _current_dialogue;
 	}
 
-	// During option selection mode.
-	if (_state == DIALOGUE_STATE_OPTION) {
-		// Check for option selections. If a selection was made, Update() returns the index to the next line of dialogue, otherwise -1 indicates no selection was made.
-		next_line = _current_option->Update();
-		// If next_line is greater than -1, a selection was made.
-		if( next_line != -1 )
-		{
-			finish_line = true;
-		}
+	if (_current_dialogue != NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "beginning a new dialogue while another dialogue is still active" << endl;
 	}
 
-	// During dialogue text display mode.
+	_current_dialogue = dialogue;
+	_current_options = NULL; // This will get set to appropriate dialogue options in the Update method
+	_display_time = _current_dialogue->GetCurrentTime();
+	_display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
+}
+
+
+
+void DialogueWindow::EndDialogue() {
+	_current_dialogue = NULL;
+	_current_options = NULL;
+	_display_time = -1;
+	MapMode::_current_map->_map_state = EXPLORE;
+}
+
+
+
+void DialogueWindow::Update() {
+	bool line_finished = false; // When set to true, indicates to move on to the next line of dialogue
+	int32 next_line = -1; // Stores an index to the next line of dialogue to be displayed.
+
+	if (_current_dialogue == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to update dialogue manager when no dialogue was active" << endl;
+		return;
+	}
+
 	if (_state == DIALOGUE_STATE_NORMAL) {
 		_display_textbox.Update(MapMode::_current_map->_time_elapsed);
 
-		// Update the dialogue timer
-		if (time_remaining > 0) {
-			time_remaining -= MapMode::_current_map->_time_elapsed;
-			// If it get below 0, clip it to 0 as -1 means infinite
-			if (time_remaining < 0) {
-				time_remaining = 0;
-				finish_line = true;
+		// TODO: there is potential for dead-lock here. Lines that have (or do not have) a display time, have player options,
+		// and/or have the input blocking property set can cause a lock-up.
+
+		// Update the display timer if it is enabled for this dialogue
+		if (_display_time > 0) {
+			_display_time -= MapMode::_current_map->_time_elapsed;
+			
+			if (_display_time <= 0) {
+				if (_current_dialogue->CurrentLineHasOptions() == true) {
+					_current_options = _current_dialogue->GetCurrentOptions();
+					_state = DIALOGUE_STATE_OPTION;
+				}
+				else {
+					line_finished = true;
+					next_line = _current_dialogue->GetCurrentNextLine();
+				}
 			}
 		}
+		
 		// Check for user input only if this dialogue is non-blocking
 		if (_current_dialogue->IsBlocked() == false) {
 			if (InputManager->ConfirmPress()) {
 				// If the line is not yet finished displaying, display the rest of the text
-				if (!_display_textbox.IsFinished()) {
+				if (_display_textbox.IsFinished() == false) {
 					_display_textbox.ForceFinish();
 				}
-				// Otherwise, finish this line
+				// Proceed to option selection if the line has options
+				else if (_current_dialogue->CurrentLineHasOptions() == true) {
+					_current_options = _current_dialogue->GetCurrentOptions();
+					_state = DIALOGUE_STATE_OPTION;
+				}
 				else {
-					// Check for dialogue options
-					if(_current_dialogue->CurrentLineHasOptions()){
-						// Load the options and set state to option mode
-						_current_option = _current_dialogue->GetCurrentOptions();
-						_state = DIALOGUE_STATE_OPTION;
-					}
-					// Option selection is done
-					else {
-						finish_line = true;
-						next_line = _current_dialogue->GetCurrentNextLine();
-					}
+					line_finished = true;
+					next_line = _current_dialogue->GetCurrentNextLine();
 				}
 			}
 		}
+
+		// TODO: Handle cancel presses to allow backtracking through the dialogue
 	}
 
-	// If the line has been finished, process the post-line action if it exists and move on to the next line
-	if (finish_line == true) {
+	else if (_state == DIALOGUE_STATE_OPTION) {
+		// If the update function returns a non-negative number, a selection has been made
+		next_line = _current_options->Update();
+		if (next_line >= 0)
+			line_finished = true;
+	}
+
+	// If the line has finished, process the post-line action if it exists and move on to the next line
+	if (line_finished == true) {
+		_state = DIALOGUE_STATE_NORMAL;
+
+		// Execute any scripted actions that should occur after this line of dialogue has finished
 		if (_current_dialogue->GetCurrentAction() != NULL) {
 			try {
 				ScriptCallFunction<void>(*(_current_dialogue->GetCurrentAction()));
@@ -344,36 +397,33 @@ void DialogueManager::Update() {
 			}
 		}
 
-		// Move to the next line of dialogue
+		// If there are more lines of dialogue, continue on to the next line
 		if (_current_dialogue->ReadNextLine(next_line) == true) {
-			time_remaining = _current_dialogue->GetCurrentTime();
+			_display_time = _current_dialogue->GetCurrentTime();
 			_display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
 			_state = DIALOGUE_STATE_NORMAL;
 		}
-
-		// This dialogue is finished, restore game state as necessary
+		// The last line of dialogue has ben read. Restore all necessary game state data
 		else {
-			//The is no more line, the dialogue is over
-			MapMode::_current_map->_map_state = EXPLORE;
-			// Restore the status of the map sprites
+			// Restore the status of the sprites that participated in this dialogue
 			if (_current_dialogue->IsSaveState()) {
 				for (uint32 i = 0; i < _current_dialogue->GetLineCount(); i++) {
-					static_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetLineSpeaker(i)))->LoadState();
+					static_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetLineSpeaker(i)))->RestoreState();
 				}
 			}
-			_current_dialogue = NULL;
-			last_dialogue = NULL;
-			_state = DIALOGUE_STATE_NORMAL;
+			EndDialogue();
 		}
 	}
-} // void DialogueManager::Update()
+} // void DialogueWindow::Update()
 
 
 
-void DialogueManager::Draw() {
+void DialogueWindow::Draw() {
+	// Temporarily change the coordinate system to 1024x768, then draw the dialogue background, nameplate, speaker's name, and speaker's face portrait
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+
 	VideoManager->Move(0.0f, 768.0f);
 	_background_image.Draw();
 	VideoManager->MoveRelative(47.0f, -42.0f);
@@ -382,22 +432,22 @@ void DialogueManager::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 	VideoManager->MoveRelative(120.0f, -10.0f);
 
-	VirtualSprite* speaker = NULL;
+	VirtualSprite* speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetCurrentSpeaker()));
 	if (_state == DIALOGUE_STATE_NORMAL) {
-		_display_textbox.Draw(); // Display dialogue text
-		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetCurrentSpeaker()));
+		_display_textbox.Draw();
 	}
-	if (_state == DIALOGUE_STATE_OPTION) {
-		_current_option->Draw(); // Display options
-		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_option->GetCurrentSpeaker()));
+	else if (_state == DIALOGUE_STATE_OPTION) {
+		_display_textbox.Draw();
+		_current_options->Draw();
 	}
 	VideoManager->Text()->Draw(speaker->name, TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
+
 	if (speaker->face_portrait != NULL) {
 		VideoManager->MoveRelative(0.0f, -26.0f);
 		speaker->face_portrait->Draw();
 	}
 	VideoManager->PopState();
-} // void DialogueManager::Draw()
+} // void DialogueWindow::Draw()
 
 } // namespace private_map
 

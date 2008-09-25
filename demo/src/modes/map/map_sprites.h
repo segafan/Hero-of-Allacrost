@@ -56,9 +56,8 @@ const float VERY_FAST_SPEED = 75.0f;
 *** The "NW_NORTH" constant means that the sprite is traveling to the northwest and is
 *** facing towards the north.
 ***
-*** \note These constants include a series of shorthands (NORTHWEST, FACING_NORTH, LATERAL_MOVEMENT
-*** are a few). You should not assign the MapSprite#direction member to any of these values because
-*** they are not valid directions.
+*** \note These constants include a series of shorthands (MOVING_NORTHWEST, FACING_NORTH) used
+*** to check for movement and facing directions.
 **/
 //@{
 const uint16 NORTH     = 0x0001;
@@ -73,20 +72,20 @@ const uint16 SW_SOUTH  = 0x0100;
 const uint16 SW_WEST   = 0x0200;
 const uint16 SE_SOUTH  = 0x0400;
 const uint16 SE_EAST   = 0x0800;
-
-const uint16 NORTHWEST = NW_NORTH | NW_WEST;
-const uint16 NORTHEAST = NE_NORTH | NE_EAST;
-const uint16 SOUTHWEST = SW_SOUTH | SW_WEST;
-const uint16 SOUTHEAST = SE_SOUTH | SE_EAST;
-
+// Used to check for movement direction regardless of facing direction
+const uint16 MOVING_NORTHWEST = NW_NORTH | NW_WEST;
+const uint16 MOVING_NORTHEAST = NE_NORTH | NE_EAST;
+const uint16 MOVING_SOUTHWEST = SW_SOUTH | SW_WEST;
+const uint16 MOVING_SOUTHEAST = SE_SOUTH | SE_EAST;
+const uint16 MOVING_LATERALLY = NORTH | SOUTH | EAST | WEST;
+const uint16 MOVING_DIAGONALLY = MOVING_NORTHWEST | MOVING_NORTHEAST | MOVING_SOUTHWEST | MOVING_SOUTHEAST;
+// Used to check for facing direction regardless of moving direction
 const uint16 FACING_NORTH = NORTH | NW_NORTH | NE_NORTH;
 const uint16 FACING_SOUTH = SOUTH | SW_SOUTH | SE_SOUTH;
 const uint16 FACING_WEST = WEST | NW_WEST | SW_WEST;
 const uint16 FACING_EAST = EAST | NE_EAST | SE_EAST;
-
-const uint16 LATERAL_MOVEMENT = NORTH | SOUTH | EAST | WEST;
-const uint16 DIAGONAL_MOVEMENT = NORTHWEST | NORTHEAST | SOUTHWEST | SOUTHEAST;
 //@}
+
 
 /** \name Map Sprite Animation Constants
 *** These constants are used to index the MapSprite#animations vector to display the correct
@@ -131,6 +130,18 @@ public:
 
 	~VirtualSprite();
 
+	// ---------- Public Members
+
+	//! \brief The name of the sprite, as seen by the player in the game.
+	hoa_utils::ustring name;
+
+	/** \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
+	*** \note Not all sprites have portraits, in which case this member will be NULL
+	**/
+	hoa_video::StillImage* face_portrait;
+
+	// ---------- Public Members: Orientation and Movement
+
 	/** \brief A bit-mask for the sprite's draw orientation and direction vector.
 	*** This member determines both where to move the sprite (8 directions) and
 	*** which way the sprite is facing (4 directions). See the Sprite direction
@@ -150,19 +161,31 @@ public:
 	//! \brief Set to true when the sprite is running rather than just walking
 	bool is_running;
 
-	//! \brief The name of the sprite, as seen by the player in the game.
-	hoa_utils::ustring name;
-
-	/** \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
-	*** \note Not all sprites have portraits, in which case this member will be NULL
-	**/
-	hoa_video::StillImage* face_portrait;
+	// ---------- Public Members: Dialogue
 
 	//! \brief Set to false if the sprite contains dialogue that has not been seen by the player
 	bool seen_all_dialogue;
 
 	//! \brief True is sprite contains active dialogue.
 	bool has_active_dialogue;
+
+	//! \brief This vector contains all the dialogues of the sprite
+	std::vector<MapDialogue*> dialogues;
+
+	/** \brief An index to the dialogues vector, representing the current sprite dialogue to
+	*** display when talked to by the player. A negative value indicates that the sprite has no dialogue.
+	*** \note If the sprite has no entries in its dialogues vector, this member should remain negative,
+	*** otherwise a segmentation fault will occur.
+	**/
+	int16 _current_dialogue;
+
+	//! \brief Indicates if the icon indicating that there is a dialogue available should be drawn or not.
+	bool _show_dialogue_icon;
+
+	//! \brief Used to fade the dialogue icon according to distance
+	hoa_video::Color _dialogue_icon_color;
+
+	// ---------- Public Members: Actions
 
 	/** \brief An index to the actions vector, representing the current sprite action being performed.
 	*** A negative value indicates that the sprite is taking no action. If the sprite has no entries
@@ -186,28 +209,10 @@ public:
 	uint16 _saved_direction;
 	float _saved_movement_speed;
 	bool _saved_moving;
-	hoa_utils::ustring _saved_name;
 	int8 _saved_current_action;
 	//@}
 
-	//! \brief This vector contains all the dialogues of the sprite
-	std::vector<MapDialogue*> dialogues;
-
-	/** \brief An index to the dialogues vector, representing the current sprite dialogue to
-	*** display when talked to by the player. A negative value indicates that the sprite has no dialogue.
-	*** \note If the sprite has no entries in its dialogues vector, this member should remain negative,
-	*** otherwise a segmentation fault will occur.
-	**/
-	int16 _current_dialogue;
-
-	//! \brief Indicates if the icon indicating that there is a dialogue available should be drawn or not.
-	bool _show_dialogue_icon;
-
-	//! \brief Used to fade the dialogue icon according to distance
-	hoa_video::Color _dialogue_icon_color;
-
 	// -------------------- Public methods
-
 
 	//! \brief Updates the virtual object's position if it is moving, otherwise does nothing.
 	virtual void Update();
@@ -243,11 +248,11 @@ public:
 	**/
 	virtual void SaveState();
 
-	/** \brief This method will load the saved state of a sprite.
-	*** Attributes loaded: direction, speed, moving state, name, current action.
+	/** \brief This method will restore the saved state of a sprite.
+	*** Attributes rest: direction, speed, moving state, name, current action.
 	*** \return false if there was no saved state, true otherwise.
 	**/
-	virtual bool LoadState();
+	virtual bool RestoreState();
 
 	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#seen_all_dialogue
 	void UpdateSeenDialogue();
