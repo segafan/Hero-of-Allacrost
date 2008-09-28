@@ -38,7 +38,7 @@
 // Game Engine Declarations
 ////////////////////////////////////////////////////////////////////////////////
 
-// Audio declarations, see audio.h/cpp
+// Audio declarations, see src/engine/audio/
 namespace hoa_audio {
 	extern bool AUDIO_DEBUG;
 	class GameAudio;
@@ -65,7 +65,7 @@ namespace hoa_audio {
 	}
 }
 
-// Video declarations, see video.h/cpp
+// Video declarations, see src/engine/video/
 namespace hoa_video {
 	extern bool VIDEO_DEBUG;
 	class GameVideo;
@@ -140,7 +140,7 @@ namespace hoa_video {
 	}
 }
 
-// Script declarations, see src/engine/script
+// Script declarations, see src/engine/script/
 namespace hoa_script {
 	extern bool SCRIPT_DEBUG;
 	class GameScript;
@@ -151,7 +151,7 @@ namespace hoa_script {
 	class ModifyScriptDescriptor;
 }
 
-// Mode manager declarations, see mode_manager.h/cpp
+// Mode manager declarations, see src/engine/
 namespace hoa_mode_manager {
 	extern bool MODE_MANAGER_DEBUG;
 	class GameModeManager;
@@ -159,13 +159,13 @@ namespace hoa_mode_manager {
 	class GameMode;
 }
 
-// Input declarations, see input.h/cpp
+// Input declarations, see src/engine/
 namespace hoa_input {
 	extern bool INPUT_DEBUG;
 	class GameInput;
 }
 
-// Settings declarations, see settings.h/cpp
+// Settings declarations, see src/engine/
 namespace hoa_system {
 	extern bool SYSTEM_DEBUG;
 	class GameSystem;
@@ -207,7 +207,7 @@ namespace hoa_global {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// Battle mode declarations, see battle.h/cpp
+// Battle mode declarations, see src/modes/battle/
 namespace hoa_battle {
 	extern bool BATTLE_DEBUG;
 	class BattleMode;
@@ -227,8 +227,7 @@ namespace hoa_battle {
 	}
 }
 
-
-// Boot mode declarations, see boot.h/cpp
+// Boot mode declarations, see src/modes/boot/
 namespace hoa_boot {
 	extern bool BOOT_DEBUG;
 	class BootMode;
@@ -236,7 +235,7 @@ namespace hoa_boot {
 	class CreditsScreen;
 }
 
-// Map mode declarations, see map.h/cpp
+// Map mode declarations, see src/modes/map/
 namespace hoa_map {
 	extern bool MAP_DEBUG;
 	class MapMode;
@@ -256,9 +255,10 @@ namespace hoa_map {
 		class MapSprite;
 		class EnemySprite;
 
-		class DialogueWindow;
+		class DialogueSupervisor;
 		class MapDialogue;
-		class DialogueOptionBox;
+		class MapDialogueOptions;
+		class DialogueWindow;
 
 		class SpriteAction;
 		class ActionPathMove;
@@ -275,25 +275,25 @@ namespace hoa_map {
 	}
 }
 
-// Menu mode declarations, see menu.h/cpp
+// Menu mode declarations, see src/modes/menu/
 namespace hoa_menu {
 	extern bool MENU_DEBUG;
 	class MenuMode;
 }
 
-// Pause mode declarations, see pause.h/cpp
+// Pause mode declarations, see src/modes/
 namespace hoa_pause {
 	extern bool PAUSE_DEBUG;
 	class PauseMode;
 }
 
-// Scene mode declarations, see scene.h/cpp
+// Scene mode declarations, see src/modes/
 namespace hoa_scene {
 	extern bool SCENE_DEBUG;
 	class SceneMode;
 }
 
-// Shop mode declarations, see shop./cpp
+// Shop mode declarations, see src/modes/shop/
 namespace hoa_shop {
 	extern bool SHOP_DEBUG;
 	class ShopMode;
@@ -303,7 +303,7 @@ namespace hoa_shop {
 // Miscellaneous Declarations
 ////////////////////////////////////////////////////////////////////////////////
 
-// Utils declarations, see utils.h/cpp
+// Utils declarations, see src/
 namespace hoa_utils {
 	extern bool UTILS_DEBUG;
 	class ustring;

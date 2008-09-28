@@ -450,7 +450,7 @@ function Load(m)
 	sprite:SetDirection(8);
 	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
 	sprite:LoadRunningAnimations("img/sprites/map/claudius_run.png");
-	sprite:SetFacePortrait("img/portraits/map/claudius.png");
+	sprite:LoadFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
 
 	-- Set the camera to focus on the player's sprite
@@ -471,7 +471,7 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/laila_walk.png");
 	sprite:LoadRunningAnimations("img/sprites/map/laila_run.png");
-	sprite:SetFacePortrait("img/portraits/map/laila.png");
+	sprite:LoadFacePortrait("img/portraits/map/laila.png");
 
 	dialogue = hoa_map.MapDialogue();
 	--dialogue:SetMaxViews(1);
@@ -585,7 +585,7 @@ function Load(m)
 	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/marcus_walk.png");
-	sprite:SetFacePortrait("img/portraits/map/marcus.png");
+	sprite:LoadFacePortrait("img/portraits/map/marcus.png");
 
 	dtext = {
 	 [0] = hoa_utils.Translate("Hey there son, how's the training going?");
@@ -624,7 +624,7 @@ function Load(m)
 	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/vanica_walk.png");
-	sprite:SetFacePortrait("img/portraits/map/vanica.png");
+	sprite:LoadFacePortrait("img/portraits/map/vanica.png");
 
 	dtext = {
 	 [0] = hoa_utils.Translate("Oh, Claudius? You seemed puzzled.");

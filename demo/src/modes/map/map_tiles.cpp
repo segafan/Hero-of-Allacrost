@@ -252,34 +252,35 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 			PRINT_ERROR << "map failed to load because it could not open a tileset definition file: " << tileset_script.GetFilename() << endl;
 			exit(1);
 		}
-
 		tileset_script.OpenTable(tileset_filenames[i]);
-		tileset_script.OpenTable("animated_tiles");
-		for (uint32 j = 1; j <= tileset_script.GetTableSize(); j++) {
-			animation_info.clear();
-			tileset_script.ReadUIntVector(j, animation_info);
 
-			// The index of the first frame in the animation. (i * TILES_PER_TILESET) factors in which tileset the frame comes from
-			uint32 first_frame_index = animation_info[0] + (i * TILES_PER_TILESET);
+		if (tileset_script.DoesTableExist("animated_tiles") == true) {
+			tileset_script.OpenTable("animated_tiles");
+			for (uint32 j = 1; j <= tileset_script.GetTableSize(); j++) {
+				animation_info.clear();
+				tileset_script.ReadUIntVector(j, animation_info);
 
-			// If the first tile frame index of this animation was not referenced anywhere in the map, then the animation is unused and
-			// we can safely skip over it and move on to the next one. Otherwise if it is referenced, we have to construct the animated image
-			if (tile_references[first_frame_index] == -1) {
-				continue;
+				// The index of the first frame in the animation. (i * TILES_PER_TILESET) factors in which tileset the frame comes from
+				uint32 first_frame_index = animation_info[0] + (i * TILES_PER_TILESET);
+
+				// If the first tile frame index of this animation was not referenced anywhere in the map, then the animation is unused and
+				// we can safely skip over it and move on to the next one. Otherwise if it is referenced, we have to construct the animated image
+				if (tile_references[first_frame_index] == -1) {
+					continue;
+				}
+
+				AnimatedImage* new_animation = new AnimatedImage();
+				new_animation->SetDimensions(2.0f, 2.0f);
+
+				// Each pair of entries in the animation info indicate the tile frame index (k) and the time (k+1)
+				for (uint32 k = 0; k < animation_info.size(); k += 2) {
+					new_animation->AddFrame(tileset_images[i][animation_info[k]], animation_info[k+1]);
+				}
+				tile_animations.insert(make_pair(first_frame_index, new_animation));
 			}
-
-			AnimatedImage* new_animation = new AnimatedImage();
-			new_animation->SetDimensions(2.0f, 2.0f);
-
-			// Each pair of entries in the animation info indicate the tile frame index (k) and the time (k+1)
-			for (uint32 k = 0; k < animation_info.size(); k += 2) {
-				new_animation->AddFrame(tileset_images[i][animation_info[k]], animation_info[k+1]);
-			}
-
-			tile_animations.insert(make_pair(first_frame_index, new_animation));
+			tileset_script.CloseTable();
 		}
 
-		tileset_script.CloseTable();
 		tileset_script.CloseTable();
 		tileset_script.CloseFile();
 	} // for (uint32 i = 0; i < tileset_filenames.size(); i++)

@@ -236,10 +236,10 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::VirtualSprite;
 	friend class private_map::MapSprite;
 	friend class private_map::EnemySprite;
-	friend class private_map::DialogueOptionBox;
-	friend class private_map::DialogueWindow;
+	friend class private_map::DialogueSupervisor;
 	friend class private_map::TreasureMenu;
 	friend class private_map::MapDialogue;
+	friend class private_map::MapDialogueOptions;
 	friend class private_map::SpriteAction;
 	friend class private_map::ActionPathMove;
 	friend class private_map::EnemyZone;
@@ -312,7 +312,7 @@ private:
 	private_map::ObjectManager* _object_manager;
 
 	//! \brief This keeps a pointer to the active dialogue.
-	private_map::DialogueWindow* _dialogue_manager;
+	private_map::DialogueSupervisor* _dialogue_manager;
 
 	//! \brief Class member object which processes all information related to treasure discovery
 	private_map::TreasureMenu* _treasure_menu;

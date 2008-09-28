@@ -109,7 +109,7 @@ MapMode::MapMode(string filename) :
 
 	_tile_manager = new TileManager();
 	_object_manager = new ObjectManager();
-	_dialogue_manager = new DialogueWindow();
+	_dialogue_manager = new DialogueSupervisor();
 	_treasure_menu = new TreasureMenu();
 
 	_intro_timer.Initialize(7000, 0, this);
@@ -334,8 +334,8 @@ void MapMode::_HandleInputExplore() {
 	if (InputManager->ConfirmPress()) {
 		MapObject* obj = _object_manager->FindNearestObject(_camera);
 
-		if (obj && (obj->GetType() == VIRTUAL_TYPE || obj->GetType() == SPRITE_TYPE)) {
-			VirtualSprite *sp = reinterpret_cast<VirtualSprite*>(obj);
+		if (obj && (obj->GetType() == SPRITE_TYPE)) {
+			MapSprite *sp = reinterpret_cast<MapSprite*>(obj);
 
 			if (sp->HasDialogue()) {
 				sp->SaveState();
@@ -343,7 +343,7 @@ void MapMode::_HandleInputExplore() {
 
 				sp->moving = false;
 				sp->current_action = -1;
-				sp->SetDirection(VirtualSprite::CalculateOppositeDirection(_camera->GetDirection()));
+				sp->SetDirection(CalculateOppositeDirection(_camera->GetDirection()));
 				_dialogue_manager->BeginDialogue(sp->GetCurrentDialogue());
 				sp->NextDialogue();
 				_map_state = DIALOGUE;
