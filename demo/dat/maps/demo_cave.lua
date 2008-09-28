@@ -352,6 +352,23 @@ upper_layer[59] = { 287, 351, 382, 380, 381, 382, 383, 348, 349, 350, 383, 412, 
 -- All, if any, existing contexts follow.
 -- Allacrost map editor end. Do not edit this line. --
 
+dialogue_text = {}
+dialogue_text[0] = hoa_utils.Translate("Claudius, what are you doing here?");
+dialogue_text[1] = hoa_utils.Translate("I came in this cave for training.");
+dialogue_text[2] = hoa_utils.Translate("Well, good job getting this far all by yourself. This is a pretty dangerous place for someone as inexperienced as yourself.");
+dialogue_text[3] = hoa_utils.Translate("Yes well, I have to train hard if I want to be able to spar with you evenly one day, Jonas. By the way, what were you doing?");
+dialogue_text[4] = hoa_utils.Translate("The cave goes deeper than this, but it appears a collapse here has blocked the way. I was trying to find an alternative passage, but it appears that the inner chambers are now completely inaccessible.");
+dialogue_text[5] = hoa_utils.Translate("In any case, this is as far as you can go in this demo, so thanks for.....");
+dialogue_text[6] = hoa_utils.Translate("Wait, what was that noise? Hey, look out!");
+dialogue_text[7] = hoa_utils.Translate("Phew, that was a shock. I've never seen such foes wandering in this cave. Nice job taking care of them Claudius, I can definitely tell that your swordsmanship has improved.");
+dialogue_text[8] = hoa_utils.Translate("Thank you. By the way...why didn't you fight with me in that battle?");
+dialogue_text[9] = hoa_utils.Translate("Ah, err...well you see, you'll never reach your full potential if you always have your seniors stepping in for you.");
+dialogue_text[10] = hoa_utils.Translate("I see.");
+dialogue_text[11] = hoa_utils.Translate("And besides, I don't even have my own battle sprite graphics yet! The development team needs more artists to help move the game along!");
+dialogue_text[12] = hoa_utils.Translate(".....");
+dialogue_text[13] = hoa_utils.Translate("Well, this truly is the end of the demo. Thanks for playing.");
+
+
 function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
@@ -376,7 +393,7 @@ function Load(m)
 	sprite:SetDirection(hoa_map.MapMode.EAST);
 	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
 	sprite:LoadRunningAnimations("img/sprites/map/claudius_run.png");
-	sprite:SetFacePortrait("img/portraits/map/claudius.png");
+	sprite:LoadFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
 	-- Set the camera to focus on the player's sprite
 	map:_SetCameraFocus(sprite);
@@ -395,46 +412,27 @@ function Load(m)
 	sprite:SetDirection(hoa_map.MapMode.SOUTH);
 	sprite:LoadStandardAnimations("img/sprites/map/soldier_npc01_walk.png");
 
-	dtext = {
-	  [0] = hoa_utils.Translate("Claudius, what are you doing here?");
-	  [1] = hoa_utils.Translate("I came in this cave for training.");
-	  [2] = hoa_utils.Translate("Well, good job getting this far all by yourself. This is a pretty dangerous place for someone as inexperienced as yourself.");
-	  [3] = hoa_utils.Translate("Yes well, I have to train hard if I want to be able to spar with you evenly one day, Jonas. By the way, what were you doing?");
-	  [4] = hoa_utils.Translate("The cave goes deeper than this, but it appears a collapse here has blocked the way. I was trying to find an alternative passage, but it appears that the inner chambers are now completely inaccessible.");
-	  [5] = hoa_utils.Translate("In any case, this is as far as you can go in this demo, so thanks for.....");
-	  [6] = hoa_utils.Translate("Wait, what was that noise? Hey, look out!");
-
-	  [7] = hoa_utils.Translate("Phew, that was a shock. I've never seen such foes wandering in this cave. Nice job taking care of them Claudius, I can definitely tell that your swordsmanship has improved.");
-	  [8] = hoa_utils.Translate("Thank you. By the way...why didn't you fight with me in that battle?");
-	  [9] = hoa_utils.Translate("Ah, err...well you see, you'll never reach your full potential if you always have your seniors stepping in for you.");
-	 [10] = hoa_utils.Translate("I see.");
-	 [11] = hoa_utils.Translate("And besides, I don't even have my own battle sprite graphics yet! The development team needs more artists to help move the game along!");
-	 [12] = hoa_utils.Translate(".....");
-
-	 [13] = hoa_utils.Translate("Well, this truly is the end of the demo. Thanks for playing.");
-	}
-
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext[0], 1, -1, -1); --line 0
-	dialogue:AddText(dtext[1], 1000, -1, -1); --line 1
-	dialogue:AddText(dtext[2], 1, -1, -1); --line 2
-	dialogue:AddText(dtext[3], 1000, -1, -1); --line 3
-	dialogue:AddText(dtext[4], 1, -1, -1); --line 4
-	dialogue:AddText(dtext[5], 1, -1, 0); -- line 5: Creepy sound plays here
-	dialogue:AddText(dtext[6], 1, -1, 1); -- line 6: Boss battle occurs
+	dialogue:AddText(dialogue_text[0], 1, -1, -1); --line 0
+	dialogue:AddText(dialogue_text[1], 1000, -1, -1); --line 1
+	dialogue:AddText(dialogue_text[2], 1, -1, -1); --line 2
+	dialogue:AddText(dialogue_text[3], 1000, -1, -1); --line 3
+	dialogue:AddText(dialogue_text[4], 1, -1, -1); --line 4
+	dialogue:AddText(dialogue_text[5], 1, -1, 0); -- line 5: Creepy sound plays here
+	dialogue:AddText(dialogue_text[6], 1, -1, 1); -- line 6: Boss battle occurs
 	sprite:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext[7], 1, -1, -1); --line 7
-	dialogue:AddText(dtext[8], 1000, -1, -1); --line 8
-	dialogue:AddText(dtext[9], 1, -1, -1); --line 9
-	dialogue:AddText(dtext[10], 1000, -1, -1); --line 10
-	dialogue:AddText(dtext[11], 1, -1, -1); -- line 11
-	dialogue:AddText(dtext[12], 1000, -1, -1); -- line 12
+	dialogue:AddText(dialogue_text[7], 1, -1, -1); --line 7
+	dialogue:AddText(dialogue_text[8], 1000, -1, -1); --line 8
+	dialogue:AddText(dialogue_text[9], 1, -1, -1); --line 9
+	dialogue:AddText(dialogue_text[10], 1000, -1, -1); --line 10
+	dialogue:AddText(dialogue_text[11], 1, -1, -1); -- line 11
+	dialogue:AddText(dialogue_text[12], 1000, -1, -1); -- line 12
 
 	sprite:AddDialogue(dialogue);
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext[13], 1, -1, -1); -- line 13
+	dialogue:AddText(dialogue_text[13], 1, -1, -1); -- line 13
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionAnimate(sprite);

@@ -42,111 +42,7 @@ namespace hoa_map {
 
 namespace private_map {
 
-// ****************************************************************************
-// ********************* VirtualSprite Class Functions ************************
-// ****************************************************************************
-
-VirtualSprite::VirtualSprite() :
-	face_portrait(NULL),
-	direction(SOUTH),
-	movement_speed(NORMAL_SPEED),
-	moving(false),
-	is_running(false),
-	seen_all_dialogue(true),
-	has_active_dialogue(true),
-	_current_dialogue(0),
-	_show_dialogue_icon(true),
-	_dialogue_icon_color(1.0f, 1.0f, 1.0f, 0.0f),
-	current_action(-1),
-	forced_action(-1),
-	_saved(false),
-	_saved_direction(0),
-	_saved_movement_speed(0.0f),
-	_saved_moving(false),
-	_saved_current_action(-1)
-{
-	MapObject::_object_type = VIRTUAL_TYPE;
-}
-
-
-
-VirtualSprite::~VirtualSprite() {
-	if (face_portrait != NULL) {
-		delete face_portrait;
-		face_portrait = NULL;
-	}
-
-	for (uint32 i = 0; i < actions.size(); i++) {
-		delete actions[i];
-	}
-	actions.clear();
-
-	// Update the seen events for all dialogues
-	for (uint32 i = 0; i < dialogues.size(); ++i) {
-		string event_name = "s" + NumberToString(object_id) + "_d" + NumberToString(dialogues.size() - 1);
-		MapMode::_current_map->_map_event_group->SetEvent(event_name, dialogues[i]->GetTimesSeen());
-		delete dialogues[i];
-	}
-	dialogues.clear();
-}
-
-
-
-void VirtualSprite::AddDialogue(MapDialogue* md) {
-	dialogues.push_back(md);
-	md->SetOwner(this);
-
-	// Look up the event for this dialogue to see whether it has already been read or not
-	string event_name = "s" + NumberToString(object_id) + "_d" + NumberToString(dialogues.size() - 1);
-	md->SetEventName(event_name);
-	GlobalEventGroup& event_group = *(MapMode::_loading_map->_map_event_group);
-
-	if (event_group.DoesEventExist(event_name) == false) {
-		event_group.AddNewEvent(event_name, 0);
-		seen_all_dialogue = false;
-	}
-	else {
-		md->SetTimesSeen(event_group.GetEvent(event_name));
-		if (md->HasAlreadySeen() == false)
-			seen_all_dialogue = false;
-	}
-}
-
-
-void VirtualSprite::UpdateSeenDialogue() {
-	// Check all dialogues for any which have not yet been read
-	for (uint32 i = 0; i < dialogues.size(); i++) {
-		if (dialogues[i]->HasAlreadySeen() == false) {
-			seen_all_dialogue = false;
-			return;
-		}
-	}
-
-	seen_all_dialogue = true;
-}
-
-
-
-void VirtualSprite::UpdateActiveDialogue() {
-	// Check all dialogues for any that are still active.
-	for (size_t i = 0; i < dialogues.size(); i++) {
-		if (dialogues[i]->IsAvailable()) {
-			has_active_dialogue = true;
-			return;
-		}
-	}
-	has_active_dialogue = false;
-}
-
-void VirtualSprite::ClearDialogues() {
-	for (size_t i = 0; i < dialogues.size(); i++)
-		delete dialogues[i];
-
-	dialogues.clear();
-}
-
-
-uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
+uint16 CalculateOppositeDirection(const uint16 direction) {
 	switch (direction) {
 		case NORTH:      return SOUTH;
 		case SOUTH:      return NORTH;
@@ -166,19 +62,38 @@ uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 	}
 }
 
+// ****************************************************************************
+// ********************* VirtualSprite Class Functions ************************
+// ****************************************************************************
+
+VirtualSprite::VirtualSprite() :
+	direction(SOUTH),
+	movement_speed(NORMAL_SPEED),
+	moving(false),
+	is_running(false),
+	current_action(-1),
+	forced_action(-1),
+	_saved(false),
+	_saved_direction(0),
+	_saved_movement_speed(0.0f),
+	_saved_moving(false),
+	_saved_current_action(-1)
+{
+	MapObject::_object_type = VIRTUAL_TYPE;
+}
+
+
+
+VirtualSprite::~VirtualSprite() {
+	for (uint32 i = 0; i < actions.size(); i++) {
+		delete actions[i];
+	}
+	actions.clear();
+}
+
 
 
 void VirtualSprite::Update() {
-	// Update the alpha of the dialogue icon according to it's distance from the player sprite
-	const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
-	float icon_alpha = 1.0f - (fabs( ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + fabs(ComputeYLocation() -
-		MapMode::_current_map->_camera->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
-
-	if (icon_alpha < 0)
-		icon_alpha = 0;
-	_dialogue_icon_color.SetAlpha(icon_alpha);
-	MapMode::_current_map->_new_dialogue_icon.Update();
-
 	if (!updatable) {
 		return;
 	}
@@ -196,6 +111,7 @@ void VirtualSprite::Update() {
 		}
 	}
 
+	// The remainder of this function handles movement, so if the sprite is not moving there is nothing left to do
 	if (moving == false)
 		return;
 
@@ -331,26 +247,13 @@ void VirtualSprite::Update() {
 
 
 
-void VirtualSprite::Draw() {
-	if (HasDialogue()) {
-		if (IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons() && seen_all_dialogue == false) {
-			VideoManager->MoveRelative(0, -GetImgHeight());
-			MapMode::_current_map->_new_dialogue_icon.Draw(_dialogue_icon_color);
-		}
-	}
-}
-
-
-
 void VirtualSprite::SetDirection(uint16 dir) {
-	// If the direction is a lateral one, simply set it and return
+	// Nothing complicated needed for lateral directions
 	if (dir & (NORTH | SOUTH | EAST | WEST)) {
 		direction = dir;
-		return;
 	}
-
-	// Otherwise the direction is diagonal, and we must figure out which way the sprite should face.
-	if (dir & MOVING_NORTHWEST) {
+	// Otherwise if the direction is diagonal we must figure out which way the sprite should face.
+	else if (dir & MOVING_NORTHWEST) {
 		if (direction & (FACING_NORTH | FACING_EAST))
 			direction = NW_NORTH;
 		else
@@ -374,52 +277,10 @@ void VirtualSprite::SetDirection(uint16 dir) {
 		else
 			direction = SE_EAST;
 	}
-	else { // Invalid
-		if (MAP_DEBUG)
-			fprintf(stderr, "ERROR: in VirtualSprite::SetDirection tried to set an invalid direction (%d)\n", dir);
+	else {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to set an invalid direction: " << dir << endl;
 	}
 } // void VirtualSprite::SetDirection(uint16 dir)
-
-
-
-void VirtualSprite::SetFacePortrait(std::string pn) {
-	if (face_portrait != NULL) {
-		delete face_portrait;
-	}
-
-	face_portrait = new StillImage();
-	if (face_portrait->Load(pn) == false) {
-		delete face_portrait;
-		face_portrait = NULL;
-		PRINT_ERROR << "failed to load face portrait" << endl;
-	}
-}
-
-
-
-void VirtualSprite::SaveState() {
-	_saved = true;
-
-	_saved_direction = direction;
-	_saved_movement_speed = movement_speed;
-	_saved_moving = moving;
-	_saved_current_action = current_action;
-}
-
-
-
-bool VirtualSprite::RestoreState() {
-	if (_saved == false)
-		return false;
-
-	_saved = false;
-	 direction = _saved_direction;
-	 movement_speed = _saved_movement_speed;
-	 moving = _saved_moving;
-	 current_action = _saved_current_action;
-
-	 return true;
-}
 
 
 
@@ -454,18 +315,45 @@ void VirtualSprite::SetRandomDirection() {
 	}
 }
 
+
+
+void VirtualSprite::SaveState() {
+	_saved = true;
+	_saved_direction = direction;
+	_saved_movement_speed = movement_speed;
+	_saved_moving = moving;
+	_saved_current_action = current_action;
+}
+
+
+
+void VirtualSprite::RestoreState() {
+	if (_saved == false)
+		IF_PRINT_WARNING(MAP_DEBUG) << "restoring state when no saved state was detected" << endl;
+
+	_saved = false;
+	 direction = _saved_direction;
+	 movement_speed = _saved_movement_speed;
+	 moving = _saved_moving;
+	 current_action = _saved_current_action;
+}
+
 // ****************************************************************************
-// ************************ MapSprite Class Functions *************************
+// ********** MapSprite Class
 // ****************************************************************************
 
 // Constructor for critical class members. Other members are initialized via support functions
 MapSprite::MapSprite() :
+	face_portrait(NULL),
+	seen_all_dialogue(true),
+	has_active_dialogue(true),
+	_current_dialogue(0),
+	_dialogue_icon_color(1.0f, 1.0f, 1.0f, 0.0f),
 	was_moving(false),
 	has_running_anim(false),
 	current_animation(ANIM_STANDING_SOUTH)
 {
 	MapObject::_object_type = SPRITE_TYPE;
-	VirtualSprite::face_portrait = 0;
 }
 
 
@@ -479,6 +367,14 @@ MapSprite::~MapSprite() {
 	// Free animations
 	for (vector<AnimatedImage>::iterator i = animations.begin(); i != animations.end(); ++i)
 		(*i).Clear();
+
+	// Update the seen events for all dialogues
+	for (uint32 i = 0; i < dialogues.size(); ++i) {
+		string event_name = "s" + NumberToString(object_id) + "_d" + NumberToString(dialogues.size() - 1);
+		MapMode::_current_map->_map_event_group->SetEvent(event_name, dialogues[i]->GetTimesSeen());
+		delete dialogues[i];
+	}
+	dialogues.clear();
 }
 
 
@@ -591,8 +487,32 @@ bool MapSprite::LoadRunningAnimations(std::string filename) {
 } // bool MapSprite::LoadRunningAnimations(std::string filename)
 
 
+void MapSprite::LoadFacePortrait(std::string pn) {
+	if (face_portrait != NULL) {
+		delete face_portrait;
+	}
+
+	face_portrait = new StillImage();
+	if (face_portrait->Load(pn) == false) {
+		delete face_portrait;
+		face_portrait = NULL;
+		PRINT_ERROR << "failed to load face portrait" << endl;
+	}
+}
+
+
 // Updates the state of the sprite
 void MapSprite::Update() {
+	// Update the alpha of the dialogue icon according to it's distance from the player sprite
+	const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
+	float icon_alpha = 1.0f - (fabs(ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + fabs(ComputeYLocation() -
+		MapMode::_current_map->_camera->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
+
+	if (icon_alpha < 0)
+		icon_alpha = 0;
+	_dialogue_icon_color.SetAlpha(icon_alpha);
+	MapMode::_current_map->_new_dialogue_icon.Update();
+
 	// Set the sprite's animation to the standing still position if movement has just stopped
 	if (!moving) {
 		if (was_moving) {
@@ -667,8 +587,68 @@ void MapSprite::Update() {
 void MapSprite::Draw() {
 	if (MapObject::ShouldDraw() == true) {
 		animations[current_animation].Draw();
-		VirtualSprite::Draw();
+
+		if (HasDialogue() && MapMode::_IsShowingDialogueIcons() && seen_all_dialogue == false) {
+			VideoManager->MoveRelative(0, -GetImgHeight());
+			MapMode::_current_map->_new_dialogue_icon.Draw(_dialogue_icon_color);
+		}
 	}
+}
+
+
+
+
+void MapSprite::AddDialogue(MapDialogue* md) {
+	dialogues.push_back(md);
+	md->SetOwner(this);
+
+	// Look up the event for this dialogue to see whether it has already been read or not
+	string event_name = "s" + NumberToString(object_id) + "_d" + NumberToString(dialogues.size() - 1);
+	md->SetEventName(event_name);
+	GlobalEventGroup& event_group = *(MapMode::_loading_map->_map_event_group);
+
+	if (event_group.DoesEventExist(event_name) == false) {
+		event_group.AddNewEvent(event_name, 0);
+		seen_all_dialogue = false;
+	}
+	else {
+		md->SetTimesSeen(event_group.GetEvent(event_name));
+		if (md->HasAlreadySeen() == false)
+			seen_all_dialogue = false;
+	}
+}
+
+
+void MapSprite::UpdateSeenDialogue() {
+	// Check all dialogues for any which have not yet been read
+	for (uint32 i = 0; i < dialogues.size(); i++) {
+		if (dialogues[i]->HasAlreadySeen() == false) {
+			seen_all_dialogue = false;
+			return;
+		}
+	}
+
+	seen_all_dialogue = true;
+}
+
+
+
+void MapSprite::UpdateActiveDialogue() {
+	// Check all dialogues for any that are still active.
+	for (size_t i = 0; i < dialogues.size(); i++) {
+		if (dialogues[i]->IsAvailable()) {
+			has_active_dialogue = true;
+			return;
+		}
+	}
+	has_active_dialogue = false;
+}
+
+void MapSprite::ClearDialogues() {
+	for (size_t i = 0; i < dialogues.size(); i++)
+		delete dialogues[i];
+
+	dialogues.clear();
 }
 
 
@@ -682,18 +662,15 @@ void MapSprite::SaveState() {
 
 
 
-bool MapSprite::LoadState() {
-	if (!VirtualSprite::RestoreState())
-		return false;
+void MapSprite::RestoreState() {
+	VirtualSprite::RestoreState();
 
 	was_moving = _saved_was_moving;
 	current_animation = _saved_current_animation;
-
-	return true;
 }
 
 // *****************************************************************************
-// ********************** EnemySprite Class Functions ************************
+// ********** EnemySprite Class
 // *****************************************************************************
 
 EnemySprite::EnemySprite() :

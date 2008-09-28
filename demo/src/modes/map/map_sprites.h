@@ -108,6 +108,13 @@ const uint32 ANIM_RUNNING_WEST   = 10;
 const uint32 ANIM_RUNNING_EAST   = 11;
 //@}
 
+
+/** \brief Returns the opposite facing direction of the direction given in parameter.
+*** \return A direction that faces opposite to the argument direction
+*** \note This is mostly used as an helper function to make sprites face each other in a conversation.
+**/
+uint16 CalculateOppositeDirection(const uint16 direction);
+
 /** ****************************************************************************
 *** \brief A special type of sprite with no physical image
 ***
@@ -130,16 +137,6 @@ public:
 
 	~VirtualSprite();
 
-	// ---------- Public Members
-
-	//! \brief The name of the sprite, as seen by the player in the game.
-	hoa_utils::ustring name;
-
-	/** \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
-	*** \note Not all sprites have portraits, in which case this member will be NULL
-	**/
-	hoa_video::StillImage* face_portrait;
-
 	// ---------- Public Members: Orientation and Movement
 
 	/** \brief A bit-mask for the sprite's draw orientation and direction vector.
@@ -158,32 +155,8 @@ public:
 	**/
 	bool moving;
 
-	//! \brief Set to true when the sprite is running rather than just walking
+	//! \brief Set to true when the sprite is running rather than walking
 	bool is_running;
-
-	// ---------- Public Members: Dialogue
-
-	//! \brief Set to false if the sprite contains dialogue that has not been seen by the player
-	bool seen_all_dialogue;
-
-	//! \brief True is sprite contains active dialogue.
-	bool has_active_dialogue;
-
-	//! \brief This vector contains all the dialogues of the sprite
-	std::vector<MapDialogue*> dialogues;
-
-	/** \brief An index to the dialogues vector, representing the current sprite dialogue to
-	*** display when talked to by the player. A negative value indicates that the sprite has no dialogue.
-	*** \note If the sprite has no entries in its dialogues vector, this member should remain negative,
-	*** otherwise a segmentation fault will occur.
-	**/
-	int16 _current_dialogue;
-
-	//! \brief Indicates if the icon indicating that there is a dialogue available should be drawn or not.
-	bool _show_dialogue_icon;
-
-	//! \brief Used to fade the dialogue icon according to distance
-	hoa_video::Color _dialogue_icon_color;
 
 	// ---------- Public Members: Actions
 
@@ -200,30 +173,15 @@ public:
 	//! \brief A container for all of the actions this sprite performs.
 	std::vector<SpriteAction*> actions;
 
-	/** \name Saved state attributes
-	*** These attributes are used to save and load the state of a VirtualSprite
-	**/
-	//@{
-	//! \brief This indicates if a state was saved or not.
-	bool _saved;
-	uint16 _saved_direction;
-	float _saved_movement_speed;
-	bool _saved_moving;
-	int8 _saved_current_action;
-	//@}
-
-	// -------------------- Public methods
+	// ---------- Public methods
 
 	//! \brief Updates the virtual object's position if it is moving, otherwise does nothing.
 	virtual void Update();
 
-	//! \brief Draws a dialogue icon over the virtual sprite if it has to.
-	virtual void Draw();
+	//! \brief Does nothing since virtual sprites have no image to draw
+	virtual void Draw()
+		{}
 
-	/** \name Lua Access Functions
-	*** These functions are specifically written to enable Lua to access the members of this class.
-	**/
-	//@{
 	/** \note This method takes into account the current direction when setting the new direction
 	*** in the case of diagonal movement. For example, if the sprite is currently facing north
 	*** and this function indicates that the sprite should move northwest, it will face north
@@ -231,6 +189,34 @@ public:
 	**/
 	void SetDirection(uint16 dir);
 
+	/** \brief Sets the sprite's direction to a random value
+	*** This function is used mostly for the ActionRandomMove class.
+	**/
+	void SetRandomDirection();
+
+	/** \brief Adds a new action for the sprite to process onto the end of the sprite's action list
+	*** \param act A pointer to the instantiated SpriteAction object to use
+	**/
+	void AddAction(SpriteAction* act)
+		{ act->SetSprite(this); actions.push_back(act); }
+
+	/** \brief Saves the state of the sprite
+	*** Attributes saved: direction, speed, moving state, current action.
+	**/
+	virtual void SaveState();
+
+	/** \brief Restores the saved state of the sprite
+	*** Attributes restored: direction, speed, moving state, current action.
+	**/
+	virtual void RestoreState();
+
+	/** \name Lua Access Functions
+	*** These functions are specifically written to enable Lua to access the members of this class.
+	**/
+	//@{
+	bool IsStateSaved() const
+		{ return _saved; }
+	
 	void SetMovementSpeed(float speed)
 		{ movement_speed = speed; }
 
@@ -239,81 +225,20 @@ public:
 
 	float GetMovementSpeed() const
 		{ return movement_speed; }
-
-	void SetFacePortrait(std::string pn);
 	//@}
 
-	/** \brief This method will save the state of a sprite.
-	*** Attributes saved: direction, speed, moving state, name, current action.
-	**/
-	virtual void SaveState();
-
-	/** \brief This method will restore the saved state of a sprite.
-	*** Attributes rest: direction, speed, moving state, name, current action.
-	*** \return false if there was no saved state, true otherwise.
-	**/
-	virtual bool RestoreState();
-
-	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#seen_all_dialogue
-	void UpdateSeenDialogue();
-
-	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#has_active_dialogue
-	void UpdateActiveDialogue();
-
-	/** \name Dialogue control methods
-	*** These methods are used to add and control which dialogue should the sprite speak.
+private:
+	/** \name Saved state attributes
+	*** These attributes are used to save and restore the state of a VirtualSprite
 	**/
 	//@{
-	void AddDialogue(MapDialogue* md);
-
-	bool HasDialogue() const
-		//{ return (dialogues.size() > 0); }
-		{ if(dialogues.size() > 0) return has_active_dialogue; else return false; }
-
-	MapDialogue* GetCurrentDialogue() const
-		{ return dialogues[_current_dialogue]; }
-
-	void SetDialogue(const int16 dialogue)
-		{ if (static_cast<uint16>(dialogue) >= dialogues.size()) return; else _current_dialogue = dialogue; }
-
-	void NextDialogue() {
-		do {
-			_current_dialogue++;
-			if (static_cast<uint16>(_current_dialogue) >= dialogues.size())
-				_current_dialogue = 0;
-		} while (dialogues[_current_dialogue]->IsAvailable() == false);
-	}
-
-	int16 GetNumDialogues() const
-		{ return dialogues.size(); }
-
-	void ShowDialogueIcon(bool state)
-		{ _show_dialogue_icon = state; }
-
-	bool IsShowingDialogueIcon() const
-		{ return _show_dialogue_icon; }
+	//! \brief Indicates if the other saved members are valid because the state has recently been saved
+	bool _saved;
+	uint16 _saved_direction;
+	float _saved_movement_speed;
+	bool _saved_moving;
+	int8 _saved_current_action;
 	//@}
-
-	/** \brief Clears all of this sprites dialogues. Note that this will affect the saved game's
-	*** "s_d??" events.
-	**/
-	void ClearDialogues();
-
-	/** \brief Adds a new action for the sprite to process onto the end of the sprite's action list
-	*** \param act A pointer to the instantiated SpriteAction object to use
-	**/
-	void AddAction(SpriteAction* act)
-		{ act->SetSprite(this); actions.push_back(act); }
-
-	/** \brief This static class function returns the opposite direction of the direction given in parameter.
-	*** \note This is mostly used as an helper function to make sprites face each other.
-	**/
-	static uint16 CalculateOppositeDirection(const uint16 direction);
-
-	/** \brief Sets the sprite's direction to a random value
-	*** This function is used mostly for the ActionRandomMove class.
-	**/
-	void SetRandomDirection();
 }; // class VirtualSprite : public MapObject
 
 
@@ -332,6 +257,14 @@ public:
 	MapSprite();
 
 	~MapSprite();
+
+	//! \brief The name of the sprite, as seen by the player in the game.
+	hoa_utils::ustring name;
+
+	/** \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
+	*** \note Not all sprites have portraits, in which case this member will be NULL
+	**/
+	hoa_video::StillImage* face_portrait;
 
 	//! \brief Holds the previous value of VirtualSprite#moving from the last call to MapSprite#Update().
 	bool was_moving;
@@ -371,11 +304,71 @@ public:
 	**/
 	bool LoadRunningAnimations(std::string filename);
 
+	void LoadFacePortrait(std::string pn);
+
 	//! \brief Updates the sprite's position and state.
 	virtual void Update();
 
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	virtual void Draw();
+
+	// ---------- Public Members: Dialogue
+
+	//! \brief Set to false if the sprite contains dialogue that has not been seen by the player
+	bool seen_all_dialogue;
+
+	//! \brief True is sprite contains active dialogue.
+	bool has_active_dialogue;
+
+	//! \brief This vector contains all the dialogues of the sprite
+	std::vector<MapDialogue*> dialogues;
+
+	/** \brief An index to the dialogues vector, representing the current sprite dialogue to
+	*** display when talked to by the player. A negative value indicates that the sprite has no dialogue.
+	*** \note If the sprite has no entries in its dialogues vector, this member should remain negative,
+	*** otherwise a segmentation fault will occur.
+	**/
+	int16 _current_dialogue;
+
+	//! \brief Used to fade the dialogue icon according to distance
+	hoa_video::Color _dialogue_icon_color;
+
+	// ---------- Public methods: Dialogue
+
+	void AddDialogue(MapDialogue* md);
+
+	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#seen_all_dialogue
+	void UpdateSeenDialogue();
+
+	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#has_active_dialogue
+	void UpdateActiveDialogue();
+
+	/** \brief Clears all of this sprites dialogues. Note that this will affect the saved game's
+	*** "s_d??" events.
+	**/
+	void ClearDialogues();
+
+	bool HasDialogue() const
+		//{ return (dialogues.size() > 0); }
+		{ if(dialogues.size() > 0) return has_active_dialogue; else return false; }
+
+	MapDialogue* GetCurrentDialogue() const
+		{ return dialogues[_current_dialogue]; }
+
+	void SetDialogue(const int16 dialogue)
+		{ if (static_cast<uint16>(dialogue) >= dialogues.size()) return; else _current_dialogue = dialogue; }
+
+	void NextDialogue() {
+		do {
+			_current_dialogue++;
+			if (static_cast<uint16>(_current_dialogue) >= dialogues.size())
+				_current_dialogue = 0;
+		} while (dialogues[_current_dialogue]->IsAvailable() == false);
+	}
+
+	int16 GetNumDialogues() const
+		{ return dialogues.size(); }
+
 
 	/** \name Lua Access Functions
 	*** These functions are specifically written to enable Lua to access the members of this class.
@@ -402,7 +395,7 @@ public:
 	*** current animation.
 	*** \return false if there was no saved state, true otherwise.
 	**/
-	virtual bool LoadState();
+	virtual void RestoreState();
 }; // class MapSprite : public VirtualSprite
 
 
