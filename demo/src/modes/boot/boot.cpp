@@ -661,18 +661,19 @@ void BootMode::_SetupKeySetttingsMenu() {
 
 
 void BootMode::_SetupJoySetttingsMenu() {
-	_joy_settings_menu.AddOption(MakeUnicodeString("X Axis: "), &BootMode::_RedefineXAxisJoy);
-	_joy_settings_menu.AddOption(MakeUnicodeString("Y Axis: "), &BootMode::_RedefineYAxisJoy);
-//	_joy_settings_menu.AddOption(MakeUnicodeString("Threshold: "), &BootMode::_RedefineThresholdJoy);
+	ustring dummy;
+	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineXAxisJoy);
+	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineYAxisJoy);
+//	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineThresholdJoy);
 	
-	_joy_settings_menu.AddOption(MakeUnicodeString("Confirm: "), &BootMode::_RedefineConfirmJoy);
-	_joy_settings_menu.AddOption(MakeUnicodeString("Cancel: "), &BootMode::_RedefineCancelJoy);
-	_joy_settings_menu.AddOption(MakeUnicodeString("Menu: "), &BootMode::_RedefineMenuJoy);
-	_joy_settings_menu.AddOption(MakeUnicodeString("Swap: "), &BootMode::_RedefineSwapJoy);
-	_joy_settings_menu.AddOption(MakeUnicodeString("Left Select: "), &BootMode::_RedefineLeftSelectJoy);
-	_joy_settings_menu.AddOption(MakeUnicodeString("Right Select: "), &BootMode::_RedefineRightSelectJoy);
-	_joy_settings_menu.AddOption(MakeUnicodeString("Pause: "), &BootMode::_RedefinePauseJoy);
-//	_joy_settings_menu.AddOption(MakeUnicodeString("Quit: "), &BootMode::_RedefineQuitJoy);
+	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineConfirmJoy);
+	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineCancelJoy);
+	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineMenuJoy);
+	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineSwapJoy);
+	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineLeftSelectJoy);
+	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineRightSelectJoy);
+	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefinePauseJoy);
+//	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineQuitJoy);
 
 	_joy_settings_menu.AddOption(MakeUnicodeString("Restore defaults"), &BootMode::_OnRestoreDefaultJoyButtons);
 	_joy_settings_menu.SetWindowed(true);
@@ -1081,17 +1082,23 @@ void BootMode::Update() {
 	}
 
 	// Check for waiting keypresses or joystick button presses
+	SDL_Event ev = InputManager->GetMostRecentEvent();
 	if (_joy_setting_function != NULL)
 	{
-		if (InputManager->AnyKeyPress())
+		if (InputManager->AnyKeyPress() && ev.type == SDL_JOYBUTTONDOWN)
 		{
 			(this->*_joy_setting_function)(InputManager->GetMostRecentEvent().jbutton.button);
 			_joy_setting_function = NULL;
 			_has_modified_settings = true;
 			_UpdateJoySettings();
 			_message_window.Hide();
-			return;
 		}
+		if (InputManager->CancelPress())
+		{
+			_joy_setting_function = NULL;
+			_message_window.Hide();
+		}
+		return;
 	}
 	
 	if (_joy_axis_setting_function != NULL)
@@ -1099,26 +1106,36 @@ void BootMode::Update() {
 		int8 x = InputManager->GetLastAxisMoved();
 		if (x != -1)
 		{
-			(this->*_joy_axis_setting_function)(InputManager->GetLastAxisMoved());
+			(this->*_joy_axis_setting_function)(x);
 			_joy_axis_setting_function = NULL;
 			_has_modified_settings = true;
 			_UpdateJoySettings();
 			_message_window.Hide();
-			return;
 		}
+		if (InputManager->CancelPress())
+		{
+			_joy_axis_setting_function = NULL;
+			_message_window.Hide();
+		}
+		return;
 	}
 
 	if (_key_setting_function != NULL)
 	{
-		if (InputManager->AnyKeyPress())
+		if (InputManager->AnyKeyPress() && ev.type == SDL_KEYDOWN)
 		{
 			(this->*_key_setting_function)(InputManager->GetMostRecentEvent().key.keysym.sym);
 			_key_setting_function = NULL;
 			_has_modified_settings = true;
 			_UpdateKeySettings();
 			_message_window.Hide();
-			return;
 		}
+		if (InputManager->CancelPress())
+		{
+			_key_setting_function = NULL;
+			_message_window.Hide();
+		}
+		return;
 	}
 	
 	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
