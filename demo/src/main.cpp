@@ -236,6 +236,14 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("ERROR: unable to initialize ModeManager", __FILE__, __LINE__, __FUNCTION__);
 	}
 
+	// Set the window icon
+	#ifdef _WIN32
+		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
+	#else
+		// Later, add an icon here for non-Windows systems (which support more than 32x32 .bmp files)
+		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
+	#endif
+
 	// Load all the settings from lua
 	if (LoadSettings() == false)
 		throw Exception("ERROR: Unable to load settings file", __FILE__, __LINE__, __FUNCTION__);
@@ -272,14 +280,6 @@ void InitializeEngine() throw (Exception) {
 
 	// Set the window title and icon name
 	SDL_WM_SetCaption("Hero of Allacrost", "Hero of Allacrost");
-
-	// Set the window icon
-	#ifdef _WIN32
-		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
-	#else
-		// Later, add an icon here for non-Windows systems (which support more than 32x32 .bmp files)
-		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
-	#endif
 
 	// Hide the mouse cursor since we don't use or acknowledge mouse input from the user
 	SDL_ShowCursor(SDL_DISABLE);
