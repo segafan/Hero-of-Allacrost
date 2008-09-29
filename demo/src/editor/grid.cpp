@@ -426,14 +426,10 @@ void Grid::SaveMap()
 	const char * BEFORE_TEXT_MARKER = "-- Allacrost map editor begin. Do not edit this line. --";
 	const char * AFTER_TEXT_MARKER =  "-- Allacrost map editor end. Do not edit this line. --";
 
-// This is separated into Win32 and other because this is a workaround for a bug
-// that only affects Windows, and we are so very near release date.
-// The windows version will probably work for Linux and Mac too
 	// First, get the non-editor data (such as map scripting) from the file to save, so we don't clobber it.
 	file.open(_file_name.toAscii(), ifstream::in);
 	if (file.is_open()) {
-		
-#ifdef WIN32
+		// Put all text before BEFORE_TEXT_MARKER into before_text string
 		while(!file.eof()) {
 			file.clear();
 			file.getline(buffer, BUFFER_SIZE);
@@ -445,6 +441,7 @@ void Grid::SaveMap()
 			}
 		}
 		
+		// Search for AFTER_TEXT_MARKER
 		while (!file.eof()) {
 			file.clear();
 			file.getline(buffer, BUFFER_SIZE);
@@ -452,6 +449,7 @@ void Grid::SaveMap()
 				break;
 		}
 		
+		// Put all text after AFTER_TEXT_MARKER into after_text string
 		while (!file.eof()) {
 			file.clear();
 			file.getline(buffer, BUFFER_SIZE);
@@ -461,48 +459,6 @@ void Grid::SaveMap()
 			}
 		}
 
-#else
-		// Get the positions of the begin and end markers.
-		while(!file.eof()) {
-			file.clear();
-			before_pos = file.tellg();
-			file.getline(buffer, BUFFER_SIZE);
-			if (strstr(buffer, BEFORE_TEXT_MARKER))
-				break;
-		}
-
-		while (!file.eof()) {
-			file.clear();
-			file.getline(buffer, BUFFER_SIZE);
-			if (strstr(buffer, AFTER_TEXT_MARKER)) {
-				after_pos = file.tellg();
-				break;
-			}
-		}
-
-		// Save everything before "map editor begin" into before_text
-		file.seekg(0);
-		read_bytes = 0;
-		while (read_bytes < before_pos) {
-			bytes_to_read = before_pos - read_bytes;
-			if (bytes_to_read > BUFFER_SIZE - 1)
-				bytes_to_read = BUFFER_SIZE - 1;
-
-			file.read(buffer, bytes_to_read);
-			buffer[bytes_to_read] = 0;
-			before_text.append(buffer);
-			read_bytes += bytes_to_read;
-		}
-
-		// Save everything after "map editor end" into after_text
-		file.seekg(after_pos);
-		while (!file.eof()) {
-			file.read(buffer, BUFFER_SIZE - 1);
-			buffer[file.gcount()] = 0;
-			after_text.append(buffer);
-		}
-
-#endif
 		file.close();
 	}
 
