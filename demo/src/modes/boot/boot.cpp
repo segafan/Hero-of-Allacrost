@@ -60,6 +60,7 @@ BootMode::BootMode() :
 	_main_menu(0, false, this),
 	_key_setting_function(NULL),
 	_joy_setting_function(NULL),
+	_joy_axis_setting_function(NULL),
 	_message_window(string(""), 210.0f, 35.0f),
 	_latest_version(true),
 	_has_modified_settings(false)
@@ -475,6 +476,21 @@ void BootMode::_SetPauseKey(const SDLKey &key)
 { InputManager->SetPauseKey(key); }
 
 
+// Redefine joystick axes settings
+void BootMode::_RedefineXAxisJoy()
+{
+	_joy_axis_setting_function = &BootMode::_SetXAxisJoy;
+	_ShowMessageWindow(WAIT_JOY_AXIS);
+	InputManager->ResetLastAxisMoved();
+}
+
+void BootMode::_RedefineYAxisJoy()
+{
+	_joy_axis_setting_function = &BootMode::_SetYAxisJoy;
+	_ShowMessageWindow(WAIT_JOY_AXIS);
+	InputManager->ResetLastAxisMoved();
+}
+
 // Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
 void BootMode::_RedefineConfirmJoy() 
 { 
@@ -518,6 +534,10 @@ void BootMode::_RedefinePauseJoy()
 	_ShowMessageWindow(true);
 }
 
+void BootMode::_SetXAxisJoy(int8 axis)
+{ InputManager->SetXAxisJoy(axis); }
+void BootMode::_SetYAxisJoy(int8 axis)
+{ InputManager->SetYAxisJoy(axis); }
 void BootMode::_SetConfirmJoy(uint8 button)
 { InputManager->SetConfirmJoy(button); }
 void BootMode::_SetCancelJoy(uint8 button)
@@ -533,15 +553,29 @@ void BootMode::_SetRightSelectJoy(uint8 button)
 void BootMode::_SetPauseJoy(uint8 button)
 { InputManager->SetPauseJoy(button); }
 
-void BootMode::_ShowMessageWindow(bool joystick)
-{ 
+void BootMode::_ShowMessageWindow(WAIT_FOR wait)
+{
 	string message = "";
-	if (joystick)
+	if (wait == WAIT_JOY_BUTTON)
 		message = "Please press a new joystick button.";
-	else
+	else if (wait == WAIT_KEY)
 		message = "Please press a new key.";
+	else if (wait == WAIT_JOY_AXIS)
+		message = "Please move an axis.";
+	else {
+		PRINT_WARNING << "Undefined wait value." << std::endl;
+		return;
+	}
 	_message_window.SetText(message);
 	_message_window.Show();
+}
+
+void BootMode::_ShowMessageWindow(bool joystick)
+{
+	if (joystick)
+		_ShowMessageWindow(WAIT_JOY_BUTTON);
+	else
+		_ShowMessageWindow(WAIT_KEY);
 }
 
 
@@ -627,6 +661,10 @@ void BootMode::_SetupKeySetttingsMenu() {
 
 
 void BootMode::_SetupJoySetttingsMenu() {
+	_joy_settings_menu.AddOption(MakeUnicodeString("X Axis: "), &BootMode::_RedefineXAxisJoy);
+	_joy_settings_menu.AddOption(MakeUnicodeString("Y Axis: "), &BootMode::_RedefineYAxisJoy);
+//	_joy_settings_menu.AddOption(MakeUnicodeString("Threshold: "), &BootMode::_RedefineThresholdJoy);
+	
 	_joy_settings_menu.AddOption(MakeUnicodeString("Confirm: "), &BootMode::_RedefineConfirmJoy);
 	_joy_settings_menu.AddOption(MakeUnicodeString("Cancel: "), &BootMode::_RedefineCancelJoy);
 	_joy_settings_menu.AddOption(MakeUnicodeString("Menu: "), &BootMode::_RedefineMenuJoy);
@@ -634,11 +672,12 @@ void BootMode::_SetupJoySetttingsMenu() {
 	_joy_settings_menu.AddOption(MakeUnicodeString("Left Select: "), &BootMode::_RedefineLeftSelectJoy);
 	_joy_settings_menu.AddOption(MakeUnicodeString("Right Select: "), &BootMode::_RedefineRightSelectJoy);
 	_joy_settings_menu.AddOption(MakeUnicodeString("Pause: "), &BootMode::_RedefinePauseJoy);
+//	_joy_settings_menu.AddOption(MakeUnicodeString("Quit: "), &BootMode::_RedefineQuitJoy);
 
 	_joy_settings_menu.AddOption(MakeUnicodeString("Restore defaults"), &BootMode::_OnRestoreDefaultJoyButtons);
 	_joy_settings_menu.SetWindowed(true);
 	_joy_settings_menu.SetParent(&_options_menu);
-	_joy_settings_menu.SetTextDensity(40.0f); // Shorten the distance between text lines
+	_joy_settings_menu.SetTextDensity(30.0f); // Shorten the distance between text lines
 }
 
 
@@ -906,13 +945,16 @@ void BootMode::_UpdateKeySettings() {
 
 
 void BootMode::_UpdateJoySettings() {
-	_joy_settings_menu.SetOptionText(0, MakeUnicodeString("Confirm: Button " + NumberToString(InputManager->GetConfirmJoy())));
-	_joy_settings_menu.SetOptionText(1, MakeUnicodeString("Cancel: Button " + NumberToString(InputManager->GetCancelJoy())));
-	_joy_settings_menu.SetOptionText(2, MakeUnicodeString("Menu: Button " + NumberToString(InputManager->GetMenuJoy())));
-	_joy_settings_menu.SetOptionText(3, MakeUnicodeString("Swap: Button " + NumberToString(InputManager->GetSwapJoy())));
-	_joy_settings_menu.SetOptionText(4, MakeUnicodeString("Left Select : Button " + NumberToString(InputManager->GetLeftSelectJoy())));
-	_joy_settings_menu.SetOptionText(5, MakeUnicodeString("Right Select: Button " + NumberToString(InputManager->GetRightSelectJoy())));
-	_joy_settings_menu.SetOptionText(6, MakeUnicodeString("Pause: Button " + NumberToString(InputManager->GetPauseJoy())));
+	int32 i = 0;
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("X Axis: " + NumberToString(InputManager->GetXAxisJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Y Axis: " + NumberToString(InputManager->GetYAxisJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Confirm: Button " + NumberToString(InputManager->GetConfirmJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Cancel: Button " + NumberToString(InputManager->GetCancelJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Menu: Button " + NumberToString(InputManager->GetMenuJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Swap: Button " + NumberToString(InputManager->GetSwapJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Left Select : Button " + NumberToString(InputManager->GetLeftSelectJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Right Select: Button " + NumberToString(InputManager->GetRightSelectJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Pause: Button " + NumberToString(InputManager->GetPauseJoy())));
 }
 
 
@@ -958,6 +1000,8 @@ void BootMode::_SaveSettingsFile() {
 	settings_lua.ModifyInt("key_settings.left_select", InputManager->GetLeftSelectKey());
 	settings_lua.ModifyInt("key_settings.right_select", InputManager->GetRightSelectKey());
 	settings_lua.ModifyInt("key_settings.pause", InputManager->GetPauseKey());
+	settings_lua.ModifyInt("joystick_settings.x_axis", InputManager->GetXAxisJoy());
+	settings_lua.ModifyInt("joystick_settings.y_axis", InputManager->GetYAxisJoy());
 	settings_lua.ModifyInt("joystick_settings.confirm", InputManager->GetConfirmJoy());
 	settings_lua.ModifyInt("joystick_settings.cancel", InputManager->GetCancelJoy());
 	settings_lua.ModifyInt("joystick_settings.menu", InputManager->GetMenuJoy());
@@ -1049,6 +1093,20 @@ void BootMode::Update() {
 			return;
 		}
 	}
+	
+	if (_joy_axis_setting_function != NULL)
+	{
+		int8 x = InputManager->GetLastAxisMoved();
+		if (x != -1)
+		{
+			(this->*_joy_axis_setting_function)(InputManager->GetLastAxisMoved());
+			_joy_axis_setting_function = NULL;
+			_has_modified_settings = true;
+			_UpdateJoySettings();
+			_message_window.Hide();
+			return;
+		}
+	}
 
 	if (_key_setting_function != NULL)
 	{
@@ -1062,7 +1120,7 @@ void BootMode::Update() {
 			return;
 		}
 	}
-
+	
 	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
 	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible())
 	{
