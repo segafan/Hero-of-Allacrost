@@ -39,8 +39,9 @@ bool INPUT_DEBUG = false;
 // Initializes class members
 GameInput::GameInput() {
 	if (INPUT_DEBUG) cout << "INPUT: GameInput constructor invoked" << endl;
-	_any_key_press		  = false;
-	_any_key_release	  = false;
+	_any_key_press		    = false;
+	_any_key_release	    = false;
+	_last_axis_moved      = -1;
 	_up_state             = false;
 	_up_press             = false;
 	_up_release           = false;
@@ -499,6 +500,10 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 				_down_state = false;
 			}
 		}
+		
+		if (js_event.jaxis.value > _joystick.threshold
+			|| js_event.jaxis.value < -_joystick.threshold)
+			_last_axis_moved = js_event.jaxis.axis;
 	} // if (js_event.type == SDL_JOYAXISMOTION)
 
 	else if (js_event.type == SDL_JOYBUTTONDOWN) {

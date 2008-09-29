@@ -42,7 +42,11 @@ extern bool BOOT_DEBUG;
 
 //! An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_boot {
-
+	enum WAIT_FOR {
+		WAIT_KEY,
+		WAIT_JOY_BUTTON,
+		WAIT_JOY_AXIS
+	};
 } // namespace private_boot
 
 /*!****************************************************************************
@@ -100,6 +104,9 @@ private:
 
 	//! The function to call when a new joystick button has been pressed (if we're waiting for one.)
 	void (BootMode::*_joy_setting_function)(uint8 button);
+
+	//! The function to call when a new joystick axis has been moved (if we're waiting for one.)
+	void (BootMode::*_joy_axis_setting_function)(int8 axis);
 
 	//! Displays the select a key window.
 	hoa_menu::MessageWindow _message_window;
@@ -200,6 +207,10 @@ private:
 	*** \brief Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
 	**/
 	//@{
+	void _RedefineXAxisJoy();
+	void _RedefineYAxisJoy();
+	void _RedefineThresholdJoy();
+
 	void _RedefineConfirmJoy();
 	void _RedefineCancelJoy();
 	void _RedefineMenuJoy();
@@ -207,6 +218,7 @@ private:
 	void _RedefineLeftSelectJoy();
 	void _RedefineRightSelectJoy();
 	void _RedefinePauseJoy();
+	void _RedefineQuitJoy();
 	//@}
 
 	/**
@@ -214,6 +226,8 @@ private:
 	*** directly to the InputManager caused heap corruption.
 	**/
 	//@{
+	void _SetXAxisJoy(int8 axis);
+	void _SetYAxisJoy(int8 axis);
 	void _SetConfirmJoy(uint8 button);
 	void _SetCancelJoy(uint8 button);
 	void _SetMenuJoy(uint8 button);
@@ -226,6 +240,11 @@ private:
 	/** \brief init's the message window to display while waiting for a new key or joystick button press
 	 **/
 	void _ShowMessageWindow(bool joystick);
+
+	/** \brief init's the message window to display while waiting for a new key, joystick button press, or joystick axis move
+	 **/
+	void _ShowMessageWindow(private_boot::WAIT_FOR wait);
+
 
 	/**
 	*** \brief Setups the corresponding menu (initialize menu members, set callbacks)

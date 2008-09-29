@@ -193,6 +193,9 @@ private:
 
 	//! Any key released
 	bool _any_key_release;
+	
+	//! Any joystick axis moved
+	int8 _last_axis_moved;
 
 	/** \name  Input State Members
 	*** \brief Retain whether an input key/button is currently being held down
@@ -303,6 +306,15 @@ public:
 	*** \return True if any key/button is released
 	**/
 	bool AnyKeyRelease();
+	
+	/** \brief Returns the last joystick axis that has moved
+	*** \return True if any joystick axis has moved
+	**/
+	uint8 GetLastAxisMoved()
+		{ return _last_axis_moved; }
+		
+	void ResetLastAxisMoved()
+		{ _last_axis_moved = -1; }
 
 	/** \brief Examines the SDL queue for all user input events and calls appropriate sub-functions.
 	***
@@ -464,6 +476,20 @@ public:
 		{ return SDL_GetKeyName(_key.pause); }
 	//@}
 
+	/** \name Joystick axis access functions
+	*** \return axis number or threshold value
+	**/
+	//@{
+	int8 GetXAxisJoy() const
+		{ return _joystick.x_axis; }
+	
+	int8 GetYAxisJoy() const
+		{ return _joystick.y_axis; }
+	
+	int16 GetThresholdJoy() const
+		{ return _joystick.threshold; }
+	//@}
+
 	/** \name Joystick button handle access functions
 	*** \return Joystick button number for the action
 	**/
@@ -488,7 +514,10 @@ public:
 
 	int32 GetPauseJoy() const
 		{ return _joystick.pause; }
-	//@}	
+	
+	int32 GetQuitJoy() const
+		{ return _joystick.quit; }
+	//@}
 
 	/** \name Key re-mapping functions
 	*** \paramkey New key for the action
