@@ -47,8 +47,12 @@ int main(int argc, char **argv)
 	path.erase(path.find_last_of('/'));
 	// remove the MacOS directory
 	path.erase(path.find_last_of('/'));
-	// we are now in app/Contents
-	path.append ( "/Resources/" );
+	// remove the Contents directory
+	path.erase(path.find_last_of('/'));
+	// remove the Editor.app directory
+	path.erase(path.find_last_of('/'));
+	// we are now in a common directory containing both Allacrost and the Editor
+	path.append ( "/Allacrost.app/Contents/Resources/" );
 	chdir ( path.c_str() );
 #endif
 
