@@ -211,12 +211,13 @@ void ImageMemory::CopyFromImage(BaseTexture* img) {
 
 
 bool ImageMemory::_LoadPngImage(const string& filename) {
-	//! \todo Someone who understands the libpng library needs to add some comments to this function
+	// open up the PNG
 	FILE* fp = fopen(filename.c_str(), "rb");
 
 	if (fp == NULL)
 		return false;
 
+	// check the signature to make sure it's a PNG
 	uint8 test_buffer[8];
 
 	fread(test_buffer, 1, 8, fp);
@@ -225,6 +226,7 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 		return false;
 	}
 
+	// load the actual PNG
 	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
 
 	if (png_ptr == NULL) {
@@ -232,6 +234,7 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 		return false;
 	}
 
+	// get the info structure
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 
 	if (info_ptr == NULL) {
@@ -240,22 +243,27 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 		return false;
 	}
 
+	// error handling
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		png_destroy_read_struct(&png_ptr, NULL, (png_infopp)NULL);
 		fclose(fp);
 		return false;
 	}
 
+	// read the PNG
 	png_init_io(png_ptr, fp);
 	png_set_sig_bytes(png_ptr, 8);
 	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
 
+	// and get an array of pointers, one for each row of the PNG
 	uint8** row_pointers = png_get_rows(png_ptr, info_ptr);
 
+	// copy metadata
 	width = info_ptr->width;
 	height = info_ptr->height;
 	pixels = malloc(info_ptr->width * info_ptr->height * 4);
 
+	// check that we were able to allocate enough memory for the PNG
 	if (pixels == NULL) {
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 		fclose(fp);
@@ -263,11 +271,15 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 		return false;
 	}
 	
+	// convert the damn thing so that it works in our format
+	// this is mostly just byteswapping and adding extra data - we want everything in four channels
+	// for the moment, anyway
 	uint32 bpp = info_ptr->channels;
 	uint8* img_pixel = NULL;
 	uint8* dst_pixel = NULL;
 
 	if (info_ptr->color_type == PNG_COLOR_TYPE_PALETTE) {
+		// colours come from a palette - for this colour type, we have to look up the colour from the palette
 		png_color c;
 		for (uint32 y = 0; y < info_ptr->height; y++) {
 			for (uint32 x = 0; x < info_ptr->width; x++) {
@@ -325,6 +337,7 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 		return false;
 	}
 
+	// clean everything up
 	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 	fclose(fp);
 
@@ -335,32 +348,39 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 
 
 bool ImageMemory::_LoadJpgImage(const string& filename) {
-	//! \todo Someone who understands the libjpeg library needs to add some comments to this function
+	// open the file
 	FILE* fp;
 	uint8** buffer;
 
 	if ((fp = fopen(filename.c_str(), "rb")) == NULL)
 		return false;
 
+	// create the error-handing stuff and the main decompression object
 	jpeg_decompress_struct cinfo;
 	jpeg_error_mgr jerr;
 
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_decompress(&cinfo);
 
+	// tell it where to read, and read the header
 	jpeg_stdio_src(&cinfo, fp);
 	jpeg_read_header(&cinfo, TRUE);
 
+	// here we go, here we go, here we go!
 	jpeg_start_decompress(&cinfo);
 
+	// how much space does each row take up?
 	JDIMENSION row_stride = cinfo.output_width * cinfo.output_components;
 
+	// let's get us some MEMORY - but we use the jpeg library to do it so that it comes out of that memory pool
 	buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
+	// metadata
 	width = cinfo.output_width;
 	height = cinfo.output_height;
 	pixels = malloc(cinfo.output_width * cinfo.output_height * 3);
 
+	// swizzle everything so it's in the format we want
 	uint32 bpp = cinfo.output_components;
 	uint8* img_pixel = NULL;
 	uint8* dst_pixel = NULL;
@@ -401,6 +421,7 @@ bool ImageMemory::_LoadJpgImage(const string& filename) {
 		return false;
 	}
 
+	// clean up
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 
@@ -412,7 +433,7 @@ bool ImageMemory::_LoadJpgImage(const string& filename) {
 
 
 bool ImageMemory::_SavePngImage(const std::string& filename) const {
-	//! \todo Someone who understands the libpng library needs to add some comments to this function
+	// open up the file for writing
 	FILE* fp = fopen(filename.c_str(), "wb");
 
 	if (fp == NULL) {
@@ -420,10 +441,12 @@ bool ImageMemory::_SavePngImage(const std::string& filename) const {
 		return false;
 	}
 
+	// aah, RGB data! We can only handle RGBA at the moment
 	if (rgb_format == true) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempting to save RGB format image data as a RGBA format PNG image" << endl;
 	}
 
+	// grab a write structure
 	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
 
 	if (!png_ptr) {
@@ -432,6 +455,7 @@ bool ImageMemory::_SavePngImage(const std::string& filename) const {
 		return false;
 	}
 
+	// and a place to store the metadata
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 
 	if (!info_ptr) {
@@ -441,6 +465,7 @@ bool ImageMemory::_SavePngImage(const std::string& filename) const {
 		return false;
 	}
 
+	// prepare for error handling!
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "setjmp returned non-zero for file: " << filename << endl;
 		png_destroy_write_struct(&png_ptr, &info_ptr);
@@ -448,55 +473,68 @@ bool ImageMemory::_SavePngImage(const std::string& filename) const {
 		return false;
 	}
 
+	// tell it where to look
 	png_init_io(png_ptr, fp);
 
+	// write the header
 	png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGB_ALPHA,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
+	// get the row array from our data
 	png_byte** row_pointers = new png_byte*[height];
 	int32 bytes_per_row = width * 4;
 	for (int32 i = 0; i < height; i++) {
 		row_pointers[i] = (png_byte*)pixels + bytes_per_row * i;
 	}
 
+	// tell it what the rows are
 	png_set_rows(png_ptr, info_ptr, row_pointers);
+	// and write the PNG
 	png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
 	png_write_image(png_ptr, row_pointers);
+	// clean up
 	png_write_end(png_ptr, info_ptr);
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 
+	// free the memory we ate
 	delete[] row_pointers;
 
+	// peace and love for all
 	return true;
 } // bool ImageMemory::_SavePngImage(const std::string& filename) const
 
 
 
 bool ImageMemory::_SaveJpgImage(const std::string& filename) const {
-	//! \todo Someone who understands the libjpeg library needs to add some comments to this function
 	FILE* fp = fopen(filename.c_str(), "wb");
 	if (fp == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "could not open file: " << filename << endl;
 		return false;
 	}
 
+	// we don't support RGBA because JPEGs don't support alpha
 	if (rgb_format == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempting to save non-RGB format pixel data as a RGB format JPG image" << endl;
 	}
 
+	// compression object and error handling
 	jpeg_compress_struct cinfo;
 	jpeg_error_mgr jerr;
 
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_compress(&cinfo);
 
+	// tell libjpeg how we do things in this town
 	cinfo.in_color_space = JCS_RGB;
 	cinfo.image_width = width;
 	cinfo.image_height = height;
 	cinfo.input_components = 3;
 
+	// everything else can be default
 	jpeg_set_defaults(&cinfo);
+	// tell it where to look
 	jpeg_stdio_dest(&cinfo, fp);
+	// compress it
 	jpeg_start_compress(&cinfo, TRUE);
 
 	JSAMPROW row_pointer; // A pointer to a single row
@@ -508,6 +546,8 @@ bool ImageMemory::_SaveJpgImage(const std::string& filename) const {
 	    jpeg_write_scanlines(&cinfo, &row_pointer, 1);
 	}
 
+	// compression is DONE, we are HAPPY
+	// now finish it and clean up
 	jpeg_finish_compress(&cinfo);
 	jpeg_destroy_compress(&cinfo);
 

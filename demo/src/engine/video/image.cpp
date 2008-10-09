@@ -627,7 +627,7 @@ void ImageDescriptor::_DrawTexture(const Color* draw_color) const {
 
 
 void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp) throw(Exception) {
-	//! \todo Someone who understands libpng needs to write some comments in this function
+	// first, we start by reading from the file
 	FILE* fp = fopen(filename.c_str(), "rb");
 
 	if (fp == NULL) {
@@ -635,6 +635,7 @@ void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows
 		return;
 	}
 
+	// check the signature - make sure it is actually a PNG! otherwise BAD THINGS would happen
 	uint8 test_buffer[8];
 
 	fread(test_buffer, 1, 8, fp);
@@ -644,6 +645,7 @@ void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows
 		return;
 	}
 
+	// open up our PNG file
 	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
 
 	if (png_ptr == NULL) {
@@ -651,6 +653,7 @@ void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows
 		return;
 	}
 
+	// grab the info structure
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 
 	if (!info_ptr) {
@@ -660,6 +663,7 @@ void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows
 		return;
 	}
 
+	// error checking
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		png_destroy_read_struct(&png_ptr, NULL, (png_infopp)NULL);
 		fclose(fp);
@@ -667,14 +671,17 @@ void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows
 		return;
 	}
 
+	// open up the IO stuff and read the PNG
 	png_init_io(png_ptr, fp);
 	png_set_sig_bytes(png_ptr, 8);
 	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
 
+	// grab the relevant data...
 	cols = info_ptr->width;
 	rows = info_ptr->height;
 	bpp = info_ptr->channels * 8;
 
+	// and clean up.
 	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 	fclose(fp);
 } // void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp)
@@ -682,7 +689,7 @@ void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows
 
 
 void ImageDescriptor::_GetJpgImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp) throw(Exception) {
-	//! \todo Someone who understands libjpeg needs to write some comments in this function
+	// open up the file (with C IO)
 	FILE* fp = fopen(filename.c_str(), "rb");
 
 	if (fp == NULL) {
@@ -690,19 +697,24 @@ void ImageDescriptor::_GetJpgImageInfo(const std::string& filename, uint32& rows
 		return;
 	}
 
+	// do our magical setup: create a jpeg decompressor and the relevant error stuff
 	jpeg_decompress_struct cinfo;
 	jpeg_error_mgr jerr;
 
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_decompress(&cinfo);
 
+	// tell jpeg where to look for the data...
 	jpeg_stdio_src(&cinfo, fp);
+	// and read the header
 	jpeg_read_header(&cinfo, TRUE);
 
+	// grab the relevant information from the header...
 	cols = cinfo.output_width;
 	rows = cinfo.output_height;
 	bpp = cinfo.output_components;
 
+	// clean up
 	jpeg_destroy_decompress(&cinfo);
 
 	fclose(fp);
