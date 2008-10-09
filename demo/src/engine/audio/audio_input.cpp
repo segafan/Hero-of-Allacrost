@@ -366,6 +366,45 @@ AudioMemory::AudioMemory(AudioInput* input) :
 	}
 }
 
+AudioMemory::AudioMemory(const AudioMemory& audio_memory) :
+	AudioInput(),
+	_audio_data(NULL),
+	_data_position(0)
+{
+	_filename = audio_memory._filename;
+	_samples_per_second = audio_memory.GetSamplesPerSecond();
+	_bits_per_sample = audio_memory.GetBitsPerSample();
+	_number_channels = static_cast<uint8>(audio_memory.GetNumberChannels());
+	_total_number_samples = audio_memory.GetTotalNumberSamples();
+	_sample_size = audio_memory.GetSampleSize();
+	_play_time = audio_memory.GetPlayTime();
+	_data_size = audio_memory.GetDataSize();
+	
+	_audio_data = new uint8[_data_size];
+	memcpy(_audio_data, audio_memory._audio_data, _data_size);
+}
+
+AudioMemory& AudioMemory::operator=(const AudioMemory& audio_memory)
+{
+	if (_audio_data != NULL) {
+		delete[] _audio_data;
+		_audio_data = NULL;
+	}
+	_filename = audio_memory._filename;
+	_samples_per_second = audio_memory.GetSamplesPerSecond();
+	_bits_per_sample = audio_memory.GetBitsPerSample();
+	_number_channels = static_cast<uint8>(audio_memory.GetNumberChannels());
+	_total_number_samples = audio_memory.GetTotalNumberSamples();
+	_sample_size = audio_memory.GetSampleSize();
+	_play_time = audio_memory.GetPlayTime();
+	_data_size = audio_memory.GetDataSize();
+	
+	_data_position = audio_memory._data_position;
+	_audio_data = new uint8[_data_size];
+	memcpy(_audio_data, audio_memory._audio_data, _data_size);
+	
+	return *this;
+}
 
 
 AudioMemory::~AudioMemory() {
