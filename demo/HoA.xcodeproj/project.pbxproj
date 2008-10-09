@@ -1106,6 +1106,7 @@
 					Carbon,
 					"-lpng",
 					"-ljpeg",
+					"-llua",
 					"-llualib",
 					"-lz",
 					"-lluabind",
@@ -1113,7 +1114,6 @@
 					"-logg",
 					"-lvorbisfile",
 					"-lvorbisenc",
-					"-llua",
 					"-lintl",
 				);
 				PREBINDING = NO;
