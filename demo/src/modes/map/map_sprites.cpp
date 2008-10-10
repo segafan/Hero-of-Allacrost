@@ -73,7 +73,7 @@ VirtualSprite::VirtualSprite() :
 	is_running(false),
 	current_action(-1),
 	forced_action(-1),
-	_saved(false),
+	_state_saved(false),
 	_saved_direction(0),
 	_saved_movement_speed(0.0f),
 	_saved_moving(false),
@@ -318,7 +318,7 @@ void VirtualSprite::SetRandomDirection() {
 
 
 void VirtualSprite::SaveState() {
-	_saved = true;
+	_state_saved = true;
 	_saved_direction = direction;
 	_saved_movement_speed = movement_speed;
 	_saved_moving = moving;
@@ -328,10 +328,10 @@ void VirtualSprite::SaveState() {
 
 
 void VirtualSprite::RestoreState() {
-	if (_saved == false)
+	if (_state_saved == false)
 		IF_PRINT_WARNING(MAP_DEBUG) << "restoring state when no saved state was detected" << endl;
 
-	_saved = false;
+	_state_saved = false;
 	 direction = _saved_direction;
 	 movement_speed = _saved_movement_speed;
 	 moving = _saved_moving;
@@ -344,14 +344,15 @@ void VirtualSprite::RestoreState() {
 
 // Constructor for critical class members. Other members are initialized via support functions
 MapSprite::MapSprite() :
-	face_portrait(NULL),
-	seen_all_dialogue(true),
-	has_active_dialogue(true),
-	_current_dialogue(0),
+	_face_portrait(NULL),
+	_has_running_animations(false),
+	_current_animation(ANIM_STANDING_SOUTH),
+	_next_dialogue(-1),
+	_has_available_dialogue(false),
+	_has_unseen_dialogue(false),
 	_dialogue_icon_color(1.0f, 1.0f, 1.0f, 0.0f),
-	was_moving(false),
-	has_running_anim(false),
-	current_animation(ANIM_STANDING_SOUTH)
+	_saved_was_moving(false),
+	_saved_current_animation(0)
 {
 	MapObject::_object_type = SPRITE_TYPE;
 }
@@ -359,22 +360,14 @@ MapSprite::MapSprite() :
 
 // Free all allocated images and other data
 MapSprite::~MapSprite() {
-	if (face_portrait != NULL) {
-		delete face_portrait;
-		face_portrait = NULL;
+	if (_face_portrait != NULL) {
+		delete _face_portrait;
+		_face_portrait = NULL;
 	}
 
-	// Free animations
-	for (vector<AnimatedImage>::iterator i = animations.begin(); i != animations.end(); ++i)
+	// Free _animations
+	for (vector<AnimatedImage>::iterator i = _animations.begin(); i != _animations.end(); ++i)
 		(*i).Clear();
-
-	// Update the seen events for all dialogues
-	for (uint32 i = 0; i < dialogues.size(); ++i) {
-		string event_name = "s" + NumberToString(object_id) + "_d" + NumberToString(dialogues.size() - 1);
-		MapMode::_current_map->_map_event_group->SetEvent(event_name, dialogues[i]->GetTimesSeen());
-		delete dialogues[i];
-	}
-	dialogues.clear();
 }
 
 
@@ -383,9 +376,9 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 	// The speed to display each frame in the walking animation
 	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
 
-	// Prepare the four standing and four walking animations
+	// Prepare the four standing and four walking _animations
 	for (uint8 i = 0; i < 8; i++)
-		animations.push_back(AnimatedImage());
+		_animations.push_back(AnimatedImage());
 
 	// Load the multi-image, containing 24 frames total
 	vector<StillImage> frames(24);
@@ -396,40 +389,40 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 		return false;
 	}
 
-	// Add standing frames to animations
-	animations[ANIM_STANDING_SOUTH].AddFrame(frames[0], frame_speed);
-	animations[ANIM_STANDING_NORTH].AddFrame(frames[6], frame_speed);
-	animations[ANIM_STANDING_WEST].AddFrame(frames[12], frame_speed);
-	animations[ANIM_STANDING_EAST].AddFrame(frames[18], frame_speed);
+	// Add standing frames to _animations
+	_animations[ANIM_STANDING_SOUTH].AddFrame(frames[0], frame_speed);
+	_animations[ANIM_STANDING_NORTH].AddFrame(frames[6], frame_speed);
+	_animations[ANIM_STANDING_WEST].AddFrame(frames[12], frame_speed);
+	_animations[ANIM_STANDING_EAST].AddFrame(frames[18], frame_speed);
 
-	// Add walking frames to animations
-	animations[ANIM_WALKING_SOUTH].AddFrame(frames[1], frame_speed);
-	animations[ANIM_WALKING_SOUTH].AddFrame(frames[2], frame_speed);
-	animations[ANIM_WALKING_SOUTH].AddFrame(frames[3], frame_speed);
-	animations[ANIM_WALKING_SOUTH].AddFrame(frames[1], frame_speed);
-	animations[ANIM_WALKING_SOUTH].AddFrame(frames[4], frame_speed);
-	animations[ANIM_WALKING_SOUTH].AddFrame(frames[5], frame_speed);
+	// Add walking frames to _animations
+	_animations[ANIM_WALKING_SOUTH].AddFrame(frames[1], frame_speed);
+	_animations[ANIM_WALKING_SOUTH].AddFrame(frames[2], frame_speed);
+	_animations[ANIM_WALKING_SOUTH].AddFrame(frames[3], frame_speed);
+	_animations[ANIM_WALKING_SOUTH].AddFrame(frames[1], frame_speed);
+	_animations[ANIM_WALKING_SOUTH].AddFrame(frames[4], frame_speed);
+	_animations[ANIM_WALKING_SOUTH].AddFrame(frames[5], frame_speed);
 
-	animations[ANIM_WALKING_NORTH].AddFrame(frames[7], frame_speed);
-	animations[ANIM_WALKING_NORTH].AddFrame(frames[8], frame_speed);
-	animations[ANIM_WALKING_NORTH].AddFrame(frames[9], frame_speed);
-	animations[ANIM_WALKING_NORTH].AddFrame(frames[7], frame_speed);
-	animations[ANIM_WALKING_NORTH].AddFrame(frames[10], frame_speed);
-	animations[ANIM_WALKING_NORTH].AddFrame(frames[11], frame_speed);
+	_animations[ANIM_WALKING_NORTH].AddFrame(frames[7], frame_speed);
+	_animations[ANIM_WALKING_NORTH].AddFrame(frames[8], frame_speed);
+	_animations[ANIM_WALKING_NORTH].AddFrame(frames[9], frame_speed);
+	_animations[ANIM_WALKING_NORTH].AddFrame(frames[7], frame_speed);
+	_animations[ANIM_WALKING_NORTH].AddFrame(frames[10], frame_speed);
+	_animations[ANIM_WALKING_NORTH].AddFrame(frames[11], frame_speed);
 
-	animations[ANIM_WALKING_WEST].AddFrame(frames[13], frame_speed);
-	animations[ANIM_WALKING_WEST].AddFrame(frames[14], frame_speed);
-	animations[ANIM_WALKING_WEST].AddFrame(frames[15], frame_speed);
-	animations[ANIM_WALKING_WEST].AddFrame(frames[13], frame_speed);
-	animations[ANIM_WALKING_WEST].AddFrame(frames[16], frame_speed);
-	animations[ANIM_WALKING_WEST].AddFrame(frames[17], frame_speed);
+	_animations[ANIM_WALKING_WEST].AddFrame(frames[13], frame_speed);
+	_animations[ANIM_WALKING_WEST].AddFrame(frames[14], frame_speed);
+	_animations[ANIM_WALKING_WEST].AddFrame(frames[15], frame_speed);
+	_animations[ANIM_WALKING_WEST].AddFrame(frames[13], frame_speed);
+	_animations[ANIM_WALKING_WEST].AddFrame(frames[16], frame_speed);
+	_animations[ANIM_WALKING_WEST].AddFrame(frames[17], frame_speed);
 
-	animations[ANIM_WALKING_EAST].AddFrame(frames[19], frame_speed);
-	animations[ANIM_WALKING_EAST].AddFrame(frames[20], frame_speed);
-	animations[ANIM_WALKING_EAST].AddFrame(frames[21], frame_speed);
-	animations[ANIM_WALKING_EAST].AddFrame(frames[19], frame_speed);
-	animations[ANIM_WALKING_EAST].AddFrame(frames[22], frame_speed);
-	animations[ANIM_WALKING_EAST].AddFrame(frames[23], frame_speed);
+	_animations[ANIM_WALKING_EAST].AddFrame(frames[19], frame_speed);
+	_animations[ANIM_WALKING_EAST].AddFrame(frames[20], frame_speed);
+	_animations[ANIM_WALKING_EAST].AddFrame(frames[21], frame_speed);
+	_animations[ANIM_WALKING_EAST].AddFrame(frames[19], frame_speed);
+	_animations[ANIM_WALKING_EAST].AddFrame(frames[22], frame_speed);
+	_animations[ANIM_WALKING_EAST].AddFrame(frames[23], frame_speed);
 
 	return true;
 } // bool MapSprite::LoadStandardAnimations(std::string filename)
@@ -440,9 +433,9 @@ bool MapSprite::LoadRunningAnimations(std::string filename) {
 	// The speed to display each frame in the running animation
 	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
 
-	// Prepare to add the four running animations
+	// Prepare to add the four running _animations
 	for (uint8 i = 0; i < 4; i++)
-		animations.push_back(AnimatedImage());
+		_animations.push_back(AnimatedImage());
 
 	// Load the multi-image, containing 24 frames total
 	vector<StillImage> frames(24);
@@ -453,49 +446,50 @@ bool MapSprite::LoadRunningAnimations(std::string filename) {
 		return false;
 	}
 
-	// Add walking frames to animations
-	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[1], frame_speed);
-	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[2], frame_speed);
-	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[3], frame_speed);
-	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[1], frame_speed);
-	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[4], frame_speed);
-	animations[ANIM_RUNNING_SOUTH].AddFrame(frames[5], frame_speed);
+	// Add walking frames to _animations
+	_animations[ANIM_RUNNING_SOUTH].AddFrame(frames[1], frame_speed);
+	_animations[ANIM_RUNNING_SOUTH].AddFrame(frames[2], frame_speed);
+	_animations[ANIM_RUNNING_SOUTH].AddFrame(frames[3], frame_speed);
+	_animations[ANIM_RUNNING_SOUTH].AddFrame(frames[1], frame_speed);
+	_animations[ANIM_RUNNING_SOUTH].AddFrame(frames[4], frame_speed);
+	_animations[ANIM_RUNNING_SOUTH].AddFrame(frames[5], frame_speed);
 
-	animations[ANIM_RUNNING_NORTH].AddFrame(frames[7], frame_speed);
-	animations[ANIM_RUNNING_NORTH].AddFrame(frames[8], frame_speed);
-	animations[ANIM_RUNNING_NORTH].AddFrame(frames[9], frame_speed);
-	animations[ANIM_RUNNING_NORTH].AddFrame(frames[7], frame_speed);
-	animations[ANIM_RUNNING_NORTH].AddFrame(frames[10], frame_speed);
-	animations[ANIM_RUNNING_NORTH].AddFrame(frames[11], frame_speed);
+	_animations[ANIM_RUNNING_NORTH].AddFrame(frames[7], frame_speed);
+	_animations[ANIM_RUNNING_NORTH].AddFrame(frames[8], frame_speed);
+	_animations[ANIM_RUNNING_NORTH].AddFrame(frames[9], frame_speed);
+	_animations[ANIM_RUNNING_NORTH].AddFrame(frames[7], frame_speed);
+	_animations[ANIM_RUNNING_NORTH].AddFrame(frames[10], frame_speed);
+	_animations[ANIM_RUNNING_NORTH].AddFrame(frames[11], frame_speed);
 
-	animations[ANIM_RUNNING_WEST].AddFrame(frames[13], frame_speed);
-	animations[ANIM_RUNNING_WEST].AddFrame(frames[14], frame_speed);
-	animations[ANIM_RUNNING_WEST].AddFrame(frames[15], frame_speed);
-	animations[ANIM_RUNNING_WEST].AddFrame(frames[13], frame_speed);
-	animations[ANIM_RUNNING_WEST].AddFrame(frames[16], frame_speed);
-	animations[ANIM_RUNNING_WEST].AddFrame(frames[17], frame_speed);
+	_animations[ANIM_RUNNING_WEST].AddFrame(frames[13], frame_speed);
+	_animations[ANIM_RUNNING_WEST].AddFrame(frames[14], frame_speed);
+	_animations[ANIM_RUNNING_WEST].AddFrame(frames[15], frame_speed);
+	_animations[ANIM_RUNNING_WEST].AddFrame(frames[13], frame_speed);
+	_animations[ANIM_RUNNING_WEST].AddFrame(frames[16], frame_speed);
+	_animations[ANIM_RUNNING_WEST].AddFrame(frames[17], frame_speed);
 
-	animations[ANIM_RUNNING_EAST].AddFrame(frames[19], frame_speed);
-	animations[ANIM_RUNNING_EAST].AddFrame(frames[20], frame_speed);
-	animations[ANIM_RUNNING_EAST].AddFrame(frames[21], frame_speed);
-	animations[ANIM_RUNNING_EAST].AddFrame(frames[19], frame_speed);
-	animations[ANIM_RUNNING_EAST].AddFrame(frames[22], frame_speed);
-	animations[ANIM_RUNNING_EAST].AddFrame(frames[23], frame_speed);
+	_animations[ANIM_RUNNING_EAST].AddFrame(frames[19], frame_speed);
+	_animations[ANIM_RUNNING_EAST].AddFrame(frames[20], frame_speed);
+	_animations[ANIM_RUNNING_EAST].AddFrame(frames[21], frame_speed);
+	_animations[ANIM_RUNNING_EAST].AddFrame(frames[19], frame_speed);
+	_animations[ANIM_RUNNING_EAST].AddFrame(frames[22], frame_speed);
+	_animations[ANIM_RUNNING_EAST].AddFrame(frames[23], frame_speed);
 
-	has_running_anim = true;
+	_has_running_animations = true;
 	return true;
 } // bool MapSprite::LoadRunningAnimations(std::string filename)
 
 
+
 void MapSprite::LoadFacePortrait(std::string pn) {
-	if (face_portrait != NULL) {
-		delete face_portrait;
+	if (_face_portrait != NULL) {
+		delete _face_portrait;
 	}
 
-	face_portrait = new StillImage();
-	if (face_portrait->Load(pn) == false) {
-		delete face_portrait;
-		face_portrait = NULL;
+	_face_portrait = new StillImage();
+	if (_face_portrait->Load(pn) == false) {
+		delete _face_portrait;
+		_face_portrait = NULL;
 		PRINT_ERROR << "failed to load face portrait" << endl;
 	}
 }
@@ -515,25 +509,25 @@ void MapSprite::Update() {
 
 	// Set the sprite's animation to the standing still position if movement has just stopped
 	if (!moving) {
-		if (was_moving) {
+		if (_was_moving) {
 			// Set the current movement animation to zero progress
-			animations[current_animation].SetTimeProgress(0);
-			was_moving = false;
+			_animations[_current_animation].SetTimeProgress(0);
+			_was_moving = false;
 		}
 
 		// Determine the correct standing frame to display
 		if (current_action == -1) {
 			if (direction & FACING_NORTH) {
-				current_animation = ANIM_STANDING_NORTH;
+				_current_animation = ANIM_STANDING_NORTH;
 			}
 			else if (direction & FACING_SOUTH) {
-				current_animation = ANIM_STANDING_SOUTH;
+				_current_animation = ANIM_STANDING_SOUTH;
 			}
 			else if (direction & FACING_WEST) {
-				current_animation = ANIM_STANDING_WEST;
+				_current_animation = ANIM_STANDING_WEST;
 			}
 			else if (direction & FACING_EAST) {
-				current_animation = ANIM_STANDING_EAST;
+				_current_animation = ANIM_STANDING_EAST;
 			}
 			else {
 				cerr << "MAP ERROR: could not find proper standing animation to draw" << endl;
@@ -546,39 +540,39 @@ void MapSprite::Update() {
 
 	if (moving) {
 		// Save the previous animation
-		uint8 last_animation = current_animation;
+		uint8 last_animation = _current_animation;
 
 		// Determine the correct animation to display
 		if (direction & FACING_NORTH) {
-			current_animation = ANIM_WALKING_NORTH;
+			_current_animation = ANIM_WALKING_NORTH;
 		}
 		else if (direction & FACING_SOUTH) {
-			current_animation = ANIM_WALKING_SOUTH;
+			_current_animation = ANIM_WALKING_SOUTH;
 		}
 		else if (direction & FACING_WEST) {
-			current_animation = ANIM_WALKING_WEST;
+			_current_animation = ANIM_WALKING_WEST;
 		}
 		else if (direction & FACING_EAST) {
-			current_animation = ANIM_WALKING_EAST;
+			_current_animation = ANIM_WALKING_EAST;
 		}
 		else {
 			cerr << "MAP ERROR: could not find proper movement animation to draw" << endl;
 		}
 
-		// Increasing the animation index by four from the walking animations leads to the running animations
-		if (is_running && has_running_anim)
-			current_animation += 4;
+		// Increasing the animation index by four from the walking _animations leads to the running _animations
+		if (is_running && _has_running_animations)
+			_current_animation += 4;
 
 		// If the direction of movement changed in mid-flight, update the animation timer on the
-		// new animated image to reflect the old, so the walking animations do not appear to
+		// new animated image to reflect the old, so the walking _animations do not appear to
 		// "start and stop" whenever the direction is changed.
-		if (current_animation != last_animation) {
-			animations[current_animation].SetTimeProgress(animations[last_animation].GetTimeProgress());
-			animations[last_animation].SetTimeProgress(0);
+		if (_current_animation != last_animation) {
+			_animations[_current_animation].SetTimeProgress(_animations[last_animation].GetTimeProgress());
+			_animations[last_animation].SetTimeProgress(0);
 		}
-		animations[current_animation].Update();
+		_animations[_current_animation].Update();
 
-		was_moving = true;
+		_was_moving = true;
 	} // if (moving)
 } // void MapSprite::Update()
 
@@ -586,9 +580,9 @@ void MapSprite::Update() {
 // Draw the appropriate sprite frame at the correct position on the screen
 void MapSprite::Draw() {
 	if (MapObject::ShouldDraw() == true) {
-		animations[current_animation].Draw();
+		_animations[_current_animation].Draw();
 
-		if (HasDialogue() && MapMode::_IsShowingDialogueIcons() && seen_all_dialogue == false) {
+		if (_has_available_dialogue == true && _has_unseen_dialogue == true && MapMode::_IsShowingDialogueIcons()) {
 			VideoManager->MoveRelative(0, -GetImgHeight());
 			MapMode::_current_map->_new_dialogue_icon.Draw(_dialogue_icon_color);
 		}
@@ -598,57 +592,79 @@ void MapSprite::Draw() {
 
 
 
-void MapSprite::AddDialogue(MapDialogue* md) {
-	dialogues.push_back(md);
-	md->SetOwner(this);
+void MapSprite::AddDialogueReference(uint32 dialogue_id) {
+	_dialogue_references.push_back(dialogue_id);
+	MapMode::_loading_map->_dialogue_supervisor->AddSpriteReference(dialogue_id, GetObjectID());
+}
 
-	// Look up the event for this dialogue to see whether it has already been read or not
-	string event_name = "s" + NumberToString(object_id) + "_d" + NumberToString(dialogues.size() - 1);
-	md->SetEventName(event_name);
-	GlobalEventGroup& event_group = *(MapMode::_loading_map->_map_event_group);
 
-	if (event_group.DoesEventExist(event_name) == false) {
-		event_group.AddNewEvent(event_name, 0);
-		seen_all_dialogue = false;
+
+void MapSprite::UpdateDialogueStatus() {
+	_has_available_dialogue = false;
+	_has_unseen_dialogue = false;
+	
+	for (uint32 i = 0; i < _dialogue_references.size(); i++) {
+		MapDialogue* dialogue = MapMode::_current_map->_dialogue_supervisor->GetDialogue(_dialogue_references[i]);
+		if (dialogue == NULL) {
+			IF_PRINT_WARNING(MAP_DEBUG) << "sprite: " << object_id << " is referencing unknown dialogue: " << _dialogue_references[i] << endl;
+			continue;
+		}
+		
+		if (dialogue->IsAvailable()) {
+			_has_available_dialogue = true;
+			if (_next_dialogue < 0)
+				_next_dialogue = i;
+		}
+		if (dialogue->HasAlreadySeen() == false) {
+			_has_unseen_dialogue = true;
+		}
+	}
+
+	// TODO: if the sprite has available, unseen dialogue and the _next_dialogue pointer is pointing to a dialogue that is already seen, change it
+	// to point to the unseen available dialogue
+}
+
+
+
+void MapSprite::IncrementNextDialogue() {
+	// Handle the case where no dialogue is referenced by the sprite
+	if (_next_dialogue < 0) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function invoked when no dialogues were referenced by the sprite" << endl;
+		return;
+	}
+
+	int16 last_dialogue = _next_dialogue;
+
+	while (true) {
+		_next_dialogue++;
+		if (static_cast<uint16>(_next_dialogue) >= _dialogue_references.size())
+			_next_dialogue = 0;
+
+		MapDialogue* dialogue = MapMode::_current_map->_dialogue_supervisor->GetDialogue(_dialogue_references[_next_dialogue]);
+		if (dialogue != NULL && dialogue->IsAvailable() == true) {
+			return;
+		}
+		// If this case occurs, all dialogues are now unavailable
+		else if (_next_dialogue == last_dialogue) {
+			IF_PRINT_WARNING(MAP_DEBUG) << "all referenced dialogues are now unavailable for this sprite" << endl;
+			_has_available_dialogue = false;
+			_has_unseen_dialogue = false;
+			return;
+		}
+	}
+}
+
+
+
+
+void MapSprite::SetNextDialogue(uint16 next) {
+	// If a negative value is passed in, this means the user wants to disable
+	if (next >= _dialogue_references.size()) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "tried to set _next_dialogue to an value that was invalid (exceeds maximum bounds): " << next << endl;
 	}
 	else {
-		md->SetTimesSeen(event_group.GetEvent(event_name));
-		if (md->HasAlreadySeen() == false)
-			seen_all_dialogue = false;
+		_next_dialogue = static_cast<int16>(next);
 	}
-}
-
-
-void MapSprite::UpdateSeenDialogue() {
-	// Check all dialogues for any which have not yet been read
-	for (uint32 i = 0; i < dialogues.size(); i++) {
-		if (dialogues[i]->HasAlreadySeen() == false) {
-			seen_all_dialogue = false;
-			return;
-		}
-	}
-
-	seen_all_dialogue = true;
-}
-
-
-
-void MapSprite::UpdateActiveDialogue() {
-	// Check all dialogues for any that are still active.
-	for (size_t i = 0; i < dialogues.size(); i++) {
-		if (dialogues[i]->IsAvailable()) {
-			has_active_dialogue = true;
-			return;
-		}
-	}
-	has_active_dialogue = false;
-}
-
-void MapSprite::ClearDialogues() {
-	for (size_t i = 0; i < dialogues.size(); i++)
-		delete dialogues[i];
-
-	dialogues.clear();
 }
 
 
@@ -656,8 +672,8 @@ void MapSprite::ClearDialogues() {
 void MapSprite::SaveState() {
 	VirtualSprite::SaveState();
 
-	_saved_was_moving = was_moving;
-	_saved_current_animation = current_animation;
+	_saved_was_moving = _was_moving;
+	_saved_current_animation = _current_animation;
 }
 
 
@@ -665,8 +681,8 @@ void MapSprite::SaveState() {
 void MapSprite::RestoreState() {
 	VirtualSprite::RestoreState();
 
-	was_moving = _saved_was_moving;
-	current_animation = _saved_current_animation;
+	_was_moving = _saved_was_moving;
+	_current_animation = _saved_current_animation;
 }
 
 // *****************************************************************************
@@ -853,7 +869,7 @@ void EnemySprite::Update() {
 void EnemySprite::Draw() {
 	// Otherwise, only draw it if it is not in the DEAD state
 	if (MapObject::ShouldDraw() == true && _state != DEAD) {
-		animations[current_animation].Draw(_color);
+		_animations[_current_animation].Draw(_color);
 		return;
 	}
 }

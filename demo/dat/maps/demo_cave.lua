@@ -353,6 +353,7 @@ upper_layer[59] = { 287, 351, 382, 380, 381, 382, 383, 348, 349, 350, 383, 412, 
 -- Allacrost map editor end. Do not edit this line. --
 
 dialogue_text = {}
+-- Dialogue #1
 dialogue_text[0] = hoa_utils.Translate("Claudius, what are you doing here?");
 dialogue_text[1] = hoa_utils.Translate("I came in this cave for training.");
 dialogue_text[2] = hoa_utils.Translate("Well, good job getting this far all by yourself. This is a pretty dangerous place for someone as inexperienced as yourself.");
@@ -360,18 +361,21 @@ dialogue_text[3] = hoa_utils.Translate("Yes well, I have to train hard if I want
 dialogue_text[4] = hoa_utils.Translate("The cave goes deeper than this, but it appears a collapse here has blocked the way. I was trying to find an alternative passage, but it appears that the inner chambers are now completely inaccessible.");
 dialogue_text[5] = hoa_utils.Translate("In any case, this is as far as you can go in this demo, so thanks for.....");
 dialogue_text[6] = hoa_utils.Translate("Wait, what was that noise? Hey, look out!");
+-- Dialogue #2
 dialogue_text[7] = hoa_utils.Translate("Phew, that was a shock. I've never seen such foes wandering in this cave. Nice job taking care of them Claudius, I can definitely tell that your swordsmanship has improved.");
 dialogue_text[8] = hoa_utils.Translate("Thank you. By the way...why didn't you fight with me in that battle?");
 dialogue_text[9] = hoa_utils.Translate("Ah, err...well you see, you'll never reach your full potential if you always have your seniors stepping in for you.");
 dialogue_text[10] = hoa_utils.Translate("I see.");
 dialogue_text[11] = hoa_utils.Translate("And besides, I don't even have my own battle sprite graphics yet! The development team needs more artists to help move the game along!");
 dialogue_text[12] = hoa_utils.Translate(".....");
+-- Dialogue #3
 dialogue_text[13] = hoa_utils.Translate("Well, this truly is the end of the demo. Thanks for playing.");
 
 
-function Load(m)
+function Load(m, d)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
+	dialogue_supervisor = d;
 	
 	local sprite;
 	local dialogue;
@@ -412,28 +416,9 @@ function Load(m)
 	sprite:SetDirection(hoa_map.MapMode.SOUTH);
 	sprite:LoadStandardAnimations("img/sprites/map/soldier_npc01_walk.png");
 
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dialogue_text[0], 1, -1, -1); --line 0
-	dialogue:AddText(dialogue_text[1], 1000, -1, -1); --line 1
-	dialogue:AddText(dialogue_text[2], 1, -1, -1); --line 2
-	dialogue:AddText(dialogue_text[3], 1000, -1, -1); --line 3
-	dialogue:AddText(dialogue_text[4], 1, -1, -1); --line 4
-	dialogue:AddText(dialogue_text[5], 1, -1, 0); -- line 5: Creepy sound plays here
-	dialogue:AddText(dialogue_text[6], 1, -1, 1); -- line 6: Boss battle occurs
-	sprite:AddDialogue(dialogue);
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dialogue_text[7], 1, -1, -1); --line 7
-	dialogue:AddText(dialogue_text[8], 1000, -1, -1); --line 8
-	dialogue:AddText(dialogue_text[9], 1, -1, -1); --line 9
-	dialogue:AddText(dialogue_text[10], 1000, -1, -1); --line 10
-	dialogue:AddText(dialogue_text[11], 1, -1, -1); -- line 11
-	dialogue:AddText(dialogue_text[12], 1000, -1, -1); -- line 12
-
-	sprite:AddDialogue(dialogue);
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dialogue_text[13], 1, -1, -1); -- line 13
-	sprite:AddDialogue(dialogue);
+	sprite:AddDialogueReference(1);
+	sprite:AddDialogueReference(2);
+	sprite:AddDialogueReference(3);
 
 	action = hoa_map.ActionAnimate(sprite);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
@@ -444,6 +429,29 @@ function Load(m)
 	sprite:AddAction(action);
 	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);
+
+	dialogue = hoa_map.MapDialogue(1);
+	dialogue:AddText(dialogue_text[0], 1, 1, -1, false); --line 0
+	dialogue:AddText(dialogue_text[1], 1000, 2, -1, false); --line 1
+	dialogue:AddText(dialogue_text[2], 1, 3, -1, false); --line 2
+	dialogue:AddText(dialogue_text[3], 1000, 4, -1, false); --line 3
+	dialogue:AddText(dialogue_text[4], 1, 5, -1, false); --line 4
+	dialogue:AddText(dialogue_text[5], 1, 6, 0, false); -- line 5: Creepy sound plays here
+	dialogue:AddText(dialogue_text[6], 1, -1, 1, false); -- line 6: Boss battle occurs
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	dialogue = hoa_map.MapDialogue(2);
+	dialogue:AddText(dialogue_text[7], 1, 1, -1, false); --line 7
+	dialogue:AddText(dialogue_text[8], 1000, 2, -1, false); --line 8
+	dialogue:AddText(dialogue_text[9], 1, 3, -1, false); --line 9
+	dialogue:AddText(dialogue_text[10], 1000, 4, -1, false); --line 10
+	dialogue:AddText(dialogue_text[11], 1, 5, -1, false); -- line 11
+	dialogue:AddText(dialogue_text[12], 1000, -1, -1, false); -- line 12
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	dialogue = hoa_map.MapDialogue(3);
+	dialogue:AddText(dialogue_text[13], 1, -1, -1, false); -- line 13
+	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
 	local ezone = hoa_map.EnemyZone(2000, true);

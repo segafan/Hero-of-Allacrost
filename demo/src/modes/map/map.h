@@ -312,7 +312,7 @@ private:
 	private_map::ObjectManager* _object_manager;
 
 	//! \brief This keeps a pointer to the active dialogue.
-	private_map::DialogueSupervisor* _dialogue_manager;
+	private_map::DialogueSupervisor* _dialogue_supervisor;
 
 	//! \brief Class member object which processes all information related to treasure discovery
 	private_map::TreasureMenu* _treasure_menu;
@@ -442,6 +442,10 @@ private:
 	void _AddZone(private_map::MapZone *zone);
 
 	uint16 _GetGeneratedObjectID();
+
+	// TEMP
+	private_map::DialogueSupervisor* _GetDialogueSupervisor() const
+		{ return _dialogue_supervisor; }
 
 	private_map::VirtualSprite* _GetCameraFocus() const
 		{ return _camera; }

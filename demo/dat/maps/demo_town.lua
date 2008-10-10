@@ -13,6 +13,7 @@ enemy_ids = {}
 
 -- A reference to the C++ MapMode object that was created with this file
 map = {}
+dialogue_supervisor = {}
 
 -- The number of contexts, rows, and columns that compose the map
 num_map_contexts = 2
@@ -255,180 +256,69 @@ context_01 = { 0, 0, 0, -1, 0, 0, 1, -1, 0, 0, 2, -1, 0, 0, 3, -1, 0, 0, 4, -1, 
 
 -- Allacrost map editor end. Do not edit this line. --
 
--- Other global variables for the map script to use
-laila = nil; -- Pointer to Laila's map sprite
-sprites = {}
-sprites[1] = {
-	object_id = 1000,
-	name = "Claudius",		
-	context = 0,
-	x_position = 100,
-	x_position_offset = 0.5,
-	y_position = 36,
-	y_position_offset = 0.5,
-	col_half_width =0.95,
-	col_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 150.0,
-	direction = 8,
-	standard_animations = "img/sprites/map/claudius_walk.png",
-	running_animations = "img/sprites/map/claudius_run.png",
-	face_portrait = "img/portraits/map/claudius.png"	
-}
-sprites[2] = {
-	object_id = 2,
-	name = "Laila",
-	context = 0,
-	x_position = 105,
-	x_position_offset = 0.0,
-	y_position = 32,
-	y_position_offset = 0.0,
-	col_half_width =0.95,
-	col_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 190.0,
-	direction = 2,
-	standard_animations = "img/sprites/map/laila_walk.png",
-	running_animations = "img/sprites/map/laila_run.png",
-	face_portrait = "img/portraits/map/laila.png"
-}
-sprites[3] = {
-	object_id = 3,
-	name = "Marcus",
-	context = 0,
-	x_position = 40,
-	x_position_offset = 0.7,
-	y_position = 35,
-	y_position_offset = 0.2,
-	col_half_width =0.95,
-	col_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 225.0,
-	direction = 2,
-	standard_animations = "img/sprites/map/marcus_walk.png",
-	face_portrait = "img/portraits/map/marcus.png"
-}
-sprites[4] = {
-	object_id = 4,
-	name = "Vanica",
-	context = 0,
-	x_position = 38,
-	x_position_offset = 0.5,
-	y_position = 60,
-	y_position_offset = 0.5,
-	col_half_width =0.95,
-	col_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 225.0,
-	direction = 2,
-	standard_animations = "img/sprites/map/vanica_walk.png",
-	face_portrait = "img/portraits/map/vanica.png"
-}
-sprites[5] = {
-	object_id = 6,
-	name = "Laine",
-	context = 0,
-	x_position = 72,
-	x_position_offset = 0.5,
-	y_position = 25,
-	y_position_offset = 0.5,
-	col_half_width =0.95,
-	col_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 225.0,
-	direction = 2,
-	standard_animations = "img/sprites/map/man_npc01_walk.png"
-}
-sprites[6] = {
-	object_id = 7,
-	name = "Alexander",
-	context = 0,
-	x_position = 52,
-	x_position_offset = 0.5,
-	y_position = 35,
-	y_position_offset = 0.5,
-	col_half_width =0.95,
-	col_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 225.0,
-	direction = 2,
-	standard_animations = "img/sprites/map/man_npc02_walk.png"
-}
-sprites[7] = {
-	object_id = 8,
-	name = "Torl",
-	context = 0,
-	x_position = 40,
-	x_position_offset = 0.5,
-	y_position = 20,
-	y_position_offset = 0.5,
-	col_half_width =0.95,
-	col_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 75.0,
-	direction = 2,
-	standard_animations = "img/sprites/map/boy_npc01_walk.png"
-}
-sprites[8] = {
-	object_id = 9,
-	name = "Female Merchant",
-	context = 0,
-	x_position = 70,
-	x_position_offset = 0.5,
-	y_position = 60,
-	y_position_offset = 0.5,
-	col_half_width =0.95,
-	col_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 190.0,
-	direction = 2,
-	standard_animations = "img/sprites/map/woman_npc01_walk.png"
-}
-sprites[9] = {
-	object_id = 10,
-	name = "Livia",
-	context = 0,
-	x_position = 32,
-	x_position_offset = 0.5,
-	y_position = 29,
-	y_position_offset = 0.5,
-	col_half_width =0.95,
-	col_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 190.0,
-	direction = 2,
-	standard_animations = "img/sprites/map/girl_npc02_walk.png"
-}
-sprites[10] = {
-	object_id = 11,
-	name = "Octavia",
-	context = 0,
-	x_position = 9,
-	x_position_offset = 0.5,
-	y_position = 35,
-	y_position_offset = 0.5,
-	col_half_width =1.0,
-	col_height = 2.0,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = 225.0,
-	direction = 2,
-	standard_animations = "img/sprites/map/woman_npc02_walk.png"
-}
 
-function Load(m)
+dialogue_text = {}
+-- Dialogue #1
+dialogue_text[0] = hoa_utils.Translate("Laila, what's wrong? You have a worried look on your face.");
+dialogue_text[1] = hoa_utils.Translate("You're going into the cave again, aren't you?");
+-- If "yes" option selected 
+dialogue_text[2] = hoa_utils.Translate("But why? Its dangerous in there!");
+dialogue_text[3] = hoa_utils.Translate("Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?");
+dialogue_text[4] = hoa_utils.Translate("I know that you're worried about me and I appreciate it, but you need to stop doing this.");
+dialogue_text[5] = hoa_utils.Translate(".....Alright, I'm sorry. Just be careful in there, okay?");
+dialogue_text[6] = hoa_utils.Translate("Will do. Thanks Laila.");
+dialogue_text[7] = hoa_utils.Translate("You know Claudius, I could be of assistance to you in the cave. May I come with you?");
+-- If "no" option selected
+dialogue_text[8] = hoa_utils.Translate("Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know...");
+dialogue_text[9] = hoa_utils.Translate("Of course, I promise.");
+-- If "rejected" option selected
+dialogue_text[10] = hoa_utils.Translate("Oh....ok then. You remember to be careful.");
+dialogue_text[11] = hoa_utils.Translate("I will Laila.");
+-- If "accepted" option selected
+dialogue_text[12] = hoa_utils.Translate("Great, I'll be sure to help you any way I can.");
+dialogue_text[13] = hoa_utils.Translate("Laila has joined the party.");
+-- Dialogue #2
+dialogue_text[14] = hoa_utils.Translate("Hey there son, how's the training going?");
+dialogue_text[15] = hoa_utils.Translate("Pretty well. The enemies in the cave aren't too tough.");
+dialogue_text[16] = hoa_utils.Translate("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.");
+-- Dialogue #3
+dialogue_text[17] = hoa_utils.Translate("Oh, Claudius? You seemed puzzled.");
+dialogue_text[18] = hoa_utils.Translate("There are odd little icons above people's heads. What do they mean?");
+dialogue_text[19] = hoa_utils.Translate("That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear.");
+-- Dialogue #4
+dialogue_text[20] = hoa_utils.Translate("And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more.");
+-- Dialogue #5
+dialogue_text[21] = hoa_utils.Translate("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.");
+-- Dialogue #6
+dialogue_text[22] = hoa_utils.Translate("The interior of my home is finally finished. Not too bad is it?");
+dialogue_text[23] = hoa_utils.Translate("After its fully furnished I'm sure it will look quite nice.");
+-- Dialogue #7
+dialogue_text[24] = hoa_utils.Translate("This village is boring! There's no one I can play with here!");
+-- Dialogue #8
+dialogue_text[25] = hoa_utils.Translate("I have merchandise for sale at affordable prices. Take a look.");
+-- Dialogue #9
+dialogue_text[26] = hoa_utils.Translate("I'm looking for my brother Torl. I sure hope he doesn't get into any trouble.");
+-- Dialogue #10
+dialogue_text[27] = hoa_utils.Translate("So much work to do!");
+
+
+dialogue_option_text = {}
+-- Dialogue #1, first option "going into cave?"
+dialogue_option_text[0] = hoa_utils.Translate("Yes, I intend to...");
+dialogue_option_text[1] = hoa_utils.Translate("No, of course not...");
+-- Dialogue #1, second option "join party?"
+dialogue_option_text[2] = hoa_utils.Translate("No way, you could be hurt!");
+dialogue_option_text[3] = hoa_utils.Translate("Your help would be great!");
+
+
+laila = nil; -- Pointer to Laila's map sprite
+
+
+function Load(m, d)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
 	map._run_forever = true;
+	dialogue_supervisor = d;
 
 	local sprite;
 	local dialogue;
@@ -456,7 +346,7 @@ function Load(m)
 	-- Set the camera to focus on the player's sprite
 	map:_SetCameraFocus(sprite);
 
-	-- Create a NPC sprite
+	-- Create NPC sprites and actions
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Laila"));
 	sprite:SetObjectID(2);
@@ -473,70 +363,8 @@ function Load(m)
 	sprite:LoadRunningAnimations("img/sprites/map/laila_run.png");
 	sprite:LoadFacePortrait("img/portraits/map/laila.png");
 
-	dialogue = hoa_map.MapDialogue();
-	--dialogue:SetMaxViews(1);
-	
-	dtext = {
-	  [0] = hoa_utils.Translate("Laila, what's wrong? You have a worried look on your face.");
-	  [1] = hoa_utils.Translate("You're going into the cave again, aren't you?");
-	  --Yes
-	  [2] = hoa_utils.Translate("But why? Its dangerous in there!");
-	  [3] = hoa_utils.Translate("Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?");
-	  [4] = hoa_utils.Translate("I know that you're worried about me and I appreciate it, but you need to stop doing this.");
-	  [5] = hoa_utils.Translate(".....Alright, I'm sorry. Just be careful in there, okay?");
-	  [6] = hoa_utils.Translate("Will do. Thanks Laila.");
-	  [7] = hoa_utils.Translate("You know Claudius, I could be of assistance to you in the cave. May I come with you?");
-	  --No
-	  [8] = hoa_utils.Translate("Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know...");
-	  [9] = hoa_utils.Translate("Of course, I promise.");
-	  -- Rejected
-	 [10] = hoa_utils.Translate("Oh....ok then. You remember to be careful.");
-	 [11] = hoa_utils.Translate("I will Laila.");
-	  -- Add to party
-	 [12] = hoa_utils.Translate("Great, I'll be sure to help you any way I can.");
-	 [13] = hoa_utils.Translate("Laila has joined the party.");
+	sprite:AddDialogueReference(1);
 
-	}
-
-	doption = {
-	 --going into cave?
-	 [0] = hoa_utils.Translate("Yes, I intend to...");
-	 [1] = hoa_utils.Translate("No, of course not...");
-	 --join party?
-	 [2] = hoa_utils.Translate("No way, you could be hurt!");
-	 [3] = hoa_utils.Translate("Your help would be great!");
-	}
-
-	dialogue:AddText(dtext[0], 1000, -1, -1); --Line 0
-	dialogue:AddText(dtext[1], 2, -1, -1); --Line 1
-	dialogue:AddOption(doption[0], 2, -1);
-	dialogue:AddOption(doption[1], 8, -1);
-	
-	--Yes
-	dialogue:AddText(dtext[2], 2, -1, -1); --Line 2
-	dialogue:AddText(dtext[3], 1000, -1, -1); --Line 3
-	dialogue:AddText(dtext[4], 1000, -1, -1); --Line 4
-	dialogue:AddText(dtext[5], 2, -1, -1); --Line 5
-	dialogue:AddText(dtext[6], 1000, -1, -1); --Line 6
-	dialogue:AddText(dtext[7], 2, -1, -1); --Line 7
-	dialogue:AddOption(doption[2], 10 , -1);
-	dialogue:AddOption(doption[3], 12 , -1);
-	
-	--No
-	dialogue:AddText(dtext[8], 2, -1,-1); --Line 8
-	dialogue:AddText(dtext[9], 1000, -1, -1); --Line 9
-	dialogue:EndDialogue();
-	
-	-- Rejected
-	dialogue:AddText(dtext[10], 2, -1, -1); -- Line 10
-	dialogue:AddText(dtext[11], 1000, -1, -1); -- Line 11
-	dialogue:EndDialogue();
-	
-	-- Add to party
-	dialogue:AddText(dtext[12], 2, -1, 1); --  Line 12, Laila added to party and map sprite removed
-	dialogue:AddText(dtext[13], 2, -1, -1); -- Line 13
-	sprite:AddDialogue(dialogue);
-	
 	laila = sprite;
 	-- If Laila previously joined the party in the saved game, remove her sprite
 	if (map._map_event_group:DoesEventExist("laila_joined") == true) then
@@ -587,17 +415,7 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/marcus_walk.png");
 	sprite:LoadFacePortrait("img/portraits/map/marcus.png");
 
-	dtext = {
-	 [0] = hoa_utils.Translate("Hey there son, how's the training going?");
-	 [1] = hoa_utils.Translate("Pretty well. The enemies in the cave aren't too tough.");
-	 [2] = hoa_utils.Translate("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.");
-	}
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext[0], 3, -1, -1);
-	dialogue:AddText(dtext[1], 1000, -1, -1);
-	dialogue:AddText(dtext[2], 3, -1, -1);
-	sprite:AddDialogue(dialogue);
+	sprite:AddDialogueReference(2);
 
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(50, 35);
@@ -626,23 +444,8 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/vanica_walk.png");
 	sprite:LoadFacePortrait("img/portraits/map/vanica.png");
 
-	dtext = {
-	 [0] = hoa_utils.Translate("Oh, Claudius? You seemed puzzled.");
-	 [1] = hoa_utils.Translate("There are odd little icons above people's heads. What do they mean?");
-	 [2] = hoa_utils.Translate("That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear.");
-	 [3] = hoa_utils.Translate("And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more.");
-	}
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:SetMaxViews(1);
-	dialogue:AddText(dtext[0], 4, -1, -1);
-	dialogue:AddText(dtext[1], 1000, -1, -1);
-	dialogue:AddText(dtext[2], 4, -1, -1);
-	sprite:AddDialogue(dialogue);
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext[3], 4, -1, -1);
-	sprite:AddDialogue(dialogue);
+	sprite:AddDialogueReference(3);
+	sprite:AddDialogueReference(4);
 
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(38, 38);
@@ -655,6 +458,38 @@ function Load(m)
 	sprite:AddAction(action);
 	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName(hoa_utils.Translate("Alexander"));
+	sprite:SetObjectID(5);
+	sprite:SetContext(1);
+	sprite:SetXPosition(52, 0.5);
+	sprite:SetYPosition(35, 0.5);
+	sprite:SetCollHalfWidth(0.95);
+	sprite:SetCollHeight(1.9);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/man_npc02_walk.png");
+
+	sprite:AddDialogueReference(5);
+
+	action = hoa_map.ActionPathMove(sprite);
+	action:SetDestination(52, 25);
+	sprite:AddAction(action);
+	action = hoa_map.ActionPathMove(sprite);
+	action:SetDestination(52, 55);
+	sprite:AddAction(action);
+	action = hoa_map.ActionPathMove(sprite);
+	action:SetDestination(31, 25);
+	sprite:AddAction(action);
+	action = hoa_map.ActionPathMove(sprite);
+	action:SetDestination(40, 55);
+	sprite:AddAction(action);
+	sprite.current_action = 0;
+	map:_AddGroundObject(sprite);
+
 
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Laine"));
@@ -670,15 +505,7 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc01_walk.png");
 
-	dtext = {
-	 [0] = hoa_utils.Translate("The interior of my home is finally finished. Not too bad is it?");
-	 [1] = hoa_utils.Translate("After its fully furnished I'm sure it will look quite nice.");
-	}
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext[0], 6, -1, -1);
-	dialogue:AddText(dtext[1], 1000, -1, -1);
-	sprite:AddDialogue(dialogue);
+	sprite:AddDialogueReference(6);
 
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(94, 57);
@@ -699,43 +526,8 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Alexander"));
-	sprite:SetObjectID(7);
-	sprite:SetContext(1);
-	sprite:SetXPosition(52, 0.5);
-	sprite:SetYPosition(35, 0.5);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/man_npc02_walk.png");
-
-	dtext = hoa_utils.Translate("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.");
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext, 7, -1, -1);
-	sprite:AddDialogue(dialogue);
-
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(52, 25);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(52, 55);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(31, 25);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(40, 55);
-	sprite:AddAction(action);
-	sprite.current_action = 0;
-	map:_AddGroundObject(sprite);
-
-	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Torl"));
-	sprite:SetObjectID(8);
+	sprite:SetObjectID(7);
 	sprite:SetContext(1);
 	sprite:SetXPosition(40, 0.5);
 	sprite:SetYPosition(20, 0.5);
@@ -747,11 +539,7 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/boy_npc01_walk.png");
 
-	dtext = hoa_utils.Translate("This village is boring! There's no one I can play with here!");
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext, 8, -1, -1);
-	sprite:AddDialogue(dialogue);
+	sprite:AddDialogueReference(7);
 
 	action = hoa_map.ActionRandomMove(sprite);
 	sprite:AddAction(action);
@@ -760,7 +548,7 @@ function Load(m)
 
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Female Merchant"));
-	sprite:SetObjectID(9);
+	sprite:SetObjectID(8);
 	sprite:SetContext(2);
 	sprite:SetXPosition(10, 0.5);
 	sprite:SetYPosition(50, 0.5);
@@ -772,11 +560,7 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/woman_npc01_walk.png");
 
-	dtext = hoa_utils.Translate("I have merchandise for sale at affordable prices. Take a look.");
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext, 9, -1, 0);
-	sprite:AddDialogue(dialogue);
+	sprite:AddDialogueReference(8);
 
 	action = hoa_map.ActionAnimate(sprite);
 	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1250);
@@ -790,7 +574,7 @@ function Load(m)
 
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Livia"));
-	sprite:SetObjectID(10);
+	sprite:SetObjectID(9);
 	sprite:SetContext(1);
 	sprite:SetXPosition(32, 0.5);
 	sprite:SetYPosition(29, 0.5);
@@ -802,11 +586,7 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/girl_npc02_walk.png");
 
-	dtext = hoa_utils.Translate("I'm looking for my brother Torl. I sure hope he doesn't get into any trouble.");
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext, 10, -1, -1);
-	sprite:AddDialogue(dialogue);
+	sprite:AddDialogueReference(9);
 
 	action = hoa_map.ActionRandomMove(sprite);
 	sprite:AddAction(action);
@@ -815,7 +595,7 @@ function Load(m)
 
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Octavia"));
-	sprite:SetObjectID(11);
+	sprite:SetObjectID(10);
 	sprite:SetContext(1);
 	sprite:SetXPosition(9, 0.5);
 	sprite:SetYPosition(35, 0.5);
@@ -827,20 +607,16 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/woman_npc02_walk.png");
 
-	dtext = hoa_utils.Translate("So much work to do!");
-
-	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText(dtext, 11, -1, -1);
-	sprite:AddDialogue(dialogue);
+	sprite:AddDialogueReference(10);
 
 	action = hoa_map.ActionRandomMove(sprite);
 	sprite:AddAction(action);
 	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);
 
-	-- Add a treasure just near the town's exit zone
+	-- Add a treasure near the town's exit zone
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
-	chest:SetObjectID(12);
+	chest:SetObjectID(11);
 	chest:SetContext(1);
 	chest:SetXPosition(111, 0);
 	chest:SetYPosition(34, 0);
@@ -848,14 +624,91 @@ function Load(m)
 	chest:AddObject(1, 2); -- Adds 2 Healing Potions
 	map:_AddGroundObject(chest);
 
-	-- Add a treasure just inside the merchant's house
+	-- Add a treasure inside the merchant's house
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
-	chest:SetObjectID(13);
+	chest:SetObjectID(12);
 	chest:SetContext(2);
 	chest:SetXPosition(8, 0);
 	chest:SetYPosition(52, 0);
 	chest:AddDrunes(400);
 	map:_AddGroundObject(chest);
+
+	-- Dialogue #1
+	dialogue = hoa_map.MapDialogue(1);
+	dialogue:AddText(dialogue_text[0], 1000, 1, -1, false);
+	dialogue:AddText(dialogue_text[1], 2, 2, -1, false);
+	dialogue:AddOption(dialogue_option_text[0], 2, -1);
+	dialogue:AddOption(dialogue_option_text[1], 8, -1);
+	--Yes
+	dialogue:AddText(dialogue_text[2], 2, 3, -1, false);
+	dialogue:AddText(dialogue_text[3], 1000, 4, -1, false);
+	dialogue:AddText(dialogue_text[4], 1000, 5, -1, false);
+	dialogue:AddText(dialogue_text[5], 2, 6, -1, false);
+	dialogue:AddText(dialogue_text[6], 1000, 7, -1, false);
+	dialogue:AddText(dialogue_text[7], 2, 10, -1, false);
+	dialogue:AddOption(dialogue_option_text[2], 10 , -1);
+	dialogue:AddOption(dialogue_option_text[3], 12 , -1);
+	--No
+	dialogue:AddText(dialogue_text[8], 2, 9, -1, false);
+	dialogue:AddText(dialogue_text[9], 1000, -1, -1, false);
+	-- Rejected
+	dialogue:AddText(dialogue_text[10], 2, 11, -1, false);
+	dialogue:AddText(dialogue_text[11], 1000, -1, -1, false);
+	-- Add to party
+	dialogue:AddText(dialogue_text[12], 2, 13, 1, false); -- Laila added to party and map sprite removed
+	dialogue:AddText(dialogue_text[13], 2, -1, -1, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+	
+	-- Dialogue #2
+	dialogue = hoa_map.MapDialogue(2);
+	dialogue:AddText(dialogue_text[14], 3, 1, -1, false);
+	dialogue:AddText(dialogue_text[15], 1000, 2, -1, false);
+	dialogue:AddText(dialogue_text[16], 3, -1, -1, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Dialogue #3
+	dialogue = hoa_map.MapDialogue(3);
+	dialogue:SetMaxViews(1);
+	dialogue:AddText(dialogue_text[17], 4, 1, -1, false);
+	dialogue:AddText(dialogue_text[18], 1000, 2, -1, false);
+	dialogue:AddText(dialogue_text[19], 4, -1, -1, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Dialogue #4
+	dialogue = hoa_map.MapDialogue(4);
+	dialogue:AddText(dialogue_text[20], 4, -1, -1, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Dialogue #5
+	dialogue = hoa_map.MapDialogue(5);
+	dialogue:AddText(dialogue_text[21], 5, -1, -1, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Dialogue #6
+	dialogue = hoa_map.MapDialogue(6);
+	dialogue:AddText(dialogue_text[22], 6, 1, -1, false);
+	dialogue:AddText(dialogue_text[23], 1000, -1, -1, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Dialogue #7
+	dialogue = hoa_map.MapDialogue(7);
+	dialogue:AddText(dialogue_text[24], 7, -1, -1, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Dialogue #8
+	dialogue = hoa_map.MapDialogue(8);
+	dialogue:AddText(dialogue_text[25], 8, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Dialogue #9
+	dialogue = hoa_map.MapDialogue(9);
+	dialogue:AddText(dialogue_text[26], 9, -1, -1, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Dialogue #10
+	dialogue = hoa_map.MapDialogue(10);
+	dialogue:AddText(dialogue_text[27], 10, -1, -1, false);
+	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
@@ -879,6 +732,7 @@ function Load(m)
 	map:_AddZone(context_zone);
 end -- function Load()
 
+
 function Update()
 	-- Check if the map camera is in the exit zone
 	if (exit_zone:IsInsideZone(map._camera.x_position, map._camera.y_position) == true) then
@@ -891,6 +745,7 @@ end
 function Draw()
 	map:_DrawMapLayers();
 end
+
 
 map_functions = {}
 
@@ -911,7 +766,7 @@ map_functions[0] = function()
 	ModeManager:Push(shop);
 end
 
--- Add's Laila to the party and removes her sprite from the map
+-- Adds Laila to the party and removes her sprite from the map
 map_functions[1] = function()
 	if (map._map_event_group:DoesEventExist("laila_joined") == false) then
 		map._map_event_group:AddNewEvent("laila_joined", 1);

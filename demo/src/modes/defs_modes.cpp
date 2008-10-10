@@ -58,6 +58,7 @@ void BindModesToLua()
 			.def_readwrite("_run_disabled", &MapMode::_run_disabled)
 			.def_readwrite("_run_stamina", &MapMode::_run_stamina)
 			.def_readonly("_map_event_group", &MapMode::_map_event_group)
+			.def_readonly("_dilalogue_supervisor", &MapMode::_dialogue_supervisor)
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
 			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
 			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
@@ -65,6 +66,7 @@ void BindModesToLua()
 			.def("_SetCameraFocus", &MapMode::_SetCameraFocus)
 			.def("_SetMapState", &MapMode::_SetMapState)
 			.def("_GetMapState", &MapMode::_GetMapState)
+			.def("_GetDialogueSupervisor", &MapMode::_GetDialogueSupervisor) // TEMP
 			.def("_GetGeneratedObjectID", &MapMode::_GetGeneratedObjectID)
 			.def("_DrawMapLayers", &MapMode::_DrawMapLayers)
 
@@ -111,9 +113,7 @@ void BindModesToLua()
 				value("SLOW_SPEED", static_cast<uint32>(SLOW_SPEED)),
 				value("NORMAL_SPEED", static_cast<uint32>(NORMAL_SPEED)),
 				value("FAST_SPEED", static_cast<uint32>(FAST_SPEED)),
-				value("VERY_FAST_SPEED", static_cast<uint32>(VERY_FAST_SPEED)),
-				// Map dialogues
-				value("DIALOGUE_INFINITE", DIALOGUE_INFINITE)
+				value("VERY_FAST_SPEED", static_cast<uint32>(VERY_FAST_SPEED))
 			]
 	];
 
@@ -192,8 +192,7 @@ void BindModesToLua()
 			.def("LoadFacePortrait", &MapSprite::LoadFacePortrait)
 			.def("LoadStandardAnimations", &MapSprite::LoadStandardAnimations)
 			.def("LoadRunningAnimations", &MapSprite::LoadRunningAnimations)
-			.def("AddDialogue", &MapSprite::AddDialogue, adopt(_2))
-			.def("ClearDialogues", &MapSprite::ClearDialogues)
+			.def("AddDialogueReference", &MapSprite::AddDialogueReference)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -258,13 +257,21 @@ void BindModesToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
+		class_<DialogueSupervisor>("DialogueSupervisor")
+			.def("AddDialogue", &DialogueSupervisor::AddDialogue, adopt(_2))
+			.def("BeginDialogue", (void(DialogueSupervisor::*)(uint32))&DialogueSupervisor::BeginDialogue)
+			.def("EndDialogue", &DialogueSupervisor::EndDialogue)
+			.def("GetDialogue", &DialogueSupervisor::GetDialogue)
+			.def("GetCurrentDialogue", &DialogueSupervisor::GetCurrentDialogue)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
 		class_<MapDialogue>("MapDialogue")
-			.def(constructor<>())
+			.def(constructor<uint32>())
 			.def("AddText", &MapDialogue::AddText)
 			.def("AddOption", &MapDialogue::AddOption)
 			.def("SetMaxViews", &MapDialogue::SetMaxViews)
-			.def("SetNextLine", &MapDialogue::SetNextLine)
-			.def("EndDialogue", &MapDialogue::EndDialogue)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
