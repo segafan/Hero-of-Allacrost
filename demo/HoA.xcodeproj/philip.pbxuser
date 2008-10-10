@@ -80,7 +80,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					22,
 					300,
-					100,
+					130,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXExecutablesDataSource_ActiveFlagID,
@@ -184,8 +184,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 244700774;
-			PBXWorkspaceStateSaveDate = 244700774;
+			PBXPerProjectTemplateStateSaveDate = 245304908;
+			PBXWorkspaceStateSaveDate = 245304908;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -212,6 +212,21 @@
 			sepNavVisRange = "{12450, 1124}";
 			sepNavVisRect = "{{0, 3311}, {711, 429}}";
 			sepNavWindowFrame = "{{438, 145}, {750, 558}}";
+		};
+	};
+	4941A68C0AC1D86400D65B8E /* main_options.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 5768}}";
+			sepNavSelRange = "{3334, 0}";
+			sepNavVisRange = "{2350, 1312}";
+			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
+		};
+	};
+	4941A68D0AC1D86400D65B8E /* main_options.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 896}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 2206}";
 		};
 	};
 	4941A6900AC1D86400D65B8E /* battle.cpp */ = {
@@ -370,9 +385,9 @@
 	};
 	4941A6B00AC1D86400D65B8E /* utils.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {758, 9268}}";
+			sepNavIntBoundsRect = "{{0, 0}, {938, 9226}}";
 			sepNavSelRange = "{2855, 0}";
-			sepNavVisRange = "{2450, 1242}";
+			sepNavVisRange = "{0, 2030}";
 			sepNavVisRect = "{{0, 8438}, {711, 429}}";
 			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
 		};
@@ -802,7 +817,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {691, 1008}}";
 			sepNavSelRange = "{1345, 0}";
-			sepNavVisRange = "{1298, 953}";
+			sepNavVisRange = "{943, 1308}";
 			sepNavVisRect = "{{0, 0}, {711, 429}}";
 			sepNavWindowFrame = "{{123, 68}, {750, 558}}";
 		};

@@ -306,8 +306,6 @@
 		D49A54B80DB2BD8400FBD800 /* libintl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libintl.dylib; path = "../allacrost-dep/lib/libintl.dylib"; sourceTree = SOURCE_ROOT; };
 		D49D57010C65B1C1006E6ABA /* audio_effects.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_effects.cpp; sourceTree = "<group>"; };
 		D49D57030C65B1D2006E6ABA /* audio_effects.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_effects.h; sourceTree = "<group>"; };
-		D49FED120E14B7080083CF3E /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
-		D49FEDEB0E14B8EC0083CF3E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		D49FEDEF0E14B94C0083CF3E /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		D4A1AEBC0E8A122500488ECD /* libiconv.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.2.dylib; path = "../allacrost-dep/lib/libiconv.2.dylib"; sourceTree = SOURCE_ROOT; };
 		D4B34E720E2328540067C913 /* global_effects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = global_effects.cpp; sourceTree = "<group>"; };
@@ -571,8 +569,6 @@
 			isa = PBXGroup;
 			children = (
 				D49FEDEF0E14B94C0083CF3E /* Carbon.framework */,
-				D49FEDEB0E14B8EC0083CF3E /* AppKit.framework */,
-				D49FED120E14B7080083CF3E /* ApplicationServices.framework */,
 				D489FC600D15FBE3003940F4 /* Qt3Support.framework */,
 				D489FC610D15FBE3003940F4 /* QtCore.framework */,
 				D489FC620D15FBE3003940F4 /* QtGui.framework */,
