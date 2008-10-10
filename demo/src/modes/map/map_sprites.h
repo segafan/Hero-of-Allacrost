@@ -215,7 +215,7 @@ public:
 	**/
 	//@{
 	bool IsStateSaved() const
-		{ return _saved; }
+		{ return _state_saved; }
 	
 	void SetMovementSpeed(float speed)
 		{ movement_speed = speed; }
@@ -233,7 +233,7 @@ private:
 	**/
 	//@{
 	//! \brief Indicates if the other saved members are valid because the state has recently been saved
-	bool _saved;
+	bool _state_saved;
 	uint16 _saved_direction;
 	float _saved_movement_speed;
 	bool _saved_moving;
@@ -258,39 +258,7 @@ public:
 
 	~MapSprite();
 
-	//! \brief The name of the sprite, as seen by the player in the game.
-	hoa_utils::ustring name;
-
-	/** \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
-	*** \note Not all sprites have portraits, in which case this member will be NULL
-	**/
-	hoa_video::StillImage* face_portrait;
-
-	//! \brief Holds the previous value of VirtualSprite#moving from the last call to MapSprite#Update().
-	bool was_moving;
-
-	//! \brief Set to true if the sprite has running animations loaded
-	bool has_running_anim;
-
-	//! \brief The index to the animations vector containing the current sprite image to display
-	uint8 current_animation;
-
-	/** \brief A vector containing all the sprite's various animations.
-	*** The first four entries in this vector are the walking animation frames.
-	*** They are ordered from index 0 to 3 as: down, up, left, right. Additional
-	*** animations may follow.
-	**/
-	std::vector<hoa_video::AnimatedImage> animations;
-
-	/** \name Saved state attributes
-	*** These attributes are used to save and load the state of a VirtualSprite
-	**/
-	//@{
-	bool _saved_was_moving;
-	uint8 _saved_current_animation;
-	//@}
-
-	// -------------------------------- Methods --------------------------------
+	// ---------- Public methods
 
 	/** \brief Loads the image containing the standard animations for the sprite
 	*** \param filename The name of the image file holding the standard walking animations
@@ -312,77 +280,23 @@ public:
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	virtual void Draw();
 
-	// ---------- Public Members: Dialogue
-
-	//! \brief Set to false if the sprite contains dialogue that has not been seen by the player
-	bool seen_all_dialogue;
-
-	//! \brief True is sprite contains active dialogue.
-	bool has_active_dialogue;
-
-	//! \brief This vector contains all the dialogues of the sprite
-	std::vector<MapDialogue*> dialogues;
-
-	/** \brief An index to the dialogues vector, representing the current sprite dialogue to
-	*** display when talked to by the player. A negative value indicates that the sprite has no dialogue.
-	*** \note If the sprite has no entries in its dialogues vector, this member should remain negative,
-	*** otherwise a segmentation fault will occur.
+	/** \brief Adds a new reference to a dialogue that the sprite uses
+	*** \param dialogue_id The ID number of the dialogue
+	*** \note It is valid for a dialogue to be referenced more than once by a sprite
 	**/
-	int16 _current_dialogue;
+	void AddDialogueReference(uint32 dialogue_id);
 
-	//! \brief Used to fade the dialogue icon according to distance
-	hoa_video::Color _dialogue_icon_color;
+	//! \brief Updates all dialogue status members based on the status of all referenced dialogues
+	void UpdateDialogueStatus();
 
-	// ---------- Public methods: Dialogue
+	//! \brief Increments the next_dialogue member to index the proceeding dialogue
+	void IncrementNextDialogue();
 
-	void AddDialogue(MapDialogue* md);
-
-	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#seen_all_dialogue
-	void UpdateSeenDialogue();
-
-	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#has_active_dialogue
-	void UpdateActiveDialogue();
-
-	/** \brief Clears all of this sprites dialogues. Note that this will affect the saved game's
-	*** "s_d??" events.
+	/** \brief Sets the next dialogue member for the sprite
+	*** \param next The index value of the dialogue_references vector to set the next_dialogue member to
+	*** \note You can not set the next_dialogue member to a negative number. This could cause run-time errors if it was supported here.
 	**/
-	void ClearDialogues();
-
-	bool HasDialogue() const
-		//{ return (dialogues.size() > 0); }
-		{ if(dialogues.size() > 0) return has_active_dialogue; else return false; }
-
-	MapDialogue* GetCurrentDialogue() const
-		{ return dialogues[_current_dialogue]; }
-
-	void SetDialogue(const int16 dialogue)
-		{ if (static_cast<uint16>(dialogue) >= dialogues.size()) return; else _current_dialogue = dialogue; }
-
-	void NextDialogue() {
-		do {
-			_current_dialogue++;
-			if (static_cast<uint16>(_current_dialogue) >= dialogues.size())
-				_current_dialogue = 0;
-		} while (dialogues[_current_dialogue]->IsAvailable() == false);
-	}
-
-	int16 GetNumDialogues() const
-		{ return dialogues.size(); }
-
-
-	/** \name Lua Access Functions
-	*** These functions are specifically written to enable Lua to access the members of this class.
-	**/
-	//@{
-	void SetName(std::string na)
-		{ name = hoa_utils::MakeUnicodeString(na); }
-
-	void SetCurrentAnimation(uint8 anim)
-		{ current_animation = anim; }
-
-	uint8 GetCurrentAnimation() const
-		{ return current_animation; }
-	//@}
+	void SetNextDialogue(uint16 next);
 
 	/** \brief This method will save the state of a sprite.
 	*** Attributes saved: direction, speed, moving state, name, current action,
@@ -396,6 +310,98 @@ public:
 	*** \return false if there was no saved state, true otherwise.
 	**/
 	virtual void RestoreState();
+
+	/** \name Lua Access Functions
+	*** These functions are specifically written to enable Lua to access the members of this class.
+	**/
+	//@{
+	// TODO: needs to be a ustring
+	void SetName(std::string na)
+		{ _name = hoa_utils::MakeUnicodeString(na); }
+
+	void SetCurrentAnimation(uint8 anim)
+		{ _current_animation = anim; }
+
+	uint8 GetCurrentAnimation() const
+		{ return _current_animation; }
+
+	bool HasAvailableDialogue() const
+		{ return _has_available_dialogue; }
+
+	bool HasUnseenDialogue() const
+		{ return _has_unseen_dialogue; }
+
+	hoa_utils::ustring& GetName()
+		{ return _name; }
+
+	hoa_video::StillImage* GetFacePortrait() const
+		{ return _face_portrait; }
+
+	//! \brief Returns the next dialogue to reference (negative value returned if no dialogues are referenced)
+	int16 GetNextDialogue() const
+		{ return _next_dialogue; }
+
+	//! \brief Gets the ID value of the dialogue that will be the next to be referenced by the sprite
+	uint32 GetNextDialogueID() const // TODO: check invalid indexing
+		{ return _dialogue_references[_next_dialogue]; }
+
+	//! \brief Returns the number of dialogues referenced by the sprite (including duplicates)
+	uint16 GetNumberDialogueReferences() const
+		{ return _dialogue_references.size(); }
+	//@}
+
+protected:
+	//! \brief The name of the sprite, as seen by the player in the game.
+	hoa_utils::ustring _name;
+
+	/** \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
+	*** \note Not all sprites have portraits, in which case this member will be NULL
+	**/
+	hoa_video::StillImage* _face_portrait;
+
+	//! \brief Set to true if the sprite has running animations loaded
+	bool _has_running_animations;
+
+	//! \brief The index to the animations vector containing the current sprite image to display
+	uint8 _current_animation;
+
+	/** \brief A vector containing all the sprite's various animations.
+	*** The first four entries in this vector are the walking animation frames.
+	*** They are ordered from index 0 to 3 as: down, up, left, right. Additional
+	*** animations may follow.
+	**/
+	std::vector<hoa_video::AnimatedImage> _animations;
+
+	//! \brief Holds the previous value of VirtualSprite#moving from the last call to MapSprite#Update().
+	// TODO: I think this member should be removed...if anything it should be a static bool in the Update function
+	bool _was_moving;
+
+	//! \brief Contains the id values of all dialogues refenced by the sprite
+	std::vector<uint32> _dialogue_references;
+
+	/** \brief An index to the dialogue_references vector, representing the next dialogue the sprite should reference
+	*** A negative value indicates that the sprite has no dialogue.
+	**/
+	int16 _next_dialogue;
+
+	/** \brief True is sprite references at least one available dialogue
+	*** \note A dialogue may become unavailable if it reaches its max view count
+	**/
+	bool _has_available_dialogue;
+
+	//! \brief True if at least one dialogue referenced by this sprite has not yet been viewed -and- is available to be viewed
+	bool _has_unseen_dialogue;
+
+	//! \brief Used to fade the dialogue icon according to distance from the camera
+	hoa_video::Color _dialogue_icon_color;
+
+	/** \name Saved state attributes
+	*** These attributes are used to save and load the state of a VirtualSprite
+	**/
+	//@{
+	bool _saved_was_moving;
+	uint8 _saved_current_animation;
+	//@}
 }; // class MapSprite : public VirtualSprite
 
 

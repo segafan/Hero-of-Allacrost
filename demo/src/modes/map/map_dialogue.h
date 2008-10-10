@@ -10,7 +10,19 @@
 /** ****************************************************************************
 *** \file    map_dialogue.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for map mode dialogue.
+*** \brief   Header file for map mode dialogue
+***
+*** \todo There is A LOT of indexing and id referencing in this code and in the
+*** MapSprite's dialogue-related code. Currently very little is done to warn of
+*** bad references (a sprite referencing a dialogue via an invalid ID) or bad
+*** indexing (indexing a line of dialogue that does not exist/out of bounds errors).
+*** The reason why things are this way right now is because sprites and dialogues
+*** can be created in any order (and can even be created after the map has been loaded
+*** and is in play). Because of this, the code may be referencing things that are
+*** not yet created but will be shortly, so we don't want to print warnings about
+*** those types of circumstances. What I think we should do is write a "CheckWarnings"
+*** function or something similar that can be called after it is determined that
+*** everything *should* be created and referenced properly.
 *** ***************************************************************************/
 
 #ifndef __MAP_DIALOGUE_HEADER__
@@ -28,16 +40,13 @@ namespace hoa_map {
 
 namespace private_map {
 
-//! \brief Used to indicate that a line of dialogue can stay on the screen for an infinite amount of time
-const int32 DIALOGUE_INFINITE = -1;
-
-//! \brief Indicates the maximum number of options that a line of dialogue can present
+//! \brief The maximum number of options that a line of dialogue can present to the player
 const uint32 MAX_OPTIONS = 5;
 
 //! \brief Defines the different states the dialogue can be in.
 enum DIALOGUE_STATE {
-	DIALOGUE_STATE_LINE     =  0, //!< standard text presented in dialogue window
-	DIALOGUE_STATE_OPTION   =  1, //!< player-selectable options presented in dialogue window
+	DIALOGUE_STATE_LINE     =  0, //!< Active when the dialogue window is in the process of displaying a line of text
+	DIALOGUE_STATE_OPTION   =  1, //!< Active when player-selectable options are present in the dialogue window
 };
 
 
@@ -91,16 +100,15 @@ enum DIALOGUE_STATE {
 *** ***************************************************************************/
 class MapDialogue {
 public:
-	/** \param save_state If true, the state of the speakers should be reset when
-	*** the dialogue finishes (default == true)
-	**/
-	MapDialogue(bool save_state = true);
+	//! \param id The id number to represent the dialogue by (should be unique to other dialogue ids)
+	MapDialogue(uint32 id);
 
 	~MapDialogue();
 
 	/** \brief Adds a new line of text and to the dialogue
 	*** \param text The text to show on the screen
 	*** \param speaker_id The object ID of the speaker of this line of text
+	*** \param next_line The line of dialogue which should follow this one (a negative value indicates to end the dialogue)
 	*** \param time The maximum time in milliseconds to show the line of dialogue (default == infinite)
 	*** \param action An integer key to the map_functions table in the map file that contains the script function
 	*** to execute when this line completes. A negative value indicates that no action is to occur.
@@ -108,24 +116,32 @@ public:
 	*** \todo This should take a ustring instead of a std::string, but we need better support
 	*** for ustring in scripts to do that first.
 	**/
-	void AddText(std::string text, uint32 speaker_id, int32 time = DIALOGUE_INFINITE, int32 action = -1);
+	void AddText(std::string text, uint32 speaker_id, int32 next_line, int32 action = -1, bool display_timer = false);
 
 	/** \brief Adds an option to the most recently added line of text
 	*** \param text The text for this particular option
 	*** \param next_line The index value of the next line of dialogue to display should this option be selected
-	*** (default value of -1 indicates to just continue on to the standard next line)
+	*** (a negative value indicates to end the dialogue immediately after the option is selected)
 	*** \param action An integer key to the map_functions table in the map file that contains the
-	*** script function to execute should this option be selected
-	*** (default value of -1 indicates that no action is to occur.)
-	***/
-	void AddOption(std::string text, int32 next_line = -1, int32 action = -1);
+	*** script function to execute should this option be selected. A negative value indicates that no action is to occur.
+	***
+	*** \todo This should take a ustring instead of a std::string, but we need better support
+	*** for ustring in scripts to do that first.
+	**/
+	void AddOption(std::string text, int32 next_line, int32 action = -1);
 
 	/** \brief Proceeds the dialogue forward to display the next line
-	*** \param line Index value of the next line of dialogue to read. This value defaults to -1,
-	*** which indicates that the next line of dialogue is immediately after the current line.
+	*** \param line Index value of the next line of dialogue to read. A negative value indicates
+	*** that there is no proceeding line and that the dialogue should finish.
 	*** \return False if the dialogue is finished, true otherwise.
 	**/
-	bool ReadNextLine(int32 line = -1);
+	bool ReadNextLine(int32 line);
+
+	/** \brief Returns the string of the dialogue's event name as it would be stored in the saved game file
+	*** \return The event string in the standard format of "dialogue#ID", where ID is the dialogue ID value
+	**/
+	std::string GetEventName()
+		{ return std::string("dialogue#" + hoa_utils::NumberToString(_dialogue_id)); }
 
 	//! \brief Return true if this dialogue is available to be viewed (_times_seen is still less than _max_views)
 	bool IsAvailable() const
@@ -141,20 +157,7 @@ public:
 
 	//! \brief Indicates if this dialogue has already been seen by the player.
 	bool HasAlreadySeen() const
-		{ return (_times_seen == 0) ? false : true; }
-
-	/** \brief Sets the next line for a specified line of dialogue
-	*** \param set_line The line of dialogue to change its next line value
-	*** \param next_line The line of dialogue to skip to. A negative value indicates no
-	**/
-	void SetNextLine(uint32 set_line, int32 next_line)
-		{ _next_lines[_next_lines.size() - 1] = next_line; }
-
-	/** \brief Ends the current dialogue by setting the next line to an unlikely high line value
-	*** \todo I don't think this should be necessary to end a dialogue. Find a better way and then eliminate this function
-	**/
-	void EndDialogue()
-		{ _next_lines[_next_lines.size() - 1] = 9999; }
+		{ return (_times_seen != 0); }
 
 	// ----- Methods: retrieval of properties of the current line
 
@@ -206,20 +209,23 @@ public:
 
 	//! \name Class Member Access Functions
 	//@{
+	uint32 GetDialogueID() const
+		{ return _dialogue_id; }
+
 	int32 GetMaxViews() const
 		{ return _max_views; }
 
 	int32 GetTimesSeen() const
 		{ return _times_seen; }
 
-	MapSprite* GetOwner() const
-		{ return _owner; }
-
 	uint32 GetLineCount() const
 		{ return _line_count; }
 
 	uint32 GetCurrentLine()
 		{ return _current_line;}
+
+	bool GetSaveState() const
+		{ return _save_state; }
 
 	bool IsBlocked() const
 		{ return _blocked; }
@@ -236,12 +242,8 @@ public:
 	void SetBlocked(bool block)
 		{ _blocked = block; }
 
-	void SetOwner(MapSprite* sprite)
-		{ _owner = sprite; }
-
-	//! \todo This function should be eliminated once the dialogues are changed to not be contained within map sprites
-	void SetEventName(std::string name)
-		{ _event_name = name; }
+	void SetSaveState(bool state)
+		{ _save_state = state; }
 	//@}
 
 private:
@@ -269,9 +271,6 @@ private:
 	//! \brief The event name for this dialogue that is stored in the saved game file, of the form "dialogue#"
 	std::string _event_name;
 
-	//! \brief The sprite, if any, which "owns" this dialogue (the dialogue can only be initiated by talking to the owner)
-	MapSprite* _owner;
-
 	//! \brief The text of the conversation, split up into multiple lines
 	std::vector<hoa_utils::ustring> _text;
 
@@ -281,10 +280,7 @@ private:
 	//! \brief The maximum display time for each line in the dialogue. A negative value indicates infinite time
 	std::vector<int32> _display_times;
 
-	/** \brief Holds indeces pointing to which line should follow each line of dialogue
-	*** Usually this vector is populated with negative values, which indicate that the next line should simply
-	*** be at the next highest index
-	**/
+	//! \brief Holds indeces pointing to which line should follow each line of text. A negative value indicates that the dialogue should end.
 	std::vector<int32> _next_lines;
 
 	//! \brief A set of dialogue options indexed according to the line of dialogue that they belong to
@@ -389,7 +385,7 @@ private:
 
 
 /** ****************************************************************************
-*** \brief Manages and dialogue operation on maps
+*** \brief Manages dialogue execution on maps
 ***
 *** The MapMode class creates an instance of this class to handle all dialogue
 *** processing that occurs on maps. This includes containing the dialogue objects,
@@ -422,10 +418,28 @@ public:
 	**/
 	void AddDialogue(MapDialogue* dialogue);
 
+	/** \brief Adds a reference of a sprite to a dialogue
+	*** \param dialogue_id The ID number of the dialogue that the sprite wishes to reference
+	*** \param sprite_id The ID number of the sprite requesting to be referenced
+	***
+	*** Sprites reference a dialogue so that when the dialogue's status is updated (view count incremented, etc),
+	*** the sprite will be informed that the dialogue has changed.
+	**/
+	void AddSpriteReference(uint32 dialogue_id, uint32 sprite_id);
+
 	/** \brief Prepares the dialogue manager to begin processing a new dialogue
 	*** \param dialogue_id The id number of the dialogue to begin
 	**/
-	void BeginDialogue(MapDialogue* dialogue);
+	void BeginDialogue(uint32 dialogue_id);
+
+	/** \brief Prepares the dialogue manager to begin processing a new dialogue
+	*** \param sprite A pointer to the map sprite that references the dialogue to begin processing 
+	***
+	*** This function operates the same as the other BeginDialogue function with one exception. It also
+	*** handles the calls necessary to update the map sprite. Specifically, making sure the sprite references a
+	*** valid dialogue and increments its next dialogue pointer.
+	**/
+	void BeginDialogue(MapSprite* sprite);
 
 	//! \brief Immediately ends any dialogue that is taking place
 	void EndDialogue();
@@ -435,6 +449,16 @@ public:
 	*** \return A pointer to the dialogue requested, or NULL if no such dialogue was found
 	**/
 	MapDialogue* GetDialogue(uint32 dialogue_id);
+
+	/** \brief Called whenever a map dialogue object's status is updated
+	*** \param dialogue_id The ID number of the dialogue which was updated
+	***
+	*** The purpose of this function is to inform all map sprites which reference this dialogue
+	*** that it has been updated, and that they should update their associated data accordingly. For example,
+	*** it allows the sprite to re-examine whether or not it references any dialogue that has not been read by the player.
+	*** This function is called automatically by the class every time that this class ends a dialogue that is taking place.
+	**/
+	void AnnounceDialogueUpdate(uint32 dialogue_id);
 
 	//! \name Class member access functions
 	//@{
@@ -454,6 +478,15 @@ public:
 private:
 	//! \brief Contains all dialogues used in the map in a std::map structure. The dialogue ID is the map key
 	std::map<uint32, MapDialogue*> _all_dialogues;
+
+	/** \brief A container that stores map sprite IDs that are referenced with map dialogues
+	*** The map key is the MapDialogue ID and the vector of unsigned integers is each sprite that references the dialogue.
+	***
+	*** \note The reason why these references are stored in this class rather than in the MapDialogue class is because
+	*** it would require that a MapDialogue object exist before a sprite could create a reference to it. This would require
+	*** an unnecessary dependency about which class objects are created first in the map script which should be avoided.
+	**/
+	std::map<uint32, std::vector<uint32> > _sprite_references;
 
 	//! \brief Retains the current state of the dialogue
 	DIALOGUE_STATE _state;

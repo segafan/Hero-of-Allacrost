@@ -209,12 +209,12 @@ public:
 	**/
 	void GetImageRectangle(MapRectangle& rect) const;
 
-	/** \brief Loads the saved state of the object
+	/** \brief Restores the saved state of the object
 	*** This state data is retained in the saved game file. When any map object is created and added
 	*** to the map, this function is called to load any stored state data that there may be. Notice
 	*** that the default implementation of this function does nothing.
 	**/
-	virtual void LoadSaved()
+	virtual void RestoreSaved()
 		{}
 
 	/** \name Lua Access Functions

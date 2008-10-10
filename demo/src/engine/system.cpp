@@ -24,8 +24,6 @@
 #include "audio.h"
 #include "script.h"
 
-#include "global.h"
-
 using namespace std;
 
 using namespace hoa_utils;

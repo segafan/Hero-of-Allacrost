@@ -216,19 +216,6 @@ void ObjectManager::Load(ReadScriptDescriptor& map_file) {
 	}
 	map_file.CloseTable();
 	_num_grid_cols = _collision_grid[0].size();
-
-	// ---------- Load the saved states of all the objects
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		_ground_objects[i]->LoadSaved();
-	}
-
-	for (uint32 i = 0; i < _pass_objects.size(); i++) {
-		_pass_objects[i]->LoadSaved();
-	}
-
-	for (uint32 i = 0; i < _sky_objects.size(); i++) {
-		_sky_objects[i]->LoadSaved();
-	}
 }
 
 

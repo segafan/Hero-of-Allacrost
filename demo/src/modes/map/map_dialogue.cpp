@@ -52,26 +52,38 @@ namespace private_map {
 // ********** MapDialogue Class Functions
 // ****************************************************************************
 
-MapDialogue::MapDialogue(bool save_state) :
+MapDialogue::MapDialogue(uint32 id) :
+	_dialogue_id(id),
 	_times_seen(0),
 	_max_views(-1),
 	_line_count(0),
 	_current_line(0),
 	_blocked(false),
-	_save_state(save_state),
-	_event_name(""),
-	_owner(NULL)
-{}
+	_save_state(true),
+	_event_name("")
+{
+	// Look up the event for this dialogue to see whether it has already been read before or not
+	// Either create the event or retrieve the number of times the dialogue has been seen.
+	_event_name = GetEventName();
+	GlobalEventGroup& event_group = *(MapMode::_loading_map->_map_event_group);
+
+	if (event_group.DoesEventExist(_event_name) == false) {
+		event_group.AddNewEvent(_event_name, 0);
+	}
+	else {
+		SetTimesSeen(event_group.GetEvent(_event_name));
+	}
+}
 
 
 MapDialogue::~MapDialogue() {
-	for (uint32 i = 0; i < _options.size(); i++ ) {
+	for (uint32 i = 0; i < _options.size(); i++) {
 		if (_options[i] != NULL) {
 			delete _options[i];
 		}
 	}
 
-	for (uint32 i = 0; i < _actions.size(); ++i) {
+	for (uint32 i = 0; i < _actions.size(); i++) {
 		if (_actions[i] != NULL) {
 			delete _actions[i];
 		}
@@ -80,11 +92,10 @@ MapDialogue::~MapDialogue() {
 
 
 
-void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 time, int32 action) {
+void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 next_line, int32 action, bool display_timer) {
 	_text.push_back(MakeUnicodeString(text));
 	_speakers.push_back(speaker_id);
-	_display_times.push_back(time);
-	_next_lines.push_back(-1);
+	_next_lines.push_back(next_line);
 	_options.push_back(NULL);
 	_line_count++;
 
@@ -101,6 +112,14 @@ void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 time, int32
 	}
 	else {
 		_actions.push_back(NULL);
+	}
+
+	if (display_timer == true) {
+		// TODO: replace 5000 with a function call that will calculate the display time based on text length and player's speed setting
+		_display_times.push_back(5000);
+	}
+	else {
+		_display_times.push_back(-1);
 	}
 }
 
@@ -121,37 +140,25 @@ void MapDialogue::AddOption(string text, int32 next_line, int32 action) {
 
 
 bool MapDialogue::ReadNextLine(int32 line) {
-	bool ignore_argument = false;
-	if (line >= 0) {
-		if (line >= static_cast<int32>(_line_count)) {
-			IF_PRINT_WARNING(MAP_DEBUG) << "function argument exceeded dialogue lines bound: " << line << endl;
-			ignore_argument = true;
-		}
-		else {
-			_current_line = line;
-		}
+	bool end_dialogue = false;
+
+	// If argument is negative, there is no next line to read so end the dialogue
+	if (line < 0) {
+		end_dialogue = true;
+	}
+	// End the dialogue in this case as well to avoid crashing
+	else if (line >= static_cast<int32>(_line_count)) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function argument exceeded number of lines in dialogue: " << line << endl;
+		end_dialogue = true;
 	}
 	else {
-		ignore_argument = true;
+		_current_line = line;
 	}
 
-	if (ignore_argument == true) {
-		if (_next_lines[_current_line] >= 0)
-			_current_line = _next_lines[_current_line];
-		else
-			++_current_line;
-	}
-
-	// Determine if the dialogue is now finished
-	if (_current_line >= _text.size()) {
+	if (end_dialogue == true) {
 		_current_line = 0;
 		IncrementTimesSeen();
 		MapMode::_current_map->_map_event_group->SetEvent(_event_name, _times_seen);
-
-		if (_owner != NULL) {
-			_owner->UpdateSeenDialogue();
-			_owner->UpdateActiveDialogue();
-		}
 		return false;
 	}
 	else {
@@ -303,7 +310,9 @@ DialogueSupervisor::DialogueSupervisor() :
 
 
 DialogueSupervisor::~DialogueSupervisor() {
+	// Update the times seen count before deleting each dialogue
 	for (map<uint32, MapDialogue*>::iterator i = _all_dialogues.begin(); i != _all_dialogues.end(); i++) {
+		MapMode::_current_map->_map_event_group->SetEvent(i->second->GetEventName(), i->second->GetTimesSeen());
 		delete i->second;
 	}
 	_all_dialogues.clear();
@@ -311,9 +320,43 @@ DialogueSupervisor::~DialogueSupervisor() {
 
 
 
-void DialogueSupervisor::BeginDialogue(MapDialogue* dialogue) {
+void DialogueSupervisor::AddDialogue(MapDialogue* dialogue) {
 	if (dialogue == NULL) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
+		return;
+	}
+
+	if (GetDialogue(dialogue->GetDialogueID()) != NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "a dialogue was already registered with this ID: " << dialogue->GetDialogueID() << endl;
+		delete dialogue;
+		return;
+	}
+	else {
+		_all_dialogues.insert(make_pair(dialogue->GetDialogueID(), dialogue));
+	}
+}
+
+
+
+void DialogueSupervisor::AddSpriteReference(uint32 dialogue_id, uint32 sprite_id) {
+	map<uint32, vector<uint32> >::iterator entry = _sprite_references.find(dialogue_id);
+
+	if (entry == _sprite_references.end()) {
+		vector<uint32> new_entry(1, sprite_id);
+		_sprite_references.insert(make_pair(dialogue_id, new_entry));
+	}
+	else {
+		entry->second.push_back(sprite_id);
+	}
+}
+
+
+
+void DialogueSupervisor::BeginDialogue(uint32 dialogue_id) {
+	MapDialogue* dialogue = GetDialogue(dialogue_id);
+
+	if (dialogue == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "could not begin dialogue because none existed for id# " << dialogue_id << endl;
 		return;
 	}
 
@@ -326,11 +369,54 @@ void DialogueSupervisor::BeginDialogue(MapDialogue* dialogue) {
 	_line_timer = _current_dialogue->GetCurrentTime();
 	_dialogue_window.Initialize();
 	_dialogue_window._display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
+	MapMode::_current_map->_map_state = DIALOGUE;
+}
+
+
+
+void DialogueSupervisor::BeginDialogue(MapSprite* sprite) {
+	if (sprite == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "NULL argument passed to function" << endl;
+		return;
+	}
+
+	if (sprite->HasAvailableDialogue() == false) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "sprite argument had no available dialogue" << endl;
+		return;
+	}
+
+	MapDialogue* next_dialogue = GetDialogue(sprite->GetNextDialogueID());
+	if (next_dialogue == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "the next dialogue referenced by the sprite argument was invalid" << endl;
+		return;
+	}
+
+	if (next_dialogue->IsAvailable() == false) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "the next dialogue referenced by the sprite was not available" << endl;
+		return;
+	}
+
+	// Prepare the state of the sprite and map camera for the dialogue
+	sprite->SaveState();
+	sprite->moving = false;
+	sprite->current_action = -1;
+	sprite->SetDirection(CalculateOppositeDirection(MapMode::_current_map->_camera->GetDirection()));
+	sprite->IncrementNextDialogue();
+	// TODO: Is the line below necessary to do? Shouldn't the camera stop on its own (if its pointing to the player's character)?
+	MapMode::_current_map->_camera->moving = false; 
+	BeginDialogue(next_dialogue->GetDialogueID());
 }
 
 
 
 void DialogueSupervisor::EndDialogue() {
+	if (_current_dialogue == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "tried to end a dialogue when none was active" << endl;
+		return;
+	}
+
+	AnnounceDialogueUpdate(_current_dialogue->GetDialogueID());
+
 	_dialogue_window.Reset();
 	_current_dialogue = NULL;
 	_current_options = NULL;
@@ -345,6 +431,28 @@ MapDialogue* DialogueSupervisor::GetDialogue(uint32 dialogue_id) {
 		return _all_dialogues[dialogue_id];
 	else
 		return NULL;
+}
+
+
+
+void DialogueSupervisor::AnnounceDialogueUpdate(uint32 dialogue_id) {
+	map<uint32, vector<uint32> >::iterator entry = _sprite_references.find(dialogue_id);
+
+	// Note that we don't print a warning if no entry was found, because the case where a dialogue exists
+	// but is not referenced by any sprites is a valid one
+	if (entry == _sprite_references.end())
+		return;
+
+	// Update the dialogue status of all sprites that reference this dialogue
+	for (uint32 i = 0; i < entry->second.size(); i++) {
+		MapSprite* referee = static_cast<MapSprite*>(MapMode::_current_map->_object_manager->GetObject(entry->second[i]));
+		if (referee == NULL) {
+			IF_PRINT_WARNING(MAP_DEBUG) << "map sprite: " << entry->second[i] << " references dialogue: " << dialogue_id << " but sprite object did not exist"<< endl;
+		}
+		else {
+			referee->UpdateDialogueStatus();
+		}
+	}
 }
 
 
@@ -379,43 +487,23 @@ void DialogueSupervisor::Draw() {
 
 	// TODO: Check if speaker ID is 0 and if so, call Draw function with NULL arguments
 	MapSprite* speaker = reinterpret_cast<MapSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetCurrentSpeaker()));
-	_dialogue_window.Draw(&speaker->name, speaker->face_portrait);
+	_dialogue_window.Draw(&speaker->GetName(), speaker->GetFacePortrait());
 } // void DialogueSupervisor::Draw()
 
 
 
 void DialogueSupervisor::_UpdateLine() {
-		_dialogue_window._display_textbox.Update();
+	_dialogue_window._display_textbox.Update();
 
-		// TODO: there is potential for dead-lock here. Lines that have (or do not have) a display time, have player options,
-		// and/or have the input blocking property set can cause a lock-up.
+	// TODO: there is potential for dead-lock here. Lines that have (or do not have) a display time, have player options,
+	// and/or have the input blocking property set can cause a lock-up.
 
-		// Update the display timer if it is enabled for this dialogue
-		if (_line_timer > 0) {
-			_line_timer -= MapMode::_current_map->_time_elapsed;
-			
-			if (_line_timer <= 0) {
-				if (_current_options != NULL) {
-					_state = DIALOGUE_STATE_OPTION;
-					_ConstructOptions();
-				}
-				else {
-					_FinishLine(_current_dialogue->GetCurrentNextLine());
-				}
-			}
-		}
+	// Update the display timer if it is enabled for this dialogue
+	if (_line_timer > 0) {
+		_line_timer -= MapMode::_current_map->_time_elapsed;
 
-		// If this dialogue does not allow user input, we are finished
-		if (_current_dialogue->IsBlocked() == true)
-			return;
-
-		if (InputManager->ConfirmPress()) {
-			// If the line is not yet finished displaying, display the rest of the text
-			if (_dialogue_window._display_textbox.IsFinished() == false) {
-				_dialogue_window._display_textbox.ForceFinish();
-			}
-			// Proceed to option selection if the line has options
-			else if (_current_dialogue->CurrentLineHasOptions() == true) {
+		if (_line_timer <= 0) {
+			if (_current_options != NULL) {
 				_state = DIALOGUE_STATE_OPTION;
 				_ConstructOptions();
 			}
@@ -423,8 +511,28 @@ void DialogueSupervisor::_UpdateLine() {
 				_FinishLine(_current_dialogue->GetCurrentNextLine());
 			}
 		}
+	}
 
-		// TODO: Handle cancel presses to allow backtracking through the dialogue
+	// If this dialogue does not allow user input, we are finished
+	if (_current_dialogue->IsBlocked() == true)
+		return;
+
+	if (InputManager->ConfirmPress()) {
+		// If the line is not yet finished displaying, display the rest of the text
+		if (_dialogue_window._display_textbox.IsFinished() == false) {
+			_dialogue_window._display_textbox.ForceFinish();
+		}
+		// Proceed to option selection if the line has options
+		else if (_current_dialogue->CurrentLineHasOptions() == true) {
+			_state = DIALOGUE_STATE_OPTION;
+			_ConstructOptions();
+		}
+		else {
+			_FinishLine(_current_dialogue->GetCurrentNextLine());
+		}
+	}
+
+	// TODO: Handle cancel presses to allow backtracking through the dialogue
 } // void DialogueSupervisor::_UpdateLine()
 
 

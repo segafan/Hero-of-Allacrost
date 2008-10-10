@@ -60,15 +60,15 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 	// Check to make sure tables are of the proper size
 	// TODO: we only check that the number of rows are correct, but not the number of columns
 	if (map_file.GetTableSize("lower_layer") != _num_tile_rows) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "the lower_layer table size was not equal to the number of tile rows specified by the map" << endl;
+		PRINT_ERROR << "the lower_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
 	}
 	if (map_file.GetTableSize("middle_layer") != _num_tile_rows) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "the middle_layer table size was not equal to the number of tile rows specified by the map" << endl;
+		PRINT_ERROR << "the middle_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
 	}
 	if (map_file.GetTableSize("upper_layer") != _num_tile_rows) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "the upper_layer table size was not equal to the number of tile rows specified by the map" << endl;
+		PRINT_ERROR << "the upper_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
 	}
 

@@ -81,7 +81,7 @@ MapMode::MapMode(string filename) :
 	_map_event_group(NULL),
 	_tile_manager(NULL),
 	_object_manager(NULL),
-	_dialogue_manager(NULL),
+	_dialogue_supervisor(NULL),
 	_treasure_menu(NULL),
 	_num_map_contexts(0),
 	_current_context(MAP_CONTEXT_01),
@@ -109,7 +109,7 @@ MapMode::MapMode(string filename) :
 
 	_tile_manager = new TileManager();
 	_object_manager = new ObjectManager();
-	_dialogue_manager = new DialogueSupervisor();
+	_dialogue_supervisor = new DialogueSupervisor();
 	_treasure_menu = new TreasureMenu();
 
 	_intro_timer.Initialize(7000, 0, this);
@@ -147,7 +147,7 @@ MapMode::~MapMode() {
 
 	delete(_tile_manager);
 	delete(_object_manager);
-	delete(_dialogue_manager);
+	delete(_dialogue_supervisor);
 	delete(_treasure_menu);
 
 	_map_script.CloseFile();
@@ -201,7 +201,7 @@ void MapMode::Update() {
 	// ---------- (2) Process additional user input
 	if (_ignore_input == false) {
 		if (_map_state == DIALOGUE)
-			_dialogue_manager->Update();
+			_dialogue_supervisor->Update();
 		else if (_treasure_menu->IsActive() == true)
 			_treasure_menu->Update();
 		else if (_map_state == EXPLORE)
@@ -225,7 +225,7 @@ void MapMode::Draw() {
 	ScriptCallFunction<void>(_draw_function);
 	_DrawGUI();
 	if (_map_state == DIALOGUE) {
-		_dialogue_manager->Draw();
+		_dialogue_supervisor->Draw();
 	}
 } // void MapMode::_Draw()
 
@@ -251,7 +251,7 @@ void MapMode::_Load() {
 		PRINT_ERROR << "failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
 	}
 
-	// ---------- (2) Instruct the sub-manager classes to perform their portion of the load operation
+	// ---------- (2) Instruct the supervisor classes to perform their portion of the load operation
 	_tile_manager->Load(_map_script, this);
 	_object_manager->Load(_map_script);
 
@@ -287,10 +287,24 @@ void MapMode::_Load() {
 	// ---------- (5) Call the map script's custom load function and get a reference to all other script function pointers
 	ScriptObject map_table(luabind::from_stack(_map_script.GetLuaState(), hoa_script::private_script::STACK_TOP));
 	ScriptObject function = map_table["Load"];
-	ScriptCallFunction<void>(function, this);
+	ScriptCallFunction<void>(function, this, _dialogue_supervisor);
 
 	_update_function = _map_script.ReadFunctionPointer("Update");
 	_draw_function = _map_script.ReadFunctionPointer("Draw");
+
+	// ---------- (6) Prepare all sprites with dialogue
+	// This is done at this stage because the map script's load function creates the sprite and dialogue objects. Only after
+	// both sets are created can we determine which sprites have active dialogue.
+	
+	// TODO: Need to figure out a new function appropriate for this code?
+	// TEMP: The line below is very bad to do, but is necessary for the UpdateDialogueStatus function to work correctly
+	_current_map = this;
+	for (map<uint16, MapObject*>::iterator i = _object_manager->_all_objects.begin(); i != _object_manager->_all_objects.end(); i++) {
+		if (i->second->GetType() == SPRITE_TYPE) {
+			MapSprite* sprite = dynamic_cast<MapSprite*>(i->second);
+			sprite->UpdateDialogueStatus();
+		}
+	}
 
 	_map_script.CloseAllTables();
 } // void MapMode::_Load()
@@ -337,16 +351,8 @@ void MapMode::_HandleInputExplore() {
 		if (obj && (obj->GetType() == SPRITE_TYPE)) {
 			MapSprite *sp = reinterpret_cast<MapSprite*>(obj);
 
-			if (sp->HasDialogue()) {
-				sp->SaveState();
-				_camera->moving = false;
-
-				sp->moving = false;
-				sp->current_action = -1;
-				sp->SetDirection(CalculateOppositeDirection(_camera->GetDirection()));
-				_dialogue_manager->BeginDialogue(sp->GetCurrentDialogue());
-				sp->NextDialogue();
-				_map_state = DIALOGUE;
+			if (sp->HasAvailableDialogue()) {
+				_dialogue_supervisor->BeginDialogue(sp);
 				return;
 			}
 		}
