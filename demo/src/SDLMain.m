@@ -18,6 +18,45 @@
 extern int NXArgc;
 extern char** NXArgv;
 
+// these definitions throw out the use of -psn arguments from Carbon
+static int SDLArgc;
+static char** SDLArgv;
+
+static void GenerateSDLArguments()
+{
+	BOOL removePSN = NO;
+	int i;
+	if (NXArgc > 1 && (strncmp("-psn", NXArgv[1], 4)) == 0)
+	{
+		removePSN = YES;
+	}
+	if (removePSN)
+	{
+		SDLArgc = NXArgc - 1;
+	}
+	else
+	{
+		SDLArgc = NXArgc;
+	}
+	NSCAssert(SDLArgc > 0, @"SDLArgc was <= 0");
+	SDLArgv = malloc(sizeof(char*) * SDLArgc);
+	if (removePSN)
+	{
+		SDLArgv[0] = strdup(NXArgv[0]);
+		for (i = 1; i < SDLArgc; i++)
+		{
+			SDLArgv[i] = strdup(NXArgv[i + 1]);
+		}
+	}
+	else
+	{
+		for (i = 0; i < SDLArgc; i++)
+		{
+			SDLArgv[i] = strdup(NXArgv[i]);
+		}
+	}
+}
+
 // Create a window menu
 static void SetupWindowMenu()
 {
@@ -95,9 +134,12 @@ void CustomApplicationMain ()
 
     // Set the working directory to the .app's parent directory
     [self setupWorkingDirectory];
+	
+	// Fix the arguments to remove Carbon process serial numbers
+	GenerateSDLArguments();
 
     // Hand off to main application code
-    status = SDL_main (NXArgc, NXArgv);
+    status = SDL_main (SDLArgc, SDLArgv);
 
     // We're done, thank you for playing
     exit(status);
