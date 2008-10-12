@@ -102,7 +102,6 @@
 		D4B020BA0EA18DAF002644B9 /* libintl.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D49A54B80DB2BD8400FBD800 /* libintl.dylib */; };
 		D4B020CE0EA18DBC002644B9 /* libiconv.2.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4A1AEBC0E8A122500488ECD /* libiconv.2.dylib */; };
 		D4B020D30EA19B61002644B9 /* libSystem.B.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4B020D10EA19B60002644B9 /* libSystem.B.dylib */; };
-		D4B020D40EA19B81002644B9 /* libSystem.B.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4B020D10EA19B60002644B9 /* libSystem.B.dylib */; };
 		D4B34E5B0E2327270067C913 /* dialog_boxes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F900F20DA2010800F10953 /* dialog_boxes.cpp */; };
 		D4B34E5C0E23272A0067C913 /* skill_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */; };
 		D4B34E5D0E23272D0067C913 /* sprites.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49A54680DB28D2E00FBD800 /* sprites.cpp */; };
@@ -168,7 +167,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				D4B020D40EA19B81002644B9 /* libSystem.B.dylib in Copy Frameworks */,
 				D4B020CE0EA18DBC002644B9 /* libiconv.2.dylib in Copy Frameworks */,
 				D4B020BA0EA18DAF002644B9 /* libintl.dylib in Copy Frameworks */,
 				D489F7410D15FB41003940F4 /* SDL.framework in Copy Frameworks */,
@@ -881,7 +879,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "install_name_tool -change /usr/local/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.dylib -id libintl.dylib $TARGET_BUILD_DIR/Allacrost.app/Contents/MacOS/Allacrost\ninstall_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib -id libiconv.2.dylib $TARGET_BUILD_DIR/Allacrost.app/Contents/Frameworks/libintl.dylib\ninstall_name_tool -change /usr/lib/libSystem.B.dylib @executable_path/../Frameworks/libSystem.B.dylib -id libSystem.B.dylib $TARGET_BUILD_DIR/Allacrost.app/Contents/Frameworks/libintl.dylib";
+			shellScript = "install_name_tool -change /usr/local/lib/libintl.8.dylib @executable_path/../Frameworks/libintl.dylib -id libintl.dylib $TARGET_BUILD_DIR/Allacrost.app/Contents/MacOS/Allacrost\ninstall_name_tool -change /usr/lib/libiconv.2.dylib @executable_path/../Frameworks/libiconv.2.dylib -id libiconv.2.dylib $TARGET_BUILD_DIR/Allacrost.app/Contents/Frameworks/libintl.dylib";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

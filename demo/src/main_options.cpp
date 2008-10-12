@@ -109,12 +109,6 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 				cout << "A newer version of Allacrost (" << GetLatestVersion() << ") is available!" << endl;
 			return false;
 		}
-	#ifdef __MACH__
-		// OS X (Carbon in particular) passes an option to the game: -psn_######
-		// where ###### is the process id. We want to ignore this option.
-		else if (options[i].substr(0, 4) == "-psn") {
-		}
-	#endif
 		else {
 			cerr << "Unrecognized option: " << options[i] << endl;
 			PrintUsage();
