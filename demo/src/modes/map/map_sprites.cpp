@@ -63,7 +63,7 @@ uint16 CalculateOppositeDirection(const uint16 direction) {
 }
 
 // ****************************************************************************
-// ********************* VirtualSprite Class Functions ************************
+// ********** VirtualSprite class methods
 // ****************************************************************************
 
 VirtualSprite::VirtualSprite() :
@@ -339,10 +339,9 @@ void VirtualSprite::RestoreState() {
 }
 
 // ****************************************************************************
-// ********** MapSprite Class
+// ********** MapSprite class methods
 // ****************************************************************************
 
-// Constructor for critical class members. Other members are initialized via support functions
 MapSprite::MapSprite() :
 	_face_portrait(NULL),
 	_has_running_animations(false),
@@ -358,20 +357,16 @@ MapSprite::MapSprite() :
 }
 
 
-// Free all allocated images and other data
+
 MapSprite::~MapSprite() {
 	if (_face_portrait != NULL) {
 		delete _face_portrait;
 		_face_portrait = NULL;
 	}
-
-	// Free _animations
-	for (vector<AnimatedImage>::iterator i = _animations.begin(); i != _animations.end(); ++i)
-		(*i).Clear();
 }
 
 
-// Load in the appropriate images and other data for the sprite
+
 bool MapSprite::LoadStandardAnimations(std::string filename) {
 	// The speed to display each frame in the walking animation
 	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
@@ -495,7 +490,7 @@ void MapSprite::LoadFacePortrait(std::string pn) {
 }
 
 
-// Updates the state of the sprite
+
 void MapSprite::Update() {
 	// Update the alpha of the dialogue icon according to it's distance from the player sprite
 	const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
@@ -686,7 +681,7 @@ void MapSprite::RestoreState() {
 }
 
 // *****************************************************************************
-// ********** EnemySprite Class
+// ********** EnemySprite class methods
 // *****************************************************************************
 
 EnemySprite::EnemySprite() :

@@ -406,48 +406,40 @@ void MapMode::_HandleInputExplore() {
 
 
 void MapMode::_CalculateDrawInfo() {
-	// TODO: these two macros are temporary in trying to solve issues involving misaligned graphics
-	// (tiles, sprites) displayed on the screen. The final solution to this problem remains to be found.
-	#define __MAP_CHANGE_1__
-	#define __MAP_CHANGE_2__
+	// ---------- (1) Determine the center position coordinates for the camera
+	float camera_x, camera_y; // Holds the final X, Y coordinates of the camera
+	float x_pixel_length, y_pixel_length; // The X and Y length values that coorespond to a single pixel in the current coodinate system
+	float rounded_x_offset, rounded_y_offset; // The X and Y position offsets of the camera, rounded to perfectly align on a pixel boundary
 
-#ifdef __MAP_CHANGE_1__
-	static float x (_draw_info.tile_x_start);
-	static float y (_draw_info.tile_y_start);
-	_draw_info.tile_x_start = x;
-	_draw_info.tile_y_start = y;
-#endif
+	// TODO: the call to GetPixelSize() will return the same result every time so long as the coordinate system did not change. If we never
+	// change the coordinate system in map mode, then this should be done only once and the calculated values should be saved for re-use.
+	// However, we've discussed the possiblity of adding a zoom feature to maps, in which case we need to continually re-calculate the pixel size
+	VideoManager->GetPixelSize(x_pixel_length, y_pixel_length);
+	rounded_x_offset = FloorToFloatMultiple(_camera->x_offset, x_pixel_length);
+	rounded_y_offset = FloorToFloatMultiple(_camera->y_offset, y_pixel_length);
+	camera_x = static_cast<float>(_camera->x_position) + rounded_x_offset;
+	camera_y = static_cast<float>(_camera->y_position) + rounded_y_offset;
 
-	// ---------- (1) Set the default starting draw positions for the tiles (top left tile)
-
-	float camera_x = _camera->ComputeXLocation();
-	float camera_y = _camera->ComputeYLocation();
-
+	// ---------- (2) Calculate all four screen edges and determine 
 	// Determine the draw coordinates of the top left corner using the camera's current position
-	_draw_info.tile_x_start = 1.0f - _camera->x_offset;
+	_draw_info.tile_x_start = 1.0f - rounded_x_offset;
 	if (IsOddNumber(_camera->x_position))
 		_draw_info.tile_x_start -= 1.0f;
 
-	_draw_info.tile_y_start = 2.0f - _camera->y_offset;
+	_draw_info.tile_y_start = 2.0f - rounded_y_offset;
 	if (IsOddNumber(_camera->y_position))
 		_draw_info.tile_y_start -= 1.0f;
 
-	// By default the map draws 32 + 1 columns and 24 + 1 rows of tiles, the maximum that can fit on the screen.
-	_draw_info.num_draw_cols = TILE_COLS + 1;
-	_draw_info.num_draw_rows = TILE_ROWS + 1;
-
-	// The default starting tile row and column is relative to the map camera's current position.
+	// The starting  row and column of tiles to draw is determined by the map camera's position
 	_draw_info.starting_col = (_camera->x_position / 2) - HALF_TILE_COLS;
 	_draw_info.starting_row = (_camera->y_position / 2) - HALF_TILE_ROWS;
-
-	// ---------- (2) Determine the coordinates for the screen edges on the map grid
 
 	_draw_info.screen_edges.top    = camera_y - HALF_SCREEN_ROWS;
 	_draw_info.screen_edges.bottom = camera_y + HALF_SCREEN_ROWS;
 	_draw_info.screen_edges.left   = camera_x - HALF_SCREEN_COLS;
 	_draw_info.screen_edges.right  = camera_x + HALF_SCREEN_COLS;
 
-	// ---------- (3) Check for special conditions that modify the drawing state
+	// ---------- (3) Check for boundary conditions and re-adjust as necessary so we don't draw outside the map area
 
 	// Usually the map centers on the camera's position, but when the camera becomes too close to
 	// the edges of the map, we need to modify the drawing properties of the frame.
@@ -482,46 +474,21 @@ void MapMode::_CalculateDrawInfo() {
 		_draw_info.screen_edges.top = _draw_info.screen_edges.bottom - SCREEN_ROWS;
 	}
 
-	// Check for the conditions where the tile images align perfectly with the screen and one less row or column of tiles is drawn
-	if (IsFloatInRange(_draw_info.tile_x_start, 0.999f, 1.001f)) { // Is the value approximately equal to 1.0f?
-		_draw_info.num_draw_cols--;
+	// ---------- (4) Determine the number of rows and columns of tiles that need to be drawn
+
+	// When the tile images align perfectly with the screen, we can afford to draw one less row or column of tiles
+	if (IsFloatInRange(_draw_info.tile_x_start, 0.999f, 1.001f)) {
+		_draw_info.num_draw_cols = TILE_COLS;
 	}
-	if (IsFloatInRange(_draw_info.tile_y_start, 1.999f, 2.001f)) { // Is the value approximately equal to 2.0f?
-		_draw_info.num_draw_rows--;
+	else {
+		_draw_info.num_draw_cols = TILE_COLS + 1;
 	}
-
-#ifdef __MAP_CHANGE_1__
-	float y_resolution;
-	float x_resolution;
-
-	float x2 (_draw_info.tile_x_start);
-	float y2 (_draw_info.tile_y_start);
-
-	VideoManager->GetPixelSize(x_resolution, y_resolution);
-	x_resolution = fabs(x_resolution);
-	y_resolution = fabs(y_resolution);
-
-	_draw_info.tile_x_start = FloorToFloatMultiple(_draw_info.tile_x_start, x_resolution);
-	_draw_info.tile_y_start = FloorToFloatMultiple(_draw_info.tile_y_start, y_resolution);
-
-	if (x2 - _draw_info.tile_x_start > x_resolution * 0.5f)
-		_draw_info.tile_x_start += x_resolution;
-	if (y2 - _draw_info.tile_y_start > y_resolution * 0.5f)
-		_draw_info.tile_y_start += y_resolution;
-#endif
-
-#if defined(__MAP_CHANGE_1__) && defined(__MAP_CHANGE_2__)
-	_draw_info.screen_edges.left = FloorToFloatMultiple(_draw_info.screen_edges.left, x_resolution);
-	_draw_info.screen_edges.top = FloorToFloatMultiple(_draw_info.screen_edges.top, y_resolution);
-
-	if (camera_x - HALF_SCREEN_COLS - _draw_info.screen_edges.left > x_resolution * 0.5f)
-		_draw_info.screen_edges.left += x_resolution;
-	if (camera_y - HALF_SCREEN_ROWS - _draw_info.screen_edges.top > y_resolution * 0.5f)
-		_draw_info.screen_edges.top += y_resolution;
-
-	_draw_info.screen_edges.right = _draw_info.screen_edges.left + 2 * SCREEN_COLS;
-	_draw_info.screen_edges.bottom = _draw_info.screen_edges.top + 2 * SCREEN_ROWS;
-#endif
+	if (IsFloatInRange(_draw_info.tile_y_start, 1.999f, 2.001f)) {
+		_draw_info.num_draw_rows = TILE_ROWS;
+	}
+	else {
+		_draw_info.num_draw_rows = TILE_ROWS + 1;
+	}
 
 	// Comment this out to print out debugging info about each map frame that is drawn
 // 	printf("--- MAP DRAW INFO ---\n");
@@ -684,3 +651,4 @@ uint16 MapMode::_GetGeneratedObjectID() {
 }
 
 } // namespace hoa_map
+
