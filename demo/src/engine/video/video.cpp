@@ -484,6 +484,9 @@ void GameVideo::SetCoordSys(const CoordSys& coordinate_system) {
 
  	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	// This small translation is supposed to help with pixel-perfect 2D rendering in OpenGL.
+	// Reference: http://www.opengl.org/resources/faq/technical/transformations.htm#tran0030
+	glTranslatef(0.375, 0.375, 0);
 }
 
 
