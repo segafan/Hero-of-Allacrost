@@ -358,8 +358,8 @@ const std::string GameVideo::CreateGLErrorString() {
 //-----------------------------------------------------------------------------
 
 void GameVideo::GetPixelSize(float& x, float& y) {
-	x = (_current_context.coordinate_system.GetRight() - _current_context.coordinate_system.GetLeft()) / _screen_width;
-	y = (_current_context.coordinate_system.GetTop() - _current_context.coordinate_system.GetBottom()) / _screen_height;
+	x = fabs(_current_context.coordinate_system.GetRight() - _current_context.coordinate_system.GetLeft()) / _screen_width;
+	y = fabs(_current_context.coordinate_system.GetTop() - _current_context.coordinate_system.GetBottom()) / _screen_height;
 }
 
 

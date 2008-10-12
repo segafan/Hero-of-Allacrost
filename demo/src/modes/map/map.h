@@ -32,6 +32,7 @@
 #include "utils.h"
 
 // Allacrost engines
+#include "audio.h"
 #include "mode_manager.h"
 #include "script.h"
 #include "video.h"
