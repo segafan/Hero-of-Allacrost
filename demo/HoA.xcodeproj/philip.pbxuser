@@ -11,10 +11,11 @@
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
 		activeArchitecture = i386;
 		activeBuildConfigurationName = Release;
-		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
-		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
+		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
+		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
 		addToTargets = (
 			4941A4AF0AC1D77500D65B8E /* Allacrost */,
+			D4D1BA480B02B1DB0052BF1E /* Editor */,
 		);
 		breakpoints = (
 		);
@@ -184,8 +185,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 245304908;
-			PBXWorkspaceStateSaveDate = 245304908;
+			PBXPerProjectTemplateStateSaveDate = 245467137;
+			PBXWorkspaceStateSaveDate = 245467137;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
