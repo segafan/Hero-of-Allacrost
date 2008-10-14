@@ -83,15 +83,26 @@ bool MapObject::ShouldDraw() {
 	if (context != MapMode::_current_map->_current_context)
 		return false;
 
-	// Store the full x and y position coordinates of the sprite in a single pair of variables
-	float x_pos = static_cast<float>(x_position) + x_offset;
-	float y_pos = static_cast<float>(y_position) + y_offset;
-
 	// ---------- Determine if the sprite is off-screen and if so, don't draw it.
 	MapRectangle img_rect;
 	GetImageRectangle(img_rect);
 	if (MapRectangle::CheckIntersection(img_rect, MapMode::_current_map->_draw_info.screen_edges) == false)
 		return false;
+
+	// ---------- (1) Determine the center position coordinates for the camera
+	float x_pos, y_pos; // Holds the final X, Y coordinates of the camera
+	float x_pixel_length, y_pixel_length; // The X and Y length values that coorespond to a single pixel in the current coodinate system
+	float rounded_x_offset, rounded_y_offset; // The X and Y position offsets of the object, rounded to perfectly align on a pixel boundary
+
+
+	// TODO: the call to GetPixelSize() will return the same result every time so long as the coordinate system did not change. If we never
+	// change the coordinate system in map mode, then this should be done only once and the calculated values should be saved for re-use.
+	// However, we've discussed the possiblity of adding a zoom feature to maps, in which case we need to continually re-calculate the pixel size
+	VideoManager->GetPixelSize(x_pixel_length, y_pixel_length);
+	rounded_x_offset = FloorToFloatMultiple(x_offset, x_pixel_length);
+	rounded_y_offset = FloorToFloatMultiple(y_offset, y_pixel_length);
+	x_pos = static_cast<float>(x_position) + rounded_x_offset;
+	y_pos = static_cast<float>(y_position) + rounded_y_offset;
 
 	// ---------- Move the drawing cursor to the appropriate coordinates for this sprite
 	VideoManager->Move(x_pos - MapMode::_current_map->_draw_info.screen_edges.left, y_pos - MapMode::_current_map->_draw_info.screen_edges.top);
