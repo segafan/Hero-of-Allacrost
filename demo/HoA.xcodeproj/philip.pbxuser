@@ -67,7 +67,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					300,
-					133.2085,
+					132.20849609375,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXErrorsWarningsDataSource_TypeID,
@@ -81,7 +81,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					22,
 					300,
-					130,
+					129.58349609375,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXExecutablesDataSource_ActiveFlagID,
@@ -145,9 +145,9 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					20,
-					219,
+					218,
 					20,
-					48.1626,
+					48,
 					43,
 					43,
 					20,
@@ -185,8 +185,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 245467137;
-			PBXWorkspaceStateSaveDate = 245467137;
+			PBXPerProjectTemplateStateSaveDate = 246518065;
+			PBXWorkspaceStateSaveDate = 246518065;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -517,7 +517,7 @@
 	D43080DE0AF982F800A5173A /* Allacrost */ = {
 		isa = PBXExecutable;
 		activeArgIndices = (
-			NO,
+			YES,
 			NO,
 		);
 		argumentStrings = (
@@ -581,10 +581,18 @@
 			sepNavWindowFrame = "{{38, 6}, {750, 746}}";
 		};
 	};
+	D438C79A0C9117400032F79E /* image_base.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1219, 9226}}";
+			sepNavSelRange = "{14864, 55}";
+			sepNavVisRange = "{15508, 893}";
+		};
+	};
 	D438C79D0C9117650032F79E /* image_base.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {788, 4158}}";
-			sepNavSelRange = "{8904, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {1219, 4130}}";
+			sepNavSelRange = "{2858, 11}";
+			sepNavVisRange = "{5997, 1394}";
 			sepNavVisRect = "{{0, 2956}, {672, 263}}";
 		};
 	};
