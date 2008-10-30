@@ -312,8 +312,11 @@ private:
 	//! \brief Instance of helper class to map mode. Responsible for object and sprite related operations.
 	private_map::ObjectManager* _object_manager;
 
-	//! \brief This keeps a pointer to the active dialogue.
+	//! \brief Instance of helper class to map mode. Responsible for dialogue execution and display operations.
 	private_map::DialogueSupervisor* _dialogue_supervisor;
+
+	//! \brief Instance of helper class to map mode. Responsible for updating and managing active map events.
+	private_map::EventSupervisor* _event_supervisor;
 
 	//! \brief Class member object which processes all information related to treasure discovery
 	private_map::TreasureMenu* _treasure_menu;

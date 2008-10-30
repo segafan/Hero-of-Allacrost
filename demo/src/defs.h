@@ -260,6 +260,12 @@ namespace hoa_map {
 		class MapDialogueOptions;
 		class DialogueWindow;
 
+		class EventSupervisor;
+		class MapEvent;
+		class MoveEvent;
+		class DialogueEvent;
+		class ScriptedEvent;
+
 		class SpriteAction;
 		class ActionPathMove;
 		class ActionAnimate;
