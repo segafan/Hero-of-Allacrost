@@ -29,6 +29,7 @@
 // Local map mode headers
 #include "map.h"
 #include "map_dialogue.h"
+#include "map_events.h"
 #include "map_objects.h"
 #include "map_sprites.h"
 #include "map_tiles.h"
@@ -110,6 +111,7 @@ MapMode::MapMode(string filename) :
 	_tile_manager = new TileManager();
 	_object_manager = new ObjectManager();
 	_dialogue_supervisor = new DialogueSupervisor();
+	_event_supervisor = new EventSupervisor();
 	_treasure_menu = new TreasureMenu();
 
 	_intro_timer.Initialize(7000, 0, this);
@@ -148,6 +150,7 @@ MapMode::~MapMode() {
 	delete(_tile_manager);
 	delete(_object_manager);
 	delete(_dialogue_supervisor);
+	delete(_event_supervisor);
 	delete(_treasure_menu);
 
 	_map_script.CloseFile();
@@ -216,6 +219,9 @@ void MapMode::Update() {
 		_object_manager->Update();
 		_object_manager->SortObjects();
 	}
+
+	// ---------- (5) Update all active map events
+	_event_supervisor->Update();
 } // void MapMode::Update()
 
 
@@ -295,7 +301,7 @@ void MapMode::_Load() {
 	// ---------- (6) Prepare all sprites with dialogue
 	// This is done at this stage because the map script's load function creates the sprite and dialogue objects. Only after
 	// both sets are created can we determine which sprites have active dialogue.
-	
+
 	// TODO: Need to figure out a new function appropriate for this code?
 	// TEMP: The line below is very bad to do, but is necessary for the UpdateDialogueStatus function to work correctly
 	_current_map = this;
@@ -420,7 +426,7 @@ void MapMode::_CalculateDrawInfo() {
 	camera_x = static_cast<float>(_camera->x_position) + rounded_x_offset;
 	camera_y = static_cast<float>(_camera->y_position) + rounded_y_offset;
 
-	// ---------- (2) Calculate all four screen edges and determine 
+	// ---------- (2) Calculate all four screen edges and determine
 	// Determine the draw coordinates of the top left corner using the camera's current position
 	_draw_info.tile_x_start = 1.0f - rounded_x_offset;
 	if (IsOddNumber(_camera->x_position))

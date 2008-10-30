@@ -143,6 +143,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/map/map_actions.h \
 	$(MODES_DIR)/map/map_dialogue.cpp \
 	$(MODES_DIR)/map/map_dialogue.h \
+	$(MODES_DIR)/map/map_events.cpp \
+	$(MODES_DIR)/map/map_events.h \
 	$(MODES_DIR)/map/map_objects.cpp \
 	$(MODES_DIR)/map/map_objects.h \
 	$(MODES_DIR)/map/map_sprites.cpp \
