@@ -119,7 +119,7 @@ void VirtualSprite::Update() {
 	float tmp_x = x_offset;
 	float tmp_y = y_offset;
 
-	float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
+	float distance_moved = static_cast<float>(SystemManager->GetUpdateTime()) / movement_speed;
 	// Double the distance to move if the sprite is running
 	if (is_running == true)
 		distance_moved *= 2.0f;
@@ -597,14 +597,14 @@ void MapSprite::AddDialogueReference(uint32 dialogue_id) {
 void MapSprite::UpdateDialogueStatus() {
 	_has_available_dialogue = false;
 	_has_unseen_dialogue = false;
-	
+
 	for (uint32 i = 0; i < _dialogue_references.size(); i++) {
 		MapDialogue* dialogue = MapMode::_current_map->_dialogue_supervisor->GetDialogue(_dialogue_references[i]);
 		if (dialogue == NULL) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "sprite: " << object_id << " is referencing unknown dialogue: " << _dialogue_references[i] << endl;
 			continue;
 		}
-		
+
 		if (dialogue->IsAvailable()) {
 			_has_available_dialogue = true;
 			if (_next_dialogue < 0)

@@ -49,7 +49,7 @@ namespace private_map {
 *** trigger a battle, etc.
 *** ***************************************************************************/
 class MapTreasure : public PhysicalObject {
-	friend class TreasureMenu;
+	friend class TreasureSupervisor;
 
 public:
 	/** \param image_file The name of the multi image file to load for the treasure
@@ -148,7 +148,7 @@ private:
 *** and could be placed over them when it was visible? I think this would be much more visually
 *** pleasing than the current implementation.
 *** **************************************************************************************/
-class TreasureMenu {
+class TreasureSupervisor {
 public:
 	//! \brief The possible sub-windows that are selected, used for determining how to process user input
 	enum SELECTION {
@@ -157,9 +157,9 @@ public:
 		DETAIL_SELECTED = 2  //!< set when the user is viewing details about a particular treasure
 	};
 
-	TreasureMenu();
+	TreasureSupervisor();
 
-	~TreasureMenu();
+	~TreasureSupervisor();
 
 	/** \brief Un-hides the menu window and initializes it to display the contents of a new treasure
 	*** \param treasure A pointer to the treasure to display the contents of
@@ -217,7 +217,7 @@ private:
 
 	//! \brief Processes user input when the detailed view of a treasure object is selected
 	void _UpdateDetail();
-}; // class TreasureMenu
+}; // class TreasureSupervisor
 
 } // namespace private_map
 

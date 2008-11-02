@@ -89,6 +89,14 @@
 #endif
 
 
+/** \brief Forces the application to abort with an error
+*** \param message An error message string to report
+*** This macro throws an Exception which if unhandled, will be caught at the end of the main game loop.
+*** Therefore the application will not terminate immediately, but instead will wait until the main game
+*** loop reaches the end of the current iteration.
+**/
+#define ERROR_AND_ABORT(message) throw Exception(message, __FILE__, __LINE__, __FUNCTION__)
+
 /** \name Print Message Helper Macros
 *** These macros assist programmers with writing debug, warning, or error messages that are to be printed to
 *** a user's terminal. They are formatted as follows: `MSGTYPE:FILE:FUNCTION:LINE: `. To use the macro, all
@@ -471,9 +479,9 @@ std::string MakeStandardString(const hoa_utils::ustring& text);
 
 /** \brief Returns a translated string (return value of the gettext() function)
 *** \param text The string that needs to be translated
-*** \return A translated text in the form of a string 
+*** \return A translated text in the form of a string
 ***
-*** This function is used to call the gettext() function, such that, 
+*** This function is used to call the gettext() function, such that,
 *** for different language modes different text will be displayed.
 **/
 std::string Translate(const std::string& text);
@@ -528,12 +536,7 @@ int32 RandomBoundedInteger(int32 lower_bound, int32 upper_bound);
 **/
 int32 GaussianRandomValue(int32 mean, float std_dev = 10.0f, bool positive_value = true);
 
-/******************************************************************************
- * bool Probability(uint32 chance);
- *
- *	This function calculates a random number on a given chance and returns true if the chance occurs.
- *  For example, if calling Probability(25), there is a probability of 25% on returning `true`.
- ******************************************************************************/
+
 /** \brief Returns true/false depending on the chance
 *** \param chance Value between 0..100. 0 will always return false and >=100 will always return true.
 *** \return True if the chance occurs

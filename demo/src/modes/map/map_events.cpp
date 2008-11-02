@@ -44,13 +44,13 @@ MoveEvent::~MoveEvent() {
 
 
 
-void MoveEvent::StartEvent() {
+void MoveEvent::_Start() {
 	// TODO
 }
 
 
 
-bool MoveEvent::IsEventFinished() {
+bool MoveEvent::_Update() {
 	// TODO
 	return true;
 }
@@ -73,13 +73,13 @@ DialogueEvent::~DialogueEvent() {
 
 
 
-void DialogueEvent::StartEvent() {
+void DialogueEvent::_Start() {
 	// TODO
 }
 
 
 
-bool DialogueEvent::IsEventFinished() {
+bool DialogueEvent::_Update() {
 	// TODO
 	return true;
 }
@@ -89,7 +89,9 @@ bool DialogueEvent::IsEventFinished() {
 // ****************************************************************************
 
 ScriptedEvent::ScriptedEvent(uint32 event_id, uint32 start_func_index, uint32 check_func_index) :
-	MapEvent(event_id)
+	MapEvent(event_id),
+	_start_function(NULL),
+	_check_function(NULL)
 {
 	// TODO
 }
@@ -106,13 +108,13 @@ ScriptedEvent::~ScriptedEvent() {
 
 
 
-void ScriptedEvent::StartEvent() {
+void ScriptedEvent::_Start() {
 	// TODO
 }
 
 
 
-bool ScriptedEvent::IsEventFinished() {
+bool ScriptedEvent::_Update() {
 	// TODO
 	return true;
 }
@@ -168,7 +170,7 @@ void EventSupervisor::BeginEvent(MapEvent* event) {
 	}
 
 	_all_events.insert(make_pair(event->_event_id, event));
-	event->StartEvent();
+	event->_Start();
 	_ExamineEventLinks(event, true);
 }
 
@@ -190,7 +192,7 @@ void EventSupervisor::Update() {
 
 	// Check for active events which have finished
 	for (list<MapEvent*>::iterator i = _active_events.begin(); i != _active_events.end(); i++) {
-		if ((*i)->IsEventFinished() == true) {
+		if ((*i)->_Update() == true) {
 			MapEvent* finished_event = *i;
 			i = _active_events.erase(i);
 			// We examine the event links only after the event has been removed from the active list
@@ -209,6 +211,7 @@ MapEvent* EventSupervisor::GetEvent(uint32 event_id) const {
 	else
 		return i->second;
 }
+
 
 
 void EventSupervisor::_ExamineEventLinks(MapEvent* parent_event, bool event_start) {

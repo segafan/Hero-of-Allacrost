@@ -178,14 +178,14 @@ void MapTreasure::Open() {
 	}
 
 	// Initialize the treasure menu to display the contents of the open treasure
-	MapMode::_current_map->_treasure_menu->Initialize(this);
+	MapMode::_current_map->_treasure_supervisor->Initialize(this);
 }
 
 // ****************************************************************************
-// ***** TreasureMenu class methods
+// ***** TreasureSupervisor class methods
 // ****************************************************************************
 
-TreasureMenu::TreasureMenu() :
+TreasureSupervisor::TreasureSupervisor() :
 	_treasure(NULL),
 	_selection(ACTION_SELECTED)
 {
@@ -237,18 +237,18 @@ TreasureMenu::TreasureMenu() :
 	_detail_textbox.SetDisplayMode(VIDEO_TEXT_REVEAL);
 	_detail_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_detail_textbox.SetOwner(&_list_window);
-} // TreasureMenu::TreasureMenu()
+} // TreasureSupervisor::TreasureSupervisor()
 
 
 
-TreasureMenu::~TreasureMenu() {
+TreasureSupervisor::~TreasureSupervisor() {
 	_action_window.Destroy();
 	_list_window.Destroy();
 }
 
 
 
-void TreasureMenu::Initialize(MapTreasure* treasure) {
+void TreasureSupervisor::Initialize(MapTreasure* treasure) {
 	if (treasure == NULL) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
 		return;
@@ -260,6 +260,7 @@ void TreasureMenu::Initialize(MapTreasure* treasure) {
 	}
 
 	_treasure = treasure;
+	MapMode::_current_map->_PushState(STATE_TREASURE);
 
 	// Construct the object list, including any drunes that were contained within the treasure
 	if (_treasure->_drunes != 0) {
@@ -280,7 +281,7 @@ void TreasureMenu::Initialize(MapTreasure* treasure) {
 	_action_window.Show();
 	_list_window.Show();
 
-	// Immediately add the drunes  and objects to the player's inventory
+	// Immediately add the drunes and objects to the player's inventory
 	GlobalManager->AddDrunes(_treasure->_drunes);
 
 	// The AddToInventory function will delete the pointer that it is given if that type of object
@@ -297,11 +298,11 @@ void TreasureMenu::Initialize(MapTreasure* treasure) {
 			_objects_to_delete.push_back(obj);
 		}
 	}
-} // void TreasureMenu::Initialize(MapTreasure* treasure)
+} // void TreasureSupervisor::Initialize(MapTreasure* treasure)
 
 
 
-void TreasureMenu::Update() {
+void TreasureSupervisor::Update() {
 	_action_window.Update();
 	_list_window.Update();
 	_action_options.Update();
@@ -328,7 +329,7 @@ void TreasureMenu::Update() {
 
 
 
-void TreasureMenu::Draw() {
+void TreasureSupervisor::Draw() {
 	// We wait until the treasure is fully open before displaying any part of the menu
 	if (_treasure->current_animation != MapTreasure::TREASURE_OPEN_ANIM) {
 		return;
@@ -372,11 +373,11 @@ void TreasureMenu::Draw() {
 	}
 
 	VideoManager->PopState();
-} // void TreasureMenu::Draw()
+} // void TreasureSupervisor::Draw()
 
 
 
-void TreasureMenu::Finish() {
+void TreasureSupervisor::Finish() {
 	for (uint32 i = 0; i < _objects_to_delete.size(); i++) {
 		delete _objects_to_delete[i];
 	}
@@ -390,11 +391,13 @@ void TreasureMenu::Finish() {
 	_action_window.Hide();
 	_list_window.Hide();
 	_list_options.ClearOptions();
+
+	MapMode::_current_map->_PopState();
 }
 
 
 
-void TreasureMenu::_UpdateAction() {
+void TreasureSupervisor::_UpdateAction() {
 	if (InputManager->ConfirmPress()) {
 		if (_action_options.GetSelection() == 0) { // "Done" action
 			Finish();
@@ -422,7 +425,7 @@ void TreasureMenu::_UpdateAction() {
 
 
 
-void TreasureMenu::_UpdateList() {
+void TreasureSupervisor::_UpdateList() {
 	if (InputManager->ConfirmPress()) {
 		_selection = DETAIL_SELECTED;
 		_list_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
@@ -457,7 +460,7 @@ void TreasureMenu::_UpdateList() {
 
 
 
-void TreasureMenu::_UpdateDetail() {
+void TreasureSupervisor::_UpdateDetail() {
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 		if (_detail_textbox.IsFinished() == false) {
 			_detail_textbox.ForceFinish();

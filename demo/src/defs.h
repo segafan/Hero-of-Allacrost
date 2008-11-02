@@ -272,7 +272,7 @@ namespace hoa_map {
 		class ActionScriptFunction;
 
 		class MapTreasure;
-		class TreasureMenu;
+		class TreasureSupervisor;
 
 		class ZoneSection;
 		class MapZone;
