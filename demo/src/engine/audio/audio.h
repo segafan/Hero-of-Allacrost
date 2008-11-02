@@ -41,7 +41,7 @@
 namespace hoa_audio {
 
 //! \brief The singleton pointer responsible for all audio operations.
-extern GameAudio* AudioManager;
+extern AudioEngine* AudioManager;
 
 //! \brief Determines whether the code in the hoa_audio namespace should print debug statements or not.
 extern bool AUDIO_DEBUG;
@@ -56,7 +56,7 @@ const uint16 MAX_DEFAULT_AUDIO_SOURCES = 64;
 
 
 
-//! \brief A container class for an element of the LRU audio cache managed by the GameAudio class
+//! \brief A container class for an element of the LRU audio cache managed by the AudioEngine class
 class AudioCacheElement {
 public:
 	AudioCacheElement(uint32 time, AudioDescriptor* aud) :
@@ -82,8 +82,8 @@ public:
 *** \note Make sure to later resume paused sounds, otherwise the sources that they hold
 *** will never be released
 *** ***************************************************************************/
-class GameAudio : public hoa_utils::Singleton<GameAudio> {
-	friend class hoa_utils::Singleton<GameAudio>;
+class AudioEngine : public hoa_utils::Singleton<AudioEngine> {
+	friend class hoa_utils::Singleton<AudioEngine>;
 // friend class private_audio::SoundData;
 // friend class private_audio::MusicData;
 	friend class AudioDescriptor;
@@ -92,7 +92,7 @@ class GameAudio : public hoa_utils::Singleton<GameAudio> {
 	friend class Effects;
 
 public:
-	~GameAudio();
+	~AudioEngine();
 
 	/** \brief Opens all audio libraries and initializes the audio device, context, and states
 	*** \return True if there were no errors during initialization
@@ -214,7 +214,7 @@ public:
 	*** \param filename The name of the sound or music file to operate on
 	***
 	*** These methods invoke the named operation on the piece of audio contained
-	*** within the GameAudio's LRU audio cache. The primary intended use for these
+	*** within the AudioEngine's LRU audio cache. The primary intended use for these
 	*** functions are for scripts which simply wish to play a sound once to indicate
 	*** an event or action.
 	***
@@ -309,8 +309,8 @@ public:
 private:
 	//! \note Constructors are kept private since this class is a singleton
 	//@{
-	GameAudio();
-	GameAudio(const GameAudio &game_audio);
+	AudioEngine();
+	AudioEngine(const AudioEngine &game_audio);
 	//@}
 
 	//! \brief The global volume level of all sounds (0.0f is mute, 1.0f is max)
@@ -389,9 +389,9 @@ private:
 	*** \param filename The filename of the audio to load
 	*** \return True if the audio was successfully added to the cache, false if it was not.
 	*** \note If this function returns false, you should delete the pointer that you passed to it.
-	**/ 
+	**/
 	bool _LoadAudio(AudioDescriptor* audio, const std::string& filename);
-}; // class GameAudio : public hoa_utils::Singleton<GameAudio>
+}; // class AudioEngine : public hoa_utils::Singleton<AudioEngine>
 
 } // namespace hoa_audio
 

@@ -60,7 +60,7 @@ extern "C" {
 namespace hoa_script {
 
 //! \brief The singleton pointer responsible for the interaction between the C++ engine and Lua scripts.
-extern GameScript* ScriptManager;
+extern ScriptEngine* ScriptManager;
 
 //! \brief Determines whether the code in the hoa_script namespace should print debug statements or not.
 extern bool SCRIPT_DEBUG;
@@ -96,7 +96,7 @@ const luabind::iterator TABLE_END;
 *** \note Compiled Lua files exhibit faster performance than uncompile files.
 *** ***************************************************************************/
 class ScriptDescriptor {
-	friend class GameScript;
+	friend class ScriptEngine;
 
 public:
 	ScriptDescriptor ()
@@ -191,14 +191,14 @@ protected:
 ***
 *** \note This class is a singleton
 *** ***************************************************************************/
-class GameScript : public hoa_utils::Singleton<GameScript> {
-	friend class hoa_utils::Singleton<GameScript>;
+class ScriptEngine : public hoa_utils::Singleton<ScriptEngine> {
+	friend class hoa_utils::Singleton<ScriptEngine>;
 	friend class ScriptDescriptor;
 	friend class ReadScriptDescriptor;
 	friend class WriteScriptDescriptor;
 	friend class ModifyScriptDescriptor;
 public:
-	~GameScript();
+	~ScriptEngine();
 
 	bool SingletonInitialize ();
 
@@ -214,10 +214,10 @@ public:
 
 	/** \brief Handles run-time errors generated in Lua
 	*** \param err A reference to the luabind::error instance that was thrown
-	*** 
+	***
 	*** What this method does is retrieve the Lua error message that has been placed on top of the Lua stack,
 	*** prints the error message to stderr, and removes it from the stack.
-	*** 
+	***
 	*** \note If this method is called after the luabind::error is caught, there is a chance that the lua_State
 	*** where the error was generated has become invalid. If this is the case, this method will generate a segmentation
 	*** fault.
@@ -233,7 +233,7 @@ public:
 	void HandleCastError(luabind::cast_failed& err);
 
 private:
-	GameScript();
+	ScriptEngine();
 
 	//! \brief Maintains a list of all data files that are currently open.
 	std::map<std::string, ScriptDescriptor*> _open_files;
@@ -258,7 +258,7 @@ private:
 
 	//! \brief Removes an open file from the list of open files
 	void _RemoveOpenFile(ScriptDescriptor* sd);
-}; // class GameScript
+}; // class ScriptEngine : public hoa_utils::Singleton<ScriptEngine>
 
 } // namespace hoa_script
 

@@ -26,7 +26,7 @@ const uint32 VIDEO_TIME_BETWEEN_SHAKE_UPDATES = 50;
 
 
 
-void GameVideo::ShakeScreen(float force, uint32 falloff_time, ShakeFalloff falloff_method) {
+void VideoEngine::ShakeScreen(float force, uint32 falloff_time, ShakeFalloff falloff_method) {
 	if (force < 0.0f) {
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO WARNING: " << __FUNCTION__ << " was passed a negative force value" << endl;
@@ -86,11 +86,11 @@ void GameVideo::ShakeScreen(float force, uint32 falloff_time, ShakeFalloff fallo
 	
 	// Add the shake force to the list of shakes
 	_shake_forces.push_front(shake);
-} // bool GameVideo::ShakeScreen(float force, uint32 falloff_time, ShakeFalloff falloff_method)
+} // bool VideoEngine::ShakeScreen(float force, uint32 falloff_time, ShakeFalloff falloff_method)
 
 
 
-void GameVideo::_UpdateShake(uint32 frame_time) {
+void VideoEngine::_UpdateShake(uint32 frame_time) {
 	if (_shake_forces.empty()) {
 		_x_shake = 0;
 		_y_shake = 0;
@@ -130,11 +130,11 @@ void GameVideo::_UpdateShake(uint32 frame_time) {
 	// Note that this doesn't produce a radially symmetric distribution of offsets
 	_x_shake = _RoundForce(RandomFloat(-net_force, net_force));
 	_y_shake = _RoundForce(RandomFloat(-net_force, net_force));	
-} // void GameVideo::_UpdateShake(uint32 frame_time)
+} // void VideoEngine::_UpdateShake(uint32 frame_time)
 
 
 
-float GameVideo::_RoundForce(float force) {
+float VideoEngine::_RoundForce(float force) {
 	int32 fraction_percent = static_cast<int32>(force * 100.0f) - (static_cast<int32>(force) * 100);
 	
 	int32 random_percent = rand() % 100;

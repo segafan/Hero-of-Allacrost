@@ -23,7 +23,7 @@
 namespace hoa_mode_manager {
 
 //! The singleton pointer responsible for maintaining and updating the game mode state.
-extern GameModeManager* ModeManager;
+extern ModeEngine* ModeManager;
 
 //! Determines whether the code in the hoa_mode_manager namespace should print debug statements or not.
 extern bool MODE_MANAGER_DEBUG;
@@ -47,18 +47,18 @@ const uint8 MODE_MANAGER_WORLD_MODE  = 8;
 *** \brief An abstract class that all game mode classes inherit from.
 ***
 *** The GameMode class is the starting base for developing a new mode of operation
-*** for the game. The GameModeManager class handles all of the GameMode class
+*** for the game. The ModeEngine class handles all of the GameMode class
 *** objects. One should learn to understand the interaction between these two
 *** classes.
 ***
 *** \note THIS IS VERY IMPORTANT. Never, under any circumstances should
 *** you ever invoke the delete function on a pointer to this object or its related
 *** subclasses. The reason is that all of the memory reference handling is done
-*** by the GameModeManager class. If you attempt to ignore this warning you \b will
+*** by the ModeEngine class. If you attempt to ignore this warning you \b will
 *** generate a segmentation fault.
 *** **************************************************************************/
 class GameMode {
-	friend class GameModeManager;
+	friend class ModeEngine;
 
 protected:
 	//! Indicates what 'mode' this object is in (what type of inherited class).
@@ -94,7 +94,7 @@ public:
 /** ***************************************************************************
 *** \brief Manages and maintains all of the living game mode objects.
 ***
-*** The GameModeManager class keeps a stack of GameMode objects, where the object
+*** The ModeEngine class keeps a stack of GameMode objects, where the object
 *** on the top of the stack is the active GameMode (there can only be one active
 *** game mode at any time). The Update() and Draw() functions for this class are
 *** wrapper calls to the GameMode functions of the same name, and act on the
@@ -102,10 +102,10 @@ public:
 ***
 *** When a condition is encountered in which a game mode wishes to destroy itself
 *** and/or push a new mode onto the stack, this does not occur until the next
-*** call to the GameModeManager#Update() function. The GameModeManager#push_stack
+*** call to the ModeEngine#Update() function. The GameModeManager#push_stack
 *** retains all the game modes we wish to push onto the stack on the next call to
-*** GameModeManager#Update(), and the GameModeManager#pop_count member retains
-*** how many modes to delete and pop off the GameModeManager#game_stack. Pop
+*** ModeEngine#Update(), and the GameModeManager#pop_count member retains
+*** how many modes to delete and pop off the ModeEngine#game_stack. Pop
 *** operations are \b always performed before push operations.
 ***
 *** \note 1) This class is a singleton.
@@ -116,38 +116,38 @@ public:
 *** a stack is used. The second reason is "just in case" we need to access a stack
 *** element that is not on the top of the stack.
 *** **************************************************************************/
-class GameModeManager : public hoa_utils::Singleton<GameModeManager> {
-	friend class hoa_utils::Singleton<GameModeManager>;
+class ModeEngine : public hoa_utils::Singleton<ModeEngine> {
+	friend class hoa_utils::Singleton<ModeEngine>;
 
 private:
-	GameModeManager();
+	ModeEngine();
 
 	/** \brief A stack containing all the live game modes.
 	*** \note The back/last element of the vector is the top of the stack.
 	**/
 	std::vector<GameMode*> _game_stack;
 
-	//! A vector of game modes to push to the stack on the next call to GameModeManager#Update().
+	//! A vector of game modes to push to the stack on the next call to ModeEngine#Update().
 	std::vector<GameMode*> _push_stack;
 
 	//! True if a state change occured and we need to change the active game mode.
 	bool _state_change;
 
-	//! The number of game modes to pop from the back of the stack on the next call to GameModeManager#Update().
+	//! The number of game modes to pop from the back of the stack on the next call to ModeEngine#Update().
 	uint32 _pop_count;
 
 public:
-	~GameModeManager();
+	~ModeEngine();
 
 	bool SingletonInitialize();
 
 	//! \brief Increments by one the number of game modes to pop off the stack
 	void Pop();
 
-	/** \brief Removes all game modes from the stack on the next call to GameModeManager#Update().
+	/** \brief Removes all game modes from the stack on the next call to ModeEngine#Update().
 	***
-	*** This function sets the GameModeManager#pop_count member to the size of GameModeManager#game_stack.
-	*** If there is no game mode in GameModeManager#push_stack before the next call to GameModeManager#Update(),
+	*** This function sets the ModeEngine#pop_count member to the size of GameModeManager#game_stack.
+	*** If there is no game mode in ModeEngine#push_stack before the next call to GameModeManager#Update(),
 	*** The game will encounter a segmentation fault and die. Therefore, be careful with this function.
 	***
 	*** \note Typically this function is only used when the game exits, or when a programmer is smoking crack.
@@ -189,7 +189,7 @@ public:
 
 	//! \brief Prints the contents of the game_stack member to standard output.
 	void DEBUG_PrintStack();
-}; // class GameModeManager
+}; // class ModeEngine : public hoa_utils::Singleton<ModeEngine>
 
 } // namespace hoa_mode_manager
 

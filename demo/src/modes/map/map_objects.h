@@ -23,18 +23,12 @@
 // Allacrost engines
 #include "video.h"
 
+// Local map mode headers
+#include "map_utils.h"
+
 namespace hoa_map {
 
 namespace private_map {
-
-//! \brief Used to identify the type of map object or sprite
-enum MAP_OBJECT_TYPE {
-	PHYSICAL_TYPE = 0,
-	VIRTUAL_TYPE = 1,
-	SPRITE_TYPE = 2,
-	ENEMY_TYPE = 3,
-	TREASURE_TYPE = 4
-};
 
 /** ****************************************************************************
 *** \brief Abstract class that represents objects on a map
@@ -370,59 +364,6 @@ public:
 		{ return current_animation; }
 	//@}
 }; // class PhysicalObject : public MapObject
-
-
-/** ****************************************************************************
-*** \brief A container class for node information in pathfinding.
-***
-*** This class is used in the MapMode#_FindPath function to find an optimal
-*** path from a given source to a destination. The path finding algorithm
-*** employed is A* and thus many members of this class are particular to the
-*** implementation of that algorithm.
-*** ***************************************************************************/
-class PathNode {
-public:
-	/** \brief The grid coordinates for this node
-	*** These coordinates correspond to the collision grid, where each element
-	*** is a 16x16 pixel space on the map.
-	**/
-	//@{
-	int16 row, col;
-	//@}
-
-	//! \name Path Scoring Members
-	//@{
-	//! \brief The total score for this node (f = g + h).
-	int16 f_score;
-
-	//! \brief The score for this node relative to the source.
-	int16 g_score;
-
-	//! \brief The Manhattan distance from this node to the destination.
-	int16 h_score;
-	//@}
-
-	//! \brief The grid coordinates for the parent of this node
-	int16 parent_row, parent_col;
-
-	PathNode() : row(-1), col(-1), f_score(0), g_score(0), h_score(0), parent_row(0), parent_col(0)
-		{}
-
-	PathNode(int16 r, int16 c) : row(r), col(c), f_score(0), g_score(0), h_score(0), parent_row(0), parent_col(0)
-		{}
-
-	//! \brief Overloaded comparison operator checks that row and col members are equal
-	bool operator==(const PathNode& that) const
-		{ return ((this->row == that.row) && (this->col == that.col)); }
-
-	//! \brief Overloaded comparison operator checks that row or col members are unequal
-	bool operator!=(const PathNode& that) const
-		{ return ((this->row != that.row) || (this->col != that.col)); }
-
-	//! \brief Overloaded comparison operator only used for path finding, compares the two f_scores
-	bool operator<(const PathNode& that) const
-		{ return this->f_score > that.f_score; }
-}; // class PathNode
 
 
 /** ****************************************************************************

@@ -36,19 +36,12 @@
 #include "script.h"
 #include "video.h"
 
+// Local map mode headers
+#include "map_utils.h"
+
 namespace hoa_map {
 
 namespace private_map {
-
-//! \brief The maximum number of options that a line of dialogue can present to the player
-const uint32 MAX_OPTIONS = 5;
-
-//! \brief Defines the different states the dialogue can be in.
-enum DIALOGUE_STATE {
-	DIALOGUE_STATE_LINE     =  0, //!< Active when the dialogue window is in the process of displaying a line of text
-	DIALOGUE_STATE_OPTION   =  1, //!< Active when player-selectable options are present in the dialogue window
-};
-
 
 /** ****************************************************************************
 *** \brief Represents dialogues between characters on a map
@@ -433,7 +426,7 @@ public:
 	void BeginDialogue(uint32 dialogue_id);
 
 	/** \brief Prepares the dialogue manager to begin processing a new dialogue
-	*** \param sprite A pointer to the map sprite that references the dialogue to begin processing 
+	*** \param sprite A pointer to the map sprite that references the dialogue to begin processing
 	***
 	*** This function operates the same as the other BeginDialogue function with one exception. It also
 	*** handles the calls necessary to update the map sprite. Specifically, making sure the sprite references a
@@ -470,7 +463,7 @@ public:
 
 	MapDialogueOptions* GetCurrentOptions() const
 		{ return _current_options; }
-	
+
 	int32 GetLineTimer() const
 		{ return _line_timer; }
 	//@}

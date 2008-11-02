@@ -76,7 +76,7 @@ extern "C" {
 namespace hoa_video {
 
 //! \brief The singleton pointer for the engine, responsible for all video operations.
-extern GameVideo* VideoManager;
+extern VideoEngine* VideoManager;
 
 //! \brief Determines whether the code in the hoa_video namespace should print
 extern bool VIDEO_DEBUG;
@@ -191,8 +191,8 @@ void RotatePoint(float &x, float &y, float angle);
 *** large, the implementation of many of the methods for this class are split up
 *** into multiple .cpp source files in the video code directory.
 *** *****************************************************************************/
-class GameVideo : public hoa_utils::Singleton<GameVideo> {
-	friend class hoa_utils::Singleton<GameVideo>;
+class VideoEngine : public hoa_utils::Singleton<VideoEngine> {
+	friend class hoa_utils::Singleton<VideoEngine>;
 
 	friend class TextureController;
 	friend class TextSupervisor;
@@ -215,7 +215,7 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class TextImage;
 
 public:
-	~GameVideo();
+	~VideoEngine();
 
 	/** \brief Initialzies all video engine libraries and sub-systems
 	*** \return True if all initializations were successful, false if there was an error.
@@ -290,7 +290,7 @@ public:
 
 	bool IsInitialized() const
 		{ return _initialized; }
-	
+
 	//! \brief Returns true if game is in fullscreen mode, false if it is in windowed mode
 	bool IsFullscreen() const
 		{ return _fullscreen; }
@@ -496,9 +496,9 @@ public:
 	StillImage CaptureScreen() throw(hoa_utils::Exception);
 
 	/** \brief returns the amount of animation frames that have passed since the last
-	 *         call to GameVideo::Display(). This number is based on VIDEO_ANIMATION_FRAME_PERIOD,
+	 *         call to VideoEngine::Display(). This number is based on VIDEO_ANIMATION_FRAME_PERIOD,
 	 *         and is used so that AnimatedImages know how many frames to increment themselves by.
-	 * \return the number of nimations frames passed since last GameVideo::Display() call
+	 * \return the number of nimations frames passed since last VideoEngine::Display() call
 	 */
 	int32 GetFrameChange()
 		{ return _current_frame_diff; }
@@ -509,7 +509,7 @@ public:
 	*** `if (VideoManager->GUI()->LoadMenuSkin(...) == true) { cout << "Success" << endl; }`
 	***
 	*** \note See gui.h for the public methods available from the GUISupervisor class
-	*** \note This function is guaranteed to return a valid pointer so long as the GameVideo class
+	*** \note This function is guaranteed to return a valid pointer so long as the VideoEngine class
 	*** has been properly initialized
 	**/
 	GUISupervisor* GUI()
@@ -521,7 +521,7 @@ public:
 	*** `if (VideoManager->Text()->LoadFont(...) == true) { cout << "Success" << endl; }`
 	***
 	*** \note See text.h for the public methods available from the TextSupervisor class
-	*** \note This function is guaranteed to return a valid pointer so long as the GameVideo class
+	*** \note This function is guaranteed to return a valid pointer so long as the VideoEngine class
 	*** has been properly initialized
 	**/
 	TextSupervisor* Text()
@@ -533,7 +533,7 @@ public:
 	*** `if (VideoManager->Textures()->ReloadTextures() == true) { cout << "Success" << endl; }`
 	***
 	*** \note See texture_controller.h for the public methods available from the GUISupervisor class
-	*** \note This function is guaranteed to return a valid pointer so long as the GameVideo class
+	*** \note This function is guaranteed to return a valid pointer so long as the VideoEngine class
 	*** has been properly initialized
 	**/
 	TextureController* Textures()
@@ -763,7 +763,7 @@ public:
 	 */
 	TextStyle GetTextStyle();
 private:
-	GameVideo();
+	VideoEngine();
 
 	//-- Private variables ----------------------------------------------------
 
@@ -870,7 +870,7 @@ private:
 	//! STL map containing all loaded particle effect definitions
 	std::map<std::string, ParticleEffectDef*> _particle_effect_defs;
 
-	//! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
+	//! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any VideoEngine functions that clobber these settings
 	std::stack<private_video::Context> _context_stack;
 
 	//! check to see if the VideoManager has already been setup.
@@ -937,7 +937,7 @@ private:
 	*** This includes, for instance, the number of texture switches made during a frame.
 	**/
 	void _DEBUG_ShowAdvancedStats();
-}; // class GameVideo : public hoa_utils::Singleton<GameVideo>
+}; // class VideoEngine : public hoa_utils::Singleton<VideoEngine>
 
 }  // namespace hoa_video
 

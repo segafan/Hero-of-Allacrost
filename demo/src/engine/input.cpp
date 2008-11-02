@@ -29,16 +29,16 @@ using namespace hoa_mode_manager;
 using namespace hoa_system;
 using namespace hoa_input::private_input;
 
-template<> hoa_input::GameInput* Singleton<hoa_input::GameInput>::_singleton_reference = NULL;
+template<> hoa_input::InputEngine* Singleton<hoa_input::InputEngine>::_singleton_reference = NULL;
 
 namespace hoa_input {
 
-GameInput* InputManager = NULL;
+InputEngine* InputManager = NULL;
 bool INPUT_DEBUG = false;
 
 // Initializes class members
-GameInput::GameInput() {
-	if (INPUT_DEBUG) cout << "INPUT: GameInput constructor invoked" << endl;
+InputEngine::InputEngine() {
+	if (INPUT_DEBUG) cout << "INPUT: InputEngine constructor invoked" << endl;
 	_any_key_press		    = false;
 	_any_key_release	    = false;
 	_last_axis_moved      = -1;
@@ -72,7 +72,7 @@ GameInput::GameInput() {
 	_left_select_state    = false;
 	_left_select_press    = false;
 	_left_select_release  = false;
-	
+
 	_pause_press          = false;
 	_quit_press           = false;
 
@@ -86,8 +86,8 @@ GameInput::GameInput() {
 
 
 
-GameInput::~GameInput() {
-	if (INPUT_DEBUG) cout << "INPUT: GameInput destructor invoked" << endl;
+InputEngine::~InputEngine() {
+	if (INPUT_DEBUG) cout << "INPUT: InputEngine destructor invoked" << endl;
 
 	// If a joystick is open, close it before exiting
 	if (_joystick.js != NULL) {
@@ -97,7 +97,7 @@ GameInput::~GameInput() {
 
 
 // Initialize singleton pointers and key/joystick systems.
-bool GameInput::SingletonInitialize() {
+bool InputEngine::SingletonInitialize() {
 	// Initialize the SDL joystick subsystem
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0) {
 		cerr << "INPUT ERROR: failed to initailize the SDL joystick subsystem" << endl;
@@ -108,9 +108,9 @@ bool GameInput::SingletonInitialize() {
 }
 
 
-// This is no longer inside SingletonInitialize because we need to load the lua settings 
+// This is no longer inside SingletonInitialize because we need to load the lua settings
 // before initializing the joysticks.
-void GameInput::InitializeJoysticks()
+void InputEngine::InitializeJoysticks()
 {
 	// Attempt to initialize and setup the joystick system
 	if (SDL_NumJoysticks() == 0) { // No joysticks found
@@ -126,7 +126,7 @@ void GameInput::InitializeJoysticks()
 
 
 // Loads the default key settings from the lua file and sets them back
-bool GameInput::RestoreDefaultKeys() {
+bool InputEngine::RestoreDefaultKeys() {
 	// Load the settings file
 	string in_filename = GetSettingsFilename();
 	ReadScriptDescriptor settings_file;
@@ -159,7 +159,7 @@ bool GameInput::RestoreDefaultKeys() {
 
 
 // Loads the default joystick settings from the lua file and sets them back
-bool GameInput::RestoreDefaultJoyButtons()
+bool InputEngine::RestoreDefaultJoyButtons()
 {
 	// Load the settings file
 	string in_filename = GetSettingsFilename();
@@ -190,19 +190,19 @@ bool GameInput::RestoreDefaultJoyButtons()
 
 
 // Checks if any keyboard key or joystick button is pressed
-bool GameInput::AnyKeyPress() {
+bool InputEngine::AnyKeyPress() {
 	return _any_key_press;
 }
 
 
 // Checks if any keyboard key or joystick button is released
-bool GameInput::AnyKeyRelease() {
+bool InputEngine::AnyKeyRelease() {
 	return _any_key_release;
 }
 
 
 // Handles all of the event processing for the game.
-void GameInput::EventHandler() {
+void InputEngine::EventHandler() {
 	SDL_Event event; // Holds the game event
 
 	// Reset all of the press and release flags so that they don't get detected twice.
@@ -246,7 +246,7 @@ void GameInput::EventHandler() {
 			// be rather annoying. The code which did this is commented out below. I think it would
 			// be better if instead the application yielded for a certain amount of time when the
 			// application looses context.
-			
+
 // 			if (event.active.state & SDL_APPACTIVE) {
 // 				if (event.active.gain == 0) { // Window was iconified/minimized
 // 					// Check if the game is in pause mode. Otherwise the player might put pause on,
@@ -280,14 +280,14 @@ void GameInput::EventHandler() {
 			_JoystickEventHandler(event);
 		}
 	} // while (SDL_PollEvent(&event)
-} // void GameInput::EventHandler()
+} // void InputEngine::EventHandler()
 
 
 
 // Handles all keyboard events for the game
-void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
+void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 	if (key_event.type == SDL_KEYDOWN) { // Key was pressed
-		
+
 		_any_key_press = true;
 
 		if (key_event.keysym.mod & KMOD_CTRL || key_event.keysym.sym == SDLK_LCTRL || key_event.keysym.sym == SDLK_RCTRL) { // CTRL key was held down
@@ -330,7 +330,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				VideoManager->Textures()->DEBUG_NextTexSheet();
 				return;
 			}
-			
+
 			//return;
 		} // endif CTRL pressed
 
@@ -452,11 +452,11 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			return;
 		}
 	}
-} // void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event)
+} // void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event)
 
 
 // Handles all joystick events for the game
-void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
+void InputEngine::_JoystickEventHandler(SDL_Event& js_event) {
 	if (js_event.type == SDL_JOYAXISMOTION) {
 		if (js_event.jaxis.axis == _joystick.x_axis) {
 			if (js_event.jaxis.value < -_joystick.threshold) {
@@ -468,7 +468,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			else {
 				_left_state = false;
 			}
-			
+
 			if (js_event.jaxis.value > _joystick.threshold) {
 				if (!_right_state) {
 					_right_state = true;
@@ -500,7 +500,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 				_down_state = false;
 			}
 		}
-		
+
 		if (js_event.jaxis.value > _joystick.threshold
 			|| js_event.jaxis.value < -_joystick.threshold)
 			_last_axis_moved = js_event.jaxis.axis;
@@ -587,11 +587,11 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 	} // else if (js_event.type == JOYBUTTONUP)
 
 	// NOTE: SDL_JOYBALLMOTION and SDL_JOYHATMOTION are ignored for now. Should we process them?
-} // void GameInput::_JoystickEventHandler(SDL_Event& js_event)
+} // void InputEngine::_JoystickEventHandler(SDL_Event& js_event)
 
 
 // Sets a new key over an older one. If the same key is used elsewhere, the older one is removed
-void GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key) {
+void InputEngine::_SetNewKey(SDLKey & old_key, SDLKey new_key) {
 	if (_key.up == new_key) { // up key used already
 		_key.up = old_key;
 		old_key = new_key;
@@ -649,11 +649,11 @@ void GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key) {
 	}
 
 	old_key = new_key; // Otherwise simply overwrite the old value
-} // end GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key)
+} // end InputEngine::_SetNewKey(SDLKey & old_key, SDLKey new_key)
 
 
 // Sets a new joystick button over an older one. If the same button is used elsewhere, the older one is removed
-void GameInput::_SetNewJoyButton(uint8 & old_button, uint8 new_button) {
+void InputEngine::_SetNewJoyButton(uint8 & old_button, uint8 new_button) {
 	if (_joystick.confirm == new_button) { // confirm button used already
 		_joystick.confirm = old_button;
 		old_button = new_button;
@@ -691,7 +691,7 @@ void GameInput::_SetNewJoyButton(uint8 & old_button, uint8 new_button) {
 	}
 
 	old_button = new_button; // Otherwise simply overwrite the old value
-} // end GameInput::_SetNewJoyButton(uint8 & old_button, uint8 new_button)
+} // end InputEngine::_SetNewJoyButton(uint8 & old_button, uint8 new_button)
 
 
 } // namespace hoa_input

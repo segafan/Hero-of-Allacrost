@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,8 +16,8 @@
 *** event manager. I may add support for them later if it is found necessary.
 ***
 *** \todo Joystick processing needs more testing. It has only bee tested with
-*** one gamepad (Logitech Wingman Extreme). Particularly, I'm not sure if I 
-*** chose an adequate value for JOYSTICK_THRESHOLD that will be suitable for 
+*** one gamepad (Logitech Wingman Extreme). Particularly, I'm not sure if I
+*** chose an adequate value for JOYSTICK_THRESHOLD that will be suitable for
 *** all gamepads/joysticks.
 ***
 *** \todo This engine is missing the following functionality:
@@ -45,7 +45,7 @@
 namespace hoa_input {
 
 //! The singleton pointer responsible for handling and updating user input.
-extern GameInput* InputManager;
+extern InputEngine* InputManager;
 
 //! Determines whether the code in the hoa_input namespace should print debug statements or not.
 extern bool INPUT_DEBUG;
@@ -116,7 +116,7 @@ public:
 	//! \brief Identify which axes to use for x and y.
 	int8 x_axis;
 	int8 y_axis;
-	
+
 	//! \brief The threshold value we use to partition the range of joystick values into on and off
 	uint16 threshold;
 }; // class JoystickState
@@ -159,28 +159,28 @@ public:
 *** - Quit Event :: same as Ctrl+Q, this happens when the user tries to close the game window
 ***
 *** \note This class is a singleton.
-*** 
+***
 *** \note Unlike other inputs, pause and quit events are only monitored by presses and have no
 *** state or release methods.
 ***
-*** \note Keep in mind that these events are \b not mutually exclusive (an up press and a down 
+*** \note Keep in mind that these events are \b not mutually exclusive (an up press and a down
 *** press may be registered at the same time). This class does not attempt to give one
 *** event precedence over the other, except in the case of pause and quit events. Therefore,
 *** your code you should deal with the problem of not having mutual exclusive events directly.
 ***
 *** \note Because this class will be used quite often to check the status of the various
-*** booleans, encapsulation has been used so that one can't accidentally change the value 
-*** of one of the members and introduce hard-to-find bugs in the code. 
+*** booleans, encapsulation has been used so that one can't accidentally change the value
+*** of one of the members and introduce hard-to-find bugs in the code.
 *** (eg. `if (up_state = true)` instead of `if (up_state == true)`.
 ***
 *** \note In the end, all you really need to know about this class are the
 *** member access functions in the public section of this class (its not that hard).
 *** **************************************************************************/
-class GameInput : public hoa_utils::Singleton<GameInput> {
-	friend class hoa_utils::Singleton<GameInput>;
+class InputEngine : public hoa_utils::Singleton<InputEngine> {
+	friend class hoa_utils::Singleton<InputEngine>;
 
 private:
-	GameInput();
+	InputEngine();
 
 	//! Holds the current user-defined key settings
 	private_input::KeyState _key;
@@ -193,13 +193,13 @@ private:
 
 	//! Any key released
 	bool _any_key_release;
-	
+
 	//! Any joystick axis moved
 	int8 _last_axis_moved;
 
 	/** \name  Input State Members
 	*** \brief Retain whether an input key/button is currently being held down
-	**/	
+	**/
 	//@{
 	bool _up_state;
 	bool _down_state;
@@ -214,7 +214,7 @@ private:
 	//@}
 
 	/** \name  Input Press Members
-	*** \brief Retain whether an input key/button was just pressed 
+	*** \brief Retain whether an input key/button was just pressed
 	**/
 	//@{
 	bool _up_press;
@@ -280,7 +280,7 @@ private:
 	**/
 	void _SetNewJoyButton(uint8 & old_button, uint8 new_button);
 public:
-	~GameInput();
+	~InputEngine();
 
 	bool SingletonInitialize ();
 
@@ -306,13 +306,13 @@ public:
 	*** \return True if any key/button is released
 	**/
 	bool AnyKeyRelease();
-	
+
 	/** \brief Returns the last joystick axis that has moved
 	*** \return True if any joystick axis has moved
 	**/
 	uint8 GetLastAxisMoved()
 		{ return _last_axis_moved; }
-		
+
 	void ResetLastAxisMoved()
 		{ _last_axis_moved = -1; }
 
@@ -482,10 +482,10 @@ public:
 	//@{
 	int8 GetXAxisJoy() const
 		{ return _joystick.x_axis; }
-	
+
 	int8 GetYAxisJoy() const
 		{ return _joystick.y_axis; }
-	
+
 	int16 GetThresholdJoy() const
 		{ return _joystick.threshold; }
 	//@}
@@ -514,7 +514,7 @@ public:
 
 	int32 GetPauseJoy() const
 		{ return _joystick.pause; }
-	
+
 	int32 GetQuitJoy() const
 		{ return _joystick.quit; }
 	//@}
@@ -639,8 +639,7 @@ public:
 	//! \brief Returns the most recent event retrieved from SDL
 	const SDL_Event& GetMostRecentEvent() const
 		{ return _event; }
-
-}; // class GameInput
+}; // class InputEngine : public hoa_utils::Singleton<InputEngine>
 
 } // namespace hoa_input
 

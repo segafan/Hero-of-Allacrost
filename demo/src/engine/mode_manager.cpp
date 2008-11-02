@@ -23,11 +23,11 @@ using namespace hoa_system;
 using namespace hoa_boot;
 
 
-template<> hoa_mode_manager::GameModeManager* Singleton<hoa_mode_manager::GameModeManager>::_singleton_reference = NULL;
+template<> hoa_mode_manager::ModeEngine* Singleton<hoa_mode_manager::ModeEngine>::_singleton_reference = NULL;
 
 namespace hoa_mode_manager {
 
-GameModeManager* ModeManager = NULL;
+ModeEngine* ModeManager = NULL;
 bool MODE_MANAGER_DEBUG = false;
 
 // ****************************************************************************
@@ -51,20 +51,20 @@ GameMode::~GameMode() {
 }
 
 // ****************************************************************************
-// ***** GameModeManager class
+// ***** ModeEngine class
 // ****************************************************************************
 
 // This constructor must be defined for the singleton macro
-GameModeManager::GameModeManager() {
-	if (MODE_MANAGER_DEBUG) cout << "MODE MANAGER: GameModeManager constructor invoked" << endl;
+ModeEngine::ModeEngine() {
+	if (MODE_MANAGER_DEBUG) cout << "MODE MANAGER: ModeEngine constructor invoked" << endl;
 	_pop_count = 0;
 	_state_change = false;
 }
 
 
 // The destructor frees all the modes still on the stack
-GameModeManager::~GameModeManager() {
-	if (MODE_MANAGER_DEBUG) cout << "MODE MANAGER: GameModeManager destructor invoked" << endl;
+ModeEngine::~ModeEngine() {
+	if (MODE_MANAGER_DEBUG) cout << "MODE MANAGER: ModeEngine destructor invoked" << endl;
 	// Delete any game modes on the stack
 	while (_game_stack.size() != 0) {
 		delete _game_stack.back();
@@ -80,7 +80,7 @@ GameModeManager::~GameModeManager() {
 
 
 // Deletes any game modes on the stack or the push stack and resets all counters
-bool GameModeManager::SingletonInitialize() {
+bool ModeEngine::SingletonInitialize() {
 	// Delete any game modes on the stack
 	while (_game_stack.size() != 0) {
 		delete _game_stack.back();
@@ -101,27 +101,27 @@ bool GameModeManager::SingletonInitialize() {
 
 
 // Free the top mode on the stack and pop it off
-void GameModeManager::Pop() {
+void ModeEngine::Pop() {
 	_pop_count++;
 	_state_change = true;
 }
 
 
 // Pop off all game modes
-void GameModeManager::PopAll() {
+void ModeEngine::PopAll() {
 	_pop_count = static_cast<uint32>(_game_stack.size());
 }
 
 
 // Push a new game mode onto the stack
-void GameModeManager::Push(GameMode* gm) {
+void ModeEngine::Push(GameMode* gm) {
 	_push_stack.push_back(gm);
 	_state_change = true;
 }
 
 
 // Returns the mode type of the game mode on the top of the stack
-uint8 GameModeManager::GetGameType() {
+uint8 ModeEngine::GetGameType() {
 	if (_game_stack.empty())
 		return MODE_MANAGER_DUMMY_MODE;
 	else
@@ -130,7 +130,7 @@ uint8 GameModeManager::GetGameType() {
 
 
 // Returns the mode type of a game mode on the stack
-uint8 GameModeManager::GetGameType(uint32 index) {
+uint8 ModeEngine::GetGameType(uint32 index) {
 	if (_game_stack.size() < index)
 		return MODE_MANAGER_DUMMY_MODE;
 	else
@@ -139,7 +139,7 @@ uint8 GameModeManager::GetGameType(uint32 index) {
 
 
 // Returns a pointer to the game mode that's currently on the top of the stack
-GameMode* GameModeManager::GetTop() {
+GameMode* ModeEngine::GetTop() {
 	if (_game_stack.empty())
 		return NULL;
 	else
@@ -148,7 +148,7 @@ GameMode* GameModeManager::GetTop() {
 
 
 // Returns a pointer to a game mode on the stack
-GameMode* GameModeManager::Get(uint32 index) {
+GameMode* ModeEngine::Get(uint32 index) {
 	if (_game_stack.size() < index)
 		return NULL;
 	else
@@ -157,7 +157,7 @@ GameMode* GameModeManager::Get(uint32 index) {
 
 
 // Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
-void GameModeManager::Update() {
+void ModeEngine::Update() {
 	// If a Push() or Pop() function was called, we need to adjust the state of the game stack.
 	if (_state_change == true) {
 		// Pop however many game modes we need to from the top of the stack
@@ -204,7 +204,7 @@ void GameModeManager::Update() {
 
 
 // Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
-void GameModeManager::Draw() {
+void ModeEngine::Draw() {
 	if (_game_stack.size() == 0) {
 		return;
 	}
@@ -214,7 +214,7 @@ void GameModeManager::Draw() {
 
 
 // Used for debugging purposes ONLY. Prints the contents of the game mode stack.
-void GameModeManager::DEBUG_PrintStack() {
+void ModeEngine::DEBUG_PrintStack() {
 	cout << "MODE MANAGER DEBUG: Printing Game Stack" << endl;
 	if (_game_stack.size() == 0) {
 		cout << "***Game stack is empty!" << endl;

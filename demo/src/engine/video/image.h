@@ -83,7 +83,7 @@ namespace hoa_video {
 *** destructors of the derived classes to implement.
 *** ***************************************************************************/
 class ImageDescriptor {
-	friend class GameVideo;
+	friend class VideoEngine;
 
 public:
 	ImageDescriptor();
@@ -99,7 +99,7 @@ public:
 
 	/** \brief Draws the image to the display buffer
 	*** The location and orientation of the drawn image is dependent upon the current cursor position
-	*** and context (draw flags) set in the GameVideo class.
+	*** and context (draw flags) set in the VideoEngine class.
 	**/
 	virtual void Draw() const = 0;
 
@@ -331,7 +331,7 @@ private:
 *** classes.
 *** ***************************************************************************/
 class StillImage : public ImageDescriptor {
-	friend class GameVideo;
+	friend class VideoEngine;
 	friend class ImageDescriptor;
 	friend class AnimatedImage;
 	friend class CompositeImage;
@@ -485,7 +485,7 @@ public:
 *** to do so yourself.
 *** ***************************************************************************/
 class AnimatedImage : public ImageDescriptor {
-	friend class GameVideo;
+	friend class VideoEngine;
 
 public:
 	//! \brief Supply the constructor with "true" if you want this to represent a grayscale image.
@@ -765,7 +765,7 @@ public:
 
 	/** \brief Draws the image to the display buffer
 	*** The location and orientation of the drawn image is dependent upon the current cursor position
-	*** and context (draw flags) set in the GameVideo class.
+	*** and context (draw flags) set in the VideoEngine class.
 	**/
 	void Draw() const;
 

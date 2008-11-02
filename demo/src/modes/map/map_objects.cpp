@@ -35,8 +35,6 @@
 #include "map_objects.h"
 #include "map_sprites.h"
 
-
-
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
@@ -50,7 +48,6 @@ using namespace hoa_battle;
 namespace hoa_map {
 
 namespace private_map {
-
 
 // *****************************************************************************
 // ********** MapObject Class Functions

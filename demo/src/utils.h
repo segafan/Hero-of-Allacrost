@@ -377,7 +377,7 @@ private:
 *** practice, however.
 ***
 *** \note Most of our singleton classes also define a pointer to their singleton object inside the
-*** source file of the class. For example, the GameAudio singleton contains the AudioManager class object
+*** source file of the class. For example, the AudioEngine singleton contains the AudioManager class object
 *** name inside the hoa_audio namespace. Therefore you do not need to call the SingletonGetReference()
 *** function when this object is made available.
 *** ***************************************************************************/

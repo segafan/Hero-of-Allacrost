@@ -24,6 +24,7 @@
 #include "video.h"
 
 // Local map mode headers
+#include "map_utils.h"
 #include "map_objects.h"
 
 namespace hoa_map {

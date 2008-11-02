@@ -26,19 +26,19 @@ using namespace luabind;
 using namespace hoa_utils;
 using namespace hoa_script::private_script;
 
-template<> hoa_script::GameScript* Singleton<hoa_script::GameScript>::_singleton_reference = NULL;
+template<> hoa_script::ScriptEngine* Singleton<hoa_script::ScriptEngine>::_singleton_reference = NULL;
 
 namespace hoa_script {
 
-GameScript* ScriptManager = NULL;
+ScriptEngine* ScriptManager = NULL;
 bool SCRIPT_DEBUG = false;
 
 //-----------------------------------------------------------------------------
-// GameScript Class Functions
+// ScriptEngine Class Functions
 //-----------------------------------------------------------------------------
 
-GameScript::GameScript() {
-	if (SCRIPT_DEBUG) cout << "SCRIPT: GameScript constructor invoked." << endl;
+ScriptEngine::ScriptEngine() {
+	if (SCRIPT_DEBUG) cout << "SCRIPT: ScriptEngine constructor invoked." << endl;
 
 	// Initialize Lua and LuaBind
 	_global_state = lua_open();
@@ -51,8 +51,8 @@ GameScript::GameScript() {
 
 
 
-GameScript::~GameScript() {
-	if (SCRIPT_DEBUG) cout << "SCRIPT: GameScript destructor invoked." << endl;
+ScriptEngine::~ScriptEngine() {
+	if (SCRIPT_DEBUG) cout << "SCRIPT: ScriptEngine destructor invoked." << endl;
 
 	_open_files.clear();
 	lua_close(_global_state);
@@ -61,14 +61,14 @@ GameScript::~GameScript() {
 
 
 
-bool GameScript::SingletonInitialize() {
+bool ScriptEngine::SingletonInitialize() {
 	// TODO: Open the user setting's file and apply those settings
 	return true;
 }
 
 
 
-void GameScript::HandleLuaError(luabind::error& err) {
+void ScriptEngine::HandleLuaError(luabind::error& err) {
 	lua_State *state = err.state();
 	cerr << "SCRIPT ERROR: a run-time Lua error has occured with the following error message:\n  " << endl;
 	std::string k = lua_tostring(state, lua_gettop(state)) ;
@@ -78,13 +78,13 @@ void GameScript::HandleLuaError(luabind::error& err) {
 
 
 
-void GameScript::HandleCastError(luabind::cast_failed& err) {
+void ScriptEngine::HandleCastError(luabind::cast_failed& err) {
 	cerr << "SCRIPT ERROR: the return value of a Lua function call could not be successfully converted "
 		<< "to the specified C++ type: " << err.what() << endl;
 }
 
 
-lua_State *GameScript::_CheckForPreviousLuaState(const std::string &filename)
+lua_State *ScriptEngine::_CheckForPreviousLuaState(const std::string &filename)
 {
 	if (_open_threads.find(filename) != _open_threads.end())
 			return _open_threads[filename];
@@ -93,7 +93,7 @@ lua_State *GameScript::_CheckForPreviousLuaState(const std::string &filename)
 
 
 
-void GameScript::_AddOpenFile(ScriptDescriptor* sd) {
+void ScriptEngine::_AddOpenFile(ScriptDescriptor* sd) {
 	// NOTE: Function assumes that the file is not already open
 	_open_files.insert(make_pair(sd->_filename, sd));
 	// add the lua_State to the list of opened lua states
@@ -107,14 +107,14 @@ void GameScript::_AddOpenFile(ScriptDescriptor* sd) {
 
 
 
-void GameScript::_RemoveOpenFile(ScriptDescriptor* sd) {
+void ScriptEngine::_RemoveOpenFile(ScriptDescriptor* sd) {
 	// NOTE: Function assumes that the ScriptDescriptor file is already open
 	_open_files.erase(sd->_filename);
 }
 
 
 
-bool GameScript::IsFileOpen(const std::string& filename) {
+bool ScriptEngine::IsFileOpen(const std::string& filename) {
 	return false; // TEMP: working on resolving the issue with files being opened multiple times
 
 	if (_open_files.find(filename) != _open_files.end()) {

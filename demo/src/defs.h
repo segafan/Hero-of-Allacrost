@@ -41,7 +41,7 @@
 // Audio declarations, see src/engine/audio/
 namespace hoa_audio {
 	extern bool AUDIO_DEBUG;
-	class GameAudio;
+	class AudioEngine;
 
 	class AudioDescriptor;
 	class MusicDescriptor;
@@ -68,7 +68,7 @@ namespace hoa_audio {
 // Video declarations, see src/engine/video/
 namespace hoa_video {
 	extern bool VIDEO_DEBUG;
-	class GameVideo;
+	class VideoEngine;
 
 	class Color;
 	class CoordSys;
@@ -143,7 +143,7 @@ namespace hoa_video {
 // Script declarations, see src/engine/script/
 namespace hoa_script {
 	extern bool SCRIPT_DEBUG;
-	class GameScript;
+	class ScriptEngine;
 
 	class ScriptDescriptor;
 	class ReadScriptDescriptor;
@@ -154,7 +154,7 @@ namespace hoa_script {
 // Mode manager declarations, see src/engine/
 namespace hoa_mode_manager {
 	extern bool MODE_MANAGER_DEBUG;
-	class GameModeManager;
+	class ModeEngine;
 
 	class GameMode;
 }
@@ -162,13 +162,13 @@ namespace hoa_mode_manager {
 // Input declarations, see src/engine/
 namespace hoa_input {
 	extern bool INPUT_DEBUG;
-	class GameInput;
+	class InputEngine;
 }
 
 // Settings declarations, see src/engine/
 namespace hoa_system {
 	extern bool SYSTEM_DEBUG;
-	class GameSystem;
+	class SystemEngine;
 	class Timer;
 }
 
@@ -262,7 +262,9 @@ namespace hoa_map {
 
 		class EventSupervisor;
 		class MapEvent;
-		class MoveEvent;
+		class SpritePathMoveEvent;
+		class SpriteRandomMoveEvent;
+		class SpriteAnimateEvent;
 		class DialogueEvent;
 		class ScriptedEvent;
 

@@ -117,7 +117,7 @@ public:
 	
 	
 	/*!
-	 *  \brief destroys the system. Called by GameVideo's destructor
+	 *  \brief destroys the system. Called by VideoEngine's destructor
 	 */			
 	void Destroy();
 
