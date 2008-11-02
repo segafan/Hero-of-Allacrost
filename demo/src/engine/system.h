@@ -77,7 +77,7 @@ enum SYSTEM_TIMER_STATE {
 };
 
 //! \brief The singleton pointer responsible for managing the system during game operation.
-extern GameSystem* SystemManager;
+extern SystemEngine* SystemManager;
 
 //! \brief Determines whether the code in the hoa_system namespace should print debug statements or not.
 extern bool SYSTEM_DEBUG;
@@ -94,7 +94,7 @@ namespace private_system {
 *** designed specifically for use by the various game mode classes, but it is
 *** certainly capable of being utilized just as effectively by the engine or
 *** or other parts of the code. The operation of this class is also integrated
-*** with the GameSystem class, which routinely updates and manageds its timers.
+*** with the SystemEngine class, which routinely updates and manageds its timers.
 *** The features of this timing mechanism include:
 ***
 *** - automatically updates its timing every frame
@@ -114,7 +114,7 @@ namespace private_system {
 *** game code, such as temporary displaying damage numbers.
 *** ***************************************************************************/
 class SystemTimer {
-	friend class GameSystem;
+	friend class SystemEngine;
 
 public:
 	SystemTimer();
@@ -225,7 +225,7 @@ private:
 	uint32 _times_completed;
 
 	/** \brief Updates the timer if it is running
-	*** This method can only be invoked by the GameSystem class. Invoking this method is also the only way in which
+	*** This method can only be invoked by the SystemEngine class. Invoking this method is also the only way in which
 	*** the timer may arrive at the finished state.
 	**/
 	void _UpdateTimer();
@@ -241,12 +241,12 @@ private:
 ***
 *** \note This class is a singleton.
 *** ***************************************************************************/
-class GameSystem : public hoa_utils::Singleton<GameSystem> {
-	friend class hoa_utils::Singleton<GameSystem>;
+class SystemEngine : public hoa_utils::Singleton<SystemEngine> {
+	friend class hoa_utils::Singleton<SystemEngine>;
 	friend class SystemTimer;
 
 public:
-	~GameSystem();
+	~SystemEngine();
 
 	bool SingletonInitialize();
 
@@ -273,7 +273,7 @@ public:
 	void UpdateTimers();
 
 	/** \brief Checks all system timers for whether they should be paused or resumed
-	*** This function is typically called whenever the GameModeManager class has changed the active game mode.
+	*** This function is typically called whenever the ModeEngine class has changed the active game mode.
 	*** When this is done, all system timers that are owned by the new game mode are resumed, all timers with
 	*** a different owner are paused, and all timers with no owner are ignored.
 	**/
@@ -349,7 +349,7 @@ public:
 
 
 private:
-	GameSystem();
+	SystemEngine();
 
 	//! \brief The last time that the UpdateTimers function was called, in milliseconds.
 	uint32 _last_update;
@@ -382,7 +382,7 @@ private:
 	*** SystemTimer objects themselves.
 	**/
 	std::set<SystemTimer*> _system_timers;
-}; // class GameSystem : public hoa_utils::Singleton<GameSystem>
+}; // class SystemEngine : public hoa_utils::Singleton<SystemEngine>
 
 
 template <class T> struct generic_class_func_info
@@ -397,7 +397,7 @@ template <class T> struct generic_class_func_info
 };
 
 
-template <class T> Thread * GameSystem::SpawnThread(void (T::*func)(), T * myclass) {
+template <class T> Thread * SystemEngine::SpawnThread(void (T::*func)(), T * myclass) {
 #if (THREAD_TYPE == SDL_THREADS)
 	Thread * thread;
 	static generic_class_func_info <T> gen;

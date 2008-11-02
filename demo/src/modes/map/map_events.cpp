@@ -13,10 +13,14 @@
 *** \brief   Source file for map mode events and event processing.
 *** ***************************************************************************/
 
-#include "map_events.h"
-
 // Allacrost engines
 #include "system.h"
+
+// Local map mode headers
+#include "map.h"
+#include "map_events.h"
+#include "map_objects.h"
+#include "map_sprites.h"
 
 using namespace std;
 
@@ -27,32 +31,181 @@ namespace hoa_map {
 namespace private_map {
 
 // ****************************************************************************
-// ********** MoveEvent Class Functions
+// ********** PathMoveEvent Class Functions
 // ****************************************************************************
 
-MoveEvent::MoveEvent(uint32 event_id, uint32 sprite_id, uint32 x_coord, uint32 y_coord) :
-	MapEvent(event_id)
+SpritePathMoveEvent::SpritePathMoveEvent(uint32 event_id, VirtualSprite* sprite, uint32 x_coord, uint32 y_coord) :
+	MapEvent(event_id),
+	_sprite(sprite),
+	_current_node(0)
 {
+	// TODO: check that x/y coordinates are within map boundaries
+	_destination.col = x_coord;
+	_destination.row = y_coord;
+}
+
+
+
+SpritePathMoveEvent::~SpritePathMoveEvent() {
 	// TODO
 }
 
 
 
-MoveEvent::~MoveEvent() {
-	// TODO
+void SpritePathMoveEvent::_Start() {
+	_current_node = 0;
+	// TODO: Check if we already have a previously computed path and if it is still valid, use it.
+	// The code below automatically re-uses a path if there is one without checking if the source
+	// node is the same as the sprite's current position
+
+	if (_path.empty() == true) {
+		MapMode::_current_map->_object_manager->FindPath(_sprite, _path, _destination);
+
+		// If no path could be found, there's nothing more that can be done here
+		if (_path.empty() == true)
+			IF_PRINT_WARNING(MAP_DEBUG) << "could not discover a path to destination" << endl;
+	}
 }
 
 
 
-void MoveEvent::_Start() {
-	// TODO
+bool SpritePathMoveEvent::_Update() {
+	// TODO: the code below needs to be optimized. We should only be doing the directional
+	// readjustment after the sprite has reached the next node
+
+	_sprite->moving = true;
+	if (_sprite->y_position > _path[_current_node].row) { // Need to move toward the north
+		if (_sprite->x_position > _path[_current_node].col)
+			_sprite->SetDirection(MOVING_NORTHWEST);
+		else if (_sprite->x_position < _path[_current_node].col)
+			_sprite->SetDirection(MOVING_NORTHEAST);
+		else
+			_sprite->SetDirection(NORTH);
+	}
+	else if (_sprite->y_position < _path[_current_node].row) { // Need to move toward the south
+		if (_sprite->x_position > _path[_current_node].col)
+			_sprite->SetDirection(MOVING_SOUTHWEST);
+		else if (_sprite->x_position < _path[_current_node].col)
+			_sprite->SetDirection(MOVING_SOUTHEAST);
+		else
+			_sprite->SetDirection(SOUTH);
+	}
+	else if (_sprite->x_position > _path[_current_node].col) { // Need to move west
+		_sprite->SetDirection(WEST);
+	}
+	else if (_sprite->x_position < _path[_current_node].col) { // Need to move east
+		_sprite->SetDirection(EAST);
+	}
+	else { // The x and y position have reached the node, update to the next node
+		_current_node++;
+		if (_current_node >= _path.size()) { // Destination has been reached
+			_sprite->moving = false;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// ****************************************************************************
+// ********** SpriteRandomMoveEvent Class Functions
+// ****************************************************************************
+
+SpriteRandomMoveEvent::SpriteRandomMoveEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time, uint32 direction_time) :
+	MapEvent(event_id),
+	_sprite(sprite),
+	_total_movement_time(move_time),
+	_total_direction_time(direction_time),
+	_movement_timer(0),
+	_direction_timer(0)
+{}
+
+
+
+SpriteRandomMoveEvent::~SpriteRandomMoveEvent()
+{}
+
+
+
+void SpriteRandomMoveEvent::_Start() {
+	_sprite->SetRandomDirection();
+	_sprite->moving = true;
 }
 
 
 
-bool MoveEvent::_Update() {
-	// TODO
-	return true;
+bool SpriteRandomMoveEvent::_Update() {
+	_direction_timer += SystemManager->GetUpdateTime();
+	_movement_timer += SystemManager->GetUpdateTime();
+
+	// Check if we should change the sprite's direction
+	if (_direction_timer >= _total_direction_time) {
+		_direction_timer -= _total_direction_time;
+		_sprite->SetRandomDirection();
+	}
+
+	if (_movement_timer >= _total_movement_time) {
+		_movement_timer = 0;
+		_sprite->moving = false;
+		return true;
+	}
+
+	return false;
+}
+
+// ****************************************************************************
+// ********** SpriteAnimateEvent Class Functions
+// ****************************************************************************
+
+SpriteAnimateEvent::SpriteAnimateEvent(uint32 event_id, VirtualSprite* sprite) :
+	MapEvent(event_id),
+	_sprite(sprite),
+	_current_frame(0),
+	_display_timer(0),
+	_loop_count(0),
+	_number_loops(0)
+{}
+
+
+
+SpriteAnimateEvent::~SpriteAnimateEvent()
+{}
+
+
+
+void SpriteAnimateEvent::_Start() {
+	_current_frame = 0;
+	_display_timer = 0;
+	_loop_count = 0;
+}
+
+
+
+bool SpriteAnimateEvent::_Update() {
+	_display_timer += SystemManager->GetUpdateTime();
+
+	if (_display_timer > _frame_times[_current_frame]) {
+		_display_timer = 0;
+		_current_frame++;
+
+		// Check if we are past the final frame to display in the loop
+		if (_current_frame >= _frames.size()) {
+			_current_frame = 0;
+
+			// If this animation is not infinitely looped, increment the loop counter
+			if (_number_loops >= 0) {
+				_loop_count++;
+				if (_loop_count > _number_loops) {
+					_loop_count = 0;
+					return true;
+				 }
+			}
+		}
+
+		dynamic_cast<MapSprite*>(_sprite)->SetCurrentAnimation(static_cast<uint8>(_frames[_current_frame]));
+	}
+
+	return false;
 }
 
 // ****************************************************************************

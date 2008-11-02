@@ -29,18 +29,18 @@ using namespace hoa_system;
 using namespace hoa_audio::private_audio;
 
 
-template<> hoa_audio::GameAudio* Singleton<hoa_audio::GameAudio>::_singleton_reference = 0;
+template<> hoa_audio::AudioEngine* Singleton<hoa_audio::AudioEngine>::_singleton_reference = 0;
 
 
 namespace hoa_audio {
 
-GameAudio* AudioManager = NULL;
+AudioEngine* AudioManager = NULL;
 bool AUDIO_DEBUG = false;
 bool AUDIO_ENABLE = true;
 
 
 
-GameAudio::GameAudio () :
+AudioEngine::AudioEngine () :
 	_sound_volume(1.0f),
 	_music_volume(1.0f),
 	_device(0),
@@ -53,7 +53,7 @@ GameAudio::GameAudio () :
 
 
 
-bool GameAudio::SingletonInitialize() {
+bool AudioEngine::SingletonInitialize() {
 	if (!AUDIO_ENABLE)
 		return true;
 
@@ -147,11 +147,11 @@ bool GameAudio::SingletonInitialize() {
 	}
 
 	return true;
-} // bool GameAudio::SingletonInitialize()
+} // bool AudioEngine::SingletonInitialize()
 
 
 
-GameAudio::~GameAudio() {
+AudioEngine::~AudioEngine() {
 	if (!AUDIO_ENABLE)
 		return;
 
@@ -188,7 +188,7 @@ GameAudio::~GameAudio() {
 
 
 
-void GameAudio::Update() {
+void AudioEngine::Update() {
 	if (!AUDIO_ENABLE)
 		return;
 
@@ -215,7 +215,7 @@ void GameAudio::Update() {
 
 
 
-void GameAudio::SetSoundVolume(float volume) {
+void AudioEngine::SetSoundVolume(float volume) {
 	if (volume < 0.0f) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set sound volume less than 0.0f" << endl;
 		_sound_volume = 0.0f;
@@ -237,7 +237,7 @@ void GameAudio::SetSoundVolume(float volume) {
 
 
 
-void GameAudio::SetMusicVolume(float volume) {
+void AudioEngine::SetMusicVolume(float volume) {
 	if (volume < 0.0f) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set music volume less than 0.0f: " << volume << endl;
 		_music_volume = 0.0f;
@@ -259,7 +259,7 @@ void GameAudio::SetMusicVolume(float volume) {
 
 
 
-void GameAudio::PauseAllSounds() {
+void AudioEngine::PauseAllSounds() {
 	for (list<SoundDescriptor*>::iterator i = _registered_sounds.begin();
 			i != _registered_sounds.end(); i++) {
 		(*i)->Pause();
@@ -268,7 +268,7 @@ void GameAudio::PauseAllSounds() {
 
 
 
-void GameAudio::ResumeAllSounds() {
+void AudioEngine::ResumeAllSounds() {
 	for (list<SoundDescriptor*>::iterator i = _registered_sounds.begin();
 			i != _registered_sounds.end(); i++) {
 		(*i)->Resume();
@@ -277,7 +277,7 @@ void GameAudio::ResumeAllSounds() {
 
 
 
-void GameAudio::StopAllSounds() {
+void AudioEngine::StopAllSounds() {
 	for (list<SoundDescriptor*>::iterator i =_registered_sounds.begin();
 			i != _registered_sounds.end(); i++) {
 		(*i)->Stop();
@@ -286,7 +286,7 @@ void GameAudio::StopAllSounds() {
 
 
 
-void GameAudio::RewindAllSounds() {
+void AudioEngine::RewindAllSounds() {
 	for (list<SoundDescriptor*>::iterator i = _registered_sounds.begin();
 			i != _registered_sounds.end(); i++) {
 		(*i)->Rewind();
@@ -295,7 +295,7 @@ void GameAudio::RewindAllSounds() {
 
 
 
-void GameAudio::PauseAllMusic() {
+void AudioEngine::PauseAllMusic() {
 	for (list<MusicDescriptor*>::iterator i = _registered_music.begin();
 			i != _registered_music.end(); i++) {
 		(*i)->Pause();
@@ -304,7 +304,7 @@ void GameAudio::PauseAllMusic() {
 
 
 
-void GameAudio::ResumeAllMusic() {
+void AudioEngine::ResumeAllMusic() {
 	for (list<MusicDescriptor*>::iterator i = _registered_music.begin();
 			i != _registered_music.end(); i++) {
 		(*i)->Resume();
@@ -313,7 +313,7 @@ void GameAudio::ResumeAllMusic() {
 
 
 
-void GameAudio::StopAllMusic() {
+void AudioEngine::StopAllMusic() {
 	for (list<MusicDescriptor*>::iterator i = _registered_music.begin();
 			i != _registered_music.end(); i++) {
 		(*i)->Stop();
@@ -322,7 +322,7 @@ void GameAudio::StopAllMusic() {
 
 
 
-void GameAudio::RewindAllMusic() {
+void AudioEngine::RewindAllMusic() {
 	for (list<MusicDescriptor*>::iterator i = _registered_music.begin();
 			i != _registered_music.end(); i++) {
 		(*i)->Rewind();
@@ -331,28 +331,28 @@ void GameAudio::RewindAllMusic() {
 
 
 
-void GameAudio::SetListenerPosition(const float position[3]) {
+void AudioEngine::SetListenerPosition(const float position[3]) {
 	alListenerfv(AL_POSITION, position);
 	memcpy(_listener_position, position, sizeof(float) * 3);
 }
 
 
 
-void GameAudio::SetListenerVelocity(const float velocity[3]) {
+void AudioEngine::SetListenerVelocity(const float velocity[3]) {
 	alListenerfv(AL_VELOCITY, velocity);
 	memcpy(_listener_velocity, velocity, sizeof(float) * 3);
 }
 
 
 
-void GameAudio::SetListenerOrientation(const float orientation[3]) {
+void AudioEngine::SetListenerOrientation(const float orientation[3]) {
 	alListenerfv(AL_ORIENTATION, orientation);
 	memcpy(_listener_orientation, orientation, sizeof(float) * 3);
 }
 
 
 
-bool GameAudio::LoadSound(const std::string& filename) {
+bool AudioEngine::LoadSound(const std::string& filename) {
 	SoundDescriptor* new_sound = new SoundDescriptor();
 
 	if (_LoadAudio(new_sound, filename) == false) {
@@ -365,9 +365,9 @@ bool GameAudio::LoadSound(const std::string& filename) {
 
 
 
-bool GameAudio::LoadMusic(const std::string& filename) {
+bool AudioEngine::LoadMusic(const std::string& filename) {
 	MusicDescriptor* new_music = new MusicDescriptor();
-	
+
 	if (_LoadAudio(new_music, filename) == false) {
 		delete new_music;
 		return false;
@@ -378,7 +378,7 @@ bool GameAudio::LoadMusic(const std::string& filename) {
 
 
 
-void GameAudio::PlaySound(const std::string& filename) {
+void AudioEngine::PlaySound(const std::string& filename) {
 	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
 
 	if (element == _audio_cache.end()) {
@@ -397,7 +397,7 @@ void GameAudio::PlaySound(const std::string& filename) {
 
 
 
-void GameAudio::PlayMusic(const std::string& filename) {
+void AudioEngine::PlayMusic(const std::string& filename) {
 	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
 
 	if (element == _audio_cache.end()) {
@@ -416,7 +416,7 @@ void GameAudio::PlayMusic(const std::string& filename) {
 
 
 
-void GameAudio::StopSound(const std::string& filename) {
+void AudioEngine::StopSound(const std::string& filename) {
 	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
 
 	if (element == _audio_cache.end()) {
@@ -430,7 +430,7 @@ void GameAudio::StopSound(const std::string& filename) {
 
 
 
-void GameAudio::PauseSound(const std::string& filename) {
+void AudioEngine::PauseSound(const std::string& filename) {
 	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
 
 	if (element == _audio_cache.end()) {
@@ -444,7 +444,7 @@ void GameAudio::PauseSound(const std::string& filename) {
 
 
 
-void GameAudio::ResumeSound(const std::string& filename) {
+void AudioEngine::ResumeSound(const std::string& filename) {
 	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
 
 	if (element == _audio_cache.end()) {
@@ -458,7 +458,7 @@ void GameAudio::ResumeSound(const std::string& filename) {
 
 
 
-SoundDescriptor* GameAudio::RetrieveSound(const std::string& filename) {
+SoundDescriptor* AudioEngine::RetrieveSound(const std::string& filename) {
 	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
 
 	if (element == _audio_cache.end()) {
@@ -475,7 +475,7 @@ SoundDescriptor* GameAudio::RetrieveSound(const std::string& filename) {
 
 
 
-MusicDescriptor* GameAudio::RetrieveMusic(const std::string& filename) {
+MusicDescriptor* AudioEngine::RetrieveMusic(const std::string& filename) {
 	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
 
 	if (element == _audio_cache.end()) {
@@ -492,7 +492,7 @@ MusicDescriptor* GameAudio::RetrieveMusic(const std::string& filename) {
 
 
 
-const std::string GameAudio::CreateALErrorString() {
+const std::string AudioEngine::CreateALErrorString() {
 	switch (_al_error_code) {
 		case AL_NO_ERROR:
 			return "AL_NO_ERROR";
@@ -513,7 +513,7 @@ const std::string GameAudio::CreateALErrorString() {
 
 
 
-const std::string GameAudio::CreateALCErrorString() {
+const std::string AudioEngine::CreateALCErrorString() {
 	switch (_alc_error_code) {
 		case ALC_NO_ERROR:
 			return "ALC_NO_ERROR";
@@ -534,7 +534,7 @@ const std::string GameAudio::CreateALCErrorString() {
 
 
 
-void GameAudio::DEBUG_PrintInfo() {
+void AudioEngine::DEBUG_PrintInfo() {
 	const ALCchar* c;
 
 	cout << "*** Audio Information ***" << endl;
@@ -571,7 +571,7 @@ void GameAudio::DEBUG_PrintInfo() {
 
 
 
-private_audio::AudioSource* GameAudio::_AcquireAudioSource() {
+private_audio::AudioSource* AudioEngine::_AcquireAudioSource() {
 	// (1) Find and return the first source that does not have an owner
 	for (vector<AudioSource*>::iterator i = _audio_sources.begin(); i != _audio_sources.end(); i++) {
 		if ((*i)->owner == NULL) {
@@ -596,7 +596,7 @@ private_audio::AudioSource* GameAudio::_AcquireAudioSource() {
 
 
 
-bool GameAudio::_LoadAudio(AudioDescriptor* audio, const std::string& filename) {
+bool AudioEngine::_LoadAudio(AudioDescriptor* audio, const std::string& filename) {
 	if (_audio_cache.find(filename) != _audio_cache.end()) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "audio was already contained within the cache: " << filename << endl;
 		return false;
@@ -635,7 +635,7 @@ bool GameAudio::_LoadAudio(AudioDescriptor* audio, const std::string& filename) 
 
 	delete lru_element->second.audio;
 	_audio_cache.erase(lru_element);
-	
+
 	if (audio->LoadAudio(filename) == false) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "could not add new audio file into cache because load operation failed: " << filename << endl;
 		return false;
@@ -643,6 +643,6 @@ bool GameAudio::_LoadAudio(AudioDescriptor* audio, const std::string& filename) 
 
 	_audio_cache.insert(make_pair(filename, AudioCacheElement(SDL_GetTicks(), audio)));
 	return true;
-} // bool GameAudio::_LoadAudio(AudioDescriptor* audio, const std::string& filename)
+} // bool AudioEngine::_LoadAudio(AudioDescriptor* audio, const std::string& filename)
 
 } // namespace hoa_audio

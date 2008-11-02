@@ -131,7 +131,7 @@ namespace private_video
 
 //-----------------------------------------------------------------------------
 // Loads the effect, returns false on failure. This is a temporary function, until
-// the GameScript code is finished
+// the ScriptEngine code is finished
 //-----------------------------------------------------------------------------
 
 bool TEMP_LoadEffectHelper(const string &filename, lua_State *L, ParticleEffectDef *def)

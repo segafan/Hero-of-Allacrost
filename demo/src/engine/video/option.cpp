@@ -595,7 +595,7 @@ void OptionBox::HandleCancelKey() {
 void OptionBox::SetFont(const std::string& font_name) {
 	if (VideoManager->Text()->GetFontProperties(font_name) == NULL) {
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: OptionBox::SetFont() failed because GameVideo::GetFontProperties() returned false for font: " << font_name << endl;
+			cerr << "VIDEO WARNING: OptionBox::SetFont() failed because VideoEngine::GetFontProperties() returned false for font: " << font_name << endl;
 		return;
 	}
 

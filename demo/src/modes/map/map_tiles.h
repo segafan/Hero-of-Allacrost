@@ -23,12 +23,12 @@
 #include "defs.h"
 #include "utils.h"
 
+// Local map mode headers
+#include "map_utils.h"
+
 namespace hoa_map {
 
 namespace private_map {
-
-//! \brief The number of tiles that are found in a tileset image (512x512 pixel image containing 32x32 pixel tiles)
-const uint32 TILES_PER_TILESET = 256;
 
 /** ****************************************************************************
 *** \brief Represents a single image tile on the map.

@@ -870,7 +870,7 @@ void Grid::initializeGL()
 	// Destroy the video engine
 	VideoManager->SingletonDestroy();
 	// Recreate the video engine's singleton
-	VideoManager = GameVideo::SingletonCreate();
+	VideoManager = VideoEngine::SingletonCreate();
 	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
 
 	VideoManager->SingletonInitialize();

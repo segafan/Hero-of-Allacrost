@@ -174,13 +174,13 @@ protected:
 *** \brief A helper class to the video engine to manage all of the GUI functionality.
 ***
 *** There is exactly one instance of this class, which is both created and destroyed
-*** by the GameVideo class. This class is essentially an extension of the GameVideo
+*** by the VideoEngine class. This class is essentially an extension of the GameVideo
 *** class which manages the GUI system. It also handles the drawing of the 
 *** average frames per second (FPS) on the screen.
 *** ***************************************************************************/
 class GUISupervisor : public hoa_utils::Singleton<GUISupervisor> {
 	friend class hoa_utils::Singleton<GUISupervisor>;
-	friend class GameVideo;
+	friend class VideoEngine;
 	friend class MenuWindow;
 public:
 	GUISupervisor();

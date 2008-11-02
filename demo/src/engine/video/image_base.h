@@ -172,7 +172,7 @@ private:
 *** instances of it. Instead, we create instances of its derivative classes.
 *** ***************************************************************************/
 class BaseTexture {
-	friend class GameVideo;
+	friend class VideoEngine;
 
 public:
 	BaseTexture();

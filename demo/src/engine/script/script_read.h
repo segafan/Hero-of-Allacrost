@@ -66,7 +66,7 @@ const int32 FLOAT_TYPE      = 0x12344321;
 *** segmentation fault.
 *** ***************************************************************************/
 class ReadScriptDescriptor : public ScriptDescriptor {
-	friend class GameScript;
+	friend class ScriptEngine;
 public:
 	virtual ~ReadScriptDescriptor();
 

@@ -29,6 +29,9 @@
 // Allacrost engines
 #include "script.h"
 
+// Local map mode headers
+#include "map_utils.h"
+
 namespace hoa_map {
 
 namespace private_map {
@@ -138,17 +141,20 @@ private:
 *** Using event linking, it is very simple to have a single event represent
 *** a sprite traveling to multiple destinations, or multiple sprites travel to
 *** multiple destinations.
+***
+*** \todo Should we also have a constructor that takes a sprite's integer ID?
+*** \todo Should we write a public function to allow the path destination to change?
 *** ***************************************************************************/
-class MoveEvent : public MapEvent {
+class SpritePathMoveEvent : public MapEvent {
 public:
 	/** \param event_id The ID of this event
-	*** \param sprite_id The ID of the sprite to move
+	*** \param sprite A pointer to the sprite to move
 	*** \param x_coord The X coordinate to move the sprite to
 	*** \param y_coord The Y coordinate to move the sprite to
 	**/
-	MoveEvent(uint32 event_id, uint32 sprite_id, uint32 x_coord, uint32 y_coord);
+	SpritePathMoveEvent(uint32 event_id, VirtualSprite* sprite, uint32 x_coord, uint32 y_coord);
 
-	~MoveEvent();
+	~SpritePathMoveEvent();
 
 protected:
 	//! \brief Calculates a path for the sprite to move to the destination
@@ -157,9 +163,139 @@ protected:
 	//! \brief Returns true when the sprite has reached the destination
 	bool _Update();
 
-private:
-	// TODO
-}; // class MoveEvent : public MapEvent
+	//! \brief A pointer to the map sprite that walks the path
+	VirtualSprite* _sprite;
+
+	//! \brief The destination coordinates for this path movement
+	PathNode _destination;
+
+	//! \brief Holds the path needed to traverse from source to destination
+	std::vector<PathNode> _path;
+
+	//! \brief An index to the path vector containing the node that the sprite currently occupies
+	uint32 _current_node;
+
+}; // class SpritePathMoveEvent : public MapEvent
+
+
+/** ****************************************************************************
+*** \brief An event which randomizes movement of a sprite
+*** ***************************************************************************/
+class SpriteRandomMoveEvent : public MapEvent {
+public:
+	/** \param event_id The ID of this event
+	*** \param sprite A pointer to the sprite to move
+	*** \param move_time The total amount of time that this event should take
+	*** \param direction_time The amount of time to wait before changing the sprite's direction randomly
+	**/
+	SpriteRandomMoveEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time = 10000, uint32 direction_time = 2000);
+
+	~SpriteRandomMoveEvent();
+
+protected:
+	//! \brief Calculates a path for the sprite to move to the destination
+	void _Start();
+
+	//! \brief Returns true when the sprite has reached the destination
+	bool _Update();
+
+	//! \brief A pointer to the map sprite that walks the path
+	VirtualSprite* _sprite;
+
+	/** \brief The amount of time (in milliseconds) to perform random movement before ending this action
+	*** Set this member to hoa_system::INFINITE_TIME in order to continue the random movement
+	*** forever. The default value of this member will be set to 10 seconds if it is not specified.
+	**/
+	uint32 _total_movement_time;
+
+	/** \brief The amount of time (in milliseconds) that the sprite should continue moving in its current direction
+	*** The default value for this timer is 1.5 seconds (1500ms).
+	**/
+	uint32 _total_direction_time;
+
+	//! \brief A timer which keeps track of how long the sprite has been in random movement
+	uint32 _movement_timer;
+
+	//! \brief A timer which keeps track of how long the sprite has been moving around since the last change in direction.
+	uint32 _direction_timer;
+}; // class SpriteRandomMoveEvent : public MapEvent
+
+
+/** ****************************************************************************
+*** \brief Displays specific sprite frames for a certain period of time
+***
+*** This event displays a certain animation of a sprite for a specified amount of time.
+*** Its primary purpose is to allow complete control over how a sprite appears to the
+*** player and to show the sprite interacting with its surroundings, such as flipping
+*** through a book taken from a bookshelf. Looping of these animations is also supported.
+***
+*** \note You <b>must</b> add at least one frame to this object
+***
+*** \note These actions can not be used with VirtualSprite objects, since this
+*** class explicitly needs animation images to work and virtual sprites have no
+*** images.
+*** ***************************************************************************/
+class SpriteAnimateEvent : public MapEvent {
+public:
+	/** \param event_id The ID of this event
+	*** \param sprite A pointer to the sprite to move
+	**/
+	SpriteAnimateEvent(uint32 event_id, VirtualSprite* sprite);
+
+	~SpriteAnimateEvent();
+
+	/** \brief Adds a new frame to the animation set
+	*** \param frame The index of the sprite's animations to display
+	*** \param time The amount of time, in milliseconds, to display this frame
+	**/
+	void AddFrame(uint16 frame, uint32 time)
+		{ _frames.push_back(frame); _frame_times.push_back(time); }
+
+	/** \brief Sets the loop
+	***
+	**/
+	void SetLoopCount(int32 count)
+		{ _loop_count = count; }
+
+protected:
+	//! \brief Calculates a path for the sprite to move to the destination
+	void _Start();
+
+	//! \brief Returns true when the sprite has reached the destination
+	bool _Update();
+
+	//! \brief A pointer to the map sprite that walks the path
+	VirtualSprite* _sprite;
+
+	//! \brief Index to the current frame to display from the frames vector
+	uint32 _current_frame;
+
+	//! \brief Used to count down the display time of the current frame
+	uint32 _display_timer;
+
+	//! \brief A counter for the number of animation loops that have been performed
+	int32 _loop_count;
+
+	/** \brief The number of times to loop the display of the frame set before finishing
+	*** A value less than zero indicates to loop forever. Be careful with this,
+	*** because that means that the action would never arrive at the "finished"
+	*** state.
+	***
+	*** \note The default value of this member is zero, which indicates that the
+	*** animations will not be looped (they will run exactly once to completion).
+	**/
+	int32 _number_loops;
+
+	/** \brief Holds the sprite animations to display for this action
+	*** The values contained here are indeces to the sprite's animations vector
+	**/
+	std::vector<uint16> _frames;
+
+	/** \brief Indicates how long to display each frame
+	*** The size of this vector should be equal to the size of the frames vector
+	**/
+	std::vector<uint32> _frame_times;
+}; // class SpriteRandomMoveEvent : public MapEvent
 
 
 /** ****************************************************************************

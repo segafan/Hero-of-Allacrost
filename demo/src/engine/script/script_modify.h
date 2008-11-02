@@ -44,7 +44,7 @@ namespace hoa_script {
 *** \todo Add ability to modify tables and their data
 *** ***************************************************************************/
 class ModifyScriptDescriptor : public ReadScriptDescriptor {
-	friend class GameScript;
+	friend class ScriptEngine;
 public:
 	~ModifyScriptDescriptor();
 

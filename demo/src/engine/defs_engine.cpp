@@ -47,8 +47,8 @@ void BindEngineToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_audio")
 	[
-		class_<GameAudio>("GameAudio")
-			.def("PlaySound", &GameAudio::PlaySound)
+		class_<AudioEngine>("GameAudio")
+			.def("PlaySound", &AudioEngine::PlaySound)
 	];
 
 	} // End using audio namespaces
@@ -61,7 +61,7 @@ void BindEngineToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_input")
 	[
-		class_<GameInput>("GameInput")
+		class_<InputEngine>("GameInput")
 	];
 
 	} // End using input namespaces
@@ -79,14 +79,14 @@ void BindEngineToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_mode_manager")
 	[
-		class_<GameModeManager>("GameModeManager")
-			.def("Push", &GameModeManager::Push, adopt(_2))
-			.def("Pop", &GameModeManager::Pop)
-			.def("PopAll", &GameModeManager::PopAll)
-			.def("GetTop", &GameModeManager::GetTop)
-			.def("Get", &GameModeManager::Get)
-			.def("GetGameType", (uint8 (GameModeManager::*)(uint32))&GameModeManager::GetGameType)
-			.def("GetGameType", (uint8 (GameModeManager::*)())&GameModeManager::GetGameType)
+		class_<ModeEngine>("GameModeManager")
+			.def("Push", &ModeEngine::Push, adopt(_2))
+			.def("Pop", &ModeEngine::Pop)
+			.def("PopAll", &ModeEngine::PopAll)
+			.def("GetTop", &ModeEngine::GetTop)
+			.def("Get", &ModeEngine::Get)
+			.def("GetGameType", (uint8 (ModeEngine::*)(uint32))&ModeEngine::GetGameType)
+			.def("GetGameType", (uint8 (ModeEngine::*)())&ModeEngine::GetGameType)
 	];
 
 	} // End using mode manager namespaces
@@ -99,7 +99,7 @@ void BindEngineToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_script")
 	[
-		class_<GameScript>("GameScript")
+		class_<ScriptEngine>("GameScript")
 	];
 
 	} // End using script namespaces
@@ -112,16 +112,16 @@ void BindEngineToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_system")
 	[
-		class_<GameSystem>("GameSystem")
-			.def("GetUpdateTime", &GameSystem::GetUpdateTime)
-			.def("SetPlayTime", &GameSystem::SetPlayTime)
-			.def("GetPlayHours", &GameSystem::GetPlayHours)
-			.def("GetPlayMinutes", &GameSystem::GetPlayMinutes)
-			.def("GetPlaySeconds", &GameSystem::GetPlaySeconds)
-			.def("GetLanguage", &GameSystem::GetLanguage)
-			.def("SetLanguage", &GameSystem::SetLanguage)
-			.def("NotDone", &GameSystem::NotDone)
-			.def("ExitGame", &GameSystem::ExitGame)
+		class_<SystemEngine>("GameSystem")
+			.def("GetUpdateTime", &SystemEngine::GetUpdateTime)
+			.def("SetPlayTime", &SystemEngine::SetPlayTime)
+			.def("GetPlayHours", &SystemEngine::GetPlayHours)
+			.def("GetPlayMinutes", &SystemEngine::GetPlayMinutes)
+			.def("GetPlaySeconds", &SystemEngine::GetPlaySeconds)
+			.def("GetLanguage", &SystemEngine::GetLanguage)
+			.def("SetLanguage", &SystemEngine::SetLanguage)
+			.def("NotDone", &SystemEngine::NotDone)
+			.def("ExitGame", &SystemEngine::ExitGame)
 	];
 
 	} // End using system namespaces
@@ -134,7 +134,7 @@ void BindEngineToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_video")
 	[
-		class_<GameVideo>("GameVideo")
+		class_<VideoEngine>("GameVideo")
 	];
 
 	} // End using video namespaces

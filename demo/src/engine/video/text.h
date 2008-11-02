@@ -247,7 +247,7 @@ public:
 *** TextImage is a compound image containing each line of a text string.
 *** ***************************************************************************/
 class TextImage : public ImageDescriptor {
-	friend class GameVideo;
+	friend class VideoEngine;
 public:
 	//! \brief Construct empty text object
 	TextImage();
@@ -360,8 +360,8 @@ private:
 /** ****************************************************************************
 *** \brief A helper class to the video engine to manage all text rendering
 ***
-*** This class is a singleton and it is both created and destroyed by the GameVideo
-*** class. TextSupervisor is essentially an extension of the GameVideo singleton
+*** This class is a singleton and it is both created and destroyed by the VideoEngine
+*** class. TextSupervisor is essentially an extension of the VideoEngine singleton
 *** class which handles all font and text related operations.
 *** 
 *** \note The singleton name of this class is "TextManager"
@@ -372,7 +372,7 @@ private:
 *** ***************************************************************************/
 class TextSupervisor : public hoa_utils::Singleton<TextSupervisor> {
 	friend class hoa_utils::Singleton<TextSupervisor>;
-	friend class GameVideo;
+	friend class VideoEngine;
 	friend class TextureController;
 	friend class private_video::TextTexture;
 	friend class TextImage;

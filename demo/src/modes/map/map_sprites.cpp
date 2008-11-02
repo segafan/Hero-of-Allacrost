@@ -42,26 +42,6 @@ namespace hoa_map {
 
 namespace private_map {
 
-uint16 CalculateOppositeDirection(const uint16 direction) {
-	switch (direction) {
-		case NORTH:      return SOUTH;
-		case SOUTH:      return NORTH;
-		case WEST:       return EAST;
-		case EAST:       return WEST;
-		case NW_NORTH:   return SE_SOUTH;
-		case NW_WEST:    return SE_EAST;
-		case NE_NORTH:   return SW_SOUTH;
-		case NE_EAST:    return SW_WEST;
-		case SW_SOUTH:   return NE_NORTH;
-		case SW_WEST:    return NE_EAST;
-		case SE_SOUTH:   return NW_NORTH;
-		case SE_EAST:    return NW_WEST;
-		default:
-			IF_PRINT_WARNING(MAP_DEBUG) << "invalid direction argument: " << direction << endl;
-			return SOUTH;
-	}
-}
-
 // ****************************************************************************
 // ********** VirtualSprite class methods
 // ****************************************************************************

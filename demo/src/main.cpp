@@ -73,7 +73,7 @@ using namespace hoa_map;
 *** Deleteing the singleton class objects will free all of the memory that the game uses.
 *** This is because all other classes and data structures in Allacrost are managed
 *** by these singletons either directly or in directly. For example, BattleMode is a
-*** class object that is managed by the GameModeManager class, and thus the GameModeManager
+*** class object that is managed by the ModeEngine class, and thus the GameModeManager
 *** destructor will also invoke the BattleMode destructor (as well as the destructors of any
 *** other game modes that exist).
 **/
@@ -82,17 +82,17 @@ void QuitAllacrost() {
 	// static Destroy() singleton function will do no harm (it checks that the object exists before deleting it).
 
 	// Delete the mode manager first so that all game modes free their resources
-	GameModeManager::SingletonDestroy();
+	ModeEngine::SingletonDestroy();
 
 	// Delete the global manager second to remove all object references corresponding to other engine subsystems
 	GameGlobal::SingletonDestroy();
 
 	// Delete all of the reamining independent engine components
-	GameAudio::SingletonDestroy();
-	GameInput::SingletonDestroy();
-	GameScript::SingletonDestroy();
-	GameSystem::SingletonDestroy();
-	GameVideo::SingletonDestroy();
+	AudioEngine::SingletonDestroy();
+	InputEngine::SingletonDestroy();
+	ScriptEngine::SingletonDestroy();
+	SystemEngine::SingletonDestroy();
+	VideoEngine::SingletonDestroy();
 } // void QuitAllacrost()
 
 // Reads in all of the settings and sets the values in the according game manager's
@@ -199,12 +199,12 @@ void InitializeEngine() throw (Exception) {
 	}
 
 	// Create and initialize singleton class managers
-	AudioManager = GameAudio::SingletonCreate();
-	InputManager = GameInput::SingletonCreate();
-	VideoManager = GameVideo::SingletonCreate();
-	ScriptManager = GameScript::SingletonCreate();
-	SystemManager = GameSystem::SingletonCreate();
-	ModeManager = GameModeManager::SingletonCreate();
+	AudioManager = AudioEngine::SingletonCreate();
+	InputManager = InputEngine::SingletonCreate();
+	VideoManager = VideoEngine::SingletonCreate();
+	ScriptManager = ScriptEngine::SingletonCreate();
+	SystemManager = SystemEngine::SingletonCreate();
+	ModeManager = ModeEngine::SingletonCreate();
 	GlobalManager = GameGlobal::SingletonCreate();
 
 	if (VideoManager->SingletonInitialize() == false) {

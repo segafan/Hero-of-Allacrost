@@ -37,166 +37,16 @@
 #include "script.h"
 #include "video.h"
 
+// Local map mode headers
+#include "map_utils.h"
+
 //! All calls to map mode are wrapped in this namespace.
 namespace hoa_map {
-
-//! Determines whether the code in the hoa_map namespace should print debug statements or not.
-extern bool MAP_DEBUG;
 
 //! An internal namespace to be used only within the map code. Don't use this namespace anywhere else!
 namespace private_map {
 
-// ************************ MAP CONSTANTS ****************************
-
-/** \name Screen Coordiante System Constants
-*** \brief Represents the size of the visible screen in map tiles and the collision grid
-*** Every map tile is 32x32 pixels, and every collision grid element is one quarter of that
-*** area (16x16). Thus the number of collision grid elements that compose the screen are
-*** four times the number of tiles that are visible on the screen. This also means the number
-*** of rows and columns of grid elements that encompass the screen are twice that of the
-*** number of rows and columns of tiles.
-**/
-//@{
-const float SCREEN_COLS = 64.0f;
-const float SCREEN_ROWS = 48.0f;
-const float HALF_SCREEN_COLS = 32.0f;
-const float HALF_SCREEN_ROWS = 24.0f;
-
-const uint16 TILE_COLS = 32; // Number of tile columns that fit on the screen
-const uint16 TILE_ROWS = 24; // Number of tile rows that fit on the screen
-const uint16 HALF_TILE_COLS = 16;
-const uint16 HALF_TILE_ROWS = 12;
-
-const uint16 GRID_LENGTH = 16; // Length of a grid element in pixels
-const uint16 TILE_LENGTH = 32; // Length of a tile in pixels
-const uint16 HALF_TILE_LENGTH = 16;
-//@}
-
-/** \name Map State Constants
-*** \brief Constants used for determining the current state of operation during map mode.
-**/
-//@{
-enum MAP_STATE {
-	STATE_INVALID    = 0,
-	STATE_EXPLORE    = 1, // Standard state, player has control to move about map
-	STATE_SCENE      = 2, // Like the explore state but player has no control (input is ignored)
-	STATE_DIALOGUE   = 3, // When a dialogue is active
-	STATE_TREASURE   = 4, // Active when a treasure has been procured by the player
-	STATE_TOTAL      = 5
-};
-//@}
-
-
-/** \name Map Context Constants
-*** \brief Constants used to represent all 32 possible map contexts
-*** Note that only one bit is set for each context. This is done so that the collision
-*** grid for all contexts can be stored in a single integer. This also simplifies the
-*** complexity of collision detection for map sprites.
-**/
-enum MAP_CONTEXT {
-	MAP_CONTEXT_01 = 0x00000001, // Also known as the base context
-	MAP_CONTEXT_02 = 0x00000002,
-	MAP_CONTEXT_03 = 0x00000004,
-	MAP_CONTEXT_04 = 0x00000008,
-	MAP_CONTEXT_05 = 0x00000010,
-	MAP_CONTEXT_06 = 0x00000020,
-	MAP_CONTEXT_07 = 0x00000040,
-	MAP_CONTEXT_08 = 0x00000080,
-	MAP_CONTEXT_09 = 0x00000100,
-	MAP_CONTEXT_10 = 0x00000200,
-	MAP_CONTEXT_11 = 0x00000400,
-	MAP_CONTEXT_12 = 0x00000800,
-	MAP_CONTEXT_13 = 0x00001000,
-	MAP_CONTEXT_14 = 0x00002000,
-	MAP_CONTEXT_15 = 0x00004000,
-	MAP_CONTEXT_16 = 0x00008000,
-	MAP_CONTEXT_17 = 0x00010000,
-	MAP_CONTEXT_18 = 0x00020000,
-	MAP_CONTEXT_19 = 0x00040000,
-	MAP_CONTEXT_20 = 0x00080000,
-	MAP_CONTEXT_21 = 0x00100000,
-	MAP_CONTEXT_22 = 0x00200000,
-	MAP_CONTEXT_23 = 0x00400000,
-	MAP_CONTEXT_24 = 0x00800000,
-	MAP_CONTEXT_25 = 0x01000000,
-	MAP_CONTEXT_26 = 0x02000000,
-	MAP_CONTEXT_27 = 0x04000000,
-	MAP_CONTEXT_28 = 0x08000000,
-	MAP_CONTEXT_29 = 0x10000000,
-	MAP_CONTEXT_30 = 0x20000000,
-	MAP_CONTEXT_31 = 0x40000000,
-	MAP_CONTEXT_32 = 0x80000000
-};
-
-
-/** ****************************************************************************
-*** \brief Represents a rectangular section of a map
-***
-*** This is a small class that is used to represent rectangular map areas. These
-*** areas are used very frequently throughout the map code to check for collision
-*** detection, determining objects that are within a certain radius of one
-*** another, etc.
-*** ***************************************************************************/
-class MapRectangle {
-public:
-	MapRectangle() :
-		left(0.0f), right(0.0f), top(0.0f), bottom(0.0f)
-		{}
-
-	MapRectangle(float l, float r, float t, float b) :
-		left(l), right(r), top(t), bottom(b)
-		{}
-
-	//! \brief The four edges of the rectangle's area
-	float left, right, top, bottom;
-
-	/** \brief Determines if two rectangle objects intersect with one another
-	*** \param first A reference to the first rectangle object
-	*** \param second A reference to the second rectangle object
-	*** \return True if the two rectangles intersect at any location
-	***
-	*** This function assumes that the rectangle objects hold map collision grid
-	*** coordinates, where the top of the rectangle is a smaller number than the
-	*** bottom of the rectangle and the left is a smaller number than the right.
-	**/
-	static bool CheckIntersection(const MapRectangle& first, const MapRectangle& second);
-}; // class MapRectangle
-
-
-/** ****************************************************************************
-*** \brief Retains information about how the next map frame should be drawn.
-***
-*** This class is used by the MapMode class to determine how the next map frame
-*** should be drawn. This includes which tiles will be visible and the offset
-*** coordinates for the screen. Map objects also use this information to determine
-*** where (and if) they should be drawn.
-***
-*** \note The MapMode class keeps an active object of this class with the latest
-*** information about the map. It should be the only instance of this class that is
-*** needed.
-*** ***************************************************************************/
-class MapFrame {
-public:
-	//! \brief The column and row indeces of the starting tile to draw (the top-left tile).
-	int16 starting_col, starting_row;
-
-	//! \brief The number of columns and rows of tiles to draw on the screen.
-	uint8 num_draw_cols, num_draw_rows;
-
-	//! \brief The x and y position screen coordinates to start drawing tiles from.
-	float tile_x_start, tile_y_start;
-
-	/** \brief The position coordinates of the screen edges.
-	*** These members are in terms of the map grid 16x16 pixel coordinates that map objects use.
-	*** The presense of these coordinates make it easier for map objects to figure out whether or
-	*** not they should be drawn on the screen. Note that these are <b>not</b> used as drawing
-	*** cursor positions, but rather are map grid coordinates indicating where the screen edges lie.
-	**/
-	MapRectangle screen_edges;
-}; // class MapFrame
-
 } // namespace private_map
-
 
 /** ****************************************************************************
 *** \brief Handles the game execution while the player is exploring maps.
@@ -244,6 +94,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::TreasureSupervisor;
 	friend class private_map::MapDialogue;
 	friend class private_map::MapDialogueOptions;
+	friend class private_map::SpritePathMoveEvent;
 	friend class private_map::SpriteAction;
 	friend class private_map::ActionPathMove;
 	friend class private_map::EnemyZone;
@@ -444,7 +295,7 @@ private:
 	void _UpdateExplore();
 
 	//! \brief Calculates information about how to draw the next map frame
-	void _CalculateDrawInfo();
+	void _CalculateMapFrame();
 
 	//! \brief Draws all visible map tiles and sprites to the screen
 	void _DrawMapLayers();

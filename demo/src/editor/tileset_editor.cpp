@@ -50,7 +50,7 @@ void TilesetDisplay::initializeGL()
 	// Destroy and recreate the video engine
 	// NOTE: This is actually a very bad practice to do. We have to figure out an alternative.
 	VideoManager->SingletonDestroy();
-	VideoManager = GameVideo::SingletonCreate();
+	VideoManager = VideoEngine::SingletonCreate();
 	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
 
 	VideoManager->SingletonInitialize();

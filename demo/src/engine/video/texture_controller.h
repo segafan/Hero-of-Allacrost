@@ -14,7 +14,7 @@
 ***
 *** This code declares a single class, TextureController, which manages all
 *** texture sheets in use by the game. This class is a singleton, and it is
-*** essentially an extension of the GameVideo class.
+*** essentially an extension of the VideoEngine class.
 *** ***************************************************************************/
 
 #ifndef __TEXTURE_CONTROLLER_HEADER__
@@ -42,7 +42,7 @@ extern TextureController* TextureManager;
 
 class TextureController : public hoa_utils::Singleton<TextureController> {
 	friend class hoa_utils::Singleton<TextureController>;
-	friend class GameVideo;
+	friend class VideoEngine;
 	friend class private_video::ImageMemory;
 	friend class ImageDescriptor;
 	friend class StillImage;

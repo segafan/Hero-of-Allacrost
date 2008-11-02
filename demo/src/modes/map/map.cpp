@@ -51,21 +51,6 @@ using namespace hoa_map::private_map;
 
 namespace hoa_map {
 
-namespace private_map {
-
-bool MapRectangle::CheckIntersection(const MapRectangle& first, const MapRectangle& second) {
-	if ((first.left > second.right) ||
-		(first.right < second.left) ||
-		(first.top > second.bottom) ||
-		(first.bottom < second.top))
-		return false;
-	else
-		return true;
-}
-
-} // namespace private_map
-
-bool MAP_DEBUG = false;
 // Initialize static class variables
 MapMode *MapMode::_current_map = NULL;
 MapMode *MapMode::_loading_map = NULL;
@@ -231,7 +216,7 @@ void MapMode::Update() {
 
 
 void MapMode::Draw() {
-	_CalculateDrawInfo();
+	_CalculateMapFrame();
 	ScriptCallFunction<void>(_draw_function);
 	_DrawGUI();
 	if (_CurrentState() == STATE_DIALOGUE) {
@@ -448,7 +433,7 @@ void MapMode::_UpdateExplore() {
 
 
 
-void MapMode::_CalculateDrawInfo() {
+void MapMode::_CalculateMapFrame() {
 	// ---------- (1) Determine the center position coordinates for the camera
 	float camera_x, camera_y; // Holds the final X, Y coordinates of the camera
 	float x_pixel_length, y_pixel_length; // The X and Y length values that coorespond to a single pixel in the current coodinate system
@@ -541,7 +526,7 @@ void MapMode::_CalculateDrawInfo() {
 // 	printf("Tile draw start:   [%f, %f]\n", _draw_info.tile_x_start, _draw_info.tile_y_start);
 // 	printf("Edges (T,B,L,R):   [%f, %f, %f, %f]\n", _draw_info.screen_edges.top, _draw_info.screen_edges.bottom,
 // 		_draw_info.screen_edges.left, _draw_info.screen_edges.right);
-} // void MapMode::_CalculateDrawInfo()
+} // void MapMode::_CalculateMapFrame()
 
 
 

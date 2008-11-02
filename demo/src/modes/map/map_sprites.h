@@ -24,6 +24,7 @@
 #include "video.h"
 
 // Local map mode headers
+#include "map_utils.h"
 #include "map_objects.h"
 #include "map_actions.h"
 #include "map_dialogue.h"
@@ -32,88 +33,6 @@
 namespace hoa_map {
 
 namespace private_map {
-
-// *********************** SPRITE CONSTANTS **************************
-
-/** \name Map Sprite Speeds
-*** \brief Common speeds for sprite movement.
-*** These values are the time (in milliseconds) that it takes a sprite to walk
-*** the distance of one map grid (16 pixels).
-**/
-//@{
-const float VERY_SLOW_SPEED = 225.0f;
-const float SLOW_SPEED      = 190.0f;
-const float NORMAL_SPEED    = 150.0f;
-const float FAST_SPEED      = 110.0f;
-const float VERY_FAST_SPEED = 75.0f;
-//@}
-
-/** \name Sprite Direction Constants
-*** \brief Constants used for determining sprite directions
-*** Sprites are allowed to travel in eight different directions, however the sprite itself
-*** can only be facing one of four ways: north, south, east, or west. Because of this, it
-*** is possible to travel, for instance, northwest facing north <i>or</i> northwest facing west.
-*** The "NW_NORTH" constant means that the sprite is traveling to the northwest and is
-*** facing towards the north.
-***
-*** \note These constants include a series of shorthands (MOVING_NORTHWEST, FACING_NORTH) used
-*** to check for movement and facing directions.
-**/
-//@{
-const uint16 NORTH     = 0x0001;
-const uint16 SOUTH     = 0x0002;
-const uint16 WEST      = 0x0004;
-const uint16 EAST      = 0x0008;
-const uint16 NW_NORTH  = 0x0010;
-const uint16 NW_WEST   = 0x0020;
-const uint16 NE_NORTH  = 0x0040;
-const uint16 NE_EAST   = 0x0080;
-const uint16 SW_SOUTH  = 0x0100;
-const uint16 SW_WEST   = 0x0200;
-const uint16 SE_SOUTH  = 0x0400;
-const uint16 SE_EAST   = 0x0800;
-// Used to check for movement direction regardless of facing direction
-const uint16 MOVING_NORTHWEST = NW_NORTH | NW_WEST;
-const uint16 MOVING_NORTHEAST = NE_NORTH | NE_EAST;
-const uint16 MOVING_SOUTHWEST = SW_SOUTH | SW_WEST;
-const uint16 MOVING_SOUTHEAST = SE_SOUTH | SE_EAST;
-const uint16 MOVING_LATERALLY = NORTH | SOUTH | EAST | WEST;
-const uint16 MOVING_DIAGONALLY = MOVING_NORTHWEST | MOVING_NORTHEAST | MOVING_SOUTHWEST | MOVING_SOUTHEAST;
-// Used to check for facing direction regardless of moving direction
-const uint16 FACING_NORTH = NORTH | NW_NORTH | NE_NORTH;
-const uint16 FACING_SOUTH = SOUTH | SW_SOUTH | SE_SOUTH;
-const uint16 FACING_WEST = WEST | NW_WEST | SW_WEST;
-const uint16 FACING_EAST = EAST | NE_EAST | SE_EAST;
-//@}
-
-
-/** \name Map Sprite Animation Constants
-*** These constants are used to index the MapSprite#animations vector to display the correct
-*** animation. The first 8 entries in this vector always represent the same sets of animations
-*** for each map sprite. Not all sprites have running animations, so the next 4 entries in the
-*** sprite's animation vector are not necessarily running animations.
-**/
-//@{
-const uint32 ANIM_STANDING_SOUTH = 0;
-const uint32 ANIM_STANDING_NORTH = 1;
-const uint32 ANIM_STANDING_WEST  = 2;
-const uint32 ANIM_STANDING_EAST  = 3;
-const uint32 ANIM_WALKING_SOUTH  = 4;
-const uint32 ANIM_WALKING_NORTH  = 5;
-const uint32 ANIM_WALKING_WEST   = 6;
-const uint32 ANIM_WALKING_EAST   = 7;
-const uint32 ANIM_RUNNING_SOUTH  = 8;
-const uint32 ANIM_RUNNING_NORTH  = 9;
-const uint32 ANIM_RUNNING_WEST   = 10;
-const uint32 ANIM_RUNNING_EAST   = 11;
-//@}
-
-
-/** \brief Returns the opposite facing direction of the direction given in parameter.
-*** \return A direction that faces opposite to the argument direction
-*** \note This is mostly used as an helper function to make sprites face each other in a conversation.
-**/
-uint16 CalculateOppositeDirection(const uint16 direction);
 
 /** ****************************************************************************
 *** \brief A special type of sprite with no physical image
@@ -216,7 +135,7 @@ public:
 	//@{
 	bool IsStateSaved() const
 		{ return _state_saved; }
-	
+
 	void SetMovementSpeed(float speed)
 		{ movement_speed = speed; }
 

@@ -284,7 +284,7 @@ bool PrintSystemInformation() {
 	printf("\n===== Video Information\n");
 
 	// TODO: This code should be re-located to a function (DEBUG_PrintInfo()) in the video engine
-// 	hoa_video::VideoManager = hoa_video::GameVideo::SingletonCreate();
+// 	hoa_video::VideoManager = hoa_video::VideoEngine::SingletonCreate();
 // 	if (hoa_video::VideoManager->SingletonInitialize() == false) {
 // 		cerr << "ERROR: unable to initialize the VideoManager" << endl;
 // 		return false;
@@ -292,7 +292,7 @@ bool PrintSystemInformation() {
 // 	else {
 // 		hoa_video::VideoManager->DEBUG_PrintInfo();
 // 	}
-// 	hoa_video::GameVideo::SingletonDestroy();
+// 	hoa_video::VideoEngine::SingletonDestroy();
 
 	// TODO: print the OpenGL version number here
 
@@ -338,7 +338,7 @@ bool PrintSystemInformation() {
 
 	printf("\n===== Audio Information\n");
 
-	hoa_audio::AudioManager = hoa_audio::GameAudio::SingletonCreate();
+	hoa_audio::AudioManager = hoa_audio::AudioEngine::SingletonCreate();
 	if (hoa_audio::AudioManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize the AudioManager" << endl;
 		return false;
@@ -346,7 +346,7 @@ bool PrintSystemInformation() {
 	else {
 		hoa_audio::AudioManager->DEBUG_PrintInfo();
 	}
-	hoa_audio::GameAudio::SingletonDestroy();
+	hoa_audio::AudioEngine::SingletonDestroy();
 
 	printf("\n");
 

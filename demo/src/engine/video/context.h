@@ -37,7 +37,7 @@ namespace private_video {
 *** changes a lot of internal settings can easily leave the video engine in the 
 *** same state that it waswhen it entered in. The graphics context includes
 *** properties such as draw flags, axis transformations, and the current coordinate
-*** system. The context must be pushed and then popped by any method of the GameVideo 
+*** system. The context must be pushed and then popped by any method of the VideoEngine 
 *** class which modifies this context.
 ***
 *** \note Transformations are actually handled separately by the OpenGL

@@ -27,11 +27,11 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_video::private_video;
 
-template<> hoa_video::GameVideo* Singleton<hoa_video::GameVideo>::_singleton_reference = NULL;
+template<> hoa_video::VideoEngine* Singleton<hoa_video::VideoEngine>::_singleton_reference = NULL;
 
 namespace hoa_video {
 
-GameVideo* VideoManager = NULL;
+VideoEngine* VideoManager = NULL;
 bool VIDEO_DEBUG = false;
 
 //-----------------------------------------------------------------------------
@@ -69,10 +69,10 @@ void RotatePoint(float& x, float& y, float angle) {
 }
 
 //-----------------------------------------------------------------------------
-// GameVideo class
+// VideoEngine class
 //-----------------------------------------------------------------------------
 
-GameVideo::GameVideo() :
+VideoEngine::VideoEngine() :
 	_initialized(false)
 {
 	_target = VIDEO_TARGET_SDL_WINDOW;
@@ -117,7 +117,7 @@ GameVideo::GameVideo() :
 
 
 
-GameVideo::~GameVideo() {
+VideoEngine::~VideoEngine() {
 	_particle_manager.Destroy();
 	GUIManager->SingletonDestroy();
 	TextManager->SingletonDestroy();
@@ -130,7 +130,7 @@ GameVideo::~GameVideo() {
 
 
 
-bool GameVideo::SingletonInitialize() {
+bool VideoEngine::SingletonInitialize() {
 	// check to see if the singleton is already initialized
 	if (_initialized)
 		return true;
@@ -141,16 +141,16 @@ bool GameVideo::SingletonInitialize() {
 	}
 
 	return true;
-} // bool GameVideo::SingletonInitialize()
+} // bool VideoEngine::SingletonInitialize()
 
 
 
-bool GameVideo::FinalizeInitialization() {
+bool VideoEngine::FinalizeInitialization() {
 	// Create instances of the various sub-systems
 	TextureManager = TextureController::SingletonCreate();
 	TextManager = TextSupervisor::SingletonCreate();
 	GUIManager = GUISupervisor::SingletonCreate();
-	
+
 	if (TextureManager->SingletonInitialize() == false) {
 		PRINT_ERROR << "could not initialize texture manager" << endl;
 		return false;
@@ -188,7 +188,7 @@ bool GameVideo::FinalizeInitialization() {
 
 
 
-void GameVideo::SetInitialResolution(int32 width, int32 height) {
+void VideoEngine::SetInitialResolution(int32 width, int32 height) {
 	// Get the current system color depth and resolution
 	const SDL_VideoInfo* video_info(0);
 	video_info = SDL_GetVideoInfo();
@@ -215,10 +215,10 @@ void GameVideo::SetInitialResolution(int32 width, int32 height) {
 }
 
 //-----------------------------------------------------------------------------
-// GameVideo class - General methods
+// VideoEngine class - General methods
 //-----------------------------------------------------------------------------
 
-void GameVideo::SetTarget(VIDEO_TARGET target) {
+void VideoEngine::SetTarget(VIDEO_TARGET target) {
 	if (target <= VIDEO_TARGET_INVALID || target >= VIDEO_TARGET_TOTAL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "tried to set video engine to an invalid target: " << target << endl;
 		return;
@@ -229,7 +229,7 @@ void GameVideo::SetTarget(VIDEO_TARGET target) {
 
 
 
-void GameVideo::SetDrawFlags(int32 first_flag, ...) {
+void VideoEngine::SetDrawFlags(int32 first_flag, ...) {
 	int32 flag = first_flag;
 	va_list args;
 
@@ -265,7 +265,7 @@ void GameVideo::SetDrawFlags(int32 first_flag, ...) {
 
 
 
-void GameVideo::Clear() {
+void VideoEngine::Clear() {
 	//! \todo glClearColor is a state change operation. It should only be called when the clear color changes
 	if (_uses_lights)
 		Clear(_light_color);
@@ -275,7 +275,7 @@ void GameVideo::Clear() {
 
 
 
-void GameVideo::Clear(const Color &c) {
+void VideoEngine::Clear(const Color &c) {
 	SetViewport(0.0f, 100.0f, 0.0f, 100.0f);
 	glClearColor(c[0], c[1], c[2], c[3]);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -289,7 +289,7 @@ void GameVideo::Clear(const Color &c) {
 
 
 
-void GameVideo::Display(uint32 frame_time) {
+void VideoEngine::Display(uint32 frame_time) {
 	// Update all particle effects
 	_particle_manager.Update(frame_time);
 
@@ -340,11 +340,11 @@ void GameVideo::Display(uint32 frame_time) {
 	_animation_counter += frame_time;
 	int32 current_frame_index = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
 	_current_frame_diff = current_frame_index - old_frame_index;
-} // void GameVideo::Display(uint32 frame_time)
+} // void VideoEngine::Display(uint32 frame_time)
 
 
 
-const std::string GameVideo::CreateGLErrorString() {
+const std::string VideoEngine::CreateGLErrorString() {
 	const GLubyte* error_string = gluErrorString(_gl_error_code);
 
 	if (error_string == NULL)
@@ -354,17 +354,17 @@ const std::string GameVideo::CreateGLErrorString() {
 }
 
 //-----------------------------------------------------------------------------
-// GameVideo class - Screen size and resolution methods
+// VideoEngine class - Screen size and resolution methods
 //-----------------------------------------------------------------------------
 
-void GameVideo::GetPixelSize(float& x, float& y) {
+void VideoEngine::GetPixelSize(float& x, float& y) {
 	x = fabs(_current_context.coordinate_system.GetRight() - _current_context.coordinate_system.GetLeft()) / _screen_width;
 	y = fabs(_current_context.coordinate_system.GetTop() - _current_context.coordinate_system.GetBottom()) / _screen_height;
 }
 
 
 
-bool GameVideo::ApplySettings() {
+bool VideoEngine::ApplySettings() {
 	if (_target == VIDEO_TARGET_SDL_WINDOW) {
 		// Losing GL context, so unload images first
 		if (TextureManager && TextureManager->UnloadTextures() == false) {
@@ -438,13 +438,13 @@ bool GameVideo::ApplySettings() {
 	}
 
 	return false;
-} // bool GameVideo::ApplySettings()
+} // bool VideoEngine::ApplySettings()
 
 //-----------------------------------------------------------------------------
-// GameVideo class - Coordinate system and viewport methods
+// VideoEngine class - Coordinate system and viewport methods
 //-----------------------------------------------------------------------------
 
-void GameVideo::SetViewport(float left, float right, float bottom, float top) {
+void VideoEngine::SetViewport(float left, float right, float bottom, float top) {
 	if (left > right) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "left argument was greater than right argument" << endl;
 		return;
@@ -474,7 +474,7 @@ void GameVideo::SetViewport(float left, float right, float bottom, float top) {
 
 
 
-void GameVideo::SetCoordSys(const CoordSys& coordinate_system) {
+void VideoEngine::SetCoordSys(const CoordSys& coordinate_system) {
 	_current_context.coordinate_system = coordinate_system;
 
 	glMatrixMode(GL_PROJECTION);
@@ -491,21 +491,21 @@ void GameVideo::SetCoordSys(const CoordSys& coordinate_system) {
 
 
 
-void GameVideo::EnableScissoring() {
+void VideoEngine::EnableScissoring() {
 	_current_context.scissoring_enabled = true;
 	glEnable(GL_SCISSOR_TEST);
 }
 
 
 
-void GameVideo::DisableScissoring() {
+void VideoEngine::DisableScissoring() {
 	_current_context.scissoring_enabled = false;
 	glDisable(GL_SCISSOR_TEST);
 }
 
 
 
-void GameVideo::SetScissorRect(float left, float right, float bottom, float top) {
+void VideoEngine::SetScissorRect(float left, float right, float bottom, float top) {
 	_current_context.scissor_rectangle = CalculateScreenRect(left, right, bottom, top);
 
 	glScissor(static_cast<GLint>((_current_context.scissor_rectangle.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _current_context.viewport.width),
@@ -517,7 +517,7 @@ void GameVideo::SetScissorRect(float left, float right, float bottom, float top)
 
 
 
-void GameVideo::SetScissorRect(const ScreenRect& rect) {
+void VideoEngine::SetScissorRect(const ScreenRect& rect) {
 	_current_context.scissor_rectangle = rect;
 
 	glScissor(static_cast<GLint>((_current_context.scissor_rectangle.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _current_context.viewport.width),
@@ -529,7 +529,7 @@ void GameVideo::SetScissorRect(const ScreenRect& rect) {
 
 
 
-ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom, float top) {
+ScreenRect VideoEngine::CalculateScreenRect(float left, float right, float bottom, float top) {
 	ScreenRect rect;
 
 	int32 scr_left = _ScreenCoordX(left);
@@ -559,10 +559,10 @@ ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom,
 }
 
 //-----------------------------------------------------------------------------
-// GameVideo class - Transformation methods
+// VideoEngine class - Transformation methods
 //-----------------------------------------------------------------------------
 
-void GameVideo::Move(float x, float y) {
+void VideoEngine::Move(float x, float y) {
 	glLoadIdentity();
 	glTranslatef(x, y, 0);
 	_x_cursor = x;
@@ -571,7 +571,7 @@ void GameVideo::Move(float x, float y) {
 
 
 
-void GameVideo::MoveRelative(float x, float y) {
+void VideoEngine::MoveRelative(float x, float y) {
 	glTranslatef(x, y, 0);
 	_x_cursor += x;
 	_y_cursor += y;
@@ -580,7 +580,7 @@ void GameVideo::MoveRelative(float x, float y) {
 
 
 
-void GameVideo::PushState() {
+void VideoEngine::PushState() {
 	// Push current modelview transformation
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -590,7 +590,7 @@ void GameVideo::PushState() {
 
 
 
-void GameVideo::PopState() {
+void VideoEngine::PopState() {
 	// Restore the most recent context information and pop it from stack
 	if (_context_stack.empty()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "no video states were saved on the stack" << endl;
@@ -620,7 +620,7 @@ void GameVideo::PopState() {
 
 
 
-void GameVideo::SetTransform(float matrix[16]) {
+void VideoEngine::SetTransform(float matrix[16]) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glLoadMatrixf(matrix);
@@ -628,7 +628,7 @@ void GameVideo::SetTransform(float matrix[16]) {
 
 
 
-void GameVideo::EnableSceneLighting(const Color& color) {
+void VideoEngine::EnableSceneLighting(const Color& color) {
 	_light_color = color;
 
 	if (IsFloatEqual(color[3], 1.0f) == false) {
@@ -638,13 +638,13 @@ void GameVideo::EnableSceneLighting(const Color& color) {
 }
 
 
-void GameVideo::DisableSceneLighting() {
+void VideoEngine::DisableSceneLighting() {
 	_light_color = Color::white;
 }
 
 
 
-void GameVideo::EnableFog(const Color &color, float intensity) {
+void VideoEngine::EnableFog(const Color &color, float intensity) {
 	// Set the parameters
 	_fog_color = color;
 	_fog_intensity = intensity;
@@ -676,20 +676,20 @@ void GameVideo::EnableFog(const Color &color, float intensity) {
 
 
 
-void GameVideo::DisableFog() {
+void VideoEngine::DisableFog() {
 	glDisable(GL_FOG);
 	_fog_intensity = 0.0f;
 }
 
 
 
-void GameVideo::EnablePointLights() {
+void VideoEngine::EnablePointLights() {
 	_light_overlay = TextureManager->_CreateBlankGLTexture(1024, 1024);
 	_uses_lights = true;
 }
 
 
-void GameVideo::DisablePointLights() {
+void VideoEngine::DisablePointLights() {
 	if (_light_overlay != INVALID_TEXTURE_ID) {
 		TextureManager->_DeleteTexture(_light_overlay);
 	}
@@ -700,7 +700,7 @@ void GameVideo::DisablePointLights() {
 
 
 
-void GameVideo::ApplyLightingOverlay() {
+void VideoEngine::ApplyLightingOverlay() {
 	if (_light_overlay == INVALID_TEXTURE_ID) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "light overlay texture was invalid" << endl;
 		return;
@@ -742,7 +742,7 @@ void GameVideo::ApplyLightingOverlay() {
 
 
 
-StillImage GameVideo::CaptureScreen() throw(Exception) {
+StillImage VideoEngine::CaptureScreen() throw(Exception) {
 	// Static variable used to make sure the capture has a unique name in the texture image map
 	static uint32 capture_id = 0;
 
@@ -808,7 +808,7 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 
 
 
-void GameVideo::SetGamma(float value) {
+void VideoEngine::SetGamma(float value) {
 	_gamma_value = value;
 
 	// Limit min/max gamma
@@ -826,7 +826,7 @@ void GameVideo::SetGamma(float value) {
 
 
 
-void GameVideo::MakeScreenshot(const std::string& filename) {
+void VideoEngine::MakeScreenshot(const std::string& filename) {
 	private_video::ImageMemory buffer;
 
 	// Retrieve the width and height of the viewport.
@@ -870,7 +870,7 @@ void GameVideo::MakeScreenshot(const std::string& filename) {
 // _CreateTempFilename
 //-----------------------------------------------------------------------------
 
-std::string GameVideo::_CreateTempFilename(const std::string &extension)
+std::string VideoEngine::_CreateTempFilename(const std::string &extension)
 {
 	// figure out the temp filename to return
 	string file_name = "/tmp/allacrost";
@@ -913,7 +913,7 @@ std::string GameVideo::_CreateTempFilename(const std::string &extension)
 
 
 
-int32 GameVideo::_ConvertYAlign(int32 y_align) {
+int32 VideoEngine::_ConvertYAlign(int32 y_align) {
 	switch (y_align) {
 		case VIDEO_Y_BOTTOM:
 			return -1;
@@ -930,7 +930,7 @@ int32 GameVideo::_ConvertYAlign(int32 y_align) {
 
 
 
-int32 GameVideo::_ConvertXAlign(int32 x_align) {
+int32 VideoEngine::_ConvertXAlign(int32 x_align) {
 	switch (x_align) {
 		case VIDEO_X_LEFT:
 			return -1;
@@ -945,13 +945,13 @@ int32 GameVideo::_ConvertXAlign(int32 x_align) {
 }
 
 
-bool GameVideo::SetDefaultCursor(const std::string &cursor_image_filename) {
+bool VideoEngine::SetDefaultCursor(const std::string &cursor_image_filename) {
 	return _default_menu_cursor.Load(cursor_image_filename);
 }
 
 
 
-StillImage* GameVideo::GetDefaultCursor() {
+StillImage* VideoEngine::GetDefaultCursor() {
 	if (_default_menu_cursor.GetWidth() != 0.0f)  // cheap test if image is valid
 		return &_default_menu_cursor;
 	else
@@ -961,7 +961,7 @@ StillImage* GameVideo::GetDefaultCursor() {
 
 
 
-int32 GameVideo::_ScreenCoordX(float x) {
+int32 VideoEngine::_ScreenCoordX(float x) {
 	float percent;
 	if (_current_context.coordinate_system.GetLeft() < _current_context.coordinate_system.GetRight())
 		percent = (x - _current_context.coordinate_system.GetLeft()) /
@@ -975,7 +975,7 @@ int32 GameVideo::_ScreenCoordX(float x) {
 
 
 
-int32 GameVideo::_ScreenCoordY(float y) {
+int32 VideoEngine::_ScreenCoordY(float y) {
 	float percent;
 	if (_current_context.coordinate_system.GetTop() < _current_context.coordinate_system.GetBottom())
 		percent = (y - _current_context.coordinate_system.GetTop()) /
@@ -989,7 +989,7 @@ int32 GameVideo::_ScreenCoordY(float y) {
 
 
 
-bool GameVideo::MakeLightning(const std::string &lit_file) {
+bool VideoEngine::MakeLightning(const std::string &lit_file) {
 	FILE *fp = fopen(lit_file.c_str(), "rb");
 	if(!fp)
 		return false;
@@ -1041,7 +1041,7 @@ bool GameVideo::MakeLightning(const std::string &lit_file) {
 
 
 
-void GameVideo::DrawLightning() {
+void VideoEngine::DrawLightning() {
 	if(!_lightning_active)
 		return;
 
@@ -1064,7 +1064,7 @@ void GameVideo::DrawLightning() {
 
 
 
-void GameVideo::DrawFullscreenOverlay(const Color& color) {
+void VideoEngine::DrawFullscreenOverlay(const Color& color) {
 	PushState();
 
 	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
@@ -1079,7 +1079,7 @@ void GameVideo::DrawFullscreenOverlay(const Color& color) {
 
 
 
-void GameVideo::_DEBUG_ShowAdvancedStats() {
+void VideoEngine::_DEBUG_ShowAdvancedStats() {
 	char text[50];
 	sprintf(text, "Switches: %d\nParticles: %d", TextureManager->_debug_num_tex_switches, _particle_manager.GetNumParticles());
 
@@ -1091,7 +1091,7 @@ void GameVideo::_DEBUG_ShowAdvancedStats() {
 
 
 
-void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Color& c) {
+void VideoEngine::DrawGrid(float x, float y, float x_step, float y_step, const Color& c) {
 	PushState();
 
 	Move(0, 0);
@@ -1126,7 +1126,7 @@ void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Col
 
 
 
-void GameVideo::DrawRectangle(float width, float height, const Color& color) {
+void VideoEngine::DrawRectangle(float width, float height, const Color& color) {
 	_rectangle_image._width = width;
 	_rectangle_image._height = height;
 	_rectangle_image._color[0] = color;
@@ -1136,7 +1136,7 @@ void GameVideo::DrawRectangle(float width, float height, const Color& color) {
 
 
 
-void GameVideo::DrawHalo(const StillImage &id, float x, float y, const Color &color) {
+void VideoEngine::DrawHalo(const StillImage &id, float x, float y, const Color &color) {
 	PushMatrix();
 	Move(x, y);
 
@@ -1149,7 +1149,7 @@ void GameVideo::DrawHalo(const StillImage &id, float x, float y, const Color &co
 
 
 
-void GameVideo::DrawLight(const StillImage &id, float x, float y, const Color &color) {
+void VideoEngine::DrawLight(const StillImage &id, float x, float y, const Color &color) {
 	if (_uses_lights == false) {
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: called DrawLight() even though real lighting was not enabled!" << endl;
@@ -1160,7 +1160,7 @@ void GameVideo::DrawLight(const StillImage &id, float x, float y, const Color &c
 
 
 
-void GameVideo::DrawFPS(uint32 frame_time) {
+void VideoEngine::DrawFPS(uint32 frame_time) {
 	PushState();
 	GUIManager->_DrawFPS(frame_time);
 	PopState();

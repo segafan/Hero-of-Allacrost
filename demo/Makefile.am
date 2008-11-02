@@ -153,6 +153,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/map/map_tiles.h \
 	$(MODES_DIR)/map/map_treasure.cpp \
 	$(MODES_DIR)/map/map_treasure.h \
+	$(MODES_DIR)/map/map_utils.cpp \
+	$(MODES_DIR)/map/map_utils.h \
 	$(MODES_DIR)/map/map_zones.cpp \
 	$(MODES_DIR)/map/map_zones.h \
 	$(MODES_DIR)/menu/menu.cpp \

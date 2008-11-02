@@ -50,7 +50,7 @@ namespace hoa_script {
 *** possibly also delete the plain text version when this is done.
 *** ***************************************************************************/
 class WriteScriptDescriptor : public ScriptDescriptor {
-	friend class GameScript;
+	friend class ScriptEngine;
 public:
 	~WriteScriptDescriptor();
 

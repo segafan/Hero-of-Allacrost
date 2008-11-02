@@ -62,7 +62,7 @@ Editor::Editor() : QMainWindow(),
 	_error_max_contexts = new QErrorMessage(this);
 
 	// create the video engine's singleton
-	// VideoManager = GameVideo::SingletonCreate();
+	// VideoManager = VideoEngine::SingletonCreate();
 	// Commented out grid and tileset editor create and destroy VideoManager
 
 } // Editor constructor
@@ -78,8 +78,8 @@ Editor::~Editor()
 		delete _skill_editor;
 	delete _undo_stack;
 
-	GameScript::SingletonDestroy();
-	GameVideo::SingletonDestroy();
+	ScriptEngine::SingletonDestroy();
+	VideoEngine::SingletonDestroy();
 } // Editor destructor
 
 

@@ -76,7 +76,7 @@ const uint32 NUMBER_STREAMING_BUFFERS = 4;
 *** suppports an infinte number of buffers (as long as there is enough memory).
 *** ***************************************************************************/
 class AudioBuffer {
-	friend class GameAudio;
+	friend class AudioEngine;
 
 public:
 	AudioBuffer();
@@ -129,12 +129,12 @@ public:
 *** MAX_DEFAULT_AUDIO_SOURCES) and have the audio descriptors share between
 *** sources as they need them.
 ***
-*** \note OpenAL sources are created and by the GameAudio class, not within the
+*** \note OpenAL sources are created and by the AudioEngine class, not within the
 *** AudioSource constructor. The sources are, however, deleted by the destructor.
 ***
 *** \note You should never really need to call the IsValid() function when
 *** retrieving a new AudioSource to use. This is because all AudioSource objects
-*** created by GameAudio are guaranteed to have a valid OpenAL source contained
+*** created by AudioEngine are guaranteed to have a valid OpenAL source contained
 *** by the object.
 *** ***************************************************************************/
 class AudioSource {
@@ -181,7 +181,7 @@ public:
 *** or it should be made private.
 *** ***************************************************************************/
 class AudioDescriptor {
-	friend class GameAudio;
+	friend class AudioEngine;
 
 public:
 	AudioDescriptor();
@@ -334,7 +334,7 @@ protected:
 	*** This isn't actually the true volume of the audio, but rather the modulation
 	*** value of the global sound or music volume level. For example, if this object
 	*** represented a sound and the volume was set to 0.75f, and the global sound
-	*** volume in GameAudio was 0.80f, the true volume would be (0.75 * 0.8 = 0.6).
+	*** volume in AudioEngine was 0.80f, the true volume would be (0.75 * 0.8 = 0.6).
 	*** By default this member is set to 1.0f.
 	**/
 	float _volume;
@@ -353,7 +353,7 @@ protected:
 	*** \param volume The volume level to set, ranging from [0.0f, 1.0f]
 	*** This should be thought of as a helper function to the SetVolume methods
 	*** for the derived classes, which modulate the volume level of the sound/music
-	*** by the global sound and music volume controls in the GameAudio class.
+	*** by the global sound and music volume controls in the AudioEngine class.
 	**/
 	void _SetVolumeControl(float volume);
 
@@ -405,7 +405,7 @@ public:
 	/** \brief Sets the volume of the sound
 	*** \param volume The volume to set the sound, value between [0.0, 1.0]
 	*** This value will be modulated by the global sound volume found in the
-	*** GameAudio class.
+	*** AudioEngine class.
 	**/
 	void SetVolume(float volume);
 }; // class SoundDescriptor : public AudioDescriptor
@@ -434,7 +434,7 @@ public:
 	/** \brief Sets the volume of the music
 	*** \param volume The volume to set the music, value between [0.0, 1.0]
 	*** This value will be modulated by the global music volume found in the
-	*** GameAudio class.
+	*** AudioEngine class.
 	**/
 	void SetVolume(float volume);
 

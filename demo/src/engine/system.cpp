@@ -31,11 +31,11 @@ using namespace hoa_audio;
 using namespace hoa_script;
 using namespace hoa_mode_manager;
 
-template<> hoa_system::GameSystem* Singleton<hoa_system::GameSystem>::_singleton_reference = NULL;
+template<> hoa_system::SystemEngine* Singleton<hoa_system::SystemEngine>::_singleton_reference = NULL;
 
 namespace hoa_system {
 
-GameSystem* SystemManager = NULL;
+SystemEngine* SystemManager = NULL;
 bool SYSTEM_DEBUG = false;
 
 // -----------------------------------------------------------------------------
@@ -154,12 +154,12 @@ void SystemTimer::_UpdateTimer() {
 }
 
 // -----------------------------------------------------------------------------
-// GameSystem Class
+// SystemEngine Class
 // -----------------------------------------------------------------------------
 
-GameSystem::GameSystem() {
+SystemEngine::SystemEngine() {
 	if (SYSTEM_DEBUG)
-		cout << "SETTINGS: GameSystem constructor invoked" << endl;
+		cout << "SETTINGS: SystemEngine constructor invoked" << endl;
 
 	_not_done = true;
 	SetLanguage("en"); //Default language is English
@@ -167,14 +167,14 @@ GameSystem::GameSystem() {
 
 
 
-GameSystem::~GameSystem() {
+SystemEngine::~SystemEngine() {
 	if (SYSTEM_DEBUG)
-		cout << "SETTINGS: GameSystem destructor invoked" << endl;
+		cout << "SETTINGS: SystemEngine destructor invoked" << endl;
 }
 
 
 
-bool GameSystem::SingletonInitialize() {
+bool SystemEngine::SingletonInitialize() {
 	// Initialize the gettext library
 	setlocale(LC_ALL, "");
 	setlocale(LC_NUMERIC, "C");
@@ -190,7 +190,7 @@ bool GameSystem::SingletonInitialize() {
 
 
 // Set up the timers before the main game loop begins
-void GameSystem::InitializeTimers() {
+void SystemEngine::InitializeTimers() {
 	_last_update = SDL_GetTicks();
 	_update_time = 1; // Set to non-zero, otherwise bad things may happen...
 	_hours_played = 0;
@@ -202,7 +202,7 @@ void GameSystem::InitializeTimers() {
 
 
 
-void GameSystem::UpdateTimers() {
+void SystemEngine::UpdateTimers() {
 	// ----- (1): Update the update game timer
 	uint32 tmp = _last_update;
 	_last_update = SDL_GetTicks();
@@ -230,7 +230,7 @@ void GameSystem::UpdateTimers() {
 
 
 
-void GameSystem::ExamineSystemTimers() {
+void SystemEngine::ExamineSystemTimers() {
 	GameMode* active_mode = ModeManager->GetTop();
 	GameMode* timer_mode = NULL;
 
@@ -248,7 +248,7 @@ void GameSystem::ExamineSystemTimers() {
 
 
 
-void GameSystem::SetLanguage(std::string lang) {
+void SystemEngine::SetLanguage(std::string lang) {
 	// A 2 character string is the only allowable argument
 	if (lang.size() != 2) {
 		return;
@@ -275,31 +275,31 @@ void GameSystem::SetLanguage(std::string lang) {
 
 
 
-void GameSystem::WaitForThread(Thread * thread) {
+void SystemEngine::WaitForThread(Thread * thread) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_WaitThread(thread, NULL);
 #endif
 }
 
-Semaphore * GameSystem::CreateSemaphore(int max) {
+Semaphore * SystemEngine::CreateSemaphore(int max) {
 #if (THREAD_TYPE == SDL_THREADS)
 	return SDL_CreateSemaphore(max);
 #endif
 }
 
-void GameSystem::DestroySemaphore(Semaphore * s) {
+void SystemEngine::DestroySemaphore(Semaphore * s) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_DestroySemaphore(s);
 #endif
 }
 
-void GameSystem::LockThread(Semaphore * s) {
+void SystemEngine::LockThread(Semaphore * s) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_SemWait(s);
 #endif
 }
 
-void GameSystem::UnlockThread(Semaphore * s) {
+void SystemEngine::UnlockThread(Semaphore * s) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_SemPost(s);
 #endif

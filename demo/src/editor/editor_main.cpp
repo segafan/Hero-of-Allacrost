@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 #endif
 
 	QApplication app(argc, argv);
-	hoa_script::ScriptManager = hoa_script::GameScript::SingletonCreate();
+	hoa_script::ScriptManager = hoa_script::ScriptEngine::SingletonCreate();
 	hoa_script::ScriptManager->SingletonInitialize();
 	hoa_global::GlobalManager = hoa_global::GameGlobal::SingletonCreate();
 	hoa_defs::BindGlobalsToLua();

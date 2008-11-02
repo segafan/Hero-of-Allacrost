@@ -26,7 +26,7 @@ namespace hoa_video
 //                    attach a flame effect to a sword or something)
 //-----------------------------------------------------------------------------
 
-ParticleEffectID GameVideo::AddParticleEffect(const string &filename, float x, float y, bool reload)
+ParticleEffectID VideoEngine::AddParticleEffect(const string &filename, float x, float y, bool reload)
 {
 	ParticleEffectDef *def = NULL;
 	
@@ -56,7 +56,7 @@ ParticleEffectID GameVideo::AddParticleEffect(const string &filename, float x, f
 	if(id == VIDEO_INVALID_EFFECT)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: failed to add effect to particle manager in GameVideo::AddParticleEffect()!" << endl;
+			cerr << "VIDEO ERROR: failed to add effect to particle manager in VideoEngine::AddParticleEffect()!" << endl;
 	}
 	
 	return id;
@@ -69,7 +69,7 @@ ParticleEffectID GameVideo::AddParticleEffect(const string &filename, float x, f
 //                      but before rendering the GUI.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawParticleEffects()
+bool VideoEngine::DrawParticleEffects()
 {
 	return _particle_manager.Draw();
 }
@@ -81,7 +81,7 @@ bool GameVideo::DrawParticleEffects()
 //                         to simply stop emitting new particles
 //-----------------------------------------------------------------------------
 
-void GameVideo::StopAllParticleEffects(bool kill_immediate)
+void VideoEngine::StopAllParticleEffects(bool kill_immediate)
 {
 	return _particle_manager.StopAll();
 }
@@ -93,7 +93,7 @@ void GameVideo::StopAllParticleEffects(bool kill_immediate)
 //                    or an invalid id is passed, then NULL is returned.
 //-----------------------------------------------------------------------------
 
-ParticleEffect *GameVideo::GetParticleEffect(ParticleEffectID id)
+ParticleEffect *VideoEngine::GetParticleEffect(ParticleEffectID id)
 {
 	return _particle_manager.GetEffect(id);
 }
@@ -104,7 +104,7 @@ ParticleEffect *GameVideo::GetParticleEffect(ParticleEffectID id)
 //                  screen
 //-----------------------------------------------------------------------------
 
-int32 GameVideo::GetNumParticles()
+int32 VideoEngine::GetNumParticles()
 {
 	return _particle_manager.GetNumParticles();
 }

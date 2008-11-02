@@ -20,7 +20,6 @@
 #include "utils.h"
 #include "defs.h"
 
-
 namespace hoa_map {
 
 namespace private_map {
