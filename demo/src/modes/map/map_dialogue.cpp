@@ -369,7 +369,7 @@ void DialogueSupervisor::BeginDialogue(uint32 dialogue_id) {
 	_line_timer = _current_dialogue->GetCurrentTime();
 	_dialogue_window.Initialize();
 	_dialogue_window._display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
-	MapMode::_current_map->_map_state = DIALOGUE;
+	MapMode::_current_map->_PushState(STATE_DIALOGUE);
 }
 
 
@@ -403,7 +403,7 @@ void DialogueSupervisor::BeginDialogue(MapSprite* sprite) {
 	sprite->SetDirection(CalculateOppositeDirection(MapMode::_current_map->_camera->GetDirection()));
 	sprite->IncrementNextDialogue();
 	// TODO: Is the line below necessary to do? Shouldn't the camera stop on its own (if its pointing to the player's character)?
-	MapMode::_current_map->_camera->moving = false; 
+	MapMode::_current_map->_camera->moving = false;
 	BeginDialogue(next_dialogue->GetDialogueID());
 }
 
@@ -421,7 +421,7 @@ void DialogueSupervisor::EndDialogue() {
 	_current_dialogue = NULL;
 	_current_options = NULL;
 	_line_timer = -1;
-	MapMode::_current_map->_map_state = EXPLORE;
+	MapMode::_current_map->_PopState();
 }
 
 
@@ -500,7 +500,7 @@ void DialogueSupervisor::_UpdateLine() {
 
 	// Update the display timer if it is enabled for this dialogue
 	if (_line_timer > 0) {
-		_line_timer -= MapMode::_current_map->_time_elapsed;
+		_line_timer -= SystemManager->GetUpdateTime();
 
 		if (_line_timer <= 0) {
 			if (_current_options != NULL) {
@@ -600,7 +600,7 @@ void DialogueSupervisor::_FinishLine(int32 next_line) {
 		_dialogue_window._display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
 		return;
 	}
-	
+
 	// If this point in the function is reached, the last line of dialogue has ben read
 	// Restore the status of the sprites that participated in this dialogue if necessary
 	if (_current_dialogue->IsSaveState()) {

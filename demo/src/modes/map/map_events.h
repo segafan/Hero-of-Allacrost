@@ -109,18 +109,19 @@ public:
 	void AddEventLink(uint32 child_event_id, bool launch_at_start, uint32 launch_timer)
 		{ _event_links.push_back(EventLink(child_event_id, launch_at_start, launch_timer)); }
 
+protected:
 	/** \brief Starts the event
 	*** This function is only called once per event execution
 	**/
-	virtual void StartEvent() = 0;
+	virtual void _Start() = 0;
 
-	/** \brief Checks if the event has finished and may also update the event progress
+	/** \brief Updates the event progress and checks if the event has finished
 	*** \return True if the event is finished
 	*** This function is called as many times as needed until the event has finished. The contents
 	*** of this function may do more than simply check if the event is finished. It may also execute
 	*** code for the event with the goal of eventually brining the event to a finished state.
 	**/
-	virtual bool IsEventFinished() = 0;
+	virtual bool _Update() = 0;
 
 private:
 	//! \brief A unique ID number for the event. A value of zero is invalid
@@ -149,11 +150,12 @@ public:
 
 	~MoveEvent();
 
+protected:
 	//! \brief Calculates a path for the sprite to move to the destination
-	void StartEvent();
+	void _Start();
 
 	//! \brief Returns true when the sprite has reached the destination
-	bool IsEventFinished();
+	bool _Update();
 
 private:
 	// TODO
@@ -177,11 +179,12 @@ public:
 
 	~DialogueEvent();
 
+protected:
 	//! \brief Begins the dialogue
-	void StartEvent();
+	void _Start();
 
 	//! \brief Returns true when the last line of the dialogue has been read
-	bool IsEventFinished();
+	bool _Update();
 
 private:
 	// TODO
@@ -209,11 +212,12 @@ public:
 
 	~ScriptedEvent();
 
+protected:
 	//! \brief Calls the Lua _start_function
-	void StartEvent();
+	void _Start();
 
 	//! \brief Calls the Lua _check_function
-	bool IsEventFinished();
+	bool _Update();
 
 private:
 	//! \brief A pointer to the Lua function that starts the event

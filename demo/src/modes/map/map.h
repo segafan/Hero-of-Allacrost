@@ -57,32 +57,35 @@ namespace private_map {
 *** number of rows and columns of tiles.
 **/
 //@{
-const float SCREEN_COLS = 32.0f;
-const float SCREEN_ROWS = 24.0f;
-const float HALF_SCREEN_COLS = 16.0f;
-const float HALF_SCREEN_ROWS = 12.0f;
+const float SCREEN_COLS = 64.0f;
+const float SCREEN_ROWS = 48.0f;
+const float HALF_SCREEN_COLS = 32.0f;
+const float HALF_SCREEN_ROWS = 24.0f;
 
-const uint16 TILE_COLS = 16; // Number of tile columns that fit on the screen
-const uint16 TILE_ROWS = 12; // Number of tile rows that fit on the screen
-const uint16 HALF_TILE_COLS = 8;
-const uint16 HALF_TILE_ROWS = 6;
+const uint16 TILE_COLS = 32; // Number of tile columns that fit on the screen
+const uint16 TILE_ROWS = 24; // Number of tile rows that fit on the screen
+const uint16 HALF_TILE_COLS = 16;
+const uint16 HALF_TILE_ROWS = 12;
 
-const uint16 GRID_LENGTH = 32; // Length of a grid element in pixels
-const uint16 TILE_LENGTH = 64; // Length of a tile in pixels
-const uint16 HALF_TILE_LENGTH = 32;
+const uint16 GRID_LENGTH = 16; // Length of a grid element in pixels
+const uint16 TILE_LENGTH = 32; // Length of a tile in pixels
+const uint16 HALF_TILE_LENGTH = 16;
 //@}
 
 /** \name Map State Constants
 *** \brief Constants used for determining the current state of operation during map mode.
 **/
 //@{
-//! \brief The standard state of the map, where the player is free to roam.
-const uint8 EXPLORE      = 0x01;
-//! \brief When a dialogue is in process, the map is in this state.
-const uint8 DIALOGUE     = 0x02;
-//! \brief When the map is in this state, the player can not control the action.
-const uint8 OBSERVATION  = 0x04;
+enum MAP_STATE {
+	STATE_INVALID    = 0,
+	STATE_EXPLORE    = 1, // Standard state, player has control to move about map
+	STATE_SCENE      = 2, // Like the explore state but player has no control (input is ignored)
+	STATE_DIALOGUE   = 3, // When a dialogue is active
+	STATE_TREASURE   = 4, // Active when a treasure has been procured by the player
+	STATE_TOTAL      = 5
+};
 //@}
+
 
 /** \name Map Context Constants
 *** \brief Constants used to represent all 32 possible map contexts
@@ -238,7 +241,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::MapSprite;
 	friend class private_map::EnemySprite;
 	friend class private_map::DialogueSupervisor;
-	friend class private_map::TreasureMenu;
+	friend class private_map::TreasureSupervisor;
 	friend class private_map::MapDialogue;
 	friend class private_map::MapDialogueOptions;
 	friend class private_map::SpriteAction;
@@ -319,7 +322,7 @@ private:
 	private_map::EventSupervisor* _event_supervisor;
 
 	//! \brief Class member object which processes all information related to treasure discovery
-	private_map::TreasureMenu* _treasure_menu;
+	private_map::TreasureSupervisor* _treasure_supervisor;
 
 	/** \brief A script function which assists with the MapMode#Update method
 	*** This function implements any custom update code that the specific map needs to be performed.
@@ -353,6 +356,8 @@ private:
 	//! \brief Indicates the current state that the map is in, such as when a dialogue is taking place.
 	uint8 _map_state;
 
+	std::vector<private_map::MAP_STATE> _state_stack;
+
 	//! \brief While true, all user input commands to map mode are ignored
 	bool _ignore_input;
 
@@ -367,10 +372,6 @@ private:
 	static bool _show_dialogue_icons;
 
 	// ----- Members : Map Timing and Graphics -----
-
-	//! \brief The time elapsed since the last Update() call to MapMode.
-	//! \todo Can be removed because the SystemManager contains this same data
-	uint32 _time_elapsed;
 
 	/** \brief A timer used for when the player first enters the map
 	*** This timer is set to 7000 ms (7 seconds) and is used to display the map's location graphic
@@ -418,11 +419,29 @@ private:
 
 	// ----- Methods -----
 
+	//! \brief Empties the state stack and places an invalid state on top
+	void _ResetState();
+
+	/** \brief Pushes a state type to the top of the state stack, making it the active state
+	*** \param state The state to push onto the stack
+	**/
+	void _PushState(private_map::MAP_STATE state);
+
+	//! \brief Removes the highest item in the state stack
+	void _PopState();
+
+	/** \brief Retrieves the current map state
+	*** \return The top-most item on the map state stack
+	**/
+	private_map::MAP_STATE _CurrentState();
+
+
+
 	//! \brief Loads all map data contained in the Lua file that defines the map
 	void _Load();
 
-	//! \brief Handles user input when the map is in the explore state
-	void _HandleInputExplore();
+	//! \brief A helper function to Update() that is called only when the map is in the explore state
+	void _UpdateExplore();
 
 	//! \brief Calculates information about how to draw the next map frame
 	void _CalculateDrawInfo();
@@ -454,20 +473,11 @@ private:
 	private_map::VirtualSprite* _GetCameraFocus() const
 		{ return _camera; }
 
-	uint8 _GetMapState() const
-		{ return _map_state; }
-
-	uint32 _GetTimeElapsed() const
-		{ return _time_elapsed; }
-
 	static bool _IsShowingDialogueIcons()
 		{ return _show_dialogue_icons; }
 
 	void _SetCameraFocus(private_map::VirtualSprite *sprite)
 		{ _camera = sprite; }
-
-	void _SetMapState(uint8 state)
-		{ _map_state = state; }
 
 	static void _ShowDialogueIcons( bool state )
 		{ _show_dialogue_icons = state; }

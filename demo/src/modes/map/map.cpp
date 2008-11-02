@@ -83,19 +83,21 @@ MapMode::MapMode(string filename) :
 	_tile_manager(NULL),
 	_object_manager(NULL),
 	_dialogue_supervisor(NULL),
-	_treasure_menu(NULL),
+	_event_supervisor(NULL),
+	_treasure_supervisor(NULL),
 	_num_map_contexts(0),
 	_current_context(MAP_CONTEXT_01),
 	_run_stamina(10000),
-	_map_state(EXPLORE),
 	_ignore_input(false),
 	_run_forever(false),
 	_run_disabled(false),
-	_time_elapsed(0),
 	_camera(NULL)
 {
 	mode_type = MODE_MANAGER_MAP_MODE;
 	_loading_map = this;
+
+	_ResetState();
+	_PushState(STATE_EXPLORE);
 
 	// Create the event group name by modifying the filename to consists only of alphanumeric characters and underscores
 	// This will make it a valid identifier name in Lua syntax
@@ -112,7 +114,7 @@ MapMode::MapMode(string filename) :
 	_object_manager = new ObjectManager();
 	_dialogue_supervisor = new DialogueSupervisor();
 	_event_supervisor = new EventSupervisor();
-	_treasure_menu = new TreasureMenu();
+	_treasure_supervisor = new TreasureSupervisor();
 
 	_intro_timer.Initialize(7000, 0, this);
 
@@ -151,7 +153,7 @@ MapMode::~MapMode() {
 	delete(_object_manager);
 	delete(_dialogue_supervisor);
 	delete(_event_supervisor);
-	delete(_treasure_menu);
+	delete(_treasure_supervisor);
 
 	_map_script.CloseFile();
 }
@@ -196,32 +198,34 @@ void MapMode::Update() {
 		return;
 	}
 
-	_time_elapsed = SystemManager->GetUpdateTime();
 
 	// ---------- (1) Call the map script's update function
 	ScriptCallFunction<void>(_update_function);
 
-	// ---------- (2) Process additional user input
-	if (_ignore_input == false) {
-		if (_map_state == DIALOGUE)
-			_dialogue_supervisor->Update();
-		else if (_treasure_menu->IsActive() == true)
-			_treasure_menu->Update();
-		else if (_map_state == EXPLORE)
-			_HandleInputExplore();
-	}
-
 	// ---------- (3) Update all animated tile images
 	_tile_manager->Update();
-
-	// ---------- (4) Update all objects on the map
-	if (_treasure_menu->IsActive() == false) {
-		_object_manager->Update();
-		_object_manager->SortObjects();
-	}
-
+	_object_manager->Update();
+	_object_manager->SortObjects();
 	// ---------- (5) Update all active map events
 	_event_supervisor->Update();
+
+	switch (_CurrentState()) {
+		case STATE_EXPLORE:
+			_UpdateExplore();
+			break;
+		case STATE_SCENE:
+			break;
+		case STATE_DIALOGUE:
+			_dialogue_supervisor->Update();
+			break;
+		case STATE_TREASURE:
+			_treasure_supervisor->Update();
+			break;
+		default:
+			IF_PRINT_WARNING(MAP_DEBUG) << "map was set in an unknown state: " << _CurrentState() << endl;
+			_ResetState();
+			break;
+	}
 } // void MapMode::Update()
 
 
@@ -230,10 +234,43 @@ void MapMode::Draw() {
 	_CalculateDrawInfo();
 	ScriptCallFunction<void>(_draw_function);
 	_DrawGUI();
-	if (_map_state == DIALOGUE) {
+	if (_CurrentState() == STATE_DIALOGUE) {
 		_dialogue_supervisor->Draw();
 	}
 } // void MapMode::_Draw()
+
+
+
+void MapMode::_ResetState() {
+	_state_stack.clear();
+	_state_stack.push_back(STATE_INVALID);
+}
+
+
+
+void MapMode::_PushState(MAP_STATE state) {
+	_state_stack.push_back(state);
+}
+
+
+
+void MapMode::_PopState() {
+	_state_stack.pop_back();
+	if (_state_stack.empty() == true) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "stack was empty after operation, reseting state stack" << endl;
+		_state_stack.push_back(STATE_INVALID);
+	}
+}
+
+
+
+MAP_STATE MapMode::_CurrentState() {
+	if (_state_stack.empty() == true) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "stack was empty, reseting state stack" << endl;
+		_state_stack.push_back(STATE_INVALID);
+	}
+	return _state_stack.back();
+}
 
 
 
@@ -317,7 +354,7 @@ void MapMode::_Load() {
 
 
 
-void MapMode::_HandleInputExplore() {
+void MapMode::_UpdateExplore() {
 	// First go to menu mode if the user requested it
 	if (InputManager->MenuPress()) {
 		MenuMode *MM = new MenuMode(_map_name, _location_graphic.GetFilename());
@@ -334,8 +371,8 @@ void MapMode::_HandleInputExplore() {
 		if (_run_forever) {
 			_camera->is_running = true;
 		}
-		else if (_run_stamina > _time_elapsed * 2) {
-			_run_stamina -= (_time_elapsed * 2);
+		else if (_run_stamina > SystemManager->GetUpdateTime() * 2) {
+			_run_stamina -= (SystemManager->GetUpdateTime() * 2);
 			_camera->is_running = true;
 		}
 		else {
@@ -344,7 +381,7 @@ void MapMode::_HandleInputExplore() {
 	}
 	// Regenerate the stamina at 1/2 the consumption rate
 	else if (_run_stamina < 10000) {
-		_run_stamina += _time_elapsed;
+		_run_stamina += SystemManager->GetUpdateTime();
 		if (_run_stamina > 10000)
 			_run_stamina = 10000;
 	}
@@ -619,8 +656,8 @@ void MapMode::_DrawGUI() {
 	VideoManager->PopState();
 
 	// ---------- (3) Draw the treasure menu if necessary
-	if (_treasure_menu->IsActive() == true)
-		_treasure_menu->Draw();
+	if (_treasure_supervisor->IsActive() == true)
+		_treasure_supervisor->Draw();
 } // void MapMode::_DrawGUI()
 
 

@@ -64,8 +64,6 @@ void BindModesToLua()
 			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
 			.def("_AddZone", &MapMode::_AddZone, adopt(_2))
 			.def("_SetCameraFocus", &MapMode::_SetCameraFocus)
-			.def("_SetMapState", &MapMode::_SetMapState)
-			.def("_GetMapState", &MapMode::_GetMapState)
 			.def("_GetDialogueSupervisor", &MapMode::_GetDialogueSupervisor) // TEMP
 			.def("_GetGeneratedObjectID", &MapMode::_GetGeneratedObjectID)
 			.def("_DrawMapLayers", &MapMode::_DrawMapLayers)
@@ -79,9 +77,10 @@ void BindModesToLua()
 			// Namespace constants
 			.enum_("constants") [
 				// Map states
-				value("EXPLORE", EXPLORE),
-				value("DIALOGUE", DIALOGUE),
-				value("OBSERVATION", OBSERVATION),
+				value("STATE_EXPLORE", STATE_EXPLORE),
+				value("STATE_SCENE", STATE_EXPLORE),
+				value("STATE_DIALOGUE", STATE_EXPLORE),
+				value("STATE_TREASURE", STATE_EXPLORE),
 				// Object types
 				value("PHYSICAL_TYPE", PHYSICAL_TYPE),
 				value("VIRTUAL_TYPE", VIRTUAL_TYPE),
