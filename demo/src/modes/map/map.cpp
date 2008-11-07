@@ -65,8 +65,8 @@ MapMode::MapMode(string filename) :
 	_map_filename(filename),
 	_map_tablespace(""), // will be properly initialized in the Load() function
 	_map_event_group(NULL),
-	_tile_manager(NULL),
-	_object_manager(NULL),
+	_tile_supervisor(NULL),
+	_object_supervisor(NULL),
 	_dialogue_supervisor(NULL),
 	_event_supervisor(NULL),
 	_treasure_supervisor(NULL),
@@ -80,6 +80,7 @@ MapMode::MapMode(string filename) :
 {
 	mode_type = MODE_MANAGER_MAP_MODE;
 	_loading_map = this;
+	_current_map = this;
 
 	_ResetState();
 	_PushState(STATE_EXPLORE);
@@ -95,8 +96,8 @@ MapMode::MapMode(string filename) :
 	}
 	_map_event_group = GlobalManager->GetEventGroup(event_group_name);
 
-	_tile_manager = new TileManager();
-	_object_manager = new ObjectManager();
+	_tile_supervisor = new TileSupervisor();
+	_object_supervisor = new ObjectSupervisor();
 	_dialogue_supervisor = new DialogueSupervisor();
 	_event_supervisor = new EventSupervisor();
 	_treasure_supervisor = new TreasureSupervisor();
@@ -134,8 +135,8 @@ MapMode::~MapMode() {
 		delete(_enemies[i]);
 	_enemies.clear();
 
-	delete(_tile_manager);
-	delete(_object_manager);
+	delete(_tile_supervisor);
+	delete(_object_supervisor);
 	delete(_dialogue_supervisor);
 	delete(_event_supervisor);
 	delete(_treasure_supervisor);
@@ -188,11 +189,9 @@ void MapMode::Update() {
 	ScriptCallFunction<void>(_update_function);
 
 	// ---------- (3) Update all animated tile images
-	_tile_manager->Update();
-	_object_manager->Update();
-	_object_manager->SortObjects();
-	// ---------- (5) Update all active map events
-	_event_supervisor->Update();
+	_tile_supervisor->Update();
+	_object_supervisor->Update();
+	_object_supervisor->SortObjects();
 
 	switch (_CurrentState()) {
 		case STATE_EXPLORE:
@@ -211,6 +210,9 @@ void MapMode::Update() {
 			_ResetState();
 			break;
 	}
+
+	// ---------- (5) Update all active map events
+	_event_supervisor->Update();
 } // void MapMode::Update()
 
 
@@ -280,8 +282,8 @@ void MapMode::_Load() {
 	}
 
 	// ---------- (2) Instruct the supervisor classes to perform their portion of the load operation
-	_tile_manager->Load(_map_script, this);
-	_object_manager->Load(_map_script);
+	_tile_supervisor->Load(_map_script, this);
+	_object_supervisor->Load(_map_script);
 
 	// ---------- (3) Load map sounds and music
 	vector<string> sound_filenames;
@@ -327,7 +329,7 @@ void MapMode::_Load() {
 	// TODO: Need to figure out a new function appropriate for this code?
 	// TEMP: The line below is very bad to do, but is necessary for the UpdateDialogueStatus function to work correctly
 	_current_map = this;
-	for (map<uint16, MapObject*>::iterator i = _object_manager->_all_objects.begin(); i != _object_manager->_all_objects.end(); i++) {
+	for (map<uint16, MapObject*>::iterator i = _object_supervisor->_all_objects.begin(); i != _object_supervisor->_all_objects.end(); i++) {
 		if (i->second->GetType() == SPRITE_TYPE) {
 			MapSprite* sprite = dynamic_cast<MapSprite*>(i->second);
 			sprite->UpdateDialogueStatus();
@@ -374,7 +376,7 @@ void MapMode::_UpdateExplore() {
 	// If the user requested a confirm event, check if there is a nearby object that the player may interact with
 	// Interactions are currently limited to dialogue with sprites and opening of treasures
 	if (InputManager->ConfirmPress()) {
-		MapObject* obj = _object_manager->FindNearestObject(_camera);
+		MapObject* obj = _object_supervisor->FindNearestObject(_camera);
 
 		if (obj && (obj->GetType() == SPRITE_TYPE)) {
 			MapSprite *sp = reinterpret_cast<MapSprite*>(obj);
@@ -480,10 +482,10 @@ void MapMode::_CalculateMapFrame() {
 		_draw_info.screen_edges.right = SCREEN_COLS;
 	}
 	// Camera exceeds the right boundary of the map
-	else if (_draw_info.starting_col + TILE_COLS >= _tile_manager->_num_tile_cols) {
-		_draw_info.starting_col = static_cast<int16>(_tile_manager->_num_tile_cols - TILE_COLS);
+	else if (_draw_info.starting_col + TILE_COLS >= _tile_supervisor->_num_tile_cols) {
+		_draw_info.starting_col = static_cast<int16>(_tile_supervisor->_num_tile_cols - TILE_COLS);
 		_draw_info.tile_x_start = 1.0f;
-		_draw_info.screen_edges.right = static_cast<float>(_object_manager->_num_grid_cols);
+		_draw_info.screen_edges.right = static_cast<float>(_object_supervisor->_num_grid_cols);
 		_draw_info.screen_edges.left = _draw_info.screen_edges.right - SCREEN_COLS;
 	}
 
@@ -495,10 +497,10 @@ void MapMode::_CalculateMapFrame() {
 		_draw_info.screen_edges.bottom = SCREEN_ROWS;
 	}
 	// Camera exceeds the bottom boundary of the map
-	else if (_draw_info.starting_row + TILE_ROWS >= _tile_manager->_num_tile_rows) {
-		_draw_info.starting_row = static_cast<int16>(_tile_manager->_num_tile_rows - TILE_ROWS);
+	else if (_draw_info.starting_row + TILE_ROWS >= _tile_supervisor->_num_tile_rows) {
+		_draw_info.starting_row = static_cast<int16>(_tile_supervisor->_num_tile_rows - TILE_ROWS);
 		_draw_info.tile_y_start = 2.0f;
-		_draw_info.screen_edges.bottom = static_cast<float>(_object_manager->_num_grid_rows);
+		_draw_info.screen_edges.bottom = static_cast<float>(_object_supervisor->_num_grid_rows);
 		_draw_info.screen_edges.top = _draw_info.screen_edges.bottom - SCREEN_ROWS;
 	}
 
@@ -533,16 +535,16 @@ void MapMode::_CalculateMapFrame() {
 void MapMode::_DrawMapLayers() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 
-	_tile_manager->DrawLowerLayer(&_draw_info);
-	_tile_manager->DrawMiddleLayer(&_draw_info);
+	_tile_supervisor->DrawLowerLayer(&_draw_info);
+	_tile_supervisor->DrawMiddleLayer(&_draw_info);
 
-	_object_manager->DrawGroundObjects(&_draw_info, false); // First draw pass of ground objects
-	_object_manager->DrawPassObjects(&_draw_info);
-	_object_manager->DrawGroundObjects(&_draw_info, true); // Second draw pass of ground objects
+	_object_supervisor->DrawGroundObjects(&_draw_info, false); // First draw pass of ground objects
+	_object_supervisor->DrawPassObjects(&_draw_info);
+	_object_supervisor->DrawGroundObjects(&_draw_info, true); // Second draw pass of ground objects
 
-	_tile_manager->DrawUpperLayer(&_draw_info);
+	_tile_supervisor->DrawUpperLayer(&_draw_info);
 
-	_object_manager->DrawSkyObjects(&_draw_info);
+	_object_supervisor->DrawSkyObjects(&_draw_info);
 } // void MapMode::_DrawMapLayers()
 
 
@@ -648,34 +650,34 @@ void MapMode::_DrawGUI() {
 
 
 void MapMode::_AddGroundObject(MapObject *obj) {
-	_object_manager->_ground_objects.push_back(obj);
-	_object_manager->_all_objects.insert(make_pair(obj->object_id, obj));
+	_object_supervisor->_ground_objects.push_back(obj);
+	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
 }
 
 
 
 void MapMode::_AddPassObject(MapObject *obj) {
-	_object_manager->_pass_objects.push_back(obj);
-	_object_manager->_all_objects.insert(make_pair(obj->object_id, obj));
+	_object_supervisor->_pass_objects.push_back(obj);
+	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
 }
 
 
 
 void MapMode::_AddSkyObject(MapObject *obj) {
-	_object_manager->_sky_objects.push_back(obj);
-	_object_manager->_all_objects.insert(make_pair(obj->object_id, obj));
+	_object_supervisor->_sky_objects.push_back(obj);
+	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
 }
 
 
 
 void MapMode::_AddZone(MapZone *zone) {
-	_object_manager->_zones.push_back(zone);
+	_object_supervisor->_zones.push_back(zone);
 }
 
 
 
 uint16 MapMode::_GetGeneratedObjectID() {
-	return ++(_object_manager->_last_id);
+	return ++(_object_supervisor->_last_id);
 }
 
 } // namespace hoa_map

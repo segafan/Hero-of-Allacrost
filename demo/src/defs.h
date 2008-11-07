@@ -241,16 +241,17 @@ namespace hoa_map {
 	class MapMode;
 
 	namespace private_map {
-		class TileManager;
+		class TileSupervisor;
 		class MapTile;
 
 		class MapRectangle;
 		class MapFrame;
 		class PathNode;
 
-		class ObjectManager;
+		class ObjectSupervisor;
 		class MapObject;
 		class PhysicalObject;
+
 		class VirtualSprite;
 		class MapSprite;
 		class EnemySprite;
@@ -262,19 +263,15 @@ namespace hoa_map {
 
 		class EventSupervisor;
 		class MapEvent;
-		class SpritePathMoveEvent;
-		class SpriteRandomMoveEvent;
-		class SpriteAnimateEvent;
 		class DialogueEvent;
 		class ScriptedEvent;
+		class SpriteEvent;
+		class PathMoveSpriteEvent;
+		class RandomMoveSpriteEvent;
+		class AnimateSpriteEvent;
 
-		class SpriteAction;
-		class ActionPathMove;
-		class ActionAnimate;
-		class ActionScriptFunction;
-
-		class MapTreasure;
 		class TreasureSupervisor;
+		class MapTreasure;
 
 		class ZoneSection;
 		class MapZone;

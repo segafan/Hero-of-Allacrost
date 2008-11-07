@@ -103,25 +103,23 @@ public:
 	*** \param speaker_id The object ID of the speaker of this line of text
 	*** \param next_line The line of dialogue which should follow this one (a negative value indicates to end the dialogue)
 	*** \param time The maximum time in milliseconds to show the line of dialogue (default == infinite)
-	*** \param action An integer key to the map_functions table in the map file that contains the script function
-	*** to execute when this line completes. A negative value indicates that no action is to occur.
+	*** \param event The ID of an event to enact after selecting the option. A zero value indicates that no event is to occur.
 	***
 	*** \todo This should take a ustring instead of a std::string, but we need better support
 	*** for ustring in scripts to do that first.
 	**/
-	void AddText(std::string text, uint32 speaker_id, int32 next_line, int32 action = -1, bool display_timer = false);
+	void AddText(std::string text, uint32 speaker_id, int32 next_line, uint32 event = 0, bool display_timer = false);
 
 	/** \brief Adds an option to the most recently added line of text
 	*** \param text The text for this particular option
 	*** \param next_line The index value of the next line of dialogue to display should this option be selected
 	*** (a negative value indicates to end the dialogue immediately after the option is selected)
-	*** \param action An integer key to the map_functions table in the map file that contains the
-	*** script function to execute should this option be selected. A negative value indicates that no action is to occur.
+	*** \param event The ID of an event to enact after selecting the option. A zero value indicates that no event is to occur.
 	***
 	*** \todo This should take a ustring instead of a std::string, but we need better support
 	*** for ustring in scripts to do that first.
 	**/
-	void AddOption(std::string text, int32 next_line, int32 action = -1);
+	void AddOption(std::string text, int32 next_line, uint32 event = 0);
 
 	/** \brief Proceeds the dialogue forward to display the next line
 	*** \param line Index value of the next line of dialogue to read. A negative value indicates
@@ -178,9 +176,9 @@ public:
 	int32 GetCurrentTime() const
 		{ return _display_times[_current_line]; }
 
-	//! \brief Returns a pointer to the ScriptObject that will be invoked after the current line of dialogue completes
-	ScriptObject* GetCurrentAction()
-		{ return _actions[_current_line]; }
+	//! \brief Returns the integer ID of the event that will be invoked after the current line of dialogue completes
+	uint32 GetCurrentEvent()
+		{ return _events[_current_line]; }
 
 	// ----- Methods: retrieval of properties of a specific line
 
@@ -196,9 +194,9 @@ public:
 	int32 GetLineTime(uint32 line) const
 		{ if (line > _display_times.size()) return -1; else return _display_times[line]; }
 
-	//! \brief Returns the actions to follow a specific line
-	ScriptObject* GetLineAction(uint32 line)
-		{ if (line > _actions.size()) return NULL; else return _actions[line]; }
+	//! \brief Returns the ID of the event to execute after a specific line
+	uint32 GetLineEvent(uint32 line)
+		{ if (line > _events.size()) return 0; else return _events[line]; }
 
 	//! \name Class Member Access Functions
 	//@{
@@ -255,7 +253,7 @@ private:
 	//! \brief An index to the current line to read.
 	uint32 _current_line;
 
-	//! \brief If true, dialogues will ignore user input and instead execute independently
+	//! \brief If true, dialogue will ignore user input and instead execute independently
 	bool _blocked;
 
 	//! \brief If true, the status of map sprites will be reset after the dialogue completes
@@ -279,8 +277,8 @@ private:
 	//! \brief A set of dialogue options indexed according to the line of dialogue that they belong to
 	std::vector<MapDialogueOptions*> _options;
 
-	//! \brief A list of optional events that may occur after each line
-	std::vector<ScriptObject*> _actions;
+	//! \brief An optional MapEvent that may occur after each line
+	std::vector<uint32> _events;
 }; // class MapDialogue
 
 
@@ -304,15 +302,15 @@ public:
 	MapDialogueOptions()
 		{}
 
-	~MapDialogueOptions();
+	~MapDialogueOptions()
+		{}
 
 	/** \brief Adds a new option to the OptionBox
 	*** \param text The text for the new option
 	*** \param next_line An integer index of the next line of dialogue should this option be selected.
-	*** \param action An integer key to the map_functions table in the map file that contains the script
-	*** function to execute when this option is select. A negative value indicates no action is to occur.
+	*** \param event The ID of an event to enact after selecting the option. Zero indicates that no event is to occur.
 	***/
-	void AddOption(hoa_utils::ustring text, int32 next_line, int32 action = -1);
+	void AddOption(hoa_utils::ustring text, int32 next_line, uint32 event = 0);
 
 private:
 	//! \brief Contains the text of the dialogue, where each entry represents a single line
@@ -323,10 +321,8 @@ private:
 	**/
 	std::vector<int32> _next_lines;
 
-	/** \brief An optional script event that may occur after each line
-	*** A NULL entry indicates that no option is to occur.
-	**/
-	std::vector<ScriptObject*> _actions;
+	//! \brief An optional MapEvent that may occur as a result of selecting each option
+	std::vector<uint32> _events;
 }; // class MapDialogueOptions
 
 
@@ -382,11 +378,11 @@ private:
 ***
 *** The MapMode class creates an instance of this class to handle all dialogue
 *** processing that occurs on maps. This includes containing the dialogue objects,
-*** handling user input, processing of script actions, and display timing of the
+*** handling user input, processing of script events, and display timing of the
 *** dialogue.
 ***
 *** \todo Add support so that the player may backtrack through lines in a
-*** dialogue (without re-processing selected options or previous script actions).
+*** dialogue (without re-processing selected options or previous script events).
 *** ***************************************************************************/
 class DialogueSupervisor {
 public:

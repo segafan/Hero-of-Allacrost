@@ -30,7 +30,6 @@
 
 // Local map mode headers
 #include "map.h"
-#include "map_actions.h"
 #include "map_dialogue.h"
 #include "map_objects.h"
 #include "map_sprites.h"
@@ -161,10 +160,10 @@ void PhysicalObject::Draw() {
 }
 
 // *****************************************************************************
-// ********** ObjectManager Class Functions
+// ********** ObjectSupervisor Class Functions
 // *****************************************************************************
 
-ObjectManager::ObjectManager() :
+ObjectSupervisor::ObjectSupervisor() :
 	_num_grid_rows(0),
 	_num_grid_cols(0),
 	_last_id(1000)
@@ -179,7 +178,7 @@ ObjectManager::ObjectManager() :
 
 
 
-ObjectManager::~ObjectManager() {
+ObjectSupervisor::~ObjectSupervisor() {
 	// Delete all of the map objects
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		delete(_ground_objects[i]);
@@ -195,7 +194,7 @@ ObjectManager::~ObjectManager() {
 
 
 
-MapObject* ObjectManager::GetObject(uint32 object_id) {
+MapObject* ObjectSupervisor::GetObject(uint32 object_id) {
 	map<uint16, MapObject*>::iterator i = _all_objects.find(object_id);
 
 	if (i == _all_objects.end())
@@ -206,7 +205,7 @@ MapObject* ObjectManager::GetObject(uint32 object_id) {
 
 
 
-void ObjectManager::SortObjects() {
+void ObjectSupervisor::SortObjects() {
 	std::sort(_ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less());
 	std::sort(_pass_objects.begin(), _pass_objects.end(), MapObject_Ptr_Less());
 	std::sort(_sky_objects.begin(), _sky_objects.end(), MapObject_Ptr_Less());
@@ -214,7 +213,7 @@ void ObjectManager::SortObjects() {
 
 
 
-void ObjectManager::Load(ReadScriptDescriptor& map_file) {
+void ObjectSupervisor::Load(ReadScriptDescriptor& map_file) {
 	// ---------- Construct the collision grid
 	map_file.OpenTable("map_grid");
 	_num_grid_rows = map_file.GetTableSize();
@@ -228,7 +227,7 @@ void ObjectManager::Load(ReadScriptDescriptor& map_file) {
 
 
 
-void ObjectManager::Update() {
+void ObjectSupervisor::Update() {
 	for (uint32 i = 0; i < _zones.size(); i++) {
 		_zones[i]->Update();
 	}
@@ -246,7 +245,7 @@ void ObjectManager::Update() {
 
 
 
-void ObjectManager::DrawGroundObjects(const MapFrame* const frame, const bool second_pass) {
+void ObjectSupervisor::DrawGroundObjects(const MapFrame* const frame, const bool second_pass) {
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		if (_ground_objects[i]->draw_on_second_pass == second_pass) {
 			_ground_objects[i]->Draw();
@@ -257,7 +256,7 @@ void ObjectManager::DrawGroundObjects(const MapFrame* const frame, const bool se
 
 
 
-void ObjectManager::DrawPassObjects(const MapFrame* const frame) {
+void ObjectSupervisor::DrawPassObjects(const MapFrame* const frame) {
 	for (uint32 i = 0; i < _pass_objects.size(); i++) {
 		_pass_objects[i]->Draw();
 	}
@@ -265,7 +264,7 @@ void ObjectManager::DrawPassObjects(const MapFrame* const frame) {
 
 
 
-void ObjectManager::DrawSkyObjects(const MapFrame* const frame) {
+void ObjectSupervisor::DrawSkyObjects(const MapFrame* const frame) {
 	for (uint32 i = 0; i < _sky_objects.size(); i++) {
 		_sky_objects[i]->Draw();
 	}
@@ -273,7 +272,7 @@ void ObjectManager::DrawSkyObjects(const MapFrame* const frame) {
 
 
 
-MapObject* ObjectManager::FindNearestObject(const VirtualSprite* sprite, float search_distance) {
+MapObject* ObjectSupervisor::FindNearestObject(const VirtualSprite* sprite, float search_distance) {
 	// NOTE: We don't check if the argument is NULL here for performance reasons
 	MapRectangle search_area;
 
@@ -352,11 +351,11 @@ MapObject* ObjectManager::FindNearestObject(const VirtualSprite* sprite, float s
 		}
 	}
 	return closest_obj;
-} // MapObject* ObjectManager::FindNearestObject(VirtualSprite* sprite, float search_distance)
+} // MapObject* ObjectSupervisor::FindNearestObject(VirtualSprite* sprite, float search_distance)
 
 
 
-bool ObjectManager::CheckMapCollision(const private_map::MapObject* const obj) {
+bool ObjectSupervisor::CheckMapCollision(const private_map::MapObject* const obj) {
 	// NOTE: We don't check if the argument is NULL here for performance reasons
 	if (obj->no_collision == true) {
 		return false;
@@ -393,7 +392,7 @@ bool ObjectManager::CheckMapCollision(const private_map::MapObject* const obj) {
 
 
 
-bool ObjectManager::CheckObjectCollision(const MapRectangle& rect, const private_map::MapObject* const obj) {
+bool ObjectSupervisor::CheckObjectCollision(const MapRectangle& rect, const private_map::MapObject* const obj) {
 	// NOTE: We don't check if the argument is NULL here for performance reasons
 	MapRectangle obj_rect;
 	obj->GetCollisionRectangle(obj_rect);
@@ -402,7 +401,7 @@ bool ObjectManager::CheckObjectCollision(const MapRectangle& rect, const private
 
 
 
-bool ObjectManager::DoObjectsCollide(const MapObject* const obj1, const MapObject* const obj2) {
+bool ObjectSupervisor::DoObjectsCollide(const MapObject* const obj1, const MapObject* const obj2) {
 	// NOTE: We don't check if the arguments are NULL here for performance reasons
 
 	// Check if either of the two objects have the no_collision property enabled
@@ -424,7 +423,7 @@ bool ObjectManager::DoObjectsCollide(const MapObject* const obj1, const MapObjec
 
 
 
-bool ObjectManager::DetectCollision(VirtualSprite* sprite) {
+bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite) {
 	// NOTE: We don't check if the argument is NULL here for performance reasons
 
 	// ---------- (1) Check that the sprite does not collide with the map tiles or boundaries
@@ -497,11 +496,11 @@ bool ObjectManager::DetectCollision(VirtualSprite* sprite) {
 	}
 
 	return true;
-} // bool ObjectManager::DetectCollision(VirtualSprite* sprite)
+} // bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite)
 
 
 
-void ObjectManager::FindPath(const VirtualSprite* sprite, vector<PathNode>& path, const PathNode& dest) {
+void ObjectSupervisor::FindPath(const VirtualSprite* sprite, vector<PathNode>& path, const PathNode& dest) {
 	// NOTE: Refer to the implementation of the A* algorithm to understand what all these lists and score values are for
 	std::vector<PathNode> open_list;
 	std::vector<PathNode> closed_list;
@@ -659,7 +658,7 @@ void ObjectManager::FindPath(const VirtualSprite* sprite, vector<PathNode>& path
 		}
 	}
 	std::reverse(path.begin(), path.end());
-} // void ObjectManager::FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest)
+} // void ObjectSupervisor::FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest)
 
 } // namespace private_map
 

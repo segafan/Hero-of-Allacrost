@@ -22,6 +22,7 @@ num_tile_rows = 40
 
 -- The sound files used on this map.
 sound_filenames = {}
+sound_filenames[1] = "snd/coins.wav"
 
 -- The music files used as background music on this map.
 music_filenames = {}
@@ -319,10 +320,11 @@ function Load(m, d)
 	map = m;
 	map._run_forever = true;
 	dialogue_supervisor = d;
+	event_supervisor = m._event_supervisor;
 
 	local sprite;
 	local dialogue;
-	local action;
+	local event;
 	local chest;
 
 	-- Create the player's sprite
@@ -371,33 +373,29 @@ function Load(m, d)
 		map_functions[1]();
 	end
 
-	action = hoa_map.ActionAnimate(sprite);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
-	action:SetLoopCount(0);
-	sprite:AddAction(action);
+	event = hoa_map.AnimateSpriteEvent(10001, sprite);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
+	event:AddEventLink(10002, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10002, sprite, 105, 44);
+	event:AddEventLink(10003, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.AnimateSpriteEvent(10003, sprite);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
+	event:AddEventLink(10004, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10004, sprite, 105, 32);
+	event:AddEventLink(10001, false, 0);
+	event_supervisor:RegisterEvent(event);
 
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(105, 44);
-	sprite:AddAction(action);
-
-	action = hoa_map.ActionAnimate(sprite);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
-	action:SetLoopCount(0);
-	sprite:AddAction(action);
-
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(105, 32);
-	sprite:AddAction(action);
-
-	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
@@ -417,16 +415,16 @@ function Load(m, d)
 
 	sprite:AddDialogueReference(2);
 
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(50, 35);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(40, 35);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(88, 26);
-	sprite:AddAction(action);
-	sprite.current_action = 0;
+	event = hoa_map.PathMoveSpriteEvent(10005, sprite, 50, 35);
+	event:AddEventLink(10006, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10006, sprite, 40, 35);
+	event:AddEventLink(10007, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10007, sprite, 88, 26);
+	event:AddEventLink(10005, false, 0);
+	event_supervisor:RegisterEvent(event);
+
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
@@ -447,16 +445,16 @@ function Load(m, d)
 	sprite:AddDialogueReference(3);
 	sprite:AddDialogueReference(4);
 
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(38, 38);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(38, 60);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(35, 48);
-	sprite:AddAction(action);
-	sprite.current_action = 0;
+	event = hoa_map.PathMoveSpriteEvent(10008, sprite, 38, 38);
+	event:AddEventLink(10009, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10009, sprite, 38, 60);
+	event:AddEventLink(10010, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10010, sprite, 35, 48);
+	event:AddEventLink(10008, false, 0);
+	event_supervisor:RegisterEvent(event);
+
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
@@ -475,21 +473,20 @@ function Load(m, d)
 
 	sprite:AddDialogueReference(5);
 
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(52, 25);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(52, 55);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(31, 25);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(40, 55);
-	sprite:AddAction(action);
-	sprite.current_action = 0;
-	map:_AddGroundObject(sprite);
+	event = hoa_map.PathMoveSpriteEvent(10011, sprite, 52, 25);
+	event:AddEventLink(10012, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10012, sprite, 52, 55);
+	event:AddEventLink(10013, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10013, sprite, 31, 25);
+	event:AddEventLink(10014, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10014, sprite, 40, 55);
+	event:AddEventLink(10011, false, 0);
+	event_supervisor:RegisterEvent(event);
 
+	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Laine"));
@@ -507,22 +504,24 @@ function Load(m, d)
 
 	sprite:AddDialogueReference(6);
 
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(94, 57);
-	sprite:AddAction(action);
-	action = hoa_map.ActionAnimate(sprite);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1500);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 8500);
-	sprite:AddAction(action)
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(84, 57);
-	sprite:AddAction(action);
-	action = hoa_map.ActionAnimate(sprite);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 2000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 4000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 4000);
-	sprite:AddAction(action)
-	sprite.current_action = 0;
+	event = hoa_map.PathMoveSpriteEvent(10015, sprite, 94, 57);
+	event:AddEventLink(10016, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.AnimateSpriteEvent(10016, sprite);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1500);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 8500);
+	event:AddEventLink(10017, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10017, sprite, 84, 57);
+	event:AddEventLink(10018, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.AnimateSpriteEvent(10018, sprite);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 2000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 4000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 4000);
+	event:AddEventLink(10016, false, 0);
+	event_supervisor:RegisterEvent(event);
+
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
@@ -541,9 +540,10 @@ function Load(m, d)
 
 	sprite:AddDialogueReference(7);
 
-	action = hoa_map.ActionRandomMove(sprite);
-	sprite:AddAction(action);
-	sprite.current_action = 0;
+	event = hoa_map.RandomMoveSpriteEvent(10019, sprite, 10000, 2000);
+	event:AddEventLink(10019, false, 0);
+	event_supervisor:RegisterEvent(event);
+
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
@@ -562,14 +562,15 @@ function Load(m, d)
 
 	sprite:AddDialogueReference(8);
 
-	action = hoa_map.ActionAnimate(sprite);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1250);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 2500);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1250);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 2500);
-	action:SetLoopCount(-1);
-	sprite:AddAction(action);
-	sprite.current_action = 0;
+	event = hoa_map.AnimateSpriteEvent(10020, sprite);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1250);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 2500);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1250);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 2500);
+	event:SetLoopCount(-1);
+	event:AddEventLink(10020, false, 0);
+	event_supervisor:RegisterEvent(event);
+
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
@@ -588,9 +589,10 @@ function Load(m, d)
 
 	sprite:AddDialogueReference(9);
 
-	action = hoa_map.ActionRandomMove(sprite);
-	sprite:AddAction(action);
-	sprite.current_action = 0;
+	event = hoa_map.RandomMoveSpriteEvent(10021, sprite, 10000, 2000);
+	event:AddEventLink(10021, false, 0);
+	event_supervisor:RegisterEvent(event);
+
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
@@ -609,9 +611,10 @@ function Load(m, d)
 
 	sprite:AddDialogueReference(10);
 
-	action = hoa_map.ActionRandomMove(sprite);
-	sprite:AddAction(action);
-	sprite.current_action = 0;
+	event = hoa_map.RandomMoveSpriteEvent(10022, sprite, 10000, 2000);
+	event:AddEventLink(10022, false, 0);
+	event_supervisor:RegisterEvent(event);
+
 	map:_AddGroundObject(sprite);
 
 	-- Add a treasure near the town's exit zone
@@ -635,79 +638,79 @@ function Load(m, d)
 
 	-- Dialogue #1
 	dialogue = hoa_map.MapDialogue(1);
-	dialogue:AddText(dialogue_text[0], 1000, 1, -1, false);
-	dialogue:AddText(dialogue_text[1], 2, 2, -1, false);
-	dialogue:AddOption(dialogue_option_text[0], 2, -1);
-	dialogue:AddOption(dialogue_option_text[1], 8, -1);
+	dialogue:AddText(dialogue_text[0], 1000, 1, 0, false);
+	dialogue:AddText(dialogue_text[1], 2, 2, 0, false);
+	dialogue:AddOption(dialogue_option_text[0], 2, 0);
+	dialogue:AddOption(dialogue_option_text[1], 8, 0);
 	--Yes
-	dialogue:AddText(dialogue_text[2], 2, 3, -1, false);
-	dialogue:AddText(dialogue_text[3], 1000, 4, -1, false);
-	dialogue:AddText(dialogue_text[4], 1000, 5, -1, false);
-	dialogue:AddText(dialogue_text[5], 2, 6, -1, false);
-	dialogue:AddText(dialogue_text[6], 1000, 7, -1, false);
-	dialogue:AddText(dialogue_text[7], 2, 10, -1, false);
-	dialogue:AddOption(dialogue_option_text[2], 10 , -1);
-	dialogue:AddOption(dialogue_option_text[3], 12 , -1);
+	dialogue:AddText(dialogue_text[2], 2, 3, 0, false);
+	dialogue:AddText(dialogue_text[3], 1000, 4, 0, false);
+	dialogue:AddText(dialogue_text[4], 1000, 5, 0, false);
+	dialogue:AddText(dialogue_text[5], 2, 6, 0, false);
+	dialogue:AddText(dialogue_text[6], 1000, 7, 0, false);
+	dialogue:AddText(dialogue_text[7], 2, 10, 0, false);
+	dialogue:AddOption(dialogue_option_text[2], 10, 0);
+	dialogue:AddOption(dialogue_option_text[3], 12, 0);
 	--No
-	dialogue:AddText(dialogue_text[8], 2, 9, -1, false);
-	dialogue:AddText(dialogue_text[9], 1000, -1, -1, false);
+	dialogue:AddText(dialogue_text[8], 2, 9, 0, false);
+	dialogue:AddText(dialogue_text[9], 1000, -1, 0, false);
 	-- Rejected
-	dialogue:AddText(dialogue_text[10], 2, 11, -1, false);
-	dialogue:AddText(dialogue_text[11], 1000, -1, -1, false);
+	dialogue:AddText(dialogue_text[10], 2, 11, 0, false);
+	dialogue:AddText(dialogue_text[11], 1000, -1, 0, false);
 	-- Add to party
 	dialogue:AddText(dialogue_text[12], 2, 13, 1, false); -- Laila added to party and map sprite removed
-	dialogue:AddText(dialogue_text[13], 2, -1, -1, false);
+	dialogue:AddText(dialogue_text[13], 2, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	
 	-- Dialogue #2
 	dialogue = hoa_map.MapDialogue(2);
-	dialogue:AddText(dialogue_text[14], 3, 1, -1, false);
-	dialogue:AddText(dialogue_text[15], 1000, 2, -1, false);
-	dialogue:AddText(dialogue_text[16], 3, -1, -1, false);
+	dialogue:AddText(dialogue_text[14], 3, 1, 0, false);
+	dialogue:AddText(dialogue_text[15], 1000, 2, 0, false);
+	dialogue:AddText(dialogue_text[16], 3, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue #3
 	dialogue = hoa_map.MapDialogue(3);
 	dialogue:SetMaxViews(1);
-	dialogue:AddText(dialogue_text[17], 4, 1, -1, false);
-	dialogue:AddText(dialogue_text[18], 1000, 2, -1, false);
-	dialogue:AddText(dialogue_text[19], 4, -1, -1, false);
+	dialogue:AddText(dialogue_text[17], 4, 1, 0, false);
+	dialogue:AddText(dialogue_text[18], 1000, 2, 0, false);
+	dialogue:AddText(dialogue_text[19], 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue #4
 	dialogue = hoa_map.MapDialogue(4);
-	dialogue:AddText(dialogue_text[20], 4, -1, -1, false);
+	dialogue:AddText(dialogue_text[20], 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue #5
 	dialogue = hoa_map.MapDialogue(5);
-	dialogue:AddText(dialogue_text[21], 5, -1, -1, false);
+	dialogue:AddText(dialogue_text[21], 5, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue #6
 	dialogue = hoa_map.MapDialogue(6);
-	dialogue:AddText(dialogue_text[22], 6, 1, -1, false);
-	dialogue:AddText(dialogue_text[23], 1000, -1, -1, false);
+	dialogue:AddText(dialogue_text[22], 6, 1, 0, false);
+	dialogue:AddText(dialogue_text[23], 1000, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue #7
 	dialogue = hoa_map.MapDialogue(7);
-	dialogue:AddText(dialogue_text[24], 7, -1, -1, false);
+	dialogue:AddText(dialogue_text[24], 7, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue #8
 	dialogue = hoa_map.MapDialogue(8);
-	dialogue:AddText(dialogue_text[25], 8, -1, 0, false);
+	dialogue:AddText(dialogue_text[25], 8, -1, 2, false); -- Go to shop mode
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue #9
 	dialogue = hoa_map.MapDialogue(9);
-	dialogue:AddText(dialogue_text[26], 9, -1, -1, false);
+	dialogue:AddText(dialogue_text[26], 9, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue #10
 	dialogue = hoa_map.MapDialogue(10);
-	dialogue:AddText(dialogue_text[27], 10, -1, -1, false);
+	dialogue:AddText(dialogue_text[27], 10, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Create a zone for exiting the map, to be used as a trigger
@@ -730,6 +733,21 @@ function Load(m, d)
 	context_zone:AddSection(hoa_map.ZoneSection(8, 60, 9, 62), true);
 	context_zone:AddSection(hoa_map.ZoneSection(14, 60, 15, 62), true);
 	map:_AddZone(context_zone);
+
+	event_supervisor:StartEvent(10001);
+	event_supervisor:StartEvent(10005);
+	event_supervisor:StartEvent(10008);
+	event_supervisor:StartEvent(10011);
+	event_supervisor:StartEvent(10015);
+	event_supervisor:StartEvent(10019);
+	event_supervisor:StartEvent(10020);
+	event_supervisor:StartEvent(10021);
+	event_supervisor:StartEvent(10022);
+
+	event = hoa_map.ScriptedEvent(1, 1, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(2, 2, 0);
+	event_supervisor:RegisterEvent(event);
 end -- function Load()
 
 
@@ -749,21 +767,9 @@ end
 
 map_functions = {}
 
--- Creates a new shop mode instance
+-- Empty do-nothing function for events
 map_functions[0] = function()
-	local shop = hoa_shop.ShopMode();
-	shop:AddObject(1); -- Healing Potion
-	shop:AddObject(4); -- Healing Stone
-	shop:AddObject(3001); -- Bomb
-	shop:AddObject(3002); -- Super Bomb
---	shop:AddObject(10002); -- Iron Sword
---	shop:AddObject(10502); -- Standard Crossbow
---	shop:AddObject(20002); -- Cobalt Helm
-	shop:AddObject(20502); -- Winged Circlet
-	shop:AddObject(30002); -- Leather Chain Mail
---	shop:AddObject(40002); -- Phoenix Shield
-	shop:AddObject(50502); -- Leather Boots
-	ModeManager:Push(shop);
+	return true;
 end
 
 -- Adds Laila to the party and removes her sprite from the map
@@ -779,3 +785,21 @@ map_functions[1] = function()
 	laila:SetXPosition(0, 0.0);
 	laila:SetXPosition(0, 0.0);	
 end
+
+-- Creates a new shop mode instance
+map_functions[2] = function()
+	local shop = hoa_shop.ShopMode();
+	shop:AddObject(1); -- Healing Potion
+	shop:AddObject(4); -- Healing Stone
+	shop:AddObject(3001); -- Bomb
+	shop:AddObject(3002); -- Super Bomb
+--	shop:AddObject(10002); -- Iron Sword
+--	shop:AddObject(10502); -- Standard Crossbow
+--	shop:AddObject(20002); -- Cobalt Helm
+	shop:AddObject(20502); -- Winged Circlet
+	shop:AddObject(30002); -- Leather Chain Mail
+--	shop:AddObject(40002); -- Phoenix Shield
+	shop:AddObject(50502); -- Leather Boots
+	ModeManager:Push(shop);
+end
+

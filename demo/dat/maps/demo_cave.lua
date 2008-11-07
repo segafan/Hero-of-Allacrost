@@ -376,10 +376,11 @@ function Load(m, d)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
 	dialogue_supervisor = d;
-	
+	event_supervisor = m._event_supervisor;
+
 	local sprite;
 	local dialogue;
-	local action;
+	local event;
 	local chest;
 
 	-- Create the player's sprite
@@ -420,37 +421,38 @@ function Load(m, d)
 	sprite:AddDialogueReference(2);
 	sprite:AddDialogueReference(3);
 
-	action = hoa_map.ActionAnimate(sprite);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1500);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
-	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1500);
-	action:SetLoopCount(-1);
-	sprite:AddAction(action);
-	sprite.current_action = 0;
+	event = hoa_map.AnimateSpriteEvent(10000, sprite);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1500);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
+	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1500);
+	event:SetLoopCount(-1);
+	event:AddEventLink(10000, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event_supervisor:StartEvent(event);
 	map:_AddGroundObject(sprite);
 
 	dialogue = hoa_map.MapDialogue(1);
-	dialogue:AddText(dialogue_text[0], 1, 1, -1, false); --line 0
-	dialogue:AddText(dialogue_text[1], 1000, 2, -1, false); --line 1
-	dialogue:AddText(dialogue_text[2], 1, 3, -1, false); --line 2
-	dialogue:AddText(dialogue_text[3], 1000, 4, -1, false); --line 3
-	dialogue:AddText(dialogue_text[4], 1, 5, -1, false); --line 4
-	dialogue:AddText(dialogue_text[5], 1, 6, 0, false); -- line 5: Creepy sound plays here
-	dialogue:AddText(dialogue_text[6], 1, -1, 1, false); -- line 6: Boss battle occurs
+	dialogue:AddText(dialogue_text[0], 1, 1, 0, false); --line 0
+	dialogue:AddText(dialogue_text[1], 1000, 2, 0, false); --line 1
+	dialogue:AddText(dialogue_text[2], 1, 3, 0, false); --line 2
+	dialogue:AddText(dialogue_text[3], 1000, 4, 0, false); --line 3
+	dialogue:AddText(dialogue_text[4], 1, 5, 0, false); --line 4
+	dialogue:AddText(dialogue_text[5], 1, 6, 1, false); -- line 5: Creepy sound plays here
+	dialogue:AddText(dialogue_text[6], 1, -1, 2, false); -- line 6: Boss battle occurs
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(2);
-	dialogue:AddText(dialogue_text[7], 1, 1, -1, false); --line 7
-	dialogue:AddText(dialogue_text[8], 1000, 2, -1, false); --line 8
-	dialogue:AddText(dialogue_text[9], 1, 3, -1, false); --line 9
-	dialogue:AddText(dialogue_text[10], 1000, 4, -1, false); --line 10
-	dialogue:AddText(dialogue_text[11], 1, 5, -1, false); -- line 11
-	dialogue:AddText(dialogue_text[12], 1000, -1, -1, false); -- line 12
+	dialogue:AddText(dialogue_text[7], 1, 1, 0, false); --line 7
+	dialogue:AddText(dialogue_text[8], 1000, 2, 0, false); --line 8
+	dialogue:AddText(dialogue_text[9], 1, 3, 0, false); --line 9
+	dialogue:AddText(dialogue_text[10], 1000, 4, 0, false); --line 10
+	dialogue:AddText(dialogue_text[11], 1, 5, 0, false); -- line 11
+	dialogue:AddText(dialogue_text[12], 1000, -1, 0, false); -- line 12
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(3);
-	dialogue:AddText(dialogue_text[13], 1, -1, -1, false); -- line 13
+	dialogue:AddText(dialogue_text[13], 1, -1, 0, false); -- line 13
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
@@ -672,6 +674,12 @@ function Load(m, d)
 	-- Add a section to the zone to enable the user to exit the map
 	exit_zone:AddSection(hoa_map.ZoneSection(2, 116, 4, 118));
 	map:_AddZone(exit_zone);
+
+	event_supervisor:BeginEvent(10000);
+	event = hoa_map.ScriptedEvent(1, 1, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(1, 2, 0);
+	event_supervisor:RegisterEvent(event);
 end
 
 
@@ -696,13 +704,18 @@ end
 
 map_functions = {}
 
--- Plays a ground-rumbling sound
+-- Empty do-nothing function for events
 map_functions[0] = function()
+	return true;
+end
+
+-- Plays a ground-rumbling sound
+map_functions[1] = function()
 	AudioManager:PlaySound("snd/rumble.wav");
 end
 
 -- Throws player into a boss battle
-map_functions[1] = function()
+map_functions[2] = function()
 	local enemy = hoa_map.EnemySprite();
 	enemy:SetObjectID(map:_GetGeneratedObjectID());
 	enemy:SetContext(1);
@@ -719,11 +732,10 @@ map_functions[1] = function()
 	enemy:AddEnemy(104);
 	enemy:AddEnemy(105);
 	enemy:AddEnemy(106);
-	local action = hoa_map.ActionPathMove(enemy);
-	action:SetDestination(74, 40);
-	enemy:AddAction(action);
-	enemy.current_action = 0;
 	enemy:ChangeStateHostile();
 	enemy:SetBattleMusicTheme("mus/The_Creature_Awakens.ogg");
 	map:_AddGroundObject(enemy); 
+	local event = hoa_map.PathMoveSpriteEvent(10001, enemy, 74, 40);
+	event_supervisor:RegisterEvent(event);
+	event_supervisor:BeginEvent(event);
 end

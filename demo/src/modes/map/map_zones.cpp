@@ -158,7 +158,7 @@ void EnemyZone::Update() {
 		_RandomPosition(x, y);
 		_enemies[index]->SetXPosition(x, 0.0f);
 		_enemies[index]->SetYPosition(y, 0.0f);
-		collision = MapMode::_current_map->_object_manager->DetectCollision(_enemies[index]);
+		collision = MapMode::_current_map->_object_supervisor->DetectCollision(_enemies[index]);
 	} while (collision && --retries > 0);
 
 	// If we didn't find a suitable spawning location, reset the collision info
@@ -207,8 +207,8 @@ void ContextZone::Update() {
 	int16 index;
 
 	// Check every ground object and determine if its context should be changed by this zone
-	for (std::vector<MapObject*>::iterator i = MapMode::_current_map->_object_manager->_ground_objects.begin();
-		i != MapMode::_current_map->_object_manager->_ground_objects.end(); i++)
+	for (std::vector<MapObject*>::iterator i = MapMode::_current_map->_object_supervisor->_ground_objects.begin();
+		i != MapMode::_current_map->_object_supervisor->_ground_objects.end(); i++)
 	{
 		// If the object does not have a context equal to one of the two switching contexts, do not examine it further
 		if ((*i)->GetContext() != _context_one && (*i)->GetContext() != _context_two) {

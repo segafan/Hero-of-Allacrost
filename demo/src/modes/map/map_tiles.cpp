@@ -30,14 +30,14 @@ namespace hoa_map {
 
 namespace private_map {
 
-TileManager::TileManager() :
+TileSupervisor::TileSupervisor() :
 	_num_tile_rows(0),
 	_num_tile_cols(0)
 {}
 
 
 
-TileManager::~TileManager() {
+TileSupervisor::~TileSupervisor() {
 	// Delete all objects in _tile_images but *not* _animated_tile_images.
 	// This is because _animated_tile_images is a subset of _tile_images.
 	for (uint32 i = 0; i < _tile_images.size(); i++)
@@ -50,7 +50,7 @@ TileManager::~TileManager() {
 
 
 
-void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instance) {
+void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_instance) {
 	// TODO: Add some more error checking in this function (such as checking for script errors after reading blocks of data from the map file)
 
 	// ---------- (1) Load the map dimensions and do some basic sanity checks
@@ -313,11 +313,11 @@ void TileManager::Load(ReadScriptDescriptor& map_file, const MapMode* map_instan
 
 	// Remove all tileset images. Any tiles which were not added to _tile_images will no longer exist in memory
 	tileset_images.clear();
-} // void TileManager::Load(ReadScriptDescriptor& map_file)
+} // void TileSupervisor::Load(ReadScriptDescriptor& map_file)
 
 
 
-void TileManager::Update() {
+void TileSupervisor::Update() {
 	for (uint32 i = 0; i < _animated_tile_images.size(); i++) {
 		_animated_tile_images[i]->Update();
 	}
@@ -325,7 +325,7 @@ void TileManager::Update() {
 
 
 
-void TileManager::DrawLowerLayer(const MapFrame* const frame) {
+void TileSupervisor::DrawLowerLayer(const MapFrame* const frame) {
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
 	for (uint32 r = static_cast<uint32>(frame->starting_row);
@@ -347,7 +347,7 @@ void TileManager::DrawLowerLayer(const MapFrame* const frame) {
 
 
 
-void TileManager::DrawMiddleLayer(const MapFrame* const frame) {
+void TileSupervisor::DrawMiddleLayer(const MapFrame* const frame) {
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
 	for (uint32 r = static_cast<uint32>(frame->starting_row);
@@ -370,7 +370,7 @@ void TileManager::DrawMiddleLayer(const MapFrame* const frame) {
 
 
 
-void TileManager::DrawUpperLayer(const MapFrame* const frame) {
+void TileSupervisor::DrawUpperLayer(const MapFrame* const frame) {
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
 	for (uint32 r = static_cast<uint32>(frame->starting_row);
