@@ -29,11 +29,12 @@
 #include "battle.h"
 #include "battle_actors.h"
 #include "map.h"
-#include "map_actions.h"
 #include "map_dialogue.h"
+#include "map_events.h"
 #include "map_objects.h"
 #include "map_sprites.h"
 #include "map_treasure.h"
+#include "map_utils.h"
 #include "map_zones.h"
 #include "shop.h"
 
@@ -59,6 +60,7 @@ void BindModesToLua()
 			.def_readwrite("_run_stamina", &MapMode::_run_stamina)
 			.def_readonly("_map_event_group", &MapMode::_map_event_group)
 			.def_readonly("_dilalogue_supervisor", &MapMode::_dialogue_supervisor)
+			.def_readonly("_event_supervisor", &MapMode::_event_supervisor)
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
 			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
 			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
@@ -177,8 +179,6 @@ void BindModesToLua()
 			.def("SetMovementSpeed", &VirtualSprite::SetMovementSpeed)
 			.def("GetDirection", &VirtualSprite::GetDirection)
 			.def("GetMovementSpeed", &VirtualSprite::GetMovementSpeed)
-			.def("AddAction", &VirtualSprite::AddAction, adopt(_2))
-			.def_readwrite("current_action", &VirtualSprite::current_action)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -275,32 +275,58 @@ void BindModesToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<SpriteAction>("SpriteAction")
-			.def("Execute", &SpriteAction::Execute)
+		class_<EventSupervisor>("EventSupervisor")
+			.def("RegisterEvent", &EventSupervisor::RegisterEvent, adopt(_2))
+			.def("StartEvent", (void(EventSupervisor::*)(uint32))&EventSupervisor::StartEvent)
+			.def("StartEvent", (void(EventSupervisor::*)(MapEvent*))&EventSupervisor::StartEvent)
+			.def("TerminateEvent", &EventSupervisor::TerminateEvent)
+			.def("IsEventActive", &EventSupervisor::IsEventActive)
+			.def("HasActiveEvent", &EventSupervisor::HasActiveEvent)
+			.def("HasLaunchEvent", &EventSupervisor::HasLaunchEvent)
+			.def("GetEvent", &EventSupervisor::GetEvent)
+
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ActionPathMove, SpriteAction>("ActionPathMove")
-			.def(constructor<VirtualSprite*>())
-			.def("SetDestination", &ActionPathMove::SetDestination)
+		class_<MapEvent>("MapEvent")
+			.def("GetEventID", &MapEvent::GetEventID)
+			.def("AddEventLink", &MapEvent::AddEventLink)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ActionRandomMove, SpriteAction>("ActionRandomMove")
-			.def(constructor<VirtualSprite*>())
-			.def_readwrite("total_movement_time", &ActionRandomMove::total_movement_time)
-			.def_readwrite("total_direction_time", &ActionRandomMove::total_direction_time)
+		class_<ScriptedEvent, MapEvent>("ScriptedEvent")
+			.def(constructor<uint32, uint32, uint32>())
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ActionAnimate, SpriteAction>("ActionAnimate")
-			.def(constructor<VirtualSprite*>())
-			.def("AddFrame", &ActionAnimate::AddFrame)
-			.def("SetLoopCount", &ActionAnimate::SetLoopCount)
+		class_<SpriteEvent, MapEvent>("SpriteEvent")
 	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<PathMoveSpriteEvent, SpriteEvent>("PathMoveSpriteEvent")
+			.def(constructor<uint32, VirtualSprite*, uint32, uint32>())
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<RandomMoveSpriteEvent, SpriteEvent>("RandomMoveSpriteEvent")
+			.def(constructor<uint32, VirtualSprite*, uint32, uint32>())
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<AnimateSpriteEvent, MapEvent>("AnimateSpriteEvent")
+			.def(constructor<uint32, VirtualSprite*>())
+			.def("AddFrame", &AnimateSpriteEvent::AddFrame)
+			.def("SetLoopCount", &AnimateSpriteEvent::SetLoopCount)
+	];
+
+
+
 	} // End using map mode namespaces
 
 	// ----- Battle Mode bindings

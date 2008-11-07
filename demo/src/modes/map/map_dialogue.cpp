@@ -30,6 +30,7 @@
 // Local map mode headers
 #include "map.h"
 #include "map_dialogue.h"
+#include "map_events.h"
 #include "map_objects.h"
 #include "map_sprites.h"
 
@@ -82,37 +83,17 @@ MapDialogue::~MapDialogue() {
 			delete _options[i];
 		}
 	}
-
-	for (uint32 i = 0; i < _actions.size(); i++) {
-		if (_actions[i] != NULL) {
-			delete _actions[i];
-		}
-	}
 }
 
 
 
-void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 next_line, int32 action, bool display_timer) {
+void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 next_line, uint32 event, bool display_timer) {
 	_text.push_back(MakeUnicodeString(text));
 	_speakers.push_back(speaker_id);
 	_next_lines.push_back(next_line);
 	_options.push_back(NULL);
+	_events.push_back(event);
 	_line_count++;
-
-	if (action >= 0) {
-		MapMode::_loading_map->_map_script.OpenTable(MapMode::_loading_map->_map_tablespace, true);
-		MapMode::_loading_map->_map_script.OpenTable("map_functions");
-
-		ScriptObject* new_action = new ScriptObject();
-		*new_action = MapMode::_loading_map->_map_script.ReadFunctionPointer(action);
-		_actions.push_back(new_action);
-
-		MapMode::_loading_map->_map_script.CloseTable();
-		MapMode::_loading_map->_map_script.CloseTable();
-	}
-	else {
-		_actions.push_back(NULL);
-	}
 
 	if (display_timer == true) {
 		// TODO: replace 5000 with a function call that will calculate the display time based on text length and player's speed setting
@@ -125,7 +106,7 @@ void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 next_line, 
 
 
 
-void MapDialogue::AddOption(string text, int32 next_line, int32 action) {
+void MapDialogue::AddOption(string text, int32 next_line, uint32 event) {
 	int32 current_line = _line_count - 1; // Current line that options will belong to.
 
 	// If the line the options will be added to currently has no options, create a new instance of the MapDialogueOptions class to store the options in.
@@ -134,7 +115,7 @@ void MapDialogue::AddOption(string text, int32 next_line, int32 action) {
 		_options[current_line] = option;
 	}
 
-	_options[current_line]->AddOption(MakeUnicodeString(text), next_line, action);
+	_options[current_line]->AddOption(MakeUnicodeString(text), next_line, event);
 }
 
 
@@ -170,16 +151,7 @@ bool MapDialogue::ReadNextLine(int32 line) {
 // ********** MapDialogueOptions Functions
 // ******************************************************************************
 
-MapDialogueOptions::~MapDialogueOptions() {
-	for (uint32 i = 0; i < _actions.size(); i++) {
-		if (_actions[i] != NULL)
-			delete _actions[i];
-	}
-}
-
-
-
-void MapDialogueOptions::AddOption(ustring text, int32 next_line, int32 action) {
+void MapDialogueOptions::AddOption(ustring text, int32 next_line, uint32 event) {
 	if (_text.size() >= MAX_OPTIONS) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "dialogue option box already contains too many options. The new option will not be added." << endl;
 		return;
@@ -187,21 +159,7 @@ void MapDialogueOptions::AddOption(ustring text, int32 next_line, int32 action) 
 
 	_text.push_back(text);
 	_next_lines.push_back(next_line);
-
-	if (action < 0) {
-		_actions.push_back(NULL);
-	}
-	else {
-		MapMode::_loading_map->_map_script.OpenTable(MapMode::_loading_map->_map_tablespace, true);
-		MapMode::_loading_map->_map_script.OpenTable("map_functions");
-
-		ScriptObject* new_action = new ScriptObject();
-		*new_action = MapMode::_loading_map->_map_script.ReadFunctionPointer(action);
-		_actions.push_back(new_action);
-
-		MapMode::_loading_map->_map_script.CloseTable();
-		MapMode::_loading_map->_map_script.CloseTable();
-	}
+	_events.push_back(event);
 }
 
 // ****************************************************************************
@@ -399,7 +357,6 @@ void DialogueSupervisor::BeginDialogue(MapSprite* sprite) {
 	// Prepare the state of the sprite and map camera for the dialogue
 	sprite->SaveState();
 	sprite->moving = false;
-	sprite->current_action = -1;
 	sprite->SetDirection(CalculateOppositeDirection(MapMode::_current_map->_camera->GetDirection()));
 	sprite->IncrementNextDialogue();
 	// TODO: Is the line below necessary to do? Shouldn't the camera stop on its own (if its pointing to the player's character)?
@@ -445,7 +402,7 @@ void DialogueSupervisor::AnnounceDialogueUpdate(uint32 dialogue_id) {
 
 	// Update the dialogue status of all sprites that reference this dialogue
 	for (uint32 i = 0; i < entry->second.size(); i++) {
-		MapSprite* referee = static_cast<MapSprite*>(MapMode::_current_map->_object_manager->GetObject(entry->second[i]));
+		MapSprite* referee = static_cast<MapSprite*>(MapMode::_current_map->_object_supervisor->GetObject(entry->second[i]));
 		if (referee == NULL) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "map sprite: " << entry->second[i] << " references dialogue: " << dialogue_id << " but sprite object did not exist"<< endl;
 		}
@@ -486,7 +443,7 @@ void DialogueSupervisor::Draw() {
 	}
 
 	// TODO: Check if speaker ID is 0 and if so, call Draw function with NULL arguments
-	MapSprite* speaker = reinterpret_cast<MapSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetCurrentSpeaker()));
+	MapSprite* speaker = reinterpret_cast<MapSprite*>(MapMode::_current_map->_object_supervisor->GetObject(_current_dialogue->GetCurrentSpeaker()));
 	_dialogue_window.Draw(&speaker->GetName(), speaker->GetFacePortrait());
 } // void DialogueSupervisor::Draw()
 
@@ -540,18 +497,14 @@ void DialogueSupervisor::_UpdateLine() {
 void DialogueSupervisor::_UpdateOptions() {
 	_dialogue_window._display_options.Update();
 
-	// Execute any action for the current selection, then return the next line of dialogue for this selection
+	// Execute the event for the current selection if applicable, then return the next line of dialogue for this selection
 	if (InputManager->ConfirmPress()) {
 		_dialogue_window._display_options.HandleConfirmKey();
 
 		int32 selected_option = _dialogue_window._display_options.GetSelection();
 
-		if (_current_options->_actions[selected_option] != NULL) {
-			try {
-				ScriptCallFunction<void>(*(_current_options->_actions[selected_option]));
-			} catch (luabind::error& e) {
-				ScriptManager->HandleLuaError(e);
-			}
+		if (_current_options->_events[selected_option] != 0) {
+			MapMode::_current_map->_event_supervisor->StartEvent(_current_options->_events[selected_option]);
 		}
 
 		_FinishLine(_current_options->_next_lines[selected_option]);
@@ -584,13 +537,9 @@ void DialogueSupervisor::_FinishLine(int32 next_line) {
 	_dialogue_window._display_options.ClearOptions();
 	_state = DIALOGUE_STATE_LINE;
 
-	// Execute any scripted actions that should occur after this line of dialogue has finished
-	if (_current_dialogue->GetCurrentAction() != NULL) {
-		try {
-			ScriptCallFunction<void>(*(_current_dialogue->GetCurrentAction()));
-		} catch (luabind::error& e) {
-			ScriptManager->HandleLuaError(e);
-		}
+	// Execute any scripted events that should occur after this line of dialogue has finished
+	if (_current_dialogue->GetCurrentEvent() != 0) {
+		MapMode::_current_map->_event_supervisor->StartEvent(_current_dialogue->GetCurrentEvent());
 	}
 
 	// Check if there are more lines of dialogue and continue on to the next line if available
@@ -608,7 +557,7 @@ void DialogueSupervisor::_FinishLine(int32 next_line) {
 		// for all speakers without duplication (i.e. the case where a speaker spoke more than one line of dialogue).
 		set<MapSprite*> participants;
 		for (uint32 i = 0; i < _current_dialogue->GetLineCount(); i++) {
-			participants.insert(static_cast<MapSprite*>(MapMode::_current_map->_object_manager->GetObject(_current_dialogue->GetLineSpeaker(i))));
+			participants.insert(static_cast<MapSprite*>(MapMode::_current_map->_object_supervisor->GetObject(_current_dialogue->GetLineSpeaker(i))));
 		}
 
 		for (set<MapSprite*>::iterator i = participants.begin(); i != participants.end(); i++) {

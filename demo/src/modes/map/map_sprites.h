@@ -26,7 +26,6 @@
 // Local map mode headers
 #include "map_utils.h"
 #include "map_objects.h"
-#include "map_actions.h"
 #include "map_dialogue.h"
 #include "map_zones.h"
 
@@ -77,20 +76,10 @@ public:
 	//! \brief Set to true when the sprite is running rather than walking
 	bool is_running;
 
-	// ---------- Public Members: Actions
+	// ---------- Public Members: Events
 
-	/** \brief An index to the actions vector, representing the current sprite action being performed.
-	*** A negative value indicates that the sprite is taking no action. If the sprite has no entries
-	*** in its actions vector, this member should remain negative, otherwise a segmentation fault
-	*** will occur.
-	**/
-	int8 current_action;
-
-	// TODO: change how forced action work
-	int8 forced_action;
-
-	//! \brief A container for all of the actions this sprite performs.
-	std::vector<SpriteAction*> actions;
+	//! \brief A pointer to the event that is controlling the action of this sprite
+	SpriteEvent* control_event;
 
 	// ---------- Public methods
 
@@ -113,19 +102,32 @@ public:
 	**/
 	void SetRandomDirection();
 
-	/** \brief Adds a new action for the sprite to process onto the end of the sprite's action list
-	*** \param act A pointer to the instantiated SpriteAction object to use
+	/** \brief Declares that an event is taking control over the sprite
+	*** \param event The sprite event that is assuming control
+	*** This function is not safe to call when there is an event already controlling the sprite.
+	*** The previously controlling event should first release control (which will set the control_event
+	*** member to NULL) before a new event acquires it. The acquisition will be successful regardless
+	*** of whether there is currently a controlling event or not, but a warning will be printed in the
+	*** improper case.
 	**/
-	void AddAction(SpriteAction* act)
-		{ act->SetSprite(this); actions.push_back(act); }
+	void AcquireControl(SpriteEvent* event);
+
+	/** \brief Declares that an event is releasing control over the sprite
+	*** \param event The sprite event that is releasing control
+	*** The reason why the SpriteEvent has to pass a pointer to itself in this call is to make sure
+	*** that this event is still controlling the sprite. If the control has switched to another event
+	*** (because another event acquired it before this event released it), a warning will be printed
+	*** and no change will be made (the control event will not change).
+	**/
+	void ReleaseControl(SpriteEvent* event);
 
 	/** \brief Saves the state of the sprite
-	*** Attributes saved: direction, speed, moving state, current action.
+	*** Attributes saved: direction, speed, moving state
 	**/
 	virtual void SaveState();
 
 	/** \brief Restores the saved state of the sprite
-	*** Attributes restored: direction, speed, moving state, current action.
+	*** Attributes restored: direction, speed, moving state
 	**/
 	virtual void RestoreState();
 
@@ -146,7 +148,7 @@ public:
 		{ return movement_speed; }
 	//@}
 
-private:
+protected:
 	/** \name Saved state attributes
 	*** These attributes are used to save and restore the state of a VirtualSprite
 	**/
@@ -156,7 +158,6 @@ private:
 	uint16 _saved_direction;
 	float _saved_movement_speed;
 	bool _saved_moving;
-	int8 _saved_current_action;
 	//@}
 }; // class VirtualSprite : public MapObject
 
@@ -218,13 +219,13 @@ public:
 	void SetNextDialogue(uint16 next);
 
 	/** \brief This method will save the state of a sprite.
-	*** Attributes saved: direction, speed, moving state, name, current action,
+	*** Attributes saved: direction, speed, moving state, name
 	*** current animation.
 	**/
 	virtual void SaveState();
 
 	/** \brief This method will load the saved state of a sprite.
-	*** Attributes loaded: direction, speed, moving state, name, current action,
+	*** Attributes loaded: direction, speed, moving state, name
 	*** current animation.
 	*** \return false if there was no saved state, true otherwise.
 	**/

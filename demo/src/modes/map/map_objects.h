@@ -378,15 +378,15 @@ public:
 *** for different types of map objects. We need to find out what these are and
 *** maintain a list of those ranges here.
 *** ***************************************************************************/
-class ObjectManager {
+class ObjectSupervisor {
 	friend class hoa_map::MapMode;
 	// TEMP: for allowing context zones to access all objects
 	friend class hoa_map::private_map::ContextZone;
 
 public:
-	ObjectManager();
+	ObjectSupervisor();
 
-	~ObjectManager();
+	~ObjectSupervisor();
 
 	/** \brief Retrieves a pointer to an object on this map
 	*** \param object_id The id number of the object to retreive
@@ -542,7 +542,7 @@ private:
 
 	//! \brief Container for all zones used in this map
 	std::vector<MapZone*> _zones;
-}; // class ObjectManager
+}; // class ObjectSupervisor
 
 } // namespace private_map
 

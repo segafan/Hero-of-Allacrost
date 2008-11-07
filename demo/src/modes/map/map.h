@@ -94,13 +94,12 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::TreasureSupervisor;
 	friend class private_map::MapDialogue;
 	friend class private_map::MapDialogueOptions;
-	friend class private_map::SpritePathMoveEvent;
-	friend class private_map::SpriteAction;
-	friend class private_map::ActionPathMove;
+	friend class private_map::PathMoveSpriteEvent;
+	friend class private_map::ScriptedEvent;
 	friend class private_map::EnemyZone;
 	friend class private_map::ContextZone;
-	friend class private_map::ObjectManager;
-	friend class private_map::TileManager;
+	friend class private_map::ObjectSupervisor;
+	friend class private_map::TileSupervisor;
 
 	friend void hoa_defs::BindModesToLua();
 public:
@@ -161,10 +160,10 @@ private:
 	// ----- Members : Sub-management Objects -----
 
 	//! \brief Instance of helper class to map mode. Responsible for tile related operations.
-	private_map::TileManager* _tile_manager;
+	private_map::TileSupervisor* _tile_supervisor;
 
 	//! \brief Instance of helper class to map mode. Responsible for object and sprite related operations.
-	private_map::ObjectManager* _object_manager;
+	private_map::ObjectSupervisor* _object_supervisor;
 
 	//! \brief Instance of helper class to map mode. Responsible for dialogue execution and display operations.
 	private_map::DialogueSupervisor* _dialogue_supervisor;

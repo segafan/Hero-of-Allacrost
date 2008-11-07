@@ -28,7 +28,7 @@
 #include "map_sprites.h"
 #include "map_objects.h"
 #include "map_dialogue.h"
-#include "map_actions.h"
+#include "map_events.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -51,44 +51,25 @@ VirtualSprite::VirtualSprite() :
 	movement_speed(NORMAL_SPEED),
 	moving(false),
 	is_running(false),
-	current_action(-1),
-	forced_action(-1),
+	control_event(NULL),
 	_state_saved(false),
 	_saved_direction(0),
 	_saved_movement_speed(0.0f),
-	_saved_moving(false),
-	_saved_current_action(-1)
+	_saved_moving(false)
 {
 	MapObject::_object_type = VIRTUAL_TYPE;
 }
 
 
 
-VirtualSprite::~VirtualSprite() {
-	for (uint32 i = 0; i < actions.size(); i++) {
-		delete actions[i];
-	}
-	actions.clear();
-}
+VirtualSprite::~VirtualSprite()
+{}
 
 
 
 void VirtualSprite::Update() {
 	if (!updatable) {
 		return;
-	}
-
-	// If the sprite was not forced to do a certain action
-	if (forced_action < 0) {
-		// Execute the sprite's action and if it is finished, update the action counter
-		if (current_action >= 0) {
-			actions[current_action]->Execute();
-			if (actions[current_action]->IsFinishedReset()) {
-				current_action++;
-				if (static_cast<uint8>(current_action) >= actions.size())
-					current_action = 0;
-			}
-		}
 	}
 
 	// The remainder of this function handles movement, so if the sprite is not moving there is nothing left to do
@@ -118,16 +99,16 @@ void VirtualSprite::Update() {
 		y_offset += distance_moved;
 
 	// Determine if the sprite may move to this new Y position
-	if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+	if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
 		// Determine if we can slide on an object
 		if( direction & (SOUTH | NORTH)) {
 			//Start from a sprite's size away and get closer testing collision each time
 			for( float i = 0; i < coll_half_width * 2; i += 0.1f ) {
 				x_offset = tmp_x - ( coll_half_width * 2 ) + i;
-				if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+				if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
 					//Try the other way, can't go that way
 					x_offset = tmp_x + ( coll_half_width * 2 ) - i;
-					if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+					if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
 						//Still can't slide, reset
 						x_offset = tmp_x;
 					}
@@ -175,16 +156,16 @@ void VirtualSprite::Update() {
 		x_offset += distance_moved;
 
 	// Determine if the sprite may move to this new X position
-	if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+	if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
 		// Determine if we can slide on an object
 		if( direction & (WEST | EAST)) {
 			//Start from a sprite's size away and get closer testing collision each time
 			for( float i = 0; i < coll_height; i += 0.1f ) {
 				y_offset = tmp_y - coll_height + i;
-				if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+				if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
 					//Try the other way, can't go that way
 					y_offset = tmp_y + coll_height - i;
-					if (MapMode::_current_map->_object_manager->DetectCollision(this)) {
+					if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
 						//Still can't slide, reset
 						y_offset = tmp_y;
 					}
@@ -297,12 +278,47 @@ void VirtualSprite::SetRandomDirection() {
 
 
 
+void VirtualSprite::AcquireControl(SpriteEvent* event) {
+	if (event == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
+		return;
+	}
+
+	if (control_event != NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "a new event is acquiring control when the previous event has not "
+			"released control over this sprite, object id: " << GetObjectID() << endl;
+	}
+	control_event = event;
+}
+
+
+
+void VirtualSprite::ReleaseControl(SpriteEvent* event) {
+	if (event == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
+		return;
+	}
+
+	if (control_event == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "no event had control over this sprite, object id: " << GetObjectID() << endl;
+	}
+	else if (control_event != event) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "a different event has control of this sprite, object id: " << GetObjectID() << endl;
+	}
+	else {
+		control_event = NULL;
+	}
+}
+
+
+
 void VirtualSprite::SaveState() {
 	_state_saved = true;
 	_saved_direction = direction;
 	_saved_movement_speed = movement_speed;
 	_saved_moving = moving;
-	_saved_current_action = current_action;
+	if (control_event != NULL)
+		MapMode::_current_map->_event_supervisor->PauseEvent(control_event->GetEventID());
 }
 
 
@@ -315,7 +331,8 @@ void VirtualSprite::RestoreState() {
 	 direction = _saved_direction;
 	 movement_speed = _saved_movement_speed;
 	 moving = _saved_moving;
-	 current_action = _saved_current_action;
+	 if (control_event != NULL)
+		MapMode::_current_map->_event_supervisor->ResumeEvent(control_event->GetEventID());
 }
 
 // ****************************************************************************
@@ -491,7 +508,7 @@ void MapSprite::Update() {
 		}
 
 		// Determine the correct standing frame to display
-		if (current_action == -1) {
+		if (control_event == NULL || _state_saved == true) {
 			if (direction & FACING_NORTH) {
 				_current_animation = ANIM_STANDING_NORTH;
 			}
@@ -757,11 +774,6 @@ const std::vector<uint32>& EnemySprite::RetrieveRandomParty() {
 
 
 void EnemySprite::Update() {
-	if (current_action != -1) {
-		MapSprite::Update();
-		return;
-	}
-
 	switch (_state) {
 		// Gradually increase the alpha while the sprite is fading in during spawning
 		case SPAWNING:

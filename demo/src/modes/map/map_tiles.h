@@ -66,19 +66,19 @@ public:
 *** \brief A helper class to MapMode responsible for all tile data and operations
 ***
 *** This class is responsible for loading, updating, and drawing all tile images
-*** and managing the tile grid. The TileManager does <b>not</b> manage the map
+*** and managing the tile grid. The TileSupervisor does <b>not</b> manage the map
 *** collision grid, which is used by map objects and sprites.
 ***
 *** Maps have a minimum size of 24 rows and 32 columns of tiles. Theoretically
 *** there is no upper limit on size.
 *** ***************************************************************************/
-class TileManager {
+class TileSupervisor {
 	friend class hoa_map::MapMode;
 
 public:
-	TileManager();
+	TileSupervisor();
 
-	~TileManager();
+	~TileSupervisor();
 
 	/** \brief Handles all operations on loading tilesets and tile images from the map data file
 	*** \param map_file A reference to the Lua file containing the map data
@@ -138,7 +138,7 @@ private:
 	*** _tile_images vector, which contains both still and animated images.
 	**/
 	std::vector<hoa_video::AnimatedImage*> _animated_tile_images;
-}; // class TileManager
+}; // class TileSupervisor
 
 } // namespace private_map
 
