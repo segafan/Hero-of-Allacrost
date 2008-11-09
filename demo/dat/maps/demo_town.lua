@@ -312,7 +312,7 @@ dialogue_option_text[2] = hoa_utils.Translate("No way, you could be hurt!");
 dialogue_option_text[3] = hoa_utils.Translate("Your help would be great!");
 
 
-laila = nil; -- Pointer to Laila's map sprite
+laila = nil; -- Pointer to Laila''s map sprite
 
 
 function Load(m, d)
@@ -327,7 +327,7 @@ function Load(m, d)
 	local event;
 	local chest;
 
-	-- Create the player's sprite
+	-- Create the player''s sprite
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Claudius"));
 	sprite:SetObjectID(1000);
@@ -345,7 +345,7 @@ function Load(m, d)
 	sprite:LoadFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
 
-	-- Set the camera to focus on the player's sprite
+	-- Set the camera to focus on the player''s sprite
 	map:_SetCameraFocus(sprite);
 
 	-- Create NPC sprites and actions
@@ -617,7 +617,7 @@ function Load(m, d)
 
 	map:_AddGroundObject(sprite);
 
-	-- Add a treasure near the town's exit zone
+	-- Add a treasure near the town''s exit zone
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
 	chest:SetObjectID(11);
 	chest:SetContext(1);
@@ -627,7 +627,7 @@ function Load(m, d)
 	chest:AddObject(1, 2); -- Adds 2 Healing Potions
 	map:_AddGroundObject(chest);
 
-	-- Add a treasure inside the merchant's house
+	-- Add a treasure inside the merchant''s house
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
 	chest:SetObjectID(12);
 	chest:SetContext(2);

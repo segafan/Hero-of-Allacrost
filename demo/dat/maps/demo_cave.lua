@@ -383,7 +383,7 @@ function Load(m, d)
 	local event;
 	local chest;
 
-	-- Create the player's sprite
+	-- Create the player''s sprite
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Claudius"));
 	sprite:SetObjectID(1000);
@@ -400,7 +400,7 @@ function Load(m, d)
 	sprite:LoadRunningAnimations("img/sprites/map/claudius_run.png");
 	sprite:LoadFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
-	-- Set the camera to focus on the player's sprite
+	-- Set the camera to focus on the player''s sprite
 	map:_SetCameraFocus(sprite);
 
 	sprite = hoa_map.MapSprite();
