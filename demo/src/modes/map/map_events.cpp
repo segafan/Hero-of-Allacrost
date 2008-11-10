@@ -378,7 +378,7 @@ void EventSupervisor::TerminateEvent(uint32 event_id) {
 
 void EventSupervisor::Update() {
 	// Update all launch event timers and start all events whose timers have finished
-	for (list<pair<int32, MapEvent*> >::iterator i = _launch_events.begin(); i != _launch_events.end(); i++) {
+	for (list<pair<int32, MapEvent*> >::iterator i = _launch_events.begin(); i != _launch_events.end();) {
 		i->first -= SystemManager->GetUpdateTime();
 
 		if (i->first <= 0) { // Timer has expired
@@ -387,16 +387,20 @@ void EventSupervisor::Update() {
 			// We begin the event only after it has been removed from the launch list
 			StartEvent(start_event);
 		}
+		else
+			++i;
 	}
 
 	// Check for active events which have finished
-	for (list<MapEvent*>::iterator i = _active_events.begin(); i != _active_events.end(); i++) {
+	for (list<MapEvent*>::iterator i = _active_events.begin(); i != _active_events.end();) {
 		if ((*i)->_Update() == true) {
 			MapEvent* finished_event = *i;
 			i = _active_events.erase(i);
 			// We examine the event links only after the event has been removed from the active list
 			_ExamineEventLinks(finished_event, false);
 		}
+		else
+			++i;
 	}
 }
 
