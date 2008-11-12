@@ -619,7 +619,7 @@ void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect
 void TextBox::_DEBUG_DrawOutline(float text_y)
 {
 	if (!_DEBUG_draw_outline)
-	return;
+		return;
 
 	// Stores the positions of the four sides of the rectangle
 	float left   = 0.0f;
@@ -639,7 +639,7 @@ void TextBox::_DEBUG_DrawOutline(float text_y)
 
 	for (int i = 1; i <= possible_lines; ++i)
 	{
-		line_offset += lineHeight;
+		line_offset += line_height;
 		VideoManager->DrawLine(left, line_offset, right, line_offset, 3, alpha_black);
 	}
 }
