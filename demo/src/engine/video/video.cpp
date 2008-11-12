@@ -1166,4 +1166,36 @@ void VideoEngine::DrawFPS(uint32 frame_time) {
 	PopState();
 }
 
+void VideoEngine::DrawLine(float startX, float startY, float endX, float endY, float widthPx, const Color &col)
+{
+	GLfloat vert_coords[] =
+	{
+		startX, startY,
+		endX,   endY
+	};
+	glEnable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Normal blending
+	glPushAttrib(GL_LINE_WIDTH);
+	float pxW, pxH;
+	GetPixelSize(pxW, pxH);
+	glLineWidth(widthPx * pxH);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glColor4fv((GLfloat*)col.GetColors());
+	glVertexPointer(2, GL_FLOAT, 0, vert_coords);
+	glDrawArrays(GL_LINES, 0, 2);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glPopAttrib();
+}
+
+void VideoEngine::DrawRect(float x1, float y1, float x2, float y2, float widthPx, const Color &col)
+{
+	DrawLine(x1, y1, x2, y1, widthPx, col);
+	DrawLine(x2, y1, x2, y2, widthPx, col);
+	DrawLine(x2, y2, x1, y2, widthPx, col);
+	DrawLine(x1, y2, x1, y1, widthPx, col);
+}
+
 }  // namespace hoa_video
