@@ -20,6 +20,8 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
+bool TextBox::_DEBUG_draw_outline = false;
+
 TextBox::TextBox()
 : _width(0.0f),
   _height(0.0f),
@@ -72,6 +74,7 @@ void TextBox::Update(uint32 time) {
 		_finished = true;
 }
 
+const Color alpha_black(0.0f, 0.0f, 0.0f, 0.5f);
 
 
 void TextBox::Draw() {
@@ -158,6 +161,8 @@ void TextBox::Draw() {
 	else { // (_text_xalign == VIDEO_X_RIGHT)
 		text_xpos = right;
 	}
+
+	_DEBUG_DrawOutline(text_ypos);
 
 	// Set the draw cursor, draw flags, and draw the text
 	VideoManager->Move(0.0f, text_ypos);
@@ -455,6 +460,7 @@ void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect
 		float line_width = static_cast<float>(TextManager->CalculateTextWidth(_text_style.font, _text[line]));
 		int32 x_align = VideoManager->_ConvertXAlign(_text_xalign);
 		float x_offset = text_x + ((x_align + 1) * line_width) * 0.5f * VideoManager->_current_context.coordinate_system.GetHorizontalDirection();
+
 		VideoManager->MoveRelative(x_offset, 0.0f);
 
 		int32 line_size = static_cast<int32>(_text[line].size());
@@ -610,5 +616,37 @@ void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect
 	} // for (int32 line = 0; line < static_cast<int32>(_text.size()); ++line)
 } // void TextBox::_DrawLines(float text_x, float text_y, ScreenRect scissor_rect)
 
+void TextBox::_DEBUG_DrawOutline(float text_y)
+{
+	if (!_DEBUG_draw_outline)
+	return;
+
+	// Stores the positions of the four sides of the rectangle
+	float left   = 0.0f;
+	float right  = _width;
+	float bottom = 0.0f;
+	float top    = _height;
+
+	float vertDirection = VideoManager->_current_context.coordinate_system.GetVerticalDirection();
+
+	VideoManager->Move(0.0f, 0.0f);
+	CalculateAlignedRect(left, right, bottom, top);
+	VideoManager->DrawRect(left, bottom, right, top, 3, alpha_black);
+
+	int possible_lines = _height / _font_properties->line_skip;
+	float line_height = _font_properties->line_skip * -vertDirection;
+	float line_offset = text_y;
+
+	for (int i = 1; i <= possible_lines; ++i)
+	{
+		line_offset += lineHeight;
+		VideoManager->DrawLine(left, line_offset, right, line_offset, 3, alpha_black);
+	}
+}
+
+void TextBox::DEBUG_EnableDrawOutline(bool enable)
+{
+	_DEBUG_draw_outline = enable;
+}
 
 }  // namespace hoa_video

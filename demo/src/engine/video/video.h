@@ -762,6 +762,15 @@ public:
 	/** Retrieves current set text style for rendering
 	 */
 	TextStyle GetTextStyle();
+
+	/** Draws a solid color line
+	 */
+	void DrawLine(float startX, float startY, float endX, float endY, float widthPx, const Color &col);
+
+	/** Draws a rectangle constructed of 4 solid lines
+	 */
+	void DrawRect(float x1, float y1, float x2, float y2, float widthPx, const Color &col);
+
 private:
 	VideoEngine();
 
