@@ -41,6 +41,12 @@ const uint32 MAX_FTIME_DIFF = 5;
 //! \brief The number of samples to take if we need to play catchup with the current FPS
 const uint32 FPS_CATCHUP = 20;
 
+//! \brief 50% alpha colors used for debug drawing of GUI element outlines
+//@{
+const Color alpha_black(0.0f, 0.0f, 0.0f, 0.5f);
+const Color alpha_white(1.0f, 1.0f, 1.0f, 0.5f);
+//@}
+
 /** ****************************************************************************
 *** \brief An abstract base class for all GUI elements (windows + controls).
 *** This class contains basic functions such as Draw(), Update(), etc.
@@ -69,6 +75,15 @@ public:
 	**/
 	virtual bool IsInitialized(std::string &errors) = 0;
 
+	/** \brief Sets the width and height of the element
+	*** \param w The width to set for the element
+	*** \param h The height to set for the element
+	*** If either the width or height arguments are negative (or zero) no change will take place. This method only sets the
+	*** _width and _height members. Deriving classes may need to override this function to take into consideration
+	*** changes that must take place when the element is re-sized.
+	**/
+	virtual void SetDimensions(float w, float h);
+
 	/** \brief Sets the position of the object.
 	*** \param x A reference to store the x coordinate of the object.
 	*** \param y A reference to store the y coordinate of the object.
@@ -82,6 +97,13 @@ public:
 	*** \param yalign Valid values include VIDEO_Y_TOP, VIDEO_Y_CENTER, or VIDEO_Y_BOTTOM.
 	**/
 	void SetAlignment(int32 xalign, int32 yalign);
+
+	/** \brief Returns the width and height of the GUI element
+	*** \param w Reference to a variable to hold the width
+	*** \param h Reference to a variable to hold the height
+	**/
+	void GetDimensions(float& w, float& h) const
+		{ w = _width; h = _height; }
 
 	/** \brief Gets the position of the object.
 	*** \param x A reference to store the x coordinate of the object.
@@ -106,6 +128,9 @@ public:
 	***
 	*** Given a rectangle specified in VIDEO_X_LEFT and VIDEO_Y_BOTTOM orientation, this function
 	*** transforms the rectangle based on the video engine's alignment flags.
+	*** \todo I think this function needs to be renamed. It seems to only be used to compute the
+	*** four edges of the GUI element. It should be called "CalculateEdges" or somthing more
+	*** specific if it is only used in this manner.
 	**/
 	virtual void CalculateAlignedRect(float &left, float &right, float &bottom, float &top);
 
@@ -116,12 +141,18 @@ protected:
 	//! \brief The x and y position of the gui element.
 	float _x_position, _y_position;
 
+	//! \brief The dimensions of the GUI element in pixels.
+	float _width, _height;
+
 	//! \brief Used to determine if the object is in a valid state.
 	//! \note This member is set after every change to any of the object's settings.
 	bool  _initialized;
 
 	//! \brief Contains the errors that need to be resolved if the object is in an invalid state (not ready for rendering).
 	std::string _initialization_errors;
+
+	//! \brief Draws an outline of the element boundaries
+	virtual void _DEBUG_DrawOutline();
 }; // class GUIElement
 
 
@@ -138,6 +169,16 @@ public:
 	virtual ~GUIControl()
 		{}
 
+	/** \brief Calculates and returns the four edges for an aligned rectangle
+	*** \param left A reference where to store the coordinates of the rectangle's left edge.
+	*** \param right A reference where to store the coordinates of the rectangle's right edge.
+	*** \param bottom A reference where to store the coordinates of the rectangle's bttom edge.
+	*** \param top A reference where to store the coordinates of the rectangle's top edge.
+	*** \note The difference between this function and the one for GUI elements is that
+	*** controls must take their owner window into account.
+	**/
+	virtual void CalculateAlignedRect(float &left, float &right, float &bottom, float &top);
+
 	/** \brief Sets the menu window which "owns" this control.
 	*** \param owner_window A pointer to the menu that owns the control.
 	*** \note If the control is not owned by any menu window, then set the owner to NULL.
@@ -145,7 +186,7 @@ public:
 	*** rectangle so that the control won't be drawn outside of the bounds of the menu.
 	*** It also means that the position of the control is relative to the position of the
 	*** window. (i.e. control.position += menu.position).
-	 */
+	**/
 	virtual void SetOwner(MenuWindow *owner_window)
 		{ _owner = owner_window; }
 
@@ -156,16 +197,11 @@ protected:
 	**/
 	MenuWindow *_owner;
 
-	/** \brief Calculates and returns the four edges for an aligned rectangle
-	*** \param left A reference where to store the coordinates of the rectangle's left edge.
-	*** \param right A reference where to store the coordinates of the rectangle's right edge.
-	*** \param bottom A reference where to store the coordinates of the rectangle's bttom edge.
-	*** \param top A reference where to store the coordinates of the rectangle's top edge.
+	/** \brief Draws an outline of the control boundaries
+	*** \note This implementation uses the
 	***
-	*** \note The difference between this function and the one for GUI elements is that
-	*** controls must take their owner window into account.
 	**/
-	virtual void CalculateAlignedRect(float &left, float &right, float &bottom, float &top);
+	virtual void _DEBUG_DrawOutline();
 }; // class GUIControl : public GUIElement
 
 } // namespace private_video
@@ -175,7 +211,7 @@ protected:
 ***
 *** There is exactly one instance of this class, which is both created and destroyed
 *** by the VideoEngine class. This class is essentially an extension of the GameVideo
-*** class which manages the GUI system. It also handles the drawing of the 
+*** class which manages the GUI system. It also handles the drawing of the
 *** average frames per second (FPS) on the screen.
 *** ***************************************************************************/
 class GUISupervisor : public hoa_utils::Singleton<GUISupervisor> {
@@ -255,10 +291,14 @@ public:
 	**/
 	void SetDefaultMenuSkin(std::string& skin_name);
 
+	//! \brief Returns true if GUI elements should have outlines drawn over their boundaries
+	bool DEBUG_DrawOutlines() const
+		{ return _DEBUG_draw_outlines; }
+
 private:
 	/** \brief A map containing all of the menu skins which have been loaded
 	*** The string argument is the reference name of the menu, which is defined
-	*** by the user when they load a new skin. 
+	*** by the user when they load a new skin.
 	***
 	**/
 	std::map<std::string, private_video::MenuSkin> _menu_skins;
@@ -296,6 +336,11 @@ private:
 	*** been displayed.
 	**/
 	uint32 _number_samples;
+
+	/** \brief Draws an outline of the boundary for all GUI elements drawn to the screen when true
+	*** The VideoEngine class contains the method that modifies this variable.
+	**/
+	bool _DEBUG_draw_outlines;
 
 	// ---------- Private methods
 
@@ -337,7 +382,7 @@ private:
 	*** screen is actually the average over the last several frames.
 	**/
 	void _DrawFPS(uint32 frame_time);
-}; // class GUISupervisor
+}; // class GUISupervisor : public hoa_utils::Singleton<GUISupervisor>
 
 } // namespace hoa_video
 

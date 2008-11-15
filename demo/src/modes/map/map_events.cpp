@@ -14,8 +14,10 @@
 *** ***************************************************************************/
 
 // Allacrost engines
+#include "mode_manager.h"
 #include "script.h"
 #include "system.h"
+#include "video.h"
 
 // Local map mode headers
 #include "map.h"
@@ -23,10 +25,17 @@
 #include "map_objects.h"
 #include "map_sprites.h"
 
+// Other mode headers
+#include "shop.h"
+
 using namespace std;
 
+using namespace hoa_mode_manager;
 using namespace hoa_script;
 using namespace hoa_system;
+using namespace hoa_video;
+
+using namespace hoa_shop;
 
 namespace hoa_map {
 
@@ -37,6 +46,70 @@ namespace private_map {
 // ****************************************************************************
 
 DialogueEvent::DialogueEvent(uint32 event_id, uint32 dialogue_id) :
+	MapEvent(event_id),
+	_dialogue_id(dialogue_id)
+{}
+
+
+
+DialogueEvent::~DialogueEvent()
+{}
+
+
+
+void DialogueEvent::_Start() {
+	MapMode::_current_map->_dialogue_supervisor->BeginDialogue(_dialogue_id);
+}
+
+
+
+bool DialogueEvent::_Update() {
+	MapDialogue* active_dialogue = MapMode::_current_map->_dialogue_supervisor->GetCurrentDialogue();
+	if (active_dialogue != NULL && active_dialogue->GetDialogueID() == _dialogue_id)
+		return true;
+	else
+		return false;
+}
+
+// ****************************************************************************
+// ********** ShopEvent Class Functions
+// ****************************************************************************
+
+ShopEvent::ShopEvent(uint32 event_id) :
+	MapEvent(event_id)
+{}
+
+
+
+ShopEvent::~ShopEvent()
+{}
+
+
+void ShopEvent::AddWare(uint32 object_id) {
+	_ware_ids.insert(object_id);
+}
+
+
+
+void ShopEvent::_Start() {
+	ShopMode* shop = new ShopMode();
+	for (set<uint32>::iterator i = _ware_ids.begin(); i != _ware_ids.end(); i++) {
+		shop->AddObject(*i);
+	}
+	ModeManager->Push(shop);
+}
+
+
+
+bool ShopEvent::_Update() {
+	return true;
+}
+
+// ****************************************************************************
+// ********** SoundEvent Class Functions
+// ****************************************************************************
+
+SoundEvent::SoundEvent(uint32 event_id) :
 	MapEvent(event_id)
 {
 	// TODO
@@ -44,19 +117,121 @@ DialogueEvent::DialogueEvent(uint32 event_id, uint32 dialogue_id) :
 
 
 
-DialogueEvent::~DialogueEvent() {
+SoundEvent::~SoundEvent() {
 	// TODO
 }
 
 
 
-void DialogueEvent::_Start() {
+void SoundEvent::_Start() {
 	// TODO
 }
 
 
 
-bool DialogueEvent::_Update() {
+bool SoundEvent::_Update() {
+	// TODO
+	return true;
+}
+
+// ****************************************************************************
+// ********** MapTransitionEvent Class Functions
+// ****************************************************************************
+
+MapTransitionEvent::MapTransitionEvent(uint32 event_id, std::string filename) :
+	MapEvent(event_id),
+	_transition_filename(filename),
+	_fade_timer(0)
+{}
+
+
+
+MapTransitionEvent::~MapTransitionEvent()
+{}
+
+
+
+void MapTransitionEvent::_Start() {
+	MapMode::_current_map->_PushState(STATE_SCENE);
+	_fade_timer = 0;
+	VideoManager->FadeScreen(Color::black, FADE_OUT_TIME);
+	// TODO: fade out the current map music
+}
+
+
+
+bool MapTransitionEvent::_Update() {
+	while (_fade_timer < FADE_OUT_TIME) {
+		_fade_timer += SystemManager->GetUpdateTime();
+		return false;
+	}
+
+	ModeManager->Pop();
+	try {
+		MapMode *MM = new MapMode(_transition_filename);
+		ModeManager->Push(MM);
+	} catch (luabind::error e) {
+		PRINT_ERROR << "Error loading map: " << _transition_filename << endl;
+		ScriptManager->HandleLuaError(e);
+	}
+	VideoManager->FadeScreen(Color::clear, FADE_OUT_TIME / 2);
+	return true;
+}
+
+// ****************************************************************************
+// ********** JoinPartyEvent Class Functions
+// ****************************************************************************
+
+JoinPartyEvent::JoinPartyEvent(uint32 event_id) :
+	MapEvent(event_id)
+{
+	// TODO
+}
+
+
+
+JoinPartyEvent::~JoinPartyEvent() {
+	// TODO
+}
+
+
+
+void JoinPartyEvent::_Start() {
+	// TODO
+}
+
+
+
+bool JoinPartyEvent::_Update() {
+	// TODO
+	return true;
+}
+
+// ****************************************************************************
+// ********** BattleEncounterEvent Class Functions
+// ****************************************************************************
+
+BattleEncounterEvent::BattleEncounterEvent(uint32 event_id) :
+	MapEvent(event_id)
+{
+	// TODO
+}
+
+
+
+BattleEncounterEvent::~BattleEncounterEvent() {
+	// TODO
+}
+
+
+
+void BattleEncounterEvent::_Start() {
+	// TODO
+}
+
+
+
+bool BattleEncounterEvent::_Update() {
 	// TODO
 	return true;
 }

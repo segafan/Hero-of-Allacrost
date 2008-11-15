@@ -320,6 +320,9 @@ void OptionBox::Draw() {
 		bounds.y_bottom += yoff;
 	} // for (int32 row = row_min; row < row_max; row++)
 
+	if (GUIManager->DEBUG_DrawOutlines() == true)
+		_DEBUG_DrawOutline();
+
 	//VideoManager->EnableScissoring(scissoring_rollback);
 	VideoManager->PopState();
 } // void OptionBox::Draw()

@@ -94,6 +94,12 @@ namespace private_video {
 *** ***************************************************************************/
 class MenuSkin {
 public:
+	MenuSkin()
+		{}
+
+	~MenuSkin()
+		{}
+
 	/** \brief A 2d array that holds the border images for the menu skin
 	*** The entries in this array represent the following parts:
 	*** - borders[0][0]: upper left corner
@@ -121,12 +127,6 @@ public:
 
 	//! \brief The (optional) background image of the menu skin that fills the inside of the MenuWindow
 	StillImage background;
-
-	MenuSkin()
-		{}
-
-	~MenuSkin()
-		{}
 }; // class MenuSkin
 
 } // namespace private_video
@@ -166,7 +166,7 @@ public:
 	*** \note This function <b>must</b> be called before you attempt to draw the window.
 	**/
 	bool Create(std::string skin_name, float w, float h, int32 visible_flags = VIDEO_MENU_EDGE_ALL, int32 shared_flags = 0);
-	
+
 	//! \note This version of the create function does not take a skin_name argument. It uses the default menu skin.
 	bool Create(float w, float h, int32 visible_flags = VIDEO_MENU_EDGE_ALL, int32 shared_flags = 0);
 
@@ -225,9 +225,6 @@ public:
 
 	//! \name Class Member Access Functions
 	//@{
-	void GetDimensions(float& w, float& h) const
-		{ w = _width; h = _height; }
-
 	VIDEO_MENU_DISPLAY_MODE GetDisplayMode() const
 		{ return _display_mode; }
 
@@ -236,7 +233,7 @@ public:
 
 	/** \note When the window is in the process of showing or hiding, subsequent calls to this function
 	*** (in between calls to Update()) will yield different results as the active dimensions of the window
-	*** are changing. When the window is fully shown or fully hidden, this function will always return the 
+	*** are changing. When the window is fully shown or fully hidden, this function will always return the
 	*** same scissor rectangle that is reflective of the window's full size.
 	***
 	**/

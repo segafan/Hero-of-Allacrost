@@ -712,6 +712,17 @@ public:
 	void ToggleFPS()
 		{ _fps_display = !_fps_display; }
 
+	/** \brief Draws a colored line between two points
+	*** \param x1 The x coordinate of the first point
+	*** \param y1 The y coordinate of the first point
+	*** \param x2 The x coordinate of the second point
+	*** \param y2 The y coordinate of the second point
+	*** \param width The width/thickness of the line to draw, in pixels
+	*** \param color The color to draw the line in
+	*** \todo Width argument should be an unsigned, non-zero integer
+	**/
+	void DrawLine(float x1, float y1, float x2, float y2, float width, const Color& color);
+
 	/** \brief draws a line grid. Used by map editor to draw a grid over all
 	 *         the tiles. This function will start at (x,y), and go to
 	 *         (xMax, yMax), with horizontal cell spacing of xstep and
@@ -729,14 +740,25 @@ public:
 	void DrawGrid(float x, float y, float x_step, float y_step, const Color &c);
 
 	/** \brief Draws a solid rectangle of a given color.
-	 * Draws a solid rectangle of a given color. For that, the lower-left corner
-	 * of the rectangle has to be specified, and also its size. The parameters depends
-	 * on the current Coordinate System.
-	 * \param width Width of the rectangle.
-	 * \param height Height of the rectangle.
-	 * \param color Color to paint the rectangle.
-	 */
+	*** Draws a solid rectangle of a given color. For that, the lower-left corner
+	*** of the rectangle has to be specified, and also its size. The parameters depends
+	*** on the current Coordinate System.
+	*** \param width Width of the rectangle.
+	*** \param height Height of the rectangle.
+	*** \param color Color to paint the rectangle.
+	**/
 	void DrawRectangle(float width, float height, const Color& color);
+
+	/** \brief Draws an outline of a rectangle that is not filled in
+	*** \param left The x coordinate corresponding to the left side of the rectangle
+	*** \param right The x coordinate corresponding to the right side of the rectangle
+	*** \param bottom The y coordinate corresponding to the bottom side of the rectangle
+	*** \param top The y coordinate corresponding to the top side of the rectangle
+	*** \param width The width/thickness of the outline to draw, in pixels
+	*** \param color The color to draw the outline in
+	*** \todo Width argument should be an unsigned, non-zero integer
+	**/
+	void DrawRectangleOutline(float x1, float y1, float x2, float y2, float width, const Color& color);
 
 	/** \brief Takes a screenshot and saves the image to a file
 	*** \param filename The name of the file, if any, to save the screenshot as. Default is "screenshot.jpg"
@@ -763,14 +785,10 @@ public:
 	 */
 	TextStyle GetTextStyle();
 
-	/** Draws a solid color line
-	 */
-	void DrawLine(float startX, float startY, float endX, float endY, float widthPx, const Color &col);
-
-	/** Draws a rectangle constructed of 4 solid lines
-	 */
-	void DrawRect(float x1, float y1, float x2, float y2, float widthPx, const Color &col);
-
+	/** \brief Debug functioning for enabling/disabling the drawing of GUI element boundaries
+	*** \param enable Set to true to enable outlines, false to disable
+	**/
+	void DEBUG_EnableGUIOutlines(bool enable);
 private:
 	VideoEngine();
 

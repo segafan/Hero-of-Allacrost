@@ -202,10 +202,6 @@ public:
 	**/
 	bool IsInitialized(std::string& errors);
 
-	/** \brief Enable or disable drawing of outline around textbox.
-	 */
-	static void DEBUG_EnableDrawOutline(bool enable);
-
 private:
 	//! \brief The dimensions of the text box, in pixels.
 	float _width, _height;
@@ -245,9 +241,6 @@ private:
 
 	//! \brief The unedited text for reformatting
 	hoa_utils::ustring _text_save;
-
-	//! \brief Whether drawing the outline is enabled
-	static bool _DEBUG_draw_outline;
 
 	/** \brief Returns the height of the text when it's rendered with the current font
 	*** \return The height of text rendered in current font

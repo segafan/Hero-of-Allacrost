@@ -209,6 +209,10 @@ enum DIALOGUE_STATE {
 const uint32 MAX_OPTIONS = 5;
 
 
+//! \brief The number of milliseconds to take to fade out the map
+const uint32 FADE_OUT_TIME = 2000;
+
+
 /** \brief Returns the opposite facing direction of the direction given in parameter.
 *** \return A direction that faces opposite to the argument direction
 *** \note This is mostly used as an helper function to make sprites face each other in a conversation.

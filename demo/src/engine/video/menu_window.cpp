@@ -191,6 +191,9 @@ void MenuWindow::Draw() {
 	VideoManager->Move(_x_position, _y_position);
 	_menu_image.Draw(Color::white);
 
+	if (GUIManager->DEBUG_DrawOutlines() == true)
+		_DEBUG_DrawOutline();
+
 	VideoManager->PopState();
 	return;
 } // void MenuWindow::Draw()
@@ -279,9 +282,13 @@ bool MenuWindow::IsInitialized(string& errors) {
 
 
 void MenuWindow::SetDimensions(float w, float h) {
-	if (w <= 0 || h <= 0) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "width and/or height argument was invalid: "
-			<< "(width = " << w << ", height = " << h << ")" << endl;
+	if (w <= 0.0f) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid width argument: " << w << endl;
+		return;
+	}
+
+	if (h <= 0.0f) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid height argument: " << h << endl;
 		return;
 	}
 
