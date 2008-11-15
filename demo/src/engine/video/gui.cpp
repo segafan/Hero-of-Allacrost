@@ -35,16 +35,31 @@ GUIElement::GUIElement() :
 
 
 
+void GUIElement::SetDimensions(float w, float h) {
+	if (w <= 0.0f) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid width argument: " << w << endl;
+		return;
+	}
+
+	if (h <= 0.0f) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid height argument: " << h << endl;
+		return;
+	}
+
+	_width = w;
+	_height = h;
+}
+
+
+
 void GUIElement::SetAlignment(int32 xalign, int32 yalign) {
 	if (_xalign != VIDEO_X_LEFT && _xalign != VIDEO_X_CENTER && _xalign != VIDEO_X_RIGHT) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Invalid xalign value (" << xalign << ") passed to GUIElement::SetAlignment()" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid xalign value: " << xalign << endl;
 		return;
 	}
 
 	if (_yalign != VIDEO_Y_TOP && _yalign != VIDEO_Y_CENTER && _yalign != VIDEO_Y_BOTTOM) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Invalid yalign value (" << yalign << ") passed to GUIElement::SetAlignment()" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid yalign value: " << yalign << endl;
 		return;
 	}
 
@@ -79,10 +94,23 @@ void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, 
 
 	left   += x_off;
 	right  += x_off;
-
 	top    += y_off;
 	bottom += y_off;
 } // void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
+
+
+
+void GUIElement::_DEBUG_DrawOutline() {
+	float left = 0.0f;
+	float right = _width;
+	float bottom = 0.0f;
+	float top = _height;
+
+	VideoManager->Move(0.0f, 0.0f);
+	CalculateAlignedRect(left, right, bottom, top);
+	VideoManager->DrawRectangleOutline(left, right, bottom, top, 3, alpha_black);
+	VideoManager->DrawRectangleOutline(left, right, bottom, top, 1, alpha_white);
+}
 
 // *****************************************************************************
 // ******************************* GUIControl **********************************
@@ -130,6 +158,20 @@ void GUIControl::CalculateAlignedRect(float &left, float &right, float &bottom, 
 			bottom += menu_bottom;
 		}
 	} // if (_owner)
+}
+
+
+
+void GUIControl::_DEBUG_DrawOutline() {
+	float left = 0.0f;
+	float right = _width;
+	float bottom = 0.0f;
+	float top = _height;
+
+	VideoManager->Move(0.0f, 0.0f);
+	CalculateAlignedRect(left, right, bottom, top);
+	VideoManager->DrawRectangleOutline(left, right, bottom, top, 3, alpha_black);
+	VideoManager->DrawRectangleOutline(left, right, bottom, top, 1, alpha_white);
 }
 
 } // namespace private_video
@@ -259,7 +301,7 @@ bool GUISupervisor::LoadMenuSkin(string skin_name, string border_image, string b
 		}
 	}
 
-	// ----- (4) Determine if this new skin should be made the default skin 
+	// ----- (4) Determine if this new skin should be made the default skin
 	if (make_default == true || _menu_skins.size() == 1) {
 		_default_skin = &new_skin;
 	}

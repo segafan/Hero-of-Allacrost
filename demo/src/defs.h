@@ -265,6 +265,11 @@ namespace hoa_map {
 		class MapEvent;
 		class DialogueEvent;
 		class ScriptedEvent;
+		class ShopEvent;
+		class SoundEvent;
+		class MapTransitionEvent;
+		class JoinPartyEvent;
+		class BattleEncounterEvent;
 		class SpriteEvent;
 		class PathMoveSpriteEvent;
 		class RandomMoveSpriteEvent;

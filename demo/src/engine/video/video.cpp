@@ -151,12 +151,12 @@ bool VideoEngine::FinalizeInitialization() {
 	TextManager = TextSupervisor::SingletonCreate();
 	GUIManager = GUISupervisor::SingletonCreate();
 
+	// Initialize all sub-systems
 	if (TextureManager->SingletonInitialize() == false) {
 		PRINT_ERROR << "could not initialize texture manager" << endl;
 		return false;
 	}
 
-	// Initialize all sub-systems
 	if (TextManager->SingletonInitialize() == false) {
 		PRINT_ERROR << "could not initialize text manager" << endl;
 		return false;
@@ -177,10 +177,14 @@ bool VideoEngine::FinalizeInitialization() {
 	Display(0);
 	Clear();
 
+	// TEMP: this is a hack and should be removed when we can support procedural images
 	if (_rectangle_image.Load("") == false) {
 		PRINT_ERROR << "_rectangle_image could not be created" << endl;
 		return false;
 	}
+
+	// Set the argument to false to remove debug GUI outlines
+	DEBUG_EnableGUIOutlines(true);
 
 	_initialized = true;
 	return true;
@@ -960,6 +964,12 @@ StillImage* VideoEngine::GetDefaultCursor() {
 
 
 
+void VideoEngine::DEBUG_EnableGUIOutlines(bool enable) {
+	GUIManager->_DEBUG_draw_outlines = enable;
+}
+
+
+
 
 int32 VideoEngine::_ScreenCoordX(float x) {
 	float percent;
@@ -1091,6 +1101,32 @@ void VideoEngine::_DEBUG_ShowAdvancedStats() {
 
 
 
+void VideoEngine::DrawLine(float x1, float y1, float x2, float y2, float width, const Color& color) {
+	GLfloat vert_coords[] =
+	{
+		x1, y1,
+		x2, y2
+	};
+	glEnable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Normal blending
+	glPushAttrib(GL_LINE_WIDTH);
+
+	float pixel_width, pixel_height;
+	GetPixelSize(pixel_width, pixel_height);
+	glLineWidth(width * pixel_height);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glColor4fv((GLfloat*)color.GetColors());
+	glVertexPointer(2, GL_FLOAT, 0, vert_coords);
+	glDrawArrays(GL_LINES, 0, 2);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glPopAttrib();
+}
+
+
+
 void VideoEngine::DrawGrid(float x, float y, float x_step, float y_step, const Color& c) {
 	PushState();
 
@@ -1136,6 +1172,14 @@ void VideoEngine::DrawRectangle(float width, float height, const Color& color) {
 
 
 
+void VideoEngine::DrawRectangleOutline(float left, float right, float bottom, float top, float width, const Color& color) {
+	DrawLine(left, bottom, right, bottom, width, color);
+	DrawLine(left, top, right, top, width, color);
+	DrawLine(left, bottom, left, top, width, color);
+	DrawLine(right, bottom, right, top, width, color);
+}
+
+
 void VideoEngine::DrawHalo(const StillImage &id, float x, float y, const Color &color) {
 	PushMatrix();
 	Move(x, y);
@@ -1164,38 +1208,6 @@ void VideoEngine::DrawFPS(uint32 frame_time) {
 	PushState();
 	GUIManager->_DrawFPS(frame_time);
 	PopState();
-}
-
-void VideoEngine::DrawLine(float startX, float startY, float endX, float endY, float widthPx, const Color &col)
-{
-	GLfloat vert_coords[] =
-	{
-		startX, startY,
-		endX,   endY
-	};
-	glEnable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Normal blending
-	glPushAttrib(GL_LINE_WIDTH);
-	float pxW, pxH;
-	GetPixelSize(pxW, pxH);
-	glLineWidth(widthPx * pxH);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glColor4fv((GLfloat*)col.GetColors());
-	glVertexPointer(2, GL_FLOAT, 0, vert_coords);
-	glDrawArrays(GL_LINES, 0, 2);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glPopAttrib();
-}
-
-void VideoEngine::DrawRect(float x1, float y1, float x2, float y2, float widthPx, const Color &col)
-{
-	DrawLine(x1, y1, x2, y1, widthPx, col);
-	DrawLine(x2, y1, x2, y2, widthPx, col);
-	DrawLine(x2, y2, x1, y2, widthPx, col);
-	DrawLine(x1, y2, x1, y1, widthPx, col);
 }
 
 }  // namespace hoa_video

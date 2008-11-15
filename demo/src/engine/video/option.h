@@ -445,7 +445,7 @@ private:
 	bool _switching;
 	//@}
 
-	//! \name Drawng Related Members
+	//! \name Drawing Related Members
 	//@{
 	//! \brief Retains the x and y offsets for where the cursor should be drawn relative to the selected option
 	float _cursor_xoffset, _cursor_yoffset;

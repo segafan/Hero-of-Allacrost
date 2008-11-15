@@ -161,8 +161,138 @@ protected:
 	bool _Update();
 
 private:
-	// TODO
+	//! \brief The ID of the dialogue to invoke
+	uint32 _dialogue_id;
 }; // class DialogueEvent : public MapEvent
+
+
+/** ****************************************************************************
+*** \brief An event that creates an instance of ShopMode when started
+***
+*** \todo Several future shop mode features will likely need to be added to this
+*** class. This includes limited availability of objects, market pricing, etc.
+*** ***************************************************************************/
+class ShopEvent : public MapEvent {
+public:
+	/** \param event_id The ID of this event
+	**/
+	ShopEvent(uint32 event_id);
+
+	~ShopEvent();
+
+	/** \brief Adds a ware to the list of objects for sale
+	*** \param object_id The ID of the GlobalObject to make available for purchase
+	*** \note All wares must be added before the _Start() method is called to ensure
+	*** that the wares actually appear in shop mode.
+	**/
+	void AddWare(uint32 object_id);
+
+protected:
+	//! \brief Creates an instance of ShopMode and pushes it to the game mode stack
+	void _Start();
+
+	//! \brief Performs no operation (returns true)
+	bool _Update();
+
+	//! \brief The GlobalObject IDs of all objects to be sold in the shop
+	std::set<uint32> _ware_ids;
+}; // class ShopEvent : public MapEvent
+
+
+/** ****************************************************************************
+*** \brief
+***
+***
+*** ***************************************************************************/
+class SoundEvent : public MapEvent {
+public:
+	/** \param event_id The ID of this event
+	**/
+	SoundEvent(uint32 event_id);
+
+	~SoundEvent();
+
+protected:
+	//! \brief
+	void _Start();
+
+	//! \brief
+	bool _Update();
+
+}; // class SoundEvent : public MapEvent
+
+
+/** ****************************************************************************
+*** \brief
+***
+***
+*** ***************************************************************************/
+class MapTransitionEvent : public MapEvent {
+public:
+	/** \param event_id The ID of this event
+	*** \param filename The name of the map file to transition to
+	**/
+	MapTransitionEvent(uint32 event_id, std::string filneame);
+
+	~MapTransitionEvent();
+
+protected:
+	//! \brief Begins the transition process by fading out the screen and music
+	void _Start();
+
+	//! \brief Once the fading process completes, creates the new map mode to transition to
+	bool _Update();
+
+	//! \brief The filename of the map to transition to
+	std::string _transition_filename;
+
+	//! \brief A timer used for fading out the current map
+	uint32 _fade_timer;
+}; // class MapTransitionEvent : public MapEvent
+
+
+/** ****************************************************************************
+*** \brief
+***
+***
+*** ***************************************************************************/
+class JoinPartyEvent : public MapEvent {
+public:
+	/** \param event_id The ID of this event
+	**/
+	JoinPartyEvent(uint32 event_id);
+
+	~JoinPartyEvent();
+
+protected:
+	//! \brief
+	void _Start();
+
+	//! \brief
+	bool _Update();
+}; // class JoinPartyEvent : public MapEvent
+
+
+/** ****************************************************************************
+*** \brief
+***
+***
+*** ***************************************************************************/
+class BattleEncounterEvent : public MapEvent {
+public:
+	/** \param event_id The ID of this event
+	**/
+	BattleEncounterEvent(uint32 event_id);
+
+	~BattleEncounterEvent();
+
+protected:
+	//! \brief
+	void _Start();
+
+	//! \brief
+	bool _Update();
+}; // class BattleEncounterEvent : public MapEvent
 
 
 /** ****************************************************************************
@@ -193,7 +323,6 @@ protected:
 	//! \brief Calls the Lua _check_function
 	bool _Update();
 
-private:
 	//! \brief A pointer to the Lua function that starts the event
 	ScriptObject _start_function;
 

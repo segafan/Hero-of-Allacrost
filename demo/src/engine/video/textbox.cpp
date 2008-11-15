@@ -20,8 +20,6 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
-bool TextBox::_DEBUG_draw_outline = false;
-
 TextBox::TextBox()
 : _width(0.0f),
   _height(0.0f),
@@ -74,7 +72,6 @@ void TextBox::Update(uint32 time) {
 		_finished = true;
 }
 
-const Color alpha_black(0.0f, 0.0f, 0.0f, 0.5f);
 
 
 void TextBox::Draw() {
@@ -124,7 +121,8 @@ void TextBox::Draw() {
 
 	ScreenRect rect(x, y, w, h);
 
-	/* XXX: Disabled buggy
+	// TODO: this block of code (scissoring for textboxes) does not work properly
+	/*
 	if (_owner) {
 		rect.Intersect(_owner->GetScissorRect());
 	}
@@ -162,12 +160,13 @@ void TextBox::Draw() {
 		text_xpos = right;
 	}
 
-	_DEBUG_DrawOutline(text_ypos);
-
 	// Set the draw cursor, draw flags, and draw the text
 	VideoManager->Move(0.0f, text_ypos);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	_DrawTextLines(text_xpos, text_ypos, rect);
+
+	if (GUIManager->DEBUG_DrawOutlines() == true)
+		_DEBUG_DrawOutline(text_ypos);
 
 	VideoManager->PopState();
 } // void TextBox::Draw()
@@ -176,14 +175,12 @@ void TextBox::Draw() {
 
 void TextBox::SetDimensions(float w, float h) {
 	if (w <= 0.0f || w > 1024.0f) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: TextBox::SetDimensions() failed, invalid width: " << w << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid width argument: " << w << endl;
 		return;
 	}
 
 	if (h <= 0.0f || h > 768.0f) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: TextBox::SetDimensions() failed, invalid height: " << h << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid height argument: " << h << endl;
 		return;
 	}
 
@@ -616,11 +613,9 @@ void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect
 	} // for (int32 line = 0; line < static_cast<int32>(_text.size()); ++line)
 } // void TextBox::_DrawLines(float text_x, float text_y, ScreenRect scissor_rect)
 
-void TextBox::_DEBUG_DrawOutline(float text_y)
-{
-	if (!_DEBUG_draw_outline)
-		return;
 
+
+void TextBox::_DEBUG_DrawOutline(float text_y) {
 	// Stores the positions of the four sides of the rectangle
 	float left   = 0.0f;
 	float right  = _width;
@@ -631,7 +626,8 @@ void TextBox::_DEBUG_DrawOutline(float text_y)
 
 	VideoManager->Move(0.0f, 0.0f);
 	CalculateAlignedRect(left, right, bottom, top);
-	VideoManager->DrawRect(left, bottom, right, top, 3, alpha_black);
+	VideoManager->DrawRectangleOutline(left, right, bottom, top, 3, alpha_black);
+	VideoManager->DrawRectangleOutline(left, right, bottom, top, 1, alpha_white);
 
 	int possible_lines = _height / _font_properties->line_skip;
 	float line_height = _font_properties->line_skip * -vertDirection;
@@ -641,12 +637,8 @@ void TextBox::_DEBUG_DrawOutline(float text_y)
 	{
 		line_offset += line_height;
 		VideoManager->DrawLine(left, line_offset, right, line_offset, 3, alpha_black);
+		VideoManager->DrawLine(left, line_offset, right, line_offset, 1, alpha_white);
 	}
-}
-
-void TextBox::DEBUG_EnableDrawOutline(bool enable)
-{
-	_DEBUG_draw_outline = enable;
 }
 
 }  // namespace hoa_video
