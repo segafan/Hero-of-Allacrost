@@ -15,7 +15,6 @@
 		4941A6FA0AC1D86400D65B8E /* boot_credits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6970AC1D86400D65B8E /* boot_credits.cpp */; };
 		4941A6FC0AC1D86400D65B8E /* boot_menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6990AC1D86400D65B8E /* boot_menu.cpp */; };
 		4941A6FE0AC1D86400D65B8E /* map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A69C0AC1D86400D65B8E /* map.cpp */; };
-		4941A7000AC1D86400D65B8E /* map_actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A69E0AC1D86400D65B8E /* map_actions.cpp */; };
 		4941A7020AC1D86400D65B8E /* map_dialogue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A00AC1D86400D65B8E /* map_dialogue.cpp */; };
 		4941A7040AC1D86400D65B8E /* map_objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A20AC1D86400D65B8E /* map_objects.cpp */; };
 		4941A7060AC1D86400D65B8E /* menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A50AC1D86400D65B8E /* menu.cpp */; };
@@ -157,6 +156,8 @@
 		D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110400C58546800ADC969 /* audio_descriptor.cpp */; };
 		D4F1104C0C58548B00ADC969 /* audio_input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110460C58548B00ADC969 /* audio_input.cpp */; };
 		D4F1104E0C58548B00ADC969 /* audio_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110480C58548B00ADC969 /* audio_stream.cpp */; };
+		D4F411370EC78C78005C5997 /* map_events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F411330EC78C78005C5997 /* map_events.cpp */; };
+		D4F411380EC78C78005C5997 /* map_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F411350EC78C78005C5997 /* map_utils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -222,8 +223,6 @@
 		4941A69A0AC1D86400D65B8E /* boot_menu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = boot_menu.h; sourceTree = "<group>"; };
 		4941A69C0AC1D86400D65B8E /* map.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = map.cpp; sourceTree = "<group>"; };
 		4941A69D0AC1D86400D65B8E /* map.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = map.h; sourceTree = "<group>"; };
-		4941A69E0AC1D86400D65B8E /* map_actions.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = map_actions.cpp; sourceTree = "<group>"; };
-		4941A69F0AC1D86400D65B8E /* map_actions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = map_actions.h; sourceTree = "<group>"; };
 		4941A6A00AC1D86400D65B8E /* map_dialogue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = map_dialogue.cpp; sourceTree = "<group>"; };
 		4941A6A10AC1D86400D65B8E /* map_dialogue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = map_dialogue.h; sourceTree = "<group>"; };
 		4941A6A20AC1D86400D65B8E /* map_objects.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = map_objects.cpp; sourceTree = "<group>"; };
@@ -310,6 +309,19 @@
 		D4A1AEBC0E8A122500488ECD /* libiconv.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.2.dylib; path = "../allacrost-dep/lib/libiconv.2.dylib"; sourceTree = SOURCE_ROOT; };
 		D4B34E720E2328540067C913 /* global_effects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = global_effects.cpp; sourceTree = "<group>"; };
 		D4B34E730E2328540067C913 /* global_effects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = global_effects.h; sourceTree = "<group>"; };
+		D4BA6CE00EC7872C00F2DEB0 /* allacrost.pot */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = allacrost.pot; sourceTree = "<group>"; };
+		D4BA6CE10EC7872C00F2DEB0 /* boldquot.sed */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = boldquot.sed; sourceTree = "<group>"; };
+		D4BA6CE20EC7872C00F2DEB0 /* en@boldquot.header */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "en@boldquot.header"; sourceTree = "<group>"; };
+		D4BA6CE30EC7872C00F2DEB0 /* en@quot.header */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "en@quot.header"; sourceTree = "<group>"; };
+		D4BA6CE40EC7872C00F2DEB0 /* fr.mo */ = {isa = PBXFileReference; lastKnownFileType = file; path = fr.mo; sourceTree = "<group>"; };
+		D4BA6CE50EC7872C00F2DEB0 /* fr.po */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fr.po; sourceTree = "<group>"; };
+		D4BA6CE60EC7872C00F2DEB0 /* insert-header.sin */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "insert-header.sin"; sourceTree = "<group>"; };
+		D4BA6CE70EC7872C00F2DEB0 /* Makefile.in.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile.in.in; sourceTree = "<group>"; };
+		D4BA6CE80EC7872C00F2DEB0 /* Makevars */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makevars; sourceTree = "<group>"; };
+		D4BA6CE90EC7872C00F2DEB0 /* POTFILES.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = POTFILES.in; sourceTree = "<group>"; };
+		D4BA6CEA0EC7872C00F2DEB0 /* quot.sed */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = quot.sed; sourceTree = "<group>"; };
+		D4BA6CEB0EC7872C00F2DEB0 /* remove-potcdate.sin */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "remove-potcdate.sin"; sourceTree = "<group>"; };
+		D4BA6CEC0EC7872C00F2DEB0 /* Rules-quot */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Rules-quot"; sourceTree = "<group>"; };
 		D4D166250BC0D91300190FC0 /* color.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = color.h; sourceTree = "<group>"; };
 		D4D166260BC0D91300190FC0 /* context.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
 		D4D166270BC0D91300190FC0 /* coord_sys.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = coord_sys.h; sourceTree = "<group>"; };
@@ -373,6 +385,10 @@
 		D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = skill_editor.cpp; sourceTree = "<group>"; };
 		D4F2EB270D111B4300A2F1D7 /* skill_editor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = skill_editor.h; sourceTree = "<group>"; };
 		D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = skill_editor.moc.cpp; path = src/editor/skill_editor.moc.cpp; sourceTree = "<group>"; };
+		D4F411330EC78C78005C5997 /* map_events.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = map_events.cpp; sourceTree = "<group>"; };
+		D4F411340EC78C78005C5997 /* map_events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = map_events.h; sourceTree = "<group>"; };
+		D4F411350EC78C78005C5997 /* map_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = map_utils.cpp; sourceTree = "<group>"; };
+		D4F411360EC78C78005C5997 /* map_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = map_utils.h; sourceTree = "<group>"; };
 		D4F900F20DA2010800F10953 /* dialog_boxes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dialog_boxes.cpp; sourceTree = "<group>"; };
 		D4F900F30DA2010800F10953 /* dialog_boxes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dialog_boxes.h; sourceTree = "<group>"; };
 		D4F901260DA214E100F10953 /* dialog_boxes.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dialog_boxes.moc.cpp; path = src/editor/dialog_boxes.moc.cpp; sourceTree = "<group>"; };
@@ -416,6 +432,7 @@
 		4941A49F0AC1D76400D65B8E = {
 			isa = PBXGroup;
 			children = (
+				D4BA6CDF0EC7872C00F2DEB0 /* txt */,
 				D404C6E80B02FCEC00827A19 /* Temporary Source Files */,
 				4941A4BC0AC1D7B300D65B8E /* Source Files */,
 				4941A4BD0AC1D7BA00D65B8E /* Resources */,
@@ -534,6 +551,10 @@
 		4941A69B0AC1D86400D65B8E /* map */ = {
 			isa = PBXGroup;
 			children = (
+				D4F411330EC78C78005C5997 /* map_events.cpp */,
+				D4F411340EC78C78005C5997 /* map_events.h */,
+				D4F411350EC78C78005C5997 /* map_utils.cpp */,
+				D4F411360EC78C78005C5997 /* map_utils.h */,
 				D47FF3820E7B9A1800423A0C /* map_treasure.h */,
 				D47FF3800E7B9A0A00423A0C /* map_treasure.cpp */,
 				D4E8089D0D485241006D641C /* map_tiles.cpp */,
@@ -544,8 +565,6 @@
 				493D9E440B9C9FFD00DF1F52 /* map_zones.h */,
 				4941A69C0AC1D86400D65B8E /* map.cpp */,
 				4941A69D0AC1D86400D65B8E /* map.h */,
-				4941A69E0AC1D86400D65B8E /* map_actions.cpp */,
-				4941A69F0AC1D86400D65B8E /* map_actions.h */,
 				4941A6A00AC1D86400D65B8E /* map_dialogue.cpp */,
 				4941A6A10AC1D86400D65B8E /* map_dialogue.h */,
 				4941A6A20AC1D86400D65B8E /* map_objects.cpp */,
@@ -678,6 +697,26 @@
 			path = script;
 			sourceTree = "<group>";
 		};
+		D4BA6CDF0EC7872C00F2DEB0 /* txt */ = {
+			isa = PBXGroup;
+			children = (
+				D4BA6CE00EC7872C00F2DEB0 /* allacrost.pot */,
+				D4BA6CE10EC7872C00F2DEB0 /* boldquot.sed */,
+				D4BA6CE20EC7872C00F2DEB0 /* en@boldquot.header */,
+				D4BA6CE30EC7872C00F2DEB0 /* en@quot.header */,
+				D4BA6CE40EC7872C00F2DEB0 /* fr.mo */,
+				D4BA6CE50EC7872C00F2DEB0 /* fr.po */,
+				D4BA6CE60EC7872C00F2DEB0 /* insert-header.sin */,
+				D4BA6CE70EC7872C00F2DEB0 /* Makefile.in.in */,
+				D4BA6CE80EC7872C00F2DEB0 /* Makevars */,
+				D4BA6CE90EC7872C00F2DEB0 /* POTFILES.in */,
+				D4BA6CEA0EC7872C00F2DEB0 /* quot.sed */,
+				D4BA6CEB0EC7872C00F2DEB0 /* remove-potcdate.sin */,
+				D4BA6CEC0EC7872C00F2DEB0 /* Rules-quot */,
+			);
+			path = txt;
+			sourceTree = "<group>";
+		};
 		D4D166240BC0D91300190FC0 /* video */ = {
 			isa = PBXGroup;
 			children = (
@@ -755,6 +794,7 @@
 			buildConfigurationList = 4941A4B40AC1D77900D65B8E /* Build configuration list for PBXNativeTarget "Allacrost" */;
 			buildPhases = (
 				4941A4AC0AC1D77500D65B8E /* Resources */,
+				D48D3B780ECFE73E003F40CB /* Gettext setup */,
 				4941A4AD0AC1D77500D65B8E /* Sources */,
 				4941A4AE0AC1D77500D65B8E /* Frameworks */,
 				4941A4B70AC1D78600D65B8E /* Copy Frameworks */,
@@ -846,7 +886,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "#!/bin/bash\nif [[ -f ../allacrost-dep/moc ]]; then\n../allacrost-dep/moc -o src/editor/dialog_boxes.moc.cpp src/editor/dialog_boxes.h\n../allacrost-dep/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n../allacrost-dep/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n../allacrost-dep/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n../allacrost-dep/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelif [[ -f /Developer/Tools/Qt/moc ]]; then\n/Developer/Tools/Qt/moc -o src/editor/dialog_boxes.moc.cpp src/editor/dialog_boxes.h\n/Developer/Tools/Qt/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/Developer/Tools/Qt/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/Developer/Tools/Qt/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/Developer/Tools/Qt/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelse\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/dialog_boxes.moc.cpp src/editor/dialog_boxes.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nfi";
+			shellScript = "#!/bin/bash\nif [[ -f ../allacrost-dep/bin/moc ]]; then\n../allacrost-dep/bin/moc -o src/editor/dialog_boxes.moc.cpp src/editor/dialog_boxes.h\n../allacrost-dep/bin/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n../allacrost-dep/bin/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n../allacrost-dep/bin/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n../allacrost-dep/bin/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelif [[ -f /Developer/Tools/Qt/moc ]]; then\n/Developer/Tools/Qt/moc -o src/editor/dialog_boxes.moc.cpp src/editor/dialog_boxes.h\n/Developer/Tools/Qt/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/Developer/Tools/Qt/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/Developer/Tools/Qt/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/Developer/Tools/Qt/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nelse\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/dialog_boxes.moc.cpp src/editor/dialog_boxes.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/editor.moc.cpp src/editor/editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/grid.moc.cpp src/editor/grid.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/skill_editor.moc.cpp src/editor/skill_editor.h\n/usr/local/Trolltech/Qt-4.2.0/bin/moc -o src/editor/tileset_editor.moc.cpp src/editor/tileset_editor.h\nfi";
+		};
+		D48D3B780ECFE73E003F40CB /* Gettext setup */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Gettext setup";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "dir=\"$TARGET_BUILD_DIR/Allacrost.app/Contents/Resources/translations\"\nmkdir $dir\nfor file in `echo txt/*.po`\ndo\n\ttemp=`basename $file`\n\tname=${temp%\\.*}\n\t../allacrost-dep/bin/msgfmt -c $file -o $name.mo\n\tmkdir $dir/$name\n\tmkdir $dir/$name/LC_MESSAGES\n\tmv $name.mo $dir/$name/LC_MESSAGES/allacrost.mo\ndone";
 		};
 		D49A54A30DB2B38000FBD800 /* Remap libs */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -893,7 +947,6 @@
 				4941A6FA0AC1D86400D65B8E /* boot_credits.cpp in Sources */,
 				4941A6FC0AC1D86400D65B8E /* boot_menu.cpp in Sources */,
 				4941A6FE0AC1D86400D65B8E /* map.cpp in Sources */,
-				4941A7000AC1D86400D65B8E /* map_actions.cpp in Sources */,
 				4941A7020AC1D86400D65B8E /* map_dialogue.cpp in Sources */,
 				4941A7040AC1D86400D65B8E /* map_objects.cpp in Sources */,
 				4941A7060AC1D86400D65B8E /* menu.cpp in Sources */,
@@ -950,6 +1003,8 @@
 				D4E8089F0D485241006D641C /* map_tiles.cpp in Sources */,
 				D4B34E750E2328540067C913 /* global_effects.cpp in Sources */,
 				D47FF3810E7B9A0A00423A0C /* map_treasure.cpp in Sources */,
+				D4F411370EC78C78005C5997 /* map_events.cpp in Sources */,
+				D4F411380EC78C78005C5997 /* map_utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
