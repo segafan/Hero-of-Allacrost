@@ -16,6 +16,9 @@
 
 #ifdef _WIN32
 	#include <direct.h>
+#elif defined __MACH__
+	#include <unistd.h>
+	#include <cstdlib>
 #endif
 
 #include <libintl.h>
@@ -178,12 +181,32 @@ bool SystemEngine::SingletonInitialize() {
 	// Initialize the gettext library
 	setlocale(LC_ALL, "");
 	setlocale(LC_NUMERIC, "C");
-	bindtextdomain("allacrost", "./txt");
-	textdomain("allacrost");
 
-// 	setlocale(LC_ALL, "");
-// 	bindtextdomain(PACKAGE, DATADIR);
-// 	textdomain(PACKAGE);
+	#ifdef __MACH__
+		char buffer[PATH_MAX];
+		// Get the current working directory.
+		string cwd(getcwd(buffer, PATH_MAX));
+		cwd.append("/translations/");
+		bindtextdomain("allacrost", cwd.c_str());
+		textdomain("allacrost");
+	#elif (defined(__linux__) || defined(__FreeBSD__)) && !defined(RELEASE_BUILD)
+		// Look for translation files in LOCALEDIR only if they are not available in the
+		// current directory.
+		if (ifstream("dat/config/settings.lua") == NULL) {
+			bindtextdomain(PACKAGE, LOCALEDIR);
+			textdomain(PACKAGE);
+		} else {
+			char buffer[PATH_MAX];
+			// Get the current working directory.
+			string cwd(getcwd(buffer, PATH_MAX));
+			cwd.append("/txt/");
+			bindtextdomain(PACKAGE, cwd.c_str());
+			textdomain(PACKAGE);
+		}
+	#else
+		bindtextdomain(PACKAGE, LOCALEDIR);
+		textdomain(PACKAGE);
+	#endif
 
 	return true;
 }
