@@ -19,6 +19,8 @@
 #elif defined __MACH__
 	#include <unistd.h>
 	#include <cstdlib>
+#elif defined __linux__
+	#include <limits.h>
 #endif
 
 #include <libintl.h>
