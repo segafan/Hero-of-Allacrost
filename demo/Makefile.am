@@ -2,7 +2,7 @@ EXTRA_DIST = ABOUT-NLS AUTHORS COPYING config.rpath configure dat doc img INSTAL
 
 SUBDIRS = txt
 
-AM_CPPFLAGS = -DDATADIR=\"$(datadir)/allacrost\"
+AM_CPPFLAGS = -DDATADIR=\"$(datadir)/allacrost\" -DLOCALEDIR=\"$(datadir)/allacrost/$(LOCALEDIR)\" -DPACKAGE=\"$(PACKAGE)\"
 ACLOCAL_AMFLAGS = -I m4
 
 INCLUDES = \

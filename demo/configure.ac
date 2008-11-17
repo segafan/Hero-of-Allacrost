@@ -99,6 +99,9 @@ AC_CHECK_LIB([m], [log], [], \
 	 exit -1])
 
 AM_GNU_GETTEXT([external])
+AC_SUBST([PACKAGE])
+LOCALEDIR=txt
+AC_SUBST([LOCALEDIR])
 
 AC_PATH_PROGS([LUA_CONFIG], [lua-config])
 
