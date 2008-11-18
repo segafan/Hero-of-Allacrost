@@ -105,20 +105,21 @@ void OptionBox::Draw() {
 
 	CoordSys &cs = VideoManager->_current_context.coordinate_system;
 
-	if( cs.GetVerticalDirection() < 0 ) {
-		rect.top += static_cast<int32>( _vertical_spacing ) + ( _number_rows ); //To accomodate the 1 pixel per row offset
+	if (cs.GetVerticalDirection() < 0) {
+		rect.top += static_cast<int32>(_vertical_spacing) + (_number_rows); //To accomodate the 1 pixel per row offset
 	}
 
 	bool scissor = VideoManager->IsScissoringEnabled();
-	if ( _owner && _scissoring && _scissoring_owner ) {
+	if (_owner && _scissoring && _scissoring_owner) {
 		rect.Intersect(_owner->GetScissorRect());
-		if( VideoManager->IsScissoringEnabled() ) {
+		if (VideoManager->IsScissoringEnabled()) {
 			rect.Intersect(VideoManager->GetScissorRect());
 		}
 		scissor = true;
 		VideoManager->SetScissorRect(rect);
-	} else if ( _scissoring && !_scissoring_owner ) {
-		if( VideoManager->IsScissoringEnabled() ) {
+	}
+	else if (_scissoring && !_scissoring_owner) {
+		if (VideoManager->IsScissoringEnabled()) {
 			rect.Intersect(VideoManager->GetScissorRect());
 		}
 		scissor = true;

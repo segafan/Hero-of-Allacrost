@@ -203,9 +203,6 @@ public:
 	bool IsInitialized(std::string& errors);
 
 private:
-	//! \brief The dimensions of the text box, in pixels.
-	float _width, _height;
-
 	//! \brief The display speed of the text, in characters per second.
 	float _display_speed;
 
