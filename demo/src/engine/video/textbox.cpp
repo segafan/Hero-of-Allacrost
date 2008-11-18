@@ -20,9 +20,7 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
-TextBox::TextBox()
-: _width(0.0f),
-  _height(0.0f),
+TextBox::TextBox() :
   _display_speed(0.0f),
   _text_xalign(VIDEO_X_LEFT),
   _text_yalign(VIDEO_Y_BOTTOM),
@@ -34,17 +32,17 @@ TextBox::TextBox()
 	_initialized = false;
 }
 
-TextBox::TextBox(float x, float y, float width, float height, const TEXT_DISPLAY_MODE &mode)
-: _width(width),
-  _height(height),
-  _display_speed(0.0f),
-  _text_xalign(VIDEO_X_LEFT),
-  _text_yalign(VIDEO_Y_BOTTOM),
-  _num_chars(0),
-  _finished(false),
-  _current_time(0),
-  _mode(mode)
+TextBox::TextBox(float x, float y, float width, float height, const TEXT_DISPLAY_MODE &mode) :
+	_display_speed(0.0f),
+	_text_xalign(VIDEO_X_LEFT),
+	_text_yalign(VIDEO_Y_BOTTOM),
+	_num_chars(0),
+	_finished(false),
+	_current_time(0),
+	_mode(mode)
 {
+	_width = width;
+	_height = height;
 	_text_style = TextManager->GetDefaultStyle();
 	SetPosition(x, y);
 	_initialized = false;

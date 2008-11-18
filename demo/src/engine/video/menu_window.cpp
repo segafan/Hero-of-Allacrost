@@ -21,8 +21,6 @@ using namespace hoa_video::private_video;
 namespace hoa_video {
 
 MenuWindow::MenuWindow() :
-	_width(0),
-	_height(0),
 	_skin(NULL),
 	_window_state(VIDEO_MENU_STATE_HIDDEN),
 	_display_timer(0),
@@ -191,8 +189,9 @@ void MenuWindow::Draw() {
 	VideoManager->Move(_x_position, _y_position);
 	_menu_image.Draw(Color::white);
 
-	if (GUIManager->DEBUG_DrawOutlines() == true)
+	if (GUIManager->DEBUG_DrawOutlines() == true) {
 		_DEBUG_DrawOutline();
+	}
 
 	VideoManager->PopState();
 	return;

@@ -30,6 +30,8 @@ GUIElement::GUIElement() :
 	_yalign(VIDEO_Y_TOP),
 	_x_position(0.0f),
 	_y_position(0.0f),
+	_width(0.0f),
+	_height(0.0f),
 	_initialized(false)
 {}
 
@@ -69,8 +71,8 @@ void GUIElement::SetAlignment(int32 xalign, int32 yalign) {
 
 
 
-void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, float &top) {
-	float width  = right - left;
+void GUIElement::CalculateAlignedRect(float& left, float& right, float& bottom, float& top) {
+	float width = right - left;
 	float height = top - bottom;
 
 	if (width < 0.0f)
@@ -196,8 +198,7 @@ GUISupervisor::GUISupervisor() {
 GUISupervisor::~GUISupervisor() {
 	// Determine if any MenuWindows have not yet been deleted, and delete them if they exist
 	if (_menu_windows.empty() == false) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: When GUISupervison destructor was invoked, there were still undestroyed MenuWindows" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "there were undestroyed MenuWindows in GUISupervisor destructor" << endl;
 		std::map<uint32, MenuWindow*> window_copies = _menu_windows;
 		for (std::map<uint32, MenuWindow*>::iterator i = window_copies.begin(); i != window_copies.end(); i++) {
 			i->second->Destroy();
@@ -256,7 +257,7 @@ bool GUISupervisor::LoadMenuSkin(string skin_name, string border_image, string b
 {
 	// ----- (1) Check that the skin_name is not already used by another skin
 	if (_menu_skins.find(skin_name) != _menu_skins.end()) {
-		cerr << "VIDEO ERROR: In GUI::LoadMenuSkin(), the skin name " << skin_name << " is already used by another skin" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "the skin name " << skin_name << " is already used by another skin" << endl;
 		return false;
 	}
 
@@ -295,7 +296,7 @@ bool GUISupervisor::LoadMenuSkin(string skin_name, string border_image, string b
 	// ----- (3) Load the background image, if one has been specified
 	if (background_image != "") {
 		if (new_skin.background.Load(background_image) == false) {
-			cerr << "VIDEO ERROR: In GUI::LoadMenuSkin(), the background image file could not be loaded" << endl;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "the background image file could not be loaded" << endl;
 			_menu_skins.erase(skin_name);
 			return false;
 		}
@@ -313,8 +314,7 @@ bool GUISupervisor::LoadMenuSkin(string skin_name, string border_image, string b
 
 void GUISupervisor::SetDefaultMenuSkin(std::string& skin_name) {
 	if (_menu_skins.find(skin_name) == _menu_skins.end()) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: In GUI::SetDefaultMenuSkin(), the skin name " << skin_name << " was not registered" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "the skin name " << skin_name << " was not registered" << endl;
 		return;
 	}
 
@@ -325,8 +325,7 @@ void GUISupervisor::SetDefaultMenuSkin(std::string& skin_name) {
 
 void GUISupervisor::DeleteMenuSkin(std::string& skin_name) {
 	if (_menu_skins.find(skin_name) == _menu_skins.end()) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: In GUI::DeleteMenuSkin(), the skin name " << skin_name << " was not registered" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "the skin name " << skin_name << " was not registered" << endl;
 		return;
 	}
 
@@ -335,9 +334,7 @@ void GUISupervisor::DeleteMenuSkin(std::string& skin_name) {
 	map<uint32, MenuWindow*>::iterator i = _menu_windows.begin();
 	while (i != _menu_windows.end()) {
 		if (dead_skin == i->second->_skin) {
-			if (VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: In GUI::DeleteMenuSkin(), the MenuSkin \"" << skin_name <<
-					"\" was not deleted because a MenuWindow object was found to be using it" << endl;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "the MenuSkin \"" << skin_name << "\" was not deleted because a MenuWindow object was found to be using it" << endl;
 			return;
 		}
 		++i;
@@ -350,8 +347,7 @@ void GUISupervisor::DeleteMenuSkin(std::string& skin_name) {
 
 void GUISupervisor::_AddMenuWindow(MenuWindow* new_window) {
 	if (_menu_windows.find(new_window->_id) != _menu_windows.end()) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: GUISupervisor::AddMenuWindow() failed because there already existed a window with the same ID" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because there already existed a window with the same ID" << endl;
 		return;
 	}
 	_menu_windows.insert(std::make_pair(new_window->_id, new_window));
@@ -366,8 +362,7 @@ void GUISupervisor::_RemoveMenuWindow(MenuWindow* old_window) {
 		_menu_windows.erase(i);
 	}
 	else {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: GUISupervisor::RemoveMenuWindow() did not find a corresponding entry in the menu windows map" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "did not find a corresponding entry in the menu windows map" << endl;
 	}
 }
 
@@ -425,7 +420,6 @@ void GUISupervisor::_DrawFPS(uint32 frame_time) {
 	sprintf(fps_text, "FPS: %d", avg_fps);
 
 	VideoManager->Text()->SetDefaultFont("debug_font");
-
 	VideoManager->Move(930.0f, 720.0f); // Upper right hand corner of the screen
 	VideoManager->Text()->Draw(fps_text);
 } // void GUISupervisor::_DrawFPS(uint32 frame_time)

@@ -261,9 +261,6 @@ private:
 	//! \brief The current id of this object.
 	int32 _id;
 
-	//! \brief The dimensions of the menu window, in pixels.
-	float _width, _height;
-
 	//! \brief The dimensions of the space inside the window borders.
 	float _inner_width, _inner_height;
 
