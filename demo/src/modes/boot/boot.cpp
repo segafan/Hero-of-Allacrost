@@ -140,6 +140,7 @@ BootMode::BootMode() :
 	_SetupOptionsMenu();
 	_SetupVideoOptionsMenu();
 	_SetupAudioOptionsMenu();
+	_SetupLanguageOptionsMenu();
 	_SetupKeySetttingsMenu();
 	_SetupJoySetttingsMenu();
 	_SetupResolutionMenu();
@@ -603,12 +604,12 @@ void BootMode::_SetupMainMenu() {
 void BootMode::_SetupOptionsMenu() {
 	_options_menu.AddOption(MakeUnicodeString("Video"), &BootMode::_OnVideoOptions);
 	_options_menu.AddOption(MakeUnicodeString("Audio"), &BootMode::_OnAudioOptions);
-	_options_menu.AddOption(MakeUnicodeString("Language"));
+	_options_menu.AddOption(MakeUnicodeString("Language"), &BootMode::_OnLanguageOptions);
 	_options_menu.AddOption(MakeUnicodeString("Key Settings"), &BootMode::_OnKeySettings);
 	_options_menu.AddOption(MakeUnicodeString("Joystick Settings"), &BootMode::_OnJoySettings);
 
 	// Disable some of the options
-	_options_menu.EnableOption(2, false); // Language
+	//_options_menu.EnableOption(2, false); // Language
 
 	_options_menu.SetWindowed(true);
 	_options_menu.SetParent(&_main_menu);
@@ -636,6 +637,15 @@ void BootMode::_SetupAudioOptionsMenu()
 	_audio_options_menu.AddOption(MakeUnicodeString("Music Volume: "), 0, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
 	_audio_options_menu.SetWindowed(true);
 	_audio_options_menu.SetParent(&_options_menu);
+}
+
+
+// Inits the language-select menu
+void BootMode::_SetupLanguageOptionsMenu()
+{
+	_language_options_menu.AddOption(MakeUnicodeString("French"), &BootMode::_OnLanguageSelect);
+	_language_options_menu.SetWindowed(true);
+	_language_options_menu.SetParent(&_options_menu);
 }
 
 
@@ -787,6 +797,15 @@ void BootMode::_OnAudioOptions()
 }
 
 
+// 'Language' confirmed
+void BootMode::_OnLanguageOptions()
+{
+	// Switch the current menu
+	_current_menu = &_language_options_menu;
+	//_UpdateLanguageOptions();
+}
+
+
 // 'Key settings' confirmed
 void BootMode::_OnKeySettings() {
 	_current_menu = &_key_settings_menu;
@@ -808,6 +827,14 @@ void BootMode::_OnVideoMode() {
 	VideoManager->ApplySettings();
 	_UpdateVideoOptions();
 	_has_modified_settings = true;
+}
+
+
+// Specific language selected
+void BootMode::_OnLanguageSelect() {
+	SystemManager->SetLanguage("fr");
+	// TODO: when the new language is set by the above call, we need to reload/refresh all text,
+	// otherwise the new language will not take effect.
 }
 
 

@@ -191,8 +191,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 248468945;
-			PBXWorkspaceStateSaveDate = 248468945;
+			PBXPerProjectTemplateStateSaveDate = 248557491;
+			PBXWorkspaceStateSaveDate = 248557491;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -270,20 +270,20 @@
 	};
 	4941A6950AC1D86400D65B8E /* boot.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {968, 18298}}";
-			sepNavSelRange = "{40992, 10}";
-			sepNavVisRange = "{40588, 923}";
+			sepNavIntBoundsRect = "{{0, 0}, {1286, 18480}}";
+			sepNavSelRange = "{26715, 0}";
+			sepNavVisRange = "{25986, 1118}";
 			sepNavVisRect = "{{0, 12918}, {711, 429}}";
-			sepNavWindowFrame = "{{459, 37}, {750, 558}}";
+			sepNavWindowFrame = "{{459, 4}, {750, 774}}";
 		};
 	};
 	4941A6960AC1D86400D65B8E /* boot.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {691, 4956}}";
-			sepNavSelRange = "{2963, 0}";
-			sepNavVisRange = "{1712, 1187}";
+			sepNavIntBoundsRect = "{{0, 0}, {758, 5180}}";
+			sepNavSelRange = "{9205, 0}";
+			sepNavVisRange = "{8384, 1006}";
 			sepNavVisRect = "{{0, 553}, {711, 645}}";
-			sepNavWindowFrame = "{{347, 4}, {750, 774}}";
+			sepNavWindowFrame = "{{2, 4}, {750, 774}}";
 		};
 	};
 	4941A6970AC1D86400D65B8E /* boot_credits.cpp */ = {
@@ -304,9 +304,9 @@
 	};
 	4941A6990AC1D86400D65B8E /* boot_menu.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1412, 4410}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1412, 4228}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{7342, 611}";
+			sepNavVisRange = "{1572, 1030}";
 			sepNavVisRect = "{{0, 3911}, {711, 429}}";
 			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
 		};
@@ -804,6 +804,22 @@
 			sepNavWindowFrame = "{{15, -1}, {773, 774}}";
 		};
 	};
+	D4D166440BC0D91400190FC0 /* text.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {818, 14070}}";
+			sepNavSelRange = "{12036, 0}";
+			sepNavVisRange = "{11669, 1221}";
+			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
+		};
+	};
+	D4D166450BC0D91400190FC0 /* text.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {842, 7658}}";
+			sepNavSelRange = "{13793, 0}";
+			sepNavVisRange = "{12950, 2280}";
+			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
+		};
+	};
 	D4D166480BC0D91400190FC0 /* video.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {986, 16338}}";
@@ -814,8 +830,9 @@
 	};
 	D4D166490BC0D91400190FC0 /* video.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {914, 13034}}";
-			sepNavSelRange = "{1789, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {740, 13524}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{27706, 1623}";
 			sepNavVisRect = "{{0, 342}, {711, 429}}";
 			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
 		};
@@ -1083,7 +1100,7 @@
 		delayBeforeContinue = 0;
 		hitCount = 0;
 		ignoreCount = 0;
-		modificationTime = 248508802.357497;
+		modificationTime = 248561428.889359;
 		state = 2;
 		symbolName = setlocale;
 	};
@@ -1105,7 +1122,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		lineNumber = 254;
-		modificationTime = 248508802.357402;
+		modificationTime = 248561428.889194;
 		state = 2;
 	};
 	D4F5C4400ECC022400BCB646 /* libintl.h */ = {
@@ -1126,7 +1143,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		lineNumber = 270;
-		modificationTime = 248508802.357424;
+		modificationTime = 248561428.889212;
 		state = 2;
 	};
 	D4F5C4430ECC022400BCB646 /* bindtextdomain */ = {
@@ -1139,7 +1156,7 @@
 		delayBeforeContinue = 0;
 		hitCount = 0;
 		ignoreCount = 0;
-		modificationTime = 248508802.357506;
+		modificationTime = 248561428.88937;
 		state = 2;
 		symbolName = bindtextdomain;
 	};
@@ -1154,7 +1171,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		location = libintl.dylib;
-		modificationTime = 248508802.357513;
+		modificationTime = 248561428.889383;
 		state = 1;
 		symbolName = dgettext;
 	};
@@ -1169,7 +1186,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		location = libintl.dylib;
-		modificationTime = 248508802.357523;
+		modificationTime = 248561428.889399;
 		state = 1;
 		symbolName = dcgettext;
 	};
