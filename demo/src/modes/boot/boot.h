@@ -93,6 +93,9 @@ private:
 	//! 'Audio Options' menu
 	BootMenu _audio_options_menu;
 
+	//! 'Language' menu
+	BootMenu _language_options_menu;
+	
 	//! 'Key Settings' menu
 	BootMenu _key_settings_menu;
 
@@ -254,6 +257,7 @@ private:
 	void _SetupOptionsMenu();
 	void _SetupVideoOptionsMenu();
 	void _SetupAudioOptionsMenu();
+	void _SetupLanguageOptionsMenu();
 	void _SetupKeySetttingsMenu();
 	void _SetupJoySetttingsMenu();
 	void _SetupResolutionMenu();
@@ -282,6 +286,8 @@ private:
 	void _OnVideoOptions();
 	//! 'Audio' confirmed
 	void _OnAudioOptions();
+	//! 'Language' confirmed
+	void _OnLanguageOptions();
 	//! 'Key settings' confirmed
 	void _OnKeySettings();
 	//! 'Joystick settings' confirmed
@@ -292,6 +298,9 @@ private:
 	//! 'Video mode' confirmed
 	void _OnVideoMode();
 
+	//! Specific language selected
+	void _OnLanguageSelect();
+	
 	//! Sound volume down
 	void _OnSoundLeft();
 	//! Sound volume up
