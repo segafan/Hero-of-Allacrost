@@ -206,6 +206,7 @@ protected:
 
 } // namespace private_video
 
+
 /** ****************************************************************************
 *** \brief A helper class to the video engine to manage all of the GUI functionality.
 ***

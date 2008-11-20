@@ -112,6 +112,7 @@ enum SelectMode {
 	VIDEO_SELECT_TOTAL   =  2
 };
 
+
 namespace private_video {
 
 /** \name Option Tag Constants
@@ -128,6 +129,7 @@ const uint16 LEFT_TAG2    = static_cast<uint16>('L');
 const uint16 CENTER_TAG2  = static_cast<uint16>('C');
 const uint16 RIGHT_TAG2   = static_cast<uint16>('R');
 //@}
+
 
 /** ****************************************************************************
 *** \brief A class which encapsulates the various contents of an option.
@@ -147,6 +149,7 @@ public:
 	int32 value;
 };
 
+
 /** ****************************************************************************
 *** \brief Holds the bound coordinates for a particular "cell" in an option box.
 ***
@@ -161,6 +164,7 @@ public:
 	//! \brief The x coordinate for the left, right, and center of the cell
 	float x_left, x_center, x_right;
 };
+
 
 /** ****************************************************************************
 *** \brief Represents one particular option in a list and all its elements
@@ -193,6 +197,7 @@ public:
 };
 
 } // namespace private_video
+
 
 /** ****************************************************************************
 *** \brief Represents rows and columns of options that the player may select
@@ -351,10 +356,10 @@ public:
 	void SetCursorOffset(float x, float y)
 		{ _cursor_xoffset = x; _cursor_yoffset = y; }
 
-	/** \brief Sets the font that the option box will use for text
-	*** \param font_name The label to a valid, pre-loaded font to use
+	/** \brief Sets the text style to use for this textbox.
+	*** \param style The style intended \see #TextStyle
 	**/
-	void SetFont(const std::string &font_name);
+	void SetTextStyle(const TextStyle& style);
 
 	/** \brief Sets the state of the cursor icon
 	*** \param state The cursor state to set
@@ -438,15 +443,15 @@ private:
 	//! \brief The wrapping mode used for vertical cursor movement
 	WrapMode _vertical_wrap_mode;
 
-	//! \brief The font used for rendering the text
-	std::string _font;
-
 	//! \brief When set to true, the user may switch the locations of two different options
 	bool _switching;
 	//@}
 
 	//! \name Drawing Related Members
 	//@{
+	//! \brief The text style that the options should be rendered in
+	TextStyle _text_style;
+
 	//! \brief Retains the x and y offsets for where the cursor should be drawn relative to the selected option
 	float _cursor_xoffset, _cursor_yoffset;
 

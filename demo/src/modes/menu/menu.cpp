@@ -363,9 +363,9 @@ void MenuMode::Update() {
 		} // switch (_current_menu_showing)
 		_GetNextActiveWindow();
 	} // if VIDEO_OPTION_CONFIRM
-	
+
 	_current_menu->Update();
-	
+
 } // void MenuMode::Update()
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -534,7 +534,7 @@ void MenuMode::_HandleInventoryMenu() {
 
 void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
 	// Set all the default options
-	ob->SetFont("default");
+	ob->SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	ob->SetCellSize(115.0f, 50.0f);
 	ob->SetPosition(142.0f, 85.0f);
 	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -717,7 +717,7 @@ void MenuMode::_HandleStatusMenu() {
 			break;
 	}
 }
-	
+
 void MenuMode::_HandleOptionsMenu() {
 	switch (_menu_options.GetSelection()) {
 		case OPTIONS_EDIT:
@@ -816,7 +816,7 @@ void MenuMode::_HandleEquipMenu() {
 
 
 void MenuMode::_GetNextActiveWindow()
-{ 
+{
 	switch (_current_menu_showing)
 	{
 	case SHOW_MAIN:
@@ -1068,7 +1068,7 @@ void MenuMode::_DrawBottomMenu() {
 
 					break;
 				} // case EQUIP_LEGGINGS
-				
+
 				default:
 					break;
 			} // switch

@@ -45,7 +45,7 @@ ActionWindow::ActionWindow() {
 		cerr << "BATTLE ERROR: In ActionWindow constructor, the call to MenuWindow::Create() failed" << endl;
 	}
 	MenuWindow::SetPosition(512.0f, 128.0f);
-	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);	
+	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
 	// Setup options for VIEW_ACTION_CATEGORY
 	_InitActionCategoryList();
@@ -91,7 +91,7 @@ void ActionWindow::_InitActionCategoryList()
 	_action_category_list.SetCursorOffset(-20.0f, 25.0f);
 	_action_category_list.SetCellSize(100.0f, 100.0f);
 	_action_category_list.SetSize(4, 1);
-	_action_category_list.SetFont("battle");
+	_action_category_list.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
 	_action_category_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_category_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_action_category_list.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -106,14 +106,14 @@ void ActionWindow::_InitActionSelectionList()
 	_action_selection_list.SetPosition(128.0f, 120.0f);
 	_action_selection_list.SetCursorOffset(-50.0f, 25.0f);
 	_action_selection_list.SetCellSize(300.0f, 35.0f);
-	_action_selection_list.SetFont("battle");
+	_action_selection_list.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
 	_action_selection_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_selection_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_action_selection_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_selection_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_action_selection_list.SetOwner(this);
 }
-	
+
 
 void ActionWindow::_InitSelectionHeaders()
 {
@@ -221,7 +221,7 @@ void ActionWindow::_UpdateActionCategory() {
 	else if (InputManager->RightPress()) {
 		_action_category_list.HandleRightKey();
 	}
-	
+
 	else if (InputManager->ConfirmPress() ) {
 		_action_category_list.HandleConfirmKey();
 		if (_action_category_list.GetEvent() == VIDEO_OPTION_CONFIRM) {
@@ -490,7 +490,7 @@ void ActionWindow::_ConstructActionSelectionList() {
 		else if (_selected_action_category == ACTION_TYPE_SUPPORT) {
 			_skill_list = _character->GetActor()->GetSupportSkills();
 		}
-		
+
 		if (_skill_list->empty()) {
 			if (BATTLE_DEBUG)
 				cerr << "BATTLE ERROR: In ActionWindow::ConstructActionSelectionList(), the character had no skills to list" << endl;
@@ -520,7 +520,7 @@ void ActionWindow::_ConstructActionSelectionList() {
 	if (_selected_action_category == ACTION_TYPE_ITEM) {
 		// A temporary pointer to all the items to check
 		vector<GlobalItem*>* temp_item_list;
-		
+
 		temp_item_list = GlobalManager->GetInventoryItems();
 		if (temp_item_list->empty()) {
 			if (BATTLE_DEBUG)
@@ -620,7 +620,7 @@ FinishWindow::FinishWindow()
 	//Just like the ones in Menu Mode
 	float start_x = (1024 - 800) / 2 + 144;
 	float start_y = 768 - ((768 - 600) / 2 + 15);
-	
+
 	if (!MenuWindow::Create(480.0f, 560.0f))
 		cerr << "BATTLE ERROR: In FinishWindow constructor, the call to MenuWindow::Create() failed" << endl;
 
@@ -727,7 +727,7 @@ void FinishWindow::_InitLoseOptions()
 	_lose_options.SetCellSize(128.0f, 50.0f);
 	_lose_options.SetPosition(270.0f, 130.0f);
 	_lose_options.SetSize(1, 4);
-	_lose_options.SetFont("battle");
+	_lose_options.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
 	_lose_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_lose_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_lose_options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -849,7 +849,7 @@ void FinishWindow::_UpdateAnnounceWin() {
 // This block causes the game to freeze at the end of battle.
 /*	if (_finish_outcome.IsFinished() == false) {
 		_finish_outcome.Update(SystemManager->GetUpdateTime());
-		
+
 		if (InputManager->ConfirmPress())
 			_finish_outcome.ForceFinish();
 		return;
@@ -996,7 +996,7 @@ void FinishWindow::_UpdateAnnounceLose() {
 // This block causes the game to freeze at the end of battle.
 /*	if (_finish_outcome.IsFinished() == false) {
 		_finish_outcome.Update(SystemManager->GetUpdateTime());
-		
+
 		if (InputManager->ConfirmPress())
 			_finish_outcome.ForceFinish();
 		return;
@@ -1022,7 +1022,7 @@ void FinishWindow::_UpdateAnnounceLose() {
 				break;
 		}
 	}
-	
+
 }
 
 
@@ -1138,44 +1138,44 @@ void FinishWindow::_DrawWinGrowth() {
 		VideoManager->MoveRelative(140, 105);
 
 		//HP
-		display_text = MakeUnicodeString("HP: ") + 
+		display_text = MakeUnicodeString("HP: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetMaxHitPoints()));
 		if (_growth_gained[i][0])
 		{
-			display_text += MakeUnicodeString(" (") + 
+			display_text += MakeUnicodeString(" (") +
 			MakeUnicodeString(NumberToString(_growth_gained[i][0])) + MakeUnicodeString(")");
 		}
 		VideoManager->Text()->Draw(display_text);
 
 		//SP
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("SP: ") + 
+		display_text = MakeUnicodeString("SP: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetMaxSkillPoints()));
 		if (_growth_gained[i][1])
 		{
-			display_text += MakeUnicodeString(" (") + 
+			display_text += MakeUnicodeString(" (") +
 			MakeUnicodeString(NumberToString(_growth_gained[i][1])) + MakeUnicodeString(")");
 		}
 		VideoManager->Text()->Draw(display_text);
 
 		//STR
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("STR: ") + 
+		display_text = MakeUnicodeString("STR: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
 		if (_growth_gained[i][2])
 		{
-			display_text += MakeUnicodeString(" (") + 
+			display_text += MakeUnicodeString(" (") +
 			MakeUnicodeString(NumberToString(_growth_gained[i][2])) + MakeUnicodeString(")");
 		}
 		VideoManager->Text()->Draw(display_text);
 
 		//VIG
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("VIG: ") + 
+		display_text = MakeUnicodeString("VIG: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetVigor()));
 		if (_growth_gained[i][3])
 		{
-			display_text += MakeUnicodeString(" (") + 
+			display_text += MakeUnicodeString(" (") +
 			MakeUnicodeString(NumberToString(_growth_gained[i][3])) + MakeUnicodeString(")");
 		}
 		VideoManager->Text()->Draw(display_text);
@@ -1183,44 +1183,44 @@ void FinishWindow::_DrawWinGrowth() {
 		//Second Column
 		//FOR
 		VideoManager->MoveRelative(155, 78);
-		display_text = MakeUnicodeString("FOR: ") + 
+		display_text = MakeUnicodeString("FOR: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
 		if (_growth_gained[i][4])
 		{
-			display_text += MakeUnicodeString(" (") + 
+			display_text += MakeUnicodeString(" (") +
 			MakeUnicodeString(NumberToString(_growth_gained[i][4])) + MakeUnicodeString(")");
 		}
 		VideoManager->Text()->Draw(display_text);
 
 		//PRO
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("PRO: ") + 
+		display_text = MakeUnicodeString("PRO: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetProtection()));
 		if (_growth_gained[i][5])
 		{
-			display_text += MakeUnicodeString(" (") + 
+			display_text += MakeUnicodeString(" (") +
 			MakeUnicodeString(NumberToString(_growth_gained[i][5])) + MakeUnicodeString(")");
 		}
 		VideoManager->Text()->Draw(display_text);
 
 		//AGI
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("AGI: ") + 
+		display_text = MakeUnicodeString("AGI: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetAgility()));
 		if (_growth_gained[i][6])
 		{
-			display_text += MakeUnicodeString(" (") + 
+			display_text += MakeUnicodeString(" (") +
 			MakeUnicodeString(NumberToString(_growth_gained[i][6])) + MakeUnicodeString(")");
 		}
 		VideoManager->Text()->Draw(display_text);
 
 		//EVD
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("EVD: ") + 
+		display_text = MakeUnicodeString("EVD: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetEvade()));
 		if (_growth_gained[i][7])
 		{
-			display_text += MakeUnicodeString(" (") + 
+			display_text += MakeUnicodeString(" (") +
 			MakeUnicodeString(NumberToString(_growth_gained[i][7])) + MakeUnicodeString(")");
 		}
 		VideoManager->Text()->Draw(display_text);
@@ -1251,7 +1251,7 @@ void FinishWindow::_DrawWinSkills()
 		VideoManager->MoveRelative(140, 35);
 		VideoManager->Text()->Draw("Skills Learned");
 		VideoManager->MoveRelative(50, -30);
-		
+
 		skills_learned = _character_growths[i]->GetSkillsLearned();
 
 		for (uint32 j = 0; j < skills_learned->size(); ++j)
@@ -1264,9 +1264,9 @@ void FinishWindow::_DrawWinSkills()
 	}
 }
 
-void FinishWindow::_DrawWinSpoils() 
+void FinishWindow::_DrawWinSpoils()
 {
-	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);	
+	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 	//VideoManager->Move(496, 683);
 	//VideoManager->Move(96, 683);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
@@ -1300,7 +1300,7 @@ void FinishWindow::_DrawWinSpoils()
 
 
 void FinishWindow::_DrawAnnounceLose() {
-	
+
 	_lose_options.Draw();
 
 }

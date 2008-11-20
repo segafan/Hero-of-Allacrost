@@ -212,7 +212,7 @@ TreasureSupervisor::TreasureSupervisor() :
 	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_action_options.SetCursorOffset(-50.0f, -25.0f);
-	_action_options.SetFont("default");
+	_action_options.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_action_options.SetSelection(0);
 	_action_options.SetOwner(&_action_window);
 
@@ -224,7 +224,7 @@ TreasureSupervisor::TreasureSupervisor() :
 	_list_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_list_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_list_options.SetCursorOffset(-50.0f, -25.0f);
-	_list_options.SetFont("default");
+	_list_options.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_list_options.SetOwner(&_list_window);
 	// TODO: this currently does not work (text will be blank). Re-enable it once
 	// the scissoring bug is fixed in the video engine

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ void BootMenu::SetWindowed(bool windowed)
 
 	if (!_is_windowed) // without a window
 	{
-		_current_menu.SetFont("default");
+		_current_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 		_current_menu.SetCellSize(150.0f, 70.0f);
 		_current_menu.SetPosition(552.0f, 50.0f);
 		_current_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -113,7 +113,7 @@ void BootMenu::SetWindowed(bool windowed)
 	}
 	else // windowed
 	{
-		_current_menu.SetFont("default");
+		_current_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 		_current_menu.SetCellSize(210.0f, 50.0f);
 		_current_menu.SetPosition(150.0f, 200.0f);
 		_current_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -169,14 +169,14 @@ bool BootMenu::IsWindowed() const
 // Returns true if the currently selected option is enabled and a confirm handler is available
 bool BootMenu::IsSelectionEnabled() const
 {
-	return _current_menu.IsEnabled(_current_menu.GetSelection()) && 
+	return _current_menu.IsEnabled(_current_menu.GetSelection()) &&
 		_confirm_handlers.at(_current_menu.GetSelection()) != 0;
 }
 
 
 // Draws menu on the screen
 bool BootMenu::Draw()
-{	
+{
 	_menu_window->Draw();
 
 	VideoManager->DisableScissoring(); // Scissoring is/was an issue when changing resolution. For now, disable it when drawing the menus :/

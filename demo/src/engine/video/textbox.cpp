@@ -32,6 +32,8 @@ TextBox::TextBox() :
 	_initialized = false;
 }
 
+
+
 TextBox::TextBox(float x, float y, float width, float height, const TEXT_DISPLAY_MODE &mode) :
 	_display_speed(0.0f),
 	_text_xalign(VIDEO_X_LEFT),
@@ -47,6 +49,7 @@ TextBox::TextBox(float x, float y, float width, float height, const TEXT_DISPLAY
 	SetPosition(x, y);
 	_initialized = false;
 }
+
 
 
 TextBox::~TextBox() {
@@ -186,7 +189,6 @@ void TextBox::SetDimensions(float w, float h) {
 	_height = h;
 	_ReformatText();
 }
-
 
 
 
@@ -358,6 +360,8 @@ int32 TextBox::_CalculateTextHeight() {
 	else
 		return _font_properties->height + _font_properties->line_skip * (static_cast<int32>(_text.size()) - 1);
 }
+
+
 
 void TextBox::_AddLine(const ustring& line) {
 	// perform word wrapping in a loop until all the text is added
@@ -631,8 +635,7 @@ void TextBox::_DEBUG_DrawOutline(float text_y) {
 	float line_height = _font_properties->line_skip * -vertDirection;
 	float line_offset = text_y;
 
-	for (int i = 1; i <= possible_lines; ++i)
-	{
+	for (int i = 1; i <= possible_lines; ++i) {
 		line_offset += line_height;
 		VideoManager->DrawLine(left, line_offset, right, line_offset, 3, alpha_black);
 		VideoManager->DrawLine(left, line_offset, right, line_offset, 1, alpha_white);

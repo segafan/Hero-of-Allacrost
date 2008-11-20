@@ -98,12 +98,11 @@ public:
 	void ForceFinish()
 		{ if (_text.empty() == true) return; _finished = true; }
 
-	/** \brief Sets the width and height of the text box. Returns false and prints an error message
+	/** \brief Sets the width and height of the text box
 	*** \param w The width to set for the text box (for a 1024x768 coordinate system).
 	*** \param h The height to set for the text box (for a 1024x768 coordinate system).
 	*** If the width or height are negative, or if they are larger than 1024 or 768 respectively,
-	*** then the function will print an error message and will not change the properties of the
-	*** textbox.
+	*** then the function will not change the properties of the textbox.
 	**/
 	void SetDimensions(float w, float h);
 
@@ -147,15 +146,6 @@ public:
 	*** See the unicode version of SetDisplayText for more details.
 	**/
 	void SetDisplayText(const std::string& text);
-
-	/** \brief Obtains the width and height of the text box.
-	*** \param w A reference to the variable in which to store the width.
-	*** \param h A reference to the variable in which to store the height.
-	*** If the dimensions are invalid because SetDimensions has not yet been called, neither
-	*** w nor h will be modified.
-	**/
-	void GetDimensions(float& w, float& h)
-		{ w = _width; h = _height; }
 
 	/** \brief Retrieve the current x and y alignments for the text
 	*** \param xalign The member to hold the x alignment (e.g. VIDEO_X_LEFT).
@@ -271,9 +261,12 @@ private:
 	**/
 	void _ReformatText();
 
-	/** \brief Outlines border and lines of the textbox, formatting.
-	 */
-	void _DEBUG_DrawOutline(float text_y);
+	/** \brief Draws an outline of the element boundaries
+	*** \param text_ypos The y position corresponding to the top of the first line of text
+	*** \note This function also draws an outline for each line of text in addition to the textbox
+	*** as a whole.
+	**/
+	void _DEBUG_DrawOutline(float text_ypos);
 
 }; // class TextBox : public GUIControl
 
