@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ PauseMode::PauseMode(bool quit_state, bool pause_audio) :
 	_paused_text.SetText(MakeUnicodeString("PAUSED"));
 
 	// Initialize the quit options box
-	_quit_options.SetFont("default");
+	_quit_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_quit_options.SetSize(3, 1);
 	_quit_options.SetCellSize(250.0f, 50.0f);
 	_quit_options.SetPosition(512.0f, 384.0f);

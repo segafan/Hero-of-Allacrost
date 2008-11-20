@@ -167,31 +167,31 @@ void MapDialogueOptions::AddOption(ustring text, int32 next_line, uint32 event) 
 // ****************************************************************************
 
 DialogueWindow::DialogueWindow() {
-	if (_background_image.Load("img/menus/dialogue_box.png") == false)
-		cerr << "MAP ERROR: failed to load image: " << _background_image.GetFilename() << endl;
+	if (_parchment_image.Load("img/menus/black_sleet_parch.png") == false)
+		cerr << "MAP ERROR: failed to load image: " << _parchment_image.GetFilename() << endl;
 
 	if (_nameplate_image.Load("img/menus/dialogue_nameplate.png") == false)
 		cerr << "MAP ERROR: failed to load image: " << _nameplate_image.GetFilename() << endl;
 
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
-// 	MenuWindow::Create(1024.0f, 256.0f);
-// 	MenuWindow::SetPosition(0.0f, 512.0f);
-// 	MenuWindow::SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+	MenuWindow::Create(992.0f, 192.0f);
+	MenuWindow::SetPosition(12.0f, 560.0f);
+	MenuWindow::SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 
 	_display_textbox.SetDisplaySpeed(30);
-	_display_textbox.SetPosition(300.0f, 768.0f - 180.0f);
-	_display_textbox.SetDimensions(1024.0f - 300.0f - 60.0f, 180.0f - 70.0f);
+	_display_textbox.SetPosition(260.0f, 596.0f);
+	_display_textbox.SetDimensions(700.0f, 126.0f);
 	_display_textbox.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_display_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
 	_display_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_display_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
-	_display_options.SetCellSize(500.0f, 25.0f);
+	_display_options.SetCellSize(600.0f, 25.0f);
 	_display_options.SetSize(1, 4);
-	_display_options.SetPosition(325.0f, 620.0f);
+	_display_options.SetPosition(260.0f, 596.0f);
 	_display_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_display_options.SetFont("map");
+	_display_options.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_display_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_display_options.SetCursorOffset(-55.0f, -25.0f);
 	_display_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_NONE);
@@ -203,19 +203,19 @@ DialogueWindow::DialogueWindow() {
 
 
 DialogueWindow::~DialogueWindow() {
-// 	MenuWindow::Destroy();
+	MenuWindow::Destroy();
 }
 
 
 
 void DialogueWindow::Initialize() {
-//	MenuWindow::Show();
+	MenuWindow::Show();
 }
 
 
 
 void DialogueWindow::Reset() {
-//	MenuWindow::Hide();
+	MenuWindow::Hide();
 	_display_textbox.ClearText();
 	_display_options.ClearOptions();
 }
@@ -223,33 +223,34 @@ void DialogueWindow::Reset() {
 
 
 void DialogueWindow::Draw(ustring* name, StillImage* portrait) {
-	// Temporarily change the coordinate system to 1024x768, then draw the dialogue background, nameplate, speaker's name, and speaker's face portrait
+	MenuWindow::Draw();
+
+	// Temporarily change the coordinate system to 1024x768 and draw the contents of the dialogue window
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
-//	MenuWindow::Draw();
+	VideoManager->Move(18.0f, 744.0f);
+	_parchment_image.Draw();
 
-	VideoManager->Move(0.0f, 768.0f); // Bottom right corner of screen
-	_background_image.Draw();
-
-	VideoManager->MoveRelative(47.0f, -42.0f);
-	if (name != NULL)
-		_nameplate_image.Draw();
+// 	VideoManager->Move(47.0f, 726.0f);
+// 	if (name != NULL)
+// 		_nameplate_image.Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
-	VideoManager->MoveRelative(120.0f, -10.0f);
-
-	_display_textbox.Draw();
-	_display_options.Draw();
+	VideoManager->MoveRelative(120.0f, -20.0f);
 
 	if (name != NULL)
 		VideoManager->Text()->Draw(*name, TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 
 	if (portrait != NULL) {
-		VideoManager->MoveRelative(0.0f, -26.0f);
+		VideoManager->MoveRelative(0.0f, -20.0f);
 		portrait->Draw();
 	}
+
+	_display_textbox.Draw();
+	_display_options.Draw();
+
 	VideoManager->PopState();
 }
 

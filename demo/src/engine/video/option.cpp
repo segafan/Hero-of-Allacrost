@@ -126,7 +126,7 @@ void OptionBox::Draw() {
 		VideoManager->SetScissorRect(rect);
 	}
 
-	VideoManager->Text()->SetDefaultFont(_font);
+// 	VideoManager->Text()->SetDefaultFont(_font);
 	VideoManager->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
 	int32 row_min, row_max;
@@ -247,7 +247,7 @@ void OptionBox::Draw() {
 
 						if (text_index >= 0 && text_index < static_cast<int32>(op.text.size())) {
 							const ustring& text = op.text[text_index];
-							float width = static_cast<float>(VideoManager->Text()->CalculateTextWidth(_font, text));
+							float width = static_cast<float>(VideoManager->Text()->CalculateTextWidth(_text_style.font, text));
 							float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
 
 							if (xalign == VIDEO_X_CENTER)
@@ -257,10 +257,15 @@ void OptionBox::Draw() {
 
 							if (edge < left_edge)
 								left_edge = edge;
-							TextStyle ts(_font);
-							if (op.disabled)
-								ts.color = Color::gray;
-							TextManager->Draw(text, ts);
+							if (op.disabled) {
+								Color saved = _text_style.color;
+								_text_style.color = Color::gray;
+								TextManager->Draw(text, _text_style);
+								_text_style.color = saved;
+							}
+							else {
+								TextManager->Draw(text, _text_style);
+							}
 						}
 
 						break;
@@ -269,7 +274,7 @@ void OptionBox::Draw() {
 					case VIDEO_OPTION_ELEMENT_TOTAL:
 					default:
 					{
-						cerr << "VIDEO WARNING: In OptionBox::Draw(), invalid option element type was present" << endl;
+						IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid option element type was present" << endl;
 						break;
 					}
 				} // switch (op.elements[element].type)
@@ -468,7 +473,7 @@ bool OptionBox::IsInitialized(string& error_messages) {
 	if (_option_yalign < VIDEO_Y_TOP || _option_yalign > VIDEO_Y_BOTTOM)
 		s << "* Invalid y align (" << _option_yalign << ")" << endl;
 
-	if (_font.empty())
+	if (_text_style.font.empty())
 		s << "* Invalid font (none has been set)" << endl;
 
 	if (_selection_mode <= VIDEO_SELECT_INVALID || _selection_mode >= VIDEO_SELECT_TOTAL)
@@ -596,14 +601,13 @@ void OptionBox::HandleCancelKey() {
 // Member Access Functions
 // -----------------------------------------------------------------------------
 
-void OptionBox::SetFont(const std::string& font_name) {
-	if (VideoManager->Text()->GetFontProperties(font_name) == NULL) {
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: OptionBox::SetFont() failed because VideoEngine::GetFontProperties() returned false for font: " << font_name << endl;
+void OptionBox::SetTextStyle(const TextStyle& style) {
+	if (TextManager->GetFontProperties(style.font) == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "text style references an invalid font name: " << style.font << endl;
 		return;
 	}
 
-	_font = font_name;
+	_text_style = style;
 	_initialized = IsInitialized(_initialization_errors);
 }
 
@@ -611,9 +615,7 @@ void OptionBox::SetFont(const std::string& font_name) {
 
 void OptionBox::SetCursorState(CursorState state) {
 	if (state <= VIDEO_CURSOR_STATE_INVALID || state >= VIDEO_CURSOR_STATE_TOTAL) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: OptionBox::SetCursorState() failed because the argument passed was invalid: "
-				<< state << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid function argument : " << state << endl;
 		return;
 	}
 

@@ -332,9 +332,6 @@ private:
 *** This class, inheriting from the MenuWindow class, handles all visual control
 *** and placement of a dialgoue. It serves primarily as a container class for
 *** dialogue graphics.
-***
-*** \todo Replace the background image member with just the parchment paper image
-*** and use the inherited menu window object to replace the background image.
 *** ***************************************************************************/
 class DialogueWindow : public hoa_video::MenuWindow {
 	friend class DialogueSupervisor;
@@ -359,8 +356,8 @@ public:
 	void Draw(hoa_utils::ustring* name, hoa_video::StillImage* portrait);
 
 private:
-	//! \brief A background image used in map dialogue
-	hoa_video::StillImage _background_image;
+	//! \brief A parchment paper image embedded within the dialogue window
+	hoa_video::StillImage _parchment_image;
 
 	//! \brief The nameplate image used along with the dialogue box image
 	hoa_video::StillImage _nameplate_image;

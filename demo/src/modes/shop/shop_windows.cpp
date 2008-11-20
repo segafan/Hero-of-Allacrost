@@ -56,7 +56,7 @@ ShopActionWindow::ShopActionWindow() {
 	action_options.SetSize(1, 5); // One column, numerous rows
 	action_options.SetCellSize(150.0f, 50.0f);
 	action_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	action_options.SetFont("default");
+	action_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	action_options.SetCursorOffset(-50.0f, 20.0f);
 	action_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -202,7 +202,7 @@ BuyListWindow::BuyListWindow() {
 	object_list.SetPosition(35.0f, 362.0f);//50.0f, 400.0f);
 	object_list.SetCellSize(500.0f, 50.0f);
 	object_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	object_list.SetFont("default");
+	object_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	object_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	object_list.SetCursorOffset(-50.0f, 20.0f);
 	object_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
@@ -339,7 +339,7 @@ SellListWindow::SellListWindow() {
 	object_list.SetPosition(50.0f, 350.0f);
 	object_list.SetSize(1, 6);
 	object_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	object_list.SetFont("default");
+	object_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	object_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	object_list.SetCursorOffset(-50.0f, 20.0f);
 	object_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -473,7 +473,7 @@ void SellListWindow::Draw() {
 ObjectInfoWindow::ObjectInfoWindow() {
 	_is_weapon = false;
 	_is_armor  = false;
-	
+
 	// (1) Create the info window in the bottom right-hand section of the screen
 	MenuWindow::Create(600, 243, ~VIDEO_MENU_EDGE_TOP);
 	MenuWindow::SetPosition(312, 332);
@@ -501,7 +501,7 @@ ObjectInfoWindow::ObjectInfoWindow() {
 	properties.SetTextStyle(TextStyle());
 	properties.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	properties.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	
+
 	// (5) Load character icons
 	_LoadCharacterIcons();
 }
@@ -518,7 +518,7 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 	_object = obj;
 	_is_weapon = false;
 	_is_armor  = false;
-	
+
 	_usableBy.clear();
 	_statVariance.clear();
 	_metaVariance.clear();
@@ -529,27 +529,27 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 		return;
 	}
 
-	if (obj->GetObjectType() == GLOBAL_OBJECT_WEAPON || 
-	    obj->GetObjectType() == GLOBAL_OBJECT_HEAD_ARMOR || 
+	if (obj->GetObjectType() == GLOBAL_OBJECT_WEAPON ||
+	    obj->GetObjectType() == GLOBAL_OBJECT_HEAD_ARMOR ||
 	    obj->GetObjectType() == GLOBAL_OBJECT_TORSO_ARMOR ||
-	    obj->GetObjectType() == GLOBAL_OBJECT_ARM_ARMOR || 
+	    obj->GetObjectType() == GLOBAL_OBJECT_ARM_ARMOR ||
 	    obj->GetObjectType() == GLOBAL_OBJECT_LEG_ARMOR) {
 		uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
 		GlobalCharacter* ch;
-		
+
 		if(obj->GetObjectType() == GLOBAL_OBJECT_WEAPON) {
 			_is_weapon = true;
 		}
 		else {
 			_is_armor = true;
 		}
-		
+
 		for(uint32 i = 0; i < partysize; i++) {
 			ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(i));
-			
-			// If the currently selected character can equip this weapon, calculate the +/- effects the weapon/armor has on stats. 
+
+			// If the currently selected character can equip this weapon, calculate the +/- effects the weapon/armor has on stats.
 			if(static_cast<GlobalArmor*>(obj)->GetUsableBy() & ch->GetID()) {
-				int32 variance = 0;	
+				int32 variance = 0;
 				int32 metaVariance = 0;
 				switch(obj->GetObjectType()) {
 					case GLOBAL_OBJECT_WEAPON:
@@ -573,12 +573,12 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 						metaVariance = static_cast<GlobalArmor*>(obj)->GetMetaphysicalDefense() - ch->GetLegArmorEquipped()->GetMetaphysicalDefense();
 						break;
 					default: break;
-				}	
-				
+				}
+
 				// Put variance info into the corresponding vectors for currently selected character's index.
 				_usableBy.push_back(ch);
 				_statVariance.push_back(variance);
-				_metaVariance.push_back(metaVariance); 
+				_metaVariance.push_back(metaVariance);
 			}
 			else {
 				_usableBy.push_back(NULL);
@@ -627,22 +627,22 @@ void ObjectInfoWindow::Draw() {
 	_object->GetIconImage().Draw();
 	VideoManager->MoveRelative(60, 20);
 	VideoManager->Text()->Draw(_object->GetName());
-	
+
 	if(_is_weapon || _is_armor) {
 		hoa_utils::ustring atk_or_def;
 		if(_is_weapon) atk_or_def = MakeUnicodeString("ATK:");
 		if(_is_armor)  atk_or_def = MakeUnicodeString("DEF:");
-		
+
 		VideoManager->Move(335,110);
-		
+
 		for(uint32 i = 0; i < /*CHANGE TO PARTYSIZE*/_usableBy.size(); i++) {
-			
+
 			// if selected character is able to equip this item
 			if(_usableBy[i] != NULL) {
 				//VideoManager->Text()->Draw(_usableBy[i]->GetName());
 				_character_icons[i].Draw();
 				VideoManager->MoveRelative(47, 32);
-				
+
 				VideoManager->Text()->Draw(atk_or_def, TextStyle("default", Color::white, VIDEO_TEXT_SHADOW_DARK));
 				VideoManager->MoveRelative(47, 0);
 				if(_statVariance[i] > 0) {
@@ -656,11 +656,11 @@ void ObjectInfoWindow::Draw() {
 					VideoManager->Text()->Draw(NumberToString(_statVariance[i]), TextStyle("default", Color::red, VIDEO_TEXT_SHADOW_DARK) );
 					VideoManager->MoveRelative(-2, 0);
 				}
-				
+
 				VideoManager->MoveRelative(-47, -32);
 				VideoManager->Text()->Draw("MET: ", TextStyle("default", Color::white, VIDEO_TEXT_SHADOW_DARK));
 				VideoManager->MoveRelative(47, 0);
-				
+
 				if(_metaVariance[i] > 0) {
 					VideoManager->Text()->Draw("+" + NumberToString(_metaVariance[i]), TextStyle("default", Color::green, VIDEO_TEXT_SHADOW_DARK));
 				}
@@ -679,12 +679,12 @@ void ObjectInfoWindow::Draw() {
 				_character_icons_bw[i].Draw();
 				VideoManager->MoveRelative(124, 0);
 			}
-					
-			
+
+
 		}
 	}
 	// Draw the object's description and stats text boxes
-	description.Draw(); 
+	description.Draw();
 	properties.Draw();
 }
 
@@ -694,24 +694,24 @@ void ObjectInfoWindow::_LoadCharacterIcons() {
 	GlobalCharacter* ch;  													// Used to point to individual character
 	hoa_video::StillImage icon;												// Stores color icon image
 	hoa_video::StillImage icon_bw;											// Store b&w icon image
-	
+
 	for(uint32 i = 0; i < partysize; i++) {
 			ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(i));
-	 
+
 			// load color character icon
 			if (icon.Load("img/icons/actors/characters/" + ch->GetFilename() + ".png", 45, 45) == false)
 				cerr << "SHOPMODE: Couldn't load character icon: " + ch->GetFilename() + ".png" << endl;
-				
+
 			// load black and white character icon
 			if (icon_bw.Load("img/icons/actors/characters/" + ch->GetFilename() + "_bw.png", 45, 45) == false)
 				cerr << "SHOPMODE: Couldn't load character icon: " + ch->GetFilename() + "_bw.png" << endl;
-				
+
 			// put color and black and white icons into appropiate vectors
 			_character_icons.push_back(icon);
 			_character_icons_bw.push_back(icon_bw);
 	}
 }
-	
+
 // *****************************************************************************
 // ***** ConfirmWindow
 // *****************************************************************************
@@ -729,7 +729,7 @@ ConfirmWindow::ConfirmWindow() {
 	options.SetSize(2, 1); // Two columns, one row
 	options.SetCellSize(150.0f, 50.0f);
 	options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	options.SetFont("default");
+	options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	options.SetCursorOffset(-50.0f, 20.0f);
 	options.SetVerticalWrapMode(VIDEO_WRAP_MODE_NONE);
