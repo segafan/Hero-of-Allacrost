@@ -363,11 +363,11 @@ private:
 *** This class is a singleton and it is both created and destroyed by the VideoEngine
 *** class. TextSupervisor is essentially an extension of the VideoEngine singleton
 *** class which handles all font and text related operations.
-*** 
+***
 *** \note The singleton name of this class is "TextManager"
-*** 
+***
 *** \note When the API user needs to access methods of this class, the recommended
-*** way for doing so is to call "VideoManager->Text()->MethodName()". 
+*** way for doing so is to call "VideoManager->Text()->MethodName()".
 *** VideoManager->Text() returns the singleton pointer to this class.
 *** ***************************************************************************/
 class TextSupervisor : public hoa_utils::Singleton<TextSupervisor> {
@@ -391,12 +391,10 @@ public:
 	*** \param font_filename The filename of the font file to load
 	*** \param font_name The name which to refer to the font after it is loaded
 	*** \param size The point size to set the font after it is loaded
-	*** \param style The default shadow style for this font (default value = VIDEO_TEXT_SHADOW_NONE)
 	*** \param make_default If set to true, this font will be made the default font if it is loaded successfully (default value = false)
 	*** \return True if the font was successfully loaded, or false if there was an error
 	**/
-	bool LoadFont(const std::string& filename, const std::string& font_name, uint32 size, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_NONE,
-		bool make_default = false);
+	bool LoadFont(const std::string& filename, const std::string& font_name, uint32 size, bool make_default = false);
 
 	/** \brief Removes a loaded font from memory and frees up associated resources
 	*** \param font_name The reference name of the font to unload

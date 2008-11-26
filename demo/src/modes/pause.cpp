@@ -56,10 +56,10 @@ PauseMode::PauseMode(bool quit_state, bool pause_audio) :
 	_paused_text.SetText(MakeUnicodeString("PAUSED"));
 
 	// Initialize the quit options box
-	_quit_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	_quit_options.SetSize(3, 1);
-	_quit_options.SetCellSize(250.0f, 50.0f);
 	_quit_options.SetPosition(512.0f, 384.0f);
+// 	_quit_options.SetDimensions(750.0f, 50.0f, 3, 1, 3, 1);
+	_quit_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+
 	_quit_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_quit_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_quit_options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -145,11 +145,11 @@ void PauseMode::Update() {
 		}
 
 		else if (InputManager->LeftPress() == true) {
-			_quit_options.HandleLeftKey();
+			_quit_options.InputLeft();
 		}
 
 		else if (InputManager->RightPress() == true) {
-			_quit_options.HandleRightKey();
+			_quit_options.InputRight();
 		}
 	}
 } // void PauseMode::Update()

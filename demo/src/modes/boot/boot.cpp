@@ -7,11 +7,11 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    boot.cpp
- * \author  Viljami Korhonen, mindflayer@allacrost.org
- * \brief   Source file for boot mode interface.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    boot.cpp
+*** \author  Viljami Korhonen, mindflayer@allacrost.org
+*** \brief   Source file for boot mode interface.
+*** ***************************************************************************/
 
 #include <iostream>
 #include <sstream>
@@ -48,7 +48,7 @@ bool BOOT_DEBUG = false;
 
 
 // Initialize static members here
-bool BootMode::_logo_animating = true;
+bool BootMode::_initial_entry = true;
 
 // ****************************************************************************
 // *************************** GENERAL FUNCTIONS ******************************
@@ -57,7 +57,6 @@ bool BootMode::_logo_animating = true;
 // The constructor initializes variables and sets up the path names of the boot images
 BootMode::BootMode() :
 	_fade_out(false),
-	_main_menu(0, false, this),
 	_key_setting_function(NULL),
 	_joy_setting_function(NULL),
 	_joy_axis_setting_function(NULL),
@@ -65,12 +64,12 @@ BootMode::BootMode() :
 	_latest_version(true),
 	_has_modified_settings(false)
 {
-	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
+	IF_PRINT_DEBUG(BOOT_DEBUG) << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
 
 	ReadScriptDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
-		cout << "BOOT ERROR: failed to load data file" << endl;
+		PRINT_ERROR << "BOOT ERROR: failed to load data file" << endl;
 	}
 
 	// Load all bitmaps using this StillImage
@@ -90,8 +89,7 @@ BootMode::BootMode() :
 	_boot_images.push_back(im);
 
 	if (success == false) {
-		if (BOOT_DEBUG)
-			cerr << "BOOT ERROR: failed to load a boot mode image" << endl;
+		PRINT_ERROR << "BOOT ERROR: failed to load a boot mode image" << endl;
 	}
 
 	// Load the audio stuff
@@ -103,8 +101,8 @@ BootMode::BootMode() :
 	read_data.ReadStringVector("sound_files", new_sound_files);
 
 	if (read_data.IsErrorDetected()) {
-		cerr << "BOOT ERROR: some error occured during reading of boot data file" << endl;
-		cerr << read_data.GetErrorMessages() << endl;
+		PRINT_ERROR << "some error occured during reading of boot data file" << endl;
+		PRINT_ERROR << read_data.GetErrorMessages() << endl;
 	}
 
 	read_data.CloseFile();
@@ -135,6 +133,39 @@ BootMode::BootMode() :
 	else
 		_latest_version_number = "";
 
+	_menu_window.Create(250.0f, 400.0f);
+	_menu_window.SetPosition(387.0f, 560.0f);
+	_menu_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+	_menu_window.Hide();
+
+/*
+	if (!_is_windowed) // without a window
+	{
+		_active_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+// 		_active_menu.SetCellSize(150.0f, 70.0f);
+		_active_menu.SetPosition(552.0f, 50.0f);
+		_active_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+		_active_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+		_active_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+		_active_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+		_active_menu.SetCursorOffset(-50.0f, 28.0f);
+// 		_active_menu.SetSize(_active_menu.GetNumberOptions(), 1);
+	}
+	else // windowed
+	{
+		_active_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+// 		_active_menu.SetCellSize(210.0f, 50.0f);
+		_active_menu.SetPosition(150.0f, 200.0f);
+		_active_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+		_active_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+		_active_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+		_active_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+		_active_menu.SetCursorOffset(-50.0f, 28.0f);
+// 		_active_menu.SetSize(1, _active_menu.GetNumberOptions());
+		_active_menu.SetOwner(_menu_window);
+	}
+*/
+
 	// Construct our menu hierarchy here
 	_SetupMainMenu();
 	_SetupOptionsMenu();
@@ -145,9 +176,6 @@ BootMode::BootMode() :
 	_SetupJoySetttingsMenu();
 	_SetupResolutionMenu();
 
-	// Set the main menu as our currently selected menu
-	_current_menu = &_main_menu;
-
 	// make sure message window is not visible
 	_message_window.Hide();
 }
@@ -155,6 +183,7 @@ BootMode::BootMode() :
 
 // The destructor frees all used music, sounds, and images.
 BootMode::~BootMode() {
+	_menu_window.Destroy();
 	_SaveSettingsFile();
 
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
@@ -175,18 +204,229 @@ void BootMode::Reset() {
 	// Set the coordinate system that BootMode uses
 	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->DisableFog(); // Turn off any remaining fog
-	VideoManager->Text()->SetDefaultTextColor(Color::white);
 
-	// Reset the game universe
-	GlobalManager->ClearAllData();
+	GlobalManager->ClearAllData(); 	// Resets the game universe to a NULL state
+	BootMenu::active_boot_mode = this;
 
 	// Decide which music track to play
-	if (_logo_animating)
+	if (_initial_entry)
 		_boot_music.at(1).Play(); // Opening Effect
 	else
 		_boot_music.at(0).Play(); // Main theme
 }
+
+
+
+
+
+// This is called once every frame iteration to update the status of the game
+void BootMode::Update() {
+	_menu_window.Update(SystemManager->GetUpdateTime());
+
+	if (InputManager->QuitPress() == true) {
+		SystemManager->ExitGame();
+		return;
+	}
+
+	// Screen is in the process of fading out
+	if (_fade_out)
+	{
+		// When the screen is finished fading to black, create a new map mode and fade back in
+		if (!VideoManager->IsFading()) {
+			ModeManager->Pop();
+			try {
+				MapMode *MM = new MapMode(MakeStandardString(GlobalManager->GetLocationName()));
+				ModeManager->Push(MM);
+			} catch (luabind::error e) {
+				cerr << "Map::_Load -- Error loading map dat/maps/demo_town.lua, returning to BootMode." << endl;
+				cerr << "Exception message:" << endl;
+				ScriptManager->HandleLuaError(e);
+			}
+			VideoManager->FadeScreen(Color::clear, 1000);
+		}
+		return;
+	}
+	else if (_initial_entry) // We're animating the opening logo
+	{
+		if (InputManager->AnyKeyPress()) // Check if we want to skip the demo
+		{
+			_EndOpeningAnimation();
+			return;
+		}
+		else
+		{
+			return; // Otherwise skip rest of the event handling for now
+		}
+	}
+
+	// Update the credits window (because it may be hiding/showing!)
+	_credits_screen.Update(SystemManager->GetUpdateTime());
+
+	//CD: Handle key press here, just like any other time
+	if (_welcome_screen.IsVisible())
+	{
+		if (InputManager->AnyKeyPress())
+		{
+			_boot_sounds.at(0).Play();
+			_welcome_screen.Hide();
+
+			// save the settings (automatically changes the welcome variable to 0
+			_has_modified_settings = true;
+			_SaveSettingsFile();
+		}
+
+		return;
+	}
+
+	// Check for waiting keypresses or joystick button presses
+	SDL_Event ev = InputManager->GetMostRecentEvent();
+	if (_joy_setting_function != NULL)
+	{
+		if (InputManager->AnyKeyPress() && ev.type == SDL_JOYBUTTONDOWN)
+		{
+			(this->*_joy_setting_function)(InputManager->GetMostRecentEvent().jbutton.button);
+			_joy_setting_function = NULL;
+			_has_modified_settings = true;
+			_UpdateJoySettings();
+			_message_window.Hide();
+		}
+		if (InputManager->CancelPress())
+		{
+			_joy_setting_function = NULL;
+			_message_window.Hide();
+		}
+		return;
+	}
+
+	if (_joy_axis_setting_function != NULL)
+	{
+		int8 x = InputManager->GetLastAxisMoved();
+		if (x != -1)
+		{
+			(this->*_joy_axis_setting_function)(x);
+			_joy_axis_setting_function = NULL;
+			_has_modified_settings = true;
+			_UpdateJoySettings();
+			_message_window.Hide();
+		}
+		if (InputManager->CancelPress())
+		{
+			_joy_axis_setting_function = NULL;
+			_message_window.Hide();
+		}
+		return;
+	}
+
+	if (_key_setting_function != NULL)
+	{
+		if (InputManager->AnyKeyPress() && ev.type == SDL_KEYDOWN)
+		{
+			(this->*_key_setting_function)(InputManager->GetMostRecentEvent().key.keysym.sym);
+			_key_setting_function = NULL;
+			_has_modified_settings = true;
+			_UpdateKeySettings();
+			_message_window.Hide();
+		}
+		if (InputManager->CancelPress())
+		{
+			_key_setting_function = NULL;
+			_message_window.Hide();
+		}
+		return;
+	}
+
+	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
+	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible())
+	{
+		// Play 'confirm sound' if the selection isn't grayed out and it has a confirm handler
+		if (_active_menu->IsEnabled(_active_menu->GetSelection()))
+			_boot_sounds.at(0).Play();
+		else
+			_boot_sounds.at(3).Play(); // Otherwise play a different sound
+
+		_active_menu->InputConfirm();
+
+	}
+	else if (InputManager->LeftPress() && !_credits_screen.IsVisible())
+	{
+		_active_menu->InputLeft();
+	}
+	else if(InputManager->RightPress() && !_credits_screen.IsVisible())
+	{
+		_active_menu->InputRight();
+	}
+	else if(InputManager->UpPress() && !_credits_screen.IsVisible())
+	{
+		_active_menu->InputUp();
+	}
+	else if(InputManager->DownPress() && !_credits_screen.IsVisible())
+	{
+		_active_menu->InputDown();
+	}
+	else if(InputManager->CancelPress())
+	{
+		_active_menu->InputCancel();
+		// Close the credits-screen if it was visible
+		if (_credits_screen.IsVisible())
+		{
+			_credits_screen.Hide();
+			_boot_sounds.at(1).Play(); // Play cancel sound here as well
+		}
+
+		// check to see if settings need to be saved (if we're exiting from the key or joystick
+		// settings menu
+		_SaveSettingsFile();
+
+		// Play cancel sound
+		_boot_sounds.at(1).Play();
+	}
+
+	// Update menu events
+// 	_active_menu->GetEvent();
+}
+
+
+// Draws our next frame to the video back buffer
+void BootMode::Draw() {
+	// If we're animating logo at the moment, handle all drawing in there and simply return
+	if (_initial_entry)
+	{
+		_AnimateLogo();
+		return;
+	}
+
+	_DrawBackgroundItems();
+
+	_menu_window.Draw();
+
+
+	// Decide whether to draw the credits window, welcome window or the main menu
+	if (_credits_screen.IsVisible())
+		_credits_screen.Draw();
+	else if (_welcome_screen.IsVisible())
+		_welcome_screen.Draw();
+	else if (_active_menu != NULL)
+		_active_menu->Draw();
+
+	if (!_latest_version)
+	{
+		VideoManager->Text()->SetDefaultTextColor(Color::green);
+		VideoManager->Move(482.0f, 553.0f);
+		VideoManager->Text()->Draw("New version available from allacrost.org: " + _latest_version_number);
+	}
+
+	VideoManager->Move(65.0f, 10.0f);
+	VideoManager->Text()->SetDefaultFont("default");
+	VideoManager->Text()->SetDefaultTextColor(Color::gray);
+	VideoManager->Text()->Draw("Demo 1.0.0");
+	VideoManager->MoveRelative(730.0f, 0.0f);
+	VideoManager->Text()->Draw("Copyright (C) 2004 - 2008 The Allacrost Project");
+
+// 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->Move(0, 0);
+	_message_window.Draw();
+}
+
 
 
 // Animates the logo when the boot mode starts up. Should not be called before LoadBootImages.
@@ -218,8 +458,7 @@ void BootMode::_AnimateLogo() {
 	{
 	}
 	// Sequence two: fade in logo+sword
-	else if (total_time >= SEQUENCE_TWO && total_time < SEQUENCE_THREE)
-	{
+	else if (total_time >= SEQUENCE_TWO && total_time < SEQUENCE_THREE) {
 		float alpha = (total_time - SEQUENCE_TWO) / (SEQUENCE_THREE - SEQUENCE_TWO);
 
 		VideoManager->Move(512.0f, 385.0f); // logo bg
@@ -234,8 +473,7 @@ void BootMode::_AnimateLogo() {
 		_boot_images[3].Draw(Color(alpha, alpha, alpha, 1.0f));
 	}
 	// Sequence three: Sword unsheathe & slide
-	else if (total_time >= SEQUENCE_THREE && total_time < SEQUENCE_FOUR)
-	{
+	else if (total_time >= SEQUENCE_THREE && total_time < SEQUENCE_FOUR) {
 		float dt = (total_time - SEQUENCE_THREE) * 0.001f;
 		sword_x = 670.0f + (dt * dt) * 660.0f; // s = s0 + 0.5 * a * t^2
 		VideoManager->Move(512.0f, 385.0f); // logo bg
@@ -250,8 +488,7 @@ void BootMode::_AnimateLogo() {
 		_boot_images[3].Draw();
 	}
 	// Sequence four: Spin around the sword
-	else if (total_time >= SEQUENCE_FOUR && total_time < SEQUENCE_FIVE)
-	{
+	else if (total_time >= SEQUENCE_FOUR && total_time < SEQUENCE_FIVE) {
 		const float ROTATIONS = 720.0f + 90.0f;
 		const float SPEED_LEFT = 35.0f;
 		const float SPEED_UP = 750.0f;
@@ -276,8 +513,7 @@ void BootMode::_AnimateLogo() {
 		_boot_images[2].Draw();
 	}
 	// Sequence five: Sword comes back
-	else if (total_time >= SEQUENCE_FIVE && total_time < SEQUENCE_SIX)
-	{
+	else if (total_time >= SEQUENCE_FIVE && total_time < SEQUENCE_SIX) {
 		// Delta goes from 0.0f to 1.0f
 		float delta_root = (total_time - SEQUENCE_FIVE) / (SEQUENCE_SIX - SEQUENCE_FIVE);
 		float delta = delta_root * delta_root * delta_root * delta_root;
@@ -295,23 +531,21 @@ void BootMode::_AnimateLogo() {
 		_boot_images[2].Draw();
 	}
 	// Sequence six: flash of light
-	else if (total_time >= SEQUENCE_SIX && total_time < SEQUENCE_SEVEN)
-	{
+	else if (total_time >= SEQUENCE_SIX && total_time < SEQUENCE_SEVEN) {
 		// Delta goes from 1.0f to 0.0f
 		float delta = (total_time - SEQUENCE_SIX) / (SEQUENCE_SEVEN - SEQUENCE_SIX);
 		delta = 1.0f - delta * delta;
 		VideoManager->EnableFog(Color::white, delta);
 		_DrawBackgroundItems();
 	}
-	else if (total_time >= SEQUENCE_SEVEN)
-	{
+	else if (total_time >= SEQUENCE_SEVEN) {
 		_EndOpeningAnimation();
 		_DrawBackgroundItems();
 	}
 }
 
 
-// Draws background image, logo and sword at their default locations
+// Draws background image, logo and sword at their stationary locations
 void BootMode::_DrawBackgroundItems() {
 	VideoManager->Move(512.0f, 384.0f);
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
@@ -325,13 +559,13 @@ void BootMode::_DrawBackgroundItems() {
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	_boot_images[2].Draw(); // Draw the sword
 
-	VideoManager->Move(512, 648);
+	VideoManager->Move(512.0f, 648.0f);
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	_boot_images[3].Draw(); // Draw the logo text
 }
 
 
-// Stops playback of the opening animation
+
 void BootMode::_EndOpeningAnimation() {
 	VideoManager->DisableFog(); // Turn off the fog
 
@@ -343,7 +577,7 @@ void BootMode::_EndOpeningAnimation() {
 
 //	Effects::FadeOut(_boot_music.at(1), 10.0f);
 //	Effects::FadeIn(_boot_music.at(0), 50.0f);
-	
+
 	// Load the settings file for reading in the welcome variable
 	ReadScriptDescriptor settings_lua;
 	string file = GetSettingsFilename();
@@ -357,28 +591,30 @@ void BootMode::_EndOpeningAnimation() {
 	}
 	settings_lua.CloseTable();
 	settings_lua.CloseFile();
-	_logo_animating = false;
+	_initial_entry = false;
+
+	_active_menu = &_main_menu;
 }
 
 
-// Waits infinitely for a key press
+// Waits indefinitely for a key press
 SDLKey BootMode::_WaitKeyPress() {
 	SDL_Event event;
 	while (SDL_WaitEvent(&event)) {
 		if (event.type == SDL_KEYDOWN)
-			return event.key.keysym.sym;
+			break;
 	}
 
-	return event.key.keysym.sym; // This line is actually never reached but the compiler will complain if it's removed :)
+	return event.key.keysym.sym;
 }
 
 
-// Waits infinitely for a joystick press
+// Waits indefinitely for a joystick press
 uint8 BootMode::_WaitJoyPress() {
 	SDL_Event event;
 	while (SDL_WaitEvent(&event)) {
 		if (event.type == SDL_JOYBUTTONDOWN)
-			return event.jbutton.button;
+			break;
 	}
 
 	return event.jbutton.button;
@@ -386,95 +622,145 @@ uint8 BootMode::_WaitJoyPress() {
 
 
 // Redefines a key to be mapped to another command. Waits for keypress using _WaitKeyPress()
-void BootMode::_RedefineUpKey() 
-{ 
-	_key_setting_function = &BootMode::_SetUpKey; 
+void BootMode::_RedefineUpKey() {
+	_key_setting_function = &BootMode::_SetUpKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineDownKey() 
-{ 
+
+
+void BootMode::_RedefineDownKey() {
 	_key_setting_function = &BootMode::_SetDownKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineLeftKey() 
-{ 
-	_key_setting_function = &BootMode::_SetLeftKey; 
+
+
+void BootMode::_RedefineLeftKey() {
+	_key_setting_function = &BootMode::_SetLeftKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineRightKey() 
-{ 
-	_key_setting_function = &BootMode::_SetRightKey; 
+
+
+void BootMode::_RedefineRightKey() {
+	_key_setting_function = &BootMode::_SetRightKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineConfirmKey() 
-{ 
-	_key_setting_function = &BootMode::_SetConfirmKey; 
+
+
+void BootMode::_RedefineConfirmKey() {
+	_key_setting_function = &BootMode::_SetConfirmKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineCancelKey() 
-{ 
-	_key_setting_function = &BootMode::_SetCancelKey; 
+
+
+void BootMode::_RedefineCancelKey() {
+	_key_setting_function = &BootMode::_SetCancelKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineMenuKey() 
-{ 
-	_key_setting_function = &BootMode::_SetMenuKey; 
+
+
+void BootMode::_RedefineMenuKey() {
+	_key_setting_function = &BootMode::_SetMenuKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineSwapKey() 
-{ 
-	_key_setting_function = &BootMode::_SetSwapKey; 
+
+
+void BootMode::_RedefineSwapKey() {
+	_key_setting_function = &BootMode::_SetSwapKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineLeftSelectKey() 
-{ 
-	_key_setting_function = &BootMode::_SetLeftSelectKey; 
+
+
+void BootMode::_RedefineLeftSelectKey() {
+	_key_setting_function = &BootMode::_SetLeftSelectKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefineRightSelectKey() 
-{ 
-	_key_setting_function = &BootMode::_SetRightSelectKey; 
+
+
+void BootMode::_RedefineRightSelectKey() {
+	_key_setting_function = &BootMode::_SetRightSelectKey;
 	_ShowMessageWindow(false);
 }
 
-void BootMode::_RedefinePauseKey() 
-{ 
-	_key_setting_function = &BootMode::_SetPauseKey; 
+
+
+void BootMode::_RedefinePauseKey() {
+	_key_setting_function = &BootMode::_SetPauseKey;
 	_ShowMessageWindow(false);
 }
 
-// Pass through functions (required for the function pointer, see header file for details)
-void BootMode::_SetUpKey(const SDLKey &key)
-{ InputManager->SetUpKey(key); }
-void BootMode::_SetDownKey(const SDLKey &key)
-{ InputManager->SetDownKey(key); }
-void BootMode::_SetLeftKey(const SDLKey &key)
-{ InputManager->SetLeftKey(key); }
-void BootMode::_SetRightKey(const SDLKey &key)
-{ InputManager->SetRightKey(key); }
-void BootMode::_SetConfirmKey(const SDLKey &key)
-{ InputManager->SetConfirmKey(key); }
-void BootMode::_SetCancelKey(const SDLKey &key)
-{ InputManager->SetCancelKey(key); }
-void BootMode::_SetMenuKey(const SDLKey &key)
-{ InputManager->SetMenuKey(key); }
-void BootMode::_SetSwapKey(const SDLKey &key)
-{ InputManager->SetSwapKey(key); }
-void BootMode::_SetLeftSelectKey(const SDLKey &key)
-{ InputManager->SetLeftSelectKey(key); }
-void BootMode::_SetRightSelectKey(const SDLKey &key)
-{ InputManager->SetRightSelectKey(key); }
-void BootMode::_SetPauseKey(const SDLKey &key)
-{ InputManager->SetPauseKey(key); }
+
+
+void BootMode::_SetUpKey(const SDLKey &key) {
+	InputManager->SetUpKey(key);
+}
+
+
+
+void BootMode::_SetDownKey(const SDLKey &key) {
+	InputManager->SetDownKey(key);
+}
+
+
+void BootMode::_SetLeftKey(const SDLKey &key) {
+	InputManager->SetLeftKey(key);
+}
+
+
+
+void BootMode::_SetRightKey(const SDLKey &key) {
+	InputManager->SetRightKey(key);
+}
+
+
+
+void BootMode::_SetConfirmKey(const SDLKey &key) {
+	InputManager->SetConfirmKey(key);
+}
+
+
+
+void BootMode::_SetCancelKey(const SDLKey &key) {
+	InputManager->SetCancelKey(key);
+}
+
+
+
+void BootMode::_SetMenuKey(const SDLKey &key) {
+	InputManager->SetMenuKey(key);
+}
+
+
+
+void BootMode::_SetSwapKey(const SDLKey &key) {
+	InputManager->SetSwapKey(key);
+}
+
+
+
+void BootMode::_SetLeftSelectKey(const SDLKey &key) {
+	InputManager->SetLeftSelectKey(key);
+}
+
+
+
+void BootMode::_SetRightSelectKey(const SDLKey &key) {
+	InputManager->SetRightSelectKey(key);
+}
+
+
+
+void BootMode::_SetPauseKey(const SDLKey &key) {
+	InputManager->SetPauseKey(key);
+}
 
 
 // Redefine joystick axes settings
@@ -485,6 +771,8 @@ void BootMode::_RedefineXAxisJoy()
 	InputManager->ResetLastAxisMoved();
 }
 
+
+
 void BootMode::_RedefineYAxisJoy()
 {
 	_joy_axis_setting_function = &BootMode::_SetYAxisJoy;
@@ -492,46 +780,59 @@ void BootMode::_RedefineYAxisJoy()
 	InputManager->ResetLastAxisMoved();
 }
 
+
 // Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
-void BootMode::_RedefineConfirmJoy() 
-{ 
-	_joy_setting_function = &BootMode::_SetConfirmJoy; 
+void BootMode::_RedefineConfirmJoy()
+{
+	_joy_setting_function = &BootMode::_SetConfirmJoy;
 	_ShowMessageWindow(true);
 }
 
-void BootMode::_RedefineCancelJoy() 
-{ 
-	_joy_setting_function = &BootMode::_SetCancelJoy; 
+
+
+void BootMode::_RedefineCancelJoy()
+{
+	_joy_setting_function = &BootMode::_SetCancelJoy;
 	_ShowMessageWindow(true);
 }
 
-void BootMode::_RedefineMenuJoy() 
-{ 
-	_joy_setting_function = &BootMode::_SetMenuJoy; 
+
+
+void BootMode::_RedefineMenuJoy()
+{
+	_joy_setting_function = &BootMode::_SetMenuJoy;
 	_ShowMessageWindow(true);
 }
 
-void BootMode::_RedefineSwapJoy() 
-{ 
-	_joy_setting_function = &BootMode::_SetSwapJoy; 
+
+
+void BootMode::_RedefineSwapJoy()
+{
+	_joy_setting_function = &BootMode::_SetSwapJoy;
 	_ShowMessageWindow(true);
 }
 
-void BootMode::_RedefineLeftSelectJoy() 
-{ 
-	_joy_setting_function = &BootMode::_SetLeftSelectJoy; 
+
+
+void BootMode::_RedefineLeftSelectJoy()
+{
+	_joy_setting_function = &BootMode::_SetLeftSelectJoy;
 	_ShowMessageWindow(true);
 }
 
-void BootMode::_RedefineRightSelectJoy() 
-{ 
-	_joy_setting_function = &BootMode::_SetRightSelectJoy; 
+
+
+void BootMode::_RedefineRightSelectJoy()
+{
+	_joy_setting_function = &BootMode::_SetRightSelectJoy;
 	_ShowMessageWindow(true);
 }
 
-void BootMode::_RedefinePauseJoy() 
-{ 
-	_joy_setting_function = &BootMode::_SetPauseJoy; 
+
+
+void BootMode::_RedefinePauseJoy()
+{
+	_joy_setting_function = &BootMode::_SetPauseJoy;
 	_ShowMessageWindow(true);
 }
 
@@ -582,6 +883,14 @@ void BootMode::_ShowMessageWindow(bool joystick)
 
 // Inits the main menu
 void BootMode::_SetupMainMenu() {
+	_main_menu.SetPosition(512.0f, 50.0f);
+	_main_menu.SetDimensions(600.0f, 50.0f, 5, 1, 5, 1);
+	_main_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_main_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_main_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_main_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_main_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_main_menu.SetCursorOffset(-50.0f, 28.0f);
 
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeUnicodeString("New Game"), &BootMode::_OnNewGame);
@@ -590,13 +899,19 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 
-	string path = GetUserDataPath(true) + "saved_game.lua";
-	if (!DoesFileExist(path))
-		_main_menu.EnableOption(1, false);
 	// TEMP: these options are for debugign purposes only and should be removed for releases
 // 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 // 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
 // 	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
+
+	string path = GetUserDataPath(true) + "saved_game.lua";
+	if (DoesFileExist(path) == false) {
+		_main_menu.EnableOption(1, false);
+		_main_menu.SetSelection(0);
+	}
+	else {
+		_main_menu.SetSelection(1);
+	}
 }
 
 
@@ -607,12 +922,6 @@ void BootMode::_SetupOptionsMenu() {
 	_options_menu.AddOption(MakeUnicodeString("Language"), &BootMode::_OnLanguageOptions);
 	_options_menu.AddOption(MakeUnicodeString("Key Settings"), &BootMode::_OnKeySettings);
 	_options_menu.AddOption(MakeUnicodeString("Joystick Settings"), &BootMode::_OnJoySettings);
-
-	// Disable some of the options
-	//_options_menu.EnableOption(2, false); // Language
-
-	_options_menu.SetWindowed(true);
-	_options_menu.SetParent(&_main_menu);
 }
 
 
@@ -621,12 +930,10 @@ void BootMode::_SetupVideoOptionsMenu()
 {
 	_video_options_menu.AddOption(MakeUnicodeString("Resolution:"), &BootMode::_OnResolution);
 	_video_options_menu.AddOption(MakeUnicodeString("Window mode:"), &BootMode::_OnVideoMode, &BootMode::_OnVideoMode, &BootMode::_OnVideoMode); // Left & right will change window mode as well as plain 'confirm' !
-	_video_options_menu.AddOption(MakeUnicodeString("Brightness:"), 0, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
+	_video_options_menu.AddOption(MakeUnicodeString("Brightness:"), NULL, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
 	_video_options_menu.AddOption(MakeUnicodeString("Image quality:"));
 
 	_video_options_menu.EnableOption(3, false); // disable image quality
-	_video_options_menu.SetWindowed(true);
-	_video_options_menu.SetParent(&_options_menu);
 }
 
 
@@ -635,8 +942,6 @@ void BootMode::_SetupAudioOptionsMenu()
 {
 	_audio_options_menu.AddOption(MakeUnicodeString("Sound Volume: "), 0, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
 	_audio_options_menu.AddOption(MakeUnicodeString("Music Volume: "), 0, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
-	_audio_options_menu.SetWindowed(true);
-	_audio_options_menu.SetParent(&_options_menu);
 }
 
 
@@ -644,8 +949,6 @@ void BootMode::_SetupAudioOptionsMenu()
 void BootMode::_SetupLanguageOptionsMenu()
 {
 	_language_options_menu.AddOption(MakeUnicodeString("French"), &BootMode::_OnLanguageSelect);
-	_language_options_menu.SetWindowed(true);
-	_language_options_menu.SetParent(&_options_menu);
 }
 
 
@@ -662,11 +965,7 @@ void BootMode::_SetupKeySetttingsMenu() {
 	_key_settings_menu.AddOption(MakeUnicodeString("Left Select: "), &BootMode::_RedefineLeftSelectKey);
 	_key_settings_menu.AddOption(MakeUnicodeString("Right Select: "), &BootMode::_RedefineRightSelectKey);
 	_key_settings_menu.AddOption(MakeUnicodeString("Pause: "), &BootMode::_RedefinePauseKey);
-
 	_key_settings_menu.AddOption(MakeUnicodeString("Restore defaults"), &BootMode::_OnRestoreDefaultKeys);
-	_key_settings_menu.SetWindowed(true);
-	_key_settings_menu.SetParent(&_options_menu);
-	_key_settings_menu.SetTextDensity(30.0f); // Shorten the distance between text lines
 }
 
 
@@ -675,7 +974,7 @@ void BootMode::_SetupJoySetttingsMenu() {
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineXAxisJoy);
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineYAxisJoy);
 //	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineThresholdJoy);
-	
+
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineConfirmJoy);
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineCancelJoy);
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineMenuJoy);
@@ -686,9 +985,6 @@ void BootMode::_SetupJoySetttingsMenu() {
 //	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineQuitJoy);
 
 	_joy_settings_menu.AddOption(MakeUnicodeString("Restore defaults"), &BootMode::_OnRestoreDefaultJoyButtons);
-	_joy_settings_menu.SetWindowed(true);
-	_joy_settings_menu.SetParent(&_options_menu);
-	_joy_settings_menu.SetTextDensity(30.0f); // Shorten the distance between text lines
 }
 
 
@@ -696,16 +992,12 @@ void BootMode::_SetupResolutionMenu() {
 	_resolution_menu.AddOption(MakeUnicodeString("640 x 480"), &BootMode::_OnResolution640x480);
 	_resolution_menu.AddOption(MakeUnicodeString("800 x 600"), &BootMode::_OnResolution800x600);
 	_resolution_menu.AddOption(MakeUnicodeString("1024 x 768"), &BootMode::_OnResolution1024x768);
-	_resolution_menu.SetParent(&_video_options_menu);
-	_resolution_menu.SetWindowed(true);
 }
 
 
 // Main menu handlers
 // 'New Game' confirmed
 void BootMode::_OnNewGame() {
-	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
-
 	GlobalManager->NewGame();
 
 	_fade_out = true;
@@ -717,10 +1009,8 @@ void BootMode::_OnNewGame() {
 
 // 'Load Game' confirmed. Not done yet, sorry mate.
 void BootMode::_OnLoadGame() {
-	if (BOOT_DEBUG)	cout << "BOOT: Loading game." << endl;
-
 	string filename = GetUserDataPath(true) + "saved_game.lua";
-	if (DoesFileExist(filename)) {		
+	if (DoesFileExist(filename)) {
 		GlobalManager->LoadGame(filename);
 		_fade_out = true;
 		VideoManager->FadeScreen(Color::black, 1000);
@@ -735,7 +1025,7 @@ void BootMode::_OnLoadGame() {
 
 // 'Options' confirmed
 void BootMode::_OnOptions() {
-	_current_menu = &_options_menu;
+	_active_menu = &_options_menu;
 }
 
 
@@ -745,7 +1035,7 @@ void BootMode::_OnCredits() {
 }
 
 // 'Quit' confirmed
-void BootMode::_OnQuit() 
+void BootMode::_OnQuit()
 { SystemManager->ExitGame(); }
 
 // Battle debug confirmed
@@ -776,14 +1066,14 @@ void BootMode::_OnShopDebug() {
 
 // 'Resolution' confirmed
 void BootMode::_OnResolution() {
-	_current_menu = &_resolution_menu;
+	_active_menu = &_resolution_menu;
 }
 
 
 // 'Video' confirmed
 void BootMode::_OnVideoOptions()
 {
-	_current_menu = &_video_options_menu;
+	_active_menu = &_video_options_menu;
 	_UpdateVideoOptions();
 }
 
@@ -792,7 +1082,7 @@ void BootMode::_OnVideoOptions()
 void BootMode::_OnAudioOptions()
 {
 	// Switch the current menu
-	_current_menu = &_audio_options_menu;
+	_active_menu = &_audio_options_menu;
 	_UpdateAudioOptions();
 }
 
@@ -801,21 +1091,21 @@ void BootMode::_OnAudioOptions()
 void BootMode::_OnLanguageOptions()
 {
 	// Switch the current menu
-	_current_menu = &_language_options_menu;
+	_active_menu = &_language_options_menu;
 	//_UpdateLanguageOptions();
 }
 
 
 // 'Key settings' confirmed
 void BootMode::_OnKeySettings() {
-	_current_menu = &_key_settings_menu;
+	_active_menu = &_key_settings_menu;
 	_UpdateKeySettings();
 }
 
 
 // 'Joystick settings' confirmed
 void BootMode::_OnJoySettings() {
-	_current_menu = &_joy_settings_menu;
+	_active_menu = &_joy_settings_menu;
 	_UpdateJoySettings();
 }
 
@@ -875,7 +1165,7 @@ void BootMode::_OnMusicRight() {
 void BootMode::_SetResolution(int32 width, int32 height) {
 	VideoManager->SetResolution(width, height);
 	VideoManager->ApplySettings();
-	_current_menu = &_video_options_menu; // return back to video options
+// 	_active_menu = &_video_options_menu; // return back to video options
 	_UpdateVideoOptions();
 	_has_modified_settings = true;
 }
@@ -958,31 +1248,31 @@ void BootMode::_UpdateAudioOptions() {
 // Updates the key settings screen
 void BootMode::_UpdateKeySettings() {
 	// Update key names
-	_key_settings_menu.SetOptionText(0, MakeUnicodeString("Move Up: " + InputManager->GetUpKeyName()));
-	_key_settings_menu.SetOptionText(1, MakeUnicodeString("Move Down: " + InputManager->GetDownKeyName()));
-	_key_settings_menu.SetOptionText(2, MakeUnicodeString("Move Left: " + InputManager->GetLeftKeyName()));
-	_key_settings_menu.SetOptionText(3, MakeUnicodeString("Move Right: " + InputManager->GetRightKeyName()));
-	_key_settings_menu.SetOptionText(4, MakeUnicodeString("Confirm: " + InputManager->GetConfirmKeyName()));
-	_key_settings_menu.SetOptionText(5, MakeUnicodeString("Cancel: " + InputManager->GetCancelKeyName()));
-	_key_settings_menu.SetOptionText(6, MakeUnicodeString("Menu: " + InputManager->GetMenuKeyName()));
-	_key_settings_menu.SetOptionText(7, MakeUnicodeString("Swap: " + InputManager->GetSwapKeyName()));
-	_key_settings_menu.SetOptionText(8, MakeUnicodeString("Left Select: " + InputManager->GetLeftSelectKeyName()));
-	_key_settings_menu.SetOptionText(9, MakeUnicodeString("Right Select: " + InputManager->GetRightSelectKeyName()));
-	_key_settings_menu.SetOptionText(10, MakeUnicodeString("Pause: " + InputManager->GetPauseKeyName()));
+	_key_settings_menu.SetOptionText(0, MakeUnicodeString("Move Up<r>" + InputManager->GetUpKeyName()));
+	_key_settings_menu.SetOptionText(1, MakeUnicodeString("Move Down<r>" + InputManager->GetDownKeyName()));
+	_key_settings_menu.SetOptionText(2, MakeUnicodeString("Move Left<r>" + InputManager->GetLeftKeyName()));
+	_key_settings_menu.SetOptionText(3, MakeUnicodeString("Move Right<r>" + InputManager->GetRightKeyName()));
+	_key_settings_menu.SetOptionText(4, MakeUnicodeString("Confirm<r>" + InputManager->GetConfirmKeyName()));
+	_key_settings_menu.SetOptionText(5, MakeUnicodeString("Cancel<r>" + InputManager->GetCancelKeyName()));
+	_key_settings_menu.SetOptionText(6, MakeUnicodeString("Menu<r>" + InputManager->GetMenuKeyName()));
+	_key_settings_menu.SetOptionText(7, MakeUnicodeString("Swap<r>" + InputManager->GetSwapKeyName()));
+	_key_settings_menu.SetOptionText(8, MakeUnicodeString("Left Select<r>" + InputManager->GetLeftSelectKeyName()));
+	_key_settings_menu.SetOptionText(9, MakeUnicodeString("Right Select<r>" + InputManager->GetRightSelectKeyName()));
+	_key_settings_menu.SetOptionText(10, MakeUnicodeString("Pause<r>" + InputManager->GetPauseKeyName()));
 }
 
 
 void BootMode::_UpdateJoySettings() {
 	int32 i = 0;
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("X Axis: " + NumberToString(InputManager->GetXAxisJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Y Axis: " + NumberToString(InputManager->GetYAxisJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Confirm: Button " + NumberToString(InputManager->GetConfirmJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Cancel: Button " + NumberToString(InputManager->GetCancelJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Menu: Button " + NumberToString(InputManager->GetMenuJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Swap: Button " + NumberToString(InputManager->GetSwapJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Left Select : Button " + NumberToString(InputManager->GetLeftSelectJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Right Select: Button " + NumberToString(InputManager->GetRightSelectJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Pause: Button " + NumberToString(InputManager->GetPauseJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("X Axis<r>" + NumberToString(InputManager->GetXAxisJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Y Axis<r>" + NumberToString(InputManager->GetYAxisJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Confirm: Button<r>" + NumberToString(InputManager->GetConfirmJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Cancel: Button<r>" + NumberToString(InputManager->GetCancelJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Menu: Button<r>" + NumberToString(InputManager->GetMenuJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Swap: Button<r>" + NumberToString(InputManager->GetSwapJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Left Select : Button<r>" + NumberToString(InputManager->GetLeftSelectJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Right Select: Button<r>" + NumberToString(InputManager->GetRightSelectJoy())));
+	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Pause: Button<r>" + NumberToString(InputManager->GetPauseJoy())));
 }
 
 
@@ -997,7 +1287,7 @@ void BootMode::_SaveSettingsFile() {
 	string file = GetUserDataPath(false) + "settings.lua";
 	if (!DoesFileExist(file))
 		CopyFile(string("dat/config/settings.lua"), file);
-		
+
 	ModifyScriptDescriptor settings_lua;
 	if (!settings_lua.OpenFile(file)) {
 		cout << "BOOT ERROR: failed to load the settings file!" << endl;
@@ -1036,7 +1326,7 @@ void BootMode::_SaveSettingsFile() {
 	settings_lua.ModifyInt("joystick_settings.swap", InputManager->GetSwapJoy());
 	settings_lua.ModifyInt("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
 	settings_lua.ModifyInt("joystick_settings.right_select", InputManager->GetRightSelectJoy());
-	settings_lua.ModifyInt("joystick_settings.pause", InputManager->GetPauseJoy());	
+	settings_lua.ModifyInt("joystick_settings.pause", InputManager->GetPauseJoy());
 
 	// and save it!
 	settings_lua.CommitChanges();
@@ -1044,244 +1334,5 @@ void BootMode::_SaveSettingsFile() {
 
 	_has_modified_settings = false;
 }
-
-
-// This is called once every frame iteration to update the status of the game
-void BootMode::Update() {
-	uint32 time_elapsed = SystemManager->GetUpdateTime();
-
-	if (InputManager->QuitPress() == true) {
-		SystemManager->ExitGame();
-		return;
-	}
-
-	// Screen is in the process of fading out
-	if (_fade_out)
-	{
-		// When the screen is finished fading to black, create a new map mode and fade back in
-		if (!VideoManager->IsFading()) {
-			ModeManager->Pop();
-			try {
-				MapMode *MM = new MapMode(MakeStandardString(GlobalManager->GetLocationName()));
-				ModeManager->Push(MM);
-			} catch (luabind::error e) {
-				cerr << "Map::_Load -- Error loading map dat/maps/demo_town.lua, returning to BootMode." << endl;
-				cerr << "Exception message:" << endl;
-				ScriptManager->HandleLuaError(e);
-			}
-			VideoManager->FadeScreen(Color::clear, 1000);
-		}
-		return;
-	}
-	else if (_logo_animating) // We're animating the opening logo
-	{
-		if (InputManager->AnyKeyPress()) // Check if we want to skip the demo
-		{
-			_EndOpeningAnimation();
-			return;
-		}
-		else
-		{
-			return; // Otherwise skip rest of the event handling for now
-		}
-	}
-
-	// Update the menu window
-	BootMenu::UpdateWindow(time_elapsed);
-
-	// Update the credits window (because it may be hiding/showing!)
-	_credits_screen.Update(time_elapsed);
-
-	//CD: Handle key press here, just like any other time
-	if (_welcome_screen.IsVisible())
-	{
-		if (InputManager->AnyKeyPress())
-		{
-			_boot_sounds.at(0).Play();
-			_welcome_screen.Hide();
-
-			// save the settings (automatically changes the welcome variable to 0
-			_has_modified_settings = true;
-			_SaveSettingsFile();
-		}
-
-		return;
-	}
-
-	// Check for waiting keypresses or joystick button presses
-	SDL_Event ev = InputManager->GetMostRecentEvent();
-	if (_joy_setting_function != NULL)
-	{
-		if (InputManager->AnyKeyPress() && ev.type == SDL_JOYBUTTONDOWN)
-		{
-			(this->*_joy_setting_function)(InputManager->GetMostRecentEvent().jbutton.button);
-			_joy_setting_function = NULL;
-			_has_modified_settings = true;
-			_UpdateJoySettings();
-			_message_window.Hide();
-		}
-		if (InputManager->CancelPress())
-		{
-			_joy_setting_function = NULL;
-			_message_window.Hide();
-		}
-		return;
-	}
-	
-	if (_joy_axis_setting_function != NULL)
-	{
-		int8 x = InputManager->GetLastAxisMoved();
-		if (x != -1)
-		{
-			(this->*_joy_axis_setting_function)(x);
-			_joy_axis_setting_function = NULL;
-			_has_modified_settings = true;
-			_UpdateJoySettings();
-			_message_window.Hide();
-		}
-		if (InputManager->CancelPress())
-		{
-			_joy_axis_setting_function = NULL;
-			_message_window.Hide();
-		}
-		return;
-	}
-
-	if (_key_setting_function != NULL)
-	{
-		if (InputManager->AnyKeyPress() && ev.type == SDL_KEYDOWN)
-		{
-			(this->*_key_setting_function)(InputManager->GetMostRecentEvent().key.keysym.sym);
-			_key_setting_function = NULL;
-			_has_modified_settings = true;
-			_UpdateKeySettings();
-			_message_window.Hide();
-		}
-		if (InputManager->CancelPress())
-		{
-			_key_setting_function = NULL;
-			_message_window.Hide();
-		}
-		return;
-	}
-	
-	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
-	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible())
-	{
-		// Play 'confirm sound' if the selection isn't grayed out and it has a confirm handler
-		if (_current_menu->IsSelectionEnabled())
-			_boot_sounds.at(0).Play();
-		else
-			_boot_sounds.at(3).Play(); // Otherwise play a silly 'b�p'
-
-		_current_menu->ConfirmPressed();
-
-		// Update window status
-		if (_current_menu->IsWindowed())
-		{
-			BootMenu::ShowWindow(true);
-		}
-		else
-		{
-			BootMenu::ShowWindow(false);
-		}
-	}
-	else if (InputManager->LeftPress() && !_credits_screen.IsVisible())
-	{
-		_current_menu->LeftPressed();
-	}
-	else if(InputManager->RightPress() && !_credits_screen.IsVisible())
-	{
-		_current_menu->RightPressed();
-	}
-	else if(InputManager->UpPress() && !_credits_screen.IsVisible())
-	{
-		_current_menu->UpPressed();
-	}
-	else if(InputManager->DownPress() && !_credits_screen.IsVisible())
-	{
-		_current_menu->DownPressed();
-	}
-	else if(InputManager->CancelPress())
-	{
-		// Close the credits-screen if it was visible
-		if (_credits_screen.IsVisible())
-		{
-			_credits_screen.Hide();
-			_boot_sounds.at(1).Play(); // Play cancel sound here as well
-		}
-
-		// check to see if settings need to be saved (if we're exiting from the key or joystick
-		// settings menu
-		_SaveSettingsFile();
-
-		// Otherwise the cancel was given for the main menu
-		_current_menu->CancelPressed();
-
-		// Go up in the menu hierarchy if possible
-		if (_current_menu->GetParent() != 0)
-		{
-			// Play cancel sound
-			_boot_sounds.at(1).Play();
-
-			// Go up a level in the menu hierarchy
-			_current_menu = _current_menu->GetParent();
-
-			// Update window status again
-			if (_current_menu->IsWindowed())
-				BootMenu::ShowWindow(true);
-			else
-				BootMenu::ShowWindow(false);
-		}
-	}
-
-	// Update menu events
-	_current_menu->GetEvent();
-}
-
-
-// Draws our next frame to the video back buffer
-void BootMode::Draw() {
-
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
-
-	// If we're animating logo at the moment, handle all drawing in there and simply return
-	if (_logo_animating)
-	{
-		_AnimateLogo();
-		return;
-	}
-
-	_DrawBackgroundItems();
-
-	// Decide whether to draw the credits window, welcome window or the main menu
-	if (_credits_screen.IsVisible())
-		_credits_screen.Draw();
-	else if (_welcome_screen.IsVisible())
-		_welcome_screen.Draw();
-	else
-		_current_menu->Draw();
-
-	if (!_latest_version)
-	{
-		VideoManager->Text()->SetDefaultTextColor(Color::green);
-		VideoManager->Move(482.0f, 553.0f);
-		VideoManager->Text()->Draw("New version available from allacrost.org: " + _latest_version_number);
-	}
-
-	VideoManager->Move(65.0f, 10.0f);
-	VideoManager->Text()->SetDefaultFont("default");
-	VideoManager->Text()->SetDefaultTextColor(Color::gray);
-	VideoManager->Text()->Draw("Tech Demo 0.2.2");
-	VideoManager->MoveRelative(730.0f, 0.0f);
-	VideoManager->Text()->Draw("Copyright (C) 2004 - 2008 The Allacrost Project");
-
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
-	VideoManager->Move(0, 0);
-	VideoManager->SetCoordSys(0.0f, 1023.0f, 767.0f, 0.0f);
-	_message_window.Draw();
-}
-
 
 } // namespace hoa_boot

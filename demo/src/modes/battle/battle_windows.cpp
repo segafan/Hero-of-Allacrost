@@ -88,9 +88,8 @@ void ActionWindow::_InitActionCategoryList()
 
 	_action_category_list.SetOptions(category_options);
 	_action_category_list.SetPosition(50.0f, 120.0f);
+	_action_category_list.SetDimensions(400.0f, 100.0f, 4, 1, 4, 1);
 	_action_category_list.SetCursorOffset(-20.0f, 25.0f);
-	_action_category_list.SetCellSize(100.0f, 100.0f);
-	_action_category_list.SetSize(4, 1);
 	_action_category_list.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
 	_action_category_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_category_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -104,8 +103,8 @@ void ActionWindow::_InitActionCategoryList()
 void ActionWindow::_InitActionSelectionList()
 {
 	_action_selection_list.SetPosition(128.0f, 120.0f);
+	_action_selection_list.SetDimensions(300.0f, 35.0f, 1, 4, 1, 4);
 	_action_selection_list.SetCursorOffset(-50.0f, 25.0f);
-	_action_selection_list.SetCellSize(300.0f, 35.0f);
 	_action_selection_list.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
 	_action_selection_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_selection_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -216,14 +215,14 @@ void ActionWindow::_UpdateActionCategory() {
 	_action_category_list.Update(SystemManager->GetUpdateTime());
 
 	if (InputManager->LeftPress()) {
-		_action_category_list.HandleLeftKey();
+		_action_category_list.InputLeft();
 	}
 	else if (InputManager->RightPress()) {
-		_action_category_list.HandleRightKey();
+		_action_category_list.InputRight();
 	}
 
 	else if (InputManager->ConfirmPress() ) {
-		_action_category_list.HandleConfirmKey();
+		_action_category_list.InputConfirm();
 		if (_action_category_list.GetEvent() == VIDEO_OPTION_CONFIRM) {
 			_selected_action_category = static_cast<uint32>(_action_category_list.GetSelection());
 			_ConstructActionSelectionList();
@@ -247,10 +246,10 @@ void ActionWindow::_UpdateActionSelection() {
 	_action_selection_list.Update(SystemManager->GetUpdateTime());
 
 	if (InputManager->UpPress()) {
-		_action_selection_list.HandleUpKey();
+		_action_selection_list.InputUp();
 	}
 	if (InputManager->DownPress()) {
-		_action_selection_list.HandleDownKey();
+		_action_selection_list.InputDown();
 	}
 
 	if (InputManager->ConfirmPress()) {
@@ -506,7 +505,7 @@ void ActionWindow::_ConstructActionSelectionList() {
 
 		// Add the options to the list
 		_action_selection_list.SetOptions(skill_text);
-		_action_selection_list.SetSize(1, skill_text.size());
+// 		_action_selection_list.SetSize(1, skill_text.size());
 		_action_selection_list.SetSelection(0);
 
 		// Disable any options for which the character does not have a sufficient amount of SP to execute
@@ -550,10 +549,10 @@ void ActionWindow::_ConstructActionSelectionList() {
  		}
 
 		// Calculate the number of rows, this is dividing by 6, and if there is a remainder > 0, add one more row for the remainder
- 		_action_selection_list.SetSize(1, _item_list.size() / 6 + ((_item_list.size() % 6) > 0 ? 1 : 0));
+//  		_action_selection_list.SetSize(1, _item_list.size() / 6 + ((_item_list.size() % 6) > 0 ? 1 : 0));
 
 		_action_selection_list.SetOptions(items_text);
-		_action_selection_list.SetSize(1, items_text.size());
+// 		_action_selection_list.SetSize(1, items_text.size());
 		_action_selection_list.SetSelection(0);
 	} // if (_action_category_selected == ACTION_TYPE_ITEM)
 
@@ -724,9 +723,8 @@ void FinishWindow::_InitLoseOptions()
 	lose_text.push_back(MakeUnicodeString("Return to main menu"));
 	lose_text.push_back(MakeUnicodeString("Exit the game"));
 	_lose_options.SetOptions(lose_text);
-	_lose_options.SetCellSize(128.0f, 50.0f);
 	_lose_options.SetPosition(270.0f, 130.0f);
-	_lose_options.SetSize(1, 4);
+	_lose_options.SetDimensions(128.0f, 200.0f, 1, 4, 1, 4);
 	_lose_options.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
 	_lose_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_lose_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1003,10 +1001,10 @@ void FinishWindow::_UpdateAnnounceLose() {
 	} */
 
 	if (InputManager->UpPress()) {
-		_lose_options.HandleUpKey();
+		_lose_options.InputUp();
 	}
 	else if (InputManager->DownPress()) {
-		_lose_options.HandleDownKey();
+		_lose_options.InputDown();
 	}
 	else if (InputManager->ConfirmPress()) {
 		switch (_lose_options.GetSelection()) {

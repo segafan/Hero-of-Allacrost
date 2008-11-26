@@ -42,28 +42,57 @@ extern bool BOOT_DEBUG;
 
 //! An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_boot {
-	enum WAIT_FOR {
-		WAIT_KEY,
-		WAIT_JOY_BUTTON,
-		WAIT_JOY_AXIS
-	};
+
+
+enum BOOT_STATE {
+	BOOT_INVALID = 0,
+	BOOT_INTRO   = 1,
+	BOOT_MAIN    = 2,
+	BOOT_LOAD    = 3,
+	BOOT_OPTIONS = 4,
+	BOOT_CREDITS = 5,
+	BOOT_TOTAL   = 6
+};
+
+enum WAIT_FOR {
+	WAIT_KEY,
+	WAIT_JOY_BUTTON,
+	WAIT_JOY_AXIS
+};
+
 } // namespace private_boot
 
-/*!****************************************************************************
- * \brief Handles everything that needs to be done on the game's boot screen.
- *
- * This is the first mode that is pushed onto the game stack when the program starts.
- * Because the user can set various game settings from this game mode, it has a
- * heavy amount of interaction with the GameSettings class.
- *
- *****************************************************************************/
+/** ****************************************************************************
+*** \brief Handles everything that needs to be done on the game's boot screen.
+***
+*** This is the first mode that is pushed onto the game stack when the program starts.
+*** Because the user can set various game settings from this game mode, it has a
+*** heavy amount of interaction with the game engine classes.
+***
+*** ***************************************************************************/
 class BootMode : public hoa_mode_manager::GameMode {
+	friend class BootMenu;
+
+public:
+	BootMode();
+
+	~BootMode();
+
+	//! Resets appropriate class members. Called whenever BootMode is made the active game mode.
+	void Reset();
+
+	//! Wrapper function that calls different update functions depending on the menu state.
+	void Update();
+
+	//! Wrapper function that calls different draw functions depending on the menu state.
+	void Draw();
+
 private:
+	//! If true, the logo is animating (sword flying and so on...)
+	static bool _initial_entry;
+
 	//! If true, boot mode is exiting and we have to wait for the screen to finish fading out.
 	bool _fade_out;
-
-	//! If true, the logo is animating (sword flying and so on...)
-	static bool _logo_animating;
 
 	//! Music pieces to be used at the boot screen.
 	std::vector<hoa_audio::MusicDescriptor> _boot_music;
@@ -78,8 +107,11 @@ private:
 	//! Welcome screen window
 	WelcomeScreen _welcome_screen;
 
-	//! A pointer to the currently visible menu
-	BootMenu * _current_menu;
+	//! \brief Pointer to the active boot menu
+	BootMenu* _active_menu;
+
+	//!
+	hoa_video::MenuWindow _menu_window;
 
 	//! Main menu
 	BootMenu _main_menu;
@@ -95,7 +127,7 @@ private:
 
 	//! 'Language' menu
 	BootMenu _language_options_menu;
-	
+
 	//! 'Key Settings' menu
 	BootMenu _key_settings_menu;
 
@@ -300,7 +332,7 @@ private:
 
 	//! Specific language selected
 	void _OnLanguageSelect();
-	
+
 	//! Sound volume down
 	void _OnSoundLeft();
 	//! Sound volume up
@@ -348,22 +380,8 @@ private:
 
 	//! Saves all the game settings into a .lua file
 	void _SaveSettingsFile();
-
-public:
-	//! Initializes class members and loads media data.
-	BootMode();
-	//! Frees all media data (images and audio).
-	~BootMode();
-
-	//! Resets appropriate class members. Called whenever BootMode is made the active game mode.
-	void Reset();
-	//! Wrapper function that calls different update functions depending on the menu state.
-	void Update();
-	//! Wrapper function that calls different draw functions depending on the menu state.
-	void Draw();
-
-};
+}; // class BootMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_boot
 
-#endif
+#endif // __BOOT_HEADER__

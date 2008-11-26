@@ -187,9 +187,8 @@ DialogueWindow::DialogueWindow() {
 	_display_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_display_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
-	_display_options.SetCellSize(600.0f, 25.0f);
-	_display_options.SetSize(1, 4);
 	_display_options.SetPosition(260.0f, 596.0f);
+	_display_options.SetDimensions(700.0f, 126.0f, 1, 4, 1, 4);
 	_display_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_display_options.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_display_options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -500,7 +499,7 @@ void DialogueSupervisor::_UpdateOptions() {
 
 	// Execute the event for the current selection if applicable, then return the next line of dialogue for this selection
 	if (InputManager->ConfirmPress()) {
-		_dialogue_window._display_options.HandleConfirmKey();
+		_dialogue_window._display_options.InputConfirm();
 
 		int32 selected_option = _dialogue_window._display_options.GetSelection();
 
@@ -514,11 +513,11 @@ void DialogueSupervisor::_UpdateOptions() {
 	// TODO: handle cancel press to return to previous lines
 
 	else if (InputManager->UpPress()) {
-		_dialogue_window._display_options.HandleUpKey();
+		_dialogue_window._display_options.InputUp();
 	}
 
 	else if (InputManager->DownPress()) {
-		_dialogue_window._display_options.HandleDownKey();
+		_dialogue_window._display_options.InputDown();
 	}
 } // void DialogueSupervisor::_UpdateOptions()
 

@@ -204,9 +204,8 @@ TreasureSupervisor::TreasureSupervisor() :
 	_action_options.AddOption(MakeUnicodeString("Done"));
 	_action_options.AddOption(MakeUnicodeString("View"));
 	_action_options.AddOption(MakeUnicodeString("Menu"));
-	_action_options.SetCellSize(150.0f, 32.0f);
-	_action_options.SetSize(3, 1);
 	_action_options.SetPosition(20.0f, 20.0f);
+	_action_options.SetDimensions(450.0f, 32.0f, 3, 1, 3, 1);
 	_action_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -216,9 +215,8 @@ TreasureSupervisor::TreasureSupervisor() :
 	_action_options.SetSelection(0);
 	_action_options.SetOwner(&_action_window);
 
-	_list_options.SetCellSize(470.0f, 32.0f);
-	_list_options.SetSize(1, 6);
 	_list_options.SetPosition(20.0f, 20.0f);
+	_list_options.SetDimensions(470.0f, 192.0f, 1, 6, 1, 6);
 	_list_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_list_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_list_options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -417,10 +415,10 @@ void TreasureSupervisor::_UpdateAction() {
 	}
 
 	else if (InputManager->LeftPress())
-		_action_options.HandleLeftKey();
+		_action_options.InputLeft();
 
 	else if (InputManager->RightPress())
-		_action_options.HandleRightKey();
+		_action_options.InputRight();
 }
 
 
@@ -450,11 +448,11 @@ void TreasureSupervisor::_UpdateList() {
 	}
 
 	else if (InputManager->UpPress()) {
-		_list_options.HandleUpKey();
+		_list_options.InputUp();
 	}
 
 	else if (InputManager->DownPress()) {
-		_list_options.HandleDownKey();
+		_list_options.InputDown();
 	}
 }
 

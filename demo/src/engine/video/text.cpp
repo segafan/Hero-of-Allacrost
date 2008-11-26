@@ -14,7 +14,7 @@
 ***
 *** This code makes use of the SDL_ttf font library for representing fonts,
 *** font glyphs, and text.
-*** 
+***
 *** \note Normally the int data type should not be used in Allacrost code,
 *** however it is used periodically throughout this file as the SDL_ttf library
 *** requests integer arguments.
@@ -458,7 +458,7 @@ bool TextSupervisor::SingletonInitialize() {
 
 
 
-bool TextSupervisor::LoadFont(const string& filename, const string& font_name, uint32 size, TEXT_SHADOW_STYLE style, bool make_default)
+bool TextSupervisor::LoadFont(const string& filename, const string& font_name, uint32 size, bool make_default)
 {
 	// Make sure that the font name is not already taken
 	if (IsFontValid(font_name) == true) {
@@ -488,9 +488,7 @@ bool TextSupervisor::LoadFont(const string& filename, const string& font_name, u
 
 	// Create the glyph cache for the font and add it to the font map
 	fp->glyph_cache = new std::map<uint16, FontGlyph*>;
-
 	_font_map[font_name] = fp;
-
 	return true;
 } // bool TextSupervisor::LoadFont(...)
 
@@ -719,7 +717,7 @@ void TextSupervisor::_CacheGlyphs(const uint16* text, FontProperties* fp) {
 
 		w = RoundUpPow2(initial->w + 1);
 		h = RoundUpPow2(initial->h + 1);
-		
+
 		intermediary = SDL_CreateRGBSurface(0, w, h, 32, RMASK, GMASK, BMASK, AMASK);
 		if (intermediary == NULL) {
 			SDL_FreeSurface(initial);
@@ -808,7 +806,7 @@ void TextSupervisor::_DrawTextHelper(const uint16* const text, FontProperties* f
 	CoordSys& cs = VideoManager->_current_context.coordinate_system;
 
 	_CacheGlyphs(text, fp);
-	
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_FOG);
