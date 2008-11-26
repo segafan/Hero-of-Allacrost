@@ -13,9 +13,6 @@
 *** \brief   Source file for pause mode interface.
 *** ***************************************************************************/
 
-#include <iostream>
-
-
 #include "audio.h"
 #include "video.h"
 #include "input.h"
@@ -57,7 +54,7 @@ PauseMode::PauseMode(bool quit_state, bool pause_audio) :
 
 	// Initialize the quit options box
 	_quit_options.SetPosition(512.0f, 384.0f);
-// 	_quit_options.SetDimensions(750.0f, 50.0f, 3, 1, 3, 1);
+	_quit_options.SetDimensions(750.0f, 50.0f, 3, 1, 3, 1);
 	_quit_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 
 	_quit_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -89,10 +86,10 @@ void PauseMode::Reset() {
 		_screen_capture = VideoManager->CaptureScreen();
 	}
 	catch(Exception e) {
-		PRINT_WARNING << e.ToString() << endl;
+		IF_PRINT_WARNING(PAUSE_DEBUG) << e.ToString() << endl;
 	}
 
-	VideoManager->SetCoordSys(0, 1024, 0, 768);
+	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 }
 
@@ -100,7 +97,7 @@ void PauseMode::Reset() {
 
 void PauseMode::Update() {
 	// Don't eat up 100% of the CPU time while in pause mode
-	SDL_Delay(50);
+	SDL_Delay(50); // Put the process to sleep for 50ms
 
 	if (_quit_state == false) {
 		if (InputManager->QuitPress() == true) {
@@ -165,7 +162,7 @@ void PauseMode::Draw() {
 	_screen_capture.Draw(_dim_color);
 
 	// Re-set the coordinate system for everything else
-	VideoManager->SetCoordSys(0, 1024.0f, 0, 768.0f);
+	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
 	if (_quit_state == false) {
 		VideoManager->Move(512.0f, 384.0f);
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
