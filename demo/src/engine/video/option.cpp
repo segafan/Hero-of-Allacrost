@@ -19,36 +19,40 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
-OptionBox::OptionBox() {
-	_option_xalign = VIDEO_X_LEFT;
-	_option_yalign = VIDEO_Y_TOP;
-	_selection_mode = VIDEO_SELECT_SINGLE;
-	_switching = false;
-	_horizontal_wrap_mode = VIDEO_WRAP_MODE_NONE;
-	_vertical_wrap_mode = VIDEO_WRAP_MODE_NONE;
-	_cursor_state = VIDEO_CURSOR_STATE_VISIBLE;
-	_event = 0;
-	_selection = -1;
-	_first_selection = -1;
-	_number_options = 0;
-	_scrolling = 0;
-	_scroll_offset = 0;
-	_blink_time = 0;
-	_scroll_time = 0;
-	_blink = false;
-	_cursor_xoffset = 0.0f;
-	_cursor_yoffset = 0.0f;
-	_horizontal_spacing = _vertical_spacing = 0.0f;
-	_number_rows = _number_columns = 0;
-	_initialized = IsInitialized(_initialization_errors);
-	_scissoring = false;
-	_scissoring_owner = false;
-}
-
-
-
-OptionBox::~OptionBox() {
-	ClearOptions();
+OptionBox::OptionBox() :
+	GUIControl(),
+	_initialized(false),
+	_number_rows(1),
+	_number_columns(1),
+	_number_cell_rows(1),
+	_number_cell_columns(1),
+	_cell_width(0.0f),
+	_cell_height(0.0f),
+	_selection_mode(VIDEO_SELECT_SINGLE),
+	_horizontal_wrap_mode(VIDEO_WRAP_MODE_NONE),
+	_vertical_wrap_mode(VIDEO_WRAP_MODE_NONE),
+	_enable_switching(false),
+	_cursor_xoffset(0.0f),
+	_cursor_yoffset(0.0f),
+	_scroll_offset(0),
+	_option_xalign(VIDEO_X_LEFT),
+	_option_yalign(VIDEO_Y_CENTER),
+	_scissoring(false),
+	_scissoring_owner(false),
+	_event(0),
+	_selection(-1),
+	_first_selection(-1),
+	_cursor_state(VIDEO_CURSOR_STATE_VISIBLE),
+	_blink(false),
+	_blink_time(0),
+	_scrolling(false),
+	_scroll_time(0),
+	_scroll_direction(0)
+{
+	// TEMP
+	_width = 1.0f;
+	_height = 1.0f;
+	_text_style = TextStyle("default", Color::white, VIDEO_TEXT_SHADOW_BLACK, 1, -2);
 }
 
 
@@ -80,12 +84,15 @@ void OptionBox::Draw() {
 	VideoManager->PushState();
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 
+	if (GUIManager->DEBUG_DrawOutlines() == true)
+		_DEBUG_DrawOutline();
+
 	// (1) Determine the edge dimensions of the option box
 	float left, right, bottom, top;
 	left = 0.0f;
-	right = _number_columns * _horizontal_spacing;
+	right = _number_columns * _cell_width;
 	bottom = 0.0f;
-	top = _number_rows * _vertical_spacing;
+	top = _number_rows * _cell_height;
 
 	CalculateAlignedRect(left, right, bottom, top);
 
@@ -100,13 +107,13 @@ void OptionBox::Draw() {
 	if (h < 0)
 		h = -h;
 
-	//Calculate scissoring rectangle
+	// Calculate scissoring rectangle
 	ScreenRect rect(x, y, w, h);
 
 	CoordSys &cs = VideoManager->_current_context.coordinate_system;
 
 	if (cs.GetVerticalDirection() < 0) {
-		rect.top += static_cast<int32>(_vertical_spacing) + (_number_rows); //To accomodate the 1 pixel per row offset
+		rect.top += static_cast<int32>(_cell_height) + (_number_rows); //To accomodate the 1 pixel per row offset
 	}
 
 	bool scissor = VideoManager->IsScissoringEnabled();
@@ -140,21 +147,21 @@ void OptionBox::Draw() {
 		row_min = _scroll_offset;
 		row_max = _scroll_offset + _number_rows + 1;
 
-		cell_offset = cs.GetVerticalDirection() * (1.0f - (_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _vertical_spacing;
+		cell_offset = cs.GetVerticalDirection() * (1.0f - (_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
 	}
 	else { // Scrolling down
 		row_min = _scroll_offset - 1;
 		row_max = _scroll_offset + _number_rows;
-		cell_offset = cs.GetVerticalDirection() * ((_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _vertical_spacing;
+		cell_offset = cs.GetVerticalDirection() * ((_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
 	}
 
 	OptionCellBounds bounds;
 	bounds.y_top = top + cell_offset;
-	bounds.y_center = bounds.y_top - 0.5f * _vertical_spacing * cs.GetVerticalDirection();
+	bounds.y_center = bounds.y_top - 0.5f * _cell_height * cs.GetVerticalDirection();
 	bounds.y_bottom = (bounds.y_center * 2.0f) - bounds.y_top;
 
-	float yoff = -_vertical_spacing * cs.GetVerticalDirection();
-	float xoff = _horizontal_spacing * cs.GetHorizontalDirection();
+	float yoff = -_cell_height * cs.GetVerticalDirection();
+	float xoff = _cell_width * cs.GetHorizontalDirection();
 	bool finished = false;
 
 	// Iterate through all the visible option cells and draw them
@@ -165,14 +172,14 @@ void OptionBox::Draw() {
 			VideoManager->DisableScissoring();
 
 		bounds.x_left = left;
-		bounds.x_center = bounds.x_left + (0.5f * _horizontal_spacing * cs.GetHorizontalDirection());
+		bounds.x_center = bounds.x_left + (0.5f * _cell_width * cs.GetHorizontalDirection());
 		bounds.x_right = (bounds.x_center * 2.0f) - bounds.x_left;
 
 		// Draw the columns of options
 		for (int32 col = 0; col < _number_columns; ++col) {
 			int32 index = row * _number_columns + col;
 
-			if (index >= _number_options || index < 0) {
+			if (index >= GetNumberOptions() || index < 0) {
 				finished = true;
 				break;
 			}
@@ -288,7 +295,7 @@ void OptionBox::Draw() {
 				if (_scroll_direction == -1)// Scrolling up
 					cursor_offset = -cell_offset;
 				else // Scrolling down
-					cursor_offset = -cell_offset + cs.GetVerticalDirection() * _vertical_spacing;
+					cursor_offset = -cell_offset + cs.GetVerticalDirection() * _cell_height;
 			}
 
 			// Check if this is the index where we should draw the cursor icon for switching elements
@@ -326,8 +333,8 @@ void OptionBox::Draw() {
 		bounds.y_bottom += yoff;
 	} // for (int32 row = row_min; row < row_max; row++)
 
-	if (GUIManager->DEBUG_DrawOutlines() == true)
-		_DEBUG_DrawOutline();
+// 	if (GUIManager->DEBUG_DrawOutlines() == true)
+// 		GUIControl::_DEBUG_DrawOutline();
 
 	//VideoManager->EnableScissoring(scissoring_rollback);
 	VideoManager->PopState();
@@ -335,62 +342,72 @@ void OptionBox::Draw() {
 
 
 
-void OptionBox::ClearOptions() {
-	_options.clear();
-	_number_options = 0;
+void OptionBox::SetDimensions(float width, float height, uint8 num_cols, uint8 num_rows, uint8 cell_cols, uint8 cell_rows) {
+	if (num_rows == 0 || num_cols == 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "num_rows/num_cols argument was zero" << endl;
+		return;
+	}
+
+	if (cell_rows == 0 || cell_cols == 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "cell_rows/cell_cols argument was zero" << endl;
+		return;
+	}
+
+	if (num_rows < cell_rows || num_cols < cell_cols) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "num_rows/num_cols was less than cell_rows/cell_cols" << endl;
+		return;
+	}
+
+	_width = width;
+	_height = height;
+	_number_columns = num_cols;
+	_number_rows = num_rows;
+	_number_cell_columns = cell_cols;
+	_number_cell_rows = cell_rows;
+	_cell_width = _width / cell_cols;
+	_cell_height = _height / cell_rows;
 }
 
 
 
-bool OptionBox::SetOptions(const vector<ustring>& format_text) {
-	_options.clear();
-	_number_options = 0;
-
-	vector<ustring>::const_iterator i = format_text.begin();
-	while (i != format_text.end()) {
-		const ustring &str = *i;
-
+void OptionBox::SetOptions(const vector<ustring>& option_text) {
+	ClearOptions();
+	for (vector<ustring>::const_iterator i = option_text.begin(); i != option_text.end(); i++) {
+		const ustring& str = *i;
 		Option option;
 
 		if (_ConstructOption(str, option) == false) {
-			_options.clear();
-			_number_options = 0;
-			if (VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: OptionBox::SetOptions() failed due to an invalid format string: "
-					<< MakeStandardString(*i) << endl;
-			return false;
+			ClearOptions();
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "an option contained an invalid formatted string: " << MakeStandardString(*i) << endl;
+			return;
 		}
-
 		_options.push_back(option);
-
-		_number_options++;
-		i++;
 	}
-
-	return true;
 }
 
 
 
-bool OptionBox::AddOption(const hoa_utils::ustring &text) {
-	Option option;
+void OptionBox::ClearOptions() {
+	_options.clear();
+}
 
-	// Construct the option
+
+
+void OptionBox::AddOption(const hoa_utils::ustring& text) {
+	Option option;
 	if (_ConstructOption(text, option) == false) {
-		return false;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument contained an invalid formatted string: " << MakeStandardString(text) << endl;
+		return;
 	}
 
 	_options.push_back(option);
-	_number_options++;
-	return true;
 }
 
 
 
 bool OptionBox::SetOptionText(int32 index, const hoa_utils::ustring &text) {
-	if (index < 0 || index >= _number_options) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: OptionBox::SetOptionText() failed because it was given an invalid index: " << index << endl;
+	if (index < 0 || index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument was invalid (out of bounds): " << index << endl;
 		return false;
 	}
 
@@ -401,21 +418,19 @@ bool OptionBox::SetOptionText(int32 index, const hoa_utils::ustring &text) {
 
 
 void OptionBox::SetSelection(int32 index) {
-	if (index < 0 || index >= _number_options) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: OptionBox::SetSelection() failed because it was passed an invalid index: "
-				<< index << endl;
+	if (index < 0 || index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument was invalid (out of bounds): " << index << endl;
 		return;
 	}
-	_selection = index;
 
+	_selection = index;
 	int32 select_row = _selection / _number_columns;
 
 	// If the new selection isn't currently being displayed, instantly scroll to it
-	if (select_row < _scroll_offset || select_row > _scroll_offset + _number_rows - 1) {
+	if (select_row < _scroll_offset || select_row > (_scroll_offset + _number_rows - 1)) {
 		_scroll_offset = select_row - _number_rows + 1;
 
-		int32 total_num_rows = (_number_options + _number_columns - 1) / _number_columns;
+		int32 total_num_rows = (GetNumberOptions() + _number_columns - 1) / _number_columns;
 
 		if (_scroll_offset + _number_rows >= total_num_rows) {
 			_scroll_offset = total_num_rows - _number_rows;
@@ -426,10 +441,8 @@ void OptionBox::SetSelection(int32 index) {
 
 
 void OptionBox::EnableOption(int32 index, bool enable) {
-	if (index < 0 || index >= _number_options) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: OptionBox::EnableOption() failed because an invalid "
-				<< "option index was specified: " << index << endl;
+	if (index < 0 || index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument index was invalid: " << index << endl;
 		return;
 	}
 
@@ -439,10 +452,8 @@ void OptionBox::EnableOption(int32 index, bool enable) {
 
 
 bool OptionBox::IsOptionEnabled(int32 index) {
-	if (index < 0 || index >= _number_options) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: OptionBox::IsOptionEnabled() failed because an invalid "
-				<< "option index was specified: " << index << endl;
+	if (index < 0 || index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument index was invalid: " << index << endl;
 		return false;
 	}
 
@@ -455,17 +466,23 @@ bool OptionBox::IsInitialized(string& error_messages) {
 	ostringstream s;
 	error_messages.clear();
 
+	if (_width <= 0.0f)
+		s << "* Invalid width (" << _width << ")" << endl;
+
+	if (_height <= 0.0f)
+		s << "* Invalid height (" << _height << ")" << endl;
+
 	if (_number_rows <= 0)
 		s << "* Invalid number of rows (" << _number_rows << ")" << endl;
 
 	if (_number_columns <= 0)
 		s << "* Invalid number of columns (" << _number_columns << ")" << endl;
 
-	if (_horizontal_spacing <= 0.0f && _number_columns > 1)
-		s << "* Invalid horizontal spacing (" << _horizontal_spacing << ")" << endl;
+	if (_cell_width <= 0.0f && _number_columns > 1)
+		s << "* Invalid horizontal spacing (" << _cell_width << ")" << endl;
 
-	if (_vertical_spacing <= 0.0f && _number_rows > 1)
-		s << "* Invalid vertical spacing (" << _vertical_spacing << ")" << endl;
+	if (_cell_height <= 0.0f && _number_rows > 1)
+		s << "* Invalid vertical spacing (" << _cell_height << ")" << endl;
 
 	if (_option_xalign < VIDEO_X_LEFT || _option_xalign > VIDEO_X_RIGHT)
 		s << "* Invalid x align (" << _option_xalign << ")" << endl;
@@ -493,7 +510,60 @@ bool OptionBox::IsInitialized(string& error_messages) {
 // Input Handling Methods
 // -----------------------------------------------------------------------------
 
-void OptionBox::HandleUpKey() {
+void OptionBox::InputConfirm() {
+	// Abort if an invalid option is selected
+	if (_selection < 0 || _selection >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "an invalid (out of bounds) option was selected: " << _selection << endl;
+		return;
+	}
+
+	// Ignore input while scrolling, or if an event has already been logged
+	if (_scrolling || _event || _options[_selection].disabled)
+		return;
+
+	// Case #1: switch the position of two different options
+	if (_enable_switching && _first_selection >= 0 && _selection != _first_selection) {
+		Option temp = _options[_selection];
+		_options[_selection] = _options[_first_selection];
+		_options[_first_selection] = temp;
+		_first_selection = -1; // Done so that we know we're not in switching mode any more
+		_event = VIDEO_OPTION_SWITCH;
+	}
+
+	// Case #2: partial confirm (confirming the first element in a double confirm)
+	else if (_selection_mode == VIDEO_SELECT_DOUBLE && _first_selection == -1) {
+		_first_selection = _selection;
+	}
+
+	// Case #3: standard confirm
+	else {
+		if (_options[_selection].disabled) {
+			// TODO: do something to tell player they confirmed on a disabled option?
+			return;
+		}
+		_event = VIDEO_OPTION_CONFIRM;
+		// Get out of switch mode
+		_first_selection = -1;
+	}
+}
+
+
+
+void OptionBox::InputCancel() {
+	// Ignore input while scrolling, or if an event has already been logged
+	if (_scrolling || _event)
+		return;
+
+	// If we're in switching mode unselect the first selection
+	if (_first_selection >= 0)
+		_first_selection = -1;
+	else
+		_event = VIDEO_OPTION_CANCEL;
+}
+
+
+
+void OptionBox::InputUp() {
 	// Ignore input while scrolling, or if an event has already been logged
 	if (_scrolling || _event)
 		return;
@@ -504,7 +574,7 @@ void OptionBox::HandleUpKey() {
 
 
 
-void OptionBox::HandleDownKey() {
+void OptionBox::InputDown() {
 	// Ignore input while scrolling, or if an event has already been logged
 	if (_scrolling || _event)
 		return;
@@ -515,7 +585,7 @@ void OptionBox::HandleDownKey() {
 
 
 
-void OptionBox::HandleLeftKey() {
+void OptionBox::InputLeft() {
 	// Ignore input while scrolling, or if an event has already been logged
 	if (_scrolling || _event)
 		return;
@@ -526,75 +596,13 @@ void OptionBox::HandleLeftKey() {
 
 
 
-void OptionBox::HandleRightKey() {
+void OptionBox::InputRight() {
 	// Ignore input while scrolling, or if an event has already been logged
 	if (_scrolling || _event)
 		return;
-
 
 	if (_ChangeSelection(1, true) == false)
 		_event = VIDEO_OPTION_BOUNDS_RIGHT;
-}
-
-
-
-void OptionBox::HandleConfirmKey() {
-	// Abort if an invalid option is selected
-	if (_selection < 0 || _selection >= _number_options) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: In OptionBox::HandleConfirmKey(), an invalid (out of bounds) option "
-				<< "was selected: " << _selection << endl;
-		return;
-	}
-
-	// Ignore input while scrolling, or if an event has already been logged
-	if (_scrolling || _event || _options[_selection].disabled)
-		return;
-
-	// Case #1: switch the position of two different options
-	if (_switching && _first_selection >= 0 && _selection != _first_selection) {
-		// Switch the location of the two selected options
-		Option temp = _options[_selection];
-		_options[_selection] = _options[_first_selection];
-		_options[_first_selection] = temp;
-		// Set _first_selection to -1, so that we know we're not in switching mode any more
-		_first_selection = -1;
-
-		_event = VIDEO_OPTION_SWITCH;
-	}
-
-	// Case #2: partial confirm (confirming the first element in a double confirm)
-	else if (_selection_mode == VIDEO_SELECT_DOUBLE && _first_selection == -1) {
-		// mark the item that is getting switched
-		_first_selection = _selection;
-	}
-
-	// Case #3: confirm
-	else {
-		if (_options[_selection].disabled) {
-			// TODO: do something to tell player they confirmed on a disabled option
-			return;
-		}
-
-		_event = VIDEO_OPTION_CONFIRM;
-
-		// Get out of switch mode
-		_first_selection = -1;
-	}
-}
-
-
-
-void OptionBox::HandleCancelKey() {
-	// Ignore input while scrolling, or if an event has already been logged
-	if (_scrolling || _event)
-		return;
-
-	// If we're in switch mode and the cancel key is hit, get out of switch mode.
-	if (_first_selection >= 0)
-		_first_selection = -1;
-	else
-		_event = VIDEO_OPTION_CANCEL;
 }
 
 // -----------------------------------------------------------------------------
@@ -653,19 +661,16 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 				// All formatting tags are at least 3 characters long because you need the opening (<)
 				// and close (>) plus stuff in the middle. So anything less than 3 characters is a problem.
 
-				if (VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: OptionBox::_ConstructOption() failed because a tag opening was detected "
-						<< "with an inadequate number of remaining characters to construct a full tag: "
-						<< MakeStandardString(format_string) << endl;
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because a tag opening was detected with an inadequate "
+					<< "number of remaining characters to construct a full tag: " << MakeStandardString(format_string) << endl;
 				return false;
 			}
 
 			size_t end_position = tmp.find(END_TAG);
 
 			if (end_position == ustring::npos) { // Did not find the end of the tag
-				if (VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: OptionBox::_ConstructOption() failed because a matching end tag could not "
-						<< "be found for an open tag: " << MakeStandardString(format_string) << endl;
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because a matching end tag could not be found for an open tag: "
+					<< MakeStandardString(format_string) << endl;
 				return false;
 			}
 
@@ -692,7 +697,7 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 					StillImage imd;
 					if (imd.Load(tag_text) == false) {
 						if (VIDEO_DEBUG)
-							cerr << "VIDEO ERROR: OptionBox::_ConstructOption failed because of an invalid image tag: "
+							IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because of an invalid image tag: "
 								<< MakeStandardString(format_string) << endl;
 						return false;
 					}
@@ -740,6 +745,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 	// Do nothing if the movement is horizontal and there is only one column with no horizontal wrap shifting
 	if (horizontal == true && _number_columns == 1 && _horizontal_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
 		return false;
+
 	// Do nothing if the movement is vertical and there is only one row with no vertical wrap shifting
 	if (horizontal == false && _number_rows == 1 && _vertical_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
 		return false;
@@ -750,8 +756,8 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 	bool bounds_exceeded = false;
 
 	// Determine if the movement selection will exceed a column or row bondary
-	if( (horizontal == true && ( (col + offset < 0) || (col + offset >= _number_columns) || (col + offset >= _number_options ) ) ) ||
-		    (horizontal == false && ( (row + offset < 0) || (row + offset >= _number_rows) || (row + offset >= _number_options ) ) ) )
+	if ((horizontal == true && ((col + offset < 0) || (col + offset >= _number_columns) || (col + offset >= GetNumberOptions()))) ||
+		(horizontal == false && ((row + offset < 0) || (row + offset >= _number_rows) || (row + offset >= GetNumberOptions()))))
 	{
 		bounds_exceeded = true;
 	}
@@ -776,72 +782,66 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 		if (col + offset < 0) { // The left boundary was exceeded
 			if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT)
 				offset += _number_columns;
-			else if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_SHIFTED) {
-				if (_vertical_wrap_mode != VIDEO_WRAP_MODE_NONE) // Make sure vertical wrapping is accepted
-					offset += _number_options;
-				else
-					return false;
-			}
+			// Make sure vertical wrapping is allowed if horizontal wrap mode is shifting
+			else if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_SHIFTED && _vertical_wrap_mode != VIDEO_WRAP_MODE_NONE)
+				offset += GetNumberOptions();
+			else
+				return false;
 		}
 		else { // The right boundary was exceeded
 			if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT)
 				offset -= _number_columns;
-			else if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_SHIFTED) {
-				if (_vertical_wrap_mode != VIDEO_WRAP_MODE_NONE) // Make sure vertical wrapping is accepted
-				{
-					offset = 0;
-					_selection++;
-				}
+			// Make sure vertical wrapping is allowed if horizontal wrap mode is shifting
+			else if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_SHIFTED && _vertical_wrap_mode != VIDEO_WRAP_MODE_NONE) {
+				offset = 0;
+				_selection++;
+			}
 				else
 					return false;
-			}
 		}
-		_selection = (_selection + offset) % _number_options;
+		_selection = (_selection + offset) % GetNumberOptions();
 	}
 
 	// Case #4: vertical movement with wrapping enabled
 	else {
 		if (row + offset < 0) { // The top boundary was exceeded
 			if (_vertical_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT)
-				offset += _number_options;
-			else if (_vertical_wrap_mode == VIDEO_WRAP_MODE_SHIFTED) {
-				if (_horizontal_wrap_mode != VIDEO_WRAP_MODE_NONE) // Make sure horizontal wrapping is accepted
-					offset += (_number_columns - 1);
-				else
-					return false;
-			}
+				offset += GetNumberOptions();
+			// Make sure horizontal wrapping is allowed if vertical wrap mode is shifting
+			else if (_vertical_wrap_mode == VIDEO_WRAP_MODE_SHIFTED && _horizontal_wrap_mode != VIDEO_WRAP_MODE_NONE)
+				offset += (_number_columns - 1);
+			else
+				return false;
 		}
 		else  { // The bottom boundary was exceeded
 			if (_vertical_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT) {
-				if( row + offset >= _number_options )
-					offset -= _number_options;
+				if( row + offset >= GetNumberOptions() )
+					offset -= GetNumberOptions();
 			}
-			else if (_vertical_wrap_mode == VIDEO_WRAP_MODE_SHIFTED) {
-				if (_horizontal_wrap_mode != VIDEO_WRAP_MODE_NONE) // Make sure horizontal wrapping is accepted
-					offset -= (_number_columns - 1);
-				else
-					return false;
-			}
+			// Make sure horizontal wrapping is allowed if vertical wrap mode is shifting
+			else if (_vertical_wrap_mode == VIDEO_WRAP_MODE_SHIFTED && _horizontal_wrap_mode != VIDEO_WRAP_MODE_NONE)
+				offset -= (_number_columns - 1);
+			else
+				return false;
 		}
-		_selection = (_selection + (offset * _number_columns)) % _number_options;
+		_selection = (_selection + (offset * _number_columns)) % GetNumberOptions();
 	}
 
 	// If the new selection isn't currently being displayed, scroll it into view
 	row = _selection / _number_columns;
-	if (row < _scroll_offset || row >= _scroll_offset + _number_rows ) {
+	if (row < _scroll_offset || row >= _scroll_offset + _number_rows) {
 		_scrolling = true;
 		_scroll_time = 0;
 
 		if (row < _scroll_offset)
-			_scroll_direction = -1 * ( _scroll_offset - row ); // scroll up
+			_scroll_direction = -1 * (_scroll_offset - row); // scroll up
 		else
-			_scroll_direction = 1 * ( row - _number_rows - _scroll_offset + 1 ); // scroll down
+			_scroll_direction = 1 * (row - _number_rows - _scroll_offset + 1); // scroll down
 
 		_scroll_offset += _scroll_direction;
 	}
 
 	_event = VIDEO_OPTION_SELECTION_CHANGE;
-
 	return true;
 } // bool OptionBox::_ChangeSelection(int32 offset, bool horizontal)
 
@@ -862,7 +862,7 @@ void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBoun
 			break;
 	}
 
-	switch(yalign) {
+	switch (yalign) {
 		case VIDEO_Y_TOP:
 			y = bounds.y_top;
 			break;
@@ -876,5 +876,36 @@ void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBoun
 
 	VideoManager->Move(x, y);
 } // void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds& bounds, float& x, float& y)
+
+
+
+void OptionBox::_DEBUG_DrawOutline() {
+	float left = 0.0f;
+	float right = _width;
+	float bottom = 0.0f;
+	float top = _height;
+
+	// Draw the outline of the option box area
+	VideoManager->Move(0.0f, 0.0f);
+	CalculateAlignedRect(left, right, bottom, top);
+	VideoManager->DrawRectangleOutline(left, right, bottom, top, 3, alpha_black);
+	VideoManager->DrawRectangleOutline(left, right, bottom, top, 1, alpha_white);
+
+	// Draw outline for inner cell rows
+	float cell_row = top;
+	for (uint32 i = 1; i < _number_cell_rows; i++) {
+		cell_row += _cell_height;
+		VideoManager->DrawLine(left, cell_row, right, cell_row, 3, alpha_black);
+		VideoManager->DrawLine(left, cell_row, right, cell_row, 1, alpha_white);
+	}
+
+	// Draw outline for inner cell columns
+	float cell_col = left;
+	for (uint32 i = 1; i < _number_cell_columns; i++) {
+		cell_col += _cell_width;
+		VideoManager->DrawLine(cell_col, bottom, cell_col, top, 3, alpha_black);
+		VideoManager->DrawLine(cell_col, bottom, cell_col, top, 1, alpha_white);
+	}
+}
 
 } // namespace hoa_video

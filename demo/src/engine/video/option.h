@@ -224,7 +224,8 @@ class OptionBox : public private_video::GUIControl {
 public:
 	OptionBox();
 
-	~OptionBox();
+	~OptionBox()
+		{}
 
 	/** \brief Updates any blinking or scrolling effects for the option box
 	*** \param frame_time The number of milliseconds elapsed this frame
@@ -237,24 +238,38 @@ public:
 	//! \brief Draws each enabled option to the screen
 	void Draw();
 
-	//! \brief Removes all options and their allocated data from the OptionBox
-	void ClearOptions();
+	/** \brief Sets the visible dimensions, 2D data structure, and visible data layout
+	*** \param width The width to set for the entire option box
+	*** \param height The height to set for the entire option box
+	*** \param num_cols The number of columns of options (should be non-zero)
+	*** \param num_rows The number of rows of options (should be non-zero)
+	*** \param cell_cols The number of columns of cells that should be visible in the display area (should be non-zero)
+	*** \param cell_rows The number of rows of cells that should be visible in the display area (should be non-zero)
+	***
+	*** These settings will determine the size of each cell. Cell size is computed as (width/cell_cols), (height/cell_rows).
+	*** The num_cols and num_rows must be greater than or equal to visible_rows and visible_cols. This requirement is necessary
+	*** because it is silly to try to represent a structure of 2 columns and 2 rows in a layout of 4 columns and 4 rows. Failure
+	*** to observe this requirement will result in no changes being made by this function.
+	**/
+	void SetDimensions(float width, float height, uint8 num_cols, uint8 num_rows, uint8 cell_cols, uint8 cell_rows);
 
 	/** \brief Sets the options to display in this option box
 	*** \param option_text A vector of unicode strings which contain the text for each item, along with any formatting tags
-	*** \return True if all options were added successfull, or false if an option failed
-	*** If this function returns false, then it will not add any options to the OptionBox (even the ones that can be
-	*** successfully added without an error).
+	*** \note Calling this function will clear any current options
 	***
-	*** For example: "<img/weapons/mythril.png>Mythril knife<r>500 drunes"
+	*** If any single option contains formatting errors, then the entire set of options will not be added.
+	*** Example of an option with formatting: "<img/weapons/mythril.png>Mythril knife<r>500 drunes"
 	**/
-	bool SetOptions(const std::vector<hoa_utils::ustring>& option_text);
+	void SetOptions(const std::vector<hoa_utils::ustring>& option_text);
+
+	//! \brief Removes all options and their allocated data from the OptionBox
+	void ClearOptions();
 
 	/** \brief Adds a new option to the OptionBox
 	*** \param text The formatting text for the new option
-	*** \return Returns false is for some reason the option could not be added
+	*** The option will not be added if it contained formatting errors.
 	**/
-	bool AddOption(const hoa_utils::ustring &text);
+	void AddOption(const hoa_utils::ustring &text);
 
 	/** \brief Changes the stored information of a particular option
 	*** \param index The index of the option to change
@@ -293,30 +308,16 @@ public:
 	*** \brief Processes the input commands for moving the cursor, selecting options, etcetra
 	**/
 	//@{
-	void HandleUpKey();
-	void HandleDownKey();
-	void HandleLeftKey();
-	void HandleRightKey();
-	void HandleConfirmKey();
-	void HandleCancelKey();
+	void InputConfirm();
+	void InputCancel();
+	void InputUp();
+	void InputDown();
+	void InputLeft();
+	void InputRight();
 	//@}
 
 	//! \name Member Access Functions
 	//@{
-	/** \brief Sets the size of the option box in terms of number of columns and rows
-	*** \param columns The number of columns to allocate for the option box
-	*** \param rows The number of rows to allocate for the option box
-	**/
-	void SetSize(int32 columns, int32 rows)
-		{ _number_columns = columns; _number_rows = rows; _initialized = IsInitialized(_initialization_errors); }
-
-	/** \brief Sets the width and height of all option cells
-	*** \param horz_spacing The amount of horizontal space allocated for each cell
-	*** \param vert_spacing The amount of vertical space allocated for each cell
-	**/
-	void SetCellSize(float horz_spacing, float vert_spacing)
-		{ _horizontal_spacing = horz_spacing; _vertical_spacing = vert_spacing; _initialized = IsInitialized(_initialization_errors); }
-
 	/** \brief Sets the alignment of the option text and cursor
 	*** \param xalign Left/center/right alignment of text in the cell
 	*** \param yalign Top/center/bottom alignment of text in the cell
@@ -346,8 +347,8 @@ public:
 	*** \param enable True enables switching, false disables it
 	*** \note Switching is disabled by default
 	**/
-	void SetSwitching(bool enable)
-		{ _switching = enable; }
+	void SetEnableSwitching(bool enable)
+		{ _enable_switching = enable; }
 
 	/** \brief Sets the cursor offset relative to the text position
 	*** \param x Horizontal offset (the sign determines whether its left or right)
@@ -402,7 +403,7 @@ public:
 
 	//! \brief Retreives the number of options in the option box
 	int32 GetNumberOptions() const
-		{ return _number_options; }
+		{ return _options.size(); }
 	//@}
 
 	/** \brief Used to enable scissoring of the option box
@@ -416,6 +417,8 @@ private:
 	//! \brief When set to true, indicates that the option box is initialized and ready to be used
 	bool _initialized;
 
+	//! \name Option Property Members
+	//@{
 	/** \brief The vector containing all of the options
 	*** This 1D structure represents a 2D array of options. For an option box with 2 rows and 3 columns,
 	*** the first 3 elements would contain the contents of the 1st row (left to right) and the last 3
@@ -423,28 +426,23 @@ private:
 	**/
 	std::vector<private_video::Option> _options;
 
-	//! \name Option Property Members
-	//@{
-	//! \brief The number of options there are in this box
-	int32 _number_options;
+	//! \brief The total number of rows and columns of data represented by the box
+	int32 _number_rows, _number_columns;
 
-	//! \brief The number of columns of options
-	int32 _number_columns;
+	//! \brief How many rows and columns of cells can fit in the option box dimensions
+	uint32 _number_cell_rows, _number_cell_columns;
 
-	//! \brief The number of rows of options
-	int32 _number_rows;
+	//! \brief The dimenions of each cell within the option box
+	float _cell_width, _cell_height;
 
 	//! \brief The selection mode for the option box (ie single or double confirm selection)
 	SelectMode _selection_mode;
 
-	//! \brief The wrapping mode used for horizontal cursor movement
-	WrapMode _horizontal_wrap_mode;
-
-	//! \brief The wrapping mode used for vertical cursor movement
-	WrapMode _vertical_wrap_mode;
+	//! \brief The wrapping modes used for horizontal and vertical cursor movement
+	WrapMode _horizontal_wrap_mode, _vertical_wrap_mode;
 
 	//! \brief When set to true, the user may switch the locations of two different options
-	bool _switching;
+	bool _enable_switching;
 	//@}
 
 	//! \name Drawing Related Members
@@ -458,17 +456,17 @@ private:
 	//! \brief A draw offset used for the option box when it is scrolling
 	int32 _scroll_offset;
 
-	//! \brief The amount of horizontal spacing between option cells
-	float _horizontal_spacing;
-
-	//! \brief The amount of vertical spacing between option cells
-	float _vertical_spacing;
-
 	//! \brief The horizontal alignment type for option cell contents
 	int32 _option_xalign;
 
 	//! \brief The vertical alignment type for option cell contents
 	int32 _option_yalign;
+
+	//! \brief True if scissoring is enabled
+	bool _scissoring;
+
+	//! \brief True if scissoring should be applied according to the owner window, false for the box's size
+	bool _scissoring_owner;
 	//@}
 
 	//! \name Active State Members
@@ -503,12 +501,6 @@ private:
 	int32 _scroll_direction;
 	//@}
 
-	//! \brief True if scissoring is enabled
-	bool _scissoring;
-
-	//! \brief True if scissoring should be applied according to the owner window, false for the box's size
-	bool _scissoring_owner;
-
 	// ---------- Private methods
 
 	/** \brief helper function to parse text for an option box, and fill an Option structure
@@ -534,6 +526,9 @@ private:
 	*** This is a helper function for OptionBox::Draw()
 	**/
 	void _SetupAlignment(int32 xalign, int32 yalign, const private_video::OptionCellBounds& bounds, float& x, float& y);
+
+	//! \brief Draws an outline of the option box and the inner cell boundaries
+	void _DEBUG_DrawOutline();
 }; // class OptionBox : public private_video::GUIControl
 
 } // namespace hoa_video

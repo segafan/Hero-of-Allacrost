@@ -302,15 +302,15 @@ void MenuMode::Update() {
 		if (_current_menu->IsEnabled(_current_menu->GetSelection()))
 			_menu_sounds["confirm"].Play();
 
-		_current_menu->HandleConfirmKey();
+		_current_menu->InputConfirm();
 	}
 	else if (InputManager->LeftPress()) {
 		// Play Sound
-		_current_menu->HandleLeftKey();
+		_current_menu->InputLeft();
 	}
 	else if (InputManager->RightPress()) {
 		// Play Sound
-		_current_menu->HandleRightKey();
+		_current_menu->InputRight();
 	}
 	else if (InputManager->SwapPress()) {
 		// Play Sound
@@ -535,8 +535,8 @@ void MenuMode::_HandleInventoryMenu() {
 void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
 	// Set all the default options
 	ob->SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	ob->SetCellSize(115.0f, 50.0f);
 	ob->SetPosition(142.0f, 85.0f);
+	ob->SetDimensions(115.0f, 50.0f, 1, 1, 1, 1);
 	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	ob->SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -549,7 +549,7 @@ void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
 void MenuMode::_SetupMainOptionBox() {
 	// Setup the main options box
 	_SetupOptionBoxCommonSettings(&_main_options);
-	_main_options.SetSize(MAIN_SIZE, 1);
+// 	_main_options.SetSize(MAIN_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -571,7 +571,7 @@ void MenuMode::_SetupMainOptionBox() {
 void MenuMode::_SetupInventoryOptionBox() {
 	// Setup the option box
 	_SetupOptionBoxCommonSettings(&_menu_inventory);
-	_menu_inventory.SetSize(INV_SIZE, 1);
+// 	_menu_inventory.SetSize(INV_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -589,7 +589,7 @@ void MenuMode::_SetupInventoryOptionBox() {
 void MenuMode::_SetupSkillsOptionBox() {
 	// Setup the option box
 	_SetupOptionBoxCommonSettings(&_menu_skills);
-	_menu_skills.SetSize(SKILLS_SIZE, 1);
+// 	_menu_skills.SetSize(SKILLS_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -604,7 +604,7 @@ void MenuMode::_SetupSkillsOptionBox() {
 void MenuMode::_SetupStatusOptionBox() {
 	// Setup the status option box
 	_SetupOptionBoxCommonSettings(&_menu_status);
-	_menu_status.SetSize(STATUS_SIZE, 1);
+// 	_menu_status.SetSize(STATUS_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -621,7 +621,7 @@ void MenuMode::_SetupStatusOptionBox() {
 void MenuMode::_SetupOptionsOptionBox() {
 	// Setup the options option box
 	_SetupOptionBoxCommonSettings(&_menu_options);
-	_menu_options.SetSize(OPTIONS_SIZE, 1);
+// 	_menu_options.SetSize(OPTIONS_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -637,7 +637,7 @@ void MenuMode::_SetupOptionsOptionBox() {
 void MenuMode::_SetupSaveOptionBox() {
 	// setup the save options box
 	_SetupOptionBoxCommonSettings(&_menu_save);
-	_menu_save.SetSize(SAVE_SIZE, 1);
+// 	_menu_save.SetSize(SAVE_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -652,7 +652,7 @@ void MenuMode::_SetupSaveOptionBox() {
 void MenuMode::_SetupFormationOptionBox() {
 	// setup the save options box
 	_SetupOptionBoxCommonSettings(&_menu_formation);
-	_menu_formation.SetSize(FORMATION_SIZE, 1);
+// 	_menu_formation.SetSize(FORMATION_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -667,8 +667,8 @@ void MenuMode::_SetupFormationOptionBox() {
 void MenuMode::_SetupEquipOptionBox() {
 	// Setup the status option box
 	_SetupOptionBoxCommonSettings(&_menu_equip);
-	_menu_equip.SetCellSize(150.0f, 50.0f);
-	_menu_equip.SetSize(EQUIP_SIZE, 1);
+// 	_menu_equip.SetCellSize(150.0f, 50.0f);
+// 	_menu_equip.SetSize(EQUIP_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;

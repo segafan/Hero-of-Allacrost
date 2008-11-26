@@ -624,18 +624,18 @@ void TextBox::_DEBUG_DrawOutline(float text_y) {
 	float bottom = 0.0f;
 	float top    = _height;
 
-	float vertDirection = VideoManager->_current_context.coordinate_system.GetVerticalDirection();
-
+	// Draw the outline of the textbox
 	VideoManager->Move(0.0f, 0.0f);
 	CalculateAlignedRect(left, right, bottom, top);
 	VideoManager->DrawRectangleOutline(left, right, bottom, top, 3, alpha_black);
 	VideoManager->DrawRectangleOutline(left, right, bottom, top, 1, alpha_white);
 
-	int possible_lines = _height / _font_properties->line_skip;
-	float line_height = _font_properties->line_skip * -vertDirection;
+	// Draw the inner boundaries for each line of text
+	uint32 possible_lines = _height / _font_properties->line_skip;
+	float line_height = _font_properties->line_skip * -VideoManager->_current_context.coordinate_system.GetVerticalDirection();
 	float line_offset = text_y;
 
-	for (int i = 1; i <= possible_lines; ++i) {
+	for (uint32 i = 1; i <= possible_lines; ++i) {
 		line_offset += line_height;
 		VideoManager->DrawLine(left, line_offset, right, line_offset, 3, alpha_black);
 		VideoManager->DrawLine(left, line_offset, right, line_offset, 1, alpha_white);

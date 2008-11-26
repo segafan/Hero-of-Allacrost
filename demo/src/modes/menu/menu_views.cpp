@@ -149,14 +149,12 @@ InventoryWindow::~InventoryWindow()
 //Initializes the list of items
 void InventoryWindow::_InitInventoryItems() {
 	// Set up the inventory option box
-	_inventory_items.SetCellSize(400.0f, 60.0f);
-
 	_inventory_items.SetPosition(500.0f, 170.0f);
+	_inventory_items.SetDimensions(400.0f, 360.0f, 1, 6, 1, 6);
 	_inventory_items.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_inventory_items.SetCursorOffset(-52.0f, -20.0f);
 	_inventory_items.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_inventory_items.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_inventory_items.SetSize( 1, 6 );
 	_inventory_items.Scissoring( true, false );
 
 	// Update the item text
@@ -175,15 +173,13 @@ void InventoryWindow::_InitCharSelect() {
 	vector<ustring> options;
 	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
 
+	_char_select.SetPosition(72.0f, 109.0f);
+	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
 	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-	_char_select.SetSize(1, 4);
-	_char_select.SetCellSize(360, 108);
-	_char_select.SetPosition(72.0f, 109.0f);
 
 	//Use a blank string so the cursor has somewhere to point
 	//String is overdrawn by char portraits, so no matter
@@ -198,10 +194,9 @@ void InventoryWindow::_InitCharSelect() {
 
 //Initalizes the available item categories
 void InventoryWindow::_InitCategory() {
-	_item_categories.SetCellSize(56.0f,30.0f);
 	_item_categories.SetPosition(458.0f, 120.0f);
+	_item_categories.SetDimensions(448.0f, 30.0f, ITEM_CATEGORY_SIZE, 1, ITEM_CATEGORY_SIZE, 1);
 	_item_categories.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	_item_categories.SetSize(ITEM_CATEGORY_SIZE,1);
 
 	_item_categories.SetCursorOffset(-52.0f, -20.0f);
 	_item_categories.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
@@ -270,27 +265,27 @@ void InventoryWindow::Update() {
 	// Handle the appropriate input events
 	if (InputManager->ConfirmPress())
 	{
-		active_option->HandleConfirmKey();
+		active_option->InputConfirm();
 	}
 	else if (InputManager->CancelPress())
 	{
-		active_option->HandleCancelKey();
+		active_option->InputCancel();
 	}
 	else if (InputManager->LeftPress())
 	{
-		active_option->HandleLeftKey();
+		active_option->InputLeft();
 	}
 	else if (InputManager->RightPress())
 	{
-		active_option->HandleRightKey();
+		active_option->InputRight();
 	}
 	else if (InputManager->UpPress())
 	{
-		active_option->HandleUpKey();
+		active_option->InputUp();
 	}
 	else if (InputManager->DownPress())
 	{
-		active_option->HandleDownKey();
+		active_option->InputDown();
 	}
 
 	uint32 event = active_option->GetEvent();
@@ -504,14 +499,13 @@ void StatusWindow::_InitCharSelect() {
 	vector<ustring> options;
 	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
 
+	_char_select.SetPosition(72.0f, 109.0f);
+	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
 	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-	_char_select.SetCellSize(360, 108);
-	_char_select.SetPosition(72.0f, 109.0f);
 
 	// Use blank string so cursor can point somewhere
 	for (uint32 i = 0; i < size; i++) {
@@ -528,15 +522,15 @@ void StatusWindow::Update() {
 	// check input values
 	if (InputManager->UpPress())
 	{
-		_char_select.HandleUpKey();
+		_char_select.InputUp();
 	}
 	else if (InputManager->DownPress())
 	{
-		_char_select.HandleDownKey();
+		_char_select.InputDown();
 	}
 	else if (InputManager->CancelPress())
 	{
-		_char_select.HandleCancelKey();
+		_char_select.InputCancel();
 	}
 
 	if (_char_select.GetEvent() == VIDEO_OPTION_CANCEL) {
@@ -670,8 +664,8 @@ void SkillsWindow::Activate(bool new_status) {
 
 void SkillsWindow::_InitSkillsList() {
 	// Set up the inventory option box
-	_skills_list.SetCellSize(180.0f, 30.0f);
 	_skills_list.SetPosition(500.0f, 170.0f);
+	_skills_list.SetDimensions(180.0f, 30.0f, 1, 4, 1, 4);
 	_skills_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_skills_list.SetCursorOffset(-52.0f, -20.0f);
 	_skills_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -684,8 +678,8 @@ void SkillsWindow::_InitSkillsList() {
 	_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 
 	// setup the cost option box
-	_skill_cost_list.SetCellSize(180.0f, 30.0f);
 	_skill_cost_list.SetPosition(800.0f, 170.0f);
+	_skill_cost_list.SetDimensions(180.0f, 30.0f, 1, 4, 1, 4);
 	_skill_cost_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_skill_cost_list.SetCursorOffset(-52.0f, -20.0f);
 	_skill_cost_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -701,14 +695,14 @@ void SkillsWindow::_InitCharSelect() {
 	vector<ustring> options;
 	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
 
+	_char_select.SetPosition(72.0f, 109.0f);
+	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
 	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-	_char_select.SetCellSize(360, 108);
-	_char_select.SetPosition(72.0f, 109.0f);
+
 
 	//Use blank strings....won't be seen anyway
 	for (uint32 i = 0; i < size; i++) {
@@ -724,10 +718,9 @@ void SkillsWindow::_InitCharSelect() {
 
 
 void SkillsWindow::_InitSkillsCategories() {
-	_skills_categories.SetCellSize(105.0f,30.0f);
 	_skills_categories.SetPosition(510.0f, 120.0f);
+	_skills_categories.SetDimensions(105.0f, 30.0f, SKILL_CATEGORY_SIZE, 1, SKILL_CATEGORY_SIZE, 1);
 	_skills_categories.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	_skills_categories.SetSize(SKILL_CATEGORY_SIZE,1);
 	_skills_categories.SetCursorOffset(-52.0f, -20.0f);
 	_skills_categories.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_skills_categories.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -767,27 +760,27 @@ void SkillsWindow::Update() {
 	// Handle the appropriate input events
 	if (InputManager->ConfirmPress())
 	{
-		active_option->HandleConfirmKey();
+		active_option->InputConfirm();
 	}
 	else if (InputManager->CancelPress())
 	{
-		active_option->HandleCancelKey();
+		active_option->InputCancel();
 	}
 	else if (InputManager->LeftPress())
 	{
-		active_option->HandleLeftKey();
+		active_option->InputLeft();
 	}
 	else if (InputManager->RightPress())
 	{
-		active_option->HandleRightKey();
+		active_option->InputRight();
 	}
 	else if (InputManager->UpPress())
 	{
-		active_option->HandleUpKey();
+		active_option->InputUp();
 	}
 	else if (InputManager->DownPress())
 	{
-		active_option->HandleDownKey();
+		active_option->InputDown();
 	}
 
 	uint32 event = active_option->GetEvent();
@@ -950,8 +943,8 @@ void SkillsWindow::_UpdateSkillList() {
 
 	switch (_skills_categories.GetSelection()) {
 		case SKILL_ALL:
-			_skills_list.SetSize(1, all_skills->size());
-			_skill_cost_list.SetSize(1, all_skills->size());
+// 			_skills_list.SetSize(1, all_skills->size());
+// 			_skill_cost_list.SetSize(1, all_skills->size());
 
 			for (i = all_skills->begin(); i != all_skills->end(); ++i)
 			{
@@ -961,8 +954,8 @@ void SkillsWindow::_UpdateSkillList() {
 			}
 			break;
 		case SKILL_BATTLE:
-			_skills_list.SetSize(1,battle_skills->size());
-			_skill_cost_list.SetSize(1, battle_skills->size());
+// 			_skills_list.SetSize(1,battle_skills->size());
+// 			_skill_cost_list.SetSize(1, battle_skills->size());
 
 			for (i = battle_skills->begin(); i != battle_skills->end(); ++i)
 			{
@@ -972,8 +965,8 @@ void SkillsWindow::_UpdateSkillList() {
 			}
 			break;
 		case SKILL_FIELD:
-			_skills_list.SetSize(1, menu_skills->size());
-			_skill_cost_list.SetSize(1, menu_skills->size());
+// 			_skills_list.SetSize(1, menu_skills->size());
+// 			_skill_cost_list.SetSize(1, menu_skills->size());
 
 			for (i = menu_skills->begin(); i != menu_skills->end(); ++i)
 			{
@@ -983,7 +976,8 @@ void SkillsWindow::_UpdateSkillList() {
 			}
 			break;
 		default:
-			_skills_list.SetSize(1,0);
+// 			_skills_list.SetSize(1,0);
+			break;
 	}
 
 	_skills_list.SetOptions(options);
@@ -1058,7 +1052,7 @@ void EquipWindow::Activate(bool new_status) {
 
 void EquipWindow::_InitEquipmentList() {
 	// Set up the inventory option box
-	_equip_list.SetCellSize(180.0f, 30.0f);
+// 	_equip_list.SetCellSize(180.0f, 30.0f);
 
 	_equip_list.SetPosition(500.0f, 170.0f);
 	_equip_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
@@ -1083,15 +1077,13 @@ void EquipWindow::_InitCharSelect() {
 	vector<ustring> options;
 	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
 
+	_char_select.SetPosition(72.0f, 109.0f);
+	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
 	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-	//_char_select.SetSize(1, 4);
-	_char_select.SetCellSize(360, 108);
-	_char_select.SetPosition(72.0f, 109.0f);
 
 	//Use blank strings....won't be seen anyway
 	for (uint32 i = 0; i < size; i++) {
@@ -1109,10 +1101,9 @@ void EquipWindow::_InitCharSelect() {
 
 void EquipWindow::_InitEquipmentSelect() {
 	//Set params
-	_equip_select.SetCellSize(105.0f,70.0f);
 	_equip_select.SetPosition(680.0f, 145.0f);
+	_equip_select.SetDimensions(105.0f, 350.0f, 1, EQUIP_CATEGORY_SIZE, 1, EQUIP_CATEGORY_SIZE);
 	_equip_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	_equip_select.SetSize(1,EQUIP_CATEGORY_SIZE);
 
 	_equip_select.SetCursorOffset(-132.0f, -20.0f);
 	_equip_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
@@ -1148,27 +1139,27 @@ void EquipWindow::Update() {
 	// Handle the appropriate input events
 	if (InputManager->ConfirmPress())
 	{
-		active_option->HandleConfirmKey();
+		active_option->InputConfirm();
 	}
 	else if (InputManager->CancelPress())
 	{
-		active_option->HandleCancelKey();
+		active_option->InputCancel();
 	}
 	else if (InputManager->LeftPress())
 	{
-		active_option->HandleLeftKey();
+		active_option->InputLeft();
 	}
 	else if (InputManager->RightPress())
 	{
-		active_option->HandleRightKey();
+		active_option->InputRight();
 	}
 	else if (InputManager->UpPress())
 	{
-		active_option->HandleUpKey();
+		active_option->InputUp();
 	}
 	else if (InputManager->DownPress())
 	{
-		active_option->HandleDownKey();
+		active_option->InputDown();
 	}
 
 	uint32 event = active_option->GetEvent();
@@ -1353,7 +1344,7 @@ void EquipWindow::_UpdateEquipList() {
 
 				break;
 		} // switch
-		_equip_list.SetSize(1, gearsize);
+// 		_equip_list.SetSize(1, gearsize);
 		_equip_list.SetOptions(options);
 	} // if EQUIP_ACTIVE_LIST
 
@@ -1385,7 +1376,7 @@ void EquipWindow::_UpdateEquipList() {
 		options.push_back(ch->GetArmArmorEquipped()->GetName());
 		options.push_back(ch->GetLegArmorEquipped()->GetName());
 
-		_equip_select.SetSize(1, 5);
+// 		_equip_select.SetSize(1, 5);
 		_equip_select.SetOptions(options);
 	}
 
@@ -1463,23 +1454,22 @@ void FormationWindow::_InitCharSelect() {
 	std::vector<ustring> options;
 	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
 
+	_char_select.SetPosition(72.0f, 109.0f);
+	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
 	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-	_char_select.SetCellSize(360, 108);
-	_char_select.SetPosition(72.0f, 109.0f);
 
+	_second_char_select.SetPosition(72.0f, 109.0f);
+	_second_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_second_char_select.SetCursorOffset(-50.0f, -6.0f);
 	_second_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_second_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_second_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_second_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_second_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-	_second_char_select.SetCellSize(360, 108);
-	_second_char_select.SetPosition(72.0f, 109.0f);
+
 
 	// Use blank string so cursor can point somewhere
 	for (uint32 i = 0; i < size; i++) {
@@ -1514,27 +1504,27 @@ void FormationWindow::Update() {
 	// Handle the appropriate input events
 	if (InputManager->ConfirmPress())
 	{
-		active_option->HandleConfirmKey();
+		active_option->InputConfirm();
 	}
 	else if (InputManager->CancelPress())
 	{
-		active_option->HandleCancelKey();
+		active_option->InputCancel();
 	}
 	else if (InputManager->LeftPress())
 	{
-		active_option->HandleLeftKey();
+		active_option->InputLeft();
 	}
 	else if (InputManager->RightPress())
 	{
-		active_option->HandleRightKey();
+		active_option->InputRight();
 	}
 	else if (InputManager->UpPress())
 	{
-		active_option->HandleUpKey();
+		active_option->InputUp();
 	}
 	else if (InputManager->DownPress())
 	{
-		active_option->HandleDownKey();
+		active_option->InputDown();
 	}
 
 	uint32 event = active_option->GetEvent();
@@ -1611,9 +1601,8 @@ OverwriteConfirmWindow::OverwriteConfirmWindow(const string &message) :
 	text.push_back(MakeUnicodeString("Yes"));
 	text.push_back(MakeUnicodeString("No"));
 	_yes_no.SetOptions(text);
-	_yes_no.SetCellSize(100.0f, 50.0f);
 	_yes_no.SetPosition(100, 70);
-	_yes_no.SetSize(2, 1);
+	_yes_no.SetDimensions(200.0f, 59.0f, 2, 1, 2, 1);
 	_yes_no.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_yes_no.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_yes_no.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
@@ -1653,9 +1642,9 @@ void OverwriteConfirmWindow::Update()
 		}
 	}
 	else if (InputManager->LeftPress())
-		_yes_no.HandleLeftKey();
+		_yes_no.InputLeft();
 	else if (InputManager->RightPress())
-		_yes_no.HandleRightKey();
+		_yes_no.InputRight();
 	else if (InputManager->CancelPress())
 		_option = CONFIRM_RESULT_CANCEL;
 }

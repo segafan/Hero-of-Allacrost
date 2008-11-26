@@ -53,8 +53,7 @@ ShopActionWindow::ShopActionWindow() {
 	// (2) Initialize the list of actions
 	action_options.SetOwner(this);
 	action_options.SetPosition(25.0f, 600.0f);
-	action_options.SetSize(1, 5); // One column, numerous rows
-	action_options.SetCellSize(150.0f, 50.0f);
+	action_options.SetDimensions(150.0f, 250.0f, 1, 5, 1, 5);
 	action_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	action_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -92,7 +91,7 @@ void ShopActionWindow::Update() {
 	action_options.Update(); // Clear any OptionBox events, since they prevent further user input
 
 	if (InputManager->ConfirmPress()) {
-		action_options.HandleConfirmKey();
+		action_options.InputConfirm();
 		if (action_options.GetSelection() == 0) { // Buy wares
 			action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 			current_shop->_info_window.SetObject(current_shop->_buy_objects[0]);
@@ -159,10 +158,10 @@ void ShopActionWindow::Update() {
 		current_shop->_shop_sounds["cancel"].Play();
 	}
 	else if (InputManager->UpPress()) {
-		action_options.HandleUpKey();
+		action_options.InputUp();
 	}
 	else if (InputManager->DownPress()) {
-		action_options.HandleDownKey();
+		action_options.InputDown();
 	}
 }
 
@@ -199,8 +198,8 @@ BuyListWindow::BuyListWindow() {
 	MenuWindow::Show();
 
 	object_list.SetOwner(this);
-	object_list.SetPosition(35.0f, 362.0f);//50.0f, 400.0f);
-	object_list.SetCellSize(500.0f, 50.0f);
+	object_list.SetPosition(35.0f, 362.0f);
+	object_list.SetDimensions(500.0f, 50.0f, 1, 6, 1, 6);
 	object_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	object_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	object_list.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -233,7 +232,7 @@ void BuyListWindow::RefreshList() {
 			current_shop->_buy_objects_quantities[i]
 		);
 	}
-	object_list.SetSize(1, object_list.GetNumberOptions());
+// 	object_list.SetSize(1, object_list.GetNumberOptions());
 	object_list.SetSelection(0);
 }
 
@@ -244,7 +243,7 @@ void BuyListWindow::Update() {
 	object_list.Update(); // Clear any OptionBox events, since they prevent further user input
 
 	if (InputManager->ConfirmPress()) {
-		object_list.HandleConfirmKey();
+		object_list.InputConfirm();
 
 		int32 x = object_list.GetSelection();
 		if (current_shop->_buy_objects_quantities[x] == 0) {
@@ -274,11 +273,11 @@ void BuyListWindow::Update() {
 		current_shop->_shop_sounds["cancel"].Play();
 	}
 	else if (InputManager->UpPress()) {
-		object_list.HandleUpKey();
+		object_list.InputUp();
 		current_shop->_info_window.SetObject(current_shop->_buy_objects[object_list.GetSelection()]);
 	}
 	else if (InputManager->DownPress()) {
-		object_list.HandleDownKey();
+		object_list.InputDown();
 		current_shop->_info_window.SetObject(current_shop->_buy_objects[object_list.GetSelection()]);
 	}
 	else if (InputManager->LeftPress()) {
@@ -335,9 +334,8 @@ SellListWindow::SellListWindow() {
 	MenuWindow::Show();
 
 	object_list.SetOwner(this);
-	object_list.SetCellSize(500.0f, 50.0f);
 	object_list.SetPosition(50.0f, 350.0f);
-	object_list.SetSize(1, 6);
+	object_list.SetDimensions(500.0f, 300.0f, 1, 6, 1, 6);
 	object_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	object_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	object_list.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -376,7 +374,7 @@ void SellListWindow::Update() {
 	object_list.Update(); // Clear any OptionBox events, since they prevent further user input
 
 	if (InputManager->ConfirmPress()) {
-		object_list.HandleConfirmKey();
+		object_list.InputConfirm();
 		int32 x = object_list.GetSelection();
 
 		if (current_shop->_sell_objects_quantities[x] == 0) {
@@ -405,11 +403,11 @@ void SellListWindow::Update() {
 		current_shop->_shop_sounds["cancel"].Play();
 	}
 	else if (InputManager->UpPress()) {
-		object_list.HandleUpKey();
+		object_list.InputUp();
 		current_shop->_info_window.SetObject(current_shop->_current_inv[object_list.GetSelection()]);
 	}
 	else if (InputManager->DownPress()) {
-		object_list.HandleDownKey();
+		object_list.InputDown();
 		current_shop->_info_window.SetObject(current_shop->_current_inv[object_list.GetSelection()]);
 	}
 	else if (InputManager->LeftPress()) {
@@ -726,8 +724,7 @@ ConfirmWindow::ConfirmWindow() {
 	// (2) Initialize the option list
 	options.SetOwner(this);
 	options.SetPosition(100.0f, 100.0f);
-	options.SetSize(2, 1); // Two columns, one row
-	options.SetCellSize(150.0f, 50.0f);
+	options.SetDimensions(300.0f, 50.0f, 2, 1, 2, 1);
 	options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -753,10 +750,10 @@ void ConfirmWindow::Update() {
 	options.Update();
 
 	if (InputManager->LeftPress()) {
-		options.HandleLeftKey();
+		options.InputLeft();
 	}
 	else if (InputManager->RightPress()) {
-		options.HandleRightKey();
+		options.InputRight();
 	}
 
 	if (InputManager->CancelPress()) {
