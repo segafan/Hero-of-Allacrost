@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2008 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ public:
 	PauseMode(bool quit_state, bool pause_audio = false);
 
 	~PauseMode();
-	
+
 	//! \brief Resets appropriate class members. Called whenever PauseMode is made the active game mode.
 	void Reset();
 
@@ -84,7 +84,7 @@ private:
 	//! \brief The color used to dim the background screen capture image
 	hoa_video::Color _dim_color;
 
-	//! \brief "PAUSED" rendered as an image texture
+	//! \brief "PAUSED" rendered as a text image texture
 	hoa_video::TextImage _paused_text;
 
 	//! \brief The list of selectabled quit options presented to the user while the mode is in the quit state
@@ -93,4 +93,4 @@ private:
 
 } // namespace hoa_pause
 
-#endif
+#endif // __PAUSE_HEADER__
