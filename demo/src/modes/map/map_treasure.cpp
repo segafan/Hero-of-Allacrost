@@ -187,54 +187,58 @@ void MapTreasure::Open() {
 
 TreasureSupervisor::TreasureSupervisor() :
 	_treasure(NULL),
-	_selection(ACTION_SELECTED)
+	_selection(ACTION_SELECTED),
+	_window_title(MakeUnicodeString("Treasure Contents"), TextStyle("map", Color::yellow, VIDEO_TEXT_SHADOW_DARK, 1, -2)),
+	_selection_name(),
+	_selection_icon(NULL)
 {
 	// Create the menu windows and option boxes used for the treasure menu and
 	// align them at the appropriate locations on the screen
-	_action_window.Create(512, 64, ~VIDEO_MENU_EDGE_BOTTOM);
+	_action_window.Create(512.0f, 64.0f, ~VIDEO_MENU_EDGE_BOTTOM);
+	_action_window.SetPosition(512.0f, 460.0f);
 	_action_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
-	_action_window.SetPosition(512, 488);
 	_action_window.SetDisplayMode(VIDEO_MENU_INSTANT);
 
-	_list_window.Create(512, 192);
+	_list_window.Create(512.0f, 236.0f);
+	_list_window.SetPosition(512.0f, 516.0f);
 	_list_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
-	_list_window.SetPosition(512, 544);
 	_list_window.SetDisplayMode(VIDEO_MENU_INSTANT);
 
-	_action_options.AddOption(MakeUnicodeString("Done"));
-	_action_options.AddOption(MakeUnicodeString("View"));
-	_action_options.AddOption(MakeUnicodeString("Menu"));
-	_action_options.SetPosition(20.0f, 20.0f);
+	_action_options.SetPosition(30.0f, 18.0f);
 	_action_options.SetDimensions(450.0f, 32.0f, 3, 1, 3, 1);
 	_action_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_options.SetCursorOffset(-50.0f, -25.0f);
-	_action_options.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
+	_action_options.SetTextStyle(TextStyle("map", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
+	_action_options.AddOption(MakeUnicodeString("Done"));
+	_action_options.AddOption(MakeUnicodeString("View"));
+	_action_options.AddOption(MakeUnicodeString("Menu"));
 	_action_options.SetSelection(0);
 	_action_options.SetOwner(&_action_window);
 
 	_list_options.SetPosition(20.0f, 20.0f);
-	_list_options.SetDimensions(470.0f, 192.0f, 1, 6, 1, 6);
-	_list_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_list_options.SetDimensions(470.0f, 200.0f, 1, 5, 1, 5);
 	_list_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	_list_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_list_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_list_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_list_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_list_options.SetCursorOffset(-50.0f, -25.0f);
-	_list_options.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
+	_list_options.SetTextStyle(TextStyle("map", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
 	_list_options.SetOwner(&_list_window);
-	// TODO: this currently does not work (text will be blank). Re-enable it once
-	// the scissoring bug is fixed in the video engine
+	// TODO: this currently does not work (text will be blank). Re-enable it once the scissoring bug is fixed in the video engine
 // 	_list_options.Scissoring(true, true);
 
-	_detail_textbox.SetPosition(20.0f, 92.0f);
-	_detail_textbox.SetDimensions(470.0f, 100.0f);
+	_detail_textbox.SetPosition(20.0f, 90.0f);
+	_detail_textbox.SetDimensions(470.0f, 128.0f);
 	_detail_textbox.SetDisplaySpeed(50);
-	_detail_textbox.SetTextStyle(TextStyle());
+	_detail_textbox.SetTextStyle(TextStyle("map", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
 	_detail_textbox.SetDisplayMode(VIDEO_TEXT_REVEAL);
 	_detail_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_detail_textbox.SetOwner(&_list_window);
+
+	_selection_name.SetStyle(TextStyle("map", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
 } // TreasureSupervisor::TreasureSupervisor()
 
 
@@ -334,36 +338,26 @@ void TreasureSupervisor::Draw() {
 	}
 
 	VideoManager->PushState();
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
 	_action_window.Draw();
-
-	VideoManager->Move(280.0f, 500.0f);
-	TextManager->Draw("Treasure Contents");
-
 	_action_options.Draw();
 	_list_window.Draw();
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->Move(512.0f, 465.0f);
+	_window_title.Draw();
 
 	if (_selection == DETAIL_SELECTED) {
-		uint32 list_selection = _list_options.GetSelection();
-		bool drunes_selected = (_treasure->_drunes != 0 && list_selection == 0);
-
-		// Decrement list selection if we have drunes so that it can be used to index the treasure object list
-		if (_treasure->_drunes != 0)
-			list_selection--;
-
 		// Move to the upper left corner and draw either "Drunes" or the name of the selected object
-		VideoManager->Move(280.0f, 590.0f);
-		if (drunes_selected)
-			TextManager->Draw("Drunes");
-		else
-			TextManager->Draw(_treasure->_objects_list[list_selection]->GetName());
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+		VideoManager->Move(280.0f, 550.0f);
+		_selection_name.Draw();
 
 		// Move to the upper right corner and draw the object icon
-		if (drunes_selected == false) {
-			VideoManager->Move(680.0f, 620.0f);
-			_treasure->_objects_list[list_selection]->GetIconImage().Draw();
+		if (_selection_icon != NULL) {
+			VideoManager->Move(680.0f, 535.0f);
+			_selection_icon->Draw();
 		}
+
 		_detail_textbox.Draw();
 	}
 	else {
@@ -430,6 +424,8 @@ void TreasureSupervisor::_UpdateList() {
 
 		uint32 list_selection = _list_options.GetSelection();
 		if (list_selection == 0 && _treasure->_drunes != 0) { // If true, the drunes have been selected
+			_selection_name.SetText(MakeUnicodeString("Drunes"));
+			_selection_icon = NULL;
 			_detail_textbox.SetDisplayText(MakeUnicodeString("With the additional " + NumberToString(_treasure->_drunes) +
 			" drunes found in this treasure added, the party now holds a total of " + NumberToString(GlobalManager->GetDrunes())
 			+ " drunes."));
@@ -437,6 +433,9 @@ void TreasureSupervisor::_UpdateList() {
 		else { // Otherwise, a GlobalObject is selected
 			if (_treasure->_drunes != 0)
 				list_selection--;
+			_selection_name.SetText(_treasure->_objects_list[list_selection]->GetName());
+			// TODO: this is not good practice. We should probably either remove the const status from the GetIconImage() call
+			_selection_icon = const_cast<StillImage*>(&_treasure->_objects_list[list_selection]->GetIconImage());
 			_detail_textbox.SetDisplayText(_treasure->_objects_list[list_selection]->GetDescription());
 		}
 	}
