@@ -208,6 +208,15 @@ private:
 	//! \brief A textbox that displays the detailed description about a selected treasure
 	hoa_video::TextBox _detail_textbox;
 
+	//! \brief A rendering of the name for the treasure window
+	hoa_video::TextImage _window_title;
+
+	//! \brief The name of the selected list item
+	hoa_video::TextImage _selection_name;
+
+	//! \brief A pointer to the image of the selected list item
+	hoa_video::StillImage* _selection_icon;
+
 	// ---------- Private methods
 
 	//! \brief Processes user input when the action sub-window is selected
