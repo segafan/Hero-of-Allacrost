@@ -176,12 +176,24 @@ public:
 *** \todo Text should contain rendered text images instead of text that needs
 *** to be rendered and drawn every frame
 ***
-*** \todo Add support for animated images
-***
-*** \todo Allow images to be manipulated (resized, gray-scaled, etc.)
+*** \todo Add support for animated images?
 *** ***************************************************************************/
 class Option {
 public:
+	Option();
+
+	~Option();
+
+	Option(const Option& copy);
+
+	Option& operator=(const Option& copy);
+
+	//! \brief Deletes all data maintained by the object
+	void Clear();
+
+	//! \brief A flag to specify whether this option is disabled or not
+	bool disabled;
+
 	//! \brief The elements that this option is composed of
 	std::vector<OptionElement> elements;
 
@@ -189,12 +201,8 @@ public:
 	std::vector<hoa_utils::ustring> text;
 
 	//! \brief Contains all images used for this option
-	//! \todo Allow for animated images as well
-	std::vector<StillImage> images;
-
-	//! \brief A flag to specify whether this option is disabled or not
-	bool disabled;
-};
+	StillImage* image;
+}; // class Option
 
 } // namespace private_video
 
@@ -276,7 +284,7 @@ public:
 	*** \param text The text to change the option to
 	*** \return False if the option text could not be changed
 	**/
-	bool SetOptionText(int32 index, const hoa_utils::ustring &text);
+	bool SetOptionText(uint32 index, const hoa_utils::ustring &text);
 
 	/** \brief Sets the currently selected option (0 to # of options - 1)
 	*** \param index The desired selection index in the list of options
@@ -284,19 +292,31 @@ public:
 	*** If no options are currently stored when this method is called, the
 	*** method will print a warning message and return.
 	**/
-	void SetSelection(int32 index);
+	void SetSelection(uint32 index);
 
 	/** \brief Enables or disables the option located at a specified index
 	*** \param index The index of the option to enable or disable
 	*** \param enable Set to true to enable, false to disable
 	**/
-	void EnableOption(int32 index, bool enable);
+	void EnableOption(uint32 index, bool enable);
 
 	/** \brief Determines if an option is enabled or not
 	*** \param index The index of the option in the list to check
 	*** \return True if the option is enabled, false if it is not
 	**/
-	bool IsOptionEnabled(int32 index);
+	bool IsOptionEnabled(uint32 index);
+
+	/** \brief Returns true if the given option is enabled
+	*** \param index The index of the option to check
+	*** \return True if option is enabled, false if it's not
+	**/
+	bool IsEnabled(uint32 index) const;
+
+	/** \brief Retrieves a pointer to the image embedded within the option
+	*** \param index The index of the option to retrieve the image
+	*** \return NULL if the index is invalid or the option does not embed an image, otherwise a valid pointer to a StillImage
+	**/
+	StillImage* GetEmbeddedImage(uint32 index) const;
 
 	/** \brief Used to determine whether the option box is initialized and ready for use
 	*** \param error_messages Used to report the list of reasons why the option box is not initialized
@@ -373,13 +393,6 @@ public:
 	bool IsScrolling() const
 		{ return _scrolling; }
 
-	/** \brief Returns true if the given option is enabled
-	*** \param index The index of the option to check
-	*** \return True if option is enabled, false if it's not
-	**/
-	bool IsEnabled(int32 index) const
-		{ return !_options[index].disabled; }
-
 	/** \brief Retreives an event that has occurred, or zero if no event occurred.
 	*** \return An integer int representing an option box event (i.e. cancel, confirm, left, right, etc.)
 	*** \note Calling the Update() method will clear any registered events
@@ -402,7 +415,7 @@ public:
 		{ return _number_columns; }
 
 	//! \brief Retreives the number of options in the option box
-	int32 GetNumberOptions() const
+	uint32 GetNumberOptions() const
 		{ return _options.size(); }
 	//@}
 
@@ -430,7 +443,7 @@ private:
 	int32 _number_rows, _number_columns;
 
 	//! \brief How many rows and columns of cells can fit in the option box dimensions
-	uint32 _number_cell_rows, _number_cell_columns;
+	int32 _number_cell_rows, _number_cell_columns;
 
 	//! \brief The dimenions of each cell within the option box
 	float _cell_width, _cell_height;
@@ -515,7 +528,7 @@ private:
 	*** \param horizontal true if moving horizontally, false if moving vertically
 	*** \return False if the selection does not change
 	**/
-	bool _ChangeSelection(int32 offset, bool horizontal);
+	bool _ChangeSelection(uint32 offset, bool horizontal);
 
 	/** \brief Sets draw flags and determines the x and y coordinates for rendering an option inside a cell
 	*** \param xalign The x alignement for the cell contents

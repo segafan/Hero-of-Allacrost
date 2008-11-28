@@ -19,6 +19,73 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
+////////////////////////////////////////////////////////////////////////////////
+// Option class methods
+////////////////////////////////////////////////////////////////////////////////
+
+Option::Option() :
+	disabled(false),
+	image(NULL)
+{}
+
+
+
+Option::~Option() {
+	Clear();
+}
+
+
+
+Option::Option(const Option& copy) :
+	disabled(copy.disabled),
+	elements(copy.elements),
+	text(copy.text)
+{
+	if (copy.image == NULL) {
+		image = NULL;
+	}
+	else {
+		image = new StillImage(*(copy.image));
+	}
+}
+
+
+
+Option& Option::operator=(const Option& copy) {
+	// Handle the case were a dumbass assigns an object to itself
+	if (this == &copy) {
+		return *this;
+	}
+
+	disabled = copy.disabled;
+	elements = copy.elements;
+	text = copy.text;
+	if (copy.image == NULL) {
+		image = NULL;
+	}
+	else {
+		image = new StillImage(*(copy.image));
+	}
+
+	return *this;
+}
+
+
+
+void Option::Clear() {
+	disabled = false;
+	elements.clear();
+	text.clear();
+	if (image != NULL) {
+		delete image;
+		image = NULL;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// OptionBox class methods
+////////////////////////////////////////////////////////////////////////////////
+
 OptionBox::OptionBox() :
 	GUIControl(),
 	_initialized(false),
@@ -177,9 +244,9 @@ void OptionBox::Draw() {
 
 		// Draw the columns of options
 		for (int32 col = 0; col < _number_columns; ++col) {
-			int32 index = row * _number_columns + col;
+			uint32 index = row * _number_columns + col;
 
-			if (index >= GetNumberOptions() || index < 0) {
+			if (index >= GetNumberOptions()) {
 				finished = true;
 				break;
 			}
@@ -221,25 +288,19 @@ void OptionBox::Draw() {
 					}
 					case VIDEO_OPTION_ELEMENT_IMAGE:
 					{
-						int32 image_index = op.elements[element].value;
+						if (op.disabled)
+							op.image->Draw(Color::gray);
+						else
+							op.image->Draw(Color::white);
 
-						if (image_index >= 0 && image_index < static_cast<int32>(op.images.size())) {
-							if (op.disabled)
-								op.images[image_index].Draw(Color::gray);
-							else
-								op.images[image_index].Draw(Color::white);
-
-							float width = op.images[image_index].GetWidth();
-							float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
-							if (xalign == VIDEO_X_CENTER)
-								edge -= width * 0.5f * cs.GetHorizontalDirection();
-							else if (xalign == VIDEO_X_RIGHT)
-								edge -= width * cs.GetHorizontalDirection();
-
-							if (edge < left_edge)
-								left_edge = edge;
-
-						}
+						float width = op.image->GetWidth();
+						float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
+						if (xalign == VIDEO_X_CENTER)
+							edge -= width * 0.5f * cs.GetHorizontalDirection();
+						else if (xalign == VIDEO_X_RIGHT)
+							edge -= width * cs.GetHorizontalDirection();
+						if (edge < left_edge)
+							left_edge = edge;
 						break;
 					}
 					case VIDEO_OPTION_ELEMENT_POSITION:
@@ -299,7 +360,7 @@ void OptionBox::Draw() {
 			}
 
 			// Check if this is the index where we should draw the cursor icon for switching elements
-			if (index == _first_selection && _blink == false && _cursor_state != VIDEO_CURSOR_STATE_HIDDEN) {
+			if (static_cast<int32>(index) == _first_selection && _blink == false && _cursor_state != VIDEO_CURSOR_STATE_HIDDEN) {
 				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
 				VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 				VideoManager->MoveRelative(_cursor_xoffset + left_edge + _cursor_xoffset, cursor_offset + _cursor_yoffset + _cursor_yoffset);
@@ -310,7 +371,7 @@ void OptionBox::Draw() {
 			}
 
 			// Check if this is the index where we should draw the selection cursor icon, if it is visible
-			if (index == _selection && (_blink && _cursor_state == VIDEO_CURSOR_STATE_BLINKING) == false && _cursor_state != VIDEO_CURSOR_STATE_HIDDEN) {
+			if (static_cast<int32>(index) == _selection && (_blink && _cursor_state == VIDEO_CURSOR_STATE_BLINKING) == false && _cursor_state != VIDEO_CURSOR_STATE_HIDDEN) {
 				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
 				VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 				VideoManager->MoveRelative(_cursor_xoffset + left_edge, cursor_offset + _cursor_yoffset);
@@ -405,8 +466,8 @@ void OptionBox::AddOption(const hoa_utils::ustring& text) {
 
 
 
-bool OptionBox::SetOptionText(int32 index, const hoa_utils::ustring &text) {
-	if (index < 0 || index >= GetNumberOptions()) {
+bool OptionBox::SetOptionText(uint32 index, const hoa_utils::ustring &text) {
+	if (index >= GetNumberOptions()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument was invalid (out of bounds): " << index << endl;
 		return false;
 	}
@@ -417,8 +478,8 @@ bool OptionBox::SetOptionText(int32 index, const hoa_utils::ustring &text) {
 
 
 
-void OptionBox::SetSelection(int32 index) {
-	if (index < 0 || index >= GetNumberOptions()) {
+void OptionBox::SetSelection(uint32 index) {
+	if (index >= GetNumberOptions()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument was invalid (out of bounds): " << index << endl;
 		return;
 	}
@@ -440,8 +501,8 @@ void OptionBox::SetSelection(int32 index) {
 
 
 
-void OptionBox::EnableOption(int32 index, bool enable) {
-	if (index < 0 || index >= GetNumberOptions()) {
+void OptionBox::EnableOption(uint32 index, bool enable) {
+	if (index >= GetNumberOptions()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument index was invalid: " << index << endl;
 		return;
 	}
@@ -451,13 +512,35 @@ void OptionBox::EnableOption(int32 index, bool enable) {
 
 
 
-bool OptionBox::IsOptionEnabled(int32 index) {
-	if (index < 0 || index >= GetNumberOptions()) {
+bool OptionBox::IsOptionEnabled(uint32 index) {
+	if (index >= GetNumberOptions()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument index was invalid: " << index << endl;
 		return false;
 	}
 
 	return (!_options[index].disabled);
+}
+
+
+
+bool OptionBox::IsEnabled(uint32 index) const {
+	if (index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument index was invalid: " << index << endl;
+		return false;
+	}
+
+	return !_options[index].disabled;
+}
+
+
+
+StillImage* OptionBox::GetEmbeddedImage(uint32 index) const {
+	if (index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument index was invalid: " << index << endl;
+		return false;
+	}
+
+	return _options[index].image;
 }
 
 
@@ -512,7 +595,7 @@ bool OptionBox::IsInitialized(string& error_messages) {
 
 void OptionBox::InputConfirm() {
 	// Abort if an invalid option is selected
-	if (_selection < 0 || _selection >= GetNumberOptions()) {
+	if (_selection < 0 || _selection >= static_cast<int32>(GetNumberOptions())) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "an invalid (out of bounds) option was selected: " << _selection << endl;
 		return;
 	}
@@ -635,13 +718,7 @@ void OptionBox::SetCursorState(CursorState state) {
 // -----------------------------------------------------------------------------
 
 bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
-	// Options are enabled by default
-	op.disabled = false;
-
-	// Clear all vectors, to make certain that the Option passed in is empty
-	op.elements.clear();
-	op.text.clear();
-	op.images.clear();
+	op.Clear();
 
 	// This is a valid case. It simply means we add an option with no tags, text, or other data.
 	if (format_string.empty()) {
@@ -694,16 +771,19 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 					new_element.value = atoi(tag_text.c_str());
 				}
 				else { // Then this must be an image tag
-					StillImage imd;
-					if (imd.Load(tag_text) == false) {
-						if (VIDEO_DEBUG)
-							IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because of an invalid image tag: "
-								<< MakeStandardString(format_string) << endl;
+					if (op.image != NULL) {
+						IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because two image tags were embedded within a single option"
+							<< MakeStandardString(format_string) << endl;
+						return false;
+					}
+					op.image = new StillImage();
+					if (op.image->Load(tag_text) == false) {
+						IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because of an invalid image tag: "
+							<< MakeStandardString(format_string) << endl;
 						return false;
 					}
 					new_element.type  = VIDEO_OPTION_ELEMENT_IMAGE;
-					new_element.value = static_cast<int32>(op.images.size());
-					op.images.push_back(imd);
+					new_element.value = 0;
 				}
 			}
 
@@ -741,7 +821,7 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 
 
 
-bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
+bool OptionBox::_ChangeSelection(uint32 offset, bool horizontal) {
 	// Do nothing if the movement is horizontal and there is only one column with no horizontal wrap shifting
 	if (horizontal == true && _number_columns == 1 && _horizontal_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
 		return false;
@@ -751,8 +831,8 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 		return false;
 
 	// Get the row, column coordinates for the current selection
-	int32 row = _selection / _number_columns;
-	int32 col = _selection % _number_columns;
+	uint32 row = _selection / _number_columns;
+	uint32 col = _selection % _number_columns;
 	bool bounds_exceeded = false;
 
 	// Determine if the movement selection will exceed a column or row bondary
@@ -815,7 +895,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 		}
 		else  { // The bottom boundary was exceeded
 			if (_vertical_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT) {
-				if( row + offset >= GetNumberOptions() )
+				if (row + offset >= GetNumberOptions() )
 					offset -= GetNumberOptions();
 			}
 			// Make sure horizontal wrapping is allowed if vertical wrap mode is shifting
