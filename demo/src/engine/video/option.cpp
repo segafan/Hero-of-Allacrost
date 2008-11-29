@@ -151,36 +151,38 @@ void OptionBox::Draw() {
 	VideoManager->PushState();
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 
+	// TODO: This call is also made at the end of this function. It is made here because for some
+	// strange reason, only the option box outline is drawn and not the outline for the individual
+	// cells. I'm not sure what part of the code between here and the end of this function could
+	// affect that. This bug needs to be resolved and then this call to _DEBUG_DrawOutline() should
+	// be removed, leaving only the call at the bottom of the function
 	if (GUIManager->DEBUG_DrawOutlines() == true)
 		_DEBUG_DrawOutline();
 
-	// (1) Determine the edge dimensions of the option box
+	int32 x, y, w, h;
 	float left, right, bottom, top;
+
+	// ---------- (1) Determine the edge dimensions of the option box
 	left = 0.0f;
 	right = _number_columns * _cell_width;
 	bottom = 0.0f;
 	top = _number_rows * _cell_height;
-
 	CalculateAlignedRect(left, right, bottom, top);
-
-	int32 x, y, w, h;
 
 	x = static_cast<int32>(left < right ? left : right);
 	y = static_cast<int32>(top < bottom ? top : bottom);
 	w = static_cast<int32>(right - left);
+	h = static_cast<int32>(top - bottom);
 	if (w < 0)
 		w = -w;
-	h = static_cast<int32>(top - bottom);
 	if (h < 0)
 		h = -h;
 
-	// Calculate scissoring rectangle
+	// ---------- (2) Calculate scissoring rectangle
 	ScreenRect rect(x, y, w, h);
-
 	CoordSys &cs = VideoManager->_current_context.coordinate_system;
-
 	if (cs.GetVerticalDirection() < 0) {
-		rect.top += static_cast<int32>(_cell_height) + (_number_rows); //To accomodate the 1 pixel per row offset
+		rect.top += static_cast<int32>(_cell_height) + (_number_rows); // To accomodate the 1 pixel per row offset
 	}
 
 	bool scissor = VideoManager->IsScissoringEnabled();
@@ -200,39 +202,39 @@ void OptionBox::Draw() {
 		VideoManager->SetScissorRect(rect);
 	}
 
-// 	VideoManager->Text()->SetDefaultFont(_font);
+	// ---------- (3) Determine the option cells to drawn and any offsets needed for scrolling
 	VideoManager->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
 	int32 row_min, row_max;
-	float cell_offset = 0.0f;
+	float scroll_offset = 0.0f;
 
 	if (!_scrolling) {
 		row_min = _scroll_offset;
-		row_max = _scroll_offset + _number_rows;
+		row_max = _scroll_offset + _number_cell_rows;
 	}
 	else if (_scroll_direction == -1) { // Scrolling up
 		row_min = _scroll_offset;
-		row_max = _scroll_offset + _number_rows + 1;
+		row_max = _scroll_offset + _number_cell_rows + 1;
 
-		cell_offset = cs.GetVerticalDirection() * (1.0f - (_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
+		scroll_offset = cs.GetVerticalDirection() * (1.0f - (_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
 	}
 	else { // Scrolling down
 		row_min = _scroll_offset - 1;
-		row_max = _scroll_offset + _number_rows;
-		cell_offset = cs.GetVerticalDirection() * ((_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
+		row_max = _scroll_offset + _number_cell_rows;
+		scroll_offset = cs.GetVerticalDirection() * ((_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
 	}
 
+	float xoff = _cell_width * cs.GetHorizontalDirection();
+	float yoff = -_cell_height * cs.GetVerticalDirection();
+	bool finished = false;
+
 	OptionCellBounds bounds;
-	bounds.y_top = top + cell_offset;
+	bounds.y_top = top + scroll_offset;
 	bounds.y_center = bounds.y_top - 0.5f * _cell_height * cs.GetVerticalDirection();
 	bounds.y_bottom = (bounds.y_center * 2.0f) - bounds.y_top;
 
-	float yoff = -_cell_height * cs.GetVerticalDirection();
-	float xoff = _cell_width * cs.GetHorizontalDirection();
-	bool finished = false;
-
-	// Iterate through all the visible option cells and draw them
-	for (int32 row = row_min; row < row_max; row++) {
+	// ---------- (4) Iterate through all the visible option cells and draw them and the draw cursor
+	for (int32 row = row_min; row < row_max && finished == false; row++) {
 		if (scissor)
 			VideoManager->EnableScissoring();
 		else
@@ -243,142 +245,24 @@ void OptionBox::Draw() {
 		bounds.x_right = (bounds.x_center * 2.0f) - bounds.x_left;
 
 		// Draw the columns of options
-		for (int32 col = 0; col < _number_columns; ++col) {
-			uint32 index = row * _number_columns + col;
+		for (int32 col = 0; col < _number_cell_columns; ++col) {
+			uint32 index = row * _number_cell_columns + col;
 
+			// If there are more visible cells than there are options available we leave those cells empty
 			if (index >= GetNumberOptions()) {
 				finished = true;
 				break;
 			}
 
-			float left_edge = 999999.0f; // The x offset to where the text actually begins
-			float x, y;
+			float left_edge = 999999.0f; // The x offset to where the visible option contents begin
+			_DrawOption(_options.at(index), bounds, scroll_offset, left_edge);
 
-			int32 xalign = _option_xalign;
-			int32 yalign = _option_yalign;
-			_SetupAlignment(xalign, yalign, bounds, x, y);
-
-			Option &op = _options.at(index);
-			/*if (op.disabled)
-				VideoManager->Text()->SetDefaultTextColor(Color::gray);
-			else
-				VideoManager->Text()->SetDefaultTextColor(Color::white);
-			*/
-
-			// Iterate through all option elements in the current option
-			for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++) {
-				switch (op.elements[element].type) {
-					case VIDEO_OPTION_ELEMENT_LEFT_ALIGN:
-					{
-						xalign = VIDEO_X_LEFT;
-						_SetupAlignment(xalign, _option_yalign, bounds, x, y);
-						break;
-					}
-					case VIDEO_OPTION_ELEMENT_CENTER_ALIGN:
-					{
-						xalign = VIDEO_X_CENTER;
-						_SetupAlignment(xalign, _option_yalign, bounds, x, y);
-						break;
-					}
-					case VIDEO_OPTION_ELEMENT_RIGHT_ALIGN:
-					{
-						xalign = VIDEO_X_RIGHT;
-						_SetupAlignment(xalign, _option_yalign, bounds, x, y);
-						break;
-					}
-					case VIDEO_OPTION_ELEMENT_IMAGE:
-					{
-						if (op.disabled)
-							op.image->Draw(Color::gray);
-						else
-							op.image->Draw(Color::white);
-
-						float width = op.image->GetWidth();
-						float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
-						if (xalign == VIDEO_X_CENTER)
-							edge -= width * 0.5f * cs.GetHorizontalDirection();
-						else if (xalign == VIDEO_X_RIGHT)
-							edge -= width * cs.GetHorizontalDirection();
-						if (edge < left_edge)
-							left_edge = edge;
-						break;
-					}
-					case VIDEO_OPTION_ELEMENT_POSITION:
-					{
-						x = bounds.x_left + op.elements[element].value * cs.GetHorizontalDirection();
-						VideoManager->Move(x, y);
-						break;
-					}
-					case VIDEO_OPTION_ELEMENT_TEXT:
-					{
-						int32 text_index = op.elements[element].value;
-
-						if (text_index >= 0 && text_index < static_cast<int32>(op.text.size())) {
-							const ustring& text = op.text[text_index];
-							float width = static_cast<float>(VideoManager->Text()->CalculateTextWidth(_text_style.font, text));
-							float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
-
-							if (xalign == VIDEO_X_CENTER)
-								edge -= width * 0.5f * cs.GetHorizontalDirection();
-							else if (xalign == VIDEO_X_RIGHT)
-								edge -= width * cs.GetHorizontalDirection();
-
-							if (edge < left_edge)
-								left_edge = edge;
-							if (op.disabled) {
-								Color saved = _text_style.color;
-								_text_style.color = Color::gray;
-								TextManager->Draw(text, _text_style);
-								_text_style.color = saved;
-							}
-							else {
-								TextManager->Draw(text, _text_style);
-							}
-						}
-
-						break;
-					}
-					case VIDEO_OPTION_ELEMENT_INVALID:
-					case VIDEO_OPTION_ELEMENT_TOTAL:
-					default:
-					{
-						IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid option element type was present" << endl;
-						break;
-					}
-				} // switch (op.elements[element].type)
-			} // for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++)
-
-			// Should never scissor the cursor
-			VideoManager->DisableScissoring();
-
-			float cursor_offset = 0;
-			if (_scrolling) {
-				if (_scroll_direction == -1)// Scrolling up
-					cursor_offset = -cell_offset;
-				else // Scrolling down
-					cursor_offset = -cell_offset + cs.GetVerticalDirection() * _cell_height;
-			}
-
-			// Check if this is the index where we should draw the cursor icon for switching elements
-			if (static_cast<int32>(index) == _first_selection && _blink == false && _cursor_state != VIDEO_CURSOR_STATE_HIDDEN) {
-				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
-				VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-				VideoManager->MoveRelative(_cursor_xoffset + left_edge + _cursor_xoffset, cursor_offset + _cursor_yoffset + _cursor_yoffset);
-				StillImage *default_cursor = VideoManager->GetDefaultCursor();
-
-				if (default_cursor)
-					default_cursor->Draw(Color::white);
-			}
-
-			// Check if this is the index where we should draw the selection cursor icon, if it is visible
-			if (static_cast<int32>(index) == _selection && (_blink && _cursor_state == VIDEO_CURSOR_STATE_BLINKING) == false && _cursor_state != VIDEO_CURSOR_STATE_HIDDEN) {
-				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
-				VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-				VideoManager->MoveRelative(_cursor_xoffset + left_edge, cursor_offset + _cursor_yoffset);
-				StillImage *default_cursor = VideoManager->GetDefaultCursor();
-
-				if (default_cursor)
-					default_cursor->Draw(Color::white);
+			// Draw the cursor if the previously drawn option was or is selected
+			if ((static_cast<int32>(index) == _selection || static_cast<int32>(index) == _first_selection) &&
+				_cursor_state != VIDEO_CURSOR_STATE_HIDDEN && (_cursor_state != VIDEO_CURSOR_STATE_BLINKING || _blink == true)) {
+				// If this option was the first selection, draw it darkened so that it has a different appearance
+				bool darken = (static_cast<int32>(index) == _first_selection) ? true : false;
+				_DrawCursor(bounds, scroll_offset, left_edge, darken);
 			}
 
 			bounds.x_left += xoff;
@@ -386,18 +270,15 @@ void OptionBox::Draw() {
 			bounds.x_right += xoff;
 		} // for (int32 col = 0; col < _number_columns; ++col)
 
-		if (finished)
-			break;
-
 		bounds.y_top += yoff;
 		bounds.y_center += yoff;
 		bounds.y_bottom += yoff;
 	} // for (int32 row = row_min; row < row_max; row++)
 
-// 	if (GUIManager->DEBUG_DrawOutlines() == true)
-// 		GUIControl::_DEBUG_DrawOutline();
+	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
+	if (GUIManager->DEBUG_DrawOutlines() == true)
+		GUIControl::_DEBUG_DrawOutline();
 
-	//VideoManager->EnableScissoring(scissoring_rollback);
 	VideoManager->PopState();
 } // void OptionBox::Draw()
 
@@ -956,6 +837,133 @@ void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBoun
 
 	VideoManager->Move(x, y);
 } // void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds& bounds, float& x, float& y)
+
+
+
+void OptionBox::_DrawOption(const Option& op, const OptionCellBounds &bounds, float scroll_offset, float& left_edge) {
+	// TODO: this function doesn't make use of the scroll_offset parameter currently, but I'm pretty sure it is
+	// needed somewhere to get scrolling full working. Once the scrolling feature has been enabled and verified
+	// for correctness if this paramater is still unused, remove it.
+
+	float x, y;
+	int32 xalign = _option_xalign;
+	int32 yalign = _option_yalign;
+	CoordSys &cs = VideoManager->_current_context.coordinate_system;
+
+	_SetupAlignment(xalign, yalign, bounds, x, y);
+	// Iterate through all option elements in the current option
+	for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++) {
+		switch (op.elements[element].type) {
+			case VIDEO_OPTION_ELEMENT_LEFT_ALIGN:
+			{
+				xalign = VIDEO_X_LEFT;
+				_SetupAlignment(xalign, _option_yalign, bounds, x, y);
+				break;
+			}
+			case VIDEO_OPTION_ELEMENT_CENTER_ALIGN:
+			{
+				xalign = VIDEO_X_CENTER;
+				_SetupAlignment(xalign, _option_yalign, bounds, x, y);
+				break;
+			}
+			case VIDEO_OPTION_ELEMENT_RIGHT_ALIGN:
+			{
+				xalign = VIDEO_X_RIGHT;
+				_SetupAlignment(xalign, _option_yalign, bounds, x, y);
+				break;
+			}
+			case VIDEO_OPTION_ELEMENT_IMAGE:
+			{
+				if (op.disabled)
+					op.image->Draw(Color::gray);
+				else
+					op.image->Draw(Color::white);
+
+				float width = op.image->GetWidth();
+				float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
+				if (xalign == VIDEO_X_CENTER)
+					edge -= width * 0.5f * cs.GetHorizontalDirection();
+				else if (xalign == VIDEO_X_RIGHT)
+					edge -= width * cs.GetHorizontalDirection();
+				if (edge < left_edge)
+					left_edge = edge;
+				break;
+			}
+			case VIDEO_OPTION_ELEMENT_POSITION:
+			{
+				x = bounds.x_left + op.elements[element].value * cs.GetHorizontalDirection();
+				VideoManager->Move(x, y);
+				break;
+			}
+			case VIDEO_OPTION_ELEMENT_TEXT:
+			{
+				int32 text_index = op.elements[element].value;
+
+				if (text_index >= 0 && text_index < static_cast<int32>(op.text.size())) {
+					const ustring& text = op.text[text_index];
+					float width = static_cast<float>(VideoManager->Text()->CalculateTextWidth(_text_style.font, text));
+					float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
+
+					if (xalign == VIDEO_X_CENTER)
+						edge -= width * 0.5f * cs.GetHorizontalDirection();
+					else if (xalign == VIDEO_X_RIGHT)
+						edge -= width * cs.GetHorizontalDirection();
+
+					if (edge < left_edge)
+						left_edge = edge;
+					if (op.disabled) {
+						Color saved = _text_style.color;
+						_text_style.color = Color::gray;
+						TextManager->Draw(text, _text_style);
+						_text_style.color = saved;
+					}
+					else {
+						TextManager->Draw(text, _text_style);
+					}
+				}
+
+				break;
+			}
+			case VIDEO_OPTION_ELEMENT_INVALID:
+			case VIDEO_OPTION_ELEMENT_TOTAL:
+			default:
+			{
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid option element type was present" << endl;
+				break;
+			}
+		} // switch (op.elements[element].type)
+	} // for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++)
+}
+
+
+
+void OptionBox::_DrawCursor(const OptionCellBounds &bounds, float scroll_offset, float left_edge, bool darken) {
+	float x, y;
+
+	// Should never scissor the cursor
+	VideoManager->DisableScissoring();
+
+	float cursor_offset = 0.0f;
+	if (_scrolling) {
+		if (_scroll_direction == -1) // Scrolling up
+			cursor_offset = -scroll_offset;
+		else // Scrolling down
+			cursor_offset = -scroll_offset + VideoManager->_current_context.coordinate_system.GetVerticalDirection() * _cell_height;
+	}
+
+	_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->MoveRelative(left_edge + _cursor_xoffset + cursor_offset, cursor_offset + _cursor_yoffset);
+	StillImage *default_cursor = VideoManager->GetDefaultCursor();
+
+	if (default_cursor == NULL)
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid (NULL) cursor image" << endl;
+
+	if (darken == false)
+		default_cursor->Draw();
+	else
+		default_cursor->Draw(Color(1.0f, 1.0f, 1.0f, 0.5f));
+}
 
 
 

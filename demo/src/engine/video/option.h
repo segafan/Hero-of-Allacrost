@@ -505,7 +505,7 @@ private:
 	int32 _blink_time;
 
 	//! \brief Set to true if the box is currently in the middle of scrolling
-	bool  _scrolling;
+	bool _scrolling;
 
 	//! \brief The timer used for controlling option scrolling
 	int32 _scroll_time;
@@ -517,11 +517,11 @@ private:
 	// ---------- Private methods
 
 	/** \brief helper function to parse text for an option box, and fill an Option structure
-	*** \param formatString the formatted string, using the XML structure described by SetOptions()
+	*** \param format_string the formatted string, using the XML structure described by SetOptions()
 	*** \param option which option the string corresponds to
 	*** \return True if the option was successfully constructed from the string, or false if there was an error.
 	**/
-	bool _ConstructOption(const hoa_utils::ustring &formatString, private_video::Option &option);
+	bool _ConstructOption(const hoa_utils::ustring &format_string, private_video::Option &option);
 
 	/** \brief Changes the selected option by making a movement relative to the current selection
 	*** \param offset The amount to move in specified direction (ie 1 row up, 1 column right, etc.)
@@ -536,9 +536,30 @@ private:
 	*** \param bounds The boundary coordinates for the option cell
 	*** \param x A reference to return the x position for the cursor
 	*** \param y A reference to return the y position for the cursor
-	*** This is a helper function for OptionBox::Draw()
+	***
+	*** This function also moves the draw cursor to the position specified by the alignment and the cell boundaries.
 	**/
 	void _SetupAlignment(int32 xalign, int32 yalign, const private_video::OptionCellBounds& bounds, float& x, float& y);
+
+	/** \brief Draws a single option cell
+	*** \param op The option contents to draw within the cell
+	*** \param bounds The boundary coordinates for the information cell
+	*** \param scroll_offset A draw offset for when the option box is in the process of scrolling from one option to another
+	*** \param left_edge Returns a coordinate that represents the left edge of the cell content (as opposed to strictly the cell boundary)
+	**/
+	void _DrawOption(const private_video::Option& op, const private_video::OptionCellBounds &bounds, float cell_offset, float &left_edge);
+
+	/** \brief Draws the cursor
+	*** \param op The option contents to draw within the cell
+	*** \param bounds The boundary coordinates for the information cell
+	*** \param scroll_offset A draw offset for when the option box is in the process of scrolling from one option to another
+	*** \param left_edge A draw coordiante that represents the left edge of the cell content (as opposed to strictly the cell boundary)
+	*** \param darken If true, the cursor image will be drawn with a 50% alpha black color applied
+	***
+	*** This method should be called immediately proceeding the _DrawOption method so that it can retrieve the correct value for left_edge
+	*** from the cell which should have a cursor drawn.
+	**/
+	void _DrawCursor(const private_video::OptionCellBounds &bounds, float cell_offset, float left_edge, bool darken);
 
 	//! \brief Draws an outline of the option box and the inner cell boundaries
 	void _DEBUG_DrawOutline();
