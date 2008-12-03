@@ -398,14 +398,7 @@ protected:
 	//! \brief Returns true when the sprite has reached the destination
 	bool _Update();
 
-	//! \brief The destination coordinates for this path movement
-	PathNode _destination;
 
-	//! \brief Holds the path needed to traverse from source to destination
-	std::vector<PathNode> _path;
-
-	//! \brief An index to the path vector containing the node that the sprite currently occupies
-	uint32 _current_node;
 }; // class PathMoveSpriteEvent : public SpriteEvent
 
 

@@ -72,6 +72,14 @@ void VirtualSprite::Update() {
 		return;
 	}
 
+	if (_path.empty() == true) {
+		MapMode::_current_map->_object_supervisor->FindPath(this, _path, _destination);
+
+		// If no path could be found, there's nothing more that can be done here
+		if (_path.empty() == true)
+			IF_PRINT_WARNING(MAP_DEBUG) << "could not discover a path to destination" << endl;
+	}
+
 	// The remainder of this function handles movement, so if the sprite is not moving there is nothing left to do
 	if (moving == false)
 		return;
@@ -92,118 +100,56 @@ void VirtualSprite::Update() {
 	// full collision detection, then it moves in the x direction and does full collision detection.
 	// I think we should only do collision detection once per move, not twice.
 
-	// Move the sprite the appropriate distance in the appropriate Y direction
+	// Move the sprite the appropriate distance in the appropriate Y and X direction
 	if (direction & (NORTH | MOVING_NORTHWEST | MOVING_NORTHEAST))
 		y_offset -= distance_moved;
 	else if (direction & (SOUTH | MOVING_SOUTHWEST | MOVING_SOUTHEAST))
 		y_offset += distance_moved;
-
-	// Determine if the sprite may move to this new Y position
-	if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
-		// Determine if we can slide on an object
-		if( direction & (SOUTH | NORTH)) {
-			//Start from a sprite's size away and get closer testing collision each time
-			for( float i = 0; i < coll_half_width * 2; i += 0.1f ) {
-				x_offset = tmp_x - ( coll_half_width * 2 ) + i;
-				if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
-					//Try the other way, can't go that way
-					x_offset = tmp_x + ( coll_half_width * 2 ) - i;
-					if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
-						//Still can't slide, reset
-						x_offset = tmp_x;
-					}
-					else {
-						x_offset = tmp_x + distance_moved;
-						break;
-					}
-				}
-				else {
-					x_offset = tmp_x - distance_moved;
-					break;
-				}
-			}
-
-			// Roll-over X position offsets if necessary
-			while (x_offset < 0.0f) {
-				x_position -= 1;
-				x_offset += 1.0f;
-			}
-			while (x_offset > 1.0f) {
-				x_position += 1;
-				x_offset -= 1.0f;
-			}
-		}
-
-		y_offset = tmp_y;
-
-	}
-	else {
-		// Roll-over Y position offsets if necessary
-		while (y_offset < 0.0f) {
-			y_position -= 1;
-			y_offset += 1.0f;
-		}
-		while (y_offset > 1.0f) {
-			y_position += 1;
-			y_offset -= 1.0f;
-		}
-	}
-
-	// Move the sprite the appropriate distance in the appropriate X direction
 	if (direction & (WEST | MOVING_NORTHWEST | MOVING_SOUTHWEST))
 		x_offset -= distance_moved;
 	else if (direction & (EAST | MOVING_NORTHEAST | MOVING_SOUTHEAST))
 		x_offset += distance_moved;
 
-	// Determine if the sprite may move to this new X position
 	if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
-		// Determine if we can slide on an object
-		if( direction & (WEST | EAST)) {
-			//Start from a sprite's size away and get closer testing collision each time
-			for( float i = 0; i < coll_height; i += 0.1f ) {
-				y_offset = tmp_y - coll_height + i;
-				if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
-					//Try the other way, can't go that way
-					y_offset = tmp_y + coll_height - i;
-					if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
-						//Still can't slide, reset
-						y_offset = tmp_y;
-					}
-					else {
-						y_offset = tmp_y + distance_moved;
-						break;
-					}
-				}
-				else {
-					y_offset = tmp_y - distance_moved;
-					break;
-				}
+		if (this->GetObjectID() != 1000)
+		{
+			if ((_destination.col & _destination.row) != -1)
+			{
+				MapMode::_current_map->_object_supervisor->FindPath(this, _path, _destination);
+				return;
 			}
-
-			// Roll-over Y position offsets if necessary
-			while (y_offset < 0.0f) {
-				y_position -= 1;
-				y_offset += 1.0f;
-			}
-			while (y_offset > 1.0f) {
-				y_position += 1;
-				y_offset -= 1.0f;
+			else 
+			{
+				x_offset = tmp_x;
+				y_offset = tmp_y;
+				this->SetRandomDirection();
 			}
 		}
-
-		x_offset = tmp_x;
-	}
-	else {
-		// Roll-over X position offsets if necessary
-		while (x_offset < 0.0f) {
-			x_position -= 1;
-			x_offset += 1.0f;
-		}
-		while (x_offset > 1.0f) {
-			x_position += 1;
-			x_offset -= 1.0f;
+		else
+		{
+			x_offset = tmp_x;
+			y_offset = tmp_y;
 		}
 	}
+
+	// Roll-over Y and X position offsets if necessary
+	while (y_offset < 0.0f) {
+		y_position -= 1;
+		y_offset += 1.0f;
+	}
+	while (y_offset > 1.0f) {
+		y_position += 1;
+		y_offset -= 1.0f;
+	}
+	while (x_offset < 0.0f) {
+		x_position -= 1;
+		x_offset += 1.0f;
+	}
+	while (x_offset > 1.0f) {
+		x_position += 1;
+		x_offset -= 1.0f;
+	}
+
 } // void VirtualSprite::Update()
 
 
