@@ -422,7 +422,6 @@ bool ObjectSupervisor::DoObjectsCollide(const MapObject* const obj1, const MapOb
 }
 
 
-
 bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite) {
 	// NOTE: We don't check if the argument is NULL here for performance reasons
 
@@ -499,8 +498,36 @@ bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite) {
 } // bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite)
 
 
+bool ObjectSupervisor::IsPositionOccupied(int16 row, int16 col)
+{
+	vector<MapObject*>* objects = &_ground_objects; 
 
-void ObjectSupervisor::FindPath(const VirtualSprite* sprite, vector<PathNode>& path, const PathNode& dest) {
+	uint16 tmp_X;
+	uint16 tmp_Y;
+	float tmp_X_Offset;
+	float tmp_Y_Offset;
+
+	for (uint32 i = 0; i < objects->size(); i++) 
+	{
+		(*objects)[i]->GetXPosition(tmp_X, tmp_X_Offset);
+		(*objects)[i]->GetYPosition(tmp_Y, tmp_Y_Offset);
+
+		if (col >= tmp_X - (*objects)[i]->GetCollHalfWidth() &&
+			col <= tmp_X + (*objects)[i]->GetCollHalfWidth())
+		{
+			if (row <= tmp_Y + (*objects)[i]->GetCollHeight() &&
+				row >= tmp_Y)
+			{
+				return true;
+			}
+			continue;
+		}
+	}
+	return false;
+}
+
+
+void ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, const PathNode& dest) {
 	// NOTE: Refer to the implementation of the A* algorithm to understand what all these lists and score values are for
 	std::vector<PathNode> open_list;
 	std::vector<PathNode> closed_list;
@@ -587,7 +614,13 @@ void ObjectSupervisor::FindPath(const VirtualSprite* sprite, vector<PathNode>& p
 					}
 				}
 			}
+
 			if (continue_loop == false) { // This node is invalid
+				continue;
+			}
+
+			if (IsPositionOccupied(nodes[i].row, nodes[i].col))
+			{
 				continue;
 			}
 

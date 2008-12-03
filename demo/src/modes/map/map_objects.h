@@ -488,7 +488,9 @@ public:
 	***
 	*** \note If an error is detected, the function will return an empty path vector.
 	**/
-	void FindPath(const private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
+	void FindPath(private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
+
+	bool IsPositionOccupied(int16 col, int16 row);
 
 private:
 	/** \brief The number of rows and columns in the collision gride

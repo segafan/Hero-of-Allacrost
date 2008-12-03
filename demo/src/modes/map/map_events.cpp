@@ -274,12 +274,12 @@ bool ScriptedEvent::_Update() {
 // ****************************************************************************
 
 PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 x_coord, uint32 y_coord) :
-	SpriteEvent(event_id, sprite),
-	_current_node(0)
+	SpriteEvent(event_id, sprite)
 {
 	// TODO: check that x/y coordinates are within map boundaries
-	_destination.col = x_coord;
-	_destination.row = y_coord;
+	_sprite->_current_node = 0;
+	_sprite->_destination.col = x_coord;
+	_sprite->_destination.row = y_coord;
 }
 
 
@@ -292,18 +292,11 @@ PathMoveSpriteEvent::~PathMoveSpriteEvent() {
 
 void PathMoveSpriteEvent::_Start() {
 	SpriteEvent::_Start();
-	_current_node = 0;
+	_sprite->_current_node = 0;
 	// TODO: Check if we already have a previously computed path and if it is still valid, use it.
 	// The code below automatically re-uses a path if there is one without checking if the source
 	// node is the same as the sprite's current position
 
-	if (_path.empty() == true) {
-		MapMode::_current_map->_object_supervisor->FindPath(_sprite, _path, _destination);
-
-		// If no path could be found, there's nothing more that can be done here
-		if (_path.empty() == true)
-			IF_PRINT_WARNING(MAP_DEBUG) << "could not discover a path to destination" << endl;
-	}
 }
 
 
@@ -313,34 +306,37 @@ bool PathMoveSpriteEvent::_Update() {
 	// readjustment after the sprite has reached the next node
 
 	_sprite->moving = true;
-	if (_sprite->y_position > _path[_current_node].row) { // Need to move toward the north
-		if (_sprite->x_position > _path[_current_node].col)
-			_sprite->SetDirection(MOVING_NORTHWEST);
-		else if (_sprite->x_position < _path[_current_node].col)
-			_sprite->SetDirection(MOVING_NORTHEAST);
-		else
-			_sprite->SetDirection(NORTH);
-	}
-	else if (_sprite->y_position < _path[_current_node].row) { // Need to move toward the south
-		if (_sprite->x_position > _path[_current_node].col)
-			_sprite->SetDirection(MOVING_SOUTHWEST);
-		else if (_sprite->x_position < _path[_current_node].col)
-			_sprite->SetDirection(MOVING_SOUTHEAST);
-		else
-			_sprite->SetDirection(SOUTH);
-	}
-	else if (_sprite->x_position > _path[_current_node].col) { // Need to move west
-		_sprite->SetDirection(WEST);
-	}
-	else if (_sprite->x_position < _path[_current_node].col) { // Need to move east
-		_sprite->SetDirection(EAST);
-	}
-	else { // The x and y position have reached the node, update to the next node
-		_current_node++;
-		if (_current_node >= _path.size()) { // Destination has been reached
-			_sprite->moving = false;
-			_sprite->ReleaseControl(this);
-			return true;
+	if (!_sprite->_path.empty())
+	{
+		if (_sprite->y_position > _sprite->_path[_sprite->_current_node].row) { // Need to move toward the north
+			if (_sprite->x_position > _sprite->_path[_sprite->_current_node].col)
+				_sprite->SetDirection(MOVING_NORTHWEST);
+			else if (_sprite->x_position < _sprite->_path[_sprite->_current_node].col)
+				_sprite->SetDirection(MOVING_NORTHEAST);
+			else
+				_sprite->SetDirection(NORTH);
+		}
+		else if (_sprite->y_position < _sprite->_path[_sprite->_current_node].row) { // Need to move toward the south
+			if (_sprite->x_position > _sprite->_path[_sprite->_current_node].col)
+				_sprite->SetDirection(MOVING_SOUTHWEST);
+			else if (_sprite->x_position < _sprite->_path[_sprite->_current_node].col)
+				_sprite->SetDirection(MOVING_SOUTHEAST);
+			else
+				_sprite->SetDirection(SOUTH);
+		}
+		else if (_sprite->x_position > _sprite->_path[_sprite->_current_node].col) { // Need to move west
+			_sprite->SetDirection(WEST);
+		}
+		else if (_sprite->x_position < _sprite->_path[_sprite->_current_node].col) { // Need to move east
+			_sprite->SetDirection(EAST);
+		}
+		else { // The x and y position have reached the node, update to the next node
+			_sprite->_current_node++;
+			if (_sprite->_current_node >= _sprite->_path.size()) { // Destination has been reached
+				_sprite->moving = false;
+				_sprite->ReleaseControl(this);
+				return true;
+			}
 		}
 	}
 

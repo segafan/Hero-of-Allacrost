@@ -57,6 +57,15 @@ public:
 
 	// ---------- Public Members: Orientation and Movement
 
+	//! \brief The destination coordinates for this path movement
+	PathNode _destination;
+
+	//! \brief Holds the path needed to traverse from source to destination
+	std::vector<PathNode> _path;
+
+	//! \brief An index to the path vector containing the node that the sprite currently occupies
+	uint32 _current_node;
+
 	/** \brief A bit-mask for the sprite's draw orientation and direction vector.
 	*** This member determines both where to move the sprite (8 directions) and
 	*** which way the sprite is facing (4 directions). See the Sprite direction
