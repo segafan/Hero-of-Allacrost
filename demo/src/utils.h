@@ -457,6 +457,19 @@ std::string NumberToString(const T t)
 **/
 bool IsStringNumeric(const std::string& text);
 
+/** \brief Converts from UTF8 to UTF16 using iconv
+*** \param source The utf8 character array to convert
+*** \param dest   A utf16 destination array of size length + 1
+*** \param length The number of characters to convert
+***
+*** This converts from UTF8 to UTF16 using the iconv library.
+*** This is not expected to be used in most situations - it is called
+*** by the MakeUnicodeString method. Note that the first character
+*** output is the UTF16 "Byte Order Mark" and should be skipped
+*** if only characters are desired.
+**/
+bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length);
+
 /** \brief Creates a ustring from a standard string
 *** \param text The standard string to create the ustring equivalent for
 *** \return A ustring containing the same information as the function parameter

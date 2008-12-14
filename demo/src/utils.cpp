@@ -27,6 +27,7 @@
 #include <libintl.h>
 #include <fstream>
 #include <sys/stat.h>
+#include <iconv.h>
 
 #include "utils.h"
 #include "socket.h"
@@ -308,18 +309,53 @@ bool IsStringNumeric(const string& text) {
 	return true;
 } // bool IsStringNumeric(const string& text)
 
+// Converts from UTF8 to UTF16, including the Byte Order Mark, using iconv
+// Skip the first uint16 to skip the BOM.
+bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
+	if (!length)
+		return true;
+
+	iconv_t convertor = iconv_open("UTF16", "UTF8");
+	if (convertor == (iconv_t) -1) {
+		std::cerr << "Failed to initialise UTF8->UTF16 conversion through iconv." << std::endl;
+		return false;
+	}
+
+	// The iconv API doesn't specify a const source
+	// for legacy support reasons.
+	char *sourceChar = const_cast<char *>(source);
+	char *destChar   = reinterpret_cast<char *>(dest);
+	size_t sourceLen = length;
+	size_t destLen   = (length + 1) * 2;
+	size_t ret = iconv(convertor, &sourceChar, &sourceLen,
+				      &destChar,   &destLen);
+	iconv_close(convertor);
+	if (ret == (size_t) -1) {
+		perror("iconv");
+		std::cerr << "Conversion of '" << source << "' from UTF8->UTF16 failed." << std::endl;
+		return false;
+	}
+	return true;
+}
 
 // Creates a ustring from a normal string
 ustring MakeUnicodeString(const string& text) {
-	int32 length = static_cast<int32>(text.length());
-	uint16 *ubuff = new uint16[length+1];
-	ubuff[length] = static_cast<uint16>('\0');
-
-	for (int32 c = 0; c < length; ++c) {
-		ubuff[c] = static_cast<uint16>(text[c]);
+	int32 length = static_cast<int32>(text.length() + 1);
+	uint16 *ubuff = new uint16[length + 1];
+	memset(ubuff, '\0', sizeof(*ubuff));
+	uint16 *utf16String = ubuff;
+	
+	if (!UTF8ToUTF16(text.c_str(), ubuff, length)) {
+		for (int32 c = 0; c < length; ++c) {
+			ubuff[c] = static_cast<uint16>(text[c]);
+		}
+	}
+	else {
+		// Skip the "Byte Order Mark" from the UTF16 specification
+		utf16String = ubuff + 1;
 	}
 
-	ustring new_ustr(ubuff);
+	ustring new_ustr(utf16String);
 	delete[] ubuff;
 
 	return new_ustr;
