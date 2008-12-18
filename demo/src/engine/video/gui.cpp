@@ -213,7 +213,10 @@ GUISupervisor::~GUISupervisor() {
 
 
 bool GUISupervisor::SingletonInitialize() {
-	return true;
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_scroll_arrows, "img/menus/scroll_arrows.png", 2, 4) == true)
+		return true;
+	else
+		return false;
 }
 
 

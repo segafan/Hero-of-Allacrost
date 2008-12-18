@@ -213,11 +213,6 @@ public:
 *** The OptionBox control is used for presenting the player with several choices,
 *** of actions to take, wares to buy, etc.
 ***
-*** \note 2D option box support needs to be tested. Should we allow 2D option
-*** boxes that are not completely filled? For example, a 3 row, 3 column option
-*** box that contains only 7 elements (final row has only 1st column)? I don't
-*** believe this class supports that yet...but it might.
-***
 *** \todo Add scrolling feature to OptionBox so we can scroll through lists of
 *** options that are greater than the display area.
 ***
@@ -227,6 +222,8 @@ public:
 *** additional options that are not currently in view (note: this should
 *** probably be added to the GUIControl class for both OptionBox and TextBox
 *** to inherit from)
+***
+*** \todo Support multiple forms of scroll animations.
 *** ***************************************************************************/
 class OptionBox : public private_video::GUIControl {
 public:
@@ -463,6 +460,9 @@ private:
 	//! \brief The text style that the options should be rendered in
 	TextStyle _text_style;
 
+	//! \brief The column of row of data that is drawn in the top-left cell
+	uint32 _draw_left_column, _draw_top_row;
+
 	//! \brief Retains the x and y offsets for where the cursor should be drawn relative to the selected option
 	float _cursor_xoffset, _cursor_yoffset;
 
@@ -480,6 +480,12 @@ private:
 
 	//! \brief True if scissoring should be applied according to the owner window, false for the box's size
 	bool _scissoring_owner;
+
+	//! \brief When true the scroll arrows for the horizontal and vertical directions will be drawn
+	bool _draw_horizontal_arrows, _draw_vertical_arrows;
+
+	//! \brief When true the scroll arrows in these directions will be drawn with the grey arrow
+	bool _grey_up_arrow, _grey_down_arrow, _grey_left_arrow, _grey_right_arrow;
 	//@}
 
 	//! \name Active State Members
@@ -540,6 +546,12 @@ private:
 	*** This function also moves the draw cursor to the position specified by the alignment and the cell boundaries.
 	**/
 	void _SetupAlignment(int32 xalign, int32 yalign, const private_video::OptionCellBounds& bounds, float& x, float& y);
+
+	/** \brief Calling this method will re-examine which scroll arrow boolean members need to be set
+	*** This should be called whenever the data or cell columns/rows changed, whenever the selection in changed,
+	*** and in general whenever the viewable contents of the option box are changed.
+	**/
+	void _DetermineScrollArrows();
 
 	/** \brief Draws a single option cell
 	*** \param op The option contents to draw within the cell

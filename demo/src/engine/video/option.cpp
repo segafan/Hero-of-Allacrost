@@ -99,6 +99,8 @@ OptionBox::OptionBox() :
 	_horizontal_wrap_mode(VIDEO_WRAP_MODE_NONE),
 	_vertical_wrap_mode(VIDEO_WRAP_MODE_NONE),
 	_enable_switching(false),
+	_draw_left_column(0),
+	_draw_top_row(0),
 	_cursor_xoffset(0.0f),
 	_cursor_yoffset(0.0f),
 	_scroll_offset(0),
@@ -106,6 +108,12 @@ OptionBox::OptionBox() :
 	_option_yalign(VIDEO_Y_CENTER),
 	_scissoring(false),
 	_scissoring_owner(false),
+	_draw_horizontal_arrows(false),
+	_draw_vertical_arrows(false),
+	_grey_up_arrow(false),
+	_grey_down_arrow(false),
+	_grey_left_arrow(false),
+	_grey_right_arrow(false),
 	_event(0),
 	_selection(-1),
 	_first_selection(-1),
@@ -274,6 +282,10 @@ void OptionBox::Draw() {
 		bounds.y_center += yoff;
 		bounds.y_bottom += yoff;
 	} // for (int32 row = row_min; row < row_max; row++)
+
+	// ---------- (5) Draw scroll arrows where appropriate
+	_draw_horizontal_arrows = (_number_cell_columns < _number_columns) && (static_cast<int32>(GetNumberOptions()) > _number_cell_columns);
+	_draw_vertical_arrows = (_number_cell_rows < _number_rows) && (static_cast<int32>(GetNumberOptions()) > _number_columns * _number_cell_rows);
 
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 	if (GUIManager->DEBUG_DrawOutlines() == true)
@@ -704,11 +716,11 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 
 bool OptionBox::_ChangeSelection(uint32 offset, bool horizontal) {
 	// Do nothing if the movement is horizontal and there is only one column with no horizontal wrap shifting
-	if (horizontal == true && _number_columns == 1 && _horizontal_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
+	if (horizontal == true && _number_cell_columns == 1 && _horizontal_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
 		return false;
 
 	// Do nothing if the movement is vertical and there is only one row with no vertical wrap shifting
-	if (horizontal == false && _number_rows == 1 && _vertical_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
+	if (horizontal == false && _number_cell_rows == 1 && _vertical_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
 		return false;
 
 	// Get the row, column coordinates for the current selection
@@ -717,8 +729,8 @@ bool OptionBox::_ChangeSelection(uint32 offset, bool horizontal) {
 	bool bounds_exceeded = false;
 
 	// Determine if the movement selection will exceed a column or row bondary
-	if ((horizontal == true && ((col + offset < 0) || (col + offset >= _number_columns) || (col + offset >= GetNumberOptions()))) ||
-		(horizontal == false && ((row + offset < 0) || (row + offset >= _number_rows) || (row + offset >= GetNumberOptions()))))
+	if ((horizontal == true && ((col + offset < 0) || (col + offset >= static_cast<uint32>(_number_columns)) || (col + offset >= GetNumberOptions()))) ||
+		(horizontal == false && ((row + offset < 0) || (row + offset >= static_cast<uint32>(_number_rows)) || (row + offset >= GetNumberOptions()))))
 	{
 		bounds_exceeded = true;
 	}
@@ -788,19 +800,36 @@ bool OptionBox::_ChangeSelection(uint32 offset, bool horizontal) {
 		_selection = (_selection + (offset * _number_columns)) % GetNumberOptions();
 	}
 
-	// If the new selection isn't currently being displayed, scroll it into view
-	row = _selection / _number_columns;
-	if (row < _scroll_offset || row >= _scroll_offset + _number_rows) {
+	// Determine if the new selection is not displayed in any cells. If so, scroll it into view.
+	int32 selection_row = _selection / _number_columns;
+	int32 selection_col = _selection % _number_columns;
+
+	if ((selection_row < _draw_top_row) || (selection_row >= (_draw_top_row + _number_cell_rows)) ||
+		(selection_col < _draw_left_column) || (selection_col >= (_draw_left_column + _number_cell_columns))) {
 		_scrolling = true;
 		_scroll_time = 0;
 
-		if (row < _scroll_offset)
+		if (selection_row < _scroll_offset)
 			_scroll_direction = -1 * (_scroll_offset - row); // scroll up
 		else
 			_scroll_direction = 1 * (row - _number_rows - _scroll_offset + 1); // scroll down
 
 		_scroll_offset += _scroll_direction;
 	}
+
+	// If the new selection isn't currently being displayed, scroll it into view
+// 	row = _selection / _number_columns;
+// 	if (row < _scroll_offset || row >= _scroll_offset + _number_rows) {
+// 		_scrolling = true;
+// 		_scroll_time = 0;
+//
+// 		if (row < _scroll_offset)
+// 			_scroll_direction = -1 * (_scroll_offset - row); // scroll up
+// 		else
+// 			_scroll_direction = 1 * (row - _number_rows - _scroll_offset + 1); // scroll down
+//
+// 		_scroll_offset += _scroll_direction;
+// 	}
 
 	_event = VIDEO_OPTION_SELECTION_CHANGE;
 	return true;
@@ -837,6 +866,29 @@ void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBoun
 
 	VideoManager->Move(x, y);
 } // void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds& bounds, float& x, float& y)
+
+
+
+void OptionBox::_DetermineScrollArrows() {
+	_grey_up_arrow = false;
+	_grey_down_arrow = false;
+	_grey_left_arrow = false;
+	_grey_right_arrow = false;
+
+	_draw_horizontal_arrows = (_number_cell_columns < _number_columns) && (GetNumberOptions() > _number_cell_columns);
+	_draw_vertical_arrows = (_number_cell_rows < _number_rows) && (GetNumberOptions() > _number_columns * _number_cell_rows);
+
+	// TODO: fill out the rest of this function
+// 	if (_draw_horizontal_arrows == true) {
+// 		_grey_left_arrow =
+// 		_grey_right_arrow =
+// 	}
+//
+// 	if (_draw_vertical_arrows == true) {
+// 		_grey_up_arrow =
+// 		_grey_down_arrow =
+// 	}
+}
 
 
 
@@ -933,7 +985,7 @@ void OptionBox::_DrawOption(const Option& op, const OptionCellBounds &bounds, fl
 			}
 		} // switch (op.elements[element].type)
 	} // for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++)
-}
+} // void OptionBox::_DrawOption(const Option& op, const OptionCellBounds &bounds, float scroll_offset, float& left_edge)
 
 
 
@@ -963,7 +1015,7 @@ void OptionBox::_DrawCursor(const OptionCellBounds &bounds, float scroll_offset,
 		default_cursor->Draw();
 	else
 		default_cursor->Draw(Color(1.0f, 1.0f, 1.0f, 0.5f));
-}
+} // void OptionBox::_DrawCursor(const OptionCellBounds &bounds, float scroll_offset, float left_edge, bool darken)
 
 
 
