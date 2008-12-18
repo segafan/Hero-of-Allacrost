@@ -94,6 +94,9 @@ void MenuWindow::Update(uint32 frame_time) {
 			_window_state = VIDEO_MENU_STATE_HIDDEN;
 	}
 
+	// TODO: This does not need to be done every update call (it always retuns the same thing so long
+	// as the window does not move. This is a performance problem and should be fixed so that this is
+	// only done with the window size or alignment changes.
 	if (_window_state == VIDEO_MENU_STATE_HIDDEN || _window_state == VIDEO_MENU_STATE_SHOWN) {
 //		if (_is_scissored == true) {
 			float x_buffer = (_width - _inner_width) / 2;

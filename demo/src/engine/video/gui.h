@@ -47,6 +47,19 @@ const Color alpha_black(0.0f, 0.0f, 0.0f, 0.5f);
 const Color alpha_white(1.0f, 1.0f, 1.0f, 0.5f);
 //@}
 
+//! \brief Constants used as indeces to access the GUISupervisor#_scroll_arrows vector
+//@{
+const uint32 SCROLL_UP           = 0;
+const uint32 SCROLL_DOWN         = 1;
+const uint32 SCROLL_LEFT         = 2;
+const uint32 SCROLL_RIGHT        = 3;
+const uint32 SCROLL_UP_GREY      = 4;
+const uint32 SCROLL_DOWN_GREY    = 5;
+const uint32 SCROLL_LEFT_GREY    = 6;
+const uint32 SCROLL_RIGHT_GREY   = 7;
+//@}
+
+
 /** ****************************************************************************
 *** \brief An abstract base class for all GUI elements (windows + controls).
 *** This class contains basic functions such as Draw(), Update(), etc.
@@ -219,6 +232,8 @@ class GUISupervisor : public hoa_utils::Singleton<GUISupervisor> {
 	friend class hoa_utils::Singleton<GUISupervisor>;
 	friend class VideoEngine;
 	friend class MenuWindow;
+	friend class TextBox;
+	friend class OptionBox;
 public:
 	GUISupervisor();
 
@@ -297,6 +312,14 @@ public:
 		{ return _DEBUG_draw_outlines; }
 
 private:
+	/** \brief Stores the arrow icons used for scrolling through various GUI controls
+	*** The size of this vector is eight. The first four images are the standard arrows and the last
+	*** four are greyed out arrows (used to indicate the end of scrolling). The first four arrow
+	*** images represent up, down, left, right in that order, and the last four arrows follow this
+	*** format as well.
+	**/
+	std::vector<StillImage> _scroll_arrows;
+
 	/** \brief A map containing all of the menu skins which have been loaded
 	*** The string argument is the reference name of the menu, which is defined
 	*** by the user when they load a new skin.
