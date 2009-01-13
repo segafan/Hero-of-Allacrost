@@ -150,7 +150,7 @@ InventoryWindow::~InventoryWindow()
 void InventoryWindow::_InitInventoryItems() {
 	// Set up the inventory option box
 	_inventory_items.SetPosition(500.0f, 170.0f);
-	_inventory_items.SetDimensions(400.0f, 360.0f, 1, 6, 1, 6);
+	_inventory_items.SetDimensions(400.0f, 360.0f, 1, 255, 1, 3);
 	_inventory_items.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_inventory_items.SetCursorOffset(-52.0f, -20.0f);
 	_inventory_items.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -480,8 +480,7 @@ StatusWindow::StatusWindow() :
 
 
 StatusWindow::~StatusWindow() {
-	// FIXME: Why was this here?  Do we need to delete the portraits?
-	// uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
+	
 }
 
 // Activate/deactivate window
@@ -665,7 +664,7 @@ void SkillsWindow::Activate(bool new_status) {
 void SkillsWindow::_InitSkillsList() {
 	// Set up the inventory option box
 	_skills_list.SetPosition(500.0f, 170.0f);
-	_skills_list.SetDimensions(180.0f, 30.0f, 1, 4, 1, 4);
+	_skills_list.SetDimensions(180.0f, 360.0f, 1, 255, 1, 4);
 	_skills_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_skills_list.SetCursorOffset(-52.0f, -20.0f);
 	_skills_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -679,7 +678,7 @@ void SkillsWindow::_InitSkillsList() {
 
 	// setup the cost option box
 	_skill_cost_list.SetPosition(800.0f, 170.0f);
-	_skill_cost_list.SetDimensions(180.0f, 30.0f, 1, 4, 1, 4);
+	_skill_cost_list.SetDimensions(180.0f, 360.0f, 1, 255, 1, 4);
 	_skill_cost_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_skill_cost_list.SetCursorOffset(-52.0f, -20.0f);
 	_skill_cost_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);

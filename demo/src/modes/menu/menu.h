@@ -59,9 +59,9 @@ enum MAIN_CATEGORY {
 //! \name Inventory Menu Options Constants
 //@{
 const uint32 INV_USE    = 0;
-const uint32 INV_SORT   = 1;
-const uint32 INV_BACK   = 2;
-const uint32 INV_SIZE   = 3;
+// const uint32 INV_SORT   = 1;
+const uint32 INV_BACK   = 1;
+const uint32 INV_SIZE   = 2;
 //@}
 
 //! \name Skills Menu Options Constants

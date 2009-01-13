@@ -493,10 +493,10 @@ void MenuMode::_HandleMainMenu() {
 			_current_menu = &_menu_equip;
 			break;
 
-		case MAIN_SAVE:
+		/*case MAIN_SAVE:
 			_current_menu_showing = SHOW_SAVE;
 			_current_menu = &_menu_save;
-			break;
+			break;*/
 
 		case MAIN_EXIT:
 			ModeManager->Pop();
@@ -516,10 +516,10 @@ void MenuMode::_HandleInventoryMenu() {
 			_inventory_window.Activate(true);
 			break;
 
-		case INV_SORT:
+/*		case INV_SORT:
 			// TODO: Handle the sort inventory comand
 			cout << "MENU: Inventory sort command!" << endl;
-			break;
+			break;*/
 
 		case INV_BACK:
 			_current_menu_showing = SHOW_MAIN;
@@ -549,7 +549,7 @@ void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
 void MenuMode::_SetupMainOptionBox() {
 	// Setup the main options box
 	_SetupOptionBoxCommonSettings(&_main_options);
-// 	_main_options.SetSize(MAIN_SIZE, 1);
+	_main_options.SetDimensions(745.0f, 50.0f, MAIN_SIZE, 1, MAIN_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -571,12 +571,12 @@ void MenuMode::_SetupMainOptionBox() {
 void MenuMode::_SetupInventoryOptionBox() {
 	// Setup the option box
 	_SetupOptionBoxCommonSettings(&_menu_inventory);
-// 	_menu_inventory.SetSize(INV_SIZE, 1);
+	_menu_inventory.SetDimensions(115.0f, 50.0f, INV_SIZE, 1, INV_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Use"));
-	options.push_back(MakeUnicodeString("Sort"));
+//	options.push_back(MakeUnicodeString("Sort"));
 	options.push_back(MakeUnicodeString("Back"));
 
 	// Add strings and set default selection.
@@ -589,7 +589,7 @@ void MenuMode::_SetupInventoryOptionBox() {
 void MenuMode::_SetupSkillsOptionBox() {
 	// Setup the option box
 	_SetupOptionBoxCommonSettings(&_menu_skills);
-// 	_menu_skills.SetSize(SKILLS_SIZE, 1);
+	_menu_skills.SetDimensions(115.0f, 50.0f, SKILLS_SIZE, 1, SKILLS_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -604,7 +604,7 @@ void MenuMode::_SetupSkillsOptionBox() {
 void MenuMode::_SetupStatusOptionBox() {
 	// Setup the status option box
 	_SetupOptionBoxCommonSettings(&_menu_status);
-// 	_menu_status.SetSize(STATUS_SIZE, 1);
+	_menu_status.SetDimensions(115.0f, 50.0f, STATUS_SIZE, 1, STATUS_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -621,7 +621,7 @@ void MenuMode::_SetupStatusOptionBox() {
 void MenuMode::_SetupOptionsOptionBox() {
 	// Setup the options option box
 	_SetupOptionBoxCommonSettings(&_menu_options);
-// 	_menu_options.SetSize(OPTIONS_SIZE, 1);
+	_menu_options.SetDimensions(115.0f, 50.0f, OPTIONS_SIZE, 1, OPTIONS_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -652,7 +652,7 @@ void MenuMode::_SetupSaveOptionBox() {
 void MenuMode::_SetupFormationOptionBox() {
 	// setup the save options box
 	_SetupOptionBoxCommonSettings(&_menu_formation);
-// 	_menu_formation.SetSize(FORMATION_SIZE, 1);
+	_menu_formation.SetDimensions(115.0f, 50.0f, FORMATION_SIZE, 1, FORMATION_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -667,6 +667,7 @@ void MenuMode::_SetupFormationOptionBox() {
 void MenuMode::_SetupEquipOptionBox() {
 	// Setup the status option box
 	_SetupOptionBoxCommonSettings(&_menu_equip);
+	_menu_equip.SetDimensions(115.0f, 50.0f, EQUIP_SIZE, 1, EQUIP_SIZE, 1);
 // 	_menu_equip.SetCellSize(150.0f, 50.0f);
 // 	_menu_equip.SetSize(EQUIP_SIZE, 1);
 

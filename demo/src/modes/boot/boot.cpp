@@ -884,7 +884,7 @@ void BootMode::_ShowMessageWindow(bool joystick)
 // Inits the main menu
 void BootMode::_SetupMainMenu() {
 	_main_menu.SetPosition(512.0f, 50.0f);
-	_main_menu.SetDimensions(600.0f, 50.0f, 5, 1, 5, 1);
+	_main_menu.SetDimensions(600.0f, 50.0f, 8, 1, 8, 1);
 	_main_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_main_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_main_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -897,12 +897,14 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Load Game"), &BootMode::_OnLoadGame);
 	_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
-	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
-
+	
 	// TEMP: these options are for debugign purposes only and should be removed for releases
-// 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
-// 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
-// 	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
+	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
+	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
+	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
+
+	// Quit should always be included, and should always be last.
+	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 
 	string path = GetUserDataPath(true) + "saved_game.lua";
 	if (DoesFileExist(path) == false) {
