@@ -199,7 +199,7 @@ BuyListWindow::BuyListWindow() {
 
 	object_list.SetOwner(this);
 	object_list.SetPosition(35.0f, 362.0f);
-	object_list.SetDimensions(500.0f, 50.0f, 1, 6, 1, 6);
+	object_list.SetDimensions(500.0f, 360.0f, 1, 255, 1, 6);
 	object_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	object_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	object_list.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -233,6 +233,7 @@ void BuyListWindow::RefreshList() {
 		);
 	}
 // 	object_list.SetSize(1, object_list.GetNumberOptions());
+	object_list.SetDimensions(500.0f, 360.0f, 1, 255, 1, 6);
 	object_list.SetSelection(0);
 }
 
@@ -319,6 +320,9 @@ void BuyListWindow::Draw() {
 
 	if (hide_options == false && object_list.GetNumberOptions() > 0) {
 		object_list.Draw();
+	}
+	else {
+		cout << "BuyList object_list not drawn!" << endl;
 	}
 }
 

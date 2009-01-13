@@ -534,7 +534,7 @@ private:
 	*** \param horizontal true if moving horizontally, false if moving vertically
 	*** \return False if the selection does not change
 	**/
-	bool _ChangeSelection(uint32 offset, bool horizontal);
+	bool _ChangeSelection(int32 offset, bool horizontal);
 
 	/** \brief Sets draw flags and determines the x and y coordinates for rendering an option inside a cell
 	*** \param xalign The x alignement for the cell contents

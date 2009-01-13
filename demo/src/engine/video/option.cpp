@@ -153,6 +153,7 @@ void OptionBox::Update(uint32 frame_time) {
 void OptionBox::Draw() {
 	// Do nothing if the option box is not properly initialized
 	if (!IsInitialized(_initialization_errors)) {
+		cout << "ERROR: Could not draw OptionBox" << endl;
 		return;
 	}
 
@@ -189,7 +190,7 @@ void OptionBox::Draw() {
 	// ---------- (2) Calculate scissoring rectangle
 	ScreenRect rect(x, y, w, h);
 	CoordSys &cs = VideoManager->_current_context.coordinate_system;
-	if (cs.GetVerticalDirection() < 0) {
+/*	if (cs.GetVerticalDirection() < 0) {
 		rect.top += static_cast<int32>(_cell_height) + (_number_rows); // To accomodate the 1 pixel per row offset
 	}
 
@@ -209,26 +210,26 @@ void OptionBox::Draw() {
 		scissor = true;
 		VideoManager->SetScissorRect(rect);
 	}
-
+*/
 	// ---------- (3) Determine the option cells to drawn and any offsets needed for scrolling
 	VideoManager->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
-	int32 row_min, row_max;
+//	int32 row_min, row_max;
 	float scroll_offset = 0.0f;
 
 	if (!_scrolling) {
-		row_min = _scroll_offset;
-		row_max = _scroll_offset + _number_cell_rows;
+//		row_min = _scroll_offset;
+//		row_max = _scroll_offset + _number_cell_rows;
 	}
 	else if (_scroll_direction == -1) { // Scrolling up
-		row_min = _scroll_offset;
-		row_max = _scroll_offset + _number_cell_rows + 1;
+//		row_min = _scroll_offset;
+//		row_max = _scroll_offset + _number_cell_rows + 1;
 
 		scroll_offset = cs.GetVerticalDirection() * (1.0f - (_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
 	}
 	else { // Scrolling down
-		row_min = _scroll_offset - 1;
-		row_max = _scroll_offset + _number_cell_rows;
+//		row_min = _scroll_offset - 1;
+//		row_max = _scroll_offset + _number_cell_rows;
 		scroll_offset = cs.GetVerticalDirection() * ((_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
 	}
 
@@ -242,10 +243,10 @@ void OptionBox::Draw() {
 	bounds.y_bottom = (bounds.y_center * 2.0f) - bounds.y_top;
 
 	// ---------- (4) Iterate through all the visible option cells and draw them and the draw cursor
-	for (int32 row = row_min; row < row_max && finished == false; row++) {
-		if (scissor)
-			VideoManager->EnableScissoring();
-		else
+	for (int32 row = _draw_top_row; row < _draw_top_row + _number_cell_rows && finished == false; row++) {
+//		if (scissor)
+//			VideoManager->EnableScissoring();
+//		else
 			VideoManager->DisableScissoring();
 
 		bounds.x_left = left;
@@ -253,12 +254,12 @@ void OptionBox::Draw() {
 		bounds.x_right = (bounds.x_center * 2.0f) - bounds.x_left;
 
 		// Draw the columns of options
-		for (int32 col = 0; col < _number_cell_columns; ++col) {
-			uint32 index = row * _number_cell_columns + col;
+		for (int32 col = _draw_left_column; col < _draw_left_column + _number_cell_columns; ++col) {
+			int32 index = row * _number_cell_columns + col;
 
 			// If there are more visible cells than there are options available we leave those cells empty
-			if (index >= GetNumberOptions()) {
-				finished = true;
+			if (index >= GetNumberOptions() ) {
+//				finished = true;
 				break;
 			}
 
@@ -714,7 +715,7 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 
 
 
-bool OptionBox::_ChangeSelection(uint32 offset, bool horizontal) {
+bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 	// Do nothing if the movement is horizontal and there is only one column with no horizontal wrap shifting
 	if (horizontal == true && _number_cell_columns == 1 && _horizontal_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
 		return false;
@@ -724,8 +725,8 @@ bool OptionBox::_ChangeSelection(uint32 offset, bool horizontal) {
 		return false;
 
 	// Get the row, column coordinates for the current selection
-	uint32 row = _selection / _number_columns;
-	uint32 col = _selection % _number_columns;
+	int32 row = _selection / _number_columns;
+	int32 col = _selection % _number_columns;
 	bool bounds_exceeded = false;
 
 	// Determine if the movement selection will exceed a column or row bondary
@@ -752,14 +753,17 @@ bool OptionBox::_ChangeSelection(uint32 offset, bool horizontal) {
 
 	// Case #3: horizontal movement with wrapping enabled
 	else if (horizontal == true) {
-		if (col + offset < 0) { // The left boundary was exceeded
-			if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT)
-				offset += _number_columns;
+		if (col + offset <= 0) { // The left boundary was exceeded
+			if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT) {
+				offset = _number_columns - 1;
+			}
 			// Make sure vertical wrapping is allowed if horizontal wrap mode is shifting
-			else if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_SHIFTED && _vertical_wrap_mode != VIDEO_WRAP_MODE_NONE)
+			else if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_SHIFTED && _vertical_wrap_mode != VIDEO_WRAP_MODE_NONE) {
 				offset += GetNumberOptions();
-			else
+			}
+			else {
 				return false;
+			}
 		}
 		else { // The right boundary was exceeded
 			if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT)
@@ -769,15 +773,15 @@ bool OptionBox::_ChangeSelection(uint32 offset, bool horizontal) {
 				offset = 0;
 				_selection++;
 			}
-				else
-					return false;
+			else
+				return false;
 		}
 		_selection = (_selection + offset) % GetNumberOptions();
 	}
 
 	// Case #4: vertical movement with wrapping enabled
 	else {
-		if (row + offset < 0) { // The top boundary was exceeded
+		if (row + offset <= 0) { // The top boundary was exceeded
 			if (_vertical_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT)
 				offset += GetNumberOptions();
 			// Make sure horizontal wrapping is allowed if vertical wrap mode is shifting
@@ -804,10 +808,49 @@ bool OptionBox::_ChangeSelection(uint32 offset, bool horizontal) {
 	int32 selection_row = _selection / _number_columns;
 	int32 selection_col = _selection % _number_columns;
 
-	if ((selection_row < _draw_top_row) || (selection_row >= (_draw_top_row + _number_cell_rows)) ||
-		(selection_col < _draw_left_column) || (selection_col >= (_draw_left_column + _number_cell_columns))) {
+	if ( (selection_row < _draw_top_row) ) {
 		_scrolling = true;
 		_scroll_time = 0;
+		_draw_top_row = selection_row;
+
+		if (selection_row < _scroll_offset)
+			_scroll_direction = -1 * (_scroll_offset - row); // scroll up
+		else
+			_scroll_direction = 1 * (row - _number_rows - _scroll_offset + 1); // scroll down
+
+		_scroll_offset += _scroll_direction;
+	}
+
+	else if ( (selection_row >= (_draw_top_row + _number_cell_rows)) ) {
+		_scrolling = true;
+		_scroll_time = 0;
+		_draw_top_row = selection_row - _number_cell_rows + 1;
+
+		if (selection_row < _scroll_offset)
+			_scroll_direction = -1 * (_scroll_offset - row); // scroll up
+		else
+			_scroll_direction = 1 * (row - _number_rows - _scroll_offset + 1); // scroll down
+
+		_scroll_offset += _scroll_direction;
+	}
+
+	else if ( (selection_col < _draw_left_column) ) {
+		_scrolling = true;
+		_scroll_time = 0;
+		_draw_left_column = selection_col;
+
+		if (selection_row < _scroll_offset)
+			_scroll_direction = -1 * (_scroll_offset - row); // scroll up
+		else
+			_scroll_direction = 1 * (row - _number_rows - _scroll_offset + 1); // scroll down
+
+		_scroll_offset += _scroll_direction;
+	}
+
+	else if ( (selection_col >= (_draw_left_column + _number_cell_columns))) {
+		_scrolling = true;
+		_scroll_time = 0;
+		_draw_left_column = selection_col - _number_cell_columns + 1;
 
 		if (selection_row < _scroll_offset)
 			_scroll_direction = -1 * (_scroll_offset - row); // scroll up
