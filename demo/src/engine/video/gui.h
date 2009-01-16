@@ -311,6 +311,10 @@ public:
 	bool DEBUG_DrawOutlines() const
 		{ return _DEBUG_draw_outlines; }
 
+	// Don't commit this.
+	std::vector<StillImage>* GetScrollArrows()
+		{ return &_scroll_arrows; }
+
 private:
 	/** \brief Stores the arrow icons used for scrolling through various GUI controls
 	*** The size of this vector is eight. The first four images are the standard arrows and the last

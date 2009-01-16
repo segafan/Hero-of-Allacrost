@@ -67,6 +67,8 @@ public:
 
 	void InputRight();
 
+	void InputCancel();
+
 private:
 	//! confirm-key handlers for all options in the menu
 	std::vector<void (BootMode::*)()> _confirm_handlers;

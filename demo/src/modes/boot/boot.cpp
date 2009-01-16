@@ -365,12 +365,32 @@ void BootMode::Update() {
 	}
 	else if(InputManager->CancelPress())
 	{
-		_active_menu->InputCancel();
 		// Close the credits-screen if it was visible
 		if (_credits_screen.IsVisible())
 		{
 			_credits_screen.Hide();
 			_boot_sounds.at(1).Play(); // Play cancel sound here as well
+		}
+		else if (_active_menu == &_main_menu) {
+			
+		}
+		else if (_active_menu == &_options_menu) {
+			_active_menu = &_main_menu;
+		}
+		else if (_active_menu == &_video_options_menu) {
+			_active_menu = &_options_menu;
+		}
+		else if (_active_menu == &_audio_options_menu) {
+			_active_menu = &_options_menu;
+		}
+		else if (_active_menu == &_language_options_menu) {
+			_active_menu = &_options_menu;
+		}
+		else if (_active_menu == &_key_settings_menu) {
+			_active_menu = &_options_menu;
+		}
+		else if (_active_menu == &_joy_settings_menu) {
+			_active_menu = &_options_menu;
 		}
 
 		// check to see if settings need to be saved (if we're exiting from the key or joystick
@@ -420,7 +440,7 @@ void BootMode::Draw() {
 	VideoManager->Text()->SetDefaultTextColor(Color::gray);
 	VideoManager->Text()->Draw("Demo 1.0.0");
 	VideoManager->MoveRelative(730.0f, 0.0f);
-	VideoManager->Text()->Draw("Copyright (C) 2004 - 2008 The Allacrost Project");
+	VideoManager->Text()->Draw("Copyright (C) 2004 - 2009 The Allacrost Project");
 
 // 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	VideoManager->Move(0, 0);
@@ -898,12 +918,11 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	
-	// TEMP: these options are for debugign purposes only and should be removed for releases
+	// TEMP: these options are for debugging purposes only and should be removed for releases
 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
 	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
 
-	// Quit should always be included, and should always be last.
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 
 	string path = GetUserDataPath(true) + "saved_game.lua";
@@ -919,43 +938,96 @@ void BootMode::_SetupMainMenu() {
 
 // Inits the options menu
 void BootMode::_SetupOptionsMenu() {
+	_options_menu.SetPosition(512.0f, 384.0f);
+	_options_menu.SetDimensions(300.0f, 500.0f, 1, 5, 1, 5);
+	_options_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_options_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_options_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_options_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_options_menu.SetCursorOffset(-50.0f, 28.0f);
+
 	_options_menu.AddOption(MakeUnicodeString("Video"), &BootMode::_OnVideoOptions);
 	_options_menu.AddOption(MakeUnicodeString("Audio"), &BootMode::_OnAudioOptions);
 	_options_menu.AddOption(MakeUnicodeString("Language"), &BootMode::_OnLanguageOptions);
 	_options_menu.AddOption(MakeUnicodeString("Key Settings"), &BootMode::_OnKeySettings);
 	_options_menu.AddOption(MakeUnicodeString("Joystick Settings"), &BootMode::_OnJoySettings);
+
+	_options_menu.SetSelection(0);
 }
 
 
 // Inits the video-options menu
 void BootMode::_SetupVideoOptionsMenu()
 {
+	_video_options_menu.SetPosition(512.0f, 384.0f);
+	_video_options_menu.SetDimensions(300.0f, 400.0f, 1, 4, 1, 4);
+	_video_options_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_video_options_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_video_options_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_video_options_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_video_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_video_options_menu.SetCursorOffset(-50.0f, 28.0f);
+
 	_video_options_menu.AddOption(MakeUnicodeString("Resolution:"), &BootMode::_OnResolution);
 	_video_options_menu.AddOption(MakeUnicodeString("Window mode:"), &BootMode::_OnVideoMode, &BootMode::_OnVideoMode, &BootMode::_OnVideoMode); // Left & right will change window mode as well as plain 'confirm' !
 	_video_options_menu.AddOption(MakeUnicodeString("Brightness:"), NULL, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
 	_video_options_menu.AddOption(MakeUnicodeString("Image quality:"));
 
 	_video_options_menu.EnableOption(3, false); // disable image quality
+
+	_video_options_menu.SetSelection(0);
 }
 
 
 // Inits the audio-options menu
 void BootMode::_SetupAudioOptionsMenu()
 {
+	_audio_options_menu.SetPosition(512.0f, 384.0f);
+	_audio_options_menu.SetDimensions(300.0f, 200.0f, 1, 2, 1, 2);
+	_audio_options_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_audio_options_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_audio_options_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_audio_options_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_audio_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_audio_options_menu.SetCursorOffset(-50.0f, 28.0f);
+
 	_audio_options_menu.AddOption(MakeUnicodeString("Sound Volume: "), 0, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
 	_audio_options_menu.AddOption(MakeUnicodeString("Music Volume: "), 0, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
+
+	_audio_options_menu.SetSelection(0);
 }
 
 
 // Inits the language-select menu
 void BootMode::_SetupLanguageOptionsMenu()
 {
+	_language_options_menu.SetPosition(512.0f, 384.0f);
+	_language_options_menu.SetDimensions(300.0f, 200.0f, 1, 1, 1, 1);
+	_language_options_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_language_options_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_language_options_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_language_options_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_language_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_language_options_menu.SetCursorOffset(-50.0f, 28.0f);
+
 	_language_options_menu.AddOption(MakeUnicodeString("French"), &BootMode::_OnLanguageSelect);
+
+	_language_options_menu.SetSelection(0);
 }
 
 
 // Inits the key-settings menu
 void BootMode::_SetupKeySetttingsMenu() {
+	_key_settings_menu.SetPosition(512.0f, 384.0f);
+	_key_settings_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
+	_key_settings_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_key_settings_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_key_settings_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_key_settings_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_key_settings_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_key_settings_menu.SetCursorOffset(-50.0f, 28.0f);
+
 	_key_settings_menu.AddOption(MakeUnicodeString("Up: "), &BootMode::_RedefineUpKey);
 	_key_settings_menu.AddOption(MakeUnicodeString("Down: "), &BootMode::_RedefineDownKey);
 	_key_settings_menu.AddOption(MakeUnicodeString("Left: "), &BootMode::_RedefineLeftKey);
@@ -972,6 +1044,15 @@ void BootMode::_SetupKeySetttingsMenu() {
 
 
 void BootMode::_SetupJoySetttingsMenu() {
+	_joy_settings_menu.SetPosition(512.0f, 384.0f);
+	_joy_settings_menu.SetDimensions(300.0f, 500.0f, 1, 10, 1, 10);
+	_joy_settings_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_joy_settings_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_joy_settings_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_joy_settings_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_joy_settings_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_joy_settings_menu.SetCursorOffset(-50.0f, 28.0f);
+
 	ustring dummy;
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineXAxisJoy);
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineYAxisJoy);
@@ -991,6 +1072,15 @@ void BootMode::_SetupJoySetttingsMenu() {
 
 
 void BootMode::_SetupResolutionMenu() {
+	_resolution_menu.SetPosition(512.0f, 384.0f);
+	_resolution_menu.SetDimensions(300.0f, 200.0f, 1, 3, 1, 3);
+	_resolution_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_resolution_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_resolution_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_resolution_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_resolution_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_resolution_menu.SetCursorOffset(-50.0f, 28.0f);
+
 	_resolution_menu.AddOption(MakeUnicodeString("640 x 480"), &BootMode::_OnResolution640x480);
 	_resolution_menu.AddOption(MakeUnicodeString("800 x 600"), &BootMode::_OnResolution800x600);
 	_resolution_menu.AddOption(MakeUnicodeString("1024 x 768"), &BootMode::_OnResolution1024x768);
@@ -1042,7 +1132,7 @@ void BootMode::_OnQuit()
 
 // Battle debug confirmed
 void BootMode::_OnBattleDebug() {
-	ModeManager->Pop();
+//	ModeManager->Pop();
 	GlobalManager->AddCharacter(1);
 	BattleMode *BM = new BattleMode();
 	BM->AddEnemy(1);
@@ -1052,7 +1142,7 @@ void BootMode::_OnBattleDebug() {
 
 // Menu debug confirmed
 void BootMode::_OnMenuDebug() {
-	ModeManager->Pop();
+//	ModeManager->Pop();
 	GlobalManager->AddCharacter(1);
 	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("The Boot Screen"), "img/menus/locations/desert_cave.png");
 	ModeManager->Push(MM);
@@ -1060,6 +1150,7 @@ void BootMode::_OnMenuDebug() {
 
 // Shop debug confirmed
 void BootMode::_OnShopDebug() {
+	GlobalManager->AddCharacter(1);
 	GlobalManager->AddDrunes(500);
 	hoa_shop::ShopMode *SM = new hoa_shop::ShopMode();
 	ModeManager->Push(SM);
