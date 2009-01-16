@@ -168,7 +168,6 @@ void OptionBox::Draw() {
 	if (GUIManager->DEBUG_DrawOutlines() == true)
 		_DEBUG_DrawOutline();
 
-	int32 x, y, w, h;
 	float left, right, bottom, top;
 
 	// ---------- (1) Determine the edge dimensions of the option box
@@ -178,40 +177,9 @@ void OptionBox::Draw() {
 	top = _number_rows * _cell_height;
 	CalculateAlignedRect(left, right, bottom, top);
 
-	x = static_cast<int32>(left < right ? left : right);
-	y = static_cast<int32>(top < bottom ? top : bottom);
-	w = static_cast<int32>(right - left);
-	h = static_cast<int32>(top - bottom);
-	if (w < 0)
-		w = -w;
-	if (h < 0)
-		h = -h;
-
-	// ---------- (2) Calculate scissoring rectangle
-	ScreenRect rect(x, y, w, h);
 	CoordSys &cs = VideoManager->_current_context.coordinate_system;
-/*	if (cs.GetVerticalDirection() < 0) {
-		rect.top += static_cast<int32>(_cell_height) + (_number_rows); // To accomodate the 1 pixel per row offset
-	}
 
-	bool scissor = VideoManager->IsScissoringEnabled();
-	if (_owner && _scissoring && _scissoring_owner) {
-		rect.Intersect(_owner->GetScissorRect());
-		if (VideoManager->IsScissoringEnabled()) {
-			rect.Intersect(VideoManager->GetScissorRect());
-		}
-		scissor = true;
-		VideoManager->SetScissorRect(rect);
-	}
-	else if (_scissoring && !_scissoring_owner) {
-		if (VideoManager->IsScissoringEnabled()) {
-			rect.Intersect(VideoManager->GetScissorRect());
-		}
-		scissor = true;
-		VideoManager->SetScissorRect(rect);
-	}
-*/
-	// ---------- (3) Determine the option cells to drawn and any offsets needed for scrolling
+	// ---------- (2) Determine the option cells to drawn and any offsets needed for scrolling
 	VideoManager->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
 //	int32 row_min, row_max;
@@ -242,7 +210,7 @@ void OptionBox::Draw() {
 	bounds.y_center = bounds.y_top - 0.5f * _cell_height * cs.GetVerticalDirection();
 	bounds.y_bottom = (bounds.y_center * 2.0f) - bounds.y_top;
 
-	// ---------- (4) Iterate through all the visible option cells and draw them and the draw cursor
+	// ---------- (3) Iterate through all the visible option cells and draw them and the draw cursor
 	for (int32 row = _draw_top_row; row < _draw_top_row + _number_cell_rows && finished == false; row++) {
 //		if (scissor)
 //			VideoManager->EnableScissoring();
@@ -259,7 +227,7 @@ void OptionBox::Draw() {
 
 			// If there are more visible cells than there are options available we leave those cells empty
 			if (index >= GetNumberOptions() ) {
-//				finished = true;
+				finished = true;
 				break;
 			}
 
@@ -284,11 +252,40 @@ void OptionBox::Draw() {
 		bounds.y_bottom += yoff;
 	} // for (int32 row = row_min; row < row_max; row++)
 
-	// ---------- (5) Draw scroll arrows where appropriate
-	_draw_horizontal_arrows = (_number_cell_columns < _number_columns) && (static_cast<int32>(GetNumberOptions()) > _number_cell_columns);
-	_draw_vertical_arrows = (_number_cell_rows < _number_rows) && (static_cast<int32>(GetNumberOptions()) > _number_columns * _number_cell_rows);
+	// ---------- (4) Draw scroll arrows where appropriate
+	_DetermineScrollArrows();
+	std::vector<StillImage>* arrows = GUIManager->GetScrollArrows();
+
+	
+	float x, y, w, h;
+	this->GetPosition(x, y);
+	this->GetDimensions(w, h);
+
+	float hd = cs.GetHorizontalDirection();
+	float vd = cs.GetVerticalDirection();
+
+	if (_draw_vertical_arrows) {
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
+		VideoManager->Move( x + w, y + h);
+		arrows->at(0).Draw();
+
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->Move( x + w, y );
+		arrows->at(1).Draw();
+	}
+
+	if (_draw_horizontal_arrows) {
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->Move( x, y );
+		arrows->at(3).Draw();
+
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->Move( x + w, y );
+		arrows->at(2).Draw();
+	}
 
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
+	
 	if (GUIManager->DEBUG_DrawOutlines() == true)
 		GUIControl::_DEBUG_DrawOutline();
 

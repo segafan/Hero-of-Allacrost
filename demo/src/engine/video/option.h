@@ -176,7 +176,7 @@ public:
 *** \todo Text should contain rendered text images instead of text that needs
 *** to be rendered and drawn every frame
 ***
-*** \todo Add support for animated images?
+*** \todo Add support for animated images? (Low priority task)
 *** ***************************************************************************/
 class Option {
 public:
@@ -213,8 +213,7 @@ public:
 *** The OptionBox control is used for presenting the player with several choices,
 *** of actions to take, wares to buy, etc.
 ***
-*** \todo Add scrolling feature to OptionBox so we can scroll through lists of
-*** options that are greater than the display area.
+*** Scrolling feature now supported.
 ***
 *** \todo Allow the user to set an arbitrary cursor blink rate and scroll rate
 ***
@@ -224,6 +223,7 @@ public:
 *** to inherit from)
 ***
 *** \todo Support multiple forms of scroll animations.
+*** (This should be considered a low priority task, if dealt with at all.)
 *** ***************************************************************************/
 class OptionBox : public private_video::GUIControl {
 public:

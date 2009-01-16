@@ -677,13 +677,13 @@ void SkillsWindow::_InitSkillsList() {
 	_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 
 	// setup the cost option box
-	_skill_cost_list.SetPosition(800.0f, 170.0f);
+	_skill_cost_list.SetPosition(700.0f, 170.0f);
 	_skill_cost_list.SetDimensions(180.0f, 360.0f, 1, 255, 1, 4);
 	_skill_cost_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_skill_cost_list.SetCursorOffset(-52.0f, -20.0f);
 	_skill_cost_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_skill_cost_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_skill_cost_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_skill_cost_list.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
 	_skill_cost_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
 
@@ -717,8 +717,8 @@ void SkillsWindow::_InitCharSelect() {
 
 
 void SkillsWindow::_InitSkillsCategories() {
-	_skills_categories.SetPosition(510.0f, 120.0f);
-	_skills_categories.SetDimensions(105.0f, 30.0f, SKILL_CATEGORY_SIZE, 1, SKILL_CATEGORY_SIZE, 1);
+	_skills_categories.SetPosition(458.0f, 120.0f);
+	_skills_categories.SetDimensions(448.0f, 30.0f, SKILL_CATEGORY_SIZE, 1, SKILL_CATEGORY_SIZE, 1);
 	_skills_categories.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_skills_categories.SetCursorOffset(-52.0f, -20.0f);
 	_skills_categories.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
