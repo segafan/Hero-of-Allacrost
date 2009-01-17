@@ -20,6 +20,7 @@ INCLUDES = \
 	-I$(top_srcdir)/src/modes/boot \
 	-I$(top_srcdir)/src/modes/map \
 	-I$(top_srcdir)/src/modes/menu \
+	-I$(top_srcdir)/src/modes/save \
 	-I$(top_srcdir)/src/modes/shop
 
 VIDEO_DIR = src/engine/video
@@ -161,6 +162,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/menu/menu_views.h \
 	$(MODES_DIR)/pause.cpp \
 	$(MODES_DIR)/pause.h \
+	$(MODES_DIR)/save/save_mode.h \
+	$(MODES_DIR)/save/save_mode.cpp \
 	$(MODES_DIR)/scene.cpp \
 	$(MODES_DIR)/scene.h \
 	$(MODES_DIR)/shop/shop.h \

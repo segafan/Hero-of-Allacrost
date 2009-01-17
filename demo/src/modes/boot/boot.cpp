@@ -25,6 +25,7 @@
 
 #include "boot.h"
 #include "map.h"
+#include "save_mode.h"
 #include "battle.h" // tmp
 #include "menu.h" // even more tmp
 #include "shop.h" // tmp
@@ -925,7 +926,7 @@ void BootMode::_SetupMainMenu() {
 
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 
-	string path = GetUserDataPath(true) + "saved_game.lua";
+	string path = GetUserDataPath(true) + "saved_game_1.lua";
 	if (DoesFileExist(path) == false) {
 		_main_menu.EnableOption(1, false);
 		_main_menu.SetSelection(0);
@@ -1099,19 +1100,12 @@ void BootMode::_OnNewGame() {
 }
 
 
-// 'Load Game' confirmed. Not done yet, sorry mate.
 void BootMode::_OnLoadGame() {
-	string filename = GetUserDataPath(true) + "saved_game.lua";
-	if (DoesFileExist(filename)) {
-		GlobalManager->LoadGame(filename);
-		_fade_out = true;
-		VideoManager->FadeScreen(Color::black, 1000);
-//		_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
-		_boot_music.at(0).Stop();
-	}
-	else {
-		cout << "BOOT: No saved game file exists, can not load game" << endl;
-	}
+	_boot_music.at(0).Stop();
+	// TODO: SaveMode music should take over when this is used for loading games...
+	hoa_save::SaveMode *SVM = new hoa_save::SaveMode(false);
+	ModeManager->Pop();
+	ModeManager->Push(SVM);
 }
 
 
@@ -1155,7 +1149,6 @@ void BootMode::_OnShopDebug() {
 	hoa_shop::ShopMode *SM = new hoa_shop::ShopMode();
 	ModeManager->Push(SM);
 }
-
 
 // 'Resolution' confirmed
 void BootMode::_OnResolution() {

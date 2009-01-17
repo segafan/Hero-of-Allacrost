@@ -101,7 +101,7 @@ void PauseMode::Update() {
 
 	if (_quit_state == false) {
 		if (InputManager->QuitPress() == true) {
-			_quit_state = true;
+			ModeManager->Pop();
 			return;
 		}
 		else if (InputManager->PausePress() == true) {
