@@ -1104,7 +1104,6 @@ void BootMode::_OnLoadGame() {
 	_boot_music.at(0).Stop();
 	// TODO: SaveMode music should take over when this is used for loading games...
 	hoa_save::SaveMode *SVM = new hoa_save::SaveMode(false);
-	ModeManager->Pop();
 	ModeManager->Push(SVM);
 }
 

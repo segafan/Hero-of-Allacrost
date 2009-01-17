@@ -142,7 +142,7 @@ void SaveMode::Update() {
 	{
 		// When the screen is finished fading to black, create a new map mode and fade back in
 		if (!VideoManager->IsFading()) {
-			ModeManager->Pop();
+			ModeManager->PopAll();
 			try {
 				MapMode *MM = new MapMode(MakeStandardString(GlobalManager->GetLocationName()));
 				ModeManager->Push(MM);
@@ -150,6 +150,7 @@ void SaveMode::Update() {
 				cerr << "Map::_Load -- Error loading map dat/maps/demo_town.lua, returning to BootMode." << endl;
 				cerr << "Exception message:" << endl;
 				ScriptManager->HandleLuaError(e);
+				ModeManager->Push(new BootMode());
 			}
 			VideoManager->FadeScreen(Color::clear, 1000);
 		}
