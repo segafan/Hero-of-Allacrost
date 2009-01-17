@@ -22,6 +22,8 @@
 #include "audio.h"
 #include "pause.h"
 
+#include "save_mode.h" // TODO: remove this
+
 #include "mode_manager.h"
 #include "menu.h"
 
@@ -493,10 +495,13 @@ void MenuMode::_HandleMainMenu() {
 			_current_menu = &_menu_equip;
 			break;
 
-		/*case MAIN_SAVE:
-			_current_menu_showing = SHOW_SAVE;
-			_current_menu = &_menu_save;
-			break;*/
+		case MAIN_SAVE:
+//			_current_menu_showing = SHOW_SAVE;
+//			_current_menu = &_menu_save;
+		{	hoa_save::SaveMode *SVM = new hoa_save::SaveMode(true);
+			ModeManager->Push(SVM);
+			break;
+		} // end scope
 
 		case MAIN_EXIT:
 			ModeManager->Pop();
@@ -768,7 +773,10 @@ void MenuMode::_HandleSaveMenu() {
 	string file_name;
 	switch (_menu_save.GetSelection()) {
 		case SAVE_SAVE:
-			// TODO: Handle Save - Save command
+		{	hoa_save::SaveMode *SVM = new hoa_save::SaveMode(true);
+			ModeManager->Push(SVM);
+
+/* TODO: Get rid of all of this.
 			file_name = GetUserDataPath(true) + "saved_game.lua";
 			if (DoesFileExist(file_name))
 			{
@@ -779,8 +787,9 @@ void MenuMode::_HandleSaveMenu() {
 			{
 				GlobalManager->SaveGame(file_name);
 				_message_window = new MessageWindow("Your game has been saved.", 250.0f, 50.0f);
-			}
+			} */
 			break;
+		} // end scope
 
 		case SAVE_BACK:
 			_current_menu_showing = SHOW_MAIN;
