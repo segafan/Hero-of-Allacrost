@@ -13,6 +13,7 @@ enemy_ids = { 1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106 }
 
 -- A reference to the C++ MapMode object that was created with this file
 map = {}
+dialogue_supervisor = {}
 
 -- The number of rows and columns of tiles that compose the map
 num_map_contexts = 1
@@ -400,6 +401,7 @@ function Load(m, d)
 	sprite:LoadRunningAnimations("img/sprites/map/claudius_run.png");
 	sprite:LoadFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
+
 	-- Set the camera to focus on the player''s sprite
 	map:_SetCameraFocus(sprite);
 
@@ -429,7 +431,6 @@ function Load(m, d)
 	event:SetLoopCount(-1);
 	event:AddEventLink(10000, false, 0);
 	event_supervisor:RegisterEvent(event);
-	event_supervisor:StartEvent(event);
 	map:_AddGroundObject(sprite);
 
 	dialogue = hoa_map.MapDialogue(1);
@@ -675,11 +676,12 @@ function Load(m, d)
 	exit_zone:AddSection(hoa_map.ZoneSection(2, 116, 4, 118));
 	map:_AddZone(exit_zone);
 
-	event_supervisor:BeginEvent(10000);
 	event = hoa_map.ScriptedEvent(1, 1, 0);
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.ScriptedEvent(1, 2, 0);
 	event_supervisor:RegisterEvent(event);
+
+	event_supervisor:StartEvent(10000);
 end
 
 
