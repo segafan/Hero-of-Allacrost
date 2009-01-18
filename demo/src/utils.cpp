@@ -321,9 +321,14 @@ bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
 		return false;
 	}
 
+	#if _LIBICONV_VERSION >= 0x0109
+	// We are using an updated iconv API
+	const char *sourceChar = source;
+	#else
 	// The iconv API doesn't specify a const source
 	// for legacy support reasons.
 	char *sourceChar = const_cast<char *>(source);
+	#endif
 	char *destChar   = reinterpret_cast<char *>(dest);
 	size_t sourceLen = length;
 	size_t destLen   = (length + 1) * 2;
