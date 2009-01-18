@@ -26,6 +26,7 @@
 		4941A7520AC1D9A200D65B8E /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
 		4941A7650AC1DCA500D65B8E /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4941A7630AC1DCA500D65B8E /* SDLMain.m */; };
 		4941A7680AC1DCE000D65B8E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7670AC1DCDF00D65B8E /* Cocoa.framework */; };
+		495583450F237A84008150B8 /* save_mode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 495583430F237A84008150B8 /* save_mode.cpp */; };
 		4996296A0AF50B1F00B6A328 /* global_skills.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629620AF50B1F00B6A328 /* global_skills.cpp */; };
 		4996296C0AF50B1F00B6A328 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629640AF50B1F00B6A328 /* global.cpp */; };
 		4996296F0AF50B1F00B6A328 /* global_objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629670AF50B1F00B6A328 /* global_objects.cpp */; };
@@ -241,6 +242,8 @@
 		4941A7510AC1D9A200D65B8E /* mac_logo.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = mac_logo.icns; path = img/logos/mac_logo.icns; sourceTree = "<group>"; };
 		4941A7630AC1DCA500D65B8E /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = SDLMain.m; path = src/SDLMain.m; sourceTree = "<group>"; };
 		4941A7670AC1DCDF00D65B8E /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		495583430F237A84008150B8 /* save_mode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = save_mode.cpp; sourceTree = "<group>"; };
+		495583440F237A84008150B8 /* save_mode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = save_mode.h; sourceTree = "<group>"; };
 		499629620AF50B1F00B6A328 /* global_skills.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = global_skills.cpp; sourceTree = "<group>"; };
 		499629630AF50B1F00B6A328 /* global_objects.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = global_objects.h; sourceTree = "<group>"; };
 		499629640AF50B1F00B6A328 /* global.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = global.cpp; sourceTree = "<group>"; };
@@ -504,6 +507,7 @@
 		4941A68E0AC1D86400D65B8E /* modes */ = {
 			isa = PBXGroup;
 			children = (
+				495583420F237A84008150B8 /* save */,
 				D41148360D15F053005F0A3F /* defs_modes.cpp */,
 				D407F7E80BADECF300848C43 /* shop */,
 				4941A68F0AC1D86400D65B8E /* battle */,
@@ -603,6 +607,15 @@
 				4941A7130AC1D89300D65B8E /* OpenGL.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		495583420F237A84008150B8 /* save */ = {
+			isa = PBXGroup;
+			children = (
+				495583430F237A84008150B8 /* save_mode.cpp */,
+				495583440F237A84008150B8 /* save_mode.h */,
+			);
+			path = save;
 			sourceTree = "<group>";
 		};
 		499629610AF50B1F00B6A328 /* global */ = {
@@ -1005,6 +1018,7 @@
 				D47FF3810E7B9A0A00423A0C /* map_treasure.cpp in Sources */,
 				D4F411370EC78C78005C5997 /* map_events.cpp in Sources */,
 				D4F411380EC78C78005C5997 /* map_utils.cpp in Sources */,
+				495583450F237A84008150B8 /* save_mode.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1168,6 +1182,7 @@
 					"-lvorbisfile",
 					"-lvorbisenc",
 					"-lintl",
+					"-liconv",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
@@ -1223,6 +1238,7 @@
 					"-lvorbisfile",
 					"-lvorbisenc",
 					"-lintl",
+					"-liconv",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
