@@ -264,21 +264,33 @@ void OptionBox::Draw() {
 	if (_draw_vertical_arrows) {
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 		VideoManager->Move( right, top );
-		arrows->at(0).Draw();
+		if (_grey_up_arrow)
+			arrows->at(4).Draw();
+		else
+			arrows->at(0).Draw();
 
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 		VideoManager->Move( right, bottom);
-		arrows->at(1).Draw();
+		if (_grey_down_arrow)
+			arrows->at(5).Draw();
+		else
+			arrows->at(1).Draw();
 	}
 
 	if (_draw_horizontal_arrows) {
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 		VideoManager->Move( left, bottom);
-		arrows->at(3).Draw();
+		if (_grey_left_arrow)
+			arrows->at(7).Draw();
+		else
+			arrows->at(3).Draw();
 
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 		VideoManager->Move( right, bottom);
-		arrows->at(2).Draw();
+		if (_grey_right_arrow)
+			arrows->at(6).Draw();
+		else
+			arrows->at(2).Draw();
 	}
 
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
@@ -915,16 +927,23 @@ void OptionBox::_DetermineScrollArrows() {
 	_draw_horizontal_arrows = (_number_cell_columns < _number_columns) && (GetNumberOptions() > _number_cell_columns);
 	_draw_vertical_arrows = (_number_cell_rows < _number_rows) && (GetNumberOptions() > _number_columns * _number_cell_rows);
 
-	// TODO: fill out the rest of this function
-// 	if (_draw_horizontal_arrows == true) {
-// 		_grey_left_arrow =
-// 		_grey_right_arrow =
-// 	}
-//
-// 	if (_draw_vertical_arrows == true) {
-// 		_grey_up_arrow =
-// 		_grey_down_arrow =
-// 	}
+	if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_NONE) {
+		if (_draw_left_column == 0)
+			_grey_left_arrow = true;
+		if (_draw_left_column + _number_cell_columns >= _number_columns)
+			_grey_right_arrow = true;
+		if (_selection >= _options.size() - 1)
+			_grey_right_arrow = true;
+	}
+
+	if (_vertical_wrap_mode == VIDEO_WRAP_MODE_NONE) {
+		if (_draw_top_row == 0)
+			_grey_up_arrow = true;
+		if (_draw_top_row + _number_cell_rows > _number_rows)
+			_grey_down_arrow = true;
+		if (_selection + _number_cell_columns >= _options.size())
+			_grey_down_arrow = true;
+	}
 }
 
 
