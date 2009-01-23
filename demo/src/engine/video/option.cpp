@@ -159,6 +159,7 @@ void OptionBox::Draw() {
 
 	VideoManager->PushState();
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
+	VideoManager->DisableScissoring();
 
 	// TODO: This call is also made at the end of this function. It is made here because for some
 	// strange reason, only the option box outline is drawn and not the outline for the individual
@@ -212,10 +213,6 @@ void OptionBox::Draw() {
 
 	// ---------- (3) Iterate through all the visible option cells and draw them and the draw cursor
 	for (int32 row = _draw_top_row; row < _draw_top_row + _number_cell_rows && finished == false; row++) {
-//		if (scissor)
-//			VideoManager->EnableScissoring();
-//		else
-			VideoManager->DisableScissoring();
 
 		bounds.x_left = left;
 		bounds.x_center = bounds.x_left + (0.5f * _cell_width * cs.GetHorizontalDirection());
@@ -239,7 +236,7 @@ void OptionBox::Draw() {
 				_cursor_state != VIDEO_CURSOR_STATE_HIDDEN && (_cursor_state != VIDEO_CURSOR_STATE_BLINKING || _blink == true)) {
 				// If this option was the first selection, draw it darkened so that it has a different appearance
 				bool darken = (static_cast<int32>(index) == _first_selection) ? true : false;
-				_DrawCursor(bounds, scroll_offset, left_edge, darken);
+				_DrawCursor(bounds, 0 /*scroll_offset*/ , left_edge, darken);
 			}
 
 			bounds.x_left += xoff;
@@ -257,30 +254,30 @@ void OptionBox::Draw() {
 	std::vector<StillImage>* arrows = GUIManager->GetScrollArrows();
 
 	
-	float x, y, w, h;
-	this->GetPosition(x, y);
+	float w, h;
 	this->GetDimensions(w, h);
 
+	
 	float hd = cs.GetHorizontalDirection();
 	float vd = cs.GetVerticalDirection();
 
 	if (_draw_vertical_arrows) {
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
-		VideoManager->Move( x + w, y + h);
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->Move( right, top );
 		arrows->at(0).Draw();
 
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->Move( x + w, y );
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
+		VideoManager->Move( right, top - vd*h);
 		arrows->at(1).Draw();
 	}
 
 	if (_draw_horizontal_arrows) {
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->Move( x, y );
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->Move( left, top - vd*h);
 		arrows->at(3).Draw();
 
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->Move( x + w, y );
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->Move( left + hd*w, top - vd*h);
 		arrows->at(2).Draw();
 	}
 
