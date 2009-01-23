@@ -311,7 +311,6 @@ void ActionWindow::_UpdateTargetSelection() {
 		}
 		else {
 			GlobalItem* item = GetSelectedItem();
-			// NOTE: Don't know if decrementing the item count is the best approach to use here.
 			// We decrement the count now so that if the next character wants to use items, they know
 			// how many are available to use. If the current character uses the item, then the decrement stays.
 			// If count == 0, then it's removed from inventory...if item is not used (i.e. battle ends before use),
@@ -337,25 +336,12 @@ void ActionWindow::_UpdateTargetSelection() {
 		return;
 	}
 
-	//CD NOTE: We've removed the _ConstructTargetInformation calls from here
-	//because we need to do it every frame.  If we have a character selected
-	//as our target for using something like a healing potion, and he gets hit,
-	//we need to update his HP to reflect what it is after the hit.  With the
-	//below logic, his info won't be refreshed until we change targets
 	if (InputManager->UpPress() || InputManager->DownPress()) {
-//		BattleActor* previous_target = current_battle->_selected_target;
 		current_battle->_SelectNextTarget(InputManager->UpPress());
-		/*if (previous_target != current_battle->_selected_target) {
-			_ConstructTargetInformation();
-		}*/
 	}
 	else if ((InputManager->LeftPress() || InputManager->RightPress())
 		&& _action_target_type == GLOBAL_TARGET_ATTACK_POINT) {
-//		uint32 previous_ap = current_battle->_selected_attack_point;
 		current_battle->_SelectNextAttackPoint(InputManager->RightPress());
-		/*if (previous_ap != current_battle->_selected_attack_point) {
-			_ConstructTargetInformation();
-		}*/
 	}
 
 	_ConstructTargetInformation();

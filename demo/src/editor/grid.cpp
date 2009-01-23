@@ -422,7 +422,6 @@ void Grid::SaveMap()
 	ifstream file;
 	string before_text;
 	string after_text;
-	int32 before_pos = 0, after_pos = 0, read_bytes, bytes_to_read;
 	const char * BEFORE_TEXT_MARKER = "-- Allacrost map editor begin. Do not edit this line. --";
 	const char * AFTER_TEXT_MARKER =  "-- Allacrost map editor end. Do not edit this line. --";
 
