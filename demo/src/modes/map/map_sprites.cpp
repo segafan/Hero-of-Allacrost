@@ -72,7 +72,8 @@ void VirtualSprite::Update() {
 		return;
 	}
 
-	if (_path.empty() == true) {
+	if (_path.empty() == true && (_destination.col & _destination.row) != -1
+	    && x_position != _destination.col && y_position != _destination.row) {
 		MapMode::_current_map->_object_supervisor->FindPath(this, _path, _destination);
 
 		// If no path could be found, there's nothing more that can be done here
