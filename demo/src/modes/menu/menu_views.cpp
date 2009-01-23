@@ -150,7 +150,7 @@ InventoryWindow::~InventoryWindow()
 void InventoryWindow::_InitInventoryItems() {
 	// Set up the inventory option box
 	_inventory_items.SetPosition(500.0f, 170.0f);
-	_inventory_items.SetDimensions(400.0f, 360.0f, 1, 255, 1, 3);
+	_inventory_items.SetDimensions(400.0f, 360.0f, 1, 255, 1, 6);
 	_inventory_items.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_inventory_items.SetCursorOffset(-52.0f, -20.0f);
 	_inventory_items.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
