@@ -215,12 +215,10 @@ public:
 ***
 *** Scrolling feature now supported.
 ***
-*** \todo Allow the user to set an arbitrary cursor blink rate and scroll rate
+*** Contains support for drawing scroll arrows on the option box to indicate
+*** additional options that are not currently in view
 ***
-*** \todo Add support for drawing scroll arrows on the option box to indicate
-*** additional options that are not currently in view (note: this should
-*** probably be added to the GUIControl class for both OptionBox and TextBox
-*** to inherit from)
+*** \todo Allow the user to set an arbitrary cursor blink rate and scroll rate
 ***
 *** \todo Support multiple forms of scroll animations.
 *** (This should be considered a low priority task, if dealt with at all.)

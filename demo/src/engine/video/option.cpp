@@ -173,9 +173,9 @@ void OptionBox::Draw() {
 
 	// ---------- (1) Determine the edge dimensions of the option box
 	left = 0.0f;
-	right = _number_columns * _cell_width;
+	right = _number_cell_columns * _cell_width;
 	bottom = 0.0f;
-	top = _number_rows * _cell_height;
+	top = _number_cell_rows * _cell_height;
 	CalculateAlignedRect(left, right, bottom, top);
 
 	CoordSys &cs = VideoManager->_current_context.coordinate_system;
@@ -267,17 +267,17 @@ void OptionBox::Draw() {
 		arrows->at(0).Draw();
 
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
-		VideoManager->Move( right, top - vd*h);
+		VideoManager->Move( right, bottom);
 		arrows->at(1).Draw();
 	}
 
 	if (_draw_horizontal_arrows) {
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->Move( left, top - vd*h);
+		VideoManager->Move( left, bottom);
 		arrows->at(3).Draw();
 
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->Move( left + hd*w, top - vd*h);
+		VideoManager->Move( right, bottom);
 		arrows->at(2).Draw();
 	}
 
