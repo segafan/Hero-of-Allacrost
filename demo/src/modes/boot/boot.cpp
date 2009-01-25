@@ -336,6 +336,8 @@ void BootMode::Update() {
 		return;
 	}
 
+	_active_menu->Update();
+
 	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
 	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible())
 	{
@@ -392,6 +394,9 @@ void BootMode::Update() {
 		}
 		else if (_active_menu == &_joy_settings_menu) {
 			_active_menu = &_options_menu;
+		}
+		else if (_active_menu == &_resolution_menu) {
+			_active_menu = &_video_options_menu;
 		}
 
 		// check to see if settings need to be saved (if we're exiting from the key or joystick
@@ -1085,6 +1090,13 @@ void BootMode::_SetupResolutionMenu() {
 	_resolution_menu.AddOption(MakeUnicodeString("640 x 480"), &BootMode::_OnResolution640x480);
 	_resolution_menu.AddOption(MakeUnicodeString("800 x 600"), &BootMode::_OnResolution800x600);
 	_resolution_menu.AddOption(MakeUnicodeString("1024 x 768"), &BootMode::_OnResolution1024x768);
+	
+	if (VideoManager->GetScreenWidth() == 640)
+		_resolution_menu.SetSelection(0);
+	else if (VideoManager->GetScreenWidth() == 800)
+		_resolution_menu.SetSelection(1);
+	else if (VideoManager->GetScreenWidth() == 1024)
+		_resolution_menu.SetSelection(2);
 }
 
 

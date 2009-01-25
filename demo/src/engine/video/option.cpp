@@ -115,7 +115,7 @@ OptionBox::OptionBox() :
 	_grey_left_arrow(false),
 	_grey_right_arrow(false),
 	_event(0),
-	_selection(-1),
+	_selection(0),
 	_first_selection(-1),
 	_cursor_state(VIDEO_CURSOR_STATE_VISIBLE),
 	_blink(false),
