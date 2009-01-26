@@ -321,12 +321,12 @@ bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
 		return false;
 	}
 
-	#if _LIBICONV_VERSION >= 0x0109
-	// We are using an updated iconv API
+	#if _LIBICONV_VERSION == 0x0109
+	// We are using an iconv API that uses const char*
 	const char *sourceChar = source;
 	#else
-	// The iconv API doesn't specify a const source
-	// for legacy support reasons.
+	// The iconv API doesn't specify a const source for legacy support reasons.
+	// Versions after 0x0109 changed back to char* for POSIX reasons.
 	char *sourceChar = const_cast<char *>(source);
 	#endif
 	char *destChar   = reinterpret_cast<char *>(dest);
@@ -391,9 +391,11 @@ string MakeStandardString(const ustring& text) {
 
 // Invokes gettext() and translates string (if possible)
 string Translate(const string& text) {
+//ustring Translate(const string& text) {
 	string str = string( gettext( text.c_str() ) );
 	return str;
-} // ustring TranslateString(const string& text)
+//	return MakeUnicodeString(str);
+} // ustring Translate(const string& text)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// Random number generator functions

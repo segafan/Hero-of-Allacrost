@@ -9,17 +9,9 @@
 /* Begin PBXBuildFile section */
 		4941A6F10AC1D86400D65B8E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68B0AC1D86400D65B8E /* main.cpp */; };
 		4941A6F20AC1D86400D65B8E /* main_options.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68C0AC1D86400D65B8E /* main_options.cpp */; };
-		4941A6F40AC1D86400D65B8E /* battle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6900AC1D86400D65B8E /* battle.cpp */; };
-		4941A6F60AC1D86400D65B8E /* battle_actors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6920AC1D86400D65B8E /* battle_actors.cpp */; };
 		4941A6F80AC1D86400D65B8E /* boot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6950AC1D86400D65B8E /* boot.cpp */; };
 		4941A6FA0AC1D86400D65B8E /* boot_credits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6970AC1D86400D65B8E /* boot_credits.cpp */; };
 		4941A6FC0AC1D86400D65B8E /* boot_menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6990AC1D86400D65B8E /* boot_menu.cpp */; };
-		4941A6FE0AC1D86400D65B8E /* map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A69C0AC1D86400D65B8E /* map.cpp */; };
-		4941A7020AC1D86400D65B8E /* map_dialogue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A00AC1D86400D65B8E /* map_dialogue.cpp */; };
-		4941A7040AC1D86400D65B8E /* map_objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A20AC1D86400D65B8E /* map_objects.cpp */; };
-		4941A7060AC1D86400D65B8E /* menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A50AC1D86400D65B8E /* menu.cpp */; };
-		4941A7080AC1D86400D65B8E /* menu_views.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A70AC1D86400D65B8E /* menu_views.cpp */; };
-		4941A70A0AC1D86400D65B8E /* pause.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A90AC1D86400D65B8E /* pause.cpp */; };
 		4941A70E0AC1D86400D65B8E /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6AD0AC1D86400D65B8E /* scene.cpp */; };
 		4941A7100AC1D86400D65B8E /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */; };
 		4941A7140AC1D89300D65B8E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7130AC1D89300D65B8E /* OpenGL.framework */; };
@@ -40,11 +32,8 @@
 		49A1AC680CF4381D00AF23FE /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
 		49A1AC690CF4381D00AF23FE /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
 		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
-		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
-		D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
 		D41148330D15F00E005F0A3F /* defs_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148320D15F00E005F0A3F /* defs_engine.cpp */; };
 		D41148350D15F029005F0A3F /* defs_global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148340D15F029005F0A3F /* defs_global.cpp */; };
-		D41148370D15F053005F0A3F /* defs_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148360D15F053005F0A3F /* defs_modes.cpp */; };
 		D413E04E0CFFEA4400D5FAB4 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D413E04D0CFFEA4400D5FAB4 /* OpenAL.framework */; };
 		D41AC1DB0C4C7C980097B042 /* script_write.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440963B0C45E37300E58975 /* script_write.cpp */; };
 		D41AC1DC0C4C7C9F0097B042 /* script_read.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096390C45E37300E58975 /* script_read.cpp */; };
@@ -54,8 +43,6 @@
 		D438C7990C9117300032F79E /* texture_controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D438C7970C9117300032F79E /* texture_controller.cpp */; };
 		D438C79B0C9117400032F79E /* image_base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D438C79A0C9117400032F79E /* image_base.cpp */; };
 		D438C79C0C9117400032F79E /* image_base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D438C79A0C9117400032F79E /* image_base.cpp */; };
-		D440962D0C45E2F200E58975 /* map_sprites.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440962C0C45E2F200E58975 /* map_sprites.cpp */; };
-		D44096310C45E31900E58975 /* battle_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096300C45E31900E58975 /* battle_windows.cpp */; };
 		D440963D0C45E37300E58975 /* script.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096350C45E37300E58975 /* script.cpp */; };
 		D440963F0C45E37300E58975 /* script_modify.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096370C45E37300E58975 /* script_modify.cpp */; };
 		D44096410C45E37300E58975 /* script_read.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096390C45E37300E58975 /* script_read.cpp */; };
@@ -63,7 +50,6 @@
 		D46D59760C8A6C1A0074DFF0 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
 		D47843D80E1B3B0400FD76F7 /* tileset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */; };
 		D47843F90E1B452800FD76F7 /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA680B02B27F0052BF1E /* grid.cpp */; };
-		D47FF3810E7B9A0A00423A0C /* map_treasure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D47FF3800E7B9A0A00423A0C /* map_treasure.cpp */; };
 		D48901A40D15FC2E003940F4 /* Qt3Support.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC600D15FBE3003940F4 /* Qt3Support.framework */; };
 		D48901A50D15FC2E003940F4 /* QtCore.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC610D15FBE3003940F4 /* QtCore.framework */; };
 		D48901A60D15FC2E003940F4 /* QtGui.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC620D15FBE3003940F4 /* QtGui.framework */; };
@@ -111,6 +97,26 @@
 		D4B34E660E23275C0067C913 /* tileset_editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F0F4330CDE7CD000EFE9B0 /* tileset_editor.moc.cpp */; };
 		D4B34E740E2328540067C913 /* global_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4B34E720E2328540067C913 /* global_effects.cpp */; };
 		D4B34E750E2328540067C913 /* global_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4B34E720E2328540067C913 /* global_effects.cpp */; };
+		D4B8AA8C0F2D507600B4D975 /* battle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6900AC1D86400D65B8E /* battle.cpp */; };
+		D4B8AA8D0F2D507A00B4D975 /* battle_actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DDE3930C4A15EE00937677 /* battle_actions.cpp */; };
+		D4B8AA8E0F2D507D00B4D975 /* battle_actors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6920AC1D86400D65B8E /* battle_actors.cpp */; };
+		D4B8AA8F0F2D508100B4D975 /* battle_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096300C45E31900E58975 /* battle_windows.cpp */; };
+		D4B8AA930F2D514400B4D975 /* map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A69C0AC1D86400D65B8E /* map.cpp */; };
+		D4B8AA940F2D514400B4D975 /* map_dialogue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A00AC1D86400D65B8E /* map_dialogue.cpp */; };
+		D4B8AA950F2D514400B4D975 /* map_events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F411330EC78C78005C5997 /* map_events.cpp */; };
+		D4B8AA960F2D514400B4D975 /* map_objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A20AC1D86400D65B8E /* map_objects.cpp */; };
+		D4B8AA970F2D514400B4D975 /* map_sprites.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440962C0C45E2F200E58975 /* map_sprites.cpp */; };
+		D4B8AA980F2D514400B4D975 /* map_tiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4E8089D0D485241006D641C /* map_tiles.cpp */; };
+		D4B8AA990F2D514400B4D975 /* map_treasure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D47FF3800E7B9A0A00423A0C /* map_treasure.cpp */; };
+		D4B8AA9A0F2D514400B4D975 /* map_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F411350EC78C78005C5997 /* map_utils.cpp */; };
+		D4B8AA9B0F2D514400B4D975 /* map_zones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */; };
+		D4B8AA9C0F2D519A00B4D975 /* menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A50AC1D86400D65B8E /* menu.cpp */; };
+		D4B8AA9D0F2D519A00B4D975 /* menu_views.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A70AC1D86400D65B8E /* menu_views.cpp */; };
+		D4B8AA9E0F2D51D100B4D975 /* pause.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A90AC1D86400D65B8E /* pause.cpp */; };
+		D4B8AA9F0F2D51F100B4D975 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
+		D4B8AAA00F2D51F100B4D975 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
+		D4B8AAA10F2D521E00B4D975 /* defs_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148360D15F053005F0A3F /* defs_modes.cpp */; };
+		D4B9C32F0ED9527F000CB899 /* menu_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166320BC0D91300190FC0 /* menu_window.cpp */; };
 		D4CD69C30DB3302300FF17CD /* SDL_net.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
 		D4CD69C60DB3331800FF17CD /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
 		D4D0FA820E1A02A300B9EC20 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
@@ -119,7 +125,6 @@
 		D4D166510BC0D91400190FC0 /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662C0BC0D91300190FC0 /* gui.cpp */; };
 		D4D166530BC0D91400190FC0 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662E0BC0D91300190FC0 /* image.cpp */; };
 		D4D166550BC0D91400190FC0 /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166300BC0D91300190FC0 /* interpolator.cpp */; };
-		D4D166570BC0D91400190FC0 /* menu_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166320BC0D91300190FC0 /* menu_window.cpp */; };
 		D4D166590BC0D91400190FC0 /* option.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166340BC0D91300190FC0 /* option.cpp */; };
 		D4D1665C0BC0D91400190FC0 /* particle_effect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166370BC0D91300190FC0 /* particle_effect.cpp */; };
 		D4D166600BC0D91400190FC0 /* particle_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1663B0BC0D91300190FC0 /* particle_manager.cpp */; };
@@ -149,16 +154,11 @@
 		D4D1BA8B0B02B4400052BF1E /* Editor-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */; };
 		D4D1BF450B02B6510052BF1E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7130AC1D89300D65B8E /* OpenGL.framework */; };
 		D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
-		D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */; };
-		D4DDE3940C4A15EE00937677 /* battle_actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DDE3930C4A15EE00937677 /* battle_actions.cpp */; };
 		D4E561270BB71B53002FB758 /* defs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4E561260BB71B53002FB758 /* defs.cpp */; };
-		D4E8089F0D485241006D641C /* map_tiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4E8089D0D485241006D641C /* map_tiles.cpp */; };
 		D4EE2D640BE85F5B00B7112A /* boot_welcome.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */; };
 		D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110400C58546800ADC969 /* audio_descriptor.cpp */; };
 		D4F1104C0C58548B00ADC969 /* audio_input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110460C58548B00ADC969 /* audio_input.cpp */; };
 		D4F1104E0C58548B00ADC969 /* audio_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110480C58548B00ADC969 /* audio_stream.cpp */; };
-		D4F411370EC78C78005C5997 /* map_events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F411330EC78C78005C5997 /* map_events.cpp */; };
-		D4F411380EC78C78005C5997 /* map_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F411350EC78C78005C5997 /* map_utils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -644,9 +644,9 @@
 				D4D166240BC0D91300190FC0 /* video */,
 				4999AC1B0AF407BD004DD3A3 /* audio */,
 				4999AC480AF407BE004DD3A3 /* input.cpp */,
+				4999AC4D0AF407BE004DD3A3 /* input.h */,
 				4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */,
 				4999AC4C0AF407BE004DD3A3 /* mode_manager.h */,
-				4999AC4D0AF407BE004DD3A3 /* input.h */,
 				4999AC4E0AF407BE004DD3A3 /* system.cpp */,
 				4999AC4F0AF407BE004DD3A3 /* system.h */,
 				49BDC4500AF5412600940A6C /* socket.h */,
@@ -952,41 +952,63 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4941A6F10AC1D86400D65B8E /* main.cpp in Sources */,
-				4941A6F20AC1D86400D65B8E /* main_options.cpp in Sources */,
-				4941A6F40AC1D86400D65B8E /* battle.cpp in Sources */,
-				4941A6F60AC1D86400D65B8E /* battle_actors.cpp in Sources */,
+				D4B8AA8C0F2D507600B4D975 /* battle.cpp in Sources */,
+				D4B8AA8D0F2D507A00B4D975 /* battle_actions.cpp in Sources */,
+				D4B8AA8E0F2D507D00B4D975 /* battle_actors.cpp in Sources */,
+				D4B8AA8F0F2D508100B4D975 /* battle_windows.cpp in Sources */,
 				4941A6F80AC1D86400D65B8E /* boot.cpp in Sources */,
 				4941A6FA0AC1D86400D65B8E /* boot_credits.cpp in Sources */,
 				4941A6FC0AC1D86400D65B8E /* boot_menu.cpp in Sources */,
-				4941A6FE0AC1D86400D65B8E /* map.cpp in Sources */,
-				4941A7020AC1D86400D65B8E /* map_dialogue.cpp in Sources */,
-				4941A7040AC1D86400D65B8E /* map_objects.cpp in Sources */,
-				4941A7060AC1D86400D65B8E /* menu.cpp in Sources */,
-				4941A7080AC1D86400D65B8E /* menu_views.cpp in Sources */,
-				4941A70A0AC1D86400D65B8E /* pause.cpp in Sources */,
+				D4EE2D640BE85F5B00B7112A /* boot_welcome.cpp in Sources */,
+				D4E561270BB71B53002FB758 /* defs.cpp in Sources */,
+				D41148330D15F00E005F0A3F /* defs_engine.cpp in Sources */,
+				D41148350D15F029005F0A3F /* defs_global.cpp in Sources */,
+				D4B8AAA10F2D521E00B4D975 /* defs_modes.cpp in Sources */,
+				4941A6F10AC1D86400D65B8E /* main.cpp in Sources */,
+				4941A6F20AC1D86400D65B8E /* main_options.cpp in Sources */,
+				D4B8AA930F2D514400B4D975 /* map.cpp in Sources */,
+				D4B8AA940F2D514400B4D975 /* map_dialogue.cpp in Sources */,
+				D4B8AA950F2D514400B4D975 /* map_events.cpp in Sources */,
+				D4B8AA960F2D514400B4D975 /* map_objects.cpp in Sources */,
+				D4B8AA970F2D514400B4D975 /* map_sprites.cpp in Sources */,
+				D4B8AA980F2D514400B4D975 /* map_tiles.cpp in Sources */,
+				D4B8AA990F2D514400B4D975 /* map_treasure.cpp in Sources */,
+				D4B8AA9A0F2D514400B4D975 /* map_utils.cpp in Sources */,
+				D4B8AA9B0F2D514400B4D975 /* map_zones.cpp in Sources */,
+				D4B8AA9C0F2D519A00B4D975 /* menu.cpp in Sources */,
+				D4B8AA9D0F2D519A00B4D975 /* menu_views.cpp in Sources */,
+				D4B8AA9E0F2D51D100B4D975 /* pause.cpp in Sources */,
+				495583450F237A84008150B8 /* save_mode.cpp in Sources */,
 				4941A70E0AC1D86400D65B8E /* scene.cpp in Sources */,
+				D4B8AA9F0F2D51F100B4D975 /* shop.cpp in Sources */,
+				D4B8AAA00F2D51F100B4D975 /* shop_windows.cpp in Sources */,
 				4941A7100AC1D86400D65B8E /* utils.cpp in Sources */,
+				4996296C0AF50B1F00B6A328 /* global.cpp in Sources */,
+				499629710AF50B1F00B6A328 /* global_actors.cpp in Sources */,
+				D4B34E750E2328540067C913 /* global_effects.cpp in Sources */,
+				4996296F0AF50B1F00B6A328 /* global_objects.cpp in Sources */,
+				4996296A0AF50B1F00B6A328 /* global_skills.cpp in Sources */,
 				4941A7650AC1DCA500D65B8E /* SDLMain.m in Sources */,
 				4999AC510AF407BE004DD3A3 /* audio.cpp in Sources */,
+				D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */,
+				D49D57020C65B1C1006E6ABA /* audio_effects.cpp in Sources */,
+				D4F1104C0C58548B00ADC969 /* audio_input.cpp in Sources */,
+				D4F1104E0C58548B00ADC969 /* audio_stream.cpp in Sources */,
+				D440963D0C45E37300E58975 /* script.cpp in Sources */,
+				D440963F0C45E37300E58975 /* script_modify.cpp in Sources */,
+				D44096410C45E37300E58975 /* script_read.cpp in Sources */,
+				D44096430C45E37300E58975 /* script_write.cpp in Sources */,
 				4999AC7B0AF407BE004DD3A3 /* input.cpp in Sources */,
 				4999AC7D0AF407BE004DD3A3 /* mode_manager.cpp in Sources */,
 				4999AC810AF407BE004DD3A3 /* system.cpp in Sources */,
-				4996296A0AF50B1F00B6A328 /* global_skills.cpp in Sources */,
-				4996296C0AF50B1F00B6A328 /* global.cpp in Sources */,
-				4996296F0AF50B1F00B6A328 /* global_objects.cpp in Sources */,
-				499629710AF50B1F00B6A328 /* global_actors.cpp in Sources */,
 				49BDC4530AF5412600940A6C /* socket.cpp in Sources */,
-				D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */,
-				D407F7ED0BADECF300848C43 /* shop.cpp in Sources */,
-				D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */,
-				D4E561270BB71B53002FB758 /* defs.cpp in Sources */,
 				D4D1664E0BC0D91400190FC0 /* effects.cpp in Sources */,
 				D4D1664F0BC0D91400190FC0 /* fade.cpp in Sources */,
 				D4D166510BC0D91400190FC0 /* gui.cpp in Sources */,
 				D4D166530BC0D91400190FC0 /* image.cpp in Sources */,
+				D438C79B0C9117400032F79E /* image_base.cpp in Sources */,
 				D4D166550BC0D91400190FC0 /* interpolator.cpp in Sources */,
-				D4D166570BC0D91400190FC0 /* menu_window.cpp in Sources */,
+				D4B9C32F0ED9527F000CB899 /* menu_window.cpp in Sources */,
 				D4D166590BC0D91400190FC0 /* option.cpp in Sources */,
 				D4D1665C0BC0D91400190FC0 /* particle_effect.cpp in Sources */,
 				D4D166600BC0D91400190FC0 /* particle_manager.cpp in Sources */,
@@ -994,31 +1016,9 @@
 				D4D166650BC0D91400190FC0 /* shake.cpp in Sources */,
 				D4D166690BC0D91400190FC0 /* text.cpp in Sources */,
 				D4D1666B0BC0D91400190FC0 /* textbox.cpp in Sources */,
-				D4D1666D0BC0D91400190FC0 /* video.cpp in Sources */,
-				D4EE2D640BE85F5B00B7112A /* boot_welcome.cpp in Sources */,
-				D440962D0C45E2F200E58975 /* map_sprites.cpp in Sources */,
-				D44096310C45E31900E58975 /* battle_windows.cpp in Sources */,
-				D440963D0C45E37300E58975 /* script.cpp in Sources */,
-				D440963F0C45E37300E58975 /* script_modify.cpp in Sources */,
-				D44096410C45E37300E58975 /* script_read.cpp in Sources */,
-				D44096430C45E37300E58975 /* script_write.cpp in Sources */,
-				D4DDE3940C4A15EE00937677 /* battle_actions.cpp in Sources */,
-				D4F1104C0C58548B00ADC969 /* audio_input.cpp in Sources */,
-				D4F1104E0C58548B00ADC969 /* audio_stream.cpp in Sources */,
-				D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */,
-				D49D57020C65B1C1006E6ABA /* audio_effects.cpp in Sources */,
 				D49850D40C82AEA50067770B /* texture.cpp in Sources */,
 				D438C7980C9117300032F79E /* texture_controller.cpp in Sources */,
-				D438C79B0C9117400032F79E /* image_base.cpp in Sources */,
-				D41148330D15F00E005F0A3F /* defs_engine.cpp in Sources */,
-				D41148350D15F029005F0A3F /* defs_global.cpp in Sources */,
-				D41148370D15F053005F0A3F /* defs_modes.cpp in Sources */,
-				D4E8089F0D485241006D641C /* map_tiles.cpp in Sources */,
-				D4B34E750E2328540067C913 /* global_effects.cpp in Sources */,
-				D47FF3810E7B9A0A00423A0C /* map_treasure.cpp in Sources */,
-				D4F411370EC78C78005C5997 /* map_events.cpp in Sources */,
-				D4F411380EC78C78005C5997 /* map_utils.cpp in Sources */,
-				495583450F237A84008150B8 /* save_mode.cpp in Sources */,
+				D4D1666D0BC0D91400190FC0 /* video.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1166,8 +1166,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
+				ONLY_LINK_ESSENTIAL_SYMBOLS = YES;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -1220,8 +1219,6 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
 				LINK_WITH_STANDARD_LIBRARIES = YES;
 				ONLY_LINK_ESSENTIAL_SYMBOLS = YES;
 				OTHER_LDFLAGS = (
@@ -1276,7 +1273,6 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
 				ONLY_LINK_ESSENTIAL_SYMBOLS = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DQT_CLEAN_NAMESPACE",
@@ -1287,15 +1283,18 @@
 					"-DQT_SHARED",
 				);
 				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-					"-llua",
 					"-lpng",
 					"-ljpeg",
+					"-llua",
 					"-llualib",
 					"-lz",
 					"-lluabind",
+					"-lvorbis",
+					"-logg",
+					"-lvorbisfile",
+					"-lvorbisenc",
 					"-lintl",
+					"-liconv",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
@@ -1328,7 +1327,6 @@
 					"../allacrost-dep/lib",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../allacrost-dep/lib\"";
 				ONLY_LINK_ESSENTIAL_SYMBOLS = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DQT_CLEAN_NAMESPACE",
@@ -1339,15 +1337,18 @@
 					"-DQT_SHARED",
 				);
 				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-					"-llua",
 					"-lpng",
 					"-ljpeg",
+					"-llua",
 					"-llualib",
+					"-lz",
 					"-lluabind",
+					"-lvorbis",
+					"-logg",
+					"-lvorbisfile",
+					"-lvorbisenc",
 					"-lintl",
-					"-headerpad_max_install_names",
+					"-liconv",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
