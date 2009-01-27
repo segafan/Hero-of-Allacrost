@@ -212,18 +212,18 @@ void OptionBox::Draw() {
 	bounds.y_bottom = (bounds.y_center * 2.0f) - bounds.y_top;
 
 	// ---------- (3) Iterate through all the visible option cells and draw them and the draw cursor
-	for (int32 row = _draw_top_row; row < _draw_top_row + _number_cell_rows && finished == false; row++) {
+	for (uint32 row = _draw_top_row; row < _draw_top_row + _number_cell_rows && finished == false; row++) {
 
 		bounds.x_left = left;
 		bounds.x_center = bounds.x_left + (0.5f * _cell_width * cs.GetHorizontalDirection());
 		bounds.x_right = (bounds.x_center * 2.0f) - bounds.x_left;
 
 		// Draw the columns of options
-		for (int32 col = _draw_left_column; col < _draw_left_column + _number_cell_columns; ++col) {
-			int32 index = row * _number_cell_columns + col;
+		for (uint32 col = _draw_left_column; col < _draw_left_column + _number_cell_columns; ++col) {
+			uint32 index = row * _number_cell_columns + col;
 
 			// If there are more visible cells than there are options available we leave those cells empty
-			if (index >= GetNumberOptions() ) {
+			if (index >= GetNumberOptions()) {
 				finished = true;
 				break;
 			}
@@ -253,24 +253,20 @@ void OptionBox::Draw() {
 	_DetermineScrollArrows();
 	std::vector<StillImage>* arrows = GUIManager->GetScrollArrows();
 
-	
+
 	float w, h;
 	this->GetDimensions(w, h);
 
-	
-	float hd = cs.GetHorizontalDirection();
-	float vd = cs.GetVerticalDirection();
-
 	if (_draw_vertical_arrows) {
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->Move( right, top );
+		VideoManager->Move(right, top);
 		if (_grey_up_arrow)
 			arrows->at(4).Draw();
 		else
 			arrows->at(0).Draw();
 
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
-		VideoManager->Move( right, bottom);
+		VideoManager->Move(right, bottom);
 		if (_grey_down_arrow)
 			arrows->at(5).Draw();
 		else
@@ -279,14 +275,14 @@ void OptionBox::Draw() {
 
 	if (_draw_horizontal_arrows) {
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->Move( left, bottom);
+		VideoManager->Move(left, bottom);
 		if (_grey_left_arrow)
 			arrows->at(7).Draw();
 		else
 			arrows->at(3).Draw();
 
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->Move( right, bottom);
+		VideoManager->Move(right, bottom);
 		if (_grey_right_arrow)
 			arrows->at(6).Draw();
 		else
@@ -294,7 +290,7 @@ void OptionBox::Draw() {
 	}
 
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
-	
+
 	if (GUIManager->DEBUG_DrawOutlines() == true)
 		GUIControl::_DEBUG_DrawOutline();
 
@@ -736,8 +732,8 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 	bool bounds_exceeded = false;
 
 	// Determine if the movement selection will exceed a column or row bondary
-	if ((horizontal == true && ((col + offset < 0) || (col + offset >= static_cast<uint32>(_number_columns)) || (col + offset >= GetNumberOptions()))) ||
-		(horizontal == false && ((row + offset < 0) || (row + offset >= static_cast<uint32>(_number_rows)) || (row + offset >= GetNumberOptions()))))
+	if ((horizontal == true && ((col + offset < 0) || (col + offset >= _number_columns) || (col + offset >= static_cast<int32>(GetNumberOptions())))) ||
+		(horizontal == false && ((row + offset < 0) || (row + offset >= _number_rows) || (row + offset >= static_cast<int32>(GetNumberOptions())))))
 	{
 		bounds_exceeded = true;
 	}
@@ -798,7 +794,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 		}
 		else  { // The bottom boundary was exceeded
 			if (_vertical_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT) {
-				if (row + offset >= GetNumberOptions() )
+				if (row + offset >= static_cast<int32>(GetNumberOptions()))
 					offset -= GetNumberOptions();
 			}
 			// Make sure horizontal wrapping is allowed if vertical wrap mode is shifting
@@ -814,7 +810,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 	int32 selection_row = _selection / _number_columns;
 	int32 selection_col = _selection % _number_columns;
 
-	if ( (selection_row < _draw_top_row) ) {
+	if ((static_cast<uint32>(selection_row) < _draw_top_row)) {
 		_scrolling = true;
 		_scroll_time = 0;
 		_draw_top_row = selection_row;
@@ -827,7 +823,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 		_scroll_offset += _scroll_direction;
 	}
 
-	else if ( (selection_row >= (_draw_top_row + _number_cell_rows)) ) {
+	else if ((static_cast<uint32>(selection_row) >= (_draw_top_row + _number_cell_rows)) ) {
 		_scrolling = true;
 		_scroll_time = 0;
 		_draw_top_row = selection_row - _number_cell_rows + 1;
@@ -840,7 +836,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 		_scroll_offset += _scroll_direction;
 	}
 
-	else if ( (selection_col < _draw_left_column) ) {
+	else if ((static_cast<uint32>(selection_col) < _draw_left_column)) {
 		_scrolling = true;
 		_scroll_time = 0;
 		_draw_left_column = selection_col;
@@ -853,7 +849,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 		_scroll_offset += _scroll_direction;
 	}
 
-	else if ( (selection_col >= (_draw_left_column + _number_cell_columns))) {
+	else if ((static_cast<uint32>(selection_col) >= (_draw_left_column + _number_cell_columns))) {
 		_scrolling = true;
 		_scroll_time = 0;
 		_draw_left_column = selection_col - _number_cell_columns + 1;
@@ -924,24 +920,24 @@ void OptionBox::_DetermineScrollArrows() {
 	_grey_left_arrow = false;
 	_grey_right_arrow = false;
 
-	_draw_horizontal_arrows = (_number_cell_columns < _number_columns) && (GetNumberOptions() > _number_cell_columns);
-	_draw_vertical_arrows = (_number_cell_rows < _number_rows) && (GetNumberOptions() > _number_columns * _number_cell_rows);
+	_draw_horizontal_arrows = (_number_cell_columns < _number_columns) && (static_cast<int32>(GetNumberOptions()) > _number_cell_columns);
+	_draw_vertical_arrows = (_number_cell_rows < _number_rows) && (static_cast<int32>(GetNumberOptions()) > _number_columns * _number_cell_rows);
 
 	if (_horizontal_wrap_mode == VIDEO_WRAP_MODE_NONE) {
 		if (_draw_left_column == 0)
 			_grey_left_arrow = true;
-		if (_draw_left_column + _number_cell_columns >= _number_columns)
+		if (static_cast<int32>(_draw_left_column + _number_cell_columns) >= _number_columns)
 			_grey_right_arrow = true;
-		if (_selection >= _options.size() - 1)
+		if (_selection >= static_cast<int32>(_options.size() - 1))
 			_grey_right_arrow = true;
 	}
 
 	if (_vertical_wrap_mode == VIDEO_WRAP_MODE_NONE) {
 		if (_draw_top_row == 0)
 			_grey_up_arrow = true;
-		if (_draw_top_row + _number_cell_rows > _number_rows)
+		if (static_cast<int32>(_draw_top_row + _number_cell_rows) > _number_rows)
 			_grey_down_arrow = true;
-		if (_selection + _number_cell_columns >= _options.size())
+		if (_selection + _number_cell_columns >= static_cast<int32>(_options.size()))
 			_grey_down_arrow = true;
 	}
 }
@@ -1089,7 +1085,7 @@ void OptionBox::_DEBUG_DrawOutline() {
 
 	// Draw outline for inner cell rows
 	float cell_row = top;
-	for (uint32 i = 1; i < _number_cell_rows; i++) {
+	for (int32 i = 1; i < _number_cell_rows; i++) {
 		cell_row += _cell_height;
 		VideoManager->DrawLine(left, cell_row, right, cell_row, 3, alpha_black);
 		VideoManager->DrawLine(left, cell_row, right, cell_row, 1, alpha_white);
@@ -1097,7 +1093,7 @@ void OptionBox::_DEBUG_DrawOutline() {
 
 	// Draw outline for inner cell columns
 	float cell_col = left;
-	for (uint32 i = 1; i < _number_cell_columns; i++) {
+	for (int32 i = 1; i < _number_cell_columns; i++) {
 		cell_col += _cell_width;
 		VideoManager->DrawLine(cell_col, bottom, cell_col, top, 3, alpha_black);
 		VideoManager->DrawLine(cell_col, bottom, cell_col, top, 1, alpha_white);

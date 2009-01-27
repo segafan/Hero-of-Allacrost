@@ -422,6 +422,7 @@ bool ObjectSupervisor::DoObjectsCollide(const MapObject* const obj1, const MapOb
 }
 
 
+
 bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite) {
 	// NOTE: We don't check if the argument is NULL here for performance reasons
 
@@ -498,16 +499,16 @@ bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite) {
 } // bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite)
 
 
-bool ObjectSupervisor::IsPositionOccupied(int16 row, int16 col)
-{
-	vector<MapObject*>* objects = &_ground_objects; 
+
+bool ObjectSupervisor::IsPositionOccupied(int16 row, int16 col) {
+	vector<MapObject*>* objects = &_ground_objects;
 
 	uint16 tmp_X;
 	uint16 tmp_Y;
 	float tmp_X_Offset;
 	float tmp_Y_Offset;
 
-	for (uint32 i = 0; i < objects->size(); i++) 
+	for (uint32 i = 0; i < objects->size(); i++)
 	{
 		(*objects)[i]->GetXPosition(tmp_X, tmp_X_Offset);
 		(*objects)[i]->GetYPosition(tmp_Y, tmp_Y_Offset);

@@ -45,6 +45,7 @@ AudioInput::AudioInput() :
 {}
 
 /* Some quick macros for byte swapping. SDL has some nice fast asm methods, so we'll use those */
+// NOTE: these should probably be moved to the utils.h file
 #ifdef __BIG_ENDIAN__
 #define SWAP_U32_FROM_LITTLE(x) { x = SDL_Swap32(x); }
 #define SWAP_U16_FROM_LITTLE(x) { x = SDL_Swap16(x); }
@@ -159,7 +160,7 @@ bool WavFile::Initialize() {
 	_file_input.read(buffer, 4);
 	memcpy(&_data_size, buffer, 4);
 	SWAP_U32_FROM_LITTLE(_data_size);
-	
+
 	_data_init = _file_input.tellg();
 	_total_number_samples = _data_size / _sample_size;
 	_play_time = static_cast<float>(_total_number_samples) / static_cast<float>(_samples_per_second);
@@ -187,7 +188,7 @@ uint32 WavFile::Read(uint8* buffer, uint32 size, bool& end) {
 
 	uint32 read = _file_input.gcount() / _sample_size;
 	end = (read != size);
-	
+
 #ifdef __BIG_ENDIAN__
 	if (_bits_per_sample == 16)
 	{
@@ -379,7 +380,7 @@ AudioMemory::AudioMemory(const AudioMemory& audio_memory) :
 	_sample_size = audio_memory.GetSampleSize();
 	_play_time = audio_memory.GetPlayTime();
 	_data_size = audio_memory.GetDataSize();
-	
+
 	_audio_data = new uint8[_data_size];
 	memcpy(_audio_data, audio_memory._audio_data, _data_size);
 }
@@ -398,11 +399,11 @@ AudioMemory& AudioMemory::operator=(const AudioMemory& audio_memory)
 	_sample_size = audio_memory.GetSampleSize();
 	_play_time = audio_memory.GetPlayTime();
 	_data_size = audio_memory.GetDataSize();
-	
+
 	_data_position = audio_memory._data_position;
 	_audio_data = new uint8[_data_size];
 	memcpy(_audio_data, audio_memory._audio_data, _data_size);
-	
+
 	return *this;
 }
 
