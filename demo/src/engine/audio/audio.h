@@ -169,7 +169,7 @@ public:
 	*** \brief Used to manipulate the shared 3D state members that all sounds share
 	*** Refer to the OpenAL documentation to understand what effect each of these
 	*** properties have (listener position, velocity, and orientation).
-	*/
+	**/
 	//@{
 	void SetListenerPosition(const float position[3]);
 	void SetListenerVelocity(const float velocity[3]);

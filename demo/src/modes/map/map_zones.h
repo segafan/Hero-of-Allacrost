@@ -50,7 +50,7 @@ public:
 }; // class ZoneSection
 
 
-/** ***************************************************************************
+/** ****************************************************************************
 *** \brief Represents a zone on a map that can take any shape
 ***
 *** The area is made up of many ZoneSection instances, so it can be any shape
@@ -230,6 +230,21 @@ private:
 	**/
 	int16 _IsInsideZone(MapObject* object);
 }; // class ContextZone : public MapZone
+
+
+/** ****************************************************************************
+*** \brief Represents an area where the active map context may switch
+***
+***
+*** ***************************************************************************/
+class AudioZone : public MapZone {
+public:
+	AudioZone();
+
+	~AudioZone();
+
+private:
+}; // class AudioZone : public MapZone
 
 } // namespace private_map
 

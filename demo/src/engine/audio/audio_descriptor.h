@@ -105,19 +105,19 @@ public:
 *** \brief Represents an OpenAL source
 ***
 *** OpenAL is designed to take care of the complexity of panning sound to
-*** different speakers; it does this by storing the locations in 3d space of 
-*** both the physical sources that a sound might originate from (for example, 
-*** the point in space where two swords clang together), and also the 3d 
-*** location of the listener's "ears". A source in OpenAL is simply metadata 
-*** about the position of the sound; the actual sound itself comes from audio 
-*** data which is loaded into a buffer, and then played back through one of 
+*** different speakers; it does this by storing the locations in 3d space of
+*** both the physical sources that a sound might originate from (for example,
+*** the point in space where two swords clang together), and also the 3d
+*** location of the listener's "ears". A source in OpenAL is simply metadata
+*** about the position of the sound; the actual sound itself comes from audio
+*** data which is loaded into a buffer, and then played back through one of
 *** these sources.
 ***
 *** This metadata includes properties like position, velocity,
 *** etc. None of these are actually altered by OpenAL; OpenAL does not use
 *** velocity to move the sound sources for us each game tick; rather, it simply
-*** uses these to calculate sound itself (velocity is actually used for 
-*** calculating doppler effects). We are expected to fill these values with 
+*** uses these to calculate sound itself (velocity is actually used for
+*** calculating doppler effects). We are expected to fill these values with
 *** appropriate position/velocity data to keep them in sync with the game
 *** objects they represent.
 ***
@@ -199,13 +199,13 @@ public:
 	***
 	*** The action taken by this function depends on the load type selected. For static sounds, a single OpenAL buffer is
 	*** filled. For streaming, the file/memory is prepared.
-	*/
+	**/
 	virtual bool LoadAudio(const std::string& filename, AUDIO_LOAD load_type = AUDIO_LOAD_STATIC, uint32 stream_buffer_size = private_audio::DEFAULT_BUFFER_SIZE);
 
 	/** \brief Frees all data resources and resets class parameters
 	***
 	*** It resets the _state and _offset class members, as well as deleting _data, _stream, _input, _buffer, and resets _source.
-	*/
+	**/
 	void FreeAudio();
 
 	const std::string GetFilename() const
