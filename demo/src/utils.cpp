@@ -309,13 +309,47 @@ bool IsStringNumeric(const string& text) {
 	return true;
 } // bool IsStringNumeric(const string& text)
 
+// Converts from UTF16 to UTF8, using iconv
+bool UTF16ToUTF8(const uint16 *source, char *dest, size_t length) {
+	if (!length)
+		return true;
+
+	iconv_t convertor = iconv_open("UTF-8", "UTF-16");
+	if (convertor == (iconv_t) -1) {
+		std::cerr << "Failed to initialise UTF16->UTF8 conversion through iconv." << std::endl;
+		return false;
+	}
+
+	const char *source_char = reinterpret_cast<const char *>(source);
+	#if _LIBICONV_VERSION == 0x0109
+	// We are using an iconv API that uses const char*
+	const char *sourceChar = source_char;
+	#else
+	// The iconv API doesn't specify a const source for legacy support reasons.
+	// Versions after 0x0109 changed back to char* for POSIX reasons.
+	char *sourceChar = const_cast<char *>(source_char);
+	#endif
+	char *destChar   = dest;
+	size_t sourceLen = length;
+	size_t destLen   = length;
+	size_t ret = iconv(convertor, &sourceChar, &sourceLen,
+				      &destChar,   &destLen);
+	iconv_close(convertor);
+	if (ret == (size_t) -1) {
+		perror("iconv");
+		std::cerr << "Conversion of '" << source << "' from UTF16->UTF8 failed." << std::endl;
+		return false;
+	}
+	return true;
+}
+
 // Converts from UTF8 to UTF16, including the Byte Order Mark, using iconv
 // Skip the first uint16 to skip the BOM.
 bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
 	if (!length)
 		return true;
 
-	iconv_t convertor = iconv_open("UTF16", "UTF8");
+	iconv_t convertor = iconv_open("UTF-16", "UTF-8");
 	if (convertor == (iconv_t) -1) {
 		std::cerr << "Failed to initialise UTF8->UTF16 conversion through iconv." << std::endl;
 		return false;

@@ -457,6 +457,7 @@ std::string NumberToString(const T t)
 **/
 bool IsStringNumeric(const std::string& text);
 
+bool UTF16ToUTF8(const uint16 *source, char *dest, size_t length);
 /** \brief Converts from UTF8 to UTF16 using iconv
 *** \param source The utf8 character array to convert
 *** \param dest   A utf16 destination array of size length + 1
