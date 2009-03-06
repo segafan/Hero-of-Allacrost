@@ -309,12 +309,18 @@ bool IsStringNumeric(const string& text) {
 	return true;
 } // bool IsStringNumeric(const string& text)
 
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+  #define UTF_16_ICONV_NAME "UTF-16LE"
+#else
+  #define UTF_16_ICONV_NAME "UTF-16BE"
+#endif
+
 // Converts from UTF16 to UTF8, using iconv
 bool UTF16ToUTF8(const uint16 *source, char *dest, size_t length) {
 	if (!length)
 		return true;
 
-	iconv_t convertor = iconv_open("UTF-8", "UTF-16");
+	iconv_t convertor = iconv_open("UTF-8", UTF_16_ICONV_NAME);
 	if (convertor == (iconv_t) -1) {
 		std::cerr << "Failed to initialise UTF16->UTF8 conversion through iconv." << std::endl;
 		return false;
@@ -349,7 +355,7 @@ bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
 	if (!length)
 		return true;
 
-	iconv_t convertor = iconv_open("UTF-16", "UTF-8");
+	iconv_t convertor = iconv_open(UTF_16_ICONV_NAME, "UTF-8");
 	if (convertor == (iconv_t) -1) {
 		std::cerr << "Failed to initialise UTF8->UTF16 conversion through iconv." << std::endl;
 		return false;
