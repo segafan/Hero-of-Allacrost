@@ -315,6 +315,9 @@ bool IsStringNumeric(const string& text) {
   #define UTF_16_ICONV_NAME "UTF-16BE"
 #endif
 
+#define UTF_16_BOM_STD 0xFEFF
+#define UTF_16_BOM_REV 0xFFFE
+
 // Converts from UTF16 to UTF8, using iconv
 bool UTF16ToUTF8(const uint16 *source, char *dest, size_t length) {
 	if (!length)
@@ -390,14 +393,18 @@ ustring MakeUnicodeString(const string& text) {
 	memset(ubuff, '\0', sizeof(*ubuff));
 	uint16 *utf16String = ubuff;
 	
-	if (!UTF8ToUTF16(text.c_str(), ubuff, length)) {
-		for (int32 c = 0; c < length; ++c) {
-			ubuff[c] = static_cast<uint16>(text[c]);
+	if (UTF8ToUTF16(text.c_str(), ubuff, length)) {
+		// Skip the "Byte Order Mark" from the UTF16 specification
+		if (utf16String[0] == UTF_16_BOM_STD ||
+		    utf16String[0] == UTF_16_BOM_REV)
+		{
+			utf16String = ubuff + 1;
 		}
 	}
 	else {
-		// Skip the "Byte Order Mark" from the UTF16 specification
-		utf16String = ubuff + 1;
+		for (int32 c = 0; c < length; ++c) {
+			ubuff[c] = static_cast<uint16>(text[c]);
+		}
 	}
 
 	ustring new_ustr(utf16String);
