@@ -32,11 +32,11 @@
 	#include "alc.h"
 #endif
 
-#include <vorbis/vorbisfile.h>
-#include <fstream>
-
 #include "defs.h"
 #include "utils.h"
+
+#include <vorbis/vorbisfile.h>
+#include <fstream>
 
 namespace hoa_audio {
 
