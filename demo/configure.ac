@@ -76,7 +76,8 @@ AC_CHECK_LIB([openal], [alGetError], [], \
 	[echo "You need to install the OpenAL library."
 	 exit -1])
 AC_CHECK_LIB([vorbisfile], [ov_open], [], \
-	[echo "You should install the ALUT library for maximum performance."])
+	[echo "Could not find the vorbis library. Check that it is properly installed on your system"
+	 exit -1])
 AC_CHECK_LIB([SDL_ttf], [TTF_Init], [], \
 	[echo "Could not find the SDL_ttf library. Check that it is properly installed on your system"
 	 exit -1])
