@@ -42,11 +42,8 @@ ScriptEngine::ScriptEngine() {
 
 	// Initialize Lua and LuaBind
 	_global_state = lua_open();
+	luaL_openlibs(_global_state);
 	luabind::open(_global_state);
-	lua_baselibopen(_global_state);
-	lua_iolibopen(_global_state);
-	lua_strlibopen(_global_state);
-	lua_mathlibopen(_global_state);
 }
 
 

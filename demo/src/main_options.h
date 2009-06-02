@@ -27,14 +27,15 @@ namespace hoa_main {
 **/
 bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv);
 
+/** \brief Parses a secondary list of options provided to a primary program option
+*** \param vars The list of secondary options in single string format
+*** \param options A reference to a container of strings that should hold each seconary option
+*** \return False if there was an error while parsing the option list
+**/
+bool ParseSecondaryOptions(std::string vars, std::vector<std::string>& options);
+
 //! \brief Prints out the program usage for running the program.
 void PrintUsage();
-
-/** \brief Enables debugging print statements in various parts of the game engine.
-*** \param vars The name(s) of the debugging variable(s) to enable.
-*** \return False if a bad function argument was given, or true on success.
-**/
-bool EnableDebugging(std::string vars);
 
 /** \brief Prints information about the user's system.
 *** \return False if an error occured while retrieving system information.
@@ -51,13 +52,10 @@ bool CheckFiles();
 **/
 bool ResetSettings();
 
-/** \brief Executes a specific piece of code that is intended to test some piece of functionality
-*** \param test_code An unsigned integer, provided by the user, which indicates which test code to run
-***
-*** The purpose of this function is primarily intended for debugging engine components without requiring
-*** the programmer to alter main.cpp. Useful tests can be kept around permanently, so that if a particular
-*** implementation of an engine component changes, it is easy to re-test that the correct behavior occurs.
+/** \brief Enables debugging print statements in various parts of the game engine.
+*** \param vars The name(s) of the debugging variable(s) to enable.
+*** \return False if a bad function argument was given, or true on success.
 **/
-void DEBUG_TestCode(uint32 test_code);
+bool EnableDebugging(std::string vars);
 
 } // namespace hoa_main
