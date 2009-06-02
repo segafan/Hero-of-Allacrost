@@ -95,7 +95,10 @@ void QuitAllacrost() {
 	VideoEngine::SingletonDestroy();
 } // void QuitAllacrost()
 
-// Reads in all of the settings and sets the values in the according game manager's
+
+/** \brief Reads in all of the saved game settings and sets values in the according game manager classes
+*** \return True if the settings were loaded successfully
+**/
 bool LoadSettings()
 {
 	ReadScriptDescriptor settings;
@@ -186,11 +189,11 @@ bool LoadSettings()
 	settings.CloseFile();
 
 	return true;
-}
+} // bool LoadSettings()
+
 
 /** \brief Initializes all engine components and makes other preparations for the game to start
 *** \return True if the game engine was initialized successfully, false if an unrecoverable error occured
-***
 **/
 void InitializeEngine() throw (Exception) {
 	// Initialize SDL. The video, audio, and joystick subsystems are initialized elsewhere.
@@ -333,8 +336,8 @@ int main(int argc, char *argv[]) {
 		int32 return_code = EXIT_FAILURE;
 
 		// Parse command lines and exit out of the game if needed
-		if (hoa_main::ParseProgramOptions(return_code, (int32) argc, argv) == false) {
-			return (int) return_code;
+		if (hoa_main::ParseProgramOptions(return_code, static_cast<int32>(argc), argv) == false) {
+			return static_cast<int>(return_code);
 		}
 
 		// Function call below throws exceptions if any errors occur

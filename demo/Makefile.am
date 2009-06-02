@@ -9,6 +9,7 @@ INCLUDES = \
    `test $(LUA_CONFIG) && $(LUA_CONFIG) --include` \
 	-I/usr/include/SDL \
 	-I/usr/include/AL \
+	-I/usr/include/lua5.1 \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/engine \
 	-I$(top_srcdir)/src/engine/audio \
@@ -170,7 +171,7 @@ modes_SOURCES = \
 	$(MODES_DIR)/shop/shop.cpp \
 	$(MODES_DIR)/shop/shop_windows.h \
 	$(MODES_DIR)/shop/shop_windows.cpp
-	
+
 if COND_EDITOR
 EDITOR_DIR = src/editor
 EDITOR_BIN = allacrost-editor
@@ -179,7 +180,7 @@ BUILT_SOURCES = $(allacrost_editor_MOC)
 CLEANFILES = $(BUILT_SOURCES) $(EDITOR_BIN)
 $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 	$(MOC) -o $@ $<
-allacrost_editor_MOC = $(EDITOR_DIR)/dialog_boxes.moc.cpp $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp $(EDITOR_DIR)/skill_editor.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp 
+allacrost_editor_MOC = $(EDITOR_DIR)/dialog_boxes.moc.cpp $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp $(EDITOR_DIR)/skill_editor.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp
 allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/editor_main.cpp \
 	$(EDITOR_DIR)/editor.cpp \
@@ -247,7 +248,7 @@ install-data-local:
 	( $(find_data) ) | while read file; do \
 		echo $(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/allacrost/$$file"; \
 		$(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/allacrost/$$file"; \
-	done 
+	done
 
 uninstall-local:
 	@$(NORMAL_UNINSTALL)

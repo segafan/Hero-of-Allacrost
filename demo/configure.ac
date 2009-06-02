@@ -65,7 +65,7 @@ AC_CHECK_LIB([GLU], [gluGetString], [], [AC_MSG_ERROR([GLU not found])])
 
 AC_CHECK_LIB([png], [png_read_info], [], \
 	[echo "Could not find the png library. Check that it is properly installed on your system"
-	 exit -1])	
+	 exit -1])
 AC_CHECK_LIB([jpeg], [jpeg_read_raw_data], [], \
 	[echo "Could not find the jpeg library. Check that it is properly installed on your system"
 	 exit -1])
@@ -84,13 +84,9 @@ AC_CHECK_LIB([SDL_ttf], [TTF_Init], [], \
 AC_CHECK_LIB([SDL_net], [SDLNet_Init], [], \
 	[echo "Could not find the SDL_net library. Check that it is properly installed on your system"
 	 exit -1])
-AC_CHECK_LIB([lua50], [lua_open], [], \
-	[AC_CHECK_LIB([lua], [lua_open], [], \
-		[echo "Could not find the lua library. Check that it is properly installed on your system"
-		 exit -1])])
-AC_CHECK_LIB([lualib50], [luaopen_table], [], \
-	[AC_CHECK_LIB([lualib], [luaopen_table], [], \
-		[echo "Could not find the lualib library. Check that it is properly installed on your system"
+AC_CHECK_LIB([lua5.1], [lua_newstate], [], \
+	[AC_CHECK_LIB([lua5.1], [lua_newstate], [], \
+ 		[echo "Could not find the lua 5.1 library. Check that it is properly installed on your system"
 		 exit -1])])
 AC_CHECK_LIB([luabind], [open], [], \
 	[echo "Could not find the luabind library. Check that it is properly installed on your system"
