@@ -88,8 +88,16 @@ AC_CHECK_LIB([lua5.1], [lua_newstate], [], \
 	[AC_CHECK_LIB([lua5.1], [lua_newstate], [], \
  		[echo "Could not find the lua 5.1 library. Check that it is properly installed on your system"
 		 exit -1])])
+AC_CHECK_DECL([LUABIND_VERSION], [],
+	[echo "Could not find the luabind 0.8+ headers. Check that they are properly installed on your system"
+	exit -1],
+	[#include <luabind/version.hpp>
+	 #if (LUABIND_VERSION < 800)
+	 	#undef LUABIND_VERSION
+	 #endif])
+
 AC_CHECK_LIB([luabind], [open], [], \
-	[echo "Could not find the luabind library. Check that it is properly installed on your system"
+	[echo "Could not find the luabind 0.8+ library. Check that it is properly installed on your system"
 	 exit -1])
 AC_CHECK_LIB([m], [log], [], \
 	[echo "Could not find the math library. Check that it is properly installed on your system"
