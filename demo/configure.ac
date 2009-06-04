@@ -100,8 +100,6 @@ AC_SUBST([PACKAGE])
 LOCALEDIR=txt
 AC_SUBST([LOCALEDIR])
 
-AC_PATH_PROGS([LUA_CONFIG], [lua-config])
-
 dnl Check for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC

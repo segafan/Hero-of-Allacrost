@@ -6,7 +6,6 @@ AM_CPPFLAGS = -DDATADIR=\"$(datadir)/allacrost\" -DLOCALEDIR=\"$(datadir)/allacr
 ACLOCAL_AMFLAGS = -I m4
 
 INCLUDES = \
-   `test $(LUA_CONFIG) && $(LUA_CONFIG) --include` \
 	-I/usr/include/SDL \
 	-I/usr/include/AL \
 	-I/usr/include/lua5.1 \
