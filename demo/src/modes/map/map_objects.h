@@ -463,6 +463,15 @@ public:
 	**/
 	bool DoObjectsCollide(const private_map::MapObject* const obj1, const private_map::MapObject* const obj2);
 
+	/** \brief Determines if a map object or sprite occupies a certain element of the collision grid
+	*** \param col The collision grid column
+	*** \param row The collision grid row
+	*** \return True if the collision grid element is occupied by an object or sprite
+	***
+	*** \todo Take into account the object/sprite's collision property and also add a parameter for map context
+	**/
+	bool IsPositionOccupied(int16 col, int16 row);
+
 	/** \brief Determines if a map sprite's position is invalid because of a collision
 	*** \param sprite A pointer to the map sprite to check
 	*** \return True if a collision was detected, false if one was not
@@ -481,16 +490,15 @@ public:
 	*** \param sprite A pointer of the sprite to find the path for
 	*** \param path A reference to a vector of PathNode objects to store the path
 	*** \param dest The destination coordinates
+	*** \return True if a path to the destination was found successfully
 	***
 	*** This algorithm uses the A* algorithm to find a path from a source to a destination.
 	*** This function ignores the position of all other objects and only concerns itself with
 	*** which map grid elements are walkable.
 	***
-	*** \note If an error is detected, the function will return an empty path vector.
+	*** \note If an error is detected or a path could not be found, the function will empty the path vector before returning
 	**/
-	void FindPath(private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
-
-	bool IsPositionOccupied(int16 col, int16 row);
+	bool FindPath(private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
 
 private:
 	/** \brief The number of rows and columns in the collision gride

@@ -66,7 +66,7 @@ MapDialogue::MapDialogue(uint32 id) :
 	// Look up the event for this dialogue to see whether it has already been read before or not
 	// Either create the event or retrieve the number of times the dialogue has been seen.
 	_event_name = GetEventName();
-	GlobalEventGroup& event_group = *(MapMode::_loading_map->_map_event_group);
+	GlobalEventGroup& event_group = *(MapMode::_current_map->_map_event_group);
 
 	if (event_group.DoesEventExist(_event_name) == false) {
 		event_group.AddNewEvent(_event_name, 0);

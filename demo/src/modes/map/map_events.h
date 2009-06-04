@@ -79,18 +79,19 @@ public:
 *** \brief An abstract class representing an event that occurs on a map
 ***
 *** An event can be virtually anything from playing a sound to moving a sprite
-*** to beginning a dialogue. Events do not necessarily inform the user (though
+*** to beginning a dialogue. Events do not necessarily inform the user (through
 *** visual or audio means) that an event has occurred. They may be employed to
 *** change the state of a map without the player's knowledge. This is an abstract
 *** class because common types of events (such as beginning a dialogue) are implemented
 *** in C++ code while Lua is used to represent not-so-common types of events.
 ***
-*** All events have a unique non-zero ID unsigned integer value that serve to
-*** distinguish the events from one another. Events can also contain any number
-*** of "links" to children events, which are events which launch simultaneously
+*** All events have a unique, non-zero, unsigned integer value that serve to
+*** distinguish the events from one another (an ID number). Events can also contain any
+*** number of "links" to children events, which are events which launch simultaneously
 *** with or some time after the parent event. Events are processed via two
-*** functions. StartEvent() begins the event, and IsEventFinished() returns true
-*** when the event has finished.
+*** functions. _Start() is called only one when the event begins. _Update() is called
+*** once for every iteration of the main game loop until this function returns a true
+*** value, indicating that the event is finished.
 *** ***************************************************************************/
 class MapEvent {
 	friend class EventSupervisor;
@@ -398,7 +399,20 @@ protected:
 	//! \brief Returns true when the sprite has reached the destination
 	bool _Update();
 
+	//! \brief Sets the correct direction for the sprite to move to the next node in the path
+	void _SetDirection();
 
+	//! \brief The source coordinates for this path movement
+	int16 _source_col, _source_row;
+
+	//! \brief The destination coordinates for this path movement
+	PathNode _destination;
+
+	//! \brief Holds the path needed to traverse from source to destination
+	std::vector<PathNode> _path;
+
+	//! \brief An index to the path vector containing the node that the sprite currently occupies
+	uint32 _current_node;
 }; // class PathMoveSpriteEvent : public SpriteEvent
 
 

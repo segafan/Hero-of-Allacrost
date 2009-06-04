@@ -72,16 +72,7 @@ void VirtualSprite::Update() {
 		return;
 	}
 
-	if (_path.empty() == true && (_destination.col & _destination.row) != -1
-	    && x_position != _destination.col && y_position != _destination.row) {
-		MapMode::_current_map->_object_supervisor->FindPath(this, _path, _destination);
-
-		// If no path could be found, there's nothing more that can be done here
-		if (_path.empty() == true)
-			IF_PRINT_WARNING(MAP_DEBUG) << "could not discover a path to destination" << endl;
-	}
-
-	// The remainder of this function handles movement, so if the sprite is not moving there is nothing left to do
+	// This function handles movement, so if the sprite is not moving there is nothing to do
 	if (moving == false)
 		return;
 
@@ -111,26 +102,30 @@ void VirtualSprite::Update() {
 	else if (direction & (EAST | MOVING_NORTHEAST | MOVING_SOUTHEAST))
 		x_offset += distance_moved;
 
-	if (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
-		if (this->GetObjectID() != 1000)
-		{
-			if ((_destination.col & _destination.row) != -1)
-			{
-				MapMode::_current_map->_object_supervisor->FindPath(this, _path, _destination);
-				return;
-			}
-			else 
-			{
-				x_offset = tmp_x;
-				y_offset = tmp_y;
-				this->SetRandomDirection();
-			}
-		}
-		else
-		{
+	// TEMP: this is a while loop instead of an if statement so that the code can break out of it
+	while (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
+		// If no event is controlling this sprite, do not attempt to resolve the collision
+		if (control_event == NULL) {
 			x_offset = tmp_x;
 			y_offset = tmp_y;
+			return;
 		}
+
+		// Determine if this sprite is moving on a path. If so, try to resolve the collision
+		PathMoveSpriteEvent* path_event = dynamic_cast<PathMoveSpriteEvent*>(control_event);
+		if (path_event != NULL) {
+			// TODO: figure out if the sprite should wait or recalculate a new path
+			break;
+		}
+
+		// If the sprite is moving randomly, change its direction
+		RandomMoveSpriteEvent* random_event = dynamic_cast<RandomMoveSpriteEvent*>(control_event);
+		if (random_event != NULL) {
+			// TODO: instruct event to change to a different random direction
+			break;
+		}
+
+		break;
 	}
 
 	// Roll-over Y and X position offsets if necessary
@@ -150,7 +145,6 @@ void VirtualSprite::Update() {
 		x_position += 1;
 		x_offset -= 1.0f;
 	}
-
 } // void VirtualSprite::Update()
 
 
@@ -533,7 +527,7 @@ void MapSprite::Draw() {
 
 void MapSprite::AddDialogueReference(uint32 dialogue_id) {
 	_dialogue_references.push_back(dialogue_id);
-	MapMode::_loading_map->_dialogue_supervisor->AddSpriteReference(dialogue_id, GetObjectID());
+	MapMode::_current_map->_dialogue_supervisor->AddSpriteReference(dialogue_id, GetObjectID());
 }
 
 
@@ -694,8 +688,8 @@ void EnemySprite::AddEnemy(uint32 enemy_id) {
 	// Make sure that the GlobalEnemy has already been created for this enemy_id
 	if (MAP_DEBUG) {
 		bool found = false;
-		for (uint32 i = 0; i < MapMode::_loading_map->_enemies.size(); i++) {
-			if (MapMode::_loading_map->_enemies[i]->GetID() == enemy_id) {
+		for (uint32 i = 0; i < MapMode::_current_map->_enemies.size(); i++) {
+			if (MapMode::_current_map->_enemies[i]->GetID() == enemy_id) {
 				found = true;
 				break;
 			}

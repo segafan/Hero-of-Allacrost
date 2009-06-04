@@ -53,7 +53,6 @@ namespace hoa_map {
 
 // Initialize static class variables
 MapMode *MapMode::_current_map = NULL;
-MapMode *MapMode::_loading_map = NULL;
 bool MapMode::_show_dialogue_icons = true;
 
 // ****************************************************************************
@@ -79,7 +78,6 @@ MapMode::MapMode(string filename) :
 	_camera(NULL)
 {
 	mode_type = MODE_MANAGER_MAP_MODE;
-	_loading_map = this;
 	_current_map = this;
 
 	_ResetState();
