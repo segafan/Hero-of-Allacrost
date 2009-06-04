@@ -127,17 +127,6 @@ private:
 	**/
 	static MapMode *_current_map;
 
-	/** \brief A reference to the instance of MapMode which most recently had its constructor called
-	*** This is not the same as _current_map, and this pointer should only be used in conjunction with
-	*** loading code. The pointer is only updated when the MapMode constructor is called.
-	***
-	*** \todo The need for this member is questionable. We need to examine if it is absolutely necessary
-	*** to have and if there is a better alternative. Its only use is for the map code that executes
-	*** between creating the new MapMode object and having the Reset function called to make the object
-	*** the current map.
-	**/
-	static MapMode *_loading_map;
-
 	//! \brief The name of the Lua file that represents the map
 	std::string _map_filename;
 

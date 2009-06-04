@@ -119,9 +119,9 @@ void MapTreasure::LoadSaved() {
 	string event_name = "chest_" + NumberToString(GetObjectID());
 
 	//Add an event in the group having the ObjectID of the chest as name
-	if (MapMode::_loading_map->_map_event_group->DoesEventExist(event_name)) {
+	if (MapMode::_current_map->_map_event_group->DoesEventExist(event_name)) {
 		// If the event is non-zero, the treasure has already been opened
-		if (MapMode::_loading_map->_map_event_group->GetEvent(event_name) != 0) {
+		if (MapMode::_current_map->_map_event_group->GetEvent(event_name) != 0) {
 			SetCurrentAnimation(TREASURE_OPEN_ANIM);
 			_drunes = 0;
 			for (uint32 i = 0; i < _objects_list.size(); i++)

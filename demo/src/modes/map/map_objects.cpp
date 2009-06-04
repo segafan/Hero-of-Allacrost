@@ -503,22 +503,17 @@ bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite) {
 bool ObjectSupervisor::IsPositionOccupied(int16 row, int16 col) {
 	vector<MapObject*>* objects = &_ground_objects;
 
-	uint16 tmp_X;
-	uint16 tmp_Y;
-	float tmp_X_Offset;
-	float tmp_Y_Offset;
+	uint16 tmp_x;
+	uint16 tmp_y;
+	float tmp_x_offset;
+	float tmp_y_offset;
 
-	for (uint32 i = 0; i < objects->size(); i++)
-	{
-		(*objects)[i]->GetXPosition(tmp_X, tmp_X_Offset);
-		(*objects)[i]->GetYPosition(tmp_Y, tmp_Y_Offset);
+	for (uint32 i = 0; i < objects->size(); i++) {
+		(*objects)[i]->GetXPosition(tmp_x, tmp_x_offset);
+		(*objects)[i]->GetYPosition(tmp_y, tmp_y_offset);
 
-		if (col >= tmp_X - (*objects)[i]->GetCollHalfWidth() &&
-			col <= tmp_X + (*objects)[i]->GetCollHalfWidth())
-		{
-			if (row <= tmp_Y + (*objects)[i]->GetCollHeight() &&
-				row >= tmp_Y)
-			{
+		if (col >= tmp_x - (*objects)[i]->GetCollHalfWidth() && col <= tmp_x + (*objects)[i]->GetCollHalfWidth()) {
+			if (row <= tmp_y + (*objects)[i]->GetCollHeight() && row >= tmp_y) {
 				return true;
 			}
 			continue;
@@ -528,7 +523,7 @@ bool ObjectSupervisor::IsPositionOccupied(int16 row, int16 col) {
 }
 
 
-void ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, const PathNode& dest) {
+bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, const PathNode& dest) {
 	// NOTE: Refer to the implementation of the A* algorithm to understand what all these lists and score values are for
 	std::vector<PathNode> open_list;
 	std::vector<PathNode> closed_list;
@@ -554,21 +549,21 @@ void ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 
 	// Check that the source node is not the same as the destination node
 	if (source_node == dest) {
-		PRINT_ERROR << "source node is same as destination in MapMode::_FindPath()" << endl;
-		return;
+		PRINT_ERROR << "source node is same as destination" << endl;
+		return false;
 	}
 
 	// Check that the destination is valid for the sprite to move to
 	if ((dest.col - x_span < 0) || (dest.row - y_span < 0) ||
 		(dest.col + x_span >= (_num_grid_cols)) || (dest.row >= (_num_grid_rows))) {
 		PRINT_ERROR << "sprite can not move to destination node on path because it exceeds map boundaries" << endl;
-		return;
+		return false;
 	}
 	for (int16 r = dest.row - y_span; r < dest.row; r++) {
 		for (int16 c = dest.col - x_span; c < dest.col + x_span; c++) {
 			if ((_collision_grid[r][c] & sprite->context) > 0) {
 				PRINT_ERROR << "sprite can not move to destination node on path because one or more grid tiles are unwalkable" << endl;
-				return;
+				return false;
 			}
 		}
 	}
@@ -620,8 +615,7 @@ void ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 				continue;
 			}
 
-			if (IsPositionOccupied(nodes[i].row, nodes[i].col))
-			{
+			if (IsPositionOccupied(nodes[i].row, nodes[i].col)) {
 				continue;
 			}
 
@@ -672,8 +666,8 @@ void ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 
 	if (open_list.empty()) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "could not find path to destination" << endl;
-		path.push_back(source_node);
-		return;
+		path.clear();
+		return false;
 	}
 
 	// Add the destination node to the vector, retain its parent, and remove it from the closed list
@@ -692,7 +686,9 @@ void ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 		}
 	}
 	std::reverse(path.begin(), path.end());
-} // void ObjectSupervisor::FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest)
+
+	return true;
+} // bool ObjectSupervisor::FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest)
 
 } // namespace private_map
 
