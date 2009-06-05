@@ -193,6 +193,10 @@ public:
 		{ return (static_cast<float>(y_position) + y_offset); }
 	//@}
 
+	//! \brief Retrieves the object type identifier
+	MAP_OBJECT_TYPE GetObjectType() const
+		{ return _object_type; }
+
 	/** \brief Returns the collision rectangle for the current object
 	*** \param rect A reference to the MapRectangle object to store the collision rectangle data
 	**/
@@ -466,25 +470,38 @@ public:
 	/** \brief Determines if a map object or sprite occupies a certain element of the collision grid
 	*** \param col The collision grid column
 	*** \param row The collision grid row
-	*** \return True if the collision grid element is occupied by an object or sprite
+	*** \return A pointer to the object occupying the grid position or NULL if the position is unoccupied
 	***
 	*** \todo Take into account the object/sprite's collision property and also add a parameter for map context
 	**/
-	bool IsPositionOccupied(int16 col, int16 row);
+	private_map::MapObject* IsPositionOccupied(int16 col, int16 row);
+
+	/** \brief Determines if a specific map object occupies a specific element of the collision grid
+	*** \param col The collision grid column
+	*** \param row The collision grid row
+	*** \param object The object to check for occupation of the grid element
+	*** \return True if the grid element is occupied by the object
+	***
+	*** \todo Take into account the object/sprite's collision property and also add a parameter for map context
+	**/
+	bool IsPositionOccupiedByObject(int16 col, int16 row, MapObject* object);
 
 	/** \brief Determines if a map sprite's position is invalid because of a collision
 	*** \param sprite A pointer to the map sprite to check
-	*** \return True if a collision was detected, false if one was not
+	*** \param collision_object A pointer to a pointer to the object that collides with the sprite.
+	*** This member may be set to NULL if this information is not required by the callee. Otherwise, the callee
+	*** should declare a pointer member of type MapObject and pass the address of that pointer to this parameter.
+	*** \return The type of collision detected, which may include NO_COLLISION if none was detected
 	***
 	*** This method is invoked by a map sprite who wishes to check for its own collision.
-	*** The collision detection is performed agains three types of obstacles:
+	*** The collision detection is performed against three types of obstacles:
 	***
 	*** -# Boundary conditions: where the sprite has walked off the edges of the map
-	*** -# Tile collisions: where the sprite's collision rectangle overlaps with an unwalkable section of the map grid
+	*** -# Grid collisions: where the sprite's collision rectangle overlaps with an unwalkable section of the map grid
 	*** -# Object collision: where the sprite's collision rectangle overlaps that of another object's,
 	***    where the object is in the same draw layer and context as the original sprite.
 	**/
-	bool DetectCollision(private_map::VirtualSprite* sprite);
+	COLLISION_TYPE DetectCollision(private_map::VirtualSprite* sprite, private_map::MapObject** collision_object);
 
 	/** \brief Finds a path from a sprite's current position to a destination
 	*** \param sprite A pointer of the sprite to find the path for

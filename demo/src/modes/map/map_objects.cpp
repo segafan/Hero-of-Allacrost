@@ -18,15 +18,11 @@
 
 // Allacrost engines
 #include "audio.h"
-#include "mode_manager.h"
 #include "system.h"
 #include "video.h"
 
 // Allacrost globals
 #include "global.h"
-
-// Other game mode headers
-#include "battle.h"
 
 // Local map mode headers
 #include "map.h"
@@ -37,12 +33,10 @@
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
-using namespace hoa_mode_manager;
 using namespace hoa_script;
 using namespace hoa_system;
 using namespace hoa_video;
 using namespace hoa_global;
-using namespace hoa_battle;
 
 namespace hoa_map {
 
@@ -423,29 +417,48 @@ bool ObjectSupervisor::DoObjectsCollide(const MapObject* const obj1, const MapOb
 
 
 
-bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite) {
+COLLISION_TYPE ObjectSupervisor::DetectCollision(VirtualSprite* sprite, MapObject** collision_object) {
 	// NOTE: We don't check if the argument is NULL here for performance reasons
 
-	// ---------- (1) Check that the sprite does not collide with the map tiles or boundaries
-	if (CheckMapCollision(sprite) == true)
-		return true;
-
-	// If the sprite has this property set, no further checks are needed
+	// If the sprite has this property set it can not collide
 	if (sprite->no_collision == true) {
-		return false;
+		return NO_COLLISION;
 	}
 
-	// ---------- (2) Determine which set of objects to do collision detection with
-	MapObject* collide_obj = NULL;
-	vector<MapObject*>* objects = NULL; // A pointer to the layer of objects to do the collision detection with
+	MapRectangle coll_rect;
+	sprite->GetCollisionRectangle(coll_rect);
 
+	// ---------- (1) Check if any part of the object's collision rectangle is outside of the map boundary
+	if (coll_rect.left < 0.0f || coll_rect.right >= static_cast<float>(_num_grid_cols) ||
+		coll_rect.top < 0.0f || coll_rect.bottom >= static_cast<float>(_num_grid_rows)) {
+		return BOUNDARY_COLLISION;
+	}
+
+	// ---------- (2) Check if the object's collision rectangel overlaps with any unwalkable elements on the collision grid
+	// Grid based collision is not done for objects in the sky layer
+	if (sprite->sky_object == false) {
+		// Determine if the object's collision rectangle overlaps any unwalkable tiles
+		// Note that because the sprite's collision rectangle was previously determined to be within the map bounds,
+		// the map grid tile indeces referenced in this loop are all valid entries and do not need to be checked for out-of-bounds conditions
+		for (uint32 r = static_cast<uint32>(coll_rect.top); r <= static_cast<uint32>(coll_rect.bottom); r++) {
+			for (uint32 c = static_cast<uint32>(coll_rect.left); c <= static_cast<uint32>(coll_rect.right); c++) {
+				// Checks the collision grid at the row-column at the object's current context
+				if ((_collision_grid[r][c] & sprite->context) != 0) {
+					return GRID_COLLISION;
+				}
+			}
+		}
+	}
+
+	// ---------- (3) Determine which set of objects to do collision detection with
+	MapObject* obstruction_object = NULL;
+	vector<MapObject*>* objects = NULL; // A pointer to the layer of objects to do the collision detection with
 	if (sprite->sky_object == false)
 		objects = &_ground_objects;
 	else
 		objects = &_sky_objects;
 
-	// ---------- (3) Check collision areas for all objects matching the layer and context of the sprite
-
+	// ---------- (4) Check collision areas for all objects matching the layer and context of the sprite
 	MapRectangle sprite_rect;
 	sprite->GetCollisionRectangle(sprite_rect);
 
@@ -459,48 +472,24 @@ bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite) {
 			continue;
 
 		if (CheckObjectCollision(sprite_rect, (*objects)[i]) == true) {
-			collide_obj = (*objects)[i];
+			obstruction_object = (*objects)[i];
 			break;
 		}
 	}
 
-	if (collide_obj == NULL) {
-		return false;
-	}
-
-	// ---------- (4) If a collision was detected, determine any further appropriate action
-	// TODO: this code needs to be removed, relocated, or improved
-	// Check if the map camera collided with an enemy sprite
-	EnemySprite* enemy = NULL;
-	if (sprite == MapMode::_current_map->_camera && collide_obj->GetType() == ENEMY_TYPE) {
-		enemy = reinterpret_cast<EnemySprite*>(collide_obj);
-	}
-	else if (collide_obj == MapMode::_current_map->_camera && sprite->GetType() == ENEMY_TYPE) {
-		enemy = reinterpret_cast<EnemySprite*>(sprite);
-	}
-	else { // No enemy collision, nothing left to do here but report the collision
-		return true;
-	}
-
-	if (enemy->IsHostile()) {
-		enemy->ChangeStateDead();
-		BattleMode *BM = new BattleMode();
-		string enemy_battle_music = enemy->GetBattleMusicTheme();
-		if (enemy_battle_music != "")
-			BM->AddMusic(enemy_battle_music);
-		ModeManager->Push(BM);
-		const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
-		for (uint32 i = 0; i < enemy_party.size(); i++) {
-			BM->AddEnemy(enemy_party[i]);
+	if (obstruction_object != NULL) {
+		if (collision_object != NULL) {
+			*collision_object = obstruction_object;
 		}
+		return OBJECT_COLLISION;
 	}
 
-	return true;
-} // bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite)
+	return NO_COLLISION;
+} // bool ObjectSupervisor::DetectCollision(VirtualSprite* sprite, MapObject** collision_object)
 
 
 
-bool ObjectSupervisor::IsPositionOccupied(int16 row, int16 col) {
+MapObject* ObjectSupervisor::IsPositionOccupied(int16 row, int16 col) {
 	vector<MapObject*>* objects = &_ground_objects;
 
 	uint16 tmp_x;
@@ -514,13 +503,38 @@ bool ObjectSupervisor::IsPositionOccupied(int16 row, int16 col) {
 
 		if (col >= tmp_x - (*objects)[i]->GetCollHalfWidth() && col <= tmp_x + (*objects)[i]->GetCollHalfWidth()) {
 			if (row <= tmp_y + (*objects)[i]->GetCollHeight() && row >= tmp_y) {
-				return true;
+				return (*objects)[i];
 			}
-			continue;
+		}
+	}
+
+	return NULL;
+}
+
+
+
+bool ObjectSupervisor::IsPositionOccupiedByObject(int16 row, int16 col, MapObject* object) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "NULL pointer passed into function argument" << endl;
+		return false;
+	}
+
+	uint16 tmp_x;
+	uint16 tmp_y;
+	float tmp_x_offset;
+	float tmp_y_offset;
+
+	object->GetXPosition(tmp_x, tmp_x_offset);
+	object->GetYPosition(tmp_y, tmp_y_offset);
+
+	if (col >= tmp_x - object->GetCollHalfWidth() && col <= tmp_x + object->GetCollHalfWidth()) {
+		if (row <= tmp_y + object->GetCollHeight() && row >= tmp_y) {
+			return true;
 		}
 	}
 	return false;
 }
+
 
 
 bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, const PathNode& dest) {

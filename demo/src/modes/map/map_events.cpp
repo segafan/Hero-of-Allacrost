@@ -46,7 +46,7 @@ namespace private_map {
 // ****************************************************************************
 
 DialogueEvent::DialogueEvent(uint32 event_id, uint32 dialogue_id) :
-	MapEvent(event_id),
+	MapEvent(event_id, DIALOGUE_EVENT),
 	_dialogue_id(dialogue_id)
 {}
 
@@ -76,7 +76,7 @@ bool DialogueEvent::_Update() {
 // ****************************************************************************
 
 ShopEvent::ShopEvent(uint32 event_id) :
-	MapEvent(event_id)
+	MapEvent(event_id, SHOP_EVENT)
 {}
 
 
@@ -110,7 +110,7 @@ bool ShopEvent::_Update() {
 // ****************************************************************************
 
 SoundEvent::SoundEvent(uint32 event_id) :
-	MapEvent(event_id)
+	MapEvent(event_id, SOUND_EVENT)
 {
 	// TODO
 }
@@ -139,7 +139,7 @@ bool SoundEvent::_Update() {
 // ****************************************************************************
 
 MapTransitionEvent::MapTransitionEvent(uint32 event_id, std::string filename) :
-	MapEvent(event_id),
+	MapEvent(event_id, MAP_TRANSITION_EVENT),
 	_transition_filename(filename),
 	_fade_timer(0)
 {}
@@ -183,7 +183,7 @@ bool MapTransitionEvent::_Update() {
 // ****************************************************************************
 
 JoinPartyEvent::JoinPartyEvent(uint32 event_id) :
-	MapEvent(event_id)
+	MapEvent(event_id, JOIN_PARTY_EVENT)
 {
 	// TODO
 }
@@ -212,7 +212,7 @@ bool JoinPartyEvent::_Update() {
 // ****************************************************************************
 
 BattleEncounterEvent::BattleEncounterEvent(uint32 event_id) :
-	MapEvent(event_id)
+	MapEvent(event_id, BATTLE_ENCOUNTER_EVENT)
 {
 	// TODO
 }
@@ -241,7 +241,7 @@ bool BattleEncounterEvent::_Update() {
 // ****************************************************************************
 
 ScriptedEvent::ScriptedEvent(uint32 event_id, uint32 start_index, uint32 update_index) :
-	MapEvent(event_id)
+	MapEvent(event_id, SCRIPTED_EVENT)
 {
 	ReadScriptDescriptor& map_script = MapMode::_current_map->_map_script;
 	map_script.OpenTable(MapMode::_current_map->_map_tablespace, true);
@@ -274,7 +274,7 @@ bool ScriptedEvent::_Update() {
 // ****************************************************************************
 
 PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 x_coord, uint32 y_coord) :
-	SpriteEvent(event_id, sprite),
+	SpriteEvent(event_id, PATH_MOVE_SPRITE_EVENT, sprite),
 	_source_col(-1),
 	_source_row(-1),
 	_current_node(0)
@@ -325,7 +325,12 @@ bool PathMoveSpriteEvent::_Update() {
 		return true;
 	}
 
-	// If the sprite is at the position of the current node
+	// This condition may happen if a collision halted the sprite's movement
+	if (_sprite->moving == false) {
+		_sprite->moving = true;
+	}
+
+	// Check if the sprite has arrived at the position of the current node
 	if (_sprite->x_position == _path[_current_node].col && _sprite->y_position == _path[_current_node].row) {
 		_current_node++;
 
@@ -346,36 +351,123 @@ bool PathMoveSpriteEvent::_Update() {
 
 
 void PathMoveSpriteEvent::_SetDirection() {
-	if (_sprite->y_position > _path[_current_node].row) { // Need to move toward the north
-		if (_sprite->x_position > _path[_current_node].col)
-			_sprite->SetDirection(MOVING_NORTHWEST);
-		else if (_sprite->x_position < _path[_current_node].col)
-			_sprite->SetDirection(MOVING_NORTHEAST);
-		else
-			_sprite->SetDirection(NORTH);
+	uint16 direction = 0;
+
+	if (_sprite->y_position > _path[_current_node].row) { // Need to move north
+		direction |= NORTH;
 	}
-	else if (_sprite->y_position < _path[_current_node].row) { // Need to move toward the south
-		if (_sprite->x_position > _path[_current_node].col)
-			_sprite->SetDirection(MOVING_SOUTHWEST);
-		else if (_sprite->x_position < _path[_current_node].col)
-			_sprite->SetDirection(MOVING_SOUTHEAST);
-		else
-			_sprite->SetDirection(SOUTH);
+	else if (_sprite->y_position < _path[_current_node].row) { // Need to move south
+		direction |= SOUTH;
 	}
-	else if (_sprite->x_position > _path[_current_node].col) { // Need to move west
-		_sprite->SetDirection(WEST);
+
+	if (_sprite->x_position > _path[_current_node].col) { // Need to move west
+		direction |= WEST;
 	}
-	else if (_sprite->x_position < _path[_current_node].col) { // Need to move east
-		_sprite->SetDirection(EAST);
+	else if (_sprite->x_position < _path[_current_node].col) { // // Need to move east
+		direction |= EAST;
 	}
+
+	// Determine if the sprite should move diagonally to the next node
+	if ((direction & (NORTH | SOUTH)) && (direction & (WEST | EAST))) {
+		switch (direction) {
+			case (NORTH | WEST):
+				direction = MOVING_NORTHWEST;
+				break;
+			case (NORTH | EAST):
+				direction = MOVING_NORTHEAST;
+				break;
+			case (SOUTH | WEST):
+				direction = MOVING_SOUTHWEST;
+				break;
+			case (SOUTH | EAST):
+				direction = MOVING_SOUTHEAST;
+				break;
+		}
+	}
+
+	_sprite->SetDirection(direction);
 }
+
+
+
+void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj) {
+	// Boundary and grid collisions should not occur on a pre-calculated path. If these conditions do occur,
+	// we terminate the path event immediately. The conditions may occur if, for some reason, the map's boundaries
+	// or collision grid are modified after the path is calculated
+	if (coll_type == BOUNDARY_COLLISION || coll_type == GRID_COLLISION) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "boundary or grid collision occurred on a pre-calculated path movement" << endl;
+
+		_path.clear(); // This path is obviously not a correct one so we should trash it
+		_sprite->ReleaseControl(this);
+		MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
+		return;
+	}
+
+	// If the code has reached this point, then we are dealing with an object collision
+
+	// Determine if the obstructing object is blocking the destination of the path
+	bool destination_blocked = MapMode::_current_map->_object_supervisor->IsPositionOccupiedByObject(_destination.row, _destination.col, coll_obj);
+
+	switch (coll_obj->GetObjectType()) {
+		case PHYSICAL_TYPE:
+		case TREASURE_TYPE:
+			// If the object is a static map object and blocking the destination, give up and terminate the event
+			if (destination_blocked == true) {
+				// Note that we will retain the path (we don't clear() it), hoping that next time the object is moved
+				_sprite->ReleaseControl(this);
+				MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
+			}
+			// Otherwise, try to find an alternative path around the object
+			else {
+				// TEMP: Right now we just give up trying to complete the path because our pathfinding algorithm doesn't account for objects yet
+				_sprite->ReleaseControl(this);
+				MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
+
+				// TODO: recalculate and find an alternative path around the object
+			}
+			return;
+
+		case VIRTUAL_TYPE:
+		case SPRITE_TYPE:
+		case ENEMY_TYPE:
+			VirtualSprite* coll_sprite = dynamic_cast<VirtualSprite*>(coll_obj);
+			// The object is a sprite and blocking the destination. How we resolve the situation depends upon whether or not the sprite is moving
+			if (destination_blocked == true) {
+				if (coll_sprite->moving == true) {
+					// The obstructing sprite is moving so hopefully it will get out of the way eventually. We will wait for it to do so
+				}
+				else {
+					// The obstructing sprite is not moving so give up trying to reach the destination
+					_sprite->ReleaseControl(this);
+					MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
+				}
+			}
+
+			else {
+				if (coll_sprite->moving == true) {
+					// TEMP: The obstructing sprite is moving so hopefully it will get out of the way eventually. We will wait for it to do so
+
+					// TODO: Re-calculate and find a path around the object
+				}
+
+				else {
+					// TEMP: The obstructing sprite is not moving so give up trying to reach the destination
+					_sprite->ReleaseControl(this);
+					MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
+
+					// TODO: Re-calculate and find a path around the object
+				}
+			}
+			return;
+	}
+} // void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj)
 
 // ****************************************************************************
 // ********** RandomMoveSpriteEvent Class Functions
 // ****************************************************************************
 
 RandomMoveSpriteEvent::RandomMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time, uint32 direction_time) :
-	SpriteEvent(event_id, sprite),
+	SpriteEvent(event_id, RANDOM_MOVE_SPRITE_EVENT, sprite),
 	_total_movement_time(move_time),
 	_total_direction_time(direction_time),
 	_movement_timer(0),
@@ -417,12 +509,19 @@ bool RandomMoveSpriteEvent::_Update() {
 	return false;
 }
 
+
+
+void RandomMoveSpriteEvent::_ResolveCollision() {
+	_sprite->SetRandomDirection();
+	_sprite->moving = true;
+}
+
 // ****************************************************************************
 // ********** AnimateSpriteEvent Class Functions
 // ****************************************************************************
 
 AnimateSpriteEvent::AnimateSpriteEvent(uint32 event_id, VirtualSprite* sprite) :
-	SpriteEvent(event_id, sprite),
+	SpriteEvent(event_id, ANIMATE_SPRITE_EVENT, sprite),
 	_current_frame(0),
 	_display_timer(0),
 	_loop_count(0),
@@ -564,7 +663,10 @@ void EventSupervisor::TerminateEvent(uint32 event_id) {
 	// TODO: what if the event is in the active queue in more than one location?
 	for (list<MapEvent*>::iterator i = _active_events.begin(); i != _active_events.end(); i++) {
 		if ((*i)->_event_id == event_id) {
-			_active_events.erase(i);
+			MapEvent* terminated_event = *i;
+			i = _active_events.erase(i);
+			// We examine the event links only after the event has been removed from the active list
+			_ExamineEventLinks(terminated_event, false);
 			return;
 		}
 	}

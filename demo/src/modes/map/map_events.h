@@ -97,14 +97,17 @@ class MapEvent {
 	friend class EventSupervisor;
 public:
 	//! \param id The ID for the map event (a zero value is invalid)
-	MapEvent(uint32 id) :
-		_event_id(id) {}
+	MapEvent(uint32 id, EVENT_TYPE type) :
+		_event_id(id), _event_type(type) {}
 
 	~MapEvent()
 		{}
 
 	uint32 GetEventID() const
 		{ return _event_id; }
+
+	EVENT_TYPE GetEventType() const
+		{ return _event_type; }
 
 	/** \brief Declares a child event to be linked to this event
 	*** \param child_event_id The event id of the child event
@@ -131,6 +134,9 @@ protected:
 private:
 	//! \brief A unique ID number for the event. A value of zero is invalid
 	uint32 _event_id;
+
+	//! \brief Identifier for the class type of this event
+	EVENT_TYPE _event_type;
 
 	//! \brief All child events of this class, represented by EventLink objects
 	std::vector<EventLink> _event_links;
@@ -351,10 +357,11 @@ protected:
 class SpriteEvent : public MapEvent {
 public:
 	/** \param event_id The ID of this event
+	*** \param event_type The type of this event
 	*** \param sprite A pointer to the sprite that this event will control
 	**/
-	SpriteEvent(uint32 event_id, VirtualSprite* sprite) :
-		MapEvent(event_id), _sprite(sprite) {}
+	SpriteEvent(uint32 event_id, EVENT_TYPE event_type, VirtualSprite* sprite) :
+		MapEvent(event_id, event_type), _sprite(sprite) {}
 
 	~SpriteEvent()
 		{}
@@ -382,6 +389,8 @@ protected:
 *** \todo Should we write a public function to allow the path destination to change?
 *** ***************************************************************************/
 class PathMoveSpriteEvent : public SpriteEvent {
+	friend class VirtualSprite;
+
 public:
 	/** \param event_id The ID of this event
 	*** \param sprite A pointer to the sprite to move
@@ -402,6 +411,12 @@ protected:
 	//! \brief Sets the correct direction for the sprite to move to the next node in the path
 	void _SetDirection();
 
+	/** \brief Determines an appropriate resolution when the sprite collides with an obstruction
+	*** \param coll_type The type of collision that has occurred
+	*** \param coll_obj A pointer to the MapObject that the sprite has collided with, if any
+	**/
+	void _ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj);
+
 	//! \brief The source coordinates for this path movement
 	int16 _source_col, _source_row;
 
@@ -420,6 +435,8 @@ protected:
 *** \brief An event which randomizes movement of a sprite
 *** ***************************************************************************/
 class RandomMoveSpriteEvent : public SpriteEvent {
+	friend class VirtualSprite;
+
 public:
 	/** \param event_id The ID of this event
 	*** \param sprite A pointer to the sprite to move
@@ -436,6 +453,9 @@ protected:
 
 	//! \brief Returns true when the sprite has reached the destination
 	bool _Update();
+
+	//! \brief Immediately changes the direction of motion for the sprite in an attempt to resolve the collision that occurred
+	void _ResolveCollision();
 
 	/** \brief The amount of time (in milliseconds) to perform random movement before ending this action
 	*** Set this member to hoa_system::INFINITE_TIME in order to continue the random movement
@@ -600,9 +620,7 @@ public:
 	/** \brief Terminates an event if it is active
 	*** \param event_id The ID of the event to terminate
 	*** \note If there is no active event that corresponds to the event ID, the function will do nothing.
-	*** \note This function will <b>not</b> terminate any of the event's children. All children that launch from this
-	*** event's start will remain in the active or launch event containers. Any children that launch after the event's
-	*** finish will not be processed.
+	*** \note This function will <b>not</b> terminate or prevent the launching of any of the event's children.
 	*** \note Use of this function is atypical and should be avoided. Termination of certain events before their completion
 	*** can lead to memory leaks, errors, and other problems. Make sure that the event you are terminating will not cause
 	*** any of these conditions.

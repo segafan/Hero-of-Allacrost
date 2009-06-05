@@ -158,7 +158,7 @@ void EnemyZone::Update() {
 		_RandomPosition(x, y);
 		_enemies[index]->SetXPosition(x, 0.0f);
 		_enemies[index]->SetYPosition(y, 0.0f);
-		collision = MapMode::_current_map->_object_supervisor->DetectCollision(_enemies[index]);
+		collision = MapMode::_current_map->_object_supervisor->DetectCollision(_enemies[index], NULL);
 	} while (collision && --retries > 0);
 
 	// If we didn't find a suitable spawning location, reset the collision info

@@ -18,6 +18,7 @@
 
 // Allacrost engines
 #include "audio.h"
+#include "mode_manager.h"
 #include "system.h"
 
 // Allacrost globals
@@ -30,13 +31,18 @@
 #include "map_dialogue.h"
 #include "map_events.h"
 
+// Other game mode headers
+#include "battle.h"
+
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
+using namespace hoa_mode_manager;
 using namespace hoa_video;
 using namespace hoa_script;
 using namespace hoa_system;
 using namespace hoa_global;
+using namespace hoa_battle;
 
 namespace hoa_map {
 
@@ -88,10 +94,6 @@ void VirtualSprite::Update() {
 	if (direction & MOVING_DIAGONALLY)
 		distance_moved *= 0.707f;
 
-	// TODO: the code below is very inefficient because first it moves in the y direction and does
-	// full collision detection, then it moves in the x direction and does full collision detection.
-	// I think we should only do collision detection once per move, not twice.
-
 	// Move the sprite the appropriate distance in the appropriate Y and X direction
 	if (direction & (NORTH | MOVING_NORTHWEST | MOVING_NORTHEAST))
 		y_offset -= distance_moved;
@@ -102,48 +104,37 @@ void VirtualSprite::Update() {
 	else if (direction & (EAST | MOVING_NORTHEAST | MOVING_SOUTHEAST))
 		x_offset += distance_moved;
 
-	// TEMP: this is a while loop instead of an if statement so that the code can break out of it
-	while (MapMode::_current_map->_object_supervisor->DetectCollision(this)) {
-		// If no event is controlling this sprite, do not attempt to resolve the collision
-		if (control_event == NULL) {
-			x_offset = tmp_x;
-			y_offset = tmp_y;
-			return;
+	MapObject* collision_object = NULL;
+	COLLISION_TYPE collision_type = NO_COLLISION;
+	collision_type = MapMode::_current_map->_object_supervisor->DetectCollision(this, &collision_object);
+
+	if (collision_type == NO_COLLISION) {
+		// Roll-over Y and X position offsets if necessary
+		while (y_offset < 0.0f) {
+			y_position -= 1;
+			y_offset += 1.0f;
 		}
-
-		// Determine if this sprite is moving on a path. If so, try to resolve the collision
-		PathMoveSpriteEvent* path_event = dynamic_cast<PathMoveSpriteEvent*>(control_event);
-		if (path_event != NULL) {
-			// TODO: figure out if the sprite should wait or recalculate a new path
-			break;
+		while (y_offset > 1.0f) {
+			y_position += 1;
+			y_offset -= 1.0f;
 		}
-
-		// If the sprite is moving randomly, change its direction
-		RandomMoveSpriteEvent* random_event = dynamic_cast<RandomMoveSpriteEvent*>(control_event);
-		if (random_event != NULL) {
-			// TODO: instruct event to change to a different random direction
-			break;
+		while (x_offset < 0.0f) {
+			x_position -= 1;
+			x_offset += 1.0f;
 		}
+		while (x_offset > 1.0f) {
+			x_position += 1;
+			x_offset -= 1.0f;
+		}
+	}
+	else {
+		// Restore the sprite's position and stop its motion. The _ResolveCollision() call that follows may restore the sprite's
+		// motion but it can not have an effect on the sprite's position
+		moving = false;
+		x_offset = tmp_x;
+		y_offset = tmp_y;
 
-		break;
-	}
-
-	// Roll-over Y and X position offsets if necessary
-	while (y_offset < 0.0f) {
-		y_position -= 1;
-		y_offset += 1.0f;
-	}
-	while (y_offset > 1.0f) {
-		y_position += 1;
-		y_offset -= 1.0f;
-	}
-	while (x_offset < 0.0f) {
-		x_position -= 1;
-		x_offset += 1.0f;
-	}
-	while (x_offset > 1.0f) {
-		x_position += 1;
-		x_offset -= 1.0f;
+		_ResolveCollision(collision_type, collision_object);
 	}
 } // void VirtualSprite::Update()
 
@@ -275,6 +266,66 @@ void VirtualSprite::RestoreState() {
 	 if (control_event != NULL)
 		MapMode::_current_map->_event_supervisor->ResumeEvent(control_event->GetEventID());
 }
+
+
+
+void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj) {
+	// ---------- (1) First check for the case where the player has collided with a hostile enemy sprite
+	EnemySprite* enemy = NULL;
+	if (this == MapMode::_current_map->_camera && coll_obj->GetType() == ENEMY_TYPE) {
+		enemy = reinterpret_cast<EnemySprite*>(coll_obj);
+	}
+	else if (coll_obj == MapMode::_current_map->_camera && this->GetType() == ENEMY_TYPE) {
+		enemy = reinterpret_cast<EnemySprite*>(this);
+	}
+
+	// If these two conditions are true, begin the battle
+	if (enemy != NULL && enemy->IsHostile()) {
+		enemy->ChangeStateDead();
+
+		BattleMode *BM = new BattleMode();
+		ModeManager->Push(BM);
+
+		string enemy_battle_music = enemy->GetBattleMusicTheme();
+		if (enemy_battle_music != "")
+			BM->AddMusic(enemy_battle_music);
+
+		const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
+		for (uint32 i = 0; i < enemy_party.size(); i++) {
+			BM->AddEnemy(enemy_party[i]);
+		}
+
+		// TODO: some sort of map-to-battle transition animation sequence needs to start here
+		return;
+	}
+
+	// ---------- (2) Determine what, if any, type of event was controlling the sprite when the collision occurred.
+	EVENT_TYPE event_type = INVALID_EVENT;
+	if (control_event != NULL) {
+		event_type = control_event->GetEventType();
+	}
+
+	// ---------- (3) Call the appropriate collision resolution function for the various control events
+	PathMoveSpriteEvent* path_event = NULL;
+	RandomMoveSpriteEvent* random_event = NULL;
+	switch (event_type) {
+		case PATH_MOVE_SPRITE_EVENT:
+			path_event = dynamic_cast<PathMoveSpriteEvent*>(control_event);
+			path_event->_ResolveCollision(coll_type, coll_obj);
+			break;
+
+		case RANDOM_MOVE_SPRITE_EVENT:
+			random_event = dynamic_cast<RandomMoveSpriteEvent*>(control_event);
+			random_event->_ResolveCollision();
+			break;
+
+		case INVALID_EVENT: // INVALID_EVENT typically indicates that this sprite is controlled by the player
+			break;
+
+		default:
+			break;
+	}
+} // void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj)
 
 // ****************************************************************************
 // ********** MapSprite class methods
