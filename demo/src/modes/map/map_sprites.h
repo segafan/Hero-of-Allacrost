@@ -149,6 +149,12 @@ public:
 	//@}
 
 protected:
+	/** \brief Determines an appropriate resolution when the sprite collides with an obstruction
+	*** \param coll_type The type of collision that has occurred
+	*** \param coll_obj A pointer to the MapObject that the sprite has collided with, if any
+	**/
+	void _ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj);
+
 	/** \name Saved state attributes
 	*** These attributes are used to save and restore the state of a VirtualSprite
 	**/

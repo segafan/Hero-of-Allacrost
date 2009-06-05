@@ -198,6 +198,31 @@ const uint32 ANIM_RUNNING_EAST   = 11;
 //@}
 
 
+//! \brief Represents the various types of collisions which may occur for a sprite
+enum COLLISION_TYPE {
+	NO_COLLISION = 0,       //!< Indicates that no collision has occurred
+	BOUNDARY_COLLISION = 1, //!< Happens when the sprite attempts to move outside any of the map's boundaries
+	GRID_COLLISION = 2,     //!< Condition when the sprite's collision rectangle overlaps an invalid element of the map's collision grid
+	OBJECT_COLLISION = 3,   //!< Occurs when the sprite collides with another map object in the same object layer
+};
+
+
+//! \brief Identifiers for the similarly named classes of map events
+enum EVENT_TYPE {
+	INVALID_EVENT              = 0,
+	DIALOGUE_EVENT             = 1,
+	SHOP_EVENT                 = 2,
+	SOUND_EVENT                = 3,
+	MAP_TRANSITION_EVENT       = 4,
+	JOIN_PARTY_EVENT           = 5,
+	BATTLE_ENCOUNTER_EVENT     = 6,
+	SCRIPTED_EVENT             = 7,
+	PATH_MOVE_SPRITE_EVENT     = 8,
+	RANDOM_MOVE_SPRITE_EVENT   = 9,
+	ANIMATE_SPRITE_EVENT       = 10,
+};
+
+
 //! \brief Defines the different states the dialogue can be in.
 enum DIALOGUE_STATE {
 	DIALOGUE_STATE_LINE     =  0, //!< Active when the dialogue window is in the process of displaying a line of text
