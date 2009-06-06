@@ -271,32 +271,34 @@ void VirtualSprite::RestoreState() {
 
 void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj) {
 	// ---------- (1) First check for the case where the player has collided with a hostile enemy sprite
-	EnemySprite* enemy = NULL;
-	if (this == MapMode::_current_map->_camera && coll_obj->GetType() == ENEMY_TYPE) {
-		enemy = reinterpret_cast<EnemySprite*>(coll_obj);
-	}
-	else if (coll_obj == MapMode::_current_map->_camera && this->GetType() == ENEMY_TYPE) {
-		enemy = reinterpret_cast<EnemySprite*>(this);
-	}
-
-	// If these two conditions are true, begin the battle
-	if (enemy != NULL && enemy->IsHostile()) {
-		enemy->ChangeStateDead();
-
-		BattleMode *BM = new BattleMode();
-		ModeManager->Push(BM);
-
-		string enemy_battle_music = enemy->GetBattleMusicTheme();
-		if (enemy_battle_music != "")
-			BM->AddMusic(enemy_battle_music);
-
-		const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
-		for (uint32 i = 0; i < enemy_party.size(); i++) {
-			BM->AddEnemy(enemy_party[i]);
+	if (coll_obj != NULL) {
+		EnemySprite* enemy = NULL;
+		if (this == MapMode::_current_map->_camera && coll_obj->GetType() == ENEMY_TYPE) {
+			enemy = reinterpret_cast<EnemySprite*>(coll_obj);
+		}
+		else if (coll_obj == MapMode::_current_map->_camera && this->GetType() == ENEMY_TYPE) {
+			enemy = reinterpret_cast<EnemySprite*>(this);
 		}
 
-		// TODO: some sort of map-to-battle transition animation sequence needs to start here
-		return;
+		// If these two conditions are true, begin the battle
+		if (enemy != NULL && enemy->IsHostile()) {
+			enemy->ChangeStateDead();
+
+			BattleMode *BM = new BattleMode();
+			ModeManager->Push(BM);
+
+			string enemy_battle_music = enemy->GetBattleMusicTheme();
+			if (enemy_battle_music != "")
+				BM->AddMusic(enemy_battle_music);
+
+			const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
+			for (uint32 i = 0; i < enemy_party.size(); i++) {
+				BM->AddEnemy(enemy_party[i]);
+			}
+
+			// TODO: some sort of map-to-battle transition animation sequence needs to start here
+			return;
+		}
 	}
 
 	// ---------- (2) Determine what, if any, type of event was controlling the sprite when the collision occurred.
