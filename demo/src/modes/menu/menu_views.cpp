@@ -1054,6 +1054,7 @@ void EquipWindow::_InitEquipmentList() {
 // 	_equip_list.SetCellSize(180.0f, 30.0f);
 
 	_equip_list.SetPosition(500.0f, 170.0f);
+	_equip_list.SetDimensions(400.0f, 360.0f, 1, 255, 1, 6);
 	_equip_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 
 	_equip_list.SetCursorOffset(-52.0f, -20.0f);

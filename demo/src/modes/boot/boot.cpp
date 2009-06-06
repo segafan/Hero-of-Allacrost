@@ -176,6 +176,7 @@ BootMode::BootMode() :
 	_SetupKeySetttingsMenu();
 	_SetupJoySetttingsMenu();
 	_SetupResolutionMenu();
+	_active_menu = &_main_menu;
 
 	// make sure message window is not visible
 	_message_window.Hide();
@@ -618,8 +619,6 @@ void BootMode::_EndOpeningAnimation() {
 	settings_lua.CloseTable();
 	settings_lua.CloseFile();
 	_initial_entry = false;
-
-	_active_menu = &_main_menu;
 }
 
 
