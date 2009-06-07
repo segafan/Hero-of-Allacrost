@@ -126,6 +126,11 @@ bool GameGlobal::SingletonInitialize() {
 	if (_global_script.OpenFile("dat/global.lua") == false) {
 		return false;
 	}
+	
+	hoa_script::ReadScriptDescriptor tmp;
+	if (tmp.OpenFile("dat/actors/map_sprites_stock.lua") == false) {
+		return false;
+	}
 
 	if (_items_script.OpenFile("dat/objects/items.lua") == false) {
 		return false;
