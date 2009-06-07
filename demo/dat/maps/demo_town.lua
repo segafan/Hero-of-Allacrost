@@ -328,52 +328,24 @@ function Load(m, d)
 	local chest;
 
 	-- Create the player''s sprite
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Claudius"));
-	sprite:SetObjectID(1000);
-	sprite:SetContext(1);
-	sprite:SetXPosition(100, 0.5);
-	sprite:SetYPosition(36, 0.5);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
-	sprite:SetDirection(8);
-	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
-	sprite:LoadRunningAnimations("img/sprites/map/claudius_run.png");
-	sprite:LoadFacePortrait("img/portraits/map/claudius.png");
+	sprite = ConstructSprite("Claudius", 1000, 100, 36);
 	map:_AddGroundObject(sprite);
-
 	-- Set the camera to focus on the player''s sprite
 	map:_SetCameraFocus(sprite);
 
+
 	-- Create NPC sprites and actions
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Laila"));
-	sprite:SetObjectID(2);
-	sprite:SetContext(1);
-	sprite:SetXPosition(105, 0.0);
-	sprite:SetYPosition(32, 0.0);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/laila_walk.png");
-	sprite:LoadRunningAnimations("img/sprites/map/laila_run.png");
-	sprite:LoadFacePortrait("img/portraits/map/laila.png");
 
-	sprite:AddDialogueReference(1);
+	-- Add NPC Laila
+	laila = ConstructSprite("Laila", 2, 105, 32, 0.0, 0.0);
+	laila:AddDialogueReference(1);
 
-	laila = sprite;
 	-- If Laila previously joined the party in the saved game, remove her sprite
 	if (map._map_event_group:DoesEventExist("laila_joined") == true) then
 		map_functions[1]();
 	end
 
-	event = hoa_map.AnimateSpriteEvent(10001, sprite);
+	event = hoa_map.AnimateSpriteEvent(10001, laila);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 1000);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1000);
@@ -381,10 +353,10 @@ function Load(m, d)
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
 	event:AddEventLink(10002, false, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10002, sprite, 105, 44);
+	event = hoa_map.PathMoveSpriteEvent(10002, laila, 105, 44);
 	event:AddEventLink(10003, false, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.AnimateSpriteEvent(10003, sprite);
+	event = hoa_map.AnimateSpriteEvent(10003, laila);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1000);
@@ -392,27 +364,15 @@ function Load(m, d)
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
 	event:AddEventLink(10004, false, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10004, sprite, 105, 32);
+	event = hoa_map.PathMoveSpriteEvent(10004, laila, 105, 32);
 	event:AddEventLink(10001, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	map:_AddGroundObject(sprite);
+	map:_AddGroundObject(laila);
 
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Marcus"));
-	sprite:SetObjectID(3);
-	sprite:SetContext(1);
-	sprite:SetXPosition(40, 0.7);
-	sprite:SetYPosition(35, 0.2);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/marcus_walk.png");
-	sprite:LoadFacePortrait("img/portraits/map/marcus.png");
 
+	-- Add NPC Marcus
+	sprite = ConstructSprite("Marcus", 3, 40, 35, 0.7, 0.2);
 	sprite:AddDialogueReference(2);
 
 	event = hoa_map.PathMoveSpriteEvent(10005, sprite, 50, 35);
@@ -427,21 +387,9 @@ function Load(m, d)
 
 	map:_AddGroundObject(sprite);
 
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Vanica"));
-	sprite:SetObjectID(4);
-	sprite:SetContext(1);
-	sprite:SetXPosition(38, 0.5);
-	sprite:SetYPosition(60, 0.5);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/vanica_walk.png");
-	sprite:LoadFacePortrait("img/portraits/map/vanica.png");
-
+	
+	-- Add NPC Vanica
+	sprite = ConstructSprite("Vanica", 4, 38, 60);
 	sprite:AddDialogueReference(3);
 	sprite:AddDialogueReference(4);
 
@@ -457,20 +405,9 @@ function Load(m, d)
 
 	map:_AddGroundObject(sprite);
 
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Alexander"));
-	sprite:SetObjectID(5);
-	sprite:SetContext(1);
-	sprite:SetXPosition(52, 0.5);
-	sprite:SetYPosition(35, 0.5);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/man_npc02_walk.png");
 
+	-- Add NPC Alexander
+	sprite = ConstructSprite("Alexander", 5, 52, 35);
 	sprite:AddDialogueReference(5);
 
 	event = hoa_map.PathMoveSpriteEvent(10011, sprite, 52, 25);
@@ -488,20 +425,10 @@ function Load(m, d)
 
 	map:_AddGroundObject(sprite);
 
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Laine"));
-	sprite:SetObjectID(6);
-	sprite:SetContext(2);
-	sprite:SetXPosition(84, 0.5);
-	sprite:SetYPosition(57, 0.5);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/man_npc01_walk.png");
 
+	-- Add NPC Laine
+	sprite = ConstructSprite("Laine", 6, 84, 57);
+	sprite:SetContext(2);
 	sprite:AddDialogueReference(6);
 
 	event = hoa_map.PathMoveSpriteEvent(10015, sprite, 94, 57);
@@ -524,20 +451,9 @@ function Load(m, d)
 
 	map:_AddGroundObject(sprite);
 
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Torl"));
-	sprite:SetObjectID(7);
-	sprite:SetContext(1);
-	sprite:SetXPosition(40, 0.5);
-	sprite:SetYPosition(20, 0.5);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/boy_npc01_walk.png");
 
+	-- Add NPC Torl
+	sprite = ConstructSprite("Torl", 7, 40, 20);
 	sprite:AddDialogueReference(7);
 
 	event = hoa_map.RandomMoveSpriteEvent(10019, sprite, 10000, 2000);
@@ -546,20 +462,10 @@ function Load(m, d)
 
 	map:_AddGroundObject(sprite);
 
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Female Merchant"));
-	sprite:SetObjectID(8);
-	sprite:SetContext(2);
-	sprite:SetXPosition(10, 0.5);
-	sprite:SetYPosition(50, 0.5);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/woman_npc01_walk.png");
 
+	-- Add NPC Female Merchant
+	sprite = ConstructSprite("Female Merchant", 8, 10, 50);
+	sprite:SetContext(2);
 	sprite:AddDialogueReference(8);
 
 	event = hoa_map.AnimateSpriteEvent(10020, sprite);
@@ -573,20 +479,9 @@ function Load(m, d)
 
 	map:_AddGroundObject(sprite);
 
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Livia"));
-	sprite:SetObjectID(9);
-	sprite:SetContext(1);
-	sprite:SetXPosition(32, 0.5);
-	sprite:SetYPosition(29, 0.5);
-	sprite:SetCollHalfWidth(0.95);
-	sprite:SetCollHeight(1.9);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/girl_npc02_walk.png");
 
+	-- Add NPC Livia
+	sprite = ConstructSprite("Livia", 9, 32, 29);
 	sprite:AddDialogueReference(9);
 
 	event = hoa_map.RandomMoveSpriteEvent(10021, sprite, 10000, 2000);
@@ -595,20 +490,9 @@ function Load(m, d)
 
 	map:_AddGroundObject(sprite);
 
-	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Octavia"));
-	sprite:SetObjectID(10);
-	sprite:SetContext(1);
-	sprite:SetXPosition(9, 0.5);
-	sprite:SetYPosition(35, 0.5);
-	sprite:SetCollHalfWidth(1.0);
-	sprite:SetCollHeight(2.0);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/woman_npc02_walk.png");
 
+	-- Add NPC Octavia
+	sprite = ConstructSprite("Octavia", 10, 9, 35);
 	sprite:AddDialogueReference(10);
 
 	event = hoa_map.RandomMoveSpriteEvent(10022, sprite, 10000, 2000);
@@ -616,6 +500,7 @@ function Load(m, d)
 	event_supervisor:RegisterEvent(event);
 
 	map:_AddGroundObject(sprite);
+
 
 	-- Add a treasure near the town''s exit zone
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
@@ -802,4 +687,3 @@ map_functions[2] = function()
 	shop:AddObject(50502); -- Leather Boots
 	ModeManager:Push(shop);
 end
-

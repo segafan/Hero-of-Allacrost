@@ -240,7 +240,7 @@ void BootMode::Update() {
 				MapMode *MM = new MapMode(MakeStandardString(GlobalManager->GetLocationName()));
 				ModeManager->Push(MM);
 			} catch (luabind::error e) {
-				cerr << "Map::_Load -- Error loading map dat/maps/demo_town.lua, returning to BootMode." << endl;
+				PRINT_ERROR << "Map::_Load -- Error loading map " << MakeStandardString(GlobalManager->GetLocationName()) << ", returning to BootMode." << endl;
 				cerr << "Exception message:" << endl;
 				ScriptManager->HandleLuaError(e);
 			}
