@@ -414,14 +414,11 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 			// If the object is a static map object and blocking the destination, give up and terminate the event
 			if (destination_blocked == true) {
 				// Note that we will retain the path (we don't clear() it), hoping that next time the object is moved
-				_sprite->ReleaseControl(this);
-				MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
+
 			}
 			// Otherwise, try to find an alternative path around the object
 			else {
 				// TEMP: Right now we just give up trying to complete the path because our pathfinding algorithm doesn't account for objects yet
-				_sprite->ReleaseControl(this);
-				MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
 
 				// TODO: recalculate and find an alternative path around the object
 			}
@@ -438,8 +435,6 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 				}
 				else {
 					// The obstructing sprite is not moving so give up trying to reach the destination
-					_sprite->ReleaseControl(this);
-					MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
 				}
 			}
 
@@ -452,9 +447,6 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 
 				else {
 					// TEMP: The obstructing sprite is not moving so give up trying to reach the destination
-					_sprite->ReleaseControl(this);
-					MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
-
 					// TODO: Re-calculate and find a path around the object
 				}
 			}

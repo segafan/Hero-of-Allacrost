@@ -102,6 +102,13 @@ public:
 	**/
 	void SetRandomDirection();
 
+	/** \brief Calculates the distance the sprite should move given its velocity (speed and direction)
+	*** \return A floating point value representing the distance moved
+	*** \note This method does not check if the "moving" member is true but does factor in the "is_running"
+	*** member in its calculation.
+	**/
+	float CalculateDistanceMoved();
+
 	/** \brief Declares that an event is taking control over the sprite
 	*** \param event The sprite event that is assuming control
 	*** This function is not safe to call when there is an event already controlling the sprite.

@@ -166,7 +166,7 @@ const uint16 MOVING_NORTHWEST = NW_NORTH | NW_WEST;
 const uint16 MOVING_NORTHEAST = NE_NORTH | NE_EAST;
 const uint16 MOVING_SOUTHWEST = SW_SOUTH | SW_WEST;
 const uint16 MOVING_SOUTHEAST = SE_SOUTH | SE_EAST;
-const uint16 MOVING_LATERALLY = NORTH | SOUTH | EAST | WEST;
+const uint16 MOVING_ORTHOGONALLY = NORTH | SOUTH | EAST | WEST;
 const uint16 MOVING_DIAGONALLY = MOVING_NORTHWEST | MOVING_NORTHEAST | MOVING_SOUTHWEST | MOVING_SOUTHEAST;
 // Used to check for facing direction regardless of moving direction
 const uint16 FACING_NORTH = NORTH | NW_NORTH | NE_NORTH;
@@ -326,9 +326,7 @@ public:
 	*** These coordinates correspond to the collision grid, where each element
 	*** is a 16x16 pixel space on the map.
 	**/
-	//@{
 	int16 row, col;
-	//@}
 
 	//! \name Path Scoring Members
 	//@{
@@ -344,6 +342,8 @@ public:
 
 	//! \brief The grid coordinates for the parent of this node
 	int16 parent_row, parent_col;
+
+	// ---------- Methods
 
 	PathNode() : row(-1), col(-1), f_score(0), g_score(0), h_score(0), parent_row(0), parent_col(0)
 		{}
