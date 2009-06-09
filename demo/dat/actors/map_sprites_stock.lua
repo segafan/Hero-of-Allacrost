@@ -131,7 +131,7 @@ function ConstructSprite(name, id, x, y, x_off, y_off)
 	if (y_off == nil) then
 		y_off = 0.5;
 	end
-	dir = (2 ^ math.random(1, 4)) / 2;
+	dir = (2 ^ math.random(0, 3));
 
 	if (sprites[name]) then
 		sprite = hoa_map.MapSprite();
