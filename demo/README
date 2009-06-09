@@ -27,7 +27,7 @@ OpenAL
 libogg
 libvorbis
 GNU Gettext
-lua 5.0.x and lualib 5.0.x (NOT lua 5.1+)
+lua 5.1.x
 Luabind
 Boost headers (make sure that the boost headers used to compile Luabind are the same version used to compile Allacrost)
 Qt 4+ (only if you wish to compile the map editor)
