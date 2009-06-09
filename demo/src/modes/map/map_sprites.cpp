@@ -86,13 +86,7 @@ void VirtualSprite::Update() {
 	float tmp_x = x_offset;
 	float tmp_y = y_offset;
 
-	float distance_moved = static_cast<float>(SystemManager->GetUpdateTime()) / movement_speed;
-	// Double the distance to move if the sprite is running
-	if (is_running == true)
-		distance_moved *= 2.0f;
-	// If the movement is diagonal, decrease the lateral movement distance by sin(45 degress)
-	if (direction & MOVING_DIAGONALLY)
-		distance_moved *= 0.707f;
+	float distance_moved = CalculateDistanceMoved();
 
 	// Move the sprite the appropriate distance in the appropriate Y and X direction
 	if (direction & (NORTH | MOVING_NORTHWEST | MOVING_NORTHEAST))
@@ -109,23 +103,7 @@ void VirtualSprite::Update() {
 	collision_type = MapMode::_current_map->_object_supervisor->DetectCollision(this, &collision_object);
 
 	if (collision_type == NO_COLLISION) {
-		// Roll-over Y and X position offsets if necessary
-		while (y_offset < 0.0f) {
-			y_position -= 1;
-			y_offset += 1.0f;
-		}
-		while (y_offset > 1.0f) {
-			y_position += 1;
-			y_offset -= 1.0f;
-		}
-		while (x_offset < 0.0f) {
-			x_position -= 1;
-			x_offset += 1.0f;
-		}
-		while (x_offset > 1.0f) {
-			x_position += 1;
-			x_offset -= 1.0f;
-		}
+		CheckPositionOffsets();
 	}
 	else {
 		// Restore the sprite's position and stop its motion. The _ResolveCollision() call that follows may restore the sprite's
@@ -206,6 +184,21 @@ void VirtualSprite::SetRandomDirection() {
 		default:
 			IF_PRINT_WARNING(MAP_DEBUG) << "invalid randomized direction was chosen" << endl;
 	}
+}
+
+
+
+float VirtualSprite::CalculateDistanceMoved() {
+	float distance_moved = static_cast<float>(SystemManager->GetUpdateTime()) / movement_speed;
+
+	// Double the distance to move if the sprite is running
+	if (is_running == true)
+		distance_moved *= 2.0f;
+	// If the movement is diagonal, decrease the lateral movement distance by sin(45 degress)
+	if (direction & MOVING_DIAGONALLY)
+		distance_moved *= 0.707f;
+
+	return distance_moved;
 }
 
 
@@ -302,12 +295,13 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 	}
 
 	// ---------- (2) Determine what, if any, type of event was controlling the sprite when the collision occurred.
-	EVENT_TYPE event_type = INVALID_EVENT;
-	if (control_event != NULL) {
-		event_type = control_event->GetEventType();
+	if (control_event == NULL) {
+		MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(this, coll_type, coll_obj);
+		return;
 	}
 
 	// ---------- (3) Call the appropriate collision resolution function for the various control events
+	EVENT_TYPE event_type = control_event->GetEventType();
 	PathMoveSpriteEvent* path_event = NULL;
 	RandomMoveSpriteEvent* random_event = NULL;
 	switch (event_type) {
@@ -319,9 +313,6 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 		case RANDOM_MOVE_SPRITE_EVENT:
 			random_event = dynamic_cast<RandomMoveSpriteEvent*>(control_event);
 			random_event->_ResolveCollision();
-			break;
-
-		case INVALID_EVENT: // INVALID_EVENT typically indicates that this sprite is controlled by the player
 			break;
 
 		default:

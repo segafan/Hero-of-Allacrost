@@ -178,6 +178,9 @@ public:
 	**/
 	bool ShouldDraw();
 
+	//! \brief Rolls over the position coordinates if the offsets exceed below 0.0f or above 1.0f
+	void CheckPositionOffsets();
+
 	/** \brief Computes the full floating-point location coordinates of the object
 	*** \return The full x or y coordinate location of the object
 	***
@@ -300,7 +303,6 @@ public:
 protected:
 	//! \brief This is used to identify the type of map object for inheriting classes.
 	MAP_OBJECT_TYPE _object_type;
-
 }; // class MapObject
 
 
@@ -503,6 +505,22 @@ public:
 	**/
 	COLLISION_TYPE DetectCollision(private_map::VirtualSprite* sprite, private_map::MapObject** collision_object);
 
+	/** \brief Attempts to modify a sprite's movement to avoid an obstruction that it has collided with
+	*** \param coll_type The type of collision that has occurred
+	*** \param coll_obj A pointer to the MapObject that the sprite has collided with, if any
+	***
+	*** This function enables sprites to "slide" or "roll" around targets that are in their way. For example,
+	*** if a sprite moving west ran into a small tree, this function would examine the situation and if appropriate,
+	*** it would move the sprite in the north or south directions to get around the tree. This allows for a more
+	*** natural movement in the game and also enables sprites to better navigate through narrow passage ways. Put simply,
+	*** this algorithm allows sprites to automatically roll/slide around the corners of obstructions.
+	***
+	*** \todo I think this algorithm should also try to partially adjust the sprite's position even when it fails to avoid
+	*** the collision. For example, if walking straight into the middle of a long wall and a collision occurs with that wall, the
+	*** sprite's position should be adjusted such that it is directly next to the wall with no open space inbetween.
+	**/
+	void AdjustSpriteAroundCollision(VirtualSprite* sprite, COLLISION_TYPE coll_type, MapObject* coll_obj);
+
 	/** \brief Finds a path from a sprite's current position to a destination
 	*** \param sprite A pointer of the sprite to find the path for
 	*** \param path A reference to a vector of PathNode objects to store the path
@@ -518,6 +536,34 @@ public:
 	bool FindPath(private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
 
 private:
+	/** \brief A helper function to _AdjustSpriteAroundCollision that handles orthogonal adjustments
+	*** \param sprite The sprite to examine for movement adjustments
+	*** \param coll_obj The object that was collided with in an object type collision, or NULL if no object was collided with
+	***
+	*** The algorithm works by examining the immediate area around the sprite in the direction where the collision
+	*** occurred. It will examine a short line in the collision grid immediately next to the sprite in the collision
+	*** direction. The length of this line will be three times the length/height of the sprite's collision grid (rounded up to
+	*** whole integer values). For example, a sprite moving west with a collision rectangle size of 2 units wide by 3 units high will
+	*** equate to a line of 9 collision grid units to examine. If this 9 unit line contains any walkable section
+	*** that consists of 3 or more concurrent grid elements, the algorithm instructs the sprite to move in that direction.
+	***
+	*** If the coll_obj pointer is not NULL, then the object's collision rectangle will also be used in determining if an adjustment is
+	*** possible. No other objects will be considered, however, except after the adjustment has been calculated. This is done so that
+	*** the algorithm is fast and doesn't attempt to look at every map object in context.
+	**/
+	void _AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject* coll_obj);
+
+	/** \brief A helper function to _AdjustSpriteAroundCollision that handles diagonal adjustments
+	*** \param sprite The sprite to examine for movement adjustments
+	*** \param coll_obj The object that was collided with in an object type collision, or NULL if no object was collided with
+	***
+	*** The algorithm for diagonal movement is similar in nature to that of orthogonal movement. In diagonal movement,
+	*** both a vertical and horizontal adjustment direction are considered. For example, for a sprite moving north east the
+	*** algorithm will examine if the sprite's position can be adjusted strictly north or stictly east. The sprite's position
+	*** will never be set to go backwards (i.e. to the south or west in the cae of the northeast example).
+	**/
+	void _AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* coll_obj);
+
 	/** \brief The number of rows and columns in the collision gride
 	*** The number of collision grid rows and columns is always equal to twice
 	*** that of the number of rows and columns of tiles (stored in the TileManager).
