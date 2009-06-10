@@ -258,60 +258,6 @@ context_01 = { 0, 0, 0, -1, 0, 0, 1, -1, 0, 0, 2, -1, 0, 0, 3, -1, 0, 0, 4, -1, 
 -- Allacrost map editor end. Do not edit this line. --
 
 
-dialogue_text = {}
--- Dialogue #1
-dialogue_text[0] = hoa_utils.Translate("Laila, what's wrong? You have a worried look on your face.");
-dialogue_text[1] = hoa_utils.Translate("You're going into the cave again, aren't you?");
--- If "yes" option selected 
-dialogue_text[2] = hoa_utils.Translate("But why? Its dangerous in there!");
-dialogue_text[3] = hoa_utils.Translate("Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?");
-dialogue_text[4] = hoa_utils.Translate("I know that you're worried about me and I appreciate it, but you need to stop doing this.");
-dialogue_text[5] = hoa_utils.Translate(".....Alright, I'm sorry. Just be careful in there, okay?");
-dialogue_text[6] = hoa_utils.Translate("Will do. Thanks Laila.");
-dialogue_text[7] = hoa_utils.Translate("You know Claudius, I could be of assistance to you in the cave. May I come with you?");
--- If "no" option selected
-dialogue_text[8] = hoa_utils.Translate("Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know...");
-dialogue_text[9] = hoa_utils.Translate("Of course, I promise.");
--- If "rejected" option selected
-dialogue_text[10] = hoa_utils.Translate("Oh....ok then. You remember to be careful.");
-dialogue_text[11] = hoa_utils.Translate("I will Laila.");
--- If "accepted" option selected
-dialogue_text[12] = hoa_utils.Translate("Great, I'll be sure to help you any way I can.");
-dialogue_text[13] = hoa_utils.Translate("Laila has joined the party.");
--- Dialogue #2
-dialogue_text[14] = hoa_utils.Translate("Hey there son, how's the training going?");
-dialogue_text[15] = hoa_utils.Translate("Pretty well. The enemies in the cave aren't too tough.");
-dialogue_text[16] = hoa_utils.Translate("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.");
--- Dialogue #3
-dialogue_text[17] = hoa_utils.Translate("Oh, Claudius? You seemed puzzled.");
-dialogue_text[18] = hoa_utils.Translate("There are odd little icons above people's heads. What do they mean?");
-dialogue_text[19] = hoa_utils.Translate("That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear.");
--- Dialogue #4
-dialogue_text[20] = hoa_utils.Translate("And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more.");
--- Dialogue #5
-dialogue_text[21] = hoa_utils.Translate("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.");
--- Dialogue #6
-dialogue_text[22] = hoa_utils.Translate("The interior of my home is finally finished. Not too bad is it?");
-dialogue_text[23] = hoa_utils.Translate("After its fully furnished I'm sure it will look quite nice.");
--- Dialogue #7
-dialogue_text[24] = hoa_utils.Translate("This village is boring! There's no one I can play with here!");
--- Dialogue #8
-dialogue_text[25] = hoa_utils.Translate("I have merchandise for sale at affordable prices. Take a look.");
--- Dialogue #9
-dialogue_text[26] = hoa_utils.Translate("I'm looking for my brother Torl. I sure hope he doesn't get into any trouble.");
--- Dialogue #10
-dialogue_text[27] = hoa_utils.Translate("So much work to do!");
-
-
-dialogue_option_text = {}
--- Dialogue #1, first option "going into cave?"
-dialogue_option_text[0] = hoa_utils.Translate("Yes, I intend to...");
-dialogue_option_text[1] = hoa_utils.Translate("No, of course not...");
--- Dialogue #1, second option "join party?"
-dialogue_option_text[2] = hoa_utils.Translate("No way, you could be hurt!");
-dialogue_option_text[3] = hoa_utils.Translate("Your help would be great!");
-
-
 laila = nil; -- Pointer to Laila''s map sprite
 
 
@@ -326,6 +272,7 @@ function Load(m, d)
 	local dialogue;
 	local event;
 	local chest;
+	local text;
 
 	-- Create the player''s sprite
 	sprite = ConstructSprite("Claudius", 1000, 100, 36);
@@ -338,13 +285,67 @@ function Load(m, d)
 
 	-- Add NPC Laila
 	laila = ConstructSprite("Laila", 2, 105, 32, 0.0, 0.0);
-	laila:AddDialogueReference(1);
-
 	-- If Laila previously joined the party in the saved game, remove her sprite
 	if (map._map_event_group:DoesEventExist("laila_joined") == true) then
 		map_functions[1]();
 	end
 
+	-- Dialogue with Laila
+	dialogue = hoa_map.MapDialogue(1);
+
+	text = hoa_utils.Translate("Laila, what's wrong? You have a worried look on your face.");
+	dialogue:AddText(text, 1000, 1, 0, false);
+	text = hoa_utils.Translate("You're going into the cave again, aren't you?");
+	dialogue:AddText(text, 2, 2, 0, false);
+
+	-- Are you going into the cave?
+	text = hoa_utils.Translate("Yes, I intend to...");
+	dialogue:AddOption(text, 2, 0);
+	text = hoa_utils.Translate("No, of course not...");
+	dialogue:AddOption(text, 8, 0);
+
+	--Yes
+	text = hoa_utils.Translate("But why? Its dangerous in there!");
+	dialogue:AddText(text, 2, 3, 0, false);
+	text = hoa_utils.Translate("Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?");
+	dialogue:AddText(text, 1000, 4, 0, false);
+	text = hoa_utils.Translate("I know that you're worried about me and I appreciate it, but you need to stop doing this.");
+	dialogue:AddText(text, 1000, 5, 0, false);
+	text = hoa_utils.Translate(".....Alright, I'm sorry. Just be careful in there, okay?");
+	dialogue:AddText(text, 2, 6, 0, false);
+	text = hoa_utils.Translate("Will do. Thanks Laila.");
+	dialogue:AddText(text, 1000, 7, 0, false);
+	text = hoa_utils.Translate("You know Claudius, I could be of assistance to you in the cave. May I come with you?");
+	dialogue:AddText(text, 2, 10, 0, false);
+
+	-- Allow Laila to join party?
+	text = hoa_utils.Translate("No way, you could be hurt!");
+	dialogue:AddOption(text, 10, 0);
+	text = hoa_utils.Translate("Your help would be great!");
+	dialogue:AddOption(text, 12, 0);
+
+	--No
+	text = hoa_utils.Translate("Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know...");
+	dialogue:AddText(text, 2, 9, 0, false);
+	text = hoa_utils.Translate("Of course, I promise.");
+	dialogue:AddText(text, 1000, -1, 0, false);
+
+	-- Rejected
+	text = hoa_utils.Translate("Oh....ok then. You remember to be careful.");
+	dialogue:AddText(text, 2, 11, 0, false);
+	text = hoa_utils.Translate("I will Laila.");
+	dialogue:AddText(text, 1000, -1, 0, false);
+
+	-- Add to party
+	text = hoa_utils.Translate("Great, I'll be sure to help you any way I can.");
+	dialogue:AddText(text, 2, 13, 1, false); -- Laila added to party and map sprite removed
+	text = hoa_utils.Translate("Laila has joined the party.");
+	dialogue:AddText(text, 2, -1, 0, false);
+
+	laila:AddDialogueReference(1);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Add Laila's movement events (up and down)
 	event = hoa_map.AnimateSpriteEvent(10001, laila);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1000);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 1000);
@@ -373,8 +374,21 @@ function Load(m, d)
 
 	-- Add NPC Marcus
 	sprite = ConstructSprite("Marcus", 3, 40, 35, 0.7, 0.2);
+
+	-- Add Marcus Dialogue
+	dialogue = hoa_map.MapDialogue(2);
+
+	text = hoa_utils.Translate("Hey there son, how's the training going?");
+	dialogue:AddText(text, 3, 1, 0, false);
+	text = hoa_utils.Translate("Pretty well. The enemies in the cave aren't too tough.");
+	dialogue:AddText(text, 1000, 2, 0, false);
+	text = hoa_utils.Translate("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.");
+	dialogue:AddText(text, 3, -1, 0, false);
+
+	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(2);
 
+	-- Add Marcus movement events
 	event = hoa_map.PathMoveSpriteEvent(10005, sprite, 50, 35);
 	event:AddEventLink(10006, false, 0);
 	event_supervisor:RegisterEvent(event);
@@ -390,9 +404,28 @@ function Load(m, d)
 	
 	-- Add NPC Vanica
 	sprite = ConstructSprite("Vanica", 4, 38, 60);
+
+	-- Add Vanica's Dialogue #1
+	dialogue = hoa_map.MapDialogue(3);
+	dialogue:SetMaxViews(1);
+	text = hoa_utils.Translate("Oh, Claudius? You seemed puzzled.");
+	dialogue:AddText(text, 4, 1, 0, false);
+	text = hoa_utils.Translate("There are odd little icons above people's heads. What do they mean?");
+	dialogue:AddText(text, 1000, 2, 0, false);
+	text = hoa_utils.Translate("That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear.");
+	dialogue:AddText(text, 4, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	-- Add Vanica's Dialogue #2
+	dialogue = hoa_map.MapDialogue(4);
+	text = hoa_utils.Translate("And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more.");
+	dialogue:AddText(text, 4, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
 	sprite:AddDialogueReference(3);
 	sprite:AddDialogueReference(4);
 
+	-- Add Vanica's movement events
 	event = hoa_map.PathMoveSpriteEvent(10008, sprite, 38, 38);
 	event:AddEventLink(10009, false, 0);
 	event_supervisor:RegisterEvent(event);
@@ -408,8 +441,15 @@ function Load(m, d)
 
 	-- Add NPC Alexander
 	sprite = ConstructSprite("Alexander", 5, 52, 35);
+
+	-- Add Alexander's dialogue
+	dialogue = hoa_map.MapDialogue(5);
+	text = hoa_utils.Translate("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.");
+	dialogue:AddText(text, 5, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(5);
 
+	-- Add Alexander's movement events
 	event = hoa_map.PathMoveSpriteEvent(10011, sprite, 52, 25);
 	event:AddEventLink(10012, false, 0);
 	event_supervisor:RegisterEvent(event);
@@ -429,8 +469,17 @@ function Load(m, d)
 	-- Add NPC Laine
 	sprite = ConstructSprite("Laine", 6, 84, 57);
 	sprite:SetContext(2);
+
+	-- Add Laine's Dialogue
+	dialogue = hoa_map.MapDialogue(6);
+	text = hoa_utils.Translate("The interior of my home is finally finished. Not too bad is it?");
+	dialogue:AddText(text, 6, 1, 0, false);
+	text = hoa_utils.Translate("After its fully furnished I'm sure it will look quite nice.");
+	dialogue:AddText(text, 1000, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(6);
 
+	-- Add Laine's movement events
 	event = hoa_map.PathMoveSpriteEvent(10015, sprite, 94, 57);
 	event:AddEventLink(10016, false, 0);
 	event_supervisor:RegisterEvent(event);
@@ -454,8 +503,15 @@ function Load(m, d)
 
 	-- Add NPC Torl
 	sprite = ConstructSprite("Torl", 7, 40, 20);
+
+	-- Add Torl's Dialogue
+	dialogue = hoa_map.MapDialogue(7);
+	text = hoa_utils.Translate("This village is boring! There's no one I can play with here!");
+	dialogue:AddText(text, 7, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(7);
 
+	-- Add Torl's movement event (moving very fast)
 	event = hoa_map.RandomMoveSpriteEvent(10019, sprite, 10000, 2000);
 	event:AddEventLink(10019, false, 0);
 	event_supervisor:RegisterEvent(event);
@@ -466,8 +522,15 @@ function Load(m, d)
 	-- Add NPC Female Merchant
 	sprite = ConstructSprite("Female Merchant", 8, 10, 50);
 	sprite:SetContext(2);
+
+	-- Add Female Merchant's Dialogue
+	dialogue = hoa_map.MapDialogue(8);
+	text = hoa_utils.Translate("I have merchandise for sale at affordable prices. Take a look.");
+	dialogue:AddText(text, 8, -1, 2, false); -- Go to shop mode
+	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(8);
 
+	-- Add Female Merchant's movemnt events (turning from side to side)
 	event = hoa_map.AnimateSpriteEvent(10020, sprite);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1250);
 	event:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 2500);
@@ -480,10 +543,17 @@ function Load(m, d)
 	map:_AddGroundObject(sprite);
 
 
-	-- Add NPC Livia
+	-- Add Livia
 	sprite = ConstructSprite("Livia", 9, 32, 29);
+
+	-- Add Livia's Dialogue
+	dialogue = hoa_map.MapDialogue(9);
+	text = hoa_utils.Translate("I'm looking for my brother Torl. I sure hope he doesn't get into any trouble.");
+	dialogue:AddText(text, 9, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(9);
 
+	-- Add Livia's movement events
 	event = hoa_map.RandomMoveSpriteEvent(10021, sprite, 10000, 2000);
 	event:AddEventLink(10021, false, 0);
 	event_supervisor:RegisterEvent(event);
@@ -493,8 +563,15 @@ function Load(m, d)
 
 	-- Add NPC Octavia
 	sprite = ConstructSprite("Octavia", 10, 9, 35);
+
+	-- Add Octavia's dialogue
+	dialogue = hoa_map.MapDialogue(10);
+	text = hoa_utils.Translate("So much work to do!");
+	dialogue:AddText(text, 10, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(10);
 
+	-- Add Octavia's movement events
 	event = hoa_map.RandomMoveSpriteEvent(10022, sprite, 10000, 2000);
 	event:AddEventLink(10022, false, 0);
 	event_supervisor:RegisterEvent(event);
@@ -521,82 +598,8 @@ function Load(m, d)
 	chest:AddDrunes(400);
 	map:_AddGroundObject(chest);
 
-	-- Dialogue #1
-	dialogue = hoa_map.MapDialogue(1);
-	dialogue:AddText(dialogue_text[0], 1000, 1, 0, false);
-	dialogue:AddText(dialogue_text[1], 2, 2, 0, false);
-	dialogue:AddOption(dialogue_option_text[0], 2, 0);
-	dialogue:AddOption(dialogue_option_text[1], 8, 0);
-	--Yes
-	dialogue:AddText(dialogue_text[2], 2, 3, 0, false);
-	dialogue:AddText(dialogue_text[3], 1000, 4, 0, false);
-	dialogue:AddText(dialogue_text[4], 1000, 5, 0, false);
-	dialogue:AddText(dialogue_text[5], 2, 6, 0, false);
-	dialogue:AddText(dialogue_text[6], 1000, 7, 0, false);
-	dialogue:AddText(dialogue_text[7], 2, 10, 0, false);
-	dialogue:AddOption(dialogue_option_text[2], 10, 0);
-	dialogue:AddOption(dialogue_option_text[3], 12, 0);
-	--No
-	dialogue:AddText(dialogue_text[8], 2, 9, 0, false);
-	dialogue:AddText(dialogue_text[9], 1000, -1, 0, false);
-	-- Rejected
-	dialogue:AddText(dialogue_text[10], 2, 11, 0, false);
-	dialogue:AddText(dialogue_text[11], 1000, -1, 0, false);
-	-- Add to party
-	dialogue:AddText(dialogue_text[12], 2, 13, 1, false); -- Laila added to party and map sprite removed
-	dialogue:AddText(dialogue_text[13], 2, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
 	
-	-- Dialogue #2
-	dialogue = hoa_map.MapDialogue(2);
-	dialogue:AddText(dialogue_text[14], 3, 1, 0, false);
-	dialogue:AddText(dialogue_text[15], 1000, 2, 0, false);
-	dialogue:AddText(dialogue_text[16], 3, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
 
-	-- Dialogue #3
-	dialogue = hoa_map.MapDialogue(3);
-	dialogue:SetMaxViews(1);
-	dialogue:AddText(dialogue_text[17], 4, 1, 0, false);
-	dialogue:AddText(dialogue_text[18], 1000, 2, 0, false);
-	dialogue:AddText(dialogue_text[19], 4, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
-
-	-- Dialogue #4
-	dialogue = hoa_map.MapDialogue(4);
-	dialogue:AddText(dialogue_text[20], 4, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
-
-	-- Dialogue #5
-	dialogue = hoa_map.MapDialogue(5);
-	dialogue:AddText(dialogue_text[21], 5, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
-
-	-- Dialogue #6
-	dialogue = hoa_map.MapDialogue(6);
-	dialogue:AddText(dialogue_text[22], 6, 1, 0, false);
-	dialogue:AddText(dialogue_text[23], 1000, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
-
-	-- Dialogue #7
-	dialogue = hoa_map.MapDialogue(7);
-	dialogue:AddText(dialogue_text[24], 7, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
-
-	-- Dialogue #8
-	dialogue = hoa_map.MapDialogue(8);
-	dialogue:AddText(dialogue_text[25], 8, -1, 2, false); -- Go to shop mode
-	dialogue_supervisor:AddDialogue(dialogue);
-
-	-- Dialogue #9
-	dialogue = hoa_map.MapDialogue(9);
-	dialogue:AddText(dialogue_text[26], 9, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
-
-	-- Dialogue #10
-	dialogue = hoa_map.MapDialogue(10);
-	dialogue:AddText(dialogue_text[27], 10, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
@@ -656,8 +659,6 @@ map_functions[1] = function()
 	laila:SetVisible(false);
 	laila:SetNoCollision(true);
 	laila:SetUpdatable(false);
-	laila:SetXPosition(0, 0.0);
-	laila:SetXPosition(0, 0.0);	
 end
 
 -- Creates a new shop mode instance
