@@ -725,10 +725,10 @@ void ObjectSupervisor::AdjustSpriteAroundCollision(private_map::VirtualSprite* s
 		return;
 	}
 
-	// Check for the case of an object collision where the object is also a sprite that is moving
-	// If this condition is true, do not attempt to modify this sprite's position and allow the other
-	// sprite to adjust its own movement.
-	if (coll_type == OBJECT_COLLISION) {
+	// If this is an object collision, the sprite to be adjusted is not the map camera (player-controlled),
+	// and the other object is a sprite that is moving, do not attempt to modify this sprite's position.
+	// We'll allow the other sprite to adjuts its own position instead.
+	if (coll_type == OBJECT_COLLISION && sprite != MapMode::_current_map->_camera) {
 		MAP_OBJECT_TYPE obj_type = coll_obj->GetType();
 		if ((obj_type == VIRTUAL_TYPE) || (obj_type == SPRITE_TYPE) || (obj_type == ENEMY_TYPE)) {
 			VirtualSprite* coll_sprite = dynamic_cast<VirtualSprite*>(coll_obj);
@@ -751,18 +751,21 @@ void ObjectSupervisor::AdjustSpriteAroundCollision(private_map::VirtualSprite* s
 void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject* coll_obj) {
 	// A horizontal adjustment means that the sprite was trying to move vertically and needs to be adjusted horizontally around a collision
 	bool horizontal_adjustment = (sprite->direction & (NORTH | SOUTH));
-	// The length or height of the sprite that determines the dimensions of the line
+	// The length or height of the sprite that determines the dimensions of the line, in collision grid units
 	uint16 sprite_length;
 	// Stores the row/col axis of the line
 	int16 line_axis = 0;
 	// Stores the col/row endpoints of the line
 	int16 start_point, end_point = 0;
 
+	MapRectangle sprite_coll_rect;
+	sprite->GetCollisionRectangle(sprite_coll_rect);
+
 	// ---------- (1): Determine the length of the sprite and the start/end points of the line
 	if (horizontal_adjustment == true) {
-		// 0.5f is added to ensure proper rounding of the floating point value
-		sprite_length = static_cast<uint16>(2.0f * sprite->coll_half_width + 0.5f);
-		start_point = sprite->x_position - (3 * sprite_length / 2);
+		// +1 is added since the cast throws away everything after the decimal and we want a ceiling integer
+		sprite_length = 1 + static_cast<uint16>(sprite_coll_rect.right - sprite_coll_rect.left);
+		start_point = sprite->x_position - ((3 * sprite_length) / 2);
 		end_point = start_point + (3 * sprite_length);
 
 		// Ensure that the line end points do not go outside of the map boundaries.
@@ -770,8 +773,8 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 		end_point = (end_point >= _num_grid_cols) ? _num_grid_cols : end_point;
 	}
 	else {
-		// 0.5f is added to ensure proper rounding of the floating point value
-		sprite_length = static_cast<uint16>(sprite->coll_height + 0.5f);
+		// +1 is added since the cast throws away everything after the decimal and we want a ceiling integer
+		sprite_length = 1 + static_cast<uint16>(sprite_coll_rect.bottom - sprite_coll_rect.top);
 		start_point = sprite->y_position - (2 * sprite_length);
 		end_point = start_point + (3 * sprite_length);
 
@@ -785,19 +788,19 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 	switch (sprite->direction) {
 		case NORTH:
 			// Set to the row above the top of the sprite's collision rectangle
-			line_axis = sprite->y_position - sprite_length - 1;
+			line_axis = static_cast<int16>(sprite_coll_rect.top) - 1;
 			break;
 		case SOUTH:
 			// Set to the row below the bottom of the sprite's collision rectangle
-			line_axis = sprite->y_position + 1;
+			line_axis = static_cast<int16>(sprite_coll_rect.bottom) + 1;
 			break;
 		case EAST:
-			// Set to the column to the left of the left edge of the sprite's collision rectangle
-			line_axis = sprite->x_position + (sprite_length / 2) + 1;
+			// Set to the column to the right of the right edge of the sprite's collision rectangle
+			line_axis = static_cast<int16>(sprite_coll_rect.right) + 1;
 			break;
 		case WEST:
-			// Set to the column to the right of the right edge of the sprite's collision rectangle
-			line_axis = sprite->x_position - (sprite_length / 2) - 1;
+			// Set to the column to the left of the left edge of the sprite's collision rectangle
+			line_axis = static_cast<int16>(sprite_coll_rect.left) - 1;
 			break;
 	}
 
@@ -808,12 +811,12 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 	// ---------- (3): Populate the line based upon the collision grid and sprite context information
 	if (horizontal_adjustment == true) {
 		for (uint16 i = start_point, j = 0; i <= end_point; i++, j++) {
-			grid_line[j] = (_collision_grid[i][line_axis] & sprite->context);
+			grid_line[j] = (_collision_grid[line_axis][i] & sprite->context);
 		}
 	}
 	else {
 		for (uint16 i = start_point, j = 0; i <= end_point; i++, j++) {
-			grid_line[j] = (_collision_grid[line_axis][i] & sprite->context);
+			grid_line[j] = (_collision_grid[i][line_axis] & sprite->context);
 		}
 	}
 
@@ -861,7 +864,8 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 	int16 start_distance = -1, end_distance = -1;
 
 	// Examine the line segement from the center to the start point
-	for (uint16 i = grid_line.size() / 2, j = 0; i >= 0; i--, j++) {
+	gap_counter = 0;
+	for (int16 i = grid_line.size() / 2, j = 0; i >= 0; i--, j++) {
 		if (grid_line[i] == true) {
 			start_distance = -1;
 			gap_counter = 0;
@@ -872,6 +876,7 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 			}
 			gap_counter++;
 			if (gap_counter == sprite_length) {
+				// TODO: make sure that if there is an object collision, the object doesn't block this gap
 				break;
 			}
 		}
@@ -883,7 +888,7 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 
 	// Examine the line segement from the center to the end point
 	gap_counter = 0;
-	for (uint16 i = grid_line.size() / 2, j = 0; i < grid_line.size(); i++, j++) {
+	for (int16 i = grid_line.size() / 2, j = 0; i < grid_line.size(); i++, j++) {
 		if (grid_line[i] == true) {
 			end_distance = -1;
 			gap_counter = 0;
@@ -894,6 +899,7 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 			}
 			gap_counter++;
 			if (gap_counter == sprite_length) {
+				// TODO: make sure that if there is an object collision, the object doesn't block this gap
 				break;
 			}
 		}
