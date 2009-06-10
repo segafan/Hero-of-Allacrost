@@ -761,7 +761,12 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 	MapRectangle sprite_coll_rect;
 	sprite->GetCollisionRectangle(sprite_coll_rect);
 
-	// ---------- (1): Determine the length of the sprite and the start/end points of the line
+	MapRectangle object_coll_rect;
+	if (coll_obj != NULL) {
+		coll_obj->GetCollisionRectangle(object_coll_rect);
+	}
+
+	// ---------- (1): Determine the length of the sprite and the start/end points of the collision grid line to examine
 	if (horizontal_adjustment == true) {
 		// +1 is added since the cast throws away everything after the decimal and we want a ceiling integer
 		sprite_length = 1 + static_cast<uint16>(sprite_coll_rect.right - sprite_coll_rect.left);
@@ -821,40 +826,31 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 	}
 
 	// ---------- (4): If there was an object involved in this collision, modify the line to represent occupied elements
-	if (coll_obj != NULL) {
-		// Holds the start and end index relative to the grid_line where the collided object exists
-		uint16 start_edge, end_edge;
+	// Determines if the start or end directions of the grid should be examined in future steps
+	bool check_start = true, check_end = true;
 
+	if (coll_obj != NULL) {
 		if (horizontal_adjustment == true) {
-			// Initially set the start edge to the coordinate of the left edge of the collision object
-			start_edge = coll_obj->x_position - static_cast<uint16>(coll_obj->coll_half_width + coll_obj->x_offset);
-			// Convert the coordinate into a valid index into the grid_line
-			start_edge = (start_edge > start_point) ? (start_edge - start_point) : 0;
-			// Set the end edge to the start edge plus the width of the sprite, making sure we don't exceed the bounds of the grid line
-			end_edge = start_edge + static_cast<uint16>(coll_obj->coll_half_width * 2.0f);
-			if (end_edge >= grid_line.size()) {
-				end_edge = grid_line.size() - 1;
+			if (object_coll_rect.left < sprite_coll_rect.left) {
+				check_start = false;
 			}
-			// Set all grid_line elements that the object occupies to be unavailable
-			for (uint32 i = start_edge; i <= end_edge; i++) {
-				grid_line[i] = true;
+			if (object_coll_rect.right > sprite_coll_rect.right) {
+				check_end = false;
 			}
 		}
 		else {
-			// Initially set the start edge to the coordinate of the top edge of the collision object
-			start_edge = coll_obj->y_position - static_cast<uint16>(coll_obj->coll_height + coll_obj->y_offset);
-			// Convert the coordinate into a valid index into the grid_line
-			start_edge = (start_edge > start_point) ? (start_edge - start_point) : 0;
-			// Set the end edge to the start edge plus the width of the sprite, making sure we don't exceed the bounds of the grid line
-			end_edge = start_edge + static_cast<uint16>(coll_obj->coll_height);
-			if (end_edge >= grid_line.size()) {
-				end_edge = grid_line.size() - 1;
+			if (object_coll_rect.top < sprite_coll_rect.top) {
+				check_start = false;
 			}
-			// Set all grid_line elements that the object occupies to be unavailable
-			for (uint32 i = start_edge; i <= end_edge; i++) {
-				grid_line[i] = true;
+			if (object_coll_rect.bottom > sprite_coll_rect.bottom) {
+				check_end = false;
 			}
 		}
+	}
+
+	// If the object is big enough it may obstruct both endpoints, in which case there's nothing more that can be done
+	if ((check_start == false) && (check_end == false)) {
+		return;
 	}
 
 	// ---------- (5): Starting from the center, examine both sides of the line for a gap wide enough for the sprite to fit through
@@ -863,50 +859,54 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 	// Used to determine how close the nearest available gap is
 	int16 start_distance = -1, end_distance = -1;
 
-	// Examine the line segement from the center to the start point
-	gap_counter = 0;
-	for (int16 i = grid_line.size() / 2, j = 0; i >= 0; i--, j++) {
-		if (grid_line[i] == true) {
+	// Examine the line segment from the center to the start point
+	if (check_start == true) {
+		gap_counter = 0;
+		for (int16 i = grid_line.size() / 2, j = 0; i >= 0; i--, j++) {
+			if (grid_line[i] == true) {
+				start_distance = -1;
+				gap_counter = 0;
+			}
+			else {
+				if (gap_counter == 0) {
+					start_distance = j;
+				}
+				gap_counter++;
+				if (gap_counter == sprite_length) {
+					// TODO: make sure that if there is an object collision, the object doesn't block this gap
+					break;
+				}
+			}
+		}
+		// If no gap that was large enough was found, set the distance to an invalid number
+		if (gap_counter != sprite_length) {
 			start_distance = -1;
-			gap_counter = 0;
 		}
-		else {
-			if (gap_counter == 0) {
-				start_distance = j;
-			}
-			gap_counter++;
-			if (gap_counter == sprite_length) {
-				// TODO: make sure that if there is an object collision, the object doesn't block this gap
-				break;
-			}
-		}
-	}
-	// If no gap that was large enough was found, set the distance to an invalid number
-	if (gap_counter != sprite_length) {
-		start_distance = -1;
 	}
 
 	// Examine the line segement from the center to the end point
-	gap_counter = 0;
-	for (int16 i = grid_line.size() / 2, j = 0; i < grid_line.size(); i++, j++) {
-		if (grid_line[i] == true) {
+	if (check_end == true) {
+		gap_counter = 0;
+		for (int16 i = grid_line.size() / 2, j = 0; i < static_cast<int16>(grid_line.size()); i++, j++) {
+			if (grid_line[i] == true) {
+				end_distance = -1;
+				gap_counter = 0;
+			}
+			else {
+				if (gap_counter == 0) {
+					end_distance = j;
+				}
+				gap_counter++;
+				if (gap_counter == sprite_length) {
+					// TODO: make sure that if there is an object collision, the object doesn't block this gap
+					break;
+				}
+			}
+		}
+		// If no gap that was large enough was found, set the distance to an invalid number
+		if (gap_counter != sprite_length) {
 			end_distance = -1;
-			gap_counter = 0;
 		}
-		else {
-			if (gap_counter == 0) {
-				end_distance = j;
-			}
-			gap_counter++;
-			if (gap_counter == sprite_length) {
-				// TODO: make sure that if there is an object collision, the object doesn't block this gap
-				break;
-			}
-		}
-	}
-	// If no gap that was large enough was found, set the distance to an invalid number
-	if (gap_counter != sprite_length) {
-		end_distance = -1;
 	}
 
 	// Now determine which side of the line has the closest gap and move the sprite in that direction
@@ -922,9 +922,25 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 	else if ((start_distance == -1) && (end_distance >= 0)) {
 		move_in_start_direction = false;
 	}
-	else {
-		// If the start and end side gaps are equadistant, it doesn't matter which one we pick
+	else if ((start_distance >= 0) && (end_distance >= 0) && (coll_obj == NULL)) {
 		move_in_start_direction = (start_distance <= end_distance) ? true : false;
+	}
+	else if ((start_distance != end_distance) && (coll_obj != NULL)) {
+		move_in_start_direction = (start_distance < end_distance) ? true : false;
+	}
+	else { // then ((start_distance == end_distance) && (coll_obj != NULL))
+		// In this case, the collided object must necessarily have a collision rectangle that is less than or equal to the
+		// width/height of the sprite's collision rectangle. The appropriate sides (left/right or top/bottom) of the object
+		// can also not exceed beyond the boundaries of the sprite. So we need to find out which side (start or end) has the
+		// most difference between the two object's edges and move the sprite in the direction of least distance.
+		if (horizontal_adjustment == true) {
+			move_in_start_direction = ((sprite_coll_rect.right - object_coll_rect.left) < (object_coll_rect.right - sprite_coll_rect.left)) ?
+				true : false;
+		}
+		else {
+			move_in_start_direction = ((sprite_coll_rect.bottom - object_coll_rect.top) < (object_coll_rect.bottom - sprite_coll_rect.top)) ?
+				true : false;
+		}
 	}
 
 	// ---------- (6): Adjust the sprite's movement in the appropriate direction

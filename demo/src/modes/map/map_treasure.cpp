@@ -61,8 +61,8 @@ MapTreasure::MapTreasure(string image_file, uint8 num_total_frames, uint8 num_cl
 
 	// Update the frame image sizes to work in the MapMode coordinate system
 	for (uint32 i = 0; i < frames.size(); i++) {
-		frames[i].SetWidth(TILE_LENGTH / frames[i].GetWidth());
-		frames[i].SetHeight(TILE_LENGTH / frames[i].GetHeight());
+		frames[i].SetWidth(frames[i].GetWidth() / (GRID_LENGTH / 2));
+		frames[i].SetHeight(frames[i].GetHeight() / (GRID_LENGTH / 2));
 	}
 
 	// (2) Now that we know the total number of frames in the image, make sure the frame count arguments make sense

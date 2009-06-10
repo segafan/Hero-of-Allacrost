@@ -450,6 +450,8 @@ function Load(m, d)
 	sprite:AddDialogueReference(5);
 
 	-- Add Alexander's movement events
+	-- TEMP: path movement disabled temporarily for testing of new map mode features
+--[[
 	event = hoa_map.PathMoveSpriteEvent(10011, sprite, 52, 25);
 	event:AddEventLink(10012, false, 0);
 	event_supervisor:RegisterEvent(event);
@@ -462,7 +464,7 @@ function Load(m, d)
 	event = hoa_map.PathMoveSpriteEvent(10014, sprite, 40, 55);
 	event:AddEventLink(10011, false, 0);
 	event_supervisor:RegisterEvent(event);
-
+--]]
 	map:_AddGroundObject(sprite);
 
 
