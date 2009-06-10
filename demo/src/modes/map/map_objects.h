@@ -515,6 +515,11 @@ public:
 	*** natural movement in the game and also enables sprites to better navigate through narrow passage ways. Put simply,
 	*** this algorithm allows sprites to automatically roll/slide around the corners of obstructions.
 	***
+	*** If the object that the sprite collided with is anothing moving sprite, then no attempt to modify the sprite's position
+	*** is performed. This allows for two moving sprites that collided with one another to not come into a deadlock situation
+	*** where they are both trying to move around the other since one sprite will stop its motion and the other will roll
+	*** around until the two are free from colliding with one another.
+	***
 	*** \todo I think this algorithm should also try to partially adjust the sprite's position even when it fails to avoid
 	*** the collision. For example, if walking straight into the middle of a long wall and a collision occurs with that wall, the
 	*** sprite's position should be adjusted such that it is directly next to the wall with no open space inbetween.
