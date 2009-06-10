@@ -184,7 +184,8 @@ void MapMode::Update() {
 
 
 	// ---------- (1) Call the map script's update function
-	ScriptCallFunction<void>(_update_function);
+	if (_update_function)
+		ScriptCallFunction<void>(_update_function);
 
 	// ---------- (3) Update all animated tile images
 	_tile_supervisor->Update();
@@ -217,7 +218,10 @@ void MapMode::Update() {
 
 void MapMode::Draw() {
 	_CalculateMapFrame();
-	ScriptCallFunction<void>(_draw_function);
+	if (_draw_function)
+		ScriptCallFunction<void>(_draw_function);
+	else
+		_DrawMapLayers();
 	_DrawGUI();
 	if (_CurrentState() == STATE_DIALOGUE) {
 		_dialogue_supervisor->Draw();

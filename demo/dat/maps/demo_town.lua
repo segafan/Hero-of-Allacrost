@@ -639,23 +639,12 @@ end -- function Load()
 function Update()
 	-- Check if the map camera is in the exit zone
 	if (exit_zone:IsInsideZone(map._camera.x_position, map._camera.y_position) == true) then
-		ModeManager:Pop();
-		local cave_map = hoa_map.MapMode("dat/maps/demo_cave.lua");
-		ModeManager:Push(cave_map);
+		LoadNewMap("demo_cave");
 	end
 end
 
-function Draw()
-	map:_DrawMapLayers();
-end
 
-
-map_functions = {}
-
--- Empty do-nothing function for events
-map_functions[0] = function()
-	return true;
-end
+-- Add dialogue functions
 
 -- Adds Laila to the party and removes her sprite from the map
 map_functions[1] = function()
@@ -673,17 +662,5 @@ end
 
 -- Creates a new shop mode instance
 map_functions[2] = function()
-	local shop = hoa_shop.ShopMode();
-	shop:AddObject(1); -- Healing Potion
-	shop:AddObject(4); -- Healing Stone
-	shop:AddObject(3001); -- Bomb
-	shop:AddObject(3002); -- Super Bomb
-	shop:AddObject(10002); -- Iron Sword
-	shop:AddObject(10502); -- Standard Crossbow
-	shop:AddObject(20002); -- Cobalt Helm
-	shop:AddObject(20502); -- Winged Circlet
-	shop:AddObject(30002); -- Leather Chain Mail
-	shop:AddObject(40002); -- Phoenix Shield
-	shop:AddObject(50502); -- Leather Boots
-	ModeManager:Push(shop);
+	LoadNewShop(1, 4, 3001, 3002, 10002, 10502, 20002, 30002, 40002, 50502);
 end
