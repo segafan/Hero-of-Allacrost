@@ -555,6 +555,11 @@ private:
 	*** If the coll_obj pointer is not NULL, then the object's collision rectangle will also be used in determining if an adjustment is
 	*** possible. No other objects will be considered, however, except after the adjustment has been calculated. This is done so that
 	*** the algorithm is fast and doesn't attempt to look at every map object in context.
+	***
+	*** \todo One possible downside to this algorithm is that it doesn't take into account other nearby objects that could be
+	*** in the way. Theoretically if we had a line of sprites standing in an open plane and we tried to move one sprite through the middle
+	*** of them, the sprite would continue to oscillate around this living wall thinking it has found a gap to get through when
+	*** there is none. This is something to consider addressing in the future.
 	**/
 	void _AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject* coll_obj);
 
