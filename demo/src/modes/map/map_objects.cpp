@@ -558,6 +558,36 @@ bool ObjectSupervisor::IsPositionOccupiedByObject(int16 row, int16 col, MapObjec
 
 
 
+void ObjectSupervisor::AdjustSpriteAroundCollision(private_map::VirtualSprite* sprite, COLLISION_TYPE coll_type, MapObject* coll_obj) {
+	// TEMP: For now, we don't handle map boundary collisions since there's no way around them
+	if (coll_type == BOUNDARY_COLLISION) {
+		// TODO: see if we can align the sprite directly along the map boundary in this case
+		return;
+	}
+
+	// If this is an object collision, the sprite to be adjusted is not the map camera (player-controlled),
+	// and the other object is a sprite that is moving, do not attempt to modify this sprite's position.
+	// We'll allow the other sprite to adjuts its own position instead.
+	if (coll_type == OBJECT_COLLISION && sprite != MapMode::_current_map->_camera) {
+		MAP_OBJECT_TYPE obj_type = coll_obj->GetType();
+		if ((obj_type == VIRTUAL_TYPE) || (obj_type == SPRITE_TYPE) || (obj_type == ENEMY_TYPE)) {
+			VirtualSprite* coll_sprite = dynamic_cast<VirtualSprite*>(coll_obj);
+			if (coll_sprite->moving == true) {
+				return;
+			}
+		}
+	}
+
+	if (sprite->direction & MOVING_ORTHOGONALLY) {
+		_AdjustSpriteOrthogonal(sprite, coll_obj);
+	}
+	else {
+		_AdjustSpriteDiagonal(sprite, coll_obj);
+	}
+} // ObjectSupervisor::_AdjustSpriteAroundCollision(COLLISION_TYPE coll_type, MapObject* coll_obj);
+
+
+
 bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, const PathNode& dest) {
 	// NOTE: Refer to the implementation of the A* algorithm to understand what all these lists and score values are for
 	std::vector<PathNode> open_list;
@@ -718,55 +748,52 @@ bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 
 
 
-void ObjectSupervisor::AdjustSpriteAroundCollision(private_map::VirtualSprite* sprite, COLLISION_TYPE coll_type, MapObject* coll_obj) {
-	// TEMP: For now, we don't handle map boundary collisions since there's no way around them
-	if (coll_type == BOUNDARY_COLLISION) {
-		// TODO: see if we can align the sprite directly along the map boundary in this case
-		return;
-	}
-
-	// If this is an object collision, the sprite to be adjusted is not the map camera (player-controlled),
-	// and the other object is a sprite that is moving, do not attempt to modify this sprite's position.
-	// We'll allow the other sprite to adjuts its own position instead.
-	if (coll_type == OBJECT_COLLISION && sprite != MapMode::_current_map->_camera) {
-		MAP_OBJECT_TYPE obj_type = coll_obj->GetType();
-		if ((obj_type == VIRTUAL_TYPE) || (obj_type == SPRITE_TYPE) || (obj_type == ENEMY_TYPE)) {
-			VirtualSprite* coll_sprite = dynamic_cast<VirtualSprite*>(coll_obj);
-			if (coll_sprite->moving == true) {
-				return;
-			}
-		}
-	}
-
-	if (sprite->direction & MOVING_ORTHOGONALLY) {
-		_AdjustSpriteOrthogonal(sprite, coll_obj);
-	}
-	else {
-		_AdjustSpriteDiagonal(sprite, coll_obj);
-	}
-} // ObjectSupervisor::_AdjustSpriteAroundCollision(COLLISION_TYPE coll_type, MapObject* coll_obj);
-
-
-
 void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject* coll_obj) {
 	// A horizontal adjustment means that the sprite was trying to move vertically and needs to be adjusted horizontally around a collision
 	bool horizontal_adjustment = (sprite->direction & (NORTH | SOUTH));
-	// The length or height of the sprite that determines the dimensions of the line, in collision grid units
-	uint16 sprite_length;
-	// Stores the row/col axis of the line
-	int16 line_axis = 0;
-	// Stores the col/row endpoints of the line
-	int16 start_point, end_point = 0;
+	// Determines if the start or end directions of the grid should be examined in future steps
+	bool check_start = true, check_end = true;
 
 	MapRectangle sprite_coll_rect;
 	sprite->GetCollisionRectangle(sprite_coll_rect);
 
+	// ---------- (1): If this was an object collision, first check if there is sufficient space to either side of the object
 	MapRectangle object_coll_rect;
 	if (coll_obj != NULL) {
 		coll_obj->GetCollisionRectangle(object_coll_rect);
 	}
 
-	// ---------- (1): Determine the length of the sprite and the start/end points of the collision grid line to examine
+	if (coll_obj != NULL) {
+		if (horizontal_adjustment == true) {
+			if (object_coll_rect.left < sprite_coll_rect.left) {
+				check_start = false;
+			}
+			if (object_coll_rect.right > sprite_coll_rect.right) {
+				check_end = false;
+			}
+		}
+		else {
+			if (object_coll_rect.top < sprite_coll_rect.top) {
+				check_start = false;
+			}
+			if (object_coll_rect.bottom > sprite_coll_rect.bottom) {
+				check_end = false;
+			}
+		}
+
+		// If the object is big enough that it obstructs both sides, there's nothing more that can be done
+		if ((check_start == false) && (check_end == false)) {
+			return;
+		}
+	}
+
+	// ---------- (2): Determine the length of the sprite and the start/end points of the collision grid line to examine
+	// The length or height of the sprite that determines the dimensions of the line, in collision grid units
+	uint16 sprite_length;
+	// Stores the col/row endpoints of the collision grid line
+	// For horizontal adjustments, start/end represents is left/right directions while vertical adjustments represent top/bottom
+	int16 start_point, end_point = 0;
+
 	if (horizontal_adjustment == true) {
 		// +1 is added since the cast throws away everything after the decimal and we want a ceiling integer
 		sprite_length = 1 + static_cast<uint16>(sprite_coll_rect.right - sprite_coll_rect.left);
@@ -788,32 +815,40 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 		end_point = (end_point >= _num_grid_rows) ? _num_grid_rows : end_point;
 	}
 
-	// ---------- (2): Determine the line's axis based on the direction the sprite is trying to move.
-	// Note that the line_axis member should never be set to a value outside of the map boundaries so the boundary condition is not checked here.
+	// ---------- (3): Determine the collision grid line axis based on the direction the sprite is trying to move
+	// Stores the row/col axis of the line
+	int16 line_axis = 0;
+
 	switch (sprite->direction) {
 		case NORTH:
 			// Set to the row above the top of the sprite's collision rectangle
 			line_axis = static_cast<int16>(sprite_coll_rect.top) - 1;
+			line_axis = (line_axis >= 0) ? line_axis : 0;
 			break;
 		case SOUTH:
 			// Set to the row below the bottom of the sprite's collision rectangle
 			line_axis = static_cast<int16>(sprite_coll_rect.bottom) + 1;
+			line_axis = (line_axis < _num_grid_rows) ? line_axis : _num_grid_rows - 1;
 			break;
 		case EAST:
 			// Set to the column to the right of the right edge of the sprite's collision rectangle
 			line_axis = static_cast<int16>(sprite_coll_rect.right) + 1;
+			line_axis = (line_axis < _num_grid_cols) ? line_axis : _num_grid_cols - 1;
 			break;
 		case WEST:
 			// Set to the column to the left of the left edge of the sprite's collision rectangle
 			line_axis = static_cast<int16>(sprite_coll_rect.left) - 1;
+			line_axis = (line_axis >= 0) ? line_axis : 0;
 			break;
 	}
 
-	// Construct a vector of bools used to represent the line that will be examined
+	// ---------- (4): Populate the line based upon the collision grid and sprite context information
+	// A vector of bools used to represent the collision grid line in front of the sprite that will be examined
 	// True values in this vector indicate that the indexed area is not available for the sprite to move to
-	vector<bool> grid_line(sprite_length * 3);
+	// Note that (end_point - start_point) is usually equal to sprite_length * 3, except in some boundary conditions
+	// when the grid line is made shorter
+	vector<bool> grid_line(end_point - start_point);
 
-	// ---------- (3): Populate the line based upon the collision grid and sprite context information
 	if (horizontal_adjustment == true) {
 		for (uint16 i = start_point, j = 0; i <= end_point; i++, j++) {
 			grid_line[j] = (_collision_grid[line_axis][i] & sprite->context);
@@ -823,34 +858,6 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 		for (uint16 i = start_point, j = 0; i <= end_point; i++, j++) {
 			grid_line[j] = (_collision_grid[i][line_axis] & sprite->context);
 		}
-	}
-
-	// ---------- (4): If there was an object involved in this collision, modify the line to represent occupied elements
-	// Determines if the start or end directions of the grid should be examined in future steps
-	bool check_start = true, check_end = true;
-
-	if (coll_obj != NULL) {
-		if (horizontal_adjustment == true) {
-			if (object_coll_rect.left < sprite_coll_rect.left) {
-				check_start = false;
-			}
-			if (object_coll_rect.right > sprite_coll_rect.right) {
-				check_end = false;
-			}
-		}
-		else {
-			if (object_coll_rect.top < sprite_coll_rect.top) {
-				check_start = false;
-			}
-			if (object_coll_rect.bottom > sprite_coll_rect.bottom) {
-				check_end = false;
-			}
-		}
-	}
-
-	// If the object is big enough it may obstruct both endpoints, in which case there's nothing more that can be done
-	if ((check_start == false) && (check_end == false)) {
-		return;
 	}
 
 	// ---------- (5): Starting from the center, examine both sides of the line for a gap wide enough for the sprite to fit through
@@ -873,17 +880,15 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 				}
 				gap_counter++;
 				if (gap_counter == sprite_length) {
-					// TODO: make sure that if there is an object collision, the object doesn't block this gap
 					break;
 				}
 			}
 		}
-		// If no gap that was large enough was found, set the distance to an invalid number
+		// If no gap that was large enough was found, the sprite shouldn't adjust itself in the start direction
 		if (gap_counter != sprite_length) {
-			start_distance = -1;
+			check_start = false;
 		}
 	}
-
 	// Examine the line segement from the center to the end point
 	if (check_end == true) {
 		gap_counter = 0;
@@ -898,41 +903,40 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 				}
 				gap_counter++;
 				if (gap_counter == sprite_length) {
-					// TODO: make sure that if there is an object collision, the object doesn't block this gap
 					break;
 				}
 			}
 		}
-		// If no gap that was large enough was found, set the distance to an invalid number
+		// If no gap that was large enough was found, the sprite shouldn't adjust itself in the start direction
 		if (gap_counter != sprite_length) {
-			end_distance = -1;
+			check_end = false;
 		}
 	}
 
-	// Now determine which side of the line has the closest gap and move the sprite in that direction
-	bool move_in_start_direction;
-
 	// If no gaps were found there's nothing else that can be done here
-	if ((start_distance == -1) && (end_distance == -1)) {
+	if ((check_start == false) && (check_end == false)) {
 		return;
 	}
-	else if ((start_distance >= 0) && (end_distance == -1)) {
+
+	// ---------- (6): Determine which side has the closest gap for the sprite to go through
+	bool move_in_start_direction;
+
+	if ((check_start == true) && (check_end == false)) {
 		move_in_start_direction = true;
 	}
-	else if ((start_distance == -1) && (end_distance >= 0)) {
+	else if ((check_start == false) && (check_end == true)) {
 		move_in_start_direction = false;
 	}
-	else if ((start_distance >= 0) && (end_distance >= 0) && (coll_obj == NULL)) {
+	// In the following cases, both start and end sides are valid to make adjustments to
+	else if (coll_obj == NULL) {
+		// Adjust in the position of least grid distance
 		move_in_start_direction = (start_distance <= end_distance) ? true : false;
 	}
-	else if ((start_distance != end_distance) && (coll_obj != NULL)) {
-		move_in_start_direction = (start_distance < end_distance) ? true : false;
-	}
-	else { // then ((start_distance == end_distance) && (coll_obj != NULL))
-		// In this case, the collided object must necessarily have a collision rectangle that is less than or equal to the
-		// width/height of the sprite's collision rectangle. The appropriate sides (left/right or top/bottom) of the object
-		// can also not exceed beyond the boundaries of the sprite. So we need to find out which side (start or end) has the
-		// most difference between the two object's edges and move the sprite in the direction of least distance.
+	else {
+		// In this case, the collided object must have a collision rectangle that is less than or equal to the width/height of the
+		// sprite's collision rectangle. The appropriate sides (left/right or top/bottom) of the object can also not exceed beyond
+		// the boundaries of the sprite. So we need to find out which side (start or end) has the most difference between the two
+		// objects' edges and move the sprite in the direction of least distance.
 		if (horizontal_adjustment == true) {
 			move_in_start_direction = ((sprite_coll_rect.right - object_coll_rect.left) < (object_coll_rect.right - sprite_coll_rect.left)) ?
 				true : false;
@@ -943,12 +947,12 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 		}
 	}
 
-	// ---------- (6): Adjust the sprite's movement in the appropriate direction
+	// ---------- (7): Adjust the sprite's movement in the appropriate direction
 	// Save the current offsets in case the adjustment fails
 	float tmp_x = sprite->x_offset;
 	float tmp_y = sprite->y_offset;
 	float adjustment_distance = sprite->CalculateDistanceMoved();
-	// Adjustment movement is reduced to the same speed as diagonal movement, at sin(45)
+	// Adjustment movement distance is reduced to the same degree as diagonal movement, at sin(45)
 	adjustment_distance *= 0.707f;
 
 	if (horizontal_adjustment == true) {
@@ -975,7 +979,7 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 		sprite->y_offset = tmp_y;
 	}
 	else {
-		// The adjustment was successful if this line is reached
+		// The position adjustment was successful if this line is reached
 		sprite->CheckPositionOffsets();
 		sprite->moving = true;
 	}
@@ -984,81 +988,125 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 
 
 void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* coll_obj) {
-	// The col/row coordinates of the grid element on the diagonal grid element that the sprite is trying to move to
-	uint16 start_col, start_row;
 	// Used to determine which orthogonal directions (east vs west, north vs south) the sprite's position may be adjusted
 	bool adjust_north, adjust_east;
-	// To store the edge's of the sprite's collision rectangle in the format of the collision grid
-	uint16 north_edge, south_edge, east_edge, west_edge;
+	// Used to determine if horizontal or vertical movement adjustment should be considered
+	bool horizontal_move_okay = true, vertical_move_okay = true;
 
-	// ---------- (1): Determine the origin coordinate and direction that is valid to adjust the sprite's position
 	MapRectangle sprite_coll_rect;
 	sprite->GetCollisionRectangle(sprite_coll_rect);
-	north_edge = static_cast<uint16>(sprite_coll_rect.top);
-	south_edge = static_cast<uint16>(sprite_coll_rect.bottom);
-	east_edge = static_cast<uint16>(sprite_coll_rect.right);
-	west_edge = static_cast<uint16>(sprite_coll_rect.left);
 
 	switch (sprite->direction) {
 		case NE_NORTH:
 		case NE_EAST:
 			adjust_north = true;
 			adjust_east = true;
-			start_col = east_edge + 1;
-			start_row = north_edge - 1;
 			break;
 		case NW_NORTH:
 		case NW_WEST:
 			adjust_north = true;
 			adjust_east = false;
-			start_col = west_edge - 1;
-			start_row = north_edge - 1;
 			break;
 		case SE_SOUTH:
 		case SE_EAST:
 			adjust_north = false;
 			adjust_east = true;
-			start_col = east_edge + 1;
-			start_row = south_edge - 1;
 			break;
 		case SW_SOUTH:
 		case SW_WEST:
 			adjust_north = false;
 			adjust_east = false;
-			start_col = west_edge - 1;
-			start_row = south_edge + 1;
 			break;
 	}
 
-	// ---------- (2): Check if the area to the immediate sides of the sprite are traversable
-	bool horizontal_move_okay = true, vertical_move_okay = true;
-	uint16 r, c;
-	c = (adjust_east == true) ? (east_edge + 1) : (west_edge - 1);
-	for (r = north_edge; r <= south_edge; r++) {
-		if (_collision_grid[r][c] & sprite->context) {
-			horizontal_move_okay = false;
-			break;
-		}
-	}
-
-	r = (adjust_north == true) ? (north_edge - 1) : (south_edge + 1);
-	for (c = west_edge; c <= east_edge; c++) {
-		if (_collision_grid[r][c] & sprite->context) {
-			vertical_move_okay = false;
-			break;
-		}
-	}
-
-	// ---------- (3): If there was an object involved in the collision, check the edges of the object relative to the sprite
-	MapRectangle obj_coll_rect;
+	// ---------- (1): If there was an object involved in the collision, check the edges of the object relative to the sprite
+	MapRectangle object_coll_rect;
 	if (coll_obj != NULL) {
-		coll_obj->GetCollisionRectangle(obj_coll_rect);
+		coll_obj->GetCollisionRectangle(object_coll_rect);
 
-		if ((sprite_coll_rect.top < obj_coll_rect.bottom) || (sprite_coll_rect.bottom > obj_coll_rect.top)) {
+		// First check if either side of the sprite is obstructed by the object
+		if ((adjust_north == true) && (sprite_coll_rect.top < object_coll_rect.bottom)) {
 			horizontal_move_okay = false;
 		}
-		if ((sprite_coll_rect.left < obj_coll_rect.right) || (sprite_coll_rect.right > obj_coll_rect.left)) {
+		else if ((adjust_north == false) && (sprite_coll_rect.bottom > object_coll_rect.top)) {
+			horizontal_move_okay = false;
+		}
+
+		if ((adjust_east == true) && (sprite_coll_rect.right > object_coll_rect.left)) {
 			vertical_move_okay = false;
+		}
+		else if ((adjust_east == false) && (sprite_coll_rect.left < object_coll_rect.right)) {
+			vertical_move_okay = false;
+		}
+
+		// Now check if there is a sufficient amount of space to move around the obstruction on either side
+		if (horizontal_move_okay == true) {
+			if ((adjust_east == true) && (sprite_coll_rect.right < object_coll_rect.right)) {
+				horizontal_move_okay = false;
+			}
+			else if ((adjust_east == false) && (sprite_coll_rect.left > object_coll_rect.left)) {
+				horizontal_move_okay = false;
+			}
+		}
+		if (vertical_move_okay == true) {
+			if ((adjust_north == true) && (sprite_coll_rect.top > object_coll_rect.top)) {
+				vertical_move_okay = false;
+			}
+			else if ((adjust_north == false) && (sprite_coll_rect.bottom < object_coll_rect.bottom)) {
+				vertical_move_okay = false;
+			}
+		}
+
+		// If both of these conditions are true, the sprite position can not be adjusted
+		if ((horizontal_move_okay == false) && (vertical_move_okay == false)) {
+			return;
+		}
+	}
+
+	// ---------- (2): Determine the origin coordinate and direction that is valid to adjust the sprite's position
+	// To store the edge's of the sprite's collision rectangle in the format of the collision grid
+	uint16 north_edge, south_edge, east_edge, west_edge;
+	// The col/row coordinates of the grid element on the diagonal grid element that the sprite is trying to move to
+	int16 start_col, start_row;
+
+	north_edge = static_cast<uint16>(sprite_coll_rect.top);
+	south_edge = static_cast<uint16>(sprite_coll_rect.bottom);
+	east_edge = static_cast<uint16>(sprite_coll_rect.right);
+	west_edge = static_cast<uint16>(sprite_coll_rect.left);
+
+	if (adjust_north == true) {
+		start_row = north_edge - 1;
+		start_row = (start_row >= 0) ? start_row : 0;
+	}
+	else {
+		start_row = south_edge + 1;
+		start_row = (start_row < _num_grid_rows) ? start_row : _num_grid_rows - 1;
+	}
+	if (adjust_east == true) {
+		start_col = east_edge + 1;
+		start_col = (start_col < _num_grid_cols) ? start_col : _num_grid_cols - 1;
+	}
+	else {
+		start_col = west_edge - 1;
+		start_col = (start_col >= 0) ? start_col : 0;
+	}
+
+	// ---------- (3): Check if the area to the immediate sides of the sprite are traversable
+	uint16 r, c;
+	if (horizontal_move_okay == true) {
+		for (c = start_col, r = north_edge; r <= south_edge; r++) {
+			if (_collision_grid[r][c] & sprite->context) {
+				horizontal_move_okay = false;
+				break;
+			}
+		}
+	}
+	if (vertical_move_okay == true) {
+		for (r = start_row, c = west_edge; c <= east_edge; c++) {
+			if (_collision_grid[r][c] & sprite->context) {
+				vertical_move_okay = false;
+				break;
+			}
 		}
 	}
 
@@ -1068,9 +1116,9 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 	}
 
 	// ---------- (4): Populate the grid lines based upon the collision grid and sprite context information
-	// 0.5f is added to ensure proper rounding of the floating point value
-	uint16 sprite_length = static_cast<uint16>(2.0f * sprite->coll_half_width + 0.5f);
-	uint16 sprite_height = static_cast<uint16>(sprite->coll_height + 0.5f);
+	// +1 is added since the cast throws away everything after the decimal and we want a ceiling integer
+	uint16 sprite_length = 1 + static_cast<uint16>(2.0f * sprite->coll_half_width);
+	uint16 sprite_height = 1 + static_cast<uint16>(sprite->coll_height);
 
 	// Construct a vector of bools used to represent the line that will be examined
 	// True values in this vector indicate that the indexed area is not available for the sprite to move to
@@ -1079,19 +1127,19 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 
 	// Resize vectors to ensure that we don't access the collision grid at an invalid location
 	if (horizontal_move_okay == true) {
-		if ((adjust_east == true) && (sprite_length * 2 > start_col)) {
-			horizontal_grid_line.resize(sprite_length * 2 - start_col);
+		if ((adjust_east == true) && (start_col + (sprite_length * 2) - 1 >= _num_grid_cols)) {
+			horizontal_grid_line.resize(_num_grid_cols - start_col + 1);
 		}
-		else if ((adjust_east == false) && (start_col + sprite_length * 2 >= _num_grid_cols)) {
-			horizontal_grid_line.resize(_num_grid_cols - start_col);
+		else if ((adjust_east == false) && (start_col - (sprite_length * 2) - 1 < 0)) {
+			horizontal_grid_line.resize(start_col + 1);
 		}
 	}
 	if (vertical_move_okay == true) {
-		if ((adjust_north == true) && (sprite_height * 2 > start_row)) {
-			vertical_grid_line.resize(sprite_height * 2 - start_row);
+		if ((adjust_north == true) && (start_row - (sprite_height * 2) - 1 < 0)) {
+			vertical_grid_line.resize(start_row + 1);
 		}
-		else if ((adjust_north == false) && (start_row + sprite_height * 2 >= _num_grid_rows)) {
-			vertical_grid_line.resize(_num_grid_rows - start_row);
+		else if ((adjust_north == false) && (start_row + (sprite_height * 2) - 1 >= _num_grid_rows)) {
+			vertical_grid_line.resize(_num_grid_rows - start_row + 1);
 		}
 	}
 
@@ -1121,55 +1169,7 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 		}
 	}
 
-	// ---------- (5): If there was an object involved in this collision, modify the line to represent occupied elements
-	if (coll_obj != NULL) {
-		uint16 obj_north_edge, obj_south_edge, obj_east_edge, obj_west_edge;
-		obj_north_edge = static_cast<uint16>(obj_coll_rect.top);
-		obj_south_edge = static_cast<uint16>(obj_coll_rect.bottom);
-		obj_east_edge = static_cast<uint16>(obj_coll_rect.right);
-		obj_west_edge = static_cast<uint16>(obj_coll_rect.left);
-
-
-		// Holds the start and end index relative to the grid_line where the collided object exists
-		uint16 start_edge, end_edge;
-
-		if (horizontal_move_okay == true) {
-			if (adjust_east == true) {
-				start_edge = (obj_west_edge > start_col) ? obj_west_edge : start_col;
-				start_edge = start_edge - start_col;
-				end_edge = start_edge + (obj_east_edge - obj_west_edge);
-				end_edge = (end_edge >= horizontal_grid_line.size()) ? horizontal_grid_line.size() : end_edge;
-			}
-			else {
-				start_edge = (obj_east_edge < start_col) ? obj_east_edge : start_col;
-				start_edge = start_edge - start_col;
-				end_edge = start_edge + (obj_east_edge - obj_west_edge);
-				end_edge = (end_edge >= horizontal_grid_line.size()) ? horizontal_grid_line.size() : end_edge;
-			}
-			for (uint16 i = start_edge; i <= end_edge; i++) {
-				horizontal_grid_line[i] = true;
-			}
-		}
-		if (vertical_move_okay == true) {
-			if (adjust_north == true) {
-				start_edge = (obj_south_edge < start_col) ? obj_south_edge : start_col;
-				start_edge = start_edge - start_col;
-				end_edge = start_edge + (obj_south_edge - obj_north_edge);
-				end_edge = (end_edge >= vertical_grid_line.size()) ? vertical_grid_line.size() : end_edge;
-			}
-			else {
-				start_edge = (obj_north_edge > start_col) ? obj_north_edge : start_col;
-				start_edge = start_edge - start_col;
-				end_edge = start_edge + (obj_south_edge - obj_north_edge);
-				end_edge = (end_edge >= vertical_grid_line.size()) ? vertical_grid_line.size() : end_edge;
-			}
-			for (uint16 i = start_edge; i <= end_edge; i++) {
-				vertical_grid_line[i] = true;
-			}
-		}
-	} // if (coll_obj != NULL)
-
-	// ---------- (6): Starting from the start coordinate, examine both grid lines to find the closest sprite-sized gap
+	// ---------- (5): Beginning from the start coordinate, examine both grid lines to find the closest sprite-sized gap
 	// A counter used for finding a gap of the appropriate size
 	uint16 gap_counter;
 	// Used to determine how close the nearest available gap is in each direction
@@ -1193,10 +1193,9 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 			}
 		}
 		if (gap_counter != sprite_length) {
-			horizontal_distance = -1;
+			horizontal_move_okay = true;
 		}
 	}
-
 	if (vertical_move_okay == true) {
 		gap_counter = 0;
 		for (uint16 i = 0; i < vertical_grid_line.size(); i++) {
@@ -1215,26 +1214,36 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 			}
 		}
 		if (gap_counter != sprite_height) {
-			vertical_distance = -1;
+			vertical_move_okay = true;
 		}
 	}
 
-	// Now determine which grid line has the closest gap and move the sprite in that direction
-	bool move_in_horizontal_direction;
-
-	// If no gaps were found there's nothing else that can be done here
-	if ((horizontal_distance == -1) && (vertical_distance == -1)) {
+	// If both of these conditions are true, the sprite position can not be adjusted
+	if ((horizontal_move_okay == false) && (vertical_move_okay == false)) {
 		return;
 	}
-	else if ((horizontal_distance >= 0) && (vertical_distance == -1)) {
+
+	// ---------- (6): Determine which direction has the closest gap for the sprite to go through
+	bool move_in_horizontal_direction;
+
+	if ((horizontal_move_okay == true) && (vertical_move_okay == false)) {
 		move_in_horizontal_direction = true;
 	}
-	else if ((horizontal_distance == -1) && (vertical_distance >= 0)) {
+	else if ((horizontal_move_okay == false) && (vertical_move_okay == true)) {
 		move_in_horizontal_direction = false;
 	}
-	else {
-		// If the gaps on either side are equadistant, it doesn't matter which one we pick
+	// In the following cases, both horizontal and vertical directions are valid for making positional adjustments
+	else if (coll_obj == NULL) {
+		// Adjust in the position of least grid distance
 		move_in_horizontal_direction = (horizontal_distance <= vertical_distance) ? true : false;
+	}
+	else {
+		// Find out if the shortest distance to the edge of an object is horizontal or vertical
+		float obj_vertical_distance = (adjust_north == true) ?
+			(object_coll_rect.top - sprite_coll_rect.top) : (object_coll_rect.bottom - sprite_coll_rect.bottom);
+		float obj_horizontal_distance = (adjust_east == true) ?
+			(object_coll_rect.right - sprite_coll_rect.right) : (object_coll_rect.left - sprite_coll_rect.left);
+		move_in_horizontal_direction = (obj_horizontal_distance < obj_vertical_distance) ? true : false;
 	}
 
 	// ---------- (7): Adjust the sprite's movement in the appropriate direction
