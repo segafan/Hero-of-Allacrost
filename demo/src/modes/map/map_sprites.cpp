@@ -294,9 +294,9 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 		}
 	}
 
+	MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(this, coll_type, coll_obj);
 	// ---------- (2) Determine what, if any, type of event was controlling the sprite when the collision occurred.
 	if (control_event == NULL) {
-		MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(this, coll_type, coll_obj);
 		return;
 	}
 
