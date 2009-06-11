@@ -927,13 +927,23 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 
 	// TEMP TEMP TEMP: Load the character's idle animation
 	AnimatedImage idle;
-	idle.SetDimensions(64, 128);
-	vector<uint32> timings(6, 10);
+	idle.SetDimensions(96, 96);
+	vector<uint32> idle_timings(4, 15);
 
-	if (idle.LoadFromFrameGrid("img/sprites/battle/characters/" + _filename + "_idle.png", timings, 1, 6) == false) {
+	if (idle.LoadFromFrameGrid("img/sprites/map/" + _filename + "_idle.png", idle_timings, 1, 4) == false) {
 		exit(1);
 	}
 	_battle_animation["idle"] = idle;
+
+	// TEMP TEMP TEMP: Load the character's attack animation
+	AnimatedImage attack;
+	attack.SetDimensions(96, 96);
+	vector<uint32> attack_timings(5, 5);
+
+	if (attack.LoadFromFrameGrid("img/sprites/map/" + _filename + "_attack.png", attack_timings, 1, 5) == false) {
+		exit(1);
+	}
+	_battle_animation["attack"] = attack;
 
 	// Load the character's battle portraits from a multi image
 	_battle_portraits.assign(5, StillImage());

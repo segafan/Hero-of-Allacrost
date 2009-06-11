@@ -352,6 +352,7 @@ void BindModesToLua()
 			.def("AddHitPoints", &BattleActor::AddHitPoints)
 			.def("AddStrength", &BattleActor::AddStrength)
 			.def("AddNewEffect", &BattleActor::AddNewEffect)
+			.def("PlayAnimation", &BattleActor::PlayAnimation)
 	];
 	} // End using battle mode namespaces
 

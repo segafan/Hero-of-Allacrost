@@ -1140,7 +1140,7 @@ void BootMode::_OnBattleDebug() {
 	GlobalManager->AddCharacter(1);
 	BattleMode *BM = new BattleMode();
 	BM->AddEnemy(1);
-	//BM->AddEnemy(1);
+	BM->AddEnemy(1);
 	ModeManager->Push(BM);
 }
 
