@@ -523,6 +523,9 @@ public:
 	*** \todo I think this algorithm should also try to partially adjust the sprite's position even when it fails to avoid
 	*** the collision. For example, if walking straight into the middle of a long wall and a collision occurs with that wall, the
 	*** sprite's position should be adjusted such that it is directly next to the wall with no open space inbetween.
+	***
+	*** \todo I'm almost certain that there will be problems with this algorithm when the sprite is very close to any map boundary.
+	*** This code needs further testing for these types of conditions.
 	**/
 	void AdjustSpriteAroundCollision(VirtualSprite* sprite, COLLISION_TYPE coll_type, MapObject* coll_obj);
 
