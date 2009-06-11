@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include "input.h"
 #include "script.h"
@@ -163,6 +164,7 @@ void BattleActor::TakeDamage(int32 damage) {
 		else
 		{
 			BattleCharacter* character = (BattleCharacter*)(this);
+			character->PlayAnimation("idle");
 			character->GetActor()->RetrieveBattleAnimation("idle")->GetCurrentFrame()->EnableGrayScale();
 		}
 
@@ -203,7 +205,9 @@ void BattleActor::TEMP_ResetAttackTimer() {
 // *****************************************************************************
 
 BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin) :
-	BattleActor(character, x_origin, y_origin)
+	BattleActor(character, x_origin, y_origin),
+	_current_animation("idle"),
+	_frames_remaining(22222)
 {
 	if (_stamina_icon.Load("img/icons/actors/characters/" + character->GetFilename() + ".png", 45, 45) == false)
 		cerr << "Unable to load stamina icon for " << character->GetFilename() << endl;
@@ -245,7 +249,7 @@ void BattleCharacter::Update() {
 
 	//If he's dead, we freeze him on his last frame
 	if (IsAlive())
-		GetActor()->RetrieveBattleAnimation("idle")->Update();
+		GetActor()->RetrieveBattleAnimation(_current_animation)->Update();
 }
 
 
@@ -255,7 +259,15 @@ void BattleCharacter::DrawSprite() {
 
 	// Draw the character sprite
 	VideoManager->Move(_x_location, _y_location);
-	GetActor()->RetrieveBattleAnimation("idle")->Draw();
+	GetActor()->RetrieveBattleAnimation(_current_animation)->Draw();
+
+	if(_frames_remaining == 0) {
+		_current_animation = "idle";
+		_frames_remaining = 22222;
+	}
+	else if (_frames_remaining < 22222) {
+		_frames_remaining--;
+	}
 
 	if (IsAlive()) {
 		// Draw the actor selector image if this character is currently selected
@@ -292,6 +304,11 @@ void BattleCharacter::DrawSprite() {
 	}
 } // void BattleCharacter::DrawSprite()
 
+void BattleCharacter::PlayAnimation(std::string alias) {
+	_current_animation = alias;
+	GetActor()->RetrieveBattleAnimation(_current_animation)->ResetAnimation();
+	_frames_remaining = 30;
+}
 
 
 void BattleCharacter::DrawPortrait() {
@@ -310,7 +327,7 @@ void BattleCharacter::DrawPortrait() {
 		float alpha = (hp_percent) * 4;
 		portrait_frames[3].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
 	}
-  else if (hp_percent < 0.50f) {
+	else if (hp_percent < 0.50f) {
 		portrait_frames[3].Draw();
 		float alpha = (hp_percent - 0.25f) * 4;
 		portrait_frames[2].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
@@ -537,6 +554,9 @@ void BattleEnemy::DrawSprite() {
 } // void BattleEnemy::DrawSprite()
 
 
+void BattleEnemy::PlayAnimation(std::string alias) {
+	// NOTE: This is currently designed to take no action, enemies are not animated
+}
 
 void BattleEnemy::_DecideAction() {
 	// TEMP: this selects the first skill the enemy has and the first character as a target. Needs to be changed

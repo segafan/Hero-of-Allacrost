@@ -98,6 +98,9 @@ public:
 	//! \brief Draws the actor's current sprite animation frame
 	virtual void DrawSprite() = 0;
 
+	//! \brief Sets actor's current sprite animation type
+	virtual void PlayAnimation(std::string alias) = 0;
+
 	/** \brief Draws the actor's stamina icon at the appropriate location
 	*** \param is_selected If true, the stamina icon will be drawn highlighted
 	**/
@@ -250,6 +253,9 @@ public:
 	//! \brief Draws the character's current sprite animation frame
 	void DrawSprite();
 
+	//! \brief Sets character's current sprite animation type
+	void PlayAnimation(std::string alias);
+
 	//! \brief Draws the character's damage-blended face portrait
 	void DrawPortrait();
 
@@ -258,6 +264,10 @@ public:
 
 	hoa_global::GlobalCharacter* GetActor()
 		{ return dynamic_cast<hoa_global::GlobalCharacter*>(_actor); }
+
+protected:
+	std::string _current_animation;
+	uint32 _frames_remaining;
 }; // class BattleCharacter
 
 
@@ -280,6 +290,9 @@ public:
 
 	//! \brief Draws the damage-blended enemy sprite on the battle field
 	void DrawSprite();
+
+	//! \brief Sets actor's current sprite animation type
+	void PlayAnimation(std::string alias);
 
 	hoa_global::GlobalEnemy* GetActor()
 		{ return dynamic_cast<hoa_global::GlobalEnemy*>(_actor); }
