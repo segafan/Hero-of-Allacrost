@@ -948,41 +948,14 @@ void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 	}
 
 	// ---------- (7): Adjust the sprite's movement in the appropriate direction
-	// Save the current offsets in case the adjustment fails
-	float tmp_x = sprite->x_offset;
-	float tmp_y = sprite->y_offset;
-	float adjustment_distance = sprite->CalculateDistanceMoved();
-	// Adjustment movement distance is reduced to the same degree as diagonal movement, at sin(45)
-	adjustment_distance *= 0.707f;
-
+	uint16 direction;
 	if (horizontal_adjustment == true) {
-		if (move_in_start_direction == true) {
-			sprite->x_offset -= adjustment_distance;
-		}
-		else {
-			sprite->x_offset += adjustment_distance;
-		}
+		direction = (move_in_start_direction == true) ? WEST : EAST;
 	}
 	else {
-		if (move_in_start_direction == true) {
-			sprite->y_offset -= adjustment_distance;
-		}
-		else {
-			sprite->y_offset += adjustment_distance;
-		}
+		direction = (move_in_start_direction == true) ? NORTH : SOUTH;
 	}
-
-	// Check for a collision in the newly adjusted position
-	if (DetectCollision(sprite, NULL) == true) {
-		// Restore the sprite's position and give up any further efforts for movement adjustment
-		sprite->x_offset = tmp_x;
-		sprite->y_offset = tmp_y;
-	}
-	else {
-		// The position adjustment was successful if this line is reached
-		sprite->CheckPositionOffsets();
-		sprite->moving = true;
-	}
+	_AdjustSpritePosition(sprite, direction);
 } // void ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject* coll_obj)
 
 
@@ -1024,7 +997,7 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 	if (coll_obj != NULL) {
 		coll_obj->GetCollisionRectangle(object_coll_rect);
 
-		// First check if either side of the sprite is obstructed by the object
+		// Check if either side of the sprite is obstructed by the object
 		if ((adjust_north == true) && (sprite_coll_rect.top < object_coll_rect.bottom)) {
 			horizontal_move_okay = false;
 		}
@@ -1039,31 +1012,13 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 			vertical_move_okay = false;
 		}
 
-		// Now check if there is a sufficient amount of space to move around the obstruction on either side
-		if (horizontal_move_okay == true) {
-			if ((adjust_east == true) && (sprite_coll_rect.right < object_coll_rect.right)) {
-				horizontal_move_okay = false;
-			}
-			else if ((adjust_east == false) && (sprite_coll_rect.left > object_coll_rect.left)) {
-				horizontal_move_okay = false;
-			}
-		}
-		if (vertical_move_okay == true) {
-			if ((adjust_north == true) && (sprite_coll_rect.top > object_coll_rect.top)) {
-				vertical_move_okay = false;
-			}
-			else if ((adjust_north == false) && (sprite_coll_rect.bottom < object_coll_rect.bottom)) {
-				vertical_move_okay = false;
-			}
-		}
-
 		// If both of these conditions are true, the sprite position can not be adjusted
 		if ((horizontal_move_okay == false) && (vertical_move_okay == false)) {
 			return;
 		}
 	}
 
-	// ---------- (2): Determine the origin coordinate and direction that is valid to adjust the sprite's position
+	// ---------- (2): Check if the area to the immediate sides of the sprite are traversable
 	// To store the edge's of the sprite's collision rectangle in the format of the collision grid
 	uint16 north_edge, south_edge, east_edge, west_edge;
 	// The col/row coordinates of the grid element on the diagonal grid element that the sprite is trying to move to
@@ -1091,7 +1046,6 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 		start_col = (start_col >= 0) ? start_col : 0;
 	}
 
-	// ---------- (3): Check if the area to the immediate sides of the sprite are traversable
 	uint16 r, c;
 	if (horizontal_move_okay == true) {
 		for (c = start_col, r = north_edge; r <= south_edge; r++) {
@@ -1115,7 +1069,24 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 		return;
 	}
 
-	// ---------- (4): Populate the grid lines based upon the collision grid and sprite context information
+	// If only one direction is valid, adjust the sprite's position in that direction and return
+	if ((horizontal_move_okay == false) || (vertical_move_okay == false)) {
+		uint16 direction;
+		if (vertical_move_okay == true) {
+			direction = (adjust_north == true) ? NORTH : SOUTH;
+		}
+		else { // then (horizontal_move_okay == true)
+			direction = (adjust_east == true) ? EAST : WEST;
+		}
+		_AdjustSpritePosition(sprite, direction);
+		return;
+	}
+
+	// Reaching this point means that it is valid for the sprite to move in either direction. So try
+	// to determine the direction that has the shortest distance around the colliding obstacle. Note
+	// that this is a rare case so this code does not get executed very frequently
+
+	// ---------- (3): Populate the grid lines based upon the collision grid and sprite context information
 	// +1 is added since the cast throws away everything after the decimal and we want a ceiling integer
 	uint16 sprite_length = 1 + static_cast<uint16>(2.0f * sprite->coll_half_width);
 	uint16 sprite_height = 1 + static_cast<uint16>(sprite->coll_height);
@@ -1169,11 +1140,11 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 		}
 	}
 
-	// ---------- (5): Beginning from the start coordinate, examine both grid lines to find the closest sprite-sized gap
+	// ---------- (4): Beginning from the start coordinate, examine both grid lines to find the closest sprite-sized gap
 	// A counter used for finding a gap of the appropriate size
 	uint16 gap_counter;
 	// Used to determine how close the nearest available gap is in each direction
-	int16 horizontal_distance = -1, vertical_distance = -1;
+	int16 horizontal_distance = 0, vertical_distance = 0;
 
 	if (horizontal_move_okay == true) {
 		gap_counter = 0;
@@ -1193,7 +1164,7 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 			}
 		}
 		if (gap_counter != sprite_length) {
-			horizontal_move_okay = true;
+			horizontal_distance = 0;
 		}
 	}
 	if (vertical_move_okay == true) {
@@ -1214,28 +1185,20 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 			}
 		}
 		if (gap_counter != sprite_height) {
-			vertical_move_okay = true;
+			vertical_distance = 0;
 		}
 	}
 
-	// If both of these conditions are true, the sprite position can not be adjusted
-	if ((horizontal_move_okay == false) && (vertical_move_okay == false)) {
-		return;
-	}
-
-	// ---------- (6): Determine which direction has the closest gap for the sprite to go through
+	// ---------- (5): Determine which direction has the closest gap for the sprite to go through
 	bool move_in_horizontal_direction;
-
-	if ((horizontal_move_okay == true) && (vertical_move_okay == false)) {
-		move_in_horizontal_direction = true;
-	}
-	else if ((horizontal_move_okay == false) && (vertical_move_okay == true)) {
-		move_in_horizontal_direction = false;
-	}
-	// In the following cases, both horizontal and vertical directions are valid for making positional adjustments
-	else if (coll_obj == NULL) {
-		// Adjust in the position of least grid distance
-		move_in_horizontal_direction = (horizontal_distance <= vertical_distance) ? true : false;
+	if (coll_obj == NULL) {
+		if (horizontal_distance != vertical_distance) {
+			move_in_horizontal_direction = (horizontal_distance < vertical_distance) ? true : false;
+		}
+		else {
+			// If the distances are equal or no gap was found, give preference to the facing direction of the sprite
+			move_in_horizontal_direction = (sprite->direction & (FACING_EAST | FACING_WEST)) ? true : false;
+		}
 	}
 	else {
 		// Find out if the shortest distance to the edge of an object is horizontal or vertical
@@ -1244,43 +1207,78 @@ void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* c
 		float obj_horizontal_distance = (adjust_east == true) ?
 			(object_coll_rect.right - sprite_coll_rect.right) : (object_coll_rect.left - sprite_coll_rect.left);
 		move_in_horizontal_direction = (obj_horizontal_distance < obj_vertical_distance) ? true : false;
+
+		// Confirm that the shortest gap also corresponds with the collision grid gap distances
+		if ((move_in_horizontal_direction == true) && (horizontal_distance > vertical_distance)) {
+			move_in_horizontal_direction = false;
+		}
+		else if ((move_in_horizontal_direction == false) && (vertical_distance > horizontal_distance)) {
+			move_in_horizontal_direction = true;
+		}
 	}
 
-	// ---------- (7): Adjust the sprite's movement in the appropriate direction
-	// Save the current offsets in case the adjustment fails
-	float tmp_x = sprite->x_offset;
-	float tmp_y = sprite->y_offset;
-	float adjustment_distance = sprite->CalculateDistanceMoved();
-
+	// ---------- (6): Adjust the sprite's movement in the appropriate direction
+	uint16 direction;
 	if (move_in_horizontal_direction == true) {
-		if (adjust_east == true) {
-			sprite->x_offset += adjustment_distance;
-		}
-		else {
-			sprite->x_offset -= adjustment_distance;
-		}
+		direction = (adjust_east == true) ? EAST : WEST;
 	}
 	else {
-		if (adjust_north == true) {
+		direction = (adjust_north == true) ? NORTH : SOUTH;
+	}
+	_AdjustSpritePosition(sprite, direction);
+} // void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* coll_obj)
+
+
+
+void ObjectSupervisor::_AdjustSpritePosition(VirtualSprite* sprite, uint16 direction) {
+	// Used to save the current position offset in case the adjustment fails
+	float saved_offset;
+	// Holds the distance to adjust the sprite by
+	float adjustment_distance = sprite->CalculateDistanceMoved();
+
+	// Orthogonal adjustment movement distance is reduced to the same degree as diagonal movement, at sin(45)
+	if (sprite->direction & MOVING_ORTHOGONALLY) {
+		adjustment_distance *= 0.707f;
+	}
+
+	switch (direction) {
+		case NORTH:
+			saved_offset = sprite->y_offset;
 			sprite->y_offset -= adjustment_distance;
-		}
-		else {
+			break;
+		case SOUTH:
+			saved_offset = sprite->y_offset;
 			sprite->y_offset += adjustment_distance;
-		}
+			break;
+		case EAST:
+			saved_offset = sprite->x_offset;
+			sprite->x_offset += adjustment_distance;
+			break;
+		case WEST:
+			saved_offset = sprite->x_offset;
+			sprite->x_offset -= adjustment_distance;
+			break;
+		default:
+			IF_PRINT_WARNING(MAP_DEBUG) << "invalid direction argument passed to this function: " << direction << endl;
+			return;
 	}
 
 	// Check for a collision in the newly adjusted position
 	if (DetectCollision(sprite, NULL) == true) {
 		// Restore the sprite's position and give up any further efforts for movement adjustment
-		sprite->x_offset = tmp_x;
-		sprite->y_offset = tmp_y;
+		if (direction & (NORTH | SOUTH)) {
+			sprite->y_offset = saved_offset;
+		}
+		else {
+			sprite->y_offset = saved_offset;
+		}
 	}
 	else {
 		// The adjustment was successful if this line is reached
 		sprite->CheckPositionOffsets();
 		sprite->moving = true;
 	}
-} // void ObjectSupervisor::_AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* coll_obj)
+} // void ObjectSupervisor::_AdjustSpritePosition(VirtualSprite* sprite, uint16 direction)
 
 } // namespace private_map
 

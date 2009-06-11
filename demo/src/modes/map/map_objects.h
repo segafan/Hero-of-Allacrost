@@ -577,6 +577,12 @@ private:
 	**/
 	void _AdjustSpriteDiagonal(VirtualSprite* sprite, MapObject* coll_obj);
 
+	/** \brief Helper function to _AdjustSpriteOrthogonal and _AdjustSpriteDiagonal that performs the actual adjustments
+	*** \param sprite The sprite whose position should be adjusted
+	*** \param direction The direction to adjust the sprite's position (only NORTH, SOUTH, EAST, and WEST are valid values)
+	**/
+	void _AdjustSpritePosition(VirtualSprite* sprite, uint16 direction);
+
 	/** \brief The number of rows and columns in the collision gride
 	*** The number of collision grid rows and columns is always equal to twice
 	*** that of the number of rows and columns of tiles (stored in the TileManager).
