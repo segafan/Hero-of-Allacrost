@@ -277,7 +277,9 @@ PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite,
 	SpriteEvent(event_id, PATH_MOVE_SPRITE_EVENT, sprite),
 	_source_col(-1),
 	_source_row(-1),
-	_current_node(0)
+	_current_node(0),
+	_last_x_position(0),
+	_last_y_position(0)
 {
 	// TODO: check that x/y coordinates are within map boundaries
 	_destination.col = x_coord;
@@ -295,6 +297,8 @@ PathMoveSpriteEvent::~PathMoveSpriteEvent() {
 void PathMoveSpriteEvent::_Start() {
 	SpriteEvent::_Start();
 	_current_node = 0;
+	_last_x_position = _sprite->x_position;
+	_last_y_position = _sprite->y_position;
 
 	// If a path already exists and the current position of the sprite is the same as the source position for this path,
 	// then we will re-use it and not bother to compute a new path.
@@ -325,11 +329,6 @@ bool PathMoveSpriteEvent::_Update() {
 		return true;
 	}
 
-	// This condition may happen if a collision halted the sprite's movement
-	if (_sprite->moving == false) {
-		_sprite->moving = true;
-	}
-
 	// Check if the sprite has arrived at the position of the current node
 	if (_sprite->x_position == _path[_current_node].col && _sprite->y_position == _path[_current_node].row) {
 		_current_node++;
@@ -343,6 +342,12 @@ bool PathMoveSpriteEvent::_Update() {
 		else {
 			_SetDirection();
 		}
+	}
+	// If the sprite has moved to a new position other than the next node, adjust its direction so it is trying to move to the next node
+	else if ((_sprite->x_position != _last_x_position) || (_sprite->y_position != _last_y_position)) {
+		_last_x_position = _sprite->x_position;
+		_last_y_position = _sprite->y_position;
+		_SetDirection();
 	}
 
 	return false;
@@ -395,62 +400,63 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 	// we terminate the path event immediately. The conditions may occur if, for some reason, the map's boundaries
 	// or collision grid are modified after the path is calculated
 	if (coll_type == BOUNDARY_COLLISION || coll_type == GRID_COLLISION) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "boundary or grid collision occurred on a pre-calculated path movement" << endl;
-
-		_path.clear(); // This path is obviously not a correct one so we should trash it
-		_sprite->ReleaseControl(this);
-		MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
+		if (MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj) == false) {
+			IF_PRINT_WARNING(MAP_DEBUG) << "boundary or grid collision occurred on a pre-calculated path movement" << endl;
+		}
+		// Wait
+// 		_path.clear(); // This path is obviously not a correct one so we should trash it
+// 		_sprite->ReleaseControl(this);
+// 		MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
 		return;
 	}
 
 	// If the code has reached this point, then we are dealing with an object collision
 
-	// Determine if the obstructing object is blocking the destination of the path
+	// Determine if the obstructing object is blocking the destination of this path
 	bool destination_blocked = MapMode::_current_map->_object_supervisor->IsPositionOccupiedByObject(_destination.row, _destination.col, coll_obj);
+	VirtualSprite* coll_sprite = NULL;
 
 	switch (coll_obj->GetObjectType()) {
 		case PHYSICAL_TYPE:
 		case TREASURE_TYPE:
 			// If the object is a static map object and blocking the destination, give up and terminate the event
 			if (destination_blocked == true) {
+				IF_PRINT_WARNING(MAP_DEBUG) << "path destination was blocked by a non-sprite map object" << endl;
+				_path.clear(); // This path is obviously not a correct one so we should trash it
+				_sprite->ReleaseControl(this);
+				MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
 				// Note that we will retain the path (we don't clear() it), hoping that next time the object is moved
 
 			}
 			// Otherwise, try to find an alternative path around the object
 			else {
-				// TEMP: Right now we just give up trying to complete the path because our pathfinding algorithm doesn't account for objects yet
-
+				// TEMP: try a movement adjustment to get around the object
+				MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj);
 				// TODO: recalculate and find an alternative path around the object
 			}
-			return;
+			break;
 
 		case VIRTUAL_TYPE:
 		case SPRITE_TYPE:
 		case ENEMY_TYPE:
-			VirtualSprite* coll_sprite = dynamic_cast<VirtualSprite*>(coll_obj);
-			// The object is a sprite and blocking the destination. How we resolve the situation depends upon whether or not the sprite is moving
+			coll_sprite = dynamic_cast<VirtualSprite*>(coll_obj);
 			if (destination_blocked == true) {
-				if (coll_sprite->moving == true) {
-					// The obstructing sprite is moving so hopefully it will get out of the way eventually. We will wait for it to do so
-				}
-				else {
-					// The obstructing sprite is not moving so give up trying to reach the destination
-				}
+				// Do nothing but wait for the obstructing sprite to move out of the way
+				return;
+
+				// TODO: maybe we should use a timer here to determine if a certain number of seconds have passed while waiting for the obstructiong
+				// sprite to move. If that timer expires and the destination is still blocked by the sprite, we could give up on reaching the
+				// destination and terminate the path event
 			}
 
 			else {
-				if (coll_sprite->moving == true) {
-					// TEMP: The obstructing sprite is moving so hopefully it will get out of the way eventually. We will wait for it to do so
-
-					// TODO: Re-calculate and find a path around the object
-				}
-
-				else {
-					// TEMP: The obstructing sprite is not moving so give up trying to reach the destination
-					// TODO: Re-calculate and find a path around the object
-				}
+				// TEMP: try a movement adjustment to get around the object
+				MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj);
 			}
-			return;
+			break;
+
+		default:
+			IF_PRINT_WARNING(MAP_DEBUG) << "collision object was of an unknown object type: " << coll_obj->GetObjectType() << endl;
 	}
 } // void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj)
 
@@ -503,9 +509,11 @@ bool RandomMoveSpriteEvent::_Update() {
 
 
 
-void RandomMoveSpriteEvent::_ResolveCollision() {
-	_sprite->SetRandomDirection();
-	_sprite->moving = true;
+void RandomMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj) {
+	// Try to adjust the sprite's position around the collision. If that fails, change the sprite's direction
+	if (MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj) == false) {
+		_sprite->SetRandomDirection();
+	}
 }
 
 // ****************************************************************************

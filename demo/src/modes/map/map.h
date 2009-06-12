@@ -97,6 +97,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::DialogueEvent;
 	friend class private_map::MapTransitionEvent;
 	friend class private_map::PathMoveSpriteEvent;
+	friend class private_map::RandomMoveSpriteEvent;
 	friend class private_map::ScriptedEvent;
 	friend class private_map::EnemyZone;
 	friend class private_map::ContextZone;
