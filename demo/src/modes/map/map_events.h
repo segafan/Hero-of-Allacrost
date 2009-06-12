@@ -161,15 +161,14 @@ public:
 	~DialogueEvent();
 
 protected:
+	//! \brief The ID of the dialogue to invoke
+	uint32 _dialogue_id;
+
 	//! \brief Begins the dialogue
 	void _Start();
 
 	//! \brief Returns true when the last line of the dialogue has been read
 	bool _Update();
-
-private:
-	//! \brief The ID of the dialogue to invoke
-	uint32 _dialogue_id;
 }; // class DialogueEvent : public MapEvent
 
 
@@ -195,14 +194,14 @@ public:
 	void AddWare(uint32 object_id);
 
 protected:
+	//! \brief The GlobalObject IDs of all objects to be sold in the shop
+	std::set<uint32> _ware_ids;
+
 	//! \brief Creates an instance of ShopMode and pushes it to the game mode stack
 	void _Start();
 
 	//! \brief Performs no operation (returns true)
 	bool _Update();
-
-	//! \brief The GlobalObject IDs of all objects to be sold in the shop
-	std::set<uint32> _ware_ids;
 }; // class ShopEvent : public MapEvent
 
 
@@ -244,17 +243,17 @@ public:
 	~MapTransitionEvent();
 
 protected:
-	//! \brief Begins the transition process by fading out the screen and music
-	void _Start();
-
-	//! \brief Once the fading process completes, creates the new map mode to transition to
-	bool _Update();
-
 	//! \brief The filename of the map to transition to
 	std::string _transition_filename;
 
 	//! \brief A timer used for fading out the current map
 	uint32 _fade_timer;
+
+	//! \brief Begins the transition process by fading out the screen and music
+	void _Start();
+
+	//! \brief Once the fading process completes, creates the new map mode to transition to
+	bool _Update();
 }; // class MapTransitionEvent : public MapEvent
 
 
@@ -324,17 +323,17 @@ public:
 	~ScriptedEvent();
 
 protected:
-	//! \brief Calls the Lua _start_function
-	void _Start();
-
-	//! \brief Calls the Lua _check_function
-	bool _Update();
-
 	//! \brief A pointer to the Lua function that starts the event
 	ScriptObject _start_function;
 
 	//! \brief A pointer to the Lua function that returns a boolean value if the event is finished
 	ScriptObject _update_function;
+
+	//! \brief Calls the Lua _start_function
+	void _Start();
+
+	//! \brief Calls the Lua _check_function
+	bool _Update();
 }; // class ScriptedEvent : public MapEvent
 
 
@@ -352,6 +351,12 @@ protected:
 *** # In the _Start method, call SpriteEvent::_Start() before any other code
 *** # Before returning true in the _Update() method, call _sprite->ReleaseControl(this)
 ***
+*** \note It is important to keep in mind that all map sprites have their update
+*** function called before map events are updated. This can have implications for
+*** changing some members of the sprite object inside the _Start() and _Update() methods
+*** as these methods are called <i>after</i> the sprite's own Update() method. Keep
+*** this property in mind when designing a derived sprite event class.
+***
 *** \todo Should we also have a constructor that takes a sprite's integer ID?
 *** ***************************************************************************/
 class SpriteEvent : public MapEvent {
@@ -367,15 +372,15 @@ public:
 		{}
 
 protected:
+	//! \brief A pointer to the map sprite that the event controls
+	VirtualSprite* _sprite;
+
 	//! \brief Acquires control of the sprite that the event will operate on
-	void _Start()
+	virtual void _Start()
 		{ _sprite->AcquireControl(this); }
 
 	//! \brief Updates the state of the sprite and returns true if the event is finished
 	virtual bool _Update() = 0;
-
-	//! \brief A pointer to the map sprite that the event controls
-	VirtualSprite* _sprite;
 }; // class SpriteEvent : public MapEvent
 
 
@@ -402,6 +407,21 @@ public:
 	~PathMoveSpriteEvent();
 
 protected:
+	//! \brief The source coordinates for this path movement
+	int16 _source_col, _source_row;
+
+	//! \brief The destination coordinates for this path movement
+	PathNode _destination;
+
+	//! \brief Holds the path needed to traverse from source to destination
+	std::vector<PathNode> _path;
+
+	//! \brief An index to the path vector containing the node that the sprite currently occupies
+	uint32 _current_node;
+
+	//! \brief Used to store the previous known position of the sprite
+	uint16 _last_x_position, _last_y_position;
+
 	//! \brief Calculates a path for the sprite to move to the destination
 	void _Start();
 
@@ -416,18 +436,6 @@ protected:
 	*** \param coll_obj A pointer to the MapObject that the sprite has collided with, if any
 	**/
 	void _ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj);
-
-	//! \brief The source coordinates for this path movement
-	int16 _source_col, _source_row;
-
-	//! \brief The destination coordinates for this path movement
-	PathNode _destination;
-
-	//! \brief Holds the path needed to traverse from source to destination
-	std::vector<PathNode> _path;
-
-	//! \brief An index to the path vector containing the node that the sprite currently occupies
-	uint32 _current_node;
 }; // class PathMoveSpriteEvent : public SpriteEvent
 
 
@@ -448,15 +456,6 @@ public:
 	~RandomMoveSpriteEvent();
 
 protected:
-	//! \brief Calculates a path for the sprite to move to the destination
-	void _Start();
-
-	//! \brief Returns true when the sprite has reached the destination
-	bool _Update();
-
-	//! \brief Immediately changes the direction of motion for the sprite in an attempt to resolve the collision that occurred
-	void _ResolveCollision();
-
 	/** \brief The amount of time (in milliseconds) to perform random movement before ending this action
 	*** Set this member to hoa_system::INFINITE_TIME in order to continue the random movement
 	*** forever. The default value of this member will be set to 10 seconds if it is not specified.
@@ -473,6 +472,18 @@ protected:
 
 	//! \brief A timer which keeps track of how long the sprite has been moving around since the last change in direction.
 	uint32 _direction_timer;
+
+	//! \brief Calculates a path for the sprite to move to the destination
+	void _Start();
+
+	//! \brief Returns true when the sprite has reached the destination
+	bool _Update();
+
+	/** \brief Tries to adjust the sprite's position around the collision. Will randomally change the sprite's direction if that fails.
+	*** \param coll_type The type of collision that has occurred
+	*** \param coll_obj A pointer to the MapObject that the sprite has collided with, if any
+	**/
+	void _ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj);
 }; // class RandomMoveSpriteEvent : public SpriteEvent
 
 
@@ -513,12 +524,6 @@ public:
 		{ _loop_count = count; }
 
 protected:
-	//! \brief Calculates a path for the sprite to move to the destination
-	void _Start();
-
-	//! \brief Returns true when the sprite has reached the destination
-	bool _Update();
-
 	//! \brief Index to the current frame to display from the frames vector
 	uint32 _current_frame;
 
@@ -547,6 +552,12 @@ protected:
 	*** The size of this vector should be equal to the size of the frames vector
 	**/
 	std::vector<uint32> _frame_times;
+
+	//! \brief Calculates a path for the sprite to move to the destination
+	void _Start();
+
+	//! \brief Returns true when the sprite has reached the destination
+	bool _Update();
 }; // class AnimateSpriteEvent : public SpriteEvent
 
 

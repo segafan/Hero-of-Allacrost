@@ -67,11 +67,19 @@ public:
 	//! \brief The speed at which the sprite moves around the map.
 	float movement_speed;
 
-	/** \brief Set to true when the sprite is currently in motion.
-	*** \note This does not necessarily mean that the sprite actually is moving,
-	*** but rather that the sprite is <i>trying</i> to move in a certain direction.
+	/** \brief Set to true when the sprite is currently in motio.
+	*** This does not necessarily mean that the sprite actually is moving, but rather
+	*** that the sprite is <i>trying</i> to move in a certain direction.
 	**/
 	bool moving;
+
+	/** \brief Set to true whenever the sprite's position was changed due to movement
+	*** This is distinctly different than the moving member. Whereas the moving member
+	*** indicates desired movement, this member indicates that positionaly change due to
+	*** movement actually occurred. It is used for drawing functions to determine if they
+	*** should draw the sprite in motion or not in motion
+	**/
+	bool moved_position;
 
 	//! \brief Set to true when the sprite is running rather than walking
 	bool is_running;
@@ -305,10 +313,6 @@ protected:
 	**/
 	std::vector<hoa_video::AnimatedImage> _animations;
 
-	//! \brief Holds the previous value of VirtualSprite#moving from the last call to MapSprite#Update().
-	// TODO: I think this member should be removed...if anything it should be a static bool in the Update function
-	bool _was_moving;
-
 	//! \brief Contains the id values of all dialogues refenced by the sprite
 	std::vector<uint32> _dialogue_references;
 
@@ -332,7 +336,6 @@ protected:
 	*** These attributes are used to save and load the state of a VirtualSprite
 	**/
 	//@{
-	bool _saved_was_moving;
 	uint8 _saved_current_animation;
 	//@}
 }; // class MapSprite : public VirtualSprite

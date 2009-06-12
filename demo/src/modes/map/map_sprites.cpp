@@ -56,6 +56,7 @@ VirtualSprite::VirtualSprite() :
 	direction(SOUTH),
 	movement_speed(NORMAL_SPEED),
 	moving(false),
+	moved_position(false),
 	is_running(false),
 	control_event(NULL),
 	_state_saved(false),
@@ -74,13 +75,26 @@ VirtualSprite::~VirtualSprite()
 
 
 void VirtualSprite::Update() {
+	moved_position = false;
+
 	if (!updatable) {
 		return;
 	}
 
-	// This function handles movement, so if the sprite is not moving there is nothing to do
-	if (moving == false)
+	// Determine if a movement event is controlling the sprite.
+	if (moving == false) {
 		return;
+// 		if (control_event != NULL) {
+// 			EVENT_TYPE event_type = control_event->GetEventType();
+// 			if (event_type == PATH_MOVE_SPRITE_EVENT || event_type == RANDOM_MOVE_SPRITE_EVENT) {
+// 				moving = true;
+// 			}
+// 		}
+// 		// If the sprite still isn't moving, there's nothing more to update here
+// 		if (moving == false) {
+// 			return;
+// 		}
+	}
 
 	// Save the previous sprite's position temporarily
 	float tmp_x = x_offset;
@@ -104,11 +118,11 @@ void VirtualSprite::Update() {
 
 	if (collision_type == NO_COLLISION) {
 		CheckPositionOffsets();
+		moved_position = true;
 	}
 	else {
-		// Restore the sprite's position and stop its motion. The _ResolveCollision() call that follows may restore the sprite's
-		// motion but it can not have an effect on the sprite's position
-		moving = false;
+		// Restore the sprite's position. The _ResolveCollision() call that follows may find an alternative
+		// position to move the sprite to.
 		x_offset = tmp_x;
 		y_offset = tmp_y;
 
@@ -294,29 +308,25 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 		}
 	}
 
-	MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(this, coll_type, coll_obj);
-	// ---------- (2) Determine what, if any, type of event was controlling the sprite when the collision occurred.
+	// ---------- (2) Adjust the sprite's position if no event was controlling this sprite
+	// This sprite is assumed in this case to be controlled by the player since sprites don't move by themselves
 	if (control_event == NULL) {
+		MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(this, coll_type, coll_obj);
 		return;
 	}
 
 	// ---------- (3) Call the appropriate collision resolution function for the various control events
 	EVENT_TYPE event_type = control_event->GetEventType();
-	PathMoveSpriteEvent* path_event = NULL;
-	RandomMoveSpriteEvent* random_event = NULL;
-	switch (event_type) {
-		case PATH_MOVE_SPRITE_EVENT:
-			path_event = dynamic_cast<PathMoveSpriteEvent*>(control_event);
-			path_event->_ResolveCollision(coll_type, coll_obj);
-			break;
-
-		case RANDOM_MOVE_SPRITE_EVENT:
-			random_event = dynamic_cast<RandomMoveSpriteEvent*>(control_event);
-			random_event->_ResolveCollision();
-			break;
-
-		default:
-			break;
+	if (event_type == PATH_MOVE_SPRITE_EVENT) {
+		PathMoveSpriteEvent* path_event = dynamic_cast<PathMoveSpriteEvent*>(control_event);
+		path_event->_ResolveCollision(coll_type, coll_obj);
+	}
+	else if (event_type == RANDOM_MOVE_SPRITE_EVENT) {
+		RandomMoveSpriteEvent* random_event = dynamic_cast<RandomMoveSpriteEvent*>(control_event);
+		random_event->_ResolveCollision(coll_type, coll_obj);
+	}
+	else {
+		IF_PRINT_WARNING(MAP_DEBUG) << "collision occurred when sprite was controlled by a non-motion event" << endl;
 	}
 } // void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj)
 
@@ -332,7 +342,6 @@ MapSprite::MapSprite() :
 	_has_available_dialogue(false),
 	_has_unseen_dialogue(false),
 	_dialogue_icon_color(1.0f, 1.0f, 1.0f, 0.0f),
-	_saved_was_moving(false),
 	_saved_current_animation(0)
 {
 	MapObject::_object_type = SPRITE_TYPE;
@@ -474,22 +483,17 @@ void MapSprite::LoadFacePortrait(std::string pn) {
 
 
 void MapSprite::Update() {
-	// Update the alpha of the dialogue icon according to it's distance from the player sprite
-	const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
-	float icon_alpha = 1.0f - (fabs(ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + fabs(ComputeYLocation() -
-		MapMode::_current_map->_camera->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
+	// Stores the last value of moved_position to determine when a change in sprite movement between calls to this function occurs
+	static bool was_moved = moved_position;
 
-	if (icon_alpha < 0)
-		icon_alpha = 0;
-	_dialogue_icon_color.SetAlpha(icon_alpha);
-	MapMode::_current_map->_new_dialogue_icon.Update();
+	// This call will update the sprite's position and perform collision detection
+	VirtualSprite::Update();
 
 	// Set the sprite's animation to the standing still position if movement has just stopped
-	if (!moving) {
-		if (_was_moving) {
+	if (moved_position == false) {
+		if (was_moved == true) {
 			// Set the current movement animation to zero progress
 			_animations[_current_animation].SetTimeProgress(0);
-			_was_moving = false;
 		}
 
 		// Determine the correct standing frame to display
@@ -507,15 +511,12 @@ void MapSprite::Update() {
 				_current_animation = ANIM_STANDING_EAST;
 			}
 			else {
-				cerr << "MAP ERROR: could not find proper standing animation to draw" << endl;
+				PRINT_ERROR << "invalid sprite direction, could not find proper standing animation to draw" << endl;
 			}
 		}
-	} // if (!moving)
+	}
 
-	// This call will update the sprite's position and perform collision detection
-	VirtualSprite::Update();
-
-	if (moving) {
+	else { // then (moved_position == true)
 		// Save the previous animation
 		uint8 last_animation = _current_animation;
 
@@ -533,12 +534,13 @@ void MapSprite::Update() {
 			_current_animation = ANIM_WALKING_EAST;
 		}
 		else {
-			cerr << "MAP ERROR: could not find proper movement animation to draw" << endl;
+			PRINT_ERROR << "invalid sprite direction, could not find proper standing animation to draw" << endl;
 		}
 
 		// Increasing the animation index by four from the walking _animations leads to the running _animations
-		if (is_running && _has_running_animations)
+		if (is_running && _has_running_animations) {
 			_current_animation += 4;
+		}
 
 		// If the direction of movement changed in mid-flight, update the animation timer on the
 		// new animated image to reflect the old, so the walking _animations do not appear to
@@ -548,24 +550,34 @@ void MapSprite::Update() {
 			_animations[last_animation].SetTimeProgress(0);
 		}
 		_animations[_current_animation].Update();
+	}
 
-		_was_moving = true;
-	} // if (moving)
+	was_moved = moved_position;
 } // void MapSprite::Update()
 
 
 // Draw the appropriate sprite frame at the correct position on the screen
 void MapSprite::Draw() {
+	// Update the alpha of the dialogue icon according to it's distance from the player sprite
+	const float DIALOGUE_ICON_VISIBLE_RANGE = 10.0f;
+
 	if (MapObject::ShouldDraw() == true) {
 		_animations[_current_animation].Draw();
 
 		if (_has_available_dialogue == true && _has_unseen_dialogue == true && MapMode::_IsShowingDialogueIcons()) {
+			float icon_alpha = 1.0f - (fabs(ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + fabs(ComputeYLocation() -
+				MapMode::_current_map->_camera->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
+
+			if (icon_alpha < 0.0f)
+				icon_alpha = 0.0f;
+			_dialogue_icon_color.SetAlpha(icon_alpha);
+			MapMode::_current_map->_new_dialogue_icon.Update();
+
 			VideoManager->MoveRelative(0, -GetImgHeight());
 			MapMode::_current_map->_new_dialogue_icon.Draw(_dialogue_icon_color);
 		}
 	}
 }
-
 
 
 
@@ -649,7 +661,6 @@ void MapSprite::SetNextDialogue(uint16 next) {
 void MapSprite::SaveState() {
 	VirtualSprite::SaveState();
 
-	_saved_was_moving = _was_moving;
 	_saved_current_animation = _current_animation;
 }
 
@@ -658,7 +669,6 @@ void MapSprite::SaveState() {
 void MapSprite::RestoreState() {
 	VirtualSprite::RestoreState();
 
-	_was_moving = _saved_was_moving;
 	_current_animation = _saved_current_animation;
 }
 
