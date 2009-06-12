@@ -851,12 +851,12 @@ bool ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject*
 	vector<bool> grid_line(end_point - start_point);
 
 	if (horizontal_adjustment == true) {
-		for (uint16 i = start_point, j = 0; i <= end_point; i++, j++) {
+		for (uint16 i = start_point, j = 0; i <= end_point && i < _collision_grid[line_axis].size(); i++, j++) {
 			grid_line[j] = (_collision_grid[line_axis][i] & sprite->context);
 		}
 	}
 	else {
-		for (uint16 i = start_point, j = 0; i <= end_point; i++, j++) {
+		for (uint16 i = start_point, j = 0; i <= end_point && i < _collision_grid.size(); i++, j++) {
 			grid_line[j] = (_collision_grid[i][line_axis] & sprite->context);
 		}
 	}
