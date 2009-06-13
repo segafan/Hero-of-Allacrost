@@ -114,7 +114,7 @@ void VirtualSprite::Update() {
 
 	MapObject* collision_object = NULL;
 	COLLISION_TYPE collision_type = NO_COLLISION;
-	collision_type = MapMode::_current_map->_object_supervisor->DetectCollision(this, &collision_object);
+	collision_type = MapMode::CurrentInstance()->GetObjectSupervisor()->DetectCollision(this, &collision_object);
 
 	if (collision_type == NO_COLLISION) {
 		CheckPositionOffsets();
@@ -257,7 +257,7 @@ void VirtualSprite::SaveState() {
 	_saved_movement_speed = movement_speed;
 	_saved_moving = moving;
 	if (control_event != NULL)
-		MapMode::_current_map->_event_supervisor->PauseEvent(control_event->GetEventID());
+		MapMode::CurrentInstance()->GetEventSupervisor()->PauseEvent(control_event->GetEventID());
 }
 
 
@@ -271,7 +271,7 @@ void VirtualSprite::RestoreState() {
 	 movement_speed = _saved_movement_speed;
 	 moving = _saved_moving;
 	 if (control_event != NULL)
-		MapMode::_current_map->_event_supervisor->ResumeEvent(control_event->GetEventID());
+		MapMode::CurrentInstance()->GetEventSupervisor()->ResumeEvent(control_event->GetEventID());
 }
 
 
@@ -280,10 +280,10 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 	// ---------- (1) First check for the case where the player has collided with a hostile enemy sprite
 	if (coll_obj != NULL) {
 		EnemySprite* enemy = NULL;
-		if (this == MapMode::_current_map->_camera && coll_obj->GetType() == ENEMY_TYPE) {
+		if (this == MapMode::CurrentInstance()->GetCamera() && coll_obj->GetType() == ENEMY_TYPE) {
 			enemy = reinterpret_cast<EnemySprite*>(coll_obj);
 		}
-		else if (coll_obj == MapMode::_current_map->_camera && this->GetType() == ENEMY_TYPE) {
+		else if (coll_obj == MapMode::CurrentInstance()->GetCamera() && this->GetType() == ENEMY_TYPE) {
 			enemy = reinterpret_cast<EnemySprite*>(this);
 		}
 
@@ -311,7 +311,7 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 	// ---------- (2) Adjust the sprite's position if no event was controlling this sprite
 	// This sprite is assumed in this case to be controlled by the player since sprites don't move by themselves
 	if (control_event == NULL) {
-		MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(this, coll_type, coll_obj);
+		MapMode::CurrentInstance()->GetObjectSupervisor()->AdjustSpriteAroundCollision(this, coll_type, coll_obj);
 		return;
 	}
 
@@ -341,7 +341,6 @@ MapSprite::MapSprite() :
 	_next_dialogue(-1),
 	_has_available_dialogue(false),
 	_has_unseen_dialogue(false),
-	_dialogue_icon_color(1.0f, 1.0f, 1.0f, 0.0f),
 	_saved_current_animation(0)
 {
 	MapObject::_object_type = SPRITE_TYPE;
@@ -564,17 +563,17 @@ void MapSprite::Draw() {
 	if (MapObject::ShouldDraw() == true) {
 		_animations[_current_animation].Draw();
 
-		if (_has_available_dialogue == true && _has_unseen_dialogue == true && MapMode::_IsShowingDialogueIcons()) {
-			float icon_alpha = 1.0f - (fabs(ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation()) + fabs(ComputeYLocation() -
-				MapMode::_current_map->_camera->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
+		if (_has_available_dialogue == true && _has_unseen_dialogue == true && MapMode::CurrentInstance()->IsShowDialogueIcons() == true) {
+			Color icon_color(1.0f, 1.0f, 1.0f, 0.0f);
+			float icon_alpha = 1.0f - (fabs(ComputeXLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeXLocation()) + fabs(ComputeYLocation() -
+				MapMode::CurrentInstance()->GetCamera()->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
 
 			if (icon_alpha < 0.0f)
 				icon_alpha = 0.0f;
-			_dialogue_icon_color.SetAlpha(icon_alpha);
-			MapMode::_current_map->_new_dialogue_icon.Update();
+			icon_color.SetAlpha(icon_alpha);
 
 			VideoManager->MoveRelative(0, -GetImgHeight());
-			MapMode::_current_map->_new_dialogue_icon.Draw(_dialogue_icon_color);
+			MapMode::CurrentInstance()->GetDialogueIcon().Draw(icon_color);
 		}
 	}
 }
@@ -583,7 +582,7 @@ void MapSprite::Draw() {
 
 void MapSprite::AddDialogueReference(uint32 dialogue_id) {
 	_dialogue_references.push_back(dialogue_id);
-	MapMode::_current_map->_dialogue_supervisor->AddSpriteReference(dialogue_id, GetObjectID());
+	MapMode::CurrentInstance()->GetDialogueSupervisor()->AddSpriteReference(dialogue_id, GetObjectID());
 }
 
 
@@ -593,7 +592,7 @@ void MapSprite::UpdateDialogueStatus() {
 	_has_unseen_dialogue = false;
 
 	for (uint32 i = 0; i < _dialogue_references.size(); i++) {
-		MapDialogue* dialogue = MapMode::_current_map->_dialogue_supervisor->GetDialogue(_dialogue_references[i]);
+		MapDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[i]);
 		if (dialogue == NULL) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "sprite: " << object_id << " is referencing unknown dialogue: " << _dialogue_references[i] << endl;
 			continue;
@@ -629,7 +628,7 @@ void MapSprite::IncrementNextDialogue() {
 		if (static_cast<uint16>(_next_dialogue) >= _dialogue_references.size())
 			_next_dialogue = 0;
 
-		MapDialogue* dialogue = MapMode::_current_map->_dialogue_supervisor->GetDialogue(_dialogue_references[_next_dialogue]);
+		MapDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[_next_dialogue]);
 		if (dialogue != NULL && dialogue->IsAvailable() == true) {
 			return;
 		}
@@ -741,16 +740,8 @@ void EnemySprite::AddEnemy(uint32 enemy_id) {
 
 	// Make sure that the GlobalEnemy has already been created for this enemy_id
 	if (MAP_DEBUG) {
-		bool found = false;
-		for (uint32 i = 0; i < MapMode::_current_map->_enemies.size(); i++) {
-			if (MapMode::_current_map->_enemies[i]->GetID() == enemy_id) {
-				found = true;
-				break;
-			}
-		}
-
-		if (found == false) {
-			IF_PRINT_WARNING(MAP_DEBUG) << "enemy to add has id " << enemy_id << ", which does not exist in MapMode::_enemies" << endl;
+		if (MapMode::CurrentInstance()->IsEnemyLoaded(enemy_id) == false) {
+			PRINT_WARNING << "enemy to add has id " << enemy_id << ", which does not exist in MapMode::_enemies" << endl;
 		}
 	}
 }
@@ -787,8 +778,8 @@ void EnemySprite::Update() {
 			float xdelta, ydelta;
 			_time_elapsed += SystemManager->GetUpdateTime();
 
-			xdelta = ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation();
-			ydelta = ComputeYLocation() - MapMode::_current_map->_camera->ComputeYLocation();
+			xdelta = ComputeXLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeXLocation();
+			ydelta = ComputeYLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeYLocation();
 
 			// If the sprite has moved outside of its zone and it should not, reverse the sprite's direction
 			if ( _zone != NULL && _zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestrained() ) {
@@ -807,7 +798,7 @@ void EnemySprite::Update() {
 				// Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
 				// The order of comparaisons here is important, the NULL check MUST come before the rest or a null pointer exception could happen if no zone is registered
 				if ( _zone == NULL || ( fabs(xdelta) <= _aggro_range && fabs(ydelta) <= _aggro_range
-					 && (!_zone->IsRestrained() || _zone->IsInsideZone(MapMode::_current_map->_camera->x_position, MapMode::_current_map->_camera->y_position)) ) )
+					 && (!_zone->IsRestrained() || _zone->IsInsideZone(MapMode::CurrentInstance()->GetCamera()->x_position, MapMode::CurrentInstance()->GetCamera()->y_position)) ) )
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
 						SetDirection(SOUTH);

@@ -70,13 +70,13 @@ bool MapObject::ShouldDraw() {
 	if (visible == false)
 		return false;
 
-	if (context != MapMode::_current_map->_current_context)
+	if (context != MapMode::CurrentInstance()->GetCurrentContext())
 		return false;
 
 	// ---------- Determine if the sprite is off-screen and if so, don't draw it.
 	MapRectangle img_rect;
 	GetImageRectangle(img_rect);
-	if (MapRectangle::CheckIntersection(img_rect, MapMode::_current_map->_draw_info.screen_edges) == false)
+	if (MapRectangle::CheckIntersection(img_rect, MapMode::CurrentInstance()->GetMapFrame().screen_edges) == false)
 		return false;
 
 	// ---------- (1) Determine the center position coordinates for the camera
@@ -95,7 +95,7 @@ bool MapObject::ShouldDraw() {
 	y_pos = static_cast<float>(y_position) + rounded_y_offset;
 
 	// ---------- Move the drawing cursor to the appropriate coordinates for this sprite
-	VideoManager->Move(x_pos - MapMode::_current_map->_draw_info.screen_edges.left, y_pos - MapMode::_current_map->_draw_info.screen_edges.top);
+	VideoManager->Move(x_pos - MapMode::CurrentInstance()->GetMapFrame().screen_edges.left, y_pos - MapMode::CurrentInstance()->GetMapFrame().screen_edges.top);
 	return true;
 } // bool MapObject::DrawHelper()
 
@@ -568,7 +568,7 @@ bool ObjectSupervisor::AdjustSpriteAroundCollision(private_map::VirtualSprite* s
 	// If this is an object collision, the sprite to be adjusted is not the map camera (player-controlled),
 	// and the other object is a sprite that is moving, do not attempt to modify this sprite's position.
 	// We'll allow the other sprite to adjuts its own position instead.
-	if (coll_type == OBJECT_COLLISION && sprite != MapMode::_current_map->_camera) {
+	if (coll_type == OBJECT_COLLISION && sprite != MapMode::CurrentInstance()->GetCamera()) {
 		MAP_OBJECT_TYPE obj_type = coll_obj->GetType();
 		if ((obj_type == VIRTUAL_TYPE) || (obj_type == SPRITE_TYPE) || (obj_type == ENEMY_TYPE)) {
 			VirtualSprite* coll_sprite = dynamic_cast<VirtualSprite*>(coll_obj);

@@ -53,28 +53,25 @@ void BindModesToLua()
 	[
 		class_<MapMode, hoa_mode_manager::GameMode>("MapMode")
 			.def(constructor<const std::string&>())
-			.def_readwrite("_camera", &MapMode::_camera)
-			.def_readwrite("_ignore_input", &MapMode::_ignore_input)
-			.def_readwrite("_run_forever", &MapMode::_run_forever)
-			.def_readwrite("_run_disabled", &MapMode::_run_disabled)
-			.def_readwrite("_run_stamina", &MapMode::_run_stamina)
-			.def_readonly("_map_event_group", &MapMode::_map_event_group)
-			.def_readonly("_dilalogue_supervisor", &MapMode::_dialogue_supervisor)
-			.def_readonly("_event_supervisor", &MapMode::_event_supervisor)
-			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
-			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
-			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
-			.def("_AddZone", &MapMode::_AddZone, adopt(_2))
-			.def("_SetCameraFocus", &MapMode::_SetCameraFocus)
-			.def("_GetDialogueSupervisor", &MapMode::_GetDialogueSupervisor) // TEMP
-			.def("_GetGeneratedObjectID", &MapMode::_GetGeneratedObjectID)
-			.def("_DrawMapLayers", &MapMode::_DrawMapLayers)
+			.def_readonly("object_supervisor", &MapMode::_object_supervisor)
+			.def_readonly("event_supervisor", &MapMode::_event_supervisor)
+			.def_readonly("dialogue_supervisor", &MapMode::_dialogue_supervisor)
+			.def_readonly("map_event_group", &MapMode::_map_event_group)
 
-			.scope
-			[
-				def("_ShowDialogueIcons", &MapMode::_ShowDialogueIcons),
-				def("_IsShowingDialogueIcons", &MapMode::_IsShowingDialogueIcons)
-			]
+			.def_readwrite("camera", &MapMode::_camera)
+			.def_readwrite("ignore_input", &MapMode::_ignore_input)
+			.def_readwrite("run_forever", &MapMode::_run_forever)
+			.def_readwrite("run_disabled", &MapMode::_run_disabled)
+			.def_readwrite("run_stamina", &MapMode::_run_stamina)
+
+			.def("AddGroundObject", &MapMode::AddGroundObject, adopt(_2))
+			.def("AddPassObject", &MapMode::AddPassObject, adopt(_2))
+			.def("AddSkyObject", &MapMode::AddSkyObject, adopt(_2))
+			.def("AddZone", &MapMode::AddZone, adopt(_2))
+			.def("SetCamera", &MapMode::SetCamera)
+			.def("SetShowDialogueIcons", &MapMode::SetShowDialogueIcons)
+			.def("IsShowDialogueIcons", &MapMode::IsShowDialogueIcons)
+			.def("DrawMapLayers", &MapMode::_DrawMapLayers)
 
 			// Namespace constants
 			.enum_("constants") [
@@ -116,6 +113,12 @@ void BindModesToLua()
 				value("FAST_SPEED", static_cast<uint32>(FAST_SPEED)),
 				value("VERY_FAST_SPEED", static_cast<uint32>(VERY_FAST_SPEED))
 			]
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<ObjectSupervisor>("ObjectSupervisor")
+			.def("GenerateObjectID", &ObjectSupervisor::GenerateObjectID)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

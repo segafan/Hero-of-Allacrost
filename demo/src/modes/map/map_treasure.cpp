@@ -119,9 +119,9 @@ void MapTreasure::LoadSaved() {
 	string event_name = "chest_" + NumberToString(GetObjectID());
 
 	//Add an event in the group having the ObjectID of the chest as name
-	if (MapMode::_current_map->_map_event_group->DoesEventExist(event_name)) {
+	if (MapMode::CurrentInstance()->GetMapEventGroup()->DoesEventExist(event_name)) {
 		// If the event is non-zero, the treasure has already been opened
-		if (MapMode::_current_map->_map_event_group->GetEvent(event_name) != 0) {
+		if (MapMode::CurrentInstance()->GetMapEventGroup()->GetEvent(event_name) != 0) {
 			SetCurrentAnimation(TREASURE_OPEN_ANIM);
 			_drunes = 0;
 			for (uint32 i = 0; i < _objects_list.size(); i++)
@@ -170,15 +170,15 @@ void MapTreasure::Open() {
 	string event_name = "chest_" + NumberToString(GetObjectID());
 
 	// Add an event to the map group indicating that the chest has now been opened
-	if (MapMode::_current_map->_map_event_group->DoesEventExist(event_name) == true) {
-		MapMode::_current_map->_map_event_group->SetEvent(event_name, 1);
+	if (MapMode::CurrentInstance()->GetMapEventGroup()->DoesEventExist(event_name) == true) {
+		MapMode::CurrentInstance()->GetMapEventGroup()->SetEvent(event_name, 1);
 	}
 	else {
-		MapMode::_current_map->_map_event_group->AddNewEvent(event_name, 1);
+		MapMode::CurrentInstance()->GetMapEventGroup()->AddNewEvent(event_name, 1);
 	}
 
 	// Initialize the treasure menu to display the contents of the open treasure
-	MapMode::_current_map->_treasure_supervisor->Initialize(this);
+	MapMode::CurrentInstance()->GetTreasureSupervisor()->Initialize(this);
 }
 
 // ****************************************************************************
@@ -262,7 +262,7 @@ void TreasureSupervisor::Initialize(MapTreasure* treasure) {
 	}
 
 	_treasure = treasure;
-	MapMode::_current_map->_PushState(STATE_TREASURE);
+	MapMode::CurrentInstance()->PushState(STATE_TREASURE);
 
 	// Construct the object list, including any drunes that were contained within the treasure
 	if (_treasure->_drunes != 0) {
@@ -384,7 +384,7 @@ void TreasureSupervisor::Finish() {
 	_list_window.Hide();
 	_list_options.ClearOptions();
 
-	MapMode::_current_map->_PopState();
+	MapMode::CurrentInstance()->PopState();
 }
 
 
@@ -400,7 +400,7 @@ void TreasureSupervisor::_UpdateAction() {
 			_list_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		}
 		else if (_action_options.GetSelection() == 2) { // "Menu" action
-			MenuMode* MM = new MenuMode(MapMode::_current_map->_map_name, MapMode::_current_map->_location_graphic.GetFilename());
+			MenuMode* MM = new MenuMode(MapMode::CurrentInstance()->GetMapName(), MapMode::CurrentInstance()->GetLocationGraphic().GetFilename());
 			ModeManager->Push(MM);
 			return;
 		}

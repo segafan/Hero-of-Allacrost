@@ -394,6 +394,10 @@ public:
 
 	~ObjectSupervisor();
 
+	//! \brief Returns a unique ID integer for an object to use
+	uint16 GenerateObjectID()
+		{ return ++_last_id; }
+
 	/** \brief Retrieves a pointer to an object on this map
 	*** \param object_id The id number of the object to retreive
 	*** \return A pointer to the map object, or NULL if no object with that ID was found

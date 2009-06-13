@@ -261,12 +261,12 @@ context_01 = { 0, 0, 0, -1, 0, 0, 1, -1, 0, 0, 2, -1, 0, 0, 3, -1, 0, 0, 4, -1, 
 laila = nil; -- Pointer to Laila''s map sprite
 
 
-function Load(m, d)
+function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
-	map._run_forever = true;
-	dialogue_supervisor = d;
-	event_supervisor = m._event_supervisor;
+	map.run_forever = true;
+	dialogue_supervisor = m.dialogue_supervisor;
+	event_supervisor = m.event_supervisor;
 
 	local sprite;
 	local dialogue;
@@ -276,9 +276,9 @@ function Load(m, d)
 
 	-- Create the player''s sprite
 	sprite = ConstructSprite("Claudius", 1000, 100, 36);
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 	-- Set the camera to focus on the player''s sprite
-	map:_SetCameraFocus(sprite);
+	map:SetCamera(sprite);
 
 
 	-- Create NPC sprites and actions
@@ -286,7 +286,7 @@ function Load(m, d)
 	-- Add NPC Laila
 	laila = ConstructSprite("Laila", 2, 105, 32, 0.0, 0.0);
 	-- If Laila previously joined the party in the saved game, remove her sprite
-	if (map._map_event_group:DoesEventExist("laila_joined") == true) then
+	if (map.map_event_group:DoesEventExist("laila_joined") == true) then
 		map_functions[1]();
 	end
 
@@ -369,7 +369,7 @@ function Load(m, d)
 	event:AddEventLink(10001, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	map:_AddGroundObject(laila);
+	map:AddGroundObject(laila);
 
 
 	-- Add NPC Marcus
@@ -399,7 +399,7 @@ function Load(m, d)
 	event:AddEventLink(10005, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 	
 	-- Add NPC Vanica
@@ -436,7 +436,7 @@ function Load(m, d)
 	event:AddEventLink(10008, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 
 	-- Add NPC Alexander
@@ -465,7 +465,7 @@ function Load(m, d)
 	event:AddEventLink(10011, false, 0);
 	event_supervisor:RegisterEvent(event);
 --]]
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 
 	-- Add NPC Laine
@@ -500,7 +500,7 @@ function Load(m, d)
 	event:AddEventLink(10016, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 
 	-- Add NPC Torl
@@ -518,7 +518,7 @@ function Load(m, d)
 	event:AddEventLink(10019, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 
 	-- Add NPC Female Merchant
@@ -542,7 +542,7 @@ function Load(m, d)
 	event:AddEventLink(10020, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 
 	-- Add Livia
@@ -560,7 +560,7 @@ function Load(m, d)
 	event:AddEventLink(10021, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 
 	-- Add NPC Octavia
@@ -578,7 +578,7 @@ function Load(m, d)
 	event:AddEventLink(10022, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 
 	-- Add a treasure near the town''s exit zone
@@ -589,7 +589,7 @@ function Load(m, d)
 	chest:SetYPosition(34, 0);
 	chest:AddDrunes(100);
 	chest:AddObject(1, 2); -- Adds 2 Healing Potions
-	map:_AddGroundObject(chest);
+	map:AddGroundObject(chest);
 
 	-- Add a treasure inside the merchant''s house
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
@@ -598,7 +598,7 @@ function Load(m, d)
 	chest:SetXPosition(8, 0);
 	chest:SetYPosition(52, 0);
 	chest:AddDrunes(400);
-	map:_AddGroundObject(chest);
+	map:AddGroundObject(chest);
 
 	
 
@@ -607,7 +607,7 @@ function Load(m, d)
 	exit_zone = hoa_map.MapZone();
 	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
 	exit_zone:AddSection(hoa_map.ZoneSection(118, 30, 119, 40));
-	map:_AddZone(exit_zone);
+	map:AddZone(exit_zone);
 
 	-- Create two zones for switching the map context
 	context_zone = hoa_map.ContextZone(1, 2);
@@ -615,14 +615,14 @@ function Load(m, d)
 	context_zone:AddSection(hoa_map.ZoneSection(92, 73, 95, 74), true);
 	context_zone:AddSection(hoa_map.ZoneSection(90, 70, 91, 73), true);
 	context_zone:AddSection(hoa_map.ZoneSection(96, 70, 97, 73), true);
-	map:_AddZone(context_zone);
+	map:AddZone(context_zone);
 
 	context_zone = hoa_map.ContextZone(1, 2);
 	context_zone:AddSection(hoa_map.ZoneSection(10, 60, 13, 62), false);
 	context_zone:AddSection(hoa_map.ZoneSection(10, 63, 13, 64), true);
 	context_zone:AddSection(hoa_map.ZoneSection(8, 60, 9, 62), true);
 	context_zone:AddSection(hoa_map.ZoneSection(14, 60, 15, 62), true);
-	map:_AddZone(context_zone);
+	map:AddZone(context_zone);
 
 	event_supervisor:StartEvent(10001);
 	event_supervisor:StartEvent(10005);
@@ -643,7 +643,7 @@ end -- function Load()
 
 function Update()
 	-- Check if the map camera is in the exit zone
-	if (exit_zone:IsInsideZone(map._camera.x_position, map._camera.y_position) == true) then
+	if (exit_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
 		LoadNewMap("demo_cave");
 	end
 end
@@ -653,8 +653,8 @@ end
 
 -- Adds Laila to the party and removes her sprite from the map
 map_functions[1] = function()
-	if (map._map_event_group:DoesEventExist("laila_joined") == false) then
-		map._map_event_group:AddNewEvent("laila_joined", 1);
+	if (map.map_event_group:DoesEventExist("laila_joined") == false) then
+		map.map_event_group:AddNewEvent("laila_joined", 1);
 		GlobalManager:AddCharacter(LAILA);
 	end
 

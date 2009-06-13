@@ -83,28 +83,8 @@ namespace private_map {
 *** classes should be viewed as extensions of the MapMode class.
 *** ***************************************************************************/
 class MapMode : public hoa_mode_manager::GameMode {
-	friend class private_map::MapFrame;
-	friend class private_map::MapObject;
-	friend class private_map::PhysicalObject;
-	friend class private_map::MapTreasure;
-	friend class private_map::VirtualSprite;
-	friend class private_map::MapSprite;
-	friend class private_map::EnemySprite;
-	friend class private_map::DialogueSupervisor;
-	friend class private_map::TreasureSupervisor;
-	friend class private_map::MapDialogue;
-	friend class private_map::MapDialogueOptions;
-	friend class private_map::DialogueEvent;
-	friend class private_map::MapTransitionEvent;
-	friend class private_map::PathMoveSpriteEvent;
-	friend class private_map::RandomMoveSpriteEvent;
-	friend class private_map::ScriptedEvent;
-	friend class private_map::EnemyZone;
-	friend class private_map::ContextZone;
-	friend class private_map::ObjectSupervisor;
-	friend class private_map::TileSupervisor;
-
 	friend void hoa_defs::BindModesToLua();
+
 public:
 	//! \param filename The name of the Lua file that retains all data about the map to create
 	MapMode(std::string filename);
@@ -120,13 +100,112 @@ public:
 	//! \brief The highest level draw function that will call the appropriate lower-level draw functions
 	void Draw();
 
+	// The methods below this line are not intended to be used outside of the map code
+
+	//! \brief Empties the state stack and places an invalid state on top
+	void ResetState();
+
+	/** \brief Pushes a state type to the top of the state stack, making it the active state
+	*** \param state The state to push onto the stack
+	**/
+	void PushState(private_map::MAP_STATE state);
+
+	//! \brief Removes the highest item in the state stack
+	void PopState();
+
+	/** \brief Retrieves the current map state
+	*** \return The top-most item on the map state stack
+	**/
+	private_map::MAP_STATE CurrentState();
+
+	/** \brief Opens the map tablespace of the map script
+	*** \param use_global Has the same effect as in ReadScriptDescriptor#OpenTable
+	**/
+	void OpenMapTablespace(bool use_global = false)
+		{ _map_script.OpenTable(_map_tablespace, use_global); }
+
+	//! \brief Adds a new object to the ground object layer
+	void AddGroundObject(private_map::MapObject *obj);
+
+	//! \brief Adds a new object to the pass object layer
+	void AddPassObject(private_map::MapObject *obj);
+
+	//! \brief Adds a new object to the sky object layer
+	void AddSkyObject(private_map::MapObject *obj);
+
+	//! \brief Adds a new zone to the map
+	void AddZone(private_map::MapZone *zone);
+
+	/** \brief Checks if a GlobalEnemy with the specified id is already loaded in the MapMode#_enemies container
+	*** \param id The id of the enemy to find
+	*** \return True if the enemy is loaded
+	**/
+	bool IsEnemyLoaded(uint32 id) const;
+
+	//! \brief Class member accessor functions
+	//@{
+	static MapMode* const CurrentInstance()
+		{ return _current_instance; }
+
+	const hoa_utils::ustring& GetMapName() const
+		{ return _map_name; }
+
+	hoa_global::GlobalEventGroup* GetMapEventGroup() const
+		{ return _map_event_group; }
+
+	hoa_script::ReadScriptDescriptor& GetMapScript()
+		{ return _map_script; }
+
+	private_map::TileSupervisor* GetTileSupervisor() const
+		{ return _tile_supervisor; }
+
+	private_map::ObjectSupervisor* GetObjectSupervisor() const
+		{ return _object_supervisor; }
+
+	private_map::EventSupervisor* GetEventSupervisor() const
+		{ return _event_supervisor; }
+
+	private_map::DialogueSupervisor* GetDialogueSupervisor() const
+		{ return _dialogue_supervisor; }
+
+	private_map::TreasureSupervisor* GetTreasureSupervisor() const
+		{ return _treasure_supervisor; }
+
+	const private_map::MapFrame& GetMapFrame() const
+		{ return _map_frame; }
+
+	private_map::VirtualSprite* GetCamera() const
+		{ return _camera; }
+
+	void SetCamera(private_map::VirtualSprite* sprite)
+		{ _camera = sprite; }
+
+	uint8 GetNumMapContexts() const
+		{ return _num_map_contexts; }
+
+	private_map::MAP_CONTEXT GetCurrentContext() const
+		{ return _current_context; }
+
+	bool IsShowDialogueIcons() const
+		{ return _show_dialogue_icons; }
+
+	void SetShowDialogueIcons(bool state)
+		{ _show_dialogue_icons = state; }
+
+	const hoa_video::AnimatedImage& GetDialogueIcon() const
+		{ return _dialogue_icon; }
+
+	const hoa_video::StillImage& GetLocationGraphic() const
+		{ return _location_graphic; }
+	//@}
+
 private:
 	// ----- Members : Names and Identifiers -----
 
 	/** \brief A reference to the current instance of MapMode
 	*** This is used by other map clases to be able to refer to the map that they exist in.
 	**/
-	static MapMode *_current_map;
+	static MapMode* _current_instance;
 
 	//! \brief The name of the Lua file that represents the map
 	std::string _map_filename;
@@ -149,7 +228,7 @@ private:
 	**/
 	hoa_script::ReadScriptDescriptor _map_script;
 
-	// ----- Members : Sub-management Objects -----
+	// ----- Members : Supervisor Class Objects and Script Functions -----
 
 	//! \brief Instance of helper class to map mode. Responsible for tile related operations.
 	private_map::TileSupervisor* _tile_supervisor;
@@ -157,11 +236,11 @@ private:
 	//! \brief Instance of helper class to map mode. Responsible for object and sprite related operations.
 	private_map::ObjectSupervisor* _object_supervisor;
 
-	//! \brief Instance of helper class to map mode. Responsible for dialogue execution and display operations.
-	private_map::DialogueSupervisor* _dialogue_supervisor;
-
 	//! \brief Instance of helper class to map mode. Responsible for updating and managing active map events.
 	private_map::EventSupervisor* _event_supervisor;
+
+	//! \brief Instance of helper class to map mode. Responsible for dialogue execution and display operations.
+	private_map::DialogueSupervisor* _dialogue_supervisor;
 
 	//! \brief Class member object which processes all information related to treasure discovery
 	private_map::TreasureSupervisor* _treasure_supervisor;
@@ -181,7 +260,13 @@ private:
 
 	// ----- Members : Properties and State -----
 
-	//! \brief The number of contexts for this map (at least 1, at most 32)
+	//! \brief Retains information needed to correctly draw the next map frame
+	private_map::MapFrame _map_frame;
+
+	//! \brief A pointer to the map sprite that the map camera will focus on
+	private_map::VirtualSprite* _camera;
+
+	//! \brief The number of contexts that this map uses (at least 1, at most 32)
 	uint8 _num_map_contexts;
 
 	/** \brief The currently active map context
@@ -189,31 +274,30 @@ private:
 	**/
 	private_map::MAP_CONTEXT _current_context;
 
-	/** \brief The amount of stamina
-	*** This value ranges from 0 (empty) to 10000 (full). Stamina takes 10 seconds to completely fill from
-	*** the empty state and 5 seconds to empty from the full state.
+	/** \brief Maintains a stack state for the different modes of operation that the map may be in
+	*** The top (back) of the stack is the active mode
 	**/
-	uint32 _run_stamina;
-
-	//! \brief Indicates the current state that the map is in, such as when a dialogue is taking place.
-	uint8 _map_state;
-
 	std::vector<private_map::MAP_STATE> _state_stack;
 
 	//! \brief While true, all user input commands to map mode are ignored
 	bool _ignore_input;
 
-	//! \brief If true, the player's stamina will not drain as they run
-	bool _run_forever;
-
 	//! \brief While true, the player is not allowed to run at all.
 	bool _run_disabled;
 
-	//! \brief Indicates if dialogue icons should be drawn or not.
-	//! \todo I don't think that this needs to be a static member. It should be true by default.
-	static bool _show_dialogue_icons;
+	//! \brief If true, the player's stamina will not drain as they run
+	bool _run_forever;
 
-	// ----- Members : Map Timing and Graphics -----
+	/** \brief A counter for the player's stamina
+	*** This value ranges from 0 (empty) to 10000 (full). Stamina takes 10 seconds to completely fill from
+	*** the empty state and 5 seconds to empty from the full state.
+	**/
+	uint32 _run_stamina;
+
+	//! \brief Indicates if dialogue icons should be drawn above NPCs who have unread dialogue
+	bool _show_dialogue_icons;
+
+	// ----- Members : Timing and Graphics -----
 
 	/** \brief A timer used for when the player first enters the map
 	*** This timer is set to 7000 ms (7 seconds) and is used to display the map's location graphic
@@ -222,30 +306,19 @@ private:
 	**/
 	hoa_system::SystemTimer _intro_timer;
 
-	//! \brief Holds an image that represents an outline of the location, used primarily in MenuMode
+	//! \brief Freestyle art image of the current map
 	hoa_video::StillImage _location_graphic;
 
-	//! \brief Icon which appears over NPCs who have unread dialogue
-	hoa_video::AnimatedImage _new_dialogue_icon;
+	//! \brief An icon graphic which appears over the heads of NPCs who have dialogue that has not been read by the player
+	hoa_video::AnimatedImage _dialogue_icon;
 
-	//! \brief Image which underlays the stamina bar for "running"
+	//! \brief Image which underlays the stamina bar for running
 	hoa_video::StillImage _stamina_bar_background;
 
 	//! \brief Image which overlays the stamina bar to show that the player has unlimited running
 	hoa_video::StillImage _stamina_bar_infinite_overlay;
 
-	// ----- Members : Containers and Other Data -----
-
-	/** \brief A pointer to the map sprite that the map camera will focus on
-	*** \note Note that this member is a pointer to a map sprite, not a map object.
-	*** However, this does not mean that the camera is not able to focus on non-sprite
-	*** map objects. The MapMode#_virtual_focus member can be used to emulate that
-	*** focus.
-	**/
-	private_map::VirtualSprite* _camera;
-
-	//! \brief Retains information needed to correctly draw the next map frame
-	private_map::MapFrame _draw_info;
+	// ----- Members : Containers -----
 
 	//! \brief The music that the map will need to make use of
 	std::vector<hoa_audio::MusicDescriptor> _music;
@@ -261,24 +334,6 @@ private:
 
 	// ----- Methods -----
 
-	//! \brief Empties the state stack and places an invalid state on top
-	void _ResetState();
-
-	/** \brief Pushes a state type to the top of the state stack, making it the active state
-	*** \param state The state to push onto the stack
-	**/
-	void _PushState(private_map::MAP_STATE state);
-
-	//! \brief Removes the highest item in the state stack
-	void _PopState();
-
-	/** \brief Retrieves the current map state
-	*** \return The top-most item on the map state stack
-	**/
-	private_map::MAP_STATE _CurrentState();
-
-
-
 	//! \brief Loads all map data contained in the Lua file that defines the map
 	void _Load();
 
@@ -293,37 +348,6 @@ private:
 
 	//! \brief Draws all GUI visuals, such as dialogue icons and the stamina bar
 	void _DrawGUI();
-
-	/** \name Lua Access Functions
-	*** These methods exist to allow Lua to make function calls to examine and modify the map's state.
-	**/
-	//@{
-	void _AddGroundObject(private_map::MapObject *obj);
-
-	void _AddPassObject(private_map::MapObject *obj);
-
-	void _AddSkyObject(private_map::MapObject *obj);
-
-	void _AddZone(private_map::MapZone *zone);
-
-	uint16 _GetGeneratedObjectID();
-
-	// TEMP
-	private_map::DialogueSupervisor* _GetDialogueSupervisor() const
-		{ return _dialogue_supervisor; }
-
-	private_map::VirtualSprite* _GetCameraFocus() const
-		{ return _camera; }
-
-	static bool _IsShowingDialogueIcons()
-		{ return _show_dialogue_icons; }
-
-	void _SetCameraFocus(private_map::VirtualSprite *sprite)
-		{ _camera = sprite; }
-
-	static void _ShowDialogueIcons( bool state )
-		{ _show_dialogue_icons = state; }
-	//@}
 }; // class MapMode
 
 } // namespace hoa_map;
