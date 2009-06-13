@@ -749,6 +749,151 @@ bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 
 
 
+bool ObjectSupervisor::_AlignSpritePosition(VirtualSprite* sprite, COLLISION_TYPE coll_type, MapObject* coll_obj) {
+	bool perform_horizontal_alignment, perform_vertical_alignment;
+	bool north_or_south, east_or_west;
+
+
+	// ---------- (1):
+	MapRectangle sprite_coll_rect;
+	sprite->GetCollisionRectangle(sprite_coll_rect);
+	MapRectangle object_coll_rect;
+	if (coll_obj != NULL) {
+		coll_obj->GetCollisionRectangle(object_coll_rect);
+	}
+
+	if (sprite->direction & MOVING_DIAGONALLY) {
+		perform_horizontal_alignment = true;
+		perform_vertical_alignment = true;
+	}
+	else if (sprite->direction & (NORTH | SOUTH)) {
+		perform_horizontal_alignment = false;
+		perform_vertical_alignment = true;
+	}
+	else if (sprite->direction & (EAST | WEST)) {
+		perform_horizontal_alignment = true;
+		perform_vertical_alignment = false;
+	}
+	else {
+		IF_PRINT_WARNING(MAP_DEBUG) << "invalid sprite direction: " << sprite->direction << endl;
+		return false;
+	}
+
+	if (sprite->direction & FACING_NORTH) {
+		north_or_south = true;
+	}
+	else if (sprite->direction & FACING_SOUTH) {
+		north_or_south = false;
+	}
+	if (sprite->direction & FACING_EAST) {
+		east_or_west = true;
+	}
+	else if (sprite->direction & FACING_WEST) {
+		east_or_west = false;
+	}
+
+	// ---------- (2):
+	float x_value, x_base;
+	float y_value, y_base;
+
+	if (coll_type == BOUNDARY_COLLISION) {
+		if (perform_horizontal_alignment == true) {
+			x_value = (east_or_west) ? sprite_coll_rect.right : sprite_coll_rect.left;
+			x_base = (east_or_west) ? static_cast<float>(_num_grid_cols - 1) : 0.0f;
+		}
+		if (perform_vertical_alignment == true) {
+			y_value = (north_or_south) ? sprite_coll_rect.top : sprite_coll_rect.bottom;
+			y_base = (north_or_south) ? 0.0f : static_cast<float>(_num_grid_rows - 1);
+		}
+	}
+	else if (coll_type == GRID_COLLISION) {
+		if (perform_horizontal_alignment == true) {
+			x_value = (east_or_west) ? sprite_coll_rect.right - static_cast<float>(static_cast<uint32>(sprite_coll_rect.right)) :
+				sprite_coll_rect.left - static_cast<float>(static_cast<uint32>(sprite_coll_rect.left));
+			x_base = 0.0f;
+		}
+		if (perform_vertical_alignment == true) {
+			y_value = (north_or_south) ? sprite_coll_rect.top - static_cast<float>(static_cast<uint32>(sprite_coll_rect.top)) :
+				sprite_coll_rect.bottom - static_cast<float>(static_cast<uint32>(sprite_coll_rect.bottom));
+			y_base = 0.0f;
+		}
+	}
+	else if (coll_type == OBJECT_COLLISION) {
+		coll_obj->GetCollisionRectangle(object_coll_rect);
+		if (perform_horizontal_alignment == true) {
+			x_value = (east_or_west) ? sprite_coll_rect.right : sprite_coll_rect.left;
+			x_base = (east_or_west) ? object_coll_rect.left : object_coll_rect.right;
+		}
+		if (perform_vertical_alignment == true) {
+			y_value = (north_or_south) ? sprite_coll_rect.top : sprite_coll_rect.bottom;
+			y_base = (north_or_south) ? object_coll_rect.bottom : object_coll_rect.top;
+		}
+	}
+	else {
+		IF_PRINT_WARNING(MAP_DEBUG) << "invalid coll_type parameter: " << coll_type << endl;
+		return false;
+	}
+
+	// ---------- (3):
+	bool horizontal_is_aligned = false, vertical_is_aligned = false;
+	if (perform_horizontal_alignment == true) {
+		horizontal_is_aligned = IsFloatEqual(x_value, x_base);
+	}
+	if (perform_vertical_alignment == true) {
+		vertical_is_aligned = IsFloatEqual(y_value, y_base);
+	}
+
+	if ((horizontal_is_aligned == true) && (perform_vertical_alignment == false)) {
+		return false;
+	}
+	else if ((vertical_is_aligned == true) && (perform_horizontal_alignment == false)) {
+		return false;
+	}
+	else if ((horizontal_is_aligned == true) && (vertical_is_aligned == true)) {
+		return false;
+	}
+
+	// ---------- (4):
+	float saved_x_offset = sprite->x_offset;
+	float saved_y_offset = sprite->y_offset;
+
+	if ((perform_horizontal_alignment == true) && (perform_vertical_alignment == false)) {
+		sprite->x_offset += x_value - x_base;
+	}
+	else if ((perform_horizontal_alignment == false) && (perform_vertical_alignment == true)) {
+		sprite->y_offset += y_value - y_base;
+	}
+	else { // then ((perform_horizontal_alignment == true) && (perform_vertical_alignment == true))
+		// Check for conditions where one of the two sides is already aligned
+		if (horizontal_is_aligned == true) {
+
+		}
+		else if (vertical_is_aligned == true) {
+
+		}
+		else {
+			sprite->x_offset += x_value - x_base;
+			sprite->y_offset += y_value - y_base;
+		}
+	}
+
+	// ---------- (5):
+	if (DetectCollision(sprite, NULL) != NO_COLLISION) {
+		// Restore the sprite's position and give up any further efforts for positional alignment
+		sprite->x_offset = saved_x_offset;
+		sprite->y_offset = saved_y_offset;
+		return false;
+	}
+	else {
+		// The alignment was successful, check the position offsets and state that the sprite's position has been changed
+		sprite->CheckPositionOffsets();
+		sprite->moved_position = true;
+		return true;
+	}
+}
+
+
+
 bool ObjectSupervisor::_AdjustSpriteOrthogonal(VirtualSprite* sprite, MapObject* coll_obj) {
 	// A horizontal adjustment means that the sprite was trying to move vertically and needs to be adjusted horizontally around a collision
 	bool horizontal_adjustment = (sprite->direction & (NORTH | SOUTH));
@@ -1264,13 +1409,13 @@ bool ObjectSupervisor::_AdjustSpritePosition(VirtualSprite* sprite, uint16 direc
 	}
 
 	// Check for a collision in the newly adjusted position
-	if (DetectCollision(sprite, NULL) == true) {
+	if (DetectCollision(sprite, NULL) != NO_COLLISION) {
 		// Restore the sprite's position and give up any further efforts for movement adjustment
 		if (direction & (NORTH | SOUTH)) {
 			sprite->y_offset = saved_offset;
 		}
 		else {
-			sprite->y_offset = saved_offset;
+			sprite->x_offset = saved_offset;
 		}
 		return false;
 	}
