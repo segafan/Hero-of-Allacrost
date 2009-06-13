@@ -603,6 +603,14 @@ private:
 
 	// ---------- Methods
 
+	/** \brief Attempts to align a sprite alongside whatever the sprite may have collided against
+	*** \param sprite The sprite to examine for positional alignment
+	*** \param coll_type The type of collision that occurred
+	*** \param coll_obj The object that was collided with in an object type collision, or NULL if no object was collided with
+	*** \return True if the sprite's position was successfully modified
+	**/
+	bool _AlignSpritePosition(VirtualSprite* sprite, COLLISION_TYPE coll_type, MapObject* coll_obj);
+
 	/** \brief A helper function to _AdjustSpriteAroundCollision that handles orthogonal adjustments
 	*** \param sprite The sprite to examine for movement adjustments
 	*** \param coll_obj The object that was collided with in an object type collision, or NULL if no object was collided with
