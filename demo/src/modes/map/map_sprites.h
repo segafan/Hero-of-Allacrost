@@ -329,9 +329,6 @@ protected:
 	//! \brief True if at least one dialogue referenced by this sprite has not yet been viewed -and- is available to be viewed
 	bool _has_unseen_dialogue;
 
-	//! \brief Used to fade the dialogue icon according to distance from the camera
-	hoa_video::Color _dialogue_icon_color;
-
 	/** \name Saved state attributes
 	*** These attributes are used to save and load the state of a VirtualSprite
 	**/

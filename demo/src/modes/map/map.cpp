@@ -52,36 +52,36 @@ using namespace hoa_map::private_map;
 namespace hoa_map {
 
 // Initialize static class variables
-MapMode *MapMode::_current_map = NULL;
-bool MapMode::_show_dialogue_icons = true;
+MapMode* MapMode::_current_instance = NULL;
 
 // ****************************************************************************
-// ********** MapMode Class Functions
+// ********** MapMode Public Class Methods
 // ****************************************************************************
 
 MapMode::MapMode(string filename) :
 	GameMode(),
 	_map_filename(filename),
-	_map_tablespace(""), // will be properly initialized in the Load() function
+	_map_tablespace(""),
 	_map_event_group(NULL),
 	_tile_supervisor(NULL),
 	_object_supervisor(NULL),
-	_dialogue_supervisor(NULL),
 	_event_supervisor(NULL),
+	_dialogue_supervisor(NULL),
 	_treasure_supervisor(NULL),
+	_camera(NULL),
 	_num_map_contexts(0),
 	_current_context(MAP_CONTEXT_01),
-	_run_stamina(10000),
 	_ignore_input(false),
-	_run_forever(false),
 	_run_disabled(false),
-	_camera(NULL)
+	_run_forever(false),
+	_run_stamina(10000),
+	_show_dialogue_icons(true)
 {
 	mode_type = MODE_MANAGER_MAP_MODE;
-	_current_map = this;
+	_current_instance = this;
 
-	_ResetState();
-	_PushState(STATE_EXPLORE);
+	ResetState();
+	PushState(STATE_EXPLORE);
 
 	// Create the event group name by modifying the filename to consists only of alphanumeric characters and underscores
 	// This will make it a valid identifier name in Lua syntax
@@ -96,8 +96,8 @@ MapMode::MapMode(string filename) :
 
 	_tile_supervisor = new TileSupervisor();
 	_object_supervisor = new ObjectSupervisor();
-	_dialogue_supervisor = new DialogueSupervisor();
 	_event_supervisor = new EventSupervisor();
+	_dialogue_supervisor = new DialogueSupervisor();
 	_treasure_supervisor = new TreasureSupervisor();
 
 	_intro_timer.Initialize(7000, 0, this);
@@ -107,8 +107,8 @@ MapMode::MapMode(string filename) :
 
 	// Load miscellaneous map graphics
 	vector<uint32> timings(16, 100); // holds the timing data for the new dialogue animation; 16 frames at 100ms each
-	_new_dialogue_icon.SetDimensions(2, 2);
-	if (_new_dialogue_icon.LoadFromFrameSize("img/misc/dialogue_icon.png", timings, 32, 32) == false)
+	_dialogue_icon.SetDimensions(2, 2);
+	if (_dialogue_icon.LoadFromFrameSize("img/misc/dialogue_icon.png", timings, 32, 32) == false)
 		IF_PRINT_WARNING(MAP_DEBUG) << "failed to load the new dialogue icon image" << endl;
 
 	if (_stamina_bar_background.Load("img/misc/stamina_bar_background.png", 227, 24) == false)
@@ -135,8 +135,8 @@ MapMode::~MapMode() {
 
 	delete(_tile_supervisor);
 	delete(_object_supervisor);
-	delete(_dialogue_supervisor);
 	delete(_event_supervisor);
+	delete(_dialogue_supervisor);
 	delete(_treasure_supervisor);
 
 	_map_script.CloseFile();
@@ -149,13 +149,13 @@ void MapMode::Reset() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 
-	// Let all other map classes know that this is now the active map
-	MapMode::_current_map = this;
+	// Set the active instance pointer to this map
+	MapMode::_current_instance = this;
 
 	// Make the map location known globally to other code that may need to know this information
 	GlobalManager->SetLocation(MakeUnicodeString(_map_filename), _location_graphic.GetFilename());
 
-	// TEMP: This will need to be scripted later
+	// TODO: This music playback code should be scripted
 	if (_music.size() > 0 && _music.back().GetState() != AUDIO_STATE_PLAYING) {
 		_music.back().Play();
 	}
@@ -168,6 +168,7 @@ void MapMode::Reset() {
 void MapMode::Update() {
 	// TODO: we need to detect if a battle is about to occur and if so, fade the screen gradually from
 	// map mode into the battle
+	_dialogue_icon.Update();
 
 	// TODO: instead of doing this every frame, see if it can be done only when the _camera pointer is modified
 	_current_context = _camera->GetContext();
@@ -182,17 +183,17 @@ void MapMode::Update() {
 		return;
 	}
 
-
 	// ---------- (1) Call the map script's update function
 	if (_update_function)
 		ScriptCallFunction<void>(_update_function);
 
-	// ---------- (3) Update all animated tile images
+	// ---------- (2) Update all animated tile images
 	_tile_supervisor->Update();
 	_object_supervisor->Update();
 	_object_supervisor->SortObjects();
 
-	switch (_CurrentState()) {
+	// ---------- (3) Update the active state of the map
+	switch (CurrentState()) {
 		case STATE_EXPLORE:
 			_UpdateExplore();
 			break;
@@ -205,12 +206,12 @@ void MapMode::Update() {
 			_treasure_supervisor->Update();
 			break;
 		default:
-			IF_PRINT_WARNING(MAP_DEBUG) << "map was set in an unknown state: " << _CurrentState() << endl;
-			_ResetState();
+			IF_PRINT_WARNING(MAP_DEBUG) << "map was set in an unknown state: " << CurrentState() << endl;
+			ResetState();
 			break;
 	}
 
-	// ---------- (5) Update all active map events
+	// ---------- (4) Update all active map events
 	_event_supervisor->Update();
 } // void MapMode::Update()
 
@@ -218,32 +219,34 @@ void MapMode::Update() {
 
 void MapMode::Draw() {
 	_CalculateMapFrame();
+
 	if (_draw_function)
 		ScriptCallFunction<void>(_draw_function);
 	else
 		_DrawMapLayers();
+
 	_DrawGUI();
-	if (_CurrentState() == STATE_DIALOGUE) {
+	if (CurrentState() == STATE_DIALOGUE) {
 		_dialogue_supervisor->Draw();
 	}
 } // void MapMode::_Draw()
 
 
 
-void MapMode::_ResetState() {
+void MapMode::ResetState() {
 	_state_stack.clear();
 	_state_stack.push_back(STATE_INVALID);
 }
 
 
 
-void MapMode::_PushState(MAP_STATE state) {
+void MapMode::PushState(MAP_STATE state) {
 	_state_stack.push_back(state);
 }
 
 
 
-void MapMode::_PopState() {
+void MapMode::PopState() {
 	_state_stack.pop_back();
 	if (_state_stack.empty() == true) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "stack was empty after operation, reseting state stack" << endl;
@@ -253,7 +256,7 @@ void MapMode::_PopState() {
 
 
 
-MAP_STATE MapMode::_CurrentState() {
+MAP_STATE MapMode::CurrentState() {
 	if (_state_stack.empty() == true) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "stack was empty, reseting state stack" << endl;
 		_state_stack.push_back(STATE_INVALID);
@@ -262,6 +265,46 @@ MAP_STATE MapMode::_CurrentState() {
 }
 
 
+
+void MapMode::AddGroundObject(MapObject *obj) {
+	_object_supervisor->_ground_objects.push_back(obj);
+	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
+}
+
+
+
+void MapMode::AddPassObject(MapObject *obj) {
+	_object_supervisor->_pass_objects.push_back(obj);
+	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
+}
+
+
+
+void MapMode::AddSkyObject(MapObject *obj) {
+	_object_supervisor->_sky_objects.push_back(obj);
+	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
+}
+
+
+
+void MapMode::AddZone(MapZone *zone) {
+	_object_supervisor->_zones.push_back(zone);
+}
+
+
+
+bool MapMode::IsEnemyLoaded(uint32 id) const {
+	for (uint32 i = 0; i < _enemies.size(); i++) {
+		if (_enemies[i]->GetID() == id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// ****************************************************************************
+// ********** MapMode Private Class Methods
+// ****************************************************************************
 
 void MapMode::_Load() {
 	// ---------- (1) Open map script file and read in the basic map properties and tile definitions
@@ -319,7 +362,7 @@ void MapMode::_Load() {
 	// ---------- (5) Call the map script's custom load function and get a reference to all other script function pointers
 	ScriptObject map_table(luabind::from_stack(_map_script.GetLuaState(), hoa_script::private_script::STACK_TOP));
 	ScriptObject function = map_table["Load"];
-	ScriptCallFunction<void>(function, this, _dialogue_supervisor);
+	ScriptCallFunction<void>(function, this);
 
 	_update_function = _map_script.ReadFunctionPointer("Update");
 	_draw_function = _map_script.ReadFunctionPointer("Draw");
@@ -330,7 +373,7 @@ void MapMode::_Load() {
 
 	// TODO: Need to figure out a new function appropriate for this code?
 	// TEMP: The line below is very bad to do, but is necessary for the UpdateDialogueStatus function to work correctly
-	_current_map = this;
+	_current_instance = this;
 	for (map<uint16, MapObject*>::iterator i = _object_supervisor->_all_objects.begin(); i != _object_supervisor->_all_objects.end(); i++) {
 		if (i->second->GetType() == SPRITE_TYPE) {
 			MapSprite* sprite = dynamic_cast<MapSprite*>(i->second);
@@ -454,22 +497,22 @@ void MapMode::_CalculateMapFrame() {
 
 	// ---------- (2) Calculate all four screen edges and determine
 	// Determine the draw coordinates of the top left corner using the camera's current position
-	_draw_info.tile_x_start = 1.0f - rounded_x_offset;
+	_map_frame.tile_x_start = 1.0f - rounded_x_offset;
 	if (IsOddNumber(_camera->x_position))
-		_draw_info.tile_x_start -= 1.0f;
+		_map_frame.tile_x_start -= 1.0f;
 
-	_draw_info.tile_y_start = 2.0f - rounded_y_offset;
+	_map_frame.tile_y_start = 2.0f - rounded_y_offset;
 	if (IsOddNumber(_camera->y_position))
-		_draw_info.tile_y_start -= 1.0f;
+		_map_frame.tile_y_start -= 1.0f;
 
 	// The starting  row and column of tiles to draw is determined by the map camera's position
-	_draw_info.starting_col = (_camera->x_position / 2) - HALF_TILE_COLS;
-	_draw_info.starting_row = (_camera->y_position / 2) - HALF_TILE_ROWS;
+	_map_frame.starting_col = (_camera->x_position / 2) - HALF_TILE_COLS;
+	_map_frame.starting_row = (_camera->y_position / 2) - HALF_TILE_ROWS;
 
-	_draw_info.screen_edges.top    = camera_y - HALF_SCREEN_ROWS;
-	_draw_info.screen_edges.bottom = camera_y + HALF_SCREEN_ROWS;
-	_draw_info.screen_edges.left   = camera_x - HALF_SCREEN_COLS;
-	_draw_info.screen_edges.right  = camera_x + HALF_SCREEN_COLS;
+	_map_frame.screen_edges.top    = camera_y - HALF_SCREEN_ROWS;
+	_map_frame.screen_edges.bottom = camera_y + HALF_SCREEN_ROWS;
+	_map_frame.screen_edges.left   = camera_x - HALF_SCREEN_COLS;
+	_map_frame.screen_edges.right  = camera_x + HALF_SCREEN_COLS;
 
 	// ---------- (3) Check for boundary conditions and re-adjust as necessary so we don't draw outside the map area
 
@@ -477,59 +520,59 @@ void MapMode::_CalculateMapFrame() {
 	// the edges of the map, we need to modify the drawing properties of the frame.
 
 	// Camera exceeds the left boundary of the map
-	if (_draw_info.starting_col < 0) {
-		_draw_info.starting_col = 0;
-		_draw_info.tile_x_start = 1.0f;
-		_draw_info.screen_edges.left = 0.0f;
-		_draw_info.screen_edges.right = SCREEN_COLS;
+	if (_map_frame.starting_col < 0) {
+		_map_frame.starting_col = 0;
+		_map_frame.tile_x_start = 1.0f;
+		_map_frame.screen_edges.left = 0.0f;
+		_map_frame.screen_edges.right = SCREEN_COLS;
 	}
 	// Camera exceeds the right boundary of the map
-	else if (_draw_info.starting_col + TILE_COLS >= _tile_supervisor->_num_tile_cols) {
-		_draw_info.starting_col = static_cast<int16>(_tile_supervisor->_num_tile_cols - TILE_COLS);
-		_draw_info.tile_x_start = 1.0f;
-		_draw_info.screen_edges.right = static_cast<float>(_object_supervisor->_num_grid_cols);
-		_draw_info.screen_edges.left = _draw_info.screen_edges.right - SCREEN_COLS;
+	else if (_map_frame.starting_col + TILE_COLS >= _tile_supervisor->_num_tile_cols) {
+		_map_frame.starting_col = static_cast<int16>(_tile_supervisor->_num_tile_cols - TILE_COLS);
+		_map_frame.tile_x_start = 1.0f;
+		_map_frame.screen_edges.right = static_cast<float>(_object_supervisor->_num_grid_cols);
+		_map_frame.screen_edges.left = _map_frame.screen_edges.right - SCREEN_COLS;
 	}
 
 	// Camera exceeds the top boundary of the map
-	if (_draw_info.starting_row < 0) {
-		_draw_info.starting_row = 0;
-		_draw_info.tile_y_start = 2.0f;
-		_draw_info.screen_edges.top = 0.0f;
-		_draw_info.screen_edges.bottom = SCREEN_ROWS;
+	if (_map_frame.starting_row < 0) {
+		_map_frame.starting_row = 0;
+		_map_frame.tile_y_start = 2.0f;
+		_map_frame.screen_edges.top = 0.0f;
+		_map_frame.screen_edges.bottom = SCREEN_ROWS;
 	}
 	// Camera exceeds the bottom boundary of the map
-	else if (_draw_info.starting_row + TILE_ROWS >= _tile_supervisor->_num_tile_rows) {
-		_draw_info.starting_row = static_cast<int16>(_tile_supervisor->_num_tile_rows - TILE_ROWS);
-		_draw_info.tile_y_start = 2.0f;
-		_draw_info.screen_edges.bottom = static_cast<float>(_object_supervisor->_num_grid_rows);
-		_draw_info.screen_edges.top = _draw_info.screen_edges.bottom - SCREEN_ROWS;
+	else if (_map_frame.starting_row + TILE_ROWS >= _tile_supervisor->_num_tile_rows) {
+		_map_frame.starting_row = static_cast<int16>(_tile_supervisor->_num_tile_rows - TILE_ROWS);
+		_map_frame.tile_y_start = 2.0f;
+		_map_frame.screen_edges.bottom = static_cast<float>(_object_supervisor->_num_grid_rows);
+		_map_frame.screen_edges.top = _map_frame.screen_edges.bottom - SCREEN_ROWS;
 	}
 
 	// ---------- (4) Determine the number of rows and columns of tiles that need to be drawn
 
 	// When the tile images align perfectly with the screen, we can afford to draw one less row or column of tiles
-	if (IsFloatInRange(_draw_info.tile_x_start, 0.999f, 1.001f)) {
-		_draw_info.num_draw_cols = TILE_COLS;
+	if (IsFloatInRange(_map_frame.tile_x_start, 0.999f, 1.001f)) {
+		_map_frame.num_draw_cols = TILE_COLS;
 	}
 	else {
-		_draw_info.num_draw_cols = TILE_COLS + 1;
+		_map_frame.num_draw_cols = TILE_COLS + 1;
 	}
-	if (IsFloatInRange(_draw_info.tile_y_start, 1.999f, 2.001f)) {
-		_draw_info.num_draw_rows = TILE_ROWS;
+	if (IsFloatInRange(_map_frame.tile_y_start, 1.999f, 2.001f)) {
+		_map_frame.num_draw_rows = TILE_ROWS;
 	}
 	else {
-		_draw_info.num_draw_rows = TILE_ROWS + 1;
+		_map_frame.num_draw_rows = TILE_ROWS + 1;
 	}
 
 	// Comment this out to print out debugging info about each map frame that is drawn
 // 	printf("--- MAP DRAW INFO ---\n");
-// 	printf("Starting row, col: [%d, %d]\n", _draw_info.starting_row, _draw_info.starting_col);
-// 	printf("# draw rows, cols: [%d, %d]\n", _draw_info.num_draw_rows, _draw_info.num_draw_cols);
+// 	printf("Starting row, col: [%d, %d]\n", _map_frame.starting_row, _map_frame.starting_col);
+// 	printf("# draw rows, cols: [%d, %d]\n", _map_frame.num_draw_rows, _map_frame.num_draw_cols);
 // 	printf("Camera position:   [%f, %f]\n", camera_x, camera_y);
-// 	printf("Tile draw start:   [%f, %f]\n", _draw_info.tile_x_start, _draw_info.tile_y_start);
-// 	printf("Edges (T,B,L,R):   [%f, %f, %f, %f]\n", _draw_info.screen_edges.top, _draw_info.screen_edges.bottom,
-// 		_draw_info.screen_edges.left, _draw_info.screen_edges.right);
+// 	printf("Tile draw start:   [%f, %f]\n", _map_frame.tile_x_start, _map_frame.tile_y_start);
+// 	printf("Edges (T,B,L,R):   [%f, %f, %f, %f]\n", _map_frame.screen_edges.top, _map_frame.screen_edges.bottom,
+// 		_map_frame.screen_edges.left, _map_frame.screen_edges.right);
 } // void MapMode::_CalculateMapFrame()
 
 
@@ -537,16 +580,16 @@ void MapMode::_CalculateMapFrame() {
 void MapMode::_DrawMapLayers() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 
-	_tile_supervisor->DrawLowerLayer(&_draw_info);
-	_tile_supervisor->DrawMiddleLayer(&_draw_info);
+	_tile_supervisor->DrawLowerLayer(&_map_frame);
+	_tile_supervisor->DrawMiddleLayer(&_map_frame);
 
-	_object_supervisor->DrawGroundObjects(&_draw_info, false); // First draw pass of ground objects
-	_object_supervisor->DrawPassObjects(&_draw_info);
-	_object_supervisor->DrawGroundObjects(&_draw_info, true); // Second draw pass of ground objects
+	_object_supervisor->DrawGroundObjects(&_map_frame, false); // First draw pass of ground objects
+	_object_supervisor->DrawPassObjects(&_map_frame);
+	_object_supervisor->DrawGroundObjects(&_map_frame, true); // Second draw pass of ground objects
 
-	_tile_supervisor->DrawUpperLayer(&_draw_info);
+	_tile_supervisor->DrawUpperLayer(&_map_frame);
 
-	_object_supervisor->DrawSkyObjects(&_draw_info);
+	_object_supervisor->DrawSkyObjects(&_map_frame);
 } // void MapMode::_DrawMapLayers()
 
 
@@ -648,39 +691,6 @@ void MapMode::_DrawGUI() {
 	if (_treasure_supervisor->IsActive() == true)
 		_treasure_supervisor->Draw();
 } // void MapMode::_DrawGUI()
-
-
-
-void MapMode::_AddGroundObject(MapObject *obj) {
-	_object_supervisor->_ground_objects.push_back(obj);
-	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
-}
-
-
-
-void MapMode::_AddPassObject(MapObject *obj) {
-	_object_supervisor->_pass_objects.push_back(obj);
-	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
-}
-
-
-
-void MapMode::_AddSkyObject(MapObject *obj) {
-	_object_supervisor->_sky_objects.push_back(obj);
-	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
-}
-
-
-
-void MapMode::_AddZone(MapZone *zone) {
-	_object_supervisor->_zones.push_back(zone);
-}
-
-
-
-uint16 MapMode::_GetGeneratedObjectID() {
-	return ++(_object_supervisor->_last_id);
-}
 
 } // namespace hoa_map
 

@@ -373,11 +373,11 @@ dialogue_text[12] = hoa_utils.Translate(".....");
 dialogue_text[13] = hoa_utils.Translate("Well, this truly is the end of the demo. Thanks for playing.");
 
 
-function Load(m, d)
+function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
-	dialogue_supervisor = d;
-	event_supervisor = m._event_supervisor;
+	dialogue_supervisor = m.dialogue_supervisor;
+	event_supervisor = m.event_supervisor;
 
 	local sprite;
 	local dialogue;
@@ -400,10 +400,10 @@ function Load(m, d)
 	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
 	sprite:LoadRunningAnimations("img/sprites/map/claudius_run.png");
 	sprite:LoadFacePortrait("img/portraits/map/claudius.png");
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 	-- Set the camera to focus on the player''s sprite
-	map:_SetCameraFocus(sprite);
+	map:SetCamera(sprite);
 
 	sprite = hoa_map.MapSprite();
 	sprite:SetName(hoa_utils.Translate("Jonas"));
@@ -431,7 +431,7 @@ function Load(m, d)
 	event:SetLoopCount(-1);
 	event:AddEventLink(10000, false, 0);
 	event_supervisor:RegisterEvent(event);
-	map:_AddGroundObject(sprite);
+	map:AddGroundObject(sprite);
 
 	dialogue = hoa_map.MapDialogue(1);
 	dialogue:AddText(dialogue_text[0], 1, 1, 0, false); --line 0
@@ -463,7 +463,7 @@ function Load(m, d)
 
 	-- Create a sprite representation of a monster attached to this zone
 	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(1);
 	enemy:SetCollHalfWidth(1.0);
 	enemy:SetCollHeight(2.0);
@@ -481,14 +481,14 @@ function Load(m, d)
 	ezone:AddEnemy(enemy, map, 2);
 
 	-- Finally, add the zone to the map
-	map:_AddZone(ezone);
+	map:AddZone(ezone);
 
 
 	local ezone = hoa_map.EnemyZone(2000, true);
 	ezone:AddSection(hoa_map.ZoneSection(60, 76, 70, 96));
 
 	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(1);
 	enemy:SetCollHalfWidth(1.0);
 	enemy:SetCollHeight(2.0);
@@ -502,7 +502,7 @@ function Load(m, d)
 	ezone:AddEnemy(enemy, map, 1);
 
 	enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(1);
 	enemy:SetCollHalfWidth(1.0);
 	enemy:SetCollHeight(2.0);
@@ -516,7 +516,7 @@ function Load(m, d)
 	enemy:AddEnemy(1);
 	ezone:AddEnemy(enemy, map, 1);
 
-	map:_AddZone(ezone);
+	map:AddZone(ezone);
 
 
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
@@ -524,7 +524,7 @@ function Load(m, d)
 	ezone:AddSection(hoa_map.ZoneSection(20, 62, 32, 72));
 
 	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(1);
 	enemy:SetCollHalfWidth(1.0);
 	enemy:SetCollHeight(2.0);
@@ -543,7 +543,7 @@ function Load(m, d)
 	ezone:AddEnemy(enemy, map, 1);
 
 	enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(1);
 	enemy:SetCollHalfWidth(1.0);
 	enemy:SetCollHeight(2.0);
@@ -563,7 +563,7 @@ function Load(m, d)
 	enemy:AddEnemy(3);
 	ezone:AddEnemy(enemy, map, 1);
 	-- Finally, add the zone to the map
-	map:_AddZone(ezone);
+	map:AddZone(ezone);
 
 
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
@@ -571,7 +571,7 @@ function Load(m, d)
 	ezone:AddSection(hoa_map.ZoneSection(8, 26, 21, 35));
 
 	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(1);
 	enemy:SetCollHalfWidth(1.0);
 	enemy:SetCollHeight(2.0);
@@ -595,7 +595,7 @@ function Load(m, d)
 	ezone:AddEnemy(enemy, map, 1);
 
 	enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(1);
 	enemy:SetCollHalfWidth(1.0);
 	enemy:SetCollHeight(2.0);
@@ -617,7 +617,7 @@ function Load(m, d)
 	enemy:AddEnemy(4);
 	ezone:AddEnemy(enemy, map, 1);
 	-- Finally, add the zone to the map
-	map:_AddZone(ezone);
+	map:AddZone(ezone);
 
 
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
@@ -625,7 +625,7 @@ function Load(m, d)
 	ezone:AddSection(hoa_map.ZoneSection(44, 6, 51, 13));
 
 	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(1);
 	enemy:SetCollHalfWidth(1.0);
 	enemy:SetCollHeight(2.0);
@@ -648,7 +648,7 @@ function Load(m, d)
 	enemy:AddEnemy(3);
 	ezone:AddEnemy(enemy, map, 1);
 	-- Finally, add the zone to the map
-	map:_AddZone(ezone);
+	map:AddZone(ezone);
 
 	-- Add a treasure about half-way through the cave
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
@@ -659,7 +659,7 @@ function Load(m, d)
 	chest:AddDrunes(175);
 	chest:AddObject(1, 1); -- Adds 1 Healing Potion
 	chest:AddObject(30002, 1); -- Adds 1 Leather Chain Mail
-	map:_AddGroundObject(chest);
+	map:AddGroundObject(chest);
 
 	-- Add a second treasure with a few potions just before the boss encounter
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
@@ -668,13 +668,13 @@ function Load(m, d)
 	chest:SetXPosition(62, 0);
 	chest:SetYPosition(40, 0);
 	chest:AddObject(1, 3); -- Adds 3 Healing Potions
-	map:_AddGroundObject(chest);
+	map:AddGroundObject(chest);
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
 	-- Add a section to the zone to enable the user to exit the map
 	exit_zone:AddSection(hoa_map.ZoneSection(2, 116, 4, 118));
-	map:_AddZone(exit_zone);
+	map:AddZone(exit_zone);
 
 	event = hoa_map.ScriptedEvent(1, 1, 0);
 	event_supervisor:RegisterEvent(event);
@@ -687,12 +687,12 @@ end
 
 function Update()
 	-- Check if the map camera is in the exit zone
-	if (exit_zone:IsInsideZone(map._camera.x_position, map._camera.y_position) == true) then
+	if (exit_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
 		ModeManager:Pop();
 		local cave_map = hoa_map.MapMode("dat/maps/demo_town.lua");
-		cave_map._camera:SetXPosition(117, 0.0);
-		cave_map._camera:SetYPosition(38, 0.5);
-		cave_map._camera:SetDirection(hoa_map.MapMode.WEST);
+		cave_map.camera:SetXPosition(117, 0.0);
+		cave_map.camera:SetYPosition(38, 0.5);
+		cave_map.camera:SetDirection(hoa_map.MapMode.WEST);
 		ModeManager:Push(cave_map);
 	end
 end
@@ -700,7 +700,7 @@ end
 
 
 function Draw()
-	map:_DrawMapLayers();
+	map:DrawMapLayers();
 end
 
 
@@ -719,7 +719,7 @@ end
 -- Throws player into a boss battle
 map_functions[2] = function()
 	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(1);
 	enemy:SetXPosition(71, 0.0);
 	enemy:SetYPosition(28, 0.0);
@@ -736,7 +736,7 @@ map_functions[2] = function()
 	enemy:AddEnemy(106);
 	enemy:ChangeStateHostile();
 	enemy:SetBattleMusicTheme("mus/The_Creature_Awakens.ogg");
-	map:_AddGroundObject(enemy); 
+	map:AddGroundObject(enemy); 
 	local event = hoa_map.PathMoveSpriteEvent(10001, enemy, 74, 40);
 	event_supervisor:RegisterEvent(event);
 	event_supervisor:BeginEvent(event);

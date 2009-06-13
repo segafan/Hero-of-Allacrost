@@ -58,13 +58,13 @@ DialogueEvent::~DialogueEvent()
 
 
 void DialogueEvent::_Start() {
-	MapMode::_current_map->_dialogue_supervisor->BeginDialogue(_dialogue_id);
+	MapMode::CurrentInstance()->GetDialogueSupervisor()->BeginDialogue(_dialogue_id);
 }
 
 
 
 bool DialogueEvent::_Update() {
-	MapDialogue* active_dialogue = MapMode::_current_map->_dialogue_supervisor->GetCurrentDialogue();
+	MapDialogue* active_dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetCurrentDialogue();
 	if (active_dialogue != NULL && active_dialogue->GetDialogueID() == _dialogue_id)
 		return true;
 	else
@@ -152,7 +152,7 @@ MapTransitionEvent::~MapTransitionEvent()
 
 
 void MapTransitionEvent::_Start() {
-	MapMode::_current_map->_PushState(STATE_SCENE);
+	MapMode::CurrentInstance()->PushState(STATE_SCENE);
 	_fade_timer = 0;
 	VideoManager->FadeScreen(Color::black, FADE_OUT_TIME);
 	// TODO: fade out the current map music
@@ -243,8 +243,8 @@ bool BattleEncounterEvent::_Update() {
 ScriptedEvent::ScriptedEvent(uint32 event_id, uint32 start_index, uint32 update_index) :
 	MapEvent(event_id, SCRIPTED_EVENT)
 {
-	ReadScriptDescriptor& map_script = MapMode::_current_map->_map_script;
-	map_script.OpenTable(MapMode::_current_map->_map_tablespace, true);
+	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
+	MapMode::CurrentInstance()->OpenMapTablespace(true);
 	map_script.OpenTable("map_functions");
 	_start_function = map_script.ReadFunctionPointer(start_index);
 	_update_function = map_script.ReadFunctionPointer(update_index);
@@ -315,7 +315,7 @@ void PathMoveSpriteEvent::_Start() {
 		return;
 	}
 
-	if (MapMode::_current_map->_object_supervisor->FindPath(_sprite, _path, _destination) == true) {
+	if (MapMode::CurrentInstance()->GetObjectSupervisor()->FindPath(_sprite, _path, _destination) == true) {
 		_sprite->moving = true;
 		_SetDirection();
 	}
@@ -400,20 +400,20 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 	// we terminate the path event immediately. The conditions may occur if, for some reason, the map's boundaries
 	// or collision grid are modified after the path is calculated
 	if (coll_type == BOUNDARY_COLLISION || coll_type == GRID_COLLISION) {
-		if (MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj) == false) {
+		if (MapMode::CurrentInstance()->GetObjectSupervisor()->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj) == false) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "boundary or grid collision occurred on a pre-calculated path movement" << endl;
 		}
 		// Wait
 // 		_path.clear(); // This path is obviously not a correct one so we should trash it
 // 		_sprite->ReleaseControl(this);
-// 		MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
+// 		MapMode::CurrentInstance()->GetEventSupervisor()->TerminateEvent(GetEventID());
 		return;
 	}
 
 	// If the code has reached this point, then we are dealing with an object collision
 
 	// Determine if the obstructing object is blocking the destination of this path
-	bool destination_blocked = MapMode::_current_map->_object_supervisor->IsPositionOccupiedByObject(_destination.row, _destination.col, coll_obj);
+	bool destination_blocked = MapMode::CurrentInstance()->GetObjectSupervisor()->IsPositionOccupiedByObject(_destination.row, _destination.col, coll_obj);
 	VirtualSprite* coll_sprite = NULL;
 
 	switch (coll_obj->GetObjectType()) {
@@ -424,14 +424,14 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 				IF_PRINT_WARNING(MAP_DEBUG) << "path destination was blocked by a non-sprite map object" << endl;
 				_path.clear(); // This path is obviously not a correct one so we should trash it
 				_sprite->ReleaseControl(this);
-				MapMode::_current_map->_event_supervisor->TerminateEvent(GetEventID());
+				MapMode::CurrentInstance()->GetEventSupervisor()->TerminateEvent(GetEventID());
 				// Note that we will retain the path (we don't clear() it), hoping that next time the object is moved
 
 			}
 			// Otherwise, try to find an alternative path around the object
 			else {
 				// TEMP: try a movement adjustment to get around the object
-				MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj);
+				MapMode::CurrentInstance()->GetObjectSupervisor()->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj);
 				// TODO: recalculate and find an alternative path around the object
 			}
 			break;
@@ -451,7 +451,7 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 
 			else {
 				// TEMP: try a movement adjustment to get around the object
-				MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj);
+				MapMode::CurrentInstance()->GetObjectSupervisor()->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj);
 			}
 			break;
 
@@ -511,7 +511,7 @@ bool RandomMoveSpriteEvent::_Update() {
 
 void RandomMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj) {
 	// Try to adjust the sprite's position around the collision. If that fails, change the sprite's direction
-	if (MapMode::_current_map->_object_supervisor->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj) == false) {
+	if (MapMode::CurrentInstance()->GetObjectSupervisor()->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj) == false) {
 		_sprite->SetRandomDirection();
 	}
 }

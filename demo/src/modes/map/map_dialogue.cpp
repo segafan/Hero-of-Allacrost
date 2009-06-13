@@ -66,7 +66,7 @@ MapDialogue::MapDialogue(uint32 id) :
 	// Look up the event for this dialogue to see whether it has already been read before or not
 	// Either create the event or retrieve the number of times the dialogue has been seen.
 	_event_name = GetEventName();
-	GlobalEventGroup& event_group = *(MapMode::_current_map->_map_event_group);
+	GlobalEventGroup& event_group = *(MapMode::CurrentInstance()->GetMapEventGroup());
 
 	if (event_group.DoesEventExist(_event_name) == false) {
 		event_group.AddNewEvent(_event_name, 0);
@@ -139,7 +139,7 @@ bool MapDialogue::ReadNextLine(int32 line) {
 	if (end_dialogue == true) {
 		_current_line = 0;
 		IncrementTimesSeen();
-		MapMode::_current_map->_map_event_group->SetEvent(_event_name, _times_seen);
+		MapMode::CurrentInstance()->GetMapEventGroup()->SetEvent(_event_name, _times_seen);
 		return false;
 	}
 	else {
@@ -270,7 +270,7 @@ DialogueSupervisor::DialogueSupervisor() :
 DialogueSupervisor::~DialogueSupervisor() {
 	// Update the times seen count before deleting each dialogue
 	for (map<uint32, MapDialogue*>::iterator i = _all_dialogues.begin(); i != _all_dialogues.end(); i++) {
-		MapMode::_current_map->_map_event_group->SetEvent(i->second->GetEventName(), i->second->GetTimesSeen());
+		MapMode::CurrentInstance()->GetMapEventGroup()->SetEvent(i->second->GetEventName(), i->second->GetTimesSeen());
 		delete i->second;
 	}
 	_all_dialogues.clear();
@@ -327,7 +327,7 @@ void DialogueSupervisor::BeginDialogue(uint32 dialogue_id) {
 	_line_timer = _current_dialogue->GetCurrentTime();
 	_dialogue_window.Initialize();
 	_dialogue_window._display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
-	MapMode::_current_map->_PushState(STATE_DIALOGUE);
+	MapMode::CurrentInstance()->PushState(STATE_DIALOGUE);
 }
 
 
@@ -357,10 +357,10 @@ void DialogueSupervisor::BeginDialogue(MapSprite* sprite) {
 	// Prepare the state of the sprite and map camera for the dialogue
 	sprite->SaveState();
 	sprite->moving = false;
-	sprite->SetDirection(CalculateOppositeDirection(MapMode::_current_map->_camera->GetDirection()));
+	sprite->SetDirection(CalculateOppositeDirection(MapMode::CurrentInstance()->GetCamera()->GetDirection()));
 	sprite->IncrementNextDialogue();
 	// TODO: Is the line below necessary to do? Shouldn't the camera stop on its own (if its pointing to the player's character)?
-	MapMode::_current_map->_camera->moving = false;
+	MapMode::CurrentInstance()->GetCamera()->moving = false;
 	BeginDialogue(next_dialogue->GetDialogueID());
 }
 
@@ -378,7 +378,7 @@ void DialogueSupervisor::EndDialogue() {
 	_current_dialogue = NULL;
 	_current_options = NULL;
 	_line_timer = -1;
-	MapMode::_current_map->_PopState();
+	MapMode::CurrentInstance()->PopState();
 }
 
 
@@ -402,7 +402,7 @@ void DialogueSupervisor::AnnounceDialogueUpdate(uint32 dialogue_id) {
 
 	// Update the dialogue status of all sprites that reference this dialogue
 	for (uint32 i = 0; i < entry->second.size(); i++) {
-		MapSprite* referee = static_cast<MapSprite*>(MapMode::_current_map->_object_supervisor->GetObject(entry->second[i]));
+		MapSprite* referee = static_cast<MapSprite*>(MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(entry->second[i]));
 		if (referee == NULL) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "map sprite: " << entry->second[i] << " references dialogue: " << dialogue_id << " but sprite object did not exist"<< endl;
 		}
@@ -443,7 +443,7 @@ void DialogueSupervisor::Draw() {
 	}
 
 	// TODO: Check if speaker ID is 0 and if so, call Draw function with NULL arguments
-	MapSprite* speaker = reinterpret_cast<MapSprite*>(MapMode::_current_map->_object_supervisor->GetObject(_current_dialogue->GetCurrentSpeaker()));
+	MapSprite* speaker = reinterpret_cast<MapSprite*>(MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(_current_dialogue->GetCurrentSpeaker()));
 	_dialogue_window.Draw(&speaker->GetName(), speaker->GetFacePortrait());
 } // void DialogueSupervisor::Draw()
 
@@ -504,7 +504,7 @@ void DialogueSupervisor::_UpdateOptions() {
 		int32 selected_option = _dialogue_window._display_options.GetSelection();
 
 		if (_current_options->_events[selected_option] != 0) {
-			MapMode::_current_map->_event_supervisor->StartEvent(_current_options->_events[selected_option]);
+			MapMode::CurrentInstance()->GetEventSupervisor()->StartEvent(_current_options->_events[selected_option]);
 		}
 
 		_FinishLine(_current_options->_next_lines[selected_option]);
@@ -539,7 +539,7 @@ void DialogueSupervisor::_FinishLine(int32 next_line) {
 
 	// Execute any scripted events that should occur after this line of dialogue has finished
 	if (_current_dialogue->GetCurrentEvent() != 0) {
-		MapMode::_current_map->_event_supervisor->StartEvent(_current_dialogue->GetCurrentEvent());
+		MapMode::CurrentInstance()->GetEventSupervisor()->StartEvent(_current_dialogue->GetCurrentEvent());
 	}
 
 	// Check if there are more lines of dialogue and continue on to the next line if available
@@ -557,7 +557,7 @@ void DialogueSupervisor::_FinishLine(int32 next_line) {
 		// for all speakers without duplication (i.e. the case where a speaker spoke more than one line of dialogue).
 		set<MapSprite*> participants;
 		for (uint32 i = 0; i < _current_dialogue->GetLineCount(); i++) {
-			participants.insert(static_cast<MapSprite*>(MapMode::_current_map->_object_supervisor->GetObject(_current_dialogue->GetLineSpeaker(i))));
+			participants.insert(static_cast<MapSprite*>(MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(_current_dialogue->GetLineSpeaker(i))));
 		}
 
 		for (set<MapSprite*>::iterator i = participants.begin(); i != participants.end(); i++) {
