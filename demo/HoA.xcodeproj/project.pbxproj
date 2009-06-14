@@ -77,7 +77,6 @@
 		D49850D40C82AEA50067770B /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
 		D49A54B90DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D49A54B80DB2BD8400FBD800 /* libintl.dylib */; };
 		D49D57020C65B1C1006E6ABA /* audio_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49D57010C65B1C1006E6ABA /* audio_effects.cpp */; };
-		D4A1AEBF0E8A126E00488ECD /* libiconv.2.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4A1AEBC0E8A122500488ECD /* libiconv.2.dylib */; };
 		D4B00DD00D15F1A200A5DBB1 /* defs_global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148340D15F029005F0A3F /* defs_global.cpp */; };
 		D4B00DD10D15F1A200A5DBB1 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629640AF50B1F00B6A328 /* global.cpp */; };
 		D4B00DD30D15F1A200A5DBB1 /* global_actors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629690AF50B1F00B6A328 /* global_actors.cpp */; };
@@ -86,7 +85,6 @@
 		D4B00DE00D15F25F00A5DBB1 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4E0AF407BE004DD3A3 /* system.cpp */; };
 		D4B00DE40D15F29F00A5DBB1 /* mode_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */; };
 		D4B020BA0EA18DAF002644B9 /* libintl.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D49A54B80DB2BD8400FBD800 /* libintl.dylib */; };
-		D4B020CE0EA18DBC002644B9 /* libiconv.2.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4A1AEBC0E8A122500488ECD /* libiconv.2.dylib */; };
 		D4B34E5B0E2327270067C913 /* dialog_boxes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F900F20DA2010800F10953 /* dialog_boxes.cpp */; };
 		D4B34E5C0E23272A0067C913 /* skill_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */; };
 		D4B34E5D0E23272D0067C913 /* sprites.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49A54680DB28D2E00FBD800 /* sprites.cpp */; };
@@ -168,7 +166,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				D4B020CE0EA18DBC002644B9 /* libiconv.2.dylib in Copy Frameworks */,
 				D4B020BA0EA18DAF002644B9 /* libintl.dylib in Copy Frameworks */,
 				D489F7410D15FB41003940F4 /* SDL.framework in Copy Frameworks */,
 				D489F7420D15FB41003940F4 /* SDL_net.framework in Copy Frameworks */,
@@ -183,7 +180,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				D4A1AEBF0E8A126E00488ECD /* libiconv.2.dylib in Copy Frameworks */,
 				D49A54B90DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */,
 				D4CD69C30DB3302300FF17CD /* SDL_net.framework in Copy Frameworks */,
 				D48901AD0D15FCB1003940F4 /* SDL_ttf.framework in Copy Frameworks */,
@@ -1173,7 +1169,6 @@
 					"-lpng",
 					"-ljpeg",
 					"-llua",
-					"-llualib",
 					"-lz",
 					"-lluabind",
 					"-lvorbis",
@@ -1185,6 +1180,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				USER_HEADER_SEARCH_PATHS = "../allacrost-dep/frameworks/SDL.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
@@ -1227,7 +1223,6 @@
 					"-lpng",
 					"-ljpeg",
 					"-llua",
-					"-llualib",
 					"-lz",
 					"-lluabind",
 					"-lvorbis",
@@ -1239,6 +1234,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = "../allacrost-dep/frameworks/SDL.framework/Headers";
 				WRAPPER_EXTENSION = app;
@@ -1286,7 +1282,6 @@
 					"-lpng",
 					"-ljpeg",
 					"-llua",
-					"-llualib",
 					"-lz",
 					"-lluabind",
 					"-lvorbis",
@@ -1298,6 +1293,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				USER_HEADER_SEARCH_PATHS = "../allacrost-dep/frameworks/SDL.framework/Headers ../allacrost-dep/frameworks/Qt3Support.framework/Headers ../allacrost-dep/frameworks/QtCore.framework/Headers ../allacrost-dep/frameworks/QtGui.framework/Headers ../allacrost-dep/frameworks/QtOpenGL.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
@@ -1340,7 +1336,6 @@
 					"-lpng",
 					"-ljpeg",
 					"-llua",
-					"-llualib",
 					"-lz",
 					"-lluabind",
 					"-lvorbis",
@@ -1352,6 +1347,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				USER_HEADER_SEARCH_PATHS = "../allacrost-dep/frameworks/QtXml.framework/Headers ../allacrost-dep/frameworks/SDL.framework/Headers ../allacrost-dep/frameworks/Qt3Support.framework/Headers ../allacrost-dep/frameworks/QtCore.framework/Headers ../allacrost-dep/frameworks/QtGui.framework/Headers ../allacrost-dep/frameworks/QtOpenGL.framework/Headers ../allacrost-dep/frameworks/QtNetwork.framework/Headers ../allacrost-dep/frameworks/QtSql.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
