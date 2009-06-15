@@ -199,13 +199,27 @@ bool IsFloatInRange(float value, float lower, float upper);
 bool IsFloatEqual(float value, float base, float delta = 0.001f);
 
 
+/** \brief Returns the fractional portion of a floating point value
+*** \param value The floating point value to retrieve the fractional portion (format x.y)
+*** \return A float containing only the fractional value (format 0.y)
+**/
+float GetFloatFraction(float value);
+
+
+/** \brief Returns the integer portion of a floating point value
+*** \param value The floating point value to retrieve the integer portion (format x.y)
+*** \return A float containing only the integer value (format x.0)
+**/
+float GetFloatInteger(float value);
+
+
 //! \brief Rounds down a float to a multiple of another float
 /*!
  *  \return Rounded float
  *  \param value Number to be rounded
  *  \param multiple Multiple to be considered when rounding
  */
-float FloorToFloatMultiple (const float value, const float multiple);
+float FloorToFloatMultiple(const float value, const float multiple);
 
 
 //!	\brief Converts data to string
