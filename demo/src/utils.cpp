@@ -74,17 +74,28 @@ bool IsFloatInRange(float value, float lower, float upper) {
 }
 
 
+
 bool IsFloatEqual(float value, float base, float delta) {
 	return (value >= (base - delta) && value <= (base + delta));
 }
 
 
-float FloorToFloatMultiple (const float value, const float multiple)
-{
-	return multiple * floor(value / multiple);
+
+float GetFloatFraction(float value) {
+	return  (value - GetFloatInteger(value));
 }
 
 
+
+float GetFloatInteger(float value) {
+	return static_cast<float>(static_cast<int>(value));
+}
+
+
+
+float FloorToFloatMultiple (const float value, const float multiple) {
+	return multiple * floor(value / multiple);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// ustring Class
@@ -392,7 +403,7 @@ ustring MakeUnicodeString(const string& text) {
 	uint16 *ubuff = new uint16[length + 1];
 	memset(ubuff, '\0', sizeof(*ubuff));
 	uint16 *utf16String = ubuff;
-	
+
 	if (UTF8ToUTF16(text.c_str(), ubuff, length)) {
 		// Skip the "Byte Order Mark" from the UTF16 specification
 		if (utf16String[0] == UTF_16_BOM_STD ||
@@ -738,7 +749,7 @@ const std::string GetUserDataPath(bool user_files) {
 
 const std::string GetSettingsFilename() {
 	std::string settings_file;
-	
+
 	settings_file = GetUserDataPath(false) + "settings.lua";
 	if (DoesFileExist(settings_file) == false) {
 		settings_file = "dat/config/settings.lua";
