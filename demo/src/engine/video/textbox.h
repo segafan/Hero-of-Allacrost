@@ -192,6 +192,12 @@ public:
 	**/
 	bool IsInitialized(std::string& errors);
 
+	/** \brief Returns the height of the text when it's rendered with the current font
+	*** \return The height of text rendered in current font
+	*** \note This is a low-level function so it doesn't check if the current font is valid or not
+	**/
+	int32 CalculateTextHeight();
+
 private:
 	//! \brief The display speed of the text, in characters per second.
 	float _display_speed;
@@ -228,12 +234,6 @@ private:
 
 	//! \brief The unedited text for reformatting
 	hoa_utils::ustring _text_save;
-
-	/** \brief Returns the height of the text when it's rendered with the current font
-	*** \return The height of text rendered in current font
-	*** \note This is a low-level function so it doesn't check if the current font is valid or not
-	**/
-	int32 _CalculateTextHeight();
 
 	/** \brief Returns true if the given unicode character can be interrupted for a word wrap.
 	*** \param character The character you wish to check.
