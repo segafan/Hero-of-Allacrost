@@ -135,7 +135,7 @@ void TextBox::Draw() {
 	*/
 
 	// Holds the height of the text to be drawn
-	float text_height = static_cast<float>(_CalculateTextHeight());
+	float text_height = static_cast<float>(CalculateTextHeight());
 	// Holds the x and y position where the text should be drawn
 	float text_xpos, text_ypos;
 
@@ -319,7 +319,7 @@ void TextBox::_ReformatText() {
 	}
 
 	// (2): Calculate the height of the text and check it against the height of the textbox.
-	int32 text_height = _CalculateTextHeight();
+	int32 text_height = CalculateTextHeight();
 
 	if (text_height > _height) {
 		if (VIDEO_DEBUG) {
@@ -354,7 +354,7 @@ bool TextBox::IsInitialized(string& errors) {
 
 
 
-int32 TextBox::_CalculateTextHeight() {
+int32 TextBox::CalculateTextHeight() {
 	if (_text.empty())
 		return 0;
 	else
