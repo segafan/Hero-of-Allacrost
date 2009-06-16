@@ -432,6 +432,13 @@ void DialogueSupervisor::Update() {
 			_state = DIALOGUE_STATE_LINE;
 			break;
 	}
+
+	if (InputManager->CancelPress()) {
+		_state = DIALOGUE_STATE_LINE;
+		_RestoreSprites();
+		EndDialogue();
+	}
+
 } // void DialogueSupervisor::Update()
 
 
@@ -524,6 +531,12 @@ void DialogueSupervisor::_UpdateOptions() {
 
 
 void DialogueSupervisor::_ConstructOptions() {
+	float x, y;
+	int32 height;
+
+	_dialogue_window._display_textbox.GetPosition(x, y);
+	height = _dialogue_window._display_textbox.CalculateTextHeight();
+	_dialogue_window._display_options.SetPosition(x, y + height);
 	for (vector<ustring>::iterator i = _current_options->_text.begin(); i != _current_options->_text.end(); i++) {
 		_dialogue_window._display_options.AddOption(*i);
 	}
@@ -553,21 +566,29 @@ void DialogueSupervisor::_FinishLine(int32 next_line) {
 	// If this point in the function is reached, the last line of dialogue has ben read
 	// Restore the status of the sprites that participated in this dialogue if necessary
 	if (_current_dialogue->IsSaveState()) {
-		// We only want to call the RestoreState function *once* for each speaker, so first we have to construct a list of pointers
-		// for all speakers without duplication (i.e. the case where a speaker spoke more than one line of dialogue).
-		set<MapSprite*> participants;
-		for (uint32 i = 0; i < _current_dialogue->GetLineCount(); i++) {
-			participants.insert(static_cast<MapSprite*>(MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(_current_dialogue->GetLineSpeaker(i))));
-		}
-
-		for (set<MapSprite*>::iterator i = participants.begin(); i != participants.end(); i++) {
-			if ((*i)->IsStateSaved() == true)
-				(*i)->RestoreState();
-		}
+		_RestoreSprites();
 	}
 
 	EndDialogue();
 } // void DialogueSupervisor::_FinishLine()
+
+
+void DialogueSupervisor::_RestoreSprites()
+{
+	// We only want to call the RestoreState function *once* for each speaker, so first we have to construct a list of pointers
+	// for all speakers without duplication (i.e. the case where a speaker spoke more than one line of dialogue).
+	
+	set<MapSprite*> participants;
+	for (uint32 i = 0; i < _current_dialogue->GetLineCount(); i++) {
+		participants.insert(static_cast<MapSprite*>(MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(_current_dialogue->GetLineSpeaker(i))));
+	}
+
+	for (set<MapSprite*>::iterator i = participants.begin(); i != participants.end(); i++) {
+		if ((*i)->IsStateSaved() == true)
+			(*i)->RestoreState();
+	}
+}
+
 
 } // namespace private_map
 
