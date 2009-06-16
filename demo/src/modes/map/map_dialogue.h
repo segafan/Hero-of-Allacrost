@@ -505,6 +505,9 @@ private:
 	*** This function will automatically end the dialogue if no line follows the current line
 	**/
 	void _FinishLine(int32 next_line);
+	
+	//! \brief Restores sprites to their states before this dialogue started
+	void _RestoreSprites();
 }; // class DialogueSupervisor
 
 } // namespace private_map
