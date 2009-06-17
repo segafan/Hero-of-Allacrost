@@ -207,7 +207,7 @@ void BattleActor::TEMP_ResetAttackTimer() {
 BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin) :
 	BattleActor(character, x_origin, y_origin),
 	_current_animation("idle"),
-	_frames_remaining(22222)
+	_animation_time(0)
 {
 	if (_stamina_icon.Load("img/icons/actors/characters/" + character->GetFilename() + ".png", 45, 45) == false)
 		cerr << "Unable to load stamina icon for " << character->GetFilename() << endl;
@@ -259,15 +259,20 @@ void BattleCharacter::DrawSprite() {
 
 	// Draw the character sprite
 	VideoManager->Move(_x_location, _y_location);
+
+	if (_current_animation == "idle") {
+		// no need to do anything
+	}
+	else if (_animation_time.IsFinished()) {
+		_current_animation = "idle";
+	}
+	else {
+		uint32 dist = 120 * _animation_time.GetTimeExpired() / _animation_time.GetDuration();
+		VideoManager->MoveRelative(dist, 0);
+	}
+
 	GetActor()->RetrieveBattleAnimation(_current_animation)->Draw();
 
-	if(_frames_remaining == 0) {
-		_current_animation = "idle";
-		_frames_remaining = 22222;
-	}
-	else if (_frames_remaining < 22222) {
-		_frames_remaining--;
-	}
 
 	if (IsAlive()) {
 		// Draw the actor selector image if this character is currently selected
@@ -307,7 +312,9 @@ void BattleCharacter::DrawSprite() {
 void BattleCharacter::PlayAnimation(std::string alias) {
 	_current_animation = alias;
 	GetActor()->RetrieveBattleAnimation(_current_animation)->ResetAnimation();
-	_frames_remaining = 30;
+	_animation_time.SetDuration(300);
+	_animation_time.Reset();
+	_animation_time.Run();
 }
 
 
@@ -425,7 +432,9 @@ void BattleCharacter::DrawStatus() {
 // /////////////////////////////////////////////////////////////////////////////
 
 BattleEnemy::BattleEnemy(GlobalEnemy* enemy, float x_origin, float y_origin) :
-	BattleActor(enemy, x_origin, y_origin)
+	BattleActor(enemy, x_origin, y_origin),
+	_animation_string("idle"),
+	_animation_time(0)
 {
 	if (_stamina_icon.Load("img/icons/actors/enemies/" + _actor->GetFilename() + ".png", 45, 45) == false)
 		cerr << "ERROR: In BattleEnemy constructor" << endl;
@@ -484,6 +493,18 @@ void BattleEnemy::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	std::vector<StillImage>& sprite_frames = *(GetActor()->GetBattleSpriteFrames());
 
+	uint32 enemy_draw_offset = 0;
+
+	if (_animation_string == "idle") {
+		// no need to do anything
+	}
+	else if (_animation_time.IsFinished()) {
+		_animation_string = "idle";
+	}
+	else {
+		enemy_draw_offset = 80 * _animation_time.GetTimeExpired() / _animation_time.GetDuration();
+	}
+
 	// Draw the sprite's final damage frame in grayscale and return
 	if (_state == ACTOR_DEAD) {
 		VideoManager->Move(_x_location, _y_location);
@@ -499,7 +520,8 @@ void BattleEnemy::DrawSprite() {
 		}
 
 		// Draw the enemy's damage-blended sprite frames	
-		VideoManager->Move(_x_location, _y_location);
+		VideoManager->Move(_x_location - enemy_draw_offset, _y_location);
+
 		float hp_percent = static_cast<float>(GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
 
 		// Alpha will range from 1.0 to 0.0 in the following calculations
@@ -536,26 +558,14 @@ void BattleEnemy::DrawSprite() {
 			VideoManager->PopState();
 		}
 	}
-
-	// TEMP: Determine if enemy needs to have red damage text drawn next to it
-	/*if (_total_time_damaged > 0) {
-		_total_time_damaged += SystemManager->GetUpdateTime();
-
-		VideoManager->Text()->SetDefaultFont("battle_dmg");
-		VideoManager->Text()->SetDefaultTextColor(Color::red);
-		VideoManager->Move(GetXLocation() + 25.0f, GetYLocation() + ( _total_time_damaged / 35.0f ) + 80.0f);
-		VideoManager->Text()->Draw(NumberToString(_damage_dealt));
-		VideoManager->Text()->SetDefaultFont("battle");
-
-		if (_total_time_damaged > 3000) {
-			_total_time_damaged = 0;
-		}
-	}*/
 } // void BattleEnemy::DrawSprite()
 
 
 void BattleEnemy::PlayAnimation(std::string alias) {
-	// NOTE: This is currently designed to take no action, enemies are not animated
+	_animation_string = alias;
+	_animation_time.SetDuration(90);
+	_animation_time.Reset();
+	_animation_time.Run();
 }
 
 void BattleEnemy::_DecideAction() {

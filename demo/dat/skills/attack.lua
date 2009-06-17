@@ -50,6 +50,7 @@ skills[2] = {
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 10 - target:GetPhysicalDefense());
 		end
+		instigator:PlayAnimation("attack");
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
@@ -103,7 +104,7 @@ skills[100] = {
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 14 - target:GetPhysicalDefense());
 		end
-		--target:TakeDamage(14);
+		instigator:PlayAnimation("attack");
 		AudioManager:PlaySound("snd/snake_attack.wav");
 	end
 }
@@ -121,7 +122,7 @@ skills[101] = {
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 13 - target:GetPhysicalDefense());
 		end
-		--target:TakeDamage(13);
+		instigator:PlayAnimation("attack");
 		AudioManager:PlaySound("snd/spider_attack.wav");
 	end
 }
@@ -139,7 +140,7 @@ skills[102] = {
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 10 - target:GetPhysicalDefense());
 		end
-		--target:TakeDamage(10);
+		instigator:PlayAnimation("attack");
 		AudioManager:PlaySound("snd/slime_attack.wav");
 	end
 }
@@ -158,71 +159,75 @@ skills[103] = {
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
 		end
-		--target:TakeDamage(20);
+		instigator:PlayAnimation("attack");
 		AudioManager:PlaySound("snd/skeleton_attack.wav");
 	end
 }
 
 skills[104] = {
-   name = "Drake attack",
-   sp_required = 0,
-   warmup_time = 900,
-   cooldown_time = 0,
-   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
-   target_ally = false,
-   
-   BattleExecute = function(target, instigator)
+	name = "Drake attack",
+	sp_required = 0,
+	warmup_time = 900,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
 		end
+		instigator:PlayAnimation("attack");
 	end
 }
 
 skills[105] = {
-   name = "Deceleon attack",
-   sp_required = 0,
-   warmup_time = 900,
-   cooldown_time = 0,
-   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
-   target_ally = false,
-   
-   BattleExecute = function(target, instigator)
+	name = "Deceleon attack",
+	sp_required = 0,
+	warmup_time = 900,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
 		end
+		instigator:PlayAnimation("attack");
 	end
 }
 
 skills[106] = {
-   name = "Nagaruda attack",
-   sp_required = 0,
-   warmup_time = 1400,
-   cooldown_time = 0,
-   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
-   target_ally = false,
-   
-   BattleExecute = function(target, instigator)
+	name = "Nagaruda attack",
+	sp_required = 0,
+	warmup_time = 1400,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 30 - target:GetPhysicalDefense());
 		end
+		instigator:PlayAnimation("attack");
 	end
 }
 
 skills[107] = {
-   name = "Aurum Drakueli attack",
-   sp_required = 0,
-   warmup_time = 900,
-   cooldown_time = 0,
-   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
-   target_ally = false,
-   
-   BattleExecute = function(target, instigator)
+	name = "Aurum Drakueli attack",
+	sp_required = 0,
+	warmup_time = 900,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
 		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
 		end
+		instigator:PlayAnimation("attack");
 	end
 }
