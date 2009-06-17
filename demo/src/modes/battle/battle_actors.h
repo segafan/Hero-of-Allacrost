@@ -267,7 +267,7 @@ public:
 
 protected:
 	std::string _current_animation;
-	uint32 _frames_remaining;
+	hoa_system::SystemTimer _animation_time;
 }; // class BattleCharacter
 
 
@@ -299,6 +299,10 @@ public:
 
 	//! \brief Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
 	bool operator<(const BattleEnemy & other) const;
+
+protected:
+	std::string _animation_string;
+	hoa_system::SystemTimer _animation_time;
 
 private:
 	/** \brief Decides what action that the enemy should execute and the target
