@@ -44,6 +44,8 @@
 namespace hoa_battle {
 
 extern bool BATTLE_DEBUG;
+extern float timer_multiplier;
+extern bool wait;
 
 //! \brief An internal namespace to be used only within the battle code. Don't use this namespace anywhere else!
 namespace private_battle {

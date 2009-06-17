@@ -42,6 +42,8 @@ using namespace hoa_battle::private_battle;
 namespace hoa_battle {
 
 bool BATTLE_DEBUG = false;
+float timer_multiplier = 1.0f;
+bool wait = true;
 
 namespace private_battle {
 
@@ -343,10 +345,14 @@ void BattleMode::_Initialize() {
 	//Now adjust starting wait times based on agility proportions
 	//If current actor's agility is twice the lowest agility, then
 	//they will have a wait time that is half of the slowest actor
+	// We also use timer_multiplier to adjust start times.
+	// The lower the value of timer_multiplier, the faster the battle goes
+
 	float proportion;
 
 	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
-		proportion = static_cast<float>(_min_agility) / static_cast<float>(_enemy_actors[i]->GetActor()->GetAgility());
+		proportion = timer_multiplier * static_cast<float>(_min_agility) /
+			static_cast<float>(_enemy_actors[i]->GetActor()->GetAgility());
 		_enemy_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
 
 		//Start the timer.  We can do this here because the calculations will be done so quickly
@@ -355,7 +361,7 @@ void BattleMode::_Initialize() {
 	}
 
 	for (uint8 i = 0; i < _character_actors.size(); i++) {
-		proportion = static_cast<float>(_min_agility) / static_cast<float>(_character_actors[i]->GetActor()->GetAgility());
+		proportion = timer_multiplier * static_cast<float>(_min_agility) / static_cast<float>(_character_actors[i]->GetActor()->GetAgility());
 		_character_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
 
 		//Start the timer.  We can do this here because the calculations will be done so quickly
@@ -444,6 +450,9 @@ void BattleMode::Update() {
 	// ----- (2): Update the state of all battle actors and graphics
 	if (_selected_character == NULL) {  // TEMP: for implementing non-active battle mode, find better way to do so
 		UnFreezeTimers();  // TEMP: also for non-active battle mode
+	}
+	
+	if (_selected_character == NULL || !wait) {
 		for (uint8 i = 0; i < _character_actors.size(); i++) {
 			_character_actors[i]->Update();
 		}
@@ -702,14 +711,16 @@ void BattleMode::_ActivateNextCharacter()
 		_selected_character->SetState(ACTOR_AWAITING_TURN);
 		//_selected_character->GetWaitTime()->Pause();
 		_action_window.Initialize(_selected_character);
-		FreezeTimers(); // TEMP: for non-active battle mode
+		if (wait)
+			FreezeTimers(); // TEMP: for non-active battle mode
 	}
 }
 
 void BattleMode::_SetInitialTarget() {
 	if (_action_window._action_target_ally == true) {
-		_selected_target = GetPlayerCharacterAt(0);
-		_selected_target_index = 0;
+		_selected_target_index = -1;
+		_selected_target_index = GetIndexOfNextAliveCharacter(true);
+		_selected_target = GetPlayerCharacterAt(_selected_target_index);
 		_selected_attack_point = 0;
 	}
 	else {
