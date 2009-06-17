@@ -43,6 +43,7 @@
 #include "input.h"
 #include "script.h"
 #include "system.h"
+#include "battle.h"
 
 #include "global.h"
 
@@ -137,16 +138,28 @@ bool LoadSettings()
 	InputManager->SetRightSelectJoy(static_cast<uint8>(settings.ReadInt("right_select")));
 	InputManager->SetPauseJoy(static_cast<uint8>(settings.ReadInt("pause")));
 
-	// WinterKnight: These are hidden settings. You can change them by editing settings.lua,
-	// but they are not available in the options menu at this time.
 	InputManager->SetQuitJoy(static_cast<uint8>(settings.ReadInt("quit")));
 	if (settings.DoesIntExist("x_axis"))
 		InputManager->SetXAxisJoy(static_cast<int8>(settings.ReadInt("x_axis")));
 	if (settings.DoesIntExist("y_axis"))
 		InputManager->SetYAxisJoy(static_cast<int8>(settings.ReadInt("y_axis")));
+
+	// WinterKnight: These are hidden settings. You can change them by editing settings.lua,
+	// but they are not available in the options menu at this time.
 	if (settings.DoesIntExist("threshold"))
 		InputManager->SetThresholdJoy(static_cast<uint16>(settings.ReadInt("threshold")));
+
 	settings.CloseTable();
+
+	// battle_settings.timer_multiplier is also a hidden setting
+	if (settings.DoesTableExist("battle_settings")) {
+		settings.OpenTable("battle_settings");
+		if (settings.DoesFloatExist("timer_multiplier"))
+			hoa_battle::timer_multiplier = static_cast<float>(settings.ReadFloat("timer_multiplier"));
+		if (settings.DoesBoolExist("wait"))
+			hoa_battle::wait = static_cast<bool>(settings.ReadBool("wait"));
+		settings.CloseTable();
+	}
 
 	if (settings.IsErrorDetected()) {
 		cerr << "SETTINGS LOAD ERROR: an error occured while trying to retrieve joystick mapping information "

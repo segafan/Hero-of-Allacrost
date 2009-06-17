@@ -104,7 +104,7 @@ SkillAction::SkillAction(BattleActor* source, BattleActor* target, GlobalSkill* 
 	BattleAction(source, target, attack_point),
 	_skill(skill)
 {
-	_warm_up_time.Initialize(skill->GetWarmupTime(), 0, current_battle);
+	_warm_up_time.Initialize(skill->GetWarmupTime() * timer_multiplier, 0, current_battle);
 	_warm_up_time.Run();
 
 	if (skill == NULL && BATTLE_DEBUG) {
@@ -175,7 +175,7 @@ ItemAction::ItemAction(BattleActor* source, BattleActor* target, GlobalItem* ite
 	BattleAction(source, target, attack_point),
 	_item(item)
 {
-	_warm_up_time.Initialize(ITEM_WARM_UP_TIME, 0, current_battle);
+	_warm_up_time.Initialize(ITEM_WARM_UP_TIME * timer_multiplier, 0, current_battle);
 	_warm_up_time.Run();
 
 	if (item == NULL && BATTLE_DEBUG) {
