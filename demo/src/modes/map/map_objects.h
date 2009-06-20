@@ -509,7 +509,7 @@ public:
 	**/
 	COLLISION_TYPE DetectCollision(private_map::VirtualSprite* sprite, private_map::MapObject** collision_object);
 
-	/** \brief Attempts to modify a sprite's movement to avoid an obstruction that it has collided with
+	/** \brief Attempts to modify a sprite's position in response to an obstruction that it has collided with
 	*** \param coll_type The type of collision that has occurred
 	*** \param coll_obj A pointer to the MapObject that the sprite has collided with, if any
 	*** \return True if the sprite's position was successfully modified
@@ -518,19 +518,12 @@ public:
 	*** if a sprite moving west ran into a small tree, this function would examine the situation and if appropriate,
 	*** it would move the sprite in the north or south directions to get around the tree. This allows for a more
 	*** natural movement in the game and also enables sprites to better navigate through narrow passage ways. Put simply,
-	*** this algorithm allows sprites to automatically roll/slide around the corners of obstructions.
+	*** this function allows sprites to automatically roll/slide around the corners of obstructions.
 	***
 	*** If the object that the sprite collided with is anothing moving sprite, then no attempt to modify the sprite's position
 	*** is performed. This allows for two moving sprites that collided with one another to not come into a deadlock situation
 	*** where they are both trying to move around the other since one sprite will stop its motion and the other will roll
 	*** around until the two are free from colliding with one another.
-	***
-	*** \todo I think this algorithm should also try to partially adjust the sprite's position even when it fails to avoid
-	*** the collision. For example, if walking straight into the middle of a long wall and a collision occurs with that wall, the
-	*** sprite's position should be adjusted such that it is directly next to the wall with no open space inbetween.
-	***
-	*** \todo I'm almost certain that there will be problems with this algorithm when the sprite is very close to any map boundary.
-	*** This code needs further testing for these types of conditions.
 	**/
 	bool AdjustSpriteAroundCollision(VirtualSprite* sprite, COLLISION_TYPE coll_type, MapObject* coll_obj);
 
@@ -603,7 +596,7 @@ private:
 
 	// ---------- Methods
 
-	/** \brief Attempts to align a sprite alongside whatever the sprite has collided against
+	/** \brief Attempts to align a sprite's collision rectangle alongside whatever the sprite has collided against
 	*** \param sprite The sprite to examine for positional alignment
 	*** \param direction The direction in which the alignment should take place (only NORTH, SOUTH, EAST, and WEST are valid values)
 	*** \param coll_type The type of collision that occurred
@@ -616,7 +609,7 @@ private:
 
 	/** \brief A helper function to AdjustSpriteAroundCollision that moves a sprite around a corner
 	*** \param sprite The sprite to examine for movement adjustments
-	*** \param coll_type The type of collision that occurred
+	*** \param coll_type The type of collision that occurred (BOUNDARY_COLLISION is an invalid value for this function)
 	*** \param sprite_coll_rect The collision rectangle of the sprite
 	*** \param object_coll_rect The collision rectangle of the collided object (not valid if coll_type is not equal to OBJECT_COLLISION)
 	*** \return True if the sprite's position was modified
@@ -629,9 +622,10 @@ private:
 	*** equate to a line of 9 collision grid units to examine. If this 9 unit line contains any walkable section
 	*** that consists of 3 or more concurrent grid elements, the algorithm instructs the sprite to move in that direction.
 	***
-	*** If the coll_obj pointer is not NULL, then the object's collision rectangle will also be used in determining if an adjustment is
-	*** possible. No other objects will be considered, however, except after the adjustment has been calculated. This is done so that
-	*** the algorithm is fast and doesn't attempt to look at every map object in context.
+	*** If the collision type was an OBJECT_COLLISION, then in addition to the collision grid the algorithm will examine if there is
+	*** a nearby corner of the object that was collided with. However, no other map objects will be considered in this case (because
+	*** we wish to limit the computational complexity of this algorithm). If there is another object in the way, then the function will
+	*** fail (return false) when it tries to modify the sprite's position around the corner.
 	***
 	*** \todo One possible downside to this algorithm is that it doesn't take into account other nearby objects that could be
 	*** in the way. Theoretically if we had a line of sprites standing in an open plane and we tried to move one sprite through the middle
@@ -646,12 +640,13 @@ private:
 	*** \param coll_type The type of collision that occurred
 	*** \param sprite_coll_rect The collision rectangle of the sprite
 	*** \param object_coll_rect The collision rectangle of the collided object (not valid if coll_type is not equal to OBJECT_COLLISION)
-	*** \return True if the sprite's position was successfully modified
+	*** \return True if the sprite's position was modified
 	***
-	*** The algorithm for diagonal movement is similar in nature to that of orthogonal movement. In diagonal movement,
-	*** both a vertical and horizontal adjustment direction are considered. For example, for a sprite moving north east the
-	*** algorithm will examine if the sprite's position can be adjusted strictly north or stictly east. The sprite's position
-	*** will never be set to go backwards (i.e. to the south or west in the cae of the northeast example).
+	*** This algorithm will first check for alignment of the sprite with its collision in either the horizontal or vertical directions
+	*** (and in rare cases, both). If the sprite is not aligned with the collision, its position will be adjusted so that it is. If
+	*** the sprite is already aligned, then the function will try moving the sprite in only the horizontal or vertical direction.
+	*** The sprite will never be positioned to move backwards. That is, if the sprite is trying to move north east, this function may
+	*** move the sprite north, east, or northeast, but it will never move it to the south or west.
 	**/
 	bool _MoveSpriteAroundCollisionDiagonal(VirtualSprite* sprite, COLLISION_TYPE coll_type,
 		const MapRectangle& sprite_coll_rect, const MapRectangle& object_coll_rect);
@@ -660,7 +655,7 @@ private:
 	*** \param sprite The sprite whose position should be modify
 	*** \param direction The direction to modify the sprite's position in (NORTH, SOUTH, EAST, and WEST are the only valid values)
 	*** \param distance The distance to move the sprite in the specified direction
-	*** \return True if the sprite's position was successfully modified
+	*** \return True if the sprite's position was successfully modified to a new valid location
 	**/
 	bool _ModifySpritePosition(VirtualSprite* sprite, uint16 direction, float distance);
 }; // class ObjectSupervisor
