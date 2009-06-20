@@ -162,6 +162,10 @@ const uint16 SW_WEST   = 0x0200;
 const uint16 SE_SOUTH  = 0x0400;
 const uint16 SE_EAST   = 0x0800;
 // Used to check for movement direction regardless of facing direction
+const uint16 MOVING_NORTHWARD = NORTH | NW_NORTH | NW_WEST | NE_NORTH | NE_EAST;
+const uint16 MOVING_SOUTHWARD = SOUTH | SW_SOUTH | SW_WEST | SE_SOUTH | SE_EAST;
+const uint16 MOVING_EASTWARD = EAST | NE_EAST | NE_NORTH | SE_EAST | SE_SOUTH;
+const uint16 MOVING_WESTWARD = WEST | NW_WEST | NW_NORTH | SW_WEST | SW_SOUTH;
 const uint16 MOVING_NORTHWEST = NW_NORTH | NW_WEST;
 const uint16 MOVING_NORTHEAST = NE_NORTH | NE_EAST;
 const uint16 MOVING_SOUTHWEST = SW_SOUTH | SW_WEST;

@@ -603,31 +603,25 @@ private:
 
 	// ---------- Methods
 
-	/** \brief Attempts to align a sprite alongside whatever the sprite may have collided against
+	/** \brief Attempts to align a sprite alongside whatever the sprite has collided against
 	*** \param sprite The sprite to examine for positional alignment
+	*** \param direction The direction in which the alignment should take place (only NORTH, SOUTH, EAST, and WEST are valid values)
 	*** \param coll_type The type of collision that occurred
 	*** \param sprite_coll_rect The collision rectangle of the sprite
-	*** \param object_coll_rect The collision rectangle of the collided object (not valid if coll_type is not equal to OBJECT_COLLISION)
-	*** \return True if the sprite's position was successfully modified
+	*** \param object_coll_rect The collision rectangle of the collided object (unused if coll_type is not equal to OBJECT_COLLISION)
+	*** \return True if the sprite's position was modified
 	**/
-	bool _AlignSpritePosition(VirtualSprite* sprite, COLLISION_TYPE coll_type, MapRectangle& sprite_coll_rect, MapRectangle& object_coll_rect);
+	bool _AlignSpriteWithCollision(VirtualSprite* sprite, uint16 direction, COLLISION_TYPE coll_type,
+		const MapRectangle& sprite_coll_rect, const MapRectangle& object_coll_rect);
 
-	/** \brief Attempts to align a sprite alongside whatever the sprite may have collided against
-	*** \param sprite The sprite to examine for positional alignment
-	*** \param coll_type The type of collision that occurred
-	*** \param sprite_coll_rect The collision rectangle of the sprite
-	*** \param object_coll_rect The collision rectangle of the collided object (not valid if coll_type is not equal to OBJECT_COLLISION)
-	*** \return True if the sprite's position was successfully modified
-	**/
-	bool _AlignSpriteOrthogonal(VirtualSprite* sprite, COLLISION_TYPE coll_type, MapRectangle& sprite_coll_rect, MapRectangle& object_coll_rect);
-
-	/** \brief A helper function to _AdjustSpriteAroundCollision that handles orthogonal adjustments
+	/** \brief A helper function to AdjustSpriteAroundCollision that moves a sprite around a corner
 	*** \param sprite The sprite to examine for movement adjustments
 	*** \param coll_type The type of collision that occurred
 	*** \param sprite_coll_rect The collision rectangle of the sprite
 	*** \param object_coll_rect The collision rectangle of the collided object (not valid if coll_type is not equal to OBJECT_COLLISION)
-	*** \return True if the sprite's position was successfully modified
+	*** \return True if the sprite's position was modified
 	***
+	*** This function is what allows a sprite to "roll" or "slide" around the corner of an obstruction when the sprite moves orthogonally.
 	*** The algorithm works by examining the immediate area around the sprite in the direction where the collision
 	*** occurred. It will examine a short line in the collision grid immediately next to the sprite in the collision
 	*** direction. The length of this line will be three times the length/height of the sprite's collision grid (rounded up to
@@ -644,9 +638,10 @@ private:
 	*** of them, the sprite would continue to oscillate around this living wall thinking it has found a gap to get through when
 	*** there is none. This is something to consider addressing in the future.
 	**/
-	bool _AdjustSpriteOrthogonal(VirtualSprite* sprite, COLLISION_TYPE coll_type, MapRectangle& sprite_coll_rect, MapRectangle& object_coll_rect);
+	bool _MoveSpriteAroundCollisionCorner(VirtualSprite* sprite, COLLISION_TYPE coll_type,
+		const MapRectangle& sprite_coll_rect, const MapRectangle& object_coll_rect);
 
-	/** \brief A helper function to _AdjustSpriteAroundCollision that handles diagonal adjustments
+	/** \brief A helper function to AdjustSpriteAroundCollision that handles diagonal adjustment to sprite movement
 	*** \param sprite The sprite to examine for movement adjustments
 	*** \param coll_type The type of collision that occurred
 	*** \param sprite_coll_rect The collision rectangle of the sprite
@@ -658,17 +653,8 @@ private:
 	*** algorithm will examine if the sprite's position can be adjusted strictly north or stictly east. The sprite's position
 	*** will never be set to go backwards (i.e. to the south or west in the cae of the northeast example).
 	**/
-	bool _AdjustSpriteDiagonal(VirtualSprite* sprite, COLLISION_TYPE coll_type, MapRectangle& sprite_coll_rect, MapRectangle& object_coll_rect);
-
-	/** \brief Modifies the position of a sprite and checks if the new position is valid
-	*** \param sprite The sprite whose position should be modified
-	*** \param direction The direction to modify the sprite's position in (NORTH, SOUTH, EAST, and WEST are the only valid values)
-	*** \return True if the sprite's position was successfully modified
-	***
-	*** The distance to move the sprite is calculated based on the sprite's direction member (which may be different from the direction paramter)
-	*** and its movement speed.
-	**/
-	bool _ModifySpritePosition(VirtualSprite* sprite, uint16 direction);
+	bool _MoveSpriteAroundCollisionDiagonal(VirtualSprite* sprite, COLLISION_TYPE coll_type,
+		const MapRectangle& sprite_coll_rect, const MapRectangle& object_coll_rect);
 
 	/** \brief Modifies the position of a sprite and checks if the new position is valid
 	*** \param sprite The sprite whose position should be modify
