@@ -134,6 +134,18 @@ private:
 	//! 'Joystick Settings' menu
 	BootMenu _joy_settings_menu;
 
+	//! 'Load Profile' menu
+	BootMenu _load_profile_menu;
+
+	//! 'Save Profile' Menu
+	BootMenu _save_profile_menu;
+
+	//! 'Profiles' Menu
+	BootMenu _profiles_menu;
+
+	//! 'User Input' Menu
+	BootMenu _user_input_menu;
+
 	//! The function to call when a new key has been pressed (if we're waiting for one.)
 	void (BootMode::*_key_setting_function)(const SDLKey &);
 
@@ -143,8 +155,17 @@ private:
 	//! The function to call when a new joystick axis has been moved (if we're waiting for one.)
 	void (BootMode::*_joy_axis_setting_function)(int8 axis);
 
+	//! The function to call when we want to overwrite 
+	void (BootMode::*_overwrite_function) ();
+
 	//! Displays the select a key window.
 	hoa_menu::MessageWindow _message_window;
+
+	//! Displays the please type file name window
+	hoa_menu::MessageWindow _file_name_alert;
+
+	//! Displays the actual filename being typed
+	hoa_menu::MessageWindow _file_name_window;
 
 	//! 'Resolution switcher' menu
 	BootMenu _resolution_menu;
@@ -157,6 +178,10 @@ private:
 
 	//! If this isn't the latest version, what is?
 	std::string _latest_version_number;
+
+	//! Make sure we store the filename currently being typed
+	std::string _current_filename;
+
 
 
 	/*!
@@ -281,6 +306,10 @@ private:
 	void _ShowMessageWindow(private_boot::WAIT_FOR wait);
 
 
+	/** \brief overwrites the profile if the user has confirmed 
+	**/
+	void _OverwriteProfile();
+
 	/**
 	*** \brief Setups the corresponding menu (initialize menu members, set callbacks)
 	**/
@@ -293,6 +322,10 @@ private:
 	void _SetupKeySetttingsMenu();
 	void _SetupJoySetttingsMenu();
 	void _SetupResolutionMenu();
+	void _SetupLoadProfileMenu();
+	void _SetupSaveProfileMenu();
+	void _SetupProfileMenu();
+	void _SetupUserInputMenu();
 	//@}
 
 	// Main Menu handlers
@@ -366,6 +399,25 @@ private:
 	void _OnRestoreDefaultJoyButtons();
 
 
+	//! Switches to the menu which loads the profile specified by the user
+	void _OnLoadProfile();
+
+	//! Switches to the menu which saves the settings to a file specified by the user
+	void _OnSaveProfile();
+
+	//! Saves and Loads profiles specified by the user
+	void _OnProfiles();
+
+	//! Loads the settings file specified by the user
+	void _OnLoadFile();
+	
+	//! Asks user for filename and then saves the settings to a .lua file
+	void _OnSaveFile();
+
+	//! Adds a letter to the currently selected filename
+	void _OnPickLetter();
+
+
 	//! Updates the video options screen
 	void _UpdateVideoOptions();
 
@@ -378,8 +430,27 @@ private:
 	//! Updates the joystick settings screen
 	void _UpdateJoySettings();
 
-	//! Saves all the game settings into a .lua file
-	void _SaveSettingsFile();
+	//! Updates the save and load profile menus
+	void _UpdateSaveAndLoadProfiles();
+
+	/**
+	** \brief Saves the settings to a file specified by the user
+	** \param fileName the name of the file for the settings to be saved to, if a blank string is passed the default "settings.lua" will be ** used
+	**/
+	void _SaveSettingsFile(const std::string& fileName);
+
+
+	/**
+	** \brief Saves the settings to a file specified by the user
+	** \param fileName the name of the file for the settings to be loaded from if a blank string is passed the default "settings.lua" will ** be used
+	**/
+	bool _LoadSettingsFile(const std::string& fileName);
+
+	/** \brief returns the directory listing for the user data path
+	** \return A vector listing all the files in the directory not including the default settings.lua file, this is meant for personalized ** profiles only
+	**/
+	std::vector<std::string> _GetDirectoryListingUserDataPath();
+
 }; // class BootMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_boot
