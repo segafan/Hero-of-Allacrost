@@ -793,19 +793,19 @@ bool ObjectSupervisor::_AlignSpriteWithCollision(VirtualSprite* sprite, uint16 d
 		// When aligning with the grid, we only need to check that the fractional part of the float is equal to 0.0f
 		switch (direction) {
 			case NORTH:
-				pos_sprite = -GetFloatFraction(sprite_coll_rect.top);
+				pos_sprite = GetFloatFraction(sprite_coll_rect.top);
 				pos_border = 0.0f;
 				break;
 			case SOUTH:
-				pos_sprite = -GetFloatFraction(sprite_coll_rect.bottom);
+				pos_sprite = 1.0f - GetFloatFraction(sprite_coll_rect.bottom);
 				pos_border = 0.0f;
 				break;
 			case EAST:
-				pos_sprite = -GetFloatFraction(sprite_coll_rect.right);
+				pos_sprite = 1.0f - GetFloatFraction(sprite_coll_rect.right);
 				pos_border = 0.0f;
 				break;
 			case WEST:
-				pos_sprite = -GetFloatFraction(sprite_coll_rect.left);
+				pos_sprite = GetFloatFraction(sprite_coll_rect.left);
 				pos_border = 0.0f;
 				break;
 		}
@@ -836,20 +836,17 @@ bool ObjectSupervisor::_AlignSpriteWithCollision(VirtualSprite* sprite, uint16 d
 	}
 
 	// ---------- (2): Check if the sprite is already aligned and modify the sprite's position if it is not
-	// The default delta for floating point compare is too small and
-	if (IsFloatEqual(pos_sprite, pos_border, 0.1f) == true) {
+	if (IsFloatEqual(pos_sprite, pos_border, 0.001f) == true) {
 		return false;
 	}
 	else {
-		float distance = pos_border - pos_sprite;
-		if (distance < 0.0f)
-			distance += 0.01f;
-		else
-			distance -= 0.01f;
-		bool result = _ModifySpritePosition(sprite, direction, distance);
-// 		if (result == false)
-// 			printf("S: %f -- O: %f -- D: %f\n", pos_sprite, pos_border, distance);
-		return result;
+		// 0.0005f is subtracted from the distance so that the alignment is never completely perfect. If it was perfect,
+		// the alignment would fail because of the collision detection algorithm. For example, if we try to align a sprite
+		// moving south with a row of collision grid elements at row 42, if we set the sprite's collision rectangle bottom to
+		// 42.0f then the collision detection algorithm will include the collision grid row at 42 in its detection. So instead
+		// we set the collision rectangle bottom to something slightly less than 42.0f (~41.9995f) so that this doesn't happen.
+		float distance = fabs(pos_border - pos_sprite - 0.0005f);
+		return _ModifySpritePosition(sprite, direction, distance);
 	}
 } // bool _AlignSpriteWithCollision(VirtualSprite* sprite, uint16 direction, COLLISION_TYPE coll_type ... )
 
