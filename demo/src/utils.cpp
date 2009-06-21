@@ -703,6 +703,81 @@ bool RemoveDirectory(const std::string& dir_name) {
 	return true;
 }
 
+vector<string> ListDirectory(const std::string& dir_name, const std::string& filter) {
+	//create our vector
+	vector<string> directoryList;
+
+	//Don't try to list if the directory does not exist
+	struct stat buf;
+	int32 i = stat(dir_name.c_str(), &buf);
+	if (i != 0)
+		return directoryList;
+
+	//directory exists so lets list
+	#if defined _WIN32
+	//Windows platform
+
+		// Get the current directory that the Allacrost application resides in
+		char app_path[1024];
+		GetCurrentDirectoryA(1024, app_path);
+
+		int32 app_path_len = static_cast<int32>(strlen(app_path));
+		if (app_path_len <= 0)
+			return false;
+		if(app_path[app_path_len-1] == '\\')    // Remove the ending slash if one is there
+			app_path[app_path_len-1] = '\0';
+
+		string full_path = app_path;
+
+		if (dir_name[0] == '/' || dir_name[0] == '\\') {
+			full_path += dir_name;
+		}
+		else {
+			full_path += "\\";
+			full_path += dir_name;
+		}
+
+		char file_found[1024];
+		WIN32_FIND_DATAA info;
+		HANDLE hp;
+		sprintf(file_found, "%s\\*.*", full_path.c_str());
+		hp = FindFirstFileA(file_found, &info);
+
+		if (hp != INVALID_HANDLE_VALUE) {
+			// List each file from the full_path directory
+			do {
+				if(filter == "")
+					directoryList.push_back(file_found);
+				else if(fileName.find(filter) != string::npos)
+					directoryList.push_back(file_found);
+			} while(FindNextFileA(hp, &info));
+		}
+		FindClose(hp);
+	#else
+	//Not Windows
+	DIR *dir;
+	struct dirent *dir_file;
+	dir = opendir(dir_name.c_str()); //open the directory for listing
+	if(!dir) {
+		cerr << "UTILS ERROR: Failed to list directory: " << dir_name << endl;
+		return directoryList;
+	}
+
+	//List each file found in the directory as long as it end with .lua
+	while ((dir_file = readdir(dir))) {
+		string fileName = dir_file->d_name;
+		//contains a .lua ending so put it in the directory
+		if(filter == "")
+			directoryList.push_back(dir_file->d_name);
+		else if(fileName.find(filter) != string::npos)
+			directoryList.push_back(dir_file->d_name);
+	}
+	#endif
+
+	return directoryList;
+}
+
+
 
 
 const std::string GetUserDataPath(bool user_files) {
