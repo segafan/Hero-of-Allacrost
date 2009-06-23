@@ -1818,12 +1818,16 @@ std::vector<std::string> BootMode::_GetDirectoryListingUserDataPath() {
 
 	//get the entire directory listing for user data path
 	vector<string> directoryListing = ListDirectory(GetUserDataPath(true),".lua");
+	
+	if (directoryListing.empty()) {
+		return directoryListing;
+	} else {
+		//as stated earlier this is for personalized profiles only
+		directoryListing.erase(find(directoryListing.begin(),directoryListing.end(),"settings.lua"));
 
-	//as stated earlier this is for personalized profiles only
-	directoryListing.erase(find(directoryListing.begin(),directoryListing.end(),"settings.lua"));
-
-	//return the vector!
-	return directoryListing;
+		//return the vector!
+		return directoryListing;
+	}
 }
 
 
