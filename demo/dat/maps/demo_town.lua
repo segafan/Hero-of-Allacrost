@@ -445,9 +445,13 @@ function Load(m)
 	-- Add Alexander's dialogue
 	dialogue = hoa_map.MapDialogue(5);
 	text = hoa_utils.Translate("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.");
-	dialogue:AddText(text, 5, -1, 0, false);
+	dialogue:AddText(text, 5, -1, 12000, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(5);
+
+	-- Add Alexander's sound event
+	event = hoa_map.SoundEvent(12000, 0);
+	event_supervisor:RegisterEvent(event);
 
 	-- Add Alexander's movement events
 	-- TEMP: path movement disabled temporarily for testing of new map mode features

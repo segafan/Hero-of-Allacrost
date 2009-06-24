@@ -14,6 +14,7 @@
 *** ***************************************************************************/
 
 // Allacrost engines
+#include "audio.h"
 #include "mode_manager.h"
 #include "script.h"
 #include "system.h"
@@ -30,6 +31,7 @@
 
 using namespace std;
 
+using namespace hoa_audio;
 using namespace hoa_mode_manager;
 using namespace hoa_script;
 using namespace hoa_system;
@@ -109,29 +111,39 @@ bool ShopEvent::_Update() {
 // ********** SoundEvent Class Functions
 // ****************************************************************************
 
-SoundEvent::SoundEvent(uint32 event_id) :
+SoundEvent::SoundEvent(uint32 event_id, uint32 sound_id) :
 	MapEvent(event_id, SOUND_EVENT)
 {
-	// TODO
+	vector<SoundDescriptor> map_sounds = MapMode::CurrentInstance()->GetSounds();
+	if (sound_id >= map_sounds.size()) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "invalid sound ID argument: " << sound_id << endl;
+	}
+	else {
+		_sound = map_sounds[sound_id];
+	}
 }
 
 
 
 SoundEvent::~SoundEvent() {
-	// TODO
+	_sound.Stop();
 }
 
 
 
 void SoundEvent::_Start() {
-	// TODO
+	_sound.Play();
 }
 
 
 
 bool SoundEvent::_Update() {
-	// TODO
-	return true;
+	if (_sound.GetState() == AUDIO_STATE_STOPPED) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 // ****************************************************************************

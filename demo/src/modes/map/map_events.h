@@ -213,17 +213,25 @@ protected:
 class SoundEvent : public MapEvent {
 public:
 	/** \param event_id The ID of this event
+	*** \param sound_id The index into the vector MapMode::_sounds of the sound to play
 	**/
-	SoundEvent(uint32 event_id);
+	SoundEvent(uint32 event_id, uint32 sound_id);
 
 	~SoundEvent();
 
+	//! \brief Accessor which allows the properties of the sound to be customized
+	hoa_audio::SoundDescriptor& GetSound()
+		{ return _sound; }
+
 protected:
-	//! \brief
+	//! \brief Begins playback of the sound
 	void _Start();
 
-	//! \brief
+	//! \brief Returns true when the sound has finished playing, or finished looping
 	bool _Update();
+
+	//! \brief The sound that this event will play
+	hoa_audio::SoundDescriptor _sound;
 
 }; // class SoundEvent : public MapEvent
 
