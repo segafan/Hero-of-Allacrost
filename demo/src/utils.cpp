@@ -723,7 +723,7 @@ vector<string> ListDirectory(const std::string& dir_name, const std::string& fil
 
 		int32 app_path_len = static_cast<int32>(strlen(app_path));
 		if (app_path_len <= 0)
-			return false;
+			return directoryList;
 		if(app_path[app_path_len-1] == '\\')    // Remove the ending slash if one is there
 			app_path[app_path_len-1] = '\0';
 
@@ -746,7 +746,8 @@ vector<string> ListDirectory(const std::string& dir_name, const std::string& fil
 		if (hp != INVALID_HANDLE_VALUE) {
 			// List each file from the full_path directory
 			do {
-				if(filter == "")
+			   std::string fileName(file_found);
+				if(filter == "") 
 					directoryList.push_back(file_found);
 				else if(fileName.find(filter) != string::npos)
 					directoryList.push_back(file_found);
