@@ -68,6 +68,7 @@ void TilesetDisplay::paintGL()
 		VideoManager->GetScreenHeight() / TILE_HEIGHT, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	VideoManager->Clear(Color::blue);
+	VideoManager->Move(0, 0);
 
 	if (tileset->IsInitialized() == true) {
 		// Draw the tileset as a single image
