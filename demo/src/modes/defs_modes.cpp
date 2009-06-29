@@ -287,7 +287,6 @@ void BindModesToLua()
 			.def("HasActiveEvent", &EventSupervisor::HasActiveEvent)
 			.def("HasLaunchEvent", &EventSupervisor::HasLaunchEvent)
 			.def("GetEvent", &EventSupervisor::GetEvent)
-
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
