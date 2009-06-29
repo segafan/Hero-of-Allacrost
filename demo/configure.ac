@@ -84,8 +84,8 @@ AC_CHECK_LIB([SDL_ttf], [TTF_Init], [], \
 AC_CHECK_LIB([SDL_net], [SDLNet_Init], [], \
 	[echo "Could not find the SDL_net library. Check that it is properly installed on your system"
 	 exit -1])
-AC_CHECK_LIB([lua5.1], [lua_newstate], [], \
-	[AC_CHECK_LIB([lua5.1], [lua_newstate], [], \
+AC_CHECK_LIB([lua51], [lua_newstate], [], \
+	[AC_CHECK_LIB([lua], [lua_newstate], [], \
  		[echo "Could not find the lua 5.1 library. Check that it is properly installed on your system"
 		 exit -1])])
 AC_CHECK_DECL([LUABIND_VERSION], [],
