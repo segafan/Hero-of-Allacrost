@@ -1,9 +1,9 @@
 sprites = {}
 
-NORMAL_SPEED = hoa_map.MapMode.NORMAL_SPEED;
-SLOW_SPEED = hoa_map.MapMode.SLOW_SPEED;
-VERY_SLOW_SPEED = hoa_map.MapMode.VERY_SLOW_SPEED;
-VERY_FAST_SPEED = hoa_map.MapMode.VERY_FAST_SPEED;
+local NORMAL_SPEED = hoa_map.MapMode.NORMAL_SPEED;
+local SLOW_SPEED = hoa_map.MapMode.SLOW_SPEED;
+local VERY_SLOW_SPEED = hoa_map.MapMode.VERY_SLOW_SPEED;
+local VERY_FAST_SPEED = hoa_map.MapMode.VERY_FAST_SPEED;
 
 sprites["Claudius"] = {
 	name = hoa_utils.Translate("Claudius"),
