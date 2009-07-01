@@ -304,6 +304,12 @@ void BindModesToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
+		class_<MapTransitionEvent, MapEvent>("MapTransitionEvent")
+			.def(constructor<uint32, std::string>())
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
 		class_<ScriptedEvent, MapEvent>("ScriptedEvent")
 			.def(constructor<uint32, uint32, uint32>())
 	];
@@ -332,8 +338,6 @@ void BindModesToLua()
 			.def("AddFrame", &AnimateSpriteEvent::AddFrame)
 			.def("SetLoopCount", &AnimateSpriteEvent::SetLoopCount)
 	];
-
-
 
 	} // End using map mode namespaces
 

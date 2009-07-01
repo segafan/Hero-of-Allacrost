@@ -681,6 +681,9 @@ function Load(m)
 	event = hoa_map.ScriptedEvent(1, 2, 0);
 	event_supervisor:RegisterEvent(event);
 
+	event = hoa_map.MapTransitionEvent(22111, "dat/maps/demo_town.lua");
+	event_supervisor:RegisterEvent(event);
+
 	event_supervisor:StartEvent(10000);
 end
 
@@ -688,12 +691,9 @@ end
 function Update()
 	-- Check if the map camera is in the exit zone
 	if (exit_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
-		ModeManager:Pop();
-		local cave_map = hoa_map.MapMode("dat/maps/demo_town.lua");
-		cave_map.camera:SetXPosition(117, 0.0);
-		cave_map.camera:SetYPosition(38, 0.5);
-		cave_map.camera:SetDirection(hoa_map.MapMode.WEST);
-		ModeManager:Push(cave_map);
+		if (event_supervisor:IsEventActive(22111) == false) then
+			event_supervisor:StartEvent(22111);
+		end
 	end
 end
 
