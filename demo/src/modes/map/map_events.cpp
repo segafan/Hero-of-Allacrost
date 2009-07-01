@@ -139,11 +139,11 @@ void SoundEvent::_Start() {
 
 bool SoundEvent::_Update() {
 	if (_sound.GetState() == AUDIO_STATE_STOPPED) {
+		// TODO: is it necessary to reset the loop counter and other properties here before returning?
 		return true;
 	}
-	else {
-		return false;
-	}
+
+	return false;
 }
 
 // ****************************************************************************
@@ -152,9 +152,10 @@ bool SoundEvent::_Update() {
 
 MapTransitionEvent::MapTransitionEvent(uint32 event_id, std::string filename) :
 	MapEvent(event_id, MAP_TRANSITION_EVENT),
-	_transition_filename(filename),
-	_fade_timer(0)
-{}
+	_transition_map_filename(filename)
+{
+	_fade_timer.Initialize(FADE_OUT_TIME, 0, MapMode::CurrentInstance());
+}
 
 
 
@@ -165,29 +166,34 @@ MapTransitionEvent::~MapTransitionEvent()
 
 void MapTransitionEvent::_Start() {
 	MapMode::CurrentInstance()->PushState(STATE_SCENE);
-	_fade_timer = 0;
-	VideoManager->FadeScreen(Color::black, FADE_OUT_TIME);
-	// TODO: fade out the current map music
+	_fade_timer.Reset();
+	_fade_timer.Run();
+	// TODO: The call below is a problem because if the user pauses while this event is in progress,
+	// the screen fade will continue while in pause mode (it shouldn't). I think instead we'll have
+	// to perform a manual fade of the screen.
+	VideoManager->FadeScreen(Color::black, _fade_timer.GetDuration());
+
+	// TODO: fade out the map music
 }
 
 
 
 bool MapTransitionEvent::_Update() {
-	while (_fade_timer < FADE_OUT_TIME) {
-		_fade_timer += SystemManager->GetUpdateTime();
-		return false;
+	if (_fade_timer.IsFinished() == true) {
+		ModeManager->Pop();
+		try {
+			MapMode *MM = new MapMode(_transition_map_filename);
+			ModeManager->Push(MM);
+		} catch (luabind::error e) {
+			PRINT_ERROR << "Error loading map: " << _transition_map_filename << endl;
+			ScriptManager->HandleLuaError(e);
+		}
+		// This will fade the screen back in from black
+		VideoManager->FadeScreen(Color::clear, _fade_timer.GetDuration() / 2);
+		return true;
 	}
 
-	ModeManager->Pop();
-	try {
-		MapMode *MM = new MapMode(_transition_filename);
-		ModeManager->Push(MM);
-	} catch (luabind::error e) {
-		PRINT_ERROR << "Error loading map: " << _transition_filename << endl;
-		ScriptManager->HandleLuaError(e);
-	}
-	VideoManager->FadeScreen(Color::clear, FADE_OUT_TIME / 2);
-	return true;
+	return false;
 }
 
 // ****************************************************************************

@@ -206,9 +206,24 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief
+*** \brief Plays a sound. The event finishes when the sound stops
 ***
+*** The suggested usage for initializing an object of this class is the following:
+*** -# Call the class constructor
+*** -# Call the GetSound() function to retrieve the SoundDescriptor object
+*** -# Call SoundDescriptor methods to set the desired properties of the sound (looping, attenuation, etc)
 ***
+*** After these steps are performed the event is ready to launch. The default properties
+*** of the sound are the same as are in the default constructor of the SoundDescriptor
+*** class. This includes no looping and no distance attenuation. The event will finish when the
+*** sound finishes playing (when the sound state is AUDIO_STATE_STOPPED). Note that if looping is set
+*** to infinite, the sound will never enter this state. It is possible to prematurely terminate this
+*** event by calling the GetSound() method and invoking Stop() on the SoundDescriptor object that is
+*** returned.
+***
+*** \todo Support sounds with a position that employ distance attenuation. Perhaps
+*** another derived class would be ideal to implement this, since sounds could possibly
+*** be mobile (attached to sprites).
 *** ***************************************************************************/
 class SoundEvent : public MapEvent {
 public:
@@ -232,7 +247,6 @@ protected:
 
 	//! \brief The sound that this event will play
 	hoa_audio::SoundDescriptor _sound;
-
 }; // class SoundEvent : public MapEvent
 
 
@@ -251,17 +265,17 @@ public:
 	~MapTransitionEvent();
 
 protected:
-	//! \brief The filename of the map to transition to
-	std::string _transition_filename;
-
-	//! \brief A timer used for fading out the current map
-	uint32 _fade_timer;
-
 	//! \brief Begins the transition process by fading out the screen and music
 	void _Start();
 
 	//! \brief Once the fading process completes, creates the new map mode to transition to
 	bool _Update();
+
+	//! \brief The filename of the map to transition to
+	std::string _transition_map_filename;
+
+	//! \brief A timer used for fading out the current map
+	hoa_system::SystemTimer _fade_timer;
 }; // class MapTransitionEvent : public MapEvent
 
 
