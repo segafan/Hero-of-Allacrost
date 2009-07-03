@@ -29,11 +29,10 @@ namespace hoa_script {
 
 ReadScriptDescriptor::~ReadScriptDescriptor() {
 	if (IsFileOpen()) {
-		IF_PRINT_WARNING(SCRIPT_DEBUG) <<
-		"ReadScriptDescriptor destructor was called when file was still open: " << endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "destructor was called when file was still open: " << _filename << endl;
 		CloseFile();
 	}
-	
+
 	_filename = "";
 	_access_mode = SCRIPT_CLOSED;
 	_error_messages.clear();
@@ -43,9 +42,12 @@ ReadScriptDescriptor::~ReadScriptDescriptor() {
 //-----------------------------------------------------------------------------
 // File Access Functions
 //-----------------------------------------------------------------------------
+
 bool ReadScriptDescriptor::OpenFile(const string& filename) {
 	return OpenFile(filename, false);
 }
+
+
 
 bool ReadScriptDescriptor::OpenFile(const string& filename, bool force_reload) {
 	// check for file extensions
@@ -67,18 +69,18 @@ bool ReadScriptDescriptor::OpenFile(const string& filename, bool force_reload) {
 		return false;
 	}
 
-	
+
 	// Check if this file was opened previously.
-	if (force_reload || (_lstack = ScriptManager->_CheckForPreviousLuaState(file_name)) == NULL)
-	{	
+	if ((force_reload == true) || (_lstack = ScriptManager->_CheckForPreviousLuaState(file_name)) == NULL)
+	{
 		// Increases the global stack size by 1 element. That is needed because the new thread will be pushed in the
 		// stack and we have to be sure there is enough space there.
-		lua_checkstack(ScriptManager->GetGlobalState(),1);
+		lua_checkstack(ScriptManager->GetGlobalState(), 1);
 		_lstack = lua_newthread(ScriptManager->GetGlobalState());
 
-		// Attempt to load and execute the Lua file.
+		// Attempt to load and execute the Lua file
 		if (luaL_loadfile(_lstack, file_name.c_str()) != 0 || lua_pcall(_lstack, 0, 0, 0)) {
-			cerr << "SCRIPT ERROR: ReadScriptDescriptor::OpenFile() could not open the file " << file_name << endl;
+			PRINT_ERROR << "could not open script file: " << file_name << ", error message:" << endl;
 			cerr << lua_tostring(_lstack, private_script::STACK_TOP) << endl;
 			_access_mode = SCRIPT_CLOSED;
 			return false;
@@ -89,15 +91,13 @@ bool ReadScriptDescriptor::OpenFile(const string& filename, bool force_reload) {
 	_access_mode = SCRIPT_READ;
 	ScriptManager->_AddOpenFile(this);
 	return true;
-} // bool ReadScriptDescriptor::OpenFile(string file_name)
+} // bool ReadScriptDescriptor::OpenFile(string file_name, bool force_reload)
 
 
 
 bool ReadScriptDescriptor::OpenFile() {
 	if (_filename == "") {
-		if (SCRIPT_DEBUG)
-			cerr << "SCRIPT ERROR: ReadScriptDescriptor::OpenFile(), could not open file "
-				<< "because of an invalid file name (empty string)." << endl;
+		PRINT_ERROR << "could not open file because of an invalid file name (empty string)" << endl;
 		return false;
 	}
 
@@ -113,9 +113,8 @@ void ReadScriptDescriptor::CloseFile() {
 	}
 
 	// Probably not needed. Script errors should be printed immediately.
-	if (SCRIPT_DEBUG && IsErrorDetected()) {
-		cerr << "SCRIPT WARNING: In ReadScriptDescriptor::CloseFile(), the file " << _filename
-			<< " had error messages remaining. They are as follows:" << endl;
+	if (IsErrorDetected()) {
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "the file " << _filename << " had the following error messages remaining:" << endl;
 		cerr << _error_messages.str() << endl;
 	}
 
@@ -190,7 +189,7 @@ bool ReadScriptDescriptor::_CheckDataType(int32 type, luabind::object& obj_check
 		return true;
 	}
 
-	// Because Lua only has a "number" type, we have to do perform a special cast 
+	// Because Lua only has a "number" type, we have to do perform a special cast
 	// to examine integer versus floating point types
 	else if (object_type == LUA_TNUMBER) {
 		if (type == INTEGER_TYPE) {
@@ -262,13 +261,13 @@ object ReadScriptDescriptor::ReadFunctionPointer(const string& key) {
 				<< "for the table element key: " << key << endl;
 			return luabind::object();
 		}
-	
+
 		if (type(o[key]) != LUA_TFUNCTION) {
 			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the data retrieved was not a function "
 				<< "for the table element key: " << key << endl;
 			return luabind::object();
 		}
-		
+
 		return o[key];
 	}
 } // object ReadScriptDescriptor::ReadFunctionPointer(string key)
@@ -329,14 +328,14 @@ void ReadScriptDescriptor::OpenTable(int32 table_name) {
 				<< "to open the with the element key " << table_name << endl;
 		return;
 	}
-	
+
 	lua_pushnumber(_lstack, table_name);
 
 	if (!lua_istable(_lstack, STACK_TOP - 1)) {
 		IF_PRINT_WARNING(SCRIPT_DEBUG) << "about to fail because STACK_TOP - 1 is not a "
 		<< "table, or the table does not exist for the table element key: " << table_name << endl;
 	}
-	
+
 	lua_gettable(_lstack, STACK_TOP - 1); // sometimes, this line will cause a major b0rk and kill Allacrost silently
 
 	if (!lua_istable(_lstack, STACK_TOP)) {

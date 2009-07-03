@@ -38,7 +38,7 @@ bool SCRIPT_DEBUG = false;
 //-----------------------------------------------------------------------------
 
 ScriptEngine::ScriptEngine() {
-	if (SCRIPT_DEBUG) cout << "SCRIPT: ScriptEngine constructor invoked." << endl;
+	IF_PRINT_DEBUG(SCRIPT_DEBUG) << "ScriptEngine constructor invoked." << endl;
 
 	// Initialize Lua and LuaBind
 	_global_state = lua_open();
@@ -49,7 +49,7 @@ ScriptEngine::ScriptEngine() {
 
 
 ScriptEngine::~ScriptEngine() {
-	if (SCRIPT_DEBUG) cout << "SCRIPT: ScriptEngine destructor invoked." << endl;
+	IF_PRINT_DEBUG(SCRIPT_DEBUG) << "ScriptEngine destructor invoked." << endl;
 
 	_open_files.clear();
 	lua_close(_global_state);
@@ -65,9 +65,20 @@ bool ScriptEngine::SingletonInitialize() {
 
 
 
+bool ScriptEngine::IsFileOpen(const std::string& filename) {
+	return false; // TEMP: working on resolving the issue with files being opened multiple times
+
+	if (_open_files.find(filename) != _open_files.end()) {
+		return true;
+	}
+	return false;
+}
+
+
+
 void ScriptEngine::HandleLuaError(luabind::error& err) {
 	lua_State *state = err.state();
-	cerr << "SCRIPT ERROR: a run-time Lua error has occured with the following error message:\n  " << endl;
+	PRINT_ERROR << "a runtime Lua error has occured with the following error message:\n  " << endl;
 	std::string k = lua_tostring(state, lua_gettop(state)) ;
 	cerr << k << endl;
 	lua_pop(state, 1);
@@ -76,27 +87,19 @@ void ScriptEngine::HandleLuaError(luabind::error& err) {
 
 
 void ScriptEngine::HandleCastError(luabind::cast_failed& err) {
-	cerr << "SCRIPT ERROR: the return value of a Lua function call could not be successfully converted "
+	PRINT_ERROR << "the return value of a Lua function call could not be successfully converted "
 		<< "to the specified C++ type: " << err.what() << endl;
-}
-
-
-lua_State *ScriptEngine::_CheckForPreviousLuaState(const std::string &filename)
-{
-	if (_open_threads.find(filename) != _open_threads.end())
-			return _open_threads[filename];
-	return NULL;
 }
 
 
 
 void ScriptEngine::_AddOpenFile(ScriptDescriptor* sd) {
-	// NOTE: Function assumes that the file is not already open
+	// NOTE: This function assumes that the file is not already open
+
 	_open_files.insert(make_pair(sd->_filename, sd));
-	// add the lua_State to the list of opened lua states
-	if (sd->GetAccessMode() == SCRIPT_READ || sd->GetAccessMode() == SCRIPT_MODIFY)
-	{
-		ReadScriptDescriptor *rsd = (ReadScriptDescriptor *)sd;
+	// Add the lua_State to the list of opened lua states if it is not already present
+	if (sd->GetAccessMode() == SCRIPT_READ || sd->GetAccessMode() == SCRIPT_MODIFY) {
+		ReadScriptDescriptor* rsd = dynamic_cast<ReadScriptDescriptor*>(sd);
 		if (_open_threads.find(rsd->GetFilename()) == _open_threads.end())
 			_open_threads[rsd->GetFilename()] = rsd->_lstack;
 	}
@@ -111,13 +114,12 @@ void ScriptEngine::_RemoveOpenFile(ScriptDescriptor* sd) {
 
 
 
-bool ScriptEngine::IsFileOpen(const std::string& filename) {
-	return false; // TEMP: working on resolving the issue with files being opened multiple times
-
-	if (_open_files.find(filename) != _open_files.end()) {
-		return true;
-	}
-	return false;
+lua_State *ScriptEngine::_CheckForPreviousLuaState(const std::string &filename) {
+	if (_open_threads.find(filename) != _open_threads.end())
+		return _open_threads[filename];
+	else
+		return NULL;
 }
+
 
 } // namespace hoa_script

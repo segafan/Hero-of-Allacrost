@@ -206,7 +206,7 @@ void Grid::LoadMap()
 	ReadScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
-	if (!read_data.OpenFile(string(_file_name.toAscii())))
+	if (!read_data.OpenFile(string(_file_name.toAscii()), true))
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
 
 	read_data.OpenTable(string(_file_name.section('/', -1).remove(".lua").toAscii()));
@@ -439,7 +439,7 @@ void Grid::SaveMap()
 				before_text.push_back('\n');
 			}
 		}
-		
+
 		// Search for AFTER_TEXT_MARKER
 		while (!file.eof()) {
 			file.clear();
@@ -447,7 +447,7 @@ void Grid::SaveMap()
 			if (strstr(buffer, AFTER_TEXT_MARKER))
 				break;
 		}
-		
+
 		// Put all text after AFTER_TEXT_MARKER into after_text string
 		while (!file.eof()) {
 			file.clear();

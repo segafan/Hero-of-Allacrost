@@ -235,29 +235,30 @@ public:
 private:
 	ScriptEngine();
 
-	//! \brief Maintains a list of all data files that are currently open.
+	//! \brief Maintains a list of all script files that are currently open
 	std::map<std::string, ScriptDescriptor*> _open_files;
 
-	/** \brief Maintains a cache of opened lua threads, so that should a file that has already been loaded
-	***	into the lua state will not be loaded again, instead the lua_thread will be returned.
+	/** \brief Maintains a cache of opened lua threads
+	*** This is done so that a file that has already been loaded into the lua state will not be loaded again.
+	*** Instead the lua_thread will be returned.
 	**/
-	std::map<std::string, lua_State *> _open_threads;
+	std::map<std::string, lua_State*> _open_threads;
 
 	//! \brief The lua state shared globally by all files
-	lua_State *_global_state;
+	lua_State* _global_state;
 
 	//! \brief Adds an open file to the list of open files
 	void _AddOpenFile(ScriptDescriptor* sd);
 
+	//! \brief Removes an open file from the list of open files
+	void _RemoveOpenFile(ScriptDescriptor* sd);
+
 	/** \brief Checks for the existence of a previously opened lua state from that filename.
 	*** This should class because the filename contains the full path
 	***
-	*** \return returns the lua_State * for that file, or null if the file has never been opened.
+	*** \return A pointer to the lua_State for the file, or NULL if the file has never been opened.
 	**/
-	lua_State *_CheckForPreviousLuaState(const std::string &filename);
-
-	//! \brief Removes an open file from the list of open files
-	void _RemoveOpenFile(ScriptDescriptor* sd);
+	lua_State* _CheckForPreviousLuaState(const std::string &filename);
 }; // class ScriptEngine : public hoa_utils::Singleton<ScriptEngine>
 
 } // namespace hoa_script
