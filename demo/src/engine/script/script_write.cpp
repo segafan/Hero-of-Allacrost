@@ -34,7 +34,7 @@ WriteScriptDescriptor::~WriteScriptDescriptor() {
 				<< _filename << endl;
 		CloseFile();
 	}
-	
+
 	_filename = "";
 	_access_mode = SCRIPT_CLOSED;
 	_error_messages.clear();
@@ -112,6 +112,24 @@ void WriteScriptDescriptor::CloseFile() {
 	_open_tables.clear();
 	_access_mode = SCRIPT_CLOSED;
 	ScriptManager->_RemoveOpenFile(this);
+}
+
+
+
+bool WriteScriptDescriptor::SaveFile() {
+	if (IsFileOpen() == false) {
+		PRINT_ERROR << "could not save the file because it was not open" << endl;
+		return false;
+	}
+
+	if (SCRIPT_DEBUG && IsErrorDetected()) {
+		cerr << "SCRIPT WARNING: In WriteScriptDescriptor::CloseFile(), the file " << _filename
+			<< " had error messages remaining. They are as follows:" << endl;
+		cerr << _error_messages.str() << endl;
+	}
+
+	_outfile.flush();
+	return _outfile.bad();
 }
 
 //-----------------------------------------------------------------------------

@@ -34,7 +34,7 @@ namespace hoa_script {
 *** existing Lua files. This class is primarily for writing data, not
 *** code, although it is indeed possible to write script code using this class.
 ***
-*** \note With the exception of the open/close file functions, all methods of
+*** \note With the exception of the open/close/save file functions, all methods of
 *** this class assume that the file is open and do not check otherwise. If you
 *** try to invoke these functions with an unopened file, you will generate a
 *** segmentation fault.
@@ -55,13 +55,22 @@ public:
 	~WriteScriptDescriptor();
 
 	/** \name File Access Functions
-	*** \note These are derived from ScriptDescriptor, refer to the comments for these 
+	*** \note Most of these are derived from ScriptDescriptor, refer to the comments for these
 	*** methods in the header file for that class.
 	**/
 	//@{
 	bool OpenFile(const std::string& file_name);
 	bool OpenFile();
 	void CloseFile();
+
+	/** \brief Saves the file with the newly written contents
+	*** \return True if the save operation was successful
+	***
+	*** All this method actually does is flush the output file stream. This method does not need
+	*** to be called normally since simply calling CloseFile() will achieve the same effect. The purpose
+	*** of this method is to provide the option to save the file contents without also closing the file.
+	**/
+	bool SaveFile();
 	//@}
 
 	/** \name Comment Write Functions
