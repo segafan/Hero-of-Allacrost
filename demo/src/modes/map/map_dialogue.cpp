@@ -187,8 +187,8 @@ DialogueWindow::DialogueWindow() {
 	_display_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_display_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
-	_display_options.SetPosition(260.0f, 596.0f);
-	_display_options.SetDimensions(700.0f, 126.0f, 1, 4, 1, 4);
+	_display_options.SetPosition(300.0f, 630.0f);
+	_display_options.SetDimensions(660.0f, 90.0f, 1, 255, 1, 3);
 	_display_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_display_options.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_display_options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -531,12 +531,6 @@ void DialogueSupervisor::_UpdateOptions() {
 
 
 void DialogueSupervisor::_ConstructOptions() {
-	float x, y;
-	int32 height;
-
-	_dialogue_window._display_textbox.GetPosition(x, y);
-	height = _dialogue_window._display_textbox.CalculateTextHeight();
-	_dialogue_window._display_options.SetPosition(x, y + height);
 	for (vector<ustring>::iterator i = _current_options->_text.begin(); i != _current_options->_text.end(); i++) {
 		_dialogue_window._display_options.AddOption(*i);
 	}
@@ -573,11 +567,11 @@ void DialogueSupervisor::_FinishLine(int32 next_line) {
 } // void DialogueSupervisor::_FinishLine()
 
 
-void DialogueSupervisor::_RestoreSprites()
-{
+
+void DialogueSupervisor::_RestoreSprites() {
 	// We only want to call the RestoreState function *once* for each speaker, so first we have to construct a list of pointers
 	// for all speakers without duplication (i.e. the case where a speaker spoke more than one line of dialogue).
-	
+
 	set<MapSprite*> participants;
 	for (uint32 i = 0; i < _current_dialogue->GetLineCount(); i++) {
 		participants.insert(static_cast<MapSprite*>(MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(_current_dialogue->GetLineSpeaker(i))));
@@ -588,7 +582,6 @@ void DialogueSupervisor::_RestoreSprites()
 			(*i)->RestoreState();
 	}
 }
-
 
 } // namespace private_map
 
