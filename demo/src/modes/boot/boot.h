@@ -384,6 +384,7 @@ private:
 	void _OnResolution640x480();
 	void _OnResolution800x600();
 	void _OnResolution1024x768();
+	void _OnResolution1280x1024();
 	//@}
 
 	//! Brightness increment
