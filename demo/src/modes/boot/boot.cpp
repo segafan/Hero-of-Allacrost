@@ -1230,7 +1230,7 @@ void BootMode::_SetupJoySetttingsMenu() {
 
 void BootMode::_SetupResolutionMenu() {
 	_resolution_menu.SetPosition(512.0f, 384.0f);
-	_resolution_menu.SetDimensions(300.0f, 200.0f, 1, 3, 1, 3);
+	_resolution_menu.SetDimensions(300.0f, 200.0f, 1, 4, 1, 4);
 	_resolution_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_resolution_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_resolution_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1241,6 +1241,7 @@ void BootMode::_SetupResolutionMenu() {
 	_resolution_menu.AddOption(MakeUnicodeString("640 x 480"), &BootMode::_OnResolution640x480);
 	_resolution_menu.AddOption(MakeUnicodeString("800 x 600"), &BootMode::_OnResolution800x600);
 	_resolution_menu.AddOption(MakeUnicodeString("1024 x 768"), &BootMode::_OnResolution1024x768);
+	_resolution_menu.AddOption(MakeUnicodeString("1280 x 1024"), &BootMode::_OnResolution1280x1024);
 	
 	if (VideoManager->GetScreenWidth() == 640)
 		_resolution_menu.SetSelection(0);
@@ -1248,6 +1249,8 @@ void BootMode::_SetupResolutionMenu() {
 		_resolution_menu.SetSelection(1);
 	else if (VideoManager->GetScreenWidth() == 1024)
 		_resolution_menu.SetSelection(2);
+	else if(VideoManager->GetScreenWidth() == 1280)
+		_resolution_menu.SetSelection(3);
 }
 
 
@@ -1431,6 +1434,11 @@ void BootMode::_OnResolution800x600() {
 void BootMode::_OnResolution1024x768() {
 	if (VideoManager->GetScreenWidth() != 1024 && VideoManager->GetScreenHeight() != 768)
 		_SetResolution(1024, 768);
+}
+
+void BootMode::_OnResolution1280x1024() {
+	if(VideoManager->GetScreenWidth() != 1280 && VideoManager->GetScreenHeight() != 1024)
+		_SetResolution(1280,1024);
 }
 
 // Brightness increment. Actually the correct term is "gamma correction" but I think it's easier for the user to think of it just as brightness!
@@ -1769,9 +1777,31 @@ bool BootMode::_LoadSettingsFile(const std::string& fileName) {
 	settings.OpenTable("video_settings");
 	bool fullscreen = settings.ReadBool("full_screen");
 	int32 resx = settings.ReadInt("screen_resx");
-	int32 resy = settings.ReadInt("screen_resy");
-	VideoManager->SetInitialResolution(resx, resy);
-	VideoManager->SetFullscreen(fullscreen);
+
+	//Set Resolution  according to width if no width matches our predefined resoultion set to lowest resolution
+	if(resx == 640) {
+		_OnResolution640x480();
+		_resolution_menu.SetSelection(0);
+	}
+	else if(resx == 800) {
+		_OnResolution800x600();
+		_resolution_menu.SetSelection(1);
+	}
+	else if(resx == 1024) {
+		_OnResolution1024x768();
+		_resolution_menu.SetSelection(2);
+	}
+	else if(resx == 1280) {
+		_OnResolution1280x1024();
+		_resolution_menu.SetSelection(3);
+	}
+
+	//set the fullscreen and update video options
+	if(VideoManager->IsFullscreen() && fullscreen == false)
+		_OnVideoMode();
+	else if(VideoManager->IsFullscreen() == false && fullscreen)
+		_OnVideoMode();
+
 	settings.CloseTable();
 
 	if (settings.IsErrorDetected()) {
