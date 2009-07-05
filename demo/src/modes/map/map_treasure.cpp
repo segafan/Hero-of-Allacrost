@@ -217,7 +217,7 @@ TreasureSupervisor::TreasureSupervisor() :
 	_action_options.SetOwner(&_action_window);
 
 	_list_options.SetPosition(20.0f, 20.0f);
-	_list_options.SetDimensions(726.0f, 200.0f, 1, 5, 1, 5);
+	_list_options.SetDimensions(726.0f, 200.0f, 1, 255, 1, 5);
 	_list_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_list_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_list_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);

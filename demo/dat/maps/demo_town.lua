@@ -303,6 +303,13 @@ function Load(m)
 	dialogue:AddOption(text, 2, 0);
 	text = hoa_utils.Translate("No, of course not...");
 	dialogue:AddOption(text, 8, 0);
+	-- Additional options added for testing purposes
+	text = hoa_utils.Translate("Test Option #1");
+	dialogue:AddOption(text, -1, 0);
+	text = hoa_utils.Translate("Test Option #2");
+	dialogue:AddOption(text, -1, 0);
+	text = hoa_utils.Translate("Test Option #3");
+	dialogue:AddOption(text, -1, 0);
 
 	--Yes
 	text = hoa_utils.Translate("But why? Its dangerous in there!");
@@ -323,7 +330,6 @@ function Load(m)
 	dialogue:AddOption(text, 10, 0);
 	text = hoa_utils.Translate("Your help would be great!");
 	dialogue:AddOption(text, 12, 0);
-
 	--No
 	text = hoa_utils.Translate("Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know...");
 	dialogue:AddText(text, 2, 9, 0, false);
@@ -593,6 +599,13 @@ function Load(m)
 	chest:SetYPosition(34, 0);
 	chest:AddDrunes(100);
 	chest:AddObject(1, 2); -- Adds 2 Healing Potions
+	-- Objects below this line were added for testing purposes
+	chest:AddObject(30001, 1);
+	chest:AddObject(30002, 1);
+	chest:AddObject(30501, 1);
+	chest:AddObject(20001, 1);
+	chest:AddObject(20002, 1);
+	chest:AddObject(20501, 1);
 	map:AddGroundObject(chest);
 
 	-- Add a treasure inside the merchant''s house
