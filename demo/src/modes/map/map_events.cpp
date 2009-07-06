@@ -111,15 +111,11 @@ bool ShopEvent::_Update() {
 // ********** SoundEvent Class Functions
 // ****************************************************************************
 
-SoundEvent::SoundEvent(uint32 event_id, uint32 sound_id) :
+SoundEvent::SoundEvent(uint32 event_id, string sound_filename) :
 	MapEvent(event_id, SOUND_EVENT)
 {
-	vector<SoundDescriptor> map_sounds = MapMode::CurrentInstance()->GetSounds();
-	if (sound_id >= map_sounds.size()) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "invalid sound ID argument: " << sound_id << endl;
-	}
-	else {
-		_sound = map_sounds[sound_id];
+	if (_sound.LoadAudio(sound_filename) == false) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "failed to load sound event: " << sound_filename << endl;
 	}
 }
 

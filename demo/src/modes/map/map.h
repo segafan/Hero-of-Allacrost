@@ -197,12 +197,6 @@ public:
 
 	const hoa_video::StillImage& GetLocationGraphic() const
 		{ return _location_graphic; }
-
-	const std::vector<hoa_audio::SoundDescriptor>& GetSounds() const
-		{ return _sounds; }
-
-	const std::vector<hoa_audio::MusicDescriptor>& GetMusic() const
-		{ return _music; }
 	//@}
 
 private:

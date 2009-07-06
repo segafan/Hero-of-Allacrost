@@ -299,7 +299,7 @@ void BindModesToLua()
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<SoundEvent, MapEvent>("SoundEvent")
-			.def(constructor<uint32, uint32>())
+			.def(constructor<uint32, std::string>())
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

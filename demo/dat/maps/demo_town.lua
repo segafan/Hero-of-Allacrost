@@ -456,7 +456,7 @@ function Load(m)
 	sprite:AddDialogueReference(5);
 
 	-- Add Alexander's sound event
-	event = hoa_map.SoundEvent(12000, 0);
+	event = hoa_map.SoundEvent(12000, "snd/coins.wav");
 	event_supervisor:RegisterEvent(event);
 
 	-- Add Alexander's movement events
