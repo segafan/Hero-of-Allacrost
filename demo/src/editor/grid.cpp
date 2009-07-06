@@ -206,7 +206,7 @@ void Grid::LoadMap()
 	ReadScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
-	if (!read_data.OpenFile(string(_file_name.toAscii()), true))
+	if (read_data.OpenFile(string(_file_name.toAscii()), true) == false)
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
 
 	read_data.OpenTable(string(_file_name.section('/', -1).remove(".lua").toAscii()));

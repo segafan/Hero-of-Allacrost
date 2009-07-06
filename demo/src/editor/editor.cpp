@@ -433,7 +433,6 @@ void Editor::_FileSaveAs()
 
 void Editor::_FileSave()
 {
-
 	if (_ed_scrollview->_map->GetFileName().isEmpty() ||
 		_ed_scrollview->_map->GetFileName() == "Untitled")
 	{
@@ -475,6 +474,8 @@ void Editor::_FileClose()
 			delete _ed_tabs;
 			_ed_tabs = NULL;
 		} // tabs must exist first
+		
+		setCaption("Hero of Allacrost Level Editor");
 	} // make sure an unsaved map is not lost
 } // _FileClose()
 
@@ -1947,7 +1948,7 @@ void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index)
 	{
 		// Set up for opening autotiling.lua.
 		ReadScriptDescriptor read_data;
-		if (read_data.OpenFile("dat/tilesets/autotiling.lua") == false)
+		if (read_data.OpenFile("dat/tilesets/autotiling.lua", true) == false)
 			QMessageBox::warning(this, "Loading File...",
 				QString("ERROR: could not open dat/tilesets/autotiling.lua for reading!"));
 
@@ -2077,7 +2078,7 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 
 		// Set up for opening autotiling.lua.
 		ReadScriptDescriptor read_data;
-		if (read_data.OpenFile("dat/tilesets/autotiling.lua") == false)
+		if (read_data.OpenFile("dat/tilesets/autotiling.lua", true) == false)
 			QMessageBox::warning(this, "Loading File...",
 				QString("ERROR: could not open dat/tilesets/autotiling.lua for reading!"));
 
