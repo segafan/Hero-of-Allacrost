@@ -104,12 +104,12 @@ void SkillEditor::_LoadSkills()
 {
 	string path = string("dat/skills/");
 	ReadScriptDescriptor script;
-	script.OpenFile(path + "defense.lua");
+	script.OpenFile(path + "defense.lua", true);
 	script.CloseFile();
-	script.OpenFile(path + "support.lua");
+	script.OpenFile(path + "support.lua", true);
 	script.CloseFile();
 	vector<GlobalSkill *> skills;
-	if (script.OpenFile(path + "attack.lua") != false)
+	if (script.OpenFile(path + "attack.lua", true) != false)
 		_LoadSkills(script, skills, GLOBAL_SKILL_ATTACK);
 	// Now clean up the skills script (due to the way we're storing the scripts in lua, they're all actually in one big table in lua
 	// regardless of the file split on disk
