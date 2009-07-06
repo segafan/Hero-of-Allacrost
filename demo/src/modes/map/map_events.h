@@ -221,6 +221,10 @@ protected:
 *** event by calling the GetSound() method and invoking Stop() on the SoundDescriptor object that is
 *** returned.
 ***
+*** \note The MapMode class has a container of SoundDescriptor objects which should include all of
+*** the sounds that may be used on a given map. This means that when a SoundEvent is created, the
+*** sound file data will already be loaded by the audio engine.
+***
 *** \todo Support sounds with a position that employ distance attenuation. Perhaps
 *** another derived class would be ideal to implement this, since sounds could possibly
 *** be mobile (attached to sprites).
@@ -228,9 +232,9 @@ protected:
 class SoundEvent : public MapEvent {
 public:
 	/** \param event_id The ID of this event
-	*** \param sound_id The index into the vector MapMode::_sounds of the sound to play
+	*** \param sound_filename The name of the sound file to load
 	**/
-	SoundEvent(uint32 event_id, uint32 sound_id);
+	SoundEvent(uint32 event_id, std::string sound_filename);
 
 	~SoundEvent();
 
