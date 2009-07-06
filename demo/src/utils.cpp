@@ -375,6 +375,7 @@ bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
 		return false;
 	}
 
+	std::cerr << "Libiconv version is " << std::hex << _LIBICONV_VERSION << std::endl;
 	#if _LIBICONV_VERSION == 0x0109
 	// We are using an iconv API that uses const char*
 	const char *sourceChar = source;
@@ -409,8 +410,29 @@ ustring MakeUnicodeString(const string& text) {
 		if (utf16String[0] == UTF_16_BOM_STD ||
 		    utf16String[0] == UTF_16_BOM_REV)
 		{
+			std::cerr << "UTF_16_ICONV_NAME is " << UTF_16_ICONV_NAME << std::endl;
+			std::cerr << "UTF8ToUTF16() successful, skipping byte order mark" << std::endl;
+			if (utf16String[0] == UTF_16_BOM_STD)
+				std::cerr << "  Byte order mark is UTF_16_BOM_STD (0xFEFF)." << std::endl;
+			else if (utf16String[0] == UTF_16_BOM_REV)
+				std::cerr << "  Byte order mark is UTF_16_BOM_REV (0xFFFE)." << std::endl;
 			utf16String = ubuff + 1;
 		}
+		else {
+			std::cerr << "UTF_16_ICONV_NAME is " << UTF_16_ICONV_NAME << std::endl;
+			std::cerr << "UTF8ToUTF16() successful, but not skipping byte order mark since it's not present!" << std::endl;
+		}
+		
+		#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+			// For some reason, using UTF-16BE to iconv on big-endian machines
+			// still does not create correctly accented characters, so this
+			// byte swapping must be performed (only for irregular characters,
+			// hence the mask).
+
+			for (int32 c = 0; c < length; c++)
+				if (utf16String[c] & 0xFF80)
+					utf16String[c] = (utf16String[c] << 8) | (utf16String[c] >> 8);
+		#endif
 	}
 	else {
 		for (int32 c = 0; c < length; ++c) {

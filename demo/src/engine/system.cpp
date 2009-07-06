@@ -190,12 +190,14 @@ bool SystemEngine::SingletonInitialize() {
 		string cwd(getcwd(buffer, PATH_MAX));
 		cwd.append("/translations/");
 		bindtextdomain("allacrost", cwd.c_str());
+		bind_textdomain_codeset("allacrost", "UTF-8");
 		textdomain("allacrost");
 	#elif (defined(__linux__) || defined(__FreeBSD__)) && !defined(RELEASE_BUILD)
 		// Look for translation files in LOCALEDIR only if they are not available in the
 		// current directory.
 		if (ifstream("dat/config/settings.lua") == NULL) {
 			bindtextdomain(PACKAGE, LOCALEDIR);
+			bind_textdomain_codeset(PACKAGE, "UTF-8");
 			textdomain(PACKAGE);
 		} else {
 			char buffer[PATH_MAX];
@@ -203,10 +205,12 @@ bool SystemEngine::SingletonInitialize() {
 			string cwd(getcwd(buffer, PATH_MAX));
 			cwd.append("/txt/");
 			bindtextdomain(PACKAGE, cwd.c_str());
+			bind_textdomain_codeset(PACKAGE, "UTF-8");
 			textdomain(PACKAGE);
 		}
 	#else
 		bindtextdomain(PACKAGE, LOCALEDIR);
+		bind_textdomain_codeset(PACKAGE, "UTF-8");
 		textdomain(PACKAGE);
 	#endif
 
