@@ -341,7 +341,7 @@ bool UTF16ToUTF8(const uint16 *source, char *dest, size_t length) {
 	}
 
 	const char *source_char = reinterpret_cast<const char *>(source);
-	#if _LIBICONV_VERSION == 0x0109
+	#if (defined(_LIBICONV_VERSION) && _LIBICONV_VERSION == 0x0109)
 	// We are using an iconv API that uses const char*
 	const char *sourceChar = source_char;
 	#else
@@ -375,14 +375,19 @@ bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
 		return false;
 	}
 
-	std::cerr << "Libiconv version is " << std::hex << _LIBICONV_VERSION << std::endl;
-	#if _LIBICONV_VERSION == 0x0109
-	// We are using an iconv API that uses const char*
-	const char *sourceChar = source;
+	#if (defined(_LIBICONV_VERSION))
+		std::cerr << "Libiconv version is " << std::hex << _LIBICONV_VERSION << std::endl;
 	#else
-	// The iconv API doesn't specify a const source for legacy support reasons.
-	// Versions after 0x0109 changed back to char* for POSIX reasons.
-	char *sourceChar = const_cast<char *>(source);
+		std::cerr << "Libiconv version is not defined." << std::endl;
+	#endif
+
+	#if (defined(_LIBICONV_VERSION) && _LIBICONV_VERSION == 0x0109)
+		// We are using an iconv API that uses const char*
+		const char *sourceChar = source;
+	#else
+		// The iconv API doesn't specify a const source for legacy support reasons.
+		// Versions after 0x0109 changed back to char* for POSIX reasons.
+		char *sourceChar = const_cast<char *>(source);
 	#endif
 	char *destChar   = reinterpret_cast<char *>(dest);
 	size_t sourceLen = length;
