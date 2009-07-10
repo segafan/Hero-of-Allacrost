@@ -121,7 +121,6 @@ credits_text =
 	"Additional Music and Sound\n\n" ..
 	"Jean Malary (hamiko) - sound mixer\n" ..
 	"Matt Dexter (Star Pilot) - soundtrack composer\n" ..
-	"Simon Frisch (SimonF) - soundtrack composer\n" ..
 	"\n\n" ..
 
 	"Additional Internet Services\n\n" ..

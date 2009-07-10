@@ -767,7 +767,7 @@ bool ObjectSupervisor::_AlignSpriteWithCollision(VirtualSprite* sprite, uint16 d
 
 	// ---------- (1): Determine the border coordinates that should be examined
 	// Used to hold the proper coordinate of the sprite and the collision border
-	float pos_sprite, pos_border;
+	float pos_sprite = 0.0f, pos_border = 0.0f;
 
 	if (coll_type == BOUNDARY_COLLISION) {
 		switch (direction) {
@@ -1065,7 +1065,7 @@ bool ObjectSupervisor::_MoveSpriteAroundCollisionDiagonal(VirtualSprite* sprite,
 	const MapRectangle& sprite_coll_rect, const MapRectangle& object_coll_rect)
 {
 	// Determines the horizontal and vertical directions to examine (north/south and east/west correspond to true/false)
-	bool north_or_south, east_or_west;
+	bool north_or_south = false, east_or_west = false;
 	// Determines if horizontal or vertical collision alignment should be performed
 	bool check_horizontal_align = false, check_vertical_align = false;
 

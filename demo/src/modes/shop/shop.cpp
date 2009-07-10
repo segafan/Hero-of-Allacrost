@@ -52,13 +52,28 @@ ShopMode* private_shop::current_shop = NULL;
 
 
 
-ShopMode::ShopMode() {
+ShopMode::ShopMode() :
+	_state(SHOP_STATE_ACTION),
+	_deal_types(0),
+	_purchases_cost(0),
+	_sales_revenue(0),
+	_action_window(NULL),
+	_buy_window(NULL),
+	_sell_window(NULL),
+	_info_window(NULL),
+	_confirm_window(NULL),
+	_prompt_window(NULL)
+{
 	mode_type = MODE_MANAGER_SHOP_MODE;
 	private_shop::current_shop = this;
 
-	_state = SHOP_STATE_ACTION;
-	_purchases_cost = 0;
-	_sales_revenue = 0;
+	_action_window = new ShopActionWindow();
+	_greeting_window = new ShopGreetingWindow();
+	_buy_window = new BuyListWindow();
+	_sell_window = new SellListWindow();
+	_info_window = new ObjectInfoWindow();
+	_confirm_window = new ConfirmWindow();
+	_prompt_window = new PromptWindow();
 
 	try {
 		_saved_screen = VideoManager->CaptureScreen();
@@ -76,6 +91,14 @@ ShopMode::~ShopMode() {
 	}
 	_buy_objects.clear();
 
+	delete _action_window;
+	delete _greeting_window;
+	delete _buy_window;
+	delete _sell_window;
+	delete _info_window;
+	delete _confirm_window;
+	delete _prompt_window;
+
 	private_shop::current_shop = NULL;
 }
 
@@ -92,9 +115,44 @@ void ShopMode::Reset() {
 	_sales_revenue = 0;
 
 	_buy_objects_quantities.clear();
-	for (uint32 ctr = 0; ctr < _buy_objects.size(); ctr++) {
+	for (uint32 i = 0; i < _buy_objects.size(); i++) {
 		_buy_objects_quantities.push_back(0);
+		switch (_buy_objects[i]->GetObjectType()) {
+			case GLOBAL_OBJECT_ITEM:
+				_deal_types |= DEALS_ITEMS;
+				break;
+			case GLOBAL_OBJECT_WEAPON:
+				_deal_types |= DEALS_WEAPONS;
+				break;
+			case GLOBAL_OBJECT_HEAD_ARMOR:
+				_deal_types |= DEALS_HEAD_ARMOR;
+				break;
+			case GLOBAL_OBJECT_TORSO_ARMOR:
+				_deal_types |= DEALS_TORSO_ARMOR;
+				break;
+			case GLOBAL_OBJECT_ARM_ARMOR:
+				_deal_types |= DEALS_ARM_ARMOR;
+				break;
+			case GLOBAL_OBJECT_LEG_ARMOR:
+				_deal_types |= DEALS_LEG_ARMOR;
+				break;
+			case GLOBAL_OBJECT_SHARD:
+				_deal_types |= DEALS_SHARDS;
+				break;
+			case GLOBAL_OBJECT_KEY_ITEM:
+				_deal_types |= DEALS_KEY_ITEMS;
+				break;
+			default:
+				IF_PRINT_WARNING(SHOP_DEBUG) << "unknown object type sold in shop: " << _buy_objects[i]->GetObjectType() << endl;
+				break;
+		}
 	}
+
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_object_category_images, "img/icons/object_categories.png", 2, 4) == false) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load category images: img/icons/object_categories.png" << endl;
+		return;
+	}
+	_greeting_window->SetCategoryIcons(_deal_types, _object_category_images);
 
 	map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
 	map<uint32, GlobalObject*>::iterator iter;
@@ -104,12 +162,11 @@ void ShopMode::Reset() {
 		_sell_objects_quantities.push_back(0);
 	}
 
-	_action_window.UpdateFinanceText();
-	_buy_window.RefreshList();
-	_sell_window.UpdateSellList();
+	_buy_window->RefreshList();
+	_sell_window->UpdateSellList();
 
-	if (_sell_window.object_list.GetNumberOptions() > 0) {
-		_sell_window.object_list.SetSelection(0);
+	if (_sell_window->object_list.GetNumberOptions() > 0) {
+		_sell_window->object_list.SetSelection(0);
 	}
 
 	_shop_sounds["confirm"] = SoundDescriptor();
@@ -137,19 +194,20 @@ void ShopMode::Update() {
 
 	switch (_state) {
 		case SHOP_STATE_ACTION:
-			_action_window.Update();
+			_action_window->Update();
+			_greeting_window->Update();
 			break;
 		case SHOP_STATE_BUY:
-			_buy_window.Update();
+			_buy_window->Update();
 			break;
 		case SHOP_STATE_SELL:
-			_sell_window.Update();
+			_sell_window->Update();
 			break;
 		case SHOP_STATE_CONFIRM:
-			_confirm_window.Update();
+			_confirm_window->Update();
 			break;
 		case SHOP_STATE_PROMPT:
-			_prompt_window.Update();
+			_prompt_window->Update();
 			break;
 		default:
 			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << ", reseting to initial state" << endl;
@@ -173,27 +231,28 @@ void ShopMode::Draw() {
 	// Restore the standard shop coordinate system before drawing the shop windows
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 
-	_action_window.Draw();
-	_info_window.Draw();
+	_action_window->Draw();
+	_greeting_window->Draw();
+// 	_info_window->Draw();
 
-	// Determine if we should draw the buy window, sell window, or an empty menu window
-	// NOTE: we should never see both buy and sell states in the state/saved_state member.
-	if (_state == SHOP_STATE_BUY || _saved_state == SHOP_STATE_BUY) {
-		_buy_window.Draw();
-	}
-	else if (_state == SHOP_STATE_SELL || _saved_state == SHOP_STATE_SELL) {
-		_sell_window.Draw();
-	}
-	else {
-		_buy_window.MenuWindow::Draw();
-	}
-
-	if (_state == SHOP_STATE_CONFIRM) {
-		_confirm_window.Draw();
-	}
-	else if (_state == SHOP_STATE_PROMPT) {
-		_prompt_window.Draw();
-	}
+// 	// Determine if we should draw the buy window, sell window, or an empty menu window
+// 	// NOTE: we should never see both buy and sell states in the state/saved_state member.
+// 	if (_state == SHOP_STATE_BUY || _saved_state == SHOP_STATE_BUY) {
+// 		_buy_window->Draw();
+// 	}
+// 	else if (_state == SHOP_STATE_SELL || _saved_state == SHOP_STATE_SELL) {
+// 		_sell_window->Draw();
+// 	}
+// 	else {
+// 		_buy_window->MenuWindow::Draw();
+// 	}
+//
+// 	if (_state == SHOP_STATE_CONFIRM) {
+// 		_confirm_window->Draw();
+// 	}
+// 	else if (_state == SHOP_STATE_PROMPT) {
+// 		_prompt_window->Draw();
+// 	}
 }
 
 

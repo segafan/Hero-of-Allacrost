@@ -44,7 +44,7 @@ namespace private_shop {
 
 ShopActionWindow::ShopActionWindow() {
 	// (1) Initialize the window
-	MenuWindow::Create(200, 600, ~VIDEO_MENU_EDGE_RIGHT);
+	MenuWindow::Create(800, 80, ~VIDEO_MENU_EDGE_BOTTOM);
 	MenuWindow::SetPosition(112, 684);
 	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
@@ -52,30 +52,37 @@ ShopActionWindow::ShopActionWindow() {
 
 	// (2) Initialize the list of actions
 	action_options.SetOwner(this);
-	action_options.SetPosition(25.0f, 600.0f);
-	action_options.SetDimensions(150.0f, 250.0f, 1, 5, 1, 5);
-	action_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	action_options.SetPosition(40.0f, 60.0f);
+	action_options.SetDimensions(720.0f, 20.0f, 5, 1, 5, 1);
+	action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	action_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	action_options.SetCursorOffset(-50.0f, 20.0f);
 	action_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 
-	action_options.AddOption(MakeUnicodeString("Buy wares"));
-	action_options.AddOption(MakeUnicodeString("Sell inventory"));
-	action_options.AddOption(MakeUnicodeString("Confirm transaction"));
-	action_options.AddOption(MakeUnicodeString("Enter party menu"));
-	action_options.AddOption(MakeUnicodeString("Leave shop"));
+	action_options.AddOption(MakeUnicodeString("Buy"));
+	action_options.AddOption(MakeUnicodeString("Sell"));
+	action_options.AddOption(MakeUnicodeString("Trade"));
+	action_options.AddOption(MakeUnicodeString("Confirm"));
+	action_options.AddOption(MakeUnicodeString("Leave"));
 	action_options.SetSelection(0);
 
-	// (3) Initialize the financial text box
-	finance_text.SetOwner(this);
-	finance_text.SetPosition(25.0f, 120.0f);
-	finance_text.SetDimensions(150.0f, 65.0f);
-	finance_text.SetTextStyle(TextStyle());
-	finance_text.SetDisplaySpeed(30);
-	finance_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
-	finance_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	UpdateFinanceText();
+	// (3) Initialize the financial table text
+	finance_table.SetOwner(this);
+	finance_table.SetPosition(80.0f, 30.0f);
+	finance_table.SetDimensions(680.0f, 20.0f, 4, 1, 4, 1);
+	finance_table.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	finance_table.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	finance_table.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	// Initialize all four options with an empty string that will be overwritten by the following method call
+	for (uint32 i = 0; i < 4; i++)
+		finance_table.AddOption(MakeUnicodeString(""));
+	UpdateFinanceTable();
+
+	// (4) Initialize the drunes icon image
+	if (drunes_icon.Load("img/icons/drunes.png") == false)
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load drunes image for action window" << endl;
+	drunes_icon.SetDimensions(30.0f, 30.0f);
 } // ShopActionWindow::ShopActionWindow()
 
 
@@ -92,41 +99,44 @@ void ShopActionWindow::Update() {
 
 	if (InputManager->ConfirmPress()) {
 		action_options.InputConfirm();
-		if (action_options.GetSelection() == 0) { // Buy wares
+		if (action_options.GetSelection() == 0) { // Buy
 			action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-			current_shop->_info_window.SetObject(current_shop->_buy_objects[0]);
-			current_shop->_buy_window.hide_options = false;
-			current_shop->_buy_window.object_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			current_shop->_info_window->SetObject(current_shop->_buy_objects[0]);
+			current_shop->_buy_window->hide_options = false;
+			current_shop->_buy_window->object_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 			current_shop->_state = SHOP_STATE_BUY;
 			current_shop->_shop_sounds["confirm"].Play();
 		}
-		else if (action_options.GetSelection() == 1) { // Sell inventory
+		else if (action_options.GetSelection() == 1) { // Sell
 			// TODO: Inventory empty check is not sufficient here because if the inventory only consists
 			// of key items, then the sell menu should not come up
 			if (GlobalManager->GetInventory()->empty() == true) {
 				current_shop->_PushAndSetState(SHOP_STATE_PROMPT);
-				current_shop->_prompt_window.Show();
-				current_shop->_prompt_window.prompt_text.SetDisplayText(MakeUnicodeString(
+				current_shop->_prompt_window->Show();
+				current_shop->_prompt_window->prompt_text.SetDisplayText(MakeUnicodeString(
 					"The party's inventory is empty. There is nothing you can offer to sell.")
 				);
 				current_shop->_shop_sounds["cancel"].Play();
 			}
 			else {
 				action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-				current_shop->_info_window.SetObject(current_shop->_current_inv[0]);
-				current_shop->_sell_window.UpdateSellList();
-				current_shop->_sell_window.object_list.SetSelection(0);
-				current_shop->_sell_window.hide_options = false;
-				current_shop->_sell_window.object_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				current_shop->_info_window->SetObject(current_shop->_current_inv[0]);
+				current_shop->_sell_window->UpdateSellList();
+				current_shop->_sell_window->object_list.SetSelection(0);
+				current_shop->_sell_window->hide_options = false;
+				current_shop->_sell_window->object_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				current_shop->_state = SHOP_STATE_SELL;
 				current_shop->_shop_sounds["confirm"].Play();
 			}
 		}
-		else if (action_options.GetSelection() == 2) { // Confirm transaction
-			if ((current_shop->_purchases_cost + current_shop->_sales_revenue) == 0) {
+		else if (action_options.GetSelection() == 2) { // Trade
+			// TODO
+		}
+		else if (action_options.GetSelection() == 3) { // Confirm
+			if (current_shop->HasPreparedTransaction() == false) {
 				current_shop->_PushAndSetState(SHOP_STATE_PROMPT);
-				current_shop->_prompt_window.Show();
-				current_shop->_prompt_window.prompt_text.SetDisplayText(MakeUnicodeString(
+				current_shop->_prompt_window->Show();
+				current_shop->_prompt_window->prompt_text.SetDisplayText(MakeUnicodeString(
 					"You have not offered to make any purchases or sales.")
 				);
 				current_shop->_shop_sounds["cancel"].Play();
@@ -134,15 +144,9 @@ void ShopActionWindow::Update() {
 			else {
 				action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				current_shop->_state = SHOP_STATE_CONFIRM;
-				current_shop->_confirm_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				current_shop->_confirm_window.Show();
+				current_shop->_confirm_window->options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				current_shop->_confirm_window->Show();
 			}
-		}
-		else if (action_options.GetSelection() == 3) { // Enter party menu
-			current_shop->_shop_sounds["confirm"].Play();
-			// TEMP: the current location name and graphic need to be retrieved from the most recent map mode on the stack
-			hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("Village"), "img/menus/locations/mountain_village.png");
-			ModeManager->Push(MM);
 		}
 		else if (action_options.GetSelection() == 4) { // Leave shop
 			ModeManager->Pop();
@@ -157,25 +161,21 @@ void ShopActionWindow::Update() {
 		ModeManager->Pop();
 		current_shop->_shop_sounds["cancel"].Play();
 	}
-	else if (InputManager->UpPress()) {
-		action_options.InputUp();
+	else if (InputManager->LeftPress()) {
+		action_options.InputLeft();
 	}
-	else if (InputManager->DownPress()) {
-		action_options.InputDown();
+	else if (InputManager->RightPress()) {
+		action_options.InputRight();
 	}
 }
 
 
 
-void ShopActionWindow::UpdateFinanceText() {
-	if (current_shop != NULL) {
-		finance_text.SetDisplayText(MakeUnicodeString(
-			  "Funds:  " + NumberToString(GlobalManager->GetDrunes()) +
-			"\nCosts: " + (current_shop->GetPurchaseCost() == 0 ? " " : "-") + NumberToString(current_shop->GetPurchaseCost()) +
-			"\nSales: " + (current_shop->GetSalesRevenue() == 0 ? " " : "+") + NumberToString(current_shop->GetSalesRevenue()) +
-			"\nTotal:  " + NumberToString(current_shop->GetTotalRemaining())
-		));
-	}
+void ShopActionWindow::UpdateFinanceTable() {
+	finance_table.SetOptionText(0, MakeUnicodeString("Funds: " + NumberToString(GlobalManager->GetDrunes())));
+	finance_table.SetOptionText(1, MakeUnicodeString("Purchases: -" + NumberToString(current_shop->GetPurchaseCost())));
+	finance_table.SetOptionText(2, MakeUnicodeString("Sales: +" + NumberToString(current_shop->GetSalesRevenue())));
+	finance_table.SetOptionText(3, MakeUnicodeString("Total: " + NumberToString(current_shop->GetTotalRemaining())));
 }
 
 
@@ -183,7 +183,163 @@ void ShopActionWindow::UpdateFinanceText() {
 void ShopActionWindow::Draw() {
 	MenuWindow::Draw();
 	action_options.Draw();
-	finance_text.Draw();
+	finance_table.Draw();
+	VideoManager->Move(150.0f, 610.0f);
+	drunes_icon.Draw();
+}
+
+// *****************************************************************************
+// ***** ShopGreetingWindow class methods
+// *****************************************************************************
+
+ShopGreetingWindow::ShopGreetingWindow() {
+	// (1) Initialize the window
+	MenuWindow::Create(800, 200, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_TOP);
+	MenuWindow::SetPosition(112, 612);
+	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
+	MenuWindow::Show();
+
+	// (2) Initialize the greeting textbox
+	greeting_text.SetOwner(this);
+	greeting_text.SetPosition(40.0f, 190.0f);
+	greeting_text.SetDimensions(720.0f, 25.0f);
+	greeting_text.SetTextStyle(TextStyle());
+	greeting_text.SetDisplaySpeed(30);
+	greeting_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	greeting_text.SetTextAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	greeting_text.SetDisplayText(MakeUnicodeString("Welcome! Take a look around.")); // Default greeting, will usually be overwritten
+
+	// (3) Initialize the price level textbox
+	pricing_text.SetOwner(this);
+	pricing_text.SetPosition(40.0f, 65.0f);
+	pricing_text.SetDimensions(720.0f, 50.0f);
+	pricing_text.SetTextStyle(TextStyle());
+	pricing_text.SetDisplaySpeed(30);
+	pricing_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	pricing_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	SetPriceLevelText(SHOP_PRICE_STANDARD, SHOP_PRICE_STANDARD); // Default price levels, will usually be overwritten
+} // ShopActionWindow::ShopActionWindow()
+
+
+
+ShopGreetingWindow::~ShopGreetingWindow() {
+	MenuWindow::Destroy();
+} // ShopActionWindow::ShopActionWindow()
+
+
+
+void ShopGreetingWindow::Update() {
+	MenuWindow::Update();
+	greeting_text.Update();
+	pricing_text.Update();
+}
+
+
+
+void ShopGreetingWindow::Draw() {
+	MenuWindow::Draw();
+	greeting_text.Draw();
+	pricing_text.Draw();
+	VideoManager->Move(200.0f, 500.0f);
+	for (uint32 i = 0; i < category_icons.size(); i++) {
+		category_icons[i].Draw();
+		VideoManager->MoveRelative(80.0f, 0.0f);
+	}
+}
+
+
+
+void ShopGreetingWindow::SetGreetingText(hoa_utils::ustring greeting) {
+	greeting_text.SetDisplayText(greeting);
+}
+
+
+
+void ShopGreetingWindow::SetPriceLevelText(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level) {
+	const ustring VERY_HIGH = MakeUnicodeString("very high");
+	const ustring HIGH = MakeUnicodeString("high");
+	const ustring STANDARD = MakeUnicodeString("standard");
+	const ustring LOW = MakeUnicodeString("low");
+	const ustring VERY_LOW = MakeUnicodeString("very low");
+
+	ustring buy_price, sell_price;
+	switch (buy_level) {
+		case SHOP_PRICE_VERY_HIGH:
+			buy_price = VERY_HIGH;
+			break;
+		case SHOP_PRICE_HIGH:
+			buy_price = HIGH;
+			break;
+		case SHOP_PRICE_STANDARD:
+			buy_price = STANDARD;
+			break;
+		case SHOP_PRICE_LOW:
+			buy_price = LOW;
+			break;
+		case SHOP_PRICE_VERY_LOW:
+			buy_price = VERY_LOW;
+			break;
+		default:
+			buy_price = STANDARD;
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid buy_level argument: " << buy_level << endl;
+			break;
+	}
+
+	switch (sell_level) {
+		case SHOP_PRICE_VERY_HIGH:
+			sell_price = VERY_HIGH;
+			break;
+		case SHOP_PRICE_HIGH:
+			sell_price = HIGH;
+			break;
+		case SHOP_PRICE_STANDARD:
+			sell_price = STANDARD;
+			break;
+		case SHOP_PRICE_LOW:
+			sell_price = LOW;
+			break;
+		case SHOP_PRICE_VERY_LOW:
+			sell_price = VERY_LOW;
+			break;
+		default:
+			sell_price = STANDARD;
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid sell_level argument: " << sell_level << endl;
+			break;
+	}
+
+	pricing_text.SetDisplayText(MakeUnicodeString("Merchan't buy prices are ") + buy_price + MakeUnicodeString(".\nMerchant's sell prices are ") + sell_price + MakeUnicodeString("."));
+} // void ShopGreetingWindow::SetPriceLevelText(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level)
+
+
+
+void ShopGreetingWindow::SetCategoryIcons(uint8 deal_types, vector<StillImage>& deal_images) {
+	category_icons = deal_images;
+
+	if ((deal_types & DEALS_ITEMS) == false) {
+		category_icons[0].EnableGrayScale();
+	}
+	if ((deal_types & DEALS_WEAPONS) == false) {
+		category_icons[1].EnableGrayScale();
+	}
+	if ((deal_types & DEALS_HEAD_ARMOR) == false) {
+		category_icons[2].EnableGrayScale();
+	}
+	if ((deal_types & DEALS_TORSO_ARMOR) == false) {
+		category_icons[3].EnableGrayScale();
+	}
+	if ((deal_types & DEALS_ARM_ARMOR) == false) {
+		category_icons[4].EnableGrayScale();
+	}
+	if ((deal_types & DEALS_LEG_ARMOR) == false) {
+		category_icons[5].EnableGrayScale();
+	}
+	if ((deal_types & DEALS_SHARDS) == false) {
+		category_icons[6].EnableGrayScale();
+	}
+	if ((deal_types & DEALS_KEY_ITEMS) == false) {
+		category_icons[7].EnableGrayScale();
+	}
 }
 
 // *****************************************************************************
@@ -191,8 +347,8 @@ void ShopActionWindow::Draw() {
 // *****************************************************************************
 
 BuyListWindow::BuyListWindow() {
-	MenuWindow::Create(600, 365/*400*/, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_BOTTOM);
-	MenuWindow::SetPosition(312, 684);
+	MenuWindow::Create(800, 400, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_TOP | VIDEO_MENU_EDGE_BOTTOM);
+	MenuWindow::SetPosition(112, 584);
 	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
 	MenuWindow::Show();
@@ -249,8 +405,8 @@ void BuyListWindow::Update() {
 		int32 x = object_list.GetSelection();
 		if (current_shop->_buy_objects_quantities[x] == 0) {
 			current_shop->_PushAndSetState(SHOP_STATE_PROMPT);
-			current_shop->_prompt_window.Show();
-			current_shop->_prompt_window.prompt_text.SetDisplayText(MakeUnicodeString(
+			current_shop->_prompt_window->Show();
+			current_shop->_prompt_window->prompt_text.SetDisplayText(MakeUnicodeString(
 				"No quantity for this selection was made. Use the right and left commands to increment "
 				"or decrement the amount of this object to purchase.")
 			);
@@ -259,27 +415,27 @@ void BuyListWindow::Update() {
 
 		current_shop->_state = SHOP_STATE_CONFIRM;
 		object_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-		current_shop->_info_window.SetObject(NULL);
-		current_shop->_confirm_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-		current_shop->_confirm_window.Show();
+		current_shop->_info_window->SetObject(NULL);
+		current_shop->_confirm_window->options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		current_shop->_confirm_window->Show();
 		current_shop->_shop_sounds["confirm"].Play();
 		}
 	}
 	else if (InputManager->CancelPress()) {
 		hide_options = true;
 		current_shop->_state = SHOP_STATE_ACTION;
-		current_shop->_action_window.action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		current_shop->_action_window->action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		object_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-		current_shop->_info_window.SetObject(NULL);
+		current_shop->_info_window->SetObject(NULL);
 		current_shop->_shop_sounds["cancel"].Play();
 	}
 	else if (InputManager->UpPress()) {
 		object_list.InputUp();
-		current_shop->_info_window.SetObject(current_shop->_buy_objects[object_list.GetSelection()]);
+		current_shop->_info_window->SetObject(current_shop->_buy_objects[object_list.GetSelection()]);
 	}
 	else if (InputManager->DownPress()) {
 		object_list.InputDown();
-		current_shop->_info_window.SetObject(current_shop->_buy_objects[object_list.GetSelection()]);
+		current_shop->_info_window->SetObject(current_shop->_buy_objects[object_list.GetSelection()]);
 	}
 	else if (InputManager->LeftPress()) {
 		int32 x = object_list.GetSelection();
@@ -290,7 +446,7 @@ void BuyListWindow::Update() {
 				MakeUnicodeString(NumberToString(current_shop->_buy_objects[x]->GetPrice())) + MakeUnicodeString("   x") +
 				MakeUnicodeString(NumberToString(current_shop->_buy_objects_quantities[x]))
 			);
-			current_shop->_action_window.UpdateFinanceText();
+			current_shop->_action_window->UpdateFinanceTable();
 		}
 		else {
 			current_shop->_shop_sounds["cancel"].Play();
@@ -301,7 +457,7 @@ void BuyListWindow::Update() {
 		if (current_shop->_buy_objects[x]->GetPrice() <= current_shop->GetTotalRemaining()) {
 			current_shop->_buy_objects_quantities[x]++;
 			current_shop->_purchases_cost += current_shop->_buy_objects[x]->GetPrice();
-			current_shop->_action_window.UpdateFinanceText();
+			current_shop->_action_window->UpdateFinanceTable();
 			object_list.SetOptionText(x, current_shop->_buy_objects[x]->GetName() + MakeUnicodeString("<R>") +
 				MakeUnicodeString(NumberToString(current_shop->_buy_objects[x]->GetPrice())) + MakeUnicodeString("   x") +
 				MakeUnicodeString(NumberToString(current_shop->_buy_objects_quantities[x]))
@@ -331,8 +487,8 @@ void BuyListWindow::Draw() {
 // *****************************************************************************
 
 SellListWindow::SellListWindow() {
-	MenuWindow::Create(600, 400, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_BOTTOM);
-	MenuWindow::SetPosition(312, 684);
+	MenuWindow::Create(800, 400, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_TOP | VIDEO_MENU_EDGE_BOTTOM);
+	MenuWindow::SetPosition(112, 584);
 	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
 	MenuWindow::Show();
@@ -383,8 +539,8 @@ void SellListWindow::Update() {
 
 		if (current_shop->_sell_objects_quantities[x] == 0) {
 			current_shop->_PushAndSetState(SHOP_STATE_PROMPT);
-			current_shop->_prompt_window.Show();
-			current_shop->_prompt_window.prompt_text.SetDisplayText(MakeUnicodeString(
+			current_shop->_prompt_window->Show();
+			current_shop->_prompt_window->prompt_text.SetDisplayText(MakeUnicodeString(
 				"No quantity for this selection was made. Use the right and left commands to increment "
 				"or decrement the amount of this object to offer for sale.")
 			);
@@ -393,33 +549,33 @@ void SellListWindow::Update() {
 			hide_options = true;
 			object_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 			current_shop->_state = SHOP_STATE_CONFIRM;
-			current_shop->_confirm_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			current_shop->_confirm_window.Show();
+			current_shop->_confirm_window->options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			current_shop->_confirm_window->Show();
 			current_shop->_shop_sounds["confirm"].Play();
 		}
 	}
 	else if (InputManager->CancelPress()) {
 		hide_options = true;
 		current_shop->_state = SHOP_STATE_ACTION;
-		current_shop->_action_window.action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		current_shop->_action_window->action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		object_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-		current_shop->_info_window.SetObject(NULL);
+		current_shop->_info_window->SetObject(NULL);
 		current_shop->_shop_sounds["cancel"].Play();
 	}
 	else if (InputManager->UpPress()) {
 		object_list.InputUp();
-		current_shop->_info_window.SetObject(current_shop->_current_inv[object_list.GetSelection()]);
+		current_shop->_info_window->SetObject(current_shop->_current_inv[object_list.GetSelection()]);
 	}
 	else if (InputManager->DownPress()) {
 		object_list.InputDown();
-		current_shop->_info_window.SetObject(current_shop->_current_inv[object_list.GetSelection()]);
+		current_shop->_info_window->SetObject(current_shop->_current_inv[object_list.GetSelection()]);
 	}
 	else if (InputManager->LeftPress()) {
 		int32 x = object_list.GetSelection();
 		if (current_shop->_sell_objects_quantities[x] > 0) {
 			current_shop->_sell_objects_quantities[x]--;
 			current_shop->_sales_revenue -= (current_shop->_current_inv[x]->GetPrice() / 2);
-			current_shop->_action_window.UpdateFinanceText();
+			current_shop->_action_window->UpdateFinanceTable();
 		}
 		else {
 			current_shop->_shop_sounds["cancel"].Play();
@@ -430,7 +586,7 @@ void SellListWindow::Update() {
 		if (current_shop->_current_inv[x]->GetCount() > static_cast<uint32>(current_shop->_sell_objects_quantities[x])) {
 			current_shop->_sell_objects_quantities[x]++;
 			current_shop->_sales_revenue += (current_shop->_current_inv[x]->GetPrice() / 2);
-			current_shop->_action_window.UpdateFinanceText();
+			current_shop->_action_window->UpdateFinanceTable();
 		}
 		else {
 			current_shop->_shop_sounds["cancel"].Play();
@@ -477,8 +633,8 @@ ObjectInfoWindow::ObjectInfoWindow() {
 	_is_armor  = false;
 
 	// (1) Create the info window in the bottom right-hand section of the screen
-	MenuWindow::Create(600, 243, ~VIDEO_MENU_EDGE_TOP);
-	MenuWindow::SetPosition(312, 332);
+	MenuWindow::Create(800, 300, ~VIDEO_MENU_EDGE_TOP);
+	MenuWindow::SetPosition(112, 184);
 	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
 	MenuWindow::Show();
@@ -763,7 +919,7 @@ void ConfirmWindow::Update() {
 	if (InputManager->CancelPress()) {
 		current_shop->_shop_sounds["cancel"].Play();
 		options.SetSelection(0);
-		current_shop->_action_window.action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		current_shop->_action_window->action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 		current_shop->_state = SHOP_STATE_ACTION;
 	}
@@ -795,10 +951,10 @@ void ConfirmWindow::Update() {
 			current_shop->_purchases_cost = 0;
 			current_shop->_sales_revenue = 0;
 			current_shop->_shop_sounds["coins"].Play();
-			current_shop->_action_window.UpdateFinanceText();
-			current_shop->_info_window.SetObject(NULL);
-			current_shop->_buy_window.RefreshList();
-			current_shop->_sell_window.UpdateSellList();
+			current_shop->_action_window->UpdateFinanceTable();
+			current_shop->_info_window->SetObject(NULL);
+			current_shop->_buy_window->RefreshList();
+			current_shop->_sell_window->UpdateSellList();
 			current_shop->_state = SHOP_STATE_BUY;
 		}
 		else { // Cancel purchase
@@ -807,7 +963,7 @@ void ConfirmWindow::Update() {
 
 		// Return to previous window
 		options.SetSelection(0);
-		current_shop->_action_window.action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		current_shop->_action_window->action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 		current_shop->_PopState();
 	}
