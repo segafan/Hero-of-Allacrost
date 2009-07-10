@@ -283,7 +283,7 @@ void TreasureSupervisor::Initialize(MapTreasure* treasure) {
 	}
 
 	for (uint32 i = 0; i < _list_options.GetNumberOptions(); i++) {
-		_list_options.GetEmbeddedImage(i)->SetDimensions(32.0f, 32.0f);
+		_list_options.GetEmbeddedImage(i)->SetDimensions(30.0f, 30.0f);
 	}
 
 	_action_options.SetSelection(0);

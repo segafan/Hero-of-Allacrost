@@ -346,7 +346,7 @@ void BootMode::Update() {
 		}
 		return;
 	}
-	
+
 	if(_overwrite_function != NULL)
 	{
 		if(InputManager->ConfirmPress())
@@ -403,7 +403,7 @@ void BootMode::Update() {
 			_boot_sounds.at(1).Play(); // Play cancel sound here as well
 		}
 		else if (_active_menu == &_main_menu) {
-			
+
 		}
 		else if (_active_menu == &_options_menu) {
 			_active_menu = &_main_menu;
@@ -960,7 +960,7 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Load Game"), &BootMode::_OnLoadGame);
 	_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
-	
+
 	// TEMP: these options are for debugging purposes only and should be removed for releases
 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
@@ -1097,10 +1097,10 @@ void BootMode::_SetupLoadProfileMenu() {
 	_load_profile_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_load_profile_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	
+
 	//add the options in for each file
 	for(int32 i = 0; i < (int32) _GetDirectoryListingUserDataPath().size(); i++) {
-		
+
 		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
 		string fileName = _GetDirectoryListingUserDataPath().at(i);
 		_load_profile_menu.AddOption(MakeUnicodeString(fileName.c_str()), &BootMode::_OnLoadFile);
@@ -1121,11 +1121,11 @@ void BootMode::_SetupSaveProfileMenu() {
 	//this option is selected when user wants to create a new file
 	_save_profile_menu.AddOption(MakeUnicodeString("New Profile"), &BootMode::_OnSaveFile);
 
-	
+
 	//add the options in for each file
 	//these options are selected when user wants to overwrite an existing file
 	for(int32 i = 0; i < (int32) _GetDirectoryListingUserDataPath().size(); i++) {
-		
+
 		string fileName = _GetDirectoryListingUserDataPath().at(i);
 		_save_profile_menu.AddOption(MakeUnicodeString(fileName.c_str()), &BootMode::_OnSaveFile);
 	}
@@ -1242,7 +1242,7 @@ void BootMode::_SetupResolutionMenu() {
 	_resolution_menu.AddOption(MakeUnicodeString("800 x 600"), &BootMode::_OnResolution800x600);
 	_resolution_menu.AddOption(MakeUnicodeString("1024 x 768"), &BootMode::_OnResolution1024x768);
 	_resolution_menu.AddOption(MakeUnicodeString("1280 x 1024"), &BootMode::_OnResolution1280x1024);
-	
+
 	if (VideoManager->GetScreenWidth() == 640)
 		_resolution_menu.SetSelection(0);
 	else if (VideoManager->GetScreenWidth() == 800)
@@ -1311,7 +1311,26 @@ void BootMode::_OnMenuDebug() {
 void BootMode::_OnShopDebug() {
 	GlobalManager->AddCharacter(1);
 	GlobalManager->AddDrunes(500);
+	GlobalManager->AddToInventory(1, 5);
+	GlobalManager->AddToInventory(30501, 2);
+	GlobalManager->AddToInventory(2, 3);
+	GlobalManager->AddToInventory(3);
+	GlobalManager->AddToInventory(3002);
+	GlobalManager->AddToInventory(10001);
+	GlobalManager->AddToInventory(10502);
 	hoa_shop::ShopMode *SM = new hoa_shop::ShopMode();
+	SM->AddObject(1);
+	SM->AddObject(2);
+	SM->AddObject(10501);
+	SM->AddObject(10504);
+	SM->AddObject(3);
+	SM->AddObject(3001);
+	SM->AddObject(30001);
+	SM->AddObject(30002);
+	SM->AddObject(20001);
+	SM->AddObject(20002);
+	SM->AddObject(20501);
+	SM->AddObject(20502);
 	ModeManager->Push(SM);
 }
 
@@ -1477,7 +1496,7 @@ void BootMode::_OnLoadProfile() {
 // Saves the settings to a .lua file specified by the user
 void BootMode::_OnSaveProfile() {
 	_active_menu = &_save_profile_menu;
-	
+
 }
 // Loads the file specified by the user
 void BootMode::_OnLoadFile() {
@@ -1527,10 +1546,10 @@ void BootMode::_OnPickLetter() {
 
 	if(_user_input_menu.GetSelection() == 27) {
 		//end, so save the file
-		
+
 		//add the .lua extension
 		_current_filename += ".lua";
-	
+
 		//lets save this mofo :) and then add the option to save_profile menu and the load-profile menu
 		_has_modified_settings = true;
 		_SaveSettingsFile(_current_filename);
@@ -1539,7 +1558,7 @@ void BootMode::_OnPickLetter() {
 
 		//make sure we reset the current filename string
 		_current_filename = "";
-	
+
 		//also make sure we hide the alert windows if they havent selected new profile
 		_file_name_alert.Hide();
 		_file_name_window.Hide();
@@ -1549,10 +1568,10 @@ void BootMode::_OnPickLetter() {
 
 		//since we ended we have to go back to the save profile menu
 		_active_menu = &_save_profile_menu;
-		
+
 	}
 	else if(_user_input_menu.GetSelection() == 26) {
-		//take off the last letter 
+		//take off the last letter
 		//we subtract 1 because char arrays AKA strings start at position 0
 
 		//make sure we dont try to erase letters that are not there
@@ -1643,7 +1662,7 @@ void BootMode::_UpdateSaveAndLoadProfiles() {
 	for(int32 i = 0; i < (int32) _GetDirectoryListingUserDataPath().size(); i++) {
 		_load_profile_menu.SetOptionText(i,MakeUnicodeString(_GetDirectoryListingUserDataPath().at(i)));
 	}
-	
+
 }
 
 
@@ -1663,7 +1682,7 @@ void BootMode::_SaveSettingsFile(const std::string& fileName) {
 
 	if(fileName == "")
 		file = fileTemp;
-	else 
+	else
 		file = GetUserDataPath(false) + fileName;
 
 	//copy the default file so we have an already set up lua file and then we can modify its settings
@@ -1718,7 +1737,7 @@ void BootMode::_SaveSettingsFile(const std::string& fileName) {
 }
 
 bool BootMode::_LoadSettingsFile(const std::string& fileName) {
-	
+
 	ReadScriptDescriptor settings;
 	if (settings.OpenFile(fileName) == false)
 		return false;
@@ -1848,7 +1867,7 @@ std::vector<std::string> BootMode::_GetDirectoryListingUserDataPath() {
 
 	//get the entire directory listing for user data path
 	vector<string> directoryListing = ListDirectory(GetUserDataPath(true),".lua");
-	
+
 	if (directoryListing.empty()) {
 		return directoryListing;
 	} else {

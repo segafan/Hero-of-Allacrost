@@ -34,7 +34,11 @@
 
 #include "global.h"
 
+#include "shop_utils.h"
+
 namespace hoa_shop {
+
+
 
 namespace private_shop {
 
@@ -42,8 +46,8 @@ namespace private_shop {
 *** \brief Represents the main window in shop mode which contains the shop actions
 ***
 *** Shop actions include "buy", "sell", etc. This window also contains financial
-*** information about the party and marked purchases. This window is located on
-*** the left side of all of the shop menus.
+*** information about the party and marked purchases. This window is located at
+*** the top of the group of windows and is shown on a permanent basis.
 ***
 *** \todo Retrieve the name and location graphic of the most recent map mode
 *** (highest on the game stack) for when the user enters menu mode through shop
@@ -61,6 +65,9 @@ public:
 	//! \brief Updates the text box that displays the financial information about the transaction
 	void UpdateFinanceText();
 
+	//! \brief Updates the text table that displays the financial information about the transaction
+	void UpdateFinanceTable();
+
 	//! \brief Draws the window to the screen
 	void Draw();
 
@@ -69,9 +76,65 @@ public:
 	**/
 	hoa_video::OptionBox action_options;
 
-	//! \brief Prints financial information in the bottom of the window
-	hoa_video::TextBox finance_text;
+	//! \brief Table-formatted text containing the financial information about the current purchases and sales
+	hoa_video::OptionBox finance_table;
+
+	//! \brief Image icon representing drunes, drawn at 0.5x scale next to the finance table
+	hoa_video::StillImage drunes_icon;
 }; // class ShopActionWindow : public hoa_video::MenuWindow
+
+
+/** ****************************************************************************
+*** \brief Displays textual information about the shop at the highest menu level
+***
+*** This window displays a brief introductory greeting from the shop keeper and
+*** informs the player of the fairness in their buy/sell prices. It is located
+*** directly below the action window and is only displayed when the player is
+*** at the highest level of the shop menu hiearchy. After creating this class,
+*** the greeting text and price level text need to be set. If they are not set,
+*** then a generic greeting or text for a standard price level will be used.
+*** ***************************************************************************/
+class ShopGreetingWindow : public hoa_video::MenuWindow {
+public:
+	ShopGreetingWindow();
+
+	~ShopGreetingWindow();
+
+	//! \brief Updates the state of the window
+	void Update();
+
+	//! \brief Draws the window to the screen
+	void Draw();
+
+	/** \brief Sets the greeting text of the merchant
+	*** \param greeting The textual greeting
+	**/
+	void SetGreetingText(hoa_utils::ustring greeting);
+
+	/** \brief Sets the text representing the buy/sell price levels of the merchant
+	*** \param buy_level The pricing level for the merchandise to be bought
+	*** \param sell_level The pricing level for anything the player wishes to sell
+	**/
+	void SetPriceLevelText(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level);
+
+	/** \brief Determines what type of merchandise is purchased and sold at this shop
+	*** \param deal_types A bit vector indicating which types of objects are dealt with at the shop
+	*** \param deal_images A vector of images representing each type of dealing
+	***
+	*** This method will copy the deal_images vector to the category_icons vector. Then any unused
+	*** category images as determined by the deals_type parameter will have grayscale enabled.
+	**/
+	void SetCategoryIcons(uint8 deal_types, std::vector<hoa_video::StillImage>& deal_images);
+
+	//! \brief Prints financial information in the bottom of the window
+	hoa_video::TextBox greeting_text;
+
+	//! \brief Text that indicates the price levels
+	hoa_video::TextBox pricing_text;
+
+	//! \brief Container for icon images that represent each object category that the shop deals in
+	std::vector<hoa_video::StillImage> category_icons;
+}; // class ShopGreetingWindow : public hoa_video::MenuWindow
 
 
 /** ****************************************************************************
@@ -203,17 +266,17 @@ private:
 	*** object in the player's inventory or anywhere else.
 	**/
 	hoa_global::GlobalObject* _object;
-	
+
 	//COMMENT!!!!!
 	bool _is_weapon;
 	bool _is_armor;
-	
+
 	//! \brief A vector holding the list of characters capable of equipping the above object.
 	std::vector<hoa_global::GlobalCharacter*> _usableBy;
-	
+
 	//! \brief A vector that holds an icon image for each character in the party.
 	std::vector<hoa_video::StillImage> _character_icons;
-	
+
 	std::vector<hoa_video::StillImage> _character_icons_bw;
 
 	/** \brief Vector that holds the +/- variance of stats for equipping above object.
@@ -221,12 +284,12 @@ private:
 	*** that is capable of equipping this object.
 	**/
 	std::vector<int32> _statVariance;
-	
+
 	//! \brief Same as above, but this holds the variance for the meta defense/attack.
 	std::vector<int32> _metaVariance;
-	
+
 	void _LoadCharacterIcons();
-	
+
 }; // class ObjectInfoWindow : public hoa_video::MenuWindow
 
 

@@ -168,6 +168,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/scene.h \
 	$(MODES_DIR)/shop/shop.h \
 	$(MODES_DIR)/shop/shop.cpp \
+	$(MODES_DIR)/shop/shop_utils.h \
+	$(MODES_DIR)/shop/shop_utils.cpp \
 	$(MODES_DIR)/shop/shop_windows.h \
 	$(MODES_DIR)/shop/shop_windows.cpp
 

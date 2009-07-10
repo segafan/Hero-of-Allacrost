@@ -16,9 +16,6 @@
 *** merchant. This mode is usually entered from a map after speaking with a
 *** store owner.
 ***
-*** \todo Allow shops to have a status flag indicating if their prices (for buy
-*** and for sale) are higher or lower than the common prices.
-***
 *** \todo Implement feature for shops to have limited quantity of wares to buy,
 *** as well as the ability to re-generate more quantities as the time passes
 *** between shops.
@@ -33,6 +30,7 @@
 #include "global.h"
 
 #include "mode_manager.h"
+#include "shop_utils.h"
 #include "shop_windows.h"
 
 namespace hoa_shop {
@@ -42,18 +40,6 @@ extern bool SHOP_DEBUG;
 
 namespace private_shop {
 
-//! \brief Used to indicate what window has control of user input
-enum SHOP_STATE {
-	SHOP_STATE_INVALID   = -1,
-	SHOP_STATE_ACTION    =  0,
-	SHOP_STATE_BUY       =  1,
-	SHOP_STATE_SELL      =  2,
-	SHOP_STATE_CONFIRM   =  3,
-	SHOP_STATE_PROMPT    =  4,
-	SHOP_STATE_TOTAL     =  5
-};
-
-
 /** \brief A pointer to the currently active shop mode
 *** This is used by the various shop classes so that they can refer back to the main class from which
 *** they are a part of. This member is initially set to NULL. It is set whenever the ShopMode
@@ -62,7 +48,6 @@ enum SHOP_STATE {
 extern ShopMode* current_shop;
 
 } // namespace private_shop
-
 
 /** ****************************************************************************
 *** \brief Handles the game execution while the player is shopping.
@@ -106,23 +91,26 @@ public:
 	/** \brief Adds a new object for the shop to sell
 	*** \param object_id The id number of the object to add
 	***
-	*** You should only specify id numbers that correspond to items, weapons, or armor
 	*** The newly added object won't be seen in the shop menu until the Reset() function is called.
 	**/
 	void AddObject(uint32 object_id);
 
 	//! \name Class member access functions
 	//@{
-	uint32 GetPurchaseCost()
+	uint32 GetPurchaseCost() const
 		{ return _purchases_cost; }
 
-	uint32 GetSalesRevenue()
+	uint32 GetSalesRevenue() const
 		{ return _sales_revenue; }
 
 	//! \brief Returns the quantity: current drunes - total costs + total sales
-	uint32 GetTotalRemaining()
+	uint32 GetTotalRemaining() const
 		{ return hoa_global::GlobalManager->GetDrunes() - _purchases_cost + _sales_revenue; }
 	//@}
+
+	//! \brief Returns true if the user has indicated they wish to buy or sell any items
+	bool HasPreparedTransaction() const
+		{ return ((_purchases_cost != 0) || (_sales_revenue != 0)); }
 
 private:
 	//! \brief Keeps track of what windows are open to determine how to handle user input.
@@ -130,6 +118,9 @@ private:
 
 	//! \brief Use to retain the previous value of the _state member
 	private_shop::SHOP_STATE _saved_state;
+
+	//! \brief A bit vector that represents the types of merchandise that the shop deals in (items, weapons, etc)
+	uint8 _deal_types;
 
 	//! \brief The total cost of all marked purchases.
 	uint32 _purchases_cost;
@@ -160,6 +151,9 @@ private:
 	**/
 	std::vector<hoa_global::GlobalObject*> _current_inv;
 
+	//! \brief Retains all icon images for each object category
+	std::vector<hoa_video::StillImage> _object_category_images;
+
 	/** \brief Contains quantities corresponding to _all_objects
 	**/
 	std::vector<uint32> _buy_objects_quantities;
@@ -171,22 +165,25 @@ private:
 	//! \name Shopping menu windows
 	//@{
 	//! \brief The top window containing the shop actions (buy, sell, etc).
-	private_shop::ShopActionWindow _action_window;
+	private_shop::ShopActionWindow* _action_window;
+
+	//! \brief The greeting window from the merchant
+	private_shop::ShopGreetingWindow* _greeting_window;
 
 	//! \brief The window containing the list of wares for sale
-	private_shop::BuyListWindow _buy_window;
+	private_shop::BuyListWindow* _buy_window;
 
 	//! \brief The window containing the list of wares for sale
-	private_shop::SellListWindow _sell_window;
+	private_shop::SellListWindow* _sell_window;
 
 	//! \brief The window that provides a detailed description of the selected object in the list window
-	private_shop::ObjectInfoWindow _info_window;
+	private_shop::ObjectInfoWindow* _info_window;
 
 	//! \brief A window to confirm various information about user requested actions
-	private_shop::ConfirmWindow _confirm_window;
+	private_shop::ConfirmWindow* _confirm_window;
 
 	//! \brief A window to prompt the user with information about their action or selection
-	private_shop::PromptWindow _prompt_window;
+	private_shop::PromptWindow* _prompt_window;
 	//@}
 
 	// ---------- Private methods
