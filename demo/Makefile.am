@@ -168,10 +168,18 @@ modes_SOURCES = \
 	$(MODES_DIR)/scene.h \
 	$(MODES_DIR)/shop/shop.h \
 	$(MODES_DIR)/shop/shop.cpp \
+	$(MODES_DIR)/shop/shop_buy.h \
+	$(MODES_DIR)/shop/shop_buy.cpp \
+	$(MODES_DIR)/shop/shop_confirm.h \
+	$(MODES_DIR)/shop/shop_confirm.cpp \
+	$(MODES_DIR)/shop/shop_root.h \
+	$(MODES_DIR)/shop/shop_root.cpp \
+	$(MODES_DIR)/shop/shop_sell.h \
+	$(MODES_DIR)/shop/shop_sell.cpp \
+	$(MODES_DIR)/shop/shop_trade.h \
+	$(MODES_DIR)/shop/shop_trade.cpp \
 	$(MODES_DIR)/shop/shop_utils.h \
-	$(MODES_DIR)/shop/shop_utils.cpp \
-	$(MODES_DIR)/shop/shop_windows.h \
-	$(MODES_DIR)/shop/shop_windows.cpp
+	$(MODES_DIR)/shop/shop_utils.cpp
 
 if COND_EDITOR
 EDITOR_DIR = src/editor

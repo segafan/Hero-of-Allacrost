@@ -27,11 +27,11 @@
 #include "defs.h"
 #include "utils.h"
 
+#include "mode_manager.h"
+
 #include "global.h"
 
-#include "mode_manager.h"
 #include "shop_utils.h"
-#include "shop_windows.h"
 
 namespace hoa_shop {
 
@@ -63,18 +63,24 @@ extern ShopMode* current_shop;
 *** invalid operation (buy x0 quantity of an item). When this occurs, we make
 *** the prompt window the current state, but also save the buy state because
 *** we still want to draw the list of wares to purchase.
+***
+*** \note The recommended way to create and initialize this class is to call the
+*** following methods.
+***
+*** -# ShopMode constructor
+*** -# SetGreetingText()
+*** -# SetPriceLevels()
+*** -# AddObject() for each object to be sold
+*** -# Wait for the Reset() method to be automatically called
 *** ***************************************************************************/
 class ShopMode : public hoa_mode_manager::GameMode {
-	friend class private_shop::ShopActionWindow;
-	friend class private_shop::BuyListWindow;
-	friend class private_shop::SellListWindow;
-	friend class private_shop::ObjectInfoWindow;
-	friend class private_shop::ConfirmWindow;
-	friend class private_shop::PromptWindow;
 public:
 	ShopMode();
 
 	~ShopMode();
+
+	static ShopMode* CurrentInstance()
+		{ return _current_instance; }
 
 	/** \brief Resets appropriate settings. Called whenever the ShopMode object is made the active game mode.
 	*** This function additionally constructs the inventory menu from the object list. Therefore, if you add
@@ -88,6 +94,21 @@ public:
 	//! \brief Handles the drawing of everything on the shop menu and makes sub-draw function calls as appropriate.
 	void Draw();
 
+	/** \brief Sets the greeting message from the shop/merchant
+	*** \param greeting The text
+	*** \note This method will only work if it is called before the shop is initialized. Calling it afterwards will
+	*** result in no operation and a warning message
+	**/
+	void SetGreetingText(hoa_utils::ustring greeting);
+
+	/** \brief Sets the buy and sell price levels for the shop
+	*** \param buy_level The price level to set for wares that the player would buy from the shop
+	*** \param sell_level The price level to set for wares that the player would sell to the shop
+	*** \note This method will only work if it is called before the shop is initialized. Calling it afterwards will
+	*** result in no operation and a warning message
+	**/
+	void SetPriceLevels(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level);
+
 	/** \brief Adds a new object for the shop to sell
 	*** \param object_id The id number of the object to add
 	***
@@ -95,49 +116,111 @@ public:
 	**/
 	void AddObject(uint32 object_id);
 
-	//! \name Class member access functions
-	//@{
-	uint32 GetPurchaseCost() const
-		{ return _purchases_cost; }
+	// Functions below this line are intended for use only by other shop mode classes
 
-	uint32 GetSalesRevenue() const
-		{ return _sales_revenue; }
+	/** \brief Loads data and prepares shop for initial use
+	*** This function should only be called once, usually from the Load() method. If it is called more than
+	*** once it will print a warning and refuse to execute a second time.
+	**/
+	void Initialize();
 
-	//! \brief Returns the quantity: current drunes - total costs + total sales
-	uint32 GetTotalRemaining() const
-		{ return hoa_global::GlobalManager->GetDrunes() - _purchases_cost + _sales_revenue; }
-	//@}
+	/** \brief Called whenever the player successfully confirms a transaction
+	*** This method processes the transaction, including modifying the party's drune count, adding/removing
+	*** objects from the inventory, and auto equipping/un-equipping traded equipment. It also calls appropriate
+	*** methods in the various shop interfaces to update their display lists with the updated inventory contents and
+	*** shop stocks.
+	**/
+	void CompleteTransaction();
+
+	/** \brief Updates the costs and sales totals
+	*** \param costs_amount The amount to change the purchases cost member by
+	*** \param sales_amount The amount to change the sales revenue member by
+	***
+	*** Obviously if one wishes to only update either costs or sales but not both, pass a zero value for the
+	*** appropriate argument that should not be changed. This function should only be called when necessary because
+	*** it also has to update the finance text in the shop's root interface, so the function does not just
+	*** modify integer values but does have a small amount of computational overhead
+	**/
+	void UpdateFinances(int32 costs_amount, int32 sales_amount);
+
+	/** \brief Changes the active state of shop mode and prepares the interface of the new state
+	*** \param new_state The state to change the shop to
+	**/
+	void ChangeState(private_shop::SHOP_STATE new_state);
 
 	//! \brief Returns true if the user has indicated they wish to buy or sell any items
 	bool HasPreparedTransaction() const
-		{ return ((_purchases_cost != 0) || (_sales_revenue != 0)); }
+		{ return ((_total_costs != 0) || (_total_sales != 0)); }
+
+	//! \brief Returns the number of drunes that the party would be left with after the marked purchases and sales
+	uint32 GetTotalRemaining() const
+		{ return (hoa_global::GlobalManager->GetDrunes() + _total_sales - _total_costs); }
+
+	//! \name Class member access functions
+	//@{
+	bool IsInitialized() const
+		{ return _initialized; }
+
+	private_shop::SHOP_STATE GetState() const
+		{ return _state; }
+
+	SHOP_PRICE_LEVEL GetBuyPriceLevel() const
+		{ return _buy_price_level; }
+
+	SHOP_PRICE_LEVEL GetSellPriceLevel() const
+		{ return _sell_price_level; }
+
+	uint8 GetDealTypes() const
+		{ return _deal_types; }
+
+	uint32 GetTotalCosts() const
+		{ return _total_costs; }
+
+	uint32 GetTotalSales() const
+		{ return _total_sales; }
+
+	const std::vector<hoa_video::StillImage>& GetObjectCategoryImages() const
+		{ return _object_category_images; }
+
+	/** \brief Retrieves a shop sound object
+	*** \param identifier The string identifier for the sound to retrieve
+	*** \return A pointer to the SoundDescriptor, or NULL if no sound had the identifier name
+	**/
+	hoa_audio::SoundDescriptor* GetSound(std::string identifier);
+	//@}
 
 private:
+	/** \brief A reference to the current instance of ShopMode
+	*** This is used by other shop clases to be able to refer to the shop that they exist in. This member
+	*** is NULL when no shop is active
+	**/
+	static ShopMode* _current_instance;
+
+	//! \brief Set to true only after the shop has been initialized and is ready to be used by the player
+	bool _initialized;
+
 	//! \brief Keeps track of what windows are open to determine how to handle user input.
 	private_shop::SHOP_STATE _state;
-
-	//! \brief Use to retain the previous value of the _state member
-	private_shop::SHOP_STATE _saved_state;
 
 	//! \brief A bit vector that represents the types of merchandise that the shop deals in (items, weapons, etc)
 	uint8 _deal_types;
 
+	//! \brief The shop's price level of objects that the player buys
+	SHOP_PRICE_LEVEL _buy_price_level;
+
+	//! \brief The shop's price level of objects that the player sells
+	SHOP_PRICE_LEVEL _sell_price_level;
+
 	//! \brief The total cost of all marked purchases.
-	uint32 _purchases_cost;
+	uint32 _total_costs;
 
 	//! \brief The total revenue that will be earned from all marked sales.
-	uint32 _sales_revenue;
-
-	//! \brief An image of the last frame shown on the screen before ShopMode was created.
-	hoa_video::StillImage _saved_screen;
+	uint32 _total_sales;
 
 	/** \brief Contains the ids of all objects which are sold in this shop
 	*** The map key is the object id and the value is not used for anything (currently).
 	**/
 	std::map<uint32, uint32> _object_map;
-
-	//! \brief A map of the sounds used in shop mode
-	std::map<std::string, hoa_audio::SoundDescriptor> _shop_sounds;
 
 	/** \brief Contains all of the objects
 	*** \note This container is temporary, and will be replaced with multiple containers (for each
@@ -151,9 +234,6 @@ private:
 	**/
 	std::vector<hoa_global::GlobalObject*> _current_inv;
 
-	//! \brief Retains all icon images for each object category
-	std::vector<hoa_video::StillImage> _object_category_images;
-
 	/** \brief Contains quantities corresponding to _all_objects
 	**/
 	std::vector<uint32> _buy_objects_quantities;
@@ -162,42 +242,29 @@ private:
 	**/
 	std::vector<uint32> _sell_objects_quantities;
 
-	//! \name Shopping menu windows
+	/** \name Shopping interfaces
+	*** These are the class objects which are responsible for managing each state in shop mode
+	**/
 	//@{
-	//! \brief The top window containing the shop actions (buy, sell, etc).
-	private_shop::ShopActionWindow* _action_window;
+	private_shop::ShopRootInterface* _root_interface;
 
-	//! \brief The greeting window from the merchant
-	private_shop::ShopGreetingWindow* _greeting_window;
+	private_shop::ShopBuyInterface* _buy_interface;
 
-	//! \brief The window containing the list of wares for sale
-	private_shop::BuyListWindow* _buy_window;
+	private_shop::ShopSellInterface* _sell_interface;
 
-	//! \brief The window containing the list of wares for sale
-	private_shop::SellListWindow* _sell_window;
+	private_shop::ShopTradeInterface* _trade_interface;
 
-	//! \brief The window that provides a detailed description of the selected object in the list window
-	private_shop::ObjectInfoWindow* _info_window;
-
-	//! \brief A window to confirm various information about user requested actions
-	private_shop::ConfirmWindow* _confirm_window;
-
-	//! \brief A window to prompt the user with information about their action or selection
-	private_shop::PromptWindow* _prompt_window;
+	private_shop::ShopConfirmInterface* _confirm_interface;
 	//@}
 
-	// ---------- Private methods
-	/** \brief Saves the current state and then changes the current state
-	*** \param new_state The new state to make the current shop state
-	*** \note Only use this function to change the state if you intend to
-	*** return to the saved state when the new state finishes.
-	**/
-	void _PushAndSetState(private_shop::SHOP_STATE new_state)
-		{ _saved_state = _state; _state = new_state; }
+	//! \brief Holds an image of the screen taken when the ShopMode instance was created
+	hoa_video::StillImage _saved_screen;
 
-	//! \brief Retrieves the previously saved state
-	void _PopState()
-		{ _state = _saved_state; _saved_state = private_shop::SHOP_STATE_INVALID; }
+	//! \brief Retains all icon images for each object category
+	std::vector<hoa_video::StillImage> _object_category_images;
+
+	//! \brief A map of the sounds used in shop mode
+	std::map<std::string, hoa_audio::SoundDescriptor*> _shop_sounds;
 }; // class ShopMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_shop

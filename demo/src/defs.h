@@ -206,7 +206,6 @@ namespace hoa_global {
 // Game Mode Declarations
 ////////////////////////////////////////////////////////////////////////////////
 
-
 // Battle mode declarations, see src/modes/battle/
 namespace hoa_battle {
 	extern bool BATTLE_DEBUG;
@@ -307,6 +306,23 @@ namespace hoa_scene {
 namespace hoa_shop {
 	extern bool SHOP_DEBUG;
 	class ShopMode;
+
+	namespace private_shop {
+		class ShopInterface;
+
+		class ShopRootInterface;
+		class RootWindow;
+		class GreetingWindow;
+
+		class ShopBuyInterface;
+
+		class ShopSellInterface;
+
+		class ShopTradeInterface;
+
+		class ShopConfirmInterface;
+
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
