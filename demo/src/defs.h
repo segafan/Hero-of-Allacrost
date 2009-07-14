@@ -309,6 +309,7 @@ namespace hoa_shop {
 
 	namespace private_shop {
 		class ShopInterface;
+		class ShopObject;
 
 		class ShopRootInterface;
 		class RootWindow;

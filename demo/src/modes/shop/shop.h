@@ -217,30 +217,25 @@ private:
 	//! \brief The total revenue that will be earned from all marked sales.
 	uint32 _total_sales;
 
-	/** \brief Contains the ids of all objects which are sold in this shop
-	*** The map key is the object id and the value is not used for anything (currently).
+	/** \brief A container of objects that ShopMode created itself and need to be deleted when finished
+	*** These also happen to represent a list of all global objects that the shop may sell to the player
 	**/
-	std::map<uint32, uint32> _object_map;
+	std::vector<hoa_global::GlobalObject*> _created_objects;
 
-	/** \brief Contains all of the objects
-	*** \note This container is temporary, and will be replaced with multiple containers (for each
-	*** type of object) at a later time.
+	/** \brief Holds all objects that can be bought, sold, or traded in the shop
+	*** The integer key to this map is the global object ID represented by the ShopObject.
 	**/
-	std::vector<hoa_global::GlobalObject*> _buy_objects;
+	std::map<uint32, private_shop::ShopObject> _shop_objects;
 
-	/** \brief Contains all of the items
-	*** \note This container is temporary, and will be replaced with multiple containers (for each
-	*** type of object) at a later time.
+	/** \brief Holds pointers to all objects that the player plans to purchase
+	*** The integer key to this map is the global object ID represented by the ShopObject.
 	**/
-	std::vector<hoa_global::GlobalObject*> _current_inv;
+	std::map<uint32, private_shop::ShopObject*> _buy_objects;
 
-	/** \brief Contains quantities corresponding to _all_objects
+	/** \brief Holds pointers to all objects that the player plans to sell
+	*** The integer key to this map is the global object ID represented by the ShopObject.
 	**/
-	std::vector<uint32> _buy_objects_quantities;
-
-	/** \brief Contains quantities corresponding to current inventory
-	**/
-	std::vector<uint32> _sell_objects_quantities;
+	std::map<uint32, private_shop::ShopObject*> _sell_objects;
 
 	/** \name Shopping interfaces
 	*** These are the class objects which are responsible for managing each state in shop mode
