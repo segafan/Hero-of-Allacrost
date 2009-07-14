@@ -46,6 +46,7 @@ namespace private_global {
 *** - Key Items:    70001-80000
 **/
 //@{
+const uint32 OBJECT_ID_INVALID   = 0;
 const uint32 MAX_ITEM_ID         = 10000;
 const uint32 MAX_WEAPON_ID       = 20000;
 const uint32 MAX_HEAD_ARMOR_ID   = 30000;
@@ -54,6 +55,7 @@ const uint32 MAX_ARM_ARMOR_ID    = 50000;
 const uint32 MAX_LEG_ARMOR_ID    = 60000;
 const uint32 MAX_SHARD_ID        = 70000;
 const uint32 MAX_KEY_ITEM_ID     = 80000;
+const uint32 OBJECT_ID_EXCEEDS   = 80001;
 //@}
 
 } // namespace private_global

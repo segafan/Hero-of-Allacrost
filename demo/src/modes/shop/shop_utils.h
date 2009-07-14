@@ -50,6 +50,22 @@ enum SHOP_STATE {
 	SHOP_STATE_TOTAL     =  5
 };
 
+//! \name Price multipliers
+//! \brief These values are multiplied by an object's standard price to get the price for the desired price level
+//@{
+const float BUY_PRICE_VERY_GOOD   = 1.2f;
+const float BUY_PRICE_GOOD        = 1.4f;
+const float BUY_PRICE_STANDARD    = 1.6f;
+const float BUY_PRICE_POOR        = 1.8f;
+const float BUY_PRICE_VERY_POOR   = 2.0f;
+
+const float SELL_PRICE_VERY_GOOD  = 0.9f;
+const float SELL_PRICE_GOOD       = 0.8f;
+const float SELL_PRICE_STANDARD   = 0.7f;
+const float SELL_PRICE_POOR       = 0.6f;
+const float SELL_PRICE_VERY_POOR  = 0.5f;
+//@}
+
 //! \name Object deal types
 //! \brief Constants used to determine the types of merchandise that the shop deals with
 //@{
@@ -62,6 +78,7 @@ const uint8 DEALS_LEG_ARMOR    = 0x20;
 const uint8 DEALS_SHARDS       = 0x40;
 const uint8 DEALS_KEY_ITEMS    = 0x80;
 //@}
+
 
 /** ***************************************************************************
 *** \brief Abstract class for shop interfaces
@@ -84,33 +101,122 @@ public:
 	virtual void Draw() = 0;
 }; // class ShopInterface
 
+
 /** ***************************************************************************
-*** \brief
+*** \brief Represents objects that are bought, sold, and traded within the shop
 ***
+*** This class wraps around a GlobalObject and uses additional members that are
+*** properties of the object specific to shopping. The ShopMode class maintains
+*** containers of these objects and the various interfaces perform modifications
+*** to their properties.
 ***
+*** \note Be careful with assigning the GlobalObject pointer in the class constructor.
+*** The object pointed to, if it exists in the global party inventory, will be deleted
+*** if all counts to this member are removed from the inventory. Therefore never use
+*** a GlobalObject inventory pointer if you don't have to (use the ones that ShopMode
+*** creates for all objects being sold in the shop) and if a sell count goes to zero,
+*** delete the corresponding ShopObject.
+***
+*** \note The data in this class is used to determine if this object should be visible
+*** in buy and/or sell lists.
 *** **************************************************************************/
-class ObjectList {
+class ShopObject {
 public:
-	ObjectList();
+	/** \param object A pointer to a valid GlobalObject instance that the shop object will represent
+	*** \param sold_by_shop True if this object is offered for sale by the shop
+	**/
+	ShopObject(hoa_global::GlobalObject* object, bool sold_by_shop);
 
-	~ObjectList();
+	~ShopObject()
+		{}
 
-	std::vector<hoa_global::GlobalObject*> _all_objects;
+	/** \brief Sets the buy and sell prices for the object
+	*** \param buy_level The buy level of the shop that will determine its buy price
+	*** \param sell_level The sell level of the shop that will determine its sell price
+	**/
+	void SetPricing(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level);
 
-	std::vector<hoa_global::GlobalItem*> _items;
+	//! \name Class member accessor functions
+	//@{
+	hoa_global::GlobalObject* GetObject() const
+		{ return _object; }
 
-	std::vector<hoa_global::GlobalWeapon*> _weapons;
+	bool IsSoldInShop() const
+		{ return _sold_in_shop; }
 
-	std::vector<hoa_global::GlobalArmor*> _head_armor;
+	uint32 GetBuyPrice() const
+		{ return _buy_price; }
 
-	std::vector<hoa_global::GlobalArmor*> _torso_armor;
+	uint32 GetSellPrice() const
+		{ return _sell_price; }
 
-	std::vector<hoa_global::GlobalArmor*> _arm_armor;
+	uint32 GetOwnCount() const
+		{ return _own_count; }
 
-	std::vector<hoa_global::GlobalArmor*> _leg_armor;
+	uint32 GetStockCount() const
+		{ return _stock_count; }
 
-	std::vector<hoa_global::GlobalShard*> _shards;
-}; // class ObjectList
+	uint32 GetBuyCount() const
+		{ return _buy_count; }
+
+	uint32 GetSellCount() const
+		{ return _sell_count; }
+
+	void ResetBuyCount()
+		{ _buy_count = 0; }
+
+	void ResetSellCount()
+		{ _sell_count = 0; }
+	//@}
+
+	/** \name Increment and Decrement Functions
+	*** \brief Increments or decrements the value of the various count members
+	*** \param inc/dec The amount to decrement the count by (default value == 1)
+	***
+	*** These functions increment or decrement the respective count members. Checks are performed
+	*** to prevent error conditions from occurring. For example, the buy count can not be greater
+	*** than the stock count and the sell count can not be greater than the own count. None of the
+	*** count members will be allowed to decrement below zero. Overflow conditions however are not
+	*** checked. Should any error condition occur, a warning message will be printed and the value
+	*** of the count member will not be modified.
+	**/
+	//@{
+	void IncrementOwnCount(uint32 inc = 1);
+	void IncrementStockCount(uint32 inc = 1);
+	void IncrementBuyCount(uint32 inc = 1);
+	void IncrementSellCount(uint32 inc = 1);
+	void DecrementOwnCount(uint32 dec = 1);
+	void DecrementStockCount(uint32 dec = 1);
+	void DecrementBuyCount(uint32 dec = 1);
+	void DecrementSellCount(uint32 dec = 1);
+	//@}
+
+private:
+	//! \brief A pointer to the global object represented by this
+	hoa_global::GlobalObject* _object;
+
+	//! \brief Set to true if the player is able to buy this object from the shop
+	bool _sold_in_shop;
+
+	//! \brief The price that the player must pay to buy this object from the shop
+	uint32 _buy_price;
+
+	//! \brief The return that the player will receive for selling this object to the shop
+	uint32 _sell_price;
+
+	//! \brief The number of this object that the player's party currently owns
+	uint32 _own_count;
+
+	//! \brief The stock of this object that the shop
+	uint32 _stock_count;
+
+	//! \brief The amount of this object that the player plans to purchase
+	uint32 _buy_count;
+
+	//! \brief The amount of this object that the player plans to sell
+	uint32 _sell_count;
+}; // class ShopObject
+
 
 /** ****************************************************************************
 *** \brief Displays detailed information about a selected object

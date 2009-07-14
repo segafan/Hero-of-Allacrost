@@ -33,8 +33,160 @@ namespace hoa_shop {
 namespace private_shop {
 
 // *****************************************************************************
+// ***** ShopObject class methods
+// *****************************************************************************
+
+ShopObject::ShopObject(hoa_global::GlobalObject* object, bool sold_by_shop) :
+	_object(object),
+	_sold_in_shop(sold_by_shop),
+	_buy_price(0),
+	_sell_price(0),
+	_own_count(0),
+	_stock_count(0),
+	_buy_count(0),
+	_sell_count(0)
+{
+	assert(_object != NULL);
+}
+
+
+
+void ShopObject::SetPricing(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level) {
+	_buy_price = _object->GetPrice();
+	_sell_price = _object->GetPrice();
+
+	switch (buy_level) {
+		case SHOP_PRICE_VERY_GOOD:
+			_buy_price *= BUY_PRICE_VERY_GOOD;
+			break;
+		case SHOP_PRICE_GOOD:
+			_buy_price *= BUY_PRICE_GOOD;
+			break;
+		case SHOP_PRICE_STANDARD:
+			_buy_price *= BUY_PRICE_STANDARD;
+			break;
+		case SHOP_PRICE_POOR:
+			_buy_price *= BUY_PRICE_POOR;
+			break;
+		case SHOP_PRICE_VERY_POOR:
+			_buy_price *= BUY_PRICE_VERY_POOR;
+			break;
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "unknown buy level: " << buy_level << endl;
+	}
+
+	switch (sell_level) {
+		case SHOP_PRICE_VERY_GOOD:
+			_sell_price *= SELL_PRICE_VERY_GOOD;
+			break;
+		case SHOP_PRICE_GOOD:
+			_sell_price *= SELL_PRICE_GOOD;
+			break;
+		case SHOP_PRICE_STANDARD:
+			_sell_price *= SELL_PRICE_STANDARD;
+			break;
+		case SHOP_PRICE_POOR:
+			_sell_price *= SELL_PRICE_POOR;
+			break;
+		case SHOP_PRICE_VERY_POOR:
+			_sell_price *= SELL_PRICE_VERY_POOR;
+			break;
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "unknown sell level: " << sell_level << endl;
+	}
+}
+
+
+
+void ShopObject::IncrementOwnCount(uint32 inc) {
+	_own_count += inc;
+}
+
+
+
+void ShopObject::IncrementStockCount(uint32 inc) {
+	_stock_count += inc;
+}
+
+
+
+void ShopObject::IncrementBuyCount(uint32 inc) {
+	_buy_count += inc;
+
+	if (_stock_count > _buy_count) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "incremented buy count beyond the amount available in stock" << endl;
+		_buy_count -= inc;
+	}
+}
+
+
+
+void ShopObject::IncrementSellCount(uint32 inc) {
+	_sell_count += inc;
+
+	if (_sell_count > _own_count) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "incremented sell count beyond the amount available to be sold" << endl;
+		_sell_count -= inc;
+	}
+}
+
+
+
+void ShopObject::DecrementOwnCount(uint32 dec) {
+	if (dec > _own_count) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to decrement own count below zero" << endl;
+		return;
+	}
+
+	_own_count -= dec;
+
+	if (_own_count < _sell_count) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "decremented own count below that of the sell count" << endl;
+		_own_count += dec;
+	}
+}
+
+
+
+void ShopObject::DecrementStockCount(uint32 dec) {
+	if (dec > _stock_count) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to decrement stock count below zero" << endl;
+		return;
+	}
+
+	_stock_count -= dec;
+
+	if (_stock_count < _buy_count) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "decremented stock count below that of the buy count" << endl;
+		_stock_count += dec;
+	}
+}
+
+
+
+void ShopObject::DecrementBuyCount(uint32 dec) {
+	if (dec > _buy_count) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to decrement buy count below zero" << endl;
+		return;
+	}
+
+	_buy_count -= dec;
+}
+
+
+
+void ShopObject::DecrementSellCount(uint32 dec) {
+	if (dec > _sell_count) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to decrement sell count below zero" << endl;
+		return;
+	}
+
+	_sell_count -= dec;
+}
+
+// *****************************************************************************
 // ***** ObjectInfoWindow
-// ***************************************************************************
+// *****************************************************************************
 
 ObjectInfoWindow::ObjectInfoWindow() {
 	_is_weapon = false;

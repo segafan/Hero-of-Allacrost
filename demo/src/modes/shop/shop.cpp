@@ -91,10 +91,10 @@ ShopMode::ShopMode() :
 
 
 ShopMode::~ShopMode() {
-	for (uint32 i = 0; i < _buy_objects.size(); i++) {
-		delete(_buy_objects[i]);
+	for (uint32 i = 0; i < _created_objects.size(); i++) {
+		delete(_created_objects[i]);
 	}
-	_buy_objects.clear();
+	_created_objects.clear();
 
 	delete _root_interface;
 	delete _buy_interface;
@@ -219,18 +219,25 @@ void ShopMode::SetPriceLevels(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_
 
 
 void ShopMode::AddObject(uint32 object_id) {
-	if (object_id == 0 || object_id > 60000) {
+	if (IsInitialized() == true) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "shop is already initialized" << endl;
+		return;
+	}
+
+	if (object_id == private_global::OBJECT_ID_INVALID || object_id >= private_global::OBJECT_ID_EXCEEDS) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object with invalid id: " << object_id << endl;
 		return;
 	}
 
-	if (_object_map.find(object_id) != _object_map.end()) {
+	if (_shop_objects.find(object_id) != _shop_objects.end()) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object that was already in the object list: " << object_id << endl;
 		return;
 	}
 
-	_object_map.insert(make_pair(object_id, 0));
-	_buy_objects.push_back(GlobalCreateNewObject(object_id, 1));
+	GlobalObject* new_object = GlobalCreateNewObject(object_id, 1);
+	_created_objects.push_back(new_object);
+	ShopObject new_shop_object(new_object, true);
+	_shop_objects.insert(make_pair(object_id, new_shop_object));
 }
 
 
@@ -243,8 +250,8 @@ void ShopMode::Initialize() {
 
 	_initialized = true;
 
-	for (uint32 i = 0; i < _buy_objects.size(); i++) {
-		switch (_buy_objects[i]->GetObjectType()) {
+	for (uint32 i = 0; i < _created_objects.size(); i++) {
+		switch (_created_objects[i]->GetObjectType()) {
 			case GLOBAL_OBJECT_ITEM:
 				_deal_types |= DEALS_ITEMS;
 				break;
@@ -270,7 +277,7 @@ void ShopMode::Initialize() {
 				_deal_types |= DEALS_KEY_ITEMS;
 				break;
 			default:
-				IF_PRINT_WARNING(SHOP_DEBUG) << "unknown object type sold in shop: " << _buy_objects[i]->GetObjectType() << endl;
+				IF_PRINT_WARNING(SHOP_DEBUG) << "unknown object type sold in shop: " << _created_objects[i]->GetObjectType() << endl;
 				break;
 		}
 	}
@@ -300,13 +307,18 @@ void ShopMode::Initialize() {
 
 
 void ShopMode::CompleteTransaction() {
-	_buy_objects_quantities.clear();
+	for (map<uint32, ShopObject*>:: iterator i = _buy_objects.begin(); i != _buy_objects.end(); i++) {
+		// TODO
+	}
+
+	for (map<uint32, ShopObject*>:: iterator i = _sell_objects.begin(); i != _sell_objects.end(); i++) {
+		// TODO
+	}
+
 	map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
 	map<uint32, GlobalObject*>::iterator iter;
-
-	_sell_objects_quantities.clear();
 	for (iter = inv->begin(); iter != inv->end(); iter++) {
-		_sell_objects_quantities.push_back(0);
+		// TODO
 	}
 }
 
