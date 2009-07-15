@@ -44,16 +44,22 @@ namespace private_shop {
 *** is processed from this class. When the shop is in a different state, only the
 *** root window is updated and drawn and nothing else is done by this interface.
 *** ***************************************************************************/
-class ShopRootInterface : public ShopInterface {
+class RootInterface : public ShopInterface {
 public:
-	ShopRootInterface();
+	RootInterface();
 
-	~ShopRootInterface();
+	~RootInterface();
 
 	// ---------- Methods ----------
 
 	//! \brief Initializes various textual and image data based on the shop properties
 	void Initialize();
+
+	//! \brief Shows the greeting window and shows the cursor for the root window options
+	void MakeActive();
+
+	//! \brief Hides the greeting window and hides the root window option cursor
+	void MakeInactive();
 
 	//! \brief Updates the state of GUI objects and may also process user input
 	void Update();
@@ -76,7 +82,7 @@ private:
 
 	//! \brief A small window that presents an overview of information about the shop
 	GreetingWindow* _greeting_window;
-}; // class ShopRootInterface : public ShopInterface
+}; // class RootInterface : public ShopInterface
 
 
 /** ****************************************************************************

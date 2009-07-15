@@ -40,28 +40,38 @@ namespace hoa_shop {
 namespace private_shop {
 
 // *****************************************************************************
-// ***** ShopTradeInterface class methods
+// ***** TradeInterface class methods
 // *****************************************************************************
 
-ShopTradeInterface::ShopTradeInterface() {
+TradeInterface::TradeInterface() {
 
 }
 
 
 
-ShopTradeInterface::~ShopTradeInterface() {
+TradeInterface::~TradeInterface() {
 
 }
 
 
 
-void ShopTradeInterface::Initialize() {
+void TradeInterface::Initialize() {
 
 }
 
 
 
-void ShopTradeInterface::Update() {
+void TradeInterface::MakeActive() {
+}
+
+
+
+void TradeInterface::MakeInactive() {
+}
+
+
+
+void TradeInterface::Update() {
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
 	}
@@ -69,7 +79,7 @@ void ShopTradeInterface::Update() {
 
 
 
-void ShopTradeInterface::Draw() {
+void TradeInterface::Draw() {
 
 }
 

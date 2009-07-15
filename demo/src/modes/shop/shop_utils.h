@@ -84,7 +84,9 @@ const uint8 DEALS_KEY_ITEMS    = 0x80;
 *** \brief Abstract class for shop interfaces
 ***
 *** Shop interface classes are manager classes for a particular state of shop
-*** mode. All interface classes inherit from this abstract class.
+*** mode. All interface classes inherit from this abstract class. All interfaces
+*** are initialized only once after the ShopMode class finishes its own initialization
+*** routine.
 *** **************************************************************************/
 class ShopInterface {
 public:
@@ -94,10 +96,19 @@ public:
 	virtual ~ShopInterface()
 		{}
 
+	//! \brief Performs any initialization that could not be done when the class was constructed
 	virtual void Initialize() = 0;
 
+	//! \brief Called whenever the shop state changes and this becomes the active interface
+	virtual void MakeActive() = 0;
+
+	//! \brief Called when this interface is active and the shop state changes causing it to become inactive
+	virtual void MakeInactive() = 0;
+
+	//! \brief Updates the state of the interface and operates on user input
 	virtual void Update() = 0;
 
+	//! \brief Draws the interface's contents to the screen
 	virtual void Draw() = 0;
 }; // class ShopInterface
 

@@ -311,17 +311,18 @@ namespace hoa_shop {
 		class ShopInterface;
 		class ShopObject;
 
-		class ShopRootInterface;
+		class RootInterface;
 		class RootWindow;
 		class GreetingWindow;
 
-		class ShopBuyInterface;
+		class BuyInterface;
+		class BuyObjectList;
 
-		class ShopSellInterface;
+		class SellInterface;
 
-		class ShopTradeInterface;
+		class TradeInterface;
 
-		class ShopConfirmInterface;
+		class ConfirmInterface;
 
 	}
 }

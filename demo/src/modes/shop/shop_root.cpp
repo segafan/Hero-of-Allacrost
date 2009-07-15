@@ -43,24 +43,24 @@ namespace hoa_shop {
 namespace private_shop {
 
 // *****************************************************************************
-// ***** ShopRootInterface class methods
+// ***** RootInterface class methods
 // *****************************************************************************
 
-ShopRootInterface::ShopRootInterface() {
+RootInterface::RootInterface() {
 	_root_window = new RootWindow();
 	_greeting_window = new GreetingWindow();
 }
 
 
 
-ShopRootInterface::~ShopRootInterface() {
+RootInterface::~RootInterface() {
 	delete _root_window;
 	delete _greeting_window;
 }
 
 
 
-void ShopRootInterface::Initialize() {
+void RootInterface::Initialize() {
 	// Text constants that represent the various price levels
 	const ustring VERY_GOOD = MakeUnicodeString("very good");
 	const ustring GOOD = MakeUnicodeString("good");
@@ -149,11 +149,25 @@ void ShopRootInterface::Initialize() {
 
 	_greeting_window->pricing_text.SetDisplayText(MakeUnicodeString("Merchant's buy prices are ") + buy_text + MakeUnicodeString(".\n") +
 		MakeUnicodeString("Merchant's sell prices are ") + sell_text + MakeUnicodeString("."));
+} // void RootInterface::Initialize()
+
+
+
+void RootInterface::MakeActive() {
+	_greeting_window->Show();
+	_root_window->action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 }
 
 
 
-void ShopRootInterface::Update() {
+void RootInterface::MakeInactive() {
+	_greeting_window->Hide();
+	_root_window->action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+}
+
+
+
+void RootInterface::Update() {
 	_root_window->Update();
 
 	if (ShopMode::CurrentInstance()->GetState() != SHOP_STATE_ROOT) {
@@ -204,7 +218,7 @@ void ShopRootInterface::Update() {
 
 
 
-void ShopRootInterface::Draw() {
+void RootInterface::Draw() {
 	_root_window->Draw();
 
 	if (ShopMode::CurrentInstance()->GetState() != SHOP_STATE_ROOT) {
@@ -216,13 +230,13 @@ void ShopRootInterface::Draw() {
 
 
 
-void ShopRootInterface::SetGreetingText(hoa_utils::ustring greeting) {
+void RootInterface::SetGreetingText(hoa_utils::ustring greeting) {
 	_greeting_window->greeting_text.SetDisplayText(greeting);
 }
 
 
 
-void ShopRootInterface::UpdateFinanceTable() {
+void RootInterface::UpdateFinanceTable() {
 	_root_window->finance_table.SetOptionText(0, MakeUnicodeString("Funds: " + NumberToString(GlobalManager->GetDrunes())));
 	_root_window->finance_table.SetOptionText(1, MakeUnicodeString("Purchases: -" + NumberToString(ShopMode::CurrentInstance()->GetTotalCosts())));
 	_root_window->finance_table.SetOptionText(2, MakeUnicodeString("Sales: +" + NumberToString(ShopMode::CurrentInstance()->GetTotalSales())));

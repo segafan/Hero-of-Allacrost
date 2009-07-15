@@ -30,18 +30,22 @@ namespace hoa_shop {
 
 namespace private_shop {
 
-class ShopTradeInterface : public ShopInterface {
+class TradeInterface : public ShopInterface {
 public:
-	ShopTradeInterface();
+	TradeInterface();
 
-	~ShopTradeInterface();
+	~TradeInterface();
 
 	void Initialize();
+
+	void MakeActive();
+
+	void MakeInactive();
 
 	void Update();
 
 	void Draw();
-}; // class ShopTradeInterface : public ShopInterface
+}; // class TradeInterface : public ShopInterface
 
 }
 

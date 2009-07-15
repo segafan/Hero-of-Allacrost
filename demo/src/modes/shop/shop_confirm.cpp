@@ -38,28 +38,38 @@ namespace hoa_shop {
 namespace private_shop {
 
 // *****************************************************************************
-// ***** ShopConfirmInterface class methods
+// ***** ConfirmInterface class methods
 // *****************************************************************************
 
-ShopConfirmInterface::ShopConfirmInterface() {
+ConfirmInterface::ConfirmInterface() {
 
 }
 
 
 
-ShopConfirmInterface::~ShopConfirmInterface() {
+ConfirmInterface::~ConfirmInterface() {
 
 }
 
 
 
-void ShopConfirmInterface::Initialize() {
+void ConfirmInterface::Initialize() {
 
 }
 
 
 
-void ShopConfirmInterface::Update() {
+void ConfirmInterface::MakeActive() {
+}
+
+
+
+void ConfirmInterface::MakeInactive() {
+}
+
+
+
+void ConfirmInterface::Update() {
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
 	}
@@ -67,7 +77,7 @@ void ShopConfirmInterface::Update() {
 
 
 
-void ShopConfirmInterface::Draw() {
+void ConfirmInterface::Draw() {
 
 }
 
