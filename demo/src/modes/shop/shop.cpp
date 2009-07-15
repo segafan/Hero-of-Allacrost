@@ -74,11 +74,21 @@ ShopMode::ShopMode() :
 	mode_type = MODE_MANAGER_SHOP_MODE;
 	_current_instance = this;
 
-	_root_interface = new ShopRootInterface();
-	_buy_interface = new ShopBuyInterface();
-	_sell_interface = new ShopSellInterface();
-	_trade_interface = new ShopTradeInterface();
-	_confirm_interface = new ShopConfirmInterface();
+	_list_window.Create(800.0f, 380.0f, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_TOP | VIDEO_MENU_EDGE_BOTTOM);
+	_list_window.SetPosition(112.0f, 612.0f);
+	_list_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_list_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+
+	_info_window.Create(800.0f, 200.0f, ~VIDEO_MENU_EDGE_TOP);
+	_info_window.SetPosition(112.0f, 220.0f);
+	_info_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_info_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+
+	_root_interface = new RootInterface();
+	_buy_interface = new BuyInterface();
+	_sell_interface = new SellInterface();
+	_trade_interface = new TradeInterface();
+	_confirm_interface = new ConfirmInterface();
 
 	try {
 		_saved_screen = VideoManager->CaptureScreen();
@@ -230,7 +240,7 @@ void ShopMode::AddObject(uint32 object_id) {
 	}
 
 	if (_shop_objects.find(object_id) != _shop_objects.end()) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object that was already in the object list: " << object_id << endl;
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object that already existed: " << object_id << endl;
 		return;
 	}
 
@@ -238,6 +248,31 @@ void ShopMode::AddObject(uint32 object_id) {
 	_created_objects.push_back(new_object);
 	ShopObject new_shop_object(new_object, true);
 	_shop_objects.insert(make_pair(object_id, new_shop_object));
+}
+
+
+
+void ShopMode::RemoveObject(uint32 object_id) {
+	map<uint32, ShopObject>::iterator shop_iter = _shop_objects.find(object_id);
+	if (shop_iter == _shop_objects.end()) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to remove object that did not exist: " << object_id << endl;
+		return;
+	}
+
+	if (shop_iter->second.IsSoldInShop() == true) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "tried to remove object that is sold in shop: " << object_id << endl;
+		return;
+	}
+
+	if (shop_iter->second.GetOwnCount() != 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object's ownership count was non-zero: " << object_id << endl;
+		return;
+	}
+
+	_shop_objects.erase(shop_iter);
+	_sell_objects.erase(object_id);
+
+	// TODO: call the sell interface and inform it that the object has been removed
 }
 
 
@@ -250,6 +285,7 @@ void ShopMode::Initialize() {
 
 	_initialized = true;
 
+	// ---------- (1): Determine what types of objects the shop deals in based on the created object list
 	for (uint32 i = 0; i < _created_objects.size(); i++) {
 		switch (_created_objects[i]->GetObjectType()) {
 			case GLOBAL_OBJECT_ITEM:
@@ -282,8 +318,24 @@ void ShopMode::Initialize() {
 		}
 	}
 
+	// ---------- (2): Add objects from the player's inventory to the list of shop objects
+	map<uint32, GlobalObject*>* inventory = GlobalManager->GetInventory();
+	for (map<uint32, GlobalObject*>::iterator i = inventory->begin(); i != inventory->end(); i++) {
+		// Check if the object already exists in the shop list and if so, set its ownership count
+		map<uint32, ShopObject>::iterator shop_obj_iter = _shop_objects.find(i->second->GetID());
+		if (shop_obj_iter != _shop_objects.end()) {
+			shop_obj_iter->second.IncrementOwnCount(i->second->GetCount());
+		}
+		// Otherwise, add the shop object to the list
+		else {
+			ShopObject new_shop_object(i->second, false);
+			_shop_objects.insert(make_pair(i->second->GetID(), new_shop_object));
+		}
+	}
+
+	// ---------- (3): Load shop multimedia data
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_object_category_images, "img/icons/object_categories.png", 2, 4) == false) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load category images: img/icons/object_categories.png" << endl;
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load category image icons" << endl;
 		return;
 	}
 
@@ -297,6 +349,7 @@ void ShopMode::Initialize() {
 	_shop_sounds["coins"]->LoadAudio("snd/coins.wav");
 	_shop_sounds["bump"]->LoadAudio("snd/bump.wav");
 
+	// ---------- (4): Initialize all shop interfaces
 	_root_interface->Initialize();
 	_buy_interface->Initialize();
 	_sell_interface->Initialize();
@@ -315,9 +368,8 @@ void ShopMode::CompleteTransaction() {
 		// TODO
 	}
 
-	map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
-	map<uint32, GlobalObject*>::iterator iter;
-	for (iter = inv->begin(); iter != inv->end(); iter++) {
+	map<uint32, GlobalObject*>* inventory = GlobalManager->GetInventory();
+	for (map<uint32, GlobalObject*>::iterator i = inventory->begin(); i != inventory->end(); i++) {
 		// TODO
 	}
 }
@@ -348,8 +400,56 @@ void ShopMode::UpdateFinances(int32 costs_amount, int32 sales_amount) {
 
 
 void ShopMode::ChangeState(SHOP_STATE new_state) {
+	if (_state == new_state) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "shop was already in the state to change to: " << _state << endl;
+		return;
+	}
+
+	switch (_state) {
+		case SHOP_STATE_ROOT:
+			_root_interface->MakeInactive();
+			break;
+		case SHOP_STATE_BUY:
+			_buy_interface->MakeInactive();
+			break;
+		case SHOP_STATE_SELL:
+			_sell_interface->MakeInactive();
+			break;
+		case SHOP_STATE_TRADE:
+			_trade_interface->MakeInactive();
+			break;
+		case SHOP_STATE_CONFIRM:
+			_confirm_interface->MakeInactive();
+			break;
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "shop was in an unknown state: " << _state << endl;
+			break;
+	}
+
 	_state = new_state;
-}
+	switch (_state) {
+		case SHOP_STATE_ROOT:
+			_root_interface->MakeActive();
+			break;
+		case SHOP_STATE_BUY:
+			_buy_interface->MakeActive();
+			break;
+		case SHOP_STATE_SELL:
+			_sell_interface->MakeActive();
+			break;
+		case SHOP_STATE_TRADE:
+			_trade_interface->MakeActive();
+			break;
+		case SHOP_STATE_CONFIRM:
+			_confirm_interface->MakeActive();
+			break;
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "unknown new state, setting shop to root state: " << new_state << endl;
+			_state = SHOP_STATE_ROOT;
+			_root_interface->MakeActive();
+			break;
+	}
+} // void ShopMode::ChangeState(SHOP_STATE new_state)
 
 
 

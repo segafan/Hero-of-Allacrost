@@ -30,18 +30,22 @@ namespace hoa_shop {
 
 namespace private_shop {
 
-class ShopConfirmInterface : public ShopInterface {
+class ConfirmInterface : public ShopInterface {
 public:
-	ShopConfirmInterface();
+	ConfirmInterface();
 
-	~ShopConfirmInterface();
+	~ConfirmInterface();
 
 	void Initialize();
+
+	void MakeActive();
+
+	void MakeInactive();
 
 	void Update();
 
 	void Draw();
-}; // class ShopConfirmInterface : public ShopInterface
+}; // class ConfirmInterface : public ShopInterface
 
 /** ****************************************************************************
 *** \brief Displays the object's icon, name, and a sale confirmation message

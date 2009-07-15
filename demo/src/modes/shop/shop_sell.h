@@ -30,18 +30,22 @@ namespace hoa_shop {
 
 namespace private_shop {
 
-class ShopSellInterface : public ShopInterface {
+class SellInterface : public ShopInterface {
 public:
-	ShopSellInterface();
+	SellInterface();
 
-	~ShopSellInterface();
+	~SellInterface();
 
 	void Initialize();
+
+	void MakeActive();
+
+	void MakeInactive();
 
 	void Update();
 
 	void Draw();
-}; // class ShopSellInterface : public ShopInterface
+}; // class SellInterface : public ShopInterface
 
 /** ****************************************************************************
 *** \brief A window containing a list of current inventory and selling price

@@ -28,69 +28,137 @@ namespace hoa_shop {
 
 namespace private_shop {
 
-class ShopBuyInterface : public ShopInterface {
+/** ****************************************************************************
+*** \brief Manages the shop when it is in buy mode and enables the player to view and purchase wares
+***
+*** This interface displays the list of objects that are available for sale. It organizes
+*** these objects based on their object type (item, weapon, etc.) and allows the player
+*** to switch between views of these different categories.
+*** ***************************************************************************/
+class BuyInterface : public ShopInterface {
 public:
-	ShopBuyInterface();
+	BuyInterface();
 
-	~ShopBuyInterface();
+	~BuyInterface();
 
+	//! \brief Initializes the data conatiners and GUI objects to be used
 	void Initialize();
 
+	//! \brief Shows the menu windows that are used
+	void MakeActive();
+
+	//! \brief Hides the menu windows that are used
+	void MakeInactive();
+
+	//! \brief Processes user input and updates the purchase totals as appropriate
 	void Update();
 
+	//! \brief Draws the GUI elements to the screen
 	void Draw();
-}; // class ShopBuyInterface : public ShopInterface
+
+private:
+	//! \brief Index to the active entry in both the _object_data and _object_lists containers
+	uint32 _current_datalist;
+
+	/** \brief Contains all objects for sale sorted into various category lists
+	***
+	*** The minimum size this container will ever be is two and the maximum it will be is nine. The first
+	*** entry (index 0) always holds the list of all objects regardless of categories. The proceeding
+	*** entries will be ordered based on object type, beginning with items and ending with key items.
+	*** For example, if the shop deals in weapons and shards, index 0 will hold a list of all weapons
+	*** and shards, index 1 will hold a list of all weapons, and index 2 will hold a list of all shards.
+	**/
+	std::vector<std::vector<ShopObject*> > _object_data;
+
+	/** \brief Class objects used to display the object data to the player
+	***
+	*** The size and contents of this container mimic that which is found in the _object_data container.
+	**/
+	std::vector<BuyObjectList*> _object_lists;
+
+	//! \brief Contains a row of images for each available item sold in the shop
+	hoa_video::OptionBox _object_types;
+
+	//! \brief Header text for the object identifier list (refer to the BuyObjectList class)
+	hoa_video::OptionBox _identifier_header;
+
+	//! \brief Header text for the properties identifier list (refer to the BuyObjectList class)
+	hoa_video::OptionBox _properties_header;
+
+	//! \brief Pointer to the window used for displaying the list of objects for sale
+	hoa_video::MenuWindow* _list_window;
+
+	//! \brief Pointer to the window used for displaying detailed information about a particular object
+	hoa_video::MenuWindow* _info_window;
+}; // class BuyInterface : public ShopInterface
+
 
 /** ****************************************************************************
-*** \brief A window containing a list of objects and their price
+*** \brief A GUI container representing a list of objects that may be bought
 ***
-*** \todo Allow the player to browse via object category (all, items, weapons,
-*** etc).
+*** This container actually uses two option boxes to represent the list. The first
+*** option box is on the left hand side and contains the image icon for the object
+*** and the object's name. The second option box to the right lists the price, stock,
+*** amount owned by the player, and amount the player indicates that they wish to
+*** purchase. The number of entries in both option boxes and the number of entries in
+*** the object_data vector should be the same.
 *** ***************************************************************************/
-class BuyListWindow : public hoa_video::MenuWindow {
+class BuyObjectList {
 public:
-	BuyListWindow();
+	BuyObjectList();
 
-	~BuyListWindow();
+	~BuyObjectList()
+		{}
 
 	// -------------------- Class Methods
 
-	//! \brief Removes all entries from the list of objects for sale
+	/** \brief Removes all entries from the option boxes
+	*** \note This will also set the object_data member to NULL, so usually calling this function
+	*** should be followed by invoking PopulateList() to refill the class with valid data.
+	**/
 	void Clear();
 
-	/** \brief Adds a new entry to the option box
-	*** \param name The name of the object for this entry
-	*** \param price The price of the object in this entry
-	*** \param quantity The maximum quantity of this object that are available to buy
+	/** \brief Clears and then constructs the option box data
+	*** \param objects A pointer to a data vector containing the objects to populate the list with
 	**/
-	void AddEntry(hoa_utils::ustring name, uint32 price, uint32 quantity);
+	void PopulateList(std::vector<ShopObject*>* objects);
 
-	//! \brief Reconstructs the option box from the entries that have been added
-	void ConstructList();
-
-	//! \brief Refreshes the option box and all entries
+	//! \brief Reconstructs all option box entries from the object data
 	void RefreshList();
 
-	//! \brief Processes user input and updates the cursor
+	/** \brief Reconstructs the displayed properties of a single object
+	*** \param index The index of the object data to reconstruct
+	***
+	*** This method refreshes only the relevant options of the properties_list and does not modify
+	*** the identifier_list. The reason for this is that the identifier_list (containing the image
+	*** and name of the object) never needs to be changed since that data is static. The properties,
+	*** however, do require frequent change as the stock, number owned, and amount to buy can be
+	*** manipulated by the user.
+	**/
+	void RefreshEntryProperties(uint32 index);
+
+	//! \brief Updates the option boxes
 	void Update();
 
-	//! \brief Draws the object list window and options to the screen
+	//! \brief Draws the option boxes
 	void Draw();
 
 	// -------------------- Class Members
 
-	//! \brief When set to true, the OptionBox will not be drawn for this window
-	bool hide_options;
+	//! \brief A pointer to the vector of object data that the class is to display
+	std::vector<ShopObject*>* object_data;
 
-	/** \brief Contains the list of objects for sale
-	*** Each option includes the name of the object and its price.
+	//! \brief Identifies objects via their icon and name
+	hoa_video::OptionBox identifier_list;
+
+	/** \brief Contains shop properties about the object: price, stock, own, and amount to buy
+	***
 	**/
-	hoa_video::OptionBox object_list;
+	hoa_video::OptionBox properties_list;
 }; // class BuyListWindow : public hoa_video::MenuWindow
 
+} // namespace private_shop
 
-}
-
-}
+} // namespace hoa_shop
 
 #endif // __SHOP_BUY_HEADER__

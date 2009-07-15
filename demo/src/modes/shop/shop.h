@@ -116,6 +116,16 @@ public:
 	**/
 	void AddObject(uint32 object_id);
 
+	/** \brief Deletes an object from the shop
+	*** \param object_id The id number of the object to remove
+	***
+	*** This function should be used in only one specific case. This case is when the player owns this object and
+	*** chooses to sell all instances of it and additionally the shop does not sell this item. Trying to remove
+	*** an object that the shop sells to the player or trying to remove an object that still remains in the party's
+	*** inventory will result in a warning message and the object will not be removed.
+	**/
+	void RemoveObject(uint32 object_id);
+
 	// Functions below this line are intended for use only by other shop mode classes
 
 	/** \brief Loads data and prepares shop for initial use
@@ -179,6 +189,9 @@ public:
 	uint32 GetTotalSales() const
 		{ return _total_sales; }
 
+	std::map<uint32, private_shop::ShopObject>* GetShopObjects()
+		{ return &_shop_objects; }
+
 	const std::vector<hoa_video::StillImage>& GetObjectCategoryImages() const
 		{ return _object_category_images; }
 
@@ -187,6 +200,12 @@ public:
 	*** \return A pointer to the SoundDescriptor, or NULL if no sound had the identifier name
 	**/
 	hoa_audio::SoundDescriptor* GetSound(std::string identifier);
+
+	hoa_video::MenuWindow* GetListWindow()
+		{ return &_list_window; }
+
+	hoa_video::MenuWindow* GetInfoWindow()
+		{ return &_info_window; }
 	//@}
 
 private:
@@ -241,15 +260,11 @@ private:
 	*** These are the class objects which are responsible for managing each state in shop mode
 	**/
 	//@{
-	private_shop::ShopRootInterface* _root_interface;
-
-	private_shop::ShopBuyInterface* _buy_interface;
-
-	private_shop::ShopSellInterface* _sell_interface;
-
-	private_shop::ShopTradeInterface* _trade_interface;
-
-	private_shop::ShopConfirmInterface* _confirm_interface;
+	private_shop::RootInterface* _root_interface;
+	private_shop::BuyInterface* _buy_interface;
+	private_shop::SellInterface* _sell_interface;
+	private_shop::TradeInterface* _trade_interface;
+	private_shop::ConfirmInterface* _confirm_interface;
 	//@}
 
 	//! \brief Holds an image of the screen taken when the ShopMode instance was created
@@ -260,6 +275,12 @@ private:
 
 	//! \brief A map of the sounds used in shop mode
 	std::map<std::string, hoa_audio::SoundDescriptor*> _shop_sounds;
+
+	//! \brief A window utilized by interfaces to display a long list of information
+	hoa_video::MenuWindow _list_window;
+
+	//! \brief A window utlized by interfaces to display detailed information about a particular object
+	hoa_video::MenuWindow _info_window;
 }; // class ShopMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_shop
