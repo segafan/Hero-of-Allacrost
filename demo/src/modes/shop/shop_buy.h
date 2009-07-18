@@ -76,6 +76,12 @@ private:
 	**/
 	std::vector<BuyObjectList*> _object_lists;
 
+	//! \brief Pointer to the window used for displaying the list of objects for sale
+	hoa_video::MenuWindow* _list_window;
+
+	//! \brief Pointer to the window used for displaying detailed information about a particular object
+	hoa_video::MenuWindow* _info_window;
+
 	//! \brief Contains a row of images for each available item sold in the shop
 	hoa_video::OptionBox _object_types;
 
@@ -84,12 +90,6 @@ private:
 
 	//! \brief Header text for the properties identifier list (refer to the BuyObjectList class)
 	hoa_video::OptionBox _properties_header;
-
-	//! \brief Pointer to the window used for displaying the list of objects for sale
-	hoa_video::MenuWindow* _list_window;
-
-	//! \brief Pointer to the window used for displaying detailed information about a particular object
-	hoa_video::MenuWindow* _info_window;
 }; // class BuyInterface : public ShopInterface
 
 

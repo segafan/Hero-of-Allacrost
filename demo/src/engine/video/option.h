@@ -268,11 +268,44 @@ public:
 	//! \brief Removes all options and their allocated data from the OptionBox
 	void ClearOptions();
 
+	/** \brief Adds a blank new option to the OptionBox
+	*** The option added is an empty string. Invoke the various AddOptionElement*() methods to construct the option after this call.
+	**/
+	void AddOption();
+
 	/** \brief Adds a new option to the OptionBox
 	*** \param text The formatting text for the new option
 	*** The option will not be added if it contained formatting errors.
 	**/
 	void AddOption(const hoa_utils::ustring &text);
+
+	/** \brief Appends a text string element to an existing option
+	*** \param option_index The index of the option to append the text element to
+	*** \param text The unicode string to add to the text
+	*** \note This string is treated as pure text and formatting options embedded in the string will
+	*** <b>not</b> be processed by this function.
+	**/
+	void AddOptionElementText(uint32 option_index, const hoa_utils::ustring& text);
+
+	/** \brief Appends an image element to an existing option
+	*** \param option_index The index of the option to append the image element to
+	*** \param filename The name of the image file to load for use in this option
+	**/
+	void AddOptionElementImage(uint32 option_index, std::string& image_filename);
+
+	/** \brief Appends an image element to an existing option
+	*** \param option_index The index of the option to append the image element to
+	*** \param image A pointer to the image to create a copy of for the option (must be non-NULL)
+	**/
+	void AddOptionElementImage(uint32 option_index, const StillImage* image);
+
+	/** \brief Appends an alignment element to an existing option
+	*** \param option_index The index of the option to append the alignment element to
+	*** \param postion_type The only valid values for this argument are: VIDEO_OPTION_ELEMENT_LEFT_ALIGN,
+	*** VIDEO_OPTION_ELEMENT_CENTER_ALIGN, and VIDEO_OPTION_ELEMENT_RIGHT_ALIGN. All other values will be
+	*** ignored.
+	**/
+	void AddOptionElementAlignment(uint32 option_index, OptionElementType position_type);
 
 	/** \brief Changes the stored information of a particular option
 	*** \param index The index of the option to change
