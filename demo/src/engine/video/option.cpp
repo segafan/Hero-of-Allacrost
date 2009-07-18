@@ -350,6 +350,18 @@ void OptionBox::ClearOptions() {
 
 
 
+void OptionBox::AddOption() {
+	Option option;
+	if (_ConstructOption(ustring(), option) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to construct option using an empty string"  << endl;
+		return;
+	}
+
+	_options.push_back(option);
+}
+
+
+
 void OptionBox::AddOption(const hoa_utils::ustring& text) {
 	Option option;
 	if (_ConstructOption(text, option) == false) {
@@ -358,6 +370,92 @@ void OptionBox::AddOption(const hoa_utils::ustring& text) {
 	}
 
 	_options.push_back(option);
+}
+
+
+
+void OptionBox::AddOptionElementText(uint32 option_index, const ustring& text) {
+	if (option_index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "out-of-range option_index argument: " << option_index << endl;
+		return;
+	}
+
+	Option& this_option = _options[option_index];
+	OptionElement new_element;
+
+	new_element.type = VIDEO_OPTION_ELEMENT_TEXT;
+	new_element.value = static_cast<int32>(this_option.text.size());
+	this_option.text.push_back(text);
+	this_option.elements.push_back(new_element);
+}
+
+
+
+void OptionBox::AddOptionElementImage(uint32 option_index, string& image_filename) {
+	if (option_index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "out-of-range option_index argument: " << option_index << endl;
+		return;
+	}
+
+	Option& this_option = _options[option_index];
+	OptionElement new_element;
+
+	new_element.type = VIDEO_OPTION_ELEMENT_IMAGE;
+	new_element.value = 0;
+
+	this_option.image = new StillImage();
+	if (this_option.image->Load(image_filename) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to add image element because image file load failed" << image_filename << endl;
+		delete this_option.image;
+		this_option.image = NULL;
+		return;
+	}
+
+	this_option.elements.push_back(new_element);
+}
+
+
+
+void OptionBox::AddOptionElementImage(uint32 option_index, const StillImage* image) {
+	if (option_index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "out-of-range option_index argument: " << option_index << endl;
+		return;
+	}
+	if (image == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "image argument was NULL" << endl;
+		return;
+	}
+
+	Option& this_option = _options[option_index];
+	OptionElement new_element;
+
+	new_element.type = VIDEO_OPTION_ELEMENT_IMAGE;
+	new_element.value = 0;
+
+	this_option.image = new StillImage(*image);
+	this_option.elements.push_back(new_element);
+}
+
+
+
+void OptionBox::AddOptionElementAlignment(uint32 option_index, OptionElementType position_type) {
+	if (option_index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "out-of-range option_index argument: " << option_index << endl;
+		return;
+	}
+	if ((position_type != VIDEO_OPTION_ELEMENT_LEFT_ALIGN) &&
+		(position_type != VIDEO_OPTION_ELEMENT_CENTER_ALIGN) &&
+		(position_type != VIDEO_OPTION_ELEMENT_RIGHT_ALIGN))
+	{
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid position_type argument" << position_type <<  endl;
+	}
+
+	Option& this_option = _options[option_index];
+	OptionElement new_element;
+
+	new_element.type = position_type;
+	new_element.value = 0;
+	this_option.elements.push_back(new_element);
 }
 
 
