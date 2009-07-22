@@ -657,6 +657,12 @@ bool RemoveDirectory(const std::string& dir_name);
 std::vector<std::string> ListDirectory(const std::string& dir_name, const std::string& filter);
 //@}
 
+/** \brief Deletes a specified file 
+*** \param filename The name of the file to be deleted
+*** \return true on success false on failure
+**/
+bool DeleteFile(const std::string& filename);
+
 
 //! \name User directory and settings paths
 //@{

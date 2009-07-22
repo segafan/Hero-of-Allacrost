@@ -180,6 +180,7 @@ BootMode::BootMode() :
 	_SetupJoySetttingsMenu();
 	_SetupResolutionMenu();
 	_SetupLoadProfileMenu();
+	_SetupDeleteProfileMenu();
 	_SetupSaveProfileMenu();
 	_SetupProfileMenu();
 	_SetupUserInputMenu();
@@ -433,6 +434,9 @@ void BootMode::Update() {
 			_active_menu = &_profiles_menu;
 		}
 		else if (_active_menu == &_save_profile_menu){
+			_active_menu = &_profiles_menu;
+		}
+		else if (_active_menu == &_delete_profile_menu){
 			_active_menu = &_profiles_menu;
 		}
 		else if(_active_menu == &_user_input_menu) {
@@ -1107,6 +1111,27 @@ void BootMode::_SetupLoadProfileMenu() {
 	}
 }
 
+void BootMode::_SetupDeleteProfileMenu() {
+	_delete_profile_menu.SetPosition(512.0f, 384.0f);
+	_delete_profile_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
+	_delete_profile_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_delete_profile_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_delete_profile_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_delete_profile_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_delete_profile_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_delete_profile_menu.SetCursorOffset(-50.0f, 28.0f);
+
+
+	//add the options in for each file
+	for(int32 i = 0; i < (int32) _GetDirectoryListingUserDataPath().size(); i++) {
+
+		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
+		string fileName = _GetDirectoryListingUserDataPath().at(i);
+		_delete_profile_menu.AddOption(MakeUnicodeString(fileName.c_str()), &BootMode::_OnDeleteFile);
+	}
+}
+
+
 //Inits the save-profile menu
 void BootMode::_SetupSaveProfileMenu() {
 	_save_profile_menu.SetPosition(512.0f, 384.0f);
@@ -1135,7 +1160,7 @@ void BootMode::_SetupSaveProfileMenu() {
 //Inits the profiles menu
 void BootMode::_SetupProfileMenu() {
 	_profiles_menu.SetPosition(512.0f, 384.0f);
-	_profiles_menu.SetDimensions(300.0f, 200.0f, 1, 2, 1, 2);
+	_profiles_menu.SetDimensions(300.0f, 300.0f, 1, 3, 1, 3);
 	_profiles_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_profiles_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_profiles_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1145,6 +1170,7 @@ void BootMode::_SetupProfileMenu() {
 
 	_profiles_menu.AddOption(MakeUnicodeString("Save"), &BootMode::_OnSaveProfile);
 	_profiles_menu.AddOption(MakeUnicodeString("Load"), &BootMode::_OnLoadProfile);
+	_profiles_menu.AddOption(MakeUnicodeString("Delete"), &BootMode::_OnDeleteProfile);
 
 }
 
@@ -1498,6 +1524,11 @@ void BootMode::_OnSaveProfile() {
 	_active_menu = &_save_profile_menu;
 
 }
+
+//Switches to the delete profile menu
+void BootMode::_OnDeleteProfile() {
+	_active_menu = &_delete_profile_menu;
+}
 // Loads the file specified by the user
 void BootMode::_OnLoadFile() {
 
@@ -1513,6 +1544,30 @@ void BootMode::_OnLoadFile() {
 	_UpdateJoySettings();
 	_UpdateVideoOptions();
 	_UpdateAudioOptions();
+}
+
+//Deletes the file
+void BootMode::_OnDeleteFile() {
+
+	//get the file path
+	const string& fileName = GetUserDataPath(true) + _GetDirectoryListingUserDataPath().at(_load_profile_menu.GetSelection());
+	
+	bool success = DeleteFile(fileName);
+
+	if(success && BOOT_DEBUG)
+		cout << "profile was successfully deleted " << fileName << endl;
+	else
+		cout << "failed to delete profile " << fileName << endl;
+
+	//Clear the option boxes on all the menus and reload them so we can get rid of the deleted profile
+	_save_profile_menu.ClearOptions();
+	_delete_profile_menu.ClearOptions();
+	_load_profile_menu.ClearOptions();
+
+	//reload the menus
+	_SetupSaveProfileMenu();
+	_SetupDeleteProfileMenu();
+	_SetupLoadProfileMenu();
 }
 
 // Saves the file specified by the user
@@ -1555,6 +1610,7 @@ void BootMode::_OnPickLetter() {
 		_SaveSettingsFile(_current_filename);
 		_save_profile_menu.AddOption(MakeUnicodeString(_current_filename), &BootMode::_OnSaveFile);
 		_load_profile_menu.AddOption(MakeUnicodeString(_current_filename), &BootMode::_OnLoadFile);
+		_delete_profile_menu.AddOption(MakeUnicodeString(_current_filename), &BootMode::_OnDeleteFile);
 
 		//make sure we reset the current filename string
 		_current_filename = "";
@@ -1661,6 +1717,7 @@ void BootMode::_UpdateSaveAndLoadProfiles() {
 	//match the text with the directory listing :0
 	for(int32 i = 0; i < (int32) _GetDirectoryListingUserDataPath().size(); i++) {
 		_load_profile_menu.SetOptionText(i,MakeUnicodeString(_GetDirectoryListingUserDataPath().at(i)));
+		_delete_profile_menu.SetOptionText(i,MakeUnicodeString(_GetDirectoryListingUserDataPath().at(i)));
 	}
 
 }
