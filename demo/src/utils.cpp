@@ -805,6 +805,14 @@ vector<string> ListDirectory(const std::string& dir_name, const std::string& fil
 	return directoryList;
 }
 
+bool DeleteFile(const std::string &filename) {
+	if(DoesFileExist(filename.c_str())) {
+		remove(filename.c_str());
+		return true;
+	}
+	return false;
+}
+
 
 
 

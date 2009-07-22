@@ -140,6 +140,9 @@ private:
 	//! 'Save Profile' Menu
 	BootMenu _save_profile_menu;
 
+	//! 'Delete Profile' Menu
+	BootMenu _delete_profile_menu;
+
 	//! 'Profiles' Menu
 	BootMenu _profiles_menu;
 
@@ -326,6 +329,7 @@ private:
 	void _SetupSaveProfileMenu();
 	void _SetupProfileMenu();
 	void _SetupUserInputMenu();
+	void _SetupDeleteProfileMenu();
 	//@}
 
 	// Main Menu handlers
@@ -406,6 +410,9 @@ private:
 	//! Switches to the menu which saves the settings to a file specified by the user
 	void _OnSaveProfile();
 
+	//! Switches to the menu which allows user to delete a profile
+	void _OnDeleteProfile();
+
 	//! Saves and Loads profiles specified by the user
 	void _OnProfiles();
 
@@ -414,6 +421,9 @@ private:
 	
 	//! Asks user for filename and then saves the settings to a .lua file
 	void _OnSaveFile();
+
+	//! Deletes the profile
+	void _OnDeleteFile();
 
 	//! Adds a letter to the currently selected filename
 	void _OnPickLetter();
