@@ -1855,11 +1855,7 @@ bool BootMode::_LoadSettingsFile(const std::string& fileName) {
 	int32 resx = settings.ReadInt("screen_resx");
 
 	//Set Resolution  according to width if no width matches our predefined resoultion set to lowest resolution
-	if(resx == 640) {
-		_OnResolution640x480();
-		_resolution_menu.SetSelection(0);
-	}
-	else if(resx == 800) {
+	if(resx == 800) {
 		_OnResolution800x600();
 		_resolution_menu.SetSelection(1);
 	}
@@ -1870,6 +1866,10 @@ bool BootMode::_LoadSettingsFile(const std::string& fileName) {
 	else if(resx == 1280) {
 		_OnResolution1280x1024();
 		_resolution_menu.SetSelection(3);
+	}
+	else {
+		_OnResolution640x480();
+		_resolution_menu.SetSelection(0);
 	}
 
 	//set the fullscreen and update video options
