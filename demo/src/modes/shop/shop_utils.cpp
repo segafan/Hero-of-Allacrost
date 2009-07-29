@@ -21,6 +21,7 @@
 #include "global.h"
 
 #include "shop_utils.h"
+#include "shop.h"
 
 using namespace std;
 
@@ -111,22 +112,40 @@ void ShopObject::IncrementStockCount(uint32 inc) {
 
 
 void ShopObject::IncrementBuyCount(uint32 inc) {
-	_buy_count += inc;
+	uint32 old_count = _buy_count;
+	if (inc == 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function received an argument with a value of zero" << endl;
+		return;
+	}
 
+	_buy_count += inc;
 	if (_stock_count > _buy_count) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "incremented buy count beyond the amount available in stock" << endl;
-		_buy_count -= inc;
+		_buy_count = old_count;
+		return;
+	}
+	if (old_count == 0) {
+		ShopMode::CurrentInstance()->AddObjectToBuyList(this);
 	}
 }
 
 
 
 void ShopObject::IncrementSellCount(uint32 inc) {
-	_sell_count += inc;
+	uint32 old_count = _sell_count;
+	if (inc == 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function received an argument with a value of zero" << endl;
+		return;
+	}
 
+	_sell_count += inc;
 	if (_sell_count > _own_count) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "incremented sell count beyond the amount available to be sold" << endl;
 		_sell_count -= inc;
+		return;
+	}
+	if (old_count == 0) {
+		ShopMode::CurrentInstance()->AddObjectToSellList(this);
 	}
 }
 
@@ -165,23 +184,39 @@ void ShopObject::DecrementStockCount(uint32 dec) {
 
 
 void ShopObject::DecrementBuyCount(uint32 dec) {
+	if (dec == 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function received an argument with a value of zero" << endl;
+		return;
+	}
+
 	if (dec > _buy_count) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to decrement buy count below zero" << endl;
 		return;
 	}
 
 	_buy_count -= dec;
+	if (_buy_count == 0) {
+		ShopMode::CurrentInstance()->RemoveObjectFromBuyList(this);
+	}
 }
 
 
 
 void ShopObject::DecrementSellCount(uint32 dec) {
+	if (dec == 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function received an argument with a value of zero" << endl;
+		return;
+	}
+
 	if (dec > _sell_count) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to decrement sell count below zero" << endl;
 		return;
 	}
 
 	_sell_count -= dec;
+	if (_sell_count == 0) {
+		ShopMode::CurrentInstance()->RemoveObjectFromSellList(this);
+	}
 }
 
 // *****************************************************************************

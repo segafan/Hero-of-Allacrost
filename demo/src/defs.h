@@ -316,7 +316,7 @@ namespace hoa_shop {
 		class GreetingWindow;
 
 		class BuyInterface;
-		class BuyObjectList;
+		class BuyList;
 
 		class SellInterface;
 
