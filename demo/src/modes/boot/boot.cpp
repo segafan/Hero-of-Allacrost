@@ -1533,41 +1533,60 @@ void BootMode::_OnDeleteProfile() {
 void BootMode::_OnLoadFile() {
 
 	//get the file path
-	const string& fileName = GetUserDataPath(true) + _GetDirectoryListingUserDataPath().at(_load_profile_menu.GetSelection());
+	if(_load_profile_menu.GetSelection() < 0 || _load_profile_menu.GetSelection() >= (int32)_GetDirectoryListingUserDataPath().size())
+		cerr << "selection was out of range: " << _load_profile_menu.GetSelection() << " try another one " << endl;
+	else
+	{
+		const string& fileName = GetUserDataPath(true) + _GetDirectoryListingUserDataPath().at(_load_profile_menu.GetSelection());
+		bool success = _LoadSettingsFile(fileName);
 
-	//load the file
-	if(_LoadSettingsFile(fileName) && BOOT_DEBUG)
-		cout << "profile was successfully loaded " << fileName << endl;
+		//load the file
+		if(BOOT_DEBUG)
+		{
+			if(success)
+				cout << "profile was successfully loaded " << fileName << endl;
+			else
+				cout << "profile failed to load " << fileName << endl;
+		}
 
-	//update all of the settings when loaded
-	_UpdateKeySettings();
-	_UpdateJoySettings();
-	_UpdateVideoOptions();
-	_UpdateAudioOptions();
+		//update all of the settings when loaded
+		_UpdateKeySettings();
+		_UpdateJoySettings();
+		_UpdateVideoOptions();
+		_UpdateAudioOptions();
+	}
 }
 
 //Deletes the file
 void BootMode::_OnDeleteFile() {
 
-	//get the file path
-	const string& fileName = GetUserDataPath(true) + _GetDirectoryListingUserDataPath().at(_load_profile_menu.GetSelection());
-	
-	bool success = DeleteFile(fileName);
-
-	if(success && BOOT_DEBUG)
-		cout << "profile was successfully deleted " << fileName << endl;
+	if(_load_profile_menu.GetSelection() < 0 || _load_profile_menu.GetSelection() >= (int32)_GetDirectoryListingUserDataPath().size())
+		cerr << "selection was out of range: " << _load_profile_menu.GetSelection() << " try another one " << endl;
 	else
-		cout << "failed to delete profile " << fileName << endl;
+	{
+		//get the file path
+		const string& fileName = GetUserDataPath(true) + _GetDirectoryListingUserDataPath().at(_load_profile_menu.GetSelection());
+	
+		bool success = DeleteFile(fileName);
 
-	//Clear the option boxes on all the menus and reload them so we can get rid of the deleted profile
-	_save_profile_menu.ClearOptions();
-	_delete_profile_menu.ClearOptions();
-	_load_profile_menu.ClearOptions();
+		if(BOOT_DEBUG)
+		{
+			if(success)
+				cout << "profile was successfully deleted " << fileName << endl;
+			else
+				cout << "failed to delete profile " << fileName << endl;
+		}
 
-	//reload the menus
-	_SetupSaveProfileMenu();
-	_SetupDeleteProfileMenu();
-	_SetupLoadProfileMenu();
+		//Clear the option boxes on all the menus and reload them so we can get rid of the deleted profile
+		_save_profile_menu.ClearOptions();
+		_delete_profile_menu.ClearOptions();
+		_load_profile_menu.ClearOptions();
+
+		//reload the menus
+		_SetupSaveProfileMenu();
+		_SetupDeleteProfileMenu();
+		_SetupLoadProfileMenu();
+	}
 }
 
 // Saves the file specified by the user
