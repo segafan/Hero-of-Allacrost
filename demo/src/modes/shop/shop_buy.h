@@ -74,7 +74,7 @@ private:
 	***
 	*** The size and contents of this container mimic that which is found in the _object_data container.
 	**/
-	std::vector<BuyObjectList*> _object_lists;
+	std::vector<BuyList*> _object_lists;
 
 	//! \brief Pointer to the window used for displaying the list of objects for sale
 	hoa_video::MenuWindow* _list_window;
@@ -82,14 +82,26 @@ private:
 	//! \brief Pointer to the window used for displaying detailed information about a particular object
 	hoa_video::MenuWindow* _info_window;
 
-	//! \brief Contains a row of images for each available item sold in the shop
-	hoa_video::OptionBox _object_types;
+	//! \brief Contains a column of images representing each category of object sold in the shop
+	hoa_video::OptionBox _category_list;
 
-	//! \brief Header text for the object identifier list (refer to the BuyObjectList class)
+	//! \brief Header text for the object identifier list (refer to the BuyList class)
 	hoa_video::OptionBox _identifier_header;
 
-	//! \brief Header text for the properties identifier list (refer to the BuyObjectList class)
+	//! \brief Header text for the properties identifier list (refer to the BuyList class)
 	hoa_video::OptionBox _properties_header;
+
+	// ---------- Methods ----------
+	//! \brief Returns the number of object categories displayed by the buy interface
+	uint32 GetNumberObjectCategories() const
+		{ return _object_data.size(); }
+
+	//! \brief Returns true if the buy interface includes an "All" category for displaying wares
+	bool _HasAllCategory() const
+		{ return (_object_data.size() > 1); }
+
+	//! \brief Used to update the category icons to show the unselected categories in gray
+	void _UpdateSelectedCategory();
 }; // class BuyInterface : public ShopInterface
 
 
@@ -103,11 +115,11 @@ private:
 *** purchase. The number of entries in both option boxes and the number of entries in
 *** the object_data vector should be the same.
 *** ***************************************************************************/
-class BuyObjectList {
+class BuyList {
 public:
-	BuyObjectList();
+	BuyList();
 
-	~BuyObjectList()
+	~BuyList()
 		{}
 
 	// -------------------- Class Methods
@@ -135,7 +147,7 @@ public:
 	*** however, do require frequent change as the stock, number owned, and amount to buy can be
 	*** manipulated by the user.
 	**/
-	void RefreshEntryProperties(uint32 index);
+	void RefreshEntry(uint32 index);
 
 	//! \brief Updates the option boxes
 	void Update();
@@ -155,7 +167,7 @@ public:
 	***
 	**/
 	hoa_video::OptionBox properties_list;
-}; // class BuyListWindow : public hoa_video::MenuWindow
+}; // class BuyList
 
 } // namespace private_shop
 

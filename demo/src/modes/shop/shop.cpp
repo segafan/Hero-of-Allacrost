@@ -270,7 +270,7 @@ void ShopMode::RemoveObject(uint32 object_id) {
 	}
 
 	_shop_objects.erase(shop_iter);
-	_sell_objects.erase(object_id);
+	_sell_list.erase(object_id);
 
 	// TODO: call the sell interface and inform it that the object has been removed
 }
@@ -333,7 +333,12 @@ void ShopMode::Initialize() {
 		}
 	}
 
-	// ---------- (3): Load shop multimedia data
+	// ---------- (3): Initialize pricing for all shop objects
+	for (map<uint32, ShopObject>::iterator i = _shop_objects.begin(); i != _shop_objects.end(); i++) {
+		i->second.SetPricing(_buy_price_level, _sell_price_level);
+	}
+
+	// ---------- (4): Load shop multimedia data
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_object_category_images, "img/icons/object_categories.png", 2, 4) == false) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load category image icons" << endl;
 		return;
@@ -349,22 +354,106 @@ void ShopMode::Initialize() {
 	_shop_sounds["coins"]->LoadAudio("snd/coins.wav");
 	_shop_sounds["bump"]->LoadAudio("snd/bump.wav");
 
-	// ---------- (4): Initialize all shop interfaces
+	// ---------- (5): Initialize all shop interfaces
 	_root_interface->Initialize();
 	_buy_interface->Initialize();
 	_sell_interface->Initialize();
 	_trade_interface->Initialize();
 	_confirm_interface->Initialize();
+} // void ShopMode::Initialize()
+
+
+
+void ShopMode::AddObjectToBuyList(ShopObject* object) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL argument" << endl;
+		return;
+	}
+
+	if (object->GetBuyCount() == 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object to be added had a buy count of zero" << endl;
+	}
+
+	uint32 object_id = object->GetObject()->GetID();
+	pair<map<uint32, ShopObject*>::iterator, bool> ret_val;
+	ret_val = _buy_list.insert(make_pair(object_id, object));
+	if (ret_val.second == false) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object to be added already existed in buy list" << endl;
+	}
+}
+
+
+
+void ShopMode::RemoveObjectFromBuyList(ShopObject* object) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL argument" << endl;
+		return;
+	}
+
+	if (object->GetBuyCount() > 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object to be removed had a buy count that was non-zero" << endl;
+	}
+
+	uint32 object_id = object->GetObject()->GetID();
+	map<uint32, ShopObject*>::iterator object_entry = _buy_list.find(object_id);
+	if (object_entry == _buy_list.end()) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object to be removed did not exist on the buy list" << endl;
+	}
+	else {
+		_buy_list.erase(object_entry);
+	}
+}
+
+
+
+void ShopMode::AddObjectToSellList(ShopObject* object) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL argument" << endl;
+		return;
+	}
+
+	if (object->GetSellCount() == 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object to be added had a sell count of zero" << endl;
+	}
+
+	uint32 object_id = object->GetObject()->GetID();
+	pair<map<uint32, ShopObject*>::iterator, bool> ret_val;
+	ret_val = _sell_list.insert(make_pair(object_id, object));
+	if (ret_val.second == false) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object to be added already existed in sell list" << endl;
+	}
+}
+
+
+
+void ShopMode::RemoveObjectFromSellList(ShopObject* object) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL argument" << endl;
+		return;
+	}
+
+	if (object->GetSellCount() > 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object to be removed had a sell count that was non-zero" << endl;
+	}
+
+	uint32 object_id = object->GetObject()->GetID();
+	map<uint32, ShopObject*>::iterator object_entry = _sell_list.find(object_id);
+	if (object_entry == _sell_list.end()) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object to be removed did not exist on the sell list" << endl;
+	}
+	else {
+		_sell_list.erase(object_entry);
+	}
 }
 
 
 
 void ShopMode::CompleteTransaction() {
-	for (map<uint32, ShopObject*>:: iterator i = _buy_objects.begin(); i != _buy_objects.end(); i++) {
+	for (map<uint32, ShopObject*>:: iterator i = _buy_list.begin(); i != _buy_list.end(); i++) {
 		// TODO
 	}
 
-	for (map<uint32, ShopObject*>:: iterator i = _sell_objects.begin(); i != _sell_objects.end(); i++) {
+	for (map<uint32, ShopObject*>:: iterator i = _sell_list.begin(); i != _sell_list.end(); i++) {
 		// TODO
 	}
 

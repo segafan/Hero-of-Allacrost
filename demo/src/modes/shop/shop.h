@@ -134,6 +134,34 @@ public:
 	**/
 	void Initialize();
 
+	/** \brief Used when an object has been selected for purchase by the player
+	*** \param object A pointer to the object to add
+	*** \note The buy count of the shop object added should be non-zero before this function is called.
+	*** Otherwise a warning message will be printed, but the object will still be added.
+	**/
+	void AddObjectToBuyList(private_shop::ShopObject* object);
+
+	/** \brief Used when the player decides not to purchase an object that was previously marked to be bought
+	*** \param object A pointer to the object to remove
+	*** \note The buy count of the shop object added should be zero before this function is called.
+	*** Otherwise a warning message will be printed, but the object will still be removed.
+	**/
+	void RemoveObjectFromBuyList(private_shop::ShopObject* object);
+
+	/** \brief Used when an object has been selected to be sold by the player
+	*** \param object A pointer to the object to add
+	*** \note The sell count of the shop object added should be non-zero before this function is called.
+	*** Otherwise a warning message will be printed, but the object will still be added.
+	**/
+	void AddObjectToSellList(private_shop::ShopObject* object);
+
+	/** \brief Used when the player decides not to sell an object that was previously marked to be sold
+	*** \param object A pointer to the object to remove
+	*** \note The sell count of the shop object added should be zero before this function is called.
+	*** Otherwise a warning message will be printed, but the object will still be removed.
+	**/
+	void RemoveObjectFromSellList(private_shop::ShopObject* object);
+
 	/** \brief Called whenever the player successfully confirms a transaction
 	*** This method processes the transaction, including modifying the party's drune count, adding/removing
 	*** objects from the inventory, and auto equipping/un-equipping traded equipment. It also calls appropriate
@@ -192,6 +220,12 @@ public:
 	std::map<uint32, private_shop::ShopObject>* GetShopObjects()
 		{ return &_shop_objects; }
 
+	std::map<uint32, private_shop::ShopObject*>* GetBuyList()
+		{ return &_buy_list; }
+
+	std::map<uint32, private_shop::ShopObject*>* GetSellList()
+		{ return &_sell_list; }
+
 	const std::vector<hoa_video::StillImage>& GetObjectCategoryImages() const
 		{ return _object_category_images; }
 
@@ -249,12 +283,12 @@ private:
 	/** \brief Holds pointers to all objects that the player plans to purchase
 	*** The integer key to this map is the global object ID represented by the ShopObject.
 	**/
-	std::map<uint32, private_shop::ShopObject*> _buy_objects;
+	std::map<uint32, private_shop::ShopObject*> _buy_list;
 
 	/** \brief Holds pointers to all objects that the player plans to sell
 	*** The integer key to this map is the global object ID represented by the ShopObject.
 	**/
-	std::map<uint32, private_shop::ShopObject*> _sell_objects;
+	std::map<uint32, private_shop::ShopObject*> _sell_list;
 
 	/** \name Shopping interfaces
 	*** These are the class objects which are responsible for managing each state in shop mode
