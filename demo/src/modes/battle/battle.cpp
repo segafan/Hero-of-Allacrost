@@ -71,6 +71,7 @@ BattleMode::BattleMode() :
 	_initialized(false),
 	_battle_over(false),
 	_victorious_battle(false),
+	_animation_in_process(false),
 	_selected_character_index(0),
 	_selected_target_index(0),
 	_selected_character(NULL),
@@ -415,6 +416,20 @@ void BattleMode::Update() {
 		return;
 	}
 
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		if (_character_actors[i]->GetAnimationString() != "idle") {
+			_character_actors[i]->Update();
+			return;
+		}
+	}
+
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		if (_enemy_actors[i]->GetAnimationString() != "idle") {
+			_enemy_actors[i]->Update();
+			return;
+		}
+	}
+
 	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberCharactersAlive() == 0);
 	_victorious_battle = (_NumberEnemiesAlive() == 0);
 
@@ -436,7 +451,6 @@ void BattleMode::Update() {
 
 			_action_window.Reset();
 			_finish_window.Initialize(_victorious_battle);
-
 		}
 
 		// The FinishWindow::Update() function handles all update code when a battle is over.

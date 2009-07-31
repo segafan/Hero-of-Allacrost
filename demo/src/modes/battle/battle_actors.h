@@ -34,23 +34,23 @@ namespace private_battle {
 
 //! \brief Represents the possible states that a BattleActor may be in
 enum ACTOR_STATE {
-	ACTOR_INVALID		= -1,
+	ACTOR_INVALID       = -1,
 	//! Actor is recovering stamina so they can execute another action
-	ACTOR_IDLE			=  0,
+	ACTOR_IDLE          =  0,
 	ACTOR_AWAITING_TURN =  1,
 	//! Actor has selected an action and is preparing to execute it
-	ACTOR_WARM_UP		=  2,
+	ACTOR_WARM_UP       =  2,
 	//! Actor is prepared to execute action and is waiting their turn to act
-	ACTOR_READY			=  3,
+	ACTOR_READY         =  3,
 	//! Actor is in the process of executing their selected action
-	ACTOR_ACTING		=  4,
+	ACTOR_ACTING        =  4,
 	//! Actor is finished with action execution and recovering
-	ACTOR_COOL_DOWN		=  5,
+	ACTOR_COOL_DOWN     =  5,
 	//! Actor has perished and is inactive in battle
-	ACTOR_DEAD			=  6,
+	ACTOR_DEAD          =  6,
 	//! Actor is in some state of paralysis and can not act nor recover stamina
-	ACTOR_PARALYZED		=  7,
-	ACTOR_TOTAL			=  8
+	ACTOR_PARALYZED     =  7,
+	ACTOR_TOTAL         =  8
 };
 
 //! \brief Constants for the significant locations along the stamina meter
@@ -179,10 +179,12 @@ public:
 
 	//! \brief Affect stat modifiers
 	void AddHitPoints(int32 hp);
-	void AddStrength(int32 str)	{_actor->AddStrength(str);}
+	void AddStrength(int32 str)     {_actor->AddStrength(str);}
+	void AddFortitude(int32 frt)    {_actor->AddFortitude(frt);}
+	void AddAgility(int32 agi)      {_actor->AddAgility(agi);}
+	void AddVigor(int32 vig)        {_actor->AddVigor(vig);}
 
-	//! \brief Resets the attack timer for the animation
-	void TEMP_ResetAttackTimer();
+	virtual std::string GetAnimationString() = 0;
 
 protected:
 	//! \brief A pointer to the global actor object which the battle actor represents
@@ -206,26 +208,12 @@ protected:
 	//! \brief The y-value of it's location, since x is fixed
 	float _stamina_icon_location;
 
-	//! \brief Variable for tracking time (ms) on how long to show the damage text
-	//FIX ME this has to go
-	//uint32 _total_time_damaged;
-
-	//! \brief How much damage was dealt on the last strike
-	//FIX ME this has to go unless we have good cause for it
-	//uint32 _damage_dealt;
-
 	//! \brief The actor's icon for the stamina meter
 	hoa_video::StillImage _stamina_icon;
 
-	//! \name Actor timers
-	//@{
 	//! \brief Amount of time character spends in the idle phase
 	//FIX ME for now, will also be used for cool down times?
 	hoa_system::SystemTimer _wait_time;
-
-	//! \brief Timer for the attack animation
-	hoa_system::SystemTimer _TEMP_attack_animation_timer;
-	//@}
 
 	//! \brief Recalculates wait time if agility has changed	
 	void _RecalculateWaitTime();
@@ -265,8 +253,14 @@ public:
 	hoa_global::GlobalCharacter* GetActor()
 		{ return dynamic_cast<hoa_global::GlobalCharacter*>(_actor); }
 
+	virtual std::string GetAnimationString()
+		{ return _animation_string; }
+
 protected:
-	std::string _current_animation;
+	//! \brief Contains alias of current animation
+	std::string _animation_string;
+
+	//! \brief Contains countdown timer of current animation
 	hoa_system::SystemTimer _animation_time;
 }; // class BattleCharacter
 
@@ -300,8 +294,14 @@ public:
 	//! \brief Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
 	bool operator<(const BattleEnemy & other) const;
 
+	virtual std::string GetAnimationString()
+		{ return _animation_string; }
+
 protected:
+	//! \brief Contains alias of current animation
 	std::string _animation_string;
+
+	//! \brief Contains countdown timer of current animation
 	hoa_system::SystemTimer _animation_time;
 
 private:

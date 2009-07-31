@@ -14,30 +14,58 @@ end
 
 status_effects[1] = {
 	name = "Strength Up",
+	-- Multiplies Strength by 3
 	
-	Init = function(target)
-		target:AddStrength(400);
+	Init = function(thisEffect, target)
+		thisEffect:SetStrModfier(3.0);
 	end,
 
-	Update = function(target)
+	Update = function(thisEffect, target)
 	end,
 
-	Remove = function(target)
-		target:AddStrength(-400);
+	Remove = function(thisEffect, target)
 	end
 }
 
 status_effects[2] = {
 	name = "Defense Up",
+
+	-- Multiplies Fortitude by 3
+	Init = function(thisEffect, target)
+		thisEffect:SetForModfier(3.0);
+	end,
+
+	Update = function(thisEffect, target)
+	end,
+
+	Remove = function(thisEffect, target)
+	end
+}
+
+status_effects[3] = {
+	name = "Agility Down",
 	
-	Init = function(target)
-		target:AddFortitude(400);
+	Init = function(thisEffect, target)
+--		thisEffect:SetAgiModfier(0.5);
 	end,
 
-	Update = function(target)
+	Update = function(thisEffect, target)
 	end,
 
-	Remove = function(target)
-		target:AddFortitude(-400);
+	Remove = function(thisEffect, target)
+	end
+}
+
+status_effects[4] = {
+	name = "Hiding",
+	
+	Init = function(thisEffect, target)
+		thisEffect:SetEvaModfier(5.0);
+	end,
+
+	Update = function(thisEffect, target)
+	end,
+
+	Remove = function(thisEffect, target)
 	end
 }

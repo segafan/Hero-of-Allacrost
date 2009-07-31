@@ -1,8 +1,11 @@
 CLAUDIUS = 1
 LAILA = 2
+KYLE = 3
+RAFAELA = 4
 
 function NewGame()
 	GlobalManager:AddCharacter(CLAUDIUS);
+	GlobalManager:AddCharacter(KYLE);
 	GlobalManager:SetDrunes(250);
 	GlobalManager:AddToInventory(1, 2);
 	GlobalManager:SetLocation("dat/maps/demo_town.lua");
