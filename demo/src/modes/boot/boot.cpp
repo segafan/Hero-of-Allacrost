@@ -1319,7 +1319,13 @@ void BootMode::_OnQuit()
 void BootMode::_OnBattleDebug() {
 //	ModeManager->Pop();
 	GlobalManager->AddCharacter(1);
+	GlobalManager->AddCharacter(2);
+	GlobalManager->AddCharacter(3);
+	GlobalManager->AddCharacter(4);
 	BattleMode *BM = new BattleMode();
+	BM->AddEnemy(1);
+	BM->AddEnemy(1);
+	BM->AddEnemy(1);
 	BM->AddEnemy(1);
 	BM->AddEnemy(1);
 	ModeManager->Push(BM);
@@ -1329,6 +1335,9 @@ void BootMode::_OnBattleDebug() {
 void BootMode::_OnMenuDebug() {
 //	ModeManager->Pop();
 	GlobalManager->AddCharacter(1);
+	GlobalManager->AddCharacter(2);
+	GlobalManager->AddCharacter(3);
+	GlobalManager->AddCharacter(4);
 	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("The Boot Screen"), "img/menus/locations/desert_cave.png");
 	ModeManager->Push(MM);
 }
@@ -1336,6 +1345,9 @@ void BootMode::_OnMenuDebug() {
 // Shop debug confirmed
 void BootMode::_OnShopDebug() {
 	GlobalManager->AddCharacter(1);
+	GlobalManager->AddCharacter(2);
+	GlobalManager->AddCharacter(3);
+	GlobalManager->AddCharacter(4);
 	GlobalManager->AddDrunes(500);
 	GlobalManager->AddToInventory(1, 5);
 	GlobalManager->AddToInventory(30501, 2);

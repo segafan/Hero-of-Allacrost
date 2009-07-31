@@ -16,14 +16,14 @@ characters[CLAUDIUS] = {
 	initial_stats = {
 		experience_level = 1,
 		experience_points = 0,
-		max_hit_points = 60,
+		max_hit_points = 630,
 		max_skill_points = 15,
 		strength = 12,
 		vigor = 4,
-		fortitude = 14,
+		fortitude = 15,
 		protection = 6,
 		agility = 30,
-		evade = 4.0,
+		evade = 5.0,
 		weapon = 10001,
 		head_armor = 20001,
 		torso_armor = 30001,
@@ -89,7 +89,7 @@ characters[CLAUDIUS] = {
 		}
 	},
 
-	skills = { [1] = 1, [2] = 2}
+	skills = { [1] = 1, [2] = 2, [3] = 3 }
 } -- characters[CLAUDIUS]
 
 
@@ -107,7 +107,7 @@ characters[LAILA] = {
 		vigor = 7,
 		fortitude = 12,
 		protection = 10,
-		agility = 36,
+		agility = 38,
 		evade = 5.0,
 		weapon = 10501,
 		head_armor = 20501,
@@ -178,6 +178,176 @@ characters[LAILA] = {
 } -- characters[LAILA]
 
 
+
+characters[KYLE] = {
+	name = "Kyle",
+	filename = "kyle",
+
+	initial_stats = {
+		experience_level = 1,
+		experience_points = 0,
+		max_hit_points = 55,
+		max_skill_points = 19,
+		strength = 15,
+		vigor = 3,
+		fortitude = 12,
+		protection = 5,
+		agility = 35,
+		evade = 4.5,
+		weapon = 10001,
+		head_armor = 20001,
+		torso_armor = 30001,
+		arm_armor = 40001,
+		leg_armor = 50001
+	},
+
+	attack_points = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_HEAD] = {
+			name = "Head",
+			x_position = 31,
+			y_position = 54,
+			fortitude_modifier = -0.20,
+			protection_modifier = 0.25,
+			evade_modifier = 0.50
+		},
+		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
+			name = "Torso",
+			x_position = 37,
+			y_position = 34,
+			fortitude_modifier = 0.40,
+			protection_modifier = 0.10,
+			evade_modifier = -0.20
+		},
+		[hoa_global.GameGlobal.GLOBAL_POSITION_ARMS] = {
+			name = "Arms",
+			x_position = 31,
+			y_position = 54,
+			fortitude_modifier = 0.10,
+			protection_modifier = 0.00,
+			evade_modifier = 0.10
+		},
+		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
+			name = "Legs",
+			x_position = 37,
+			y_position = 34,
+			fortitude_modifier = 0.20,
+			protection_modifier = 0.20,
+			evade_modifier = 0.05
+		}
+	},
+
+	growth_stats = {
+		[1] = {
+			hit_points = 5.0,
+			skill_points = 1.0,
+			strength = 2.0,
+			vigor = 1.0,
+			fortitude = 2.0,
+			protection = 1.0,
+			agility = 1.0,
+			evade = 1.0
+		},
+		[4] = {
+			hit_points = 5.0,
+			skill_points = 2.0,
+			strength = 3.0,
+			vigor = 2.0,
+			fortitude = 3.0,
+			protection = 1.0,
+			agility = 1.0,
+			evade = 1.0
+		}
+	},
+
+	skills = { [1] = 21, [2] = 22}
+} -- characters[KYLE]
+
+
+
+characters[RAFAELA] = {
+	name = "Rafaela",
+	filename = "rafaela",
+
+	initial_stats = {
+		experience_level = 1,
+		experience_points = 0,
+		max_hit_points = 56,
+		max_skill_points = 19,
+		strength = 11,
+		vigor = 3,
+		fortitude = 13,
+		protection = 5,
+		agility = 46,
+		evade = 5.0,
+		weapon = 10001,
+		head_armor = 20501,
+		torso_armor = 30501,
+		arm_armor = 40501,
+		leg_armor = 50501
+	},
+
+	attack_points = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_HEAD] = {
+			name = "Head",
+			x_position = 31,
+			y_position = 54,
+			fortitude_modifier = -0.20,
+			protection_modifier = 0.25,
+			evade_modifier = 0.50
+		},
+		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
+			name = "Torso",
+			x_position = 37,
+			y_position = 34,
+			fortitude_modifier = 0.40,
+			protection_modifier = 0.10,
+			evade_modifier = -0.20
+		},
+		[hoa_global.GameGlobal.GLOBAL_POSITION_ARMS] = {
+			name = "Arms",
+			x_position = 31,
+			y_position = 54,
+			fortitude_modifier = 0.10,
+			protection_modifier = 0.00,
+			evade_modifier = 0.10
+		},
+		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
+			name = "Legs",
+			x_position = 37,
+			y_position = 34,
+			fortitude_modifier = 0.20,
+			protection_modifier = 0.20,
+			evade_modifier = 0.05
+		}
+	},
+
+	growth_stats = {
+		[1] = {
+			hit_points = 5.0,
+			skill_points = 1.0,
+			strength = 2.0,
+			vigor = 1.0,
+			fortitude = 2.0,
+			protection = 1.0,
+			agility = 1.0,
+			evade = 1.0
+		},
+		[4] = {
+			hit_points = 5.0,
+			skill_points = 2.0,
+			strength = 3.0,
+			vigor = 2.0,
+			fortitude = 3.0,
+			protection = 1.0,
+			agility = 1.0,
+			evade = 1.0
+		}
+	},
+
+	skills = { [1] = 31, [2] = 32}
+} -- characters[RAFAELA]
+
+
 ------------------------------------------------------------------------------[[
 -- \brief Called everytime a character reaches a new experience level. 
 -- \param character A pointer to the GlobalCharacter who has gained the new level
@@ -222,7 +392,7 @@ function DetermineGrowth(character)
 	character_growth._fortitude_growth = growth_table["fortitude"];
 	character_growth._protection_growth = growth_table["protection"];
 	character_growth._agility_growth = growth_table["agility"];
-	character_growth._evade_growth = growth_table["evade"];
+	character_growth._evade_growth = 0;
 	
 	-- Determine if the character learns any skills at this new level	
 	if (type(new_skills) == "number") then

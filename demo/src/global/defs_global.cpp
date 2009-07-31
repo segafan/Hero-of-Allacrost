@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /** ***************************************************************************
-*** \file    defs.h
+*** \file    defs_global.cpp
 *** \author  Daniel Steuernol, steu@allacrost.org
 *** \brief   Source file for Lua binding code
 ***
@@ -248,6 +248,12 @@ void BindGlobalsToLua()
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalStatusEffect>("GlobalStatusEffect")
+			.def("SetStrModifier", &GlobalStatusEffect::SetStrModifier)
+			.def("SetVigModifier", &GlobalStatusEffect::SetVigModifier)
+			.def("SetForModifier", &GlobalStatusEffect::SetForModifier)
+			.def("SetProModifier", &GlobalStatusEffect::SetProModifier)
+			.def("SetAgiModifier", &GlobalStatusEffect::SetAgiModifier)
+			.def("SetEvaModifier", &GlobalStatusEffect::SetEvaModifier)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")

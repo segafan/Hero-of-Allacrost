@@ -38,7 +38,13 @@ namespace hoa_global {
 GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 	_id(id),
 	_name(NULL),
-	_intensity(intensity)
+	_intensity(intensity),
+	_str_modifier(1.0),
+	_vig_modifier(1.0),
+	_for_modifier(1.0),
+	_pro_modifier(1.0),
+	_agi_modifier(1.0),
+	_eva_modifier(1.0)
 {
 	if (_id == 0 || _id > 5) {
 		cerr << "GLOBAL ERROR: GlobalStatusEffect constructor failed due to an invalid id assignment: " << _id << endl;

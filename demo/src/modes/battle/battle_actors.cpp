@@ -56,8 +56,8 @@ BattleActor::BattleActor(GlobalActor* actor, float x_origin, float y_origin) :
 	//_damage_dealt(0)
 {
 	// Reset attack timer, TEMP CODE!!!!
-	_TEMP_attack_animation_timer.Initialize(0);
-	_TEMP_attack_animation_timer.Run();
+	// _TEMP_attack_animation_timer.Initialize(0);
+	// _TEMP_attack_animation_timer.Run();
 }
 
 
@@ -101,7 +101,11 @@ void BattleActor::DrawStaminaIcon(bool is_selected) {
 
 
 uint32 BattleActor::GetPhysicalAttack() {
-	return GetActor()->GetTotalPhysicalAttack();
+	uint32 atk = GetActor()->GetTotalPhysicalAttack();
+	for (int i = 0; i < _actor_effects.size(); i++) {
+		atk = atk * _actor_effects[i]->GetStrModifier();
+	}
+	return atk;
 }
 
 uint32 BattleActor::GetPhysicalDefense() {
@@ -109,11 +113,19 @@ uint32 BattleActor::GetPhysicalDefense() {
 }
 
 float BattleActor::GetCombatEvade() {
-	return GetActor()->GetEvade();
+	uint32 eva = GetActor()->GetEvade();
+	for (int i = 0; i < _actor_effects.size(); i++) {
+		eva = eva * _actor_effects[i]->GetEvaModifier();
+	}
+	return eva;
 }
 
 uint32 BattleActor::GetCombatAgility() {
-	return GetActor()->GetAgility();
+	uint32 agi = GetActor()->GetAgility();
+	for (int i = 0; i < _actor_effects.size(); i++) {
+		agi = agi * _actor_effects[i]->GetAgiModifier();
+	}
+	return agi;
 }
 
 
@@ -179,7 +191,7 @@ void BattleActor::TakeDamage(int32 damage) {
 void BattleActor::AddEffect(hoa_global::GlobalStatusEffect* new_effect) {
 	_actor_effects.push_back(new_effect);
 	ScriptObject* init = new_effect->GetInitFunction();
-	ScriptCallFunction<void>(*init, this);
+	ScriptCallFunction<void>(*init, new_effect, this);
 }
 
 void BattleActor::AddNewEffect(int id) {
@@ -194,29 +206,19 @@ void BattleActor::AddHitPoints(int32 hp) {
 	GetActor()->AddHitPoints(hp);
 }
 
-
-void BattleActor::TEMP_ResetAttackTimer() {
-	_TEMP_attack_animation_timer.Initialize(1000);
-	_TEMP_attack_animation_timer.Run();
-}
-
 // *****************************************************************************
 // BattleCharacter class
 // *****************************************************************************
 
 BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin) :
 	BattleActor(character, x_origin, y_origin),
-	_current_animation("idle"),
+	_animation_string("idle"),
 	_animation_time(0)
 {
 	if (_stamina_icon.Load("img/icons/actors/characters/" + character->GetFilename() + ".png", 45, 45) == false)
 		cerr << "Unable to load stamina icon for " << character->GetFilename() << endl;
 
 	_state = ACTOR_IDLE;
-
-//	AddEffect(new GlobalStatusEffect(1));
-//	ScriptObject* init = _actor_effects[_actor_effects.size() - 1]->GetInitFunction();
-//	ScriptCallFunction<void>(*init, character);
 } // BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin)
 
 
@@ -249,7 +251,7 @@ void BattleCharacter::Update() {
 
 	//If he's dead, we freeze him on his last frame
 	if (IsAlive())
-		GetActor()->RetrieveBattleAnimation(_current_animation)->Update();
+		GetActor()->RetrieveBattleAnimation(_animation_string)->Update();
 }
 
 
@@ -260,18 +262,18 @@ void BattleCharacter::DrawSprite() {
 	// Draw the character sprite
 	VideoManager->Move(_x_location, _y_location);
 
-	if (_current_animation == "idle") {
+	if (_animation_string == "idle") {
 		// no need to do anything
 	}
 	else if (_animation_time.IsFinished()) {
-		_current_animation = "idle";
+		_animation_string = "idle";
 	}
 	else {
 		uint32 dist = 120 * _animation_time.GetTimeExpired() / _animation_time.GetDuration();
 		VideoManager->MoveRelative(dist, 0);
 	}
 
-	GetActor()->RetrieveBattleAnimation(_current_animation)->Draw();
+	GetActor()->RetrieveBattleAnimation(_animation_string)->Draw();
 
 
 	if (IsAlive()) {
@@ -288,20 +290,6 @@ void BattleCharacter::DrawSprite() {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
 			current_battle->_actor_selection_image.Draw();
 		}
-
-		// TEMP: determine if character sprite needs red damage numbers drawn next to it
-		/*if (_total_time_damaged > 0) {
-			_total_time_damaged += SystemManager->GetUpdateTime();
-			VideoManager->Text()->SetDefaultFont("battle_dmg");
-			VideoManager->Text()->SetDefaultTextColor(Color::red);
-			VideoManager->Move(GetXLocation() + 40.0f, GetYLocation() + ( _total_time_damaged / 35.0f ) + 100.0f);
-			VideoManager->Text()->Draw(NumberToString(_damage_dealt));
-			VideoManager->Text()->SetDefaultFont("battle");
-
-			if (_total_time_damaged > 3000) { // Show it for three seconds
-				_total_time_damaged = 0;
-			}
-		}*/
 	}
 	else {
 	//	VideoManager->Move(_x_location, _y_location);
@@ -310,8 +298,8 @@ void BattleCharacter::DrawSprite() {
 } // void BattleCharacter::DrawSprite()
 
 void BattleCharacter::PlayAnimation(std::string alias) {
-	_current_animation = alias;
-	GetActor()->RetrieveBattleAnimation(_current_animation)->ResetAnimation();
+	_animation_string = alias;
+	GetActor()->RetrieveBattleAnimation(_animation_string)->ResetAnimation();
 	_animation_time.SetDuration(300);
 	_animation_time.Reset();
 	_animation_time.Run();
@@ -563,7 +551,7 @@ void BattleEnemy::DrawSprite() {
 
 void BattleEnemy::PlayAnimation(std::string alias) {
 	_animation_string = alias;
-	_animation_time.SetDuration(90);
+	_animation_time.SetDuration(270);
 	_animation_time.Reset();
 	_animation_time.Run();
 }

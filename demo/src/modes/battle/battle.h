@@ -79,8 +79,10 @@ const float MONSTER_LOCATIONS[][2] = {
 };
 
 const float PLAYER_LOCATIONS[][2] = {
-	{ 256.0f, 320.0f },
-	{ 150.0f, 270.0f }
+	{ 250.0f, 320.0f },
+	{ 175.0f, 270.0f },
+	{ 100.0f, 350.0f },
+	{  25.0f, 300.0f },
 };
 
 
@@ -354,6 +356,9 @@ private:
 
 	//! \brief Set to true if it was player who won the battle.
 	bool _victorious_battle;
+
+	//! \brief Set to true if a battle animation is taking place.
+	bool _animation_in_process;
 
 	/** \brief Container for all music to be played during the battle
 	*** The first element in this vector is the primary battle track. For most battles, only a primary track

@@ -18,7 +18,7 @@ end
 
 skills[1] = {
 	name = "Slicing Rain",
-	description = "A simple but effective vertical sword slash.",
+	description = "A simple but effective sword slash.",
 	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 0,
@@ -26,12 +26,16 @@ skills[1] = {
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
-			target:TakeDamage(instigator:GetPhysicalAttack() + 5 - target:GetPhysicalDefense());
-		end
 		instigator:PlayAnimation("attack");
-		AudioManager:PlaySound("snd/sword_swipe.wav");
+
+		--If the random float is bigger, then we landed the hit
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 5 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/swordslice1.wav");
+		else
+			target:TakeDamage(0);
+			AudioManager:PlaySound("snd/sword_swipe.wav");
+		end
 	end
 }
 
@@ -46,26 +50,28 @@ skills[2] = {
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade() + 2.5) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 10 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/swordslice1.wav");
+		else
+			target:TakeDamage(0);
+			AudioManager:PlaySound("snd/sword_swipe.wav");
 		end
-		instigator:PlayAnimation("attack");
-		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
 
 skills[3] = {
-	name = "Power Up",
-	description = "Increase strength.",
+	name = "Whirlwind",
+	-- WARNING: Untested
+	description = "Attack all.",
 	sp_required = 3,
 	warmup_time = 1200,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
-	target_ally = true,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
+	target_ally = false,
 
 	BattleExecute = function(target, instigator)
-		target:AddNewEffect(1);
+		target:TakeDamage(instigator:GetPhysicalAttack());
 		AudioManager:PlaySound("snd/rumble.wav");
 	end
 }
@@ -89,6 +95,83 @@ skills[11] = {
 	end
 }
 
+skills[21] = {
+	name = "Side Slash",
+	description = "A very basic sword attack.",
+	sp_required = 0,
+	warmup_time = 1500,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 3 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/swordslice2.wav");
+		else
+			target:TakeDamage(0);
+			AudioManager:PlaySound("snd/sword_swipe.wav");
+		end
+	end
+}
+
+skills[22] = {
+	name = "Blade Rush",
+	description = "Attempt for a powerful blow.",
+	sp_required = 4,
+	warmup_time = 2000,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade() + 8.5) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/swordslice2.wav");
+		else
+			target:TakeDamage(0);
+			AudioManager:PlaySound("snd/sword_swipe.wav");
+		end
+	end
+}
+
+skills[31] = {
+	name = "Stab",
+	description = "Stab enemy with dagger.",
+	sp_required = 0,
+	warmup_time = 2000,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
+		--If the random float is bigger, then we landed the hit
+		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 5 - target:GetPhysicalDefense());
+		end
+		instigator:PlayAnimation("attack");
+		AudioManager:PlaySound("snd/sword_swipe.wav");
+	end
+}
+
+skills[32] = {
+	name = "Dagger Throw",
+	description = "Throw dagger at an enemy.",
+	sp_required = 3,
+	warmup_time = 2000,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
+		--If the random float is bigger, then we landed the hit
+		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 80)) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() * 1.5 + 0 - target:GetPhysicalDefense());
+		end
+		instigator:PlayAnimation("attack");
+		AudioManager:PlaySound("snd/sword_swipe.wav");
+	end
+}
 
 -- Enemy attack skills
 skills[100] = {
