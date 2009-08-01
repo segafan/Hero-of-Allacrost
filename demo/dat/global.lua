@@ -8,8 +8,7 @@ function NewGame()
 	GlobalManager:AddCharacter(KYLE);
 	GlobalManager:SetDrunes(250);
 	GlobalManager:AddToInventory(1, 2);
---	GlobalManager:SetLocation("dat/maps/demo_town.lua");
-	GlobalManager:SetLocation("dat/maps/desert_village.lua");
+	GlobalManager:SetLocation("dat/maps/demo_town.lua");
 end
 
 
