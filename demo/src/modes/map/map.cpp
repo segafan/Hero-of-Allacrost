@@ -322,8 +322,7 @@ void MapMode::_Load() {
 	// Read the number of map contexts, the name of the map, and load the location graphic image
 	_num_map_contexts = _map_script.ReadUInt("num_map_contexts");
 	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
-//	if (_location_graphic.Load("img/menus/locations/" + _map_script.ReadString("location_filename")) == false) {
-	if (_location_graphic.Load("img/menus/locations/mountain_village.png") == false) {
+	if (_location_graphic.Load("img/menus/locations/" + _map_script.ReadString("location_filename")) == false) {
 		PRINT_ERROR << "failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
 	}
 
