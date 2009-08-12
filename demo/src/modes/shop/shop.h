@@ -273,7 +273,7 @@ private:
 	/** \brief A container of objects that ShopMode created itself and need to be deleted when finished
 	*** These also happen to represent a list of all global objects that the shop may sell to the player
 	**/
-	std::vector<hoa_global::GlobalObject*> _created_objects;
+	std::vector<hoa_global::GlobalObject*> _managed_objects;
 
 	/** \brief Holds all objects that can be bought, sold, or traded in the shop
 	*** The integer key to this map is the global object ID represented by the ShopObject.
@@ -309,6 +309,12 @@ private:
 
 	//! \brief A map of the sounds used in shop mode
 	std::map<std::string, hoa_audio::SoundDescriptor*> _shop_sounds;
+
+	//! \brief The highest level shop window that contains the root menu
+	hoa_video::MenuWindow _top_window;
+
+	//! \brief The window which contains the shop greeting information, used in the root interface
+	hoa_video::MenuWindow _greeting_window;
 
 	//! \brief A window utilized by interfaces to display a long list of information
 	hoa_video::MenuWindow _list_window;

@@ -101,10 +101,10 @@ ShopMode::ShopMode() :
 
 
 ShopMode::~ShopMode() {
-	for (uint32 i = 0; i < _created_objects.size(); i++) {
-		delete(_created_objects[i]);
+	for (uint32 i = 0; i < _managed_objects.size(); i++) {
+		delete(_managed_objects[i]);
 	}
-	_created_objects.clear();
+	_managed_objects.clear();
 
 	delete _root_interface;
 	delete _buy_interface;
@@ -245,7 +245,7 @@ void ShopMode::AddObject(uint32 object_id) {
 	}
 
 	GlobalObject* new_object = GlobalCreateNewObject(object_id, 1);
-	_created_objects.push_back(new_object);
+	_managed_objects.push_back(new_object);
 	ShopObject new_shop_object(new_object, true);
 	_shop_objects.insert(make_pair(object_id, new_shop_object));
 }
@@ -285,9 +285,9 @@ void ShopMode::Initialize() {
 
 	_initialized = true;
 
-	// ---------- (1): Determine what types of objects the shop deals in based on the created object list
-	for (uint32 i = 0; i < _created_objects.size(); i++) {
-		switch (_created_objects[i]->GetObjectType()) {
+	// ---------- (1): Determine what types of objects the shop deals in based on the managed object list
+	for (uint32 i = 0; i < _managed_objects.size(); i++) {
+		switch (_managed_objects[i]->GetObjectType()) {
 			case GLOBAL_OBJECT_ITEM:
 				_deal_types |= DEALS_ITEMS;
 				break;
@@ -313,7 +313,7 @@ void ShopMode::Initialize() {
 				_deal_types |= DEALS_KEY_ITEMS;
 				break;
 			default:
-				IF_PRINT_WARNING(SHOP_DEBUG) << "unknown object type sold in shop: " << _created_objects[i]->GetObjectType() << endl;
+				IF_PRINT_WARNING(SHOP_DEBUG) << "unknown object type sold in shop: " << _managed_objects[i]->GetObjectType() << endl;
 				break;
 		}
 	}
