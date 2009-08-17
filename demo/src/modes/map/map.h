@@ -118,6 +118,9 @@ public:
 	**/
 	private_map::MAP_STATE CurrentState();
 
+	void PlayNewMusic(uint32 n)
+		{ _music.at(n).Play(); }
+
 	/** \brief Opens the map tablespace of the map script
 	*** \param use_global Has the same effect as in ReadScriptDescriptor#OpenTable
 	**/

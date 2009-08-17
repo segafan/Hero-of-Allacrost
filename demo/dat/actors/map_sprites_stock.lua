@@ -31,6 +31,29 @@ sprites["Laila"] = {
 	face_portrait = "img/portraits/map/laila.png"
 }
 
+sprites["Kyle"] = {
+	name = hoa_utils.Translate("Kyle"),
+	coll_half_width = 0.95,
+	coll_height = 1.9,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = SLOW_SPEED,
+
+	standard_animations = "img/sprites/map/kyle_walk.png",
+	face_portrait = "img/portraits/map/kyle.png"
+}
+
+sprites["Captain"] = {
+	name = hoa_utils.Translate("Captain"),
+	coll_half_width = 0.95,
+	coll_height = 1.9,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = SLOW_SPEED,
+
+	standard_animations = "img/sprites/map/soldier_npc01_walk.png"
+}
+
 sprites["Marcus"] = {
 	name = hoa_utils.Translate("Marcus"),
 	coll_half_width = 0.95,

@@ -45,6 +45,7 @@ void BindGlobalsToLua()
 	[
 		class_<GameGlobal>("GameGlobal")
 			.def("AddCharacter", (void(GameGlobal::*)(uint32)) &GameGlobal::AddCharacter)
+			.def("RemoveCharacter", (void(GameGlobal::*)(uint32)) &GameGlobal::RemoveCharacter)
 			.def("GetCharacter", &GameGlobal::GetCharacter)
 			.def("GetDrunes", &GameGlobal::GetDrunes)
 			.def("SetDrunes", &GameGlobal::SetDrunes)
