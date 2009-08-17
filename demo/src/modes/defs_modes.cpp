@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /** ***************************************************************************
-*** \file    defs.h
+*** \file    defs_modes.cpp
 *** \author  Daniel Steuernol, steu@allacrost.org
 *** \brief   Source file for Lua binding code
 ***
@@ -64,6 +64,7 @@ void BindModesToLua()
 			.def_readwrite("run_disabled", &MapMode::_run_disabled)
 			.def_readwrite("run_stamina", &MapMode::_run_stamina)
 
+			.def("PlayNewMusic", (void(MapMode::*)(uint32)) &MapMode::PlayNewMusic)
 			.def("AddGroundObject", &MapMode::AddGroundObject, adopt(_2))
 			.def("AddPassObject", &MapMode::AddPassObject, adopt(_2))
 			.def("AddSkyObject", &MapMode::AddSkyObject, adopt(_2))

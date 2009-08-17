@@ -24,7 +24,7 @@ sound_filenames = {}
 
 -- The music files used as background music on this map.
 music_filenames = {}
-music_filenames[1] = ""
+music_filenames[1] = "mus/Confrontation.ogg"
 
 -- The names of the contexts used to improve Editor user-friendliness
 context_names = {}
@@ -648,7 +648,7 @@ upper_layer[119] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 
 -- All, if any, existing contexts follow.
 -- Allacrost map editor end. Do not edit this line. --
---[[
+
 function Load(m)
 	map = m;
 	map.run_forever = false;
@@ -662,7 +662,7 @@ function Load(m)
 	local text;
 
 	-- Create the player's sprite
-	sprite = ConstructSprite("Claudius", 1000, 100, 36);
+	sprite = ConstructSprite("Claudius", 1000, 25, 7);
 	map:AddGroundObject(sprite);
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(sprite);
@@ -672,11 +672,11 @@ function Load(m)
 	ezone:AddSection(hoa_map.ZoneSection(34, 88, 46, 96));
 
 	-- Create a sprite representation of a monster attached to this zone
-	sprite = ConstructEnemySprite("Slime", map.object_supervisor:GenerateObjectID(), 5, 5);
+--	sprite = ConstructEnemySprite("Slime", map.object_supervisor:GenerateObjectID(), 5, 5);
 	
 
-	sprite = ConstructEnemySprite("Scorpion", map.object_supervisor:GenerateObjectID(), 10, 10);
-	sprite = ConstructEnemySprite("Snake", map.object_supervisor:GenerateObjectID(), 15, 15);
+--	sprite = ConstructEnemySprite("Scorpion", map.object_supervisor:GenerateObjectID(), 10, 10);
+--	sprite = ConstructEnemySprite("Snake", map.object_supervisor:GenerateObjectID(), 15, 15);
 
 	local enemy = hoa_map.EnemySprite();
 	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
@@ -698,5 +698,22 @@ function Load(m)
 
 	-- Finally, add the zone to the map
 	map:AddZone(ezone);
+
+	-- Create a zone for exiting the map, to be used as a trigger
+	exit_zone = hoa_map.MapZone();
+	exit_zone:AddSection(hoa_map.ZoneSection(20, 0, 30, 3));
+	map:AddZone(exit_zone);
+
+	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_village.lua");
+	event_supervisor:RegisterEvent(event);
 end
---]]
+
+
+function Update()
+	-- Check if the map camera is in the exit zone
+	if (exit_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (event_supervisor:IsEventActive(22111) == false) then
+			event_supervisor:StartEvent(22111);
+		end
+	end
+end

@@ -331,7 +331,7 @@ function Load(m)
 	text = hoa_utils.Translate("Your help would be great!");
 	dialogue:AddOption(text, 12, 0);
 	--No
-	text = hoa_utils.Translate("Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know...");
+	text = hoa_utils.Translate("Oh good. I was worried you were. Please tell me if you are Claudius, just so I can know...");
 	dialogue:AddText(text, 2, 9, 0, false);
 	text = hoa_utils.Translate("Of course, I promise.");
 	dialogue:AddText(text, 1000, -1, 0, false);
