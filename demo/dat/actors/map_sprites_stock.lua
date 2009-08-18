@@ -144,6 +144,17 @@ sprites["Octavia"] = {
 	standard_animations = "img/sprites/map/woman_npc02_walk.png"
 }
 
+sprites["Karlate"] = {
+	name = hoa_utils.Translate("Karlate"),
+	coll_half_width = 0.95,
+	coll_height = 1.9,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = SLOW_SPEED,
+
+	standard_animations = "img/sprites/map/soldier_npc01_walk.png"
+}
+
 
 sprite = {}
 
