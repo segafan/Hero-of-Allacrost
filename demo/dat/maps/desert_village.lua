@@ -884,6 +884,10 @@ function Load(m)
 	exit_zone:AddSection(hoa_map.ZoneSection(40, 254, 50, 255));
 	map:AddZone(exit_zone);
 
+	exit_zone2 = hoa_map.MapZone();
+	exit_zone2:AddSection(hoa_map.ZoneSection(0, 0, 75, 75));
+	map:AddZone(exit_zone2);
+
 	-- Create zones for switching the map context
 	context_zone = hoa_map.ContextZone(1, 2);
 	context_zone:AddSection(hoa_map.ZoneSection(20, 244, 23, 246), false);
@@ -920,6 +924,8 @@ function Load(m)
 
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_outskirts.lua");
 	event_supervisor:RegisterEvent(event);
+	event = hoa_map.MapTransitionEvent(22112, "dat/maps/new_cave.lua");
+	event_supervisor:RegisterEvent(event);
 end -- function Load()
 
 
@@ -928,6 +934,12 @@ function Update()
 	if (exit_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
 		if (event_supervisor:IsEventActive(22111) == false) then
 			event_supervisor:StartEvent(22111);
+		end
+	end
+
+	if (exit_zone2:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (event_supervisor:IsEventActive(22112) == false) then
+			event_supervisor:StartEvent(22112);
 		end
 	end
 end
