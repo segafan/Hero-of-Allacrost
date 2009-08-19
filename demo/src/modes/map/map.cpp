@@ -156,8 +156,8 @@ void MapMode::Reset() {
 	GlobalManager->SetLocation(MakeUnicodeString(_map_filename), _location_graphic.GetFilename());
 
 	// TODO: This music playback code should be scripted
-	if (_music.size() > 0 && _music.back().GetState() != AUDIO_STATE_PLAYING) {
-		_music.back().Play();
+	if (_music.size() > 0 && _music[0].GetState() != AUDIO_STATE_PLAYING) {
+		_music[0].Play();
 	}
 
 	_intro_timer.Run();
@@ -344,9 +344,9 @@ void MapMode::_Load() {
 
 	vector<string> music_filenames;
 	_map_script.ReadStringVector("music_filenames", music_filenames);
+	_music.resize(music_filenames.size(), MusicDescriptor());
 	for (uint32 i = 0; i < music_filenames.size(); i++) {
-		_music.push_back(MusicDescriptor());
-		if (_music.back().LoadAudio(music_filenames[i]) == false) {
+		if (_music[i].LoadAudio(music_filenames[i]) == false) {
 			PRINT_ERROR << "failed to load map music: " << music_filenames[i] << endl;
 			return;
 		}

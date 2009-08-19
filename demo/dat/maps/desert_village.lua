@@ -25,6 +25,7 @@ sound_filenames = {}
 -- The music files used as background music on this map.
 music_filenames = {}
 music_filenames[1] = "mus/Seeking_New_Worlds.ogg"
+music_filenames[2] = "mus/Confrontation.ogg"
 
 -- The names of the contexts used to improve Editor user-friendliness
 context_names = {}
@@ -965,13 +966,11 @@ map_functions[3] = function()
 end
 
 map_functions[4] = function()
---	FIXME: Adding this line causes LuaBind error
---	MapMode:PlayNewMusic(1);
+	map:PlayNewMusic(1);
 end
 
 map_functions[5] = function()
---	FIXME: Adding this line causes LuaBind error
---	MapMode:PlayNewMusic(2);
+	map:PlayNewMusic(0);
 --	captain:SetXPosition(120);
 --	captain:SetYPosition(200);
 end
