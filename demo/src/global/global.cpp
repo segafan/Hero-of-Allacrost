@@ -259,6 +259,9 @@ void GameGlobal::AddCharacter(GlobalCharacter* ch) {
 
 
 void GameGlobal::RemoveCharacter(uint32 id) {
+	
+	_active_party.RemoveActorByID(id);
+	
 	map<uint32, GlobalCharacter*>::iterator ch = _characters.find(id);
 
 	if (ch == _characters.end()) {
