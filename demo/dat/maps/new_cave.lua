@@ -7,10 +7,13 @@ setfenv(1, ns);
 map_name = "North Cave"
 location_filename = "desert_cave.png"
 
+enemy_ids = { 1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106 }
+
 -- Allacrost map editor begin. Do not edit this line. --
 
 -- A reference to the C++ MapMode object that was created with this file
 map = {}
+dialogue_supervisor = {}
 
 -- The number of contexts, rows, and columns that compose the map
 num_map_contexts = 1
@@ -386,6 +389,32 @@ function Load(m)
 	map:AddGroundObject(sprite);
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(sprite);
+
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
+	ezone:AddSection(hoa_map.ZoneSection(20, 94, 40, 120));
+
+	-- Create a sprite representation of a monster attached to this zone
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, 2);
+
+	-- Finally, add the zone to the map
+	map:AddZone(ezone);
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
