@@ -32,6 +32,12 @@
 		49A1AC680CF4381D00AF23FE /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
 		49A1AC690CF4381D00AF23FE /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
 		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
+		A6C7F9B3103DD60C008BAFB1 /* shop_buy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9A7103DD60C008BAFB1 /* shop_buy.cpp */; };
+		A6C7F9B4103DD60C008BAFB1 /* shop_confirm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9A9103DD60C008BAFB1 /* shop_confirm.cpp */; };
+		A6C7F9B5103DD60C008BAFB1 /* shop_root.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9AB103DD60C008BAFB1 /* shop_root.cpp */; };
+		A6C7F9B6103DD60C008BAFB1 /* shop_sell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9AD103DD60C008BAFB1 /* shop_sell.cpp */; };
+		A6C7F9B7103DD60C008BAFB1 /* shop_trade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9AF103DD60C008BAFB1 /* shop_trade.cpp */; };
+		A6C7F9B8103DD60C008BAFB1 /* shop_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9B1103DD60C008BAFB1 /* shop_utils.cpp */; };
 		D41148330D15F00E005F0A3F /* defs_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148320D15F00E005F0A3F /* defs_engine.cpp */; };
 		D41148350D15F029005F0A3F /* defs_global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148340D15F029005F0A3F /* defs_global.cpp */; };
 		D413E04E0CFFEA4400D5FAB4 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D413E04D0CFFEA4400D5FAB4 /* OpenAL.framework */; };
@@ -112,7 +118,6 @@
 		D4B8AA9D0F2D519A00B4D975 /* menu_views.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A70AC1D86400D65B8E /* menu_views.cpp */; };
 		D4B8AA9E0F2D51D100B4D975 /* pause.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A90AC1D86400D65B8E /* pause.cpp */; };
 		D4B8AA9F0F2D51F100B4D975 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
-		D4B8AAA00F2D51F100B4D975 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
 		D4B8AAA10F2D521E00B4D975 /* defs_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148360D15F053005F0A3F /* defs_modes.cpp */; };
 		D4B9C32F0ED9527F000CB899 /* menu_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166320BC0D91300190FC0 /* menu_window.cpp */; };
 		D4CD69C30DB3302300FF17CD /* SDL_net.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
@@ -259,12 +264,22 @@
 		49BDC4500AF5412600940A6C /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
 		49BDC4510AF5412600940A6C /* socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socket.cpp; sourceTree = "<group>"; };
 		49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "Allacrost-Info.plist"; sourceTree = "<group>"; };
+		A6C7F9A7103DD60C008BAFB1 /* shop_buy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shop_buy.cpp; sourceTree = "<group>"; };
+		A6C7F9A8103DD60C008BAFB1 /* shop_buy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shop_buy.h; sourceTree = "<group>"; };
+		A6C7F9A9103DD60C008BAFB1 /* shop_confirm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shop_confirm.cpp; sourceTree = "<group>"; };
+		A6C7F9AA103DD60C008BAFB1 /* shop_confirm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shop_confirm.h; sourceTree = "<group>"; };
+		A6C7F9AB103DD60C008BAFB1 /* shop_root.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shop_root.cpp; sourceTree = "<group>"; };
+		A6C7F9AC103DD60C008BAFB1 /* shop_root.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shop_root.h; sourceTree = "<group>"; };
+		A6C7F9AD103DD60C008BAFB1 /* shop_sell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shop_sell.cpp; sourceTree = "<group>"; };
+		A6C7F9AE103DD60C008BAFB1 /* shop_sell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shop_sell.h; sourceTree = "<group>"; };
+		A6C7F9AF103DD60C008BAFB1 /* shop_trade.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shop_trade.cpp; sourceTree = "<group>"; };
+		A6C7F9B0103DD60C008BAFB1 /* shop_trade.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shop_trade.h; sourceTree = "<group>"; };
+		A6C7F9B1103DD60C008BAFB1 /* shop_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shop_utils.cpp; sourceTree = "<group>"; };
+		A6C7F9B2103DD60C008BAFB1 /* shop_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shop_utils.h; sourceTree = "<group>"; };
 		D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = editor.moc.cpp; path = src/editor/editor.moc.cpp; sourceTree = "<group>"; };
 		D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grid.moc.cpp; path = src/editor/grid.moc.cpp; sourceTree = "<group>"; };
 		D407F7E90BADECF300848C43 /* shop.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop.cpp; sourceTree = "<group>"; };
 		D407F7EA0BADECF300848C43 /* shop.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop.h; sourceTree = "<group>"; };
-		D407F7EB0BADECF300848C43 /* shop_windows.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop_windows.cpp; sourceTree = "<group>"; };
-		D407F7EC0BADECF300848C43 /* shop_windows.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop_windows.h; sourceTree = "<group>"; };
 		D41148320D15F00E005F0A3F /* defs_engine.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = defs_engine.cpp; sourceTree = "<group>"; };
 		D41148340D15F029005F0A3F /* defs_global.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = defs_global.cpp; sourceTree = "<group>"; };
 		D41148360D15F053005F0A3F /* defs_modes.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = defs_modes.cpp; sourceTree = "<group>"; };
@@ -683,10 +698,20 @@
 		D407F7E80BADECF300848C43 /* shop */ = {
 			isa = PBXGroup;
 			children = (
+				A6C7F9A7103DD60C008BAFB1 /* shop_buy.cpp */,
+				A6C7F9A8103DD60C008BAFB1 /* shop_buy.h */,
+				A6C7F9A9103DD60C008BAFB1 /* shop_confirm.cpp */,
+				A6C7F9AA103DD60C008BAFB1 /* shop_confirm.h */,
+				A6C7F9AB103DD60C008BAFB1 /* shop_root.cpp */,
+				A6C7F9AC103DD60C008BAFB1 /* shop_root.h */,
+				A6C7F9AD103DD60C008BAFB1 /* shop_sell.cpp */,
+				A6C7F9AE103DD60C008BAFB1 /* shop_sell.h */,
+				A6C7F9AF103DD60C008BAFB1 /* shop_trade.cpp */,
+				A6C7F9B0103DD60C008BAFB1 /* shop_trade.h */,
+				A6C7F9B1103DD60C008BAFB1 /* shop_utils.cpp */,
+				A6C7F9B2103DD60C008BAFB1 /* shop_utils.h */,
 				D407F7E90BADECF300848C43 /* shop.cpp */,
 				D407F7EA0BADECF300848C43 /* shop.h */,
-				D407F7EB0BADECF300848C43 /* shop_windows.cpp */,
-				D407F7EC0BADECF300848C43 /* shop_windows.h */,
 			);
 			path = shop;
 			sourceTree = "<group>";
@@ -977,7 +1002,6 @@
 				495583450F237A84008150B8 /* save_mode.cpp in Sources */,
 				4941A70E0AC1D86400D65B8E /* scene.cpp in Sources */,
 				D4B8AA9F0F2D51F100B4D975 /* shop.cpp in Sources */,
-				D4B8AAA00F2D51F100B4D975 /* shop_windows.cpp in Sources */,
 				4941A7100AC1D86400D65B8E /* utils.cpp in Sources */,
 				4996296C0AF50B1F00B6A328 /* global.cpp in Sources */,
 				499629710AF50B1F00B6A328 /* global_actors.cpp in Sources */,
@@ -1015,6 +1039,12 @@
 				D49850D40C82AEA50067770B /* texture.cpp in Sources */,
 				D438C7980C9117300032F79E /* texture_controller.cpp in Sources */,
 				D4D1666D0BC0D91400190FC0 /* video.cpp in Sources */,
+				A6C7F9B3103DD60C008BAFB1 /* shop_buy.cpp in Sources */,
+				A6C7F9B4103DD60C008BAFB1 /* shop_confirm.cpp in Sources */,
+				A6C7F9B5103DD60C008BAFB1 /* shop_root.cpp in Sources */,
+				A6C7F9B6103DD60C008BAFB1 /* shop_sell.cpp in Sources */,
+				A6C7F9B7103DD60C008BAFB1 /* shop_trade.cpp in Sources */,
+				A6C7F9B8103DD60C008BAFB1 /* shop_utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
