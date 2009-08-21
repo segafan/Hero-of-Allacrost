@@ -384,10 +384,14 @@ function Load(m)
 	local chest;
 
 	-- Create the player''s sprite
-	sprite = ConstructSprite("Claudius", 1000, 120, 110);
+	sprite = ConstructSprite("Claudius", 1000, 110, 110);
 	map:AddGroundObject(sprite);
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(sprite);
+
+	-- Add NPC Kyle
+	kyle = ConstructSprite("Kyle", 2, 120, 30, 0.0, 0.0);
+	map:AddGroundObject(kyle);
 
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
 	local ezone = hoa_map.EnemyZone(2000, true);
@@ -441,8 +445,6 @@ function Load(m)
 
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_village.lua");
 	event_supervisor:RegisterEvent(event);
-
-	event_supervisor:StartEvent(10000);
 end
 
 
@@ -459,4 +461,12 @@ end
 
 function Draw()
 	map:DrawMapLayers();
+end
+
+-- Removes Kyle sprite from the map
+map_functions[1] = function()
+	kyle:SetVisible(false);
+	kyle:SetNoCollision(true);
+	kyle:SetUpdatable(false);
+	kyle:SetContext(2);
 end
