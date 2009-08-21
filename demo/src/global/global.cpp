@@ -279,9 +279,10 @@ void GameGlobal::RemoveCharacter(uint32 id) {
 
 			// Reform the active party, in case the removed character was a member of it
 			_active_party.RemoveAllActors();
-			for (uint32 j = 0; j < 4 || j >= _character_order.size(); j++) {
+			for (uint32 j = 0; j < 4 && j < _character_order.size(); j++) {
 				_active_party.AddActor(_character_order[j]);
 			}
+			break;
 		}
 	}
 } // void GameGlobal::RemoveCharacter(uint32 id)
