@@ -842,7 +842,7 @@ function Load(m)
 	text = hoa_utils.Translate("I understand, sir.");
 	dialogue:AddText(text, 1000, 6, 0, false);
 	text = hoa_utils.Translate("Just think about it. Now, do me a favor and find Kyle. I need to have a talk with him as well.");
-	dialogue:AddText(text, 3, -1, 0, false);
+	dialogue:AddText(text, 3, -1, 6, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
 
@@ -928,6 +928,8 @@ function Load(m)
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.ScriptedEvent(5, 5, 0);
 	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(6, 6, 0);
+	event_supervisor:RegisterEvent(event);
 
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_outskirts.lua");
 	event_supervisor:RegisterEvent(event);
@@ -961,23 +963,37 @@ map_functions[1] = function()
 	kyle:SetVisible(false);
 	kyle:SetNoCollision(true);
 	kyle:SetUpdatable(false);
+	kyle:SetContext(2);
 end
 
+-- Shop setup function (Karlate armory)
+-- TODO: Remove Laila's equipment
 map_functions[2] = function()
 	LoadNewShop(1, 4, 3001, 3002, 10002, 10502, 20002, 30002, 40002, 50502);
 end
 
+-- Kyle leaves party, when talking to captain
 map_functions[3] = function()
 	GlobalManager:RemoveCharacter(KYLE);
 end
 
 map_functions[4] = function()
---	map:PlayNewMusic(1);
+	
 end
 
+-- Captain goes inside to speak with Claudius
 map_functions[5] = function()
---	map:PlayNewMusic(0);
 	captain:SetXPosition(156, 0);
 	captain:SetYPosition(60, 0);
 	captain:SetContext(2);
+end
+
+-- Hide captain, he has nothing left to say
+-- NOTE: It may be preferable to give him a single line of dialogue
+-- allowing him to stay on the map, but we need a way to do that
+map_functions[6] = function()
+	captain:SetVisible(false);
+	captain:SetNoCollision(true);
+	captain:SetUpdatable(false);
+	captain:SetContext(1);
 end
