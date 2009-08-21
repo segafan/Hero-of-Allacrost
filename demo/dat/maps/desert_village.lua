@@ -767,7 +767,7 @@ function Load(m)
 
 
 	-- Add NPC Karlate Captain
-	captain = ConstructSprite("Captain", 3, 156, 70, 0.0, 0.0);
+	captain = ConstructSprite("Captain", 3, 156, 80, 0.0, 0.0);
 
 	-- Add Captain Dialogue
 	dialogue = hoa_map.MapDialogue(2);
@@ -971,6 +971,6 @@ end
 
 map_functions[5] = function()
 	map:PlayNewMusic(0);
---	captain:SetXPosition(120);
---	captain:SetYPosition(200);
+	captain:SetXPosition(156, 0);
+	captain:SetYPosition(70, 0);
 end
