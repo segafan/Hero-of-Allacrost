@@ -137,8 +137,8 @@ BootMode::BootMode() :
 	else
 		_latest_version_number = "";
 
-	_menu_window.Create(250.0f, 400.0f);
-	_menu_window.SetPosition(387.0f, 560.0f);
+	_menu_window.Create(250.0f, 550.0f);
+	_menu_window.SetPosition(387.0f, 580.0f);
 	_menu_window.SetDisplayMode(VIDEO_MENU_INSTANT);
 	_menu_window.Hide();
 
@@ -235,7 +235,6 @@ void BootMode::Reset() {
 // This is called once every frame iteration to update the status of the game
 void BootMode::Update() {
 	_menu_window.Update(SystemManager->GetUpdateTime());
-
 	if (InputManager->QuitPress() == true) {
 		SystemManager->ExitGame();
 		return;
@@ -407,6 +406,7 @@ void BootMode::Update() {
 
 		}
 		else if (_active_menu == &_options_menu) {
+			_menu_window.Hide();
 			_active_menu = &_main_menu;
 		}
 		else if (_active_menu == &_video_options_menu) {
@@ -465,7 +465,6 @@ void BootMode::Draw() {
 	_DrawBackgroundItems();
 
 	_menu_window.Draw();
-
 
 	// Decide whether to draw the credits window, welcome window or the main menu
 	if (_credits_screen.IsVisible())
@@ -985,7 +984,7 @@ void BootMode::_SetupMainMenu() {
 
 // Inits the options menu
 void BootMode::_SetupOptionsMenu() {
-	_options_menu.SetPosition(512.0f, 384.0f);
+	_options_menu.SetPosition(512.0f, 300.0f);
 	_options_menu.SetDimensions(300.0f, 600.0f, 1, 6, 1, 6);
 	_options_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_options_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1303,6 +1302,7 @@ void BootMode::_OnLoadGame() {
 // 'Options' confirmed
 void BootMode::_OnOptions() {
 	_active_menu = &_options_menu;
+	_menu_window.Show();
 }
 
 
