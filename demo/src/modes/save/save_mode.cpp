@@ -66,6 +66,11 @@ SaveMode::SaveMode(bool enable_saving) :
 {
 	mode_type = MODE_MANAGER_SAVE_MODE;
 
+	_window.Create(400.0f, 500.0f);
+	_window.SetPosition(312.0f, 630.0f);
+	_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+	_window.Hide();
+
 	// Initialize the save options box
 	_save_options.SetPosition(512.0f, 384.0f);
 	_save_options.SetDimensions(250.0f, 200.0f, 1, 3, 1, 3);
@@ -103,6 +108,14 @@ SaveMode::SaveMode(bool enable_saving) :
 	if (_saving_enabled == false) {
 		_save_options.EnableOption(SAVE_GAME, false);
 	}
+
+	if (_save_music.LoadAudio("mus/Save_Game.ogg") == false) {
+		PRINT_ERROR << "failed to load save/load music file: " << endl;
+		SystemManager->ExitGame();
+		return;
+	}
+
+	_window.Show();
 }
 
 
@@ -124,6 +137,8 @@ void SaveMode::Reset() {
 
 	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+
+	_save_music.Play();
 }
 
 
@@ -247,6 +262,8 @@ void SaveMode::Draw() {
 
 	// Re-set the coordinate system for everything else
 	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
+
+	_window.Draw();
 
 	if (_current_state == SAVE_MODE_NORMAL) {
 		_save_options.Draw();
