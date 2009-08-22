@@ -33,7 +33,6 @@ extern bool SAVE_DEBUG;
 /** ****************************************************************************
 *** \brief Handles saving and loading
 ***
-*** TODO: Everything!
 *** ***************************************************************************/
 class SaveMode : public hoa_mode_manager::GameMode {
 public:
@@ -53,6 +52,12 @@ public:
 private:
 	//! \brief Attempts to load a game. returns true on success, false on fail
 	bool _LoadGame(int);
+
+	//! \brief The MenuWindow for the backdrop
+	hoa_video::MenuWindow _window;
+
+	//! \brief The music file to be played
+	hoa_audio::MusicDescriptor _save_music;
 
 	//! \brief Current state of SaveMode
 	uint8 _current_state;
