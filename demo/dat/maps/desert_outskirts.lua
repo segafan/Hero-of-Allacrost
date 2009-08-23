@@ -7,7 +7,7 @@ setfenv(1, ns);
 map_name = "Desert Outskirts"
 location_filename = "desert_cave.png"
 
-enemy_ids = { 1, 2, 3, 4, 5 }
+enemy_ids = { 1, 2, 3, 4, 5, 103 }
 
 -- Allacrost map editor begin. Do not edit this line. --
 
@@ -24,7 +24,7 @@ sound_filenames = {}
 
 -- The music files used as background music on this map.
 music_filenames = {}
-music_filenames[1] = "mus/Confrontation.ogg"
+music_filenames[1] = "mus/Seeking_New_Worlds.ogg"
 
 -- The names of the contexts used to improve Editor user-friendliness
 context_names = {}
@@ -649,6 +649,8 @@ upper_layer[119] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 -- All, if any, existing contexts follow.
 -- Allacrost map editor end. Do not edit this line. --
 
+kyle = nil;
+
 function Load(m)
 	map = m;
 	map.run_forever = false;
@@ -666,6 +668,47 @@ function Load(m)
 	map:AddGroundObject(sprite);
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(sprite);
+
+	-- Add Kyle sprite
+	-- TODO: Hide Kyle sprite if he is still in the party.
+	kyle = ConstructSprite("Kyle", 2, 35, 35, 0.0, 0.0);
+	-- If kyle previously joined the party in the saved game, remove his sprite
+	if (map.map_event_group:DoesEventExist("desert_beast_fought") == true) then
+		map_functions[1]();
+	end
+
+	-- Dialogue with kyle
+	dialogue = hoa_map.MapDialogue(1);
+
+	text = hoa_utils.Translate("There you are!");
+	dialogue:AddText(text, 1000, 1, 0, false);
+	text = hoa_utils.Translate("Hey...");
+	dialogue:AddText(text, 2, 2, 0, false);
+	text = hoa_utils.Translate("What are you doing? The captain wants to speak with you.");
+	dialogue:AddText(text, 1000, 3, 0, false);
+	text = hoa_utils.Translate("He can wait.");
+	dialogue:AddText(text, 2, 4, 0, false);
+	text = hoa_utils.Translate("...What?");
+	dialogue:AddText(text, 1000, 5, 0, false);
+	text = hoa_utils.Translate("(Kyle hands Claudius a cloth.  Inside is a piece of cake.");
+	dialogue:AddText(text, 2, 6, 0, false);
+	text = hoa_utils.Translate("I managed to swipe some goodies from the kitchen quarters a bit ago.  I saved you some.");
+	dialogue:AddText(text, 2, 7, 0, false);
+	text = hoa_utils.Translate("You shouldn't -");
+	dialogue:AddText(text, 1000, 8, 0, false);
+	text = hoa_utils.Translate("It's just a piece of cake.  It's not going to hurt anyone.");
+	dialogue:AddText(text, 2, 9, 0, false);
+	text = hoa_utils.Translate("I guess you're right.  And hey, thanks for covering for me back there.  I appreciate it.");
+	dialogue:AddText(text, 1000, 10, 0, false);
+	text = hoa_utils.Translate("Don't mention it.  I'm already on bad terms with the captain anyway; there's no sense in getting you in trouble too.");
+	dialogue:AddText(text, 2, 11, 0, false);
+	text = hoa_utils.Translate("Hey, what's that... look out!");
+	dialogue:AddText(text, 1000, -1, 2, false);
+
+	kyle:AddDialogueReference(1);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	map:AddGroundObject(kyle);
 
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
 	local ezone = hoa_map.EnemyZone(2000, true);
@@ -704,6 +747,12 @@ function Load(m)
 	exit_zone:AddSection(hoa_map.ZoneSection(20, 0, 30, 3));
 	map:AddZone(exit_zone);
 
+	-- Register event functions
+	event = hoa_map.ScriptedEvent(1, 1, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(2, 2, 0);
+	event_supervisor:RegisterEvent(event);
+
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_village.lua");
 	event_supervisor:RegisterEvent(event);
 end
@@ -716,4 +765,40 @@ function Update()
 			event_supervisor:StartEvent(22111);
 		end
 	end
+end
+
+-- Adds Kyle to the party and removes his sprite from the map
+map_functions[1] = function()
+	if (map.map_event_group:DoesEventExist("desert_beast_fought") == false) then
+		map.map_event_group:AddNewEvent("desert_beast_fought", 1);
+		GlobalManager:AddCharacter(KYLE);
+	end
+
+	kyle:SetContext(2);
+	kyle:SetVisible(false);
+	kyle:SetNoCollision(true);
+	kyle:SetUpdatable(false);
+end
+
+map_functions[2] = function()
+	map_functions[1]();
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetXPosition(34, 0.0);
+	enemy:SetYPosition(34, 0.0);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(2.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/gigas_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(103);
+	enemy:ChangeStateHostile();
+	enemy:SetBattleMusicTheme("mus/The_Creature_Awakens.ogg");
+	map:AddGroundObject(enemy); 
+--	local event = hoa_map.PathMoveSpriteEvent(10001, enemy, 37, 37);
+--	event_supervisor:RegisterEvent(event);
+--	event_supervisor:BeginEvent(event);
 end
