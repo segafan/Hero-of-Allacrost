@@ -554,7 +554,7 @@ void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
 void MenuMode::_SetupMainOptionBox() {
 	// Setup the main options box
 	_SetupOptionBoxCommonSettings(&_main_options);
-	_main_options.SetDimensions(745.0f, 50.0f, MAIN_SIZE, 1, 4, 1);
+	_main_options.SetDimensions(745.0f, 50.0f, MAIN_SIZE, 1, 7, 1);
 
 	// Generate the strings
 	vector<ustring> options;
