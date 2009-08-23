@@ -682,9 +682,6 @@ function Load(m)
 	kyle:AddDialogueReference(1);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	map:AddGroundObject(kyle);
-
-
 	-- Add NPC Karlate Captain
 	captain = ConstructSprite("Captain", 3, 156, 38, 0.0, 0.0);
 
@@ -857,6 +854,7 @@ function Load(m)
 	event_supervisor:RegisterEvent(event);
 
 	if (map.map_event_group:DoesEventExist("kyle_joined") == false) then
+		map:AddGroundObject(kyle);
 		dialogue_supervisor:BeginDialogue(1);
 	end
 end -- function Load()
