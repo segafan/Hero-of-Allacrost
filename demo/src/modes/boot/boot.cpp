@@ -137,8 +137,8 @@ BootMode::BootMode() :
 	else
 		_latest_version_number = "";
 
-	_menu_window.Create(250.0f, 550.0f);
-	_menu_window.SetPosition(387.0f, 580.0f);
+	_menu_window.Create(300.0f, 550.0f);
+	_menu_window.SetPosition(360.0f, 580.0f);
 	_menu_window.SetDisplayMode(VIDEO_MENU_INSTANT);
 	_menu_window.Hide();
 
@@ -1007,7 +1007,7 @@ void BootMode::_SetupOptionsMenu() {
 // Inits the video-options menu
 void BootMode::_SetupVideoOptionsMenu()
 {
-	_video_options_menu.SetPosition(512.0f, 384.0f);
+	_video_options_menu.SetPosition(512.0f, 300.0f);
 	_video_options_menu.SetDimensions(300.0f, 400.0f, 1, 4, 1, 4);
 	_video_options_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_video_options_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1030,7 +1030,7 @@ void BootMode::_SetupVideoOptionsMenu()
 // Inits the audio-options menu
 void BootMode::_SetupAudioOptionsMenu()
 {
-	_audio_options_menu.SetPosition(512.0f, 384.0f);
+	_audio_options_menu.SetPosition(512.0f, 300.0f);
 	_audio_options_menu.SetDimensions(300.0f, 200.0f, 1, 2, 1, 2);
 	_audio_options_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_audio_options_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1049,7 +1049,7 @@ void BootMode::_SetupAudioOptionsMenu()
 // Inits the language-select menu
 void BootMode::_SetupLanguageOptionsMenu()
 {
-	_language_options_menu.SetPosition(512.0f, 384.0f);
+	_language_options_menu.SetPosition(512.0f, 300.0f);
 	_language_options_menu.SetDimensions(300.0f, 200.0f, 1, 1, 1, 1);
 	_language_options_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_language_options_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1066,7 +1066,7 @@ void BootMode::_SetupLanguageOptionsMenu()
 
 // Inits the key-settings menu
 void BootMode::_SetupKeySetttingsMenu() {
-	_key_settings_menu.SetPosition(512.0f, 384.0f);
+	_key_settings_menu.SetPosition(512.0f, 300.0f);
 	_key_settings_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
 	_key_settings_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_key_settings_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1091,7 +1091,7 @@ void BootMode::_SetupKeySetttingsMenu() {
 
 //Inits the load-profile menu
 void BootMode::_SetupLoadProfileMenu() {
-	_load_profile_menu.SetPosition(512.0f, 384.0f);
+	_load_profile_menu.SetPosition(512.0f, 300.0f);
 	_load_profile_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
 	_load_profile_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_load_profile_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1111,7 +1111,7 @@ void BootMode::_SetupLoadProfileMenu() {
 }
 
 void BootMode::_SetupDeleteProfileMenu() {
-	_delete_profile_menu.SetPosition(512.0f, 384.0f);
+	_delete_profile_menu.SetPosition(512.0f, 300.0f);
 	_delete_profile_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
 	_delete_profile_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_delete_profile_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1133,7 +1133,7 @@ void BootMode::_SetupDeleteProfileMenu() {
 
 //Inits the save-profile menu
 void BootMode::_SetupSaveProfileMenu() {
-	_save_profile_menu.SetPosition(512.0f, 384.0f);
+	_save_profile_menu.SetPosition(512.0f, 300.0f);
 	_save_profile_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
 	_save_profile_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_save_profile_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1158,7 +1158,7 @@ void BootMode::_SetupSaveProfileMenu() {
 
 //Inits the profiles menu
 void BootMode::_SetupProfileMenu() {
-	_profiles_menu.SetPosition(512.0f, 384.0f);
+	_profiles_menu.SetPosition(512.0f, 300.0f);
 	_profiles_menu.SetDimensions(300.0f, 300.0f, 1, 3, 1, 3);
 	_profiles_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_profiles_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1226,7 +1226,7 @@ void BootMode::_SetupUserInputMenu() {
 
 
 void BootMode::_SetupJoySetttingsMenu() {
-	_joy_settings_menu.SetPosition(512.0f, 384.0f);
+	_joy_settings_menu.SetPosition(512.0f, 300.0f);
 	_joy_settings_menu.SetDimensions(300.0f, 500.0f, 1, 10, 1, 10);
 	_joy_settings_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_joy_settings_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1254,7 +1254,7 @@ void BootMode::_SetupJoySetttingsMenu() {
 
 
 void BootMode::_SetupResolutionMenu() {
-	_resolution_menu.SetPosition(512.0f, 384.0f);
+	_resolution_menu.SetPosition(512.0f, 300.0f);
 	_resolution_menu.SetDimensions(300.0f, 200.0f, 1, 4, 1, 4);
 	_resolution_menu.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_resolution_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
