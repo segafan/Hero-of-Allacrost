@@ -418,3 +418,72 @@ enemies[106] = {
 		{ 30001, 0.15, 1 } -- Karlate breastplate
 	}
 }
+
+enemies[107] = {
+	name = "Kyle",
+	filename = "kyle",
+	sprite_width = 32,
+	sprite_height = 64,
+
+	
+	initial_stats = {
+		hit_points = 55,
+		skill_points = 10,
+		experience_points = 5,
+		strength = 15,
+		vigor = 5,
+		fortitude = 14,
+		protection = 4,
+		agility = 13,
+		evade = 2.0,
+		drunes = 18
+	},
+	
+	growth_stats = {
+		hit_points = 9.0,
+		skill_points = 10.0,
+		experience_points = 1.5,
+		strength = 8.0,
+		vigor = 0.0,
+		fortitude = 8.0,
+		protection = 4.0,
+		agility = 10.0,
+		evade = 2.0,
+		drunes = 2.0
+	},
+
+	attack_points = {
+		[1] = {
+			name = "Head",
+			x_position = 9,
+			y_position = 108,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		},
+		[2] = {
+			name = "Chest",
+			x_position = 20,
+			y_position = 82,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		},
+		[3] = {
+			name = "Legs",
+			x_position = 6,
+			y_position = 56,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		}
+	},
+
+	skills = {
+		[1] = 21
+	},
+
+	drop_objects = {
+		{ 1, 0.15, 1 } -- Healing potion
+	}
+}
