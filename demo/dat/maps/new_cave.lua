@@ -7,7 +7,7 @@ setfenv(1, ns);
 map_name = "North Cave"
 location_filename = "desert_cave.png"
 
-enemy_ids = { 1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106 }
+enemy_ids = { 1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106, 107 }
 
 -- Allacrost map editor begin. Do not edit this line. --
 
@@ -391,6 +391,41 @@ function Load(m)
 
 	-- Add NPC Kyle
 	kyle = ConstructSprite("Kyle", 2, 120, 30, 0.0, 0.0);
+
+	-- Dialogue with kyle
+	dialogue = hoa_map.MapDialogue(1);
+
+	text = hoa_utils.Translate("What have you done...");
+	dialogue:AddText(text, 1000, 1, 0, false);
+	text = hoa_utils.Translate("I'm sorry.  I didn't want to have to do that.");
+	dialogue:AddText(text, 2, 2, 0, false);
+	text = hoa_utils.Translate("What are you doing?");
+	dialogue:AddText(text, 2, 3, 0, false);
+	text = hoa_utils.Translate("I can't let you get away.");
+	dialogue:AddText(text, 1000, 4, 0, false);
+	text = hoa_utils.Translate("I'm your friend!");
+	dialogue:AddText(text, 2, 5, 0, false);
+	text = hoa_utils.Translate("It's my duty!");
+	dialogue:AddText(text, 1000, 6, 0, false);
+	text = hoa_utils.Translate("Don't do this.");
+	dialogue:AddText(text, 2, 7, 0, false);
+	text = hoa_utils.Translate("You've already done it.");
+	dialogue:AddText(text, 1000, 8, 0, false);
+	text = hoa_utils.Translate("I don't want to fight you.");
+	dialogue:AddText(text, 2, 9, 0, false);
+	text = hoa_utils.Translate("Then lower your weapon and turn yourself in.");
+	dialogue:AddText(text, 1000, 10, 0, false);
+	text = hoa_utils.Translate("You know I can't.");
+	dialogue:AddText(text, 2, 11, 0, false);
+	text = hoa_utils.Translate("And you know I can't just let you get away.");
+	dialogue:AddText(text, 1000, 12, 0, false);
+	text = hoa_utils.Translate("Isn't our friendship more important than your duty?");
+	dialogue:AddText(text, 2, 13, 0, false);
+	text = hoa_utils.Translate("You killed the Captain!");
+	dialogue:AddText(text, 1000, -1, 2, false);
+
+	kyle:AddDialogueReference(1);
+	dialogue_supervisor:AddDialogue(dialogue);
 	map:AddGroundObject(kyle);
 
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
@@ -443,6 +478,12 @@ function Load(m)
 	exit_zone:AddSection(hoa_map.ZoneSection(122, 110, 124, 114));
 	map:AddZone(exit_zone);
 
+	-- Register event functions
+	event = hoa_map.ScriptedEvent(1, 1, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(2, 2, 0);
+	event_supervisor:RegisterEvent(event);
+
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_village.lua");
 	event_supervisor:RegisterEvent(event);
 end
@@ -469,4 +510,28 @@ map_functions[1] = function()
 	kyle:SetNoCollision(true);
 	kyle:SetUpdatable(false);
 	kyle:SetContext(2);
+end
+
+map_functions[2] = function()
+	map_functions[1]();
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetXPosition(120, 0.0);
+	enemy:SetYPosition(30, 0.0);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(4.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/kyle_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(107);
+	enemy:ChangeStateHostile();
+	enemy:SetBattleMusicTheme("mus/The_Creature_Awakens.ogg");
+	kyle:SetVisible(false);
+	kyle:SetNoCollision(true);
+	kyle:SetUpdatable(false);
+	kyle:SetContext(2);
+	map:AddGroundObject(enemy); 
 end

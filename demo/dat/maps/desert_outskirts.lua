@@ -5,7 +5,7 @@ setfenv(1, ns);
 
 -- The map name and location graphic
 map_name = "Desert Outskirts"
-location_filename = "desert_cave.png"
+location_filename = "mountain_village.png"
 
 enemy_ids = { 1, 2, 3, 4, 5, 103 }
 
@@ -672,7 +672,6 @@ function Load(m)
 	-- Add Kyle sprite
 	-- TODO: Hide Kyle sprite if he is still in the party.
 	kyle = ConstructSprite("Kyle", 2, 35, 35, 0.0, 0.0);
-	-- If kyle previously joined the party in the saved game, remove his sprite
 	if (map.map_event_group:DoesEventExist("desert_beast_fought") == true) then
 		map_functions[1]();
 	end
@@ -798,7 +797,4 @@ map_functions[2] = function()
 	enemy:ChangeStateHostile();
 	enemy:SetBattleMusicTheme("mus/The_Creature_Awakens.ogg");
 	map:AddGroundObject(enemy); 
---	local event = hoa_map.PathMoveSpriteEvent(10001, enemy, 37, 37);
---	event_supervisor:RegisterEvent(event);
---	event_supervisor:BeginEvent(event);
 end
