@@ -51,6 +51,8 @@ enum OBJECT_TYPE
 
 LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy);
 
+class EditorScrollView;
+
 class Grid: public QGLWidget
 {
 	Q_OBJECT     // macro needed to use QT's slots and signals
@@ -135,6 +137,9 @@ class Grid: public QGLWidget
 		//! A list containing the names of each context.
 		//! \note Should have a max size of 32. That's the max amount of contexts.
 		QStringList context_names;
+
+		//! pointer to scrollview
+		EditorScrollView * _ed_scrollview;
 
 	protected:
 		//! \brief Sets up the rendering context of the OpenGL portion of the editor.

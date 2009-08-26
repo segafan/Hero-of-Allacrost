@@ -1420,6 +1420,7 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name,
 
 	// Create a new map.
 	_map = new Grid(viewport(), "Untitled", width, height);
+	_map->_ed_scrollview = this;
 	addChild(_map);
 
 	// Create menu actions related to the Context menu.

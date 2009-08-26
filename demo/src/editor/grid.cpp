@@ -17,6 +17,7 @@
 #include <sstream>
 #include <iostream>
 #include "grid.h"
+#include "editor.h"
 
 using namespace hoa_script;
 using namespace hoa_map::private_map;
@@ -881,7 +882,7 @@ void Grid::initializeGL()
 
 void Grid::paintGL()
 {
-	int32 col;                       // tile array loop index
+	int32 col, row;                  // tile array loop index
 	vector<int32>::iterator it;      // used to iterate through tile arrays
 	int tileset_index;               // index into the tileset_names vector
 	int tile_index;                  // ranges from 0-255
@@ -898,27 +899,57 @@ void Grid::paintGL()
 	// Draw lower layer
 	if (_ll_on)
 	{
-		VideoManager->Move(0.0f, 0.0f);
-		col = 0;
-		for (it = _lower_layer[_context].begin(); it != _lower_layer[_context].end(); it++)
+		// Calculate which tiles are visible
+		// Set left, right, and width
+		int sbval = _ed_scrollview->horizontalScrollBar()->value();
+		int viewwidth = _ed_scrollview->width();
+		int num_tiles_width = ((viewwidth - 21) / 32) + 1;
+		
+		int left_tile = sbval / 32;
+		int right_tile = left_tile + num_tiles_width;
+		right_tile = (right_tile < _width) ? right_tile : _width - 1;
+		
+		// Set top, bottom, and height
+		sbval = _ed_scrollview->verticalScrollBar()->value();
+		int viewheight = _ed_scrollview->height();
+		int num_tiles_height = ((viewheight - 21) / 32) + 1;
+		
+		int top_tile = sbval / 32;
+		int bottom_tile = top_tile + num_tiles_height;
+		bottom_tile = (bottom_tile < _height) ? bottom_tile : _height - 1;
+
+
+		VideoManager->Move(left_tile, top_tile);
+
+		int layer_index;
+		col = left_tile;
+		row = top_tile;
+		int i = 0;
+		while (row <= bottom_tile)
 		{
-			if (*it != -1)
+			layer_index = _lower_layer[_context][row * _width + col];
+			if (layer_index != -1)
 			{
-				tileset_index = *it / 256;
+				tileset_index = layer_index / 256;
 				if (tileset_index == 0)
-					tile_index = *it;
+					tile_index = layer_index;
 				else  // Don't divide by 0
-					tile_index = *it % (tileset_index * 256);
+					tile_index = layer_index % (tileset_index * 256);
 				tilesets[tileset_index]->tiles[tile_index].Draw();
-				//tilesets[tileset_index]->walkability
 			} // a tile exists to draw
-			col++;
-			col %= _width;
-			if (col == 0)
-				VideoManager->MoveRelative(-_width + 1, 1.0f);
-			else
+			if (col == right_tile) {
+				col = left_tile;
+				row++;
+				VideoManager->MoveRelative(-(right_tile - left_tile), 1.0f);
+			}
+			else {
+				col++;
 				VideoManager->MoveRelative(1.0f, 0.0f);
+			}
+			i++;
+			
 		} // iterate through lower layer
+//		std::cout << "Drew this many tiles: " << i << std::endl;
 	} // lower layer must be viewable
 
 	// Draw middle layer
