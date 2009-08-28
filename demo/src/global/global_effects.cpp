@@ -44,7 +44,8 @@ GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 	_for_modifier(1.0),
 	_pro_modifier(1.0),
 	_agi_modifier(1.0),
-	_eva_modifier(1.0)
+	_eva_modifier(1.0),
+	_stun(false)
 {
 	if (_id == 0 || _id > 5) {
 		cerr << "GLOBAL ERROR: GlobalStatusEffect constructor failed due to an invalid id assignment: " << _id << endl;
@@ -87,6 +88,8 @@ GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 		}
 		return;
 	}
+	
+	_timer = new hoa_system::SystemTimer();
 }
 
 GlobalStatusEffect::~GlobalStatusEffect() {

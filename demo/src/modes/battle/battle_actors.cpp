@@ -52,12 +52,7 @@ BattleActor::BattleActor(GlobalActor* actor, float x_origin, float y_origin) :
 	_x_location(x_origin),
 	_y_location(y_origin),
 	_actor_effects()
-	//_total_time_damaged(0),
-	//_damage_dealt(0)
 {
-	// Reset attack timer, TEMP CODE!!!!
-	// _TEMP_attack_animation_timer.Initialize(0);
-	// _TEMP_attack_animation_timer.Run();
 }
 
 
@@ -449,8 +444,20 @@ bool BattleEnemy::operator<(const BattleEnemy & other) const {
 
 
 void BattleEnemy::Update() {
-	if (_state == ACTOR_IDLE)
-	{
+	bool paused = false;
+
+	for (uint32 i = 0; i < GetActorEffects().size(); i++) {
+		if (GetActorEffects().at(i)->CausesStunEffect()) {
+			_wait_time.Pause();
+			paused = true;
+		}
+		if (GetActorEffects().at(i)->GetTimer()->IsFinished()) {
+			_wait_time.Run();
+			paused = false;
+		}
+	}
+
+	if (_state == ACTOR_IDLE && !paused) {
 		if (_wait_time.IsFinished()) { // Indicates that the idle state is now finished
 			_stamina_icon_location = STAMINA_LOCATION_SELECT;
 			_state = ACTOR_WARM_UP;
@@ -459,19 +466,9 @@ void BattleEnemy::Update() {
 			_DecideAction();
 		}
 		else { // If still in IDLE state, update the stamina icon's location
-			//_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
 			_stamina_icon_location += SystemManager->GetUpdateTime() * (300.0f / _wait_time.GetDuration());
 		}
 		return;
-	}
-
-	// TEMP: while the enemy is attacking, update their location to show a little jolting horizontal movement
-	if (_state == ACTOR_ACTING) {
-		if ((_x_origin - _x_location) < 50)
-			_x_location -= 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
-	}
-	else {
-		SetXLocation(GetXOrigin()); // Restore actor to original location
 	}
 }
 

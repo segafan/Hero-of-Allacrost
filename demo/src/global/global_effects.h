@@ -162,19 +162,24 @@ public:
 	void SetIntensity(GLOBAL_INTENSITY intensity)
 		{ _intensity = intensity; }
 
+	hoa_system::SystemTimer* GetTimer(){ return _timer; }
 	double GetStrModifier()            { return _str_modifier; }
 	double GetVigModifier()            { return _vig_modifier; }
 	double GetForModifier()            { return _for_modifier; }
 	double GetProModifier()            { return _pro_modifier; }
 	double GetAgiModifier()            { return _agi_modifier; }
 	double GetEvaModifier()            { return _eva_modifier; }
+	bool CausesStunEffect()            { return _stun; }
 
+	void SetDuration(uint32 n)         { _timer->Initialize(n); }
+	void StartTimer()                  { _timer->Reset(); _timer->Run(); }
 	void SetStrModifier(double n)      { _str_modifier = n; }
 	void SetVigModifier(double n)      { _vig_modifier = n; }
 	void SetForModifier(double n)      { _for_modifier = n; }
 	void SetProModifier(double n)      { _pro_modifier = n; }
-	void SetAgiModifier(double n)      { /*_agi_modifier = n;*/ }
-	void SetEvaModifier(double n)      { /*_eva_modifier = n;*/ }
+	void SetAgiModifier(double n)      { _agi_modifier = n; }
+	void SetEvaModifier(double n)      { _eva_modifier = n; }
+	void SetStunEffect(bool n)         { _stun = n; }
 	//@}
 
 	/** \brief Increments the status effect intensity by a positive amount
@@ -227,13 +232,16 @@ private:
 	ScriptObject* _update;
 	//! \brief Removal script for object
 	ScriptObject* _remove;
-	
+
+	hoa_system::SystemTimer* _timer;
+
 	double _str_modifier;
 	double _vig_modifier;
 	double _for_modifier;
 	double _pro_modifier;
 	double _agi_modifier;
 	double _eva_modifier;
+	bool _stun;
 }; // class GlobalStatusEffect
 
 } // namespace hoa_global
