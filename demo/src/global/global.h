@@ -438,6 +438,9 @@ public:
 
 	std::vector<GlobalKeyItem*>* GetInventoryKeyItems()
 		{ return &_inventory_key_items; }
+
+	hoa_script::ReadScriptDescriptor* GetBattleEventDescriptor()
+		{ return &_battle_events_script; }
 	//@}
 
 private:
@@ -507,6 +510,7 @@ private:
 	hoa_script::ReadScriptDescriptor _attack_skills_script;
 	hoa_script::ReadScriptDescriptor _defend_skills_script;
 	hoa_script::ReadScriptDescriptor _support_skills_script;
+	hoa_script::ReadScriptDescriptor _battle_events_script;
 	//@}
 
 	/** \brief The container which stores all of the groups of events that have occured in the game
