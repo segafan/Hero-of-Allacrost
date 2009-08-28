@@ -128,6 +128,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/battle/battle_actions.h \
 	$(MODES_DIR)/battle/battle_actors.cpp \
 	$(MODES_DIR)/battle/battle_actors.h \
+	$(MODES_DIR)/battle/battle_events.cpp \
+	$(MODES_DIR)/battle/battle_events.h \
 	$(MODES_DIR)/battle/battle_windows.cpp \
 	$(MODES_DIR)/battle/battle_windows.h \
 	$(MODES_DIR)/boot/boot.cpp \

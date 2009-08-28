@@ -39,6 +39,7 @@
 #include "mode_manager.h"
 #include "battle_actions.h"
 #include "battle_actors.h"
+#include "battle_events.h"
 #include "battle_windows.h"
 
 namespace hoa_battle {
@@ -538,6 +539,8 @@ private:
 
 	//! \brief List of all DamageText objects currently active
 	std::list<DamageText*> _damage_text_list;
+
+	std::vector<BattleEvent*> _events;
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
 

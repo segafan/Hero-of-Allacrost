@@ -182,6 +182,10 @@ bool GameGlobal::SingletonInitialize() {
 	}
 	_defend_skills_script.OpenTable("skills");
 
+	if (_battle_events_script.OpenFile("dat/battle_events.lua") == false) {
+		return false;
+	}
+	_battle_events_script.OpenTable("battle_events");
 	return true;
 }
 

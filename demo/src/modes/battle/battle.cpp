@@ -20,6 +20,7 @@
 
 #include "script.h"
 #include "input.h"
+#include "battle_events.h"
 
 #include "mode_manager.h"
 #include "battle.h"
@@ -125,6 +126,8 @@ BattleMode::BattleMode() :
 // 	_action_window;// = new ActionWindow();
 	// FIXME: Get rid of this!!!
 	_TEMP_LoadTestData();
+
+	_events.push_back(thisEvent);
 } // BattleMode::BattleMode()
 
 
@@ -370,12 +373,24 @@ void BattleMode::_Initialize() {
 		_character_actors[i]->ResetWaitTime();
 	}
 
+	ScriptObject* before_func;
+	for (uint32 i = 0; i < _events.size(); i++) {
+		before_func = _events[i]->GetBeforeFunction();
+		ScriptCallFunction<void>(*before_func, this);
+	}
+
 	_initialized = true;
 } // void BattleMode::_Initialize()
 
 
 
 void BattleMode::_ShutDown() {
+	ScriptObject* after_func;
+	for (uint32 i = 0; i < _events.size(); i++) {
+		after_func = _events[i]->GetAfterFunction();
+		ScriptCallFunction<void>(*after_func, this);
+	}
+
 	_battle_music[_current_music].Stop();
 
 	_ReviveCharacters();
@@ -414,6 +429,13 @@ void BattleMode::Update() {
 		FreezeTimers();
 		ModeManager->Push(new PauseMode(false));
 		return;
+	}
+	
+	// First, call update functions of any BattleEvents
+	ScriptObject* during_func;
+	for (uint32 i = 0; i < _events.size(); i++) {
+		during_func = _events[i]->GetDuringFunction();
+		ScriptCallFunction<void>(*during_func, this);
 	}
 
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
