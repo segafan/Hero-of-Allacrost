@@ -50,6 +50,8 @@ skills[2] = {
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
+		instigator:PlayAnimation("attack");
+
 		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade() + 2.5) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 10 - target:GetPhysicalDefense());
 			AudioManager:PlaySound("snd/swordslice1.wav");
@@ -71,6 +73,7 @@ skills[3] = {
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
+		instigator:PlayAnimation("attack");
 		target:TakeDamage(instigator:GetPhysicalAttack());
 		AudioManager:PlaySound("snd/rumble.wav");
 	end
@@ -105,6 +108,7 @@ skills[21] = {
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
+		instigator:PlayAnimation("attack");
 		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 3 - target:GetPhysicalDefense());
 			AudioManager:PlaySound("snd/swordslice2.wav");
@@ -125,6 +129,7 @@ skills[22] = {
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
+		instigator:PlayAnimation("attack");
 		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade() + 8.5) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
 			AudioManager:PlaySound("snd/swordslice2.wav");

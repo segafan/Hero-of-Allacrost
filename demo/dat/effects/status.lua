@@ -17,7 +17,7 @@ status_effects[1] = {
 	-- Multiplies Strength by 3
 	
 	Init = function(thisEffect, target)
-		thisEffect:SetStrModfier(3.0);
+		thisEffect:SetStrModifier(3.0);
 	end,
 
 	Update = function(thisEffect, target)
@@ -32,7 +32,7 @@ status_effects[2] = {
 
 	-- Multiplies Fortitude by 3
 	Init = function(thisEffect, target)
-		thisEffect:SetForModfier(3.0);
+		thisEffect:SetForModifier(3.0);
 	end,
 
 	Update = function(thisEffect, target)
@@ -46,7 +46,7 @@ status_effects[3] = {
 	name = "Agility Down",
 	
 	Init = function(thisEffect, target)
---		thisEffect:SetAgiModfier(0.5);
+		thisEffect:SetAgiModifier(0.5);
 	end,
 
 	Update = function(thisEffect, target)
@@ -60,7 +60,7 @@ status_effects[4] = {
 	name = "Hiding",
 	
 	Init = function(thisEffect, target)
-		thisEffect:SetEvaModfier(5.0);
+		thisEffect:SetEvaModifier(5.0);
 	end,
 
 	Update = function(thisEffect, target)
