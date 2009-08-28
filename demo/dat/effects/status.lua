@@ -43,10 +43,12 @@ status_effects[2] = {
 }
 
 status_effects[3] = {
-	name = "Agility Down",
+	name = "Stun",
 	
 	Init = function(thisEffect, target)
-		thisEffect:SetAgiModifier(0.5);
+		thisEffect:SetStunEffect(true);
+		thisEffect:SetDuration(10000);
+		thisEffect:StartTimer();
 	end,
 
 	Update = function(thisEffect, target)

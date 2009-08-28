@@ -249,12 +249,15 @@ void BindGlobalsToLua()
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalStatusEffect>("GlobalStatusEffect")
+			.def("SetDuration", &GlobalStatusEffect::SetDuration)
+			.def("StartTimer", &GlobalStatusEffect::StartTimer)
 			.def("SetStrModifier", &GlobalStatusEffect::SetStrModifier)
 			.def("SetVigModifier", &GlobalStatusEffect::SetVigModifier)
 			.def("SetForModifier", &GlobalStatusEffect::SetForModifier)
 			.def("SetProModifier", &GlobalStatusEffect::SetProModifier)
 			.def("SetAgiModifier", &GlobalStatusEffect::SetAgiModifier)
 			.def("SetEvaModifier", &GlobalStatusEffect::SetEvaModifier)
+			.def("SetStunEffect", &GlobalStatusEffect::SetStunEffect)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
