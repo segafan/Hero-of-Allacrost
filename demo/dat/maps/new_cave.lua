@@ -528,7 +528,7 @@ map_functions[2] = function()
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(107);
 	enemy:ChangeStateHostile();
-	enemy:SetBattleMusicTheme("mus/The_Creature_Awakens.ogg");
+	enemy:SetBattleMusicTheme("mus/Betrayal_Battle.ogg");
 	kyle:SetVisible(false);
 	kyle:SetNoCollision(true);
 	kyle:SetUpdatable(false);
