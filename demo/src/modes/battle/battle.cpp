@@ -88,7 +88,8 @@ BattleMode::BattleMode() :
 	_winning_music("mus/Allacrost_Fanfare.ogg"),
 	_losing_music("mus/Allacrost_Intermission.ogg"),
 	_dialogue_window(true),
-	_dialogue_on(false)
+	_dialogue_on(false),
+	_after_scripts_finished(false)
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
@@ -385,12 +386,6 @@ void BattleMode::_Initialize() {
 
 
 void BattleMode::_ShutDown() {
-	ScriptObject* after_func;
-	for (uint32 i = 0; i < _events.size(); i++) {
-		after_func = _events[i]->GetAfterFunction();
-		ScriptCallFunction<void>(*after_func, this);
-	}
-
 	_battle_music[_current_music].Stop();
 
 	_ReviveCharacters();
@@ -442,6 +437,7 @@ void BattleMode::Update() {
 			}
 			else {
 				ShowDialogue();
+				return;
 			}
 			UnFreezeTimers();
 		}
@@ -477,6 +473,16 @@ void BattleMode::Update() {
 
 	// ----- (1): If the battle is over, only execute this small block of update code
 	if (_battle_over) {
+		if (_after_scripts_finished == false) {
+			ScriptObject* after_func;
+			for (uint32 i = 0; i < _events.size(); i++) {
+				after_func = _events[i]->GetAfterFunction();
+				ScriptCallFunction<void>(*after_func, this);
+			}
+			_after_scripts_finished = true;
+			return;
+		}
+
 		if (/*!_finish_window*/_finish_window.GetState() == FINISH_INVALID) { // Indicates that the battle has just now finished
 			//_finish_window = new FinishWindow();
 			// make sure the battle has our music
@@ -596,7 +602,7 @@ void BattleMode::_CleanupActionQueue()
 
 void BattleMode::Draw() {
 	// Apply scene lighting if the battle has finished
-	if (_battle_over) {
+	if (_battle_over && _after_scripts_finished) {
 		if (_victorious_battle) {
 			VideoManager->EnableSceneLighting(Color(0.914f, 0.753f, 0.106f, 1.0f)); // Golden color for victory
 		}
@@ -615,7 +621,7 @@ void BattleMode::Draw() {
 		_action_window.Draw();
 	}
 
-	if (_battle_over) {
+	if (_battle_over && _after_scripts_finished) {
 		_finish_window.Draw();
 	}
 
