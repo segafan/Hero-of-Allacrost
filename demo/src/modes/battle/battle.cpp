@@ -126,8 +126,6 @@ BattleMode::BattleMode() :
 // 	_action_window;// = new ActionWindow();
 	// FIXME: Get rid of this!!!
 	_TEMP_LoadTestData();
-
-	_events.push_back(thisEvent);
 } // BattleMode::BattleMode()
 
 
