@@ -527,6 +527,7 @@ map_functions[2] = function()
 	enemy:LoadStandardAnimations("img/sprites/map/kyle_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(107);
+	enemy:AddBattleEvent(1);
 	enemy:ChangeStateHostile();
 	enemy:SetBattleMusicTheme("mus/Betrayal_Battle.ogg");
 	kyle:SetVisible(false);

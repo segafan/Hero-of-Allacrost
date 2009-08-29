@@ -221,6 +221,7 @@ void BindModesToLua()
 			.def("ChangeStateDead", &EnemySprite::ChangeStateDead)
 			.def("ChangeStateSpawning", &EnemySprite::ChangeStateSpawning)
 			.def("ChangeStateHostile", &EnemySprite::ChangeStateHostile)
+			.def("AddBattleEvent", &EnemySprite::AddBattleEvent)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
