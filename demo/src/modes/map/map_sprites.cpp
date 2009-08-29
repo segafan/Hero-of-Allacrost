@@ -292,6 +292,9 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 			enemy->ChangeStateDead();
 
 			BattleMode *BM = new BattleMode();
+			for (int ctr = 0; ctr < enemy->GetBattleEvents().size(); ctr++) {
+				BM->AddEvent(enemy->GetBattleEvents().at(ctr));
+			}
 			ModeManager->Push(BM);
 
 			string enemy_battle_music = enemy->GetBattleMusicTheme();

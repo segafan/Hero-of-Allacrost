@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /** ***************************************************************************
-*** \file    defs.h
+*** \file    defs_engine.cpp
 *** \author  Daniel Steuernol, steu@allacrost.org
 *** \brief   Source file for Lua binding code
 ***

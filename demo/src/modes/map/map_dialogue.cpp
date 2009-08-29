@@ -166,7 +166,7 @@ void MapDialogueOptions::AddOption(ustring text, int32 next_line, uint32 event) 
 // ********** DialogueWindow class methods
 // ****************************************************************************
 
-DialogueWindow::DialogueWindow() {
+DialogueWindow::DialogueWindow(bool isBattle) {
 	if (_parchment_image.Load("img/menus/black_sleet_parch.png") == false)
 		cerr << "MAP ERROR: failed to load image: " << _parchment_image.GetFilename() << endl;
 
@@ -175,9 +175,12 @@ DialogueWindow::DialogueWindow() {
 
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
-	MenuWindow::Create(992.0f, 192.0f);
-	MenuWindow::SetPosition(12.0f, 560.0f);
-	MenuWindow::SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+	
+	if (!isBattle) {
+		MenuWindow::Create(992.0f, 192.0f);
+		MenuWindow::SetPosition(12.0f, 560.0f);
+		MenuWindow::SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+	}
 
 	_display_textbox.SetDisplaySpeed(30);
 	_display_textbox.SetPosition(260.0f, 596.0f);

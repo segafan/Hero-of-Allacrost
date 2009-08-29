@@ -36,6 +36,8 @@
 #include "global.h"
 #include "global_actors.h"
 
+#include "map_dialogue.h"
+
 #include "mode_manager.h"
 #include "battle_actions.h"
 #include "battle_actors.h"
@@ -257,9 +259,6 @@ public:
 	//! \brief Plays the specified piece of music
 	void PlayMusic(const std::string &music_filename);
 
-	// TODO: Some of the public methods below should probably not be public...
-
-
 	//! \brief Sets whether an action is being performed or not, and what that action is
 	//void SetPerformingAction(bool is_performing, private_battle::BattleAction* se);
 
@@ -345,8 +344,12 @@ public:
 	 */
 	void AddDamageText(const hoa_utils::ustring& text, uint32 duration, float x, float y);
 
-	/*private_battle::BattleAction* GetActiveAction()
-		{ return _active_action; }*/
+	void AddEvent(BattleEvent* thisEvent)
+		{ _events.push_back(thisEvent); }
+
+	void AddDialogue(std::string speaker_name, std::string text);
+
+	void ShowDialogue();
 
 private:
 	//! \brief When set to true, all preparations have been made and the battle is ready to begin
@@ -540,7 +543,16 @@ private:
 	//! \brief List of all DamageText objects currently active
 	std::list<DamageText*> _damage_text_list;
 
+	//! \brief Contains BattleEvents applicable to current battle
 	std::vector<BattleEvent*> _events;
+
+	hoa_map::private_map::DialogueWindow _dialogue_window;
+
+	bool _dialogue_on;
+
+	hoa_utils::ustring _speaker_name;
+
+	std::deque<hoa_utils::ustring> _dialogue_text;
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
 
