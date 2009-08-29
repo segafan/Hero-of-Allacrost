@@ -15,6 +15,10 @@ battle_events[1] = {
 	--TODO: Add dialogue!
 
 	Before = function(bat_mode)
+		bat_mode:AddDialogue("Kyle", "Do you really think it's going to matter if I take a little treasure? I jut want enough to start a new life, away from this servitude. Can't you understand that?");
+		bat_mode:AddDialogue("Claudius", "You’ve tarnished your honor and disgraced the Harrvahan knighthood!");
+		bat_mode:AddDialogue("Kyle", "To hell with the knighthood!");
+		bat_mode:ShowDialogue();
 	end,
 
 	During = function(bat_mode)

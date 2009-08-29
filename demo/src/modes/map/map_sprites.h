@@ -456,6 +456,8 @@ public:
 
 	void AddBattleEvent(uint32 n)
 		{ hoa_battle::BattleEvent* thisEvent = new hoa_battle::BattleEvent(n); _battle_events.push_back(thisEvent); }
+	
+	std::vector<hoa_battle::BattleEvent*> GetBattleEvents() { return _battle_events; }
 	//@}
 
 private:

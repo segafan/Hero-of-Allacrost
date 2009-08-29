@@ -86,7 +86,9 @@ BattleMode::BattleMode() :
 	_next_monster_location_index(0),
 	_default_music("mus/Confrontation.ogg"),
 	_winning_music("mus/Allacrost_Fanfare.ogg"),
-	_losing_music("mus/Allacrost_Intermission.ogg")
+	_losing_music("mus/Allacrost_Intermission.ogg"),
+	_dialogue_window(true),
+	_dialogue_on(false)
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
@@ -418,6 +420,9 @@ void BattleMode::_ReviveCharacters()
 ////////////////////////////////////////////////////////////////////////////////
 
 void BattleMode::Update() {
+	_dialogue_window._display_textbox.Update();
+	_dialogue_window._display_options.Update();
+
 	if (InputManager->QuitPress()) {
 		FreezeTimers();
 		ModeManager->Push(new PauseMode(true));
@@ -427,6 +432,23 @@ void BattleMode::Update() {
 		FreezeTimers();
 		ModeManager->Push(new PauseMode(false));
 		return;
+	}
+	else if (_dialogue_on) {
+		if (InputManager->ConfirmPress()) {
+			_dialogue_window.Reset();
+			
+			if (_dialogue_text.empty()) {
+				_dialogue_on = false;
+			}
+			else {
+				ShowDialogue();
+			}
+			UnFreezeTimers();
+		}
+		else {
+			FreezeTimers();
+			return;
+		}
 	}
 	
 	// First, call update functions of any BattleEvents
@@ -595,6 +617,10 @@ void BattleMode::Draw() {
 
 	if (_battle_over) {
 		_finish_window.Draw();
+	}
+
+	if (_dialogue_on) {
+		_dialogue_window.Draw(&_speaker_name, NULL);
 	}
 } // void BattleMode::Draw()
 
@@ -1197,6 +1223,23 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 void BattleMode::AddDamageText(const hoa_utils::ustring& text, uint32 duration, float x, float y)
 {
 	_damage_text_list.push_front(new DamageText(text, duration, x, y));
+}
+
+void BattleMode::ShowDialogue() {
+	_speaker_name = _dialogue_text.front();
+	_dialogue_text.pop_front();
+	hoa_utils::ustring text = _dialogue_text.front();
+	_dialogue_text.pop_front();
+
+	_dialogue_window.Reset();
+	_dialogue_on = true;
+	_dialogue_window._display_textbox.SetDisplayText(text);
+	_dialogue_window.Initialize();
+}
+
+void BattleMode::AddDialogue(std::string speaker_name, std::string text) {
+	_dialogue_text.push_back(MakeUnicodeString(speaker_name));
+	_dialogue_text.push_back(MakeUnicodeString(text));
 }
 
 void BattleMode::_RemoveExpiredDamageText()

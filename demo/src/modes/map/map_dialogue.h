@@ -39,6 +39,10 @@
 // Local map mode headers
 #include "map_utils.h"
 
+namespace hoa_battle {
+class BattleMode;
+}
+
 namespace hoa_map {
 
 namespace private_map {
@@ -335,8 +339,9 @@ private:
 *** ***************************************************************************/
 class DialogueWindow : public hoa_video::MenuWindow {
 	friend class DialogueSupervisor;
+	friend class hoa_battle::BattleMode;
 public:
-	DialogueWindow();
+	DialogueWindow(bool isBattle = false);
 
 	~DialogueWindow();
 

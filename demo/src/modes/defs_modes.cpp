@@ -352,6 +352,8 @@ void BindModesToLua()
 		class_<BattleMode, hoa_mode_manager::GameMode>("BattleMode")
 			.def(constructor<>())
 			.def("AddEnemy", (void(BattleMode::*)(uint32)) &BattleMode::AddEnemy)
+			.def("AddDialogue", &BattleMode::AddDialogue)
+			.def("ShowDialogue", &BattleMode::ShowDialogue)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
