@@ -63,7 +63,7 @@ enemies[101] = {
 	},
 
 	skills = {
-		[1] = 1
+		[1] = 103
 	},
 
 	drop_objects = {
@@ -125,7 +125,7 @@ enemies[102] = {
 	},
 
 	skills = {
-		[1] = 1
+		[1] = 103
 	},
 
 	drop_objects = {
@@ -428,15 +428,15 @@ enemies[107] = {
 	
 	initial_stats = {
 		hit_points = 55,
-		skill_points = 10,
-		experience_points = 5,
-		strength = 22,
+		skill_points = 19,
+		experience_points = 20,
+		strength = 24,
 		vigor = 5,
 		fortitude = 14,
-		protection = 4,
-		agility = 13,
-		evade = 2.0,
-		drunes = 18
+		protection = 6,
+		agility = 36,
+		evade = 5.0,
+		drunes = 5
 	},
 	
 	growth_stats = {

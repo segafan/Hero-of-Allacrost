@@ -454,6 +454,89 @@ function Load(m)
 	-- Finally, add the zone to the map
 	map:AddZone(ezone);
 
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
+	ezone:AddSection(hoa_map.ZoneSection(6, 8, 24, 20));
+
+	-- Create a sprite representation of a monster attached to this zone
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(101);
+	-- Add the enemy to the zone once (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, 1);
+
+	-- Finally, add the zone to the map
+	map:AddZone(ezone);
+
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
+	ezone:AddSection(hoa_map.ZoneSection(55, 8, 75, 30));
+
+	-- Create a sprite representation of a monster attached to this zone
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(3);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	-- Add the enemy to the zone once (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, 1);
+
+	-- Finally, add the zone to the map
+	map:AddZone(ezone);
+
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
+	ezone:AddSection(hoa_map.ZoneSection(36, 72, 52, 76));
+
+	-- Create a sprite representation of a monster attached to this zone
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(3);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	-- Add the enemy to the zone once (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, 1);
+
+	-- Finally, add the zone to the map
+	map:AddZone(ezone);
+
 	-- Add a treasure about half-way through the cave
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
 	chest:SetObjectID(500);
@@ -470,6 +553,14 @@ function Load(m)
 	chest:SetXPosition(62, 0);
 	chest:SetYPosition(88, 0);
 	chest:AddObject(1, 3); -- Adds 3 Healing Potions
+	map:AddGroundObject(chest);
+
+	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
+	chest:SetObjectID(501);
+	chest:SetContext(1);
+	chest:SetXPosition(6, 0);
+	chest:SetYPosition(20, 0);
+	chest:AddObject(10002, 1); -- Adds Iron Sword
 	map:AddGroundObject(chest);
 
 	-- Create a zone for exiting the map, to be used as a trigger
