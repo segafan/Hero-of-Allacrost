@@ -554,6 +554,8 @@ private:
 
 	std::deque<hoa_utils::ustring> _dialogue_text;
 
+	bool _after_scripts_finished;
+
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
 
 	/** \brief Loads images and other hard-coded data for the battle
