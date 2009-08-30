@@ -103,7 +103,7 @@ void ActionWindow::_InitActionCategoryList()
 void ActionWindow::_InitActionSelectionList()
 {
 	_action_selection_list.SetPosition(128.0f, 120.0f);
-	_action_selection_list.SetDimensions(300.0f, 35.0f, 1, 4, 1, 4);
+	_action_selection_list.SetDimensions(300.0f, 100.0f, 1, 4, 1, 4);
 	_action_selection_list.SetCursorOffset(-50.0f, 25.0f);
 	_action_selection_list.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
 	_action_selection_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);

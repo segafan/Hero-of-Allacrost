@@ -32,7 +32,6 @@ skills[1] = {
 		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 5 - target:GetPhysicalDefense());
 			AudioManager:PlaySound("snd/swordslice1.wav");
-			target:AddNewEffect(3);
 		else
 			target:TakeDamage(0);
 			AudioManager:PlaySound("snd/sword_swipe.wav");
@@ -44,7 +43,7 @@ skills[1] = {
 skills[2] = {
 	name = "Forward Thrust",
 	description = "A quick and daring thrust into an opponent's flesh.",
-	sp_required = 2,
+	sp_required = 1,
 	warmup_time = 1200,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
@@ -64,10 +63,33 @@ skills[2] = {
 }
 
 skills[3] = {
-	name = "Whirlwind",
-	-- WARNING: Untested
-	description = "Attack all.",
+	name = "Stun Slash",
+	description = "A quick and daring thrust into an opponent's flesh.",
 	sp_required = 3,
+	warmup_time = 1200,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
+
+	BattleExecute = function(target, instigator)
+		instigator:PlayAnimation("attack");
+
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade() + 5.5) then
+			target:TakeDamage(instigator:GetPhysicalAttack() - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/swordslice1.wav");
+			target:AddNewEffect(3);
+		else
+			target:TakeDamage(0);
+			AudioManager:PlaySound("snd/sword_swipe.wav");
+		end
+	end
+}
+
+skills[4] = {
+	-- FIXME: This does not work yet.
+	name = "Whirlwind",
+	description = "Damage all enemies",
+	sp_required = 7,
 	warmup_time = 1200,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
