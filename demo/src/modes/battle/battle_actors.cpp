@@ -98,19 +98,23 @@ void BattleActor::DrawStaminaIcon(bool is_selected) {
 uint32 BattleActor::GetPhysicalAttack() {
 	uint32 atk = GetActor()->GetTotalPhysicalAttack();
 	for (int i = 0; i < _actor_effects.size(); i++) {
-		atk = atk * _actor_effects[i]->GetStrModifier();
+		atk += atk * _actor_effects[i]->GetStrModifier();
 	}
 	return atk;
 }
 
 uint32 BattleActor::GetPhysicalDefense() {
-	return GetActor()->GetTotalPhysicalDefense(0); /// @todo : fix the parameter to a correct attack point index!
+	uint32 pdef = GetActor()->GetTotalPhysicalDefense(0); /// @todo : fix the parameter to a correct attack point index!
+	for (int i = 0; i < _actor_effects.size(); i++) {
+		pdef += pdef * _actor_effects[i]->GetForModifier();
+	}
+	return pdef;
 }
 
 float BattleActor::GetCombatEvade() {
 	uint32 eva = GetActor()->GetEvade();
 	for (int i = 0; i < _actor_effects.size(); i++) {
-		eva = eva * _actor_effects[i]->GetEvaModifier();
+		eva += eva * _actor_effects[i]->GetEvaModifier();
 	}
 	return eva;
 }
@@ -118,7 +122,7 @@ float BattleActor::GetCombatEvade() {
 uint32 BattleActor::GetCombatAgility() {
 	uint32 agi = GetActor()->GetAgility();
 	for (int i = 0; i < _actor_effects.size(); i++) {
-		agi = agi * _actor_effects[i]->GetAgiModifier();
+		agi += agi * _actor_effects[i]->GetAgiModifier();
 	}
 	return agi;
 }
@@ -224,8 +228,20 @@ BattleCharacter::~BattleCharacter() {
 
 
 void BattleCharacter::Update() {
-	if (_state == ACTOR_IDLE)
-	{
+	bool paused = false;
+
+	for (uint32 i = 0; i < GetActorEffects().size(); i++) {
+		if (GetActorEffects().at(i)->CausesStunEffect()) {
+			_wait_time.Pause();
+			paused = true;
+		}
+		if (GetActorEffects().at(i)->GetTimer()->IsFinished()) {
+			_wait_time.Run();
+			paused = false;
+		}
+	}
+
+	if (_state == ACTOR_IDLE && !paused) {
 		if (_wait_time.IsRunning())
 		{
 			_stamina_icon_location += SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_SELECT - STAMINA_LOCATION_BOTTOM) / _wait_time.GetDuration());
@@ -236,17 +252,28 @@ void BattleCharacter::Update() {
 			current_battle->AddToTurnQueue(this);
 		}
 	}
-	else if (_state == ACTOR_ACTING)
-	{
-		if ((_x_location - _x_origin) < 50)
-			_x_location += 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
-	}
-	else
-		SetXLocation(GetXOrigin()); // Restore original place
+//	else if (_state == ACTOR_ACTING) {
+//		if ((_x_location - _x_origin) < 50)
+//			_x_location += 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
+//	}
+//	else
+//		SetXLocation(GetXOrigin()); // Restore original place
 
 	//If he's dead, we freeze him on his last frame
 	if (IsAlive())
 		GetActor()->RetrieveBattleAnimation(_animation_string)->Update();
+
+	ScriptObject* remove;
+
+	for (uint32 i = 0; i < GetActorEffects().size(); i++) {
+		if (GetActorEffects().at(i)->GetTimer()->IsFinished()) {
+			// FIXME: remove functions do not work, though we don't really use them anyway
+			// remove = _actor_effects[i]->GetRemoveFunction();
+			// ScriptCallFunction<void>(*remove, this); // status effect's time is up
+			delete(_actor_effects.at(i));
+			_actor_effects.at(i) = new GlobalStatusEffect(1); // replace it with a dummy
+		}
+	}
 }
 
 

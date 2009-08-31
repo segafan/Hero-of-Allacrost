@@ -17,9 +17,9 @@ end
 -- -----------------------------------------------------------------------------
 
 skills[10001] = {
-	name = "Raise Defense",
-	description = "Take a defensive stance.",
-	sp_required = 1,
+	name = "Karlate Guard",
+	description = "Take a strong defensive stance.",
+	sp_required = 3,
 	warmup_time = 300,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,

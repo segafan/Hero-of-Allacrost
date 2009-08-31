@@ -13,11 +13,9 @@ end
 
 
 status_effects[1] = {
-	name = "Strength Up",
-	-- Multiplies Strength by 3
+	name = "Dummy effect",
 	
 	Init = function(thisEffect, target)
-		thisEffect:SetStrModifier(3.0);
 	end,
 
 	Update = function(thisEffect, target)
@@ -30,9 +28,10 @@ status_effects[1] = {
 status_effects[2] = {
 	name = "Defense Up",
 
-	-- Multiplies Fortitude by 3
 	Init = function(thisEffect, target)
-		thisEffect:SetForModifier(3.0);
+		thisEffect:SetForModifier(0.25); -- Increase Physical Defense by 25%
+		thisEffect:SetDuration(30000); -- This is about three "turns"
+		thisEffect:StartTimer();
 	end,
 
 	Update = function(thisEffect, target)
@@ -44,10 +43,11 @@ status_effects[2] = {
 
 status_effects[3] = {
 	name = "Stun",
+	-- Stop an actor's timer for a brief period
 	
 	Init = function(thisEffect, target)
 		thisEffect:SetStunEffect(true);
-		thisEffect:SetDuration(10000);
+		thisEffect:SetDuration(10000); -- This is about one "turn"
 		thisEffect:StartTimer();
 	end,
 
@@ -59,10 +59,12 @@ status_effects[3] = {
 }
 
 status_effects[4] = {
-	name = "Hiding",
-	
+	name = "Dodge Enemies",
+
 	Init = function(thisEffect, target)
-		thisEffect:SetEvaModifier(5.0);
+		thisEffect:SetEvaModifier(5.0); -- Increase evade by 500%
+		thisEffect:SetDuration(10000); -- This is about one "turn"
+		thisEffect:StartTimer();
 	end,
 
 	Update = function(thisEffect, target)

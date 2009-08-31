@@ -112,7 +112,7 @@ skills[11] = {
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade() + 5.5) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 8 - target:GetPhysicalDefense());
 			AudioManager:PlaySound("snd/crossbow.ogg");
 		else
@@ -174,11 +174,15 @@ skills[31] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 5 - target:GetPhysicalDefense());
+			instigator:PlayAnimation("attack");
+			AudioManager:PlaySound("snd/sword_swipe.wav");
+		else
+			target:TakeDamage(0);
+			instigator:PlayAnimation("attack");
+			AudioManager:PlaySound("snd/sword_swipe.wav");
 		end
-		instigator:PlayAnimation("attack");
-		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
 
@@ -193,11 +197,13 @@ skills[32] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 80)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade() + 5.5) then
 			target:TakeDamage(instigator:GetPhysicalAttack() * 1.5 + 0 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/sword_swipe.wav");
+		else
+			target:TakeDamage(0);
+			AudioManager:PlaySound("snd/sword_swipe.wav");
 		end
-		instigator:PlayAnimation("attack");
-		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
 
@@ -212,11 +218,11 @@ skills[100] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 14 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/snake_attack.wav");
 		end
 		instigator:PlayAnimation("attack");
-		AudioManager:PlaySound("snd/snake_attack.wav");
 	end
 }
 
@@ -230,7 +236,7 @@ skills[101] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 13 - target:GetPhysicalDefense());
 		end
 		instigator:PlayAnimation("attack");
@@ -248,7 +254,7 @@ skills[102] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 10 - target:GetPhysicalDefense());
 		end
 		instigator:PlayAnimation("attack");
@@ -267,7 +273,7 @@ skills[103] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
 		end
 		instigator:PlayAnimation("attack");
@@ -285,7 +291,7 @@ skills[104] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
 		end
 		instigator:PlayAnimation("attack");
@@ -302,7 +308,7 @@ skills[105] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
 		end
 		instigator:PlayAnimation("attack");
@@ -319,7 +325,7 @@ skills[106] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 30 - target:GetPhysicalDefense());
 		end
 		instigator:PlayAnimation("attack");
@@ -336,7 +342,7 @@ skills[107] = {
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
-		if ((instigator:GetCombatAgility() * (hoa_utils.RandomFloat() * 100)) > target:GetCombatEvade()) then
+		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
 		end
 		instigator:PlayAnimation("attack");

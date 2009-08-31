@@ -144,12 +144,12 @@ enemies[103] = {
 	initial_stats = {
 		hit_points = 85,
 		skill_points = 10,
-		experience_points = 12,
-		strength = 15,
+		experience_points = 45,
+		strength = 20,
 		vigor = 0,
 		fortitude = 8,
 		protection = 5,
-		agility = 10,
+		agility = 15,
 		evade = 2.0,
 		drunes = 80
 	},
