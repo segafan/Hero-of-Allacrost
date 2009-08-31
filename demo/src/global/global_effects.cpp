@@ -39,12 +39,12 @@ GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 	_id(id),
 	_name(NULL),
 	_intensity(intensity),
-	_str_modifier(1.0),
-	_vig_modifier(1.0),
-	_for_modifier(1.0),
-	_pro_modifier(1.0),
-	_agi_modifier(1.0),
-	_eva_modifier(1.0),
+	_str_modifier(0.0),
+	_vig_modifier(0.0),
+	_for_modifier(0.0),
+	_pro_modifier(0.0),
+	_agi_modifier(0.0),
+	_eva_modifier(0.0),
 	_stun(false)
 {
 	if (_id == 0 || _id > 5) {

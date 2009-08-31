@@ -441,13 +441,14 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
 	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
 	enemy:AddEnemy(2);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(5);
+	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
 	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, 2);
 
@@ -467,12 +468,11 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
 	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(101);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(4);
+	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
 	-- Add the enemy to the zone once (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, 1);
 
@@ -492,16 +492,15 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
 	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(4);
-	enemy:AddEnemy(3);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(3);
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(3);
+	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
 	-- Add the enemy to the zone once (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, 1);
 
@@ -524,13 +523,11 @@ function Load(m)
 	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(3);
-	enemy:AddEnemy(4);
-	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(3);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
+	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
 	-- Add the enemy to the zone once (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, 1);
 
