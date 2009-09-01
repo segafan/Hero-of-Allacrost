@@ -332,7 +332,7 @@ void ActionWindow::_UpdateTargetSelection() {
 	}
 
 	// If the target is a party type, then ignore arrow key presses since they are not processed
-	if (_action_target_type == GLOBAL_TARGET_PARTY) {
+	if (_action_target_type == GLOBAL_TARGET_PARTY || _action_target_type == GLOBAL_TARGET_SELF) {
 		return;
 	}
 
