@@ -29,3 +29,17 @@ skills[10001] = {
 		instigator:AddNewEffect(2);
 	end
 }
+
+skills[10002] = {
+	name = "Dodge Enemies",
+	description = "Increases evasion ability for a brief period.",
+	sp_required = 1,
+	warmup_time = 300,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
+	target_ally = true,
+
+	BattleExecute = function(target, instigator)
+		instigator:AddNewEffect(4);
+	end
+}

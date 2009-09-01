@@ -852,10 +852,12 @@ function Load(m)
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.MapTransitionEvent(22112, "dat/maps/new_cave.lua");
 	event_supervisor:RegisterEvent(event);
+	event = hoa_map.DialogueEvent(23000, 1);
+	event_supervisor:RegisterEvent(event);
 
 	if (map.map_event_group:DoesEventExist("kyle_joined") == false) then
 		map:AddGroundObject(kyle);
-		dialogue_supervisor:BeginDialogue(1);
+		event_supervisor:StartEvent(23000);
 	end
 end -- function Load()
 

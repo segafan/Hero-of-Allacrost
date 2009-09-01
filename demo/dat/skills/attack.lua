@@ -238,9 +238,11 @@ skills[101] = {
 		--If the random float is bigger, then we landed the hit
 		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 13 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/spider_attack.wav");
+		else
+			target:TakeDamage(0);
 		end
 		instigator:PlayAnimation("attack");
-		AudioManager:PlaySound("snd/spider_attack.wav");
 	end
 }
 
@@ -256,9 +258,11 @@ skills[102] = {
 		--If the random float is bigger, then we landed the hit
 		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 10 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/slime_attack.wav");
+		else
+			target:TakeDamage(0);
 		end
 		instigator:PlayAnimation("attack");
-		AudioManager:PlaySound("snd/slime_attack.wav");
 	end
 }
 
@@ -293,6 +297,9 @@ skills[104] = {
 		--If the random float is bigger, then we landed the hit
 		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
+			AudioManager:PlaySound("snd/skeleton_attack.wav");
+		else
+			target:TakeDamage(0);
 		end
 		instigator:PlayAnimation("attack");
 	end

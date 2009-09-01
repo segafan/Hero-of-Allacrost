@@ -428,6 +428,15 @@ function Load(m)
 	dialogue_supervisor:AddDialogue(dialogue);
 	map:AddGroundObject(kyle);
 
+	dialogue = hoa_map.MapDialogue(2);
+
+	text = hoa_utils.Translate("(Insert dialogue here)");
+	dialogue:AddText(text, 2, 1, 0, false);
+	text = hoa_utils.Translate("Damn you, Kyle.");
+	dialogue:AddText(text, 1000, -1, 0, false);
+
+	dialogue_supervisor:AddDialogue(dialogue);
+
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
 	local ezone = hoa_map.EnemyZone(2000, true);
 	ezone:AddSection(hoa_map.ZoneSection(20, 94, 40, 120));
@@ -601,26 +610,12 @@ map_functions[1] = function()
 end
 
 map_functions[2] = function()
-	map_functions[1]();
-	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
-	enemy:SetContext(1);
-	enemy:SetXPosition(120, 0.0);
-	enemy:SetYPosition(30, 0.0);
-	enemy:SetCollHalfWidth(1.0);
-	enemy:SetCollHeight(4.0);
-	enemy:SetImgHalfWidth(1.0);
-	enemy:SetImgHeight(4.0);
-	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/kyle_walk.png");
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(107);
-	enemy:AddBattleEvent(1);
-	enemy:ChangeStateHostile();
-	enemy:SetBattleMusicTheme("mus/Betrayal_Battle.ogg");
-	kyle:SetVisible(false);
-	kyle:SetNoCollision(true);
-	kyle:SetUpdatable(false);
-	kyle:SetContext(2);
-	map:AddGroundObject(enemy); 
+	local event = hoa_map.BattleEncounterEvent(11000, 107);
+	event:SetMusic("mus/Betrayal_Battle.ogg");
+	event:AddBattleEvent(1);
+	event:AddEventLink(11001, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.DialogueEvent(11001, 2);
+	event_supervisor:RegisterEvent(event);
+	event_supervisor:StartEvent(11000);
 end
