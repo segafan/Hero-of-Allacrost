@@ -259,7 +259,7 @@ characters[KYLE] = {
 		}
 	},
 
-	skills = { [1] = 21, [2] = 22}
+	skills = { [1] = 21, [2] = 10002, [3] = 22}
 } -- characters[KYLE]
 
 

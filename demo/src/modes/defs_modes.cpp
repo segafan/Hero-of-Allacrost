@@ -341,6 +341,21 @@ void BindModesToLua()
 			.def("SetLoopCount", &AnimateSpriteEvent::SetLoopCount)
 	];
 
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<DialogueEvent, MapEvent>("DialogueEvent")
+			.def(constructor<uint32, uint32>())
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<BattleEncounterEvent, MapEvent>("BattleEncounterEvent")
+			.def(constructor<uint32, uint32>())
+			.def("SetMusic", &BattleEncounterEvent::SetMusic)
+			.def("AddBattleEvent", &BattleEncounterEvent::AddBattleEvent)
+			.def("AddEnemy", &BattleEncounterEvent::AddEnemy)
+	];
+
 	} // End using map mode namespaces
 
 	// ----- Battle Mode bindings

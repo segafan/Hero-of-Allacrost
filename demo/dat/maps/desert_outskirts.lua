@@ -709,6 +709,23 @@ function Load(m)
 
 	map:AddGroundObject(kyle);
 
+	dialogue = hoa_map.MapDialogue(2);
+
+ 	text = hoa_utils.Translate("Good job.");
+	dialogue:AddText(text, 1000, 1, 0, false);
+ 	text = hoa_utils.Translate("Let's go back to our living quarters.");
+	dialogue:AddText(text, 2, 2, 0, false);
+ 	text = hoa_utils.Translate("All right.");
+	dialogue:AddText(text, 1000, 3, 0, false);
+ 	text = hoa_utils.Translate("Claudius?");
+	dialogue:AddText(text, 2, 4, 0, false);
+ 	text = hoa_utils.Translate("Yes?");
+	dialogue:AddText(text, 1000, 5, 0, false);
+ 	text = hoa_utils.Translate("I just want you to know that no matter what happens, we’ll always be friends.");
+	dialogue:AddText(text, 2, -1, 0, false);
+
+	dialogue_supervisor:AddDialogue(dialogue);
+
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
 	local ezone = hoa_map.EnemyZone(2000, true);
 	ezone:AddSection(hoa_map.ZoneSection(34, 88, 46, 96));
@@ -781,20 +798,13 @@ end
 
 map_functions[2] = function()
 	map_functions[1]();
-	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
-	enemy:SetContext(1);
-	enemy:SetXPosition(34, 0.0);
-	enemy:SetYPosition(34, 0.0);
-	enemy:SetCollHalfWidth(1.0);
-	enemy:SetCollHeight(2.0);
-	enemy:SetImgHalfWidth(2.0);
-	enemy:SetImgHeight(4.0);
-	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/gigas_walk.png");
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(103);
-	enemy:ChangeStateHostile();
-	enemy:SetBattleMusicTheme("mus/The_Creature_Awakens.ogg");
-	map:AddGroundObject(enemy); 
+
+	local event = hoa_map.BattleEncounterEvent(11000, 103);
+	event:SetMusic("mus/The_Creature_Awakens.ogg");
+	event:AddEventLink(11001, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.DialogueEvent(11001, 2);
+	event_supervisor:RegisterEvent(event);
+
+	event_supervisor:StartEvent(11000);
 end

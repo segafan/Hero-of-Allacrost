@@ -255,7 +255,7 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief
+*** \brief Event for switching from one map to another, with fading.
 ***
 ***
 *** ***************************************************************************/
@@ -306,7 +306,7 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief
+*** \brief Instantly starts a battle.
 ***
 ***
 *** ***************************************************************************/
@@ -314,15 +314,27 @@ class BattleEncounterEvent : public MapEvent {
 public:
 	/** \param event_id The ID of this event
 	**/
-	BattleEncounterEvent(uint32 event_id);
+	BattleEncounterEvent(uint32 event_id, uint32 enemy_id);
 
 	~BattleEncounterEvent();
 
+	void SetMusic(std::string filename);
+	void AddEnemy(uint32 enemy_id);
+	void AddBattleEvent(uint32 event_id);
 protected:
-	//! \brief
+	//! \brief ID numbers for enemies to generate
+	std::vector<uint32> _enemy_ids;
+
+	//! \brief ID numbers for BattleEvents to add (not to be confused with map events)
+	std::vector<uint32> _battle_event_ids;
+
+	//! \brief Filename for battle music
+	std::string _battle_music;
+
+	//! \brief Starts the battle
 	void _Start();
 
-	//! \brief
+	//! \brief Currently does nothing
 	bool _Update();
 }; // class BattleEncounterEvent : public MapEvent
 

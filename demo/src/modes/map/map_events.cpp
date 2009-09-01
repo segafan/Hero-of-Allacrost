@@ -28,6 +28,7 @@
 
 // Other mode headers
 #include "shop.h"
+#include "battle.h"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ using namespace hoa_script;
 using namespace hoa_system;
 using namespace hoa_video;
 
+using namespace hoa_battle;
 using namespace hoa_shop;
 
 namespace hoa_map {
@@ -225,22 +227,40 @@ bool JoinPartyEvent::_Update() {
 // ********** BattleEncounterEvent Class Functions
 // ****************************************************************************
 
-BattleEncounterEvent::BattleEncounterEvent(uint32 event_id) :
-	MapEvent(event_id, BATTLE_ENCOUNTER_EVENT)
+BattleEncounterEvent::BattleEncounterEvent(uint32 event_id, uint32 enemy_id) :
+	MapEvent(event_id, BATTLE_ENCOUNTER_EVENT),
+	_battle_music("mus/Confrontation.ogg")
 {
-	// TODO
+	_enemy_ids.push_back(enemy_id);
 }
 
 
 
 BattleEncounterEvent::~BattleEncounterEvent() {
-	// TODO
 }
 
+void BattleEncounterEvent::SetMusic(std::string filename) {
+	_battle_music = filename;
+}
 
+void BattleEncounterEvent::AddEnemy(uint32 enemy_id) {
+	_enemy_ids.push_back(enemy_id);
+}
+
+void BattleEncounterEvent::AddBattleEvent(uint32 event_id) {
+	_battle_event_ids.push_back(event_id);
+}
 
 void BattleEncounterEvent::_Start() {
-	// TODO
+	BattleMode* batt_mode = new BattleMode();
+	for (int i = 0; i < _enemy_ids.size(); i++) {
+		batt_mode->AddEnemy(_enemy_ids.at(i));
+	}
+	for (int i = 0; i < _battle_event_ids.size(); i++) {
+		batt_mode->AddEvent(new BattleEvent(_battle_event_ids.at(i)));
+	}
+	batt_mode->AddMusic(_battle_music);
+	ModeManager->Push(batt_mode);
 }
 
 
