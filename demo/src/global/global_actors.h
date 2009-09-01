@@ -37,7 +37,8 @@ enum GLOBAL_TARGET {
 	GLOBAL_TARGET_ATTACK_POINT =  0,
 	GLOBAL_TARGET_ACTOR        =  1,
 	GLOBAL_TARGET_PARTY        =  2,
-	GLOBAL_TARGET_TOTAL        =  3
+	GLOBAL_TARGET_SELF         =  3,
+	GLOBAL_TARGET_TOTAL        =  4
 };
 
 /** \name GlobalItem and GlobalSkill Usage Cases

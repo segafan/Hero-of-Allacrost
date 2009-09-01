@@ -252,12 +252,6 @@ void BattleCharacter::Update() {
 			current_battle->AddToTurnQueue(this);
 		}
 	}
-//	else if (_state == ACTOR_ACTING) {
-//		if ((_x_location - _x_origin) < 50)
-//			_x_location += 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
-//	}
-//	else
-//		SetXLocation(GetXOrigin()); // Restore original place
 
 	//If he's dead, we freeze him on his last frame
 	if (IsAlive())
@@ -304,26 +298,19 @@ void BattleCharacter::DrawSprite() {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
 			current_battle->_actor_selection_image.Draw();
 		}
-		// Draw the character sprite
-		//VideoManager->Move(_x_location, _y_location);
-		//GetActor()->RetrieveBattleAnimation("idle")->Draw();
 
 		if (this == current_battle->_selected_target) {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
 			current_battle->_actor_selection_image.Draw();
 		}
 	}
-	else {
-	//	VideoManager->Move(_x_location, _y_location);
-	//	sprite_frames[3].Draw();
-	}
 } // void BattleCharacter::DrawSprite()
 
 void BattleCharacter::PlayAnimation(std::string alias) {
 	_animation_string = alias;
 	GetActor()->RetrieveBattleAnimation(_animation_string)->ResetAnimation();
-	_animation_time.SetDuration(300);
 	_animation_time.Reset();
+	_animation_time.SetDuration(300);
 	_animation_time.Run();
 }
 
