@@ -32,6 +32,7 @@
 		49A1AC680CF4381D00AF23FE /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
 		49A1AC690CF4381D00AF23FE /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
 		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
+		A6619300104E4E9900E0A444 /* battle_events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A66192FE104E4E9900E0A444 /* battle_events.cpp */; };
 		A6C7F9B3103DD60C008BAFB1 /* shop_buy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9A7103DD60C008BAFB1 /* shop_buy.cpp */; };
 		A6C7F9B4103DD60C008BAFB1 /* shop_confirm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9A9103DD60C008BAFB1 /* shop_confirm.cpp */; };
 		A6C7F9B5103DD60C008BAFB1 /* shop_root.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9AB103DD60C008BAFB1 /* shop_root.cpp */; };
@@ -264,6 +265,8 @@
 		49BDC4500AF5412600940A6C /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
 		49BDC4510AF5412600940A6C /* socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socket.cpp; sourceTree = "<group>"; };
 		49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "Allacrost-Info.plist"; sourceTree = "<group>"; };
+		A66192FE104E4E9900E0A444 /* battle_events.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = battle_events.cpp; sourceTree = "<group>"; };
+		A66192FF104E4E9900E0A444 /* battle_events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = battle_events.h; sourceTree = "<group>"; };
 		A6C7F9A7103DD60C008BAFB1 /* shop_buy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shop_buy.cpp; sourceTree = "<group>"; };
 		A6C7F9A8103DD60C008BAFB1 /* shop_buy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shop_buy.h; sourceTree = "<group>"; };
 		A6C7F9A9103DD60C008BAFB1 /* shop_confirm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shop_confirm.cpp; sourceTree = "<group>"; };
@@ -536,6 +539,8 @@
 		4941A68F0AC1D86400D65B8E /* battle */ = {
 			isa = PBXGroup;
 			children = (
+				A66192FE104E4E9900E0A444 /* battle_events.cpp */,
+				A66192FF104E4E9900E0A444 /* battle_events.h */,
 				D4DDE3950C4A15FC00937677 /* battle_actions.h */,
 				D4DDE3930C4A15EE00937677 /* battle_actions.cpp */,
 				D44096320C45E32600E58975 /* battle_windows.h */,
@@ -1045,6 +1050,7 @@
 				A6C7F9B6103DD60C008BAFB1 /* shop_sell.cpp in Sources */,
 				A6C7F9B7103DD60C008BAFB1 /* shop_trade.cpp in Sources */,
 				A6C7F9B8103DD60C008BAFB1 /* shop_utils.cpp in Sources */,
+				A6619300104E4E9900E0A444 /* battle_events.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
