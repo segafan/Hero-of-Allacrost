@@ -62,8 +62,8 @@ status_effects[4] = {
 	name = "Dodge Enemies",
 
 	Init = function(thisEffect, target)
-		thisEffect:SetEvaModifier(15.0); -- Increase evade by 1500%
-		thisEffect:SetDuration(50000); -- This is about two "turns"
+		thisEffect:SetEvaModifier(9.0); -- Increase evade by 900%
+		thisEffect:SetDuration(20000); -- This is about two "turns"
 		thisEffect:StartTimer();
 	end,
 

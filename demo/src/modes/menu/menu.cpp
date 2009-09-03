@@ -672,9 +672,7 @@ void MenuMode::_SetupFormationOptionBox() {
 void MenuMode::_SetupEquipOptionBox() {
 	// Setup the status option box
 	_SetupOptionBoxCommonSettings(&_menu_equip);
-	_menu_equip.SetDimensions(115.0f, 50.0f, EQUIP_SIZE, 1, EQUIP_SIZE, 1);
-// 	_menu_equip.SetCellSize(150.0f, 50.0f);
-// 	_menu_equip.SetSize(EQUIP_SIZE, 1);
+	_menu_equip.SetDimensions(195.0f, 50.0f, EQUIP_SIZE, 1, EQUIP_SIZE, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -772,32 +770,21 @@ void MenuMode::_HandleFormationMenu() {
 void MenuMode::_HandleSaveMenu() {
 	string file_name;
 	switch (_menu_save.GetSelection()) {
-		case SAVE_SAVE:
-		{	hoa_save::SaveMode *SVM = new hoa_save::SaveMode(true);
+		case SAVE_SAVE: {
+			hoa_save::SaveMode *SVM = new hoa_save::SaveMode(true);
 			ModeManager->Push(SVM);
-
-/* TODO: Get rid of all of this.
-			file_name = GetUserDataPath(true) + "saved_game.lua";
-			if (DoesFileExist(file_name))
-			{
-				// Show confirm dialogue window
-				_confirm_window = new OverwriteConfirmWindow("Saved game file already exists, overwrite?");
-			}
-			else
-			{
-				GlobalManager->SaveGame(file_name);
-				_message_window = new MessageWindow("Your game has been saved.", 250.0f, 50.0f);
-			} */
 			break;
-		} // end scope
+		}
 
-		case SAVE_BACK:
+		case SAVE_BACK: {
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
+		}
 
-		default:
+		default: {
 			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleSaveMenu()" << endl;
+		}
 	}
 }
 

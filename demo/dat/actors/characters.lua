@@ -75,7 +75,7 @@ characters[CLAUDIUS] = {
 			fortitude = 2.0,
 			protection = 1.0,
 			agility = 1.0,
-			evade = 1.0
+			evade = 0.0
 		},
 		[4] = {
 			hit_points = 5.0,
@@ -85,7 +85,7 @@ characters[CLAUDIUS] = {
 			fortitude = 3.0,
 			protection = 1.0,
 			agility = 1.0,
-			evade = 1.0
+			evade = 0.0
 		}
 	},
 
@@ -170,7 +170,7 @@ characters[LAILA] = {
 			fortitude = 3.0,
 			protection = 1.0,
 			agility = 1.0,
-			evade = 1.0
+			evade = 0.0
 		}
 	},
 
@@ -245,7 +245,7 @@ characters[KYLE] = {
 			fortitude = 2.0,
 			protection = 1.0,
 			agility = 1.0,
-			evade = 1.0
+			evade = 0.0
 		},
 		[4] = {
 			hit_points = 5.0,
@@ -255,7 +255,7 @@ characters[KYLE] = {
 			fortitude = 3.0,
 			protection = 1.0,
 			agility = 1.0,
-			evade = 1.0
+			evade = 0.0
 		}
 	},
 
@@ -330,7 +330,7 @@ characters[RAFAELA] = {
 			fortitude = 2.0,
 			protection = 1.0,
 			agility = 1.0,
-			evade = 1.0
+			evade = 0.0
 		},
 		[4] = {
 			hit_points = 5.0,
@@ -340,7 +340,7 @@ characters[RAFAELA] = {
 			fortitude = 3.0,
 			protection = 1.0,
 			agility = 1.0,
-			evade = 1.0
+			evade = 0.0
 		}
 	},
 
