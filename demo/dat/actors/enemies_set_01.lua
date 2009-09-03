@@ -40,7 +40,7 @@ enemies[1] = {
 		fortitude = 12.0,
 		protection = 4.0,
 		agility = 5.0,
-		evade = 2.0,
+		evade = 0.0,
 		drunes = 2.0
 	},
 
@@ -102,7 +102,7 @@ enemies[2] = {
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0,
-		drunes = 2.0
+		drunes = 0.0
 	},
 
 
@@ -163,7 +163,7 @@ enemies[3] = {
 		fortitude = 5.0,
 		protection = 4.0,
 		agility = 10.0,
-		evade = 2.0,
+		evade = 0.0,
 		drunes = 2.0
 	},
 
@@ -233,7 +233,7 @@ enemies[4] = {
 		fortitude = 8.0,
 		protection = 4.0,
 		agility = 10.0,
-		evade = 2.0,
+		evade = 0.0,
 		drunes = 2.0
 	},
 
@@ -303,7 +303,7 @@ enemies[5] = {
 		fortitude = 7.0,
 		protection = 4.0,
 		agility = 10.0,
-		evade = 2.0,
+		evade = 0.0,
 		drunes = 2.0
 	},
 
