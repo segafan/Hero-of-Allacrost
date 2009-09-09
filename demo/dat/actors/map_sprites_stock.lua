@@ -51,7 +51,7 @@ sprites["Captain"] = {
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 
-	standard_animations = "img/sprites/map/soldier_npc01_walk.png"
+	standard_animations = "img/sprites/map/soldier_npc02_walk.png"
 }
 
 sprites["Marcus"] = {
@@ -154,7 +154,6 @@ sprites["Karlate"] = {
 
 	standard_animations = "img/sprites/map/soldier_npc01_walk.png"
 }
-
 
 sprite = {}
 
