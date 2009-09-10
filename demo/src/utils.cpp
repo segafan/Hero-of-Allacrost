@@ -336,7 +336,6 @@ bool UTF16ToUTF8(const uint16 *source, char *dest, size_t length) {
 
 	iconv_t convertor = iconv_open("UTF-8", UTF_16_ICONV_NAME);
 	if (convertor == (iconv_t) -1) {
-// 		std::cerr << "Failed to initialise UTF16->UTF8 conversion through iconv." << std::endl;
 		return false;
 	}
 
@@ -357,7 +356,6 @@ bool UTF16ToUTF8(const uint16 *source, char *dest, size_t length) {
 	iconv_close(convertor);
 	if (ret == (size_t) -1) {
 		perror("iconv");
-// 		std::cerr << "Conversion of '" << source << "' from UTF16->UTF8 failed." << std::endl;
 		return false;
 	}
 	return true;
@@ -371,15 +369,8 @@ bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
 
 	iconv_t convertor = iconv_open(UTF_16_ICONV_NAME, "UTF-8");
 	if (convertor == (iconv_t) -1) {
-// 		std::cerr << "Failed to initialise UTF8->UTF16 conversion through iconv." << std::endl;
 		return false;
 	}
-
-	#if (defined(_LIBICONV_VERSION))
-// 		std::cerr << "Libiconv version is " << std::hex << _LIBICONV_VERSION << std::endl;
-	#else
-// 		std::cerr << "Libiconv version is not defined." << std::endl;
-	#endif
 
 	#if (defined(_LIBICONV_VERSION) && _LIBICONV_VERSION == 0x0109)
 		// We are using an iconv API that uses const char*
@@ -397,7 +388,6 @@ bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
 	iconv_close(convertor);
 	if (ret == (size_t) -1) {
 		perror("iconv");
-// 		std::cerr << "Conversion of '" << source << "' from UTF8->UTF16 failed." << std::endl;
 		return false;
 	}
 	return true;
@@ -413,19 +403,7 @@ ustring MakeUnicodeString(const string& text) {
 	if (UTF8ToUTF16(text.c_str(), ubuff, length)) {
 		// Skip the "Byte Order Mark" from the UTF16 specification
 		if (utf16String[0] == UTF_16_BOM_STD ||  utf16String[0] == UTF_16_BOM_REV) {
-// 			std::cerr << "UTF_16_ICONV_NAME is " << UTF_16_ICONV_NAME << std::endl;
-// 			std::cerr << "UTF8ToUTF16() successful, skipping byte order mark" << std::endl;
-			if (utf16String[0] == UTF_16_BOM_STD) {
-// 				std::cerr << "  Byte order mark is UTF_16_BOM_STD (0xFEFF)." << std::endl;
-			}
-			else if (utf16String[0] == UTF_16_BOM_REV) {
-// 				std::cerr << "  Byte order mark is UTF_16_BOM_REV (0xFFFE)." << std::endl;
-			}
 			utf16String = ubuff + 1;
-		}
-		else {
-// 			std::cerr << "UTF_16_ICONV_NAME is " << UTF_16_ICONV_NAME << std::endl;
-// 			std::cerr << "UTF8ToUTF16() successful, but not skipping byte order mark since it's not present!" << std::endl;
 		}
 
 		#if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -476,10 +454,8 @@ string MakeStandardString(const ustring& text) {
 
 // Invokes gettext() and translates string (if possible)
 string Translate(const string& text) {
-//ustring Translate(const string& text) {
 	string str = string( gettext( text.c_str() ) );
 	return str;
-//	return MakeUnicodeString(str);
 } // ustring Translate(const string& text)
 
 ////////////////////////////////////////////////////////////////////////////////

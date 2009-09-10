@@ -330,7 +330,6 @@
 		D4BA6CE10EC7872C00F2DEB0 /* boldquot.sed */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = boldquot.sed; sourceTree = "<group>"; };
 		D4BA6CE20EC7872C00F2DEB0 /* en@boldquot.header */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "en@boldquot.header"; sourceTree = "<group>"; };
 		D4BA6CE30EC7872C00F2DEB0 /* en@quot.header */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "en@quot.header"; sourceTree = "<group>"; };
-		D4BA6CE40EC7872C00F2DEB0 /* fr.mo */ = {isa = PBXFileReference; lastKnownFileType = file; path = fr.mo; sourceTree = "<group>"; };
 		D4BA6CE50EC7872C00F2DEB0 /* fr.po */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fr.po; sourceTree = "<group>"; };
 		D4BA6CE60EC7872C00F2DEB0 /* insert-header.sin */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "insert-header.sin"; sourceTree = "<group>"; };
 		D4BA6CE70EC7872C00F2DEB0 /* Makefile.in.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile.in.in; sourceTree = "<group>"; };
@@ -743,7 +742,6 @@
 				D4BA6CE10EC7872C00F2DEB0 /* boldquot.sed */,
 				D4BA6CE20EC7872C00F2DEB0 /* en@boldquot.header */,
 				D4BA6CE30EC7872C00F2DEB0 /* en@quot.header */,
-				D4BA6CE40EC7872C00F2DEB0 /* fr.mo */,
 				D4BA6CE50EC7872C00F2DEB0 /* fr.po */,
 				D4BA6CE60EC7872C00F2DEB0 /* insert-header.sin */,
 				D4BA6CE70EC7872C00F2DEB0 /* Makefile.in.in */,
