@@ -672,9 +672,6 @@ function Load(m)
 	-- Add Kyle sprite
 	-- TODO: Hide Kyle sprite if he is still in the party.
 	kyle = ConstructSprite("Kyle", 2, 35, 35, 0.0, 0.0);
-	if (map.map_event_group:DoesEventExist("desert_beast_fought") == true) then
-		map_functions[1]();
-	end
 
 	-- Dialogue with kyle
 	dialogue = hoa_map.MapDialogue(1);
@@ -707,7 +704,11 @@ function Load(m)
 	kyle:AddDialogueReference(1);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	map:AddGroundObject(kyle);
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("kyle_missing") == true) then
+		if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == false) then
+			map:AddGroundObject(kyle);
+		end
+	end
 
 	dialogue = hoa_map.MapDialogue(2);
 
@@ -783,22 +784,20 @@ function Update()
 	end
 end
 
--- Adds Kyle to the party and removes his sprite from the map
 map_functions[1] = function()
-	if (map.map_event_group:DoesEventExist("desert_beast_fought") == false) then
-		map.map_event_group:AddNewEvent("desert_beast_fought", 1);
-		GlobalManager:AddCharacter(KYLE);
-	end
+end
+
+map_functions[2] = function()
+	-- Adds Kyle to the party and removes his sprite from the map
+	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("desert_beast_fought", 1);
+	GlobalManager:AddCharacter(KYLE);
 
 	kyle:SetContext(2);
 	kyle:SetVisible(false);
 	kyle:SetNoCollision(true);
 	kyle:SetUpdatable(false);
-end
 
-map_functions[2] = function()
-	map_functions[1]();
-
+	-- Sets up and starts boss encounter
 	local event = hoa_map.BattleEncounterEvent(11000, 103);
 	event:SetMusic("mus/The_Creature_Awakens.ogg");
 	event:AddEventLink(11001, false, 0);
