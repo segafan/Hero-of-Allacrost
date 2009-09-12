@@ -632,17 +632,11 @@ function Load(m)
 	local chest;
 	local text;
 
-	-- Create the player''s sprite
-	sprite = ConstructSprite("Claudius", 1000, 155, 144);
-	map:AddGroundObject(sprite);
-	-- Set the camera to focus on the player''s sprite
-	map:SetCamera(sprite);
-
 	-- Add Kyle sprite
 	kyle = ConstructSprite("Kyle", 2, 165, 144, 0.0, 0.0);
-	-- If kyle previously joined the party in the saved game, remove his sprite
-	if (map.map_event_group:DoesEventExist("kyle_joined") == true) then
-		map_functions[1]();
+
+	if (GlobalManager:DoesEventGroupExist("kyle_story") == false) then
+		GlobalManager:AddNewEventGroup("kyle_story");
 	end
 
 	-- Dialogue with kyle
@@ -681,6 +675,7 @@ function Load(m)
 
 	kyle:AddDialogueReference(1);
 	dialogue_supervisor:AddDialogue(dialogue);
+	map:AddGroundObject(kyle);
 
 	-- Add NPC Karlate Captain
 	captain = ConstructSprite("Captain", 3, 156, 38, 0.0, 0.0);
@@ -726,7 +721,7 @@ function Load(m)
 	text = hoa_utils.Translate("I don’t know, sir. (Not again, Kyle...)");
 	dialogue:AddText(text, 1000, 9, 0, false);
 	text = hoa_utils.Translate("All right, you’ll face me then.");
-	dialogue:AddText(text, 3, 10, 4, false);
+	dialogue:AddText(text, 3, 10, 0, false);
 	text = hoa_utils.Translate("Sir?");
 	dialogue:AddText(text, 1000, 11, 0, false);
 	text = hoa_utils.Translate("Draw your weapon, soldier.");
@@ -796,6 +791,11 @@ function Load(m)
 	sprite:AddDialogueReference(7);
 	map:AddGroundObject(sprite);
 
+	dialogue = hoa_map.MapDialogue(8);
+	text = hoa_utils.Translate("Claudius?  Claudius!  WAKE UP!");
+	dialogue:AddText(text, 5, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
 	exit_zone:AddSection(hoa_map.ZoneSection(40, 222, 50, 223));
@@ -852,12 +852,39 @@ function Load(m)
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.MapTransitionEvent(22112, "dat/maps/new_cave.lua");
 	event_supervisor:RegisterEvent(event);
+
+	-- Opening dialogue for a new game
 	event = hoa_map.DialogueEvent(23000, 1);
 	event_supervisor:RegisterEvent(event);
 
-	if (map.map_event_group:DoesEventExist("kyle_joined") == false) then
-		map:AddGroundObject(kyle);
+	-- "Betrayal" dialogue
+	event = hoa_map.DialogueEvent(23001, 8);
+	event_supervisor:RegisterEvent(event);
+
+	-- Depending on current point in the story, MapEvent will occur
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("hill_dialogue") == false) then
+		-- Create the player''s sprite
+		sprite = ConstructSprite("Claudius", 1000, 155, 144);
+		map:AddGroundObject(sprite);
+		-- Set the camera to focus on the player''s sprite
+		map:SetCamera(sprite);
+		-- Game has just started, begin opening dialogue
 		event_supervisor:StartEvent(23000);
+	elseif (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
+		-- Just got back from desert battle, go into night event
+		-- TODO: Visual/audio effects needed here
+		map_functions[1](); -- remove Kyle's sprite, we're not in the beginning
+		sprite = ConstructSprite("Claudius", 1000, 155, 114); -- place Claudius in the barracks
+		map:AddGroundObject(sprite); -- add Claudius to map
+		map:SetCamera(sprite); -- Set the camera to focus on the player's sprite
+		event_supervisor:StartEvent(23001); -- start dialogue
+	else
+		-- No event happens in town right now, so just start at the entrance
+		-- TODO: determine which entrance to start at
+		sprite = ConstructSprite("Claudius", 1000, 45, 220); -- place Claudius at the south entrance
+		map:AddGroundObject(sprite); -- add Claudius to map
+		map_functions[1](); -- remove Kyle's sprite, we're not in the beginning
+		map:SetCamera(sprite); -- Set the camera to focus on the player's sprite
 	end
 end -- function Load()
 
@@ -877,17 +904,17 @@ function Update()
 	end
 end
 
--- Adds Kyle to the party and removes his sprite from the map
+-- Removes Kyle's sprite from the map, adds Kyle to party
 map_functions[1] = function()
-	if (map.map_event_group:DoesEventExist("kyle_joined") == false) then
-		map.map_event_group:AddNewEvent("kyle_joined", 1);
-		GlobalManager:AddCharacter(KYLE);
-	end
-
 	kyle:SetContext(2);
 	kyle:SetVisible(false);
 	kyle:SetNoCollision(true);
 	kyle:SetUpdatable(false);
+
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("hill_dialogue") == false) then
+		GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("hill_dialogue", 1);
+		GlobalManager:AddCharacter(KYLE);
+	end	
 end
 
 -- Shop setup function (Karlate armory)
@@ -898,11 +925,12 @@ end
 
 -- Kyle leaves party, when talking to captain
 map_functions[3] = function()
+	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("kyle_leaves", 1);
 	GlobalManager:RemoveCharacter(KYLE);
 end
 
 map_functions[4] = function()
-	
+		
 end
 
 -- Captain goes inside to speak with Claudius
@@ -920,4 +948,5 @@ map_functions[6] = function()
 	captain:SetNoCollision(true);
 	captain:SetUpdatable(false);
 	captain:SetContext(1);
+	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("kyle_missing", 1);
 end
