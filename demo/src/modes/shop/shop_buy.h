@@ -74,7 +74,7 @@ private:
 	***
 	*** The size and contents of this container mimic that which is found in the _object_data container.
 	**/
-	std::vector<BuyList*> _object_lists;
+	std::vector<BuyDisplay*> _object_lists;
 
 	//! \brief Pointer to the window used for displaying the list of objects for sale
 	hoa_video::MenuWindow* _list_window;
@@ -85,10 +85,10 @@ private:
 	//! \brief Contains a column of images representing each category of object sold in the shop
 	hoa_video::OptionBox _category_list;
 
-	//! \brief Header text for the object identifier list (refer to the BuyList class)
+	//! \brief Header text for the object identifier list (refer to the BuyDisplay class)
 	hoa_video::OptionBox _identifier_header;
 
-	//! \brief Header text for the properties identifier list (refer to the BuyList class)
+	//! \brief Header text for the properties identifier list (refer to the BuyDisplay class)
 	hoa_video::OptionBox _properties_header;
 
 	// ---------- Methods ----------
@@ -106,68 +106,23 @@ private:
 
 
 /** ****************************************************************************
-*** \brief A GUI container representing a list of objects that may be bought
-***
-*** This container actually uses two option boxes to represent the list. The first
-*** option box is on the left hand side and contains the image icon for the object
-*** and the object's name. The second option box to the right lists the price, stock,
-*** amount owned by the player, and amount the player indicates that they wish to
-*** purchase. The number of entries in both option boxes and the number of entries in
-*** the object_data vector should be the same.
+*** \brief A GUI display of the list of objects that may be bought
 *** ***************************************************************************/
-class BuyList {
+class BuyDisplay : public ListDisplay {
 public:
-	BuyList();
+	BuyDisplay();
 
-	~BuyList()
+	~BuyDisplay()
 		{}
-
-	// -------------------- Class Methods
-
-	/** \brief Removes all entries from the option boxes
-	*** \note This will also set the object_data member to NULL, so usually calling this function
-	*** should be followed by invoking PopulateList() to refill the class with valid data.
-	**/
-	void Clear();
-
-	/** \brief Clears and then constructs the option box data
-	*** \param objects A pointer to a data vector containing the objects to populate the list with
-	**/
-	void PopulateList(std::vector<ShopObject*>* objects);
 
 	//! \brief Reconstructs all option box entries from the object data
 	void RefreshList();
 
 	/** \brief Reconstructs the displayed properties of a single object
 	*** \param index The index of the object data to reconstruct
-	***
-	*** This method refreshes only the relevant options of the properties_list and does not modify
-	*** the identifier_list. The reason for this is that the identifier_list (containing the image
-	*** and name of the object) never needs to be changed since that data is static. The properties,
-	*** however, do require frequent change as the stock, number owned, and amount to buy can be
-	*** manipulated by the user.
 	**/
 	void RefreshEntry(uint32 index);
-
-	//! \brief Updates the option boxes
-	void Update();
-
-	//! \brief Draws the option boxes
-	void Draw();
-
-	// -------------------- Class Members
-
-	//! \brief A pointer to the vector of object data that the class is to display
-	std::vector<ShopObject*>* object_data;
-
-	//! \brief Identifies objects via their icon and name
-	hoa_video::OptionBox identifier_list;
-
-	/** \brief Contains shop properties about the object: price, stock, own, and amount to buy
-	***
-	**/
-	hoa_video::OptionBox properties_list;
-}; // class BuyList
+}; // class BuyDisplay : public ListDisplay
 
 } // namespace private_shop
 

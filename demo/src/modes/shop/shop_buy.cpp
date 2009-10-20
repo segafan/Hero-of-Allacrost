@@ -126,9 +126,9 @@ void BuyInterface::Initialize() {
 
 	// ---------- (3): Create the buy object lists using the object data that is now ready
 	for (uint32 i = 0; i < _object_data.size(); i++) {
-		BuyList* new_list = new BuyList();
-		new_list->identifier_list.SetOwner(_list_window);
-		new_list->properties_list.SetOwner(_list_window);
+		BuyDisplay* new_list = new BuyDisplay();
+		new_list->GetIdentifyList().SetOwner(_list_window);
+		new_list->GetPropertyList().SetOwner(_list_window);
 		new_list->PopulateList(&(_object_data[i]));
 
 		_object_lists.push_back(new_list);
@@ -193,8 +193,8 @@ void BuyInterface::MakeInactive() {
 
 
 void BuyInterface::Update() {
-	BuyList* selected_list = _object_lists[_current_datalist];
-	uint32 selected_entry = selected_list->identifier_list.GetSelection();
+	BuyDisplay* selected_list = _object_lists[_current_datalist];
+	uint32 selected_entry = selected_list->GetIdentifyList().GetSelection();
 	ShopObject* selected_object = _object_data[_current_datalist][selected_entry];
 
 	if (InputManager->ConfirmPress()) {
@@ -204,14 +204,34 @@ void BuyInterface::Update() {
 		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
 	}
 
+	// Left select/right select change the category being viewed
+	else if (InputManager->LeftSelectPress()) {
+		if (GetNumberObjectCategories() > 1) {
+			_current_datalist = (_current_datalist == 0) ? (_object_data.size() - 1) : (_current_datalist - 1);
+			selected_list = _object_lists[_current_datalist];
+			selected_list->RefreshList();
+			_UpdateSelectedCategory();
+		}
+	}
+	else if (InputManager->RightSelectPress()) {
+		if (GetNumberObjectCategories() > 1) {
+			_current_datalist = (_current_datalist >= (_object_data.size() - 1)) ? 0 : (_current_datalist + 1);
+			selected_list = _object_lists[_current_datalist];
+			selected_list->RefreshList();
+			_UpdateSelectedCategory();
+		}
+	}
+
 	// Up/down changes the selected object in the current list
 	else if (InputManager->UpPress()) {
-		selected_list->identifier_list.InputUp();
-		selected_list->properties_list.InputUp();
+		cout << "UP press" << endl;
+		selected_list->GetIdentifyList().InputUp();
+		selected_list->GetPropertyList().InputUp();
 	}
 	else if (InputManager->DownPress()) {
-		selected_list->identifier_list.InputDown();
-		selected_list->properties_list.InputDown();
+		cout << "DOWN press" << endl;
+		selected_list->GetIdentifyList().InputDown();
+		selected_list->GetPropertyList().InputDown();
 	}
 
 	// Left/right change the quantity of the object to buy
@@ -233,24 +253,6 @@ void BuyInterface::Update() {
 			selected_object->IncrementBuyCount();
 			selected_list->RefreshEntry(selected_entry);
 			ShopMode::CurrentInstance()->GetSound("confirm")->Play();
-		}
-	}
-
-	// Left select/right select change the category being viewed
-	else if (InputManager->LeftSelectPress()) {
-		if (GetNumberObjectCategories() > 1) {
-			_current_datalist = (_current_datalist == 0) ? (_object_data.size() - 1) : (_current_datalist - 1);
-			selected_list = _object_lists[_current_datalist];
-			selected_list->RefreshList();
-			_UpdateSelectedCategory();
-		}
-	}
-	else if (InputManager->RightSelectPress()) {
-		if (GetNumberObjectCategories() > 1) {
-			_current_datalist = (_current_datalist >= (_object_data.size() - 1)) ? 0 : (_current_datalist + 1);
-			selected_list = _object_lists[_current_datalist];
-			selected_list->RefreshList();
-			_UpdateSelectedCategory();
 		}
 	}
 }
@@ -294,28 +296,29 @@ void BuyInterface::_UpdateSelectedCategory() {
 }
 
 // *****************************************************************************
-// ***** BuyList class methods
+// ***** BuyDisplay class methods
 // *****************************************************************************
 
-BuyList::BuyList() :
-	object_data(NULL)
+BuyDisplay::BuyDisplay() :
+	ListDisplay()
 {
-	identifier_list.SetPosition(100.0f, 330.0f);
-	identifier_list.SetDimensions(400.0f, 300.0f, 1, 255, 1, 8);
-	identifier_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	identifier_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	identifier_list.SetSelectMode(VIDEO_SELECT_SINGLE);
-	identifier_list.SetCursorOffset(-250.0f, 20.0f);
-	identifier_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
-	identifier_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_identify_list.SetPosition(100.0f, 330.0f);
+	_identify_list.SetDimensions(400.0f, 300.0f, 1, 255, 1, 8);
+	_identify_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_identify_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_property_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	_identify_list.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_identify_list.SetCursorOffset(0.0f, 0.0f);
+	_identify_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
+	_identify_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 
-	properties_list.SetPosition(500.0f, 330.0f);
-	properties_list.SetDimensions(250.0f, 300.0f, 4, 255, 4, 8);
-	properties_list.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
-	properties_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	identifier_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	properties_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
-	properties_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_property_list.SetPosition(500.0f, 330.0f);
+	_property_list.SetDimensions(250.0f, 300.0f, 4, 255, 4, 8);
+	_property_list.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
+	_property_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_property_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	_property_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
+	_property_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 
 	// NOTE: Both the identifier and properties lists will have SetOwner() called for the menu
 	// window that they exist on. This is done by the BuyInterface class shortly after this
@@ -324,85 +327,51 @@ BuyList::BuyList() :
 
 
 
-void BuyList::Clear() {
-	object_data = NULL;
-	identifier_list.ClearOptions();
-	properties_list.ClearOptions();
-}
-
-
-
-void BuyList::PopulateList(vector<ShopObject*>* objects) {
-	if (objects == NULL) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "function was given a NULL pointer argument" << endl;
-		return;
-	}
-
-	object_data = objects;
-	RefreshList();
-}
-
-
-
-void BuyList::RefreshList() {
-	if (object_data == NULL) {
+void BuyDisplay::RefreshList() {
+	if (_objects == NULL) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "no object data is available" << endl;
 		return;
 	}
 
-	identifier_list.ClearOptions();
-	properties_list.ClearOptions();
+	_identify_list.ClearOptions();
+	_property_list.ClearOptions();
 
 	ShopObject* shop_obj = NULL;
-	for (uint32 i = 0; i < object_data->size(); i++) {
-		shop_obj = (*object_data)[i];
+	for (uint32 i = 0; i < _objects->size(); i++) {
+		shop_obj = (*_objects)[i];
 		// Add an entry with the icon image of the object (scaled down by 4x to 30x30 pixels) followed by the object name
-		identifier_list.AddOption(MakeUnicodeString("<" + shop_obj->GetObject()->GetIconImage().GetFilename() + "><30>")
+		_identify_list.AddOption(MakeUnicodeString("<" + shop_obj->GetObject()->GetIconImage().GetFilename() + "><30>")
 			+ shop_obj->GetObject()->GetName());
-		identifier_list.GetEmbeddedImage(i)->SetDimensions(30.0f, 30.0f);
+		_identify_list.GetEmbeddedImage(i)->SetDimensions(30.0f, 30.0f);
 
 		// Add an option for each object property in the order of: price, stock, number owned, and amount to buy
-		properties_list.AddOption(MakeUnicodeString(NumberToString(shop_obj->GetBuyPrice())));
-		properties_list.AddOption(MakeUnicodeString("x" + NumberToString(shop_obj->GetStockCount())));
-		properties_list.AddOption(MakeUnicodeString("x" + NumberToString(shop_obj->GetOwnCount())));
-		properties_list.AddOption(MakeUnicodeString("x" + NumberToString(shop_obj->GetBuyCount())));
+		_property_list.AddOption(MakeUnicodeString(NumberToString(shop_obj->GetBuyPrice())));
+		_property_list.AddOption(MakeUnicodeString("x" + NumberToString(shop_obj->GetStockCount())));
+		_property_list.AddOption(MakeUnicodeString("x" + NumberToString(shop_obj->GetOwnCount())));
+		_property_list.AddOption(MakeUnicodeString("x" + NumberToString(shop_obj->GetBuyCount())));
 	}
 
-	identifier_list.SetSelection(0);
-	properties_list.SetSelection(0);
+	_identify_list.SetSelection(0);
+	_property_list.SetSelection(0);
 }
 
 
 
-void BuyList::RefreshEntry(uint32 index) {
-	if (object_data == NULL) {
+void BuyDisplay::RefreshEntry(uint32 index) {
+	if (_objects == NULL) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "no object data is available" << endl;
 		return;
 	}
-	if (index >= object_data->size()) {
+	if (index >= _objects->size()) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "index argument was out of range: " << index << endl;
 		return;
 	}
 
-	ShopObject* shop_obj = (*object_data)[index];
-	// Update only the stock, number owned, and amount to buy. The price text does not require updating
-	properties_list.SetOptionText((index * 4) + 1, MakeUnicodeString("x" + NumberToString(shop_obj->GetStockCount())));
-	properties_list.SetOptionText((index * 4) + 2, MakeUnicodeString("x" + NumberToString(shop_obj->GetOwnCount())));
-	properties_list.SetOptionText((index * 4) + 3, MakeUnicodeString("x" + NumberToString(shop_obj->GetBuyCount())));
-}
-
-
-
-void BuyList::Update() {
-	identifier_list.Update();
-	properties_list.Update();
-}
-
-
-
-void BuyList::Draw() {
-	identifier_list.Draw();
-	properties_list.Draw();
+	// Update only the stock, number owned, and amount to sell. The price does not require updating
+	ShopObject* shop_obj = (*_objects)[index];
+	_property_list.SetOptionText((index * 4) + 1, MakeUnicodeString("x" + NumberToString(shop_obj->GetStockCount())));
+	_property_list.SetOptionText((index * 4) + 2, MakeUnicodeString("x" + NumberToString(shop_obj->GetOwnCount())));
+	_property_list.SetOptionText((index * 4) + 3, MakeUnicodeString("x" + NumberToString(shop_obj->GetBuyCount())));
 }
 
 } // namespace private_shop

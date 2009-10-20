@@ -45,58 +45,76 @@ public:
 	void Update();
 
 	void Draw();
+
+private:
+	//! \brief Index to the active entry in both the _object_data and _object_lists containers
+	uint32 _current_datalist;
+
+	/** \brief Contains all objects for sale sorted into various category lists
+	***
+	*** The minimum size this container will ever be is two and the maximum it will be is nine. The first
+	*** entry (index 0) always holds the list of all objects regardless of categories. The proceeding
+	*** entries will be ordered based on object type, beginning with items and ending with key items.
+	*** For example, if the shop deals in weapons and shards, index 0 will hold a list of all weapons
+	*** and shards, index 1 will hold a list of all weapons, and index 2 will hold a list of all shards.
+	**/
+	std::vector<std::vector<ShopObject*> > _object_data;
+
+	/** \brief Class objects used to display the object data to the player
+	***
+	*** The size and contents of this container mimic that which is found in the _object_data container.
+	**/
+	std::vector<SellDisplay*> _object_lists;
+
+	//! \brief Pointer to the window used for displaying the list of objects for sale
+	hoa_video::MenuWindow* _list_window;
+
+	//! \brief Pointer to the window used for displaying detailed information about a particular object
+	hoa_video::MenuWindow* _info_window;
+
+	//! \brief Contains a column of images representing each category of object sold in the shop
+	hoa_video::OptionBox _category_list;
+
+	//! \brief Header text for the object identifier list (refer to the BuyList class)
+	hoa_video::OptionBox _identifier_header;
+
+	//! \brief Header text for the properties identifier list (refer to the BuyList class)
+	hoa_video::OptionBox _properties_header;
+
+	// ---------- Methods ----------
+	//! \brief Returns the number of object categories displayed by the buy interface
+	uint32 GetNumberObjectCategories() const
+		{ return _object_data.size(); }
+
+	//! \brief Returns true if the buy interface includes an "All" category for displaying wares
+	bool _HasAllCategory() const
+		{ return (_object_data.size() > 1); }
+
+	//! \brief Used to update the category icons to show the unselected categories in gray
+	void _UpdateSelectedCategory();
 }; // class SellInterface : public ShopInterface
 
 /** ****************************************************************************
-*** \brief A window containing a list of current inventory and selling price
-***
-***
+*** \brief A GUI display of the list of objects that may be bought
 *** ***************************************************************************/
-class SellListWindow : public hoa_video::MenuWindow {
+class SellDisplay : public ListDisplay {
 public:
-	SellListWindow();
+	SellDisplay();
 
-	~SellListWindow();
+	~SellDisplay()
+		{}
 
-	// -------------------- Class Methods
+	//! \brief Reconstructs all option box entries from the object data
+	void RefreshList();
 
-	//! \brief Removes all object entries from the list
-	void Clear();
-
-	/** \brief Adds a new entry to the option box
-	*** \param name The name of the object for this entry
-	*** \param count The number of objects in the current inventory
-	*** \param price The price of the object in this entry
+	/** \brief Reconstructs the displayed properties of a single object
+	*** \param index The index of the object data to reconstruct
 	**/
-	void AddEntry(hoa_utils::ustring name, uint32 count, uint32 price, uint32 sell_count);
+	void RefreshEntry(uint32 index);
+}; // class SellDisplay : public ListDisplay
 
-	//! \brief Processes user input and updates the cursor
-	void Update();
+} // private_shop
 
-	//! \brief Refreshes list of sellable items
-	void UpdateSellList();
-
-	//! \brief Draws the object list window and options to the screen
-	void Draw();
-
-	// -------------------- Class Members
-
-	//! \brief When set to true, the OptionBox will not be drawn for this window
-	bool hide_options;
-
-	//! \brief Contains the text that forms each option in the list
-	std::vector<hoa_utils::ustring> option_text;
-
-	/** \brief Contains the list of objects for sale
-	*** Each option includes the name of the object and its price.
-	**/
-	hoa_video::OptionBox object_list;
-
-	hoa_video::TextBox list_header;
-}; // class SellListWindow : public hoa_video::MenuWindow
-
-}
-
-}
+} // hoa_shop
 
 #endif // __SHOP_SELL_HEADER__
