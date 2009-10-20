@@ -220,6 +220,42 @@ void ShopObject::DecrementSellCount(uint32 dec) {
 }
 
 // *****************************************************************************
+// ***** ListDisplay class methods
+// *****************************************************************************
+
+void ListDisplay::Clear() {
+	_objects = NULL;
+	_identify_list.ClearOptions();
+	_property_list.ClearOptions();
+}
+
+
+
+void ListDisplay::PopulateList(vector<ShopObject*>* objects) {
+	if (objects == NULL) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function was given a NULL pointer argument" << endl;
+		return;
+	}
+
+	_objects = objects;
+	RefreshList();
+}
+
+
+
+void ListDisplay::Update() {
+	_identify_list.Update();
+	_property_list.Update();
+}
+
+
+
+void ListDisplay::Draw() {
+	_identify_list.Draw();
+	_property_list.Draw();
+}
+
+// *****************************************************************************
 // ***** ObjectInfoWindow
 // *****************************************************************************
 

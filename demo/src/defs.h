@@ -310,15 +310,17 @@ namespace hoa_shop {
 	namespace private_shop {
 		class ShopInterface;
 		class ShopObject;
+		class ListDisplay;
 
 		class RootInterface;
 		class RootWindow;
 		class GreetingWindow;
 
 		class BuyInterface;
-		class BuyList;
+		class BuyDisplay;
 
 		class SellInterface;
+		class SellDisplay;
 
 		class TradeInterface;
 

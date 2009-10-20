@@ -229,6 +229,79 @@ private:
 }; // class ShopObject
 
 
+
+/** ****************************************************************************
+*** \brief An abstract class for displaying a list of shop objects
+***
+*** This class is used to display a list of shop objects to the user along with
+*** certain properties. It uses two OptionBox objects to represent the objects that
+*** are displayed. The first option box contains the image icon and name of the shop
+*** object. The second option box contains properties about the object such as the
+*** price, stock, and amount owned by the player. Both OptionBox objects have the same
+*** size.
+***
+*** \note The constructor of derived classes should set the properties of the
+*** _identifier_list and _properties_list OptionBox objects. This will determine
+*** how the information is displayed when the Draw() routine is called.
+*** ***************************************************************************/
+class ListDisplay {
+public:
+	ListDisplay() : _objects(NULL)
+		{}
+
+	virtual ~ListDisplay()
+		{}
+
+	/** \brief Removes all entries from the option boxes
+	*** \note This will also set the object_data member to NULL, so usually calling this function
+	*** should be followed by invoking PopulateList() to refill the class with valid data.
+	**/
+	void Clear();
+
+	/** \brief Clears and then constructs the option box data
+	*** \param objects A pointer to a data vector containing the objects to populate the list with
+	**/
+	void PopulateList(std::vector<ShopObject*>* objects);
+
+	//! \brief Reconstructs all option box entries from the object data
+	virtual void RefreshList() = 0;
+
+	/** \brief Reconstructs the displayed properties of a single object
+	*** \param index The index of the object data to reconstruct
+	***
+	*** This method refreshes only the relevant options of the properties_list and does not modify
+	*** the identifier_list. The reason for this is that the identifier_list (containing the image
+	*** and name of the object) never needs to be changed since that data is static. The properties,
+	*** however, do require frequent change as these properties can be modified by the player.
+	**/
+	virtual void RefreshEntry(uint32 index) = 0;
+
+	//! \brief Updates the option boxes
+	void Update();
+
+	//! \brief Draws the option boxes
+	void Draw();
+
+
+	hoa_video::OptionBox& GetIdentifyList()
+		{ return _identify_list; }
+
+	hoa_video::OptionBox& GetPropertyList()
+		{ return _property_list; }
+
+protected:
+	//! \brief A pointer to the vector of object data that the class is to display
+	std::vector<ShopObject*>* _objects;
+
+	//! \brief Identifies objects via their icon and name
+	hoa_video::OptionBox _identify_list;
+
+	//! \brief Contains shop properties about the object such as price, stock, amount owned, and amount to buy/sell
+	hoa_video::OptionBox _property_list;
+}; // class ListDisplay
+
+
+
 /** ****************************************************************************
 *** \brief Displays detailed information about a selected object
 ***
