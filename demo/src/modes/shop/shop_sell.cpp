@@ -11,8 +11,6 @@
 *** \file    shop_sell.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Source file for sell menu of shop mode
-***
-*** WRITE SOMETHING
 *** ***************************************************************************/
 
 #include "defs.h"
@@ -43,9 +41,26 @@ namespace private_shop {
 // ***** SellInterface class methods
 // *****************************************************************************
 
-SellInterface::SellInterface() {
-// 	std::map<uint32, GlobalObject*>* inventory = GlobalManager->GetInventory();
+SellInterface::SellInterface() :
+	_current_datalist(0),
+	_list_window(NULL),
+	_info_window(NULL)
+{
+	_list_window = ShopMode::CurrentInstance()->GetListWindow();
+	_info_window = ShopMode::CurrentInstance()->GetInfoWindow();
+}
 
+
+
+SellInterface::~SellInterface() {
+	for (uint32 i = 0; i < _object_displays.size(); i++) {
+		delete _object_displays[i];
+	}
+}
+
+
+
+void SellInterface::Initialize() {
 	// Used to temporarily hold a pointer to a valid shop object
 	ShopObject* obj = NULL;
 	// Pointer to the container of all objects that are bought/sold/traded in the ship
@@ -57,7 +72,7 @@ SellInterface::SellInterface() {
 	// Holds the index within the _object_data vector where the container for a specific object type is
 	vector<uint32> type_index(8, 0);
 
-	// ---------- (1): Populating the _object_data container with an entry for each type of object dealt in the shop
+	// ---------- (1): Populating the _object_data container with an entry for each type of object in the player's inventory
 	_object_data.push_back(vector<ShopObject*>()); // This first entry represents all objects
 	uint32 next_index = 1; // Used to set the appropriate data in the type_index vector
 	uint8 bit_x = 0x01; // Used to do a bit-by-bit analysis of the obj_types variable
@@ -74,7 +89,7 @@ SellInterface::SellInterface() {
 	for (map<uint32, ShopObject>::iterator i = shop_objects->begin(); i != shop_objects->end(); i++) {
 		obj = &(i->second);
 
-		if (obj->IsSoldInShop() == true) {
+		if (obj->GetOwnCount() > 0) {
 			_object_data[0].push_back(obj);
 
 			switch (obj->GetObject()->GetObjectType()) {
@@ -109,14 +124,14 @@ SellInterface::SellInterface() {
 		}
 	}
 
-	// ---------- (3): Create the buy object lists using the object data that is now ready
+	// ---------- (3): Create the sell displays using the object data that is now ready
 	for (uint32 i = 0; i < _object_data.size(); i++) {
 		SellDisplay* new_list = new SellDisplay();
 		new_list->GetIdentifyList().SetOwner(_list_window);
 		new_list->GetPropertyList().SetOwner(_list_window);
 		new_list->PopulateList(&(_object_data[i]));
 
-		_object_lists.push_back(new_list);
+		_object_displays.push_back(new_list);
 	}
 
 	// ---------- (4): Initialize the list headers and object type icons
@@ -164,24 +179,16 @@ SellInterface::SellInterface() {
 
 
 
-SellInterface::~SellInterface() {
-
-}
-
-
-
-void SellInterface::Initialize() {
-
-}
-
-
-
 void SellInterface::MakeActive() {
+	_list_window->Show();
+	_info_window->Show();
 }
 
 
 
 void SellInterface::MakeInactive() {
+	_list_window->Hide();
+	_info_window->Hide();
 }
 
 
@@ -190,12 +197,105 @@ void SellInterface::Update() {
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
 	}
+
+	SellDisplay* selected_list = _object_displays[_current_datalist];
+	uint32 selected_entry = selected_list->GetIdentifyList().GetSelection();
+	ShopObject* selected_object = _object_data[_current_datalist][selected_entry];
+
+	if (InputManager->ConfirmPress()) {
+		// TODO: Bring up an "instant sale" confirmation menu
+	}
+	else if (InputManager->CancelPress()) {
+		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
+	}
+
+	// Left select/right select change the category being viewed
+	else if (InputManager->LeftSelectPress()) {
+		if (GetNumberObjectCategories() > 1) {
+			_current_datalist = (_current_datalist == 0) ? (_object_data.size() - 1) : (_current_datalist - 1);
+			selected_list = _object_displays[_current_datalist];
+			selected_list->RefreshList();
+			_UpdateSelectedCategory();
+		}
+	}
+	else if (InputManager->RightSelectPress()) {
+		if (GetNumberObjectCategories() > 1) {
+			_current_datalist = (_current_datalist >= (_object_data.size() - 1)) ? 0 : (_current_datalist + 1);
+			selected_list = _object_displays[_current_datalist];
+			selected_list->RefreshList();
+			_UpdateSelectedCategory();
+		}
+	}
+
+	// Up/down changes the selected object in the current list
+	else if (InputManager->UpPress()) {
+		selected_list->GetIdentifyList().InputUp();
+		selected_list->GetPropertyList().InputUp();
+	}
+	else if (InputManager->DownPress()) {
+		selected_list->GetIdentifyList().InputDown();
+		selected_list->GetPropertyList().InputDown();
+	}
+
+	// Left/right change the quantity of the object to buy
+	else if (InputManager->LeftPress()) {
+		if (selected_object->GetBuyCount() == 0) {
+			ShopMode::CurrentInstance()->GetSound("bump")->Play();
+		}
+		else {
+			selected_object->DecrementBuyCount();
+			selected_list->RefreshEntry(selected_entry);
+			ShopMode::CurrentInstance()->GetSound("cancel")->Play();
+		}
+	}
+	else if (InputManager->RightPress()) {
+		if (selected_object->GetBuyCount() >= selected_object->GetStockCount()) {
+			ShopMode::CurrentInstance()->GetSound("bump")->Play();
+		}
+		else {
+			selected_object->IncrementBuyCount();
+			selected_list->RefreshEntry(selected_entry);
+			ShopMode::CurrentInstance()->GetSound("confirm")->Play();
+		}
+	}
 }
 
 
 
 void SellInterface::Draw() {
+	_list_window->Draw();
+	_identifier_header.Draw();
+	_properties_header.Draw();
+	_category_list.Draw();
+	_object_displays[_current_datalist]->Draw();
 
+	_info_window->Draw();
+}
+
+
+
+void SellInterface::_UpdateSelectedCategory() {
+	if (GetNumberObjectCategories() == 1) {
+		return;
+	}
+
+	// If the all category is selected, show all of the category icons in full color
+	if ((_HasAllCategory() == true) && (_current_datalist == 0)) {
+		for (uint32 i = 0; i < _category_list.GetNumberOptions(); i++) {
+			_category_list.GetEmbeddedImage(i)->DisableGrayScale();
+		}
+		return;
+	}
+
+	// Otherwise enable grayscale for all unselected object category icons
+	for (uint32 i = 0; i < _category_list.GetNumberOptions(); i++) {
+		if (i == (_current_datalist - 1)) {
+			_category_list.GetEmbeddedImage(i)->DisableGrayScale();
+		}
+		else {
+			_category_list.GetEmbeddedImage(i)->EnableGrayScale();
+		}
+	}
 }
 
 // *****************************************************************************

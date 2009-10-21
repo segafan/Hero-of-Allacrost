@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    shop_buy.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for buy menus of shop mode
+*** \brief   Header file for buy menu of shop mode
 *** ***************************************************************************/
 
 #ifndef __SHOP_BUY_HEADER__
@@ -57,7 +57,7 @@ public:
 	void Draw();
 
 private:
-	//! \brief Index to the active entry in both the _object_data and _object_lists containers
+	//! \brief Index to the active entry in both the _object_data and _object_displays containers
 	uint32 _current_datalist;
 
 	/** \brief Contains all objects for sale sorted into various category lists
@@ -71,10 +71,9 @@ private:
 	std::vector<std::vector<ShopObject*> > _object_data;
 
 	/** \brief Class objects used to display the object data to the player
-	***
 	*** The size and contents of this container mimic that which is found in the _object_data container.
 	**/
-	std::vector<BuyDisplay*> _object_lists;
+	std::vector<BuyDisplay*> _object_displays;
 
 	//! \brief Pointer to the window used for displaying the list of objects for sale
 	hoa_video::MenuWindow* _list_window;
