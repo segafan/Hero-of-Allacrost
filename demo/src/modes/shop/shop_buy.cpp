@@ -53,8 +53,8 @@ BuyInterface::BuyInterface() :
 
 
 BuyInterface::~BuyInterface() {
-	for (uint32 i = 0; i < _object_lists.size(); i++) {
-		delete _object_lists[i];
+	for (uint32 i = 0; i < _object_displays.size(); i++) {
+		delete _object_displays[i];
 	}
 }
 
@@ -124,14 +124,14 @@ void BuyInterface::Initialize() {
 		}
 	}
 
-	// ---------- (3): Create the buy object lists using the object data that is now ready
+	// ---------- (3): Create the buy displays using the object data that is now ready
 	for (uint32 i = 0; i < _object_data.size(); i++) {
 		BuyDisplay* new_list = new BuyDisplay();
 		new_list->GetIdentifyList().SetOwner(_list_window);
 		new_list->GetPropertyList().SetOwner(_list_window);
 		new_list->PopulateList(&(_object_data[i]));
 
-		_object_lists.push_back(new_list);
+		_object_displays.push_back(new_list);
 	}
 
 	// ---------- (4): Initialize the list headers and object type icons
@@ -193,7 +193,7 @@ void BuyInterface::MakeInactive() {
 
 
 void BuyInterface::Update() {
-	BuyDisplay* selected_list = _object_lists[_current_datalist];
+	BuyDisplay* selected_list = _object_displays[_current_datalist];
 	uint32 selected_entry = selected_list->GetIdentifyList().GetSelection();
 	ShopObject* selected_object = _object_data[_current_datalist][selected_entry];
 
@@ -208,7 +208,7 @@ void BuyInterface::Update() {
 	else if (InputManager->LeftSelectPress()) {
 		if (GetNumberObjectCategories() > 1) {
 			_current_datalist = (_current_datalist == 0) ? (_object_data.size() - 1) : (_current_datalist - 1);
-			selected_list = _object_lists[_current_datalist];
+			selected_list = _object_displays[_current_datalist];
 			selected_list->RefreshList();
 			_UpdateSelectedCategory();
 		}
@@ -216,7 +216,7 @@ void BuyInterface::Update() {
 	else if (InputManager->RightSelectPress()) {
 		if (GetNumberObjectCategories() > 1) {
 			_current_datalist = (_current_datalist >= (_object_data.size() - 1)) ? 0 : (_current_datalist + 1);
-			selected_list = _object_lists[_current_datalist];
+			selected_list = _object_displays[_current_datalist];
 			selected_list->RefreshList();
 			_UpdateSelectedCategory();
 		}
@@ -224,12 +224,10 @@ void BuyInterface::Update() {
 
 	// Up/down changes the selected object in the current list
 	else if (InputManager->UpPress()) {
-		cout << "UP press" << endl;
 		selected_list->GetIdentifyList().InputUp();
 		selected_list->GetPropertyList().InputUp();
 	}
 	else if (InputManager->DownPress()) {
-		cout << "DOWN press" << endl;
 		selected_list->GetIdentifyList().InputDown();
 		selected_list->GetPropertyList().InputDown();
 	}
@@ -264,7 +262,7 @@ void BuyInterface::Draw() {
 	_identifier_header.Draw();
 	_properties_header.Draw();
 	_category_list.Draw();
-	_object_lists[_current_datalist]->Draw();
+	_object_displays[_current_datalist]->Draw();
 
 	_info_window->Draw();
 }

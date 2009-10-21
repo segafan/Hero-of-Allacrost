@@ -11,8 +11,6 @@
 *** \file    shop_sell.h
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Header file for sell menu of shop mode
-***
-*** WRITE SOMETHING
 *** ***************************************************************************/
 
 #ifndef __SHOP_SELL_HEADER__
@@ -30,24 +28,36 @@ namespace hoa_shop {
 
 namespace private_shop {
 
+/** ****************************************************************************
+*** \brief Manages the shop when it is in sell mode and enables the player to view and sell wares
+***
+*** This interface displays the list of objects that are available to be sold. In other words, it
+*** displays the player's current inventory. It organizes these objects based on their object type
+*** (item, weapon, etc.) and allows the player to switch between views of these different categories.
+*** ***************************************************************************/
 class SellInterface : public ShopInterface {
 public:
 	SellInterface();
 
 	~SellInterface();
 
+	//! \brief Initializes the data conatiners and GUI objects to be used
 	void Initialize();
 
+	//! \brief Shows the menu windows that are used
 	void MakeActive();
 
+	//! \brief Hides the menu windows that are used
 	void MakeInactive();
 
+	//! \brief Processes user input and updates the purchase totals as appropriate
 	void Update();
 
+	//! \brief Draws the GUI elements to the screen
 	void Draw();
 
 private:
-	//! \brief Index to the active entry in both the _object_data and _object_lists containers
+	//! \brief Index to the active entry in both the _object_data and _object_displays containers
 	uint32 _current_datalist;
 
 	/** \brief Contains all objects for sale sorted into various category lists
@@ -55,16 +65,16 @@ private:
 	*** The minimum size this container will ever be is two and the maximum it will be is nine. The first
 	*** entry (index 0) always holds the list of all objects regardless of categories. The proceeding
 	*** entries will be ordered based on object type, beginning with items and ending with key items.
-	*** For example, if the shop deals in weapons and shards, index 0 will hold a list of all weapons
-	*** and shards, index 1 will hold a list of all weapons, and index 2 will hold a list of all shards.
+	*** For example, if the player has only weapons and shards in their inventory, index 0 will hold a
+	*** list of all weapons and shards, index 1 will hold a list of all weapons, and index 2 will hold a
+	*** list of all shards.
 	**/
 	std::vector<std::vector<ShopObject*> > _object_data;
 
 	/** \brief Class objects used to display the object data to the player
-	***
 	*** The size and contents of this container mimic that which is found in the _object_data container.
 	**/
-	std::vector<SellDisplay*> _object_lists;
+	std::vector<SellDisplay*> _object_displays;
 
 	//! \brief Pointer to the window used for displaying the list of objects for sale
 	hoa_video::MenuWindow* _list_window;
@@ -95,7 +105,7 @@ private:
 }; // class SellInterface : public ShopInterface
 
 /** ****************************************************************************
-*** \brief A GUI display of the list of objects that may be bought
+*** \brief A GUI display of the list of objects that may be sold
 *** ***************************************************************************/
 class SellDisplay : public ListDisplay {
 public:
