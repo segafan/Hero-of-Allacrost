@@ -307,7 +307,7 @@ BuyDisplay::BuyDisplay() :
 	_identify_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_identify_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 	_identify_list.SetSelectMode(VIDEO_SELECT_SINGLE);
-	_identify_list.SetCursorOffset(0.0f, 0.0f);
+	_identify_list.SetCursorOffset(0.0f, 20.0f);
 	_identify_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
 	_identify_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 

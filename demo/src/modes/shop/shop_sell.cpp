@@ -67,7 +67,7 @@ void SellInterface::Initialize() {
 	map<uint32, ShopObject>* shop_objects = ShopMode::CurrentInstance()->GetShopObjects();
 	// Bit-vector that indicates what types of objects are sold in the shop
 	uint8 obj_types = ShopMode::CurrentInstance()->GetDealTypes();
-	// The number of object categories in this buy menu (not including the "all" category)
+	// The number of object categories in this sell menu (not including the "all" category)
 	uint8 num_obj_categories = 0;
 	// Holds the index within the _object_data vector where the container for a specific object type is
 	vector<uint32> type_index(8, 0);
@@ -237,23 +237,23 @@ void SellInterface::Update() {
 		selected_list->GetPropertyList().InputDown();
 	}
 
-	// Left/right change the quantity of the object to buy
+	// Left/right change the quantity of the object to sell
 	else if (InputManager->LeftPress()) {
-		if (selected_object->GetBuyCount() == 0) {
+		if (selected_object->GetSellCount() == 0) {
 			ShopMode::CurrentInstance()->GetSound("bump")->Play();
 		}
 		else {
-			selected_object->DecrementBuyCount();
+			selected_object->DecrementSellCount();
 			selected_list->RefreshEntry(selected_entry);
 			ShopMode::CurrentInstance()->GetSound("cancel")->Play();
 		}
 	}
 	else if (InputManager->RightPress()) {
-		if (selected_object->GetBuyCount() >= selected_object->GetStockCount()) {
+		if (selected_object->GetSellCount() >= selected_object->GetOwnCount()) {
 			ShopMode::CurrentInstance()->GetSound("bump")->Play();
 		}
 		else {
-			selected_object->IncrementBuyCount();
+			selected_object->IncrementSellCount();
 			selected_list->RefreshEntry(selected_entry);
 			ShopMode::CurrentInstance()->GetSound("confirm")->Play();
 		}
@@ -310,7 +310,8 @@ SellDisplay::SellDisplay() :
 	_identify_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_identify_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
 	_identify_list.SetSelectMode(VIDEO_SELECT_SINGLE);
-	_identify_list.SetCursorOffset(-500.0f, 0.0f);
+	_identify_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	_identify_list.SetCursorOffset(0.0f, 20.0f);
 	_identify_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
 	_identify_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 
