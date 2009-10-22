@@ -226,10 +226,12 @@ void BuyInterface::Update() {
 	else if (InputManager->UpPress()) {
 		selected_list->GetIdentifyList().InputUp();
 		selected_list->GetPropertyList().InputUp();
+		selected_list->Update();
 	}
 	else if (InputManager->DownPress()) {
 		selected_list->GetIdentifyList().InputDown();
 		selected_list->GetPropertyList().InputDown();
+		selected_list->Update();
 	}
 
 	// Left/right change the quantity of the object to buy
