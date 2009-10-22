@@ -226,12 +226,10 @@ void BuyInterface::Update() {
 	else if (InputManager->UpPress()) {
 		selected_list->GetIdentifyList().InputUp();
 		selected_list->GetPropertyList().InputUp();
-		selected_list->Update();
 	}
 	else if (InputManager->DownPress()) {
 		selected_list->GetIdentifyList().InputDown();
 		selected_list->GetPropertyList().InputDown();
-		selected_list->Update();
 	}
 
 	// Left/right change the quantity of the object to buy
@@ -255,6 +253,7 @@ void BuyInterface::Update() {
 			ShopMode::CurrentInstance()->GetSound("confirm")->Play();
 		}
 	}
+	selected_list->Update();
 }
 
 
@@ -306,7 +305,7 @@ BuyDisplay::BuyDisplay() :
 	_identify_list.SetDimensions(400.0f, 300.0f, 1, 255, 1, 8);
 	_identify_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_identify_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	_property_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	_identify_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 	_identify_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_identify_list.SetCursorOffset(0.0f, 0.0f);
 	_identify_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
