@@ -830,8 +830,11 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 	bool bounds_exceeded = false;
 
 	// Determine if the movement selection will exceed a column or row bondary
-	if ((horizontal == true && ((col + offset < 0) || (col + offset >= _number_columns) || (col + offset >= static_cast<int32>(GetNumberOptions())))) ||
-		(horizontal == false && ((row + offset < 0) || (row + offset >= _number_rows) || (row + offset >= static_cast<int32>(GetNumberOptions())))))
+	int new_row = (row + offset) * _number_columns;
+	if ((horizontal == true && ((col + offset < 0) || (col + offset >= _number_columns) ||
+			(col + offset >= static_cast<int32>(GetNumberOptions())))) ||
+		(horizontal == false && ((new_row < 0) || (new_row >= _number_rows) ||
+			(new_row >= static_cast<int32>(GetNumberOptions())))))
 	{
 		bounds_exceeded = true;
 	}
@@ -892,7 +895,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 		}
 		else  { // The bottom boundary was exceeded
 			if (_vertical_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT) {
-				if (row + offset >= static_cast<int32>(GetNumberOptions()))
+				if (row + offset >= _number_rows)
 					offset -= GetNumberOptions();
 			}
 			// Make sure horizontal wrapping is allowed if vertical wrap mode is shifting
