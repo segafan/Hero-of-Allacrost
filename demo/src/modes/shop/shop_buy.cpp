@@ -239,6 +239,7 @@ void BuyInterface::Update() {
 		}
 		else {
 			selected_object->DecrementBuyCount();
+			ShopMode::CurrentInstance()->UpdateFinances(-selected_object->GetBuyPrice(), 0);
 			selected_list->RefreshEntry(selected_entry);
 			ShopMode::CurrentInstance()->GetSound("cancel")->Play();
 		}
@@ -249,6 +250,7 @@ void BuyInterface::Update() {
 		}
 		else {
 			selected_object->IncrementBuyCount();
+			ShopMode::CurrentInstance()->UpdateFinances(selected_object->GetBuyPrice(), 0);
 			selected_list->RefreshEntry(selected_entry);
 			ShopMode::CurrentInstance()->GetSound("confirm")->Play();
 		}
