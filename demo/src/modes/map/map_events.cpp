@@ -89,16 +89,16 @@ ShopEvent::~ShopEvent()
 {}
 
 
-void ShopEvent::AddWare(uint32 object_id) {
-	_ware_ids.insert(object_id);
+void ShopEvent::AddWare(uint32 object_id, uint32 stock) {
+	_wares.insert(make_pair(object_id, stock));
 }
 
 
 
 void ShopEvent::_Start() {
 	ShopMode* shop = new ShopMode();
-	for (set<uint32>::iterator i = _ware_ids.begin(); i != _ware_ids.end(); i++) {
-		shop->AddObject(*i);
+	for (set<pair<uint32, uint32> >::iterator i = _wares.begin(); i != _wares.end(); i++) {
+		shop->AddObject((*i).first, (*i).second);
 	}
 	ModeManager->Push(shop);
 }
@@ -239,24 +239,32 @@ BattleEncounterEvent::BattleEncounterEvent(uint32 event_id, uint32 enemy_id) :
 BattleEncounterEvent::~BattleEncounterEvent() {
 }
 
+
+
 void BattleEncounterEvent::SetMusic(std::string filename) {
 	_battle_music = filename;
 }
+
+
 
 void BattleEncounterEvent::AddEnemy(uint32 enemy_id) {
 	_enemy_ids.push_back(enemy_id);
 }
 
+
+
 void BattleEncounterEvent::AddBattleEvent(uint32 event_id) {
 	_battle_event_ids.push_back(event_id);
 }
 
+
+
 void BattleEncounterEvent::_Start() {
 	BattleMode* batt_mode = new BattleMode();
-	for (int i = 0; i < _enemy_ids.size(); i++) {
+	for (uint32 i = 0; i < _enemy_ids.size(); i++) {
 		batt_mode->AddEnemy(_enemy_ids.at(i));
 	}
-	for (int i = 0; i < _battle_event_ids.size(); i++) {
+	for (uint32 i = 0; i < _battle_event_ids.size(); i++) {
 		batt_mode->AddEvent(new BattleEvent(_battle_event_ids.at(i)));
 	}
 	batt_mode->AddMusic(_battle_music);

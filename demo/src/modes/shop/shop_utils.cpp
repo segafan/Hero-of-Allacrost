@@ -119,7 +119,7 @@ void ShopObject::IncrementBuyCount(uint32 inc) {
 	}
 
 	_buy_count += inc;
-	if (_stock_count > _buy_count) {
+	if (_stock_count < _buy_count) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "incremented buy count beyond the amount available in stock" << endl;
 		_buy_count = old_count;
 		return;
