@@ -188,14 +188,15 @@ public:
 
 	/** \brief Adds a ware to the list of objects for sale
 	*** \param object_id The ID of the GlobalObject to make available for purchase
+	*** \param stock The amount of the object to make available for purchase
 	*** \note All wares must be added before the _Start() method is called to ensure
 	*** that the wares actually appear in shop mode.
 	**/
-	void AddWare(uint32 object_id);
+	void AddWare(uint32 object_id, uint32 stock);
 
 protected:
-	//! \brief The GlobalObject IDs of all objects to be sold in the shop
-	std::set<uint32> _ware_ids;
+	//! \brief The GlobalObject IDs and stock count of all objects to be sold in the shop
+	std::set<std::pair<uint32, uint32> > _wares;
 
 	//! \brief Creates an instance of ShopMode and pushes it to the game mode stack
 	void _Start();

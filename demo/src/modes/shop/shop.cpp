@@ -228,9 +228,14 @@ void ShopMode::SetPriceLevels(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_
 
 
 
-void ShopMode::AddObject(uint32 object_id) {
+void ShopMode::AddObject(uint32 object_id, uint32 stock) {
 	if (IsInitialized() == true) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "shop is already initialized" << endl;
+		return;
+	}
+
+	if (stock == 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "added an object with a zero stock count" << endl;
 		return;
 	}
 
@@ -247,6 +252,7 @@ void ShopMode::AddObject(uint32 object_id) {
 	GlobalObject* new_object = GlobalCreateNewObject(object_id, 1);
 	_managed_objects.push_back(new_object);
 	ShopObject new_shop_object(new_object, true);
+	new_shop_object.IncrementStockCount(stock);
 	_shop_objects.insert(make_pair(object_id, new_shop_object));
 }
 
@@ -486,6 +492,7 @@ void ShopMode::UpdateFinances(int32 costs_amount, int32 sales_amount) {
 	_total_sales = static_cast<uint32>(updated_sales);
 	_root_interface->UpdateFinanceTable();
 }
+
 
 
 void ShopMode::ChangeState(SHOP_STATE new_state) {

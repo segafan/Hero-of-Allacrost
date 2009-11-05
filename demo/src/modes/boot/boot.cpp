@@ -1357,18 +1357,18 @@ void BootMode::_OnShopDebug() {
 	GlobalManager->AddToInventory(10001);
 	GlobalManager->AddToInventory(10502);
 	hoa_shop::ShopMode *SM = new hoa_shop::ShopMode();
-	SM->AddObject(1);
-	SM->AddObject(2);
-	SM->AddObject(10501);
-	SM->AddObject(10504);
-	SM->AddObject(3);
-	SM->AddObject(3001);
-	SM->AddObject(30001);
-	SM->AddObject(30002);
-	SM->AddObject(20001);
-	SM->AddObject(20002);
-	SM->AddObject(20501);
-	SM->AddObject(20502);
+	SM->AddObject(1, 3);
+	SM->AddObject(2, 5);
+	SM->AddObject(10501, 2);
+	SM->AddObject(10504, 4);
+	SM->AddObject(3, 12);
+	SM->AddObject(3001, 1);
+	SM->AddObject(30001, 2);
+	SM->AddObject(30002, 3);
+	SM->AddObject(20001, 10);
+	SM->AddObject(20002, 11);
+	SM->AddObject(20501, 2);
+	SM->AddObject(20502, 1);
 	ModeManager->Push(SM);
 }
 
@@ -1578,7 +1578,7 @@ void BootMode::_OnDeleteFile() {
 	{
 		//get the file path
 		const string& fileName = GetUserDataPath(true) + _GetDirectoryListingUserDataPath().at(_load_profile_menu.GetSelection());
-	
+
 		bool success = DeleteFile(fileName);
 
 		if(BOOT_DEBUG)

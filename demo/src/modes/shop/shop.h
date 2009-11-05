@@ -111,10 +111,11 @@ public:
 
 	/** \brief Adds a new object for the shop to sell
 	*** \param object_id The id number of the object to add
+	*** \param stock The amount of the object to make available for sale at the shop
 	***
 	*** The newly added object won't be seen in the shop menu until the Reset() function is called.
 	**/
-	void AddObject(uint32 object_id);
+	void AddObject(uint32 object_id, uint32 stock);
 
 	/** \brief Deletes an object from the shop
 	*** \param object_id The id number of the object to remove
