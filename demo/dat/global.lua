@@ -21,10 +21,14 @@ function LoadNewMap(map_name)
 end
 
 function LoadNewShop(...)
-	local i, v;
+	local i, v, item;
 	local shop = hoa_shop.ShopMode();
 	for i,v in ipairs(arg) do
-		shop:AddObject(v);
+		if (i % 2 == 1) then
+			item = v
+		else
+			shop:AddObject(item, v)
+		end
 	end
 	ModeManager:Push(shop);
 end

@@ -920,7 +920,7 @@ end
 -- Shop setup function (Karlate armory)
 -- TODO: Remove Laila's equipment
 map_functions[2] = function()
-	LoadNewShop(1, 4, 3001, 3002, 10002, 10502, 20002, 30002, 40002, 50502);
+	LoadNewShop(1, 5, 4, 5, 3001, 5, 3002, 5, 10002, 5, 10502, 5, 20002, 5, 30002, 5, 40002, 5, 50502, 5);
 end
 
 -- Kyle leaves party, when talking to captain
@@ -930,7 +930,7 @@ map_functions[3] = function()
 end
 
 map_functions[4] = function()
-		
+
 end
 
 -- Captain goes inside to speak with Claudius
