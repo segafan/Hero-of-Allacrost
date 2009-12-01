@@ -675,7 +675,6 @@ function Load(m)
 
 	kyle:AddDialogueReference(1);
 	dialogue_supervisor:AddDialogue(dialogue);
-	map:AddGroundObject(kyle);
 
 	-- Add NPC Karlate Captain
 	captain = ConstructSprite("Captain", 3, 156, 38, 0.0, 0.0);
@@ -762,8 +761,6 @@ function Load(m)
 	captain:AddDialogueReference(3);
 	captain:AddDialogueReference(4);
 
-	map:AddGroundObject(captain);
-
 	-- Generic Karlate Sprite (training site guard #1)
 	sprite = ConstructSprite("Karlate", 4, 152, 78, 0.0, 0.0);
 	dialogue = hoa_map.MapDialogue(5);
@@ -793,7 +790,29 @@ function Load(m)
 
 	dialogue = hoa_map.MapDialogue(8);
 	text = hoa_utils.Translate("Claudius?  Claudius!  WAKE UP!");
-	dialogue:AddText(text, 5, -1, 0, false);
+	dialogue:AddText(text, 5, 1, 0, false);
+	text = hoa_utils.Translate("Huh?  What?");
+	dialogue:AddText(text, 1000, 2, 0, false);
+	text = hoa_utils.Translate("Get your gear and let's go!");
+	dialogue:AddText(text, 5, 3, 0, false);
+	text = hoa_utils.Translate("What's going on?");
+	dialogue:AddText(text, 1000, 4, 0, false);
+	text = hoa_utils.Translate("The treasury!  A thief has broken in and stolen everything.  The captain has called a man hunt.  Now equip yourself and meet us out front.");
+	dialogue:AddText(text, 5, 5, 0, false);
+	text = hoa_utils.Translate("Come on, Kyle, let's go!");
+	dialogue:AddText(text, 1000, 6, 0, false);
+	text = hoa_utils.Translate("...Kyle?");
+	dialogue:AddText(text, 1000, 7, 0, false);
+	text = hoa_utils.Translate("Oh no...");
+	dialogue:AddText(text, 1000, 8, 0, false);
+	text = hoa_utils.Translate("For those of you who don't know, a thief has broken into the treasury and stolen a vast quantity of gold.  It is up to us to capture the criminal and return what they have taken.  It's believed that the robbery occurred no more than 20 minutes ago, so the thief can't be far.  Everyone split up and comb the town.");
+	dialogue:AddText(text, 5, 9, 0, false);
+	text = hoa_utils.Translate("Sir?");
+	dialogue:AddText(text, 1000, 10, 0, false);
+	text = hoa_utils.Translate("Yes, Claudius?");
+	dialogue:AddText(text, 5, 11, 0, false);
+	text = hoa_utils.Translate("...Nothing.");
+	dialogue:AddText(text, 1000, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Create a zone for exiting the map, to be used as a trigger
@@ -866,6 +885,8 @@ function Load(m)
 		-- Create the player''s sprite
 		sprite = ConstructSprite("Claudius", 1000, 155, 144);
 		map:AddGroundObject(sprite);
+		map:AddGroundObject(kyle);
+		map:AddGroundObject(captain);
 		-- Set the camera to focus on the player''s sprite
 		map:SetCamera(sprite);
 		-- Game has just started, begin opening dialogue
@@ -873,18 +894,18 @@ function Load(m)
 	elseif (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
 		-- Just got back from desert battle, go into night event
 		-- TODO: Visual/audio effects needed here
-		map_functions[1](); -- remove Kyle's sprite, we're not in the beginning
-		sprite = ConstructSprite("Claudius", 1000, 155, 114); -- place Claudius in the barracks
-		map:AddGroundObject(sprite); -- add Claudius to map
-		map:SetCamera(sprite); -- Set the camera to focus on the player's sprite
-		event_supervisor:StartEvent(23001); -- start dialogue
+		-- TODO: Ideally, we would do a more elegant transition here.  Feel free to code one if you are able.
+		GlobalManager:RemoveCharacter(KYLE);                      -- Kyle disappears, get him out of the party
+		sprite = ConstructSprite("Claudius", 1000, 155, 114);     -- place Claudius in the barracks
+		map:AddGroundObject(sprite);                              -- add Claudius to map
+		map:SetCamera(sprite);                                    -- Set the camera to focus on the player's sprite
+		event_supervisor:StartEvent(23001);                       -- start dialogue
 	else
 		-- No event happens in town right now, so just start at the entrance
 		-- TODO: determine which entrance to start at
-		sprite = ConstructSprite("Claudius", 1000, 45, 220); -- place Claudius at the south entrance
-		map:AddGroundObject(sprite); -- add Claudius to map
-		map_functions[1](); -- remove Kyle's sprite, we're not in the beginning
-		map:SetCamera(sprite); -- Set the camera to focus on the player's sprite
+		sprite = ConstructSprite("Claudius", 1000, 45, 220);      -- place Claudius at the south entrance
+		map:AddGroundObject(sprite);                              -- add Claudius to map
+		map:SetCamera(sprite);                                    -- Set the camera to focus on the player's sprite
 	end
 end -- function Load()
 

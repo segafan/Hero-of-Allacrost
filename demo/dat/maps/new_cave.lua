@@ -389,11 +389,29 @@ function Load(m)
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(sprite);
 
-	-- Add NPC Kyle
+	-- Add NPC's
 	kyle = ConstructSprite("Kyle", 2, 120, 30, 0.0, 0.0);
+	captain = ConstructSprite("Captain", 3, 116, 30, 0.0, 0.0);
+
+	dialogue = hoa_map.MapDialogue(1);
+
+	text = hoa_utils.Translate("Stop this foolishness, Kyle. You can’t escape. Lower your weapon and come peacefully and I’ll make sure your punishment is lenient.");
+	dialogue:AddText(text, 3, 1, 0, false);
+	text = hoa_utils.Translate("No. I’m doing this for me. I don’t expect you to understand.");
+	dialogue:AddText(text, 2, 2, 0, false);
+	text = hoa_utils.Translate("Then you leave me no choice.");
+	dialogue:AddText(text, 3, 3, 0, false);
+	text = hoa_utils.Translate("I’m very disappointed in you, Kyle.");
+	dialogue:AddText(text, 3, 4, 0, false);
+	text = hoa_utils.Translate("Over here, Claudius!");
+	dialogue:AddText(text, 3, 5, 0, false);
+	text = hoa_utils.Translate("No!");
+	dialogue:AddText(text, 1000, 6, 3, false);
+
+	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue with kyle
-	dialogue = hoa_map.MapDialogue(1);
+	dialogue = hoa_map.MapDialogue(2);
 
 	text = hoa_utils.Translate("What have you done...");
 	dialogue:AddText(text, 1000, 1, 0, false);
@@ -424,11 +442,10 @@ function Load(m)
 	text = hoa_utils.Translate("You killed the Captain!");
 	dialogue:AddText(text, 1000, -1, 2, false);
 
-	kyle:AddDialogueReference(1);
+	kyle:AddDialogueReference(2);
 	dialogue_supervisor:AddDialogue(dialogue);
-	map:AddGroundObject(kyle);
 
-	dialogue = hoa_map.MapDialogue(2);
+	dialogue = hoa_map.MapDialogue(3);
 
 	text = hoa_utils.Translate("(Insert dialogue here)");
 	dialogue:AddText(text, 2, 1, 0, false);
@@ -543,7 +560,7 @@ function Load(m)
 	-- Finally, add the zone to the map
 	map:AddZone(ezone);
 
-	-- Add a treasure about half-way through the cave
+	-- Add a treasure chest with 2 Healing Potions
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
 	chest:SetObjectID(500);
 	chest:SetContext(1);
@@ -552,7 +569,7 @@ function Load(m)
 	chest:AddObject(1, 2); -- Adds 2 Healing Potions
 	map:AddGroundObject(chest);
 
-	-- Add a treasure about half-way through the cave
+	-- Add a treasure chest with 3 Healing Potions
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
 	chest:SetObjectID(501);
 	chest:SetContext(1);
@@ -561,6 +578,7 @@ function Load(m)
 	chest:AddObject(1, 3); -- Adds 3 Healing Potions
 	map:AddGroundObject(chest);
 
+	-- Add a treasure chest with an Iron Sword
 	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
 	chest:SetObjectID(501);
 	chest:SetContext(1);
@@ -575,14 +593,31 @@ function Load(m)
 	exit_zone:AddSection(hoa_map.ZoneSection(122, 110, 124, 114));
 	map:AddZone(exit_zone);
 
+	-- Create a zone for exiting the map, to be used as a trigger
+	exit_zone2 = hoa_map.MapZone();
+	-- Add a section to the zone to enable the user to exit the map
+	exit_zone2:AddSection(hoa_map.ZoneSection(102, 0, 124, 34));
+	map:AddZone(exit_zone2);
+
+
 	-- Register event functions
 	event = hoa_map.ScriptedEvent(1, 1, 0);
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.ScriptedEvent(2, 2, 0);
 	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(3, 3, 0);
+	event_supervisor:RegisterEvent(event);
 
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_village.lua");
 	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.DialogueEvent(11003, 1);
+	event_supervisor:RegisterEvent(event);
+	
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
+		map:AddGroundObject(kyle);
+		map:AddGroundObject(captain);
+	end
 end
 
 
@@ -591,6 +626,15 @@ function Update()
 	if (exit_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
 		if (event_supervisor:IsEventActive(22111) == false) then
 			event_supervisor:StartEvent(22111);
+		end
+	elseif (exit_zone2:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (event_supervisor:IsEventActive(11003) == false) then
+			if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
+				if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("final_battle") == false) then
+					GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("final_battle", 1);
+					event_supervisor:StartEvent(11003);
+				end
+			end
 		end
 	end
 end
@@ -615,7 +659,13 @@ map_functions[2] = function()
 	event:AddBattleEvent(1);
 	event:AddEventLink(11001, false, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.DialogueEvent(11001, 2);
+	event = hoa_map.DialogueEvent(11001, 3);
 	event_supervisor:RegisterEvent(event);
 	event_supervisor:StartEvent(11000);
+end
+
+map_functions[3] = function()
+	event = hoa_map.DialogueEvent(11002, 2);
+	event_supervisor:RegisterEvent(event);
+	event_supervisor:StartEvent(11002);
 end
