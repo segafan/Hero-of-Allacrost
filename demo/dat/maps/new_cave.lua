@@ -653,6 +653,7 @@ map_functions[1] = function()
 	kyle:SetContext(2);
 end
 
+-- Start the boss battle
 map_functions[2] = function()
 	local event = hoa_map.BattleEncounterEvent(11000, 107);
 	event:SetMusic("mus/Betrayal_Battle.ogg");
@@ -664,7 +665,15 @@ map_functions[2] = function()
 	event_supervisor:StartEvent(11000);
 end
 
+-- Executes when knight Captain is killed
 map_functions[3] = function()
+	-- First, remove KC from map
+	captain:SetVisible(false);
+	captain:SetNoCollision(true);
+	captain:SetUpdatable(false);
+	captain:SetContext(2);
+
+	-- transition to next dialogue
 	event = hoa_map.DialogueEvent(11002, 2);
 	event_supervisor:RegisterEvent(event);
 	event_supervisor:StartEvent(11002);
