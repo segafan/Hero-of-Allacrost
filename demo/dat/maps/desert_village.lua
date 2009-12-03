@@ -896,7 +896,8 @@ function Load(m)
 		-- TODO: Visual/audio effects needed here
 		-- TODO: Ideally, we would do a more elegant transition here.  Feel free to code one if you are able.
 		GlobalManager:RemoveCharacter(KYLE);                      -- Kyle disappears, get him out of the party
-		sprite = ConstructSprite("Claudius", 1000, 155, 114);     -- place Claudius in the barracks
+		sprite = ConstructSprite("Claudius", 1000, 125, 20);      -- place Claudius in the barracks (coordinates)
+		sprite:SetContext(2);                                     -- place Claudius in the barracks (context)
 		map:AddGroundObject(sprite);                              -- add Claudius to map
 		map:SetCamera(sprite);                                    -- Set the camera to focus on the player's sprite
 		event_supervisor:StartEvent(23001);                       -- start dialogue
