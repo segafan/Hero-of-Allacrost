@@ -184,7 +184,7 @@ bool VideoEngine::FinalizeInitialization() {
 	}
 
 	// Set the argument to false to remove debug GUI outlines
-	DEBUG_EnableGUIOutlines(true);
+	DEBUG_EnableGUIOutlines(false);
 
 	_initialized = true;
 	return true;

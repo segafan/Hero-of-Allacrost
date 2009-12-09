@@ -949,6 +949,16 @@ end
 map_functions[3] = function()
 	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("kyle_leaves", 1);
 	GlobalManager:RemoveCharacter(KYLE);
+	kyle:SetContext(1);
+	kyle:SetVisible(true);
+	kyle:SetNoCollision(true);
+	kyle:SetUpdatable(true);
+	kyle:SetXPosition(152, 0);
+	kyle:SetYPosition(40, 0);
+	-- set Kyle's path to the bottom of the screen, then let him disappear
+	event = hoa_map.PathMoveSpriteEvent(10001, kyle, 152, 150);
+	event_supervisor:RegisterEvent(event);
+	event_supervisor:StartEvent(10001);
 end
 
 map_functions[4] = function()
