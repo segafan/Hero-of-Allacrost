@@ -815,6 +815,16 @@ function Load(m)
 	dialogue:AddText(text, 1000, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
+	-- Generic Karlate Sprite
+	sprite = ConstructSprite("Karlate", 7, 142, 30, 0.0, 0.0);
+	dialogue = hoa_map.MapDialogue(9);
+	text = hoa_utils.Translate("Awaiting orders, sir.");
+	dialogue:AddText(text, 4, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+	sprite:AddDialogueReference(9);
+	sprite:SetContext(2);
+	map:AddGroundObject(sprite);
+
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
 	exit_zone:AddSection(hoa_map.ZoneSection(40, 222, 50, 223));
@@ -888,7 +898,18 @@ function Load(m)
 		-- TODO: Visual/audio effects needed here
 		-- TODO: Ideally, we would do a more elegant transition here.  Feel free to code one if you are able.
 		GlobalManager:RemoveCharacter(KYLE);                      -- Kyle disappears, get him out of the party
-		sprite = ConstructSprite("Claudius", 1000, 125, 20);      -- place Claudius in the barracks (coordinates)
+
+		-- Generic Karlate Sprite
+		sprite = ConstructSprite("Karlate", 8, 130, 17, 0.0, 0.0);
+		dialogue = hoa_map.MapDialogue(10);
+		text = hoa_utils.Translate("Where did the culprit go?");
+		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue_supervisor:AddDialogue(dialogue);
+		sprite:AddDialogueReference(10);
+		sprite:SetContext(2);
+		map:AddGroundObject(sprite);
+
+		sprite = ConstructSprite("Claudius", 1000, 125, 17);      -- place Claudius in the barracks (coordinates)
 		sprite:SetContext(2);                                     -- place Claudius in the barracks (context)
 		map:AddGroundObject(sprite);                              -- add Claudius to map
 		map:SetCamera(sprite);                                    -- Set the camera to focus on the player's sprite
