@@ -670,8 +670,7 @@ function Load(m)
 	map:SetCamera(sprite);
 
 	-- Add Kyle sprite
-	-- TODO: Hide Kyle sprite if he is still in the party.
-	kyle = ConstructSprite("Kyle", 2, 35, 35, 0.0, 0.0);
+	kyle = ConstructSprite("Kyle", 2, 5, 75, 0.0, 0.0);
 
 	-- Dialogue with kyle
 	dialogue = hoa_map.MapDialogue(1);
@@ -758,6 +757,51 @@ function Load(m)
 
 	-- Finally, add the zone to the map
 	map:AddZone(ezone);
+
+
+
+	-- Create an EnemyZone
+	ezone = hoa_map.EnemyZone(2000, true); -- 2000 ms between respawns, monsters restricted to zone area
+	ezone:AddSection(hoa_map.ZoneSection(54, 45, 66, 60)); -- define zone boundaries
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png"); -- enemy party will appear on map as snake
+	enemy:NewEnemyParty(); -- First potential enemy party
+	enemy:AddEnemy(3); -- add a snake
+	enemy:AddEnemy(2); -- add a spider
+	enemy:NewEnemyParty(); -- Second potential enemy party
+	enemy:AddEnemy(3); -- add a snake
+	enemy:AddEnemy(3); -- add a snake
+	ezone:AddEnemy(enemy, map, 2); -- Add the enemy to the zone two times	
+	map:AddZone(ezone); -- Finally, add the zone to the map
+
+	-- Create an EnemyZone
+	ezone = hoa_map.EnemyZone(2000, true); -- 2000 ms between respawns, monsters restricted to zone area
+	ezone:AddSection(hoa_map.ZoneSection(44, 30, 56, 45)); -- define zone boundaries
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png"); -- enemy party will appear on map as snake
+	enemy:NewEnemyParty(); -- First potential enemy party
+	enemy:AddEnemy(3); -- add a snake
+	enemy:AddEnemy(2); -- add a spider
+	enemy:NewEnemyParty(); -- Second potential enemy party
+	enemy:AddEnemy(3); -- add a snake
+	enemy:AddEnemy(3); -- add a snake
+	ezone:AddEnemy(enemy, map, 2); -- Add the enemy to the zone two times	
+	map:AddZone(ezone); -- Finally, add the zone to the map
+
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
