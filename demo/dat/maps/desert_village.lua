@@ -614,9 +614,10 @@ context_01 = { 0, 0, 0, -1, 0, 0, 1, -1, 0, 0, 2, -1, 0, 0, 3, -1, 0, 0, 4, -1, 
 
 -- Allacrost map editor end. Do not edit this line. --
 
-
+-- these are NPC's who will need to be accessed by multiple functions
 kyle = nil;
 captain = nil;
+wakeupguy = nil;
 
 
 function Load(m)
@@ -639,7 +640,7 @@ function Load(m)
 		GlobalManager:AddNewEventGroup("kyle_story");
 	end
 
-	-- Dialogue with kyle
+	-- Dialogue with kyle (opening)
 	dialogue = hoa_map.MapDialogue(1);
 
 	text = hoa_utils.Translate("I’m just saying that I’m only doing this because of my father. He was a knight, so now I have to be one. If it was my choice I would be far away from here.");
@@ -673,8 +674,18 @@ function Load(m)
 	text = hoa_utils.Translate("Kyle has joined the party.");
 	dialogue:AddText(text, 2, -1, 0, false);
 
-	kyle:AddDialogueReference(1);
 	dialogue_supervisor:AddDialogue(dialogue);
+
+
+	-- Dialogue with kyle (in the unlikely event that you would talk to him)
+	dialogue = hoa_map.MapDialogue(11);
+
+	text = hoa_utils.Translate("");
+	dialogue:AddText(text, 2, -1, 0, false);
+	
+	kyle:AddDialogueReference(11);
+
+
 
 	-- Add NPC Karlate Captain
 	captain = ConstructSprite("Captain", 3, 156, 38, 0.0, 0.0);
@@ -812,7 +823,7 @@ function Load(m)
 	text = hoa_utils.Translate("Yes, Claudius?");
 	dialogue:AddText(text, 5, 11, 0, false);
 	text = hoa_utils.Translate("...Nothing.");
-	dialogue:AddText(text, 1000, -1, 0, false);
+	dialogue:AddText(text, 1000, -1, 7, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Generic Karlate Sprite
@@ -868,6 +879,8 @@ function Load(m)
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.ScriptedEvent(6, 6, 0);
 	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(7, 7, 0);
+	event_supervisor:RegisterEvent(event);
 
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_outskirts.lua");
 	event_supervisor:RegisterEvent(event);
@@ -899,15 +912,15 @@ function Load(m)
 		-- TODO: Ideally, we would do a more elegant transition here.  Feel free to code one if you are able.
 		GlobalManager:RemoveCharacter(KYLE);                      -- Kyle disappears, get him out of the party
 
-		-- Generic Karlate Sprite
-		sprite = ConstructSprite("Karlate", 8, 130, 15, 0.0, 0.0);
+		-- Generic Karlate Sprite, wakes up Claudius
+		wakeupguy = ConstructSprite("Karlate", 8, 130, 15, 0.0, 0.0);
 		dialogue = hoa_map.MapDialogue(10);
 		text = hoa_utils.Translate("Where did the culprit go?");
 		dialogue:AddText(text, 4, -1, 0, false);
 		dialogue_supervisor:AddDialogue(dialogue);
-		sprite:AddDialogueReference(10);
-		sprite:SetContext(2);
-		map:AddGroundObject(sprite);
+		wakeupguy:AddDialogueReference(10);
+		wakeupguy:SetContext(2);
+		map:AddGroundObject(wakeupguy);
 
 		sprite = ConstructSprite("Claudius", 1000, 125, 15);      -- place Claudius in the barracks (coordinates)
 		sprite:SetContext(2);                                     -- place Claudius in the barracks (context)
@@ -972,7 +985,6 @@ map_functions[3] = function()
 	event = hoa_map.PathMoveSpriteEvent(10001, kyle, 152, 150);
 	event_supervisor:RegisterEvent(event);
 	event_supervisor:StartEvent(10001);
-	-- TODO: make him disappear!
 end
 
 map_functions[4] = function()
@@ -994,5 +1006,14 @@ map_functions[6] = function()
 	captain:SetNoCollision(true);
 	captain:SetUpdatable(false);
 	captain:SetContext(1);
+	kyle:SetContext(2); -- kyle goes missing, so make him disappear too
 	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("kyle_missing", 1);
+end
+
+-- after briefing Claudius, generic Karlate leaves
+map_functions[7] = function()
+	-- set Kyle's path to the bottom of the screen, then let him disappear
+	event = hoa_map.PathMoveSpriteEvent(10002, wakeupguy, 152, 150);
+	event_supervisor:RegisterEvent(event);
+	event_supervisor:StartEvent(10002);
 end
