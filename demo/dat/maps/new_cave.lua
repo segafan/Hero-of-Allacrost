@@ -2,6 +2,7 @@ local ns = {}
 setmetatable(ns, {__index = _G})
 new_cave = ns;
 setfenv(1, ns);
+local_chest_counter = 500;
 
 -- The map name and location graphic
 map_name = "North Cave"
@@ -549,165 +550,19 @@ function Load(m)
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(sprite);
 
-	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
-	local ezone = hoa_map.EnemyZone(2000, true);
-	ezone:AddSection(hoa_map.ZoneSection(20, 94, 40, 120));
+	QuickEnemySlime(20, 94, 40, 120, 2);
+	QuickEnemySlime(55, 8, 75, 30, 1);
+	QuickEnemySlime(100, 165, 140, 190, 3);
+	QuickEnemyGiant(6, 8, 24, 20, 1);
+	QuickEnemySnakes(10, 165, 50, 190, 1);
+	QuickEnemySnakes(84, 38, 110, 54, 2);
 
-	-- Create a sprite representation of a monster attached to this zone
-	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
-	enemy:SetContext(1);
-	enemy:SetCollHalfWidth(1.0);
-	enemy:SetCollHeight(2.0);
-	enemy:SetImgHalfWidth(1.0);
-	enemy:SetImgHeight(4.0);
-	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(2);
-	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
-	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
-	ezone:AddEnemy(enemy, map, 2);
-
-	-- Finally, add the zone to the map
-	map:AddZone(ezone);
-
-	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
-	local ezone = hoa_map.EnemyZone(2000, true);
-	ezone:AddSection(hoa_map.ZoneSection(6, 8, 24, 20));
-
-	-- Create a sprite representation of a monster attached to this zone
-	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
-	enemy:SetContext(1);
-	enemy:SetCollHalfWidth(1.0);
-	enemy:SetCollHeight(2.0);
-	enemy:SetImgHalfWidth(1.0);
-	enemy:SetImgHeight(4.0);
-	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(4);
-	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
-	-- Add the enemy to the zone once (it also gets added to the ground objects) 
-	ezone:AddEnemy(enemy, map, 1);
-
-	-- Finally, add the zone to the map
-	map:AddZone(ezone);
-
-	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
-	local ezone = hoa_map.EnemyZone(2000, true);
-	ezone:AddSection(hoa_map.ZoneSection(55, 8, 75, 30));
-
-	-- Create a sprite representation of a monster attached to this zone
-	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
-	enemy:SetContext(1);
-	enemy:SetCollHalfWidth(1.0);
-	enemy:SetCollHeight(2.0);
-	enemy:SetImgHalfWidth(1.0);
-	enemy:SetImgHeight(4.0);
-	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(3);
-	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
-	-- Add the enemy to the zone once (it also gets added to the ground objects) 
-	ezone:AddEnemy(enemy, map, 1);
-
-	-- Finally, add the zone to the map
-	map:AddZone(ezone);
-
-	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
-	local ezone = hoa_map.EnemyZone(2000, true);
-	ezone:AddSection(hoa_map.ZoneSection(36, 72, 52, 76));
-
-	-- Create a sprite representation of a monster attached to this zone
-	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
-	enemy:SetContext(1);
-	enemy:SetCollHalfWidth(1.0);
-	enemy:SetCollHeight(2.0);
-	enemy:SetImgHalfWidth(1.0);
-	enemy:SetImgHeight(4.0);
-	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(2);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(3);
-	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
-	-- Add the enemy to the zone once (it also gets added to the ground objects) 
-	ezone:AddEnemy(enemy, map, 1);
-
-	-- Finally, add the zone to the map
-	map:AddZone(ezone);
-
-	-- Add a treasure chest with 2 Healing Potions
-	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
-	chest:SetObjectID(500);
-	chest:SetContext(1);
-	chest:SetXPosition(95, 0);
-	chest:SetYPosition(110, 0);
-	chest:AddObject(1, 2); -- Adds 2 Healing Potions
-	map:AddGroundObject(chest);
-
-	-- Add a treasure chest with 3 Healing Potions
-	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
-	chest:SetObjectID(501);
-	chest:SetContext(1);
-	chest:SetXPosition(62, 0);
-	chest:SetYPosition(88, 0);
-	chest:AddObject(1, 3); -- Adds 3 Healing Potions
-	map:AddGroundObject(chest);
-
-	-- Add a treasure chest with an Iron Sword
-	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
-	chest:SetObjectID(502);
-	chest:SetContext(1);
-	chest:SetXPosition(6, 0);
-	chest:SetYPosition(20, 0);
-	chest:AddObject(10002, 1); -- Adds Iron Sword
-	map:AddGroundObject(chest);
-
-	-- Add a treasure chest with a Leather Chain Mail
-	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
-	chest:SetObjectID(503);
-	chest:SetContext(1);
-	chest:SetXPosition(150, 0);
-	chest:SetYPosition(50, 0);
-	chest:AddObject(30002, 1); -- Adds Leather Chain Mail
-	map:AddGroundObject(chest);
-
-	-- Add a treasure chest with a Cobalt Helm
-	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
-	chest:SetObjectID(504);
-	chest:SetContext(1);
-	chest:SetXPosition(150, 0);
-	chest:SetYPosition(80, 0);
-	chest:AddObject(20002, 1); -- Adds Cobalt Helm
-	map:AddGroundObject(chest);
-
-	-- Add a treasure chest with a Phoenix Shield
-	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
-	chest:SetObjectID(505);
-	chest:SetContext(1);
-	chest:SetXPosition(145, 0);
-	chest:SetYPosition(180, 0);
-	chest:AddObject(40002, 1); -- Adds Phoenix Shield
-	map:AddGroundObject(chest);
+	QuickChest( 95, 110,     1, 2);
+	QuickChest( 62,  88,     1, 3);
+	QuickChest(  6,  20, 10002, 1);
+	QuickChest(150,  50, 30002, 1);
+	QuickChest(150,  80, 20002, 1);
+	QuickChest(145, 180, 40002, 1);
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
@@ -745,4 +600,106 @@ end
 
 function Draw()
 	map:DrawMapLayers();
+end
+
+-- Creates an EnemyZone with snake enemies
+function QuickEnemySnakes(x1, y1, x2, y2, n)
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
+	ezone:AddSection(hoa_map.ZoneSection(x1, y1, x2, y2));
+
+	-- Create a sprite representation of a monster attached to this zone
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
+	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
+	-- Add the enemy to the zone n times (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, n);
+
+	-- Finally, add the zone to the map
+	map:AddZone(ezone);	
+end
+
+-- Creates an EnemyZone with slime enemies
+function QuickEnemySlime(x1, y1, x2, y2, n)
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
+	ezone:AddSection(hoa_map.ZoneSection(x1, y1, x2, y2));
+
+	-- Create a sprite representation of a monster attached to this zone
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(3);
+	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
+	-- Add the enemy to the zone n times (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, n);
+
+	-- Finally, add the zone to the map
+	map:AddZone(ezone);
+end
+
+-- Creates an EnemyZone with a large monster
+function QuickEnemyGiant(x1, y1, x2, y2, n)
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
+	ezone:AddSection(hoa_map.ZoneSection(x1, y1, x2, y2));
+
+	-- Create a sprite representation of a monster attached to this zone
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(2.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(2.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/gigas_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(104);
+	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
+	-- Add the enemy to the zone n times (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, n);
+
+	-- Finally, add the zone to the map
+	map:AddZone(ezone);
+end
+
+-- Add a treasure chest to the map at the given coordinates, with one type of item
+-- x,y = coordinates
+-- objnum = ID of the GlobalObject to add to the chest
+-- quantity = number of objects to include in chest
+function QuickChest(x, y, objnum, quantity)
+	chest = hoa_map.MapTreasure("img/misc/chest1.png", 4);
+	chest:SetObjectID(local_chest_counter);
+	chest:SetContext(1);
+	chest:SetXPosition(x, 0);
+	chest:SetYPosition(y, 0);
+	chest:AddObject(objnum, quantity)
+	map:AddGroundObject(chest);
+	local_chest_counter = local_chest_counter + 1;
 end
