@@ -290,17 +290,17 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("Failed to load libertine_capitals.ttf font at size 32", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text20", 20) == false) {
-		throw Exception("Failed to load libertine.ttf font at size 20", __FILE__, __LINE__, __FUNCTION__);
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text18", 18) == false) {
+		throw Exception("Failed to load libertine.ttf font at size 18", __FILE__, __LINE__, __FUNCTION__);
 	}
-	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text23", 23) == false) {
-		throw Exception("Failed to load libertine.ttf font at size 23", __FILE__, __LINE__, __FUNCTION__);
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text22", 22) == false) {
+		throw Exception("Failed to load libertine.ttf font at size 22", __FILE__, __LINE__, __FUNCTION__);
 	}
 	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text26", 26) == false) {
 		throw Exception("Failed to load libertine.ttf font at size 26", __FILE__, __LINE__, __FUNCTION__);
 	}
-	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text29", 29) == false) {
-		throw Exception("Failed to load libertine.ttf font at size 29", __FILE__, __LINE__, __FUNCTION__);
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text30", 30) == false) {
+		throw Exception("Failed to load libertine.ttf font at size 30", __FILE__, __LINE__, __FUNCTION__);
 	}
 
 	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "default", 18) == false) {
@@ -324,7 +324,7 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("Failed to load the 'Libertine' font as 'title, size 24'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	VideoManager->Text()->SetDefaultStyle(TextStyle("default", Color::white, VIDEO_TEXT_SHADOW_BLACK, 1, -2));
+	VideoManager->Text()->SetDefaultStyle(TextStyle("text22", Color::white, VIDEO_TEXT_SHADOW_BLACK, 1, -2));
 
 	// Set the window title and icon name
 	SDL_WM_SetCaption("Hero of Allacrost", "Hero of Allacrost");

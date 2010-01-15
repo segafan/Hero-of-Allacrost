@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    shop_root.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Source file for root menu of shop mode
+*** \brief   Source file for root interface of shop mode
 *** ***************************************************************************/
 
 #include <iostream>
@@ -115,15 +115,15 @@ RootInterface::RootInterface() {
 	_shop_name.SetStyle(TextStyle("title32"));
 	_shop_name.SetText(MakeUnicodeString("Shop Name")); // This default name should be overwritten
 
-	_buy_price_text.SetStyle(TextStyle("text23"));
+	_buy_price_text.SetStyle(TextStyle("text22"));
 	_buy_price_text.SetText(MakeUnicodeString("Buy prices"));
-	_sell_price_text.SetStyle(TextStyle("text23"));
+	_sell_price_text.SetStyle(TextStyle("text22"));
 	_sell_price_text.SetText(MakeUnicodeString("Sell prices"));
 
 	_greeting_text.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
 	_greeting_text.SetPosition(40.0f, 100.0f);
 	_greeting_text.SetDimensions(600.0f, 50.0f);
-	_greeting_text.SetTextStyle(TextStyle("text23"));
+	_greeting_text.SetTextStyle(TextStyle("text22"));
 	_greeting_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_greeting_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_greeting_text.SetDisplayText(MakeUnicodeString("\"Welcome! Take a look around.\"")); // Default greeting, should usually be overwritten
@@ -222,7 +222,7 @@ void RootInterface::Initialize() {
 	// ---------- (2): Construct category name text and graphics
 	uint32 deal_types = ShopMode::CurrentInstance()->GetDealTypes();
 
-	TextStyle name_style("text23");
+	TextStyle name_style("text22");
 	const vector<StillImage>& all_cat_icons = ShopMode::CurrentInstance()->GetObjectCategoryImages();
 
 	if ((deal_types & DEALS_ITEMS) != 0) {

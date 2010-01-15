@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    shop_sell.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Source file for sell menu of shop mode
+*** \brief   Source file for sell interface of shop mode
 *** ***************************************************************************/
 
 #include "defs.h"

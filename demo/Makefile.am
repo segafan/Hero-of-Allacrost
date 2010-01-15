@@ -174,6 +174,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/shop/shop_buy.cpp \
 	$(MODES_DIR)/shop/shop_confirm.h \
 	$(MODES_DIR)/shop/shop_confirm.cpp \
+	$(MODES_DIR)/shop/shop_leave.h \
+	$(MODES_DIR)/shop/shop_leave.cpp \
 	$(MODES_DIR)/shop/shop_root.h \
 	$(MODES_DIR)/shop/shop_root.cpp \
 	$(MODES_DIR)/shop/shop_sell.h \

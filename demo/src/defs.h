@@ -313,8 +313,6 @@ namespace hoa_shop {
 		class ListDisplay;
 
 		class RootInterface;
-		class RootWindow;
-		class GreetingWindow;
 
 		class BuyInterface;
 		class BuyDisplay;
@@ -326,6 +324,7 @@ namespace hoa_shop {
 
 		class ConfirmInterface;
 
+		class LeaveInterface;
 	}
 }
 

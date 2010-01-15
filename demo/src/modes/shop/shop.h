@@ -10,15 +10,11 @@
 /** ****************************************************************************
 *** \file    shop.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for shop mode interface.
+*** \brief   Header file for shop mode interface
 ***
 *** This code provides an interface for the user to purchase wares from a
 *** merchant. This mode is usually entered from a map after speaking with a
-*** store owner.
-***
-*** \todo Implement feature for shops to have limited quantity of wares to buy,
-*** as well as the ability to re-generate more quantities as the time passes
-*** between shops.
+*** shop keeper.
 *** ***************************************************************************/
 
 #ifndef __SHOP_HEADER__
@@ -55,7 +51,7 @@ extern ShopMode* current_shop;
 *** ShopMode allows the player to purchase items, weapons, armor, and other
 *** objects. ShopMode consists of a captured screenshot which forms the
 *** background image, upon which a series of menu windows are drawn. The
-*** background image is of size 1024x768, and a 800x600 arrangement of three
+*** coordinate system used is 1024x768, and a 800x600 arrangement of three
 *** menu windows (top, middle, bottom) are drawn on top of that backdrop. These
 *** windows are shared beteen all states of shop mode (root, buy, sell, etc.) and
 *** the contents of the windows change depending on the active state of shop mode.
@@ -68,7 +64,7 @@ extern ShopMode* current_shop;
 *** -# SetGreetingText()
 *** -# SetPriceLevels()
 *** -# AddObject() for each object to be sold
-*** -# Wait for the Reset() method to be automatically called
+*** -# Wait for the Reset() method to be automatically called, which will finalize shop initialization
 *** ***************************************************************************/
 class ShopMode : public hoa_mode_manager::GameMode {
 public:
@@ -79,10 +75,7 @@ public:
 	static ShopMode* CurrentInstance()
 		{ return _current_instance; }
 
-	/** \brief Resets appropriate settings. Called whenever the ShopMode object is made the active game mode.
-	*** This function additionally constructs the inventory menu from the object list. Therefore, if you add
-	*** an object to the inventory it won't be seen in the list until this function is called.
-	**/
+	//! \brief Resets appropriate settings and initializes shop if appropriate. Called whenever the ShopMode object is made the active game mode.
 	void Reset();
 
 	//! \brief Handles user input and updates the shop menu.
@@ -91,50 +84,8 @@ public:
 	//! \brief Handles the drawing of everything on the shop menu and makes sub-draw function calls as appropriate.
 	void Draw();
 
-	/** \brief Sets the name of the store that should be displayed to the player
-	*** \param greeting The name of the shop
-	*** \note This method will only work if it is called before the shop is initialized. Calling it afterwards will
-	*** result in no operation and a warning message
-	**/
-	void SetShopName(hoa_utils::ustring name);
-
-	/** \brief Sets the greeting message from the shop/merchant
-	*** \param greeting The text
-	*** \note This method will only work if it is called before the shop is initialized. Calling it afterwards will
-	*** result in no operation and a warning message
-	**/
-	void SetGreetingText(hoa_utils::ustring greeting);
-
-	/** \brief Sets the buy and sell price levels for the shop
-	*** \param buy_level The price level to set for wares that the player would buy from the shop
-	*** \param sell_level The price level to set for wares that the player would sell to the shop
-	*** \note This method will only work if it is called before the shop is initialized. Calling it afterwards will
-	*** result in no operation and a warning message
-	**/
-	void SetPriceLevels(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level);
-
-	/** \brief Adds a new object for the shop to sell
-	*** \param object_id The id number of the object to add
-	*** \param stock The amount of the object to make available for sale at the shop
-	***
-	*** The newly added object won't be seen in the shop menu until the Reset() function is called.
-	**/
-	void AddObject(uint32 object_id, uint32 stock);
-
-	/** \brief Deletes an object from the shop
-	*** \param object_id The id number of the object to remove
-	***
-	*** This function should be used in only one specific case. This case is when the player owns this object and
-	*** chooses to sell all instances of it and additionally the shop does not sell this item. Trying to remove
-	*** an object that the shop sells to the player or trying to remove an object that still remains in the party's
-	*** inventory will result in a warning message and the object will not be removed.
-	**/
-	void RemoveObject(uint32 object_id);
-
-	// Functions below this line are intended for use only by other shop mode classes
-
 	/** \brief Loads data and prepares shop for initial use
-	*** This function should only be called once, usually from the Load() method. If it is called more than
+	*** This function is only be called once from the Reset() method. If it is called more than
 	*** once it will print a warning and refuse to execute a second time.
 	**/
 	void Initialize();
@@ -181,8 +132,8 @@ public:
 	***
 	*** Obviously if one wishes to only update either costs or sales but not both, pass a zero value for the
 	*** appropriate argument that should not be changed. This function should only be called when necessary because
-	*** it also has to update the finance text in the shop's root interface, so the function does not just
-	*** modify integer values but does have a small amount of computational overhead
+	*** it also has to update the finance text. Thus the function does not just modify integer values but in fact
+	*** does have a small amount of computational overhead
 	**/
 	void UpdateFinances(int32 costs_amount, int32 sales_amount);
 
@@ -198,6 +149,53 @@ public:
 	//! \brief Returns the number of drunes that the party would be left with after the marked purchases and sales
 	uint32 GetTotalRemaining() const
 		{ return (hoa_global::GlobalManager->GetDrunes() + _total_sales - _total_costs); }
+
+	/** \name Exported class methods
+	*** The methods in this group are avaiable to be called from within Lua. Their intended use is for setting shop settings
+	*** and initializing data before the shop is opened.
+	**/
+	//@{
+	/** \brief Sets the name of the store that should be displayed to the player
+	*** \param greeting The name of the shop
+	*** \note This method will only work if it is called before the shop is initialized. Calling it afterwards will
+	*** result in no operation and a warning message
+	**/
+	void SetShopName(hoa_utils::ustring name);
+
+	/** \brief Sets the greeting message from the shop/merchant
+	*** \param greeting The text
+	*** \note This method will only work if it is called before the shop is initialized. Calling it afterwards will
+	*** result in no operation and a warning message
+	**/
+	void SetGreetingText(hoa_utils::ustring greeting);
+
+	/** \brief Sets the buy and sell price levels for the shop
+	*** \param buy_level The price level to set for wares that the player would buy from the shop
+	*** \param sell_level The price level to set for wares that the player would sell to the shop
+	*** \note This method will only work if it is called before the shop is initialized. Calling it afterwards will
+	*** result in no operation and a warning message
+	**/
+	void SetPriceLevels(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level);
+
+	/** \brief Adds a new object for the shop to sell
+	*** \param object_id The id number of the object to add
+	*** \param stock The amount of the object to make available for sale at the shop
+	***
+	*** Adding an object after the shop mode instance has already been initialized (by being made the active game state)
+	*** this call will add the object but will not be visible to the player.
+	**/
+	void AddObject(uint32 object_id, uint32 stock);
+	//@}
+
+	/** \brief Deletes an object from the shop
+	*** \param object_id The id number of the object to remove
+	***
+	*** This function should be used in only one specific case. This case is when the player owns this object and
+	*** chooses to sell all instances of it and additionally the shop does not sell this item. Trying to remove
+	*** an object that the shop sells to the player or trying to remove an object that still remains in the party's
+	*** inventory will result in a warning message and the object will not be removed.
+	**/
+	void RemoveObject(uint32 object_id);
 
 	//! \name Class member access functions
 	//@{
@@ -266,10 +264,10 @@ private:
 	//! \brief A bit vector that represents the types of merchandise that the shop deals in (items, weapons, etc)
 	uint8 _deal_types;
 
-	//! \brief The shop's price level of objects that the player buys
+	//! \brief The shop's price level of objects that the player buys from the shop
 	SHOP_PRICE_LEVEL _buy_price_level;
 
-	//! \brief The shop's price level of objects that the player sells
+	//! \brief The shop's price level of objects that the player sells to the shop
 	SHOP_PRICE_LEVEL _sell_price_level;
 
 	//! \brief The total cost of all marked purchases.
@@ -281,7 +279,7 @@ private:
 	/** \brief A container of objects that ShopMode created itself and need to be deleted when finished
 	*** These also happen to represent a list of all global objects that the shop may sell to the player
 	**/
-	std::vector<hoa_global::GlobalObject*> _managed_objects;
+	std::vector<hoa_global::GlobalObject*> _created_objects;
 
 	/** \brief Holds all objects that can be bought, sold, or traded in the shop
 	*** The integer key to this map is the global object ID represented by the ShopObject.
@@ -299,7 +297,7 @@ private:
 	std::map<uint32, private_shop::ShopObject*> _sell_list;
 
 	/** \name Shopping interfaces
-	*** These are the class objects which are responsible for managing each state in shop mode
+	*** These are class objects which are responsible for managing each state in shop mode
 	**/
 	//@{
 	private_shop::RootInterface* _root_interface;
@@ -307,6 +305,7 @@ private:
 	private_shop::SellInterface* _sell_interface;
 	private_shop::TradeInterface* _trade_interface;
 	private_shop::ConfirmInterface* _confirm_interface;
+	private_shop::LeaveInterface* _leave_interface;
 	//@}
 
 	//! \brief Holds an image of the screen taken when the ShopMode instance was created
@@ -330,10 +329,13 @@ private:
 	//! \brief The list of options for what the player may do in shop mode
 	hoa_video::OptionBox _action_options;
 
+	//! \brief Separate text images for each action option. Displayed when _action_options are hidden
+	std::vector<hoa_video::TextImage> _action_titles;
+
 	//! \brief Table-formatted text containing the financial information about the current purchases and sales
 	hoa_video::OptionBox _finance_table;
 
-	//! \brief Image icon representing drunes 0.25x scale
+	//! \brief Image icon representing drunes (currency)
 	hoa_video::StillImage _drunes_icon;
 }; // class ShopMode : public hoa_mode_manager::GameMode
 

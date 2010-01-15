@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    shop_root.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for root menus of shop mode
+*** \brief   Header file for root interface of shop mode
 *** ***************************************************************************/
 
 #ifndef __SHOP_ROOT_HEADER__
