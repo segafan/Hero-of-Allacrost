@@ -74,24 +74,68 @@ ShopMode::ShopMode() :
 	mode_type = MODE_MANAGER_SHOP_MODE;
 	_current_instance = this;
 
-	_list_window.Create(800.0f, 380.0f, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_TOP | VIDEO_MENU_EDGE_BOTTOM);
-	_list_window.SetPosition(112.0f, 612.0f);
-	_list_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	_list_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+	// ---------- (1): Create the menu windows and set their properties
+	_top_window.Create(800.0f, 96.0f, ~VIDEO_MENU_EDGE_BOTTOM);
+	_top_window.SetPosition(112.0f, 684.0f);
+	_top_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_top_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+	_top_window.Show();
 
-	_info_window.Create(800.0f, 200.0f, ~VIDEO_MENU_EDGE_TOP);
-	_info_window.SetPosition(112.0f, 220.0f);
-	_info_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	_info_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+	_middle_window.Create(800.0f, 400.0f, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_TOP | VIDEO_MENU_EDGE_BOTTOM);
+	_middle_window.SetPosition(112.0f, 604.0f);
+	_middle_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_middle_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+	_middle_window.Show();
+
+	_bottom_window.Create(800.0f, 140.0f, ~VIDEO_MENU_EDGE_TOP);
+	_bottom_window.SetPosition(112.0f, 224.0f);
+	_bottom_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_bottom_window.SetDisplayMode(VIDEO_MENU_INSTANT);
+	_bottom_window.Show();
+
+	// (2) Create the list of shop actions
+	_action_options.SetOwner(&_top_window);
+	_action_options.SetPosition(80.0f, 90.0f);
+	_action_options.SetDimensions(640.0f, 30.0f, 5, 1, 5, 1);
+	_action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_action_options.SetTextStyle(TextStyle("title28"));
+	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_action_options.SetCursorOffset(-55.0f, 30.0f);
+	_action_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+
+	_action_options.AddOption(MakeUnicodeString("Buy"));
+	_action_options.AddOption(MakeUnicodeString("Sell"));
+	_action_options.AddOption(MakeUnicodeString("Trade"));
+	_action_options.AddOption(MakeUnicodeString("Confirm"));
+	_action_options.AddOption(MakeUnicodeString("Leave"));
+	_action_options.SetSelection(0);
+
+	// (3) Create the financial table text
+	_finance_table.SetOwner(&_top_window);
+	_finance_table.SetPosition(80.0f, 45.0f);
+	_finance_table.SetDimensions(640.0f, 20.0f, 4, 1, 4, 1);
+	_finance_table.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_finance_table.SetTextStyle(TextStyle("text20"));
+	_finance_table.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	// Initialize all four options with an empty string that will be overwritten by the following method call
+	for (uint32 i = 0; i < 4; i++)
+		_finance_table.AddOption(ustring());
+	UpdateFinances(0, 0);
+
+	// (4) Initialize the drunes icon image
+	if (_drunes_icon.Load("img/icons/drunes.png") == false)
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load drunes image for action window" << endl;
 
 	_root_interface = new RootInterface();
 	_buy_interface = new BuyInterface();
 	_sell_interface = new SellInterface();
 	_trade_interface = new TradeInterface();
 	_confirm_interface = new ConfirmInterface();
+	// TODO
+	// _leave_interface = new LeaveInterface();
 
 	try {
-		_saved_screen = VideoManager->CaptureScreen();
+		_screen_backdrop = VideoManager->CaptureScreen();
 	}
 	catch (Exception e) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << e.ToString() << endl;
@@ -111,6 +155,10 @@ ShopMode::~ShopMode() {
 	delete _sell_interface;
 	delete _trade_interface;
 	delete _confirm_interface;
+
+	_top_window.Destroy();
+	_middle_window.Destroy();
+	_bottom_window.Destroy();
 
 	if (_current_instance == this)
 		_current_instance = NULL;
@@ -142,6 +190,46 @@ void ShopMode::Update() {
 		return;
 	}
 
+	// When the shop state is at the root interface ShopMode needs to process user input and possibly change state
+	if (_state == SHOP_STATE_ROOT) {
+		SoundDescriptor* sound = NULL; // Used to hold pointers of sound objects to play
+
+		if (InputManager->ConfirmPress()) {
+			if (_action_options.GetSelection() < 0 || _action_options.GetSelection() > 4) {
+				IF_PRINT_WARNING(SHOP_DEBUG) << "invalid selection in action window: " << _action_options.GetSelection() << endl;
+				_action_options.SetSelection(0);
+				return;
+			}
+
+			_action_options.InputConfirm();
+			sound = ShopMode::CurrentInstance()->GetSound("confirm");
+			assert(sound != NULL);
+			sound->Play();
+
+			if (_action_options.GetSelection() == 0) { // Buy
+				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_BUY);
+			}
+			else if (_action_options.GetSelection() == 1) { // Sell
+				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_SELL);
+			}
+			else if (_action_options.GetSelection() == 2) { // Trade
+				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_TRADE);
+			}
+			else if (_action_options.GetSelection() == 3) { // Confirm
+				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_CONFIRM);
+			}
+			else if (_action_options.GetSelection() == 4) { // Leave
+				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_LEAVE);
+			}
+		}
+		else if (InputManager->LeftPress()) {
+			_action_options.InputLeft();
+		}
+		else if (InputManager->RightPress()) {
+			_action_options.InputRight();
+		}
+	} // if (_state == SHOP_STATE_ROOT)
+
 	switch (_state) {
 		case SHOP_STATE_ROOT:
 			_root_interface->Update();
@@ -158,6 +246,10 @@ void ShopMode::Update() {
 		case SHOP_STATE_CONFIRM:
 			_confirm_interface->Update();
 			break;
+// TODO
+// 		case SHOP_STATE_LEAVE:
+// 			_leave_interface->Update();
+// 			break;
 		default:
 			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << ", reseting to root state" << endl;
 			_state = SHOP_STATE_ROOT;
@@ -168,22 +260,58 @@ void ShopMode::Update() {
 
 
 void ShopMode::Draw() {
-	// Draw the background image
-	// Set the system coordinates to the size of the window (same with the saved-screen)
-	int32 width = VideoManager->GetScreenWidth();
-	int32 height = VideoManager->GetScreenHeight();
-	VideoManager->SetCoordSys(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
-
+	// ---------- (1): Draw the background image. Set the system coordinates to the size of the window (same as the screen backdrop)
+	VideoManager->SetCoordSys(0.0f, static_cast<float>(VideoManager->GetScreenWidth()), 0.0f, static_cast<float>(VideoManager->GetScreenHeight()));
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(0.0f, 0.0f);
-	_saved_screen.Draw();
+	_screen_backdrop.Draw();
 
-	// Restore the standard shop coordinate system before drawing the shop windows
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	// ---------- (2): Draw all menu windows
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f); // Restore the standard shop coordinate system before drawing the shop windows
+	_top_window.Draw();
+	_bottom_window.Draw();
+	_middle_window.Draw(); // Drawn last because the middle window has the middle upper and lower window borders attached
 
-	// The root interface is always drawn regardless of the shop's state
-	_root_interface->Draw();
+	// ---------- (3): Draw the contents of the top window
+	VideoManager->Move(130.0f, 605.0f);
+	_drunes_icon.Draw();
+	VideoManager->MoveRelative(705.0f, 0.0f);
+	_drunes_icon.Draw();
+
 	switch (_state) {
 		case SHOP_STATE_ROOT:
+			_action_options.Draw();
+			break;
+		case SHOP_STATE_BUY:
+			_action_options.Draw();
+			break;
+		case SHOP_STATE_SELL:
+			_action_options.Draw();
+			break;
+		case SHOP_STATE_TRADE:
+			_action_options.Draw();
+			break;
+		case SHOP_STATE_CONFIRM:
+			_action_options.Draw();
+			break;
+// TODO
+// 		case SHOP_STATE_LEAVE:
+// 			_action_options.Draw();
+// 			break;
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << endl;
+			break;
+	}
+
+	// TODO: This method isn't working correctly (know idea why these coordinates work). When the call is fixed, the args should be updated
+	VideoManager->DrawLine(-635.0f, 32.0f, -10.0f, 32.0f, 1.0f, Color::white);
+
+	_finance_table.Draw();
+
+	// ---------- (4): Call the draw function on the active interface to fill the contents of the other two windows
+	switch (_state) {
+		case SHOP_STATE_ROOT:
+			_root_interface->Draw();
 			break;
 		case SHOP_STATE_BUY:
 			_buy_interface->Draw();
@@ -197,10 +325,25 @@ void ShopMode::Draw() {
 		case SHOP_STATE_CONFIRM:
 			_confirm_interface->Draw();
 			break;
+// TODO
+// 		case SHOP_STATE_LEAVE:
+// 			_leave_interface->Draw();
+// 			break;
 		default:
 			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << endl;
 			break;
 	}
+}
+
+
+
+void ShopMode::SetShopName(ustring name) {
+	if (IsInitialized() == true) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function called after shop was already initialized" << endl;
+		return;
+	}
+
+	_root_interface->SetShopName(name);
 }
 
 
@@ -490,7 +633,11 @@ void ShopMode::UpdateFinances(int32 costs_amount, int32 sales_amount) {
 
 	_total_costs = static_cast<uint32>(updated_costs);
 	_total_sales = static_cast<uint32>(updated_sales);
-	_root_interface->UpdateFinanceTable();
+
+	_finance_table.SetOptionText(0, MakeUnicodeString("Funds: " + NumberToString(GlobalManager->GetDrunes())));
+	_finance_table.SetOptionText(1, MakeUnicodeString("Purchases: -" + NumberToString(ShopMode::CurrentInstance()->GetTotalCosts())));
+	_finance_table.SetOptionText(2, MakeUnicodeString("Sales: +" + NumberToString(ShopMode::CurrentInstance()->GetTotalSales())));
+	_finance_table.SetOptionText(3, MakeUnicodeString("Total: " + NumberToString(ShopMode::CurrentInstance()->GetTotalRemaining())));
 }
 
 
@@ -501,49 +648,11 @@ void ShopMode::ChangeState(SHOP_STATE new_state) {
 		return;
 	}
 
-	switch (_state) {
-		case SHOP_STATE_ROOT:
-			_root_interface->MakeInactive();
-			break;
-		case SHOP_STATE_BUY:
-			_buy_interface->MakeInactive();
-			break;
-		case SHOP_STATE_SELL:
-			_sell_interface->MakeInactive();
-			break;
-		case SHOP_STATE_TRADE:
-			_trade_interface->MakeInactive();
-			break;
-		case SHOP_STATE_CONFIRM:
-			_confirm_interface->MakeInactive();
-			break;
-		default:
-			IF_PRINT_WARNING(SHOP_DEBUG) << "shop was in an unknown state: " << _state << endl;
-			break;
-	}
-
 	_state = new_state;
-	switch (_state) {
-		case SHOP_STATE_ROOT:
-			_root_interface->MakeActive();
-			break;
-		case SHOP_STATE_BUY:
-			_buy_interface->MakeActive();
-			break;
-		case SHOP_STATE_SELL:
-			_sell_interface->MakeActive();
-			break;
-		case SHOP_STATE_TRADE:
-			_trade_interface->MakeActive();
-			break;
-		case SHOP_STATE_CONFIRM:
-			_confirm_interface->MakeActive();
-			break;
-		default:
-			IF_PRINT_WARNING(SHOP_DEBUG) << "unknown new state, setting shop to root state: " << new_state << endl;
-			_state = SHOP_STATE_ROOT;
-			_root_interface->MakeActive();
-			break;
+
+	// TEMP: shop mode should conditionally exit on leave
+	if (_state == SHOP_STATE_LEAVE) {
+		ModeManager->Pop();
 	}
 } // void ShopMode::ChangeState(SHOP_STATE new_state)
 

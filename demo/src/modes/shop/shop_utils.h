@@ -47,7 +47,8 @@ enum SHOP_STATE {
 	SHOP_STATE_SELL      =  2,
 	SHOP_STATE_TRADE     =  3,
 	SHOP_STATE_CONFIRM   =  4,
-	SHOP_STATE_TOTAL     =  5
+	SHOP_STATE_LEAVE     =  5,
+	SHOP_STATE_TOTAL     =  6
 };
 
 //! \name Price multipliers
@@ -98,12 +99,6 @@ public:
 
 	//! \brief Performs any initialization that could not be done when the class was constructed
 	virtual void Initialize() = 0;
-
-	//! \brief Called whenever the shop state changes and this becomes the active interface
-	virtual void MakeActive() = 0;
-
-	//! \brief Called when this interface is active and the shop state changes causing it to become inactive
-	virtual void MakeInactive() = 0;
 
 	//! \brief Updates the state of the interface and operates on user input
 	virtual void Update() = 0;
@@ -281,7 +276,6 @@ public:
 
 	//! \brief Draws the option boxes
 	void Draw();
-
 
 	hoa_video::OptionBox& GetIdentifyList()
 		{ return _identify_list; }

@@ -59,16 +59,6 @@ void ConfirmInterface::Initialize() {
 
 
 
-void ConfirmInterface::MakeActive() {
-}
-
-
-
-void ConfirmInterface::MakeInactive() {
-}
-
-
-
 void ConfirmInterface::Update() {
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);

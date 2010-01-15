@@ -260,10 +260,11 @@ void InitializeEngine() throw (Exception) {
 		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
 	#endif
 
-	// Load all the settings from lua
+	// Load all the settings from lua. This includes some engine configuration settings.
 	if (LoadSettings() == false)
 		throw Exception("ERROR: Unable to load settings file", __FILE__, __LINE__, __FUNCTION__);
-	// Delayed initialization calls to the managers
+
+	// Apply engine configuration settings with delayed initialization calls to the managers
 	InputManager->InitializeJoysticks();
 	if (VideoManager->ApplySettings() == false)
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
@@ -272,13 +273,42 @@ void InitializeEngine() throw (Exception) {
 	if (VideoManager->GUI()->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
 		throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
 	}
+	// NOTE: This function call should have its argument set to false for release builds
+	VideoManager->DEBUG_EnableGUIOutlines(false);
+
+	// Load all standard font sets used across the game
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title20", 20) == false) {
+		throw Exception("Failed to load libertine_capitals.ttf font at size 20", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title24", 24) == false) {
+		throw Exception("Failed to load libertine_capitals.ttf font at size 24", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title28", 28) == false) {
+		throw Exception("Failed to load libertine_capitals.ttf font at size 28", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title32", 32) == false) {
+		throw Exception("Failed to load libertine_capitals.ttf font at size 32", __FILE__, __LINE__, __FUNCTION__);
+	}
+
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text20", 20) == false) {
+		throw Exception("Failed to load libertine.ttf font at size 20", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text23", 23) == false) {
+		throw Exception("Failed to load libertine.ttf font at size 23", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text26", 26) == false) {
+		throw Exception("Failed to load libertine.ttf font at size 26", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text29", 29) == false) {
+		throw Exception("Failed to load libertine.ttf font at size 29", __FILE__, __LINE__, __FUNCTION__);
+	}
 
 	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "default", 18) == false) {
 		throw Exception("Failed to load the 'Junicode Regular' font as 'default, size 18'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
 	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "map", 22) == false) {
-		throw Exception("Failed to load the 'Junicode Regular' font as 'map, size 24'", __FILE__, __LINE__, __FUNCTION__);
+		throw Exception("Failed to load the 'Junicode Regular' font as 'map, size 22'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
 	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "battle", 20) == false) {

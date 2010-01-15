@@ -38,10 +38,6 @@ public:
 
 	void Initialize();
 
-	void MakeActive();
-
-	void MakeInactive();
-
 	void Update();
 
 	void Draw();

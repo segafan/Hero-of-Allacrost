@@ -55,19 +55,16 @@ extern ShopMode* current_shop;
 *** ShopMode allows the player to purchase items, weapons, armor, and other
 *** objects. ShopMode consists of a captured screenshot which forms the
 *** background image, upon which a series of menu windows are drawn. The
-*** background image is of size 1024x768, and a 800x600 arrangement of windows
-*** is drawn ontop of the middle of that image.
-***
-*** \note Shop states are a little confusing because of prompt/confirmation
-*** windows. These windows appear when, for instance, the player attempts an
-*** invalid operation (buy x0 quantity of an item). When this occurs, we make
-*** the prompt window the current state, but also save the buy state because
-*** we still want to draw the list of wares to purchase.
+*** background image is of size 1024x768, and a 800x600 arrangement of three
+*** menu windows (top, middle, bottom) are drawn on top of that backdrop. These
+*** windows are shared beteen all states of shop mode (root, buy, sell, etc.) and
+*** the contents of the windows change depending on the active state of shop mode.
 ***
 *** \note The recommended way to create and initialize this class is to call the
 *** following methods.
 ***
 *** -# ShopMode constructor
+*** -# SetShopName()
 *** -# SetGreetingText()
 *** -# SetPriceLevels()
 *** -# AddObject() for each object to be sold
@@ -93,6 +90,13 @@ public:
 
 	//! \brief Handles the drawing of everything on the shop menu and makes sub-draw function calls as appropriate.
 	void Draw();
+
+	/** \brief Sets the name of the store that should be displayed to the player
+	*** \param greeting The name of the shop
+	*** \note This method will only work if it is called before the shop is initialized. Calling it afterwards will
+	*** result in no operation and a warning message
+	**/
+	void SetShopName(hoa_utils::ustring name);
 
 	/** \brief Sets the greeting message from the shop/merchant
 	*** \param greeting The text
@@ -236,11 +240,14 @@ public:
 	**/
 	hoa_audio::SoundDescriptor* GetSound(std::string identifier);
 
-	hoa_video::MenuWindow* GetListWindow()
-		{ return &_list_window; }
+	hoa_video::MenuWindow* GetTopWindow()
+		{ return &_top_window; }
 
-	hoa_video::MenuWindow* GetInfoWindow()
-		{ return &_info_window; }
+	hoa_video::MenuWindow* GetMiddleWindow()
+		{ return &_middle_window; }
+
+	hoa_video::MenuWindow* GetBottomWindow()
+		{ return &_bottom_window; }
 	//@}
 
 private:
@@ -303,7 +310,7 @@ private:
 	//@}
 
 	//! \brief Holds an image of the screen taken when the ShopMode instance was created
-	hoa_video::StillImage _saved_screen;
+	hoa_video::StillImage _screen_backdrop;
 
 	//! \brief Retains all icon images for each object category
 	std::vector<hoa_video::StillImage> _object_category_images;
@@ -311,17 +318,23 @@ private:
 	//! \brief A map of the sounds used in shop mode
 	std::map<std::string, hoa_audio::SoundDescriptor*> _shop_sounds;
 
-	//! \brief The highest level shop window that contains the root menu
+	//! \brief The highest level window that contains the shop actions and finance information
 	hoa_video::MenuWindow _top_window;
 
-	//! \brief The window which contains the shop greeting information, used in the root interface
-	hoa_video::MenuWindow _greeting_window;
+	//! \brief The largest window usually used to display lists of objects
+	hoa_video::MenuWindow _middle_window;
 
-	//! \brief A window utilized by interfaces to display a long list of information
-	hoa_video::MenuWindow _list_window;
+	//! \brief The lowest window typically displays detailed information or additional shop options
+	hoa_video::MenuWindow _bottom_window;
 
-	//! \brief A window utlized by interfaces to display detailed information about a particular object
-	hoa_video::MenuWindow _info_window;
+	//! \brief The list of options for what the player may do in shop mode
+	hoa_video::OptionBox _action_options;
+
+	//! \brief Table-formatted text containing the financial information about the current purchases and sales
+	hoa_video::OptionBox _finance_table;
+
+	//! \brief Image icon representing drunes 0.25x scale
+	hoa_video::StillImage _drunes_icon;
 }; // class ShopMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_shop
