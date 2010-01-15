@@ -44,12 +44,6 @@ public:
 	//! \brief Initializes the data conatiners and GUI objects to be used
 	void Initialize();
 
-	//! \brief Shows the menu windows that are used
-	void MakeActive();
-
-	//! \brief Hides the menu windows that are used
-	void MakeInactive();
-
 	//! \brief Processes user input and updates the purchase totals as appropriate
 	void Update();
 
@@ -74,12 +68,6 @@ private:
 	*** The size and contents of this container mimic that which is found in the _object_data container.
 	**/
 	std::vector<BuyDisplay*> _object_displays;
-
-	//! \brief Pointer to the window used for displaying the list of objects for sale
-	hoa_video::MenuWindow* _list_window;
-
-	//! \brief Pointer to the window used for displaying detailed information about a particular object
-	hoa_video::MenuWindow* _info_window;
 
 	//! \brief Contains a column of images representing each category of object sold in the shop
 	hoa_video::OptionBox _category_list;

@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    shop_root.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Source file for root menus of shop mode
+*** \brief   Source file for root menu of shop mode
 *** ***************************************************************************/
 
 #include <iostream>
@@ -42,335 +42,282 @@ namespace hoa_shop {
 
 namespace private_shop {
 
+// The maximum number of category icons + text that can be displayed in a single row
+const uint8 MAX_CATEGORY_ROW_SIZE = 4;
+
+// *****************************************************************************
+// ***** CategoryData class methods
+// *****************************************************************************
+
+void CategoryData::ComputeCoordinates(uint8 number_categories) {
+	if (number_categories > GLOBAL_OBJECT_TOTAL) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "invalid argument value: " << number_categories << endl;
+		return;
+	}
+
+	// ---------- (1): Determine the number of entries in each category row
+	if (number_categories <= MAX_CATEGORY_ROW_SIZE) {
+		first_row_num = number_categories;
+		second_row_num = 0;
+	}
+	else {
+		first_row_num = MAX_CATEGORY_ROW_SIZE;
+		second_row_num = number_categories - first_row_num;
+	}
+
+	// ---------- (2): Determine the y position in each category row
+	if (second_row_num != 0) { // then there are two rows of categories to draw
+		first_row_y = 420.0f;
+		second_row_y = 320.0f;
+	}
+	else {
+		first_row_y = 370.0f;
+		second_row_y = first_row_y;
+	}
+
+	// ---------- (3): Determine the x position of each category row
+	switch (first_row_num) {
+		case 1:
+			first_row_x = 512.0f; // Horizontal center of screen
+			break;
+		case 2:
+			first_row_x = 437.0f; // The delta between icons when drawn is 150.0f, so move the draw cursor by half that amount
+			break;
+		case 3:
+			first_row_x = 362.0f;
+			break;
+		case 4:
+			first_row_x = 287.0f;
+			break;
+	}
+	switch (second_row_num) {
+		case 1:
+			second_row_x = 512.0f;
+			break;
+		case 2:
+			second_row_x = 437.0f;
+			break;
+		case 3:
+			second_row_x = 362.0f;
+			break;
+		case 4:
+			second_row_x = 287.0f;
+			break;
+	}
+} // void CategoryData::ComputeCoordinates(uint8 number_categories)
+
 // *****************************************************************************
 // ***** RootInterface class methods
 // *****************************************************************************
 
 RootInterface::RootInterface() {
-	_root_window = new RootWindow();
-	_greeting_window = new GreetingWindow();
-}
+	// Initialize text properties and set default text where appropriate
+	_shop_name.SetStyle(TextStyle("title32"));
+	_shop_name.SetText(MakeUnicodeString("Shop Name")); // This default name should be overwritten
 
+	_buy_price_text.SetStyle(TextStyle("text23"));
+	_buy_price_text.SetText(MakeUnicodeString("Buy prices"));
+	_sell_price_text.SetStyle(TextStyle("text23"));
+	_sell_price_text.SetText(MakeUnicodeString("Sell prices"));
 
-
-RootInterface::~RootInterface() {
-	delete _root_window;
-	delete _greeting_window;
+	_greeting_text.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
+	_greeting_text.SetPosition(40.0f, 100.0f);
+	_greeting_text.SetDimensions(600.0f, 50.0f);
+	_greeting_text.SetTextStyle(TextStyle("text23"));
+	_greeting_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	_greeting_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_greeting_text.SetDisplayText(MakeUnicodeString("\"Welcome! Take a look around.\"")); // Default greeting, should usually be overwritten
 }
 
 
 
 void RootInterface::Initialize() {
-	// Text constants that represent the various price levels
-	const ustring VERY_GOOD = MakeUnicodeString("very good");
-	const ustring GOOD = MakeUnicodeString("good");
-	const ustring STANDARD = MakeUnicodeString("standard");
-	const ustring POOR = MakeUnicodeString("poor");
-	const ustring VERY_POOR = MakeUnicodeString("very poor");
+	// ---------- (1): Create the price level graphics
+	// Holds the number of stars to display that represent the price levels
+	int8 num_buy_stars = 0;
+	int8 num_sell_stars = 0;
 
-	// ----- (1): Initialize the finance table text
-	UpdateFinanceTable();
-
-	// ----- (2): Retrieve copies of each category icon and enable grayscale for unused categories
-	uint8 deal_types = ShopMode::CurrentInstance()->GetDealTypes();
-	_greeting_window->category_icons = ShopMode::CurrentInstance()->GetObjectCategoryImages();
-
-	if ((deal_types & DEALS_ITEMS) == false) {
-		_greeting_window->category_icons[0].EnableGrayScale();
-	}
-	if ((deal_types & DEALS_WEAPONS) == false) {
-		_greeting_window->category_icons[1].EnableGrayScale();
-	}
-	if ((deal_types & DEALS_HEAD_ARMOR) == false) {
-		_greeting_window->category_icons[2].EnableGrayScale();
-	}
-	if ((deal_types & DEALS_TORSO_ARMOR) == false) {
-		_greeting_window->category_icons[3].EnableGrayScale();
-	}
-	if ((deal_types & DEALS_ARM_ARMOR) == false) {
-		_greeting_window->category_icons[4].EnableGrayScale();
-	}
-	if ((deal_types & DEALS_LEG_ARMOR) == false) {
-		_greeting_window->category_icons[5].EnableGrayScale();
-	}
-	if ((deal_types & DEALS_SHARDS) == false) {
-		_greeting_window->category_icons[6].EnableGrayScale();
-	}
-	if ((deal_types & DEALS_KEY_ITEMS) == false) {
-		_greeting_window->category_icons[7].EnableGrayScale();
-	}
-
-	// ----- (3): Initialize the shop pricing text based on the buy/sell price levels
-	ustring buy_text, sell_text;
-
+	// Determine the number of stars based on the price level
 	switch (ShopMode::CurrentInstance()->GetBuyPriceLevel()) {
 		case SHOP_PRICE_VERY_GOOD:
-			buy_text = VERY_GOOD;
+			num_buy_stars = 5;
 			break;
 		case SHOP_PRICE_GOOD:
-			buy_text = GOOD;
+			num_buy_stars = 4;
 			break;
 		case SHOP_PRICE_STANDARD:
-			buy_text = STANDARD;
+			num_buy_stars = 3;
 			break;
 		case SHOP_PRICE_POOR:
-			buy_text = POOR;
+			num_buy_stars = 2;
 			break;
 		case SHOP_PRICE_VERY_POOR:
-			buy_text = VERY_POOR;
+			num_buy_stars = 1;
 			break;
 		default:
-			buy_text = STANDARD;
-			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid buy_level argument: " << ShopMode::CurrentInstance()->GetBuyPriceLevel() << endl;
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid buy level argument: " << ShopMode::CurrentInstance()->GetBuyPriceLevel() << endl;
 			break;
 	}
 
 	switch (ShopMode::CurrentInstance()->GetSellPriceLevel()) {
 		case SHOP_PRICE_VERY_GOOD:
-			sell_text = VERY_GOOD;
+			num_sell_stars = 5;
 			break;
 		case SHOP_PRICE_GOOD:
-			sell_text = GOOD;
+			num_sell_stars = 4;
 			break;
 		case SHOP_PRICE_STANDARD:
-			sell_text = STANDARD;
+			num_sell_stars = 3;
 			break;
 		case SHOP_PRICE_POOR:
-			sell_text = POOR;
+			num_sell_stars = 2;
 			break;
 		case SHOP_PRICE_VERY_POOR:
-			sell_text = VERY_POOR;
+			num_sell_stars = 1;
 			break;
 		default:
-			sell_text = STANDARD;
-			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid sell_level argument: " << ShopMode::CurrentInstance()->GetSellPriceLevel() << endl;
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid sell level argument: " << ShopMode::CurrentInstance()->GetSellPriceLevel() << endl;
 			break;
 	}
 
-	_greeting_window->pricing_text.SetDisplayText(MakeUnicodeString("Merchant's buy prices are ") + buy_text + MakeUnicodeString(".\n") +
-		MakeUnicodeString("Merchant's sell prices are ") + sell_text + MakeUnicodeString("."));
+	// Star images used to construct the composite star rating (30x30 pixel size)
+	StillImage star, gray_star;
+
+	if (star.Load("img/icons/star.png") == false) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load star image for price ratings" << endl;
+	}
+	gray_star = star;
+	gray_star.EnableGrayScale();
+
+	// Finally, construct the composite images with the correct star rating
+	_buy_price_rating.SetDimensions(200.0f, 30.0f);
+	_sell_price_rating.SetDimensions(200.0f, 30.0f);
+
+	float offset = 0.0f;
+	for (uint8 count = 5; count > 0; count--) {
+		if (num_buy_stars > 0) {
+			_buy_price_rating.AddImage(star, offset, 0.0f);
+		}
+		else {
+			_buy_price_rating.AddImage(gray_star, offset, 0.0f);
+		}
+
+		num_buy_stars--;
+		offset += 40.0f;
+	}
+
+	offset = 0.0f;
+	for (uint8 count = 5; count > 0; count--, num_sell_stars--) {
+		if (num_sell_stars > 0) {
+			_sell_price_rating.AddImage(star, offset, 0.0f);
+		}
+		else {
+			_sell_price_rating.AddImage(gray_star, offset, 0.0f);
+		}
+
+		num_buy_stars--;
+		offset += 40.0f;
+	}
+
+	// ---------- (2): Construct category name text and graphics
+	uint32 deal_types = ShopMode::CurrentInstance()->GetDealTypes();
+
+	TextStyle name_style("text23");
+	const vector<StillImage>& all_cat_icons = ShopMode::CurrentInstance()->GetObjectCategoryImages();
+
+	if ((deal_types & DEALS_ITEMS) != 0) {
+		_category_names.push_back(TextImage(MakeUnicodeString("Items"), name_style));
+		_category_icons.push_back(all_cat_icons[0]);
+	}
+	if ((deal_types & DEALS_WEAPONS) != 0) {
+		_category_names.push_back(TextImage(MakeUnicodeString("Weapons"), name_style));
+		_category_icons.push_back(all_cat_icons[1]);
+ 	}
+	if ((deal_types & DEALS_HEAD_ARMOR) != 0) {
+		_category_names.push_back(TextImage(MakeUnicodeString("Head Armor"), name_style));
+		_category_icons.push_back(all_cat_icons[2]);
+	}
+	if ((deal_types & DEALS_TORSO_ARMOR) != 0) {
+		_category_names.push_back(TextImage(MakeUnicodeString("Torso Armor"), name_style));
+		_category_icons.push_back(all_cat_icons[3]);
+	}
+	if ((deal_types & DEALS_ARM_ARMOR) != 0) {
+		_category_names.push_back(TextImage(MakeUnicodeString("Arm Armor"), name_style));
+		_category_icons.push_back(all_cat_icons[4]);
+	}
+	if ((deal_types & DEALS_LEG_ARMOR) != 0) {
+		_category_names.push_back(TextImage(MakeUnicodeString("Leg Armor"), name_style));
+		_category_icons.push_back(all_cat_icons[5]);
+	}
+	if ((deal_types & DEALS_SHARDS) != 0) {
+		_category_names.push_back(TextImage(MakeUnicodeString("Shards"), name_style));
+		_category_icons.push_back(all_cat_icons[6]);
+	}
+	if ((deal_types & DEALS_KEY_ITEMS) != 0) {
+		_category_names.push_back(TextImage(MakeUnicodeString("Key Items"), name_style));
+		_category_icons.push_back(all_cat_icons[7]);
+	}
+
+	_category_data.ComputeCoordinates(_category_icons.size());
 } // void RootInterface::Initialize()
 
 
 
-void RootInterface::MakeActive() {
-	_greeting_window->Show();
-	_root_window->action_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-}
-
-
-
-void RootInterface::MakeInactive() {
-	_greeting_window->Hide();
-	_root_window->action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-}
-
-
-
 void RootInterface::Update() {
-	_root_window->Update();
-
-	if (ShopMode::CurrentInstance()->GetState() != SHOP_STATE_ROOT) {
-		return;
-	}
-
-	_greeting_window->Update();
-
-	// ----- Process User Input
-	SoundDescriptor* sound = NULL; // Used to hold pointers of sound objects to play
-
-	if (InputManager->ConfirmPress()) {
-		if (_root_window->action_options.GetSelection() < 0 || _root_window->action_options.GetSelection() > 4) {
-			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid selection in action window: " << _root_window->action_options.GetSelection() << endl;
-			_root_window->action_options.SetSelection(0);
-			return;
-		}
-
-		_root_window->action_options.InputConfirm();
-		_root_window->action_options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-		sound = ShopMode::CurrentInstance()->GetSound("confirm");
-		assert(sound != NULL);
-		sound->Play();
-
-		if (_root_window->action_options.GetSelection() == 0) { // Buy
-			ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_BUY);
-		}
-		else if (_root_window->action_options.GetSelection() == 1) { // Sell
-			ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_SELL);
-		}
-		else if (_root_window->action_options.GetSelection() == 2) { // Trade
-			ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_TRADE);
-		}
-		else if (_root_window->action_options.GetSelection() == 3) { // Confirm
-			ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_CONFIRM);
-		}
-		else if (_root_window->action_options.GetSelection() == 4) { // Leave shop
-			ModeManager->Pop();
-		}
-	}
-	else if (InputManager->LeftPress()) {
-		_root_window->action_options.InputLeft();
-	}
-	else if (InputManager->RightPress()) {
-		_root_window->action_options.InputRight();
-	}
+	_greeting_text.Update();
 }
 
 
 
 void RootInterface::Draw() {
-	_root_window->Draw();
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_TOP, 0);
 
-	if (ShopMode::CurrentInstance()->GetState() != SHOP_STATE_ROOT) {
-		return;
+	// Middle window: draw shop's name at the top
+	VideoManager->Move(512.0f, 580.0f);
+	_shop_name.Draw();
+
+	// Middle window: below the shop name draw the pricing text and rating image
+	VideoManager->MoveRelative(-140.0f, -60.0f);
+	_buy_price_text.Draw();
+	VideoManager->MoveRelative(280.0f, 0.0f);
+	_sell_price_text.Draw();
+
+	VideoManager->MoveRelative(-280.0f, -40.0f);
+	_buy_price_rating.Draw();
+	VideoManager->MoveRelative(280.0f, 0.0f);
+	_sell_price_rating.Draw();
+
+	// Middle window: below the pricing text/image draw the category icons and text in one or two rows
+	VideoManager->Move(_category_data.first_row_x, _category_data.first_row_y);
+	for (uint8 i = 0; i < _category_data.first_row_num; i++) {
+		_category_icons[i].Draw();
+		VideoManager->MoveRelative(0.0f, -60.0f);
+		_category_names[i].Draw();
+		VideoManager->MoveRelative(150.0f, 60.0f);
 	}
 
-	_greeting_window->Draw();
+	VideoManager->Move(_category_data.second_row_x, _category_data.second_row_y);
+	for (uint8 i = 0; i < _category_data.second_row_num; i++) {
+		_category_icons[i + MAX_CATEGORY_ROW_SIZE].Draw();
+		VideoManager->MoveRelative(0.0f, -60.0f);
+		_category_names[i +MAX_CATEGORY_ROW_SIZE].Draw();
+		VideoManager->MoveRelative(150.0f, 60.0f);
+	}
+
+	// Bottom window: draw the greeting text
+	_greeting_text.Draw();
+}
+
+
+
+void RootInterface::SetShopName(hoa_utils::ustring name) {
+	_shop_name.SetText(name);
 }
 
 
 
 void RootInterface::SetGreetingText(hoa_utils::ustring greeting) {
-	_greeting_window->greeting_text.SetDisplayText(greeting);
-}
-
-
-
-void RootInterface::UpdateFinanceTable() {
-	_root_window->finance_table.SetOptionText(0, MakeUnicodeString("Funds: " + NumberToString(GlobalManager->GetDrunes())));
-	_root_window->finance_table.SetOptionText(1, MakeUnicodeString("Purchases: -" + NumberToString(ShopMode::CurrentInstance()->GetTotalCosts())));
-	_root_window->finance_table.SetOptionText(2, MakeUnicodeString("Sales: +" + NumberToString(ShopMode::CurrentInstance()->GetTotalSales())));
-	_root_window->finance_table.SetOptionText(3, MakeUnicodeString("Total: " + NumberToString(ShopMode::CurrentInstance()->GetTotalRemaining())));
-}
-
-// *****************************************************************************
-// ***** RootWindow class methods
-// *****************************************************************************
-
-RootWindow::RootWindow() {
-	// (1) Initialize the window
-	MenuWindow::Create(800.0f, 80.0f, ~VIDEO_MENU_EDGE_BOTTOM);
-	MenuWindow::SetPosition(112.0f, 684.0f);
-	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
-	MenuWindow::Show();
-
-	// (2) Initialize the list of actions
-	action_options.SetOwner(this);
-	action_options.SetPosition(40.0f, 60.0f);
-	action_options.SetDimensions(720.0f, 20.0f, 5, 1, 5, 1);
-	action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	action_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
-	action_options.SetCursorOffset(-50.0f, 20.0f);
-	action_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-
-	action_options.AddOption(MakeUnicodeString("Buy"));
-	action_options.AddOption(MakeUnicodeString("Sell"));
-	action_options.AddOption(MakeUnicodeString("Trade"));
-	action_options.AddOption(MakeUnicodeString("Confirm"));
-	action_options.AddOption(MakeUnicodeString("Leave"));
-	action_options.SetSelection(0);
-
-	// (3) Initialize the financial table text
-	finance_table.SetOwner(this);
-	finance_table.SetPosition(80.0f, 30.0f);
-	finance_table.SetDimensions(680.0f, 20.0f, 4, 1, 4, 1);
-	finance_table.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	finance_table.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	finance_table.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	// Initialize all four options with an empty string that will be overwritten by the following method call
-	for (uint32 i = 0; i < 4; i++)
-		finance_table.AddOption(ustring());
-
-	// (4) Initialize the drunes icon image
-	if (drunes_icon.Load("img/icons/drunes.png") == false)
-		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load drunes image for action window" << endl;
-	drunes_icon.SetDimensions(30.0f, 30.0f);
-} // RootWindow::RootWindow()
-
-
-
-RootWindow::~RootWindow() {
-	MenuWindow::Destroy();
-}
-
-
-
-void RootWindow::Update() {
-	MenuWindow::Update();
-	action_options.Update(); // Clear any OptionBox events, since they prevent further user input
-}
-
-
-
-void RootWindow::Draw() {
-	MenuWindow::Draw();
-	action_options.Draw();
-	finance_table.Draw();
-
-	VideoManager->Move(150.0f, 610.0f);
-	drunes_icon.Draw();
-}
-
-// *****************************************************************************
-// ***** GreetingWindow class methods
-// *****************************************************************************
-
-GreetingWindow::GreetingWindow() {
-	// (1) Initialize the window
-	MenuWindow::Create(800.0f, 200.0f, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_TOP);
-	MenuWindow::SetPosition(112.0f, 612.0f);
-	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
-	MenuWindow::Show();
-
-	// (2) Initialize the greeting textbox
-	greeting_text.SetOwner(this);
-	greeting_text.SetPosition(40.0f, 190.0f);
-	greeting_text.SetDimensions(720.0f, 25.0f);
-	greeting_text.SetTextStyle(TextStyle());
-	greeting_text.SetDisplaySpeed(30);
-	greeting_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
-	greeting_text.SetTextAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
-	greeting_text.SetDisplayText(MakeUnicodeString("Welcome! Take a look around.")); // Default greeting, should usually be overwritten
-
-	// (3) Initialize the price level textbox
-	pricing_text.SetOwner(this);
-	pricing_text.SetPosition(40.0f, 65.0f);
-	pricing_text.SetDimensions(720.0f, 50.0f);
-	pricing_text.SetTextStyle(TextStyle());
-	pricing_text.SetDisplaySpeed(30);
-	pricing_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
-	pricing_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-}
-
-
-
-GreetingWindow::~GreetingWindow() {
-	MenuWindow::Destroy();
-}
-
-
-
-void GreetingWindow::Update() {
-	MenuWindow::Update();
-	greeting_text.Update();
-	pricing_text.Update();
-}
-
-
-
-void GreetingWindow::Draw() {
-	MenuWindow::Draw();
-	greeting_text.Draw();
-	pricing_text.Draw();
-
-	VideoManager->Move(200.0f, 500.0f);
-	for (uint32 i = 0; i < category_icons.size(); i++) {
-		category_icons[i].Draw();
-		VideoManager->MoveRelative(80.0f, 0.0f);
-	}
+	_greeting_text.SetDisplayText(greeting);
 }
 
 } // namespace private_shop

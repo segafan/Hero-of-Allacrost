@@ -42,13 +42,8 @@ namespace private_shop {
 // *****************************************************************************
 
 BuyInterface::BuyInterface() :
-	_current_datalist(0),
-	_list_window(NULL),
-	_info_window(NULL)
-{
-	_list_window = ShopMode::CurrentInstance()->GetListWindow();
-	_info_window = ShopMode::CurrentInstance()->GetInfoWindow();
-}
+	_current_datalist(0)
+{}
 
 
 
@@ -127,15 +122,15 @@ void BuyInterface::Initialize() {
 	// ---------- (3): Create the buy displays using the object data that is now ready
 	for (uint32 i = 0; i < _object_data.size(); i++) {
 		BuyDisplay* new_list = new BuyDisplay();
-		new_list->GetIdentifyList().SetOwner(_list_window);
-		new_list->GetPropertyList().SetOwner(_list_window);
+		new_list->GetIdentifyList().SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
+		new_list->GetPropertyList().SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 		new_list->PopulateList(&(_object_data[i]));
 
 		_object_displays.push_back(new_list);
 	}
 
 	// ---------- (4): Initialize the list headers and object type icons
-	_identifier_header.SetOwner(_list_window);
+	_identifier_header.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 	_identifier_header.SetPosition(150.0f, 360.0f);
 	_identifier_header.SetDimensions(360.0f, 30.0f, 1, 1, 1, 1);
 	_identifier_header.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -143,7 +138,7 @@ void BuyInterface::Initialize() {
 	_identifier_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 	_identifier_header.AddOption(MakeUnicodeString("Name"));
 
-	_properties_header.SetOwner(_list_window);
+	_properties_header.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 	_properties_header.SetPosition(510.0f, 360.0f);
 	_properties_header.SetDimensions(250.0f, 30.0f, 4, 1, 4, 1);
 	_properties_header.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
@@ -158,7 +153,7 @@ void BuyInterface::Initialize() {
 	if (num_obj_categories == 1) {
 		num_obj_categories++;
 	}
-	_category_list.SetOwner(_list_window);
+	_category_list.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 	_category_list.SetPosition(30.0f, 370.0f);
 	_category_list.SetDimensions(60.0f, 360.0f, 1, num_obj_categories, 1, num_obj_categories);
 	_category_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -174,20 +169,6 @@ void BuyInterface::Initialize() {
 			_category_list.GetEmbeddedImage(this_option_index)->SetDimensions(45.0f, 45.0f);
 		}
 	}
-}
-
-
-
-void BuyInterface::MakeActive() {
-	_list_window->Show();
-	_info_window->Show();
-}
-
-
-
-void BuyInterface::MakeInactive() {
-	_list_window->Hide();
-	_info_window->Hide();
 }
 
 
@@ -262,13 +243,10 @@ void BuyInterface::Update() {
 
 
 void BuyInterface::Draw() {
-	_list_window->Draw();
 	_identifier_header.Draw();
 	_properties_header.Draw();
 	_category_list.Draw();
 	_object_displays[_current_datalist]->Draw();
-
-	_info_window->Draw();
 }
 
 

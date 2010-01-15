@@ -61,16 +61,6 @@ void TradeInterface::Initialize() {
 
 
 
-void TradeInterface::MakeActive() {
-}
-
-
-
-void TradeInterface::MakeInactive() {
-}
-
-
-
 void TradeInterface::Update() {
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
