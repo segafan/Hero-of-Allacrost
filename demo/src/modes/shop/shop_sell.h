@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    shop_sell.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for sell menu of shop mode
+*** \brief   Header file for sell interface of shop mode
 *** ***************************************************************************/
 
 #ifndef __SHOP_SELL_HEADER__

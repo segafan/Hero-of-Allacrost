@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    shop_buy.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for buy menu of shop mode
+*** \brief   Header file for buy interface of shop mode
 *** ***************************************************************************/
 
 #ifndef __SHOP_BUY_HEADER__

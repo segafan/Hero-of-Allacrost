@@ -10,11 +10,11 @@
 /** ****************************************************************************
 *** \file    shop.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for shop mode interface.
+*** \brief   Source file for shop mode interface
 ***
 *** This code provides an interface for the user to purchase wares from a
 *** merchant. This mode is usually entered from a map after discussing with a
-*** store owner.
+*** shop keeper.
 *** ***************************************************************************/
 
 #include <iostream>
@@ -38,6 +38,7 @@
 #include "shop_sell.h"
 #include "shop_trade.h"
 #include "shop_confirm.h"
+#include "shop_leave.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -56,6 +57,9 @@ bool SHOP_DEBUG = false;
 // Initialize static class variables
 ShopMode* ShopMode::_current_instance = NULL;
 
+// *****************************************************************************
+// ***** ShopMode class methods
+// *****************************************************************************
 
 ShopMode::ShopMode() :
 	_initialized(false),
@@ -110,12 +114,18 @@ ShopMode::ShopMode() :
 	_action_options.AddOption(MakeUnicodeString("Leave"));
 	_action_options.SetSelection(0);
 
+	_action_titles.push_back(TextImage(MakeUnicodeString("Buy"), TextStyle("title28")));
+	_action_titles.push_back(TextImage(MakeUnicodeString("Sell"), TextStyle("title28")));
+	_action_titles.push_back(TextImage(MakeUnicodeString("Trade"), TextStyle("title28")));
+	_action_titles.push_back(TextImage(MakeUnicodeString("Confirm"), TextStyle("title28")));
+	_action_titles.push_back(TextImage(MakeUnicodeString("Leave"), TextStyle("title28")));
+
 	// (3) Create the financial table text
 	_finance_table.SetOwner(&_top_window);
 	_finance_table.SetPosition(80.0f, 45.0f);
 	_finance_table.SetDimensions(640.0f, 20.0f, 4, 1, 4, 1);
 	_finance_table.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_finance_table.SetTextStyle(TextStyle("text20"));
+	_finance_table.SetTextStyle(TextStyle("text22"));
 	_finance_table.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 	// Initialize all four options with an empty string that will be overwritten by the following method call
 	for (uint32 i = 0; i < 4; i++)
@@ -131,8 +141,7 @@ ShopMode::ShopMode() :
 	_sell_interface = new SellInterface();
 	_trade_interface = new TradeInterface();
 	_confirm_interface = new ConfirmInterface();
-	// TODO
-	// _leave_interface = new LeaveInterface();
+	_leave_interface = new LeaveInterface();
 
 	try {
 		_screen_backdrop = VideoManager->CaptureScreen();
@@ -140,21 +149,22 @@ ShopMode::ShopMode() :
 	catch (Exception e) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << e.ToString() << endl;
 	}
-}
+} // ShopMode::ShopMode()
 
 
 
 ShopMode::~ShopMode() {
-	for (uint32 i = 0; i < _managed_objects.size(); i++) {
-		delete(_managed_objects[i]);
+	for (uint32 i = 0; i < _created_objects.size(); i++) {
+		delete(_created_objects[i]);
 	}
-	_managed_objects.clear();
+	_created_objects.clear();
 
 	delete _root_interface;
 	delete _buy_interface;
 	delete _sell_interface;
 	delete _trade_interface;
 	delete _confirm_interface;
+	delete _leave_interface;
 
 	_top_window.Destroy();
 	_middle_window.Destroy();
@@ -170,8 +180,6 @@ void ShopMode::Reset() {
 	// Setup video engine constructs
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->Text()->SetDefaultFont("default");
-	VideoManager->Text()->SetDefaultTextColor(Color::white);
 
 	_current_instance = this;
 	if (IsInitialized() == false)
@@ -181,6 +189,7 @@ void ShopMode::Reset() {
 
 
 void ShopMode::Update() {
+	// Pause and quit events have highest priority. If either type of event is detected, no other update processing will be done
 	if (InputManager->QuitPress() == true) {
 		ModeManager->Push(new PauseMode(true));
 		return;
@@ -190,7 +199,7 @@ void ShopMode::Update() {
 		return;
 	}
 
-	// When the shop state is at the root interface ShopMode needs to process user input and possibly change state
+	// When the state is at the root interface ,ShopMode needs to process user input and possibly change state
 	if (_state == SHOP_STATE_ROOT) {
 		SoundDescriptor* sound = NULL; // Used to hold pointers of sound objects to play
 
@@ -202,7 +211,7 @@ void ShopMode::Update() {
 			}
 
 			_action_options.InputConfirm();
-			sound = ShopMode::CurrentInstance()->GetSound("confirm");
+			sound = GetSound("confirm");
 			assert(sound != NULL);
 			sound->Play();
 
@@ -230,6 +239,7 @@ void ShopMode::Update() {
 		}
 	} // if (_state == SHOP_STATE_ROOT)
 
+	// Update the active interface
 	switch (_state) {
 		case SHOP_STATE_ROOT:
 			_root_interface->Update();
@@ -246,16 +256,15 @@ void ShopMode::Update() {
 		case SHOP_STATE_CONFIRM:
 			_confirm_interface->Update();
 			break;
-// TODO
-// 		case SHOP_STATE_LEAVE:
-// 			_leave_interface->Update();
-// 			break;
+		case SHOP_STATE_LEAVE:
+			_leave_interface->Update();
+			break;
 		default:
 			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << ", reseting to root state" << endl;
 			_state = SHOP_STATE_ROOT;
 			break;
 	} // switch (_state)
-}
+} // void ShopMode::Update()
 
 
 
@@ -278,33 +287,34 @@ void ShopMode::Draw() {
 	VideoManager->MoveRelative(705.0f, 0.0f);
 	_drunes_icon.Draw();
 
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->Move(512.0f, 657.0f);
 	switch (_state) {
 		case SHOP_STATE_ROOT:
 			_action_options.Draw();
 			break;
 		case SHOP_STATE_BUY:
-			_action_options.Draw();
+			_action_titles[0].Draw();
 			break;
 		case SHOP_STATE_SELL:
-			_action_options.Draw();
+			_action_titles[1].Draw();
 			break;
 		case SHOP_STATE_TRADE:
-			_action_options.Draw();
+			_action_titles[2].Draw();
 			break;
 		case SHOP_STATE_CONFIRM:
-			_action_options.Draw();
+			_action_titles[3].Draw();
 			break;
-// TODO
-// 		case SHOP_STATE_LEAVE:
-// 			_action_options.Draw();
-// 			break;
+		case SHOP_STATE_LEAVE:
+			_action_titles[4].Draw();
+			break;
 		default:
 			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << endl;
 			break;
 	}
 
 	// TODO: This method isn't working correctly (know idea why these coordinates work). When the call is fixed, the args should be updated
-	VideoManager->DrawLine(-635.0f, 32.0f, -10.0f, 32.0f, 1.0f, Color::white);
+	VideoManager->DrawLine(-315.0f, -20.0f, 315.0f, -20.0f, 1.0f, Color::white);
 
 	_finance_table.Draw();
 
@@ -325,105 +335,14 @@ void ShopMode::Draw() {
 		case SHOP_STATE_CONFIRM:
 			_confirm_interface->Draw();
 			break;
-// TODO
-// 		case SHOP_STATE_LEAVE:
-// 			_leave_interface->Draw();
-// 			break;
+		case SHOP_STATE_LEAVE:
+			_leave_interface->Draw();
+			break;
 		default:
 			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << endl;
 			break;
 	}
-}
-
-
-
-void ShopMode::SetShopName(ustring name) {
-	if (IsInitialized() == true) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "function called after shop was already initialized" << endl;
-		return;
-	}
-
-	_root_interface->SetShopName(name);
-}
-
-
-
-void ShopMode::SetGreetingText(ustring greeting) {
-	if (IsInitialized() == true) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "function called after shop was already initialized" << endl;
-		return;
-	}
-
-	_root_interface->SetGreetingText(greeting);
-}
-
-
-
-void ShopMode::SetPriceLevels(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level) {
-	if (IsInitialized() == true) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "function called after shop was already initialized" << endl;
-		return;
-	}
-
-	_buy_price_level = buy_level;
-	_sell_price_level = sell_level;
-}
-
-
-
-void ShopMode::AddObject(uint32 object_id, uint32 stock) {
-	if (IsInitialized() == true) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "shop is already initialized" << endl;
-		return;
-	}
-
-	if (stock == 0) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "added an object with a zero stock count" << endl;
-		return;
-	}
-
-	if (object_id == private_global::OBJECT_ID_INVALID || object_id >= private_global::OBJECT_ID_EXCEEDS) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object with invalid id: " << object_id << endl;
-		return;
-	}
-
-	if (_shop_objects.find(object_id) != _shop_objects.end()) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object that already existed: " << object_id << endl;
-		return;
-	}
-
-	GlobalObject* new_object = GlobalCreateNewObject(object_id, 1);
-	_managed_objects.push_back(new_object);
-	ShopObject new_shop_object(new_object, true);
-	new_shop_object.IncrementStockCount(stock);
-	_shop_objects.insert(make_pair(object_id, new_shop_object));
-}
-
-
-
-void ShopMode::RemoveObject(uint32 object_id) {
-	map<uint32, ShopObject>::iterator shop_iter = _shop_objects.find(object_id);
-	if (shop_iter == _shop_objects.end()) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to remove object that did not exist: " << object_id << endl;
-		return;
-	}
-
-	if (shop_iter->second.IsSoldInShop() == true) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "tried to remove object that is sold in shop: " << object_id << endl;
-		return;
-	}
-
-	if (shop_iter->second.GetOwnCount() != 0) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "object's ownership count was non-zero: " << object_id << endl;
-		return;
-	}
-
-	_shop_objects.erase(shop_iter);
-	_sell_list.erase(object_id);
-
-	// TODO: call the sell interface and inform it that the object has been removed
-}
-
+} // void ShopMode::Draw()
 
 
 void ShopMode::Initialize() {
@@ -435,8 +354,8 @@ void ShopMode::Initialize() {
 	_initialized = true;
 
 	// ---------- (1): Determine what types of objects the shop deals in based on the managed object list
-	for (uint32 i = 0; i < _managed_objects.size(); i++) {
-		switch (_managed_objects[i]->GetObjectType()) {
+	for (uint32 i = 0; i < _created_objects.size(); i++) {
+		switch (_created_objects[i]->GetObjectType()) {
 			case GLOBAL_OBJECT_ITEM:
 				_deal_types |= DEALS_ITEMS;
 				break;
@@ -462,7 +381,7 @@ void ShopMode::Initialize() {
 				_deal_types |= DEALS_KEY_ITEMS;
 				break;
 			default:
-				IF_PRINT_WARNING(SHOP_DEBUG) << "unknown object type sold in shop: " << _managed_objects[i]->GetObjectType() << endl;
+				IF_PRINT_WARNING(SHOP_DEBUG) << "unknown object type sold in shop: " << _created_objects[i]->GetObjectType() << endl;
 				break;
 		}
 	}
@@ -509,6 +428,7 @@ void ShopMode::Initialize() {
 	_sell_interface->Initialize();
 	_trade_interface->Initialize();
 	_confirm_interface->Initialize();
+	_leave_interface->Initialize();
 } // void ShopMode::Initialize()
 
 
@@ -650,11 +570,102 @@ void ShopMode::ChangeState(SHOP_STATE new_state) {
 
 	_state = new_state;
 
-	// TEMP: shop mode should conditionally exit on leave
+	// When state changes to the leave state, leave immediately if there are no marked purchases, sales, or trades
 	if (_state == SHOP_STATE_LEAVE) {
-		ModeManager->Pop();
+		if ((GetTotalCosts() == 0) && (GetTotalSales() == 0)) {
+			ModeManager->Pop();
+		}
 	}
 } // void ShopMode::ChangeState(SHOP_STATE new_state)
+
+
+
+void ShopMode::SetShopName(ustring name) {
+	if (IsInitialized() == true) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function called after shop was already initialized" << endl;
+		return;
+	}
+
+	_root_interface->SetShopName(name);
+}
+
+
+
+void ShopMode::SetGreetingText(ustring greeting) {
+	if (IsInitialized() == true) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function called after shop was already initialized" << endl;
+		return;
+	}
+
+	_root_interface->SetGreetingText(greeting);
+}
+
+
+
+void ShopMode::SetPriceLevels(SHOP_PRICE_LEVEL buy_level, SHOP_PRICE_LEVEL sell_level) {
+	if (IsInitialized() == true) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function called after shop was already initialized" << endl;
+		return;
+	}
+
+	_buy_price_level = buy_level;
+	_sell_price_level = sell_level;
+}
+
+
+
+void ShopMode::AddObject(uint32 object_id, uint32 stock) {
+	if (IsInitialized() == true) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function called after shop was already initialized" << endl;
+		return;
+	}
+
+	if (stock == 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "added an object with a zero stock count" << endl;
+		return;
+	}
+
+	if (object_id == private_global::OBJECT_ID_INVALID || object_id >= private_global::OBJECT_ID_EXCEEDS) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object with invalid id: " << object_id << endl;
+		return;
+	}
+
+	if (_shop_objects.find(object_id) != _shop_objects.end()) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object that already existed: " << object_id << endl;
+		return;
+	}
+
+	GlobalObject* new_object = GlobalCreateNewObject(object_id, 1);
+	_created_objects.push_back(new_object);
+	ShopObject new_shop_object(new_object, true);
+	new_shop_object.IncrementStockCount(stock);
+	_shop_objects.insert(make_pair(object_id, new_shop_object));
+}
+
+
+
+void ShopMode::RemoveObject(uint32 object_id) {
+	map<uint32, ShopObject>::iterator shop_iter = _shop_objects.find(object_id);
+	if (shop_iter == _shop_objects.end()) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to remove object that did not exist: " << object_id << endl;
+		return;
+	}
+
+	if (shop_iter->second.IsSoldInShop() == true) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "tried to remove object that is sold in shop: " << object_id << endl;
+		return;
+	}
+
+	if (shop_iter->second.GetOwnCount() != 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "object's ownership count was non-zero: " << object_id << endl;
+		return;
+	}
+
+	_shop_objects.erase(shop_iter);
+	_sell_list.erase(object_id);
+
+	// TODO: call the sell interface and inform it that the object has been removed
+}
 
 
 
