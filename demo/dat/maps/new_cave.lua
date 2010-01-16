@@ -576,7 +576,7 @@ function Load(m)
 	exit_zone2:AddSection(hoa_map.ZoneSection(102, 0, 124, 14));
 	map:AddZone(exit_zone2);
 
-	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_village.lua");
+	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_training.lua");
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.MapTransitionEvent(22112, "dat/maps/betrayal_room.lua");
 	event_supervisor:RegisterEvent(event);

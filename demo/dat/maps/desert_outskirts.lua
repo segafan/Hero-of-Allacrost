@@ -5,7 +5,7 @@ setfenv(1, ns);
 
 -- The map name and location graphic
 map_name = "Desert Outskirts"
-location_filename = "mountain_village.png"
+location_filename = "blank.png"
 
 enemy_ids = { 1, 2, 3, 4, 5, 103 }
 
@@ -814,7 +814,7 @@ function Load(m)
 	event = hoa_map.ScriptedEvent(2, 2, 0);
 	event_supervisor:RegisterEvent(event);
 
-	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_village.lua");
+	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_training.lua");
 	event_supervisor:RegisterEvent(event);
 end
 
