@@ -123,7 +123,7 @@ public:
 	void SetDisplayMode(const TEXT_DISPLAY_MODE &mode);
 
 	/** \brief Sets the text display speed (in characters per second).
-	*** \param display_speed The display speed, in terms ofcharacters per second.
+	*** \param display_speed The display speed, in terms of characters per second.
 	*** If the current display mode is one line at a time, then the display speed is based
 	*** on VIDEO_CHARS_PER_LINE characters per line, so for example, a display speed of 10
 	*** would mean 3 seconds per line if VIDEO_CHARS_PER_LINE is 30.

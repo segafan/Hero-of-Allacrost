@@ -407,7 +407,7 @@ void ShopMode::Initialize() {
 	}
 
 	// ---------- (4): Load shop multimedia data
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(_object_category_images, "img/icons/object_categories.png", 2, 4) == false) {
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_object_category_images, "img/icons/object_categories.png", 3, 4) == false) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load category image icons" << endl;
 		return;
 	}

@@ -68,7 +68,7 @@ private:
 	/** \brief Class objects used to display the object data to the player
 	*** The size and contents of this container mimic that which is found in the _object_data container.
 	**/
-	std::vector<SellDisplay*> _object_displays;
+	std::vector<SellListDisplay*> _object_displays;
 
 	//! \brief Contains a column of images representing each category of object sold in the shop
 	hoa_video::OptionBox _category_list;
@@ -95,11 +95,11 @@ private:
 /** ****************************************************************************
 *** \brief A GUI display of the list of objects that may be sold
 *** ***************************************************************************/
-class SellDisplay : public ListDisplay {
+class SellListDisplay : public ObjectListDisplay {
 public:
-	SellDisplay();
+	SellListDisplay();
 
-	~SellDisplay()
+	~SellListDisplay()
 		{}
 
 	//! \brief Reconstructs all option box entries from the object data
@@ -109,10 +109,10 @@ public:
 	*** \param index The index of the object data to reconstruct
 	**/
 	void RefreshEntry(uint32 index);
-}; // class SellDisplay : public ListDisplay
+}; // class SellListDisplay : public ObjectListDisplay
 
-} // private_shop
+} // namespace private_shop
 
-} // hoa_shop
+} // namespace hoa_shop
 
 #endif // __SHOP_SELL_HEADER__
