@@ -26,7 +26,10 @@
 using namespace std;
 
 using namespace hoa_utils;
+
+using namespace hoa_system;
 using namespace hoa_video;
+
 using namespace hoa_global;
 
 namespace hoa_shop {
@@ -220,10 +223,66 @@ void ShopObject::DecrementSellCount(uint32 dec) {
 }
 
 // *****************************************************************************
-// ***** ListDisplay class methods
+// ***** ObjectCategoryDisplay class methods
 // *****************************************************************************
 
-void ListDisplay::Clear() {
+ObjectCategoryDisplay::ObjectCategoryDisplay() :
+	_category_icon(NULL),
+	_last_icon(NULL)
+{
+	// The default time it takes to transition graphics/text to a new category (in milliseconds)
+	const uint32 DEFAULT_TRANSITION_TIME = 500;
+
+	_transition_timer.Initialize(DEFAULT_TRANSITION_TIME, 0, ShopMode::CurrentInstance());
+	_category_text.SetDisplaySpeed(static_cast<float>(DEFAULT_TRANSITION_TIME));
+}
+
+
+
+ObjectCategoryDisplay::~ObjectCategoryDisplay() {
+	_category_icon = NULL;
+	_last_icon = NULL;
+}
+
+
+
+void ObjectCategoryDisplay::SetTransitionTime(uint32 time) {
+	// Transition times can only be set when the timer is in the initial state
+	if (_transition_timer.IsInitial() == false) {
+		_transition_timer.Reset();
+	}
+
+	_transition_timer.SetDuration(time);
+	_category_text.SetDisplaySpeed(static_cast<float>(time) / 1000.0f);
+}
+
+
+
+void ObjectCategoryDisplay::ChangeCategory(ustring& name, const StillImage* icon) {
+	if (icon == NULL) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function's icon argument was passed a NULL pointer" << endl;
+	}
+
+	_last_icon = _category_icon;
+	_category_icon = icon;
+
+	_category_text.SetDisplayText(name);
+
+	_transition_timer.Reset();
+	_transition_timer.Run();
+}
+
+
+
+void ObjectCategoryDisplay::Update() {
+	_category_text.Update();
+}
+
+// *****************************************************************************
+// ***** ObjectListDisplay class methods
+// *****************************************************************************
+
+void ObjectListDisplay::Clear() {
 	_objects = NULL;
 	_identify_list.ClearOptions();
 	_property_list.ClearOptions();
@@ -231,7 +290,7 @@ void ListDisplay::Clear() {
 
 
 
-void ListDisplay::PopulateList(vector<ShopObject*>* objects) {
+void ObjectListDisplay::PopulateList(vector<ShopObject*>* objects) {
 	if (objects == NULL) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "function was given a NULL pointer argument" << endl;
 		return;
@@ -243,14 +302,22 @@ void ListDisplay::PopulateList(vector<ShopObject*>* objects) {
 
 
 
-void ListDisplay::Update() {
+void ObjectListDisplay::RefreshAllEntries() {
+	for (uint32 i = 0; i < _objects->size(); i++) {
+		RefreshEntry(i);
+	}
+}
+
+
+
+void ObjectListDisplay::Update() {
 	_identify_list.Update();
 	_property_list.Update();
 }
 
 
 
-void ListDisplay::Draw() {
+void ObjectListDisplay::Draw() {
 	_identify_list.Draw();
 	_property_list.Draw();
 }

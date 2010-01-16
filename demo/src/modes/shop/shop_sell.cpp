@@ -121,7 +121,7 @@ void SellInterface::Initialize() {
 
 	// ---------- (3): Create the sell displays using the object data that is now ready
 	for (uint32 i = 0; i < _object_data.size(); i++) {
-		SellDisplay* new_list = new SellDisplay();
+		SellListDisplay* new_list = new SellListDisplay();
 		new_list->GetIdentifyList().SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 		new_list->GetPropertyList().SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 		new_list->PopulateList(&(_object_data[i]));
@@ -179,7 +179,7 @@ void SellInterface::Update() {
 		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
 	}
 
-	SellDisplay* selected_list = _object_displays[_current_datalist];
+	SellListDisplay* selected_list = _object_displays[_current_datalist];
 	uint32 selected_entry = selected_list->GetIdentifyList().GetSelection();
 	ShopObject* selected_object = _object_data[_current_datalist][selected_entry];
 
@@ -282,11 +282,11 @@ void SellInterface::_UpdateSelectedCategory() {
 }
 
 // *****************************************************************************
-// ***** SellDisplay class methods
+// ***** SellListDisplay class methods
 // *****************************************************************************
 
-SellDisplay::SellDisplay() :
-	ListDisplay()
+SellListDisplay::SellListDisplay() :
+	ObjectListDisplay()
 {
 	_identify_list.SetPosition(150.0f, 330.0f);
 	_identify_list.SetDimensions(360.0f, 300.0f, 1, 255, 1, 8);
@@ -313,7 +313,7 @@ SellDisplay::SellDisplay() :
 
 
 
-void SellDisplay::RefreshList() {
+void SellListDisplay::RefreshList() {
 	if (_objects == NULL) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "no object data is available" << endl;
 		return;
@@ -343,7 +343,7 @@ void SellDisplay::RefreshList() {
 
 
 
-void SellDisplay::RefreshEntry(uint32 index) {
+void SellListDisplay::RefreshEntry(uint32 index) {
 	if (_objects == NULL) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "no object data is available" << endl;
 		return;

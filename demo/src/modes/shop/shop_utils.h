@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "utils.h"
 
+#include "system.h"
 #include "video.h"
 
 namespace hoa_shop {
@@ -224,31 +225,88 @@ private:
 }; // class ShopObject
 
 
+/** ****************************************************************************
+*** \brief An abstract class for displaying the current selected object category
+***
+*** The contents of this class are used to display an icon image and name. This
+*** class is intended to be used to display only one single category and is not
+*** recommended to be used if you wish to display multiple categories in a list.
+*** This class also enables a smooth transition when switching from one category
+*** to the next. It does so by a general visual transformation from the former
+*** category icon to the next and an animation of the category text changing.
+***
+*** \note In the Draw() method implementation of the inheriting class, take care
+*** to check that the icon image pointer members are not NULL before attempting
+*** to draw them.
+*** ***************************************************************************/
+class ObjectCategoryDisplay {
+public:
+	ObjectCategoryDisplay();
+
+	virtual ~ObjectCategoryDisplay();
+
+	/** \brief Sets the amount of time that it should take to fully transition between categories
+	*** \param time The amount of time, in milliseconds
+	*** \note The default time is defined by the value of _DEFAULT_TRANSITION_TIME. You only need to
+	*** call this method if you do not wish to use the default value.
+	**/
+	void SetTransitionTime(uint32 time);
+
+	/** \brief Sets the new category
+	*** \param name The text to display that represents the category's name
+	*** \param icon A pointer to the new image to represent the category's icon
+	*** \note This function does not check whether or not the new name/icon are not
+	*** the same as the previous name/icon
+	*** \note It is safe to pass a NULL pointer for the icon argument, but a warning message
+	*** will be printed if this is the case.
+	**/
+	void ChangeCategory(hoa_utils::ustring& name, const hoa_video::StillImage* icon);
+
+	//! \brief Must be called so that the TextBox can proceed
+	void Update();
+
+	//! \brief Draws the graphics and text to the screen
+	virtual void Draw() = 0;
+
+protected:
+	//! \brief A pointer to an icon image representing the current category
+	const hoa_video::StillImage* _category_icon;
+
+	//! \brief A pointer to the icon image that represents the previous category
+	const hoa_video::StillImage* _last_icon;
+
+	//! \brief The name/description text of the current category
+	hoa_video::TextBox _category_text;
+
+	//! \brief A timer used to track the progress of category transitions
+	hoa_system::SystemTimer _transition_timer;
+}; // class ObjectCategoryDisplay
+
 
 /** ****************************************************************************
 *** \brief An abstract class for displaying a list of shop objects
 ***
 *** This class is used to display a list of shop objects to the user along with
-*** certain properties. It uses two OptionBox objects to represent the objects that
-*** are displayed. The first option box contains the image icon and name of the shop
-*** object. The second option box contains properties about the object such as the
-*** price, stock, and amount owned by the player. Both OptionBox objects have the same
-*** size.
+*** certain properties. It uses two OptionBox objects to achieve this, which are placed
+*** side by side. The left option box contains indentifying information of the shop
+*** object while the right option box contains specific object properties. Both OptionBox
+*** objects have the same number of rows (a row represents a single object) but usually a
+*** different number of columns.
 ***
-*** \note The constructor of derived classes should set the properties of the
-*** _identifier_list and _properties_list OptionBox objects. This will determine
-*** how the information is displayed when the Draw() routine is called.
+*** It is up to the deriving class to determine what information that the OptionBoxes ultimately
+*** display and how that information is displayed. The deriving class constructor should set the
+*** the properties of the OptionBox objects to display them as desired.
 *** ***************************************************************************/
-class ListDisplay {
+class ObjectListDisplay {
 public:
-	ListDisplay() : _objects(NULL)
+	ObjectListDisplay() : _objects(NULL)
 		{}
 
-	virtual ~ListDisplay()
-		{}
+	virtual ~ObjectListDisplay()
+		{ Clear(); }
 
 	/** \brief Removes all entries from the option boxes
-	*** \note This will also set the object_data member to NULL, so usually calling this function
+	*** \note This will also set the _objects member to NULL, so usually calling this function
 	*** should be followed by invoking PopulateList() to refill the class with valid data.
 	**/
 	void Clear();
@@ -263,13 +321,15 @@ public:
 
 	/** \brief Reconstructs the displayed properties of a single object
 	*** \param index The index of the object data to reconstruct
-	***
-	*** This method refreshes only the relevant options of the properties_list and does not modify
-	*** the identifier_list. The reason for this is that the identifier_list (containing the image
-	*** and name of the object) never needs to be changed since that data is static. The properties,
-	*** however, do require frequent change as these properties can be modified by the player.
 	**/
 	virtual void RefreshEntry(uint32 index) = 0;
+
+	/** \brief Reconstructs the displayed properties of all objects in the list
+	*** The difference between this method and the RefreshList() method is that this method only
+	*** operates on the object's properties, whereas RefreshList() also works on the identification
+	*** data. This method is less costly than reconstructing the entire list.
+	**/
+	virtual void RefreshAllEntries();
 
 	//! \brief Updates the option boxes
 	void Update();
@@ -287,13 +347,12 @@ protected:
 	//! \brief A pointer to the vector of object data that the class is to display
 	std::vector<ShopObject*>* _objects;
 
-	//! \brief Identifies objects via their icon and name
+	//! \brief Contains identification information about each objects such as graphical icon and name
 	hoa_video::OptionBox _identify_list;
 
-	//! \brief Contains shop properties about the object such as price, stock, amount owned, and amount to buy/sell
+	//! \brief Contains properties about the object such as price, stock, amount owned, or amount to buy/sell
 	hoa_video::OptionBox _property_list;
-}; // class ListDisplay
-
+}; // class ObjectListDisplay
 
 
 /** ****************************************************************************
