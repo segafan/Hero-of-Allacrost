@@ -274,6 +274,12 @@ public:
 	uint32 GetUsableBy() const
 		{ return _usable_by; }
 
+	const std::vector<GlobalShard*>& GetSockets() const
+		{ return _sockets; }
+
+	const std::map<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>& GetElementalEffects() const
+		{ return _elemental_effects; }
+
 private:
 	//! \brief The amount of physical damage that the weapon causes
 	uint32 _physical_attack;
@@ -286,10 +292,21 @@ private:
 	**/
 	uint32 _usable_by;
 
-	// TODO: Add elementals, status, and shard sockets to weapons
-	// std::map<GLOBAL_ELEMENTAL, uint32> _elemental_bonuses;
-	// std::map<GLOBAL_STATUS, uint32> _status_bonuses;
-	// std::vector<GlobalShard*> _sockets;
+	/** \brief Sockets which may be used to place shards on the weapon
+	*** Many weapons may have no sockets, so it is not uncommon for the size of this vector to be
+	*** zero. When a socket is available but empty (has no attached shard), the pointer at that index
+	*** will be NULL.
+	**/
+	std::vector<GlobalShard*> _sockets;
+
+	/** \brief Container that holds the intensity of each type of elemental effect of the weapon
+	*** No elemental effect is indicated by an intensity of GLOBAL_INTENSITY_NEUTRAL
+	**/
+	std::map<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY> _elemental_effects;
+
+	// TODO: Add status effects to weapons
+	// std::map<GLOBAL_STATUS, GLOBAL_INTENSITY> _status_effects;
+
 }; // class GlobalWeapon : public GlobalObject
 
 
@@ -320,6 +337,12 @@ public:
 	uint32 GetUsableBy() const
 		{ return _usable_by; }
 
+	const std::vector<GlobalShard*>& GetSockets() const
+		{ return _sockets; }
+
+	const std::map<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>& GetElementalEffects() const
+		{ return _elemental_effects; }
+
 private:
 	//! \brief The amount of physical defense that the armor provides
 	uint32 _physical_defense;
@@ -332,10 +355,20 @@ private:
 	**/
 	uint32 _usable_by;
 
-	// TODO: Add elementals, status, and shard sockets to armor
-	// std::map<GLOBAL_ELEMENTAL, uint32> _elemental_bonuses;
-	// std::map<GLOBAL_STATUS, uint32> _status_bonuses;
-	// std::vector<GlobalShard*> _sockets;
+	/** \brief Sockets which may be used to place shards on the armor
+	*** Many armor may have no sockets, so it is not uncommon for the size of this vector to be
+	*** zero. When a socket is available but empty (has no attached shard), the pointer at that index
+	*** will be NULL.
+	**/
+	std::vector<GlobalShard*> _sockets;
+
+	/** \brief Container that holds the intensity of each type of elemental effect of the armor
+	*** No elemental effect is indicated by an intensity of GLOBAL_INTENSITY_NEUTRAL
+	**/
+	std::map<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY> _elemental_effects;
+
+	// TODO: Add status effects to weapons
+	// std::map<GLOBAL_STATUS, GLOBAL_INTENSITY> _status_effects;
 }; // class GlobalArmor : public GlobalObject
 
 

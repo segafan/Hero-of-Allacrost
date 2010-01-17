@@ -184,7 +184,7 @@ private:
 	*** increases the fortitude of the attack point by 25%. If the base protection rating was 10 and the protection
 	*** modifier was -0.30f, the resulting protection for the attack point would be: 10 + (10 * -0.30f) = 7.
 	***
-	*** The lower bound for each modifier is -1.0f (-100%), which will result in a value of zero for that stat. No 
+	*** The lower bound for each modifier is -1.0f (-100%), which will result in a value of zero for that stat. No
 	*** actor stats can be negative so even if the modifier drops below -1.0f, the resulting value will still be zero.
 	*** There is no theoretical upper bound, but it is usually advised to keep it under 1.0f (100%).
 	**/
@@ -234,7 +234,7 @@ private:
 /** ****************************************************************************
 *** \brief Represents an actor that can participate in battles
 ***
-*** This is an abstract parent class that both playable characters and enemies 
+*** This is an abstract parent class that both playable characters and enemies
 *** inherit from in order to provide a consistent interface to the statistics
 *** that characters and enemies share.
 ***
@@ -362,13 +362,13 @@ public:
 	// TODO: elemental and status effects not yet available in game
 // 	std::vector<GlobalElementalEffect*>& GetElementalAttackBonuses()
 // 		{ return _elemental_attack_bonuses; }
-// 
+//
 // 	std::vector<std::pair<float, GlobalStatusEffect*> >& GetStatusAttackBonuses()
 // 		{ return _status_attack_bonuses; }
-// 
+//
 // 	std::vector<GlobalElementalEffect*>& GetElementalDefenseBonuses()
 // 		{ return _elemental_defense_bonuses; }
-// 
+//
 // 	std::vector<std::pair<float, GlobalStatusEffect*> >& GetStatusDefenseBonuses()
 // 		{ return _status_defense_bonuses; }
 	//@}
@@ -647,7 +647,7 @@ protected:
 ***    learned and call AcknoledgeGrowth() (*see note)
 ***
 *** \note When an experience level is gained, after the call to AcknowledgeGrowth()
-*** there may be new growth available (because the character gained multiple 
+*** there may be new growth available (because the character gained multiple
 *** experience levels or met the requirements for additional gradual growth for
 *** the new experience level to gain). Thus, you should strongly consider calling
 *** the IsGrowthDetected() method after AcknowledgeGrowth() to report any further
@@ -887,6 +887,9 @@ public:
 
 	// TEMP: image accessor functions
 	//@{
+	std::vector<hoa_video::StillImage>* GetStandardSpriteFrames()
+		{ return &_map_frames_standard; }
+
 	void AddBattleAnimation(const std::string & name, hoa_video::AnimatedImage anim)
 		{ _battle_animation[name] = anim; }
 
@@ -1069,7 +1072,7 @@ protected:
 	/** \brief Contains all of the possible skills that the enemy may possess
 	*** The map key is the id for the skill that the enemy may know. The value for each key is the
 	*** experience level that the enemy is required to be at in order to effectively learn the skill.
-	*** The elements in this map are added to the enemy's _skill vector of GlobalSkills when the 
+	*** The elements in this map are added to the enemy's _skill vector of GlobalSkills when the
 	*** Initialize() function is called, and as long as the enemy meets the level requirements for
 	*** adding the skill.
 	**/
@@ -1100,9 +1103,9 @@ protected:
 ***
 *** \note When this class is destroyed, the actors contained within the class are
 *** <i>not</i> destroyed.
-*** 
+***
 *** \note All methods which perform an operation by using an actor ID are
-*** <b>only</b> valid to use if the party does not allow duplicates. 
+*** <b>only</b> valid to use if the party does not allow duplicates.
 *** ***************************************************************************/
 class GlobalParty : public GlobalTarget {
 public:

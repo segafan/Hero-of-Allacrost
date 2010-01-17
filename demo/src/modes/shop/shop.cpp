@@ -145,11 +145,19 @@ void ShopMedia::Initialize() {
 		_object_category_names.push_back(all_text[8]);
 		_object_category_icons.push_back(all_icons[8]);
 	}
+
+	// Grab the sprite frames for all characters in the active party
+	vector<GlobalCharacter*>* characters = GlobalManager->GetCharacterOrder();
+	for (uint32 i = 0; i < characters->size(); i++) {
+		_character_sprites.push_back(characters->at(i)->GetStandardSpriteFrames()->at(0));
+	}
 }
 
 
 
 StillImage* ShopMedia::GetElementalIcon(GLOBAL_ELEMENTAL element_type, GLOBAL_INTENSITY intensity) {
+	const uint32 NUMBER_INTENSTIY_LEVELS = 9;
+
 	// Row/col coordinates for where the specific icon can be found in the multi image array
 	uint32 row = 0, col = 0;
 
@@ -218,7 +226,7 @@ StillImage* ShopMedia::GetElementalIcon(GLOBAL_ELEMENTAL element_type, GLOBAL_IN
 			return NULL;
 	}
 
-	return &(_elemental_icons[(row * GLOBAL_INTENSITY_TOTAL) + col]);
+	return &(_elemental_icons[(row * NUMBER_INTENSTIY_LEVELS) + col]);
 }
 
 

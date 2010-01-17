@@ -186,6 +186,15 @@ GlobalWeapon::GlobalWeapon(uint32 id, uint32 count) :
 		exit(1);
 	}
 
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_FIRE, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_WATER, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_VOLT, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_EARTH, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SLICING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SMASHING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_MAULING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_PIERCING, GLOBAL_INTENSITY_NEUTRAL));
+
 	ReadScriptDescriptor& script_file = GlobalManager->_weapons_script;
 
 	if (script_file.DoesTableExist(_id) == false) {
@@ -231,6 +240,15 @@ GlobalArmor::GlobalArmor(uint32 id, uint32 count) :
 		cerr << "GLOBAL ERROR: GlobalArmor constructor failed due to an invalid id assignment: " << _id << endl;
 		exit(1);
 	}
+
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_FIRE, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_WATER, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_VOLT, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_EARTH, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SLICING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SMASHING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_MAULING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_PIERCING, GLOBAL_INTENSITY_NEUTRAL));
 
 	// Figure out the appropriate script reference to grab based on the id value
 	ReadScriptDescriptor* script_file;

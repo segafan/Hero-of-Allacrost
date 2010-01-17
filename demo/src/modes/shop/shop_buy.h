@@ -304,8 +304,11 @@ public:
 	//! \brief The name of the selected object
 	hoa_video::TextImage object_name;
 
-	//! \brief The textual description of the object to display
-	hoa_video::TextBox object_description;
+	//! \brief A summary description of the object to display
+	hoa_video::TextBox summary_description;
+
+	//! \brief A more detailed "lore" description about the object's origins and connections with the world
+	hoa_video::TextBox lore_description;
 
 	//! \brief For weapons and armor, header text identifying the physical and metaphysical ratings
 	hoa_video::TextImage phys_header, meta_header;
@@ -319,20 +322,50 @@ public:
 	//! \brief For weapons and armor, text indicating how many sockets the selected equipment has available
 	hoa_video::TextImage socket_text;
 
-	//! \brief Icon images representing each of the game's elements
+	//! \brief Icon images representing elemental effects and intensity properties of the selected object
 	std::vector<hoa_video::StillImage> elemental_icons;
 
-	//! \brief Icon images representing each of the game's status effects
+	//! \brief Icon images representing status effects and intensity properties of the selected object
 	std::vector<hoa_video::StillImage> status_icons;
 
 	//! \brief Sprite images of all characters currently in the party
 	std::vector<hoa_video::StillImage> character_sprites;
 
-	//! \brief For weapons and armor, text to indicate an increase or decrease in phys/meta stat value for each party character
-	std::vector<hoa_video::TextImage> stat_inc_text, stat_dec_text;
-
 	//! \brief For weapons and armor, icon image that represents when a character already has the object equipped
 	hoa_video::StillImage equip_icon;
+
+	//! \brief For weapons and armor, this member is set to true for each character that has the object equipped
+	std::vector<bool> character_equipped;
+
+	//! \brief For weapons and armor, text to indicate changes in phys/meta stats from current equipment
+	std::vector<hoa_video::TextImage> phys_change_text, meta_change_text;
+
+	//! \brief Text styles used in the rendering of phys/meta change text
+	hoa_video::TextStyle positive_change_style, negative_change_style, no_change_style;
+private:
+	/** \brief Sets all elemental icons to the proper image given a container
+	*** \param elemental_effects A const reference to a map of elemental effects and their associated intensities
+	***
+	*** The argument is presumed to have an entrity for each type of element. This condition is not checked by the function.
+	*** The format of the parameter comes from the global object code, as object classes return a const std::map reference
+	*** of this type to indicate their elemental effects.
+	**/
+	void _SetElementalIcons(const std::map<hoa_global::GLOBAL_ELEMENTAL, hoa_global::GLOBAL_INTENSITY>& elemental_effects);
+
+	// TODO: Implement this method when status effects are available
+// 	void _SetStatusIcons(const std::map<hoa_global::GLOBAL_STATUS, hoa_global::GLOBAL_INTENSITY>& status_effects);
+
+	/** \brief Updates the visible character sprites, equipped status, and stat text for the selected object
+	*** This method should only be called if the selected_object member is a weapon or armor
+	**/
+	void _SetEquipStatus();
+
+	/** \brief Re-renders the physical and metaphysical change text
+	*** \param index The index into the phys_change_text and meta_change_text containers to re-render
+	*** \param phys_diff The physical change amount
+	*** \param meta_diff The metaphysical change amount
+	**/
+	void _RenderChangeText(uint32 index, int32 phys_diff, int32 meta_diff);
 }; // class BuyObjectView
 
 } // namespace private_shop

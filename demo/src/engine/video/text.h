@@ -109,11 +109,15 @@ public:
 
 	//! \brief Constructor requiring a font name, using white text, and optional shadow style and offsets
 	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK, int32 shadow_x = 1, int32 shadow_y = -2) :
-		font(fnt), color(Color::white), shadow_style(style ), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
+		font(fnt), color(Color::white), shadow_style(style), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
+
+	//! \brief Constructor requiring a font name and color, using default shadow styles and offsets
+	TextStyle(std::string fnt, Color c) :
+		font(fnt), color(c), shadow_style(VIDEO_TEXT_SHADOW_DARK), shadow_offset_x(1), shadow_offset_y(-2) {}
 
 	//! \brief Constructor using default font, requiring a color to be defined, and optional shadow style and offsets
 	TextStyle(Color c, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK, int32 shadow_x = 1, int32 shadow_y = -2) :
-		font("default"), color(c), shadow_style(style ), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
+		font("default"), color(c), shadow_style(style), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
 
 	//! \brief Constructor using default font and white color, and requiring a shadow style with optional shadow offsets
 	TextStyle(TEXT_SHADOW_STYLE style, int32 shadow_x = 1, int32 shadow_y = -2) :
