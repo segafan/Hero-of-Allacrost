@@ -1348,7 +1348,7 @@ void BootMode::_OnShopDebug() {
 	GlobalManager->AddCharacter(2);
 	GlobalManager->AddCharacter(3);
 	GlobalManager->AddCharacter(4);
-	GlobalManager->AddDrunes(500);
+	GlobalManager->AddDrunes(1842);
 	GlobalManager->AddToInventory(1, 5);
 	GlobalManager->AddToInventory(30501, 2);
 	GlobalManager->AddToInventory(2, 3);

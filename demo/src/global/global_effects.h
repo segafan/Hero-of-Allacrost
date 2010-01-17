@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,6 +43,15 @@ enum GLOBAL_ELEMENTAL {
 	GLOBAL_ELEMENTAL_MAULING    = 7,
 	GLOBAL_ELEMENTAL_PIERCING   = 8,
 	GLOBAL_ELEMENTAL_TOTAL      = 9
+};
+
+/** \name Status Effect Types
+*** \brief Constants used to identify the various types of status effects
+*** There are a total of eight elementals: four physical and four metaphysical.
+**/
+enum GLOBAL_STATUS {
+	GLOBAL_STATUS_INVALID    = 0,
+	GLOBAL_STATUS_TOTAL      = 1
 };
 
 /** \name EffectIntensity Levels
@@ -103,7 +112,7 @@ public:
 	*** \param amount The number of levels to increase the intensity by (default = 1)
 	**/
 	void IncrementIntensity(uint8 amount = 1);
-	
+
 	/** \brief Decrements the elemental effect's intensity
 	*** \param amount The number of levels to decrease the intensity by (default = 1)
 	**/
@@ -195,7 +204,7 @@ public:
 	*** reflect this.
 	**/
 	bool IncrementIntensity(uint8 amount);
-	
+
 	/** \brief Decrements the status effect intensity by a specified amount
 	*** \param amount The number of intensity levels to decrement the status effect by
 	*** \return False if the intensity level reaches GLOBAL_INTENSITY_INVALID (zero intensity)

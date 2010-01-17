@@ -30,7 +30,7 @@ namespace hoa_global {
 
 std::string GetTargetTypeText(int globalTargetType, int globalTargetAlly)
 {
-	static std::string TargetTypeText[GLOBAL_TARGET_TOTAL][2] = 
+	static std::string TargetTypeText[GLOBAL_TARGET_TOTAL][2] =
 	{{"Single Point", "Single Point"},
 	 {"Single Enemy", "Single Ally"},
 	 {"All Enemies", "All Allies"}};
@@ -558,7 +558,7 @@ void GlobalCharacterGrowth::_CheckForGrowth() {
 			_evade_growth += _evade_periodic_growth[i].second;
 		_evade_periodic_growth.clear();
 
-		
+
 		return;
 	} // if (_actor_ower->GetExperiencePoints() >= _experience_for_next_level)
 
@@ -842,7 +842,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	for (uint32 i = GLOBAL_POSITION_HEAD; i <= GLOBAL_POSITION_LEGS; i++) {
 		if (initial == false) // Make sure the armor_equipped vector is the same size as the _attack_points vector
 			_armor_equipped.push_back(NULL);
-	
+
 		_attack_points.push_back(new GlobalAttackPoint(this));
 		char_script.OpenTable(i);
 		if (_attack_points[i]->_LoadData(char_script) == false) {
@@ -924,6 +924,11 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	_CalculateAttackRatings();
 	_CalculateDefenseRatings();
 	_CalculateEvadeRatings();
+
+	// TEMP: Load the standard map frames for the sprite
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_map_frames_standard, "img/sprites/map/" + _filename + "_walk.png", 4, 6) == false) {
+		exit(1);
+	}
 
 	// TEMP TEMP TEMP: Load the character's idle animation
 	AnimatedImage idle;
