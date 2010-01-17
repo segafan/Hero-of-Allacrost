@@ -308,16 +308,19 @@ namespace hoa_shop {
 	class ShopMode;
 
 	namespace private_shop {
+		class ShopMedia;
 		class ShopInterface;
 		class ShopObject;
 		class ListDisplay;
 
 		class RootInterface;
+		class CategoryDrawData;
 
 		class BuyInterface;
 		class BuyCategoryDisplay;
 		class BuyListDisplay;
 		class BuyListView;
+		class BuyObjectView;
 
 		class SellInterface;
 		class SellListDisplay;

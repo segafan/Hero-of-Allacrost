@@ -42,67 +42,125 @@ namespace private_shop {
 // *****************************************************************************
 
 BuyInterface::BuyInterface() :
-	_selected_object(NULL),
-	_buy_list_view(new BuyListView())
+	_list_view_active(true),
+	_buy_list_view(new BuyListView()),
+	_buy_object_view(new BuyObjectView())
 {}
 
 
 
 BuyInterface::~BuyInterface() {
 	delete _buy_list_view;
+	delete _buy_object_view;
 }
 
 
 
 void BuyInterface::Initialize() {
 	_buy_list_view->Initialize();
-	_selected_object = _buy_list_view->GetSelectedObject();
+	_buy_object_view->Initialize();
+	_buy_object_view->SetSelectedObject(_buy_list_view->GetSelectedObject());
 }
 
 
 
 void BuyInterface::Update() {
-	if (InputManager->ConfirmPress()) {
-		// TODO: Bring up an "instant purchase" confirmation menu
-	}
-	else if (InputManager->CancelPress()) {
-		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
-	}
-	else if (InputManager->MenuPress()) {
-		// TODO: activate detailed information view about selected object
+	ShopObject* obj = _buy_list_view->GetSelectedObject();
+	ShopObject* new_obj = NULL;
+
+	if (_list_view_active == true) {
+		if (InputManager->ConfirmPress()) {
+			// TODO: Bring up an "instant purchase" confirmation menu
+		}
+		else if (InputManager->CancelPress()) {
+			ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
+			ShopMedia::CurrentInstance()->GetSound("cancel")->Play();
+		}
+		else if (InputManager->MenuPress()) {
+			_buy_object_view->ChangeViewComplete();
+			_list_view_active = false;
+		}
+
+		// Swap cycles through the object categories
+		else if (InputManager->SwapPress() && (_buy_list_view->GetNumberObjectCategories() > 1)) {
+			new_obj = _buy_list_view->ChangeCategory(true);
+			_buy_object_view->SetSelectedObject(new_obj);
+			ShopMedia::CurrentInstance()->GetSound("confirm")->Play();
+		}
+
+		// Up/down changes the selected object in the current list
+		else if (InputManager->UpPress()) {
+			new_obj = _buy_list_view->ChangeSelection(false);
+			if (new_obj != obj) {
+				_buy_object_view->SetSelectedObject(new_obj);
+				ShopMedia::CurrentInstance()->GetSound("confirm")->Play();
+			}
+		}
+		else if (InputManager->DownPress()) {
+			new_obj = _buy_list_view->ChangeSelection(true);
+			if (new_obj != obj) {
+				_buy_object_view->SetSelectedObject(new_obj);
+				ShopMedia::CurrentInstance()->GetSound("confirm")->Play();
+			}
+		}
+
+		// Left/right change the quantity of the object to buy
+		else if (InputManager->LeftPress()) {
+			if (_buy_list_view->ChangeQuantity(false) == true) {
+				ShopMedia::CurrentInstance()->GetSound("confirm")->Play();
+			}
+			else {
+				ShopMedia::CurrentInstance()->GetSound("bump")->Play();
+			}
+		}
+		else if (InputManager->RightPress()) {
+			if (_buy_list_view->ChangeQuantity(true) == true) {
+				ShopMedia::CurrentInstance()->GetSound("confirm")->Play();
+			}
+			else {
+				ShopMedia::CurrentInstance()->GetSound("bump")->Play();
+			}
+		}
+
+		// Left select/right select change the quantity of the object to buy by 10 at a time
+		else if (InputManager->LeftSelectPress()) {
+			if (_buy_list_view->ChangeQuantity(false, 10) == true) {
+				ShopMedia::CurrentInstance()->GetSound("confirm")->Play();
+			}
+			else {
+				ShopMedia::CurrentInstance()->GetSound("bump")->Play();
+			}
+		}
+		else if (InputManager->RightSelectPress()) {
+			if (_buy_list_view->ChangeQuantity(true, 10) == true) {
+				ShopMedia::CurrentInstance()->GetSound("confirm")->Play();
+			}
+			else {
+				ShopMedia::CurrentInstance()->GetSound("bump")->Play();
+			}
+		}
+
+		_buy_list_view->Update();
+	} // if (_list_view_active == true)
+
+	else {
+		if (InputManager->ConfirmPress()) {
+			_buy_object_view->ChangeViewSummary();
+			_list_view_active = true;
+		}
 	}
 
-	// Left select/right select change the category being viewed
-	else if (InputManager->LeftSelectPress()) {
-		_buy_list_view->ChangeCategory(false);
-	}
-	else if (InputManager->RightSelectPress()) {
-		_buy_list_view->ChangeCategory(true);
-	}
-
-	// Up/down changes the selected object in the current list
-	else if (InputManager->UpPress()) {
-		_buy_list_view->ChangeSelection(false);
-	}
-	else if (InputManager->DownPress()) {
-		_buy_list_view->ChangeSelection(true);
-	}
-
-	// Left/right change the quantity of the object to buy
-	else if (InputManager->LeftPress()) {
-		_buy_list_view->ChangeQuantity(false);
-	}
-	else if (InputManager->RightPress()) {
-		_buy_list_view->ChangeQuantity(true);
-	}
-
-	_buy_list_view->Update();
+	_buy_object_view->Update();
 }
 
 
 
 void BuyInterface::Draw() {
-	_buy_list_view->Draw();
+	if (_list_view_active == true) {
+		_buy_list_view->Draw();
+	}
+
+	_buy_object_view->Draw();
 }
 
 // *****************************************************************************
@@ -114,7 +172,7 @@ BuyCategoryDisplay::BuyCategoryDisplay() :
 {
 	_category_text.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 	_category_text.SetPosition(25.0f, 175.0f);
-	_category_text.SetDimensions(125.0f, 25.0f);
+	_category_text.SetDimensions(125.0f, 30.0f);
 	_category_text.SetTextStyle(TextStyle("text22"));
 	_category_text.SetDisplayMode(VIDEO_TEXT_FADELINE);
 	_category_text.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
@@ -250,78 +308,47 @@ BuyListView::~BuyListView() {
 
 
 void BuyListView::Initialize() {
-	// The total number of types of objects that may be available for sale
-	const uint8 NUMBER_OBJECT_CATEGORIES = 8;
-
-	// ---------- (1): Populating the object_data container with an entry for each type of object dealt in the shop
-	// Bit-vector that indicates what types of objects are sold in the shop
-	uint8 deal_types = ShopMode::CurrentInstance()->GetDealTypes();
+	// ---------- (1): Load all category names and icon images to be used
 	// The number of categories of objects that the shop has for sale
-	uint8 num_obj_categories = 0;
-	// Holds the index to the object_data vector where the container for a specific object type is located
-	vector<uint32> type_index(8, 0);
+	uint8 num_obj_categories = ShopMedia::CurrentInstance()->GetObjectCategoryNames()->size();
 
-	uint32 next_index = 0; // Used to set the appropriate data in the type_index vector
-	uint8 bit_x = 0x01; // Used to do a bit-by-bit analysis of the obj_types variable
-	for (uint8 i = 0; i < NUMBER_OBJECT_CATEGORIES; i++, bit_x <<= 1) {
-		// Check if the type is available by doing a bit-wise comparison
-		if (deal_types & bit_x) {
-			num_obj_categories++;
-			type_index[i] = next_index++;
-			object_data.push_back(vector<ShopObject*>());
-		}
+	category_names = *(ShopMedia::CurrentInstance()->GetObjectCategoryNames());
+	vector<StillImage>* cat_icons = ShopMedia::CurrentInstance()->GetObjectCategoryIcons();
+	for (uint32 i = 0; i < cat_icons->size(); i++) {
+		category_icons.push_back(&(cat_icons->at(i)));
 	}
 
-	// If there is more than one category that the shop deals in, create room for an additional "All Wares" category
-	if (num_obj_categories > 1) {
-		object_data.push_back(vector<ShopObject*>());
-		// Make "All Wares" the initial category viewed by the player
-		current_category = num_obj_categories;
-	}
-
-	// ---------- (2): Load all category names and icon images required
-	const vector<StillImage>& all_cat_icons = ShopMode::CurrentInstance()->GetObjectCategoryImages();
-
-	if ((deal_types & DEALS_ITEMS) != 0) {
-		category_names.push_back(MakeUnicodeString("Items"));
-		category_icons.push_back(&all_cat_icons[0]);
-	}
-	if ((deal_types & DEALS_WEAPONS) != 0) {
-		category_names.push_back(MakeUnicodeString("Weapons"));
-		category_icons.push_back(&all_cat_icons[1]);
- 	}
-	if ((deal_types & DEALS_HEAD_ARMOR) != 0) {
-		category_names.push_back(MakeUnicodeString("Head Armor"));
-		category_icons.push_back(&all_cat_icons[2]);
-	}
-	if ((deal_types & DEALS_TORSO_ARMOR) != 0) {
-		category_names.push_back(MakeUnicodeString("Torso Armor"));
-		category_icons.push_back(&all_cat_icons[3]);
-	}
-	if ((deal_types & DEALS_ARM_ARMOR) != 0) {
-		category_names.push_back(MakeUnicodeString("Arm Armor"));
-		category_icons.push_back(&all_cat_icons[4]);
-	}
-	if ((deal_types & DEALS_LEG_ARMOR) != 0) {
-		category_names.push_back(MakeUnicodeString("Leg Armor"));
-		category_icons.push_back(&all_cat_icons[5]);
-	}
-	if ((deal_types & DEALS_SHARDS) != 0) {
-		category_names.push_back(MakeUnicodeString("Shards"));
-		category_icons.push_back(&all_cat_icons[6]);
-	}
-	if ((deal_types & DEALS_KEY_ITEMS) != 0) {
-		category_names.push_back(MakeUnicodeString("Key Items"));
-		category_icons.push_back(&all_cat_icons[7]);
-	}
-
-	// If there is more than one category that the shop deals in, add the additional "All Wares" category
-	if (num_obj_categories > 1) {
-		category_names.push_back(MakeUnicodeString("All Wares"));
-		category_icons.push_back(&all_cat_icons[8]);
-	}
+	// Set the initial category to the last category that was added (this is usually "All Wares")
+	current_category = num_obj_categories - 1;
 	// Initialize the category display with the initial category
 	category_display.ChangeCategory(category_names[current_category], category_icons[current_category]);
+
+	// ---------- (2): Populating the object_data container and determine category index mappings
+	for (uint32 i = 0; i < num_obj_categories; i++) {
+		object_data.push_back(vector<ShopObject*>());
+	}
+
+	// Bit-vector that indicates what types of objects are sold in the shop
+	uint8 deal_types = ShopMode::CurrentInstance()->GetDealTypes();
+	// Holds the index to the object_data vector where the container for a specific object type is located
+	vector<uint32> type_index(GLOBAL_OBJECT_TOTAL, 0);
+	// Used to set the appropriate data in the type_index vector
+	uint32 next_index = 0;
+	// Used to do a bit-by-bit analysis of the deal_types variable
+	uint8 bit_x = 0x01;
+
+	// This loop determines where each type of object should be placed in the object_data container. For example,
+	// if the available categories in the shop are items, weapons, shards, and all wares, the size of object_data
+	// will be four. But when we go to add an object of one of these types into the object_data container, we need
+	// to know the correct index for each type of object. These indeces are stored in the type_index vector. The
+	// size of this vector is the number of object types, so it becomes simple to map each object type to its correct
+	// location in object_data.
+	for (uint8 i = 0; i < GLOBAL_OBJECT_TOTAL; i++, bit_x <<= 1) {
+		// Check if the type is available by doing a bit-wise comparison
+		if (deal_types & bit_x) {
+			type_index[i] = next_index++;
+		}
+	}
 
 	// ---------- (3): Populate the object_data containers
 	// Used to temporarily hold a pointer to a valid shop object
@@ -492,6 +519,118 @@ ShopObject* BuyListView::GetSelectedObject() const {
 	BuyListDisplay* selected_list = list_displays[current_category];
 	uint32 selected_entry = selected_list->GetIdentifyList().GetSelection();
 	return object_data[current_category][selected_entry];
+}
+
+// *****************************************************************************
+// ***** BuyObjectView class methods
+// *****************************************************************************
+
+BuyObjectView::BuyObjectView() :
+	view_state(VIEW_SUMMARY),
+	selected_object(NULL)
+{
+	// Initialize all properties of class members that we can
+	object_name.SetStyle(TextStyle("title24"));
+
+	object_description.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
+	object_description.SetPosition(100.0f, 100.0f);
+	object_description.SetDimensions(600.0f, 50.0f);
+	object_description.SetTextStyle(TextStyle("text22"));
+	object_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	object_description.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	object_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+
+	phys_header.SetStyle(TextStyle("text22"));
+	phys_header.SetText(MakeUnicodeString("Phys:"));
+	meta_header.SetStyle(TextStyle("text22"));
+	meta_header.SetText(MakeUnicodeString("Meta:"));
+
+	phys_rating.SetStyle(TextStyle("text22"));
+	meta_rating.SetStyle(TextStyle("text22"));
+
+// 	if (socket_icon.Load("img/icons/socket.png") == false) {
+// 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load socket icon image" << endl;
+// 	}
+
+	socket_text.SetStyle(TextStyle("text22"));
+
+// 	if (equip_icon.Load("img/icons/equip.png") == false) {
+// 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load equip icon image" << endl;
+// 	}
+
+// 	elemental_icons = ShopMedia::CurrentInstance()->GetElementalIcons();
+// 	status_icons = ShopMedia::CurrentInstance()->GetStatusIcons();
+}
+
+
+
+void BuyObjectView::Initialize() {
+// 	character_sprites = ShopMedia::CurrentInstance()->GetCharacterSprites();
+}
+
+
+
+void BuyObjectView::Update() {
+	// TODO: update necessary GUI displays and animations
+}
+
+
+
+void BuyObjectView::Draw() {
+	// Draw summary information in the bottom window only
+	if (view_state == VIEW_SUMMARY) {
+		// TODO
+	}
+
+	// Use both middle and lower windows to draw all available information
+	else if (view_state == VIEW_COMPLETE) {
+		// TODO
+	}
+
+	else {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "unknown view state: " << view_state << endl;
+	}
+}
+
+
+
+void BuyObjectView::SetSelectedObject(ShopObject* object) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL argument" << endl;
+		return;
+	}
+
+	if (selected_object == object) {
+		return;
+	}
+
+	selected_object = object;
+
+	// TODO
+}
+
+
+
+void BuyObjectView::ChangeViewSummary() {
+	if (view_state == VIEW_SUMMARY) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "class was already in view summary state" << endl;
+		return;
+	}
+
+	view_state = VIEW_SUMMARY;
+	// TODO
+}
+
+
+
+void BuyObjectView::ChangeViewComplete() {
+	if (view_state == VIEW_COMPLETE) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "class was already in view complete state" << endl;
+		return;
+	}
+
+	view_state = VIEW_COMPLETE;
+	// TODO
 }
 
 } // namespace private_shop

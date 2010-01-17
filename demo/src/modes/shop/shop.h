@@ -36,12 +36,120 @@ extern bool SHOP_DEBUG;
 
 namespace private_shop {
 
-/** \brief A pointer to the currently active shop mode
-*** This is used by the various shop classes so that they can refer back to the main class from which
-*** they are a part of. This member is initially set to NULL. It is set whenever the ShopMode
-*** constructor is invoked, and reset back to NULL when the ShopMode destructor is invoked.
-**/
-extern ShopMode* current_shop;
+/** ****************************************************************************
+*** \brief A companion class to ShopMode that holds various multimedia data
+***
+*** All of the shop mode interfaces share media data in forming their presentations.
+*** This class retains all of this common media data and makes it available for
+*** the shop interfaces to utilize. Like ShopMode, this class contains a static
+*** pointer to an object of the class type that represents the current instance
+*** of the class. This makes it easier for the code to get access to the data.
+*** Below is a typical use case for this class:
+***
+*** ShopMedia::CurrentInstance()->GetObjectCategoryImages();
+***
+*** \note The accessor methods return non-const pointers to the relevant data
+*** structures and objects. This is done for reasons of convenience as many places
+*** in the shop code wish to make non-const copies of data stored in this class.
+*** Take care not to abuse these pointers and modify the state of any of the data
+*** members in this class as it would have negative repercussions.
+*** ***************************************************************************/
+class ShopMedia {
+public:
+	ShopMedia();
+
+	~ShopMedia()
+		{}
+
+	static ShopMedia* CurrentInstance()
+		{ return _current_instance; }
+
+	static void SetCurrentInstance(ShopMedia* instance)
+		{ _current_instance = instance; }
+
+	/** \brief Finishes preparing media data for use
+	*** This function prepares any class members that could not be made ready in the constructor. This
+	*** may be the case, for example, where the contents of a data container are dependent on knowing
+	*** which object categories the shop deals in (which can not be known until shop mode is initialized
+	*** and all wares have been added to the shop).
+	**/
+	void Initialize();
+
+	std::vector<hoa_utils::ustring>* GetObjectCategoryNames()
+		{ return &_object_category_names; }
+
+	std::vector<hoa_video::StillImage>* GetObjectCategoryIcons()
+		{ return &_object_category_icons; }
+
+	hoa_video::StillImage* GetDrunesIcon()
+		{ return &_drunes_icon; }
+
+	hoa_video::StillImage* GetSocketIcon()
+		{ return &_socket_icon; }
+
+	hoa_video::StillImage* GetEquipIcon()
+		{ return &_equip_icon; }
+
+	std::vector<hoa_video::StillImage>* GetElementalIcons()
+		{ return &_elemental_icons; }
+
+	/** \brief Retrieves a specific elemental icon with the proper type and intensity
+	*** \param element_type The type of element the user is trying to retrieve the icon for
+	*** \param intensity The intensity level of the icon to retrieve
+	*** \return The icon representation of the element type and intensity
+	**/
+	hoa_video::StillImage* GetElementalIcon(hoa_global::GLOBAL_ELEMENTAL element_type, hoa_global::GLOBAL_INTENSITY intensity);
+
+	std::vector<hoa_video::StillImage>* GetStatusIcons()
+		{ return &_status_icons; }
+
+	// TODO
+// 	hoa_video::StillImage* GetStatusIcon(hoa_global::GLOBAL_STATUS status_type, hoa_global::GLOBAL_INTENSITY intensity);
+
+	std::vector<hoa_video::StillImage>* GetCharacterSprites()
+		{ return &_character_sprites; }
+
+	/** \brief Retrieves a shop sound object
+	*** \param identifier The string identifier for the sound to retrieve
+	*** \return A pointer to the SoundDescriptor, or NULL if no sound had the identifier name
+	**/
+	hoa_audio::SoundDescriptor* GetSound(std::string identifier);
+
+private:
+	/** \brief A reference to the current instance of ShopMedia
+	*** This is used by other shop clases to be able to refer to the shop that they exist in. This member
+	*** is NULL when no shop is active
+	**/
+	static ShopMedia* _current_instance;
+
+	//! \brief Retains all text names for each object category sold by the shop
+	std::vector<hoa_utils::ustring> _object_category_names;
+
+	//! \brief Retains all icon images for each object category sold by the shop
+	std::vector<hoa_video::StillImage> _object_category_icons;
+
+	//! \brief Image icon representing drunes (currency)
+	hoa_video::StillImage _drunes_icon;
+
+	//! \brief Image icon representing open sockets available on weapons and armor
+	hoa_video::StillImage _socket_icon;
+
+	//! \brief Image icon that represents when a character has a weapon or armor equipped
+	hoa_video::StillImage _equip_icon;
+
+	//! \brief Retains all icon images that represent the game's elementals
+	std::vector<hoa_video::StillImage> _elemental_icons;
+
+	//! \brief Retains all icon images that represent the game's status effects
+	std::vector<hoa_video::StillImage> _status_icons;
+
+	//! \brief Retains sprite image frames for all characters in the active party
+	std::vector<hoa_video::StillImage> _character_sprites;
+
+	//! \brief A map of the sounds used in shop mode
+	std::map<std::string, hoa_audio::SoundDescriptor*> _sounds;
+
+}; // class ShopMedia
 
 } // namespace private_shop
 
@@ -78,17 +186,17 @@ public:
 	//! \brief Resets appropriate settings and initializes shop if appropriate. Called whenever the ShopMode object is made the active game mode.
 	void Reset();
 
-	//! \brief Handles user input and updates the shop menu.
-	void Update();
-
-	//! \brief Handles the drawing of everything on the shop menu and makes sub-draw function calls as appropriate.
-	void Draw();
-
 	/** \brief Loads data and prepares shop for initial use
 	*** This function is only be called once from the Reset() method. If it is called more than
 	*** once it will print a warning and refuse to execute a second time.
 	**/
 	void Initialize();
+
+	//! \brief Handles user input and updates the shop menu.
+	void Update();
+
+	//! \brief Handles the drawing of everything on the shop menu and makes sub-draw function calls as appropriate.
+	void Draw();
 
 	/** \brief Used when an object has been selected for purchase by the player
 	*** \param object A pointer to the object to add
@@ -229,15 +337,6 @@ public:
 	std::map<uint32, private_shop::ShopObject*>* GetSellList()
 		{ return &_sell_list; }
 
-	const std::vector<hoa_video::StillImage>& GetObjectCategoryImages() const
-		{ return _object_category_images; }
-
-	/** \brief Retrieves a shop sound object
-	*** \param identifier The string identifier for the sound to retrieve
-	*** \return A pointer to the SoundDescriptor, or NULL if no sound had the identifier name
-	**/
-	hoa_audio::SoundDescriptor* GetSound(std::string identifier);
-
 	hoa_video::MenuWindow* GetTopWindow()
 		{ return &_top_window; }
 
@@ -296,6 +395,9 @@ private:
 	**/
 	std::map<uint32, private_shop::ShopObject*> _sell_list;
 
+	//! \brief A pointer to the ShopMedia object created to coincide with this instance of ShopMode
+	private_shop::ShopMedia* _shop_media;
+
 	/** \name Shopping interfaces
 	*** These are class objects which are responsible for managing each state in shop mode
 	**/
@@ -310,12 +412,6 @@ private:
 
 	//! \brief Holds an image of the screen taken when the ShopMode instance was created
 	hoa_video::StillImage _screen_backdrop;
-
-	//! \brief Retains all icon images for each object category
-	std::vector<hoa_video::StillImage> _object_category_images;
-
-	//! \brief A map of the sounds used in shop mode
-	std::map<std::string, hoa_audio::SoundDescriptor*> _shop_sounds;
 
 	//! \brief The highest level window that contains the shop actions and finance information
 	hoa_video::MenuWindow _top_window;
@@ -334,9 +430,6 @@ private:
 
 	//! \brief Table-formatted text containing the financial information about the current purchases and sales
 	hoa_video::OptionBox _finance_table;
-
-	//! \brief Image icon representing drunes (currency)
-	hoa_video::StillImage _drunes_icon;
 }; // class ShopMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_shop

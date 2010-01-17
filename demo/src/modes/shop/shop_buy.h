@@ -32,8 +32,10 @@ namespace private_shop {
 *** \brief Manages the shop when it is in buy mode and enables the player to view and purchase wares
 ***
 *** This interface displays the list of objects that are available for sale. It organizes
-*** these objects based on their object type (item, weapon, etc.) and allows the player
-*** to switch between views of these different categories.
+*** these objects based on their object type/category (item, weapon, etc.) and allows the
+*** player to switch between views of these different categories. This interface also displays
+*** information about the currently selected object such as its description, statistical
+*** ratings, usable characters, etc.
 *** ***************************************************************************/
 class BuyInterface : public ShopInterface {
 public:
@@ -44,18 +46,23 @@ public:
 	//! \brief Initializes the data conatiners and GUI objects to be used
 	void Initialize();
 
-	//! \brief Processes user input and updates the purchase totals as appropriate
+	//! \brief Processes user input and sends appropriate commands to helper class objects
 	void Update();
 
 	//! \brief Draws the GUI elements to the screen
 	void Draw();
 
 private:
-	//! \brief A pointer to the currently selected object
-	ShopObject* _selected_object;
+	/** \brief When true, the list view will be updated and drawn
+	*** The value of this member coincides with the active view state of the BuyObjectView class
+	**/
+	bool _list_view_active;
 
-	//! \brief A manager class object for displaying categories and lists of objects for sale
+	//! \brief A helper class object for displaying categories and lists of objects for sale
 	BuyListView* _buy_list_view;
+
+	//! \brief A helper class object for displaying information about a particular object
+	BuyObjectView* _buy_object_view;
 }; // class BuyInterface : public ShopInterface
 
 
@@ -122,8 +129,8 @@ public:
 ***
 *** This class represents the view of the middle menu window in buy mode when that
 *** window contains the current object category and a list of objects for sale.
-*** The primary purpose of this class is to serve as a helper to the ShopInterface class
-*** and to keep the code organized.
+*** The primary purpose of this class is to serve as a helper to the BuyInterface
+*** class and to keep the code organized.
 *** ***************************************************************************/
 class BuyListView {
 public:
@@ -136,7 +143,7 @@ public:
 	//! \brief Finishes initialization of any data or settings that could not be completed in constructor
 	void Initialize();
 
-	//! \brief Updates the list
+	//! \brief Updates the object category and list displays
 	void Update();
 
 	//! \brief Draws the contents to the screen
@@ -213,6 +220,120 @@ public:
 	**/
 	std::vector<std::vector<ShopObject*> > object_data;
 }; // class BuyListView
+
+
+/** ****************************************************************************
+*** \brief Manages all data and graphics showing summary information about an object
+***
+*** This class shows summary information about the currently selected object. It displays
+*** this information in one of two display modes. The first mode uses only the lower window
+*** and shows only a limited amount of information. This is the default view mode that the
+*** player sees and this information is visible in tandem with the graphics displayed by the
+*** BuyListView class. The second view mode is entered if the player requests to see all the
+*** details about the selected object. In this view mode, the BuyListView class' graphics are
+*** hidden and this class displays the complete set of information about the selected object
+*** using both the middle and lower menu windows. The type of information which is displayed is
+*** different depending upon what type of object is selected. The primary purpose of this class
+*** is to serve as a helper to the BuyInterface class and to keep the code organized.
+***
+*** \todo Currently this class treats the display of shards the same as it does for items
+*** and key items. This should be changed once shard properties have a more clear definition
+*** in the game design.
+***
+*** \todo Status icons are not currently displayed as there are no status effects implemented
+*** in the game yet. Once status effects are functional and graphics are ready to represent
+*** them, this code should be updated.
+***
+*** \todo The character sprites are not yet animated in the display. This should be changed
+*** once the appropriate set of sprite frames are available for this menu.
+*** ***************************************************************************/
+class BuyObjectView {
+public:
+	BuyObjectView();
+
+	~BuyObjectView()
+		{}
+
+	/** ****************************************************************************
+	*** \brief List of view states that this class may execute in
+	*** - VIEW_SUMMARY: default view mode, displays information summary in bottom window
+	*** - VIEW_COMPLETE: displays all available information in both middle and bottom windows
+	*** ***************************************************************************/
+	enum ObjectViewState {
+		VIEW_SUMMARY,
+		VIEW_COMPLETE
+	};
+
+	// ---------- Methods
+
+	//! \brief Finishes initialization of any data or settings that could not be completed in constructor
+	void Initialize();
+
+	//! \brief Updates sprite animations and other graphics as necessary
+	void Update();
+
+	//! \brief Draws the contents to the screen
+	void Draw();
+
+	/** \brief Changes the selected object to the function argument
+	*** \param object A pointer to the shop object to change (NULL-safe, but will result in a warning message)
+	*** \note The code using this class should always use this function to change the selected object rather than
+	*** changing the public selected_object member directly. This method updates all of the relevent graphics and
+	*** data displays in addition to changing the pointer member.
+	**/
+	void SetSelectedObject(ShopObject* object);
+
+	/** \brief Changes the view mode to use only the lower window to display an information summary
+	*** If the class is already in this state, a warning message will be printed and no change will take place.
+	**/
+	void ChangeViewSummary();
+
+	/** \brief Changes the view mode to use both middle and lower windows to display all possible information
+	*** If the class is already in this state, a warning message will be printed and no change will take place.
+	**/
+	void ChangeViewComplete();
+
+	// ---------- Members
+
+	//! \brief Holds the current view state of this class
+	ObjectViewState view_state;
+
+	//! \brief A pointer to the object who's information should be displayed
+	ShopObject* selected_object;
+
+	//! \brief The name of the selected object
+	hoa_video::TextImage object_name;
+
+	//! \brief The textual description of the object to display
+	hoa_video::TextBox object_description;
+
+	//! \brief For weapons and armor, header text identifying the physical and metaphysical ratings
+	hoa_video::TextImage phys_header, meta_header;
+
+	//! \brief For weapons and armor, a rendering of the physical and metaphysical attack/defense ratings
+	hoa_video::TextImage phys_rating, meta_rating;
+
+	//! \brief For weapons and armor, an icon image of a shard socket
+	hoa_video::StillImage socket_icon;
+
+	//! \brief For weapons and armor, text indicating how many sockets the selected equipment has available
+	hoa_video::TextImage socket_text;
+
+	//! \brief Icon images representing each of the game's elements
+	std::vector<hoa_video::StillImage> elemental_icons;
+
+	//! \brief Icon images representing each of the game's status effects
+	std::vector<hoa_video::StillImage> status_icons;
+
+	//! \brief Sprite images of all characters currently in the party
+	std::vector<hoa_video::StillImage> character_sprites;
+
+	//! \brief For weapons and armor, text to indicate an increase or decrease in phys/meta stat value for each party character
+	std::vector<hoa_video::TextImage> stat_inc_text, stat_dec_text;
+
+	//! \brief For weapons and armor, icon image that represents when a character already has the object equipped
+	hoa_video::StillImage equip_icon;
+}; // class BuyObjectView
 
 } // namespace private_shop
 
