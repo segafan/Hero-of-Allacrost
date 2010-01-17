@@ -506,6 +506,7 @@ void ShopMode::Update() {
 		else if (InputManager->RightPress()) {
 			_action_options.InputRight();
 		}
+		_action_options.Update();
 	} // if (_state == SHOP_STATE_ROOT)
 
 	// Update the active interface
