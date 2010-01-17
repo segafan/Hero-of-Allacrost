@@ -12,7 +12,7 @@
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Source file for shop mode utility code.
 ***
-*** This file contains common code that is shared among the various shop mode
+*** This file contains utility code that is shared among the various shop mode
 *** classes.
 *** ***************************************************************************/
 

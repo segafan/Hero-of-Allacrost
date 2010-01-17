@@ -149,7 +149,7 @@ void SellInterface::Initialize() {
 	_properties_header.AddOption(MakeUnicodeString("Own"));
 	_properties_header.AddOption(MakeUnicodeString("Sell"));
 
-	const vector<StillImage>& category_images = ShopMode::CurrentInstance()->GetObjectCategoryImages();
+	vector<StillImage>* category_images = ShopMedia::CurrentInstance()->GetObjectCategoryIcons();
 	if (num_obj_categories == 1) {
 		num_obj_categories++;
 	}
@@ -165,7 +165,7 @@ void SellInterface::Initialize() {
 		if (obj_types & (0x01 << i)) {
 			uint32 this_option_index = _category_list.GetNumberOptions();
 			_category_list.AddOption();
-			_category_list.AddOptionElementImage(this_option_index, &(category_images[i]));
+			_category_list.AddOptionElementImage(this_option_index, &(category_images->at(i)));
 			_category_list.GetEmbeddedImage(this_option_index)->SetDimensions(45.0f, 45.0f);
 		}
 	}
@@ -221,24 +221,24 @@ void SellInterface::Update() {
 	// Left/right change the quantity of the object to sell
 	else if (InputManager->LeftPress()) {
 		if (selected_object->GetSellCount() == 0) {
-			ShopMode::CurrentInstance()->GetSound("bump")->Play();
+			ShopMedia::CurrentInstance()->GetSound("bump")->Play();
 		}
 		else {
 			selected_object->DecrementSellCount();
 			ShopMode::CurrentInstance()->UpdateFinances(0, -selected_object->GetSellPrice());
 			selected_list->RefreshEntry(selected_entry);
-			ShopMode::CurrentInstance()->GetSound("cancel")->Play();
+			ShopMedia::CurrentInstance()->GetSound("cancel")->Play();
 		}
 	}
 	else if (InputManager->RightPress()) {
 		if (selected_object->GetSellCount() >= selected_object->GetOwnCount()) {
-			ShopMode::CurrentInstance()->GetSound("bump")->Play();
+			ShopMedia::CurrentInstance()->GetSound("bump")->Play();
 		}
 		else {
 			selected_object->IncrementSellCount();
 			ShopMode::CurrentInstance()->UpdateFinances(0, selected_object->GetSellPrice());
 			selected_list->RefreshEntry(selected_entry);
-			ShopMode::CurrentInstance()->GetSound("confirm")->Play();
+			ShopMedia::CurrentInstance()->GetSound("confirm")->Play();
 		}
 	}
 }

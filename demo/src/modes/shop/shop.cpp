@@ -54,8 +54,186 @@ using namespace hoa_pause;
 namespace hoa_shop {
 
 bool SHOP_DEBUG = false;
-// Initialize static class variables
+// Initialize static class variable
 ShopMode* ShopMode::_current_instance = NULL;
+
+namespace private_shop {
+
+// *****************************************************************************
+// ***** ShopMedia class methods
+// *****************************************************************************
+
+// Initialize static class variable
+ShopMedia* ShopMedia::_current_instance = NULL;
+
+ShopMedia::ShopMedia() {
+	if (_drunes_icon.Load("img/icons/drunes.png") == false)
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load drunes icon image" << endl;
+
+	if (_socket_icon.Load("img/menus/socket.png") == false)
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load socket icon image" << endl;
+
+	if (_equip_icon.Load("img/menus/equip.png") == false)
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load equip icon image" << endl;
+
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_elemental_icons, "img/icons/elemental_icons.png", 8, 9) == false) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load elemental icon images" << endl;
+		return;
+	}
+
+	// TODO
+// 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_status_icons, "img/icons/status_icons.png", ROWS, COLS) == false) {
+// 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load status icon images" << endl;
+// 		return;
+// 	}
+
+	_sounds["confirm"] = new SoundDescriptor();
+	_sounds["cancel"] = new SoundDescriptor();
+	_sounds["coins"] = new SoundDescriptor();
+	_sounds["bump"] = new SoundDescriptor();
+
+	uint32 sound_load_failures = 0;
+	if (_sounds["confirm"]->LoadAudio("snd/confirm.wav") == false)
+		sound_load_failures++;
+	if (_sounds["cancel"]->LoadAudio("snd/cancel.wav") == false)
+		sound_load_failures++;
+	if (_sounds["coins"]->LoadAudio("snd/coins.wav") == false)
+		sound_load_failures++;
+	if (_sounds["bump"]->LoadAudio("snd/bump.wav") == false)
+		sound_load_failures++;
+
+	if (sound_load_failures > 0) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load " << sound_load_failures << " sounds needed by shop mode" << endl;
+	}
+}
+
+
+
+void ShopMedia::Initialize() {
+	// Temporary containers to hold all possible category text and icons
+	vector<ustring> all_text;
+	vector<StillImage> all_icons;
+
+	all_text.push_back(MakeUnicodeString("Items"));
+	all_text.push_back(MakeUnicodeString("Weapons"));
+	all_text.push_back(MakeUnicodeString("Head Armor"));
+	all_text.push_back(MakeUnicodeString("Torso Armor"));
+	all_text.push_back(MakeUnicodeString("Arm Armor"));
+	all_text.push_back(MakeUnicodeString("Leg Armor"));
+	all_text.push_back(MakeUnicodeString("Shards"));
+	all_text.push_back(MakeUnicodeString("Key Items"));
+	all_text.push_back(MakeUnicodeString("All Wares"));
+
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(all_icons, "img/icons/object_category_icons.png", 3, 4) == false) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load object category icon images" << endl;
+		return;
+	}
+
+	// Determine which categories are used in this shop and populate the true containers with that data
+	uint8 deal_types = ShopMode::CurrentInstance()->GetDealTypes();
+	uint8 bit_x = 0x01; // Used to do a bit-by-bit analysis of the obj_types variable
+	for (uint8 i = 0; i < GLOBAL_OBJECT_TOTAL; i++, bit_x <<= 1) {
+		// Check if the type is available by doing a bit-wise comparison
+		if (deal_types & bit_x) {
+			_object_category_names.push_back(all_text[i]);
+			_object_category_icons.push_back(all_icons[i]);
+		}
+	}
+
+	// If here is more than one category, add the text/icon for all wares
+	if (_object_category_names.size() > 1) {
+		_object_category_names.push_back(all_text[8]);
+		_object_category_icons.push_back(all_icons[8]);
+	}
+}
+
+
+
+StillImage* ShopMedia::GetElementalIcon(GLOBAL_ELEMENTAL element_type, GLOBAL_INTENSITY intensity) {
+	// Row/col coordinates for where the specific icon can be found in the multi image array
+	uint32 row = 0, col = 0;
+
+	// Elemental type determines the icon's row
+	switch (element_type) {
+		case GLOBAL_ELEMENTAL_FIRE:
+			row = 0;
+			break;
+		case GLOBAL_ELEMENTAL_WATER:
+			row = 1;
+			break;
+		case GLOBAL_ELEMENTAL_VOLT:
+			row = 2;
+			break;
+		case GLOBAL_ELEMENTAL_EARTH:
+			row = 3;
+			break;
+		case GLOBAL_ELEMENTAL_SLICING:
+			row = 4;
+			break;
+		case GLOBAL_ELEMENTAL_SMASHING:
+			row = 5;
+			break;
+		case GLOBAL_ELEMENTAL_MAULING:
+			row = 6;
+			break;
+		case GLOBAL_ELEMENTAL_PIERCING:
+			row = 7;
+			break;
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid elemental type: " << element_type << endl;
+			return NULL;
+	}
+
+	// Intensity determines the icon's column
+	switch (intensity) {
+		case GLOBAL_INTENSITY_POS_EXTREME:
+			col = 0;
+			break;
+		case GLOBAL_INTENSITY_POS_GREATER:
+			col = 1;
+			break;
+		case GLOBAL_INTENSITY_POS_MODERATE:
+			col = 2;
+			break;
+		case GLOBAL_INTENSITY_POS_LESSER:
+			col = 3;
+			break;
+		case GLOBAL_INTENSITY_NEUTRAL:
+			col = 4;
+			break;
+		case GLOBAL_INTENSITY_NEG_LESSER:
+			col = 5;
+			break;
+		case GLOBAL_INTENSITY_NEG_MODERATE:
+			col = 6;
+			break;
+		case GLOBAL_INTENSITY_NEG_GREATER:
+			col = 7;
+			break;
+		case GLOBAL_INTENSITY_NEG_EXTREME:
+			col = 8;
+			break;
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid intensity level: " << intensity << endl;
+			return NULL;
+	}
+
+	return &(_elemental_icons[(row * GLOBAL_INTENSITY_TOTAL) + col]);
+}
+
+
+
+SoundDescriptor* ShopMedia::GetSound(string identifier) {
+	map<string, SoundDescriptor*>::iterator sound = _sounds.find(identifier);
+	if (sound != _sounds.end()) {
+		return sound->second;
+	}
+	else {
+		return NULL;
+	}
+}
+
+} // namespace private_shop
 
 // *****************************************************************************
 // ***** ShopMode class methods
@@ -69,6 +247,7 @@ ShopMode::ShopMode() :
 	_sell_price_level(SHOP_PRICE_STANDARD),
 	_total_costs(0),
 	_total_sales(0),
+	_shop_media(NULL),
 	_root_interface(NULL),
 	_buy_interface(NULL),
 	_sell_interface(NULL),
@@ -107,18 +286,25 @@ ShopMode::ShopMode() :
 	_action_options.SetCursorOffset(-55.0f, 30.0f);
 	_action_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 
-	_action_options.AddOption(MakeUnicodeString("Buy"));
-	_action_options.AddOption(MakeUnicodeString("Sell"));
-	_action_options.AddOption(MakeUnicodeString("Trade"));
-	_action_options.AddOption(MakeUnicodeString("Confirm"));
-	_action_options.AddOption(MakeUnicodeString("Leave"));
+	vector<ustring> option_text;
+	option_text.push_back(MakeUnicodeString("Buy"));
+	option_text.push_back(MakeUnicodeString("Sell"));
+	option_text.push_back(MakeUnicodeString("Trade"));
+	option_text.push_back(MakeUnicodeString("Confirm"));
+	option_text.push_back(MakeUnicodeString("Leave"));
+
+	_action_options.AddOption(option_text[0]);
+	_action_options.AddOption(option_text[1]);
+	_action_options.AddOption(option_text[2]);
+	_action_options.AddOption(option_text[3]);
+	_action_options.AddOption(option_text[4]);
 	_action_options.SetSelection(0);
 
-	_action_titles.push_back(TextImage(MakeUnicodeString("Buy"), TextStyle("title28")));
-	_action_titles.push_back(TextImage(MakeUnicodeString("Sell"), TextStyle("title28")));
-	_action_titles.push_back(TextImage(MakeUnicodeString("Trade"), TextStyle("title28")));
-	_action_titles.push_back(TextImage(MakeUnicodeString("Confirm"), TextStyle("title28")));
-	_action_titles.push_back(TextImage(MakeUnicodeString("Leave"), TextStyle("title28")));
+	_action_titles.push_back(TextImage(option_text[0], TextStyle("title28")));
+	_action_titles.push_back(TextImage(option_text[1], TextStyle("title28")));
+	_action_titles.push_back(TextImage(option_text[2], TextStyle("title28")));
+	_action_titles.push_back(TextImage(option_text[3], TextStyle("title28")));
+	_action_titles.push_back(TextImage(option_text[4], TextStyle("title28")));
 
 	// (3) Create the financial table text
 	_finance_table.SetOwner(&_top_window);
@@ -132,10 +318,7 @@ ShopMode::ShopMode() :
 		_finance_table.AddOption(ustring());
 	UpdateFinances(0, 0);
 
-	// (4) Initialize the drunes icon image
-	if (_drunes_icon.Load("img/icons/drunes.png") == false)
-		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load drunes image for action window" << endl;
-
+	_shop_media = new ShopMedia();
 	_root_interface = new RootInterface();
 	_buy_interface = new BuyInterface();
 	_sell_interface = new SellInterface();
@@ -159,6 +342,7 @@ ShopMode::~ShopMode() {
 	}
 	_created_objects.clear();
 
+	delete _shop_media;
 	delete _root_interface;
 	delete _buy_interface;
 	delete _sell_interface;
@@ -170,21 +354,98 @@ ShopMode::~ShopMode() {
 	_middle_window.Destroy();
 	_bottom_window.Destroy();
 
-	if (_current_instance == this)
+	if (_current_instance == this) {
 		_current_instance = NULL;
+		ShopMedia::SetCurrentInstance(NULL);
+	}
 }
 
 
 
 void ShopMode::Reset() {
-	// Setup video engine constructs
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
 	_current_instance = this;
+	_shop_media->SetCurrentInstance(_shop_media);
 	if (IsInitialized() == false)
 		Initialize();
 }
+
+
+
+void ShopMode::Initialize() {
+	if (IsInitialized() == true) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "shop was already initialized previously" << endl;
+		return;
+	}
+
+	_initialized = true;
+
+	// ---------- (1): Determine what types of objects the shop deals in based on the managed object list
+	for (uint32 i = 0; i < _created_objects.size(); i++) {
+		switch (_created_objects[i]->GetObjectType()) {
+			case GLOBAL_OBJECT_ITEM:
+				_deal_types |= DEALS_ITEMS;
+				break;
+			case GLOBAL_OBJECT_WEAPON:
+				_deal_types |= DEALS_WEAPONS;
+				break;
+			case GLOBAL_OBJECT_HEAD_ARMOR:
+				_deal_types |= DEALS_HEAD_ARMOR;
+				break;
+			case GLOBAL_OBJECT_TORSO_ARMOR:
+				_deal_types |= DEALS_TORSO_ARMOR;
+				break;
+			case GLOBAL_OBJECT_ARM_ARMOR:
+				_deal_types |= DEALS_ARM_ARMOR;
+				break;
+			case GLOBAL_OBJECT_LEG_ARMOR:
+				_deal_types |= DEALS_LEG_ARMOR;
+				break;
+			case GLOBAL_OBJECT_SHARD:
+				_deal_types |= DEALS_SHARDS;
+				break;
+			case GLOBAL_OBJECT_KEY_ITEM:
+				_deal_types |= DEALS_KEY_ITEMS;
+				break;
+			default:
+				IF_PRINT_WARNING(SHOP_DEBUG) << "unknown object type sold in shop: " << _created_objects[i]->GetObjectType() << endl;
+				break;
+		}
+	}
+
+	// ---------- (2): Add objects from the player's inventory to the list of shop objects
+	map<uint32, GlobalObject*>* inventory = GlobalManager->GetInventory();
+	for (map<uint32, GlobalObject*>::iterator i = inventory->begin(); i != inventory->end(); i++) {
+		// Check if the object already exists in the shop list and if so, set its ownership count
+		map<uint32, ShopObject>::iterator shop_obj_iter = _shop_objects.find(i->second->GetID());
+		if (shop_obj_iter != _shop_objects.end()) {
+			shop_obj_iter->second.IncrementOwnCount(i->second->GetCount());
+		}
+		// Otherwise, add the shop object to the list
+		else {
+			ShopObject new_shop_object(i->second, false);
+			_shop_objects.insert(make_pair(i->second->GetID(), new_shop_object));
+		}
+	}
+
+	// ---------- (3): Initialize pricing for all shop objects
+	for (map<uint32, ShopObject>::iterator i = _shop_objects.begin(); i != _shop_objects.end(); i++) {
+		i->second.SetPricing(_buy_price_level, _sell_price_level);
+	}
+
+	// ---------- (4): Initialize multimedia data
+	_shop_media->Initialize();
+
+	// ---------- (4): Initialize all shop interfaces
+	_root_interface->Initialize();
+	_buy_interface->Initialize();
+	_sell_interface->Initialize();
+	_trade_interface->Initialize();
+	_confirm_interface->Initialize();
+	_leave_interface->Initialize();
+} // void ShopMode::Initialize()
 
 
 
@@ -211,7 +472,7 @@ void ShopMode::Update() {
 			}
 
 			_action_options.InputConfirm();
-			sound = GetSound("confirm");
+			sound = ShopMedia::CurrentInstance()->GetSound("confirm");
 			assert(sound != NULL);
 			sound->Play();
 
@@ -283,9 +544,9 @@ void ShopMode::Draw() {
 
 	// ---------- (3): Draw the contents of the top window
 	VideoManager->Move(130.0f, 605.0f);
-	_drunes_icon.Draw();
+	ShopMedia::CurrentInstance()->GetDrunesIcon()->Draw();
 	VideoManager->MoveRelative(705.0f, 0.0f);
-	_drunes_icon.Draw();
+	ShopMedia::CurrentInstance()->GetDrunesIcon()->Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(512.0f, 657.0f);
@@ -343,93 +604,6 @@ void ShopMode::Draw() {
 			break;
 	}
 } // void ShopMode::Draw()
-
-
-void ShopMode::Initialize() {
-	if (IsInitialized() == true) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "shop was already initialized previously" << endl;
-		return;
-	}
-
-	_initialized = true;
-
-	// ---------- (1): Determine what types of objects the shop deals in based on the managed object list
-	for (uint32 i = 0; i < _created_objects.size(); i++) {
-		switch (_created_objects[i]->GetObjectType()) {
-			case GLOBAL_OBJECT_ITEM:
-				_deal_types |= DEALS_ITEMS;
-				break;
-			case GLOBAL_OBJECT_WEAPON:
-				_deal_types |= DEALS_WEAPONS;
-				break;
-			case GLOBAL_OBJECT_HEAD_ARMOR:
-				_deal_types |= DEALS_HEAD_ARMOR;
-				break;
-			case GLOBAL_OBJECT_TORSO_ARMOR:
-				_deal_types |= DEALS_TORSO_ARMOR;
-				break;
-			case GLOBAL_OBJECT_ARM_ARMOR:
-				_deal_types |= DEALS_ARM_ARMOR;
-				break;
-			case GLOBAL_OBJECT_LEG_ARMOR:
-				_deal_types |= DEALS_LEG_ARMOR;
-				break;
-			case GLOBAL_OBJECT_SHARD:
-				_deal_types |= DEALS_SHARDS;
-				break;
-			case GLOBAL_OBJECT_KEY_ITEM:
-				_deal_types |= DEALS_KEY_ITEMS;
-				break;
-			default:
-				IF_PRINT_WARNING(SHOP_DEBUG) << "unknown object type sold in shop: " << _created_objects[i]->GetObjectType() << endl;
-				break;
-		}
-	}
-
-	// ---------- (2): Add objects from the player's inventory to the list of shop objects
-	map<uint32, GlobalObject*>* inventory = GlobalManager->GetInventory();
-	for (map<uint32, GlobalObject*>::iterator i = inventory->begin(); i != inventory->end(); i++) {
-		// Check if the object already exists in the shop list and if so, set its ownership count
-		map<uint32, ShopObject>::iterator shop_obj_iter = _shop_objects.find(i->second->GetID());
-		if (shop_obj_iter != _shop_objects.end()) {
-			shop_obj_iter->second.IncrementOwnCount(i->second->GetCount());
-		}
-		// Otherwise, add the shop object to the list
-		else {
-			ShopObject new_shop_object(i->second, false);
-			_shop_objects.insert(make_pair(i->second->GetID(), new_shop_object));
-		}
-	}
-
-	// ---------- (3): Initialize pricing for all shop objects
-	for (map<uint32, ShopObject>::iterator i = _shop_objects.begin(); i != _shop_objects.end(); i++) {
-		i->second.SetPricing(_buy_price_level, _sell_price_level);
-	}
-
-	// ---------- (4): Load shop multimedia data
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(_object_category_images, "img/icons/object_categories.png", 3, 4) == false) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load category image icons" << endl;
-		return;
-	}
-
-	_shop_sounds["confirm"] = new SoundDescriptor();
-	_shop_sounds["cancel"] = new SoundDescriptor();
-	_shop_sounds["coins"] = new SoundDescriptor();
-	_shop_sounds["bump"] = new SoundDescriptor();
-
-	_shop_sounds["confirm"]->LoadAudio("snd/confirm.wav");
-	_shop_sounds["cancel"]->LoadAudio("snd/cancel.wav");
-	_shop_sounds["coins"]->LoadAudio("snd/coins.wav");
-	_shop_sounds["bump"]->LoadAudio("snd/bump.wav");
-
-	// ---------- (5): Initialize all shop interfaces
-	_root_interface->Initialize();
-	_buy_interface->Initialize();
-	_sell_interface->Initialize();
-	_trade_interface->Initialize();
-	_confirm_interface->Initialize();
-	_leave_interface->Initialize();
-} // void ShopMode::Initialize()
 
 
 
@@ -665,18 +839,6 @@ void ShopMode::RemoveObject(uint32 object_id) {
 	_sell_list.erase(object_id);
 
 	// TODO: call the sell interface and inform it that the object has been removed
-}
-
-
-
-SoundDescriptor* ShopMode::GetSound(string identifier) {
-	map<string, SoundDescriptor*>::iterator sound = _shop_sounds.find(identifier);
-	if (sound != _shop_sounds.end()) {
-		return sound->second;
-	}
-	else {
-		return NULL;
-	}
 }
 
 } // namespace hoa_shop

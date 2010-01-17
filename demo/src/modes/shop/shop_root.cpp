@@ -46,10 +46,10 @@ namespace private_shop {
 const uint8 MAX_CATEGORY_ROW_SIZE = 4;
 
 // *****************************************************************************
-// ***** CategoryData class methods
+// ***** CategoryDrawData class methods
 // *****************************************************************************
 
-void CategoryData::ComputeCoordinates(uint8 number_categories) {
+void CategoryDrawData::ComputeCoordinates(uint8 number_categories) {
 	if (number_categories > GLOBAL_OBJECT_TOTAL) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "invalid argument value: " << number_categories << endl;
 		return;
@@ -104,7 +104,7 @@ void CategoryData::ComputeCoordinates(uint8 number_categories) {
 			second_row_x = 287.0f;
 			break;
 	}
-} // void CategoryData::ComputeCoordinates(uint8 number_categories)
+} // void CategoryDrawData::ComputeCoordinates(uint8 number_categories)
 
 // *****************************************************************************
 // ***** RootInterface class methods
@@ -183,7 +183,7 @@ void RootInterface::Initialize() {
 	// Star images used to construct the composite star rating (30x30 pixel size)
 	StillImage star, gray_star;
 
-	if (star.Load("img/icons/star.png") == false) {
+	if (star.Load("img/menus/star.png") == false) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load star image for price ratings" << endl;
 	}
 	gray_star = star;
@@ -219,46 +219,19 @@ void RootInterface::Initialize() {
 		offset += 40.0f;
 	}
 
-	// ---------- (2): Construct category name text and graphics
-	uint32 deal_types = ShopMode::CurrentInstance()->GetDealTypes();
+	// ---------- (2): Construct category name text and graphics and determine category draw coordinates
+	// Determine the number of names and icons of categories to load
+	uint32 number_categories = ShopMedia::CurrentInstance()->GetObjectCategoryNames()->size();
+	if (number_categories > 1) // If multiple categories are available, remove one because we don't want to show the "all" category
+		number_categories--;
 
 	TextStyle name_style("text22");
-	const vector<StillImage>& all_cat_icons = ShopMode::CurrentInstance()->GetObjectCategoryImages();
-
-	if ((deal_types & DEALS_ITEMS) != 0) {
-		_category_names.push_back(TextImage(MakeUnicodeString("Items"), name_style));
-		_category_icons.push_back(all_cat_icons[0]);
-	}
-	if ((deal_types & DEALS_WEAPONS) != 0) {
-		_category_names.push_back(TextImage(MakeUnicodeString("Weapons"), name_style));
-		_category_icons.push_back(all_cat_icons[1]);
- 	}
-	if ((deal_types & DEALS_HEAD_ARMOR) != 0) {
-		_category_names.push_back(TextImage(MakeUnicodeString("Head Armor"), name_style));
-		_category_icons.push_back(all_cat_icons[2]);
-	}
-	if ((deal_types & DEALS_TORSO_ARMOR) != 0) {
-		_category_names.push_back(TextImage(MakeUnicodeString("Torso Armor"), name_style));
-		_category_icons.push_back(all_cat_icons[3]);
-	}
-	if ((deal_types & DEALS_ARM_ARMOR) != 0) {
-		_category_names.push_back(TextImage(MakeUnicodeString("Arm Armor"), name_style));
-		_category_icons.push_back(all_cat_icons[4]);
-	}
-	if ((deal_types & DEALS_LEG_ARMOR) != 0) {
-		_category_names.push_back(TextImage(MakeUnicodeString("Leg Armor"), name_style));
-		_category_icons.push_back(all_cat_icons[5]);
-	}
-	if ((deal_types & DEALS_SHARDS) != 0) {
-		_category_names.push_back(TextImage(MakeUnicodeString("Shards"), name_style));
-		_category_icons.push_back(all_cat_icons[6]);
-	}
-	if ((deal_types & DEALS_KEY_ITEMS) != 0) {
-		_category_names.push_back(TextImage(MakeUnicodeString("Key Items"), name_style));
-		_category_icons.push_back(all_cat_icons[7]);
+	for (uint32 i = 0; i < number_categories; i++) {
+		_category_names.push_back(TextImage(ShopMedia::CurrentInstance()->GetObjectCategoryNames()->at(i), name_style));
+		_category_icons.push_back(ShopMedia::CurrentInstance()->GetObjectCategoryIcons()->at(i));
 	}
 
-	_category_data.ComputeCoordinates(_category_icons.size());
+	_category_draw_data.ComputeCoordinates(_category_icons.size());
 } // void RootInterface::Initialize()
 
 
@@ -288,16 +261,16 @@ void RootInterface::Draw() {
 	_sell_price_rating.Draw();
 
 	// Middle window: below the pricing text/image draw the category icons and text in one or two rows
-	VideoManager->Move(_category_data.first_row_x, _category_data.first_row_y);
-	for (uint8 i = 0; i < _category_data.first_row_num; i++) {
+	VideoManager->Move(_category_draw_data.first_row_x, _category_draw_data.first_row_y);
+	for (uint8 i = 0; i < _category_draw_data.first_row_num; i++) {
 		_category_icons[i].Draw();
 		VideoManager->MoveRelative(0.0f, -60.0f);
 		_category_names[i].Draw();
 		VideoManager->MoveRelative(150.0f, 60.0f);
 	}
 
-	VideoManager->Move(_category_data.second_row_x, _category_data.second_row_y);
-	for (uint8 i = 0; i < _category_data.second_row_num; i++) {
+	VideoManager->Move(_category_draw_data.second_row_x, _category_draw_data.second_row_y);
+	for (uint8 i = 0; i < _category_draw_data.second_row_num; i++) {
 		_category_icons[i + MAX_CATEGORY_ROW_SIZE].Draw();
 		VideoManager->MoveRelative(0.0f, -60.0f);
 		_category_names[i +MAX_CATEGORY_ROW_SIZE].Draw();

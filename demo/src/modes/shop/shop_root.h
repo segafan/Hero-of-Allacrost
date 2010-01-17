@@ -38,7 +38,7 @@ namespace private_shop {
 *** depending on whether one or two rows are to be drawn. The x draw position of the category icons and text is
 *** also variable depending on the number of categories to be drawn in that row.
 *** ***************************************************************************/
-class CategoryData {
+class CategoryDrawData {
 public:
 	/** \brief Determines the appropriate values to set for each class member
 	*** \param number_categories The total number of object categories to draw. Valid range: 1-8
@@ -52,7 +52,7 @@ public:
 
 	//! \brief Starting draw positions for the first and second rows of object categories
 	float first_row_x, first_row_y, second_row_x, second_row_y;
-}; // class CategoryData
+}; // class CategoryDrawData
 
 
 /** ****************************************************************************
@@ -128,7 +128,7 @@ private:
 	hoa_video::TextBox _greeting_text;
 
 	//! \brief A container holding the correct draw coordinates and information for object categories
-	CategoryData _category_data;
+	CategoryDrawData _category_draw_data;
 }; // class RootInterface : public ShopInterface
 
 } // namespace private_shop
