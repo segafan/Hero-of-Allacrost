@@ -63,12 +63,18 @@ namespace private_shop {
 // ***** ShopMedia class methods
 // *****************************************************************************
 
-// Initialize static class variable
-ShopMedia* ShopMedia::_current_instance = NULL;
-
 ShopMedia::ShopMedia() {
 	if (_drunes_icon.Load("img/icons/drunes.png") == false)
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load drunes icon image" << endl;
+
+	if (_check_icon.Load("img/menus/green_check.png") == false)
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load check icon image" << endl;
+
+	if (_x_icon.Load("img/menus/red_x.png") == false)
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load x icon image" << endl;
+
+	if (_socket_icon.Load("img/menus/socket.png") == false)
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load socket icon image" << endl;
 
 	if (_socket_icon.Load("img/menus/socket.png") == false)
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load socket icon image" << endl;
@@ -82,7 +88,7 @@ ShopMedia::ShopMedia() {
 	}
 
 	// TODO
-// 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_status_icons, "img/icons/status_icons.png", ROWS, COLS) == false) {
+// 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_status_icons, "img/icons/_status_icons.png", ROWS, COLS) == false) {
 // 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load status icon images" << endl;
 // 		return;
 // 	}
@@ -241,6 +247,602 @@ SoundDescriptor* ShopMedia::GetSound(string identifier) {
 	}
 }
 
+// *****************************************************************************
+// ***** ShopObjectViewer class methods
+// *****************************************************************************
+
+ShopObjectViewer::ShopObjectViewer() :
+	_view_mode(SHOP_VIEW_MODE_LIST),
+	_selected_object(NULL),
+	_object_type(SHOP_OBJECT_INVALID),
+	_map_usable(false),
+	_battle_usable(false),
+	_target_type_index(0)
+{
+	// Initialize all properties of class members that we can
+	_object_name.SetStyle(TextStyle("title24"));
+
+	_description_text.SetPosition(102.0f, 56.0f);
+	_description_text.SetDimensions(600.0f, 50.0f);
+	_description_text.SetTextStyle(TextStyle("text22"));
+	_description_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	_description_text.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_description_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+
+	// TODO: Initialize all of the lore properties here, not just the owner
+	_lore_text.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
+
+	_map_use_header.SetStyle(TextStyle("text22"));
+	_map_use_header.SetText(MakeUnicodeString("Map Use:"));
+	_battle_use_header.SetStyle(TextStyle("text22"));
+	_battle_use_header.SetText(MakeUnicodeString("Battle Use:"));
+	_target_type_header.SetStyle(TextStyle("text22"));
+	_target_type_header.SetText(MakeUnicodeString("Target:"));
+
+	_target_type_text.push_back(TextImage(MakeUnicodeString("Self"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(MakeUnicodeString("Ally"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(MakeUnicodeString("Enemy"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(MakeUnicodeString("All Allies"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(MakeUnicodeString("All Enemies"), TextStyle("text22")));
+
+	_phys_header.SetStyle(TextStyle("text22"));
+	_phys_header.SetText(MakeUnicodeString("Phys:"));
+	_meta_header.SetStyle(TextStyle("text22"));
+	_meta_header.SetText(MakeUnicodeString("Meta:"));
+
+	_phys_rating.SetStyle(TextStyle("text22"));
+	_meta_rating.SetStyle(TextStyle("text22"));
+	_socket_text.SetStyle(TextStyle("text22"));
+
+	// Size elemental and status icon containers to the total number of avaiable elementals/status effects
+	_elemental_icons.resize(GLOBAL_ELEMENTAL_TOTAL, StillImage());
+	// TODO
+// 	_status_icons.resize(GLOBAL_STATUS_TOTAL, StillImage());
+}
+
+
+
+void ShopObjectViewer::Initialize() {
+	_description_text.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
+
+	_check_icon = *(ShopMode::CurrentInstance()->Media()->GetCheckIcon());
+	_x_icon = *(ShopMode::CurrentInstance()->Media()->GetXIcon());
+	_socket_icon = *(ShopMode::CurrentInstance()->Media()->GetSocketIcon());
+	_equip_icon = *(ShopMode::CurrentInstance()->Media()->GetEquipIcon());
+
+	uint32 number_character = ShopMode::CurrentInstance()->Media()->GetCharacterSprites()->size();
+
+	for (uint32 i = 0; i < number_character; i++) {
+		_character_sprites.push_back(ShopMode::CurrentInstance()->Media()->GetCharacterSprites()->at(i));
+		_character_equipped.push_back(false);
+		_phys_change_text.push_back(TextImage());
+		_meta_change_text.push_back(TextImage());
+	}
+}
+
+
+
+void ShopObjectViewer::Update() {
+	_description_text.Update();
+	_lore_text.Update();
+}
+
+
+
+void ShopObjectViewer::Draw() {
+	// Set the initial draw cursor position to the top left corner of the proper window
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
+	if (_view_mode == SHOP_VIEW_MODE_LIST) {
+		VideoManager->Move(135.0f, 188.0f);
+	}
+	else if (_view_mode == SHOP_VIEW_MODE_INFO) {
+		VideoManager->Move(135.0f, 588.0f);
+	}
+	else { // An unknown/unsupported view mode is active, so draw nothing
+		return;
+	}
+
+	// Object's name and icon are drawn in the same position for all objects
+	_object_name.Draw();
+	VideoManager->MoveRelative(0.0f, -55.0f);
+	_selected_object->GetObject()->GetIconImage().Draw();
+
+	switch (_object_type) {
+		case SHOP_OBJECT_ITEM:
+			_DrawItem();
+			break;
+		case SHOP_OBJECT_EQUIPMENT:
+			_DrawEquipment();
+			break;
+		case SHOP_OBJECT_SHARD:
+			_DrawShard();
+			break;
+		case SHOP_OBJECT_KEY_ITEM:
+			_DrawKeyItem();
+			break;
+		default: // unknown/unsupported object type, draw no further information
+			break;
+	}
+
+	// In the info view mode, description text and lore text is always drawn near the bottom of the middle window
+	if (_view_mode == SHOP_VIEW_MODE_INFO) {
+// 		_description_text.Draw();
+// 		_lore_text.Draw();
+	}
+}
+
+
+
+void ShopObjectViewer::SetSelectedObject(ShopObject* object) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL argument" << endl;
+		return;
+	}
+
+	if (_selected_object == object) {
+		return;
+	}
+
+	// Specific object type pointers used to cast the new object to its specific type
+	GlobalItem* selected_item = NULL;
+	GlobalWeapon* selected_weapon = NULL;
+	GlobalArmor* selected_armor = NULL;
+	GlobalShard* selected_shard = NULL;
+
+	_selected_object = object;
+	_object_type = _selected_object->DetermineShopObjectType();
+
+	// Get a pointer to the global object type of the new object selection
+	switch (_selected_object->GetObject()->GetObjectType()) {
+		case GLOBAL_OBJECT_ITEM:
+			selected_item = dynamic_cast<GlobalItem*>(_selected_object->GetObject());
+			break;
+		case GLOBAL_OBJECT_WEAPON:
+			selected_weapon = dynamic_cast<GlobalWeapon*>(_selected_object->GetObject());
+			break;
+		case GLOBAL_OBJECT_HEAD_ARMOR:
+		case GLOBAL_OBJECT_TORSO_ARMOR:
+		case GLOBAL_OBJECT_ARM_ARMOR:
+		case GLOBAL_OBJECT_LEG_ARMOR:
+			selected_armor = dynamic_cast<GlobalArmor*>(_selected_object->GetObject());
+			break;
+		case GLOBAL_OBJECT_SHARD:
+			selected_shard = dynamic_cast<GlobalShard*>(_selected_object->GetObject());
+			break;
+		case GLOBAL_OBJECT_KEY_ITEM:
+			// TODO: not implemented yet. I think the GlobalKeyItem class should re-use the GlobalItem class. We'll see...
+			break;
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid object type: " << _selected_object->GetObject()->GetObjectType() << endl;
+			break;
+	}
+
+	_object_name.SetText(_selected_object->GetObject()->GetName());
+	_description_text.SetDisplayText(_selected_object->GetObject()->GetDescription());
+	// TODO: this data is not yet available in the global code
+// 	_lore_text.SetDisplayText(_selected_object->GetObject()->GetLore());
+
+	if (selected_item != NULL) {
+		_SetItemData();
+	}
+	if (selected_weapon != NULL) {
+		_phys_rating.SetText(NumberToString(selected_weapon->GetPhysicalAttack()));
+		_meta_rating.SetText(NumberToString(selected_weapon->GetMetaphysicalAttack()));
+		_socket_text.SetText("x" + NumberToString(selected_weapon->GetSockets().size()));
+		_SetElementalIcons(selected_weapon->GetElementalEffects());
+		_SetEquipmentData();
+	}
+	else if (selected_armor != NULL) {
+		_phys_rating.SetText(NumberToString(selected_armor->GetPhysicalDefense()));
+		_meta_rating.SetText(NumberToString(selected_armor->GetMetaphysicalDefense()));
+		_socket_text.SetText("x" + NumberToString(selected_armor->GetSockets().size()));
+		_SetElementalIcons(selected_armor->GetElementalEffects());
+		_SetEquipmentData();
+	}
+	else if (selected_shard != NULL) {
+		// TODO
+	}
+} // void ShopObjectViewer::SetSelectedObject(ShopObject* object)
+
+
+
+void ShopObjectViewer::ChangeViewMode(SHOP_VIEW_MODE new_mode) {
+	if (_view_mode == new_mode) {
+		return;
+	}
+
+	if (new_mode == SHOP_VIEW_MODE_LIST) {
+		_view_mode = new_mode;
+		_description_text.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
+	}
+	else if (new_mode == SHOP_VIEW_MODE_INFO) {
+		_view_mode = new_mode;
+		_description_text.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
+	}
+	else {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "unknown/unsupported view mode passed in function argument: " << new_mode << endl;
+	}
+}
+
+
+
+void ShopObjectViewer::_SetElementalIcons(const map<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>& elemental_effects) {
+	uint32 index = 0;
+
+	for (map<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>::const_iterator i = elemental_effects.begin(); i != elemental_effects.end(); i++) {
+		switch (i->first) {
+			case GLOBAL_ELEMENTAL_FIRE:
+				index = 0;
+				break;
+			case GLOBAL_ELEMENTAL_WATER:
+				index = 1;
+				break;
+			case GLOBAL_ELEMENTAL_VOLT:
+				index = 2;
+				break;
+			case GLOBAL_ELEMENTAL_EARTH:
+				index = 3;
+				break;
+			case GLOBAL_ELEMENTAL_SLICING:
+				index = 4;
+				break;
+			case GLOBAL_ELEMENTAL_SMASHING:
+				index = 5;
+				break;
+			case GLOBAL_ELEMENTAL_MAULING:
+				index = 6;
+				break;
+			case GLOBAL_ELEMENTAL_PIERCING:
+				index = 7;
+				break;
+			default:
+				IF_PRINT_WARNING(SHOP_DEBUG) << "invalid elemental type: " << i->first << endl;
+				break;
+		}
+
+		_elemental_icons[index] = *(ShopMode::CurrentInstance()->Media()->GetElementalIcon(i->first, i->second));
+		if (i->second == GLOBAL_INTENSITY_NEUTRAL) {
+			_elemental_icons[index].EnableGrayScale();
+		}
+	}
+}
+
+
+// TODO: Implement this method when status effects are available
+// 	void ShopObjectViewer::_SetStatusIcons(const map<GLOBAL_STATUS, GLOBAL_INTENSITY>& status_effects) { }
+
+
+
+void ShopObjectViewer::_SetItemData() {
+	if (_object_type != SHOP_OBJECT_ITEM) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function invoked when selected object was not an item: " << _object_type << endl;
+		return;
+	}
+
+	// Set map/battle usability status
+	GlobalItem* item = dynamic_cast<GlobalItem*>(_selected_object->GetObject());
+	_map_usable = item->IsUsableInMenu();
+	_battle_usable = item->IsUsableInBattle();
+
+	// Determine the target type text to display for this item
+	bool allied_target = item->IsTargetAlly();
+	GLOBAL_TARGET target_type = item->GetTargetType();
+	// The _target_type_vector contains five entries representing the following categories:
+	// "Self", "Ally", "Enemy", "All Allies", "All Enemies.
+	if (target_type == GLOBAL_TARGET_SELF) {
+		_target_type_index = 0;
+	}
+	else if ((allied_target == true) && (target_type != GLOBAL_TARGET_PARTY)) {
+		_target_type_index = 1;
+	}
+	else if ((allied_target == false) && (target_type != GLOBAL_TARGET_PARTY)) {
+		_target_type_index = 2;
+	}
+	else if ((allied_target == true) && (target_type == GLOBAL_TARGET_PARTY)) {
+		_target_type_index = 3;
+	}
+	else if ((allied_target == false) && (target_type == GLOBAL_TARGET_PARTY)) {
+		_target_type_index = 5;
+	}
+	else {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "unknown/unhandled target type, defaulting to 'self'" << endl;
+		_target_type_index = 0;
+	}
+}
+
+
+
+void ShopObjectViewer::_SetEquipmentData() {
+	if (_object_type != SHOP_OBJECT_EQUIPMENT) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function invoked when selected object was not a piece of equipment: " << _object_type << endl;
+		return;
+	}
+
+	// ---------- (1): Determine whether the selected object is a weapon or piece of armor
+	GlobalWeapon* selected_weapon = NULL;
+	GlobalArmor* selected_armor = NULL;
+	uint32 usable_status = 0; // This is a bit mask that will hold the selected object's usablility information
+	uint32 armor_index = 0; // Will hold the correct index into a GlobalCharacter object's equipped armor container
+
+	if (_selected_object->GetObject()->GetObjectType() == GLOBAL_OBJECT_WEAPON) {
+		selected_weapon = dynamic_cast<GlobalWeapon*>(_selected_object->GetObject());
+		usable_status = selected_weapon->GetUsableBy();
+	}
+	else {
+		selected_armor = dynamic_cast<GlobalArmor*>(_selected_object->GetObject());
+		usable_status = selected_armor->GetUsableBy();
+
+		// Armor on GlobalCharacter objects are stored in 4-element vectors. The different armor type maps to one of these four elements
+		switch (selected_armor->GetObjectType()) {
+			case GLOBAL_OBJECT_HEAD_ARMOR:
+				armor_index = 0;
+				break;
+			case GLOBAL_OBJECT_TORSO_ARMOR:
+				armor_index = 1;
+				break;
+			case GLOBAL_OBJECT_ARM_ARMOR:
+				armor_index = 2;
+				break;
+			case GLOBAL_OBJECT_LEG_ARMOR:
+				armor_index = 3;
+				break;
+			default:
+				IF_PRINT_WARNING(SHOP_DEBUG) << "object type was not armor: " << _selected_object->GetObject()->GetObjectType() << endl;
+				return;
+		}
+	}
+
+	// ---------- (2): For each character, determine if they already have the selection equipped or determine the change in pricing
+	vector<GlobalCharacter*>* party = GlobalManager->GetCharacterOrder();
+	GlobalCharacter* character = NULL;
+	GlobalWeapon* equipped_weapon = NULL;
+	GlobalArmor* equipped_armor = NULL;
+	int32 phys_diff = 0, meta_diff = 0; // Holds the difference in attack power from equipped weapon/armor to selected weapon/armor
+
+	// NOTE: In this block of code, entries to the _phys_change_text and _meta_change_text members are only modified if that information is to be
+	// displayed for the character (meaning that the character can use the weapon/armor and does not already have it equipped). This means
+	// that these two container members may contain stale data from previous objects. This is acceptable, however, as the stale data should
+	// never be drawn. The stale data is allowed to remain so that we do not waste time re-rendering text for which we will not display.
+	if (selected_weapon != NULL) {
+		for (uint32 i = 0; i < party->size(); i++) {
+			character = party->at(i);
+			equipped_weapon = character->GetWeaponEquipped();
+
+			// Initially assume that the character does not have this weapon equipped
+			_character_equipped[i] = false;
+
+			// Case 1: determine if the character can use the weapon and if not, move on to the next character
+			// Toggle grayscale mode appropriately to indicate whether or not the character can equip this
+			if (usable_status & (character->GetID())) {
+				if (_character_sprites[i].IsGrayScale() == true)
+					_character_sprites[i].DisableGrayScale();
+			}
+			else {
+				if (_character_sprites[i].IsGrayScale() == false)
+					_character_sprites[i].EnableGrayScale();
+				continue;
+			}
+			// Case 2: if the player does not have any weapon equipped, the stat diff is equal to the selected weapon's ratings
+			if (equipped_weapon == NULL) {
+				phys_diff = static_cast<int32>(selected_weapon->GetPhysicalAttack());
+				meta_diff = static_cast<int32>(selected_weapon->GetMetaphysicalAttack());
+			}
+			// Case 3: if the player already has this weapon equipped, indicate thus and move on to the next character
+			if (selected_weapon->GetID() == equipped_weapon->GetID()) {
+				_character_equipped[i] = true;
+				continue;
+			}
+			// Case 4: the player can use this weapon and does not already have it equipped
+			else {
+				phys_diff = static_cast<int32>(selected_weapon->GetPhysicalAttack()) -
+					static_cast<int32>(equipped_weapon->GetPhysicalAttack());
+				meta_diff = static_cast<int32>(selected_weapon->GetMetaphysicalAttack()) -
+					static_cast<int32>(equipped_weapon->GetMetaphysicalAttack());
+			}
+
+			// If this line has been reached, either case (2) or case (4) were evaluated as true. Render the phys/meta stat variation text
+			_SetChangeText(i, phys_diff, meta_diff);
+		}
+	}
+	else { // (selected_armor != NULL)
+		for (uint32 i = 0; i < party->size(); i++) {
+			character = party->at(i);
+			equipped_armor = character->GetArmorEquipped()->at(armor_index);
+
+			// Initially assume that the character does not have this armor equipped
+			_character_equipped[i] = false;
+
+			// Case 1: determine if the character can use the armor and if not, move on to the next character
+			// Toggle grayscale mode appropriately to indicate whether or not the character can equip this
+			if (usable_status & (character->GetID())) {
+				if (_character_sprites[i].IsGrayScale() == true)
+					_character_sprites[i].DisableGrayScale();
+			}
+			else {
+				if (_character_sprites[i].IsGrayScale() == false)
+					_character_sprites[i].EnableGrayScale();
+				continue;
+			}
+			// Case 2: if the player does not have any armor equipped, the stat diff is equal to the selected armor's ratings
+			if (equipped_armor == NULL) {
+				phys_diff = static_cast<int32>(selected_armor->GetPhysicalDefense());
+				meta_diff = static_cast<int32>(selected_armor->GetMetaphysicalDefense());
+			}
+			// Case 3: if the player already has this armor equipped, indicate thus and move on to the next character
+			if (selected_armor->GetID() == equipped_armor->GetID()) {
+				_character_equipped[i] = true;
+				continue;
+			}
+			// Case 4: the player can use this armor and does not already have it equipped
+			else {
+				phys_diff = static_cast<int32>(selected_armor->GetPhysicalDefense()) -
+					static_cast<int32>(equipped_armor->GetPhysicalDefense());
+				meta_diff = static_cast<int32>(selected_armor->GetMetaphysicalDefense()) -
+					static_cast<int32>(equipped_armor->GetMetaphysicalDefense());
+			}
+
+			// If this line has been reached, either case (2) or case (4) were evaluated as true. Render the phys/meta stat variation text
+			_SetChangeText(i, phys_diff, meta_diff);
+		}
+	}
+} // void ShopObjectViewer::_SetEquipmentData()
+
+
+
+void ShopObjectViewer::_SetChangeText(uint32 index, int32 phys_diff, int32 meta_diff) {
+	if (index >= _character_sprites.size()) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "index argument was out of bounds: " << index << endl;
+		return;
+	}
+
+	_phys_change_text[index].Clear();
+	if (phys_diff > 0) {
+		_phys_change_text[index].SetStyle(TextStyle("text18", Color::green));
+		_phys_change_text[index].SetText("+" + NumberToString(phys_diff));
+	}
+	else if (phys_diff < 0) {
+		_phys_change_text[index].SetStyle(TextStyle("text18", Color::red));
+		_phys_change_text[index].SetText(NumberToString(phys_diff));
+	}
+	else { // (phys_diff == 0)
+		_phys_change_text[index].SetStyle(TextStyle("text18", Color::white));
+		_phys_change_text[index].SetText(NumberToString(phys_diff));
+	}
+
+	_meta_change_text[index].Clear();
+	if (meta_diff > 0) {
+		_meta_change_text[index].SetStyle(TextStyle("text18", Color::green));
+		_meta_change_text[index].SetText("+" + NumberToString(meta_diff));
+	}
+	else if (meta_diff < 0) {
+		_meta_change_text[index].SetStyle(TextStyle("text18", Color::red));
+		_meta_change_text[index].SetText(NumberToString(meta_diff));
+	}
+	else { // (meta_diff == 0)
+		_meta_change_text[index].SetStyle(TextStyle("text18", Color::white));
+		_meta_change_text[index].SetText(NumberToString(meta_diff));
+	}
+}
+
+
+
+void ShopObjectViewer::_DrawItem() {
+	float move_offset = 0.0f; // Used to save image widths in determining relative movement
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
+
+	VideoManager->MoveRelative(80.0f, 15.0f);
+	_map_use_header.Draw();
+	move_offset = _map_use_header.GetWidth() + 5.0f; // 5.0f is a small buffer space between text and graphic
+	VideoManager->MoveRelative(move_offset, 0.0f);
+	if (_map_usable == true) {
+		_check_icon.Draw();
+	}
+	else {
+		_x_icon.Draw();
+	}
+
+	VideoManager->MoveRelative(175.0f - move_offset, 0.0f);
+	_battle_use_header.Draw();
+	move_offset = _battle_use_header.GetWidth() + 5.0f;
+	VideoManager->MoveRelative(move_offset, 0.0f);
+	if (_battle_usable == true) {
+		_check_icon.Draw();
+	}
+	else {
+		_x_icon.Draw();
+	}
+
+	VideoManager->MoveRelative(175.0f - move_offset, 0.0f);
+	_target_type_header.Draw();
+	move_offset = _target_type_header.GetWidth() + 5.0f;
+	VideoManager->MoveRelative(move_offset, 0.0f);
+	_target_type_text[_target_type_index].Draw();
+
+	_description_text.Draw();
+}
+
+
+
+void ShopObjectViewer::_DrawEquipment() {
+		VideoManager->MoveRelative(80.0f, 15.0f);
+		_phys_header.Draw();
+		VideoManager->MoveRelative(0.0f, -30.0f);
+		_meta_header.Draw();
+
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, 0);
+		VideoManager->MoveRelative(90.0f, 30.0f);
+		_phys_rating.Draw();
+		VideoManager->MoveRelative(0.0f, -30.0f);
+		_meta_rating.Draw();
+
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
+		VideoManager->MoveRelative(20.0f, 15.0f);
+		_socket_icon.Draw();
+		VideoManager->MoveRelative(20.0f, 0.0f);
+		_socket_text.Draw();
+
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
+		VideoManager->MoveRelative(50.0f, 55.0f);
+		for (uint32 i = 0; i < GLOBAL_ELEMENTAL_TOTAL / 2; i++) {
+			_elemental_icons[i].Draw();
+			VideoManager->MoveRelative(0.0f, -25.0f);
+		}
+		VideoManager->MoveRelative(40.0f, 100.0f);
+		for (uint32 i = GLOBAL_ELEMENTAL_TOTAL / 2; i < GLOBAL_ELEMENTAL_TOTAL; i++) {
+			_elemental_icons[i].Draw();
+			VideoManager->MoveRelative(0.0f, -25.0f);
+		}
+
+		// TODO: Draw two columns of status icons
+		VideoManager->MoveRelative(80.0f, 0.0f); // TEMP: remove once commented code block below is added
+// 		VideoManager->MoveRelative(40.0f, 100.0f);
+// 		for (uint32 i = 0; i < 4; i++) {
+// 			_status_icons[i].Draw();
+// 			VideoManager->MoveRelative(0.0f, -25.0f);
+// 		}
+// 		VideoManager->MoveRelative(40.0f, 100.0f);
+// 		for (uint32 i = 4; i < 8; i++) {
+// 			_status_icons[i].Draw();
+// 			VideoManager->MoveRelative(0.0f, -25.0f);
+// 		}
+
+		VideoManager->SetDrawFlags(VIDEO_Y_TOP, 0);
+		VideoManager->MoveRelative(60.0f, 140.0f);
+	for (uint32 i = 0; (i < _character_sprites.size()) && (i < 8); i++) {
+		_character_sprites[i].Draw();
+
+		// Case 1: Draw the equip icon below the character sprite
+		if (_character_equipped[i] == true) {
+			VideoManager->MoveRelative(0.0f, -78.0f);
+			_equip_icon.Draw();
+			VideoManager->MoveRelative(0.0f, 78.0f);
+		}
+		// Case 2: Draw the phys/meta change text below the sprite
+		else if (_character_sprites[i].IsGrayScale() == false) {
+			VideoManager->MoveRelative(0.0f, -65.0f);
+			_phys_change_text[i].Draw();
+			VideoManager->MoveRelative(0.0f, -20.0f);
+			_meta_change_text[i].Draw();
+			VideoManager->MoveRelative(0.0f, 85.0f);
+		}
+		// Case 3: Nothing needs to be drawn below the sprite
+		VideoManager->MoveRelative(40.0f, 0.0f);
+	}
+}
+
+
+
+void ShopObjectViewer::_DrawShard() {
+	// TODO
+}
+
+
+
+void ShopObjectViewer::_DrawKeyItem() {
+	// TODO
+}
+
+
 } // namespace private_shop
 
 // *****************************************************************************
@@ -256,6 +858,7 @@ ShopMode::ShopMode() :
 	_total_costs(0),
 	_total_sales(0),
 	_shop_media(NULL),
+	_object_viewer(NULL),
 	_root_interface(NULL),
 	_buy_interface(NULL),
 	_sell_interface(NULL),
@@ -300,12 +903,7 @@ ShopMode::ShopMode() :
 	option_text.push_back(MakeUnicodeString("Trade"));
 	option_text.push_back(MakeUnicodeString("Confirm"));
 	option_text.push_back(MakeUnicodeString("Leave"));
-
-	_action_options.AddOption(option_text[0]);
-	_action_options.AddOption(option_text[1]);
-	_action_options.AddOption(option_text[2]);
-	_action_options.AddOption(option_text[3]);
-	_action_options.AddOption(option_text[4]);
+	_action_options.SetOptions(option_text);
 	_action_options.SetSelection(0);
 
 	_action_titles.push_back(TextImage(option_text[0], TextStyle("title28")));
@@ -327,6 +925,7 @@ ShopMode::ShopMode() :
 	UpdateFinances(0, 0);
 
 	_shop_media = new ShopMedia();
+	_object_viewer = new ShopObjectViewer();
 	_root_interface = new RootInterface();
 	_buy_interface = new BuyInterface();
 	_sell_interface = new SellInterface();
@@ -351,6 +950,7 @@ ShopMode::~ShopMode() {
 	_created_objects.clear();
 
 	delete _shop_media;
+	delete _object_viewer;
 	delete _root_interface;
 	delete _buy_interface;
 	delete _sell_interface;
@@ -364,7 +964,6 @@ ShopMode::~ShopMode() {
 
 	if (_current_instance == this) {
 		_current_instance = NULL;
-		ShopMedia::SetCurrentInstance(NULL);
 	}
 }
 
@@ -375,7 +974,6 @@ void ShopMode::Reset() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
 	_current_instance = this;
-	_shop_media->SetCurrentInstance(_shop_media);
 	if (IsInitialized() == false)
 		Initialize();
 }
@@ -443,10 +1041,11 @@ void ShopMode::Initialize() {
 		i->second.SetPricing(_buy_price_level, _sell_price_level);
 	}
 
-	// ---------- (4): Initialize multimedia data
+	// ---------- (4): Initialize multimedia data and viewer
 	_shop_media->Initialize();
+	_object_viewer->Initialize();
 
-	// ---------- (4): Initialize all shop interfaces
+	// ---------- (5): Initialize all shop interfaces
 	_root_interface->Initialize();
 	_buy_interface->Initialize();
 	_sell_interface->Initialize();
@@ -480,7 +1079,7 @@ void ShopMode::Update() {
 			}
 
 			_action_options.InputConfirm();
-			sound = ShopMedia::CurrentInstance()->GetSound("confirm");
+			sound = ShopMode::CurrentInstance()->Media()->GetSound("confirm");
 			assert(sound != NULL);
 			sound->Play();
 
@@ -553,9 +1152,9 @@ void ShopMode::Draw() {
 
 	// ---------- (3): Draw the contents of the top window
 	VideoManager->Move(130.0f, 605.0f);
-	ShopMedia::CurrentInstance()->GetDrunesIcon()->Draw();
+	ShopMode::CurrentInstance()->Media()->GetDrunesIcon()->Draw();
 	VideoManager->MoveRelative(705.0f, 0.0f);
-	ShopMedia::CurrentInstance()->GetDrunesIcon()->Draw();
+	ShopMode::CurrentInstance()->Media()->GetDrunesIcon()->Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(512.0f, 657.0f);
@@ -759,7 +1358,31 @@ void ShopMode::ChangeState(SHOP_STATE new_state) {
 			ModeManager->Pop();
 		}
 	}
-} // void ShopMode::ChangeState(SHOP_STATE new_state)
+
+	switch (_state) {
+		case SHOP_STATE_ROOT:
+			_root_interface->MakeActive();
+			break;
+		case SHOP_STATE_BUY:
+			_buy_interface->MakeActive();
+			break;
+		case SHOP_STATE_SELL:
+			_sell_interface->MakeActive();
+			break;
+		case SHOP_STATE_TRADE:
+			_trade_interface->MakeActive();
+			break;
+		case SHOP_STATE_CONFIRM:
+			_confirm_interface->MakeActive();
+			break;
+		case SHOP_STATE_LEAVE:
+			_leave_interface->MakeActive();
+			break;
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << endl;
+			break;
+	}
+}
 
 
 

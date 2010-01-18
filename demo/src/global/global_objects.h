@@ -233,7 +233,7 @@ public:
 
 private:
 	/** \brief The type of target for the item.
-	*** Target types include attack points, actors, and parties. This enum  type is defined in global_skills.h
+	*** Target types include attack points, actors, and parties. This enum type is defined in global_actors.h
 	**/
 	GLOBAL_TARGET _target_type;
 
