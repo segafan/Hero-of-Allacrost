@@ -98,8 +98,6 @@ engine_SOURCES = \
 	$(ENGINE_DIR)/input.h \
 	$(ENGINE_DIR)/mode_manager.cpp \
 	$(ENGINE_DIR)/mode_manager.h \
-	$(ENGINE_DIR)/socket.cpp \
-	$(ENGINE_DIR)/socket.h \
 	$(ENGINE_DIR)/defs_engine.cpp \
 	$(audio_SOURCES) \
 	$(video_SOURCES) \
@@ -212,8 +210,6 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/tileset_editor.h \
 	$(video_SOURCES) \
 	$(script_SOURCES) \
-	$(ENGINE_DIR)/socket.cpp \
-	$(ENGINE_DIR)/socket.h \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h \
