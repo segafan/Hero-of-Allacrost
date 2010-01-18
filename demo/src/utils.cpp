@@ -30,11 +30,9 @@
 #include <iconv.h>
 
 #include "utils.h"
-#include "socket.h"
 
 
 using namespace std;
-using namespace hoa_socket;
 
 namespace hoa_utils {
 
@@ -847,60 +845,6 @@ const std::string GetSettingsFilename() {
 	}
 
 	return settings_file;
-}
-
-#define VERSION_HOST "rabidtinker.mine.nu"
-#define VERSION_PATH "/~alistair/allacrost-version.txt"
-#define ALLACROST_MAJOR_VERSION 0
-#define ALLACROST_MINOR_VERSION 1
-#define ALLACROST_PATCH 0
-
-static std::string temp_version_str;
-
-bool IsLatestVersion ()
-{
-	uint32 rversionmajor;
-	uint32 rversionminor;
-	uint32 rpatch;
-	/*rversion = atof ( system(VERSION_URL) );
-	rpatch = atoi ( system(PATCH_URL) );*/
-	/*FILE* fp = popen ( "curl -s " VERSION_URL, "r" );
-	if (!fp)
-		return true;
-	fscanf ( fp, "%d.%d.%d", &rversionmajor, &rversionminor, &rpatch );
-	pclose ( fp );*/
-	Socket conn;
-	conn.Connect ( VERSION_HOST, 80 );
-	if (!conn.IsConnected()) // could not connect
-		return true; // assume latest version
-	//conn.Write ( "GET http://%s%s\r\n", VERSION_HOST, VERSION_PATH );
-	conn.Write ( "GET http://" VERSION_HOST VERSION_PATH "\r\n" );
-	conn.IsQueued ( 300 );
-	conn.ScanLine ( "%d.%d.%d", &rversionmajor, &rversionminor, &rpatch );
-	conn.Disconnect();
-
-	char vstring[255];
-	sprintf ( vstring, "%d.%d.%d", rversionmajor, rversionminor, rpatch );
-	temp_version_str = vstring;
-
-	if (rversionmajor > ALLACROST_MAJOR_VERSION)
-		return false;
-	else if (rversionmajor == ALLACROST_MAJOR_VERSION)
-	{
-		if (rversionminor > ALLACROST_MINOR_VERSION)
-			return false;
-		else if (rversionminor == ALLACROST_MINOR_VERSION)
-		{
-			if (rpatch > ALLACROST_PATCH)
-				return false;
-		}
-	}
-	return true;
-}
-
-string GetLatestVersion ()
-{
-	return temp_version_str;
 }
 
 } // namespace utils

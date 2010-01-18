@@ -87,13 +87,6 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 			return_code = 0;
 			return false;
 		}
-		else if (options[i] == "-v" || options[i] == "--version") {
-			if (IsLatestVersion())
-				cout << "This is the latest version of Allacrost" << endl;
-			else
-				cout << "A newer version of Allacrost (" << GetLatestVersion() << ") is available!" << endl;
-			return false;
-		}
 		else {
 			cerr << "Unrecognized option: " << options[i] << endl;
 			PrintUsage();
