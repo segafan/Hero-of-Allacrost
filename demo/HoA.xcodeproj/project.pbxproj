@@ -163,6 +163,7 @@
 		D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110400C58546800ADC969 /* audio_descriptor.cpp */; };
 		D4F1104C0C58548B00ADC969 /* audio_input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110460C58548B00ADC969 /* audio_input.cpp */; };
 		D4F1104E0C58548B00ADC969 /* audio_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110480C58548B00ADC969 /* audio_stream.cpp */; };
+		D4F8C0641103D32F0082DAFD /* shop_leave.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F8C0631103D32F0082DAFD /* shop_leave.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -405,6 +406,8 @@
 		D4F411340EC78C78005C5997 /* map_events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = map_events.h; sourceTree = "<group>"; };
 		D4F411350EC78C78005C5997 /* map_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = map_utils.cpp; sourceTree = "<group>"; };
 		D4F411360EC78C78005C5997 /* map_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = map_utils.h; sourceTree = "<group>"; };
+		D4F8C0631103D32F0082DAFD /* shop_leave.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shop_leave.cpp; sourceTree = "<group>"; };
+		D4F8C0651103D3400082DAFD /* shop_leave.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shop_leave.h; sourceTree = "<group>"; };
 		D4F900F20DA2010800F10953 /* dialog_boxes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dialog_boxes.cpp; sourceTree = "<group>"; };
 		D4F900F30DA2010800F10953 /* dialog_boxes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dialog_boxes.h; sourceTree = "<group>"; };
 		D4F901260DA214E100F10953 /* dialog_boxes.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dialog_boxes.moc.cpp; path = src/editor/dialog_boxes.moc.cpp; sourceTree = "<group>"; };
@@ -702,6 +705,8 @@
 		D407F7E80BADECF300848C43 /* shop */ = {
 			isa = PBXGroup;
 			children = (
+				D4F8C0651103D3400082DAFD /* shop_leave.h */,
+				D4F8C0631103D32F0082DAFD /* shop_leave.cpp */,
 				A6C7F9A7103DD60C008BAFB1 /* shop_buy.cpp */,
 				A6C7F9A8103DD60C008BAFB1 /* shop_buy.h */,
 				A6C7F9A9103DD60C008BAFB1 /* shop_confirm.cpp */,
@@ -1049,6 +1054,7 @@
 				A6C7F9B7103DD60C008BAFB1 /* shop_trade.cpp in Sources */,
 				A6C7F9B8103DD60C008BAFB1 /* shop_utils.cpp in Sources */,
 				A6619300104E4E9900E0A444 /* battle_events.cpp in Sources */,
+				D4F8C0641103D32F0082DAFD /* shop_leave.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

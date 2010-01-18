@@ -12,8 +12,8 @@
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
 		activeArchitecture = i386;
 		activeBuildConfigurationName = Debug;
-		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
-		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
+		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
+		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
 			4941A4AF0AC1D77500D65B8E /* Allacrost */,
 		);
@@ -191,8 +191,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 274256488;
-			PBXWorkspaceStateSaveDate = 274256488;
+			PBXPerProjectTemplateStateSaveDate = 285467116;
+			PBXWorkspaceStateSaveDate = 285467116;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -1154,7 +1154,7 @@
 		delayBeforeContinue = 0;
 		hitCount = 0;
 		ignoreCount = 0;
-		modificationTime = 272869541.040502;
+		modificationTime = 285468173.522935;
 		state = 2;
 		symbolName = setlocale;
 	};
@@ -1176,7 +1176,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		lineNumber = 254;
-		modificationTime = 272869541.040382;
+		modificationTime = 285468173.522745;
 		state = 2;
 	};
 	D4F5C4400ECC022400BCB646 /* libintl.h */ = {
@@ -1197,7 +1197,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		lineNumber = 270;
-		modificationTime = 272869541.040404;
+		modificationTime = 285468173.522772;
 		state = 2;
 	};
 	D4F5C4430ECC022400BCB646 /* bindtextdomain */ = {
@@ -1210,7 +1210,7 @@
 		delayBeforeContinue = 0;
 		hitCount = 0;
 		ignoreCount = 0;
-		modificationTime = 272869541.040515;
+		modificationTime = 285468173.522967;
 		state = 2;
 		symbolName = bindtextdomain;
 	};
@@ -1225,7 +1225,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		location = libintl.dylib;
-		modificationTime = 272869541.040529;
+		modificationTime = 285468173.522984;
 		state = 1;
 		symbolName = dgettext;
 	};
@@ -1240,7 +1240,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		location = libintl.dylib;
-		modificationTime = 272869541.040538;
+		modificationTime = 285468173.523015;
 		state = 1;
 		symbolName = dcgettext;
 	};
