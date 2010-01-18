@@ -30,7 +30,7 @@
 #include <iconv.h>
 
 #include "utils.h"
-
+#include <SDL/SDL.h>
 
 using namespace std;
 
