@@ -679,25 +679,6 @@ const std::string GetUserDataPath(bool user_files = true);
 const std::string GetSettingsFilename();
 //@}
 
-
-//! \name Version Checking Functions
-//@{
-/** \brief Checks version against a remote server
-*** \return A boolean indicating whether the user is running the latest version
-***
-*** This function will return true to indicate that the user is using the latest
-*** version OR that an error occured.
-**/
-bool IsLatestVersion();
-
-/** \brief Gets newest version
-*** \return A string containing the version information of the latest version
-***
-*** This should only be called after a call to IsLatestVersion()
-**/
-std::string GetLatestVersion();
-//@}
-
 } // namespace hoa_utils
 
 #endif // __UTILS_HEADER__

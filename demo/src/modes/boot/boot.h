@@ -173,9 +173,6 @@ private:
 	//! 'Resolution switcher' menu
 	BootMenu _resolution_menu;
 
-	//! Latest version according to version check
-	bool _latest_version;
-
 	//! Has the user modified game settings?
 	bool _has_modified_settings;
 

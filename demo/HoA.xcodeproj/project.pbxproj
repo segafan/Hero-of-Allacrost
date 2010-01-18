@@ -31,7 +31,6 @@
 		49A1AC670CF4381D00AF23FE /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB320BAF28B800013185 /* img */; };
 		49A1AC680CF4381D00AF23FE /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
 		49A1AC690CF4381D00AF23FE /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
-		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
 		A6619300104E4E9900E0A444 /* battle_events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A66192FE104E4E9900E0A444 /* battle_events.cpp */; };
 		A6C7F9B3103DD60C008BAFB1 /* shop_buy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9A7103DD60C008BAFB1 /* shop_buy.cpp */; };
 		A6C7F9B4103DD60C008BAFB1 /* shop_confirm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C7F9A9103DD60C008BAFB1 /* shop_confirm.cpp */; };
@@ -68,11 +67,9 @@
 		D48901AD0D15FCB1003940F4 /* SDL_ttf.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BC0D15FA13003940F4 /* SDL_ttf.framework */; };
 		D48901AE0D15FCCA003940F4 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BD0D15FA13003940F4 /* SDL.framework */; };
 		D48901AF0D15FCD3003940F4 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BC0D15FA13003940F4 /* SDL_ttf.framework */; };
-		D489F6BE0D15FA13003940F4 /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
 		D489F6BF0D15FA13003940F4 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BC0D15FA13003940F4 /* SDL_ttf.framework */; };
 		D489F6C00D15FA13003940F4 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BD0D15FA13003940F4 /* SDL.framework */; };
 		D489F7410D15FB41003940F4 /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BD0D15FA13003940F4 /* SDL.framework */; };
-		D489F7420D15FB41003940F4 /* SDL_net.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
 		D489F7430D15FB41003940F4 /* SDL_ttf.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BC0D15FA13003940F4 /* SDL_ttf.framework */; };
 		D489FC670D15FBE3003940F4 /* Qt3Support.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC600D15FBE3003940F4 /* Qt3Support.framework */; };
 		D489FC680D15FBE3003940F4 /* QtCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489FC610D15FBE3003940F4 /* QtCore.framework */; };
@@ -121,8 +118,6 @@
 		D4B8AA9F0F2D51F100B4D975 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
 		D4B8AAA10F2D521E00B4D975 /* defs_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148360D15F053005F0A3F /* defs_modes.cpp */; };
 		D4B9C32F0ED9527F000CB899 /* menu_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166320BC0D91300190FC0 /* menu_window.cpp */; };
-		D4CD69C30DB3302300FF17CD /* SDL_net.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
-		D4CD69C60DB3331800FF17CD /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D489F6BB0D15FA13003940F4 /* SDL_net.framework */; };
 		D4D0FA820E1A02A300B9EC20 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
 		D4D1664E0BC0D91400190FC0 /* effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166290BC0D91300190FC0 /* effects.cpp */; };
 		D4D1664F0BC0D91400190FC0 /* fade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662A0BC0D91300190FC0 /* fade.cpp */; };
@@ -154,7 +149,6 @@
 		D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */; };
 		D4D1BA6F0B02B27F0052BF1E /* editor_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA670B02B27F0052BF1E /* editor_main.cpp */; };
 		D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */; };
-		D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
 		D4D1BA8B0B02B4400052BF1E /* Editor-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */; };
 		D4D1BF450B02B6510052BF1E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7130AC1D89300D65B8E /* OpenGL.framework */; };
 		D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
@@ -175,7 +169,6 @@
 			files = (
 				D4B020BA0EA18DAF002644B9 /* libintl.dylib in Copy Frameworks */,
 				D489F7410D15FB41003940F4 /* SDL.framework in Copy Frameworks */,
-				D489F7420D15FB41003940F4 /* SDL_net.framework in Copy Frameworks */,
 				D489F7430D15FB41003940F4 /* SDL_ttf.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
@@ -188,7 +181,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				D49A54B90DB2BD8400FBD800 /* libintl.dylib in Copy Frameworks */,
-				D4CD69C30DB3302300FF17CD /* SDL_net.framework in Copy Frameworks */,
 				D48901AD0D15FCB1003940F4 /* SDL_ttf.framework in Copy Frameworks */,
 				D48901AC0D15FCA7003940F4 /* SDL.framework in Copy Frameworks */,
 				D48901A40D15FC2E003940F4 /* Qt3Support.framework in Copy Frameworks */,
@@ -263,8 +255,6 @@
 		4999AC4D0AF407BE004DD3A3 /* input.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = input.h; sourceTree = "<group>"; };
 		4999AC4E0AF407BE004DD3A3 /* system.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = system.cpp; sourceTree = "<group>"; };
 		4999AC4F0AF407BE004DD3A3 /* system.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = system.h; sourceTree = "<group>"; };
-		49BDC4500AF5412600940A6C /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
-		49BDC4510AF5412600940A6C /* socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socket.cpp; sourceTree = "<group>"; };
 		49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "Allacrost-Info.plist"; sourceTree = "<group>"; };
 		A66192FE104E4E9900E0A444 /* battle_events.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = battle_events.cpp; sourceTree = "<group>"; };
 		A66192FF104E4E9900E0A444 /* battle_events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = battle_events.h; sourceTree = "<group>"; };
@@ -306,7 +296,6 @@
 		D440963C0C45E37300E58975 /* script_write.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = script_write.h; sourceTree = "<group>"; };
 		D47FF3800E7B9A0A00423A0C /* map_treasure.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = map_treasure.cpp; sourceTree = "<group>"; };
 		D47FF3820E7B9A1800423A0C /* map_treasure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = map_treasure.h; sourceTree = "<group>"; };
-		D489F6BB0D15FA13003940F4 /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = "../allacrost-dep/frameworks/SDL_net.framework"; sourceTree = SOURCE_ROOT; };
 		D489F6BC0D15FA13003940F4 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = "../allacrost-dep/frameworks/SDL_ttf.framework"; sourceTree = SOURCE_ROOT; };
 		D489F6BD0D15FA13003940F4 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = "../allacrost-dep/frameworks/SDL.framework"; sourceTree = SOURCE_ROOT; };
 		D489FC600D15FBE3003940F4 /* Qt3Support.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Qt3Support.framework; path = "../allacrost-dep/frameworks/Qt3Support.framework"; sourceTree = SOURCE_ROOT; };
@@ -421,7 +410,6 @@
 				4941A7680AC1DCE000D65B8E /* Cocoa.framework in Frameworks */,
 				4941A7140AC1D89300D65B8E /* OpenGL.framework in Frameworks */,
 				D413E04E0CFFEA4400D5FAB4 /* OpenAL.framework in Frameworks */,
-				D489F6BE0D15FA13003940F4 /* SDL_net.framework in Frameworks */,
 				D489F6BF0D15FA13003940F4 /* SDL_ttf.framework in Frameworks */,
 				D489F6C00D15FA13003940F4 /* SDL.framework in Frameworks */,
 			);
@@ -431,7 +419,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4CD69C60DB3331800FF17CD /* SDL_net.framework in Frameworks */,
 				D48901AF0D15FCD3003940F4 /* SDL_ttf.framework in Frameworks */,
 				D48901AE0D15FCCA003940F4 /* SDL.framework in Frameworks */,
 				D4D1BF450B02B6510052BF1E /* OpenGL.framework in Frameworks */,
@@ -617,7 +604,6 @@
 				D489FC640D15FBE3003940F4 /* QtOpenGL.framework */,
 				D489FC650D15FBE3003940F4 /* QtSql.framework */,
 				D489FC660D15FBE3003940F4 /* QtXml.framework */,
-				D489F6BB0D15FA13003940F4 /* SDL_net.framework */,
 				D489F6BC0D15FA13003940F4 /* SDL_ttf.framework */,
 				D489F6BD0D15FA13003940F4 /* SDL.framework */,
 				D413E04D0CFFEA4400D5FAB4 /* OpenAL.framework */,
@@ -667,8 +653,6 @@
 				4999AC4C0AF407BE004DD3A3 /* mode_manager.h */,
 				4999AC4E0AF407BE004DD3A3 /* system.cpp */,
 				4999AC4F0AF407BE004DD3A3 /* system.h */,
-				49BDC4500AF5412600940A6C /* socket.h */,
-				49BDC4510AF5412600940A6C /* socket.cpp */,
 			);
 			path = engine;
 			sourceTree = "<group>";
@@ -1029,7 +1013,6 @@
 				4999AC7B0AF407BE004DD3A3 /* input.cpp in Sources */,
 				4999AC7D0AF407BE004DD3A3 /* mode_manager.cpp in Sources */,
 				4999AC810AF407BE004DD3A3 /* system.cpp in Sources */,
-				49BDC4530AF5412600940A6C /* socket.cpp in Sources */,
 				D4D1664E0BC0D91400190FC0 /* effects.cpp in Sources */,
 				D4D1664F0BC0D91400190FC0 /* fade.cpp in Sources */,
 				D4D166510BC0D91400190FC0 /* gui.cpp in Sources */,
@@ -1075,7 +1058,6 @@
 				D4B34E640E23275A0067C913 /* grid.moc.cpp in Sources */,
 				D4B34E650E23275B0067C913 /* skill_editor.moc.cpp in Sources */,
 				D4B34E660E23275C0067C913 /* tileset_editor.moc.cpp in Sources */,
-				D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */,
 				D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */,
 				D41AC1DE0C4C7CAE0097B042 /* script.cpp in Sources */,
 				D41AC1DD0C4C7CA60097B042 /* script_modify.cpp in Sources */,

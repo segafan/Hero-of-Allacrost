@@ -65,7 +65,6 @@ BootMode::BootMode() :
 	_message_window(string(""), 210.0f, 35.0f),
 	_file_name_alert(string(""),300.0f,35.0f),
 	_file_name_window(string(""),150.0f,35.0f),
-	_latest_version(true),
 	_has_modified_settings(false)
 {
 	IF_PRINT_DEBUG(BOOT_DEBUG) << "BOOT: BootMode constructor invoked." << endl;
@@ -129,13 +128,6 @@ BootMode::BootMode() :
 			return;
 		}
 	}
-
-	// Check the version
-	_latest_version = true; //IsLatestVersion();
-	if (!_latest_version)
-		_latest_version_number = GetLatestVersion();
-	else
-		_latest_version_number = "";
 
 	_menu_window.Create(300.0f, 550.0f);
 	_menu_window.SetPosition(360.0f, 580.0f);
@@ -473,13 +465,6 @@ void BootMode::Draw() {
 		_welcome_screen.Draw();
 	else if (_active_menu != NULL)
 		_active_menu->Draw();
-
-	if (!_latest_version)
-	{
-		VideoManager->Text()->SetDefaultTextColor(Color::green);
-		VideoManager->Move(482.0f, 553.0f);
-		VideoManager->Text()->Draw("New version available from allacrost.org: " + _latest_version_number);
-	}
 
 	VideoManager->Move(65.0f, 10.0f);
 	VideoManager->Text()->SetDefaultFont("default");
