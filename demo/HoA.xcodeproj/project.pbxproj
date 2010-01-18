@@ -942,7 +942,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "dir=\"$TARGET_BUILD_DIR/Allacrost.app/Contents/Resources/translations\"\nmkdir $dir\nfor file in `echo txt/*.po`\ndo\n\ttemp=`basename $file`\n\tname=${temp%\\.*}\n\t../allacrost-dep/bin/msgfmt -c $file -o $name.mo\n\tmkdir $dir/$name\n\tmkdir $dir/$name/LC_MESSAGES\n\tmv $name.mo $dir/$name/LC_MESSAGES/allacrost.mo\ndone";
+			shellScript = "dir=\"$TARGET_BUILD_DIR/Allacrost.app/Contents/Resources/translations\"\nmkdir -p $dir\nfor file in `echo txt/*.po`\ndo\n\ttemp=`basename $file`\n\tname=${temp%\\.*}\n\t../allacrost-dep/bin/msgfmt -c $file -o $name.mo\n\tmkdir -p $dir/$name\n\tmkdir -p $dir/$name/LC_MESSAGES\n\tmv $name.mo $dir/$name/LC_MESSAGES/allacrost.mo\ndone";
 		};
 		D49A54A30DB2B38000FBD800 /* Remap libs */ = {
 			isa = PBXShellScriptBuildPhase;
