@@ -85,6 +85,7 @@ credits_text =
 -- Additional credit level
 	"Additional Programming\n\n" ..
 	"Aaron Smith (Etherstar) - audio engine\n" ..
+	"Alastair Lynn (prophile) - various code, Mac OS X maintenance" ..
 	"Brandon Barnes (Winter Knight) - game engine, game modes\n" ..
 	"Corey Hoffstein (visage) - battle code\n" ..
 	"Dale Ma (eguitarz) - map editor\n" ..
