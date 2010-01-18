@@ -88,6 +88,10 @@ public:
 	//! \brief Initializes various textual and image data based on the shop properties
 	void Initialize();
 
+	//! \brief No actions need to take place when this interface becomes activated
+	void MakeActive()
+		{}
+
 	//! \brief Updates the state of GUI objects and may also process user input
 	void Update();
 

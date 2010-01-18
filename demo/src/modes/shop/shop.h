@@ -61,12 +61,6 @@ public:
 	~ShopMedia()
 		{}
 
-	static ShopMedia* CurrentInstance()
-		{ return _current_instance; }
-
-	static void SetCurrentInstance(ShopMedia* instance)
-		{ _current_instance = instance; }
-
 	/** \brief Finishes preparing media data for use
 	*** This function prepares any class members that could not be made ready in the constructor. This
 	*** may be the case, for example, where the contents of a data container are dependent on knowing
@@ -83,6 +77,12 @@ public:
 
 	hoa_video::StillImage* GetDrunesIcon()
 		{ return &_drunes_icon; }
+
+	hoa_video::StillImage* GetCheckIcon()
+		{ return &_check_icon; }
+
+	hoa_video::StillImage* GetXIcon()
+		{ return &_x_icon; }
 
 	hoa_video::StillImage* GetSocketIcon()
 		{ return &_socket_icon; }
@@ -116,12 +116,6 @@ public:
 	hoa_audio::SoundDescriptor* GetSound(std::string identifier);
 
 private:
-	/** \brief A reference to the current instance of ShopMedia
-	*** This is used by other shop clases to be able to refer to the shop that they exist in. This member
-	*** is NULL when no shop is active
-	**/
-	static ShopMedia* _current_instance;
-
 	//! \brief Retains all text names for each object category sold by the shop
 	std::vector<hoa_utils::ustring> _object_category_names;
 
@@ -130,6 +124,12 @@ private:
 
 	//! \brief Image icon representing drunes (currency)
 	hoa_video::StillImage _drunes_icon;
+
+	//! \brief Image icon of a green check mark
+	hoa_video::StillImage _check_icon;
+
+	//! \brief Image icon of a red x
+	hoa_video::StillImage _x_icon;
 
 	//! \brief Image icon representing open sockets available on weapons and armor
 	hoa_video::StillImage _socket_icon;
@@ -148,8 +148,182 @@ private:
 
 	//! \brief A map of the sounds used in shop mode
 	std::map<std::string, hoa_audio::SoundDescriptor*> _sounds;
-
 }; // class ShopMedia
+
+
+/** ****************************************************************************
+*** \brief Manages all data and graphics for showing detailed information about an object
+***
+*** This class shows summary information about the currently selected object. It displays
+*** this information in one of two display modes. The first mode uses only the lower window
+*** and shows only a limited amount of information. This is the default view mode that the
+*** player sees and this information is visible in tandem with the graphics displayed by the
+*** BuyListView class. The second view mode is entered if the player requests to see all the
+*** details about the selected object. In this view mode, the BuyListView class' graphics are
+*** hidden and this class displays the complete set of information about the selected object
+*** using both the middle and lower menu windows. The type of information which is displayed is
+*** different depending upon what type of object is selected. The primary purpose of this class
+*** is to serve as a helper to the BuyInterface class and to keep the code organized.
+***
+*** \todo Currently this class treats the display of shards the same as it does for items
+*** and key items. This should be changed once shard properties have a more clear definition
+*** in the game design.
+***
+*** \todo Status icons are not currently displayed as there are no status effects implemented
+*** in the game yet. Once status effects are functional and graphics are ready to represent
+*** them, this code should be updated.
+***
+*** \todo The character sprites are not yet animated in the display. This should be changed
+*** once the appropriate set of sprite frames are available for this menu.
+*** ***************************************************************************/
+class ShopObjectViewer {
+public:
+	ShopObjectViewer();
+
+	~ShopObjectViewer()
+		{}
+
+	//! \brief Finishes initialization of any data or settings that could not be completed in constructor
+	void Initialize();
+
+	//! \brief Updates sprite animations and other graphics as necessary
+	void Update();
+
+	//! \brief Draws the contents to the screen
+	void Draw();
+
+	/** \brief Changes the selected object to the function argument
+	*** \param object A pointer to the shop object to change (NULL-safe, but will result in a warning message)
+	*** \note The code using this class should always use this function to change the selected object rather than
+	*** changing the public _selected_object member directly. This method updates all of the relevent graphics and
+	*** data displays in addition to changing the pointer member.
+	**/
+	void SetSelectedObject(ShopObject* object);
+
+	/** \brief Changes the view mode which will effect what content is drawn and where it is drawn
+	*** \param new_mode The view mode to change to
+	*** If the current view mode is the same as the new mode, no action will be taken. If the new mode is unknown
+	*** or otherwise unsupported, a warning message will be printed and no change will take place.
+	**/
+	void ChangeViewMode(SHOP_VIEW_MODE new_mode);
+
+private:
+	//! \brief Holds the current view mode of this class
+	SHOP_VIEW_MODE _view_mode;
+
+	//! \brief A pointer to the object who's information should be displayed
+	ShopObject* _selected_object;
+
+	//! \brief The type of the selected object
+	SHOP_OBJECT _object_type;
+
+	//! \name Data that all object types share
+	//@{
+	//! \brief The name of the selected object
+	hoa_video::TextImage _object_name;
+
+	//! \brief A summary description of the object to display
+	hoa_video::TextBox _description_text;
+
+	//! \brief A more detailed "lore" description about the object's origins and connections with the world
+	hoa_video::TextBox _lore_text;
+	//@}
+
+	//! \name Data used only for item object types
+	//@{
+	//! \brief For items, various header text for identifying specific item properties
+	hoa_video::TextImage _map_use_header, _battle_use_header, _target_type_header;
+
+	//! \brief Image copies of a green check mark and a red x mark
+	hoa_video::StillImage _check_icon, _x_icon;
+
+	//! \brief Holds rendered text images of possible set of target types ("Self", "Ally", "Enemy", "All Allies", "All Enemies")
+	std::vector<hoa_video::TextImage> _target_type_text;
+
+	//! \brief Booleans that indicate whether the item is usable on maps and/or in battles
+	bool  _map_usable, _battle_usable;
+
+	//! \brief Index into the _target_type_text vector to get the appropriate descriptor for this item
+	uint32 _target_type_index;
+	//@}
+
+	//! \name Data used only for weapon and armor object types
+	//@{
+	//! \brief Header text identifying the physical and metaphysical ratings
+	hoa_video::TextImage _phys_header, _meta_header;
+
+	//! \brief A rendering of the physical and metaphysical attack/defense ratings
+	hoa_video::TextImage _phys_rating, _meta_rating;
+
+	//! \brief An icon image of a shard socket
+	hoa_video::StillImage _socket_icon;
+
+	//! \brief Text indicating how many sockets the selected equipment has available
+	hoa_video::TextImage _socket_text;
+
+	//! \brief Icon images representing elemental effects and intensity properties of the selected object
+	std::vector<hoa_video::StillImage> _elemental_icons;
+
+	//! \brief Icon images representing status effects and intensity properties of the selected object
+	std::vector<hoa_video::StillImage> _status_icons;
+	//@}
+
+	//! \name Data used for displaying character sprites and related status
+	//@{
+	//! \brief Sprite images of all characters currently in the party
+	std::vector<hoa_video::StillImage> _character_sprites;
+
+	//! \brief For weapons and armor, icon image that represents when a character already has the object equipped
+	hoa_video::StillImage _equip_icon;
+
+	//! \brief For weapons and armor, this member is set to true for each character that has the object equipped
+	std::vector<bool> _character_equipped;
+
+	//! \brief For weapons and armor, text to indicate changes in phys/meta stats from current equipment
+	std::vector<hoa_video::TextImage> _phys_change_text, _meta_change_text;
+	//@}
+
+	/** \brief Sets all elemental icons to the proper image given a container
+	*** \param elemental_effects A const reference to a map of elemental effects and their associated intensities
+	***
+	*** The argument is presumed to have an entrity for each type of element. This condition is not checked by the function.
+	*** The format of the parameter comes from the global object code, as object classes return a const std::map reference
+	*** of this type to indicate their elemental effects.
+	**/
+	void _SetElementalIcons(const std::map<hoa_global::GLOBAL_ELEMENTAL, hoa_global::GLOBAL_INTENSITY>& elemental_effects);
+
+	// TODO: Implement this method when status effects are available
+// 	void _SetStatusIcons(const std::map<hoa_global::GLOBAL_STATUS, hoa_global::GLOBAL_INTENSITY>& status_effects);
+
+	/** \brief Updates the data and visuals associated specifically with items for the selected object
+	*** This method should only be called if the _selected_object member is an item
+	**/
+	void _SetItemData();
+
+	/** \brief Updates the visible character sprites, equipped status, and stat text and data for the selected object
+	*** This method should only be called if the _selected_object member is a weapon or armor
+	**/
+	void _SetEquipmentData();
+
+	/** \brief Rnders the desired physical and metaphysical change text
+	*** \param index The index into the _phys_change_text and _meta_change_text containers to re-render
+	*** \param phys_diff The physical change amount
+	*** \param meta_diff The metaphysical change amount
+	**/
+	void _SetChangeText(uint32 index, int32 phys_diff, int32 meta_diff);
+
+	//! \brief Helper function that draws information specific to items
+	void _DrawItem();
+
+	//! \brief Helper function that draws information specific to equipment
+	void _DrawEquipment();
+
+	//! \brief Helper function that draws information specific to shards
+	void _DrawShard();
+
+	//! \brief Helper function that draws information specific to key items
+	void _DrawKeyItem();
+}; // class ShopObjectViewer
 
 } // namespace private_shop
 
@@ -180,8 +354,17 @@ public:
 
 	~ShopMode();
 
+	//! \brief Returns a pointer to the active instance of shop mode
 	static ShopMode* CurrentInstance()
 		{ return _current_instance; }
+
+	//! \brief Provides access to the ShopMedia class members and methods
+	private_shop::ShopMedia* Media()
+		{ return _shop_media; }
+
+	//! \brief Provides access to the ShopObjectViewer class members and methods
+	private_shop::ShopObjectViewer* ObjectViewer()
+		{ return _object_viewer; }
 
 	//! \brief Resets appropriate settings and initializes shop if appropriate. Called whenever the ShopMode object is made the active game mode.
 	void Reset();
@@ -397,6 +580,13 @@ private:
 
 	//! \brief A pointer to the ShopMedia object created to coincide with this instance of ShopMode
 	private_shop::ShopMedia* _shop_media;
+
+	/** \brief A pointer to the ShopObjectViewer object created to assist interface classes in visual presentation
+	*** ShopMode only creates and initializes this object and makes it available for the shop interfaces to use.
+	*** It does not call any standard methods on this class such as Update() or Draw(). That has to be done by
+	*** the interface class that uses it.
+	**/
+	private_shop::ShopObjectViewer* _object_viewer;
 
 	/** \name Shopping interfaces
 	*** These are class objects which are responsible for managing each state in shop mode

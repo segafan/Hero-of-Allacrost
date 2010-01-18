@@ -149,7 +149,7 @@ void SellInterface::Initialize() {
 	_properties_header.AddOption(MakeUnicodeString("Own"));
 	_properties_header.AddOption(MakeUnicodeString("Sell"));
 
-	vector<StillImage>* category_images = ShopMedia::CurrentInstance()->GetObjectCategoryIcons();
+	vector<StillImage>* category_images = ShopMode::CurrentInstance()->Media()->GetObjectCategoryIcons();
 	if (num_obj_categories == 1) {
 		num_obj_categories++;
 	}
@@ -221,24 +221,24 @@ void SellInterface::Update() {
 	// Left/right change the quantity of the object to sell
 	else if (InputManager->LeftPress()) {
 		if (selected_object->GetSellCount() == 0) {
-			ShopMedia::CurrentInstance()->GetSound("bump")->Play();
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 		}
 		else {
 			selected_object->DecrementSellCount();
 			ShopMode::CurrentInstance()->UpdateFinances(0, -selected_object->GetSellPrice());
 			selected_list->RefreshEntry(selected_entry);
-			ShopMedia::CurrentInstance()->GetSound("cancel")->Play();
+			ShopMode::CurrentInstance()->Media()->GetSound("cancel")->Play();
 		}
 	}
 	else if (InputManager->RightPress()) {
 		if (selected_object->GetSellCount() >= selected_object->GetOwnCount()) {
-			ShopMedia::CurrentInstance()->GetSound("bump")->Play();
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 		}
 		else {
 			selected_object->IncrementSellCount();
 			ShopMode::CurrentInstance()->UpdateFinances(0, selected_object->GetSellPrice());
 			selected_list->RefreshEntry(selected_entry);
-			ShopMedia::CurrentInstance()->GetSound("confirm")->Play();
+			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		}
 	}
 }

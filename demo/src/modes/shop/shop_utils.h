@@ -60,6 +60,22 @@ enum SHOP_VIEW_MODE {
 	SHOP_VIEW_MODE_TOTAL     =  2
 };
 
+/** \brief Type identifiers for representing different categories of shop objects
+*** GlobalObject classes already have their own type member, so why create a type for ShopObject classes?
+*** The answer is that shop interfaces often present data about certain object types in exactly the same manner
+*** and in many cases its convenient to refer to these common types by one name. The ShopObject class,
+*** does not have a SHOP_OBJECT member but does have a static function for converting a GLOBAL_OBJECT
+*** to a SHOP_OBJECT.
+**/
+enum SHOP_OBJECT {
+	SHOP_OBJECT_INVALID    = -1,
+	SHOP_OBJECT_ITEM       =  0,
+	SHOP_OBJECT_EQUIPMENT  =  1, //!< This type covers weapons and all types of armor
+	SHOP_OBJECT_SHARD      =  2,
+	SHOP_OBJECT_KEY_ITEM   =  3,
+	SHOP_OBJECT_TOTAL      =  4
+};
+
 //! \name Price multipliers
 //! \brief These values are multiplied by an object's standard price to get the price for the desired price level
 //@{
@@ -109,6 +125,9 @@ public:
 	//! \brief Performs any initialization that could not be done when the class was constructed
 	virtual void Initialize() = 0;
 
+	//! \brief Invoked to notify when the shop state has changed and the interface has become active
+	virtual void MakeActive() = 0;
+
 	//! \brief Updates the state of the interface and operates on user input
 	virtual void Update() = 0;
 
@@ -144,6 +163,14 @@ public:
 
 	~ShopObject()
 		{}
+
+	/** \brief Determines the appropriate SHOP_OBJECT that corresponds to a GLOBAL_OBJECT
+	*** \param global_type The global object type to find the equivalent shop object type for
+	**/
+	static SHOP_OBJECT DetermineShopObjectType(hoa_global::GLOBAL_OBJECT global_type);
+
+	//! \brief Returns the shop object type of this object
+	SHOP_OBJECT DetermineShopObjectType();
 
 	/** \brief Sets the buy and sell prices for the object
 	*** \param buy_level The buy level of the shop that will determine its buy price

@@ -311,6 +311,7 @@ namespace hoa_shop {
 		class ShopMedia;
 		class ShopInterface;
 		class ShopObject;
+		class ShopObjectViewer;
 		class ListDisplay;
 
 		class RootInterface;
@@ -320,7 +321,6 @@ namespace hoa_shop {
 		class BuyCategoryDisplay;
 		class BuyListDisplay;
 		class BuyListView;
-		class BuyObjectView;
 
 		class SellInterface;
 		class SellListDisplay;

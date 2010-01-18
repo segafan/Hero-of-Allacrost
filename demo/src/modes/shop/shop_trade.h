@@ -38,6 +38,9 @@ public:
 
 	void Initialize();
 
+	// TODO
+	void MakeActive() {}
+
 	void Update();
 
 	void Draw();

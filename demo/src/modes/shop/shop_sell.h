@@ -44,6 +44,9 @@ public:
 	//! \brief Initializes the data conatiners and GUI objects to be used
 	void Initialize();
 
+	// TODO
+	void MakeActive() {}
+
 	//! \brief Processes user input and updates the purchase totals as appropriate
 	void Update();
 

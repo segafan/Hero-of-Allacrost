@@ -40,7 +40,7 @@ namespace private_shop {
 // ***** ShopObject class methods
 // *****************************************************************************
 
-ShopObject::ShopObject(hoa_global::GlobalObject* object, bool sold_by_shop) :
+ShopObject::ShopObject(GlobalObject* object, bool sold_by_shop) :
 	_object(object),
 	_sold_in_shop(sold_by_shop),
 	_buy_price(0),
@@ -51,6 +51,45 @@ ShopObject::ShopObject(hoa_global::GlobalObject* object, bool sold_by_shop) :
 	_sell_count(0)
 {
 	assert(_object != NULL);
+}
+
+
+
+SHOP_OBJECT ShopObject::DetermineShopObjectType(GLOBAL_OBJECT global_type) {
+	SHOP_OBJECT shop_type;
+
+	switch (global_type) {
+		case GLOBAL_OBJECT_ITEM:
+			shop_type = SHOP_OBJECT_ITEM;
+			break;
+		case GLOBAL_OBJECT_WEAPON:
+		case GLOBAL_OBJECT_HEAD_ARMOR:
+		case GLOBAL_OBJECT_TORSO_ARMOR:
+		case GLOBAL_OBJECT_ARM_ARMOR:
+		case GLOBAL_OBJECT_LEG_ARMOR:
+			shop_type = SHOP_OBJECT_EQUIPMENT;
+			break;
+		case GLOBAL_OBJECT_SHARD:
+			shop_type = SHOP_OBJECT_SHARD;
+			break;
+		case GLOBAL_OBJECT_KEY_ITEM:
+			shop_type = SHOP_OBJECT_KEY_ITEM;
+			break;
+		case GLOBAL_OBJECT_INVALID:
+		case GLOBAL_OBJECT_TOTAL:
+		default:
+			IF_PRINT_WARNING(SHOP_DEBUG) << "no conversion type existed for global object: " << global_type << endl;
+			shop_type = SHOP_OBJECT_INVALID;
+			break;
+	}
+
+	return shop_type;
+}
+
+
+
+SHOP_OBJECT ShopObject::DetermineShopObjectType() {
+	return DetermineShopObjectType(GetObject()->GetObjectType());
 }
 
 

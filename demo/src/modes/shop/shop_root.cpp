@@ -221,14 +221,14 @@ void RootInterface::Initialize() {
 
 	// ---------- (2): Construct category name text and graphics and determine category draw coordinates
 	// Determine the number of names and icons of categories to load
-	uint32 number_categories = ShopMedia::CurrentInstance()->GetObjectCategoryNames()->size();
+	uint32 number_categories = ShopMode::CurrentInstance()->Media()->GetObjectCategoryNames()->size();
 	if (number_categories > 1) // If multiple categories are available, remove one because we don't want to show the "all" category
 		number_categories--;
 
 	TextStyle name_style("text22");
 	for (uint32 i = 0; i < number_categories; i++) {
-		_category_names.push_back(TextImage(ShopMedia::CurrentInstance()->GetObjectCategoryNames()->at(i), name_style));
-		_category_icons.push_back(ShopMedia::CurrentInstance()->GetObjectCategoryIcons()->at(i));
+		_category_names.push_back(TextImage(ShopMode::CurrentInstance()->Media()->GetObjectCategoryNames()->at(i), name_style));
+		_category_icons.push_back(ShopMode::CurrentInstance()->Media()->GetObjectCategoryIcons()->at(i));
 	}
 
 	_category_draw_data.ComputeCoordinates(_category_icons.size());
