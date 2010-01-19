@@ -283,18 +283,6 @@ private:
 	std::vector<hoa_video::TextImage> _phys_change_text, _meta_change_text;
 	//@}
 
-	/** \brief Sets all elemental icons to the proper image given a container
-	*** \param elemental_effects A const reference to a map of elemental effects and their associated intensities
-	***
-	*** The argument is presumed to have an entrity for each type of element. This condition is not checked by the function.
-	*** The format of the parameter comes from the global object code, as object classes return a const std::map reference
-	*** of this type to indicate their elemental effects.
-	**/
-	void _SetElementalIcons(const std::map<hoa_global::GLOBAL_ELEMENTAL, hoa_global::GLOBAL_INTENSITY>& elemental_effects);
-
-	// TODO: Implement this method when status effects are available
-// 	void _SetStatusIcons(const std::map<hoa_global::GLOBAL_STATUS, hoa_global::GLOBAL_INTENSITY>& status_effects);
-
 	/** \brief Updates the data and visuals associated specifically with items for the selected object
 	*** This method should only be called if the _selected_object member is an item
 	**/
@@ -305,12 +293,38 @@ private:
 	**/
 	void _SetEquipmentData();
 
-	/** \brief Rnders the desired physical and metaphysical change text
+	/** \brief Updates the data and visuals associated specifically with shards for the selected object
+	*** This method should only be called if the _selected_object member is a shard
+	**/
+	void _SetShardData();
+
+	//! \brief Determines the proper window owner, position, dimensions for description text
+	void _SetDescriptionText();
+
+	/** \brief Renders the desired physical and metaphysical change text
 	*** \param index The index into the _phys_change_text and _meta_change_text containers to re-render
 	*** \param phys_diff The physical change amount
 	*** \param meta_diff The metaphysical change amount
 	**/
 	void _SetChangeText(uint32 index, int32 phys_diff, int32 meta_diff);
+
+	/** \brief Sets all elemental icons to the proper image when given a container
+	*** \param elemental_effects A const reference to a map of elemental effect types and their associated intensities
+	***
+	*** The argument is presumed to have an entrity for each type of element. This condition is not checked by the function.
+	*** The format of the parameter comes from the global object code, as object classes return a const std::map reference
+	*** of this type to indicate their elemental effects.
+	**/
+	void _SetElementalIcons(const std::map<hoa_global::GLOBAL_ELEMENTAL, hoa_global::GLOBAL_INTENSITY>& elemental_effects);
+
+	/** \brief Sets all statusicons to the proper image when given a container
+	*** \param status_effects A const reference to a map of status effect types and their associated intensities
+	***
+	*** The argument is presumed to have an entrity for each type of status. This condition is not checked by the function.
+	*** The format of the parameter comes from the global object code, as object classes return a const std::map reference
+	*** of this type to indicate their status effects.
+	**/
+	void _SetStatusIcons(const std::map<hoa_global::GLOBAL_STATUS, hoa_global::GLOBAL_INTENSITY>& status_effects);
 
 	//! \brief Helper function that draws information specific to items
 	void _DrawItem();

@@ -147,7 +147,7 @@ void BuyInterface::Update() {
 	} // if (_list_view_active == true)
 
 	else {
-		if (InputManager->ConfirmPress()) {
+		if (InputManager->MenuPress()) {
 			ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(SHOP_VIEW_MODE_LIST);
 			_list_view_active = true;
 		}
