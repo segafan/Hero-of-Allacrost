@@ -199,6 +199,7 @@ const uint32 ANIM_RUNNING_SOUTH  = 8;
 const uint32 ANIM_RUNNING_NORTH  = 9;
 const uint32 ANIM_RUNNING_WEST   = 10;
 const uint32 ANIM_RUNNING_EAST   = 11;
+const uint32 ANIM_ATTACKING_EAST = 12;
 //@}
 
 
