@@ -469,6 +469,35 @@ bool MapSprite::LoadRunningAnimations(std::string filename) {
 
 
 
+bool MapSprite::LoadAttackAnimations(std::string filename) {
+	// The speed to display each frame in the walking animation
+	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
+
+	// Prepare the four standing and four walking _animations
+	for (uint8 i = 0; i < 8; i++)
+		_animations.push_back(AnimatedImage());
+
+	// Load the multi-image, containing 24 frames total
+	vector<StillImage> frames(5);
+	for (uint8 i = 0; i < 5; i++)
+		frames[i].SetDimensions(img_half_width * 4, img_height);
+
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, filename, 1, 5) == false) {
+		return false;
+	}
+
+	// Add attack frames to _animations
+	_animations[ANIM_ATTACKING_EAST].AddFrame(frames[0], frame_speed);
+	_animations[ANIM_ATTACKING_EAST].AddFrame(frames[1], frame_speed);
+	_animations[ANIM_ATTACKING_EAST].AddFrame(frames[2], frame_speed);
+	_animations[ANIM_ATTACKING_EAST].AddFrame(frames[3], frame_speed);
+	_animations[ANIM_ATTACKING_EAST].AddFrame(frames[4], frame_speed);
+
+	return true;
+} // bool MapSprite::LoadAttackAnimations(std::string filename)
+
+
+
 void MapSprite::LoadFacePortrait(std::string pn) {
 	if (_face_portrait != NULL) {
 		delete _face_portrait;
@@ -491,8 +520,12 @@ void MapSprite::Update() {
 	// This call will update the sprite's position and perform collision detection
 	VirtualSprite::Update();
 
+	// if it's a custom animation, just display that and ignore everything else
+	if (_custom_animation_on == true) {
+		_animations[_current_animation].Update();
+	}
 	// Set the sprite's animation to the standing still position if movement has just stopped
-	if (moved_position == false) {
+	else if (moved_position == false) {
 		if (was_moved == true) {
 			// Set the current movement animation to zero progress
 			_animations[_current_animation].SetTimeProgress(0);

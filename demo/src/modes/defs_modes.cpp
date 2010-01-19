@@ -195,6 +195,7 @@ void BindModesToLua()
 			.def("LoadFacePortrait", &MapSprite::LoadFacePortrait)
 			.def("LoadStandardAnimations", &MapSprite::LoadStandardAnimations)
 			.def("LoadRunningAnimations", &MapSprite::LoadRunningAnimations)
+			.def("LoadAttackAnimations", &MapSprite::LoadAttackAnimations)
 			.def("AddDialogueReference", &MapSprite::AddDialogueReference)
 	];
 

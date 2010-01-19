@@ -582,6 +582,7 @@ void AnimateSpriteEvent::_Start() {
 	_current_frame = 0;
 	_display_timer = 0;
 	_loop_count = 0;
+	dynamic_cast<MapSprite*>(_sprite)->SetCustomAnimation(true);
 	dynamic_cast<MapSprite*>(_sprite)->SetCurrentAnimation(static_cast<uint8>(_frames[_current_frame]));
 }
 
@@ -603,6 +604,7 @@ bool AnimateSpriteEvent::_Update() {
 				_loop_count++;
 				if (_loop_count > _number_loops) {
 					_loop_count = 0;
+					dynamic_cast<MapSprite*>(_sprite)->SetCustomAnimation(false);
 					_sprite->ReleaseControl(this);
 					return true;
 				 }

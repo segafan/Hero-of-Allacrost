@@ -215,6 +215,12 @@ public:
 	**/
 	bool LoadRunningAnimations(std::string filename);
 
+	/** \brief Loads the image containing the attack animations for the sprite
+	*** \param filename The name of the image file
+	*** \return False if the animations were not created successfully.
+	**/
+	bool LoadAttackAnimations(std::string filename);
+
 	void LoadFacePortrait(std::string pn);
 
 	//! \brief Updates the sprite's position and state.
@@ -291,7 +297,12 @@ public:
 	//! \brief Returns the number of dialogues referenced by the sprite (including duplicates)
 	uint16 GetNumberDialogueReferences() const
 		{ return _dialogue_references.size(); }
+
+	//! \brief Set to true for a custom animation
+	void SetCustomAnimation(bool on_or_off)
+		{ _custom_animation_on = on_or_off; }
 	//@}
+
 
 protected:
 	//! \brief The name of the sprite, as seen by the player in the game.
@@ -330,6 +341,9 @@ protected:
 
 	//! \brief True if at least one dialogue referenced by this sprite has not yet been viewed -and- is available to be viewed
 	bool _has_unseen_dialogue;
+	
+	//! \brief True if a custom animation is in use
+	bool _custom_animation_on;
 
 	/** \name Saved state attributes
 	*** These attributes are used to save and load the state of a VirtualSprite
