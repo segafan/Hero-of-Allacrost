@@ -426,6 +426,10 @@ void ShopObjectViewer::Update() {
 
 
 void ShopObjectViewer::Draw() {
+	if (_selected_object == NULL) {
+		return;
+	}
+
 	// Set the initial draw cursor position to the top left corner of the proper window
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 	if (_view_mode == SHOP_VIEW_MODE_LIST) {
@@ -471,7 +475,7 @@ void ShopObjectViewer::Draw() {
 
 void ShopObjectViewer::SetSelectedObject(ShopObject* object) {
 	if (object == NULL) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL argument" << endl;
+		_selected_object = NULL;
 		return;
 	}
 

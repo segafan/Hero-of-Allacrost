@@ -112,7 +112,7 @@ void CategoryDrawData::ComputeCoordinates(uint8 number_categories) {
 
 RootInterface::RootInterface() {
 	// Initialize text properties and set default text where appropriate
-	_shop_name.SetStyle(TextStyle("title32"));
+	_shop_name.SetStyle(TextStyle("title28"));
 	_shop_name.SetText(MakeUnicodeString("Shop Name")); // This default name should be overwritten
 
 	_buy_price_text.SetStyle(TextStyle("text22"));

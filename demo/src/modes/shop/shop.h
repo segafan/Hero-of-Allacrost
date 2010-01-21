@@ -229,7 +229,7 @@ public:
 	void Draw();
 
 	/** \brief Changes the selected object to the function argument
-	*** \param object A pointer to the shop object to change (NULL-safe, but will result in a warning message)
+	*** \param object A pointer to the shop object to change (NULL-safe)
 	*** \note The code using this class should always use this function to change the selected object rather than
 	*** changing the public _selected_object member directly. This method updates all of the relevent graphics and
 	*** data displays in addition to changing the pointer member.
