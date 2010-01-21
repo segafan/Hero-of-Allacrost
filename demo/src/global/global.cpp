@@ -274,9 +274,6 @@ void GameGlobal::RemoveCharacter(uint32 id) {
 		return;
 	}
 
-	delete(ch->second);
-	_characters.erase(ch);
-
 	for (vector<GlobalCharacter*>::iterator i = _character_order.begin(); i != _character_order.end(); i++) {
 		if ((*i)->GetID() == id) {
 			_character_order.erase(i);
@@ -289,6 +286,11 @@ void GameGlobal::RemoveCharacter(uint32 id) {
 			break;
 		}
 	}
+
+	delete(ch->second);
+	_characters.erase(ch);
+
+	cout << _character_order.size() << endl;
 } // void GameGlobal::RemoveCharacter(uint32 id)
 
 
