@@ -67,6 +67,10 @@ ShopMedia::ShopMedia() {
 	if (_drunes_icon.Load("img/icons/drunes.png") == false)
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load drunes icon image" << endl;
 
+	if (_star_icon.Load("img/menus/star.png") == false) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load star icon image" << endl;
+	}
+
 	if (_check_icon.Load("img/menus/green_check.png") == false)
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load check icon image" << endl;
 

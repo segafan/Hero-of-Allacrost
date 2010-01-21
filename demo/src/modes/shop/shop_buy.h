@@ -91,6 +91,15 @@ private:
 	**/
 	std::vector<BuyListDisplay*> _list_displays;
 
+	//! \brief A copy of the selected object's icon, scaled to 1/4 size
+	hoa_video::StillImage _selected_icon;
+
+	//! \brief Text image of the selected object's name
+	hoa_video::TextImage _selected_name;
+
+	//! \brief A single row option box containing the selected object's properties
+	hoa_video::OptionBox _selected_properties;
+
 	/** \brief Contains all objects for sale sorted into various category lists
 	***
 	*** The minimum size this container will ever be is two and the maximum it will be is nine. The first
@@ -100,6 +109,11 @@ private:
 	*** and shards, index 1 will hold a list of all weapons, and index 2 will hold a list of all shards.
 	**/
 	std::vector<std::vector<ShopObject*> > _object_data;
+
+	/** \brief Takes all necessary action for when the active view mode is to be altered
+	*** \param new_mode The new view mode to set
+	**/
+	void _ChangeViewMode(SHOP_VIEW_MODE new_mode);
 
 	/** \brief Changes the current category and object list that is being displayed
 	*** \param left_or_right False to move the category to the left, or true for the right
@@ -127,34 +141,38 @@ private:
 	//! \brief Sets the _selected_object member based on the current display list entry
 	void _SetSelectedObject();
 
-	//! \brief Returns the total number of viewable object categories
-	uint32 _GetNumberObjectCategories() const
-		{ return _object_data.size(); }
+	/** \brief Refreshes the text in the _selected_properties OptionBox
+	*** This method only needs to be called when the properties (likely quantity) change
+	*** in the "info" view mode. Calling it while in "list" view is wasted effort
+	**/
+	void _RefreshSelectedProperties();
 }; // class BuyInterface : public ShopInterface
 
 
 /** ****************************************************************************
-*** \brief A display class that maintains and draws lists of objects that may be bought
+*** \brief A display class that manages and draws lists of objects that may be marked to buy
 ***
-*** The inherited _identify_list and _property_list contain several pieces of data. The
-*** first contains a 0.25x size icon of the object and the object's name. Both pieces
-*** of information are stored in a single column of data. The second list contains four
-*** columns of data per row which are price, shop stock, amount owned (by the player), and
-*** the amount the player has indicated they wish to buy.
+*** The "identify" list contains a 0.25x size icon of the object and the object's name.
+*** The "properties" list contains price, shop stock, amount owned by the player, and
+*** requested buy quantity. Only buy quantity requires regular refreshing based upon
+*** the player's actions while in this interface.
 *** ***************************************************************************/
 class BuyListDisplay : public ObjectListDisplay {
 public:
-	BuyListDisplay();
+	BuyListDisplay()
+		{}
 
 	~BuyListDisplay()
 		{}
 
 	//! \brief Reconstructs all option box entries from the object data
-	void RefreshList();
+	void ReconstructList();
 
-	/** \brief Reconstructs the displayed properties of a single object
+	/** \brief Will refresh the displayed buy count property for a single list entry
 	*** \param index The index of the object data to reconstruct
 	***
+	*** The reason that only buy quantity is refreshed is that no other property data needs to be
+	*** updated while in the buy interface. All other data remains static and only
 	*** This method refreshes only the relevant options of the _property_list and does not modify
 	*** the _identify_list. The reason for this is that the _identify_list contains static data that
 	*** requires no changes or updates. The object's properties, however, do require frequent change

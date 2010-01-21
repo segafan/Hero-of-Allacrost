@@ -278,15 +278,6 @@ private:
 *** upon the type of object selected. For example, while the list view mode may
 *** show a text/icon representing "all wares", in info view mode all wares is
 *** never displayed because it does not represent a particular type of object.
-***
-*** The new and old category icons fade in
-*** and out with each other. This animation is best illustrated as a timeline, where
-*** (t) represents the amount of time the entire transition takes.
-***
-*** -# 0      : old icon displayed completely, begins transparency fade
-*** -# (t/3)  : old icon is 1/2 transparent, new icon begins fading in
-*** -# (2t/3) : old icon is completely transparent, new icon is 1/2 transparent
-*** -# (t)    : new icon is displayed completely
 *** ***************************************************************************/
 class ObjectCategoryDisplay {
 public:
@@ -350,20 +341,23 @@ protected:
 *** \brief An abstract class for displaying a list of shop objects
 ***
 *** This class is used to display a list of shop objects to the user along with
-*** certain properties. It uses two OptionBox objects to achieve this, which are placed
-*** side by side. The left option box contains indentifying information of the shop
-*** object while the right option box contains specific object properties. Both OptionBox
-*** objects have the same number of rows (a row represents a single object) but usually a
-*** different number of columns.
+*** certain properties. It uses two OptionBox objects to achieve this, which are
+*** placed side by side. The left list, "identify", contains indentifying information
+*** of the shop object, usually its name and image icon. The right list, "properties",
+*** contains several properties of the object. Both lists have the same number of rows,
+*** where a row represents a single object, the identify list has only a single column
+*** while the property list has four columns.
 ***
-*** It is up to the deriving class to determine what information that the OptionBoxes ultimately
-*** display and how that information is displayed. The deriving class constructor should set the
-*** the properties of the OptionBox objects to display them as desired.
+*** The deriving class determines what data is placed in both the identify and property
+*** lists. The deriving class defines the ReconstructList() and RefreshEntry() methods
+*** to do this. The lists are always drawn to the right side of the middle shop window
+*** and display no more than eight entries at a time. If desired, a deriving class can
+*** retrieve references to the OptionBox objects representing both lists in this class
+*** and change their default properties to suite one's needs.
 *** ***************************************************************************/
 class ObjectListDisplay {
 public:
-	ObjectListDisplay() : _objects(NULL)
-		{}
+	ObjectListDisplay();
 
 	virtual ~ObjectListDisplay()
 		{ Clear(); }
@@ -374,23 +368,24 @@ public:
 	**/
 	void Clear();
 
-	/** \brief Clears and then constructs the option box data
+	/** \brief Clears the lists and then reconstructs them using the option box data given
 	*** \param objects A pointer to a data vector containing the objects to populate the list with
 	**/
 	void PopulateList(std::vector<ShopObject*>* objects);
 
 	//! \brief Reconstructs all option box entries from the object data
-	virtual void RefreshList() = 0;
+	virtual void ReconstructList() = 0;
 
-	/** \brief Reconstructs the displayed properties of a single object
-	*** \param index The index of the object data to reconstruct
+	/** \brief Refreshes the desired properties of a single object
+	*** \param index The row index of the object data to reconstruct
 	**/
 	virtual void RefreshEntry(uint32 index) = 0;
 
-	/** \brief Reconstructs the displayed properties of all objects in the list
-	*** The difference between this method and the RefreshList() method is that this method only
-	*** operates on the object's properties, whereas RefreshList() also works on the identification
-	*** data. This method is less costly than reconstructing the entire list.
+	/** \brief Refreshes the desired properties of all objects in the list
+	*** The difference between this method and the ReconstructList() method is that this method only
+	*** operates on the object's desired properties by calling RefreshEntry(), whereas ReconstructList()
+	*** clears and rebuilds the entire list from scratch. Using this method is much less costly than
+	*** reconstructing the entire list.
 	**/
 	virtual void RefreshAllEntries();
 
@@ -400,11 +395,14 @@ public:
 	//! \brief Draws the option boxes
 	void Draw();
 
+	//! \name Class member access methods
+	//@{
 	hoa_video::OptionBox& GetIdentifyList()
 		{ return _identify_list; }
 
 	hoa_video::OptionBox& GetPropertyList()
 		{ return _property_list; }
+	//@}
 
 protected:
 	//! \brief A pointer to the vector of object data that the class is to display

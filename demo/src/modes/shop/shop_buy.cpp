@@ -42,7 +42,7 @@ namespace private_shop {
 // *****************************************************************************
 
 BuyInterface::BuyInterface() :
-	_view_mode(SHOP_VIEW_MODE_LIST),
+	_view_mode(SHOP_VIEW_MODE_INVALID),
 	_selected_object(NULL),
 	_current_category(0)
 {
@@ -52,8 +52,6 @@ BuyInterface::BuyInterface() :
 	_name_header.SetStyle(TextStyle("title24"));
 	_name_header.SetText(MakeUnicodeString("Name"));
 
-	_properties_header.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
-	_properties_header.SetPosition(480.0f, 390.0f);
 	_properties_header.SetDimensions(300.0f, 30.0f, 4, 1, 4, 1);
 	_properties_header.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
 	_properties_header.SetTextStyle(TextStyle("title24"));
@@ -62,6 +60,19 @@ BuyInterface::BuyInterface() :
 	_properties_header.AddOption(MakeUnicodeString("Stock"));
 	_properties_header.AddOption(MakeUnicodeString("Own"));
 	_properties_header.AddOption(MakeUnicodeString("Buy"));
+
+	_selected_name.SetStyle(TextStyle("text22"));
+
+	_selected_properties.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
+	_selected_properties.SetPosition(480.0f, 80.0f);
+	_selected_properties.SetDimensions(300.0f, 30.0f, 4, 1, 4, 1);
+	_selected_properties.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
+	_selected_properties.SetTextStyle(TextStyle("text22"));
+	_selected_properties.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	_selected_properties.AddOption(ustring());
+	_selected_properties.AddOption(ustring());
+	_selected_properties.AddOption(ustring());
+	_selected_properties.AddOption(ustring());
 }
 
 
@@ -169,7 +180,9 @@ void BuyInterface::Initialize() {
 		new_list->PopulateList(&(_object_data[i]));
 		_list_displays.push_back(new_list);
 	}
+
 	_SetSelectedObject();
+	_ChangeViewMode(SHOP_VIEW_MODE_LIST);
 }
 
 
@@ -186,10 +199,7 @@ void BuyInterface::MakeActive() {
 void BuyInterface::Update() {
 	if (_view_mode == SHOP_VIEW_MODE_LIST) {
 		if (InputManager->ConfirmPress()) {
-			_view_mode = SHOP_VIEW_MODE_INFO;
-			ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(_view_mode);
-			_category_display.ChangeViewMode(_view_mode);
-			_category_display.SetSelectedObject(_selected_object);
+			_ChangeViewMode(SHOP_VIEW_MODE_INFO);
 		}
 		else if (InputManager->CancelPress()) {
 			ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
@@ -248,35 +258,41 @@ void BuyInterface::Update() {
 
 	else if (_view_mode == SHOP_VIEW_MODE_INFO) {
 		if (InputManager->ConfirmPress()) {
-			_view_mode = SHOP_VIEW_MODE_LIST;
-			ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(_view_mode);
-			_category_display.ChangeViewMode(_view_mode);
+			_ChangeViewMode(SHOP_VIEW_MODE_LIST);
 		}
 
 		// Left/right change the quantity of the object to buy
 		else if (InputManager->LeftPress()) {
-			if (_ChangeQuantity(false) == true)
+			if (_ChangeQuantity(false) == true) {
 				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+				_RefreshSelectedProperties();
+			}
 			else
 				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 		}
 		else if (InputManager->RightPress()) {
-			if (_ChangeQuantity(true) == true)
+			if (_ChangeQuantity(true) == true) {
+				_RefreshSelectedProperties();
 				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			}
 			else
 				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 		}
 
 		// Left select/right select change the quantity of the object to buy by 10 at a time
 		else if (InputManager->LeftSelectPress()) {
-			if (_ChangeQuantity(false, 10) == true)
+			if (_ChangeQuantity(false, 10) == true) {
+				_RefreshSelectedProperties();
 				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			}
 			else
 				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 		}
 		else if (InputManager->RightSelectPress()) {
-			if (_ChangeQuantity(true, 10) == true)
+			if (_ChangeQuantity(true, 10) == true) {
+				_RefreshSelectedProperties();
 				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			}
 			else
 				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 		}
@@ -307,16 +323,55 @@ void BuyInterface::Draw() {
 	else if (_view_mode == SHOP_VIEW_MODE_INFO) {
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		VideoManager->Move(295.0f, 175.0f);
+		_name_header.Draw();
+		_properties_header.Draw();
 
-		// TODO: display selected object stats in lower window
-// 		_name_header.Draw();
-
-// 		_properties_header.Draw();
+		VideoManager->MoveRelative(0.0f, -50.0f);
+		_selected_icon.Draw();
+		VideoManager->MoveRelative(30.0f, 0.0f);
+		_selected_name.Draw();
+		_selected_properties.Draw();
 
 		_category_display.Draw();
 	}
 
 	ShopMode::CurrentInstance()->ObjectViewer()->Draw();
+}
+
+
+
+void BuyInterface::_ChangeViewMode(SHOP_VIEW_MODE new_mode) {
+	if (_view_mode == new_mode)
+		return;
+
+	if (new_mode == SHOP_VIEW_MODE_LIST) {
+		_view_mode = new_mode;
+		ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(_view_mode);
+		_category_display.ChangeViewMode(_view_mode);
+
+		_properties_header.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
+		_properties_header.SetPosition(480.0f, 390.0f);
+	}
+	else if (new_mode == SHOP_VIEW_MODE_INFO) {
+		_view_mode = new_mode;
+		ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(_view_mode);
+		_category_display.ChangeViewMode(_view_mode);
+		_category_display.SetSelectedObject(_selected_object);
+
+		_properties_header.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
+		_properties_header.SetPosition(480.0f, 130.0f);
+
+		_selected_name.SetText(_selected_object->GetObject()->GetName());
+		_selected_icon = _selected_object->GetObject()->GetIconImage();
+		_selected_icon.SetDimensions(30.0f, 30.0f);
+		_selected_properties.SetOptionText(0, MakeUnicodeString(NumberToString(_selected_object->GetBuyPrice())));
+		_selected_properties.SetOptionText(1, MakeUnicodeString("x" + NumberToString(_selected_object->GetStockCount())));
+		_selected_properties.SetOptionText(2, MakeUnicodeString("x" + NumberToString(_selected_object->GetOwnCount())));
+		_selected_properties.SetOptionText(3, MakeUnicodeString("x" + NumberToString(_selected_object->GetBuyCount())));
+	}
+	else {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "tried to change to an invalid/unsupported view mode: " << new_mode << endl;
+	}
 }
 
 
@@ -423,37 +478,21 @@ void BuyInterface::_SetSelectedObject() {
 	_selected_object = _object_data[_current_category][selected_entry];
 }
 
+
+
+void BuyInterface::_RefreshSelectedProperties() {
+	if (_selected_object == NULL)
+		return;
+
+	// The only property that really needs to be refreshed is the buy quantity. Other properties will remain static.
+	_selected_properties.SetOptionText(3, MakeUnicodeString("x" + NumberToString(_selected_object->GetBuyCount())));
+}
+
 // *****************************************************************************
 // ***** BuyListDisplay class methods
 // *****************************************************************************
 
-BuyListDisplay::BuyListDisplay() :
-	ObjectListDisplay()
-{
-	_identify_list.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
-	_identify_list.SetPosition(180.0f, 330.0f);
-	_identify_list.SetDimensions(300.0f, 300.0f, 1, 255, 1, 8);
-	_identify_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_identify_list.SetTextStyle(TextStyle("text22"));
-	_identify_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-	_identify_list.SetSelectMode(VIDEO_SELECT_SINGLE);
-	_identify_list.SetCursorOffset(-50.0f, 20.0f);
-	_identify_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
-	_identify_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-
-	_property_list.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
-	_property_list.SetPosition(480.0f, 330.0f);
-	_property_list.SetDimensions(300.0f, 300.0f, 4, 255, 4, 8);
-	_property_list.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
-	_property_list.SetTextStyle(TextStyle("text22"));
-	_property_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	_property_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
-	_property_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-}
-
-
-
-void BuyListDisplay::RefreshList() {
+void BuyListDisplay::ReconstructList() {
 	if (_objects == NULL) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "no object data is available" << endl;
 		return;
@@ -484,8 +523,6 @@ void BuyListDisplay::RefreshList() {
 
 
 void BuyListDisplay::RefreshEntry(uint32 index) {
-	const uint8 NUMBER_BUY_PROPERTIES = 4; // How many columns of data are in a single row of the _property_list
-
 	if (_objects == NULL) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "no object data is available" << endl;
 		return;
@@ -495,11 +532,11 @@ void BuyListDisplay::RefreshEntry(uint32 index) {
 		return;
 	}
 
-	// Update only the stock, number owned, and amount to sell. The price does not require updating
+	// Only the amount to buy changes and needs to be refreshed on a regular basis. Other properties remain static the
+	// player confirms their transaction outside of this interface.
 	ShopObject* shop_obj = (*_objects)[index];
-	_property_list.SetOptionText((index * NUMBER_BUY_PROPERTIES) + 1, MakeUnicodeString("x" + NumberToString(shop_obj->GetStockCount())));
-	_property_list.SetOptionText((index * NUMBER_BUY_PROPERTIES) + 2, MakeUnicodeString("x" + NumberToString(shop_obj->GetOwnCount())));
-	_property_list.SetOptionText((index * NUMBER_BUY_PROPERTIES) + 3, MakeUnicodeString("x" + NumberToString(shop_obj->GetBuyCount())));
+	_property_list.SetOptionText((index * _property_list.GetNumberColumns()) + (_property_list.GetNumberColumns() - 1),
+		MakeUnicodeString("x" + NumberToString(shop_obj->GetBuyCount())));
 }
 
 } // namespace private_shop
