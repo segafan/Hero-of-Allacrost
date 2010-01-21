@@ -344,6 +344,7 @@ MapSprite::MapSprite() :
 	_next_dialogue(-1),
 	_has_available_dialogue(false),
 	_has_unseen_dialogue(false),
+	_custom_animation_on(false),
 	_saved_current_animation(0)
 {
 	MapObject::_object_type = SPRITE_TYPE;

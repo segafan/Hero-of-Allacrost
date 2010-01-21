@@ -190,7 +190,11 @@ function Load(m)
 
 	-- Add NPC's
 	kyle = ConstructSprite("Kyle", 2, 38, 30, 0.0, 0.0);
+	kyle:LoadAttackAnimations("img/sprites/map/kyle_attack_w.png");
+	kyle:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
+	kyle:SetNoCollision(true);
 	captain = ConstructSprite("Captain", 3, 26, 30, 0.0, 0.0);
+	captain:SetNoCollision(true);
 
 	dialogue = hoa_map.MapDialogue(1);
 
@@ -203,43 +207,43 @@ function Load(m)
 	text = hoa_utils.Translate("I’m very disappointed in you, Kyle.");
 	dialogue:AddText(text, 3, 4, 0, false);
 	text = hoa_utils.Translate("Over here, Claudius!");
-	dialogue:AddText(text, 3, 5, 0, false);
-	text = hoa_utils.Translate("No!");
-	dialogue:AddText(text, 1000, 6, 3, false);
+	dialogue:AddText(text, 3, -1, 11002, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Dialogue with kyle
 	dialogue = hoa_map.MapDialogue(2);
 
-	text = hoa_utils.Translate("What have you done...");
+	text = hoa_utils.Translate("No!");
 	dialogue:AddText(text, 1000, 1, 0, false);
+	text = hoa_utils.Translate("What have you done...");
+	dialogue:AddText(text, 1000, 2, 0, false);
 	text = hoa_utils.Translate("I'm sorry.  I didn't want to have to do that.");
-	dialogue:AddText(text, 2, 2, 0, false);
-	text = hoa_utils.Translate("What are you doing?");
 	dialogue:AddText(text, 2, 3, 0, false);
+	text = hoa_utils.Translate("What are you doing?");
+	dialogue:AddText(text, 2, 4, 0, false);
 	text = hoa_utils.Translate("I can't let you get away.");
-	dialogue:AddText(text, 1000, 4, 0, false);
+	dialogue:AddText(text, 1000, 5, 0, false);
 	text = hoa_utils.Translate("I'm your friend!");
-	dialogue:AddText(text, 2, 5, 0, false);
+	dialogue:AddText(text, 2, 6, 0, false);
 	text = hoa_utils.Translate("It's my duty!");
-	dialogue:AddText(text, 1000, 6, 0, false);
+	dialogue:AddText(text, 1000, 7, 0, false);
 	text = hoa_utils.Translate("Don't do this.");
-	dialogue:AddText(text, 2, 7, 0, false);
+	dialogue:AddText(text, 2, 8, 0, false);
 	text = hoa_utils.Translate("You've already done it.");
-	dialogue:AddText(text, 1000, 8, 0, false);
+	dialogue:AddText(text, 1000, 9, 0, false);
 	text = hoa_utils.Translate("I don't want to fight you.");
-	dialogue:AddText(text, 2, 9, 0, false);
+	dialogue:AddText(text, 2, 10, 0, false);
 	text = hoa_utils.Translate("Then lower your weapon and turn yourself in.");
-	dialogue:AddText(text, 1000, 10, 0, false);
+	dialogue:AddText(text, 1000, 11, 0, false);
 	text = hoa_utils.Translate("You know I can't.");
-	dialogue:AddText(text, 2, 11, 0, false);
+	dialogue:AddText(text, 2, 12, 0, false);
 	text = hoa_utils.Translate("And you know I can't just let you get away.");
-	dialogue:AddText(text, 1000, 12, 0, false);
+	dialogue:AddText(text, 1000, 13, 0, false);
 	text = hoa_utils.Translate("Isn't our friendship more important than your duty?");
-	dialogue:AddText(text, 2, 13, 0, false);
+	dialogue:AddText(text, 2, 14, 0, false);
 	text = hoa_utils.Translate("You killed the Captain!");
-	dialogue:AddText(text, 1000, -1, 2, false);
+	dialogue:AddText(text, 1000, -1, 11004, false); -- start boss battle event (11004)
 
 	kyle:AddDialogueReference(2);
 	dialogue_supervisor:AddDialogue(dialogue);
@@ -254,24 +258,45 @@ function Load(m)
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Create a zone for exiting the map, to be used as a trigger
---	exit_zone = hoa_map.MapZone();
+	exit_zone = hoa_map.MapZone();
 	-- Add a section to the zone to enable the user to exit the map
---	exit_zone:AddSection(hoa_map.ZoneSection(122, 110, 124, 114));
---	map:AddZone(exit_zone);
+	exit_zone:AddSection(hoa_map.ZoneSection(30, 45, 34, 48));
+	map:AddZone(exit_zone);
 
 	-- Register event functions
 	event = hoa_map.ScriptedEvent(1, 1, 0);
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.ScriptedEvent(2, 2, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(3, 3, 0);
+
+	event = hoa_map.DialogueEvent(11000, 1); -- initial dialogue
 	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.PathMoveSpriteEvent(11001, kyle, 26, 30); -- kyle moves
+	event:AddEventLink(11002, false, 0);
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.AnimateSpriteEvent(11002, kyle); -- kyle strikes
+	event:AddFrame(12, 850);
+	event:AddEventLink(11003, false, 0);
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.DialogueEvent(11003, 2); -- next dialogue
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.BattleEncounterEvent(11004, 107); -- final battle
+	event:SetMusic("mus/Betrayal_Battle.ogg");
+	event:AddBattleEvent(1);
+	event:AddEventLink(11005, false, 0);
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.DialogueEvent(11005, 3); -- closing dialogue
+	event_supervisor:RegisterEvent(event);
+
 
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/new_cave.lua");
 	event_supervisor:RegisterEvent(event);
 
-	event = hoa_map.DialogueEvent(11003, 1);
-	event_supervisor:RegisterEvent(event);
 	
 	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
 		map:AddGroundObject(kyle);
@@ -279,13 +304,22 @@ function Load(m)
 		
 		if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
 			GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle", 1);
-			event_supervisor:StartEvent(11003);
+			event_supervisor:StartEvent(11000);
 		end
 	end
 end
 
 function Draw()
 	map:DrawMapLayers();
+end
+
+function Update()
+	-- Check if the map camera is in the exit zone
+	if (exit_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (event_supervisor:IsEventActive(22111) == false) then
+			event_supervisor:StartEvent(22111);
+		end
+	end
 end
 
 -- Removes Kyle sprite from the map
@@ -296,20 +330,8 @@ map_functions[1] = function()
 	kyle:SetContext(2);
 end
 
--- Start the boss battle
-map_functions[2] = function()
-	local event = hoa_map.BattleEncounterEvent(11000, 107);
-	event:SetMusic("mus/Betrayal_Battle.ogg");
-	event:AddBattleEvent(1);
-	event:AddEventLink(11001, false, 0);
-	event_supervisor:RegisterEvent(event);
-	event = hoa_map.DialogueEvent(11001, 3);
-	event_supervisor:RegisterEvent(event);
-	event_supervisor:StartEvent(11000);
-end
-
 -- Executes when knight Captain is killed
-map_functions[3] = function()
+map_functions[2] = function()
 	-- First, remove KC from map
 	captain:SetVisible(false);
 	captain:SetNoCollision(true);
@@ -317,7 +339,5 @@ map_functions[3] = function()
 	captain:SetContext(2);
 
 	-- transition to next dialogue
-	event = hoa_map.DialogueEvent(11002, 2);
-	event_supervisor:RegisterEvent(event);
 	event_supervisor:StartEvent(11002);
 end

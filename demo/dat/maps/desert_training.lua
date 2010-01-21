@@ -402,6 +402,7 @@ function Load(m)
 	kyle:SetVisible(false);
 	kyle:SetNoCollision(true);
 	kyle:SetUpdatable(false);
+	kyle:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 	map:AddGroundObject(kyle);
 	
 	-- Add NPC Karlate Captain
@@ -480,6 +481,11 @@ function Load(m)
 	map:AddGroundObject(sprite);                              -- add Claudius to map
 	map:SetCamera(sprite);                                    -- Set the camera to focus on the player's sprite
 end -- function Load()
+
+
+function Draw()
+	map:DrawMapLayers();
+end
 
 
 function Update()

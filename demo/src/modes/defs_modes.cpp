@@ -107,6 +107,7 @@ void BindModesToLua()
 				value("ANIM_WALKING_NORTH", ANIM_WALKING_NORTH),
 				value("ANIM_WALKING_WEST", ANIM_WALKING_WEST),
 				value("ANIM_WALKING_EAST", ANIM_WALKING_EAST),
+				value("ANIM_ATTACKING_EAST", ANIM_ATTACKING_EAST),
 				// Sprite speeds
 				value("VERY_SLOW_SPEED", static_cast<uint32>(VERY_SLOW_SPEED)),
 				value("SLOW_SPEED", static_cast<uint32>(SLOW_SPEED)),
