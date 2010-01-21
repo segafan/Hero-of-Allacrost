@@ -401,6 +401,32 @@ void ObjectCategoryDisplay::ChangeCategory(ustring& name, const StillImage* icon
 // ***** ObjectListDisplay class methods
 // *****************************************************************************
 
+ObjectListDisplay::ObjectListDisplay() :
+	_objects(NULL)
+{
+	_identify_list.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
+	_identify_list.SetPosition(180.0f, 330.0f);
+	_identify_list.SetDimensions(300.0f, 300.0f, 1, 255, 1, 8);
+	_identify_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_identify_list.SetTextStyle(TextStyle("text22"));
+	_identify_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	_identify_list.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_identify_list.SetCursorOffset(-50.0f, 20.0f);
+	_identify_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
+	_identify_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+
+	_property_list.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
+	_property_list.SetPosition(480.0f, 330.0f);
+	_property_list.SetDimensions(300.0f, 300.0f, 4, 255, 4, 8);
+	_property_list.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
+	_property_list.SetTextStyle(TextStyle("text22"));
+	_property_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	_property_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
+	_property_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+}
+
+
+
 void ObjectListDisplay::Clear() {
 	_objects = NULL;
 	_identify_list.ClearOptions();
@@ -416,15 +442,14 @@ void ObjectListDisplay::PopulateList(vector<ShopObject*>* objects) {
 	}
 
 	_objects = objects;
-	RefreshList();
+	ReconstructList();
 }
 
 
 
 void ObjectListDisplay::RefreshAllEntries() {
-	for (uint32 i = 0; i < _objects->size(); i++) {
+	for (uint32 i = 0; i < _objects->size(); i++)
 		RefreshEntry(i);
-	}
 }
 
 

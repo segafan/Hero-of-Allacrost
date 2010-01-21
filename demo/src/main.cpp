@@ -279,27 +279,27 @@ void InitializeEngine() throw (Exception) {
 	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title20", 20) == false) {
 		throw Exception("Failed to load libertine_capitals.ttf font at size 20", __FILE__, __LINE__, __FUNCTION__);
 	}
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title22", 22) == false) {
+		throw Exception("Failed to load libertine_capitals.ttf font at size 22", __FILE__, __LINE__, __FUNCTION__);
+	}
 	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title24", 24) == false) {
 		throw Exception("Failed to load libertine_capitals.ttf font at size 24", __FILE__, __LINE__, __FUNCTION__);
 	}
 	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title28", 28) == false) {
 		throw Exception("Failed to load libertine_capitals.ttf font at size 28", __FILE__, __LINE__, __FUNCTION__);
 	}
-	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title32", 32) == false) {
-		throw Exception("Failed to load libertine_capitals.ttf font at size 32", __FILE__, __LINE__, __FUNCTION__);
-	}
 
 	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text18", 18) == false) {
 		throw Exception("Failed to load libertine.ttf font at size 18", __FILE__, __LINE__, __FUNCTION__);
 	}
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text20", 20) == false) {
+		throw Exception("Failed to load libertine.ttf font at size 20", __FILE__, __LINE__, __FUNCTION__);
+	}
 	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text22", 22) == false) {
 		throw Exception("Failed to load libertine.ttf font at size 22", __FILE__, __LINE__, __FUNCTION__);
 	}
-	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text26", 26) == false) {
-		throw Exception("Failed to load libertine.ttf font at size 26", __FILE__, __LINE__, __FUNCTION__);
-	}
-	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text30", 30) == false) {
-		throw Exception("Failed to load libertine.ttf font at size 30", __FILE__, __LINE__, __FUNCTION__);
+	if (VideoManager->Text()->LoadFont("img/fonts/libertine.ttf", "text24", 24) == false) {
+		throw Exception("Failed to load libertine.ttf font at size 24", __FILE__, __LINE__, __FUNCTION__);
 	}
 
 	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "default", 18) == false) {

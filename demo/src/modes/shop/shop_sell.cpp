@@ -195,7 +195,7 @@ void SellInterface::Update() {
 		if (GetNumberObjectCategories() > 1) {
 			_current_datalist = (_current_datalist == 0) ? (_object_data.size() - 1) : (_current_datalist - 1);
 			selected_list = _object_displays[_current_datalist];
-			selected_list->RefreshList();
+			selected_list->ReconstructList();
 			_UpdateSelectedCategory();
 		}
 	}
@@ -203,7 +203,7 @@ void SellInterface::Update() {
 		if (GetNumberObjectCategories() > 1) {
 			_current_datalist = (_current_datalist >= (_object_data.size() - 1)) ? 0 : (_current_datalist + 1);
 			selected_list = _object_displays[_current_datalist];
-			selected_list->RefreshList();
+			selected_list->ReconstructList();
 			_UpdateSelectedCategory();
 		}
 	}
@@ -285,35 +285,7 @@ void SellInterface::_UpdateSelectedCategory() {
 // ***** SellListDisplay class methods
 // *****************************************************************************
 
-SellListDisplay::SellListDisplay() :
-	ObjectListDisplay()
-{
-	_identify_list.SetPosition(150.0f, 330.0f);
-	_identify_list.SetDimensions(360.0f, 300.0f, 1, 255, 1, 8);
-	_identify_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_identify_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	_identify_list.SetSelectMode(VIDEO_SELECT_SINGLE);
-	_identify_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-	_identify_list.SetCursorOffset(-50.0f, 20.0f);
-	_identify_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
-	_identify_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-
-	_property_list.SetPosition(510.0f, 330.0f);
-	_property_list.SetDimensions(250.0f, 300.0f, 4, 255, 4, 8);
-	_property_list.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
-	_property_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	_property_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	_property_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
-	_property_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-
-	// NOTE: Both the identifier and properties lists will have SetOwner() called for the menu
-	// window that they exist on. This is done by the SellInterface class shortly after this
-	// constructor returns
-}
-
-
-
-void SellListDisplay::RefreshList() {
+void SellListDisplay::ReconstructList() {
 	if (_objects == NULL) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "no object data is available" << endl;
 		return;

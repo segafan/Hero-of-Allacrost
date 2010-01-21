@@ -100,13 +100,14 @@ private:
 *** ***************************************************************************/
 class SellListDisplay : public ObjectListDisplay {
 public:
-	SellListDisplay();
+	SellListDisplay()
+		{}
 
 	~SellListDisplay()
 		{}
 
 	//! \brief Reconstructs all option box entries from the object data
-	void RefreshList();
+	void ReconstructList();
 
 	/** \brief Reconstructs the displayed properties of a single object
 	*** \param index The index of the object data to reconstruct

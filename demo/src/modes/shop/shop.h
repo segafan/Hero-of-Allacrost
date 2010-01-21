@@ -84,6 +84,9 @@ public:
 	hoa_video::StillImage* GetDrunesIcon()
 		{ return &_drunes_icon; }
 
+	hoa_video::StillImage* GetStarIcon()
+		{ return &_star_icon; }
+
 	hoa_video::StillImage* GetCheckIcon()
 		{ return &_check_icon; }
 
@@ -154,6 +157,9 @@ private:
 
 	//! \brief Image icon representing drunes (currency)
 	hoa_video::StillImage _drunes_icon;
+
+	//! \brief Image icon of a single yellow/gold star
+	hoa_video::StillImage _star_icon;
 
 	//! \brief Image icon of a green check mark
 	hoa_video::StillImage _check_icon;

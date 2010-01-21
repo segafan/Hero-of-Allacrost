@@ -182,10 +182,7 @@ void RootInterface::Initialize() {
 
 	// Star images used to construct the composite star rating (30x30 pixel size)
 	StillImage star, gray_star;
-
-	if (star.Load("img/menus/star.png") == false) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load star image for price ratings" << endl;
-	}
+	star = *(ShopMode::CurrentInstance()->Media()->GetStarIcon());
 	gray_star = star;
 	gray_star.EnableGrayScale();
 
