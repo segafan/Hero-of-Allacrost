@@ -147,6 +147,10 @@ public:
 	void Pause()
 		{ if (IsRunning()) _state = SYSTEM_TIMER_PAUSED; }
 
+	//! \brief Sets the timer to the finished state
+	void Finish()
+		{ _state = SYSTEM_TIMER_FINISHED; }
+
 	//! \name Timer State Checking Functions
 	//@{
 	bool IsInitial() const

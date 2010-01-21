@@ -69,11 +69,17 @@ public:
 	**/
 	void Initialize();
 
-	std::vector<hoa_utils::ustring>* GetObjectCategoryNames()
-		{ return &_object_category_names; }
+	std::vector<hoa_utils::ustring>* GetAllCategoryNames()
+		{ return &_all_category_names; }
 
-	std::vector<hoa_video::StillImage>* GetObjectCategoryIcons()
-		{ return &_object_category_icons; }
+	std::vector<hoa_video::StillImage>* GetAllCategoryIcons()
+		{ return &_all_category_icons; }
+
+	std::vector<hoa_utils::ustring>* GetSaleCategoryNames()
+		{ return &_sale_category_names; }
+
+	std::vector<hoa_video::StillImage>* GetSaleCategoryIcons()
+		{ return &_sale_category_icons; }
 
 	hoa_video::StillImage* GetDrunesIcon()
 		{ return &_drunes_icon; }
@@ -93,6 +99,26 @@ public:
 	std::vector<hoa_video::StillImage>* GetElementalIcons()
 		{ return &_elemental_icons; }
 
+	std::vector<hoa_video::StillImage>* GetStatusIcons()
+		{ return &_status_icons; }
+
+	std::vector<hoa_video::StillImage>* GetCharacterSprites()
+		{ return &_character_sprites; }
+
+	/** \brief Retrieves the category name that represents the specified object type
+	*** \param object_type The type of the global object to retrieve the name for
+	*** \return A pointer to the ustring holding the category's name. NULL if the argument was invalid.
+	*** \note GLOBAL_OBJECT_TOTAL will return the name for "all wares"
+	**/
+	hoa_utils::ustring* GetCategoryName(hoa_global::GLOBAL_OBJECT object_type);
+
+	/** \brief Retrieves the category icon image that represents the specified object type
+	*** \param object_type The type of the global object to retrieve the icon for
+	*** \return A pointer to the image holding the category's icon. NULL if the argument was invalid.
+	*** \note GLOBAL_OBJECT_TOTAL will return the icon for "all wares"
+	**/
+	hoa_video::StillImage* GetCategoryIcon(hoa_global::GLOBAL_OBJECT object_type);
+
 	/** \brief Retrieves a specific elemental icon with the proper type and intensity
 	*** \param element_type The type of element the user is trying to retrieve the icon for
 	*** \param intensity The intensity level of the icon to retrieve
@@ -100,14 +126,12 @@ public:
 	**/
 	hoa_video::StillImage* GetElementalIcon(hoa_global::GLOBAL_ELEMENTAL element_type, hoa_global::GLOBAL_INTENSITY intensity);
 
-	std::vector<hoa_video::StillImage>* GetStatusIcons()
-		{ return &_status_icons; }
-
-	// TODO
-// 	hoa_video::StillImage* GetStatusIcon(hoa_global::GLOBAL_STATUS status_type, hoa_global::GLOBAL_INTENSITY intensity);
-
-	std::vector<hoa_video::StillImage>* GetCharacterSprites()
-		{ return &_character_sprites; }
+	/** \brief Retrieves a specificstatus icon with the proper type and intensity
+	*** \param status_type The type of status the user is trying to retrieve the icon for
+	*** \param intensity The intensity level of the icon to retrieve
+	*** \return The icon representation of the status type and intensity
+	**/
+	hoa_video::StillImage* GetStatusIcon(hoa_global::GLOBAL_STATUS status_type, hoa_global::GLOBAL_INTENSITY intensity);
 
 	/** \brief Retrieves a shop sound object
 	*** \param identifier The string identifier for the sound to retrieve
@@ -116,11 +140,17 @@ public:
 	hoa_audio::SoundDescriptor* GetSound(std::string identifier);
 
 private:
-	//! \brief Retains all text names for each object category sold by the shop
-	std::vector<hoa_utils::ustring> _object_category_names;
+	//! \brief Retains text names for all possible object categories, including "all wares"
+	std::vector<hoa_utils::ustring> _all_category_names;
 
-	//! \brief Retains all icon images for each object category sold by the shop
-	std::vector<hoa_video::StillImage> _object_category_icons;
+	//! \brief Retains icon images for all possible object categories, including "all wares"
+	std::vector<hoa_video::StillImage> _all_category_icons;
+
+	//! \brief Retains text names only for those object categories sold by the shop
+	std::vector<hoa_utils::ustring> _sale_category_names;
+
+	//! \brief Retains icon images only for those object categories sold by the shop
+	std::vector<hoa_video::StillImage> _sale_category_icons;
 
 	//! \brief Image icon representing drunes (currency)
 	hoa_video::StillImage _drunes_icon;

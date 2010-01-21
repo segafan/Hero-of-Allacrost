@@ -56,41 +56,81 @@ public:
 	void Draw();
 
 private:
-	/** \brief When true, the list view will be updated and drawn
-	*** The value of this member coincides with the active view state of the ShopObjectViewer class
+	//! \brief Stores the active view state of the buy interface
+	SHOP_VIEW_MODE _view_mode;
+
+	//! \brief A pointer to the currently selected object in the active list display
+	ShopObject* _selected_object;
+
+	//! \brief Retains the number of object categories for sale
+	uint32 _number_categories;
+
+	//! \brief Serves as an index to the following containers: _object_data, _category_names, _category_icons, and _list_displays
+	uint32 _current_category;
+
+	//! \brief Header text for the category field
+	hoa_video::TextImage _category_header;
+
+	//! \brief Header text for the name field
+	hoa_video::TextImage _name_header;
+
+	//! \brief Header text for the list of object properties (refer to the BuyListDisplay class)
+	hoa_video::OptionBox _properties_header;
+
+	//! \brief String representations of all category names that may
+	std::vector<hoa_utils::ustring> _category_names;
+
+	//! \brief A pointer to icon images
+	std::vector<hoa_video::StillImage*> _category_icons;
+
+	//! \brief Display manager for the current category of objects selected
+	ObjectCategoryDisplay _category_display;
+
+	/** \brief Class objects used to display the object data to the player
+	*** The size and contents of this container mimic that which is found in the __object_data container.
 	**/
-	bool _list_view_active;
+	std::vector<BuyListDisplay*> _list_displays;
 
-	//! \brief A helper class object for displaying categories and lists of objects for sale
-	BuyListView* _buy_list_view;
+	/** \brief Contains all objects for sale sorted into various category lists
+	***
+	*** The minimum size this container will ever be is two and the maximum it will be is nine. The first
+	*** entry (index 0) always holds the list of all objects regardless of categories. The proceeding
+	*** entries will be ordered based on object type, beginning with items and ending with key items.
+	*** For example, if the shop deals in weapons and shards, index 0 will hold a list of all weapons
+	*** and shards, index 1 will hold a list of all weapons, and index 2 will hold a list of all shards.
+	**/
+	std::vector<std::vector<ShopObject*> > _object_data;
+
+	/** \brief Changes the current category and object list that is being displayed
+	*** \param left_or_right False to move the category to the left, or true for the right
+	*** \return True if the _selected_object member has changed
+	**/
+	bool _ChangeCategory(bool left_or_right);
+
+	/** \brief Changes the current selection in the object list
+	*** \param up_or_down False to move the selection cursor up, or true to move it down
+	*** \return True if the _selected_object member has changed
+	**/
+	bool _ChangeSelection(bool up_or_down);
+
+	/** \brief Change the buy quantity of the current selection
+	*** \param less_or_more False to decrease the quantity, true to increase it
+	*** \param amount The amount to decrease/increase the quantity by (default value == 1)
+	*** \return False if no quantity change could take place, true if a quantity change did occur
+	*** \note Even if the function returns true, there is no guarantee that the requested amount
+	*** was fully met. For example, if the function is asked to increase the buy quantity by 10 but
+	*** the shop only has 6 instances of the selected object in stock, the function will increase
+	*** the quantity by 6 (not 10) and return true.
+	**/
+	bool _ChangeQuantity(bool less_or_more, uint32 amount = 1);
+
+	//! \brief Sets the _selected_object member based on the current display list entry
+	void _SetSelectedObject();
+
+	//! \brief Returns the total number of viewable object categories
+	uint32 _GetNumberObjectCategories() const
+		{ return _object_data.size(); }
 }; // class BuyInterface : public ShopInterface
-
-
-/** ****************************************************************************
-*** \brief A display class that draws the current object category icon and text
-***
-*** The contents of this class are drawn to the left side of the middle window.
-*** When a new category is selected to be displayed, a gradual transition animation
-*** takes place. The previous category name text will immediately disappear and
-*** the new name text line will fade in. The new and old category icons fade in
-*** and out with each other. This animation is best illustrated as a timeline, where
-*** (t) represents the amount of time the entire transition takes.
-***
-*** -# 0      : old icon displayed completely, begins transparency fade
-*** -# (t/3)  : old icon is 1/2 transparent, new icon begins fading in
-*** -# (2t/3) : old icon is completely transparent, new icon is 1/2 transparent
-*** -# (t)    : new icon is displayed completely
-*** ***************************************************************************/
-class BuyCategoryDisplay : public ObjectCategoryDisplay {
-public:
-	BuyCategoryDisplay();
-
-	~BuyCategoryDisplay()
-		{}
-
-	//! \brief Draws the category name and icon to the screen
-	void Draw();
-}; // class BuyListDisplay : public ObjectCategoryDisplay
 
 
 /** ****************************************************************************
@@ -122,104 +162,6 @@ public:
 	**/
 	void RefreshEntry(uint32 index);
 }; // class BuyListDisplay : public ObjectListDisplay
-
-
-/** ****************************************************************************
-*** \brief Manages all data and graphics for showing object lists and categories
-***
-*** This class represents the view of the middle menu window in buy mode when that
-*** window contains the current object category and a list of objects for sale.
-*** The primary purpose of this class is to serve as a helper to the BuyInterface
-*** class and to keep the code organized.
-*** ***************************************************************************/
-class BuyListView {
-public:
-	BuyListView();
-
-	~BuyListView();
-
-	// ---------- Methods
-
-	//! \brief Finishes initialization of any data or settings that could not be completed in constructor
-	void Initialize();
-
-	//! \brief Updates the object category and list displays
-	void Update();
-
-	//! \brief Draws the contents to the screen
-	void Draw();
-
-	/** \brief Changes the current category and object list that is being displayed
-	*** \param left_or_right False to move the category to the left, or true for the right
-	*** \return A pointer to the ShopObject selected after the category change is performed
-	**/
-	ShopObject* ChangeCategory(bool left_or_right);
-
-	/** \brief Changes the current selection in the object list
-	*** \param up_or_down False to move the selection cursor up, or true to move it down
-	*** \return A pointer to the ShopObject selected after the selection change is performed
-	**/
-	ShopObject* ChangeSelection(bool up_or_down);
-
-	/** \brief Change the buy quantity of the current selection
-	*** \param less_or_more False to decrease the quantity, true to increase it
-	*** \param amount The amount to decrease/increase the quantity by (default value == 1)
-	*** \return False if no quantity change could take place, true if a quantity change did occur
-	*** \note Even if the function returns true, there is no guarantee that the requested amount
-	*** was fully met. For example, if the function is asked to increase the buy quantity by 10 but
-	*** the shop only has 6 instances of the selected object in stock, the function will increase
-	*** the quantity by 6 (not 10) and return true.
-	**/
-	bool ChangeQuantity(bool less_or_more, uint32 amount = 1);
-
-	/** \brief Returns a pointer to the currently selected object in the view
-	*** \note This method should never return NULL as long as its called after the Initialize() method has
-	*** been called once before.
-	**/
-	ShopObject* GetSelectedObject() const;
-
-	//! \brief Returns the total number of viewable object categories
-	uint32 GetNumberObjectCategories() const
-		{ return object_data.size(); }
-
-	// ---------- Members
-
-	//! \brief Serves as an index to the following containers: object_data, category_names, category_icons, and list_displays
-	uint32 current_category;
-
-	//! \brief Header text for the category field
-	hoa_video::TextImage category_header;
-
-	//! \brief Header text for the name field
-	hoa_video::TextImage name_header;
-
-	//! \brief Header text for the list of object properties (refer to the BuyListDisplay class)
-	hoa_video::OptionBox properties_header;
-
-	//! \brief String representations of all category names that may
-	std::vector<hoa_utils::ustring> category_names;
-
-	//! \brief A pointer to icon images
-	std::vector<const hoa_video::StillImage*> category_icons;
-
-	//! \brief Display manager for the current category of objects selected
-	BuyCategoryDisplay category_display;
-
-	/** \brief Class objects used to display the object data to the player
-	*** The size and contents of this container mimic that which is found in the _object_data container.
-	**/
-	std::vector<BuyListDisplay*> list_displays;
-
-	/** \brief Contains all objects for sale sorted into various category lists
-	***
-	*** The minimum size this container will ever be is two and the maximum it will be is nine. The first
-	*** entry (index 0) always holds the list of all objects regardless of categories. The proceeding
-	*** entries will be ordered based on object type, beginning with items and ending with key items.
-	*** For example, if the shop deals in weapons and shards, index 0 will hold a list of all weapons
-	*** and shards, index 1 will hold a list of all weapons, and index 2 will hold a list of all shards.
-	**/
-	std::vector<std::vector<ShopObject*> > object_data;
-}; // class BuyListView
 
 } // namespace private_shop
 

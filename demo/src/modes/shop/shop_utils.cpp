@@ -265,56 +265,136 @@ void ShopObject::DecrementSellCount(uint32 dec) {
 // ***** ObjectCategoryDisplay class methods
 // *****************************************************************************
 
+// The time it takes to transition graphics to a new category (in milliseconds)
+const uint32 TRANSITION_TIME_ICON = 500;
+// Represents the display speed when transitioning to new category text
+const float TRANSITION_TIME_TEXT = 25.0f;
+
 ObjectCategoryDisplay::ObjectCategoryDisplay() :
-	_category_icon(NULL),
-	_last_icon(NULL)
+	_view_mode(SHOP_VIEW_MODE_LIST),
+	_selected_object(NULL),
+	_current_icon(NULL),
+	_last_icon(NULL),
+	_object_icon(NULL)
 {
-	// The default time it takes to transition graphics/text to a new category (in milliseconds)
-	const uint32 DEFAULT_TRANSITION_TIME = 500;
+	_name_text.SetStyle(TextStyle("text22"));
 
-	_transition_timer.Initialize(DEFAULT_TRANSITION_TIME, 0, ShopMode::CurrentInstance());
-	_category_text.SetDisplaySpeed(static_cast<float>(DEFAULT_TRANSITION_TIME));
+	_name_textbox.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
+	_name_textbox.SetPosition(25.0f, 175.0f);
+	_name_textbox.SetDimensions(125.0f, 30.0f);
+	_name_textbox.SetTextStyle(TextStyle("text22"));
+	_name_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
+	_name_textbox.SetDisplaySpeed(TRANSITION_TIME_TEXT);
+	_name_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	// TODO: Alignment should be VIDEO_X_CENTER, but a bug is preventing it from working correctly right now
+	_name_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+
+	_transition_timer.Initialize(TRANSITION_TIME_ICON, 0, ShopMode::CurrentInstance());
 }
 
 
 
-ObjectCategoryDisplay::~ObjectCategoryDisplay() {
-	_category_icon = NULL;
+ObjectCategoryDisplay::~ObjectCategoryDisplay()
+{
+	_selected_object = NULL;
+	_current_icon = NULL;
 	_last_icon = NULL;
+	_object_icon = NULL;
 }
 
 
 
-void ObjectCategoryDisplay::SetTransitionTime(uint32 time) {
-	// Transition times can only be set when the timer is in the initial state
-	if (_transition_timer.IsInitial() == false) {
-		_transition_timer.Reset();
+void ObjectCategoryDisplay::Update() {
+	_name_textbox.Update();
+}
+
+
+
+void ObjectCategoryDisplay::Draw() {
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+
+	if (_view_mode == SHOP_VIEW_MODE_LIST) {
+		VideoManager->Move(200.0f, 410.0f);
+
+		if (_transition_timer.IsRunning() == true) {
+			// Alpha ranges from 0.0f at timer start to 1.0f at end
+			float alpha = static_cast<float>(_transition_timer.GetTimeExpired()) / static_cast<float>(TRANSITION_TIME_ICON);
+
+			if (_last_icon != NULL)
+				_last_icon->Draw(Color(1.0f, 1.0f, 1.0f, 1.0f - alpha));
+			if (_current_icon != NULL)
+				_current_icon->Draw(Color(1.0f, 1.0f, 1.0f, alpha));
+		}
+		else if (_current_icon != NULL) {
+			_current_icon->Draw();
+		}
+		_name_textbox.Draw();
+	}
+	else if ((_view_mode == SHOP_VIEW_MODE_INFO) && (_selected_object != NULL)) {
+		VideoManager->Move(200.0f, 165.0f);
+		_object_icon->Draw();
+		VideoManager->MoveRelative(0.0f, -45.0f);
+		_name_text.Draw();
+	}
+}
+
+
+
+void ObjectCategoryDisplay::ChangeViewMode(SHOP_VIEW_MODE new_mode) {
+	if (_view_mode == new_mode) {
+		return;
 	}
 
-	_transition_timer.SetDuration(time);
-	_category_text.SetDisplaySpeed(static_cast<float>(time) / 1000.0f);
+	if (new_mode == SHOP_VIEW_MODE_LIST) {
+		_view_mode = new_mode;
+		_transition_timer.Finish();
+	}
+	else if (new_mode == SHOP_VIEW_MODE_INFO) {
+		_view_mode = new_mode;
+	}
+	else {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "invalid/unknown view mode requested: " << new_mode << endl;
+		return;
+	}
+}
+
+
+
+void ObjectCategoryDisplay::SetSelectedObject(ShopObject* shop_object) {
+	if (_selected_object == shop_object) {
+		return;
+	}
+
+	_selected_object = shop_object;
+
+	if (_selected_object == NULL) {
+		_object_icon = NULL;
+		_name_text.SetText("");
+		return;
+	}
+	else {
+		GLOBAL_OBJECT object_type = _selected_object->GetObject()->GetObjectType();
+		_name_text.SetText(*(ShopMode::CurrentInstance()->Media()->GetCategoryName(object_type)));
+		_object_icon = ShopMode::CurrentInstance()->Media()->GetCategoryIcon(object_type);
+	}
 }
 
 
 
 void ObjectCategoryDisplay::ChangeCategory(ustring& name, const StillImage* icon) {
 	if (icon == NULL) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "function's icon argument was passed a NULL pointer" << endl;
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL pointer argument" << endl;
 	}
 
-	_last_icon = _category_icon;
-	_category_icon = icon;
+	_name_textbox.SetDisplayText(name);
 
-	_category_text.SetDisplayText(name);
+	_last_icon = _current_icon;
+	_current_icon = icon;
 
-	_transition_timer.Reset();
-	_transition_timer.Run();
-}
-
-
-
-void ObjectCategoryDisplay::Update() {
-	_category_text.Update();
+	if (_view_mode == SHOP_VIEW_MODE_LIST) {
+		_transition_timer.Reset();
+		_transition_timer.Run();
+	}
 }
 
 // *****************************************************************************
@@ -331,7 +411,7 @@ void ObjectListDisplay::Clear() {
 
 void ObjectListDisplay::PopulateList(vector<ShopObject*>* objects) {
 	if (objects == NULL) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "function was given a NULL pointer argument" << endl;
+		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL pointer argument" << endl;
 		return;
 	}
 

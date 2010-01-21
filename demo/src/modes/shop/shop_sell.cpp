@@ -149,7 +149,7 @@ void SellInterface::Initialize() {
 	_properties_header.AddOption(MakeUnicodeString("Own"));
 	_properties_header.AddOption(MakeUnicodeString("Sell"));
 
-	vector<StillImage>* category_images = ShopMode::CurrentInstance()->Media()->GetObjectCategoryIcons();
+	vector<StillImage>* category_images = ShopMode::CurrentInstance()->Media()->GetSaleCategoryIcons();
 	if (num_obj_categories == 1) {
 		num_obj_categories++;
 	}

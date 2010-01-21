@@ -312,15 +312,13 @@ namespace hoa_shop {
 		class ShopInterface;
 		class ShopObject;
 		class ShopObjectViewer;
-		class ListDisplay;
+		class ObjectListDisplay;
 
 		class RootInterface;
 		class CategoryDrawData;
 
 		class BuyInterface;
-		class BuyCategoryDisplay;
 		class BuyListDisplay;
-		class BuyListView;
 
 		class SellInterface;
 		class SellListDisplay;
