@@ -261,57 +261,85 @@ private:
 
 
 /** ****************************************************************************
-*** \brief An abstract class for displaying the current selected object category
+*** \brief Displays text and an icon image to represent an object category
 ***
-*** The contents of this class are used to display an icon image and name. This
-*** class is intended to be used to display only one single category and is not
-*** recommended to be used if you wish to display multiple categories in a list.
-*** This class also enables a smooth transition when switching from one category
-*** to the next. It does so by a general visual transformation from the former
-*** category icon to the next and an animation of the category text changing.
+*** This class is used to display an icon image and name representing a category.
+*** It is designed to support the needs of both the buy and sell interfaces of
+*** shop mode and behaves slightly differently based on the current view mode.
+*** When in the "list" view mode, the name + icon are drawn to the left side of
+*** the middle window. Cycling through categories while in this view mode will
+*** transition the text and icon graphics smoothly by fading the icon from one
+*** to the next and visibly refreshing the line of text.
 ***
-*** \note In the Draw() method implementation of the inheriting class, take care
-*** to check that the icon image pointer members are not NULL before attempting
-*** to draw them.
+*** While in the "info" view mode, the display of the category and name text is
+*** done instantly. This view mode will draw the contents to the left side of the
+*** bottom window. The icon and name can also be different than what is show in
+*** list mode, because the category name/icon drawn in info mode depends entirely
+*** upon the type of object selected. For example, while the list view mode may
+*** show a text/icon representing "all wares", in info view mode all wares is
+*** never displayed because it does not represent a particular type of object.
+***
+*** The new and old category icons fade in
+*** and out with each other. This animation is best illustrated as a timeline, where
+*** (t) represents the amount of time the entire transition takes.
+***
+*** -# 0      : old icon displayed completely, begins transparency fade
+*** -# (t/3)  : old icon is 1/2 transparent, new icon begins fading in
+*** -# (2t/3) : old icon is completely transparent, new icon is 1/2 transparent
+*** -# (t)    : new icon is displayed completely
 *** ***************************************************************************/
 class ObjectCategoryDisplay {
 public:
 	ObjectCategoryDisplay();
 
-	virtual ~ObjectCategoryDisplay();
-
-	/** \brief Sets the amount of time that it should take to fully transition between categories
-	*** \param time The amount of time, in milliseconds
-	*** \note The default time is defined by the value of _DEFAULT_TRANSITION_TIME. You only need to
-	*** call this method if you do not wish to use the default value.
-	**/
-	void SetTransitionTime(uint32 time);
-
-	/** \brief Sets the new category
-	*** \param name The text to display that represents the category's name
-	*** \param icon A pointer to the new image to represent the category's icon
-	*** \note This function does not check whether or not the new name/icon are not
-	*** the same as the previous name/icon
-	*** \note It is safe to pass a NULL pointer for the icon argument, but a warning message
-	*** will be printed if this is the case.
-	**/
-	void ChangeCategory(hoa_utils::ustring& name, const hoa_video::StillImage* icon);
+	~ObjectCategoryDisplay();
 
 	//! \brief Must be called so that the TextBox can proceed
 	void Update();
 
 	//! \brief Draws the graphics and text to the screen
-	virtual void Draw() = 0;
+	void Draw();
+
+	/** \brief Changes the viewing mode for the display and updates display state appropriately
+	*** \param new_mode The mode to change the view to
+	**/
+	void ChangeViewMode(SHOP_VIEW_MODE new_mode);
+
+	/** \brief Sets the selected object and may also render a new text image
+	*** \param shop_object A pointer to the new object. A NULL pointer is acceptable
+	**/
+	void SetSelectedObject(ShopObject* shop_object);
+
+	/** \brief Sets the category text and icon for diplay in "list" view mode
+	*** \param name The text to display that represents the category's name
+	*** \param icon A pointer to the new image to represent the category's icon
+	*** \note This function does not check whether or not the new name/icon are not
+	*** the same as the previous name/icon
+	*** \note It is safe to pass a NULL pointer for the icon argument
+	**/
+	void ChangeCategory(hoa_utils::ustring& name, const hoa_video::StillImage* icon);
 
 protected:
+	//! \brief Determines where and how the category display should draw its images
+	SHOP_VIEW_MODE _view_mode;
+
+	//! \brief A pointer to the selected object whose category should be represented
+	ShopObject* _selected_object;
+
 	//! \brief A pointer to an icon image representing the current category
-	const hoa_video::StillImage* _category_icon;
+	const hoa_video::StillImage* _current_icon;
 
 	//! \brief A pointer to the icon image that represents the previous category
 	const hoa_video::StillImage* _last_icon;
 
-	//! \brief The name/description text of the current category
-	hoa_video::TextBox _category_text;
+	//! \brief The category image for the selected object
+	const hoa_video::StillImage* _object_icon;
+
+	//! \brief The name of the current category for "list" view mode
+	hoa_video::TextBox _name_textbox;
+
+	//! \brief The name of the current category for "info" view mode
+	hoa_video::TextImage _name_text;
 
 	//! \brief A timer used to track the progress of category transitions
 	hoa_system::SystemTimer _transition_timer;

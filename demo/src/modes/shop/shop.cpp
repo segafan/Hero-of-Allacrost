@@ -87,7 +87,7 @@ ShopMedia::ShopMedia() {
 		return;
 	}
 
-	// TODO
+	// TODO: uncomment once status effects are ready to be added
 // 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_status_icons, "img/icons/_status_icons.png", ROWS, COLS) == false) {
 // 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load status icon images" << endl;
 // 		return;
@@ -116,24 +116,24 @@ ShopMedia::ShopMedia() {
 
 
 void ShopMedia::Initialize() {
-	// Temporary containers to hold all possible category text and icons
-	vector<ustring> all_text;
-	vector<StillImage> all_icons;
+	_all_category_names.push_back(MakeUnicodeString("Items"));
+	_all_category_names.push_back(MakeUnicodeString("Weapons"));
+	_all_category_names.push_back(MakeUnicodeString("Head Armor"));
+	_all_category_names.push_back(MakeUnicodeString("Torso Armor"));
+	_all_category_names.push_back(MakeUnicodeString("Arm Armor"));
+	_all_category_names.push_back(MakeUnicodeString("Leg Armor"));
+	_all_category_names.push_back(MakeUnicodeString("Shards"));
+	_all_category_names.push_back(MakeUnicodeString("Key Items"));
+	_all_category_names.push_back(MakeUnicodeString("All Wares"));
 
-	all_text.push_back(MakeUnicodeString("Items"));
-	all_text.push_back(MakeUnicodeString("Weapons"));
-	all_text.push_back(MakeUnicodeString("Head Armor"));
-	all_text.push_back(MakeUnicodeString("Torso Armor"));
-	all_text.push_back(MakeUnicodeString("Arm Armor"));
-	all_text.push_back(MakeUnicodeString("Leg Armor"));
-	all_text.push_back(MakeUnicodeString("Shards"));
-	all_text.push_back(MakeUnicodeString("Key Items"));
-	all_text.push_back(MakeUnicodeString("All Wares"));
-
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(all_icons, "img/icons/object_category_icons.png", 3, 4) == false) {
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_all_category_icons, "img/icons/object_category_icons.png", 3, 4) == false) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load object category icon images" << endl;
 		return;
 	}
+	// The last three images in this multi image are blank, so they are removed
+	_all_category_icons.pop_back();
+	_all_category_icons.pop_back();
+	_all_category_icons.pop_back();
 
 	// Determine which categories are used in this shop and populate the true containers with that data
 	uint8 deal_types = ShopMode::CurrentInstance()->GetDealTypes();
@@ -141,15 +141,15 @@ void ShopMedia::Initialize() {
 	for (uint8 i = 0; i < GLOBAL_OBJECT_TOTAL; i++, bit_x <<= 1) {
 		// Check if the type is available by doing a bit-wise comparison
 		if (deal_types & bit_x) {
-			_object_category_names.push_back(all_text[i]);
-			_object_category_icons.push_back(all_icons[i]);
+			_sale_category_names.push_back(_all_category_names[i]);
+			_sale_category_icons.push_back(_all_category_icons[i]);
 		}
 	}
 
 	// If here is more than one category, add the text/icon for all wares
-	if (_object_category_names.size() > 1) {
-		_object_category_names.push_back(all_text[8]);
-		_object_category_icons.push_back(all_icons[8]);
+	if (_sale_category_names.size() > 1) {
+		_sale_category_names.push_back(_all_category_names[8]);
+		_sale_category_icons.push_back(_all_category_icons[8]);
 	}
 
 	// Grab the sprite frames for all characters in the active party
@@ -157,6 +157,86 @@ void ShopMedia::Initialize() {
 	for (uint32 i = 0; i < characters->size(); i++) {
 		_character_sprites.push_back(characters->at(i)->GetStandardSpriteFrames()->at(0));
 	}
+}
+
+
+
+ustring* ShopMedia::GetCategoryName(GLOBAL_OBJECT object_type) {
+	uint32 index = 0;
+
+	switch (object_type) {
+		case GLOBAL_OBJECT_ITEM:
+			index = 0;
+			break;
+		case GLOBAL_OBJECT_WEAPON:
+			index = 1;
+			break;
+		case GLOBAL_OBJECT_HEAD_ARMOR:
+			index = 2;
+			break;
+		case GLOBAL_OBJECT_TORSO_ARMOR:
+			index = 3;
+			break;
+		case GLOBAL_OBJECT_ARM_ARMOR:
+			index = 4;
+			break;
+		case GLOBAL_OBJECT_LEG_ARMOR:
+			index = 5;
+			break;
+		case GLOBAL_OBJECT_SHARD:
+			index = 6;
+			break;
+		case GLOBAL_OBJECT_KEY_ITEM:
+			index = 7;
+			break;
+		case GLOBAL_OBJECT_TOTAL:
+			index = 8;
+			break;
+		default:
+			return NULL;
+	}
+
+	return &(_all_category_names[index]);
+}
+
+
+
+StillImage* ShopMedia::GetCategoryIcon(GLOBAL_OBJECT object_type) {
+	uint32 index = 0;
+
+	switch (object_type) {
+		case GLOBAL_OBJECT_ITEM:
+			index = 0;
+			break;
+		case GLOBAL_OBJECT_WEAPON:
+			index = 1;
+			break;
+		case GLOBAL_OBJECT_HEAD_ARMOR:
+			index = 2;
+			break;
+		case GLOBAL_OBJECT_TORSO_ARMOR:
+			index = 3;
+			break;
+		case GLOBAL_OBJECT_ARM_ARMOR:
+			index = 4;
+			break;
+		case GLOBAL_OBJECT_LEG_ARMOR:
+			index = 5;
+			break;
+		case GLOBAL_OBJECT_SHARD:
+			index = 6;
+			break;
+		case GLOBAL_OBJECT_KEY_ITEM:
+			index = 7;
+			break;
+		case GLOBAL_OBJECT_TOTAL:
+			index = 8;
+			break;
+		default:
+			return NULL;
+	}
+
+	return &(_all_category_icons[index]);
 }
 
 
@@ -233,6 +313,13 @@ StillImage* ShopMedia::GetElementalIcon(GLOBAL_ELEMENTAL element_type, GLOBAL_IN
 	}
 
 	return &(_elemental_icons[(row * NUMBER_INTENSTIY_LEVELS) + col]);
+}
+
+
+
+StillImage* GetStatusIcon(GLOBAL_STATUS status_type, GLOBAL_INTENSITY intensity) {
+	// TODO: implement this function once status effects are ready
+	return NULL;
 }
 
 
@@ -1144,33 +1231,33 @@ void ShopMode::Update() {
 			_action_options.InputRight();
 		}
 		_action_options.Update();
-	} // if (_state == SHOP_STATE_ROOT)
 
-	// Update the active interface
-	switch (_state) {
-		case SHOP_STATE_ROOT:
-			_root_interface->Update();
-			break;
-		case SHOP_STATE_BUY:
-			_buy_interface->Update();
-			break;
-		case SHOP_STATE_SELL:
-			_sell_interface->Update();
-			break;
-		case SHOP_STATE_TRADE:
-			_trade_interface->Update();
-			break;
-		case SHOP_STATE_CONFIRM:
-			_confirm_interface->Update();
-			break;
-		case SHOP_STATE_LEAVE:
-			_leave_interface->Update();
-			break;
-		default:
-			IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << ", reseting to root state" << endl;
-			_state = SHOP_STATE_ROOT;
-			break;
-	} // switch (_state)
+		_root_interface->Update();
+	} // if (_state == SHOP_STATE_ROOT)
+	else {
+		// Update the active interface
+		switch (_state) {
+			case SHOP_STATE_BUY:
+				_buy_interface->Update();
+				break;
+			case SHOP_STATE_SELL:
+				_sell_interface->Update();
+				break;
+			case SHOP_STATE_TRADE:
+				_trade_interface->Update();
+				break;
+			case SHOP_STATE_CONFIRM:
+				_confirm_interface->Update();
+				break;
+			case SHOP_STATE_LEAVE:
+				_leave_interface->Update();
+				break;
+			default:
+				IF_PRINT_WARNING(SHOP_DEBUG) << "invalid shop state: " << _state << ", reseting to root state" << endl;
+				_state = SHOP_STATE_ROOT;
+				break;
+		} // switch (_state)
+	}
 } // void ShopMode::Update()
 
 
