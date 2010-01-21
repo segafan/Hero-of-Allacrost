@@ -402,6 +402,7 @@ void ObjectCategoryDisplay::ChangeCategory(ustring& name, const StillImage* icon
 // *****************************************************************************
 
 ObjectListDisplay::ObjectListDisplay() :
+	_list_empty(true),
 	_objects(NULL)
 {
 	_identify_list.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
@@ -429,6 +430,7 @@ ObjectListDisplay::ObjectListDisplay() :
 
 void ObjectListDisplay::Clear() {
 	_objects = NULL;
+	_list_empty = true;
 	_identify_list.ClearOptions();
 	_property_list.ClearOptions();
 }
@@ -443,6 +445,7 @@ void ObjectListDisplay::PopulateList(vector<ShopObject*>* objects) {
 
 	_objects = objects;
 	ReconstructList();
+	_list_empty = _objects->empty();
 }
 
 

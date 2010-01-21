@@ -397,6 +397,9 @@ public:
 
 	//! \name Class member access methods
 	//@{
+	bool IsListEmpty() const
+		{ return _list_empty; }
+
 	hoa_video::OptionBox& GetIdentifyList()
 		{ return _identify_list; }
 
@@ -405,6 +408,9 @@ public:
 	//@}
 
 protected:
+	//! \brief Set to true if _objects is NULL or if the size of the vector pointed to by _objects is zero
+	bool _list_empty;
+
 	//! \brief A pointer to the vector of object data that the class is to display
 	std::vector<ShopObject*>* _objects;
 

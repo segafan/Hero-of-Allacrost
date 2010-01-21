@@ -11,6 +11,10 @@
 *** \file    shop_buy.h
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Header file for buy interface of shop mode
+***
+*** \note The contents of this file are near identical to the contents of
+*** shop_sell.h. When making any changes to this file, please look to shop_sell.h
+*** to see if it should have similar changes made.
 *** ***************************************************************************/
 
 #ifndef __SHOP_BUY_HEADER__
@@ -87,7 +91,7 @@ private:
 	ObjectCategoryDisplay _category_display;
 
 	/** \brief Class objects used to display the object data to the player
-	*** The size and contents of this container mimic that which is found in the __object_data container.
+	*** The size and contents of this container mimic that which is found in the _object_data container.
 	**/
 	std::vector<BuyListDisplay*> _list_displays;
 
@@ -155,7 +159,7 @@ private:
 *** The "identify" list contains a 0.25x size icon of the object and the object's name.
 *** The "properties" list contains price, shop stock, amount owned by the player, and
 *** requested buy quantity. Only buy quantity requires regular refreshing based upon
-*** the player's actions while in this interface.
+*** the player's actions while the buy interface is active.
 *** ***************************************************************************/
 class BuyListDisplay : public ObjectListDisplay {
 public:
@@ -172,11 +176,8 @@ public:
 	*** \param index The index of the object data to reconstruct
 	***
 	*** The reason that only buy quantity is refreshed is that no other property data needs to be
-	*** updated while in the buy interface. All other data remains static and only
-	*** This method refreshes only the relevant options of the _property_list and does not modify
-	*** the _identify_list. The reason for this is that the _identify_list contains static data that
-	*** requires no changes or updates. The object's properties, however, do require frequent change
-	***  as this data (such as amount to buy or sell) can be directly manipulated by the player.
+	*** updated while in the buy interface. All other data remains static and require updating
+	*** only after a shop transaction occurs.
 	**/
 	void RefreshEntry(uint32 index);
 }; // class BuyListDisplay : public ObjectListDisplay

@@ -11,6 +11,10 @@
 *** \file    shop_buy.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Source file for buy interface of shop mode
+***
+*** \note The contents of this file are near identical to the contents of
+*** shop_sell.cpp. When making any changes to this file, please look to shop_sell.cpp
+*** to see if it should have similar changes made.
 *** ***************************************************************************/
 
 #include "defs.h"
@@ -264,8 +268,8 @@ void BuyInterface::Update() {
 		// Left/right change the quantity of the object to buy
 		else if (InputManager->LeftPress()) {
 			if (_ChangeQuantity(false) == true) {
-				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 				_RefreshSelectedProperties();
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 			}
 			else
 				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
@@ -485,7 +489,8 @@ void BuyInterface::_RefreshSelectedProperties() {
 		return;
 
 	// The only property that really needs to be refreshed is the buy quantity. Other properties will remain static.
-	_selected_properties.SetOptionText(3, MakeUnicodeString("x" + NumberToString(_selected_object->GetBuyCount())));
+	_selected_properties.SetOptionText(_selected_properties.GetNumberColumns() - 1,
+		MakeUnicodeString("x" + NumberToString(_selected_object->GetBuyCount())));
 }
 
 // *****************************************************************************

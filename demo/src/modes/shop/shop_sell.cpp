@@ -11,6 +11,10 @@
 *** \file    shop_sell.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Source file for sell interface of shop mode
+***
+*** \note The contents of this file are near identical to the contents of
+*** shop_sell.cpp. When making any changes to this file, please look to shop_sell.cpp
+*** to see if it should have similar changes made.
 *** ***************************************************************************/
 
 #include "defs.h"
@@ -42,51 +46,118 @@ namespace private_shop {
 // *****************************************************************************
 
 SellInterface::SellInterface() :
-	_current_datalist(0)
-{}
+	_view_mode(SHOP_VIEW_MODE_INVALID),
+	_selected_object(NULL),
+	_current_category(0)
+{
+	_category_header.SetStyle(TextStyle("title24"));
+	_category_header.SetText(MakeUnicodeString("Category"));
+
+	_name_header.SetStyle(TextStyle("title24"));
+	_name_header.SetText(MakeUnicodeString("Name"));
+
+	_properties_header.SetDimensions(300.0f, 30.0f, 4, 1, 4, 1);
+	_properties_header.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
+	_properties_header.SetTextStyle(TextStyle("title24"));
+	_properties_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	_properties_header.AddOption(MakeUnicodeString("Price"));
+	_properties_header.AddOption(MakeUnicodeString("Stock"));
+	_properties_header.AddOption(MakeUnicodeString("Own"));
+	_properties_header.AddOption(MakeUnicodeString("Sell"));
+
+	_selected_name.SetStyle(TextStyle("text22"));
+
+	_selected_properties.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
+	_selected_properties.SetPosition(480.0f, 80.0f);
+	_selected_properties.SetDimensions(300.0f, 30.0f, 4, 1, 4, 1);
+	_selected_properties.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
+	_selected_properties.SetTextStyle(TextStyle("text22"));
+	_selected_properties.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	_selected_properties.AddOption(ustring());
+	_selected_properties.AddOption(ustring());
+	_selected_properties.AddOption(ustring());
+	_selected_properties.AddOption(ustring());
+}
 
 
 
 SellInterface::~SellInterface() {
-	for (uint32 i = 0; i < _object_displays.size(); i++) {
-		delete _object_displays[i];
+	for (uint32 i = 0; i < _list_displays.size(); i++) {
+		delete _list_displays[i];
 	}
 }
 
 
 
 void SellInterface::Initialize() {
+	// Before doing anything else, determine if the shop deals in key items. Key items are not allowed to
+	// be sold so this must be taken into account when initializing the data
+	bool deals_key_items = (ShopMode::CurrentInstance()->GetDealTypes() & DEALS_KEY_ITEMS) ? true : false;
+
+	// ---------- (1): Load all category names and icon images to be used
+	_number_categories = ShopMode::CurrentInstance()->Media()->GetSaleCategoryNames()->size();
+
+	_category_names = *(ShopMode::CurrentInstance()->Media()->GetSaleCategoryNames());
+	vector<StillImage>* icons = ShopMode::CurrentInstance()->Media()->GetSaleCategoryIcons();
+	for (uint32 i = 0; i < icons->size(); i++) {
+		_category_icons.push_back(&(icons->at(i)));
+	}
+
+	if (deals_key_items == true) {
+		// Reduce the number of categories and swap the last two entries in the names and icons containers.
+		// The last entry contains "All Wares" and the second to last contains "Key Items". After swapping
+		// these two categories, pop off the back to remove key item data.
+		_number_categories--;
+		if (_number_categories > 1) {
+			_category_names[_number_categories - 2] = _category_names[_number_categories - 1];
+			_category_names.pop_back();
+			_category_icons[_number_categories - 2] = _category_icons[_number_categories - 1];
+			_category_icons.pop_back();
+		}
+	}
+
+	// Set the initial category to the last category that was added (this is usually "All Wares")
+	_current_category = _number_categories - 1;
+	// Initialize the category display with the initial category
+	_category_display.ChangeCategory(_category_names[_current_category], _category_icons[_current_category]);
+
+	// ---------- (2): Prepare the _object_data container and determine category index mappings
+	for (uint32 i = 0; i < _number_categories; i++) {
+		_object_data.push_back(vector<ShopObject*>());
+	}
+
+	// Bit-vector that indicates what types of objects are sold in the shop
+	uint8 deal_types = ShopMode::CurrentInstance()->GetDealTypes();
+	// Holds the index to the _object_data vector where the container for a specific object type is located
+	vector<uint32> type_index(GLOBAL_OBJECT_TOTAL, 0);
+	// Used to set the appropriate data in the type_index vector
+	uint32 next_index = 0;
+	// Used to do a bit-by-bit analysis of the deal_types variable
+	uint8 bit_x = 0x01;
+
+	// This loop determines where each type of object should be placed in the _object_data container. For example,
+	// if the available categories in the shop are items, weapons, shards, and all wares, the size of _object_data
+	// will be four. When we go to add an object of one of these types into the _object_data container, we need
+	// to know the correct index for each type of object. These indeces are stored in the type_index vector. The
+	// size of this vector is the number of object types, so it becomes simple to map each object type to its correct
+	// location in _object_data.
+	for (uint8 i = 0; i < GLOBAL_OBJECT_TOTAL; i++, bit_x <<= 1) {
+		// Check if the type is available by doing a bit-wise comparison
+		if (deal_types & bit_x) {
+			type_index[i] = next_index++;
+		}
+	}
+
+	// ---------- (3): Populate the _object_data containers
 	// Used to temporarily hold a pointer to a valid shop object
 	ShopObject* obj = NULL;
 	// Pointer to the container of all objects that are bought/sold/traded in the ship
 	map<uint32, ShopObject>* shop_objects = ShopMode::CurrentInstance()->GetShopObjects();
-	// Bit-vector that indicates what types of objects are sold in the shop
-	uint8 obj_types = ShopMode::CurrentInstance()->GetDealTypes();
-	// The number of object categories in this sell menu (not including the "all" category)
-	uint8 num_obj_categories = 0;
-	// Holds the index within the _object_data vector where the container for a specific object type is
-	vector<uint32> type_index(8, 0);
 
-	// ---------- (1): Populating the _object_data container with an entry for each type of object in the player's inventory
-	_object_data.push_back(vector<ShopObject*>()); // This first entry represents all objects
-	uint32 next_index = 1; // Used to set the appropriate data in the type_index vector
-	uint8 bit_x = 0x01; // Used to do a bit-by-bit analysis of the obj_types variable
-	for (uint32 i = 0; i < type_index.size(); i++, bit_x <<= 1) {
-		// Check if the type is available by doing a bit-wise comparison
-		if (obj_types & bit_x) {
-			num_obj_categories++;
-			type_index[i] = next_index++;
-			_object_data.push_back(vector<ShopObject*>());
-		}
-	}
-
-	// ---------- (2): Populate the object containers
 	for (map<uint32, ShopObject>::iterator i = shop_objects->begin(); i != shop_objects->end(); i++) {
 		obj = &(i->second);
 
 		if (obj->GetOwnCount() > 0) {
-			_object_data[0].push_back(obj);
-
 			switch (obj->GetObject()->GetObjectType()) {
 				case GLOBAL_OBJECT_ITEM:
 					_object_data[type_index[0]].push_back(obj);
@@ -110,175 +181,328 @@ void SellInterface::Initialize() {
 					_object_data[type_index[6]].push_back(obj);
 					break;
 				case GLOBAL_OBJECT_KEY_ITEM:
-					_object_data[type_index[7]].push_back(obj);
-					break;
+					continue; // Key items are not permitted to be sold
 				default:
 					IF_PRINT_WARNING(SHOP_DEBUG) << "added object of unknown type: " << obj->GetObject()->GetObjectType() << endl;
 					break;
 			}
+
+			// If there is an "All Wares" category, make sure the object gets added there as well
+			if (_number_categories > 1) {
+				_object_data.back().push_back(obj);
+			}
 		}
 	}
 
-	// ---------- (3): Create the sell displays using the object data that is now ready
+	// ---------- (4): Create the sell displays using the object data that is now ready
 	for (uint32 i = 0; i < _object_data.size(); i++) {
 		SellListDisplay* new_list = new SellListDisplay();
-		new_list->GetIdentifyList().SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
-		new_list->GetPropertyList().SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 		new_list->PopulateList(&(_object_data[i]));
-
-		_object_displays.push_back(new_list);
+		_list_displays.push_back(new_list);
 	}
 
-	// ---------- (4): Initialize the list headers and object type icons
-	_identifier_header.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
-	_identifier_header.SetPosition(150.0f, 360.0f);
-	_identifier_header.SetDimensions(400.0f, 30.0f, 1, 1, 1, 1);
-	_identifier_header.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_identifier_header.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	_identifier_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	_identifier_header.AddOption(MakeUnicodeString("Name"));
+	_SetSelectedObject();
+	_ChangeViewMode(SHOP_VIEW_MODE_LIST);
+}
 
-	_properties_header.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
-	_properties_header.SetPosition(510.0f, 360.0f);
-	_properties_header.SetDimensions(250.0f, 30.0f, 4, 1, 4, 1);
-	_properties_header.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
-	_properties_header.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	_properties_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	_properties_header.AddOption(MakeUnicodeString("Price"));
-	_properties_header.AddOption(MakeUnicodeString("Stock"));
-	_properties_header.AddOption(MakeUnicodeString("Own"));
-	_properties_header.AddOption(MakeUnicodeString("Sell"));
 
-	vector<StillImage>* category_images = ShopMode::CurrentInstance()->Media()->GetSaleCategoryIcons();
-	if (num_obj_categories == 1) {
-		num_obj_categories++;
-	}
-	_category_list.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
-	_category_list.SetPosition(30.0f, 370.0f);
-	_category_list.SetDimensions(60.0f, 360.0f, 1, num_obj_categories, 1, num_obj_categories);
-	_category_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_category_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	_category_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
-	_category_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 
-	for (uint32 i = 0; i < 8; i++) {
-		if (obj_types & (0x01 << i)) {
-			uint32 this_option_index = _category_list.GetNumberOptions();
-			_category_list.AddOption();
-			_category_list.AddOptionElementImage(this_option_index, &(category_images->at(i)));
-			_category_list.GetEmbeddedImage(this_option_index)->SetDimensions(45.0f, 45.0f);
-		}
-	}
-
+void SellInterface::MakeActive() {
+	ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(_view_mode);
+	ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(_selected_object);
+	_category_display.ChangeViewMode(_view_mode);
+	_category_display.SetSelectedObject(_selected_object);
 }
 
 
 
 void SellInterface::Update() {
-	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
-		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
-	}
-
-	SellListDisplay* selected_list = _object_displays[_current_datalist];
-	uint32 selected_entry = selected_list->GetIdentifyList().GetSelection();
-	ShopObject* selected_object = _object_data[_current_datalist][selected_entry];
-
-	if (InputManager->ConfirmPress()) {
-		// TODO: Bring up an "instant sale" confirmation menu
-	}
-	else if (InputManager->CancelPress()) {
-		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
-	}
-
-	// Left select/right select change the category being viewed
-	else if (InputManager->LeftSelectPress()) {
-		if (GetNumberObjectCategories() > 1) {
-			_current_datalist = (_current_datalist == 0) ? (_object_data.size() - 1) : (_current_datalist - 1);
-			selected_list = _object_displays[_current_datalist];
-			selected_list->ReconstructList();
-			_UpdateSelectedCategory();
+	if (_view_mode == SHOP_VIEW_MODE_LIST) {
+		if ((InputManager->ConfirmPress()) && (_selected_object != NULL)) {
+			_ChangeViewMode(SHOP_VIEW_MODE_INFO);
 		}
-	}
-	else if (InputManager->RightSelectPress()) {
-		if (GetNumberObjectCategories() > 1) {
-			_current_datalist = (_current_datalist >= (_object_data.size() - 1)) ? 0 : (_current_datalist + 1);
-			selected_list = _object_displays[_current_datalist];
-			selected_list->ReconstructList();
-			_UpdateSelectedCategory();
-		}
-	}
-
-	// Up/down changes the selected object in the current list
-	else if (InputManager->UpPress()) {
-		selected_list->GetIdentifyList().InputUp();
-		selected_list->GetPropertyList().InputUp();
-	}
-	else if (InputManager->DownPress()) {
-		selected_list->GetIdentifyList().InputDown();
-		selected_list->GetPropertyList().InputDown();
-	}
-
-	// Left/right change the quantity of the object to sell
-	else if (InputManager->LeftPress()) {
-		if (selected_object->GetSellCount() == 0) {
-			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
-		}
-		else {
-			selected_object->DecrementSellCount();
-			ShopMode::CurrentInstance()->UpdateFinances(0, -selected_object->GetSellPrice());
-			selected_list->RefreshEntry(selected_entry);
+		else if (InputManager->CancelPress()) {
+			ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
 			ShopMode::CurrentInstance()->Media()->GetSound("cancel")->Play();
 		}
-	}
-	else if (InputManager->RightPress()) {
-		if (selected_object->GetSellCount() >= selected_object->GetOwnCount()) {
-			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
-		}
-		else {
-			selected_object->IncrementSellCount();
-			ShopMode::CurrentInstance()->UpdateFinances(0, selected_object->GetSellPrice());
-			selected_list->RefreshEntry(selected_entry);
+
+		// Swap cycles through the object categories
+		else if (InputManager->SwapPress() && (_number_categories > 1)) {
+			if (_ChangeCategory(true) == true)
+				ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(_selected_object);
 			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		}
+
+		// Up/down changes the selected object in the current list
+		else if (InputManager->UpPress()) {
+			if (_ChangeSelection(false) == true) {
+				ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(_selected_object);
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			}
+		}
+		else if (InputManager->DownPress()) {
+			if (_ChangeSelection(true) == true) {
+				ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(_selected_object);
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			}
+		}
+
+		// Left/right change the quantity of the object to sell
+		else if (InputManager->LeftPress()) {
+			if (_ChangeQuantity(false) == true)
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			else
+				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+		}
+		else if (InputManager->RightPress()) {
+			if (_ChangeQuantity(true) == true)
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			else
+				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+		}
+
+		// Left select/right select change the quantity of the object to sell by 10 at a time
+		else if (InputManager->LeftSelectPress()) {
+			if (_ChangeQuantity(false, 10) == true)
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			else
+				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+		}
+		else if (InputManager->RightSelectPress()) {
+			if (_ChangeQuantity(true, 10) == true)
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			else
+				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+		}
+	} // if (_view_mode == SHOP_VIEW_MODE_LIST)
+
+	else if (_view_mode == SHOP_VIEW_MODE_INFO) {
+		if (InputManager->ConfirmPress()) {
+			_ChangeViewMode(SHOP_VIEW_MODE_LIST);
+		}
+
+		// Left/right change the quantity of the object to sell
+		else if (InputManager->LeftPress()) {
+			if (_ChangeQuantity(false) == true) {
+				_RefreshSelectedProperties();
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			}
+			else
+				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+		}
+		else if (InputManager->RightPress()) {
+			if (_ChangeQuantity(true) == true) {
+				_RefreshSelectedProperties();
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			}
+			else
+				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+		}
+
+		// Left select/right select change the quantity of the object to sell by 10 at a time
+		else if (InputManager->LeftSelectPress()) {
+			if (_ChangeQuantity(false, 10) == true) {
+				_RefreshSelectedProperties();
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			}
+			else
+				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+		}
+		else if (InputManager->RightSelectPress()) {
+			if (_ChangeQuantity(true, 10) == true) {
+				_RefreshSelectedProperties();
+				ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+			}
+			else
+				ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+		}
 	}
+
+	_category_display.Update();
+	_list_displays[_current_category]->Update();
+	ShopMode::CurrentInstance()->ObjectViewer()->Update();
 }
 
 
 
 void SellInterface::Draw() {
-	ShopMode::CurrentInstance()->GetMiddleWindow()->Draw();
-	_identifier_header.Draw();
-	_properties_header.Draw();
-	_category_list.Draw();
-	_object_displays[_current_datalist]->Draw();
+	if (_view_mode == SHOP_VIEW_MODE_LIST) {
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
+		VideoManager->Move(200.0f, 558.0f);
+		_category_header.Draw();
 
-	ShopMode::CurrentInstance()->GetBottomWindow()->Draw();
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
+		VideoManager->MoveRelative(95.0f, 0.0f);
+		_name_header.Draw();
+
+		_properties_header.Draw();
+
+		_category_display.Draw();
+		_list_displays[_current_category]->Draw();
+	}
+	else if (_view_mode == SHOP_VIEW_MODE_INFO) {
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+		VideoManager->Move(295.0f, 175.0f);
+		_name_header.Draw();
+		_properties_header.Draw();
+
+		VideoManager->MoveRelative(0.0f, -50.0f);
+		_selected_icon.Draw();
+		VideoManager->MoveRelative(30.0f, 0.0f);
+		_selected_name.Draw();
+		_selected_properties.Draw();
+
+		_category_display.Draw();
+	}
+
+	ShopMode::CurrentInstance()->ObjectViewer()->Draw();
 }
 
 
 
-void SellInterface::_UpdateSelectedCategory() {
-	if (GetNumberObjectCategories() == 1) {
+void SellInterface::_ChangeViewMode(SHOP_VIEW_MODE new_mode) {
+	if (_view_mode == new_mode)
 		return;
+
+	if (new_mode == SHOP_VIEW_MODE_LIST) {
+		_view_mode = new_mode;
+		ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(_view_mode);
+		_category_display.ChangeViewMode(_view_mode);
+
+		_properties_header.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
+		_properties_header.SetPosition(480.0f, 390.0f);
+	}
+	else if (new_mode == SHOP_VIEW_MODE_INFO) {
+		_view_mode = new_mode;
+		ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(_view_mode);
+		_category_display.ChangeViewMode(_view_mode);
+		_category_display.SetSelectedObject(_selected_object);
+
+		_properties_header.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
+		_properties_header.SetPosition(480.0f, 130.0f);
+
+		_selected_name.SetText(_selected_object->GetObject()->GetName());
+		_selected_icon = _selected_object->GetObject()->GetIconImage();
+		_selected_icon.SetDimensions(30.0f, 30.0f);
+		_selected_properties.SetOptionText(0, MakeUnicodeString(NumberToString(_selected_object->GetSellPrice())));
+		_selected_properties.SetOptionText(1, MakeUnicodeString("x" + NumberToString(_selected_object->GetStockCount())));
+		_selected_properties.SetOptionText(2, MakeUnicodeString("x" + NumberToString(_selected_object->GetOwnCount())));
+		_selected_properties.SetOptionText(3, MakeUnicodeString("x" + NumberToString(_selected_object->GetSellCount())));
+	}
+	else {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "tried to change to an invalid/unsupported view mode: " << new_mode << endl;
+	}
+}
+
+
+
+bool SellInterface::_ChangeCategory(bool left_or_right) {
+	if (_number_categories == 1) {
+		return false;
 	}
 
-	// If the all category is selected, show all of the category icons in full color
-	if ((_HasAllCategory() == true) && (_current_datalist == 0)) {
-		for (uint32 i = 0; i < _category_list.GetNumberOptions(); i++) {
-			_category_list.GetEmbeddedImage(i)->DisableGrayScale();
-		}
-		return;
+	if (left_or_right == false) {
+		_current_category = (_current_category == 0) ? (_number_categories -1) : (_current_category - 1);
+	}
+	else {
+		_current_category = (_current_category >= (_number_categories - 1)) ? 0 : (_current_category + 1);
 	}
 
-	// Otherwise enable grayscale for all unselected object category icons
-	for (uint32 i = 0; i < _category_list.GetNumberOptions(); i++) {
-		if (i == (_current_datalist - 1)) {
-			_category_list.GetEmbeddedImage(i)->DisableGrayScale();
-		}
-		else {
-			_category_list.GetEmbeddedImage(i)->EnableGrayScale();
-		}
+	_category_display.ChangeCategory(_category_names[_current_category], _category_icons[_current_category]);
+	// Refresh all entries in the newly selected list is required because every object is available in two
+	// categories, their standard type and the "All Wares" category.
+	_list_displays[_current_category]->RefreshAllEntries();
+
+	ShopObject* last_obj = _selected_object;
+	_SetSelectedObject();
+	if (last_obj == _selected_object)
+		return false;
+	else
+		return true;
+}
+
+
+
+bool SellInterface::_ChangeSelection(bool up_or_down) {
+	SellListDisplay* selected_list = _list_displays[_current_category];
+
+	if (up_or_down == false) {
+		selected_list->GetIdentifyList().InputUp();
+		selected_list->GetPropertyList().InputUp();
 	}
+	else {
+		selected_list->GetIdentifyList().InputDown();
+		selected_list->GetPropertyList().InputDown();
+	}
+
+	ShopObject* last_obj = _selected_object;
+	_SetSelectedObject();
+	if (last_obj == _selected_object)
+		return false;
+	else
+		return true;
+}
+
+
+
+bool SellInterface::_ChangeQuantity(bool less_or_more, uint32 amount) {
+	ShopObject* selected_object = _selected_object;
+	// Holds the amount that the quantity will actually increase or decrease by. May be less than the
+	// amount requested if there is an limitation such as shop stock or available funds
+	uint32 change_amount = amount;
+
+	if (less_or_more == false) {
+		if (selected_object->GetSellCount() == 0) {
+			return false;
+		}
+
+		if (amount > selected_object->GetSellCount()) {
+			change_amount = selected_object->GetSellCount();
+		}
+		selected_object->DecrementSellCount(change_amount);
+		ShopMode::CurrentInstance()->UpdateFinances(0, -(selected_object->GetSellPrice() * change_amount));
+		_list_displays[_current_category]->RefreshEntry(_list_displays[_current_category]->GetIdentifyList().GetSelection());
+		return true;
+	}
+	else {
+		// Make sure that there is at least one more object available to sell in the player's inventory
+		if (selected_object->GetSellCount() >= selected_object->GetOwnCount()) {
+			return false;
+		}
+
+		// Determine if there's enough of the object in stock to sell. If not, sell as many left as possible
+		if ((selected_object->GetOwnCount() - selected_object->GetSellCount()) < change_amount) {
+			change_amount = selected_object->GetOwnCount() - selected_object->GetSellCount();
+		}
+		selected_object->IncrementSellCount(change_amount);
+		ShopMode::CurrentInstance()->UpdateFinances(0, (selected_object->GetSellPrice() * change_amount));
+		_list_displays[_current_category]->RefreshEntry(_list_displays[_current_category]->GetIdentifyList().GetSelection());
+		return true;
+	}
+}
+
+
+
+void SellInterface::_SetSelectedObject() {
+	SellListDisplay* selected_list = _list_displays[_current_category];
+	if (selected_list->IsListEmpty() == true) {
+		_selected_object = NULL;
+	}
+	else {
+		uint32 selected_entry = selected_list->GetIdentifyList().GetSelection();
+		_selected_object = _object_data[_current_category][selected_entry];
+	}
+}
+
+
+
+void SellInterface::_RefreshSelectedProperties() {
+	if (_selected_object == NULL)
+		return;
+
+	// The only property that really needs to be refreshed is the sell quantity. Other properties will remain static.
+	_selected_properties.SetOptionText(_selected_properties.GetNumberColumns() - 1,
+		MakeUnicodeString("x" + NumberToString(_selected_object->GetSellCount())));
 }
 
 // *****************************************************************************
@@ -325,11 +549,11 @@ void SellListDisplay::RefreshEntry(uint32 index) {
 		return;
 	}
 
-	// Update only the stock, number owned, and amount to sell. The price does not require updating
+	// Only the amount to sell changes and needs to be refreshed on a regular basis. Other properties remain static the
+	// player confirms their transaction outside of this interface.
 	ShopObject* shop_obj = (*_objects)[index];
-	_property_list.SetOptionText((index * 4) + 1, MakeUnicodeString("x" + NumberToString(shop_obj->GetStockCount())));
-	_property_list.SetOptionText((index * 4) + 2, MakeUnicodeString("x" + NumberToString(shop_obj->GetOwnCount())));
-	_property_list.SetOptionText((index * 4) + 3, MakeUnicodeString("x" + NumberToString(shop_obj->GetSellCount())));
+	_property_list.SetOptionText((index * _property_list.GetNumberColumns()) + (_property_list.GetNumberColumns() - 1),
+		MakeUnicodeString("x" + NumberToString(shop_obj->GetSellCount())));
 }
 
 } // namespace private_shop
