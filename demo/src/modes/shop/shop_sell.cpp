@@ -533,8 +533,10 @@ void SellListDisplay::ReconstructList() {
 		_property_list.AddOption(MakeUnicodeString("x" + NumberToString(shop_obj->GetSellCount())));
 	}
 
-	_identify_list.SetSelection(0);
-	_property_list.SetSelection(0);
+	if (_objects->empty() == false) {
+		_identify_list.SetSelection(0);
+		_property_list.SetSelection(0);
+	}
 }
 
 

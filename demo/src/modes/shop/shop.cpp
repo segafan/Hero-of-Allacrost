@@ -564,7 +564,7 @@ void ShopObjectViewer::_SetItemData() {
 		_target_type_index = 3;
 	}
 	else if ((allied_target == false) && (target_type == GLOBAL_TARGET_PARTY)) {
-		_target_type_index = 5;
+		_target_type_index = 4;
 	}
 	else {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "unknown/unhandled target type, defaulting to 'self'" << endl;
