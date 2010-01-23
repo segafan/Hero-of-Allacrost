@@ -58,8 +58,7 @@ class ShopMedia {
 public:
 	ShopMedia();
 
-	~ShopMedia()
-		{}
+	~ShopMedia();
 
 	/** \brief Finishes preparing media data for use
 	*** This function prepares any class members that could not be made ready in the constructor. This

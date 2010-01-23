@@ -278,8 +278,7 @@ void TextBox::SetDisplayText(const ustring& text) {
 
 		default:
 			_end_time = 0;
-			if (VIDEO_DEBUG)
-				cerr << "VIDEO WARNING: unknown display mode was set in TextBox::SetDisplayText(): " << _mode << endl;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown display mode was active: " << _mode << endl;
 			break;
 	};
 
@@ -297,9 +296,7 @@ void TextBox::_ReformatText() {
 
 	// If font not set, return (leave _text vector empty)
 	if (!_font_properties) {
-		if (VIDEO_DEBUG) {
-			cerr << "VIDEO WARNING: TextBox::_ReformatText() with invalid font." << endl;
-		}
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "textbox font is invalid" << endl;
 		return;
 	}
 
@@ -322,10 +319,8 @@ void TextBox::_ReformatText() {
 	int32 text_height = CalculateTextHeight();
 
 	if (text_height > _height) {
-		if (VIDEO_DEBUG) {
-			cerr << "VIDEO WARNING: In TextBox::_ReformatText() tried to display text of height (";
-			cerr << text_height << ") in a window of lower height (" << _height << ")" << endl;
-		}
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "tried to display text of height (" << text_height
+			<< ") in a window of lower height (" << _height << ")" << endl;
 	}
 } // void TextBox::_ReformatText()
 
@@ -602,9 +597,7 @@ void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect
 		else {
 			// Invalid display mode: just render the text instantly
 			TextManager->Draw(_text[line]);
-			if (VIDEO_DEBUG) {
-				cerr << "VIDEO WARNING: In TextBox::_DrawLines, an unsupported text display mode was active: " << _mode << endl;
-			}
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "an unknown/unsupported text display mode was active: " << _mode << endl;
 		}
 
 		// (3): Prepare to draw the next line and move the draw cursor appropriately

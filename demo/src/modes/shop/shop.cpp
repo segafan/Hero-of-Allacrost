@@ -119,6 +119,14 @@ ShopMedia::ShopMedia() {
 
 
 
+ShopMedia::~ShopMedia() {
+	for (map<string, SoundDescriptor*>::iterator i = _sounds.begin(); i != _sounds.end(); i++)
+		delete i->second;
+	_sounds.clear();
+}
+
+
+
 void ShopMedia::Initialize() {
 	_all_category_names.push_back(MakeUnicodeString("Items"));
 	_all_category_names.push_back(MakeUnicodeString("Weapons"));
@@ -353,17 +361,17 @@ ShopObjectViewer::ShopObjectViewer() :
 	// Initialize all properties of class members that we can
 	_object_name.SetStyle(TextStyle("title24"));
 
-	_description_text.SetTextStyle(TextStyle("text22"));
+	// Position and dimensions for _description_text are set by _SetDescriptionText()
+	_description_text.SetTextStyle(TextStyle("text20"));
 	_description_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_description_text.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_description_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_SetDescriptionText(); // Will set the position and dimensions of _description_text
 
-	// TODO: Initialize all of the lore properties here, not just the owner
 	_lore_text.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 	_lore_text.SetPosition(25.0f, 100.0f);
 	_lore_text.SetDimensions(760.0f, 80.0f);
-	_lore_text.SetTextStyle(TextStyle("text22"));
+	_lore_text.SetTextStyle(TextStyle("text20"));
 	_lore_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_lore_text.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_lore_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
@@ -737,23 +745,27 @@ void ShopObjectViewer::_SetShardData() {
 
 
 void ShopObjectViewer::_SetDescriptionText() {
-	if (_view_mode == SHOP_VIEW_MODE_INFO) {
-		_description_text.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
-		_description_text.SetPosition(25.0f, 140.0f);
-		_description_text.SetDimensions(760.0f, 30.0f);
-		return; // In info view, description text is always displayed the same way for all objects
+	if (_view_mode == SHOP_VIEW_MODE_LIST) {
+		_description_text.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
+		// For key items, draw position is a little higher than other cases to center it in the blank area
+		if (_object_type == SHOP_OBJECT_KEY_ITEM) {
+			_description_text.SetPosition(102.0f, 76.0f);
+		}
+		else {
+			_description_text.SetPosition(102.0f, 56.0f);
+		}
+		_description_text.SetDimensions(675.0f, 50.0f);
 	}
 
-	// (_view_mode == SHOP_VIEW_MODE_LIST) should be true from this point forward
-	_description_text.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
-	if (_object_type == SHOP_OBJECT_KEY_ITEM) {
-		// For key items, draw position is a little higher than other cases to center it in the blank area
-		_description_text.SetPosition(102.0f, 76.0f);
+	else if (_view_mode == SHOP_VIEW_MODE_INFO) {
+		_description_text.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
+		_description_text.SetPosition(25.0f, 140.0f);
+		_description_text.SetDimensions(750.0f, 50.0f);
 	}
+
 	else {
-		_description_text.SetPosition(102.0f, 56.0f);
+		IF_PRINT_WARNING(SHOP_DEBUG) << "unknown/unsupported view mode was active: " << _view_mode << endl;
 	}
-	_description_text.SetDimensions(675.0f, 30.0f);
 }
 
 

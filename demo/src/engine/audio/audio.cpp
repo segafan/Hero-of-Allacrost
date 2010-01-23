@@ -175,10 +175,12 @@ AudioEngine::~AudioEngine() {
 
 	// We shouldn't have any descriptors registered now -- check that this is true
 	if (_registered_sounds.empty() == false) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "SoundDescriptor objects were still registered when destructor was invoked" << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << _registered_sounds.size() << " SoundDescriptor objects were still "
+			"registered when destructor was invoked" << endl;
 	}
 	if (_registered_music.empty() == false) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "MusicDescriptor objects were still registered when destructor was invoked" << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << _registered_music.size() << " MusicDescriptor objects were still "
+			"registered when destructor was invoked" << endl;
 	}
 
 	alcMakeContextCurrent(0);
