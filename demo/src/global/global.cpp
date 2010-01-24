@@ -289,8 +289,6 @@ void GameGlobal::RemoveCharacter(uint32 id) {
 
 	delete(ch->second);
 	_characters.erase(ch);
-
-	cout << _character_order.size() << endl;
 } // void GameGlobal::RemoveCharacter(uint32 id)
 
 
