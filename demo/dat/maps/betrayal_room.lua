@@ -182,6 +182,8 @@ function Load(m)
 	local event;
 	local chest;
 
+	CreateDialogue();
+
 	-- Create the player''s sprite
 	sprite = ConstructSprite("Claudius", 1000, 32, 44);
 	map:AddGroundObject(sprite);
@@ -193,10 +195,83 @@ function Load(m)
 	kyle:LoadAttackAnimations("img/sprites/map/kyle_attack_w.png");
 	kyle:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 	kyle:SetNoCollision(true);
+
 	captain = ConstructSprite("Captain", 3, 26, 30, 0.0, 0.0);
 	captain:SetNoCollision(true);
 
-	dialogue = hoa_map.MapDialogue(1);
+	-- Create a zone for exiting the map, to be used as a trigger
+	exit_zone = hoa_map.MapZone();
+	-- Add a section to the zone to enable the user to exit the map
+	exit_zone:AddSection(hoa_map.ZoneSection(30, 45, 34, 48));
+	map:AddZone(exit_zone);
+
+	-- Register events
+	event = hoa_map.DialogueEvent(11000, 1); -- initial dialogue
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.PathMoveSpriteEvent(11001, kyle, 26, 30); -- Kyle moves
+	event:AddEventLink(11002, false, 0);
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.AnimateSpriteEvent(11002, kyle); -- Kyle strikes
+	event:AddFrame(12, 850);
+	event:AddEventLink(11003, false, 0);
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.ScriptedEvent(11003, 2, 0); -- call function #2 to remove captain
+	event:AddEventLink(11004, false, 0);
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.DialogueEvent(11004, 2); -- next dialogue
+	-- dialogue is programmed to call event #11005
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.BattleEncounterEvent(11005, 107); -- final battle
+	event:SetMusic("mus/Betrayal_Battle.ogg");
+	event:AddBattleEvent(1);
+	event:AddEventLink(11006, false, 0);
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.DialogueEvent(11006, 3); -- closing dialogue
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.PathMoveSpriteEvent(11007, kyle, 26, 0); -- Kyle moves again
+	event:AddEventLink(11008, false, 0);
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.ScriptedEvent(11008, 1, 0); -- calls function #1 to remover Kyle, finish
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.MapTransitionEvent(22111, "dat/maps/new_cave.lua");
+	event_supervisor:RegisterEvent(event);
+
+	
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
+		map:AddGroundObject(kyle);
+		map:AddGroundObject(captain);
+		
+--		if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
+--			GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle", 1);
+			event_supervisor:StartEvent(11000);
+--		end
+	end
+end
+
+function Draw()
+	map:DrawMapLayers();
+end
+
+function Update()
+	-- Check if the map camera is in the exit zone
+	if (exit_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (event_supervisor:IsEventActive(22111) == false) then
+			event_supervisor:StartEvent(22111);
+		end
+	end
+end
+
+function CreateDialogue()
+	local dialogue = hoa_map.MapDialogue(1);
 
 	text = hoa_utils.Translate("Stop this foolishness, Kyle. You can’t escape. Lower your weapon and come peacefully and I’ll make sure your punishment is lenient.");
 	dialogue:AddText(text, 3, 1, 0, false);
@@ -207,7 +282,7 @@ function Load(m)
 	text = hoa_utils.Translate("I’m very disappointed in you, Kyle.");
 	dialogue:AddText(text, 3, 4, 0, false);
 	text = hoa_utils.Translate("Over here, Claudius!");
-	dialogue:AddText(text, 3, -1, 11002, false);
+	dialogue:AddText(text, 3, -1, 11001, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
 
@@ -243,9 +318,8 @@ function Load(m)
 	text = hoa_utils.Translate("Isn't our friendship more important than your duty?");
 	dialogue:AddText(text, 2, 14, 0, false);
 	text = hoa_utils.Translate("You killed the Captain!");
-	dialogue:AddText(text, 1000, -1, 11004, false); -- start boss battle event (11004)
+	dialogue:AddText(text, 1000, -1, 11005, false); -- start boss battle event (11004)
 
-	kyle:AddDialogueReference(2);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(3);
@@ -253,73 +327,9 @@ function Load(m)
 	text = hoa_utils.Translate("(Insert dialogue here)");
 	dialogue:AddText(text, 2, 1, 0, false);
 	text = hoa_utils.Translate("Damn you, Kyle.");
-	dialogue:AddText(text, 1000, -1, 0, false);
+	dialogue:AddText(text, 1000, -1, 11007, false); -- Kyle leaves the scene (11007)
 
 	dialogue_supervisor:AddDialogue(dialogue);
-
-	-- Create a zone for exiting the map, to be used as a trigger
-	exit_zone = hoa_map.MapZone();
-	-- Add a section to the zone to enable the user to exit the map
-	exit_zone:AddSection(hoa_map.ZoneSection(30, 45, 34, 48));
-	map:AddZone(exit_zone);
-
-	-- Register event functions
-	event = hoa_map.ScriptedEvent(1, 1, 0);
-	event_supervisor:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(2, 2, 0);
-	event_supervisor:RegisterEvent(event);
-
-	event = hoa_map.DialogueEvent(11000, 1); -- initial dialogue
-	event_supervisor:RegisterEvent(event);
-
-	event = hoa_map.PathMoveSpriteEvent(11001, kyle, 26, 30); -- kyle moves
-	event:AddEventLink(11002, false, 0);
-	event_supervisor:RegisterEvent(event);
-
-	event = hoa_map.AnimateSpriteEvent(11002, kyle); -- kyle strikes
-	event:AddFrame(12, 850);
-	event:AddEventLink(11003, false, 0);
-	event_supervisor:RegisterEvent(event);
-
-	event = hoa_map.DialogueEvent(11003, 2); -- next dialogue
-	event_supervisor:RegisterEvent(event);
-
-	event = hoa_map.BattleEncounterEvent(11004, 107); -- final battle
-	event:SetMusic("mus/Betrayal_Battle.ogg");
-	event:AddBattleEvent(1);
-	event:AddEventLink(11005, false, 0);
-	event_supervisor:RegisterEvent(event);
-
-	event = hoa_map.DialogueEvent(11005, 3); -- closing dialogue
-	event_supervisor:RegisterEvent(event);
-
-
-	event = hoa_map.MapTransitionEvent(22111, "dat/maps/new_cave.lua");
-	event_supervisor:RegisterEvent(event);
-
-	
-	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
-		map:AddGroundObject(kyle);
-		map:AddGroundObject(captain);
-		
-		if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
-			GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle", 1);
-			event_supervisor:StartEvent(11000);
-		end
-	end
-end
-
-function Draw()
-	map:DrawMapLayers();
-end
-
-function Update()
-	-- Check if the map camera is in the exit zone
-	if (exit_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
-		if (event_supervisor:IsEventActive(22111) == false) then
-			event_supervisor:StartEvent(22111);
-		end
-	end
 end
 
 -- Removes Kyle sprite from the map
@@ -330,14 +340,10 @@ map_functions[1] = function()
 	kyle:SetContext(2);
 end
 
--- Executes when knight Captain is killed
+-- Remove captain from map
 map_functions[2] = function()
-	-- First, remove KC from map
 	captain:SetVisible(false);
 	captain:SetNoCollision(true);
 	captain:SetUpdatable(false);
 	captain:SetContext(2);
-
-	-- transition to next dialogue
-	event_supervisor:StartEvent(11002);
 end
