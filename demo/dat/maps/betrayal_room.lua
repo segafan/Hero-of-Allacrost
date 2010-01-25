@@ -250,10 +250,10 @@ function Load(m)
 		map:AddGroundObject(kyle);
 		map:AddGroundObject(captain);
 		
---		if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
---			GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle", 1);
+		if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
+			GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle", 1);
 			event_supervisor:StartEvent(11000);
---		end
+		end
 	end
 end
 
