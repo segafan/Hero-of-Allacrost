@@ -752,6 +752,7 @@ function Load(m)
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(5);
+	enemy:SetBattleBackground("img/backdrops/battle/desert.png");
 	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, 2);
 
@@ -778,6 +779,7 @@ function Load(m)
 	enemy:NewEnemyParty(); -- Second potential enemy party
 	enemy:AddEnemy(3); -- add a snake
 	enemy:AddEnemy(3); -- add a snake
+	enemy:SetBattleBackground("img/backdrops/battle/desert.png");
 	ezone:AddEnemy(enemy, map, 2); -- Add the enemy to the zone two times	
 	map:AddZone(ezone); -- Finally, add the zone to the map
 
@@ -799,6 +801,7 @@ function Load(m)
 	enemy:NewEnemyParty(); -- Second potential enemy party
 	enemy:AddEnemy(3); -- add a snake
 	enemy:AddEnemy(3); -- add a snake
+	enemy:SetBattleBackground("img/backdrops/battle/desert.png");
 	ezone:AddEnemy(enemy, map, 2); -- Add the enemy to the zone two times	
 	map:AddZone(ezone); -- Finally, add the zone to the map
 

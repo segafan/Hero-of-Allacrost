@@ -435,6 +435,9 @@ public:
 	std::string GetBattleMusicTheme() const
 		{ return _music_theme; }
 
+	std::string GetBattleBackground() const
+		{ return _bg_file; }
+
 	bool IsDead() const
 		{ return _state == DEAD; }
 
@@ -458,6 +461,9 @@ public:
 
 	void SetBattleMusicTheme(const std::string& music_theme)
 		{ _music_theme = music_theme; }
+
+	void SetBattleBackground(const std::string& bg_file)
+		{ _bg_file = bg_file; }
 
 	void ChangeStateDead()
 		{ Reset(); if (_zone) _zone->EnemyDead(); }
@@ -501,6 +507,9 @@ private:
 
 	//! \brief The default battle music theme for the monster
 	std::string _music_theme;
+
+	//! \brief The default background for the battle
+	std::string _bg_file;
 
 	/** \brief Contains the possible groups of enemies that may appear in a battle should the player encounter this enemy sprite
 	*** The numbers contained within this member are ID numbers for the enemy. If the

@@ -259,6 +259,9 @@ public:
 	//! \brief Plays the specified piece of music
 	void PlayMusic(const std::string &music_filename);
 
+	//! \brief Determines background image for battle
+	void AddBackground(const std::string& new_battle_background);
+
 	//! \brief Sets whether an action is being performed or not, and what that action is
 	//void SetPerformingAction(bool is_performing, private_battle::BattleAction* se);
 

@@ -275,6 +275,15 @@ void BattleMode::PlayMusic(const string &music_filename)
 
 
 
+void BattleMode::AddBackground(const string &new_battle_background) {
+	// Load all background images
+	if (_battle_background.Load(new_battle_background, SCREEN_LENGTH * TILE_SIZE, SCREEN_HEIGHT * TILE_SIZE) == false) {
+		cerr << "BATTLE ERROR: Failed to load background image: " << endl;
+		_ShutDown();
+	}
+}
+
+
 void BattleMode::_TEMP_LoadTestData() {
 	// Load all background images
 	if (_battle_background.Load("img/backdrops/battle/desert_cave.png", SCREEN_LENGTH * TILE_SIZE, SCREEN_HEIGHT * TILE_SIZE) == false) {
