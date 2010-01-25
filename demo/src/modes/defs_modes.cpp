@@ -355,6 +355,7 @@ void BindModesToLua()
 		class_<BattleEncounterEvent, MapEvent>("BattleEncounterEvent")
 			.def(constructor<uint32, uint32>())
 			.def("SetMusic", &BattleEncounterEvent::SetMusic)
+			.def("SetBackground", &BattleEncounterEvent::SetBackground)
 			.def("AddBattleEvent", &BattleEncounterEvent::AddBattleEvent)
 			.def("AddEnemy", &BattleEncounterEvent::AddEnemy)
 	];

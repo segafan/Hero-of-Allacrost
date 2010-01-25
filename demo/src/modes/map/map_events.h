@@ -320,6 +320,7 @@ public:
 	~BattleEncounterEvent();
 
 	void SetMusic(std::string filename);
+	void SetBackground(std::string filename);
 	void AddEnemy(uint32 enemy_id);
 	void AddBattleEvent(uint32 event_id);
 protected:
@@ -331,6 +332,9 @@ protected:
 
 	//! \brief Filename for battle music
 	std::string _battle_music;
+
+	//! \brief Filename for battle background
+	std::string _battle_background;
 
 	//! \brief Starts the battle
 	void _Start();
