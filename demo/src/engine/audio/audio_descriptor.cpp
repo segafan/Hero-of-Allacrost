@@ -705,6 +705,11 @@ void AudioDescriptor::_AcquireSource() {
 		return;
 	}
 
+	if (_buffer == NULL) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "function was invoked when object did not have an audio buffer attached" << endl;
+		return;
+	}
+
 	_source = AudioManager->_AcquireAudioSource();
 	if (_source == NULL) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << _input->GetFilename() << endl;
