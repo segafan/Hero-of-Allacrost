@@ -418,9 +418,17 @@ void MapMode::_UpdateExplore() {
 			_run_stamina = 10000;
 	}
 
+	float mouse_x, mouse_y;
+	InputManager->GetMousePosition(mouse_x, mouse_y);
+
 	// If the user requested a confirm event, check if there is a nearby object that the player may interact with
 	// Interactions are currently limited to dialogue with sprites and opening of treasures
-	if (InputManager->ConfirmPress()) {
+	if (InputManager->ConfirmPress() ||
+	   (InputManager->ClickPress() &&
+		mouse_x > 0.38f &&
+		mouse_x < 0.62f &&
+		mouse_y > 0.38f &&
+		mouse_y < 0.62f)) {
 		MapObject* obj = _object_supervisor->FindNearestObject(_camera);
 
 		if (obj && (obj->GetType() == SPRITE_TYPE)) {
@@ -451,8 +459,6 @@ void MapMode::_UpdateExplore() {
 	// Determine the direction of movement. Priority of movement is given to: up, down, left, right.
 	// In the case of diagonal movement, the direction that the sprite should face also needs to be deduced.
 	if (_camera->moving == true) {
-		float mouse_x, mouse_y;
-		InputManager->GetMousePosition(mouse_x, mouse_y);
 		if (InputManager->UpState() || (mouse_y > 0.55f && InputManager->ClickState()))
 		{
 			if (InputManager->LeftState() || (mouse_x < 0.45f && InputManager->ClickState()))
