@@ -132,6 +132,10 @@ public:
 	**/
 	void GetAlignment(int32 &xalign, int32 &yalign) const
 		{ xalign = _xalign; yalign = _yalign; }
+	
+	/** \brief Checks if the mouse is within this GUI object
+	**/
+	bool ContainsMouse() const;
 
 	/** \brief Calculates and returns the four edges for an aligned rectangle
 	*** \param left A reference where to store the coordinates of the rectangle's left edge.
