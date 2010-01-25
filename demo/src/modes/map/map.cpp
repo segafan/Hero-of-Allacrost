@@ -441,7 +441,7 @@ void MapMode::_UpdateExplore() {
 	}
 
 	// Detect movement input from the user
-	if (InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState()) {
+	if (InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState() || InputManager->ClickState()) {
 		_camera->moving = true;
 	}
 	else {
@@ -451,28 +451,30 @@ void MapMode::_UpdateExplore() {
 	// Determine the direction of movement. Priority of movement is given to: up, down, left, right.
 	// In the case of diagonal movement, the direction that the sprite should face also needs to be deduced.
 	if (_camera->moving == true) {
-		if (InputManager->UpState())
+		float mouse_x, mouse_y;
+		InputManager->GetMousePosition(mouse_x, mouse_y);
+		if (InputManager->UpState() || mouse_y > 0.55f)
 		{
-			if (InputManager->LeftState())
+			if (InputManager->LeftState() || mouse_x < 0.45f)
 				_camera->SetDirection(MOVING_NORTHWEST);
-			else if (InputManager->RightState())
+			else if (InputManager->RightState() || mouse_x > 0.55f)
 				_camera->SetDirection(MOVING_NORTHEAST);
 			else
 				_camera->SetDirection(NORTH);
 		}
-		else if (InputManager->DownState())
+		else if (InputManager->DownState() || mouse_y < 0.45f)
 		{
-			if (InputManager->LeftState())
+			if (InputManager->LeftState() || mouse_x < 0.45f)
 				_camera->SetDirection(MOVING_SOUTHWEST);
-			else if (InputManager->RightState())
+			else if (InputManager->RightState() || mouse_x > 0.55f)
 				_camera->SetDirection(MOVING_SOUTHEAST);
 			else
 				_camera->SetDirection(SOUTH);
 		}
-		else if (InputManager->LeftState()) {
+		else if (InputManager->LeftState() || mouse_x < 0.45f) {
 			_camera->SetDirection(WEST);
 		}
-		else if (InputManager->RightState()) {
+		else if (InputManager->RightState() || mouse_x > 0.55f) {
 			_camera->SetDirection(EAST);
 		}
 	} // if (_camera->moving == true)
