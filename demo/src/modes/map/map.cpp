@@ -453,28 +453,28 @@ void MapMode::_UpdateExplore() {
 	if (_camera->moving == true) {
 		float mouse_x, mouse_y;
 		InputManager->GetMousePosition(mouse_x, mouse_y);
-		if (InputManager->UpState() || mouse_y > 0.55f)
+		if (InputManager->UpState() || (mouse_y > 0.55f && InputManager->ClickState()))
 		{
-			if (InputManager->LeftState() || mouse_x < 0.45f)
+			if (InputManager->LeftState() || (mouse_x < 0.45f && InputManager->ClickState()))
 				_camera->SetDirection(MOVING_NORTHWEST);
-			else if (InputManager->RightState() || mouse_x > 0.55f)
+			else if (InputManager->RightState() || (mouse_x > 0.55f && InputManager->ClickState()))
 				_camera->SetDirection(MOVING_NORTHEAST);
 			else
 				_camera->SetDirection(NORTH);
 		}
-		else if (InputManager->DownState() || mouse_y < 0.45f)
+		else if (InputManager->DownState() || (mouse_y < 0.45f && InputManager->ClickState()))
 		{
-			if (InputManager->LeftState() || mouse_x < 0.45f)
+			if (InputManager->LeftState() || (mouse_x < 0.45f && InputManager->ClickState()))
 				_camera->SetDirection(MOVING_SOUTHWEST);
-			else if (InputManager->RightState() || mouse_x > 0.55f)
+			else if (InputManager->RightState() || (mouse_x > 0.55f && InputManager->ClickState()))
 				_camera->SetDirection(MOVING_SOUTHEAST);
 			else
 				_camera->SetDirection(SOUTH);
 		}
-		else if (InputManager->LeftState() || mouse_x < 0.45f) {
+		else if (InputManager->LeftState() || (mouse_x < 0.45f && InputManager->ClickState())) {
 			_camera->SetDirection(WEST);
 		}
-		else if (InputManager->RightState() || mouse_x > 0.55f) {
+		else if (InputManager->RightState() || (mouse_x > 0.55f && InputManager->ClickState())) {
 			_camera->SetDirection(EAST);
 		}
 	} // if (_camera->moving == true)
