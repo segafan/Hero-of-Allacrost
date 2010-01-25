@@ -475,20 +475,17 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 
 void InputEngine::_MouseEventHandler(SDL_Event& mouse_event) {
 	if (mouse_event.type == SDL_MOUSEMOTION) {
-		_mouse_x = mouse_event.motion.x;
-		_mouse_y = mouse_event.motion.y;
+		SDL_Surface* screen = SDL_GetVideoSurface();
+		_mouse_x = mouse_event.motion.x / (float)(screen->w);
+		_mouse_y = 1.0f - (mouse_event.motion.x / (float)(screen->h));
 	}
 	else if (mouse_event.type == SDL_MOUSEBUTTONDOWN &&
 	         mouse_event.button.button == SDL_BUTTON_LEFT) {
 		_mouse_click_state = true;
-		_mouse_x = mouse_event.button.x;
-		_mouse_y = mouse_event.button.y;
 	}
 	else if (mouse_event.type == SDL_MOUSEBUTTONUP &&
 	         mouse_event.button.button == SDL_BUTTON_LEFT) {
 		_mouse_click_state = false;
-		_mouse_x = mouse_event.button.x;
-		_mouse_y = mouse_event.button.y;
 	}
 }
 

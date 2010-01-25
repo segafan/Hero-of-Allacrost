@@ -189,7 +189,7 @@ private:
 	private_input::JoystickState _joystick;
 
 	//! Holds the current mouse coordinates
-	int32 _mouse_x, _mouse_y;
+	float _mouse_x, _mouse_y;
 
 	//! Holds the time since the last mouse movement
 	int32 _mouse_update_time;
@@ -653,10 +653,12 @@ public:
 	//@}
 
 	//@{
-	void GetMousePosition(int32& x, int32& y) const
+	void GetMousePosition(float& x, float& y) const
 		{ x = _mouse_x; y = _mouse_y; }
 	uint32_t TimeSinceLastMouseMovement() const
 		{ return _mouse_update_time; }
+	bool MouseMoved() const
+		{ return _mouse_update_time == 0; }
 	bool ClickState() const
 		{ return _mouse_click_state; }
 	bool ClickPress() const
