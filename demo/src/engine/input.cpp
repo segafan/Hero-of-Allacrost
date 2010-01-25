@@ -41,6 +41,11 @@ InputEngine::InputEngine() {
 	if (INPUT_DEBUG) cout << "INPUT: InputEngine constructor invoked" << endl;
 	_any_key_press		    = false;
 	_any_key_release	    = false;
+	_mouse_x              = 0;
+	_mouse_y              = 0;
+	_mouse_update_time    = 1000;
+	_mouse_click_state    = false;
+	_mouse_click_state_previous = false;
 	_last_axis_moved      = -1;
 	_up_state             = false;
 	_up_press             = false;
@@ -204,6 +209,8 @@ bool InputEngine::AnyKeyRelease() {
 // Handles all of the event processing for the game.
 void InputEngine::EventHandler() {
 	SDL_Event event; // Holds the game event
+	
+	bool mouse_activity = _mouse_click_state;
 
 	// Reset all of the press and release flags so that they don't get detected twice.
 	_any_key_press   = false;
@@ -229,6 +236,7 @@ void InputEngine::EventHandler() {
 	_right_select_release = false;
 	_left_select_press    = false;
 	_left_select_release  = false;
+	_mouse_click_state_previous = _mouse_click_state;
 
 	_pause_press = false;
 	_quit_press = false;
@@ -276,10 +284,21 @@ void InputEngine::EventHandler() {
 		else if (event.type == SDL_KEYUP || event.type == SDL_KEYDOWN) {
 			_KeyEventHandler(event.key);
 		}
+		else if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONUP || event.type == SDL_MOUSEBUTTONDOWN) {
+			_MouseEventHandler(event);
+			mouse_activity = true;
+		}
 		else {
 			_JoystickEventHandler(event);
 		}
 	} // while (SDL_PollEvent(&event)
+	if (mouse_activity) {
+		_mouse_update_time = 0;
+	}
+	else {
+		_mouse_update_time += SystemManager->GetUpdateTime();
+	}
+	SDL_ShowCursor((_mouse_update_time > 2000) ? SDL_DISABLE : SDL_ENABLE);
 } // void InputEngine::EventHandler()
 
 
@@ -454,6 +473,24 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 	}
 } // void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event)
 
+void InputEngine::_MouseEventHandler(SDL_Event& mouse_event) {
+	if (mouse_event.type == SDL_MOUSEMOTION) {
+		_mouse_x = mouse_event.motion.x;
+		_mouse_y = mouse_event.motion.y;
+	}
+	else if (mouse_event.type == SDL_MOUSEBUTTONDOWN &&
+	         mouse_event.button.button == SDL_BUTTON_LEFT) {
+		_mouse_click_state = true;
+		_mouse_x = mouse_event.button.x;
+		_mouse_y = mouse_event.button.y;
+	}
+	else if (mouse_event.type == SDL_MOUSEBUTTONUP &&
+	         mouse_event.button.button == SDL_BUTTON_LEFT) {
+		_mouse_click_state = false;
+		_mouse_x = mouse_event.button.x;
+		_mouse_y = mouse_event.button.y;
+	}
+}
 
 // Handles all joystick events for the game
 void InputEngine::_JoystickEventHandler(SDL_Event& js_event) {
