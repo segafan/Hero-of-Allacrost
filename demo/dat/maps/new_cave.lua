@@ -625,6 +625,7 @@ function QuickEnemySnakes(x1, y1, x2, y2, n)
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(3);
 	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
+	enemy:SetBattleBackground("img/backdrops/battle/desert_cave.png");
 	-- Add the enemy to the zone n times (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, n);
 
@@ -656,6 +657,7 @@ function QuickEnemySlime(x1, y1, x2, y2, n)
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(3);
 	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
+	enemy:SetBattleBackground("img/backdrops/battle/desert_cave.png");
 	-- Add the enemy to the zone n times (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, n);
 
@@ -682,6 +684,7 @@ function QuickEnemyGiant(x1, y1, x2, y2, n)
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(104);
 	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
+	enemy:SetBattleBackground("img/backdrops/battle/desert_cave.png");
 	-- Add the enemy to the zone n times (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, n);
 

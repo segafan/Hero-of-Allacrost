@@ -301,6 +301,10 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 			if (enemy_battle_music != "")
 				BM->AddMusic(enemy_battle_music);
 
+			string battle_background = enemy->GetBattleBackground();
+			if (battle_background != "")
+				BM->AddBackground(battle_background);
+
 			const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
 			for (uint32 i = 0; i < enemy_party.size(); i++) {
 				BM->AddEnemy(enemy_party[i]);
@@ -718,7 +722,8 @@ EnemySprite::EnemySprite() :
 	_aggro_range(8.0f),
 	_time_dir_change(2500),
 	_time_to_spawn(3500),
-	_music_theme("")
+	_music_theme(""),
+	_bg_file("")
 {
 	filename = "";
 	MapObject::_object_type = ENEMY_TYPE;
