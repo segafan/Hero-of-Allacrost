@@ -414,7 +414,7 @@ function Load(m)
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
-	exit_zone:AddSection(hoa_map.ZoneSection(0, 80, 4, 90));
+	exit_zone:AddSection(hoa_map.ZoneSection(0, 0, 10, 128));
 	map:AddZone(exit_zone);
 
 	-- Create zones for switching the map context
@@ -452,7 +452,7 @@ function Load(m)
 		event_supervisor:StartEvent(23001);                       -- start dialogue
 	else
 		-- No special event, so just start at the entrance
-		sprite = ConstructSprite("Claudius", 1000, 6, 85);        -- place Claudius at the south entrance
+		sprite = ConstructSprite("Claudius", 1000, 16, 85);       -- place Claudius at the entrance
 		map:AddGroundObject(sprite);                              -- add Claudius to map
 	end
 

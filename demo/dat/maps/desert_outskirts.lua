@@ -808,7 +808,7 @@ function Load(m)
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
-	exit_zone:AddSection(hoa_map.ZoneSection(20, 0, 30, 3));
+	exit_zone:AddSection(hoa_map.ZoneSection(0, 0, 58, 3));
 	map:AddZone(exit_zone);
 
 	-- Register event functions

@@ -435,15 +435,15 @@ function Load(m)
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
-	exit_zone:AddSection(hoa_map.ZoneSection(50, 122, 70, 127));
+	exit_zone:AddSection(hoa_map.ZoneSection(18, 122, 113, 127)); -- south exit
 	map:AddZone(exit_zone);
 
 	exit_zone2 = hoa_map.MapZone();
-	exit_zone2:AddSection(hoa_map.ZoneSection(0, 80, 17, 85));
+	exit_zone2:AddSection(hoa_map.ZoneSection(0, 80, 17, 85)); -- west exit
 	map:AddZone(exit_zone2);
 
 	exit_zone3 = hoa_map.MapZone();
-	exit_zone3:AddSection(hoa_map.ZoneSection(124, 80, 128, 90));
+	exit_zone3:AddSection(hoa_map.ZoneSection(114, 0, 128, 127)); -- east exit
 	map:AddZone(exit_zone3);
 
 	-- Create zones for switching the map context
