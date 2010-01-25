@@ -441,7 +441,7 @@ function Load(m)
 		GlobalManager:RemoveCharacter(KYLE);                       -- Kyle disappears, get him out of the party
 
 		-- Generic Karlate Sprite, wakes up Claudius
-		wakeupguy = ConstructSprite("Karlate", 8, 120, 15, 0.0, 0.0);
+		wakeupguy = ConstructSprite("Karlate", 8, 70, 50, 0.0, 0.0);
 		wakeupguy:AddDialogueReference(5);
 		wakeupguy:SetContext(2);
 		map:AddGroundObject(wakeupguy);
@@ -522,7 +522,8 @@ function CreateDialogue()
 end
 
 map_functions[1] = function()
-	event = hoa_map.PathMoveSpriteEvent(10002, wakeupguy, 52, 60);
+	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal", 1);
+	event = hoa_map.PathMoveSpriteEvent(10002, wakeupguy, 30, 90);
 	event_supervisor:RegisterEvent(event);
 	event_supervisor:StartEvent(10002);
 end

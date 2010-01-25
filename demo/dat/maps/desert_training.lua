@@ -374,7 +374,8 @@ context_01 = { 0, 0, 0, -1, 0, 0, 1, -1, 0, 0, 2, -1, 0, 0, 3, -1, 0, 0, 4, -1, 
 
 -- Allacrost map editor end. Do not edit this line. --
 
--- these are NPC's who will need to be accessed by multiple functions
+-- these are sprites which will need to be accessed by multiple functions
+claudius_sprite = nil;
 kyle = nil;
 captain = nil;
 
@@ -397,20 +398,20 @@ function Load(m)
 		GlobalManager:AddNewEventGroup("kyle_story");
 	end
 
-	kyle = ConstructSprite("Kyle", 2, 1, 1, 0.0, 0.0);
+	-- TODO: determine which entrance to start at
+	claudius_sprite = ConstructSprite("Claudius", 1000, 65, 90);       -- place Claudius in the middle of the map
+	claudius_sprite:LoadAttackAnimations("img/sprites/map/claudius_attack.png");
+
+	kyle = ConstructSprite("Kyle", 2, 66, 50, 0.0, 0.0);
 	kyle:SetContext(2);
-	kyle:SetVisible(false);
 	kyle:SetNoCollision(true);
-	kyle:SetUpdatable(false);
-	kyle:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
-	map:AddGroundObject(kyle);
+	kyle:SetMovementSpeed(hoa_map.MapMode.FAST_SPEED);
 	
 	-- Add NPC Karlate Captain
-	captain = ConstructSprite("Captain", 3, 46, 68, 0.0, 0.0);
-	captain:AddDialogueReference(1);
+	captain = ConstructSprite("Captain", 3, 60, 46, 0.0, 0.0);
+	captain:SetContext(2);
 	captain:AddDialogueReference(2);
-	map:AddGroundObject(captain);
-
+	
 	-- Generic Karlate Sprite (training site guard #1)
 	sprite = ConstructSprite("Karlate", 4, 52, 78, 0.0, 0.0);
 	sprite:AddDialogueReference(3);
@@ -426,7 +427,7 @@ function Load(m)
 	sprite:AddDialogueReference(5);
 	map:AddGroundObject(sprite);
 
-	-- Generic Karlate Sprite
+	-- Generic Karlate Sprite (inside training hall)
 	sprite = ConstructSprite("Karlate", 7, 42, 45, 0.0, 0.0);
 	sprite:AddDialogueReference(6);
 	sprite:SetContext(2);
@@ -465,6 +466,19 @@ function Load(m)
 	event = hoa_map.ScriptedEvent(6, 6, 0);
 	event_supervisor:RegisterEvent(event);
 
+	event = hoa_map.DialogueEvent(10000, 1); -- triggers initial dialogue with captain
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10001, kyle, 66, 124);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.AnimateSpriteEvent(10002, claudius_sprite); -- Claudius takes practice swing
+	event:AddFrame(12, 850);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10003, captain, 66, 50);
+	event_supervisor:RegisterEvent(event);
+
+	event = hoa_map.DialogueEvent(11000, 7); -- triggers transitionary dialogue
+	event_supervisor:RegisterEvent(event);
+
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_outskirts.lua");
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.MapTransitionEvent(22112, "dat/maps/new_cave.lua");
@@ -472,14 +486,32 @@ function Load(m)
 	event = hoa_map.MapTransitionEvent(22113, "dat/maps/desert_barracks.lua");
 	event_supervisor:RegisterEvent(event);
 
-	-- "Betrayal" dialogue
-	event = hoa_map.DialogueEvent(23001, 8);
-	event_supervisor:RegisterEvent(event);
 
-	-- TODO: determine which entrance to start at
-	sprite = ConstructSprite("Claudius", 1000, 65, 120);      -- place Claudius at the south entrance
-	map:AddGroundObject(sprite);                              -- add Claudius to map
-	map:SetCamera(sprite);                                    -- Set the camera to focus on the player's sprite
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("kyle_leaves") == false) then
+		-- executes if this is the first time in this map
+		map:AddGroundObject(captain);
+		map:AddGroundObject(kyle);
+		claudius_sprite:SetContext(2);
+		claudius_sprite:SetXPosition(60, 0);
+		claudius_sprite:SetYPosition(50, 0);
+		event_supervisor:StartEvent(10000);
+	elseif (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true) then
+		-- do we need to do anything here?  just don't let it fall through to the next one
+	elseif (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
+		-- executes if we just fought the beast in the desert
+		claudius_sprite:SetXPosition(66, 0);
+		claudius_sprite:SetYPosition(120, 0);
+
+		kyle:SetXPosition(60, 0);
+		kyle:SetYPosition(120, 0);
+		kyle:SetContext(1);
+
+		map:AddGroundObject(kyle);
+		event_supervisor:StartEvent(11000);
+	end
+
+	map:AddGroundObject(claudius_sprite);    -- add Claudius to map
+	map:SetCamera(claudius_sprite);          -- Set the camera to focus on the player's sprite
 end -- function Load()
 
 
@@ -528,56 +560,56 @@ function CreateDialogue()
 	text = hoa_utils.Translate("Kyle leaves.");
 	dialogue:AddText(text, 2, 7, 3, false);
 	text = hoa_utils.Translate("Show me your slicing attack technique.");
-	dialogue:AddText(text, 3, 8, 0, false);
+	dialogue:AddText(text, 3, 8, 10002, false);
 	text = hoa_utils.Translate("Hi-ya!");
 	dialogue:AddText(text, 1000, 9, 0, false);
 	text = hoa_utils.Translate("Good Claudius. Remember to never take your eye off your target. Now show me the proper form for a parry.");
-	dialogue:AddText(text, 3, 10, 0, false);
-	text = hoa_utils.Translate("Claudius blocks.");
-	dialogue:AddText(text, 1000, 11, 0, false);
+	dialogue:AddText(text, 3, 10, 10002, false);
 	text = hoa_utils.Translate("Nicely done.");
-	dialogue:AddText(text, 3, 12, 0, false);
+	dialogue:AddText(text, 3, 11, 0, false);
 	text = hoa_utils.Translate("Thank you, sir.");
-	dialogue:AddText(text, 1000, 13, 0, false);
+	dialogue:AddText(text, 1000, 12, 0, false);
 	text = hoa_utils.Translate("Let’s see how you fare when the opponent strikes back. Get down here Kyle!");
-	dialogue:AddText(text, 3, 14, 0, false);
+	dialogue:AddText(text, 3, 13, 0, false);
 	text = hoa_utils.Translate("Where's that friend of yours run off to this time?");
-	dialogue:AddText(text, 3, 15, 0, false);
+	dialogue:AddText(text, 3, 14, 0, false);
 	text = hoa_utils.Translate("I don’t know, sir. (Not again, Kyle...)");
-	dialogue:AddText(text, 1000, 16, 0, false);
+	dialogue:AddText(text, 1000, 15, 0, false);
 	text = hoa_utils.Translate("All right, you’ll face me then.");
-	dialogue:AddText(text, 3, 17, 0, false);
+	dialogue:AddText(text, 3, 16, 5, false);
 	text = hoa_utils.Translate("Sir?");
-	dialogue:AddText(text, 1000, 18, 0, false);
+	dialogue:AddText(text, 1000, 17, 0, false);
 	text = hoa_utils.Translate("Draw your weapon, soldier.");
-	dialogue:AddText(text, 3, 19, 0, false);
+	dialogue:AddText(text, 3, 18, 0, false);
 	text = hoa_utils.Translate("Remember what you've learned.");
+	dialogue:AddText(text, 3, 19, 10002, false);
+	text = hoa_utils.Translate("Well done, Claudius.  \nThat's all for today.");
 	dialogue:AddText(text, 3, 20, 0, false);
-	text = hoa_utils.Translate("Well done, Claudius.");
-	dialogue:AddText(text, 3, 21, 0, false);
-	text = hoa_utils.Translate("That's all for today.");
-	dialogue:AddText(text, 3, 22, 0, false);
 	text = hoa_utils.Translate("Yes, sir.");
+	dialogue:AddText(text, 1000, 21, 0, false);
+	text = hoa_utils.Translate("Claudius, there's something else we need to talk about.");
+	dialogue:AddText(text, 3, 22, 0, false);
+	text = hoa_utils.Translate("Yes?");
 	dialogue:AddText(text, 1000, 23, 0, false);
-	text = hoa_utils.Translate("Come with me, Claudius, we need to talk.  Meet me in the training hall.");
-	dialogue:AddText(text, 3, -1, 5, false);
+	text = hoa_utils.Translate("You and Kyle are close.");
+	dialogue:AddText(text, 3, 24, 0, false);
+	text = hoa_utils.Translate("We are, sir.");
+	dialogue:AddText(text, 1000, 25, 0, false);
+	text = hoa_utils.Translate("This is difficult, but it needs to be said. You have a lot of potential, Claudius, but I worry about you. I know Kyle is your friend, but I fear he is becoming an impediment to you in your quest for knighthood.");
+	dialogue:AddText(text, 3, 26, 0, false);
+	text = hoa_utils.Translate("Kyle is a good man, sir. He just makes mistakes sometimes.");
+	dialogue:AddText(text, 1000, 27, 0, false);
+	text = hoa_utils.Translate("Regardless, I want you to seriously consider your priorities. Becoming a knight takes sacrifice, and sometimes that sacrifice is spending less time with the people we care about.");
+	dialogue:AddText(text, 3, 28, 0, false);
+	text = hoa_utils.Translate("I understand, sir.");
+	dialogue:AddText(text, 1000, 29, 0, false);
+	text = hoa_utils.Translate("Just think about it. Now, do me a favor and find Kyle. I need to have a talk with him as well.");
+	dialogue:AddText(text, 3, -1, 6, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(2);
-	text = hoa_utils.Translate("You and Kyle are close.");
-	dialogue:AddText(text, 3, 1, 0, false);
-	text = hoa_utils.Translate("We are, sir.");
-	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_utils.Translate("This is difficult, but it needs to be said. You have a lot of potential, Claudius, but I worry about you. I know Kyle is your friend, but I fear he is becoming an impediment to you in your quest for knighthood.");
-	dialogue:AddText(text, 3, 3, 0, false);
-	text = hoa_utils.Translate("Kyle is a good man, sir. He just messes up sometimes.");
-	dialogue:AddText(text, 1000, 4, 0, false);
-	text = hoa_utils.Translate("Regardless, I want you to seriously consider your priorities. Becoming a knight takes sacrifice, and sometimes that sacrifice is spending less time with the people we care about.");
-	dialogue:AddText(text, 3, 5, 0, false);
-	text = hoa_utils.Translate("I understand, sir.");
-	dialogue:AddText(text, 1000, 6, 0, false);
-	text = hoa_utils.Translate("Just think about it. Now, do me a favor and find Kyle. I need to have a talk with him as well.");
-	dialogue:AddText(text, 3, -1, 6, false);
+	text = hoa_utils.Translate("I need you to look for Kyle.  I hope he didn't wander off.  Maybe the other soldiers know where he is?");
+	dialogue:AddText(text, 3, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(3);
@@ -585,19 +617,41 @@ function CreateDialogue()
 	dialogue:AddText(text, 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(4);
-	text = hoa_utils.Translate("I hear some guy stole from the kitchen yesterday.  They've tightened up security.");
-	dialogue:AddText(text, 5, -1, 0, false);
-	dialogue_supervisor:AddDialogue(dialogue);
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true) then
+		-- change some dialogue if betrayal has occurred
+		dialogue = hoa_map.MapDialogue(4);
+		text = hoa_utils.Translate("The captain and some others went off to the cave down that path to the west.");
+		dialogue:AddText(text, 5, -1, 0, false);
+		dialogue_supervisor:AddDialogue(dialogue);
+	else
+		dialogue = hoa_map.MapDialogue(4);
+		text = hoa_utils.Translate("Kyle?  Oh, yeah, I think he went off to the south.");
+		dialogue:AddText(text, 5, -1, 0, false);
+		dialogue_supervisor:AddDialogue(dialogue);
+	end
 
 	dialogue = hoa_map.MapDialogue(5);
 	text = hoa_utils.Translate("Hello, Claudius.  Is your equipment in order?");
 	dialogue:AddText(text, 6, -1, 2, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(6);
-	text = hoa_utils.Translate("Looking for someone to spar with?");
-	dialogue:AddText(text, 4, -1, 0, false);
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true) then
+		dialogue = hoa_map.MapDialogue(6);
+		text = hoa_utils.Translate("You'd be a fool to run out into the desert on your own for very long.  There's a cave to the west, though, and if you go far enough, you'll find water.");
+		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue_supervisor:AddDialogue(dialogue);
+	else
+		dialogue = hoa_map.MapDialogue(6);
+		text = hoa_utils.Translate("I hear some guy stole from the kitchen yesterday.  They've tightened up security.");
+		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue_supervisor:AddDialogue(dialogue);
+	end
+
+	dialogue = hoa_map.MapDialogue(7);
+	text = hoa_utils.Translate("Back home... hey Claudius, we should get some rest.  Let's head back to the barracks.");
+	dialogue:AddText(text, 2, 1, 0, false);
+	text = hoa_utils.Translate("Okay, let's call it a night.");
+	dialogue:AddText(text, 1000, -1, 22113, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 end
 
@@ -614,37 +668,21 @@ end
 map_functions[3] = function()
 	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("kyle_leaves", 1);
 	GlobalManager:RemoveCharacter(KYLE);
-	kyle:SetContext(1);
-	kyle:SetVisible(true);
-	kyle:SetNoCollision(true);
-	kyle:SetUpdatable(true);
-	kyle:SetXPosition(46, 0);
-	kyle:SetYPosition(72, 0);
-	-- set Kyle's path to the bottom of the screen, then let him disappear
-	event = hoa_map.PathMoveSpriteEvent(10001, kyle, 46, 124);
-	event_supervisor:RegisterEvent(event);
+	-- set Kyle's path to the bottom of the screen
 	event_supervisor:StartEvent(10001);
 end
 
 map_functions[4] = function()
-
+	
 end
 
--- Captain goes inside to speak with Claudius
+-- Captain moves
 map_functions[5] = function()
-	captain:SetXPosition(56, 0);
-	captain:SetYPosition(50, 0);
-	captain:SetContext(2);
+	kyle:SetContext(2); -- now is a good time to make Kyle disappear
+	event_supervisor:StartEvent(10003); -- then move the captain
 end
 
--- Hide captain, he has nothing left to say
--- NOTE: It may be preferable to give him a single line of dialogue
--- allowing him to stay on the map, but we need a way to do that
+-- Done talking to captain
 map_functions[6] = function()
-	captain:SetVisible(false);
-	captain:SetNoCollision(true);
-	captain:SetUpdatable(false);
-	captain:SetContext(1);
-	kyle:SetContext(2); -- kyle goes missing, so make him disappear too
 	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("kyle_missing", 1);
 end
