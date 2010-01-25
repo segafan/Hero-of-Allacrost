@@ -11,11 +11,13 @@
 
 #include "option.h"
 #include "video.h"
+#include "input.h"
 
 using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video::private_video;
+using namespace hoa_input;
 
 namespace hoa_video {
 
@@ -130,7 +132,13 @@ OptionBox::OptionBox() :
 	_text_style = TextStyle("default", Color::white, VIDEO_TEXT_SHADOW_BLACK, 1, -2);
 }
 
-
+template <class T>
+static bool InRange(T value, T bound1, T bound2) {
+	if (bound1 > bound2) {
+		std::swap(bound1, bound2);
+	}
+	return value >= bound1 && value < bound2;
+}
 
 void OptionBox::Update(uint32 frame_time) {
 	_event = 0; // Clear all events
@@ -145,6 +153,75 @@ void OptionBox::Update(uint32 frame_time) {
 			_scroll_time = 0;
 			_scrolling = false;
 		}
+	}
+
+	if (InputManager->MouseMoved() && ContainsMouse()) {
+		// code shamelessly copied from the draw function
+		float left, right, bottom, top;
+
+		left = 0.0f;
+		right = _number_cell_columns * _cell_width;
+		bottom = 0.0f;
+		top = _number_cell_rows * _cell_height;
+		CalculateAlignedRect(left, right, bottom, top);
+		
+		const CoordSys& cs = VideoManager->GetCoordSys();
+
+		float mouse_x, mouse_y;
+		float actual_x, actual_y;
+		InputManager->GetMousePosition(mouse_x, mouse_y);
+		cs.ConvertNormalisedToLocal(actual_x, actual_y, mouse_x, mouse_y);
+		float scroll_offset = 0.0f;
+
+		if (_scrolling && _scroll_direction == -1) { // Scrolling up
+			scroll_offset = cs.GetVerticalDirection() * (1.0f - (_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
+		}
+		else if (_scrolling) { // Scrolling down
+			scroll_offset = cs.GetVerticalDirection() * ((_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _cell_height;
+		}
+
+		float xoff = _cell_width * cs.GetHorizontalDirection();
+		float yoff = -_cell_height * cs.GetVerticalDirection();
+		bool finished = false;
+		
+		OptionCellBounds bounds;
+		bounds.y_top = top + scroll_offset;
+		bounds.y_center = bounds.y_top - 0.5f * _cell_height * cs.GetVerticalDirection();
+		bounds.y_bottom = (bounds.y_center * 2.0f) - bounds.y_top;
+
+		// ---------- (3) Iterate through all the visible option cells and draw them and the draw cursor
+		for (uint32 row = _draw_top_row; row < _draw_top_row + _number_cell_rows && !finished; row++) {
+			bounds.x_left = left;
+			bounds.x_center = bounds.x_left + (0.5f * _cell_width * cs.GetHorizontalDirection());
+			bounds.x_right = (bounds.x_center * 2.0f) - bounds.x_left;
+
+			for (uint32 col = _draw_left_column; col < _draw_left_column + _number_cell_columns; ++col) {
+				uint32 index = row * _number_cell_columns + col;
+
+				// If there are more visible cells than there are options available we leave those cells empty
+				if (index >= GetNumberOptions()) {
+					finished = true;
+					break;
+				}
+				
+				if (InRange<float>(actual_x, bounds.x_left, bounds.x_right) &&
+				    InRange<float>(actual_y, bounds.y_bottom, bounds.y_top))
+				{
+					finished = true;
+					SetSelection(index);
+					break;
+				}
+	
+				bounds.x_left += xoff;
+				bounds.x_center += xoff;
+				bounds.x_right += xoff;
+			}
+			bounds.y_top += yoff;
+			bounds.y_bottom += yoff;
+		}
+	}
+	if (InputManager->ClickPress() && ContainsMouse()) {
+		InputConfirm();
 	}
 }
 

@@ -477,7 +477,7 @@ void InputEngine::_MouseEventHandler(SDL_Event& mouse_event) {
 	if (mouse_event.type == SDL_MOUSEMOTION) {
 		SDL_Surface* screen = SDL_GetVideoSurface();
 		_mouse_x = mouse_event.motion.x / (float)(screen->w);
-		_mouse_y = 1.0f - (mouse_event.motion.x / (float)(screen->h));
+		_mouse_y = 1.0f - (mouse_event.motion.y / (float)(screen->h));
 	}
 	else if (mouse_event.type == SDL_MOUSEBUTTONDOWN &&
 	         mouse_event.button.button == SDL_BUTTON_LEFT) {
