@@ -229,7 +229,8 @@ bool JoinPartyEvent::_Update() {
 
 BattleEncounterEvent::BattleEncounterEvent(uint32 event_id, uint32 enemy_id) :
 	MapEvent(event_id, BATTLE_ENCOUNTER_EVENT),
-	_battle_music("mus/Confrontation.ogg")
+	_battle_music("mus/Confrontation.ogg"),
+	_battle_background("img/backdrops/battle/desert.png")
 {
 	_enemy_ids.push_back(enemy_id);
 }
@@ -245,6 +246,10 @@ void BattleEncounterEvent::SetMusic(std::string filename) {
 	_battle_music = filename;
 }
 
+
+void BattleEncounterEvent::SetBackground(std::string filename) {
+	_battle_background = filename;
+}
 
 
 void BattleEncounterEvent::AddEnemy(uint32 enemy_id) {
@@ -268,6 +273,7 @@ void BattleEncounterEvent::_Start() {
 		batt_mode->AddEvent(new BattleEvent(_battle_event_ids.at(i)));
 	}
 	batt_mode->AddMusic(_battle_music);
+	batt_mode->AddBackground(_battle_background);
 	ModeManager->Push(batt_mode);
 }
 

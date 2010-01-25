@@ -847,6 +847,7 @@ map_functions[2] = function()
 	-- Sets up and starts boss encounter
 	local event = hoa_map.BattleEncounterEvent(11000, 103);
 	event:SetMusic("mus/The_Creature_Awakens.ogg");
+	event:SetBackground("img/backdrops/battle/desert.png");
 	event:AddEventLink(11001, false, 0);
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.DialogueEvent(11001, 2);
