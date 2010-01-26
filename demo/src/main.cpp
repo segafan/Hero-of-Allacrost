@@ -329,15 +329,15 @@ void InitializeEngine() throw (Exception) {
 	SDL_WM_SetCaption("Hero of Allacrost", "Hero of Allacrost");
 
 	// Hide the mouse cursor since we don't use or acknowledge mouse input from the user
-	//SDL_ShowCursor(SDL_DISABLE);
+	SDL_ShowCursor(SDL_DISABLE);
 
 	// Enabled for multilingual keyboard support
 	SDL_EnableUNICODE(1);
 
 	// Ignore the events that we don't care about so they never appear in the event queue
-	//SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-	//SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
-	//SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
+	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
+	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
+	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
 	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);

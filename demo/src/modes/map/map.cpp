@@ -418,17 +418,9 @@ void MapMode::_UpdateExplore() {
 			_run_stamina = 10000;
 	}
 
-	float mouse_x, mouse_y;
-	InputManager->GetMousePosition(mouse_x, mouse_y);
-
 	// If the user requested a confirm event, check if there is a nearby object that the player may interact with
 	// Interactions are currently limited to dialogue with sprites and opening of treasures
-	if (InputManager->ConfirmPress() ||
-	   (InputManager->ClickPress() &&
-		mouse_x > 0.38f &&
-		mouse_x < 0.62f &&
-		mouse_y > 0.38f &&
-		mouse_y < 0.62f)) {
+	if (InputManager->ConfirmPress()) {
 		MapObject* obj = _object_supervisor->FindNearestObject(_camera);
 
 		if (obj && (obj->GetType() == SPRITE_TYPE)) {
@@ -449,7 +441,7 @@ void MapMode::_UpdateExplore() {
 	}
 
 	// Detect movement input from the user
-	if (InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState() || InputManager->ClickState()) {
+	if (InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState()) {
 		_camera->moving = true;
 	}
 	else {
@@ -459,28 +451,28 @@ void MapMode::_UpdateExplore() {
 	// Determine the direction of movement. Priority of movement is given to: up, down, left, right.
 	// In the case of diagonal movement, the direction that the sprite should face also needs to be deduced.
 	if (_camera->moving == true) {
-		if (InputManager->UpState() || (mouse_y > 0.55f && InputManager->ClickState()))
+		if (InputManager->UpState())
 		{
-			if (InputManager->LeftState() || (mouse_x < 0.45f && InputManager->ClickState()))
+			if (InputManager->LeftState())
 				_camera->SetDirection(MOVING_NORTHWEST);
-			else if (InputManager->RightState() || (mouse_x > 0.55f && InputManager->ClickState()))
+			else if (InputManager->RightState())
 				_camera->SetDirection(MOVING_NORTHEAST);
 			else
 				_camera->SetDirection(NORTH);
 		}
-		else if (InputManager->DownState() || (mouse_y < 0.45f && InputManager->ClickState()))
+		else if (InputManager->DownState())
 		{
-			if (InputManager->LeftState() || (mouse_x < 0.45f && InputManager->ClickState()))
+			if (InputManager->LeftState())
 				_camera->SetDirection(MOVING_SOUTHWEST);
-			else if (InputManager->RightState() || (mouse_x > 0.55f && InputManager->ClickState()))
+			else if (InputManager->RightState())
 				_camera->SetDirection(MOVING_SOUTHEAST);
 			else
 				_camera->SetDirection(SOUTH);
 		}
-		else if (InputManager->LeftState() || (mouse_x < 0.45f && InputManager->ClickState())) {
+		else if (InputManager->LeftState()) {
 			_camera->SetDirection(WEST);
 		}
-		else if (InputManager->RightState() || (mouse_x > 0.55f && InputManager->ClickState())) {
+		else if (InputManager->RightState()) {
 			_camera->SetDirection(EAST);
 		}
 	} // if (_camera->moving == true)

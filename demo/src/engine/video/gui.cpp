@@ -9,7 +9,6 @@
 
 #include "video.h"
 #include "gui.h"
-#include "input.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -100,20 +99,6 @@ void GUIElement::CalculateAlignedRect(float& left, float& right, float& bottom, 
 	top    += y_off;
 	bottom += y_off;
 } // void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
-
-
-
-bool GUIElement::ContainsMouse() const {
-	float mouseX, mouseY;
-	float actualX, actualY;
-	hoa_input::InputManager->GetMousePosition(mouseX, mouseY);
-	VideoManager->GetCoordSys().ConvertNormalisedToLocal(actualX, actualY, mouseX, mouseY);
-	if (actualX < _x_position || actualX >= (_x_position + _width))
-		return false;
-	if (actualY < _y_position || actualY >= (_y_position + _height))
-		return false;
-	return true;
-}
 
 
 
