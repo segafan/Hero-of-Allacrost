@@ -188,18 +188,6 @@ private:
 	//! Holds the current user-defined joystick settings
 	private_input::JoystickState _joystick;
 
-	//! Holds the current mouse coordinates
-	float _mouse_x, _mouse_y;
-
-	//! Holds the time since the last mouse movement
-	int32 _mouse_update_time;
-
-	//! Mouse left-click held
-	bool _mouse_click_state;
-
-	//! Mouse previous left-click state
-	bool _mouse_click_state_previous;
-
 	//! Any key (or joystick button) pressed
 	bool _any_key_press;
 
@@ -271,15 +259,11 @@ private:
 	 **/
 	SDL_Event _event;
 
-	/** \brief Processes all keyboard input events
+	/** \brief Processes all keyboard input event
 	*** \param key_event The event to process
 	**/
 	void _KeyEventHandler(SDL_KeyboardEvent& key_event);
-	/** \brief Processes all mouse input events
-	*** \param js_event The event to process
-	**/
-	void _MouseEventHandler(SDL_Event& js_event);
-	/** \brief Processes all joystick input events
+	/** \brief Processes all joystick input event
 	*** \param js_event The event to process
 	**/
 	void _JoystickEventHandler(SDL_Event& js_event);
@@ -650,21 +634,6 @@ public:
 
 	int32 GetPauseKey() const
 		{ return _key.pause; }
-	//@}
-
-	//@{
-	void GetMousePosition(float& x, float& y) const
-		{ x = _mouse_x; y = _mouse_y; }
-	uint32_t TimeSinceLastMouseMovement() const
-		{ return _mouse_update_time; }
-	bool MouseMoved() const
-		{ return _mouse_update_time == 0; }
-	bool ClickState() const
-		{ return _mouse_click_state; }
-	bool ClickPress() const
-		{ return _mouse_click_state && !_mouse_click_state_previous; }
-	bool ClickRelease() const
-		{ return !_mouse_click_state && _mouse_click_state_previous; }
 	//@}
 
 	//! \brief Returns the most recent event retrieved from SDL

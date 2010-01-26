@@ -70,16 +70,6 @@ public:
 		{ return fabs(_top - _bottom); }
 	//@}
 
-	//! \brief Normalisation functions
-	//@{
-	void ConvertNormalisedToLocal(float& localX, float& localY, float normalisedX, float normalisedY) const
-		{ localX = _left + normalisedX * (_right - _left);
-		  localY = _bottom + normalisedY * (_top - _bottom); }
-	void ConvertLocalToNormalised(float& normalisedX, float& normalisedY, float localX, float localY) const
-		{ normalisedX = (_left - localX) / (_right - _left);
-		  normalisedY = (_bottom - localY) / (_top - _bottom); }
-	//@}
-
 private:
 	//! \brief If the y-coordinates increase from bottom to top, this is 1.0f. Otherwise it is -1.0f.
 	float _vertical_direction;
