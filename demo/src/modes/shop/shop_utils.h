@@ -389,6 +389,11 @@ public:
 	**/
 	virtual void RefreshAllEntries();
 
+	/** \brief Returns a pointer to the currently selected shop object
+	*** This method may return NULL if the current selection is invalid or the _objects container is empty
+	**/
+	ShopObject* GetSelectedObject();
+
 	//! \brief Updates the option boxes
 	void Update();
 

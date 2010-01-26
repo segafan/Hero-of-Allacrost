@@ -192,6 +192,9 @@ void BuyInterface::Initialize() {
 
 
 void BuyInterface::MakeActive() {
+	for (uint32 i = 0; i < _list_displays.size(); i++)
+		_list_displays[i]->ReconstructList();
+
 	ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(_view_mode);
 	ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(_selected_object);
 	_category_display.ChangeViewMode(_view_mode);
@@ -521,8 +524,10 @@ void BuyListDisplay::ReconstructList() {
 		_property_list.AddOption(MakeUnicodeString("x" + NumberToString(shop_obj->GetBuyCount())));
 	}
 
-	_identify_list.SetSelection(0);
-	_property_list.SetSelection(0);
+	if (_objects->empty() == false) {
+		_identify_list.SetSelection(0);
+		_property_list.SetSelection(0);
+	}
 }
 
 

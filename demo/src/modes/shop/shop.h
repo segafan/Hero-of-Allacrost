@@ -458,11 +458,14 @@ public:
 	**/
 	void RemoveObjectFromSellList(private_shop::ShopObject* object);
 
-	/** \brief Called whenever the player successfully confirms a transaction
+	/** \brief Called whenever the player chooses to clear all marked purchases, sales, and trades
+	*** This will empty the buy/sell/trade lists and reset the total costs and sales amounts
+	**/
+	void ClearOrder();
+
+	/** \brief Called whenever the player confirms a transaction
 	*** This method processes the transaction, including modifying the party's drune count, adding/removing
-	*** objects from the inventory, and auto equipping/un-equipping traded equipment. It also calls appropriate
-	*** methods in the various shop interfaces to update their display lists with the updated inventory contents and
-	*** shop stocks.
+	*** objects from the inventory, and auto equipping/un-equipping traded equipment.
 	**/
 	void CompleteTransaction();
 

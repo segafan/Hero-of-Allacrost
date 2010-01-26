@@ -81,10 +81,10 @@ private:
 	//! \brief Header text for the list of object properties (refer to the BuyListDisplay class)
 	hoa_video::OptionBox _properties_header;
 
-	//! \brief String representations of all category names that may
+	//! \brief String representations of all object categories where purchases are available
 	std::vector<hoa_utils::ustring> _category_names;
 
-	//! \brief A pointer to icon images
+	//! \brief A pointer to the icon image for each purchasable object category
 	std::vector<hoa_video::StillImage*> _category_icons;
 
 	//! \brief Display manager for the current category of objects selected
