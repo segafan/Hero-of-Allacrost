@@ -1444,14 +1444,34 @@ void ShopMode::RemoveObjectFromSellList(ShopObject* object) {
 
 
 
-void ShopMode::CompleteTransaction() {
-	for (map<uint32, ShopObject*>:: iterator i = _buy_list.begin(); i != _buy_list.end(); i++) {
-		// TODO
-	}
+void ShopMode::ClearOrder() {
+	for (map<uint32, ShopObject*>::iterator i = _buy_list.begin(); i != _buy_list.end(); i++)
+		i->second->ResetBuyCount();
+	for (map<uint32, ShopObject*>::iterator i = _sell_list.begin(); i != _sell_list.end(); i++)
+		i->second->ResetSellCount();
 
-	for (map<uint32, ShopObject*>:: iterator i = _sell_list.begin(); i != _sell_list.end(); i++) {
-		// TODO
+	_buy_list.clear();
+	_sell_list.clear();
+
+	_total_costs = 0;
+	_total_sales = 0;
+	UpdateFinances(0, 0);
+}
+
+
+
+void ShopMode::CompleteTransaction() {
+	for (map<uint32, ShopObject*>::iterator i = _buy_list.begin(); i != _buy_list.end(); i++) {
+		if (i->second->GetBuyCount() == 0)
+			continue;
 	}
+	_buy_list.clear();
+
+	for (map<uint32, ShopObject*>::iterator i = _sell_list.begin(); i != _sell_list.end(); i++) {
+		if (i->second->GetSellCount() == 0)
+			continue;
+	}
+	_sell_list.clear();
 
 	map<uint32, GlobalObject*>* inventory = GlobalManager->GetInventory();
 	for (map<uint32, GlobalObject*>::iterator i = inventory->begin(); i != inventory->end(); i++) {

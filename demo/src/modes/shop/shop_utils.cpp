@@ -444,15 +444,38 @@ void ObjectListDisplay::PopulateList(vector<ShopObject*>* objects) {
 	}
 
 	_objects = objects;
-	ReconstructList();
 	_list_empty = _objects->empty();
+	ReconstructList();
 }
 
 
 
 void ObjectListDisplay::RefreshAllEntries() {
+	if (_objects == NULL)
+		return;
+
 	for (uint32 i = 0; i < _objects->size(); i++)
 		RefreshEntry(i);
+}
+
+
+
+ShopObject* ObjectListDisplay::GetSelectedObject() {
+	if (_objects == NULL)
+		return NULL;
+
+	if (_list_empty == true)
+		return NULL;
+
+	if (static_cast<uint32>(_identify_list.GetSelection()) >= _objects->size()) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "current selection index exceeds available objects: " << _identify_list.GetSelection() << endl;
+		return NULL;
+	}
+
+	uint32 selection = _identify_list.GetSelection();
+	cout << "selection: " << selection << endl;
+	cout << "objects size: " << _objects->size() << endl;
+	return _objects->at(_identify_list.GetSelection());
 }
 
 
