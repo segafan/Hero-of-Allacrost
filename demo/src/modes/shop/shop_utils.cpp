@@ -401,10 +401,7 @@ void ObjectCategoryDisplay::ChangeCategory(ustring& name, const StillImage* icon
 // ***** ObjectListDisplay class methods
 // *****************************************************************************
 
-ObjectListDisplay::ObjectListDisplay() :
-	_list_empty(true),
-	_objects(NULL)
-{
+ObjectListDisplay::ObjectListDisplay() {
 	_identify_list.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 	_identify_list.SetPosition(180.0f, 330.0f);
 	_identify_list.SetDimensions(300.0f, 300.0f, 1, 255, 1, 8);
@@ -429,53 +426,49 @@ ObjectListDisplay::ObjectListDisplay() :
 
 
 void ObjectListDisplay::Clear() {
-	_objects = NULL;
-	_list_empty = true;
+	_objects.clear();
 	_identify_list.ClearOptions();
 	_property_list.ClearOptions();
 }
 
 
 
-void ObjectListDisplay::PopulateList(vector<ShopObject*>* objects) {
-	if (objects == NULL) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "function was passed a NULL pointer argument" << endl;
-		return;
-	}
-
+void ObjectListDisplay::PopulateList(vector<ShopObject*>& objects) {
 	_objects = objects;
-	_list_empty = _objects->empty();
 	ReconstructList();
 }
 
 
 
 void ObjectListDisplay::RefreshAllEntries() {
-	if (_objects == NULL)
+	if (_objects.empty() == true)
 		return;
 
-	for (uint32 i = 0; i < _objects->size(); i++)
+	for (uint32 i = 0; i < _objects.size(); i++)
 		RefreshEntry(i);
 }
 
 
 
 ShopObject* ObjectListDisplay::GetSelectedObject() {
-	if (_objects == NULL)
+	if (_objects.empty() == true)
 		return NULL;
 
-	if (_list_empty == true)
-		return NULL;
-
-	if (static_cast<uint32>(_identify_list.GetSelection()) >= _objects->size()) {
+	if (static_cast<uint32>(_identify_list.GetSelection()) >= _objects.size()) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "current selection index exceeds available objects: " << _identify_list.GetSelection() << endl;
 		return NULL;
 	}
 
-	uint32 selection = _identify_list.GetSelection();
-	cout << "selection: " << selection << endl;
-	cout << "objects size: " << _objects->size() << endl;
-	return _objects->at(_identify_list.GetSelection());
+	return _objects[_identify_list.GetSelection()];
+}
+
+
+
+uint32 ObjectListDisplay::GetCurrentSelection() {
+	if (_objects.empty() == true)
+		return 0;
+	else
+		return static_cast<uint32>(_identify_list.GetSelection());
 }
 
 

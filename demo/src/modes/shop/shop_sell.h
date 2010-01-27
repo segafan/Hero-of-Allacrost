@@ -110,16 +110,6 @@ private:
 	//! \brief A single row option box containing the selected object's properties
 	hoa_video::OptionBox _selected_properties;
 
-	/** \brief Contains all objects to sell sorted into various category lists
-	***
-	*** The minimum size this container will ever be is two and the maximum it will be is nine. The first
-	*** entry (index 0) always holds the list of all objects regardless of categories. The proceeding
-	*** entries will be ordered based on object type, beginning with items and ending with key items.
-	*** For example, if the shop deals in weapons and shards, index 0 will hold a list of all weapons
-	*** and shards, index 1 will hold a list of all weapons, and index 2 will hold a list of all shards.
-	**/
-	std::vector<std::vector<ShopObject*> > _object_data;
-
 	/** \brief Takes all necessary action for when the active view mode is to be altered
 	*** \param new_mode The new view mode to set
 	**/
@@ -136,20 +126,6 @@ private:
 	*** \return True if the _selected_object member has changed
 	**/
 	bool _ChangeSelection(bool up_or_down);
-
-	/** \brief Change the sell quantity of the current selection
-	*** \param less_or_more False to decrease the quantity, true to increase it
-	*** \param amount The amount to decrease/increase the quantity by (default value == 1)
-	*** \return False if no quantity change could take place, true if a quantity change did occur
-	*** \note Even if the function returns true, there is no guarantee that the requested amount
-	*** was fully met. For example, if the function is asked to increase the sell quantity by 8 but
-	*** the player only has 3 instances of the selected object in inventory, the function will increase
-	*** the quantity by 3 (not 8) and return true.
-	**/
-	bool _ChangeQuantity(bool less_or_more, uint32 amount = 1);
-
-	//! \brief Sets the _selected_object member based on the current display list entry
-	void _SetSelectedObject();
 
 	/** \brief Refreshes the text in the _selected_properties OptionBox
 	*** This method only needs to be called when the properties (likely quantity) change
@@ -183,9 +159,20 @@ public:
 	***
 	*** The reason that only sell quantity is refreshed is that no other property data needs to be
 	*** updated while in the sell interface. All other data remains static and require updating
-	*** only after a shop transaction occurs.
+	*** only after a shop transaction is completed.
 	**/
 	void RefreshEntry(uint32 index);
+
+	/** \brief Changes the sell count of the selected object, refreshes the list entry, and updates financial totals
+	*** \param less_or_more False to decrease the quantity, true to increase it
+	*** \param amount The amount to decrease/increase the quantity by (default value == 1)
+	*** \return False if no quantity change could take place, true if a quantity change did occur
+	*** \note Even if the function returns true, there is no guarantee that the requested amount
+	*** was fully met. For example, if the function is asked to increase the sell quantity by 8 but
+	*** the player only has 3 instances of the selected object in inventory, the function will increase
+	*** the quantity by 3 (not 8) and return true.
+	**/
+	bool ChangeSellQuantity(bool less_or_more, uint32 amount = 1);
 }; // class SellListDisplay : public ObjectListDisplay
 
 } // namespace private_shop
