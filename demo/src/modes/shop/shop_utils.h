@@ -76,6 +76,9 @@ enum SHOP_OBJECT {
 	SHOP_OBJECT_TOTAL      =  4
 };
 
+//! \brief The number to add/subtract from buy/sell count when the player uses the increase/decrease batch commands
+const uint32 SHOP_BATCH_COUNT = 10;
+
 //! \name Price multipliers
 //! \brief These values are multiplied by an object's standard price to get the price for the desired price level
 //@{
@@ -349,11 +352,16 @@ protected:
 *** while the property list has four columns.
 ***
 *** The deriving class determines what data is placed in both the identify and property
-*** lists. The deriving class defines the ReconstructList() and RefreshEntry() methods
-*** to do this. The lists are always drawn to the right side of the middle shop window
-*** and display no more than eight entries at a time. If desired, a deriving class can
+*** lists. It will define the ReconstructList() and RefreshEntry() methods to achieve
+*** this. The lists are always drawn on the right side of the middle shop window and
+*** display no more than eight entries at a time. If desired, a deriving class can
 *** retrieve references to the OptionBox objects representing both lists in this class
-*** and change their default properties to suite one's needs.
+*** and change their default properties to fit one's needs.
+***
+*** \note Because the data used to construct this list are a series of ShopObject pointers,
+*** this means that the object data can and often is modified outside of this class. It is
+*** up to the user of this class to determine when the object data has been modified and
+*** to refresh the list data as appropriate.
 *** ***************************************************************************/
 class ObjectListDisplay {
 public:
@@ -363,15 +371,15 @@ public:
 		{ Clear(); }
 
 	/** \brief Removes all entries from the option boxes
-	*** \note This will also set the _objects member to NULL, so usually calling this function
-	*** should be followed by invoking PopulateList() to refill the class with valid data.
+	*** \note This will also clear all entries from the _objects member, so usually calling this
+	*** function should be followed by invoking PopulateList() to refill the class with valid data.
 	**/
 	void Clear();
 
 	/** \brief Clears the lists and then reconstructs them using the option box data given
-	*** \param objects A pointer to a data vector containing the objects to populate the list with
+	*** \param objects A reference to a data vector containing the objects to populate the list with
 	**/
-	void PopulateList(std::vector<ShopObject*>* objects);
+	void PopulateList(std::vector<ShopObject*>& objects);
 
 	//! \brief Reconstructs all option box entries from the object data
 	virtual void ReconstructList() = 0;
@@ -394,6 +402,11 @@ public:
 	**/
 	ShopObject* GetSelectedObject();
 
+	/** \brief Returns the index of the currently selected object in the list
+	*** \return The selected index. Will return 0 if there is no valid selection (if the list is empty)
+	**/
+	uint32 GetCurrentSelection();
+
 	//! \brief Updates the option boxes
 	void Update();
 
@@ -403,7 +416,7 @@ public:
 	//! \name Class member access methods
 	//@{
 	bool IsListEmpty() const
-		{ return _list_empty; }
+		{ return _objects.empty(); }
 
 	hoa_video::OptionBox& GetIdentifyList()
 		{ return _identify_list; }
@@ -413,11 +426,8 @@ public:
 	//@}
 
 protected:
-	//! \brief Set to true if _objects is NULL or if the size of the vector pointed to by _objects is zero
-	bool _list_empty;
-
-	//! \brief A pointer to the vector of object data that the class is to display
-	std::vector<ShopObject*>* _objects;
+	//! \brief The vector of object data that the class is to display
+	std::vector<ShopObject*> _objects;
 
 	//! \brief Contains identification information about each objects such as graphical icon and name
 	hoa_video::OptionBox _identify_list;

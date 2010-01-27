@@ -178,8 +178,8 @@ void ConfirmInterface::MakeActive() {
 	_trade_characters = 0;
 	// TODO: Iterate through the trade container similar to buy and sell containers
 
-	_buy_list_display->PopulateList(&buy_vector);
-	_sell_list_display->PopulateList(&sell_vector);
+	_buy_list_display->PopulateList(buy_vector);
+	_sell_list_display->PopulateList(sell_vector);
 
 	// Determine which active list should be initially shown and change properties as needed
 	if (_buy_count != 0) {
@@ -222,6 +222,9 @@ void ConfirmInterface::MakeActive() {
 	_clear_actions.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 	_buy_list_display->GetIdentifyList().SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 	_sell_list_display->GetIdentifyList().SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+	ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(NULL);
+	ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(SHOP_VIEW_MODE_INFO);
 } // void ConfirmInterface::MakeActive()
 
 
@@ -229,6 +232,8 @@ void ConfirmInterface::MakeActive() {
 void ConfirmInterface::Update() {
 	_main_actions.Update();
 	_clear_actions.Update();
+	_buy_list_display->Update();
+	_sell_list_display->Update();
 
 	// A swap press changes the active transaction list being shown. It takes precedence over all other
 	// input events. Only the "info" state ignores this command because the transaction list is not visible
@@ -331,25 +336,9 @@ void ConfirmInterface::Update() {
 	}
 
 	else if (_state == CONFIRM_STATE_INFO) {
-		if (InputManager->ConfirmPress()) {
+		if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 			_ChangeState(CONFIRM_STATE_LIST);
 			return;
-		}
-
-		switch (_active_list) {
-			case ACTIVE_LIST_BUY:
-				_UpdateBuyList();
-				return;
-			case ACTIVE_LIST_SELL:
-				_UpdateSellList();
-				return;
-			case ACTIVE_LIST_TRADE:
-				_UpdateTradeList();
-				return;
-			default:
-				IF_PRINT_WARNING(SHOP_DEBUG) << "invalid transaction list was active: "
-					<< _active_list << endl;
-				return;
 		}
 	}
 
@@ -408,7 +397,7 @@ void ConfirmInterface::Draw() {
 		}
 		else { // The active list is empty
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-			VideoManager->Move(600.0f, 405.0f);
+			VideoManager->Move(560.0f, 405.0f);
 			_empty_list_text.Draw();
 		}
 	}
@@ -465,6 +454,9 @@ void ConfirmInterface::_ChangeState(CONFIRM_STATE new_state) {
 	else if (_state == CONFIRM_STATE_LIST) {
 		_buy_list_display->GetIdentifyList().SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 		_sell_list_display->GetIdentifyList().SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	}
+	else if (_state == CONFIRM_STATE_INFO) {
+		ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(NULL);
 	}
 
 	// Modify appropriate display properties of new state
@@ -534,19 +526,42 @@ void ConfirmInterface::_UpdateBuyList() {
 	if (_buy_count == 0)
 		return;
 
-	// TODO
-// 	ShopObject* selected_object = _buy_list_display->GetSelectedObject();
-	if (_state == CONFIRM_STATE_LIST) {
-
+	if (InputManager->ConfirmPress()) {
+		_ChangeState(CONFIRM_STATE_INFO);
 	}
-	else if (_state == CONFIRM_STATE_INFO) {
-
+	else if (InputManager->UpPress()) {
+		_buy_list_display->GetIdentifyList().InputUp();
+		_buy_list_display->GetPropertyList().InputUp();
 	}
-	else {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "invalid state was active: " << _state << endl;
+	else if (InputManager->DownPress()) {
+		_buy_list_display->GetIdentifyList().InputDown();
+		_buy_list_display->GetPropertyList().InputDown();
+	}
+	else if (InputManager->LeftPress()) {
+		if (_buy_list_display->ChangeBuyQuantity(false) == true)
+			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+		else
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+	}
+	else if (InputManager->RightPress()) {
+		if (_buy_list_display->ChangeBuyQuantity(true) == true)
+			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+		else
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+	}
+	else if (InputManager->LeftSelectPress()) {
+		if (_buy_list_display->ChangeBuyQuantity(false, 10) == true)
+			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+		else
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+	}
+	else if (InputManager->RightSelectPress()) {
+		if (_buy_list_display->ChangeBuyQuantity(true, 10) == true)
+			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+		else
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 	}
 }
-
 
 
 
@@ -554,16 +569,40 @@ void ConfirmInterface::_UpdateSellList() {
 	if (_sell_count == 0)
 		return;
 
-	// TODO
-// 	ShopObject* selected_object = _sell_list_display->GetSelectedObject();
-	if (_state == CONFIRM_STATE_LIST) {
-
+	if (InputManager->ConfirmPress()) {
+		_ChangeState(CONFIRM_STATE_INFO);
 	}
-	else if (_state == CONFIRM_STATE_INFO) {
-
+	else if (InputManager->UpPress()) {
+		_sell_list_display->GetIdentifyList().InputUp();
+		_sell_list_display->GetPropertyList().InputUp();
 	}
-	else {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "invalid state was active: " << _state << endl;
+	else if (InputManager->DownPress()) {
+		_sell_list_display->GetIdentifyList().InputDown();
+		_sell_list_display->GetPropertyList().InputDown();
+	}
+	else if (InputManager->LeftPress()) {
+		if (_sell_list_display->ChangeSellQuantity(false) == true)
+			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+		else
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+	}
+	else if (InputManager->RightPress()) {
+		if (_sell_list_display->ChangeSellQuantity(true) == true)
+			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+		else
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+	}
+	else if (InputManager->LeftSelectPress()) {
+		if (_sell_list_display->ChangeSellQuantity(false, SHOP_BATCH_COUNT) == true)
+			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+		else
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
+	}
+	else if (InputManager->RightSelectPress()) {
+		if (_sell_list_display->ChangeSellQuantity(true, SHOP_BATCH_COUNT) == true)
+			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
+		else
+			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 	}
 }
 
