@@ -10,9 +10,7 @@
 /** ****************************************************************************
 *** \file    shop_trade.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Source file for trade menu of shop mode
-***
-*** WRITE SOMETHING
+*** \brief   Source file for trade interface of shop mode
 *** ***************************************************************************/
 
 #include "defs.h"
@@ -44,7 +42,8 @@ namespace private_shop {
 // *****************************************************************************
 
 TradeInterface::TradeInterface() {
-
+	TEMP_feature_unavailable.SetStyle(TextStyle("text24"));
+	TEMP_feature_unavailable.SetText(MakeUnicodeString("This feature is not yet available."));
 }
 
 
@@ -61,6 +60,18 @@ void TradeInterface::Initialize() {
 
 
 
+void TradeInterface::MakeActive() {
+
+}
+
+
+
+void TradeInterface::TransactionNotification() {
+
+}
+
+
+
 void TradeInterface::Update() {
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 		ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);
@@ -70,7 +81,8 @@ void TradeInterface::Update() {
 
 
 void TradeInterface::Draw() {
-
+	VideoManager->Move(512.0f, 405.0f);
+	TEMP_feature_unavailable.Draw();
 }
 
 } // namespace private_shop
