@@ -140,12 +140,6 @@ ConfirmInterface::~ConfirmInterface() {
 
 
 
-void ConfirmInterface::Initialize() {
-	// The class constructor and MakeActive() method perform all necessary initialization for this class
-}
-
-
-
 void ConfirmInterface::MakeActive() {
 	map<uint32, ShopObject*>* buy_list = ShopMode::CurrentInstance()->GetBuyList();
 	map<uint32, ShopObject*>* sell_list = ShopMode::CurrentInstance()->GetSellList();
@@ -208,6 +202,10 @@ void ConfirmInterface::MakeActive() {
 	else {
 		_no_transactions = true;
 		_active_list = ACTIVE_LIST_BUY;
+		_buy_header.SetStyle(TextStyle("title24", Color::yellow));
+		_sell_header.SetStyle(TextStyle("title22", Color::white));
+		_trade_header.SetStyle(TextStyle("title22", Color::white));
+		_properties_header.SetOptionText(3, MakeUnicodeString("Buy"));
 	}
 
 	_RenderBuyStats();
@@ -226,6 +224,23 @@ void ConfirmInterface::MakeActive() {
 	ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(NULL);
 	ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(SHOP_VIEW_MODE_INFO);
 } // void ConfirmInterface::MakeActive()
+
+
+
+void ConfirmInterface::TransactionNotification() {
+	_buy_count = 0;
+	_buy_unique = 0;
+	_sell_count = 0;
+	_sell_unique = 0;
+	_trade_count = 0;
+	_trade_characters = 0;
+	_buy_list_display->Clear();
+	_sell_list_display->Clear();
+	_no_transactions = true;
+	_RenderBuyStats();
+	_RenderSellStats();
+	_RenderTradeStats();
+}
 
 
 
@@ -267,14 +282,23 @@ void ConfirmInterface::Update() {
 					_ChangeState(CONFIRM_STATE_CLEAR);
 					return;
 				case 2: // "Complete Transaction"
-					_CompleteTransaction();
+					// Make sure that at least one purchase/sale/trade is going to take place
+					if ((_buy_count != 0) || (_sell_count != 0) || (_trade_count != 0)) {
+						ShopMode::CurrentInstance()->Media()->GetSound("coins")->Play();
+						// Calling ShopMode::CompleteTransaction() will call the TransactionNotification() method
+						// for this interface class. which will reset all transaction counts and list displays.
+						ShopMode::CurrentInstance()->CompleteTransaction();
+					}
+					// Otherwise simply clear the order without a confirmation prompt
+					else {
+						_ClearOrder();
+					}
 					return;
 				default:
 					IF_PRINT_WARNING(SHOP_DEBUG) << "invalid selection in primary action options: "
 						<< _main_actions.GetSelection() << endl;
 					return;
 			}
-
 		}
 
 		else if (InputManager->LeftPress()) {
@@ -376,7 +400,7 @@ void ConfirmInterface::Draw() {
 		_trade_stats.Draw();
 
 		// Draw the list headers and contents
-		if ((_active_list == ACTIVE_LIST_BUY) && (_buy_count != 0)) {
+		if ((_active_list == ACTIVE_LIST_BUY) && (_buy_list_display->IsListEmpty() == false)) {
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 			VideoManager->Move(295.0f, 558.0f);
 			_name_header.Draw();
@@ -384,7 +408,7 @@ void ConfirmInterface::Draw() {
 			_properties_header.Draw();
 			_buy_list_display->Draw();
 		}
-		else if ((_active_list == ACTIVE_LIST_SELL) && (_sell_count != 0)) {
+		else if ((_active_list == ACTIVE_LIST_SELL) && (_sell_list_display->IsListEmpty() == false)) {
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 			VideoManager->Move(295.0f, 558.0f);
 			_name_header.Draw();
@@ -393,7 +417,8 @@ void ConfirmInterface::Draw() {
 			_sell_list_display->Draw();
 		}
 		else if ((_active_list == ACTIVE_LIST_TRADE) && (_trade_count != 0)) {
-			// TODO
+			// TODO: once trade support is added, change above condition `(_trade_count != 0)`
+			// to a check on the trade list display's empty status
 		}
 		else { // The active list is empty
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
@@ -417,24 +442,6 @@ void ConfirmInterface::Draw() {
 		_main_actions.Draw();
 	}
 } // void ConfirmInterface::Draw()
-
-
-
-void ConfirmInterface::_RenderBuyStats() {
-	_buy_stats.SetText(NumberToString(_buy_count) + " count\n" +  NumberToString(_buy_unique) + " unique");
-}
-
-
-
-void ConfirmInterface::_RenderSellStats() {
-	_sell_stats.SetText(NumberToString(_sell_count) + " count\n" +  NumberToString(_sell_unique) + " unique");
-}
-
-
-
-void ConfirmInterface::_RenderTradeStats() {
-	_trade_stats.SetText(NumberToString(_trade_count) + " count\n" +  NumberToString(_trade_characters) + " characters");
-}
 
 
 
@@ -490,7 +497,7 @@ void ConfirmInterface::_ChangeState(CONFIRM_STATE new_state) {
 		ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(selected_object);
 	}
 	_state = new_state;
-}
+} // void ConfirmInterface::_ChangeState(CONFIRM_STATE new_state)
 
 
 
@@ -523,7 +530,7 @@ void ConfirmInterface::_CycleActiveTransactionList() {
 
 
 void ConfirmInterface::_UpdateBuyList() {
-	if (_buy_count == 0)
+	if (_buy_list_display->IsListEmpty() == true)
 		return;
 
 	if (InputManager->ConfirmPress()) {
@@ -538,25 +545,25 @@ void ConfirmInterface::_UpdateBuyList() {
 		_buy_list_display->GetPropertyList().InputDown();
 	}
 	else if (InputManager->LeftPress()) {
-		if (_buy_list_display->ChangeBuyQuantity(false) == true)
+		if (ChangeBuyQuantity(false) == true)
 			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		else
 			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 	}
 	else if (InputManager->RightPress()) {
-		if (_buy_list_display->ChangeBuyQuantity(true) == true)
+		if (ChangeBuyQuantity(true) == true)
 			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		else
 			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 	}
 	else if (InputManager->LeftSelectPress()) {
-		if (_buy_list_display->ChangeBuyQuantity(false, 10) == true)
+		if (ChangeBuyQuantity(false, 10) == true)
 			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		else
 			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 	}
 	else if (InputManager->RightSelectPress()) {
-		if (_buy_list_display->ChangeBuyQuantity(true, 10) == true)
+		if (ChangeBuyQuantity(true, 10) == true)
 			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		else
 			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
@@ -566,7 +573,7 @@ void ConfirmInterface::_UpdateBuyList() {
 
 
 void ConfirmInterface::_UpdateSellList() {
-	if (_sell_count == 0)
+	if (_sell_list_display->IsListEmpty() == true)
 		return;
 
 	if (InputManager->ConfirmPress()) {
@@ -581,25 +588,25 @@ void ConfirmInterface::_UpdateSellList() {
 		_sell_list_display->GetPropertyList().InputDown();
 	}
 	else if (InputManager->LeftPress()) {
-		if (_sell_list_display->ChangeSellQuantity(false) == true)
+		if (ChangeSellQuantity(false) == true)
 			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		else
 			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 	}
 	else if (InputManager->RightPress()) {
-		if (_sell_list_display->ChangeSellQuantity(true) == true)
+		if (ChangeSellQuantity(true) == true)
 			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		else
 			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 	}
 	else if (InputManager->LeftSelectPress()) {
-		if (_sell_list_display->ChangeSellQuantity(false, SHOP_BATCH_COUNT) == true)
+		if (ChangeSellQuantity(false, SHOP_BATCH_COUNT) == true)
 			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		else
 			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
 	}
 	else if (InputManager->RightSelectPress()) {
-		if (_sell_list_display->ChangeSellQuantity(true, SHOP_BATCH_COUNT) == true)
+		if (ChangeSellQuantity(true, SHOP_BATCH_COUNT) == true)
 			ShopMode::CurrentInstance()->Media()->GetSound("confirm")->Play();
 		else
 			ShopMode::CurrentInstance()->Media()->GetSound("bump")->Play();
@@ -609,10 +616,71 @@ void ConfirmInterface::_UpdateSellList() {
 
 
 void ConfirmInterface::_UpdateTradeList() {
-	if (_trade_count == 0)
-		return;
-
 	// TODO: implement this method when trade interface is complete
+}
+
+
+
+bool ConfirmInterface::ChangeBuyQuantity(bool less_or_more, uint32 amount) {
+	ShopObject* obj = _buy_list_display->GetSelectedObject();
+	int32 old_count = obj->GetBuyCount();
+
+	if (_buy_list_display->ChangeBuyQuantity(less_or_more, amount) == false) {
+		return false;
+	}
+
+	// new_count should never equal old_count if BuyListDisplay::ChangeBuyQuantity() returned true
+	int32 new_count = obj->GetBuyCount();
+
+	// Update the unique and count buy members and re-render the stats
+	if (old_count == 0)
+		_buy_unique++;
+	if (new_count == 0)
+		_buy_unique--;
+	_buy_count += (new_count - old_count);
+	_RenderBuyStats();
+	return true;
+}
+
+
+
+bool ConfirmInterface::ChangeSellQuantity(bool less_or_more, uint32 amount) {
+	ShopObject* obj = _sell_list_display->GetSelectedObject();
+	int32 old_count = obj->GetSellCount();
+
+	if (_sell_list_display->ChangeSellQuantity(less_or_more, amount) == false) {
+		return false;
+	}
+
+	// new_count should never equal old_count if SellListDisplay::ChangeSellQuantity() returned true
+	int32 new_count = obj->GetSellCount();
+
+	// Update the unique and count sell members and re-render the stats
+	if (old_count == 0)
+		_sell_unique++;
+	if (new_count == 0)
+		_sell_unique--;
+	_sell_count += (new_count - old_count);
+	_RenderSellStats();
+	return true;
+}
+
+
+
+void ConfirmInterface::_RenderBuyStats() {
+	_buy_stats.SetText(NumberToString(_buy_count) + " count\n" +  NumberToString(_buy_unique) + " unique");
+}
+
+
+
+void ConfirmInterface::_RenderSellStats() {
+	_sell_stats.SetText(NumberToString(_sell_count) + " count\n" +  NumberToString(_sell_unique) + " unique");
+}
+
+
+
+void ConfirmInterface::_RenderTradeStats() {
+	_trade_stats.SetText(NumberToString(_trade_count) + " count\n" +  NumberToString(_trade_characters) + " characters");
 }
 
 
@@ -628,22 +696,6 @@ void ConfirmInterface::_ClearOrder() {
 	_sell_list_display->Clear();
 	_no_transactions = true;
 	ShopMode::CurrentInstance()->ClearOrder();
-	// TODO: play appropriate sound
-}
-
-
-
-void ConfirmInterface::_CompleteTransaction() {
-	_buy_count = 0;
-	_buy_unique = 0;
-	_sell_count = 0;
-	_sell_unique = 0;
-	_trade_count = 0;
-	_trade_characters = 0;
-	_buy_list_display->Clear();
-	_sell_list_display->Clear();
-	_no_transactions = true;
-	ShopMode::CurrentInstance()->CompleteTransaction();
 	// TODO: play appropriate sound
 }
 

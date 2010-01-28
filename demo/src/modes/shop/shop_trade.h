@@ -41,6 +41,8 @@ public:
 	// TODO
 	void MakeActive() {}
 
+	void TransactionNotification() {}
+
 	void Update();
 
 	void Draw();

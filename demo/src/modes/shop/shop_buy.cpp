@@ -190,18 +190,32 @@ void BuyInterface::Initialize() {
 
 	_selected_object = _list_displays[_current_category]->GetSelectedObject();
 	_ChangeViewMode(SHOP_VIEW_MODE_LIST);
-}
+} // void BuyInterface::Initialize()
 
 
 
 void BuyInterface::MakeActive() {
+	// Buy counts may have be modified externally so a complete list refresh is necessary
 	for (uint32 i = 0; i < _list_displays.size(); i++)
-		_list_displays[i]->ReconstructList();
+		_list_displays[i]->RefreshAllEntries();
 
+	_selected_object = _list_displays[_current_category]->GetSelectedObject();
 	ShopMode::CurrentInstance()->ObjectViewer()->ChangeViewMode(_view_mode);
 	ShopMode::CurrentInstance()->ObjectViewer()->SetSelectedObject(_selected_object);
 	_category_display.ChangeViewMode(_view_mode);
 	_category_display.SetSelectedObject(_selected_object);
+}
+
+
+
+void BuyInterface::TransactionNotification() {
+	for (uint32 i = 0; i < _list_displays.size(); i++) {
+		_list_displays[i]->ReconstructList();
+		_list_displays[i]->ResetSelection();
+	}
+
+	_current_category = _number_categories - 1;
+	_view_mode = SHOP_VIEW_MODE_LIST;
 }
 
 
@@ -311,7 +325,7 @@ void BuyInterface::Update() {
 	_category_display.Update();
 	_list_displays[_current_category]->Update();
 	ShopMode::CurrentInstance()->ObjectViewer()->Update();
-}
+} // void BuyInterface::Update()
 
 
 
@@ -392,7 +406,7 @@ bool BuyInterface::_ChangeCategory(bool left_or_right) {
 	}
 
 	if (left_or_right == false) {
-		_current_category = (_current_category == 0) ? (_number_categories -1) : (_current_category - 1);
+		_current_category = (_current_category == 0) ? (_number_categories - 1) : (_current_category - 1);
 	}
 	else {
 		_current_category = (_current_category >= (_number_categories - 1)) ? 0 : (_current_category + 1);
@@ -416,14 +430,10 @@ bool BuyInterface::_ChangeCategory(bool left_or_right) {
 bool BuyInterface::_ChangeSelection(bool up_or_down) {
 	BuyListDisplay* selected_list = _list_displays[_current_category];
 
-	if (up_or_down == false) {
-		selected_list->GetIdentifyList().InputUp();
-		selected_list->GetPropertyList().InputUp();
-	}
-	else {
-		selected_list->GetIdentifyList().InputDown();
-		selected_list->GetPropertyList().InputDown();
-	}
+	if (up_or_down == false)
+		selected_list->InputUp();
+	else
+		selected_list->InputDown();
 
 	ShopObject* last_obj = _selected_object;
 	_selected_object = _list_displays[_current_category]->GetSelectedObject();
