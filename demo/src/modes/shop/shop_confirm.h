@@ -33,11 +33,11 @@ namespace hoa_shop {
 namespace private_shop {
 
 /** ****************************************************************************
-*** \brief The interface where the player confirms and complete their transaction
+*** \brief The interface where the player confirms and completes their transaction
 ***
 *** After the player has selected their purchases, sales, and trades, they typically
 *** enter this interface to finalize their choices and complete the transaction. There
-*** are four primary actions that a player may chose from while in this interface.
+*** are three primary actions that a player may chose from while in this interface.
 ***
 *** -# "Modify Order": allows the player to view the buy/sell/trade lists and change order quantities
 *** -# "Clear Order": brings up a second confirmation that will clear all marked purchases, sales, and trades
@@ -57,7 +57,7 @@ namespace private_shop {
 *** information about a selected item in the same manner that can be done in the buy and sell interfaces.
 *** ***************************************************************************/
 class ConfirmInterface : public ShopInterface {
-	//! \brief States pf the confirm interface used to determine how to process user input and what information to draw
+	//! \brief States of the confirm interface used to determine how to process user input and what information to draw
 	enum CONFIRM_STATE {
 		CONFIRM_STATE_INVALID       = -1,
 		CONFIRM_STATE_MAIN          =  0, //!< User input is focused on the main interface prompt
@@ -88,7 +88,7 @@ public:
 	//! \brief Processes the buy/sell/trade lists and determines the counts and other information about each transaction
 	void MakeActive();
 
-	//! \brief No actions need to take place when a transaction occurs
+	//! \brief Resets all buy/sell/trade count stats and text and clears the list displays
 	void TransactionNotification();
 
 	//! \brief Handles user input and internal state management
@@ -152,7 +152,7 @@ private:
 	//! \brief Text to display in the middle window when the selected transaction list is empty
 	hoa_video::TextImage _empty_list_text;
 
-	//! \brief Text displayed in the lower window when there are no marked transactions of any time
+	//! \brief Text displayed in the lower window when there are no marked transactions of any type
 	hoa_video::TextImage _no_transactions_text;
 
 	//! \brief A display of all wares marked for purchase and their properties

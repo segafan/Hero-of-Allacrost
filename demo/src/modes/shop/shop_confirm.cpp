@@ -23,7 +23,6 @@
 #include "audio.h"
 #include "input.h"
 #include "video.h"
-#include "global.h"
 
 #include "shop.h"
 #include "shop_confirm.h"
@@ -273,7 +272,7 @@ void ConfirmInterface::Update() {
 			return;
 		}
 
-		if (InputManager->ConfirmPress()) {
+		else if (InputManager->ConfirmPress()) {
 			switch (_main_actions.GetSelection()) {
 				case 0: // "Modify Order"
 					_ChangeState(CONFIRM_STATE_LIST);
@@ -537,12 +536,10 @@ void ConfirmInterface::_UpdateBuyList() {
 		_ChangeState(CONFIRM_STATE_INFO);
 	}
 	else if (InputManager->UpPress()) {
-		_buy_list_display->GetIdentifyList().InputUp();
-		_buy_list_display->GetPropertyList().InputUp();
+		_buy_list_display->InputUp();
 	}
 	else if (InputManager->DownPress()) {
-		_buy_list_display->GetIdentifyList().InputDown();
-		_buy_list_display->GetPropertyList().InputDown();
+		_buy_list_display->InputDown();
 	}
 	else if (InputManager->LeftPress()) {
 		if (ChangeBuyQuantity(false) == true)
@@ -580,12 +577,10 @@ void ConfirmInterface::_UpdateSellList() {
 		_ChangeState(CONFIRM_STATE_INFO);
 	}
 	else if (InputManager->UpPress()) {
-		_sell_list_display->GetIdentifyList().InputUp();
-		_sell_list_display->GetPropertyList().InputUp();
+		_sell_list_display->InputUp();
 	}
 	else if (InputManager->DownPress()) {
-		_sell_list_display->GetIdentifyList().InputDown();
-		_sell_list_display->GetPropertyList().InputDown();
+		_sell_list_display->InputDown();
 	}
 	else if (InputManager->LeftPress()) {
 		if (ChangeSellQuantity(false) == true)

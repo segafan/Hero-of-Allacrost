@@ -10,9 +10,7 @@
 /** ****************************************************************************
 *** \file    shop_trade.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for trade menu of shop mode
-***
-*** WRITE SOMETHING
+*** \brief   Header file for trade interface of shop mode
 *** ***************************************************************************/
 
 #ifndef __SHOP_TRADE_HEADER__
@@ -30,6 +28,11 @@ namespace hoa_shop {
 
 namespace private_shop {
 
+/** ****************************************************************************
+*** \brief Manages the shop where the player is allowed to trade current equipment on their characters
+***
+*** \todo This interface remains incomplete and will be finished at a later time.
+*** ***************************************************************************/
 class TradeInterface : public ShopInterface {
 public:
 	TradeInterface();
@@ -38,18 +41,20 @@ public:
 
 	void Initialize();
 
-	// TODO
-	void MakeActive() {}
+	void MakeActive();
 
-	void TransactionNotification() {}
+	void TransactionNotification();
 
 	void Update();
 
 	void Draw();
+
+	//! \brief Temporary text image stating that this interface is unavailable
+	hoa_video::TextImage TEMP_feature_unavailable;
 }; // class TradeInterface : public ShopInterface
 
-}
+} // namespace private_shop
 
-}
+} // namespace hoa_shop
 
 #endif // __SHOP_TRADE_HEADER__
