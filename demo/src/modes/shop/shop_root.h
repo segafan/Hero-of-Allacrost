@@ -92,6 +92,10 @@ public:
 	void MakeActive()
 		{}
 
+	//! \brief No actions need to take place when a transaction occurs
+	void TransactionNotification()
+		{}
+
 	//! \brief Updates the state of GUI objects and may also process user input
 	void Update();
 

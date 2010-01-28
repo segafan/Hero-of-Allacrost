@@ -441,7 +441,7 @@ void ObjectListDisplay::PopulateList(vector<ShopObject*>& objects) {
 
 
 void ObjectListDisplay::RefreshAllEntries() {
-	if (_objects.empty() == true)
+	if (IsListEmpty() == true)
 		return;
 
 	for (uint32 i = 0; i < _objects.size(); i++)
@@ -451,7 +451,7 @@ void ObjectListDisplay::RefreshAllEntries() {
 
 
 ShopObject* ObjectListDisplay::GetSelectedObject() {
-	if (_objects.empty() == true)
+	if (IsListEmpty() == true)
 		return NULL;
 
 	if (static_cast<uint32>(_identify_list.GetSelection()) >= _objects.size()) {
@@ -464,11 +464,34 @@ ShopObject* ObjectListDisplay::GetSelectedObject() {
 
 
 
+void ObjectListDisplay::ResetSelection() {
+	if (IsListEmpty() == false) {
+		_identify_list.SetSelection(0);
+		_property_list.SetSelection(0);
+	}
+}
+
+
+
 uint32 ObjectListDisplay::GetCurrentSelection() {
-	if (_objects.empty() == true)
+	if (IsListEmpty() == true)
 		return 0;
 	else
 		return static_cast<uint32>(_identify_list.GetSelection());
+}
+
+
+
+void ObjectListDisplay::InputUp() {
+	_identify_list.InputUp();
+	_property_list.InputUp();
+}
+
+
+
+void ObjectListDisplay::InputDown() {
+	_identify_list.InputDown();
+	_property_list.InputDown();
 }
 
 

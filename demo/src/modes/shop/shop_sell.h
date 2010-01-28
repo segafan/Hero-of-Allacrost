@@ -59,6 +59,9 @@ public:
 	//! \brief Sets the selected object for the ShopObjectViewer class
 	void MakeActive();
 
+	//! \brief Completely reconstructs all display lists from the party's inventory
+	void TransactionNotification();
+
 	//! \brief Processes user input and sends appropriate commands to helper class objects
 	void Update();
 
@@ -109,6 +112,15 @@ private:
 
 	//! \brief A single row option box containing the selected object's properties
 	hoa_video::OptionBox _selected_properties;
+
+	/** \brief Clears out all list displays and rebuilds them from scratch using the party's inventory
+	*** This operation needs to be performed when the interface is initialized and whenever a transaction
+	*** occurs. The latter case is necessary because in a transaction, the player may have bought new
+	*** objects which should be made available to sell immediately, or the player may have sold off all
+	*** counts of objects that they already had and thus these objects should not appear on the sell list
+	*** anymore.
+	**/
+	void _PopulateLists();
 
 	/** \brief Takes all necessary action for when the active view mode is to be altered
 	*** \param new_mode The new view mode to set

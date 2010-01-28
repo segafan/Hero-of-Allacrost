@@ -131,6 +131,9 @@ public:
 	//! \brief Invoked to notify when the shop state has changed and the interface has become active
 	virtual void MakeActive() = 0;
 
+	//! \brief Invoked whenever a transaction is made to allow the interface to update itself appropriately
+	virtual void TransactionNotification() = 0;
+
 	//! \brief Updates the state of the interface and operates on user input
 	virtual void Update() = 0;
 
@@ -402,10 +405,23 @@ public:
 	**/
 	ShopObject* GetSelectedObject();
 
+	//! \brief Resets list selection to the first entry
+	void ResetSelection();
+
 	/** \brief Returns the index of the currently selected object in the list
 	*** \return The selected index. Will return 0 if there is no valid selection (if the list is empty)
 	**/
 	uint32 GetCurrentSelection();
+
+	//! \brief Inputs an up command to change the current selection
+	void InputUp();
+
+	//! \brief Inputs a down command to change the current selection
+	void InputDown();
+
+	//! \brief Returns true if the list contains no entries
+	bool IsListEmpty() const
+		{ return _objects.empty(); }
 
 	//! \brief Updates the option boxes
 	void Update();
@@ -415,9 +431,6 @@ public:
 
 	//! \name Class member access methods
 	//@{
-	bool IsListEmpty() const
-		{ return _objects.empty(); }
-
 	hoa_video::OptionBox& GetIdentifyList()
 		{ return _identify_list; }
 

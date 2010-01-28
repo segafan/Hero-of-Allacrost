@@ -1461,23 +1461,62 @@ void ShopMode::ClearOrder() {
 
 
 void ShopMode::CompleteTransaction() {
+	uint32 count = 0;
+	uint32 id = 0;
+
+	// Add all objects on the buy list to inventory and update shop object status
 	for (map<uint32, ShopObject*>::iterator i = _buy_list.begin(); i != _buy_list.end(); i++) {
-		if (i->second->GetBuyCount() == 0)
+		count = i->second->GetBuyCount();
+		id = i->second->GetObject()->GetID();
+
+		// The player may have reduced the buy count to zero in the confirm interface before completing the transaction
+		// We simply ignore any objects on the buy list with this condition
+		if (count == 0)
 			continue;
+
+		i->second->ResetBuyCount();
+		i->second->IncrementOwnCount(count);
+		i->second->DecrementStockCount(count);
+		GlobalManager->AddToInventory(id, count);
 	}
 	_buy_list.clear();
 
+	// Remove all objects on the sell list from the inventory and update shop object status
 	for (map<uint32, ShopObject*>::iterator i = _sell_list.begin(); i != _sell_list.end(); i++) {
-		if (i->second->GetSellCount() == 0)
+		count = i->second->GetSellCount();
+		id = i->second->GetObject()->GetID();
+
+		if (count == 0)
 			continue;
+
+		i->second->ResetSellCount();
+		i->second->DecrementOwnCount(count);
+		GlobalManager->DecrementObjectCount(id, count);
+
+		// When all owned instances of this object have been sold off, the object is automatically removed
+		// from the player's inventory. If the object is not sold in the shop, this means it must be removed
+		// from all shop object containers as the object data (GlobalObject pointer) is now invalid.
+		if ((i->second->GetOwnCount() == 0) && (i->second->IsSoldInShop() == false)) {
+			RemoveObject(id);
+		}
 	}
 	_sell_list.clear();
 
-	map<uint32, GlobalObject*>* inventory = GlobalManager->GetInventory();
-	for (map<uint32, GlobalObject*>::iterator i = inventory->begin(); i != inventory->end(); i++) {
-		// TODO
-	}
-}
+	// Update the player's drune count by subtracting costs and adding revenue and update the shop's financial display
+	GlobalManager->AddDrunes(_total_sales);
+	GlobalManager->SubtractDrunes(_total_costs);
+	_total_costs = 0;
+	_total_sales = 0;
+	UpdateFinances(0, 0);
+
+	// Notify all interfaces that a transaction has just been completed
+	_root_interface->TransactionNotification();
+	_buy_interface->TransactionNotification();
+	_sell_interface->TransactionNotification();
+	_trade_interface->TransactionNotification();
+	_confirm_interface->TransactionNotification();
+	_leave_interface->TransactionNotification();
+} // void ShopMode::CompleteTransaction()
 
 
 
@@ -1502,9 +1541,9 @@ void ShopMode::UpdateFinances(int32 costs_amount, int32 sales_amount) {
 	_total_sales = static_cast<uint32>(updated_sales);
 
 	_finance_table.SetOptionText(0, MakeUnicodeString("Funds: " + NumberToString(GlobalManager->GetDrunes())));
-	_finance_table.SetOptionText(1, MakeUnicodeString("Purchases: -" + NumberToString(ShopMode::CurrentInstance()->GetTotalCosts())));
-	_finance_table.SetOptionText(2, MakeUnicodeString("Sales: +" + NumberToString(ShopMode::CurrentInstance()->GetTotalSales())));
-	_finance_table.SetOptionText(3, MakeUnicodeString("Total: " + NumberToString(ShopMode::CurrentInstance()->GetTotalRemaining())));
+	_finance_table.SetOptionText(1, MakeUnicodeString("Purchases: -" + NumberToString(_total_costs)));
+	_finance_table.SetOptionText(2, MakeUnicodeString("Sales: +" + NumberToString(_total_sales)));
+	_finance_table.SetOptionText(3, MakeUnicodeString("Total: " + NumberToString(GetTotalRemaining())));
 }
 
 
@@ -1591,11 +1630,6 @@ void ShopMode::AddObject(uint32 object_id, uint32 stock) {
 		return;
 	}
 
-	if (stock == 0) {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "added an object with a zero stock count" << endl;
-		return;
-	}
-
 	if (object_id == private_global::OBJECT_ID_INVALID || object_id >= private_global::OBJECT_ID_EXCEEDS) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "attempted to add object with invalid id: " << object_id << endl;
 		return;
@@ -1633,9 +1667,6 @@ void ShopMode::RemoveObject(uint32 object_id) {
 	}
 
 	_shop_objects.erase(shop_iter);
-	_sell_list.erase(object_id);
-
-	// TODO: call the sell interface and inform it that the object has been removed
 }
 
 } // namespace hoa_shop

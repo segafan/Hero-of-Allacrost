@@ -53,6 +53,9 @@ public:
 	//! \brief Sets the selected object for the ShopObjectViewer class
 	void MakeActive();
 
+	//! \brief Reconstructs all buy display lists and resets the current category
+	void TransactionNotification();
+
 	//! \brief Processes user input and sends appropriate commands to helper class objects
 	void Update();
 

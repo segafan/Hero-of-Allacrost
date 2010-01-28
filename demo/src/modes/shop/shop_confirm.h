@@ -81,11 +81,15 @@ public:
 
 	~ConfirmInterface();
 
-	//! \brief Not used by this interface as all initialization can be performed in the class constructor
-	void Initialize();
+	//! \brief Not used by this interface as all initialization is performed in the class constructor and MakeActive() method
+	void Initialize()
+		{}
 
 	//! \brief Processes the buy/sell/trade lists and determines the counts and other information about each transaction
 	void MakeActive();
+
+	//! \brief No actions need to take place when a transaction occurs
+	void TransactionNotification();
 
 	//! \brief Handles user input and internal state management
 	void Update();
@@ -173,15 +177,6 @@ private:
 	hoa_video::OptionBox _clear_actions;
 
 private:
-	//! \brief Re-renders the text image for buy stats using the current buy data
-	void _RenderBuyStats();
-
-	//! \brief Re-renders the text image for sell stats using the current sell data
-	void _RenderSellStats();
-
-	//! \brief Re-renders the text image for trade stats using the current trade data
-	void _RenderTradeStats();
-
 	/** \brief Changes the current state and modifies other members and display properties appropriately
 	*** \param new_state The new state to change the confirm interface to
 	**/
@@ -199,11 +194,37 @@ private:
 	//! \brief An update helper function used to change the trade list selection or selected trade
 	void _UpdateTradeList();
 
+	/** \brief Changes the buy quantity of a selected object and updates and re-renders buy stats text
+	*** \param less_or_more False to decrease the quantity, true to increase it
+	*** \param amount The amount to decrease/increase the quantity by (default value == 1)
+	*** \return False if no quantity change could take place, true if a quantity change did occur
+	*** \note This function signature is identical to the function of the same name as the BuyListDisplay class.
+	*** This method serves as a wrapper to that class with the additional feature of automatically updating
+	*** buy stats data and re-rendering the stats text as appropriate.
+	**/
+	bool ChangeBuyQuantity(bool less_or_more, uint32 amount = 1);
+
+	/** \brief Changes the sell quantity of a selected object and updates and re-renders buy stats text
+	*** \param less_or_more False to decrease the quantity, true to increase it
+	*** \param amount The amount to decrease/increase the quantity by (default value == 1)
+	*** \return False if no quantity change could take place, true if a quantity change did occur
+	*** \note This function signature is identical to the function of the same name as the SellListDisplay class.
+	*** This method serves as a wrapper to that class with the additional feature of automatically updating
+	*** sell stats data and re-rendering the stats text as appropriate.
+	**/
+	bool ChangeSellQuantity(bool less_or_more, uint32 amount = 1);
+
+	//! \brief Re-renders the text image for buy stats using the current buy data
+	void _RenderBuyStats();
+
+	//! \brief Re-renders the text image for sell stats using the current sell data
+	void _RenderSellStats();
+
+	//! \brief Re-renders the text image for trade stats using the current trade data
+	void _RenderTradeStats();
+
 	//! \brief Executes a clear order command from the player, clearing all marked transactions
 	void _ClearOrder();
-
-	//! \brief Modify's the party's inventory, drunes, and shop wares by finalizing all purchases, sales, and trades
-	void _CompleteTransaction();
 
 	//! \brief Performs necessary clean-ups to interface state information and marked transactions when the player leaves this interface
 	void _LeaveInterface();
