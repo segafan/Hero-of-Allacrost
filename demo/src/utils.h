@@ -673,6 +673,13 @@ bool DeleteFile(const std::string& filename);
 **/
 const std::string GetUserDataPath(bool user_files = true);
 
+/** \brief returns the directory path to save/load/delete user profiles
+*** \return A string containing the path to the profiles directory
+*** \TODO: might have to add in special support for OSX if we want to 
+*** 	   keep the profiles under the user creatd content
+**/
+const std::string GetUserProfilePath();
+
 /** \brief Retrieves the path and filename of the settings file to use
 *** \return A string with the settings filename, or an empty string if the settings file could not be found
 **/
