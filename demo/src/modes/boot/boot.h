@@ -60,6 +60,12 @@ enum WAIT_FOR {
 	WAIT_JOY_AXIS
 };
 
+enum PICK_LETTER {
+	END = 27,
+	BACK = 26,
+	MAX_NAME = 19,
+};
+
 } // namespace private_boot
 
 /** ****************************************************************************
@@ -444,20 +450,22 @@ private:
 	/**
 	** \brief Saves the settings to a file specified by the user
 	** \param fileName the name of the file for the settings to be saved to, if a blank string is passed the default "settings.lua" will be ** used
+	** \return true if file could be saved, false otherwise
 	**/
-	void _SaveSettingsFile(const std::string& fileName);
+	bool _SaveSettingsFile(const std::string& fileName);
 
 
 	/**
 	** \brief Saves the settings to a file specified by the user
 	** \param fileName the name of the file for the settings to be loaded from if a blank string is passed the default "settings.lua" will ** be used
+	** \return true if file could be loaded, false otherwise
 	**/
 	bool _LoadSettingsFile(const std::string& fileName);
 
 	/** \brief returns the directory listing for the user data path
 	** \return A vector listing all the files in the directory not including the default settings.lua file, this is meant for personalized ** profiles only
 	**/
-	std::vector<std::string> _GetDirectoryListingUserDataPath();
+	std::vector<std::string> _GetDirectoryListingUserProfilePath();
 
 }; // class BootMode : public hoa_mode_manager::GameMode
 

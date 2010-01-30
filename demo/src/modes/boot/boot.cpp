@@ -1087,10 +1087,10 @@ void BootMode::_SetupLoadProfileMenu() {
 
 
 	//add the options in for each file
-	for(int32 i = 0; i < (int32) _GetDirectoryListingUserDataPath().size(); i++) {
+	for(int32 i = 0; i < (int32) _GetDirectoryListingUserProfilePath().size(); i++) {
 
 		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
-		string fileName = _GetDirectoryListingUserDataPath().at(i);
+		string fileName = _GetDirectoryListingUserProfilePath().at(i);
 		_load_profile_menu.AddOption(MakeUnicodeString(fileName.c_str()), &BootMode::_OnLoadFile);
 	}
 }
@@ -1107,10 +1107,10 @@ void BootMode::_SetupDeleteProfileMenu() {
 
 
 	//add the options in for each file
-	for(int32 i = 0; i < (int32) _GetDirectoryListingUserDataPath().size(); i++) {
+	for(int32 i = 0; i < (int32) _GetDirectoryListingUserProfilePath().size(); i++) {
 
 		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
-		string fileName = _GetDirectoryListingUserDataPath().at(i);
+		string fileName = _GetDirectoryListingUserProfilePath().at(i);
 		_delete_profile_menu.AddOption(MakeUnicodeString(fileName.c_str()), &BootMode::_OnDeleteFile);
 	}
 }
@@ -1133,9 +1133,9 @@ void BootMode::_SetupSaveProfileMenu() {
 
 	//add the options in for each file
 	//these options are selected when user wants to overwrite an existing file
-	for(int32 i = 0; i < (int32) _GetDirectoryListingUserDataPath().size(); i++) {
+	for(int32 i = 0; i < (int32) _GetDirectoryListingUserProfilePath().size(); i++) {
 
-		string fileName = _GetDirectoryListingUserDataPath().at(i);
+		string fileName = _GetDirectoryListingUserProfilePath().at(i);
 		_save_profile_menu.AddOption(MakeUnicodeString(fileName.c_str()), &BootMode::_OnSaveFile);
 	}
 
@@ -1530,20 +1530,21 @@ void BootMode::_OnDeleteProfile() {
 void BootMode::_OnLoadFile() {
 
 	//get the file path
-	if(_load_profile_menu.GetSelection() < 0 || _load_profile_menu.GetSelection() >= (int32)_GetDirectoryListingUserDataPath().size())
+	if(_load_profile_menu.GetSelection() < 0 || _load_profile_menu.GetSelection() >= (int32)_GetDirectoryListingUserProfilePath().size())
 		cerr << "selection was out of range: " << _load_profile_menu.GetSelection() << " try another one " << endl;
 	else
 	{
-		const string& fileName = GetUserDataPath(true) + _GetDirectoryListingUserDataPath().at(_load_profile_menu.GetSelection());
+		//we took off the .lua extension so that end users wouldn't see it but we need to add it back now
+		const string& fileName = GetUserProfilePath() + _GetDirectoryListingUserProfilePath().at(_load_profile_menu.GetSelection()) + ".lua";
 		bool success = _LoadSettingsFile(fileName);
 
 		//load the file
 		if(BOOT_DEBUG)
 		{
 			if(success)
-				cout << "profile was successfully loaded " << fileName << endl;
+				cout << "BOOT: profile was successfully loaded " << fileName << endl;
 			else
-				cout << "profile failed to load " << fileName << endl;
+				cout << "BOOT ERROR: profile failed to load " << fileName << endl;
 		}
 
 		//update all of the settings when loaded
@@ -1557,21 +1558,22 @@ void BootMode::_OnLoadFile() {
 //Deletes the file
 void BootMode::_OnDeleteFile() {
 
-	if(_load_profile_menu.GetSelection() < 0 || _load_profile_menu.GetSelection() >= (int32)_GetDirectoryListingUserDataPath().size())
+	if(_load_profile_menu.GetSelection() < 0 || _load_profile_menu.GetSelection() >= (int32)_GetDirectoryListingUserProfilePath().size())
 		cerr << "selection was out of range: " << _load_profile_menu.GetSelection() << " try another one " << endl;
 	else
 	{
 		//get the file path
-		const string& fileName = GetUserDataPath(true) + _GetDirectoryListingUserDataPath().at(_load_profile_menu.GetSelection());
+		//we took off the .lua extension so that end users wouldn't see it but we need to add it back now
+		const string& fileName = GetUserProfilePath() + _GetDirectoryListingUserProfilePath().at(_load_profile_menu.GetSelection()) + ".lua";
 
 		bool success = DeleteFile(fileName);
 
 		if(BOOT_DEBUG)
 		{
 			if(success)
-				cout << "profile was successfully deleted " << fileName << endl;
+				cout << "BOOT: profile was successfully deleted " << fileName << endl;
 			else
-				cout << "failed to delete profile " << fileName << endl;
+				cout << "BOOT ERROR: failed to delete profile " << fileName << endl;
 		}
 
 		//Clear the option boxes on all the menus and reload them so we can get rid of the deleted profile
@@ -1615,7 +1617,7 @@ void BootMode::_OnPickLetter() {
 	//the letters from the table
 	char letters[26] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
 
-	if(_user_input_menu.GetSelection() == 27) {
+	if(_user_input_menu.GetSelection() == END) {
 		//end, so save the file
 
 		//add the .lua extension
@@ -1623,7 +1625,18 @@ void BootMode::_OnPickLetter() {
 
 		//lets save this mofo :) and then add the option to save_profile menu and the load-profile menu
 		_has_modified_settings = true;
-		_SaveSettingsFile(_current_filename);
+
+		if(_SaveSettingsFile(_current_filename))
+		{
+			if(BOOT_DEBUG)
+				cout << "BOOT: profile successfully saved.";
+		}
+		else
+			cout << "BOOT ERROR: profile could not be saved.";		
+		
+			
+		//take off the .lua extension so the end user doesnt see it
+		_current_filename.erase(_current_filename.size() - 4);
 		_save_profile_menu.AddOption(MakeUnicodeString(_current_filename), &BootMode::_OnSaveFile);
 		_load_profile_menu.AddOption(MakeUnicodeString(_current_filename), &BootMode::_OnLoadFile);
 		_delete_profile_menu.AddOption(MakeUnicodeString(_current_filename), &BootMode::_OnDeleteFile);
@@ -1642,7 +1655,7 @@ void BootMode::_OnPickLetter() {
 		_active_menu = &_save_profile_menu;
 
 	}
-	else if(_user_input_menu.GetSelection() == 26) {
+	else if(_user_input_menu.GetSelection() == BACK) {
 		//take off the last letter
 		//we subtract 1 because char arrays AKA strings start at position 0
 
@@ -1652,7 +1665,7 @@ void BootMode::_OnPickLetter() {
 	}
 	else {
 		//add letter to the filename the filename can be no longer than 19 characters
-		if(_current_filename.length() != 19)
+		if(_current_filename.length() != MAX_NAME)
 			_current_filename += letters[_user_input_menu.GetSelection()];
 		else if(BOOT_DEBUG)
 			cout << "BOOT ERROR: Filename cannot be longer than 19 characters";
@@ -1731,32 +1744,32 @@ void BootMode::_UpdateJoySettings() {
 
 void BootMode::_UpdateSaveAndLoadProfiles() {
 	//match the text with the directory listing :0
-	for(int32 i = 0; i < (int32) _GetDirectoryListingUserDataPath().size(); i++) {
-		_load_profile_menu.SetOptionText(i,MakeUnicodeString(_GetDirectoryListingUserDataPath().at(i)));
-		_delete_profile_menu.SetOptionText(i,MakeUnicodeString(_GetDirectoryListingUserDataPath().at(i)));
+	for(int32 i = 0; i < (int32) _GetDirectoryListingUserProfilePath().size(); i++) {
+		_load_profile_menu.SetOptionText(i,MakeUnicodeString(_GetDirectoryListingUserProfilePath().at(i)));
+		_delete_profile_menu.SetOptionText(i,MakeUnicodeString(_GetDirectoryListingUserProfilePath().at(i)));
 	}
 
 }
 
 
 // Saves all the game settings into a .lua file
-void BootMode::_SaveSettingsFile(const std::string& fileName) {
+bool BootMode::_SaveSettingsFile(const std::string& fileName) {
 
 	// No need to save the settings if we haven't edited anything!
 	if (!_has_modified_settings)
-		return;
+		return false;
 
 	string file = "";
 	string fileTemp = "";
 
 	// Load the settings file for reading in the original data
-	fileTemp = GetUserDataPath(false) + "settings.lua";
+	fileTemp = GetUserProfilePath() + "settings.lua";
 
 
 	if(fileName == "")
 		file = fileTemp;
 	else
-		file = GetUserDataPath(false) + fileName;
+		file = GetUserProfilePath() + fileName;
 
 	//copy the default file so we have an already set up lua file and then we can modify its settings
 	if (!DoesFileExist(file))
@@ -1764,7 +1777,8 @@ void BootMode::_SaveSettingsFile(const std::string& fileName) {
 
 	ModifyScriptDescriptor settings_lua;
 	if (!settings_lua.OpenFile(file)) {
-		cout << "BOOT ERROR: failed to load the settings file!" << endl;
+		cerr << "BOOT ERROR: failed to load the settings file!" << endl;
+		return false;
 	}
 
 	// Write the current settings into the .lua file
@@ -1807,13 +1821,19 @@ void BootMode::_SaveSettingsFile(const std::string& fileName) {
 	settings_lua.CloseFile();
 
 	_has_modified_settings = false;
+
+	return true;
 }
 
 bool BootMode::_LoadSettingsFile(const std::string& fileName) {
 
 	ReadScriptDescriptor settings;
+
 	if (settings.OpenFile(fileName) == false)
 		return false;
+
+	if(BOOT_DEBUG)
+		cout << "BOOT: Opened file to load settings " << settings.GetFilename() << endl;
 
 	settings.OpenTable("settings");
 	settings.OpenTable("key_settings");
@@ -1832,7 +1852,7 @@ bool BootMode::_LoadSettingsFile(const std::string& fileName) {
 
 	if (settings.IsErrorDetected()) {
 		cerr << "SETTINGS LOAD ERROR: failure while trying to retrieve key map "
-			<< "information from file: " << fileName << endl;
+			<< "information from file: " << settings.GetFilename() << endl;
 		cerr << settings.GetErrorMessages() << endl;
 		return false;
 	}
@@ -1860,7 +1880,7 @@ bool BootMode::_LoadSettingsFile(const std::string& fileName) {
 
 	if (settings.IsErrorDetected()) {
 		cerr << "SETTINGS LOAD ERROR: an error occured while trying to retrieve joystick mapping information "
-			<< "from file: " << fileName << endl;
+			<< "from file: " << settings.GetFilename() << endl;
 		cerr << settings.GetErrorMessages() << endl;
 		return false;
 	}
@@ -1869,6 +1889,7 @@ bool BootMode::_LoadSettingsFile(const std::string& fileName) {
 	settings.OpenTable("video_settings");
 	bool fullscreen = settings.ReadBool("full_screen");
 	int32 resx = settings.ReadInt("screen_resx");
+
 
 	//Set Resolution  according to width if no width matches our predefined resoultion set to lowest resolution
 	if(resx == 800) {
@@ -1898,7 +1919,7 @@ bool BootMode::_LoadSettingsFile(const std::string& fileName) {
 
 	if (settings.IsErrorDetected()) {
 		cerr << "SETTINGS LOAD ERROR: failure while trying to retrieve video settings "
-			<< "information from file: " << fileName << endl;
+			<< "information from file: " << settings.GetFilename() << endl;
 		cerr << settings.GetErrorMessages() << endl;
 		return false;
 	}
@@ -1913,12 +1934,16 @@ bool BootMode::_LoadSettingsFile(const std::string& fileName) {
 
 	if (settings.IsErrorDetected()) {
 		cerr << "SETTINGS LOAD ERROR: failure while trying to retrieve audio settings "
-			<< "information from file: " << fileName << endl;
+			<< "information from file: " << settings.GetFilename() << endl;
 		cerr << settings.GetErrorMessages() << endl;
 		return false;
 	}
 
 	settings.CloseFile();
+
+	if(BOOT_DEBUG)
+		cout << "Profile closed " << settings.GetFilename() << endl;
+
 
 	return true;
 }//bool _LoadSettingsFile
@@ -1928,24 +1953,28 @@ void BootMode::_OverwriteProfile() {
 	//so lets overwrite it
 	_has_modified_settings = true;
 
-	//we subtract 1 to take into account the new profile option
-	_SaveSettingsFile(_GetDirectoryListingUserDataPath().at(_save_profile_menu.GetSelection() - 1));
+	//we subtract 1 to take into account the "new profile" option
+	_SaveSettingsFile(_GetDirectoryListingUserProfilePath().at(_save_profile_menu.GetSelection() - 1) + ".lua");
 
 	//if we got past the save settings without throwing an exception then we succeeded
 	if(BOOT_DEBUG)
-		cout << "Profile successfully overwritten " << _GetDirectoryListingUserDataPath().at(_save_profile_menu.GetSelection() - 1) << endl;
+		cout << "BOOT: profile successfully overwritten " << _GetDirectoryListingUserProfilePath().at(_save_profile_menu.GetSelection() - 1) << endl;
 }
 
-std::vector<std::string> BootMode::_GetDirectoryListingUserDataPath() {
+std::vector<std::string> BootMode::_GetDirectoryListingUserProfilePath() {
 
 	//get the entire directory listing for user data path
-	vector<string> directoryListing = ListDirectory(GetUserDataPath(true),".lua");
+	vector<string> directoryListing = ListDirectory(GetUserProfilePath(),".lua");
 
 	if (directoryListing.empty()) {
 		return directoryListing;
 	} else {
 		//as stated earlier this is for personalized profiles only
 		directoryListing.erase(find(directoryListing.begin(),directoryListing.end(),"settings.lua"));
+
+		//we also need to take off the .lua extension so end users do not see it
+		for(int32 i = 0; i < (int32)directoryListing.size(); i++)
+			directoryListing.at(i).erase(directoryListing.at(i).size() - 4);
 
 		//return the vector!
 		return directoryListing;
