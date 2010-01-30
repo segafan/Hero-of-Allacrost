@@ -228,6 +228,7 @@ function Load(m)
 
 	event = hoa_map.BattleEncounterEvent(11005, 107); -- final battle
 	event:SetMusic("mus/Betrayal_Battle.ogg");
+	event:SetBackground("img/backdrops/battle/desert_cave.png");
 	event:AddBattleEvent(1);
 	event:AddEventLink(11006, false, 0);
 	event_supervisor:RegisterEvent(event);
