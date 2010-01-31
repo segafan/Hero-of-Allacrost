@@ -175,7 +175,7 @@ DialogueWindow::DialogueWindow(bool isBattle) {
 
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
-	
+
 	if (!isBattle) {
 		MenuWindow::Create(992.0f, 192.0f);
 		MenuWindow::SetPosition(12.0f, 560.0f);
@@ -185,7 +185,7 @@ DialogueWindow::DialogueWindow(bool isBattle) {
 	_display_textbox.SetDisplaySpeed(30);
 	_display_textbox.SetPosition(260.0f, 596.0f);
 	_display_textbox.SetDimensions(700.0f, 126.0f);
-	_display_textbox.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
+	_display_textbox.SetTextStyle(TextStyle("text20", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_display_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
 	_display_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_display_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
@@ -193,7 +193,7 @@ DialogueWindow::DialogueWindow(bool isBattle) {
 	_display_options.SetPosition(300.0f, 630.0f);
 	_display_options.SetDimensions(660.0f, 90.0f, 1, 255, 1, 3);
 	_display_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_display_options.SetTextStyle(TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
+	_display_options.SetTextStyle(TextStyle("title20", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_display_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_display_options.SetCursorOffset(-55.0f, -25.0f);
 	_display_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_NONE);
@@ -243,7 +243,7 @@ void DialogueWindow::Draw(ustring* name, StillImage* portrait) {
 	VideoManager->MoveRelative(120.0f, -20.0f);
 
 	if (name != NULL)
-		VideoManager->Text()->Draw(*name, TextStyle("map", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
+		VideoManager->Text()->Draw(*name, TextStyle("title22", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 
 	if (portrait != NULL) {
 		VideoManager->MoveRelative(0.0f, -20.0f);
