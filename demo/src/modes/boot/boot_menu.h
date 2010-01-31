@@ -10,28 +10,39 @@
 /** ****************************************************************************
 *** \file    boot_menu.h
 *** \author  Viljami Korhonen, mindflayer@allacrost.org
-*** \brief   Header file for the boot-mode menu
-***
-*** This code extends some parts of the OptionBox class to match the
-*** requirements of boot menus. This includes features like multi-depth
-*** menus and custom visualization as well as custom event handling.
-*** However, no inheritance was used as I found it to be more of a nuisance
-*** than benefit in here!
+*** \brief   Header file for the boot menus
 *** ***************************************************************************/
 
 #ifndef __BOOT_MENU__
 #define __BOOT_MENU__
 
-#include "utils.h"
 #include "defs.h"
+#include "utils.h"
 
 #include "video.h"
 
 namespace hoa_boot {
 
+namespace private_boot {
+
 /** ****************************************************************************
-*** \brief The BootMenu-class will help in creation of the boot-menu.
-*** All of the boot-menu functions are given via function pointers to the class.
+*** \brief Used for the construction and operation of all boot mode menus
+***
+*** This class is an extension of the OptionBox class found in the GUI code. Its
+*** primary feature is that it utilizes function pointers to the BootMode class,
+*** which makes this class incredibly flexible and versatile. The way it works
+*** is to keep several containers of function pointers, where the size of these
+*** containers are equal to the number of options in the menu. The function pointers
+*** are invoked on the selected option when an input command is received. For example,
+*** if the second option is selected and a confirm press is registered, the appropriate
+*** function pointed to for that option and that input event will be called. Other
+*** than this simple yet powerful feature, this class operates and acts exactly the same
+*** as a standard OptionBox object.
+***
+*** \note There are some OptionBox methods which should not be used for this class. Particularly
+*** any methods that add or remove options should be avoided because they do not know to modify
+*** the function pointer containers appropriately. Use only the methods specific to this class
+*** to add or remove options.
 *** ***************************************************************************/
 class BootMenu : public hoa_video::OptionBox {
 public:
@@ -41,51 +52,46 @@ public:
 	~BootMenu()
 		{}
 
-	/** \brief Pointer to the active boot mode
-	*** This is guaranteed to be a valid pointer and is set in the BootMode::Reset() function
-	**/
-	static BootMode* active_boot_mode;
-
-	/** \brief Adds a new menu option with the desired function attached to it
+	/** \brief Adds a new option to the menu with the desired function pointers attached
 	*** \param text A text representing the new option
-	*** \param *confirm_function 'Confirm' handler from the BootMode
-	*** \param *left_function 'Left' handler from the BootMode
-	*** \param *right_function 'Right' handler from the BootMode
-	*** \param *up_function 'Up' handler from the BootMode
-	*** \param *down_function 'Down' handler from the BootMode
+	*** \param *up_function BootMode handler function for up input events
+	*** \param *down_function BootMode handler function for down input events
+	*** \param *confirm_function BootMode handler function for confirm input events
+	*** \param *left_function BootMode handler function for left input events
+	*** \param *right_function BootMode handler function for right input events
 	**/
-	void AddOption(const hoa_utils::ustring & text, void (BootMode::*confirm_function)() = 0, void (BootMode::*left_function)() = 0,
-		void (BootMode::*right_function)() = 0, void (BootMode::*up_function)() = 0, void (BootMode::*down_function)() = 0);
+	void AddOption(const hoa_utils::ustring & text, void (BootMode::*confirm_function)() = NULL,
+		void (BootMode::*up_function)() = NULL,   void (BootMode::*down_function)() = NULL,
+		void (BootMode::*left_function)() = NULL, void (BootMode::*right_function)() = NULL);
 
+	//! \brief
+	//@{
 	void InputConfirm();
-
 	void InputUp();
-
 	void InputDown();
-
 	void InputLeft();
-
 	void InputRight();
-
-	void InputCancel();
+	//@}
 
 private:
-	//! confirm-key handlers for all options in the menu
+	//! \brief Confirm input handlers for all options in the menu
 	std::vector<void (BootMode::*)()> _confirm_handlers;
 
-	//! left-key handlers for all options in the menu
-	std::vector<void (BootMode::*)()> _left_handlers;
-
-	//! right-key handlers for all options in the menu
-	std::vector<void (BootMode::*)()> _right_handlers;
-
-	//! up-key handlers for all options in the menu
+	//! \brief Up input handlers for all options in the menu
 	std::vector<void (BootMode::*)()> _up_handlers;
 
-	//! down-key handlers for all options in the menu
+	//! \brief Down input handlers for all options in the menu
 	std::vector<void (BootMode::*)()> _down_handlers;
+
+	//! \brief Left input handlers for all options in the menu
+	std::vector<void (BootMode::*)()> _left_handlers;
+
+	//! \brief Right input handlers for all options in the menu
+	std::vector<void (BootMode::*)()> _right_handlers;
 }; // class BootMenu : public hoa_video::OptionBox
 
-}
+} // namespace private_boot
+
+} // namespace hoa_boot
 
 #endif // __BOOT_MENU__

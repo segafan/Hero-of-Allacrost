@@ -230,8 +230,12 @@ namespace hoa_battle {
 namespace hoa_boot {
 	extern bool BOOT_DEBUG;
 	class BootMode;
-	class BootMenu;
-	class CreditsScreen;
+
+	namespace private_boot {
+		class BootMenu;
+		class CreditsWindow;
+		class WelcomeWindow;
+	}
 }
 
 // Map mode declarations, see src/modes/map/

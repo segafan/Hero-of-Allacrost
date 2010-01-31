@@ -29,11 +29,13 @@
 
 #include "shop_utils.h"
 
+//! \brief All calls to shop mode are wrapped in this namespace.
 namespace hoa_shop {
 
 //! \brief Determines whether the code in the hoa_shop namespace should print debug statements or not.
 extern bool SHOP_DEBUG;
 
+//! \brief An internal namespace to be used only within the shop code. Don't use this namespace anywhere else!
 namespace private_shop {
 
 /** ****************************************************************************

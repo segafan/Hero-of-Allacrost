@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,66 +10,80 @@
 /** ****************************************************************************
 *** \file    boot_welcome.h
 *** \author  Philip Vorsilak, gorzuate@allacrost.org
-*** \brief   Header file for the Welcome screen, copied from boot_credits.h
-***
-*** This file defines the welcome screen class that is used by boot mode.
+*** \brief   Header file for the boot welcome window
 *** ***************************************************************************/
 
 #ifndef __BOOT_WELCOME__
 #define __BOOT_WELCOME__
 
-#include <string>
-
+#include "utils.h"
 #include "video.h"
 
 namespace hoa_boot {
 
-// TODO: this should all be defined in the private_boot namespace
+namespace private_boot {
 
 /** ****************************************************************************
-*** \brief Provides for everything that is needed for displaying the game 
-***        welcome message.
+*** \brief Displays vital information to the player upon starting the game
 ***
-*** This class is used only in boot mode.
+*** This welcome window only pops up the first time that the player starts the game.
+*** Its purpose is to ensure that the player understands the default key commands in
+*** case they started up the game prior to reading the game manual. Under normal
+*** circumstances, this screen is shown only once when the player first starts up
+*** the game after installation. After that the Lua file holding the game settings
+*** is marked so that this screen does not pop up a second time.
+***
+*** The window itself consists of a large MenuWindow, header text explaining the
+*** window's purpose of providing default key mappings to the player, a table of
+*** the default keys and purposes, and footer text informing the player where
+*** they can find more information.
 *** *****************************************************************************/
-class WelcomeScreen
-{
+class WelcomeWindow {
 public:
-	WelcomeScreen();
+	WelcomeWindow();
 
-	~WelcomeScreen();
+	~WelcomeWindow();
 
-	//! Draws the welcome window on the screen if it is set visible
+	//! \brief Updates the state of the welcome window and processes user input
+	void Update();
+
+	//! \brief Draws the welcome window and its contents to the screen
 	void Draw();
 
-	//! Shows the welcome window
+	//! \brief Activates and shows the welcome window
 	void Show();
 
-	//! Hides the welcome window
+	//! \brief Deactivates and hides the welcome window
 	void Hide();
 
-	//! Returns true if the welcome window is set visible at the moment
-	bool IsVisible();
+	//! \brief Returns true if the welcome window is currently active and visible
+	bool IsActive() const
+		{ return _active; }
 
 private:
-	//! Window for the screen
+	//! \brief Set to true when the window is active and should be visible on the screen
+	bool _active;
+
+	//! \brief The GUI menu window that all other content is drawn upon
 	hoa_video::MenuWindow _window;
 
-	//! Is the window visible or not
-	bool _visible;
+	//! \brief Rendered text of the header string
+	hoa_video::TextImage _text_header;
 
-	//! Rendered text header string
-	hoa_video::TextImage _welcome_header_rendered;
+	//! \brief An option box used as a header for the key table
+	hoa_video::OptionBox _key_table_header;
 
-	//! Rendered text body string
-	hoa_video::TextImage _welcome_body_rendered;
+	//! \brief Stores the text for default key mappings in a table format
+	hoa_video::OptionBox _key_table;
 
-	//! Text header to be displayed
-	std::string _welcome_text_header;
+	//! \brief Rendered text that tells the player how to move past the window
+	hoa_video::TextImage _text_additional;
 
-	//! Text body to be displayed
-	std::string _welcome_text_body;
-};
+	//! \brief Rendered text that tells the player how to move past the window
+	hoa_video::TextImage _text_continue;
+}; // class WelcomeWindow
+
+} // namespace private_boot
 
 } // namespace hoa_boot
 
