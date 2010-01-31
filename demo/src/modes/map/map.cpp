@@ -622,7 +622,7 @@ void MapMode::_DrawGUI() {
 		VideoManager->Move(512.0f, 100.0f);
 		_location_graphic.Draw(blend);
 		VideoManager->MoveRelative(0.0f, -80.0f);
-		VideoManager->Text()->Draw(_map_name, TextStyle("map", blend, VIDEO_TEXT_SHADOW_DARK));
+		VideoManager->Text()->Draw(_map_name, TextStyle("title24", blend, VIDEO_TEXT_SHADOW_DARK));
 		VideoManager->PopState();
 	}
 

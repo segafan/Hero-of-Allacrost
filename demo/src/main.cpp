@@ -306,10 +306,6 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("Failed to load the 'Junicode Regular' font as 'default, size 18'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "map", 22) == false) {
-		throw Exception("Failed to load the 'Junicode Regular' font as 'map, size 22'", __FILE__, __LINE__, __FUNCTION__);
-	}
-
 	if (VideoManager->Text()->LoadFont("img/fonts/junicode_regular.ttf", "battle", 20) == false) {
 		throw Exception("Failed to load the 'Junicode Regular' font as 'battle, size 20'", __FILE__, __LINE__, __FUNCTION__);
 	}

@@ -188,7 +188,7 @@ void MapTreasure::Open() {
 TreasureSupervisor::TreasureSupervisor() :
 	_treasure(NULL),
 	_selection(ACTION_SELECTED),
-	_window_title(MakeUnicodeString("Treasure Contents"), TextStyle("map", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2)),
+	_window_title(MakeUnicodeString("Treasure Contents"), TextStyle("title24", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2)),
 	_selection_name(),
 	_selection_icon(NULL)
 {
@@ -211,7 +211,7 @@ TreasureSupervisor::TreasureSupervisor() :
 	_action_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_options.SetCursorOffset(-50.0f, -25.0f);
-	_action_options.SetTextStyle(TextStyle("map", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
+	_action_options.SetTextStyle(TextStyle("title22", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
 	_action_options.AddOption(MakeUnicodeString("Finished"));
 	_action_options.SetSelection(0);
 	_action_options.SetOwner(&_action_window);
@@ -223,7 +223,7 @@ TreasureSupervisor::TreasureSupervisor() :
 	_list_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_list_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_list_options.SetCursorOffset(-50.0f, -25.0f);
-	_list_options.SetTextStyle(TextStyle("map", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
+	_list_options.SetTextStyle(TextStyle("text22", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
 	_list_options.SetOwner(&_list_window);
 	// TODO: this currently does not work (text will be blank). Re-enable it once the scissoring bug is fixed in the video engine
 // 	_list_options.Scissoring(true, true);
@@ -231,12 +231,12 @@ TreasureSupervisor::TreasureSupervisor() :
 	_detail_textbox.SetPosition(20.0f, 90.0f);
 	_detail_textbox.SetDimensions(726.0f, 128.0f);
 	_detail_textbox.SetDisplaySpeed(50);
-	_detail_textbox.SetTextStyle(TextStyle("map", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
+	_detail_textbox.SetTextStyle(TextStyle("text22", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
 	_detail_textbox.SetDisplayMode(VIDEO_TEXT_REVEAL);
 	_detail_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_detail_textbox.SetOwner(&_list_window);
 
-	_selection_name.SetStyle(TextStyle("map", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
+	_selection_name.SetStyle(TextStyle("text22", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
 
 	if (_drunes_icon.Load("img/icons/drunes.png") == false)
 		IF_PRINT_WARNING(MAP_DEBUG) << "failed to load drunes icon for treasure menu" << endl;
