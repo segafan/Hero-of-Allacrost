@@ -395,7 +395,7 @@ bool UTF8ToUTF16(const char *source, uint16 *dest, size_t length) {
 ustring MakeUnicodeString(const string& text) {
 	int32 length = static_cast<int32>(text.length() + 1);
 	uint16 *ubuff = new uint16[length + 1];
-	memset(ubuff, '\0', sizeof(*ubuff));
+	memset(ubuff, 0, 2*(length+1));
 	uint16 *utf16String = ubuff;
 
 	if (UTF8ToUTF16(text.c_str(), ubuff, length)) {
