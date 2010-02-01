@@ -220,7 +220,7 @@ function Load(m)
 	text = hoa_utils.Translate("I think we do. Come on!");
 	dialogue:AddText(text, 1000, 14, 0, false);
 	text = hoa_utils.Translate("Kyle has joined the party.");
-	dialogue:AddText(text, 2, -1, 1, false);
+	dialogue:AddText(text, 2, -1, 22111, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
 
@@ -229,9 +229,6 @@ function Load(m)
 	GlobalManager:AddCharacter(KYLE);
 
 	-- Register event functions
-	event = hoa_map.ScriptedEvent(1, 1, 0);
-	event_supervisor:RegisterEvent(event);
-
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_training.lua");
 	event_supervisor:RegisterEvent(event);
 	
@@ -239,9 +236,4 @@ function Load(m)
 	event = hoa_map.DialogueEvent(23000, 1);
 	event_supervisor:RegisterEvent(event);
 	event_supervisor:StartEvent(23000);
-end
-
-
-map_functions[1] = function()
-	event_supervisor:StartEvent(22111);
 end

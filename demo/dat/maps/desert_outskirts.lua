@@ -812,11 +812,17 @@ function Load(m)
 	map:AddZone(exit_zone);
 
 	-- Register event functions
-	event = hoa_map.ScriptedEvent(1, 1, 0);
-	event_supervisor:RegisterEvent(event);
 	event = hoa_map.ScriptedEvent(2, 2, 0);
 	event_supervisor:RegisterEvent(event);
 
+	event = hoa_map.BattleEncounterEvent(11000, 103);
+	event:SetMusic("mus/The_Creature_Awakens.ogg");
+	event:SetBackground("img/backdrops/battle/desert.png");
+	event:AddEventLink(11001, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.DialogueEvent(11001, 2);
+	event_supervisor:RegisterEvent(event);
+	
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_training.lua");
 	event_supervisor:RegisterEvent(event);
 end
@@ -844,14 +850,6 @@ map_functions[2] = function()
 	kyle:SetNoCollision(true);
 	kyle:SetUpdatable(false);
 
-	-- Sets up and starts boss encounter
-	local event = hoa_map.BattleEncounterEvent(11000, 103);
-	event:SetMusic("mus/The_Creature_Awakens.ogg");
-	event:SetBackground("img/backdrops/battle/desert.png");
-	event:AddEventLink(11001, false, 0);
-	event_supervisor:RegisterEvent(event);
-	event = hoa_map.DialogueEvent(11001, 2);
-	event_supervisor:RegisterEvent(event);
-
+	-- starts boss encounter
 	event_supervisor:StartEvent(11000);
 end
