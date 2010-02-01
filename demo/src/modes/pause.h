@@ -10,20 +10,17 @@
 /** ****************************************************************************
 *** \file    pause.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for pause and quit interface.
-***
-*** This code is responsible for managing the game's operation while the game
-*** is in a paused state.
+*** \brief   Header file for pause mode interface.
 *** ***************************************************************************/
 
 #ifndef __PAUSE_HEADER__
 #define __PAUSE_HEADER__
 
-#include "utils.h"
 #include "defs.h"
+#include "utils.h"
 
-#include "video.h"
 #include "mode_manager.h"
+#include "video.h"
 
 //! \brief All calls to pause mode are wrapped in this namespace.
 namespace hoa_pause {
@@ -32,11 +29,11 @@ namespace hoa_pause {
 extern bool PAUSE_DEBUG;
 
 /** ****************************************************************************
-*** \brief Handles the game operation during a pause or quit user request
+*** \brief Handles the game operation after a pause or quit request from the player
 ***
 *** This mode is normally entered when the player inputs a pause or quit command.
 *** This class uses a captured screen image as its background and displays either
-*** the text "PAUSED" or a quit options menu depending on the state that the mode
+*** the text "Paused" or a quit options menu depending on the state that the mode
 *** is set in. The constructor also allows you the option to automatically pause
 *** the audio while the game is in this mode of operation.
 ***
@@ -48,9 +45,9 @@ extern bool PAUSE_DEBUG;
 *** \note When the user enters this mode, the game will sleep for small periods
 *** of time so that the application isn't using up 100% of the CPU.
 ***
-*** \note If the user inputs a quit event when this mode is active and in the
+*** \note If the user inputs another quit event when this mode is active and in the
 *** quit state, the game will exit immediately. If the user inputs a quit event
-*** when the quit state is not active, then the quit state is activated.
+*** when the quit state is not active, this will activate the quite state.
 *** ***************************************************************************/
 class PauseMode : public hoa_mode_manager::GameMode {
 public:
@@ -72,7 +69,7 @@ public:
 	void Draw();
 
 private:
-	//! \brief When true, the player is presented with quit options. When false, "PAUSED" is displayed on the screen
+	//! \brief When true, the player is presented with quit options. When false, "Paused" is displayed on the screen
 	bool _quit_state;
 
 	//! \brief Set to true if the audio should be resumed when this mode finishes

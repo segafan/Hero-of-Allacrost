@@ -33,7 +33,10 @@ namespace hoa_pause {
 
 bool PAUSE_DEBUG = false;
 
-//! \name Quit Options Constants
+/** \name Quit Options Menu Constants
+*** These constants reprent the OptionBox selection indeces of the three different options
+*** presented to the player while the _quit_state member is active.
+**/
 //@{
 const uint8 QUIT_GAME      = 0;
 const uint8 QUIT_TO_BOOT   = 1;
@@ -48,14 +51,14 @@ PauseMode::PauseMode(bool quit_state, bool pause_audio) :
 {
 	mode_type = MODE_MANAGER_PAUSE_MODE;
 
-	// Render the PAUSED string in white text
-	_paused_text.SetStyle(TextStyle("default", Color::white, VIDEO_TEXT_SHADOW_BLACK));
-	_paused_text.SetText(MakeUnicodeString("PAUSED"));
+	// Render the paused string in white text
+	_paused_text.SetStyle(TextStyle("title28", Color::white, VIDEO_TEXT_SHADOW_BLACK));
+	_paused_text.SetText(MakeUnicodeString("Paused"));
 
 	// Initialize the quit options box
 	_quit_options.SetPosition(512.0f, 384.0f);
 	_quit_options.SetDimensions(750.0f, 50.0f, 3, 1, 3, 1);
-	_quit_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_quit_options.SetTextStyle(TextStyle("title24", Color::white, VIDEO_TEXT_SHADOW_BLACK));
 
 	_quit_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_quit_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -85,23 +88,23 @@ void PauseMode::Reset() {
 	try {
 		_screen_capture = VideoManager->CaptureScreen();
 	}
-	catch(Exception e) {
+	catch (Exception e) {
 		IF_PRINT_WARNING(PAUSE_DEBUG) << e.ToString() << endl;
 	}
 
 	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 }
 
 
 
 void PauseMode::Update() {
 	// Don't eat up 100% of the CPU time while in pause mode
-	SDL_Delay(50); // Put the process to sleep for 50ms
+	SDL_Delay(50); // Puts the process to sleep for 50ms
 
 	if (_quit_state == false) {
 		if (InputManager->QuitPress() == true) {
-			ModeManager->Pop();
+			_quit_state = true;
 			return;
 		}
 		else if (InputManager->PausePress() == true) {
@@ -110,14 +113,15 @@ void PauseMode::Update() {
 		}
 	}
 
-	else {
+	else { // (_quit_state == true)
+		_quit_options.Update();
+
 		if (InputManager->QuitPress() == true) {
 			SystemManager->ExitGame();
 			return;
 		}
 
-		_quit_options.Update();
-		if (InputManager->ConfirmPress() == true) {
+		else if (InputManager->ConfirmPress() == true) {
 			switch (_quit_options.GetSelection()) {
 				case QUIT_CANCEL:
 					ModeManager->Pop();
@@ -155,21 +159,19 @@ void PauseMode::Update() {
 
 void PauseMode::Draw() {
 	// Set the coordinate system for the background and draw
-	float width = _screen_capture.GetWidth();
-	float height = _screen_capture.GetHeight();
-	VideoManager->SetCoordSys(0, width, 0, height);
+	VideoManager->SetCoordSys(0.0f, _screen_capture.GetWidth(), 0.0f, _screen_capture.GetHeight());
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(0.0f, 0.0f);
 	_screen_capture.Draw(_dim_color);
 
 	// Re-set the coordinate system for everything else
 	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
-	if (_quit_state == false) {
-		VideoManager->Move(512.0f, 384.0f);
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
-		_paused_text.Draw();
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
-	}
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->Move(512.0f, 384.0f);
 
+	if (_quit_state == false) {
+		_paused_text.Draw();
+	}
 	else {
 		_quit_options.Draw();
 	}
