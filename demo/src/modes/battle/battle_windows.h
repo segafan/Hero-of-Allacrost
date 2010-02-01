@@ -88,24 +88,24 @@ enum FINISH_WINDOW_STATE {
 *** This window is located at the bottom right hand corner of the screen. This window
 *** has a constant position and size, but its inner contents can change greatly depending
 *** on the context of the battle. These content views are described below.
-*** 
+***
 *** - View #1: Action Category
 *** In the first view, the player is presented with a list of possible action categories
 *** (attack, defend, etc.). Which categories are available depends upon the current
 *** character for whom the player is selection an action, and also whether or not any usable
 *** items are in the party's inventory. After selecting a category, we proceed to the second
 *** view.
-*** 
+***
 *** - View #2: Action Selection
 *** In this view, the previously selected action category is displayed along with a list of
 *** the possible actions of that category and the amount of SP that they require to be used.
 *** Once the player selects an action to take, we proceed to view #3. The player can also
 *** hold down the MENU key, which will invoke view #4 to be displayed.
-*** 
+***
 *** - View #3: Target Selection
 *** This view displays information about the target that the player currently has selected
 *** (an enemy or character). This information includes the target's name, attack point,
-*** elemental and status effect properties, etc. Note that if the action selected targets 
+*** elemental and status effect properties, etc. Note that if the action selected targets
 *** either the entire party of characters or enemies, then this view is skipped.
 ***
 *** - View #4: Action Information
@@ -215,11 +215,26 @@ private:
 
 	//! \name TextImage objects
 	//@{
-	//! \brief Rendered text of "Skill     SP" as a header for the skill selection list
-	hoa_video::TextImage _skill_selection_header;
+	//! \brief A container full with rendered text of all possible action categories
+	std::vector<hoa_video::TextImage> _action_category_text;
 
-	//! \brief Rendered text of "Item     QTY" as a header for the item selection list
-	hoa_video::TextImage _item_selection_header;
+	//! \brief Rendered text for a name header of the skill selection list
+	hoa_video::TextImage _skill_name_header;
+
+	//! \brief Rendered text for a skill points header of the skill selection list
+	hoa_video::TextImage _skill_points_header;
+
+	//! \brief Rendered text for a name header of the item selection list
+	hoa_video::TextImage _item_name_header;
+
+	//! \brief Rendered text for a quantity header of the item selection list
+	hoa_video::TextImage _item_quantity_header;
+
+	//! \brief Rendered text that serves as a header to the action information text
+	hoa_video::TextImage _action_header;
+
+	//! \brief Rendered text that serves as a header to the target information text
+	hoa_video::TextImage _target_header;
 
 	//! \brief Rendered text that contains information about the currently selected action
 	hoa_video::TextImage _action_information;
@@ -235,7 +250,7 @@ private:
 
 	//! \brief Sets up the selection list option box
 	void _InitActionSelectionList();
-	
+
 	//! \brief Initializes Skill/SP and Item/Qty headers for the action selection lists
 	void _InitSelectionHeaders();
 
@@ -321,14 +336,20 @@ private:
 	//! \brief The state that the window is in, which determines its contents
 	FINISH_WINDOW_STATE _state;
 
+	//! \brief The amount of money won
+	int32 _victory_money;
+
+	//! \brief The amount of xp earned (per character)
+	int32 _victory_xp;
+
+	//! \brief Tallies the amount of growth each character has received for each stat
+	int _growth_gained[4][8];
+
 	//! \brief Pointers to all characters who took part in the battle
 	std::vector<hoa_global::GlobalCharacter*> _characters;
 
 	//! \brief The growth members for all object pointers in the _characters table
 	std::vector<hoa_global::GlobalCharacterGrowth*> _character_growths;
-
-	//! \brief Tallies the amount of growth each character has received for each stat
-	int _growth_gained[4][8];
 
 	//! \brief Text that displays the battle's outcome (victory or defeat)
 	hoa_video::TextBox _finish_outcome;
@@ -348,28 +369,21 @@ private:
 	//! \brief Character portraits
 	hoa_video::StillImage _char_portraits[4];
 
-	//! \brief The amount of money won
-	int32 _victory_money;
-
-	//! \brief The amount of xp earned (per character)
-	int32 _victory_xp;
-
 	//! \brief Items won from battle (<ID, quantity>)
 	std::map<hoa_global::GlobalObject*, int32> _victory_items;
 
 	// ----- Private methods
-	/*!
-	 * \brief Creates 4 character windows
-	 * \param start_x The x coordinate for the upper left corner of the window
-	 * \param start_y The y coordinate for the upper left corner of the window
-	 */
+
+	/** \brief Creates 4 character windows
+	*** \param start_x The x coordinate for the upper left corner of the window
+	*** \param start_y The y coordinate for the upper left corner of the window
+	**/
 	void _InitCharacterWindows(float start_x, float start_y);
 
-	/*!
-	 * \brief Creates _xp_and_money_window and _items_window
-	 * \param start_x The x coordinate for the upper left corner of the window
-	 * \param start_y The y coordinate for the upper left corner of the window
-	 */
+	/** \brief Creates _xp_and_money_window and _items_window
+	*** \param start_x The x coordinate for the upper left corner of the window
+	*** \param start_y The y coordinate for the upper left corner of the window
+	**/
 	void _InitSpoilsWindows(float start_x, float start_y);
 
 	//! \brief Sets up the OptionBox for things like retrying the battle

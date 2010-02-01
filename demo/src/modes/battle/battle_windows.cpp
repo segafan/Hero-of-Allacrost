@@ -42,7 +42,7 @@ ActionWindow::ActionWindow() {
 
 	// TODO: declare the MenuSkin to be used
 	if (MenuWindow::Create(512.0f, 128.0f) == false) {
-		cerr << "BATTLE ERROR: In ActionWindow constructor, the call to MenuWindow::Create() failed" << endl;
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "the call to MenuWindow::Create() failed" << endl;
 	}
 	MenuWindow::SetPosition(512.0f, 128.0f);
 	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
@@ -69,6 +69,8 @@ ActionWindow::~ActionWindow() {
 
 void ActionWindow::_InitActionCategoryList()
 {
+	TextStyle category_style("title22", Color::white, VIDEO_TEXT_SHADOW_DARK);
+
 	// NOTE: may need to set the dimensions of these images to 45, 45
 	_action_category_icons.resize(4);
 	bool success = true;
@@ -77,7 +79,7 @@ void ActionWindow::_InitActionCategoryList()
 	success &= _action_category_icons[2].Load("img/icons/battle/support.png");
 	success &= _action_category_icons[3].Load("img/icons/battle/item.png");
 	if (success == false) {
-		cerr << "BATTLE ERROR: In ActionWindow constructor, failed to load an action category icon" << endl;
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load an action category icon" << endl;
 	}
 
 	vector<ustring> category_options;
@@ -87,27 +89,32 @@ void ActionWindow::_InitActionCategoryList()
 	category_options.push_back(MakeUnicodeString("<img/icons/battle/item.png>\nItem"));
 
 	_action_category_list.SetOptions(category_options);
-	_action_category_list.SetPosition(50.0f, 120.0f);
-	_action_category_list.SetDimensions(400.0f, 100.0f, 4, 1, 4, 1);
+	_action_category_list.SetPosition(60.0f, 110.0f);
+	_action_category_list.SetDimensions(400.0f, 80.0f, 4, 1, 4, 1);
 	_action_category_list.SetCursorOffset(-20.0f, 25.0f);
-	_action_category_list.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
 	_action_category_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_category_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_action_category_list.SetTextStyle(category_style);
 	_action_category_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_category_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_action_category_list.SetSelection(0);
 	_action_category_list.SetOwner(this);
+
+	_action_category_text.push_back(TextImage("Attack", category_style));
+	_action_category_text.push_back(TextImage("Defense", category_style));
+	_action_category_text.push_back(TextImage("Support", category_style));
+	_action_category_text.push_back(TextImage("Item", category_style));
 }
 
 
 void ActionWindow::_InitActionSelectionList()
 {
-	_action_selection_list.SetPosition(128.0f, 120.0f);
-	_action_selection_list.SetDimensions(300.0f, 100.0f, 1, 4, 1, 4);
+	_action_selection_list.SetPosition(125.0f, 110.0f);
+	_action_selection_list.SetDimensions(360.0f, 100.0f, 1, 255, 1, 4);
 	_action_selection_list.SetCursorOffset(-50.0f, 25.0f);
-	_action_selection_list.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
 	_action_selection_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_selection_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_action_selection_list.SetTextStyle(TextStyle("text20", Color::white, VIDEO_TEXT_SHADOW_DARK));
 	_action_selection_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_selection_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_action_selection_list.SetOwner(this);
@@ -116,12 +123,20 @@ void ActionWindow::_InitActionSelectionList()
 
 void ActionWindow::_InitSelectionHeaders()
 {
-	TextStyle battle_style("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK);
+	TextStyle header_style("title22", Color::white, VIDEO_TEXT_SHADOW_DARK);
 
-	_skill_selection_header.SetStyle(battle_style);
-	_item_selection_header.SetStyle(battle_style);
-	_skill_selection_header.SetText("Skill                                                  SP");
-	_item_selection_header.SetText("Item                                                  Qty");
+	_skill_name_header.SetStyle(header_style);
+	_skill_name_header.SetText("Skill");
+	_skill_points_header.SetStyle(header_style);
+	_skill_points_header.SetText("SP");
+	_item_name_header.SetStyle(header_style);
+	_item_name_header.SetText("Item");
+	_item_quantity_header.SetStyle(header_style);
+	_item_quantity_header.SetText("Qty");
+	_action_header.SetStyle(header_style);
+	_action_header.SetText("Action Information");
+	_target_header.SetStyle(header_style);
+	_target_header.SetText("Target Information");
 }
 
 
@@ -130,7 +145,6 @@ void ActionWindow::_InitInformationText()
 	TextStyle battle_style("battle", Color::white, VIDEO_TEXT_SHADOW_DARK);
 
 	_action_information.SetStyle(battle_style);
-
 	_target_information.SetStyle(battle_style);
 }
 
@@ -275,8 +289,7 @@ void ActionWindow::_UpdateActionSelection() {
 		}
 
 		else {
-			if (BATTLE_DEBUG)
-				cerr << "BATTLE WARNING: In ActionWindow::_UpdateActionSelection(), selected action category was invalid" << endl;
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "selected action category was invalid" << endl;
 		}
 
 		_ConstructTargetInformation();
@@ -377,8 +390,7 @@ void ActionWindow::Draw() {
 		case VIEW_INVALID:
 		case VIEW_TOTAL:
 		default:
-			if (BATTLE_DEBUG)
-				cerr << "BATTLE ERROR: In ActionWindow::Draw(), the window state was invalid: " << _state << endl;
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "the window state was invalid: " << _state << endl;
 			return;
 	}
 }
@@ -401,35 +413,36 @@ void ActionWindow::_DrawActionSelection() {
 
 	switch (_selected_action_category) {
 		case ACTION_TYPE_ATTACK:
-			VideoManager->Text()->Draw("Attack");
+			_action_category_text[0].Draw();
 			break;
 		case ACTION_TYPE_DEFEND:
-			VideoManager->Text()->Draw("Defend");
+			_action_category_text[1].Draw();
 			break;
 		case ACTION_TYPE_SUPPORT:
-			VideoManager->Text()->Draw("Support");
+			_action_category_text[2].Draw();
 			break;
 		case ACTION_TYPE_ITEM:
-			VideoManager->Text()->Draw("Item");
+			_action_category_text[3].Draw();
 			break;
 		default:
-			if (BATTLE_DEBUG)
-				cerr << "BATTLE ERROR: In ActionWindow::_DrawActionSelection(), unknown action category was selected: "
-					<< _selected_action_category << endl;
+			IF_PRINT_WARNING(BATTLE_DEBUG)<< "unknown action category was selected: " << _selected_action_category << endl;
 			return;
 	}
 
 	// Draw the action list header text
-	VideoManager->Move(640.0f, 125.0f);
+	VideoManager->Move(640.0f, 122.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
-	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	if (_selected_action_category != ACTION_TYPE_ITEM) {
-		//_skill_selection_header.Draw();
-		VideoManager->Text()->Draw(_skill_selection_header.GetString());
+		_skill_name_header.Draw();
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, 0);
+		VideoManager->MoveRelative(355.0f, 0.0f);
+		_skill_points_header.Draw();
 	}
 	else {
-		//_item_selection_header.Draw();
-		VideoManager->Text()->Draw(_item_selection_header.GetString());
+		_item_name_header.Draw();
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, 0);
+		VideoManager->MoveRelative(355.0f, 0.0f);
+		_item_quantity_header.Draw();
 	}
 
 	// Draw the list of actions
@@ -440,22 +453,18 @@ void ActionWindow::_DrawActionSelection() {
 
 void ActionWindow::_DrawTargetSelection() {
 	VideoManager->Move(640.0f, 125.0f);
-	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
-	VideoManager->Text()->Draw(MakeUnicodeString("Target Information"));
+	_target_header.Draw();
 	VideoManager->MoveRelative(120.0f, -30.0f);
-	//_target_information.Draw();
-	VideoManager->Text()->Draw(_target_information.GetString());
+	_target_information.Draw();
 }
 
 
 
 void ActionWindow::_DrawActionInformation() {
 	VideoManager->Move(640.0f, 125.0f);
-	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
-	VideoManager->Text()->Draw(MakeUnicodeString("Action Information"));
+	_action_header.Draw();
 	VideoManager->MoveRelative(120.0f, -30.0f);
-	//_action_information.Draw();
-	VideoManager->Text()->Draw(_action_information.GetString());
+	_action_information.Draw();
 }
 
 // ----- OTHER METHODS
@@ -477,8 +486,7 @@ void ActionWindow::_ConstructActionSelectionList() {
 		}
 
 		if (_skill_list->empty()) {
-			if (BATTLE_DEBUG)
-				cerr << "BATTLE ERROR: In ActionWindow::ConstructActionSelectionList(), the character had no skills to list" << endl;
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "the character had no skills to list" << endl;
 			return;
 		}
 
@@ -508,8 +516,7 @@ void ActionWindow::_ConstructActionSelectionList() {
 
 		temp_item_list = GlobalManager->GetInventoryItems();
 		if (temp_item_list->empty()) {
-			if (BATTLE_DEBUG)
-				cerr << "BATTLE ERROR: In ActionWindow::ConstructActionSelectionList(), there were no items in the inventory" << endl;
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "there were no items in the inventory" << endl;
 			return;
 		}
 
@@ -543,8 +550,7 @@ void ActionWindow::_ConstructActionSelectionList() {
 	} // if (_action_category_selected == ACTION_TYPE_ITEM)
 
 	else {
-		if (BATTLE_DEBUG)
-			cerr << "BATTLE ERROR: In ActionWindow::ConstructActionSelectionList(), the action category selected was invalid" << endl;
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "the action category selected was invalid" << endl;
 	}
 } // void ActionWindow::ConstructActionSelectionList()
 
@@ -562,7 +568,6 @@ void ActionWindow::_ConstructTargetInformation() {
 		// TODO: construct a list of all characters or enemies depending upon the type
 	}
 
-	//VideoManager->Text()->SetDefaultTextColor(Color::white);
 	_target_information.SetText(target_text);
 } // void ActionWindow::_ConstructTargetInformation()
 
@@ -589,7 +594,6 @@ void ActionWindow::_ConstructActionInformation() {
 			MakeUnicodeString("\nTarget Type: ") + MakeUnicodeString(GetTargetTypeText(GetSelectedSkill()->GetTargetType(), GetSelectedSkill()->IsTargetAlly()));
 	}
 
-	//VideoManager->Text()->SetDefaultTextColor(Color::white);
 	_action_information.SetText(action_text);
 } // void ActionWindow::_ConstructActionInformation()
 
@@ -607,7 +611,7 @@ FinishWindow::FinishWindow()
 	float start_y = 768 - ((768 - 600) / 2 + 15);
 
 	if (!MenuWindow::Create(480.0f, 560.0f))
-		cerr << "BATTLE ERROR: In FinishWindow constructor, the call to MenuWindow::Create() failed" << endl;
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "the call to MenuWindow::Create() failed" << endl;
 
 	MenuWindow::SetPosition(start_x, start_y);
 
@@ -711,7 +715,7 @@ void FinishWindow::_InitLoseOptions()
 	_lose_options.SetOptions(lose_text);
 	_lose_options.SetPosition(270.0f, 130.0f);
 	_lose_options.SetDimensions(128.0f, 200.0f, 1, 4, 1, 4);
-	_lose_options.SetTextStyle(TextStyle("battle", Color(1.0f, 1.0f, 0.0f, 0.8f), VIDEO_TEXT_SHADOW_DARK));
+	_lose_options.SetTextStyle(TextStyle("text22", Color::white, VIDEO_TEXT_SHADOW_DARK));
 	_lose_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_lose_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_lose_options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -726,12 +730,13 @@ void FinishWindow::_InitLoseOptions()
 
 void FinishWindow::_InitVictoryText()
 {
-	_finish_outcome.SetPosition(512, 0);
-	_finish_outcome.SetDimensions(400, 100);
+	_finish_outcome.SetPosition(512.0f, 384.0f);
+	_finish_outcome.SetDimensions(400.0f, 100.0f);
 	_finish_outcome.SetDisplaySpeed(30);
-	_finish_outcome.SetTextStyle(TextStyle());
-	_finish_outcome.SetDisplayMode(VIDEO_TEXT_REVEAL);
-	_finish_outcome.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_finish_outcome.SetTextStyle(TextStyle("text24", Color::white));
+	_finish_outcome.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	_finish_outcome.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_finish_outcome.SetTextAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 }
 
 // ----- Tallies all the stuff we've won (xp, money, items)
@@ -1087,7 +1092,8 @@ void FinishWindow::Draw() {
 void FinishWindow::_DrawAnnounceWin() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(512.0f, 384.0f);
-	VideoManager->Text()->Draw("VICTORY!!");
+// 	_finish_outcome.Draw();
+	VideoManager->Text()->Draw("Victory!!!", TextStyle("title24"));
 }
 
 

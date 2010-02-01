@@ -97,7 +97,7 @@ void BattleActor::DrawStaminaIcon(bool is_selected) {
 
 uint32 BattleActor::GetPhysicalAttack() {
 	uint32 atk = GetActor()->GetTotalPhysicalAttack();
-	for (int i = 0; i < _actor_effects.size(); i++) {
+	for (uint32 i = 0; i < _actor_effects.size(); i++) {
 		atk += atk * _actor_effects[i]->GetStrModifier();
 	}
 	return atk;
@@ -105,7 +105,7 @@ uint32 BattleActor::GetPhysicalAttack() {
 
 uint32 BattleActor::GetPhysicalDefense() {
 	uint32 pdef = GetActor()->GetTotalPhysicalDefense(0); /// @todo : fix the parameter to a correct attack point index!
-	for (int i = 0; i < _actor_effects.size(); i++) {
+	for (uint32 i = 0; i < _actor_effects.size(); i++) {
 		pdef += pdef * _actor_effects[i]->GetForModifier();
 	}
 	return pdef;
@@ -113,7 +113,7 @@ uint32 BattleActor::GetPhysicalDefense() {
 
 float BattleActor::GetCombatEvade() {
 	uint32 eva = GetActor()->GetEvade();
-	for (int i = 0; i < _actor_effects.size(); i++) {
+	for (uint32 i = 0; i < _actor_effects.size(); i++) {
 		eva += eva * _actor_effects[i]->GetEvaModifier();
 	}
 	return eva;
@@ -121,7 +121,7 @@ float BattleActor::GetCombatEvade() {
 
 uint32 BattleActor::GetCombatAgility() {
 	uint32 agi = GetActor()->GetAgility();
-	for (int i = 0; i < _actor_effects.size(); i++) {
+	for (uint32 i = 0; i < _actor_effects.size(); i++) {
 		agi += agi * _actor_effects[i]->GetAgiModifier();
 	}
 	return agi;
@@ -215,9 +215,16 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, flo
 	_animation_time(0)
 {
 	if (_stamina_icon.Load("img/icons/actors/characters/" + character->GetFilename() + ".png", 45, 45) == false)
-		cerr << "Unable to load stamina icon for " << character->GetFilename() << endl;
+		PRINT_ERROR << "Unable to load stamina icon for " << character->GetFilename() << endl;
 
 	_state = ACTOR_IDLE;
+
+	_name_text.SetStyle(TextStyle("title22"));
+	_name_text.SetText(GetActor()->GetName());
+	_hit_points_text.SetStyle(TextStyle("text20"));
+	_hit_points_text.SetText(NumberToString(GetActor()->GetHitPoints()));
+	_skill_points_text.SetStyle(TextStyle("text20"));
+	_skill_points_text.SetText(NumberToString(GetActor()->GetSkillPoints()));
 } // BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin)
 
 
@@ -257,7 +264,7 @@ void BattleCharacter::Update() {
 	if (IsAlive())
 		GetActor()->RetrieveBattleAnimation(_animation_string)->Update();
 
-	ScriptObject* remove;
+// 	ScriptObject* remove;
 
 	for (uint32 i = 0; i < GetActorEffects().size(); i++) {
 		if (GetActorEffects().at(i)->GetTimer()->IsFinished()) {
@@ -369,18 +376,17 @@ void BattleCharacter::DrawStatus() {
 	}
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->Text()->SetDefaultTextColor(Color::white);
 
 	// Draw the highlighted background if the character is selected
 	if (current_battle->_selected_character == this) {
-		VideoManager->Move(149, 84.0f + y_offset);
+		VideoManager->Move(149.0f, 84.0f + y_offset);
 		current_battle->_character_selection.Draw();
 	}
 
 	// Draw the character's name
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, 0);
-	VideoManager->Move(280.0f, 90.0f + y_offset);
- 	VideoManager->Text()->Draw(GetActor()->GetName());
+	VideoManager->Move(280.0f, 82.0f + y_offset);
+	_name_text.Draw();
 
 	// If the swap key is being held down, draw status icons
 	if (InputManager->SwapState()) {
@@ -394,7 +400,7 @@ void BattleCharacter::DrawStatus() {
 
 		// Draw HP bar in green
 		bar_size = static_cast<float>(90 * GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
-		VideoManager->Move(312, 90 + y_offset);
+		VideoManager->Move(312.0f, 90.0f + y_offset);
 
 		if (GetActor()->GetHitPoints() > 0) {
 			VideoManager->DrawRectangle(bar_size, 6, Color(0.133f, 0.455f, 0.133f, 1.0f));
@@ -402,7 +408,7 @@ void BattleCharacter::DrawStatus() {
 
 		// Draw SP bar in blue
 		bar_size = static_cast<float>(90 * GetActor()->GetSkillPoints()) / static_cast<float>(GetActor()->GetMaxSkillPoints());
-		VideoManager->Move(420, 90 + y_offset);
+		VideoManager->Move(420.0f, 90.0f + y_offset);
 
 		if (GetActor()->GetSkillPoints() > 0) {
 			VideoManager->DrawRectangle(bar_size, 6, Color(0.129f, 0.263f, 0.451f, 1.0f));
@@ -413,14 +419,20 @@ void BattleCharacter::DrawStatus() {
 		VideoManager->Move(293.0f, 84.0f + y_offset);
 		current_battle->_character_bars.Draw();
 
+		// TODO: The SetText calls below should not be done here. They should be made whenever the character's HP/SP
+		// is modified. This re-renders the text every frame regardless of whether or not the HP/SP changed so its
+		// not efficient
+
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
 		// Draw the character's current health on top of the middle of the HP bar
-		VideoManager->Move(355.0f, 94.0f + y_offset);
-		VideoManager->Text()->Draw(NumberToString(GetActor()->GetHitPoints()));
+		VideoManager->Move(355.0f, 90.0f + y_offset);
+		_hit_points_text.SetText(NumberToString(GetActor()->GetHitPoints()));
+		_hit_points_text.Draw();
 
 		// Draw the character's current skill points on top of the middle of the SP bar
 		VideoManager->MoveRelative(110, 0);
-		VideoManager->Text()->Draw(NumberToString(GetActor()->GetSkillPoints()));
+		_skill_points_text.SetText(NumberToString(GetActor()->GetSkillPoints()));
+		_skill_points_text.Draw();
 	}
 } // void BattleCharacter::DrawStatus()
 
@@ -518,7 +530,7 @@ void BattleEnemy::DrawSprite() {
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 		}
 
-		// Draw the enemy's damage-blended sprite frames	
+		// Draw the enemy's damage-blended sprite frames
 		VideoManager->Move(_x_location - enemy_draw_offset, _y_location);
 
 		float hp_percent = static_cast<float>(GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
