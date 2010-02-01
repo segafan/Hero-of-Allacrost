@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,19 +165,19 @@ public:
 
 	//! \brief Resets the menu mode back to its default setup.
 	void Reset();
-	
+
 	//! \brief Updates the menu. Calls Update() on active window if there is one
 	void Update();
-	
+
 	//! \brief Draws the menu. Calls Draw() on active window if there is one.
 	void Draw();
 
 private:
-	//! \brief A static pointer to the last instantiated MenuMode object, or NULL if no such object exists.
+	//! \brief A static pointer to the last instantiated MenuMode object
 	static MenuMode* _instance;
 
-	//! \brief The name of the location in the game where MenuMode was invoked, which will be displayed on the menu screen.
-	hoa_utils::ustring _locale_name;
+	//! \brief Text image which displays the name of the location in the game where MenuMode was invoked
+	hoa_video::TextImage _locale_name;
 
 	/** \brief The graphic that represents the current map that the player is exploring
 	*** This image is set using the string in the MenuMode constructor
@@ -221,13 +221,13 @@ private:
 
 	//! \brief A map of the sounds used while in MenuMode
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
-	
+
 	//! The selected character
 //	static uint32 _char_selected;
-	
+
 	//! The selected item/skill/equipment
 	uint32 _item_selected;
-		
+
 	//! The current option box to display
 	uint32 _current_menu_showing;
 
@@ -236,7 +236,7 @@ private:
 
 	//! A pointer to the current options menu
 	hoa_video::OptionBox *_current_menu;
-	
+
 	//! The top level options in boot mode
 	hoa_video::OptionBox _main_options;
 
@@ -251,7 +251,7 @@ private:
 	hoa_video::OptionBox _menu_save;
 	static hoa_video::OptionBox _char_select;
 	//@}
-	
+
 	//! \brief Functions that initialize the numerous option boxes
 	//@{
 	void _SetupOptionBoxCommonSettings(hoa_video::OptionBox *ob);
@@ -288,10 +288,10 @@ private:
 
 	//! \brief Draws the bottom part of the menu mode.
 	void _DrawBottomMenu();
-	
+
 	//! \brief Draws the 'Name' and 'Qty' tags for the item list.
 	void _DrawItemListHeader();
-	
+
 }; // class MenuMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_menu

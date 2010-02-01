@@ -59,7 +59,8 @@ MenuMode::MenuMode(ustring locale_name, string locale_image) :
 	if (MENU_DEBUG)
 		cout << "MENU: MenuMode constructor invoked." << endl;
 
-	_locale_name = locale_name;
+	_locale_name.SetStyle(TextStyle("title22"));
+	_locale_name.SetText(locale_name);
 
 	// Initialize the location graphic
 	_locale_graphic.SetStatic(true);
@@ -197,9 +198,7 @@ MenuMode::~MenuMode() {
 // Resets configuration/data for the class as appropriate
 void MenuMode::Reset() {
 	// Top left corner coordinates in menu mode are always (0,0)
-	VideoManager->SetCoordSys(0, 1024, 768, 0);
-
-	VideoManager->Text()->SetDefaultFont("default");
+	VideoManager->SetCoordSys(0.0f, 1023.0f, 767.0f, 0.0f);
 
 	// Show all windows (make them visible)
 	_bottom_window.Show();
@@ -382,7 +381,7 @@ void MenuMode::Draw() {
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
-	VideoManager->Move(0, 0);
+	VideoManager->Move(0.0f, 0.0f);
 	_saved_screen.Draw();
 
 	// Restore the Coordinate system (that one is menu mode coodinate system)
@@ -394,10 +393,7 @@ void MenuMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 
 	// Move to the top left corner
-	VideoManager->Move(0,0);
-
-	// Set the text colour to white
-	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
+	VideoManager->Move(0.0f, 0.0f);
 
 	_main_options_window.Draw();
 	_DrawBottomMenu();
@@ -539,7 +535,7 @@ void MenuMode::_HandleInventoryMenu() {
 
 void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
 	// Set all the default options
-	ob->SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	ob->SetTextStyle(TextStyle("title22"));
 	ob->SetPosition(142.0f, 85.0f);
 	ob->SetDimensions(115.0f, 50.0f, 1, 1, 1, 1);
 	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -841,7 +837,7 @@ void MenuMode::_DrawBottomMenu() {
 	_bottom_window.Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->Move(150, 577);
+	VideoManager->Move(150, 580);
 
 	if (_current_menu_showing == SHOW_INVENTORY ) {
 		if (_inventory_window._active_box == ITEM_ACTIVE_LIST) {
@@ -1073,7 +1069,7 @@ void MenuMode::_DrawBottomMenu() {
 	} // if SHOW_EQUIP
 	else {
 		// Display Location
-		VideoManager->Text()->Draw(_locale_name);
+		_locale_name.Draw();
 
 		// Draw Played Time
 		VideoManager->MoveRelative(-40, 60);

@@ -86,36 +86,36 @@ void CharacterWindow::Draw() {
 	_portrait.Draw();
 
 	// Write character name
-	VideoManager->MoveRelative(150, 0);
-	VideoManager->Text()->Draw(character->GetName());
+	VideoManager->MoveRelative(150, -5);
+	VideoManager->Text()->Draw(character->GetName(), TextStyle("title22"));
 
 	// Level
 	VideoManager->MoveRelative(0,20);
 	std::ostringstream os_level;
 	os_level << character->GetExperienceLevel();
 	std::string xp_level = std::string("Lv: ") + os_level.str();
-	VideoManager->Text()->Draw(MakeUnicodeString(xp_level));
+	VideoManager->Text()->Draw(MakeUnicodeString(xp_level), TextStyle("text20"));
 
 	// HP
 	VideoManager->MoveRelative(0,20);
 	ostringstream os_health;
 	os_health << character->GetHitPoints() << " / " << character->GetMaxHitPoints();
 	std::string health = std::string("HP: ") + os_health.str();
-	VideoManager->Text()->Draw(MakeUnicodeString(health));
+	VideoManager->Text()->Draw(MakeUnicodeString(health), TextStyle("text20"));
 
 	// SP
 	VideoManager->MoveRelative(0,20);
 	ostringstream os_skill;
 	os_skill << character->GetSkillPoints() << " / " << character->GetMaxSkillPoints();
 	std::string skill = std::string("SP: ") + os_skill.str();
-	VideoManager->Text()->Draw(MakeUnicodeString(skill));
+	VideoManager->Text()->Draw(MakeUnicodeString(skill), TextStyle("text20"));
 
 	// XP to level up
 	VideoManager->MoveRelative(0, 20);
 	ostringstream os_xp;
 	os_xp << (character->GetExperienceForNextLevel() - character->GetExperiencePoints());
 	std::string xp = std::string("XP To Next: ") + os_xp.str();
-	VideoManager->Text()->Draw(MakeUnicodeString(xp));
+	VideoManager->Text()->Draw(MakeUnicodeString(xp), TextStyle("text20"));
 
 	return;
 }
@@ -136,7 +136,7 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE) {
 	_description.SetPosition(30.0f, 525.0f);
 	_description.SetDimensions(800.0f, 80.0f);
 	_description.SetDisplaySpeed(30);
-	_description.SetTextStyle(TextStyle());
+	_description.SetTextStyle(TextStyle("text20"));
 	_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
@@ -151,7 +151,7 @@ void InventoryWindow::_InitInventoryItems() {
 	// Set up the inventory option box
 	_inventory_items.SetPosition(500.0f, 170.0f);
 	_inventory_items.SetDimensions(400.0f, 360.0f, 1, 255, 1, 6);
-	_inventory_items.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_inventory_items.SetTextStyle(TextStyle("text20"));
 	_inventory_items.SetCursorOffset(-52.0f, -20.0f);
 	_inventory_items.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_inventory_items.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -176,7 +176,7 @@ void InventoryWindow::_InitCharSelect() {
 	_char_select.SetPosition(72.0f, 109.0f);
 	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
-	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_char_select.SetTextStyle(TextStyle("text20"));
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -196,7 +196,7 @@ void InventoryWindow::_InitCharSelect() {
 void InventoryWindow::_InitCategory() {
 	_item_categories.SetPosition(458.0f, 120.0f);
 	_item_categories.SetDimensions(448.0f, 30.0f, ITEM_CATEGORY_SIZE, 1, ITEM_CATEGORY_SIZE, 1);
-	_item_categories.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_item_categories.SetTextStyle(TextStyle("text20"));
 
 	_item_categories.SetCursorOffset(-52.0f, -20.0f);
 	_item_categories.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
@@ -303,7 +303,7 @@ void InventoryWindow::Update() {
 					_inventory_items.SetSelection(0);
 					_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_description.SetDisplayText( _item_objects[ 0 ]->GetDescription() );
+					_description.SetDisplayText(_item_objects[ 0 ]->GetDescription());
 					_active_box = ITEM_ACTIVE_LIST;
 					MenuMode::_instance->_menu_sounds["confirm"].Play();
 				} // if _inventory_items.GetNumberOptions() > 0
@@ -334,7 +334,7 @@ void InventoryWindow::Update() {
 				MenuMode::_instance->_menu_sounds["cancel"].Play();
 			} // else if VIDEO_OPTION_CANCEL
 			else if ( event == VIDEO_OPTION_BOUNDS_UP || VIDEO_OPTION_BOUNDS_DOWN ) {
-				_description.SetDisplayText( _item_objects[ _inventory_items.GetSelection() ]->GetDescription() );
+				_description.SetDisplayText(_item_objects[ _inventory_items.GetSelection() ]->GetDescription());
 			} // else if VIDEO_OPTION_BOUNDS_UP
 			break;
 		} // case ITEM_ACTIVE_LIST
@@ -480,7 +480,7 @@ StatusWindow::StatusWindow() :
 
 
 StatusWindow::~StatusWindow() {
-	
+
 }
 
 // Activate/deactivate window
@@ -501,7 +501,7 @@ void StatusWindow::_InitCharSelect() {
 	_char_select.SetPosition(72.0f, 109.0f);
 	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
-	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_char_select.SetTextStyle(TextStyle("text20"));
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -641,7 +641,7 @@ SkillsWindow::SkillsWindow() :
 	_description.SetDisplaySpeed(30);
 	_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	_description.SetTextStyle(TextStyle());
+	_description.SetTextStyle(TextStyle("text20"));
 
 } // SkillsWindow::SkillsWindow()
 
@@ -665,7 +665,7 @@ void SkillsWindow::_InitSkillsList() {
 	// Set up the inventory option box
 	_skills_list.SetPosition(500.0f, 170.0f);
 	_skills_list.SetDimensions(180.0f, 360.0f, 1, 255, 1, 4);
-	_skills_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_skills_list.SetTextStyle(TextStyle("text20"));
 	_skills_list.SetCursorOffset(-52.0f, -20.0f);
 	_skills_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_skills_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -679,7 +679,7 @@ void SkillsWindow::_InitSkillsList() {
 	// setup the cost option box
 	_skill_cost_list.SetPosition(700.0f, 170.0f);
 	_skill_cost_list.SetDimensions(180.0f, 360.0f, 1, 255, 1, 4);
-	_skill_cost_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_skill_cost_list.SetTextStyle(TextStyle("text20"));
 	_skill_cost_list.SetCursorOffset(-52.0f, -20.0f);
 	_skill_cost_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_skill_cost_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -697,7 +697,7 @@ void SkillsWindow::_InitCharSelect() {
 	_char_select.SetPosition(72.0f, 109.0f);
 	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
-	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_char_select.SetTextStyle(TextStyle("text20"));
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -719,7 +719,7 @@ void SkillsWindow::_InitCharSelect() {
 void SkillsWindow::_InitSkillsCategories() {
 	_skills_categories.SetPosition(458.0f, 120.0f);
 	_skills_categories.SetDimensions(448.0f, 30.0f, SKILL_CATEGORY_SIZE, 1, SKILL_CATEGORY_SIZE, 1);
-	_skills_categories.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_skills_categories.SetTextStyle(TextStyle("text20"));
 	_skills_categories.SetCursorOffset(-52.0f, -20.0f);
 	_skills_categories.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_skills_categories.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -881,7 +881,7 @@ void SkillsWindow::Update() {
 	if (_active_box != SKILL_ACTIVE_CHAR_APPLY)
 		_UpdateSkillList();
 
-	if (_skills_list.GetNumberOptions() > 0 && _skills_list.GetSelection() >= 0 && _skills_list.GetNumberOptions() > _skills_list.GetSelection())
+	if (_skills_list.GetNumberOptions() > 0 && _skills_list.GetSelection() >= 0 && static_cast<int32>(_skills_list.GetNumberOptions()) > _skills_list.GetSelection())
 	{
 		GlobalSkill *skill = _GetCurrentSkill();
 		string desc = MakeStandardString(skill->GetName()) + "\n\n" + MakeStandardString(skill->GetDescription());
@@ -1055,7 +1055,7 @@ void EquipWindow::_InitEquipmentList() {
 
 	_equip_list.SetPosition(500.0f, 170.0f);
 	_equip_list.SetDimensions(400.0f, 360.0f, 1, 255, 1, 6);
-	_equip_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_equip_list.SetTextStyle(TextStyle("text20"));
 
 	_equip_list.SetCursorOffset(-52.0f, -20.0f);
 	_equip_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
@@ -1080,7 +1080,7 @@ void EquipWindow::_InitCharSelect() {
 	_char_select.SetPosition(72.0f, 109.0f);
 	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
-	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_char_select.SetTextStyle(TextStyle("text20"));
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -1103,7 +1103,7 @@ void EquipWindow::_InitEquipmentSelect() {
 	//Set params
 	_equip_select.SetPosition(680.0f, 145.0f);
 	_equip_select.SetDimensions(105.0f, 350.0f, 1, EQUIP_CATEGORY_SIZE, 1, EQUIP_CATEGORY_SIZE);
-	_equip_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_equip_select.SetTextStyle(TextStyle("text20"));
 
 	_equip_select.SetCursorOffset(-132.0f, -20.0f);
 	_equip_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
@@ -1457,7 +1457,7 @@ void FormationWindow::_InitCharSelect() {
 	_char_select.SetPosition(72.0f, 109.0f);
 	_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
-	_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_char_select.SetTextStyle(TextStyle("text20"));
 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -1465,7 +1465,7 @@ void FormationWindow::_InitCharSelect() {
 	_second_char_select.SetPosition(72.0f, 109.0f);
 	_second_char_select.SetDimensions(360.0f, 432.0f, 1, 4, 1, 4);
 	_second_char_select.SetCursorOffset(-50.0f, -6.0f);
-	_second_char_select.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_second_char_select.SetTextStyle(TextStyle("text20"));
 	_second_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_second_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_second_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -1603,7 +1603,7 @@ OverwriteConfirmWindow::OverwriteConfirmWindow(const string &message) :
 	_yes_no.SetOptions(text);
 	_yes_no.SetPosition(100, 70);
 	_yes_no.SetDimensions(200.0f, 59.0f, 2, 1, 2, 1);
-	_yes_no.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_yes_no.SetTextStyle(TextStyle("text20"));
 	_yes_no.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_yes_no.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_yes_no.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -1614,7 +1614,7 @@ OverwriteConfirmWindow::OverwriteConfirmWindow(const string &message) :
 
 	_textbox.SetPosition(30, 0);
 	_textbox.SetDimensions(355, 50);
-	_textbox.SetTextStyle(TextStyle());
+	_textbox.SetTextStyle(TextStyle("text20"));
 	_textbox.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_textbox.SetDisplayText(_message);
@@ -1670,7 +1670,7 @@ MessageWindow::MessageWindow(const string &message, float w, float h) :
 
 	_textbox.SetPosition(30, 5);
 	_textbox.SetDimensions(w, h);
-	_textbox.SetTextStyle(TextStyle());
+	_textbox.SetTextStyle(TextStyle("text22"));
 	_textbox.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_textbox.SetDisplayText(_message);
