@@ -127,7 +127,7 @@ public:
 
 	uint32 GetIndex() const
 		{ return _index; }
-	
+
 	float GetXOrigin() const
 		{ return _x_origin; }
 
@@ -215,7 +215,7 @@ protected:
 	//FIX ME for now, will also be used for cool down times?
 	hoa_system::SystemTimer _wait_time;
 
-	//! \brief Recalculates wait time if agility has changed	
+	//! \brief Recalculates wait time if agility has changed
 	void _RecalculateWaitTime();
 
 	//! \brief Contains this actor's battle effects
@@ -262,6 +262,15 @@ protected:
 
 	//! \brief Contains countdown timer of current animation
 	hoa_system::SystemTimer _animation_time;
+
+	//! \brief Rendered text of the character's name
+	hoa_video::TextImage _name_text;
+
+	//! \brief Rendered text of the character's current hit points
+	hoa_video::TextImage _hit_points_text;
+
+	//! \brief Rendered text of the character's current skill points
+	hoa_video::TextImage _skill_points_text;
 }; // class BattleCharacter
 
 
