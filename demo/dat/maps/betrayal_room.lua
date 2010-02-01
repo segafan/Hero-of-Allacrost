@@ -218,7 +218,7 @@ function Load(m)
 	event:AddEventLink(11003, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	event = hoa_map.ScriptedEvent(11003, 2, 0); -- call function #2 to remove captain
+	event = hoa_map.ScriptedEvent(11003, 6, 0); -- call function #6 to remove captain
 	event:AddEventLink(11004, false, 0);
 	event_supervisor:RegisterEvent(event);
 
@@ -240,7 +240,7 @@ function Load(m)
 	event:AddEventLink(11008, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	event = hoa_map.ScriptedEvent(11008, 1, 0); -- calls function #1 to remover Kyle, finish
+	event = hoa_map.ScriptedEvent(11008, 5, 0); -- calls function #5 to remover Kyle, finish
 	event_supervisor:RegisterEvent(event);
 
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/new_cave.lua");
@@ -333,8 +333,20 @@ function CreateDialogue()
 	dialogue_supervisor:AddDialogue(dialogue);
 end
 
--- Removes Kyle sprite from the map
 map_functions[1] = function()
+end
+
+map_functions[2] = function()
+end
+
+map_functions[3] = function()
+end
+
+map_functions[4] = function()
+end
+
+-- Removes Kyle sprite from the map
+map_functions[5] = function()
 	kyle:SetVisible(false);
 	kyle:SetNoCollision(true);
 	kyle:SetUpdatable(false);
@@ -342,7 +354,7 @@ map_functions[1] = function()
 end
 
 -- Remove captain from map
-map_functions[2] = function()
+map_functions[6] = function()
 	captain:SetVisible(false);
 	captain:SetNoCollision(true);
 	captain:SetUpdatable(false);

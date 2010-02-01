@@ -693,6 +693,9 @@ bool GameGlobal::LoadGame(const string& filename) {
 	if (file.OpenFile(filename, true) == false) {
 		return false;
 	}
+
+	ClearAllData();
+
 	// open the namespace that the save game is encapsulated in.
 	file.OpenTable("save_game1");
 

@@ -453,10 +453,6 @@ function Load(m)
 	map:AddZone(context_zone);
 
 	-- Register event functions
-	event = hoa_map.ScriptedEvent(1, 1, 0);
-	event_supervisor:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(2, 2, 0);
-	event_supervisor:RegisterEvent(event);
 	event = hoa_map.ScriptedEvent(3, 3, 0);
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.ScriptedEvent(4, 4, 0);
@@ -632,7 +628,7 @@ function CreateDialogue()
 
 	dialogue = hoa_map.MapDialogue(5);
 	text = hoa_utils.Translate("Hello, Claudius.  Is your equipment in order?");
-	dialogue:AddText(text, 6, -1, 2, false);
+	dialogue:AddText(text, 6, -1, 4, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true) then
@@ -658,10 +654,7 @@ end
 map_functions[1] = function()
 end
 
--- Shop setup function (Karlate armory)
--- TODO: Remove Laila's equipment
 map_functions[2] = function()
-	LoadNewShop(1, 5, 4, 5, 3001, 5, 3002, 5, 10002, 5, 10502, 5, 20002, 5, 30002, 5, 40002, 5, 50502, 5);
 end
 
 -- Kyle leaves party, when talking to captain
@@ -672,8 +665,9 @@ map_functions[3] = function()
 	event_supervisor:StartEvent(10001);
 end
 
+-- Shop setup function (Karlate armory)
 map_functions[4] = function()
-	
+	LoadNewShop(1, 5, 4, 5, 3001, 5, 3002, 5, 10002, 5, 20002, 5, 30002, 5, 40002, 5);
 end
 
 -- Captain moves
