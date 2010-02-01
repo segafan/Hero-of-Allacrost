@@ -958,7 +958,6 @@ void BootMode::_OnQuit() {
 
 
 void BootMode::_TEMP_OnBattle() {
-//	ModeManager->Pop();
 	GlobalManager->AddCharacter(1);
 	GlobalManager->AddCharacter(2);
 	GlobalManager->AddCharacter(3);
@@ -975,7 +974,7 @@ void BootMode::_TEMP_OnBattle() {
 
 
 void BootMode::_TEMP_OnMenu() {
-//	ModeManager->Pop();
+	GlobalManager->AddToInventory(1, 5);
 	GlobalManager->AddCharacter(1);
 	GlobalManager->AddCharacter(2);
 	GlobalManager->AddCharacter(3);
