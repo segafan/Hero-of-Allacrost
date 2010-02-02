@@ -82,7 +82,7 @@ private:
 	hoa_video::TextImage _name_header;
 
 	//! \brief Header text for the list of object properties (refer to the BuyListDisplay class)
-	hoa_video::OptionBox _properties_header;
+	hoa_gui::OptionBox _properties_header;
 
 	//! \brief String representations of all object categories where purchases are available
 	std::vector<hoa_utils::ustring> _category_names;
@@ -103,7 +103,7 @@ private:
 	hoa_video::TextImage _selected_name;
 
 	//! \brief A single row option box containing the selected object's properties
-	hoa_video::OptionBox _selected_properties;
+	hoa_gui::OptionBox _selected_properties;
 
 	/** \brief Takes all necessary action for when the active view mode is to be altered
 	*** \param new_mode The new view mode to set

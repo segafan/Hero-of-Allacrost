@@ -259,11 +259,12 @@ private:
 	 **/
 	SDL_Event _event;
 
-	/** \brief Processes all keyboard input event
+	/** \brief Processes all keyboard input events
 	*** \param key_event The event to process
 	**/
 	void _KeyEventHandler(SDL_KeyboardEvent& key_event);
-	/** \brief Processes all joystick input event
+
+	/** \brief Processes all joystick input events
 	*** \param js_event The event to process
 	**/
 	void _JoystickEventHandler(SDL_Event& js_event);

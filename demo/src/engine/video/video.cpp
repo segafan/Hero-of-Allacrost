@@ -87,7 +87,6 @@ VideoEngine::VideoEngine() :
 	_uses_lights = false;
 	_light_overlay = INVALID_TEXTURE_ID;
 	_advanced_display = false;
-	_fps_display = false;
 	_x_shake = 0;
 	_y_shake = 0;
 	_gamma_value = 1.0f;
@@ -118,7 +117,6 @@ VideoEngine::VideoEngine() :
 
 VideoEngine::~VideoEngine() {
 	_particle_manager.Destroy();
-	GUIManager->SingletonDestroy();
 	TextManager->SingletonDestroy();
 
 	_default_menu_cursor.Clear();
@@ -148,7 +146,6 @@ bool VideoEngine::FinalizeInitialization() {
 	// Create instances of the various sub-systems
 	TextureManager = TextureController::SingletonCreate();
 	TextManager = TextSupervisor::SingletonCreate();
-	GUIManager = GUISupervisor::SingletonCreate();
 
 	// Initialize all sub-systems
 	if (TextureManager->SingletonInitialize() == false) {
@@ -158,11 +155,6 @@ bool VideoEngine::FinalizeInitialization() {
 
 	if (TextManager->SingletonInitialize() == false) {
 		PRINT_ERROR << "could not initialize text manager" << endl;
-		return false;
-	}
-
-	if (GUIManager->SingletonInitialize() == false) {
-		PRINT_ERROR << "could not initialize GUI manager" << endl;
 		return false;
 	}
 
@@ -181,9 +173,6 @@ bool VideoEngine::FinalizeInitialization() {
 		PRINT_ERROR << "_rectangle_image could not be created" << endl;
 		return false;
 	}
-
-	// Set the argument to false to remove debug GUI outlines
-	DEBUG_EnableGUIOutlines(false);
 
 	_initialized = true;
 	return true;
@@ -325,9 +314,6 @@ void VideoEngine::Display(uint32 frame_time) {
 	// ones used to draw the video engine debugging text
 	if (_advanced_display)
 		_DEBUG_ShowAdvancedStats();
-
-	if (_fps_display)
-		DrawFPS(frame_time);
 
 	if (TextureManager->debug_current_sheet >= 0)
 		TextureManager->DEBUG_ShowTexSheet();
@@ -963,12 +949,6 @@ StillImage* VideoEngine::GetDefaultCursor() {
 
 
 
-void VideoEngine::DEBUG_EnableGUIOutlines(bool enable) {
-	GUIManager->_DEBUG_draw_outlines = enable;
-}
-
-
-
 
 int32 VideoEngine::_ScreenCoordX(float x) {
 	float percent;
@@ -1197,14 +1177,6 @@ void VideoEngine::DrawLight(const StillImage &id, float x, float y, const Color 
 	}
 
 	DrawHalo(id, x, y, color);
-}
-
-
-
-void VideoEngine::DrawFPS(uint32 frame_time) {
-	PushState();
-	GUIManager->_DrawFPS(frame_time);
-	PopState();
 }
 
 }  // namespace hoa_video

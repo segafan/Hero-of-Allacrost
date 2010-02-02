@@ -151,7 +151,7 @@ private:
 	hoa_video::TextImage _copyright_text;
 
 	//! \brief A simple menu window where the various options menus are displayed
-	hoa_video::MenuWindow _options_window;
+	hoa_gui::MenuWindow _options_window;
 
 	//! \brief A window used to display the game credits
 	private_boot::CreditsWindow* _credits_window;

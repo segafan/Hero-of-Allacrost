@@ -89,11 +89,6 @@ namespace hoa_video {
 	class FontProperties;
 	class TextImage;
 
-	class GUISupervisor;
-	class MenuWindow;
-	class TextBox;
-	class OptionBox;
-
 	class Interpolator;
 
 	class ParticleEffect;
@@ -119,14 +114,6 @@ namespace hoa_video {
 		class AnimationFrame;
 		class ImageElement;
 
-		class GUIElement;
-		class GUIControl;
-		class MenuSkin;
-
-		class Option;
-		class OptionElement;
-		class OptionCellBounds;
-
 		class ParticleManager;
 		class ParticleSystem;
 		class ParticleSystemDef;
@@ -137,6 +124,23 @@ namespace hoa_video {
 
 		class ScreenFader;
 		class ShakeForce;
+	}
+}
+
+namespace hoa_gui {
+	class GUISystem;
+	class MenuWindow;
+	class TextBox;
+	class OptionBox;
+
+	namespace private_gui {
+		class GUIElement;
+		class GUIControl;
+		class MenuSkin;
+
+		class Option;
+		class OptionElement;
+		class OptionCellBounds;
 	}
 }
 

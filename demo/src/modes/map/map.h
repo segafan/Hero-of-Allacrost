@@ -36,6 +36,7 @@
 #include "mode_manager.h"
 #include "script.h"
 #include "video.h"
+#include "system.h"
 
 // Local map mode headers
 #include "map_utils.h"

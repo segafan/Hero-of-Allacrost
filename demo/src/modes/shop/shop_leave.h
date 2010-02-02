@@ -140,7 +140,7 @@ private:
 	hoa_video::TextImage _name_header;
 
 	//! \brief List header text for the list of object properties (refer to the BuyListDisplay class)
-	hoa_video::OptionBox _properties_header;
+	hoa_gui::OptionBox _properties_header;
 
 	//! \brief Text to display in the middle window when the selected transaction list is empty
 	hoa_video::TextImage _empty_list_text;
@@ -158,7 +158,7 @@ private:
 	hoa_video::TextImage _main_prompt;
 
 	//! \brief The list of actions that the user can take
-	hoa_video::OptionBox _main_actions;
+	hoa_gui::OptionBox _main_actions;
 
 private:
 	/** \brief Changes the current state and modifies other members and display properties appropriately

@@ -33,6 +33,7 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
+using namespace hoa_gui;
 using namespace hoa_system;
 using namespace hoa_mode_manager;
 using namespace hoa_input;

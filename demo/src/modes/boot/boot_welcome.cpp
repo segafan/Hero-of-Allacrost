@@ -19,6 +19,8 @@ using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video;
+using namespace hoa_gui;
+using namespace hoa_script;
 
 namespace hoa_boot {
 

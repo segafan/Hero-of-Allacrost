@@ -19,8 +19,9 @@
 #include "defs.h"
 #include "utils.h"
 
-#include "mode_manager.h"
 #include "video.h"
+#include "gui.h"
+#include "mode_manager.h"
 
 //! \brief All calls to pause mode are wrapped in this namespace.
 namespace hoa_pause {
@@ -85,7 +86,7 @@ private:
 	hoa_video::TextImage _paused_text;
 
 	//! \brief The list of selectabled quit options presented to the user while the mode is in the quit state
-	hoa_video::OptionBox _quit_options;
+	hoa_gui::OptionBox _quit_options;
 }; // class PauseMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_pause

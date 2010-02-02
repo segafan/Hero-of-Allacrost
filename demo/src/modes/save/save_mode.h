@@ -54,7 +54,7 @@ private:
 	bool _LoadGame(int);
 
 	//! \brief The MenuWindow for the backdrop
-	hoa_video::MenuWindow _window;
+	hoa_gui::MenuWindow _window;
 
 	//! \brief The music file to be played
 	hoa_audio::MusicDescriptor _save_music;
@@ -69,10 +69,10 @@ private:
 	hoa_video::Color _dim_color;
 
 	//! \brief The list of save/load/cancel
-	hoa_video::OptionBox _save_options;
+	hoa_gui::OptionBox _save_options;
 
 	//! \brief The list of files to save/load from
-	hoa_video::OptionBox _file_list;
+	hoa_gui::OptionBox _file_list;
 
 	//! \brief Tracks whether games can be saved, or only loaded.
 	bool _saving_enabled;
