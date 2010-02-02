@@ -15,6 +15,8 @@ INCLUDES = \
 	-I$(top_srcdir)/src/engine/video \
 	-I$(top_srcdir)/src/engine/script \
 	-I$(top_srcdir)/src/global \
+	-I$(top_srcdir)/src/common \
+	-I$(top_srcdir)/src/common/gui \
 	-I$(top_srcdir)/src/modes \
 	-I$(top_srcdir)/src/modes/battle \
 	-I$(top_srcdir)/src/modes/boot \
@@ -31,18 +33,12 @@ video_SOURCES = \
 	$(VIDEO_DIR)/effects.cpp \
 	$(VIDEO_DIR)/fade.cpp \
 	$(VIDEO_DIR)/fade.h \
-	$(VIDEO_DIR)/gui.cpp \
-	$(VIDEO_DIR)/gui.h \
 	$(VIDEO_DIR)/image_base.cpp \
 	$(VIDEO_DIR)/image_base.h \
 	$(VIDEO_DIR)/image.cpp \
 	$(VIDEO_DIR)/image.h \
 	$(VIDEO_DIR)/interpolator.cpp \
 	$(VIDEO_DIR)/interpolator.h \
-	$(VIDEO_DIR)/menu_window.cpp \
-	$(VIDEO_DIR)/menu_window.h \
-	$(VIDEO_DIR)/option.cpp \
-	$(VIDEO_DIR)/option.h \
 	$(VIDEO_DIR)/particle.h \
 	$(VIDEO_DIR)/particle_effect.cpp \
 	$(VIDEO_DIR)/particle_effect.h \
@@ -57,8 +53,6 @@ video_SOURCES = \
 	$(VIDEO_DIR)/shake.h \
 	$(VIDEO_DIR)/text.cpp \
 	$(VIDEO_DIR)/text.h \
-	$(VIDEO_DIR)/textbox.cpp \
-	$(VIDEO_DIR)/textbox.h \
 	$(VIDEO_DIR)/texture.cpp \
 	$(VIDEO_DIR)/texture.h \
 	$(VIDEO_DIR)/texture_controller.cpp \
@@ -116,6 +110,17 @@ global_SOURCES = \
 	$(GLOBAL_DIR)/global_skills.cpp \
 	$(GLOBAL_DIR)/global_skills.h \
 	$(GLOBAL_DIR)/defs_global.cpp
+
+COMMON_DIR = src/common
+common_SOURCES = \
+	$(COMMON_DIR)/gui/gui.cpp \
+	$(COMMON_DIR)/gui/gui.h \
+	$(COMMON_DIR)/gui/menu_window.cpp \
+	$(COMMON_DIR)/gui/menu_window.h \
+	$(COMMON_DIR)/gui/option.cpp \
+	$(COMMON_DIR)/gui/option.h \
+	$(COMMON_DIR)/gui/textbox.cpp \
+	$(COMMON_DIR)/gui/textbox.h
 
 MODES_DIR = src/modes
 modes_SOURCES = \
@@ -236,6 +241,7 @@ allacrost_SOURCES = \
 	src/utils.h \
 	$(engine_SOURCES) \
 	$(global_SOURCES) \
+	$(common_SOURCES) \
 	$(modes_SOURCES)
 
 dist-hook:
