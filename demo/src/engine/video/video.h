@@ -81,6 +81,16 @@ extern bool VIDEO_DEBUG;
 //! animation frame period: how many milliseconds 1 frame of animation lasts for
 const int32 VIDEO_ANIMATION_FRAME_PERIOD = 10;
 
+namespace private_video {
+//! \brief The number of FPS samples to retain across frames
+const uint32 FPS_SAMPLES = 250;
+
+//! \brief Maximum milliseconds that the current frame time and our averaged frame time must vary before we begin trying to catch up
+const uint32 MAX_FTIME_DIFF = 5;
+
+//! \brief The number of samples to take if we need to play catchup with the current FPS
+const uint32 FPS_CATCHUP = 20;
+}
 
 //! \brief Draw flags to control x and y alignment, flipping, and texture blending.
 enum VIDEO_DRAW_FLAGS {
@@ -758,10 +768,41 @@ public:
 	/** Retrieves current set text style for rendering
 	 */
 	TextStyle GetTextStyle();
+
+	/** \brief Updates the FPS counter and draws the current average FPS to the screen
+	*** The number of milliseconds that have expired since the last frame was drawn
+	**/
+	void DrawFPS(uint32 frame_time);
+
+	/** \brief toggles the FPS display (on by default)
+	 */
+	void ToggleFPS()
+		{ _fps_display = !_fps_display; }
 private:
 	VideoEngine();
 
 	//-- Private variables ----------------------------------------------------
+
+	//! fps display flag. If true, FPS is displayed
+	bool _fps_display;
+	
+	//! \brief A circular array of FPS samples used for calculating average FPS
+	uint32 _fps_samples[private_video::FPS_SAMPLES];
+
+	/** \brief Keeps track of the sum of FPS values over the last VIDEO_FPS_SAMPLES frames
+	*** This is used to simplify the calculation of average frames per second.
+	**/
+	uint32 _fps_sum;
+
+	//! \brief An index variable to keep track of the start of the circular fps_samples array.
+	uint32 _current_sample;
+
+	/** \brief The number of FPS samples currently recorded.
+	*** This value should always be VIDEO_FPS_SAMPLES, unless the game has just started, in which
+	*** case it could be anywhere from 0 to VIDEO_FPS_SAMPLES depending on how many frames have
+	*** been displayed.
+	**/
+	uint32 _number_samples;
 
 	//! \brief Holds the most recently fetched OpenGL error code
 	GLenum _gl_error_code;

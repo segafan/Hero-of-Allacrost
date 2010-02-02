@@ -15,7 +15,6 @@
 
 #include "input.h"
 #include "video.h"
-#include "gui.h"
 #include "script.h"
 
 #include "mode_manager.h"
@@ -25,7 +24,6 @@ using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video;
-using namespace hoa_gui;
 using namespace hoa_script;
 using namespace hoa_mode_manager;
 using namespace hoa_system;
@@ -310,7 +308,7 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				_quit_press = true;
 			}
 			else if (key_event.keysym.sym == SDLK_r) {
-				GUIManager->ToggleFPS();
+				VideoManager->ToggleFPS();
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_s) {
