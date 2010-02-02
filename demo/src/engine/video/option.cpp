@@ -127,7 +127,6 @@ OptionBox::OptionBox() :
 	// TEMP
 	_width = 1.0f;
 	_height = 1.0f;
-	_text_style = TextStyle("default", Color::white, VIDEO_TEXT_SHADOW_BLACK, 1, -2);
 }
 
 

@@ -142,7 +142,7 @@ void ActionWindow::_InitSelectionHeaders()
 
 void ActionWindow::_InitInformationText()
 {
-	TextStyle battle_style("battle", Color::white, VIDEO_TEXT_SHADOW_DARK);
+	TextStyle battle_style("text22", Color::white, VIDEO_TEXT_SHADOW_DARK);
 
 	_action_information.SetStyle(battle_style);
 	_target_information.SetStyle(battle_style);

@@ -249,7 +249,7 @@ private:
 	bool _char_select_active;
 
 	//! character selection option box
-	hoa_video::OptionBox & _char_select;
+	hoa_video::OptionBox _char_select;
 
 	/*!
 	* \brief initialize character selection option box
@@ -333,7 +333,7 @@ private:
 	uint32 _active_box;
 
 	//! The character select option box
-	hoa_video::OptionBox & _char_select;
+	hoa_video::OptionBox _char_select;
 
 	//! The skills categories option box
 	hoa_video::OptionBox _skills_categories;
@@ -423,7 +423,7 @@ public:
 private:
 
 	//! Character selector
-	hoa_video::OptionBox & _char_select;
+	hoa_video::OptionBox _char_select;
 
 	//! Equipment selector
 	hoa_video::OptionBox _equip_select;
@@ -516,7 +516,7 @@ public:
 	OverwriteConfirmWindow(const std::string &message);
 
 	~OverwriteConfirmWindow();
-	
+
 	//! \brief Standard Window Functions
 	//@{
 	void Update();
@@ -554,7 +554,7 @@ template <class T> std::vector<hoa_global::GlobalObject*> InventoryWindow::_GetI
 	for (typename std::vector<T*>::iterator i = inv->begin(); i != inv->end(); i++) {
 		obj_vector.push_back( *i );
 	}
-	
+
 	return obj_vector;
 }
 
@@ -563,7 +563,7 @@ template <class T> std::vector<hoa_global::GlobalObject*> InventoryWindow::_GetI
 /** **************************************************************************
 *** \brief A window to display a message to the player
 *** Displays a message to the user in the center of the screen
-*** This class is not private because it's a handy message box and 
+*** This class is not private because it's a handy message box and
 *** it could be used else where.
 *** **************************************************************************/
 class MessageWindow : public hoa_video::MenuWindow

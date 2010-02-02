@@ -100,32 +100,40 @@ public:
 
 /** ****************************************************************************
 *** \brief A class encompassing all properties that define a text style
+***
+*** The TextSupervisor class maintains a TextStyle object that serves as the
+*** default style. The various constructors for the TextStyle class will use the
+*** properties of the default text style when they are not provided with the
+*** information to initialize all of the class members.
 *** ***************************************************************************/
 class TextStyle {
 public:
-	//! \brief No-arg constructor uses default font, white text, and default dark shadow with offets
-	TextStyle() :
-		font("default"), color(Color::white), shadow_style(VIDEO_TEXT_SHADOW_DARK), shadow_offset_x(1), shadow_offset_y(-2) {}
+	//! \brief No-arg constructor will set all members to the same value as the current default text style
+	TextStyle();
 
-	//! \brief Constructor requiring a font name, using white text, and optional shadow style and offsets
-	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK, int32 shadow_x = 1, int32 shadow_y = -2) :
-		font(fnt), color(Color::white), shadow_style(style), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
+	//! \brief Constructor requiring a font name only
+	TextStyle(std::string fnt);
 
-	//! \brief Constructor requiring a font name and color, using default shadow styles and offsets
-	TextStyle(std::string fnt, Color c) :
-		font(fnt), color(c), shadow_style(VIDEO_TEXT_SHADOW_DARK), shadow_offset_x(1), shadow_offset_y(-2) {}
+	//! \brief Constructor requiring a text color only
+	TextStyle(Color c);
 
-	//! \brief Constructor using default font, requiring a color to be defined, and optional shadow style and offsets
-	TextStyle(Color c, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK, int32 shadow_x = 1, int32 shadow_y = -2) :
-		font("default"), color(c), shadow_style(style), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
+	//! \brief Constructor requiring a shadow style only
+	TextStyle(TEXT_SHADOW_STYLE style);
 
-	//! \brief Constructor using default font and white color, and requiring a shadow style with optional shadow offsets
-	TextStyle(TEXT_SHADOW_STYLE style, int32 shadow_x = 1, int32 shadow_y = -2) :
-		font("default"), color(Color::white), shadow_style(style), shadow_offset_x(1), shadow_offset_y(-2) {}
+	//! \brief Constructor requiring a font name and text color
+	TextStyle(std::string fnt, Color c);
 
-	//! \brief Full constructor requiring three arguments to be filled: font, color, shadow style, and optionally shadow offsets
-	TextStyle(std::string fnt, Color col, TEXT_SHADOW_STYLE style, int32 shadow_x = 1, int32 shadow_y = -2) :
-		font(fnt),  color(col), shadow_style(style), shadow_offset_x(shadow_x), shadow_offset_y(shadow_y) {}
+	//! \brief Constructor requiring a font name and shadow style
+	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style);
+
+	//! \brief Constructor requiring a text color and shadow style
+	TextStyle(Color c, TEXT_SHADOW_STYLE style);
+
+	//! \brief Constructor requiring a font name, color, and shadow style
+	TextStyle(std::string fnt, Color c, TEXT_SHADOW_STYLE style);
+
+	//! \brief Full constructor requiring initialization data arguments for all class members
+	TextStyle(std::string fnt, Color c, TEXT_SHADOW_STYLE style, int32 shadow_x, int32 shadow_y);
 
 	// ---------- Public members
 
@@ -141,7 +149,6 @@ public:
 	//! \brief The x and y offsets of the shadow
 	int32 shadow_offset_x, shadow_offset_y;
 }; // class TextStyle
-
 
 namespace private_video {
 
@@ -469,39 +476,17 @@ public:
 
 	//! \name Class member access methods
 	//@{
-	/** \brief Gets the name of the current default font used for text rendering
-	*** \note If there are no fonts loaded, this method will return an empty string
-	**/
-	const std::string& GetDefaultFont() const;
-
 	const TextStyle& GetDefaultStyle() const
 		{ return _default_style; }
 
-	Color GetDefaultTextColor() const;
-
-	/** \brief Sets the default font to use for text rendering
-	*** \param font_name The name of the pre-loaded font to set as the default
-	*** \note If the argument does not have valid font data associated with it, no change will be made
-	**/
-	void SetDefaultFont(const std::string& font_name);
-
 	void SetDefaultStyle(TextStyle style)
 		{ _default_style = style; }
-
-	void SetDefaultTextColor(const Color& color);
 	//@}
 
 private:
-	TextSupervisor()
-		{}
+	TextSupervisor();
 
 	// ---------- Private members
-
-	//! \brief The default font, set to an empty string if no fonts are loaded
-	std::string _default_font;
-
-	//! \brief The default color to render text in
-	Color _default_text_color;
 
 	//! \brief The default text style
 	TextStyle _default_style;

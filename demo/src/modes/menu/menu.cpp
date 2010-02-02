@@ -45,8 +45,7 @@ namespace hoa_menu {
 
 bool MENU_DEBUG = false;
 
-MenuMode* MenuMode::_instance = NULL;
-OptionBox MenuMode::_char_select;
+MenuMode* MenuMode::_current_instance = NULL;
 
 ////////////////////////////////////////////////////////////////////////////////
 // MenuMode class -- Initialization and Destruction Code
@@ -154,11 +153,11 @@ MenuMode::MenuMode(ustring locale_name, string locale_image) :
 	_menu_sounds["bump"] = SoundDescriptor();
 	_menu_sounds["bump"].LoadAudio("snd/bump.wav");
 
-	if (_instance != NULL) {
+	if (_current_instance != NULL) {
 		if (MENU_DEBUG)
 			cerr << "MENU WARNING: attempting to create a new instance of MenuMode when one already seems to exist" << endl;
 	}
-	_instance = this;
+	_current_instance = this;
 } // MenuMode::MenuMode()
 
 
@@ -185,7 +184,7 @@ MenuMode::~MenuMode() {
 	_menu_sounds["bump"].FreeAudio();
 	_menu_sounds["cancel"].FreeAudio();
 
-	_instance = NULL;
+	_current_instance = NULL;
 
 	if (_confirm_window != NULL)
 		delete _confirm_window;

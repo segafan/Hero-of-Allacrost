@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,10 +34,10 @@ namespace private_video {
 ***
 *** The Context class holds the current state of the video engine. This is
 *** used so that the context can be pushed and popped, so that a function which
-*** changes a lot of internal settings can easily leave the video engine in the 
-*** same state that it waswhen it entered in. The graphics context includes
+*** changes a lot of internal settings can easily leave the video engine in the
+*** same state that it was when it entered in. The graphics context includes
 *** properties such as draw flags, axis transformations, and the current coordinate
-*** system. The context must be pushed and then popped by any method of the VideoEngine 
+*** system. The context must be pushed and then popped by any method of the VideoEngine
 *** class which modifies this context.
 ***
 *** \note Transformations are actually handled separately by the OpenGL
@@ -53,15 +53,9 @@ public:
 
 	//! \brief Draw flip flags to determine if an element should be drawn flipped across an axis.
 	int8 x_flip, y_flip;
-	
+
 	//! \brief The coordinate system being used by this context.
 	CoordSys coordinate_system;
-
-	//! \brief The current font being used by this context.
-	std::string font;
-
-	//! \brief The current font color being used by this context.
-	Color text_color;
 
 	//! \brief Defines the screen subset to draw the graphics into.
 	ScreenRect viewport;

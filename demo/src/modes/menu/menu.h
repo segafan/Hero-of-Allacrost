@@ -163,6 +163,10 @@ public:
 
 	~MenuMode();
 
+	//! \brief Returns a pointer to the active instance of menu mode
+	static MenuMode* CurrentInstance()
+		{ return _current_instance; }
+
 	//! \brief Resets the menu mode back to its default setup.
 	void Reset();
 
@@ -172,9 +176,13 @@ public:
 	//! \brief Draws the menu. Calls Draw() on active window if there is one.
 	void Draw();
 
+	// TEMP: other menu classes need access to this member
+	hoa_video::OptionBox& GetCharSelect()
+		{ return _char_select; }
+
 private:
 	//! \brief A static pointer to the last instantiated MenuMode object
-	static MenuMode* _instance;
+	static MenuMode* _current_instance;
 
 	//! \brief Text image which displays the name of the location in the game where MenuMode was invoked
 	hoa_video::TextImage _locale_name;
@@ -249,7 +257,7 @@ private:
 	hoa_video::OptionBox _menu_equip;
 	hoa_video::OptionBox _menu_formation;
 	hoa_video::OptionBox _menu_save;
-	static hoa_video::OptionBox _char_select;
+	hoa_video::OptionBox _char_select;
 	//@}
 
 	//! \brief Functions that initialize the numerous option boxes

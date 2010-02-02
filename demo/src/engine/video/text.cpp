@@ -36,6 +36,98 @@ namespace hoa_video {
 
 TextSupervisor* TextManager = NULL;
 
+// -----------------------------------------------------------------------------
+// TextStyle class
+// -----------------------------------------------------------------------------
+
+TextStyle::TextStyle() :
+	font(VideoManager->Text()->GetDefaultStyle().font),
+	color(VideoManager->Text()->GetDefaultStyle().color),
+	shadow_style(VideoManager->Text()->GetDefaultStyle().shadow_style),
+	shadow_offset_x(VideoManager->Text()->GetDefaultStyle().shadow_offset_x),
+	shadow_offset_y(VideoManager->Text()->GetDefaultStyle().shadow_offset_y)
+{}
+
+
+
+TextStyle::TextStyle(string fnt) :
+	font(fnt),
+	color(VideoManager->Text()->GetDefaultStyle().color),
+	shadow_style(VideoManager->Text()->GetDefaultStyle().shadow_style),
+	shadow_offset_x(VideoManager->Text()->GetDefaultStyle().shadow_offset_x),
+	shadow_offset_y(VideoManager->Text()->GetDefaultStyle().shadow_offset_y)
+{}
+
+
+
+TextStyle::TextStyle(Color c) :
+	font(VideoManager->Text()->GetDefaultStyle().font),
+	color(c),
+	shadow_style(VideoManager->Text()->GetDefaultStyle().shadow_style),
+	shadow_offset_x(VideoManager->Text()->GetDefaultStyle().shadow_offset_x),
+	shadow_offset_y(VideoManager->Text()->GetDefaultStyle().shadow_offset_y)
+{}
+
+
+
+TextStyle::TextStyle(TEXT_SHADOW_STYLE style) :
+	font(VideoManager->Text()->GetDefaultStyle().font),
+	color(VideoManager->Text()->GetDefaultStyle().color),
+	shadow_style(style),
+	shadow_offset_x(VideoManager->Text()->GetDefaultStyle().shadow_offset_x),
+	shadow_offset_y(VideoManager->Text()->GetDefaultStyle().shadow_offset_y)
+{}
+
+
+
+TextStyle::TextStyle(string fnt, Color c) :
+	font(fnt),
+	color(c),
+	shadow_style(VideoManager->Text()->GetDefaultStyle().shadow_style),
+	shadow_offset_x(VideoManager->Text()->GetDefaultStyle().shadow_offset_x),
+	shadow_offset_y(VideoManager->Text()->GetDefaultStyle().shadow_offset_y)
+{}
+
+
+
+TextStyle::TextStyle(string fnt, TEXT_SHADOW_STYLE style) :
+	font(fnt),
+	color(VideoManager->Text()->GetDefaultStyle().color),
+	shadow_style(style),
+	shadow_offset_x(VideoManager->Text()->GetDefaultStyle().shadow_offset_x),
+	shadow_offset_y(VideoManager->Text()->GetDefaultStyle().shadow_offset_y)
+{}
+
+
+
+TextStyle::TextStyle(Color c, TEXT_SHADOW_STYLE style) :
+	font(VideoManager->Text()->GetDefaultStyle().font),
+	color(c),
+	shadow_style(style),
+	shadow_offset_x(VideoManager->Text()->GetDefaultStyle().shadow_offset_x),
+	shadow_offset_y(VideoManager->Text()->GetDefaultStyle().shadow_offset_y)
+{}
+
+
+
+TextStyle::TextStyle(string fnt, Color c, TEXT_SHADOW_STYLE style) :
+	font(fnt),
+	color(c),
+	shadow_style(style),
+	shadow_offset_x(VideoManager->Text()->GetDefaultStyle().shadow_offset_x),
+	shadow_offset_y(VideoManager->Text()->GetDefaultStyle().shadow_offset_y)
+{}
+
+
+
+TextStyle::TextStyle(string fnt, Color c, TEXT_SHADOW_STYLE style, int32 shadow_x, int32 shadow_y) :
+	font(fnt),
+	color(c),
+	shadow_style(style),
+	shadow_offset_x(shadow_x),
+	shadow_offset_y(shadow_y)
+{}
+
 namespace private_video {
 
 // Endian-dependent bit masks for the different color channels
@@ -418,6 +510,13 @@ void TextImage::_Regenerate() {
 // TextSupervisor class
 // -----------------------------------------------------------------------------
 
+// When TextSupervisor is created, the
+TextSupervisor::TextSupervisor() :
+	_default_style("", Color(), VIDEO_TEXT_SHADOW_INVALID, 0, 0)
+{}
+
+
+
 TextSupervisor::~TextSupervisor() {
 	// Remove all loaded fonts and cached glyphs, then shutdown the SDL_ttf library
 	for (map<string, FontProperties*>::iterator i = _font_map.begin(); i != _font_map.end(); i++) {
@@ -606,34 +705,6 @@ int32 TextSupervisor::CalculateTextWidth(const std::string& font_name, const std
 	}
 
 	return width;
-}
-
-
-
-const std::string& TextSupervisor::GetDefaultFont() const {
-	return VideoManager->_current_context.font;
-}
-
-
-
-Color TextSupervisor::GetDefaultTextColor() const {
-	return VideoManager->_current_context.text_color;
-}
-
-
-
-void TextSupervisor::SetDefaultFont(const std::string& font_name) {
-	if (_font_map.find(font_name) == _font_map.end()) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
-		return;
-	}
-	VideoManager->_current_context.font = font_name;
-}
-
-
-
-void TextSupervisor::SetDefaultTextColor(const Color& color) {
-	VideoManager->_current_context.text_color = color;
 }
 
 

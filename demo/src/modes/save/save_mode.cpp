@@ -74,7 +74,7 @@ SaveMode::SaveMode(bool enable_saving) :
 	// Initialize the save options box
 	_save_options.SetPosition(512.0f, 384.0f);
 	_save_options.SetDimensions(250.0f, 200.0f, 1, 3, 1, 3);
-	_save_options.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
+	_save_options.SetTextStyle(TextStyle("title22"));
 
 	_save_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_save_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -89,13 +89,13 @@ SaveMode::SaveMode(bool enable_saving) :
 	// Initialize the save options box
 	_file_list.SetPosition(512.0f, 384.0f);
 	_file_list.SetDimensions(250.0f, 500.0f, 1, 7, 1, 7);
-	_file_list.SetTextStyle(VideoManager->Text()->GetDefaultStyle());
-	
+	_file_list.SetTextStyle(TextStyle("title22"));
+
 	_file_list.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_file_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_file_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_file_list.SetCursorOffset(-58.0f, 18.0f);
-	
+
 	_file_list.AddOption(MakeUnicodeString("Cancel"));
 	_file_list.AddOption(MakeUnicodeString("File #1"));
 	_file_list.AddOption(MakeUnicodeString("File #2"));
@@ -121,7 +121,7 @@ SaveMode::SaveMode(bool enable_saving) :
 
 
 SaveMode::~SaveMode() {
-	
+
 }
 
 
