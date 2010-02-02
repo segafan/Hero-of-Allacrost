@@ -225,7 +225,6 @@ void TextureController::DEBUG_ShowTexSheet() {
 
 	glPopMatrix();
 
-	TextManager->SetDefaultFont("debug_font");
 	char buf[200];
 
 	VideoManager->Move(20, VideoManager->_current_context.coordinate_system.GetTop() - 30);
@@ -532,11 +531,11 @@ bool TextureController::_ReloadImagesToSheet(TexSheet* sheet) {
 			uint16 pos0, pos1; // Used to find the start and end positions of a sub-string
 			uint32 x, y; //
 			uint32 rows, cols;
-			
+
 			pos0 = img->tags.find("<X", 0);
 			pos1 = img->tags.find('_', pos0);
 			x = atoi(img->tags.substr(pos0 + 2, pos1).c_str());
-			
+
 			pos0 = img->tags.find("<Y", 0);
 			pos1 = img->tags.find('_', pos0);
 			y = atoi(img->tags.substr(pos0 + 2, pos1).c_str());

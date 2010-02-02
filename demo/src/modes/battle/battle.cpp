@@ -178,7 +178,6 @@ void BattleMode::Reset() {
 	current_battle = this;
 
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
-	VideoManager->Text()->SetDefaultFont("battle");
 
 	// Load the default battle music track if no other music has been added
 	if (_battle_music.empty()) {
@@ -440,7 +439,7 @@ void BattleMode::Update() {
 	else if (_dialogue_on) {
 		if (InputManager->ConfirmPress()) {
 			_dialogue_window.Reset();
-			
+
 			if (_dialogue_text.empty()) {
 				_dialogue_on = false;
 			}
@@ -455,7 +454,7 @@ void BattleMode::Update() {
 			return;
 		}
 	}
-	
+
 	// First, call update functions of any BattleEvents
 	ScriptObject* during_func;
 	for (uint32 i = 0; i < _events.size(); i++) {
@@ -522,7 +521,7 @@ void BattleMode::Update() {
 	if (_selected_character == NULL) {  // TEMP: for implementing non-active battle mode, find better way to do so
 		UnFreezeTimers();  // TEMP: also for non-active battle mode
 	}
-	
+
 	if (_selected_character == NULL || !wait) {
 		for (uint8 i = 0; i < _character_actors.size(); i++) {
 			_character_actors[i]->Update();
@@ -1283,11 +1282,8 @@ void BattleMode::_RemoveExpiredDamageText()
 
 void DamageText::Draw()
 {
-	VideoManager->Text()->SetDefaultFont("battle_dmg");
-	VideoManager->Text()->SetDefaultTextColor(Color::red);
 	VideoManager->Move(_x_pos, _y_pos + ( _timer.GetTimeExpired() / 35.0f ));
-	VideoManager->Text()->Draw(_text);
-	VideoManager->Text()->SetDefaultFont("battle");
+	VideoManager->Text()->Draw(_text, TextStyle("text18", Color::red));
 }
 
 } // namespace hoa_battle

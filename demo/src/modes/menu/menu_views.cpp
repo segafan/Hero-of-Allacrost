@@ -305,12 +305,12 @@ void InventoryWindow::Update() {
 					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 					_description.SetDisplayText(_item_objects[ 0 ]->GetDescription());
 					_active_box = ITEM_ACTIVE_LIST;
-					MenuMode::_instance->_menu_sounds["confirm"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 				} // if _inventory_items.GetNumberOptions() > 0
 			} // if VIDEO_OPTION_CONFIRM
 			// Deactivate inventory
 			else if (event == VIDEO_OPTION_CANCEL) {
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 				_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				Activate(false);
 			} // if VIDEO_OPTION_CANCEL
@@ -324,14 +324,14 @@ void InventoryWindow::Update() {
 				_active_box = ITEM_ACTIVE_CHAR;
 				_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::_instance->_menu_sounds["confirm"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 			} // if VIDEO_OPTION_CONFIRM
 			// Return to category selection
 			else if (event == VIDEO_OPTION_CANCEL) {
 				_active_box = ITEM_ACTIVE_CATEGORY;
 				_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			} // else if VIDEO_OPTION_CANCEL
 			else if ( event == VIDEO_OPTION_BOUNDS_UP || VIDEO_OPTION_BOUNDS_DOWN ) {
 				_description.SetDisplayText(_item_objects[ _inventory_items.GetSelection() ]->GetDescription());
@@ -369,7 +369,7 @@ void InventoryWindow::Update() {
 				_active_box = ITEM_ACTIVE_LIST;
 				_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			} // if VIDEO_OPTION_CANCEL
 			break;
 		} // case ITEM_ACTIVE_CHAR
@@ -458,8 +458,8 @@ void InventoryWindow::Draw() {
 ////////////////////////////////////////////////////////////////////////////////
 
 StatusWindow::StatusWindow() :
-	_char_select_active(false),
-	_char_select(MenuMode::_char_select) {
+	_char_select_active(false)
+{
 	// Get party size for iteration
 	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
 	StillImage portrait;
@@ -534,7 +534,7 @@ void StatusWindow::Update() {
 
 	if (_char_select.GetEvent() == VIDEO_OPTION_CANCEL) {
 		Activate(false);
-		MenuMode::_instance->_menu_sounds["cancel"].Play();
+		MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 	}
 	_char_select.Update();
 } // void StatusWindow::Update()
@@ -627,7 +627,6 @@ void StatusWindow::Draw() {
 
 SkillsWindow::SkillsWindow() :
 	_active_box(SKILL_ACTIVE_NONE),
-	_char_select(MenuMode::_char_select),
 	_char_skillset(0)
 {
 	// Init option boxes
@@ -805,14 +804,14 @@ void SkillsWindow::Update() {
 				}
 				ScriptCallFunction<void>(*script_function, target, instigator);
 				instigator->SubtractSkillPoints(skill->GetSPRequired());
-				MenuMode::_instance->_menu_sounds["confirm"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 			}
 			else if (event == VIDEO_OPTION_CANCEL) {
 				_active_box = SKILL_ACTIVE_LIST;
 				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_char_select.SetSelection(_char_skillset);
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			}
 			break;
 
@@ -823,12 +822,12 @@ void SkillsWindow::Update() {
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				_char_skillset = _char_select.GetSelection();
-				MenuMode::_instance->_menu_sounds["confirm"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 			}
 			else if (event == VIDEO_OPTION_CANCEL) {
 				Activate(false);
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			}
 			break;
 
@@ -841,14 +840,14 @@ void SkillsWindow::Update() {
 					_active_box = SKILL_ACTIVE_CHAR_APPLY;
 					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 					_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					MenuMode::_instance->_menu_sounds["confirm"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 				}
 				else
-					MenuMode::_instance->_menu_sounds["cancel"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			}
 			else if (event == VIDEO_OPTION_CANCEL) {
 				_active_box = SKILL_ACTIVE_CATEGORY;
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 			}
@@ -862,15 +861,15 @@ void SkillsWindow::Update() {
 					_active_box = SKILL_ACTIVE_LIST;
 					_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					MenuMode::_instance->_menu_sounds["confirm"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 				}
 				else {
-					MenuMode::_instance->_menu_sounds["cancel"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 				}
 			}
 			else if (event == VIDEO_OPTION_CANCEL) {
 				_active_box = SKILL_ACTIVE_CHAR;
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 				_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				_char_select.SetSelection(_char_skillset);
@@ -1019,8 +1018,8 @@ void SkillsWindow::Draw() {
 ////////////////////////////////////////////////////////////////////////////////
 
 EquipWindow::EquipWindow() :
-	_char_select(MenuMode::_char_select),
-	_active_box(EQUIP_ACTIVE_NONE) {
+	_active_box(EQUIP_ACTIVE_NONE)
+{
 	// Initialize option boxes
 	_InitCharSelect();
 	_InitEquipmentSelect();
@@ -1171,11 +1170,11 @@ void EquipWindow::Update() {
 			_active_box = EQUIP_ACTIVE_SELECT;
 			_char_select.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			MenuMode::_instance->_menu_sounds["confirm"].Play();
+			MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 		}
 		else if (event == VIDEO_OPTION_CANCEL) {
 			Activate(false);
-			MenuMode::_instance->_menu_sounds["cancel"].Play();
+			MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 		}
 		break;
 
@@ -1188,18 +1187,18 @@ void EquipWindow::Update() {
 				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_equip_list.SetSelection(0);
 				_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::_instance->_menu_sounds["confirm"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 			}
 			else {
 				_active_box = EQUIP_ACTIVE_SELECT;
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			}
 		}
 		else if (event == VIDEO_OPTION_CANCEL) {
 			_active_box = EQUIP_ACTIVE_CHAR;
 			_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-			MenuMode::_instance->_menu_sounds["cancel"].Play();
+			MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 		}
 		break;
 
@@ -1217,7 +1216,7 @@ void EquipWindow::Update() {
 					GlobalManager->AddToInventory(ch->EquipWeapon((GlobalWeapon*)GlobalManager->RetrieveFromInventory(id_num)));
 				}
 				else {
-					MenuMode::_instance->_menu_sounds["cancel"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 				}
 				break;}
 
@@ -1228,7 +1227,7 @@ void EquipWindow::Update() {
 					GlobalManager->AddToInventory(ch->EquipHeadArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
 				}
 				else {
-					MenuMode::_instance->_menu_sounds["cancel"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 				}
 				break;}
 
@@ -1239,7 +1238,7 @@ void EquipWindow::Update() {
 					GlobalManager->AddToInventory(ch->EquipTorsoArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
 				}
 				else {
-					MenuMode::_instance->_menu_sounds["cancel"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 				}
 				break;}
 
@@ -1250,7 +1249,7 @@ void EquipWindow::Update() {
 					GlobalManager->AddToInventory(ch->EquipArmArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
 				}
 				else {
-					MenuMode::_instance->_menu_sounds["cancel"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 				}
 				break;}
 
@@ -1261,7 +1260,7 @@ void EquipWindow::Update() {
 					GlobalManager->AddToInventory(ch->EquipLegArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
 				}
 				else {
-					MenuMode::_instance->_menu_sounds["cancel"].Play();
+					MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 				}
 				break;}
 
@@ -1273,11 +1272,11 @@ void EquipWindow::Update() {
 			_active_box = EQUIP_ACTIVE_SELECT;
 			_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			MenuMode::_instance->_menu_sounds["confirm"].Play();
+			MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 		} // if VIDEO_OPTION_CONFIRM
 		else if (event == VIDEO_OPTION_CANCEL) {
 			_active_box = EQUIP_ACTIVE_SELECT;
-			MenuMode::_instance->_menu_sounds["cancel"].Play();
+			MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		} // else if VIDEO_OPTION_CANCEL
@@ -1536,11 +1535,11 @@ void FormationWindow::Update() {
 				_active_box = FORM_ACTIVE_SECOND;
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 				_second_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::_instance->_menu_sounds["confirm"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
 			}
 			else if (event == VIDEO_OPTION_CANCEL) {
 				Activate(false);
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			}
 			break;
 
@@ -1555,7 +1554,7 @@ void FormationWindow::Update() {
 				_active_box = FORM_ACTIVE_CHAR;
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				_second_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-				MenuMode::_instance->_menu_sounds["cancel"].Play();
+				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			}
 			break;
 	} // switch
