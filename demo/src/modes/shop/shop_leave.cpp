@@ -37,6 +37,7 @@ using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_input;
 using namespace hoa_video;
+using namespace hoa_gui;
 using namespace hoa_mode_manager;
 
 namespace hoa_shop {

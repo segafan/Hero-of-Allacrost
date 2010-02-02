@@ -177,7 +177,7 @@ public:
 	void Draw();
 
 	// TEMP: other menu classes need access to this member
-	hoa_video::OptionBox& GetCharSelect()
+	hoa_gui::OptionBox& GetCharSelect()
 		{ return _char_select; }
 
 private:
@@ -201,8 +201,8 @@ private:
 	*** \brief The various menu windows that are displayed in menu mode
 	**/
 	//@{
-	hoa_video::MenuWindow _bottom_window;
-	hoa_video::MenuWindow _main_options_window;
+	hoa_gui::MenuWindow _bottom_window;
+	hoa_gui::MenuWindow _main_options_window;
 
 	private_menu::CharacterWindow _character_window0;
 	private_menu::CharacterWindow _character_window1;
@@ -218,7 +218,7 @@ private:
 
 	/** \brief The currently active window
 	 **/
-	hoa_video::MenuWindow *_active_window;
+	hoa_gui::MenuWindow *_active_window;
 
 //	private_menu::SaveWindow _save_window;
 
@@ -243,26 +243,26 @@ private:
 	uint32 _current_window;
 
 	//! A pointer to the current options menu
-	hoa_video::OptionBox *_current_menu;
-
+	hoa_gui::OptionBox *_current_menu;
+	
 	//! The top level options in boot mode
-	hoa_video::OptionBox _main_options;
+	hoa_gui::OptionBox _main_options;
 
 	//! \name Option boxes that are used in the various menu windows
 	//@{
-	hoa_video::OptionBox _menu_inventory;
-	hoa_video::OptionBox _menu_skills;
-	hoa_video::OptionBox _menu_status;
-	hoa_video::OptionBox _menu_options;
-	hoa_video::OptionBox _menu_equip;
-	hoa_video::OptionBox _menu_formation;
-	hoa_video::OptionBox _menu_save;
-	hoa_video::OptionBox _char_select;
+	hoa_gui::OptionBox _menu_inventory;
+	hoa_gui::OptionBox _menu_skills;
+	hoa_gui::OptionBox _menu_status;
+	hoa_gui::OptionBox _menu_options;
+	hoa_gui::OptionBox _menu_equip;
+	hoa_gui::OptionBox _menu_formation;
+	hoa_gui::OptionBox _menu_save;
+	hoa_gui::OptionBox _char_select;
 	//@}
 
 	//! \brief Functions that initialize the numerous option boxes
 	//@{
-	void _SetupOptionBoxCommonSettings(hoa_video::OptionBox *ob);
+	void _SetupOptionBoxCommonSettings(hoa_gui::OptionBox *ob);
 	void _SetupMainOptionBox();
 	void _SetupInventoryOptionBox();
 	void _SetupSkillsOptionBox();

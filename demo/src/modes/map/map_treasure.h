@@ -194,19 +194,19 @@ private:
 	std::vector<hoa_global::GlobalObject*> _objects_to_delete;
 
 	//! \brief Contains options for viewing, using, or equipping inventory, or for exiting the menu
-	hoa_video::MenuWindow _action_window;
+	hoa_gui::MenuWindow _action_window;
 
 	//! \brief Lists all of the drunes and inventory objects contained in the treasure
-	hoa_video::MenuWindow _list_window;
+	hoa_gui::MenuWindow _list_window;
 
 	//! \brief The available actions that a user can currently take. Displayed in the _action_window.
-	hoa_video::OptionBox _action_options;
+	hoa_gui::OptionBox _action_options;
 
 	//! \brief The name + quantity of all drunes and inventory objects earned. Displayed in the _list_window
-	hoa_video::OptionBox _list_options;
+	hoa_gui::OptionBox _list_options;
 
 	//! \brief A textbox that displays the detailed description about a selected treasure
-	hoa_video::TextBox _detail_textbox;
+	hoa_gui::TextBox _detail_textbox;
 
 	//! \brief A rendering of the name for the treasure window
 	hoa_video::TextImage _window_title;

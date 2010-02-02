@@ -15,6 +15,7 @@
 
 #include "input.h"
 #include "video.h"
+#include "gui.h"
 #include "script.h"
 
 #include "mode_manager.h"
@@ -24,6 +25,7 @@ using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video;
+using namespace hoa_gui;
 using namespace hoa_script;
 using namespace hoa_mode_manager;
 using namespace hoa_system;
@@ -204,7 +206,7 @@ bool InputEngine::AnyKeyRelease() {
 // Handles all of the event processing for the game.
 void InputEngine::EventHandler() {
 	SDL_Event event; // Holds the game event
-
+	
 	// Reset all of the press and release flags so that they don't get detected twice.
 	_any_key_press   = false;
 	_any_key_release = false;
@@ -308,7 +310,7 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				_quit_press = true;
 			}
 			else if (key_event.keysym.sym == SDLK_r) {
-				VideoManager->ToggleFPS();
+				GUIManager->ToggleFPS();
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_s) {
@@ -453,7 +455,6 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 		}
 	}
 } // void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event)
-
 
 // Handles all joystick events for the game
 void InputEngine::_JoystickEventHandler(SDL_Event& js_event) {

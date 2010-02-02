@@ -260,10 +260,10 @@ private:
 	hoa_video::TextImage _object_name;
 
 	//! \brief A summary description of the object to display
-	hoa_video::TextBox _description_text;
+	hoa_gui::TextBox _description_text;
 
 	//! \brief A more detailed "lore" description about the object's origins and connections with the world
-	hoa_video::TextBox _lore_text;
+	hoa_gui::TextBox _lore_text;
 	//@}
 
 	//! \name Data used only for item object types
@@ -574,13 +574,13 @@ public:
 	std::map<uint32, private_shop::ShopObject*>* GetSellList()
 		{ return &_sell_list; }
 
-	hoa_video::MenuWindow* GetTopWindow()
+	hoa_gui::MenuWindow* GetTopWindow()
 		{ return &_top_window; }
 
-	hoa_video::MenuWindow* GetMiddleWindow()
+	hoa_gui::MenuWindow* GetMiddleWindow()
 		{ return &_middle_window; }
 
-	hoa_video::MenuWindow* GetBottomWindow()
+	hoa_gui::MenuWindow* GetBottomWindow()
 		{ return &_bottom_window; }
 	//@}
 
@@ -658,22 +658,22 @@ private:
 	hoa_video::StillImage _screen_backdrop;
 
 	//! \brief The highest level window that contains the shop actions and finance information
-	hoa_video::MenuWindow _top_window;
+	hoa_gui::MenuWindow _top_window;
 
 	//! \brief The largest window usually used to display lists of objects
-	hoa_video::MenuWindow _middle_window;
+	hoa_gui::MenuWindow _middle_window;
 
 	//! \brief The lowest window typically displays detailed information or additional shop options
-	hoa_video::MenuWindow _bottom_window;
+	hoa_gui::MenuWindow _bottom_window;
 
 	//! \brief The list of options for what the player may do in shop mode
-	hoa_video::OptionBox _action_options;
+	hoa_gui::OptionBox _action_options;
 
 	//! \brief Separate text images for each action option. Displayed when _action_options are hidden
 	std::vector<hoa_video::TextImage> _action_titles;
 
 	//! \brief Table-formatted text containing the financial information about the current purchases and sales
-	hoa_video::OptionBox _finance_table;
+	hoa_gui::OptionBox _finance_table;
 }; // class ShopMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_shop

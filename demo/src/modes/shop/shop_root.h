@@ -133,7 +133,7 @@ private:
 	std::vector<hoa_video::StillImage> _category_icons;
 
 	//! \brief A textbox displaying a short greeting or message from the shop keeper
-	hoa_video::TextBox _greeting_text;
+	hoa_gui::TextBox _greeting_text;
 
 	//! \brief A container holding the correct draw coordinates and information for object categories
 	CategoryDrawData _category_draw_data;

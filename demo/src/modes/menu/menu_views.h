@@ -28,6 +28,7 @@
 #include "defs.h"
 
 #include "video.h"
+#include "gui.h"
 
 #include "global.h"
 
@@ -120,7 +121,7 @@ enum CONFIRM_RESULT
 *** It will contain all the information of the character and handle its draw
 *** placement.
 *** ***************************************************************************/
-class CharacterWindow : public hoa_video::MenuWindow {
+class CharacterWindow : public hoa_gui::MenuWindow {
 private:
 	//! The name of the character that this window corresponds) to
 	uint32 _char_id;
@@ -151,7 +152,7 @@ public:
 ***
 *** This handles item use.  You can also view all items by category.
 *** ***************************************************************************/
-class InventoryWindow : public hoa_video::MenuWindow {
+class InventoryWindow : public hoa_gui::MenuWindow {
 	friend class hoa_menu::MenuMode;
 
 public:
@@ -195,16 +196,16 @@ private:
 	uint32 _active_box;
 
 	//! OptionBox to display all of the items
-	hoa_video::OptionBox _inventory_items;
+	hoa_gui::OptionBox _inventory_items;
 
 	//! OptionBox to choose character
-	hoa_video::OptionBox _char_select;
+	hoa_gui::OptionBox _char_select;
 
 	//! OptionBox to choose item category
-	hoa_video::OptionBox _item_categories;
+	hoa_gui::OptionBox _item_categories;
 
 	//! TextBox that holds the selected object's description
-	hoa_video::TextBox _description;
+	hoa_gui::TextBox _description;
 
 	//! Vector of GlobalObjects that corresponds to _inventory_items
 	std::vector< hoa_global::GlobalObject* > _item_objects;
@@ -240,7 +241,7 @@ private:
 *** This window display all the attributes of the character.
 *** You can scroll through them all as well, to view all the different characters.
 *** ***************************************************************************/
-class StatusWindow : public hoa_video::MenuWindow {
+class StatusWindow : public hoa_gui::MenuWindow {
 private:
 	//! char portraits
 	std::vector<hoa_video::StillImage> _full_portraits;
@@ -249,7 +250,7 @@ private:
 	bool _char_select_active;
 
 	//! character selection option box
-	hoa_video::OptionBox _char_select;
+	hoa_gui::OptionBox _char_select;
 
 	/*!
 	* \brief initialize character selection option box
@@ -295,7 +296,7 @@ public:
 *** You can scroll through them all, filter by category, choose one, and apply it
 *** to a character.
 *** ***************************************************************************/
-class SkillsWindow : public hoa_video::MenuWindow {
+class SkillsWindow : public hoa_gui::MenuWindow {
 	friend class hoa_menu::MenuMode;
 
 public:
@@ -333,19 +334,19 @@ private:
 	uint32 _active_box;
 
 	//! The character select option box
-	hoa_video::OptionBox _char_select;
+	hoa_gui::OptionBox _char_select;
 
 	//! The skills categories option box
-	hoa_video::OptionBox _skills_categories;
+	hoa_gui::OptionBox _skills_categories;
 
 	//! The skills list option box
-	hoa_video::OptionBox _skills_list;
+	hoa_gui::OptionBox _skills_list;
 
 	//! The skill SP cost option box
-	hoa_video::OptionBox _skill_cost_list;
+	hoa_gui::OptionBox _skill_cost_list;
 
 	//! TextBox that holds the selected skill's description
-	hoa_video::TextBox _description;
+	hoa_gui::TextBox _description;
 
 	//! Track which character's skillset was chosen
 	int32 _char_skillset;
@@ -389,7 +390,7 @@ private:
 *** This window changes a character's equipment.
 *** You can choose a piece of equipment and replace with an item from the given list.
 *** ***************************************************************************/
-class EquipWindow : public hoa_video::MenuWindow {
+class EquipWindow : public hoa_gui::MenuWindow {
 	friend class hoa_menu::MenuMode;
 
 public:
@@ -423,13 +424,13 @@ public:
 private:
 
 	//! Character selector
-	hoa_video::OptionBox _char_select;
+	hoa_gui::OptionBox _char_select;
 
 	//! Equipment selector
-	hoa_video::OptionBox _equip_select;
+	hoa_gui::OptionBox _equip_select;
 
 	//! Replacement selector
-	hoa_video::OptionBox _equip_list;
+	hoa_gui::OptionBox _equip_list;
 
 	//! Flag to specify the active option box
 	uint32 _active_box;
@@ -466,7 +467,7 @@ private:
 ***
 *** This window changes party order.
 *** ***************************************************************************/
-class FormationWindow : public hoa_video::MenuWindow {
+class FormationWindow : public hoa_gui::MenuWindow {
 	friend class hoa_menu::MenuMode;
 
 public:
@@ -493,10 +494,10 @@ private:
 	uint32 _active_box;
 
 	//! The character select option box
-	hoa_video::OptionBox _char_select;
+	hoa_gui::OptionBox _char_select;
 
 	//! The character select option box once first character has been selected
-	hoa_video::OptionBox _second_char_select;
+	hoa_gui::OptionBox _second_char_select;
 
 	/*!
 	* \brief initialize character selection option box
@@ -510,7 +511,7 @@ private:
 *** Gives the player the chance to choose to overwrite the save game file
 *** or to stop the save process
 *** **************************************************************************/
-class OverwriteConfirmWindow : public hoa_video::MenuWindow
+class OverwriteConfirmWindow : public hoa_gui::MenuWindow
 {
 public:
 	OverwriteConfirmWindow(const std::string &message);
@@ -535,10 +536,10 @@ private:
 	CONFIRM_RESULT _option;
 
 	//! Response from the user
-	hoa_video::OptionBox _yes_no;
+	hoa_gui::OptionBox _yes_no;
 
 	//! used to display the message
-	hoa_video::TextBox _textbox;
+	hoa_gui::TextBox _textbox;
 
 	//! \brief A map of the sounds used while in MenuMode
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
@@ -566,7 +567,7 @@ template <class T> std::vector<hoa_global::GlobalObject*> InventoryWindow::_GetI
 *** This class is not private because it's a handy message box and
 *** it could be used else where.
 *** **************************************************************************/
-class MessageWindow : public hoa_video::MenuWindow
+class MessageWindow : public hoa_gui::MenuWindow
 {
 public:
 	MessageWindow(const std::string &message, float w, float h);
@@ -586,7 +587,7 @@ private:
 	std::string _message;
 
 	//! \brief used to display the message
-	hoa_video::TextBox _textbox;
+	hoa_gui::TextBox _textbox;
 }; // class MessageWindow
 
 } // namespace hoa_menu

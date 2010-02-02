@@ -18,6 +18,7 @@
 
 #include "utils.h"
 #include "video.h"
+#include "gui.h"
 
 namespace hoa_boot {
 
@@ -71,7 +72,7 @@ private:
 	float _scroll_offset;
 
 	//! \brief The GUI menu window that all other content is drawn upon
-	hoa_video::MenuWindow _window;
+	hoa_gui::MenuWindow _window;
 
 	//! \brief The rendered image of the credits text
 	hoa_video::TextImage _credits_text;

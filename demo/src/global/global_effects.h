@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "utils.h"
+#include "system.h"
 
 #include "video.h"
 #include "script.h"

@@ -40,6 +40,7 @@
 
 #include "audio.h"
 #include "video.h"
+#include "gui.h"
 #include "input.h"
 #include "script.h"
 #include "system.h"
@@ -57,6 +58,7 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
+using namespace hoa_gui;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
 using namespace hoa_system;
@@ -89,6 +91,7 @@ void QuitAllacrost() {
 	GameGlobal::SingletonDestroy();
 
 	// Delete all of the reamining independent engine components
+	GUISystem::SingletonDestroy();
 	AudioEngine::SingletonDestroy();
 	InputEngine::SingletonDestroy();
 	ScriptEngine::SingletonDestroy();
@@ -219,6 +222,7 @@ void InitializeEngine() throw (Exception) {
 	VideoManager = VideoEngine::SingletonCreate();
 	ScriptManager = ScriptEngine::SingletonCreate();
 	SystemManager = SystemEngine::SingletonCreate();
+	GUIManager = GUISystem::SingletonCreate();
 	ModeManager = ModeEngine::SingletonCreate();
 	GlobalManager = GameGlobal::SingletonCreate();
 
@@ -269,11 +273,11 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
 	if (VideoManager->FinalizeInitialization() == false)
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
-	if (VideoManager->GUI()->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
+	if (GUIManager->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
 		throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
 	}
 	// NOTE: This function call should have its argument set to false for release builds
-	VideoManager->DEBUG_EnableGUIOutlines(false);
+	GUIManager->DEBUG_EnableGUIOutlines(false);
 
 	// Load all standard font sets used across the game
 	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title20", 20) == false) {
@@ -329,7 +333,10 @@ void InitializeEngine() throw (Exception) {
 int main(int argc, char *argv[]) {
 	// When the program exits, first the QuitAllacrost() function is called, followed by SDL_Quit()
 	atexit(SDL_Quit);
-	atexit(QuitAllacrost);
+	//atexit(QuitAllacrost);
+	// QuitAllacrost isn't strictly necessary:
+	//  the system is quite capable of recovering program resources on its own
+	//  QuitAllacrost will just slow down shutdown
 
 	try {
 		// Change to the directory where the Allacrost data is stored
@@ -394,6 +401,9 @@ int main(int argc, char *argv[]) {
 
 			// 5) Update the game status
 			ModeManager->Update();
+
+			// 6) Draw the FPS
+			//GUISystem->DrawFPS(SystemManager->GetUpdateTime());
 		} // while (SystemManager->NotDone())
 	} catch (Exception& e) {
 		#ifdef WIN32

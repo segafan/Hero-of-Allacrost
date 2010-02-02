@@ -67,10 +67,6 @@ extern "C" {
 #include "text.h"
 #include "particle_manager.h"
 #include "particle_effect.h"
-#include "gui.h"
-#include "menu_window.h"
-#include "option.h"
-#include "textbox.h"
 
 //! \brief All calls to the video engine are wrapped in this namespace.
 namespace hoa_video {
@@ -196,13 +192,13 @@ class VideoEngine : public hoa_utils::Singleton<VideoEngine> {
 
 	friend class TextureController;
 	friend class TextSupervisor;
-	friend class GUISupervisor;
+	friend class hoa_gui::GUISystem;
 
-	friend class TextBox;
-	friend class OptionBox;
-	friend class MenuWindow;
+	friend class hoa_gui::TextBox;
+	friend class hoa_gui::OptionBox;
+	friend class hoa_gui::MenuWindow;
 
-	friend class private_video::GUIElement;
+	friend class hoa_gui::private_gui::GUIElement;
 	friend class private_video::TexSheet;
 	friend class private_video::FixedTexSheet;
 	friend class private_video::VariableTexSheet;
@@ -504,18 +500,6 @@ public:
 		{ return _current_frame_diff; }
 
 	/** \brief Returns a pointer to the GUIManager singleton object
-	*** This method allows the user to perform GUI management operations. For example, to load a
-	*** menu skin, the user may utilize this method like so:
-	*** `if (VideoManager->GUI()->LoadMenuSkin(...) == true) { cout << "Success" << endl; }`
-	***
-	*** \note See gui.h for the public methods available from the GUISupervisor class
-	*** \note This function is guaranteed to return a valid pointer so long as the VideoEngine class
-	*** has been properly initialized
-	**/
-	GUISupervisor* GUI()
-		{ return GUIManager; }
-
-	/** \brief Returns a pointer to the GUIManager singleton object
 	*** This method allows the user to perform text operations. For example, to load a
 	*** font, the user may utilize this method like so:
 	*** `if (VideoManager->Text()->LoadFont(...) == true) { cout << "Success" << endl; }`
@@ -532,7 +516,7 @@ public:
 	*** all textures, the user may utilize this method like so:
 	*** `if (VideoManager->Textures()->ReloadTextures() == true) { cout << "Success" << endl; }`
 	***
-	*** \note See texture_controller.h for the public methods available from the GUISupervisor class
+	*** \note See texture_controller.h for the public methods available from the GUISystem class
 	*** \note This function is guaranteed to return a valid pointer so long as the VideoEngine class
 	*** has been properly initialized
 	**/
@@ -702,16 +686,6 @@ public:
 	float GetGamma() const
 		{ return _gamma_value; }
 
-	/** \brief Updates the FPS counter and draws the current average FPS to the screen
-	*** The number of milliseconds that have expired since the last frame was drawn
-	**/
-	void DrawFPS(uint32 frame_time);
-
-	/** \brief toggles the FPS display (on by default)
-	 */
-	void ToggleFPS()
-		{ _fps_display = !_fps_display; }
-
 	/** \brief Draws a colored line between two points
 	*** \param x1 The x coordinate of the first point
 	*** \param y1 The y coordinate of the first point
@@ -784,11 +758,6 @@ public:
 	/** Retrieves current set text style for rendering
 	 */
 	TextStyle GetTextStyle();
-
-	/** \brief Debug functioning for enabling/disabling the drawing of GUI element boundaries
-	*** \param enable Set to true to enable outlines, false to disable
-	**/
-	void DEBUG_EnableGUIOutlines(bool enable);
 private:
 	VideoEngine();
 
@@ -820,9 +789,6 @@ private:
 
 	//! advanced display flag. If true, info about the video engine is shown on screen
 	bool _advanced_display;
-
-	//! fps display flag. If true, FPS is displayed
-	bool _fps_display;
 
 	//! keep track of number of draw calls per frame
 	int32 _num_draw_calls;

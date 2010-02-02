@@ -33,6 +33,7 @@ using namespace hoa_utils;
 using namespace hoa_input;
 using namespace hoa_mode_manager;
 using namespace hoa_video;
+using namespace hoa_gui;
 using namespace hoa_global;
 using namespace hoa_menu;
 

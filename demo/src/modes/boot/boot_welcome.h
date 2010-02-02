@@ -18,6 +18,7 @@
 
 #include "utils.h"
 #include "video.h"
+#include "gui.h"
 
 namespace hoa_boot {
 
@@ -64,17 +65,17 @@ private:
 	//! \brief Set to true when the window is active and should be visible on the screen
 	bool _active;
 
-	//! \brief The GUI menu window that all other content is drawn upon
-	hoa_video::MenuWindow _window;
+	//! Window for the screen
+	hoa_gui::MenuWindow _window;
 
 	//! \brief Rendered text of the header string
 	hoa_video::TextImage _text_header;
 
 	//! \brief An option box used as a header for the key table
-	hoa_video::OptionBox _key_table_header;
+	hoa_gui::OptionBox _key_table_header;
 
 	//! \brief Stores the text for default key mappings in a table format
-	hoa_video::OptionBox _key_table;
+	hoa_gui::OptionBox _key_table;
 
 	//! \brief Rendered text that tells the player how to move past the window
 	hoa_video::TextImage _text_additional;

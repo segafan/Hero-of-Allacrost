@@ -24,6 +24,7 @@
 
 #include "system.h"
 #include "video.h"
+#include "gui.h"
 
 namespace hoa_shop {
 
@@ -333,7 +334,7 @@ protected:
 	const hoa_video::StillImage* _object_icon;
 
 	//! \brief The name of the current category for "list" view mode
-	hoa_video::TextBox _name_textbox;
+	hoa_gui::TextBox _name_textbox;
 
 	//! \brief The name of the current category for "info" view mode
 	hoa_video::TextImage _name_text;
@@ -431,10 +432,10 @@ public:
 
 	//! \name Class member access methods
 	//@{
-	hoa_video::OptionBox& GetIdentifyList()
+	hoa_gui::OptionBox& GetIdentifyList()
 		{ return _identify_list; }
 
-	hoa_video::OptionBox& GetPropertyList()
+	hoa_gui::OptionBox& GetPropertyList()
 		{ return _property_list; }
 	//@}
 
@@ -443,10 +444,10 @@ protected:
 	std::vector<ShopObject*> _objects;
 
 	//! \brief Contains identification information about each objects such as graphical icon and name
-	hoa_video::OptionBox _identify_list;
+	hoa_gui::OptionBox _identify_list;
 
 	//! \brief Contains properties about the object such as price, stock, amount owned, or amount to buy/sell
-	hoa_video::OptionBox _property_list;
+	hoa_gui::OptionBox _property_list;
 }; // class ObjectListDisplay
 
 } // namespace private_shop

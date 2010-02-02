@@ -88,7 +88,7 @@ private:
 	hoa_video::TextImage _name_header;
 
 	//! \brief Header text for the list of object properties (refer to the SellListDisplay class)
-	hoa_video::OptionBox _properties_header;
+	hoa_gui::OptionBox _properties_header;
 
 	//! \brief String representations of all category names that may
 	std::vector<hoa_utils::ustring> _category_names;
@@ -111,7 +111,7 @@ private:
 	hoa_video::TextImage _selected_name;
 
 	//! \brief A single row option box containing the selected object's properties
-	hoa_video::OptionBox _selected_properties;
+	hoa_gui::OptionBox _selected_properties;
 
 	/** \brief Clears out all list displays and rebuilds them from scratch using the party's inventory
 	*** This operation needs to be performed when the interface is initialized and whenever a transaction

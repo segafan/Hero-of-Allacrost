@@ -20,6 +20,7 @@
 #include "utils.h"
 
 #include "video.h"
+#include "gui.h"
 
 namespace hoa_boot {
 
@@ -44,7 +45,7 @@ namespace private_boot {
 *** the function pointer containers appropriately. Use only the methods specific to this class
 *** to add or remove options.
 *** ***************************************************************************/
-class BootMenu : public hoa_video::OptionBox {
+class BootMenu : public hoa_gui::OptionBox {
 public:
 	BootMenu()
 		{}

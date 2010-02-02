@@ -35,6 +35,7 @@
 // Allacrost engines
 #include "script.h"
 #include "video.h"
+#include "gui.h"
 
 // Local map mode headers
 #include "map_utils.h"
@@ -337,7 +338,7 @@ private:
 *** and placement of a dialgoue. It serves primarily as a container class for
 *** dialogue graphics.
 *** ***************************************************************************/
-class DialogueWindow : public hoa_video::MenuWindow {
+class DialogueWindow : public hoa_gui::MenuWindow {
 	friend class DialogueSupervisor;
 	friend class hoa_battle::BattleMode;
 public:
@@ -368,10 +369,10 @@ private:
 	hoa_video::StillImage _nameplate_image;
 
 	//! \brief The textbox used for rendering the dialogue text
-	hoa_video::TextBox _display_textbox;
+	hoa_gui::TextBox _display_textbox;
 
 	//! \brief The option box used for rendering dialogue options where applicable
-	hoa_video::OptionBox _display_options;
+	hoa_gui::OptionBox _display_options;
 }; // class DialogueWindow : public hoa_video::MenuWindow
 
 

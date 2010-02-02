@@ -119,7 +119,7 @@ enum FINISH_WINDOW_STATE {
 *** \todo Add a function that allows you to add new action categories in the case
 *** of categories available after special events
 *** ***************************************************************************/
-class ActionWindow : public hoa_video::MenuWindow {
+class ActionWindow : public hoa_gui::MenuWindow {
 	friend class hoa_battle::BattleMode;
 
 public:
@@ -205,10 +205,10 @@ private:
 	*** Typically this list includes "attack", "defend", "support", and "item". More types may appear
 	*** under special circumstances and conditions.
 	**/
-	hoa_video::OptionBox _action_category_list;
+	hoa_gui::OptionBox _action_category_list;
 
 	//! \brief The option box that lists the actions that can be taken after a category is selected
-	hoa_video::OptionBox _action_selection_list;
+	hoa_gui::OptionBox _action_selection_list;
 
 	//! \brief A vector containing the icons used for representing each action category
 	std::vector<hoa_video::StillImage> _action_category_icons;
@@ -310,7 +310,7 @@ private:
 *** \todo Add feature where spoils (XP, drunes, etc) are quickly counted down as
 *** they go into the party's posession.
 *** ***************************************************************************/
-class FinishWindow : public hoa_video::MenuWindow {
+class FinishWindow : public hoa_gui::MenuWindow {
 	friend class hoa_battle::BattleMode;
 
 public:
@@ -352,19 +352,19 @@ private:
 	std::vector<hoa_global::GlobalCharacterGrowth*> _character_growths;
 
 	//! \brief Text that displays the battle's outcome (victory or defeat)
-	hoa_video::TextBox _finish_outcome;
+	hoa_gui::TextBox _finish_outcome;
 
 	//! \brief The list of options that the player may choose from when they lose the battle
-	hoa_video::OptionBox _lose_options;
+	hoa_gui::OptionBox _lose_options;
 
 	//! \brief The window containing the XP and money won
-	hoa_video::MenuWindow _xp_and_money_window;
+	hoa_gui::MenuWindow _xp_and_money_window;
 
 	//! \brief The windows that show character portraits and stats
-	hoa_video::MenuWindow _character_window[4];
+	hoa_gui::MenuWindow _character_window[4];
 
 	//! \brief Lists the items won
-	hoa_video::MenuWindow _items_window;
+	hoa_gui::MenuWindow _items_window;
 
 	//! \brief Character portraits
 	hoa_video::StillImage _char_portraits[4];
