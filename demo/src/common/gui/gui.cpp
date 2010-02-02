@@ -187,14 +187,7 @@ using namespace private_gui;
 // *****************************************************************************
 
 GUISystem::GUISystem() {
-	_fps_sum = 0;
-	_fps_display = false;
-	_current_sample = 0;
-	_number_samples = 0;
 	_DEBUG_draw_outlines = false;
-
-	for (uint32 sample = 0; sample < FPS_SAMPLES; sample++)
-		 _fps_samples[sample] = 0;
 }
 
 
@@ -372,65 +365,5 @@ void GUISystem::_RemoveMenuWindow(MenuWindow* old_window) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "did not find a corresponding entry in the menu windows map" << endl;
 	}
 }
-
-
-
-void GUISystem::DrawFPS(uint32 frame_time) {
-	if (!_fps_display)
-		return;
-	VideoManager->PushState();
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
-
-	// Calculate the FPS for the current frame
-	uint32 current_fps = 1000;
-	if (frame_time) {
-		current_fps /= frame_time;
-	}
-
-	// The number of times to insert the current FPS sample into the fps_samples array
-	uint32 number_insertions;
-
-	if (_number_samples == 0) {
-		// If the FPS display is uninitialized, set the entire FPS array to the current FPS
-		_number_samples = FPS_SAMPLES;
-		number_insertions = FPS_SAMPLES;
-	}
-	else if (current_fps >= 500) {
-		 // If the game is going at 500 fps or faster, 1 insertion is enough
-		number_insertions = 1;
-	}
-	else {
-		// Find if there's a discrepancy between the current frame time and the averaged one.
-		// If there's a large difference, add extra samples so the FPS display "catches up" more quickly.
-		float avg_frame_time = 1000.0f * FPS_SAMPLES / _fps_sum;
-		int32 time_difference = static_cast<int32>(avg_frame_time) - static_cast<int32>(frame_time);
-
-		if (time_difference < 0)
-			time_difference = -time_difference;
-
-		if (time_difference <= static_cast<int32>(MAX_FTIME_DIFF))
-			number_insertions = 1;
-		else
-			number_insertions = FPS_CATCHUP; // Take more samples to catch up to the current FPS
-	}
-
-	// Insert the current_fps samples into the fps_samples array for the number of times specified
-	for (uint32 j = 0; j < number_insertions; j++) {
-		_fps_sum -= _fps_samples[_current_sample];
-		_fps_sum += current_fps;
-		_fps_samples[_current_sample] = current_fps;
-		_current_sample = (_current_sample + 1) % FPS_SAMPLES;
-	}
-
-	uint32 avg_fps = _fps_sum / FPS_SAMPLES;
-
-	// The text to display to the screen
-	char fps_text[16];
-	sprintf(fps_text, "FPS: %d", avg_fps);
-
-	VideoManager->Move(930.0f, 720.0f); // Upper right hand corner of the screen
-	VideoManager->Text()->Draw(fps_text, TextStyle("text20", Color::white));
-	VideoManager->PopState();
-} // void GUISystem::_DrawFPS(uint32 frame_time)
 
 } // namespace hoa_gui
