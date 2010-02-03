@@ -1,3 +1,5 @@
 # List of source files which contain translatable strings.
 dat/maps/demo_town.lua
 dat/maps/demo_cave.lua
+dat/config/languages.lua
+src/modes/boot/boot.cpp
