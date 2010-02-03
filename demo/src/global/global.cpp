@@ -13,11 +13,7 @@
 *** \brief   Source file for the global game manager
 *** ***************************************************************************/
 
-#include <iostream>
-
-#include "video.h"
 #include "system.h"
-
 #include "global.h"
 
 using namespace std;
@@ -575,8 +571,8 @@ bool GameGlobal::DoesEventExist(const string& group_name, const string& event_na
 	if (group_iter == _event_groups.end())
 		return false;
 
-	map<string, int32>::const_iterator event_iter = group_iter->second->_events.find(event_name);
-	if (event_iter == group_iter->second->_events.end())
+	map<string, int32>::const_iterator event_iter = group_iter->second->GetEvents().find(event_name);
+	if (event_iter == group_iter->second->GetEvents().end())
 		return false;
 
 	return true;
@@ -613,8 +609,8 @@ int32 GameGlobal::GetEventValue(const string& group_name, const string& event_na
 	if (group_iter == _event_groups.end())
 		return GLOBAL_BAD_EVENT;
 
-	map<string, int32>::const_iterator event_iter = group_iter->second->_events.find(event_name);
-	if (event_iter == group_iter->second->_events.end())
+	map<string, int32>::const_iterator event_iter = group_iter->second->GetEvents().find(event_name);
+	if (event_iter == group_iter->second->GetEvents().end())
 		return GLOBAL_BAD_EVENT;
 
 	return event_iter->second;
@@ -1020,8 +1016,8 @@ void GameGlobal::_SaveEvents(WriteScriptDescriptor& file, GlobalEventGroup* even
 
 	file.WriteLine("\t" + event_group->GetGroupName() + " = {");
 
-	for (map<string, int32>::iterator i = event_group->_events.begin(); i != event_group->_events.end(); i++) {
-		if (i == event_group->_events.begin())
+	for (map<string, int32>::const_iterator i = event_group->GetEvents().begin(); i != event_group->GetEvents().end(); i++) {
+		if (i == event_group->GetEvents().begin())
 			file.WriteLine("\t\t", false);
 		else
 			file.WriteLine(", ", false);

@@ -27,12 +27,12 @@
 #include "utils.h"
 #include "script.h"
 
-#include "global_objects.h"
 #include "global_actors.h"
 #include "global_effects.h"
+#include "global_objects.h"
 #include "global_skills.h"
 
-//! \brief All calls to global code are wrapped in this namespace.
+//! \brief All calls to global code are wrapped inside this namespace.
 namespace hoa_global {
 
 //! \brief The singleton pointer responsible for the management of global game data.
@@ -69,8 +69,6 @@ const int32 GLOBAL_BAD_EVENT = -5555555;
 *** retrieval of these objects.
 *** ***************************************************************************/
 class GlobalEventGroup {
-friend class GameGlobal;
-
 public:
 	//! \param group_name The name of the group to create (this can not be changed)
 	GlobalEventGroup(const std::string& group_name) :
@@ -114,6 +112,10 @@ public:
 	//! \brief Returns a copy of the name of this group
 	std::string GetGroupName() const
 		{ return _group_name; }
+
+	//! \brief Returns an immutable reference to the private _events container
+	const std::map<std::string, int32>& GetEvents() const
+		{ return _events; }
 
 private:
 	//! \brief The name given to this group of events

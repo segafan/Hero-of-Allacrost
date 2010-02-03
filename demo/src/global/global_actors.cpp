@@ -13,11 +13,11 @@
 *** \brief   Source file for global game actors.
 *** ***************************************************************************/
 
-#include <iostream>
-
 #include "video.h"
-
-#include "global.h"
+#include "global_actors.h"
+#include "global_objects.h"
+#include "global_effects.h"
+#include "global_skills.h"
 
 using namespace std;
 
@@ -27,22 +27,48 @@ using namespace hoa_script;
 
 namespace hoa_global {
 
+string GetTargetTypeText(GLOBAL_TARGET target_type, bool target_ally) {
+	switch (target_type) {
+		case GLOBAL_TARGET_ATTACK_POINT:
+			return "Single Point";
+		case GLOBAL_TARGET_ACTOR:
+			if (target_ally == true)
+				return "Single Ally";
+			else
+				return "Single Enemy";
+		case GLOBAL_TARGET_PARTY:
+			if (target_ally == true)
+				return "All Allies";
+			else
+				return "All Enemies";
+		case GLOBAL_TARGET_SELF:
+			return "Self";
+		default:
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received invalid target_type argument: " << target_type << endl;
+	}
 
-std::string GetTargetTypeText(int globalTargetType, int globalTargetAlly)
-{
-	static std::string TargetTypeText[GLOBAL_TARGET_TOTAL][2] =
-	{{"Single Point", "Single Point"},
-	 {"Single Enemy", "Single Ally"},
-	 {"All Enemies", "All Allies"}};
-
-	return TargetTypeText[globalTargetType][globalTargetAlly];
+	return "";
 }
 
 // -----------------------------------------------------------------------------
 // GlobalAttackPoint class
 // -----------------------------------------------------------------------------
 
-bool GlobalAttackPoint::_LoadData(ReadScriptDescriptor& script) {
+GlobalAttackPoint::GlobalAttackPoint(GlobalActor* owner) :
+	_actor_owner(owner),
+	_x_position(0),
+	_y_position(0),
+	_fortitude_modifier(0.0f),
+	_protection_modifier(0.0f),
+	_evade_modifier(0.0f),
+	_total_physical_defense(0),
+	_total_metaphysical_defense(0),
+	_total_evade_rating(0)
+{}
+
+
+
+bool GlobalAttackPoint::LoadData(ReadScriptDescriptor& script) {
 	if (script.IsFileOpen() == false) {
 		return false;
 	}
@@ -56,19 +82,80 @@ bool GlobalAttackPoint::_LoadData(ReadScriptDescriptor& script) {
 
 	if (script.IsErrorDetected()) {
 		if (GLOBAL_DEBUG) {
-			cerr << "GLOBAL ERROR: GlobalAttackPoint::LoadData() failed due to script reading errors. "
-				<< "They are as follows:" << endl;
+			PRINT_WARNING << "one or more errors occurred while reading the save game file - they are listed below" << endl;
 			cerr << script.GetErrorMessages() << endl;
 		}
 		return false;
 	}
 
 	return true;
-} // bool GlobalAttackPoint::_LoadData(ReadScriptDescriptor& script)
+}
+
+
+
+void GlobalAttackPoint::CalculateTotalDefense(const GlobalArmor* equipped_armor) {
+	if (_actor_owner == NULL) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "attack point has no owning actor" << endl;
+		return;
+	}
+
+	// Calculate defense ratings from owning actor's base stat properties and the attack point modifiers
+	if (_fortitude_modifier <= -1.0f) // If the modifier is less than or equal to -100%, set the total defense to zero
+		_total_physical_defense = 0;
+	else
+		_total_physical_defense = _actor_owner->GetFortitude() + static_cast<int32>(_actor_owner->GetFortitude() * _fortitude_modifier);
+
+	if (_protection_modifier <= -1.0f) // If the modifier is less than or equal to -100%, set the total defense to zero
+		_total_metaphysical_defense = 0;
+	else
+		_total_metaphysical_defense = _actor_owner->GetProtection() + static_cast<int32>(_actor_owner->GetProtection() * _protection_modifier);
+
+	// If present, add defense ratings from the armor equipped
+	if (equipped_armor != NULL) {
+		_total_physical_defense += equipped_armor->GetPhysicalDefense();
+		_total_metaphysical_defense += equipped_armor->GetMetaphysicalDefense();
+	}
+}
+
+
+
+void GlobalAttackPoint::CalculateTotalEvade() {
+	if (_actor_owner == NULL) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "attack point has no owning actor" << endl;
+		return;
+	}
+
+	// Calculate evade ratings from owning actor's base evade stat and the evade modifier
+	if (_fortitude_modifier <= -1.0f) // If the modifier is less than or equal to -100%, set the total evade to zero
+		_total_evade_rating = 0.0f;
+	else
+		_total_evade_rating = _actor_owner->GetEvade() + (_actor_owner->GetEvade() * _evade_modifier);
+}
 
 // -----------------------------------------------------------------------------
 // GlobalActor class
 // -----------------------------------------------------------------------------
+
+GlobalActor::GlobalActor() :
+	_id(0),
+	_experience_level(0),
+	_experience_points(0),
+	_hit_points(0),
+	_max_hit_points(0),
+	_skill_points(0),
+	_max_skill_points(0),
+	_strength(0),
+	_vigor(0),
+	_fortitude(0),
+	_protection(0),
+	_agility(0),
+	_evade(0),
+	_total_physical_attack(0),
+	_total_metaphysical_attack(0),
+	_weapon_equipped(NULL)
+{}
+
+
 
 GlobalActor::~GlobalActor() {
 	// Delete all attack points
@@ -117,10 +204,10 @@ GlobalActor::GlobalActor(const GlobalActor& copy) {
 	// Copy all attack points
 	for (uint32 i = 0; i < copy._attack_points.size(); i++) {
 		_attack_points.push_back(new GlobalAttackPoint(*copy._attack_points[i]));
-		_attack_points[i]->_actor_owner = this;
+		_attack_points[i]->SetActorOwner(this);
 	}
 
-	// Copy all equipment that is not NULL
+	// Copy all equipment
 	if (copy._weapon_equipped == NULL)
 		_weapon_equipped = NULL;
 	else
@@ -137,12 +224,11 @@ GlobalActor::GlobalActor(const GlobalActor& copy) {
 	for (map<uint32, GlobalSkill*>::const_iterator i = copy._skills.begin(); i != copy._skills.end(); i++) {
 		_skills.insert(make_pair(i->first, new GlobalSkill(*(i->second))));
 	}
-} // GlobalActor::GlobalActor(const GlobalActor& copy)
+}
 
 
 
 GlobalActor& GlobalActor::operator=(const GlobalActor& copy) {
-	cout << "GlobalActor assignment operator" << endl;
 	if (this == &copy) // Handle self-assignment case
 		return *this;
 
@@ -167,10 +253,10 @@ GlobalActor& GlobalActor::operator=(const GlobalActor& copy) {
 	// Copy all attack points
 	for (uint32 i = 0; i < copy._attack_points.size(); i++) {
 		_attack_points.push_back(new GlobalAttackPoint(*_attack_points[i]));
-		_attack_points[i]->_actor_owner = this;
+		_attack_points[i]->SetActorOwner(this);
 	}
 
-	// Copy all equipment that is not NULL
+	// Copy all equipment
 	if (copy._weapon_equipped == NULL)
 		_weapon_equipped = NULL;
 	else
@@ -188,96 +274,113 @@ GlobalActor& GlobalActor::operator=(const GlobalActor& copy) {
 		_skills.insert(make_pair(i->first, new GlobalSkill(*(i->second))));
 	}
 	return *this;
-} // GlobalActor& GlobalActor::operator=(const GlobalActor& copy)
+}
+
+
+
+GlobalWeapon* GlobalActor::EquipWeapon(GlobalWeapon* weapon) {
+	GlobalWeapon* old_weapon = _weapon_equipped;
+	_weapon_equipped = weapon;
+	_CalculateAttackRatings();
+	return old_weapon;
+}
+
+
+
+GlobalArmor* GlobalActor::EquipArmor(GlobalArmor* armor, uint32 index) {
+	if (index >= _armor_equipped.size()) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded number of pieces of armor equipped: " << index << endl;
+		return armor;
+	}
+
+	GlobalArmor* old_armor = _armor_equipped[index];
+	_armor_equipped[index] = armor;
+
+	if (old_armor != NULL && armor != NULL) {
+		if (old_armor->GetObjectType() != armor->GetObjectType()) {
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "old armor was replaced with a different type of armor" << endl;
+		}
+	}
+
+	_attack_points[index]->CalculateTotalDefense(_armor_equipped[index]);
+	return old_armor;
+}
 
 
 
 uint32 GlobalActor::GetTotalPhysicalDefense(uint32 index) const {
 	if (index >= _attack_points.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalActor::GetTotalPhysicalDefense() was called with an invalid "
-				<< "index argument: " << index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded number of attack points: " << index << endl;
 		return 0;
 	}
-	else {
-		return _attack_points[index]->GetTotalPhysicalDefense();
-	}
+
+	return _attack_points[index]->GetTotalPhysicalDefense();
 }
 
 
 
 uint32 GlobalActor::GetTotalMetaphysicalDefense(uint32 index) const {
 	if (index >= _attack_points.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalActor::GetTotalMetaphysicalDefense() was called with an invalid "
-				<< "index argument: " << index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded number of attack points: " << index << endl;
 		return 0;
 	}
-	else {
-		return _attack_points[index]->GetTotalMetaphysicalDefense();
-	}
+
+	return _attack_points[index]->GetTotalMetaphysicalDefense();
 }
 
 
 
 float GlobalActor::GetTotalEvadeRating(uint32 index) const {
 	if (index >= _attack_points.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalActor::GetTotalEvadeRating() was called with an invalid "
-				<< "index argument: " << index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded number of attack points: " << index << endl;
 		return 0.0f;
 	}
-	else {
-		return _attack_points[index]->GetTotalEvadeRating();
-	}
+
+	return _attack_points[index]->GetTotalEvadeRating();
 }
 
 
 
 GlobalArmor* GlobalActor::GetArmorEquipped(uint32 index) const {
 	if (index >= _armor_equipped.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalActor::GetArmorEquipped() was called with an invalid "
-				<< "index argument: " << index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded number of pieces of armor equipped: " << index << endl;
 		return NULL;
 	}
-	else {
-		return _armor_equipped[index];
-	}
+
+	return _armor_equipped[index];
 }
 
 
 
 GlobalAttackPoint* GlobalActor::GetAttackPoint(uint32 index) const {
 	if (index >= _attack_points.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalActor::GetAttackPoint() was called with an invalid "
-				<< "index argument: " << index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded number of attack points: " << index << endl;
 		return NULL;
 	}
-	else {
-		return _attack_points[index];
-	}
+
+	return _attack_points[index];
 }
 
 
 
 GlobalSkill* GlobalActor::GetSkill(uint32 skill_id) const {
 	map<uint32, GlobalSkill*>::const_iterator skill_location = _skills.find(skill_id);
-	if (skill_location != _skills.end())
-		return skill_location->second;
-	else
+	if (skill_location == _skills.end()) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "actor did not have a skill with the requested skill_id: " << skill_id << endl;
 		return NULL;
+	}
+
+	return skill_location->second;
 }
 
 
 
 GlobalSkill* GlobalActor::GetSkill(const GlobalSkill* skill) const {
 	if (skill == NULL) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalActor::GetSkill() was called with a NULL skill argument" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received a NULL pointer argument" << endl;
 		return NULL;
 	}
+
 	return GetSkill(skill->GetID());
 }
 
@@ -298,66 +401,20 @@ void GlobalActor::_CalculateAttackRatings() {
 void GlobalActor::_CalculateDefenseRatings() {
 	// Re-calculate the defense ratings for all attack points
 	for (uint32 i = 0; i < _attack_points.size(); i++) {
-		// If the modifier is -100% or less, set the total defense to zero
-		_attack_points[i]->_total_physical_defense = 0;
-		if (_attack_points[i]->_fortitude_modifier > -1.0f)
-			_attack_points[i]->_total_physical_defense = _fortitude + static_cast<uint32>(_fortitude * _attack_points[i]->_fortitude_modifier);
-
-		_attack_points[i]->_total_metaphysical_defense = 0;
-		if (_attack_points[i]->_protection_modifier > -1.0f)
-			_attack_points[i]->_total_metaphysical_defense = _protection + static_cast<uint32>(_protection * _attack_points[i]->_protection_modifier);
-
-		// If there's armor equipped on this attack point add its defensive properties to the defense totals
-		if (_armor_equipped.size() > i && _armor_equipped[i] != NULL) {
-			_attack_points[i]->_total_physical_defense += _armor_equipped[i]->GetPhysicalDefense();
-			_attack_points[i]->_total_metaphysical_defense += _armor_equipped[i]->GetMetaphysicalDefense();
-		}
+		if ((i < _armor_equipped.size()) && (_armor_equipped[i] != NULL))
+			_attack_points[i]->CalculateTotalDefense(_armor_equipped[i]);
+		else
+			_attack_points[i]->CalculateTotalDefense(NULL);
 	}
-} // void GlobalActor::_CalculateDefenseRatings()
+}
 
 
 
 void GlobalActor::_CalculateEvadeRatings() {
 	// Re-calculate the evade ratings for all attack points
 	for (uint32 i = 0; i < _attack_points.size(); i++) {
-		// If the modifier is -100% or less, set the evade rating to zero
-		_attack_points[i]->_total_evade_rating = 0;
-		if (_attack_points[i]->_evade_modifier > -1.0f)
-			_attack_points[i]->_total_evade_rating = _evade + static_cast<uint32>(_evade * _attack_points[i]->_evade_modifier);
+		_attack_points[i]->CalculateTotalEvade();
 	}
-} // void GlobalActor::_CalculateEvadeRatings()
-
-
-
-GlobalWeapon* GlobalActor::EquipWeapon(GlobalWeapon* weapon) {
-	GlobalWeapon* old_weapon = _weapon_equipped;
-	_weapon_equipped = weapon;
-	_CalculateAttackRatings();
-	return old_weapon;
-}
-
-
-
-GlobalArmor* GlobalActor::EquipArmor(GlobalArmor* armor, uint32 index) {
-	if (index >= _armor_equipped.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalActor::EquipArmor() was given an invalid index: " << index
-				<< ", the armor was not equipped" << endl;
-		return armor;
-	}
-
-	GlobalArmor* old_armor = _armor_equipped[index];
-	_armor_equipped[index] = armor;
-
-	if (old_armor != NULL && armor != NULL) {
-		if (old_armor->GetObjectType() != armor->GetObjectType()) {
-			if (GLOBAL_DEBUG)
-				cerr << "GLOBAL WARNING: GlobalActor::EquipArmor() replaced the old armor "
-					<< "with a different type of armor" << endl;
-		}
-	}
-	_CalculateDefenseRatings();
-	return old_armor;
 }
 
 // -----------------------------------------------------------------------------
@@ -431,14 +488,15 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 		_experience_level_gained = false;
 		_DetermineNextLevelExperience();
 
+		string filename = "dat/actors/characters.lua";
 		ReadScriptDescriptor character_script;
-		if (character_script.OpenFile("dat/actors/characters.lua") == false) {
-			PRINT_ERROR << "failed to open the characters.lua script file when the character reached a new experience level" << endl;
+		if (character_script.OpenFile(filename) == false) {
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to open character data file: " << filename << endl;
 			return;
 		}
 
 		try {
-			ScriptCallFunction<void>(character_script.GetLuaState(), "DetermineGrowth", this->_character_owner);
+			ScriptCallFunction<void>(character_script.GetLuaState(), "DetermineGrowth", _character_owner);
 			_ConstructPeriodicGrowth();
 			_CheckForGrowth();
 		}
@@ -455,7 +513,7 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 		for (uint32 i = 0; i < _skills_learned.size(); i++) {
 			GlobalSkill* skill = _skills_learned[i];
 			if (_character_owner->_skills.find(skill->GetID()) != _character_owner->_skills.end()) {
-				IF_PRINT_WARNING(GLOBAL_DEBUG) <<  "character had already learned the skill with the id: " << skill->GetID() << endl;
+				IF_PRINT_WARNING(GLOBAL_DEBUG) << "character had already learned the skill with the id: " << skill->GetID() << endl;
 				delete _skills_learned[i];
 				continue;
 			}
@@ -473,7 +531,7 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 					_character_owner->_support_skills.push_back(skill);
 					break;
 				default:
-					IF_PRINT_WARNING(GLOBAL_DEBUG) << "new learned skill had an unknown skill type: " << skill->GetType() << endl;
+					IF_PRINT_WARNING(GLOBAL_DEBUG) << "newly learned skill had an unknown skill type: " << skill->GetType() << endl;
 					break;
 			}
 		}
@@ -492,31 +550,26 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 
 void GlobalCharacterGrowth::_AddSkill(uint32 skill_id) {
 	if (skill_id == 0) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalCharacterGrowth::_AddSkill() failed because an invalid skill id was passed to it (0)" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid skill_id argument: " << skill_id << endl;
 		return;
 	}
-
 	// Make sure we don't add a skill to learn more than once
 	for (vector<GlobalSkill*>::iterator i = _skills_learned.begin(); i != _skills_learned.end(); i++) {
 		if (skill_id == (*i)->GetID()) {
-			if (GLOBAL_DEBUG)
-				cerr << "GLOBAL WARNING: GlobalCharacterGrowth::_AddSkill() failed because the skill to be added was already "
-					<< "present in the list of skills to earn. The skill ID in question was: " << skill_id << endl;
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add was already present in the list of skills to learn: " << skill_id << endl;
 			return;
 		}
 	}
 
 	GlobalSkill* skill = new GlobalSkill(skill_id);
 	if (skill->GetID() == 0) { // Indicates that the skill failed to load successfully
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalCharacterGrowth::_AddSkill() failed because the skill failed to load" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add failed to load: " << skill_id << endl;
 		delete skill;
 	}
 	else {
 		_skills_learned.push_back(skill);
 	}
-} // void GlobalCharacterGrowth::_AddSkill(uint32 skill_id)
+}
 
 
 
@@ -732,20 +785,21 @@ void GlobalCharacterGrowth::_ConstructPeriodicGrowth() {
 	_protection_growth = 0;
 	_agility_growth = 0;
 	_evade_growth = 0.0f;
-} // void GlobalCharacterGrowth::_ConstructPeriodicGrowth()
+}
 
 
 
 void GlobalCharacterGrowth::_DetermineNextLevelExperience() {
-	uint32 new_xp = 0; // Temporary variable for holding the new experience milestone
+	uint32 base_xp = 0;
+	uint32 new_xp = 0;
 
 	// TODO: implement a real algorithm for determining the next experience goal
-	uint32 base_xp = _character_owner->GetExperienceLevel() * 40;
-	new_xp = GaussianRandomValue(base_xp, base_xp/10.0f);
+	base_xp = _character_owner->GetExperienceLevel() * 40;
+	new_xp = GaussianRandomValue(base_xp, base_xp / 10.0f);
 
 	_experience_for_last_level = _experience_for_next_level;
 	_experience_for_next_level = new_xp;
-} // void GlobalCharacterGrowth::_DetermineNextLevelExperience()
+}
 
 // -----------------------------------------------------------------------------
 // GlobalCharacter class
@@ -755,27 +809,23 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	_growth(this)
 {
 	_id = id;
-	_weapon_equipped = NULL;
 
-	// (1): Attempt to open the characters script file
+	// ----- (1): Open the characters script file
+	string filename = "dat/actors/characters.lua";
 	ReadScriptDescriptor char_script;
-	if (char_script.OpenFile("dat/actors/characters.lua") == false) {
-		IF_PRINT_DEBUG(GLOBAL_DEBUG) << "GLOBAL ERROR: GlobalCharacter constructor could not "
-			<< "create a new character because the script file dat/actors/character.lua did "
-			<< "not open succesfully" << endl;
-		// Set the character's ID to zero since this is now an invalid character object
-		_id = 0;
+	if (char_script.OpenFile(filename) == false) {
+		PRINT_ERROR << "failed to open character data file: " << filename << endl;
 		return;
 	}
 
-	// (2): Open up the table containing the character's data and retrieve their basic properties
+	// ----- (2): Retrieve their basic character property data
 	char_script.OpenTable("characters");
 	char_script.OpenTable(_id);
 	_name = MakeUnicodeString(char_script.ReadString("name"));
 	_filename = char_script.ReadString("filename");
 
-	// (3): Constructing the character from their initial stats if requested
-	if (initial) {
+	// ----- (3): Construct the character from the initial stats if necessary
+	if (initial == true) {
 		char_script.OpenTable("initial_stats");
 		_experience_level = char_script.ReadUInt("experience_level");
 		_experience_points = char_script.ReadUInt("experience_points");
@@ -793,63 +843,55 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 		// Add the character's initial equipment. If any equipment ids are zero, that indicates nothing is to be equipped.
 		uint32 equipment_id = 0;
 		equipment_id = char_script.ReadUInt("weapon");
-		if (equipment_id != 0) {
+		if (equipment_id != 0)
 			_weapon_equipped = new GlobalWeapon(equipment_id);
-		} else {
+		else
 			_weapon_equipped = NULL;
-		}
 
 		equipment_id = char_script.ReadUInt("head_armor");
-		if (equipment_id != 0) {
+		if (equipment_id != 0)
 			_armor_equipped.push_back(new GlobalArmor(equipment_id));
-		} else {
+		else
 			_armor_equipped.push_back(NULL);
-		}
 
 		equipment_id = char_script.ReadUInt("torso_armor");
-		if (equipment_id != 0) {
+		if (equipment_id != 0)
 			_armor_equipped.push_back(new GlobalArmor(equipment_id));
-		} else {
+		else
 			_armor_equipped.push_back(NULL);
-		}
 
 		equipment_id = char_script.ReadUInt("arm_armor");
-		if (equipment_id != 0) {
+		if (equipment_id != 0)
 			_armor_equipped.push_back(new GlobalArmor(equipment_id));
-		} else {
+		else
 			_armor_equipped.push_back(NULL);
-		}
 
 		equipment_id = char_script.ReadUInt("leg_armor");
-		if (equipment_id != 0) {
+		if (equipment_id != 0)
 			_armor_equipped.push_back(new GlobalArmor(equipment_id));
-		} else {
+		else
 			_armor_equipped.push_back(NULL);
-		}
-		char_script.CloseTable();
 
+		char_script.CloseTable();
 		if (char_script.IsErrorDetected()) {
 			if (GLOBAL_DEBUG) {
-				cerr << "GLOBAL WARNING: GlobalCharacter constructor had errors in reading the character's "
-					<< "initial stats. They are as follows:" << endl;
+				PRINT_WARNING << "one or more errors occurred while reading initial data - they are listed below" << endl;
 				cerr << char_script.GetErrorMessages() << endl;
 			}
 		}
-	} // if (initial)
+	} // if (initial == true)
+	else {
+		 // Make sure the _armor_equipped vector is sized appropriately
+		_armor_equipped.resize(4, NULL);
+	}
 
-	// (4): Setup the character's attack points
+	// ----- (4): Setup the character's attack points
 	char_script.OpenTable("attack_points");
 	for (uint32 i = GLOBAL_POSITION_HEAD; i <= GLOBAL_POSITION_LEGS; i++) {
-		if (initial == false) // Make sure the armor_equipped vector is the same size as the _attack_points vector
-			_armor_equipped.push_back(NULL);
-
 		_attack_points.push_back(new GlobalAttackPoint(this));
 		char_script.OpenTable(i);
-		if (_attack_points[i]->_LoadData(char_script) == false) {
-			if (GLOBAL_DEBUG) {
-				cerr << "GLOBAL WARNING: GlobalCharacter constructor failed to succesfully load data for "
-					<< "attack point number: " << i << endl;
-			}
+		if (_attack_points[i]->LoadData(char_script) == false) {
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to succesfully load data for attack point: " << i << endl;
 		}
 		char_script.CloseTable();
 	}
@@ -857,17 +899,16 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 
 	if (char_script.IsErrorDetected()) {
 		if (GLOBAL_DEBUG) {
-			cerr << "GLOBAL WARNING: GlobalCharacter constructor had errors in reading the character's "
-				<< "attack points. They are as follows:" << endl;
+			PRINT_WARNING << "one or more errors occurred while reading attack point data - they are listed below" << endl;
 			cerr << char_script.GetErrorMessages() << endl;
 		}
 	}
 
-	// (5): Create the character's initial skill set, if requested
+	// ----- (5): Construct the character's initial skill set if necessary
 	if (initial) {
-		// The keys to the skills table indicate the level, the value is the skill id
-		vector<uint32> skill_levels;
+		// The skills table contains key/value pairs. The key indicate the level required to learn the skill and the value is the skill's id
 		uint32 skill_id;
+		vector<uint32> skill_levels;
 		char_script.OpenTable("skills");
 		char_script.ReadTableKeys(skill_levels);
 
@@ -880,11 +921,9 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 		}
 
 		char_script.CloseTable();
-
 		if (char_script.IsErrorDetected()) {
 			if (GLOBAL_DEBUG) {
-				cerr << "GLOBAL WARNING: GlobalCharacter constructor had errors in reading the character's "
-					<< "initial skill set. They are as follows:" << endl;
+				PRINT_WARNING << "one or more errors occurred while reading skill data - they are listed below" << endl;
 				cerr << char_script.GetErrorMessages() << endl;
 			}
 		}
@@ -893,7 +932,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	char_script.CloseTable(); // "characters[id]"
 	char_script.CloseTable(); // "characters"
 
-	// (6): Determine the character's initial growth, if requested
+	// ----- (6): Determine the character's initial growth if necessary
 	if (initial) {
 		// Initialize the experience level milestones
 		_growth._experience_for_last_level = _experience_points;
@@ -911,26 +950,27 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 		}
 	}
 
+	// ----- (7): Close the script file and calculate all rating totals
 	if (char_script.IsErrorDetected()) {
 		if (GLOBAL_DEBUG) {
-			cerr << "GLOBAL WARNING: GlobalCharacter constructor had script read errors remaining when "
-				<< "it was finished with the file. They are as follows: " << endl;
+			PRINT_WARNING << "one or more errors occurred while reading final data - they are listed below" << endl;
 			cerr << char_script.GetErrorMessages() << endl;
 		}
 	}
-
 	char_script.CloseFile();
 
 	_CalculateAttackRatings();
 	_CalculateDefenseRatings();
 	_CalculateEvadeRatings();
 
-	// TEMP: Load the standard map frames for the sprite
+	// ----- (8) Load character sprite and portrait images
+	// NOTE: The code below is all TEMP and is subject to great change or removal in the future
+	// TEMP: load standard map sprite walking frames
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_map_frames_standard, "img/sprites/map/" + _filename + "_walk.png", 4, 6) == false) {
 		exit(1);
 	}
 
-	// TEMP TEMP TEMP: Load the character's idle animation
+	// TEMP: Load the character's idle animation
 	AnimatedImage idle;
 	idle.SetDimensions(96, 96);
 	vector<uint32> idle_timings(4, 15);
@@ -940,7 +980,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	}
 	_battle_animation["idle"] = idle;
 
-	// TEMP TEMP TEMP: Load the character's attack animation
+	// TEMP: Load the character's attack animation
 	AnimatedImage attack;
 	attack.SetDimensions(96, 96);
 	vector<uint32> attack_timings(5, 5);
@@ -950,7 +990,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	}
 	_battle_animation["attack"] = attack;
 
-	// Load the character's battle portraits from a multi image
+	// TEMP: Load the character's battle portraits from a multi image
 	_battle_portraits.assign(5, StillImage());
 	for (uint32 i = 0; i < _battle_portraits.size(); i++) {
 		_battle_portraits[i].SetDimensions(100, 100);
@@ -961,29 +1001,27 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 
 
 
-GlobalCharacter::~GlobalCharacter() {
-	// TODO: Remove all references to loaded image files
+bool GlobalCharacter::AddExperiencePoints(uint32 xp) {
+	_experience_points += xp;
+	_growth._CheckForGrowth();
+	return _growth.IsGrowthDetected();
 }
 
 
 
 void GlobalCharacter::AddSkill(uint32 skill_id) {
 	if (skill_id == 0) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalCharacter::AddSkill() failed because an invalid skill id was passed to it (0)" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid skill_id argument: " << skill_id << endl;
 		return;
 	}
-
 	if (_skills.find(skill_id) != _skills.end()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalCharacter::AddSkill() failed because the character had already learned the skill "
-				<< "with the skill id value of: " << skill_id << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to add skill because the character already knew this skill: " << skill_id << endl;
+		return;
 	}
 
 	GlobalSkill* skill = new GlobalSkill(skill_id);
 	if (skill->GetID() == 0) { // Indicates that the skill failed to load successfully
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalCharacter::AddSkill() failed because the skill failed to load" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add failed to load: " << skill_id << endl;
 		delete skill;
 		return;
 	}
@@ -1001,65 +1039,70 @@ void GlobalCharacter::AddSkill(uint32 skill_id) {
 			_support_skills.push_back(skill);
 			break;
 		default:
-			if (GLOBAL_DEBUG)
-				cerr << "GLOBAL WARNING: GlobalCharacter::AddSkill() loaded a new skill with an unknown skill type: " << skill->GetType() << endl;
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "loaded a new skill with an unknown skill type: " << skill->GetType() << endl;
 			break;
 	}
-} // void GlobalCharacter::AddSkill(uint32 skill_id)
-
-
-
-bool GlobalCharacter::AddExperiencePoints(uint32 xp) {
-	_experience_points += xp;
-	_growth._CheckForGrowth();
-	return _growth.IsGrowthDetected();
 }
 
 // -----------------------------------------------------------------------------
 // GlobalEnemy class
 // -----------------------------------------------------------------------------
 
-GlobalEnemy::GlobalEnemy(uint32 id) {
+GlobalEnemy::GlobalEnemy(uint32 id) :
+	GlobalActor(),
+	_growth_hit_points(0.0f),
+	_growth_skill_points(0.0f),
+	_growth_experience_points(0.0f),
+	_growth_strength(0.0f),
+	_growth_vigor(0.0f),
+	_growth_fortitude(0.0f),
+	_growth_protection(0.0f),
+	_growth_agility(0.0f),
+	_growth_evade(0.0f),
+	_growth_drunes(0.0f),
+	_drunes_dropped(0),
+	_sprite_width(0),
+	_sprite_height(0)
+{
 	_id = id;
-	_experience_level = 0;
-	_weapon_equipped = NULL;
-	_armor_equipped.clear();
 
-	// (1): Use the id member to determine the name of the data file that the enemy is defined in
+	// ----- (1): Use the id member to determine the name of the data file that the enemy is defined in
 	string file_ext;
-	if (_id < 1) {
-		cerr << "GLOBAL ERROR: invalid id for loading enemy data: " << _id << endl;
-	} else if (_id < 101) {
-		file_ext = "01";
-	} else if (_id < 201) {
-		file_ext = "02";
-	}
-	string filename = "dat/actors/enemies_set_" + file_ext + ".lua";
+	string filename;
 
-	// (2): Open the script file and table that store the enemy data
+	if (_id == 0)
+		PRINT_ERROR << "invalid id for loading enemy data: " << _id << endl;
+	else if ((_id > 0) && (_id <= 100))
+		file_ext = "01";
+	else if ((_id > 100) && (_id <= 200))
+		file_ext = "02";
+
+	filename = "dat/actors/enemies_set_" + file_ext + ".lua";
+
+	// ----- (2): Open the script file and table that store the enemy data
 	ReadScriptDescriptor enemy_data;
 	if (enemy_data.OpenFile(filename) == false) {
-		cerr << "GLOBAL ERROR: failed to load enemy data file: " << _filename << endl;
-		_id = 0;
+		PRINT_ERROR << "failed to open enemy data file: " << filename << endl;
 		return;
 	}
+
 	enemy_data.OpenTable("enemies");
 	enemy_data.OpenTable(_id);
 
-	// (3): Load the enemy's name and sprite data
+	// ----- (3): Load the enemy's name and sprite data
 	_name = MakeUnicodeString(enemy_data.ReadString("name"));
 	_filename = enemy_data.ReadString("filename");
 	_sprite_width = enemy_data.ReadInt("sprite_width");
 	_sprite_height = enemy_data.ReadInt("sprite_height");
 
-	// (4): Attempt to load the MultiImage for the sprite's frames, which should contain one row and four columns of images
+	// ----- (4): Attempt to load the MultiImage for the sprite's frames, which should contain one row and four columns of images
 	_battle_sprite_frames.assign(4, StillImage());
 	string sprite_filename = "img/sprites/battle/enemies/" + _filename + ".png";
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_battle_sprite_frames, sprite_filename, 1, 4) == false) {
-		cerr << "GLOBAL WARNING: failed to load sprite frames for enemy: " << sprite_filename << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to load sprite frames for enemy: " << sprite_filename << endl;
 	}
 
-	// (5): Load the enemy's initial stats
+	// ----- (5): Load the enemy's initial stats
 	enemy_data.OpenTable("initial_stats");
 	_max_hit_points = enemy_data.ReadUInt("hit_points");
 	_hit_points = _max_hit_points;
@@ -1075,7 +1118,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	_drunes_dropped = enemy_data.ReadUInt("drunes");
 	enemy_data.CloseTable();
 
-	// (6): Load the enemy's growth statistics
+	// ----- (6): Load the enemy's growth statistics
 	enemy_data.OpenTable("growth_stats");
 	_growth_hit_points = enemy_data.ReadFloat("hit_points");
 	_growth_skill_points = enemy_data.ReadFloat("skill_points");
@@ -1089,21 +1132,20 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	_growth_drunes = enemy_data.ReadFloat("drunes");
 	enemy_data.CloseTable();
 
-	// (7): Create the attack points for the enemy
+	// ----- (7): Create the attack points for the enemy
 	enemy_data.OpenTable("attack_points");
 	uint32 ap_size = enemy_data.GetTableSize();
 	for (uint32 i = 1; i <= ap_size; i++) {
 		_attack_points.push_back(new GlobalAttackPoint(this));
 		enemy_data.OpenTable(i);
-		if (_attack_points.back()->_LoadData(enemy_data) == false) {
-			cerr << "GLOBAL ERROR: GlobalEnemy constructor was unable to load data for an attack point" << endl;
-			exit(1);
+		if (_attack_points.back()->LoadData(enemy_data) == false) {
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to load data for an attack point: " << i << endl;
 		}
 		enemy_data.CloseTable();
 	}
 	enemy_data.CloseTable();
 
-	// (8): Add the set of skills to the enemy
+	// ----- (8): Add the set of skills to the enemy
 	vector<int32> skill_levels;
 	enemy_data.OpenTable("skills");
 	enemy_data.ReadTableKeys(skill_levels);
@@ -1113,8 +1155,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	}
 	enemy_data.CloseTable();
 
-
-	// (9): Load the possible items that the enemy may drop
+	// ----- (9): Load the possible items that the enemy may drop
 	enemy_data.OpenTable("drop_objects");
 	for (uint32 i = 1; i <= enemy_data.GetTableSize(); i++) {
 		enemy_data.OpenTable(i);
@@ -1130,8 +1171,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 
 	if (enemy_data.IsErrorDetected()) {
 		if (GLOBAL_DEBUG) {
-			cerr << "GLOBAL WARNING: GlobalEnemy constructor had script read errors remaining when "
-				<< "it was finished with the file. They are as follows: " << endl;
+			PRINT_WARNING << "one or more errors occurred while reading the enemy data - they are listed below" << endl;
 			cerr << enemy_data.GetErrorMessages() << endl;
 		}
 	}
@@ -1141,34 +1181,23 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	_CalculateAttackRatings();
 	_CalculateDefenseRatings();
 	_CalculateEvadeRatings();
-
-} // GlobalEnemy::~GlobalEnemy()
-
-
-
-GlobalEnemy::~GlobalEnemy() {
-	// TODO: dereference all loaded image files
-}
+} // GlobalEnemy::GlobalEnemy(uint32 id)
 
 
 
 void GlobalEnemy::AddSkill(uint32 skill_id) {
 	if (skill_id == 0) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalEnemy::AddSkill() failed because an invalid skill id was passed to it (0)" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid skill_id argument: " << skill_id << endl;
 		return;
 	}
-
 	if (_skills.find(skill_id) != _skills.end()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalEnemy::AddSkill() failed because the enemy had already learned the skill "
-				<< "with the skill id value of: " << skill_id << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to add skill because the enemy already knew this skill: " << skill_id << endl;
+		return;
 	}
 
 	GlobalSkill* skill = new GlobalSkill(skill_id);
 	if (skill->GetID() == 0) { // Indicates that the skill failed to load successfully
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalCharacter::AddSkill() failed because the skill failed to load" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add failed to load: " << skill_id << endl;
 		delete skill;
 		return;
 	}
@@ -1181,14 +1210,11 @@ void GlobalEnemy::AddSkill(uint32 skill_id) {
 
 void GlobalEnemy::Initialize(uint32 xp_level) {
 	if (xp_level == 0) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalEnemy::Initialize() was called with an xp_level argument of 0" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid xp_level argument of 0: " << _id << endl;
 		return;
 	}
-
 	if (_skills.empty() == false) { // Indicates that the enemy has already been initialized
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalEnemy::Initialize() was invoked for an already initialized enemy" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function was invoked for an already initialized enemy: " << _id << endl;
 		return;
 	}
 
@@ -1201,8 +1227,7 @@ void GlobalEnemy::Initialize(uint32 xp_level) {
 	}
 
 	if (_skills.empty()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalEnemy::Initialize() did not add any skills for the enemy" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no skills were added for the enemy: " << _id << endl;
 	}
 
 	// ----- (2): Add the new stats to the growth rate multiplied by the experience level
@@ -1256,8 +1281,7 @@ void GlobalEnemy::DetermineDroppedObjects(vector<GlobalObject*>& objects) {
 
 void GlobalParty::AddActor(GlobalActor* actor, int32 index) {
 	if (actor == NULL) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::AddActor() was passed a NULL actor argument" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received a NULL actor argument" << endl;
 		return;
 	}
 
@@ -1265,21 +1289,23 @@ void GlobalParty::AddActor(GlobalActor* actor, int32 index) {
 		// Check that this actor is not already in the party
 		for (uint32 i = 0; i < _actors.size(); i++) {
 			if (actor->GetID() == _actors[i]->GetID()) {
-				if (GLOBAL_DEBUG)
-					cerr << "GLOBAL WARNING: GlobalParty::AddActor() attempted to add a duplicate actor "
-						<< "when duplicates were not allowed: " << actor->GetID() << endl;
+				IF_PRINT_WARNING(GLOBAL_DEBUG) << "attempted to add an actor that was already in the party "
+					<< "when duplicates were not allowed: " << actor->GetID() << endl;
 				return;
 			}
 		}
 	}
 
+	// Add actor to the end of the party if index is negative
 	if (index < 0) {
 		_actors.push_back(actor);
+		return;
 	}
-	else if (static_cast<uint32>(index) >= _actors.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::AddActor() was given an index argument that exceeded "
-				<< "the current party size: " << index << endl;
+
+	// Check that the requested index does not exceed the size of the container
+	if (static_cast<uint32>(index) >= _actors.size()) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded the current party size: " << index << endl;
+		_actors.push_back(actor); // Add the actor to the end of the party instead
 		return;
 	}
 	else {
@@ -1287,15 +1313,13 @@ void GlobalParty::AddActor(GlobalActor* actor, int32 index) {
 		for (int32 i = 0; i < index; i++, position++);
 		_actors.insert(position, actor);
 	}
-} // void GlobalParty::AddActor(GlobalActor* actor, int32 index)
+}
 
 
 
 GlobalActor* GlobalParty::RemoveActorAtIndex(uint32 index) {
 	if (index >= _actors.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::RemoveActorAtIndex() was called with an out-of-bounds "
-				<< "index argument: " << index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded current party size: " << index << endl;
 		return NULL;
 	}
 
@@ -1305,15 +1329,13 @@ GlobalActor* GlobalParty::RemoveActorAtIndex(uint32 index) {
 	_actors.erase(position);
 
 	return removed_actor;
-} // GlobalActor* GlobalParty::RemoveActorAtIndex(uint32 index)
+}
 
 
 
 GlobalActor* GlobalParty::RemoveActorByID(uint32 id) {
 	if (_allow_duplicates) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::RemoveActorByID() was called when duplicate actors "
-				<< "were allowed in the party: " << id << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "tried to remove actor when duplicates were allowed in the party: " << id << endl;
 		return NULL;
 	}
 
@@ -1327,57 +1349,71 @@ GlobalActor* GlobalParty::RemoveActorByID(uint32 id) {
 	}
 
 	if (removed_actor == NULL) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::RemoveActorByID() failed to find an actor in the party "
-				<< "with the requested id: " << id << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to find an actor in the party with the requested id: " << id << endl;
 	}
 
 	return removed_actor;
-} // GlobalActor* GlobalParty::RemoveActorByID(uint32 id)
+}
+
+
+
+GlobalActor* GlobalParty::GetActorAtIndex(uint32 index) const {
+	if (index >= _actors.size()) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded current party size: " << index << endl;
+		return NULL;
+	}
+
+	return _actors[index];
+}
+
+
+
+GlobalActor* GlobalParty::GetActorByID(uint32 id) const {
+	if (_allow_duplicates) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "tried to retrieve actor when duplicates were allowed in the party: " << id << endl;
+		return NULL;
+	}
+
+	for (uint32 i = 0; i < _actors.size(); i++) {
+		if (_actors[i]->GetID() == id) {
+			return _actors[i];
+		}
+	}
+
+	IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to find an actor in the party with the requested id: " << id << endl;
+	return NULL;
+}
 
 
 
 void GlobalParty::SwapActorsByIndex(uint32 first_index, uint32 second_index) {
 	if (first_index == second_index) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::SwapActorsByIndex() was called with both the first and "
-				<< "second index arguments equal to one another: " << first_index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "first_index and second_index arguments had the same value: " << first_index << endl;
 		return;
 	}
-
 	if (first_index >= _actors.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::SwapActorsByIndex() was called with an out-of-bounds "
-				<< "first index argument: " << first_index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "first_index argument exceeded current party size: " << first_index << endl;
 		return;
 	}
-
 	if (second_index >= _actors.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::SwapActorsByIndex() was called with an out-of-bounds "
-				<< "second index argument: " << second_index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "second_index argument exceeded current party size: " << second_index << endl;
 		return;
 	}
 
 	GlobalActor* tmp = _actors[first_index];
 	_actors[first_index] = _actors[second_index];
 	_actors[second_index] = tmp;
-} // void GlobalParty::SwapActorsByIndex(uint32 first_index, uint32 second_index)
+}
 
 
 
 void GlobalParty::SwapActorsByID(uint32 first_id, uint32 second_id) {
 	if (first_id == second_id) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::SwapActorsByID() was called with both the first and "
-				<< "second id arguments equal to one another: " << first_id << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "first_id and second_id arguments had the same value: " << first_id << endl;
 		return;
 	}
-
 	if (_allow_duplicates) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::SwapActorsByID() was called when duplicate actors "
-				<< "were allowed in the party" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "tried to swap actors when duplicates were allowed in the party: " << first_id << endl;
 		return;
 	}
 
@@ -1393,63 +1429,51 @@ void GlobalParty::SwapActorsByID(uint32 first_id, uint32 second_id) {
 	}
 
 	if (first_position == _actors.end()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::SwapActorsByID() failed because there did not exist "
-				<< "an actor with an id equal to the first_id argument: " << first_id << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to find an actor in the party with the requested first_id: " << first_id << endl;
 		return;
 	}
 	if (second_position == _actors.end()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::SwapActorsByID() failed because there did not exist "
-				<< "an actor with an id equal to the second_id argument: " << second_id << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to find an actor in the party with the requested second_id: " << second_id << endl;
 		return;
 	}
 
 	GlobalActor* tmp = *first_position;
 	*first_position = *second_position;
 	*second_position = tmp;
-} // void GlobalParty::SwapActorsByID(uint32 first_id, uint32 second_id)
+}
 
 
 
 GlobalActor* GlobalParty::ReplaceActorByIndex(uint32 index, GlobalActor* new_actor) {
 	if (new_actor == NULL) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::ReplaceActorByIndex() was passed a NULL actor argument" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received a NULL new_actor argument" << endl;
 		return NULL;
 	}
-
 	if (index >= _actors.size()) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::ReplaceActorByIndex() was called with an out-of-bounds "
-				<< "index argument: " << index << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded current party size: " << index << endl;
 		return NULL;
 	}
 
 	GlobalActor* tmp = _actors[index];
 	_actors[index] = new_actor;
 	return tmp;
-} // GlobalActor* GlobalParty::ReplaceActorByIndex(uint32 index, GlobalActor* new_actor)
+}
 
 
 
 GlobalActor* GlobalParty::ReplaceActorByID(uint32 id, GlobalActor* new_actor) {
 	if (_allow_duplicates) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::ReplaceActorByID() was called when duplicate actors "
-				<< "were allowed in the party: " << id << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "tried to replace actor when duplicates were allowed in the party: " << id << endl;
 		return NULL;
 	}
-
 	if (new_actor == NULL) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::ReplaceActorByID() was passed a NULL actor argument" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received a NULL new_actor argument" << endl;
 		return NULL;
 	}
 
 	GlobalActor* removed_actor = NULL;
 	for (vector<GlobalActor*>::iterator position = _actors.begin(); position != _actors.end(); position++) {
-		if (id == (*position)->GetID()) {
+		if ((*position)->GetID() == id) {
 			removed_actor = *position;
 			*position = new_actor;
 			break;
@@ -1457,13 +1481,11 @@ GlobalActor* GlobalParty::ReplaceActorByID(uint32 id, GlobalActor* new_actor) {
 	}
 
 	if (removed_actor == NULL) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::ReplaceActorByID() failed to find an actor in the party "
-				<< "with the requested id: " << id << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to find an actor in the party with the requested id: " << id << endl;
 	}
 
 	return removed_actor;
-} // GlobalActor* GlobalParty::ReplaceActorByID(uint32 id, GlobalActor* new_actor)
+}
 
 
 
@@ -1475,36 +1497,14 @@ float GlobalParty::AverageExperienceLevel() const {
 	for (uint32 i = 0; i < _actors.size(); i++)
 		xp_level_sum += static_cast<float>(_actors[i]->GetExperienceLevel());
 	return (xp_level_sum / static_cast<float>(_actors.size()));
-} // float GlobalParty::AverageExperienceLevel()
-
-
-
-GlobalActor* GlobalParty::GetActorByID(uint32 id) const {
-	if (_allow_duplicates) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalParty::GetActorByID() was called when duplicate actors "
-				<< "were allowed in the party: " << id << endl;
-		return NULL;
-	}
-
-	for (uint32 i = 0; i < _actors.size(); i++) {
-		if (_actors[i]->GetID() == id) {
-			return _actors[i];
-		}
-	}
-
-	if (GLOBAL_DEBUG)
-		cerr << "GLOBAL WARNING: GlobalParty::GetActorByID() failed to find an actor in the party "
-				<< "with the requested id: " << id << endl;
-	return NULL;
-} // GlobalActor* GlobalParty::GetActorByID(uint32 hp)
+}
 
 
 
 void GlobalParty::AddHitPoints(uint32 hp) {
-	for (std::vector<GlobalActor*>::iterator i = _actors.begin(); i != _actors.end(); i++) {
+	for (vector<GlobalActor*>::iterator i = _actors.begin(); i != _actors.end(); i++) {
 		(*i)->AddHitPoints(hp);
 	}
-} // void GlobalParty::AddHitPoints(uint32 hp)
+}
 
 } // namespace hoa_global

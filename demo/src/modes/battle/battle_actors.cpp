@@ -71,8 +71,8 @@ void BattleActor::ConstructInformation(hoa_utils::ustring& info, int32 ap_index)
 
 	// Add character's name and attack point name if viable
 	info += GetActor()->GetName();
-	if (ap_index >= 0 && static_cast<uint32>(ap_index) < GetActor()->GetAttackPoints()->size()) {
-		info += MakeUnicodeString(" - ") + GetActor()->GetAttackPoints()->at(ap_index)->GetName();
+	if (ap_index >= 0 && static_cast<uint32>(ap_index) < GetActor()->GetAttackPoints().size()) {
+		info += MakeUnicodeString(" - ") + GetActor()->GetAttackPoints().at(ap_index)->GetName();
 	}
 	info += MakeUnicodeString("\n");
 
@@ -559,7 +559,7 @@ void BattleEnemy::DrawSprite() {
 		if (this == current_battle->_selected_target && current_battle->_action_window.GetActionTargetType() == GLOBAL_TARGET_ATTACK_POINT) {
 			VideoManager->PushState();
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-			std::vector<GlobalAttackPoint*>& attack_points = *(GetActor()->GetAttackPoints());
+			const vector<GlobalAttackPoint*>& attack_points = GetActor()->GetAttackPoints();
 
 			VideoManager->Move(GetXLocation() + attack_points[current_battle->_selected_attack_point]->GetXPosition(),
 				GetYLocation() + attack_points[current_battle->_selected_attack_point]->GetYPosition());
@@ -595,7 +595,7 @@ void BattleEnemy::_DecideAction() {
 		else
 			target = 0;
 	}
-	GlobalSkill* skill = GetActor()->GetSkills()->begin()->second;
+	GlobalSkill* skill = GetActor()->GetSkills().begin()->second;
 	BattleAction* action = new SkillAction(this, current_battle->GetPlayerCharacterAt(target), skill);
 	current_battle->AddBattleActionToQueue(action);
 	SetXLocation(GetXOrigin()); // Always attack from the starting location
