@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Allacrost Demo 0.3.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
 "POT-Creation-Date: 2008-11-22 22:37-0800\n"
-"PO-Revision-Date: 2008-11-22 23:17-0800\n"
+"PO-Revision-Date: 2010-02-02 20:33-0800\n"
 "Last-Translator: Philip Vorsilak <gorzuate@allacrost.org>\n"
 "Language-Team: French <team@allacrost.org>\n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,7 @@ msgstr ""
 
 #: dat/config/languages.lua:2
 msgid "French"
-msgstr ""
+msgstr "Français"
 
 #: dat/maps/demo_cave.lua:357
 msgid "Claudius, what are you doing here?"
@@ -248,35 +248,23 @@ msgstr ""
 msgid "Octavia"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:513 src/modes/boot/boot.cpp:533
-msgid "New Game"
-msgstr "Test"
-
-#: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
-msgid "Load Game"
-msgstr ""
-
-#: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
-msgid "Options"
-msgstr ""
-
-#: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
-msgid "Credits"
-msgstr ""
-
-#: src/modes/boot/boot.cpp:513 src/modes/boot/boot.cpp:533
+#: src/modes/boot/boot.cpp:513
+#: src/modes/boot/boot.cpp:533
 msgid "New Game"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
+#: src/modes/boot/boot.cpp:514
+#: src/modes/boot/boot.cpp:534
 msgid "Load Game"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
+#: src/modes/boot/boot.cpp:515
+#: src/modes/boot/boot.cpp:535
 msgid "Options"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
+#: src/modes/boot/boot.cpp:516
+#: src/modes/boot/boot.cpp:536
 msgid "Credits"
 msgstr ""
 
@@ -292,7 +280,8 @@ msgstr ""
 msgid "Shop"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:520 src/modes/boot/boot.cpp:537
+#: src/modes/boot/boot.cpp:520
+#: src/modes/boot/boot.cpp:537
 msgid "Quit"
 msgstr ""
 
@@ -388,7 +377,8 @@ msgstr ""
 msgid "Pause: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:673 src/modes/boot/boot.cpp:702
+#: src/modes/boot/boot.cpp:673
+#: src/modes/boot/boot.cpp:702
 msgid "Restore defaults"
 msgstr ""
 
@@ -415,3 +405,4 @@ msgstr ""
 #: src/modes/boot/boot.cpp:867
 msgid "end"
 msgstr ""
+
