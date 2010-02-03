@@ -222,8 +222,8 @@ void InitializeEngine() throw (Exception) {
 	VideoManager = VideoEngine::SingletonCreate();
 	ScriptManager = ScriptEngine::SingletonCreate();
 	SystemManager = SystemEngine::SingletonCreate();
-	GUIManager = GUISystem::SingletonCreate();
 	ModeManager = ModeEngine::SingletonCreate();
+	GUIManager = GUISystem::SingletonCreate();
 	GlobalManager = GameGlobal::SingletonCreate();
 
 	if (VideoManager->SingletonInitialize() == false) {
@@ -248,11 +248,11 @@ void InitializeEngine() throw (Exception) {
 	if (InputManager->SingletonInitialize() == false) {
 		throw Exception("ERROR: unable to initialize InputManager", __FILE__, __LINE__, __FUNCTION__);
 	}
-	if (GlobalManager->SingletonInitialize() == false) {
-		throw Exception("ERROR: unable to initialize GlobalManager", __FILE__, __LINE__, __FUNCTION__);
-	}
 	if (ModeManager->SingletonInitialize() == false) {
 		throw Exception("ERROR: unable to initialize ModeManager", __FILE__, __LINE__, __FUNCTION__);
+	}
+	if (GlobalManager->SingletonInitialize() == false) {
+		throw Exception("ERROR: unable to initialize GlobalManager", __FILE__, __LINE__, __FUNCTION__);
 	}
 
 	// Set the window icon
@@ -273,6 +273,9 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
 	if (VideoManager->FinalizeInitialization() == false)
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
+	if (GUIManager->SingletonInitialize() == false) {
+		throw Exception("ERROR: unable to initialize GUIManager", __FILE__, __LINE__, __FUNCTION__);
+	}
 	if (GUIManager->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
 		throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
 	}
@@ -331,12 +334,9 @@ void InitializeEngine() throw (Exception) {
 
 // Every great game begins with a single function :)
 int main(int argc, char *argv[]) {
-	// When the program exits, first the QuitAllacrost() function is called, followed by SDL_Quit()
+	// When the program exits, the QuitAllacrost() function will be called first, followed by SDL_Quit()
 	atexit(SDL_Quit);
-	//atexit(QuitAllacrost);
-	// QuitAllacrost isn't strictly necessary:
-	//  the system is quite capable of recovering program resources on its own
-	//  QuitAllacrost will just slow down shutdown
+	atexit(QuitAllacrost);
 
 	try {
 		// Change to the directory where the Allacrost data is stored

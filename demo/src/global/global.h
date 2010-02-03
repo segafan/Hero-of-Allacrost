@@ -47,7 +47,7 @@ const int32 GLOBAL_BAD_EVENT = -5555555;
 /** ****************************************************************************
 *** \brief A container that manages the occurences of several related game events
 ***
-*** Events in Allacrost are nothing more than a string, integer pair. The string
+*** Events in Allacrost are nothing more than a string-integer pair. The string
 *** represents the name of the event while the integer takes on various meanings
 *** about the event. One example of an event could be if the player has already
 *** seen a certain piece of dialogue, and the integer would be set to zero or
@@ -55,7 +55,7 @@ const int32 GLOBAL_BAD_EVENT = -5555555;
 *** player previous chose option A, B, C, or D when presented with a list of
 *** possible actions to take, in which the integer value would represent the
 *** option taken.
-*** 
+***
 *** Because we want to continually look-up whether or not an event has occured,
 *** it is not efficient to store all game events in a single container (the
 *** larger the number of events, the longer the event search time). Instead,
@@ -63,13 +63,19 @@ const int32 GLOBAL_BAD_EVENT = -5555555;
 *** event group could represent all of the events that occured on a particular
 *** map, for instance.
 ***
-*** \note Only the GameGlobal class may construct objects of this class. There
-*** are methods in GameGlobal to create new objects of this class
+*** \note Other parts of the code should not have a need to construct objects of
+*** this class. The GameGlobal class maintains a container of GlobalEventGroup
+*** objects and provides methods to allow the creation, modification, and
+*** retrieval of these objects.
 *** ***************************************************************************/
 class GlobalEventGroup {
-	friend class GameGlobal;
+friend class GameGlobal;
 
 public:
+	//! \param group_name The name of the group to create (this can not be changed)
+	GlobalEventGroup(const std::string& group_name) :
+		_group_name(group_name) {}
+
 	~GlobalEventGroup() {}
 
 	/** \brief Queries whether or not an event of a given name exists in the group
@@ -82,21 +88,22 @@ public:
 	/** \brief Adds a new event to the group
 	*** \param event_name The name of the event to add
 	*** \param event_value The value of the event to add (default value is zero)
-	*** \note If an event by the given name already exists, the function will abort
-	*** and not add the new event
+	*** \note If an event by the given name already exists, a warning will be printed and no addition
+	*** or modification of any kind will take place
 	**/
 	void AddNewEvent(const std::string& event_name, int32 event_value = 0);
 
 	/** \brief Retrieves the value of a specific event in the group
 	*** \param event_name The name of the event to retrieve
-	*** \return The value of the event, or GLOBAL_BAD_EVENT if the event corresponding to the name wasn't found
+	*** \return The value of the event, or GLOBAL_BAD_EVENT if there is no event corresponding to
+	*** the requested event named
 	**/
 	int32 GetEvent(const std::string& event_name);
 
 	/** \brief Sets the value for an existing event
 	*** \param event_name The name of the event whose value should be changed
 	*** \param event_value The value to set for the event
-	*** \note If the event by the given name is not found, no change will be made
+	*** \note If the event by the given name is not found, a warning will be printed and no change will be made
 	**/
 	void SetEvent(const std::string& event_name, int32 event_value);
 
@@ -113,33 +120,22 @@ private:
 	std::string _group_name;
 
 	/** \brief The map container for all the events in the group
-	*** The string is the name of the event, which should be unique to the group. The integer 
-	*** value represents the event's status and can take on multiple meanings depending on the
-	*** event's context.
+	*** The string is the name of the event, which is unique within the group. The integer value
+	*** represents the event's state and can take on multiple meanings depending on the context
+	*** of this specific event.
 	**/
 	std::map<std::string, int32> _events;
-
-	/** \brief The class constructor is private because groups may only be created by the GameGlobal class
-	*** \param group_name The name of the group to create (this can not be changed)
-	**/
-	GlobalEventGroup(const std::string& group_name) :
-		_group_name(group_name) {}
-
-	//! \note Copy constructor and assignment operator kept private to prevent external code creating their own GlobalEventGroup objects
-	//@{
-	GlobalEventGroup(const GlobalEventGroup& geg);
-	GlobalEventGroup& operator=(const GlobalEventGroup& geg);
-	//@}
 }; // class GlobalEventGroup
 
 
 /** ****************************************************************************
-*** \brief Retains all the state information about the player's active game
+*** \brief Retains all the state information about the active game
 ***
 *** This class is a resource manager for the current state of the game that is
 *** being played. It retains all of the characters in the player's party, the
-*** party's inventory, etc. This class assists the various game modes by allowing
-*** them to share data with each other on a "global" basis.
+*** party's inventory, game events, etc. Nearly every game mode will need to
+*** interact with this class in some form or another, whether it is to retrieve a
+*** specific set of data or t
 ***
 *** \note This class is a singleton, even though it is technically not an engine
 *** manager class. There can only be one game instance that the player is playing
@@ -315,9 +311,9 @@ public:
 	*** \param group_name The name of the event group to retreive
 	*** \return A pointer to the GlobalEventGroup that represents the event group, or NULL if no event group
 	*** of the specifed name was found
-	*** 
+	***
 	*** You can use this method to invoke the public methods of the GlobalEventGroup class. For example, if
-	*** we wanted to add a new event "cave_collapse" with a value of 1 to the group event "cave_map", we 
+	*** we wanted to add a new event "cave_collapse" with a value of 1 to the group event "cave_map", we
 	*** would do the following: GlobalManager->GetEventGroup("cave_map")->AddNewEvent("cave_collapse", 1);
 	*** Be careful, however, because since this function returns NULL if the event group was not found, the
 	*** example code above would produce a segmentation fault if no event group by the name "cave_map" existed.
@@ -369,7 +365,7 @@ public:
 	**/
 	void SetLocation(const hoa_utils::ustring& location_name)
 		{ _location_name = location_name; }
-		
+
 	/** \brief Sets the location
 	*** \param location_name The string that contains the name of the current map
 	**/
@@ -379,7 +375,7 @@ public:
 	//! \brief Executes function NewGame() from global script
 	void NewGame()
 		{ ScriptCallFunction<void>(_global_script.GetLuaState(), "NewGame"); }
-	
+
 	/** \brief Saves all global data to a saved game file
 	*** \param filename The filename of the saved game file where to write the data to
 	*** \return True if the game was successfully saved, false if it was not
@@ -481,40 +477,70 @@ private:
 	std::map<uint32, GlobalObject*> _inventory;
 
 	/** \brief Inventory containers
-	*** These vectors contain the inventory of the entire party. The vectors are sorted according to the user's personal preferences.
+	*** These vectors contain the inventory of the entire party. The vectors are sorted according to the player's personal preferences.
 	*** When a new object is added to the inventory, by default it will be placed at the end of the vector.
 	**/
 	//@{
-	std::vector<GlobalItem*>    _inventory_items;
-	std::vector<GlobalWeapon*>  _inventory_weapons;
-	std::vector<GlobalArmor*>   _inventory_head_armor;
-	std::vector<GlobalArmor*>   _inventory_torso_armor;
-	std::vector<GlobalArmor*>   _inventory_arm_armor;
-	std::vector<GlobalArmor*>   _inventory_leg_armor;
-	std::vector<GlobalShard*>   _inventory_shards;
-	std::vector<GlobalKeyItem*> _inventory_key_items;
+	std::vector<GlobalItem*>     _inventory_items;
+	std::vector<GlobalWeapon*>   _inventory_weapons;
+	std::vector<GlobalArmor*>    _inventory_head_armor;
+	std::vector<GlobalArmor*>    _inventory_torso_armor;
+	std::vector<GlobalArmor*>    _inventory_arm_armor;
+	std::vector<GlobalArmor*>    _inventory_leg_armor;
+	std::vector<GlobalShard*>    _inventory_shards;
+	std::vector<GlobalKeyItem*>  _inventory_key_items;
 	//@}
 
-	//! \brief Script files that retain data for various global constructs
+	//! \name Global data and function script files
 	//@{
+	//! \brief Contains character ID definitions and a number of useful functions
 	hoa_script::ReadScriptDescriptor _global_script;
+
+	//! \brief Contains data definitions for all items
 	hoa_script::ReadScriptDescriptor _items_script;
+
+	//! \brief Contains data definitions for all weapons
 	hoa_script::ReadScriptDescriptor _weapons_script;
+
+	//! \brief Contains data definitions for all armor that are equipped on the head
 	hoa_script::ReadScriptDescriptor _head_armor_script;
+
+	//! \brief Contains data definitions for all armor that are equipped on the torso
 	hoa_script::ReadScriptDescriptor _torso_armor_script;
+
+	//! \brief Contains data definitions for all armor that are equipped on the arms
 	hoa_script::ReadScriptDescriptor _arm_armor_script;
+
+	//! \brief Contains data definitions for all armor that are equipped on the legs
 	hoa_script::ReadScriptDescriptor _leg_armor_script;
+
+	//! \brief Contains data definitions for all shards
 	// hoa_script::ReadScriptDescriptor _shard_script;
+
+	//! \brief Contains data definitions for all key items
 	// hoa_script::ReadScriptDescriptor _key_items_script;
-	hoa_script::ReadScriptDescriptor _effects_script;
+
+	//! \brief Contains data and functional definitions for all attack skills
 	hoa_script::ReadScriptDescriptor _attack_skills_script;
+
+	//! \brief Contains data and functional definitions for all defense skills
 	hoa_script::ReadScriptDescriptor _defend_skills_script;
+
+	//! \brief Contains data and functional definitions for all support skills
 	hoa_script::ReadScriptDescriptor _support_skills_script;
+
+	//! \brief Contains functional definitions for all status effects
+	hoa_script::ReadScriptDescriptor _status_effects_script;
+
+	//! \brief Contains data and functional definitions for sprites seen in game maps
+	hoa_script::ReadScriptDescriptor _map_sprites_script;
+
+	//! \brief Contains data and functional definitions for scripted events in key game battles
 	hoa_script::ReadScriptDescriptor _battle_events_script;
 	//@}
 
 	/** \brief The container which stores all of the groups of events that have occured in the game
-	*** The name of the GlobalEventGroup serves as its key in this map data structure.
+	*** The name of each GlobalEventGroup object serves as its key in this map data structure.
 	**/
 	std::map<std::string, GlobalEventGroup*> _event_groups;
 
@@ -584,9 +610,10 @@ private:
 template <class T> bool GameGlobal::_RemoveFromInventory(uint32 obj_id, std::vector<T*>& inv) {
 	for (typename std::vector<T*>::iterator i = inv.begin(); i != inv.end(); i++) {
 		if ((*i)->GetID() == obj_id) {
+			// Delete the object, remove it from the vector container, and remove it from the _inventory map
 			delete _inventory[obj_id];
-			_inventory.erase(obj_id);
 			inv.erase(i);
+			_inventory.erase(obj_id);
 			return true;
 		}
 	}
@@ -621,8 +648,7 @@ template <class T> T* GameGlobal::_RetrieveFromInventory(uint32 obj_id, std::vec
 
 template <class T> void GameGlobal::_SaveInventory(hoa_script::WriteScriptDescriptor& file, std::string name, std::vector<T*>& inv) {
 	if (file.IsFileOpen() == false) {
-		if (GLOBAL_DEBUG)
-			std::cerr << "GLOBAL WARNING: GameGlobal::_SaveInventory() failed because the file passed to it was not open" << std::endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed because the argument file was not open" << std::endl;
 		return;
 	}
 
@@ -642,4 +668,4 @@ template <class T> void GameGlobal::_SaveInventory(hoa_script::WriteScriptDescri
 
 } // namespace hoa_global
 
-#endif
+#endif // __GLOBAL_HEADER__
