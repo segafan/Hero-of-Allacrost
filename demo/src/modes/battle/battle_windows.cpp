@@ -317,11 +317,11 @@ void ActionWindow::_UpdateTargetSelection() {
 		return;
 	}
 	else if (InputManager->ConfirmPress()) {
-		vector<GlobalAttackPoint*>* attack_points = current_battle->_selected_target->GetActor()->GetAttackPoints();
+		const vector<GlobalAttackPoint*>& attack_points = current_battle->_selected_target->GetActor()->GetAttackPoints();
 		BattleAction* new_event;
 		if (_selected_action_category != ACTION_TYPE_ITEM) {
 			new_event = new SkillAction(current_battle->_selected_character, current_battle->_selected_target, GetSelectedSkill(),
-				attack_points->at(current_battle->_selected_attack_point));
+				attack_points.at(current_battle->_selected_attack_point));
 		}
 		else {
 			GlobalItem* item = GetSelectedItem();
@@ -331,7 +331,7 @@ void ActionWindow::_UpdateTargetSelection() {
 			// it is incremented back.
 			item->DecrementCount(1);
 			new_event = new ItemAction(current_battle->_selected_character, current_battle->_selected_target, item,
-				attack_points->at(current_battle->_selected_attack_point));
+				attack_points.at(current_battle->_selected_attack_point));
 		}
 		current_battle->AddBattleActionToQueue(new_event);
 		current_battle->_selected_character->SetState(ACTOR_WARM_UP);

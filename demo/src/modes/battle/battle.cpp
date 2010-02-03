@@ -863,13 +863,13 @@ void BattleMode::_SelectNextAttackPoint(bool forward_direction) {
 
 	if (forward_direction) {
 		_selected_attack_point++;
-		if (_selected_attack_point >= _selected_target->GetActor()->GetAttackPoints()->size())
+		if (_selected_attack_point >= _selected_target->GetActor()->GetAttackPoints().size())
 			_selected_attack_point = 0;
 	}
 
 	else {
 		if (_selected_attack_point == 0)
-			_selected_attack_point = _selected_target->GetActor()->GetAttackPoints()->size() - 1;
+			_selected_attack_point = _selected_target->GetActor()->GetAttackPoints().size() - 1;
 		else
 			_selected_attack_point--;
 	}
