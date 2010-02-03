@@ -511,14 +511,14 @@ void BootMode::_SetupMainMenu() {
 		_main_menu.SetCursorOffset(-50.0f, 28.0f);
 
 		// Add all the needed menu options to the main menu
-		_main_menu.AddOption(MakeUnicodeString("New Game"), &BootMode::_OnNewGame);
-		_main_menu.AddOption(MakeUnicodeString("Load Game"), &BootMode::_OnLoadGame);
-		_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
-		_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
-		_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_TEMP_OnBattle);
-		_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_TEMP_OnMenu);
-		_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_TEMP_OnShop);
-		_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
+		_main_menu.AddOption(MakeUnicodeString(Translate("New Game")), &BootMode::_OnNewGame);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Load Game")), &BootMode::_OnLoadGame);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Options")), &BootMode::_OnOptions);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Credits")), &BootMode::_OnCredits);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Battle")), &BootMode::_TEMP_OnBattle);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Menu")), &BootMode::_TEMP_OnMenu);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Shop")), &BootMode::_TEMP_OnShop);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Quit")), &BootMode::_OnQuit);
 	}
 	else {
 		_main_menu.SetPosition(512.0f, 80.0f);
@@ -531,11 +531,11 @@ void BootMode::_SetupMainMenu() {
 		_main_menu.SetCursorOffset(-50.0f, 28.0f);
 
 		// Add all the needed menu options to the main menu
-		_main_menu.AddOption(MakeUnicodeString("New Game"), &BootMode::_OnNewGame);
-		_main_menu.AddOption(MakeUnicodeString("Load Game"), &BootMode::_OnLoadGame);
-		_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
-		_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
-		_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
+		_main_menu.AddOption(MakeUnicodeString(Translate("New Game")), &BootMode::_OnNewGame);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Load Game")), &BootMode::_OnLoadGame);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Options")), &BootMode::_OnOptions);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Credits")), &BootMode::_OnCredits);
+		_main_menu.AddOption(MakeUnicodeString(Translate("Quit")), &BootMode::_OnQuit);
 	}
 
 	string path = GetUserDataPath(true) + "saved_game_1.lua";
@@ -560,12 +560,12 @@ void BootMode::_SetupOptionsMenu() {
 	_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_options_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_options_menu.AddOption(MakeUnicodeString("Video"), &BootMode::_OnVideoOptions);
-	_options_menu.AddOption(MakeUnicodeString("Audio"), &BootMode::_OnAudioOptions);
-	_options_menu.AddOption(MakeUnicodeString("Language"), &BootMode::_OnLanguageOptions);
-	_options_menu.AddOption(MakeUnicodeString("Key Settings"), &BootMode::_OnKeySettings);
-	_options_menu.AddOption(MakeUnicodeString("Joystick Settings"), &BootMode::_OnJoySettings);
-	_options_menu.AddOption(MakeUnicodeString("Profiles"), &BootMode::_OnProfiles);
+	_options_menu.AddOption(MakeUnicodeString(Translate("Video")), &BootMode::_OnVideoOptions);
+	_options_menu.AddOption(MakeUnicodeString(Translate("Audio")), &BootMode::_OnAudioOptions);
+	_options_menu.AddOption(MakeUnicodeString(Translate("Language")), &BootMode::_OnLanguageOptions);
+	_options_menu.AddOption(MakeUnicodeString(Translate("Key Settings")), &BootMode::_OnKeySettings);
+	_options_menu.AddOption(MakeUnicodeString(Translate("Joystick Settings")), &BootMode::_OnJoySettings);
+	_options_menu.AddOption(MakeUnicodeString(Translate("Profiles")), &BootMode::_OnProfiles);
 
 	_options_menu.SetSelection(0);
 }
@@ -582,11 +582,11 @@ void BootMode::_SetupVideoOptionsMenu() {
 	_video_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_video_options_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_video_options_menu.AddOption(MakeUnicodeString("Resolution:"), &BootMode::_OnResolution);
+	_video_options_menu.AddOption(MakeUnicodeString(Translate("Resolution:")), &BootMode::_OnResolution);
 	// Left & right will change window mode as well as confirm
-	_video_options_menu.AddOption(MakeUnicodeString("Window mode:"), &BootMode::_OnToggleFullscreen, NULL, NULL, &BootMode::_OnToggleFullscreen, &BootMode::_OnToggleFullscreen);
-	_video_options_menu.AddOption(MakeUnicodeString("Brightness:"), NULL, NULL, NULL, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
-	_video_options_menu.AddOption(MakeUnicodeString("Image quality:"));
+	_video_options_menu.AddOption(MakeUnicodeString(Translate("Window mode:")), &BootMode::_OnToggleFullscreen, NULL, NULL, &BootMode::_OnToggleFullscreen, &BootMode::_OnToggleFullscreen);
+	_video_options_menu.AddOption(MakeUnicodeString(Translate("Brightness:")), NULL, NULL, NULL, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
+	_video_options_menu.AddOption(MakeUnicodeString(Translate("Image quality:")));
 
 	_video_options_menu.EnableOption(3, false); // Disable image quality
 
@@ -605,8 +605,8 @@ void BootMode::_SetupAudioOptionsMenu() {
 	_audio_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_audio_options_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_audio_options_menu.AddOption(MakeUnicodeString("Sound Volume: "), NULL, NULL, NULL, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
-	_audio_options_menu.AddOption(MakeUnicodeString("Music Volume: "), NULL, NULL, NULL, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
+	_audio_options_menu.AddOption(MakeUnicodeString(Translate("Sound Volume: ")), NULL, NULL, NULL, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
+	_audio_options_menu.AddOption(MakeUnicodeString(Translate("Music Volume: ")), NULL, NULL, NULL, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
 
 	_audio_options_menu.SetSelection(0);
 }
@@ -615,7 +615,6 @@ void BootMode::_SetupAudioOptionsMenu() {
 
 void BootMode::_SetupLanguageOptionsMenu() {
 	_language_options_menu.SetPosition(512.0f, 300.0f);
-	_language_options_menu.SetDimensions(300.0f, 200.0f, 1, 1, 1, 1);
 	_language_options_menu.SetTextStyle(TextStyle("title22"));
 	_language_options_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_language_options_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -623,9 +622,30 @@ void BootMode::_SetupLanguageOptionsMenu() {
 	_language_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_language_options_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_language_options_menu.AddOption(MakeUnicodeString("French"), &BootMode::_OnLanguageSelect);
 
-	_language_options_menu.SetSelection(0);
+	//read in the languages from the language.lua file
+	ReadScriptDescriptor languages;
+	if(!languages.OpenFile(_LANGUAGE_FILE))
+		cerr << "BOOT ERROR: Could not open the language file! " << languages.GetFilename() << endl;
+	else
+	{
+		vector<std::string> language_vector;
+		languages.ReadStringVector("languages",language_vector);
+
+		//setup the dimensions according to how many language we have available
+		_language_options_menu.SetDimensions(300.0f, 200.0f, 1, language_vector.size(), 1, language_vector.size());
+
+		//now loop through all the languages and add them
+		//the first 3 characters are taken up by the 2 letter language code
+		for(int32 i = 0; i < (int32)language_vector.size(); i++)
+			_language_options_menu.AddOption(MakeUnicodeString(language_vector.at(i).substr(2)), &BootMode::_OnLanguageSelect);
+
+		languages.CloseAllTables();
+		if(languages.IsErrorDetected())
+			cerr << "BOOT ERROR: Error while loading language options. " << languages.GetErrorMessages() << endl;
+	}
+
+	//_language_options_menu.SetSelection(0);
 }
 
 
@@ -640,18 +660,18 @@ void BootMode::_SetupKeySetttingsMenu() {
 	_key_settings_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_key_settings_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_key_settings_menu.AddOption(MakeUnicodeString("Up: "), &BootMode::_RedefineUpKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Down: "), &BootMode::_RedefineDownKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Left: "), &BootMode::_RedefineLeftKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Right: "), &BootMode::_RedefineRightKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Confirm: "), &BootMode::_RedefineConfirmKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Cancel: "), &BootMode::_RedefineCancelKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Menu: "), &BootMode::_RedefineMenuKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Swap: "), &BootMode::_RedefineSwapKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Left Select: "), &BootMode::_RedefineLeftSelectKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Right Select: "), &BootMode::_RedefineRightSelectKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Pause: "), &BootMode::_RedefinePauseKey);
-	_key_settings_menu.AddOption(MakeUnicodeString("Restore defaults"), &BootMode::_OnRestoreDefaultKeys);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Up: ")), &BootMode::_RedefineUpKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Down: ")), &BootMode::_RedefineDownKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Left: ")), &BootMode::_RedefineLeftKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Right: ")), &BootMode::_RedefineRightKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Confirm: ")), &BootMode::_RedefineConfirmKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Cancel: ")), &BootMode::_RedefineCancelKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Menu: ")), &BootMode::_RedefineMenuKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Swap: ")), &BootMode::_RedefineSwapKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Left Select: ")), &BootMode::_RedefineLeftSelectKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Right Select: ")), &BootMode::_RedefineRightSelectKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Pause: ")), &BootMode::_RedefinePauseKey);
+	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Restore defaults")), &BootMode::_OnRestoreDefaultKeys);
 }
 
 
@@ -680,7 +700,7 @@ void BootMode::_SetupJoySetttingsMenu() {
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefinePauseJoy);
 //	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineQuitJoy);
 
-	_joy_settings_menu.AddOption(MakeUnicodeString("Restore defaults"), &BootMode::_OnRestoreDefaultJoyButtons);
+	_joy_settings_menu.AddOption(MakeUnicodeString(Translate("Restore defaults")), &BootMode::_OnRestoreDefaultJoyButtons);
 }
 
 
@@ -722,16 +742,15 @@ void BootMode::_SetupProfileMenu() {
 	_profiles_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_profiles_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_profiles_menu.AddOption(MakeUnicodeString("Save"), &BootMode::_OnSaveProfile);
-	_profiles_menu.AddOption(MakeUnicodeString("Load"), &BootMode::_OnLoadProfile);
-	_profiles_menu.AddOption(MakeUnicodeString("Delete"), &BootMode::_OnDeleteProfile);
+	_profiles_menu.AddOption(MakeUnicodeString(Translate("Save")), &BootMode::_OnSaveProfile);
+	_profiles_menu.AddOption(MakeUnicodeString(Translate("Load")), &BootMode::_OnLoadProfile);
+	_profiles_menu.AddOption(MakeUnicodeString(Translate("Delete")), &BootMode::_OnDeleteProfile);
 }
 
 
 
 void BootMode::_SetupLoadProfileMenu() {
 	_load_profile_menu.SetPosition(512.0f, 300.0f);
-	_load_profile_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
 	_load_profile_menu.SetTextStyle(TextStyle("title22"));
 	_load_profile_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_load_profile_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -739,11 +758,14 @@ void BootMode::_SetupLoadProfileMenu() {
 	_load_profile_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_load_profile_menu.SetCursorOffset(-50.0f, 28.0f);
 
+	//setup the dimensions according to how many language we have available
+	vector<std::string> profile_vector = _GetDirectoryListingUserProfilePath();
+	_load_profile_menu.SetDimensions(300.0f, 200.0f, 1,profile_vector.size(), 1, profile_vector.size());
 
 	//add the options in for each file
-	for (uint32 i = 0; i < _GetDirectoryListingUserProfilePath().size(); i++) {
+	for (uint32 i = 0; i < profile_vector.size(); i++) {
 		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
-		string filename = _GetDirectoryListingUserProfilePath().at(i);
+		string filename = profile_vector.at(i);
 		_load_profile_menu.AddOption(MakeUnicodeString(filename.c_str()), &BootMode::_OnLoadFile);
 	}
 }
@@ -761,14 +783,18 @@ void BootMode::_SetupSaveProfileMenu() {
 	_save_profile_menu.SetCursorOffset(-50.0f, 28.0f);
 
 	//this option is selected when user wants to create a new file
-	_save_profile_menu.AddOption(MakeUnicodeString("New Profile"), &BootMode::_OnSaveFile);
+	_save_profile_menu.AddOption(MakeUnicodeString(Translate("New Profile")), &BootMode::_OnSaveFile);
 
+
+	//setup the dimensions according to how many language we have available
+	vector<std::string> profile_vector = _GetDirectoryListingUserProfilePath();
+	_load_profile_menu.SetDimensions(300.0f, 200.0f, 1,profile_vector.size(), 1, profile_vector.size());
 
 	//add the options in for each file
-	//these options are selected when user wants to overwrite an existing file
-	for (uint32 i = 0; i < _GetDirectoryListingUserProfilePath().size(); i++) {
-		string filename = _GetDirectoryListingUserProfilePath().at(i);
-		_save_profile_menu.AddOption(MakeUnicodeString(filename.c_str()), &BootMode::_OnSaveFile);
+	for (uint32 i = 0; i < profile_vector.size(); i++) {
+		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
+		string filename = profile_vector.at(i);
+		_load_profile_menu.AddOption(MakeUnicodeString(filename.c_str()), &BootMode::_OnLoadFile);
 	}
 }
 
@@ -836,10 +862,10 @@ void BootMode::_SetupUserInputMenu() {
 	_user_input_menu.AddOption(MakeUnicodeString("z"), &BootMode::_OnPickLetter);
 
 	//backspace to delete characters
-	_user_input_menu.AddOption(MakeUnicodeString("back"), &BootMode::_OnPickLetter);
+	_user_input_menu.AddOption(MakeUnicodeString(Translate("back")), &BootMode::_OnPickLetter);
 
 	//end to confirm the name
-	_user_input_menu.AddOption(MakeUnicodeString("end"), &BootMode::_OnPickLetter);
+	_user_input_menu.AddOption(MakeUnicodeString(Translate("end")), &BootMode::_OnPickLetter);
 }
 
 
@@ -1154,9 +1180,24 @@ void BootMode::_OnMusicRight() {
 
 
 void BootMode::_OnLanguageSelect() {
-	SystemManager->SetLanguage("fr");
+
+	ReadScriptDescriptor languages;
+	if(!languages.OpenFile(_LANGUAGE_FILE))
+		cerr << "BOOT ERROR: Error while loading language file! " << languages.GetFilename() << endl;
+	else
+	{
+		vector<std::string> language_vector;
+		languages.ReadStringVector("languages",language_vector);
+
+		//we only need the first 2 characters
+		SystemManager->SetLanguage(language_vector.at(_language_options_menu.GetSelection()).substr(0,2));
+		languages.CloseAllTables();
+		if(languages.IsErrorDetected())
+			cerr << "BOOT ERROR: Error while setting the system language! " << languages.GetFilename() << endl;
+
 	// TODO: when the new language is set by the above call, we need to reload/refresh all text,
 	// otherwise the new language will not take effect.
+	}
 }
 
 

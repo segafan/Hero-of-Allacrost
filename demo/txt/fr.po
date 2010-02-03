@@ -15,6 +15,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: dat/config/languages.lua:2
+msgid "French"
+msgstr ""
+
 #: dat/maps/demo_cave.lua:357
 msgid "Claudius, what are you doing here?"
 msgstr "Claudius, qu'est-ce que vous faites ici?"
@@ -242,4 +246,172 @@ msgstr ""
 
 #: dat/maps/demo_town.lua:599
 msgid "Octavia"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:513 src/modes/boot/boot.cpp:533
+msgid "New Game"
+msgstr "Test"
+
+#: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
+msgid "Load Game"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
+msgid "Options"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
+msgid "Credits"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:513 src/modes/boot/boot.cpp:533
+msgid "New Game"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
+msgid "Load Game"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
+msgid "Options"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
+msgid "Credits"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:517
+msgid "Battle"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:518
+msgid "Menu"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:519
+msgid "Shop"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:520 src/modes/boot/boot.cpp:537
+msgid "Quit"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:562
+msgid "Video"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:563
+msgid "Audio"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:564
+msgid "Language"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:565
+msgid "Key Settings"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:566
+msgid "Joystick Settings"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:567
+msgid "Profiles"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:584
+msgid "Resolution:"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:586
+msgid "Window mode:"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:587
+msgid "Brightness:"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:588
+msgid "Image quality:"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:607
+msgid "Sound Volume: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:608
+msgid "Music Volume: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:662
+msgid "Up: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:663
+msgid "Down: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:664
+msgid "Left: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:665
+msgid "Right: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:666
+msgid "Confirm: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:667
+msgid "Cancel: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:668
+msgid "Menu: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:669
+msgid "Swap: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:670
+msgid "Left Select: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:671
+msgid "Right Select: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:672
+msgid "Pause: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:673 src/modes/boot/boot.cpp:702
+msgid "Restore defaults"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:744
+msgid "Save"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:745
+msgid "Load"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:746
+msgid "Delete"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:785
+msgid "New Profile"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:864
+msgid "back"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:867
+msgid "end"
 msgstr ""
