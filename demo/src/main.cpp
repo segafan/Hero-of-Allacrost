@@ -273,9 +273,6 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
 	if (VideoManager->FinalizeInitialization() == false)
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
-	if (GUIManager->SingletonInitialize() == false) {
-		throw Exception("ERROR: unable to initialize GUIManager", __FILE__, __LINE__, __FUNCTION__);
-	}
 	if (GUIManager->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
 		throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
 	}
@@ -327,6 +324,10 @@ void InitializeEngine() throw (Exception) {
 	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
+
+	if (GUIManager->SingletonInitialize() == false) {
+		throw Exception("ERROR: unable to initialize GUIManager", __FILE__, __LINE__, __FUNCTION__);
+	}
 
 	SystemManager->InitializeTimers();
 } // void InitializeEngine()
