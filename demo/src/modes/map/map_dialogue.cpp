@@ -437,7 +437,11 @@ void DialogueSupervisor::Update() {
 			break;
 	}
 
-	if (InputManager->CancelPress()) {
+	// FIXME: This is disabled to prevent problems where a dialogue is necessary or has other things attached.
+	// For instance: in the opening map it was possible to cancel the dialogue and be stuck there.
+	// Possible fix: advancing to a 'necessary part' of the dialogue
+	// Possible fix: allowing dialogues to be specified as 'non-cancelable'
+	if (0 && InputManager->CancelPress()) {
 		_state = DIALOGUE_STATE_LINE;
 		_RestoreSprites();
 		EndDialogue();
