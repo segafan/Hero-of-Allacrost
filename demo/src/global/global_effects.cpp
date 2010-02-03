@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 		cerr << "GLOBAL ERROR: GlobalStatusEffect constructor failed due to an invalid id assignment: " << _id << endl;
 		exit(1);
 	}
-	ReadScriptDescriptor& script_file = GlobalManager->_effects_script;
+	ReadScriptDescriptor& script_file = GlobalManager->_status_effects_script;
 
 	if (script_file.DoesTableExist(_id) == false) {
 		cerr << "GLOBAL ERROR: GlobalStatusEffect constructor failed because the table containing the "
@@ -62,8 +62,8 @@ GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 	// Load the item data from the script
 	script_file.OpenTable(_id);
 	_name = MakeUnicodeString(script_file.ReadString("name"));
-	
-	if (	script_file.DoesFunctionExist("Init") 
+
+	if (	script_file.DoesFunctionExist("Init")
 		&& script_file.DoesFunctionExist("Update")
 		&& script_file.DoesFunctionExist("Remove")	)
 	{
@@ -88,7 +88,7 @@ GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 		}
 		return;
 	}
-	
+
 	_timer = new hoa_system::SystemTimer();
 }
 

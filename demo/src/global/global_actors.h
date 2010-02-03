@@ -52,6 +52,9 @@ enum GLOBAL_USE {
 	GLOBAL_USE_TOTAL   =  3
 };
 
+//! \brief The maximum number of characters that can be in the active party
+const uint32 GLOBAL_MAX_PARTY_SIZE = 4;
+
 /** \name Character Attack Point Positions
 *** \brief Intergers that represent the location of the four attack points on characters
 **/

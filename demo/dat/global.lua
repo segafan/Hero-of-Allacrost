@@ -1,7 +1,9 @@
-CLAUDIUS = 1
-LAILA = 2
-KYLE = 3
-RAFAELA = 4
+
+-- Character IDs. Each ID can have only a single bit active as IDs are used in bitmask operations.
+CLAUDIUS   = 1;
+LAILA      = 2;
+KYLE       = 4;
+RAFAELA    = 8;
 
 function NewGame()
 	GlobalManager:AddCharacter(CLAUDIUS);
@@ -15,8 +17,8 @@ end
 
 function LoadNewMap(map_name)
 	ModeManager:Pop();
-	local cave_map = hoa_map.MapMode("dat/maps/" .. map_name .. ".lua");
-	ModeManager:Push(cave_map);
+	local new_map = hoa_map.MapMode("dat/maps/" .. map_name .. ".lua");
+	ModeManager:Push(new_map);
 end
 
 function LoadNewShop(...)
