@@ -10,9 +10,13 @@
 /** ****************************************************************************
 *** \file    global_effects.h
 *** \author  Jacob Rudolph, rujasu@allacrost.org
-*** \brief   Header file for global game effects.
+*** \brief   Header file for global game effects
 ***
 *** This file contains the class implementation for status and elemental effects.
+*** Status effects are certain states that characters and enemies may fall in
+*** to while in battle, such as being poisoned or confused. Elemental effects
+*** are special properties that allow an aggressor to take advantage of to
+*** expose a weakness on a target.
 *** ***************************************************************************/
 
 #ifndef __GLOBAL_EFFECTS_HEADER__
@@ -30,35 +34,34 @@
 namespace hoa_global {
 
 /** \name Elemental Effect Types
-*** \brief Constants used to identify the various elementals
-*** There are a total of eight elementals: four physical and four metaphysical.
+*** \brief Used to identify the eight different types of elementals
+*** There are a total of four physical and four metaphysical elemental effects
 **/
 enum GLOBAL_ELEMENTAL {
-	GLOBAL_ELEMENTAL_INVALID    = 0,
-	GLOBAL_ELEMENTAL_FIRE       = 1,
-	GLOBAL_ELEMENTAL_WATER      = 2,
-	GLOBAL_ELEMENTAL_VOLT       = 3,
-	GLOBAL_ELEMENTAL_EARTH      = 4,
-	GLOBAL_ELEMENTAL_SLICING    = 5,
-	GLOBAL_ELEMENTAL_SMASHING   = 6,
-	GLOBAL_ELEMENTAL_MAULING    = 7,
-	GLOBAL_ELEMENTAL_PIERCING   = 8,
-	GLOBAL_ELEMENTAL_TOTAL      = 9
+	GLOBAL_ELEMENTAL_INVALID    = -1,
+	GLOBAL_ELEMENTAL_FIRE       =  0,
+	GLOBAL_ELEMENTAL_WATER      =  1,
+	GLOBAL_ELEMENTAL_VOLT       =  2,
+	GLOBAL_ELEMENTAL_EARTH      =  3,
+	GLOBAL_ELEMENTAL_SLICING    =  4,
+	GLOBAL_ELEMENTAL_SMASHING   =  5,
+	GLOBAL_ELEMENTAL_MAULING    =  6,
+	GLOBAL_ELEMENTAL_PIERCING   =  7,
+	GLOBAL_ELEMENTAL_TOTAL      =  8
 };
 
 /** \name Status Effect Types
-*** \brief Constants used to identify the various types of status effects
-*** There are a total of eight elementals: four physical and four metaphysical.
+*** \brief Used to identify the various types of status effects
 **/
 enum GLOBAL_STATUS {
-	GLOBAL_STATUS_INVALID    = 0,
-	GLOBAL_STATUS_TOTAL      = 1
+	GLOBAL_STATUS_INVALID    = -1,
+	GLOBAL_STATUS_TOTAL      =  0
 };
 
-/** \name EffectIntensity Levels
+/** \name Effect Intensity Levels
 *** \brief Used to reflect the potency of elemental and status effects
-***
-***
+*** There are nine valid intensity levels. Four negative, four positive, and one neutral.
+*** The neutral intensity level essentially equates to "no effect".
 **/
 enum GLOBAL_INTENSITY {
 	GLOBAL_INTENSITY_INVALID       = -5,
@@ -66,31 +69,51 @@ enum GLOBAL_INTENSITY {
 	GLOBAL_INTENSITY_NEG_GREATER   = -3,
 	GLOBAL_INTENSITY_NEG_MODERATE  = -2,
 	GLOBAL_INTENSITY_NEG_LESSER    = -1,
-	GLOBAL_INTENSITY_NEUTRAL       = 0,
-	GLOBAL_INTENSITY_POS_LESSER    = 1,
-	GLOBAL_INTENSITY_POS_MODERATE  = 2,
-	GLOBAL_INTENSITY_POS_GREATER   = 3,
-	GLOBAL_INTENSITY_POS_EXTREME   = 4,
-	GLOBAL_INTENSITY_TOTAL         = 5
+	GLOBAL_INTENSITY_NEUTRAL       =  0,
+	GLOBAL_INTENSITY_POS_LESSER    =  1,
+	GLOBAL_INTENSITY_POS_MODERATE  =  2,
+	GLOBAL_INTENSITY_POS_GREATER   =  3,
+	GLOBAL_INTENSITY_POS_EXTREME   =  4,
+	GLOBAL_INTENSITY_TOTAL         =  5
 };
 
+/** \brief Increments an intensity enumerated value
+*** \param intensity A reference to the intensity data to modify
+*** \param amount The number of levels to increase the intensity by (default == 1)
+*** \return True if the intensity data was modified or false if it was left unchanged
+*** \note The intensity will not be allowed to increase beyond the valid intensity range
+**/
+bool IncrementIntensity(GLOBAL_INTENSITY& intensity, uint8 amount = 1);
+
+/** \brief Decrements an intensity enumerated value
+*** \param intensity A reference to the intensity data to modify
+*** \param amount The number of levels to decrease the intensity by (default == 1)
+*** \return True if the intensity data was modified or false if it was left unchanged
+*** \note The intensity will not be allowed to decrease beyond the valid intensity range
+**/
+bool DecrementIntensity(GLOBAL_INTENSITY& intensity, uint8 amount = 1);
+
+
 /** ****************************************************************************
-*** \brief Represents an elemental effect on an actor or other object
+*** \brief Represents an elemental effect in the game
 ***
-*** Elemental effects are special types of attack and defense bonuses. They do
-*** not apply on individual attack points, but rather on the whole of a
-*** character or enemy. There are really two types of elemental effects: physical
-*** and metaphysical (the same as the two types of attacks). The difference
-*** between physical and metaphysical attacks is the relationship of elemental
-*** strengths and weaknesses. For example, equpping an armor with the metaphysical
-*** "fire" elemental makes the bearer weak against water, but strong against earth.
-*** On the contrary, an armor with the phyiscal "piercing" elemental makes the bearer
-*** strong against piercing attacks.
+*** This class is a simple container of two enumerated values: an elemental type
+*** and an intensity. Elemental effects provide for special types of attack and
+*** defense bonuses. There are really two types of elemental effects: physical
+*** and metaphysical, the same as the two attack damage types. Whether the elemental
+*** effect represented by objects of this class are meant to serve as a defensive boost
+*** or an offensive boost is determined by the context in which the class object is used.
+***
+*** \todo Explain any differences between how physical versus metaphyiscal elements
+*** function in the game once that decision has been reached.
 *** ***************************************************************************/
 class GlobalElementalEffect {
 public:
-	GlobalElementalEffect() :
-		_type(GLOBAL_ELEMENTAL_INVALID), _intensity(GLOBAL_INTENSITY_NEUTRAL) {}
+	/** \param type The elemental type that this class object should represent
+	*** \param intensity The intensity of the elemental (default value == GLOBAL_INTENSITY_NEUTRAL)
+	**/
+	GlobalElementalEffect(GLOBAL_ELEMENTAL type, GLOBAL_INTENSITY intensity = GLOBAL_INTENSITY_NEUTRAL) :
+		_type(type), _intensity(intensity) {}
 
 	~GlobalElementalEffect()
 		{}
@@ -111,149 +134,180 @@ public:
 
 	/** \brief Increments the elemental effect's intensity
 	*** \param amount The number of levels to increase the intensity by (default = 1)
+	*** \note The intensity will not be allowed to increase beyond the valid intensity range
 	**/
 	void IncrementIntensity(uint8 amount = 1);
 
 	/** \brief Decrements the elemental effect's intensity
 	*** \param amount The number of levels to decrease the intensity by (default = 1)
+	*** \note The intensity will not be allowed to decrease beyond the valid intensity range
 	**/
 	void DecrementIntensity(uint8 amount = 1);
 
 private:
-	/** \brief The type (identifier) of elemental that the object represents
-	*** Refer to the Elemental Effect Types for a list of the valid types and values that
-	*** this member may be.
-	**/
+	//! \brief The type of elemental that the object represents
 	GLOBAL_ELEMENTAL _type;
 
-	/** \brief The intensity of the elemental effect has
-	*** Note that this member only includes positive values since it is an unsigned integer. This is
-	*** done for simplicity. Whether the elemental effect is a defensive boost or an offensive boost
-	*** is not determined by this class, but rather the context in which the class object is used.
-	**/
+	//! \brief The intensity level of this elemental effect
 	GLOBAL_INTENSITY _intensity;
 }; // class GlobalElementalEffect
 
 
-
 /** ****************************************************************************
-*** \brief Represents a status effect on an actor or other object
+*** \brief Represents a status effect in the game
 ***
-*** Status effects are either aiding (boost to strength) or ailing (poisoned).
-*** An object of this class represents a single status effect (not mulitple).
-*** A feature unique to Allacrost is that status effects have different levels
-*** of intensity, four to be exact.
+*** Status effects can be either aiding or ailing to the actor with the active
+*** status. (TODO: provide a more accurate description once this class structure
+*** is in a more-or-less final state).
 ***
-*** \todo Determine how we wish to handle status effects which are polar
-*** opposites of one another (i.e., increase in speed versus decrease in speed).
+*** \todo I think this class needs big changes. First, it should only be used to
+*** represent a status effect I feel (as a property on weapons or armor) property
+*** similar to the GlobalElementalEffect class. The battle code should create a
+*** derived class to achieve that. Perhaps these classes should be renamed
+*** Global*Attribute instead in to better represent what these classes really are?
 ***
-*** \todo Add a pointer to the script function to execute (if any) to apply the
-*** status effect. Note that some status effects will require periodic updates
-*** (e.g. poison) while others only need to be applied one time (e.g. increase
-*** in strength).
+*** Second, all of these modifier methods are unnecessary IMO. Instead, the derived
+*** class should simply have a pointer to the actor the status is inflicted on and
+*** the script can modify the properties of the actor as appropriate. I'm leaving
+*** things the way they are now, but I really think these changes should be done.
+*** -- Roots
 *** ***************************************************************************/
 class GlobalStatusEffect {
 public:
+	/** \param id The unique id value that determines the status effect that this class object should represent
+	*** \param intensity The intensity of the status (default value == GLOBAL_INTENSITY_NEUTRAL)
+	**/
 	GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity = GLOBAL_INTENSITY_NEUTRAL);
 
 	virtual ~GlobalStatusEffect();
 
-	// TODO: Return a pointer from image stored in GameGlobal
-	hoa_video::StillImage* GetIconImage();
+	//! \brief Resets and starts the status effect's timer
+	void StartTimer()
+		{ _timer->Reset(); _timer->Run(); }
+
+	/** \brief Sets how long the timer should run for
+	*** \param n The number of milliseconds that the timer should run for
+	**/
+	void SetDuration(uint32 n)
+		{ _timer->Initialize(n); }
+
+	/** \brief Increments the status effect intensity by a positive amount
+	*** \param amount The number of intensity levels to increase the status effect by
+	*** \return True if the intensity level was modified
+	**/
+	bool IncrementIntensity(uint8 amount);
+
+	/** \brief Decrements the status effect intensity by a negative amount
+	*** \param amount The number of intensity levels to decrement the status effect by
+	*** \return True if the intensity level was modified
+	**/
+	bool DecrementIntensity(uint8 amount);
 
 	//! \brief Class Member Access Functions
 	//@{
+	const hoa_utils::ustring GetEffectName() const
+		{ return _name; }
+
 	GLOBAL_INTENSITY GetIntensity() const
 		{ return _intensity; }
 
-	const hoa_utils::ustring GetEffectName() const
-		{ return _name; }
+	hoa_system::SystemTimer* GetTimer() const
+		{ return _timer; }
+
+	float GetStrModifier() const
+		{ return _str_modifier; }
+
+	float GetVigModifier() const
+		{ return _vig_modifier; }
+
+	float GetForModifier() const
+		{ return _for_modifier; }
+
+	float GetProModifier() const
+		{ return _pro_modifier; }
+
+	float GetAgiModifier() const
+		{ return _agi_modifier; }
+
+	float GetEvaModifier() const
+		{ return _eva_modifier; }
+
+	bool IsStunEffect() const
+		{ return _stun; }
+
+	ScriptObject* GetInitFunction()
+		{ return _init; }
+
+	ScriptObject* GetUpdateFunction()
+		{ return _update; }
+
+	ScriptObject* GetRemoveFunction()
+		{ return _remove; }
+
+	// TODO: Return a pointer from image stored in GameGlobal
+	hoa_video::StillImage* GetIconImage();
 
 	void SetIntensity(GLOBAL_INTENSITY intensity)
 		{ _intensity = intensity; }
 
-	hoa_system::SystemTimer* GetTimer(){ return _timer; }
-	double GetStrModifier()            { return _str_modifier; }
-	double GetVigModifier()            { return _vig_modifier; }
-	double GetForModifier()            { return _for_modifier; }
-	double GetProModifier()            { return _pro_modifier; }
-	double GetAgiModifier()            { return _agi_modifier; }
-	double GetEvaModifier()            { return _eva_modifier; }
-	bool CausesStunEffect()            { return _stun; }
+	void SetStrModifier(float n)
+		{ _str_modifier = n; }
 
-	void SetDuration(uint32 n)         { _timer->Initialize(n); }
-	void StartTimer()                  { _timer->Reset(); _timer->Run(); }
-	void SetStrModifier(double n)      { _str_modifier = n; }
-	void SetVigModifier(double n)      { _vig_modifier = n; }
-	void SetForModifier(double n)      { _for_modifier = n; }
-	void SetProModifier(double n)      { _pro_modifier = n; }
-	void SetAgiModifier(double n)      { _agi_modifier = n; }
-	void SetEvaModifier(double n)      { _eva_modifier = n; }
-	void SetStunEffect(bool n)         { _stun = n; }
-	//@}
+	void SetVigModifier(float n)
+		{ _vig_modifier = n; }
 
-	/** \brief Increments the status effect intensity by a positive amount
-	*** \param amount The number of intensity levels to increase the status effect by
-	*** \return False if the intensity level could not fully be increased by the amount specified (upper bound limit)
-	***
-	*** Usually the return value of this function can be safely ignored. What happens is, for example, when the original
-	*** intensity level is equal to "greater intensity level" and the function is given a parameter of "2", it will
-	*** increment the intensity by one level (not two) to "extreme" (the maximum upper limit). It then returns false
-	*** to indicate that the intensity could not fully be increased by the amount specified.
-	***
-	*** \note If this function does indeed change the intensity level, the _icon_image pointer will also be changed to
-	*** reflect this.
-	**/
-	bool IncrementIntensity(uint8 amount);
+	void SetForModifier(float n)
+		{ _for_modifier = n; }
 
-	/** \brief Decrements the status effect intensity by a specified amount
-	*** \param amount The number of intensity levels to decrement the status effect by
-	*** \return False if the intensity level reaches GLOBAL_INTENSITY_INVALID (zero intensity)
-	***
-	*** Unlike the IncrementIntensity function, the user is advised to always check the return value of this function.
-	*** When the intensity reaches zero, the user may wish to delete the StatusEffect object class as it no longer has
-	*** any effect on the actor.
-	**/
-	bool DecrementIntensity(uint8 amount);
+	void SetProModifier(float n)
+		{ _pro_modifier = n; }
 
-	//! \brief Script Function Accessors
-	//@{
-	ScriptObject* GetInitFunction()         { return _init; }
-	ScriptObject* GetUpdateFunction()       { return _update; }
-	ScriptObject* GetRemoveFunction()       { return _remove; }
+	void SetAgiModifier(float n)
+		{ _agi_modifier = n; }
+
+	void SetEvaModifier(float n)
+		{ _eva_modifier = n; }
+
+	void SetStunEffect(bool n)
+		{ _stun = n; }
 	//@}
 
 private:
-	//! \brief unique ID number of effect
+	//! \brief An ID number that identifies the type of effect
 	uint32 _id;
 
 	//! \brief The name of the effect
 	hoa_utils::ustring _name;
 
-	/** \brief The level of intensity of the status effect
-	*** There are four levels of intensity, as indicated by the Status Effect Intensities constants.
-	*** This member should only ever equal one of those values
-	**/
+	//! \brief The intensity level of this status effect
 	GLOBAL_INTENSITY _intensity;
 
-	//! \brief Initialization script for object
-	ScriptObject* _init;
-	//! \brief Update script for object
-	ScriptObject* _update;
-	//! \brief Removal script for object
-	ScriptObject* _remove;
+	//! \brief Percentage modifiers for various actor stats
+	//@{
+	float _str_modifier;
+	float _vig_modifier;
+	float _for_modifier;
+	float _pro_modifier;
+	float _agi_modifier;
+	float _eva_modifier;
+	//@}
 
+	//! \brief If true the status effect will prevent an inflicted actor from taking any action
+	bool _stun;
+
+	//! \brief A timer used to determine how long the status effect lasts
 	hoa_system::SystemTimer* _timer;
 
-	double _str_modifier;
-	double _vig_modifier;
-	double _for_modifier;
-	double _pro_modifier;
-	double _agi_modifier;
-	double _eva_modifier;
-	bool _stun;
+	//! \brief A pointer to the initialization script function
+	ScriptObject* _init;
+
+	//! \brief A pointer to the update script function
+	ScriptObject* _update;
+
+	//! \brief A pointer to the remove script function
+	ScriptObject* _remove;
 }; // class GlobalStatusEffect
 
 } // namespace hoa_global
 
-#endif
+#endif // __GLOBAL_EFFECTS_HEADER__
