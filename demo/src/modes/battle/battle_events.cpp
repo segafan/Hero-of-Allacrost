@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2009 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ BattleEvent::BattleEvent(uint32 id) : _id(id), _name(NULL) {
 		cerr << "BATTLE ERROR: BattleEvent constructor failed due to an invalid id assignment: " << _id << endl;
 		exit(1);
 	}
-	ReadScriptDescriptor& script_file = *(GlobalManager->GetBattleEventDescriptor());
+	ReadScriptDescriptor& script_file = *(GlobalManager->GetBattleEventScript());
 
 	if (script_file.DoesTableExist(_id) == false) {
 		cerr << "BATTLE ERROR: BattleEvent constructor failed because the table containing the "
@@ -44,8 +44,8 @@ BattleEvent::BattleEvent(uint32 id) : _id(id), _name(NULL) {
 	// Load the item data from the script
 	script_file.OpenTable(_id);
 	_name = MakeUnicodeString(script_file.ReadString("name"));
-	
-	if (	script_file.DoesFunctionExist("Before") 
+
+	if (	script_file.DoesFunctionExist("Before")
 		&& script_file.DoesFunctionExist("During")
 		&& script_file.DoesFunctionExist("After")	)
 	{
