@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    global_actors.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Source file for global game actors.
+*** \brief   Source file for global game actors
 *** ***************************************************************************/
 
 #include "video.h"

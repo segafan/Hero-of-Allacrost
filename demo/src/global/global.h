@@ -145,9 +145,6 @@ private:
 *** ***************************************************************************/
 class GameGlobal : public hoa_utils::Singleton<GameGlobal> {
 	friend class hoa_utils::Singleton<GameGlobal>;
-	friend class GlobalItem;
-	friend class GlobalWeapon;
-	friend class GlobalArmor;
 	friend class GlobalSkill;
 	friend class GlobalStatusEffect;
 
@@ -437,7 +434,25 @@ public:
 	std::vector<GlobalKeyItem*>* GetInventoryKeyItems()
 		{ return &_inventory_key_items; }
 
-	hoa_script::ReadScriptDescriptor* GetBattleEventDescriptor()
+	hoa_script::ReadScriptDescriptor& GetItemsScript()
+		{ return _items_script; }
+
+	hoa_script::ReadScriptDescriptor& GetWeaponsScript()
+		{ return _weapons_script; }
+
+	hoa_script::ReadScriptDescriptor& GetHeadArmorScript()
+		{ return _head_armor_script; }
+
+	hoa_script::ReadScriptDescriptor& GetTorsoArmorScript()
+		{ return _torso_armor_script; }
+
+	hoa_script::ReadScriptDescriptor& GetArmArmorScript()
+		{ return _arm_armor_script; }
+
+	hoa_script::ReadScriptDescriptor& GetLegArmorScript()
+		{ return _leg_armor_script; }
+
+	hoa_script::ReadScriptDescriptor* GetBattleEventScript()
 		{ return &_battle_events_script; }
 	//@}
 
