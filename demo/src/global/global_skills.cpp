@@ -15,6 +15,8 @@
 
 #include "script.h"
 #include "video.h"
+
+#include "global_skills.h"
 #include "global.h"
 
 using namespace std;

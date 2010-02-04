@@ -238,7 +238,7 @@ void BattleCharacter::Update() {
 	bool paused = false;
 
 	for (uint32 i = 0; i < GetActorEffects().size(); i++) {
-		if (GetActorEffects().at(i)->CausesStunEffect()) {
+		if (GetActorEffects().at(i)->IsStunEffect()) {
 			_wait_time.Pause();
 			paused = true;
 		}
@@ -473,7 +473,7 @@ void BattleEnemy::Update() {
 	bool paused = false;
 
 	for (uint32 i = 0; i < GetActorEffects().size(); i++) {
-		if (GetActorEffects().at(i)->CausesStunEffect()) {
+		if (GetActorEffects().at(i)->IsStunEffect()) {
 			_wait_time.Pause();
 			paused = true;
 		}

@@ -10,26 +10,89 @@
 /** ****************************************************************************
 *** \file    global_effects.cpp
 *** \author  Jacob Rudolph, rujasu@allacrost.org
-*** \brief   Source file for global game effects.
-***
-*** This file contains the class implementation for status and elemental effects.
+*** \brief   Source file for global game effects
 *** ***************************************************************************/
 
-#include <iostream>
-
+#include "script.h"
 #include "video.h"
+
+#include "global_effects.h"
 #include "global.h"
 
 using namespace std;
+
 using namespace hoa_utils;
-using namespace hoa_video;
+
 using namespace hoa_script;
+using namespace hoa_video;
 
 namespace hoa_global {
+
+bool IncrementIntensity(GLOBAL_INTENSITY& intensity, uint8 amount) {
+	if (amount == 0)
+		return false;
+	if ((intensity <= GLOBAL_INTENSITY_INVALID) || (intensity >= GLOBAL_INTENSITY_POS_EXTREME))
+		return false;
+
+	// This check protects against overflow conditions
+	if (amount > (GLOBAL_INTENSITY_TOTAL * 2)) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "attempted to increment intensity by an excessive amount: " << amount << endl;
+		if (intensity == GLOBAL_INTENSITY_POS_EXTREME) {
+			return false;
+		}
+		else {
+			intensity = GLOBAL_INTENSITY_POS_EXTREME;
+			return true;
+		}
+	}
+
+	// TODO: compiler does not allow this, figure out another way
+// 	intensity += amount;
+	if (intensity >= GLOBAL_INTENSITY_TOTAL)
+		intensity = GLOBAL_INTENSITY_POS_EXTREME;
+	return true;
+}
+
+
+
+bool DecrementIntensity(GLOBAL_INTENSITY& intensity, uint8 amount) {
+	if (amount == 0)
+		return false;
+	if ((intensity <= GLOBAL_INTENSITY_NEG_EXTREME) || (intensity >= GLOBAL_INTENSITY_TOTAL))
+		return false;
+
+	// This check protects against overflow conditions
+	if (amount > (GLOBAL_INTENSITY_TOTAL * 2)) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "attempted to decrement intensity by an excessive amount: " << amount << endl;
+		if (intensity == GLOBAL_INTENSITY_NEG_EXTREME) {
+			return false;
+		}
+		else {
+			intensity = GLOBAL_INTENSITY_NEG_EXTREME;
+			return true;
+		}
+	}
+
+	// TODO: compiler does not allow this, figure out another way
+// 	intensity -= amount;
+	if (intensity <= GLOBAL_INTENSITY_INVALID)
+		intensity = GLOBAL_INTENSITY_NEG_EXTREME;
+	return true;
+}
 
 // -----------------------------------------------------------------------------
 // GlobalElementalEffect class
 // -----------------------------------------------------------------------------
+
+void GlobalElementalEffect::IncrementIntensity(uint8 amount) {
+	hoa_global::IncrementIntensity(_intensity, amount);
+}
+
+
+
+void GlobalElementalEffect::DecrementIntensity(uint8 amount) {
+	hoa_global::DecrementIntensity(_intensity, amount);
+}
 
 // -----------------------------------------------------------------------------
 // GlobalStatusEffect class
@@ -37,125 +100,93 @@ namespace hoa_global {
 
 GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 	_id(id),
-	_name(NULL),
 	_intensity(intensity),
-	_str_modifier(0.0),
-	_vig_modifier(0.0),
-	_for_modifier(0.0),
-	_pro_modifier(0.0),
-	_agi_modifier(0.0),
-	_eva_modifier(0.0),
-	_stun(false)
+	_str_modifier(0.0f),
+	_vig_modifier(0.0f),
+	_for_modifier(0.0f),
+	_pro_modifier(0.0f),
+	_agi_modifier(0.0f),
+	_eva_modifier(0.0f),
+	_stun(false),
+	_timer(NULL),
+	_init(NULL),
+	_update(NULL),
+	_remove(NULL)
 {
+	// TODO: Replace the "5" numeric below with a constant representing the maximum skill ID number
 	if (_id == 0 || _id > 5) {
-		cerr << "GLOBAL ERROR: GlobalStatusEffect constructor failed due to an invalid id assignment: " << _id << endl;
-		exit(1);
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "constructor received an invalid id argument: " << id << endl;
+		return;
 	}
-	ReadScriptDescriptor& script_file = GlobalManager->_status_effects_script;
+	ReadScriptDescriptor& script_file = GlobalManager->GetStatusEffectsScript();
 
 	if (script_file.DoesTableExist(_id) == false) {
-		cerr << "GLOBAL ERROR: GlobalStatusEffect constructor failed because the table containing the "
-			<< "effect definition did not exist for status effect id: " << _id << endl;
-		exit(1);
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no valid data for status effect in definition file: " << id << endl;
+		return;
 	}
 
 	// Load the item data from the script
 	script_file.OpenTable(_id);
 	_name = MakeUnicodeString(script_file.ReadString("name"));
 
-	if (	script_file.DoesFunctionExist("Init")
+	if (script_file.DoesFunctionExist("Init")
 		&& script_file.DoesFunctionExist("Update")
-		&& script_file.DoesFunctionExist("Remove")	)
+		&& script_file.DoesFunctionExist("Remove"))
 	{
 		_init = new ScriptObject();
-		*_init = script_file.ReadFunctionPointer("Init");
+		(*_init) = script_file.ReadFunctionPointer("Init");
 		_update = new ScriptObject();
-		*_update = script_file.ReadFunctionPointer("Update");
+		(*_update) = script_file.ReadFunctionPointer("Update");
 		_remove = new ScriptObject();
-		*_remove = script_file.ReadFunctionPointer("Remove");
+		(*_remove) = script_file.ReadFunctionPointer("Remove");
 	}
 	else {
-		cerr << "GLOBAL ERROR: GlobalStatusEffect constructor" << endl;
-		exit(1);
+		PRINT_WARNING << "functions missing in status effect definition file: " << id << endl;
+		return;
 	}
 
 	script_file.CloseTable();
-
 	if (script_file.IsErrorDetected()) {
 		if (GLOBAL_DEBUG) {
-			cerr << "GLOBAL WARNING: GlobalStatusEffect constructor incurred script reading errors. They are as follows: " << endl;
+			PRINT_WARNING << "one or more errors occurred while reading status effect data - they are listed below" << endl;
 			cerr << script_file.GetErrorMessages() << endl;
 		}
 		return;
 	}
 
 	_timer = new hoa_system::SystemTimer();
-}
+} // GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity)
+
+
 
 GlobalStatusEffect::~GlobalStatusEffect() {
-	delete _init;
+	if (_timer != NULL)
+		delete _timer;
+	_timer = NULL;
+
+	if (_init != NULL)
+		delete _init;
 	_init = NULL;
-	delete _update;
+
+	if (_update != NULL)
+		delete _update;
 	_update = NULL;
-	delete _remove;
+
+	if (_remove != NULL)
+		delete _remove;
 	_remove = NULL;
 }
 
+
+
 bool GlobalStatusEffect::IncrementIntensity(uint8 amount) {
-	// Intensity can not be increased beyond the upper bound "extreme"
-	if (_intensity == GLOBAL_INTENSITY_POS_EXTREME) {
-		return false;
-	}
-
-	if (amount == 0) {
-		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: passed 0 for amount argument to increase intensity of status effect\n");
-		return false;
-	}
-
-	if (amount < 10) {
-		// _intensity += amount;
-		if (_intensity > GLOBAL_INTENSITY_POS_EXTREME) {
-			_intensity = GLOBAL_INTENSITY_POS_EXTREME;
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-	// This is done to protect against the possibility of an overflow condition
-	else {
-		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: amount argument was > 10 to increase intensity of status effect\n");
-
-		if (_intensity != GLOBAL_INTENSITY_POS_EXTREME) {
-			_intensity = GLOBAL_INTENSITY_POS_EXTREME;
-		}
-		return false;
-	}
-} // bool GlobalStatusEffect::IncrementIntensity(uint8 amount)
+	return hoa_global::IncrementIntensity(_intensity, amount);
+}
 
 
 
 bool GlobalStatusEffect::DecrementIntensity(uint8 amount) {
-	if (_intensity == GLOBAL_INTENSITY_INVALID) {
-		return false;
-	}
-
-	if (amount == 0) {
-		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: passed 0 for amount argument to decrease intensity of status effect\n");
-		return false;
-	}
-
-	if (amount <= _intensity) {
-		// _intensity -= amount;
-		return true;
-	}
-	// This is done to protect against the possibility of an overflow condition
-	else {
-		if (_intensity != GLOBAL_INTENSITY_NEUTRAL) {
-			_intensity = GLOBAL_INTENSITY_NEUTRAL;
-		}
-		return false;
-	}
-} // bool GlobalStatusEffect::DecrementIntensity(uint8 amount)
+	return hoa_global::DecrementIntensity(_intensity, amount);
+}
 
 } // namespace hoa_global
