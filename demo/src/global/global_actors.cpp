@@ -562,7 +562,7 @@ void GlobalCharacterGrowth::_AddSkill(uint32 skill_id) {
 	}
 
 	GlobalSkill* skill = new GlobalSkill(skill_id);
-	if (skill->GetID() == 0) { // Indicates that the skill failed to load successfully
+	if (skill->IsValid() == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add failed to load: " << skill_id << endl;
 		delete skill;
 	}
@@ -1020,7 +1020,7 @@ void GlobalCharacter::AddSkill(uint32 skill_id) {
 	}
 
 	GlobalSkill* skill = new GlobalSkill(skill_id);
-	if (skill->GetID() == 0) { // Indicates that the skill failed to load successfully
+	if (skill->IsValid() == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add failed to load: " << skill_id << endl;
 		delete skill;
 		return;
@@ -1196,7 +1196,7 @@ void GlobalEnemy::AddSkill(uint32 skill_id) {
 	}
 
 	GlobalSkill* skill = new GlobalSkill(skill_id);
-	if (skill->GetID() == 0) { // Indicates that the skill failed to load successfully
+	if (skill->IsValid() == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add failed to load: " << skill_id << endl;
 		delete skill;
 		return;

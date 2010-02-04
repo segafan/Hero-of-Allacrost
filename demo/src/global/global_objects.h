@@ -119,6 +119,10 @@ public:
 	virtual ~GlobalObject()
 		{}
 
+	//! \brief Returns true if the object is properly initialized and ready to be used
+	bool IsValid() const
+		{ return (_id != 0); }
+
 	/** \brief Purely virtual function used to distinguish between object types
 	*** \return A value that represents the type of object
 	**/
@@ -189,6 +193,10 @@ protected:
 	//! \brief A loaded icon image of the object at its original size of 60x60 pixels
 	hoa_video::StillImage _icon_image;
 
+	//! \brief Causes the object to become invalid due to a loading error or other significant issue
+	void _InvalidateObject()
+		{ _id = 0; }
+
 	/** \brief Reads object data from an open script file
 	*** \param script A reference to a script file that has been opened and prepared
 	***
@@ -256,7 +264,7 @@ public:
 	//@}
 
 private:
-	/** \brief The type of target for the item.
+	/** \brief The type of target for the item
 	*** Target types include attack points, actors, and parties. This enum type is defined in global_actors.h
 	**/
 	GLOBAL_TARGET _target_type;

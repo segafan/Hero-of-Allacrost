@@ -61,6 +61,7 @@ void GlobalObject::_LoadObjectData(hoa_script::ReadScriptDescriptor& script) {
 	string icon_file = script.ReadString("icon");
 	if (_icon_image.Load(icon_file) == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to load icon image for item: " << _id << endl;
+		_InvalidateObject();
 	}
 }
 
@@ -73,12 +74,14 @@ GlobalItem::GlobalItem(uint32 id, uint32 count) :
 {
 	if ((_id == 0) || (_id > MAX_ITEM_ID)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "invalid id in constructor: " << _id << endl;
+		_InvalidateObject();
 		return;
 	}
 
 	ReadScriptDescriptor& script_file = GlobalManager->GetItemsScript();
 	if (script_file.DoesTableExist(_id) == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no valid data for item in definition file: " << _id << endl;
+		_InvalidateObject();
 		return;
 	}
 
@@ -104,6 +107,7 @@ GlobalItem::GlobalItem(uint32 id, uint32 count) :
 			PRINT_WARNING << "one or more errors occurred while reading item data - they are listed below" << endl;
 			cerr << script_file.GetErrorMessages() << endl;
 		}
+		_InvalidateObject();
 	}
 } // void GlobalItem::GlobalItem(uint32 id, uint32 count = 1)
 
@@ -180,12 +184,14 @@ GlobalWeapon::GlobalWeapon(uint32 id, uint32 count) :
 
 	if ((_id <= MAX_ITEM_ID) || (_id > MAX_WEAPON_ID)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "invalid id in constructor: " << _id << endl;
+		_InvalidateObject();
 		return;
 	}
 
 	ReadScriptDescriptor& script_file = GlobalManager->GetWeaponsScript();
 	if (script_file.DoesTableExist(_id) == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no valid data for weapon in definition file: " << _id << endl;
+		_InvalidateObject();
 		return;
 	}
 
@@ -203,7 +209,7 @@ GlobalWeapon::GlobalWeapon(uint32 id, uint32 count) :
 			PRINT_WARNING << "one or more errors occurred while reading weapon data - they are listed below" << endl;
 			cerr << script_file.GetErrorMessages() << endl;
 		}
-		return;
+		_InvalidateObject();
 	}
 } // void GlobalWeapon::GlobalWeapon(uint32 id, uint32 count = 1)
 
@@ -226,6 +232,7 @@ GlobalArmor::GlobalArmor(uint32 id, uint32 count) :
 
 	if ((_id <= MAX_WEAPON_ID) || (_id > MAX_LEG_ARMOR_ID)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "invalid id in constructor: " << _id << endl;
+		_InvalidateObject();
 		return;
 	}
 
@@ -246,11 +253,13 @@ GlobalArmor::GlobalArmor(uint32 id, uint32 count) :
 			break;
 		default:
 			IF_PRINT_WARNING(GLOBAL_DEBUG) << "could not determine armor type: " << _id << endl;
+			_InvalidateObject();
 			return;
 	}
 
 	if (script_file->DoesTableExist(_id) == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no valid data for armor in definition file: " << _id << endl;
+		_InvalidateObject();
 		return;
 	}
 
@@ -268,7 +277,7 @@ GlobalArmor::GlobalArmor(uint32 id, uint32 count) :
 			PRINT_WARNING << "one or more errors occurred while reading armor data - they are listed below" << endl;
 			cerr << script_file->GetErrorMessages() << endl;
 		}
-		return;
+		_InvalidateObject();
 	}
 } // void GlobalArmor::GlobalArmor(uint32 id, uint32 count = 1)
 
@@ -296,6 +305,7 @@ GlobalShard::GlobalShard(uint32 id, uint32 count) :
 {
 	if ((_id <= MAX_LEG_ARMOR_ID) || (_id > MAX_SHARD_ID)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "invalid id in constructor: " << _id << endl;
+		_InvalidateObject();
 		return;
 	}
 
@@ -303,6 +313,7 @@ GlobalShard::GlobalShard(uint32 id, uint32 count) :
 // 	ReadScriptDescriptor& script_file = GlobalManager->GetShardsScript();
 // 	if (script_file.DoesTableExist(_id) == false) {
 // 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no valid data for shard in definition file: " << _id << endl;
+// 		_InvalidateObject();
 // 		return;
 // 	}
 //
@@ -316,6 +327,7 @@ GlobalShard::GlobalShard(uint32 id, uint32 count) :
 // 			PRINT_WARNING << "one or more errors occurred while reading shard data - they are listed below" << endl;
 // 			cerr << script_file.GetErrorMessages() << endl;
 // 		}
+// 		_InvalidateObject();
 // 	}
 } // void GlobalShard::GlobalShard(uint32 id, uint32 count = 1)
 
@@ -328,6 +340,7 @@ GlobalKeyItem::GlobalKeyItem(uint32 id, uint32 count) :
 {
 	if ((_id <= MAX_SHARD_ID) || (_id > MAX_KEY_ITEM_ID)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "invalid id in constructor: " << _id << endl;
+		_InvalidateObject();
 		return;
 	}
 
@@ -335,6 +348,7 @@ GlobalKeyItem::GlobalKeyItem(uint32 id, uint32 count) :
 // 	ReadScriptDescriptor& script_file = GlobalManager->GetKeyItemsScript();
 // 	if (script_file.DoesTableExist(_id) == false) {
 // 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no valid data for key item in definition file: " << _id << endl;
+// 		_InvalidateObject();
 // 		return;
 // 	}
 //
@@ -348,6 +362,7 @@ GlobalKeyItem::GlobalKeyItem(uint32 id, uint32 count) :
 // 			PRINT_WARNING << "one or more errors occurred while reading key item data - they are listed below" << endl;
 // 			cerr << script_file.GetErrorMessages() << endl;
 // 		}
+// 		_InvalidateObject();
 // 	}
 } // void GlobalKeyItem::GlobalKeyItem(uint32 id, uint32 count = 1)
 
