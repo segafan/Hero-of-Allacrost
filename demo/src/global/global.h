@@ -145,7 +145,6 @@ private:
 *** ***************************************************************************/
 class GameGlobal : public hoa_utils::Singleton<GameGlobal> {
 	friend class hoa_utils::Singleton<GameGlobal>;
-	friend class GlobalSkill;
 	friend class GlobalStatusEffect;
 
 public:
@@ -451,6 +450,15 @@ public:
 
 	hoa_script::ReadScriptDescriptor& GetLegArmorScript()
 		{ return _leg_armor_script; }
+
+	hoa_script::ReadScriptDescriptor& GetAttackSkillsScript()
+		{ return _attack_skills_script; }
+
+	hoa_script::ReadScriptDescriptor& GetDefendSkillsScript()
+		{ return _defend_skills_script; }
+
+	hoa_script::ReadScriptDescriptor& GetSupportSkillsScript()
+		{ return _support_skills_script; }
 
 	hoa_script::ReadScriptDescriptor* GetBattleEventScript()
 		{ return &_battle_events_script; }

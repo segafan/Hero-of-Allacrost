@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -13,8 +13,7 @@
 *** \brief   Source file for global game skills.
 *** ***************************************************************************/
 
-#include <iostream>
-
+#include "script.h"
 #include "video.h"
 #include "global.h"
 
@@ -34,47 +33,40 @@ using namespace private_global;
 
 GlobalSkill::GlobalSkill(uint32 id) :
 	_id(id),
+	_type(GLOBAL_SKILL_INVALID),
+	_sp_required(0),
+	_warmup_time(0),
+	_cooldown_time(0),
+	_target_type(GLOBAL_TARGET_INVALID),
+	_target_ally(false),
 	_battle_execute_function(NULL),
 	_menu_execute_function(NULL)
 {
 	// A pointer to the skill script which will be used to load this skill
 	ReadScriptDescriptor *skill_script = NULL;
 
-	if (_id == 0) {
-		_type = GLOBAL_SKILL_INVALID;
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalSkill constructor failed because it had an invalid id value: " << _id << endl;
-		return;
-	}
-	else if (_id <= MAX_ATTACK_ID) {
+	if ((_id > 0) && (_id <= MAX_ATTACK_ID)) {
 		_type = GLOBAL_SKILL_ATTACK;
-		skill_script = &(GlobalManager->_attack_skills_script);
+		skill_script = &(GlobalManager->GetAttackSkillsScript());
 	}
-	else if (_id <= MAX_DEFEND_ID) {
+	else if ((_id > MAX_ATTACK_ID) && (_id <= MAX_DEFEND_ID)) {
 		_type = GLOBAL_SKILL_DEFEND;
-		skill_script = &(GlobalManager->_defend_skills_script);
+		skill_script = &(GlobalManager->GetDefendSkillsScript());
 	}
-	else if (_id <= MAX_SUPPORT_ID) {
+	else if ((_id > MAX_DEFEND_ID) && (_id <= MAX_SUPPORT_ID)) {
 		_type = GLOBAL_SKILL_SUPPORT;
-		skill_script = &(GlobalManager->_support_skills_script);
+		skill_script = &(GlobalManager->GetSupportSkillsScript());
 	}
 	else {
-		_type = GLOBAL_SKILL_INVALID;
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalSkill constructor failed because it had an invalid id value: " << _id << endl;
-		_id = 0;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "constructor received an invalid id argument: " << id << endl;
+		_id = 0; // Indicate that this skill is invalid
 		return;
 	}
-
-	// make sure the script is open
-	if (!skill_script->IsFileOpen())
-		skill_script->OpenFile();
 
 	// Load the skill properties from the script
 	if (skill_script->DoesTableExist(_id) == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalSkill constructor failed because there was no skill defined for the id: " << _id << endl;
-		_id = 0;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no valid data for skill in definition file: " << _id << endl;
+		_id = 0; // Indicate that this skill is invalid
 		return;
 	}
 
@@ -98,10 +90,12 @@ GlobalSkill::GlobalSkill(uint32 id) :
 	}
 
 	skill_script->CloseTable();
-
 	if (skill_script->IsErrorDetected()) {
-		cerr << "GLOBAL ERROR: GlobalSkill constructor experienced errors when reading Lua data. They are as follows: " << endl;
-		cerr << skill_script->GetErrorMessages() << endl;
+		if (GLOBAL_DEBUG) {
+			PRINT_WARNING << "one or more errors occurred while reading skill data - they are listed below" << endl;
+			cerr << skill_script->GetErrorMessages() << endl;
+		}
+		_id = 0; // Indicate that this skill is invalid
 	}
 } // GlobalSkill::GlobalSkill()
 
@@ -117,16 +111,6 @@ GlobalSkill::~GlobalSkill() {
 		delete _menu_execute_function;
 		_menu_execute_function = NULL;
 	}
-
-// 	for (uint32 i = 0; i < _elemental_effects.size(); i++) {
-// 		delete _elemental_effects[i];
-// 	}
-// 	_elemental_effects.empty();
-// 
-// 	for (uint32 i = 0; i < _status_effects.size(); i++) {
-// 		delete _status_effects[i].second;
-// 	}
-// 	_status_effects.empty();
 }
 
 
@@ -152,7 +136,7 @@ GlobalSkill::GlobalSkill(const GlobalSkill& copy) {
 		_menu_execute_function = NULL;
 	else
 		_menu_execute_function = new ScriptObject(*copy._menu_execute_function);
-} // GlobalSkill::GlobalSkill(const GlobalSkill& copy)
+}
 
 
 
@@ -182,6 +166,6 @@ GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy) {
 		_menu_execute_function = new ScriptObject(*copy._menu_execute_function);
 
 	return *this;
-} // GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy)
+}
 
 } // namespace hoa_global
