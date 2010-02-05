@@ -16,6 +16,7 @@ INCLUDES = \
 	-I$(top_srcdir)/src/engine/script \
 	-I$(top_srcdir)/src/global \
 	-I$(top_srcdir)/src/common \
+	-I$(top_srcdir)/src/common/global \
 	-I$(top_srcdir)/src/common/gui \
 	-I$(top_srcdir)/src/modes \
 	-I$(top_srcdir)/src/modes/battle \
@@ -97,7 +98,7 @@ engine_SOURCES = \
 	$(video_SOURCES) \
 	$(script_SOURCES)
 
-GLOBAL_DIR = src/global
+GLOBAL_DIR = src/common/global
 global_SOURCES = \
 	$(GLOBAL_DIR)/global.cpp \
 	$(GLOBAL_DIR)/global.h \
@@ -111,16 +112,21 @@ global_SOURCES = \
 	$(GLOBAL_DIR)/global_skills.h \
 	$(GLOBAL_DIR)/defs_global.cpp
 
+GUI_DIR = src/common/gui
+gui_SOURCES = \
+	$(GUI_DIR)/gui.cpp \
+	$(GUI_DIR)/gui.h \
+	$(GUI_DIR)/menu_window.cpp \
+	$(GUI_DIR)/menu_window.h \
+	$(GUI_DIR)/option.cpp \
+	$(GUI_DIR)/option.h \
+	$(GUI_DIR)/textbox.cpp \
+	$(GUI_DIR)/textbox.h
+
 COMMON_DIR = src/common
 common_SOURCES = \
-	$(COMMON_DIR)/gui/gui.cpp \
-	$(COMMON_DIR)/gui/gui.h \
-	$(COMMON_DIR)/gui/menu_window.cpp \
-	$(COMMON_DIR)/gui/menu_window.h \
-	$(COMMON_DIR)/gui/option.cpp \
-	$(COMMON_DIR)/gui/option.h \
-	$(COMMON_DIR)/gui/textbox.cpp \
-	$(COMMON_DIR)/gui/textbox.h
+	$(global_SOURCES) \
+	$(gui_SOURCES)
 
 MODES_DIR = src/modes
 modes_SOURCES = \
@@ -240,7 +246,6 @@ allacrost_SOURCES = \
 	src/utils.cpp \
 	src/utils.h \
 	$(engine_SOURCES) \
-	$(global_SOURCES) \
 	$(common_SOURCES) \
 	$(modes_SOURCES)
 
