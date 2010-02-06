@@ -54,7 +54,7 @@ PauseMode::PauseMode(bool quit_state, bool pause_audio) :
 
 	// Render the paused string in white text
 	_paused_text.SetStyle(TextStyle("title28", Color::white, VIDEO_TEXT_SHADOW_BLACK));
-	_paused_text.SetText(MakeUnicodeString("Paused"));
+	_paused_text.SetText(UTranslate("Paused"));
 
 	// Initialize the quit options box
 	_quit_options.SetPosition(512.0f, 384.0f);
@@ -66,9 +66,9 @@ PauseMode::PauseMode(bool quit_state, bool pause_audio) :
 	_quit_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_quit_options.SetCursorOffset(-58.0f, 18.0f);
 
-	_quit_options.AddOption(MakeUnicodeString("Quit Game"));
-	_quit_options.AddOption(MakeUnicodeString("Quit to Main Menu"));
-	_quit_options.AddOption(MakeUnicodeString("Cancel"));
+	_quit_options.AddOption(UTranslate("Quit Game"));
+	_quit_options.AddOption(UTranslate("Quit to Main Menu"));
+	_quit_options.AddOption(UTranslate("Cancel"));
 	_quit_options.SetSelection(QUIT_CANCEL);
 }
 

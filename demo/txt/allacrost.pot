@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-02-02 19:56-0500\n"
+"POT-Creation-Date: 2010-02-06 14:33-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -258,154 +258,154 @@ msgstr ""
 msgid "So much work to do!"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:513 src/modes/boot/boot.cpp:533
+#: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
 msgid "New Game"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
+#: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
 msgid "Load Game"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
+#: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
 msgid "Options"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
+#: src/modes/boot/boot.cpp:517 src/modes/boot/boot.cpp:537
 msgid "Credits"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:517
+#: src/modes/boot/boot.cpp:518
 msgid "Battle"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:518
+#: src/modes/boot/boot.cpp:519
 msgid "Menu"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:519
+#: src/modes/boot/boot.cpp:520
 msgid "Shop"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:520 src/modes/boot/boot.cpp:537
+#: src/modes/boot/boot.cpp:521 src/modes/boot/boot.cpp:538
 msgid "Quit"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:562
+#: src/modes/boot/boot.cpp:563
 msgid "Video"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:563
+#: src/modes/boot/boot.cpp:564
 msgid "Audio"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:564
+#: src/modes/boot/boot.cpp:565
 msgid "Language"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:565
+#: src/modes/boot/boot.cpp:566
 msgid "Key Settings"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:566
+#: src/modes/boot/boot.cpp:567
 msgid "Joystick Settings"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:567
+#: src/modes/boot/boot.cpp:568
 msgid "Profiles"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:584
+#: src/modes/boot/boot.cpp:585
 msgid "Resolution:"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:586
+#: src/modes/boot/boot.cpp:587
 msgid "Window mode:"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:587
+#: src/modes/boot/boot.cpp:588
 msgid "Brightness:"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:588
+#: src/modes/boot/boot.cpp:589
 msgid "Image quality:"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:607
+#: src/modes/boot/boot.cpp:608
 msgid "Sound Volume: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:608
+#: src/modes/boot/boot.cpp:609
 msgid "Music Volume: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:662
+#: src/modes/boot/boot.cpp:663
 msgid "Up: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:663
+#: src/modes/boot/boot.cpp:664
 msgid "Down: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:664
+#: src/modes/boot/boot.cpp:665
 msgid "Left: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:665
+#: src/modes/boot/boot.cpp:666
 msgid "Right: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:666
+#: src/modes/boot/boot.cpp:667
 msgid "Confirm: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:667
+#: src/modes/boot/boot.cpp:668
 msgid "Cancel: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:668
+#: src/modes/boot/boot.cpp:669
 msgid "Menu: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:669
+#: src/modes/boot/boot.cpp:670
 msgid "Swap: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:670
+#: src/modes/boot/boot.cpp:671
 msgid "Left Select: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:671
+#: src/modes/boot/boot.cpp:672
 msgid "Right Select: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:672
+#: src/modes/boot/boot.cpp:673
 msgid "Pause: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:673 src/modes/boot/boot.cpp:702
+#: src/modes/boot/boot.cpp:674 src/modes/boot/boot.cpp:703
 msgid "Restore defaults"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:744
+#: src/modes/boot/boot.cpp:745
 msgid "Save"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:745
+#: src/modes/boot/boot.cpp:746
 msgid "Load"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:746
+#: src/modes/boot/boot.cpp:747
 msgid "Delete"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:785
+#: src/modes/boot/boot.cpp:786
 msgid "New Profile"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:864
+#: src/modes/boot/boot.cpp:865
 msgid "back"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:867
+#: src/modes/boot/boot.cpp:868
 msgid "end"
 msgstr ""

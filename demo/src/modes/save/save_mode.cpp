@@ -82,9 +82,9 @@ SaveMode::SaveMode(bool enable_saving) :
 	_save_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_save_options.SetCursorOffset(-58.0f, 18.0f);
 
-	_save_options.AddOption(MakeUnicodeString("Save Game"));
-	_save_options.AddOption(MakeUnicodeString("Load Game"));
-	_save_options.AddOption(MakeUnicodeString("Cancel"));
+	_save_options.AddOption(UTranslate("Save Game"));
+	_save_options.AddOption(UTranslate("Load Game"));
+	_save_options.AddOption(UTranslate("Cancel"));
 	_save_options.SetSelection(SAVE_CANCEL);
 
 	// Initialize the save options box
@@ -97,13 +97,13 @@ SaveMode::SaveMode(bool enable_saving) :
 	_file_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_file_list.SetCursorOffset(-58.0f, 18.0f);
 
-	_file_list.AddOption(MakeUnicodeString("Cancel"));
-	_file_list.AddOption(MakeUnicodeString("File #1"));
-	_file_list.AddOption(MakeUnicodeString("File #2"));
-	_file_list.AddOption(MakeUnicodeString("File #3"));
-	_file_list.AddOption(MakeUnicodeString("File #4"));
-	_file_list.AddOption(MakeUnicodeString("File #5"));
-	_file_list.AddOption(MakeUnicodeString("File #6"));
+	_file_list.AddOption(UTranslate("Cancel"));
+	_file_list.AddOption(UTranslate("File #1"));
+	_file_list.AddOption(UTranslate("File #2"));
+	_file_list.AddOption(UTranslate("File #3"));
+	_file_list.AddOption(UTranslate("File #4"));
+	_file_list.AddOption(UTranslate("File #5"));
+	_file_list.AddOption(UTranslate("File #6"));
 	_file_list.SetSelection(0);
 
 	if (_saving_enabled == false) {

@@ -16,6 +16,7 @@
 // Allacrost engines
 #include "input.h"
 #include "mode_manager.h"
+#include "system.h"
 #include "video.h"
 
 // Allacrost globals
@@ -32,6 +33,7 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_input;
 using namespace hoa_mode_manager;
+using namespace hoa_system;
 using namespace hoa_video;
 using namespace hoa_gui;
 using namespace hoa_global;
@@ -189,7 +191,7 @@ void MapTreasure::Open() {
 TreasureSupervisor::TreasureSupervisor() :
 	_treasure(NULL),
 	_selection(ACTION_SELECTED),
-	_window_title(MakeUnicodeString("Treasure Contents"), TextStyle("title24", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2)),
+	_window_title(UTranslate("Treasure Contents"), TextStyle("title24", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2)),
 	_selection_name(),
 	_selection_icon(NULL)
 {
@@ -213,7 +215,7 @@ TreasureSupervisor::TreasureSupervisor() :
 	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_options.SetCursorOffset(-50.0f, -25.0f);
 	_action_options.SetTextStyle(TextStyle("title22", Color::white, VIDEO_TEXT_SHADOW_DARK, 1, -2));
-	_action_options.AddOption(MakeUnicodeString("Finished"));
+	_action_options.AddOption(UTranslate("Finished"));
 	_action_options.SetSelection(0);
 	_action_options.SetOwner(&_action_window);
 
@@ -448,11 +450,11 @@ void TreasureSupervisor::_UpdateList() {
 
 		uint32 list_selection = _list_options.GetSelection();
 		if (list_selection == 0 && _treasure->_drunes != 0) { // If true, the drunes have been selected
-			_selection_name.SetText(MakeUnicodeString("Drunes"));
+			_selection_name.SetText(UTranslate("Drunes"));
 			_selection_icon = &_drunes_icon;
-			_detail_textbox.SetDisplayText(MakeUnicodeString("With the additional " + NumberToString(_treasure->_drunes) +
-			" drunes found in this treasure added, the party now holds a total of " + NumberToString(GlobalManager->GetDrunes())
-			+ " drunes."));
+			_detail_textbox.SetDisplayText(UTranslate("With the additional ") + MakeUnicodeString(NumberToString(_treasure->_drunes)) +
+			UTranslate(" drunes found in this treasure added, the party now holds a total of ") + MakeUnicodeString(NumberToString(GlobalManager->GetDrunes()))
+			+ MakeUnicodeString(" drunes."));
 		}
 		else { // Otherwise, a GlobalObject is selected
 			if (_treasure->_drunes != 0)

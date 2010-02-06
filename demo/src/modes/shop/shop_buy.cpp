@@ -22,6 +22,7 @@
 
 #include "audio.h"
 #include "input.h"
+#include "system.h"
 #include "video.h"
 
 #include "global.h"
@@ -34,6 +35,7 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_input;
+using namespace hoa_system;
 using namespace hoa_video;
 using namespace hoa_gui;
 using namespace hoa_global;
@@ -52,19 +54,19 @@ BuyInterface::BuyInterface() :
 	_current_category(0)
 {
 	_category_header.SetStyle(TextStyle("title24"));
-	_category_header.SetText(MakeUnicodeString("Category"));
+	_category_header.SetText(UTranslate("Category"));
 
 	_name_header.SetStyle(TextStyle("title24"));
-	_name_header.SetText(MakeUnicodeString("Name"));
+	_name_header.SetText(UTranslate("Name"));
 
 	_properties_header.SetDimensions(300.0f, 30.0f, 4, 1, 4, 1);
 	_properties_header.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
 	_properties_header.SetTextStyle(TextStyle("title24"));
 	_properties_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	_properties_header.AddOption(MakeUnicodeString("Price"));
-	_properties_header.AddOption(MakeUnicodeString("Stock"));
-	_properties_header.AddOption(MakeUnicodeString("Own"));
-	_properties_header.AddOption(MakeUnicodeString("Buy"));
+	_properties_header.AddOption(UTranslate("Price"));
+	_properties_header.AddOption(UTranslate("Stock"));
+	_properties_header.AddOption(UTranslate("Own"));
+	_properties_header.AddOption(UTranslate("Buy"));
 
 	_selected_name.SetStyle(TextStyle("text22"));
 
@@ -390,9 +392,9 @@ void BuyInterface::_ChangeViewMode(SHOP_VIEW_MODE new_mode) {
 		_selected_icon = _selected_object->GetObject()->GetIconImage();
 		_selected_icon.SetDimensions(30.0f, 30.0f);
 		_selected_properties.SetOptionText(0, MakeUnicodeString(NumberToString(_selected_object->GetBuyPrice())));
-		_selected_properties.SetOptionText(1, MakeUnicodeString("x" + NumberToString(_selected_object->GetStockCount())));
-		_selected_properties.SetOptionText(2, MakeUnicodeString("x" + NumberToString(_selected_object->GetOwnCount())));
-		_selected_properties.SetOptionText(3, MakeUnicodeString("x" + NumberToString(_selected_object->GetBuyCount())));
+		_selected_properties.SetOptionText(1, MakeUnicodeString("×" + NumberToString(_selected_object->GetStockCount())));
+		_selected_properties.SetOptionText(2, MakeUnicodeString("×" + NumberToString(_selected_object->GetOwnCount())));
+		_selected_properties.SetOptionText(3, MakeUnicodeString("×" + NumberToString(_selected_object->GetBuyCount())));
 	}
 	else {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "tried to change to an invalid/unsupported view mode: " << new_mode << endl;
@@ -452,7 +454,7 @@ void BuyInterface::_RefreshSelectedProperties() {
 
 	// The only property that really needs to be refreshed is the buy quantity. Other properties will remain static.
 	_selected_properties.SetOptionText(_selected_properties.GetNumberColumns() - 1,
-		MakeUnicodeString("x" + NumberToString(_selected_object->GetBuyCount())));
+		MakeUnicodeString("×" + NumberToString(_selected_object->GetBuyCount())));
 }
 
 // *****************************************************************************
@@ -473,9 +475,9 @@ void BuyListDisplay::ReconstructList() {
 
 		// Add an option for each object property in the order of: price, stock, number owned, and amount to buy
 		_property_list.AddOption(MakeUnicodeString(NumberToString(obj->GetBuyPrice())));
-		_property_list.AddOption(MakeUnicodeString("x" + NumberToString(obj->GetStockCount())));
-		_property_list.AddOption(MakeUnicodeString("x" + NumberToString(obj->GetOwnCount())));
-		_property_list.AddOption(MakeUnicodeString("x" + NumberToString(obj->GetBuyCount())));
+		_property_list.AddOption(MakeUnicodeString("×" + NumberToString(obj->GetStockCount())));
+		_property_list.AddOption(MakeUnicodeString("×" + NumberToString(obj->GetOwnCount())));
+		_property_list.AddOption(MakeUnicodeString("×" + NumberToString(obj->GetBuyCount())));
 	}
 
 	if (_objects.empty() == false) {
@@ -497,7 +499,7 @@ void BuyListDisplay::RefreshEntry(uint32 index) {
 	}
 
 	_property_list.SetOptionText((index * _property_list.GetNumberColumns()) + (_property_list.GetNumberColumns() - 1),
-		MakeUnicodeString("x" + NumberToString(_objects[index]->GetBuyCount())));
+		MakeUnicodeString("×" + NumberToString(_objects[index]->GetBuyCount())));
 }
 
 

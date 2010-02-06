@@ -129,15 +129,15 @@ ShopMedia::~ShopMedia() {
 
 
 void ShopMedia::Initialize() {
-	_all_category_names.push_back(MakeUnicodeString("Items"));
-	_all_category_names.push_back(MakeUnicodeString("Weapons"));
-	_all_category_names.push_back(MakeUnicodeString("Head Armor"));
-	_all_category_names.push_back(MakeUnicodeString("Torso Armor"));
-	_all_category_names.push_back(MakeUnicodeString("Arm Armor"));
-	_all_category_names.push_back(MakeUnicodeString("Leg Armor"));
-	_all_category_names.push_back(MakeUnicodeString("Shards"));
-	_all_category_names.push_back(MakeUnicodeString("Key Items"));
-	_all_category_names.push_back(MakeUnicodeString("All Wares"));
+	_all_category_names.push_back(UTranslate("Items"));
+	_all_category_names.push_back(UTranslate("Weapons"));
+	_all_category_names.push_back(UTranslate("Head Armor"));
+	_all_category_names.push_back(UTranslate("Torso Armor"));
+	_all_category_names.push_back(UTranslate("Arm Armor"));
+	_all_category_names.push_back(UTranslate("Leg Armor"));
+	_all_category_names.push_back(UTranslate("Shards"));
+	_all_category_names.push_back(UTranslate("Key Items"));
+	_all_category_names.push_back(UTranslate("All Wares"));
 
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_all_category_icons, "img/icons/object_category_icons.png", 3, 4) == false) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load object category icon images" << endl;
@@ -378,22 +378,22 @@ ShopObjectViewer::ShopObjectViewer() :
 	_lore_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
 	_map_use_header.SetStyle(TextStyle("text22"));
-	_map_use_header.SetText(MakeUnicodeString("Map Use:"));
+	_map_use_header.SetText(UTranslate("Map Use:"));
 	_battle_use_header.SetStyle(TextStyle("text22"));
-	_battle_use_header.SetText(MakeUnicodeString("Battle Use:"));
+	_battle_use_header.SetText(UTranslate("Battle Use:"));
 	_target_type_header.SetStyle(TextStyle("text22"));
-	_target_type_header.SetText(MakeUnicodeString("Target:"));
+	_target_type_header.SetText(UTranslate("Target:"));
 
-	_target_type_text.push_back(TextImage(MakeUnicodeString("Self"), TextStyle("text22")));
-	_target_type_text.push_back(TextImage(MakeUnicodeString("Ally"), TextStyle("text22")));
-	_target_type_text.push_back(TextImage(MakeUnicodeString("Enemy"), TextStyle("text22")));
-	_target_type_text.push_back(TextImage(MakeUnicodeString("All Allies"), TextStyle("text22")));
-	_target_type_text.push_back(TextImage(MakeUnicodeString("All Enemies"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(UTranslate("Self"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(UTranslate("Ally"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(UTranslate("Enemy"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(UTranslate("All Allies"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(UTranslate("All Enemies"), TextStyle("text22")));
 
 	_phys_header.SetStyle(TextStyle("text22"));
-	_phys_header.SetText(MakeUnicodeString("Phys:"));
+	_phys_header.SetText(UTranslate("Phys:"));
 	_meta_header.SetStyle(TextStyle("text22"));
-	_meta_header.SetText(MakeUnicodeString("Meta:"));
+	_meta_header.SetText(UTranslate("Meta:"));
 
 	_phys_rating.SetStyle(TextStyle("text22"));
 	_meta_rating.SetStyle(TextStyle("text22"));
@@ -1044,11 +1044,11 @@ ShopMode::ShopMode() :
 	_action_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 
 	vector<ustring> option_text;
-	option_text.push_back(MakeUnicodeString("Buy"));
-	option_text.push_back(MakeUnicodeString("Sell"));
-	option_text.push_back(MakeUnicodeString("Trade"));
-	option_text.push_back(MakeUnicodeString("Confirm"));
-	option_text.push_back(MakeUnicodeString("Leave"));
+	option_text.push_back(UTranslate("Buy"));
+	option_text.push_back(UTranslate("Sell"));
+	option_text.push_back(UTranslate("Trade"));
+	option_text.push_back(UTranslate("Confirm"));
+	option_text.push_back(UTranslate("Leave"));
 	_action_options.SetOptions(option_text);
 	_action_options.SetSelection(0);
 
@@ -1541,10 +1541,10 @@ void ShopMode::UpdateFinances(int32 costs_amount, int32 sales_amount) {
 	_total_costs = static_cast<uint32>(updated_costs);
 	_total_sales = static_cast<uint32>(updated_sales);
 
-	_finance_table.SetOptionText(0, MakeUnicodeString("Funds: " + NumberToString(GlobalManager->GetDrunes())));
-	_finance_table.SetOptionText(1, MakeUnicodeString("Purchases: -" + NumberToString(_total_costs)));
-	_finance_table.SetOptionText(2, MakeUnicodeString("Sales: +" + NumberToString(_total_sales)));
-	_finance_table.SetOptionText(3, MakeUnicodeString("Total: " + NumberToString(GetTotalRemaining())));
+	_finance_table.SetOptionText(0, UTranslate("Funds: ") + MakeUnicodeString(NumberToString(GlobalManager->GetDrunes())));
+	_finance_table.SetOptionText(1, UTranslate("Purchases: -") + MakeUnicodeString(NumberToString(_total_costs)));
+	_finance_table.SetOptionText(2, UTranslate("Sales: +") + MakeUnicodeString(NumberToString(_total_sales)));
+	_finance_table.SetOptionText(3, UTranslate("Total: ") + MakeUnicodeString(NumberToString(GetTotalRemaining())));
 }
 
 
