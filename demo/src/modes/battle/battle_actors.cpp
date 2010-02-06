@@ -251,7 +251,7 @@ void BattleCharacter::Update() {
 	if (_state == ACTOR_IDLE && !paused) {
 		if (_wait_time.IsRunning())
 		{
-			_stamina_icon_location += SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_SELECT - STAMINA_LOCATION_BOTTOM) / _wait_time.GetDuration());
+			_stamina_icon_location += SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_COMMAND - STAMINA_LOCATION_BOTTOM) / _wait_time.GetDuration());
 		}
 		else if (_wait_time.IsFinished())
 		{
@@ -485,7 +485,7 @@ void BattleEnemy::Update() {
 
 	if (_state == ACTOR_IDLE && !paused) {
 		if (_wait_time.IsFinished()) { // Indicates that the idle state is now finished
-			_stamina_icon_location = STAMINA_LOCATION_SELECT;
+			_stamina_icon_location = STAMINA_LOCATION_COMMAND;
 			_state = ACTOR_WARM_UP;
 			//Stop the timer!!
 			_wait_time.Pause();

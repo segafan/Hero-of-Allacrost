@@ -53,16 +53,14 @@ enum ACTOR_STATE {
 	ACTOR_TOTAL         =  8
 };
 
-//! \brief Constants for the significant locations along the stamina meter
+//! \brief Position constants representing the significant locations along the stamina meter
 //@{
-//! The bottom of the stamina bar
+//! \brief The bottom most position of the stamina bar
 const float STAMINA_LOCATION_BOTTOM = 128.0f;
-//! The yellow/orange transition area where the actor can select an action
-const float STAMINA_LOCATION_SELECT = STAMINA_LOCATION_BOTTOM + 300.0f;
-//! The orange/red transition area where the actor is warmed up and ready to execute
-const float STAMINA_LOCATION_READY = STAMINA_LOCATION_SELECT + 100.0f;
-//! The top of the stamina bar
-const float STAMINA_LOCATION_TOP    = STAMINA_LOCATION_SELECT + 100.0f;
+//! \brief The location where each actor is allowed to select a command
+const float STAMINA_LOCATION_COMMAND = STAMINA_LOCATION_BOTTOM + 354.0f;
+//! \brief The top most position of the stamina bar where actors are ready to execute their actions
+const float STAMINA_LOCATION_TOP = STAMINA_LOCATION_BOTTOM + 508.0f;
 //@}
 
 /** ****************************************************************************
