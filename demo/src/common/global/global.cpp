@@ -277,8 +277,6 @@ void GameGlobal::RemoveCharacter(uint32 id) {
 		return;
 	}
 
-	delete(ch->second);
-	_characters.erase(ch);
 	for (vector<GlobalCharacter*>::iterator i = _character_order.begin(); i != _character_order.end(); i++) {
 		if ((*i)->GetID() == id) {
 			_character_order.erase(i);
@@ -291,6 +289,11 @@ void GameGlobal::RemoveCharacter(uint32 id) {
 	for (uint32 j = 0; j < _character_order.size() && j < GLOBAL_MAX_PARTY_SIZE; j++) {
 		_active_party.AddActor(_character_order[j]);
 	}
+
+	// TODO: This should not be done. Once a character has been met in the game, the character data should
+	// not be deleted for any reason. Only removed from the party.
+	delete(ch->second);
+	_characters.erase(ch);
 }
 
 
