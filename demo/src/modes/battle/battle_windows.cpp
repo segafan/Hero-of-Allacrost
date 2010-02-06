@@ -84,10 +84,10 @@ void ActionWindow::_InitActionCategoryList()
 	}
 
 	vector<ustring> category_options;
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/attack.png>\nAttack"));
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/defend.png>\nDefend"));
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/support.png>\nSupport"));
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/item.png>\nItem"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/attack.png>\n") + UTranslate("Attack"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/defend.png>\n") + UTranslate("Defend"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/support.png>\n") + UTranslate("Support"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/item.png>\n") + UTranslate("Item"));
 
 	_action_category_list.SetOptions(category_options);
 	_action_category_list.SetPosition(60.0f, 110.0f);
@@ -101,10 +101,10 @@ void ActionWindow::_InitActionCategoryList()
 	_action_category_list.SetSelection(0);
 	_action_category_list.SetOwner(this);
 
-	_action_category_text.push_back(TextImage("Attack", category_style));
-	_action_category_text.push_back(TextImage("Defense", category_style));
-	_action_category_text.push_back(TextImage("Support", category_style));
-	_action_category_text.push_back(TextImage("Item", category_style));
+	_action_category_text.push_back(TextImage(UTranslate("Attack"), category_style));
+	_action_category_text.push_back(TextImage(UTranslate("Defense"), category_style));
+	_action_category_text.push_back(TextImage(UTranslate("Support"), category_style));
+	_action_category_text.push_back(TextImage(UTranslate("Item"), category_style));
 }
 
 
@@ -580,9 +580,9 @@ void ActionWindow::_ConstructActionInformation() {
 
 	// TODO: need to do a more complete job of filling out action information
 	if (_selected_action_category == ACTION_TYPE_ITEM) {
-		action_text = MakeUnicodeString("Name: ") + GetSelectedItem()->GetName() +
-			MakeUnicodeString("\nCurrent Quantity: " + NumberToString(GetSelectedItem()->GetCount())) +
-			MakeUnicodeString("\nTarget Type: ") + MakeUnicodeString(GetTargetTypeText(GetSelectedItem()->GetTargetType(), GetSelectedItem()->IsTargetAlly()));
+		action_text = UTranslate("Name: ") + GetSelectedItem()->GetName() + MakeUnicodeString("\n") +
+			UTranslate("Current Quantity: " + NumberToString(GetSelectedItem()->GetCount())) + MakeUnicodeString("\n") +
+			UTranslate("Target Type: ") + MakeUnicodeString(GetTargetTypeText(GetSelectedItem()->GetTargetType(), GetSelectedItem()->IsTargetAlly()));
 	}
 
 	else/* if (_selected_action_category == ACTION_TYPE_ATTACK
@@ -590,9 +590,9 @@ void ActionWindow::_ConstructActionInformation() {
 			|| _selected_action_category == ACTION_TYPE_SUPPORT)*/
 	{
 		// TODO: add warm-up and cool-down times (in seconds), and description
-		action_text = MakeUnicodeString("Name: ") + GetSelectedSkill()->GetName() +
-			MakeUnicodeString("\nSP Required: " + NumberToString(GetSelectedSkill()->GetSPRequired())) +
-			MakeUnicodeString("\nTarget Type: ") + MakeUnicodeString(GetTargetTypeText(GetSelectedSkill()->GetTargetType(), GetSelectedSkill()->IsTargetAlly()));
+		action_text = UTranslate("Name: ") + GetSelectedSkill()->GetName() + MakeUnicodeString("\n") +
+			UTranslate("SP Required: " + NumberToString(GetSelectedSkill()->GetSPRequired())) + MakeUnicodeString("\n") +
+			UTranslate("Target Type: ") + MakeUnicodeString(GetTargetTypeText(GetSelectedSkill()->GetTargetType(), GetSelectedSkill()->IsTargetAlly()));
 	}
 
 	_action_information.SetText(action_text);
@@ -709,10 +709,10 @@ void FinishWindow::_InitSpoilsWindows(float start_x, float start_y)
 void FinishWindow::_InitLoseOptions()
 {
 	vector<ustring> lose_text;
-	lose_text.push_back(MakeUnicodeString("Retry the battle"));
-	lose_text.push_back(MakeUnicodeString("Load from last save point"));
-	lose_text.push_back(MakeUnicodeString("Return to main menu"));
-	lose_text.push_back(MakeUnicodeString("Exit the game"));
+	lose_text.push_back(UTranslate("Retry the battle"));
+	lose_text.push_back(UTranslate("Load from last save point"));
+	lose_text.push_back(UTranslate("Return to main menu"));
+	lose_text.push_back(UTranslate("Exit the game"));
 	_lose_options.SetOptions(lose_text);
 	_lose_options.SetPosition(270.0f, 130.0f);
 	_lose_options.SetDimensions(128.0f, 200.0f, 1, 4, 1, 4);
@@ -1094,7 +1094,7 @@ void FinishWindow::_DrawAnnounceWin() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(512.0f, 384.0f);
 // 	_finish_outcome.Draw();
-	VideoManager->Text()->Draw("Victory!!!", TextStyle("title24"));
+	VideoManager->Text()->Draw(UTranslate("Victory!!!"), TextStyle("title24"));
 }
 
 
@@ -1103,7 +1103,7 @@ void FinishWindow::_DrawWinGrowth() {
 	//Draw XP Earned
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(496, 683);
-	VideoManager->Text()->Draw(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
+	VideoManager->Text()->Draw(UTranslate("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
 
 	//Now draw char info
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
@@ -1117,10 +1117,10 @@ void FinishWindow::_DrawWinGrowth() {
 		_char_portraits[i].Draw();
 
 		VideoManager->MoveRelative(5,-55);
-		VideoManager->Text()->Draw(MakeUnicodeString("Lv. ") +
+		VideoManager->Text()->Draw(UTranslate("Lv. ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetExperienceLevel())));
 		VideoManager->MoveRelative(0, -15);
-		VideoManager->Text()->Draw(MakeUnicodeString("XP To Next: ") +
+		VideoManager->Text()->Draw(UTranslate("XP To Next: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetExperienceForNextLevel() - _characters[i]->GetExperiencePoints())));
 
 		//First column
@@ -1129,7 +1129,7 @@ void FinishWindow::_DrawWinGrowth() {
 		VideoManager->MoveRelative(140, 105);
 
 		//HP
-		display_text = MakeUnicodeString("HP: ") +
+		display_text = UTranslate("HP: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetMaxHitPoints()));
 		if (_growth_gained[i][0])
 		{
@@ -1140,7 +1140,7 @@ void FinishWindow::_DrawWinGrowth() {
 
 		//SP
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("SP: ") +
+		display_text = UTranslate("SP: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetMaxSkillPoints()));
 		if (_growth_gained[i][1])
 		{
@@ -1151,7 +1151,7 @@ void FinishWindow::_DrawWinGrowth() {
 
 		//STR
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("STR: ") +
+		display_text = UTranslate("STR: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
 		if (_growth_gained[i][2])
 		{
@@ -1162,7 +1162,7 @@ void FinishWindow::_DrawWinGrowth() {
 
 		//VIG
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("VIG: ") +
+		display_text = UTranslate("VIG: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetVigor()));
 		if (_growth_gained[i][3])
 		{
@@ -1174,7 +1174,7 @@ void FinishWindow::_DrawWinGrowth() {
 		//Second Column
 		//FOR
 		VideoManager->MoveRelative(155, 78);
-		display_text = MakeUnicodeString("FOR: ") +
+		display_text = UTranslate("FOR: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
 		if (_growth_gained[i][4])
 		{
@@ -1185,7 +1185,7 @@ void FinishWindow::_DrawWinGrowth() {
 
 		//PRO
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("PRO: ") +
+		display_text = UTranslate("PRO: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetProtection()));
 		if (_growth_gained[i][5])
 		{
@@ -1196,7 +1196,7 @@ void FinishWindow::_DrawWinGrowth() {
 
 		//AGI
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("AGI: ") +
+		display_text = UTranslate("AGI: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetAgility()));
 		if (_growth_gained[i][6])
 		{
@@ -1207,7 +1207,7 @@ void FinishWindow::_DrawWinGrowth() {
 
 		//EVD
 		VideoManager->MoveRelative(0, -26);
-		display_text = MakeUnicodeString("EVD: ") +
+		display_text = UTranslate("EVD: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetEvade()));
 		if (_growth_gained[i][7])
 		{
@@ -1225,7 +1225,7 @@ void FinishWindow::_DrawWinSkills()
 	//Draw XP Earned
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(496, 683);
-	VideoManager->Text()->Draw(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
+	VideoManager->Text()->Draw(UTranslate("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
 
 	//Now draw char info
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
@@ -1240,7 +1240,7 @@ void FinishWindow::_DrawWinSkills()
 		_char_portraits[i].Draw();
 		//TEMP
 		VideoManager->MoveRelative(140, 35);
-		VideoManager->Text()->Draw("Skills Learned");
+		VideoManager->Text()->Draw(UTranslate("Skills Learned"));
 		VideoManager->MoveRelative(50, -30);
 
 		skills_learned = _character_growths[i]->GetSkillsLearned();
@@ -1262,7 +1262,7 @@ void FinishWindow::_DrawWinSpoils()
 	//VideoManager->Move(96, 683);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(280, 683);
-	VideoManager->Text()->Draw(MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money)));
+	VideoManager->Text()->Draw(UTranslate("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money)));
 
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(712, 683);
@@ -1271,7 +1271,7 @@ void FinishWindow::_DrawWinSpoils()
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	//VideoManager->Move(700, 640);
 	VideoManager->Move(475, 640);
-	VideoManager->Text()->Draw("Items");
+	VideoManager->Text()->Draw(UTranslate("Items"));
 	//VideoManager->MoveRelative(-140, -25);
 	VideoManager->MoveRelative(-200, -35);
 

@@ -145,7 +145,7 @@ void BattleActor::TakeDamage(int32 damage) {
 	if (damage <= 0)
 	{
 		//_damage_dealt = RandomBoundedInteger(1, 5);
-		text = MakeUnicodeString("Miss");
+		text = UTranslate("Miss");
 	}
 	else
 	{

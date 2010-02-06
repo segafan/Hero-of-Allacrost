@@ -114,12 +114,12 @@ void CategoryDrawData::ComputeCoordinates(uint8 number_categories) {
 RootInterface::RootInterface() {
 	// Initialize text properties and set default text where appropriate
 	_shop_name.SetStyle(TextStyle("title28"));
-	_shop_name.SetText(MakeUnicodeString("Shop Name")); // This default name should be overwritten
+	_shop_name.SetText(UTranslate("Shop Name")); // This default name should be overwritten
 
 	_buy_price_text.SetStyle(TextStyle("text22"));
-	_buy_price_text.SetText(MakeUnicodeString("Buy prices"));
+	_buy_price_text.SetText(UTranslate("Buy prices"));
 	_sell_price_text.SetStyle(TextStyle("text22"));
-	_sell_price_text.SetText(MakeUnicodeString("Sell prices"));
+	_sell_price_text.SetText(UTranslate("Sell prices"));
 
 	_greeting_text.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
 	_greeting_text.SetPosition(40.0f, 100.0f);
@@ -127,7 +127,7 @@ RootInterface::RootInterface() {
 	_greeting_text.SetTextStyle(TextStyle("text22"));
 	_greeting_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_greeting_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	_greeting_text.SetDisplayText(MakeUnicodeString("\"Welcome! Take a look around.\"")); // Default greeting, should usually be overwritten
+	_greeting_text.SetDisplayText(UTranslate("\"Welcome! Take a look around.\"")); // Default greeting, should usually be overwritten
 }
 
 

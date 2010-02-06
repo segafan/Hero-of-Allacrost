@@ -570,11 +570,11 @@ template <class T> std::vector<hoa_global::GlobalObject*> InventoryWindow::_GetI
 class MessageWindow : public hoa_gui::MenuWindow
 {
 public:
-	MessageWindow(const std::string &message, float w, float h);
+	MessageWindow(const hoa_utils::ustring &message, float w, float h);
 	~MessageWindow();
 
 	//! \brief Set the text to display in the window
-	void SetText(const std::string &message)
+	void SetText(const hoa_utils::ustring &message)
 	{ _message = message; _textbox.SetDisplayText(message); }
 
 	//! \brief Standard Window Functions
@@ -584,7 +584,7 @@ public:
 
 private:
 	//! \brief the message to display
-	std::string _message;
+	hoa_utils::ustring _message;
 
 	//! \brief used to display the message
 	hoa_gui::TextBox _textbox;

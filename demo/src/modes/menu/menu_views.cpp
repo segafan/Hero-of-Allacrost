@@ -92,31 +92,22 @@ void CharacterWindow::Draw() {
 
 	// Level
 	VideoManager->MoveRelative(0,20);
-	std::ostringstream os_level;
-	os_level << character->GetExperienceLevel();
-	std::string xp_level = std::string("Lv: ") + os_level.str();
-	VideoManager->Text()->Draw(MakeUnicodeString(xp_level), TextStyle("text20"));
+	VideoManager->Text()->Draw(UTranslate("Lv: ") + MakeUnicodeString(NumberToString(character->GetExperienceLevel())), TextStyle("text20"));
 
 	// HP
 	VideoManager->MoveRelative(0,20);
-	ostringstream os_health;
-	os_health << character->GetHitPoints() << " / " << character->GetMaxHitPoints();
-	std::string health = std::string("HP: ") + os_health.str();
-	VideoManager->Text()->Draw(MakeUnicodeString(health), TextStyle("text20"));
+	VideoManager->Text()->Draw(UTranslate("HP: ") + MakeUnicodeString(NumberToString(character->GetHitPoints()) +
+		" / " + NumberToString(character->GetMaxHitPoints())), TextStyle("text20"));
 
 	// SP
 	VideoManager->MoveRelative(0,20);
-	ostringstream os_skill;
-	os_skill << character->GetSkillPoints() << " / " << character->GetMaxSkillPoints();
-	std::string skill = std::string("SP: ") + os_skill.str();
-	VideoManager->Text()->Draw(MakeUnicodeString(skill), TextStyle("text20"));
+	VideoManager->Text()->Draw(UTranslate("SP: ") + MakeUnicodeString(NumberToString(character->GetSkillPoints()) +
+		" / " + NumberToString(character->GetMaxSkillPoints())), TextStyle("text20"));
 
 	// XP to level up
 	VideoManager->MoveRelative(0, 20);
-	ostringstream os_xp;
-	os_xp << (character->GetExperienceForNextLevel() - character->GetExperiencePoints());
-	std::string xp = std::string("XP To Next: ") + os_xp.str();
-	VideoManager->Text()->Draw(MakeUnicodeString(xp), TextStyle("text20"));
+	VideoManager->Text()->Draw(UTranslate("XP To Next: ") +
+		MakeUnicodeString(NumberToString(character->GetExperienceForNextLevel() - character->GetExperiencePoints())), TextStyle("text20"));
 
 	return;
 }
@@ -205,14 +196,14 @@ void InventoryWindow::_InitCategory() {
 	_item_categories.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 
 	vector<ustring> options;
-	options.push_back(MakeUnicodeString("All"));
-	options.push_back(MakeUnicodeString("Itm"));
-	options.push_back(MakeUnicodeString("Wpn"));
-	options.push_back(MakeUnicodeString("Hlm"));
-	options.push_back(MakeUnicodeString("Tor"));
-	options.push_back(MakeUnicodeString("Arm"));
-	options.push_back(MakeUnicodeString("Leg"));
-	options.push_back(MakeUnicodeString("Key"));
+	options.push_back(UTranslate("All"));
+	options.push_back(UTranslate("Itm"));
+	options.push_back(UTranslate("Wpn"));
+	options.push_back(UTranslate("Hlm"));
+	options.push_back(UTranslate("Tor"));
+	options.push_back(UTranslate("Arm"));
+	options.push_back(UTranslate("Leg"));
+	options.push_back(UTranslate("Key"));
 
 	_item_categories.SetOptions(options);
 	_item_categories.SetSelection(ITEM_ALL);
@@ -428,7 +419,8 @@ void InventoryWindow::_UpdateItemText() {
 	std::vector<ustring> inv_names;
 
 	for (size_t ctr = 0; ctr < _item_objects.size(); ctr++) {
-		text = MakeUnicodeString("<" + _item_objects[ctr]->GetIconImage().GetFilename() + "><32>     ") + _item_objects[ctr]->GetName() + MakeUnicodeString("<R><350>" + NumberToString(_item_objects[ctr]->GetCount()) + "   ");
+		text = MakeUnicodeString("<" + _item_objects[ctr]->GetIconImage().GetFilename() + "><32>     ") +
+			_item_objects[ctr]->GetName() + MakeUnicodeString("<R><350>" + NumberToString(_item_objects[ctr]->GetCount()) + "   ");
 		inv_names.push_back(text);
 	}
 
@@ -558,58 +550,39 @@ void StatusWindow::Draw() {
 	VideoManager->Text()->Draw(ch->GetName());
 
 	VideoManager->MoveRelative(0, 25);
-	ostringstream lvl;
-	lvl << "Experience Level: " << ch->GetExperienceLevel();
-	VideoManager->Text()->Draw(MakeUnicodeString(lvl.str()));
+	VideoManager->Text()->Draw(UTranslate("Experience Level: ") + MakeUnicodeString(NumberToString(ch->GetExperienceLevel())));
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
 
 	//Draw all character stats
 	VideoManager->MoveRelative(-55, 60);
-
-	ostringstream ohp;
-	ohp << "HP: " << ch->GetHitPoints() << " (" << ch->GetMaxHitPoints() << ")";
-	VideoManager->Text()->Draw(MakeUnicodeString(ohp.str()));
+	VideoManager->Text()->Draw(UTranslate("HP: ") + MakeUnicodeString(NumberToString(ch->GetHitPoints()) +
+		" (" + NumberToString(ch->GetMaxHitPoints()) + ")"));
 
 	VideoManager->MoveRelative(0, 25);
-	ostringstream osp;
-	osp << "SP: " << ch->GetSkillPoints() << " (" << ch->GetMaxSkillPoints() << ")";
-	VideoManager->Text()->Draw(MakeUnicodeString(osp.str()));
+	VideoManager->Text()->Draw(UTranslate("SP: ") + MakeUnicodeString(NumberToString(ch->GetSkillPoints()) +
+		" (" + NumberToString(ch->GetMaxSkillPoints()) + ")"));
 
 	VideoManager->MoveRelative(0, 25);
-	ostringstream next;
-	next << "XP to Next: " << (ch->GetExperienceForNextLevel() - ch->GetExperiencePoints());
-	VideoManager->Text()->Draw(MakeUnicodeString(next.str()));
+	VideoManager->Text()->Draw(UTranslate("XP to Next: ") + MakeUnicodeString(NumberToString(ch->GetExperienceForNextLevel() - ch->GetExperiencePoints())));
 
 	VideoManager->MoveRelative(0, 25);
-	ostringstream ostr;
-	ostr << "Strength: " << ch->GetStrength();
-	VideoManager->Text()->Draw(MakeUnicodeString(ostr.str()));
+	VideoManager->Text()->Draw(UTranslate("Strength: ") + MakeUnicodeString(NumberToString(ch->GetStrength())));
 
 	VideoManager->MoveRelative(0, 25);
-	ostringstream ovig;
-	ovig << "Vigor: " << ch->GetVigor();
-	VideoManager->Text()->Draw(MakeUnicodeString(ovig.str()));
+	VideoManager->Text()->Draw(UTranslate("Vigor: ") + MakeUnicodeString(NumberToString(ch->GetVigor())));
 
 	VideoManager->MoveRelative(0, 25);
-	ostringstream ofort;
-	ofort << "Fortitude: " << ch->GetFortitude();
-	VideoManager->Text()->Draw(MakeUnicodeString(ofort.str()));
+	VideoManager->Text()->Draw(UTranslate("Fortitude: ") + MakeUnicodeString(NumberToString(ch->GetFortitude())));
 
 	VideoManager->MoveRelative(0, 25);
-	ostringstream ores;
-	ores << "Protection: " << ch->GetProtection();
-	VideoManager->Text()->Draw(MakeUnicodeString(ores.str()));
+	VideoManager->Text()->Draw(UTranslate("Protection: ") + MakeUnicodeString(NumberToString(ch->GetProtection())));
 
 	VideoManager->MoveRelative(0, 25);
-	ostringstream agl;
-	agl << "Agility: " << ch->GetAgility();
-	VideoManager->Text()->Draw(MakeUnicodeString(agl.str()));
+	VideoManager->Text()->Draw(UTranslate("Agility: ") + MakeUnicodeString(NumberToString(ch->GetAgility())));
 
 	VideoManager->MoveRelative(0, 25);
-	ostringstream oeva;
-	oeva << "Evade: " << ch->GetEvade() << "%";
-	VideoManager->Text()->Draw(MakeUnicodeString(oeva.str()));
+	VideoManager->Text()->Draw(UTranslate("Evade: ") + MakeUnicodeString(NumberToString(ch->GetEvade()) + "%"));
 
 	//Draw character full body portrait
 	VideoManager->Move(855, 145);
@@ -727,9 +700,9 @@ void SkillsWindow::_InitSkillsCategories() {
 
 	// Create options
 	vector<ustring> options;
-	options.push_back(MakeUnicodeString("All"));
-	options.push_back(MakeUnicodeString("Field"));
-	options.push_back(MakeUnicodeString("Battle"));
+	options.push_back(UTranslate("All"));
+	options.push_back(UTranslate("Field"));
+	options.push_back(UTranslate("Battle"));
 
 	// Set options and default selection
 	_skills_categories.SetOptions(options);
@@ -1397,19 +1370,19 @@ void EquipWindow::Draw() {
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 		switch (_equip_select.GetSelection()) {
 			case EQUIP_WEAPON:
-				VideoManager->Text()->Draw(MakeUnicodeString("Weapons"));
+				VideoManager->Text()->Draw(UTranslate("Weapons"));
 				break;
 			case EQUIP_HEADGEAR:
-				VideoManager->Text()->Draw(MakeUnicodeString("Headgear"));
+				VideoManager->Text()->Draw(UTranslate("Headgear"));
 				break;
 			case EQUIP_BODYARMOR:
-				VideoManager->Text()->Draw(MakeUnicodeString("Body Armor"));
+				VideoManager->Text()->Draw(UTranslate("Body Armor"));
 				break;
 			case EQUIP_OFFHAND:
-				VideoManager->Text()->Draw(MakeUnicodeString("Offhand"));
+				VideoManager->Text()->Draw(UTranslate("Offhand"));
 				break;
 			case EQUIP_LEGGINGS:
-				VideoManager->Text()->Draw(MakeUnicodeString("Leggings"));
+				VideoManager->Text()->Draw(UTranslate("Leggings"));
 				break;
 		}
 	}
@@ -1419,15 +1392,15 @@ void EquipWindow::Draw() {
 		//FIX ME: Use XML tags for formatting option boxes
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 		VideoManager->Move(450.0f, 170.0f);
-		VideoManager->Text()->Draw(MakeUnicodeString("Weapon"));
+		VideoManager->Text()->Draw(UTranslate("Weapon"));
 		VideoManager->MoveRelative(0.0f, 70.0f);
-		VideoManager->Text()->Draw(MakeUnicodeString("Headgear"));
+		VideoManager->Text()->Draw(UTranslate("Headgear"));
 		VideoManager->MoveRelative(0.0f, 70.0f);
-		VideoManager->Text()->Draw(MakeUnicodeString("Body Armor"));
+		VideoManager->Text()->Draw(UTranslate("Body Armor"));
 		VideoManager->MoveRelative(0.0f, 70.0f);
-		VideoManager->Text()->Draw(MakeUnicodeString("Offhand"));
+		VideoManager->Text()->Draw(UTranslate("Offhand"));
 		VideoManager->MoveRelative(0.0f, 70.0f);
-		VideoManager->Text()->Draw(MakeUnicodeString("Leggings"));
+		VideoManager->Text()->Draw(UTranslate("Leggings"));
 
 		VideoManager->MoveRelative(150.0f, -370.0f);
 
@@ -1598,8 +1571,8 @@ OverwriteConfirmWindow::OverwriteConfirmWindow(const string &message) :
 	MenuWindow::Show();
 
 	vector<ustring> text;
-	text.push_back(MakeUnicodeString("Yes"));
-	text.push_back(MakeUnicodeString("No"));
+	text.push_back(UTranslate("Yes"));
+	text.push_back(UTranslate("No"));
 	_yes_no.SetOptions(text);
 	_yes_no.SetPosition(100, 70);
 	_yes_no.SetDimensions(200.0f, 59.0f, 2, 1, 2, 1);
@@ -1658,7 +1631,7 @@ void OverwriteConfirmWindow::Draw()
 
 } // namespace private_menu
 
-MessageWindow::MessageWindow(const string &message, float w, float h) :
+MessageWindow::MessageWindow(const ustring &message, float w, float h) :
 	_message(message)
 {
 	float start_x = (1024 - w) / 2;

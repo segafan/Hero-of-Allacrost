@@ -13,6 +13,8 @@
 *** \brief   Source file for the boot welcome window
 *** ***************************************************************************/
 
+#include "system.h"
+
 #include "boot_welcome.h"
 
 using namespace std;
@@ -21,6 +23,7 @@ using namespace hoa_utils;
 using namespace hoa_video;
 using namespace hoa_gui;
 using namespace hoa_script;
+using namespace hoa_system;
 
 namespace hoa_boot {
 
@@ -38,8 +41,8 @@ WelcomeWindow::WelcomeWindow() :
 	_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 
 	_text_header.SetStyle(TextStyle("text20"));
-	_text_header.SetText(MakeUnicodeString(string("The table below lists the default game controls.\n") +
-		string("The control mappings can be changed in the options menu on the next screen.")));
+	_text_header.SetText(UTranslate("The table below lists the default game controls.\n") +
+		UTranslate("The control mappings can be changed in the options menu on the next screen."));
 
 	_key_table_header.SetOwner(&_window);
 	_key_table_header.SetPosition(50.0f, 540.0f);
@@ -49,9 +52,9 @@ WelcomeWindow::WelcomeWindow() :
 	_key_table_header.SetTextStyle(TextStyle("title24"));
 	_key_table_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 
-	_key_table_header.AddOption(MakeUnicodeString("Command"));
-	_key_table_header.AddOption(MakeUnicodeString("Default Key"));
-	_key_table_header.AddOption(MakeUnicodeString("General Purpose"));
+	_key_table_header.AddOption(UTranslate("Command"));
+	_key_table_header.AddOption(UTranslate("Default Key"));
+	_key_table_header.AddOption(UTranslate("General Purpose"));
 
 	_key_table.SetOwner(&_window);
 	_key_table.SetPosition(50.0f, 500.0f);
@@ -61,48 +64,48 @@ WelcomeWindow::WelcomeWindow() :
 	_key_table.SetTextStyle(TextStyle("text22"));
 	_key_table.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 
-	_key_table.AddOption(MakeUnicodeString("Up"));
-	_key_table.AddOption(MakeUnicodeString("Up Arrow"));
-	_key_table.AddOption(MakeUnicodeString("Move position or cursor upwards"));
-	_key_table.AddOption(MakeUnicodeString("Down"));
-	_key_table.AddOption(MakeUnicodeString("Down Arrow"));
-	_key_table.AddOption(MakeUnicodeString("Move position or cursor downwards"));
-	_key_table.AddOption(MakeUnicodeString("Left"));
-	_key_table.AddOption(MakeUnicodeString("Left Arrow"));
-	_key_table.AddOption(MakeUnicodeString("Move position or cursor to the left"));
-	_key_table.AddOption(MakeUnicodeString("Right"));
-	_key_table.AddOption(MakeUnicodeString("Right Arrow"));
-	_key_table.AddOption(MakeUnicodeString("Move position or cursor to the right"));
-	_key_table.AddOption(MakeUnicodeString("Confirm"));
-	_key_table.AddOption(MakeUnicodeString("F"));
-	_key_table.AddOption(MakeUnicodeString("Confirm an action or menu command"));
-	_key_table.AddOption(MakeUnicodeString("Cancel"));
-	_key_table.AddOption(MakeUnicodeString("D"));
-	_key_table.AddOption(MakeUnicodeString("Cancel an action or menu command"));
-	_key_table.AddOption(MakeUnicodeString("Menu"));
-	_key_table.AddOption(MakeUnicodeString("S"));
-	_key_table.AddOption(MakeUnicodeString("Display the character menu"));
-	_key_table.AddOption(MakeUnicodeString("Swap"));
-	_key_table.AddOption(MakeUnicodeString("A"));
-	_key_table.AddOption(MakeUnicodeString("Swaps active menu or character"));
-	_key_table.AddOption(MakeUnicodeString("Left Select"));
-	_key_table.AddOption(MakeUnicodeString("W"));
-	_key_table.AddOption(MakeUnicodeString("Select multiple or backward page scroll"));
-	_key_table.AddOption(MakeUnicodeString("Right Select"));
-	_key_table.AddOption(MakeUnicodeString("E"));
-	_key_table.AddOption(MakeUnicodeString("Select multiple or forward page scroll"));
-	_key_table.AddOption(MakeUnicodeString("Pause"));
-	_key_table.AddOption(MakeUnicodeString("Spacebar"));
-	_key_table.AddOption(MakeUnicodeString("Pauses the game"));
-	_key_table.AddOption(MakeUnicodeString("Quit"));
-	_key_table.AddOption(MakeUnicodeString("Esc"));
-	_key_table.AddOption(MakeUnicodeString("Quit the application"));
+	_key_table.AddOption(UTranslate("Up"));
+	_key_table.AddOption(UTranslate("Up Arrow"));
+	_key_table.AddOption(UTranslate("Move position or cursor upwards"));
+	_key_table.AddOption(UTranslate("Down"));
+	_key_table.AddOption(UTranslate("Down Arrow"));
+	_key_table.AddOption(UTranslate("Move position or cursor downwards"));
+	_key_table.AddOption(UTranslate("Left"));
+	_key_table.AddOption(UTranslate("Left Arrow"));
+	_key_table.AddOption(UTranslate("Move position or cursor to the left"));
+	_key_table.AddOption(UTranslate("Right"));
+	_key_table.AddOption(UTranslate("Right Arrow"));
+	_key_table.AddOption(UTranslate("Move position or cursor to the right"));
+	_key_table.AddOption(UTranslate("Confirm"));
+	_key_table.AddOption(UTranslate("F"));
+	_key_table.AddOption(UTranslate("Confirm an action or menu command"));
+	_key_table.AddOption(UTranslate("Cancel"));
+	_key_table.AddOption(UTranslate("D"));
+	_key_table.AddOption(UTranslate("Cancel an action or menu command"));
+	_key_table.AddOption(UTranslate("Menu"));
+	_key_table.AddOption(UTranslate("S"));
+	_key_table.AddOption(UTranslate("Display the character menu"));
+	_key_table.AddOption(UTranslate("Swap"));
+	_key_table.AddOption(UTranslate("A"));
+	_key_table.AddOption(UTranslate("Swaps active menu or character"));
+	_key_table.AddOption(UTranslate("Left Select"));
+	_key_table.AddOption(UTranslate("W"));
+	_key_table.AddOption(UTranslate("Select multiple or backward page scroll"));
+	_key_table.AddOption(UTranslate("Right Select"));
+	_key_table.AddOption(UTranslate("E"));
+	_key_table.AddOption(UTranslate("Select multiple or forward page scroll"));
+	_key_table.AddOption(UTranslate("Pause"));
+	_key_table.AddOption(UTranslate("Spacebar"));
+	_key_table.AddOption(UTranslate("Pauses the game"));
+	_key_table.AddOption(UTranslate("Quit"));
+	_key_table.AddOption(UTranslate("Esc"));
+	_key_table.AddOption(UTranslate("Quit the application"));
 
 	_text_additional.SetStyle(TextStyle("text20"));
-	_text_additional.SetText(MakeUnicodeString("There are additional commands available which can be found in the MANUAL file."));
+	_text_additional.SetText(UTranslate("There are additional commands available which can be found in the MANUAL file."));
 
 	_text_continue.SetStyle(TextStyle("title24"));
-	_text_continue.SetText(MakeUnicodeString("Press any key to continue."));
+	_text_continue.SetText(UTranslate("Press any key to continue."));
 } // WelcomeWindow::WelcomeWindow()
 
 

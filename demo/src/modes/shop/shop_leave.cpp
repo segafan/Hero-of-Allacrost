@@ -22,6 +22,7 @@
 
 #include "audio.h"
 #include "input.h"
+#include "system.h"
 #include "video.h"
 #include "mode_manager.h"
 
@@ -36,6 +37,7 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_input;
+using namespace hoa_system;
 using namespace hoa_video;
 using namespace hoa_gui;
 using namespace hoa_mode_manager;
@@ -63,19 +65,19 @@ LeaveInterface::LeaveInterface() :
 	TextStyle stats_style("text20");
 
 	_buy_header.SetStyle(TextStyle("title22", Color::white));
-	_buy_header.SetText(MakeUnicodeString("Purchases"));
+	_buy_header.SetText(UTranslate("Purchases"));
 	_buy_stats.SetStyle(stats_style);
 
 	_sell_header.SetStyle(TextStyle("title22", Color::white));
-	_sell_header.SetText(MakeUnicodeString("Sales"));
+	_sell_header.SetText(UTranslate("Sales"));
 	_sell_stats.SetStyle(stats_style);
 
 	_trade_header.SetStyle(TextStyle("title22", Color::white));
-	_trade_header.SetText(MakeUnicodeString("Trades"));
+	_trade_header.SetText(UTranslate("Trades"));
 	_trade_stats.SetStyle(stats_style);
 
 	_name_header.SetStyle(TextStyle("title24"));
-	_name_header.SetText(MakeUnicodeString("Name"));
+	_name_header.SetText(UTranslate("Name"));
 
 	_properties_header.SetOwner(ShopMode::CurrentInstance()->GetMiddleWindow());
 	_properties_header.SetPosition(480.0f, 390.0f);
@@ -83,19 +85,19 @@ LeaveInterface::LeaveInterface() :
 	_properties_header.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
 	_properties_header.SetTextStyle(TextStyle("title24"));
 	_properties_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	_properties_header.AddOption(MakeUnicodeString("Price"));
-	_properties_header.AddOption(MakeUnicodeString("Stock"));
-	_properties_header.AddOption(MakeUnicodeString("Own"));
+	_properties_header.AddOption(UTranslate("Price"));
+	_properties_header.AddOption(UTranslate("Stock"));
+	_properties_header.AddOption(UTranslate("Own"));
 	_properties_header.AddOption(MakeUnicodeString(""));
 
 	_empty_list_text.SetStyle(TextStyle("text24"));
-	_empty_list_text.SetText(MakeUnicodeString("No marked transactions."));
+	_empty_list_text.SetText(UTranslate("No marked transactions."));
 
 	_buy_list_display = new BuyListDisplay();
 	_sell_list_display = new SellListDisplay();
 
 	_main_prompt.SetStyle(TextStyle("text24"));
-	_main_prompt.SetText(MakeUnicodeString("Your order is not yet final. Are you sure you want to leave the shop?"));
+	_main_prompt.SetText(UTranslate("Your order is not yet final. Are you sure you want to leave the shop?"));
 	_main_actions.SetOwner(ShopMode::CurrentInstance()->GetBottomWindow());
 	_main_actions.SetPosition(60.0f, 80.0f);
 	_main_actions.SetDimensions(600.0f, 40.0f, 3, 1, 3, 1);
@@ -104,9 +106,9 @@ LeaveInterface::LeaveInterface() :
 	_main_actions.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 	_main_actions.SetCursorOffset(-55.0f, 30.0f);
 	_main_actions.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
-	_main_actions.AddOption(MakeUnicodeString("View Order"));
-	_main_actions.AddOption(MakeUnicodeString("Confirm Order"));
-	_main_actions.AddOption(MakeUnicodeString("Leave Shop"));
+	_main_actions.AddOption(UTranslate("View Order"));
+	_main_actions.AddOption(UTranslate("Confirm Order"));
+	_main_actions.AddOption(UTranslate("Leave Shop"));
 	_main_actions.SetSelection(0);
 }
 
@@ -165,14 +167,14 @@ void LeaveInterface::MakeActive() {
 		_buy_header.SetStyle(TextStyle("title24", Color::yellow));
 		_sell_header.SetStyle(TextStyle("title22", Color::white));
 		_trade_header.SetStyle(TextStyle("title22", Color::white));
-		_properties_header.SetOptionText(3, MakeUnicodeString("Buy"));
+		_properties_header.SetOptionText(3, UTranslate("Buy"));
 	}
 	else if (_sell_count != 0) {
 		_active_list = ACTIVE_LIST_SELL;
 		_buy_header.SetStyle(TextStyle("title22", Color::white));
 		_sell_header.SetStyle(TextStyle("title24", Color::yellow));
 		_trade_header.SetStyle(TextStyle("title22", Color::white));
-		_properties_header.SetOptionText(3, MakeUnicodeString("Sell"));
+		_properties_header.SetOptionText(3, UTranslate("Sell"));
 	}
 	else if (_trade_count != 0) {
 		_active_list = ACTIVE_LIST_TRADE;
@@ -185,12 +187,15 @@ void LeaveInterface::MakeActive() {
 		_buy_header.SetStyle(TextStyle("title24", Color::yellow));
 		_sell_header.SetStyle(TextStyle("title22", Color::white));
 		_trade_header.SetStyle(TextStyle("title22", Color::white));
-		_properties_header.SetOptionText(3, MakeUnicodeString("Buy"));
+		_properties_header.SetOptionText(3, UTranslate("Buy"));
 	}
 
-	_buy_stats.SetText(NumberToString(_buy_count) + " count\n" +  NumberToString(_buy_unique) + " unique");
-	_sell_stats.SetText(NumberToString(_sell_count) + " count\n" +  NumberToString(_sell_unique) + " unique");
-	_trade_stats.SetText(NumberToString(_trade_count) + " count\n" +  NumberToString(_trade_characters) + " characters");
+	_buy_stats.SetText(NumberToString(_buy_count) + Translate(" count") + "\n" +
+		NumberToString(_buy_unique) + Translate(" unique"));
+	_sell_stats.SetText(NumberToString(_sell_count) + Translate(" count") + "\n" +
+		NumberToString(_sell_unique) + Translate(" unique"));
+	_trade_stats.SetText(NumberToString(_trade_count) + Translate(" count") + "\n" +
+		NumberToString(_trade_characters) + Translate(" characters"));
 
 	_state = LEAVE_STATE_MAIN;
 	_main_actions.SetSelection(0);
@@ -423,7 +428,7 @@ void LeaveInterface::_CycleActiveTransactionList() {
 		_active_list = ACTIVE_LIST_SELL;
 		_buy_header.SetStyle(standard);
 		_sell_header.SetStyle(highlight);
-		_properties_header.SetOptionText(3, MakeUnicodeString("Sell"));
+		_properties_header.SetOptionText(3, UTranslate("Sell"));
 	}
 	else if (_active_list == ACTIVE_LIST_SELL) {
 		_active_list = ACTIVE_LIST_TRADE;
@@ -434,7 +439,7 @@ void LeaveInterface::_CycleActiveTransactionList() {
 		_active_list = ACTIVE_LIST_BUY;
 		_trade_header.SetStyle(standard);
 		_buy_header.SetStyle(highlight);
-		_properties_header.SetOptionText(3, MakeUnicodeString("Buy"));
+		_properties_header.SetOptionText(3, UTranslate("Buy"));
 	}
 	else {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "invalid transaction list was active: " << _active_list << endl;

@@ -73,9 +73,9 @@ BootMode::BootMode() :
 	_joy_setting_function(NULL),
 	_joy_axis_setting_function(NULL),
 	_overwrite_function(NULL),
-	_message_window(string(""), 210.0f, 35.0f),
-	_file_name_alert(string(""),300.0f,35.0f),
-	_file_name_window(string(""),150.0f,35.0f)
+	_message_window(ustring(), 210.0f, 35.0f),
+	_file_name_alert(ustring(),300.0f,35.0f),
+	_file_name_window(ustring(),150.0f,35.0f)
 {
 	IF_PRINT_DEBUG(BOOT_DEBUG) << "BootMode constructor invoked" << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
@@ -84,9 +84,9 @@ BootMode::BootMode() :
 	_welcome_window = new WelcomeWindow();
 
 	_version_text.SetStyle(TextStyle("text20"));
-	_version_text.SetText(MakeUnicodeString("Demo 1.0.0"));
+	_version_text.SetText(UTranslate("Demo 1.0.0"));
 	_copyright_text.SetStyle(TextStyle("text20"));
-	_copyright_text.SetText(MakeUnicodeString("Copyright (C) 2004 - 2010 The Allacrost Project"));
+	_copyright_text.SetText(UTranslate("© 2004 — 2010 The Allacrost Project"));
 
 	ReadScriptDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
@@ -511,14 +511,14 @@ void BootMode::_SetupMainMenu() {
 		_main_menu.SetCursorOffset(-50.0f, 28.0f);
 
 		// Add all the needed menu options to the main menu
-		_main_menu.AddOption(MakeUnicodeString(Translate("New Game")), &BootMode::_OnNewGame);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Load Game")), &BootMode::_OnLoadGame);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Options")), &BootMode::_OnOptions);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Credits")), &BootMode::_OnCredits);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Battle")), &BootMode::_TEMP_OnBattle);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Menu")), &BootMode::_TEMP_OnMenu);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Shop")), &BootMode::_TEMP_OnShop);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Quit")), &BootMode::_OnQuit);
+		_main_menu.AddOption(UTranslate(Translate("New Game")), &BootMode::_OnNewGame);
+		_main_menu.AddOption(UTranslate(Translate("Load Game")), &BootMode::_OnLoadGame);
+		_main_menu.AddOption(UTranslate(Translate("Options")), &BootMode::_OnOptions);
+		_main_menu.AddOption(UTranslate(Translate("Credits")), &BootMode::_OnCredits);
+		_main_menu.AddOption(UTranslate(Translate("Battle")), &BootMode::_TEMP_OnBattle);
+		_main_menu.AddOption(UTranslate(Translate("Menu")), &BootMode::_TEMP_OnMenu);
+		_main_menu.AddOption(UTranslate(Translate("Shop")), &BootMode::_TEMP_OnShop);
+		_main_menu.AddOption(UTranslate(Translate("Quit")), &BootMode::_OnQuit);
 	}
 	else {
 		_main_menu.SetPosition(512.0f, 80.0f);
@@ -531,11 +531,11 @@ void BootMode::_SetupMainMenu() {
 		_main_menu.SetCursorOffset(-50.0f, 28.0f);
 
 		// Add all the needed menu options to the main menu
-		_main_menu.AddOption(MakeUnicodeString(Translate("New Game")), &BootMode::_OnNewGame);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Load Game")), &BootMode::_OnLoadGame);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Options")), &BootMode::_OnOptions);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Credits")), &BootMode::_OnCredits);
-		_main_menu.AddOption(MakeUnicodeString(Translate("Quit")), &BootMode::_OnQuit);
+		_main_menu.AddOption(UTranslate(Translate("New Game")), &BootMode::_OnNewGame);
+		_main_menu.AddOption(UTranslate(Translate("Load Game")), &BootMode::_OnLoadGame);
+		_main_menu.AddOption(UTranslate(Translate("Options")), &BootMode::_OnOptions);
+		_main_menu.AddOption(UTranslate(Translate("Credits")), &BootMode::_OnCredits);
+		_main_menu.AddOption(UTranslate(Translate("Quit")), &BootMode::_OnQuit);
 	}
 
 	string path = GetUserDataPath(true) + "saved_game_1.lua";
@@ -560,12 +560,12 @@ void BootMode::_SetupOptionsMenu() {
 	_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_options_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_options_menu.AddOption(MakeUnicodeString(Translate("Video")), &BootMode::_OnVideoOptions);
-	_options_menu.AddOption(MakeUnicodeString(Translate("Audio")), &BootMode::_OnAudioOptions);
-	_options_menu.AddOption(MakeUnicodeString(Translate("Language")), &BootMode::_OnLanguageOptions);
-	_options_menu.AddOption(MakeUnicodeString(Translate("Key Settings")), &BootMode::_OnKeySettings);
-	_options_menu.AddOption(MakeUnicodeString(Translate("Joystick Settings")), &BootMode::_OnJoySettings);
-	_options_menu.AddOption(MakeUnicodeString(Translate("Profiles")), &BootMode::_OnProfiles);
+	_options_menu.AddOption(UTranslate(Translate("Video")), &BootMode::_OnVideoOptions);
+	_options_menu.AddOption(UTranslate(Translate("Audio")), &BootMode::_OnAudioOptions);
+	_options_menu.AddOption(UTranslate(Translate("Language")), &BootMode::_OnLanguageOptions);
+	_options_menu.AddOption(UTranslate(Translate("Key Settings")), &BootMode::_OnKeySettings);
+	_options_menu.AddOption(UTranslate(Translate("Joystick Settings")), &BootMode::_OnJoySettings);
+	_options_menu.AddOption(UTranslate(Translate("Profiles")), &BootMode::_OnProfiles);
 
 	_options_menu.SetSelection(0);
 }
@@ -582,11 +582,11 @@ void BootMode::_SetupVideoOptionsMenu() {
 	_video_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_video_options_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_video_options_menu.AddOption(MakeUnicodeString(Translate("Resolution:")), &BootMode::_OnResolution);
+	_video_options_menu.AddOption(UTranslate(Translate("Resolution:")), &BootMode::_OnResolution);
 	// Left & right will change window mode as well as confirm
-	_video_options_menu.AddOption(MakeUnicodeString(Translate("Window mode:")), &BootMode::_OnToggleFullscreen, NULL, NULL, &BootMode::_OnToggleFullscreen, &BootMode::_OnToggleFullscreen);
-	_video_options_menu.AddOption(MakeUnicodeString(Translate("Brightness:")), NULL, NULL, NULL, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
-	_video_options_menu.AddOption(MakeUnicodeString(Translate("Image quality:")));
+	_video_options_menu.AddOption(UTranslate(Translate("Window mode:")), &BootMode::_OnToggleFullscreen, NULL, NULL, &BootMode::_OnToggleFullscreen, &BootMode::_OnToggleFullscreen);
+	_video_options_menu.AddOption(UTranslate(Translate("Brightness:")), NULL, NULL, NULL, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
+	_video_options_menu.AddOption(UTranslate(Translate("Image quality:")));
 
 	_video_options_menu.EnableOption(3, false); // Disable image quality
 
@@ -605,8 +605,8 @@ void BootMode::_SetupAudioOptionsMenu() {
 	_audio_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_audio_options_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_audio_options_menu.AddOption(MakeUnicodeString(Translate("Sound Volume: ")), NULL, NULL, NULL, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
-	_audio_options_menu.AddOption(MakeUnicodeString(Translate("Music Volume: ")), NULL, NULL, NULL, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
+	_audio_options_menu.AddOption(UTranslate(Translate("Sound Volume: ")), NULL, NULL, NULL, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
+	_audio_options_menu.AddOption(UTranslate(Translate("Music Volume: ")), NULL, NULL, NULL, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
 
 	_audio_options_menu.SetSelection(0);
 }
@@ -660,18 +660,18 @@ void BootMode::_SetupKeySetttingsMenu() {
 	_key_settings_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_key_settings_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Up: ")), &BootMode::_RedefineUpKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Down: ")), &BootMode::_RedefineDownKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Left: ")), &BootMode::_RedefineLeftKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Right: ")), &BootMode::_RedefineRightKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Confirm: ")), &BootMode::_RedefineConfirmKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Cancel: ")), &BootMode::_RedefineCancelKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Menu: ")), &BootMode::_RedefineMenuKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Swap: ")), &BootMode::_RedefineSwapKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Left Select: ")), &BootMode::_RedefineLeftSelectKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Right Select: ")), &BootMode::_RedefineRightSelectKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Pause: ")), &BootMode::_RedefinePauseKey);
-	_key_settings_menu.AddOption(MakeUnicodeString(Translate("Restore defaults")), &BootMode::_OnRestoreDefaultKeys);
+	_key_settings_menu.AddOption(UTranslate(Translate("Up: ")), &BootMode::_RedefineUpKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Down: ")), &BootMode::_RedefineDownKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Left: ")), &BootMode::_RedefineLeftKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Right: ")), &BootMode::_RedefineRightKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Confirm: ")), &BootMode::_RedefineConfirmKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Cancel: ")), &BootMode::_RedefineCancelKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Menu: ")), &BootMode::_RedefineMenuKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Swap: ")), &BootMode::_RedefineSwapKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Left Select: ")), &BootMode::_RedefineLeftSelectKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Right Select: ")), &BootMode::_RedefineRightSelectKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Pause: ")), &BootMode::_RedefinePauseKey);
+	_key_settings_menu.AddOption(UTranslate(Translate("Restore defaults")), &BootMode::_OnRestoreDefaultKeys);
 }
 
 
@@ -700,7 +700,7 @@ void BootMode::_SetupJoySetttingsMenu() {
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefinePauseJoy);
 //	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineQuitJoy);
 
-	_joy_settings_menu.AddOption(MakeUnicodeString(Translate("Restore defaults")), &BootMode::_OnRestoreDefaultJoyButtons);
+	_joy_settings_menu.AddOption(UTranslate(Translate("Restore defaults")), &BootMode::_OnRestoreDefaultJoyButtons);
 }
 
 
@@ -742,9 +742,9 @@ void BootMode::_SetupProfileMenu() {
 	_profiles_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_profiles_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	_profiles_menu.AddOption(MakeUnicodeString(Translate("Save")), &BootMode::_OnSaveProfile);
-	_profiles_menu.AddOption(MakeUnicodeString(Translate("Load")), &BootMode::_OnLoadProfile);
-	_profiles_menu.AddOption(MakeUnicodeString(Translate("Delete")), &BootMode::_OnDeleteProfile);
+	_profiles_menu.AddOption(UTranslate(Translate("Save")), &BootMode::_OnSaveProfile);
+	_profiles_menu.AddOption(UTranslate(Translate("Load")), &BootMode::_OnLoadProfile);
+	_profiles_menu.AddOption(UTranslate(Translate("Delete")), &BootMode::_OnDeleteProfile);
 }
 
 
@@ -783,7 +783,7 @@ void BootMode::_SetupSaveProfileMenu() {
 	_save_profile_menu.SetCursorOffset(-50.0f, 28.0f);
 
 	//this option is selected when user wants to create a new file
-	_save_profile_menu.AddOption(MakeUnicodeString(Translate("New Profile")), &BootMode::_OnSaveFile);
+	_save_profile_menu.AddOption(UTranslate(Translate("New Profile")), &BootMode::_OnSaveFile);
 
 
 	//setup the dimensions according to how many language we have available
@@ -862,10 +862,10 @@ void BootMode::_SetupUserInputMenu() {
 	_user_input_menu.AddOption(MakeUnicodeString("z"), &BootMode::_OnPickLetter);
 
 	//backspace to delete characters
-	_user_input_menu.AddOption(MakeUnicodeString(Translate("back")), &BootMode::_OnPickLetter);
+	_user_input_menu.AddOption(UTranslate(Translate("back")), &BootMode::_OnPickLetter);
 
 	//end to confirm the name
-	_user_input_menu.AddOption(MakeUnicodeString(Translate("end")), &BootMode::_OnPickLetter);
+	_user_input_menu.AddOption(UTranslate(Translate("end")), &BootMode::_OnPickLetter);
 }
 
 
@@ -878,57 +878,51 @@ void BootMode::_RefreshVideoOptions() {
 
 	// Update text on current video mode
 	if (VideoManager->IsFullscreen())
-		_video_options_menu.SetOptionText(1, MakeUnicodeString("Window mode: fullscreen"));
+		_video_options_menu.SetOptionText(1, UTranslate("Window mode: fullscreen"));
 	else
-		_video_options_menu.SetOptionText(1, MakeUnicodeString("Window mode: windowed"));
+		_video_options_menu.SetOptionText(1, UTranslate("Window mode: windowed"));
 
 	// Update brightness
-	_video_options_menu.SetOptionText(2, MakeUnicodeString("Brightness: " + NumberToString(VideoManager->GetGamma() * 50.0f + 0.5f) + " %"));
+	_video_options_menu.SetOptionText(2, UTranslate("Brightness: ") + MakeUnicodeString(NumberToString(VideoManager->GetGamma() * 50.0f + 0.5f) + " %"));
 }
 
 
 
 void BootMode::_RefreshAudioOptions() {
-	std::ostringstream sound_volume("");
-	sound_volume << "Sound Volume: " << static_cast<int32>(AudioManager->GetSoundVolume() * 100.0f + 0.5f) << " %";
-
-	std::ostringstream music_volume("");
-	music_volume << "Music Volume: " << static_cast<int32>(AudioManager->GetMusicVolume() * 100.0f + 0.5f) << " %";
-
-	_audio_options_menu.SetOptionText(0, MakeUnicodeString(sound_volume.str()));
-	_audio_options_menu.SetOptionText(1, MakeUnicodeString(music_volume.str()));
+	_audio_options_menu.SetOptionText(0, UTranslate("Sound Volume: ") + MakeUnicodeString(NumberToString(static_cast<int32>(AudioManager->GetSoundVolume() * 100.0f + 0.5f)) + " %"));
+	_audio_options_menu.SetOptionText(1, UTranslate("Music Volume: ") + MakeUnicodeString(NumberToString(static_cast<int32>(AudioManager->GetMusicVolume() * 100.0f + 0.5f)) + " %"));
 }
 
 
 
 void BootMode::_RefreshKeySettings() {
 	// Update key names
-	_key_settings_menu.SetOptionText(0, MakeUnicodeString("Move Up<r>" + InputManager->GetUpKeyName()));
-	_key_settings_menu.SetOptionText(1, MakeUnicodeString("Move Down<r>" + InputManager->GetDownKeyName()));
-	_key_settings_menu.SetOptionText(2, MakeUnicodeString("Move Left<r>" + InputManager->GetLeftKeyName()));
-	_key_settings_menu.SetOptionText(3, MakeUnicodeString("Move Right<r>" + InputManager->GetRightKeyName()));
-	_key_settings_menu.SetOptionText(4, MakeUnicodeString("Confirm<r>" + InputManager->GetConfirmKeyName()));
-	_key_settings_menu.SetOptionText(5, MakeUnicodeString("Cancel<r>" + InputManager->GetCancelKeyName()));
-	_key_settings_menu.SetOptionText(6, MakeUnicodeString("Menu<r>" + InputManager->GetMenuKeyName()));
-	_key_settings_menu.SetOptionText(7, MakeUnicodeString("Swap<r>" + InputManager->GetSwapKeyName()));
-	_key_settings_menu.SetOptionText(8, MakeUnicodeString("Left Select<r>" + InputManager->GetLeftSelectKeyName()));
-	_key_settings_menu.SetOptionText(9, MakeUnicodeString("Right Select<r>" + InputManager->GetRightSelectKeyName()));
-	_key_settings_menu.SetOptionText(10, MakeUnicodeString("Pause<r>" + InputManager->GetPauseKeyName()));
+	_key_settings_menu.SetOptionText(0, UTranslate("Move Up") + MakeUnicodeString("<r>" + InputManager->GetUpKeyName()));
+	_key_settings_menu.SetOptionText(1, UTranslate("Move Down") + MakeUnicodeString("<r>" + InputManager->GetDownKeyName()));
+	_key_settings_menu.SetOptionText(2, UTranslate("Move Left") + MakeUnicodeString("<r>" + InputManager->GetLeftKeyName()));
+	_key_settings_menu.SetOptionText(3, UTranslate("Move Right") + MakeUnicodeString("<r>" + InputManager->GetRightKeyName()));
+	_key_settings_menu.SetOptionText(4, UTranslate("Confirm") + MakeUnicodeString("<r>" + InputManager->GetConfirmKeyName()));
+	_key_settings_menu.SetOptionText(5, UTranslate("Cancel") + MakeUnicodeString("<r>" + InputManager->GetCancelKeyName()));
+	_key_settings_menu.SetOptionText(6, UTranslate("Menu") + MakeUnicodeString("<r>" + InputManager->GetMenuKeyName()));
+	_key_settings_menu.SetOptionText(7, UTranslate("Swap") + MakeUnicodeString("<r>" + InputManager->GetSwapKeyName()));
+	_key_settings_menu.SetOptionText(8, UTranslate("Left Select") + MakeUnicodeString("<r>" + InputManager->GetLeftSelectKeyName()));
+	_key_settings_menu.SetOptionText(9, UTranslate("Right Select") + MakeUnicodeString("<r>" + InputManager->GetRightSelectKeyName()));
+	_key_settings_menu.SetOptionText(10, UTranslate("Pause") + MakeUnicodeString("<r>" + InputManager->GetPauseKeyName()));
 }
 
 
 
 void BootMode::_RefreshJoySettings() {
 	int32 i = 0;
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("X Axis<r>" + NumberToString(InputManager->GetXAxisJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Y Axis<r>" + NumberToString(InputManager->GetYAxisJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Confirm: Button<r>" + NumberToString(InputManager->GetConfirmJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Cancel: Button<r>" + NumberToString(InputManager->GetCancelJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Menu: Button<r>" + NumberToString(InputManager->GetMenuJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Swap: Button<r>" + NumberToString(InputManager->GetSwapJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Left Select : Button<r>" + NumberToString(InputManager->GetLeftSelectJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Right Select: Button<r>" + NumberToString(InputManager->GetRightSelectJoy())));
-	_joy_settings_menu.SetOptionText(i++, MakeUnicodeString("Pause: Button<r>" + NumberToString(InputManager->GetPauseJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("X Axis") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetXAxisJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("Y Axis") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetYAxisJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("Confirm: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetConfirmJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("Cancel: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetCancelJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("Menu: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetMenuJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("Swap: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetSwapJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("Left Select : Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetLeftSelectJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("Right Select: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetRightSelectJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("Pause: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetPauseJoy())));
 }
 
 
@@ -1271,7 +1265,7 @@ void BootMode::_OnSaveFile() {
 
 		//show the alert windows before we switch
 		_file_name_alert.SetPosition(275.0f, 575.0f);
-		_file_name_alert.SetText("Please enter a name for your new profile");
+		_file_name_alert.SetText(UTranslate("Please enter a name for your new profile"));
 		_file_name_alert.Show();
 
 		_file_name_window.SetPosition(275.0f, 150.0f);
@@ -1279,7 +1273,7 @@ void BootMode::_OnSaveFile() {
 	}
 	else {
 		_file_name_alert.SetPosition(360.0f, 115.0f);
-		_file_name_alert.SetText("Overwrite? Confirm/Cancel");
+		_file_name_alert.SetText(UTranslate("Overwrite? Confirm/Cancel"));
 		_file_name_alert.Show();
 		_overwrite_function = &BootMode::_OverwriteProfile;
 	}
@@ -1377,7 +1371,7 @@ void BootMode::_OnPickLetter() {
 			cout << "BOOT ERROR: Filename cannot be longer than 19 characters";
 	}
 
-	_file_name_window.SetText(filename);
+	_file_name_window.SetText(MakeUnicodeString(filename));
 } // void BootMode::_OnPickLetter()
 
 // ****************************************************************************
@@ -1562,16 +1556,16 @@ void BootMode::_ShowMessageWindow(bool joystick) {
 void BootMode::_ShowMessageWindow(WAIT_FOR wait) {
 	string message = "";
 	if (wait == WAIT_JOY_BUTTON)
-		message = "Please press a new joystick button.";
+		_message_window.SetText(UTranslate("Please press a new joystick button."));
 	else if (wait == WAIT_KEY)
-		message = "Please press a new key.";
+		_message_window.SetText(UTranslate("Please press a new key."));
 	else if (wait == WAIT_JOY_AXIS)
-		message = "Please move an axis.";
+		_message_window.SetText(UTranslate("Please move an axis."));
 	else {
 		PRINT_WARNING << "Undefined wait value." << std::endl;
 		return;
 	}
-	_message_window.SetText(message);
+
 	_message_window.Show();
 }
 
