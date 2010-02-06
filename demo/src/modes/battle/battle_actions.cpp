@@ -58,7 +58,7 @@ BattleAction::BattleAction(BattleActor* source, BattleActor* target, GlobalAttac
 void BattleAction::Update() {
 	if (_warm_up_time.IsRunning()) {
 		//float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
-		float offset = SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_READY - STAMINA_LOCATION_SELECT) / _warm_up_time.GetDuration());
+		float offset = SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_TOP - STAMINA_LOCATION_COMMAND) / _warm_up_time.GetDuration());
 		_source->SetStaminaIconLocation(_source->GetStaminaIconLocation() + offset);
 	}
 
@@ -93,7 +93,7 @@ void BattleAction::VerifyValidTarget(BattleActor* source, BattleActor* &target)
 			return;
 		}
 		target = current_battle->GetEnemyActorAt(index);
-	}	
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +204,7 @@ void ItemAction::RunScript() {
 				}
 			}
 		}
-	
+
 		else {
 			BattleActor* character;
 			//Loop through all party members and apply
