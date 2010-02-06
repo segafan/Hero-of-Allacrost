@@ -474,49 +474,49 @@ function CreateDialogue()
 	local dialogue;
 	
 	dialogue = hoa_map.MapDialogue(1);
-		text = hoa_utils.Translate("Claudius?  Claudius!  WAKE UP!");
+		text = hoa_system.Translate("Claudius?  Claudius!  WAKE UP!");
 		dialogue:AddText(text, 5, 1, 0, false);
-		text = hoa_utils.Translate("Huh?  What?");
+		text = hoa_system.Translate("Huh?  What?");
 		dialogue:AddText(text, 1000, 2, 0, false);
-		text = hoa_utils.Translate("Get your gear and let's go!");
+		text = hoa_system.Translate("Get your gear and let's go!");
 		dialogue:AddText(text, 5, 3, 0, false);
-		text = hoa_utils.Translate("What's going on?");
+		text = hoa_system.Translate("What's going on?");
 		dialogue:AddText(text, 1000, 4, 0, false);
-		text = hoa_utils.Translate("The treasury!  A thief has broken in and stolen everything.  The captain has called a man hunt.  Now equip yourself and meet us out front.");
+		text = hoa_system.Translate("The treasury!  A thief has broken in and stolen everything.  The captain has called a man hunt.  Now equip yourself and meet us out front.");
 		dialogue:AddText(text, 5, 5, 0, false);
-		text = hoa_utils.Translate("Come on, Kyle, let's go!");
+		text = hoa_system.Translate("Come on, Kyle, let's go!");
 		dialogue:AddText(text, 1000, 6, 0, false);
-		text = hoa_utils.Translate("...Kyle?");
+		text = hoa_system.Translate("...Kyle?");
 		dialogue:AddText(text, 1000, 7, 0, false);
-		text = hoa_utils.Translate("Oh no...");
+		text = hoa_system.Translate("Oh no...");
 		dialogue:AddText(text, 1000, 8, 0, false);
-		text = hoa_utils.Translate("For those of you who don't know, a thief has broken into the treasury and stolen a vast quantity of gold.  It is up to us to capture the criminal and return what they have taken.  It's believed that the robbery occurred no more than 20 minutes ago, so the thief can't be far.  Everyone split up and comb the town.");
+		text = hoa_system.Translate("For those of you who don't know, a thief has broken into the treasury and stolen a vast quantity of gold.  It is up to us to capture the criminal and return what they have taken.  It's believed that the robbery occurred no more than 20 minutes ago, so the thief can't be far.  Everyone split up and comb the town.");
 		dialogue:AddText(text, 5, 9, 0, false);
-		text = hoa_utils.Translate("Sir?");
+		text = hoa_system.Translate("Sir?");
 		dialogue:AddText(text, 1000, 10, 0, false);
-		text = hoa_utils.Translate("Yes, Claudius?");
+		text = hoa_system.Translate("Yes, Claudius?");
 		dialogue:AddText(text, 5, 11, 0, false);
-		text = hoa_utils.Translate("...Nothing.");
+		text = hoa_system.Translate("...Nothing.");
 		dialogue:AddText(text, 1000, -1, 1, false); -- calls function #1, wakeupguy moves
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(2);
-		text = hoa_utils.Translate("This way to the barracks.");
+		text = hoa_system.Translate("This way to the barracks.");
 		dialogue:AddText(text, 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(3);
-		text = hoa_utils.Translate("Entry into the kitchen is strictly forbidden!");
+		text = hoa_system.Translate("Entry into the kitchen is strictly forbidden!");
 		dialogue:AddText(text, 5, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(4);
-		text = hoa_utils.Translate("Hi, Claudius.  If you're looking for the captain, he's at the training hall.");
+		text = hoa_system.Translate("Hi, Claudius.  If you're looking for the captain, he's at the training hall.");
 		dialogue:AddText(text, 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(5);
-		text = hoa_utils.Translate("Where did the culprit go?");
+		text = hoa_system.Translate("Where did the culprit go?");
 		dialogue:AddText(text, 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 end

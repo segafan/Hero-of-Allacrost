@@ -23,8 +23,6 @@
 #ifndef __SYSTEM_HEADER__
 #define __SYSTEM_HEADER__
 
-// #include "gettext.h"
-
 #include <set>
 #include <SDL/SDL.h>
 
@@ -54,11 +52,11 @@
 namespace hoa_system {
 
 /** \brief A constant that represents an "infinite" number of milliseconds that can never be reached
-*** \note This value is technically not infinite, but it is the maximum value of a 32-bit
+*** \note This value is technically not infinite. It is the maximum value of a 32-bit
 *** unsigned integer (2^32 - 1). This value will only be reached after ~49.7 consecutive
-*** days of the game running, which shouldn't happen.
+*** days of the game running, which should never happen.
 **/
-const uint32 SYSTEM_INFINITE_TIME = 4294967295UL;
+const uint32 SYSTEM_INFINITE_TIME = 0xFFFFFFFF;
 
 /** \brief A constant to pass to any "number_loops" function argument in the TimerSystem class
 *** Passing this constant to a TimerSystem object will instruct the timer to run indefinitely
@@ -82,10 +80,28 @@ extern SystemEngine* SystemManager;
 //! \brief Determines whether the code in the hoa_system namespace should print debug statements or not.
 extern bool SYSTEM_DEBUG;
 
-//! \brief An internal namespace to be used only within the system code.
-namespace private_system {
 
-} // namespace private_system
+/** \brief Returns a standard string translated into the game's current language
+*** \param text A const reference to the string that should be translated
+*** \return Translated text in the form of a std::string
+***
+*** If no translation exists in the current language for the requested string, the original string
+*** will be returned.
+**/
+std::string Translate(const std::string& text);
+
+/** \brief Returns a ustring translated into the game's current language
+*** \param text A const reference to the string that should be translated
+*** \return Translated text in the form of a hoa_utils::ustring
+***
+*** If no translation exists in the current language for the requested string, the original string
+*** will be returned after it is formatted into a ustring.
+***
+*** \note This function is really nothing more than a short-cut for typing:
+*** MakeUnicodeString(Translate(string));
+**/
+hoa_utils::ustring UTranslate(const std::string& text);
+
 
 /** ****************************************************************************
 *** \brief A class which allows the user to easily control timed events

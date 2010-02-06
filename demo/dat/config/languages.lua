@@ -1,2 +1,2 @@
 languages = {}
-languages[0] = "fr" .. hoa_utils.Translate("French");
+languages[0] = "fr" .. hoa_system.Translate("French");
