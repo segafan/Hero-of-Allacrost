@@ -44,13 +44,7 @@ void BindUtilsToLua() {
 	[
 		def("RandomBoundedInteger", &hoa_utils::RandomBoundedInteger)
 	];
-	
-	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_utils")
-	[
-	   def("Translate", &hoa_utils::Translate)
-	];
 	}
-
 } // void BindEngineToLua()
 
 } // namespace hoa_defs

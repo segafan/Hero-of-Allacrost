@@ -274,15 +274,15 @@ end
 function CreateDialogue()
 	local dialogue = hoa_map.MapDialogue(1);
 
-	text = hoa_utils.Translate("Stop this foolishness, Kyle. You can’t escape. Lower your weapon and come peacefully and I’ll make sure your punishment is lenient.");
+	text = hoa_system.Translate("Stop this foolishness, Kyle. You can’t escape. Lower your weapon and come peacefully and I’ll make sure your punishment is lenient.");
 	dialogue:AddText(text, 3, 1, 0, false);
-	text = hoa_utils.Translate("No. I’m doing this for me. I don’t expect you to understand.");
+	text = hoa_system.Translate("No. I’m doing this for me. I don’t expect you to understand.");
 	dialogue:AddText(text, 2, 2, 0, false);
-	text = hoa_utils.Translate("Then you leave me no choice.");
+	text = hoa_system.Translate("Then you leave me no choice.");
 	dialogue:AddText(text, 3, 3, 0, false);
-	text = hoa_utils.Translate("I’m very disappointed in you, Kyle.");
+	text = hoa_system.Translate("I’m very disappointed in you, Kyle.");
 	dialogue:AddText(text, 3, 4, 0, false);
-	text = hoa_utils.Translate("Over here, Claudius!");
+	text = hoa_system.Translate("Over here, Claudius!");
 	dialogue:AddText(text, 3, -1, 11001, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
@@ -290,44 +290,44 @@ function CreateDialogue()
 	-- Dialogue with kyle
 	dialogue = hoa_map.MapDialogue(2);
 
-	text = hoa_utils.Translate("No!");
+	text = hoa_system.Translate("No!");
 	dialogue:AddText(text, 1000, 1, 0, false);
-	text = hoa_utils.Translate("What have you done...");
+	text = hoa_system.Translate("What have you done...");
 	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_utils.Translate("I'm sorry.  I didn't want to have to do that.");
+	text = hoa_system.Translate("I'm sorry.  I didn't want to have to do that.");
 	dialogue:AddText(text, 2, 3, 0, false);
-	text = hoa_utils.Translate("What are you doing?");
+	text = hoa_system.Translate("What are you doing?");
 	dialogue:AddText(text, 2, 4, 0, false);
-	text = hoa_utils.Translate("I can't let you get away.");
+	text = hoa_system.Translate("I can't let you get away.");
 	dialogue:AddText(text, 1000, 5, 0, false);
-	text = hoa_utils.Translate("I'm your friend!");
+	text = hoa_system.Translate("I'm your friend!");
 	dialogue:AddText(text, 2, 6, 0, false);
-	text = hoa_utils.Translate("It's my duty!");
+	text = hoa_system.Translate("It's my duty!");
 	dialogue:AddText(text, 1000, 7, 0, false);
-	text = hoa_utils.Translate("Don't do this.");
+	text = hoa_system.Translate("Don't do this.");
 	dialogue:AddText(text, 2, 8, 0, false);
-	text = hoa_utils.Translate("You've already done it.");
+	text = hoa_system.Translate("You've already done it.");
 	dialogue:AddText(text, 1000, 9, 0, false);
-	text = hoa_utils.Translate("I don't want to fight you.");
+	text = hoa_system.Translate("I don't want to fight you.");
 	dialogue:AddText(text, 2, 10, 0, false);
-	text = hoa_utils.Translate("Then lower your weapon and turn yourself in.");
+	text = hoa_system.Translate("Then lower your weapon and turn yourself in.");
 	dialogue:AddText(text, 1000, 11, 0, false);
-	text = hoa_utils.Translate("You know I can't.");
+	text = hoa_system.Translate("You know I can't.");
 	dialogue:AddText(text, 2, 12, 0, false);
-	text = hoa_utils.Translate("And you know I can't just let you get away.");
+	text = hoa_system.Translate("And you know I can't just let you get away.");
 	dialogue:AddText(text, 1000, 13, 0, false);
-	text = hoa_utils.Translate("Isn't our friendship more important than your duty?");
+	text = hoa_system.Translate("Isn't our friendship more important than your duty?");
 	dialogue:AddText(text, 2, 14, 0, false);
-	text = hoa_utils.Translate("You killed the Captain!");
+	text = hoa_system.Translate("You killed the Captain!");
 	dialogue:AddText(text, 1000, -1, 11005, false); -- start boss battle event (11004)
 
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(3);
 
-	text = hoa_utils.Translate("(Insert dialogue here)");
+	text = hoa_system.Translate("(Insert dialogue here)");
 	dialogue:AddText(text, 2, 1, 0, false);
-	text = hoa_utils.Translate("Damn you, Kyle.");
+	text = hoa_system.Translate("Damn you, Kyle.");
 	dialogue:AddText(text, 1000, -1, 11007, false); -- Kyle leaves the scene (11007)
 
 	dialogue_supervisor:AddDialogue(dialogue);

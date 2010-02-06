@@ -24,7 +24,6 @@
 	#include <pwd.h>
 #endif
 
-#include <libintl.h>
 #include <fstream>
 #include <sys/stat.h>
 #include <iconv.h>
@@ -449,12 +448,6 @@ string MakeStandardString(const ustring& text) {
 
 	return new_str;
 } // string MakeStandardString(const ustring& text)
-
-// Invokes gettext() and translates string (if possible)
-string Translate(const string& text) {
-	string str = string( gettext( text.c_str() ) );
-	return str;
-} // ustring Translate(const string& text)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// Random number generator functions

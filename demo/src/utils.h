@@ -504,16 +504,6 @@ hoa_utils::ustring MakeUnicodeString(const std::string& text);
 *** this may come in use if a ustring contains file information.
 **/
 std::string MakeStandardString(const hoa_utils::ustring& text);
-
-/** \brief Returns a translated string (return value of the gettext() function)
-*** \param text The string that needs to be translated
-*** \return A translated text in the form of a ustring
-***
-*** This function is used to call the gettext() function, such that,
-*** for different language modes different text will be displayed.
-**/
-std::string Translate(const std::string& text);
-//hoa_utils::ustring Translate(const std::string& text);
 //@}
 
 
@@ -657,7 +647,7 @@ bool RemoveDirectory(const std::string& dir_name);
 std::vector<std::string> ListDirectory(const std::string& dir_name, const std::string& filter);
 //@}
 
-/** \brief Deletes a specified file 
+/** \brief Deletes a specified file
 *** \param filename The name of the file to be deleted
 *** \return true on success false on failure
 **/
@@ -675,7 +665,7 @@ const std::string GetUserDataPath(bool user_files = true);
 
 /** \brief returns the directory path to save/load/delete user profiles
 *** \return A string containing the path to the profiles directory
-*** \TODO: might have to add in special support for OSX if we want to 
+*** \TODO: might have to add in special support for OSX if we want to
 *** 	   keep the profiles under the user creatd content
 **/
 const std::string GetUserProfilePath();

@@ -23,6 +23,7 @@
 	#include <limits.h>
 #endif
 
+// #include "gettext.h"
 #include <libintl.h>
 
 #include "system.h"
@@ -42,6 +43,19 @@ namespace hoa_system {
 
 SystemEngine* SystemManager = NULL;
 bool SYSTEM_DEBUG = false;
+
+
+
+string Translate(const string& text) {
+	// gettext is a C library so the gettext() function takes/returns a C-style char* string
+	return string(gettext(text.c_str()));
+}
+
+
+
+ustring UTranslate(const string& text) {
+	return MakeUnicodeString(Translate(text));
+}
 
 // -----------------------------------------------------------------------------
 // SystemTimer Class

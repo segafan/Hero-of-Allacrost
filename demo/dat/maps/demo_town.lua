@@ -293,59 +293,59 @@ function Load(m)
 	-- Dialogue with Laila
 	dialogue = hoa_map.MapDialogue(1);
 
-	text = hoa_utils.Translate("Laila, what's wrong? You have a worried look on your face.");
+	text = hoa_system.Translate("Laila, what's wrong? You have a worried look on your face.");
 	dialogue:AddText(text, 1000, 1, 0, false);
-	text = hoa_utils.Translate("You're going into the cave again, aren't you?");
+	text = hoa_system.Translate("You're going into the cave again, aren't you?");
 	dialogue:AddText(text, 2, 2, 0, false);
 
 	-- Are you going into the cave?
-	text = hoa_utils.Translate("Yes, I intend to...");
+	text = hoa_system.Translate("Yes, I intend to...");
 	dialogue:AddOption(text, 2, 0);
-	text = hoa_utils.Translate("No, of course not...");
+	text = hoa_system.Translate("No, of course not...");
 	dialogue:AddOption(text, 8, 0);
 	-- Additional options added for testing purposes
-	text = hoa_utils.Translate("Test Option #1");
+	text = hoa_system.Translate("Test Option #1");
 	dialogue:AddOption(text, -1, 0);
-	text = hoa_utils.Translate("Test Option #2");
+	text = hoa_system.Translate("Test Option #2");
 	dialogue:AddOption(text, -1, 0);
-	text = hoa_utils.Translate("Test Option #3");
+	text = hoa_system.Translate("Test Option #3");
 	dialogue:AddOption(text, -1, 0);
 
 	--Yes
-	text = hoa_utils.Translate("But why? Its dangerous in there!");
+	text = hoa_system.Translate("But why? Its dangerous in there!");
 	dialogue:AddText(text, 2, 3, 0, false);
-	text = hoa_utils.Translate("Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?");
+	text = hoa_system.Translate("Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?");
 	dialogue:AddText(text, 1000, 4, 0, false);
-	text = hoa_utils.Translate("I know that you're worried about me and I appreciate it, but you need to stop doing this.");
+	text = hoa_system.Translate("I know that you're worried about me and I appreciate it, but you need to stop doing this.");
 	dialogue:AddText(text, 1000, 5, 0, false);
-	text = hoa_utils.Translate(".....Alright, I'm sorry. Just be careful in there, okay?");
+	text = hoa_system.Translate(".....Alright, I'm sorry. Just be careful in there, okay?");
 	dialogue:AddText(text, 2, 6, 0, false);
-	text = hoa_utils.Translate("Will do. Thanks Laila.");
+	text = hoa_system.Translate("Will do. Thanks Laila.");
 	dialogue:AddText(text, 1000, 7, 0, false);
-	text = hoa_utils.Translate("You know Claudius, I could be of assistance to you in the cave. May I come with you?");
+	text = hoa_system.Translate("You know Claudius, I could be of assistance to you in the cave. May I come with you?");
 	dialogue:AddText(text, 2, 10, 0, false);
 
 	-- Allow Laila to join party?
-	text = hoa_utils.Translate("No way, you could be hurt!");
+	text = hoa_system.Translate("No way, you could be hurt!");
 	dialogue:AddOption(text, 10, 0);
-	text = hoa_utils.Translate("Your help would be great!");
+	text = hoa_system.Translate("Your help would be great!");
 	dialogue:AddOption(text, 12, 0);
 	--No
-	text = hoa_utils.Translate("Oh good. I was worried you were. Please tell me if you are Claudius, just so I can know...");
+	text = hoa_system.Translate("Oh good. I was worried you were. Please tell me if you are Claudius, just so I can know...");
 	dialogue:AddText(text, 2, 9, 0, false);
-	text = hoa_utils.Translate("Of course, I promise.");
+	text = hoa_system.Translate("Of course, I promise.");
 	dialogue:AddText(text, 1000, -1, 0, false);
 
 	-- Rejected
-	text = hoa_utils.Translate("Oh....ok then. You remember to be careful.");
+	text = hoa_system.Translate("Oh....ok then. You remember to be careful.");
 	dialogue:AddText(text, 2, 11, 0, false);
-	text = hoa_utils.Translate("I will Laila.");
+	text = hoa_system.Translate("I will Laila.");
 	dialogue:AddText(text, 1000, -1, 0, false);
 
 	-- Add to party
-	text = hoa_utils.Translate("Great, I'll be sure to help you any way I can.");
+	text = hoa_system.Translate("Great, I'll be sure to help you any way I can.");
 	dialogue:AddText(text, 2, 13, 1, false); -- Laila added to party and map sprite removed
-	text = hoa_utils.Translate("Laila has joined the party.");
+	text = hoa_system.Translate("Laila has joined the party.");
 	dialogue:AddText(text, 2, -1, 0, false);
 
 	laila:AddDialogueReference(1);
@@ -384,11 +384,11 @@ function Load(m)
 	-- Add Marcus Dialogue
 	dialogue = hoa_map.MapDialogue(2);
 
-	text = hoa_utils.Translate("Hey there son, how's the training going?");
+	text = hoa_system.Translate("Hey there son, how's the training going?");
 	dialogue:AddText(text, 3, 1, 0, false);
-	text = hoa_utils.Translate("Pretty well. The enemies in the cave aren't too tough.");
+	text = hoa_system.Translate("Pretty well. The enemies in the cave aren't too tough.");
 	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_utils.Translate("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.");
+	text = hoa_system.Translate("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.");
 	dialogue:AddText(text, 3, -1, 0, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
@@ -414,17 +414,17 @@ function Load(m)
 	-- Add Vanica's Dialogue #1
 	dialogue = hoa_map.MapDialogue(3);
 	dialogue:SetMaxViews(1);
-	text = hoa_utils.Translate("Oh, Claudius? You seemed puzzled.");
+	text = hoa_system.Translate("Oh, Claudius? You seemed puzzled.");
 	dialogue:AddText(text, 4, 1, 0, false);
-	text = hoa_utils.Translate("There are odd little icons above people's heads. What do they mean?");
+	text = hoa_system.Translate("There are odd little icons above people's heads. What do they mean?");
 	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_utils.Translate("That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear.");
+	text = hoa_system.Translate("That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear.");
 	dialogue:AddText(text, 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Add Vanica's Dialogue #2
 	dialogue = hoa_map.MapDialogue(4);
-	text = hoa_utils.Translate("And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more.");
+	text = hoa_system.Translate("And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more.");
 	dialogue:AddText(text, 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
@@ -450,7 +450,7 @@ function Load(m)
 
 	-- Add Alexander's dialogue
 	dialogue = hoa_map.MapDialogue(5);
-	text = hoa_utils.Translate("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.");
+	text = hoa_system.Translate("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.");
 	dialogue:AddText(text, 5, -1, 12000, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(5);
@@ -484,9 +484,9 @@ function Load(m)
 
 	-- Add Laine's Dialogue
 	dialogue = hoa_map.MapDialogue(6);
-	text = hoa_utils.Translate("The interior of my home is finally finished. Not too bad is it?");
+	text = hoa_system.Translate("The interior of my home is finally finished. Not too bad is it?");
 	dialogue:AddText(text, 6, 1, 0, false);
-	text = hoa_utils.Translate("After its fully furnished I'm sure it will look quite nice.");
+	text = hoa_system.Translate("After its fully furnished I'm sure it will look quite nice.");
 	dialogue:AddText(text, 1000, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(6);
@@ -518,7 +518,7 @@ function Load(m)
 
 	-- Add Torl's Dialogue
 	dialogue = hoa_map.MapDialogue(7);
-	text = hoa_utils.Translate("This village is boring! There's no one I can play with here!");
+	text = hoa_system.Translate("This village is boring! There's no one I can play with here!");
 	dialogue:AddText(text, 7, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(7);
@@ -537,7 +537,7 @@ function Load(m)
 
 	-- Add Female Merchant's Dialogue
 	dialogue = hoa_map.MapDialogue(8);
-	text = hoa_utils.Translate("I have merchandise for sale at affordable prices. Take a look.");
+	text = hoa_system.Translate("I have merchandise for sale at affordable prices. Take a look.");
 	dialogue:AddText(text, 8, -1, 2, false); -- Go to shop mode
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(8);
@@ -560,7 +560,7 @@ function Load(m)
 
 	-- Add Livia's Dialogue
 	dialogue = hoa_map.MapDialogue(9);
-	text = hoa_utils.Translate("I'm looking for my brother Torl. I sure hope he doesn't get into any trouble.");
+	text = hoa_system.Translate("I'm looking for my brother Torl. I sure hope he doesn't get into any trouble.");
 	dialogue:AddText(text, 9, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(9);
@@ -578,7 +578,7 @@ function Load(m)
 
 	-- Add Octavia's dialogue
 	dialogue = hoa_map.MapDialogue(10);
-	text = hoa_utils.Translate("So much work to do!");
+	text = hoa_system.Translate("So much work to do!");
 	dialogue:AddText(text, 10, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(10);

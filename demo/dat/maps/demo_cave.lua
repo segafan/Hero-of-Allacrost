@@ -355,22 +355,22 @@ upper_layer[59] = { 287, 351, 382, 380, 381, 382, 383, 348, 349, 350, 383, 412, 
 
 dialogue_text = {}
 -- Dialogue #1
-dialogue_text[0] = hoa_utils.Translate("Claudius, what are you doing here?");
-dialogue_text[1] = hoa_utils.Translate("I came in this cave for training.");
-dialogue_text[2] = hoa_utils.Translate("Well, good job getting this far all by yourself. This is a pretty dangerous place for someone as inexperienced as yourself.");
-dialogue_text[3] = hoa_utils.Translate("Yes well, I have to train hard if I want to be able to spar with you evenly one day, Jonas. By the way, what were you doing?");
-dialogue_text[4] = hoa_utils.Translate("The cave goes deeper than this, but it appears a collapse here has blocked the way. I was trying to find an alternative passage, but it appears that the inner chambers are now completely inaccessible.");
-dialogue_text[5] = hoa_utils.Translate("In any case, this is as far as you can go in this demo, so thanks for.....");
-dialogue_text[6] = hoa_utils.Translate("Wait, what was that noise? Hey, look out!");
+dialogue_text[0] = hoa_system.Translate("Claudius, what are you doing here?");
+dialogue_text[1] = hoa_system.Translate("I came in this cave for training.");
+dialogue_text[2] = hoa_system.Translate("Well, good job getting this far all by yourself. This is a pretty dangerous place for someone as inexperienced as yourself.");
+dialogue_text[3] = hoa_system.Translate("Yes well, I have to train hard if I want to be able to spar with you evenly one day, Jonas. By the way, what were you doing?");
+dialogue_text[4] = hoa_system.Translate("The cave goes deeper than this, but it appears a collapse here has blocked the way. I was trying to find an alternative passage, but it appears that the inner chambers are now completely inaccessible.");
+dialogue_text[5] = hoa_system.Translate("In any case, this is as far as you can go in this demo, so thanks for.....");
+dialogue_text[6] = hoa_system.Translate("Wait, what was that noise? Hey, look out!");
 -- Dialogue #2
-dialogue_text[7] = hoa_utils.Translate("Phew, that was a shock. I've never seen such foes wandering in this cave. Nice job taking care of them Claudius, I can definitely tell that your swordsmanship has improved.");
-dialogue_text[8] = hoa_utils.Translate("Thank you. By the way...why didn't you fight with me in that battle?");
-dialogue_text[9] = hoa_utils.Translate("Ah, err...well you see, you'll never reach your full potential if you always have your seniors stepping in for you.");
-dialogue_text[10] = hoa_utils.Translate("I see.");
-dialogue_text[11] = hoa_utils.Translate("And besides, I don't even have my own battle sprite graphics yet! The development team needs more artists to help move the game along!");
-dialogue_text[12] = hoa_utils.Translate(".....");
+dialogue_text[7] = hoa_system.Translate("Phew, that was a shock. I've never seen such foes wandering in this cave. Nice job taking care of them Claudius, I can definitely tell that your swordsmanship has improved.");
+dialogue_text[8] = hoa_system.Translate("Thank you. By the way...why didn't you fight with me in that battle?");
+dialogue_text[9] = hoa_system.Translate("Ah, err...well you see, you'll never reach your full potential if you always have your seniors stepping in for you.");
+dialogue_text[10] = hoa_system.Translate("I see.");
+dialogue_text[11] = hoa_system.Translate("And besides, I don't even have my own battle sprite graphics yet! The development team needs more artists to help move the game along!");
+dialogue_text[12] = hoa_system.Translate(".....");
 -- Dialogue #3
-dialogue_text[13] = hoa_utils.Translate("Well, this truly is the end of the demo. Thanks for playing.");
+dialogue_text[13] = hoa_system.Translate("Well, this truly is the end of the demo. Thanks for playing.");
 
 
 function Load(m)
@@ -386,7 +386,7 @@ function Load(m)
 
 	-- Create the player''s sprite
 	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Claudius"));
+	sprite:SetName(hoa_system.Translate("Claudius"));
 	sprite:SetObjectID(1000);
 	sprite:SetContext(1);
 	sprite:SetXPosition(5, 0.5);
@@ -406,7 +406,7 @@ function Load(m)
 	map:SetCamera(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName(hoa_utils.Translate("Jonas"));
+	sprite:SetName(hoa_system.Translate("Jonas"));
 	sprite:SetObjectID(1);
 	sprite:SetContext(1);
 	sprite:SetXPosition(74, 0.0);

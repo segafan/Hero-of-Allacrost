@@ -643,35 +643,35 @@ function Load(m)
 	-- Dialogue with kyle (opening)
 	dialogue = hoa_map.MapDialogue(1);
 
-	text = hoa_utils.Translate("I’m just saying that I’m only doing this because of my father. He was a knight, so now I have to be one. If it was my choice I would be far away from here.");
+	text = hoa_system.Translate("I’m just saying that I’m only doing this because of my father. He was a knight, so now I have to be one. If it was my choice I would be far away from here.");
 	dialogue:AddText(text, 2, 1, 0, false);
-	text = hoa_utils.Translate("And go where? You should be happy; it’s an honor to serve your country.");
+	text = hoa_system.Translate("And go where? You should be happy; it’s an honor to serve your country.");
 	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_utils.Translate("I can do that on my own, without blindly following orders.");
+	text = hoa_system.Translate("I can do that on my own, without blindly following orders.");
 	dialogue:AddText(text, 2, 3, 0, false);
-	text = hoa_utils.Translate("It’s more effective to work together, and our leadership has our best interest at heart.");
+	text = hoa_system.Translate("It’s more effective to work together, and our leadership has our best interest at heart.");
 	dialogue:AddText(text, 1000, 4, 0, false);
-	text = hoa_utils.Translate("That’s where you’re wrong, Claudius. As far as they’re concerned we’re expendable.");
+	text = hoa_system.Translate("That’s where you’re wrong, Claudius. As far as they’re concerned we’re expendable.");
 	dialogue:AddText(text, 2, 5, 0, false);
-	text = hoa_utils.Translate("You’re crazy.");
+	text = hoa_system.Translate("You’re crazy.");
 	dialogue:AddText(text, 1000, 6, 0, false);
-	text = hoa_utils.Translate("All I know is something has to give. I can’t keep on like this.");
+	text = hoa_system.Translate("All I know is something has to give. I can’t keep on like this.");
 	dialogue:AddText(text, 2, 7, 0, false);
-	text = hoa_utils.Translate("You’ll be all right. Just remember that a knight is selfless, and the well being of everyone is more important than the individual.");
+	text = hoa_system.Translate("You’ll be all right. Just remember that a knight is selfless, and the well being of everyone is more important than the individual.");
 	dialogue:AddText(text, 1000, 8, 0, false);
-	text = hoa_utils.Translate("I just don’t understand you sometimes...");
+	text = hoa_system.Translate("I just don’t understand you sometimes...");
 	dialogue:AddText(text, 2, 9, 0, false);
-	text = hoa_utils.Translate("Hey, what time is it?");
+	text = hoa_system.Translate("Hey, what time is it?");
 	dialogue:AddText(text, 1000, 10, 0, false);
-	text = hoa_utils.Translate("I don’t know, why?");
+	text = hoa_system.Translate("I don’t know, why?");
 	dialogue:AddText(text, 2, 11, 0, false);
-	text = hoa_utils.Translate("Don’t we have training today?");
+	text = hoa_system.Translate("Don’t we have training today?");
 	dialogue:AddText(text, 1000, 12, 0, false);
-	text = hoa_utils.Translate("Who cares?");
+	text = hoa_system.Translate("Who cares?");
 	dialogue:AddText(text, 2, 13, 0, false);
-	text = hoa_utils.Translate("I think we do. Come on!");
+	text = hoa_system.Translate("I think we do. Come on!");
 	dialogue:AddText(text, 1000, 14, 1, false);
-	text = hoa_utils.Translate("Kyle has joined the party.");
+	text = hoa_system.Translate("Kyle has joined the party.");
 	dialogue:AddText(text, 2, -1, 0, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
@@ -680,7 +680,7 @@ function Load(m)
 	-- Dialogue with kyle (in the unlikely event that you would talk to him)
 	dialogue = hoa_map.MapDialogue(11);
 
-	text = hoa_utils.Translate("");
+	text = hoa_system.Translate("");
 	dialogue:AddText(text, 2, -1, 0, false);
 	
 	kyle:AddDialogueReference(11);
@@ -693,77 +693,77 @@ function Load(m)
 	-- Add Captain Dialogue
 	dialogue = hoa_map.MapDialogue(2);
 
-	text = hoa_utils.Translate("You're late.");
+	text = hoa_system.Translate("You're late.");
 	dialogue:AddText(text, 3, 1, 0, false);
-	text = hoa_utils.Translate("Sorry, sir, I -");
+	text = hoa_system.Translate("Sorry, sir, I -");
 	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_utils.Translate("It’s my fault, sir. I dragged Claudius off this morning, and because of it we weren’t able to arrive on time.");
+	text = hoa_system.Translate("It’s my fault, sir. I dragged Claudius off this morning, and because of it we weren’t able to arrive on time.");
 	dialogue:AddText(text, 2, 3, 0, false);	
-	text = hoa_utils.Translate("Very well; Kyle, you will be punished for this later. For now find a partner to train with.");
+	text = hoa_system.Translate("Very well; Kyle, you will be punished for this later. For now find a partner to train with.");
 	dialogue:AddText(text, 3, 4, 0, false);
-	text = hoa_utils.Translate("All right buddy, let's go.");
+	text = hoa_system.Translate("All right buddy, let's go.");
 	dialogue:AddText(text, 2, 5, 0, false);
-	text = hoa_utils.Translate("Not him. Claudius trains with me today.");
+	text = hoa_system.Translate("Not him. Claudius trains with me today.");
 	dialogue:AddText(text, 3, 6, 0, false);
-	text = hoa_utils.Translate("Kyle leaves.");
+	text = hoa_system.Translate("Kyle leaves.");
 	dialogue:AddText(text, 2, -1, 3, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(3);
 
-	text = hoa_utils.Translate("Show me your slicing attack technique.");
+	text = hoa_system.Translate("Show me your slicing attack technique.");
 	dialogue:AddText(text, 3, 1, 0, false);
-	text = hoa_utils.Translate("Hi-ya!");
+	text = hoa_system.Translate("Hi-ya!");
 	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_utils.Translate("Good Claudius. Remember to never take your eye off your target. Now show me the proper form for a parry.");
+	text = hoa_system.Translate("Good Claudius. Remember to never take your eye off your target. Now show me the proper form for a parry.");
 	dialogue:AddText(text, 3, 3, 0, false);
-	text = hoa_utils.Translate("Claudius blocks.");
+	text = hoa_system.Translate("Claudius blocks.");
 	dialogue:AddText(text, 1000, 4, 0, false);
-	text = hoa_utils.Translate("Nicely done.");
+	text = hoa_system.Translate("Nicely done.");
 	dialogue:AddText(text, 3, 5, 0, false);
-	text = hoa_utils.Translate("Thank you, sir.");
+	text = hoa_system.Translate("Thank you, sir.");
 	dialogue:AddText(text, 1000, 6, 0, false);
-	text = hoa_utils.Translate("Let’s see how you fare when the opponent strikes back. Get down here Kyle!");
+	text = hoa_system.Translate("Let’s see how you fare when the opponent strikes back. Get down here Kyle!");
 	dialogue:AddText(text, 3, 7, 0, false);
-	text = hoa_utils.Translate("Where's that friend of yours run off to this time?");
+	text = hoa_system.Translate("Where's that friend of yours run off to this time?");
 	dialogue:AddText(text, 3, 8, 0, false);
-	text = hoa_utils.Translate("I don’t know, sir. (Not again, Kyle...)");
+	text = hoa_system.Translate("I don’t know, sir. (Not again, Kyle...)");
 	dialogue:AddText(text, 1000, 9, 0, false);
-	text = hoa_utils.Translate("All right, you’ll face me then.");
+	text = hoa_system.Translate("All right, you’ll face me then.");
 	dialogue:AddText(text, 3, 10, 0, false);
-	text = hoa_utils.Translate("Sir?");
+	text = hoa_system.Translate("Sir?");
 	dialogue:AddText(text, 1000, 11, 0, false);
-	text = hoa_utils.Translate("Draw your weapon, soldier.");
+	text = hoa_system.Translate("Draw your weapon, soldier.");
 	dialogue:AddText(text, 3, 12, 0, false);
-	text = hoa_utils.Translate("Remember what you've learned.");
+	text = hoa_system.Translate("Remember what you've learned.");
 	dialogue:AddText(text, 3, 13, 0, false);
-	text = hoa_utils.Translate("Well done, Claudius.");
+	text = hoa_system.Translate("Well done, Claudius.");
 	dialogue:AddText(text, 3, 14, 0, false);
-	text = hoa_utils.Translate("That's all for today.");
+	text = hoa_system.Translate("That's all for today.");
 	dialogue:AddText(text, 3, 15, 0, false);
-	text = hoa_utils.Translate("Yes, sir.");
+	text = hoa_system.Translate("Yes, sir.");
 	dialogue:AddText(text, 1000, 16, 0, false);
-	text = hoa_utils.Translate("Come with me, Claudius, we need to talk.");
+	text = hoa_system.Translate("Come with me, Claudius, we need to talk.");
 	dialogue:AddText(text, 3, -1, 5, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(4);
 
-	text = hoa_utils.Translate("You and Kyle are close.");
+	text = hoa_system.Translate("You and Kyle are close.");
 	dialogue:AddText(text, 3, 1, 0, false);
-	text = hoa_utils.Translate("We are, sir.");
+	text = hoa_system.Translate("We are, sir.");
 	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_utils.Translate("This is difficult, but it needs to be said. You have a lot of potential, Claudius, but I worry about you. I know Kyle is your friend, but I fear he is becoming an impediment to you in your quest for knighthood.");
+	text = hoa_system.Translate("This is difficult, but it needs to be said. You have a lot of potential, Claudius, but I worry about you. I know Kyle is your friend, but I fear he is becoming an impediment to you in your quest for knighthood.");
 	dialogue:AddText(text, 3, 3, 0, false);
-	text = hoa_utils.Translate("Kyle is a good man, sir. He just messes up sometimes.");
+	text = hoa_system.Translate("Kyle is a good man, sir. He just messes up sometimes.");
 	dialogue:AddText(text, 1000, 4, 0, false);
-	text = hoa_utils.Translate("Regardless, I want you to seriously consider your priorities. Becoming a knight takes sacrifice, and sometimes that sacrifice is spending less time with the people we care about.");
+	text = hoa_system.Translate("Regardless, I want you to seriously consider your priorities. Becoming a knight takes sacrifice, and sometimes that sacrifice is spending less time with the people we care about.");
 	dialogue:AddText(text, 3, 5, 0, false);
-	text = hoa_utils.Translate("I understand, sir.");
+	text = hoa_system.Translate("I understand, sir.");
 	dialogue:AddText(text, 1000, 6, 0, false);
-	text = hoa_utils.Translate("Just think about it. Now, do me a favor and find Kyle. I need to have a talk with him as well.");
+	text = hoa_system.Translate("Just think about it. Now, do me a favor and find Kyle. I need to have a talk with him as well.");
 	dialogue:AddText(text, 3, -1, 6, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
@@ -775,7 +775,7 @@ function Load(m)
 	-- Generic Karlate Sprite (training site guard #1)
 	sprite = ConstructSprite("Karlate", 4, 152, 78, 0.0, 0.0);
 	dialogue = hoa_map.MapDialogue(5);
-	text = hoa_utils.Translate("This is the Karlate training site.");
+	text = hoa_system.Translate("This is the Karlate training site.");
 	dialogue:AddText(text, 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(5);
@@ -784,7 +784,7 @@ function Load(m)
 	-- Generic Karlate Sprite (training site guard #2)
 	sprite = ConstructSprite("Karlate", 5, 160, 78, 0.0, 0.0);
 	dialogue = hoa_map.MapDialogue(6);
-	text = hoa_utils.Translate("Hi, Claudius.");
+	text = hoa_system.Translate("Hi, Claudius.");
 	dialogue:AddText(text, 5, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(6);
@@ -793,43 +793,43 @@ function Load(m)
 	-- Generic Karlate Sprite (armorer)
 	sprite = ConstructSprite("Karlate", 6, 140, 38, 0.0, 0.0);
 	dialogue = hoa_map.MapDialogue(7);
-	text = hoa_utils.Translate("Hello, Claudius.  Is your equipment in order?");
+	text = hoa_system.Translate("Hello, Claudius.  Is your equipment in order?");
 	dialogue:AddText(text, 6, -1, 2, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(7);
 	map:AddGroundObject(sprite);
 
 	dialogue = hoa_map.MapDialogue(8);
-	text = hoa_utils.Translate("Claudius?  Claudius!  WAKE UP!");
+	text = hoa_system.Translate("Claudius?  Claudius!  WAKE UP!");
 	dialogue:AddText(text, 5, 1, 0, false);
-	text = hoa_utils.Translate("Huh?  What?");
+	text = hoa_system.Translate("Huh?  What?");
 	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_utils.Translate("Get your gear and let's go!");
+	text = hoa_system.Translate("Get your gear and let's go!");
 	dialogue:AddText(text, 5, 3, 0, false);
-	text = hoa_utils.Translate("What's going on?");
+	text = hoa_system.Translate("What's going on?");
 	dialogue:AddText(text, 1000, 4, 0, false);
-	text = hoa_utils.Translate("The treasury!  A thief has broken in and stolen everything.  The captain has called a man hunt.  Now equip yourself and meet us out front.");
+	text = hoa_system.Translate("The treasury!  A thief has broken in and stolen everything.  The captain has called a man hunt.  Now equip yourself and meet us out front.");
 	dialogue:AddText(text, 5, 5, 0, false);
-	text = hoa_utils.Translate("Come on, Kyle, let's go!");
+	text = hoa_system.Translate("Come on, Kyle, let's go!");
 	dialogue:AddText(text, 1000, 6, 0, false);
-	text = hoa_utils.Translate("...Kyle?");
+	text = hoa_system.Translate("...Kyle?");
 	dialogue:AddText(text, 1000, 7, 0, false);
-	text = hoa_utils.Translate("Oh no...");
+	text = hoa_system.Translate("Oh no...");
 	dialogue:AddText(text, 1000, 8, 0, false);
-	text = hoa_utils.Translate("For those of you who don't know, a thief has broken into the treasury and stolen a vast quantity of gold.  It is up to us to capture the criminal and return what they have taken.  It's believed that the robbery occurred no more than 20 minutes ago, so the thief can't be far.  Everyone split up and comb the town.");
+	text = hoa_system.Translate("For those of you who don't know, a thief has broken into the treasury and stolen a vast quantity of gold.  It is up to us to capture the criminal and return what they have taken.  It's believed that the robbery occurred no more than 20 minutes ago, so the thief can't be far.  Everyone split up and comb the town.");
 	dialogue:AddText(text, 5, 9, 0, false);
-	text = hoa_utils.Translate("Sir?");
+	text = hoa_system.Translate("Sir?");
 	dialogue:AddText(text, 1000, 10, 0, false);
-	text = hoa_utils.Translate("Yes, Claudius?");
+	text = hoa_system.Translate("Yes, Claudius?");
 	dialogue:AddText(text, 5, 11, 0, false);
-	text = hoa_utils.Translate("...Nothing.");
+	text = hoa_system.Translate("...Nothing.");
 	dialogue:AddText(text, 1000, -1, 7, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Generic Karlate Sprite
 	sprite = ConstructSprite("Karlate", 7, 142, 30, 0.0, 0.0);
 	dialogue = hoa_map.MapDialogue(9);
-	text = hoa_utils.Translate("Awaiting orders, sir.");
+	text = hoa_system.Translate("Awaiting orders, sir.");
 	dialogue:AddText(text, 4, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 	sprite:AddDialogueReference(9);
@@ -915,7 +915,7 @@ function Load(m)
 		-- Generic Karlate Sprite, wakes up Claudius
 		wakeupguy = ConstructSprite("Karlate", 8, 130, 15, 0.0, 0.0);
 		dialogue = hoa_map.MapDialogue(10);
-		text = hoa_utils.Translate("Where did the culprit go?");
+		text = hoa_system.Translate("Where did the culprit go?");
 		dialogue:AddText(text, 4, -1, 0, false);
 		dialogue_supervisor:AddDialogue(dialogue);
 		wakeupguy:AddDialogueReference(10);

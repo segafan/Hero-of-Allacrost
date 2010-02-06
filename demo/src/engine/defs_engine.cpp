@@ -112,6 +112,7 @@ void BindEngineToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_system")
 	[
+		def("Translate", &hoa_system::Translate),
 		class_<SystemEngine>("GameSystem")
 			.def("GetUpdateTime", &SystemEngine::GetUpdateTime)
 			.def("SetPlayTime", &SystemEngine::SetPlayTime)

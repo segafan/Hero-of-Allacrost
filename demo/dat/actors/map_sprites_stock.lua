@@ -6,7 +6,7 @@ local VERY_SLOW_SPEED = hoa_map.MapMode.VERY_SLOW_SPEED;
 local VERY_FAST_SPEED = hoa_map.MapMode.VERY_FAST_SPEED;
 
 sprites["Claudius"] = {
-	name = hoa_utils.Translate("Claudius"),
+	name = hoa_system.Translate("Claudius"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -19,7 +19,7 @@ sprites["Claudius"] = {
 }
 
 sprites["Laila"] = {
-	name = hoa_utils.Translate("Laila"),
+	name = hoa_system.Translate("Laila"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -32,7 +32,7 @@ sprites["Laila"] = {
 }
 
 sprites["Kyle"] = {
-	name = hoa_utils.Translate("Kyle"),
+	name = hoa_system.Translate("Kyle"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -44,7 +44,7 @@ sprites["Kyle"] = {
 }
 
 sprites["Captain"] = {
-	name = hoa_utils.Translate("Captain"),
+	name = hoa_system.Translate("Captain"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -55,7 +55,7 @@ sprites["Captain"] = {
 }
 
 sprites["Marcus"] = {
-	name = hoa_utils.Translate("Marcus"),
+	name = hoa_system.Translate("Marcus"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -67,7 +67,7 @@ sprites["Marcus"] = {
 }
 
 sprites["Vanica"] = {
-	name = hoa_utils.Translate("Vanica"),
+	name = hoa_system.Translate("Vanica"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -79,7 +79,7 @@ sprites["Vanica"] = {
 }
 
 sprites["Alexander"] = {
-	name = hoa_utils.Translate("Alexander"),
+	name = hoa_system.Translate("Alexander"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -90,7 +90,7 @@ sprites["Alexander"] = {
 }
 
 sprites["Laine"] = {
-	name = hoa_utils.Translate("Laine"),
+	name = hoa_system.Translate("Laine"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -101,7 +101,7 @@ sprites["Laine"] = {
 }
 
 sprites["Torl"] = {
-	name = hoa_utils.Translate("Torl"),
+	name = hoa_system.Translate("Torl"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -112,7 +112,7 @@ sprites["Torl"] = {
 }
 
 sprites["Female Merchant"] = {
-	name = hoa_utils.Translate("Female Merchant"),
+	name = hoa_system.Translate("Female Merchant"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -123,7 +123,7 @@ sprites["Female Merchant"] = {
 }
 
 sprites["Livia"] = {
-	name = hoa_utils.Translate("Livia"),
+	name = hoa_system.Translate("Livia"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
@@ -134,7 +134,7 @@ sprites["Livia"] = {
 }
 
 sprites["Octavia"] = {
-	name = hoa_utils.Translate("Octavia"),
+	name = hoa_system.Translate("Octavia"),
 	coll_half_width = 1.0,
 	coll_height = 2.0,
 	img_half_width = 1.0,
@@ -145,7 +145,7 @@ sprites["Octavia"] = {
 }
 
 sprites["Karlate"] = {
-	name = hoa_utils.Translate("Karlate"),
+	name = hoa_system.Translate("Karlate"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
