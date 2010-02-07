@@ -492,7 +492,7 @@ function Load(m)
 		claudius_sprite:SetYPosition(50, 0);
 		event_supervisor:StartEvent(10000);
 	elseif (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true) then
-		-- do we need to do anything here?  just don't let it fall through to the next one
+		-- do we need to do anything here?  just do not let it fall through to the next one
 	elseif (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
 		-- executes if we just fought the beast in the desert
 		claudius_sprite:SetXPosition(66, 0);
@@ -507,7 +507,7 @@ function Load(m)
 	end
 
 	map:AddGroundObject(claudius_sprite);    -- add Claudius to map
-	map:SetCamera(claudius_sprite);          -- Set the camera to focus on the player's sprite
+	map:SetCamera(claudius_sprite);          -- Set the camera to focus on the player sprite
 end -- function Load()
 
 
@@ -661,7 +661,7 @@ end
 map_functions[3] = function()
 	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("kyle_leaves", 1);
 	GlobalManager:RemoveCharacter(KYLE);
-	-- set Kyle's path to the bottom of the screen
+	-- set Kyle''s path to the bottom of the screen
 	event_supervisor:StartEvent(10001);
 end
 

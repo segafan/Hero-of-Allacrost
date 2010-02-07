@@ -663,10 +663,10 @@ function Load(m)
 	local chest;
 	local text;
 
-	-- Create the player's sprite
+	-- Create the player sprite
 	sprite = ConstructSprite("Claudius", 1000, 25, 7);
 	map:AddGroundObject(sprite);
-	-- Set the camera to focus on the player''s sprite
+	-- Set the camera to focus on the player sprite
 	map:SetCamera(sprite);
 
 	-- Add Kyle sprite

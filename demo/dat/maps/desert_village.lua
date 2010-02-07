@@ -614,7 +614,7 @@ context_01 = { 0, 0, 0, -1, 0, 0, 1, -1, 0, 0, 2, -1, 0, 0, 3, -1, 0, 0, 4, -1, 
 
 -- Allacrost map editor end. Do not edit this line. --
 
--- these are NPC's who will need to be accessed by multiple functions
+-- These are NPCs who will need to be accessed by multiple functions
 kyle = nil;
 captain = nil;
 wakeupguy = nil;
@@ -925,14 +925,14 @@ function Load(m)
 		sprite = ConstructSprite("Claudius", 1000, 125, 15);      -- place Claudius in the barracks (coordinates)
 		sprite:SetContext(2);                                     -- place Claudius in the barracks (context)
 		map:AddGroundObject(sprite);                              -- add Claudius to map
-		map:SetCamera(sprite);                                    -- Set the camera to focus on the player's sprite
+		map:SetCamera(sprite);                                    -- Set the camera to focus on the player''s sprite
 		event_supervisor:StartEvent(23001);                       -- start dialogue
 	else
 		-- No event happens in town right now, so just start at the entrance
 		-- TODO: determine which entrance to start at
 		sprite = ConstructSprite("Claudius", 1000, 45, 220);      -- place Claudius at the south entrance
 		map:AddGroundObject(sprite);                              -- add Claudius to map
-		map:SetCamera(sprite);                                    -- Set the camera to focus on the player's sprite
+		map:SetCamera(sprite);                                    -- Set the camera to focus on the player''s sprite
 	end
 end -- function Load()
 
@@ -952,7 +952,7 @@ function Update()
 	end
 end
 
--- Removes Kyle's sprite from the map, adds Kyle to party
+-- Removes Kyle''s sprite from the map, adds Kyle to party
 map_functions[1] = function()
 	kyle:SetContext(2);
 	kyle:SetVisible(false);
@@ -966,7 +966,7 @@ map_functions[1] = function()
 end
 
 -- Shop setup function (Karlate armory)
--- TODO: Remove Laila's equipment
+-- TODO: Remove Laila''s equipment
 map_functions[2] = function()
 	LoadNewShop(1, 5, 4, 5, 3001, 5, 3002, 5, 10002, 5, 10502, 5, 20002, 5, 30002, 5, 40002, 5, 50502, 5);
 end
@@ -981,7 +981,7 @@ map_functions[3] = function()
 	kyle:SetUpdatable(true);
 	kyle:SetXPosition(152, 0);
 	kyle:SetYPosition(40, 0);
-	-- set Kyle's path to the bottom of the screen, then let him disappear
+	-- set Kyle''s path to the bottom of the screen, then let him disappear
 	event = hoa_map.PathMoveSpriteEvent(10001, kyle, 152, 150);
 	event_supervisor:RegisterEvent(event);
 	event_supervisor:StartEvent(10001);
@@ -1012,7 +1012,7 @@ end
 
 -- after briefing Claudius, generic Karlate leaves
 map_functions[7] = function()
-	-- set Kyle's path to the bottom of the screen, then let him disappear
+	-- set Kyle''s path to the bottom of the screen, then let him disappear
 	event = hoa_map.PathMoveSpriteEvent(10002, wakeupguy, 152, 150);
 	event_supervisor:RegisterEvent(event);
 	event_supervisor:StartEvent(10002);
