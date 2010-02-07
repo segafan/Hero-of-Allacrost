@@ -16,6 +16,8 @@
 
 #ifdef _WIN32
 	#include <direct.h>
+	#include <stdlib.h>          // defines _MAX_PATH constant
+	#define PATH_MAX _MAX_PATH   // redefine _MAX_PATH to be compatible with Darwin's PATH_MAX
 #elif defined __MACH__
 	#include <unistd.h>
 	#include <cstdlib>
@@ -198,7 +200,7 @@ bool SystemEngine::SingletonInitialize() {
 	setlocale(LC_ALL, "");
 	setlocale(LC_NUMERIC, "C");
 
-	#ifdef __MACH__
+	#if defined(_WIN32) || defined(__MACH__)
 		char buffer[PATH_MAX];
 		// Get the current working directory.
 		string cwd(getcwd(buffer, PATH_MAX));
@@ -227,6 +229,9 @@ bool SystemEngine::SingletonInitialize() {
 		bind_textdomain_codeset(PACKAGE, "UTF-8");
 		textdomain(PACKAGE);
 	#endif
+
+	// Called here to set the default English language to use nice quote characters.
+	SetLanguage("en");
 
 	return true;
 }
@@ -296,16 +301,12 @@ void SystemEngine::SetLanguage(std::string lang) {
 	if (lang.size() != 2) {
 		return;
 	}
-// 	for (uint32 i = 0; i < SUPPORTED_LANGUAGES.size(); i++) {
-// 		if (lang == SUPPORTED_LANGUAGES[i]) {
-// 			_language = lang;
-// 			return;
-// 		}
-// 	}
-//
-// 	cerr << "SETTINGS ERROR: attempt to set unsupported language \"" << lang << "\" failed" << endl;
-	_language = lang;
 
+	// Makes English use nice quote characters instead of ugly ones.
+	if (lang == "en")
+		_language = "en@quot";
+	else
+		_language = lang;
 
 	/// @TODO, implement a cross-platform wrapper for setenv
 	#ifdef _WIN32
@@ -313,7 +314,6 @@ void SystemEngine::SetLanguage(std::string lang) {
 	#else
 		setenv ("LANGUAGE", _language.c_str(), 1);
 	#endif
-
 }
 
 
