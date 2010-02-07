@@ -27,6 +27,8 @@
 
 namespace hoa_gui {
 
+  //! [phuedx] Should these constants not be in a core settings file?
+
 //! \brief The number of milliseconds that the menu cursor blinks when in the blinking state
 const int32 VIDEO_CURSOR_BLINK_RATE = 40;
 
@@ -110,6 +112,22 @@ enum SelectMode {
 	//! \note If you press confirm on one item and confirm again on a different item, the two items get switched.
 	VIDEO_SELECT_DOUBLE  =  1,
 	VIDEO_SELECT_TOTAL   =  2
+};
+  
+enum HORIZONTAL_ARROWS_POSITION {
+  H_POSITION_INVALID = -1,
+  H_POSITION_BOTTOM = 0,
+  H_POSITION_MIDDLE = 1,
+  H_POSITION_TOP = 2,
+  H_POSITION_TOTAL = 3
+};
+  
+enum VERTICAL_ARROWS_POSITION {
+  V_POSITION_INVALID = -1,
+  V_POSITION_LEFT = 0,
+  V_POSITION_CENTER = 1,
+  V_POSITION_RIGHT = 2,
+  V_POSITION_TOTAL = 3
 };
 
 
@@ -415,6 +433,16 @@ public:
 	**/
 	void SetCursorState(CursorState state);
 
+  /** \brief Sets the horizontal arrows position
+  *** \param position The position to set
+  **/
+  void SetHorizontalArrowsPosition(HORIZONTAL_ARROWS_POSITION position);
+
+  /** \brief Sets the vertical arrows position
+   *** \param position The position to set
+   **/  
+  void SetVerticalArrowsPosition(VERTICAL_ARROWS_POSITION position);
+  
 	/** \brief Checks if the option box is in the process of scrolling
 	*** \return True if the option box is scrolling, false if it is not
 	**/
@@ -543,12 +571,19 @@ private:
 
 	//! \brief Set to true if the box is currently in the middle of scrolling
 	bool _scrolling;
-
+  
 	//! \brief The timer used for controlling option scrolling
 	int32 _scroll_time;
 
 	//! \brief Indicates the scrolling direction; 1 for down or -1 for up
 	int32 _scroll_direction;
+  
+  //! \brief The position of the horizontal scroll arrows
+  HORIZONTAL_ARROWS_POSITION _horizontal_arrows_position;
+  
+  //! \brief The position of the vertical scroll arrows
+  VERTICAL_ARROWS_POSITION _vertical_arrows_position;
+  
 	//@}
 
 	// ---------- Private methods

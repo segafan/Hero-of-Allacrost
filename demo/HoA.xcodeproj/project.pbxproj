@@ -1200,7 +1200,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
 				USER_HEADER_SEARCH_PATHS = "../allacrost-dep/frameworks/SDL.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
