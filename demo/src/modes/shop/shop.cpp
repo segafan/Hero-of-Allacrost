@@ -1177,6 +1177,7 @@ void ShopMode::Initialize() {
 		// Otherwise, add the shop object to the list
 		else {
 			ShopObject new_shop_object(i->second, false);
+			new_shop_object.IncrementOwnCount(i->second->GetCount());
 			_shop_objects.insert(make_pair(i->second->GetID(), new_shop_object));
 		}
 	}
