@@ -115,6 +115,8 @@ void ScriptEngine::_RemoveOpenFile(ScriptDescriptor* sd) {
 
 
 lua_State *ScriptEngine::_CheckForPreviousLuaState(const std::string &filename) {
+	return NULL; // TEMP, see todo notes in script.h
+
 	if (_open_threads.find(filename) != _open_threads.end())
 		return _open_threads[filename];
 	else
