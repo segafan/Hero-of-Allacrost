@@ -238,6 +238,9 @@ private:
 	//! \brief Maintains a list of all script files that are currently open
 	std::map<std::string, ScriptDescriptor*> _open_files;
 
+	// TODO: not re-opening Lua files introduces serious problems (invalid data being read) and conflicts when
+	// two files share the same variable name are opened in succession. I believe this "feature" should be
+	// removed, but I'm leaving it here for now until we understand the situation completely.
 	/** \brief Maintains a cache of opened lua threads
 	*** This is done so that a file that has already been loaded into the lua state will not be loaded again.
 	*** Instead the lua_thread will be returned.
@@ -253,6 +256,8 @@ private:
 	//! \brief Removes an open file from the list of open files
 	void _RemoveOpenFile(ScriptDescriptor* sd);
 
+	// TODO: related to the to-do note above. I don't think this function should be used. For now it
+	// always returns NULL.
 	/** \brief Checks for the existence of a previously opened lua state from that filename.
 	*** This should class because the filename contains the full path
 	***
