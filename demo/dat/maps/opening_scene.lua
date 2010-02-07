@@ -187,43 +187,7 @@ function Load(m)
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(sprite);
 
-
-	-- Dialogue with kyle (opening)
-	dialogue = hoa_map.MapDialogue(1);
-
-	text = hoa_system.Translate("I’m just saying that I’m only doing this because of my father. He was a knight, so now I have to be one. If it was my choice I would be far away from here.");
-	dialogue:AddText(text, 2, 1, 0, false);
-	text = hoa_system.Translate("And go where? You should be happy; it’s an honor to serve your country.");
-	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_system.Translate("I can do that on my own, without blindly following orders.");
-	dialogue:AddText(text, 2, 3, 0, false);
-	text = hoa_system.Translate("It’s more effective to work together, and our leadership has our best interest at heart.");
-	dialogue:AddText(text, 1000, 4, 0, false);
-	text = hoa_system.Translate("That’s where you’re wrong, Claudius. As far as they’re concerned we’re expendable.");
-	dialogue:AddText(text, 2, 5, 0, false);
-	text = hoa_system.Translate("You’re crazy.");
-	dialogue:AddText(text, 1000, 6, 0, false);
-	text = hoa_system.Translate("All I know is something has to give. I can’t keep on like this.");
-	dialogue:AddText(text, 2, 7, 0, false);
-	text = hoa_system.Translate("You’ll be all right. Just remember that a knight is selfless, and the well being of everyone is more important than the individual.");
-	dialogue:AddText(text, 1000, 8, 0, false);
-	text = hoa_system.Translate("I just don’t understand you sometimes...");
-	dialogue:AddText(text, 2, 9, 0, false);
-	text = hoa_system.Translate("Hey, what time is it?");
-	dialogue:AddText(text, 1000, 10, 0, false);
-	text = hoa_system.Translate("I don’t know, why?");
-	dialogue:AddText(text, 2, 11, 0, false);
-	text = hoa_system.Translate("Don’t we have training today?");
-	dialogue:AddText(text, 1000, 12, 0, false);
-	text = hoa_system.Translate("Who cares?");
-	dialogue:AddText(text, 2, 13, 0, false);
-	text = hoa_system.Translate("I think we do. Come on!");
-	dialogue:AddText(text, 1000, 14, 0, false);
-	text = hoa_system.Translate("Kyle has joined the party.");
-	dialogue:AddText(text, 2, -1, 22111, false);
-
-	dialogue_supervisor:AddDialogue(dialogue);
-
+	CreateDialogue();
 
 	-- adds Kyle to party
 	GlobalManager:AddCharacter(KYLE);
@@ -236,4 +200,46 @@ function Load(m)
 	event = hoa_map.DialogueEvent(23000, 1);
 	event_supervisor:RegisterEvent(event);
 	event_supervisor:StartEvent(23000);
+end
+
+function CreateDialogue()
+	-- Dialogue with kyle (opening)
+	dialogue = hoa_map.MapDialogue(1);
+
+	text = hoa_system.Translate("You know the only reason I’m doing this is because of my family. There was never any discussion. If it was my choice I’d be far away from here.");
+	dialogue:AddText(text, 2, 1, 0, false);
+	text = hoa_system.Translate("And go where? You should be happy. It’s an honor to serve your country.");
+	dialogue:AddText(text, 1000, 2, 0, false);
+	text = hoa_system.Translate("I can do that on my own.");
+	dialogue:AddText(text, 2, 3, 0, false);
+	text = hoa_system.Translate("It’s more effective to work together. Besides, the Captain has our best interest at heart.");
+	dialogue:AddText(text, 1000, 4, 0, false);
+	text = hoa_system.Translate("That’s where you’re wrong, Claudius. As far as he’s concerned we’re expendable.");
+	dialogue:AddText(text, 2, 5, 0, false);
+	text = hoa_system.Translate("You’re crazy.");
+	dialogue:AddText(text, 1000, 6, 0, false);
+	text = hoa_system.Translate("You’ve never thought about leaving the knighthood?");
+	dialogue:AddText(text, 2, 7, 0, false);
+	text = hoa_system.Translate("Of course not.");
+	dialogue:AddText(text, 1000, 8, 0, false);
+	text = hoa_system.Translate("I didn’t think so.");
+	dialogue:AddText(text, 2, 8, 0, false);
+	text = hoa_system.Translate("You’ll be all right.");
+	dialogue:AddText(text, 1000, 9, 0, false);
+	text = hoa_system.Translate("I just don’t understand you sometimes.");
+	dialogue:AddText(text, 2, 10, 0, false);
+	text = hoa_system.Translate("Hey, what time is it?");
+	dialogue:AddText(text, 1000, 11, 0, false);
+	text = hoa_system.Translate("I don’t know.");
+	dialogue:AddText(text, 2, 12, 0, false);
+	text = hoa_system.Translate("Aren’t we supposed to be sparring right now?");
+	dialogue:AddText(text, 1000, 12, 0, false);
+	text = hoa_system.Translate("Who cares?");
+	dialogue:AddText(text, 2, 13, 0, false);
+	text = hoa_system.Translate("I think we are. Come on.");
+	dialogue:AddText(text, 1000, 14, 0, false);
+	text = hoa_system.Translate("Kyle has joined the party.");
+	dialogue:AddText(text, 2, -1, 22111, false);
+
+	dialogue_supervisor:AddDialogue(dialogue);
 end
