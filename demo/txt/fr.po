@@ -1,13 +1,572 @@
+#: dat/actors/map_sprites_stock.lua:9
+msgid "Claudius"
+msgstr "Claudius"
+
+#: dat/actors/map_sprites_stock.lua:22
+msgid "Laila"
+msgstr "Laila"
+
+#: dat/actors/map_sprites_stock.lua:35
+msgid "Kyle"
+msgstr ""
+
+#: dat/actors/map_sprites_stock.lua:47
+msgid "Captain"
+msgstr ""
+
+#: dat/actors/map_sprites_stock.lua:58
+msgid "Marcus"
+msgstr ""
+
+#: dat/actors/map_sprites_stock.lua:70
+msgid "Vanica"
+msgstr ""
+
+#: dat/actors/map_sprites_stock.lua:82
+msgid "Alexander"
+msgstr ""
+
+#: dat/actors/map_sprites_stock.lua:93
+#, fuzzy
+msgid "Laine"
+msgstr "Laila"
+
+#: dat/actors/map_sprites_stock.lua:104
+msgid "Torl"
+msgstr ""
+
+#: dat/actors/map_sprites_stock.lua:115
+msgid "Female Merchant"
+msgstr ""
+
+#: dat/actors/map_sprites_stock.lua:126
+#, fuzzy
+msgid "Livia"
+msgstr "Laila"
+
+#: dat/actors/map_sprites_stock.lua:137
+msgid "Octavia"
+msgstr ""
+
+#: dat/actors/map_sprites_stock.lua:148
+msgid "Karlate"
+msgstr ""
+
+#: dat/config/languages.lua:2
+msgid "French"
+msgstr "Français"
+
+#: dat/maps/betrayal_room.lua:277
+msgid ""
+"Stop this foolishness, Kyle. You can’t escape. Lower your weapon and come "
+"peacefully and I’ll make sure your punishment is lenient."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:279
+msgid "No. I’m doing this for me. I don’t expect you to understand."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:281
+msgid "Then you leave me no choice."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:283
+msgid "I’m very disappointed in you, Kyle."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:285
+msgid "Over here, Claudius!"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:293
+msgid "No!"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:295
+msgid "What have you done..."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:297
+msgid "I'm sorry.  I didn't want to have to do that."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:299
+#, fuzzy
+msgid "What are you doing?"
+msgstr "Claudius, qu'est-ce que vous faites ici?"
+
+#: dat/maps/betrayal_room.lua:301
+msgid "I can't let you get away."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:303
+msgid "I'm your friend!"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:305
+msgid "It's my duty!"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:307
+msgid "Don't do this."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:309
+msgid "You've already done it."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:311
+msgid "I don't want to fight you."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:313
+msgid "Then lower your weapon and turn yourself in."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:315
+msgid "You know I can't."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:317
+msgid "And you know I can't just let you get away."
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:319
+msgid "Isn't our friendship more important than your duty?"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:321
+msgid "You killed the Captain!"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:328
+msgid "(Insert dialogue here)"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:330
+msgid "Damn you, Kyle."
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:404
+#, fuzzy
+msgid "Fred"
+msgstr "Français"
+
+#: dat/maps/desert_barracks.lua:410
+msgid "Scott"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:417
+msgid "Alex"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:424
+msgid "Hector"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:495 dat/maps/desert_village.lua:803
+msgid "Claudius?  Claudius!  WAKE UP!"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:497 dat/maps/desert_village.lua:805
+msgid "Huh?  What?"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:499 dat/maps/desert_village.lua:807
+msgid "Get your gear and let's go!"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:501 dat/maps/desert_village.lua:809
+msgid "What's going on?"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:503 dat/maps/desert_village.lua:811
+msgid ""
+"The treasury!  A thief has broken in and stolen everything.  The captain has "
+"called a man hunt.  Now equip yourself and meet us out front."
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:505
+msgid "Come on, Kyle, let’s go! Kyle?"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:507
+msgid "Oh no."
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:509 dat/maps/desert_village.lua:819
+msgid ""
+"For those of you who don't know, a thief has broken into the treasury and "
+"stolen a vast quantity of gold.  It is up to us to capture the criminal and "
+"return what they have taken.  It's believed that the robbery occurred no "
+"more than 20 minutes ago, so the thief can't be far.  Everyone split up and "
+"comb the town."
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:511 dat/maps/desert_training.lua:576
+#: dat/maps/desert_village.lua:735 dat/maps/desert_village.lua:821
+msgid "Sir?"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:513 dat/maps/desert_village.lua:823
+#, fuzzy
+msgid "Yes, Claudius?"
+msgstr "Claudius"
+
+#: dat/maps/desert_barracks.lua:515
+msgid "…Nothing."
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:517
+msgid "You have your orders.  Now go."
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:522
+msgid "This way to the barracks."
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:527
+msgid "Entry into the kitchen is strictly forbidden!"
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:532
+msgid ""
+"Hi, Claudius.  If you're looking for the captain, he's at the training hall."
+msgstr ""
+
+#: dat/maps/desert_barracks.lua:537 dat/maps/desert_village.lua:918
+msgid "Where did the culprit go?"
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:678
+msgid "There you are."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:680
+msgid "Hey."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:682
+msgid "What are you doing? The captain wants to speak with you."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:684
+msgid "He can wait."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:686
+msgid "...What?"
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:688
+msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:690
+msgid ""
+"I managed to swipe some goodies from the kitchen quarters. I saved you some."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:692
+msgid "You shouldn’t –"
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:694
+msgid "It's just a piece of cake.  It's not going to hurt anyone."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:696
+msgid ""
+"I guess you’re right. And hey, thanks for covering for me back there. I "
+"appreciate it."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:698
+msgid ""
+"Don’t mention it. I’m already on bad terms with the captain, there’s no "
+"sense in you getting in trouble too."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:700
+msgid "Hey, what's that... look out!"
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:714
+msgid "Good job."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:716
+msgid "You too. We should head back."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:718
+msgid "All right."
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:720
+#, fuzzy
+msgid "Claudius?"
+msgstr "Claudius"
+
+#: dat/maps/desert_outskirts.lua:722 dat/maps/desert_training.lua:588
+msgid "Yes?"
+msgstr ""
+
+#: dat/maps/desert_outskirts.lua:724
+msgid "…Let’s go."
+msgstr ""
+
+#: dat/maps/desert_training.lua:544 dat/maps/desert_village.lua:696
+msgid "You're late."
+msgstr ""
+
+#: dat/maps/desert_training.lua:546
+msgid "Sorry, sir, I –"
+msgstr ""
+
+#: dat/maps/desert_training.lua:548
+msgid "It’s my fault, sir. I dragged Claudius off this morning."
+msgstr ""
+
+#: dat/maps/desert_training.lua:550
+msgid ""
+"Very well. Kyle. Find a partner to train with. I’ll deal with you later."
+msgstr ""
+
+#: dat/maps/desert_training.lua:552 dat/maps/desert_village.lua:704
+msgid "All right buddy, let's go."
+msgstr ""
+
+#: dat/maps/desert_training.lua:554 dat/maps/desert_village.lua:706
+msgid "Not him. Claudius trains with me today."
+msgstr ""
+
+#: dat/maps/desert_training.lua:556
+msgid "Yes sir."
+msgstr ""
+
+#: dat/maps/desert_training.lua:558 dat/maps/desert_village.lua:715
+msgid "Show me your slicing attack technique."
+msgstr ""
+
+#: dat/maps/desert_training.lua:560 dat/maps/desert_village.lua:717
+msgid "Hi-ya!"
+msgstr ""
+
+#: dat/maps/desert_training.lua:562
+msgid ""
+"Good. Remember, never take your eye off your target. Now show me the proper "
+"form for a parry."
+msgstr ""
+
+#: dat/maps/desert_training.lua:564 dat/maps/desert_village.lua:723
+msgid "Nicely done."
+msgstr ""
+
+#: dat/maps/desert_training.lua:566 dat/maps/desert_village.lua:725
+msgid "Thank you, sir."
+msgstr ""
+
+#: dat/maps/desert_training.lua:568
+msgid ""
+"Let’s see how you fare when the opponent strikes back. Kyle! Get over here!"
+msgstr ""
+
+#: dat/maps/desert_training.lua:570
+msgid "Where’s that friend of yours run off to this time?"
+msgstr ""
+
+#: dat/maps/desert_training.lua:572
+msgid "I don’t know, sir."
+msgstr ""
+
+#: dat/maps/desert_training.lua:574
+msgid "You’ll face me then."
+msgstr ""
+
+#: dat/maps/desert_training.lua:578
+msgid "Draw your weapon."
+msgstr ""
+
+#: dat/maps/desert_training.lua:580
+msgid "Remember what you’ve learned."
+msgstr ""
+
+#: dat/maps/desert_training.lua:582 dat/maps/desert_village.lua:741
+msgid "Well done, Claudius."
+msgstr ""
+
+#: dat/maps/desert_training.lua:584 dat/maps/desert_village.lua:745
+msgid "Yes, sir."
+msgstr ""
+
+#: dat/maps/desert_training.lua:586 dat/maps/desert_village.lua:747
+msgid "Come with me, Claudius, we need to talk."
+msgstr ""
+
+#: dat/maps/desert_training.lua:590 dat/maps/desert_village.lua:754
+msgid "You and Kyle are close."
+msgstr ""
+
+#: dat/maps/desert_training.lua:592 dat/maps/desert_village.lua:756
+msgid "We are, sir."
+msgstr ""
+
+#: dat/maps/desert_training.lua:594
+msgid ""
+"You have a lot of potential, Claudius. I know Kyle is your friend, but I "
+"fear he’s becoming an impediment to your quest for knighthood."
+msgstr ""
+
+#: dat/maps/desert_training.lua:596
+msgid "Kyle is a good man, sir."
+msgstr ""
+
+#: dat/maps/desert_training.lua:598
+msgid ""
+"Regardless, I want you to consider your priorities. Becoming a knight takes "
+"sacrifice. Sometimes that sacrifice means spending less time with the people "
+"we care about."
+msgstr ""
+
+#: dat/maps/desert_training.lua:600 dat/maps/desert_village.lua:764
+msgid "I understand, sir."
+msgstr ""
+
+#: dat/maps/desert_training.lua:602
+msgid ""
+"Just think about it. Now, do me a favor and find Kyle. I need to speak with "
+"him as well."
+msgstr ""
+
+#: dat/maps/desert_training.lua:607
+msgid ""
+"I need you to look for Kyle.  I hope he didn't wander off.  Maybe the other "
+"soldiers know where he is?"
+msgstr ""
+
+#: dat/maps/desert_training.lua:612
+msgid ""
+"This is the Karlate training site.  The barracks are to the east.  There's a "
+"cave off to the west."
+msgstr ""
+
+#: dat/maps/desert_training.lua:619
+msgid ""
+"The captain and some others went off to the cave down that path to the west."
+msgstr ""
+
+#: dat/maps/desert_training.lua:624
+msgid "Kyle?  Oh, yeah, I think he went off to the south."
+msgstr ""
+
+#: dat/maps/desert_training.lua:630 dat/maps/desert_village.lua:796
+msgid "Hello, Claudius.  Is your equipment in order?"
+msgstr ""
+
+#: dat/maps/desert_training.lua:636
+msgid ""
+"You'd be a fool to run out into the desert on your own for very long.  "
+"There's a cave to the west, though, and if you go far enough, you'll find "
+"water."
+msgstr ""
+
+#: dat/maps/desert_training.lua:641
+msgid ""
+"I hear some guy stole from the kitchen yesterday.  They've tightened up "
+"security."
+msgstr ""
+
+#: dat/maps/desert_training.lua:647
+msgid ""
+"Back home... hey Claudius, we should get some rest.  Let's head back to the "
+"barracks."
+msgstr ""
+
+#: dat/maps/desert_training.lua:649
+msgid "Okay, let's call it a night."
+msgstr ""
+
+#: dat/maps/desert_village.lua:646
+msgid ""
+"I’m just saying that I’m only doing this because of my father. He was a "
+"knight, so now I have to be one. If it was my choice I would be far away "
+"from here."
+msgstr ""
+
+#: dat/maps/desert_village.lua:648
+msgid "And go where? You should be happy; it’s an honor to serve your country."
+msgstr ""
+
+#: dat/maps/desert_village.lua:650
+msgid "I can do that on my own, without blindly following orders."
+msgstr ""
+
+#: dat/maps/desert_village.lua:652
+msgid ""
+"It’s more effective to work together, and our leadership has our best "
+"interest at heart."
+msgstr ""
+
+#: dat/maps/desert_village.lua:654
+msgid ""
+"That’s where you’re wrong, Claudius. As far as they’re concerned we’re "
+"expendable."
+msgstr ""
+
+#: dat/maps/desert_village.lua:656 dat/maps/opening_scene.lua:219
+msgid "You’re crazy."
+msgstr ""
+
+#: dat/maps/desert_village.lua:658
+msgid "All I know is something has to give. I can’t keep on like this."
+msgstr ""
+
+#: dat/maps/desert_village.lua:660
+msgid ""
+"You’ll be all right. Just remember that a knight is selfless, and the well "
+"being of everyone is more important than the individual."
+msgstr ""
+
+#: dat/maps/desert_village.lua:662
+msgid "I just don’t understand you sometimes..."
+msgstr ""
+
+#: dat/maps/desert_village.lua:664 dat/maps/opening_scene.lua:231
+msgid "Hey, what time is it?"
+msgstr ""
+
+#: dat/maps/desert_village.lua:666
+msgid "I don’t know, why?"
+msgstr ""
+
+#: dat/maps/desert_village.lua:668
+msgid "Don’t we have training today?"
+msgstr ""
+
+#: dat/maps/desert_village.lua:670 dat/maps/opening_scene.lua:237
+msgid "Who cares?"
+msgstr ""
+
+#: dat/maps/desert_village.lua:672
+msgid "I think we do. Come on!"
+msgstr ""
+
+#: dat/maps/desert_village.lua:674 dat/maps/opening_scene.lua:241
+msgid "Kyle has joined the party."
+msgstr ""
+
 # French translation file.
 # Copyright (C) 2008 Allacrost development team
 # This file is distributed under the same license as the Allacrost package.
 # Philip Vorsilak <gorzuate@allacrost.org>, 2008.
 #
+#: dat/maps/desert_village.lua:683
 msgid ""
 msgstr ""
 "Project-Id-Version: Allacrost Demo 0.3.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-02-06 14:33-0600\n"
+"POT-Creation-Date: 2010-02-06 19:37-0800\n"
 "PO-Revision-Date: 2010-02-02 20:33-0800\n"
 "Last-Translator: Philip Vorsilak <gorzuate@allacrost.org>\n"
 "Language-Team: French <team@allacrost.org>\n"
@@ -15,246 +574,307 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: dat/config/languages.lua:2
-msgid "French"
-msgstr "Français"
+#: dat/maps/desert_village.lua:698
+msgid "Sorry, sir, I -"
+msgstr ""
 
-#: dat/maps/demo_cave.lua:358
-msgid "Claudius, what are you doing here?"
-msgstr "Claudius, qu'est-ce que vous faites ici?"
-
-#: dat/maps/demo_cave.lua:359
-msgid "I came in this cave for training."
-msgstr "Je suis entré dans cette grotte pour m'entraîner."
-
-#: dat/maps/demo_cave.lua:360
+#: dat/maps/desert_village.lua:700
 msgid ""
-"Well, good job getting this far all by yourself. This is a pretty dangerous "
-"place for someone as inexperienced as yourself."
+"It’s my fault, sir. I dragged Claudius off this morning, and because of it "
+"we weren’t able to arrive on time."
 msgstr ""
 
-#: dat/maps/demo_cave.lua:361
+#: dat/maps/desert_village.lua:702
 msgid ""
-"Yes well, I have to train hard if I want to be able to spar with you evenly "
-"one day, Jonas. By the way, what were you doing?"
+"Very well; Kyle, you will be punished for this later. For now find a partner "
+"to train with."
 msgstr ""
 
-#: dat/maps/demo_cave.lua:362
+#: dat/maps/desert_village.lua:708
+msgid "Kyle leaves."
+msgstr ""
+
+#: dat/maps/desert_village.lua:719
 msgid ""
-"The cave goes deeper than this, but it appears a collapse here has blocked "
-"the way. I was trying to find an alternative passage, but it appears that "
-"the inner chambers are now completely inaccessible."
+"Good Claudius. Remember to never take your eye off your target. Now show me "
+"the proper form for a parry."
 msgstr ""
 
-#: dat/maps/demo_cave.lua:363
-msgid ""
-"In any case, this is as far as you can go in this demo, so thanks for....."
-msgstr ""
-
-#: dat/maps/demo_cave.lua:364
-msgid "Wait, what was that noise? Hey, look out!"
-msgstr ""
-
-#: dat/maps/demo_cave.lua:366
-msgid ""
-"Phew, that was a shock. I've never seen such foes wandering in this cave. "
-"Nice job taking care of them Claudius, I can definitely tell that your "
-"swordsmanship has improved."
-msgstr ""
-
-#: dat/maps/demo_cave.lua:367
-msgid "Thank you. By the way...why didn't you fight with me in that battle?"
-msgstr ""
-
-#: dat/maps/demo_cave.lua:368
-msgid ""
-"Ah, err...well you see, you'll never reach your full potential if you always "
-"have your seniors stepping in for you."
-msgstr ""
-
-#: dat/maps/demo_cave.lua:369
-msgid "I see."
-msgstr "Je vois."
-
-#: dat/maps/demo_cave.lua:370
-msgid ""
-"And besides, I don't even have my own battle sprite graphics yet! The "
-"development team needs more artists to help move the game along!"
-msgstr ""
-
-#: dat/maps/demo_cave.lua:371
-msgid "....."
-msgstr ""
-
-#: dat/maps/demo_cave.lua:373
-msgid "Well, this truly is the end of the demo. Thanks for playing."
-msgstr ""
-
-#: dat/maps/demo_cave.lua:389
-msgid "Claudius"
+#: dat/maps/desert_village.lua:721
+#, fuzzy
+msgid "Claudius blocks."
 msgstr "Claudius"
 
-#: dat/maps/demo_cave.lua:409
-msgid "Jonas"
-msgstr "Jonas"
-
-#: dat/maps/demo_town.lua:296
-msgid "Laila, what's wrong? You have a worried look on your face."
-msgstr "Qu'est-ce qu'il y a, Laila? Tu me sembles inquiétée."
-
-#: dat/maps/demo_town.lua:298
-msgid "You're going into the cave again, aren't you?"
-msgstr "Tu vas encore aller dans la grotte, n'est-ce pas?"
-
-#: dat/maps/demo_town.lua:302
-msgid "Yes, I intend to..."
-msgstr ""
-
-#: dat/maps/demo_town.lua:304
-msgid "No, of course not..."
-msgstr ""
-
-#: dat/maps/demo_town.lua:307
-msgid "Test Option #1"
-msgstr ""
-
-#: dat/maps/demo_town.lua:309
-msgid "Test Option #2"
-msgstr ""
-
-#: dat/maps/demo_town.lua:311
-msgid "Test Option #3"
-msgstr ""
-
-#: dat/maps/demo_town.lua:315
-msgid "But why? Its dangerous in there!"
-msgstr "Mais pourquoi? C'est dangereux là-dedans!"
-
-#: dat/maps/demo_town.lua:317
+#: dat/maps/desert_village.lua:727
 msgid ""
-"Laila, if I want to be capable on the battlefield I have to fight real "
-"battles. You understand that, don't you?"
+"Let’s see how you fare when the opponent strikes back. Get down here Kyle!"
 msgstr ""
 
-#: dat/maps/demo_town.lua:319
+#: dat/maps/desert_village.lua:729
+msgid "Where's that friend of yours run off to this time?"
+msgstr ""
+
+#: dat/maps/desert_village.lua:731
+msgid "I don’t know, sir. (Not again, Kyle...)"
+msgstr ""
+
+#: dat/maps/desert_village.lua:733
+msgid "All right, you’ll face me then."
+msgstr ""
+
+#: dat/maps/desert_village.lua:737
+msgid "Draw your weapon, soldier."
+msgstr ""
+
+#: dat/maps/desert_village.lua:739
+msgid "Remember what you've learned."
+msgstr ""
+
+#: dat/maps/desert_village.lua:743
+msgid "That's all for today."
+msgstr ""
+
+#: dat/maps/desert_village.lua:758
 msgid ""
-"I know that you're worried about me and I appreciate it, but you need to "
-"stop doing this."
+"This is difficult, but it needs to be said. You have a lot of potential, "
+"Claudius, but I worry about you. I know Kyle is your friend, but I fear he "
+"is becoming an impediment to you in your quest for knighthood."
 msgstr ""
 
-#: dat/maps/demo_town.lua:321
-msgid ".....Alright, I'm sorry. Just be careful in there, okay?"
-msgstr ".....Bon, je suis desolée. Mais sois prudent là-dedans, d'accord?"
+#: dat/maps/desert_village.lua:760
+msgid "Kyle is a good man, sir. He just messes up sometimes."
+msgstr ""
 
-#: dat/maps/demo_town.lua:323
-msgid "Will do. Thanks Laila."
-msgstr "Bien sûr. Merci, Laila."
-
-#: dat/maps/demo_town.lua:325
+#: dat/maps/desert_village.lua:762
 msgid ""
-"You know Claudius, I could be of assistance to you in the cave. May I come "
-"with you?"
+"Regardless, I want you to seriously consider your priorities. Becoming a "
+"knight takes sacrifice, and sometimes that sacrifice is spending less time "
+"with the people we care about."
 msgstr ""
 
-#: dat/maps/demo_town.lua:329
-msgid "No way, you could be hurt!"
-msgstr ""
-
-#: dat/maps/demo_town.lua:331
-msgid "Your help would be great!"
-msgstr ""
-
-#: dat/maps/demo_town.lua:334
+#: dat/maps/desert_village.lua:766
 msgid ""
-"Oh good. I was worried you were. Please tell me if you are Claudius, just so "
-"I can know..."
+"Just think about it. Now, do me a favor and find Kyle. I need to have a talk "
+"with him as well."
 msgstr ""
 
-#: dat/maps/demo_town.lua:336
-msgid "Of course, I promise."
+#: dat/maps/desert_village.lua:778
+msgid "This is the Karlate training site."
 msgstr ""
 
-#: dat/maps/demo_town.lua:340
-msgid "Oh....ok then. You remember to be careful."
+#: dat/maps/desert_village.lua:787
+#, fuzzy
+msgid "Hi, Claudius."
+msgstr "Claudius"
+
+#: dat/maps/desert_village.lua:813
+msgid "Come on, Kyle, let's go!"
 msgstr ""
 
-#: dat/maps/demo_town.lua:342
-msgid "I will Laila."
+#: dat/maps/desert_village.lua:815
+msgid "...Kyle?"
 msgstr ""
 
-#: dat/maps/demo_town.lua:346
-msgid "Great, I'll be sure to help you any way I can."
+#: dat/maps/desert_village.lua:817
+msgid "Oh no..."
 msgstr ""
 
-#: dat/maps/demo_town.lua:348
-msgid "Laila has joined the party."
+#: dat/maps/desert_village.lua:825
+msgid "...Nothing."
 msgstr ""
 
-#: dat/maps/demo_town.lua:387
-msgid "Hey there son, how's the training going?"
+#: dat/maps/desert_village.lua:832
+msgid "Awaiting orders, sir."
 msgstr ""
 
-#: dat/maps/demo_town.lua:389
-msgid "Pretty well. The enemies in the cave aren't too tough."
-msgstr ""
-
-#: dat/maps/demo_town.lua:391
+#: dat/maps/opening_scene.lua:209
 msgid ""
-"Good to hear. Don't let your guard down though. The deeper you go into that "
-"cave, the more likely it is that you'll face stronger opponents."
+"You know the only reason I’m doing this is because of my family. There was "
+"never any discussion. If it was my choice I’d be far away from here."
 msgstr ""
 
-#: dat/maps/demo_town.lua:417
-msgid "Oh, Claudius? You seemed puzzled."
+#: dat/maps/opening_scene.lua:211
+msgid "And go where? You should be happy. It’s an honor to serve your country."
 msgstr ""
 
-#: dat/maps/demo_town.lua:419
-msgid "There are odd little icons above people's heads. What do they mean?"
+#: dat/maps/opening_scene.lua:213
+msgid "I can do that on my own."
 msgstr ""
 
-#: dat/maps/demo_town.lua:421
+#: dat/maps/opening_scene.lua:215
 msgid ""
-"That is a new dialogue indicator. Any person that has something new to say "
-"that you haven't already heard will have that icon above their head. Once "
-"you've listened to everything that they have to say, the icon will disappear."
+"It’s more effective to work together. Besides, the Captain has our best "
+"interest at heart."
 msgstr ""
 
-#: dat/maps/demo_town.lua:427
+#: dat/maps/opening_scene.lua:217
 msgid ""
-"And remember that a person may have more thing to say, so if the icon "
-"doesn't disappear after speaking to a person, speak to them once more."
+"That’s where you’re wrong, Claudius. As far as he’s concerned we’re "
+"expendable."
 msgstr ""
 
-#: dat/maps/demo_town.lua:453
-msgid ""
-"Choose your target wisely in battle. Its best to single out and take down "
-"one foe at a time. And don't be afraid to use a healing potion or two in "
-"battle if you're feeling weak."
+#: dat/maps/opening_scene.lua:221
+msgid "You’ve never thought about leaving the knighthood?"
 msgstr ""
 
-#: dat/maps/demo_town.lua:487
-msgid "The interior of my home is finally finished. Not too bad is it?"
+#: dat/maps/opening_scene.lua:223
+msgid "Of course not."
 msgstr ""
 
-#: dat/maps/demo_town.lua:489
-msgid "After its fully furnished I'm sure it will look quite nice."
+#: dat/maps/opening_scene.lua:225
+msgid "I didn’t think so."
 msgstr ""
 
-#: dat/maps/demo_town.lua:521
-msgid "This village is boring! There's no one I can play with here!"
+#: dat/maps/opening_scene.lua:227
+msgid "You’ll be all right."
 msgstr ""
 
-#: dat/maps/demo_town.lua:540
-msgid "I have merchandise for sale at affordable prices. Take a look."
+#: dat/maps/opening_scene.lua:229
+msgid "I just don’t understand you sometimes."
 msgstr ""
 
-#: dat/maps/demo_town.lua:563
-msgid ""
-"I'm looking for my brother Torl. I sure hope he doesn't get into any trouble."
+#: dat/maps/opening_scene.lua:233
+msgid "I don’t know."
 msgstr ""
 
-#: dat/maps/demo_town.lua:581
-msgid "So much work to do!"
+#: dat/maps/opening_scene.lua:235
+msgid "Aren’t we supposed to be sparring right now?"
+msgstr ""
+
+#: dat/maps/opening_scene.lua:239
+msgid "I think we are. Come on."
+msgstr ""
+
+#: src/modes/battle/battle_actors.cpp:148
+msgid "Miss"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:87
+#: src/modes/battle/battle_windows.cpp:104
+msgid "Attack"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:88
+msgid "Defend"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:89
+#: src/modes/battle/battle_windows.cpp:106
+msgid "Support"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:90
+#: src/modes/battle/battle_windows.cpp:107
+msgid "Item"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:105
+msgid "Defense"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:583
+#: src/modes/battle/battle_windows.cpp:593
+msgid "Name: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:584
+msgid "Current Quantity: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:585
+#: src/modes/battle/battle_windows.cpp:595
+msgid "Target Type: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:594
+msgid "SP Required: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:712
+msgid "Retry the battle"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:713
+msgid "Load from last save point"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:714
+msgid "Return to main menu"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:715
+msgid "Exit the game"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1097
+msgid "Victory!!!"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1106
+#: src/modes/battle/battle_windows.cpp:1228
+msgid "XP Gained: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1120
+msgid "Lv. "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1123 src/modes/menu/menu_views.cpp:109
+msgid "XP To Next: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1132 src/modes/menu/menu_views.cpp:99
+#: src/modes/menu/menu_views.cpp:559
+msgid "HP: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1143 src/modes/menu/menu_views.cpp:104
+#: src/modes/menu/menu_views.cpp:563
+msgid "SP: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1154 src/modes/menu/menu.cpp:856
+msgid "STR: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1165 src/modes/menu/menu.cpp:859
+msgid "VIG: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1177
+msgid "FOR: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1188 src/modes/menu/menu.cpp:865
+msgid "PRO: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1199 src/modes/menu/menu.cpp:868
+msgid "AGI: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1210 src/modes/menu/menu.cpp:871
+msgid "EVD: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1243
+msgid "Skills Learned"
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1265 src/modes/menu/menu.cpp:1052
+msgid "Drunes: "
+msgstr ""
+
+#: src/modes/battle/battle_windows.cpp:1274 src/modes/shop/shop.cpp:132
+msgid "Items"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:87
+msgid "Demo 1.0.0"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:89
+msgid "© 2004 — 2010 The Allacrost Project"
 msgstr ""
 
 #: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
@@ -262,6 +882,7 @@ msgid "New Game"
 msgstr ""
 
 #: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
+#: src/modes/save/save_mode.cpp:86
 msgid "Load Game"
 msgstr ""
 
@@ -273,11 +894,12 @@ msgstr ""
 msgid "Credits"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:518
+#: src/modes/boot/boot.cpp:518 src/modes/menu/menu_views.cpp:705
 msgid "Battle"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:519
+#: src/modes/boot/boot.cpp:519 src/modes/boot/boot.cpp:906
+#: src/modes/boot/boot_welcome.cpp:85
 msgid "Menu"
 msgstr ""
 
@@ -286,6 +908,7 @@ msgid "Shop"
 msgstr ""
 
 #: src/modes/boot/boot.cpp:521 src/modes/boot/boot.cpp:538
+#: src/modes/boot/boot_welcome.cpp:100
 msgid "Quit"
 msgstr ""
 
@@ -329,11 +952,11 @@ msgstr ""
 msgid "Image quality:"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:608
+#: src/modes/boot/boot.cpp:608 src/modes/boot/boot.cpp:892
 msgid "Sound Volume: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:609
+#: src/modes/boot/boot.cpp:609 src/modes/boot/boot.cpp:893
 msgid "Music Volume: "
 msgstr ""
 
@@ -385,7 +1008,8 @@ msgstr ""
 msgid "Restore defaults"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:745
+#: src/modes/boot/boot.cpp:745 src/modes/menu/menu.cpp:557
+#: src/modes/menu/menu.cpp:625 src/modes/menu/menu.cpp:640
 msgid "Save"
 msgstr ""
 
@@ -409,5 +1033,771 @@ msgstr ""
 msgid "end"
 msgstr ""
 
-#~ msgid "Laila"
-#~ msgstr "Laila"
+#: src/modes/boot/boot.cpp:881
+msgid "Window mode: fullscreen"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:883
+msgid "Window mode: windowed"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:886
+msgid "Brightness: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:900
+msgid "Move Up"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:901
+msgid "Move Down"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:902
+msgid "Move Left"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:903
+msgid "Move Right"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:904 src/modes/boot/boot_welcome.cpp:79
+#: src/modes/shop/shop.cpp:1050
+msgid "Confirm"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:905 src/modes/boot/boot_welcome.cpp:82
+#: src/modes/pause.cpp:71 src/modes/save/save_mode.cpp:87
+#: src/modes/save/save_mode.cpp:100
+msgid "Cancel"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:907 src/modes/boot/boot_welcome.cpp:88
+msgid "Swap"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:908 src/modes/boot/boot_welcome.cpp:91
+msgid "Left Select"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:909 src/modes/boot/boot_welcome.cpp:94
+msgid "Right Select"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:910 src/modes/boot/boot_welcome.cpp:97
+msgid "Pause"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:917
+msgid "X Axis"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:918
+msgid "Y Axis"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:919
+msgid "Confirm: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:920
+msgid "Cancel: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:921
+msgid "Menu: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:922
+msgid "Swap: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:923
+msgid "Left Select : Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:924
+msgid "Right Select: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:925
+msgid "Pause: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1268
+msgid "Please enter a name for your new profile"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1276
+msgid "Overwrite? Confirm/Cancel"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1558
+msgid "Please press a new joystick button."
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1560
+msgid "Please press a new key."
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1562
+msgid "Please move an axis."
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:44
+msgid "The table below lists the default game controls.\n"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:45
+msgid ""
+"The control mappings can be changed in the options menu on the next screen."
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:55
+msgid "Command"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:56
+msgid "Default Key"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:57
+msgid "General Purpose"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:67
+msgid "Up"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:68
+msgid "Up Arrow"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:69
+msgid "Move position or cursor upwards"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:70
+msgid "Down"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:71
+msgid "Down Arrow"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:72
+msgid "Move position or cursor downwards"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:73
+msgid "Left"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:74
+msgid "Left Arrow"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:75
+msgid "Move position or cursor to the left"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:76
+msgid "Right"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:77
+msgid "Right Arrow"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:78
+msgid "Move position or cursor to the right"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:80
+msgid "F"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:81
+msgid "Confirm an action or menu command"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:83
+msgid "D"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:84
+msgid "Cancel an action or menu command"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:86
+msgid "S"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:87
+msgid "Display the character menu"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:89
+msgid "A"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:90
+msgid "Swaps active menu or character"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:92
+msgid "W"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:93
+msgid "Select multiple or backward page scroll"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:95
+msgid "E"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:96
+msgid "Select multiple or forward page scroll"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:98
+msgid "Spacebar"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:99
+msgid "Pauses the game"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:101
+msgid "Esc"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:102
+msgid "Quit the application"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:105
+msgid ""
+"There are additional commands available which can be found in the MANUAL "
+"file."
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:108
+msgid "Press any key to continue."
+msgstr ""
+
+#: src/modes/map/map_treasure.cpp:194
+msgid "Treasure Contents"
+msgstr ""
+
+#: src/modes/map/map_treasure.cpp:218
+msgid "Finished"
+msgstr ""
+
+#: src/modes/map/map_treasure.cpp:453
+msgid "Drunes"
+msgstr ""
+
+#: src/modes/map/map_treasure.cpp:455
+msgid "With the additional "
+msgstr ""
+
+#: src/modes/map/map_treasure.cpp:456
+msgid " drunes found in this treasure added, the party now holds a total of "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:272
+msgid "Your game has been saved."
+msgstr ""
+
+#: src/modes/menu/menu.cpp:553
+msgid "Inventory"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:554
+msgid "Skills"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:555 src/modes/menu/menu.cpp:670
+msgid "Equip"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:556
+msgid "Status"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:558
+msgid "Formation"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:574 src/modes/menu/menu.cpp:592
+msgid "Use"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:576 src/modes/menu/menu.cpp:593
+#: src/modes/menu/menu.cpp:608 src/modes/menu/menu.cpp:626
+#: src/modes/menu/menu.cpp:641 src/modes/menu/menu.cpp:656
+#: src/modes/menu/menu.cpp:672
+msgid "Back"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:607
+msgid "View"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:624
+msgid "Edit"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:655
+msgid "Switch"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:671
+msgid "Remove"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:862
+msgid "FRT: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:875
+msgid "Current Equipment:"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:878 src/modes/menu/menu_views.cpp:1395
+msgid "Weapon"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:881
+msgid "Head"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:884
+msgid "Torso"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:887 src/modes/menu/menu_views.cpp:204
+msgid "Arm"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:890
+msgid "Legs"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:895
+msgid "PHYS ATK: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:898 src/modes/menu/menu.cpp:901
+#: src/modes/menu/menu.cpp:904 src/modes/menu/menu.cpp:907
+msgid "PHYS DEF: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:912
+msgid "META ATK: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:915 src/modes/menu/menu.cpp:918
+#: src/modes/menu/menu.cpp:921 src/modes/menu/menu.cpp:924
+msgid "META DEF: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:939
+msgid "PHYS ATK:"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:944
+msgid "META ATK:"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:958 src/modes/menu/menu.cpp:977
+#: src/modes/menu/menu.cpp:996 src/modes/menu/menu.cpp:1015
+msgid "PHYS DEF:"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:963 src/modes/menu/menu.cpp:982
+#: src/modes/menu/menu.cpp:1001 src/modes/menu/menu.cpp:1020
+msgid "META DEF:"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:95
+msgid "Lv: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:199 src/modes/menu/menu_views.cpp:703
+msgid "All"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:200
+msgid "Itm"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:201
+msgid "Wpn"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:202
+msgid "Hlm"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:203
+msgid "Tor"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:205
+msgid "Leg"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:206
+msgid "Key"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:553
+msgid "Experience Level: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:567
+msgid "XP to Next: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:570
+msgid "Strength: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:573
+msgid "Vigor: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:576
+msgid "Fortitude: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:579
+msgid "Protection: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:582
+msgid "Agility: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:585
+msgid "Evade: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:704
+msgid "Field"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1373 src/modes/shop/shop.cpp:133
+msgid "Weapons"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1376 src/modes/menu/menu_views.cpp:1397
+msgid "Headgear"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1379 src/modes/menu/menu_views.cpp:1399
+msgid "Body Armor"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1382 src/modes/menu/menu_views.cpp:1401
+msgid "Offhand"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1385 src/modes/menu/menu_views.cpp:1403
+msgid "Leggings"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1574 src/modes/shop/shop_confirm.cpp:127
+msgid "Yes"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1575 src/modes/shop/shop_confirm.cpp:126
+msgid "No"
+msgstr ""
+
+#: src/modes/pause.cpp:57
+msgid "Paused"
+msgstr ""
+
+#: src/modes/pause.cpp:69
+msgid "Quit Game"
+msgstr ""
+
+#: src/modes/pause.cpp:70
+msgid "Quit to Main Menu"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:85
+msgid "Save Game"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:101
+msgid "File #1"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:102
+msgid "File #2"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:103
+msgid "File #3"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:104
+msgid "File #4"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:105
+msgid "File #5"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:106
+msgid "File #6"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:134
+msgid "Head Armor"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:135
+msgid "Torso Armor"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:136
+msgid "Arm Armor"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:137
+msgid "Leg Armor"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:138
+msgid "Shards"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:139
+msgid "Key Items"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:140
+msgid "All Wares"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:381
+msgid "Map Use:"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:383
+msgid "Battle Use:"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:385
+msgid "Target:"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:387
+msgid "Self"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:388
+msgid "Ally"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:389
+msgid "Enemy"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:390
+msgid "All Allies"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:391
+msgid "All Enemies"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:394
+msgid "Phys:"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:396
+msgid "Meta:"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:1047 src/modes/shop/shop_buy.cpp:69
+#: src/modes/shop/shop_confirm.cpp:187 src/modes/shop/shop_confirm.cpp:210
+#: src/modes/shop/shop_confirm.cpp:525 src/modes/shop/shop_leave.cpp:170
+#: src/modes/shop/shop_leave.cpp:190 src/modes/shop/shop_leave.cpp:442
+msgid "Buy"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:1048 src/modes/shop/shop_confirm.cpp:195
+#: src/modes/shop/shop_confirm.cpp:514 src/modes/shop/shop_leave.cpp:177
+#: src/modes/shop/shop_leave.cpp:431 src/modes/shop/shop_sell.cpp:69
+msgid "Sell"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:1049
+msgid "Trade"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:1058
+msgid "Leave"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:1543
+msgid "Funds: "
+msgstr ""
+
+#: src/modes/shop/shop.cpp:1544
+msgid "Purchases: -"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:1545
+msgid "Sales: +"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:1546
+msgid "Total: "
+msgstr ""
+
+#: src/modes/shop/shop_buy.cpp:57 src/modes/shop/shop_sell.cpp:57
+msgid "Category"
+msgstr ""
+
+#: src/modes/shop/shop_buy.cpp:60 src/modes/shop/shop_confirm.cpp:79
+#: src/modes/shop/shop_leave.cpp:80 src/modes/shop/shop_sell.cpp:60
+msgid "Name"
+msgstr ""
+
+#: src/modes/shop/shop_buy.cpp:66 src/modes/shop/shop_confirm.cpp:87
+#: src/modes/shop/shop_leave.cpp:88 src/modes/shop/shop_sell.cpp:66
+msgid "Price"
+msgstr ""
+
+#: src/modes/shop/shop_buy.cpp:67 src/modes/shop/shop_confirm.cpp:88
+#: src/modes/shop/shop_leave.cpp:89 src/modes/shop/shop_sell.cpp:67
+msgid "Stock"
+msgstr ""
+
+#: src/modes/shop/shop_buy.cpp:68 src/modes/shop/shop_confirm.cpp:89
+#: src/modes/shop/shop_leave.cpp:90 src/modes/shop/shop_sell.cpp:68
+msgid "Own"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:67 src/modes/shop/shop_leave.cpp:68
+msgid "Purchases"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:71 src/modes/shop/shop_leave.cpp:72
+msgid "Sales"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:75 src/modes/shop/shop_leave.cpp:76
+msgid "Trades"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:93 src/modes/shop/shop_leave.cpp:94
+msgid "No marked transactions."
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:99
+msgid "There are no marked purchases, sales, or trades."
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:102
+msgid "Will that be all?"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:111
+msgid "Modify Order"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:112
+msgid "Clear Order"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:113
+msgid "Complete Transaction"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:117
+msgid "This will remove all marked purchases, sales, and trades. Are you sure?"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:669 src/modes/shop/shop_confirm.cpp:676
+#: src/modes/shop/shop_confirm.cpp:683 src/modes/shop/shop_leave.cpp:193
+#: src/modes/shop/shop_leave.cpp:195 src/modes/shop/shop_leave.cpp:197
+msgid " count"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:670 src/modes/shop/shop_leave.cpp:194
+#: src/modes/shop/shop_leave.cpp:196
+msgid " unique"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:684 src/modes/shop/shop_leave.cpp:198
+msgid " characters"
+msgstr ""
+
+#: src/modes/shop/shop_leave.cpp:100
+msgid "Your order is not yet final. Are you sure you want to leave the shop?"
+msgstr ""
+
+#: src/modes/shop/shop_leave.cpp:109
+msgid "View Order"
+msgstr ""
+
+#: src/modes/shop/shop_leave.cpp:110
+msgid "Confirm Order"
+msgstr ""
+
+#: src/modes/shop/shop_leave.cpp:111
+msgid "Leave Shop"
+msgstr ""
+
+#: src/modes/shop/shop_root.cpp:117
+msgid "Shop Name"
+msgstr ""
+
+#: src/modes/shop/shop_root.cpp:120
+msgid "Buy prices"
+msgstr ""
+
+#: src/modes/shop/shop_root.cpp:122
+msgid "Sell prices"
+msgstr ""
+
+#: src/modes/shop/shop_root.cpp:130
+msgid "\"Welcome! Take a look around.\""
+msgstr ""
+
+#: src/modes/shop/shop_trade.cpp:48
+msgid "This feature is not yet available."
+msgstr ""
+
+#~ msgid "I came in this cave for training."
+#~ msgstr "Je suis entré dans cette grotte pour m'entraîner."
+
+#~ msgid "I see."
+#~ msgstr "Je vois."
+
+#~ msgid "Jonas"
+#~ msgstr "Jonas"
+
+#~ msgid "Laila, what's wrong? You have a worried look on your face."
+#~ msgstr "Qu'est-ce qu'il y a, Laila? Tu me sembles inquiétée."
+
+#~ msgid "You're going into the cave again, aren't you?"
+#~ msgstr "Tu vas encore aller dans la grotte, n'est-ce pas?"
+
+#~ msgid "But why? Its dangerous in there!"
+#~ msgstr "Mais pourquoi? C'est dangereux là-dedans!"
+
+#~ msgid ".....Alright, I'm sorry. Just be careful in there, okay?"
+#~ msgstr ".....Bon, je suis desolée. Mais sois prudent là-dedans, d'accord?"
+
+#~ msgid "Will do. Thanks Laila."
+#~ msgstr "Bien sûr. Merci, Laila."
