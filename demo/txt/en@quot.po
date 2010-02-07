@@ -1,194 +1,220 @@
+# All this catalog "translates" are quotation characters.
+# The msgids must be ASCII and therefore cannot contain real quotation
+# characters, only substitutes like grave accent (0x60), apostrophe (0x27)
+# and double quote (0x22). These substitutes look strange; see
+# http://www.cl.cam.ac.uk/~mgk25/ucs/quotes.html
+#
+# This catalog translates grave accent (0x60) and apostrophe (0x27) to
+# left single quotation mark (U+2018) and right single quotation mark (U+2019).
+# It also translates pairs of apostrophe (0x27) to
+# left single quotation mark (U+2018) and right single quotation mark (U+2019)
+# and pairs of quotation mark (0x22) to
+# left double quotation mark (U+201C) and right double quotation mark (U+201D).
+#
+# When output to an UTF-8 terminal, the quotation characters appear perfectly.
+# When output to an ISO-8859-1 terminal, the single quotation marks are
+# transliterated to apostrophes (by iconv in glibc 2.2 or newer) or to
+# grave/acute accent (by libiconv), and the double quotation marks are
+# transliterated to 0x22.
+# When output to an ASCII terminal, the single quotation marks are
+# transliterated to apostrophes, and the double quotation marks are
+# transliterated to 0x22.
+#
 #: dat/actors/map_sprites_stock.lua:9
 msgid "Claudius"
-msgstr ""
+msgstr "Claudius"
 
 #: dat/actors/map_sprites_stock.lua:22
 msgid "Laila"
-msgstr ""
+msgstr "Laila"
 
 #: dat/actors/map_sprites_stock.lua:35
 msgid "Kyle"
-msgstr ""
+msgstr "Kyle"
 
 #: dat/actors/map_sprites_stock.lua:47
 msgid "Captain"
-msgstr ""
+msgstr "Captain"
 
 #: dat/actors/map_sprites_stock.lua:58
 msgid "Marcus"
-msgstr ""
+msgstr "Marcus"
 
 #: dat/actors/map_sprites_stock.lua:70
 msgid "Vanica"
-msgstr ""
+msgstr "Vanica"
 
 #: dat/actors/map_sprites_stock.lua:82
 msgid "Alexander"
-msgstr ""
+msgstr "Alexander"
 
 #: dat/actors/map_sprites_stock.lua:93
 msgid "Laine"
-msgstr ""
+msgstr "Laine"
 
 #: dat/actors/map_sprites_stock.lua:104
 msgid "Torl"
-msgstr ""
+msgstr "Torl"
 
 #: dat/actors/map_sprites_stock.lua:115
 msgid "Female Merchant"
-msgstr ""
+msgstr "Female Merchant"
 
 #: dat/actors/map_sprites_stock.lua:126
 msgid "Livia"
-msgstr ""
+msgstr "Livia"
 
 #: dat/actors/map_sprites_stock.lua:137
 msgid "Octavia"
-msgstr ""
+msgstr "Octavia"
 
 #: dat/actors/map_sprites_stock.lua:148
 msgid "Karlate"
-msgstr ""
+msgstr "Karlate"
 
 #: dat/config/languages.lua:2
 msgid "French"
-msgstr ""
+msgstr "French"
 
 #: dat/maps/betrayal_room.lua:277
 msgid ""
 "Stop this foolishness, Kyle. You can’t escape. Lower your weapon and come "
 "peacefully and I’ll make sure your punishment is lenient."
 msgstr ""
+"Stop this foolishness, Kyle. You can’t escape. Lower your weapon and come "
+"peacefully and I’ll make sure your punishment is lenient."
 
 #: dat/maps/betrayal_room.lua:279
 msgid "No. I’m doing this for me. I don’t expect you to understand."
-msgstr ""
+msgstr "No. I’m doing this for me. I don’t expect you to understand."
 
 #: dat/maps/betrayal_room.lua:281
 msgid "Then you leave me no choice."
-msgstr ""
+msgstr "Then you leave me no choice."
 
 #: dat/maps/betrayal_room.lua:283
 msgid "I’m very disappointed in you, Kyle."
-msgstr ""
+msgstr "I’m very disappointed in you, Kyle."
 
 #: dat/maps/betrayal_room.lua:285
 msgid "Over here, Claudius!"
-msgstr ""
+msgstr "Over here, Claudius!"
 
 #: dat/maps/betrayal_room.lua:293
 msgid "No!"
-msgstr ""
+msgstr "No!"
 
 #: dat/maps/betrayal_room.lua:295
 msgid "What have you done..."
-msgstr ""
+msgstr "What have you done..."
 
 #: dat/maps/betrayal_room.lua:297
 msgid "I'm sorry.  I didn't want to have to do that."
-msgstr ""
+msgstr "I'm sorry.  I didn't want to have to do that."
 
 #: dat/maps/betrayal_room.lua:299
 msgid "What are you doing?"
-msgstr ""
+msgstr "What are you doing?"
 
 #: dat/maps/betrayal_room.lua:301
 msgid "I can't let you get away."
-msgstr ""
+msgstr "I can't let you get away."
 
 #: dat/maps/betrayal_room.lua:303
 msgid "I'm your friend!"
-msgstr ""
+msgstr "I'm your friend!"
 
 #: dat/maps/betrayal_room.lua:305
 msgid "It's my duty!"
-msgstr ""
+msgstr "It's my duty!"
 
 #: dat/maps/betrayal_room.lua:307
 msgid "Don't do this."
-msgstr ""
+msgstr "Don't do this."
 
 #: dat/maps/betrayal_room.lua:309
 msgid "You've already done it."
-msgstr ""
+msgstr "You've already done it."
 
 #: dat/maps/betrayal_room.lua:311
 msgid "I don't want to fight you."
-msgstr ""
+msgstr "I don't want to fight you."
 
 #: dat/maps/betrayal_room.lua:313
 msgid "Then lower your weapon and turn yourself in."
-msgstr ""
+msgstr "Then lower your weapon and turn yourself in."
 
 #: dat/maps/betrayal_room.lua:315
 msgid "You know I can't."
-msgstr ""
+msgstr "You know I can't."
 
 #: dat/maps/betrayal_room.lua:317
 msgid "And you know I can't just let you get away."
-msgstr ""
+msgstr "And you know I can't just let you get away."
 
 #: dat/maps/betrayal_room.lua:319
 msgid "Isn't our friendship more important than your duty?"
-msgstr ""
+msgstr "Isn't our friendship more important than your duty?"
 
 #: dat/maps/betrayal_room.lua:321
 msgid "You killed the Captain!"
-msgstr ""
+msgstr "You killed the Captain!"
 
 #: dat/maps/betrayal_room.lua:328
 msgid "(Insert dialogue here)"
-msgstr ""
+msgstr "(Insert dialogue here)"
 
 #: dat/maps/betrayal_room.lua:330
 msgid "Damn you, Kyle."
-msgstr ""
+msgstr "Damn you, Kyle."
 
 #: dat/maps/desert_barracks.lua:404
 msgid "Fred"
-msgstr ""
+msgstr "Fred"
 
 #: dat/maps/desert_barracks.lua:410
 msgid "Scott"
-msgstr ""
+msgstr "Scott"
 
 #: dat/maps/desert_barracks.lua:417
 msgid "Alex"
-msgstr ""
+msgstr "Alex"
 
 #: dat/maps/desert_barracks.lua:424
 msgid "Hector"
-msgstr ""
+msgstr "Hector"
 
 #: dat/maps/desert_barracks.lua:495 dat/maps/desert_village.lua:803
 msgid "Claudius?  Claudius!  WAKE UP!"
-msgstr ""
+msgstr "Claudius?  Claudius!  WAKE UP!"
 
 #: dat/maps/desert_barracks.lua:497 dat/maps/desert_village.lua:805
 msgid "Huh?  What?"
-msgstr ""
+msgstr "Huh?  What?"
 
 #: dat/maps/desert_barracks.lua:499 dat/maps/desert_village.lua:807
 msgid "Get your gear and let's go!"
-msgstr ""
+msgstr "Get your gear and let's go!"
 
 #: dat/maps/desert_barracks.lua:501 dat/maps/desert_village.lua:809
 msgid "What's going on?"
-msgstr ""
+msgstr "What's going on?"
 
 #: dat/maps/desert_barracks.lua:503 dat/maps/desert_village.lua:811
 msgid ""
 "The treasury!  A thief has broken in and stolen everything.  The captain has "
 "called a man hunt.  Now equip yourself and meet us out front."
 msgstr ""
+"The treasury!  A thief has broken in and stolen everything.  The captain has "
+"called a man hunt.  Now equip yourself and meet us out front."
 
 #: dat/maps/desert_barracks.lua:505
 msgid "Come on, Kyle, let’s go! Kyle?"
-msgstr ""
+msgstr "Come on, Kyle, let’s go! Kyle?"
 
 #: dat/maps/desert_barracks.lua:507
 msgid "Oh no."
-msgstr ""
+msgstr "Oh no."
 
 #: dat/maps/desert_barracks.lua:509 dat/maps/desert_village.lua:819
 msgid ""
@@ -198,223 +224,240 @@ msgid ""
 "more than 20 minutes ago, so the thief can't be far.  Everyone split up and "
 "comb the town."
 msgstr ""
+"For those of you who don't know, a thief has broken into the treasury and "
+"stolen a vast quantity of gold.  It is up to us to capture the criminal and "
+"return what they have taken.  It's believed that the robbery occurred no "
+"more than 20 minutes ago, so the thief can't be far.  Everyone split up and "
+"comb the town."
 
 #: dat/maps/desert_barracks.lua:511 dat/maps/desert_training.lua:576
 #: dat/maps/desert_village.lua:735 dat/maps/desert_village.lua:821
 msgid "Sir?"
-msgstr ""
+msgstr "Sir?"
 
 #: dat/maps/desert_barracks.lua:513 dat/maps/desert_village.lua:823
 msgid "Yes, Claudius?"
-msgstr ""
+msgstr "Yes, Claudius?"
 
 #: dat/maps/desert_barracks.lua:515
 msgid "…Nothing."
-msgstr ""
+msgstr "…Nothing."
 
 #: dat/maps/desert_barracks.lua:517
 msgid "You have your orders.  Now go."
-msgstr ""
+msgstr "You have your orders.  Now go."
 
 #: dat/maps/desert_barracks.lua:522
 msgid "This way to the barracks."
-msgstr ""
+msgstr "This way to the barracks."
 
 #: dat/maps/desert_barracks.lua:527
 msgid "Entry into the kitchen is strictly forbidden!"
-msgstr ""
+msgstr "Entry into the kitchen is strictly forbidden!"
 
 #: dat/maps/desert_barracks.lua:532
 msgid ""
 "Hi, Claudius.  If you're looking for the captain, he's at the training hall."
 msgstr ""
+"Hi, Claudius.  If you're looking for the captain, he's at the training hall."
 
 #: dat/maps/desert_barracks.lua:537 dat/maps/desert_village.lua:918
 msgid "Where did the culprit go?"
-msgstr ""
+msgstr "Where did the culprit go?"
 
 #: dat/maps/desert_outskirts.lua:678
 msgid "There you are."
-msgstr ""
+msgstr "There you are."
 
 #: dat/maps/desert_outskirts.lua:680
 msgid "Hey."
-msgstr ""
+msgstr "Hey."
 
 #: dat/maps/desert_outskirts.lua:682
 msgid "What are you doing? The captain wants to speak with you."
-msgstr ""
+msgstr "What are you doing? The captain wants to speak with you."
 
 #: dat/maps/desert_outskirts.lua:684
 msgid "He can wait."
-msgstr ""
+msgstr "He can wait."
 
 #: dat/maps/desert_outskirts.lua:686
 msgid "...What?"
-msgstr ""
+msgstr "...What?"
 
 #: dat/maps/desert_outskirts.lua:688
 msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake."
-msgstr ""
+msgstr "(Kyle hands Claudius a cloth.  Inside is a piece of cake."
 
 #: dat/maps/desert_outskirts.lua:690
 msgid ""
 "I managed to swipe some goodies from the kitchen quarters. I saved you some."
 msgstr ""
+"I managed to swipe some goodies from the kitchen quarters. I saved you some."
 
 #: dat/maps/desert_outskirts.lua:692
 msgid "You shouldn’t –"
-msgstr ""
+msgstr "You shouldn’t –"
 
 #: dat/maps/desert_outskirts.lua:694
 msgid "It's just a piece of cake.  It's not going to hurt anyone."
-msgstr ""
+msgstr "It's just a piece of cake.  It's not going to hurt anyone."
 
 #: dat/maps/desert_outskirts.lua:696
 msgid ""
 "I guess you’re right. And hey, thanks for covering for me back there. I "
 "appreciate it."
 msgstr ""
+"I guess you’re right. And hey, thanks for covering for me back there. I "
+"appreciate it."
 
 #: dat/maps/desert_outskirts.lua:698
 msgid ""
 "Don’t mention it. I’m already on bad terms with the captain, there’s no "
 "sense in you getting in trouble too."
 msgstr ""
+"Don’t mention it. I’m already on bad terms with the captain, there’s no "
+"sense in you getting in trouble too."
 
 #: dat/maps/desert_outskirts.lua:700
 msgid "Hey, what's that... look out!"
-msgstr ""
+msgstr "Hey, what's that... look out!"
 
 #: dat/maps/desert_outskirts.lua:714
 msgid "Good job."
-msgstr ""
+msgstr "Good job."
 
 #: dat/maps/desert_outskirts.lua:716
 msgid "You too. We should head back."
-msgstr ""
+msgstr "You too. We should head back."
 
 #: dat/maps/desert_outskirts.lua:718
 msgid "All right."
-msgstr ""
+msgstr "All right."
 
 #: dat/maps/desert_outskirts.lua:720
 msgid "Claudius?"
-msgstr ""
+msgstr "Claudius?"
 
 #: dat/maps/desert_outskirts.lua:722 dat/maps/desert_training.lua:588
 msgid "Yes?"
-msgstr ""
+msgstr "Yes?"
 
 #: dat/maps/desert_outskirts.lua:724
 msgid "…Let’s go."
-msgstr ""
+msgstr "…Let’s go."
 
 #: dat/maps/desert_training.lua:544 dat/maps/desert_village.lua:696
 msgid "You're late."
-msgstr ""
+msgstr "You're late."
 
 #: dat/maps/desert_training.lua:546
 msgid "Sorry, sir, I –"
-msgstr ""
+msgstr "Sorry, sir, I –"
 
 #: dat/maps/desert_training.lua:548
 msgid "It’s my fault, sir. I dragged Claudius off this morning."
-msgstr ""
+msgstr "It’s my fault, sir. I dragged Claudius off this morning."
 
 #: dat/maps/desert_training.lua:550
 msgid ""
 "Very well. Kyle. Find a partner to train with. I’ll deal with you later."
 msgstr ""
+"Very well. Kyle. Find a partner to train with. I’ll deal with you later."
 
 #: dat/maps/desert_training.lua:552 dat/maps/desert_village.lua:704
 msgid "All right buddy, let's go."
-msgstr ""
+msgstr "All right buddy, let's go."
 
 #: dat/maps/desert_training.lua:554 dat/maps/desert_village.lua:706
 msgid "Not him. Claudius trains with me today."
-msgstr ""
+msgstr "Not him. Claudius trains with me today."
 
 #: dat/maps/desert_training.lua:556
 msgid "Yes sir."
-msgstr ""
+msgstr "Yes sir."
 
 #: dat/maps/desert_training.lua:558 dat/maps/desert_village.lua:715
 msgid "Show me your slicing attack technique."
-msgstr ""
+msgstr "Show me your slicing attack technique."
 
 #: dat/maps/desert_training.lua:560 dat/maps/desert_village.lua:717
 msgid "Hi-ya!"
-msgstr ""
+msgstr "Hi-ya!"
 
 #: dat/maps/desert_training.lua:562
 msgid ""
 "Good. Remember, never take your eye off your target. Now show me the proper "
 "form for a parry."
 msgstr ""
+"Good. Remember, never take your eye off your target. Now show me the proper "
+"form for a parry."
 
 #: dat/maps/desert_training.lua:564 dat/maps/desert_village.lua:723
 msgid "Nicely done."
-msgstr ""
+msgstr "Nicely done."
 
 #: dat/maps/desert_training.lua:566 dat/maps/desert_village.lua:725
 msgid "Thank you, sir."
-msgstr ""
+msgstr "Thank you, sir."
 
 #: dat/maps/desert_training.lua:568
 msgid ""
 "Let’s see how you fare when the opponent strikes back. Kyle! Get over here!"
 msgstr ""
+"Let’s see how you fare when the opponent strikes back. Kyle! Get over here!"
 
 #: dat/maps/desert_training.lua:570
 msgid "Where’s that friend of yours run off to this time?"
-msgstr ""
+msgstr "Where’s that friend of yours run off to this time?"
 
 #: dat/maps/desert_training.lua:572
 msgid "I don’t know, sir."
-msgstr ""
+msgstr "I don’t know, sir."
 
 #: dat/maps/desert_training.lua:574
 msgid "You’ll face me then."
-msgstr ""
+msgstr "You’ll face me then."
 
 #: dat/maps/desert_training.lua:578
 msgid "Draw your weapon."
-msgstr ""
+msgstr "Draw your weapon."
 
 #: dat/maps/desert_training.lua:580
 msgid "Remember what you’ve learned."
-msgstr ""
+msgstr "Remember what you’ve learned."
 
 #: dat/maps/desert_training.lua:582 dat/maps/desert_village.lua:741
 msgid "Well done, Claudius."
-msgstr ""
+msgstr "Well done, Claudius."
 
 #: dat/maps/desert_training.lua:584 dat/maps/desert_village.lua:745
 msgid "Yes, sir."
-msgstr ""
+msgstr "Yes, sir."
 
 #: dat/maps/desert_training.lua:586 dat/maps/desert_village.lua:747
 msgid "Come with me, Claudius, we need to talk."
-msgstr ""
+msgstr "Come with me, Claudius, we need to talk."
 
 #: dat/maps/desert_training.lua:590 dat/maps/desert_village.lua:754
 msgid "You and Kyle are close."
-msgstr ""
+msgstr "You and Kyle are close."
 
 #: dat/maps/desert_training.lua:592 dat/maps/desert_village.lua:756
 msgid "We are, sir."
-msgstr ""
+msgstr "We are, sir."
 
 #: dat/maps/desert_training.lua:594
 msgid ""
 "You have a lot of potential, Claudius. I know Kyle is your friend, but I "
 "fear he’s becoming an impediment to your quest for knighthood."
 msgstr ""
+"You have a lot of potential, Claudius. I know Kyle is your friend, but I "
+"fear he’s becoming an impediment to your quest for knighthood."
 
 #: dat/maps/desert_training.lua:596
 msgid "Kyle is a good man, sir."
-msgstr ""
+msgstr "Kyle is a good man, sir."
 
 #: dat/maps/desert_training.lua:598
 msgid ""
@@ -422,41 +465,51 @@ msgid ""
 "sacrifice. Sometimes that sacrifice means spending less time with the people "
 "we care about."
 msgstr ""
+"Regardless, I want you to consider your priorities. Becoming a knight takes "
+"sacrifice. Sometimes that sacrifice means spending less time with the people "
+"we care about."
 
 #: dat/maps/desert_training.lua:600 dat/maps/desert_village.lua:764
 msgid "I understand, sir."
-msgstr ""
+msgstr "I understand, sir."
 
 #: dat/maps/desert_training.lua:602
 msgid ""
 "Just think about it. Now, do me a favor and find Kyle. I need to speak with "
 "him as well."
 msgstr ""
+"Just think about it. Now, do me a favor and find Kyle. I need to speak with "
+"him as well."
 
 #: dat/maps/desert_training.lua:607
 msgid ""
 "I need you to look for Kyle.  I hope he didn't wander off.  Maybe the other "
 "soldiers know where he is?"
 msgstr ""
+"I need you to look for Kyle.  I hope he didn't wander off.  Maybe the other "
+"soldiers know where he is?"
 
 #: dat/maps/desert_training.lua:612
 msgid ""
 "This is the Karlate training site.  The barracks are to the east.  There's a "
 "cave off to the west."
 msgstr ""
+"This is the Karlate training site.  The barracks are to the east.  There's a "
+"cave off to the west."
 
 #: dat/maps/desert_training.lua:619
 msgid ""
 "The captain and some others went off to the cave down that path to the west."
 msgstr ""
+"The captain and some others went off to the cave down that path to the west."
 
 #: dat/maps/desert_training.lua:624
 msgid "Kyle?  Oh, yeah, I think he went off to the south."
-msgstr ""
+msgstr "Kyle?  Oh, yeah, I think he went off to the south."
 
 #: dat/maps/desert_training.lua:630 dat/maps/desert_village.lua:796
 msgid "Hello, Claudius.  Is your equipment in order?"
-msgstr ""
+msgstr "Hello, Claudius.  Is your equipment in order?"
 
 #: dat/maps/desert_training.lua:636
 msgid ""
@@ -464,22 +517,29 @@ msgid ""
 "There's a cave to the west, though, and if you go far enough, you'll find "
 "water."
 msgstr ""
+"You'd be a fool to run out into the desert on your own for very long.  "
+"There's a cave to the west, though, and if you go far enough, you'll find "
+"water."
 
 #: dat/maps/desert_training.lua:641
 msgid ""
 "I hear some guy stole from the kitchen yesterday.  They've tightened up "
 "security."
 msgstr ""
+"I hear some guy stole from the kitchen yesterday.  They've tightened up "
+"security."
 
 #: dat/maps/desert_training.lua:647
 msgid ""
 "Back home... hey Claudius, we should get some rest.  Let's head back to the "
 "barracks."
 msgstr ""
+"Back home... hey Claudius, we should get some rest.  Let's head back to the "
+"barracks."
 
 #: dat/maps/desert_training.lua:649
 msgid "Okay, let's call it a night."
-msgstr ""
+msgstr "Okay, let's call it a night."
 
 #: dat/maps/desert_village.lua:646
 msgid ""
@@ -487,146 +547,163 @@ msgid ""
 "knight, so now I have to be one. If it was my choice I would be far away "
 "from here."
 msgstr ""
+"I’m just saying that I’m only doing this because of my father. He was a "
+"knight, so now I have to be one. If it was my choice I would be far away "
+"from here."
 
 #: dat/maps/desert_village.lua:648
 msgid "And go where? You should be happy; it’s an honor to serve your country."
 msgstr ""
+"And go where? You should be happy; it’s an honor to serve your country."
 
 #: dat/maps/desert_village.lua:650
 msgid "I can do that on my own, without blindly following orders."
-msgstr ""
+msgstr "I can do that on my own, without blindly following orders."
 
 #: dat/maps/desert_village.lua:652
 msgid ""
 "It’s more effective to work together, and our leadership has our best "
 "interest at heart."
 msgstr ""
+"It’s more effective to work together, and our leadership has our best "
+"interest at heart."
 
 #: dat/maps/desert_village.lua:654
 msgid ""
 "That’s where you’re wrong, Claudius. As far as they’re concerned we’re "
 "expendable."
 msgstr ""
+"That’s where you’re wrong, Claudius. As far as they’re concerned we’re "
+"expendable."
 
 #: dat/maps/desert_village.lua:656 dat/maps/opening_scene.lua:219
 msgid "You’re crazy."
-msgstr ""
+msgstr "You’re crazy."
 
 #: dat/maps/desert_village.lua:658
 msgid "All I know is something has to give. I can’t keep on like this."
-msgstr ""
+msgstr "All I know is something has to give. I can’t keep on like this."
 
 #: dat/maps/desert_village.lua:660
 msgid ""
 "You’ll be all right. Just remember that a knight is selfless, and the well "
 "being of everyone is more important than the individual."
 msgstr ""
+"You’ll be all right. Just remember that a knight is selfless, and the well "
+"being of everyone is more important than the individual."
 
 #: dat/maps/desert_village.lua:662
 msgid "I just don’t understand you sometimes..."
-msgstr ""
+msgstr "I just don’t understand you sometimes..."
 
 #: dat/maps/desert_village.lua:664 dat/maps/opening_scene.lua:231
 msgid "Hey, what time is it?"
-msgstr ""
+msgstr "Hey, what time is it?"
 
 #: dat/maps/desert_village.lua:666
 msgid "I don’t know, why?"
-msgstr ""
+msgstr "I don’t know, why?"
 
 #: dat/maps/desert_village.lua:668
 msgid "Don’t we have training today?"
-msgstr ""
+msgstr "Don’t we have training today?"
 
 #: dat/maps/desert_village.lua:670 dat/maps/opening_scene.lua:237
 msgid "Who cares?"
-msgstr ""
+msgstr "Who cares?"
 
 #: dat/maps/desert_village.lua:672
 msgid "I think we do. Come on!"
-msgstr ""
+msgstr "I think we do. Come on!"
 
 #: dat/maps/desert_village.lua:674 dat/maps/opening_scene.lua:241
 msgid "Kyle has joined the party."
-msgstr ""
+msgstr "Kyle has joined the party."
 
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR The Allacrost Project
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# English translations for Hero of Allacrost - Demo package.
+# Copyright (C) 2010 The Allacrost Project
+# This file is distributed under the same license as the Hero of Allacrost - Demo package.
+# Automatically generated, 2010.
 #
 #: dat/maps/desert_village.lua:683
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Hero of Allacrost - Demo 0.2.2\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
 "POT-Creation-Date: 2010-02-06 19:37-0800\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2010-02-06 19:37-0800\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: dat/maps/desert_village.lua:698
 msgid "Sorry, sir, I -"
-msgstr ""
+msgstr "Sorry, sir, I -"
 
 #: dat/maps/desert_village.lua:700
 msgid ""
 "It’s my fault, sir. I dragged Claudius off this morning, and because of it "
 "we weren’t able to arrive on time."
 msgstr ""
+"It’s my fault, sir. I dragged Claudius off this morning, and because of it "
+"we weren’t able to arrive on time."
 
 #: dat/maps/desert_village.lua:702
 msgid ""
 "Very well; Kyle, you will be punished for this later. For now find a partner "
 "to train with."
 msgstr ""
+"Very well; Kyle, you will be punished for this later. For now find a partner "
+"to train with."
 
 #: dat/maps/desert_village.lua:708
 msgid "Kyle leaves."
-msgstr ""
+msgstr "Kyle leaves."
 
 #: dat/maps/desert_village.lua:719
 msgid ""
 "Good Claudius. Remember to never take your eye off your target. Now show me "
 "the proper form for a parry."
 msgstr ""
+"Good Claudius. Remember to never take your eye off your target. Now show me "
+"the proper form for a parry."
 
 #: dat/maps/desert_village.lua:721
 msgid "Claudius blocks."
-msgstr ""
+msgstr "Claudius blocks."
 
 #: dat/maps/desert_village.lua:727
 msgid ""
 "Let’s see how you fare when the opponent strikes back. Get down here Kyle!"
 msgstr ""
+"Let’s see how you fare when the opponent strikes back. Get down here Kyle!"
 
 #: dat/maps/desert_village.lua:729
 msgid "Where's that friend of yours run off to this time?"
-msgstr ""
+msgstr "Where's that friend of yours run off to this time?"
 
 #: dat/maps/desert_village.lua:731
 msgid "I don’t know, sir. (Not again, Kyle...)"
-msgstr ""
+msgstr "I don’t know, sir. (Not again, Kyle...)"
 
 #: dat/maps/desert_village.lua:733
 msgid "All right, you’ll face me then."
-msgstr ""
+msgstr "All right, you’ll face me then."
 
 #: dat/maps/desert_village.lua:737
 msgid "Draw your weapon, soldier."
-msgstr ""
+msgstr "Draw your weapon, soldier."
 
 #: dat/maps/desert_village.lua:739
 msgid "Remember what you've learned."
-msgstr ""
+msgstr "Remember what you've learned."
 
 #: dat/maps/desert_village.lua:743
 msgid "That's all for today."
-msgstr ""
+msgstr "That's all for today."
 
 #: dat/maps/desert_village.lua:758
 msgid ""
@@ -634,10 +711,13 @@ msgid ""
 "Claudius, but I worry about you. I know Kyle is your friend, but I fear he "
 "is becoming an impediment to you in your quest for knighthood."
 msgstr ""
+"This is difficult, but it needs to be said. You have a lot of potential, "
+"Claudius, but I worry about you. I know Kyle is your friend, but I fear he "
+"is becoming an impediment to you in your quest for knighthood."
 
 #: dat/maps/desert_village.lua:760
 msgid "Kyle is a good man, sir. He just messes up sometimes."
-msgstr ""
+msgstr "Kyle is a good man, sir. He just messes up sometimes."
 
 #: dat/maps/desert_village.lua:762
 msgid ""
@@ -645,1128 +725,1144 @@ msgid ""
 "knight takes sacrifice, and sometimes that sacrifice is spending less time "
 "with the people we care about."
 msgstr ""
+"Regardless, I want you to seriously consider your priorities. Becoming a "
+"knight takes sacrifice, and sometimes that sacrifice is spending less time "
+"with the people we care about."
 
 #: dat/maps/desert_village.lua:766
 msgid ""
 "Just think about it. Now, do me a favor and find Kyle. I need to have a talk "
 "with him as well."
 msgstr ""
+"Just think about it. Now, do me a favor and find Kyle. I need to have a talk "
+"with him as well."
 
 #: dat/maps/desert_village.lua:778
 msgid "This is the Karlate training site."
-msgstr ""
+msgstr "This is the Karlate training site."
 
 #: dat/maps/desert_village.lua:787
 msgid "Hi, Claudius."
-msgstr ""
+msgstr "Hi, Claudius."
 
 #: dat/maps/desert_village.lua:813
 msgid "Come on, Kyle, let's go!"
-msgstr ""
+msgstr "Come on, Kyle, let's go!"
 
 #: dat/maps/desert_village.lua:815
 msgid "...Kyle?"
-msgstr ""
+msgstr "...Kyle?"
 
 #: dat/maps/desert_village.lua:817
 msgid "Oh no..."
-msgstr ""
+msgstr "Oh no..."
 
 #: dat/maps/desert_village.lua:825
 msgid "...Nothing."
-msgstr ""
+msgstr "...Nothing."
 
 #: dat/maps/desert_village.lua:832
 msgid "Awaiting orders, sir."
-msgstr ""
+msgstr "Awaiting orders, sir."
 
 #: dat/maps/opening_scene.lua:209
 msgid ""
 "You know the only reason I’m doing this is because of my family. There was "
 "never any discussion. If it was my choice I’d be far away from here."
 msgstr ""
+"You know the only reason I’m doing this is because of my family. There was "
+"never any discussion. If it was my choice I’d be far away from here."
 
 #: dat/maps/opening_scene.lua:211
 msgid "And go where? You should be happy. It’s an honor to serve your country."
 msgstr ""
+"And go where? You should be happy. It’s an honor to serve your country."
 
 #: dat/maps/opening_scene.lua:213
 msgid "I can do that on my own."
-msgstr ""
+msgstr "I can do that on my own."
 
 #: dat/maps/opening_scene.lua:215
 msgid ""
 "It’s more effective to work together. Besides, the Captain has our best "
 "interest at heart."
 msgstr ""
+"It’s more effective to work together. Besides, the Captain has our best "
+"interest at heart."
 
 #: dat/maps/opening_scene.lua:217
 msgid ""
 "That’s where you’re wrong, Claudius. As far as he’s concerned we’re "
 "expendable."
 msgstr ""
+"That’s where you’re wrong, Claudius. As far as he’s concerned we’re "
+"expendable."
 
 #: dat/maps/opening_scene.lua:221
 msgid "You’ve never thought about leaving the knighthood?"
-msgstr ""
+msgstr "You’ve never thought about leaving the knighthood?"
 
 #: dat/maps/opening_scene.lua:223
 msgid "Of course not."
-msgstr ""
+msgstr "Of course not."
 
 #: dat/maps/opening_scene.lua:225
 msgid "I didn’t think so."
-msgstr ""
+msgstr "I didn’t think so."
 
 #: dat/maps/opening_scene.lua:227
 msgid "You’ll be all right."
-msgstr ""
+msgstr "You’ll be all right."
 
 #: dat/maps/opening_scene.lua:229
 msgid "I just don’t understand you sometimes."
-msgstr ""
+msgstr "I just don’t understand you sometimes."
 
 #: dat/maps/opening_scene.lua:233
 msgid "I don’t know."
-msgstr ""
+msgstr "I don’t know."
 
 #: dat/maps/opening_scene.lua:235
 msgid "Aren’t we supposed to be sparring right now?"
-msgstr ""
+msgstr "Aren’t we supposed to be sparring right now?"
 
 #: dat/maps/opening_scene.lua:239
 msgid "I think we are. Come on."
-msgstr ""
+msgstr "I think we are. Come on."
 
 #: src/modes/battle/battle_actors.cpp:148
 msgid "Miss"
-msgstr ""
+msgstr "Miss"
 
 #: src/modes/battle/battle_windows.cpp:87
 #: src/modes/battle/battle_windows.cpp:104
 msgid "Attack"
-msgstr ""
+msgstr "Attack"
 
 #: src/modes/battle/battle_windows.cpp:88
 msgid "Defend"
-msgstr ""
+msgstr "Defend"
 
 #: src/modes/battle/battle_windows.cpp:89
 #: src/modes/battle/battle_windows.cpp:106
 msgid "Support"
-msgstr ""
+msgstr "Support"
 
 #: src/modes/battle/battle_windows.cpp:90
 #: src/modes/battle/battle_windows.cpp:107
 msgid "Item"
-msgstr ""
+msgstr "Item"
 
 #: src/modes/battle/battle_windows.cpp:105
 msgid "Defense"
-msgstr ""
+msgstr "Defense"
 
 #: src/modes/battle/battle_windows.cpp:583
 #: src/modes/battle/battle_windows.cpp:593
 msgid "Name: "
-msgstr ""
+msgstr "Name: "
 
 #: src/modes/battle/battle_windows.cpp:584
 msgid "Current Quantity: "
-msgstr ""
+msgstr "Current Quantity: "
 
 #: src/modes/battle/battle_windows.cpp:585
 #: src/modes/battle/battle_windows.cpp:595
 msgid "Target Type: "
-msgstr ""
+msgstr "Target Type: "
 
 #: src/modes/battle/battle_windows.cpp:594
 msgid "SP Required: "
-msgstr ""
+msgstr "SP Required: "
 
 #: src/modes/battle/battle_windows.cpp:712
 msgid "Retry the battle"
-msgstr ""
+msgstr "Retry the battle"
 
 #: src/modes/battle/battle_windows.cpp:713
 msgid "Load from last save point"
-msgstr ""
+msgstr "Load from last save point"
 
 #: src/modes/battle/battle_windows.cpp:714
 msgid "Return to main menu"
-msgstr ""
+msgstr "Return to main menu"
 
 #: src/modes/battle/battle_windows.cpp:715
 msgid "Exit the game"
-msgstr ""
+msgstr "Exit the game"
 
 #: src/modes/battle/battle_windows.cpp:1097
 msgid "Victory!!!"
-msgstr ""
+msgstr "Victory!!!"
 
 #: src/modes/battle/battle_windows.cpp:1106
 #: src/modes/battle/battle_windows.cpp:1228
 msgid "XP Gained: "
-msgstr ""
+msgstr "XP Gained: "
 
 #: src/modes/battle/battle_windows.cpp:1120
 msgid "Lv. "
-msgstr ""
+msgstr "Lv. "
 
 #: src/modes/battle/battle_windows.cpp:1123 src/modes/menu/menu_views.cpp:109
 msgid "XP To Next: "
-msgstr ""
+msgstr "XP To Next: "
 
 #: src/modes/battle/battle_windows.cpp:1132 src/modes/menu/menu_views.cpp:99
 #: src/modes/menu/menu_views.cpp:559
 msgid "HP: "
-msgstr ""
+msgstr "HP: "
 
 #: src/modes/battle/battle_windows.cpp:1143 src/modes/menu/menu_views.cpp:104
 #: src/modes/menu/menu_views.cpp:563
 msgid "SP: "
-msgstr ""
+msgstr "SP: "
 
 #: src/modes/battle/battle_windows.cpp:1154 src/modes/menu/menu.cpp:856
 msgid "STR: "
-msgstr ""
+msgstr "STR: "
 
 #: src/modes/battle/battle_windows.cpp:1165 src/modes/menu/menu.cpp:859
 msgid "VIG: "
-msgstr ""
+msgstr "VIG: "
 
 #: src/modes/battle/battle_windows.cpp:1177
 msgid "FOR: "
-msgstr ""
+msgstr "FOR: "
 
 #: src/modes/battle/battle_windows.cpp:1188 src/modes/menu/menu.cpp:865
 msgid "PRO: "
-msgstr ""
+msgstr "PRO: "
 
 #: src/modes/battle/battle_windows.cpp:1199 src/modes/menu/menu.cpp:868
 msgid "AGI: "
-msgstr ""
+msgstr "AGI: "
 
 #: src/modes/battle/battle_windows.cpp:1210 src/modes/menu/menu.cpp:871
 msgid "EVD: "
-msgstr ""
+msgstr "EVD: "
 
 #: src/modes/battle/battle_windows.cpp:1243
 msgid "Skills Learned"
-msgstr ""
+msgstr "Skills Learned"
 
 #: src/modes/battle/battle_windows.cpp:1265 src/modes/menu/menu.cpp:1052
 msgid "Drunes: "
-msgstr ""
+msgstr "Drunes: "
 
 #: src/modes/battle/battle_windows.cpp:1274 src/modes/shop/shop.cpp:132
 msgid "Items"
-msgstr ""
+msgstr "Items"
 
 #: src/modes/boot/boot.cpp:87
 msgid "Demo 1.0.0"
-msgstr ""
+msgstr "Demo 1.0.0"
 
 #: src/modes/boot/boot.cpp:89
 msgid "© 2004 — 2010 The Allacrost Project"
-msgstr ""
+msgstr "© 2004 — 2010 The Allacrost Project"
 
 #: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
 msgid "New Game"
-msgstr ""
+msgstr "New Game"
 
 #: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
 #: src/modes/save/save_mode.cpp:86
 msgid "Load Game"
-msgstr ""
+msgstr "Load Game"
 
 #: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
 msgid "Options"
-msgstr ""
+msgstr "Options"
 
 #: src/modes/boot/boot.cpp:517 src/modes/boot/boot.cpp:537
 msgid "Credits"
-msgstr ""
+msgstr "Credits"
 
 #: src/modes/boot/boot.cpp:518 src/modes/menu/menu_views.cpp:705
 msgid "Battle"
-msgstr ""
+msgstr "Battle"
 
 #: src/modes/boot/boot.cpp:519 src/modes/boot/boot.cpp:906
 #: src/modes/boot/boot_welcome.cpp:85
 msgid "Menu"
-msgstr ""
+msgstr "Menu"
 
 #: src/modes/boot/boot.cpp:520
 msgid "Shop"
-msgstr ""
+msgstr "Shop"
 
 #: src/modes/boot/boot.cpp:521 src/modes/boot/boot.cpp:538
 #: src/modes/boot/boot_welcome.cpp:100
 msgid "Quit"
-msgstr ""
+msgstr "Quit"
 
 #: src/modes/boot/boot.cpp:563
 msgid "Video"
-msgstr ""
+msgstr "Video"
 
 #: src/modes/boot/boot.cpp:564
 msgid "Audio"
-msgstr ""
+msgstr "Audio"
 
 #: src/modes/boot/boot.cpp:565
 msgid "Language"
-msgstr ""
+msgstr "Language"
 
 #: src/modes/boot/boot.cpp:566
 msgid "Key Settings"
-msgstr ""
+msgstr "Key Settings"
 
 #: src/modes/boot/boot.cpp:567
 msgid "Joystick Settings"
-msgstr ""
+msgstr "Joystick Settings"
 
 #: src/modes/boot/boot.cpp:568
 msgid "Profiles"
-msgstr ""
+msgstr "Profiles"
 
 #: src/modes/boot/boot.cpp:585
 msgid "Resolution:"
-msgstr ""
+msgstr "Resolution:"
 
 #: src/modes/boot/boot.cpp:587
 msgid "Window mode:"
-msgstr ""
+msgstr "Window mode:"
 
 #: src/modes/boot/boot.cpp:588
 msgid "Brightness:"
-msgstr ""
+msgstr "Brightness:"
 
 #: src/modes/boot/boot.cpp:589
 msgid "Image quality:"
-msgstr ""
+msgstr "Image quality:"
 
 #: src/modes/boot/boot.cpp:608 src/modes/boot/boot.cpp:892
 msgid "Sound Volume: "
-msgstr ""
+msgstr "Sound Volume: "
 
 #: src/modes/boot/boot.cpp:609 src/modes/boot/boot.cpp:893
 msgid "Music Volume: "
-msgstr ""
+msgstr "Music Volume: "
 
 #: src/modes/boot/boot.cpp:663
 msgid "Up: "
-msgstr ""
+msgstr "Up: "
 
 #: src/modes/boot/boot.cpp:664
 msgid "Down: "
-msgstr ""
+msgstr "Down: "
 
 #: src/modes/boot/boot.cpp:665
 msgid "Left: "
-msgstr ""
+msgstr "Left: "
 
 #: src/modes/boot/boot.cpp:666
 msgid "Right: "
-msgstr ""
+msgstr "Right: "
 
 #: src/modes/boot/boot.cpp:667
 msgid "Confirm: "
-msgstr ""
+msgstr "Confirm: "
 
 #: src/modes/boot/boot.cpp:668
 msgid "Cancel: "
-msgstr ""
+msgstr "Cancel: "
 
 #: src/modes/boot/boot.cpp:669
 msgid "Menu: "
-msgstr ""
+msgstr "Menu: "
 
 #: src/modes/boot/boot.cpp:670
 msgid "Swap: "
-msgstr ""
+msgstr "Swap: "
 
 #: src/modes/boot/boot.cpp:671
 msgid "Left Select: "
-msgstr ""
+msgstr "Left Select: "
 
 #: src/modes/boot/boot.cpp:672
 msgid "Right Select: "
-msgstr ""
+msgstr "Right Select: "
 
 #: src/modes/boot/boot.cpp:673
 msgid "Pause: "
-msgstr ""
+msgstr "Pause: "
 
 #: src/modes/boot/boot.cpp:674 src/modes/boot/boot.cpp:703
 msgid "Restore defaults"
-msgstr ""
+msgstr "Restore defaults"
 
 #: src/modes/boot/boot.cpp:745 src/modes/menu/menu.cpp:557
 #: src/modes/menu/menu.cpp:625 src/modes/menu/menu.cpp:640
 msgid "Save"
-msgstr ""
+msgstr "Save"
 
 #: src/modes/boot/boot.cpp:746
 msgid "Load"
-msgstr ""
+msgstr "Load"
 
 #: src/modes/boot/boot.cpp:747
 msgid "Delete"
-msgstr ""
+msgstr "Delete"
 
 #: src/modes/boot/boot.cpp:786
 msgid "New Profile"
-msgstr ""
+msgstr "New Profile"
 
 #: src/modes/boot/boot.cpp:865
 msgid "back"
-msgstr ""
+msgstr "back"
 
 #: src/modes/boot/boot.cpp:868
 msgid "end"
-msgstr ""
+msgstr "end"
 
 #: src/modes/boot/boot.cpp:881
 msgid "Window mode: fullscreen"
-msgstr ""
+msgstr "Window mode: fullscreen"
 
 #: src/modes/boot/boot.cpp:883
 msgid "Window mode: windowed"
-msgstr ""
+msgstr "Window mode: windowed"
 
 #: src/modes/boot/boot.cpp:886
 msgid "Brightness: "
-msgstr ""
+msgstr "Brightness: "
 
 #: src/modes/boot/boot.cpp:900
 msgid "Move Up"
-msgstr ""
+msgstr "Move Up"
 
 #: src/modes/boot/boot.cpp:901
 msgid "Move Down"
-msgstr ""
+msgstr "Move Down"
 
 #: src/modes/boot/boot.cpp:902
 msgid "Move Left"
-msgstr ""
+msgstr "Move Left"
 
 #: src/modes/boot/boot.cpp:903
 msgid "Move Right"
-msgstr ""
+msgstr "Move Right"
 
 #: src/modes/boot/boot.cpp:904 src/modes/boot/boot_welcome.cpp:79
 #: src/modes/shop/shop.cpp:1050
 msgid "Confirm"
-msgstr ""
+msgstr "Confirm"
 
 #: src/modes/boot/boot.cpp:905 src/modes/boot/boot_welcome.cpp:82
 #: src/modes/pause.cpp:71 src/modes/save/save_mode.cpp:87
 #: src/modes/save/save_mode.cpp:100
 msgid "Cancel"
-msgstr ""
+msgstr "Cancel"
 
 #: src/modes/boot/boot.cpp:907 src/modes/boot/boot_welcome.cpp:88
 msgid "Swap"
-msgstr ""
+msgstr "Swap"
 
 #: src/modes/boot/boot.cpp:908 src/modes/boot/boot_welcome.cpp:91
 msgid "Left Select"
-msgstr ""
+msgstr "Left Select"
 
 #: src/modes/boot/boot.cpp:909 src/modes/boot/boot_welcome.cpp:94
 msgid "Right Select"
-msgstr ""
+msgstr "Right Select"
 
 #: src/modes/boot/boot.cpp:910 src/modes/boot/boot_welcome.cpp:97
 msgid "Pause"
-msgstr ""
+msgstr "Pause"
 
 #: src/modes/boot/boot.cpp:917
 msgid "X Axis"
-msgstr ""
+msgstr "X Axis"
 
 #: src/modes/boot/boot.cpp:918
 msgid "Y Axis"
-msgstr ""
+msgstr "Y Axis"
 
 #: src/modes/boot/boot.cpp:919
 msgid "Confirm: Button"
-msgstr ""
+msgstr "Confirm: Button"
 
 #: src/modes/boot/boot.cpp:920
 msgid "Cancel: Button"
-msgstr ""
+msgstr "Cancel: Button"
 
 #: src/modes/boot/boot.cpp:921
 msgid "Menu: Button"
-msgstr ""
+msgstr "Menu: Button"
 
 #: src/modes/boot/boot.cpp:922
 msgid "Swap: Button"
-msgstr ""
+msgstr "Swap: Button"
 
 #: src/modes/boot/boot.cpp:923
 msgid "Left Select : Button"
-msgstr ""
+msgstr "Left Select : Button"
 
 #: src/modes/boot/boot.cpp:924
 msgid "Right Select: Button"
-msgstr ""
+msgstr "Right Select: Button"
 
 #: src/modes/boot/boot.cpp:925
 msgid "Pause: Button"
-msgstr ""
+msgstr "Pause: Button"
 
 #: src/modes/boot/boot.cpp:1268
 msgid "Please enter a name for your new profile"
-msgstr ""
+msgstr "Please enter a name for your new profile"
 
 #: src/modes/boot/boot.cpp:1276
 msgid "Overwrite? Confirm/Cancel"
-msgstr ""
+msgstr "Overwrite? Confirm/Cancel"
 
 #: src/modes/boot/boot.cpp:1558
 msgid "Please press a new joystick button."
-msgstr ""
+msgstr "Please press a new joystick button."
 
 #: src/modes/boot/boot.cpp:1560
 msgid "Please press a new key."
-msgstr ""
+msgstr "Please press a new key."
 
 #: src/modes/boot/boot.cpp:1562
 msgid "Please move an axis."
-msgstr ""
+msgstr "Please move an axis."
 
 #: src/modes/boot/boot_welcome.cpp:44
 msgid "The table below lists the default game controls.\n"
-msgstr ""
+msgstr "The table below lists the default game controls.\n"
 
 #: src/modes/boot/boot_welcome.cpp:45
 msgid ""
 "The control mappings can be changed in the options menu on the next screen."
 msgstr ""
+"The control mappings can be changed in the options menu on the next screen."
 
 #: src/modes/boot/boot_welcome.cpp:55
 msgid "Command"
-msgstr ""
+msgstr "Command"
 
 #: src/modes/boot/boot_welcome.cpp:56
 msgid "Default Key"
-msgstr ""
+msgstr "Default Key"
 
 #: src/modes/boot/boot_welcome.cpp:57
 msgid "General Purpose"
-msgstr ""
+msgstr "General Purpose"
 
 #: src/modes/boot/boot_welcome.cpp:67
 msgid "Up"
-msgstr ""
+msgstr "Up"
 
 #: src/modes/boot/boot_welcome.cpp:68
 msgid "Up Arrow"
-msgstr ""
+msgstr "Up Arrow"
 
 #: src/modes/boot/boot_welcome.cpp:69
 msgid "Move position or cursor upwards"
-msgstr ""
+msgstr "Move position or cursor upwards"
 
 #: src/modes/boot/boot_welcome.cpp:70
 msgid "Down"
-msgstr ""
+msgstr "Down"
 
 #: src/modes/boot/boot_welcome.cpp:71
 msgid "Down Arrow"
-msgstr ""
+msgstr "Down Arrow"
 
 #: src/modes/boot/boot_welcome.cpp:72
 msgid "Move position or cursor downwards"
-msgstr ""
+msgstr "Move position or cursor downwards"
 
 #: src/modes/boot/boot_welcome.cpp:73
 msgid "Left"
-msgstr ""
+msgstr "Left"
 
 #: src/modes/boot/boot_welcome.cpp:74
 msgid "Left Arrow"
-msgstr ""
+msgstr "Left Arrow"
 
 #: src/modes/boot/boot_welcome.cpp:75
 msgid "Move position or cursor to the left"
-msgstr ""
+msgstr "Move position or cursor to the left"
 
 #: src/modes/boot/boot_welcome.cpp:76
 msgid "Right"
-msgstr ""
+msgstr "Right"
 
 #: src/modes/boot/boot_welcome.cpp:77
 msgid "Right Arrow"
-msgstr ""
+msgstr "Right Arrow"
 
 #: src/modes/boot/boot_welcome.cpp:78
 msgid "Move position or cursor to the right"
-msgstr ""
+msgstr "Move position or cursor to the right"
 
 #: src/modes/boot/boot_welcome.cpp:80
 msgid "F"
-msgstr ""
+msgstr "F"
 
 #: src/modes/boot/boot_welcome.cpp:81
 msgid "Confirm an action or menu command"
-msgstr ""
+msgstr "Confirm an action or menu command"
 
 #: src/modes/boot/boot_welcome.cpp:83
 msgid "D"
-msgstr ""
+msgstr "D"
 
 #: src/modes/boot/boot_welcome.cpp:84
 msgid "Cancel an action or menu command"
-msgstr ""
+msgstr "Cancel an action or menu command"
 
 #: src/modes/boot/boot_welcome.cpp:86
 msgid "S"
-msgstr ""
+msgstr "S"
 
 #: src/modes/boot/boot_welcome.cpp:87
 msgid "Display the character menu"
-msgstr ""
+msgstr "Display the character menu"
 
 #: src/modes/boot/boot_welcome.cpp:89
 msgid "A"
-msgstr ""
+msgstr "A"
 
 #: src/modes/boot/boot_welcome.cpp:90
 msgid "Swaps active menu or character"
-msgstr ""
+msgstr "Swaps active menu or character"
 
 #: src/modes/boot/boot_welcome.cpp:92
 msgid "W"
-msgstr ""
+msgstr "W"
 
 #: src/modes/boot/boot_welcome.cpp:93
 msgid "Select multiple or backward page scroll"
-msgstr ""
+msgstr "Select multiple or backward page scroll"
 
 #: src/modes/boot/boot_welcome.cpp:95
 msgid "E"
-msgstr ""
+msgstr "E"
 
 #: src/modes/boot/boot_welcome.cpp:96
 msgid "Select multiple or forward page scroll"
-msgstr ""
+msgstr "Select multiple or forward page scroll"
 
 #: src/modes/boot/boot_welcome.cpp:98
 msgid "Spacebar"
-msgstr ""
+msgstr "Spacebar"
 
 #: src/modes/boot/boot_welcome.cpp:99
 msgid "Pauses the game"
-msgstr ""
+msgstr "Pauses the game"
 
 #: src/modes/boot/boot_welcome.cpp:101
 msgid "Esc"
-msgstr ""
+msgstr "Esc"
 
 #: src/modes/boot/boot_welcome.cpp:102
 msgid "Quit the application"
-msgstr ""
+msgstr "Quit the application"
 
 #: src/modes/boot/boot_welcome.cpp:105
 msgid ""
 "There are additional commands available which can be found in the MANUAL "
 "file."
 msgstr ""
+"There are additional commands available which can be found in the MANUAL "
+"file."
 
 #: src/modes/boot/boot_welcome.cpp:108
 msgid "Press any key to continue."
-msgstr ""
+msgstr "Press any key to continue."
 
 #: src/modes/map/map_treasure.cpp:194
 msgid "Treasure Contents"
-msgstr ""
+msgstr "Treasure Contents"
 
 #: src/modes/map/map_treasure.cpp:218
 msgid "Finished"
-msgstr ""
+msgstr "Finished"
 
 #: src/modes/map/map_treasure.cpp:453
 msgid "Drunes"
-msgstr ""
+msgstr "Drunes"
 
 #: src/modes/map/map_treasure.cpp:455
 msgid "With the additional "
-msgstr ""
+msgstr "With the additional "
 
 #: src/modes/map/map_treasure.cpp:456
 msgid " drunes found in this treasure added, the party now holds a total of "
-msgstr ""
+msgstr " drunes found in this treasure added, the party now holds a total of "
 
 #: src/modes/menu/menu.cpp:272
 msgid "Your game has been saved."
-msgstr ""
+msgstr "Your game has been saved."
 
 #: src/modes/menu/menu.cpp:553
 msgid "Inventory"
-msgstr ""
+msgstr "Inventory"
 
 #: src/modes/menu/menu.cpp:554
 msgid "Skills"
-msgstr ""
+msgstr "Skills"
 
 #: src/modes/menu/menu.cpp:555 src/modes/menu/menu.cpp:670
 msgid "Equip"
-msgstr ""
+msgstr "Equip"
 
 #: src/modes/menu/menu.cpp:556
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #: src/modes/menu/menu.cpp:558
 msgid "Formation"
-msgstr ""
+msgstr "Formation"
 
 #: src/modes/menu/menu.cpp:574 src/modes/menu/menu.cpp:592
 msgid "Use"
-msgstr ""
+msgstr "Use"
 
 #: src/modes/menu/menu.cpp:576 src/modes/menu/menu.cpp:593
 #: src/modes/menu/menu.cpp:608 src/modes/menu/menu.cpp:626
 #: src/modes/menu/menu.cpp:641 src/modes/menu/menu.cpp:656
 #: src/modes/menu/menu.cpp:672
 msgid "Back"
-msgstr ""
+msgstr "Back"
 
 #: src/modes/menu/menu.cpp:607
 msgid "View"
-msgstr ""
+msgstr "View"
 
 #: src/modes/menu/menu.cpp:624
 msgid "Edit"
-msgstr ""
+msgstr "Edit"
 
 #: src/modes/menu/menu.cpp:655
 msgid "Switch"
-msgstr ""
+msgstr "Switch"
 
 #: src/modes/menu/menu.cpp:671
 msgid "Remove"
-msgstr ""
+msgstr "Remove"
 
 #: src/modes/menu/menu.cpp:862
 msgid "FRT: "
-msgstr ""
+msgstr "FRT: "
 
 #: src/modes/menu/menu.cpp:875
 msgid "Current Equipment:"
-msgstr ""
+msgstr "Current Equipment:"
 
 #: src/modes/menu/menu.cpp:878 src/modes/menu/menu_views.cpp:1395
 msgid "Weapon"
-msgstr ""
+msgstr "Weapon"
 
 #: src/modes/menu/menu.cpp:881
 msgid "Head"
-msgstr ""
+msgstr "Head"
 
 #: src/modes/menu/menu.cpp:884
 msgid "Torso"
-msgstr ""
+msgstr "Torso"
 
 #: src/modes/menu/menu.cpp:887 src/modes/menu/menu_views.cpp:204
 msgid "Arm"
-msgstr ""
+msgstr "Arm"
 
 #: src/modes/menu/menu.cpp:890
 msgid "Legs"
-msgstr ""
+msgstr "Legs"
 
 #: src/modes/menu/menu.cpp:895
 msgid "PHYS ATK: "
-msgstr ""
+msgstr "PHYS ATK: "
 
 #: src/modes/menu/menu.cpp:898 src/modes/menu/menu.cpp:901
 #: src/modes/menu/menu.cpp:904 src/modes/menu/menu.cpp:907
 msgid "PHYS DEF: "
-msgstr ""
+msgstr "PHYS DEF: "
 
 #: src/modes/menu/menu.cpp:912
 msgid "META ATK: "
-msgstr ""
+msgstr "META ATK: "
 
 #: src/modes/menu/menu.cpp:915 src/modes/menu/menu.cpp:918
 #: src/modes/menu/menu.cpp:921 src/modes/menu/menu.cpp:924
 msgid "META DEF: "
-msgstr ""
+msgstr "META DEF: "
 
 #: src/modes/menu/menu.cpp:939
 msgid "PHYS ATK:"
-msgstr ""
+msgstr "PHYS ATK:"
 
 #: src/modes/menu/menu.cpp:944
 msgid "META ATK:"
-msgstr ""
+msgstr "META ATK:"
 
 #: src/modes/menu/menu.cpp:958 src/modes/menu/menu.cpp:977
 #: src/modes/menu/menu.cpp:996 src/modes/menu/menu.cpp:1015
 msgid "PHYS DEF:"
-msgstr ""
+msgstr "PHYS DEF:"
 
 #: src/modes/menu/menu.cpp:963 src/modes/menu/menu.cpp:982
 #: src/modes/menu/menu.cpp:1001 src/modes/menu/menu.cpp:1020
 msgid "META DEF:"
-msgstr ""
+msgstr "META DEF:"
 
 #: src/modes/menu/menu_views.cpp:95
 msgid "Lv: "
-msgstr ""
+msgstr "Lv: "
 
 #: src/modes/menu/menu_views.cpp:199 src/modes/menu/menu_views.cpp:703
 msgid "All"
-msgstr ""
+msgstr "All"
 
 #: src/modes/menu/menu_views.cpp:200
 msgid "Itm"
-msgstr ""
+msgstr "Itm"
 
 #: src/modes/menu/menu_views.cpp:201
 msgid "Wpn"
-msgstr ""
+msgstr "Wpn"
 
 #: src/modes/menu/menu_views.cpp:202
 msgid "Hlm"
-msgstr ""
+msgstr "Hlm"
 
 #: src/modes/menu/menu_views.cpp:203
 msgid "Tor"
-msgstr ""
+msgstr "Tor"
 
 #: src/modes/menu/menu_views.cpp:205
 msgid "Leg"
-msgstr ""
+msgstr "Leg"
 
 #: src/modes/menu/menu_views.cpp:206
 msgid "Key"
-msgstr ""
+msgstr "Key"
 
 #: src/modes/menu/menu_views.cpp:553
 msgid "Experience Level: "
-msgstr ""
+msgstr "Experience Level: "
 
 #: src/modes/menu/menu_views.cpp:567
 msgid "XP to Next: "
-msgstr ""
+msgstr "XP to Next: "
 
 #: src/modes/menu/menu_views.cpp:570
 msgid "Strength: "
-msgstr ""
+msgstr "Strength: "
 
 #: src/modes/menu/menu_views.cpp:573
 msgid "Vigor: "
-msgstr ""
+msgstr "Vigor: "
 
 #: src/modes/menu/menu_views.cpp:576
 msgid "Fortitude: "
-msgstr ""
+msgstr "Fortitude: "
 
 #: src/modes/menu/menu_views.cpp:579
 msgid "Protection: "
-msgstr ""
+msgstr "Protection: "
 
 #: src/modes/menu/menu_views.cpp:582
 msgid "Agility: "
-msgstr ""
+msgstr "Agility: "
 
 #: src/modes/menu/menu_views.cpp:585
 msgid "Evade: "
-msgstr ""
+msgstr "Evade: "
 
 #: src/modes/menu/menu_views.cpp:704
 msgid "Field"
-msgstr ""
+msgstr "Field"
 
 #: src/modes/menu/menu_views.cpp:1373 src/modes/shop/shop.cpp:133
 msgid "Weapons"
-msgstr ""
+msgstr "Weapons"
 
 #: src/modes/menu/menu_views.cpp:1376 src/modes/menu/menu_views.cpp:1397
 msgid "Headgear"
-msgstr ""
+msgstr "Headgear"
 
 #: src/modes/menu/menu_views.cpp:1379 src/modes/menu/menu_views.cpp:1399
 msgid "Body Armor"
-msgstr ""
+msgstr "Body Armor"
 
 #: src/modes/menu/menu_views.cpp:1382 src/modes/menu/menu_views.cpp:1401
 msgid "Offhand"
-msgstr ""
+msgstr "Offhand"
 
 #: src/modes/menu/menu_views.cpp:1385 src/modes/menu/menu_views.cpp:1403
 msgid "Leggings"
-msgstr ""
+msgstr "Leggings"
 
 #: src/modes/menu/menu_views.cpp:1574 src/modes/shop/shop_confirm.cpp:127
 msgid "Yes"
-msgstr ""
+msgstr "Yes"
 
 #: src/modes/menu/menu_views.cpp:1575 src/modes/shop/shop_confirm.cpp:126
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: src/modes/pause.cpp:57
 msgid "Paused"
-msgstr ""
+msgstr "Paused"
 
 #: src/modes/pause.cpp:69
 msgid "Quit Game"
-msgstr ""
+msgstr "Quit Game"
 
 #: src/modes/pause.cpp:70
 msgid "Quit to Main Menu"
-msgstr ""
+msgstr "Quit to Main Menu"
 
 #: src/modes/save/save_mode.cpp:85
 msgid "Save Game"
-msgstr ""
+msgstr "Save Game"
 
 #: src/modes/save/save_mode.cpp:101
 msgid "File #1"
-msgstr ""
+msgstr "File #1"
 
 #: src/modes/save/save_mode.cpp:102
 msgid "File #2"
-msgstr ""
+msgstr "File #2"
 
 #: src/modes/save/save_mode.cpp:103
 msgid "File #3"
-msgstr ""
+msgstr "File #3"
 
 #: src/modes/save/save_mode.cpp:104
 msgid "File #4"
-msgstr ""
+msgstr "File #4"
 
 #: src/modes/save/save_mode.cpp:105
 msgid "File #5"
-msgstr ""
+msgstr "File #5"
 
 #: src/modes/save/save_mode.cpp:106
 msgid "File #6"
-msgstr ""
+msgstr "File #6"
 
 #: src/modes/shop/shop.cpp:134
 msgid "Head Armor"
-msgstr ""
+msgstr "Head Armor"
 
 #: src/modes/shop/shop.cpp:135
 msgid "Torso Armor"
-msgstr ""
+msgstr "Torso Armor"
 
 #: src/modes/shop/shop.cpp:136
 msgid "Arm Armor"
-msgstr ""
+msgstr "Arm Armor"
 
 #: src/modes/shop/shop.cpp:137
 msgid "Leg Armor"
-msgstr ""
+msgstr "Leg Armor"
 
 #: src/modes/shop/shop.cpp:138
 msgid "Shards"
-msgstr ""
+msgstr "Shards"
 
 #: src/modes/shop/shop.cpp:139
 msgid "Key Items"
-msgstr ""
+msgstr "Key Items"
 
 #: src/modes/shop/shop.cpp:140
 msgid "All Wares"
-msgstr ""
+msgstr "All Wares"
 
 #: src/modes/shop/shop.cpp:381
 msgid "Map Use:"
-msgstr ""
+msgstr "Map Use:"
 
 #: src/modes/shop/shop.cpp:383
 msgid "Battle Use:"
-msgstr ""
+msgstr "Battle Use:"
 
 #: src/modes/shop/shop.cpp:385
 msgid "Target:"
-msgstr ""
+msgstr "Target:"
 
 #: src/modes/shop/shop.cpp:387
 msgid "Self"
-msgstr ""
+msgstr "Self"
 
 #: src/modes/shop/shop.cpp:388
 msgid "Ally"
-msgstr ""
+msgstr "Ally"
 
 #: src/modes/shop/shop.cpp:389
 msgid "Enemy"
-msgstr ""
+msgstr "Enemy"
 
 #: src/modes/shop/shop.cpp:390
 msgid "All Allies"
-msgstr ""
+msgstr "All Allies"
 
 #: src/modes/shop/shop.cpp:391
 msgid "All Enemies"
-msgstr ""
+msgstr "All Enemies"
 
 #: src/modes/shop/shop.cpp:394
 msgid "Phys:"
-msgstr ""
+msgstr "Phys:"
 
 #: src/modes/shop/shop.cpp:396
 msgid "Meta:"
-msgstr ""
+msgstr "Meta:"
 
 #: src/modes/shop/shop.cpp:1047 src/modes/shop/shop_buy.cpp:69
 #: src/modes/shop/shop_confirm.cpp:187 src/modes/shop/shop_confirm.cpp:210
 #: src/modes/shop/shop_confirm.cpp:525 src/modes/shop/shop_leave.cpp:170
 #: src/modes/shop/shop_leave.cpp:190 src/modes/shop/shop_leave.cpp:442
 msgid "Buy"
-msgstr ""
+msgstr "Buy"
 
 #: src/modes/shop/shop.cpp:1048 src/modes/shop/shop_confirm.cpp:195
 #: src/modes/shop/shop_confirm.cpp:514 src/modes/shop/shop_leave.cpp:177
 #: src/modes/shop/shop_leave.cpp:431 src/modes/shop/shop_sell.cpp:69
 msgid "Sell"
-msgstr ""
+msgstr "Sell"
 
 #: src/modes/shop/shop.cpp:1049
 msgid "Trade"
-msgstr ""
+msgstr "Trade"
 
 #: src/modes/shop/shop.cpp:1058
 msgid "Leave"
-msgstr ""
+msgstr "Leave"
 
 #: src/modes/shop/shop.cpp:1543
 msgid "Funds: "
-msgstr ""
+msgstr "Funds: "
 
 #: src/modes/shop/shop.cpp:1544
 msgid "Purchases: -"
-msgstr ""
+msgstr "Purchases: -"
 
 #: src/modes/shop/shop.cpp:1545
 msgid "Sales: +"
-msgstr ""
+msgstr "Sales: +"
 
 #: src/modes/shop/shop.cpp:1546
 msgid "Total: "
-msgstr ""
+msgstr "Total: "
 
 #: src/modes/shop/shop_buy.cpp:57 src/modes/shop/shop_sell.cpp:57
 msgid "Category"
-msgstr ""
+msgstr "Category"
 
 #: src/modes/shop/shop_buy.cpp:60 src/modes/shop/shop_confirm.cpp:79
 #: src/modes/shop/shop_leave.cpp:80 src/modes/shop/shop_sell.cpp:60
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: src/modes/shop/shop_buy.cpp:66 src/modes/shop/shop_confirm.cpp:87
 #: src/modes/shop/shop_leave.cpp:88 src/modes/shop/shop_sell.cpp:66
 msgid "Price"
-msgstr ""
+msgstr "Price"
 
 #: src/modes/shop/shop_buy.cpp:67 src/modes/shop/shop_confirm.cpp:88
 #: src/modes/shop/shop_leave.cpp:89 src/modes/shop/shop_sell.cpp:67
 msgid "Stock"
-msgstr ""
+msgstr "Stock"
 
 #: src/modes/shop/shop_buy.cpp:68 src/modes/shop/shop_confirm.cpp:89
 #: src/modes/shop/shop_leave.cpp:90 src/modes/shop/shop_sell.cpp:68
 msgid "Own"
-msgstr ""
+msgstr "Own"
 
 #: src/modes/shop/shop_confirm.cpp:67 src/modes/shop/shop_leave.cpp:68
 msgid "Purchases"
-msgstr ""
+msgstr "Purchases"
 
 #: src/modes/shop/shop_confirm.cpp:71 src/modes/shop/shop_leave.cpp:72
 msgid "Sales"
-msgstr ""
+msgstr "Sales"
 
 #: src/modes/shop/shop_confirm.cpp:75 src/modes/shop/shop_leave.cpp:76
 msgid "Trades"
-msgstr ""
+msgstr "Trades"
 
 #: src/modes/shop/shop_confirm.cpp:93 src/modes/shop/shop_leave.cpp:94
 msgid "No marked transactions."
-msgstr ""
+msgstr "No marked transactions."
 
 #: src/modes/shop/shop_confirm.cpp:99
 msgid "There are no marked purchases, sales, or trades."
-msgstr ""
+msgstr "There are no marked purchases, sales, or trades."
 
 #: src/modes/shop/shop_confirm.cpp:102
 msgid "Will that be all?"
-msgstr ""
+msgstr "Will that be all?"
 
 #: src/modes/shop/shop_confirm.cpp:111
 msgid "Modify Order"
-msgstr ""
+msgstr "Modify Order"
 
 #: src/modes/shop/shop_confirm.cpp:112
 msgid "Clear Order"
-msgstr ""
+msgstr "Clear Order"
 
 #: src/modes/shop/shop_confirm.cpp:113
 msgid "Complete Transaction"
-msgstr ""
+msgstr "Complete Transaction"
 
 #: src/modes/shop/shop_confirm.cpp:117
 msgid "This will remove all marked purchases, sales, and trades. Are you sure?"
 msgstr ""
+"This will remove all marked purchases, sales, and trades. Are you sure?"
 
 #: src/modes/shop/shop_confirm.cpp:669 src/modes/shop/shop_confirm.cpp:676
 #: src/modes/shop/shop_confirm.cpp:683 src/modes/shop/shop_leave.cpp:193
 #: src/modes/shop/shop_leave.cpp:195 src/modes/shop/shop_leave.cpp:197
 msgid " count"
-msgstr ""
+msgstr " count"
 
 #: src/modes/shop/shop_confirm.cpp:670 src/modes/shop/shop_leave.cpp:194
 #: src/modes/shop/shop_leave.cpp:196
 msgid " unique"
-msgstr ""
+msgstr " unique"
 
 #: src/modes/shop/shop_confirm.cpp:684 src/modes/shop/shop_leave.cpp:198
 msgid " characters"
-msgstr ""
+msgstr " characters"
 
 #: src/modes/shop/shop_leave.cpp:100
 msgid "Your order is not yet final. Are you sure you want to leave the shop?"
-msgstr ""
+msgstr "Your order is not yet final. Are you sure you want to leave the shop?"
 
 #: src/modes/shop/shop_leave.cpp:109
 msgid "View Order"
-msgstr ""
+msgstr "View Order"
 
 #: src/modes/shop/shop_leave.cpp:110
 msgid "Confirm Order"
-msgstr ""
+msgstr "Confirm Order"
 
 #: src/modes/shop/shop_leave.cpp:111
 msgid "Leave Shop"
-msgstr ""
+msgstr "Leave Shop"
 
 #: src/modes/shop/shop_root.cpp:117
 msgid "Shop Name"
-msgstr ""
+msgstr "Shop Name"
 
 #: src/modes/shop/shop_root.cpp:120
 msgid "Buy prices"
-msgstr ""
+msgstr "Buy prices"
 
 #: src/modes/shop/shop_root.cpp:122
 msgid "Sell prices"
-msgstr ""
+msgstr "Sell prices"
 
 #: src/modes/shop/shop_root.cpp:130
 msgid "\"Welcome! Take a look around.\""
-msgstr ""
+msgstr "“Welcome! Take a look around.”"
 
 #: src/modes/shop/shop_trade.cpp:48
 msgid "This feature is not yet available."
-msgstr ""
+msgstr "This feature is not yet available."
