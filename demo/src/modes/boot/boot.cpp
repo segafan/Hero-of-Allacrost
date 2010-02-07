@@ -1313,7 +1313,6 @@ void BootMode::_OnDeleteFile() {
 
 
 void BootMode::_OnPickLetter() {
-	std::string filename;
 	//the letters from the table
 	char letters[26] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
 
@@ -1321,12 +1320,12 @@ void BootMode::_OnPickLetter() {
 		//end, so save the file
 
 		//add the .lua extension
-		filename += ".lua";
+		_current_filename += ".lua";
 
 		//lets save this mofo :) and then add the option to save_profile menu and the load-profile menu
 		_has_modified_settings = true;
 
-		if(_SaveSettingsFile(filename))
+		if(_SaveSettingsFile(_current_filename))
 		{
 			if(BOOT_DEBUG)
 				cout << "BOOT: profile successfully saved.";
@@ -1336,13 +1335,13 @@ void BootMode::_OnPickLetter() {
 
 
 		//take off the .lua extension so the end user doesnt see it
-		filename.erase(filename.size() - 4);
-		_save_profile_menu.AddOption(MakeUnicodeString(filename), &BootMode::_OnSaveFile);
-		_load_profile_menu.AddOption(MakeUnicodeString(filename), &BootMode::_OnLoadFile);
-		_delete_profile_menu.AddOption(MakeUnicodeString(filename), &BootMode::_OnDeleteFile);
+		_current_filename.erase(_current_filename.size() - 4);
+		_save_profile_menu.AddOption(MakeUnicodeString(_current_filename), &BootMode::_OnSaveFile);
+		_load_profile_menu.AddOption(MakeUnicodeString(_current_filename), &BootMode::_OnLoadFile);
+		_delete_profile_menu.AddOption(MakeUnicodeString(_current_filename), &BootMode::_OnDeleteFile);
 
-		//make sure we reset the current filename string
-		filename = "";
+		//make sure we reset the current _current_filename string
+		_current_filename = "";
 
 		//also make sure we hide the alert windows if they havent selected new profile
 		_file_name_alert.Hide();
@@ -1360,18 +1359,18 @@ void BootMode::_OnPickLetter() {
 		//we subtract 1 because char arrays AKA strings start at position 0
 
 		//make sure we dont try to erase letters that are not there
-		if(filename != "")
-			filename.erase(filename.length()-1);
+		if(_current_filename != "")
+			_current_filename.erase(_current_filename.length()-1);
 	}
 	else {
-		//add letter to the filename the filename can be no longer than 19 characters
-		if(filename.length() != MAX_NAME)
-			filename += letters[_user_input_menu.GetSelection()];
+		//add letter to the _current_filename the _current_filename can be no longer than 19 characters
+		if(_current_filename.length() != MAX_NAME)
+			_current_filename += letters[_user_input_menu.GetSelection()];
 		else if(BOOT_DEBUG)
-			cout << "BOOT ERROR: Filename cannot be longer than 19 characters";
+			cout << "BOOT ERROR: _current_filename cannot be longer than 19 characters";
 	}
 
-	_file_name_window.SetText(MakeUnicodeString(filename));
+	_file_name_window.SetText(MakeUnicodeString(_current_filename));
 } // void BootMode::_OnPickLetter()
 
 // ****************************************************************************
@@ -1643,8 +1642,8 @@ bool BootMode::_LoadSettingsFile(const std::string& filename) {
 
 	// Load video settings
 	settings.OpenTable("video_settings");
-	bool fullscreen = settings.ReadBool("full_screen");
-	int32 resx = settings.ReadInt("screen_resx");
+	bool fullscreen = static_cast<bool>(settings.ReadBool("full_screen"));
+	int32 resx = static_cast<int32>(settings.ReadInt("screen_resx"));
 
 
 	//Set Resolution  according to width if no width matches our predefined resoultion set to lowest resolution
@@ -1679,6 +1678,9 @@ bool BootMode::_LoadSettingsFile(const std::string& filename) {
 		cerr << settings.GetErrorMessages() << endl;
 		return false;
 	}
+
+	// Load language settings
+	SystemManager->SetLanguage(static_cast<std::string>(settings.ReadString("language")));
 
 	// Load Audio settings
 	if (AUDIO_ENABLE) {
@@ -1736,6 +1738,10 @@ bool BootMode::_SaveSettingsFile(const std::string& filename) {
 
 	// Write the current settings into the .lua file
 	settings_lua.ModifyInt("settings.welcome", 0);
+
+	//Save language settings
+	settings_lua.ModifyString("language", SystemManager->GetLanguage());
+
 	// video
 	settings_lua.OpenTable("settings");
 	settings_lua.ModifyInt("video_settings.screen_resx", VideoManager->GetScreenWidth());

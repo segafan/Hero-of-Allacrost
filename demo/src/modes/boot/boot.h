@@ -164,6 +164,9 @@ private:
 	//! \brief Pointer to the currently active boot menu object
 	private_boot::BootMenu* _active_menu;
 
+	//! \brief filename for profiles, this has to be global right now to work this will be fixed in the boot.cpp revision
+	std::string _current_filename;
+
 	/** \name Various menus available in boot mode
 	*** The name of the menu objects is rather self explanatory. There are a number of methods in
 	*** BootMode that are used by these menus.
