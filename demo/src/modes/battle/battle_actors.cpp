@@ -379,7 +379,7 @@ void BattleCharacter::DrawStatus() {
 
 	// Draw the highlighted background if the character is selected
 	if (current_battle->_selected_character == this) {
-		VideoManager->Move(149.0f, 84.0f + y_offset);
+		VideoManager->Move(148.0f, 84.0f + y_offset);
 		current_battle->_character_selection.Draw();
 	}
 
