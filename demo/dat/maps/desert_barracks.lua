@@ -374,7 +374,7 @@ context_01 = { 0, 0, 0, -1, 0, 0, 1, -1, 0, 0, 2, -1, 0, 0, 3, -1, 0, 0, 4, -1, 
 
 -- Allacrost map editor end. Do not edit this line. --
 
-betrayal_scene = true;
+betrayal_scene = false;
 
 -- these are NPCs who will need to be accessed by multiple functions
 claudius = nil;
@@ -394,7 +394,6 @@ function Load(m)
 	dialogue_supervisor = m.dialogue_supervisor;
 	event_supervisor = m.event_supervisor;
 
-	local sprite;
 	local dialogue;
 	local event;
 	local chest;

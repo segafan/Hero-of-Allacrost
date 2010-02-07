@@ -533,6 +533,11 @@ upper_layer[95] = { -1, -1, -1, -1, -1, 350, 380, 381, 382, 383, 380, 381, 382, 
 -- All, if any, existing contexts follow.
 -- Allacrost map editor end. Do not edit this line. --
 
+chasing_kyle = false;
+
+claudius = nil;
+kyle = nil;
+
 function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
@@ -544,11 +549,23 @@ function Load(m)
 	local event;
 	local chest;
 
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true and GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
+		chasing_kyle = true;
+	end
+
+	CreateDialogue();
+
 	-- Create the player''s sprite
-	sprite = ConstructSprite("Claudius", 1000, 78, 180);
-	map:AddGroundObject(sprite);
+	claudius = ConstructSprite("Claudius", 1000, 78, 180);
+	map:AddGroundObject(claudius);
 	-- Set the camera to focus on the player''s sprite
-	map:SetCamera(sprite);
+	map:SetCamera(claudius);
+
+	kyle = ConstructSprite("Kyle", 1000, 75, 153);
+	kyle:SetMovementSpeed(hoa_map.MapMode.FAST_SPEED);
+	if (chasing_kyle == true) then
+		map:AddGroundObject(kyle);
+	end
 
 	QuickEnemySlime(20, 94, 40, 120, 2);
 	QuickEnemySlime(55, 8, 75, 30, 1);
@@ -576,10 +593,43 @@ function Load(m)
 	exit_zone2:AddSection(hoa_map.ZoneSection(102, 0, 124, 14));
 	map:AddZone(exit_zone2);
 
+	-- events
+ 	event = hoa_map.DialogueEvent(10000, 1);
+	-- dialogue links to next event
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10001, kyle, 75, 150);
+	event:AddEventLink(10002, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10002, kyle, 35, 150);
+	event:AddEventLink(10003, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10003, kyle, 35, 115);
+	event:AddEventLink(10004, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10004, kyle, 125, 115);
+	event:AddEventLink(10005, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10005, kyle, 133, 105);
+	event:AddEventLink(10006, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10006, kyle, 135, 80);
+	event:AddEventLink(10007, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10007, kyle, 125, 75);
+	event:AddEventLink(10008, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(10008, kyle, 45, 75);
+--	event:AddEventLink(10009, false, 0);
+	event_supervisor:RegisterEvent(event);
+
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_training.lua");
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.MapTransitionEvent(22112, "dat/maps/betrayal_room.lua");
 	event_supervisor:RegisterEvent(event);
+
+	if (chasing_kyle) then
+		event_supervisor:StartEvent(10000);
+	end
 end
 
 
@@ -600,6 +650,15 @@ end
 
 function Draw()
 	map:DrawMapLayers();
+end
+
+function CreateDialogue()
+	local dialogue;
+	
+	dialogue = hoa_map.MapDialogue(1);
+	text = hoa_system.Translate("Kyle!");
+	dialogue:AddText(text, 1000, -1, 10001, false);
+	dialogue_supervisor:AddDialogue(dialogue);
 end
 
 -- Creates an EnemyZone with snake enemies
