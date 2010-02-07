@@ -769,6 +769,8 @@ vector<string> ListDirectory(const std::string& dir_name, const std::string& fil
 	}
 	#endif
 
+	closedir(dir);
+
 	return directoryList;
 }
 
