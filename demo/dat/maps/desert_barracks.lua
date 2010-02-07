@@ -374,11 +374,11 @@ context_01 = { 0, 0, 0, -1, 0, 0, 1, -1, 0, 0, 2, -1, 0, 0, 3, -1, 0, 0, 4, -1, 
 
 -- Allacrost map editor end. Do not edit this line. --
 
--- these are NPC's who will need to be accessed by multiple functions
-kyle = nil;
-captain = nil;
-wakeupguy = nil;
+betrayal_scene = false;
 
+-- these are NPC's who will need to be accessed by multiple functions
+captain = nil;
+hector = nil;
 
 function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
@@ -387,30 +387,50 @@ function Load(m)
 	dialogue_supervisor = m.dialogue_supervisor;
 	event_supervisor = m.event_supervisor;
 
-	CreateDialogue();
-
 	local sprite;
 	local dialogue;
 	local event;
 	local chest;
 	local text;
 
-	-- Generic Karlate Sprite (training site guard #1)
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true and GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == false) then
+		betrayal_scene = true;
+	end
+
+	CreateDialogue();
+
+	-- Generic Karlate Sprite (outside barracks guard)
 	sprite = ConstructSprite("Karlate", 4, 18, 78, 0.0, 0.0);
+	sprite:SetName(hoa_system.Translate("Fred"));
 	sprite:AddDialogueReference(2);
 	map:AddGroundObject(sprite);
 
 	-- Generic Karlate Sprite (kitchen guard)
 	sprite = ConstructSprite("Karlate", 5, 120, 105, 0.0, 0.0);
+	sprite:SetName(hoa_system.Translate("Scott"));
 	sprite:AddDialogueReference(3);
 	sprite:SetContext(2);
 	map:AddGroundObject(sprite);
 
 	-- Generic Karlate Sprite, inside the barracks building
 	sprite = ConstructSprite("Karlate", 7, 72, 80, 0.0, 0.0);
+	sprite:SetName(hoa_system.Translate("Alex"));
 	sprite:AddDialogueReference(4);
 	sprite:SetContext(2);
 	map:AddGroundObject(sprite);
+
+	-- Generic Karlate Sprite, wakes up Claudius
+	hector = ConstructSprite("Karlate", 8, 24, 70, 0.0, 0.0);
+	hector:SetName(hoa_system.Translate("Hector"));
+	hector:AddDialogueReference(5);
+	hector:SetContext(2);
+	map:AddGroundObject(hector);
+
+	-- Captain, for the betrayal scene
+	captain = ConstructSprite("Captain", 9, 44, 40, 0.0, 0.0);
+	if (betrayal_scene == true) then
+		map:AddGroundObject(captain);
+	end
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
@@ -433,18 +453,16 @@ function Load(m)
 	-- "Betrayal" dialogue
 	event = hoa_map.DialogueEvent(23001, 1);
 	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(23002, hector, 24, 90);
+	event:AddEventLink(23003, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(23003, hector, 24, 90);
+	event_supervisor:RegisterEvent(event);
 
-	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
+	if (betrayal_scene == true) then
 		-- Just got back from desert battle, go into night event
 		-- TODO: Visual/audio effects needed here
-		-- TODO: Ideally, we would do a more elegant transition here.  Feel free to code one if you are able.
 		GlobalManager:RemoveCharacter(KYLE);                       -- Kyle disappears, get him out of the party
-
-		-- Generic Karlate Sprite, wakes up Claudius
-		wakeupguy = ConstructSprite("Karlate", 8, 70, 50, 0.0, 0.0);
-		wakeupguy:AddDialogueReference(5);
-		wakeupguy:SetContext(2);
-		map:AddGroundObject(wakeupguy);
 
 		sprite = ConstructSprite("Claudius", 1000, 63, 45);       -- place Claudius in the barracks (coordinates)
 		sprite:SetContext(2);                                     -- place Claudius in the barracks (context)
@@ -475,29 +493,29 @@ function CreateDialogue()
 	
 	dialogue = hoa_map.MapDialogue(1);
 		text = hoa_system.Translate("Claudius?  Claudius!  WAKE UP!");
-		dialogue:AddText(text, 5, 1, 0, false);
+		dialogue:AddText(text, 8, 1, 0, false);
 		text = hoa_system.Translate("Huh?  What?");
 		dialogue:AddText(text, 1000, 2, 0, false);
 		text = hoa_system.Translate("Get your gear and let's go!");
-		dialogue:AddText(text, 5, 3, 0, false);
+		dialogue:AddText(text, 8, 3, 0, false);
 		text = hoa_system.Translate("What's going on?");
 		dialogue:AddText(text, 1000, 4, 0, false);
 		text = hoa_system.Translate("The treasury!  A thief has broken in and stolen everything.  The captain has called a man hunt.  Now equip yourself and meet us out front.");
-		dialogue:AddText(text, 5, 5, 0, false);
-		text = hoa_system.Translate("Come on, Kyle, let's go!");
+		dialogue:AddText(text, 7, 5, 0, false);
+		text = hoa_system.Translate("Come on, Kyle, let’s go! Kyle?");
 		dialogue:AddText(text, 1000, 6, 0, false);
-		text = hoa_system.Translate("...Kyle?");
+		text = hoa_system.Translate("Oh no.");
 		dialogue:AddText(text, 1000, 7, 0, false);
-		text = hoa_system.Translate("Oh no...");
-		dialogue:AddText(text, 1000, 8, 0, false);
 		text = hoa_system.Translate("For those of you who don't know, a thief has broken into the treasury and stolen a vast quantity of gold.  It is up to us to capture the criminal and return what they have taken.  It's believed that the robbery occurred no more than 20 minutes ago, so the thief can't be far.  Everyone split up and comb the town.");
-		dialogue:AddText(text, 5, 9, 0, false);
+		dialogue:AddText(text, 9, 8, 0, false);
 		text = hoa_system.Translate("Sir?");
-		dialogue:AddText(text, 1000, 10, 0, false);
+		dialogue:AddText(text, 1000, 9, 0, false);
 		text = hoa_system.Translate("Yes, Claudius?");
-		dialogue:AddText(text, 5, 11, 0, false);
-		text = hoa_system.Translate("...Nothing.");
-		dialogue:AddText(text, 1000, -1, 1, false); -- calls function #1, wakeupguy moves
+		dialogue:AddText(text, 9, 10, 0, false);
+		text = hoa_system.Translate("…Nothing.");
+		dialogue:AddText(text, 1000, -1, 0, false);
+		text = hoa_system.Translate("You have your orders.  Now go.");
+		dialogue:AddText(text, 9, 10, 1, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue(2);
@@ -523,7 +541,5 @@ end
 
 map_functions[1] = function()
 	GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal", 1);
-	event = hoa_map.PathMoveSpriteEvent(10002, wakeupguy, 30, 90);
-	event_supervisor:RegisterEvent(event);
-	event_supervisor:StartEvent(10002);
+	event_supervisor:StartEvent(23002);
 end

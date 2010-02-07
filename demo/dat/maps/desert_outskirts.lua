@@ -5,7 +5,7 @@ setfenv(1, ns);
 
 -- The map name and location graphic
 map_name = "Desert Outskirts"
-location_filename = "blank.png"
+location_filename = "desert.png"
 
 enemy_ids = { 1, 2, 3, 4, 5, 103 }
 
@@ -675,9 +675,9 @@ function Load(m)
 	-- Dialogue with kyle
 	dialogue = hoa_map.MapDialogue(1);
 
-	text = hoa_system.Translate("There you are!");
+	text = hoa_system.Translate("There you are.");
 	dialogue:AddText(text, 1000, 1, 0, false);
-	text = hoa_system.Translate("Hey...");
+	text = hoa_system.Translate("Hey.");
 	dialogue:AddText(text, 2, 2, 0, false);
 	text = hoa_system.Translate("What are you doing? The captain wants to speak with you.");
 	dialogue:AddText(text, 1000, 3, 0, false);
@@ -687,15 +687,15 @@ function Load(m)
 	dialogue:AddText(text, 1000, 5, 0, false);
 	text = hoa_system.Translate("(Kyle hands Claudius a cloth.  Inside is a piece of cake.");
 	dialogue:AddText(text, 2, 6, 0, false);
-	text = hoa_system.Translate("I managed to swipe some goodies from the kitchen quarters a bit ago.  I saved you some.");
+	text = hoa_system.Translate("I managed to swipe some goodies from the kitchen quarters. I saved you some.");
 	dialogue:AddText(text, 2, 7, 0, false);
-	text = hoa_system.Translate("You shouldn't -");
+	text = hoa_system.Translate("You shouldn’t –");
 	dialogue:AddText(text, 1000, 8, 0, false);
 	text = hoa_system.Translate("It's just a piece of cake.  It's not going to hurt anyone.");
 	dialogue:AddText(text, 2, 9, 0, false);
-	text = hoa_system.Translate("I guess you're right.  And hey, thanks for covering for me back there.  I appreciate it.");
+	text = hoa_system.Translate("I guess you’re right. And hey, thanks for covering for me back there. I appreciate it.");
 	dialogue:AddText(text, 1000, 10, 0, false);
-	text = hoa_system.Translate("Don't mention it.  I'm already on bad terms with the captain anyway; there's no sense in getting you in trouble too.");
+	text = hoa_system.Translate("Don’t mention it. I’m already on bad terms with the captain, there’s no sense in you getting in trouble too.");
 	dialogue:AddText(text, 2, 11, 0, false);
 	text = hoa_system.Translate("Hey, what's that... look out!");
 	dialogue:AddText(text, 1000, -1, 2, false);
@@ -713,7 +713,7 @@ function Load(m)
 
  	text = hoa_system.Translate("Good job.");
 	dialogue:AddText(text, 1000, 1, 0, false);
- 	text = hoa_system.Translate("Let's go back to our living quarters.");
+ 	text = hoa_system.Translate("You too. We should head back.");
 	dialogue:AddText(text, 2, 2, 0, false);
  	text = hoa_system.Translate("All right.");
 	dialogue:AddText(text, 1000, 3, 0, false);
@@ -721,7 +721,7 @@ function Load(m)
 	dialogue:AddText(text, 2, 4, 0, false);
  	text = hoa_system.Translate("Yes?");
 	dialogue:AddText(text, 1000, 5, 0, false);
- 	text = hoa_system.Translate("I just want you to know that no matter what happens, we’ll always be friends.");
+ 	text = hoa_system.Translate("…Let’s go.");
 	dialogue:AddText(text, 2, -1, 0, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
