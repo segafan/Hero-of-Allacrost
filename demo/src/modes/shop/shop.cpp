@@ -1036,7 +1036,7 @@ ShopMode::ShopMode() :
 	// (2) Create the list of shop actions
 	_action_options.SetOwner(&_top_window);
 	_action_options.SetPosition(80.0f, 90.0f);
-	_action_options.SetDimensions(640.0f, 30.0f, 5, 1, 5, 1);
+	_action_options.SetDimensions(640.0f, 30.0f, 4, 1, 4, 1);
 	_action_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
 	_action_options.SetTextStyle(TextStyle("title28"));
 	_action_options.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -1048,7 +1048,6 @@ ShopMode::ShopMode() :
 	option_text.push_back(UTranslate("Sell"));
 	option_text.push_back(UTranslate("Trade"));
 	option_text.push_back(UTranslate("Confirm"));
-	option_text.push_back(UTranslate("Leave"));
 	_action_options.SetOptions(option_text);
 	_action_options.SetSelection(0);
 
@@ -1056,7 +1055,7 @@ ShopMode::ShopMode() :
 	_action_titles.push_back(TextImage(option_text[1], TextStyle("title28")));
 	_action_titles.push_back(TextImage(option_text[2], TextStyle("title28")));
 	_action_titles.push_back(TextImage(option_text[3], TextStyle("title28")));
-	_action_titles.push_back(TextImage(option_text[4], TextStyle("title28")));
+	_action_titles.push_back(TextImage(UTranslate("Leave"), TextStyle("title28")));
 
 	// (3) Create the financial table text
 	_finance_table.SetOwner(&_top_window);
@@ -1230,20 +1229,20 @@ void ShopMode::Update() {
 			sound->Play();
 
 			if (_action_options.GetSelection() == 0) { // Buy
-				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_BUY);
+				ChangeState(SHOP_STATE_BUY);
 			}
 			else if (_action_options.GetSelection() == 1) { // Sell
-				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_SELL);
+				ChangeState(SHOP_STATE_SELL);
 			}
 			else if (_action_options.GetSelection() == 2) { // Trade
-				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_TRADE);
+				ChangeState(SHOP_STATE_TRADE);
 			}
 			else if (_action_options.GetSelection() == 3) { // Confirm
-				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_CONFIRM);
+				ChangeState(SHOP_STATE_CONFIRM);
 			}
-			else if (_action_options.GetSelection() == 4) { // Leave
-				ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_LEAVE);
-			}
+		}
+		else if (InputManager->CancelPress()) {
+			ChangeState(SHOP_STATE_LEAVE);
 		}
 		else if (InputManager->LeftPress()) {
 			_action_options.InputLeft();
@@ -1561,6 +1560,7 @@ void ShopMode::ChangeState(SHOP_STATE new_state) {
 	if (_state == SHOP_STATE_LEAVE) {
 		if ((GetTotalCosts() == 0) && (GetTotalSales() == 0)) {
 			ModeManager->Pop();
+			return;
 		}
 	}
 

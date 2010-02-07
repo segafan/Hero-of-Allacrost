@@ -52,8 +52,7 @@ enum MAIN_CATEGORY {
 //	MAIN_OPTIONS        = 3;
 	MAIN_SAVE           = 4,
 	MAIN_FORMATION      = 5,
-	MAIN_EXIT           = 6,
-	MAIN_SIZE           = 7
+	MAIN_SIZE           = 6
 };
 
 //! \name Inventory Menu Options Constants
@@ -244,7 +243,7 @@ private:
 
 	//! A pointer to the current options menu
 	hoa_gui::OptionBox *_current_menu;
-	
+
 	//! The top level options in boot mode
 	hoa_gui::OptionBox _main_options;
 
