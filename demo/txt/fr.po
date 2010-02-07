@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Allacrost Demo 0.3.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2008-11-22 22:37-0800\n"
+"POT-Creation-Date: 2010-02-06 14:33-0600\n"
 "PO-Revision-Date: 2010-02-02 20:33-0800\n"
 "Last-Translator: Philip Vorsilak <gorzuate@allacrost.org>\n"
 "Language-Team: French <team@allacrost.org>\n"
@@ -19,390 +19,395 @@ msgstr ""
 msgid "French"
 msgstr "Français"
 
-#: dat/maps/demo_cave.lua:357
+#: dat/maps/demo_cave.lua:358
 msgid "Claudius, what are you doing here?"
 msgstr "Claudius, qu'est-ce que vous faites ici?"
 
-#: dat/maps/demo_cave.lua:358
+#: dat/maps/demo_cave.lua:359
 msgid "I came in this cave for training."
 msgstr "Je suis entré dans cette grotte pour m'entraîner."
 
-#: dat/maps/demo_cave.lua:359
-msgid "Well, good job getting this far all by yourself. This is a pretty dangerous place for someone as inexperienced as yourself."
-msgstr ""
-
 #: dat/maps/demo_cave.lua:360
-msgid "Yes well, I have to train hard if I want to be able to spar with you evenly one day, Jonas. By the way, what were you doing?"
+msgid ""
+"Well, good job getting this far all by yourself. This is a pretty dangerous "
+"place for someone as inexperienced as yourself."
 msgstr ""
 
 #: dat/maps/demo_cave.lua:361
-msgid "The cave goes deeper than this, but it appears a collapse here has blocked the way. I was trying to find an alternative passage, but it appears that the inner chambers are now completely inaccessible."
+msgid ""
+"Yes well, I have to train hard if I want to be able to spar with you evenly "
+"one day, Jonas. By the way, what were you doing?"
 msgstr ""
 
 #: dat/maps/demo_cave.lua:362
-msgid "In any case, this is as far as you can go in this demo, so thanks for....."
+msgid ""
+"The cave goes deeper than this, but it appears a collapse here has blocked "
+"the way. I was trying to find an alternative passage, but it appears that "
+"the inner chambers are now completely inaccessible."
 msgstr ""
 
 #: dat/maps/demo_cave.lua:363
+msgid ""
+"In any case, this is as far as you can go in this demo, so thanks for....."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:364
 msgid "Wait, what was that noise? Hey, look out!"
 msgstr ""
 
-#: dat/maps/demo_cave.lua:365
-msgid "Phew, that was a shock. I've never seen such foes wandering in this cave. Nice job taking care of them Claudius, I can definitely tell that your swordsmanship has improved."
-msgstr ""
-
 #: dat/maps/demo_cave.lua:366
-msgid "Thank you. By the way...why didn't you fight with me in that battle?"
+msgid ""
+"Phew, that was a shock. I've never seen such foes wandering in this cave. "
+"Nice job taking care of them Claudius, I can definitely tell that your "
+"swordsmanship has improved."
 msgstr ""
 
 #: dat/maps/demo_cave.lua:367
-msgid "Ah, err...well you see, you'll never reach your full potential if you always have your seniors stepping in for you."
+msgid "Thank you. By the way...why didn't you fight with me in that battle?"
 msgstr ""
 
 #: dat/maps/demo_cave.lua:368
+msgid ""
+"Ah, err...well you see, you'll never reach your full potential if you always "
+"have your seniors stepping in for you."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:369
 msgid "I see."
 msgstr "Je vois."
 
-#: dat/maps/demo_cave.lua:369
-msgid "And besides, I don't even have my own battle sprite graphics yet! The development team needs more artists to help move the game along!"
+#: dat/maps/demo_cave.lua:370
+msgid ""
+"And besides, I don't even have my own battle sprite graphics yet! The "
+"development team needs more artists to help move the game along!"
 msgstr ""
 
-#: dat/maps/demo_cave.lua:370
+#: dat/maps/demo_cave.lua:371
 msgid "....."
 msgstr ""
 
-#: dat/maps/demo_cave.lua:372
+#: dat/maps/demo_cave.lua:373
 msgid "Well, this truly is the end of the demo. Thanks for playing."
 msgstr ""
 
-#: dat/maps/demo_cave.lua:388
-#: dat/maps/demo_town.lua:332
+#: dat/maps/demo_cave.lua:389
 msgid "Claudius"
 msgstr "Claudius"
 
-#: dat/maps/demo_cave.lua:407
+#: dat/maps/demo_cave.lua:409
 msgid "Jonas"
 msgstr "Jonas"
 
-#: dat/maps/demo_town.lua:263
+#: dat/maps/demo_town.lua:296
 msgid "Laila, what's wrong? You have a worried look on your face."
 msgstr "Qu'est-ce qu'il y a, Laila? Tu me sembles inquiétée."
 
-#: dat/maps/demo_town.lua:264
+#: dat/maps/demo_town.lua:298
 msgid "You're going into the cave again, aren't you?"
 msgstr "Tu vas encore aller dans la grotte, n'est-ce pas?"
 
-#: dat/maps/demo_town.lua:266
-msgid "But why? Its dangerous in there!"
-msgstr "Mais pourquoi? C'est dangereux là-dedans!"
-
-#: dat/maps/demo_town.lua:267
-msgid "Laila, if I want to be capable on the battlefield I have to fight real battles. You understand that, don't you?"
-msgstr ""
-
-#: dat/maps/demo_town.lua:268
-msgid "I know that you're worried about me and I appreciate it, but you need to stop doing this."
-msgstr ""
-
-#: dat/maps/demo_town.lua:269
-msgid ".....Alright, I'm sorry. Just be careful in there, okay?"
-msgstr ".....Bon, je suis desolée. Mais sois prudent là-dedans, d'accord?"
-
-#: dat/maps/demo_town.lua:270
-msgid "Will do. Thanks Laila."
-msgstr "Bien sûr. Merci, Laila."
-
-#: dat/maps/demo_town.lua:271
-msgid "You know Claudius, I could be of assistance to you in the cave. May I come with you?"
-msgstr ""
-
-#: dat/maps/demo_town.lua:273
-msgid "Oh good. I was worried you were. Please tell me if you are Cladius, just so I can know..."
-msgstr ""
-
-#: dat/maps/demo_town.lua:274
-msgid "Of course, I promise."
-msgstr ""
-
-#: dat/maps/demo_town.lua:276
-msgid "Oh....ok then. You remember to be careful."
-msgstr ""
-
-#: dat/maps/demo_town.lua:277
-msgid "I will Laila."
-msgstr ""
-
-#: dat/maps/demo_town.lua:279
-msgid "Great, I'll be sure to help you any way I can."
-msgstr ""
-
-#: dat/maps/demo_town.lua:280
-msgid "Laila has joined the party."
-msgstr ""
-
-#: dat/maps/demo_town.lua:282
-msgid "Hey there son, how's the training going?"
-msgstr ""
-
-#: dat/maps/demo_town.lua:283
-msgid "Pretty well. The enemies in the cave aren't too tough."
-msgstr ""
-
-#: dat/maps/demo_town.lua:284
-msgid "Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents."
-msgstr ""
-
-#: dat/maps/demo_town.lua:286
-msgid "Oh, Claudius? You seemed puzzled."
-msgstr ""
-
-#: dat/maps/demo_town.lua:287
-msgid "There are odd little icons above people's heads. What do they mean?"
-msgstr ""
-
-#: dat/maps/demo_town.lua:288
-msgid "That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've listened to everything that they have to say, the icon will disappear."
-msgstr ""
-
-#: dat/maps/demo_town.lua:290
-msgid "And remember that a person may have more thing to say, so if the icon doesn't disappear after speaking to a person, speak to them once more."
-msgstr ""
-
-#: dat/maps/demo_town.lua:292
-msgid "Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak."
-msgstr ""
-
-#: dat/maps/demo_town.lua:294
-msgid "The interior of my home is finally finished. Not too bad is it?"
-msgstr ""
-
-#: dat/maps/demo_town.lua:295
-msgid "After its fully furnished I'm sure it will look quite nice."
-msgstr ""
-
-#: dat/maps/demo_town.lua:297
-msgid "This village is boring! There's no one I can play with here!"
-msgstr ""
-
-#: dat/maps/demo_town.lua:299
-msgid "I have merchandise for sale at affordable prices. Take a look."
-msgstr ""
-
-#: dat/maps/demo_town.lua:301
-msgid "I'm looking for my brother Torl. I sure hope he doesn't get into any trouble."
-msgstr ""
-
-#: dat/maps/demo_town.lua:303
-msgid "So much work to do!"
-msgstr ""
-
-#: dat/maps/demo_town.lua:308
+#: dat/maps/demo_town.lua:302
 msgid "Yes, I intend to..."
 msgstr ""
 
-#: dat/maps/demo_town.lua:309
+#: dat/maps/demo_town.lua:304
 msgid "No, of course not..."
 msgstr ""
 
+#: dat/maps/demo_town.lua:307
+msgid "Test Option #1"
+msgstr ""
+
+#: dat/maps/demo_town.lua:309
+msgid "Test Option #2"
+msgstr ""
+
 #: dat/maps/demo_town.lua:311
+msgid "Test Option #3"
+msgstr ""
+
+#: dat/maps/demo_town.lua:315
+msgid "But why? Its dangerous in there!"
+msgstr "Mais pourquoi? C'est dangereux là-dedans!"
+
+#: dat/maps/demo_town.lua:317
+msgid ""
+"Laila, if I want to be capable on the battlefield I have to fight real "
+"battles. You understand that, don't you?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:319
+msgid ""
+"I know that you're worried about me and I appreciate it, but you need to "
+"stop doing this."
+msgstr ""
+
+#: dat/maps/demo_town.lua:321
+msgid ".....Alright, I'm sorry. Just be careful in there, okay?"
+msgstr ".....Bon, je suis desolée. Mais sois prudent là-dedans, d'accord?"
+
+#: dat/maps/demo_town.lua:323
+msgid "Will do. Thanks Laila."
+msgstr "Bien sûr. Merci, Laila."
+
+#: dat/maps/demo_town.lua:325
+msgid ""
+"You know Claudius, I could be of assistance to you in the cave. May I come "
+"with you?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:329
 msgid "No way, you could be hurt!"
 msgstr ""
 
-#: dat/maps/demo_town.lua:312
+#: dat/maps/demo_town.lua:331
 msgid "Your help would be great!"
 msgstr ""
 
-#: dat/maps/demo_town.lua:353
-msgid "Laila"
-msgstr "Laila"
-
-#: dat/maps/demo_town.lua:402
-msgid "Marcus"
+#: dat/maps/demo_town.lua:334
+msgid ""
+"Oh good. I was worried you were. Please tell me if you are Claudius, just so "
+"I can know..."
 msgstr ""
 
-#: dat/maps/demo_town.lua:431
-msgid "Vanica"
+#: dat/maps/demo_town.lua:336
+msgid "Of course, I promise."
 msgstr ""
 
-#: dat/maps/demo_town.lua:461
-msgid "Alexander"
+#: dat/maps/demo_town.lua:340
+msgid "Oh....ok then. You remember to be careful."
 msgstr ""
 
-#: dat/maps/demo_town.lua:492
-msgid "Laine"
+#: dat/maps/demo_town.lua:342
+msgid "I will Laila."
 msgstr ""
 
-#: dat/maps/demo_town.lua:528
-msgid "Torl"
+#: dat/maps/demo_town.lua:346
+msgid "Great, I'll be sure to help you any way I can."
 msgstr ""
 
-#: dat/maps/demo_town.lua:550
-msgid "Female Merchant"
+#: dat/maps/demo_town.lua:348
+msgid "Laila has joined the party."
 msgstr ""
 
-#: dat/maps/demo_town.lua:577
-msgid "Livia"
+#: dat/maps/demo_town.lua:387
+msgid "Hey there son, how's the training going?"
 msgstr ""
 
-#: dat/maps/demo_town.lua:599
-msgid "Octavia"
+#: dat/maps/demo_town.lua:389
+msgid "Pretty well. The enemies in the cave aren't too tough."
 msgstr ""
 
-#: src/modes/boot/boot.cpp:513
-#: src/modes/boot/boot.cpp:533
+#: dat/maps/demo_town.lua:391
+msgid ""
+"Good to hear. Don't let your guard down though. The deeper you go into that "
+"cave, the more likely it is that you'll face stronger opponents."
+msgstr ""
+
+#: dat/maps/demo_town.lua:417
+msgid "Oh, Claudius? You seemed puzzled."
+msgstr ""
+
+#: dat/maps/demo_town.lua:419
+msgid "There are odd little icons above people's heads. What do they mean?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:421
+msgid ""
+"That is a new dialogue indicator. Any person that has something new to say "
+"that you haven't already heard will have that icon above their head. Once "
+"you've listened to everything that they have to say, the icon will disappear."
+msgstr ""
+
+#: dat/maps/demo_town.lua:427
+msgid ""
+"And remember that a person may have more thing to say, so if the icon "
+"doesn't disappear after speaking to a person, speak to them once more."
+msgstr ""
+
+#: dat/maps/demo_town.lua:453
+msgid ""
+"Choose your target wisely in battle. Its best to single out and take down "
+"one foe at a time. And don't be afraid to use a healing potion or two in "
+"battle if you're feeling weak."
+msgstr ""
+
+#: dat/maps/demo_town.lua:487
+msgid "The interior of my home is finally finished. Not too bad is it?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:489
+msgid "After its fully furnished I'm sure it will look quite nice."
+msgstr ""
+
+#: dat/maps/demo_town.lua:521
+msgid "This village is boring! There's no one I can play with here!"
+msgstr ""
+
+#: dat/maps/demo_town.lua:540
+msgid "I have merchandise for sale at affordable prices. Take a look."
+msgstr ""
+
+#: dat/maps/demo_town.lua:563
+msgid ""
+"I'm looking for my brother Torl. I sure hope he doesn't get into any trouble."
+msgstr ""
+
+#: dat/maps/demo_town.lua:581
+msgid "So much work to do!"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
 msgid "New Game"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:514
-#: src/modes/boot/boot.cpp:534
+#: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
 msgid "Load Game"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:515
-#: src/modes/boot/boot.cpp:535
+#: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
 msgid "Options"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:516
-#: src/modes/boot/boot.cpp:536
+#: src/modes/boot/boot.cpp:517 src/modes/boot/boot.cpp:537
 msgid "Credits"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:517
+#: src/modes/boot/boot.cpp:518
 msgid "Battle"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:518
+#: src/modes/boot/boot.cpp:519
 msgid "Menu"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:519
+#: src/modes/boot/boot.cpp:520
 msgid "Shop"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:520
-#: src/modes/boot/boot.cpp:537
+#: src/modes/boot/boot.cpp:521 src/modes/boot/boot.cpp:538
 msgid "Quit"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:562
+#: src/modes/boot/boot.cpp:563
 msgid "Video"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:563
+#: src/modes/boot/boot.cpp:564
 msgid "Audio"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:564
+#: src/modes/boot/boot.cpp:565
 msgid "Language"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:565
+#: src/modes/boot/boot.cpp:566
 msgid "Key Settings"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:566
+#: src/modes/boot/boot.cpp:567
 msgid "Joystick Settings"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:567
+#: src/modes/boot/boot.cpp:568
 msgid "Profiles"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:584
+#: src/modes/boot/boot.cpp:585
 msgid "Resolution:"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:586
+#: src/modes/boot/boot.cpp:587
 msgid "Window mode:"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:587
+#: src/modes/boot/boot.cpp:588
 msgid "Brightness:"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:588
+#: src/modes/boot/boot.cpp:589
 msgid "Image quality:"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:607
+#: src/modes/boot/boot.cpp:608
 msgid "Sound Volume: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:608
+#: src/modes/boot/boot.cpp:609
 msgid "Music Volume: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:662
+#: src/modes/boot/boot.cpp:663
 msgid "Up: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:663
+#: src/modes/boot/boot.cpp:664
 msgid "Down: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:664
+#: src/modes/boot/boot.cpp:665
 msgid "Left: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:665
+#: src/modes/boot/boot.cpp:666
 msgid "Right: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:666
+#: src/modes/boot/boot.cpp:667
 msgid "Confirm: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:667
+#: src/modes/boot/boot.cpp:668
 msgid "Cancel: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:668
+#: src/modes/boot/boot.cpp:669
 msgid "Menu: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:669
+#: src/modes/boot/boot.cpp:670
 msgid "Swap: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:670
+#: src/modes/boot/boot.cpp:671
 msgid "Left Select: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:671
+#: src/modes/boot/boot.cpp:672
 msgid "Right Select: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:672
+#: src/modes/boot/boot.cpp:673
 msgid "Pause: "
 msgstr ""
 
-#: src/modes/boot/boot.cpp:673
-#: src/modes/boot/boot.cpp:702
+#: src/modes/boot/boot.cpp:674 src/modes/boot/boot.cpp:703
 msgid "Restore defaults"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:744
+#: src/modes/boot/boot.cpp:745
 msgid "Save"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:745
+#: src/modes/boot/boot.cpp:746
 msgid "Load"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:746
+#: src/modes/boot/boot.cpp:747
 msgid "Delete"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:785
+#: src/modes/boot/boot.cpp:786
 msgid "New Profile"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:864
+#: src/modes/boot/boot.cpp:865
 msgid "back"
 msgstr ""
 
-#: src/modes/boot/boot.cpp:867
+#: src/modes/boot/boot.cpp:868
 msgid "end"
 msgstr ""
 
+#~ msgid "Laila"
+#~ msgstr "Laila"
