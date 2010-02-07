@@ -499,10 +499,6 @@ void MenuMode::_HandleMainMenu() {
 			break;
 		} // end scope
 
-		case MAIN_EXIT:
-			ModeManager->Pop();
-			break;
-
 		default:
 			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleMainMenu()" << endl;
 			break;
@@ -550,7 +546,7 @@ void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
 void MenuMode::_SetupMainOptionBox() {
 	// Setup the main options box
 	_SetupOptionBoxCommonSettings(&_main_options);
-	_main_options.SetDimensions(745.0f, 50.0f, MAIN_SIZE, 1, 7, 1);
+	_main_options.SetDimensions(745.0f, 50.0f, MAIN_SIZE, 1, 6, 1);
 
 	// Generate the strings
 	vector<ustring> options;
@@ -560,7 +556,6 @@ void MenuMode::_SetupMainOptionBox() {
 	options.push_back(UTranslate("Status"));
 	options.push_back(UTranslate("Save"));
 	options.push_back(UTranslate("Formation"));
-	options.push_back(UTranslate("Exit"));
 
 	// Add strings and set default selection.
 	_main_options.SetOptions(options);
