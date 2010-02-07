@@ -376,7 +376,7 @@ context_01 = { 0, 0, 0, -1, 0, 0, 1, -1, 0, 0, 2, -1, 0, 0, 3, -1, 0, 0, 4, -1, 
 
 betrayal_scene = false;
 
--- these are NPC's who will need to be accessed by multiple functions
+-- These are NPCs who will need to be accessed by multiple functions
 captain = nil;
 hector = nil;
 
@@ -474,7 +474,7 @@ function Load(m)
 		map:AddGroundObject(sprite);                              -- add Claudius to map
 	end
 
-	-- Finally, set the camera to focus on the player's sprite
+	-- Finally, set the camera to focus on the player sprite
 	map:SetCamera(sprite);
 end -- function Load()
 

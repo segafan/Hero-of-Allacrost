@@ -190,7 +190,7 @@ function Load(m)
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(sprite);
 
-	-- Add NPC's
+	-- Add NPCs
 	kyle = ConstructSprite("Kyle", 2, 38, 30, 0.0, 0.0);
 	kyle:LoadAttackAnimations("img/sprites/map/kyle_attack_w.png");
 	kyle:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
