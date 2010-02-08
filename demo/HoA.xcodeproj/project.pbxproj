@@ -827,12 +827,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4941A4B40AC1D77900D65B8E /* Build configuration list for PBXNativeTarget "Allacrost" */;
 			buildPhases = (
-				4941A4AC0AC1D77500D65B8E /* Resources */,
-				D48D3B780ECFE73E003F40CB /* Gettext setup */,
 				4941A4AD0AC1D77500D65B8E /* Sources */,
 				4941A4AE0AC1D77500D65B8E /* Frameworks */,
 				4941A4B70AC1D78600D65B8E /* Copy Frameworks */,
 				D49A54B10DB2B7C800FBD800 /* Remap libs */,
+				4941A4AC0AC1D77500D65B8E /* Resources */,
+				D48D3B780ECFE73E003F40CB /* Gettext setup */,
 			);
 			buildRules = (
 			);
@@ -1102,6 +1102,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SOURCE_ROOT)/../allacrost-dep/include",
