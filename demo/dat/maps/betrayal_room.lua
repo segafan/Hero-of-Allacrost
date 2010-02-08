@@ -171,6 +171,8 @@ upper_layer[23] = { -1, -1, -1, -1, -1, -1, -1, -1, 690, 691, -1, -1, -1, -1, -1
 -- All, if any, existing contexts follow.
 -- Allacrost map editor end. Do not edit this line. --
 
+battle_scene = false;
+
 function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
@@ -181,6 +183,10 @@ function Load(m)
 	local dialogue;
 	local event;
 	local chest;
+
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true and GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
+		battle_scene = true;
+	end
 
 	CreateDialogue();
 
@@ -195,9 +201,29 @@ function Load(m)
 	kyle:LoadAttackAnimations("img/sprites/map/kyle_attack_w.png");
 	kyle:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 	kyle:SetNoCollision(true);
+	if (battle_scene == true) then
+		map:AddGroundObject(kyle);
+	end
 
 	captain = ConstructSprite("Captain", 3, 26, 30, 0.0, 0.0);
 	captain:SetNoCollision(true);
+	if (battle_scene == true) then
+		map:AddGroundObject(captain);
+	end
+
+	hector = ConstructSprite("Karlate", 4, 1, 1, 0.0, 0.0);
+	hector:SetName(hoa_system.Translate("Hector"));
+	hector:SetNoCollision(true);
+	if (battle_scene == true) then
+		map:AddGroundObject(hector);
+	end
+
+	charles = ConstructSprite("Karlate", 5, 10, 1, 0.0, 0.0);
+	charles:SetName(hoa_system.Translate("Charles"));
+	charles:SetNoCollision(true);
+	if (battle_scene == true) then
+		map:AddGroundObject(charles);
+	end
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
@@ -233,28 +259,19 @@ function Load(m)
 	event:AddEventLink(11006, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	event = hoa_map.DialogueEvent(11006, 3); -- closing dialogue
+	event = hoa_map.ScriptedEvent(11006, 5, 0); -- calls function #5 to remove Kyle, finish
+	event:AddEventLink(11007, false, 0);
 	event_supervisor:RegisterEvent(event);
 
-	event = hoa_map.PathMoveSpriteEvent(11007, kyle, 26, 0); -- Kyle moves again
-	event:AddEventLink(11008, false, 0);
-	event_supervisor:RegisterEvent(event);
-
-	event = hoa_map.ScriptedEvent(11008, 5, 0); -- calls function #5 to remover Kyle, finish
+	event = hoa_map.DialogueEvent(11007, 3); -- closing dialogue
 	event_supervisor:RegisterEvent(event);
 
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/new_cave.lua");
 	event_supervisor:RegisterEvent(event);
 
-	
-	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
-		map:AddGroundObject(kyle);
-		map:AddGroundObject(captain);
-		
-		if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
-			GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle", 1);
-			event_supervisor:StartEvent(11000);
-		end
+	if (battle_scene == true) then
+		GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle", 1);
+		event_supervisor:StartEvent(11000);
 	end
 end
 
@@ -274,14 +291,8 @@ end
 function CreateDialogue()
 	local dialogue = hoa_map.MapDialogue(1);
 
-	text = hoa_system.Translate("Stop this foolishness, Kyle. You can’t escape. Lower your weapon and come peacefully and I’ll make sure your punishment is lenient.");
-	dialogue:AddText(text, 3, 1, 0, false);
-	text = hoa_system.Translate("No. I’m doing this for me. I don’t expect you to understand.");
-	dialogue:AddText(text, 2, 2, 0, false);
-	text = hoa_system.Translate("Then you leave me no choice.");
-	dialogue:AddText(text, 3, 3, 0, false);
 	text = hoa_system.Translate("I’m very disappointed in you, Kyle.");
-	dialogue:AddText(text, 3, 4, 0, false);
+	dialogue:AddText(text, 3, 1, 0, false);
 	text = hoa_system.Translate("Over here, Claudius!");
 	dialogue:AddText(text, 3, -1, 11001, false);
 
@@ -294,29 +305,29 @@ function CreateDialogue()
 	dialogue:AddText(text, 1000, 1, 0, false);
 	text = hoa_system.Translate("What have you done...");
 	dialogue:AddText(text, 1000, 2, 0, false);
-	text = hoa_system.Translate("I'm sorry.  I didn't want to have to do that.");
+	text = hoa_system.Translate("I’m sorry.  I didn't want to have to do that.");
 	dialogue:AddText(text, 2, 3, 0, false);
 	text = hoa_system.Translate("What are you doing?");
 	dialogue:AddText(text, 2, 4, 0, false);
-	text = hoa_system.Translate("I can't let you get away.");
+	text = hoa_system.Translate("I can’t let you get away.");
 	dialogue:AddText(text, 1000, 5, 0, false);
-	text = hoa_system.Translate("I'm your friend!");
+	text = hoa_system.Translate("I’m your friend!");
 	dialogue:AddText(text, 2, 6, 0, false);
-	text = hoa_system.Translate("It's my duty!");
+	text = hoa_system.Translate("It’s my duty!");
 	dialogue:AddText(text, 1000, 7, 0, false);
-	text = hoa_system.Translate("Don't do this.");
+	text = hoa_system.Translate("Don’t do this.");
 	dialogue:AddText(text, 2, 8, 0, false);
-	text = hoa_system.Translate("You've already done it.");
+	text = hoa_system.Translate("You’ve already done it.");
 	dialogue:AddText(text, 1000, 9, 0, false);
-	text = hoa_system.Translate("I don't want to fight you.");
+	text = hoa_system.Translate("I don’t want to fight you.");
 	dialogue:AddText(text, 2, 10, 0, false);
 	text = hoa_system.Translate("Then lower your weapon and turn yourself in.");
 	dialogue:AddText(text, 1000, 11, 0, false);
-	text = hoa_system.Translate("You know I can't.");
+	text = hoa_system.Translate("You know I can’t.");
 	dialogue:AddText(text, 2, 12, 0, false);
-	text = hoa_system.Translate("And you know I can't just let you get away.");
+	text = hoa_system.Translate("And you know I can’t just let you go.");
 	dialogue:AddText(text, 1000, 13, 0, false);
-	text = hoa_system.Translate("Isn't our friendship more important than your duty?");
+	text = hoa_system.Translate("Isn’t our friendship more important than your duty?");
 	dialogue:AddText(text, 2, 14, 0, false);
 	text = hoa_system.Translate("You killed the Captain!");
 	dialogue:AddText(text, 1000, -1, 11005, false); -- start boss battle event (11004)
@@ -325,10 +336,14 @@ function CreateDialogue()
 
 	dialogue = hoa_map.MapDialogue(3);
 
-	text = hoa_system.Translate("(Insert dialogue here)");
-	dialogue:AddText(text, 2, 1, 0, false);
+	text = hoa_system.Translate("Claudius! Are you all right?");
+	dialogue:AddText(text, 5, 1, 0, false);
+	text = hoa_system.Translate("I’m fine…But the captain…He fell…");
+	dialogue:AddText(text, 2, 2, 0, false);
+	text = hoa_system.Translate("Everyone down to the cave floor! He might still be alive!");
+	dialogue:AddText(text, 4, 3, 0, false);
 	text = hoa_system.Translate("Damn you, Kyle.");
-	dialogue:AddText(text, 1000, -1, 11007, false); -- Kyle leaves the scene (11007)
+	dialogue:AddText(text, 1000, -1, 0, false); -- Kyle leaves the scene (11007)
 
 	dialogue_supervisor:AddDialogue(dialogue);
 end

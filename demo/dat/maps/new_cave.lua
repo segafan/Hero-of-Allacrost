@@ -549,23 +549,27 @@ function Load(m)
 	local event;
 	local chest;
 
-	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true and GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true and GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
 		chasing_kyle = true;
 	end
 
 	CreateDialogue();
 
 	-- Create the player''s sprite
-	claudius = ConstructSprite("Claudius", 1000, 78, 180);
+	claudius = ConstructSprite("Claudius", 1000, 78, 162);
 	map:AddGroundObject(claudius);
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(claudius);
 
-	kyle = ConstructSprite("Kyle", 1000, 75, 153);
-	kyle:SetMovementSpeed(hoa_map.MapMode.FAST_SPEED);
+	kyle = ConstructSprite("Kyle", 1, 67, 153);
+	kyle:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 	if (chasing_kyle == true) then
 		map:AddGroundObject(kyle);
 	end
+
+	captain = ConstructSprite("Captain", 2, 50, 50);
+	captain:SetVisible(false); -- Captain is off-screen but involved in dialogue
+	map:AddGroundObject(captain);
 
 	QuickEnemySlime(20, 94, 40, 120, 2);
 	QuickEnemySlime(55, 8, 75, 30, 1);
@@ -581,46 +585,76 @@ function Load(m)
 	QuickChest(150,  80, 20002, 1);
 	QuickChest(145, 180, 40002, 1);
 
-	-- Create a zone for exiting the map, to be used as a trigger
+	-- Create zones for exiting the map
 	exit_zone = hoa_map.MapZone();
-	-- Add a section to the zone to enable the user to exit the map
 	exit_zone:AddSection(hoa_map.ZoneSection(72, 190, 84, 192));
 	map:AddZone(exit_zone);
 
-	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone2 = hoa_map.MapZone();
-	-- Add a section to the zone to enable the user to exit the map
 	exit_zone2:AddSection(hoa_map.ZoneSection(102, 0, 124, 14));
 	map:AddZone(exit_zone2);
+
+	-- Event trigger zones
+	trigger_zone = hoa_map.MapZone();
+	trigger_zone:AddSection(hoa_map.ZoneSection(62, 100, 66, 100));
+	map:AddZone(trigger_zone);
+
+	trigger_zone2 = hoa_map.MapZone();
+	trigger_zone2:AddSection(hoa_map.ZoneSection(130, 90, 137, 91));
+	map:AddZone(trigger_zone2);
+
+	trigger_zone3 = hoa_map.MapZone();
+	trigger_zone3:AddSection(hoa_map.ZoneSection(45, 70, 50, 91));
+	map:AddZone(trigger_zone3);
+
+	trigger_zone4 = hoa_map.MapZone();
+	trigger_zone4:AddSection(hoa_map.ZoneSection(20, 57, 30, 60));
+	map:AddZone(trigger_zone4);
+
+	trigger_zone5 = hoa_map.MapZone();
+	trigger_zone5:AddSection(hoa_map.ZoneSection(56, 40, 58, 50));
+	map:AddZone(trigger_zone5);
 
 	-- events
  	event = hoa_map.DialogueEvent(10000, 1);
 	-- dialogue links to next event
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10001, kyle, 75, 150);
+	event = hoa_map.PathMoveSpriteEvent(10001, kyle, 35, 150);
 	event:AddEventLink(10002, false, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10002, kyle, 35, 150);
+	event = hoa_map.PathMoveSpriteEvent(10002, kyle, 35, 115);
 	event:AddEventLink(10003, false, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10003, kyle, 35, 115);
+	event = hoa_map.PathMoveSpriteEvent(10003, kyle, 66, 115);
 	event:AddEventLink(10004, false, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10004, kyle, 125, 115);
+	event = hoa_map.PathMoveSpriteEvent(10004, kyle, 66, 97);
 	event:AddEventLink(10005, false, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10005, kyle, 133, 105);
-	event:AddEventLink(10006, false, 0);
+	event = hoa_map.ScriptedEvent(10005, 1, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10006, kyle, 135, 80);
-	event:AddEventLink(10007, false, 0);
+
+	event = hoa_map.PathMoveSpriteEvent(11000, kyle, 66, 77);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10007, kyle, 125, 75);
-	event:AddEventLink(10008, false, 0);
+	event = hoa_map.ScriptedEvent(11001, 2, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(10008, kyle, 45, 75);
---	event:AddEventLink(10009, false, 0);
+	event = hoa_map.SoundEvent(11002, "snd/swordslice1.wav");
+	event:AddEventLink(11003, false, 0);
 	event_supervisor:RegisterEvent(event);
+	event = hoa_map.DialogueEvent(11003, 2);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.SoundEvent(11004, "snd/swordslice1.wav");
+	event:AddEventLink(11005, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.DialogueEvent(11005, 3);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.SoundEvent(11006, "snd/swordslice1.wav");
+	event:AddEventLink(11007, false, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.DialogueEvent(11007, 4);
+	event_supervisor:RegisterEvent(event);
+
+
 
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_training.lua");
 	event_supervisor:RegisterEvent(event);
@@ -643,6 +677,41 @@ function Update()
 		if (event_supervisor:IsEventActive(22112) == false) then
 			event_supervisor:StartEvent(22112);
 		end
+	elseif (trigger_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (chasing_kyle == true) then
+			if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("kyle_has_jumped") == false) then
+				GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("kyle_has_jumped", 1);
+				event_supervisor:StartEvent(11000);
+			end
+		end
+	elseif (trigger_zone2:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (chasing_kyle == true) then
+			if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("kyle_has_disappeared") == false) then
+				GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("kyle_has_disappeared", 1);
+				event_supervisor:StartEvent(11001);
+			end
+		end
+	elseif (trigger_zone3:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (chasing_kyle == true) then
+			if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle_dialogue_1") == false) then
+				GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle_dialogue_1", 1);
+				event_supervisor:StartEvent(11002);
+			end
+		end
+	elseif (trigger_zone4:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (chasing_kyle == true) then
+			if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle_dialogue_2") == false) then
+				GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle_dialogue_2", 1);
+				event_supervisor:StartEvent(11004);
+			end
+		end
+	elseif (trigger_zone5:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+		if (chasing_kyle == true) then
+			if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle_dialogue_3") == false) then
+				GlobalManager:GetEventGroup("kyle_story"):AddNewEvent("betrayal_battle_dialogue_3", 1);
+				event_supervisor:StartEvent(11006);
+			end
+		end
 	end
 end
 
@@ -658,6 +727,21 @@ function CreateDialogue()
 	dialogue = hoa_map.MapDialogue(1);
 	text = hoa_system.Translate("Kyle!");
 	dialogue:AddText(text, 1000, -1, 10001, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	dialogue = hoa_map.MapDialogue(2);
+	text = hoa_system.Translate("Stop this, Kyle. You can’t escape. Lower your weapon and come peacefully and I’ll make sure your punishment is lenient.");
+	dialogue:AddText(text, 2, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	dialogue = hoa_map.MapDialogue(3);
+	text = hoa_system.Translate("No. I’m doing this for me. I don’t expect you to understand.");
+	dialogue:AddText(text, 1, -1, 0, false);
+	dialogue_supervisor:AddDialogue(dialogue);
+
+	dialogue = hoa_map.MapDialogue(4);
+	text = hoa_system.Translate("Then you leave me no choice.");
+	dialogue:AddText(text, 2, -1, 0, false);
 	dialogue_supervisor:AddDialogue(dialogue);
 end
 
@@ -764,4 +848,18 @@ function QuickChest(x, y, objnum, quantity)
 	chest:AddObject(objnum, quantity)
 	map:AddGroundObject(chest);
 	local_chest_counter = local_chest_counter + 1;
+end
+
+map_functions[1] = function()
+	-- Kyle jumps
+	kyle:SetXPosition(66, 0);
+	kyle:SetYPosition(90, 0);
+end
+
+map_functions[2] = function()
+	kyle:SetVisible(false);
+end
+
+map_functions[3] = function()
+	
 end
