@@ -25,6 +25,7 @@ sound_filenames = {}
 -- The music files used as background music on this map.
 music_filenames = {}
 music_filenames[1] = "mus/Seeking_New_Worlds.ogg"
+music_filenames[2] = "mus/Betrayal.ogg"
 
 -- The names of the contexts used to improve Editor user-friendliness
 context_names = {}
@@ -528,6 +529,7 @@ function Load(m)
 
 	if (betrayal_scene == true) then
 		-- TODO: use video effect for darkness?
+		map:PlayMusic(1);
 		GlobalManager:RemoveCharacter(KYLE);                        -- Kyle disappears, get him out of the party
 		claudius = ConstructSprite("Claudius", 1000, 63, 45);       -- place Claudius in the barracks (coordinates)
 		claudius:SetContext(2);                                     -- place Claudius in the barracks (context)

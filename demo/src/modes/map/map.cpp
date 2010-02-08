@@ -75,7 +75,8 @@ MapMode::MapMode(string filename) :
 	_run_disabled(false),
 	_run_forever(false),
 	_run_stamina(10000),
-	_show_dialogue_icons(true)
+	_show_dialogue_icons(true),
+	_current_track(0)
 {
 	mode_type = MODE_MANAGER_MAP_MODE;
 	_current_instance = this;
@@ -155,9 +156,8 @@ void MapMode::Reset() {
 	// Make the map location known globally to other code that may need to know this information
 	GlobalManager->SetLocation(MakeUnicodeString(_map_filename), _location_graphic.GetFilename());
 
-	// TODO: This music playback code should be scripted
-	if (_music.size() > 0 && _music[0].GetState() != AUDIO_STATE_PLAYING) {
-		_music[0].Play();
+	if (_music.size() > _current_track && _music[_current_track].GetState() != AUDIO_STATE_PLAYING) {
+		_music[_current_track].Play();
 	}
 
 	_intro_timer.Run();
@@ -300,6 +300,12 @@ bool MapMode::IsEnemyLoaded(uint32 id) const {
 		}
 	}
 	return false;
+}
+
+void MapMode::PlayMusic(uint32 track_num) {
+	_music[_current_track].Stop();
+	_current_track = track_num;
+	_music[_current_track].Play();
 }
 
 // ****************************************************************************

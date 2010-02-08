@@ -203,6 +203,8 @@ public:
 		{ return _location_graphic; }
 	//@}
 
+	void PlayMusic(uint32 track_num);
+
 private:
 	// ----- Members : Names and Identifiers -----
 
@@ -300,6 +302,9 @@ private:
 
 	//! \brief Indicates if dialogue icons should be drawn above NPCs who have unread dialogue
 	bool _show_dialogue_icons;
+
+	//! \brief Index of current music track to play
+	uint32 _current_track;
 
 	// ----- Members : Timing and Graphics -----
 
