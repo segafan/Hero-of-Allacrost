@@ -393,6 +393,10 @@ private:
 	**/
 	std::vector<std::string> _GetDirectoryListingUserProfilePath();
 
+	/** /brief Adds in the profiles as options under whichever menu you pass in
+	**/
+	void _AddProfileOptions(private_boot::BootMenu* menu);
+
 	//! \brief Overwrites the selected profile Lua file
 	void _OverwriteProfile();
 
