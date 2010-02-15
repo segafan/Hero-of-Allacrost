@@ -221,7 +221,7 @@ protected:
 *** ***************************************************************************/
 class GUISystem : public hoa_utils::Singleton<GUISystem> {
 	friend class hoa_utils::Singleton<GUISystem>;
-	friend class VideoEngine;
+	friend class hoa_video::VideoEngine;
 	friend class MenuWindow;
 	friend class TextBox;
 	friend class OptionBox;
