@@ -526,10 +526,10 @@ void Grid::SaveMap()
 	vector<int32> ml_vect;
 	vector<int32> ul_vect;
 	// Used to save the northern walkability info of tiles in all layers of
-	// all contexts.
+	// all contexts; initialize to walkable.
 	vector<int32> map_row_north(_width*2, 0);
 	// Used to save the southern walkability info of tiles in all layers of
-	// all contexts.
+	// all contexts; initialize to walkable.
 	vector<int32> map_row_south(_width*2, 0);
 	for (int row = 0; row < _height; row++)
 	{
@@ -540,6 +540,9 @@ void Grid::SaveMap()
 		{
 			for (int32 col = row * _width; col < row * _width + _width; col++)
 			{
+				// Used to know if any tile at all on all combined layers exists.
+				bool missing_tile = true;
+				
 				// Get walkability for lower layer tile.
 				tileset_index = _lower_layer[context][col] / 256;
 				if (tileset_index == 0)
@@ -555,7 +558,10 @@ void Grid::SaveMap()
 					ll_vect.push_back(0);
 				}
 				else
+				{
+					missing_tile = false;
 					ll_vect = tilesets[tileset_index]->walkability[tile_index];
+				}
 
 				// Get walkability for middle layer tile.
 				tileset_index = _middle_layer[context][col] / 256;
@@ -572,7 +578,10 @@ void Grid::SaveMap()
 					ml_vect.push_back(0);
 				}
 				else
+				{
+					missing_tile = false;
 					ml_vect = tilesets[tileset_index]->walkability[tile_index];
+				}
 
 				// Get walkability for upper layer tile.
 				tileset_index = _upper_layer[context][col] / 256;
@@ -589,20 +598,37 @@ void Grid::SaveMap()
 					ul_vect.push_back(0);
 				}
 				else
+				{
+					missing_tile = false;
 					ul_vect = tilesets[tileset_index]->walkability[tile_index];
+				}
 
-				// NW corner
-				map_row_north[col % _width * 2]     |=
-					((ll_vect[0] | ml_vect[0] | ul_vect[0]) << context);
-				// NE corner
-				map_row_north[col % _width * 2 + 1] |=
-					((ll_vect[1] | ml_vect[1] | ul_vect[1]) << context);
-				// SW corner
-				map_row_south[col % _width * 2]     |=
-					((ll_vect[2] | ml_vect[2] | ul_vect[2]) << context);
-				// SE corner
-				map_row_south[col % _width * 2 + 1] |=
-					((ll_vect[3] | ml_vect[3] | ul_vect[3]) << context);
+				if (missing_tile == true)
+				{
+					// NW corner
+					map_row_north[col % _width * 2]     = 1 << context;
+					// NE corner
+					map_row_north[col % _width * 2 + 1] = 1 << context;
+					// SW corner
+					map_row_south[col % _width * 2]     = 1 << context;
+					// SE corner
+					map_row_south[col % _width * 2 + 1] = 1 << context;
+				} // no tile exists at current location
+				else
+				{
+					// NW corner
+					map_row_north[col % _width * 2]     |=
+						((ll_vect[0] | ml_vect[0] | ul_vect[0]) << context);
+					// NE corner
+					map_row_north[col % _width * 2 + 1] |=
+						((ll_vect[1] | ml_vect[1] | ul_vect[1]) << context);
+					// SW corner
+					map_row_south[col % _width * 2]     |=
+						((ll_vect[2] | ml_vect[2] | ul_vect[2]) << context);
+					// SE corner
+					map_row_south[col % _width * 2 + 1] |=
+						((ll_vect[3] | ml_vect[3] | ul_vect[3]) << context);
+				} // a real tile exists at current location
 
 				ll_vect.clear();
 				ml_vect.clear();
