@@ -115,6 +115,12 @@
 		D4B8AA9E0F2D51D100B4D975 /* pause.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6A90AC1D86400D65B8E /* pause.cpp */; };
 		D4B8AA9F0F2D51F100B4D975 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
 		D4B8AAA10F2D521E00B4D975 /* defs_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D41148360D15F053005F0A3F /* defs_modes.cpp */; };
+		D4CC6BD911214C3700982B23 /* defs_global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4CC6BCE11214C3700982B23 /* defs_global.cpp */; };
+		D4CC6BDA11214C3700982B23 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4CC6BCF11214C3700982B23 /* global.cpp */; };
+		D4CC6BDB11214C3700982B23 /* global_actors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4CC6BD111214C3700982B23 /* global_actors.cpp */; };
+		D4CC6BDC11214C3700982B23 /* global_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4CC6BD311214C3700982B23 /* global_effects.cpp */; };
+		D4CC6BDD11214C3700982B23 /* global_objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4CC6BD511214C3700982B23 /* global_objects.cpp */; };
+		D4CC6BDE11214C3700982B23 /* global_skills.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4CC6BD711214C3700982B23 /* global_skills.cpp */; };
 		D4D0FA820E1A02A300B9EC20 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
 		D4D1664E0BC0D91400190FC0 /* effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166290BC0D91300190FC0 /* effects.cpp */; };
 		D4D1664F0BC0D91400190FC0 /* fade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662A0BC0D91300190FC0 /* fade.cpp */; };
@@ -326,6 +332,17 @@
 		D4BA6CEA0EC7872C00F2DEB0 /* quot.sed */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = quot.sed; sourceTree = "<group>"; };
 		D4BA6CEB0EC7872C00F2DEB0 /* remove-potcdate.sin */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "remove-potcdate.sin"; sourceTree = "<group>"; };
 		D4BA6CEC0EC7872C00F2DEB0 /* Rules-quot */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Rules-quot"; sourceTree = "<group>"; };
+		D4CC6BCE11214C3700982B23 /* defs_global.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = defs_global.cpp; sourceTree = "<group>"; };
+		D4CC6BCF11214C3700982B23 /* global.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = global.cpp; sourceTree = "<group>"; };
+		D4CC6BD011214C3700982B23 /* global.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = global.h; sourceTree = "<group>"; };
+		D4CC6BD111214C3700982B23 /* global_actors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = global_actors.cpp; sourceTree = "<group>"; };
+		D4CC6BD211214C3700982B23 /* global_actors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = global_actors.h; sourceTree = "<group>"; };
+		D4CC6BD311214C3700982B23 /* global_effects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = global_effects.cpp; sourceTree = "<group>"; };
+		D4CC6BD411214C3700982B23 /* global_effects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = global_effects.h; sourceTree = "<group>"; };
+		D4CC6BD511214C3700982B23 /* global_objects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = global_objects.cpp; sourceTree = "<group>"; };
+		D4CC6BD611214C3700982B23 /* global_objects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = global_objects.h; sourceTree = "<group>"; };
+		D4CC6BD711214C3700982B23 /* global_skills.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = global_skills.cpp; sourceTree = "<group>"; };
+		D4CC6BD811214C3700982B23 /* global_skills.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = global_skills.h; sourceTree = "<group>"; };
 		D4D166250BC0D91300190FC0 /* color.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = color.h; sourceTree = "<group>"; };
 		D4D166260BC0D91300190FC0 /* context.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
 		D4D166270BC0D91300190FC0 /* coord_sys.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = coord_sys.h; sourceTree = "<group>"; };
@@ -428,6 +445,7 @@
 		4941A49F0AC1D76400D65B8E = {
 			isa = PBXGroup;
 			children = (
+				D4CC6BCD11214C3700982B23 /* global */,
 				D4BA6CDF0EC7872C00F2DEB0 /* txt */,
 				D404C6E80B02FCEC00827A19 /* Temporary Source Files */,
 				4941A4BC0AC1D7B300D65B8E /* Source Files */,
@@ -759,6 +777,25 @@
 			path = txt;
 			sourceTree = "<group>";
 		};
+		D4CC6BCD11214C3700982B23 /* global */ = {
+			isa = PBXGroup;
+			children = (
+				D4CC6BCE11214C3700982B23 /* defs_global.cpp */,
+				D4CC6BCF11214C3700982B23 /* global.cpp */,
+				D4CC6BD011214C3700982B23 /* global.h */,
+				D4CC6BD111214C3700982B23 /* global_actors.cpp */,
+				D4CC6BD211214C3700982B23 /* global_actors.h */,
+				D4CC6BD311214C3700982B23 /* global_effects.cpp */,
+				D4CC6BD411214C3700982B23 /* global_effects.h */,
+				D4CC6BD511214C3700982B23 /* global_objects.cpp */,
+				D4CC6BD611214C3700982B23 /* global_objects.h */,
+				D4CC6BD711214C3700982B23 /* global_skills.cpp */,
+				D4CC6BD811214C3700982B23 /* global_skills.h */,
+			);
+			name = global;
+			path = src/common/global;
+			sourceTree = "<group>";
+		};
 		D4D166240BC0D91300190FC0 /* video */ = {
 			isa = PBXGroup;
 			children = (
@@ -1086,6 +1123,12 @@
 				D438C79C0C9117400032F79E /* image_base.cpp in Sources */,
 				D4B00DE00D15F25F00A5DBB1 /* system.cpp in Sources */,
 				D4B00DE40D15F29F00A5DBB1 /* mode_manager.cpp in Sources */,
+				D4CC6BD911214C3700982B23 /* defs_global.cpp in Sources */,
+				D4CC6BDA11214C3700982B23 /* global.cpp in Sources */,
+				D4CC6BDB11214C3700982B23 /* global_actors.cpp in Sources */,
+				D4CC6BDC11214C3700982B23 /* global_effects.cpp in Sources */,
+				D4CC6BDD11214C3700982B23 /* global_objects.cpp in Sources */,
+				D4CC6BDE11214C3700982B23 /* global_skills.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
