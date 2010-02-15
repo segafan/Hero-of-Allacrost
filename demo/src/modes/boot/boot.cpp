@@ -758,23 +758,13 @@ void BootMode::_SetupLoadProfileMenu() {
 	_load_profile_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_load_profile_menu.SetCursorOffset(-50.0f, 28.0f);
 
-	//setup the dimensions according to how many language we have available
-	vector<std::string> profile_vector = _GetDirectoryListingUserProfilePath();
-	_load_profile_menu.SetDimensions(300.0f, 200.0f, 1,profile_vector.size(), 1, profile_vector.size());
-
-	//add the options in for each file
-	for (uint32 i = 0; i < profile_vector.size(); i++) {
-		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
-		string filename = profile_vector.at(i);
-		_load_profile_menu.AddOption(MakeUnicodeString(filename.c_str()), &BootMode::_OnLoadFile);
-	}
+	_AddProfileOptions(&_load_profile_menu);
 }
 
 
 
 void BootMode::_SetupSaveProfileMenu() {
 	_save_profile_menu.SetPosition(512.0f, 300.0f);
-	_save_profile_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
 	_save_profile_menu.SetTextStyle(TextStyle("title22"));
 	_save_profile_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_save_profile_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -785,24 +775,13 @@ void BootMode::_SetupSaveProfileMenu() {
 	//this option is selected when user wants to create a new file
 	_save_profile_menu.AddOption(UTranslate("New Profile"), &BootMode::_OnSaveFile);
 
-
-	//setup the dimensions according to how many language we have available
-	vector<std::string> profile_vector = _GetDirectoryListingUserProfilePath();
-	_load_profile_menu.SetDimensions(300.0f, 200.0f, 1,profile_vector.size(), 1, profile_vector.size());
-
-	//add the options in for each file
-	for (uint32 i = 0; i < profile_vector.size(); i++) {
-		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
-		string filename = profile_vector.at(i);
-		_load_profile_menu.AddOption(MakeUnicodeString(filename.c_str()), &BootMode::_OnLoadFile);
-	}
+	_AddProfileOptions(&_save_profile_menu);
 }
 
 
 
 void BootMode::_SetupDeleteProfileMenu() {
 	_delete_profile_menu.SetPosition(512.0f, 300.0f);
-	_delete_profile_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
 	_delete_profile_menu.SetTextStyle(TextStyle("title22"));
 	_delete_profile_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_delete_profile_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -810,13 +789,7 @@ void BootMode::_SetupDeleteProfileMenu() {
 	_delete_profile_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_delete_profile_menu.SetCursorOffset(-50.0f, 28.0f);
 
-
-	//add the options in for each file
-	for (uint32 i = 0; i < _GetDirectoryListingUserProfilePath().size(); i++) {
-		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
-		string filename = _GetDirectoryListingUserProfilePath().at(i);
-		_delete_profile_menu.AddOption(MakeUnicodeString(filename.c_str()), &BootMode::_OnDeleteFile);
-	}
+	_AddProfileOptions(&_delete_profile_menu);
 }
 
 
@@ -1188,6 +1161,8 @@ void BootMode::_OnLanguageSelect() {
 		languages.CloseAllTables();
 		if(languages.IsErrorDetected())
 			cerr << "BOOT ERROR: Error while setting the system language! " << languages.GetFilename() << endl;
+
+		languages.CloseFile();
 
 	// TODO: when the new language is set by the above call, we need to reload/refresh all text,
 	// otherwise the new language will not take effect.
@@ -1803,6 +1778,19 @@ vector<string> BootMode::_GetDirectoryListingUserProfilePath() {
 			directory_listing.at(i).erase(directory_listing.at(i).size() - 4);
 
 		return directory_listing;
+	}
+}
+void BootMode::_AddProfileOptions(private_boot::BootMenu* menu)
+{
+	//setup the dimensions according to how many profiles we have available
+	vector<std::string> profile_vector = _GetDirectoryListingUserProfilePath();
+	menu->SetDimensions(300.0f, 200.0f, 1,profile_vector.size()+1, 1, profile_vector.size()+1);
+
+	//add the options in for each file
+	for (uint32 i = 0; i < profile_vector.size(); i++) {
+		//this menu is for personalized profiles only do not include the default profile "restore defaults" already exists
+		string filename = profile_vector.at(i);
+		menu->AddOption(MakeUnicodeString(filename.c_str()), &BootMode::_OnLoadFile);
 	}
 }
 
