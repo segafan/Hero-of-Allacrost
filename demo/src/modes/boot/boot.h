@@ -136,7 +136,13 @@ private:
 
 	//! \brief Set to true when the player has made modification to any application settings
 	bool _has_modified_settings;
-
+	
+	//! \brief Filename for profiles, this has to be global right now to work this will be fixed in the boot.cpp revision
+	std::string _current_filename;
+	
+	//! \brief Stores languages' corresponding gettext PO file names, where index in vector is equivalent to the language name's position in the language options window
+	std::vector<std::string> _po_files;
+	
 	//! \brief Images that will be used at the boot screen.
 	std::vector<hoa_video::StillImage> _boot_images;
 
@@ -163,9 +169,6 @@ private:
 
 	//! \brief Pointer to the currently active boot menu object
 	private_boot::BootMenu* _active_menu;
-
-	//! \brief filename for profiles, this has to be global right now to work this will be fixed in the boot.cpp revision
-	std::string _current_filename;
 
 	/** \name Various menus available in boot mode
 	*** The name of the menu objects is rather self explanatory. There are a number of methods in

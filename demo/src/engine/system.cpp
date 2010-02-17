@@ -231,7 +231,7 @@ bool SystemEngine::SingletonInitialize() {
 	#endif
 
 	// Called here to set the default English language to use nice quote characters.
-	SetLanguage("en");
+	SetLanguage("en@quot");
 
 	return true;
 }
@@ -297,16 +297,7 @@ void SystemEngine::ExamineSystemTimers() {
 
 
 void SystemEngine::SetLanguage(std::string lang) {
-	// A 2 character string is the only allowable argument
-	if (lang.size() != 2) {
-		return;
-	}
-
-	// Makes English use nice quote characters instead of ugly ones.
-	if (lang == "en")
-		_language = "en@quot";
-	else
-		_language = lang;
+	_language = lang;
 
 	/// @TODO, implement a cross-platform wrapper for setenv
 	#ifdef _WIN32
