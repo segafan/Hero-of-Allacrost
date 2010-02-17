@@ -623,29 +623,33 @@ void BootMode::_SetupLanguageOptionsMenu() {
 	_language_options_menu.SetCursorOffset(-50.0f, 28.0f);
 
 
-	//read in the languages from the language.lua file
-	ReadScriptDescriptor languages;
-	if(!languages.OpenFile(_LANGUAGE_FILE))
-		cerr << "BOOT ERROR: Could not open the language file! " << languages.GetFilename() << endl;
-	else
-	{
-		vector<std::string> language_vector;
-		languages.ReadStringVector("languages",language_vector);
-
-		//setup the dimensions according to how many language we have available
-		_language_options_menu.SetDimensions(300.0f, 200.0f, 1, language_vector.size(), 1, language_vector.size());
-
-		//now loop through all the languages and add them
-		//the first 3 characters are taken up by the 2 letter language code
-		for(int32 i = 0; i < (int32)language_vector.size(); i++)
-			_language_options_menu.AddOption(MakeUnicodeString(language_vector.at(i).substr(2)), &BootMode::_OnLanguageSelect);
-
-		languages.CloseAllTables();
-		if(languages.IsErrorDetected())
-			cerr << "BOOT ERROR: Error while loading language options. " << languages.GetErrorMessages() << endl;
+	// Get the list of languages from the Lua file.
+	ReadScriptDescriptor read_data;
+	if (!read_data.OpenFile(_LANGUAGE_FILE)) {
+		PRINT_ERROR << "Failed to load language file: " << _LANGUAGE_FILE << endl;
+		PRINT_ERROR << "The language list will be empty." << endl;
+		return;
 	}
 
-	//_language_options_menu.SetSelection(0);
+	read_data.OpenTable("languages");
+	uint32 table_size = read_data.GetTableSize();
+
+	// Set up the dimensions of the window according to how many languages are available.
+	_language_options_menu.SetDimensions(300.0f, 200.0f, 1, table_size, 1, table_size);
+
+	_po_files.clear();
+	for (uint32 i = 1; i <= table_size; i++) {
+		read_data.OpenTable(i);
+		_po_files.push_back(read_data.ReadString(2));
+		_language_options_menu.AddOption(MakeUnicodeString(read_data.ReadString(1)),
+										 &BootMode::_OnLanguageSelect);
+		read_data.CloseTable();
+	}
+	
+	read_data.CloseTable();
+	if (read_data.IsErrorDetected())
+		PRINT_ERROR << "Error occurred while loading language list: " << read_data.GetErrorMessages() << endl;
+	read_data.CloseFile();
 }
 
 
@@ -1147,26 +1151,10 @@ void BootMode::_OnMusicRight() {
 
 
 void BootMode::_OnLanguageSelect() {
-
-	ReadScriptDescriptor languages;
-	if(!languages.OpenFile(_LANGUAGE_FILE))
-		cerr << "BOOT ERROR: Error while loading language file! " << languages.GetFilename() << endl;
-	else
-	{
-		vector<std::string> language_vector;
-		languages.ReadStringVector("languages",language_vector);
-
-		//we only need the first 2 characters
-		SystemManager->SetLanguage(language_vector.at(_language_options_menu.GetSelection()).substr(0,2));
-		languages.CloseAllTables();
-		if(languages.IsErrorDetected())
-			cerr << "BOOT ERROR: Error while setting the system language! " << languages.GetFilename() << endl;
-
-		languages.CloseFile();
+	SystemManager->SetLanguage(_po_files[_language_options_menu.GetSelection()]);
 
 	// TODO: when the new language is set by the above call, we need to reload/refresh all text,
 	// otherwise the new language will not take effect.
-	}
 }
 
 
