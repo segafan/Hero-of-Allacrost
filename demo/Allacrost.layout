@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Release Win32" />
+	<File name="src\main.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="14628" topLine="323" />
+	</File>
+	<File name="src\main_options.h" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="34" />
+	</File>
+	<File name="src\utils.h" open="1" top="0" tabpos="0">
+		<Cursor position="0" topLine="0" />
+	</File>
+</CodeBlocks_layout_file>
