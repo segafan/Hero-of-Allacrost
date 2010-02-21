@@ -767,9 +767,10 @@ vector<string> ListDirectory(const std::string& dir_name, const std::string& fil
 		else if(fileName.find(filter) != string::npos)
 			directoryList.push_back(dir_file->d_name);
 	}
-	#endif
 
 	closedir(dir);
+
+	#endif
 
 	return directoryList;
 }
