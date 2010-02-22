@@ -606,13 +606,13 @@ void Grid::SaveMap()
 				if (missing_tile == true)
 				{
 					// NW corner
-					map_row_north[col % _width * 2]     = 1 << context;
+					map_row_north[col % _width * 2]     |= 1 << context;
 					// NE corner
-					map_row_north[col % _width * 2 + 1] = 1 << context;
+					map_row_north[col % _width * 2 + 1] |= 1 << context;
 					// SW corner
-					map_row_south[col % _width * 2]     = 1 << context;
+					map_row_south[col % _width * 2]     |= 1 << context;
 					// SE corner
-					map_row_south[col % _width * 2 + 1] = 1 << context;
+					map_row_south[col % _width * 2 + 1] |= 1 << context;
 				} // no tile exists at current location
 				else
 				{
