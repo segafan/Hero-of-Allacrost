@@ -25,7 +25,7 @@ sound_filenames = {}
 -- The music files used as background music on this map.
 music_filenames = {}
 music_filenames[1] = "mus/Seeking_New_Worlds.ogg"
-music_filenames[1] = "mus/Betrayal.ogg"
+music_filenames[2] = "mus/Betrayal.ogg"
 
 -- The names of the contexts used to improve Editor user-friendliness
 context_names = {}
