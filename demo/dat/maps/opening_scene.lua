@@ -242,3 +242,4 @@ function CreateDialogue()
 	dialogue:AddText(text, 2, -1, 22111, false);
 
 	dialogue_supervisor:AddDialogue(dialogue);
+end
