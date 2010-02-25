@@ -17,8 +17,8 @@ end
 -- -----------------------------------------------------------------------------
 
 skills[10001] = {
-	name = "Karlate Guard",
-	description = "Take a strong defensive stance.",
+	name = hoa_system.Translate("Karlate Guard"),
+	description = hoa_system.Translate("Take a strong defensive stance."),
 	sp_required = 3,
 	warmup_time = 300,
 	cooldown_time = 0,
@@ -31,8 +31,8 @@ skills[10001] = {
 }
 
 skills[10002] = {
-	name = "Dodge Enemies",
-	description = "Increases evasion ability for a brief period.",
+	name = hoa_system.Translate("Dodge Enemies"),
+	description = hoa_system.Translate("Increases evasion ability for a brief period."),
 	sp_required = 1,
 	warmup_time = 300,
 	cooldown_time = 0,

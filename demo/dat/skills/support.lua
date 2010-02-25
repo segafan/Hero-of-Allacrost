@@ -17,8 +17,8 @@ end
 -- -----------------------------------------------------------------------------
 
 skills[20001] = {
-   name = "Refresh",
-   description = "Heals a party member by restoring a small amount of life force.",
+   name = hoa_system.Translate("Refresh"),
+   description = hoa_system.Translate("Heals a party member by restoring a small amount of life force."),
    sp_required = 2,
    warmup_time = 1500,
    cooldown_time = 2,

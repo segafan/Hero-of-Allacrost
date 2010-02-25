@@ -25,8 +25,8 @@ end
 -- -----------------------------------------------------------------------------
 
 armor[40001] = {
-	name = "Karlate Shield",
-	description = "Standard Karlate issued equipment. Strong wooden oak protects from all but the heaviest of assaults.",
+	name = hoa_system.Translate("Karlate Shield"),
+	description = hoa_system.Translate("Standard Karlate issued equipment. Strong wooden oak protects from all but the heaviest of assaults."),
 	icon = "img/icons/armor/karlate_shield.png",
 	physical_defense = 2,
 	metaphysical_defense = 0,
@@ -36,8 +36,8 @@ armor[40001] = {
 }
 
 armor[40002] = {
-	name = "Phoenix Shield",
-	description = "A tall steel shield with a mighty phoenix embroidered on the front.",
+	name = hoa_system.Translate("Phoenix Shield"),
+	description = hoa_system.Translate("A tall steel shield with a mighty phoenix embroidered on the front."),
 	icon = "img/icons/armor/phoenix_shield.png",
 	physical_defense = 6,
 	metaphysical_defense = 6,
@@ -51,8 +51,8 @@ armor[40002] = {
 -- -----------------------------------------------------------------------------
 
 armor[40501] = {
-	name = "Stone Bracelet",
-	description = "A bracelet crafted out of soft limestone.",
+	name = hoa_system.Translate("Stone Bracelet"),
+	description = hoa_system.Translate("A bracelet crafted out of soft limestone."),
 	icon = "img/icons/armor/stone_bracelet.png",
 	physical_defense = 4,
 	metaphysical_defense = 1,

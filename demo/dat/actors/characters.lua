@@ -10,7 +10,7 @@
 characters = {}
 
 characters[CLAUDIUS] = {
-	name = "Claudius",
+	name = hoa_system.Translate("Claudius"),
 	filename = "claudius",
 
 	initial_stats = {
@@ -33,7 +33,7 @@ characters[CLAUDIUS] = {
 
 	attack_points = {
 		[hoa_global.GameGlobal.GLOBAL_POSITION_HEAD] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 31,
 			y_position = 54,
 			fortitude_modifier = -0.20,
@@ -41,7 +41,7 @@ characters[CLAUDIUS] = {
 			evade_modifier = 0.50
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
-			name = "Torso",
+			name = hoa_system.Translate("Torso"),
 			x_position = 37,
 			y_position = 34,
 			fortitude_modifier = 0.40,
@@ -49,7 +49,7 @@ characters[CLAUDIUS] = {
 			evade_modifier = -0.20
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_ARMS] = {
-			name = "Arms",
+			name = hoa_system.Translate("Arms"),
 			x_position = 31,
 			y_position = 54,
 			fortitude_modifier = 0.10,
@@ -57,7 +57,7 @@ characters[CLAUDIUS] = {
 			evade_modifier = 0.10
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
-			name = "Legs",
+			name = hoa_system.Translate("Legs"),
 			x_position = 37,
 			y_position = 34,
 			fortitude_modifier = 0.20,
@@ -95,7 +95,7 @@ characters[CLAUDIUS] = {
 
 
 characters[LAILA] = {
-	name = "Laila",
+	name = hoa_system.Translate("Laila"),
 	filename = "laila",
 
 	initial_stats = {
@@ -118,7 +118,7 @@ characters[LAILA] = {
 
 	attack_points = {
 		[hoa_global.GameGlobal.GLOBAL_POSITION_HEAD] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 31,
 			y_position = 54,
 			fortitude_modifier = -0.20,
@@ -126,7 +126,7 @@ characters[LAILA] = {
 			evade_modifier = 0.50
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
-			name = "Torso",
+			name = hoa_system.Translate("Torso"),
 			x_position = 37,
 			y_position = 34,
 			fortitude_modifier = 0.40,
@@ -134,7 +134,7 @@ characters[LAILA] = {
 			evade_modifier = -0.20
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_ARMS] = {
-			name = "Arms",
+			name = hoa_system.Translate("Arms"),
 			x_position = 31,
 			y_position = 54,
 			fortitude_modifier = 0.10,
@@ -142,7 +142,7 @@ characters[LAILA] = {
 			evade_modifier = 0.10
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
-			name = "Legs",
+			name = hoa_system.Translate("Legs"),
 			x_position = 37,
 			y_position = 34,
 			fortitude_modifier = 0.20,
@@ -180,7 +180,7 @@ characters[LAILA] = {
 
 
 characters[KYLE] = {
-	name = "Kyle",
+	name = hoa_system.Translate("Kyle"),
 	filename = "kyle",
 
 	initial_stats = {
@@ -203,7 +203,7 @@ characters[KYLE] = {
 
 	attack_points = {
 		[hoa_global.GameGlobal.GLOBAL_POSITION_HEAD] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 31,
 			y_position = 54,
 			fortitude_modifier = -0.20,
@@ -211,7 +211,7 @@ characters[KYLE] = {
 			evade_modifier = 0.50
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
-			name = "Torso",
+			name = hoa_system.Translate("Torso"),
 			x_position = 37,
 			y_position = 34,
 			fortitude_modifier = 0.40,
@@ -219,7 +219,7 @@ characters[KYLE] = {
 			evade_modifier = -0.20
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_ARMS] = {
-			name = "Arms",
+			name = hoa_system.Translate("Arms"),
 			x_position = 31,
 			y_position = 54,
 			fortitude_modifier = 0.10,
@@ -227,7 +227,7 @@ characters[KYLE] = {
 			evade_modifier = 0.10
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
-			name = "Legs",
+			name = hoa_system.Translate("Legs"),
 			x_position = 37,
 			y_position = 34,
 			fortitude_modifier = 0.20,
@@ -265,7 +265,7 @@ characters[KYLE] = {
 
 
 characters[RAFAELA] = {
-	name = "Rafaela",
+	name = hoa_system.Translate("Rafaela"),
 	filename = "rafaela",
 
 	initial_stats = {
@@ -288,7 +288,7 @@ characters[RAFAELA] = {
 
 	attack_points = {
 		[hoa_global.GameGlobal.GLOBAL_POSITION_HEAD] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 31,
 			y_position = 54,
 			fortitude_modifier = -0.20,
@@ -296,7 +296,7 @@ characters[RAFAELA] = {
 			evade_modifier = 0.50
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
-			name = "Torso",
+			name = hoa_system.Translate("Torso"),
 			x_position = 37,
 			y_position = 34,
 			fortitude_modifier = 0.40,
@@ -304,7 +304,7 @@ characters[RAFAELA] = {
 			evade_modifier = -0.20
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_ARMS] = {
-			name = "Arms",
+			name = hoa_system.Translate("Arms"),
 			x_position = 31,
 			y_position = 54,
 			fortitude_modifier = 0.10,
@@ -312,7 +312,7 @@ characters[RAFAELA] = {
 			evade_modifier = 0.10
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
-			name = "Legs",
+			name = hoa_system.Translate("Legs"),
 			x_position = 37,
 			y_position = 34,
 			fortitude_modifier = 0.20,

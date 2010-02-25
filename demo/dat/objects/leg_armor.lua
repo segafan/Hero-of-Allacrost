@@ -25,8 +25,8 @@ end
 -- -----------------------------------------------------------------------------
 
 armor[50001] = {
-	name = "Karlate Greaves",
-	description = "Standard Karlate issued equipment. Light metal alloy protects the legs while minimizing the negative impact on movement.",
+	name = hoa_system.Translate("Karlate Greaves"),
+	description = hoa_system.Translate("Standard Karlate issued equipment. Light metal alloy protects the legs while minimizing the negative impact on movement."),
 	icon = "img/icons/armor/karlate_greaves.png",
 	physical_defense = 3,
 	metaphysical_defense = 0,
@@ -40,8 +40,8 @@ armor[50001] = {
 -- -----------------------------------------------------------------------------
 
 armor[50501] = {
-	name = "Leather Sandals",
-	description = "Light footwear that while fashionable, was not designed for battle and affords very poor protection for the user.",
+	name = hoa_system.Translate("Leather Sandals"),
+	description = hoa_system.Translate("Light footwear that while fashionable, was not designed for battle and affords very poor protection for the user."),
 	icon = "img/icons/armor/leather_sandals.png",
 	physical_defense = 1,
 	metaphysical_defense = 1,
@@ -51,8 +51,8 @@ armor[50501] = {
 }
 
 armor[50502] = {
-	name = "Leather Boots",
-	description = "Comfortable leather that protects the entire foot and lower region of the shin.",
+	name = hoa_system.Translate("Leather Boots"),
+	description = hoa_system.Translate("Comfortable leather that protects the entire foot and lower region of the shin."),
 	icon = "img/icons/armor/leather_boots.png",
 	physical_defense = 3,
 	metaphysical_defense = 1,

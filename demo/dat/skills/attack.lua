@@ -17,8 +17,8 @@ end
 -- -----------------------------------------------------------------------------
 
 skills[1] = {
-	name = "Slicing Rain",
-	description = "A simple but effective sword slash.",
+	name = hoa_system.Translate("Slicing Rain"(,
+	description = hoa_system.Translate("A simple but effective sword slash."(,
 	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 0,
@@ -41,8 +41,8 @@ skills[1] = {
 
 -- Another attack skill with faster warm-up and increased damage
 skills[2] = {
-	name = "Forward Thrust",
-	description = "A quick and daring thrust into an opponent's flesh.",
+	name = hoa_system.Translate("Forward Thrust"),
+	description = hoa_system.Translate("A quick and daring thrust into an opponent's flesh."),
 	sp_required = 1,
 	warmup_time = 1200,
 	cooldown_time = 0,
@@ -63,8 +63,8 @@ skills[2] = {
 }
 
 skills[3] = {
-	name = "Stun Slash",
-	description = "A quick and daring thrust into an opponent's flesh.",
+	name = hoa_system.Translate("Stun Slash"),
+	description = hoa_system.Translate("A quick and daring thrust into an opponent's flesh."),
 	sp_required = 3,
 	warmup_time = 1200,
 	cooldown_time = 0,
@@ -87,8 +87,8 @@ skills[3] = {
 
 skills[4] = {
 	-- FIXME: This does not work yet.
-	name = "Whirlwind",
-	description = "Damage all enemies",
+	name = hoa_system.Translate("Whirlwind"),
+	description = hoa_system.Translate("Damage all enemies"),
 	sp_required = 7,
 	warmup_time = 1200,
 	cooldown_time = 0,
@@ -103,8 +103,8 @@ skills[4] = {
 }
 
 skills[11] = {
-	name = "Quick Shot",
-	description = "A quick but weak crossbow attack.",
+	name = hoa_system.Translate("Quick Shot"),
+	description = hoa_system.Translate("A quick but weak crossbow attack."),
 	sp_required = 0,
 	warmup_time = 1000,
 	cooldown_time = 0,
@@ -122,8 +122,8 @@ skills[11] = {
 }
 
 skills[21] = {
-	name = "Side Slash",
-	description = "A very basic sword attack.",
+	name = hoa_system.Translate("Side Slash"),
+	description = hoa_system.Translate("A very basic sword attack."),
 	sp_required = 0,
 	warmup_time = 1500,
 	cooldown_time = 0,
@@ -143,8 +143,8 @@ skills[21] = {
 }
 
 skills[22] = {
-	name = "Blade Rush",
-	description = "Attempt for a powerful blow.",
+	name = hoa_system.Translate("Blade Rush"),
+	description = hoa_system.Translate("Attempt for a powerful blow."),
 	sp_required = 4,
 	warmup_time = 2000,
 	cooldown_time = 0,
@@ -164,8 +164,8 @@ skills[22] = {
 }
 
 skills[31] = {
-	name = "Stab",
-	description = "Stab enemy with dagger.",
+	name = hoa_system.Translate("Stab"),
+	description = hoa_system.Translate("Stab enemy with dagger."),
 	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 0,
@@ -187,8 +187,8 @@ skills[31] = {
 }
 
 skills[32] = {
-	name = "Dagger Throw",
-	description = "Throw dagger at an enemy.",
+	name = hoa_system.Translate("Dagger Throw"),
+	description = hoa_system.Translate("Throw dagger at an enemy."),
 	sp_required = 3,
 	warmup_time = 2000,
 	cooldown_time = 0,
