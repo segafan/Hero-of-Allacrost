@@ -17,8 +17,8 @@ end
 -- -----------------------------------------------------------------------------
 
 skills[1] = {
-	name = hoa_system.Translate("Slicing Rain"(,
-	description = hoa_system.Translate("A simple but effective sword slash."(,
+	name = hoa_system.Translate("Slicing Rain"),
+	description = hoa_system.Translate("A simple but effective sword slash."),
 	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 0,
