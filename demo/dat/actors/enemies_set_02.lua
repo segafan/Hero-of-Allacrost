@@ -12,7 +12,7 @@ if (_G.enemies == nil) then
 end
 
 enemies[101] = {
-	name = "Daemarbora",
+	name = hoa_system.Translate("Daemarbora"),
 	filename = "daemarbora",
 	sprite_width = 128,
 	sprite_height = 128,
@@ -45,7 +45,7 @@ enemies[101] = {
 
 	attack_points = {
 		[1] = {
-			name = "Trunk",
+			name = hoa_system.Translate("Trunk"),
 			x_position = 58,
 			y_position = 36,
 			fortitude_modifier = 0,
@@ -53,7 +53,7 @@ enemies[101] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Branches",
+			name = hoa_system.Translate("Branches"),
 			x_position = 64,
 			y_position = 80,
 			fortitude_modifier = 0,
@@ -73,7 +73,7 @@ enemies[101] = {
 
 
 enemies[102] = {
-	name = "Aerocephal",
+	name = hoa_system.Translate("Aerocephal"),
 	filename = "aerocephal",
 	sprite_width = 192,
 	sprite_height = 192,
@@ -107,7 +107,7 @@ enemies[102] = {
 
 	attack_points = {
 		[1] = {
-			name = "Forehead",
+			name = hoa_system.Translate("Forehead"),
 			x_position = 90,
 			y_position = 127,
 			fortitude_modifier = 0.0,
@@ -115,7 +115,7 @@ enemies[102] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Orifice",
+			name = hoa_system.Translate("Orifice"),
 			x_position = 95,
 			y_position = 77,
 			fortitude_modifier = 0.0,
@@ -135,7 +135,7 @@ enemies[102] = {
 
 
 enemies[103] = {
-	name = "Arcana Drake",
+	name = hoa_system.Translate("Arcana Drake"),
 	filename = "arcana_drake",
 	sprite_width = 192,
 	sprite_height = 256,
@@ -169,7 +169,7 @@ enemies[103] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 90,
 			y_position = 167,
 			fortitude_modifier = 0.0,
@@ -177,7 +177,7 @@ enemies[103] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Body",
+			name = hoa_system.Translate("Body"),
 			x_position = 95,
 			y_position = 111,
 			fortitude_modifier = 0.0,
@@ -185,7 +185,7 @@ enemies[103] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = "Tail",
+			name = hoa_system.Translate("Tail"),
 			x_position = 22,
 			y_position = 146,
 			fortitude_modifier = 0.0,
@@ -205,7 +205,7 @@ enemies[103] = {
 
 
 enemies[104] = {
-	name = "Nagaruda",
+	name = hoa_system.Translate("Nagaruda"),
 	filename = "nagaruda",
 	sprite_width = 192,
 	sprite_height = 256,
@@ -238,7 +238,7 @@ enemies[104] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 70,
 			y_position = 165,
 			fortitude_modifier = 0.0,
@@ -246,7 +246,7 @@ enemies[104] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Abdomen",
+			name = hoa_system.Translate("Abdomen"),
 			x_position = 60,
 			y_position = 115,
 			fortitude_modifier = 0.0,
@@ -254,7 +254,7 @@ enemies[104] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = "Tail",
+			name = hoa_system.Translate("Tail"),
 			x_position = 70,
 			y_position = 65,
 			fortitude_modifier = 0.0,
@@ -274,7 +274,7 @@ enemies[104] = {
 
 
 enemies[105] = {
-	name = "Deceleon",
+	name = hoa_system.Translate("Deceleon"),
 	filename = "deceleon",
 	sprite_width = 256,
 	sprite_height = 256,
@@ -307,7 +307,7 @@ enemies[105] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 152,
 			y_position = 226,
 			fortitude_modifier = 0.0,
@@ -315,7 +315,7 @@ enemies[105] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Chest",
+			name = hoa_system.Translate("Chest"),
 			x_position = 150,
 			y_position = 190,
 			fortitude_modifier = 0.0,
@@ -323,7 +323,7 @@ enemies[105] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = "Arm",
+			name = hoa_system.Translate("Arm"),
 			x_position = 200,
 			y_position = 155,
 			fortitude_modifier = 0.0,
@@ -331,7 +331,7 @@ enemies[105] = {
 			evade_modifier = 0.0
 		},
 		[4] = {
-			name = "Legs",
+			name = hoa_system.Translate("Legs"),
 			x_position = 150,
 			y_position = 105,
 			fortitude_modifier = 0.0,
@@ -351,7 +351,7 @@ enemies[105] = {
 
 
 enemies[106] = {
-	name = "Aurum Drakueli",
+	name = hoa_system.Translate("Aurum Drakueli"),
 	filename = "aurum-drakueli",
 	sprite_width = 320,
 	sprite_height = 256,
@@ -385,7 +385,7 @@ enemies[106] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 156,
 			y_position = 222,
 			fortitude_modifier = 0,
@@ -393,7 +393,7 @@ enemies[106] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Chest",
+			name = hoa_system.Translate("Chest"),
 			x_position = 199,
 			y_position = 155,
 			fortitude_modifier = 0,
@@ -401,7 +401,7 @@ enemies[106] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = "Arm",
+			name = hoa_system.Translate("Arm"),
 			x_position = 242,
 			y_position = 143,
 			fortitude_modifier = 0,
@@ -420,7 +420,7 @@ enemies[106] = {
 }
 
 enemies[107] = {
-	name = "Kyle",
+	name = hoa_system.Translate("Kyle"),
 	filename = "kyle",
 	sprite_width = 48,
 	sprite_height = 96,
@@ -454,7 +454,7 @@ enemies[107] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 45,
 			y_position = 80,
 			fortitude_modifier = 0.0,
@@ -462,7 +462,7 @@ enemies[107] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Chest",
+			name = hoa_system.Translate("Chest"),
 			x_position = 45,
 			y_position = 46,
 			fortitude_modifier = 0.0,
@@ -470,7 +470,7 @@ enemies[107] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = "Legs",
+			name = hoa_system.Translate("Legs"),
 			x_position = 45,
 			y_position = 14,
 			fortitude_modifier = 0.0,

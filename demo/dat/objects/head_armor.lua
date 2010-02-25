@@ -25,8 +25,8 @@ end
 -- -----------------------------------------------------------------------------
 
 armor[20001] = {
-	name = "Karlate Helmet",
-	description = "Standard Karlate issued equipment. Battle worn but still reliable head protection.",
+	name = hoa_system.Translate("Karlate Helmet"),
+	description = hoa_system.Translate("Standard Karlate issued equipment. Battle worn but still reliable head protection."),
 	icon = "img/icons/armor/karlate_helmet.png",
 	physical_defense = 6,
 	metaphysical_defense = 2,
@@ -36,8 +36,8 @@ armor[20001] = {
 }
 
 armor[20002] = {
-	name = "Cobalt Helm",
-	description = "A small helmet composed of a secret cobalt based alloy.",
+	name = hoa_system.Translate("Cobalt Helm"),
+	description = hoa_system.Translate("A small helmet composed of a secret cobalt based alloy."),
 	icon = "img/icons/armor/cobalt_helm.png",
 	physical_defense = 8,
 	metaphysical_defense = 4,
@@ -51,8 +51,8 @@ armor[20002] = {
 -- -----------------------------------------------------------------------------
 
 armor[20501] = {
-	name = "Butterfly Pins",
-	description = "A feminine head ornament that offers little effective protection.",
+	name = hoa_system.Translate("Butterfly Pins"),
+	description = hoa_system.Translate("A feminine head ornament that offers little effective protection."),
 	icon = "img/icons/armor/butterfly_pins.png",
 	physical_defense = 2,
 	metaphysical_defense = 4,
@@ -62,8 +62,8 @@ armor[20501] = {
 }
 
 armor[20502] = {
-	name = "Winged Circlet",
-	description = "A circlet imbued with a small magical presence, which wards off evil from its bearer.",
+	name = hoa_system.Translate("Winged Circlet"),
+	description = hoa_system.Translate("A circlet imbued with a small magical presence, which wards off evil from its bearer."),
 	icon = "img/icons/armor/winged_circlet.png",
 	physical_defense = 5,
 	metaphysical_defense = 10,

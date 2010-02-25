@@ -28,8 +28,8 @@ end
 -- -----------------------------------------------------------------------------
 
 items[1] = {
-	name = "Healing Potion",
-	description = "Restores a small amount of hit points to a target.",
+	name = hoa_system.Translate("Healing Potion"),
+	description = hoa_system.Translate("Restores a small amount of hit points to a target."),
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
 	target_ally = true,
@@ -47,8 +47,8 @@ items[1] = {
 }
 
 items[2] = {
-	name = "Medium Healing Potion",
-	description = "Restores a moderate amount of hit points to a target.",
+	name = hoa_system.Translate("Medium Healing Potion"),
+	description = hoa_system.Translate("Restores a moderate amount of hit points to a target."),
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
 	target_ally = true,
@@ -66,8 +66,8 @@ items[2] = {
 }
 
 items[3] = {
-	name = "Blessed Healing Potion",
-	description = "Restores a large amount of hit points to a target.",
+	name = hoa_system.Translate("Blessed Healing Potion"),
+	description = hoa_system.Translate("Restores a large amount of hit points to a target."),
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
 	target_ally = true,
@@ -85,8 +85,8 @@ items[3] = {
 }
 
 items[4] = {
-	name = "Healing Stone",
-	description = "Restores a small amount of hit points to all party members.",
+	name = hoa_system.Translate("Healing Stone"),
+	description = hoa_system.Translate("Restores a small amount of hit points to all party members."),
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
 	target_ally = true,
@@ -119,8 +119,8 @@ items[4] = {
 -- -----------------------------------------------------------------------------
 
 items[3001] = {
-	name = "Bomb",
-	description = "Damages one enemy.",
+	name = hoa_system.Translate("Bomb"),
+	description = hoa_system.Translate("Damages one enemy."),
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
 	target_ally = false,
@@ -137,8 +137,8 @@ items[3001] = {
 }
 
 items[3002] = {
-	name = "Super Bomb",
-	description = "Major damage to all enemies.",
+	name = hoa_system.Translate("Super Bomb"),
+	description = hoa_system.Translate("Major damage to all enemies."),
 	icon = "img/icons/items/health_potion.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
 	target_ally = false,

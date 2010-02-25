@@ -13,7 +13,7 @@ end
 
 
 status_effects[1] = {
-	name = "Dummy effect",
+	name = hoa_system.Translate("Dummy effect"),
 	
 	Init = function(thisEffect, target)
 	end,
@@ -26,7 +26,7 @@ status_effects[1] = {
 }
 
 status_effects[2] = {
-	name = "Defense Up",
+	name = hoa_system.Translate("Defense Up"),
 
 	Init = function(thisEffect, target)
 		thisEffect:SetForModifier(0.25); -- Increase Physical Defense by 25%
@@ -42,7 +42,7 @@ status_effects[2] = {
 }
 
 status_effects[3] = {
-	name = "Stun",
+	name = hoa_system.Translate("Stun"),
 	-- Stop an actor's timer for a brief period
 	
 	Init = function(thisEffect, target)
@@ -59,7 +59,7 @@ status_effects[3] = {
 }
 
 status_effects[4] = {
-	name = "Dodge Enemies",
+	name = hoa_system.Translate("Dodge Enemies"),
 
 	Init = function(thisEffect, target)
 		thisEffect:SetEvaModifier(9.0); -- Increase evade by 900%

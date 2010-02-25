@@ -13,7 +13,7 @@ if (_G.enemies == nil) then
 end
 
 enemies[1] = {
-	name = "Green Slime",
+	name = hoa_system.Translate("Green Slime"),
 	filename = "green_slime",
 	sprite_width = 64,
 	sprite_height = 64,
@@ -46,7 +46,7 @@ enemies[1] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 31,
 			y_position = 54,
 			fortitude_modifier = 0.0,
@@ -54,7 +54,7 @@ enemies[1] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Body",
+			name = hoa_system.Translate("Body"),
 			x_position = 37,
 			y_position = 34,
 			fortitude_modifier = 0.0,
@@ -74,7 +74,7 @@ enemies[1] = {
 
 
 enemies[2] = {
-	name = "Spider",
+	name = hoa_system.Translate("Spider"),
 	filename = "spider",
 	sprite_width = 64,
 	sprite_height = 64,
@@ -108,7 +108,7 @@ enemies[2] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 17,
 			y_position = 33,
 			fortitude_modifier = 0.0,
@@ -116,7 +116,7 @@ enemies[2] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Abdomen",
+			name = hoa_system.Translate("Abdomen"),
 			x_position = 48,
 			y_position = 57,
 			fortitude_modifier = 0.0,
@@ -136,7 +136,7 @@ enemies[2] = {
 
 
 enemies[3] = {
-	name = "Snake",
+	name = hoa_system.Translate("Snake"),
 	filename = "snake",
 	sprite_width = 128,
 	sprite_height = 64,
@@ -169,7 +169,7 @@ enemies[3] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 24,
 			y_position = 60,
 			fortitude_modifier = 0.0,
@@ -177,7 +177,7 @@ enemies[3] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Body",
+			name = hoa_system.Translate("Body"),
 			x_position = 58,
 			y_position = 25,
 			fortitude_modifier = 0.0,
@@ -185,7 +185,7 @@ enemies[3] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = "Tail",
+			name = hoa_system.Translate("Tail"),
 			x_position = 78,
 			y_position = 38,
 			fortitude_modifier = 0.0,
@@ -205,7 +205,7 @@ enemies[3] = {
 
 
 enemies[4] = {
-	name = "Skeleton",
+	name = hoa_system.Translate("Skeleton"),
 	filename = "skeleton",
 	sprite_width = 64,
 	sprite_height = 128,
@@ -239,7 +239,7 @@ enemies[4] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 9,
 			y_position = 108,
 			fortitude_modifier = 0.0,
@@ -247,7 +247,7 @@ enemies[4] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Chest",
+			name = hoa_system.Translate("Chest"),
 			x_position = 20,
 			y_position = 82,
 			fortitude_modifier = 0.0,
@@ -255,7 +255,7 @@ enemies[4] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = "Legs",
+			name = hoa_system.Translate("Legs"),
 			x_position = 6,
 			y_position = 56,
 			fortitude_modifier = 0.0,
@@ -275,7 +275,7 @@ enemies[4] = {
 
 
 enemies[5] = {
-	name = "Scorpion",
+	name = hoa_system.Translate("Scorpion"),
 	filename = "scorpion",
 	sprite_width = 64,
 	sprite_height = 64,
@@ -310,7 +310,7 @@ enemies[5] = {
 
 	attack_points = {
 		[1] = {
-			name = "Head",
+			name = hoa_system.Translate("Head"),
 			x_position = 26,
 			y_position = 23,
 			fortitude_modifier = 0.0,
@@ -318,7 +318,7 @@ enemies[5] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = "Chest",
+			name = hoa_system.Translate("Chest"),
 			x_position = 39,
 			y_position = 26,
 			fortitude_modifier = 0.0,
@@ -326,7 +326,7 @@ enemies[5] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = "Legs",
+			name = hoa_system.Translate("Legs"),
 			x_position = 48,
 			y_position = 14,
 			fortitude_modifier = 0.0,

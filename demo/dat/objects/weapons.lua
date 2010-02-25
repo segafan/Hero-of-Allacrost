@@ -25,8 +25,8 @@ end
 -- -----------------------------------------------------------------------------
 
 weapons[10001] = {
-	name = "Karlate Sword",
-	description = "Standard Karlate issued equipment. A light weight iron sword suitable for most skirmishes.",
+	name = hoa_system.Translate("Karlate Sword"),
+	description = hoa_system.Translate("Standard Karlate issued equipment. A light weight iron sword suitable for most skirmishes."),
 	icon = "img/icons/weapons/karlate_sword.png",
 	physical_attack = 12,
 	metaphysical_attack = 0,
@@ -36,8 +36,8 @@ weapons[10001] = {
 }
 
 weapons[10002] = {
-	name = "Iron Sword",
-	description = "A sturdy but somewhat dull sword forged from a single block of solid iron.",
+	name = hoa_system.Translate("Iron Sword"),
+	description = hoa_system.Translate("A sturdy but somewhat dull sword forged from a single block of solid iron."),
 	icon = "img/icons/weapons/iron_sword.png",
 	physical_attack = 16,
 	metaphysical_attack = 0,
@@ -51,8 +51,8 @@ weapons[10002] = {
 -- -----------------------------------------------------------------------------
 
 weapons[10501] = {
-	name = "Quick Crossbow",
-	description = "A lightweight but effective crossbow.",
+	name = hoa_system.Translate("Quick Crossbow"),
+	description = hoa_system.Translate("A lightweight but effective crossbow."),
 	icon = "img/icons/weapons/quick_crossbow.png",
 	physical_attack = 9,
 	metaphysical_attack = 0,
@@ -62,8 +62,8 @@ weapons[10501] = {
 }
 
 weapons[10502] = {
-	name = "Standard Crossbow",
-	description = "Standard issued equipment for archers. A crossbow designed for accuracy and ease of use.",
+	name = hoa_system.Translate("Standard Crossbow"),
+	description = hoa_system.Translate("Standard issued equipment for archers. A crossbow designed for accuracy and ease of use."),
 	icon = "img/icons/weapons/standard_crossbow.png",
 	physical_attack = 13,
 	metaphysical_attack = 0,
@@ -73,8 +73,8 @@ weapons[10502] = {
 }
 
 weapons[10503] = {
-	name = "Reinforced Crossbow",
-	description = "An improved version of the standard crossbow that mitigates recoil.",
+	name = hoa_system.Translate("Reinforced Crossbow"),
+	description = hoa_system.Translate("An improved version of the standard crossbow that mitigates recoil."),
 	icon = "img/icons/weapons/reinforced_crossbow.png",
 	physical_attack = 17,
 	metaphysical_attack = 0,
@@ -84,8 +84,8 @@ weapons[10503] = {
 }
 
 weapons[10504] = {
-	name = "Arbalest",
-	description = "Heavy crossbow designed for piercing through thick armor.",
+	name = hoa_system.Translate("Arbalest"),
+	description = hoa_system.Translate("Heavy crossbow designed for piercing through thick armor."),
 	icon = "img/icons/weapons/arbalest.png",
 	physical_attack = 21,
 	metaphysical_attack = 0,

@@ -25,8 +25,8 @@ end
 -- -----------------------------------------------------------------------------
 
 armor[30001] = {
-	name = "Karlate Breastplate",
-	description = "Standard Karlate issued equipment. Effectively protects the torso from most types of attack.",
+	name = hoa_system.Translate("Karlate Breastplate"),
+	description = hoa_system.Translate("Standard Karlate issued equipment. Effectively protects the torso from most types of attack."),
 	icon = "img/icons/armor/karlate_breastplate.png",
 	physical_defense = 8,
 	metaphysical_defense = 2,
@@ -36,8 +36,8 @@ armor[30001] = {
 }
 
 armor[30002] = {
-	name = "Leather Chain Mail",
-	description = "A light chain mail woven into a tough, leather cuirass.",
+	name = hoa_system.Translate("Leather Chain Mail"),
+	description = hoa_system.Translate("A light chain mail woven into a tough, leather cuirass."),
 	icon = "img/icons/armor/leather_chain_mail.png",
 	physical_defense = 14,
 	metaphysical_defense = 3,
@@ -51,8 +51,8 @@ armor[30002] = {
 -- -----------------------------------------------------------------------------
 
 armor[30501] = {
-	name = "Willow Dress",
-	description = "A comfortable dress that does not restrict the user's movement. Woven out of surprisingly tough materials.",
+	name = hoa_system.Translate("Willow Dress"),
+	description = hoa_system.Translate("A comfortable dress that does not restrict the user's movement. Woven out of surprisingly tough materials."),
 	icon = "img/icons/armor/willow_dress.png",
 	physical_defense = 6,
 	metaphysical_defense = 4,
