@@ -113,7 +113,7 @@ enum SelectMode {
 	VIDEO_SELECT_DOUBLE  =  1,
 	VIDEO_SELECT_TOTAL   =  2
 };
-  
+
 enum HORIZONTAL_ARROWS_POSITION {
   H_POSITION_INVALID = -1,
   H_POSITION_BOTTOM = 0,
@@ -121,7 +121,7 @@ enum HORIZONTAL_ARROWS_POSITION {
   H_POSITION_TOP = 2,
   H_POSITION_TOTAL = 3
 };
-  
+
 enum VERTICAL_ARROWS_POSITION {
   V_POSITION_INVALID = -1,
   V_POSITION_LEFT = 0,
@@ -440,9 +440,9 @@ public:
 
   /** \brief Sets the vertical arrows position
    *** \param position The position to set
-   **/  
+   **/
   void SetVerticalArrowsPosition(VERTICAL_ARROWS_POSITION position);
-  
+
 	/** \brief Checks if the option box is in the process of scrolling
 	*** \return True if the option box is scrolling, false if it is not
 	**/
@@ -571,19 +571,19 @@ private:
 
 	//! \brief Set to true if the box is currently in the middle of scrolling
 	bool _scrolling;
-  
+
 	//! \brief The timer used for controlling option scrolling
 	int32 _scroll_time;
 
 	//! \brief Indicates the scrolling direction; 1 for down or -1 for up
 	int32 _scroll_direction;
-  
-  //! \brief The position of the horizontal scroll arrows
-  HORIZONTAL_ARROWS_POSITION _horizontal_arrows_position;
-  
-  //! \brief The position of the vertical scroll arrows
-  VERTICAL_ARROWS_POSITION _vertical_arrows_position;
-  
+
+	//! \brief The position of the horizontal scroll arrows
+	HORIZONTAL_ARROWS_POSITION _horizontal_arrows_position;
+
+	//! \brief The position of the vertical scroll arrows
+	VERTICAL_ARROWS_POSITION _vertical_arrows_position;
+
 	//@}
 
 	// ---------- Private methods
