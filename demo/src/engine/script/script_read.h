@@ -68,10 +68,13 @@ const int32 FLOAT_TYPE      = 0x12344321;
 class ReadScriptDescriptor : public ScriptDescriptor {
 	friend class ScriptEngine;
 public:
+	ReadScriptDescriptor() :
+		_lstack(NULL) {}
+
 	virtual ~ReadScriptDescriptor();
 
 	/** \name File Access Functions
-	*** \note These are derived from ScriptDescriptor, refer to the comments for these 
+	*** \note These are derived from ScriptDescriptor, refer to the comments for these
 	*** methods in the header file for that class.
 	**/
 	//@{
@@ -352,7 +355,7 @@ public:
 
 	//! \brief Prints out a specific table
 	void DEBUG_PrintTable(luabind::object table, int tab = 0);
-	
+
 protected:
 	//! \brief The Lua stack, which handles all data sharing between C++ and Lua.
 	lua_State *_lstack;
@@ -516,7 +519,7 @@ template <class T> void ReadScriptDescriptor::_ReadDataVectorHelper(std::vector<
 		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the top of the stack was not a table" << std::endl;
 		return;
 	}
-	
+
 	// Iterate through all the items of the table and place it in the vector
 	for (luabind::iterator it(o); it != private_script::TABLE_END; it++) {
 		try {

@@ -52,6 +52,9 @@ namespace hoa_script {
 class WriteScriptDescriptor : public ScriptDescriptor {
 	friend class ScriptEngine;
 public:
+	WriteScriptDescriptor() :
+		_inside_comment_block(false) {}
+
 	~WriteScriptDescriptor();
 
 	/** \name File Access Functions
