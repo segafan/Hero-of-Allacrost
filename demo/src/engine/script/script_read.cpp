@@ -52,12 +52,10 @@ bool ReadScriptDescriptor::OpenFile(const string& filename) {
 bool ReadScriptDescriptor::OpenFile(const string& filename, bool force_reload) {
 	// check for file extensions
 	string file_name = filename;
-	if (DoesFileExist(file_name + ".lua"))
-	{
+	if (DoesFileExist(file_name + ".lua")) {
 		file_name = filename + ".lua";
 	}
-	if (DoesFileExist(file_name + ".hoa"))
-	{
+	if (DoesFileExist(file_name + ".hoa")) {
 		if (!(DoesFileExist(file_name + ".lua") && SCRIPT_DEBUG))
 			file_name = filename + ".hoa";
 	}
@@ -69,10 +67,8 @@ bool ReadScriptDescriptor::OpenFile(const string& filename, bool force_reload) {
 		return false;
 	}
 
-
 	// Check if this file was opened previously.
-	if ((force_reload == true) || (_lstack = ScriptManager->_CheckForPreviousLuaState(file_name)) == NULL)
-	{
+	if ((force_reload == true) || (_lstack = ScriptManager->_CheckForPreviousLuaState(file_name)) == NULL) {
 		// Increases the global stack size by 1 element. That is needed because the new thread will be pushed in the
 		// stack and we have to be sure there is enough space there.
 		lua_checkstack(ScriptManager->GetGlobalState(), 1);

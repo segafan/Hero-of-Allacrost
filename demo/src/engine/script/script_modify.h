@@ -46,10 +46,13 @@ namespace hoa_script {
 class ModifyScriptDescriptor : public ReadScriptDescriptor {
 	friend class ScriptEngine;
 public:
+	ModifyScriptDescriptor()
+		{}
+
 	~ModifyScriptDescriptor();
 
 	/** \name File Access Functions
-	*** \note These are derived from ScriptDescriptor, refer to the comments for these 
+	*** \note These are derived from ScriptDescriptor, refer to the comments for these
 	*** methods in the header file for that class.
 	**/
 	//@{
@@ -71,13 +74,13 @@ public:
 
 	void ModifyBool(int32 key, bool value)
 		{ _ModifyData(key, value); }
-	
+
 	void ModifyInt(const std::string& key, int32 value)
 		{ _ModifyData(key, value); }
-	
+
 	void ModifyInt(int32 key, int32 value)
 		{ _ModifyData(key, value); }
-	
+
 	void ModifyUInt(const std::string& key, uint32 value)
 		{ _ModifyData(key, value); }
 
@@ -86,13 +89,13 @@ public:
 
 	void ModifyFloat(const std::string& key, float value)
 		{ _ModifyData(key, value); }
-	
+
 	void ModifyFloat(int32 key, float value)
 		{ _ModifyData(key, value); }
-	
+
 	void ModifyString(const std::string& key, const std::string& value)
 		{ _ModifyData(key, value); }
-	
+
 	void ModifyString(int32 key, const std::string& value)
 		{ _ModifyData(key, value); }
 	//@}
@@ -112,13 +115,13 @@ public:
 
 	void AddNewBool(int32 key, bool value)
 		{ _AddNewData(key, value); }
-	
+
 	void AddNewInt(const std::string& key, int32 value)
 		{ _AddNewData(key, value); }
-	
+
 	void AddNewInt(int32 key, int32 value)
 		{ _AddNewData(key, value); }
-	
+
 	void AddNewUInt(const std::string& key, uint32 value)
 		{ _AddNewData(key, value); }
 
@@ -127,13 +130,13 @@ public:
 
 	void AddNewFloat(const std::string& key, float value)
 		{ _AddNewData(key, value); }
-	
+
 	void AddNewFloat(int32 key, float value)
 		{ _AddNewData(key, value); }
-	
+
 	void AddNewString(const std::string& key, const std::string& value)
 		{ _AddNewData(key, value); }
-	
+
 	void AddNewString(int32 key, const std::string& value)
 		{ _AddNewData(key, value); }
 	//@}
