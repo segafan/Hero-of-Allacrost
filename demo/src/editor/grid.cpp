@@ -183,16 +183,6 @@ vector<int32>& Grid::GetLayer(LAYER_TYPE layer, int context)
 	} // switch on the current layer
 } // GetLayer(...)
 
-void Grid::SetMusic(const QString& music_file)
-{
-	_music_file = music_file;
-} // SetMusic(...)
-
-const QString& Grid::GetMusic() const
-{
-	return _music_file;
-} // GetMusic()
-
 void Grid::CreateNewContext(int inherit_context)
 {
 	// Assumes all 3 layers have the same number of contexts.
@@ -212,6 +202,7 @@ void Grid::LoadMap()
 
 	read_data.OpenTable(string(_file_name.section('/', -1).remove(".lua").toAscii()));
 
+	music_files.clear();
 	tileset_names.clear();
 	tilesets.clear();
 	_lower_layer.clear();
@@ -355,15 +346,11 @@ void Grid::LoadMap()
 
 	// Load music
 	read_data.OpenTable("music_filenames");
-	if (read_data.IsErrorDetected() == false)
-	{
-		int size = read_data.GetTableSize();
-		if (size == 0)
-			_music_file = "None";
-		else
-			_music_file = QString(read_data.ReadString(1).c_str());
-		read_data.CloseTable();
-	}
+	table_size = read_data.GetTableSize();
+	// Remove first 4 characters in the string ("mus/")
+	for (uint32 i = 1; i <= table_size; i++)
+		music_files << QString(read_data.ReadString(i).c_str()).remove(0,4);
+	read_data.CloseTable();
 
 	// Load any existing context data
 	for (int i = 1; i < num_contexts; i++)
@@ -489,8 +476,13 @@ void Grid::SaveMap()
 
 	write_data.WriteComment("The music files used as background music on this map.");
 	write_data.BeginTable("music_filenames");
-	if (_music_file != "None")
-		write_data.WriteString(1, string(_music_file.toAscii()));
+	i = 0;
+	for (QStringList::Iterator qit = music_files.begin(); qit != music_files.end(); ++qit)
+	{
+		i++;
+		// Readd the directory name
+		write_data.WriteString(i, ((*qit).prepend("mus/")).ascii());
+	} // iterate through context_names writing each element
 	write_data.EndTable();
 	write_data.InsertNewLine();
 

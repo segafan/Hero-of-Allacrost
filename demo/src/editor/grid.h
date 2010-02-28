@@ -86,18 +86,6 @@ class Grid: public QGLWidget
 		std::vector<int32>& GetLayer(LAYER_TYPE layer, int context);
 
 		/*!
-		 *  \brief Sets the map's background music. Currently the map can only support one music file.
-		 *  \param music_file The file name of the music file that will be used.
-		 */
-		void SetMusic(const QString& music_file);
-
-		/*!
-		 *  \brief Gets the map's background music file name.
-		 *  \return A QString of the music's file name.
-		 */
-		const QString& GetMusic() const;
-
-		/*!
 		 *  \brief Creates a new context for each layer.
 		 *  \param inherit_context - the index of the context to inherit from.
 		 */
@@ -137,7 +125,9 @@ class Grid: public QGLWidget
 		//! A list containing the names of each context.
 		//! \note Should have a max size of 32. That's the max amount of contexts.
 		QStringList context_names;
-
+		//! A list storing the background music filenames.
+		QStringList music_files;
+	
 		//! pointer to scrollview
 		EditorScrollView * _ed_scrollview;
 
@@ -192,9 +182,6 @@ class Grid: public QGLWidget
 		//! not the game. Acts similarly to an actual layer as far as drawing
 		//! is concerned.
 		std::vector<int32> _select_layer;
-
-		//! Stores the background music file.
-		QString _music_file;
 }; // class Grid
 
 } // namespace hoa_editor

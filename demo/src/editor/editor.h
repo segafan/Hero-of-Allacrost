@@ -98,6 +98,7 @@ class Editor: public QMainWindow
 		//! Needed for tile editing and accessing the map properties.
 		friend class EditorScrollView;
 		friend class MapPropertiesDialog;
+		friend class MusicDialog;
 		friend class ContextPropertiesDialog;
 		friend class LayerCommand;
 		
@@ -327,6 +328,7 @@ class EditorScrollView: public Q3ScrollView
 		//! Needed for changing the editing mode and painting, and accessing the map's properties.
 		friend class Editor;
 		friend class MapPropertiesDialog;
+		friend class MusicDialog;
 		friend class ContextPropertiesDialog;
 		friend class LayerCommand;
 
