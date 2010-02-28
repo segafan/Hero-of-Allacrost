@@ -28,7 +28,7 @@
 
 namespace hoa_shop {
 
-//! \brief Used to indicate what window has control of user input
+//! \brief The five possible price ratings/levels for the shop's buy/sell prices
 enum SHOP_PRICE_LEVEL {
 	SHOP_PRICE_INVALID   = -1,
 	SHOP_PRICE_VERY_GOOD =  0,
