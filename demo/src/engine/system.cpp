@@ -91,8 +91,7 @@ void SystemTimer::Initialize(uint32 duration, int32 number_loops, hoa_mode_manag
 	// CD: Rather than checking state, it would make more sense to check and see if it has an owner
 	// If it does, then we don't add it here b/c the owner will update it.  Otherwise, system will have to update it
 	// Also, the owner should technically be any object, not just a game mode
-	if (_state == SYSTEM_TIMER_INVALID)
-	{
+	if (_state == SYSTEM_TIMER_INVALID) {
 		SystemManager->_system_timers.insert(this);
 	}
 
@@ -107,14 +106,28 @@ void SystemTimer::Initialize(uint32 duration, int32 number_loops, hoa_mode_manag
 
 
 
+float SystemTimer::PercentComplete() {
+	switch (_state) {
+		case SYSTEM_TIMER_INITIAL:
+			return 0.0f;
+		case SYSTEM_TIMER_RUNNING:
+		case SYSTEM_TIMER_PAUSED:
+			return static_cast<float>(_time_expired) / static_cast<float>(_duration);
+		case SYSTEM_TIMER_FINISHED:
+			return 1.0f;
+		default:
+			return 0.0f;
+	}
+}
+
+
+
 void SystemTimer::SetDuration(uint32 duration) {
 	if (IsInitial()) {
 		_duration = duration;
 	}
 	else {
-		if (SYSTEM_DEBUG)
-			cerr << "SYSTEM WARNING: SystemTimer::SetDuration() was invoked when the timer was not in the "
-				<< "initial state. No operation was performed." << endl;
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "function called when the timer was not in the initial state" << endl;
 		return;
 	}
 }
@@ -126,9 +139,7 @@ void SystemTimer::SetNumberLoops(int32 number_loops) {
 		_number_loops = number_loops;
 	}
 	else {
-		if (SYSTEM_DEBUG)
-			cerr << "SYSTEM WARNING: SystemTimer::SetNumberLoops() was invoked when the timer was not in the "
-				<< "initial state. No operation was performed." << endl;
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "function called when the timer was not in the initial state" << endl;
 		return;
 	}
 }
@@ -140,9 +151,7 @@ void SystemTimer::SetModeOwner(hoa_mode_manager::GameMode* mode_owner) {
 		_mode_owner = mode_owner;
 	}
 	else {
-		if (SYSTEM_DEBUG)
-			cerr << "SYSTEM WARNING: SystemTimer::SetModeOwner() was invoked when the timer was not in the "
-				<< "initial state. No operation was performed." << endl;
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "function called when the timer was not in the initial state" << endl;
 		return;
 	}
 }
@@ -179,8 +188,7 @@ void SystemTimer::_UpdateTimer() {
 // -----------------------------------------------------------------------------
 
 SystemEngine::SystemEngine() {
-	if (SYSTEM_DEBUG)
-		cout << "SETTINGS: SystemEngine constructor invoked" << endl;
+	IF_PRINT_DEBUG(SYSTEM_DEBUG) << "constructor invoked" << endl;
 
 	_not_done = true;
 	SetLanguage("en"); //Default language is English
@@ -189,8 +197,7 @@ SystemEngine::SystemEngine() {
 
 
 SystemEngine::~SystemEngine() {
-	if (SYSTEM_DEBUG)
-		cout << "SETTINGS: SystemEngine destructor invoked" << endl;
+	IF_PRINT_DEBUG(SYSTEM_DEBUG) << "destructor invoked" << endl;
 }
 
 

@@ -110,7 +110,7 @@ hoa_utils::ustring UTranslate(const std::string& text);
 *** designed specifically for use by the various game mode classes, but it is
 *** certainly capable of being utilized just as effectively by the engine or
 *** or other parts of the code. The operation of this class is also integrated
-*** with the SystemEngine class, which routinely updates and manageds its timers.
+*** with the SystemEngine class, which routinely updates and manages its timers.
 *** The features of this timing mechanism include:
 ***
 *** - automatically updates its timing every frame
@@ -181,6 +181,16 @@ public:
 	bool IsFinished() const
 		{ return (_state == SYSTEM_TIMER_FINISHED); }
 	//@}
+
+	/** \brief Returns a float representing the percent completion for the timer
+	*** \return A float with a value between 0.0f and 1.0f
+	*** \note This function is only concered with the percent completion for the current loop.
+	*** The number of loops is not taken into account at all.
+	***
+	*** This method will return 1.0f if the state is SYSTEM_TIMER_FINISHED or 0.0f if the state
+	*** is anything other than SYSTEM_TIMER_RUNNING or SYSTEM_TIMER_PAUSED. The number of loops
+	**/
+	float PercentComplete();
 
 	/** \name Member Set Access Functions
 	*** \note <b>Only</b> call these methods when the timer is in its initial state. Trying to set
