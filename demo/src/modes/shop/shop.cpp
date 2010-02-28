@@ -1115,7 +1115,7 @@ ShopMode::~ShopMode() {
 
 
 void ShopMode::Reset() {
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
 	_current_instance = this;
