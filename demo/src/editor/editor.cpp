@@ -187,13 +187,13 @@ void Editor::_MapMenuSetup()
 		_select_music_action->setEnabled(true);
 		_map_properties_action->setEnabled(true);
 		_context_properties_action->setEnabled(true);
-	} // map must exist in order to set music
+	} // map must exist in order to set properties
 	else
 	{
 		_select_music_action->setEnabled(false);
 		_map_properties_action->setEnabled(false);
 		_context_properties_action->setEnabled(false);
-	} // map does not exist, can't modify it*/
+	} // map does not exist, can't modify it
 } // _MapMenuSetup()
 
 void Editor::_ScriptMenuSetup()
@@ -746,12 +746,18 @@ void Editor::_MapSelectMusic()
 	if (_ed_scrollview == NULL)
 		return;
 
-	MusicDialog* music = new
-		MusicDialog(this, "music_dialog", _ed_scrollview->_map->GetMusic());
+	MusicDialog* music = new MusicDialog(this, "music_dialog");
 
 	if (music->exec() == QDialog::Accepted)
 	{
-		_ed_scrollview->_map->SetMusic(music->GetSelectedFile());
+		// Turn the items in the listwidget into a stringlist that the map
+		// will understand
+		QStringList  music_names;
+		QListWidget* music_list = music->GetMusicList();
+		for (unsigned int i = 0; i < music_list->count(); i++)
+			music_names << music_list->item(i)->text();
+		
+		_ed_scrollview->_map->music_files = music_names;
 		_ed_scrollview->_map->SetChanged(true);
 	} // only process results if user selected okay
 

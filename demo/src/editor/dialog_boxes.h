@@ -20,6 +20,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QListWidget>
 #include <QTreeWidget>
 
 #include "editor.h"
@@ -82,33 +83,58 @@ class MapPropertiesDialog: public QDialog
 
 class MusicDialog: public QDialog
 {
-public:
-	MusicDialog(QWidget* parent, const QString& name, const QString& selected_music);
-	~MusicDialog();
+	//! Macro needed to use Qt's slots and signals.
+	Q_OBJECT
+	
+	public:
+		//! \name MusicDialog constructor
+		//! \brief A constructor for the MusicDialog class. This class is used when selecing
+		//!        music for the map. It populates two lists, one with the music already used
+		//!        by the map, and another with the remaining music left to choose from.
+		//! \param parent The widget from which this dialog was invoked.
+		//! \param name The name of this widget.
+		MusicDialog(QWidget* parent, const QString& name);
+		~MusicDialog();
 
-	QString GetSelectedFile();
-private:
-	//! A pushbutton for canceling the new map dialog.
-	QPushButton* _cancel_pbut;
-	//! A pushbutton for okaying the new map dialog.
-	QPushButton* _ok_pbut;
-	//! Label telling you to select some music.
-	QLabel* _select_label;
-	//! A layout to manage all the labels, spinboxes, and listviews.
-	QGridLayout* _dia_layout;
-	//! A tree with all the music files.
-	QTreeWidget* _music_list;
-
-	//! Puts music files in the QTreeWidget and selects the specified file.
-	//! \param selected_str - this file will be selected
-	void _PopulateMusicList(const QString& selected_str);
+		//! Public accessor to get the list containing used music.
+		QListWidget* GetMusicList() const { return _used_music_list; }
+	
+		//! Needed for accessing map properties.
+		friend class Editor;
+		friend class EditorScrollView;
+	
+	private slots:
+		//! This slot is used to add music the used music list and remove it from the
+		//! available music list.
+		void _AddMusic();
+		//! This slot is used to remove music from the used music list and add it to the
+		//! available must list.
+		void _RemoveMusic();
+	
+	private:
+		//! A pushbutton for adding music to the map.
+		QPushButton* _add_pbut;
+		//! A pushbutton for removing music from the map.
+		QPushButton* _remove_pbut;
+		//! A pushbutton for finishing map music selection.
+		QPushButton* _ok_pbut;
+		//! Label for listview showing available music to select from.
+		QLabel* _available_label;
+		//! Label for listview showing music already in use by the map..
+		QLabel* _used_label;
+		//! A layout to manage all the labels, buttons, and listviews.
+		QGridLayout* _dia_layout;
+		//! A listview with all the remaining music files.
+		QListWidget* _available_music_list;
+		//! A listview with all the already used music files.
+		QListWidget* _used_music_list;
 }; // class MusicDialog
 
 class ContextPropertiesDialog: public QDialog
 {
 	//! Macro needed to use Qt's slots and signals.
 	Q_OBJECT
-	
+
 	public:
 		//! \name ContextPropertiesDialog constructor
 		//! \brief A constructor for the ContextPropertiesDialog class. This class is used when creating
