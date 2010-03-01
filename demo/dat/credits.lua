@@ -135,7 +135,6 @@ credits_text =
 
 -- Extra credit level
 	"Extra Thanks\n\n" ..
-	"Adam Lindquist (Zorbfish)\n" ..
 	"(Melchior)\n" ..
 	"(Egan1)\n" ..
 	"\n\n" ..
