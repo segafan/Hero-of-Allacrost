@@ -21,171 +21,29 @@
 #ifndef __BATTLE_HEADER__
 #define __BATTLE_HEADER__
 
-#include <string>
-#include <vector>
-#include <deque>
-#include <map>
-
-#include "utils.h"
 #include "defs.h"
+#include "utils.h"
 
-#include "video.h"
+
 #include "audio.h"
+#include "mode_manager.h"
 #include "system.h"
+#include "video.h"
 
 #include "global.h"
-#include "global_actors.h"
 
-#include "map_dialogue.h"
-
-#include "mode_manager.h"
-#include "battle_actions.h"
-#include "battle_actors.h"
-#include "battle_events.h"
-#include "battle_windows.h"
+#include "battle_utils.h"
+// TEMP: battle code uses MapDialogue class. This should eventually be replaced with a common code dialogue display class
+// #include "map_dialogue.h"
 
 namespace hoa_battle {
 
 extern bool BATTLE_DEBUG;
-extern float timer_multiplier;
-extern bool wait;
 
 //! \brief An internal namespace to be used only within the battle code. Don't use this namespace anywhere else!
 namespace private_battle {
 
-//! \brief A pointer to the BattleMode object that is managing the current battle that is taking place
-extern BattleMode* current_battle;
-
-//! \name Screen dimension constants
-//@{
-//! \brief Battle scenes are visualized via an invisible grid of 64x64 tiles
-const uint32 TILE_SIZE     = 64;
-//! \brief The length of the screen in number of tiles (16 x 64 = 1024)
-const uint32 SCREEN_LENGTH = 16;
-//! \brief The height of the screen in number of tiles (12 x 64 = 768)
-const uint32 SCREEN_HEIGHT = 12; 
-//@}
-
-/** \brief Possible monster locations in monster creation order. 
-*** \note This is a temporary hack until an enemy placement
-*** algorithm is properly working.
-**/
-const float MONSTER_LOCATIONS[][2] = {
-	{ 515.0f, 768.0f - 360.0f }, // 768.0f - because of reverse Y-coordinate system 
-	{ 494.0f, 768.0f - 450.0f },
-	{ 510.0f, 768.0f - 550.0f },
-	{ 580.0f, 768.0f - 630.0f },
-	{ 675.0f, 768.0f - 390.0f },
-	{ 655.0f, 768.0f - 494.0f },
-	{ 793.0f, 768.0f - 505.0f },
-	{ 730.0f, 768.0f - 600.0f }
-};
-
-const float PLAYER_LOCATIONS[][2] = {
-	{ 250.0f, 320.0f },
-	{ 175.0f, 270.0f },
-	{ 100.0f, 350.0f },
-	{  25.0f, 300.0f },
-};
-
-
-/** \name Action Type Constants
-*** \brief Identifications for the types of actions a player's characters may perform
-**/
-//@{
-const uint32 ACTION_TYPE_ATTACK    = 0;
-const uint32 ACTION_TYPE_DEFEND    = 1;
-const uint32 ACTION_TYPE_SUPPORT   = 2;
-const uint32 ACTION_TYPE_ITEM      = 3;
-//@}
-
-//! Returned as an index when looking for a character or enemy and they do not exist
-const uint32 INVALID_BATTLE_ACTOR_INDEX = 999;
-
-//! When a battle first starts, this is the wait time for the slowest actor
-const uint32 MAX_INIT_WAIT_TIME = 8000;
-
-//! Warm up time for using items (try to keep short, should be constant regardless
-// of item used
-const uint32 ITEM_WARM_UP_TIME = 1000;
-
-//! True if we are using active battle mode (i.e. timers do not pause when player is making choices
-// FIXME: should be handled via the options menu
-// FIXME: never used
-//const bool ACTIVE_BATTLE_MODE = false;
-
-/** \brief Finds the average experience level of all members in the party
-*** \return A floating point value representing the average level|
-***
-*** This calculation includes both characters in the active party and those in
-*** the reservers.
-**/
-float ComputeAveragePartyLevel();
-
-class BattleException : public hoa_utils::Exception {
-public: 
-	//! \brief The constructor
-	BattleException(const std::string & message, const std::string & file="", const int line=-1, const std::string & function="") throw();
-
-    //! \brief The destructor
-	~BattleException() throw();
-};
-
 } // namespace private_battle
-
-
-/** ****************************************************************************
-*** \brief Represents the floating text above a BattleActor when he takes damage
-***
-*** Theoretically this could be used to display other timed text above the actor's
-*** head, like "Poisoned" when he becomes so.
-*** ***************************************************************************/
-class DamageText
-{
-public:
-	/*!
-	 * \brief Should be the only constructor used
-	 * \param text The text to be drawn
-	 * \param duration How long the text should be displayed
-	 * \param x Initial x coordinate of the text
-	 * \param y Initial y coordinate of the text
-	 */
-	DamageText(hoa_utils::ustring text, uint32 duration, float x, float y) :
-		_text(text),
-		_timer(duration),
-		_x_pos(x),
-		_y_pos(y)
-	{
-		_timer.Run();
-	}
-
-	//! \brief Destructor does nothing
-	~DamageText()
-	{ }
-
-	//! \brief Renders the text ot the screen
-	void Draw();
-
-	/*!
-	 * \brief Gets the text's timer
-	 * \return Pointer to the object's timer
-	 */
-	const hoa_system::SystemTimer* GetTimer() const
-	{ return &_timer; }
-
-private:
-	//! \brief Default constructor should not be used
-	DamageText() { }
-
-	//! The text that will be rendered
-	hoa_utils::ustring _text;
-	//! To keep track of how long to show the text
-	hoa_system::SystemTimer _timer;
-	//! Starting x position for drawing
-	float _x_pos;
-	//! Starting y position for drawing
-	float _y_pos;
-};
 
 /** ****************************************************************************
 *** \brief Manages all objects, events, and scenes that occur in a battle
@@ -209,7 +67,6 @@ class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::BattleCharacter;
 	friend class private_battle::BattleEnemy;
 	friend class private_battle::BattleAction;
-	friend class private_battle::ActionWindow;
 	friend class private_battle::FinishWindow;
 
 public:
@@ -217,11 +74,15 @@ public:
 
 	~BattleMode();
 
+	//! \brief Returns a pointer to the currently active instance of battle mode
+	static BattleMode* CurrentInstance()
+		{ return _current_instance; }
+
 	//! \name Inherited methods for the GameMode class
 	//@{
 	//! \brief Resets appropriate class members. Called whenever BattleMode is made the active game mode.
 	void Reset();
-	
+
 	//! \brief This method calls different update functions depending on the battle state.
 	void Update();
 
@@ -248,163 +109,144 @@ public:
 	void AddEnemy(uint32 new_enemy_id)
 		{ AddEnemy(new hoa_global::GlobalEnemy(new_enemy_id)); }
 
+	/** \brief Sets the background image for the battle
+	*** \param filename The filename of the new background image to load
+	**/
+	void SetBackground(const std::string& filename);
+
 	/** \brief Adds a piece of music to the battle soundtrack
-	*** \param music_filename The full filename of the music to play
+	*** \param filename The full filename of the music to play
 	*** Note that the first piece of music added is the one that will be played upon entering battle. All subsequent pieces
 	*** of music added must be explicitly triggered to play by certain scripted conditions in battle. If no music is added
 	*** for a battle, a default battle theme will be played.
 	**/
-	void AddMusic(const std::string& music_filename);
+	void AddMusic(const std::string& filename);
 
-	//! \brief Plays the specified piece of music
-	void PlayMusic(const std::string &music_filename);
-
-	//! \brief Determines background image for battle
-	void AddBackground(const std::string& new_battle_background);
-
-	//! \brief Sets whether an action is being performed or not, and what that action is
-	//void SetPerformingAction(bool is_performing, private_battle::BattleAction* se);
-
-	//! \brief Added a scripted event to the queue
-	void AddBattleActionToQueue(private_battle::BattleAction* event)
-		{ _action_queue.push_back(event); }
-
-	//! \brief Remove all scripted events for an actor
-	void RemoveActionsForActor(hoa_battle::private_battle::BattleActor* actor);
-
-	//! \brief Handles any changes to the mode's state in response to an actor's death
-	// NOTE: Could expand into a generic notify function that can handle multiple types of
-	// messages
-	void NotifyOfActorDeath(hoa_battle::private_battle::BattleActor* actor);
-
-	//! \brief Returns all player actors
-	std::deque<private_battle::BattleCharacter*> GetCharacters() const
-		{ return _character_actors; }
-
-	//! \brief Freezes all timers in battle mode. Used when game is paused or using wait battle mode.
+	//! \brief Pauses all timers used in any battle mode classes
 	void FreezeTimers();
 
-	//! \brief Unfreezes all timers in battle mode.  Used when game is unpaused or using wait battle mode.
+	//! \brief Unpauses all timers used in any battle mode classes
 	void UnFreezeTimers();
 
-	//! \brief Is the battle over?
-	bool IsBattleOver() const
-		{ return _battle_over; }
+	/** \brief Changes the state of the battle and performs any initializations and updates needed
+	*** \param new_state The new state to change the battle to
+	**/
+	void ChangeState(private_battle::BATTLE_STATE new_state);
 
-	//! \brief Was the battle victorious?
-	bool IsVictorious() const
-		{ return _victorious_battle; }
+	//! \brief Returns true if the battle has finished and entered either the victory or defeat state
+	bool IsBattleFinished() const
+		 { return ((_state == private_battle::BATTLE_STATE_VICTORY) || (_state == private_battle::BATTLE_STATE_DEFEAT)); }
 
+	//! \brief Exits the battle performing any final changes as needed
+	void Exit();
+
+	/** \brief Plays the specified piece of music that has already been added to the battle soundtrack
+	*** \param filename The filename of the music to play
+	***
+	*** If the requested music was not found no change to music playback will take place.
+	**/
+	void PlayMusic(const std::string& filename);
+
+	//! \brief Returns the number of character actors in the battle, both living and dead
 	uint32 GetNumberOfCharacters() const
 		{ return _character_actors.size(); }
 
+	//! \brief Returns the number of enemy actors in the battle, both living and dead
 	uint32 GetNumberOfEnemies() const
 		{ return _enemy_actors.size(); }
 
-	uint32 GetIndexOfFirstAliveEnemy() const;
+	/** \name Battle notification methods
+	*** These methods are called by other battle classes to indicate events such as when an actor
+	*** changes its state. Often BattleMode will respond by updating the state of one or more of its
+	*** members and calling other battle classes to notify them of the event.
+	**/
+	//@{
+	/** \brief Performs any necessary changes in response to a character entering the command state
+	*** \param character A pointer to the character who is now in the ACTOR_STATE_COMMAND state
+	**/
+	void NotifyCharacterCommand(private_battle::BattleCharacter* character);
 
-	uint32 GetIndexOfLastAliveEnemy() const;
+	/** \brief Called to notify BattleMode when an actor is ready to execute an action
+	*** \param actor A pointer to the actor who has entered the state ACTOR_STATE_READY
+	**/
+	void NotifyActorReady(private_battle::BattleActor* actor);
+
+	/** \brief Performs any necessary changes in response to an actor's death
+	*** \param actor A pointer to the actor who is now deceased
+	**/
+	void NotifyActorDeath(private_battle::BattleActor* actor);
+	//@}
+
+	//! \name Class member accessor methods
+	//@{
+	std::deque<private_battle::BattleCharacter*>& GetCharacterActors()
+		{ return _character_actors; }
+
+	std::deque<private_battle::BattleEnemy*>& GetEnemyActors()
+		{ return _enemy_actors; }
+	//@}
+
+	//! \brief Returns an index to the _character_actors container of the first available living character
+// 	uint32 GetIndexOfFirstAliveEnemy() const;
+
+	//! \brief Returns an index to the _enemy_actors container of the first available living enemy
+// 	uint32 GetIndexOfLastAliveEnemy() const;
+
+	/** \brief Returns an index to the _character_actors container of the next available living character
+	*** \param move_upward If true, the next character should be further back in the container
+	**/
+// 	uint32 GetIndexOfNextAliveCharacter(bool move_upward) const;
+
+	/** \brief Returns an index to the _enemy_actors container of the next available living enemy
+	*** \param move_upward If true, the next enemy should be further back in the container
+	**/
+// 	uint32 GetIndexOfNextAliveEnemy(bool move_upward) const;
+
+	//! \brief Added a scripted event to the queue
+// 	void AddBattleActionToQueue(private_battle::BattleAction* event)
+// 		{ _action_queue.push_back(event); }
+
+	//! \brief Remove all scripted events for an actor
+// 	void RemoveActionsForActor(private_battle::BattleActor* actor);
 
 	/*!
 	 * \brief Grabs the enxt idle character based on how long they have been waiting
 	 * \param ignore We should ignore this character
 	 */
-	uint32 GetIndexOfNextIdleCharacter(hoa_battle::private_battle::BattleCharacter *ignore = NULL) const;
+// 	uint32 GetIndexOfNextIdleCharacter(private_battle::BattleCharacter *ignore = NULL) const;
 
-	//! \brief Useful for item and skill targeting for enemies
-	uint32 GetIndexOfNextAliveCharacter(bool move_upward) const;
-
-	//! \brief Useful for item and skill targeting for characters
-	uint32 GetIndexOfNextAliveEnemy(bool move_upward) const;
-
-	//! \brief Returns the player actor at the deque location 'index'
-	private_battle::BattleCharacter * GetPlayerCharacterAt(uint32 index) const
-		{ return _character_actors.at(index); }
-
-	//! \brief Returns the enemy actor at the deque location 'index'
-	private_battle::BattleEnemy * GetEnemyActorAt(uint32 index) const
-		{ return _enemy_actors.at(index); }
-
-	//! \brief Returns the index of a certain character
-	uint32 GetIndexOfCharacter(private_battle::BattleCharacter* const actor) const;
-
-	//! \brief Swap a character from _player_actors to _player_actors_in_battle
-	// This may become more complicated if it is done in a wierd graphical manner
-	void SwapCharacters(private_battle::BattleCharacter * ActorToRemove, private_battle::BattleCharacter * ActorToAdd);
+	//! \brief Swaps a current character in the party with one in the reserves
+	// TODO: This feature is not yet ready for implementation
+// 	void SwapCharacters(private_battle::BattleCharacter* remove_character, private_battle::BattleCharacter* add_character);
 
 	//! \brief Adds a player to the end of the queue when he is ready to take a turn
-	void AddToTurnQueue(private_battle::BattleCharacter *character);
+// 	void AddToCommandQueue(private_battle::BattleCharacter* character);
 
 	//! \brief Removes the given character from the turn queue
-	void RemoveFromTurnQueue(private_battle::BattleCharacter *character);
+// 	void RemoveFromTurnQueue(private_battle::BattleCharacter* character);
 
-	/*!
-	 * \brief Adds a new DamageText object used for displaying damage suffered in battle
-	 * \param text Text to display
-	 * \param duration How long it should be displayed
-	 * \param x Initial x coordinate of the text
-	 * \param y Initial y coordinate of the text
-	 */
-	void AddDamageText(const hoa_utils::ustring& text, uint32 duration, float x, float y);
 
-	void AddEvent(BattleEvent* thisEvent)
-		{ _events.push_back(thisEvent); }
+	/** \brief Adds a new event to the battle
+	*** \param event A pointer to the event to add
+	**/
+// 	void AddEvent(BattleEvent* event)
+// 		{ _events.push_back(event); }
 
-	void AddDialogue(std::string speaker_name, std::string text);
+	/** \brief Adds a line of dialogue to display during the battle
+	*** \param speaker_name The name of the speaker of the line of dialogue
+	*** \param text The dialogue text
+	**/
+// 	void AddDialogue(std::string speaker_name, std::string text);
 
-	void ShowDialogue();
+	//! \brief Shows the next line of dialogue
+// 	void ShowDialogue();
 
 private:
-	//! \brief When set to true, all preparations have been made and the battle is ready to begin
-	bool _initialized;
+	//! \brief A static pointer to the currently active instance of battle mode
+	static BattleMode* _current_instance;
 
-	//! \brief Set to true when either the character or enemy party has been defeated
-	bool _battle_over;
-
-	//! \brief Set to true if it was player who won the battle.
-	bool _victorious_battle;
-
-	//! \brief Set to true if a battle animation is taking place.
-	bool _animation_in_process;
-
-	/** \brief Container for all music to be played during the battle
-	*** The first element in this vector is the primary battle track. For most battles, only a primary track
-	*** is required. However, some battles may require additional tracks to toggle between.
-	**/
-	std::map<std::string, hoa_audio::MusicDescriptor> _battle_music;
-
-	//! \name Battle Background Data
-	//@{
-	//! \brief The full-screen, static background image to be used for the battle
-	hoa_video::StillImage _battle_background;
-
-	//! \brief Container for images (both still and animated) that are to be drawn in the background
-	std::vector<hoa_video::ImageDescriptor*> _background_images;
-	//@}
-
-	//! \name Battle Actor Containers
-	//@{
-	/** \brief Characters that are presently fighting in the battle
-	*** No more than four characters may be fighting at any given time, thus this structure will never
-	*** contain more than four CharacterActor objects. This structure does <b>not</b> include any characters
-	*** that are in the party, but not actively fighting in the battle. This structure includes characters
-	*** that have zero hit points.
-	**/
-	std::deque<private_battle::BattleCharacter*> _character_actors;
-
-	/** \brief Enemies that are presently fighting in the battle
-	*** There is a theoretical limit on how many enemies may fight in one battle, but that is dependent upon
-	*** the sprite size of all active enemies and this limit will be detected by the BattleMode class.
-	*** This structure includes enemies that have zero hit points.
-	**/
-	std::deque<private_battle::BattleEnemy*> _enemy_actors;
-
-	/** \brief Characters that are in the party reserves
-	*** This structure contains characters which are in the current party, but are not fighting in the battle.
-	*** They may be swapped into the battle by the player.
-	**/
-	std::deque<private_battle::BattleCharacter*> _reserve_characters;
-	//@}
+	//! \brief Retains the current state of the battle
+	private_battle::BATTLE_STATE _state;
 
 	//! \name Selection Data
 	//@{
@@ -432,23 +274,101 @@ private:
 	uint32 _selected_attack_point;
 	//@}
 
-	//! \name Battle GUI Windows
+	//! \name Battle Actor Containers
 	//@{
-	/** \brief Window which displays various information and options related to selecting actions for characters
-	*** Located at the bottom right hand corner of the screen, this window is only visible when the player is
-	*** actively selecting an action for a character.
+	/** \brief Characters that are presently fighting in the battle
+	*** No more than four characters may be fighting at any given time, thus this structure will never
+	*** contain more than four BattleCharacter objects. This structure does not include any characters
+	*** that are in the party, but not actively fighting in the battle. This structure includes
+	*** characters that have zero hit points.
 	**/
-	private_battle::ActionWindow _action_window;
+	std::deque<private_battle::BattleCharacter*> _character_actors;
+
+	/** \brief Enemies that are presently fighting in the battle
+	*** There is a theoretical limit on how many enemies may fight in one battle, but that is dependent upon
+	*** the sprite size of all active enemies and this limit will be detected by the BattleMode class.
+	*** This structure includes enemies that have zero hit points.
+	**/
+	std::deque<private_battle::BattleEnemy*> _enemy_actors;
+
+// 	std::set<private_battle::BattleActor*> _character_party;
+//
+// 	std::set<private_battle::BattleActor*> _enemy_party;
+
+	/** \brief A FIFO queue for characters who are awaiting their turn to have a command selected by the player
+	*** When a character completes the wait time for their idle state, they enter the command state and are
+	*** automatically placed in this queue. This structure is necessary as while the player is selecting
+	*** commands for one character, a different character's idle time may expire. If the battle is played in
+	*** "wait" mode where the battle becomes effectively paused when the player is selecting a command, this
+	*** structure is unnecessary, but it is still used regardless of whether the play mode is "wait" or "active".
+	*** Note that only characters enter this queue and not enemies, as enemies have their commands automatically
+	*** and immediately selected by the game's AI.
+	**/
+	std::list<private_battle::BattleCharacter*> _command_queue;
+
+	/** \brief A FIFO queue of all actors that are ready to perform an action
+	*** When an actor has completed the wait time for their warm-up state, they enter the ready state and are
+	*** placed in this queue. The actor at the front of the queue is in the acting state, meaning that they are
+	*** executing their action. All other actors in the queue are waiting for the acting actor to finish and
+	*** be removed from the queue before they can take their turn.
+	**/
+	std::list<private_battle::BattleActor*> _ready_queue;
+	//@}
+
+	//! \name Battle supervisor classes
+	//@{
+	//! \brief Manages state and visuals when the player is selecting a command for a character
+	private_battle::CommandSupervisor* _command_supervisor;
 
 	/** \brief Window which presents information and options after a battle is concluded
 	*** Located at the center of the screen, this window only appears after one party in the battle has defeated
 	*** the other.
 	**/
-	private_battle::FinishWindow _finish_window;
+	private_battle::FinishWindow* _finish_window;
 	//@}
 
-	//! \name Battle GUI Images
+	//! \name Character Swap Data
 	//@{
+	/** \brief The number of character swaps that the player may currently perform
+	*** The maximum number of swaps ever allowed is four, thus the value of this class member will always have the range [0, 4].
+	*** This member is also used to determine how many swap cards to draw on the battle screen.
+	**/
+	uint8 _current_number_swaps;
+	//@}
+
+	//! \brief The default battle music to play during battles
+	std::string _default_music;
+
+	//! \brief The currently playing music
+	std::string _current_music;
+
+	//! \brief the winning music
+	std::string _winning_music;
+
+	//! \brief the losing music
+	std::string _losing_music;
+
+	//! \brief Contains BattleEvents applicable to current battle
+	std::vector<BattleEvent*> _events;
+
+// 	hoa_map::private_map::DialogueWindow _dialogue_window;
+//
+// 	bool _dialogue_on;
+//
+// 	hoa_utils::ustring _speaker_name;
+//
+// 	std::deque<hoa_utils::ustring> _dialogue_text;
+
+// 	bool _after_scripts_finished;
+
+	//! \name Battle Media Data
+	//@{
+	//! \brief The full-screen, static background image to be used for the battle
+	hoa_video::StillImage _battle_background;
+
+	//! \brief Container for images (both still and animated) that are to be drawn in the background
+	std::vector<hoa_video::ImageDescriptor*> _background_images;
+
 	//! \brief The static image that is drawn for the bottom menus
 	hoa_video::StillImage _bottom_menu_image;
 
@@ -468,7 +388,7 @@ private:
 	hoa_video::StillImage _character_selection;
 
 	//! \brief An image which contains the covers for the HP and SP bars
-	hoa_video::StillImage _character_bars;
+	hoa_video::StillImage _character_bar_covers;
 
 	/** \brief The universal stamina bar that is used to represent the state of battle actors
 	*** All battle actors have a portrait that moves along this meter to signify their
@@ -487,109 +407,35 @@ private:
 	hoa_video::StillImage _swap_icon;
 
 	/** \brief Used for visual display of how many swaps a character may perform
-	*** This image is drawn in the lower left corner of the screen, just above the swap indicator. This image 
+	*** This image is drawn in the lower left corner of the screen, just above the swap indicator. This image
 	*** may be drawn on the screen up to four times (in a card-stack fashion), one for each swap that is
 	*** available to be used. It is not drawn when the player has no swaps available.
 	**/
 	hoa_video::StillImage _swap_card;
-	//@}
 
-	//! \name Character Swap Card Data
-	//@{
-	/** \brief The number of character swaps that the player may currently perform
-	*** The maximum number of swaps ever allowed is four, thus the value of this class member will always have the range [0, 4].
-	*** This member is also used to determine how many swap cards to draw on the battle screen.
+	/** \brief Container for all music to be played during the battle
+	*** The first element in this vector is the primary battle track. For most battles, only a primary track
+	*** is required. However, some battles may require additional tracks to toggle between.
 	**/
-
-	uint8 _current_number_swaps;
-
-	/** \brief A running counter to determine when a player may be given another swap card
-	*** The units of this timer are milliseconds. The timer is initially set to around 5 minutes.
-	*** Once the timer reaches below zero, it is reset and BattleMode::_num_swap_cards is incremented by one.
-	**/
-	int32 _swap_countdown_timer;
+	std::map<std::string, hoa_audio::MusicDescriptor> _battle_music;
 	//@}
-
-	//! \brief Used for scaling actor wait times
-	uint32 _min_agility;
-
-	//! \name Action Processing
-	//@{
-	//! \brief The actor action currently being performed. Set to NULL if no action is being performed.
-	//private_battle::BattleAction* _active_action;
-
-	//! \brief A FIFO queue of actor actions to perform
-	std::list<private_battle::BattleAction*> _action_queue;
-
-	//! \brief Contains actions which are processed over a period of time
-	std::list<private_battle::BattleAction*> _action_residual;
-
-	//! \brief Contains all the characters who are awaiting their turn
-	std::list<private_battle::BattleCharacter*> _characters_awaiting_turn;
-	//@}
-
-	//! \brief An Index to the (x,y) location of the next created monster (MONSTER_LOCATIONS array)
-	int32 _next_monster_location_index;
-
-	//! \brief The default battle music to play during battles
-	std::string _default_music;
-
-	//! \brief The currently playing music
-	std::string _current_music;
-
-	//! \brief the winning music
-	std::string _winning_music;
-
-	//! \brief the losing music
-	std::string _losing_music;
-
-	//! \brief List of all DamageText objects currently active
-	std::list<DamageText*> _damage_text_list;
-
-	//! \brief Contains BattleEvents applicable to current battle
-	std::vector<BattleEvent*> _events;
-
-	hoa_map::private_map::DialogueWindow _dialogue_window;
-
-	bool _dialogue_on;
-
-	hoa_utils::ustring _speaker_name;
-
-	std::deque<hoa_utils::ustring> _dialogue_text;
-
-	bool _after_scripts_finished;
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
-
-	/** \brief Loads images and other hard-coded data for the battle
-	*** \note This function is temporary until there is necessary support for battle mode from the map code
-	*** and from Lua scripting
-	**/
-	void _TEMP_LoadTestData();
 
 	//! \brief Initializes all data necessary for the battle to begin
 	void _Initialize();
 
-	//! \brief Shutdown the battle mode
-	void _ShutDown();
-
-	//! \brief Revives all dead characters to 1 HP...used in _Shutdown()
-	void _ReviveCharacters();
+	/** \brief Sets the origin location of all character and enemy actors
+	*** The location of the actors in both parties is dependent upon the number and physical size of the actor
+	*** (the size of its sprite image). This function implements the algorithm that determines those locations.
+	**/
+	void _DetermineActorLocations();
 
 	//! \brief Handles updating all our queued scripts and marks them for removal if they run
-	void _UpdateScripts();
+// 	void _UpdateScripts();
 
 	//! \brief Any scripts marked for removal are removed from the queue
-	void _CleanupActionQueue();
-
-	/*!
-	 * \brief Removes the specified DamageText object
-	 */
-	void _RemoveExpiredDamageText();
-
-	//! \brief Returns true if an actor is performing an action
-	/*bool _IsExecutingAction() const
-		{ return (_active_action != NULL); }*/
+// 	void _CleanupActionQueue();
 
 	//! \brief Returns the number of enemies that are still alive in the battle
 	uint32 _NumberEnemiesAlive() const;
@@ -600,23 +446,23 @@ private:
 	uint32 _NumberCharactersAlive() const;
 
 	//! \brief Picks the next character who should take his turn
-	void _ActivateNextCharacter();
+// 	void _ActivateNextCharacter();
 
 	/** \brief Selects the initial target for an action to take effect on
 	*** This is only used for characters to select an initial target, but not for enemies.
 	**/
-	void _SetInitialTarget();
+// 	void _SetInitialTarget();
 
 	/** \brief Sets the _target_selected member to the next available target
 	*** \param forward_direction Determines whether the next target should be located ahead or behind of the current one
 	*** This member will also change the _attack_point selected member
 	**/
-	void _SelectNextTarget(bool forward_direction);
+// 	void _SelectNextTarget(bool forward_direction);
 
 	/** \brief Sets the _attack_point_selected member to the next available attack point
 	*** \param forward_direction Determines whether the next target should be located ahead or behind of the current one
 	**/
-	void _SelectNextAttackPoint(bool forward_direction);
+// 	void _SelectNextAttackPoint(bool forward_direction);
 
 	/** \name Draw helper functions
 	*** \brief Functions which draw various components of the battle screen
@@ -624,15 +470,9 @@ private:
 	//@{
 	/** \brief Draws all background images and animations
 	*** The images and effects drawn by this function will never be drawn over anything else in the battle
-	*** (battle sprites, menus, etc.). 
+	*** (battle sprites, menus, etc.).
 	**/
-	void _DrawBackgroundVisuals();
-
-	/** \brief Draws the bottom menu visuals and information
-	*** The bottom menu contains a wide array of information, including swap cards, character portraits, character names,
-	*** and both character and enemy status. This menu is perpetually drawn on the battle screen.
-	**/
-	void _DrawBottomMenu();
+	void _DrawBackgroundGraphics();
 
 	/** \brief Draws all character and enemy sprites as well as any sprite visuals
 	*** In addition to the sprites themselves, this function draws special effects and indicators for the sprites.
@@ -640,12 +480,20 @@ private:
 	**/
 	void _DrawSprites();
 
-	//! \brief Render any damage text that exists
-	void _DrawDamageTextList();
+	//! \brief Draws all GUI graphics on the screen
+	void _DrawGUI();
 
-	/** \brief Draws the universal stamina bar and the icons of the present actors
+	/** \brief Draws the bottom menu visuals and information
+	*** The bottom menu contains a wide array of information, including swap cards, character portraits, character names,
+	*** and both character and enemy status. This menu is perpetually drawn on the battle screen.
 	**/
+	void _DrawBottomMenu();
+
+	//! \brief Draws the stamina bar and the icons of the actors of both parties
 	void _DrawStaminaBar();
+
+	//! \brief Draws indicator text and graphics for each actor on the field
+	void _DrawIndicators();
 	//@}
 }; // class BattleMode : public hoa_mode_manager::GameMode
 

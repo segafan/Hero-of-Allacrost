@@ -149,7 +149,7 @@ GlobalActor::GlobalActor() :
 	_fortitude(0),
 	_protection(0),
 	_agility(0),
-	_evade(0),
+	_evade(0.0f),
 	_total_physical_attack(0),
 	_total_metaphysical_attack(0),
 	_weapon_equipped(NULL)
@@ -386,6 +386,277 @@ GlobalSkill* GlobalActor::GetSkill(const GlobalSkill* skill) const {
 
 
 
+void GlobalActor::AddHitPoints(uint32 amount) {
+	if ((0xFFFFFFFF - amount) < _hit_points) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_hit_points = 0xFFFFFFFF;
+	}
+	else {
+		_hit_points += amount;
+	}
+
+	if (_hit_points > _max_hit_points)
+		_hit_points = _max_hit_points;
+}
+
+
+
+void GlobalActor::SubtractHitPoints(uint32 amount) {
+	if (amount >= _hit_points)
+		_hit_points = 0;
+	else
+		_hit_points -= amount;
+}
+
+
+
+void GlobalActor::AddMaxHitPoints(uint32 amount) {
+	if ((0xFFFFFFFF - amount) < _max_hit_points) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_max_hit_points = 0xFFFFFFFF;
+	}
+	else {
+		_max_hit_points += amount;
+	}
+}
+
+
+
+void GlobalActor::SubtractMaxHitPoints(uint32 amount) {
+	if (amount > _max_hit_points) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "argument value will cause max hit points to decrease to zero: " << amount << endl;
+		_max_hit_points = 0;
+		_hit_points = 0;
+	}
+	else {
+		_max_hit_points -= amount;
+		if (_hit_points > _max_hit_points)
+			_hit_points = _max_hit_points;
+	}
+}
+
+
+
+void GlobalActor::AddSkillPoints(uint32 amount) {
+	if ((0xFFFFFFFF - amount) < _skill_points) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_skill_points = 0xFFFFFFFF;
+	}
+	else {
+		_skill_points += amount;
+	}
+
+	if (_skill_points > _max_skill_points)
+		_skill_points = _max_skill_points;
+}
+
+
+
+void GlobalActor::SubtractSkillPoints(uint32 amount) {
+	if (amount >= _skill_points)
+		_skill_points = 0;
+	else
+		_skill_points -= amount;
+}
+
+
+
+void GlobalActor::AddMaxSkillPoints(uint32 amount) {
+	if ((0xFFFFFFFF - amount) < _max_skill_points) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_max_skill_points = 0xFFFFFFFF;
+	}
+	else {
+		_max_skill_points += amount;
+	}
+}
+
+
+
+void GlobalActor::SubtractMaxSkillPoints(uint32 amount) {
+	if (amount > _max_skill_points) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "argument value will cause max skill points to decrease to zero: " << amount << endl;
+		_max_skill_points = 0;
+		_skill_points = 0;
+	}
+	else {
+		_max_skill_points -= amount;
+		if (_skill_points > _max_skill_points)
+			_skill_points = _max_skill_points;
+	}
+}
+
+
+
+void GlobalActor::AddStrength(uint32 amount) {
+	if ((0xFFFFFFFF - amount) < _strength) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_strength = 0xFFFFFFFF;
+	}
+	else {
+		_strength += amount;
+	}
+
+	_CalculateAttackRatings();
+}
+
+
+
+void GlobalActor::SubtractStrength(uint32 amount) {
+	if (amount >= _strength)
+		_strength = 0;
+	else
+		_strength -= amount;
+
+	_CalculateAttackRatings();
+}
+
+
+
+void GlobalActor::AddVigor(uint32 amount) {
+	if ((0xFFFFFFFF - amount) < _vigor) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_vigor = 0xFFFFFFFF;
+	}
+	else {
+		_vigor += amount;
+	}
+
+	_CalculateAttackRatings();
+}
+
+
+
+void GlobalActor::SubtractVigor(uint32 amount) {
+	if (amount >= _vigor)
+		_vigor = 0;
+	else
+		_vigor -= amount;
+
+	_CalculateAttackRatings();
+}
+
+
+
+void GlobalActor::AddFortitude(uint32 amount) {
+	if ((0xFFFFFFFF - amount) < _fortitude) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_fortitude = 0xFFFFFFFF;
+	}
+	else {
+		_fortitude += amount;
+	}
+
+	_CalculateDefenseRatings();
+}
+
+
+
+void GlobalActor::SubtractFortitude(uint32 amount) {
+	if (amount >= _fortitude)
+		_fortitude = 0;
+	else
+		_fortitude -= amount;
+
+	_CalculateDefenseRatings();
+}
+
+
+
+void GlobalActor::AddProtection(uint32 amount) {
+	if ((0xFFFFFFFF - amount) < _protection) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_protection = 0xFFFFFFFF;
+	}
+	else {
+		_protection += amount;
+	}
+
+	_CalculateDefenseRatings();
+}
+
+
+
+void GlobalActor::SubtractProtection(uint32 amount) {
+	if (amount >= _protection)
+		_protection = 0;
+	else
+		_protection -= amount;
+
+	_CalculateDefenseRatings();
+}
+
+
+
+void GlobalActor::AddAgility(uint32 amount)  {
+	if ((0xFFFFFFFF - amount) < _agility) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_agility = 0xFFFFFFFF;
+	}
+	else {
+		_agility += amount;
+	}
+}
+
+
+
+void GlobalActor::SubtractAgility(uint32 amount) {
+	if (amount >= _agility)
+		_agility = 0;
+	else
+		_agility -= amount;
+}
+
+
+
+void GlobalActor::AddEvade(float amount) {
+	if (amount < 0.0f) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received negative argument value: " << amount << endl;
+		return;
+	}
+
+	float new_evade = _evade + amount;
+	if (new_evade < _evade) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "floating point overflow condition detected: " << amount << endl;
+		_evade = 1.0f;
+	}
+	else if (new_evade > 1.0f) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "evade rating increased above 1.0f: " << amount << endl;
+		_evade = 1.0f;
+	}
+	else {
+		_evade = new_evade;
+	}
+
+	_CalculateEvadeRatings();
+}
+
+
+
+void GlobalActor::SubtractEvade(float amount) {
+	if (amount > 0.0f) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received positive argument value: " << amount << endl;
+		return;
+	}
+
+	float new_evade = _evade + amount;
+	if (new_evade > _evade) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "floating point overflow condition detected: " << amount << endl;
+		_evade = 0.0f;
+	}
+	else if (new_evade < 0.0f) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "evade rating decreased below 0.0f: " << amount << endl;
+		_evade = 0.0f;
+	}
+	else {
+		_evade = new_evade;
+	}
+
+	_CalculateEvadeRatings();
+}
+
+
+
 void GlobalActor::_CalculateAttackRatings() {
 	_total_physical_attack = _strength;
 	_total_metaphysical_attack = _vigor;
@@ -456,10 +727,14 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 	_growth_detected = false;
 
 	// Add all growth stats to the character actor
-	if (_hit_points_growth != 0)
+	if (_hit_points_growth != 0) {
 		_character_owner->AddMaxHitPoints(_hit_points_growth);
-	if (_skill_points_growth != 0)
+		_character_owner->AddHitPoints(_hit_points_growth);
+	}
+	if (_skill_points_growth != 0) {
 		_character_owner->AddMaxSkillPoints(_skill_points_growth);
+		_character_owner->AddSkillPoints(_skill_points_growth);
+	}
 	if (_strength_growth != 0)
 		_character_owner->AddStrength(_strength_growth);
 	if (_vigor_growth != 0)

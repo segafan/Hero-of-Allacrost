@@ -214,6 +214,7 @@ namespace hoa_global {
 namespace hoa_battle {
 	extern bool BATTLE_DEBUG;
 	class BattleMode;
+	class BattleEvent;
 
 	namespace private_battle {
 		class BattleActor;
@@ -223,10 +224,20 @@ namespace hoa_battle {
 		class BattleAction;
 		class SkillAction;
 		class ItemAction;
-		class ActorEffect;
 
-		class ActionWindow;
+		class IndicatorElement;
+		class IndicatorText;
+		class IndicatorSupervisor;
+
+		class ItemCommand;
+		class SkillCommand;
+		class CharacterCommand;
+		class CommandSupervisor;
+
 		class FinishWindow;
+
+		class BattleTarget;
+		class BattleItem;
 	}
 }
 

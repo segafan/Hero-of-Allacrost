@@ -34,6 +34,19 @@ namespace hoa_global {
 *** \brief Enum values used for declaring the type of target of items, skills, and actions.
 **/
 enum GLOBAL_TARGET {
+	// TODO: The commented out target enums below should replace the current set of enums. Waiting until
+	// the right time to make this happen.
+// 	GLOBAL_TARGET_INVALID      = -1,
+// 	GLOBAL_TARGET_SELF         =  0,
+// 	GLOBAL_TARGET_SELF_POINT   =  1,
+// 	GLOBAL_TARGET_ALLY         =  2,
+// 	GLOBAL_TARGET_ALLY_POINT   =  3,
+// 	GLOBAL_TARGET_ENEMY        =  4,
+// 	GLOBAL_TARGET_ENEMY_POINT  =  5,
+// 	GLOBAL_TARGET_ALL_ALLIES   =  6,
+// 	GLOBAL_TARGET_ALL_ENEMIES  =  7,
+// 	GLOBAL_TARGET_TOTAL        =  8
+
 	GLOBAL_TARGET_INVALID      = -1,
 	GLOBAL_TARGET_ATTACK_POINT =  0,
 	GLOBAL_TARGET_ACTOR        =  1,
@@ -455,50 +468,56 @@ public:
 	/** \name Class member add and subtract functions
 	*** These methods provide a means to easily add or subtract amounts off of certain stats, such
 	*** as hit points or stength. Total attack, defense, or evade ratings are re-calculated when
-	*** an appropriately related stat is changed.
+	*** an appropriately related stat is changed. Corner cases are checked to prevent overflow conditions
+	*** and other invalid values, such as current hit points exceeded maximum hit points.
+	***
+	*** \note When making changes to the maximum hit points or skill points, you should also consider
+	*** making the same addition or subtraction to the current hit points / skill points. Modifying the
+	*** maximum values will not modify the current values unless the change causes the new maximum to
+	*** exceed the current values.
 	**/
 	//@{
-	//! \note The current hit points is prevented from exceeding the maximum hit points possible
-	void AddHitPoints(uint32 hp)
-		{ _hit_points += hp; if (_hit_points > _max_hit_points) _hit_points = _max_hit_points; }
+	void AddHitPoints(uint32 amount);
 
-	//! \note If an overflow condition is detected, hit points will be set to zero
-	void SubtractHitPoints(uint32 hp)
-		{ if (hp < _hit_points) _hit_points -= hp; else _hit_points = 0; }
+	void SubtractHitPoints(uint32 amount);
 
-	//! \note The current hit points is also increased by the same amount as the max hit points
-	void AddMaxHitPoints(uint32 hp)
-		{ _max_hit_points += hp; _hit_points += hp; }
+	void AddMaxHitPoints(uint32 amount);
 
-	//! \note The current skill points is prevented from exceeding the maximum skill points possible
-	void AddSkillPoints(uint32 sp)
-		{ _skill_points += sp; if (_skill_points > _max_skill_points) _skill_points = _max_skill_points; }
+	//! \note The number of hit points will be decreased if they are greater than the new maximum
+	void SubtractMaxHitPoints(uint32 amount);
 
-	//! \note If an overflow condition is detected, skill points will be set to zero
-	void SubtractSkillPoints(uint32 sp)
-		{ if (sp < _skill_points) _skill_points -= sp; else _skill_points = 0; }
+	void AddSkillPoints(uint32 amount);
 
-	//! \note The current skill points is also increased by the same amount as the max skill points
-	void AddMaxSkillPoints(uint32 sp)
-		{ _max_skill_points += sp; _skill_points += sp; }
+	void SubtractSkillPoints(uint32 amount);
 
-	void AddStrength(uint32 st)
-		{ _strength += st; _CalculateAttackRatings(); }
+	void AddMaxSkillPoints(uint32 amount);
 
-	void AddVigor(uint32 vi)
-		{ _vigor += vi; _CalculateAttackRatings(); }
+	//! \note The number of skill points will be decreased if they are greater than the new maximum
+	void SubtractMaxSkillPoints(uint32 amount);
 
-	void AddFortitude(uint32 fo)
-		{ _fortitude += fo; _CalculateDefenseRatings(); }
+	void AddStrength(uint32 amount);
 
-	void AddProtection(uint32 pr)
-		{ _protection += pr; _CalculateDefenseRatings(); }
+	void SubtractStrength(uint32 amount);
 
-	void AddAgility(uint32 ag)
-		{ _agility += ag; }
+	void AddVigor(uint32 amount);
 
-	void AddEvade(float ev)
-		{ _evade += ev; _CalculateEvadeRatings(); }
+	void SubtractVigor(uint32 amount);
+
+	void AddFortitude(uint32 amount);
+
+	void SubtractFortitude(uint32 amount);
+
+	void AddProtection(uint32 amount);
+
+	void SubtractProtection(uint32 amount);
+
+	void AddAgility(uint32 amount);
+
+	void SubtractAgility(uint32 amount);
+
+	void AddEvade(float amount);
+
+	void SubtractEvade(float amount);
 	//@}
 
 protected:

@@ -21,6 +21,9 @@
 #include "script.h"
 
 #include "battle.h"
+#include "battle_actions.h"
+#include "battle_actors.h"
+#include "battle_utils.h"
 
 using namespace std;
 
@@ -32,8 +35,6 @@ using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_script;
 
-using namespace hoa_battle::private_battle;
-
 namespace hoa_battle {
 
 namespace private_battle {
@@ -42,196 +43,186 @@ namespace private_battle {
 // BattleAction class
 ////////////////////////////////////////////////////////////////////////////////
 
-BattleAction::BattleAction(BattleActor* source, BattleActor* target, GlobalAttackPoint* attack_point) :
-	_source(source),
-	_target(target),
-	_attack_point(attack_point),
-	_should_be_removed(false)
+BattleAction::BattleAction(BattleActor* actor, BattleTarget target) :
+	_actor(actor),
+	_target(target)
 {
-	if ((source == NULL || target == NULL) && BATTLE_DEBUG) {
-		cerr << "BATTLE ERROR: BattleAction constructor recieved NULL source and/or target" << endl;
-	}
-}
-
-
-
-void BattleAction::Update() {
-	if (_warm_up_time.IsRunning()) {
-		//float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
-		float offset = SystemManager->GetUpdateTime() * ((STAMINA_LOCATION_TOP - STAMINA_LOCATION_COMMAND) / _warm_up_time.GetDuration());
-		_source->SetStaminaIconLocation(_source->GetStaminaIconLocation() + offset);
-	}
-
-	// TODO: Any warm up animations
-}
-
-void BattleAction::VerifyValidTarget(BattleActor* source, BattleActor* &target)
-{
-	//If the target is alive or if we're targeting someone on our team, do nothing
-	//If we're targeting a teammate we do nothing in case it's a revive skill or something
-	if (target->IsAlive() || (source->IsEnemy() == target->IsEnemy()))
-		return;
-
-	uint32 index;
-
-	if (source->IsEnemy())
-	{
-		index = current_battle->GetIndexOfNextAliveCharacter(true);
-		if (index == INVALID_BATTLE_ACTOR_INDEX)
-		{
-			cerr << "BATTLE ERROR: BattleAction::VerifyValidTarget could not find a valid target.  How did we get to this stage?" << endl;
-			return;
-		}
-		target = current_battle->GetPlayerCharacterAt(index);
-	}
-	else
-	{
-		index = current_battle->GetIndexOfNextAliveEnemy(true);
-		if (index == INVALID_BATTLE_ACTOR_INDEX)
-		{
-			cerr << "BATTLE ERROR: BattleAction::VerifyValidTarget could not find a valid target.  How did we get to this stage?" << endl;
-			return;
-		}
-		target = current_battle->GetEnemyActorAt(index);
-	}
+	if (actor == NULL)
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "constructor received NULL actor" << endl;
+	if (target.GetType() == GLOBAL_TARGET_INVALID)
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "constructor received invalid target" << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // SkillAction class
 ////////////////////////////////////////////////////////////////////////////////
 
-SkillAction::SkillAction(BattleActor* source, BattleActor* target, GlobalSkill* skill, GlobalAttackPoint* attack_point) :
-	BattleAction(source, target, attack_point),
+SkillAction::SkillAction(BattleActor* actor, BattleTarget target, GlobalSkill* skill) :
+	BattleAction(actor, target),
 	_skill(skill)
 {
-	_warm_up_time.Initialize(skill->GetWarmupTime() * timer_multiplier, 0, current_battle);
-	_warm_up_time.Run();
-
-	if (skill == NULL && BATTLE_DEBUG) {
-		cerr << "BATTLE ERROR: SkillAction constructor recieved NULL skill argument" << endl;
+	if (skill == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "constructor received NULL skill argument" << endl;
+		return;
 	}
+
+	if (skill->GetTargetType() == GLOBAL_TARGET_INVALID)
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "constructor received invalid skill" << endl;
+	if (skill->GetTargetType() != target.GetType())
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "skill and target reference different target types" << endl;
+	if (skill->IsExecutableInBattle() == false)
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "skill is not executable in battle" << endl;
 }
 
 
 
-void SkillAction::RunScript() {
-	VerifyValidTarget(_source, _target);
+uint32 SkillAction::GetWarmUpTime() const {
+	if (_skill == NULL)
+		return 0;
+	else
+		return (_skill->GetWarmupTime() * timer_multiplier);
+}
+
+
+
+uint32 SkillAction::GetCoolDownTime() const {
+	if (_skill == NULL)
+		return 0;
+	else
+		return _skill->GetCooldownTime();
+}
+
+
+
+bool SkillAction::Execute() {
+	// (1): First check that the actor has sufficient XP to use the skill
+	if (_actor->GetSkillPoints() < _skill->GetSPRequired()) {
+		// TODO: I think changing state to idle while skipping cool down will not delete the skill, test this
+		_actor->ChangeState(ACTOR_STATE_IDLE);
+		// TODO: need to indicate the the skill execution failed to the user somehow
+		return true;
+	}
+
+	// (2): Ensure that the skill will affect a valid target
+	if (_target.IsValid() == false) {
+		// TEMP: this should only be done if the skill has no custom checking for valid targets
+		if (_target.GetType() == GLOBAL_TARGET_ATTACK_POINT)
+			_target.SelectNextAttackPoint();
+		else if (_target.GetType() == GLOBAL_TARGET_ACTOR)
+			_target.SelectNextActor();
+	}
+
+	// (3): Retrieve and call the execution function of the script
 	const ScriptObject* script_function = _skill->GetBattleExecuteFunction();
 	if (script_function == NULL) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "selected skill is not executable in battle" << endl;
-		return;
-	}
-	// TODO: Check if SP requirements for skill are met
-
-	if (_skill->GetTargetType() == GLOBAL_TARGET_PARTY) {
-		if (_target->IsEnemy()) {
-			BattleEnemy* enemy;
-			//Loop through all enemies and apply the item
-			for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); i++) {
-				enemy = current_battle->GetEnemyActorAt(i);
-				ScriptCallFunction<void>(*script_function, enemy, _source);
-			}
-		}
-		else { // Target is a character
-			BattleCharacter* character;
-			//Loop through all party members and apply
-			for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); i++) {
-				character = current_battle->GetPlayerCharacterAt(i);
-				ScriptCallFunction<void>(*script_function, character, _source);
-			}
-		}
-	} // if (_skill->GetTargetType() == GLOBAL_TARGET_PARTY)
-
-	else {
-		//CD: We don't check for alive or dead here...what if it's a resurrect spell?
-	//	if (_target->IsAlive()) {
-		try
-		{ ScriptCallFunction<void>(*script_function, _target, _source); }
-		catch (luabind::error err)
-		{ ScriptManager->HandleLuaError(err); }
-	//	}
-
-		// TODO: what to do if the target is dead? Find a new target? Cancel?
-		//else {
-
-		//}
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to retrieve execution function" << endl;
+		return true;
 	}
 
-	_source->GetActor()->SubtractSkillPoints(_skill->GetSPRequired());
-	_should_be_removed = true;
-
-	// FIX ME temporary code!!!
-	if (_source) {
-		_source->ResetWaitTime();
-		_source->SetState(ACTOR_IDLE);
+	try {
+		ScriptCallFunction<void>(*script_function, _actor, _target); }
+	catch (luabind::error err) {
+		ScriptManager->HandleLuaError(err);
 	}
-} // void SkillAction::RunScript()
+
+// 	if (_target->GetType() == GLOBAL_TARGET_PARTY) {
+		// TODO: loop through _target.GetParty() and apply the function
+// 		if (_target->IsEnemy()) {
+// 			BattleEnemy* enemy;
+// 			//Loop through all enemies and apply the item
+// 			for (uint32 i = 0; i < BattleMode::CurrentInstance()->GetNumberOfEnemies(); i++) {
+// 				enemy = BattleMode::CurrentInstance()->GetEnemyActorAt(i);
+// 				ScriptCallFunction<void>(*script_function, enemy, _source);
+// 			}
+// 		}
+// 		else { // Target is a character
+// 			BattleCharacter* character;
+// 			//Loop through all party members and apply
+// 			for (uint32 i = 0; i < BattleMode::CurrentInstance()->GetNumberOfCharacters(); i++) {
+// 				character = BattleMode::CurrentInstance()->GetPlayerCharacterAt(i);
+// 				ScriptCallFunction<void>(*script_function, character, _source);
+// 			}
+// 		}
+// 	}
+// 	else {
+//
+// 	}
+
+	_actor->SubtractSkillPoints(_skill->GetSPRequired());
+	return true;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // ItemAction class
 ////////////////////////////////////////////////////////////////////////////////
 
-ItemAction::ItemAction(BattleActor* source, BattleActor* target, GlobalItem* item, GlobalAttackPoint* attack_point) :
-	BattleAction(source, target, attack_point),
+ItemAction::ItemAction(BattleActor* source, BattleTarget target, BattleItem* item) :
+	BattleAction(source, target),
 	_item(item)
 {
-	_warm_up_time.Initialize(ITEM_WARM_UP_TIME * timer_multiplier, 0, current_battle);
-	_warm_up_time.Run();
-
-	if (item == NULL && BATTLE_DEBUG) {
-		cerr << "BATTLE ERROR: ItemAction constructor recieved NULL item argument" << endl;
+	if (item == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "constructor received NULL item argument" << endl;
+		return;
 	}
+
+	if (item->GetItem().GetTargetType() == GLOBAL_TARGET_INVALID)
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "constructor received invalid item" << endl;
+	if (item->GetItem().GetTargetType() != target.GetType())
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "item and target reference different target types" << endl;
+	if (item->GetItem().IsUsableInBattle() == false)
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "item is not usable in battle" << endl;
 }
 
 
 
-void ItemAction::RunScript() {
-	VerifyValidTarget(_source, _target);
+bool ItemAction::Execute() {
+	// TODO: Check that item count > 0?
 
-	const ScriptObject* script_function = _item->GetBattleUseFunction();
+	const ScriptObject* script_function = _item->GetItem().GetBattleUseFunction();
 	if (script_function == NULL) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "item did not have a battle use function" << endl;
 	}
 
-	if (_item->GetTargetType() == GLOBAL_TARGET_PARTY) {
-		if (_target->IsEnemy()) {
-			BattleActor* enemy;
-			//Loop through enemies and apply the item to each target
-			for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); i++) {
-				enemy = current_battle->GetEnemyActorAt(i);
-				if (enemy->IsAlive()) {
-					ScriptCallFunction<void>(*script_function, enemy, _source);
-				}
-			}
-		}
+// 	if (_item->GetTargetType() == GLOBAL_TARGET_PARTY) {
+// 		if (_target->IsEnemy()) {
+// 			BattleActor* enemy;
+// 			// Loop through enemies and apply the item to each target
+// 			for (uint32 i = 0; i < BattleMode::CurrentInstance()->GetNumberOfEnemies(); i++) {
+// 				enemy = BattleMode::CurrentInstance()->GetEnemyActorAt(i);
+// 				if (enemy->IsAlive()) {
+// 					ScriptCallFunction<void>(*script_function, enemy, _source);
+// 				}
+// 			}
+// 		}
+//
+// 		else {
+// 			BattleActor* character;
+// 			// Loop through all party members and apply
+// 			for (uint32 i = 0; i < BattleMode::CurrentInstance()->GetNumberOfCharacters(); i++) {
+// 				character = BattleMode::CurrentInstance()->GetPlayerCharacterAt(i);
+// 				ScriptCallFunction<void>(*script_function, character, _source);
+// 			}
+// 		}
+// 	} // if (_item->GetTargetType() == GLOBAL_TARGET_PARTY)
+//
+// 	else {
+// 		ScriptCallFunction<void>(*script_function, _actor, _target);
+// 	}
 
-		else {
-			BattleActor* character;
-			//Loop through all party members and apply
-			for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); i++) {
-				character = current_battle->GetPlayerCharacterAt(i);
-				ScriptCallFunction<void>(*script_function, character, _source);
-			}
-		}
-	} // if (_item->GetTargetType() == GLOBAL_TARGET_PARTY)
-
-	else {
-		ScriptCallFunction<void>(*script_function, _target, _source);
+	try {
+		ScriptCallFunction<void>(*script_function, _actor, _target); }
+	catch (luabind::error err) {
+		ScriptManager->HandleLuaError(err);
 	}
 
-	if (_source->IsEnemy() == false) {
-		if (_item->GetCount() == 0)
-			GlobalManager->RemoveFromInventory(_item->GetID());
-	}
+	// Remove the item from the character party's inventory if the count falls to zero
+// 	if (_actor->IsEnemy() == false) {
+// 		if (_item->GetCount() == 0)
+// 			GlobalManager->RemoveFromInventory(_item->GetID());
+// 	}
 
-	_should_be_removed = true;
-
-	// FIX ME temporary code!!!
-	if (_source) {
-		_source->ResetWaitTime();
-		_source->SetState(ACTOR_IDLE);
-	}
-} // void ItemAction::RunScript()
+	return true;
+}
 
 } // namespace private_battle
 

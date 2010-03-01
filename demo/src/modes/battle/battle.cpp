@@ -15,16 +15,21 @@
 *** \brief   Source file for battle mode interface.
 *** ***************************************************************************/
 
-#include <iostream>
-#include <sstream>
-
-#include "script.h"
+#include "audio.h"
 #include "input.h"
-#include "battle_events.h"
-
 #include "mode_manager.h"
-#include "battle.h"
+#include "script.h"
+#include "video.h"
+
 #include "pause.h"
+
+#include "battle.h"
+#include "battle_actors.h"
+#include "battle_actions.h"
+#include "battle_command.h"
+#include "battle_events.h"
+#include "battle_finish.h"
+#include "battle_utils.h"
 
 using namespace std;
 
@@ -43,290 +48,545 @@ using namespace hoa_battle::private_battle;
 namespace hoa_battle {
 
 bool BATTLE_DEBUG = false;
-float timer_multiplier = 1.0f;
 bool wait = true;
-
-namespace private_battle {
-
-BattleMode* current_battle = NULL;
-
+// Initialize static class variable
+BattleMode* BattleMode::_current_instance = NULL;
 
 ////////////////////////////////////////////////////////////////////////////////
-// BattleException class
-////////////////////////////////////////////////////////////////////////////////
-BattleException::BattleException(const std::string & message, const std::string & file, const int line, const std::string & function) throw() :
-	Exception(message, file, line, function) {
-}
-
-BattleException::~BattleException() throw() {
-}
-
-} // namespace private battle
-
-
-////////////////////////////////////////////////////////////////////////////////
-// BattleMode class -- Initialization and Destruction Code
+// BattleMode class -- primary methods
 ////////////////////////////////////////////////////////////////////////////////
 
 BattleMode::BattleMode() :
-	_initialized(false),
-	_battle_over(false),
-	_victorious_battle(false),
-	_animation_in_process(false),
+	_state(BATTLE_STATE_INVALID),
 	_selected_character_index(0),
 	_selected_target_index(0),
 	_selected_character(NULL),
 	_selected_target(NULL),
 	_selected_attack_point(0),
-	//_finish_window(NULL),
+	_command_supervisor(new CommandSupervisor()),
+	_finish_window(new FinishWindow()),
 	_current_number_swaps(0),
-	_swap_countdown_timer(300000), // 5 minutes
-	_min_agility(9999),
-	//_active_action(NULL),
-	_next_monster_location_index(0),
 	_default_music("mus/Confrontation.ogg"),
 	_winning_music("mus/Allacrost_Fanfare.ogg"),
-	_losing_music("mus/Allacrost_Intermission.ogg"),
-	_dialogue_window(true),
-	_dialogue_on(false),
-	_after_scripts_finished(false)
+	_losing_music("mus/Allacrost_Intermission.ogg")
+// 	_dialogue_window(true),
+// 	_after_scripts_finished(false)
 {
-	if (BATTLE_DEBUG)
-		cout << "BATTLE: BattleMode constructor invoked" << endl;
+	IF_PRINT_DEBUG(BATTLE_DEBUG) << "constructor invoked" << endl;
 
 	mode_type = MODE_MANAGER_BATTLE_MODE;
 
-	if (_stamina_icon_selected.Load("img/menus/stamina_icon_selected.png", 45, 45) == false)
-		cerr << "BATTLE ERROR: Failed to load stamina icon selected image" << endl;
+	if (_battle_background.Load("img/backdrops/battle/desert_cave.png") == false)
+		PRINT_ERROR << "failed to load default background image" << endl;
 
-	_attack_point_indicator.SetDimensions(16, 16);
+	if (_stamina_icon_selected.Load("img/menus/stamina_icon_selected.png") == false)
+		PRINT_ERROR << "failed to load stamina icon selected image" << endl;
+
+	_attack_point_indicator.SetDimensions(16.0f, 16.0f);
 	if (_attack_point_indicator.LoadFromFrameGrid("img/icons/battle/attack_point_target.png", vector<uint32>(4, 10), 1, 4) == false)
-		cerr << "BATTLE ERROR: Failed to load attack point indicator." << endl;
+		PRINT_ERROR << "failed to load attack point indicator." << endl;
 
-	//Load the universal time meter image
-	if (_stamina_meter.Load("img/menus/stamina_bar.png", 10, 512) == false)
-		cerr << "BATTLE ERROR: Failed to load time meter." << endl;
+	if (_stamina_meter.Load("img/menus/stamina_bar.png") == false)
+		PRINT_ERROR << "failed to load time meter." << endl;
 
-	_actor_selection_image.SetDimensions(109, 78);
 	if (_actor_selection_image.Load("img/icons/battle/character_selector.png") == false)
-		cerr << "BATTLE ERROR: Unable to load player selector image." << endl;
+		PRINT_ERROR << "unable to load player selector image." << endl;
 
 	if (_character_selection.Load("img/menus/battle_character_selection.png") == false)
-		cerr << "BATTLE ERROR: Failed to load character selection image" << endl;
+		PRINT_ERROR << "failed to load character selection image" << endl;
 
-	if (_character_bars.Load("img/menus/battle_character_bars.png") == false)
-		cerr << "BATTLE ERROR: Failed to load character bars image" << endl;
+	if (_character_bar_covers.Load("img/menus/battle_character_bars.png") == false)
+		PRINT_ERROR << "failed to load character bars image" << endl;
 
-	if (_bottom_menu_image.Load("img/menus/battle_bottom_menu.png", 1024, 128) == false)
-		cerr << "BATTLE ERROR: Failed to load bottom menu image: " << endl;
+	if (_bottom_menu_image.Load("img/menus/battle_bottom_menu.png") == false)
+		PRINT_ERROR << "failed to load bottom menu image: " << endl;
 
-	if (_swap_icon.Load("img/icons/battle/swap_icon.png", 35, 30) == false)
-		cerr << "BATTLE ERROR: Failed to load swap icon: " << endl;
+	if (_swap_icon.Load("img/icons/battle/swap_icon.png") == false)
+		PRINT_ERROR << "failed to load swap icon: " << endl;
 
-	if (_swap_card.Load("img/icons/battle/swap_card.png", 25, 37) == false)
-		cerr << "BATTLE ERROR: Failed to load swap card: " << endl;
-
-// 	_action_window;// = new ActionWindow();
-	// FIXME: Get rid of this!!!
-	_TEMP_LoadTestData();
+	if (_swap_card.Load("img/icons/battle/swap_card.png") == false)
+		PRINT_ERROR << "failed to load swap card: " << endl;
 } // BattleMode::BattleMode()
 
 
 
 BattleMode::~BattleMode() {
-	// Don't let current_battle keep pointing to this object instance any longer
-	if (current_battle == this) {
-		current_battle = NULL;
-	}
-
 	for (map<string, MusicDescriptor>::iterator i = _battle_music.begin(); i != _battle_music.end(); i++)
 		i->second.FreeAudio();
 
 	// Delete all character and enemy actors
-	for (deque<BattleCharacter*>::iterator i = _character_actors.begin(); i != _character_actors.end(); i++) {
-		delete *i;
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		delete _character_actors[i];
 	}
 	_character_actors.clear();
-	_characters_awaiting_turn.clear();
 
-	for (deque<BattleEnemy*>::iterator i = _enemy_actors.begin(); i != _enemy_actors.end(); i++) {
-		delete *i;
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		delete _enemy_actors[i];
 	}
 	_enemy_actors.clear();
 
-	// FIX ME: If item scripts are still there, add the item back to the inventory
-	for (std::list<BattleAction*>::iterator i = _action_queue.begin(); i != _action_queue.end(); i++) {
-		if ((*i)->IsItemAction()) {
-			ItemAction* action = dynamic_cast<ItemAction*>(*i);
-			action->GetItem()->IncrementCount(1);
-		}
-		delete *i;
-	}
-	_action_queue.clear();
+	_command_queue.clear();
+	_ready_queue.clear();
 
-	for (std::list<DamageText*>::iterator it = _damage_text_list.begin(); it != _damage_text_list.end(); ++it)
-	{
-		delete *it;
-	}
-	_damage_text_list.clear();
+	delete _command_supervisor;
+	delete _finish_window;
 
+	if (_current_instance == this) {
+		_current_instance = NULL;
+	}
 } // BattleMode::~BattleMode()
 
 
 
 void BattleMode::Reset() {
-	current_battle = this;
+	_current_instance = this;
 
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
 
 	// Load the default battle music track if no other music has been added
 	if (_battle_music.empty()) {
 		_battle_music[_default_music] = MusicDescriptor();
 		if (_battle_music[_default_music].LoadAudio(_default_music) == false) {
-			PRINT_ERROR << "failed to load default battle theme music" << endl;
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load default battle music" << endl;
 		}
-		_battle_music[_default_music].Play();
 		_current_music = _default_music;
+		_battle_music[_default_music].Play();
 	}
-	else
-	{
+	else {
 		map<string, MusicDescriptor>::iterator i = _battle_music.begin();
-		i->second.Play();
 		_current_music = i->first;
+		i->second.Play();
 	}
 
-	if (_initialized == false) {
+	if (_state == BATTLE_STATE_INVALID) {
 		_Initialize();
 	}
 
 	UnFreezeTimers();
-
-	if (BATTLE_DEBUG)
-		cout << "BATTLE: BattleMode Reset() completed" << endl;
-} // void BattleMode::Reset()
+}
 
 
+
+void BattleMode::Update() {
+	_attack_point_indicator.Update(); // Required update to animated image
+
+	if (InputManager->QuitPress()) {
+		FreezeTimers();
+		ModeManager->Push(new PauseMode(true));
+		return;
+	}
+	if (InputManager->PausePress()) {
+		FreezeTimers();
+		ModeManager->Push(new PauseMode(false));
+		return;
+	}
+
+	// Determine if the battle should proceed to the victory or defeat state
+	if (IsBattleFinished() == false) {
+		bool characters_defeated = true;
+		for (uint32 i = 0; i < _character_actors.size(); i++) {
+			if (_character_actors[i]->IsAlive() == true) {
+				characters_defeated = false;
+				break;
+			}
+		}
+
+		bool enemies_defeated = true;
+		for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+			if (_enemy_actors[i]->IsAlive() == true) {
+				enemies_defeated = false;
+				break;
+			}
+		}
+
+		if ((characters_defeated == true) && (enemies_defeated == true)) {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "both parties were defeated, changing to defeat state" << endl;
+			ChangeState(BATTLE_STATE_DEFEAT);
+		}
+		else if (characters_defeated == true) {
+			ChangeState(BATTLE_STATE_DEFEAT);
+		}
+		else if (enemies_defeated == true) {
+			ChangeState(BATTLE_STATE_VICTORY);
+		}
+	}
+
+	// Process the actor ready queue
+	if (_ready_queue.empty() == false) {
+		// Only the acting actor is examined in the ready queue. If this actor is in the READY state,
+		// that means it has been waiting for BattleMode to allow it to begin its action and thus
+		// we set it to the ACTING state. We do nothing while it is in the ACTING state, allowing the
+		// actor to completely finish its action. When the actor enters any other state, it is presumed
+		// to be finished with the action or otherwise incapacitated and is removed from the queue.
+		BattleActor* acting_actor = _ready_queue.front();
+		switch (acting_actor->GetState()) {
+			case ACTOR_STATE_READY:
+				acting_actor->ChangeState(ACTOR_STATE_ACTING);
+				break;
+			case ACTOR_STATE_ACTING:
+				break;
+			default:
+				_ready_queue.pop_front();
+				break;
+		}
+	}
+
+	// First, call update functions of any BattleEvents
+// 	ScriptObject* during_func;
+// 	for (uint32 i = 0; i < _events.size(); i++) {
+// 		during_func = _events[i]->GetDuringFunction();
+// 		ScriptCallFunction<void>(*during_func, this);
+// 	}
+
+	// Update all actors
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		_character_actors[i]->Update();
+	}
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		_enemy_actors[i]->Update();
+	}
+
+	// ----- (3): Execute any scripts that are sitting in the queue
+// 	if (_action_queue.size())
+// 	{
+// 		_UpdateScripts();
+// 		_CleanupActionQueue();
+// 	} // if (_action_queue.size())
+
+	// ----- (4): Try to select an idle character if no character is currently selected
+// 	if (_selected_character == NULL)
+// 	{
+// 		_ActivateNextCharacter();
+// 	}
+
+
+
+	if (_state == BATTLE_STATE_INITIAL) {
+		// TODO
+	}
+	else if (_state == BATTLE_STATE_NORMAL) {
+		// TODO: check if any characters are in the ACTOR_STATE_COMMAND state, if so move to BATTLE_STATE_COMMAND
+// 		for (uint32 i = 0; i <
+	}
+	else if (_state == BATTLE_STATE_COMMAND) {
+		_command_supervisor->Update();
+	}
+	else if (_state == BATTLE_STATE_EVENT) {
+// 		_dialogue_window._display_textbox.Update();
+// 		_dialogue_window._display_options.Update();
+//
+// 		if (InputManager->ConfirmPress()) {
+// 			_dialogue_window.Reset();
+// 			if (_dialogue_text.empty()) {
+// 				ChangeState(BATTLE_STATE_NORMAL);
+// 			}
+// 			else {
+// 				ShowDialogue();
+// 				return;
+// 			}
+// 			UnFreezeTimers();
+// 		}
+// 		else {
+// 			FreezeTimers();
+// 			return;
+// 		}
+	}
+	else if (_state == BATTLE_STATE_VICTORY) {
+
+	}
+	else if (_state == BATTLE_STATE_DEFEAT) {
+
+	}
+	else {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid states" << endl;
+		Exit();
+	}
+
+
+
+
+	// ----- (1): If the battle is over, only execute this small block of update code
+	if (_state == BATTLE_STATE_VICTORY || _state == BATTLE_STATE_DEFEAT) {
+// 		if (_after_scripts_finished == false) {
+// 			ScriptObject* after_func;
+// 			for (uint32 i = 0; i < _events.size(); i++) {
+// 				after_func = _events[i]->GetAfterFunction();
+// 				ScriptCallFunction<void>(*after_func, this);
+// 			}
+// 			_after_scripts_finished = true;
+// 			return;
+// 		}
+
+		if (_finish_window->GetState() == FINISH_INVALID) { // Indicates that the battle has just now finished
+			//_finish_window = new FinishWindow();
+			// make sure the battle has our music
+			if (_state == BATTLE_STATE_VICTORY) {
+				AddMusic(_winning_music);
+				PlayMusic(_winning_music);
+			}
+			else {
+				AddMusic(_losing_music);
+				PlayMusic(_losing_music);
+			}
+
+			_finish_window->Initialize(_state == BATTLE_STATE_VICTORY);
+		}
+
+		// The FinishWindow::Update() function handles all update code when a battle is over.
+		// The call to shut down battle mode is also made from within this call.
+		_finish_window->Update();
+
+		// Do not update other battle code if the battle has already ended
+		return;
+	}
+} // void BattleMode::Update()
+
+
+
+void BattleMode::Draw() {
+	// Apply scene lighting if the battle has finished
+	if ((_state == BATTLE_STATE_VICTORY || _state == BATTLE_STATE_DEFEAT)) {// && _after_scripts_finished) {
+		if (_state == BATTLE_STATE_VICTORY) {
+			VideoManager->EnableSceneLighting(Color(0.914f, 0.753f, 0.106f, 1.0f)); // Golden color for victory
+		}
+		else {
+			VideoManager->EnableSceneLighting(Color(1.0f, 0.0f, 0.0f, 1.0f)); // Red color for defeat
+		}
+	}
+
+	_DrawBackgroundGraphics();
+	_DrawSprites();
+	_DrawGUI();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BattleMode class -- secondary methods
+////////////////////////////////////////////////////////////////////////////////
 
 void BattleMode::AddEnemy(GlobalEnemy* new_enemy) {
-	// (1): Don't add the enemy if it has an invalid ID or an experience level that is not zero
+	// Don't add the enemy if it has an invalid ID or an experience level that is not zero
 	if (new_enemy->GetID() == 0) {
-		if (BATTLE_DEBUG) {
-			cerr << "BATTLE WARNING: attempted to add a new enemy with an invalid id (0). "
-				<< "The enemy was not added to the battle." << endl;
-		}
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "attempted to add a new enemy with an invalid id: " << new_enemy->GetID() << endl;
 		return;
 	}
 	if (new_enemy->GetExperienceLevel() != 0) {
-		if (BATTLE_DEBUG) {
-			cerr << "BATTLE WARNING: attempted to add a new enemy that had already been initialized to experience level "
-				<< new_enemy->GetExperienceLevel() << ". The enemy was not added to the battle." << endl;
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "attempted to add a new enemy that had already been initialized: " << new_enemy->GetID() << endl;
+		return;
+	}
+
+	new_enemy->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
+	_enemy_actors.push_back(new BattleEnemy(new_enemy));
+}
+
+
+
+void BattleMode::SetBackground(const string& filename) {
+	if (_battle_background.Load(filename) == false) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load background image: " << filename << endl;
+		if (_battle_background.Load("img/backdrops/battle/desert_cave.png") == false)
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load default background image" << endl;
+	}
+}
+
+
+
+void BattleMode::AddMusic(const string& filename) {
+	if (_battle_music.find(filename) != _battle_music.end()) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "attempted to add music that had been added previously: " << filename << endl;
+		return;
+	}
+
+	_battle_music[filename] = MusicDescriptor();
+	if (_battle_music[filename].LoadAudio(filename) == false) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load music file: " << filename << endl;
+	}
+}
+
+
+
+void BattleMode::FreezeTimers() {
+	// Pause scripts
+// 	list<BattleAction*>::iterator it = _action_queue.begin();
+
+	// Pause character and enemy state timers
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		_character_actors[i]->GetStateTimer().Pause();
+	}
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		_enemy_actors[i]->GetStateTimer().Pause();
+	}
+}
+
+
+
+void BattleMode::UnFreezeTimers() {
+	// FIX ME: Do not unpause timers for paralyzed actors
+
+	// Unpause scripts
+// 	list<BattleAction*>::iterator it = _action_queue.begin();
+// 	while (it != _action_queue.end()) {
+// 		(*it)->GetWarmUpTime()->Run();
+// 		it++;
+// 	}
+
+	// Unpause character and enemy state timers
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		_character_actors[i]->GetStateTimer().Run();
+	}
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		_enemy_actors[i]->GetStateTimer().Run();
+	}
+}
+
+
+
+void BattleMode::ChangeState(BATTLE_STATE new_state) {
+	if (_state == new_state) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "battle was already in the state to change to: " << _state << endl;
+		return;
+	}
+
+	_state = new_state;
+	switch (_state) {
+		case BATTLE_STATE_INITIAL:
+			// TODO: recursive call below is temporary. This state should cause sprites to run in from off screen.
+			ChangeState(BATTLE_STATE_NORMAL);
+			break;
+		case BATTLE_STATE_NORMAL:
+			break;
+		case BATTLE_STATE_COMMAND:
+			_command_supervisor->Initialize(_selected_character);
+			break;
+		case BATTLE_STATE_EVENT:
+// 			_speaker_name = _dialogue_text.front();
+// 			_dialogue_text.pop_front();
+// 			hoa_utils::ustring text = _dialogue_text.front();
+// 			_dialogue_text.pop_front();
+//
+// 			_dialogue_window.Reset();
+// 			_dialogue_window._display_textbox.SetDisplayText(text);
+// 			_dialogue_window.Initialize();
+			break;
+		case BATTLE_STATE_VICTORY:
+			break;
+		case BATTLE_STATE_DEFEAT:
+			break;
+		default:
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "changed to invalid battle state: " << _state << endl;
+			break;
+	}
+}
+
+
+
+void BattleMode::Exit() {
+	_battle_music[_current_music].Stop();
+
+	// TEMP: Restore all dead characters back to life by giving them a single health point
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		if (_character_actors[i]->IsAlive() == false) {
+// 			_character_actors[i]->SetHitPoints(1);
+// 			_character_actors[i]->RetrieveBattleAnimation("idle")->GetCurrentFrame()->DisableGrayScale();
 		}
 	}
 
-	// (2): Level the enemy up to be within a reasonable range of the party's strength
-	new_enemy->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
-
-	// (4): Construct the enemy battle actor to be placed on the battle field
-	float x = MONSTER_LOCATIONS[_next_monster_location_index][0];
-	float y = MONSTER_LOCATIONS[_next_monster_location_index][1];
-	_next_monster_location_index++;
-
-	// TEMP
-	// The next line modulus have been changed. Howeever, a better solution is to provide a std::vector
-	// instead of an array for MONSTER_LOCATIONS, init in the constructor, and make modulus with the vector length
-	// _next_monster_location_index = _next_monster_location_index % (sizeof(MONSTER_LOCATIONS)/2); <-- Before
-	_next_monster_location_index = _next_monster_location_index % 8;  // <-- Now
-
-	BattleEnemy* enemy_actor= new BattleEnemy(new_enemy, x, y);
-	_enemy_actors.push_back(enemy_actor);
+	ModeManager->Pop();
 }
 
 
 
-void BattleMode::AddMusic(const string& music_filename) {
-	if (music_filename == "") {
-		if (BATTLE_DEBUG)
-			cerr << "BATTLE WARNING: BattleMode::AddMusic was given an empty string argument" << endl;
+void BattleMode::PlayMusic(const string& filename) {
+	if (_battle_music.find(filename) == _battle_music.end()) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "requested music file was not loaded: " << filename << endl;
 		return;
 	}
 
-	if (_battle_music.find(music_filename) != _battle_music.end())
-		// music is already loaded, just return
-		return;
-
-
-	_battle_music[music_filename] = MusicDescriptor();
-	if (_battle_music[music_filename].LoadAudio(music_filename) == false) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load music file: " << music_filename << endl;
-	}
-}
-
-void BattleMode::PlayMusic(const string &music_filename)
-{
-	if (_battle_music.find(music_filename) != _battle_music.end())
-	{
-		// music is already loaded, play first piece
-		map<string, MusicDescriptor>::iterator i = _battle_music.begin();
-		i->second.Play();
-		_current_music = i->first;
-	}
+	// TODO: this isn't playing the requested music in the argument, its playing the first track
+	map<string, MusicDescriptor>::iterator i = _battle_music.begin();
+	i->second.Play();
+	_current_music = i->first;
 }
 
 
 
-void BattleMode::AddBackground(const string &new_battle_background) {
-	// Load all background images
-	if (_battle_background.Load(new_battle_background, SCREEN_LENGTH * TILE_SIZE, SCREEN_HEIGHT * TILE_SIZE) == false) {
-		cerr << "BATTLE ERROR: Failed to load background image: " << endl;
-		_ShutDown();
+void BattleMode::NotifyCharacterCommand(BattleCharacter* character) {
+	for (list<BattleCharacter*>::iterator i = _command_queue.begin(); i != _command_queue.end(); i++) {
+		if (character == (*i)) {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "character was already present in the command queue" << endl;
+			return;
+		}
+	}
+
+	_command_queue.push_back(character);
+	if (_state != BATTLE_STATE_COMMAND) {
+		ChangeState(BATTLE_STATE_COMMAND);
 	}
 }
 
 
-void BattleMode::_TEMP_LoadTestData() {
-	// Load all background images
-	if (_battle_background.Load("img/backdrops/battle/desert_cave.png", SCREEN_LENGTH * TILE_SIZE, SCREEN_HEIGHT * TILE_SIZE) == false) {
-		cerr << "BATTLE ERROR: Failed to load background image: " << endl;
-		_ShutDown();
+
+void BattleMode::NotifyActorReady(BattleActor* actor) {
+	for (list<BattleActor*>::iterator i = _ready_queue.begin(); i != _ready_queue.end(); i++) {
+		if (actor == (*i)) {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "actor was already present in the ready queue" << endl;
+			return;
+		}
 	}
+
+	_ready_queue.push_back(actor);
 }
 
 
+
+void BattleMode::NotifyActorDeath(BattleActor* actor) {
+	// Remove actor from command and ready queues if it is found in either one
+	if (actor->IsEnemy() == false)
+		_command_queue.remove(dynamic_cast<BattleCharacter*>(actor));
+	_ready_queue.remove(actor);
+
+	// If the actor who died is the character the player is selecting a command for, reset the action window
+	// TODO: should be moved to battle command code notification
+	if (actor->IsEnemy() == false && (((BattleActor *)(_selected_character)) == actor)) {
+		_selected_character = NULL;
+		// TODO: notify command supervisor
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BattleMode class -- private methods
+////////////////////////////////////////////////////////////////////////////////
 
 void BattleMode::_Initialize() {
-	// TODO: If the battle is already initialized, restore the initial state
-	// if (_initialized)
-	// else
-
 	// (1): Construct all character battle actors from the active party
 	GlobalParty* active_party = GlobalManager->GetActiveParty();
 	if (active_party->GetPartySize() == 0) {
-		if (BATTLE_DEBUG)
-			cerr << "BATTLE ERROR: In BattleMode::_Initialize(), the size of the active party was zero" << endl;
-		ModeManager->Pop(); // Self-destruct the battle mode
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "no characters in the active party, exiting battle" << endl;
+		ModeManager->Pop();
 		return;
 	}
 
 	for (uint32 i = 0; i < active_party->GetPartySize(); i++) {
-		GlobalCharacter* new_character = dynamic_cast<GlobalCharacter*>(active_party->GetActorAtIndex(i));
-		BattleCharacter* new_actor = new BattleCharacter(new_character, PLAYER_LOCATIONS[i][0], PLAYER_LOCATIONS[i][1]);
+		BattleCharacter* new_actor = new BattleCharacter(dynamic_cast<GlobalCharacter*>(active_party->GetActorAtIndex(i)));
 		_character_actors.push_back(new_actor);
 	}
 
-	//_selected_character_index = GetIndexOfFirstIdleCharacter();
-	//_selected_character = GetPlayerCharacterAt(_selected_character_index);
+// 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+// 		_enemy_actors[i]->GetGlobalEnemy()->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
+// 	}
 
-	// (2) Loop through and find the actor with the lowest agility
-	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
-		if (_enemy_actors[i]->GetActor()->GetAgility() < _min_agility)
-			_min_agility = _enemy_actors[i]->GetActor()->GetAgility();
+	// (2): Determine the origin position for all characters and enemies
+	_DetermineActorLocations();
+
+	// (2): Find the actor with the lowest agility rating
+	uint32 min_agility = 0xFFFFFFFF;
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		if (_character_actors[i]->GetAgility() < min_agility)
+			min_agility = _character_actors[i]->GetAgility();
 	}
-
-	for (uint8 i = 0; i < _character_actors.size(); i++) {
-		if (_character_actors[i]->GetActor()->GetAgility() < _min_agility)
-			_min_agility = _character_actors[i]->GetActor()->GetAgility();
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		if (_enemy_actors[i]->GetAgility() < min_agility)
+			min_agility = _enemy_actors[i]->GetAgility();
 	}
-
 
 	// Andy: Once every game loop, the SystemManager's timers are updated
 	// However, in between calls, battle mode is constructed. As part
@@ -347,559 +607,113 @@ void BattleMode::_Initialize() {
 	// smaller than the time between A and B.  Hence the extra boost to the stamina
 	// portrait's location
 
-	//FIX ME This will not work in the future (i.e. paralysis)...realized this
-	//after writing all the above crap
-	//CD: Had to move this to before timers are initalized, otherwise this call will give
-	//our timers a little extra nudge with regards to time elapsed, thus making the portraits
-	//stop before they reach they yellow/orange line
+	// FIX ME This will not work in the future (i.e. paralysis)...realized this
+	// after writing all the above crap
+	// CD: Had to move this to before timers are initalized, otherwise this call will give
+	// our timers a little extra nudge with regards to time elapsed, thus making the portraits
+	// stop before they reach they yellow/orange line
+	// TODO: This should be fixed once battles have a little smoother start (characters run in from
+	// off screen to their positions, and stamina icons do not move until they are ready in their
+	// battle positions). Once that feature is available, remove this call.
 	SystemManager->UpdateTimers();
 
-
-	//Now adjust starting wait times based on agility proportions
-	//If current actor's agility is twice the lowest agility, then
-	//they will have a wait time that is half of the slowest actor
-	// We also use timer_multiplier to adjust start times.
+	// (3): Adjust each actor's idle state time based on their agility proportion to the slowest actor
+	// If an actor's agility is twice that of the actor with the lowest agility, then they will have an
+	// idle state time that is half of the slowest actor. We also use timer_multiplier to adjust start times.
 	// The lower the value of timer_multiplier, the faster the battle goes
-
 	float proportion;
-
-	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
-		proportion = timer_multiplier * static_cast<float>(_min_agility) /
-			static_cast<float>(_enemy_actors[i]->GetActor()->GetAgility());
-		_enemy_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
-
-		//Start the timer.  We can do this here because the calculations will be done so quickly
-		//that the other chars wont fall far behind.
-		_enemy_actors[i]->ResetWaitTime();
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		proportion = timer_multiplier * (static_cast<float>(min_agility) / static_cast<float>(_character_actors[i]->GetAgility()));
+		_character_actors[i]->SetIdleStateTime(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+		_character_actors[i]->ChangeState(ACTOR_STATE_IDLE);
+	}
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		proportion = timer_multiplier * (static_cast<float>(min_agility) / static_cast<float>(_enemy_actors[i]->GetAgility()));
+		_enemy_actors[i]->SetIdleStateTime(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+		_enemy_actors[i]->ChangeState(ACTOR_STATE_IDLE);
 	}
 
-	for (uint8 i = 0; i < _character_actors.size(); i++) {
-		proportion = timer_multiplier * static_cast<float>(_min_agility) / static_cast<float>(_character_actors[i]->GetActor()->GetAgility());
-		_character_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+	_command_supervisor->ConstructCharacterSettings();
 
-		//Start the timer.  We can do this here because the calculations will be done so quickly
-		//that the other chars wont fall far behind.
-		_character_actors[i]->ResetWaitTime();
-	}
+	// (4): Invoke any events that should occur when the battle begins
+// 	ScriptObject* before_func;
+// 	for (uint32 i = 0; i < _events.size(); i++) {
+// 		before_func = _events[i]->GetBeforeFunction();
+// 		ScriptCallFunction<void>(*before_func, this);
+// 	}
 
-	ScriptObject* before_func;
-	for (uint32 i = 0; i < _events.size(); i++) {
-		before_func = _events[i]->GetBeforeFunction();
-		ScriptCallFunction<void>(*before_func, this);
-	}
-
-	_initialized = true;
+	ChangeState(BATTLE_STATE_INITIAL);
 } // void BattleMode::_Initialize()
 
 
 
-void BattleMode::_ShutDown() {
-	_battle_music[_current_music].Stop();
+void BattleMode::_DetermineActorLocations() {
+	// Temporary static positions for enemies
+	const float TEMP_ENEMY_LOCATIONS[][2] = {
+		{ 515.0f, 768.0f - 360.0f }, // 768.0f - because of reverse Y-coordinate system
+		{ 494.0f, 768.0f - 450.0f },
+		{ 510.0f, 768.0f - 550.0f },
+		{ 580.0f, 768.0f - 630.0f },
+		{ 675.0f, 768.0f - 390.0f },
+		{ 655.0f, 768.0f - 494.0f },
+		{ 793.0f, 768.0f - 505.0f },
+		{ 730.0f, 768.0f - 600.0f }
+	};
 
-	_ReviveCharacters();
+	float position_x, position_y;
 
-	// This call will clear the input state
-	InputManager->EventHandler();
-
-	// Remove this BattleMode instance from the game stack
-	ModeManager->Pop();
-}
-
-//Bring all dead people back with 1 HP
-void BattleMode::_ReviveCharacters()
-{
-	for (uint32 i = 0; i < _character_actors.size(); ++i)
-	{
-		if (!_character_actors[i]->IsAlive())
-		{
-			_character_actors[i]->GetActor()->RetrieveBattleAnimation("idle")->GetCurrentFrame()->DisableGrayScale();
-			_character_actors[i]->GetActor()->SetHitPoints(1);
-		}
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// BattleMode class -- update methods
-////////////////////////////////////////////////////////////////////////////////
-
-void BattleMode::Update() {
-	_dialogue_window._display_textbox.Update();
-	_dialogue_window._display_options.Update();
-
-	if (InputManager->QuitPress()) {
-		FreezeTimers();
-		ModeManager->Push(new PauseMode(true));
-		return;
-	}
-	else if (InputManager->PausePress()) {
-		FreezeTimers();
-		ModeManager->Push(new PauseMode(false));
-		return;
-	}
-	else if (_dialogue_on) {
-		if (InputManager->ConfirmPress()) {
-			_dialogue_window.Reset();
-
-			if (_dialogue_text.empty()) {
-				_dialogue_on = false;
-			}
-			else {
-				ShowDialogue();
-				return;
-			}
-			UnFreezeTimers();
-		}
-		else {
-			FreezeTimers();
-			return;
-		}
+	// Determine the position of the top-right most character in the party
+	switch (_character_actors.size()) {
+		case 1:
+			position_x = 80.0f;
+			position_y = 288.0f;
+			break;
+		case 2:
+			position_x = 118.0f;
+			position_y = 343.0f;
+			break;
+		case 3:
+			position_x = 122.0f;
+			position_y = 393.0f;
+			break;
+		case 4:
+			position_x = 160.0f;
+			position_y = 448.0f;
+			break;
+		default:
+			position_x = 160.0f;
+			position_y = 448.0f;
+			break;
 	}
 
-	// First, call update functions of any BattleEvents
-	ScriptObject* during_func;
-	for (uint32 i = 0; i < _events.size(); i++) {
-		during_func = _events[i]->GetDuringFunction();
-		ScriptCallFunction<void>(*during_func, this);
-	}
-
+	// Go through all characters, changing each successive position to be down and to the left
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		if (_character_actors[i]->GetAnimationString() != "idle") {
-			_character_actors[i]->Update();
-			return;
-		}
+		_character_actors[i]->SetXOrigin(position_x);
+		_character_actors[i]->SetYOrigin(position_y);
+		_character_actors[i]->SetXLocation(position_x);
+		_character_actors[i]->SetYLocation(position_y);
+		position_x -= 42.0f;
+		position_y -= 105.0f;
 	}
 
-	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-		if (_enemy_actors[i]->GetAnimationString() != "idle") {
-			_enemy_actors[i]->Update();
-			return;
-		}
+	// TEMP: assign static locations to enemies
+	uint32 temp_pos = 0;
+	for (uint32 i = 0; i < _enemy_actors.size(); i++, temp_pos++) {
+		position_x = TEMP_ENEMY_LOCATIONS[temp_pos][0];
+		position_y = TEMP_ENEMY_LOCATIONS[temp_pos][1];
+		_enemy_actors[i]->SetXOrigin(position_x);
+		_enemy_actors[i]->SetYOrigin(position_y);
+		_enemy_actors[i]->SetXLocation(position_x);
+		_enemy_actors[i]->SetYLocation(position_y);
 	}
-
-	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberCharactersAlive() == 0);
-	_victorious_battle = (_NumberEnemiesAlive() == 0);
-
-	// ----- (1): If the battle is over, only execute this small block of update code
-	if (_battle_over) {
-		if (_after_scripts_finished == false) {
-			ScriptObject* after_func;
-			for (uint32 i = 0; i < _events.size(); i++) {
-				after_func = _events[i]->GetAfterFunction();
-				ScriptCallFunction<void>(*after_func, this);
-			}
-			_after_scripts_finished = true;
-			return;
-		}
-
-		if (/*!_finish_window*/_finish_window.GetState() == FINISH_INVALID) { // Indicates that the battle has just now finished
-			//_finish_window = new FinishWindow();
-			// make sure the battle has our music
-			if (_victorious_battle)
-			{
-				AddMusic(_winning_music);
-				PlayMusic(_winning_music);
-			}
-			else
-			{
-				AddMusic(_losing_music);
-				PlayMusic(_losing_music);
-			}
-
-			_action_window.Reset();
-			_finish_window.Initialize(_victorious_battle);
-		}
-
-		// The FinishWindow::Update() function handles all update code when a battle is over.
-		// The call to shut down battle mode is also made from within this call.
-		_finish_window.Update();
-
-		// Do not update other battle code if the battle has already ended
-		return;
-	} // if (_battle_over)
-
-	// ----- (2): Update the state of all battle actors and graphics
-	if (_selected_character == NULL) {  // TEMP: for implementing non-active battle mode, find better way to do so
-		UnFreezeTimers();  // TEMP: also for non-active battle mode
-	}
-
-	if (_selected_character == NULL || !wait) {
-		for (uint8 i = 0; i < _character_actors.size(); i++) {
-			_character_actors[i]->Update();
-		}
-		for (uint8 i = 0; i < _enemy_actors.size(); i++) {
-			_enemy_actors[i]->Update();
-		}
-	}
-	_attack_point_indicator.Update();
-
-	// ----- (3): Execute any scripts that are sitting in the queue
-	if (_action_queue.size())
-	{
-		_UpdateScripts();
-		_CleanupActionQueue();
-	} // if (_action_queue.size())
-
-	// ----- (4): Try to select an idle character if no character is currently selected
-	if (_selected_character == NULL)
-	{
-		_ActivateNextCharacter();
-	}
-
-	// ----- (5): Update the action window if the player is making an action or target selection
-	if (_action_window.GetState() != VIEW_INVALID)
-		_action_window.Update();
-
-	// ----- (6): Cleanup any lingering damage text
-	if (_damage_text_list.size())
-	{
-		_RemoveExpiredDamageText();
-	}
-} // void BattleMode::Update()
-
-void BattleMode::_UpdateScripts()
-{
-	BattleAction* se;
-	std::list<private_battle::BattleAction*>::iterator it;
-
-	for (it = _action_queue.begin(); it != _action_queue.end(); it++)
-	{
-		se = (*it);
-
-		if (se->ShouldBeRemoved())
-			continue;
-
-		se->Update();
-
-		if (se->GetWarmUpTime()->IsFinished())// && !_IsExecutingAction())
-		{
-			//SetPerformingAction(true, se);
-			se->RunScript();
-			//ran_script = true;
-			//Later have battle mode call UpdateActiveBattleAction instead
-			//_action_queue.pop_front();
-		}
-	}
-
-	//Do this out here so iterator doesnt get screwed up mid-loop
-	/*if (ran_script)
-	{
-		SetPerformingAction(false, NULL);
-	}*/
-}
-
-void BattleMode::_CleanupActionQueue()
-{
-	std::list<private_battle::BattleAction*>::iterator it;
-
-	for (it = _action_queue.begin(); it != _action_queue.end();)
-	{
-		if ((*it)->ShouldBeRemoved())
-		{
-			it = _action_queue.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// BattleMode class -- draw methods
-////////////////////////////////////////////////////////////////////////////////
-
-void BattleMode::Draw() {
-	// Apply scene lighting if the battle has finished
-	if (_battle_over && _after_scripts_finished) {
-		if (_victorious_battle) {
-			VideoManager->EnableSceneLighting(Color(0.914f, 0.753f, 0.106f, 1.0f)); // Golden color for victory
-		}
-		else {
-			VideoManager->EnableSceneLighting(Color(1.0f, 0.0f, 0.0f, 1.0f)); // Red color for defeat
-		}
-	}
-
-	_DrawBackgroundVisuals();
-	_DrawBottomMenu();
-	_DrawSprites();
-	_DrawDamageTextList();
-	_DrawStaminaBar();
-
-	if (_action_window.GetState() != VIEW_INVALID) {
-		_action_window.Draw();
-	}
-
-	if (_battle_over && _after_scripts_finished) {
-		_finish_window.Draw();
-	}
-
-	if (_dialogue_on) {
-		_dialogue_window.Draw(&_speaker_name, NULL);
-	}
-} // void BattleMode::Draw()
-
-
-
-void BattleMode::_DrawBackgroundVisuals() {
-	// Draw the full-screen, static background image
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
-	VideoManager->Move(0, 0);
-	_battle_background.Draw();
-
-	// TODO: Draw other background objects and animations
-} // void BattleMode::_DrawBackgroundVisuals()
-
-
-
-void BattleMode::_DrawBottomMenu() {
-	// Draw the static image for the lower menu
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->Move(0, 0);
-	_bottom_menu_image.Draw();
-
-	// Draw the swap icon and any swap cards
-	VideoManager->Move(6, 16);
-	_swap_icon.Draw(Color::gray);
-	VideoManager->Move(6, 68);
-	for (uint8 i = 0; i < _current_number_swaps; i++) {
-		_swap_card.Draw();
-		VideoManager->MoveRelative(4, -4);
-	}
-
-	// Draw the selected character's portrait, blended according to the character's current HP level
-	if (_selected_character)
-		_selected_character->DrawPortrait();
-
-	// Draw the status information of all character actors
-	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		_character_actors[i]->DrawStatus();
-	}
-} // void BattleMode::_DrawBottomMenu()
-
-
-
-void BattleMode::_DrawSprites() {
-	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
-
-	// Draw all character sprites
-	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		_character_actors[i]->DrawSprite();
-	}
-
-	// Sort and draw the enemies
-	//std::deque<private_battle::BattleEnemy*> sorted_enemy_actors = _enemy_actors;
- 	//std::sort(sorted_enemy_actors.begin(), sorted_enemy_actors.end(), AscendingYSort());
-
-	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-		_enemy_actors[i]->DrawSprite();
-	}
-} // void BattleMode::_DrawSprites()
-
-
-void BattleMode::_DrawDamageTextList()
-{
-	if (!_damage_text_list.size())
-		return;
-
-	std::list<DamageText*>::const_iterator it = _damage_text_list.begin();
-
-	for (; it != _damage_text_list.end(); ++it)
-	{
-		(*it)->Draw();
-	}
-}
-
-void BattleMode::_DrawStaminaBar() {
-	// ----- (1): Draw the stamina bar
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->Move(1010, 128);
-	_stamina_meter.Draw();
-
-	// ----- (2): Determine the draw order of all stamina icons and whether or not they are selected
-	GLOBAL_TARGET target_type = _action_window.GetActionTargetType();
-	bool target_character = _action_window.IsActionTargetAlly();
-	std::vector<BattleActor*> live_actors;
-
-	//FIX ME Below is the logic that should be used...requires change to UpdateTargetSelection code
-	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		if (_character_actors[i]->IsAlive())
-			live_actors.push_back(_character_actors[i]);
-	}
-
-	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-		if (_enemy_actors[i]->IsAlive())
-			live_actors.push_back(_enemy_actors[i]);
-	}
-
-	//std::vector<bool> selected(live_actors.size(), false);
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-
-	//CD: Condensed the below code so it takes fewer iterations and if checks
-	//to draw the portraits (on average)
-	if (target_type  == GLOBAL_TARGET_PARTY)
-	{
-		if (target_character == true) { // All characters are selected
-			for (uint32 i = 0; i < live_actors.size(); i++) {
-				/*if (live_actors[i]->IsEnemy() == false) {
-					selected[i] = true;
-				}*/
-				live_actors[i]->DrawStaminaIcon(!live_actors[i]->IsEnemy());
-			}
-		}
-		else { // All enemies are selected
-			for (uint32 i = 0; i < live_actors.size(); i++) {
-				/*if (live_actors[i]->IsEnemy() == true) {
-					selected[i] = true;
-				}*/
-				live_actors[i]->DrawStaminaIcon(live_actors[i]->IsEnemy());
-			}
-		}
-	}
-	else { // Find the actor who is the selected target
-		for (uint32 i = 0; i < live_actors.size(); i++) {
-			/*if (live_actors[i] == _selected_target) {
-				selected[i] = true;
-				break;
-			}*/
-			live_actors[i]->DrawStaminaIcon(live_actors[i] == _selected_target);
-		}
-	}
-
-	// ----- (3): Draw all stamina icons for live actors
-	/*VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	for (uint32 i = 0; i < live_actors.size(); i++) {
-		live_actors[i]->DrawStaminaIcon(selected[i]);
-	}*/
-} // void BattleMode::_DrawStaminaBar()
-
-////////////////////////////////////////////////////////////////////////////////
-// BattleMode class -- miscellaneous Code
-////////////////////////////////////////////////////////////////////////////////
-
-void BattleMode::_ActivateNextCharacter()
-{
-	_selected_character_index = GetIndexOfNextIdleCharacter(_selected_character);
-	if (_selected_character_index != static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX))
-	{
-		_selected_character = GetPlayerCharacterAt(_selected_character_index);
-		_selected_character->SetState(ACTOR_AWAITING_TURN);
-		//_selected_character->GetWaitTime()->Pause();
-		_action_window.Initialize(_selected_character);
-		if (wait)
-			FreezeTimers(); // TEMP: for non-active battle mode
-	}
-}
-
-void BattleMode::_SetInitialTarget() {
-	if (_action_window._action_target_ally == true) {
-		_selected_target_index = -1;
-		_selected_target_index = GetIndexOfNextAliveCharacter(true);
-		_selected_target = GetPlayerCharacterAt(_selected_target_index);
-		_selected_attack_point = 0;
-	}
-	else {
-		_selected_target = GetEnemyActorAt(GetIndexOfFirstAliveEnemy());
-		_selected_target_index = GetIndexOfFirstAliveEnemy();
-		_selected_attack_point = 0;
-	}
-}
-
-
-
-void BattleMode::_SelectNextTarget(bool forward_direction) {
-	if (_selected_target == NULL) {
-		_SetInitialTarget();
-		return;
-	}
-
-	uint32 previous_target = _selected_target_index;
-	if (forward_direction)
-	{
-		if (_action_window._action_target_ally == true)
-		{
-			_selected_target_index = (_selected_target_index + 1) % _character_actors.size();
-			_selected_target = _character_actors[_selected_target_index];
-		}
-		else
-		{
-			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
-			_selected_target = (static_cast<uint32>(_selected_target_index) == INVALID_BATTLE_ACTOR_INDEX) ?
-				NULL : _enemy_actors[_selected_target_index];
-		}
-
-	}
-
-	else {
-
-		if (_action_window._action_target_ally == true)
-		{
-			_selected_target_index--;
-
-			if (_selected_target_index < 0)
-			{
-				_selected_target_index = _character_actors.size() - 1;
-			}
-			_selected_target = _character_actors[_selected_target_index];
-		}
-		else
-		{
-			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
-			_selected_target = (static_cast<uint32>(_selected_target_index) == INVALID_BATTLE_ACTOR_INDEX) ?
-				NULL : _enemy_actors[_selected_target_index];
-		}
-	}
-
-	if (previous_target != static_cast<uint32>(_selected_target_index))
-		_selected_attack_point = 0;
-} // void BattleMode::_SelectNextTarget(bool forward_direction)
-
-
-
-void BattleMode::_SelectNextAttackPoint(bool forward_direction) {
-	if (_selected_target == NULL) {
-		_SetInitialTarget();
-		return;
-	}
-
-	if (forward_direction) {
-		_selected_attack_point++;
-		if (_selected_attack_point >= _selected_target->GetActor()->GetAttackPoints().size())
-			_selected_attack_point = 0;
-	}
-
-	else {
-		if (_selected_attack_point == 0)
-			_selected_attack_point = _selected_target->GetActor()->GetAttackPoints().size() - 1;
-		else
-			_selected_attack_point--;
-	}
-} // void BattleMode::_SelectNextAttackPoint(bool forward_direction)
-
-
-
-bool _TEMPIsA1Smaller(BattleEnemy* a1, BattleEnemy* a2) {
-	if (a1->GetYLocation() - a1->GetActor()->GetSpriteHeight() < a2->GetYLocation() - a2->GetActor()->GetSpriteHeight())
-		return true;
-
-	return false;
-}
-
-
-// Ascending Y sorting functor. We want to compare the actual objects, NOT pointers!
-struct AscendingYSort {
-	bool operator()(BattleEnemy* a1, BattleEnemy* a2)
-	{
-		//return ((*a1) < (*a2));
-		return _TEMPIsA1Smaller(a1, a2);
-	}
-};
+} // void BattleMode::_DetermineActorLocations()
 
 
 
 uint32 BattleMode::_NumberEnemiesAlive() const {
 	uint32 enemy_count = 0;
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-		if (_enemy_actors[i]->IsAlive()) {
+		if (_enemy_actors[i]->IsAlive() == true) {
 			enemy_count++;
 		}
 	}
@@ -911,7 +725,7 @@ uint32 BattleMode::_NumberEnemiesAlive() const {
 uint32 BattleMode::_NumberCharactersAlive() const {
 	uint32 character_count = 0;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		if (_character_actors[i]->IsAlive()) {
+		if (_character_actors[i]->IsAlive() == true) {
 			character_count++;
 		}
 	}
@@ -920,324 +734,496 @@ uint32 BattleMode::_NumberCharactersAlive() const {
 
 
 
-/*void BattleMode::SetPerformingAction(bool is_performing, BattleAction* se) {
-	// Check if a script has just ended. Set the script to stop performing and pop the script from the front of the queue
-	// CD: Only one script will be running at a time, so only need to check the incoming bool
-
-	if (is_performing == false)
-	{
-		// Remove the first scripted event from the queue
-		// _action_queue.front().GetSource() is always either BattleEnemy or BattleCharacter
-		//IBattleActor * source = dynamic_cast<IBattleActor*>(_action_queue.front().GetSource());
-		//IBattleActor* source = _action_queue.front().GetSource();
-		BattleActor* source = (*_active_action).GetSource();
-		if (source) {
-			source->SetState(ACTOR_IDLE);
-			//FIXME Use char and enemy stats
-			source->ResetWaitTime();
-		}
-
-		//	std::list<private_battle::BattleAction*>::iterator it = _action_queue.begin();
-		//	while (it != _action_queue.end()) {
-		//		if ((*it) == _active_action) {
-		//			_action_queue.erase(it);
-		//			break;
-		//		}
-		//		it++;
-		//	}
-		}
-		else {
-			cerr << "Invalid BattleActor pointer in SetPerformingScript()" << endl;
-			SystemManager->ExitGame();
-		}
-	}
-	else
-	{
-		if (se == NULL) {
-			cerr << "Invalid BattleActor pointer in SetPerformingScript()" << endl;
-			SystemManager->ExitGame();
-		}
-	}
-
-	_active_action = se;
-}*/
-
-
-
-void BattleMode::RemoveActionsForActor(BattleActor * actor) {
-	std::list<private_battle::BattleAction*>::iterator it = _action_queue.begin();
-
-	while (it != _action_queue.end()) {
-		if ((*it)->GetSource() == actor) {
-			if ((*it)->IsItemAction()) {
-				ItemAction* action = dynamic_cast<ItemAction*>(*it);
-				action->GetItem()->IncrementCount(1);
-			}
-			//it = _action_queue.erase(it);	//remove this location
-			(*it)->MarkForRemoval();
-		}
-		it++;
-	}
-}
-
-void BattleMode::NotifyOfActorDeath(BattleActor *actor)
-{
-	RemoveActionsForActor(actor);
-	if (!actor->IsEnemy() && (((BattleActor *)(_selected_character)) == actor))
-	{
-		_selected_character = NULL;
-		_action_window.Reset();
-	}
-
-	BattleCharacter *character = dynamic_cast<BattleCharacter*>(actor);
-	if (character)
-	{
-		RemoveFromTurnQueue(character);
-	}
-}
-
-void BattleMode::FreezeTimers() {
-	// Pause scripts
-	std::list<private_battle::BattleAction*>::iterator it = _action_queue.begin();
-
-	while (it != _action_queue.end()) {
-		(*it)->GetWarmUpTime()->Pause();
-		it++;
-	}
-
-	// Pause characters
-	for (uint32 i = 0; i < _character_actors.size(); ++i)
-		_character_actors.at(i)->GetWaitTime()->Pause();
-
-	//Pause enemies
-	for (uint32 i = 0; i < _enemy_actors.size(); ++i)
-		_enemy_actors.at(i)->GetWaitTime()->Pause();
-}
-
-
-void BattleMode::UnFreezeTimers() {
-	// FIX ME: Do not unpause timers for paralyzed actors
-
-	// Unpause scripts
-	std::list<private_battle::BattleAction*>::iterator it = _action_queue.begin();
-	while (it != _action_queue.end()) {
-		(*it)->GetWarmUpTime()->Run();
-		it++;
-	}
-
-	// Unpause characters
-	for (uint32 i = 0; i < _character_actors.size(); ++i)
-		_character_actors.at(i)->GetWaitTime()->Run();
-
-	// Unpause enemies
-	for (uint32 i = 0; i < _enemy_actors.size(); ++i)
-		_enemy_actors.at(i)->GetWaitTime()->Run();
-}
+// void BattleMode::_SetInitialTarget() {
+// 	if (_action_window->_action_target_ally == true) {
+// 		_selected_target_index = -1;
+// 		_selected_target_index = GetIndexOfNextAliveCharacter(true);
+// 		_selected_target = GetPlayerCharacterAt(_selected_target_index);
+// 		_selected_attack_point = 0;
+// 	}
+// 	else {
+// 		_selected_target = GetEnemyActorAt(GetIndexOfFirstAliveEnemy());
+// 		_selected_target_index = GetIndexOfFirstAliveEnemy();
+// 		_selected_attack_point = 0;
+// 	}
+// }
+//
+//
+//
+// void BattleMode::_SelectNextTarget(bool forward_direction) {
+// 	if (_selected_target == NULL) {
+// 		_SetInitialTarget();
+// 		return;
+// 	}
+//
+// 	uint32 previous_target = _selected_target_index;
+// 	if (forward_direction) {
+// 		if (_action_window->_action_target_ally == true) {
+// 			_selected_target_index = (_selected_target_index + 1) % _character_actors.size();
+// 			_selected_target = _character_actors[_selected_target_index];
+// 		}
+// 		else {
+// 			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
+// 			_selected_target = (static_cast<uint32>(_selected_target_index) == INVALID_BATTLE_ACTOR_INDEX) ?
+// 				NULL : _enemy_actors[_selected_target_index];
+// 		}
+// 	}
+//
+// 	else {
+// 		if (_action_window->_action_target_ally == true) {
+// 			_selected_target_index--;
+//
+// 			if (_selected_target_index < 0) {
+// 				_selected_target_index = _character_actors.size() - 1;
+// 			}
+// 			_selected_target = _character_actors[_selected_target_index];
+// 		}
+// 		else {
+// 			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
+// 			_selected_target = (static_cast<uint32>(_selected_target_index) == INVALID_BATTLE_ACTOR_INDEX) ?
+// 				NULL : _enemy_actors[_selected_target_index];
+// 		}
+// 	}
+//
+// 	if (previous_target != static_cast<uint32>(_selected_target_index))
+// 		_selected_attack_point = 0;
+// }
+//
+//
+//
+// void BattleMode::_SelectNextAttackPoint(bool forward_direction) {
+// 	if (_selected_target == NULL) {
+// 		_SetInitialTarget();
+// 		return;
+// 	}
+//
+// 	if (forward_direction) {
+// 		_selected_attack_point++;
+// 		if (_selected_attack_point >= _selected_target->GetActor()->GetAttackPoints().size())
+// 			_selected_attack_point = 0;
+// 	}
+//
+// 	else {
+// 		if (_selected_attack_point == 0)
+// 			_selected_attack_point = _selected_target->GetActor()->GetAttackPoints().size() - 1;
+// 		else
+// 			_selected_attack_point--;
+// 	}
+// }
 
 
 
-void BattleMode::SwapCharacters(BattleCharacter* ActorToRemove, BattleCharacter * ActorToAdd) {
-	// Remove 'ActorToRemove'
-	for (std::deque < BattleCharacter * >::iterator it = _character_actors.begin(); it != _character_actors.end(); it++) {
-		if (*it == ActorToRemove) {
-			_character_actors.erase(it);
-			break;
-		}
-	}
-
-	// set location and origin to removing characters location and origin
-	ActorToAdd->SetXOrigin(ActorToRemove->GetXOrigin());
-	ActorToAdd->SetYOrigin(ActorToRemove->GetYOrigin());
-	ActorToAdd->SetXLocation(static_cast<float>(ActorToRemove->GetXOrigin()));
-	ActorToAdd->SetYLocation(static_cast<float>(ActorToRemove->GetYOrigin()));
-
-	_character_actors.push_back(ActorToAdd);	//add the other character to battle
-}
-
-
-void BattleMode::AddToTurnQueue(BattleCharacter* character)
-{
-	_characters_awaiting_turn.push_back(character);
-}
-
-void BattleMode::RemoveFromTurnQueue(BattleCharacter *character)
-{
-	std::list<private_battle::BattleCharacter*>::iterator it;
-
-	for (it = _characters_awaiting_turn.begin(); it != _characters_awaiting_turn.end(); it++)
-	{
-		if ((*it) == character)
-		{
-			_characters_awaiting_turn.erase(it);
-			break;
-		}
-	}
-}
+// void BattleMode::_UpdateScripts() {
+// 	BattleAction* action;
+//
+// 	for (list<BattleAction*>::iterator i = _action_queue.begin(); i != _action_queue.end(); i++) {
+// 		action = (*i);
+//
+// // 		if (action->ShouldBeRemoved())
+// // 			continue;
+//
+// 		if (action->GetSource()->GetState() == ACTOR_STATE_READY) {
+// 			action->Execute();
+// 		}
+// 	}
+// }
+//
+//
+//
+// void BattleMode::_CleanupActionQueue() {
+// 	list<BattleAction*>::iterator it;
+//
+// 	for (it = _action_queue.begin(); it != _action_queue.end();) {
+// 		if ((*it)->ShouldBeRemoved()) {
+// 			it = _action_queue.erase(it);
+// 		}
+// 		else {
+// 			++it;
+// 		}
+// 	}
+// }
 
 
-uint32 BattleMode::GetIndexOfFirstAliveEnemy() const {
-	std::deque<private_battle::BattleEnemy*>::const_iterator it = _enemy_actors.begin();
-	for (uint32 i = 0; it != _enemy_actors.end(); i++, it++) {
-		if ((*it)->IsAlive()) {
-			return i;
-		}
-	}
 
-	// This should never be reached
-	return INVALID_BATTLE_ACTOR_INDEX;
+void BattleMode::_DrawBackgroundGraphics() {
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
+	VideoManager->Move(0.0f, 0.0f);
+	_battle_background.Draw();
+
+	// TODO: Draw other background objects and animations
 }
 
 
 
-uint32 BattleMode::GetIndexOfLastAliveEnemy() const {
-	std::deque<private_battle::BattleEnemy*>::const_iterator it = _enemy_actors.end()-1;
-	for (int32 i = _enemy_actors.size()-1; i >= 0; i--, it--) {
-		if ((*it)->IsAlive()) {
-			return i;
-		}
+void BattleMode::_DrawSprites() {
+	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
+
+	// Draw all character sprites
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		_character_actors[i]->DrawSprite();
 	}
 
-	// This should never be reached
-	return INVALID_BATTLE_ACTOR_INDEX;
+	// Draw all enemy sprites
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		_enemy_actors[i]->DrawSprite();
+	}
 }
 
 
 
-uint32 BattleMode::GetIndexOfNextIdleCharacter(BattleCharacter *ignore) const
-{
-	BattleCharacter* character;
+void BattleMode::_DrawGUI() {
+	_DrawBottomMenu();
+	_DrawStaminaBar();
+	_DrawIndicators();
 
-	if (!_characters_awaiting_turn.size())
-	{
-		return INVALID_BATTLE_ACTOR_INDEX;
+	// TODO: draw dialogue window if it is active
+// 	if (_state == BATTLE_STATE_EVENT) {
+// 		_dialogue_window.Draw(&_speaker_name, NULL);
+// 	}
+	if (_command_supervisor->GetState() != COMMAND_STATE_INVALID) {
+		_command_supervisor->Draw();
 	}
-	else if (_characters_awaiting_turn.size() == 1 || !ignore)
-	{
-		character = _characters_awaiting_turn.front();
+	if ((_state == BATTLE_STATE_VICTORY || _state == BATTLE_STATE_DEFEAT)) {// && _after_scripts_finished) {
+		_finish_window->Draw();
 	}
-	else
-	{
-		std::list<BattleCharacter*>::const_iterator it2;
-		//Find our guy in the waiting queue
-		for (it2 = _characters_awaiting_turn.begin(); it2 != _characters_awaiting_turn.end(); it2++)
-		{
-			if ((*it2) == ignore)
-			{
+}
+
+
+
+void BattleMode::_DrawBottomMenu() {
+	// Draw the static image for the lower menu
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	VideoManager->Move(0.0f, 0.0f);
+	_bottom_menu_image.Draw();
+
+	// Draw the swap icon and any swap cards
+	VideoManager->Move(6.0f, 16.0f);
+	_swap_icon.Draw(Color::gray);
+	VideoManager->Move(6.0f, 68.0f);
+	for (uint8 i = 0; i < _current_number_swaps; i++) {
+		_swap_card.Draw();
+		VideoManager->MoveRelative(4.0f, -4.0f);
+	}
+
+	// Draw the selected character's portrait, blended according to the character's current HP level
+	if (_selected_character)
+		_selected_character->DrawPortrait();
+
+	// Draw the status information of all character actors
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		_character_actors[i]->DrawStatus(i);
+	}
+}
+
+
+
+void BattleMode::_DrawStaminaBar() {
+	// ----- (1): Draw the stamina bar
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->Move(1010.0f, 128.0f);
+	_stamina_meter.Draw();
+
+	// ----- (2): Determine the draw order of all stamina icons
+// 	GLOBAL_TARGET target_type = _command_supervisor->GetSelectedTarget().GetType();
+// 	bool target_character = _action_window->IsActionTargetAlly();
+
+	// A container to hold all actors that should have their stamina icons drawn
+	vector<BattleActor*> live_actors;
+
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		if (_character_actors[i]->IsAlive())
+			live_actors.push_back(_character_actors[i]);
+	}
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		if (_enemy_actors[i]->IsAlive())
+			live_actors.push_back(_enemy_actors[i]);
+	}
+
+	//std::vector<bool> selected(live_actors.size(), false);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+
+	vector<float> draw_positions(live_actors.size(), 0.0f);
+	for (uint32 i = 0; i < live_actors.size(); i++) {
+		switch (live_actors[i]->GetState()) {
+			case ACTOR_STATE_IDLE:
+				draw_positions[i] = STAMINA_LOCATION_BOTTOM + (STAMINA_LOCATION_COMMAND - STAMINA_LOCATION_BOTTOM) *
+					live_actors[i]->GetStateTimer().PercentComplete();
 				break;
-			}
-		}
-
-		//Grab the guy after him
-		if ((++it2) != _characters_awaiting_turn.end())
-		{
-			character = (*it2);
-		}
-		//Loop around if he's at the end of the list
-		else
-		{
-			character = _characters_awaiting_turn.front();
+			case ACTOR_STATE_COMMAND:
+				draw_positions[i] = STAMINA_LOCATION_COMMAND;
+				break;
+			case ACTOR_STATE_WARM_UP:
+				draw_positions[i] = STAMINA_LOCATION_COMMAND + (STAMINA_LOCATION_TOP - STAMINA_LOCATION_COMMAND) *
+					live_actors[i]->GetStateTimer().PercentComplete();
+				break;
+			case ACTOR_STATE_READY:
+				draw_positions[i] = STAMINA_LOCATION_TOP;
+				break;
+			case ACTOR_STATE_ACTING:
+				draw_positions[i] = STAMINA_LOCATION_TOP + 25.0f;
+				break;
+			case ACTOR_STATE_COOL_DOWN:
+				draw_positions[i] = STAMINA_LOCATION_BOTTOM;
+				break;
+			default:
+				// This case is invalid. Instead of printing a debug message that will get echoed every
+				// loop, draw the icon at a clearly invalid position well away from the stamina bar
+				draw_positions[i] = STAMINA_LOCATION_BOTTOM - 50.0f;
+				break;
 		}
 	}
 
-	std::deque<BattleCharacter*>::const_iterator it = _character_actors.begin();
-	for (uint32 i = 0; it != _character_actors.end(); i++, it++)
-	{
-		if ((*it) == character)
-		{
-			return i;
-		}
+	// TODO: sort the draw positions container and correspond that to live_actors
+// 	sort(draw_positions.begin(), draw_positions.end());
+
+	// ----- (3): Draw all stamina icons in order
+	for (uint32 i = 0; i < live_actors.size(); i++) {
+		VideoManager->Move(1000.0f, draw_positions[i]);
+		live_actors[i]->GetStaminaIcon().Draw();
 	}
 
-	return INVALID_BATTLE_ACTOR_INDEX;
+	// TODO: Draw stamina icons in proper draw order
+// 	if (target_type  == GLOBAL_TARGET_PARTY) {
+// 		if (target_character == true) { // All characters are selected
+// 			for (uint32 i = 0; i < live_actors.size(); i++) {
+// 				live_actors[i]->DrawStaminaIcon(!live_actors[i]->IsEnemy());
+// 			}
+// 		}
+// 		else { // All enemies are selected
+// 			for (uint32 i = 0; i < live_actors.size(); i++) {
+// 				live_actors[i]->DrawStaminaIcon(live_actors[i]->IsEnemy());
+// 			}
+// 		}
+// 	}
+// 	else { // Find the actor who is the selected target
+// 		for (uint32 i = 0; i < live_actors.size(); i++) {
+// 			live_actors[i]->DrawStaminaIcon(live_actors[i] == _selected_target);
+// 		}
+// 	}
+
+	// ----- (3): Draw all stamina icons for live actors
+	/*VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	for (uint32 i = 0; i < live_actors.size(); i++) {
+		live_actors[i]->DrawStaminaIcon(selected[i]);
+	}*/
+} // void BattleMode::_DrawStaminaBar()
+
+
+
+void BattleMode::_DrawIndicators() {
+	// TODO: Draw sprites indicators in an ordered manner?
+
+	// Draw all character sprites
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		_character_actors[i]->DrawIndicators();
+	}
+
+	// Draw all enemy sprites
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		_enemy_actors[i]->DrawIndicators();
+	}
 }
 
 
 
-uint32 BattleMode::GetIndexOfCharacter(BattleCharacter* const actor) const {
-	deque<BattleCharacter*>::const_iterator it = _character_actors.begin();
-	for (int32 i = 0; it != _character_actors.end(); i++, it++) {
-		if (*it == actor)
-			return i;
-	}
+// void BattleMode::_ActivateNextCharacter() {
+// 	_selected_character_index = GetIndexOfNextIdleCharacter(_selected_character);
+// 	if (_selected_character_index != static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX)) {
+// 		_selected_character = GetPlayerCharacterAt(_selected_character_index);
+// 		_selected_character->ChangeState(ACTOR_STATE_READY);
+// 		//_selected_character->GetWaitTime()->Pause();
+// 		_action_window->Initialize(_selected_character);
+// 		if (wait)
+// 			FreezeTimers(); // TEMP: for non-active battle mode
+// 	}
+// }
 
-	// This should never be reached
-	return INVALID_BATTLE_ACTOR_INDEX;
+
+// void BattleMode::RemoveActionsForActor(BattleActor * actor) {
+// 	list<BattleAction*>::iterator it = _action_queue.begin();
+//
+// 	while (it != _action_queue.end()) {
+// 		if ((*it)->GetSource() == actor) {
+// 			if ((*it)->IsItemAction()) {
+// 				ItemAction* action = dynamic_cast<ItemAction*>(*it);
+// 				action->GetItem()->IncrementCount(1);
+// 			}
+// 			//it = _action_queue.erase(it);	//remove this location
+// 			(*it)->MarkForRemoval();
+// 		}
+// 		it++;
+// 	}
+// }
+
+
+
+
+// void BattleMode::AddToTurnQueue(BattleCharacter* character) {
+// 	_characters_awaiting_turn.push_back(character);
+// }
+//
+//
+//
+// void BattleMode::RemoveFromTurnQueue(BattleCharacter *character) {
+// 	for (list<private_battle::BattleCharacter*>::iterator i = _characters_awaiting_turn.begin();
+// 		i != _characters_awaiting_turn.end(); i++)
+// 	{
+// 		if ((*i) == character) {
+// 			_characters_awaiting_turn.erase(i);
+// 			return;
+// 		}
+// 	}
+//
+// 	IF_PRINT_WARNING(BATTLE_WARNING) << "character not found in turn queue" << endl;
+// }
+
+
+
+// uint32 BattleMode::GetIndexOfFirstAliveEnemy() const {
+// 	deque<BattleEnemy*>::const_iterator it = _enemy_actors.begin();
+// 	for (uint32 i = 0; it != _enemy_actors.end(); i++, it++) {
+// 		if ((*it)->IsAlive()) {
+// 			return i;
+// 		}
+// 	}
+//
+// 	// This should never be reached
+// 	return INVALID_BATTLE_ACTOR_INDEX;
+// }
+//
+//
+//
+// uint32 BattleMode::GetIndexOfLastAliveEnemy() const {
+// 	deque<BattleEnemy*>::const_iterator it = _enemy_actors.end()-1;
+// 	for (int32 i = _enemy_actors.size()-1; i >= 0; i--, it--) {
+// 		if ((*it)->IsAlive()) {
+// 			return i;
+// 		}
+// 	}
+//
+// 	// This should never be reached
+// 	return INVALID_BATTLE_ACTOR_INDEX;
+// }
+
+
+
+// uint32 BattleMode::GetIndexOfNextIdleCharacter(BattleCharacter *ignore) const {
+// 	BattleCharacter* character;
+//
+// 	if (!_characters_awaiting_turn.size()) {
+// 		return INVALID_BATTLE_ACTOR_INDEX;
+// 	}
+// 	else if (_characters_awaiting_turn.size() == 1 || !ignore) {
+// 		character = _characters_awaiting_turn.front();
+// 	}
+// 	else {
+// 		list<BattleCharacter*>::const_iterator it2;
+// 		//Find our guy in the waiting queue
+// 		for (it2 = _characters_awaiting_turn.begin(); it2 != _characters_awaiting_turn.end(); it2++) {
+// 			if ((*it2) == ignore) {
+// 				break;
+// 			}
+// 		}
+//
+// 		//Grab the guy after him
+// 		if ((++it2) != _characters_awaiting_turn.end()) {
+// 			character = (*it2);
+// 		}
+// 		//Loop around if he's at the end of the list
+// 		else {
+// 			character = _characters_awaiting_turn.front();
+// 		}
+// 	}
+//
+// 	deque<BattleCharacter*>::const_iterator it = _character_actors.begin();
+// 	for (uint32 i = 0; it != _character_actors.end(); i++, it++) {
+// 		if ((*it) == character) {
+// 			return i;
+// 		}
+// 	}
+//
+// 	return INVALID_BATTLE_ACTOR_INDEX;
+// }
+
+
+
+// uint32 BattleMode::GetIndexOfNextAliveCharacter(bool move_upward) const {
+// 	if (move_upward) {
+// 		for (uint32 i = _selected_target_index + 1; i < _character_actors.size(); i++) {
+// 			if (_character_actors[i]->IsAlive()) {
+// 				return i;
+// 			}
+// 		}
+// 		for (int32 i = 0; i <= _selected_target_index; ++i) {
+// 			if (_character_actors[i]->IsAlive()) {
+// 				return i;
+// 			}
+// 		}
+//
+// 		// This should never be reached
+// 		return INVALID_BATTLE_ACTOR_INDEX;
+// 	}
+// 	else {
+// 		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; i--) {
+// 			if (_character_actors[i]->IsAlive()) {
+// 				return i;
+// 			}
+// 		}
+// 		for (int32 i = static_cast<int32>(_character_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); i--) {
+// 			if (_character_actors[i]->IsAlive())
+// 			{
+// 				return i;
+// 			}
+// 		}
+//
+// 		// This should never be reached
+// 		return INVALID_BATTLE_ACTOR_INDEX;
+// 	}
+// }
+//
+//
+//
+// uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
+// 	if (move_upward) {
+// 		for (uint32 i = _selected_target_index + 1; i < _enemy_actors.size(); i++) {
+// 			if (_enemy_actors[i]->IsAlive()) {
+// 				return i;
+// 			}
+// 		}
+// 		for (int32 i = 0; i <= _selected_target_index; ++i) {
+// 			if (_enemy_actors[i]->IsAlive()) {
+// 				return i;
+// 			}
+// 		}
+//
+// 		// This should never be reached
+// 		return INVALID_BATTLE_ACTOR_INDEX;
+// 	}
+// 	else {
+// 		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; i--) {
+// 			if (_enemy_actors[i]->IsAlive()) {
+// 				return i;
+// 			}
+// 		}
+// 		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); i--) {
+// 			if (_enemy_actors[i]->IsAlive()) {
+// 				return i;
+// 			}
+// 		}
+//
+// 		// This should never be reached
+// 		return INVALID_BATTLE_ACTOR_INDEX;
+// 	}
+// }
+
+
+/*
+void BattleMode::AddDialogue(string speaker_name, string text) {
+	_dialogue_text.push_back(MakeUnicodeString(speaker_name));
+	_dialogue_text.push_back(MakeUnicodeString(text));
 }
 
-uint32 BattleMode::GetIndexOfNextAliveCharacter(bool move_upward) const
-{
-	if (move_upward) {
-		for (uint32 i = _selected_target_index + 1; i < _character_actors.size(); i++) {
-			if (_character_actors[i]->IsAlive()) {
-				return i;
-			}
-		}
-		for (int32 i = 0; i <= _selected_target_index; ++i) {
-			if (_character_actors[i]->IsAlive()) {
-				return i;
-			}
-		}
 
-		// This should never be reached
-		return INVALID_BATTLE_ACTOR_INDEX;
-	}
-	else {
-		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; i--) {
-			if (_character_actors[i]->IsAlive()) {
-				return i;
-			}
-		}
-		for (int32 i = static_cast<int32>(_character_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); i--) {
-			if (_character_actors[i]->IsAlive())
-			{
-				return i;
-			}
-		}
-
-		// This should never be reached
-		return INVALID_BATTLE_ACTOR_INDEX;
-	}
-}
-
-uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
-	if (move_upward) {
-		for (uint32 i = _selected_target_index + 1; i < _enemy_actors.size(); i++) {
-			if (_enemy_actors[i]->IsAlive()) {
-				return i;
-			}
-		}
-		for (int32 i = 0; i <= _selected_target_index; ++i) {
-			if (_enemy_actors[i]->IsAlive()) {
-				return i;
-			}
-		}
-
-		// This should never be reached
-		return INVALID_BATTLE_ACTOR_INDEX;
-	}
-	else {
-		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; i--) {
-			if (_enemy_actors[i]->IsAlive()) {
-				return i;
-			}
-		}
-		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); i--) {
-			if (_enemy_actors[i]->IsAlive())
-			{
-				return i;
-			}
-		}
-
-		// This should never be reached
-		return INVALID_BATTLE_ACTOR_INDEX;
-	}
-} // uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const
-
-
-void BattleMode::AddDamageText(const hoa_utils::ustring& text, uint32 duration, float x, float y)
-{
-	_damage_text_list.push_front(new DamageText(text, duration, x, y));
-}
 
 void BattleMode::ShowDialogue() {
 	_speaker_name = _dialogue_text.front();
@@ -1246,44 +1232,9 @@ void BattleMode::ShowDialogue() {
 	_dialogue_text.pop_front();
 
 	_dialogue_window.Reset();
-	_dialogue_on = true;
 	_dialogue_window._display_textbox.SetDisplayText(text);
 	_dialogue_window.Initialize();
-}
-
-void BattleMode::AddDialogue(std::string speaker_name, std::string text) {
-	_dialogue_text.push_back(MakeUnicodeString(speaker_name));
-	_dialogue_text.push_back(MakeUnicodeString(text));
-}
-
-void BattleMode::_RemoveExpiredDamageText()
-{
-	std::list<DamageText*>::iterator it;
-
-	for (it = _damage_text_list.begin(); it != _damage_text_list.end();)
-	{
-		if ((*it)->GetTimer()->IsFinished())
-		{
-			delete *it;
-			it = _damage_text_list.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-// DamageText class
-////////////////////////////////////////////////////////////////////////////////
-
-
-void DamageText::Draw()
-{
-	VideoManager->Move(_x_pos, _y_pos + ( _timer.GetTimeExpired() / 35.0f ));
-	VideoManager->Text()->Draw(_text, TextStyle("text18", Color::red));
-}
+	ChangeState(BATTLE_STATE_DIALOGUE);
+}*/
 
 } // namespace hoa_battle

@@ -190,7 +190,7 @@ public:
 	*** This method will return 1.0f if the state is SYSTEM_TIMER_FINISHED or 0.0f if the state
 	*** is anything other than SYSTEM_TIMER_RUNNING or SYSTEM_TIMER_PAUSED. The number of loops
 	**/
-	float PercentComplete();
+	float PercentComplete() const;
 
 	/** \name Member Set Access Functions
 	*** \note <b>Only</b> call these methods when the timer is in its initial state. Trying to set

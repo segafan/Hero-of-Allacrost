@@ -137,10 +137,16 @@ modes_SOURCES = \
 	$(MODES_DIR)/battle/battle_actions.h \
 	$(MODES_DIR)/battle/battle_actors.cpp \
 	$(MODES_DIR)/battle/battle_actors.h \
+	$(MODES_DIR)/battle/battle_command.cpp \
+	$(MODES_DIR)/battle/battle_command.h \
 	$(MODES_DIR)/battle/battle_events.cpp \
 	$(MODES_DIR)/battle/battle_events.h \
-	$(MODES_DIR)/battle/battle_windows.cpp \
-	$(MODES_DIR)/battle/battle_windows.h \
+	$(MODES_DIR)/battle/battle_finish.cpp \
+	$(MODES_DIR)/battle/battle_finish.h \
+	$(MODES_DIR)/battle/battle_indicators.cpp \
+	$(MODES_DIR)/battle/battle_indicators.h \
+	$(MODES_DIR)/battle/battle_utils.cpp \
+	$(MODES_DIR)/battle/battle_utils.h \
 	$(MODES_DIR)/boot/boot.cpp \
 	$(MODES_DIR)/boot/boot.h \
 	$(MODES_DIR)/boot/boot_menu.cpp \

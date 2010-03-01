@@ -20,6 +20,7 @@
 #include "global.h"
 #include "script.h"
 #include "battle_events.h"
+#include "battle_utils.h"
 
 using namespace std;
 using namespace hoa_utils;

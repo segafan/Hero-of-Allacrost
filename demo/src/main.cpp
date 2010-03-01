@@ -44,7 +44,6 @@
 #include "input.h"
 #include "script.h"
 #include "system.h"
-#include "battle.h"
 
 #include "global.h"
 
@@ -156,10 +155,11 @@ bool LoadSettings()
 	// battle_settings.timer_multiplier is also a hidden setting
 	if (settings.DoesTableExist("battle_settings")) {
 		settings.OpenTable("battle_settings");
-		if (settings.DoesFloatExist("timer_multiplier"))
-			hoa_battle::timer_multiplier = static_cast<float>(settings.ReadFloat("timer_multiplier"));
-		if (settings.DoesBoolExist("wait"))
-			hoa_battle::wait = static_cast<bool>(settings.ReadBool("wait"));
+		// TEMP: I don't think that we should do this... - Roots
+// 		if (settings.DoesFloatExist("timer_multiplier"))
+// 			hoa_battle::timer_multiplier = static_cast<float>(settings.ReadFloat("timer_multiplier"));
+// 		if (settings.DoesBoolExist("wait"))
+// 			hoa_battle::wait = static_cast<bool>(settings.ReadBool("wait"));
 		settings.CloseTable();
 	}
 
