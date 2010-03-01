@@ -482,16 +482,8 @@ void BattleCharacter::DrawStatus(uint32 order) {
 			y_offset = 0.0f;
 	}
 
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-
-	// Draw the highlighted background if the character is selected
-	if (BattleMode::CurrentInstance()->_selected_character == this) {
-		VideoManager->Move(148.0f, 84.0f + y_offset);
-		BattleMode::CurrentInstance()->_character_selection.Draw();
-	}
-
 	// Draw the character's name
-	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(280.0f, 82.0f + y_offset);
 	_name_text.Draw();
 

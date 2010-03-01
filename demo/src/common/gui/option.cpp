@@ -143,19 +143,18 @@ void OptionBox::Update(uint32 frame_time) {
 	if (_scrolling) {
 		_scroll_time += frame_time;
 
-    if (_scroll_time > VIDEO_OPTION_SCROLL_TIME) {
+    	if (_scroll_time > VIDEO_OPTION_SCROLL_TIME) {
 			_scroll_time = 0;
 			_scrolling = false;
-
-      _scroll_offset = 0.0f;
-		} else {
-      // [phuedx] Calculate the _scroll_offset independant of the coordinate system
-      _scroll_offset = (_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME)) * _cell_height;
-
-      if (_scroll_direction == -1 ) { // Up
-        _scroll_offset = _cell_height - _scroll_offset;
-      }
-    }
+			_scroll_offset = 0.0f;
+		}
+		else {
+			// [phuedx] Calculate the _scroll_offset independant of the coordinate system
+			_scroll_offset = (_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME)) * _cell_height;
+			if (_scroll_direction == -1 ) { // Up
+				_scroll_offset = _cell_height - _scroll_offset;
+			}
+		}
 	}
 }
 
@@ -178,9 +177,8 @@ void OptionBox::Draw() {
 	// affect that. This bug needs to be resolved and then this call to _DEBUG_DrawOutline() should
 	// be removed, leaving only the call at the bottom of the function
 	if (GUIManager->DEBUG_DrawOutlines() == true) {
-    //    _DEBUG_DrawOutline();
-  }
-
+		//_DEBUG_DrawOutline();
+	}
 	float left, right, bottom, top;
 
 	// ---------- (1) Determine the edge dimensions of the option box
@@ -199,8 +197,8 @@ void OptionBox::Draw() {
 	float yoff = -_cell_height * cs.GetVerticalDirection();
 	bool finished = false;
 
-  // [phuedx] Align the scroll offset with the current coordinate system
-  _scroll_offset *= cs.GetVerticalDirection();
+	// [phuedx] Align the scroll offset with the current coordinate system
+	_scroll_offset *= cs.GetVerticalDirection();
 
 	OptionCellBounds bounds;
 	bounds.y_top = top + _scroll_offset;
@@ -228,14 +226,14 @@ void OptionBox::Draw() {
 			float left_edge = 999999.0f; // The x offset to where the visible option contents begin
 			_DrawOption(_options.at(index), bounds, _scroll_offset, left_edge);
 
-      // Draw the cursor if the previously drawn option was or is selected
-      if ((static_cast<int32>(index) == _selection || static_cast<int32>(index) == _first_selection) &&
-        _cursor_state != VIDEO_CURSOR_STATE_HIDDEN && (_cursor_state != VIDEO_CURSOR_STATE_BLINKING || _blink == true)) {
-
-        // If this option was the first selection, draw it darkened so that it has a different appearance
-        bool darken = (static_cast<int32>(index) == _first_selection) ? true : false;
-        _DrawCursor(bounds, _scroll_offset, left_edge, darken);
-      }
+			// Draw the cursor if the previously drawn option was or is selected
+			if ((static_cast<int32>(index) == _selection || static_cast<int32>(index) == _first_selection) &&
+				_cursor_state != VIDEO_CURSOR_STATE_HIDDEN && (_cursor_state != VIDEO_CURSOR_STATE_BLINKING || _blink == true))
+			{
+				// If this option was the first selection, draw it darkened so that it has a different appearance
+				bool darken = (static_cast<int32>(index) == _first_selection) ? true : false;
+				_DrawCursor(bounds, _scroll_offset, left_edge, darken);
+			}
 
 			bounds.x_left += xoff;
 			bounds.x_center += xoff;
@@ -705,12 +703,16 @@ void OptionBox::SetCursorState(CursorState state) {
 	_cursor_state = state;
 }
 
+
+
 void OptionBox::SetHorizontalArrowsPosition(HORIZONTAL_ARROWS_POSITION position) {
-  _horizontal_arrows_position = position;
+	_horizontal_arrows_position = position;
 }
 
+
+
 void OptionBox::SetVerticalArrowsPosition(VERTICAL_ARROWS_POSITION position) {
-  _vertical_arrows_position = position;
+	_vertical_arrows_position = position;
 }
 
 // -----------------------------------------------------------------------------
@@ -1147,25 +1149,27 @@ void OptionBox::_DrawOption(const Option& op, const OptionCellBounds &bounds, fl
 	} // for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++)
 } // void OptionBox::_DrawOption(const Option& op, const OptionCellBounds &bounds, float scroll_offset, float& left_edge)
 
-void OptionBox::_DrawCursor(const OptionCellBounds &bounds, float scroll_offset, float left_edge, bool darken) {
-  // [phuedx] In this case the scroll offset is not used, however it should be.
-  // The Draw() function (and all helper functions) should be able able to
-  // render without knowledge of the private member variable _scroll_offset.
 
-  float x, y;
+
+void OptionBox::_DrawCursor(const OptionCellBounds &bounds, float scroll_offset, float left_edge, bool darken) {
+	// [phuedx] In this case the scroll offset is not used, however it should be.
+	// The Draw() function (and all helper functions) should be able able to
+	// render without knowledge of the private member variable _scroll_offset.
+
+	float x, y;
 
 	// Should never scissor the cursor
 	VideoManager->DisableScissoring();
 
 	float cursor_offset = 0.0f;
 
-  // [phuedx] The scroll_offset has already been calculated and projected on to the current coordinate system
+	// [phuedx] The scroll_offset has already been calculated and projected on to the current coordinate system
 	if (_scrolling) {
-    cursor_offset = -scroll_offset;
+		cursor_offset = -scroll_offset;
 	}
 
 	_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
-  VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->MoveRelative(left_edge + _cursor_xoffset, _cursor_yoffset + cursor_offset);
 
 	StillImage *default_cursor = VideoManager->GetDefaultCursor();

@@ -39,13 +39,13 @@ namespace hoa_battle {
 
 namespace private_battle {
 
-const float HEADER_POSITION_X = 200.0f;
-const float HEADER_POSITION_Y = 0.0f;
+const float HEADER_POSITION_X = 140.0f;
+const float HEADER_POSITION_Y = 140.0f;
 const float HEADER_SIZE_X = 350.0f;
 const float HEADER_SIZE_Y = 30.0f;
 
-const float LIST_POSITION_X = 200.0f;
-const float LIST_POSITION_Y = 30.0f;
+const float LIST_POSITION_X = 140.0f;
+const float LIST_POSITION_Y = 115.0f;
 const float LIST_SIZE_X = 350.0f;
 const float LIST_SIZE_Y = 120.0f;
 
@@ -492,6 +492,17 @@ CommandSupervisor::CommandSupervisor() :
 	}
 	_command_window.SetPosition(512.0f, 128.0f);
 	_command_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_command_window.Show();
+
+	_category_icons.resize(4, StillImage());
+	if (_category_icons[0].Load("img/icons/battle/attack.png") == false)
+		PRINT_ERROR << "failed to load category icon" << endl;
+	if (_category_icons[1].Load("img/icons/battle/defend.png") == false)
+		PRINT_ERROR << "failed to load category icon" << endl;
+	if (_category_icons[2].Load("img/icons/battle/support.png") == false)
+		PRINT_ERROR << "failed to load category icon" << endl;
+	if (_category_icons[3].Load("img/icons/battle/item.png") == false)
+		PRINT_ERROR << "failed to load category icon" << endl;
 
 	_category_text.resize(4, TextImage("", TextStyle("title22")));
 	_category_text[0].SetText(Translate("Attack"));
@@ -506,7 +517,7 @@ CommandSupervisor::CommandSupervisor() :
 	category_options.push_back(MakeUnicodeString("<img/icons/battle/item.png>\n") + UTranslate("Item"));
 
 	_category_list.SetOwner(&_command_window);
-	_category_list.SetPosition(256.0f, 64.0f);
+	_category_list.SetPosition(256.0f, 75.0f);
 	_category_list.SetDimensions(400.0f, 80.0f, 4, 1, 4, 1);
 	_category_list.SetCursorOffset(-20.0f, 25.0f);
 	_category_list.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -546,10 +557,41 @@ void CommandSupervisor::Initialize(BattleCharacter* character) {
 	if (_HasCharacterSettings(character) == false)
 		_CreateCharacterSettings(character);
 
-	_state = COMMAND_STATE_CATEGORY;
+	_ChangeState(COMMAND_STATE_CATEGORY);
 	_active_settings = &(_character_settings.find(character)->second);
 	_category_list.SetSelection(_active_settings->GetLastCategory());
 	_selected_target = _active_settings->GetLastTarget();
+
+	// TEMP: if last target for character was invalid, set it to the first enemy, first attack point
+	if (_selected_target.GetType() == GLOBAL_TARGET_INVALID) {
+		_selected_target.SetAttackPointTarget(0, BattleMode::CurrentInstance()->GetEnemyActors()[0]);
+	}
+
+	// Determine which categories should be enabled or disabled
+	if (_active_settings->GetAttackList()->GetNumberOptions() == 0)
+		_category_list.EnableOption(0, false);
+	else
+		_category_list.EnableOption(0, true);
+	if (_active_settings->GetDefendList()->GetNumberOptions() == 0)
+		_category_list.EnableOption(1, false);
+	else
+		_category_list.EnableOption(1, true);
+	if (_active_settings->GetSupportList()->GetNumberOptions() == 0)
+		_category_list.EnableOption(2, false);
+	else
+		_category_list.EnableOption(2, true);
+	if (_item_command.GetNumberListOptions() == 0)
+		_category_list.EnableOption(3, false);
+	else
+		_category_list.EnableOption(3, true);
+
+	// Warn if there are no enabled options in the category list
+	for (uint32 i = 0; i < _category_list.GetNumberOptions(); i++) {
+		if (_category_list.IsOptionEnabled(i) == true)
+			return;
+	}
+
+	IF_PRINT_WARNING(BATTLE_DEBUG) << "no options in category list were enabled" << endl;
 }
 
 
@@ -570,7 +612,7 @@ void CommandSupervisor::Update() {
 			break;
 		default:
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid/unknown command state: " << _state << endl;
-			_state = COMMAND_STATE_CATEGORY;
+			_ChangeState(COMMAND_STATE_CATEGORY);
 			return;
 	}
 }
@@ -595,7 +637,7 @@ void CommandSupervisor::Draw() {
 			break;
 		default:
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid/unknown command state: " << _state << endl;
-			_state = COMMAND_STATE_CATEGORY;
+			_ChangeState(COMMAND_STATE_CATEGORY);
 			return;
 	}
 }
@@ -622,67 +664,6 @@ bool CommandSupervisor::_IsItemCategorySelected() const {
 
 
 
-void CommandSupervisor::_CreateTargetText() {
-	_window_header.SetText("Target Information");
-
-	ustring target_text;
-	if (_selected_target.GetType() == GLOBAL_TARGET_ATTACK_POINT) {
-		BattleActor* actor = _selected_target.GetActor();
-		uint32 point = _selected_target.GetAttackPoint();
-
-		// Add target actor's name and attack point on the first line and actor's HP/SP on the second and third lines
-		target_text = actor->GetName();
-		target_text += MakeUnicodeString(" — ") + actor->GetAttackPoints().at(point)->GetName() + MakeUnicodeString("\n");
-		target_text += MakeUnicodeString("HP: ") + MakeUnicodeString(NumberToString(actor->GetHitPoints())) +
-			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxHitPoints())) + MakeUnicodeString("\n");
-		target_text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(actor->GetSkillPoints())) +
-			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxSkillPoints())) + MakeUnicodeString("\n");
-	}
-	else if (_selected_target.GetType() == GLOBAL_TARGET_ACTOR) {
-		BattleActor* actor = _selected_target.GetActor();
-
-		// Add target actor's name on the first line and actor's HP/SP on the second and third lines
-		target_text = actor->GetName() + MakeUnicodeString("\n");
-		target_text += MakeUnicodeString("HP: ") + MakeUnicodeString(NumberToString(actor->GetHitPoints())) +
-			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxHitPoints())) + MakeUnicodeString("\n");
-		target_text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(actor->GetSkillPoints())) +
-			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxSkillPoints())) + MakeUnicodeString("\n");
-	}
-	else if (_selected_target.GetType() == GLOBAL_TARGET_PARTY) {
-		target_text = MakeUnicodeString("All");
-	}
-	else {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << _selected_target.GetType() << endl;
-	}
-
-	_window_text.SetText(target_text);
-}
-
-
-
-void CommandSupervisor::_CreateInformationText() {
-	_window_header.SetText("Action Information");
-
-	ustring info_text;
-	if (_IsSkillCategorySelected() == true) {
-		info_text = UTranslate("Name: ") + _selected_skill->GetName() + MakeUnicodeString("\n");
-		info_text += UTranslate("Required SP: " + NumberToString(_selected_skill->GetSPRequired())) + MakeUnicodeString("\n");
-		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetTypeText(_selected_skill->GetTargetType(), _selected_skill->IsTargetAlly()));
-	}
-	else if (_IsItemCategorySelected() == true) {
-		info_text = UTranslate("Name: ") + _selected_item->GetItem().GetName() + MakeUnicodeString("\n");
-		info_text += UTranslate("Current Quantity: " + NumberToString(_selected_item->GetCount())) + MakeUnicodeString("\n");
-		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetTypeText(_selected_item->GetItem().GetTargetType(), _selected_item->GetItem().IsTargetAlly()));
-	}
-	else {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "unknown category selected: " << _category_list.GetSelection() << endl;
-	}
-
-	_window_text.SetText(info_text);
-}
-
-
-
 void CommandSupervisor::_ChangeState(COMMAND_STATE new_state) {
 	if (_state == new_state) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "class was already in state to change to: " << new_state << endl;
@@ -690,37 +671,41 @@ void CommandSupervisor::_ChangeState(COMMAND_STATE new_state) {
 	}
 
 	if (new_state == COMMAND_STATE_INVALID) {
-
+		_active_settings = NULL;
+		_selected_skill = NULL;
+		_selected_item = NULL;
+	}
+	else if (new_state == COMMAND_STATE_CATEGORY) {
+		// Nothing to do here. The Initialize() function performs all necessary actions when entering this state.
+	}
+	else if ((new_state == COMMAND_STATE_ACTION) && (_state == COMMAND_STATE_CATEGORY)) {
+		switch (_category_list.GetSelection()) {
+			case CATEGORY_ATTACK:
+				_skill_command.Initialize(GetCommandCharacter()->GetGlobalCharacter()->GetAttackSkills(), _active_settings->GetAttackList());
+				break;
+			case CATEGORY_DEFEND:
+				_skill_command.Initialize(GetCommandCharacter()->GetGlobalCharacter()->GetDefenseSkills(), _active_settings->GetDefendList());
+				break;
+			case CATEGORY_SUPPORT:
+				_skill_command.Initialize(GetCommandCharacter()->GetGlobalCharacter()->GetSupportSkills(), _active_settings->GetSupportList());
+				break;
+			case CATEGORY_ITEM:
+				_item_command.Initialize(_active_settings->GetLastItem());
+				break;
+			default:
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid category selection: " << _category_list.GetSelection() << endl;
+				_category_list.SetSelection(0);
+				return;
+		}
+	}
+	else if (new_state == COMMAND_STATE_TARGET) {
+		_CreateTargetText();
 	}
 	else if (new_state == COMMAND_STATE_INFORMATION) {
-
+		_CreateInformationText();
 	}
 
 	_state = new_state;
-}
-
-
-
-void CommandSupervisor::_FinalizeCommand() {
-	BattleAction* new_action = NULL;
-	BattleCharacter* character = _GetActiveCharacter();
-
-	if (_IsSkillCategorySelected() == true) {
-		new_action = new SkillAction(character, _selected_target, _selected_skill);
-	}
-	else if (_IsItemCategorySelected() == true) {
-		new_action = new ItemAction(character, _selected_target, _selected_item);
-	}
-	else {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "did not create action for character, unknown category selected: " << _category_list.GetSelection() << endl;
-	}
-
-	_state = COMMAND_STATE_INVALID;
-	_active_settings = NULL;
-	_selected_skill = NULL;
-	_selected_item = NULL;
-	character->ChangeState(ACTOR_STATE_WARM_UP);
-	BattleMode::CurrentInstance()->ChangeState(BATTLE_STATE_NORMAL);
 }
 
 
@@ -729,26 +714,12 @@ void CommandSupervisor::_UpdateCategory() {
 	_category_list.Update();
 
 	if (InputManager->ConfirmPress()) {
-		_state = COMMAND_STATE_ACTION;
-		_active_settings->SetLastCategory(_category_list.GetSelection());
-		switch (_category_list.GetSelection()) {
-			case CATEGORY_ATTACK:
-				_skill_command.Initialize(_GetActiveCharacter()->GetGlobalCharacter()->GetAttackSkills(), _active_settings->GetAttackList());
-				break;
-			case CATEGORY_DEFEND:
-				_skill_command.Initialize(_GetActiveCharacter()->GetGlobalCharacter()->GetDefenseSkills(), _active_settings->GetDefendList());
-				break;
-			case CATEGORY_SUPPORT:
-				_skill_command.Initialize(_GetActiveCharacter()->GetGlobalCharacter()->GetSupportSkills(), _active_settings->GetSupportList());
-				break;
-			case CATEGORY_ITEM:
-				_item_command.Initialize(_active_settings->GetLastItem());
-				break;
-			default:
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid category selection: " << _category_list.GetSelection() << endl;
-				_state = COMMAND_STATE_CATEGORY;
-				_category_list.SetSelection(0);
-				break;
+		if (_category_list.IsOptionEnabled(_category_list.GetSelection()) == true) {
+			_active_settings->SetLastCategory(_category_list.GetSelection());
+			_ChangeState(COMMAND_STATE_ACTION);
+		}
+		else {
+			// TODO: play an "invalid" sound?
 		}
 	}
 
@@ -764,15 +735,20 @@ void CommandSupervisor::_UpdateCategory() {
 
 
 void CommandSupervisor::_UpdateAction() {
-	if (_IsSkillCategorySelected() == true) {
-		if (InputManager->CancelPress()) {
-			_state = COMMAND_STATE_CATEGORY;
-		}
+	if (InputManager->CancelPress()) {
+		_ChangeState(COMMAND_STATE_CATEGORY);
+		return;
+	}
 
-		else if (InputManager->ConfirmPress()) {
+	if (_IsSkillCategorySelected() == true) {
+		if (InputManager->ConfirmPress()) {
 			_selected_skill = _skill_command.GetSelectedSkill();
-			if (_selected_skill != NULL)
-				_state = COMMAND_STATE_TARGET;
+			if (_selected_skill != NULL) {
+				_ChangeState(COMMAND_STATE_TARGET);
+			}
+			else {
+				// TODO: play "invalid" sound here?
+			}
 		}
 
 		else if (InputManager->MenuPress()) {
@@ -786,12 +762,12 @@ void CommandSupervisor::_UpdateAction() {
 	else if (_IsItemCategorySelected() == true) {
 		if (InputManager->ConfirmPress()) {
 			_selected_item = _item_command.GetSelectedItem();
-			if (_selected_item != NULL)
-				_state = COMMAND_STATE_TARGET;
-		}
-
-		else if (InputManager->CancelPress()) {
-			_state = COMMAND_STATE_CATEGORY;
+			if (_selected_item != NULL) {
+				_ChangeState(COMMAND_STATE_TARGET);
+			}
+			else {
+				// TODO: play "invalid" sound here?
+			}
 		}
 
 		else if (InputManager->MenuPress()) {
@@ -851,11 +827,14 @@ void CommandSupervisor::_DrawCategory() {
 void CommandSupervisor::_DrawAction() {
 	uint32 category_index = _category_list.GetSelection();
 
-	VideoManager->Move(560.0f, 100.0f);
-	_category_text[category_index].Draw();
-	VideoManager->MoveRelative(20.0f, 40.0f);
+	// Draw the corresponding category icon and text to the left side of the window
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->Move(570.0f, 75.0);
 	_category_icons[category_index].Draw();
+	VideoManager->MoveRelative(0.0f, -35.0f);
+	_category_text[category_index].Draw();
 
+	// Draw the header and list for either the skills or items to the right side of the window
 	if (_IsSkillCategorySelected() == true) {
 		_skill_command.DrawList();
 	}
@@ -867,15 +846,106 @@ void CommandSupervisor::_DrawAction() {
 
 
 void CommandSupervisor::_DrawTarget() {
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	VideoManager->Move(560.0f, 110.0f);
 	_window_header.Draw();
+	VideoManager->Move(560.0f, 85.0f);
 	_window_text.Draw();
 }
 
 
 
 void CommandSupervisor::_DrawInformation() {
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	VideoManager->Move(580.0f, 100.0f);
 	_window_header.Draw();
+	VideoManager->Move(600.0f, 80.0f);
 	_window_text.Draw();
+}
+
+
+
+void CommandSupervisor::_CreateTargetText() {
+	_window_header.SetText("Select Target");
+
+	ustring target_text;
+	if (_selected_target.GetType() == GLOBAL_TARGET_ATTACK_POINT) {
+		BattleActor* actor = _selected_target.GetActor();
+		uint32 point = _selected_target.GetAttackPoint();
+
+		// Add target actor's name and attack point on the first line and actor's HP/SP on the second and third lines
+		target_text = actor->GetName();
+		target_text += MakeUnicodeString(" — ") + actor->GetAttackPoints().at(point)->GetName() + MakeUnicodeString("\n");
+		target_text += MakeUnicodeString("HP: ") + MakeUnicodeString(NumberToString(actor->GetHitPoints())) +
+			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxHitPoints())) + MakeUnicodeString("\n");
+		target_text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(actor->GetSkillPoints())) +
+			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxSkillPoints())) + MakeUnicodeString("\n");
+	}
+	else if (_selected_target.GetType() == GLOBAL_TARGET_ACTOR) {
+		BattleActor* actor = _selected_target.GetActor();
+
+		// Add target actor's name on the first line and actor's HP/SP on the second and third lines
+		target_text = actor->GetName() + MakeUnicodeString("\n");
+		target_text += MakeUnicodeString("HP: ") + MakeUnicodeString(NumberToString(actor->GetHitPoints())) +
+			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxHitPoints())) + MakeUnicodeString("\n");
+		target_text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(actor->GetSkillPoints())) +
+			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxSkillPoints())) + MakeUnicodeString("\n");
+	}
+	else if (_selected_target.GetType() == GLOBAL_TARGET_PARTY) {
+		target_text = MakeUnicodeString("All");
+	}
+	else {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << _selected_target.GetType() << endl;
+	}
+
+	_window_text.SetText(target_text);
+}
+
+
+
+void CommandSupervisor::_CreateInformationText() {
+	_window_header.SetText("Action Information");
+
+	ustring info_text;
+	if (_IsSkillCategorySelected() == true) {
+		info_text = UTranslate("Name: ") + _selected_skill->GetName() + MakeUnicodeString("\n");
+		info_text += UTranslate("Required SP: " + NumberToString(_selected_skill->GetSPRequired())) + MakeUnicodeString("\n");
+		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetTypeText(_selected_skill->GetTargetType(), _selected_skill->IsTargetAlly()));
+	}
+	else if (_IsItemCategorySelected() == true) {
+		info_text = UTranslate("Name: ") + _selected_item->GetItem().GetName() + MakeUnicodeString("\n");
+		info_text += UTranslate("Current Quantity: " + NumberToString(_selected_item->GetCount())) + MakeUnicodeString("\n");
+		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetTypeText(_selected_item->GetItem().GetTargetType(), _selected_item->GetItem().IsTargetAlly()));
+	}
+	else {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "unknown category selected: " << _category_list.GetSelection() << endl;
+	}
+
+	_window_text.SetText(info_text);
+}
+
+
+
+void CommandSupervisor::_FinalizeCommand() {
+	BattleAction* new_action = NULL;
+	BattleCharacter* character = GetCommandCharacter();
+
+	if (_IsSkillCategorySelected() == true) {
+		new_action = new SkillAction(character, _selected_target, _selected_skill);
+	}
+	else if (_IsItemCategorySelected() == true) {
+		new_action = new ItemAction(character, _selected_target, _selected_item);
+	}
+	else {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "did not create action for character, unknown category selected: " << _category_list.GetSelection() << endl;
+	}
+
+	_state = COMMAND_STATE_INVALID;
+	_active_settings = NULL;
+	_selected_skill = NULL;
+	_selected_item = NULL;
+	_ChangeState(COMMAND_STATE_INVALID);
+	BattleMode::CurrentInstance()->NotifyCharacterCommandComplete(character);
 }
 
 } // namespace private_battle

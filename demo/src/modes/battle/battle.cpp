@@ -455,7 +455,13 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 		case BATTLE_STATE_NORMAL:
 			break;
 		case BATTLE_STATE_COMMAND:
-			_command_supervisor->Initialize(_selected_character);
+			if (_command_queue.empty() == true) {
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "command queue was empty when trying to change to command state" << endl;
+				_state = BATTLE_STATE_NORMAL;
+			}
+			else {
+				_command_supervisor->Initialize(_command_queue.front());
+			}
 			break;
 		case BATTLE_STATE_EVENT:
 // 			_speaker_name = _dialogue_text.front();
@@ -525,6 +531,30 @@ void BattleMode::NotifyCharacterCommand(BattleCharacter* character) {
 
 
 
+void BattleMode::NotifyCharacterCommandComplete(BattleCharacter* character) {
+	if (character == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL argument" << endl;
+		return;
+	}
+	if (_command_queue.empty() == true) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "no characters were in the command queue when function was called" << endl;
+		return;
+	}
+	if (character != _command_queue.front()) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function argument was not the same character as the front of the command queue" << endl;
+	}
+
+	character->ChangeState(ACTOR_STATE_WARM_UP);
+
+	_command_queue.pop_front();
+	if (_command_queue.empty() == true)
+		ChangeState(BATTLE_STATE_NORMAL);
+	else
+		_command_supervisor->Initialize(_command_queue.front());
+}
+
+
+
 void BattleMode::NotifyActorReady(BattleActor* actor) {
 	for (list<BattleActor*>::iterator i = _ready_queue.begin(); i != _ready_queue.end(); i++) {
 		if (actor == (*i)) {
@@ -569,6 +599,7 @@ void BattleMode::_Initialize() {
 		BattleCharacter* new_actor = new BattleCharacter(dynamic_cast<GlobalCharacter*>(active_party->GetActorAtIndex(i)));
 		_character_actors.push_back(new_actor);
 	}
+	_command_supervisor->ConstructCharacterSettings();
 
 // 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 // 		_enemy_actors[i]->GetGlobalEnemy()->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
@@ -905,9 +936,28 @@ void BattleMode::_DrawBottomMenu() {
 		VideoManager->MoveRelative(4.0f, -4.0f);
 	}
 
-	// Draw the selected character's portrait, blended according to the character's current HP level
-	if (_selected_character)
-		_selected_character->DrawPortrait();
+	// Draw the selection highlight and portrait for the active character having a command selected by the player
+	if (_state == BATTLE_STATE_COMMAND) {
+		BattleCharacter* character = _command_supervisor->GetCommandCharacter();
+		uint32 character_position = 0xFFFFFFFF; // Initial value used to check for warning condition
+
+		for (uint32 i = 0; i < _character_actors.size(); i++) {
+			if (_character_actors[i] == character) {
+				character_position = i;
+				break;
+			}
+		}
+		if (character_position == 0xFFFFFFFF) {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "the command character was not found in the character actor containers" << endl;
+			character_position = 0;
+		}
+
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->Move(148.0f, 85.0f - (character_position * 25.0f));
+		_character_selection.Draw();
+
+		character->DrawPortrait();
+	}
 
 	// Draw the status information of all character actors
 	for (uint32 i = 0; i < _character_actors.size(); i++) {

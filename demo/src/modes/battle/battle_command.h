@@ -184,6 +184,10 @@ public:
 	**/
 	void CommitInventoryChanges();
 
+	//! \brief Retuns the number of items that will be displayed in the list
+	uint32 GetNumberListOptions() const
+		{ return _item_list.GetNumberOptions(); }
+
 private:
 	/** \brief Container for all available items
 	*** The order of the items in this container is the same as the order that the items would appear in
@@ -325,6 +329,10 @@ public:
 	**/
 	void Initialize(BattleCharacter* character);
 
+	//! \brief Returns a pointer to the character that the player is selecting a command for
+	BattleCharacter* GetCommandCharacter() const
+		{ if (_active_settings == NULL) return NULL; else return _active_settings->GetCharacter(); }
+
 	//! \brief Updates the state of the command selection
 	void Update();
 
@@ -390,10 +398,6 @@ private:
 
 	// ---------- Private methods
 
-	//! \brief Returns a pointer to the character that the player is selecting a command for
-	BattleCharacter* _GetActiveCharacter() const
-		{ if (_active_settings == NULL) return NULL; else return _active_settings->GetCharacter(); }
-
 	//! \brief Returns true if the selected action category is a skill action
 	bool _IsSkillCategorySelected() const;
 
@@ -413,19 +417,10 @@ private:
 	void _CreateCharacterSettings(BattleCharacter* character)
 		{ _character_settings.insert(std::make_pair(character, CharacterCommandSettings(character, _command_window))); }
 
-	//! \brief Sets the text for _window_header and _window_text to represent information about the selected target
-	void _CreateTargetText();
-
-	//! \brief Sets the text for _window_header and _window_text to represent information about the selected skill or item
-	void _CreateInformationText();
-
 	/** \brief Changes the active command state and performs any necessary state transactions
 	*** \param new_state The state to change to
 	**/
 	void _ChangeState(COMMAND_STATE new_state);
-
-	//! \brief Finalizes the player's command of the character by creating the appropriate action
-	void _FinalizeCommand();
 
 	//! \brief Updates state when the player is selecting an action category
 	void _UpdateCategory();
@@ -450,6 +445,15 @@ private:
 
 	//! \brief Draws visible contents to the screen when the player is viewing information about an action
 	void _DrawInformation();
+
+	//! \brief Sets the text for _window_header and _window_text to represent information about the selected target
+	void _CreateTargetText();
+
+	//! \brief Sets the text for _window_header and _window_text to represent information about the selected skill or item
+	void _CreateInformationText();
+
+	//! \brief Finalizes the player's command of the character by creating the appropriate action
+	void _FinalizeCommand();
 }; // class CommandSupervisor
 
 } // namespace private_battle

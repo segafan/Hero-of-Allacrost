@@ -166,6 +166,11 @@ public:
 	**/
 	void NotifyCharacterCommand(private_battle::BattleCharacter* character);
 
+	/** \brief Called whenever the player has finished selecting a command for a character
+	*** \param character A pointer to the character that just had its command completed.
+	**/
+	void NotifyCharacterCommandComplete(private_battle::BattleCharacter* character);
+
 	/** \brief Called to notify BattleMode when an actor is ready to execute an action
 	*** \param actor A pointer to the actor who has entered the state ACTOR_STATE_READY
 	**/
