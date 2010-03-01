@@ -433,15 +433,15 @@ public:
 	**/
 	void SetCursorState(CursorState state);
 
-  /** \brief Sets the horizontal arrows position
-  *** \param position The position to set
-  **/
-  void SetHorizontalArrowsPosition(HORIZONTAL_ARROWS_POSITION position);
+	/** \brief Sets the horizontal arrows position
+	*** \param position The position to set
+	**/
+	void SetHorizontalArrowsPosition(HORIZONTAL_ARROWS_POSITION position);
 
-  /** \brief Sets the vertical arrows position
-   *** \param position The position to set
-   **/
-  void SetVerticalArrowsPosition(VERTICAL_ARROWS_POSITION position);
+	/** \brief Sets the vertical arrows position
+	*** \param position The position to set
+	**/
+	void SetVerticalArrowsPosition(VERTICAL_ARROWS_POSITION position);
 
 	/** \brief Checks if the option box is in the process of scrolling
 	*** \return True if the option box is scrolling, false if it is not
