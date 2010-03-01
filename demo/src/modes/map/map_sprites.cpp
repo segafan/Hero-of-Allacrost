@@ -292,9 +292,9 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 			enemy->ChangeStateDead();
 
 			BattleMode *BM = new BattleMode();
-			for (uint32 ctr = 0; ctr < enemy->GetBattleEvents().size(); ctr++) {
-				BM->AddEvent(enemy->GetBattleEvents().at(ctr));
-			}
+// 			for (uint32 ctr = 0; ctr < enemy->GetBattleEvents().size(); ctr++) {
+// 				BM->AddEvent(enemy->GetBattleEvents().at(ctr));
+// 			}
 			ModeManager->Push(BM);
 
 			string enemy_battle_music = enemy->GetBattleMusicTheme();
@@ -303,7 +303,7 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 
 			string battle_background = enemy->GetBattleBackground();
 			if (battle_background != "")
-				BM->AddBackground(battle_background);
+				BM->SetBackground(battle_background);
 
 			const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
 			for (uint32 i = 0; i < enemy_party.size(); i++) {

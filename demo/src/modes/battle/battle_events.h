@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2009 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,4 +55,4 @@ private:
 
 } // namespace hoa_battle
 
-#endif
+#endif // __BATTLE_EVENTS_HEADER__

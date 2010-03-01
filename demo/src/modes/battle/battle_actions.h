@@ -21,9 +21,10 @@
 #ifndef __BATTLE_ACTIONS_HEADER__
 #define __BATTLE_ACTIONS_HEADER__
 
-#include "utils.h"
 #include "defs.h"
+#include "utils.h"
 
+#include "system.h"
 #include "video.h"
 
 #include "global.h"
@@ -35,73 +36,73 @@ namespace private_battle {
 /** ****************************************************************************
 *** \brief Representation of a single action to be executed in battle
 ***
-*** This is an abstract base class for all action classes to inherit from.
-*** Actions are executed one at a time in a FIFO queue by BattleMode. Some
-*** actions may also be continuous, in that they apply an effect on the target
-*** for a limited period of time. For example, a skill which temporarily boosts
-*** the strength of its target.
+*** This is an abstract base class for all action classes to inherit from. Actions are what
+*** actors perform in battle whenever they move to attack an opponent, protect a comrade, use
+*** an item, etc. There is no distinguishment between characters and enemies as far as the action
+*** classes are concerned. All actions are implemented via Lua script functions that perform the
+*** necessary synchronization of visual and audio media presented to the user as well as modifying
+*** any change to the stats of the actor or target. Actions (and by proxy the actors executing them)
+*** may be either processed individually one at a time, or multiple skills may be executed
+*** simulatenously.
+***
+*** Each action used determines the amount of time that the actor using the action
+*** must wait in the warm up and cool down states. The warm up state is when the
+*** actor has chosen to use the action but has not yet used it. The cool down state
+*** occurs immediately after the actor finishes the action an
 *** ***************************************************************************/
 class BattleAction {
 public:
-	BattleAction(BattleActor* source, BattleActor* target, hoa_global::GlobalAttackPoint* attack_point);
+	BattleAction(BattleActor* user, BattleTarget target);
 
 	virtual ~BattleAction()
 		{}
 
-	//! \brief Updates the script
-	void Update();
-
-	//! \brief Makes sure the the target is valid, and if not it selects a new one
-	void VerifyValidTarget(BattleActor* source, BattleActor* &target);
-
-	//! \brief Executes the script
-	virtual void RunScript() = 0;
-
 	//! \brief Returns true if this action consumes an item
 	virtual bool IsItemAction() const = 0;
 
-	//! \brief Sets _should_be_removed to true so this action will be removed from the queue
-	void MarkForRemoval()
-		{ _should_be_removed = true; }
+	/** \brief Executes the action; This function may be called several times before execution is finished
+	*** \return True if the action is finished executing
+	**/
+	virtual bool Execute() = 0;
 
-	/*! \brief Returns the value of _should_be_removed
-	 *	\return If true, the action should be removed from the queue
-	 */
-	bool ShouldBeRemoved()
-		{ return _should_be_removed; }
+	//! \brief Returns the number of milliseconds that the owner actor must wait in the warm up state
+	virtual uint32 GetWarmUpTime() const = 0;
+
+	//! \brief Returns the number of milliseconds that the owner actor must wait in the cool down state
+	virtual uint32 GetCoolDownTime() const = 0;
 
 	//! \name Class member access functions
 	//@{
-	BattleActor* GetSource()
-		{ return _source; }
+	BattleActor* GetActor()
+		{ return _actor; }
 
-	BattleActor* GetTarget()
+	BattleTarget& GetTarget()
 		{ return _target; }
-
-	hoa_system::SystemTimer* GetWarmUpTime()
-		{ return &_warm_up_time; }
 	//@}
 
 protected:
 	//! \brief The rendered text for the name of the action
-	hoa_video::TextImage _script_name;
+// 	hoa_video::TextImage _action_name;
 
-	//! \brief The actor whom is initiating this action
-	BattleActor* _source;
+	//! \brief The actor who will be executing the action
+	BattleActor* _actor;
 
-	//! \brief The targets of the script
-	//! \todo This should be changed to a GlobalTarget class pointer
-	BattleActor* _target;
+	//! \brief The target of the action which may be an attack point, actor, or entire party
+	BattleTarget _target;
 
-	//! \brief The selected attack point (if applicable)
-	//! \todo This should be removed when the _target member is changed
-	hoa_global::GlobalAttackPoint* _attack_point;
-
-	//! \brief The amount of time to wait to execute the script
-	hoa_system::SystemTimer _warm_up_time;
-
-	//! \brief If true, the script needs to be removed
-	bool _should_be_removed;
+	/** \brief Makes sure that the target is valid and selects a new target if it is not
+	*** This method is necessary because there is a period of time between when the desired target
+	*** is selected and when the action actually gets executed by the owning actor. Within that time
+	*** period the target may have become invalid due death or some other reason. This method will
+	*** search for the next available target of the same type and modify the _target member so that
+	*** it points to a valid target.
+	***
+	*** \note Certain skills may have different criteria for determining target validity. For example,
+	*** a revive skill or item would be useless if no allies were in the dead state. For this reason,
+	*** inheriting classes may wish to expand upon this function to check for these types of specific
+	*** conditions.
+	**/
+// 	virtual void _VerifyValidTarget();
 }; // class BattleAction
 
 
@@ -114,12 +115,16 @@ protected:
 *** ***************************************************************************/
 class SkillAction : public BattleAction {
 public:
-	SkillAction(BattleActor* source, BattleActor* target, hoa_global::GlobalSkill* skill, hoa_global::GlobalAttackPoint* attack_point = NULL);
-
-	void RunScript();
+	SkillAction(BattleActor* actor, BattleTarget target, hoa_global::GlobalSkill* skill);
 
 	bool IsItemAction() const
 		{ return false; }
+
+	bool Execute();
+
+	uint32 GetWarmUpTime() const;
+
+	uint32 GetCoolDownTime() const;
 
 	hoa_global::GlobalSkill* GetSkill()
 		{ return _skill; }
@@ -137,24 +142,30 @@ private:
 *** as soon as the action goes into the FIFO queue. After the action is executed,
 *** the item is removed if its count has become zero. If the action is removed
 *** from the queue before it is executed (because the source actor perished, or
-*** the battle ended, or other circumstances), then the item's count is 
+*** the battle ended, or other circumstances), then the item's count is
 *** incremented back to its original value since it was not used.
 *** ***************************************************************************/
 class ItemAction : public BattleAction {
 public:
-	ItemAction(BattleActor* source, BattleActor* target, hoa_global::GlobalItem* item, hoa_global::GlobalAttackPoint* attack_point = NULL);
-
-	void RunScript();
+	ItemAction(BattleActor* source, BattleTarget target, BattleItem* item);
 
 	bool IsItemAction() const
 		{ return true; }
 
-	hoa_global::GlobalItem* GetItem()
+	bool Execute();
+
+	uint32 GetWarmUpTime() const
+		{ return (ITEM_WARM_UP_TIME * timer_multiplier); }
+
+	uint32 GetCoolDownTime() const
+		{ return 0; }
+
+	BattleItem* GetItem()
 		{ return _item; }
 
 private:
-	//! \brief Pointer to the item attached to this script (for item events only)
-	hoa_global::GlobalItem* _item;
+	//! \brief Pointer to the item attached to this script
+	BattleItem* _item;
 }; // class ItemAction : public BattleAction
 
 } // namespace private_battle

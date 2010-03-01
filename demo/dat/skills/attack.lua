@@ -250,19 +250,21 @@ skills[102] = {
 	name = "Slime Attack",
 	sp_required = 0,
 	warmup_time = 1100,
-	cooldown_time = 0,
+	cooldown_time = 500,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
 	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target:GetCombatEvade()) then
-			target:TakeDamage(instigator:GetPhysicalAttack() + 10 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+		target_point = target_actor:GetAttackPoint(target:GetAttackPoint());
+
+		-- If the random float is bigger, then we landed the hit
+		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating()) then
+			target_actor:RegisterDamage(user:GetTotalPhysicalAttack() + 10 - target_point:GetTotalPhysicalDefense());
 			AudioManager:PlaySound("snd/slime_attack.wav");
 		else
-			target:TakeDamage(0);
+			target_actor:RegisterMiss();
 		end
-		instigator:PlayAnimation("attack");
 	end
 }
 

@@ -269,11 +269,11 @@ void BattleEncounterEvent::_Start() {
 	for (uint32 i = 0; i < _enemy_ids.size(); i++) {
 		batt_mode->AddEnemy(_enemy_ids.at(i));
 	}
-	for (uint32 i = 0; i < _battle_event_ids.size(); i++) {
-		batt_mode->AddEvent(new BattleEvent(_battle_event_ids.at(i)));
-	}
+// 	for (uint32 i = 0; i < _battle_event_ids.size(); i++) {
+// 		batt_mode->AddEvent(new BattleEvent(_battle_event_ids.at(i)));
+// 	}
 	batt_mode->AddMusic(_battle_music);
-	batt_mode->AddBackground(_battle_background);
+	batt_mode->SetBackground(_battle_background);
 	ModeManager->Push(batt_mode);
 }
 

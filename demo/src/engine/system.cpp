@@ -106,7 +106,7 @@ void SystemTimer::Initialize(uint32 duration, int32 number_loops, hoa_mode_manag
 
 
 
-float SystemTimer::PercentComplete() {
+float SystemTimer::PercentComplete() const {
 	switch (_state) {
 		case SYSTEM_TIMER_INITIAL:
 			return 0.0f;

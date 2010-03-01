@@ -28,6 +28,7 @@
 
 #include "battle.h"
 #include "battle_actors.h"
+#include "battle_utils.h"
 #include "map.h"
 #include "map_dialogue.h"
 #include "map_events.h"
@@ -37,6 +38,8 @@
 #include "map_utils.h"
 #include "map_zones.h"
 #include "shop.h"
+
+#include "global_actors.h"
 
 using namespace luabind;
 
@@ -224,7 +227,6 @@ void BindModesToLua()
 			.def("ChangeStateDead", &EnemySprite::ChangeStateDead)
 			.def("ChangeStateSpawning", &EnemySprite::ChangeStateSpawning)
 			.def("ChangeStateHostile", &EnemySprite::ChangeStateHostile)
-			.def("AddBattleEvent", &EnemySprite::AddBattleEvent)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -371,27 +373,34 @@ void BindModesToLua()
 		class_<BattleMode, hoa_mode_manager::GameMode>("BattleMode")
 			.def(constructor<>())
 			.def("AddEnemy", (void(BattleMode::*)(uint32)) &BattleMode::AddEnemy)
-			.def("AddDialogue", &BattleMode::AddDialogue)
-			.def("ShowDialogue", &BattleMode::ShowDialogue)
+// 			.def("AddDialogue", &BattleMode::AddDialogue)
+// 			.def("ShowDialogue", &BattleMode::ShowDialogue)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
 	[
-		class_<BattleActor>("BattleActor")
-			.def("GetPhysicalAttack", &BattleActor::GetPhysicalAttack)
-			.def("GetPhysicalDefense", &BattleActor::GetPhysicalDefense)
-			.def("GetCombatEvade", &BattleActor::GetCombatEvade)
-			.def("GetCombatAgility", &BattleActor::GetCombatAgility)
-			.def("TakeDamage", &BattleActor::TakeDamage)
-			.def("GetActor", &BattleActor::GetActor)
-			.def("AddHitPoints", &BattleActor::AddHitPoints)
-			.def("AddStrength", &BattleActor::AddStrength)
-			.def("AddFortitude", &BattleActor::AddFortitude)
-			.def("AddAgility", &BattleActor::AddAgility)
-			.def("AddVigor", &BattleActor::AddVigor)
+		class_<BattleActor, hoa_global::GlobalActor>("BattleActor")
+			.def("RegisterDamage", &BattleActor::RegisterDamage)
+			.def("RegisterHealing", &BattleActor::RegisterHealing)
+			.def("RegisterMiss", &BattleActor::RegisterMiss)
 			.def("AddNewEffect", &BattleActor::AddNewEffect)
-			.def("PlayAnimation", &BattleActor::PlayAnimation)
 	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
+		class_<BattleTarget>("BattleTarget")
+			.def("SetAttackPointTarget", &BattleTarget::SetAttackPointTarget)
+			.def("SetActorTarget", &BattleTarget::SetActorTarget)
+			.def("SetPartyTarget", &BattleTarget::SetPartyTarget)
+			.def("IsValid", &BattleTarget::IsValid)
+			.def("SelectNextAttackPoint", &BattleTarget::SelectNextAttackPoint)
+			.def("SelectNextActor", &BattleTarget::SelectNextActor)
+			.def("GetType", &BattleTarget::GetType)
+			.def("GetAttackPoint", &BattleTarget::GetAttackPoint)
+			.def("GetActor", &BattleTarget::GetActor)
+			.def("GetParty", &BattleTarget::GetParty)
+	];
+
 	} // End using battle mode namespaces
 
 	// ----- Shop Mode bindings
