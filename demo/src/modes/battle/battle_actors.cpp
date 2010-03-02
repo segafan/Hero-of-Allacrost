@@ -261,6 +261,26 @@ void BattleActor::DrawIndicators() const {
 	_indicator_supervisor->Draw();
 }
 
+
+
+void BattleActor::SetAction(BattleAction* action) {
+	if (action == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL argument" << endl;
+		return;
+	}
+	if (_state != ACTOR_STATE_COMMAND) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "actor was not in the command state when function was called" << endl;
+		delete action;
+		return;
+	}
+	if (_action != NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "actor already had another action set -- overridding" << endl;
+		delete _action;
+	}
+
+	_action = action;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // BattleCharacter class
 ////////////////////////////////////////////////////////////////////////////////
@@ -727,7 +747,7 @@ void BattleEnemy::_DecideAction() {
 	else
 		target.SetAttackPointTarget(RandomBoundedInteger(0, num_points - 1));
 
-	_action = new SkillAction(this, target, skill);
+	SetAction(new SkillAction(this, target, skill));
 }
 
 } // namespace private_battle

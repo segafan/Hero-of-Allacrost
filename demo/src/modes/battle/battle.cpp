@@ -569,16 +569,29 @@ void BattleMode::NotifyActorReady(BattleActor* actor) {
 
 
 void BattleMode::NotifyActorDeath(BattleActor* actor) {
+	if (actor == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL argument" << endl;
+		return;
+	}
+
 	// Remove actor from command and ready queues if it is found in either one
 	if (actor->IsEnemy() == false)
 		_command_queue.remove(dynamic_cast<BattleCharacter*>(actor));
 	_ready_queue.remove(actor);
 
-	// If the actor who died is the character the player is selecting a command for, reset the action window
-	// TODO: should be moved to battle command code notification
-	if (actor->IsEnemy() == false && (((BattleActor *)(_selected_character)) == actor)) {
-		_selected_character = NULL;
-		// TODO: notify command supervisor
+	// Notify the command supervisor about the death event if it is active
+	if (_state == BATTLE_STATE_COMMAND) {
+		_command_supervisor->NotifyActorDeath(actor);
+
+		// If the actor who died was the character that the player was selecting a command for, this will cause the
+		// command supervisor will return to the invalid state.
+		if (_command_supervisor->GetState() == COMMAND_STATE_INVALID) {
+			// Either re-initialize the command supervisor with another character, or return to the normal state
+			if (_command_queue.empty() == false)
+				_command_supervisor->Initialize(_command_queue.front());
+			else
+				ChangeState(BATTLE_STATE_NORMAL);
+		}
 	}
 }
 

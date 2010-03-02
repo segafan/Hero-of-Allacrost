@@ -80,7 +80,7 @@ public:
 	bool IsAlive() const
 		{ return (_state != ACTOR_STATE_DEAD); }
 
-	// Required because this is a pure virtual method of GlobalActor
+	//! \brief Empty method. Required because this is a pure virtual method of GlobalActor
 	void AddSkill(uint32 skill_id)
 		{}
 
@@ -150,7 +150,7 @@ public:
 	void RegisterMiss();
 
 	/** \brief Increases or decreases the current skill points of the actor
-	*** \param amount Thenumber of skill points to increase or decrease
+	*** \param amount The number of skill points to increase or decrease
 	***
 	*** If the actor is dead, no change will take place. If the amount is positive, the actor will
 	*** not be allowed to exceed above their maximum skill points.
@@ -170,6 +170,17 @@ public:
 	//! \brief Draws all active indicator text and graphics for the actor
 	void DrawIndicators() const;
 
+	/** \brief Sets the action that the actor should execute next
+	*** \param action A pointer to the action that the actor should execute
+	***
+	*** The actor assumes responsibility for the memory management of the action that is given to it with
+	*** this method and will delete the object at the appropriate time. You should only call the method
+	*** when the actor is in the state ACTOR_STATE_COMMAND. Invoking it at any other time will result in a
+	*** warning and no operation, and the action object will be deleted immediately. A warning is also
+	*** printed in the case where the actor has another action prepared.
+	**/
+	void SetAction(BattleAction* action);
+
 	//! \name Class member access methods
 	//@{
 	ACTOR_STATE GetState() const
@@ -177,6 +188,9 @@ public:
 
 	hoa_global::GlobalActor* GetGlobalActor()
 		{ return _global_actor; }
+
+	BattleAction* GetAction()
+		{ return _action; }
 
 	float GetXOrigin() const
 		{ return _x_origin; }
