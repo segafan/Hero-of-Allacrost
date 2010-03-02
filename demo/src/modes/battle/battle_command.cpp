@@ -644,6 +644,23 @@ void CommandSupervisor::Draw() {
 
 
 
+void CommandSupervisor::NotifyActorDeath(BattleActor* actor) {
+	if (_state == COMMAND_STATE_INVALID) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function called when class was in invalid state" << endl;
+		return;
+	}
+
+	if (GetCommandCharacter() == actor) {
+		_ChangeState(COMMAND_STATE_INVALID);
+		return;
+	}
+
+	// TODO: update the selected target if the target is the actor who just deceased
+	// if (_selected_target.GetActor() == actor)
+}
+
+
+
 bool CommandSupervisor::_IsSkillCategorySelected() const {
 	uint32 category = _category_list.GetSelection();
 	if ((category == CATEGORY_ATTACK) || (category == CATEGORY_DEFEND) || (category == CATEGORY_SUPPORT))
@@ -939,11 +956,8 @@ void CommandSupervisor::_FinalizeCommand() {
 	else {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "did not create action for character, unknown category selected: " << _category_list.GetSelection() << endl;
 	}
+	character->SetAction(new_action);
 
-	_state = COMMAND_STATE_INVALID;
-	_active_settings = NULL;
-	_selected_skill = NULL;
-	_selected_item = NULL;
 	_ChangeState(COMMAND_STATE_INVALID);
 	BattleMode::CurrentInstance()->NotifyCharacterCommandComplete(character);
 }

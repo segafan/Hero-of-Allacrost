@@ -339,6 +339,15 @@ public:
 	//! \brief Draws the command window and contents to the screen
 	void Draw();
 
+	/** \brief Called whenever an actor dies while the command supervisor is active
+	*** \param actor A pointer to the actor who is now deceased
+	***
+	*** If the actor who died is the active character that the player is selecting an action for, this
+	*** will cause the supervisor to return to the invalid state. If the actor who died is the selected
+	*** target, the next available valid target will be selected instead.
+	**/
+	void NotifyActorDeath(private_battle::BattleActor* actor);
+
 	//! \name Class member accessor methods
 	//@{
 	COMMAND_STATE GetState() const
