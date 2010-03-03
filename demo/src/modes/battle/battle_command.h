@@ -41,9 +41,11 @@ namespace private_battle {
 *** manages OptionBox objects for the character's attack, defense, and support skills.
 *** Second, it retains the previous selections that were made for that character.
 ***
-*** \note The _last_target member only retains the previously selected attack point
-*** and/or actor. It will never retain the previous party, since there is only a single
-*** party for each side in the battle.
+*** The class retains three different types of previous targets rather than a single target.
+*** These three target members are used to retain different target types (self, ally, and foe).
+*** Party targets (all allies, all foes) are not retained since there are not mulitple possibilites
+*** for those target types. The self target types also only have a single actor target (the character
+*** himself/herself), but it is still used because the character can target multiple points on itself.
 *** ***************************************************************************/
 class CharacterCommandSettings {
 public:
@@ -62,6 +64,15 @@ public:
 	**/
 	void RefreshLists();
 
+	/** \brief Sets the appropriate last target member based on the argument target type
+	*** \param target A reference to the target to save
+	***
+	*** This function will not complain if given any valid target type, including party type targets.
+	*** Party targets will simply be ignored since those target types are not retained. Otherwise if
+	*** the target type is not invalid, the appropriate last target will be set.
+	**/
+	void SaveLastTarget(BattleTarget& target);
+
 	//! \name Class member accessor methods
 	//@{
 	void SetLastCategory(uint32 category)
@@ -70,8 +81,14 @@ public:
 	void SetLastItem(uint32 item)
 		{ _last_item = item; }
 
-	//! \note The target argument should be of type GLOBAL_TARGET_ATTACK_POINT or GLOBAL_TARGET_ACTOR
-	void SetLastTarget(BattleTarget target);
+	//! \note Only valid types for target parameter are GLOBAL_TARGET_SELF_POINT and GLOBAL_TARGET_SELF
+	void SetLastSelfTarget(BattleTarget& target);
+
+	//! \note Only valid types for target parameter are GLOBAL_TARGET_ALLY_POINT and GLOBAL_TARGET_ALLY
+	void SetLastCharacterTarget(BattleTarget& target);
+
+	//! \note Only valid types for target parameter are GLOBAL_TARGET_FOE_POINT and GLOBAL_TARGET_FOE
+	void SetLastEnemyTarget(BattleTarget& target);
 
 	BattleCharacter* GetCharacter() const
 		{ return _character; }
@@ -82,8 +99,14 @@ public:
 	uint32 GetLastItem() const
 		{ return _last_item; }
 
-	BattleTarget GetLastTarget() const
-		{ return _last_target; }
+	BattleTarget GetLastSelfTarget() const
+		{ return _last_self_target; }
+
+	BattleTarget GetLastCharacterTarget() const
+		{ return _last_character_target; }
+
+	BattleTarget GetLastEnemyTarget() const
+		{ return _last_enemy_target; }
 
 	hoa_gui::OptionBox* GetAttackList()
 		{ return &_attack_list; }
@@ -105,8 +128,14 @@ private:
 	//! \brief The index of the last item that the player selected for this character
 	uint32 _last_item;
 
-	//! \brief The last target that the player selected for this character
-	BattleTarget _last_target;
+	//! \brief Holds the last attack point that the player selected for the character to target on themselves
+	BattleTarget _last_self_target;
+
+	//! \brief The last character target that the player selected for this character
+	BattleTarget _last_character_target;
+
+	//! \brief The last enemy target that the player selected for this character
+	BattleTarget _last_enemy_target;
 
 	//! \brief A display list of all usable items
 	hoa_gui::OptionBox _attack_list;

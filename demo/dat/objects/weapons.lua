@@ -31,7 +31,7 @@ weapons[10001] = {
 	physical_attack = 12,
 	metaphysical_attack = 0,
 	standard_price = 120,
-	usable_by = CLAUDIUS,
+	usable_by = CLAUDIUS + KYLE,
 	slots = 0
 }
 
@@ -42,7 +42,7 @@ weapons[10002] = {
 	physical_attack = 16,
 	metaphysical_attack = 0,
 	standard_price = 250,
-	usable_by = CLAUDIUS,
+	usable_by = CLAUDIUS + KYLE,
 	slots = 0
 }
 

@@ -22,7 +22,7 @@ skills[20001] = {
    sp_required = 2,
    warmup_time = 1500,
    cooldown_time = 2,
-   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
+   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
    target_ally = true,
    
    BattleExecute = function(target, instigator)

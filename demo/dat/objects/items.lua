@@ -31,8 +31,7 @@ items[1] = {
 	name = hoa_system.Translate("Healing Potion"),
 	description = hoa_system.Translate("Restores a small amount of hit points to a target."),
 	icon = "img/icons/items/health_potion.png",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
-	target_ally = true,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 	standard_price = 60,
 
 	BattleUse = function(target, instigator)
@@ -40,7 +39,7 @@ items[1] = {
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
-	MenuUse = function(target)
+	FieldUse = function(target)
 		target:AddHitPoints(45);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end
@@ -50,8 +49,7 @@ items[2] = {
 	name = hoa_system.Translate("Medium Healing Potion"),
 	description = hoa_system.Translate("Restores a moderate amount of hit points to a target."),
 	icon = "img/icons/items/health_potion.png",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
-	target_ally = true,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 	standard_price = 200,
 
 	BattleUse = function(target, instigator)
@@ -59,7 +57,7 @@ items[2] = {
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
-	MenuUse = function(target)
+	FieldUse = function(target)
 		target:AddHitPoints(150);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end
@@ -69,8 +67,7 @@ items[3] = {
 	name = hoa_system.Translate("Blessed Healing Potion"),
 	description = hoa_system.Translate("Restores a large amount of hit points to a target."),
 	icon = "img/icons/items/health_potion.png",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
-	target_ally = true,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 	standard_price = 500,
 
 	BattleUse = function(target, instigator)
@@ -78,7 +75,7 @@ items[3] = {
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
-	MenuUse = function(target)
+	FieldUse = function(target)
 		target:AddHitPoints(250);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end
@@ -88,8 +85,7 @@ items[4] = {
 	name = hoa_system.Translate("Healing Stone"),
 	description = hoa_system.Translate("Restores a small amount of hit points to all party members."),
 	icon = "img/icons/items/health_potion.png",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
-	target_ally = true,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_ALLIES,
 	standard_price = 1000,
 
 	BattleUse = function(target, instigator)
@@ -97,7 +93,7 @@ items[4] = {
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
-	MenuUse = function(target)
+	FieldUse = function(target)
 		target:AddHitPoints(100);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end
@@ -115,15 +111,14 @@ items[4] = {
 -- items[2001] = {}
 
 -- -----------------------------------------------------------------------------
--- IDs 3001-3201 are reserved for damaging items
+-- IDs 3001-4000 are reserved for damaging items
 -- -----------------------------------------------------------------------------
 
 items[3001] = {
 	name = hoa_system.Translate("Bomb"),
 	description = hoa_system.Translate("Damages one enemy."),
 	icon = "img/icons/items/health_potion.png",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
-	target_ally = false,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE,
 	standard_price = 200,
 
 	BattleUse = function(target, instigator)
@@ -131,7 +126,7 @@ items[3001] = {
 		AudioManager:PlaySound("snd/rumble.wav");
 	end,
 
-	MenuUse = function(target)
+	FieldUse = function(target)
 		AudioManager:PlaySound("snd/cancel.wav");
 	end
 }
@@ -140,8 +135,7 @@ items[3002] = {
 	name = hoa_system.Translate("Super Bomb"),
 	description = hoa_system.Translate("Major damage to all enemies."),
 	icon = "img/icons/items/health_potion.png",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
-	target_ally = false,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_FOES,
 	standard_price = 1000,
 
 	BattleUse = function(target, instigator)
@@ -149,7 +143,7 @@ items[3002] = {
 		AudioManager:PlaySound("snd/rumble.wav");
 	end,
 
-	MenuUse = function(target)
+	FieldUse = function(target)
 		AudioManager:PlaySound("snd/cancel.wav");
 	end
 }

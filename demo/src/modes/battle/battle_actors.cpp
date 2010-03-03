@@ -306,12 +306,10 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character) :
 
 BattleCharacter::~BattleCharacter() {
 	// If character was about to use an item before being destructed, restore it to inventory
-	if (_action != NULL) {
-		if (_action->IsItemAction() == true) {
-			ItemAction* item_action = dynamic_cast<ItemAction*>(_action);
-// 			item_action->GetItem()->IncrementCount(1);
-		}
-		delete _action;
+	if ((_action != NULL) && (_action->IsItemAction() == true)) {
+		// TODO: not sure if this is necessary/safe to do.
+// 		ItemAction* item_action = dynamic_cast<ItemAction*>(_action);
+// 		item_action->GetItem()->IncrementCount(1);
 	}
 }
 
@@ -735,17 +733,24 @@ void BattleEnemy::_DecideAction() {
 		return;
 	}
 
+	uint32 point_target = 0;
+	BattleActor* actor_target = NULL;
+
+	// TEMP: select a random alive character
 	if (alive_characters.size() == 1)
-		target.SetActorTarget(alive_characters[0]);
+		actor_target = alive_characters[0];
 	else
-		target.SetActorTarget(alive_characters[RandomBoundedInteger(0, alive_characters.size() - 1)]);
+		actor_target = alive_characters[RandomBoundedInteger(0, alive_characters.size() - 1)];
 
 	// TEMP: select a random attack point on the target character
-	uint32 num_points = target.GetActor()->GetAttackPoints().size();
+	uint32 num_points = actor_target->GetAttackPoints().size();
 	if (num_points == 1)
-		target.SetAttackPointTarget(0);
+		point_target = 0;
 	else
-		target.SetAttackPointTarget(RandomBoundedInteger(0, num_points - 1));
+		point_target = RandomBoundedInteger(0, num_points - 1);
+
+	// TEMP: Should not statically assign to target a foe point. Examine the selected skill's target type
+	target.SetPointTarget(GLOBAL_TARGET_FOE_POINT, point_target, actor_target);
 
 	SetAction(new SkillAction(this, target, skill));
 }

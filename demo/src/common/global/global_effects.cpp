@@ -28,61 +28,9 @@ using namespace hoa_video;
 
 namespace hoa_global {
 
-bool IncrementIntensity(GLOBAL_INTENSITY& intensity, uint8 amount) {
-	if (amount == 0)
-		return false;
-	if ((intensity <= GLOBAL_INTENSITY_INVALID) || (intensity >= GLOBAL_INTENSITY_POS_EXTREME))
-		return false;
-
-	// This check protects against overflow conditions
-	if (amount > (GLOBAL_INTENSITY_TOTAL * 2)) {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "attempted to increment intensity by an excessive amount: " << amount << endl;
-		if (intensity == GLOBAL_INTENSITY_POS_EXTREME) {
-			return false;
-		}
-		else {
-			intensity = GLOBAL_INTENSITY_POS_EXTREME;
-			return true;
-		}
-	}
-
-	// TODO: compiler does not allow this, figure out another way
-// 	intensity += amount;
-	if (intensity >= GLOBAL_INTENSITY_TOTAL)
-		intensity = GLOBAL_INTENSITY_POS_EXTREME;
-	return true;
-}
-
-
-
-bool DecrementIntensity(GLOBAL_INTENSITY& intensity, uint8 amount) {
-	if (amount == 0)
-		return false;
-	if ((intensity <= GLOBAL_INTENSITY_NEG_EXTREME) || (intensity >= GLOBAL_INTENSITY_TOTAL))
-		return false;
-
-	// This check protects against overflow conditions
-	if (amount > (GLOBAL_INTENSITY_TOTAL * 2)) {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "attempted to decrement intensity by an excessive amount: " << amount << endl;
-		if (intensity == GLOBAL_INTENSITY_NEG_EXTREME) {
-			return false;
-		}
-		else {
-			intensity = GLOBAL_INTENSITY_NEG_EXTREME;
-			return true;
-		}
-	}
-
-	// TODO: compiler does not allow this, figure out another way
-// 	intensity -= amount;
-	if (intensity <= GLOBAL_INTENSITY_INVALID)
-		intensity = GLOBAL_INTENSITY_NEG_EXTREME;
-	return true;
-}
-
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalElementalEffect class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 void GlobalElementalEffect::IncrementIntensity(uint8 amount) {
 	hoa_global::IncrementIntensity(_intensity, amount);
@@ -94,9 +42,9 @@ void GlobalElementalEffect::DecrementIntensity(uint8 amount) {
 	hoa_global::DecrementIntensity(_intensity, amount);
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalStatusEffect class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
 	_id(id),

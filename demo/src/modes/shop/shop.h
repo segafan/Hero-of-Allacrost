@@ -269,12 +269,12 @@ private:
 	//! \name Data used only for item object types
 	//@{
 	//! \brief For items, various header text for identifying specific item properties
-	hoa_video::TextImage _map_use_header, _battle_use_header, _target_type_header;
+	hoa_video::TextImage _field_use_header, _battle_use_header, _target_type_header;
 
 	//! \brief Image copies of a green check mark and a red x mark
 	hoa_video::StillImage _check_icon, _x_icon;
 
-	//! \brief Holds rendered text images of possible set of target types ("Self", "Ally", "Enemy", "All Allies", "All Enemies")
+	//! \brief Holds rendered text images of possible set of target types ("Self — Point", "Ally", "All Enemies", etc.)
 	std::vector<hoa_video::TextImage> _target_type_text;
 
 	//! \brief Booleans that indicate whether the item is usable on maps and/or in battles

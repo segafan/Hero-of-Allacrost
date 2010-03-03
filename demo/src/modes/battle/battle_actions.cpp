@@ -105,11 +105,13 @@ bool SkillAction::Execute() {
 
 	// (2): Ensure that the skill will affect a valid target
 	if (_target.IsValid() == false) {
+		// TEMP: party targets should always be valid and attack points never disappear, so only the actor needs to be changed
+// 		if (IsTargetPoint(_target.GetType()) == true)
+// 			_target.SelectNextPoint();
+// 		else if (IsTargetActor(_target.GetType()) == true)
+
 		// TEMP: this should only be done if the skill has no custom checking for valid targets
-		if (_target.GetType() == GLOBAL_TARGET_ATTACK_POINT)
-			_target.SelectNextAttackPoint();
-		else if (_target.GetType() == GLOBAL_TARGET_ACTOR)
-			_target.SelectNextActor();
+		_target.SelectNextActor(_actor);
 	}
 
 	// (3): Retrieve and call the execution function of the script

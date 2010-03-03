@@ -377,18 +377,21 @@ ShopObjectViewer::ShopObjectViewer() :
 	_lore_text.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_lore_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
-	_map_use_header.SetStyle(TextStyle("text22"));
-	_map_use_header.SetText(UTranslate("Map Use:"));
+	_field_use_header.SetStyle(TextStyle("text22"));
+	_field_use_header.SetText(UTranslate("Field Use:"));
 	_battle_use_header.SetStyle(TextStyle("text22"));
 	_battle_use_header.SetText(UTranslate("Battle Use:"));
 	_target_type_header.SetStyle(TextStyle("text22"));
 	_target_type_header.SetText(UTranslate("Target:"));
 
-	_target_type_text.push_back(TextImage(UTranslate("Self"), TextStyle("text22")));
-	_target_type_text.push_back(TextImage(UTranslate("Ally"), TextStyle("text22")));
-	_target_type_text.push_back(TextImage(UTranslate("Enemy"), TextStyle("text22")));
-	_target_type_text.push_back(TextImage(UTranslate("All Allies"), TextStyle("text22")));
-	_target_type_text.push_back(TextImage(UTranslate("All Enemies"), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(GetTargetText(GLOBAL_TARGET_SELF_POINT), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(GetTargetText(GLOBAL_TARGET_ALLY_POINT), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(GetTargetText(GLOBAL_TARGET_FOE_POINT), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(GetTargetText(GLOBAL_TARGET_SELF), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(GetTargetText(GLOBAL_TARGET_ALLY), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(GetTargetText(GLOBAL_TARGET_FOE), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(GetTargetText(GLOBAL_TARGET_ALL_ALLIES), TextStyle("text22")));
+	_target_type_text.push_back(TextImage(GetTargetText(GLOBAL_TARGET_ALL_FOES), TextStyle("text22")));
 
 	_phys_header.SetStyle(TextStyle("text22"));
 	_phys_header.SetText(UTranslate("Phys:"));
@@ -552,31 +555,14 @@ void ShopObjectViewer::_SetItemData() {
 
 	// Set map/battle usability status
 	GlobalItem* item = dynamic_cast<GlobalItem*>(_selected_object->GetObject());
-	_map_usable = item->IsUsableInMenu();
+	_map_usable = item->IsUsableInField();
 	_battle_usable = item->IsUsableInBattle();
 
 	// Determine the target type text to display for this item
-	bool allied_target = item->IsTargetAlly();
 	GLOBAL_TARGET target_type = item->GetTargetType();
-	// The _target_type_vector contains five entries representing the following categories:
-	// "Self", "Ally", "Enemy", "All Allies", "All Enemies.
-	if (target_type == GLOBAL_TARGET_SELF) {
-		_target_type_index = 0;
-	}
-	else if ((allied_target == true) && (target_type != GLOBAL_TARGET_PARTY)) {
-		_target_type_index = 1;
-	}
-	else if ((allied_target == false) && (target_type != GLOBAL_TARGET_PARTY)) {
-		_target_type_index = 2;
-	}
-	else if ((allied_target == true) && (target_type == GLOBAL_TARGET_PARTY)) {
-		_target_type_index = 3;
-	}
-	else if ((allied_target == false) && (target_type == GLOBAL_TARGET_PARTY)) {
-		_target_type_index = 4;
-	}
-	else {
-		IF_PRINT_WARNING(SHOP_DEBUG) << "unknown/unhandled target type, defaulting to 'self'" << endl;
+	_target_type_index = static_cast<uint32>(target_type);
+	if (_target_type_index >= _target_type_text.size()) {
+		IF_PRINT_WARNING(SHOP_DEBUG) << "unknown/invalid target type, defaulting to 'Self': " << target_type << endl;
 		_target_type_index = 0;
 	}
 }
@@ -863,8 +849,8 @@ void ShopObjectViewer::_DrawItem() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 
 	VideoManager->MoveRelative(80.0f, 15.0f);
-	_map_use_header.Draw();
-	move_offset = _map_use_header.GetWidth() + 5.0f; // 5.0f is a small buffer space between text and graphic
+	_field_use_header.Draw();
+	move_offset = _field_use_header.GetWidth() + 5.0f; // 5.0f is a small buffer space between text and graphic
 	VideoManager->MoveRelative(move_offset, 0.0f);
 	if (_map_usable == true) {
 		_check_icon.Draw();

@@ -119,11 +119,13 @@ BattleMode::~BattleMode() {
 		delete _character_actors[i];
 	}
 	_character_actors.clear();
+	_character_party.clear();
 
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		delete _enemy_actors[i];
 	}
 	_enemy_actors.clear();
+	_enemy_party.clear();
 
 	_command_queue.clear();
 	_ready_queue.clear();
@@ -375,7 +377,9 @@ void BattleMode::AddEnemy(GlobalEnemy* new_enemy) {
 	}
 
 	new_enemy->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
-	_enemy_actors.push_back(new BattleEnemy(new_enemy));
+	BattleEnemy* new_enemy_combatant = new BattleEnemy(new_enemy);
+	_enemy_actors.push_back(new_enemy_combatant);
+	_enemy_party.push_back(new_enemy_combatant);
 }
 
 
@@ -611,6 +615,7 @@ void BattleMode::_Initialize() {
 	for (uint32 i = 0; i < active_party->GetPartySize(); i++) {
 		BattleCharacter* new_actor = new BattleCharacter(dynamic_cast<GlobalCharacter*>(active_party->GetActorAtIndex(i)));
 		_character_actors.push_back(new_actor);
+		_character_party.push_back(new_actor);
 	}
 	_command_supervisor->ConstructCharacterSettings();
 

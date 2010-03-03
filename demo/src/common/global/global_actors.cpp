@@ -27,32 +27,9 @@ using namespace hoa_script;
 
 namespace hoa_global {
 
-string GetTargetTypeText(GLOBAL_TARGET target_type, bool target_ally) {
-	switch (target_type) {
-		case GLOBAL_TARGET_ATTACK_POINT:
-			return "Single Point";
-		case GLOBAL_TARGET_ACTOR:
-			if (target_ally == true)
-				return "Single Ally";
-			else
-				return "Single Enemy";
-		case GLOBAL_TARGET_PARTY:
-			if (target_ally == true)
-				return "All Allies";
-			else
-				return "All Enemies";
-		case GLOBAL_TARGET_SELF:
-			return "Self";
-		default:
-			IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received invalid target_type argument: " << target_type << endl;
-	}
-
-	return "";
-}
-
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalAttackPoint class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalAttackPoint::GlobalAttackPoint(GlobalActor* owner) :
 	_actor_owner(owner),
@@ -132,9 +109,9 @@ void GlobalAttackPoint::CalculateTotalEvade() {
 		_total_evade_rating = _actor_owner->GetEvade() + (_actor_owner->GetEvade() * _evade_modifier);
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalActor class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalActor::GlobalActor() :
 	_id(0),
@@ -688,9 +665,9 @@ void GlobalActor::_CalculateEvadeRatings() {
 	}
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalCharacterGrowth class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalCharacterGrowth::GlobalCharacterGrowth(GlobalCharacter* owner) :
 	_character_owner(owner),
@@ -1076,9 +1053,9 @@ void GlobalCharacterGrowth::_DetermineNextLevelExperience() {
 	_experience_for_next_level = new_xp;
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalCharacter class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	_growth(this)
@@ -1319,9 +1296,9 @@ void GlobalCharacter::AddSkill(uint32 skill_id) {
 	}
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalEnemy class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalEnemy::GlobalEnemy(uint32 id) :
 	GlobalActor(),
@@ -1550,9 +1527,9 @@ void GlobalEnemy::DetermineDroppedObjects(vector<GlobalObject*>& objects) {
 	}
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalParty class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 void GlobalParty::AddActor(GlobalActor* actor, int32 index) {
 	if (actor == NULL) {

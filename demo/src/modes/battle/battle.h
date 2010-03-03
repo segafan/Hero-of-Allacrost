@@ -189,6 +189,12 @@ public:
 
 	std::deque<private_battle::BattleEnemy*>& GetEnemyActors()
 		{ return _enemy_actors; }
+
+	std::deque<private_battle::BattleActor*>& GetCharacterParty()
+		{ return _character_party; }
+
+	std::deque<private_battle::BattleActor*>& GetEnemyParty()
+		{ return _enemy_party; }
 	//@}
 
 	//! \brief Returns an index to the _character_actors container of the first available living character
@@ -289,6 +295,9 @@ private:
 	**/
 	std::deque<private_battle::BattleCharacter*> _character_actors;
 
+	//! \brief Identical to the _character_actors container except that the elements are BattleActor pointers
+	std::deque<private_battle::BattleActor*> _character_party;
+
 	/** \brief Enemies that are presently fighting in the battle
 	*** There is a theoretical limit on how many enemies may fight in one battle, but that is dependent upon
 	*** the sprite size of all active enemies and this limit will be detected by the BattleMode class.
@@ -296,9 +305,8 @@ private:
 	**/
 	std::deque<private_battle::BattleEnemy*> _enemy_actors;
 
-// 	std::set<private_battle::BattleActor*> _character_party;
-//
-// 	std::set<private_battle::BattleActor*> _enemy_party;
+	//! \brief Identical to the _enemy_actors container except that the elements are BattleActor pointers
+	std::deque<private_battle::BattleActor*> _enemy_party;
 
 	/** \brief A FIFO queue for characters who are awaiting their turn to have a command selected by the player
 	*** When a character completes the wait time for their idle state, they enter the command state and are
