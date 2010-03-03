@@ -22,13 +22,13 @@ skills[1] = {
 	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 200,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(user, target)
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetAttackPoint());
+		target_point = target_actor:GetAttackPoint(target:GetPoint());
 
 		--If the random float is bigger, then we landed the hit
 		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating()) then
@@ -48,7 +48,7 @@ skills[2] = {
 	sp_required = 1,
 	warmup_time = 1200,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -70,7 +70,7 @@ skills[3] = {
 	sp_required = 3,
 	warmup_time = 1200,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -94,7 +94,7 @@ skills[4] = {
 	sp_required = 7,
 	warmup_time = 1200,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_PARTY,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_FOES,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -110,12 +110,12 @@ skills[11] = {
 	sp_required = 0,
 	warmup_time = 1000,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetAttackPoint());
+		target_point = target_actor:GetAttackPoint(target:GetPoint());
 
 		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating() + 5.5) then
 			target_actor:RegisterDamage(user:GetTotalPhysicalAttack() + 8 - target_point:GetTotalPhysicalDefense());
@@ -133,12 +133,12 @@ skills[21] = {
 	sp_required = 0,
 	warmup_time = 1500,
 	cooldown_time = 500,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetAttackPoint());
+		target_point = target_actor:GetAttackPoint(target:GetPoint());
 		user:ChangeSpriteAnimation("attack");
 
 		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating()) then
@@ -157,7 +157,7 @@ skills[22] = {
 	sp_required = 4,
 	warmup_time = 2000,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -178,12 +178,12 @@ skills[31] = {
 	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 750,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetAttackPoint());
+		target_point = target_actor:GetAttackPoint(target:GetPoint());
 		user:ChangeSpriteAnimation("attack");
 
 		--If the random float is bigger, then we landed the hit
@@ -203,7 +203,7 @@ skills[32] = {
 	sp_required = 3,
 	warmup_time = 2000,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -224,7 +224,7 @@ skills[100] = {
 	sp_required = 0,
 	warmup_time = 900,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -242,7 +242,7 @@ skills[101] = {
 	sp_required = 0,
 	warmup_time = 1400,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -262,12 +262,12 @@ skills[102] = {
 	sp_required = 0,
 	warmup_time = 1100,
 	cooldown_time = 500,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetAttackPoint());
+		target_point = target_actor:GetAttackPoint(target:GetPoint());
 
 		-- If the random float is bigger, then we landed the hit
 		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating()) then
@@ -285,7 +285,7 @@ skills[103] = {
 	sp_required = 0,
 	warmup_time = 1400,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -303,7 +303,7 @@ skills[104] = {
 	sp_required = 0,
 	warmup_time = 900,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -323,7 +323,7 @@ skills[105] = {
 	sp_required = 0,
 	warmup_time = 900,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -340,7 +340,7 @@ skills[106] = {
 	sp_required = 0,
 	warmup_time = 1400,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)
@@ -357,7 +357,7 @@ skills[107] = {
 	sp_required = 0,
 	warmup_time = 900,
 	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 	target_ally = false,
 
 	BattleExecute = function(target, instigator)

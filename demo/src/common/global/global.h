@@ -31,6 +31,7 @@
 #include "global_effects.h"
 #include "global_objects.h"
 #include "global_skills.h"
+#include "global_utils.h"
 
 //! \brief All calls to global code are wrapped inside this namespace.
 namespace hoa_global {
@@ -40,9 +41,6 @@ extern GameGlobal* GlobalManager;
 
 //! \brief Determines whether the code in the hoa_global namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
-
-//! \brief A return value used for when a specified event name fails to be found
-const int32 GLOBAL_BAD_EVENT = -5555555;
 
 /** ****************************************************************************
 *** \brief A container that manages the occurences of several related game events

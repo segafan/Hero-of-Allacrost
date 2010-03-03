@@ -57,7 +57,9 @@ CharacterCommandSettings::CharacterCommandSettings(BattleCharacter* character, M
 	_character(character),
 	_last_category(CATEGORY_ATTACK),
 	_last_item(0),
-	_last_target(BattleTarget())
+	_last_self_target(BattleTarget()),
+	_last_character_target(BattleTarget()),
+	_last_enemy_target(BattleTarget())
 {
 	_attack_list.SetOwner(&window);
 	_attack_list.SetPosition(LIST_POSITION_X, LIST_POSITION_Y);
@@ -174,18 +176,60 @@ void CharacterCommandSettings::RefreshLists() {
 
 
 
-void CharacterCommandSettings::SetLastTarget(BattleTarget target) {
-	// Only retain the previous target if it was for an attack point or actor
+void CharacterCommandSettings::SaveLastTarget(BattleTarget& target) {
 	switch (target.GetType()) {
-		case GLOBAL_TARGET_ATTACK_POINT:
-		case GLOBAL_TARGET_ACTOR:
-			_last_target = target;
+		case GLOBAL_TARGET_SELF_POINT:
+		case GLOBAL_TARGET_SELF:
+			_last_self_target = target;
 			break;
-		case GLOBAL_TARGET_PARTY:
+		case GLOBAL_TARGET_ALLY_POINT:
+		case GLOBAL_TARGET_ALLY:
+			_last_character_target = target;
+			break;
+		case GLOBAL_TARGET_FOE_POINT:
+		case GLOBAL_TARGET_FOE:
+			_last_enemy_target = target;
+			break;
+		case GLOBAL_TARGET_ALL_ALLIES:
+		case GLOBAL_TARGET_ALL_FOES:
+			break; // Party type targets are not retained
 		default:
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "target argument was an invalid type: " << target.GetType() << endl;
 			break;
 	}
+}
+
+
+
+void CharacterCommandSettings::SetLastSelfTarget(BattleTarget& target) {
+	if ((target.GetType() != GLOBAL_TARGET_SELF_POINT) && (target.GetType() != GLOBAL_TARGET_SELF)) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "target argument was an invalid type: " << target.GetType() << endl;
+		return;
+	}
+
+	_last_self_target = target;
+}
+
+
+
+void CharacterCommandSettings::SetLastCharacterTarget(BattleTarget& target) {
+	if ((target.GetType() != GLOBAL_TARGET_ALLY_POINT) && (target.GetType() != GLOBAL_TARGET_ALLY)) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "target argument was an invalid type: " << target.GetType() << endl;
+		return;
+	}
+
+	_last_character_target = target;
+}
+
+
+
+void CharacterCommandSettings::SetLastEnemyTarget(BattleTarget& target) {
+	if ((target.GetType() != GLOBAL_TARGET_FOE_POINT) && (target.GetType() != GLOBAL_TARGET_FOE)) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "target argument was an invalid type: " << target.GetType() << endl;
+		return;
+	}
+
+	_last_enemy_target = target;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -560,12 +604,6 @@ void CommandSupervisor::Initialize(BattleCharacter* character) {
 	_ChangeState(COMMAND_STATE_CATEGORY);
 	_active_settings = &(_character_settings.find(character)->second);
 	_category_list.SetSelection(_active_settings->GetLastCategory());
-	_selected_target = _active_settings->GetLastTarget();
-
-	// TEMP: if last target for character was invalid, set it to the first enemy, first attack point
-	if (_selected_target.GetType() == GLOBAL_TARGET_INVALID) {
-		_selected_target.SetAttackPointTarget(0, BattleMode::CurrentInstance()->GetEnemyActors()[0]);
-	}
 
 	// Determine which categories should be enabled or disabled
 	if (_active_settings->GetAttackList()->GetNumberOptions() == 0)
@@ -716,6 +754,40 @@ void CommandSupervisor::_ChangeState(COMMAND_STATE new_state) {
 		}
 	}
 	else if (new_state == COMMAND_STATE_TARGET) {
+		BattleActor* user = GetCommandCharacter();
+		GLOBAL_TARGET target_type = GLOBAL_TARGET_INVALID;
+
+		if (_IsSkillCategorySelected() == true)
+			target_type = _skill_command.GetSelectedSkill()->GetTargetType();
+		else if (_IsItemCategorySelected() == true)
+			target_type = _item_command.GetSelectedItem()->GetTargetType();
+
+		// Retrieved the saved target depending on the type, or set the target if the target type is a party
+		if (IsTargetParty(target_type) == true)
+			_selected_target.SetInitialTarget(user, target_type);
+		else if (IsTargetSelf(target_type) == true)
+			_selected_target = _active_settings->GetLastSelfTarget();
+		else if (IsTargetAlly(target_type) == true)
+			_selected_target = _active_settings->GetLastCharacterTarget();
+		else if (IsTargetFoe(target_type) == true)
+			_selected_target = _active_settings->GetLastEnemyTarget();
+		else
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "no conditions met for invalid target type: " << target_type << endl;
+
+
+		// If the target type is invalid that means that there is no previous target so grab the initial target
+		if (_selected_target.GetType() == GLOBAL_TARGET_INVALID) {
+			_selected_target.SetInitialTarget(user, target_type);
+		}
+		// Otherwise if the last target is no longer valid, select the next valid target
+		else if (_selected_target.IsValid() == false) {
+			// Party targets should always be valid and attack points on actors do not disappear, so only the actor
+			// must be invalid
+			if (_selected_target.SelectNextActor(user) == false) {
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "no valid targets found" << endl;
+			}
+		}
+
 		_CreateTargetText();
 	}
 	else if (new_state == COMMAND_STATE_INFORMATION) {
@@ -814,14 +886,16 @@ void CommandSupervisor::_UpdateTarget() {
 	}
 
 	else if (InputManager->UpPress() || InputManager->DownPress()) {
-		if ((_selected_target.GetType() == GLOBAL_TARGET_ATTACK_POINT) || (_selected_target.GetType() == GLOBAL_TARGET_ACTOR)) {
-			_selected_target.SelectNextActor(InputManager->UpPress());
+		if ((IsTargetPoint(_selected_target.GetType()) == true) || (IsTargetActor(_selected_target.GetType()) == true)) {
+			_selected_target.SelectNextActor(GetCommandCharacter(), InputManager->UpPress());
+			_CreateTargetText();
 		}
 	}
 
 	else if (InputManager->RightPress() || InputManager->LeftPress()) {
-		if (_selected_target.GetType() == GLOBAL_TARGET_ATTACK_POINT) {
-			_selected_target.SelectNextAttackPoint(InputManager->RightPress());
+		if (IsTargetPoint(_selected_target.GetType()) == true) {
+			_selected_target.SelectNextPoint(GetCommandCharacter(), InputManager->RightPress());
+			_CreateTargetText();
 		}
 	}
 }
@@ -886,9 +960,9 @@ void CommandSupervisor::_CreateTargetText() {
 	_window_header.SetText("Select Target");
 
 	ustring target_text;
-	if (_selected_target.GetType() == GLOBAL_TARGET_ATTACK_POINT) {
+	if (IsTargetPoint(_selected_target.GetType()) == true) {
 		BattleActor* actor = _selected_target.GetActor();
-		uint32 point = _selected_target.GetAttackPoint();
+		uint32 point = _selected_target.GetPoint();
 
 		// Add target actor's name and attack point on the first line and actor's HP/SP on the second and third lines
 		target_text = actor->GetName();
@@ -898,7 +972,7 @@ void CommandSupervisor::_CreateTargetText() {
 		target_text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(actor->GetSkillPoints())) +
 			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxSkillPoints())) + MakeUnicodeString("\n");
 	}
-	else if (_selected_target.GetType() == GLOBAL_TARGET_ACTOR) {
+	else if (IsTargetActor(_selected_target.GetType()) == true) {
 		BattleActor* actor = _selected_target.GetActor();
 
 		// Add target actor's name on the first line and actor's HP/SP on the second and third lines
@@ -908,7 +982,7 @@ void CommandSupervisor::_CreateTargetText() {
 		target_text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(actor->GetSkillPoints())) +
 			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxSkillPoints())) + MakeUnicodeString("\n");
 	}
-	else if (_selected_target.GetType() == GLOBAL_TARGET_PARTY) {
+	else if (IsTargetParty(_selected_target.GetType()) == true) {
 		target_text = MakeUnicodeString("All");
 	}
 	else {
@@ -927,12 +1001,12 @@ void CommandSupervisor::_CreateInformationText() {
 	if (_IsSkillCategorySelected() == true) {
 		info_text = UTranslate("Name: ") + _selected_skill->GetName() + MakeUnicodeString("\n");
 		info_text += UTranslate("Required SP: " + NumberToString(_selected_skill->GetSPRequired())) + MakeUnicodeString("\n");
-		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetTypeText(_selected_skill->GetTargetType(), _selected_skill->IsTargetAlly()));
+		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_skill->GetTargetType()));
 	}
 	else if (_IsItemCategorySelected() == true) {
 		info_text = UTranslate("Name: ") + _selected_item->GetItem().GetName() + MakeUnicodeString("\n");
 		info_text += UTranslate("Current Quantity: " + NumberToString(_selected_item->GetCount())) + MakeUnicodeString("\n");
-		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetTypeText(_selected_item->GetItem().GetTargetType(), _selected_item->GetItem().IsTargetAlly()));
+		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_item->GetItem().GetTargetType()));
 	}
 	else {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "unknown category selected: " << _category_list.GetSelection() << endl;
@@ -946,6 +1020,8 @@ void CommandSupervisor::_CreateInformationText() {
 void CommandSupervisor::_FinalizeCommand() {
 	BattleAction* new_action = NULL;
 	BattleCharacter* character = GetCommandCharacter();
+
+	_active_settings->SaveLastTarget(_selected_target);
 
 	if (_IsSkillCategorySelected() == true) {
 		new_action = new SkillAction(character, _selected_target, _selected_skill);

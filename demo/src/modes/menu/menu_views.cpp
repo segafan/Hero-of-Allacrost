@@ -338,12 +338,12 @@ void InventoryWindow::Update() {
 				GlobalObject* obj = _item_objects[ _inventory_items.GetSelection() ];
 				if (obj->GetObjectType() == GLOBAL_OBJECT_ITEM) {
 					GlobalItem *item = (GlobalItem*)GlobalManager->RetrieveFromInventory(obj->GetID());
-					const ScriptObject* script_function = item->GetMenuUseFunction();
+					const ScriptObject* script_function = item->GetFieldUseFunction();
 					if (script_function == NULL) {
 						IF_PRINT_WARNING(MENU_DEBUG) << "item did not have a menu use function" << endl;
 					}
 					else {
-						if (item->GetTargetType() == GLOBAL_TARGET_PARTY) {
+						if (IsTargetParty(item->GetTargetType()) == true) {
 							GlobalParty *ch_party = GlobalManager->GetActiveParty();
 							ScriptCallFunction<void>(*script_function, ch_party);
 							item->DecrementCount();

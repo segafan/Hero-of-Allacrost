@@ -33,9 +33,9 @@ using namespace private_global;
 GameGlobal* GlobalManager = NULL;
 bool GLOBAL_DEBUG = false;
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalEventGroup class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 void GlobalEventGroup::AddNewEvent(const string& event_name, int32 event_value) {
 	if (DoesEventExist(event_name) == true) {
@@ -70,9 +70,9 @@ void GlobalEventGroup::SetEvent(const string& event_name, int32 event_value) {
 	event_iter->second = event_value;
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GameGlobal class - Initialization and Destruction
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GameGlobal::GameGlobal() {
 	IF_PRINT_DEBUG(GLOBAL_DEBUG) << "GameGlobal constructor invoked" << endl;
@@ -226,9 +226,9 @@ void GameGlobal::ClearAllData() {
 	_event_groups.clear();
 } // void GameGlobal::ClearAllData()
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GameGlobal class - Character Functions
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 void GameGlobal::AddCharacter(uint32 id) {
 	if (_characters.find(id) != _characters.end()) {
@@ -306,9 +306,9 @@ GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 		return (ch->second);
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GameGlobal class - Inventory Functions
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 void GameGlobal::AddToInventory(uint32 obj_id, uint32 obj_count) {
 	// If the object is already in the inventory, increment the count of the object
@@ -565,9 +565,9 @@ void GameGlobal::DecrementObjectCount(uint32 obj_id, uint32 count) {
 		RemoveFromInventory(obj_id);
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GameGlobal class - Event Group Functions
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 bool GameGlobal::DoesEventExist(const string& group_name, const string& event_name) const {
 	map<string, GlobalEventGroup*>::const_iterator group_iter = _event_groups.find(group_name);
@@ -630,9 +630,9 @@ uint32 GameGlobal::GetNumberEvents(const string& group_name) const {
 	return group_iter->second->GetNumberEvents();
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GameGlobal class - Other Functions
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 void GameGlobal::SetLocation(const ustring& location_name, const string& location_graphic_filename) {
 	_location_name = location_name;
@@ -780,9 +780,9 @@ bool GameGlobal::LoadGame(const string& filename) {
 	return true;
 } // bool GameGlobal::LoadGame(string& filename)
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GameGlobal class - Private Methods
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* character, bool last) {
 	if (file.IsFileOpen() == false) {

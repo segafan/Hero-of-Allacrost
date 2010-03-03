@@ -30,29 +30,9 @@ using namespace hoa_global::private_global;
 
 namespace hoa_global {
 
-GlobalObject* GlobalCreateNewObject(uint32 id, uint32 count) {
-	GlobalObject* new_object = NULL;
-
-	if ((id > 0) && (id <= MAX_ITEM_ID))
-		new_object = new GlobalItem(id, count);
-	else if ((id > MAX_ITEM_ID) && (id <= MAX_WEAPON_ID))
-		new_object = new GlobalWeapon(id, count);
-	else if ((id > MAX_WEAPON_ID) && (id <= MAX_LEG_ARMOR_ID))
-		new_object = new GlobalArmor(id, count);
-	else if ((id > MAX_LEG_ARMOR_ID) && (id <= MAX_SHARD_ID))
-		new_object = new GlobalShard(id, count);
-	else if ((id > MAX_SHARD_ID) && (id <= MAX_KEY_ITEM_ID))
-		new_object = new GlobalKeyItem(id, count);
-	else {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid id argument: " << id << endl;
-	}
-
-	return new_object;
-}
-
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalObject class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 void GlobalObject::_LoadObjectData(hoa_script::ReadScriptDescriptor& script) {
 	_name = MakeUnicodeString(script.ReadString("name"));
@@ -65,9 +45,9 @@ void GlobalObject::_LoadObjectData(hoa_script::ReadScriptDescriptor& script) {
 	}
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalItem class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalItem::GlobalItem(uint32 id, uint32 count) :
 	GlobalObject(id, count)
@@ -90,14 +70,13 @@ GlobalItem::GlobalItem(uint32 id, uint32 count) :
 	_LoadObjectData(script_file);
 
 	_target_type = static_cast<GLOBAL_TARGET>(script_file.ReadInt("target_type"));
-	_target_ally = script_file.ReadBool("target_ally");
 	if (script_file.DoesFunctionExist("BattleUse")) {
 		_battle_use_function = new ScriptObject();
 		*_battle_use_function = script_file.ReadFunctionPointer("BattleUse");
 	}
-	if (script_file.DoesFunctionExist("MenuUse")) {
-		_menu_use_function = new ScriptObject();
-		*_menu_use_function = script_file.ReadFunctionPointer("MenuUse");
+	if (script_file.DoesFunctionExist("FieldUse")) {
+		_field_use_function = new ScriptObject();
+		*_field_use_function = script_file.ReadFunctionPointer("FieldUse");
 	}
 
 
@@ -118,9 +97,9 @@ GlobalItem::~GlobalItem() {
 		delete _battle_use_function;
 		_battle_use_function = NULL;
 	}
-	if (_menu_use_function != NULL) {
-		delete _menu_use_function;
-		_menu_use_function = NULL;
+	if (_field_use_function != NULL) {
+		delete _field_use_function;
+		_field_use_function = NULL;
 	}
 }
 
@@ -128,7 +107,6 @@ GlobalItem::~GlobalItem() {
 
 GlobalItem::GlobalItem(const GlobalItem& copy) {
 	_target_type = copy._target_type;
-	_target_ally = copy._target_ally;
 
 	// Make copies of valid ScriptObject function pointers
 	if (copy._battle_use_function == NULL)
@@ -136,10 +114,10 @@ GlobalItem::GlobalItem(const GlobalItem& copy) {
 	else
 		_battle_use_function = new ScriptObject(*copy._battle_use_function);
 
-	if (copy._menu_use_function == NULL)
-		_menu_use_function = NULL;
+	if (copy._field_use_function == NULL)
+		_field_use_function = NULL;
 	else
-		_menu_use_function = new ScriptObject(*copy._menu_use_function);
+		_field_use_function = new ScriptObject(*copy._field_use_function);
 }
 
 
@@ -149,7 +127,6 @@ GlobalItem& GlobalItem::operator=(const GlobalItem& copy) {
 		return *this;
 
 	_target_type = copy._target_type;
-	_target_ally = copy._target_ally;
 
 	// Make copies of valid ScriptObject function pointers
 	if (copy._battle_use_function == NULL)
@@ -157,17 +134,17 @@ GlobalItem& GlobalItem::operator=(const GlobalItem& copy) {
 	else
 		_battle_use_function = new ScriptObject(*copy._battle_use_function);
 
-	if (copy._menu_use_function == NULL)
-		_menu_use_function = NULL;
+	if (copy._field_use_function == NULL)
+		_field_use_function = NULL;
 	else
-		_menu_use_function = new ScriptObject(*copy._menu_use_function);
+		_field_use_function = new ScriptObject(*copy._field_use_function);
 
 	return *this;
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalWeapon class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalWeapon::GlobalWeapon(uint32 id, uint32 count) :
 	GlobalObject(id, count)
@@ -213,9 +190,9 @@ GlobalWeapon::GlobalWeapon(uint32 id, uint32 count) :
 	}
 } // void GlobalWeapon::GlobalWeapon(uint32 id, uint32 count = 1)
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalArmor class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalArmor::GlobalArmor(uint32 id, uint32 count) :
 	GlobalObject(id, count)
@@ -296,9 +273,9 @@ GLOBAL_OBJECT GlobalArmor::GetObjectType() const {
 		return GLOBAL_OBJECT_INVALID;
 }
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalShard class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalShard::GlobalShard(uint32 id, uint32 count) :
 	GlobalObject(id, count)
@@ -331,9 +308,9 @@ GlobalShard::GlobalShard(uint32 id, uint32 count) :
 // 	}
 } // void GlobalShard::GlobalShard(uint32 id, uint32 count = 1)
 
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 // GlobalKeyItem class
-// -----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 GlobalKeyItem::GlobalKeyItem(uint32 id, uint32 count) :
 	GlobalObject(id, count)

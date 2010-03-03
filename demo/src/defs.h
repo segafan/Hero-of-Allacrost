@@ -197,7 +197,6 @@ namespace hoa_global {
 	class GlobalElementalEffect;
 	class GlobalSkill;
 
-	class GlobalTarget;
 	class GlobalAttackPoint;
 	class GlobalActor;
 	class GlobalCharacter;

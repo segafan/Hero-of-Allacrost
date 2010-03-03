@@ -29,70 +29,9 @@
 #include "video.h"
 #include "script.h"
 
-#include "global_actors.h"
+#include "global_utils.h"
 
 namespace hoa_global {
-
-/** \name Elemental Effect Types
-*** \brief Used to identify the eight different types of elementals
-*** There are a total of four physical and four metaphysical elemental effects
-**/
-enum GLOBAL_ELEMENTAL {
-	GLOBAL_ELEMENTAL_INVALID    = -1,
-	GLOBAL_ELEMENTAL_FIRE       =  0,
-	GLOBAL_ELEMENTAL_WATER      =  1,
-	GLOBAL_ELEMENTAL_VOLT       =  2,
-	GLOBAL_ELEMENTAL_EARTH      =  3,
-	GLOBAL_ELEMENTAL_SLICING    =  4,
-	GLOBAL_ELEMENTAL_SMASHING   =  5,
-	GLOBAL_ELEMENTAL_MAULING    =  6,
-	GLOBAL_ELEMENTAL_PIERCING   =  7,
-	GLOBAL_ELEMENTAL_TOTAL      =  8
-};
-
-/** \name Status Effect Types
-*** \brief Used to identify the various types of status effects
-**/
-enum GLOBAL_STATUS {
-	GLOBAL_STATUS_INVALID    = -1,
-	GLOBAL_STATUS_TOTAL      =  0
-};
-
-/** \name Effect Intensity Levels
-*** \brief Used to reflect the potency of elemental and status effects
-*** There are nine valid intensity levels. Four negative, four positive, and one neutral.
-*** The neutral intensity level essentially equates to "no effect".
-**/
-enum GLOBAL_INTENSITY {
-	GLOBAL_INTENSITY_INVALID       = -5,
-	GLOBAL_INTENSITY_NEG_EXTREME   = -4,
-	GLOBAL_INTENSITY_NEG_GREATER   = -3,
-	GLOBAL_INTENSITY_NEG_MODERATE  = -2,
-	GLOBAL_INTENSITY_NEG_LESSER    = -1,
-	GLOBAL_INTENSITY_NEUTRAL       =  0,
-	GLOBAL_INTENSITY_POS_LESSER    =  1,
-	GLOBAL_INTENSITY_POS_MODERATE  =  2,
-	GLOBAL_INTENSITY_POS_GREATER   =  3,
-	GLOBAL_INTENSITY_POS_EXTREME   =  4,
-	GLOBAL_INTENSITY_TOTAL         =  5
-};
-
-/** \brief Increments an intensity enumerated value
-*** \param intensity A reference to the intensity data to modify
-*** \param amount The number of levels to increase the intensity by (default == 1)
-*** \return True if the intensity data was modified or false if it was left unchanged
-*** \note The intensity will not be allowed to increase beyond the valid intensity range
-**/
-bool IncrementIntensity(GLOBAL_INTENSITY& intensity, uint8 amount = 1);
-
-/** \brief Decrements an intensity enumerated value
-*** \param intensity A reference to the intensity data to modify
-*** \param amount The number of levels to decrease the intensity by (default == 1)
-*** \return True if the intensity data was modified or false if it was left unchanged
-*** \note The intensity will not be allowed to decrease beyond the valid intensity range
-**/
-bool DecrementIntensity(GLOBAL_INTENSITY& intensity, uint8 amount = 1);
-
 
 /** ****************************************************************************
 *** \brief Represents an elemental effect in the game

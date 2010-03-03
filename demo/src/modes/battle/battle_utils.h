@@ -22,7 +22,8 @@
 #include "defs.h"
 #include "utils.h"
 
-#include "global.h"
+#include "global_objects.h"
+#include "global_utils.h"
 
 namespace hoa_battle {
 
@@ -177,7 +178,14 @@ const float STAMINA_LOCATION_TOP = STAMINA_LOCATION_BOTTOM + 508.0f;
 *** Valid target types include attack points, actors, and parties. This class is
 *** somewhat of a wrapper and allows a single instance of BattleTarget to represent
 *** any of these types. It also contains a handful of methods useful in determining
-*** the validity of a selected target and moving to another target of the same type.
+*** the validity of a selected target and selecting another target of the same type.
+***
+*** Many of these functions are dependent on receiving a pointer to a BattleActor
+*** object that is using or intends to use the BattleTarget object. This is necessary
+*** because the different types of the GLOBAL_TARGET enum are relative and the class
+*** selects different targets relative to the user. For example, selecting the next
+*** actor when the target type is GLOBAL_TARGET_ALLY requires knowing whether the user
+*** is a character or an enemy.
 *** ***************************************************************************/
 class BattleTarget {
 public:
@@ -186,25 +194,42 @@ public:
 	~BattleTarget()
 		{}
 
+	//! \brief Resets all class members, invalidating the target
+	void InvalidateTarget();
+
+	/** \brief Used to set the initial target
+	*** \param user A pointer to the actor which will use the target
+	*** \param type The type of target to set
+	***
+	*** If the function fails to find an initial target, the target type will be set to
+	*** GLOBAL_TARGET_INVALID. The initial attack point is always the first available point on the
+	*** actor (index 0). The initial actor will always be the first valid actor in their respective
+	*** party (index 0).
+	**/
+	void SetInitialTarget(BattleActor* user, hoa_global::GLOBAL_TARGET type);
+
 	/** \brief Sets the target to a specific attack point on an actor
+	*** \param type The type of target to set, must be one of the point type targets
 	*** \param attack_point An integer index into the actor's attack points
 	*** \param actor The actor to set for the target (default value == NULL)
 	*** A NULL actor simply means that the class should continue pointing to the current actor.
-	*** This is useful for cycling through attack points on an actor. Note that if the actor argument
-	*** is NULL, the _actor member should not be NULL. If both are NULL, calling this method will
-	*** result in no change.
+	*** This is useful for cycling through the available attack points on an actor. Note that if the
+	*** actor argument is NULL, the _actor member should not be NULL when the function is called.
+	*** If both are NULL, calling this method will perform no changes.
 	**/
-	void SetAttackPointTarget(uint32 attack_point, BattleActor* actor = NULL);
+	void SetPointTarget(hoa_global::GLOBAL_TARGET type, uint32 attack_point, BattleActor* actor = NULL);
 
 	/** \brief Sets the target to an actor
+	*** \param type The type of target to set, must be one of the actor type targets
 	*** \param actor A pointer to the actor to set for the target
 	**/
-	void SetActorTarget(BattleActor* actor);
+	void SetActorTarget(hoa_global::GLOBAL_TARGET type, BattleActor* actor);
 
 	/** \brief Sets the target to a party
+	*** \param type The type of target to set, must be one of the party type targets
 	*** \param actor A pointer to the party to set for the target
 	**/
-	void SetPartyTarget(std::set<BattleActor*>* party);
+	void SetPartyTarget(hoa_global::GLOBAL_TARGET type, std::deque<BattleActor*>* party);
 
 	/** \brief Returns true if the target is valid
 	*** This method assumes that a valid target is one that is alive (non-zero HP). If the target type
@@ -220,11 +245,12 @@ public:
 	bool IsValid();
 
 	/** \brief Changes the target attack point to reference the next available attack point target
+	*** \param user A pointer to the actor which is using this target
 	*** \param direction Tells the method to look either forward or backward (true/false) for the next target
-	*** \param valid_criteria When true the method will only select targets determined to be valid by IsTargetValid()
+	*** \param valid_criteria When true the method will only select targets determined to be valid by IsValid()
 	*** \return True if the attack point or actor target was changed, false if no change took place
 	***
-	*** This method should only be invoked when the _type member is equal to GLOBAL_TARGET_ATTACK_POINT.
+	*** This method should only be invoked when the _type member is equal to one of the "POINT" types.
 	*** Under normal circumstances this method will simply reference the next attack point available on
 	*** the targeted actor. However, if the actor is deceased and the valid_criteria member is set to true,
 	*** this will cause the method to look for the next available actor and call the SelectNextActor() method.
@@ -233,30 +259,30 @@ public:
 	*** member should be set to false. This will ignore whether or not the target actor is deceased and allow external
 	*** code to determine the validity of the new attack point target itself.
 	**/
-	bool SelectNextAttackPoint(bool direction = true, bool valid_criteria = true);
+	bool SelectNextPoint(BattleActor* user, bool direction = true, bool valid_criteria = true);
 
 	/** \brief Changes the target actor to reference the next available actor
+	*** \param user A pointer tot he actor which is using this target
 	*** \param direction Tells the method to look either forward or backward (true/false) for the next target
-	*** \param valid_criteria When true the method will only select actors determined to be valid by IsTargetValid()
+	*** \param valid_criteria When true the method will only select actors determined to be valid by IsValid()
 	*** \return True if the _actor member was changed, false if it was not
 	***
-	*** This method should only be called when the _type member is equal to GLOBAL_TARGET_ATTACK_POINT or
-	*** GLOBAL_TARGET_ACTOR.
+	*** This method should only be called when the target type is not one of the party types.
 	**/
-	bool SelectNextActor(bool direction = true, bool valid_criteria = true);
+	bool SelectNextActor(BattleActor* user, bool direction = true, bool valid_criteria = true);
 
 	//! \name Class member accessor methods
 	//@{
 	hoa_global::GLOBAL_TARGET GetType() const
 		{ return _type; }
 
-	uint32 GetAttackPoint() const
-		{ return _attack_point; }
+	uint32 GetPoint() const
+		{ return _point; }
 
 	BattleActor* GetActor() const
 		{ return _actor; }
 
-	std::set<BattleActor*>* GetParty() const
+	std::deque<BattleActor*>* GetParty() const
 		{ return _party; }
 	//@}
 
@@ -264,14 +290,14 @@ private:
 	//! \brief The type of target this object represents (attack point, actor, or party)
 	hoa_global::GLOBAL_TARGET _type;
 
-	//! \brief An attack point to target, as an index to the proper point on the target_actor
-	uint32 _attack_point;
+	//! \brief The attack point to target, as an index to the proper point on the _actor
+	uint32 _point;
 
 	//! \brief The actor to target
 	BattleActor* _actor;
 
 	//! \brief The party to target
-	std::set<BattleActor*>* _party;
+	std::deque<BattleActor*>* _party;
 }; // class BattleTarget
 
 
@@ -323,12 +349,6 @@ public:
 	**/
 	void DecrementAvailableCount();
 
-	/** \brief A wrapper function that retrieves the actual count of the item
-	*** \note Calling this function is equivalent to calling GetItem().GetCount()
-	**/
-	uint32 GetCount() const
-		{ return _item.GetCount(); }
-
 	/** \brief Increments the count of an item by one
 	*** \note This method should not be called under normal battle circumstances
 	**/
@@ -338,6 +358,18 @@ public:
 	*** Will also decrement the available count if the two counts are equal
 	**/
 	void DecrementCount();
+
+	/** \brief A wrapper function that retrieves the actual count of the item
+	*** \note Calling this function is equivalent to calling GetItem().GetCount()
+	**/
+	uint32 GetCount() const
+		{ return _item.GetCount(); }
+
+	/** \brief A wrapper function that retrieves the target type of the item
+	*** \note Calling this function is equivalent to calling GetItem().GetTargetType()
+	**/
+	hoa_global::GLOBAL_TARGET GetTargetType() const
+		{ return _item.GetTargetType(); }
 
 private:
 	//! \brief The item that this class represents

@@ -27,9 +27,11 @@
 #include "defs.h"
 
 #include "global.h"
-#include "global_objects.h"
 #include "global_actors.h"
+#include "global_effects.h"
+#include "global_objects.h"
 #include "global_skills.h"
+#include "global_utils.h"
 
 using namespace luabind;
 
@@ -40,6 +42,17 @@ void BindGlobalsToLua()
 	// ---------- Bind Global Components
 	{
 	using namespace hoa_global;
+
+	def("GetTargetText", &GetTargetText),
+	def("IsTargetPoint", &IsTargetPoint),
+	def("IsTargetActor", &IsTargetActor),
+	def("IsTargetParty", &IsTargetParty),
+	def("IsTargetSelf", &IsTargetSelf),
+	def("IsTargetAlly", &IsTargetAlly),
+	def("IsTargetFoe", &IsTargetFoe),
+	// TODO: Luabind doesn't like these functions. I think its because they take reference arguments.
+// 	def("IncrementIntensity", &IncrementIntensity),
+// 	def("DecrementIntensity", &DecrementIntensity),
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
@@ -81,7 +94,7 @@ void BindGlobalsToLua()
 				value("GLOBAL_OBJECT_KEY_ITEM", GLOBAL_OBJECT_KEY_ITEM),
 				// Item usage constants
 				value("GLOBAL_USE_INVALID", GLOBAL_USE_INVALID),
-				value("GLOBAL_USE_MENU", GLOBAL_USE_MENU),
+				value("GLOBAL_USE_FIELD", GLOBAL_USE_FIELD),
 				value("GLOBAL_USE_BATTLE", GLOBAL_USE_BATTLE),
 				value("GLOBAL_USE_ALL", GLOBAL_USE_ALL),
 				// Item and skill alignment constants
@@ -105,10 +118,14 @@ void BindGlobalsToLua()
 				value("GLOBAL_ELEMENTAL_PIERCING", GLOBAL_ELEMENTAL_PIERCING),
 				// Target constants
 				value("GLOBAL_TARGET_INVALID", GLOBAL_TARGET_INVALID),
-				value("GLOBAL_TARGET_ATTACK_POINT", GLOBAL_TARGET_ATTACK_POINT),
-				value("GLOBAL_TARGET_ACTOR", GLOBAL_TARGET_ACTOR),
-				value("GLOBAL_TARGET_PARTY", GLOBAL_TARGET_PARTY),
-				value("GLOBAL_TARGET_SELF", GLOBAL_TARGET_SELF)
+				value("GLOBAL_TARGET_SELF_POINT", GLOBAL_TARGET_SELF_POINT),
+				value("GLOBAL_TARGET_ALLY_POINT", GLOBAL_TARGET_ALLY_POINT),
+				value("GLOBAL_TARGET_FOE_POINT", GLOBAL_TARGET_FOE_POINT),
+				value("GLOBAL_TARGET_SELF", GLOBAL_TARGET_SELF),
+				value("GLOBAL_TARGET_ALLY", GLOBAL_TARGET_ALLY),
+				value("GLOBAL_TARGET_FOE", GLOBAL_TARGET_FOE),
+				value("GLOBAL_TARGET_ALL_ALLIES", GLOBAL_TARGET_ALL_ALLIES),
+				value("GLOBAL_TARGET_ALL_FOES", GLOBAL_TARGET_ALL_FOES)
 			]
 	];
 
@@ -297,7 +314,7 @@ void BindGlobalsToLua()
 
 	// Bind GlobalManager to Lua
 	luabind::object global_table = luabind::globals(hoa_script::ScriptManager->GetGlobalState());
-	global_table["GlobalManager"]    = hoa_global::GlobalManager;
+	global_table["GlobalManager"] = hoa_global::GlobalManager;
 } // BindGlobalsToLua
 
 } // namespace hoa_defs

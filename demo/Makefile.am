@@ -110,6 +110,8 @@ global_SOURCES = \
 	$(GLOBAL_DIR)/global_objects.h \
 	$(GLOBAL_DIR)/global_skills.cpp \
 	$(GLOBAL_DIR)/global_skills.h \
+	$(GLOBAL_DIR)/global_utils.cpp \
+	$(GLOBAL_DIR)/global_utils.h \
 	$(GLOBAL_DIR)/defs_global.cpp
 
 GUI_DIR = src/common/gui

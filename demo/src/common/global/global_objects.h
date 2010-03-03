@@ -25,65 +25,9 @@
 #include "script.h"
 #include "video.h"
 
-#include "global_effects.h"
+#include "global_utils.h"
 
 namespace hoa_global {
-
-namespace private_global {
-
-/** \name Object ID Range Constants
-*** These constants set the maximum valid ID ranges for each object category.
-*** The full valid range for each object category ID is:
-*** - Items:            1-10000
-*** - Weapons:      10001-20000
-*** - Head Armor:   20001-30000
-*** - Torso Armor:  30001-40000
-*** - Arm Armor:    40001-50000
-*** - Leg Armor:    50001-60000
-*** - Shards:       60001-70000
-*** - Key Items:    70001-80000
-**/
-//@{
-const uint32 OBJECT_ID_INVALID   = 0;
-const uint32 MAX_ITEM_ID         = 10000;
-const uint32 MAX_WEAPON_ID       = 20000;
-const uint32 MAX_HEAD_ARMOR_ID   = 30000;
-const uint32 MAX_TORSO_ARMOR_ID  = 40000;
-const uint32 MAX_ARM_ARMOR_ID    = 50000;
-const uint32 MAX_LEG_ARMOR_ID    = 60000;
-const uint32 MAX_SHARD_ID        = 70000;
-const uint32 MAX_KEY_ITEM_ID     = 80000;
-const uint32 OBJECT_ID_EXCEEDS   = 80001;
-//@}
-
-} // namespace private_global
-
-/** \name GlobalObject Types
-*** \brief Used for identification of different game object types
-**/
-enum GLOBAL_OBJECT {
-	GLOBAL_OBJECT_INVALID     = -1,
-	GLOBAL_OBJECT_ITEM        =  0,
-	GLOBAL_OBJECT_WEAPON      =  1,
-	GLOBAL_OBJECT_HEAD_ARMOR  =  2,
-	GLOBAL_OBJECT_TORSO_ARMOR =  3,
-	GLOBAL_OBJECT_ARM_ARMOR   =  4,
-	GLOBAL_OBJECT_LEG_ARMOR   =  5,
-	GLOBAL_OBJECT_SHARD       =  6,
-	GLOBAL_OBJECT_KEY_ITEM    =  7,
-	GLOBAL_OBJECT_TOTAL       =  8
-};
-
-/** \brief Creates a new GlobalObject object and returns a pointer to it
-*** \param id The id value of the object to create
-*** \param count The count of the new object to create (default value == 1)
-*** \return A pointer to the newly created GlobalObject, or NULL if the object could not be created
-***
-*** This function does not actually create a GlobalObject (it can't since its an abstract class).
-*** It creates one of the derived object class types depending on the value of the id argument.
-**/
-GlobalObject* GlobalCreateNewObject(uint32 id, uint32 count = 1);
-
 
 /** ****************************************************************************
 *** \brief An abstract base class for representing a game object
@@ -238,17 +182,14 @@ public:
 	bool IsUsableInBattle()
 		{ return (_battle_use_function != NULL); }
 
-	//! \brief Returns true if the item can be used in menus
-	bool IsUsableInMenu()
-		{ return (_menu_use_function != NULL); }
+	//! \brief Returns true if the item can be used in the field
+	bool IsUsableInField()
+		{ return (_field_use_function != NULL); }
 
 	//! \name Class Member Access Functions
 	//@{
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
-
-	bool IsTargetAlly() const
-		{ return _target_ally; }
 
 	/** \brief Returns a pointer to the ScriptObject of the battle use function
 	*** \note This function will return NULL if the skill is not usable in battle
@@ -256,27 +197,22 @@ public:
 	const ScriptObject* GetBattleUseFunction() const
 		{ return _battle_use_function; }
 
-	/** \brief Returns a pointer to the ScriptObject of the menu use function
-	*** \note This function will return NULL if the skill is not usable in menus
+	/** \brief Returns a pointer to the ScriptObject of the field use function
+	*** \note This function will return NULL if the skill is not usable in the field
 	**/
-	const ScriptObject* GetMenuUseFunction() const
-		{ return _menu_use_function; }
+	const ScriptObject* GetFieldUseFunction() const
+		{ return _field_use_function; }
 	//@}
 
 private:
-	/** \brief The type of target for the item
-	*** Target types include attack points, actors, and parties. This enum type is defined in global_actors.h
-	**/
+	//! \brief The type of target for the item
 	GLOBAL_TARGET _target_type;
-
-	//! \brief If true the item should target allies, otherwise it should target enemies
-	bool _target_ally;
 
 	//! \brief A pointer to the script function that performs the item's effect while in battle
 	ScriptObject* _battle_use_function;
 
 	//! \brief A pointer to the script function that performs the item's effect while in a menu
-	ScriptObject* _menu_use_function;
+	ScriptObject* _field_use_function;
 }; // class GlobalItem : public GlobalObject
 
 

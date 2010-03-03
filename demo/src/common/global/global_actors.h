@@ -28,102 +28,9 @@
 
 #include "video.h"
 
+#include "global_utils.h"
+
 namespace hoa_global {
-
-/** \name Target Types
-*** \brief Enum values used for declaring the type of target of items, skills, and actions.
-**/
-enum GLOBAL_TARGET {
-	// TODO: The commented out target enums below should replace the current set of enums. Waiting until
-	// the right time to make this happen.
-// 	GLOBAL_TARGET_INVALID      = -1,
-// 	GLOBAL_TARGET_SELF         =  0,
-// 	GLOBAL_TARGET_SELF_POINT   =  1,
-// 	GLOBAL_TARGET_ALLY         =  2,
-// 	GLOBAL_TARGET_ALLY_POINT   =  3,
-// 	GLOBAL_TARGET_ENEMY        =  4,
-// 	GLOBAL_TARGET_ENEMY_POINT  =  5,
-// 	GLOBAL_TARGET_ALL_ALLIES   =  6,
-// 	GLOBAL_TARGET_ALL_ENEMIES  =  7,
-// 	GLOBAL_TARGET_TOTAL        =  8
-
-	GLOBAL_TARGET_INVALID      = -1,
-	GLOBAL_TARGET_ATTACK_POINT =  0,
-	GLOBAL_TARGET_ACTOR        =  1,
-	GLOBAL_TARGET_PARTY        =  2,
-	GLOBAL_TARGET_SELF         =  3,
-	GLOBAL_TARGET_TOTAL        =  4
-};
-
-/** \name GlobalItem and GlobalSkill Usage Cases
-*** \brief Enum values used for identification of different game object types
-**/
-enum GLOBAL_USE {
-	GLOBAL_USE_INVALID = -1,
-	GLOBAL_USE_MENU    =  0,
-	GLOBAL_USE_BATTLE  =  1,
-	GLOBAL_USE_ALL     =  2, //!< Usable in both menus and battles
-	GLOBAL_USE_TOTAL   =  3
-};
-
-//! \brief The maximum number of characters that can be in the active party
-const uint32 GLOBAL_MAX_PARTY_SIZE = 4;
-
-/** \name Character Attack Point Positions
-*** \brief Integers that represent the location of the four attack points/armor types for characters
-**/
-//@{
-const uint32 GLOBAL_POSITION_HEAD  = 0;
-const uint32 GLOBAL_POSITION_TORSO = 1;
-const uint32 GLOBAL_POSITION_ARMS  = 2;
-const uint32 GLOBAL_POSITION_LEGS  = 3;
-//@}
-
-/** \name Game Character IDs
-*** \brief Integers that are used for identification of characters
-*** These series of constants are used as bit-masks for determining things such as if the character
-*** may use a certain item. Only one bit should be set for each character ID.
-***
-*** \note The IDs for each character are defined in the dat/global.lua file.
-**/
-//@{
-const uint32 GLOBAL_CHARACTER_INVALID     = 0x00000000;
-const uint32 GLOBAL_CHARACTER_ALL         = 0xFFFFFFFF;
-//@}
-
-
-/** \brief Determines and retrieves a string representation for a target type
-*** \param target_type The type of target
-*** \param target_ally True if the target is an ally, false if its an enemy
-*** \return A string representation of the target type
-**/
-std::string GetTargetTypeText(GLOBAL_TARGET target_type, bool target_ally);
-
-
-/** ****************************************************************************
-*** \brief Represents a target for an item, action, or skill
-***
-*** This is an abstract class that all three types of target classes inherit
-*** from. Pointers to this class are used as parameters to script functions
-*** that
-*** ***************************************************************************/
-class GlobalTarget {
-public:
-	GlobalTarget()
-		{}
-
-	virtual ~GlobalTarget()
-		{}
-
-	/** \brief A pure virtual function that returns the type of target
-	*** \return The appropriate GLOBAL_TARGET enum for the target type in question
-	***
-	*** This method is necessary so that GlobalTarget can be an abstract class.
-	*** Inheriting classes simply need to return a valid target type.
-	**/
-	virtual GLOBAL_TARGET GetTargetType() = 0;
-}; // class GlobalTarget
-
 
 /** ****************************************************************************
 *** \brief Represents the points of attack present on an actor
@@ -134,16 +41,13 @@ public:
 *** are located on the head, torso, arms, and legs. Each attack points may have certain weaknesses
 *** or resistances.
 *** ***************************************************************************/
-class GlobalAttackPoint : public GlobalTarget {
+class GlobalAttackPoint {
 public:
 	//! \param actor_owner A pointer to the GlobalActor owner of this attack point
 	GlobalAttackPoint(GlobalActor* owner);
 
 	~GlobalAttackPoint()
 		{ _actor_owner = NULL; }
-
-	GLOBAL_TARGET GetTargetType()
-		{ return GLOBAL_TARGET_ATTACK_POINT; }
 
 	/** \brief Reads in the attack point's data from a script file
 	*** \param script A reference to the open script file where to retrieve the data from
@@ -264,7 +168,7 @@ private:
 	**/
 	// TODO: Add status and elemental effects to attack points
 	// std::vector<std::pair<float, GlobalStatusEffect*> > _status_weaknesses;
-}; // class GlobalAttackPoint : public GlobalTarget
+}; // class GlobalAttackPoint
 
 
 /** ****************************************************************************
@@ -274,7 +178,7 @@ private:
 *** inherit from in order to provide a consistent interface to the statistics
 *** that characters and enemies share.
 *** ***************************************************************************/
-class GlobalActor : public GlobalTarget {
+class GlobalActor {
 public:
 	GlobalActor();
 
@@ -283,9 +187,6 @@ public:
 	GlobalActor(const GlobalActor& copy);
 
 	GlobalActor& operator=(const GlobalActor& copy);
-
-	GLOBAL_TARGET GetTargetType()
-		{ return GLOBAL_TARGET_ACTOR; }
 
 	/** \brief Equips a new weapon on the actor
 	*** \param weapon The new weapon to equip on the actor
@@ -648,7 +549,7 @@ protected:
 
 	//! \brief Calculates the evade rating for each attack point
 	void _CalculateEvadeRatings();
-}; // class GlobalActor : public GlobalTarget
+}; // class GlobalActor
 
 
 /** ****************************************************************************
@@ -1145,7 +1046,7 @@ protected:
 *** \note All methods which perform an operation by using an actor ID are
 *** <b>only</b> valid to use if the party does not allow duplicates.
 *** ***************************************************************************/
-class GlobalParty : public GlobalTarget {
+class GlobalParty {
 public:
 	//! \param allow_duplicates Determines whether or not the party allows duplicate actors to be added (default value == false)
 	GlobalParty(bool allow_duplicates = false) :
@@ -1153,9 +1054,6 @@ public:
 
 	~GlobalParty()
 		{}
-
-	GLOBAL_TARGET GetTargetType()
-		{ return GLOBAL_TARGET_PARTY; }
 
 	// ---------- Actor addition, removal, and retrieval methods
 
@@ -1264,7 +1162,7 @@ private:
 	*** class, the actor should be removed from this container immediately to avoid a possible segmentation fault.
 	**/
 	std::vector<GlobalActor*> _actors;
-}; // class GlobalActorParty : public GlobalTarget
+}; // class GlobalActorParty
 
 } // namespace hoa_global
 
