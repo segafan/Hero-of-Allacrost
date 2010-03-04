@@ -282,6 +282,42 @@ void BattleActor::SetAction(BattleAction* action) {
 	_action = action;
 }
 
+
+
+uint32 BattleActor::TotalPhysicalDefense() {
+	uint32 phys_defense = 0;
+
+	for (uint32 i = 0; i < _attack_points.size(); i++)
+		phys_defense += _attack_points[i]->GetTotalPhysicalDefense();
+	phys_defense /= _attack_points.size();
+
+	return phys_defense;
+}
+
+
+
+uint32 BattleActor::TotalMetaphysicalDefense() {
+	uint32 meta_defense = 0;
+
+	for (uint32 i = 0; i < _attack_points.size(); i++)
+		meta_defense += _attack_points[i]->GetTotalMetaphysicalDefense();
+	meta_defense /= _attack_points.size();
+
+	return meta_defense;
+}
+
+
+
+float BattleActor::TotalEvadeRating() {
+	float evade = 0.0f;
+
+	for (uint32 i = 0; i < _attack_points.size(); i++)
+		evade += _attack_points[i]->GetTotalEvadeRating();
+	evade /= static_cast<float>(_attack_points.size());
+
+	return evade;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // BattleCharacter class
 ////////////////////////////////////////////////////////////////////////////////

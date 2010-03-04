@@ -40,6 +40,272 @@ float timer_multiplier = 1.0f;
 bool wait;
 
 ////////////////////////////////////////////////////////////////////////////////
+// Standard battle calculation functions
+////////////////////////////////////////////////////////////////////////////////
+
+bool CalculateStandardEvasion(BattleTarget* target) {
+	return CalculateStandardEvasion(target, 0.0f);
+}
+
+
+
+bool CalculateStandardEvasion(BattleTarget* target, float add_evade) {
+	if (target == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL target argument" << endl;
+		return false;
+	}
+	if (IsTargetParty(target->GetType()) == true) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "target was a party type: " << target->GetType() << endl;
+		return false;
+	}
+
+	float evasion = 0.0f;
+	if (IsTargetPoint(target->GetType()) == true) {
+		evasion = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalEvadeRating();
+	}
+	else if (IsTargetActor(target->GetType()) == true) {
+		evasion = target->GetActor()->TotalEvadeRating();
+	}
+	else {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << target->GetType() << endl;
+		return false;
+	}
+
+	evasion += add_evade;
+
+	// Check for absolute hit/miss conditions
+	if (evasion < 0.0f)
+		return false;
+	else if (evasion > 100.0f)
+		return true;
+
+	if (RandomFloat(0.0f, 100.0f) > evasion)
+		return false;
+	else
+		return true;
+}
+
+
+
+bool CalculateStandardEvasionMultiplier(BattleTarget* target, float mul_evade) {
+	if (target == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL target argument" << endl;
+		return false;
+	}
+	if (IsTargetParty(target->GetType()) == true) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "target was a party type: " << target->GetType() << endl;
+		return false;
+	}
+
+	float evasion = 0.0f;
+	if (IsTargetPoint(target->GetType()) == true) {
+		evasion = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalEvadeRating();
+	}
+	else if (IsTargetActor(target->GetType()) == true) {
+		evasion = target->GetActor()->TotalEvadeRating();
+	}
+	else {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << target->GetType() << endl;
+		return false;
+	}
+
+	// Apply the multiplier and either reduce or subtract the delta evasion amount
+	float delta = evasion * fabs(mul_evade);
+	if (mul_evade < 0.0f)
+		evasion -= delta;
+	else
+		evasion += delta;
+
+	// Check for absolute hit/miss conditions
+	if (evasion < 0.0f)
+		return false;
+	else if (evasion > 100.0f)
+		return true;
+
+	if (RandomFloat(0.0f, 100.0f) > evasion)
+		return false;
+	else
+		return true;
+}
+
+
+
+uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target) {
+	return CalculateStandardDamage(attacker, target, 0, 0, 10.0f);
+}
+
+
+
+uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, int32 add_phys, int32 add_meta) {
+	return CalculateStandardDamage(attacker, target, add_phys, add_meta, 10.0f);
+}
+
+
+
+uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, float std_dev) {
+	return CalculateStandardDamage(attacker, target, 0, 0, std_dev);
+}
+
+
+
+uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, int32 add_phys, int32 add_meta, float std_dev) {
+	if (attacker == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL attacker argument" << endl;
+		return 0;
+	}
+	if (target == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL target argument" << endl;
+		return 0;
+	}
+	if (IsTargetParty(target->GetType()) == true) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "target was a party type: " << target->GetType() << endl;
+		return 0;
+	}
+
+	// Holds the total physical/metaphysical attack of the attacker and modifier
+	int32 total_phys_atk = 0, total_meta_atk = 0;
+	total_phys_atk = attacker->GetTotalPhysicalAttack() + add_phys;
+	total_meta_atk = attacker->GetTotalMetaphysicalAttack() + add_meta;
+	if (total_phys_atk < 0)
+		total_phys_atk = 0;
+	if (total_meta_atk < 0)
+		total_meta_atk = 0;
+
+	// Holds the total physical/metaphysical defense of the target
+	int32 total_phys_def = 0, total_meta_def = 0;
+
+	if (IsTargetPoint(target->GetType()) == true) {
+		total_phys_def = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalPhysicalDefense();
+		total_meta_def = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalMetaphysicalDefense();
+	}
+	else if (IsTargetActor(target->GetType()) == true) {
+		total_phys_def = target->GetActor()->TotalPhysicalDefense();
+		total_meta_def = target->GetActor()->TotalMetaphysicalDefense();
+	}
+	else {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << target->GetType() << endl;
+		return 0;
+	}
+
+	// Holds the physical and metaphysical damage dealt
+	int32 total_phys_dmg = 0, total_meta_dmg = 0;
+	total_phys_dmg = total_phys_atk - total_phys_dmg;
+	total_meta_dmg = total_meta_atk - total_meta_dmg;
+	if (total_phys_dmg < 0)
+		total_phys_dmg = 0;
+	if (total_meta_dmg < 0)
+		total_meta_dmg = 0;
+
+
+	// Holds the total damage dealt
+	uint32 total_dmg = 0;
+	total_dmg = total_phys_dmg + total_meta_dmg;
+	// Holds the absolute standard deviation used in the GaussianRandomValue function
+	float abs_std_dev = 0.0f;
+	// A value of "0.075f" means the standard deviation should be 7.5% of the mean (the total damage)
+	abs_std_dev = static_cast<float>(total_dmg) * std_dev;
+	total_dmg = GaussianRandomValue(total_dmg, abs_std_dev, false);
+
+	// If the total damage came to a value less than or equal to zero after gaussian randomization,
+	// fall back to returning a small non-zero damage value
+	if (total_dmg > 0)
+		return static_cast<uint32>(total_dmg);
+	else
+		return static_cast<uint32>(RandomBoundedInteger(1, 5));
+} // uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, int32 add_phys, int32 add_meta, float std_dev)
+
+
+
+uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta) {
+	return CalculateStandardDamageMultiplier(attacker, target, mul_phys, mul_meta, 10.0f);
+}
+
+
+
+uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta, float std_dev) {
+	if (attacker == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL attacker argument" << endl;
+		return 0;
+	}
+	if (target == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL target argument" << endl;
+		return 0;
+	}
+	if (IsTargetParty(target->GetType()) == true) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "target was a party type: " << target->GetType() << endl;
+		return 0;
+	}
+
+	// Holds the total physical/metaphysical attack of the attacker and modifier
+	int32 total_phys_atk = 0, total_meta_atk = 0;
+	total_phys_atk = attacker->GetTotalPhysicalAttack();
+	total_meta_atk = attacker->GetTotalMetaphysicalAttack();
+
+	// Apply the multipliers and either reduce or subtract the delta evasion amount
+	float phys_delta = 0.0f, meta_delta = 0.0f;
+	phys_delta = static_cast<float>(total_phys_atk) * fabs(mul_phys);
+	meta_delta = static_cast<float>(total_meta_atk) * fabs(mul_meta);
+
+	if (mul_phys < 0.0f)
+		total_phys_atk -= static_cast<int32>(phys_delta);
+	else
+		total_phys_atk += static_cast<int32>(phys_delta);
+	if (mul_meta < 0.0f)
+		total_meta_atk -= static_cast<int32>(meta_delta);
+	else
+		total_meta_atk += static_cast<int32>(meta_delta);
+
+	if (total_phys_atk < 0)
+		total_phys_atk = 0;
+	if (total_meta_atk < 0)
+		total_meta_atk = 0;
+
+	// Holds the total physical/metaphysical defense of the target
+	int32 total_phys_def = 0, total_meta_def = 0;
+
+	if (IsTargetPoint(target->GetType()) == true) {
+		total_phys_def = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalPhysicalDefense();
+		total_meta_def = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalMetaphysicalDefense();
+	}
+	else if (IsTargetActor(target->GetType()) == true) {
+		total_phys_def = target->GetActor()->TotalPhysicalDefense();
+		total_meta_def = target->GetActor()->TotalMetaphysicalDefense();
+	}
+	else {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << target->GetType() << endl;
+		return 0;
+	}
+
+	// Holds the physical and metaphysical damage dealt
+	int32 total_phys_dmg = 0, total_meta_dmg = 0;
+	total_phys_dmg = total_phys_atk - total_phys_dmg;
+	total_meta_dmg = total_meta_atk - total_meta_dmg;
+	if (total_phys_dmg < 0)
+		total_phys_dmg = 0;
+	if (total_meta_dmg < 0)
+		total_meta_dmg = 0;
+
+
+	// Holds the total damage dealt
+	uint32 total_dmg = 0;
+	total_dmg = total_phys_dmg + total_meta_dmg;
+	// Holds the absolute standard deviation used in the GaussianRandomValue function
+	float abs_std_dev = 0.0f;
+	// A value of "0.075f" means the standard deviation should be 7.5% of the mean (the total damage)
+	abs_std_dev = static_cast<float>(total_dmg) * std_dev;
+	total_dmg = GaussianRandomValue(total_dmg, abs_std_dev, false);
+
+	// If the total damage came to a value less than or equal to zero after gaussian randomization,
+	// fall back to returning a small non-zero damage value
+	if (total_dmg > 0)
+		return static_cast<uint32>(total_dmg);
+	else
+		return static_cast<uint32>(RandomBoundedInteger(1, 5));
+
+	return 0; // TODO
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // BattleTarget class
 ////////////////////////////////////////////////////////////////////////////////
 

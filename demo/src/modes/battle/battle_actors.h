@@ -90,39 +90,6 @@ public:
 	//! \brief Adds a battle effect to the actor's vector
 	void AddNewEffect(uint32 id);
 
-	//! \brief Resets actor stats to their original values
-	//@{
-	void ResetHitPoints(uint32 hp)
-		{ SetHitPoints(_global_actor->GetHitPoints()); }
-
-	void ResetMaxHitPoints(uint32 hp)
-		{ SetMaxHitPoints(_global_actor->GetMaxHitPoints()); }
-
-	void ResetSkillPoints(uint32 sp)
-		{ SetSkillPoints(_global_actor->GetSkillPoints()); }
-
-	void ResetMaxSkillPoints(uint32 sp)
-		{ SetMaxSkillPoints(_global_actor->GetMaxSkillPoints()); }
-
-	void ResetStrength(uint32 st)
-		{ SetStrength(_global_actor->GetStrength()); }
-
-	void ResetVigor(uint32 vi)
-		{ SetVigor(_global_actor->GetVigor()); }
-
-	void ResetFortitude(uint32 fo)
-		{ SetFortitude(_global_actor->GetFortitude()); }
-
-	void ResetProtection(uint32 pr)
-		{ SetProtection(_global_actor->GetProtection()); }
-
-	void ResetAgility(uint32 ag)
-		{ SetAgility(_global_actor->GetAgility()); }
-
-	void ResetEvade(float ev)
-		{ SetEvade(_global_actor->GetEvade()); }
-	//@}
-
 	/** \brief Changes the state of the actor and modifies the actor's properties accordingly
 	*** \param new_state The state to set the actor to
 	**/
@@ -180,6 +147,48 @@ public:
 	*** printed in the case where the actor has another action prepared.
 	**/
 	void SetAction(BattleAction* action);
+
+	//! \brief Resets actor stats to their original values
+	//@{
+	void ResetHitPoints(uint32 hp)
+		{ SetHitPoints(_global_actor->GetHitPoints()); }
+
+	void ResetMaxHitPoints(uint32 hp)
+		{ SetMaxHitPoints(_global_actor->GetMaxHitPoints()); }
+
+	void ResetSkillPoints(uint32 sp)
+		{ SetSkillPoints(_global_actor->GetSkillPoints()); }
+
+	void ResetMaxSkillPoints(uint32 sp)
+		{ SetMaxSkillPoints(_global_actor->GetMaxSkillPoints()); }
+
+	void ResetStrength(uint32 st)
+		{ SetStrength(_global_actor->GetStrength()); }
+
+	void ResetVigor(uint32 vi)
+		{ SetVigor(_global_actor->GetVigor()); }
+
+	void ResetFortitude(uint32 fo)
+		{ SetFortitude(_global_actor->GetFortitude()); }
+
+	void ResetProtection(uint32 pr)
+		{ SetProtection(_global_actor->GetProtection()); }
+
+	void ResetAgility(uint32 ag)
+		{ SetAgility(_global_actor->GetAgility()); }
+
+	void ResetEvade(float ev)
+		{ SetEvade(_global_actor->GetEvade()); }
+	//@}
+
+	//! \brief Returns the average defense/evasion totals of all of the actor's attack points
+	//@{
+	uint32 TotalPhysicalDefense();
+
+	uint32 TotalMetaphysicalDefense();
+
+	float TotalEvadeRating();
+	//@}
 
 	//! \name Class member access methods
 	//@{
