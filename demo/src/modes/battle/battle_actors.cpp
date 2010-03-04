@@ -337,7 +337,7 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character) :
 	_hit_points_text.SetText(NumberToString(GetHitPoints()));
 	_skill_points_text.SetStyle(TextStyle("text20"));
 	_skill_points_text.SetText(NumberToString(GetSkillPoints()));
-} // BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin)
+}
 
 
 
@@ -421,20 +421,6 @@ void BattleCharacter::DrawSprite() {
 	}
 
 	_global_character->RetrieveBattleAnimation(_sprite_animation_alias)->Draw();
-
-
-	if (IsAlive() == true) {
-		// Draw the actor selector image if this character is currently selected
-		if (this == BattleMode::CurrentInstance()->_selected_character) {
-			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
-			BattleMode::CurrentInstance()->_actor_selection_image.Draw();
-		}
-
-		if (this == BattleMode::CurrentInstance()->_selected_target) {
-			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
-			BattleMode::CurrentInstance()->_actor_selection_image.Draw();
-		}
-	}
 } // void BattleCharacter::DrawSprite()
 
 
@@ -454,7 +440,7 @@ void BattleCharacter::DrawPortrait() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(48.0f, 9.0f);
 
-	vector<StillImage> & portrait_frames = *(_global_character->GetBattlePortraits());
+	vector<StillImage>& portrait_frames = *(_global_character->GetBattlePortraits());
 	float hp_percent =  static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
 
 	if (GetHitPoints() == GetMaxHitPoints()) {
@@ -483,34 +469,6 @@ void BattleCharacter::DrawPortrait() {
 		float alpha = 1.0f - (hp_percent * 4.0f);
 		portrait_frames[4].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
 	}
-
-// 	if (GetHitPoints() == 0) {
-// 		portrait_frames[4].Draw();
-// 	}
-// 	// The blend alpha will range from 1.0 to 0.0 in the following calculations
-// 	else if (hp_percent < 0.25f) {
-// 		portrait_frames[4].Draw();
-// 		float alpha = (hp_percent) * 4;
-// 		portrait_frames[3].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
-// 	}
-// 	else if (hp_percent < 0.50f) {
-// 		portrait_frames[3].Draw();
-// 		float alpha = (hp_percent - 0.25f) * 4;
-// 		portrait_frames[2].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
-// 	}
-// 	else if (hp_percent < 0.75f) {
-// 		portrait_frames[2].Draw();
-// 		float alpha = (hp_percent - 0.50f) * 4;
-// 		portrait_frames[1].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
-// 	}
-// 	else if (hp_percent < 1.00f) {
-// 		portrait_frames[1].Draw();
-// 		float alpha = (hp_percent - 0.75f) * 4;
-// 		portrait_frames[0].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
-// 	}
-// 	else { // Character is at full health
-// 		portrait_frames[0].Draw();
-// 	}
 }
 
 
@@ -572,7 +530,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		// Draw the cover image over the top of the bar
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Move(293.0f, 84.0f + y_offset);
-		BattleMode::CurrentInstance()->_character_bar_covers.Draw();
+		BattleMode::CurrentInstance()->GetCharacterBarCovers().Draw();
 
 		// TODO: The SetText calls below should not be done here. They should be made whenever the character's HP/SP
 		// is modified. This re-renders the text every frame regardless of whether or not the HP/SP changed so its
@@ -680,14 +638,6 @@ void BattleEnemy::DrawSprite() {
 			enemy_draw_offset = TILE_SIZE * (2.0f - 2.0f * _state_timer.PercentComplete());
 	}
 
-// 	// Draw the actor selector image over the currently selected enemy
-// 	if (this == BattleMode::CurrentInstance()->_selected_target) {
-// 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-// 		VideoManager->Move(_x_location + GetActor()->GetSpriteWidth() / 2, _y_location - 25);
-// 		BattleMode::CurrentInstance()->_actor_selection_image.Draw();
-// 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-// 	}
-
 	// Draw the enemy's damage-blended sprite frames
 	VideoManager->Move(_x_location - enemy_draw_offset, _y_location);
 
@@ -715,20 +665,6 @@ void BattleEnemy::DrawSprite() {
 		float alpha = 1.0f - (hp_percent * 3.0f);
 		sprite_frames[3].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
 	}
-
-	// Draw the attack point indicator if necessary
-// 	if (this == BattleMode::CurrentInstance()->_selected_target && BattleMode::CurrentInstance()->_action_window->GetActionTargetType() == GLOBAL_TARGET_ATTACK_POINT) {
-// 		VideoManager->PushState();
-// 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-// 		const vector<GlobalAttackPoint*>& attack_points = GetActor()->GetAttackPoints();
-//
-// 		VideoManager->Move(GetXLocation() + attack_points[BattleMode::CurrentInstance()->_selected_attack_point]->GetXPosition(),
-// 			GetYLocation() + attack_points[BattleMode::CurrentInstance()->_selected_attack_point]->GetYPosition());
-// 		BattleMode::CurrentInstance()->_attack_point_indicator.Draw();
-//
-// 		// Reset default X and Y draw orientation
-// 		VideoManager->PopState();
-// 	}
 } // void BattleEnemy::DrawSprite()
 
 

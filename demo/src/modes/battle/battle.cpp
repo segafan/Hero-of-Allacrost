@@ -58,11 +58,6 @@ BattleMode* BattleMode::_current_instance = NULL;
 
 BattleMode::BattleMode() :
 	_state(BATTLE_STATE_INVALID),
-	_selected_character_index(0),
-	_selected_target_index(0),
-	_selected_character(NULL),
-	_selected_target(NULL),
-	_selected_attack_point(0),
 	_command_supervisor(new CommandSupervisor()),
 	_finish_window(new FinishWindow()),
 	_current_number_swaps(0),
@@ -247,19 +242,6 @@ void BattleMode::Update() {
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		_enemy_actors[i]->Update();
 	}
-
-	// ----- (3): Execute any scripts that are sitting in the queue
-// 	if (_action_queue.size())
-// 	{
-// 		_UpdateScripts();
-// 		_CleanupActionQueue();
-// 	} // if (_action_queue.size())
-
-	// ----- (4): Try to select an idle character if no character is currently selected
-// 	if (_selected_character == NULL)
-// 	{
-// 		_ActivateNextCharacter();
-// 	}
 
 
 
@@ -783,117 +765,6 @@ uint32 BattleMode::_NumberCharactersAlive() const {
 
 
 
-// void BattleMode::_SetInitialTarget() {
-// 	if (_action_window->_action_target_ally == true) {
-// 		_selected_target_index = -1;
-// 		_selected_target_index = GetIndexOfNextAliveCharacter(true);
-// 		_selected_target = GetPlayerCharacterAt(_selected_target_index);
-// 		_selected_attack_point = 0;
-// 	}
-// 	else {
-// 		_selected_target = GetEnemyActorAt(GetIndexOfFirstAliveEnemy());
-// 		_selected_target_index = GetIndexOfFirstAliveEnemy();
-// 		_selected_attack_point = 0;
-// 	}
-// }
-//
-//
-//
-// void BattleMode::_SelectNextTarget(bool forward_direction) {
-// 	if (_selected_target == NULL) {
-// 		_SetInitialTarget();
-// 		return;
-// 	}
-//
-// 	uint32 previous_target = _selected_target_index;
-// 	if (forward_direction) {
-// 		if (_action_window->_action_target_ally == true) {
-// 			_selected_target_index = (_selected_target_index + 1) % _character_actors.size();
-// 			_selected_target = _character_actors[_selected_target_index];
-// 		}
-// 		else {
-// 			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
-// 			_selected_target = (static_cast<uint32>(_selected_target_index) == INVALID_BATTLE_ACTOR_INDEX) ?
-// 				NULL : _enemy_actors[_selected_target_index];
-// 		}
-// 	}
-//
-// 	else {
-// 		if (_action_window->_action_target_ally == true) {
-// 			_selected_target_index--;
-//
-// 			if (_selected_target_index < 0) {
-// 				_selected_target_index = _character_actors.size() - 1;
-// 			}
-// 			_selected_target = _character_actors[_selected_target_index];
-// 		}
-// 		else {
-// 			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
-// 			_selected_target = (static_cast<uint32>(_selected_target_index) == INVALID_BATTLE_ACTOR_INDEX) ?
-// 				NULL : _enemy_actors[_selected_target_index];
-// 		}
-// 	}
-//
-// 	if (previous_target != static_cast<uint32>(_selected_target_index))
-// 		_selected_attack_point = 0;
-// }
-//
-//
-//
-// void BattleMode::_SelectNextAttackPoint(bool forward_direction) {
-// 	if (_selected_target == NULL) {
-// 		_SetInitialTarget();
-// 		return;
-// 	}
-//
-// 	if (forward_direction) {
-// 		_selected_attack_point++;
-// 		if (_selected_attack_point >= _selected_target->GetActor()->GetAttackPoints().size())
-// 			_selected_attack_point = 0;
-// 	}
-//
-// 	else {
-// 		if (_selected_attack_point == 0)
-// 			_selected_attack_point = _selected_target->GetActor()->GetAttackPoints().size() - 1;
-// 		else
-// 			_selected_attack_point--;
-// 	}
-// }
-
-
-
-// void BattleMode::_UpdateScripts() {
-// 	BattleAction* action;
-//
-// 	for (list<BattleAction*>::iterator i = _action_queue.begin(); i != _action_queue.end(); i++) {
-// 		action = (*i);
-//
-// // 		if (action->ShouldBeRemoved())
-// // 			continue;
-//
-// 		if (action->GetSource()->GetState() == ACTOR_STATE_READY) {
-// 			action->Execute();
-// 		}
-// 	}
-// }
-//
-//
-//
-// void BattleMode::_CleanupActionQueue() {
-// 	list<BattleAction*>::iterator it;
-//
-// 	for (it = _action_queue.begin(); it != _action_queue.end();) {
-// 		if ((*it)->ShouldBeRemoved()) {
-// 			it = _action_queue.erase(it);
-// 		}
-// 		else {
-// 			++it;
-// 		}
-// 	}
-// }
-
-
-
 void BattleMode::_DrawBackgroundGraphics() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
 	VideoManager->Move(0.0f, 0.0f);
@@ -1050,30 +921,7 @@ void BattleMode::_DrawStaminaBar() {
 		live_actors[i]->GetStaminaIcon().Draw();
 	}
 
-	// TODO: Draw stamina icons in proper draw order
-// 	if (target_type  == GLOBAL_TARGET_PARTY) {
-// 		if (target_character == true) { // All characters are selected
-// 			for (uint32 i = 0; i < live_actors.size(); i++) {
-// 				live_actors[i]->DrawStaminaIcon(!live_actors[i]->IsEnemy());
-// 			}
-// 		}
-// 		else { // All enemies are selected
-// 			for (uint32 i = 0; i < live_actors.size(); i++) {
-// 				live_actors[i]->DrawStaminaIcon(live_actors[i]->IsEnemy());
-// 			}
-// 		}
-// 	}
-// 	else { // Find the actor who is the selected target
-// 		for (uint32 i = 0; i < live_actors.size(); i++) {
-// 			live_actors[i]->DrawStaminaIcon(live_actors[i] == _selected_target);
-// 		}
-// 	}
-
-	// ----- (3): Draw all stamina icons for live actors
-	/*VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	for (uint32 i = 0; i < live_actors.size(); i++) {
-		live_actors[i]->DrawStaminaIcon(selected[i]);
-	}*/
+	// TODO: Draw stamina icon indicators such as the selector graphic
 } // void BattleMode::_DrawStaminaBar()
 
 
@@ -1094,215 +942,23 @@ void BattleMode::_DrawIndicators() {
 
 
 
-// void BattleMode::_ActivateNextCharacter() {
-// 	_selected_character_index = GetIndexOfNextIdleCharacter(_selected_character);
-// 	if (_selected_character_index != static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX)) {
-// 		_selected_character = GetPlayerCharacterAt(_selected_character_index);
-// 		_selected_character->ChangeState(ACTOR_STATE_READY);
-// 		//_selected_character->GetWaitTime()->Pause();
-// 		_action_window->Initialize(_selected_character);
-// 		if (wait)
-// 			FreezeTimers(); // TEMP: for non-active battle mode
-// 	}
-// }
-
-
-// void BattleMode::RemoveActionsForActor(BattleActor * actor) {
-// 	list<BattleAction*>::iterator it = _action_queue.begin();
-//
-// 	while (it != _action_queue.end()) {
-// 		if ((*it)->GetSource() == actor) {
-// 			if ((*it)->IsItemAction()) {
-// 				ItemAction* action = dynamic_cast<ItemAction*>(*it);
-// 				action->GetItem()->IncrementCount(1);
-// 			}
-// 			//it = _action_queue.erase(it);	//remove this location
-// 			(*it)->MarkForRemoval();
-// 		}
-// 		it++;
-// 	}
+// void BattleMode::AddDialogue(string speaker_name, string text) {
+// 	_dialogue_text.push_back(MakeUnicodeString(speaker_name));
+// 	_dialogue_text.push_back(MakeUnicodeString(text));
 // }
 
 
 
-
-// void BattleMode::AddToTurnQueue(BattleCharacter* character) {
-// 	_characters_awaiting_turn.push_back(character);
+// void BattleMode::ShowDialogue() {
+// 	_speaker_name = _dialogue_text.front();
+// 	_dialogue_text.pop_front();
+// 	hoa_utils::ustring text = _dialogue_text.front();
+// 	_dialogue_text.pop_front();
+//
+// 	_dialogue_window.Reset();
+// 	_dialogue_window._display_textbox.SetDisplayText(text);
+// 	_dialogue_window.Initialize();
+// 	ChangeState(BATTLE_STATE_DIALOGUE);
 // }
-//
-//
-//
-// void BattleMode::RemoveFromTurnQueue(BattleCharacter *character) {
-// 	for (list<private_battle::BattleCharacter*>::iterator i = _characters_awaiting_turn.begin();
-// 		i != _characters_awaiting_turn.end(); i++)
-// 	{
-// 		if ((*i) == character) {
-// 			_characters_awaiting_turn.erase(i);
-// 			return;
-// 		}
-// 	}
-//
-// 	IF_PRINT_WARNING(BATTLE_WARNING) << "character not found in turn queue" << endl;
-// }
-
-
-
-// uint32 BattleMode::GetIndexOfFirstAliveEnemy() const {
-// 	deque<BattleEnemy*>::const_iterator it = _enemy_actors.begin();
-// 	for (uint32 i = 0; it != _enemy_actors.end(); i++, it++) {
-// 		if ((*it)->IsAlive()) {
-// 			return i;
-// 		}
-// 	}
-//
-// 	// This should never be reached
-// 	return INVALID_BATTLE_ACTOR_INDEX;
-// }
-//
-//
-//
-// uint32 BattleMode::GetIndexOfLastAliveEnemy() const {
-// 	deque<BattleEnemy*>::const_iterator it = _enemy_actors.end()-1;
-// 	for (int32 i = _enemy_actors.size()-1; i >= 0; i--, it--) {
-// 		if ((*it)->IsAlive()) {
-// 			return i;
-// 		}
-// 	}
-//
-// 	// This should never be reached
-// 	return INVALID_BATTLE_ACTOR_INDEX;
-// }
-
-
-
-// uint32 BattleMode::GetIndexOfNextIdleCharacter(BattleCharacter *ignore) const {
-// 	BattleCharacter* character;
-//
-// 	if (!_characters_awaiting_turn.size()) {
-// 		return INVALID_BATTLE_ACTOR_INDEX;
-// 	}
-// 	else if (_characters_awaiting_turn.size() == 1 || !ignore) {
-// 		character = _characters_awaiting_turn.front();
-// 	}
-// 	else {
-// 		list<BattleCharacter*>::const_iterator it2;
-// 		//Find our guy in the waiting queue
-// 		for (it2 = _characters_awaiting_turn.begin(); it2 != _characters_awaiting_turn.end(); it2++) {
-// 			if ((*it2) == ignore) {
-// 				break;
-// 			}
-// 		}
-//
-// 		//Grab the guy after him
-// 		if ((++it2) != _characters_awaiting_turn.end()) {
-// 			character = (*it2);
-// 		}
-// 		//Loop around if he's at the end of the list
-// 		else {
-// 			character = _characters_awaiting_turn.front();
-// 		}
-// 	}
-//
-// 	deque<BattleCharacter*>::const_iterator it = _character_actors.begin();
-// 	for (uint32 i = 0; it != _character_actors.end(); i++, it++) {
-// 		if ((*it) == character) {
-// 			return i;
-// 		}
-// 	}
-//
-// 	return INVALID_BATTLE_ACTOR_INDEX;
-// }
-
-
-
-// uint32 BattleMode::GetIndexOfNextAliveCharacter(bool move_upward) const {
-// 	if (move_upward) {
-// 		for (uint32 i = _selected_target_index + 1; i < _character_actors.size(); i++) {
-// 			if (_character_actors[i]->IsAlive()) {
-// 				return i;
-// 			}
-// 		}
-// 		for (int32 i = 0; i <= _selected_target_index; ++i) {
-// 			if (_character_actors[i]->IsAlive()) {
-// 				return i;
-// 			}
-// 		}
-//
-// 		// This should never be reached
-// 		return INVALID_BATTLE_ACTOR_INDEX;
-// 	}
-// 	else {
-// 		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; i--) {
-// 			if (_character_actors[i]->IsAlive()) {
-// 				return i;
-// 			}
-// 		}
-// 		for (int32 i = static_cast<int32>(_character_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); i--) {
-// 			if (_character_actors[i]->IsAlive())
-// 			{
-// 				return i;
-// 			}
-// 		}
-//
-// 		// This should never be reached
-// 		return INVALID_BATTLE_ACTOR_INDEX;
-// 	}
-// }
-//
-//
-//
-// uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
-// 	if (move_upward) {
-// 		for (uint32 i = _selected_target_index + 1; i < _enemy_actors.size(); i++) {
-// 			if (_enemy_actors[i]->IsAlive()) {
-// 				return i;
-// 			}
-// 		}
-// 		for (int32 i = 0; i <= _selected_target_index; ++i) {
-// 			if (_enemy_actors[i]->IsAlive()) {
-// 				return i;
-// 			}
-// 		}
-//
-// 		// This should never be reached
-// 		return INVALID_BATTLE_ACTOR_INDEX;
-// 	}
-// 	else {
-// 		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; i--) {
-// 			if (_enemy_actors[i]->IsAlive()) {
-// 				return i;
-// 			}
-// 		}
-// 		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); i--) {
-// 			if (_enemy_actors[i]->IsAlive()) {
-// 				return i;
-// 			}
-// 		}
-//
-// 		// This should never be reached
-// 		return INVALID_BATTLE_ACTOR_INDEX;
-// 	}
-// }
-
-
-/*
-void BattleMode::AddDialogue(string speaker_name, string text) {
-	_dialogue_text.push_back(MakeUnicodeString(speaker_name));
-	_dialogue_text.push_back(MakeUnicodeString(text));
-}
-
-
-
-void BattleMode::ShowDialogue() {
-	_speaker_name = _dialogue_text.front();
-	_dialogue_text.pop_front();
-	hoa_utils::ustring text = _dialogue_text.front();
-	_dialogue_text.pop_front();
-
-	_dialogue_window.Reset();
-	_dialogue_window._display_textbox.SetDisplayText(text);
-	_dialogue_window.Initialize();
-	ChangeState(BATTLE_STATE_DIALOGUE);
-}*/
 
 } // namespace hoa_battle
