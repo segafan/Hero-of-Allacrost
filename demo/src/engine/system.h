@@ -13,7 +13,7 @@
 *** \author Andy Gardner, chopperdave@allacrost.org
 *** \brief  Header file for system code management
 ***
-*** The system code handles a wide variety of tasks, including timing, threads
+*** The system code handles a diverse variety of tasks including timing, threads
 *** and translation functions.
 ***
 *** \note This code uses the GNU gettext library for internationalization and
@@ -51,18 +51,30 @@
 //! All calls to the system engine are wrapped in this namespace.
 namespace hoa_system {
 
+//! \brief The singleton pointer responsible for managing the system during game operation.
+extern SystemEngine* SystemManager;
+
+//! \brief Determines whether the code in the hoa_system namespace should print debug statements or not.
+extern bool SYSTEM_DEBUG;
+
 /** \brief A constant that represents an "infinite" number of milliseconds that can never be reached
 *** \note This value is technically not infinite. It is the maximum value of a 32-bit
 *** unsigned integer (2^32 - 1). This value will only be reached after ~49.7 consecutive
-*** days of the game running, which should never happen.
+*** days of the game running.
 **/
 const uint32 SYSTEM_INFINITE_TIME = 0xFFFFFFFF;
 
-/** \brief A constant to pass to any "number_loops" function argument in the TimerSystem class
+/** \brief A constant to pass to any "loops" function argument in the TimerSystem class
 *** Passing this constant to a TimerSystem object will instruct the timer to run indefinitely
 *** and never finish.
 **/
-const int32 SYSTEM_LOOP_INFINITE = -1;
+const int32 SYSTEM_TIMER_NO_LOOPS = 0;
+
+/** \brief A constant to pass to any "loops" function argument in the TimerSystem class
+*** Passing this constant to a TimerSystem object will instruct the timer to run indefinitely
+*** and never finish.
+**/
+const int32 SYSTEM_TIMER_INFINITE_LOOP = -1;
 
 //! \brief All of the possible states which a SystemTimer classs object may be in
 enum SYSTEM_TIMER_STATE {
@@ -74,12 +86,6 @@ enum SYSTEM_TIMER_STATE {
 	SYSTEM_TIMER_TOTAL    =  4
 };
 
-//! \brief The singleton pointer responsible for managing the system during game operation.
-extern SystemEngine* SystemManager;
-
-//! \brief Determines whether the code in the hoa_system namespace should print debug statements or not.
-extern bool SYSTEM_DEBUG;
-
 
 /** \brief Returns a standard string translated into the game's current language
 *** \param text A const reference to the string that should be translated
@@ -90,66 +96,76 @@ extern bool SYSTEM_DEBUG;
 **/
 std::string Translate(const std::string& text);
 
+
 /** \brief Returns a ustring translated into the game's current language
 *** \param text A const reference to the string that should be translated
 *** \return Translated text in the form of a hoa_utils::ustring
 ***
-*** If no translation exists in the current language for the requested string, the original string
-*** will be returned after it is formatted into a ustring.
-***
-*** \note This function is really nothing more than a short-cut for typing:
+*** \note This function is nothing more than a short-cut for typing:
 *** MakeUnicodeString(Translate(string));
 **/
 hoa_utils::ustring UTranslate(const std::string& text);
 
 
 /** ****************************************************************************
-*** \brief A class which allows the user to easily control timed events
+*** \brief A timer assistant useful for monitoring progress and processing event sequences
 ***
-*** This is a light-weight class for maintaining a simple timer. This class is
-*** designed specifically for use by the various game mode classes, but it is
-*** certainly capable of being utilized just as effectively by the engine or
-*** or other parts of the code. The operation of this class is also integrated
-*** with the SystemEngine class, which routinely updates and manages its timers.
+*** This is a light-weight class for a simple timer. This class is designed specifically for
+*** use by the various game mode classes, but it is certainly capable of being utilized just
+*** as effectively by the engine or or other parts of the code. The operation of this class
+*** is also integrated with the SystemEngine class, which routinely updates and manages timers.
 *** The features of this timing mechanism include:
 ***
-*** - automatically updates its timing every frame
-*** - allowance to loop for an arbitrary number of times, or for infinity
-*** - optional use of an auto-pausing feature for when the timer should cease
+*** - manual update of timer by a specified amount of time
+*** - the ability to enable timers to be updated automatically
+*** - allowance to loop for an arbitrary number of times, including an infinte number of loops
+*** - declaring a timer to be owned by a game mode and enable the timer to be automatically paused/resumed
 ***
-*** \note The auto-pausing mechanism can only be utilized by game mode timers.
-*** The way it works is by detecting when the active game mode has changed and
-*** pausing all timers which do not belong to the AGM and un-pausing all timers
-*** which do belong to the AGM. The requirement to use the auto-pausing feature
-*** is to pass the class a pointer to the game mode class which "owns" the
-*** SystemTimer object. If this is not done, then the timer will not auto-pause.
+*** When the timer is in the manual update mode, the timer must have its Update() function invoked manually
+*** from whatever code is storing/managing the timer. In auto update mode, the timer will update automatically
+*** whenever the SystemEngine updates itself in the main game loop. The default mode for timers is manual update.
 ***
-*** \note It is a recommended practice to create derivative timer objects which
-*** inherit from this class. Using SystemTimer as a base class can make it
-*** relatively easy to create timers which perform specific functions in the
-*** game code, such as temporary displaying damage numbers.
+*** \note The auto pausing mechanism can only be utilized by timers that have auto update enabled and are owned
+*** by a valid game mode. The way it works is by detecting when the active game mode (AGM) has changed and pausing
+*** all timers which are not owned by the AGM and un-pausing all timers which are owned to the AGM.
 *** ***************************************************************************/
 class SystemTimer {
-	friend class SystemEngine;
+	friend class SystemEngine; // For allowing SystemEngine to call the _AutoUpdate() method
 
 public:
+	/** The no-arg constructor leaves the timer in the SYSTEM_TIMER_INVALID state.
+	*** The Initialize() method must be called before the timer can be used.
+	**/
 	SystemTimer();
 
-	//! \note This constructor automatically invokes the Initialize() method with its arguments
-	SystemTimer(uint32 duration, int32 number_loops = 0, hoa_mode_manager::GameMode* mode_owner = NULL) : _state(SYSTEM_TIMER_INVALID)
-		{ Initialize(duration, number_loops, mode_owner); }
+	/** \brief Creates and places the timer in the SYSTEM_TIMER_INITIAL state
+	*** \param duration The duration (in milliseconds) that the timer should count for
+	*** \param loops The number of times that the timer should loop for. Default value is set to no looping.
+	**/
+	SystemTimer(uint32 duration, int32 loops = 0);
 
-	~SystemTimer();
+	virtual ~SystemTimer();
 
 	/** \brief Initializes the critical members of the system timer class
 	*** \param duration The duration (in milliseconds) that the timer should count for
-	*** \param number_loops The number of times that the timer should loop its counter. Default value is set to no looping.
-	*** \param mode_owner A pointer to the GameMode which owns this class. Default value is set to NULL (no owner).
+	*** \param loops The number of times that the timer should loop for. Default value is set to no looping.
 	***
-	*** Invoking this method will instantly halt the timer and reset it to the initial state, so use it with
-	*** care.
+	*** Invoking this method will instantly halt the timer and reset it to the initial state so use it with care.
 	**/
-	void Initialize(uint32 duration, int32 number_loops = 0, hoa_mode_manager::GameMode* mode_owner = NULL);
+	void Initialize(uint32 duration, int32 loops = 0);
+
+	/** \brief Enables the auto update feature for the timer
+	*** \param owner A pointer to the GameMode which owns this class. Default value is set to NULL (no owner).
+	**/
+	void EnableAutoUpdate(hoa_mode_manager::GameMode* owner = NULL);
+
+	//! \brief Disables the timer auto update feature
+	void EnableManualUpdate();
+
+	//! \brief Updates time timer with the standard game update time
+	void Update();
+
+	void Update(uint32 time);
 
 	//! \brief Resets the timer to its initial state
 	void Reset()
@@ -182,7 +198,18 @@ public:
 		{ return (_state == SYSTEM_TIMER_FINISHED); }
 	//@}
 
-	/** \brief Returns a float representing the percent completion for the timer
+	/** \brief Returns the number of the current loop that the timer is on
+	*** This will always return a number greater than zero. So if the timer is on the first loop this
+	*** function will return 1, and so on.
+	**/
+	uint32 CurrentLoop() const
+		{ return (_times_completed + 1); }
+
+	//! \brief Returns the time remaining for the current loop to end
+	uint32 TimeLeft() const
+		{ return (_duration - _time_expired); }
+
+	/** \brief Returns a float representing the percent completion for the current loop
 	*** \return A float with a value between 0.0f and 1.0f
 	*** \note This function is only concered with the percent completion for the current loop.
 	*** The number of loops is not taken into account at all.
@@ -199,12 +226,12 @@ public:
 	//@{
 	void SetDuration(uint32 duration);
 
-	void SetNumberLoops(int32 number_loops);
+	void SetNumberLoops(int32 loops);
 
-	void SetModeOwner(hoa_mode_manager::GameMode* mode_owner);
+	void SetModeOwner(hoa_mode_manager::GameMode* owner);
 	//@}
 
-	//! \name Member Get Access Functions
+	//! \name Class Member Accessor Methods
 	//@{
 	SYSTEM_TIMER_STATE GetState() const
 		{ return _state; }
@@ -215,29 +242,25 @@ public:
 	int32 GetNumberLoops() const
 		{ return _number_loops; }
 
+	bool IsAutoUpdate() const
+		{ return _auto_update; }
+
 	hoa_mode_manager::GameMode* GetModeOwner() const
 		{ return _mode_owner; }
 
 	uint32 GetTimeExpired() const
 		{ return _time_expired; }
 
-	//! \note Technically this does not get a class member, but instead returns the difference between two members
-	uint32 GetTimeLeft() const
-		{ return (_duration - _time_expired); }
-
 	uint32 GetTimesCompleted() const
-		{ return _times_completed; }
-
-	/** \note The exact same function as GetTimesCompleted(). When looping the first iteration is loop #0, the second
-	*** iteration is loop #1, etc. So a timer that is supposed to run four loops will return 0, 1, 2, or 3 here.
-	**/
-	uint32 GetCurrentLoop() const
 		{ return _times_completed; }
 	//@}
 
-private:
+protected:
 	//! \brief Maintains the current state of the timer (initial, running, paused, or finished)
 	SYSTEM_TIMER_STATE _state;
+
+	//! \brief When true the timer will automatically update itself
+	bool _auto_update;
 
 	//! \brief The duration (in milliseconds) that the timer should run for
 	uint32 _duration;
@@ -254,11 +277,23 @@ private:
 	//! \brief Incremented by one each time the timer reaches the finished state
 	uint32 _times_completed;
 
-	/** \brief Updates the timer if it is running
-	*** This method can only be invoked by the SystemEngine class. Invoking this method is also the only way in which
-	*** the timer may arrive at the finished state.
+private:
+	/** \brief Updates the timer if it is running and has auto updating enabled
+	*** This method can only be invoked by the SystemEngine class.
 	**/
-	void _UpdateTimer();
+	void _AutoUpdate();
+
+	/** \brief Performs the actual update of the class members
+	*** \param amount The amount of time to update the timer by
+	***
+	*** The function contains the core logic of performing the update for the _time_expired and
+	*** _times_completed members as well as setting the _state member to SYSTEM_TIMER_FINISHED
+	*** when the timer has completed all of its loops. This is a helper function to the Update()
+	*** and _AutoUpdate() methods, who should perform all appropriate checking of timer state
+	*** before calling this method. The method intentionally does not do any state or error-checking
+	*** by itself; It simply updates the timer without complaint.
+	**/
+	void _UpdateTimer(uint32 amount);
 }; // class SystemTimer
 
 
@@ -273,29 +308,41 @@ private:
 *** ***************************************************************************/
 class SystemEngine : public hoa_utils::Singleton<SystemEngine> {
 	friend class hoa_utils::Singleton<SystemEngine>;
-	friend class SystemTimer;
 
 public:
 	~SystemEngine();
 
 	bool SingletonInitialize();
 
-	/** \brief Initializes the timers used in the game.
-	***
+	/** \brief Initializes the timers used in the game
 	*** This function should only be called <b>once</b> in main.cpp, just before the main game loop begins.
 	**/
 	void InitializeTimers();
 
 	/** \brief Initializes the game update timer
-	***
 	*** This function should typically only be called when the active game mode is changed. This ensures that
 	*** the active game mode's execution begins with only 1 millisecond of time expired instead of several.
 	**/
 	void InitializeUpdateTimer()
 		{ _last_update = SDL_GetTicks(); _update_time = 1; }
 
-	/** \brief Updates the game timer variables.
+	/** \brief Adds a timer to the set system timers for auto updating
+	*** \param timer A pointer to the timer to add
 	***
+	*** If the timer object does not have the auto update feature enabled, a warning will be printed and the
+	*** timer will not be added.
+	**/
+	void AddAutoTimer(SystemTimer* timer);
+
+	/** \brief Removes a timer to the set system timers for auto updating
+	*** \param timer A pointer to the timer to add
+	***
+	*** If the timer object does not have the auto update feature enabled, a warning will be printed but it
+	*** will still attempt to remove the timer.
+	**/
+	void RemoveAutoTimer(SystemTimer* timer);
+
+	/** \brief Updates the game timer variables.
 	*** This function should only be called <b>once</b> for each cycle through the main game loop. Since
 	*** it is called inside the loop in main.cpp, you should have no reason to call this function anywhere
 	*** else.
@@ -304,7 +351,7 @@ public:
 
 	/** \brief Checks all system timers for whether they should be paused or resumed
 	*** This function is typically called whenever the ModeEngine class has changed the active game mode.
-	*** When this is done, all system timers that are owned by the new game mode are resumed, all timers with
+	*** When this is done, all system timers that are owned by the active game mode are resumed, all timers with
 	*** a different owner are paused, and all timers with no owner are ignored.
 	**/
 	void ExamineSystemTimers();
@@ -321,7 +368,7 @@ public:
 	uint32 GetUpdateTime() const
 		{ return _update_time; }
 
-	/** \brief Sets the play-time of a game instance
+	/** \brief Sets the play time of a game instance
 	*** \param h The amount of hours to set.
 	*** \param m The amount of minutes to set.
 	*** \param s The amount of seconds to set.
@@ -345,7 +392,7 @@ public:
 		{ return _seconds_played; }
 	//@}
 
-	/** \brief  Used to determine what language the game is running in.
+	/** \brief Used to determine what language the game is running in.
 	*** \return The language that the game is running in.
 	**/
 	std::string GetLanguage() const
@@ -356,21 +403,21 @@ public:
 	**/
 	void SetLanguage(std::string lang);
 
-	/** \brief  Determines whether the user is done with the game.
+	/** \brief Determines whether the user is done with the game.
 	*** \return False if the user would like to exit the game.
 	**/
 	bool NotDone() const
 		{ return _not_done; }
 
 	/** \brief The function to call to initialize the exit process of the game.
-	*** \note  The game will exit the main loop once it reaches the end of its current iteration
+	*** \note The game will exit the main loop once it reaches the end of its current iteration
 	**/
 	void ExitGame()
 		{ _not_done = false; }
 
 	//! Threading classes
-	template <class T> Thread * SpawnThread(void (T::*)(), T *);
-	void WaitForThread(Thread * thread);
+	template <class T> Thread* SpawnThread(void (T::*)(), T *);
+	void WaitForThread(Thread* thread);
 
 	void LockThread(Semaphore *);
 	void UnlockThread(Semaphore *);
@@ -383,10 +430,11 @@ private:
 
 	//! \brief The last time that the UpdateTimers function was called, in milliseconds.
 	uint32 _last_update;
+
 	//! \brief The number of milliseconds that have transpired on the last timer update.
 	uint32 _update_time;
 
-	/** \name  Play time variables
+	/** \name Play time members
 	*** \brief Timers that retain the total amount of time that the user has been playing
 	*** When the player starts a new game or loads an existing game, these timers are reset.
 	**/
@@ -394,40 +442,37 @@ private:
 	uint8 _hours_played;
 	uint8 _minutes_played;
 	uint8 _seconds_played;
-	//! \note Milliseconds are not retained when saving or loading a saved game file.
-	uint16 _milliseconds_played;
+	uint16 _milliseconds_played; //!< \note Milliseconds are not retained when saving or loading a saved game file.
 	//@}
 
 	//! \brief When this member is set to false, the program will exit.
 	bool _not_done;
 
-	/** \brief The language in which to render text.
-	*** \note  This string will always be two characters wide.
-	**/
+	//! \brief The identification string that determines what language the game is running in
 	std::string _language;
 
-	/** \brief A set container for all SystemTimer objects that have been initialized
-	*** The timers in this container are updated on each call to UpdateTimers(). Timers
-	*** are inserted and erased from this class not by the SystemManager, but by the
-	*** SystemTimer objects themselves.
+	/** \brief A set container for all SystemTimer objects that have automatic updating enabled
+	*** The timers in this container are updated on each call to UpdateTimers().
 	**/
-	std::set<SystemTimer*> _system_timers;
+	std::set<SystemTimer*> _auto_system_timers;
 }; // class SystemEngine : public hoa_utils::Singleton<SystemEngine>
+
 
 
 template <class T> struct generic_class_func_info
 {
-	static int SpawnThread_Intermediate(void * vptr) {
+	static int SpawnThread_Intermediate(void* vptr) {
 		((((generic_class_func_info <T> *) vptr)->myclass)->*(((generic_class_func_info <T> *) vptr)->func))();
 		return 0;
 	}
 
-	T * myclass;
+	T* myclass;
 	void (T::*func)();
 };
 
 
-template <class T> Thread * SystemEngine::SpawnThread(void (T::*func)(), T * myclass) {
+
+template <class T> Thread* SystemEngine::SpawnThread(void (T::*func)(), T* myclass) {
 #if (THREAD_TYPE == SDL_THREADS)
 	Thread * thread;
 	static generic_class_func_info <T> gen;
@@ -455,4 +500,4 @@ template <class T> Thread * SystemEngine::SpawnThread(void (T::*func)(), T * myc
 
 } // namepsace hoa_system
 
-#endif
+#endif // __SYSTEM_HEADER__

@@ -217,6 +217,7 @@ void BattleActor::ChangeSkillPoints(int32 amount) {
 
 
 void BattleActor::Update() {
+	_state_timer.Update();
 	_indicator_supervisor->Update();
 
 // 	bool actor_stunned = false;
@@ -338,6 +339,7 @@ void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
 
 void BattleCharacter::Update() {
 	BattleActor::Update();
+	_animation_timer.Update();
 
 	// Update the active sprite animation
 	if (IsAlive() == true) {

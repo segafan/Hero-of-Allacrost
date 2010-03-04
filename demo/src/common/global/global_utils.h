@@ -96,14 +96,6 @@ enum GLOBAL_TARGET {
 	GLOBAL_TARGET_ALL_ALLIES   =  6,
 	GLOBAL_TARGET_ALL_FOES     =  7,
 	GLOBAL_TARGET_TOTAL        =  8
-
-	// TODO: Old enum set. Remove once new enum set is confirmed to be working.
-// 	GLOBAL_TARGET_INVALID      = -1,
-// 	GLOBAL_TARGET_ATTACK_POINT =  0,
-// 	GLOBAL_TARGET_ACTOR        =  1,
-// 	GLOBAL_TARGET_PARTY        =  2,
-// 	GLOBAL_TARGET_SELF         =  3,
-// 	GLOBAL_TARGET_TOTAL        =  4
 };
 
 
