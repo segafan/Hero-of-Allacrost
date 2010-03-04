@@ -8,30 +8,30 @@
 
 -- All support skills definitions are stored in this table
 if (skills == nil) then
-   skills = {}
+	skills = {}
 end
 
 
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- IDs 20001-30000 are reserved for support skills
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 skills[20001] = {
-   name = hoa_system.Translate("Refresh"),
-   description = hoa_system.Translate("Heals a party member by restoring a small amount of life force."),
-   sp_required = 2,
-   warmup_time = 1500,
-   cooldown_time = 2,
-   target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
-   target_ally = true,
+	name = hoa_system.Translate("Refresh"),
+	description = hoa_system.Translate("Heals a party member by restoring a small amount of life force."),
+	sp_required = 2,
+	warmup_time = 1500,
+	cooldown_time = 200,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
    
-   BattleExecute = function(target, instigator)
-      target:AddHitPoints(hoa_utils.RandomBoundedInteger(30,50));
-      AudioManager:PlaySound("snd/heal.wav");
-   end,
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+		target_actor:AddHitPoints(hoa_utils.RandomBoundedInteger(30,50));
+		AudioManager:PlaySound("snd/heal.wav");
+	end,
    
-   MenuExecute = function(target, instigator)
-      target:AddHitPoints(hoa_utils.RandomBoundedInteger(30,50));
-      AudioManager:PlaySound("snd/heal_spell.wav");
-   end
+	FieldExecute = function(target, instigator)
+		target:AddHitPoints(hoa_utils.RandomBoundedInteger(30,50));
+		AudioManager:PlaySound("snd/heal_spell.wav");
+	end
 }

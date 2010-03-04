@@ -40,9 +40,8 @@ GlobalSkill::GlobalSkill(uint32 id) :
 	_warmup_time(0),
 	_cooldown_time(0),
 	_target_type(GLOBAL_TARGET_INVALID),
-	_target_ally(false),
 	_battle_execute_function(NULL),
-	_menu_execute_function(NULL)
+	_field_execute_function(NULL)
 {
 	// A pointer to the skill script which will be used to load this skill
 	ReadScriptDescriptor *skill_script = NULL;
@@ -80,15 +79,14 @@ GlobalSkill::GlobalSkill(uint32 id) :
 	_warmup_time = skill_script->ReadUInt("warmup_time");
 	_cooldown_time = skill_script->ReadUInt("cooldown_time");
 	_target_type = static_cast<GLOBAL_TARGET>(skill_script->ReadInt("target_type"));
-	_target_ally = skill_script->ReadBool("target_ally");
 
 	if (skill_script->DoesFunctionExist("BattleExecute")) {
 		_battle_execute_function = new ScriptObject();
 		*_battle_execute_function = skill_script->ReadFunctionPointer("BattleExecute");
 	}
-	if (skill_script->DoesFunctionExist("MenuExecute")) {
-		_menu_execute_function = new ScriptObject();
-		*_menu_execute_function = skill_script->ReadFunctionPointer("MenuExecute");
+	if (skill_script->DoesFunctionExist("FieldExecute")) {
+		_field_execute_function = new ScriptObject();
+		*_field_execute_function = skill_script->ReadFunctionPointer("FieldExecute");
 	}
 
 	skill_script->CloseTable();
@@ -109,9 +107,9 @@ GlobalSkill::~GlobalSkill() {
 		_battle_execute_function = NULL;
 	}
 
-	if (_menu_execute_function != NULL) {
-		delete _menu_execute_function;
-		_menu_execute_function = NULL;
+	if (_field_execute_function != NULL) {
+		delete _field_execute_function;
+		_field_execute_function = NULL;
 	}
 }
 
@@ -126,7 +124,6 @@ GlobalSkill::GlobalSkill(const GlobalSkill& copy) {
 	_warmup_time = copy._warmup_time;
 	_cooldown_time = copy._cooldown_time;
 	_target_type = copy._target_type;
-	_target_ally = copy._target_ally;
 
 	// Make copies of valid ScriptObject function pointers
 	if (copy._battle_execute_function == NULL)
@@ -134,10 +131,10 @@ GlobalSkill::GlobalSkill(const GlobalSkill& copy) {
 	else
 		_battle_execute_function = new ScriptObject(*copy._battle_execute_function);
 
-	if (copy._menu_execute_function == NULL)
-		_menu_execute_function = NULL;
+	if (copy._field_execute_function == NULL)
+		_field_execute_function = NULL;
 	else
-		_menu_execute_function = new ScriptObject(*copy._menu_execute_function);
+		_field_execute_function = new ScriptObject(*copy._field_execute_function);
 }
 
 
@@ -154,7 +151,6 @@ GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy) {
 	_warmup_time = copy._warmup_time;
 	_cooldown_time = copy._cooldown_time;
 	_target_type = copy._target_type;
-	_target_ally = copy._target_ally;
 
 	// Make copies of valid ScriptObject function pointers
 	if (copy._battle_execute_function == NULL)
@@ -162,10 +158,10 @@ GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy) {
 	else
 		_battle_execute_function = new ScriptObject(*copy._battle_execute_function);
 
-	if (copy._menu_execute_function == NULL)
-		_menu_execute_function = NULL;
+	if (copy._field_execute_function == NULL)
+		_field_execute_function = NULL;
 	else
-		_menu_execute_function = new ScriptObject(*copy._menu_execute_function);
+		_field_execute_function = new ScriptObject(*copy._field_execute_function);
 
 	return *this;
 }
