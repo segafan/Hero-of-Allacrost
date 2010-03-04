@@ -62,10 +62,6 @@ namespace private_battle {
 *** to save/restore additional state information about timers on a pause event.
 *** ***************************************************************************/
 class BattleMode : public hoa_mode_manager::GameMode {
-// 	friend class private_battle::BattleActor;
-// 	friend class private_battle::BattleCharacter;
-// 	friend class private_battle::BattleEnemy;
-// 	friend class private_battle::BattleAction;
 	friend class private_battle::FinishWindow;
 
 public:
