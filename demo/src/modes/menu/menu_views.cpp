@@ -766,7 +766,7 @@ void SkillsWindow::Update() {
 				GlobalCharacter* target = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 				GlobalCharacter* instigator = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_skillset));
 
-				const ScriptObject* script_function = skill->GetMenuExecuteFunction();
+				const ScriptObject* script_function = skill->GetFieldExecuteFunction();
 
 				if (script_function == NULL) {
 					IF_PRINT_WARNING(MENU_DEBUG) << "selected skill may not be executed in menus" << endl;
@@ -809,7 +809,7 @@ void SkillsWindow::Update() {
 			// Choose skill
 			if (event == VIDEO_OPTION_CONFIRM) {
 				GlobalSkill *skill = _GetCurrentSkill();
-				if (skill->IsExecutableInMenu())
+				if (skill->IsExecutableInField())
 				{
 					_active_box = SKILL_ACTIVE_CHAR_APPLY;
 					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
@@ -968,7 +968,7 @@ void SkillsWindow::_BuildMenuBattleSkillLists(vector<GlobalSkill *> *skill_list,
 	{
 		if ((*i)->IsExecutableInBattle())
 			battle->push_back(*i);
-		if ((*i)->IsExecutableInMenu())
+		if ((*i)->IsExecutableInField())
 			field->push_back(*i);
 		all->push_back(*i);
 	}

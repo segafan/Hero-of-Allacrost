@@ -131,13 +131,13 @@ bool CalculateStandardEvasionMultiplier(BattleTarget* target, float mul_evade) {
 
 
 uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target) {
-	return CalculateStandardDamage(attacker, target, 0, 0, 10.0f);
+	return CalculateStandardDamage(attacker, target, 0, 0, .10f);
 }
 
 
 
 uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, int32 add_phys, int32 add_meta) {
-	return CalculateStandardDamage(attacker, target, add_phys, add_meta, 10.0f);
+	return CalculateStandardDamage(attacker, target, add_phys, add_meta, .10f);
 }
 
 
@@ -301,9 +301,7 @@ uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* ta
 		return static_cast<uint32>(total_dmg);
 	else
 		return static_cast<uint32>(RandomBoundedInteger(1, 5));
-
-	return 0; // TODO
-}
+} // uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta, float std_dev)
 
 ////////////////////////////////////////////////////////////////////////////////
 // BattleTarget class

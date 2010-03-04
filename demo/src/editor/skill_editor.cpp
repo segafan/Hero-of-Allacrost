@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ void SkillEditor::_LoadSkills()
 		_current_skill_index[GLOBAL_SKILL_DEFEND] = 0;
 	if (_support_skills.size() > 0)
 		_current_skill_index[GLOBAL_SKILL_SUPPORT] = 0;
-	
+
 } // _LoadSkills()
 
 void SkillEditor::_LoadSkills(ReadScriptDescriptor &script, vector<GlobalSkill *> &skills, GLOBAL_SKILL type)
@@ -141,7 +141,7 @@ void SkillEditor::_LoadSkills(ReadScriptDescriptor &script, vector<GlobalSkill *
 		skills.push_back(new GlobalSkill(keys[i]));
 	script.CloseAllTables();
 	script.CloseFile();
-	
+
 } // _LoadSkills(ReadScriptDescriptor, vector<GlobalSkill *>)
 
 void SkillEditor::_CreateTab(GLOBAL_SKILL type, vector<GlobalSkill *>skills, QString tab_name)
@@ -168,10 +168,6 @@ void SkillEditor::_CreateTab(GLOBAL_SKILL type, vector<GlobalSkill *>skills, QSt
 	_lbl_cooldown_time[type]->setText("Cooldown Time:");
 	_gl_layouts[type]->addWidget(_lbl_cooldown_time[type], 3, 0);
 
-	_lbl_target_ally[type] = new QLabel();
-	_lbl_target_ally[type]->setText("Target Ally?");
-	_gl_layouts[type]->addWidget(_lbl_target_ally[type], 3, 2);
-
 	_lbl_target_type[type] = new QLabel();
 	_lbl_target_type[type]->setText("Target Type:");
 	_gl_layouts[type]->addWidget(_lbl_target_type[type], 4, 0);
@@ -183,13 +179,6 @@ void SkillEditor::_CreateTab(GLOBAL_SKILL type, vector<GlobalSkill *>skills, QSt
 	_le_warmup_time[type] = new QLineEdit();
 	_le_cooldown_time[type] = new QLineEdit();
 	_cb_target_type[type] = new QComboBox();
-	_bg_target_ally[type] = new QButtonGroup();
-	_rb_target_ally_true[type] = new QRadioButton();
-	_rb_target_ally_false[type] = new QRadioButton();
-	_rb_target_ally_true[type]->setText(QString("true"));
-	_rb_target_ally_false[type]->setText(QString("false"));
-	_bg_target_ally[type]->addButton(_rb_target_ally_true[type]);
-	_bg_target_ally[type]->addButton(_rb_target_ally_false[type]);
 
 	if (_current_skill_index[type] != -1)
 	{
@@ -211,12 +200,6 @@ void SkillEditor::_CreateTab(GLOBAL_SKILL type, vector<GlobalSkill *>skills, QSt
 
 		text = NumberToString<uint32>(skill->GetCooldownTime());
 		_le_cooldown_time[type]->setText(QString(text.c_str()));
-
-		if (skill->IsTargetAlly())
-			_rb_target_ally_true[type]->setChecked(true);
-		else
-			_rb_target_ally_false[type]->setChecked(true);
-		_bg_target_ally[type]->setExclusive(true);
 
 		_cb_target_type[type]->insertItem("Attack Point");
 		_cb_target_type[type]->insertItem("Actor");
@@ -260,7 +243,7 @@ void SkillEditor::_CreateTab(GLOBAL_SKILL type, vector<GlobalSkill *>skills, QSt
 
 	// create the horizontal layout underneath the grid in the tab
 	_tab_bottom_hboxes[type] = new QHBoxLayout();
-	
+
 	_CreateTabBottomButtons(type);
 
 	_tab_vboxes[type]->addLayout(_tab_bottom_hboxes[type]);
@@ -352,7 +335,7 @@ void SkillEditor::_ReloadTab()
 
 	string text = MakeStandardString(skill->GetName());
 	_le_skill_names[_current_tab]->setText(QString(text.c_str()));
-	
+
 	text = MakeStandardString(skill->GetDescription());
 	_le_description[_current_tab]->setText(QString(text.c_str()));
 
@@ -367,10 +350,6 @@ void SkillEditor::_ReloadTab()
 
 	_cb_target_type[_current_tab]->setCurrentIndex(static_cast<int32>(skill->GetTargetType()));
 
-	if (skill->IsTargetAlly())
-		_rb_target_ally_true[_current_tab]->setChecked(true);
-	else
-		_rb_target_ally_false[_current_tab]->setChecked(true);
 	// TODO: as more controls are added to the tab, reload them here.
 }
 

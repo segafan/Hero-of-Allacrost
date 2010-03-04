@@ -368,6 +368,20 @@ void BindModesToLua()
 	{
 	using namespace hoa_battle;
 	using namespace hoa_battle::private_battle;
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
+		def("CalculateStandardEvasion", (bool(*)(BattleTarget*)) &CalculateStandardEvasion),
+		def("CalculateStandardEvasion", (bool(*)(BattleTarget*, float)) &CalculateStandardEvasion),
+		def("CalculateStandardEvasionMultiplier", (bool(*)(BattleTarget*, float)) &CalculateStandardEvasionMultiplier),
+		def("CalculateStandardDamage", (uint32(*)(BattleActor* attacker, BattleTarget* target)) &CalculateStandardDamage),
+		def("CalculateStandardDamage", (uint32(*)(BattleActor* attacker, BattleTarget* target, int32 add_phys, int32 add_meta)) &CalculateStandardDamage),
+		def("CalculateStandardDamage", (uint32(*)(BattleActor* attacker, BattleTarget* target, float std_dev)) &CalculateStandardDamage),
+		def("CalculateStandardDamage", (uint32(*)(BattleActor* attacker, BattleTarget* target, int32 add_phys, int32 add_meta, float std_dev)) &CalculateStandardDamage),
+		def("CalculateStandardDamageMultiplier", (uint32(*)(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta)) &CalculateStandardDamageMultiplier),
+		def("CalculateStandardDamageMultiplier", (uint32(*)(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta, float std_dev)) &CalculateStandardDamageMultiplier)
+	];
+
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
 	[
 		class_<BattleMode, hoa_mode_manager::GameMode>("BattleMode")

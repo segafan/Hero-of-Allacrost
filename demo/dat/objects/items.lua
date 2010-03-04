@@ -20,12 +20,12 @@
 
 -- All item definitions are stored in this table
 if (items == nil) then
-   items = {}
+	items = {}
 end
 
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- IDs 1-1000 are reserved for healing potions
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 items[1] = {
 	name = hoa_system.Translate("Healing Potion"),
@@ -35,7 +35,8 @@ items[1] = {
 	standard_price = 60,
 
 	BattleUse = function(target, instigator)
-		target:AddHitPoints(45);
+		target_actor = target:GetActor();
+		target_actor:AddHitPoints(45);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
@@ -53,7 +54,8 @@ items[2] = {
 	standard_price = 200,
 
 	BattleUse = function(target, instigator)
-		target:AddHitPoints(150);
+		target_actor = target:GetActor();
+		target_actor:AddHitPoints(150);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
@@ -71,7 +73,8 @@ items[3] = {
 	standard_price = 500,
 
 	BattleUse = function(target, instigator)
-		target:AddHitPoints(250);
+		target_actor = target:GetActor();
+		target_actor:AddHitPoints(250);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
@@ -89,7 +92,9 @@ items[4] = {
 	standard_price = 1000,
 
 	BattleUse = function(target, instigator)
-		target:AddHitPoints(100);
+		-- TODO: no support yet for party targets
+		target_actor = target:GetActor();
+		target_actortarget:AddHitPoints(100);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
@@ -98,21 +103,22 @@ items[4] = {
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end
 }
--- -----------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
 -- IDs 1001-2000 are reserved for status potions
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 -- items[1001] = {}
 
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- IDs 2001-3000 are reserved for elemental potions
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 -- items[2001] = {}
 
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- IDs 3001-4000 are reserved for damaging items
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 items[3001] = {
 	name = hoa_system.Translate("Bomb"),
@@ -122,7 +128,8 @@ items[3001] = {
 	standard_price = 200,
 
 	BattleUse = function(target, instigator)
-		target:TakeDamage(256);
+		target_actor = target:GetActor();
+		target_actor:TakeDamage(256);
 		AudioManager:PlaySound("snd/rumble.wav");
 	end,
 
@@ -139,7 +146,9 @@ items[3002] = {
 	standard_price = 1000,
 
 	BattleUse = function(target, instigator)
-		target:TakeDamage(500);
+		-- TODO: no support yet for party targets
+		target_actor = target:GetActor();
+		target_actor:TakeDamage(500);
 		AudioManager:PlaySound("snd/rumble.wav");
 	end,
 

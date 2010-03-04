@@ -8,13 +8,13 @@
 
 -- All defense skills definitions are stored in this table
 if (skills == nil) then
-   skills = {}
+	skills = {}
 end
 
 
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- IDs 10001-20000 are reserved for defense skills
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 skills[10001] = {
 	name = hoa_system.Translate("Karlate Guard"),
@@ -23,10 +23,10 @@ skills[10001] = {
 	warmup_time = 300,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_SELF,
-	target_ally = true,
 
-	BattleExecute = function(target, instigator)
-		instigator:AddNewEffect(2);
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+		target_actor:AddNewEffect(2);
 	end
 }
 
@@ -37,9 +37,9 @@ skills[10002] = {
 	warmup_time = 300,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_SELF,
-	target_ally = true,
 
-	BattleExecute = function(target, instigator)
-		instigator:AddNewEffect(4);
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+		target_actor:AddNewEffect(4);
 	end
 }

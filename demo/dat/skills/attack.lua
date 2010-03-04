@@ -8,13 +8,13 @@
 
 -- All attack skills definitions are stored in this table
 if (skills == nil) then
-   skills = {}
+	skills = {}
 end
 
 
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- IDs 1-10000 are reserved for attack skills
--- -----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 skills[1] = {
 	name = hoa_system.Translate("Slicing Rain"),
@@ -23,16 +23,13 @@ skills[1] = {
 	warmup_time = 2000,
 	cooldown_time = 200,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
 	BattleExecute = function(user, target)
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetPoint());
 
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating()) then
-			target_actor:RegisterDamage(user:GetTotalPhysicalAttack() + 5 - target_point:GetTotalPhysicalDefense());
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 5, 0));
 			AudioManager:PlaySound("snd/swordslice1.wav");
 		else
 			target_actor:RegisterMiss();
@@ -41,26 +38,26 @@ skills[1] = {
 	end
 }
 
--- Another attack skill with faster warm-up and increased damage
 skills[2] = {
 	name = hoa_system.Translate("Forward Thrust"),
 	description = hoa_system.Translate("A quick and daring thrust into an opponent's flesh."),
 	sp_required = 1,
-	warmup_time = 1200,
+	warmup_time = 500,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		instigator:ChangeSpriteAnimation("attack");
+	BattleExecute = function(user, target)
+		user:ChangeSpriteAnimation("attack");
+		target_actor = target:GetActor();
 
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating() + 2.5) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() + 10 - target:GetPhysicalDefense());
+		if (hoa_battle.CalculateStandardEvasion(target, 5.0) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 0, 0, 0.5));
 			AudioManager:PlaySound("snd/swordslice1.wav");
 		else
-			target:TakeDamage(0);
+			target_actor:RegisterMiss();
 			AudioManager:PlaySound("snd/sword_swipe.wav");
 		end
+
 	end
 }
 
@@ -71,17 +68,17 @@ skills[3] = {
 	warmup_time = 1200,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		instigator:ChangeSpriteAnimation("attack");
+	BattleExecute = function(user, target)
+		user:ChangeSpriteAnimation("attack");
+		target_actor = target:GetActor();
 
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating() + 5.5) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() - target:GetPhysicalDefense());
+		if (hoa_battle.CalculateStandardEvasion(target, 5.5) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 0, 0));
+			target_actor:AddNewEffect(3);
 			AudioManager:PlaySound("snd/swordslice1.wav");
-			target:AddNewEffect(3);
 		else
-			target:TakeDamage(0);
+			target_actor:RegisterMiss();
 			AudioManager:PlaySound("snd/sword_swipe.wav");
 		end
 	end
@@ -95,12 +92,18 @@ skills[4] = {
 	warmup_time = 1200,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_FOES,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		instigator:ChangeSpriteAnimation("attack");
-		target:TakeDamage(instigator:GetTotalPhysicalAttack());
-		AudioManager:PlaySound("snd/rumble.wav");
+	BattleExecute = function(user, target)
+		user:ChangeSpriteAnimation("attack");
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 0, 0));
+			AudioManager:PlaySound("snd/rumble.wav");
+		else
+			target_actor:RegisterMiss();
+			AudioManager:PlaySound("snd/sword_swipe.wav");
+		end
 	end
 }
 
@@ -111,14 +114,13 @@ skills[11] = {
 	warmup_time = 1000,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
 	BattleExecute = function(user, target)
+		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetPoint());
 
-		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating() + 5.5) then
-			target_actor:RegisterDamage(user:GetTotalPhysicalAttack() + 8 - target_point:GetTotalPhysicalDefense());
+		if (hoa_battle.CalculateStandardEvasion(target, 5.5) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 8, 0));
 			AudioManager:PlaySound("snd/crossbow.ogg");
 		else
 			target_actor:RegisterMiss();
@@ -134,15 +136,13 @@ skills[21] = {
 	warmup_time = 1500,
 	cooldown_time = 500,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
 	BattleExecute = function(user, target)
-		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetPoint());
 		user:ChangeSpriteAnimation("attack");
+		target_actor = target:GetActor();
 
-		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating()) then
-			target_actor:RegisterDamage(user:GetTotalPhysicalAttack() + 3 - target_point:GetTotalPhysicalDefense());
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 3, 0));
 			AudioManager:PlaySound("snd/swordslice2.wav");
 		else
 			target_actor:RegisterMiss();
@@ -158,15 +158,16 @@ skills[22] = {
 	warmup_time = 2000,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		instigator:ChangeSpriteAnimation("attack");
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating() + 8.5) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() + 20 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		user:ChangeSpriteAnimation("attack");
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target, 8.5) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
 			AudioManager:PlaySound("snd/swordslice2.wav");
 		else
-			target:TakeDamage(0);
+			target_actor:RegisterMiss();
 			AudioManager:PlaySound("snd/sword_swipe.wav");
 		end
 	end
@@ -179,16 +180,13 @@ skills[31] = {
 	warmup_time = 2000,
 	cooldown_time = 750,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
 	BattleExecute = function(user, target)
-		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetPoint());
 		user:ChangeSpriteAnimation("attack");
+		target_actor = target:GetActor();
 
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating()) then
-			target_actor:RegisterDamage(user:GetTotalPhysicalAttack() + 5 - target_point:GetTotalPhysicalDefense());
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 5, 0));
 			AudioManager:PlaySound("snd/sword_swipe.wav");
 		else
 			target_actor:RegisterMiss();
@@ -204,36 +202,41 @@ skills[32] = {
 	warmup_time = 2000,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating() + 5.5) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() * 1.5 + 0 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		user:ChangeSpriteAnimation("attack");
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target, 5.5) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamageMultiplier(user, target, 0.5, 0));
 			AudioManager:PlaySound("snd/sword_swipe.wav");
 		else
-			target:TakeDamage(0);
+			target_actor:RegisterMiss();
 			AudioManager:PlaySound("snd/sword_swipe.wav");
 		end
 	end
 }
 
+--------------------------------------------------------------------------------
 -- Enemy attack skills
+--------------------------------------------------------------------------------
+
 skills[100] = {
 	name = "Snake bite",
 	sp_required = 0,
 	warmup_time = 900,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating()) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() + 14 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 14, 0));
 			AudioManager:PlaySound("snd/snake_attack.wav");
+		else
+			target_actor:RegisterMiss();
 		end
-		instigator:ChangeSpriteAnimation("attack");
 	end
 }
 
@@ -243,17 +246,16 @@ skills[101] = {
 	warmup_time = 1400,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating()) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() + 13 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 13, 0));
 			AudioManager:PlaySound("snd/spider_attack.wav");
 		else
-			target:TakeDamage(0);
+			target_actor:RegisterMiss();
 		end
-		instigator:ChangeSpriteAnimation("attack");
 	end
 }
 
@@ -263,15 +265,12 @@ skills[102] = {
 	warmup_time = 1100,
 	cooldown_time = 500,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
-		target_point = target_actor:GetAttackPoint(target:GetPoint());
 
-		-- If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target_point:GetTotalEvadeRating()) then
-			target_actor:RegisterDamage(user:GetTotalPhysicalAttack() + 10 - target_point:GetTotalPhysicalDefense());
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 10, 0));
 			AudioManager:PlaySound("snd/slime_attack.wav");
 		else
 			target_actor:RegisterMiss();
@@ -286,15 +285,16 @@ skills[103] = {
 	warmup_time = 1400,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating()) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() + 20 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
+			AudioManager:PlaySound("snd/skeleton_attack.wav");
+		else
+			target_actor:RegisterMiss();
 		end
-		instigator:ChangeSpriteAnimation("attack");
-		AudioManager:PlaySound("snd/skeleton_attack.wav");
 	end
 }
 
@@ -304,17 +304,16 @@ skills[104] = {
 	warmup_time = 900,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating()) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() + 20 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
 			AudioManager:PlaySound("snd/skeleton_attack.wav");
 		else
-			target:TakeDamage(0);
+			target_actor:RegisterMiss();
 		end
-		instigator:ChangeSpriteAnimation("attack");
 	end
 }
 
@@ -324,14 +323,16 @@ skills[105] = {
 	warmup_time = 900,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating()) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() + 20 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
+			--AudioManager:PlaySound("???"); TODO: find an appropriate sound
+		else
+			target_actor:RegisterMiss();
 		end
-		instigator:ChangeSpriteAnimation("attack");
 	end
 }
 
@@ -341,14 +342,16 @@ skills[106] = {
 	warmup_time = 1400,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating()) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() + 30 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 30, 0));
+			--AudioManager:PlaySound("???"); TODO: find an appropriate sound
+		else
+			target_actor:RegisterMiss();
 		end
-		instigator:ChangeSpriteAnimation("attack");
 	end
 }
 
@@ -358,13 +361,15 @@ skills[107] = {
 	warmup_time = 900,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-	target_ally = false,
 
-	BattleExecute = function(target, instigator)
-		--If the random float is bigger, then we landed the hit
-		if (hoa_utils.RandomFloat() * 100 > target:GetTotalEvadeRating()) then
-			target:TakeDamage(instigator:GetTotalPhysicalAttack() + 20 - target:GetPhysicalDefense());
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
+			--AudioManager:PlaySound("???"); TODO: find an appropriate sound
+		else
+			target_actor:RegisterMiss();
 		end
-		instigator:ChangeSpriteAnimation("attack");
 	end
 }

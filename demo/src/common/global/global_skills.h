@@ -71,8 +71,8 @@ public:
 		{ return (_battle_execute_function != NULL); }
 
 	//! \brief Returns true if the skill can be executed in menus
-	bool IsExecutableInMenu() const
-		{ return (_menu_execute_function != NULL); }
+	bool IsExecutableInField() const
+		{ return (_field_execute_function != NULL); }
 
 	/** \name Class member access functions
 	*** \note No set functions are defined because the class members should only be intialized within Lua
@@ -102,9 +102,6 @@ public:
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
 
-	bool IsTargetAlly() const
-		{ return _target_ally; }
-
 	/** \brief Returns a pointer to the ScriptObject of the battle execution function
 	*** \note This function will return NULL if the skill is not executable in battle
 	**/
@@ -114,8 +111,8 @@ public:
 	/** \brief Returns a pointer to the ScriptObject of the menu execution function
 	*** \note This function will return NULL if the skill is not executable in menus
 	**/
-	const ScriptObject* GetMenuExecuteFunction() const
-		{ return _menu_execute_function; }
+	const ScriptObject* GetFieldExecuteFunction() const
+		{ return _field_execute_function; }
 	//@}
 
 private:
@@ -158,14 +155,11 @@ private:
 	**/
 	GLOBAL_TARGET _target_type;
 
-	//! \brief If true the item should target allies, otherwise it should target enemies
-	bool _target_ally;
-
 	//! \brief A pointer to the skill's execution function for battles
 	ScriptObject* _battle_execute_function;
 
 	//! \brief A pointer to the skill's execution function for menus
-	ScriptObject* _menu_execute_function;
+	ScriptObject* _field_execute_function;
 }; // class GlobalSkill
 
 } // namespace hoa_global
