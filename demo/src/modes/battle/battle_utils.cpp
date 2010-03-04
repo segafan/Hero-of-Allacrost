@@ -21,6 +21,8 @@
 
 #include "global.h"
 
+#include "system.h"
+
 #include "battle.h"
 #include "battle_actors.h"
 #include "battle_utils.h"
@@ -28,6 +30,8 @@
 using namespace std;
 
 using namespace hoa_utils;
+
+using namespace hoa_system;
 
 using namespace hoa_global;
 
@@ -302,6 +306,103 @@ uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* ta
 	else
 		return static_cast<uint32>(RandomBoundedInteger(1, 5));
 } // uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta, float std_dev)
+
+////////////////////////////////////////////////////////////////////////////////
+// BattleTimer class
+////////////////////////////////////////////////////////////////////////////////
+
+BattleTimer::BattleTimer() :
+	SystemTimer(),
+	_time_multiplier_active(false),
+	_time_multiplier(0.0f)
+{}
+
+
+
+BattleTimer::BattleTimer(uint32 duration, int32 loops) :
+	SystemTimer(duration, loops),
+	_time_multiplier_active(false),
+	_time_multiplier(0.0f)
+{}
+
+
+
+void BattleTimer::Update() {
+	Update(SystemManager->GetUpdateTime());
+}
+
+
+
+void BattleTimer::Update(uint32 time) {
+	if (_time_multiplier_active == false)
+		SystemTimer::Update(time);
+	else
+		SystemTimer::Update(_ApplyMultiplier(time));
+}
+
+
+
+void BattleTimer::SetTimeExpired(uint32 time) {
+	_time_expired = time;
+
+	if ((_time_expired == 0) && (_times_completed == 0)) {
+		_state = SYSTEM_TIMER_INITIAL;
+	}
+
+	else if (_time_expired >= _duration) {
+		_time_expired = 0;
+		_times_completed++;
+
+		// Check if the timer has finished the final loop and should reach the finished state
+		if ((_number_loops >= 0) && (_times_completed >= static_cast<uint32>(_number_loops))) {
+			_state = SYSTEM_TIMER_FINISHED;
+		}
+	}
+}
+
+
+
+void BattleTimer::ActivateTimeMultiplier(bool activate, float multiplier) {
+	_time_multiplier_active = activate;
+
+	if (activate == true) {
+		if (multiplier < 0.0f) {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "tried to activate a negative multiplier: " << multiplier << endl;
+			_time_multiplier_active = false;
+		}
+		else {
+			_time_multiplier = multiplier;
+		}
+	}
+}
+
+
+
+void BattleTimer::_AutoUpdate() {
+	if (_time_multiplier_active == false) {
+		SystemTimer::_AutoUpdate();
+		return;
+	}
+
+	if (_auto_update == false) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "tried to automatically update a timer that does not have auto updates enabled" << endl;
+		return;
+	}
+	if (IsRunning() == false) {
+		return;
+	}
+
+	_UpdateTimer(_ApplyMultiplier(SystemManager->GetUpdateTime()));
+}
+
+
+
+uint32 BattleTimer::_ApplyMultiplier(uint32 time) {
+	// NOTE: This static cast doesn't round the float to the nearest whole integer, it uses a floor
+	// function instead. So 24.99 would return 24 instead of 25. This should probably be changed to
+	// use a standard rounding function (didn't see anything available in utils.h for this).
+	return static_cast<uint32>(_time_multiplier * time);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // BattleTarget class

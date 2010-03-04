@@ -22,6 +22,8 @@
 #include "defs.h"
 #include "utils.h"
 
+#include "system.h"
+
 #include "global_objects.h"
 #include "global_utils.h"
 
@@ -291,6 +293,103 @@ uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* ta
 **/
 uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta, float std_dev);
 //@}
+
+
+/** ****************************************************************************
+*** \brief Builds upon the SystemTimer to provide more flexibility and features
+***
+*** Battle mode timers are a bit more advanced over the standard system engine
+*** timer to meet the needs of some timers in battle mode. The additional features
+*** available to battle timers over system timers include the following.
+***
+*** - The ability to set the expiration time of the current loop to any value
+*** - Apply a floating-point multiplier to speed up or slow down the timer
+***
+*** \note Not all timers in battle mode will require the features of this class.
+*** Evaluate the needs of a timer in the battle code and determine whether or not
+*** it should use this class or if the standard SystemTimer will meet its needs.
+*** ***************************************************************************/
+class BattleTimer : hoa_system::SystemTimer {
+	friend class SystemEngine; // For allowing SystemEngine to call the _AutoUpdate() method
+
+public:
+	BattleTimer();
+
+	/** \brief Creates and places the timer in the SYSTEM_TIMER_INITIAL state
+	*** \param duration The duration (in milliseconds) that the timer should count for
+	*** \param loops The number of times that the timer should loop for. Default value is set to no looping.
+	**/
+	BattleTimer(uint32 duration, int32 loops = 0);
+
+	~BattleTimer()
+		{}
+
+	//! \brief Overrides the SystemTimer::Update() method
+	void Update();
+
+	/** \brief Overrides the SystemTimer::Update(uint32) method
+	*** \param time The amount of time to increment the timer by
+	**/
+	void Update(uint32 time);
+
+	/** \brief Sets the time expired member and updates the timer object appropriately
+	*** \param time The value to set for the expiration time
+	***
+	*** This method will do nothing if the state of the object is SYSTEM_TIMER_INVALID or SYSTEM_TIMER_FINISHED.
+	*** The new expiration time applies only to the current loop. So for example, if the timer is on loop #2
+	*** of 5 and the loop duration is 1000ms, setting the time to 1500ms will result in the timer
+	*** state changing to loop #3 and set the expiration time back to zero. Reaching the last loop
+	*** will set the timer to the FINISHED state. Using a zero value for the time while on the first loop will
+	*** change the timer to the INITIAL state.
+	***
+	*** If you're only looking to increment the expiration time and wish for that increment to take
+	*** effect for more than just the current loop, use the Update(uint32) method. Although be aware that
+	*** Update() will take into account any timer multipliers that are active while this method ignores
+	*** the timer multiplier.
+	**/
+	void SetTimeExpired(uint32 time);
+
+	/** \brief Activates or deactivates the timer multiplier
+	*** \param activate True will activate and set the multiplier while false will deactivate.
+	*** \param multiplier The multiplier value to apply towards the timer, which should be positive.
+	***
+	*** If the activate argument is false, the multiplier value will be ignored. The multiplier
+	*** value is multiplied directly to the raw update time to obtain the actual update time.
+	*** So for example if the raw update time is 25 and the multiplier value is 0.8f, the actual
+	*** update time for the class will be 20.
+	**/
+	void ActivateTimeMultiplier(bool activate, float multiplier);
+
+	//! \name Class member accessor methods
+	//@{
+	bool IsTimeMultiplierActive() const
+		{ return _time_multiplier_active; }
+
+	float GetTimeMultiplier() const
+		{ return _time_multiplier; }
+	//@}
+
+protected:
+	//! \brief When true the timer multiplier is applied to all timer updates
+	bool _time_multiplier_active;
+
+	//! \brief A zero or positive value that is multiplied to the update time
+	float _time_multiplier;
+
+	//! \brief Overrides the SystemTimer::_AutoUpdate() method
+	virtual void _AutoUpdate();
+
+private:
+	/** \brief Computes and returns the update time after the multiplier has been applied
+	*** \param time The raw update time to use in the calculation
+	*** \return The modified update time
+	***
+	*** This method does not do any error checking such as whether the multiplier is a valid number
+	*** (non-negative) or whether or not the multiplier is active. The code that calls this function
+	*** is responsible for that condition checking.
+	**/
+	uint32 _ApplyMultiplier(uint32 time);
+}; // class BattleTimer : hoa_system::SystemTimer
 
 
 /** ****************************************************************************

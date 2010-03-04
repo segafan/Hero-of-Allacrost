@@ -235,6 +235,7 @@ namespace hoa_battle {
 
 		class FinishWindow;
 
+		class BattleTimer;
 		class BattleTarget;
 		class BattleItem;
 	}
