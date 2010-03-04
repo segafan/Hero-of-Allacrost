@@ -163,9 +163,12 @@ public:
 	void EnableManualUpdate();
 
 	//! \brief Updates time timer with the standard game update time
-	void Update();
+	virtual void Update();
 
-	void Update(uint32 time);
+	/** \brief Updates the timer by an arbitrary amount
+	*** \param time The amount of time to increment the timer by
+	**/
+	virtual void Update(uint32 time);
 
 	//! \brief Resets the timer to its initial state
 	void Reset()
@@ -277,11 +280,10 @@ protected:
 	//! \brief Incremented by one each time the timer reaches the finished state
 	uint32 _times_completed;
 
-private:
 	/** \brief Updates the timer if it is running and has auto updating enabled
 	*** This method can only be invoked by the SystemEngine class.
 	**/
-	void _AutoUpdate();
+	virtual void _AutoUpdate();
 
 	/** \brief Performs the actual update of the class members
 	*** \param amount The amount of time to update the timer by
