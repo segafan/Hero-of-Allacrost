@@ -152,7 +152,7 @@ MapTransitionEvent::MapTransitionEvent(uint32 event_id, std::string filename) :
 	MapEvent(event_id, MAP_TRANSITION_EVENT),
 	_transition_map_filename(filename)
 {
-	_fade_timer.Initialize(FADE_OUT_TIME, 0, MapMode::CurrentInstance());
+	_fade_timer.Initialize(FADE_OUT_TIME, SYSTEM_TIMER_NO_LOOPS);
 }
 
 
@@ -177,6 +177,8 @@ void MapTransitionEvent::_Start() {
 
 
 bool MapTransitionEvent::_Update() {
+	_fade_timer.Update();
+
 	if (_fade_timer.IsFinished() == true) {
 		ModeManager->Pop();
 		try {

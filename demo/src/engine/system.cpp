@@ -65,6 +65,7 @@ ustring UTranslate(const string& text) {
 
 SystemTimer::SystemTimer() :
 	_state(SYSTEM_TIMER_INVALID),
+	_auto_update(false),
 	_duration(0),
 	_number_loops(0),
 	_mode_owner(NULL),
@@ -74,34 +75,78 @@ SystemTimer::SystemTimer() :
 
 
 
-SystemTimer::~SystemTimer() {
-	// If the timer is still in the invalid state, the SystemManager never received a reference to it.
-	if (_state == SYSTEM_TIMER_INVALID)
-		return;
+SystemTimer::SystemTimer(uint32 duration, int32 loops) :
+	_state(SYSTEM_TIMER_INITIAL),
+	_auto_update(false),
+	_duration(duration),
+	_number_loops(loops),
+	_mode_owner(NULL),
+	_time_expired(0),
+	_times_completed(0)
+{}
 
-	// Remove the reference to this timer object from the SystemManager
-	SystemManager->_system_timers.erase(this);
+
+
+SystemTimer::~SystemTimer() {
+	if (_auto_update == true) {
+		SystemManager->RemoveAutoTimer(this);
+	}
 }
 
 
 
-void SystemTimer::Initialize(uint32 duration, int32 number_loops, hoa_mode_manager::GameMode* mode_owner) {
-	// If the state is invalid, this is the first time that this timer has been initialized and we need to pass it
-	// along to the SystemManager
-	// CD: Rather than checking state, it would make more sense to check and see if it has an owner
-	// If it does, then we don't add it here b/c the owner will update it.  Otherwise, system will have to update it
-	// Also, the owner should technically be any object, not just a game mode
-	if (_state == SYSTEM_TIMER_INVALID) {
-		SystemManager->_system_timers.insert(this);
-	}
-
+void SystemTimer::Initialize(uint32 duration, int32 number_loops) {
+	_state = SYSTEM_TIMER_INITIAL;
 	_duration = duration;
 	_number_loops = number_loops;
-	_mode_owner = mode_owner;
-
-	_state = SYSTEM_TIMER_INITIAL;
 	_time_expired = 0;
 	_times_completed = 0;
+}
+
+
+
+void SystemTimer::EnableAutoUpdate(GameMode* owner) {
+	if (_auto_update == true) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "timer already had auto update enabled" << endl;
+		return;
+	}
+
+	_auto_update = true;
+	_mode_owner = owner;
+	SystemManager->AddAutoTimer(this);
+}
+
+
+
+void SystemTimer::EnableManualUpdate() {
+	if (_auto_update == false) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "timer was already in manual update mode" << endl;
+		return;
+	}
+
+	SystemManager->RemoveAutoTimer(this);
+	_auto_update = false;
+	_mode_owner = NULL;
+}
+
+
+
+void SystemTimer::Update() {
+	Update(SystemManager->GetUpdateTime());
+}
+
+
+
+void SystemTimer::Update(uint32 time) {
+	if (_auto_update == true) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "update failed because timer is in automatic update mode" << endl;
+		return;
+	}
+	if (IsRunning() == false) {
+		return;
+	}
+
+	_UpdateTimer(time);
 }
 
 
@@ -123,60 +168,68 @@ float SystemTimer::PercentComplete() const {
 
 
 void SystemTimer::SetDuration(uint32 duration) {
-	if (IsInitial()) {
-		_duration = duration;
-	}
-	else {
+	if (IsInitial() == false) {
 		IF_PRINT_WARNING(SYSTEM_DEBUG) << "function called when the timer was not in the initial state" << endl;
 		return;
 	}
+
+	_duration = duration;
 }
 
 
 
-void SystemTimer::SetNumberLoops(int32 number_loops) {
-	if (IsInitial()) {
-		_number_loops = number_loops;
-	}
-	else {
+void SystemTimer::SetNumberLoops(int32 loops) {
+	if (IsInitial() == false) {
 		IF_PRINT_WARNING(SYSTEM_DEBUG) << "function called when the timer was not in the initial state" << endl;
 		return;
 	}
+
+	_number_loops = loops;
 }
 
 
 
-void SystemTimer::SetModeOwner(hoa_mode_manager::GameMode* mode_owner) {
-	if (IsInitial()) {
-		_mode_owner = mode_owner;
-	}
-	else {
+void SystemTimer::SetModeOwner(hoa_mode_manager::GameMode* owner) {
+	if (IsInitial() == false) {
 		IF_PRINT_WARNING(SYSTEM_DEBUG) << "function called when the timer was not in the initial state" << endl;
 		return;
 	}
+
+	_mode_owner = owner;
 }
 
 
 
-void SystemTimer::_UpdateTimer() {
-	if (IsRunning() == false)
+void SystemTimer::_AutoUpdate() {
+	if (_auto_update == false) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "tried to automatically update a timer that does not have auto updates enabled" << endl;
 		return;
+	}
+	if (IsRunning() == false) {
+		return;
+	}
 
-	_time_expired += SystemManager->GetUpdateTime();
+	_UpdateTimer(SystemManager->GetUpdateTime());
+}
+
+
+
+void SystemTimer::_UpdateTimer(uint32 time) {
+	_time_expired += time;
 
 	if (_time_expired >= _duration) {
 		_times_completed++;
 
-		// Checks if infinite looping is enabled
+		// Check if infinite looping is enabled
 		if (_number_loops < 0) {
 			_time_expired -= _duration;
 		}
-		// Checks if the number of loops have expired
+		// Check if the last loop has been completed
 		else if (_times_completed >= static_cast<uint32>(_number_loops)) {
 			_time_expired = 0;
 			_state = SYSTEM_TIMER_FINISHED;
 		}
-		// Otherwise, there are still additional loops to complete
+		// Otherwise there are still additional loops to complete
 		else {
 			_time_expired -= _duration;
 		}
@@ -222,7 +275,8 @@ bool SystemEngine::SingletonInitialize() {
 			bindtextdomain(PACKAGE, LOCALEDIR);
 			bind_textdomain_codeset(PACKAGE, "UTF-8");
 			textdomain(PACKAGE);
-		} else {
+		}
+		else {
 			char buffer[PATH_MAX];
 			// Get the current working directory.
 			string cwd(getcwd(buffer, PATH_MAX));
@@ -244,7 +298,7 @@ bool SystemEngine::SingletonInitialize() {
 }
 
 
-// Set up the timers before the main game loop begins
+
 void SystemEngine::InitializeTimers() {
 	_last_update = SDL_GetTicks();
 	_update_time = 1; // Set to non-zero, otherwise bad things may happen...
@@ -252,7 +306,41 @@ void SystemEngine::InitializeTimers() {
 	_minutes_played = 0;
 	_seconds_played = 0;
 	_milliseconds_played = 0;
-	_system_timers.clear();
+	_auto_system_timers.clear();
+}
+
+
+
+void SystemEngine::AddAutoTimer(SystemTimer* timer) {
+	if (timer == NULL) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "function received NULL argument" << endl;
+		return;
+	}
+	if (timer->IsAutoUpdate() == false) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "timer did not have auto update feature enabled" << endl;
+		return;
+	}
+
+// 	pair<set<SystemTimer*>::iterator, bool> return_value;
+	if (_auto_system_timers.insert(timer).second == false) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "timer already existed in auto system timer container" << endl;
+	}
+}
+
+
+
+void SystemEngine::RemoveAutoTimer(SystemTimer* timer) {
+	if (timer == NULL) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "function received NULL argument" << endl;
+		return;
+	}
+	if (timer->IsAutoUpdate() == false) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "timer did not have auto update feature enabled" << endl;
+	}
+
+	if (_auto_system_timers.erase(timer) == 0) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "timer was not found in auto system timer container" << endl;
+	}
 }
 
 
@@ -279,8 +367,8 @@ void SystemEngine::UpdateTimers() {
 	}
 
 	// ----- (3): Update all SystemTimer objects
-	for (set<SystemTimer*>::iterator i = _system_timers.begin(); i != _system_timers.end(); i++)
-		(*i)->_UpdateTimer();
+	for (set<SystemTimer*>::iterator i = _auto_system_timers.begin(); i != _auto_system_timers.end(); i++)
+		(*i)->_AutoUpdate();
 }
 
 
@@ -289,7 +377,7 @@ void SystemEngine::ExamineSystemTimers() {
 	GameMode* active_mode = ModeManager->GetTop();
 	GameMode* timer_mode = NULL;
 
-	for (set<SystemTimer*>::iterator i = _system_timers.begin(); i != _system_timers.end(); i++) {
+	for (set<SystemTimer*>::iterator i = _auto_system_timers.begin(); i != _auto_system_timers.end(); i++) {
 		timer_mode = (*i)->GetModeOwner();
 		if (timer_mode == NULL)
 			continue;
@@ -306,11 +394,11 @@ void SystemEngine::ExamineSystemTimers() {
 void SystemEngine::SetLanguage(std::string lang) {
 	_language = lang;
 
-	/// @TODO, implement a cross-platform wrapper for setenv
+	/// @TODO, implement a cross-platform wrapper for setenv in utils code
 	#ifdef _WIN32
 		SetEnvironmentVariable("LANGUAGE", _language.c_str());
 	#else
-		setenv ("LANGUAGE", _language.c_str(), 1);
+		setenv("LANGUAGE", _language.c_str(), 1);
 	#endif
 }
 
@@ -322,11 +410,15 @@ void SystemEngine::WaitForThread(Thread * thread) {
 #endif
 }
 
+
+
 Semaphore * SystemEngine::CreateSemaphore(int max) {
 #if (THREAD_TYPE == SDL_THREADS)
 	return SDL_CreateSemaphore(max);
 #endif
 }
+
+
 
 void SystemEngine::DestroySemaphore(Semaphore * s) {
 #if (THREAD_TYPE == SDL_THREADS)
@@ -334,17 +426,20 @@ void SystemEngine::DestroySemaphore(Semaphore * s) {
 #endif
 }
 
+
+
 void SystemEngine::LockThread(Semaphore * s) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_SemWait(s);
 #endif
 }
 
+
+
 void SystemEngine::UnlockThread(Semaphore * s) {
 #if (THREAD_TYPE == SDL_THREADS)
 	SDL_SemPost(s);
 #endif
 }
-
 
 } // namespace hoa_system

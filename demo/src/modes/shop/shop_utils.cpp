@@ -290,7 +290,8 @@ ObjectCategoryDisplay::ObjectCategoryDisplay() :
 	// TODO: Alignment should be VIDEO_X_CENTER, but a bug is preventing it from working correctly right now
 	_name_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
-	_transition_timer.Initialize(TRANSITION_TIME_ICON, 0, ShopMode::CurrentInstance());
+	_transition_timer.Initialize(TRANSITION_TIME_ICON, SYSTEM_TIMER_NO_LOOPS);
+	_transition_timer.EnableAutoUpdate(ShopMode::CurrentInstance());
 }
 
 

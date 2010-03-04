@@ -101,7 +101,8 @@ MapMode::MapMode(string filename) :
 	_dialogue_supervisor = new DialogueSupervisor();
 	_treasure_supervisor = new TreasureSupervisor();
 
-	_intro_timer.Initialize(7000, 0, this);
+	_intro_timer.Initialize(7000, 0);
+	_intro_timer.EnableAutoUpdate(this);
 
 	// TODO: Load the map data in a seperate thread
 	_Load();

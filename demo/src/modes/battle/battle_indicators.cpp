@@ -54,6 +54,12 @@ void IndicatorElement::Start() {
 
 
 
+void IndicatorElement::Update() {
+	_timer.Update();
+}
+
+
+
 void IndicatorElement::CalculateDrawAlpha() {
 	if ((_timer.GetState() == SYSTEM_TIMER_RUNNING) && (_timer.GetState() == SYSTEM_TIMER_PAUSED)) {
 		_alpha_color.SetAlpha(0.0f);
@@ -66,8 +72,8 @@ void IndicatorElement::CalculateDrawAlpha() {
 		alpha = static_cast<float>(_timer.GetTimeExpired() / INDICATOR_FADE_TIME);
 	}
 	// Case 2: Timer is in final stage and indicator graphic is fading out
-	else if (_timer.GetTimeLeft() < INDICATOR_FADE_TIME) {
-		alpha = static_cast<float>(_timer.GetTimeLeft() / INDICATOR_FADE_TIME);
+	else if (_timer.TimeLeft() < INDICATOR_FADE_TIME) {
+		alpha = static_cast<float>(_timer.TimeLeft() / INDICATOR_FADE_TIME);
 	}
 	// Case 3: Timer is in middle stage and indicator graphic should be drawn with no transparency
 	else {
@@ -135,6 +141,10 @@ IndicatorSupervisor::~IndicatorSupervisor() {
 
 
 void IndicatorSupervisor::Update() {
+	// Update all active elements
+	for (uint32 i = 0; i < _active_queue.size(); i++)
+		_active_queue[i]->Update();
+
 	// Remove all expired elements from the active queue
 	while (_active_queue.empty() == false) {
 		if (_active_queue.front()->IsExpired() == true) {

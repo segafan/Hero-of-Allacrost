@@ -62,6 +62,9 @@ public:
 	//! \brief Begins the display of the indicator element
 	void Start();
 
+	//! \brief Updates the timer
+	virtual void Update();
+
 	//! \brief Returns a floating point value that represents the height of the element drawn
 	virtual float ElementHeight() const = 0;
 
