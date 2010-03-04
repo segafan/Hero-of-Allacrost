@@ -24,7 +24,6 @@
 #include "defs.h"
 #include "utils.h"
 
-
 #include "audio.h"
 #include "mode_manager.h"
 #include "system.h"
@@ -63,10 +62,10 @@ namespace private_battle {
 *** to save/restore additional state information about timers on a pause event.
 *** ***************************************************************************/
 class BattleMode : public hoa_mode_manager::GameMode {
-	friend class private_battle::BattleActor;
-	friend class private_battle::BattleCharacter;
-	friend class private_battle::BattleEnemy;
-	friend class private_battle::BattleAction;
+// 	friend class private_battle::BattleActor;
+// 	friend class private_battle::BattleCharacter;
+// 	friend class private_battle::BattleEnemy;
+// 	friend class private_battle::BattleAction;
 	friend class private_battle::FinishWindow;
 
 public:
@@ -197,46 +196,6 @@ public:
 		{ return _enemy_party; }
 	//@}
 
-	//! \brief Returns an index to the _character_actors container of the first available living character
-// 	uint32 GetIndexOfFirstAliveEnemy() const;
-
-	//! \brief Returns an index to the _enemy_actors container of the first available living enemy
-// 	uint32 GetIndexOfLastAliveEnemy() const;
-
-	/** \brief Returns an index to the _character_actors container of the next available living character
-	*** \param move_upward If true, the next character should be further back in the container
-	**/
-// 	uint32 GetIndexOfNextAliveCharacter(bool move_upward) const;
-
-	/** \brief Returns an index to the _enemy_actors container of the next available living enemy
-	*** \param move_upward If true, the next enemy should be further back in the container
-	**/
-// 	uint32 GetIndexOfNextAliveEnemy(bool move_upward) const;
-
-	//! \brief Added a scripted event to the queue
-// 	void AddBattleActionToQueue(private_battle::BattleAction* event)
-// 		{ _action_queue.push_back(event); }
-
-	//! \brief Remove all scripted events for an actor
-// 	void RemoveActionsForActor(private_battle::BattleActor* actor);
-
-	/*!
-	 * \brief Grabs the enxt idle character based on how long they have been waiting
-	 * \param ignore We should ignore this character
-	 */
-// 	uint32 GetIndexOfNextIdleCharacter(private_battle::BattleCharacter *ignore = NULL) const;
-
-	//! \brief Swaps a current character in the party with one in the reserves
-	// TODO: This feature is not yet ready for implementation
-// 	void SwapCharacters(private_battle::BattleCharacter* remove_character, private_battle::BattleCharacter* add_character);
-
-	//! \brief Adds a player to the end of the queue when he is ready to take a turn
-// 	void AddToCommandQueue(private_battle::BattleCharacter* character);
-
-	//! \brief Removes the given character from the turn queue
-// 	void RemoveFromTurnQueue(private_battle::BattleCharacter* character);
-
-
 	/** \brief Adds a new event to the battle
 	*** \param event A pointer to the event to add
 	**/
@@ -252,38 +211,18 @@ public:
 	//! \brief Shows the next line of dialogue
 // 	void ShowDialogue();
 
+	//! \name Class Member Accessor Methods
+	//@{
+	hoa_video::StillImage& GetCharacterBarCovers()
+		{ return _character_bar_covers; }
+	//@}
+
 private:
 	//! \brief A static pointer to the currently active instance of battle mode
 	static BattleMode* _current_instance;
 
 	//! \brief Retains the current state of the battle
 	private_battle::BATTLE_STATE _state;
-
-	//! \name Selection Data
-	//@{
-	/** \brief Character index of the currently selected actor
-	*** \note This needs to be made defunct. Occurences of it in battle.cpp should
-	*** be replaced with the index of the _selected_character member
-	**/
-	int32 _selected_character_index;
-
-	//! \brief Argument selector
-	int32 _selected_target_index;
-
-	//! \brief The current character that is selected by the player
-	private_battle::BattleCharacter* _selected_character;
-
-	/** \brief The current target for the player's selection
-	*** This may point to either a character or enemy actor.
-	**/
-	private_battle::BattleActor* _selected_target;
-
-	/** \brief The index of the attack point on the selected target that is selected
-	*** If the target type of the skill or item is not an attack point target, then
-	*** the value of this member is meaningless.
-	**/
-	uint32 _selected_attack_point;
-	//@}
 
 	//! \name Battle Actor Containers
 	//@{
@@ -444,12 +383,6 @@ private:
 	**/
 	void _DetermineActorLocations();
 
-	//! \brief Handles updating all our queued scripts and marks them for removal if they run
-// 	void _UpdateScripts();
-
-	//! \brief Any scripts marked for removal are removed from the queue
-// 	void _CleanupActionQueue();
-
 	//! \brief Returns the number of enemies that are still alive in the battle
 	uint32 _NumberEnemiesAlive() const;
 
@@ -457,25 +390,6 @@ private:
 	*** \note This function only counts the characters on the screen, not characters in the party reserves
 	**/
 	uint32 _NumberCharactersAlive() const;
-
-	//! \brief Picks the next character who should take his turn
-// 	void _ActivateNextCharacter();
-
-	/** \brief Selects the initial target for an action to take effect on
-	*** This is only used for characters to select an initial target, but not for enemies.
-	**/
-// 	void _SetInitialTarget();
-
-	/** \brief Sets the _target_selected member to the next available target
-	*** \param forward_direction Determines whether the next target should be located ahead or behind of the current one
-	*** This member will also change the _attack_point selected member
-	**/
-// 	void _SelectNextTarget(bool forward_direction);
-
-	/** \brief Sets the _attack_point_selected member to the next available attack point
-	*** \param forward_direction Determines whether the next target should be located ahead or behind of the current one
-	**/
-// 	void _SelectNextAttackPoint(bool forward_direction);
 
 	/** \name Draw helper functions
 	*** \brief Functions which draw various components of the battle screen
