@@ -776,6 +776,34 @@ void BattleMode::_DrawBackgroundGraphics() {
 
 
 void BattleMode::_DrawSprites() {
+	// Boolenas used to determine whether or not the actor selector and attack point selector graphics should be drawn
+	bool draw_actor_selection = false;
+	bool draw_point_selection = false;
+
+	BattleTarget target = _command_supervisor->GetSelectedTarget(); // The target that the player has selected
+	BattleActor* actor_target = target.GetActor(); // A pointer to an actor being targetted (may initially be NULL if target is party)
+
+	// Determine if selector graphics should be drawn
+	if ((_state == BATTLE_STATE_COMMAND) && (_command_supervisor->GetState() == COMMAND_STATE_TARGET)) {
+		draw_actor_selection = true;
+		if (IsTargetPoint(target.GetType()) == true)
+			draw_point_selection = true;
+	}
+
+	// Draw the actor selector graphic
+	if (draw_actor_selection == true) {
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, VIDEO_BLEND, 0);
+		if (actor_target != NULL) {
+			actor_target = target.GetActor();
+			VideoManager->Move(actor_target->GetXLocation(), actor_target->GetYLocation());
+			_actor_selection_image.Draw();
+		}
+		else if (IsTargetParty(target.GetType()) == true) {
+			// TODO: add support for drawing graphic under multiple actors if the target is a party
+		}
+		// Else this target is invalid so don't draw anything
+	}
+
 	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
 
 	// Draw all character sprites
@@ -786,6 +814,16 @@ void BattleMode::_DrawSprites() {
 	// Draw all enemy sprites
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		_enemy_actors[i]->DrawSprite();
+	}
+
+	// Draw the attack point selector graphic
+	if (draw_point_selection == true) {
+		uint32 point = target.GetPoint();
+
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, VIDEO_BLEND, 0);
+		VideoManager->Move(actor_target->GetXLocation(), actor_target->GetYLocation());
+		VideoManager->MoveRelative(actor_target->GetAttackPoint(point)->GetXPosition(), actor_target->GetAttackPoint(point)->GetYPosition());
+		_attack_point_indicator.Draw();
 	}
 }
 
@@ -857,15 +895,30 @@ void BattleMode::_DrawBottomMenu() {
 
 
 void BattleMode::_DrawStaminaBar() {
-	// ----- (1): Draw the stamina bar
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->Move(1010.0f, 128.0f);
-	_stamina_meter.Draw();
+	bool draw_icon_selection = false; // Used to determine whether or not an icon selector graphic needs to be drawn
+	bool is_party_selected = false; // If true, an entire party of actors is selected
+	bool is_party_enemy = false; // If true, the selected party is the enemy party
 
-	// ----- (2): Determine the draw order of all stamina icons
-// 	GLOBAL_TARGET target_type = _command_supervisor->GetSelectedTarget().GetType();
-// 	bool target_character = _action_window->IsActionTargetAlly();
+	BattleActor* selected_actor = NULL; // A pointer to the selected actor
 
+	// ----- (1): Determine if selector graphics should be drawn
+	if ((_state == BATTLE_STATE_COMMAND) && (_command_supervisor->GetState() == COMMAND_STATE_TARGET)) {
+		BattleTarget target = _command_supervisor->GetSelectedTarget();
+
+		draw_icon_selection = true;
+		selected_actor = target.GetActor(); // Will remain NULL if the target type is a party
+
+		if (target.GetType() == GLOBAL_TARGET_ALL_ALLIES) {
+			is_party_selected = true;
+			is_party_enemy = false;
+		}
+		else if (target.GetType() == GLOBAL_TARGET_ALL_FOES) {
+			is_party_selected = true;
+			is_party_enemy = true;
+		}
+	}
+
+	// ----- (2): Determine the draw order of stamina icons for all living actors
 	// A container to hold all actors that should have their stamina icons drawn
 	vector<BattleActor*> live_actors;
 
@@ -879,7 +932,6 @@ void BattleMode::_DrawStaminaBar() {
 	}
 
 	//std::vector<bool> selected(live_actors.size(), false);
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 
 	vector<float> draw_positions(live_actors.size(), 0.0f);
 	for (uint32 i = 0; i < live_actors.size(); i++) {
@@ -915,13 +967,24 @@ void BattleMode::_DrawStaminaBar() {
 	// TODO: sort the draw positions container and correspond that to live_actors
 // 	sort(draw_positions.begin(), draw_positions.end());
 
-	// ----- (3): Draw all stamina icons in order
+	// ----- (3): Draw the stamina bar
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->Move(1010.0f, 128.0f);
+	_stamina_meter.Draw();
+
+	// ----- 4): Draw all stamina icons in order along with the selector graphic
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	for (uint32 i = 0; i < live_actors.size(); i++) {
 		VideoManager->Move(1000.0f, draw_positions[i]);
 		live_actors[i]->GetStaminaIcon().Draw();
-	}
 
-	// TODO: Draw stamina icon indicators such as the selector graphic
+		if (draw_icon_selection == true) {
+			if ((is_party_selected == false) && (live_actors[i] == selected_actor))
+				_stamina_icon_selected.Draw();
+			else if ((is_party_selected == true) && (live_actors[i]->IsEnemy() == is_party_enemy))
+				_stamina_icon_selected.Draw();
+		}
+	}
 } // void BattleMode::_DrawStaminaBar()
 
 
