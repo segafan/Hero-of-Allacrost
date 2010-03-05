@@ -168,44 +168,22 @@ void BattleMode::Update() {
 	_attack_point_indicator.Update(); // Required update to animated image
 
 	if (InputManager->QuitPress()) {
-		FreezeTimers();
 		ModeManager->Push(new PauseMode(true));
 		return;
 	}
 	if (InputManager->PausePress()) {
-		FreezeTimers();
 		ModeManager->Push(new PauseMode(false));
 		return;
 	}
 
-	// Determine if the battle should proceed to the victory or defeat state
-	if (IsBattleFinished() == false) {
-		bool characters_defeated = true;
-		for (uint32 i = 0; i < _character_actors.size(); i++) {
-			if (_character_actors[i]->IsAlive() == true) {
-				characters_defeated = false;
-				break;
-			}
-		}
+	if (IsBattleFinished() == true) {
+		_finish_window->Update();
+		return;
+	}
 
-		bool enemies_defeated = true;
-		for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-			if (_enemy_actors[i]->IsAlive() == true) {
-				enemies_defeated = false;
-				break;
-			}
-		}
-
-		if ((characters_defeated == true) && (enemies_defeated == true)) {
-			IF_PRINT_WARNING(BATTLE_DEBUG) << "both parties were defeated, changing to defeat state" << endl;
-			ChangeState(BATTLE_STATE_DEFEAT);
-		}
-		else if (characters_defeated == true) {
-			ChangeState(BATTLE_STATE_DEFEAT);
-		}
-		else if (enemies_defeated == true) {
-			ChangeState(BATTLE_STATE_VICTORY);
-		}
+	if (_state == BATTLE_STATE_COMMAND) {
+		_command_supervisor->Update();
+// 		return;
 	}
 
 	// Process the actor ready queue
@@ -228,100 +206,12 @@ void BattleMode::Update() {
 		}
 	}
 
-	// First, call update functions of any BattleEvents
-// 	ScriptObject* during_func;
-// 	for (uint32 i = 0; i < _events.size(); i++) {
-// 		during_func = _events[i]->GetDuringFunction();
-// 		ScriptCallFunction<void>(*during_func, this);
-// 	}
-
 	// Update all actors
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		_character_actors[i]->Update();
 	}
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		_enemy_actors[i]->Update();
-	}
-
-
-
-	if (_state == BATTLE_STATE_INITIAL) {
-		// TODO
-	}
-	else if (_state == BATTLE_STATE_NORMAL) {
-		// TODO: check if any characters are in the ACTOR_STATE_COMMAND state, if so move to BATTLE_STATE_COMMAND
-// 		for (uint32 i = 0; i <
-	}
-	else if (_state == BATTLE_STATE_COMMAND) {
-		_command_supervisor->Update();
-	}
-	else if (_state == BATTLE_STATE_EVENT) {
-// 		_dialogue_window._display_textbox.Update();
-// 		_dialogue_window._display_options.Update();
-//
-// 		if (InputManager->ConfirmPress()) {
-// 			_dialogue_window.Reset();
-// 			if (_dialogue_text.empty()) {
-// 				ChangeState(BATTLE_STATE_NORMAL);
-// 			}
-// 			else {
-// 				ShowDialogue();
-// 				return;
-// 			}
-// 			UnFreezeTimers();
-// 		}
-// 		else {
-// 			FreezeTimers();
-// 			return;
-// 		}
-	}
-	else if (_state == BATTLE_STATE_VICTORY) {
-
-	}
-	else if (_state == BATTLE_STATE_DEFEAT) {
-
-	}
-	else {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid states" << endl;
-		Exit();
-	}
-
-
-
-
-	// ----- (1): If the battle is over, only execute this small block of update code
-	if (_state == BATTLE_STATE_VICTORY || _state == BATTLE_STATE_DEFEAT) {
-// 		if (_after_scripts_finished == false) {
-// 			ScriptObject* after_func;
-// 			for (uint32 i = 0; i < _events.size(); i++) {
-// 				after_func = _events[i]->GetAfterFunction();
-// 				ScriptCallFunction<void>(*after_func, this);
-// 			}
-// 			_after_scripts_finished = true;
-// 			return;
-// 		}
-
-		if (_finish_window->GetState() == FINISH_INVALID) { // Indicates that the battle has just now finished
-			//_finish_window = new FinishWindow();
-			// make sure the battle has our music
-			if (_state == BATTLE_STATE_VICTORY) {
-				AddMusic(_winning_music);
-				PlayMusic(_winning_music);
-			}
-			else {
-				AddMusic(_losing_music);
-				PlayMusic(_losing_music);
-			}
-
-			_finish_window->Initialize(_state == BATTLE_STATE_VICTORY);
-		}
-
-		// The FinishWindow::Update() function handles all update code when a battle is over.
-		// The call to shut down battle mode is also made from within this call.
-		_finish_window->Update();
-
-		// Do not update other battle code if the battle has already ended
-		return;
 	}
 } // void BattleMode::Update()
 
@@ -450,18 +340,17 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 			}
 			break;
 		case BATTLE_STATE_EVENT:
-// 			_speaker_name = _dialogue_text.front();
-// 			_dialogue_text.pop_front();
-// 			hoa_utils::ustring text = _dialogue_text.front();
-// 			_dialogue_text.pop_front();
-//
-// 			_dialogue_window.Reset();
-// 			_dialogue_window._display_textbox.SetDisplayText(text);
-// 			_dialogue_window.Initialize();
+			// TODO
 			break;
 		case BATTLE_STATE_VICTORY:
+			AddMusic(_winning_music);
+			PlayMusic(_winning_music);
+			_finish_window->Initialize(true);
 			break;
 		case BATTLE_STATE_DEFEAT:
+			AddMusic(_losing_music);
+			PlayMusic(_losing_music);
+			_finish_window->Initialize(false);
 			break;
 		default:
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "changed to invalid battle state: " << _state << endl;
@@ -578,6 +467,24 @@ void BattleMode::NotifyActorDeath(BattleActor* actor) {
 			else
 				ChangeState(BATTLE_STATE_NORMAL);
 		}
+	}
+
+	// Determine if the battle should proceed to the victory or defeat state
+	if (IsBattleFinished() == true) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "actor death occurred after battle was finished" << endl;
+	}
+
+	uint32 num_alive_characters = _NumberCharactersAlive();
+	uint32 num_alive_enemies = _NumberEnemiesAlive();
+	if ((num_alive_characters == 0) && (num_alive_enemies == 0)) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "both parties were defeated; changing to defeat state" << endl;
+		ChangeState(BATTLE_STATE_DEFEAT);
+	}
+	else if (num_alive_characters == 0) {
+		ChangeState(BATTLE_STATE_DEFEAT);
+	}
+	else if (num_alive_enemies == 0) {
+		ChangeState(BATTLE_STATE_VICTORY);
 	}
 }
 
