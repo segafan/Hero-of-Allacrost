@@ -93,6 +93,12 @@ private:
 	//! \brief The growth members for all object pointers in the _characters table
 	std::vector<hoa_global::GlobalCharacterGrowth*> _character_growths;
 
+	//! \brief The music to play if the character party is victorious
+	hoa_audio::MusicDescriptor _victory_music;
+
+	//! \brief The music to play if the character party is defeated
+	hoa_audio::MusicDescriptor _defeat_music;
+
 	//! \brief Text that displays the battle's outcome (victory or defeat)
 	hoa_gui::TextBox _finish_outcome;
 
