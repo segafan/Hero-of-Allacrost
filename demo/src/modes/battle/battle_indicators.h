@@ -118,7 +118,7 @@ protected:
 *** ***************************************************************************/
 class IndicatorText : public IndicatorElement {
 public:
-	/** \param actor A valid pointer to the actor object this indicator
+	/** \param actor A valid pointer to the actor object
 	*** \param text The text to use to render the text image
 	*** \param style The style to use to render the text image
 	**/
@@ -137,7 +137,42 @@ public:
 protected:
 	//! \brief The rendered image of the text to display
 	hoa_video::TextImage _text_image;
-}; // class IndicatorText
+}; // class IndicatorText  : public IndicatorElement
+
+
+
+/** ****************************************************************************
+*** \brief Displays an image next to an actor
+***
+*** TODO: write a description. Possibly consider making this class maleable so
+*** that it can handle either still or animated images. Possibly allow a second
+*** image so that indicator can fade from one image to the next.
+*** ***************************************************************************/
+class IndicatorImage : public IndicatorElement {
+public:
+	/** \param actor A valid pointer to the actor object this indicator
+	*** \param filename The name of the image file to load
+	**/
+	IndicatorImage(BattleActor* actor, std::string& filename);
+
+	~IndicatorImage()
+		{}
+
+	//! \brief Returns the height of the image
+	float ElementHeight() const
+		{ return _image.GetHeight(); }
+
+	//! \brief Draws the image
+	void Draw();
+
+	//! \brief Returns a reference to the image
+	hoa_video::StillImage& GetImage()
+		{ return _image; }
+
+protected:
+	//! \brief The rendered image of the text to display
+	hoa_video::StillImage _image;
+}; // class IndicatorImage : public IndicatorElement
 
 
 /** ****************************************************************************

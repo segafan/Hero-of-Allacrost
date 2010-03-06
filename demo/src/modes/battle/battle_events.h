@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2009 by The Allacrost Project
+//            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software
@@ -19,6 +19,7 @@
 #define __BATTLE_EVENTS_HEADER__
 
 #include "global.h"
+#include "system.h"
 #include "script.h"
 
 namespace hoa_battle {
@@ -51,7 +52,7 @@ private:
 	ScriptObject* _after;
 
 	hoa_system::SystemTimer* _timer;
-}; // class GlobalStatusEffect
+}; // class BattleEvent
 
 } // namespace hoa_battle
 

@@ -24,14 +24,23 @@
 
 #include "defs.h"
 #include "utils.h"
-#include "system.h"
-
-#include "video.h"
-#include "script.h"
 
 #include "global_utils.h"
 
 namespace hoa_global {
+
+/** \brief Retrieves a string representation for any GLOBAL_ELEMENTAL enum value
+*** \param type The elemental enum value to find the string for
+*** \return Translated text that describes the elemental
+**/
+std::string GetElementName(GLOBAL_ELEMENTAL type);
+
+/** \brief Retrieves a string representation for any GLOBAL_STATUS enum value
+*** \param type The status enum value to find the string for
+*** \return Translated text that describes the status
+**/
+std::string GetStatusName(GLOBAL_STATUS type);
+
 
 /** ****************************************************************************
 *** \brief Represents an elemental effect in the game
@@ -57,9 +66,7 @@ public:
 	~GlobalElementalEffect()
 		{}
 
-	/** \brief Class Member Access Functions
-	*** \note The "Set" functions may also change the _icon_image member of this class
-	**/
+	//! \brief Class Member Access Functions
 	//@{
 	GLOBAL_ELEMENTAL GetType() const
 		{ return _type; }
@@ -83,7 +90,7 @@ public:
 	**/
 	void DecrementIntensity(uint8 amount = 1);
 
-private:
+protected:
 	//! \brief The type of elemental that the object represents
 	GLOBAL_ELEMENTAL _type;
 
@@ -96,39 +103,30 @@ private:
 *** \brief Represents a status effect in the game
 ***
 *** Status effects can be either aiding or ailing to the actor with the active
-*** status. (TODO: provide a more accurate description once this class structure
-*** is in a more-or-less final state).
-***
-*** \todo I think this class needs big changes. First, it should only be used to
-*** represent a status effect I feel (as a property on weapons or armor) property
-*** similar to the GlobalElementalEffect class. The battle code should create a
-*** derived class to achieve that. Perhaps these classes should be renamed
-*** Global*Attribute instead in to better represent what these classes really are?
-***
-*** Second, all of these modifier methods are unnecessary IMO. Instead, the derived
-*** class should simply have a pointer to the actor the status is inflicted on and
-*** the script can modify the properties of the actor as appropriate. I'm leaving
-*** things the way they are now, but I really think these changes should be done.
-*** -- Roots
+*** status. Status effects are only active on characters while they are in battle.
 *** ***************************************************************************/
 class GlobalStatusEffect {
 public:
-	/** \param id The unique id value that determines the status effect that this class object should represent
+	/** \param type The status type that this class object should represent
 	*** \param intensity The intensity of the status (default value == GLOBAL_INTENSITY_NEUTRAL)
 	**/
-	GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity = GLOBAL_INTENSITY_NEUTRAL);
+	GlobalStatusEffect(GLOBAL_STATUS type, GLOBAL_INTENSITY intensity = GLOBAL_INTENSITY_NEUTRAL) :
+		_type(type), _intensity(intensity) {}
 
-	virtual ~GlobalStatusEffect();
+	virtual ~GlobalStatusEffect()
+		{}
 
-	//! \brief Resets and starts the status effect's timer
-	void StartTimer()
-		{ _timer->Reset(); _timer->Run(); }
+	//! \brief Class Member Access Functions
+	//@{
+	GLOBAL_STATUS GetType() const
+		{ return _type; }
 
-	/** \brief Sets how long the timer should run for
-	*** \param n The number of milliseconds that the timer should run for
-	**/
-	void SetDuration(uint32 n)
-		{ _timer->Initialize(n); }
+	GLOBAL_INTENSITY GetIntensity() const
+		{ return _intensity; }
+
+	void SetIntensity(GLOBAL_INTENSITY intensity)
+		{ _intensity = intensity; }
+	//@}
 
 	/** \brief Increments the status effect intensity by a positive amount
 	*** \param amount The number of intensity levels to increase the status effect by
@@ -142,109 +140,12 @@ public:
 	**/
 	bool DecrementIntensity(uint8 amount);
 
-	//! \brief Class Member Access Functions
-	//@{
-	const hoa_utils::ustring GetEffectName() const
-		{ return _name; }
-
-	GLOBAL_INTENSITY GetIntensity() const
-		{ return _intensity; }
-
-	hoa_system::SystemTimer* GetTimer() const
-		{ return _timer; }
-
-	float GetStrModifier() const
-		{ return _str_modifier; }
-
-	float GetVigModifier() const
-		{ return _vig_modifier; }
-
-	float GetForModifier() const
-		{ return _for_modifier; }
-
-	float GetProModifier() const
-		{ return _pro_modifier; }
-
-	float GetAgiModifier() const
-		{ return _agi_modifier; }
-
-	float GetEvaModifier() const
-		{ return _eva_modifier; }
-
-	bool IsStunEffect() const
-		{ return _stun; }
-
-	ScriptObject* GetInitFunction()
-		{ return _init; }
-
-	ScriptObject* GetUpdateFunction()
-		{ return _update; }
-
-	ScriptObject* GetRemoveFunction()
-		{ return _remove; }
-
-	// TODO: Return a pointer from image stored in GameGlobal
-	hoa_video::StillImage* GetIconImage();
-
-	void SetIntensity(GLOBAL_INTENSITY intensity)
-		{ _intensity = intensity; }
-
-	void SetStrModifier(float n)
-		{ _str_modifier = n; }
-
-	void SetVigModifier(float n)
-		{ _vig_modifier = n; }
-
-	void SetForModifier(float n)
-		{ _for_modifier = n; }
-
-	void SetProModifier(float n)
-		{ _pro_modifier = n; }
-
-	void SetAgiModifier(float n)
-		{ _agi_modifier = n; }
-
-	void SetEvaModifier(float n)
-		{ _eva_modifier = n; }
-
-	void SetStunEffect(bool n)
-		{ _stun = n; }
-	//@}
-
-private:
-	//! \brief An ID number that identifies the type of effect
-	uint32 _id;
-
-	//! \brief The name of the effect
-	hoa_utils::ustring _name;
+protected:
+	//! \brief The type of status that the object represents
+	GLOBAL_STATUS _type;
 
 	//! \brief The intensity level of this status effect
 	GLOBAL_INTENSITY _intensity;
-
-	//! \brief Percentage modifiers for various actor stats
-	//@{
-	float _str_modifier;
-	float _vig_modifier;
-	float _for_modifier;
-	float _pro_modifier;
-	float _agi_modifier;
-	float _eva_modifier;
-	//@}
-
-	//! \brief If true the status effect will prevent an inflicted actor from taking any action
-	bool _stun;
-
-	//! \brief A timer used to determine how long the status effect lasts
-	hoa_system::SystemTimer* _timer;
-
-	//! \brief A pointer to the initialization script function
-	ScriptObject* _init;
-
-	//! \brief A pointer to the update script function
-	ScriptObject* _update;
-
-	//! \brief A pointer to the remove script function
-	ScriptObject* _remove;
 }; // class GlobalStatusEffect
 
 } // namespace hoa_global

@@ -76,12 +76,12 @@ BattleActor::~BattleActor() {
 	}
 
 	// TODO: I don't think the destructor should be calling script functions?
-	ScriptObject* remove;
-	for (uint32 i = 0; i < _actor_effects.size(); i++) {
-		remove = _actor_effects[i]->GetRemoveFunction();
-		ScriptCallFunction<void>(*remove, this);
-		delete _actor_effects[i];
-	}
+// 	ScriptObject* remove;
+// 	for (uint32 i = 0; i < _actor_effects.size(); i++) {
+// 		remove = _actor_effects[i]->GetRemoveFunction();
+// 		ScriptCallFunction<void>(*remove, this);
+// 		delete _actor_effects[i];
+// 	}
 
 	delete _indicator_supervisor;
 }
@@ -89,16 +89,16 @@ BattleActor::~BattleActor() {
 
 
 void BattleActor::AddEffect(GlobalStatusEffect* new_effect) {
-	_actor_effects.push_back(new_effect);
-	ScriptObject* init = new_effect->GetInitFunction();
-	ScriptCallFunction<void>(*init, new_effect, this);
+// 	_actor_effects.push_back(new_effect);
+// 	ScriptObject* init = new_effect->GetInitFunction();
+// 	ScriptCallFunction<void>(*init, new_effect, this);
 }
 
 
 
 void BattleActor::AddNewEffect(uint32 id) {
-	hoa_global::GlobalStatusEffect* new_effect = new GlobalStatusEffect(id);
-	AddEffect(new_effect);
+// 	hoa_global::GlobalStatusEffect* new_effect = new GlobalStatusEffect(id);
+// 	AddEffect(new_effect);
 }
 
 

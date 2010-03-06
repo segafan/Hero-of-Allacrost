@@ -13,8 +13,7 @@
 *** \brief   Source file for global game effects
 *** ***************************************************************************/
 
-#include "script.h"
-#include "video.h"
+#include "system.h"
 
 #include "global_effects.h"
 #include "global.h"
@@ -23,10 +22,75 @@ using namespace std;
 
 using namespace hoa_utils;
 
-using namespace hoa_script;
-using namespace hoa_video;
+using namespace hoa_system;
 
 namespace hoa_global {
+
+string GetElementName(GLOBAL_ELEMENTAL type) {
+	switch (type) {
+		case GLOBAL_ELEMENTAL_FIRE:
+			return Translate("Fire");
+		case GLOBAL_ELEMENTAL_WATER:
+			return Translate("Water");
+		case GLOBAL_ELEMENTAL_VOLT:
+			return Translate("Volt");
+		case GLOBAL_ELEMENTAL_EARTH:
+			return Translate("Earth");
+		case GLOBAL_ELEMENTAL_SLICING:
+			return Translate("Slicing");
+		case GLOBAL_ELEMENTAL_SMASHING:
+			return Translate("Smashing");
+		case GLOBAL_ELEMENTAL_MAULING:
+			return Translate("Mauling");
+		case GLOBAL_ELEMENTAL_PIERCING:
+			return Translate("Piercing");
+		default:
+			return Translate("Invalid Elemental");
+	}
+}
+
+
+
+string GetStatusName(GLOBAL_STATUS type) {
+	switch (type) {
+		case GLOBAL_STATUS_HP_BOOST:
+			return Translate("HP Boost");
+		case GLOBAL_STATUS_HP_DRAIN:
+			return Translate("HP Drain");
+		case GLOBAL_STATUS_SP_BOOST:
+			return Translate("SP Boost");
+		case GLOBAL_STATUS_SP_DRAIN:
+			return Translate("SP Drain");
+		case GLOBAL_STATUS_STRENGTH_BOOST:
+			return Translate("Strength Boost");
+		case GLOBAL_STATUS_STRENGTH_DRAIN:
+			return Translate("Strength Drain");
+		case GLOBAL_STATUS_VIGOR_BOOST:
+			return Translate("Vigor Boost");
+		case GLOBAL_STATUS_VIGOR_DRAIN:
+			return Translate("Vigor Drain");
+		case GLOBAL_STATUS_FORTITUDE_BOOST:
+			return Translate("Fortitude Boost");
+		case GLOBAL_STATUS_FORTITUDE_DRAIN:
+			return Translate("Fortitude Drain");
+		case GLOBAL_STATUS_PROTECTION_BOOST:
+			return Translate("Protection Boost");
+		case GLOBAL_STATUS_PROTECTION_DRAIN:
+			return Translate("Protection Drain");
+		case GLOBAL_STATUS_AGILITY_BOOST:
+			return Translate("Agility Boost");
+		case GLOBAL_STATUS_AGILITY_DRAIN:
+			return Translate("Agility Drain");
+		case GLOBAL_STATUS_EVADE_BOOST:
+			return Translate("Evade Boost");
+		case GLOBAL_STATUS_EVADE_DRAIN:
+			return Translate("Evade Drain");
+		case GLOBAL_STATUS_PARALYSIS:
+			return Translate("Paralysis");
+		default:
+			return Translate("Invalid Status");
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // GlobalElementalEffect class
@@ -45,87 +109,6 @@ void GlobalElementalEffect::DecrementIntensity(uint8 amount) {
 ////////////////////////////////////////////////////////////////////////////////
 // GlobalStatusEffect class
 ////////////////////////////////////////////////////////////////////////////////
-
-GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity) :
-	_id(id),
-	_intensity(intensity),
-	_str_modifier(0.0f),
-	_vig_modifier(0.0f),
-	_for_modifier(0.0f),
-	_pro_modifier(0.0f),
-	_agi_modifier(0.0f),
-	_eva_modifier(0.0f),
-	_stun(false),
-	_timer(NULL),
-	_init(NULL),
-	_update(NULL),
-	_remove(NULL)
-{
-	// TODO: Replace the "5" numeric below with a constant representing the maximum skill ID number
-	if (_id == 0 || _id > 5) {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "constructor received an invalid id argument: " << id << endl;
-		return;
-	}
-	ReadScriptDescriptor& script_file = GlobalManager->GetStatusEffectsScript();
-
-	if (script_file.DoesTableExist(_id) == false) {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no valid data for status effect in definition file: " << id << endl;
-		return;
-	}
-
-	// Load the item data from the script
-	script_file.OpenTable(_id);
-	_name = MakeUnicodeString(script_file.ReadString("name"));
-
-	if (script_file.DoesFunctionExist("Init")
-		&& script_file.DoesFunctionExist("Update")
-		&& script_file.DoesFunctionExist("Remove"))
-	{
-		_init = new ScriptObject();
-		(*_init) = script_file.ReadFunctionPointer("Init");
-		_update = new ScriptObject();
-		(*_update) = script_file.ReadFunctionPointer("Update");
-		_remove = new ScriptObject();
-		(*_remove) = script_file.ReadFunctionPointer("Remove");
-	}
-	else {
-		PRINT_WARNING << "functions missing in status effect definition file: " << id << endl;
-		return;
-	}
-
-	script_file.CloseTable();
-	if (script_file.IsErrorDetected()) {
-		if (GLOBAL_DEBUG) {
-			PRINT_WARNING << "one or more errors occurred while reading status effect data - they are listed below" << endl;
-			cerr << script_file.GetErrorMessages() << endl;
-		}
-		return;
-	}
-
-	_timer = new hoa_system::SystemTimer();
-} // GlobalStatusEffect::GlobalStatusEffect(uint32 id, GLOBAL_INTENSITY intensity)
-
-
-
-GlobalStatusEffect::~GlobalStatusEffect() {
-	if (_timer != NULL)
-		delete _timer;
-	_timer = NULL;
-
-	if (_init != NULL)
-		delete _init;
-	_init = NULL;
-
-	if (_update != NULL)
-		delete _update;
-	_update = NULL;
-
-	if (_remove != NULL)
-		delete _remove;
-	_remove = NULL;
-}
-
-
 
 bool GlobalStatusEffect::IncrementIntensity(uint8 amount) {
 	return hoa_global::IncrementIntensity(_intensity, amount);

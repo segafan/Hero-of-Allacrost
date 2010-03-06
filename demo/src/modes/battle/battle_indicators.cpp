@@ -116,6 +116,40 @@ void IndicatorText::Draw() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// IndicatorImage class
+////////////////////////////////////////////////////////////////////////////////
+
+IndicatorImage::IndicatorImage(BattleActor* actor, string& filename) :
+	IndicatorElement(actor)
+{
+	if (_image.Load(filename) == false)
+		PRINT_ERROR << "failed to load indicator image: " << filename << endl;
+}
+
+
+
+void IndicatorImage::Draw() {
+	VideoManager->Move(_actor->GetXLocation(), _actor->GetYLocation());
+
+	// Draw to the left of the sprite for characters and to the right of the sprite for enemys
+	if (_actor->IsEnemy() == false) {
+		VideoManager->MoveRelative(-40.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image, not -40.0f
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	}
+	else {
+		VideoManager->MoveRelative(40.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image, not 40.0f
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	}
+
+	float y_position = INDICATOR_POSITION_CHANGE * _timer.PercentComplete();
+	VideoManager->MoveRelative(0.0f, y_position);
+	CalculateDrawAlpha();
+	// TEMP: alpha modulation does not appear to be working correctly. If alpha is anything other than 1.0f, image is not drawn
+// 	_image.Draw(_alpha_color);
+	_image.Draw();
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // IndicatorSupervisor class
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -188,17 +222,17 @@ void IndicatorSupervisor::AddDamageIndicator(uint32 amount) {
 	float damage_percent = static_cast<float>(amount / _actor->GetMaxHitPoints());
 	if (damage_percent < 0.10f) {
 		style.font = "text18";
-		style.color = Color(0.7f, 0.0f, 0.0f, 1.0f);
+		style.color = Color(1.0f, 0.0f, 0.0f, 1.0f);
 	}
-	else if (damage_percent < 0.25f) {
+	else if (damage_percent < 0.20f) {
 		style.font = "text20";
-		style.color = Color(0.8f, 0.0f, 0.0f, 1.0f);
+		style.color = Color(1.0f, 0.0f, 0.0f, 1.0f);
 	}
-	else if (damage_percent < 0.45f) {
+	else if (damage_percent < 0.30f) {
 		style.font = "text22";
-		style.color = Color(0.9f, 0.0f, 0.0f, 1.0f);
+		style.color = Color(1.0f, 0.0f, 0.0f, 1.0f);
 	}
-	else { // (damage_percent >= 0.45f)
+	else { // (damage_percent >= 0.30f)
 		style.font = "text24";
 		style.color = Color(1.0f, 0.0f, 0.0f, 1.0f);
 	}
@@ -220,17 +254,17 @@ void IndicatorSupervisor::AddHealingIndicator(uint32 amount) {
 	float healing_percent = static_cast<float>(amount / _actor->GetMaxHitPoints());
 	if (healing_percent < 0.10f) {
 		style.font = "text18";
-		style.color = Color(0.0f, 0.7f, 0.0f, 1.0f);
+		style.color = Color(0.0f, 1.0f, 0.0f, 1.0f);
 	}
-	else if (healing_percent < 0.25f) {
+	else if (healing_percent < 0.20f) {
 		style.font = "text20";
-		style.color = Color(0.06f, 0.8f, 0.0f, 1.0f);
+		style.color = Color(0.06f, 1.0f, 0.0f, 1.0f);
 	}
-	else if (healing_percent < 0.45f) {
+	else if (healing_percent < 0.30f) {
 		style.font = "text22";
-		style.color = Color(0.0f, 0.9f, 0.0f, 1.0f);
+		style.color = Color(0.0f, 1.0f, 0.0f, 1.0f);
 	}
-	else { // (healing_percent >= 0.45f)
+	else { // (healing_percent >= 0.30f)
 		style.font = "text24";
 		style.color = Color(0.0f, 1.0f, 0.0f, 1.0f);
 	}
