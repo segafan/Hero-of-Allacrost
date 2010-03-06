@@ -360,7 +360,7 @@ void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
 			BattleMode::CurrentInstance()->NotifyCharacterCommand(this);
 			break;
 		case ACTOR_STATE_ACTING:
-			_action->Execute();
+			// TODO: reset state timer?
 			break;
 		case ACTOR_STATE_DEAD:
 			ChangeSpriteAnimation("idle");
