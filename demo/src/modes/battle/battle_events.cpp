@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2009 by The Allacrost Project
+//            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software
@@ -10,12 +10,8 @@
 /** ****************************************************************************
 *** \file    battle_events.cpp
 *** \author  Jacob Rudolph, rujasu@allacrost.org
-*** \brief   Implementation file for battle events.
-***
-*** This file contains the implementation for events that occur in BattleMode.
+*** \brief   Source file for battle events.
 *** ***************************************************************************/
-
-#include <iostream>
 
 #include "global.h"
 #include "script.h"

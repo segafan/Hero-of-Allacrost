@@ -141,6 +141,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/battle/battle_actors.h \
 	$(MODES_DIR)/battle/battle_command.cpp \
 	$(MODES_DIR)/battle/battle_command.h \
+	$(MODES_DIR)/battle/battle_effects.cpp \
+	$(MODES_DIR)/battle/battle_effects.h \
 	$(MODES_DIR)/battle/battle_events.cpp \
 	$(MODES_DIR)/battle/battle_events.h \
 	$(MODES_DIR)/battle/battle_finish.cpp \

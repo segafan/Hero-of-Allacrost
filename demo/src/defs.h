@@ -226,6 +226,7 @@ namespace hoa_battle {
 
 		class IndicatorElement;
 		class IndicatorText;
+		class IndicatorImage;
 		class IndicatorSupervisor;
 
 		class ItemCommand;
