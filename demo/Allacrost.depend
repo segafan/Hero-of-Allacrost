@@ -1,23 +1,304 @@
 # depslib dependency file v1.0
 1266171820 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\icon.rc
 
-1266171288 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\defs_global.cpp
-	"defs.h"
+1267919218 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_utils.cpp
+	"video.h"
 	"global.h"
-	"global_objects.h"
-	"global_actors.h"
-	"global_skills.h"
+	"shop_utils.h"
+	"shop.h"
 
-1266171289 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\defs.h
-
-1266171288 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global.h
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\video.h
+	<windows.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<png.h>
+	<jpeglib.h>
+	<SDL_ttf/SDL_ttf.h>
+	<SDL/SDL_ttf.h>
 	"defs.h"
 	"utils.h"
-	"script.h"
-	"global_actors.h"
-	"global_effects.h"
-	"global_objects.h"
-	"global_skills.h"
+	"context.h"
+	"color.h"
+	"coord_sys.h"
+	"fade.h"
+	"image.h"
+	"interpolator.h"
+	"shake.h"
+	"screen_rect.h"
+	"texture_controller.h"
+	"text.h"
+	"particle_manager.h"
+	"particle_effect.h"
+
+1193920200 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\gl.h
+	"gl_mangle.h"
+	<stdlib.h>
+	<windows.h>
+	<GL/mesa_wgl.h>
+	<GL/glext.h>
+
+1185994200 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\gl_mangle.h
+
+1185994200 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\mesa_wgl.h
+	<GL/gl.h>
+	<windows.h>
+
+1182453000 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\glext.h
+	<windows.h>
+	<stddef.h>
+	<inttypes.h>
+	<inttypes.h>
+	<inttypes.h>
+	<stdint.h>
+	<stdint.h>
+	<inttypes.h>
+
+1188220620 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\glu.h
+	"glu_mangle.h"
+	<GL/gl.h>
+
+1182453000 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\glu_mangle.h
+
+1266735103 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\png.h
+	"zlib.h"
+	"pngconf.h"
+	<crtdbg.h>
+
+1121642760 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\zlib.h
+	"zconf.h"
+
+1121863200 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\zconf.h
+	<windows.h>
+	<sys/types.h>
+	<unistd.h>
+	<unixio.h>
+
+1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\pngconf.h
+	"pngusr.h"
+	"config.h"
+	<windows.h>
+	<stdio.h>
+	<stdio.h>
+	<sys/types.h>
+	<setjmp.h>
+	<strings.h>
+	<string.h>
+	<stdlib.h>
+	<fp.h>
+	<math.h>
+	<m68881.h>
+	<mem.h>
+	<alloc.h>
+	<malloc.h>
+	<time.h>
+	<dos.h>
+
+1266735013 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\jpeglib.h
+	"jconfig.h"
+	"jmorecfg.h"
+	"jpegint.h"
+	"jerror.h"
+
+1266735103 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\jconfig.h
+	<windows.h>
+
+1116073020 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\jmorecfg.h
+
+1266735103 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\jerror.h
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_ttf.h
+	"SDL.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl.h
+	"SDL_main.h"
+	"SDL_stdinc.h"
+	"SDL_audio.h"
+	"SDL_cdrom.h"
+	"SDL_cpuinfo.h"
+	"SDL_endian.h"
+	"SDL_error.h"
+	"SDL_events.h"
+	"SDL_loadso.h"
+	"SDL_mutex.h"
+	"SDL_rwops.h"
+	"SDL_thread.h"
+	"SDL_timer.h"
+	"SDL_video.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_main.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_stdinc.h
+	"SDL_config.h"
+	<sys/types.h>
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<stdarg.h>
+	<stdlib.h>
+	<malloc.h>
+	<stddef.h>
+	<stdarg.h>
+	<memory.h>
+	<string.h>
+	<strings.h>
+	<inttypes.h>
+	<stdint.h>
+	<ctype.h>
+	<iconv.h>
+	"begin_code.h"
+	<alloca.h>
+	<malloc.h>
+	<malloc.h>
+	<malloc.h>
+	<stdlib.h>
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_config.h
+	"SDL_platform.h"
+	<stdarg.h>
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_platform.h
+
+1096734600 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\iconv.h
+	"iconv.h"
+	<stddef.h>
+	<errno.h>
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\begin_code.h
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\close_code.h
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_audio.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_endian.h"
+	"SDL_mutex.h"
+	"SDL_thread.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_error.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_endian.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_mutex.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_thread.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_mutex.h"
+	"begin_code.h"
+	<process.h>
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_rwops.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_cdrom.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_cpuinfo.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_events.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_active.h"
+	"SDL_keyboard.h"
+	"SDL_mouse.h"
+	"SDL_joystick.h"
+	"SDL_quit.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_active.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_keyboard.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_keysym.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_keysym.h
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_mouse.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_video.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_joystick.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_quit.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_loadso.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_timer.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_version.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267919220 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\defs.h
 
 1266171289 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\utils.h
 	<cstdlib>
@@ -41,17 +322,99 @@
 	"alc.h"
 	<windows.h>
 
-1266447971 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_config.h
-	"SDL_platform.h"
-	<stdarg.h>
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_platform.h
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map
 
 1266735103 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\al\al.h
 
 1266735103 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\al\alc.h
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\context.h
+	<string>
+	"defs.h"
+	"utils.h"
+	"color.h"
+	"coord_sys.h"
+	"screen_rect.h"
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\color.h
+	<SDL/SDL.h>
+	"defs.h"
+	"utils.h"
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\coord_sys.h
+	"defs.h"
+	"utils.h"
+
+1266171276 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\screen_rect.h
+	"defs.h"
+	"utils.h"
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\fade.h
+	"defs.h"
+	"utils.h"
+	"color.h"
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\image.h
+	"defs.h"
+	"utils.h"
+	"image_base.h"
+	"color.h"
+	"texture.h"
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\image_base.h
+	"defs.h"
+	"utils.h"
+	"color.h"
+	"texture.h"
+
+1266171276 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\texture.h
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	"defs.h"
+	"utils.h"
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\interpolator.h
+	"defs.h"
+	"utils.h"
+
+1266171276 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\shake.h
+	"defs.h"
+	"utils.h"
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\texture_controller.h
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	"defs.h"
+	"utils.h"
+	"texture.h"
+	"image_base.h"
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\text.h
+	"defs.h"
+	"utils.h"
+
+1266171276 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\particle_manager.h
+	"defs.h"
+	"utils.h"
+	"utils.h"
+
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\particle_effect.h
+	"defs.h"
+	"utils.h"
+
+1267919220 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global.h
+	"defs.h"
+	"utils.h"
+	"script.h"
+	"global_actors.h"
+	"global_effects.h"
+	"global_objects.h"
+	"global_skills.h"
+	"global_utils.h"
 
 1266171271 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\script\script.h
 	<sstream>
@@ -3687,399 +4050,58 @@
 	<boost/mpl/bool.hpp>
 	<luabind/back_reference_fwd.hpp>
 
-1266171271 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\script\script_read.h
+1267390215 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\script\script_read.h
 	"utils.h"
 	"defs.h"
 	"script.h"
 
-1266171271 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\script\script_write.h
+1267390215 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\script\script_write.h
 	"utils.h"
 	"defs.h"
 	"script.h"
 
-1266171270 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\script\script_modify.h
+1267390215 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\script\script_modify.h
 	"utils.h"
 	"defs.h"
 	"script.h"
 	"script_read.h"
 
-1266171288 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_actors.h
+1267919220 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_actors.h
 	"defs.h"
 	"utils.h"
 	"video.h"
+	"global_utils.h"
 
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\video.h
-	<windows.h>
-	<OpenGL/gl.h>
-	<OpenGL/glu.h>
-	<GL/gl.h>
-	<GL/glu.h>
-	<png.h>
-	<jpeglib.h>
-	<SDL_ttf/SDL_ttf.h>
-	<SDL/SDL_ttf.h>
-	"defs.h"
-	"utils.h"
-	"context.h"
-	"color.h"
-	"coord_sys.h"
-	"fade.h"
-	"image.h"
-	"interpolator.h"
-	"shake.h"
-	"screen_rect.h"
-	"texture_controller.h"
-	"text.h"
-	"particle_manager.h"
-	"particle_effect.h"
-
-1193920200 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\gl.h
-	"gl_mangle.h"
-	<stdlib.h>
-	<windows.h>
-	<GL/mesa_wgl.h>
-	<GL/glext.h>
-
-1185994200 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\gl_mangle.h
-
-1185994200 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\mesa_wgl.h
-	<GL/gl.h>
-	<windows.h>
-
-1182453000 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\glext.h
-	<windows.h>
-	<stddef.h>
-	<inttypes.h>
-	<inttypes.h>
-	<inttypes.h>
-	<stdint.h>
-	<stdint.h>
-	<inttypes.h>
-
-1188220620 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\glu.h
-	"glu_mangle.h"
-	<GL/gl.h>
-
-1182453000 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\gl\glu_mangle.h
-
-1266735103 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\png.h
-	"zlib.h"
-	"pngconf.h"
-	<crtdbg.h>
-
-1121642760 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\zlib.h
-	"zconf.h"
-
-1121863200 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\zconf.h
-	<windows.h>
-	<sys/types.h>
-	<unistd.h>
-	<unixio.h>
-
-1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\pngconf.h
-	"pngusr.h"
-	"config.h"
-	<windows.h>
-	<stdio.h>
-	<stdio.h>
-	<sys/types.h>
-	<setjmp.h>
-	<strings.h>
-	<string.h>
-	<stdlib.h>
-	<fp.h>
-	<math.h>
-	<m68881.h>
-	<mem.h>
-	<alloc.h>
-	<malloc.h>
-	<time.h>
-	<dos.h>
-
-1266735013 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\jpeglib.h
-	"jconfig.h"
-	"jmorecfg.h"
-	"jpegint.h"
-	"jerror.h"
-
-1266735103 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\jconfig.h
-	<windows.h>
-
-1116073020 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\jmorecfg.h
-
-1266735103 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\jerror.h
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_ttf.h
-	"SDL.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl.h
-	"SDL_main.h"
-	"SDL_stdinc.h"
-	"SDL_audio.h"
-	"SDL_cdrom.h"
-	"SDL_cpuinfo.h"
-	"SDL_endian.h"
-	"SDL_error.h"
-	"SDL_events.h"
-	"SDL_loadso.h"
-	"SDL_mutex.h"
-	"SDL_rwops.h"
-	"SDL_thread.h"
-	"SDL_timer.h"
-	"SDL_video.h"
-	"SDL_version.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_main.h
-	"SDL_stdinc.h"
-	"begin_code.h"
-	"close_code.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_stdinc.h
-	"SDL_config.h"
-	<sys/types.h>
-	<stdio.h>
-	<stdlib.h>
-	<stddef.h>
-	<stdarg.h>
-	<stdlib.h>
-	<malloc.h>
-	<stddef.h>
-	<stdarg.h>
-	<memory.h>
-	<string.h>
-	<strings.h>
-	<inttypes.h>
-	<stdint.h>
-	<ctype.h>
-	<iconv.h>
-	"begin_code.h"
-	<alloca.h>
-	<malloc.h>
-	<malloc.h>
-	<malloc.h>
-	<stdlib.h>
-	"close_code.h"
-
-1096734600 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\iconv.h
-	"iconv.h"
-	<stddef.h>
-	<errno.h>
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\begin_code.h
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\close_code.h
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_audio.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"SDL_endian.h"
-	"SDL_mutex.h"
-	"SDL_thread.h"
-	"SDL_rwops.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_error.h
-	"SDL_stdinc.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_endian.h
-	"SDL_stdinc.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_mutex.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_thread.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"SDL_mutex.h"
-	"begin_code.h"
-	<process.h>
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_rwops.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_cdrom.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_cpuinfo.h
-	"SDL_stdinc.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_events.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"SDL_active.h"
-	"SDL_keyboard.h"
-	"SDL_mouse.h"
-	"SDL_joystick.h"
-	"SDL_quit.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_active.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_keyboard.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"SDL_keysym.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_keysym.h
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_mouse.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"SDL_video.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_video.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"SDL_rwops.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_joystick.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_quit.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_loadso.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735100 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_timer.h
-	"SDL_stdinc.h"
-	"SDL_error.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\sdl\sdl_version.h
-	"SDL_stdinc.h"
-	"begin_code.h"
-	"close_code.h"
-
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\context.h
-	<string>
-	"defs.h"
-	"utils.h"
-	"color.h"
-	"coord_sys.h"
-	"screen_rect.h"
-
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\color.h
-	<SDL/SDL.h>
+1267919220 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_utils.h
 	"defs.h"
 	"utils.h"
 
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\coord_sys.h
+1267919220 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_effects.h
 	"defs.h"
 	"utils.h"
+	"global_utils.h"
 
-1266171276 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\screen_rect.h
+1267919220 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_objects.h
 	"defs.h"
 	"utils.h"
+	"script.h"
+	"video.h"
+	"global_utils.h"
 
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\fade.h
+1267919220 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_skills.h
 	"defs.h"
 	"utils.h"
-	"color.h"
+	"script.h"
+	"global_utils.h"
 
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\image.h
-	"defs.h"
-	"utils.h"
-	"image_base.h"
-	"color.h"
-	"texture.h"
-
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\image_base.h
-	"defs.h"
-	"utils.h"
-	"color.h"
-	"texture.h"
-
-1266171276 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\texture.h
-	<OpenGL/gl.h>
-	<OpenGL/glu.h>
-	<GL/gl.h>
-	<GL/glu.h>
-	"defs.h"
-	"utils.h"
-
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\interpolator.h
-	"defs.h"
-	"utils.h"
-
-1266171276 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\shake.h
-	"defs.h"
-	"utils.h"
-
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\texture_controller.h
-	<OpenGL/gl.h>
-	<OpenGL/glu.h>
-	<GL/gl.h>
-	<GL/glu.h>
-	"defs.h"
-	"utils.h"
-	"texture.h"
-	"image_base.h"
-
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\text.h
-	"defs.h"
-	"utils.h"
-
-1266171276 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\particle_manager.h
-	"defs.h"
-	"utils.h"
-	"utils.h"
-
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\particle_effect.h
-	"defs.h"
-	"utils.h"
-
-1266171288 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_effects.h
+1267390216 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_utils.h
 	"defs.h"
 	"utils.h"
 	"system.h"
 	"video.h"
-	"script.h"
-	"global_actors.h"
+	"gui.h"
 
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\system.h
+1267919213 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\system.h
 	<set>
 	<SDL/SDL.h>
 	"utils.h"
@@ -4091,54 +4113,6 @@
 1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\mode_manager.h
 	"utils.h"
 	"defs.h"
-
-1266171288 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_objects.h
-	"defs.h"
-	"utils.h"
-	"script.h"
-	"video.h"
-	"global_effects.h"
-
-1266171288 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_skills.h
-	"defs.h"
-	"utils.h"
-	"script.h"
-	"global_actors.h"
-
-1266171288 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global.cpp
-	"system.h"
-	"global.h"
-
-1266171288 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_actors.cpp
-	"video.h"
-	"global_actors.h"
-	"global_objects.h"
-	"global_effects.h"
-	"global_skills.h"
-
-1266171288 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_effects.cpp
-	"script.h"
-	"video.h"
-	"global_effects.h"
-	"global.h"
-
-1266171288 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_objects.cpp
-	"script.h"
-	"video.h"
-	"global_objects.h"
-	"global_effects.h"
-	"global.h"
-
-1266171288 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_skills.cpp
-	"script.h"
-	"video.h"
-	"global_skills.h"
-	"global.h"
-
-1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\gui.cpp
-	"video.h"
-	"gui.h"
-	"input.h"
 
 1266197403 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\gui.h
 	"defs.h"
@@ -4157,7 +4131,7 @@
 	"screen_rect.h"
 	"image.h"
 
-1266171289 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\option.h
+1267919220 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\option.h
 	"defs.h"
 	"utils.h"
 	"gui.h"
@@ -4169,35 +4143,23 @@
 	"gui.h"
 	"system.h"
 
-1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\input.h
-	<SDL/SDL.h>
-	"utils.h"
+1267919218 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop.h
 	"defs.h"
-
-1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\menu_window.cpp
-	<sstream>
-	"video.h"
-	"menu_window.h"
-
-1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\option.cpp
-	<sstream>
-	"option.h"
-	"video.h"
-
-1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\textbox.cpp
-	<sstream>
-	"video.h"
-	"textbox.h"
-
-1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\defs.cpp
 	"utils.h"
-	"defs.h"
-	"script.h"
+	"mode_manager.h"
+	"global.h"
+	"shop_utils.h"
 
-1266171270 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\audio\audio.cpp
-	<iostream>
+1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_trade.cpp
+	"defs.h"
+	"utils.h"
 	"audio.h"
+	"input.h"
 	"system.h"
+	"video.h"
+	"global.h"
+	"shop.h"
+	"shop_trade.h"
 
 1266171270 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\audio\audio.h
 	<OpenAL/al.h>
@@ -4265,6 +4227,133 @@
 	"utils.h"
 	"audio_descriptor.h"
 
+1266171277 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\input.h
+	<SDL/SDL.h>
+	"utils.h"
+	"defs.h"
+
+1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_trade.h
+	"defs.h"
+	"utils.h"
+	"video.h"
+	"global.h"
+	"shop_utils.h"
+
+1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_sell.cpp
+	"defs.h"
+	"utils.h"
+	"audio.h"
+	"input.h"
+	"system.h"
+	"video.h"
+	"global.h"
+	"shop.h"
+	"shop_sell.h"
+
+1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_sell.h
+	"defs.h"
+	"utils.h"
+	"video.h"
+	"global.h"
+	"shop_utils.h"
+
+1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_root.cpp
+	<iostream>
+	"utils.h"
+	"audio.h"
+	"video.h"
+	"input.h"
+	"mode_manager.h"
+	"system.h"
+	"global.h"
+	"shop.h"
+	"shop_root.h"
+
+1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_root.h
+	"defs.h"
+	"utils.h"
+	"video.h"
+	"global.h"
+	"shop_utils.h"
+
+1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_leave.cpp
+	"defs.h"
+	"utils.h"
+	"audio.h"
+	"input.h"
+	"system.h"
+	"video.h"
+	"mode_manager.h"
+	"shop.h"
+	"shop_leave.h"
+	"shop_buy.h"
+	"shop_sell.h"
+	"shop_trade.h"
+
+1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_leave.h
+	"defs.h"
+	"utils.h"
+	"video.h"
+	"global.h"
+	"shop_utils.h"
+
+1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_buy.h
+	"defs.h"
+	"utils.h"
+	"video.h"
+	"global.h"
+	"shop_utils.h"
+
+1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_confirm.cpp
+	"defs.h"
+	"utils.h"
+	"audio.h"
+	"input.h"
+	"system.h"
+	"video.h"
+	"shop.h"
+	"shop_confirm.h"
+	"shop_buy.h"
+	"shop_sell.h"
+	"shop_trade.h"
+
+1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_confirm.h
+	"defs.h"
+	"utils.h"
+	"video.h"
+	"global.h"
+	"shop_utils.h"
+
+1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\gui.cpp
+	"video.h"
+	"gui.h"
+	"input.h"
+
+1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\menu_window.cpp
+	<sstream>
+	"video.h"
+	"menu_window.h"
+
+1267919220 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\option.cpp
+	<sstream>
+	"option.h"
+	"video.h"
+
+1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\gui\textbox.cpp
+	<sstream>
+	"video.h"
+	"textbox.h"
+
+1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\defs.cpp
+	"utils.h"
+	"defs.h"
+	"script.h"
+
+1266171270 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\audio\audio.cpp
+	<iostream>
+	"audio.h"
+	"system.h"
+
 1266171270 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\audio\audio_descriptor.cpp
 	"audio.h"
 	"audio_descriptor.h"
@@ -4313,7 +4402,7 @@
 	"script_read.h"
 	"script_write.h"
 
-1266171270 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\script\script_read.cpp
+1267390215 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\script\script_read.cpp
 	"utils.h"
 	"script.h"
 	"script_read.h"
@@ -4323,6 +4412,24 @@
 	"utils.h"
 	"script.h"
 	"script_write.h"
+
+1267919213 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\system.cpp
+	<direct.h>
+	<stdlib.h>
+	<unistd.h>
+	<cstdlib>
+	<limits.h>
+	<libintl.h>
+	"system.h"
+	"audio.h"
+	"script.h"
+
+1266735101 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\allacrost-win32-depends\include\libintl.h
+	<locale.h>
+	<stdio.h>
+	<stddef.h>
+	<stdarg.h>
+	<varargs.h>
 
 1266171277 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\engine\video\effects.cpp
 	"video.h"
@@ -4425,7 +4532,7 @@
 	"video.h"
 	"script.h"
 
-1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\main.cpp
+1267919220 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\main.cpp
 	<iostream>
 	<ctime>
 	<cmath>
@@ -4441,66 +4548,11 @@
 	"input.h"
 	"script.h"
 	"system.h"
-	"battle.h"
 	"global.h"
 	"mode_manager.h"
 	"boot.h"
 	"map.h"
 	"main_options.h"
-
-1266171283 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle.h
-	<string>
-	<vector>
-	<deque>
-	<map>
-	"utils.h"
-	"defs.h"
-	"video.h"
-	"audio.h"
-	"system.h"
-	"global.h"
-	"global_actors.h"
-	"map_dialogue.h"
-	"mode_manager.h"
-	"battle_actions.h"
-	"battle_actors.h"
-	"battle_events.h"
-	"battle_windows.h"
-
-1266171286 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_dialogue.h
-	"utils.h"
-	"defs.h"
-	"script.h"
-	"video.h"
-	"gui.h"
-	"map_utils.h"
-
-1266171286 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_utils.h
-	"utils.h"
-	"defs.h"
-
-1266171283 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_actions.h
-	"utils.h"
-	"defs.h"
-	"video.h"
-	"global.h"
-
-1266171283 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_actors.h
-	"utils.h"
-	"defs.h"
-	"global_skills.h"
-	"global_actors.h"
-	"global_effects.h"
-
-1266171283 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_events.h
-	"global.h"
-	"script.h"
-
-1266171283 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_windows.h
-	"utils.h"
-	"defs.h"
-	"video.h"
-	"global.h"
 
 1266781427 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\boot\boot.h
 	"defs.h"
@@ -4535,6 +4587,10 @@
 	"system.h"
 	"map_utils.h"
 
+1266171286 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_utils.h
+	"utils.h"
+	"defs.h"
+
 1266171289 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\main_options.h
 
 1266171289 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\main_options.cpp
@@ -4549,15 +4605,20 @@
 	"global.h"
 	"main_options.h"
 
-1266171283 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle.cpp
-	<iostream>
-	<sstream>
-	"script.h"
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle.cpp
+	"audio.h"
 	"input.h"
-	"battle_events.h"
 	"mode_manager.h"
-	"battle.h"
+	"script.h"
+	"video.h"
 	"pause.h"
+	"battle.h"
+	"battle_actors.h"
+	"battle_actions.h"
+	"battle_command.h"
+	"battle_events.h"
+	"battle_finish.h"
+	"battle_utils.h"
 
 1266171286 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\pause.h
 	"defs.h"
@@ -4566,41 +4627,184 @@
 	"gui.h"
 	"mode_manager.h"
 
-1266171283 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_actions.cpp
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle.h
+	"defs.h"
+	"utils.h"
+	"audio.h"
+	"mode_manager.h"
+	"system.h"
+	"video.h"
+	"global.h"
+	"battle_utils.h"
+
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_utils.h
+	"defs.h"
+	"utils.h"
+	"system.h"
+	"global_objects.h"
+	"global_utils.h"
+
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_actors.h
+	"defs.h"
+	"utils.h"
+	"global_skills.h"
+	"global_actors.h"
+	"global_effects.h"
+	"battle_utils.h"
+
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_actions.h
+	"defs.h"
+	"utils.h"
+	"system.h"
+	"video.h"
+	"global.h"
+
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_command.h
+	"utils.h"
+	"defs.h"
+	"gui.h"
+	"global.h"
+	"battle_utils.h"
+
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_events.h
+	"global.h"
+	"system.h"
+	"script.h"
+
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_finish.h
+	"utils.h"
+	"defs.h"
+	"video.h"
+	"gui.h"
+	"global.h"
+	"battle_utils.h"
+
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_actions.cpp
 	<iostream>
 	<sstream>
 	"script.h"
 	"battle.h"
+	"battle_actions.h"
+	"battle_actors.h"
+	"battle_utils.h"
 
-1266171283 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_actors.cpp
-	<iostream>
-	<sstream>
-	<string>
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_actors.cpp
 	"input.h"
 	"script.h"
 	"battle.h"
+	"battle_actions.h"
+	"battle_actors.h"
+	"battle_indicators.h"
+	"battle_utils.h"
 
-1266171283 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_events.cpp
-	<iostream>
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_indicators.h
+	"defs.h"
+	"utils.h"
+	"battle_utils.h"
+
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_command.cpp
+	"input.h"
+	"system.h"
+	"video.h"
+	"battle.h"
+	"battle_actions.h"
+	"battle_actors.h"
+	"battle_command.h"
+	"battle_utils.h"
+
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_effects.cpp
+	"global.h"
+	"script.h"
+	"battle_effects.h"
+	"battle_utils.h"
+
+1267919219 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_effects.h
+	"global_effects.h"
+	"script.h"
+	"system.h"
+
+1267919218 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_events.cpp
 	"global.h"
 	"script.h"
 	"battle_events.h"
+	"battle_utils.h"
 
-1266171283 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_windows.cpp
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_finish.cpp
+	"mode_manager.h"
 	"input.h"
+	"system.h"
+	"video.h"
 	"battle.h"
+	"battle_actions.h"
+	"battle_actors.h"
+	"battle_finish.h"
+	"battle_utils.h"
 	"boot.h"
+
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_indicators.cpp
+	"system.h"
+	"video.h"
+	"battle_actors.h"
+	"battle_indicators.h"
+	"battle_utils.h"
+
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\battle\battle_utils.cpp
+	"defs.h"
+	"utils.h"
+	"global.h"
+	"system.h"
+	"battle.h"
+	"battle_actors.h"
+	"battle_utils.h"
+
+1266781427 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\boot\boot.cpp
+	<iostream>
+	<sstream>
+	"audio.h"
+	"script.h"
+	"input.h"
+	"system.h"
+	"global.h"
+	"boot.h"
+	"boot_credits.h"
+	"boot_welcome.h"
+	"map.h"
+	"save_mode.h"
+	"battle.h"
+	"menu.h"
+	"shop.h"
+
+1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\boot\boot_credits.h
+	"utils.h"
+	"video.h"
+	"gui.h"
+
+1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\boot\boot_welcome.h
+	"utils.h"
+	"video.h"
+	"gui.h"
+
+1266171286 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\save\save_mode.h
+	"utils.h"
+	"defs.h"
+	"video.h"
+	"mode_manager.h"
+
+1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\menu\menu.h
+	<string>
+	<vector>
+	"utils.h"
+	"defs.h"
+	"video.h"
+	"global.h"
+	"mode_manager.h"
+	"menu_views.h"
 
 1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\boot\boot_credits.cpp
 	"script.h"
 	"system.h"
 	"video.h"
 	"boot_credits.h"
-
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\boot\boot_credits.h
-	"utils.h"
-	"video.h"
-	"gui.h"
 
 1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\boot\boot_menu.cpp
 	"boot.h"
@@ -4610,15 +4814,11 @@
 	"system.h"
 	"boot_welcome.h"
 
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\boot\boot_welcome.h
-	"utils.h"
-	"video.h"
-	"gui.h"
-
-1266171286 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\defs_modes.cpp
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\defs_modes.cpp
 	"defs.h"
 	"battle.h"
 	"battle_actors.h"
+	"battle_utils.h"
 	"map.h"
 	"map_dialogue.h"
 	"map_events.h"
@@ -4628,6 +4828,15 @@
 	"map_utils.h"
 	"map_zones.h"
 	"shop.h"
+	"global_actors.h"
+
+1266171286 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_dialogue.h
+	"utils.h"
+	"defs.h"
+	"script.h"
+	"video.h"
+	"gui.h"
+	"map_utils.h"
 
 1266171286 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_events.h
 	"defs.h"
@@ -4663,21 +4872,7 @@
 	"map_utils.h"
 	"map_objects.h"
 
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop.h
-	"defs.h"
-	"utils.h"
-	"mode_manager.h"
-	"global.h"
-	"shop_utils.h"
-
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_utils.h
-	"defs.h"
-	"utils.h"
-	"system.h"
-	"video.h"
-	"gui.h"
-
-1266171286 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map.cpp
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map.cpp
 	"audio.h"
 	"script.h"
 	"input.h"
@@ -4693,16 +4888,6 @@
 	"map_tiles.h"
 	"map_treasure.h"
 	"map_zones.h"
-
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\menu\menu.h
-	<string>
-	<vector>
-	"utils.h"
-	"defs.h"
-	"video.h"
-	"global.h"
-	"mode_manager.h"
-	"menu_views.h"
 
 1266171286 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_tiles.h
 	"defs.h"
@@ -4722,7 +4907,7 @@
 	"map_objects.h"
 	"map_sprites.h"
 
-1266171286 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_events.cpp
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_events.cpp
 	"audio.h"
 	"mode_manager.h"
 	"script.h"
@@ -4746,7 +4931,7 @@
 	"map_objects.h"
 	"map_sprites.h"
 
-1266171286 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_sprites.cpp
+1267919219 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\map\map_sprites.cpp
 	"utils.h"
 	"audio.h"
 	"mode_manager.h"
@@ -4796,13 +4981,7 @@
 	"mode_manager.h"
 	"menu.h"
 
-1266171286 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\save\save_mode.h
-	"utils.h"
-	"defs.h"
-	"video.h"
-	"mode_manager.h"
-
-1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\menu\menu_views.cpp
+1267919214 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\menu\menu_views.cpp
 	<iostream>
 	<sstream>
 	"audio.h"
@@ -4845,7 +5024,7 @@
 	"defs.h"
 	"mode_manager.h"
 
-1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop.cpp
+1267919218 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop.cpp
 	<iostream>
 	"defs.h"
 	"utils.h"
@@ -4864,48 +5043,6 @@
 	"shop_confirm.h"
 	"shop_leave.h"
 
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_root.h
-	"defs.h"
-	"utils.h"
-	"video.h"
-	"global.h"
-	"shop_utils.h"
-
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_buy.h
-	"defs.h"
-	"utils.h"
-	"video.h"
-	"global.h"
-	"shop_utils.h"
-
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_sell.h
-	"defs.h"
-	"utils.h"
-	"video.h"
-	"global.h"
-	"shop_utils.h"
-
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_trade.h
-	"defs.h"
-	"utils.h"
-	"video.h"
-	"global.h"
-	"shop_utils.h"
-
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_confirm.h
-	"defs.h"
-	"utils.h"
-	"video.h"
-	"global.h"
-	"shop_utils.h"
-
-1266171282 c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_leave.h
-	"defs.h"
-	"utils.h"
-	"video.h"
-	"global.h"
-	"shop_utils.h"
-
 1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_buy.cpp
 	"defs.h"
 	"utils.h"
@@ -4916,73 +5053,6 @@
 	"global.h"
 	"shop.h"
 	"shop_buy.h"
-
-1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_confirm.cpp
-	"defs.h"
-	"utils.h"
-	"audio.h"
-	"input.h"
-	"system.h"
-	"video.h"
-	"shop.h"
-	"shop_confirm.h"
-	"shop_buy.h"
-	"shop_sell.h"
-	"shop_trade.h"
-
-1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_leave.cpp
-	"defs.h"
-	"utils.h"
-	"audio.h"
-	"input.h"
-	"system.h"
-	"video.h"
-	"mode_manager.h"
-	"shop.h"
-	"shop_leave.h"
-	"shop_buy.h"
-	"shop_sell.h"
-	"shop_trade.h"
-
-1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_root.cpp
-	<iostream>
-	"utils.h"
-	"audio.h"
-	"video.h"
-	"input.h"
-	"mode_manager.h"
-	"system.h"
-	"global.h"
-	"shop.h"
-	"shop_root.h"
-
-1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_sell.cpp
-	"defs.h"
-	"utils.h"
-	"audio.h"
-	"input.h"
-	"system.h"
-	"video.h"
-	"global.h"
-	"shop.h"
-	"shop_sell.h"
-
-1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_trade.cpp
-	"defs.h"
-	"utils.h"
-	"audio.h"
-	"input.h"
-	"system.h"
-	"video.h"
-	"global.h"
-	"shop.h"
-	"shop_trade.h"
-
-1266171282 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\modes\shop\shop_utils.cpp
-	"video.h"
-	"global.h"
-	"shop_utils.h"
-	"shop.h"
 
 1266198179 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\utils.cpp
 	<direct.h>
@@ -4995,4 +5065,42 @@
 	<iconv.h>
 	"utils.h"
 	<SDL/SDL.h>
+
+1267919220 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_effects.cpp
+	"system.h"
+	"global_effects.h"
+	"global.h"
+
+1267919220 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_actors.cpp
+	"video.h"
+	"global_actors.h"
+	"global_objects.h"
+	"global_effects.h"
+	"global_skills.h"
+
+1267919220 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global.cpp
+	"system.h"
+	"global.h"
+
+1267919220 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\defs_global.cpp
+	"defs.h"
+	"global.h"
+	"global_actors.h"
+	"global_effects.h"
+	"global_objects.h"
+	"global_skills.h"
+	"global_utils.h"
+
+1267919220 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_objects.cpp
+	"script.h"
+	"video.h"
+	"global_objects.h"
+	"global_effects.h"
+	"global.h"
+
+1267919220 source:c:\documents and settings\rujasu\my documents\svn\blocks_allacrost\src\common\global\global_skills.cpp
+	"script.h"
+	"video.h"
+	"global_skills.h"
+	"global.h"
 
