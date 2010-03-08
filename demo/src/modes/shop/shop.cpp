@@ -87,16 +87,10 @@ ShopMedia::ShopMedia() {
 	if (_equip_icon.Load("img/menus/equip.png") == false)
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load equip icon image" << endl;
 
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(_elemental_icons, "img/icons/elemental_icons.png", 8, 9) == false) {
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_elemental_icons, "img/icons/effects/elemental.png", 8, 9) == false) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load elemental icon images" << endl;
 		return;
 	}
-
-	// TODO: uncomment once status effects are ready to be added
-// 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_status_icons, "img/icons/_status_icons.png", ROWS, COLS) == false) {
-// 		IF_PRINT_WARNING(SHOP_DEBUG) << "failed to load status icon images" << endl;
-// 		return;
-// 	}
 
 	_sounds["confirm"] = new SoundDescriptor();
 	_sounds["cancel"] = new SoundDescriptor();

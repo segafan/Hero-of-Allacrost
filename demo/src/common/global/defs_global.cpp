@@ -317,6 +317,8 @@ void BindGlobalsToLua()
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalStatusEffect>("GlobalStatusEffect")
+			.def("GetType", &GlobalStatusEffect::GetType)
+			.def("GetIntensity", &GlobalStatusEffect::GetIntensity)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")

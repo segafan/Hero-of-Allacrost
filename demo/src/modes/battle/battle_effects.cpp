@@ -81,6 +81,8 @@ BattleStatusEffect::BattleStatusEffect(GLOBAL_STATUS type, GLOBAL_INTENSITY inte
 			cerr << script_file.GetErrorMessages() << endl;
 		}
 	}
+
+	_ApplyChange();
 }
 
 

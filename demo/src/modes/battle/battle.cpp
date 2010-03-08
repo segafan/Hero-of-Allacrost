@@ -74,6 +74,9 @@ BattleMode::BattleMode() :
 	if (_battle_background.Load("img/backdrops/battle/desert_cave.png") == false)
 		PRINT_ERROR << "failed to load default background image" << endl;
 
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_status_icons, "img/icons/effects/status.png", 24, 5) == false)
+		PRINT_ERROR << "failed to load status icon images" << endl;
+
 	if (_stamina_icon_selected.Load("img/menus/stamina_icon_selected.png") == false)
 		PRINT_ERROR << "failed to load stamina icon selected image" << endl;
 
@@ -386,6 +389,24 @@ void BattleMode::PlayMusic(const string& filename) {
 	map<string, MusicDescriptor>::iterator i = _battle_music.begin();
 	i->second.Play();
 	_current_music = i->first;
+}
+
+
+
+StillImage* BattleMode::GetStatusIcon(GLOBAL_STATUS type, GLOBAL_INTENSITY intensity) {
+	if ((type <= GLOBAL_STATUS_INVALID) || (type >= GLOBAL_STATUS_TOTAL)) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "type argument was invalid: " << type << endl;
+		return NULL;
+	}
+	if ((intensity < GLOBAL_INTENSITY_NEUTRAL) || (intensity >= GLOBAL_INTENSITY_TOTAL)) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "type argument was invalid: " << intensity << endl;
+		return NULL;
+	}
+
+	uint32 status_index = static_cast<uint32>(type);
+	uint32 intensity_index = static_cast<uint32>(intensity);
+
+	return &(_status_icons[(status_index * 5) + intensity_index]);
 }
 
 
