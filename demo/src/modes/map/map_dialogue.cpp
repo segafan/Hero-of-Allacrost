@@ -50,9 +50,9 @@ namespace hoa_map {
 
 namespace private_map {
 
-// ****************************************************************************
-// ********** MapDialogue Class Functions
-// ****************************************************************************
+///////////////////////////////////////////////////////////////////////////////
+// MapDialogue Class Functions
+///////////////////////////////////////////////////////////////////////////////
 
 MapDialogue::MapDialogue(uint32 id) :
 	_dialogue_id(id),
@@ -148,9 +148,9 @@ bool MapDialogue::ReadNextLine(int32 line) {
 	}
 }
 
-// ******************************************************************************
-// ********** MapDialogueOptions Functions
-// ******************************************************************************
+///////////////////////////////////////////////////////////////////////////////
+// MapDialogueOptions Functions
+///////////////////////////////////////////////////////////////////////////////
 
 void MapDialogueOptions::AddOption(ustring text, int32 next_line, uint32 event) {
 	if (_text.size() >= MAX_OPTIONS) {
@@ -163,11 +163,11 @@ void MapDialogueOptions::AddOption(ustring text, int32 next_line, uint32 event) 
 	_events.push_back(event);
 }
 
-// ****************************************************************************
-// ********** DialogueWindow class methods
-// ****************************************************************************
+///////////////////////////////////////////////////////////////////////////////
+// DialogueWindow class methods
+///////////////////////////////////////////////////////////////////////////////
 
-DialogueWindow::DialogueWindow(bool isBattle) {
+DialogueWindow::DialogueWindow() {
 	if (_parchment_image.Load("img/menus/black_sleet_parch.png") == false)
 		cerr << "MAP ERROR: failed to load image: " << _parchment_image.GetFilename() << endl;
 
@@ -176,12 +176,6 @@ DialogueWindow::DialogueWindow(bool isBattle) {
 
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
-
-	if (!isBattle) {
-		MenuWindow::Create(992.0f, 192.0f);
-		MenuWindow::SetPosition(12.0f, 560.0f);
-		MenuWindow::SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
-	}
 
 	_display_textbox.SetDisplaySpeed(30);
 	_display_textbox.SetPosition(260.0f, 596.0f);
@@ -257,9 +251,9 @@ void DialogueWindow::Draw(ustring* name, StillImage* portrait) {
 	VideoManager->PopState();
 }
 
-// ****************************************************************************
-// ********** DialogueSupervisor class methods
-// ****************************************************************************
+///////////////////////////////////////////////////////////////////////////////
+// DialogueSupervisor class methods
+///////////////////////////////////////////////////////////////////////////////
 
 DialogueSupervisor::DialogueSupervisor() :
 	_state(DIALOGUE_STATE_LINE),

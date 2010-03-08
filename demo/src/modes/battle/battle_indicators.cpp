@@ -16,6 +16,8 @@
 #include "system.h"
 #include "video.h"
 
+#include "global_utils.h"
+
 #include "battle_actors.h"
 #include "battle_indicators.h"
 #include "battle_utils.h"
@@ -23,8 +25,11 @@
 using namespace std;
 
 using namespace hoa_utils;
+
 using namespace hoa_system;
 using namespace hoa_video;
+
+using namespace hoa_global;
 
 namespace hoa_battle {
 
@@ -119,7 +124,7 @@ void IndicatorText::Draw() {
 // IndicatorImage class
 ////////////////////////////////////////////////////////////////////////////////
 
-IndicatorImage::IndicatorImage(BattleActor* actor, string& filename) :
+IndicatorImage::IndicatorImage(BattleActor* actor, const string& filename) :
 	IndicatorElement(actor)
 {
 	if (_image.Load(filename) == false)
@@ -278,6 +283,26 @@ void IndicatorSupervisor::AddMissIndicator() {
 	string text = Translate("Miss");
 	TextStyle style("text18", Color::white);
 	_wait_queue.push_back(new IndicatorText(_actor, text, style));
+}
+
+
+
+void IndicatorSupervisor::AddStatusIndicator(GLOBAL_STATUS old_status, GLOBAL_INTENSITY old_intensity,
+	GLOBAL_STATUS new_status, GLOBAL_INTENSITY new_intensity)
+{
+	// If the status and intensity has not changed, only a single status icon needs to be used
+	if ((old_status == new_status) && (old_intensity == new_intensity)) {
+		// TODO
+// 		_wait_queue.push_back(new IndicatorImage(_actor, image));
+	}
+	// Otherwise two status icons need to be used in the indicator image
+	else {
+		// TODO
+// 		_wait_queue.push_back(new IndicatorImage(_actor, image01, image02));
+	}
+
+	// TEMP
+	IF_PRINT_DEBUG(BATTLE_DEBUG) << "status change: " << new_status << ", " << new_intensity << endl;
 }
 
 } // namespace private_battle

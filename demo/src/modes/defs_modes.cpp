@@ -397,6 +397,7 @@ void BindModesToLua()
 			.def("RegisterDamage", &BattleActor::RegisterDamage)
 			.def("RegisterHealing", &BattleActor::RegisterHealing)
 			.def("RegisterMiss", &BattleActor::RegisterMiss)
+			.def("RegisterStatusChange", &BattleActor::RegisterStatusChange)
 			.def("AddNewEffect", &BattleActor::AddNewEffect)
 	];
 

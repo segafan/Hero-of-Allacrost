@@ -224,6 +224,9 @@ namespace hoa_battle {
 		class SkillAction;
 		class ItemAction;
 
+		class BattleStatusEffect;
+		class EffectsSupervisor;
+
 		class IndicatorElement;
 		class IndicatorText;
 		class IndicatorImage;

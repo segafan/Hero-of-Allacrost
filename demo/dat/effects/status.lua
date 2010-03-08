@@ -12,6 +12,35 @@ if (status_effects == nil) then
 end
 
 
+status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
+	Apply = function(effect)
+		timer = effect:GetTimer();
+		actor = effect:GetAffectedActor();
+		intensity = effect:GetIntensity();
+		
+		actor:ResetFortitude();
+		base_fortitude = actor:GetFortitude();
+		if (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_NEUTRAL) then
+			-- Fortitude was already reset, no further action needed
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER) then
+			actor:SetFortitude(base_fortitude * 2); -- Fortitude 2x
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_MODERATE) then
+			actor:SetFortitude(base_fortitude * 3); -- Fortitude 3x
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_GREATER) then
+			actor:SetFortitude(base_fortitude * 4); -- Fortitude 4x
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_EXTREME) then
+			actor:SetFortitude(base_fortitude * 5); -- Fortitude 5x
+		else
+			-- TODO: print some sort of error message?
+		end
+		timer:SetDuration(30000); -- 30 seconds
+	end
+}
+
+
+
+
+
 status_effects[1] = {
 	name = hoa_system.Translate("Dummy effect"),
 	

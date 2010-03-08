@@ -21,6 +21,7 @@
 #include "battle.h"
 #include "battle_actions.h"
 #include "battle_actors.h"
+#include "battle_effects.h"
 #include "battle_indicators.h"
 #include "battle_utils.h"
 
@@ -53,7 +54,7 @@ BattleActor::BattleActor(GlobalActor* actor) :
 	_y_location(0.0f),
 	_execution_finished(false),
 	_idle_state_time(0),
-	_actor_effects(),
+	_effects_supervisor(new EffectsSupervisor(this)),
 	_indicator_supervisor(new IndicatorSupervisor(this))
 {
 	if (actor == NULL) {
@@ -75,14 +76,7 @@ BattleActor::~BattleActor() {
 		_action = NULL;
 	}
 
-	// TODO: I don't think the destructor should be calling script functions?
-// 	ScriptObject* remove;
-// 	for (uint32 i = 0; i < _actor_effects.size(); i++) {
-// 		remove = _actor_effects[i]->GetRemoveFunction();
-// 		ScriptCallFunction<void>(*remove, this);
-// 		delete _actor_effects[i];
-// 	}
-
+	delete _effects_supervisor;
 	delete _indicator_supervisor;
 }
 
@@ -202,6 +196,23 @@ void BattleActor::RegisterMiss() {
 
 
 
+void BattleActor::RegisterStatusChange(GLOBAL_STATUS status, GLOBAL_INTENSITY intensity) {
+	GLOBAL_INTENSITY old_intensity = GLOBAL_INTENSITY_INVALID;
+	GLOBAL_INTENSITY new_intensity = intensity;
+
+	// TODO: determine if an opposite status effect is active and account for it
+
+	old_intensity = _effects_supervisor->ChangeStatus(status, new_intensity);
+
+	// If the return value was invalid, no status was changed so do not create any indicator
+	if (old_intensity == GLOBAL_INTENSITY_INVALID) {
+		return;
+	}
+	_indicator_supervisor->AddStatusIndicator(status, old_intensity, status, new_intensity);
+}
+
+
+
 void BattleActor::ChangeSkillPoints(int32 amount) {
 	uint32 unsigned_amount = static_cast<uint32>(amount);
 
@@ -218,20 +229,8 @@ void BattleActor::ChangeSkillPoints(int32 amount) {
 
 void BattleActor::Update() {
 	_state_timer.Update();
+	_effects_supervisor->Update();
 	_indicator_supervisor->Update();
-
-// 	bool actor_stunned = false;
-//
-// 	for (uint32 i = 0; i < GetActorEffects().size(); i++) {
-// 		if (GetActorEffects().at(i)->IsStunEffect()) {
-// 			_state_timer.Pause();
-// 			actor_stunned = true;
-// 		}
-// 		if (GetActorEffects().at(i)->GetTimer()->IsFinished()) {
-// 			_state_timer.Run();
-// 			actor_stunned = false;
-// 		}
-// 	}
 
 	if (_state == ACTOR_STATE_IDLE) {
 		if (_state_timer.IsFinished() == true)
@@ -245,15 +244,6 @@ void BattleActor::Update() {
 		if (_state_timer.IsFinished() == true)
 			ChangeState(ACTOR_STATE_IDLE);
 	}
-
-// 	if (_state == ACTOR_STATE_IDLE && actor_stunned == false) {
-// 		if (_state_timer.IsFinished()) { // Indicates that the idle state is now finished
-// 			_state = ACTOR_STATE_WARM_UP;
-// 			//Stop the timer!!
-// 			_state_timer.Pause();
-// 		}
-// 		return;
-// 	}
 }
 
 
@@ -388,17 +378,6 @@ void BattleCharacter::Update() {
 			ChangeState(ACTOR_STATE_COOL_DOWN);
 		}
 	}
-
-// 	for (uint32 i = 0; i < GetActorEffects().size(); i++) {
-// 		if (GetActorEffects().at(i)->GetTimer()->IsFinished()) {
-// 			// FIXME: remove functions do not work, though we don't really use them anyway
-// 			// remove = _actor_effects[i]->GetRemoveFunction();
-// 			// ScriptCallFunction<void>(*remove, this); // status effect's time is up
-//
-// 			delete _actor_effects.at(i);
-// 			_actor_effects.at(i) = new GlobalStatusEffect(1); // replace it with a dummy
-// 		}
-// 	}
 }
 
 
