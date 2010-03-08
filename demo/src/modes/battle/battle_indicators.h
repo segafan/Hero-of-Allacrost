@@ -153,7 +153,7 @@ public:
 	/** \param actor A valid pointer to the actor object this indicator
 	*** \param filename The name of the image file to load
 	**/
-	IndicatorImage(BattleActor* actor, std::string& filename);
+	IndicatorImage(BattleActor* actor, const std::string& filename);
 
 	~IndicatorImage()
 		{}
@@ -221,6 +221,21 @@ public:
 	*** Miss text is always drawn with the same style in a small font with white text
 	**/
 	void AddMissIndicator();
+
+	/** \brief Creates an indicator that illustrates a change in an actor's status
+	*** \param old_status The type of the old status effect
+	*** \param old_intensity The intensity of the old status effect
+	*** \param new_status The type of the new status effect
+	*** \param new_intensity The intensity of the new status effect
+	***
+	*** The arguments are used to determine which status icon images to use for the indicator. Most of the time
+	*** this function will choose two status icons (one old, and one new) for use in the indicator. Occasionally
+	*** we wish to show an indicator even when the status type and intensity of the effect did not change. For
+	*** example, when the timer for the status effect is reset. If the status and intensity arguments are equal,
+	*** only a single icon image will be used in the indicator.
+	**/
+	void AddStatusIndicator(hoa_global::GLOBAL_STATUS old_status, hoa_global::GLOBAL_INTENSITY old_intensity,
+		hoa_global::GLOBAL_STATUS new_status, hoa_global::GLOBAL_INTENSITY new_intensity);
 
 private:
 	//! \brief A pointer to the actor that this class supervises indicator elements for

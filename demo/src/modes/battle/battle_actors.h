@@ -116,6 +116,35 @@ public:
 	//! \brief Indicates that an action failed to connect on this target
 	void RegisterMiss();
 
+	/** \brief Causes a change in a character's status
+	*** \param status The type of status to change
+	*** \param intensity The intensity of the change
+	***
+	*** This is the single method for registering a change in status for an actor. It can be used to add
+	*** a new status, remove an existing status, or change the intensity level of an existing status. A
+	*** positive intensity argument will increase the intensity while a negative intensity will decrease
+	*** the intensity. Many different changes can occur depending upon the current state of the actor and
+	*** any active status effects when this function is called, as the list below describes.
+	***
+	*** - If this status is not already active on the character and the intensity argument is positive,
+	***   the actor will have the new status added at that intensity.
+	*** - If this status is not already active on the character and the intensity argument is negative,
+	***   no change will occur.
+	*** - If this status is active and intensity is positive, intensity will be increased but will not
+	***   exceed the maximum intensity level.
+	*** - If this status is active, the intensity is positive, and the current intensity of the status
+	***   is already at the maximum level, the status timer will be reset and the intensity will not change.
+	*** - If this status is active and intensity is negative, intensity will be decreased but not allowed
+	***   to go lower than the neutral level. If the neutral level is reached, the status will be removed.
+	*** - If this status is active and the intensity is GLOBAL_INTENSITY_NEG_EXTREME, the status will be
+	***   removed regardless of its current intensity level.
+	*** - If this status has an opposite status type that is active on the actor and the intensity argument
+	***   is positive, this will decrease the intensity of the opposite status by the degree of intensity.
+	***   This may cause that opposite status to be removed and this new status to be added if the intensity
+	***   change is significantly high.
+	**/
+	void RegisterStatusChange(hoa_global::GLOBAL_STATUS status, hoa_global::GLOBAL_INTENSITY intensity);
+
 	/** \brief Increases or decreases the current skill points of the actor
 	*** \param amount The number of skill points to increase or decrease
 	***
@@ -219,9 +248,6 @@ public:
 	hoa_video::StillImage& GetStaminaIcon()
 		{ return _stamina_icon; }
 
-	std::vector<hoa_global::GlobalStatusEffect*> GetActorEffects()
-		{ return _actor_effects; }
-
 	hoa_system::SystemTimer& GetStateTimer()
 		{ return _state_timer; }
 
@@ -270,8 +296,8 @@ protected:
 	//! \brief The actor's icon for the stamina meter
 	hoa_video::StillImage _stamina_icon;
 
-	//! \brief Contains this actor's battle effects
-	std::vector<hoa_global::GlobalStatusEffect*> _actor_effects;
+	//! \brief An assistant class to the actor that manages all the actor's status and elemental effects
+	EffectsSupervisor* _effects_supervisor;
 
 	//! \brief An assistant class to the actor that manages all the actor's indicator text and graphics
 	IndicatorSupervisor* _indicator_supervisor;

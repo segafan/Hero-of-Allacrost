@@ -37,7 +37,7 @@ armor[40001] = {
 
 armor[40002] = {
 	name = hoa_system.Translate("Phoenix Shield"),
-	description = hoa_system.Translate("A tall steel shield with a mighty phoenix embroidered on the front."),
+	description = hoa_system.Translate("A tall steel shield with a mighty phoenix emblazoned on the front."),
 	icon = "img/icons/armor/phoenix_shield.png",
 	physical_defense = 6,
 	metaphysical_defense = 6,

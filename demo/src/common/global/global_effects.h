@@ -103,7 +103,10 @@ protected:
 *** \brief Represents a status effect in the game
 ***
 *** Status effects can be either aiding or ailing to the actor with the active
-*** status. Status effects are only active on characters while they are in battle.
+*** status. Unlike elemental effects, status effects have uni-directional intensity
+*** levels instead of bi-directional. The intensity of a status effect is never allowed
+*** to decrease below the neutral level or to increase above the maximum positive level.
+*** Status effects are only active on characters and enemies while they are in battle.
 *** ***************************************************************************/
 class GlobalStatusEffect {
 public:
@@ -124,7 +127,7 @@ public:
 	GLOBAL_INTENSITY GetIntensity() const
 		{ return _intensity; }
 
-	void SetIntensity(GLOBAL_INTENSITY intensity)
+	virtual void SetIntensity(GLOBAL_INTENSITY intensity)
 		{ _intensity = intensity; }
 	//@}
 
@@ -132,13 +135,14 @@ public:
 	*** \param amount The number of intensity levels to increase the status effect by
 	*** \return True if the intensity level was modified
 	**/
-	bool IncrementIntensity(uint8 amount);
+	virtual bool IncrementIntensity(uint8 amount);
 
 	/** \brief Decrements the status effect intensity by a negative amount
 	*** \param amount The number of intensity levels to decrement the status effect by
 	*** \return True if the intensity level was modified
+	*** \note Intensity will not be decremented below GLOBAL_INTENSITY_NEUTRAL
 	**/
-	bool DecrementIntensity(uint8 amount);
+	virtual bool DecrementIntensity(uint8 amount);
 
 protected:
 	//! \brief The type of status that the object represents
