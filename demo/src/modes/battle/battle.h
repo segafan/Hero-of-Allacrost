@@ -150,6 +150,13 @@ public:
 	uint32 GetNumberOfEnemies() const
 		{ return _enemy_actors.size(); }
 
+	/** \brief Retrieves a specific status icon with the proper type and intensity
+	*** \param type The type of status effect the user is trying to retrieve the icon for
+	*** \param intensity The intensity level of the icon to retrieve
+	*** \return The icon representation of the element type and intensity, or NULL if no appropriate image was found
+	**/
+	hoa_video::StillImage* GetStatusIcon(hoa_global::GLOBAL_STATUS type, hoa_global::GLOBAL_INTENSITY intensity);
+
 	/** \name Battle notification methods
 	*** These methods are called by other battle classes to indicate events such as when an actor
 	*** changes its state. Often BattleMode will respond by updating the state of one or more of its
@@ -316,6 +323,9 @@ private:
 
 	//! \brief Container for images (both still and animated) that are to be drawn in the background
 	std::vector<hoa_video::ImageDescriptor*> _background_images;
+
+	//! \brief Contains the entire set of status effect icons
+	std::vector<hoa_video::StillImage> _status_icons;
 
 	//! \brief The static image that is drawn for the bottom menus
 	hoa_video::StillImage _bottom_menu_image;

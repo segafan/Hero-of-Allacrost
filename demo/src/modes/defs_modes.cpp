@@ -28,6 +28,7 @@
 
 #include "battle.h"
 #include "battle_actors.h"
+#include "battle_effects.h"
 #include "battle_utils.h"
 #include "map.h"
 #include "map_dialogue.h"
@@ -40,6 +41,7 @@
 #include "shop.h"
 
 #include "global_actors.h"
+#include "global_effects.h"
 
 using namespace luabind;
 
@@ -420,6 +422,13 @@ void BindModesToLua()
 			.def("GetPoint", &BattleTarget::GetPoint)
 			.def("GetActor", &BattleTarget::GetActor)
 			.def("GetParty", &BattleTarget::GetParty)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
+		class_<BattleStatusEffect, hoa_global::GlobalStatusEffect>("BattleStatusEffect")
+			.def("GetAffectedActor", &BattleStatusEffect::GetAffectedActor)
+			.def("GetTimer", &BattleStatusEffect::GetTimer)
 	];
 
 	} // End using battle mode namespaces

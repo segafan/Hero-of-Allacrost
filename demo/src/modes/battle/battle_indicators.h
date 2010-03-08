@@ -30,22 +30,18 @@ namespace hoa_battle {
 
 namespace private_battle {
 
-//! \brief The total amount of time (in milliseconds) that the display sequence lasts for indicator elements
-const uint32 INDICTATOR_TIME = 5000;
-
-//! \brief The amount of time (in milliseconds) that indicator elements fade at the beginning and end of the display sequence
-const uint32 INDICATOR_FADE_TIME = 1000;
-
-//! \brief The total vertical distance that indictor elements travel during the display sequence
-const float INDICATOR_POSITION_CHANGE = 100.0f; // TODO: need to think of a better name for this constant
-
-
 /** ****************************************************************************
 *** \brief An abstract class for displaying information about a change in an actor's state
 ***
 *** Indicators are text or graphics that appear next to actor sprites in battle.
 *** They typically represent changes to the actor such as numeric text representing
-*** damage or healing, icons representing status effects, etc.
+*** damage or healing, icons representing status effects, etc. The standard draw
+*** sequence for elements comes in three stages to make the indicators presence and
+*** disappearance more natural.
+***
+*** -# An initial transparent fade in of element over a short period of time
+*** -# Element draw at full opacity
+*** -# Finishing with a brief transparent fade out of the element
 ***
 *** \note Indicators are drawn at different orientations for different actors. For
 *** example, indicator elements and draw to the left of character actors and to
@@ -72,13 +68,14 @@ public:
 	virtual void Draw() = 0;
 
 	/** \brief Calculates the standard alpha (transparency) value for drawing the element
+	*** \return True if the alpha value is 1.0f and thus the indicator should be drawn with no alpha applied
 	***
 	*** Calling this function will set the alpha value of the _alpha_color member. Indicator elements
 	*** generally fade in and fade out to make their appearance more seamless on the battle field.
 	*** Alpha gradually increases from 0.0f to 1.0f in the first stage, remains at 1.0f for a majority
 	*** of the time, then gradually decreases back to 0.0f as the display finishes.
 	**/
-	void CalculateDrawAlpha();
+	bool CalculateDrawAlpha();
 
 	//! \brief Returns true when the indicator element has expired and should be removed
 	bool IsExpired() const
@@ -144,9 +141,8 @@ protected:
 /** ****************************************************************************
 *** \brief Displays an image next to an actor
 ***
-*** TODO: write a description. Possibly consider making this class maleable so
-*** that it can handle either still or animated images. Possibly allow a second
-*** image so that indicator can fade from one image to the next.
+*** This indicator displays a single image and is typically used for illustrating
+*** elemental and status effects.
 *** ***************************************************************************/
 class IndicatorImage : public IndicatorElement {
 public:
@@ -154,6 +150,11 @@ public:
 	*** \param filename The name of the image file to load
 	**/
 	IndicatorImage(BattleActor* actor, const std::string& filename);
+
+	/** \param actor A valid pointer to the actor object this indicator
+	*** \param image A const reference to the loaded image object to display
+	**/
+	IndicatorImage(BattleActor* actor, const hoa_video::StillImage& image);
 
 	~IndicatorImage()
 		{}
@@ -165,14 +166,81 @@ public:
 	//! \brief Draws the image
 	void Draw();
 
-	//! \brief Returns a reference to the image
+	//! \brief Returns a reference to the image use
 	hoa_video::StillImage& GetImage()
 		{ return _image; }
 
 protected:
-	//! \brief The rendered image of the text to display
+	//! \brief The image to display as an indicator
 	hoa_video::StillImage _image;
 }; // class IndicatorImage : public IndicatorElement
+
+
+
+/** ****************************************************************************
+*** \brief Displays two images blended together next to an actor
+***
+*** This indicator is similar to the IndicatorImage class in that it displays
+*** an image. The difference is that it uses two images that blend together to
+*** indicate some sort of change, usually for a status or elemental effect. It
+*** uses a modified draw sequence from standard indicator elements in five stages.
+***
+*** -# Transparent fade in of the first image
+*** -# First image drawn at full opacity
+*** -# Fade out first image while simultaneously fading in second image
+*** -# Second image drawn at full opacity
+*** -# Transparent fade out of the second image
+***
+*** \note Both images should share the same dimensions. If they do not this can
+*** cause issues as the image height is used to
+*** ***************************************************************************/
+class IndicatorBlendedImage : public IndicatorElement {
+public:
+	/** \param actor A valid pointer to the actor object this indicator
+	*** \param first_filename The name of the first image file to load
+	*** \param second_filename The name of the second image file to load
+	**/
+	IndicatorBlendedImage(BattleActor* actor, const std::string& first_filename, const std::string& second_filename);
+
+	/** \param actor A valid pointer to the actor object this indicator
+	*** \param first_image A const reference to the first loaded image to display
+	*** \param second_image A const reference to the second loaded image to display
+	**/
+	IndicatorBlendedImage(BattleActor* actor, const hoa_video::StillImage& first_image, const hoa_video::StillImage& second_image);
+
+	~IndicatorBlendedImage()
+		{}
+
+	//! \brief Returns the height of the blended image
+	float ElementHeight() const
+		{ return _first_image.GetHeight(); }
+
+	//! \brief Draws the first and/or second image blended appropriately
+	void Draw();
+
+	//! \brief Returns a reference to the first image
+	hoa_video::StillImage& GetFirstImage()
+		{ return _first_image; }
+
+	//! \brief Returns a reference to the second image
+	hoa_video::StillImage& GetSecondImage()
+		{ return _second_image; }
+
+
+protected:
+	//! \brief The first image to display in the blended element
+	hoa_video::StillImage _first_image;
+
+	//! \brief The second image to display in the blended element
+	hoa_video::StillImage _second_image;
+
+	/** \brief A modulation color used to modify the alpha (transparency) of the second image
+	*** \note This is only used when both the first and second images are beind drawn blended
+	*** together. The first image will use the inherited _alpha_color member in this case.
+	*** _alpha_color is also used for both the standard element fade in and fade out effects.
+	**/
+	hoa_video::Color _second_alpha_color;
+}; // class IndicatorBlendedImage : public IndicatorElement
 
 
 /** ****************************************************************************
