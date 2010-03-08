@@ -645,7 +645,7 @@ void BootMode::_SetupLanguageOptionsMenu() {
 										 &BootMode::_OnLanguageSelect);
 		read_data.CloseTable();
 	}
-	
+
 	read_data.CloseTable();
 	if (read_data.IsErrorDetected())
 		PRINT_ERROR << "Error occurred while loading language list: " << read_data.GetErrorMessages() << endl;
@@ -956,22 +956,37 @@ void BootMode::_OnQuit() {
 
 
 void BootMode::_TEMP_OnBattle() {
-	GlobalManager->AddCharacter(1);
-	GlobalManager->AddCharacter(2);
-	GlobalManager->AddCharacter(4);
-	GlobalManager->AddCharacter(8);
-	hoa_battle::BattleMode *BM = new hoa_battle::BattleMode();
-	BM->AddEnemy(1);
-	BM->AddEnemy(1);
-	BM->AddEnemy(1);
-	BM->AddEnemy(1);
-	BM->AddEnemy(1);
-	ModeManager->Push(BM);
+	ReadScriptDescriptor read_data;
+	if (!read_data.OpenFile("dat/config/boot.lua")) {
+		PRINT_ERROR << "failed to load boot data file" << endl;
+	}
+
+	ScriptCallFunction<void>(read_data.GetLuaState(), "BootBattleTest");
+
+	if (read_data.IsErrorDetected()) {
+		PRINT_ERROR << "an error occured during reading of the boot data file" << endl;
+		PRINT_ERROR << read_data.GetErrorMessages() << endl;
+	}
+	read_data.CloseFile();
 }
 
 
 
 void BootMode::_TEMP_OnMenu() {
+	ReadScriptDescriptor read_data;
+	if (!read_data.OpenFile("dat/config/boot.lua")) {
+		PRINT_ERROR << "failed to load boot data file" << endl;
+	}
+
+	ScriptCallFunction<void>(read_data.GetLuaState(), "BootMenuTest");
+
+	if (read_data.IsErrorDetected()) {
+		PRINT_ERROR << "an error occured during reading of the boot data file" << endl;
+		PRINT_ERROR << read_data.GetErrorMessages() << endl;
+	}
+	read_data.CloseFile();
+
+	// TEMP: remove this once menu mode can be created in Lua and then add to boot.lua
 	GlobalManager->AddToInventory(1, 5);
 	GlobalManager->AddCharacter(1);
 	GlobalManager->AddCharacter(2);
@@ -984,32 +999,18 @@ void BootMode::_TEMP_OnMenu() {
 
 
 void BootMode::_TEMP_OnShop() {
-	GlobalManager->AddCharacter(1);
-	GlobalManager->AddCharacter(2);
-	GlobalManager->AddCharacter(4);
-	GlobalManager->AddCharacter(8);
-	GlobalManager->AddDrunes(1842);
-	GlobalManager->AddToInventory(1, 5);
-	GlobalManager->AddToInventory(30501, 2);
-	GlobalManager->AddToInventory(2, 3);
-	GlobalManager->AddToInventory(3);
-	GlobalManager->AddToInventory(3002);
-	GlobalManager->AddToInventory(10001);
-	GlobalManager->AddToInventory(10502);
-	hoa_shop::ShopMode *SM = new hoa_shop::ShopMode();
-	SM->AddObject(1, 3);
-	SM->AddObject(2, 5);
-	SM->AddObject(10501, 2);
-	SM->AddObject(10504, 4);
-	SM->AddObject(3, 12);
-	SM->AddObject(3001, 1);
-	SM->AddObject(30001, 2);
-	SM->AddObject(30002, 3);
-	SM->AddObject(20001, 10);
-	SM->AddObject(20002, 11);
-	SM->AddObject(20501, 2);
-	SM->AddObject(20502, 1);
-	ModeManager->Push(SM);
+	ReadScriptDescriptor read_data;
+	if (!read_data.OpenFile("dat/config/boot.lua")) {
+		PRINT_ERROR << "failed to load boot data file" << endl;
+	}
+
+	ScriptCallFunction<void>(read_data.GetLuaState(), "BootShopTest");
+
+	if (read_data.IsErrorDetected()) {
+		PRINT_ERROR << "an error occured during reading of the boot data file" << endl;
+		PRINT_ERROR << read_data.GetErrorMessages() << endl;
+	}
+	read_data.CloseFile();
 }
 
 
