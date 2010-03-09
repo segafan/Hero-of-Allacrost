@@ -577,14 +577,6 @@ public:
 	 */
 	void DrawLight(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
-	//! \brief Prepares the
-	void EnablePointLights();
-
-	/**
-	* \brief disables point lights
-	*/
-	void DisablePointLights();
-
 	/** \brief call after all map images are drawn to apply lighting. All
 	 *         menu and text rendering should occur AFTER this call, so that
 	 *         they are not affected by lighting.
@@ -839,6 +831,9 @@ private:
 
 	//! lighting overlay texture
 	GLuint _light_overlay;
+
+	//! lighting overlay FBO
+	GLuint _light_overlay_fbo;
 
 	//! X offset to shake the screen by (if any)
 	float  _x_shake;
