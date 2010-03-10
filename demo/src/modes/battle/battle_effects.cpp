@@ -15,10 +15,12 @@
 
 #include "script.h"
 #include "system.h"
+#include "video.h"
 
 #include "global.h"
 
-#include "battle_actors.h" // TEMP
+#include "battle.h"
+#include "battle_actors.h"
 #include "battle_effects.h"
 #include "battle_utils.h"
 
@@ -28,6 +30,7 @@ using namespace hoa_utils;
 
 using namespace hoa_system;
 using namespace hoa_script;
+using namespace hoa_video;
 
 using namespace hoa_global;
 
@@ -44,7 +47,8 @@ BattleStatusEffect::BattleStatusEffect(GLOBAL_STATUS type, GLOBAL_INTENSITY inte
 	_name(GetStatusName(type)),
 	_affected_actor(actor),
 	_timer(0),
-	_apply_function(NULL)
+	_apply_function(NULL),
+	_icon_image(NULL)
 {
 	if ((type <= GLOBAL_STATUS_INVALID) || (type >= GLOBAL_STATUS_TOTAL)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "constructor received an invalid type argument: " << type << endl;
@@ -135,6 +139,8 @@ bool BattleStatusEffect::DecrementIntensity(uint8 amount) {
 
 
 void BattleStatusEffect::_ApplyChange() {
+	_icon_image = BattleMode::CurrentInstance()->GetStatusIcon(_type, _intensity);
+
 	_timer.Reset();
 	ScriptCallFunction<void>(*_apply_function, this);
 	_timer.Run();
@@ -162,30 +168,28 @@ EffectsSupervisor::~EffectsSupervisor() {
 
 
 void EffectsSupervisor::Update() {
-	// Update the timers for active status effects and remove timers which are now expired
-	map<GLOBAL_STATUS, BattleStatusEffect*>::iterator status_iter = _status_effects.begin();
-	while (status_iter != _status_effects.end()) {
-		SystemTimer* timer = status_iter->second->GetTimer();
-		timer->Update();
+	// Update the timers for all active status effects
+	SystemTimer* effect_timer = NULL;
+	for (map<GLOBAL_STATUS, BattleStatusEffect*>::iterator i = _status_effects.begin(); i != _status_effects.end(); i++) {
+		effect_timer = i->second->GetTimer();
+		effect_timer->Update();
 
-		if (timer->IsFinished() == true) {
-			status_iter->second->DecrementIntensity(1);
-			// If the intensity has decreased to neutral it should be removed
-			if (status_iter->second->GetIntensity() == GLOBAL_INTENSITY_NEUTRAL) {
-				map<GLOBAL_STATUS, BattleStatusEffect*>::iterator i = status_iter;
-				status_iter++;
-				 _status_effects.erase(i);
-				continue;
-			}
+		// Decrease the intensity of the status by one level when its timer expires. This may result in
+		// the status effect being removed from the actor if its intensity changes to the neutral level.
+		if (effect_timer->IsFinished() == true) {
+			_actor->RegisterStatusChange(i->first, GLOBAL_INTENSITY_NEG_LESSER);
 		}
-		status_iter++;
+
 	}
 }
 
 
 
 void EffectsSupervisor::Draw() {
-
+	for (map<GLOBAL_STATUS, BattleStatusEffect*>::iterator i = _status_effects.begin(); i != _status_effects.end(); i++) {
+		i->second->GetIconImage()->Draw();
+		VideoManager->MoveRelative(25.0f, 0.0f);
+	}
 }
 
 
