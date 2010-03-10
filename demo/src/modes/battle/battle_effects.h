@@ -73,6 +73,9 @@ public:
 	//! \note Returns a pointer instead of a reference so that Lua functions can access the timer
 	hoa_system::SystemTimer* GetTimer()
 		{ return &_timer; }
+
+	hoa_video::StillImage* GetIconImage() const
+		{ return _icon_image; }
 	//@}
 
 private:
@@ -91,9 +94,12 @@ private:
 	//! \brief A pointer to the update script function
 	ScriptObject* _apply_function;
 
+	//! \brief A pointer to the icon image that represents the status. Will be NULL if the status is invalid
+	hoa_video::StillImage* _icon_image;
+
 	/** \brief Applies the change in the status intensity to the affected actor
 	*** This will call the Lua function pointed to by the _apply_function member.
-	*** This will also reset the timer.
+	*** This will also reset the timer and update the icon image member.
 	**/
 	void _ApplyChange();
 }; // class BattleStatusEffect : public hoa_global::GlobalStatusEffect

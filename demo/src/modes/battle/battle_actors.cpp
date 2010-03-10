@@ -482,7 +482,9 @@ void BattleCharacter::DrawStatus(uint32 order) {
 
 	// If the swap key is being held down, draw status icons
 	if (InputManager->SwapState()) {
-		// TODO: draw status icons and information for actor
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->MoveRelative(10.0f, 0.0f);
+		_effects_supervisor->Draw();
 	}
 
 	// Otherwise, draw the HP and SP bars (bars are 90 pixels wide and 6 pixels high)
