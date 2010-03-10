@@ -13,11 +13,13 @@ end
 
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
+	name = hoa_system.Translate("Defense Up"),
+
 	Apply = function(effect)
 		timer = effect:GetTimer();
 		actor = effect:GetAffectedActor();
 		intensity = effect:GetIntensity();
-		
+
 		actor:ResetFortitude();
 		base_fortitude = actor:GetFortitude();
 		if (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_NEUTRAL) then
@@ -41,7 +43,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
 
 
 
-status_effects[1] = {
+status_effects[100] = {
 	name = hoa_system.Translate("Dummy effect"),
 	
 	Init = function(thisEffect, target)
@@ -54,7 +56,7 @@ status_effects[1] = {
 	end
 }
 
-status_effects[2] = {
+status_effects[200] = {
 	name = hoa_system.Translate("Defense Up"),
 
 	Init = function(thisEffect, target)
@@ -70,7 +72,7 @@ status_effects[2] = {
 	end
 }
 
-status_effects[3] = {
+status_effects[300] = {
 	name = hoa_system.Translate("Stun"),
 	-- Stop an actor's timer for a brief period
 	
@@ -87,7 +89,7 @@ status_effects[3] = {
 	end
 }
 
-status_effects[4] = {
+status_effects[400] = {
 	name = hoa_system.Translate("Dodge Enemies"),
 
 	Init = function(thisEffect, target)

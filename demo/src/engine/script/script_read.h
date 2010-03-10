@@ -96,6 +96,9 @@ public:
 	***
 	*** \note The DoesVariableExist checks if is there is <b>any</b> data type, structure, or
 	*** function referenced by the key name.
+	***
+	*** \note The DoesNumberExists checks if there is <b>any</b> numeric data type integer or
+	*** floating point value referenced by the key name.
 	**/
 	//@{
 	bool DoesVariableExist(const std::string& key)
@@ -103,6 +106,12 @@ public:
 
 	bool DoesVariableExist(int32 key)
 		{ return _DoesDataExist(key, LUA_TNIL); }
+
+	bool DoesNumberExist(const std::string& key)
+		{ return _DoesDataExist(key, LUA_TNUMBER); }
+
+	bool DoesNumberExist(int32 key)
+		{ return _DoesDataExist(key, LUA_TNUMBER); }
 
 	bool DoesBoolExist(const std::string& key)
 		{ return _DoesDataExist(key, LUA_TBOOLEAN); }

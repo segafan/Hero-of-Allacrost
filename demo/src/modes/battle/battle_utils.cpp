@@ -193,29 +193,33 @@ uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, int3
 
 	// Holds the physical and metaphysical damage dealt
 	int32 total_phys_dmg = 0, total_meta_dmg = 0;
-	total_phys_dmg = total_phys_atk - total_phys_dmg;
-	total_meta_dmg = total_meta_atk - total_meta_dmg;
+	total_phys_dmg = total_phys_atk - total_phys_def;
+	total_meta_dmg = total_meta_atk - total_meta_def;
 	if (total_phys_dmg < 0)
 		total_phys_dmg = 0;
 	if (total_meta_dmg < 0)
 		total_meta_dmg = 0;
 
-
 	// Holds the total damage dealt
 	uint32 total_dmg = 0;
 	total_dmg = total_phys_dmg + total_meta_dmg;
+
+	// If the total damage is zero, fall back to causing a small non-zero damage value
+	if (total_dmg <= 0)
+		return static_cast<uint32>(RandomBoundedInteger(1, 5));
+
 	// Holds the absolute standard deviation used in the GaussianRandomValue function
 	float abs_std_dev = 0.0f;
 	// A value of "0.075f" means the standard deviation should be 7.5% of the mean (the total damage)
 	abs_std_dev = static_cast<float>(total_dmg) * std_dev;
 	total_dmg = GaussianRandomValue(total_dmg, abs_std_dev, false);
 
-	// If the total damage came to a value less than or equal to zero after gaussian randomization,
+	// If the total damage came to a value less than or equal to zero after the gaussian randomization,
 	// fall back to returning a small non-zero damage value
-	if (total_dmg > 0)
-		return static_cast<uint32>(total_dmg);
-	else
+	if (total_dmg <= 0)
 		return static_cast<uint32>(RandomBoundedInteger(1, 5));
+
+	return static_cast<uint32>(total_dmg);
 } // uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, int32 add_phys, int32 add_meta, float std_dev)
 
 
@@ -280,31 +284,36 @@ uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* ta
 		return 0;
 	}
 
+
 	// Holds the physical and metaphysical damage dealt
 	int32 total_phys_dmg = 0, total_meta_dmg = 0;
-	total_phys_dmg = total_phys_atk - total_phys_dmg;
-	total_meta_dmg = total_meta_atk - total_meta_dmg;
+	total_phys_dmg = total_phys_atk - total_phys_def;
+	total_meta_dmg = total_meta_atk - total_meta_def;
 	if (total_phys_dmg < 0)
 		total_phys_dmg = 0;
 	if (total_meta_dmg < 0)
 		total_meta_dmg = 0;
 
-
 	// Holds the total damage dealt
 	uint32 total_dmg = 0;
 	total_dmg = total_phys_dmg + total_meta_dmg;
+
+	// If the total damage is zero, fall back to causing a small non-zero damage value
+	if (total_dmg <= 0)
+		return static_cast<uint32>(RandomBoundedInteger(1, 5));
+
 	// Holds the absolute standard deviation used in the GaussianRandomValue function
 	float abs_std_dev = 0.0f;
 	// A value of "0.075f" means the standard deviation should be 7.5% of the mean (the total damage)
 	abs_std_dev = static_cast<float>(total_dmg) * std_dev;
 	total_dmg = GaussianRandomValue(total_dmg, abs_std_dev, false);
 
-	// If the total damage came to a value less than or equal to zero after gaussian randomization,
+	// If the total damage came to a value less than or equal to zero after the gaussian randomization,
 	// fall back to returning a small non-zero damage value
-	if (total_dmg > 0)
-		return static_cast<uint32>(total_dmg);
-	else
+	if (total_dmg <= 0)
 		return static_cast<uint32>(RandomBoundedInteger(1, 5));
+
+	return static_cast<uint32>(total_dmg);
 } // uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta, float std_dev)
 
 ////////////////////////////////////////////////////////////////////////////////

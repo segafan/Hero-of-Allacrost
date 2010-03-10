@@ -32,8 +32,6 @@
 #include "global.h"
 
 #include "battle_utils.h"
-// TEMP: battle code uses MapDialogue class. This should eventually be replaced with a common code dialogue display class
-// #include "map_dialogue.h"
 
 namespace hoa_battle {
 

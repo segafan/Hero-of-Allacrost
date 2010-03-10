@@ -179,34 +179,34 @@ public:
 
 	//! \brief Resets actor stats to their original values
 	//@{
-	void ResetHitPoints(uint32 hp)
+	void ResetHitPoints()
 		{ SetHitPoints(_global_actor->GetHitPoints()); }
 
-	void ResetMaxHitPoints(uint32 hp)
+	void ResetMaxHitPoints()
 		{ SetMaxHitPoints(_global_actor->GetMaxHitPoints()); }
 
-	void ResetSkillPoints(uint32 sp)
+	void ResetSkillPoints()
 		{ SetSkillPoints(_global_actor->GetSkillPoints()); }
 
-	void ResetMaxSkillPoints(uint32 sp)
+	void ResetMaxSkillPoints()
 		{ SetMaxSkillPoints(_global_actor->GetMaxSkillPoints()); }
 
-	void ResetStrength(uint32 st)
+	void ResetStrength()
 		{ SetStrength(_global_actor->GetStrength()); }
 
-	void ResetVigor(uint32 vi)
+	void ResetVigor()
 		{ SetVigor(_global_actor->GetVigor()); }
 
-	void ResetFortitude(uint32 fo)
+	void ResetFortitude()
 		{ SetFortitude(_global_actor->GetFortitude()); }
 
-	void ResetProtection(uint32 pr)
+	void ResetProtection()
 		{ SetProtection(_global_actor->GetProtection()); }
 
-	void ResetAgility(uint32 ag)
+	void ResetAgility()
 		{ SetAgility(_global_actor->GetAgility()); }
 
-	void ResetEvade(float ev)
+	void ResetEvade()
 		{ SetEvade(_global_actor->GetEvade()); }
 	//@}
 
