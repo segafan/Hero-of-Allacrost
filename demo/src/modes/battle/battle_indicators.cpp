@@ -113,12 +113,12 @@ void IndicatorText::Draw() {
 
 	// Draw to the left of the sprite for characters and to the right of the sprite for enemys
 	if (_actor->IsEnemy() == false) {
-		VideoManager->MoveRelative(-40.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image, not -40.0f
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->MoveRelative(-20.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image
 	}
 	else {
-		VideoManager->MoveRelative(40.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image, not 40.0f
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->MoveRelative(_actor->GetSpriteWidth() / 2.0f, 0.0f);
 	}
 
 	float y_position = INDICATOR_POSITION_CHANGE * _timer.PercentComplete();

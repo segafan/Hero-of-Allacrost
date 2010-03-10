@@ -82,21 +82,6 @@ BattleActor::~BattleActor() {
 
 
 
-void BattleActor::AddEffect(GlobalStatusEffect* new_effect) {
-// 	_actor_effects.push_back(new_effect);
-// 	ScriptObject* init = new_effect->GetInitFunction();
-// 	ScriptCallFunction<void>(*init, new_effect, this);
-}
-
-
-
-void BattleActor::AddNewEffect(uint32 id) {
-// 	hoa_global::GlobalStatusEffect* new_effect = new GlobalStatusEffect(id);
-// 	AddEffect(new_effect);
-}
-
-
-
 void BattleActor::ChangeState(ACTOR_STATE new_state) {
 	if (_state == new_state) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "actor was already in new state: " << new_state << endl;
@@ -383,8 +368,6 @@ void BattleCharacter::Update() {
 
 
 void BattleCharacter::DrawSprite() {
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-
 	// Draw the character sprite
 	VideoManager->Move(_x_location, _y_location);
 
@@ -598,7 +581,6 @@ void BattleEnemy::Update() {
 
 
 void BattleEnemy::DrawSprite() {
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	vector<StillImage>& sprite_frames = *(_global_enemy->GetBattleSpriteFrames());
 
 	// Draw the sprite's final damage frame, which should have grayscale enabled
