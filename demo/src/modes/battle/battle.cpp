@@ -724,6 +724,10 @@ void BattleMode::_DrawSprites() {
 		if (actor_target != NULL) {
 			actor_target = target.GetActor();
 			VideoManager->Move(actor_target->GetXLocation(), actor_target->GetYLocation());
+			if (actor_target->IsEnemy() == false)
+				VideoManager->MoveRelative(-32.0f, 0.0f); // TEMP: this should move half the distance of the actor's sprite, not 32.0f
+			else
+				VideoManager->MoveRelative(32.0f, 0.0f);
 			_actor_selection_image.Draw();
 		}
 		else if (IsTargetParty(target.GetType()) == true) {
@@ -735,11 +739,13 @@ void BattleMode::_DrawSprites() {
 	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
 
 	// Draw all character sprites
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		_character_actors[i]->DrawSprite();
 	}
 
 	// Draw all enemy sprites
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		_enemy_actors[i]->DrawSprite();
 	}

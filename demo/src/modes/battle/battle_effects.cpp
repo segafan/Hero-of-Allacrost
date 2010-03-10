@@ -18,6 +18,7 @@
 
 #include "global.h"
 
+#include "battle_actors.h" // TEMP
 #include "battle_effects.h"
 #include "battle_utils.h"
 
@@ -73,8 +74,8 @@ BattleStatusEffect::BattleStatusEffect(GLOBAL_STATUS type, GLOBAL_INTENSITY inte
 	else {
 		PRINT_WARNING << "no apply function found in Lua definition file for status: " << table_id << endl;
 	}
-
 	script_file.CloseTable();
+
 	if (script_file.IsErrorDetected()) {
 		if (BATTLE_DEBUG) {
 			PRINT_WARNING << "one or more errors occurred while reading status effect data - they are listed below" << endl;
