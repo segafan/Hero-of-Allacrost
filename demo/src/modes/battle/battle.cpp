@@ -621,7 +621,7 @@ void BattleMode::_DetermineActorLocations() {
 
 	float position_x, position_y;
 
-	// Determine the position of the top-right most character in the party
+	// Determine the position of the first character in the party, who will be drawn at the top
 	switch (_character_actors.size()) {
 		case 1:
 			position_x = 80.0f;
@@ -636,22 +636,19 @@ void BattleMode::_DetermineActorLocations() {
 			position_y = 393.0f;
 			break;
 		case 4:
-			position_x = 160.0f;
-			position_y = 448.0f;
-			break;
 		default:
 			position_x = 160.0f;
 			position_y = 448.0f;
 			break;
 	}
 
-	// Go through all characters, changing each successive position to be down and to the left
+	// Set all characters in their proper positions
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		_character_actors[i]->SetXOrigin(position_x);
 		_character_actors[i]->SetYOrigin(position_y);
 		_character_actors[i]->SetXLocation(position_x);
 		_character_actors[i]->SetYLocation(position_y);
-		position_x -= 42.0f;
+		position_x -= 32.0f;
 		position_y -= 105.0f;
 	}
 
@@ -739,13 +736,12 @@ void BattleMode::_DrawSprites() {
 	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
 
 	// Draw all character sprites
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		_character_actors[i]->DrawSprite();
 	}
 
 	// Draw all enemy sprites
-	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		_enemy_actors[i]->DrawSprite();
 	}
@@ -759,7 +755,7 @@ void BattleMode::_DrawSprites() {
 		VideoManager->MoveRelative(actor_target->GetAttackPoint(point)->GetXPosition(), actor_target->GetAttackPoint(point)->GetYPosition());
 		_attack_point_indicator.Draw();
 	}
-}
+} // void BattleMode::_DrawSprites()
 
 
 

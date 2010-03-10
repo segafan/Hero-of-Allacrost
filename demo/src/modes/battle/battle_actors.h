@@ -84,16 +84,16 @@ public:
 	void AddSkill(uint32 skill_id)
 		{}
 
-	//! \brief Adds a battle effect to the actor's vector
-	void AddEffect(hoa_global::GlobalStatusEffect* new_effect);
-
-	//! \brief Adds a battle effect to the actor's vector
-	void AddNewEffect(uint32 id);
-
 	/** \brief Changes the state of the actor and modifies the actor's properties accordingly
 	*** \param new_state The state to set the actor to
 	**/
 	virtual void ChangeState(ACTOR_STATE new_state);
+
+	//! \brief Returns the width of the actor's sprite image
+	virtual float GetSpriteWidth() const = 0;
+
+	//! \brief Returns the height of the actor's sprite image
+	virtual float GetSpriteHeight() const = 0;
 
 	/** \brief Deals damage to the actor by reducing its hit points by a certain amount
 	*** \param amount The number of hit points to decrease on the actor
@@ -322,6 +322,12 @@ public:
 
 	void ChangeState(ACTOR_STATE new_state);
 
+	float GetSpriteWidth() const
+		{ return 0.0f; } // TEMP: should retrieve width of current sprite animation
+
+	float GetSpriteHeight() const
+		{ return 0.0f; } // TEMP: should retrieve height of current sprite animation
+
 	/** \brief Changes the actor's current sprite animation image
 	*** \param alias The alias text used to identify the animation to change
 	**/
@@ -383,6 +389,12 @@ public:
 		{ return true; }
 
 	void ChangeState(ACTOR_STATE new_state);
+
+	float GetSpriteWidth() const
+		{ return _global_enemy->GetBattleSpriteFrames()->at(0).GetWidth(); }
+
+	float GetSpriteHeight() const
+		{ return _global_enemy->GetBattleSpriteFrames()->at(0).GetHeight(); }
 
 	void Update();
 
