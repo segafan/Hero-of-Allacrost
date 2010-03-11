@@ -303,7 +303,7 @@ function CreateDialogue()
 
 	text = hoa_system.Translate("No!");
 	dialogue:AddText(text, 1000, 1, 0, false);
-	text = hoa_system.Translate("What have you done...");
+	text = hoa_system.Translate("What have you done…");
 	dialogue:AddText(text, 1000, 2, 0, false);
 	text = hoa_system.Translate("I’m sorry.  I didn't want to have to do that.");
 	dialogue:AddText(text, 2, 3, 0, false);
