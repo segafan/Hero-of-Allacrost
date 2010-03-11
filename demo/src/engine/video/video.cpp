@@ -48,7 +48,7 @@ eglBindFramebuffer_ptr eglBindFramebuffer;
 static void InitExtensions()
 {
 	const char* extensions = (const char*)glGetString(GL_EXTENSIONS);
-	extension_FBO = strstr(extensions, "GL_EXT_framebuffer_object");
+	extension_FBO = (bool)strstr(extensions, "GL_EXT_framebuffer_object");
 	eglGenFramebuffers      =
 	                    (eglGenFramebuffers_ptr)SDL_GL_GetProcAddress("glGenFramebuffersEXT");
 	eglFramebufferTexture2D =
@@ -121,8 +121,6 @@ VideoEngine::VideoEngine() :
 	_x_shake = 0;
 	_y_shake = 0;
 	_gamma_value = 1.0f;
-	_fog_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
-	_fog_intensity = 0.0f;
 	_light_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	_gl_error_code = GL_NO_ERROR;
 	_animation_counter = 0;
@@ -233,6 +231,8 @@ bool VideoEngine::SingletonInitialize() {
 		PRINT_ERROR << "SDL video initialization failed" << endl;
 		return false;
 	}
+
+	
 
 	return true;
 } // bool VideoEngine::SingletonInitialize()
@@ -497,6 +497,8 @@ bool VideoEngine::ApplySettings() {
 			}
 		}
 
+		InitExtensions();
+
 		// Turn off writing to the depth buffer
 		glDepthMask(GL_FALSE);
 
@@ -506,7 +508,6 @@ bool VideoEngine::ApplySettings() {
 
 		if (TextureManager)
 			TextureManager->ReloadTextures();
-		EnableFog(_fog_color, _fog_intensity);
 
 		return true;
 	} // if (_target == VIDEO_TARGET_SDL_WINDOW)
@@ -753,46 +754,6 @@ void VideoEngine::DisableSceneLighting() {
 	_light_overlay_fbo = 0;
 	_uses_lights = false;
 }
-
-
-
-void VideoEngine::EnableFog(const Color &color, float intensity) {
-	// Set the parameters
-	_fog_color = color;
-	_fog_intensity = intensity;
-
-	// Check if te intensity is within acceptable bounds
-	if (_fog_intensity < 0.0f) {
-		_fog_intensity = 0.0f;
-		IF_PRINT_DEBUG(VIDEO_DEBUG) << "intensity argument was less than 0.0f" << endl;
-	}
-	else if (_fog_intensity > 1.0f) {
-		_fog_intensity = 1.0f;
-		IF_PRINT_DEBUG(VIDEO_DEBUG) << "intensity argument was greater than 1.0f" << endl;
-	}
-
-
-	// Apply the new settings with OpenGL
-	if (IsFloatEqual(intensity, 0.0f)) {
-		glDisable(GL_FOG);
-	}
-	else {
-		glEnable(GL_FOG);
-		glHint(GL_FOG_HINT, GL_DONT_CARE);
-		glFogf(GL_FOG_MODE, GL_LINEAR);
-		glFogf(GL_FOG_START, 0.0f - intensity);
-		glFogf(GL_FOG_END, 1.0f - intensity);
-		glFogfv(GL_FOG_COLOR, (GLfloat *)color.GetColors());
-	}
-}
-
-
-
-void VideoEngine::DisableFog() {
-	glDisable(GL_FOG);
-	_fog_intensity = 0.0f;
-}
-
 
 
 void VideoEngine::ApplyLightingOverlay() {
@@ -1275,7 +1236,7 @@ void VideoEngine::DrawRectangleOutline(float left, float right, float bottom, fl
 }
 
 
-void VideoEngine::DrawHalo(const StillImage &id, float x, float y, const Color &color) {
+void VideoEngine::DrawHalo(const ImageDescriptor &id, float x, float y, const Color &color) {
 	PushMatrix();
 	Move(x, y);
 
@@ -1288,7 +1249,10 @@ void VideoEngine::DrawHalo(const StillImage &id, float x, float y, const Color &
 
 
 
-void VideoEngine::DrawLight(const StillImage &id, float x, float y, const Color &color) {
+
+void VideoEngine::DrawLight(float radius, float x, float y, const Color &color) {
+	static const int NUM_SIDES = 32;
+
 	if (!extension_FBO)
 		return;
 	if (_uses_lights == false) {
@@ -1298,15 +1262,40 @@ void VideoEngine::DrawLight(const StillImage &id, float x, float y, const Color 
 
 	eglBindFramebuffer(GL_FRAMEBUFFER_EXT, _light_overlay_fbo);
 	glViewport(0, 0, 1024, 1024);
-	
 
 	PushMatrix();
 	Move(x, y);
 	
-	char old_blend_mode = _current_context.blend;
-	_current_context.blend = VIDEO_BLEND_ADD;
-	id.Draw(color);
-	_current_context.blend = old_blend_mode;
+	glEnable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+	// generate a vertex array
+	GLfloat vertices[2+(2*NUM_SIDES)];
+	GLfloat colours[4+(4*NUM_SIDES)];
+	vertices[0] = 0.0f;
+	vertices[1] = 0.0f;
+	memset(colours, 0, sizeof(float)*(4+(4*NUM_SIDES)));
+	colours[0] = color.GetRed();
+	colours[1] = color.GetGreen();
+	colours[2] = color.GetBlue();
+	colours[3] = color.GetAlpha();
+	for (int i = 0; i < NUM_SIDES; i++)
+	{
+		float fraction = i / (float)(NUM_SIDES - 1);
+		float angle = fraction * M_PI * 2.0f;
+		vertices[2+(i*2)+0] = cosf(angle) * radius;
+		vertices[2+(i*2)+1] = sinf(angle) * radius;
+	}
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glVertexPointer(2, GL_FLOAT, 0, vertices);
+	glColorPointer(4, GL_FLOAT, 0, colours);
+	
+	glDrawArrays(GL_TRIANGLE_FAN, 0, NUM_SIDES+1);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 	
 	PopMatrix();
 

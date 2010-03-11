@@ -880,7 +880,6 @@ void TextSupervisor::_DrawTextHelper(const uint16* const text, FontProperties* f
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
-	glDisable(GL_FOG);
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.1f);
 
@@ -961,8 +960,6 @@ void TextSupervisor::_DrawTextHelper(const uint16* const text, FontProperties* f
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glPopMatrix();
 
-	if (VideoManager->_fog_intensity > 0.0f)
-		glEnable(GL_FOG);
 	glDisable(GL_ALPHA_TEST);
 } // void TextSupervisor::_DrawTextHelper(const uint16* const text, FontProperties* fp, Color color)
 

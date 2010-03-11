@@ -533,7 +533,7 @@ public:
 	TextureController* Textures()
 		{ return TextureManager; }
 
-	//-- Lighting and fog -----------------------------------------------------
+	//-- Lighting -----------------------------------------------------
 
 	/** \brief turn on the ligt color for the scene
 	 * \param color the light color to use
@@ -550,15 +550,6 @@ public:
 	const Color& GetSceneLightingColor()
 		{ return _light_color; }
 
-	/** \brief Initializes and enables fog parameters
-	*** \param color The color of the fog (the alpha value should be 1.0)
-	*** \param intensity Intensity of fog from 0.0f to 1.0f. 0.0f will disable fog.
-	**/
-	void EnableFog(const Color& color, float intensity);
-
-	//! \brief Disables the fog effect
-	void DisableFog();
-
 	/** \brief draws a halo at the given spot
 	 *
 	 *  \param id    image descriptor for the halo image
@@ -566,16 +557,16 @@ public:
 	 *  \param y     y coordinate of halo
 	 *  \param color color of halo
 	 */
-	void DrawHalo(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
+	void DrawHalo(const ImageDescriptor &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
 	/** \brief draws a real light at the given spot
 	 *
-	 *  \param id    image descriptor for the light mask
-	 *  \param x     x coordinate of light
-	 *  \param y     y coordinate of light
-	 *  \param color color of light
+	 *  \param radius light radius
+	 *  \param x      x coordinate of light
+	 *  \param y      y coordinate of light
+	 *  \param color  color of light
 	 */
-	void DrawLight(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
+	void DrawLight(float radius, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
 	/** \brief call after all map images are drawn to apply lighting. All
 	 *         menu and text rendering should occur AFTER this call, so that
@@ -868,12 +859,6 @@ private:
 
 	//! Image used for rendering rectangles
 	StillImage _rectangle_image;
-
-	//! current fog color (set by SetFog())
-	Color _fog_color;
-
-	//! current fog intensity (set by SetFog())
-	float _fog_intensity;
 
 	//! current scene lighting color (essentially just modulates vertex colors of all the images)
 	Color _light_color;
