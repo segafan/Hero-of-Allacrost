@@ -1466,8 +1466,10 @@ void BootMode::_AnimateLogo() {
 		// Delta goes from 1.0f to 0.0f
 		float delta = (total_time - SEQUENCE_SIX) / (SEQUENCE_SEVEN - SEQUENCE_SIX);
 		delta = 1.0f - delta * delta;
-		VideoManager->EnableFog(Color::white, delta);
 		_DrawBackgroundItems();
+		Color targetColor(Color::white);
+		targetColor.SetAlpha(delta);
+		VideoManager->DrawFullscreenOverlay(targetColor);
 	}
 	else if (total_time >= SEQUENCE_SEVEN) {
 		_EndLogoAnimation();
@@ -1478,8 +1480,6 @@ void BootMode::_AnimateLogo() {
 
 
 void BootMode::_EndLogoAnimation() {
-	VideoManager->DisableFog(); // Turn off the fog
-
 	// Stop playing SFX and start playing the main theme
 //	_boot_music.at(1).SetFadeOutTime(1000);
 	_boot_music.at(1).Stop();
