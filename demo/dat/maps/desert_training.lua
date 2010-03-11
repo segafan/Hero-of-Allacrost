@@ -640,7 +640,7 @@ function CreateDialogue()
 	end
 
 	dialogue = hoa_map.MapDialogue(7);
-	text = hoa_system.Translate("Back home... hey Claudius, we should get some rest.  Let's head back to the barracks.");
+	text = hoa_system.Translate("Back home… hey Claudius, we should get some rest.  Let's head back to the barracks.");
 	dialogue:AddText(text, 2, 1, 0, false);
 	text = hoa_system.Translate("Okay, let's call it a night.");
 	dialogue:AddText(text, 1000, -1, 22113, false);

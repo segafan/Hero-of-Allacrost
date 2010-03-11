@@ -683,7 +683,7 @@ function Load(m)
 	dialogue:AddText(text, 1000, 3, 0, false);
 	text = hoa_system.Translate("He can wait.");
 	dialogue:AddText(text, 2, 4, 0, false);
-	text = hoa_system.Translate("...What?");
+	text = hoa_system.Translate("…What?");
 	dialogue:AddText(text, 1000, 5, 0, false);
 	text = hoa_system.Translate("(Kyle hands Claudius a cloth.  Inside is a piece of cake.");
 	dialogue:AddText(text, 2, 6, 0, false);
@@ -697,7 +697,7 @@ function Load(m)
 	dialogue:AddText(text, 1000, 10, 0, false);
 	text = hoa_system.Translate("Don’t mention it. I’m already on bad terms with the captain, there’s no sense in you getting in trouble too.");
 	dialogue:AddText(text, 2, 11, 0, false);
-	text = hoa_system.Translate("Hey, what's that... look out!");
+	text = hoa_system.Translate("Hey, what's that… look out!");
 	dialogue:AddText(text, 1000, -1, 2, false);
 
 	kyle:AddDialogueReference(1);
