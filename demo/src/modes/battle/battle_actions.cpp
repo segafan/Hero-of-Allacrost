@@ -80,7 +80,7 @@ uint32 SkillAction::GetWarmUpTime() const {
 	if (_skill == NULL)
 		return 0;
 	else
-		return (_skill->GetWarmupTime() * timer_multiplier);
+		return _skill->GetWarmupTime();
 }
 
 

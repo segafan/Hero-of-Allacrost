@@ -31,13 +31,6 @@ namespace hoa_battle {
 
 namespace private_battle {
 
-// This is used in timers to adjust the speed of the entire battle. I think its basically meant to be a
-// TEMP variable
-extern float timer_multiplier;
-
-extern bool wait;
-
-
 //! \name Screen dimension constants
 //@{
 //! \brief Battle scenes are visualized via an invisible grid of 64x64 tiles
@@ -59,13 +52,27 @@ const uint32 CATEGORY_SUPPORT   = 2;
 const uint32 CATEGORY_ITEM      = 3;
 //@}
 
-//! Returned as an index when looking for a character or enemy and they do not exist
+
+//! \brief Position constants representing the significant locations along the stamina meter
+//@{
+//! \brief The bottom most position of the stamina bar
+const float STAMINA_LOCATION_BOTTOM = 128.0f;
+
+//! \brief The location where each actor is allowed to select a command
+const float STAMINA_LOCATION_COMMAND = STAMINA_LOCATION_BOTTOM + 354.0f;
+
+//! \brief The top most position of the stamina bar where actors are ready to execute their actions
+const float STAMINA_LOCATION_TOP = STAMINA_LOCATION_BOTTOM + 508.0f;
+//@}
+
+
+//! \brief Returned as an index when looking for a character or enemy and they do not exist
 const uint32 INVALID_BATTLE_ACTOR_INDEX = 999;
 
-//! When a battle first starts, this is the wait time for the slowest actor
+//! \brief When a battle first starts, this is the wait time for the slowest actor
 const uint32 MAX_INIT_WAIT_TIME = 8000;
 
-//! Warm up time for using items (try to keep short, should be constant regardless of item used)
+//! \brief Warm up time for using items (try to keep short, should be constant regardless of item used)
 const uint32 ITEM_WARM_UP_TIME = 1000;
 
 
@@ -85,32 +92,20 @@ enum BATTLE_STATE {
 //! \brief Represents the possible states that a BattleActor may be in
 enum ACTOR_STATE {
 	ACTOR_STATE_INVALID       = -1,
-	//! Actor is recovering stamina so they can execute another action
-	ACTOR_STATE_IDLE          =  0,
-	//! Actor is finished with the idle state but has not yet selected an action to execute
-	ACTOR_STATE_COMMAND       =  1,
-	//! Actor has selected an action and is preparing to execute it
-	ACTOR_STATE_WARM_UP       =  2,
-	//! Actor is prepared to execute action and is waiting their turn to act
-	ACTOR_STATE_READY         =  3,
-	//! Actor is in the process of executing their selected action
-	ACTOR_STATE_ACTING        =  4,
-	//! Actor is finished with previous action execution and recovering
-	ACTOR_STATE_COOL_DOWN     =  5,
-	//! Actor has perished and is inactive in battle
-	ACTOR_STATE_DEAD          =  6,
-	//! Actor is in some state of paralysis and can not act nor recover stamina
-	ACTOR_STATE_PARALYZED     =  7,
+	ACTOR_STATE_IDLE          =  0, //!< Actor is recovering stamina so they can execute another action
+	ACTOR_STATE_COMMAND       =  1, //!< Actor is finished with the idle state but has not yet selected an action to execute
+	ACTOR_STATE_WARM_UP       =  2, //!< Actor has selected an action and is preparing to execute it
+	ACTOR_STATE_READY         =  3, //!< Actor is prepared to execute action and is waiting their turn to act
+	ACTOR_STATE_ACTING        =  4, //!< Actor is in the process of executing their selected action
+	ACTOR_STATE_COOL_DOWN     =  5, //!< Actor is finished with previous action execution and recovering
+	ACTOR_STATE_DEAD          =  6, //!< Actor has perished and is inactive in battle
+	ACTOR_STATE_PARALYZED     =  7, //!< Actor is in some state of paralysis and can not act nor recover stamina
 	ACTOR_STATE_TOTAL         =  8
 };
 
 
 
-/** \brief Enums for the various states that the CommandSupervisor class may be in
-*** See the descriptions of the various views for the ActionWindow class to
-*** understand what these constants represent
-***
-**/
+//! \brief Enums for the various states that the CommandSupervisor class may be in
 enum COMMAND_STATE {
 	COMMAND_STATE_INVALID = -1,
 	//! Player is selecting the type of action to execute
@@ -125,11 +120,7 @@ enum COMMAND_STATE {
 };
 
 
-/** \brief Enums for the various states that the FinishWindow class may be in
-*** See the descriptions of the various views for the ActionWindow class to
-*** understand what these constants represent
-***
-**/
+//! \brief Enums for the various states that the FinishWindow class may be in
 enum FINISH_WINDOW_STATE {
 	FINISH_INVALID = -1,
 	//! Announces that the player is victorious and notes any characters who have gained an experience level
@@ -158,17 +149,6 @@ enum FINISH_WINDOW_STATE {
 };
 
 
-//! \brief Position constants representing the significant locations along the stamina meter
-//@{
-//! \brief The bottom most position of the stamina bar
-const float STAMINA_LOCATION_BOTTOM = 128.0f;
-
-//! \brief The location where each actor is allowed to select a command
-const float STAMINA_LOCATION_COMMAND = STAMINA_LOCATION_BOTTOM + 354.0f;
-
-//! \brief The top most position of the stamina bar where actors are ready to execute their actions
-const float STAMINA_LOCATION_TOP = STAMINA_LOCATION_BOTTOM + 508.0f;
-//@}
 
 
 /** \name Command battle calculation functions

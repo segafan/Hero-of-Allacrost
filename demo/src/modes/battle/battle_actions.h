@@ -155,7 +155,7 @@ public:
 	bool Execute();
 
 	uint32 GetWarmUpTime() const
-		{ return (ITEM_WARM_UP_TIME * timer_multiplier); }
+		{ return ITEM_WARM_UP_TIME; }
 
 	uint32 GetCoolDownTime() const
 		{ return 0; }
