@@ -4,5 +4,7 @@
 -- The second entry corresponds to the name of the gettext PO file for that
 -- language.
 languages = {}
-languages[1] = { hoa_system.Translate("English"), "en@quot" }
-languages[2] = { hoa_system.Translate("French"), "fr" }
+languages[1] = { "English", "en@quot" }
+languages[2] = { "Français", "fr" }
+languages[3] = { "Português do Brasil", "pt_BR" }
+languages[4] = { "Español", "es" }
