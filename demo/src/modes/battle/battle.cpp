@@ -582,12 +582,12 @@ void BattleMode::_Initialize() {
 	// The lower the value of timer_multiplier, the faster the battle goes
 	float proportion;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		proportion = timer_multiplier * (static_cast<float>(min_agility) / static_cast<float>(_character_actors[i]->GetAgility()));
+		proportion = static_cast<float>(min_agility) / static_cast<float>(_character_actors[i]->GetAgility());
 		_character_actors[i]->SetIdleStateTime(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
 		_character_actors[i]->ChangeState(ACTOR_STATE_IDLE);
 	}
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-		proportion = timer_multiplier * (static_cast<float>(min_agility) / static_cast<float>(_enemy_actors[i]->GetAgility()));
+		proportion = static_cast<float>(min_agility) / static_cast<float>(_enemy_actors[i]->GetAgility());
 		_enemy_actors[i]->SetIdleStateTime(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
 		_enemy_actors[i]->ChangeState(ACTOR_STATE_IDLE);
 	}

@@ -235,7 +235,10 @@ private:
 	**/
 	std::deque<private_battle::BattleCharacter*> _character_actors;
 
-	//! \brief Identical to the _character_actors container except that the elements are BattleActor pointers
+	/** \brief Identical to the _character_actors container except that the elements are BattleActor pointers
+	*** \note This container is necessary for the GlobalTarget class, which needs a common data type so that
+	*** it may point to either the character or enemy party.
+	**/
 	std::deque<private_battle::BattleActor*> _character_party;
 
 	/** \brief Enemies that are presently fighting in the battle
@@ -245,7 +248,10 @@ private:
 	**/
 	std::deque<private_battle::BattleEnemy*> _enemy_actors;
 
-	//! \brief Identical to the _enemy_actors container except that the elements are BattleActor pointers
+	/** \brief Identical to the _enemy_actors container except that the elements are BattleActor pointers
+	*** \note This container is necessary for the GlobalTarget class, which needs a common data type so that
+	*** it may point to either the character or enemy party.
+	**/
 	std::deque<private_battle::BattleActor*> _enemy_party;
 
 	/** \brief A FIFO queue for characters who are awaiting their turn to have a command selected by the player
@@ -303,16 +309,6 @@ private:
 
 	//! \brief Contains BattleEvents applicable to current battle
 	std::vector<BattleEvent*> _events;
-
-// 	hoa_map::private_map::DialogueWindow _dialogue_window;
-//
-// 	bool _dialogue_on;
-//
-// 	hoa_utils::ustring _speaker_name;
-//
-// 	std::deque<hoa_utils::ustring> _dialogue_text;
-
-// 	bool _after_scripts_finished;
 
 	//! \name Battle Media Data
 	//@{
@@ -395,9 +391,7 @@ private:
 	**/
 	uint32 _NumberCharactersAlive() const;
 
-	/** \name Draw helper functions
-	*** \brief Functions which draw various components of the battle screen
-	**/
+	//! \name Draw assistant functions
 	//@{
 	/** \brief Draws all background images and animations
 	*** The images and effects drawn by this function will never be drawn over anything else in the battle
