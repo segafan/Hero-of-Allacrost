@@ -29,8 +29,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 0.2.2\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-03-14 15:49-0300\n"
-"PO-Revision-Date: 2010-03-14 15:49-0300\n"
+"POT-Creation-Date: 2010-03-14 21:20-0400\n"
+"PO-Revision-Date: 2010-03-14 21:20-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -90,7 +90,7 @@ msgstr "Octavia"
 msgid "Karlate"
 msgstr "Karlate"
 
-#: dat/maps/betrayal_room.lua:215 dat/maps/desert_barracks.lua:439
+#: dat/maps/betrayal_room.lua:215 dat/maps/desert_barracks.lua:441
 msgid "Hector"
 msgstr "Hector"
 
@@ -182,47 +182,47 @@ msgstr "Everyone down to the cave floor! He might still be alive!"
 msgid "Damn you, Kyle."
 msgstr "Damn you, Kyle."
 
-#: dat/maps/desert_barracks.lua:409
+#: dat/maps/desert_barracks.lua:411
 msgid "Fred"
 msgstr "Fred"
 
-#: dat/maps/desert_barracks.lua:419
+#: dat/maps/desert_barracks.lua:421
 msgid "Scott"
 msgstr "Scott"
 
-#: dat/maps/desert_barracks.lua:426
+#: dat/maps/desert_barracks.lua:428
 msgid "Alex"
 msgstr "Alex"
 
-#: dat/maps/desert_barracks.lua:456
+#: dat/maps/desert_barracks.lua:458
 msgid "Jeff"
 msgstr "Jeff"
 
-#: dat/maps/desert_barracks.lua:463
+#: dat/maps/desert_barracks.lua:465
 msgid "Tim"
 msgstr "Tim"
 
-#: dat/maps/desert_barracks.lua:470
+#: dat/maps/desert_barracks.lua:472
 msgid "Joe"
 msgstr "Joe"
 
-#: dat/maps/desert_barracks.lua:559
+#: dat/maps/desert_barracks.lua:561
 msgid "Claudius?  Claudius!  WAKE UP!"
 msgstr "Claudius?  Claudius!  WAKE UP!"
 
-#: dat/maps/desert_barracks.lua:561
+#: dat/maps/desert_barracks.lua:563
 msgid "Huh?  What?"
 msgstr "Huh?  What?"
 
-#: dat/maps/desert_barracks.lua:563
+#: dat/maps/desert_barracks.lua:565
 msgid "Get your gear and let’s go!"
 msgstr "Get your gear and let’s go!"
 
-#: dat/maps/desert_barracks.lua:565
+#: dat/maps/desert_barracks.lua:567
 msgid "What’s going on?"
 msgstr "What’s going on?"
 
-#: dat/maps/desert_barracks.lua:567
+#: dat/maps/desert_barracks.lua:569
 msgid ""
 "The treasury!  A thief has broken in and stolen everything.  The captain has "
 "called a man hunt.  Now equip yourself and meet us out front."
@@ -230,33 +230,33 @@ msgstr ""
 "The treasury!  A thief has broken in and stolen everything.  The captain has "
 "called a man hunt.  Now equip yourself and meet us out front."
 
-#: dat/maps/desert_barracks.lua:569
+#: dat/maps/desert_barracks.lua:571
 msgid "Come on, Kyle, let’s go! Kyle?"
 msgstr "Come on, Kyle, let’s go! Kyle?"
 
-#: dat/maps/desert_barracks.lua:571
+#: dat/maps/desert_barracks.lua:573
 msgid "Oh no."
 msgstr "Oh no."
 
-#: dat/maps/desert_barracks.lua:576
+#: dat/maps/desert_barracks.lua:578
 msgid "This way to the barracks."
 msgstr "This way to the barracks."
 
-#: dat/maps/desert_barracks.lua:581
+#: dat/maps/desert_barracks.lua:583
 msgid "Entry into the kitchen is strictly forbidden!"
 msgstr "Entry into the kitchen is strictly forbidden!"
 
-#: dat/maps/desert_barracks.lua:586
+#: dat/maps/desert_barracks.lua:588
 msgid ""
 "Hi, Claudius.  If you're looking for the captain, he's at the training hall."
 msgstr ""
 "Hi, Claudius.  If you're looking for the captain, he's at the training hall."
 
-#: dat/maps/desert_barracks.lua:591
+#: dat/maps/desert_barracks.lua:593
 msgid "I'll stay behind and protect the barracks.  Good luck!"
 msgstr "I'll stay behind and protect the barracks.  Good luck!"
 
-#: dat/maps/desert_barracks.lua:596
+#: dat/maps/desert_barracks.lua:598
 msgid ""
 "For those of you who don’t know, a thief has broken into the armory. It is "
 "up to us to capture him. Split up and comb the area."
@@ -264,19 +264,19 @@ msgstr ""
 "For those of you who don’t know, a thief has broken into the armory. It is "
 "up to us to capture him. Split up and comb the area."
 
-#: dat/maps/desert_barracks.lua:598 dat/maps/desert_training.lua:572
+#: dat/maps/desert_barracks.lua:600 dat/maps/desert_training.lua:572
 msgid "Sir?"
 msgstr "Sir?"
 
-#: dat/maps/desert_barracks.lua:600
+#: dat/maps/desert_barracks.lua:602
 msgid "Yes, Claudius?"
 msgstr "Yes, Claudius?"
 
-#: dat/maps/desert_barracks.lua:602
+#: dat/maps/desert_barracks.lua:604
 msgid "…Nothing."
 msgstr "…Nothing."
 
-#: dat/maps/desert_barracks.lua:604
+#: dat/maps/desert_barracks.lua:606
 msgid "You have your orders.  Now go."
 msgstr "You have your orders.  Now go."
 
@@ -556,11 +556,11 @@ msgstr ""
 msgid "Okay, let's call it a night."
 msgstr "Okay, let's call it a night."
 
-#: dat/maps/new_cave.lua:788
+#: dat/maps/new_cave.lua:789
 msgid "Kyle!"
 msgstr "Kyle!"
 
-#: dat/maps/new_cave.lua:793
+#: dat/maps/new_cave.lua:794
 msgid ""
 "Stop this, Kyle. You can’t escape. Lower your weapon and come peacefully and "
 "I’ll make sure your punishment is lenient."
@@ -568,11 +568,11 @@ msgstr ""
 "Stop this, Kyle. You can’t escape. Lower your weapon and come peacefully and "
 "I’ll make sure your punishment is lenient."
 
-#: dat/maps/new_cave.lua:798
+#: dat/maps/new_cave.lua:799
 msgid "No. I’m doing this for me. I don’t expect you to understand."
 msgstr "No. I’m doing this for me. I don’t expect you to understand."
 
-#: dat/maps/new_cave.lua:803
+#: dat/maps/new_cave.lua:804
 msgid "Then you leave me no choice."
 msgstr "Then you leave me no choice."
 
@@ -796,8 +796,8 @@ msgstr "Pause: "
 msgid "Restore defaults"
 msgstr "Restore defaults"
 
-#: src/modes/boot/boot.cpp:749 src/modes/menu/menu.cpp:557
-#: src/modes/menu/menu.cpp:625 src/modes/menu/menu.cpp:640
+#: src/modes/boot/boot.cpp:749 src/modes/menu/menu.cpp:523
+#: src/modes/menu/menu.cpp:591 src/modes/menu/menu.cpp:606
 msgid "Save"
 msgstr "Save"
 
@@ -1098,142 +1098,138 @@ msgstr "With the additional "
 msgid " drunes found in this treasure added, the party now holds a total of "
 msgstr " drunes found in this treasure added, the party now holds a total of "
 
-#: src/modes/menu/menu.cpp:272
-msgid "Your game has been saved."
-msgstr "Your game has been saved."
-
-#: src/modes/menu/menu.cpp:553
+#: src/modes/menu/menu.cpp:519
 msgid "Inventory"
 msgstr "Inventory"
 
-#: src/modes/menu/menu.cpp:554
+#: src/modes/menu/menu.cpp:520
 msgid "Skills"
 msgstr "Skills"
 
-#: src/modes/menu/menu.cpp:555 src/modes/menu/menu.cpp:670
+#: src/modes/menu/menu.cpp:521 src/modes/menu/menu.cpp:636
 msgid "Equip"
 msgstr "Equip"
 
-#: src/modes/menu/menu.cpp:556
+#: src/modes/menu/menu.cpp:522
 msgid "Status"
 msgstr "Status"
 
-#: src/modes/menu/menu.cpp:558
+#: src/modes/menu/menu.cpp:524
 msgid "Formation"
 msgstr "Formation"
 
-#: src/modes/menu/menu.cpp:574 src/modes/menu/menu.cpp:592
+#: src/modes/menu/menu.cpp:540 src/modes/menu/menu.cpp:558
 msgid "Use"
 msgstr "Use"
 
-#: src/modes/menu/menu.cpp:576 src/modes/menu/menu.cpp:593
-#: src/modes/menu/menu.cpp:608 src/modes/menu/menu.cpp:626
-#: src/modes/menu/menu.cpp:641 src/modes/menu/menu.cpp:656
-#: src/modes/menu/menu.cpp:672
+#: src/modes/menu/menu.cpp:542 src/modes/menu/menu.cpp:559
+#: src/modes/menu/menu.cpp:574 src/modes/menu/menu.cpp:592
+#: src/modes/menu/menu.cpp:607 src/modes/menu/menu.cpp:622
+#: src/modes/menu/menu.cpp:638
 msgid "Back"
 msgstr "Back"
 
-#: src/modes/menu/menu.cpp:607
+#: src/modes/menu/menu.cpp:573
 msgid "View"
 msgstr "View"
 
-#: src/modes/menu/menu.cpp:624
+#: src/modes/menu/menu.cpp:590
 msgid "Edit"
 msgstr "Edit"
 
-#: src/modes/menu/menu.cpp:655
+#: src/modes/menu/menu.cpp:621
 msgid "Switch"
 msgstr "Switch"
 
-#: src/modes/menu/menu.cpp:671
+#: src/modes/menu/menu.cpp:637
 msgid "Remove"
 msgstr "Remove"
 
-#: src/modes/menu/menu.cpp:856
+#: src/modes/menu/menu.cpp:822
 msgid "STR: "
 msgstr "STR: "
 
-#: src/modes/menu/menu.cpp:859
+#: src/modes/menu/menu.cpp:825
 msgid "VIG: "
 msgstr "VIG: "
 
-#: src/modes/menu/menu.cpp:862
+#: src/modes/menu/menu.cpp:828
 msgid "FRT: "
 msgstr "FRT: "
 
-#: src/modes/menu/menu.cpp:865
+#: src/modes/menu/menu.cpp:831
 msgid "PRO: "
 msgstr "PRO: "
 
-#: src/modes/menu/menu.cpp:868
+#: src/modes/menu/menu.cpp:834
 msgid "AGI: "
 msgstr "AGI: "
 
-#: src/modes/menu/menu.cpp:871
+#: src/modes/menu/menu.cpp:837
 msgid "EVD: "
 msgstr "EVD: "
 
-#: src/modes/menu/menu.cpp:875
+#: src/modes/menu/menu.cpp:841
 msgid "Current Equipment:"
 msgstr "Current Equipment:"
 
-#: src/modes/menu/menu.cpp:878 src/modes/menu/menu_views.cpp:1395
+#: src/modes/menu/menu.cpp:844 src/modes/menu/menu_views.cpp:1395
 msgid "Weapon"
 msgstr "Weapon"
 
-#: src/modes/menu/menu.cpp:881
+#: src/modes/menu/menu.cpp:847
 msgid "Head"
 msgstr "Head"
 
-#: src/modes/menu/menu.cpp:884
+#: src/modes/menu/menu.cpp:850
 msgid "Torso"
 msgstr "Torso"
 
-#: src/modes/menu/menu.cpp:887 src/modes/menu/menu_views.cpp:204
+#: src/modes/menu/menu.cpp:853 src/modes/menu/menu_views.cpp:204
 msgid "Arm"
 msgstr "Arm"
 
-#: src/modes/menu/menu.cpp:890
+#: src/modes/menu/menu.cpp:856
 msgid "Legs"
 msgstr "Legs"
 
-#: src/modes/menu/menu.cpp:895
+#: src/modes/menu/menu.cpp:861
 msgid "PHYS ATK: "
 msgstr "PHYS ATK: "
 
-#: src/modes/menu/menu.cpp:898 src/modes/menu/menu.cpp:901
-#: src/modes/menu/menu.cpp:904 src/modes/menu/menu.cpp:907
+#: src/modes/menu/menu.cpp:864 src/modes/menu/menu.cpp:867
+#: src/modes/menu/menu.cpp:870 src/modes/menu/menu.cpp:873
 msgid "PHYS DEF: "
 msgstr "PHYS DEF: "
 
-#: src/modes/menu/menu.cpp:912
+#: src/modes/menu/menu.cpp:878
 msgid "META ATK: "
 msgstr "META ATK: "
 
-#: src/modes/menu/menu.cpp:915 src/modes/menu/menu.cpp:918
-#: src/modes/menu/menu.cpp:921 src/modes/menu/menu.cpp:924
+#: src/modes/menu/menu.cpp:881 src/modes/menu/menu.cpp:884
+#: src/modes/menu/menu.cpp:887 src/modes/menu/menu.cpp:890
 msgid "META DEF: "
 msgstr "META DEF: "
 
-#: src/modes/menu/menu.cpp:939
+#: src/modes/menu/menu.cpp:905
 msgid "PHYS ATK:"
 msgstr "PHYS ATK:"
 
-#: src/modes/menu/menu.cpp:944
+#: src/modes/menu/menu.cpp:910
 msgid "META ATK:"
 msgstr "META ATK:"
 
-#: src/modes/menu/menu.cpp:958 src/modes/menu/menu.cpp:977
-#: src/modes/menu/menu.cpp:996 src/modes/menu/menu.cpp:1015
+#: src/modes/menu/menu.cpp:924 src/modes/menu/menu.cpp:943
+#: src/modes/menu/menu.cpp:962 src/modes/menu/menu.cpp:981
 msgid "PHYS DEF:"
 msgstr "PHYS DEF:"
 
-#: src/modes/menu/menu.cpp:963 src/modes/menu/menu.cpp:982
-#: src/modes/menu/menu.cpp:1001 src/modes/menu/menu.cpp:1020
+#: src/modes/menu/menu.cpp:929 src/modes/menu/menu.cpp:948
+#: src/modes/menu/menu.cpp:967 src/modes/menu/menu.cpp:986
 msgid "META DEF:"
 msgstr "META DEF:"
 
-#: src/modes/menu/menu.cpp:1052
+#: src/modes/menu/menu.cpp:1018
 msgid "Drunes: "
 msgstr "Drunes: "
 
@@ -1336,14 +1332,6 @@ msgstr "Offhand"
 #: src/modes/menu/menu_views.cpp:1385 src/modes/menu/menu_views.cpp:1403
 msgid "Leggings"
 msgstr "Leggings"
-
-#: src/modes/menu/menu_views.cpp:1574 src/modes/shop/shop_confirm.cpp:127
-msgid "Yes"
-msgstr "Yes"
-
-#: src/modes/menu/menu_views.cpp:1575 src/modes/shop/shop_confirm.cpp:126
-msgid "No"
-msgstr "No"
 
 #: src/modes/pause.cpp:57
 msgid "Paused"
@@ -1538,6 +1526,14 @@ msgstr "Complete Transaction"
 msgid "This will remove all marked purchases, sales, and trades. Are you sure?"
 msgstr ""
 "This will remove all marked purchases, sales, and trades. Are you sure?"
+
+#: src/modes/shop/shop_confirm.cpp:126
+msgid "No"
+msgstr "No"
+
+#: src/modes/shop/shop_confirm.cpp:127
+msgid "Yes"
+msgstr "Yes"
 
 #: src/modes/shop/shop_confirm.cpp:669 src/modes/shop/shop_confirm.cpp:676
 #: src/modes/shop/shop_confirm.cpp:683 src/modes/shop/shop_leave.cpp:193

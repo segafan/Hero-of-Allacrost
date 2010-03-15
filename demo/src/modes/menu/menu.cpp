@@ -53,7 +53,6 @@ MenuMode* MenuMode::_current_instance = NULL;
 ////////////////////////////////////////////////////////////////////////////////
 
 MenuMode::MenuMode(ustring locale_name, string locale_image) :
-	_confirm_window(NULL),
 	_message_window(NULL)
 {
 	if (MENU_DEBUG)
@@ -187,9 +186,6 @@ MenuMode::~MenuMode() {
 
 	_current_instance = NULL;
 
-	if (_confirm_window != NULL)
-		delete _confirm_window;
-
 	if (_message_window != NULL)
 		delete _message_window;
 } // MenuMode::~MenuMode()
@@ -249,32 +245,6 @@ void MenuMode::Update() {
 		{
 			delete _message_window;
 			_message_window = NULL;
-		}
-		return;
-	}
-
-	// check to see if confirm window is still going
-	if (_confirm_window != NULL)
-	{
-		_confirm_window->Update();
-		// play sounds for the confirm window
-		if (InputManager->ConfirmPress())
-			_menu_sounds["confirm"].Play();
-		else if (InputManager->CancelPress())
-			_menu_sounds["cancel"].Play();
-		if (_confirm_window->Result() == CONFIRM_RESULT_YES)
-		{
-			// overwrite save
-			delete _confirm_window;
-			_confirm_window = NULL;
-			string filename = GetUserDataPath(true) + "saved_game.lua";
-			GlobalManager->SaveGame(filename);
-			_message_window = new MessageWindow(UTranslate("Your game has been saved."), 250.0f, 50.0f);
-		}
-		else if (_confirm_window->Result() == CONFIRM_RESULT_CANCEL || _confirm_window->Result() == CONFIRM_RESULT_NO)
-		{
-			delete _confirm_window;
-			_confirm_window = NULL;
 		}
 		return;
 	}
@@ -447,10 +417,6 @@ void MenuMode::Draw() {
 
 	// Draw currently active options box
 	_current_menu->Draw();
-
-	// Draw confirm window if it's active
-	if (_confirm_window != NULL)
-		_confirm_window->Draw();
 
 	// Draw message window if it's active
 	if (_message_window != NULL)

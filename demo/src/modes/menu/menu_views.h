@@ -506,45 +506,6 @@ private:
 
 }; // class FormationWindow : public hoa_video::MenuWindow
 
-/** **************************************************************************
-*** \brief The window that is displayed if the save game file already exits
-*** Gives the player the chance to choose to overwrite the save game file
-*** or to stop the save process
-*** **************************************************************************/
-class OverwriteConfirmWindow : public hoa_gui::MenuWindow
-{
-public:
-	OverwriteConfirmWindow(const std::string &message);
-
-	~OverwriteConfirmWindow();
-
-	//! \brief Standard Window Functions
-	//@{
-	void Update();
-	void Draw();
-	//@}
-
-	//! \brief Returns what the user selected in the window, true = yes, false = no
-	CONFIRM_RESULT Result()
-	{ return _option; }
-
-private:
-	//! what is displayed in this window
-	std::string _message;
-
-	//! Has an option been selected?
-	CONFIRM_RESULT _option;
-
-	//! Response from the user
-	hoa_gui::OptionBox _yes_no;
-
-	//! used to display the message
-	hoa_gui::TextBox _textbox;
-
-	//! \brief A map of the sounds used while in MenuMode
-	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
-}; // class OverwriteConfirmWindow
-
 /*!
 * \brief Converts a vector of GlobalItem*, etc. to a vector of GlobalObjects*
 * \return the same vector, with elements of type GlobalObject*
