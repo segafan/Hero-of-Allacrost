@@ -29,8 +29,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 0.2.2\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-03-14 21:20-0400\n"
-"PO-Revision-Date: 2010-03-14 21:20-0400\n"
+"POT-Creation-Date: 2010-03-14 23:32-0400\n"
+"PO-Revision-Date: 2010-03-14 23:32-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -301,8 +301,8 @@ msgid "…What?"
 msgstr "…What?"
 
 #: dat/maps/desert_outskirts.lua:688
-msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake."
-msgstr "(Kyle hands Claudius a cloth.  Inside is a piece of cake."
+msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake.)"
+msgstr "(Kyle hands Claudius a cloth.  Inside is a piece of cake.)"
 
 #: dat/maps/desert_outskirts.lua:690
 msgid ""

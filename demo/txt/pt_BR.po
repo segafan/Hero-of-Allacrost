@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Allacrost Demo 0.3.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-03-14 21:20-0400\n"
+"POT-Creation-Date: 2010-03-14 23:32-0400\n"
 "PO-Revision-Date: 2010-03-14 16:02-0300\n"
 "Last-Translator: Marcos Avila Isidoro <marcavis@yahoo.com.br>\n"
 "Language-Team: Team Allacrost\n"
@@ -284,7 +284,8 @@ msgid "…What?"
 msgstr "…Quê?"
 
 #: dat/maps/desert_outskirts.lua:688
-msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake."
+#, fuzzy
+msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake.)"
 msgstr ""
 "(Kyle entrega um pedaço de pano para Claudius. Dentro dele há uma fatia de "
 "bolo.)"
