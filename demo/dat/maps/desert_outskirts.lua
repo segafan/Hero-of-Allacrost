@@ -685,7 +685,7 @@ function Load(m)
 	dialogue:AddText(text, 2, 4, 0, false);
 	text = hoa_system.Translate("…What?");
 	dialogue:AddText(text, 1000, 5, 0, false);
-	text = hoa_system.Translate("(Kyle hands Claudius a cloth.  Inside is a piece of cake.");
+	text = hoa_system.Translate("(Kyle hands Claudius a cloth.  Inside is a piece of cake.)");
 	dialogue:AddText(text, 2, 6, 0, false);
 	text = hoa_system.Translate("I managed to swipe some goodies from the kitchen quarters. I saved you some.");
 	dialogue:AddText(text, 2, 7, 0, false);

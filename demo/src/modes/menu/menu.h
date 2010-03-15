@@ -212,7 +212,6 @@ private:
 	private_menu::SkillsWindow _skills_window;
 	private_menu::EquipWindow _equip_window;
 	private_menu::FormationWindow _formation_window;
-	private_menu::OverwriteConfirmWindow *_confirm_window;
 	MessageWindow *_message_window;
 
 	/** \brief The currently active window
