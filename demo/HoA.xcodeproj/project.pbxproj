@@ -64,6 +64,7 @@
 		D440963F0C45E37300E58975 /* script_modify.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096370C45E37300E58975 /* script_modify.cpp */; };
 		D44096410C45E37300E58975 /* script_read.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096390C45E37300E58975 /* script_read.cpp */; };
 		D44096430C45E37300E58975 /* script_write.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440963B0C45E37300E58975 /* script_write.cpp */; };
+		D447036B114DD46F0061A9AD /* global_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BD397911438C2200692A73 /* global_utils.cpp */; };
 		D46D59760C8A6C1A0074DFF0 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
 		D47843D80E1B3B0400FD76F7 /* tileset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */; };
 		D47843F90E1B452800FD76F7 /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA680B02B27F0052BF1E /* grid.cpp */; };
@@ -1157,6 +1158,7 @@
 				D4CC6BDA11214C3700982B23 /* global.cpp in Sources */,
 				D4CC6BDB11214C3700982B23 /* global_actors.cpp in Sources */,
 				D4CC6BDC11214C3700982B23 /* global_effects.cpp in Sources */,
+				D447036B114DD46F0061A9AD /* global_utils.cpp in Sources */,
 				D4CC6BDD11214C3700982B23 /* global_objects.cpp in Sources */,
 				D4CC6BDE11214C3700982B23 /* global_skills.cpp in Sources */,
 			);

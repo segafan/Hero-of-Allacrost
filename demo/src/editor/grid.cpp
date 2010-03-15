@@ -232,6 +232,14 @@ void Grid::LoadMap()
 		tileset_names.append(QString(read_data.ReadString(i).c_str()));
 	read_data.CloseTable();
 
+	// Load music
+	read_data.OpenTable("music_filenames");
+	table_size = read_data.GetTableSize();
+	// Remove first 4 characters in the string ("mus/")
+	for (uint32 i = 1; i <= table_size; i++)
+		music_files << QString(read_data.ReadString(i).c_str()).remove(0,4);
+	read_data.CloseTable();
+	
 	// Loading the tileset images using LoadMultiImage is done in editor.cpp in
 	// FileOpen via creation of the TilesetTable(s)
 
@@ -273,6 +281,7 @@ void Grid::LoadMap()
 	read_data.CloseTable();
 
 	// Load sprites
+	/*
 	read_data.OpenTable("sprites");
 	vector<int32> keys;
 	read_data.ReadTableKeys(keys);
@@ -308,7 +317,7 @@ void Grid::LoadMap()
 		read_data.CloseTable();
 	}
 	read_data.CloseTable();
-
+*/
 	// The map_grid is 4x as big as the map: 2x in the width and 2x in the height. Starting
 	// with row 0 (and doing the same thing for every row that is a multiple of 2), we take the first 2 entries,
 	// bit-wise AND them, and put them into a temporary vector called walk_temp. We keep doing this for every 2
@@ -343,14 +352,6 @@ void Grid::LoadMap()
 			walk_temp.clear();
 	} // iterate through the rows of the walkability table
 	read_data.ReadCloseTable();*/
-
-	// Load music
-	read_data.OpenTable("music_filenames");
-	table_size = read_data.GetTableSize();
-	// Remove first 4 characters in the string ("mus/")
-	for (uint32 i = 1; i <= table_size; i++)
-		music_files << QString(read_data.ReadString(i).c_str()).remove(0,4);
-	read_data.CloseTable();
 
 	// Load any existing context data
 	for (int i = 1; i < num_contexts; i++)
