@@ -314,7 +314,7 @@ void IndicatorSupervisor::AddDamageIndicator(uint32 amount) {
 	float damage_percent = static_cast<float>(amount / _actor->GetMaxHitPoints());
 	if (damage_percent < 0.10f) {
 		style.font = "text18";
-		style.color = Color(1.0f, 0.0f, 0.0f, 1.0f);
+		style.color = Color(1.0f, 0.275f, 0.275f, 1.0f);
 	}
 	else if (damage_percent < 0.20f) {
 		style.font = "text20";
@@ -322,11 +322,11 @@ void IndicatorSupervisor::AddDamageIndicator(uint32 amount) {
 	}
 	else if (damage_percent < 0.30f) {
 		style.font = "text22";
-		style.color = Color(1.0f, 0.0f, 0.0f, 1.0f);
+		style.color = Color(0.784f, 0.0f, 0.0f, 1.0f);
 	}
 	else { // (damage_percent >= 0.30f)
 		style.font = "text24";
-		style.color = Color(1.0f, 0.0f, 0.0f, 1.0f);
+		style.color = Color(0.627f, 0.0f, 0.0f, 1.0f);
 	}
 
 	_wait_queue.push_back(new IndicatorText(_actor, text, style));
