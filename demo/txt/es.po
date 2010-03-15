@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 1.0.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-03-14 21:20-0400\n"
+"POT-Creation-Date: 2010-03-14 23:32-0400\n"
 "PO-Revision-Date: 2010-03-14 23:06-0400\n"
 "Last-Translator:  <rujasu@yahoo.com>\n"
 "Language-Team: en_US <kde-i18n-doc@kde.org>\n"
@@ -279,7 +279,7 @@ msgid "…What?"
 msgstr "¿Qué?"
 
 #: dat/maps/desert_outskirts.lua:688
-msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake."
+msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake.)"
 msgstr ""
 
 #: dat/maps/desert_outskirts.lua:690
@@ -1522,4 +1522,3 @@ msgstr ""
 #: src/modes/shop/shop_trade.cpp:48
 msgid "This feature is not yet available."
 msgstr ""
-
