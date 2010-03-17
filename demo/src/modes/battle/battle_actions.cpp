@@ -185,43 +185,11 @@ bool ItemAction::Execute() {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "item did not have a battle use function" << endl;
 	}
 
-// 	if (_item->GetTargetType() == GLOBAL_TARGET_PARTY) {
-// 		if (_target->IsEnemy()) {
-// 			BattleActor* enemy;
-// 			// Loop through enemies and apply the item to each target
-// 			for (uint32 i = 0; i < BattleMode::CurrentInstance()->GetNumberOfEnemies(); i++) {
-// 				enemy = BattleMode::CurrentInstance()->GetEnemyActorAt(i);
-// 				if (enemy->IsAlive()) {
-// 					ScriptCallFunction<void>(*script_function, enemy, _source);
-// 				}
-// 			}
-// 		}
-//
-// 		else {
-// 			BattleActor* character;
-// 			// Loop through all party members and apply
-// 			for (uint32 i = 0; i < BattleMode::CurrentInstance()->GetNumberOfCharacters(); i++) {
-// 				character = BattleMode::CurrentInstance()->GetPlayerCharacterAt(i);
-// 				ScriptCallFunction<void>(*script_function, character, _source);
-// 			}
-// 		}
-// 	} // if (_item->GetTargetType() == GLOBAL_TARGET_PARTY)
-//
-// 	else {
-// 		ScriptCallFunction<void>(*script_function, _actor, _target);
-// 	}
-
 	try {
 		ScriptCallFunction<void>(*script_function, _actor, _target); }
 	catch (luabind::error err) {
 		ScriptManager->HandleLuaError(err);
 	}
-
-	// Remove the item from the character party's inventory if the count falls to zero
-// 	if (_actor->IsEnemy() == false) {
-// 		if (_item->GetCount() == 0)
-// 			GlobalManager->RemoveFromInventory(_item->GetID());
-// 	}
 
 	return true;
 }

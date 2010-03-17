@@ -49,6 +49,8 @@ function BootBattleTest()
 	GlobalManager:AddCharacter(2);
 	GlobalManager:AddCharacter(4);
 	GlobalManager:AddCharacter(8);
+	GlobalManager:AddToInventory(1, 5);
+
 	local claudius = GlobalManager:GetCharacter(1);
 	claudius:AddSkill(10001); -- Karlate guard, showcasing a status effect
 	

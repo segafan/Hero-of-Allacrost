@@ -121,7 +121,7 @@ enum COMMAND_STATE {
 
 
 //! \brief Enums for the various states that the FinishWindow class may be in
-enum FINISH_WINDOW_STATE {
+enum FINISH_STATE {
 	FINISH_INVALID = -1,
 	//! Announces that the player is victorious and notes any characters who have gained an experience level
 	FINISH_WIN_ANNOUNCE = 0,

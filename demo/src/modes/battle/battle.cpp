@@ -186,7 +186,7 @@ void BattleMode::Update() {
 
 	if (_state == BATTLE_STATE_COMMAND) {
 		_command_supervisor->Update();
-// 		return;
+		return; // This return effectively pauses the state of the actors while the player selects another command
 	}
 
 	// Process the actor ready queue
