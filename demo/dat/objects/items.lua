@@ -34,9 +34,9 @@ items[1] = {
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 	standard_price = 60,
 
-	BattleUse = function(target, instigator)
+	BattleUse = function(user, target)
 		target_actor = target:GetActor();
-		target_actor:AddHitPoints(45);
+		target_actor:RegisterHealing(45);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
@@ -53,9 +53,9 @@ items[2] = {
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 	standard_price = 200,
 
-	BattleUse = function(target, instigator)
+	BattleUse = function(user, target)
 		target_actor = target:GetActor();
-		target_actor:AddHitPoints(150);
+		target_actor:RegisterHealing(45);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
@@ -72,9 +72,9 @@ items[3] = {
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 	standard_price = 500,
 
-	BattleUse = function(target, instigator)
+	BattleUse = function(user, target)
 		target_actor = target:GetActor();
-		target_actor:AddHitPoints(250);
+		target_actor:RegisterHealing(45);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
@@ -91,10 +91,11 @@ items[4] = {
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_ALLIES,
 	standard_price = 1000,
 
-	BattleUse = function(target, instigator)
+	BattleUse = function(user, target)
 		-- TODO: no support yet for party targets
-		target_actor = target:GetActor();
-		target_actortarget:AddHitPoints(100);
+		target_party = target:GetParty();
+		-- TODO: iterate through each living actor in the party and add healing
+		target_actor:RegisterHealing(100);
 		AudioManager:PlaySound("snd/potion_drink.wav");
 	end,
 
@@ -127,9 +128,9 @@ items[3001] = {
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE,
 	standard_price = 200,
 
-	BattleUse = function(target, instigator)
+	BattleUse = function(user, target)
 		target_actor = target:GetActor();
-		target_actor:TakeDamage(256);
+		target_actor:RegisterDamage(256);
 		AudioManager:PlaySound("snd/rumble.wav");
 	end,
 
@@ -145,10 +146,11 @@ items[3002] = {
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_FOES,
 	standard_price = 1000,
 
-	BattleUse = function(target, instigator)
+	BattleUse = function(user, target)
 		-- TODO: no support yet for party targets
-		target_actor = target:GetActor();
-		target_actor:TakeDamage(500);
+		target_party = target:GetParty();
+		-- TODO: iterate through each living actor in the party and add damage
+		target_actor:RegisterDamage(500);
 		AudioManager:PlaySound("snd/rumble.wav");
 	end,
 

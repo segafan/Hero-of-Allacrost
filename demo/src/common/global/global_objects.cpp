@@ -105,7 +105,9 @@ GlobalItem::~GlobalItem() {
 
 
 
-GlobalItem::GlobalItem(const GlobalItem& copy) {
+GlobalItem::GlobalItem(const GlobalItem& copy) :
+	GlobalObject(copy)
+{
 	_target_type = copy._target_type;
 
 	// Make copies of valid ScriptObject function pointers
@@ -126,6 +128,7 @@ GlobalItem& GlobalItem::operator=(const GlobalItem& copy) {
 	if (this == &copy) // Handle self-assignment case
 		return *this;
 
+	GlobalObject::operator=(copy);
 	_target_type = copy._target_type;
 
 	// Make copies of valid ScriptObject function pointers

@@ -36,6 +36,31 @@ namespace private_battle {
 /** ****************************************************************************
 *** \brief The window displayed once a battle has either been won or lost
 ***
+***
+*** ***************************************************************************/
+class FinishDefeatOptions {
+public:
+	FinishDefeatOptions();
+
+	~FinishDefeatOptions()
+		{}
+
+	void Update();
+
+	void Draw();
+
+private:
+	//! \brief Text that displays the battle's outcome (victory or defeat)
+	hoa_gui::TextBox _message;
+
+	//! \brief The list of options that the player may choose from when they lose the battle
+	hoa_gui::OptionBox _options;
+}; // class FinishDefeatOptions
+
+
+/** ****************************************************************************
+*** \brief The window displayed once a battle has either been won or lost
+***
 *** This window is located in the center right portion of the screen and only appears
 *** when an outcome has been decided in the battle. The contents of this window differ
 *** depending on whether the battle was victorious or a loss. If the player won
@@ -71,12 +96,12 @@ public:
 	//! \brief Draws the window and its contents
 	void Draw();
 
-	FINISH_WINDOW_STATE GetState() const
+	FINISH_STATE GetState() const
 		{ return _state; }
 
 private:
 	//! \brief The state that the window is in, which determines its contents
-	FINISH_WINDOW_STATE _state;
+	FINISH_STATE _state;
 
 	//! \brief The amount of money won
 	int32 _victory_money;
