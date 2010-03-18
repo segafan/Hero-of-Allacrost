@@ -674,7 +674,7 @@ void ConfirmInterface::_RenderBuyStats() {
 
 void ConfirmInterface::_RenderSellStats() {
 	_sell_stats.SetText(NumberToString(_sell_count) + Translate(" count") + "\n" +
-		NumberToString(_sell_unique) + " unique");
+		NumberToString(_sell_unique) + Translate(" unique"));
 }
 
 

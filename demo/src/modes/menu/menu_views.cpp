@@ -106,7 +106,7 @@ void CharacterWindow::Draw() {
 
 	// XP to level up
 	VideoManager->MoveRelative(0, 20);
-	VideoManager->Text()->Draw(UTranslate("XP To Next: ") +
+	VideoManager->Text()->Draw(UTranslate("XP to Next: ") +
 		MakeUnicodeString(NumberToString(character->GetExperienceForNextLevel() - character->GetExperiencePoints())), TextStyle("text20"));
 
 	return;
