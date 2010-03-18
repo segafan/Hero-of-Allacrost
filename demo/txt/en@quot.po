@@ -29,8 +29,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 0.2.2\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-03-14 23:32-0400\n"
-"PO-Revision-Date: 2010-03-14 23:32-0400\n"
+"POT-Creation-Date: 2010-03-18 01:42-0300\n"
+"PO-Revision-Date: 2010-03-18 01:42-0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -556,11 +556,11 @@ msgstr ""
 msgid "Okay, let's call it a night."
 msgstr "Okay, let's call it a night."
 
-#: dat/maps/new_cave.lua:789
+#: dat/maps/new_cave.lua:817
 msgid "Kyle!"
 msgstr "Kyle!"
 
-#: dat/maps/new_cave.lua:794
+#: dat/maps/new_cave.lua:822
 msgid ""
 "Stop this, Kyle. You can’t escape. Lower your weapon and come peacefully and "
 "I’ll make sure your punishment is lenient."
@@ -568,11 +568,11 @@ msgstr ""
 "Stop this, Kyle. You can’t escape. Lower your weapon and come peacefully and "
 "I’ll make sure your punishment is lenient."
 
-#: dat/maps/new_cave.lua:799
+#: dat/maps/new_cave.lua:827
 msgid "No. I’m doing this for me. I don’t expect you to understand."
 msgstr "No. I’m doing this for me. I don’t expect you to understand."
 
-#: dat/maps/new_cave.lua:804
+#: dat/maps/new_cave.lua:832
 msgid "Then you leave me no choice."
 msgstr "Then you leave me no choice."
 
@@ -901,8 +901,8 @@ msgid "Swap: Button"
 msgstr "Swap: Button"
 
 #: src/modes/boot/boot.cpp:900
-msgid "Left Select : Button"
-msgstr "Left Select : Button"
+msgid "Left Select: Button"
+msgstr "Left Select: Button"
 
 #: src/modes/boot/boot.cpp:901
 msgid "Right Select: Button"
@@ -1245,9 +1245,9 @@ msgstr "HP: "
 msgid "SP: "
 msgstr "SP: "
 
-#: src/modes/menu/menu_views.cpp:109
-msgid "XP To Next: "
-msgstr "XP To Next: "
+#: src/modes/menu/menu_views.cpp:109 src/modes/menu/menu_views.cpp:567
+msgid "XP to Next: "
+msgstr "XP to Next: "
 
 #: src/modes/menu/menu_views.cpp:199 src/modes/menu/menu_views.cpp:703
 msgid "All"
@@ -1280,10 +1280,6 @@ msgstr "Key"
 #: src/modes/menu/menu_views.cpp:553
 msgid "Experience Level: "
 msgstr "Experience Level: "
-
-#: src/modes/menu/menu_views.cpp:567
-msgid "XP to Next: "
-msgstr "XP to Next: "
 
 #: src/modes/menu/menu_views.cpp:570
 msgid "Strength: "
@@ -1541,8 +1537,8 @@ msgstr "Yes"
 msgid " count"
 msgstr " count"
 
-#: src/modes/shop/shop_confirm.cpp:670 src/modes/shop/shop_leave.cpp:194
-#: src/modes/shop/shop_leave.cpp:196
+#: src/modes/shop/shop_confirm.cpp:670 src/modes/shop/shop_confirm.cpp:677
+#: src/modes/shop/shop_leave.cpp:194 src/modes/shop/shop_leave.cpp:196
 msgid " unique"
 msgstr " unique"
 

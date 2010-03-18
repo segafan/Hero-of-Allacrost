@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-03-14 23:32-0400\n"
+"POT-Creation-Date: 2010-03-18 01:42-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -501,21 +501,21 @@ msgstr ""
 msgid "Okay, let's call it a night."
 msgstr ""
 
-#: dat/maps/new_cave.lua:789
+#: dat/maps/new_cave.lua:817
 msgid "Kyle!"
 msgstr ""
 
-#: dat/maps/new_cave.lua:794
+#: dat/maps/new_cave.lua:822
 msgid ""
 "Stop this, Kyle. You can’t escape. Lower your weapon and come peacefully and "
 "I’ll make sure your punishment is lenient."
 msgstr ""
 
-#: dat/maps/new_cave.lua:799
+#: dat/maps/new_cave.lua:827
 msgid "No. I’m doing this for me. I don’t expect you to understand."
 msgstr ""
 
-#: dat/maps/new_cave.lua:804
+#: dat/maps/new_cave.lua:832
 msgid "Then you leave me no choice."
 msgstr ""
 
@@ -837,7 +837,7 @@ msgid "Swap: Button"
 msgstr ""
 
 #: src/modes/boot/boot.cpp:900
-msgid "Left Select : Button"
+msgid "Left Select: Button"
 msgstr ""
 
 #: src/modes/boot/boot.cpp:901
@@ -1178,8 +1178,8 @@ msgstr ""
 msgid "SP: "
 msgstr ""
 
-#: src/modes/menu/menu_views.cpp:109
-msgid "XP To Next: "
+#: src/modes/menu/menu_views.cpp:109 src/modes/menu/menu_views.cpp:567
+msgid "XP to Next: "
 msgstr ""
 
 #: src/modes/menu/menu_views.cpp:199 src/modes/menu/menu_views.cpp:703
@@ -1212,10 +1212,6 @@ msgstr ""
 
 #: src/modes/menu/menu_views.cpp:553
 msgid "Experience Level: "
-msgstr ""
-
-#: src/modes/menu/menu_views.cpp:567
-msgid "XP to Next: "
 msgstr ""
 
 #: src/modes/menu/menu_views.cpp:570
@@ -1473,8 +1469,8 @@ msgstr ""
 msgid " count"
 msgstr ""
 
-#: src/modes/shop/shop_confirm.cpp:670 src/modes/shop/shop_leave.cpp:194
-#: src/modes/shop/shop_leave.cpp:196
+#: src/modes/shop/shop_confirm.cpp:670 src/modes/shop/shop_confirm.cpp:677
+#: src/modes/shop/shop_leave.cpp:194 src/modes/shop/shop_leave.cpp:196
 msgid " unique"
 msgstr ""
 

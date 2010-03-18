@@ -897,7 +897,7 @@ void BootMode::_RefreshJoySettings() {
 	_joy_settings_menu.SetOptionText(i++, UTranslate("Cancel: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetCancelJoy())));
 	_joy_settings_menu.SetOptionText(i++, UTranslate("Menu: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetMenuJoy())));
 	_joy_settings_menu.SetOptionText(i++, UTranslate("Swap: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetSwapJoy())));
-	_joy_settings_menu.SetOptionText(i++, UTranslate("Left Select : Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetLeftSelectJoy())));
+	_joy_settings_menu.SetOptionText(i++, UTranslate("Left Select: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetLeftSelectJoy())));
 	_joy_settings_menu.SetOptionText(i++, UTranslate("Right Select: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetRightSelectJoy())));
 	_joy_settings_menu.SetOptionText(i++, UTranslate("Pause: Button") + MakeUnicodeString("<r>" + NumberToString(InputManager->GetPauseJoy())));
 }
