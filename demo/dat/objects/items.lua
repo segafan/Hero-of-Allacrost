@@ -28,9 +28,9 @@ end
 --------------------------------------------------------------------------------
 
 items[1] = {
-	name = hoa_system.Translate("Healing Potion"),
+	name = hoa_system.Translate("Light Healing Potion"),
 	description = hoa_system.Translate("Restores a small amount of hit points to a target."),
-	icon = "img/icons/items/health_potion.png",
+	icon = "img/icons/items/health_potion_small.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 	standard_price = 60,
 
@@ -49,7 +49,7 @@ items[1] = {
 items[2] = {
 	name = hoa_system.Translate("Medium Healing Potion"),
 	description = hoa_system.Translate("Restores a moderate amount of hit points to a target."),
-	icon = "img/icons/items/health_potion.png",
+	icon = "img/icons/items/health_potion_medium.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 	standard_price = 200,
 
@@ -68,7 +68,7 @@ items[2] = {
 items[3] = {
 	name = hoa_system.Translate("Blessed Healing Potion"),
 	description = hoa_system.Translate("Restores a large amount of hit points to a target."),
-	icon = "img/icons/items/health_potion.png",
+	icon = "img/icons/items/health_potion_large.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 	standard_price = 500,
 
@@ -85,9 +85,9 @@ items[3] = {
 }
 
 items[4] = {
-	name = hoa_system.Translate("Healing Stone"),
+	name = hoa_system.Translate("Super Healing Potion"),
 	description = hoa_system.Translate("Restores a small amount of hit points to all party members."),
-	icon = "img/icons/items/health_potion.png",
+	icon = "img/icons/items/health_potion_huge.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_ALLIES,
 	standard_price = 1000,
 
@@ -124,7 +124,7 @@ items[4] = {
 items[3001] = {
 	name = hoa_system.Translate("Bomb"),
 	description = hoa_system.Translate("Damages one enemy."),
-	icon = "img/icons/items/health_potion.png",
+	icon = "img/icons/items/scroll_red.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE,
 	standard_price = 200,
 
@@ -142,7 +142,7 @@ items[3001] = {
 items[3002] = {
 	name = hoa_system.Translate("Super Bomb"),
 	description = hoa_system.Translate("Major damage to all enemies."),
-	icon = "img/icons/items/health_potion.png",
+	icon = "img/icons/items/scroll_red.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_FOES,
 	standard_price = 1000,
 
