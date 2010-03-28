@@ -43,23 +43,90 @@ namespace hoa_battle {
 namespace private_battle {
 
 ////////////////////////////////////////////////////////////////////////////////
-// FinishDefeatOptions class
+// FinishDefeat class
 ////////////////////////////////////////////////////////////////////////////////
 
-FinishDefeatOptions::FinishDefeatOptions() {
+FinishDefeat::FinishDefeat() :
+	_number_retry_times(0)
+{
+	_options_window.Create(512.0f, 64.0f);
+	_options_window.SetPosition(512.0f, 60.0f);
+	_options_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
 
+	_tooltip_window.Create(512.0f, 112.0f);
+	_tooltip_window.SetPosition(512.0f, 124.0f);
+	_tooltip_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+
+	_outcome_message.SetPosition(512.0f, 384.0f);
+	_outcome_message.SetDimensions(400.0f, 100.0f);
+	_outcome_message.SetDisplaySpeed(30);
+	_outcome_message.SetTextStyle(TextStyle("text24", Color::white));
+	_outcome_message.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	_outcome_message.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_outcome_message.SetTextAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_outcome_message.SetDisplayText(Translate("But the heroes were defeated..."));
+
+	_options.AddOption(UTranslate("Retry"));
+	_options.AddOption(UTranslate("Restart"));
+	_options.AddOption(UTranslate("Return"));
+	_options.AddOption(UTranslate("Retire"));
+	_options.SetPosition(270.0f, 130.0f);
+	_options.SetDimensions(128.0f, 200.0f, 1, 4, 1, 4);
+	_options.SetTextStyle(TextStyle("title22", Color::white, VIDEO_TEXT_SHADOW_DARK));
+	_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_options.SetCursorOffset(-60.0f, 25.0f);
+	_options.SetSelection(0);
+	_options.SetOwner(&_options_window);
+	// TEMP: these two options are disabled because their features are not yet implemented
+	_options.EnableOption(0, false);
+	_options.EnableOption(1, false);
 }
 
 
 
-void FinishDefeatOptions::Update() {
+void FinishDefeat::Update() {
+	if (InputManager->ConfirmPress()) {
+		switch (_options.GetSelection()) {
+			case DEFEAT_OPTION_RETRY:
+				// TODO: feature not yet implemented. Reset the battle from the beginning.
+				_number_retry_times++;
+				break;
+			case DEFEAT_OPTION_RESTART:
+				// TODO: feature not yet implemented. Either auto-load last saved game or enter save
+				// mode and allow user to select file to load (but do not allow user to save a file)
+				break;
+			case DEFEAT_OPTION_RETURN:
+				ModeManager->PopAll();
+				ModeManager->Push(new hoa_boot::BootMode());
+				break;
+			case DEFEAT_OPTION_RETIRE:
+				SystemManager->ExitGame();
+				break;
+			default:
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid option selection: " << _options.GetSelection() << endl;
+				break;
+		}
+	}
 
+	else if (InputManager->LeftPress()) {
+		_options.InputLeft();
+	}
+	else if (InputManager->RightPress()) {
+		_options.InputRight();
+	}
 }
 
 
 
-void FinishDefeatOptions::Draw() {
-
+void FinishDefeat::Draw() {
+	_options_window.Draw();
+	_tooltip_window.Draw();
+	_outcome_message.Draw();
+	_options.Draw();
+	_tooltip.Draw();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

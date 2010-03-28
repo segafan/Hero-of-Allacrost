@@ -95,6 +95,17 @@ public:
 	//! \brief Returns the height of the actor's sprite image
 	virtual float GetSpriteHeight() const = 0;
 
+	/** \brief Changes the actor's current sprite animation image
+	*** \param alias The alias text used to identify the animation to change
+	***
+	*** \note Not all forms of battle sprites have multiple animations or any animations at all. For
+	*** example, enemies typically only have a standard set of unanimated damage frames for their
+	*** sprites. The reason this method is defined for all actors is so that the same skills may be
+	*** reused for both characters and enemies, since some skill implementations will wish to call
+	*** this method on the actor performing the skill.
+	**/
+	virtual void ChangeSpriteAnimation(const std::string& alias) = 0;
+
 	/** \brief Deals damage to the actor by reducing its hit points by a certain amount
 	*** \param amount The number of hit points to decrease on the actor
 	***
@@ -328,9 +339,6 @@ public:
 	float GetSpriteHeight() const
 		{ return 0.0f; } // TEMP: should retrieve height of current sprite animation
 
-	/** \brief Changes the actor's current sprite animation image
-	*** \param alias The alias text used to identify the animation to change
-	**/
 	void ChangeSpriteAnimation(const std::string& alias);
 
 	//! \brief Updates the state of the character. Must be called every frame!
@@ -395,6 +403,10 @@ public:
 
 	float GetSpriteHeight() const
 		{ return _global_enemy->GetBattleSpriteFrames()->at(0).GetHeight(); }
+
+	//! \note Enemies do not have animations so calling this function will achieve nothing
+	void ChangeSpriteAnimation(const std::string& alias)
+		{ return; }
 
 	void Update();
 
