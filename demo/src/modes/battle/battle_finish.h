@@ -33,29 +33,64 @@ namespace hoa_battle {
 
 namespace private_battle {
 
-/** ****************************************************************************
-*** \brief The window displayed once a battle has either been won or lost
-***
-***
-*** ***************************************************************************/
-class FinishDefeatOptions {
-public:
-	FinishDefeatOptions();
+//! \brief The set of defeat options that the player can select
+//@{
+const uint32 DEFEAT_OPTION_RETRY     = 0;
+const uint32 DEFEAT_OPTION_RESTART   = 1;
+const uint32 DEFEAT_OPTION_RETURN    = 2;
+const uint32 DEFEAT_OPTION_RETIRE    = 3;
+//@}
 
-	~FinishDefeatOptions()
+//! \brief The maximum number of times that the player can retry the battle if they lose
+const uint32 MAX_NUMBER_RETRIES   = 2;
+
+/** ****************************************************************************
+*** \brief A collection of GUI objects drawn when the player loses the battle
+***
+*** This class assists the FinishSupervisor class. It is only utilized when the
+*** player's characters are defeated in battle and presents the player with a
+*** number of options
+***
+*** - Retry: resets the state of the battle to the beginning and allows the
+*** - Restart: loads the game state from the last save point
+*** - Return: brings the player back to boot mode
+*** - Retire: exits the game
+*** ***************************************************************************/
+class FinishDefeat {
+public:
+	FinishDefeat();
+
+	~FinishDefeat()
 		{}
 
+	uint32 GetNumberRetryTimes() const
+		{ return _number_retry_times; }
+
+	//! \brief Processes user input and updates the GUI controls
 	void Update();
 
+	//! \brief Draws the finish window and GUI contents to the screen
 	void Draw();
 
 private:
-	//! \brief Text that displays the battle's outcome (victory or defeat)
-	hoa_gui::TextBox _message;
+	//! \brief The number of times that the player has lost and chosen to retry the battle
+	uint32 _number_retry_times;
+
+	//! \brief The window that the defeat message and options are displayed upon
+	hoa_gui::MenuWindow _options_window;
+
+	//! \brief The window that the defeat message and options are displayed upon
+	hoa_gui::MenuWindow _tooltip_window;
+
+	//! \brief Text that displays the battle's outcome
+	hoa_gui::TextBox _outcome_message;
 
 	//! \brief The list of options that the player may choose from when they lose the battle
 	hoa_gui::OptionBox _options;
-}; // class FinishDefeatOptions
+
+	//! \brief Tooltip text explaining the currently selected option
+	hoa_gui::TextBox _tooltip;
+}; // class FinishDefeat
 
 
 /** ****************************************************************************

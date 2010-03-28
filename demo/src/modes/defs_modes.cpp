@@ -423,6 +423,12 @@ void BindModesToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
 	[
+		class_<BattleEnemy, BattleActor>("BattleEnemy")
+			.def("ChangeSpriteAnimation", &BattleEnemy::ChangeSpriteAnimation)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
 		class_<BattleTarget>("BattleTarget")
 			.def("SetPointTarget", &BattleTarget::SetPointTarget)
 			.def("SetActorTarget", &BattleTarget::SetActorTarget)
