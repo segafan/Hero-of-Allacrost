@@ -349,6 +349,9 @@ private:
 	//! \brief A helper function to Update() that is called only when the map is in the explore state
 	void _UpdateExplore();
 
+	//! \brief A helper function to Update() that is called only when the map is in the dialogue state
+	void _UpdateDialogue();
+
 	//! \brief Calculates information about how to draw the next map frame
 	void _CalculateMapFrame();
 

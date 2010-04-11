@@ -199,11 +199,14 @@ void MapMode::Update() {
 			_UpdateExplore();
 			break;
 		case STATE_SCENE:
+            _camera->moving = false;
 			break;
 		case STATE_DIALOGUE:
+			_UpdateDialogue();
 			_dialogue_supervisor->Update();
 			break;
 		case STATE_TREASURE:
+            _camera->moving = false;
 			_treasure_supervisor->Update();
 			break;
 		default:
@@ -442,6 +445,7 @@ void MapMode::_UpdateExplore() {
 			MapTreasure* treasure = reinterpret_cast<MapTreasure*>(obj);
 
 			if (treasure->IsEmpty() == false) {
+			    _camera->moving = false;
 				treasure->Open();
 			}
 		}
@@ -483,7 +487,73 @@ void MapMode::_UpdateExplore() {
 			_camera->SetDirection(EAST);
 		}
 	} // if (_camera->moving == true)
-} // void MapMode::_HandleInputExplore()
+} // void MapMode::_UpdateExplore()
+
+
+
+void MapMode::_UpdateDialogue() {
+	// Update the running state of the camera object. Check if the player wishes to continue running and if so,
+	// update the stamina value if the operation is permitted
+	_camera->is_running = false;
+	if (_run_disabled == false && InputManager->CancelState() == true &&
+		(InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState()))
+	{
+		if (_run_forever) {
+			_camera->is_running = true;
+		}
+		else if (_run_stamina > SystemManager->GetUpdateTime() * 2) {
+			_run_stamina -= (SystemManager->GetUpdateTime() * 2);
+			_camera->is_running = true;
+		}
+		else {
+			_run_stamina = 0;
+		}
+	}
+	// Regenerate the stamina at 1/2 the consumption rate
+	else if (_run_stamina < 10000) {
+		_run_stamina += SystemManager->GetUpdateTime();
+		if (_run_stamina > 10000)
+			_run_stamina = 10000;
+	}
+
+    // TODO: If we want to allow moving during dialogue, this is the place to do it
+	// Detect movement input from the user
+//	if (InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState()) {
+//		_camera->moving = true;
+//	}
+//	else {
+		_camera->moving = false;
+//	}
+
+	// Determine the direction of movement. Priority of movement is given to: up, down, left, right.
+	// In the case of diagonal movement, the direction that the sprite should face also needs to be deduced.
+	if (_camera->moving == true) {
+		if (InputManager->UpState())
+		{
+			if (InputManager->LeftState())
+				_camera->SetDirection(MOVING_NORTHWEST);
+			else if (InputManager->RightState())
+				_camera->SetDirection(MOVING_NORTHEAST);
+			else
+				_camera->SetDirection(NORTH);
+		}
+		else if (InputManager->DownState())
+		{
+			if (InputManager->LeftState())
+				_camera->SetDirection(MOVING_SOUTHWEST);
+			else if (InputManager->RightState())
+				_camera->SetDirection(MOVING_SOUTHEAST);
+			else
+				_camera->SetDirection(SOUTH);
+		}
+		else if (InputManager->LeftState()) {
+			_camera->SetDirection(WEST);
+		}
+		else if (InputManager->RightState()) {
+			_camera->SetDirection(EAST);
+		}
+	} // if (_camera->moving == true)
+} // void MapMode::_UpdateDialogue()
 
 
 
