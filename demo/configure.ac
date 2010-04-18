@@ -81,9 +81,6 @@ AC_CHECK_LIB([vorbisfile], [ov_open], [], \
 AC_CHECK_LIB([SDL_ttf], [TTF_Init], [], \
 	[echo "Could not find the SDL_ttf library. Check that it is properly installed on your system"
 	 exit -1])
-AC_CHECK_LIB([SDL_net], [SDLNet_Init], [], \
-	[echo "Could not find the SDL_net library. Check that it is properly installed on your system"
-	 exit -1])
 AC_CHECK_LIB([lua5.1], [lua_newstate], [], \
 	[AC_CHECK_LIB([lua51], [lua_newstate], [], \
 	[AC_CHECK_LIB([lua], [lua_newstate], [], \
