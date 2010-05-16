@@ -199,14 +199,13 @@ void MapMode::Update() {
 			_UpdateExplore();
 			break;
 		case STATE_SCENE:
-            _camera->moving = false;
 			break;
 		case STATE_DIALOGUE:
 			_UpdateDialogue();
 			_dialogue_supervisor->Update();
 			break;
 		case STATE_TREASURE:
-            _camera->moving = false;
+			_camera->moving = false;
 			_treasure_supervisor->Update();
 			break;
 		default:
