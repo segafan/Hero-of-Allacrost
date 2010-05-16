@@ -338,7 +338,7 @@ function CreateDialogue()
 
 	text = hoa_system.Translate("Claudius! Are you all right?");
 	dialogue:AddText(text, 5, 1, 0, false);
-	text = hoa_system.Translate("I’m fine…But the captain…He fell…");
+	text = hoa_system.Translate("I’m fine… But the captain… He fell…");
 	dialogue:AddText(text, 2, 2, 0, false);
 	text = hoa_system.Translate("Everyone down to the cave floor! He might still be alive!");
 	dialogue:AddText(text, 4, 3, 0, false);
