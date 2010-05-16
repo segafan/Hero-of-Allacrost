@@ -9,7 +9,7 @@ make fr.mo
 mkdir fr
 mkdir fr/LC_MESSAGES
 mv fr.mo fr/LC_MESSAGES/allacrost.mo
- 
+
 rm es -rf
 make es.mo
 mkdir es
@@ -21,3 +21,9 @@ make pt_BR.mo
 mkdir pt_BR
 mkdir pt_BR/LC_MESSAGES
 mv pt_BR.mo pt_BR/LC_MESSAGES/allacrost.mo
+
+rm de -rf
+make de.mo
+mkdir de
+mkdir de/LC_MESSAGES
+mv de.mo de/LC_MESSAGES/allacrost.mo

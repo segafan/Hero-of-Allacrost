@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 1.0.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-03-18 01:42-0300\n"
+"POT-Creation-Date: 2010-05-15 22:24-0300\n"
 "PO-Revision-Date: 2010-03-14 23:06-0400\n"
 "Last-Translator:  <rujasu@yahoo.com>\n"
 "Language-Team: en_US <kde-i18n-doc@kde.org>\n"
@@ -153,7 +153,7 @@ msgid "Claudius! Are you all right?"
 msgstr ""
 
 #: dat/maps/betrayal_room.lua:341
-msgid "I’m fine…But the captain…He fell…"
+msgid "I’m fine… But the captain… He fell…"
 msgstr ""
 
 #: dat/maps/betrayal_room.lua:343
@@ -506,21 +506,21 @@ msgstr ""
 msgid "Okay, let's call it a night."
 msgstr ""
 
-#: dat/maps/new_cave.lua:817
+#: dat/maps/new_cave.lua:828
 msgid "Kyle!"
 msgstr "¡Kyle!"
 
-#: dat/maps/new_cave.lua:822
+#: dat/maps/new_cave.lua:833
 msgid ""
 "Stop this, Kyle. You can’t escape. Lower your weapon and come peacefully and "
 "I’ll make sure your punishment is lenient."
 msgstr ""
 
-#: dat/maps/new_cave.lua:827
+#: dat/maps/new_cave.lua:838
 msgid "No. I’m doing this for me. I don’t expect you to understand."
 msgstr ""
 
-#: dat/maps/new_cave.lua:832
+#: dat/maps/new_cave.lua:843
 msgid "Then you leave me no choice."
 msgstr ""
 
