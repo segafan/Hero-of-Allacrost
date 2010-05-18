@@ -1153,6 +1153,7 @@ void BootMode::_OnMusicRight() {
 
 void BootMode::_OnLanguageSelect() {
 	SystemManager->SetLanguage(_po_files[_language_options_menu.GetSelection()]);
+	_has_modified_settings = true;
 
 	// TODO: when the new language is set by the above call, we need to reload/refresh all text,
 	// otherwise the new language will not take effect.
@@ -1555,6 +1556,19 @@ bool BootMode::_LoadSettingsFile(const std::string& filename) {
 		cout << "BOOT: Opened file to load settings " << settings.GetFilename() << endl;
 
 	settings.OpenTable("settings");
+
+	// Load language settings
+//	uint32 lang_code = static_cast<uint32>(settings.ReadInt("lang_code"));
+
+//	if (lang_code == 1) SystemManager->SetLanguage("en@quot");
+//	else if (lang_code == 2) SystemManager->SetLanguage("fr");
+//	else if (lang_code == 3) SystemManager->SetLanguage("pt_BR");
+//	else if (lang_code == 4) SystemManager->SetLanguage("es");
+//	else if (lang_code == 5) SystemManager->SetLanguage("de");
+//	else SystemManager->SetLanguage("en@quot");
+
+	SystemManager->SetLanguage(static_cast<std::string>(settings.ReadString("language")));
+
 	settings.OpenTable("key_settings");
 	InputManager->SetUpKey(static_cast<SDLKey>(settings.ReadInt("up")));
 	InputManager->SetDownKey(static_cast<SDLKey>(settings.ReadInt("down")));
@@ -1643,9 +1657,6 @@ bool BootMode::_LoadSettingsFile(const std::string& filename) {
 		return false;
 	}
 
-	// Load language settings
-	SystemManager->SetLanguage(static_cast<std::string>(settings.ReadString("language")));
-
 	// Load Audio settings
 	if (AUDIO_ENABLE) {
 		settings.OpenTable("audio_settings");
@@ -1704,7 +1715,15 @@ bool BootMode::_SaveSettingsFile(const std::string& filename) {
 	settings_lua.ModifyInt("settings.welcome", 0);
 
 	//Save language settings
-	settings_lua.ModifyString("language", SystemManager->GetLanguage());
+	settings_lua.ModifyString("settings.language", SystemManager->GetLanguage());
+//	std::string lang_name = SystemManager->GetLanguage();
+	
+//	if (lang_name == "en@quot") settings_lua.ModifyInt("settings.lang_code", 1);
+//	else if (lang_name == "fr") settings_lua.ModifyInt("settings.lang_code", 2);
+//	else if (lang_name == "pt_br") settings_lua.ModifyInt("settings.lang_code", 3);
+//	else if (lang_name == "es") settings_lua.ModifyInt("settings.lang_code", 4);
+//	else if (lang_name == "de") settings_lua.ModifyInt("settings.lang_code", 5);
+//	else settings_lua.ModifyInt("settings.lang_code", 1);
 
 	// video
 	settings_lua.OpenTable("settings");
