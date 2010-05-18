@@ -66,4 +66,4 @@ settings.language_settings = 0
 settings.audio_defaults = {}
 settings.audio_defaults.music_vol = 1
 settings.audio_defaults.sound_vol = 1
-settings.language = "en"
+settings.language = "en@quot"
