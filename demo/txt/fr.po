@@ -7,10 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Allacrost Demo 0.3.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-05-15 22:24-0300\n"
-"PO-Revision-Date: 2010-04-22 00:36+0100\n"
-"Last-Translator: Yohann Ferreira <bertram@themanaworld.org>\n"
+"POT-Creation-Date: 2010-05-28 12:44+0200\n"
+"PO-Revision-Date: 2010-05-28 14:07+0100\n"
+"Last-Translator: Yohann Ferreira <yohan_dot_ferreira_at_orange_dot_fr>\n"
 "Language-Team: French <team@allacrost.org>\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -207,7 +208,7 @@ msgid ""
 "The treasury!  A thief has broken in and stolen everything.  The captain has "
 "called a man hunt.  Now equip yourself and meet us out front."
 msgstr ""
-"The coffre ! Un voleur s'est introduit ici et a tout volé. Le Capitaine "
+"Le coffre ! Un voleur s'est introduit ici et a tout volé. Le Capitaine "
 "prépare une chasse à l'homme. Equipe-toi et rejoins-nous devant le bâtiment."
 
 #: dat/maps/desert_barracks.lua:571
@@ -285,7 +286,7 @@ msgstr "...Quoi ?"
 #: dat/maps/desert_outskirts.lua:688
 msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake.)"
 msgstr ""
-"(Kyle montre à Claudius un morceau de tissu. A l'intérieur, un morceau de "
+"(Kyle montre à Claudius une pièce de tissu : A l'intérieur, un morceau de "
 "gâteau.)"
 
 #: dat/maps/desert_outskirts.lua:690
@@ -317,7 +318,7 @@ msgid ""
 "sense in you getting in trouble too."
 msgstr ""
 "Oublie ça. Je suis déjà en mauvais termes avec le Capitaine, il n'y a pas de "
-"raison que tu ais également des problèmes."
+"raison que tu aies également des problèmes."
 
 #: dat/maps/desert_outskirts.lua:700
 msgid "Hey, what's that… look out!"
@@ -345,7 +346,7 @@ msgstr "Oui ?"
 
 #: dat/maps/desert_outskirts.lua:724
 msgid "…Let’s go."
-msgstr "...Allons-y."
+msgstr "... Allons-y."
 
 #: dat/maps/desert_training.lua:540
 msgid "You're late."
@@ -357,32 +358,30 @@ msgstr "Désolé, Monsieur, je -"
 
 #: dat/maps/desert_training.lua:544
 msgid "It’s my fault, sir. I dragged Claudius off this morning."
-msgstr ""
-"C'est ma faute, Monsieur. C'est moi qui ai entraîné Claudius dehors ce matin."
+msgstr "C'est ma faute, Monsieur. J'ai embarqué Claudius avec moi ce matin."
 
 #: dat/maps/desert_training.lua:546
 msgid ""
 "Very well. Kyle. Find a partner to train with. I’ll deal with you later."
 msgstr ""
-"Très bien, Kyle. Trouve un partenaire pour t'entraîner. Je m'occuperai de "
+"Allons bon, Kyle. Trouve un partenaire pour t'entraîner. Je m'occuperai de "
 "toi plus tard."
 
 #: dat/maps/desert_training.lua:548
 msgid "All right buddy, let's go."
-msgstr "Très bien mon ami. Allons-y."
+msgstr "Et bien mon ami, allons-y."
 
 #: dat/maps/desert_training.lua:550
 msgid "Not him. Claudius trains with me today."
-msgstr "Pas lui. Claudius s'entraînera avec moi aujourd'hui."
+msgstr "Pas avec lui. Claudius s'entraînera avec moi aujourd'hui."
 
 #: dat/maps/desert_training.lua:552
 msgid "Yes sir."
 msgstr "Oui, Monsieur."
 
 #: dat/maps/desert_training.lua:554
-#, fuzzy
 msgid "Show me your slicing attack technique."
-msgstr "Montre-moi ta technique d'attaque de tranchage."
+msgstr "Montre-moi ta technique d'attaque."
 
 #: dat/maps/desert_training.lua:556
 msgid "Hi-ya!"
@@ -413,7 +412,7 @@ msgstr ""
 
 #: dat/maps/desert_training.lua:566
 msgid "Where’s that friend of yours run off to this time?"
-msgstr "Où est-ce que ton ami est parti cette fois ?"
+msgstr "... Où ton ami est-il encore parti cette fois ?"
 
 #: dat/maps/desert_training.lua:568
 msgid "I don’t know, sir."
@@ -441,7 +440,7 @@ msgstr "Oui, Monsieur."
 
 #: dat/maps/desert_training.lua:582
 msgid "Come with me, Claudius, we need to talk."
-msgstr "Viens avec moi, Claudius, nous avons à parler."
+msgstr "Maintenant viens avec moi, Claudius, nous avons à parler."
 
 #: dat/maps/desert_training.lua:586
 msgid "You and Kyle are close."
@@ -456,7 +455,7 @@ msgid ""
 "You have a lot of potential, Claudius. I know Kyle is your friend, but I "
 "fear he’s becoming an impediment to your quest for knighthood."
 msgstr ""
-"Tu as u sacré potentiel, Claudius. Je sais que Kyle est ton ami, mais j'ai "
+"Tu as un sacré potentiel, Claudius. Je sais que Kyle est ton ami, mais j'ai "
 "bien peur qu'il devienne un obstacle dans ta quête pour devenir un jour "
 "Chevalier."
 
@@ -544,9 +543,8 @@ msgstr ""
 "Retournons aux casernes."
 
 #: dat/maps/desert_training.lua:645
-#, fuzzy
 msgid "Okay, let's call it a night."
-msgstr "Ok, c'est assez pour aujourd'hui."
+msgstr "Oui, rentrons."
 
 #: dat/maps/new_cave.lua:828
 msgid "Kyle!"
@@ -617,19 +615,19 @@ msgstr "Bien sûr que non."
 
 #: dat/maps/opening_scene.lua:225
 msgid "I didn’t think so."
-msgstr "Je ne pense pas."
+msgstr "Je ne pensais pas."
 
 #: dat/maps/opening_scene.lua:227
 msgid "You’ll be all right."
-msgstr "Tout ira bien."
+msgstr "Ça va aller..."
 
 #: dat/maps/opening_scene.lua:229
 msgid "I just don’t understand you sometimes."
-msgstr "Il y a des fois où je ne te comprends pas."
+msgstr "... Il y a des fois où je ne te comprends pas."
 
 #: dat/maps/opening_scene.lua:231
 msgid "Hey, what time is it?"
-msgstr "Hé, Quelle heure est-il ?"
+msgstr "Au fait, Quelle heure est-il ?"
 
 #: dat/maps/opening_scene.lua:233
 msgid "I don’t know."
@@ -645,7 +643,7 @@ msgstr "Et alors ?"
 
 #: dat/maps/opening_scene.lua:239
 msgid "I think we are. Come on."
-msgstr "Je pense que c'est ce que nous faisons. Viens."
+msgstr "Je pense que nous le sommes. Allons-y."
 
 #: dat/maps/opening_scene.lua:241
 msgid "Kyle has joined the party."
@@ -661,12 +659,12 @@ msgstr "© 2004 — 2010 The Allacrost Project"
 
 #: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
 msgid "New Game"
-msgstr "Nouvelle partie"
+msgstr "Nv. jeu"
 
 #: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
 #: src/modes/save/save_mode.cpp:86
 msgid "Load Game"
-msgstr "Charger une partie"
+msgstr "Continuer"
 
 #: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
 msgid "Options"
@@ -906,23 +904,23 @@ msgstr "Sélection droite : Touche"
 msgid "Pause: Button"
 msgstr "Pause : Touche"
 
-#: src/modes/boot/boot.cpp:1232
+#: src/modes/boot/boot.cpp:1233
 msgid "Please enter a name for your new profile"
 msgstr "Veuillez entrer un nom pour votre nouveau profile"
 
-#: src/modes/boot/boot.cpp:1240
+#: src/modes/boot/boot.cpp:1241
 msgid "Overwrite? Confirm/Cancel"
 msgstr "Ecraser ? Valider/Annuler"
 
-#: src/modes/boot/boot.cpp:1522
+#: src/modes/boot/boot.cpp:1523
 msgid "Please press a new joystick button."
 msgstr "Veuillez appuyer sur une touche du joystick."
 
-#: src/modes/boot/boot.cpp:1524
+#: src/modes/boot/boot.cpp:1525
 msgid "Please press a new key."
 msgstr "Veuillez appuyer sur une nouvelle touche."
 
-#: src/modes/boot/boot.cpp:1526
+#: src/modes/boot/boot.cpp:1527
 msgid "Please move an axis."
 msgstr "Veuillez bouger un axe du joystick."
 
@@ -1103,7 +1101,7 @@ msgstr "Compétences"
 
 #: src/modes/menu/menu.cpp:521 src/modes/menu/menu.cpp:636
 msgid "Equip"
-msgstr "Equipement"
+msgstr "Equip."
 
 #: src/modes/menu/menu.cpp:522
 msgid "Status"
@@ -1134,11 +1132,11 @@ msgstr "Modifier"
 
 #: src/modes/menu/menu.cpp:621
 msgid "Switch"
-msgstr "Intervertir"
+msgstr "Changer"
 
 #: src/modes/menu/menu.cpp:637
 msgid "Remove"
-msgstr "Retirer"
+msgstr "Enlever"
 
 #: src/modes/menu/menu.cpp:822
 msgid "STR: "
@@ -1301,7 +1299,6 @@ msgid "Evade: "
 msgstr "Esquive : "
 
 #: src/modes/menu/menu_views.cpp:704
-#, fuzzy
 msgid "Field"
 msgstr "Domaine"
 
@@ -1315,11 +1312,11 @@ msgstr "Casque"
 
 #: src/modes/menu/menu_views.cpp:1379 src/modes/menu/menu_views.cpp:1399
 msgid "Body Armor"
-msgstr "Armure corporelle"
+msgstr "Armures"
 
 #: src/modes/menu/menu_views.cpp:1382 src/modes/menu/menu_views.cpp:1401
 msgid "Offhand"
-msgstr "Désinvolte"
+msgstr "Boucliers"
 
 #: src/modes/menu/menu_views.cpp:1385 src/modes/menu/menu_views.cpp:1403
 msgid "Leggings"
@@ -1371,19 +1368,19 @@ msgstr "Objets"
 
 #: src/modes/shop/shop.cpp:128
 msgid "Head Armor"
-msgstr "Armure de tête"
+msgstr "Tête"
 
 #: src/modes/shop/shop.cpp:129
 msgid "Torso Armor"
-msgstr "Armure de torse"
+msgstr "Torse"
 
 #: src/modes/shop/shop.cpp:130
 msgid "Arm Armor"
-msgstr "Armure de bras"
+msgstr "Bras"
 
 #: src/modes/shop/shop.cpp:131
 msgid "Leg Armor"
-msgstr "Armure de jambes"
+msgstr "Jambes"
 
 #: src/modes/shop/shop.cpp:132
 msgid "Shards"
@@ -1478,7 +1475,7 @@ msgstr "Stock"
 #: src/modes/shop/shop_buy.cpp:68 src/modes/shop/shop_confirm.cpp:89
 #: src/modes/shop/shop_leave.cpp:90 src/modes/shop/shop_sell.cpp:68
 msgid "Own"
-msgstr "Propre"
+msgstr "Poss."
 
 #: src/modes/shop/shop_confirm.cpp:67 src/modes/shop/shop_leave.cpp:68
 msgid "Purchases"
