@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Allacrost Demo 0.3.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-05-28 12:44+0200\n"
+"POT-Creation-Date: 2010-07-03 21:38-0400\n"
 "PO-Revision-Date: 2010-05-28 14:07+0100\n"
 "Last-Translator: Yohann Ferreira <yohan_dot_ferreira_at_orange_dot_fr>\n"
 "Language-Team: French <team@allacrost.org>\n"
@@ -74,92 +74,106 @@ msgstr "Karlate"
 msgid "Hector"
 msgstr "Hector"
 
-#: dat/maps/betrayal_room.lua:222
+#: dat/maps/betrayal_room.lua:223
 msgid "Charles"
 msgstr "Charles"
 
-#: dat/maps/betrayal_room.lua:294
+#: dat/maps/betrayal_room.lua:301
 msgid "I’m very disappointed in you, Kyle."
 msgstr "Tu me déçois beaucoup, Kyle."
 
-#: dat/maps/betrayal_room.lua:296
+#: dat/maps/betrayal_room.lua:303
 msgid "Over here, Claudius!"
 msgstr "Par ici, Claudius !"
 
-#: dat/maps/betrayal_room.lua:304
+#: dat/maps/betrayal_room.lua:311
 msgid "No!"
 msgstr "Non !"
 
-#: dat/maps/betrayal_room.lua:306
+#: dat/maps/betrayal_room.lua:313
 msgid "What have you done…"
 msgstr "Claudius, qu'as-tu fait ?"
 
-#: dat/maps/betrayal_room.lua:308
+#: dat/maps/betrayal_room.lua:315
 msgid "I’m sorry.  I didn't want to have to do that."
 msgstr "Je suis désolé. Je ne voulais pas faire cela."
 
-#: dat/maps/betrayal_room.lua:310
+#: dat/maps/betrayal_room.lua:317
 msgid "What are you doing?"
 msgstr "Claudius, qu'est-ce que vous faites ?"
 
-#: dat/maps/betrayal_room.lua:312
+#: dat/maps/betrayal_room.lua:319
 msgid "I can’t let you get away."
 msgstr "Je ne peux pas te laisser partir."
 
-#: dat/maps/betrayal_room.lua:314
+#: dat/maps/betrayal_room.lua:321
 msgid "I’m your friend!"
 msgstr "Je suis ton ami !"
 
-#: dat/maps/betrayal_room.lua:316
+#: dat/maps/betrayal_room.lua:323
 msgid "It’s my duty!"
 msgstr "C'est mon devoir !"
 
-#: dat/maps/betrayal_room.lua:318
+#: dat/maps/betrayal_room.lua:325
 msgid "Don’t do this."
 msgstr "Ne fais pas ça."
 
-#: dat/maps/betrayal_room.lua:320
+#: dat/maps/betrayal_room.lua:327
 msgid "You’ve already done it."
 msgstr "Tu l'as déjà fait."
 
-#: dat/maps/betrayal_room.lua:322
+#: dat/maps/betrayal_room.lua:329
 msgid "I don’t want to fight you."
 msgstr "Je ne veux pas te combattre."
 
-#: dat/maps/betrayal_room.lua:324
+#: dat/maps/betrayal_room.lua:331
 msgid "Then lower your weapon and turn yourself in."
 msgstr "Alors abaisse ton arme et rends-toi."
 
-#: dat/maps/betrayal_room.lua:326
+#: dat/maps/betrayal_room.lua:333
 msgid "You know I can’t."
 msgstr "Tu sais que je ne peux pas."
 
-#: dat/maps/betrayal_room.lua:328
+#: dat/maps/betrayal_room.lua:335
 msgid "And you know I can’t just let you go."
 msgstr "Et tu sais que je ne peux pas te laisser partir."
 
-#: dat/maps/betrayal_room.lua:330
+#: dat/maps/betrayal_room.lua:337
 msgid "Isn’t our friendship more important than your duty?"
 msgstr "Notre amitié n'est-elle pas plus importante que notre devoir?"
 
-#: dat/maps/betrayal_room.lua:332
+#: dat/maps/betrayal_room.lua:339
 msgid "You killed the Captain!"
 msgstr "T'as tué le Capitaine !"
 
-#: dat/maps/betrayal_room.lua:339
+#: dat/maps/betrayal_room.lua:346
+msgid ""
+"I just took some supplies, just enough to start a new life, away from this "
+"servitude. Can’t you understand?"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:348
+msgid "You’ve tarnished your honor and disgraced the Harrvahan knighthood!"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:350
+msgid "To hell with the knighthood!"
+msgstr ""
+
+#: dat/maps/betrayal_room.lua:357
 msgid "Claudius! Are you all right?"
 msgstr "Claudius ! Est-ce que ça va ?"
 
-#: dat/maps/betrayal_room.lua:341
+#: dat/maps/betrayal_room.lua:359
 #, fuzzy
 msgid "I’m fine… But the captain… He fell…"
 msgstr "Je vais bien... Mais le Capitaine... Il est mort..."
 
-#: dat/maps/betrayal_room.lua:343
+#: dat/maps/betrayal_room.lua:361
 msgid "Everyone down to the cave floor! He might still be alive!"
 msgstr "Tout le monde dans la caverne ! Il pourrait être encore en vie !"
 
-#: dat/maps/betrayal_room.lua:345
+#: dat/maps/betrayal_room.lua:363
 msgid "Damn you, Kyle."
 msgstr "Maudis sois-tu, Kyle."
 
