@@ -29,10 +29,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 0.2.2\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-05-15 22:24-0300\n"
-"PO-Revision-Date: 2010-05-15 22:24-0300\n"
+"POT-Creation-Date: 2010-07-03 21:38-0400\n"
+"PO-Revision-Date: 2010-07-03 21:38-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -94,91 +95,107 @@ msgstr "Karlate"
 msgid "Hector"
 msgstr "Hector"
 
-#: dat/maps/betrayal_room.lua:222
+#: dat/maps/betrayal_room.lua:223
 msgid "Charles"
 msgstr "Charles"
 
-#: dat/maps/betrayal_room.lua:294
+#: dat/maps/betrayal_room.lua:301
 msgid "I’m very disappointed in you, Kyle."
 msgstr "I’m very disappointed in you, Kyle."
 
-#: dat/maps/betrayal_room.lua:296
+#: dat/maps/betrayal_room.lua:303
 msgid "Over here, Claudius!"
 msgstr "Over here, Claudius!"
 
-#: dat/maps/betrayal_room.lua:304
+#: dat/maps/betrayal_room.lua:311
 msgid "No!"
 msgstr "No!"
 
-#: dat/maps/betrayal_room.lua:306
+#: dat/maps/betrayal_room.lua:313
 msgid "What have you done…"
 msgstr "What have you done…"
 
-#: dat/maps/betrayal_room.lua:308
+#: dat/maps/betrayal_room.lua:315
 msgid "I’m sorry.  I didn't want to have to do that."
 msgstr "I’m sorry.  I didn't want to have to do that."
 
-#: dat/maps/betrayal_room.lua:310
+#: dat/maps/betrayal_room.lua:317
 msgid "What are you doing?"
 msgstr "What are you doing?"
 
-#: dat/maps/betrayal_room.lua:312
+#: dat/maps/betrayal_room.lua:319
 msgid "I can’t let you get away."
 msgstr "I can’t let you get away."
 
-#: dat/maps/betrayal_room.lua:314
+#: dat/maps/betrayal_room.lua:321
 msgid "I’m your friend!"
 msgstr "I’m your friend!"
 
-#: dat/maps/betrayal_room.lua:316
+#: dat/maps/betrayal_room.lua:323
 msgid "It’s my duty!"
 msgstr "It’s my duty!"
 
-#: dat/maps/betrayal_room.lua:318
+#: dat/maps/betrayal_room.lua:325
 msgid "Don’t do this."
 msgstr "Don’t do this."
 
-#: dat/maps/betrayal_room.lua:320
+#: dat/maps/betrayal_room.lua:327
 msgid "You’ve already done it."
 msgstr "You’ve already done it."
 
-#: dat/maps/betrayal_room.lua:322
+#: dat/maps/betrayal_room.lua:329
 msgid "I don’t want to fight you."
 msgstr "I don’t want to fight you."
 
-#: dat/maps/betrayal_room.lua:324
+#: dat/maps/betrayal_room.lua:331
 msgid "Then lower your weapon and turn yourself in."
 msgstr "Then lower your weapon and turn yourself in."
 
-#: dat/maps/betrayal_room.lua:326
+#: dat/maps/betrayal_room.lua:333
 msgid "You know I can’t."
 msgstr "You know I can’t."
 
-#: dat/maps/betrayal_room.lua:328
+#: dat/maps/betrayal_room.lua:335
 msgid "And you know I can’t just let you go."
 msgstr "And you know I can’t just let you go."
 
-#: dat/maps/betrayal_room.lua:330
+#: dat/maps/betrayal_room.lua:337
 msgid "Isn’t our friendship more important than your duty?"
 msgstr "Isn’t our friendship more important than your duty?"
 
-#: dat/maps/betrayal_room.lua:332
+#: dat/maps/betrayal_room.lua:339
 msgid "You killed the Captain!"
 msgstr "You killed the Captain!"
 
-#: dat/maps/betrayal_room.lua:339
+#: dat/maps/betrayal_room.lua:346
+msgid ""
+"I just took some supplies, just enough to start a new life, away from this "
+"servitude. Can’t you understand?"
+msgstr ""
+"I just took some supplies, just enough to start a new life, away from this "
+"servitude. Can’t you understand?"
+
+#: dat/maps/betrayal_room.lua:348
+msgid "You’ve tarnished your honor and disgraced the Harrvahan knighthood!"
+msgstr "You’ve tarnished your honor and disgraced the Harrvahan knighthood!"
+
+#: dat/maps/betrayal_room.lua:350
+msgid "To hell with the knighthood!"
+msgstr "To hell with the knighthood!"
+
+#: dat/maps/betrayal_room.lua:357
 msgid "Claudius! Are you all right?"
 msgstr "Claudius! Are you all right?"
 
-#: dat/maps/betrayal_room.lua:341
+#: dat/maps/betrayal_room.lua:359
 msgid "I’m fine… But the captain… He fell…"
 msgstr "I’m fine… But the captain… He fell…"
 
-#: dat/maps/betrayal_room.lua:343
+#: dat/maps/betrayal_room.lua:361
 msgid "Everyone down to the cave floor! He might still be alive!"
 msgstr "Everyone down to the cave floor! He might still be alive!"
 
-#: dat/maps/betrayal_room.lua:345
+#: dat/maps/betrayal_room.lua:363
 msgid "Damn you, Kyle."
 msgstr "Damn you, Kyle."
 
@@ -912,23 +929,23 @@ msgstr "Right Select: Button"
 msgid "Pause: Button"
 msgstr "Pause: Button"
 
-#: src/modes/boot/boot.cpp:1232
+#: src/modes/boot/boot.cpp:1233
 msgid "Please enter a name for your new profile"
 msgstr "Please enter a name for your new profile"
 
-#: src/modes/boot/boot.cpp:1240
+#: src/modes/boot/boot.cpp:1241
 msgid "Overwrite? Confirm/Cancel"
 msgstr "Overwrite? Confirm/Cancel"
 
-#: src/modes/boot/boot.cpp:1522
+#: src/modes/boot/boot.cpp:1523
 msgid "Please press a new joystick button."
 msgstr "Please press a new joystick button."
 
-#: src/modes/boot/boot.cpp:1524
+#: src/modes/boot/boot.cpp:1525
 msgid "Please press a new key."
 msgstr "Please press a new key."
 
-#: src/modes/boot/boot.cpp:1526
+#: src/modes/boot/boot.cpp:1527
 msgid "Please move an axis."
 msgstr "Please move an axis."
 

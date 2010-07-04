@@ -155,6 +155,17 @@ sprites["Karlate"] = {
 	standard_animations = "img/sprites/map/soldier_npc01_walk.png"
 }
 
+sprites["Rubble"] = {
+	name = "????",
+	coll_half_width = 1.0,
+	coll_height = 2.0,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = NORMAL_SPEED,
+
+	standard_animations = "img/sprites/map/rocks.png"
+}
+
 sprite = {}
 
 function ConstructSprite(name, id, x, y, x_off, y_off)
