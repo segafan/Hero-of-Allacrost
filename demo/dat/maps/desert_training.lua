@@ -397,10 +397,35 @@ function Load(m)
 	if (GlobalManager:DoesEventGroupExist("kyle_story") == false) then
 		GlobalManager:AddNewEventGroup("kyle_story");
 	end
+	if (GlobalManager:DoesEventGroupExist("last_visited") == false) then
+		GlobalManager:AddNewEventGroup("last_visited");
+		GlobalManager:GetEventGroup("last_visited"):AddNewEvent("map_number", 0);
+	end
 
-	-- TODO: determine which entrance to start at
-	claudius_sprite = ConstructSprite("Claudius", 1000, 65, 90);       -- place Claudius in the middle of the map
+	-- prepare sprite for the protagonist, Claudius
+	claudius_sprite = ConstructSprite("Claudius", 1000, 65, 90);
 	claudius_sprite:LoadAttackAnimations("img/sprites/map/claudius_attack.png");
+
+	-- determine which entrance to start at
+	if (GlobalManager:GetEventGroup("last_visited"):GetEvent("map_number") == 0) then
+		-- just started, position Claudius inside the training hall
+		claudius_sprite:SetContext(2);
+		claudius_sprite:SetXPosition(60, 0);
+		claudius_sprite:SetYPosition(50, 0);
+	elseif (GlobalManager:GetEventGroup("last_visited"):GetEvent("map_number") == 1) then
+		-- came from south (desert_outskirts)
+		claudius_sprite:SetXPosition(66, 0);
+		claudius_sprite:SetYPosition(120, 0);
+	elseif (GlobalManager:GetEventGroup("last_visited"):GetEvent("map_number") == 2) then
+		-- came from east (desert_barracks)
+		claudius_sprite:SetXPosition(100, 0);
+		claudius_sprite:SetYPosition(83, 0);
+	elseif (GlobalManager:GetEventGroup("last_visited"):GetEvent("map_number") == 3) then
+		-- came from west (new_cave)
+		claudius_sprite:SetXPosition(30, 0);
+		claudius_sprite:SetYPosition(83, 0);
+	end
+	
 
 	kyle = ConstructSprite("Kyle", 2, 66, 50, 0.0, 0.0);
 	kyle:SetContext(2);
@@ -487,17 +512,11 @@ function Load(m)
 		-- executes if this is the first time in this map
 		map:AddGroundObject(captain);
 		map:AddGroundObject(kyle);
-		claudius_sprite:SetContext(2);
-		claudius_sprite:SetXPosition(60, 0);
-		claudius_sprite:SetYPosition(50, 0);
 		event_supervisor:StartEvent(10000);
 	elseif (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true) then
 		-- do we need to do anything here?  just do not let it fall through to the next one
 	elseif (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("desert_beast_fought") == true) then
 		-- executes if we just fought the beast in the desert
-		claudius_sprite:SetXPosition(66, 0);
-		claudius_sprite:SetYPosition(120, 0);
-
 		kyle:SetXPosition(60, 0);
 		kyle:SetYPosition(120, 0);
 		kyle:SetContext(1);
@@ -505,6 +524,8 @@ function Load(m)
 		map:AddGroundObject(kyle);
 		event_supervisor:StartEvent(11000);
 	end
+
+	GlobalManager:GetEventGroup("last_visited"):SetEvent("map_number", 0);
 
 	map:AddGroundObject(claudius_sprite);    -- add Claudius to map
 	map:SetCamera(claudius_sprite);          -- Set the camera to focus on the player sprite

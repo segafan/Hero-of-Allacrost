@@ -666,8 +666,6 @@ function Load(m)
 	-- Create the player sprite
 	sprite = ConstructSprite("Claudius", 1000, 25, 7);
 	map:AddGroundObject(sprite);
-	-- Set the camera to focus on the player sprite
-	map:SetCamera(sprite);
 
 	-- Add Kyle sprite
 	kyle = ConstructSprite("Kyle", 2, 5, 75, 0.0, 0.0);
@@ -825,6 +823,15 @@ function Load(m)
 	
 	event = hoa_map.MapTransitionEvent(22111, "dat/maps/desert_training.lua");
 	event_supervisor:RegisterEvent(event);
+
+	if (GlobalManager:DoesEventGroupExist("last_visited") == false) then
+		GlobalManager:AddNewEventGroup("last_visited");
+		GlobalManager:GetEventGroup("last_visited"):AddNewEvent("map_number", 1);
+	end
+	GlobalManager:GetEventGroup("last_visited"):SetEvent("map_number", 1);
+
+	-- Set the camera to focus on the player sprite
+	map:SetCamera(sprite);
 end
 
 

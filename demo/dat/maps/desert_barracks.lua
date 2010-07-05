@@ -539,6 +539,14 @@ function Load(m)
 		claudius = ConstructSprite("Claudius", 1000, 16, 85);       -- place Claudius at the entrance
 	end
 
+	-- just make sure this exists, it should as long as we're not coming from an old savefile
+	-- there's only one entrance for this map, so we don't do anything except define that this is where we came from
+	if (GlobalManager:DoesEventGroupExist("last_visited") == false) then
+		GlobalManager:AddNewEventGroup("last_visited");
+		GlobalManager:GetEventGroup("last_visited"):AddNewEvent("map_number", 2);
+	end
+	GlobalManager:GetEventGroup("last_visited"):SetEvent("map_number", 2);
+
 	-- Finally, set the camera to focus on the players sprite
 	map:AddGroundObject(claudius);                                      -- add Claudius to map
 	map:SetCamera(claudius);
