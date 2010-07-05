@@ -609,8 +609,10 @@ function Load(m)
 	local event;
 	local chest;
 
-	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true and GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
-		chasing_kyle = true;
+	if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal") == true) then
+		if (GlobalManager:GetEventGroup("kyle_story"):DoesEventExist("betrayal_battle") == false) then
+			chasing_kyle = true;
+		end
 	end
 
 	CreateDialogue();
@@ -620,6 +622,15 @@ function Load(m)
 	map:AddGroundObject(claudius);
 	-- Set the camera to focus on the player''s sprite
 	map:SetCamera(claudius);
+
+	-- what map are we coming from?
+	if (GlobalManager:DoesEventGroupExist("last_visited") == false) then
+		-- this shouldn't really necessary, but since people using the unstable/SVN versions
+		-- will have save files without the last_visited event, I'm putting it here.
+		GlobalManager:AddNewEventGroup("last_visited");
+		GlobalManager:GetEventGroup("last_visited"):AddNewEvent("map_number", 0);
+	end
+	-- TODO: They could have come from the north.  If so, relocate claudius.
 
 	kyle = ConstructSprite("Kyle", 1, 73, 162);
 	kyle:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
@@ -756,6 +767,8 @@ function Load(m)
 			kyle:SetVisible(false);
 		end
 	end
+
+	GlobalManager:GetEventGroup("last_visited"):SetEvent("map_number", 3);
 end
 
 

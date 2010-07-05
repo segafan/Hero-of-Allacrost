@@ -206,13 +206,15 @@ DialogueWindow::~DialogueWindow() {
 
 
 void DialogueWindow::Initialize() {
-	MenuWindow::Show();
+	// FIXME: Should this be here?  I don't think so, but if it does, get it working properly.
+	// currently, it does nothing except flood the debug output!
+//	MenuWindow::Show();
 }
 
 
 
 void DialogueWindow::Reset() {
-	MenuWindow::Hide();
+//	MenuWindow::Hide();
 	_display_textbox.ClearText();
 	_display_options.ClearOptions();
 }
@@ -220,7 +222,7 @@ void DialogueWindow::Reset() {
 
 
 void DialogueWindow::Draw(ustring* name, StillImage* portrait) {
-	MenuWindow::Draw();
+//	MenuWindow::Draw();
 
 	// Temporarily change the coordinate system to 1024x768 and draw the contents of the dialogue window
 	VideoManager->PushState();
