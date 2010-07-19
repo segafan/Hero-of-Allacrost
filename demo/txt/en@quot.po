@@ -29,11 +29,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 0.2.2\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-07-03 21:38-0400\n"
-"PO-Revision-Date: 2010-07-03 21:38-0400\n"
+"POT-Creation-Date: 2010-07-19 18:56-0300\n"
+"PO-Revision-Date: 2010-07-19 18:56-0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
-"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -99,75 +98,75 @@ msgstr "Hector"
 msgid "Charles"
 msgstr "Charles"
 
-#: dat/maps/betrayal_room.lua:301
+#: dat/maps/betrayal_room.lua:311
 msgid "I’m very disappointed in you, Kyle."
 msgstr "I’m very disappointed in you, Kyle."
 
-#: dat/maps/betrayal_room.lua:303
+#: dat/maps/betrayal_room.lua:313
 msgid "Over here, Claudius!"
 msgstr "Over here, Claudius!"
 
-#: dat/maps/betrayal_room.lua:311
+#: dat/maps/betrayal_room.lua:321
 msgid "No!"
 msgstr "No!"
 
-#: dat/maps/betrayal_room.lua:313
+#: dat/maps/betrayal_room.lua:323
 msgid "What have you done…"
 msgstr "What have you done…"
 
-#: dat/maps/betrayal_room.lua:315
+#: dat/maps/betrayal_room.lua:325
 msgid "I’m sorry.  I didn't want to have to do that."
 msgstr "I’m sorry.  I didn't want to have to do that."
 
-#: dat/maps/betrayal_room.lua:317
+#: dat/maps/betrayal_room.lua:327
 msgid "What are you doing?"
 msgstr "What are you doing?"
 
-#: dat/maps/betrayal_room.lua:319
+#: dat/maps/betrayal_room.lua:329
 msgid "I can’t let you get away."
 msgstr "I can’t let you get away."
 
-#: dat/maps/betrayal_room.lua:321
+#: dat/maps/betrayal_room.lua:331
 msgid "I’m your friend!"
 msgstr "I’m your friend!"
 
-#: dat/maps/betrayal_room.lua:323
+#: dat/maps/betrayal_room.lua:333
 msgid "It’s my duty!"
 msgstr "It’s my duty!"
 
-#: dat/maps/betrayal_room.lua:325
+#: dat/maps/betrayal_room.lua:335
 msgid "Don’t do this."
 msgstr "Don’t do this."
 
-#: dat/maps/betrayal_room.lua:327
+#: dat/maps/betrayal_room.lua:337
 msgid "You’ve already done it."
 msgstr "You’ve already done it."
 
-#: dat/maps/betrayal_room.lua:329
+#: dat/maps/betrayal_room.lua:339
 msgid "I don’t want to fight you."
 msgstr "I don’t want to fight you."
 
-#: dat/maps/betrayal_room.lua:331
+#: dat/maps/betrayal_room.lua:341
 msgid "Then lower your weapon and turn yourself in."
 msgstr "Then lower your weapon and turn yourself in."
 
-#: dat/maps/betrayal_room.lua:333
+#: dat/maps/betrayal_room.lua:343
 msgid "You know I can’t."
 msgstr "You know I can’t."
 
-#: dat/maps/betrayal_room.lua:335
+#: dat/maps/betrayal_room.lua:345
 msgid "And you know I can’t just let you go."
 msgstr "And you know I can’t just let you go."
 
-#: dat/maps/betrayal_room.lua:337
+#: dat/maps/betrayal_room.lua:347
 msgid "Isn’t our friendship more important than your duty?"
 msgstr "Isn’t our friendship more important than your duty?"
 
-#: dat/maps/betrayal_room.lua:339
+#: dat/maps/betrayal_room.lua:349
 msgid "You killed the Captain!"
 msgstr "You killed the Captain!"
 
-#: dat/maps/betrayal_room.lua:346
+#: dat/maps/betrayal_room.lua:356
 msgid ""
 "I just took some supplies, just enough to start a new life, away from this "
 "servitude. Can’t you understand?"
@@ -175,27 +174,27 @@ msgstr ""
 "I just took some supplies, just enough to start a new life, away from this "
 "servitude. Can’t you understand?"
 
-#: dat/maps/betrayal_room.lua:348
+#: dat/maps/betrayal_room.lua:358
 msgid "You’ve tarnished your honor and disgraced the Harrvahan knighthood!"
 msgstr "You’ve tarnished your honor and disgraced the Harrvahan knighthood!"
 
-#: dat/maps/betrayal_room.lua:350
+#: dat/maps/betrayal_room.lua:360
 msgid "To hell with the knighthood!"
 msgstr "To hell with the knighthood!"
 
-#: dat/maps/betrayal_room.lua:357
+#: dat/maps/betrayal_room.lua:367
 msgid "Claudius! Are you all right?"
 msgstr "Claudius! Are you all right?"
 
-#: dat/maps/betrayal_room.lua:359
+#: dat/maps/betrayal_room.lua:369
 msgid "I’m fine… But the captain… He fell…"
 msgstr "I’m fine… But the captain… He fell…"
 
-#: dat/maps/betrayal_room.lua:361
+#: dat/maps/betrayal_room.lua:371
 msgid "Everyone down to the cave floor! He might still be alive!"
 msgstr "Everyone down to the cave floor! He might still be alive!"
 
-#: dat/maps/betrayal_room.lua:363
+#: dat/maps/betrayal_room.lua:373
 msgid "Damn you, Kyle."
 msgstr "Damn you, Kyle."
 
@@ -223,23 +222,23 @@ msgstr "Tim"
 msgid "Joe"
 msgstr "Joe"
 
-#: dat/maps/desert_barracks.lua:561
+#: dat/maps/desert_barracks.lua:569
 msgid "Claudius?  Claudius!  WAKE UP!"
 msgstr "Claudius?  Claudius!  WAKE UP!"
 
-#: dat/maps/desert_barracks.lua:563
+#: dat/maps/desert_barracks.lua:571
 msgid "Huh?  What?"
 msgstr "Huh?  What?"
 
-#: dat/maps/desert_barracks.lua:565
+#: dat/maps/desert_barracks.lua:573
 msgid "Get your gear and let’s go!"
 msgstr "Get your gear and let’s go!"
 
-#: dat/maps/desert_barracks.lua:567
+#: dat/maps/desert_barracks.lua:575
 msgid "What’s going on?"
 msgstr "What’s going on?"
 
-#: dat/maps/desert_barracks.lua:569
+#: dat/maps/desert_barracks.lua:577
 msgid ""
 "The treasury!  A thief has broken in and stolen everything.  The captain has "
 "called a man hunt.  Now equip yourself and meet us out front."
@@ -247,33 +246,33 @@ msgstr ""
 "The treasury!  A thief has broken in and stolen everything.  The captain has "
 "called a man hunt.  Now equip yourself and meet us out front."
 
-#: dat/maps/desert_barracks.lua:571
+#: dat/maps/desert_barracks.lua:579
 msgid "Come on, Kyle, let’s go! Kyle?"
 msgstr "Come on, Kyle, let’s go! Kyle?"
 
-#: dat/maps/desert_barracks.lua:573
+#: dat/maps/desert_barracks.lua:581
 msgid "Oh no."
 msgstr "Oh no."
 
-#: dat/maps/desert_barracks.lua:578
+#: dat/maps/desert_barracks.lua:586
 msgid "This way to the barracks."
 msgstr "This way to the barracks."
 
-#: dat/maps/desert_barracks.lua:583
+#: dat/maps/desert_barracks.lua:591
 msgid "Entry into the kitchen is strictly forbidden!"
 msgstr "Entry into the kitchen is strictly forbidden!"
 
-#: dat/maps/desert_barracks.lua:588
+#: dat/maps/desert_barracks.lua:596
 msgid ""
 "Hi, Claudius.  If you're looking for the captain, he's at the training hall."
 msgstr ""
 "Hi, Claudius.  If you're looking for the captain, he's at the training hall."
 
-#: dat/maps/desert_barracks.lua:593
+#: dat/maps/desert_barracks.lua:601
 msgid "I'll stay behind and protect the barracks.  Good luck!"
 msgstr "I'll stay behind and protect the barracks.  Good luck!"
 
-#: dat/maps/desert_barracks.lua:598
+#: dat/maps/desert_barracks.lua:606
 msgid ""
 "For those of you who don’t know, a thief has broken into the armory. It is "
 "up to us to capture him. Split up and comb the area."
@@ -281,143 +280,143 @@ msgstr ""
 "For those of you who don’t know, a thief has broken into the armory. It is "
 "up to us to capture him. Split up and comb the area."
 
-#: dat/maps/desert_barracks.lua:600 dat/maps/desert_training.lua:572
+#: dat/maps/desert_barracks.lua:608 dat/maps/desert_training.lua:593
 msgid "Sir?"
 msgstr "Sir?"
 
-#: dat/maps/desert_barracks.lua:602
+#: dat/maps/desert_barracks.lua:610
 msgid "Yes, Claudius?"
 msgstr "Yes, Claudius?"
 
-#: dat/maps/desert_barracks.lua:604
+#: dat/maps/desert_barracks.lua:612
 msgid "…Nothing."
 msgstr "…Nothing."
 
-#: dat/maps/desert_barracks.lua:606
+#: dat/maps/desert_barracks.lua:614
 msgid "You have your orders.  Now go."
 msgstr "You have your orders.  Now go."
 
-#: dat/maps/desert_outskirts.lua:678
+#: dat/maps/desert_outskirts.lua:676
 msgid "There you are."
 msgstr "There you are."
 
-#: dat/maps/desert_outskirts.lua:680
+#: dat/maps/desert_outskirts.lua:678
 msgid "Hey."
 msgstr "Hey."
 
-#: dat/maps/desert_outskirts.lua:682
+#: dat/maps/desert_outskirts.lua:680
 msgid "What are you doing? The captain wants to speak with you."
 msgstr "What are you doing? The captain wants to speak with you."
 
-#: dat/maps/desert_outskirts.lua:684
+#: dat/maps/desert_outskirts.lua:682
 msgid "He can wait."
 msgstr "He can wait."
 
-#: dat/maps/desert_outskirts.lua:686
+#: dat/maps/desert_outskirts.lua:684
 msgid "…What?"
 msgstr "…What?"
 
-#: dat/maps/desert_outskirts.lua:688
+#: dat/maps/desert_outskirts.lua:686
 msgid "(Kyle hands Claudius a cloth.  Inside is a piece of cake.)"
 msgstr "(Kyle hands Claudius a cloth.  Inside is a piece of cake.)"
 
-#: dat/maps/desert_outskirts.lua:690
+#: dat/maps/desert_outskirts.lua:688
 msgid ""
 "I managed to swipe some goodies from the kitchen quarters. I saved you some."
 msgstr ""
 "I managed to swipe some goodies from the kitchen quarters. I saved you some."
 
-#: dat/maps/desert_outskirts.lua:692
+#: dat/maps/desert_outskirts.lua:690
 msgid "You shouldn’t –"
 msgstr "You shouldn’t –"
 
-#: dat/maps/desert_outskirts.lua:694
+#: dat/maps/desert_outskirts.lua:692
 msgid "It's just a piece of cake.  It's not going to hurt anyone."
 msgstr "It's just a piece of cake.  It's not going to hurt anyone."
 
+#: dat/maps/desert_outskirts.lua:694
+msgid ""
+"I guess you’re right. And hey, thanks for covering for me back there. I "
+"appreciate it."
+msgstr ""
+"I guess you’re right. And hey, thanks for covering for me back there. I "
+"appreciate it."
+
 #: dat/maps/desert_outskirts.lua:696
 msgid ""
-"I guess you’re right. And hey, thanks for covering for me back there. I "
-"appreciate it."
+"Don’t mention it. I’m already on bad terms with the captain, there’s no "
+"sense in you getting in trouble too."
 msgstr ""
-"I guess you’re right. And hey, thanks for covering for me back there. I "
-"appreciate it."
+"Don’t mention it. I’m already on bad terms with the captain, there’s no "
+"sense in you getting in trouble too."
 
 #: dat/maps/desert_outskirts.lua:698
-msgid ""
-"Don’t mention it. I’m already on bad terms with the captain, there’s no "
-"sense in you getting in trouble too."
-msgstr ""
-"Don’t mention it. I’m already on bad terms with the captain, there’s no "
-"sense in you getting in trouble too."
-
-#: dat/maps/desert_outskirts.lua:700
 msgid "Hey, what's that… look out!"
 msgstr "Hey, what's that… look out!"
 
-#: dat/maps/desert_outskirts.lua:714
+#: dat/maps/desert_outskirts.lua:712
 msgid "Good job."
 msgstr "Good job."
 
-#: dat/maps/desert_outskirts.lua:716
+#: dat/maps/desert_outskirts.lua:714
 msgid "You too. We should head back."
 msgstr "You too. We should head back."
 
-#: dat/maps/desert_outskirts.lua:718
+#: dat/maps/desert_outskirts.lua:716
 msgid "All right."
 msgstr "All right."
 
-#: dat/maps/desert_outskirts.lua:720
+#: dat/maps/desert_outskirts.lua:718
 msgid "Claudius?"
 msgstr "Claudius?"
 
-#: dat/maps/desert_outskirts.lua:722 dat/maps/desert_training.lua:584
+#: dat/maps/desert_outskirts.lua:720 dat/maps/desert_training.lua:605
 msgid "Yes?"
 msgstr "Yes?"
 
-#: dat/maps/desert_outskirts.lua:724
+#: dat/maps/desert_outskirts.lua:722
 msgid "…Let’s go."
 msgstr "…Let’s go."
 
-#: dat/maps/desert_training.lua:540
+#: dat/maps/desert_training.lua:561
 msgid "You're late."
 msgstr "You're late."
 
-#: dat/maps/desert_training.lua:542
+#: dat/maps/desert_training.lua:563
 msgid "Sorry, sir, I –"
 msgstr "Sorry, sir, I –"
 
-#: dat/maps/desert_training.lua:544
+#: dat/maps/desert_training.lua:565
 msgid "It’s my fault, sir. I dragged Claudius off this morning."
 msgstr "It’s my fault, sir. I dragged Claudius off this morning."
 
-#: dat/maps/desert_training.lua:546
+#: dat/maps/desert_training.lua:567
 msgid ""
 "Very well. Kyle. Find a partner to train with. I’ll deal with you later."
 msgstr ""
 "Very well. Kyle. Find a partner to train with. I’ll deal with you later."
 
-#: dat/maps/desert_training.lua:548
+#: dat/maps/desert_training.lua:569
 msgid "All right buddy, let's go."
 msgstr "All right buddy, let's go."
 
-#: dat/maps/desert_training.lua:550
+#: dat/maps/desert_training.lua:571
 msgid "Not him. Claudius trains with me today."
 msgstr "Not him. Claudius trains with me today."
 
-#: dat/maps/desert_training.lua:552
+#: dat/maps/desert_training.lua:573
 msgid "Yes sir."
 msgstr "Yes sir."
 
-#: dat/maps/desert_training.lua:554
+#: dat/maps/desert_training.lua:575
 msgid "Show me your slicing attack technique."
 msgstr "Show me your slicing attack technique."
 
-#: dat/maps/desert_training.lua:556
+#: dat/maps/desert_training.lua:577
 msgid "Hi-ya!"
 msgstr "Hi-ya!"
 
-#: dat/maps/desert_training.lua:558
+#: dat/maps/desert_training.lua:579
 msgid ""
 "Good. Remember, never take your eye off your target. Now show me the proper "
 "form for a parry."
@@ -425,61 +424,61 @@ msgstr ""
 "Good. Remember, never take your eye off your target. Now show me the proper "
 "form for a parry."
 
-#: dat/maps/desert_training.lua:560
+#: dat/maps/desert_training.lua:581
 msgid "Nicely done."
 msgstr "Nicely done."
 
-#: dat/maps/desert_training.lua:562
+#: dat/maps/desert_training.lua:583
 msgid "Thank you, sir."
 msgstr "Thank you, sir."
 
-#: dat/maps/desert_training.lua:564
+#: dat/maps/desert_training.lua:585
 msgid ""
 "Let’s see how you fare when the opponent strikes back. Kyle! Get over here!"
 msgstr ""
 "Let’s see how you fare when the opponent strikes back. Kyle! Get over here!"
 
-#: dat/maps/desert_training.lua:566
+#: dat/maps/desert_training.lua:587
 msgid "Where’s that friend of yours run off to this time?"
 msgstr "Where’s that friend of yours run off to this time?"
 
-#: dat/maps/desert_training.lua:568
+#: dat/maps/desert_training.lua:589
 msgid "I don’t know, sir."
 msgstr "I don’t know, sir."
 
-#: dat/maps/desert_training.lua:570
+#: dat/maps/desert_training.lua:591
 msgid "You’ll face me then."
 msgstr "You’ll face me then."
 
-#: dat/maps/desert_training.lua:574
+#: dat/maps/desert_training.lua:595
 msgid "Draw your weapon."
 msgstr "Draw your weapon."
 
-#: dat/maps/desert_training.lua:576
+#: dat/maps/desert_training.lua:597
 msgid "Remember what you’ve learned."
 msgstr "Remember what you’ve learned."
 
-#: dat/maps/desert_training.lua:578
+#: dat/maps/desert_training.lua:599
 msgid "Well done, Claudius."
 msgstr "Well done, Claudius."
 
-#: dat/maps/desert_training.lua:580
+#: dat/maps/desert_training.lua:601
 msgid "Yes, sir."
 msgstr "Yes, sir."
 
-#: dat/maps/desert_training.lua:582
+#: dat/maps/desert_training.lua:603
 msgid "Come with me, Claudius, we need to talk."
 msgstr "Come with me, Claudius, we need to talk."
 
-#: dat/maps/desert_training.lua:586
+#: dat/maps/desert_training.lua:607
 msgid "You and Kyle are close."
 msgstr "You and Kyle are close."
 
-#: dat/maps/desert_training.lua:588
+#: dat/maps/desert_training.lua:609
 msgid "We are, sir."
 msgstr "We are, sir."
 
-#: dat/maps/desert_training.lua:590
+#: dat/maps/desert_training.lua:611
 msgid ""
 "You have a lot of potential, Claudius. I know Kyle is your friend, but I "
 "fear he’s becoming an impediment to your quest for knighthood."
@@ -487,11 +486,11 @@ msgstr ""
 "You have a lot of potential, Claudius. I know Kyle is your friend, but I "
 "fear he’s becoming an impediment to your quest for knighthood."
 
-#: dat/maps/desert_training.lua:592
+#: dat/maps/desert_training.lua:613
 msgid "Kyle is a good man, sir."
 msgstr "Kyle is a good man, sir."
 
-#: dat/maps/desert_training.lua:594
+#: dat/maps/desert_training.lua:615
 msgid ""
 "Regardless, I want you to consider your priorities. Becoming a knight takes "
 "sacrifice. Sometimes that sacrifice means spending less time with the people "
@@ -501,11 +500,11 @@ msgstr ""
 "sacrifice. Sometimes that sacrifice means spending less time with the people "
 "we care about."
 
-#: dat/maps/desert_training.lua:596
+#: dat/maps/desert_training.lua:617
 msgid "I understand, sir."
 msgstr "I understand, sir."
 
-#: dat/maps/desert_training.lua:598
+#: dat/maps/desert_training.lua:619
 msgid ""
 "Just think about it. Now, do me a favor and find Kyle. I need to speak with "
 "him as well."
@@ -513,7 +512,7 @@ msgstr ""
 "Just think about it. Now, do me a favor and find Kyle. I need to speak with "
 "him as well."
 
-#: dat/maps/desert_training.lua:603
+#: dat/maps/desert_training.lua:624
 msgid ""
 "I need you to look for Kyle.  I hope he didn't wander off.  Maybe the other "
 "soldiers know where he is?"
@@ -521,7 +520,7 @@ msgstr ""
 "I need you to look for Kyle.  I hope he didn't wander off.  Maybe the other "
 "soldiers know where he is?"
 
-#: dat/maps/desert_training.lua:608
+#: dat/maps/desert_training.lua:629
 msgid ""
 "This is the Karlate training site.  The barracks are to the east.  There's a "
 "cave off to the west."
@@ -529,21 +528,21 @@ msgstr ""
 "This is the Karlate training site.  The barracks are to the east.  There's a "
 "cave off to the west."
 
-#: dat/maps/desert_training.lua:615
+#: dat/maps/desert_training.lua:636
 msgid ""
 "The captain and some others went off to the cave down that path to the west."
 msgstr ""
 "The captain and some others went off to the cave down that path to the west."
 
-#: dat/maps/desert_training.lua:620
+#: dat/maps/desert_training.lua:641
 msgid "Kyle?  Oh, yeah, I think he went off to the south."
 msgstr "Kyle?  Oh, yeah, I think he went off to the south."
 
-#: dat/maps/desert_training.lua:626
+#: dat/maps/desert_training.lua:647
 msgid "Hello, Claudius.  Is your equipment in order?"
 msgstr "Hello, Claudius.  Is your equipment in order?"
 
-#: dat/maps/desert_training.lua:632
+#: dat/maps/desert_training.lua:653
 msgid ""
 "You'd be a fool to run out into the desert on your own for very long.  "
 "There's a cave to the west, though, and if you go far enough, you'll find "
@@ -553,7 +552,7 @@ msgstr ""
 "There's a cave to the west, though, and if you go far enough, you'll find "
 "water."
 
-#: dat/maps/desert_training.lua:637
+#: dat/maps/desert_training.lua:658
 msgid ""
 "I hear some guy stole from the kitchen yesterday.  They've tightened up "
 "security."
@@ -561,7 +560,7 @@ msgstr ""
 "I hear some guy stole from the kitchen yesterday.  They've tightened up "
 "security."
 
-#: dat/maps/desert_training.lua:643
+#: dat/maps/desert_training.lua:664
 msgid ""
 "Back home… hey Claudius, we should get some rest.  Let's head back to the "
 "barracks."
@@ -569,15 +568,15 @@ msgstr ""
 "Back home… hey Claudius, we should get some rest.  Let's head back to the "
 "barracks."
 
-#: dat/maps/desert_training.lua:645
+#: dat/maps/desert_training.lua:666
 msgid "Okay, let's call it a night."
 msgstr "Okay, let's call it a night."
 
-#: dat/maps/new_cave.lua:828
+#: dat/maps/new_cave.lua:841
 msgid "Kyle!"
 msgstr "Kyle!"
 
-#: dat/maps/new_cave.lua:833
+#: dat/maps/new_cave.lua:846
 msgid ""
 "Stop this, Kyle. You can’t escape. Lower your weapon and come peacefully and "
 "I’ll make sure your punishment is lenient."
@@ -585,11 +584,11 @@ msgstr ""
 "Stop this, Kyle. You can’t escape. Lower your weapon and come peacefully and "
 "I’ll make sure your punishment is lenient."
 
-#: dat/maps/new_cave.lua:838
+#: dat/maps/new_cave.lua:851
 msgid "No. I’m doing this for me. I don’t expect you to understand."
 msgstr "No. I’m doing this for me. I don’t expect you to understand."
 
-#: dat/maps/new_cave.lua:843
+#: dat/maps/new_cave.lua:856
 msgid "Then you leave me no choice."
 msgstr "Then you leave me no choice."
 
