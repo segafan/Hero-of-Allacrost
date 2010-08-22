@@ -50,6 +50,11 @@ credits_text =
 	"Zhe Zhou (shizeet) - sound composer\n" ..
 	"\n\n" ..
 
+	"Translations\n\n" ..
+	"Marcos Avila Isidoro (marcavis) - Portuguese translation" ..
+	"(Bertram) - French translation" ..
+	"\n\n" ..
+
 	"Map Designers\n\n" ..
 	"Richard Kettering (Jetryl)\n" ..
 	"Tyler Olsen (Roots)\n" ..
