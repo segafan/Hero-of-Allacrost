@@ -50,9 +50,9 @@ credits_text =
 	"Zhe Zhou (shizeet) - sound composer\n" ..
 	"\n\n" ..
 
-	"Translations\n\n" ..
-	"Marcos Avila Isidoro (marcavis) - Portuguese translation" ..
-	"(Bertram) - French translation" ..
+	"Translation Team\n\n" ..
+	"Marcos Avila Isidoro (marcavis) - Portuguese translation\n" ..
+	"(Bertram) - French translation\n" ..
 	"\n\n" ..
 
 	"Map Designers\n\n" ..
