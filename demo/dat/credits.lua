@@ -2,11 +2,11 @@
 -- Filename: credits.lua
 --
 -- Description: Contains the credits as they are seen on the screen. This file
--- is updated for every Allacrost release to reflect any new additions or to 
+-- is updated for every Allacrost release to reflect any new additions or to
 -- re-arrange the ordering.
 ------------------------------------------------------------------------------]]
 
-credits_text = 
+credits_text =
 	"Hero of Allacrost Development Team\n" ..
 	"\n\n\n" ..
 
@@ -52,7 +52,7 @@ credits_text =
 
 	"Translation Team\n\n" ..
 	"Marcos Avila Isidoro (marcavis) - Portuguese translation\n" ..
-	"(Bertram) - French translation\n" ..
+	"Yohann Ferreira (Bertram) - French translation\n" ..
 	"\n\n" ..
 
 	"Map Designers\n\n" ..
@@ -110,7 +110,7 @@ credits_text =
 	"Francisco Munoz (fmunoz) - inventory icons\n" ..
 	"Jason Frailey (Valdroni) - concept art, map sprites\n" ..
 	"Jerimiah Short (BigPapaN0z) - map tiles\n" ..
-	"John W. Bjerk (eleazar) - map tiles\n" .. 
+	"John W. Bjerk (eleazar) - map tiles\n" ..
 	"Jon Williams (Jonatron) - map sprites\n" ..
 	"Herbert Glaser (hollowgrind) - map sprite animations\n" ..
 	"Mark Goodenough (RangerM) - map sprite animations, map tiles\n" ..
