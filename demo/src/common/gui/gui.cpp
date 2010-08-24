@@ -343,6 +343,22 @@ void GUISystem::DeleteMenuSkin(std::string& skin_name) {
 	_menu_skins.erase(skin_name);
 }
 
+bool GUISystem::IsMenuSkinAvailable(std::string& skin_name) const {
+	if (_menu_skins.find(skin_name) == _menu_skins.end()) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+private_gui::MenuSkin* GUISystem::_GetMenuSkin(std::string& skin_name) {
+	if (_menu_skins.find(skin_name) == _menu_skins.end())
+		return NULL;
+	else
+		return &(_menu_skins[skin_name]);
+}
+
 
 
 void GUISystem::_AddMenuWindow(MenuWindow* new_window) {

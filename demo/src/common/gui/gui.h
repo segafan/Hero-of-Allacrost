@@ -286,8 +286,7 @@ public:
 	void DeleteMenuSkin(std::string& skin_name);
 
 	//! \brief Returns true if there is a menu skin avialable corresponding to the argument name
-	bool IsMenuSkinAvailable(std::string& skin_name) const
-		{ if (_menu_skins.find(skin_name) == _menu_skins.end()) return false; else return true; }
+	bool IsMenuSkinAvailable(std::string& skin_name) const;
 
 	/** \brief Sets the default menu skin to use from the set of pre-loaded skins
 	*** \param skin_name The name of the already loaded menu skin that should be made the default skin
@@ -339,7 +338,7 @@ private:
 	*** If no menu skins exist, this member will be NULL. It will never be NULL as long as one menu skin is loaded.
 	*** If the default menu skin is deleted by the user, an alternative default skin will automatically be set.
 	**/
-	private_gui::MenuSkin* _default_skin;
+	hoa_gui::private_gui::MenuSkin* _default_skin;
 
 	//! \brief The next ID to assign to a MenuWindow when one is created
 	uint32 _next_window_id;
@@ -355,8 +354,7 @@ private:
 	*** \param skin_name The name of the menu skin to grab
 	*** \return A pointer to the MenuSkin, or NULL if the skin name was not found
 	**/
-	private_gui::MenuSkin* _GetMenuSkin(std::string& skin_name)
-		{ if (_menu_skins.find(skin_name) == _menu_skins.end()) return NULL; else return &(_menu_skins[skin_name]); }
+	private_gui::MenuSkin* _GetMenuSkin(std::string& skin_name);
 
 	//! \brief Returns a pointer to the default menu skin
 	private_gui::MenuSkin* _GetDefaultMenuSkin() const
