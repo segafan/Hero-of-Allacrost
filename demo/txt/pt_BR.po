@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Allacrost Demo 0.3.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
 "POT-Creation-Date: 2010-07-19 18:56-0300\n"
-"PO-Revision-Date: 2010-07-19 19:45-0300\n"
+"PO-Revision-Date: 2010-09-01 01:46-0300\n"
 "Last-Translator: Marcos Avila Isidoro <marcavis@yahoo.com.br>\n"
 "Language-Team: Team Allacrost\n"
 "MIME-Version: 1.0\n"
@@ -100,7 +100,7 @@ msgstr "O que foi que você fez…"
 
 #: dat/maps/betrayal_room.lua:325
 msgid "I’m sorry.  I didn't want to have to do that."
-msgstr "Desculpe. Eu não queria ter que fazer isso."
+msgstr "Eu sei, eu… não queria ter que fazer isso."
 
 #: dat/maps/betrayal_room.lua:327
 msgid "What are you doing?"
@@ -128,7 +128,7 @@ msgstr "Quem fez foi você."
 
 #: dat/maps/betrayal_room.lua:339
 msgid "I don’t want to fight you."
-msgstr "Eu não quero enfrentar você."
+msgstr "Eu não quero te enfrentar."
 
 #: dat/maps/betrayal_room.lua:341
 msgid "Then lower your weapon and turn yourself in."
@@ -156,7 +156,7 @@ msgstr "Eu só peguei uns suprimentos, o que desse pra começar uma vida nova, l
 
 #: dat/maps/betrayal_room.lua:358
 msgid "You’ve tarnished your honor and disgraced the Harrvahan knighthood!"
-msgstr "Você manchou a sua honra e desgraçou a ordem de Harrvah!"
+msgstr "Você manchou a sua honra e maculou a ordem de Harrvah!"
 
 #: dat/maps/betrayal_room.lua:360
 msgid "To hell with the knighthood!"
@@ -216,16 +216,16 @@ msgstr "Arrume-se e vamos!"
 
 #: dat/maps/desert_barracks.lua:575
 msgid "What’s going on?"
-msgstr "O que está havendo?"
+msgstr "O que aconteceu?"
 
 # "treasury" might change later
 #: dat/maps/desert_barracks.lua:577
 msgid "The treasury!  A thief has broken in and stolen everything.  The captain has called a man hunt.  Now equip yourself and meet us out front."
-msgstr "O tesouro! Um ladrão o arrombou e levou tudo. O capitão convocou uma busca. Agora arrume-se e nos encontre lá na fora."
+msgstr "O tesouro! Um ladrão o arrombou e levou tudo. O capitão convocou uma busca. Agora arrume-se e nos encontre lá fora."
 
 #: dat/maps/desert_barracks.lua:579
 msgid "Come on, Kyle, let’s go! Kyle?"
-msgstr "Venha, Kyle, vamos! Kyle!"
+msgstr "Venha, Kyle, vamos! …Kyle?"
 
 #: dat/maps/desert_barracks.lua:581
 msgid "Oh no."
@@ -237,11 +237,11 @@ msgstr "O quartel é por aqui."
 
 #: dat/maps/desert_barracks.lua:591
 msgid "Entry into the kitchen is strictly forbidden!"
-msgstr "É terminantemente proibido entrar na cozinha!"
+msgstr "É proibido entrar na cozinha!"
 
 #: dat/maps/desert_barracks.lua:596
 msgid "Hi, Claudius.  If you're looking for the captain, he's at the training hall."
-msgstr "Oi, Claudius. Se você está procurando o capitão, ele está na sala de treinamento."
+msgstr "Oi, Claudius. Se você está procurando o capitão, ele está no salão de treinamento."
 
 #: dat/maps/desert_barracks.lua:601
 msgid "I'll stay behind and protect the barracks.  Good luck!"
@@ -307,11 +307,11 @@ msgstr "É só uma fatia de bolo. Não vai fazer mal pra ninguém."
 
 #: dat/maps/desert_outskirts.lua:694
 msgid "I guess you’re right. And hey, thanks for covering for me back there. I appreciate it."
-msgstr "É, acho que está certo. Ah, e obrigado por ter me livrado antes. Mesmo."
+msgstr "É, acho que está certo. Ah, e obrigado por ter me tirado daquela encrenca com o capitão."
 
 #: dat/maps/desert_outskirts.lua:696
 msgid "Don’t mention it. I’m already on bad terms with the captain, there’s no sense in you getting in trouble too."
-msgstr "Não foi nada. Eu já estou encrencado com o capitão, não tem motivo pra você se meter em confusão também."
+msgstr "Não foi nada. Eu já tenho problemas com o capitão, não tem motivo pra você se meter em confusão também."
 
 #: dat/maps/desert_outskirts.lua:698
 msgid "Hey, what's that… look out!"
@@ -444,7 +444,7 @@ msgstr "Kyle é um bom homem, senhor."
 
 #: dat/maps/desert_training.lua:615
 msgid "Regardless, I want you to consider your priorities. Becoming a knight takes sacrifice. Sometimes that sacrifice means spending less time with the people we care about."
-msgstr "Apesar disso, eu quero que você considere quais são suas prioridades. É preciso sacrifício para se tornar um cavaleiro. Às vezes esse sacrifício significa passarmos menos tempo com as pessoas que importam pra nós."
+msgstr "Eu sei, mas… eu quero que você decida quais são as suas prioridades. É preciso sacrifício para se tornar um cavaleiro. Às vezes esse sacrifício significa passarmos menos tempo com as pessoas que importam pra nós."
 
 #: dat/maps/desert_training.lua:617
 msgid "I understand, sir."
@@ -472,7 +472,7 @@ msgstr "O Kyle? Ah, sim, acho que ele foi na direção sul."
 
 #: dat/maps/desert_training.lua:647
 msgid "Hello, Claudius.  Is your equipment in order?"
-msgstr "Olá, Claudius. O seu equipamento está em ordem?"
+msgstr "Olá, Claudius. Está com o equipamento em ordem?"
 
 #: dat/maps/desert_training.lua:653
 msgid "You'd be a fool to run out into the desert on your own for very long.  There's a cave to the west, though, and if you go far enough, you'll find water."
@@ -508,7 +508,7 @@ msgstr "Então você não me deixa escolha."
 
 #: dat/maps/opening_scene.lua:209
 msgid "You know the only reason I’m doing this is because of my family. There was never any discussion. If it was my choice I’d be far away from here."
-msgstr "Você sabe que só estou fazendo isso pela minha família. Isso nunca estava em discussão. Se eu pudesse escolher, estaria bem longe daqui."
+msgstr "Você sabe que só estou fazendo isso pela minha família. Nunca pensei que não fosse. Se eu pudesse escolher, estaria bem longe daqui."
 
 #: dat/maps/opening_scene.lua:211
 msgid "And go where? You should be happy. It’s an honor to serve your country."
@@ -852,7 +852,7 @@ msgstr "Pausa: Botão"
 
 #: src/modes/boot/boot.cpp:1233
 msgid "Please enter a name for your new profile"
-msgstr "Defina um nome para o seu novo perfil"
+msgstr "Defina um nome para o novo perfil"
 
 #: src/modes/boot/boot.cpp:1241
 msgid "Overwrite? Confirm/Cancel"
@@ -1031,7 +1031,7 @@ msgstr "Com os "
 # Change this message to a more natural one
 #: src/modes/map/map_treasure.cpp:456
 msgid " drunes found in this treasure added, the party now holds a total of "
-msgstr " drunes encontrados no tesouro; o total possuído pelo grupo agora é "
+msgstr " drunes encontrados no tesouro, o total possuído pelo grupo agora é "
 
 #: src/modes/menu/menu.cpp:519
 msgid "Inventory"
