@@ -224,10 +224,10 @@ void BattleMode::Draw() {
 	// Apply scene lighting if the battle has finished
 	if ((_state == BATTLE_STATE_VICTORY || _state == BATTLE_STATE_DEFEAT)) {// && _after_scripts_finished) {
 		if (_state == BATTLE_STATE_VICTORY) {
-			VideoManager->EnableSceneLighting(Color(0.914f, 0.753f, 0.106f, 1.0f)); // Golden color for victory
+//			VideoManager->EnableSceneLighting(Color(0.914f, 0.753f, 0.106f, 1.0f)); // Golden color for victory
 		}
 		else {
-			VideoManager->EnableSceneLighting(Color(1.0f, 0.0f, 0.0f, 1.0f)); // Red color for defeat
+//			VideoManager->EnableSceneLighting(Color(1.0f, 0.0f, 0.0f, 1.0f)); // Red color for defeat
 		}
 	}
 
