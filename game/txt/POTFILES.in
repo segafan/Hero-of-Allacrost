@@ -1,0 +1,24 @@
+# List of source files which contain translatable strings.
+# File globbing (*.cpp, *.lua) is not supported.
+dat/actors/map_sprites_stock.lua
+dat/maps/betrayal_room.lua
+dat/maps/desert_barracks.lua
+dat/maps/desert_outskirts.lua
+dat/maps/desert_training.lua
+dat/maps/new_cave.lua
+dat/maps/opening_scene.lua
+src/modes/pause.cpp
+src/modes/battle/battle_actors.cpp
+src/modes/boot/boot.cpp
+src/modes/boot/boot_welcome.cpp
+src/modes/map/map_treasure.cpp
+src/modes/menu/menu.cpp
+src/modes/menu/menu_views.cpp
+src/modes/save/save_mode.cpp
+src/modes/shop/shop.cpp
+src/modes/shop/shop_buy.cpp
+src/modes/shop/shop_confirm.cpp
+src/modes/shop/shop_leave.cpp
+src/modes/shop/shop_root.cpp
+src/modes/shop/shop_sell.cpp
+src/modes/shop/shop_trade.cpp
