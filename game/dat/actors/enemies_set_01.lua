@@ -64,11 +64,11 @@ enemies[1] = {
 	},
 
 	skills = {
-		[1] = 102
+		[1] = 1001
 	},
 
 	drop_objects = {
-		{ 1, 0.10, 1 } -- Healing potion
+		{ 1, 0.05, 1 } -- Minor Healing Potion
 	}
 }
 
@@ -126,11 +126,11 @@ enemies[2] = {
 	},
 
 	skills = {
-		[1] = 101
+		[1] = 1002
 	},
 
 	drop_objects = {
-		{ 1, 0.10, 1 } -- Healing potion
+		{ 1, 0.10, 1 } -- Minor Healing Potion
 	}
 }
 
@@ -195,11 +195,11 @@ enemies[3] = {
 	},
 
 	skills = {
-		[1] = 100
+		[1] = 1003
 	},
 
 	drop_objects = {
-		{ 1, 0.10, 1 } -- Healing potion
+		{ 1, 0.10, 1 } -- Minor Healing Potion
 	}
 }
 
@@ -265,11 +265,11 @@ enemies[4] = {
 	},
 
 	skills = {
-		[1] = 103
+		[1] = 1004
 	},
 
 	drop_objects = {
-		{ 1, 0.15, 1 } -- Healing potion
+		{ 1, 0.15, 1 } -- Minor Healing Potion
 	}
 }
 
@@ -336,10 +336,10 @@ enemies[5] = {
 	},
 
 	skills = {
-		[1] = 101
+		[1] = 1002
 	},
 
 	drop_objects = {
-		{ 1, 0.15, 1 } -- Healing potion
+		{ 1, 0.15, 1 } -- Minor Healing Potion
 	}
 }

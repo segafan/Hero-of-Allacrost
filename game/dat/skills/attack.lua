@@ -132,18 +132,18 @@ skills[4] = {
 --------------------------------------------------------------------------------
 
 skills[1001] = {
-	name = "Snake Bite",
+	name = "Slime Attack",
 	sp_required = 0,
-	warmup_time = 900,
-	cooldown_time = 0,
+	warmup_time = 1100,
+	cooldown_time = 500,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 14, 0));
-			AudioManager:PlaySound("snd/snake_attack.wav");
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 10, 0));
+			AudioManager:PlaySound("snd/slime_attack.wav");
 		else
 			target_actor:RegisterMiss();
 		end
@@ -170,24 +170,23 @@ skills[1002] = {
 }
 
 skills[1003] = {
-	name = "Slime Attack",
+	name = "Snake Bite",
 	sp_required = 0,
-	warmup_time = 1100,
-	cooldown_time = 500,
+	warmup_time = 900,
+	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 10, 0));
-			AudioManager:PlaySound("snd/slime_attack.wav");
+			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 14, 0));
+			AudioManager:PlaySound("snd/snake_attack.wav");
 		else
 			target_actor:RegisterMiss();
 		end
 	end
 }
-
 
 skills[1004] = {
 	name = "Skeleton Sword Attack",
