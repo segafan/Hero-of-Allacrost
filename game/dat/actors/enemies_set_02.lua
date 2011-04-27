@@ -63,11 +63,11 @@ enemies[101] = {
 	},
 
 	skills = {
-		[1] = 103
+
 	},
 
 	drop_objects = {
-		{ 10002, 0.05, 1 } -- Iron sword
+
 	}
 }
 
@@ -125,11 +125,11 @@ enemies[102] = {
 	},
 
 	skills = {
-		[1] = 103
+
 	},
 
 	drop_objects = {
-		{ 20502, 0.10, 1 } -- Winged Circlet
+
 	}
 }
 
@@ -195,11 +195,11 @@ enemies[103] = {
 	},
 
 	skills = {
-		[1] = 104
+
 	},
 
 	drop_objects = {
-		{ 20002, 0.05, 1 } -- Cobalt Helm
+
 	}
 }
 
@@ -264,11 +264,11 @@ enemies[104] = {
 	},
 
 	skills = {
-		[1] = 106
+
 	},
 
 	drop_objects = {
-		{ 40001, 0.15, 1 } -- Karlate shield
+
 	}
 }
 
@@ -341,11 +341,11 @@ enemies[105] = {
 	},
 
 	skills = {
-		[1] = 105
+
 	},
 
 	drop_objects = {
-		{ 10503, 0.05, 1 } -- Reinforced crossbow
+
 	}
 }
 
@@ -411,11 +411,11 @@ enemies[106] = {
 	},
 
 	skills = {
-		[1] = 107
+
 	},
 
 	drop_objects = {
-		{ 30001, 0.15, 1 } -- Karlate breastplate
+
 	}
 }
 
@@ -480,10 +480,10 @@ enemies[107] = {
 	},
 
 	skills = {
-		[1] = 21
+
 	},
 
 	drop_objects = {
-		{ 1, 0.15, 1 } -- Healing potion
+
 	}
 }
