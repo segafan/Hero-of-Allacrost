@@ -65,8 +65,8 @@ items[1] = {
 -- IDs 1,001 - 2,000 are reserved for status potions
 --------------------------------------------------------------------------------
 
-items[1] = {
-	name = hoa_system.Translate("Light Elixer"),
+items[1001] = {
+	name = hoa_system.Translate("Light Elixir"),
 	description = hoa_system.Translate("Reduces ailing status effects by a limited degree."),
 	icon = "img/icons/items/potion_blue_small.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
