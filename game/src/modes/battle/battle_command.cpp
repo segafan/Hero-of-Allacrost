@@ -47,7 +47,7 @@ const float HEADER_SIZE_Y = 30.0f;
 const float LIST_POSITION_X = 140.0f;
 const float LIST_POSITION_Y = 115.0f;
 const float LIST_SIZE_X = 350.0f;
-const float LIST_SIZE_Y = 120.0f;
+const float LIST_SIZE_Y = 100.0f;
 
 ////////////////////////////////////////////////////////////////////////////////
 // CharacterCommandSettings class
@@ -127,12 +127,12 @@ CharacterCommandSettings::CharacterCommandSettings(BattleCharacter* character, M
 
 	skill_list = _character->GetGlobalCharacter()->GetSupportSkills();
 	for (uint32 i = 0; i < skill_list->size(); i++) {
-		_attack_list.AddOption(ustring());
-		_attack_list.AddOptionElementText(i, skill_list->at(i)->GetName());
-		_attack_list.AddOptionElementAlignment(i, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
-		_attack_list.AddOptionElementText(i, MakeUnicodeString(NumberToString(skill_list->at(i)->GetSPRequired())));
+		_support_list.AddOption(ustring());
+		_support_list.AddOptionElementText(i, skill_list->at(i)->GetName());
+		_support_list.AddOptionElementAlignment(i, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
+		_support_list.AddOptionElementText(i, MakeUnicodeString(NumberToString(skill_list->at(i)->GetSPRequired())));
 		if (skill_list->at(i)->GetSPRequired() > _character->GetGlobalCharacter()->GetSkillPoints()) {
-			_attack_list.EnableOption(i, false);
+			_support_list.EnableOption(i, false);
 		}
 	}
 	if (skill_list->empty() == false)
