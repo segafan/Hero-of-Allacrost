@@ -96,7 +96,7 @@ characters[CLAUDIUS] = {
 
 characters[MARK] = {
 	name = hoa_system.Translate("Mark"),
-	filename = "soldier_npc01",
+	filename = "knight",
 
 	initial_stats = {
 		experience_level = 7,
@@ -171,7 +171,7 @@ characters[MARK] = {
 
 characters[DESTER] = {
 	name = hoa_system.Translate("Dester"),
-	filename = "karlate",
+	filename = "knight",
 
 	initial_stats = {
 		experience_level = 9,
@@ -246,7 +246,7 @@ characters[DESTER] = {
 
 characters[LUKAR] = {
 	name = hoa_system.Translate("Lukar"),
-	filename = "karlate",
+	filename = "knight",
 
 	initial_stats = {
 		experience_level = 18,

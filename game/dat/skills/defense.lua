@@ -52,7 +52,7 @@ skills[10001] = {
 }
 
 skills[10002] = {
-	name = hoa_system.Translate("Evasive Manuevering"),
+	name = hoa_system.Translate("Evasive Maneuvering"),
 	description = hoa_system.Translate("Increases the user's evasion ability for a brief period."),
 	sp_required = 1,
 	warmup_time = 300,
