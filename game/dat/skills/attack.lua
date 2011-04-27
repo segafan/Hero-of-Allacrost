@@ -3,7 +3,28 @@
 --
 -- Description: This file contains the definitions of all attack skills that
 -- exist in Hero of Allacrost. Each attack skill has a unique integer identifier
--- that is used as its key in the skills table below.
+-- that is used as its key in the skills table below. Some skills are primarily
+-- intended for characters to use while others are intended for enemies to use.
+-- Normally, we do not want to share skills between characters and enemies as
+-- character skills animate the sprites while enemy skills do not.
+--
+-- Skill IDs 1 through 10,000 are reserved for attack skills.
+--
+-- Each skill entry requires the following data to be defined:
+-- {name}: Text that defines the name of the skill
+-- {description}: A brief (one sentence) description of the skill
+--                (This field is required only for character skills and is optional for enemy skills)
+-- {sp_required}: The number of skill points (SP) that are required to use the skill
+--                (Zero is a valid value for this field, but a negative number is not)
+-- {warmup_time}: The number of milliseconds that the actor using the skill must wait between
+--                selecting the skill and executing it (a value of zero is valid).
+-- {cooldown_time}: The number of milliseconds that the actor using the skill must wait after
+--                  executing the skill before their stamina begins regenrating (zero is valid).
+-- {target_type}: The type of target the skill affects, which may be an attack point, actor, or party.
+--
+-- Each skill entry requires a function called {BattleExecute} to be defined. This function implements the
+-- execution of the skill in battle, dealing damage, causing status changes, playing sounds, and animating
+-- sprites.
 ------------------------------------------------------------------------------]]
 
 -- All attack skills definitions are stored in this table
@@ -13,12 +34,12 @@ end
 
 
 --------------------------------------------------------------------------------
--- IDs 1-10000 are reserved for attack skills
+-- IDs 1-1000 are reserved for character attack skills
 --------------------------------------------------------------------------------
 
 skills[1] = {
-	name = hoa_system.Translate("Slicing Rain"),
-	description = hoa_system.Translate("A simple but effective sword slash."),
+	name = hoa_system.Translate("Sword Slash"),
+	description = hoa_system.Translate("A textbook manuever that deals an effective blow with a sword."),
 	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 200,
@@ -40,7 +61,7 @@ skills[1] = {
 
 skills[2] = {
 	name = hoa_system.Translate("Forward Thrust"),
-	description = hoa_system.Translate("A quick and daring thrust into an opponent's flesh."),
+	description = hoa_system.Translate("A more powerful blow than the standard sword slash, but also less likely to hit its intended target."),
 	sp_required = 1,
 	warmup_time = 500,
 	cooldown_time = 0,
@@ -63,7 +84,7 @@ skills[2] = {
 
 skills[3] = {
 	name = hoa_system.Translate("Stun Slash"),
-	description = hoa_system.Translate("A quick and daring thrust into an opponent's flesh."),
+	description = hoa_system.Translate("A blow which targets vital areas and carries a chance to temporarily stun its target."),
 	sp_required = 3,
 	warmup_time = 1200,
 	cooldown_time = 0,
@@ -85,75 +106,8 @@ skills[3] = {
 }
 
 skills[4] = {
-	-- FIXME: This does not work yet.
-	name = hoa_system.Translate("Whirlwind"),
-	description = hoa_system.Translate("Damage all enemies"),
-	sp_required = 7,
-	warmup_time = 1200,
-	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_FOES,
-
-	BattleExecute = function(user, target)
-		user:ChangeSpriteAnimation("attack");
-		target_actor = target:GetActor();
-
-		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 0, 0));
-			AudioManager:PlaySound("snd/rumble.wav");
-		else
-			target_actor:RegisterMiss();
-			AudioManager:PlaySound("snd/sword_swipe.wav");
-		end
-	end
-}
-
-skills[11] = {
-	name = hoa_system.Translate("Quick Shot"),
-	description = hoa_system.Translate("A quick but weak crossbow attack."),
-	sp_required = 0,
-	warmup_time = 1000,
-	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-
-	BattleExecute = function(user, target)
-		user:ChangeSpriteAnimation("attack");
-		target_actor = target:GetActor();
-
-		if (hoa_battle.CalculateStandardEvasion(target, 5.5) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 8, 0));
-			AudioManager:PlaySound("snd/crossbow.ogg");
-		else
-			target_actor:RegisterMiss();
-			AudioManager:PlaySound("snd/crossbow_miss.ogg");
-		end
-	end
-}
-
-skills[21] = {
-	name = hoa_system.Translate("Side Slash"),
-	description = hoa_system.Translate("A very basic sword attack."),
-	sp_required = 0,
-	warmup_time = 1500,
-	cooldown_time = 500,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-
-	BattleExecute = function(user, target)
-		user:ChangeSpriteAnimation("attack");
-		target_actor = target:GetActor();
-
-		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 3, 0));
-			AudioManager:PlaySound("snd/swordslice2.wav");
-		else
-			target_actor:RegisterMiss();
-			AudioManager:PlaySound("snd/sword_swipe.wav");
-		end
-	end
-}
-
-skills[22] = {
 	name = hoa_system.Translate("Blade Rush"),
-	description = hoa_system.Translate("Attempt for a powerful blow."),
+	description = hoa_system.Translate("A strong and aggressive attack with a blade that deals significant damage."),
 	sp_required = 4,
 	warmup_time = 2000,
 	cooldown_time = 0,
@@ -173,56 +127,12 @@ skills[22] = {
 	end
 }
 
-skills[31] = {
-	name = hoa_system.Translate("Stab"),
-	description = hoa_system.Translate("Stab enemy with dagger."),
-	sp_required = 0,
-	warmup_time = 2000,
-	cooldown_time = 750,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-
-	BattleExecute = function(user, target)
-		user:ChangeSpriteAnimation("attack");
-		target_actor = target:GetActor();
-
-		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 5, 0));
-			AudioManager:PlaySound("snd/sword_swipe.wav");
-		else
-			target_actor:RegisterMiss();
-			AudioManager:PlaySound("snd/sword_swipe.wav");
-		end
-	end
-}
-
-skills[32] = {
-	name = hoa_system.Translate("Dagger Throw"),
-	description = hoa_system.Translate("Throw dagger at an enemy."),
-	sp_required = 3,
-	warmup_time = 2000,
-	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-
-	BattleExecute = function(user, target)
-		user:ChangeSpriteAnimation("attack");
-		target_actor = target:GetActor();
-
-		if (hoa_battle.CalculateStandardEvasion(target, 5.5) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamageMultiplier(user, target, 0.5, 0));
-			AudioManager:PlaySound("snd/sword_swipe.wav");
-		else
-			target_actor:RegisterMiss();
-			AudioManager:PlaySound("snd/sword_swipe.wav");
-		end
-	end
-}
-
 --------------------------------------------------------------------------------
--- Enemy attack skills
+-- IDs 1001-10000 are reserved for enemy attack skills
 --------------------------------------------------------------------------------
 
-skills[100] = {
-	name = "Snake bite",
+skills[1001] = {
+	name = "Snake Bite",
 	sp_required = 0,
 	warmup_time = 900,
 	cooldown_time = 0,
@@ -240,8 +150,8 @@ skills[100] = {
 	end
 }
 
-skills[101] = {
-	name = "Spider sting",
+skills[1002] = {
+	name = "Spider Bite",
 	sp_required = 0,
 	warmup_time = 1400,
 	cooldown_time = 0,
@@ -259,7 +169,7 @@ skills[101] = {
 	end
 }
 
-skills[102] = {
+skills[1003] = {
 	name = "Slime Attack",
 	sp_required = 0,
 	warmup_time = 1100,
@@ -279,7 +189,7 @@ skills[102] = {
 }
 
 
-skills[103] = {
+skills[1004] = {
 	name = "Skeleton Sword Attack",
 	sp_required = 0,
 	warmup_time = 1400,
@@ -298,78 +208,3 @@ skills[103] = {
 	end
 }
 
-skills[104] = {
-	name = "Drake attack",
-	sp_required = 0,
-	warmup_time = 900,
-	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-
-	BattleExecute = function(user, target)
-		target_actor = target:GetActor();
-
-		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
-			AudioManager:PlaySound("snd/skeleton_attack.wav");
-		else
-			target_actor:RegisterMiss();
-		end
-	end
-}
-
-skills[105] = {
-	name = "Deceleon attack",
-	sp_required = 0,
-	warmup_time = 900,
-	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-
-	BattleExecute = function(user, target)
-		target_actor = target:GetActor();
-
-		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
-			--AudioManager:PlaySound("???"); TODO: find an appropriate sound
-		else
-			target_actor:RegisterMiss();
-		end
-	end
-}
-
-skills[106] = {
-	name = "Nagaruda attack",
-	sp_required = 0,
-	warmup_time = 1400,
-	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-
-	BattleExecute = function(user, target)
-		target_actor = target:GetActor();
-
-		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 30, 0));
-			--AudioManager:PlaySound("???"); TODO: find an appropriate sound
-		else
-			target_actor:RegisterMiss();
-		end
-	end
-}
-
-skills[107] = {
-	name = "Aurum Drakueli attack",
-	sp_required = 0,
-	warmup_time = 900,
-	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
-
-	BattleExecute = function(user, target)
-		target_actor = target:GetActor();
-
-		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
-			--AudioManager:PlaySound("???"); TODO: find an appropriate sound
-		else
-			target_actor:RegisterMiss();
-		end
-	end
-}

@@ -3,7 +3,28 @@
 --
 -- Description: This file contains the definitions of all defense skills that
 -- exist in Hero of Allacrost. Each defense skill has a unique integer identifier
--- that is used as its key in the skills table below.
+-- that is used as its key in the skills table below. Some skills are primarily
+-- intended for characters to use while others are intended for enemies to use.
+-- Normally, we do not want to share skills between characters and enemies as
+-- character skills animate the sprites while enemy skills do not.
+--
+-- Skill IDs 10,001 through 20,000 are reserved for defense skills.
+--
+-- Each skill entry requires the following data to be defined:
+-- {name}: Text that defines the name of the skill
+-- {description}: A brief (one sentence) description of the skill
+--                (This field is required only for character skills and is optional for enemy skills)
+-- {sp_required}: The number of skill points (SP) that are required to use the skill
+--                (Zero is a valid value for this field, but a negative number is not)
+-- {warmup_time}: The number of milliseconds that the actor using the skill must wait between
+--                selecting the skill and executing it (a value of zero is valid).
+-- {cooldown_time}: The number of milliseconds that the actor using the skill must wait after
+--                  executing the skill before their stamina begins regenrating (zero is valid).
+-- {target_type}: The type of target the skill affects, which may be an attack point, actor, or party.
+--
+-- Each skill entry requires a function called {BattleExecute} to be defined. This function implements the
+-- execution of the skill in battle, buffing defense, causing status changes, playing sounds, and animating
+-- sprites.
 ------------------------------------------------------------------------------]]
 
 -- All defense skills definitions are stored in this table
@@ -13,12 +34,12 @@ end
 
 
 --------------------------------------------------------------------------------
--- IDs 10001-20000 are reserved for defense skills
+-- IDs 10,001-11,000 are reserved for character defense skills
 --------------------------------------------------------------------------------
 
 skills[10001] = {
-	name = hoa_system.Translate("Karlate Guard"),
-	description = hoa_system.Translate("Take a strong defensive stance."),
+	name = hoa_system.Translate("Defensive Stance"),
+	description = hoa_system.Translate("Take a stance to better defend user against incoming attacks."),
 	sp_required = 3,
 	warmup_time = 300,
 	cooldown_time = 0,
@@ -31,8 +52,8 @@ skills[10001] = {
 }
 
 skills[10002] = {
-	name = hoa_system.Translate("Dodge Enemies"),
-	description = hoa_system.Translate("Increases evasion ability for a brief period."),
+	name = hoa_system.Translate("Evasive Manuevering"),
+	description = hoa_system.Translate("Increases the user's evasion ability for a brief period."),
 	sp_required = 1,
 	warmup_time = 300,
 	cooldown_time = 0,
@@ -43,3 +64,9 @@ skills[10002] = {
 		target_actor:AddNewEffect(4);
 	end
 }
+
+--------------------------------------------------------------------------------
+-- IDs 11,001-20,000 are reserved for enemy defense skills
+--------------------------------------------------------------------------------
+
+
