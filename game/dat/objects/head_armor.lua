@@ -1,18 +1,29 @@
 ------------------------------------------------------------------------------[[
 -- Filename: head_armor.lua
 --
--- Description: This file contains the definitions of all head armors that exist
--- in Hero of Allacrost. Each armor has a unique integer identifier that is used
--- as its key in the armor table below.
+-- Description: This file contains the definitions of all head armor that exist in
+-- Hero of Allacrost. Each armor has a unique integer identifier that is used
+-- as its key in the armor table below. Armor IDs are unique not only among
+-- each other, but among other inventory game objects as well (items, weapons,
+-- other classes of armor, etc).
 --
--- Note (1): Armors ids do *not* need to be sequential. When you make a new 
--- armor, keep it grouped with similar head armor types (helmets, caps, etc.)
--- and keep some space between groups. This way, we won't get a garbled mess of
--- head armor definitions.
+-- Object IDs 20,001 through 30,000 are reserved for head armor. Do not break this 
+-- limit, because other value ranges correspond to other types of inventory objects.
 --
--- Note (2): Valid ids for head armors are 20001-30000. Do not go out of bounds
--- with this limit, as other value ranges correspond to other types of objects
--- (items, weapons, etc.)
+-- Armor IDs do -not- need to be sequential. When you make a new armor, keep it 
+-- grouped with similar armor types (helmets with helmets, etc.) and keep a buffer of
+-- space between group types. This way we won't get a mess of random head armor all over
+-- this file.
+--
+-- All armor entries need the following data to be defined:
+-- {name}: Text that defines the name of the armor.
+-- {description}: A brief description about the armor.
+-- {icon}: The filepath to the image icon representing this armor.
+-- {physical_defense}: The amount of physical defense that the armor provides.
+-- {metaphysical_defense}: The amount of metaphysical defense that the armor casues.
+-- {standard_price}: The standard asking price of this armor from merchants.
+-- {usable_by}: A list of characters which may equip this armor,
+-- {slots}: The number of slots available to equip shards on the armor.
 ------------------------------------------------------------------------------]]
 
 -- All armor definitions are stored in this table
@@ -20,18 +31,19 @@ if (armor == nil) then
    armor = {}
 end
 
+
 -- -----------------------------------------------------------------------------
--- IDs 20001-20500 are reserved for helmets
+-- IDs 20,001 - 20,500 are reserved for helmets
 -- -----------------------------------------------------------------------------
 
 armor[20001] = {
 	name = hoa_system.Translate("Karlate Helmet"),
-	description = hoa_system.Translate("Standard Karlate issued equipment. Battle worn but still reliable head protection."),
+	description = hoa_system.Translate("Standard Karlate issued equipment. Battle worn but reliable head protection."),
 	icon = "img/icons/armor/karlate_helmet.png",
 	physical_defense = 6,
 	metaphysical_defense = 2,
 	standard_price = 80,
-	usable_by = CLAUDIUS,
+	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0
 }
 
@@ -42,32 +54,18 @@ armor[20002] = {
 	physical_defense = 8,
 	metaphysical_defense = 4,
 	standard_price = 140,
-	usable_by = CLAUDIUS,
+	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0
 }
 
--- -----------------------------------------------------------------------------
--- IDs 20501-21000 are reserved for head dresses
--- -----------------------------------------------------------------------------
-
-armor[20501] = {
-	name = hoa_system.Translate("Butterfly Pins"),
-	description = hoa_system.Translate("A feminine head ornament that offers little effective protection."),
-	icon = "img/icons/armor/butterfly_pins.png",
-	physical_defense = 2,
-	metaphysical_defense = 4,
-	standard_price = 60,
-	usable_by = LAILA,
+armor[20003] = {
+	name = hoa_system.Translate("Crested Helmet"),
+	description = hoa_system.Translate("A sturdy helmet with a hinged face guard offering additional protection."),
+	icon = "img/icons/armor/crested_helmet.png",
+	physical_defense = 11,
+	metaphysical_defense = 6,
+	standard_price = 220,
+	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0
 }
 
-armor[20502] = {
-	name = hoa_system.Translate("Winged Circlet"),
-	description = hoa_system.Translate("A circlet imbued with a small magical presence, which wards off evil from its bearer."),
-	icon = "img/icons/armor/winged_circlet.png",
-	physical_defense = 5,
-	metaphysical_defense = 10,
-	standard_price = 140,
-	usable_by = LAILA,
-	slots = 0
-}
