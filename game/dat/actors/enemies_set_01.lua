@@ -64,7 +64,7 @@ enemies[1] = {
 	},
 
 	skills = {
-		[1] = 102 -- skill id 102 is given at lvl 1
+		[1] = 102
 	},
 
 	drop_objects = {
@@ -336,7 +336,7 @@ enemies[5] = {
 	},
 
 	skills = {
-		[1] = 101 -- skill id 101 is given at lvl 1
+		[1] = 101
 	},
 
 	drop_objects = {
