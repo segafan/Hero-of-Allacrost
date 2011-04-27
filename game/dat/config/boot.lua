@@ -51,15 +51,15 @@ function BootBattleTest()
 	GlobalManager:AddCharacter(8);
 	GlobalManager:AddToInventory(1, 5);
 
-	local claudius = GlobalManager:GetCharacter(1);
-	claudius:AddSkill(10001); -- Karlate guard, showcasing a status effect
+	-- local claudius = GlobalManager:GetCharacter(1);
+	-- claudius:AddSkill(10001);
 	
 	local battle = hoa_battle.BattleMode();
 	battle:AddEnemy(1);
-	battle:AddEnemy(1);
-	battle:AddEnemy(1);
-	battle:AddEnemy(1);
-	battle:AddEnemy(1);
+	battle:AddEnemy(2);
+	battle:AddEnemy(3);
+	battle:AddEnemy(4);
+	battle:AddEnemy(5);
 
 	ModeManager:Push(battle);
 end

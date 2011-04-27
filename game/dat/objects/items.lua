@@ -43,7 +43,7 @@ end
 --------------------------------------------------------------------------------
 
 items[1] = {
-	name = hoa_system.Translate("Light Healing Potion"),
+	name = hoa_system.Translate("Minor Healing Potion"),
 	description = hoa_system.Translate("Restores a small amount of hit points to a target."),
 	icon = "img/icons/items/potion_green_small.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
@@ -66,7 +66,7 @@ items[1] = {
 --------------------------------------------------------------------------------
 
 items[1001] = {
-	name = hoa_system.Translate("Light Elixir"),
+	name = hoa_system.Translate("Minor Elixir"),
 	description = hoa_system.Translate("Reduces ailing status effects by a limited degree."),
 	icon = "img/icons/items/potion_blue_small.png",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
