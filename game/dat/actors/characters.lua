@@ -16,8 +16,8 @@ characters[CLAUDIUS] = {
 	initial_stats = {
 		experience_level = 1,
 		experience_points = 0,
-		max_hit_points = 63,
-		max_skill_points = 15,
+		max_hit_points = 62,
+		max_skill_points = 8,
 		strength = 12,
 		vigor = 4,
 		fortitude = 15,
@@ -77,7 +77,7 @@ characters[CLAUDIUS] = {
 			agility = 1.0,
 			evade = 0.0
 		},
-		[4] = {
+		[6] = {
 			hit_points = 5.0,
 			skill_points = 2.0,
 			strength = 3.0,
@@ -89,30 +89,30 @@ characters[CLAUDIUS] = {
 		}
 	},
 
-	skills = { [1] = 1, [2] = 10001, [3] = 2, [4] = 3 }
+	skills = { [1] = 1, [3] = 2, [4] = 10001, [8] = 3, [12] = 20001, [15] = 4, [17] = 10002 }
 } -- characters[CLAUDIUS]
 
 
 
 characters[MARK] = {
 	name = hoa_system.Translate("Mark"),
-	filename = "karlate",
+	filename = "soldier_npc01",
 
 	initial_stats = {
-		experience_level = 1,
-		experience_points = 0,
-		max_hit_points = 63,
-		max_skill_points = 15,
-		strength = 12,
-		vigor = 4,
-		fortitude = 15,
-		protection = 6,
-		agility = 30,
-		evade = 5.0,
-		weapon = 10001,
-		head_armor = 20001,
-		torso_armor = 30001,
-		arm_armor = 40001,
+		experience_level = 7,
+		experience_points = 1128,
+		max_hit_points = 98,
+		max_skill_points = 13,
+		strength = 21,
+		vigor = 8,
+		fortitude = 24,
+		protection = 10,
+		agility = 35,
+		evade = 5.2,
+		weapon = 10002,
+		head_armor = 20002,
+		torso_armor = 30002,
+		arm_armor = 40002,
 		leg_armor = 50001
 	},
 
@@ -153,18 +153,18 @@ characters[MARK] = {
 
 	growth_stats = {
 		[1] = {
-			hit_points = 5.0,
-			skill_points = 1.0,
-			strength = 2.0,
-			vigor = 1.0,
-			fortitude = 2.0,
-			protection = 1.0,
-			agility = 1.0,
+			hit_points = 10.0,
+			skill_points = 3.0,
+			strength = 4.0,
+			vigor = 1.5,
+			fortitude = 4.4,
+			protection = 0.8,
+			agility = 1.8,
 			evade = 0.0
 		}
 	},
 
-	skills = { [1] = 1 }
+	skills = { [1] = 1, [3] = 2, [4] = 10001 }
 } -- characters[MARK]
 
 
@@ -174,20 +174,20 @@ characters[DESTER] = {
 	filename = "karlate",
 
 	initial_stats = {
-		experience_level = 1,
-		experience_points = 0,
-		max_hit_points = 63,
+		experience_level = 9,
+		experience_points = 1845,
+		max_hit_points = 120,
 		max_skill_points = 15,
-		strength = 12,
-		vigor = 4,
-		fortitude = 15,
-		protection = 6,
-		agility = 30,
-		evade = 5.0,
-		weapon = 10001,
-		head_armor = 20001,
-		torso_armor = 30001,
-		arm_armor = 40001,
+		strength = 25,
+		vigor = 12,
+		fortitude = 26,
+		protection = 14,
+		agility = 38,
+		evade = 5.3,
+		weapon = 10002,
+		head_armor = 20002,
+		torso_armor = 30002,
+		arm_armor = 40002,
 		leg_armor = 50001
 	},
 
@@ -239,7 +239,7 @@ characters[DESTER] = {
 		}
 	},
 
-	skills = { [1] = 1 }
+	skills = { [1] = 1, [3] = 2, [4] = 10001, [8] = 3 }
 } -- characters[DESTER]
 
 
@@ -249,21 +249,21 @@ characters[LUKAR] = {
 	filename = "karlate",
 
 	initial_stats = {
-		experience_level = 1,
-		experience_points = 0,
-		max_hit_points = 63,
-		max_skill_points = 15,
-		strength = 12,
-		vigor = 4,
-		fortitude = 15,
-		protection = 6,
-		agility = 30,
-		evade = 5.0,
-		weapon = 10001,
-		head_armor = 20001,
-		torso_armor = 30001,
-		arm_armor = 40001,
-		leg_armor = 50001
+		experience_level = 18,
+		experience_points = 6728,
+		max_hit_points = 237,
+		max_skill_points = 25,
+		strength = 45,
+		vigor = 21,
+		fortitude = 47,
+		protection = 23,
+		agility = 46,
+		evade = 7.0,
+		weapon = 10003,
+		head_armor = 20003,
+		torso_armor = 30003,
+		arm_armor = 40003,
+		leg_armor = 50002
 	},
 
 	attack_points = {
@@ -314,10 +314,8 @@ characters[LUKAR] = {
 		}
 	},
 
-	skills = { [1] = 1 }
+	skills = { [1] = 1, [3] = 2, [4] = 10001, [8] = 3, [12] = 20001, [15] = 4, [17] = 10002 }
 } -- characters[LUKAR]
-
-
 
 
 ------------------------------------------------------------------------------[[
