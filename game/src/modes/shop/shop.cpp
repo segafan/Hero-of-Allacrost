@@ -1623,10 +1623,13 @@ void ShopMode::AddObject(uint32 object_id, uint32 stock) {
 	}
 
 	GlobalObject* new_object = GlobalCreateNewObject(object_id, 1);
-	_created_objects.push_back(new_object);
-	ShopObject new_shop_object(new_object, true);
-	new_shop_object.IncrementStockCount(stock);
-	_shop_objects.insert(make_pair(object_id, new_shop_object));
+	if (new_object != NULL)
+	{
+		_created_objects.push_back(new_object);
+		ShopObject new_shop_object(new_object, true);
+		new_shop_object.IncrementStockCount(stock);
+		_shop_objects.insert(make_pair(object_id, new_shop_object));
+	}
 }
 
 

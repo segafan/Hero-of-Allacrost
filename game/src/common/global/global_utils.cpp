@@ -127,6 +127,12 @@ GlobalObject* GlobalCreateNewObject(uint32 id, uint32 count) {
 	else
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid id argument: " << id << endl;
 
+	// If an object was created but its ID was set to NULL, this indicates that the object is invalid
+	if ((new_object != NULL) && (new_object->GetID() == 0)) {
+		delete new_object;
+		new_object = NULL;
+	}
+	
 	return new_object;
 }
 
