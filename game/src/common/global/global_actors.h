@@ -86,10 +86,10 @@ public:
 	GlobalActor* GetActorOwner() const
 		{ return _actor_owner; }
 
-	uint16 GetXPosition() const
+	int16 GetXPosition() const
 		{ return _x_position; }
 
-	uint16 GetYPosition() const
+	int16 GetYPosition() const
 		{ return _y_position; }
 
 	float GetFortitudeModifier() const
@@ -126,11 +126,12 @@ private:
 	GlobalActor* _actor_owner;
 
 	/** \brief The position of the physical attack point relative to the actor's battle sprite
-	*** These members treat the bottom left corner of the sprite as the origin (0, 0) and increase in the
+	*** These members treat the bottom center of the sprite as the origin (0, 0) and increase in the
 	*** right and upwards directions. The combination of these two members point to the center pinpoint
-	*** location of the attack point. The units of these two members are in number of pixels.
+	*** location of the attack point. The units of these two members are in number of pixels. The _y_position
+	*** member should always be positive, by _x_position may be either positive or negative.
 	**/
-	uint16 _x_position, _y_position;
+	int16 _x_position, _y_position;
 
 	/** \brief The defense and evasion percentage modifiers for this attack point
 	***
