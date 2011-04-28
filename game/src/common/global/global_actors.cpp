@@ -1302,19 +1302,10 @@ void GlobalCharacter::AddSkill(uint32 skill_id) {
 
 GlobalEnemy::GlobalEnemy(uint32 id) :
 	GlobalActor(),
-	_growth_hit_points(0.0f),
-	_growth_skill_points(0.0f),
-	_growth_experience_points(0.0f),
-	_growth_strength(0.0f),
-	_growth_vigor(0.0f),
-	_growth_fortitude(0.0f),
-	_growth_protection(0.0f),
-	_growth_agility(0.0f),
-	_growth_evade(0.0f),
-	_growth_drunes(0.0f),
-	_drunes_dropped(0),
+	_no_stat_randomization(false),
 	_sprite_width(0),
-	_sprite_height(0)
+	_sprite_height(0),
+	_drunes_dropped(0)
 {
 	_id = id;
 
@@ -1354,8 +1345,12 @@ GlobalEnemy::GlobalEnemy(uint32 id) :
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to load sprite frames for enemy: " << sprite_filename << endl;
 	}
 
-	// ----- (5): Load the enemy's initial stats
-	enemy_data.OpenTable("initial_stats");
+	// ----- (5): Load the enemy's base stats
+	if (enemy_data.DoesBoolExist("no_stat_randomization") == true) {
+		_no_stat_randomization = enemy_data.ReadBool("no_stat_randomization");
+	}
+	
+	enemy_data.OpenTable("base_stats");
 	_max_hit_points = enemy_data.ReadUInt("hit_points");
 	_hit_points = _max_hit_points;
 	_max_skill_points = enemy_data.ReadUInt("skill_points");
@@ -1370,21 +1365,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) :
 	_drunes_dropped = enemy_data.ReadUInt("drunes");
 	enemy_data.CloseTable();
 
-	// ----- (6): Load the enemy's growth statistics
-	enemy_data.OpenTable("growth_stats");
-	_growth_hit_points = enemy_data.ReadFloat("hit_points");
-	_growth_skill_points = enemy_data.ReadFloat("skill_points");
-	_growth_experience_points = enemy_data.ReadFloat("experience_points");
-	_growth_strength = enemy_data.ReadFloat("strength");
-	_growth_vigor = enemy_data.ReadFloat("vigor");
-	_growth_fortitude = enemy_data.ReadFloat("fortitude");
-	_growth_protection = enemy_data.ReadFloat("protection");
-	_growth_agility = enemy_data.ReadFloat("agility");
-	_growth_evade = enemy_data.ReadFloat("evade");
-	_growth_drunes = enemy_data.ReadFloat("drunes");
-	enemy_data.CloseTable();
-
-	// ----- (7): Create the attack points for the enemy
+	// ----- (6): Create the attack points for the enemy
 	enemy_data.OpenTable("attack_points");
 	uint32 ap_size = enemy_data.GetTableSize();
 	for (uint32 i = 1; i <= ap_size; i++) {
@@ -1397,23 +1378,19 @@ GlobalEnemy::GlobalEnemy(uint32 id) :
 	}
 	enemy_data.CloseTable();
 
-	// ----- (8): Add the set of skills to the enemy
-	vector<int32> skill_levels;
+	// ----- (7): Add the set of skills for the enemy
 	enemy_data.OpenTable("skills");
-	enemy_data.ReadTableKeys(skill_levels);
-	for (uint32 i = 0; i < skill_levels.size(); i++) {
-		uint32 skill_id = enemy_data.ReadUInt(skill_levels[i]);
-		_skill_set[skill_id] = skill_levels[i];
+	for (uint32 i = 1; i <= enemy_data.GetTableSize(); i++) {
+		_skill_set.push_back(enemy_data.ReadUInt(i));
 	}
 	enemy_data.CloseTable();
 
-	// ----- (9): Load the possible items that the enemy may drop
+	// ----- (8): Load the possible items that the enemy may drop
 	enemy_data.OpenTable("drop_objects");
 	for (uint32 i = 1; i <= enemy_data.GetTableSize(); i++) {
 		enemy_data.OpenTable(i);
 		_dropped_objects.push_back(enemy_data.ReadUInt(1));
 		_dropped_chance.push_back(enemy_data.ReadFloat(2));
-		_dropped_level_required.push_back(enemy_data.ReadUInt(3));
 		enemy_data.CloseTable();
 	}
 	enemy_data.CloseTable();
@@ -1460,53 +1437,39 @@ void GlobalEnemy::AddSkill(uint32 skill_id) {
 
 
 
-void GlobalEnemy::Initialize(uint32 xp_level) {
-	if (xp_level == 0) {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid xp_level argument of 0: " << _id << endl;
-		return;
-	}
+void GlobalEnemy::Initialize() {
 	if (_skills.empty() == false) { // Indicates that the enemy has already been initialized
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function was invoked for an already initialized enemy: " << _id << endl;
 		return;
 	}
 
-	_experience_level = xp_level;
+	// TODO: we may wish to actually define XP levels for enemies in their data table, though I don't know what purpose it may serve
+	_experience_level = 1; 
 
 	// ----- (1): Add all new skills that should be available at the current experience level
-	for (map<uint32, uint32>::iterator i = _skill_set.begin(); i != _skill_set.end(); i++) {
-		if (_experience_level >= i->second)
-			AddSkill(i->first);
+	for (uint32 i = 0; i < _skill_set.size(); i++) {
+		AddSkill(_skill_set[i]);
 	}
 
 	if (_skills.empty()) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "no skills were added for the enemy: " << _id << endl;
 	}
 
-	// ----- (2): Add the new stats to the growth rate multiplied by the experience level
-	_max_hit_points    += static_cast<uint32>(_growth_hit_points * _experience_level);
-	_max_skill_points  += static_cast<uint32>(_growth_skill_points * _experience_level);
-	_experience_points += static_cast<uint32>(_growth_experience_points * _experience_level);
-	_strength          += static_cast<uint32>(_growth_strength * _experience_level);
-	_vigor             += static_cast<uint32>(_growth_vigor * _experience_level);
-	_fortitude         += static_cast<uint32>(_growth_fortitude * _experience_level);
-	_protection        += static_cast<uint32>(_growth_protection * _experience_level);
-	_agility           += static_cast<uint32>(_growth_agility * _experience_level);
-	_evade             += static_cast<float>(_growth_evade * _experience_level);
-	_drunes_dropped    += static_cast<uint32>(_growth_drunes * _experience_level);
-
-	// ----- (3): Randomize the new stats by using a guassian random variable
-	// Use the inital stats as the means and a standard deviation of 10% of the mean
-	_max_hit_points     = GaussianRandomValue(_max_hit_points, _max_hit_points / 10.0f);
-	_max_skill_points   = GaussianRandomValue(_max_skill_points, _max_skill_points / 10.0f);
-	_experience_points  = GaussianRandomValue(_experience_points, _experience_points / 10.0f);
-	_strength           = GaussianRandomValue(_strength, _strength / 10.0f);
-	_vigor              = GaussianRandomValue(_strength, _strength / 10.0f);
-	_fortitude          = GaussianRandomValue(_fortitude, _fortitude / 10.0f);
-	_protection         = GaussianRandomValue(_protection, _protection / 10.0f);
-	_agility            = GaussianRandomValue(_agility, _agility / 10.0f);
-	// TODO: need a gaussian random var function that takes a float arg
-	//_evade              = static_cast<float>(GaussianRandomValue(_evade, _evade / 10.0f));
-	_drunes_dropped     = GaussianRandomValue(_drunes_dropped, _drunes_dropped / 10.0f);
+	// ----- (3): Randomize the stats by using a guassian random variable
+	if (_no_stat_randomization == false) {
+		// Use the base stats as the means and a standard deviation of 10% of the mean
+		_max_hit_points     = GaussianRandomValue(_max_hit_points, _max_hit_points / 10.0f);
+		_max_skill_points   = GaussianRandomValue(_max_skill_points, _max_skill_points / 10.0f);
+		_experience_points  = GaussianRandomValue(_experience_points, _experience_points / 10.0f);
+		_strength           = GaussianRandomValue(_strength, _strength / 10.0f);
+		_vigor              = GaussianRandomValue(_strength, _strength / 10.0f);
+		_fortitude          = GaussianRandomValue(_fortitude, _fortitude / 10.0f);
+		_protection         = GaussianRandomValue(_protection, _protection / 10.0f);
+		_agility            = GaussianRandomValue(_agility, _agility / 10.0f);
+		// TODO: need a gaussian random var function that takes a float arg
+		//_evade              = static_cast<float>(GaussianRandomValue(_evade, _evade / 10.0f));
+		_drunes_dropped     = GaussianRandomValue(_drunes_dropped, _drunes_dropped / 10.0f);
+	}
 
 	// ----- (4): Set the current hit points and skill points to their new maximum values
 	_hit_points = _max_hit_points;
@@ -1519,10 +1482,8 @@ void GlobalEnemy::DetermineDroppedObjects(vector<GlobalObject*>& objects) {
 	objects.clear();
 
 	for (uint32 i = 0; i < _dropped_objects.size(); i++) {
-		if (_experience_level >= _dropped_level_required[i]) {
-			if (RandomFloat() < _dropped_chance[i]) {
-				objects.push_back(GlobalCreateNewObject(_dropped_objects[i]));
-			}
+		if (RandomFloat() < _dropped_chance[i]) {
+			objects.push_back(GlobalCreateNewObject(_dropped_objects[i]));
 		}
 	}
 }
