@@ -903,14 +903,19 @@ protected:
 *** \brief Representation of enemies that fight in battles
 ***
 *** Allacrost handles enemies a little different than most RPGs. Instead of an
-*** enemy always having the same statistics for health, strength, etc., enemies
-*** are more closely matched to the player's experience levels and abilities.
-*** In terms of the operation of this class, an enemy starts at level 0 with
-*** various base statistics and is then grown to match a level close to the
-*** current level of the player's characters, before it actually appears on
-*** the field of battle. Furthermore, the enemy is grown using gaussian random
-*** values to provide an element of uncertainty and to make the enemies that the
-*** player encounters less static.
+*** enemy always having the same statistics for health, strength, etc., enemy
+*** stats are randomized so that the same type of enemy does not always have
+*** the exact same stats. Guassian random values are applied to each enemy's
+*** "base" stats before the player begins battle with that enemy, making
+*** the enemy tougher or weaker than the base level depending on the outcome. Some
+*** enemies (notably bosses) do not have this randomization applied to their stats
+*** in order to make sure that bosses are challenging, but not overwhemlingly strong
+*** or surprisingly weak.
+*** 
+*** Enemies have one to several different skills that they may use in battle. An enemy
+*** has to have at least one skill defined for it, otherwise they would not be able to
+*** perform any action in battle. Enemy's may also carry a small chance of dropping an
+*** item or other object after they are defeated.
 *** ***************************************************************************/
 class GlobalEnemy : public GlobalActor {
 public:
@@ -920,16 +925,16 @@ public:
 		{}
 
 	/** \brief Initializes the enemy and prepares it for battle
-	*** \param xp_level The experience level to set the enemy to
 	***
-	*** This function sets the enemy's experience level, grows its stats to match this
-	*** level, and adds any skills that the enemy should be capable of using at the
-	*** level. Call this function once only, because after the enemy has skills enabled
-	*** it will not be able to re-initialize. If you need to initialize the enemy once
-	*** more, you'll have to create a brand new GlobalEnemy object and initialize that
-	*** instead.
+	*** This function sets the enemy's experience level, modifies its stats using Guassian
+	*** random values, and constructs the skills that the enemy is capable of using. Call this 
+	*** function once only, because after the enemy has skills enabled it will not be able to 
+	*** re-initialize. If you need to initialize the enemy once more, you'll have to create a 
+	*** brand new GlobalEnemy object and initialize that instead.
+	***
+	*** \note Certain enemies will skip the stat modification step.
 	**/
-	void Initialize(uint32 xp_level);
+	void Initialize();
 
 	/** \brief Enables the enemy to be able to use a specific skill
 	*** \param skill_id The integer ID of the skill to add to the enemy
@@ -968,53 +973,30 @@ public:
 	//@}
 
 protected:
-	/** \name Growth Statistics
-	*** \brief The average increase for statistics between experience levels is stored by these members
-	***
-	*** Note that even though the normal statistics members are integers, these are floating point values. This
-	*** is so because it allows us a finer granularity of control over how much a particular statistic grows
-	*** with time.
-	**/
-	//@{
-	float _growth_hit_points;
-	float _growth_skill_points;
-	float _growth_experience_points;
-	float _growth_strength;
-	float _growth_vigor;
-	float _growth_fortitude;
-	float _growth_protection;
-	float _growth_agility;
-	float _growth_evade;
-	float _growth_drunes;
-	//@}
-
-	//! \brief The amount of drunes that the enemy will drop
-	uint32 _drunes_dropped;
+	//! \brief If set to true, when initialized the enemy will not randomize its statistic values
+	bool _no_stat_randomization;
 
 	//! \brief The dimensions of the enemy's battle sprite in pixels
 	uint32 _sprite_width, _sprite_height;
 
+	//! \brief The amount of drunes that the enemy will drop
+	uint32 _drunes_dropped;
+
 	/** \brief Dropped object containers
-	*** These three vectors are all of the same size. _dropped_objects contains the IDs of the objects that the enemy
+	*** These two vectors are of the same size. _dropped_objects contains the IDs of the objects that the enemy
 	*** may drop. _dropped_chance contains a value from 0.0f to 1.0f that determines the probability of the
-	*** enemy dropping that object. And finally _dropped_level_required contains the minimum experience level
-	*** that the enemy must be at in order to drop this object at all.
+	*** enemy dropping that object.
 	**/
 	//@{
 	std::vector<uint32> _dropped_objects;
 	std::vector<float> _dropped_chance;
-	std::vector<uint32> _dropped_level_required;
 	//@}
 
 	/** \brief Contains all of the possible skills that the enemy may possess
-	*** Enemies learn a variety of skills and some of these skills they may only use at higher experience
-	*** levels. The skills referenced within this container list all possible skills that an enemy can
-	*** learn to use. The map key is the id for the skill while the value for each key is the minimum
-	*** experience level that the enemy is required to meet in order to learn and thus be able to use the
-	*** skill. The Initialize() function examines this containers and populates the GlobalActor _skills
-	*** container with the skills that the enemy is allowed to use at its current experience level.
+	*** This container holds the IDs of all skills that the enemy may execute in battle.
+	*** The Initialize() function uses this data to populates the GlobalActor _skills container.
 	**/
-	std::map<uint32, uint32> _skill_set;
+	std::vector<uint32> _skill_set;
 
 	/** \brief The battle sprite frame images for the enemy
 	*** Each enemy has four frames representing damage levels of 0%, 33%, 66%, and 100%. This vector thus

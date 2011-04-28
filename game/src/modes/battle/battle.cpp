@@ -251,7 +251,7 @@ void BattleMode::AddEnemy(GlobalEnemy* new_enemy) {
 		return;
 	}
 
-	new_enemy->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
+	new_enemy->Initialize();
 	BattleEnemy* new_enemy_combatant = new BattleEnemy(new_enemy);
 	_enemy_actors.push_back(new_enemy_combatant);
 	_enemy_party.push_back(new_enemy_combatant);

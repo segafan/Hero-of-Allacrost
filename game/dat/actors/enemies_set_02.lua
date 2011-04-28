@@ -29,19 +29,6 @@ enemies[101] = {
 		evade = 1.0,
 		drunes = 55
 	},
-	
-	growth_stats = {
-		hit_points = 10.0,
-		skill_points = 10.0,
-		experience_points = 1.8,
-		strength = 7.0,
-		vigor = 0.0,
-		fortitude = 4.0,
-		protection = 4.0,
-		agility = 10.0,
-		evade = 0.0,
-		drunes = 5.0
-	},
 
 	attack_points = {
 		[1] = {
@@ -77,7 +64,6 @@ enemies[102] = {
 	filename = "aerocephal",
 	sprite_width = 192,
 	sprite_height = 192,
-
 	
 	initial_stats = {
 		hit_points = 90,
@@ -90,19 +76,6 @@ enemies[102] = {
 		agility = 20,
 		evade = 10.0,
 		drunes = 60
-	},
-	
-	growth_stats = {
-		hit_points = 10.0,
-		skill_points = 10.0,
-		experience_points = 2.0,
-		strength = 5.0,
-		vigor = 0.0,
-		fortitude = 3.0,
-		protection = 4.0,
-		agility = 7.5,
-		evade = 0,
-		drunes = 6.0
 	},
 
 	attack_points = {
@@ -139,7 +112,6 @@ enemies[103] = {
 	filename = "arcana_drake",
 	sprite_width = 192,
 	sprite_height = 256,
-
 	
 	initial_stats = {
 		hit_points = 85,
@@ -152,19 +124,6 @@ enemies[103] = {
 		agility = 15,
 		evade = 2.0,
 		drunes = 80
-	},
-	
-	growth_stats = {
-		hit_points = 15.0,
-		skill_points = 10.0,
-		experience_points = 2.0,
-		strength = 15.0,
-		vigor = 0.0,
-		fortitude = 8.0,
-		protection = 3.0,
-		agility = 6.0,
-		evade = 0,
-		drunes = 5.0
 	},
 
 	attack_points = {
@@ -222,19 +181,6 @@ enemies[104] = {
 		evade = 2.0,
 		drunes = 70
 	},
-	
-	growth_stats = {
-		hit_points = 10.0,
-		skill_points = 10.0,
-		experience_points = 2.1,
-		strength = 6.0,
-		vigor = 0.0,
-		fortitude = 5.0,
-		protection = 4.0,
-		agility = 8.0,
-		evade = 0.0,
-		drunes = 7.0
-	},
 
 	attack_points = {
 		[1] = {
@@ -290,19 +236,6 @@ enemies[105] = {
 		agility = 4,
 		evade = 1.0,
 		drunes = 85
-	},
-	
-	growth_stats = {
-		hit_points = 10.0,
-		skill_points = 10.0,
-		experience_points = 2.2,
-		strength = 7.0,
-		vigor = 0.0,
-		fortitude = 5.0,
-		protection = 4.0,
-		agility = 4.0,
-		evade = 0.0,
-		drunes = 2.0
 	},
 
 	attack_points = {
@@ -369,19 +302,6 @@ enemies[106] = {
 		evade = 2.0,
 		drunes = 100
 	},
-	
-	growth_stats = {
-		hit_points = 15.0,
-		skill_points = 10.0,
-		experience_points = 2.2,
-		strength = 9.0,
-		vigor = 0.0,
-		fortitude = 8.0,
-		protection = 4.0,
-		agility = 7.5,
-		evade = 0.0,
-		drunes = 4.0
-	},
 
 	attack_points = {
 		[1] = {
@@ -425,20 +345,6 @@ enemies[107] = {
 	sprite_width = 48,
 	sprite_height = 96,
 
-	
-	initial_stats = {
-		hit_points = 55,
-		skill_points = 19,
-		experience_points = 20,
-		strength = 26,
-		vigor = 5,
-		fortitude = 14,
-		protection = 6,
-		agility = 36,
-		evade = 5.0,
-		drunes = 5
-	},
-	
 	growth_stats = {
 		hit_points = 5.0,
 		skill_points = 1.0,

@@ -12,13 +12,14 @@ if (_G.enemies == nil) then
    enemies = {}
 end
 
+
 enemies[1] = {
 	name = hoa_system.Translate("Green Slime"),
 	filename = "green_slime",
 	sprite_width = 64,
 	sprite_height = 64,
 
-	initial_stats = {
+	base_stats = {
 		hit_points = 22,
 		skill_points = 10,
 		experience_points = 5,
@@ -29,19 +30,6 @@ enemies[1] = {
 		agility = 12,
 		evade = 2.0,
 		drunes = 10
-	},
-	
-	growth_stats = {
-		hit_points = 10.0,
-		skill_points = 1.0,
-		experience_points = 1.2,
-		strength = 8.0,
-		vigor = 0.0,
-		fortitude = 12.0,
-		protection = 4.0,
-		agility = 5.0,
-		evade = 0.0,
-		drunes = 2.0
 	},
 
 	attack_points = {
@@ -64,11 +52,11 @@ enemies[1] = {
 	},
 
 	skills = {
-		[1] = 1001
+		1001
 	},
 
 	drop_objects = {
-		{ 1, 0.05, 1 } -- Minor Healing Potion
+
 	}
 }
 
@@ -79,7 +67,7 @@ enemies[2] = {
 	sprite_width = 64,
 	sprite_height = 64,
 
-	initial_stats = {
+	base_stats = {
 		hit_points = 25,
 		skill_points = 10,
 		experience_points = 6,
@@ -91,20 +79,6 @@ enemies[2] = {
 		evade = 2.0,
 		drunes = 12
 	},
-	
-	growth_stats = {
-		hit_points = 10.0,
-		skill_points = 10.0,
-		experience_points = 1.3,
-		strength = 7.0,
-		vigor = 0.0,
-		fortitude = 8.0,
-		protection = 4.0,
-		agility = 10.0,
-		evade = 2.0,
-		drunes = 0.0
-	},
-
 
 	attack_points = {
 		[1] = {
@@ -126,11 +100,11 @@ enemies[2] = {
 	},
 
 	skills = {
-		[1] = 1002
+		1002
 	},
 
 	drop_objects = {
-		{ 1, 0.10, 1 } -- Minor Healing Potion
+		{ 1, 0.10 } -- Minor Healing Potion
 	}
 }
 
@@ -141,7 +115,7 @@ enemies[3] = {
 	sprite_width = 128,
 	sprite_height = 64,
 
-	initial_stats = {
+	base_stats = {
 		hit_points = 28,
 		skill_points = 10,
 		experience_points = 7,
@@ -152,19 +126,6 @@ enemies[3] = {
 		agility = 15,
 		evade = 2.0,
 		drunes = 14
-	},
-	
-	growth_stats = {
-		hit_points = 10.0,
-		skill_points = 10.0,
-		experience_points = 1.4,
-		strength = 6.0,
-		vigor = 0.0,
-		fortitude = 5.0,
-		protection = 4.0,
-		agility = 10.0,
-		evade = 0.0,
-		drunes = 2.0
 	},
 
 	attack_points = {
@@ -195,11 +156,11 @@ enemies[3] = {
 	},
 
 	skills = {
-		[1] = 1003
+		1003
 	},
 
 	drop_objects = {
-		{ 1, 0.10, 1 } -- Minor Healing Potion
+		{ 1, 0.10 } -- Minor Healing Potion
 	}
 }
 
@@ -209,9 +170,8 @@ enemies[4] = {
 	filename = "skeleton",
 	sprite_width = 64,
 	sprite_height = 128,
-
 	
-	initial_stats = {
+	base_stats = {
 		hit_points = 24,
 		skill_points = 10,
 		experience_points = 5,
@@ -222,19 +182,6 @@ enemies[4] = {
 		agility = 13,
 		evade = 2.0,
 		drunes = 18
-	},
-	
-	growth_stats = {
-		hit_points = 9.0,
-		skill_points = 10.0,
-		experience_points = 1.5,
-		strength = 8.0,
-		vigor = 0.0,
-		fortitude = 8.0,
-		protection = 4.0,
-		agility = 10.0,
-		evade = 0.0,
-		drunes = 2.0
 	},
 
 	attack_points = {
@@ -265,11 +212,11 @@ enemies[4] = {
 	},
 
 	skills = {
-		[1] = 1004
+		1004
 	},
 
 	drop_objects = {
-		{ 1, 0.15, 1 } -- Minor Healing Potion
+		{ 1, 0.15 } -- Minor Healing Potion
 	}
 }
 
@@ -279,9 +226,8 @@ enemies[5] = {
 	filename = "scorpion",
 	sprite_width = 64,
 	sprite_height = 64,
-
 	
-	initial_stats = {
+	base_stats = {
 		hit_points = 22,
 		skill_points = 10,
 		experience_points = 8,
@@ -293,20 +239,6 @@ enemies[5] = {
 		evade = 2.0,
 		drunes = 12
 	},
-
-	growth_stats = {
-		hit_points = 6.0,
-		skill_points = 10.0,
-		experience_points = 1.6,
-		strength = 6.0,
-		vigor = 0.0,
-		fortitude = 7.0,
-		protection = 4.0,
-		agility = 10.0,
-		evade = 0.0,
-		drunes = 2.0
-	},
-
 
 	attack_points = {
 		[1] = {
@@ -336,10 +268,10 @@ enemies[5] = {
 	},
 
 	skills = {
-		[1] = 1002
+		1002
 	},
 
 	drop_objects = {
-		{ 1, 0.15, 1 } -- Minor Healing Potion
+		{ 1, 0.15 } -- Minor Healing Potion
 	}
 }
