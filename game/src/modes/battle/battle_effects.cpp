@@ -44,12 +44,17 @@ namespace private_battle {
 
 BattleStatusEffect::BattleStatusEffect(GLOBAL_STATUS type, GLOBAL_INTENSITY intensity, BattleActor* actor) :
 	GlobalStatusEffect(type, intensity),
-	_name(GetStatusName(type)),
+	_name(),
+	_icon_index(0),
+	_opposite_effect(GLOBAL_STATUS_INVALID),
+	_apply_function(NULL),
+	_update_function(NULL),
+	_remove_function(NULL),
 	_affected_actor(actor),
 	_timer(0),
-	_apply_function(NULL),
 	_icon_image(NULL)
 {
+	// --- (1): Check that the constructor arguments are valid
 	if ((type <= GLOBAL_STATUS_INVALID) || (type >= GLOBAL_STATUS_TOTAL)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "constructor received an invalid type argument: " << type << endl;
 		return;
@@ -63,6 +68,7 @@ BattleStatusEffect::BattleStatusEffect(GLOBAL_STATUS type, GLOBAL_INTENSITY inte
 		return;
 	}
 
+	// --- (2): Make sure that a table entry exists for this status element
 	uint32 table_id = static_cast<uint32>(type);
 	ReadScriptDescriptor& script_file = GlobalManager->GetStatusEffectsScript();
 	if (script_file.DoesTableExist(table_id) == false) {
@@ -70,13 +76,34 @@ BattleStatusEffect::BattleStatusEffect(GLOBAL_STATUS type, GLOBAL_INTENSITY inte
 		return;
 	}
 
+	// --- (3): Read in the status effect's property data
 	script_file.OpenTable(table_id);
+	_name = script_file.ReadUString("name");
+	_icon_index = script_file.ReadUInt("icon_index");
+	_opposite_effect = static_cast<GLOBAL_STATUS>(script_file.ReadInt("opposite_effect"));
+	
 	if (script_file.DoesFunctionExist("Apply")) {
 		_apply_function = new ScriptObject();
 		(*_apply_function) = script_file.ReadFunctionPointer("Apply");
 	}
 	else {
-		PRINT_WARNING << "no apply function found in Lua definition file for status: " << table_id << endl;
+		PRINT_WARNING << "no Apply function found in Lua definition file for status: " << table_id << endl;
+	}
+
+	if (script_file.DoesFunctionExist("Update")) {
+		_update_function = new ScriptObject();
+		(*_update_function) = script_file.ReadFunctionPointer("Update");
+	}
+	else {
+		PRINT_WARNING << "no Update function found in Lua definition file for status: " << table_id << endl;
+	}
+
+	if (script_file.DoesFunctionExist("Remove")) {
+		_remove_function = new ScriptObject();
+		(*_remove_function) = script_file.ReadFunctionPointer("Remove");
+	}
+	else {
+		PRINT_WARNING << "no Remove function found in Lua definition file for status: " << table_id << endl;
 	}
 	script_file.CloseTable();
 
@@ -177,6 +204,10 @@ void EffectsSupervisor::Update() {
 		// Decrease the intensity of the status by one level when its timer expires. This may result in
 		// the status effect being removed from the actor if its intensity changes to the neutral level.
 		if (effect_timer->IsFinished() == true) {
+			// Note that we register the status change on the actor instead of directly calling ChangeStatus() here.
+			// We do this because the actor's indicator supervisor needs to be informed of intensity changes so that it
+			// may display the appropriate status change information to the user. The call to BattleActor::RegisterStatusChange()
+			// will in turn make a call to EffectsSupervisor::ChangeStatus()
 			_actor->RegisterStatusChange(i->first, GLOBAL_INTENSITY_NEG_LESSER);
 		}
 

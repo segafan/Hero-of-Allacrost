@@ -52,6 +52,7 @@ string GetElementName(GLOBAL_ELEMENTAL type) {
 
 
 string GetStatusName(GLOBAL_STATUS type) {
+	// TODO: this function is deprecated and will be removed soon. Names of status effects will be kept in their Lua definitions
 	switch (type) {
 		case GLOBAL_STATUS_HP_BOOST:
 			return Translate("HP Boost");

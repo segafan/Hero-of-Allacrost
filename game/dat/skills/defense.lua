@@ -47,7 +47,8 @@ skills[10001] = {
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
-		target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
+		-- TEMP: commented out temporarily while work on status effects is being done. Will be re-enabled once this work is complete
+		-- target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
 	end
 }
 
@@ -61,7 +62,7 @@ skills[10002] = {
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
-		target_actor:AddNewEffect(4);
+		-- TODO: register status change
 	end
 }
 
