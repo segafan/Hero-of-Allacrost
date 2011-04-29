@@ -403,9 +403,14 @@ StillImage* BattleMode::GetStatusIcon(GLOBAL_STATUS type, GLOBAL_INTENSITY inten
 		return NULL;
 	}
 
-	uint32 status_index = static_cast<uint32>(type);
-	uint32 intensity_index = static_cast<uint32>(intensity);
+	map<GLOBAL_STATUS, uint32>::iterator status_entry = _status_icon_index.find(type);
+	if (status_entry == _status_icon_index.end()) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "no entry in the status icon index for status type: " << type << endl;
+		return NULL;
+	}
 
+	uint32 status_index = status_entry->second;
+	uint32 intensity_index = static_cast<uint32>(intensity);
 	return &(_status_icons[(status_index * 5) + intensity_index]);
 }
 
@@ -514,7 +519,34 @@ void BattleMode::NotifyActorDeath(BattleActor* actor) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void BattleMode::_Initialize() {
-	// (1): Construct all character battle actors from the active party
+	// (1): Setup the status index container
+	ReadScriptDescriptor& script_file = GlobalManager->GetStatusEffectsScript();
+
+	vector<int32> status_types;
+	script_file.ReadTableKeys(status_types);
+
+	for (uint32 i = 0; i < status_types.size(); i++) {
+		GLOBAL_STATUS status = static_cast<GLOBAL_STATUS>(status_types[i]);
+		
+		// Check for duplicate entries of the same status effect
+		if (_status_icon_index.find(status) != _status_icon_index.end()) {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "duplicate entry found in file " << script_file.GetFilename() <<
+				" for status type: " << status_types[i] << endl;
+			continue;
+		}
+		
+		script_file.OpenTable(status_types[i]);
+		if (script_file.DoesIntExist("icon_index") == true) {
+			uint32 icon_index = script_file.ReadUInt("icon_index");
+			_status_icon_index.insert(pair<GLOBAL_STATUS, uint32>(status, icon_index));
+		}
+		else {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "no icon_index member was found for status effect: " << status_types[i] << endl;
+		}
+		script_file.CloseTable();
+	}
+	
+	// (2): Construct all character battle actors from the active party
 	GlobalParty* active_party = GlobalManager->GetActiveParty();
 	if (active_party->GetPartySize() == 0) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "no characters in the active party, exiting battle" << endl;
@@ -533,10 +565,10 @@ void BattleMode::_Initialize() {
 // 		_enemy_actors[i]->GetGlobalEnemy()->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
 // 	}
 
-	// (2): Determine the origin position for all characters and enemies
+	// (3): Determine the origin position for all characters and enemies
 	_DetermineActorLocations();
 
-	// (2): Find the actor with the lowest agility rating
+	// (4): Find the actor with the lowest agility rating
 	uint32 min_agility = 0xFFFFFFFF;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		if (_character_actors[i]->GetAgility() < min_agility)
@@ -576,7 +608,7 @@ void BattleMode::_Initialize() {
 	// battle positions). Once that feature is available, remove this call.
 	SystemManager->UpdateTimers();
 
-	// (3): Adjust each actor's idle state time based on their agility proportion to the slowest actor
+	// (5): Adjust each actor's idle state time based on their agility proportion to the slowest actor
 	// If an actor's agility is twice that of the actor with the lowest agility, then they will have an
 	// idle state time that is half of the slowest actor. We also use timer_multiplier to adjust start times.
 	// The lower the value of timer_multiplier, the faster the battle goes
@@ -594,7 +626,7 @@ void BattleMode::_Initialize() {
 
 	_command_supervisor->ConstructCharacterSettings();
 
-	// (4): Invoke any events that should occur when the battle begins
+	// (6): Invoke any events that should occur when the battle begins
 // 	ScriptObject* before_func;
 // 	for (uint32 i = 0; i < _events.size(); i++) {
 // 		before_func = _events[i]->GetBeforeFunction();

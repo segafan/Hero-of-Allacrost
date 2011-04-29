@@ -13,6 +13,7 @@
 *** \brief   Source file for global game effects
 *** ***************************************************************************/
 
+#include "script.h"
 #include "system.h"
 
 #include "global_effects.h"
@@ -22,6 +23,7 @@ using namespace std;
 
 using namespace hoa_utils;
 
+using namespace hoa_script;
 using namespace hoa_system;
 
 namespace hoa_global {
@@ -52,45 +54,28 @@ string GetElementName(GLOBAL_ELEMENTAL type) {
 
 
 string GetStatusName(GLOBAL_STATUS type) {
-	// TODO: this function is deprecated and will be removed soon. Names of status effects will be kept in their Lua definitions
-	switch (type) {
-		case GLOBAL_STATUS_HP_BOOST:
-			return Translate("HP Boost");
-		case GLOBAL_STATUS_HP_DRAIN:
-			return Translate("HP Drain");
-		case GLOBAL_STATUS_SP_BOOST:
-			return Translate("SP Boost");
-		case GLOBAL_STATUS_SP_DRAIN:
-			return Translate("SP Drain");
-		case GLOBAL_STATUS_STRENGTH_BOOST:
-			return Translate("Strength Boost");
-		case GLOBAL_STATUS_STRENGTH_DRAIN:
-			return Translate("Strength Drain");
-		case GLOBAL_STATUS_VIGOR_BOOST:
-			return Translate("Vigor Boost");
-		case GLOBAL_STATUS_VIGOR_DRAIN:
-			return Translate("Vigor Drain");
-		case GLOBAL_STATUS_FORTITUDE_BOOST:
-			return Translate("Fortitude Boost");
-		case GLOBAL_STATUS_FORTITUDE_DRAIN:
-			return Translate("Fortitude Drain");
-		case GLOBAL_STATUS_PROTECTION_BOOST:
-			return Translate("Protection Boost");
-		case GLOBAL_STATUS_PROTECTION_DRAIN:
-			return Translate("Protection Drain");
-		case GLOBAL_STATUS_AGILITY_BOOST:
-			return Translate("Agility Boost");
-		case GLOBAL_STATUS_AGILITY_DRAIN:
-			return Translate("Agility Drain");
-		case GLOBAL_STATUS_EVADE_BOOST:
-			return Translate("Evade Boost");
-		case GLOBAL_STATUS_EVADE_DRAIN:
-			return Translate("Evade Drain");
-		case GLOBAL_STATUS_PARALYSIS:
-			return Translate("Paralysis");
-		default:
-			return Translate("Invalid Status");
+	string result;
+	int32 table_id = static_cast<int32>(type);
+
+	ReadScriptDescriptor& script_file = GlobalManager->GetStatusEffectsScript();
+	if (script_file.DoesTableExist(table_id) == true) {
+		script_file.OpenTable(table_id);
+		if (script_file.DoesStringExist("name") == true) {
+			result = script_file.ReadString("name");
+		}
+		else {
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "Lua definition file contained an entry but no name for status effect: " << type << endl;
+		}
+		script_file.CloseTable();
 	}
+	else {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "Lua definition file contained no entry for status effect: " << type << endl;
+	}
+
+	if (result == "") {
+		result = Translate("Invalid Status");
+	}
+	return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

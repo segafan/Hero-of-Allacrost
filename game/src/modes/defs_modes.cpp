@@ -447,6 +447,7 @@ void BindModesToLua()
 		class_<BattleStatusEffect, hoa_global::GlobalStatusEffect>("BattleStatusEffect")
 			.def("GetAffectedActor", &BattleStatusEffect::GetAffectedActor)
 			.def("GetTimer", &BattleStatusEffect::GetTimer)
+			.def("IsIntensityChanged", &BattleStatusEffect::IsIntensityChanged)
 	];
 
 	} // End using battle mode namespaces

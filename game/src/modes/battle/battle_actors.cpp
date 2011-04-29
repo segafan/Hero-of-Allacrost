@@ -182,19 +182,17 @@ void BattleActor::RegisterMiss() {
 
 
 void BattleActor::RegisterStatusChange(GLOBAL_STATUS status, GLOBAL_INTENSITY intensity) {
+	GLOBAL_STATUS old_status = GLOBAL_STATUS_INVALID;
+	GLOBAL_STATUS new_status = GLOBAL_STATUS_INVALID;
 	GLOBAL_INTENSITY old_intensity = GLOBAL_INTENSITY_INVALID;
-	GLOBAL_INTENSITY new_intensity = intensity;
+	GLOBAL_INTENSITY new_intensity = GLOBAL_INTENSITY_INVALID;
 
-	old_intensity = _effects_supervisor->ChangeStatus(status, new_intensity);
+	bool status_change_occurred = _effects_supervisor->ChangeStatus(status, intensity, old_status, old_intensity, new_status, new_intensity);
 
-	// If the return value was invalid, no status was changed so do not create any indicator
-	if (old_intensity == GLOBAL_INTENSITY_INVALID) {
-		return;
+	// If a status change indeed occurred, add the appropriate indicator to display the change to the player
+	if (status_change_occurred == true) {
+		_indicator_supervisor->AddStatusIndicator(old_status, old_intensity, new_status, new_intensity);
 	}
-
-	// TODO: This call needs to handle the case where opposing status effects cancel each other out,
-	// and the opposite status becomes active over the previous status.
-	_indicator_supervisor->AddStatusIndicator(status, old_intensity, status, new_intensity);
 }
 
 
