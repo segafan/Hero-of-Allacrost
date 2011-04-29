@@ -35,9 +35,15 @@ namespace hoa_global {
 **/
 std::string GetElementName(GLOBAL_ELEMENTAL type);
 
+
 /** \brief Retrieves a string representation for any GLOBAL_STATUS enum value
 *** \param type The status enum value to find the string for
 *** \return Translated text that describes the status
+***
+*** \note Each call to this function requires the status name to be retrieved from
+*** a Lua script so its a slightly costly operation. If you need to make repeated 
+*** queries to retrieve status names, consider caching results locally to reduce the
+*** number of script file accesses that need to take place.
 **/
 std::string GetStatusName(GLOBAL_STATUS type);
 
@@ -134,6 +140,7 @@ public:
 	/** \brief Increments the status effect intensity by a positive amount
 	*** \param amount The number of intensity levels to increase the status effect by
 	*** \return True if the intensity level was modified
+	*** \note Intensity will not be incremented beyond the maximum valid intensity value
 	**/
 	virtual bool IncrementIntensity(uint8 amount);
 

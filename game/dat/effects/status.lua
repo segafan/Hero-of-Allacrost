@@ -7,11 +7,11 @@
 --
 -- Each status effect implementation requires the following data to be defined.
 -- {name} - The name of the status effect as it will be shown to the player
--- {icon_index} - A numeric index to the row of images where the icons for this effe
+-- {icon_index} - A numeric index to the row of images where the icons for this effect
 -- {opposite_status} - The status which acts as an opposite status to this one
 -- {Apply} - A function executed when the status effect is applied to the target
 -- {Update} - A function executed periodically while the status is still in effect
--- {Remove} - A function texecuted when the status effect is no longer active on the target
+-- {Remove} - A function executed when the status effect is no longer active on the target
 --
 -- To verify what a status effect's icon_index should be, examine the image file 
 -- img/icons/effects/status.png and find the appropriate row of icons.
@@ -21,16 +21,20 @@
 -- effect can have only one opposite effect, not several. If the status effect has no opposite
 -- effect, this member should be set to hoa_global.GameGlobal.GLOBAL_STATUS_INVALID.
 --
--- The Apply, Update, and Remove functions are all called with a single argument, {effect},
+-- The Apply, Update, and Remove functions are all called with an argument, {effect},
 -- which is a pointer to the BattleStatusEffect object that was constructed to represent
--- this status. Use this object toaccess data relevant to the status effect. Most 
+-- this status. Use this object to access data relevant to the status effect. Most 
 -- implementations of these functions will want to grab pointers to the following pieces of
--- data. It is perfectly acceptable to write additional Lua functions for an effect that will
--- assist these three required functions (code sharing may be useful).
+-- data.
 --
 -- effect:GetTimer() - returns the BattleTimer object for the effect
 -- effect:GetAffectedActor() - returns the BattleActor object that the effect is active on
 -- effect:GetIntensity() - returns the current intensity of the active effect
+-- effect:IsIntensityChanged() - returns true if the intensity level has undergone a recent change
+--
+-- NOTE: Unlike elemental effects, status effects only ever have intensity levels that are
+-- neutral or in the positive range of values, never the negative range. You should not concern
+-- yourself with negative intensity values in this file.
 ------------------------------------------------------------------------------]]
 
 -- All item definitions are stored in this table
@@ -68,9 +72,14 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
 	end,
 
 	Update = function(effect)
+		if (effect:IsIntensityChanged() == true) then
+			
+		end
 	end,
 
 	Remove = function(effect)
+		actor = effect:GetAffectedActor();
+		actor:ResetFortitude();
 	end
 }
 

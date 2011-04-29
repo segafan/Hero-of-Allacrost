@@ -79,7 +79,7 @@ public:
 	//! \note This will cause the timer to reset and also
 	void SetIntensity(hoa_global::GLOBAL_INTENSITY intensity);
 
-	const hoa_utils::ustring& GetName() const
+	const std::string& GetName() const
 		{ return _name; }
 
 	const uint32 GetIconIndex() const
@@ -91,17 +91,32 @@ public:
 	BattleActor* GetAffectedActor() const
 		{ return _affected_actor; }
 
+	ScriptObject* GetApplyFunction() const
+		{ return _apply_function; }
+
+	ScriptObject* GetUpdateFunction() const
+		{ return _update_function; }
+
+	ScriptObject* GetRemoveFunction() const
+		{ return _remove_function; }
+
 	//! \note Returns a pointer instead of a reference so that Lua functions can access the timer
 	hoa_system::SystemTimer* GetTimer()
 		{ return &_timer; }
 
 	hoa_video::StillImage* GetIconImage() const
 		{ return _icon_image; }
+
+	bool IsIntensityChanged() const
+		{ return _intensity_changed; }
+
+	void ResetIntensityChanged()
+		{ _intensity_changed = false; }
 	//@}
 
 private:
 	//! \brief Holds the translated name of the status effect
-	hoa_utils::ustring _name;
+	std::string _name;
 
 	//! \brief Holds the index to the row where the icons for this effect are stored in the status effect multi image
 	uint32 _icon_index;
@@ -127,11 +142,15 @@ private:
 	//! \brief A pointer to the icon image that represents the status. Will be NULL if the status is invalid
 	hoa_video::StillImage* _icon_image;
 
-	/** \brief Applies the change in the status intensity to the affected actor
-	*** This will call the Lua function pointed to by the _apply_function member.
-	*** This will also reset the timer and update the icon image member.
+	//! \brief A flag set to true when the intensity value was changed and cleared when the Update method is called
+	bool _intensity_changed;
+
+	/** \brief Performs necessary operations in response to a change in intensity
+	*** \param reset_timer_only If true, this indicates that the intensity level remains unchanged and only the timer needs to be reset
+	*** 
+	*** This method should be called after every change in intensity is made.
 	**/
-	void _ApplyChange();
+	void _ProcessIntensityChange(bool reset_timer_only);
 }; // class BattleStatusEffect : public hoa_global::GlobalStatusEffect
 
 
@@ -139,9 +158,11 @@ private:
 *** \brief Manages all elemental and status elements for an actor
 ***
 *** The class contains all of the active effects on an actor. These effects are
-*** updated regularly by this class and are removed when their timers expire.
-*** This class also contains draw functions which will display icons for all the
-*** effects of an actor to the screen.
+*** updated regularly by this class and are removed when their timers expire or their
+*** intensity status is nullified by an external call. This class performs all the
+*** calls to the Lua script functions (Apply/Update/Remove) for each status effect at
+*** the appropriate time. The class also contains a draw function which will display 
+*** icons for all the active status effects of an actor to the screen.
 ***
 *** \todo The Draw function probably should be renamed to something more specific
 *** and should check whether or not the actor is a character. Its intended to be
@@ -165,40 +186,49 @@ public:
 	//! \brief Draws the element and status effect icons to the bottom status menu
 	void Draw();
 
-	/** \brief Changes the intensity level of a status effect
-	*** \param status The status effect type to change
-	*** \param intensity A reference to the amount of intensity to increase or decrease the status effect by
-	*** \return The previous intensity level of the status
-	***
-	*** This is the one and only function for performing any status changes to an actor. It will add status effects,
-	*** modify the intensity of existing effects, or remove status effects depending on the current state of the
-	*** status effect and the value of the intensity argument. If the intensity argument is positive, the status
-	*** effect will be added at that intensity if it does not already exist. If it does exist, then this will increase
-	*** the intensity of the effect. A negative intensity will either decrease the intensity of the effect if it exists,
-	*** remove the effect if it exists and the negative intensity outweights the current intensity, or if the effect
-	*** does not exist when intensity is negative, no action will be performed.
-	***
-	*** \note The intensity argument, which is a reference, is modified by the function to the new intensity value set
-	*** for the status. Since the old intensity is the return value of this function, this means that both new and old
-	*** intensity values for the status can be obtained after the change is made.
-	***
-	*** \note If any arguments are invalid the function will return GLOBAL_INTENSITY_INVALID.
-	***
-	*** \note To be absolutely certain that a status effect is removed from the actor regardless of its current intensity,
-	*** use the value GLOBAL_INTENSITY_NEG_EXTREME for the intensity argument.
-	***
-	*** \note This function only changes the state of the status and does <i>not</i> display any visual or other indicator
-	*** to the player that the status was modified. Typically you should invoke BattleActor::RegisterStatusChange(...)
-	*** when you want to change the status of the actor. That method will call this one as well as activating the proper
-	*** indicator based on the state change performed for the status.
-	**/
-	hoa_global::GLOBAL_INTENSITY ChangeStatus(hoa_global::GLOBAL_STATUS status, hoa_global::GLOBAL_INTENSITY& intensity);
-
 	/** \brief Returns true if the requested status is active on the managed actor
 	*** \param status The type of status to check for
 	**/
 	bool IsStatusActive(hoa_global::GLOBAL_STATUS status)
-		{ return (_status_effects.find(status) != _status_effects.end()); }
+		{ return (_active_status_effects.find(status) != _active_status_effects.end()); }
+
+	/** \brief Reurns true if the opposite status to that of the argument is active
+	*** \param status The type of opposite status to check for
+	**/
+	bool IsOppositeStatusActive(hoa_global::GLOBAL_STATUS status);
+
+	/** \brief Changes the intensity level of a status effect
+	*** \param status The status effect type to change
+	*** \param intensity The amount of intensity to increase or decrease the status effect by
+	*** \param old_status A reference to hold the previous status type as a result of this operation
+	*** \param old_intensity A reference to hold the previous intensity of the previous status
+	*** \param new_status A reference to the new status as a result of the change
+	*** \param new_intensity A reference to new intensity fo the new status
+	*** \return True if a change in status took place
+	***
+	*** Primary function for performing status changes on an actor. Depending upon the current state of the actor and
+	*** the first two status and intensity arguments, this function may add new status effects, remove existing effects,
+	*** or modify the intensity of existing effects. This function also takes into account status effects which have an
+	*** opposite type (e.g., strength gain status versus strength depletion status) and change the state of both effects
+	*** accordingly. So, for example, a single call to this function could remove an old effect -and- add a new effect, if
+	*** the effect to be added has an opposite effect that is currently active.
+	***
+	*** \note The old/new status/intensity arguments are used to store additional return values, so don't pass references to
+	*** variables that have data you wish to retain. If the function returns false, the value of these members is meaningless
+	*** and should be disregarded.
+	***
+	*** \note To be absolutely certain that a particular status effect is removed from the actor regardless of its current
+	*** intensity, use the value GLOBAL_INTENSITY_NEG_EXTREME for the intensity argument.
+	***
+	*** \note This function only changes the state of the status and does <i>not</i> display any visual or other indicator
+	*** to the player that the status was modified. Typically you should invoke BattleActor::RegisterStatusChange(...)
+	*** when you want to change the status of the actor. That method will call this one as well as activating the proper
+	*** indicator based on the return values from this function
+	**/
+	bool ChangeStatus(hoa_global::GLOBAL_STATUS status, hoa_global::GLOBAL_INTENSITY intensity,
+		hoa_global::GLOBAL_STATUS& previous_status, hoa_global::GLOBAL_INTENSITY& previous_intensity,
+		hoa_global::GLOBAL_STATUS& new_status, hoa_global::GLOBAL_INTENSITY& new_intensity
+	);
 
 private:
 	//! \brief A pointer to the actor that this class supervises effects for
@@ -209,7 +239,25 @@ private:
 // 	std::map<hoa_global::GLOBAL_ELEMENTAL, BattleElementEffect*> _element_effects;
 
 	//! \brief Contains all active status effects
-	std::map<hoa_global::GLOBAL_STATUS, BattleStatusEffect*> _status_effects;
+	std::map<hoa_global::GLOBAL_STATUS, BattleStatusEffect*> _active_status_effects;
+
+	/** \brief Creates a new status effect and applies it to the actor
+	*** \param status The type of the status to create
+	*** \param intensity The intensity level that the effect should be initialized at
+	***
+	*** \note This method does not check if the requested status effect already exists or not in the map of active effects.
+	*** Do not call this method unless you are certain that the given status is not already active on the actor, otherwise
+	*** memory leaks and other problems may arise.
+	**/
+	void _CreateNewStatus(hoa_global::GLOBAL_STATUS status, hoa_global::GLOBAL_INTENSITY intensity);
+
+	/** \brief Removes an existing status effect from the actor
+	*** \param status_effect A pointer to the status effect to be removed
+	*** \note After this function completes, if it was successful, the object pointed to by the status_effect argument will
+	*** be invalid and should not be used. It is good practice for the caller to set the pointer passed in to this function to
+	*** NULL immediately after the function call returns.
+	**/
+	void _RemoveStatus(BattleStatusEffect* status_effect);
 }; // class EffectsSupervisor
 
 } // namespace private_battle

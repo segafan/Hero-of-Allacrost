@@ -151,8 +151,11 @@ public:
 	***   removed regardless of its current intensity level.
 	*** - If this status has an opposite status type that is active on the actor and the intensity argument
 	***   is positive, this will decrease the intensity of the opposite status by the degree of intensity.
-	***   This may cause that opposite status to be removed and this new status to be added if the intensity
-	***   change is significantly high.
+	***   This may cause that opposite status to be removed and this new status to be added if the value of
+	***   the intensity change is high enough.
+	***
+	*** If the desired effect does yield a change in status, this function will prepare an indicator image
+	*** to be displayed representing the change in status.
 	**/
 	void RegisterStatusChange(hoa_global::GLOBAL_STATUS status, hoa_global::GLOBAL_INTENSITY intensity);
 

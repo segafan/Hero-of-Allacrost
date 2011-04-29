@@ -370,6 +370,12 @@ private:
 	*** is required. However, some battles may require additional tracks to toggle between.
 	**/
 	std::map<std::string, hoa_audio::MusicDescriptor> _battle_music;
+
+	/** \brief Container used to find the appropriate row index for each status type
+	*** Status icons for all types of status are all contained within a single image. This container is used to
+	*** quickly determine which row of icons in that image corresponds to each status type.
+	**/
+	std::map<hoa_global::GLOBAL_STATUS, uint32> _status_icon_index;
 	//@}
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
