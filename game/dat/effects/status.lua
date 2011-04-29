@@ -7,8 +7,9 @@
 --
 -- Each status effect implementation requires the following data to be defined.
 -- {name} - The name of the status effect as it will be shown to the player
+-- {duration} - The duration that the effect lasts, in milliseconds
 -- {icon_index} - A numeric index to the row of images where the icons for this effect
--- {opposite_status} - The status which acts as an opposite status to this one
+-- {opposite_effect} - The status which acts as an opposite status to this one
 -- {Apply} - A function executed when the status effect is applied to the target
 -- {Update} - A function executed periodically while the status is still in effect
 -- {Remove} - A function executed when the status effect is no longer active on the target
@@ -45,18 +46,34 @@ end
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
 	name = hoa_system.Translate("Raise Fortitude"),
+	duration = 30000,
 	icon_index = 6,
-	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_INVALID,
+	-- TODO: eventually this will have an opposite effect. Change the line below later when that effect is available.
+	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_INVALID, 
 
 	Apply = function(effect)
-		timer = effect:GetTimer();
+		status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST].ModifyAttribute(effect);
+	end,
+
+	Update = function(effect)
+		if (effect:IsIntensityChanged() == true) then
+			status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST].ModifyAttribute(effect);
+		end
+	end,
+
+	Remove = function(effect)
+		effect:GetAffectedActor():ResetFortitude();
+	end,
+
+	ModifyAttribute = function(effect)
 		actor = effect:GetAffectedActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetFortitude();
 		base_fortitude = actor:GetFortitude();
+
 		if (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_NEUTRAL) then
-			-- Fortitude was already reset, no further action needed
+			-- Fortitude was already reset. No further action needed
 		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER) then
 			actor:SetFortitude(base_fortitude * 2); -- Fortitude 2x
 		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_MODERATE) then
@@ -66,70 +83,28 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
 		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_EXTREME) then
 			actor:SetFortitude(base_fortitude * 5); -- Fortitude 5x
 		else
-			-- TODO: print some sort of error message?
+			print("Lua warning: status effect had an invalid intensity value: " .. intensity);
 		end
-		timer:SetDuration(30000); -- 30 seconds
+	end,
+}
+
+
+status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS] = {
+	name = hoa_system.Translate("Paralysis"),
+	duration = 10000,
+	icon_index = 8,
+	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_INVALID,
+	
+	Apply = function(effect)
+		-- TODO: apply paralysis state to actor
 	end,
 
 	Update = function(effect)
-		if (effect:IsIntensityChanged() == true) then
-			
-		end
+		-- Nothing needs to be updated for this effect
 	end,
 
 	Remove = function(effect)
-		actor = effect:GetAffectedActor();
-		actor:ResetFortitude();
-	end
-}
-
-
-
-
-
-status_effects[100] = {
-	name = hoa_system.Translate("Dummy effect"),
-	
-	Init = function(thisEffect, target)
+		-- TODO: restore actor to active state
 	end,
-
-	Update = function(thisEffect, target)
-	end,
-
-	Remove = function(thisEffect, target)
-	end
-}
-
-status_effects[200] = {
-	name = hoa_system.Translate("Defense Up"),
-
-	Init = function(thisEffect, target)
-		thisEffect:SetForModifier(0.25); -- Increase Physical Defense by 25%
-		thisEffect:SetDuration(30000); -- This is about three "turns"
-		thisEffect:StartTimer();
-	end,
-
-	Update = function(thisEffect, target)
-	end,
-
-	Remove = function(thisEffect, target)
-	end
-}
-
-status_effects[300] = {
-	name = hoa_system.Translate("Stun"),
-	-- Stop an actor's timer for a brief period
-	
-	Init = function(thisEffect, target)
-		thisEffect:SetStunEffect(true);
-		thisEffect:SetDuration(10000); -- This is about one "turn"
-		thisEffect:StartTimer();
-	end,
-
-	Update = function(thisEffect, target)
-	end,
-
-	Remove = function(thisEffect, target)
-	end
 }
 

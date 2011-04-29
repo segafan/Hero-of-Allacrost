@@ -39,7 +39,7 @@ end
 
 skills[1] = {
 	name = hoa_system.Translate("Sword Slash"),
-	description = hoa_system.Translate("A textbook manuever that deals an effective blow with a sword."),
+	description = hoa_system.Translate("A textbook manuever that deals an effective blow."),
 	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 200,
@@ -62,7 +62,7 @@ skills[1] = {
 skills[2] = {
 	name = hoa_system.Translate("Forward Thrust"),
 	description = hoa_system.Translate("A more powerful blow than the standard sword slash, but also less likely to hit its intended target."),
-	sp_required = 1,
+	sp_required = 2,
 	warmup_time = 500,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
@@ -83,9 +83,9 @@ skills[2] = {
 }
 
 skills[3] = {
-	name = hoa_system.Translate("Stun Slash"),
-	description = hoa_system.Translate("A blow which targets vital areas and carries a chance to temporarily stun its target."),
-	sp_required = 3,
+	name = hoa_system.Translate("Stun Strike"),
+	description = hoa_system.Translate("A blow which targets vital areas and temporarily stun its target."),
+	sp_required = 5,
 	warmup_time = 1200,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
@@ -96,7 +96,8 @@ skills[3] = {
 
 		if (hoa_battle.CalculateStandardEvasion(target, 5.5) == false) then
 			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 0, 0));
-			target_actor:AddNewEffect(3);
+			-- TODO: Calculate chance for paralysis effect and activate it
+			target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
 			AudioManager:PlaySound("snd/swordslice1.wav");
 		else
 			target_actor:RegisterMiss();

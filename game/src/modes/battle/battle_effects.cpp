@@ -80,6 +80,7 @@ BattleStatusEffect::BattleStatusEffect(GLOBAL_STATUS type, GLOBAL_INTENSITY inte
 	// --- (3): Read in the status effect's property data
 	script_file.OpenTable(table_id);
 	_name = script_file.ReadString("name");
+	_timer.SetDuration(script_file.ReadUInt("duration"));
 	_icon_index = script_file.ReadUInt("icon_index");
 	_opposite_effect = static_cast<GLOBAL_STATUS>(script_file.ReadInt("opposite_effect"));
 	
@@ -251,6 +252,32 @@ bool EffectsSupervisor::IsOppositeStatusActive(GLOBAL_STATUS status) {
 
 
 
+void EffectsSupervisor::GetAllStatusEffects(vector<GLOBAL_STATUS>& all_status_effects) {
+	all_status_effects.empty();
+
+	for (map<GLOBAL_STATUS, BattleStatusEffect*>::iterator i = _active_status_effects.begin(); i != _active_status_effects.end(); i++) {
+		all_status_effects.push_back(i->first);
+	}
+}
+
+
+
+void EffectsSupervisor::RemoveAllStatus() {
+	vector<BattleStatusEffect*> effects;
+
+	// Calls to _RemoveStatus() alter the _active_status_effects container. To avoid problems with iterating through the _active_status_effects map during
+	// the removal calls, we make a temporary copy of all the status effects and operate on that
+	for (map<GLOBAL_STATUS, BattleStatusEffect*>::iterator i = _active_status_effects.begin(); i != _active_status_effects.end(); i++) {
+		effects.push_back(i->second);
+	}
+
+	for (uint32 i = 0; i < effects.size(); i++) {
+		_RemoveStatus(effects[i]);
+	}
+}
+
+
+
 bool EffectsSupervisor::ChangeStatus(GLOBAL_STATUS status, GLOBAL_INTENSITY intensity, GLOBAL_STATUS& previous_status, GLOBAL_INTENSITY& previous_intensity,
 	GLOBAL_STATUS& new_status, GLOBAL_INTENSITY& new_intensity)
 {
@@ -409,7 +436,7 @@ void EffectsSupervisor::_RemoveStatus(BattleStatusEffect* status_effect) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "attempted to remove a status effect not present on the actor with type: " << status_effect->GetType() << endl;
 	}
 	else {
-		ScriptCallFunction<void>(*(status_effect->GetApplyFunction()), status_effect);
+		ScriptCallFunction<void>(*(status_effect->GetRemoveFunction()), status_effect);
 		delete status_effect;
 	}
 }

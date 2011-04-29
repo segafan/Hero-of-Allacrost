@@ -197,6 +197,19 @@ public:
 	**/
 	bool IsOppositeStatusActive(hoa_global::GLOBAL_STATUS status);
 
+	/** \brief Populates the argument vector with all status effects that are active on the actor
+	*** \param all_status_effects A reference to the data vector to populate
+	**/
+	void GetAllStatusEffects(std::vector<hoa_global::GLOBAL_STATUS>& all_status_effects);
+
+	/** \brief Immediately removes all active status effects from the actor
+	*** \note This function is typically used in the case of an actor's death. Because it returns no value, indicator icons
+	*** illustrating the removal of status effects can not be shown, as the indicators need to know which status effects were
+	*** active and at what intensity before they were removed. If you wish to remove all status while displaying indicators,
+	*** use a combination of GetActiveStatusEffects() and repeated calls to ChangeStatus() for each effect.
+	**/
+	void RemoveAllStatus();
+	
 	/** \brief Changes the intensity level of a status effect
 	*** \param status The status effect type to change
 	*** \param intensity The amount of intensity to increase or decrease the status effect by
