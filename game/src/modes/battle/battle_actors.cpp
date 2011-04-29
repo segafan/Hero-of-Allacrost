@@ -127,6 +127,7 @@ void BattleActor::ChangeState(ACTOR_STATE new_state) {
 			}
 			break;
 		case ACTOR_STATE_DEAD:
+			_effects_supervisor->RemoveAllStatus();
 			BattleMode::CurrentInstance()->NotifyActorDeath(this);
 			break;
 		default:

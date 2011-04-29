@@ -74,7 +74,7 @@ BattleMode::BattleMode() :
 	if (_battle_background.Load("img/backdrops/battle/desert_cave.png") == false)
 		PRINT_ERROR << "failed to load default background image" << endl;
 
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(_status_icons, "img/icons/effects/status.png", 24, 5) == false)
+	if (ImageDescriptor::LoadMultiImageFromElementSize(_status_icons, "img/icons/effects/status.png", 25, 25) == false)
 		PRINT_ERROR << "failed to load status icon images" << endl;
 
 	if (_stamina_icon_selected.Load("img/menus/stamina_icon_selected.png") == false)
