@@ -79,8 +79,14 @@ public:
 	//! \note This will cause the timer to reset and also
 	void SetIntensity(hoa_global::GLOBAL_INTENSITY intensity);
 
-	const std::string& GetName() const
+	const hoa_utils::ustring& GetName() const
 		{ return _name; }
+
+	const uint32 GetIconIndex() const
+		{ return _icon_index; }
+
+	hoa_global::GLOBAL_STATUS GetOppositeEffect() const
+		{ return _opposite_effect; }
 
 	BattleActor* GetAffectedActor() const
 		{ return _affected_actor; }
@@ -95,19 +101,28 @@ public:
 
 private:
 	//! \brief Holds the translated name of the status effect
-	std::string _name;
+	hoa_utils::ustring _name;
 
-//	//! \brief The opposte type for the status
-// 	hoa_global::GLOBAL_STATUS _opposite_type;
+	//! \brief Holds the index to the row where the icons for this effect are stored in the status effect multi image
+	uint32 _icon_index;
+
+	//! \brief The opposte effect for the status, set to GLOBAL_STATUS_INVALID if no opposite effect exists
+	hoa_global::GLOBAL_STATUS _opposite_effect;
+
+	//! \brief A pointer to the script function that applies the initial effect
+	ScriptObject* _apply_function;
+
+	//! \brief A pointer to the script function that updates any necessary changes caused by the effect
+	ScriptObject* _update_function;
+
+	//! \brief A pointer to the script function that removes the effect and restores the actor to their original state
+	ScriptObject* _remove_function;
 
 	//! \brief A pointer to the actor that is affected by this status
 	BattleActor* _affected_actor;
 
 	//! \brief A timer used to determine how long the status effect lasts
 	hoa_system::SystemTimer _timer;
-
-	//! \brief A pointer to the update script function
-	ScriptObject* _apply_function;
 
 	//! \brief A pointer to the icon image that represents the status. Will be NULL if the status is invalid
 	hoa_video::StillImage* _icon_image;

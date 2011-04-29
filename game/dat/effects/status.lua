@@ -1,9 +1,36 @@
 ------------------------------------------------------------------------------[[
 -- Filename: status.lua
 --
--- Description: This file contains the definitions of all status effects in
--- Hero of Allacrost. Each item has a unique integer identifier that is used
--- as its key in the items table below.
+-- Description: This file contains the implementations of all status effects in
+-- Hero of Allacrost. The list of different types of status effects and their
+-- corresponding names may be found in src/modes/common/global/global_effects.*.
+--
+-- Each status effect implementation requires the following data to be defined.
+-- {name} - The name of the status effect as it will be shown to the player
+-- {icon_index} - A numeric index to the row of images where the icons for this effe
+-- {opposite_status} - The status which acts as an opposite status to this one
+-- {Apply} - A function executed when the status effect is applied to the target
+-- {Update} - A function executed periodically while the status is still in effect
+-- {Remove} - A function texecuted when the status effect is no longer active on the target
+--
+-- To verify what a status effect's icon_index should be, examine the image file 
+-- img/icons/effects/status.png and find the appropriate row of icons.
+-- 
+-- The opposite_status property is only applicable to some pairs of status effects.
+-- For example, a pair of effects that increase strength and decrease strength. Each status
+-- effect can have only one opposite effect, not several. If the status effect has no opposite
+-- effect, this member should be set to hoa_global.GameGlobal.GLOBAL_STATUS_INVALID.
+--
+-- The Apply, Update, and Remove functions are all called with a single argument, {effect},
+-- which is a pointer to the BattleStatusEffect object that was constructed to represent
+-- this status. Use this object toaccess data relevant to the status effect. Most 
+-- implementations of these functions will want to grab pointers to the following pieces of
+-- data. It is perfectly acceptable to write additional Lua functions for an effect that will
+-- assist these three required functions (code sharing may be useful).
+--
+-- effect:GetTimer() - returns the BattleTimer object for the effect
+-- effect:GetAffectedActor() - returns the BattleActor object that the effect is active on
+-- effect:GetIntensity() - returns the current intensity of the active effect
 ------------------------------------------------------------------------------]]
 
 -- All item definitions are stored in this table
@@ -13,7 +40,9 @@ end
 
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
-	name = hoa_system.Translate("Defense Up"),
+	name = hoa_system.Translate("Raise Fortitude"),
+	icon_index = 6,
+	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_INVALID,
 
 	Apply = function(effect)
 		timer = effect:GetTimer();
@@ -36,6 +65,12 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
 			-- TODO: print some sort of error message?
 		end
 		timer:SetDuration(30000); -- 30 seconds
+	end,
+
+	Update = function(effect)
+	end,
+
+	Remove = function(effect)
 	end
 }
 
@@ -89,18 +124,3 @@ status_effects[300] = {
 	end
 }
 
-status_effects[400] = {
-	name = hoa_system.Translate("Dodge Enemies"),
-
-	Init = function(thisEffect, target)
-		thisEffect:SetEvaModifier(9.0); -- Increase evade by 900%
-		thisEffect:SetDuration(20000); -- This is about two "turns"
-		thisEffect:StartTimer();
-	end,
-
-	Update = function(thisEffect, target)
-	end,
-
-	Remove = function(thisEffect, target)
-	end
-}
