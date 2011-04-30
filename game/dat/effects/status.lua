@@ -43,21 +43,19 @@ if (status_effects == nil) then
    status_effects = {}
 end
 
-
-status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
+status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE] = {
 	name = hoa_system.Translate("Raise Fortitude"),
 	duration = 30000,
 	icon_index = 6,
-	-- TODO: eventually this will have an opposite effect. Change the line below later when that effect is available.
-	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_INVALID, 
+	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_DEPLETE, 
 
 	Apply = function(effect)
-		status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST].ModifyAttribute(effect);
+		status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE].ModifyAttribute(effect);
 	end,
 
 	Update = function(effect)
 		if (effect:IsIntensityChanged() == true) then
-			status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST].ModifyAttribute(effect);
+			status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE].ModifyAttribute(effect);
 		end
 	end,
 
@@ -70,24 +68,72 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST] = {
 		intensity = effect:GetIntensity();
 
 		actor:ResetFortitude();
-		base_fortitude = actor:GetFortitude();
+		base_value = actor:GetFortitude();
+		modifier = 0;
 
 		if (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_NEUTRAL) then
-			-- Fortitude was already reset. No further action needed
+			modifier = 1;
 		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER) then
-			actor:SetFortitude(base_fortitude * 2); -- Fortitude 2x
+			modifer = 1.25;
 		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_MODERATE) then
-			actor:SetFortitude(base_fortitude * 3); -- Fortitude 3x
+			modifier = 1.5;
 		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_GREATER) then
-			actor:SetFortitude(base_fortitude * 4); -- Fortitude 4x
+			modifier = 1.75;
 		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_EXTREME) then
-			actor:SetFortitude(base_fortitude * 5); -- Fortitude 5x
+			modifier = 2;
 		else
 			print("Lua warning: status effect had an invalid intensity value: " .. intensity);
 		end
+
+		actor:SetFortitude(base_value * modifier);
 	end,
 }
 
+status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_DEPLETE] = {
+	name = hoa_system.Translate("Deplete Fortitude"),
+	duration = 30000,
+	icon_index = 7,
+	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE, 
+
+	Apply = function(effect)
+		status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_DEPLETE].ModifyAttribute(effect);
+	end,
+
+	Update = function(effect)
+		if (effect:IsIntensityChanged() == true) then
+			status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_DEPLETE].ModifyAttribute(effect);
+		end
+	end,
+
+	Remove = function(effect)
+		effect:GetAffectedActor():ResetFortitude();
+	end,
+
+	ModifyAttribute = function(effect)
+		actor = effect:GetAffectedActor();
+		intensity = effect:GetIntensity();
+
+		actor:ResetFortitude();
+		base_value = actor:GetFortitude();
+		modifier = 0;
+
+		if (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_NEUTRAL) then
+			modifier = 1;
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER) then
+			modifer = 0.8;
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_MODERATE) then
+			modifier = 0.6;
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_GREATER) then
+			modifier = 0.4;
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_EXTREME) then
+			modifier = 0.2;
+		else
+			print("Lua warning: status effect had an invalid intensity value: " .. intensity);
+		end
+
+		actor:SetFortitude(base_value * modifier);
+	end,
+}
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS] = {
 	name = hoa_system.Translate("Paralysis"),

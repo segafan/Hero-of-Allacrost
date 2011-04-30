@@ -120,7 +120,12 @@ void BattleActor::ChangeState(ACTOR_STATE new_state) {
 		case ACTOR_STATE_COOL_DOWN:
 			_execution_finished = false;
 			if (_action == NULL) {
+				// TODO: This case seems to occur when the action could not be executed (due to insufficient SP, etc).
+				// When this is the case, the action gets deleted and the actor would otherwise get stuck, because we
+				// dont have a cool-down time available to give it. This case needs to be handled better
 				IF_PRINT_WARNING(BATTLE_DEBUG) << "no action available during state change: " << _state << endl;
+				// TEMP: find a better solution than this temporary hack
+				ChangeState(ACTOR_STATE_IDLE);
 			}
 			else {
 				_state_timer.Initialize(_action->GetCoolDownTime());
