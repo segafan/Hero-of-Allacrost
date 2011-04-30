@@ -47,7 +47,7 @@ skills[10001] = {
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
-		target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_BOOST, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
+		target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
 	end
 }
 
