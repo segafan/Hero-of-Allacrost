@@ -201,30 +201,37 @@ EffectsSupervisor::~EffectsSupervisor() {
 
 
 void EffectsSupervisor::Update() {
-	// Update the timers and state for all active status effects
+	// As a result of what is done in this update loop, sometimes effects will be removed and this changes the state of the _active_status_effects
+	// container. To avoid problems with container resizing, we use a seperate container to iterate through and process updates for all effects,
+	// to ensure that we don't get any bad iterator references and that we update each effect only once.
+	std::vector<BattleStatusEffect*> effects;
 	for (map<GLOBAL_STATUS, BattleStatusEffect*>::iterator i = _active_status_effects.begin(); i != _active_status_effects.end(); i++) {
-		BattleStatusEffect* this_effect = i->second;
+		effects.push_back(i->second);
+	}
+	
+	// Update the timers and state for all active status effects
+	for (uint32 i = 0; i < effects.size(); i++) {
 		bool effect_removed = false;
 		
-		this_effect->GetTimer()->Update();
+		effects[i]->GetTimer()->Update();
 
 		// Decrease the intensity of the status by one level when its timer expires. This may result in
 		// the status effect being removed from the actor if its intensity changes to the neutral level.
-		if (this_effect->GetTimer()->IsFinished() == true) {
+		if (effects[i]->GetTimer()->IsFinished() == true) {
 			// If the intensity of the effect is at its weakest, the call that follows will remove the effect from the actor
-			effect_removed = (this_effect->GetIntensity() == GLOBAL_INTENSITY_POS_LESSER);
+			effect_removed = (effects[i]->GetIntensity() == GLOBAL_INTENSITY_POS_LESSER);
 			
 			// Note that we register the status change on the actor instead of directly calling ChangeStatus() here.
 			// We do this because the actor's indicator supervisor needs to be informed of intensity changes so that it
 			// may display the appropriate status change information to the user. The call to BattleActor::RegisterStatusChange()
 			// will in turn make a call to EffectsSupervisor::ChangeStatus().
-			_actor->RegisterStatusChange(i->first, GLOBAL_INTENSITY_NEG_LESSER);
+			_actor->RegisterStatusChange(effects[i]->GetType(), GLOBAL_INTENSITY_NEG_LESSER);
 		}
 
 		// Update the effect according to the script function
 		if (effect_removed == false) {
-			ScriptCallFunction<void>(*(this_effect->GetUpdateFunction()), this_effect);
-			this_effect->ResetIntensityChanged();
+			ScriptCallFunction<void>(*(effects[i]->GetUpdateFunction()), effects[i]);
+			effects[i]->ResetIntensityChanged();
 		}
 	}
 }
