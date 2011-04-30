@@ -413,6 +413,7 @@ void BindModesToLua()
 			.def("TotalPhysicalDefense", &BattleActor::TotalPhysicalDefense)
 			.def("TotalMetaphysicalDefense", &BattleActor::TotalMetaphysicalDefense)
 			.def("TotalEvadeRating", &BattleActor::TotalEvadeRating)
+			.def("SetStatePaused", &BattleActor::SetStatePaused)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")

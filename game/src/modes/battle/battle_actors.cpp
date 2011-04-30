@@ -53,6 +53,7 @@ BattleActor::BattleActor(GlobalActor* actor) :
 	_x_location(0.0f),
 	_y_location(0.0f),
 	_execution_finished(false),
+	_state_paused(false),
 	_idle_state_time(0),
 	_effects_supervisor(new EffectsSupervisor(this)),
 	_indicator_supervisor(new IndicatorSupervisor(this))
@@ -213,7 +214,9 @@ void BattleActor::ChangeSkillPoints(int32 amount) {
 
 
 void BattleActor::Update() {
-	_state_timer.Update();
+	if (_state_paused == false)
+		_state_timer.Update();
+
 	_effects_supervisor->Update();
 	_indicator_supervisor->Update();
 
@@ -350,17 +353,20 @@ void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
 
 void BattleCharacter::Update() {
 	BattleActor::Update();
-	_animation_timer.Update();
 
-	// Update the active sprite animation
-	if (IsAlive() == true) {
-		_global_character->RetrieveBattleAnimation(_sprite_animation_alias)->Update();
-	}
+	if (_state_paused == false) {
+		_animation_timer.Update();
 
-	// If the character is executing their action,
-	if (_state == ACTOR_STATE_ACTING) {
-		if (_action->Execute() == true) {
-			ChangeState(ACTOR_STATE_COOL_DOWN);
+		// Update the active sprite animation
+		if (IsAlive() == true) {
+			_global_character->RetrieveBattleAnimation(_sprite_animation_alias)->Update();
+		}
+
+		// If the character is executing their action,
+		if (_state == ACTOR_STATE_ACTING) {
+			if (_action->Execute() == true) {
+				ChangeState(ACTOR_STATE_COOL_DOWN);
+			}
 		}
 	}
 }

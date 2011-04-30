@@ -96,7 +96,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS] = {
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_INVALID,
 	
 	Apply = function(effect)
-		-- TODO: apply paralysis state to actor
+		effect:GetAffectedActor():SetStatePaused(true);
 	end,
 
 	Update = function(effect)
@@ -104,7 +104,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS] = {
 	end,
 
 	Remove = function(effect)
-		-- TODO: restore actor to active state
+		effect:GetAffectedActor():SetStatePaused(false);
 	end,
 }
 
