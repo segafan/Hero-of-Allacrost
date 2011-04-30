@@ -277,6 +277,9 @@ public:
 	void SetYLocation(float y_location)
 		{ _y_location = y_location; }
 
+	void SetStatePaused(bool paused)
+		{ _state_paused = paused; }
+
 	//! \note If the actor is in the idle state, this will not affect the state timer
 	 void SetIdleStateTime(uint32 time)
 		{ _idle_state_time = time; }
@@ -301,11 +304,22 @@ protected:
 	//! \brief Set to true when the actor is in the ACTING state and the execution of the action is complete
 	bool _execution_finished;
 
+	/** \brief When set to true, the actor's state timer will not update and their animations will cease
+	*** This serves a different purpose than pausing/resuming the _state_timer directly, which the battle code
+	*** makes frequent use of. This is a more "long term" effect, primarily intended to aid status effects and
+	*** events in allowing an actor to be temporarily put out of action.
+	**/
+	bool _state_paused;
+
 	//! \brief The amount of time (in milliseconds) that the actor needs to wait to pass through the idle state
 	uint32 _idle_state_time;
 
 	//! \brief A timer used as the character progresses through the standard series of actor states
 	hoa_system::SystemTimer _state_timer;
+
+	// TODO: add later for effects such as "petrify"
+//	//! \brief When set to true, the actor essentially has immunity and can not be targeted by attacks
+//	bool _not_targetable;
 
 	//! \brief The actor's icon for the stamina meter
 	hoa_video::StillImage _stamina_icon;
