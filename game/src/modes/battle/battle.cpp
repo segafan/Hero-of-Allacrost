@@ -568,15 +568,15 @@ void BattleMode::_Initialize() {
 	// (3): Determine the origin position for all characters and enemies
 	_DetermineActorLocations();
 
-	// (4): Find the actor with the lowest agility rating
-	uint32 min_agility = 0xFFFFFFFF;
+	// (4): Find the actor with the highext agility rating
+	uint32 highest_agility = 0;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		if (_character_actors[i]->GetAgility() < min_agility)
-			min_agility = _character_actors[i]->GetAgility();
+		if (_character_actors[i]->GetAgility() > highest_agility)
+			highest_agility = _character_actors[i]->GetAgility();
 	}
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-		if (_enemy_actors[i]->GetAgility() < min_agility)
-			min_agility = _enemy_actors[i]->GetAgility();
+		if (_enemy_actors[i]->GetAgility() > highest_agility)
+			highest_agility = _enemy_actors[i]->GetAgility();
 	}
 
 	// Andy: Once every game loop, the SystemManager's timers are updated
@@ -608,19 +608,18 @@ void BattleMode::_Initialize() {
 	// battle positions). Once that feature is available, remove this call.
 	SystemManager->UpdateTimers();
 
-	// (5): Adjust each actor's idle state time based on their agility proportion to the slowest actor
-	// If an actor's agility is twice that of the actor with the lowest agility, then they will have an
-	// idle state time that is half of the slowest actor. We also use timer_multiplier to adjust start times.
-	// The lower the value of timer_multiplier, the faster the battle goes
+	// (5): Adjust each actor's idle state time based on their agility proportion to the fastest actor
+	// If an actor's agility is half that of the actor with the highest agility, then they will have an
+	// idle state time that is twice that of the slowest actor.
 	float proportion;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		proportion = static_cast<float>(min_agility) / static_cast<float>(_character_actors[i]->GetAgility());
-		_character_actors[i]->SetIdleStateTime(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+		proportion = static_cast<float>(highest_agility) / static_cast<float>(_character_actors[i]->GetAgility());
+		_character_actors[i]->SetIdleStateTime(static_cast<uint32>(MIN_IDLE_WAIT_TIME * proportion));
 		_character_actors[i]->ChangeState(ACTOR_STATE_IDLE);
 	}
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-		proportion = static_cast<float>(min_agility) / static_cast<float>(_enemy_actors[i]->GetAgility());
-		_enemy_actors[i]->SetIdleStateTime(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+		proportion = static_cast<float>(highest_agility) / static_cast<float>(_enemy_actors[i]->GetAgility());
+		_enemy_actors[i]->SetIdleStateTime(static_cast<uint32>(MIN_IDLE_WAIT_TIME * proportion));
 		_enemy_actors[i]->ChangeState(ACTOR_STATE_IDLE);
 	}
 

@@ -69,8 +69,8 @@ const float STAMINA_LOCATION_TOP = STAMINA_LOCATION_BOTTOM + 508.0f;
 //! \brief Returned as an index when looking for a character or enemy and they do not exist
 const uint32 INVALID_BATTLE_ACTOR_INDEX = 999;
 
-//! \brief When a battle first starts, this is the wait time for the slowest actor
-const uint32 MAX_INIT_WAIT_TIME = 8000;
+//! \brief This is the idle state wait time for the fastest actor, used to set idle state timers for all other actors
+const uint32 MIN_IDLE_WAIT_TIME = 10000;
 
 //! \brief Warm up time for using items (try to keep short, should be constant regardless of item used)
 const uint32 ITEM_WARM_UP_TIME = 1000;
