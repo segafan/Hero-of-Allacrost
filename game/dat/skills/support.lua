@@ -47,7 +47,7 @@ end
 
 skills[20001] = {
 	name = hoa_system.Translate("First Aid"),
-	description = hoa_system.Translate("Performs basic medical assistance to a target."),
+	description = hoa_system.Translate("Performs basic medical assistance, healing the target by a minor degree."),
 	sp_required = 2,
 	warmup_time = 1500,
 	cooldown_time = 200,
@@ -63,6 +63,21 @@ skills[20001] = {
 		target:AddHitPoints(hoa_utils.RandomBoundedInteger(30, 50));
 		AudioManager:PlaySound("snd/heal.wav");
 	end
+}
+
+skills[20002] = {
+	name = hoa_system.Translate("Encouraging Shout"),
+	description = hoa_system.Translate("Increases the strength of all allies."),
+	sp_required = 14,
+	warmup_time = 4000,
+	cooldown_time = 750,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_ALLIES,
+   
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+		target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_RAISE, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
+		-- AudioManager:PlaySound("snd/shout.wav");
+	end,
 }
 
 --------------------------------------------------------------------------------

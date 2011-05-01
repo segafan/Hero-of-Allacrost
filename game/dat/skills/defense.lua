@@ -51,20 +51,6 @@ skills[10001] = {
 	end
 }
 
-skills[10002] = {
-	name = hoa_system.Translate("Evasive Maneuvering"),
-	description = hoa_system.Translate("Increases the user's evasion ability for a brief period."),
-	sp_required = 1,
-	warmup_time = 300,
-	cooldown_time = 0,
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_SELF,
-
-	BattleExecute = function(user, target)
-		target_actor = target:GetActor();
-		-- TODO: register status change
-	end
-}
-
 --------------------------------------------------------------------------------
 -- IDs 11,001 - 20,000 are reserved for enemy defense skills
 --------------------------------------------------------------------------------

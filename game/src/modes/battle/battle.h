@@ -40,6 +40,66 @@ extern bool BATTLE_DEBUG;
 //! \brief An internal namespace to be used only within the battle code. Don't use this namespace anywhere else!
 namespace private_battle {
 
+/** \brief Assists BattleMode process certain sequences such as the start and end of the battle
+***
+*** Certain sequences such as when a battle first begins require a lot of operations that are not done for the
+*** remaining 99% of the time that a battle is active. The purpose of this class is to enable those custom operations
+*** and prevent the BattleMode class from being inundated with members and methods that are rarely used. This class 
+*** should support multiple different sequences so some members and methods may only pertain to one sequence or another,
+*** while other data may be shared among sequences.
+***
+*** Currently this class supports the following sequences:
+***   - Battle initialization
+***   - TODO: End of battle action to finish screen
+***   - Battle exit
+***
+*** \note BattleMode declares this class as a friend, and hence this class has access to all private data and methods of
+*** the BattleMode class.
+**/ 
+class SequenceSupervisor {
+public:
+	SequenceSupervisor(BattleMode* current_instance);
+
+	~SequenceSupervisor();
+
+	//! \brief Main function which processes the sequence from its start to its completion
+	void Update();
+
+	//! \brief Draws all contents of the battle to the screen appropriately
+	void Draw();
+
+private:
+	//! \brief A pointer to the active battle mode instance, retained locally in this class only for convience
+	BattleMode* _battle;
+	
+	//! \brief Used to represent the state of which "step" we are on in producing a particular sequence
+	uint32 _sequence_step;
+
+	//! \brief A timer utilized for many different purposes when playing out a sequence
+	hoa_system::SystemTimer _sequence_timer;
+
+	//! \brief Color whose alpha value is used for fading background graphics in and out
+	hoa_video::Color _background_fade;
+
+	//! \brief A position offset used to move GUI objects from off screen to their permanent positions
+	float _gui_position_offset;
+
+	//! \brief Updates state when the battle is in its initial sequence
+	void _UpdateInitialSequence();
+
+	//! \brief Main draw function for the initial sequence
+	void _DrawInitialSequence();
+
+	//! \brief Draws the battle background and other environmental graphics
+	void _DrawBackgroundGraphics();
+
+	//! \brief Draws all sprites to the screen
+	void _DrawSprites();
+
+	//! \brief Draws the bottom battle menu, stamina bar, and other GUI objects
+	void _DrawGUI();
+}; // class SequenceSupervisor
+
 } // namespace private_battle
 
 /** ****************************************************************************
@@ -60,6 +120,7 @@ namespace private_battle {
 *** to save/restore additional state information about timers on a pause event.
 *** ***************************************************************************/
 class BattleMode : public hoa_mode_manager::GameMode {
+	friend class private_battle::SequenceSupervisor;
 	friend class private_battle::FinishWindow;
 
 public:
@@ -221,9 +282,12 @@ public:
 private:
 	//! \brief A static pointer to the currently active instance of battle mode
 	static BattleMode* _current_instance;
-
+	
 	//! \brief Retains the current state of the battle
 	private_battle::BATTLE_STATE _state;
+
+	//! \brief Manages update and draw calls during special battle sequences
+	private_battle::SequenceSupervisor _sequence_supervisor;
 
 	//! \name Battle Actor Containers
 	//@{
@@ -382,6 +446,16 @@ private:
 
 	//! \brief Initializes all data necessary for the battle to begin
 	void _Initialize();
+
+	/** \brief Manages battle mode when it is in the initial state
+	***
+	*** This function serves to achieve the following parts of the battle initialization sequence:
+	***  - Fade in the background image
+	***  - Bring in both character and enemy sprites from off screen
+	***  - Bring in the stamina bar and icons from off screen
+	***  - Bring in the bottom battle menu
+	**/
+	void _InitialSequence();
 
 	/** \brief Sets the origin location of all character and enemy actors
 	*** The location of the actors in both parties is dependent upon the number and physical size of the actor
