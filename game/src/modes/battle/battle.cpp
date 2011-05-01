@@ -52,12 +52,266 @@ bool wait = true;
 // Initialize static class variable
 BattleMode* BattleMode::_current_instance = NULL;
 
+namespace private_battle {
+
+/** \brief Sequence step constants
+***
+*** These are used by the SequenceSupervisor methods to progress through each step in a given sequence.
+*** These constants should not need to be used in any other area of the battle code.
+**/
+//@{
+static const uint32 INIT_STEP_BACKGROUND_FADE  =  1;
+static const uint32 INIT_STEP_SPRITE_MOVEMENT  =  2;
+static const uint32 INIT_STEP_GUI_POSITIONING  =  3;
+//@}
+
+SequenceSupervisor::SequenceSupervisor(BattleMode* current_instance) :
+	_battle(current_instance),
+	_sequence_step(0),
+	_background_fade(1.0f, 1.0f, 1.0f, 0.0f),
+	_gui_position_offset(0.0f)
+{}
+
+
+
+SequenceSupervisor::~SequenceSupervisor()
+{}
+
+
+
+void SequenceSupervisor::Update() {
+	switch (_battle->_state) {
+		case BATTLE_STATE_INITIAL:
+			_UpdateInitialSequence();
+			break;
+		default:
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "battle mode was not in a supported sequence state: " << _battle->_state << endl;
+			_battle->ChangeState(BATTLE_STATE_NORMAL);
+			break;
+	}
+}
+
+
+
+void SequenceSupervisor::Draw() {
+	switch (_battle->_state) {
+		case BATTLE_STATE_INITIAL:
+			_DrawInitialSequence();
+			break;
+		default:
+			break;
+	}
+}
+
+
+
+void SequenceSupervisor::_UpdateInitialSequence() {
+	// Constants that define the time duration of each step in the sequence
+	const uint32 STEP_01_TIME = 1000;
+	const uint32 STEP_02_TIME = 1000;
+	const uint32 STEP_03_TIME = 1000;
+
+	// The furthest position offset we place the GUI objects when bringing them into view
+	const float MAX_GUI_OFFSET = 150.0f;
+	// The furtherst positions character ane enemy sprites are placed when animating them into view
+	const float MAX_CHARACTER_OFFSET = 250.0f;
+	const float MAX_ENEMY_OFFSET = 750.0f;
+	
+	// Step 0: Initial entry, prepare members for the steps to follow
+	if (_sequence_step == 0) {
+		_background_fade.SetAlpha(0.0f);
+		_gui_position_offset = MAX_GUI_OFFSET;
+		_sequence_timer.Initialize(STEP_01_TIME);
+		_sequence_timer.Run();
+
+		for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
+			_battle->_character_actors[i]->SetXLocation(_battle->_character_actors[i]->GetXOrigin() - MAX_CHARACTER_OFFSET);
+			// TODO: Use character's running animation
+			// _battle->_character_actors[i]->ChangeSpriteAnimation("run");
+		}
+
+		for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
+			_battle->_enemy_actors[i]->SetXLocation(_battle->_enemy_actors[i]->GetXOrigin() + MAX_ENEMY_OFFSET);
+		}
+		
+		_sequence_step = INIT_STEP_BACKGROUND_FADE;
+	}
+	// Step 1: Fade in the background graphics
+	else if (_sequence_step == INIT_STEP_BACKGROUND_FADE) {
+		_sequence_timer.Update();
+		_background_fade.SetAlpha(_sequence_timer.PercentComplete());
+		
+		if (_sequence_timer.IsFinished() == true) {
+			_sequence_timer.Initialize(STEP_02_TIME);
+			_sequence_timer.Run();
+			_sequence_step = INIT_STEP_SPRITE_MOVEMENT;
+		}
+	}
+	// Step 2: Move character and enemy sprites from off screen to their positions
+	else if (_sequence_step == INIT_STEP_SPRITE_MOVEMENT) {
+		_sequence_timer.Update();
+
+		float percent_incomplete = 1.0f - _sequence_timer.PercentComplete();
+		for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
+			_battle->_character_actors[i]->SetXLocation(_battle->_character_actors[i]->GetXOrigin() - (MAX_CHARACTER_OFFSET * percent_incomplete));
+		}
+
+		for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
+			_battle->_enemy_actors[i]->SetXLocation(_battle->_enemy_actors[i]->GetXOrigin() + (MAX_ENEMY_OFFSET * percent_incomplete));
+		}
+
+		if (_sequence_timer.IsFinished() == true) {
+			// Done to ensure that all actors are at their correct locations
+			for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
+				_battle->_character_actors[i]->SetXLocation(_battle->_character_actors[i]->GetXOrigin());
+				// TODO: switch character sprite back to idle after running in
+				// _battle->_character_actors[i]->ChangeSpriteAnimation("idle");
+			}
+			for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
+				_battle->_enemy_actors[i]->SetXLocation(_battle->_enemy_actors[i]->GetXOrigin());
+			}
+
+			_sequence_timer.Initialize(STEP_03_TIME);
+			_sequence_timer.Run();
+			_sequence_step = INIT_STEP_GUI_POSITIONING;
+		}
+	}
+	// Step 3: Bring in GUI objects from off screen
+	else if (_sequence_step == INIT_STEP_GUI_POSITIONING) {
+		_sequence_timer.Update();
+		_gui_position_offset = MAX_GUI_OFFSET - (_sequence_timer.PercentComplete() * MAX_GUI_OFFSET);
+
+		// Finished with the final step, reset the sequence step counter and begin normal battle state
+		if (_sequence_timer.IsFinished() == true) {
+			_sequence_step = 0;
+			BattleMode::CurrentInstance()->ChangeState(BATTLE_STATE_NORMAL);
+		}
+	}
+	// If we're in at an unknown step, reset the counter and resume normal battle operation
+	else {
+		IF_PRINT_DEBUG(BATTLE_DEBUG) << "invalid sequence step counter: " << _sequence_step << endl;
+		_sequence_step = 0;
+		BattleMode::CurrentInstance()->ChangeState(BATTLE_STATE_NORMAL);
+	}
+}
+
+
+
+void SequenceSupervisor::_DrawInitialSequence() {
+	if (_sequence_step >= INIT_STEP_BACKGROUND_FADE) {
+		_DrawBackgroundGraphics();
+	}
+	if (_sequence_step >= INIT_STEP_SPRITE_MOVEMENT) {
+		_DrawSprites();
+	}
+	if (_sequence_step >= INIT_STEP_GUI_POSITIONING) {
+		_DrawGUI();
+	}
+}
+
+
+
+void SequenceSupervisor::_DrawBackgroundGraphics() {
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	VideoManager->Move(0.0f, 0.0f);
+	_battle->_battle_background.Draw(_background_fade);
+
+
+	// TODO: Draw other background objects and animations
+}
+
+
+
+void SequenceSupervisor::_DrawSprites() {
+	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
+	// TODO: For character sprites, draw their running animations when they come in from off screen
+
+	// Draw all character sprites
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
+		_battle->_character_actors[i]->DrawSprite();
+	}
+
+	// Draw all enemy sprites
+	for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
+		_battle->_enemy_actors[i]->DrawSprite();
+	}
+}
+
+
+
+void SequenceSupervisor::_DrawGUI() {
+	// ----- (1): Draw all images that compose the bottom menu area
+	// Draw the static image for the lower menu
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	VideoManager->Move(0.0f, 0.0f -  _gui_position_offset);
+	_battle->_bottom_menu_image.Draw();
+
+	// Draw the swap icon
+	VideoManager->MoveRelative(6.0f, 16.0f);
+	_battle->_swap_icon.Draw(Color::gray);
+
+	// TODO: Decide if we want to draw this information during initial sequence or not
+// 	// Draw the status information of all character actors
+// 	for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
+// 		_battle->_character_actors[i]->DrawStatus(i);
+// 	}
+
+	// ----- (2): Determine the draw order of stamina icons for all living actors
+	// A container to hold all actors that should have their stamina icons drawn
+	vector<BattleActor*> live_actors;
+
+	for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
+		if (_battle->_character_actors[i]->IsAlive())
+			live_actors.push_back(_battle->_character_actors[i]);
+	}
+	for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
+		if (_battle->_enemy_actors[i]->IsAlive())
+			live_actors.push_back(_battle->_enemy_actors[i]);
+	}
+
+	//std::vector<bool> selected(live_actors.size(), false);
+
+	vector<float> draw_positions(live_actors.size(), 0.0f);
+	for (uint32 i = 0; i < live_actors.size(); i++) {
+		switch (live_actors[i]->GetState()) {
+			case ACTOR_STATE_IDLE:
+				draw_positions[i] = STAMINA_LOCATION_BOTTOM + (STAMINA_LOCATION_COMMAND - STAMINA_LOCATION_BOTTOM) *
+					live_actors[i]->GetStateTimer().PercentComplete();
+				break;
+			default:
+				// All other cases are invalid. Instead of printing a debug message that will get echoed every
+				// loop, draw the icon at a clearly invalid position well away from the stamina bar
+				draw_positions[i] = STAMINA_LOCATION_BOTTOM - 50.0f;
+				break;
+		}
+	}
+
+	// TODO: sort the draw positions container and correspond that to live_actors
+// 	sort(draw_positions.begin(), draw_positions.end());
+
+	// ----- (3): Draw the stamina bar
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->Move(1010.0f + _gui_position_offset, 128.0f);
+	_battle->_stamina_meter.Draw();
+
+	// ----- (4): Draw all stamina icons in order along with the selector graphic
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	for (uint32 i = 0; i < live_actors.size(); i++) {
+		VideoManager->Move(1000.0f + _gui_position_offset, draw_positions[i]);
+		live_actors[i]->GetStaminaIcon().Draw();
+	}
+} // void BattleMode::_DrawStaminaBar()
+
+} // namespace private_battle
+
 ////////////////////////////////////////////////////////////////////////////////
 // BattleMode class -- primary methods
 ////////////////////////////////////////////////////////////////////////////////
 
 BattleMode::BattleMode() :
 	_state(BATTLE_STATE_INVALID),
+	_sequence_supervisor(this),
 	_command_supervisor(new CommandSupervisor()),
 	_finish_window(new FinishWindow()),
 	_current_number_swaps(0),
@@ -184,6 +438,10 @@ void BattleMode::Update() {
 		return;
 	}
 
+	if (_state == BATTLE_STATE_INITIAL) {
+		_sequence_supervisor.Update();
+	}
+
 	if (_state == BATTLE_STATE_COMMAND) {
 		_command_supervisor->Update();
 		return; // This return effectively pauses the state of the actors while the player selects another command
@@ -229,6 +487,11 @@ void BattleMode::Draw() {
 		else {
 //			VideoManager->EnableSceneLighting(Color(1.0f, 0.0f, 0.0f, 1.0f)); // Red color for defeat
 		}
+	}
+
+	if (_state == BATTLE_STATE_INITIAL) {
+		_sequence_supervisor.Draw();
+		return;
 	}
 
 	_DrawBackgroundGraphics();
@@ -328,14 +591,12 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 	_state = new_state;
 	switch (_state) {
 		case BATTLE_STATE_INITIAL:
-			// TODO: recursive call below is temporary. This state should cause sprites to run in from off screen.
-			ChangeState(BATTLE_STATE_NORMAL);
 			break;
 		case BATTLE_STATE_NORMAL:
 			break;
 		case BATTLE_STATE_COMMAND:
 			if (_command_queue.empty() == true) {
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "command queue was empty when trying to change to command state" << endl;
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "command queue was empty after changing battle state to the command state" << endl;
 				_state = BATTLE_STATE_NORMAL;
 			}
 			else {
@@ -732,12 +993,12 @@ void BattleMode::_DrawBackgroundGraphics() {
 
 
 void BattleMode::_DrawSprites() {
-	// Boolenas used to determine whether or not the actor selector and attack point selector graphics should be drawn
+	// Booleans used to determine whether or not the actor selector and attack point selector graphics should be drawn
 	bool draw_actor_selection = false;
 	bool draw_point_selection = false;
 
 	BattleTarget target = _command_supervisor->GetSelectedTarget(); // The target that the player has selected
-	BattleActor* actor_target = target.GetActor(); // A pointer to an actor being targetted (may initially be NULL if target is party)
+	BattleActor* actor_target = target.GetActor(); // A pointer to an actor being targetted (value may be NULL if target is party)
 
 	// Determine if selector graphics should be drawn
 	if ((_state == BATTLE_STATE_COMMAND) && (_command_supervisor->GetState() == COMMAND_STATE_TARGET)) {
@@ -748,23 +1009,27 @@ void BattleMode::_DrawSprites() {
 
 	// Draw the actor selector graphic
 	if (draw_actor_selection == true) {
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, VIDEO_BLEND, 0);
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 		if (actor_target != NULL) {
-			actor_target = target.GetActor();
 			VideoManager->Move(actor_target->GetXLocation(), actor_target->GetYLocation());
-			if (actor_target->IsEnemy() == false)
-				VideoManager->MoveRelative(-32.0f, 0.0f); // TEMP: this should move half the distance of the actor's sprite, not 32.0f
-			else
-				VideoManager->MoveRelative(32.0f, 0.0f);
+			VideoManager->MoveRelative(0.0f, -20.0f);
 			_actor_selection_image.Draw();
 		}
 		else if (IsTargetParty(target.GetType()) == true) {
+			for (uint32 i = 0; i < target.GetParty()->size(); i++) {
+				// actor_target = TODO: need a method to get actor
+				VideoManager->Move(actor_target->GetXLocation(), actor_target->GetYLocation());
+				VideoManager->MoveRelative(0.0f, -20.0f);
+				_actor_selection_image.Draw();
+			}
+			actor_target = NULL;
 			// TODO: add support for drawing graphic under multiple actors if the target is a party
 		}
 		// Else this target is invalid so don't draw anything
 	}
 
 	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
+	// Right now they are drawn randomly, which would look bad/inconsistent if the sprites overlapped during their actions
 
 	// Draw all character sprites
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);

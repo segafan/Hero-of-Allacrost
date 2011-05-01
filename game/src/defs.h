@@ -216,6 +216,8 @@ namespace hoa_battle {
 	class BattleEvent;
 
 	namespace private_battle {
+		class SequenceSupervisor;
+		
 		class BattleActor;
 		class BattleCharacter;
 		class BattleEnemy;

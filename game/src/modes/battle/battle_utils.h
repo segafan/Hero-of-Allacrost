@@ -70,7 +70,7 @@ const float STAMINA_LOCATION_TOP = STAMINA_LOCATION_BOTTOM + 508.0f;
 const uint32 INVALID_BATTLE_ACTOR_INDEX = 999;
 
 //! \brief This is the idle state wait time for the fastest actor, used to set idle state timers for all other actors
-const uint32 MIN_IDLE_WAIT_TIME = 10000;
+const uint32 MIN_IDLE_WAIT_TIME = 7500;
 
 //! \brief Warm up time for using items (try to keep short, should be constant regardless of item used)
 const uint32 ITEM_WARM_UP_TIME = 1000;
@@ -462,7 +462,7 @@ public:
 	bool SelectNextPoint(BattleActor* user, bool direction = true, bool valid_criteria = true);
 
 	/** \brief Changes the target actor to reference the next available actor
-	*** \param user A pointer tot he actor which is using this target
+	*** \param user A pointer to the actor which is using this target
 	*** \param direction Tells the method to look either forward or backward (true/false) for the next target
 	*** \param valid_criteria When true the method will only select actors determined to be valid by IsValid()
 	*** \return True if the _actor member was changed, false if it was not
