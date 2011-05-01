@@ -171,8 +171,13 @@ public:
 	**/
 	void ChangeSkillPoints(int32 amount);
 
-	//! \brief Updates the state of the actor
-	virtual void Update();
+	/** \brief Updates the state of the actor
+	*** \param animations_only If true, animations will be updated but actor state will not. Default value is false
+	***
+	*** The optional boolean parameter is primarily used by battle sequences which desire to update the sprite graphics
+	*** but not any battle state.
+	**/
+	virtual void Update(bool animation_only = false);
 
 	//! \brief Draws the actor's current sprite animation frame
 	virtual void DrawSprite() = 0;
@@ -358,8 +363,8 @@ public:
 
 	void ChangeSpriteAnimation(const std::string& alias);
 
-	//! \brief Updates the state of the character. Must be called every frame!
-	void Update();
+	//! \brief Updates the state of the character. Must be called every frame loop.
+	void Update(bool animation_only = false);
 
 	//! \brief Draws the character's current sprite animation frame
 	void DrawSprite();
@@ -425,7 +430,7 @@ public:
 	void ChangeSpriteAnimation(const std::string& alias)
 		{ return; }
 
-	void Update();
+	void Update(bool animation_only = false);
 
 	//! \brief Draws the damage blended enemy sprite image on to the battle field
 	void DrawSprite();
