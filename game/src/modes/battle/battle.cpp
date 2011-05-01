@@ -89,6 +89,14 @@ void SequenceSupervisor::Update() {
 			_battle->ChangeState(BATTLE_STATE_NORMAL);
 			break;
 	}
+
+	// Update the animations of all actors
+	for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
+		_battle->_character_actors[i]->Update(true);
+	}
+	for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
+		_battle->_enemy_actors[i]->Update(true);
+	}
 }
 
 
@@ -440,6 +448,7 @@ void BattleMode::Update() {
 
 	if (_state == BATTLE_STATE_INITIAL) {
 		_sequence_supervisor.Update();
+		return;
 	}
 
 	if (_state == BATTLE_STATE_COMMAND) {
@@ -882,6 +891,18 @@ void BattleMode::_Initialize() {
 		proportion = static_cast<float>(highest_agility) / static_cast<float>(_enemy_actors[i]->GetAgility());
 		_enemy_actors[i]->SetIdleStateTime(static_cast<uint32>(MIN_IDLE_WAIT_TIME * proportion));
 		_enemy_actors[i]->ChangeState(ACTOR_STATE_IDLE);
+	}
+
+	// (6): Randomize each actor's initial idle state progress to be somewhere in the lower half of their total
+	// idle state time. This is performed so that every battle doesn't start will all stamina icons piled on top
+	// of one another at the bottom of the stamina bar
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		uint32 max_init_timer = _character_actors[i]->GetIdleStateTime() / 2;
+		_character_actors[i]->GetStateTimer().Update(RandomBoundedInteger(0, max_init_timer));
+	}
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		uint32 max_init_timer = _enemy_actors[i]->GetIdleStateTime() / 2;
+		_enemy_actors[i]->GetStateTimer().Update(RandomBoundedInteger(0, max_init_timer));
 	}
 
 	_command_supervisor->ConstructCharacterSettings();

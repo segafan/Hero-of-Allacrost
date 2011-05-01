@@ -218,23 +218,19 @@ void BattleActor::ChangeSkillPoints(int32 amount) {
 
 
 
-void BattleActor::Update() {
-	if (_state_paused == false)
+void BattleActor::Update(bool animation_only) {
+	if ((_state_paused == false) && (animation_only == false))
 		_state_timer.Update();
 
 	_effects_supervisor->Update();
 	_indicator_supervisor->Update();
 
-	if (_state == ACTOR_STATE_IDLE) {
-		if (_state_timer.IsFinished() == true)
+	if (_state_timer.IsFinished() == true) {
+		if (_state == ACTOR_STATE_IDLE)
 			ChangeState(ACTOR_STATE_COMMAND);
-	}
-	else if (_state == ACTOR_STATE_WARM_UP) {
-		if (_state_timer.IsFinished() == true)
+		else if (_state == ACTOR_STATE_WARM_UP)
 			ChangeState(ACTOR_STATE_READY);
-	}
-	else if (_state == ACTOR_STATE_COOL_DOWN) {
-		if (_state_timer.IsFinished() == true)
+		else if (_state == ACTOR_STATE_COOL_DOWN)
 			ChangeState(ACTOR_STATE_IDLE);
 	}
 }
@@ -356,8 +352,8 @@ void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
 
 
 
-void BattleCharacter::Update() {
-	BattleActor::Update();
+void BattleCharacter::Update(bool animation_only) {
+	BattleActor::Update(animation_only);
 
 	if (_state_paused == false) {
 		_animation_timer.Update();
@@ -365,6 +361,11 @@ void BattleCharacter::Update() {
 		// Update the active sprite animation
 		if (IsAlive() == true) {
 			_global_character->RetrieveBattleAnimation(_sprite_animation_alias)->Update();
+		}
+
+		// Do no further update action if we are only supposed to update animations
+		if (animation_only == true) {
+			return;
 		}
 
 		// If the character is executing their action,
@@ -577,8 +578,13 @@ void BattleEnemy::ChangeState(ACTOR_STATE new_state) {
 
 
 
-void BattleEnemy::Update() {
-	BattleActor::Update();
+void BattleEnemy::Update(bool animation_only) {
+	BattleActor::Update(animation_only);
+
+	// Do nothing in this function if only animations are to be updated
+	if (animation_only == true) {
+		return;
+	}
 
 	if (_state == ACTOR_STATE_ACTING) {
 		if (_execution_finished == false)
