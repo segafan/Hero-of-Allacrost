@@ -722,6 +722,19 @@ bool BattleTarget::SelectNextActor(BattleActor* user, bool direction, bool valid
 	}
 } // bool BattleTarget::SelectNextActor(BattleActor* user, bool direction, bool valid_criteria)
 
+
+BattleActor* BattleTarget::GetPartyActor(uint32 index) {
+	if (_party == NULL) {
+		return NULL;
+	}
+
+	if (index >= _party->size()) {
+		return NULL;
+	}
+
+	return (*_party)[index];
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // BattleItem class
 ////////////////////////////////////////////////////////////////////////////////

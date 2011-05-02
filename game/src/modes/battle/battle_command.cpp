@@ -1006,7 +1006,10 @@ void CommandSupervisor::_CreateTargetText() {
 			MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(actor->GetMaxSkillPoints())) + MakeUnicodeString("\n");
 	}
 	else if (IsTargetParty(_selected_target.GetType()) == true) {
-		target_text = MakeUnicodeString("All");
+		if (_selected_target.GetType() == GLOBAL_TARGET_ALL_ALLIES)
+			target_text = UTranslate("All Allies");
+		else
+			target_text = UTranslate("All Enemies");
 	}
 	else {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << _selected_target.GetType() << endl;
@@ -1039,26 +1042,6 @@ void CommandSupervisor::_CreateInformationText() {
 	}
 
 	_window_text.SetText(info_text);
-
-	
-// 	_window_header.SetText("Action Information");
-// 
-// 	ustring info_text;
-// 	if (_IsSkillCategorySelected() == true) {
-// 		info_text = UTranslate("Name: ") + _selected_skill->GetName() + MakeUnicodeString("\n");
-// 		info_text += UTranslate("Required SP: " + NumberToString(_selected_skill->GetSPRequired())) + MakeUnicodeString("\n");
-// 		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_skill->GetTargetType()));
-// 	}
-// 	else if (_IsItemCategorySelected() == true) {
-// 		info_text = UTranslate("Name: ") + _selected_item->GetItem().GetName() + MakeUnicodeString("\n");
-// 		info_text += UTranslate("Current Quantity: " + NumberToString(_selected_item->GetCount())) + MakeUnicodeString("\n");
-// 		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_item->GetItem().GetTargetType()));
-// 	}
-// 	else {
-// 		IF_PRINT_WARNING(BATTLE_DEBUG) << "unknown category selected: " << _category_list.GetSelection() << endl;
-// 	}
-// 
-// 	_window_text.SetText(info_text);
 }
 
 
