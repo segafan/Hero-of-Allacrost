@@ -440,7 +440,7 @@ void BindModesToLua()
 			.def("GetType", &BattleTarget::GetType)
 			.def("GetPoint", &BattleTarget::GetPoint)
 			.def("GetActor", &BattleTarget::GetActor)
-			.def("GetParty", &BattleTarget::GetParty)
+			.def("GetPartyActor", &BattleTarget::GetPartyActor)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")

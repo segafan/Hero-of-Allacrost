@@ -74,9 +74,16 @@ skills[20002] = {
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_ALLIES,
    
 	BattleExecute = function(user, target)
-		target_actor = target:GetActor();
-		target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_RAISE, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
-		-- AudioManager:PlaySound("snd/shout.wav");
+		local index = 0;
+		while true do
+			target_actor = target:GetPartyActor(index);
+			if (target_actor == nil) then
+				break;
+			end
+
+			target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_RAISE, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
+			index = index + 1;
+		end
 	end,
 }
 

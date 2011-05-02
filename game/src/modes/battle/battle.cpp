@@ -115,9 +115,9 @@ void SequenceSupervisor::Draw() {
 
 void SequenceSupervisor::_UpdateInitialSequence() {
 	// Constants that define the time duration of each step in the sequence
-	const uint32 STEP_01_TIME = 1000;
-	const uint32 STEP_02_TIME = 1000;
-	const uint32 STEP_03_TIME = 1000;
+	const uint32 STEP_01_TIME = 500;
+	const uint32 STEP_02_TIME = 500;
+	const uint32 STEP_03_TIME = 500;
 
 	// The furthest position offset we place the GUI objects when bringing them into view
 	const float MAX_GUI_OFFSET = 150.0f;
@@ -1037,9 +1037,9 @@ void BattleMode::_DrawSprites() {
 			_actor_selection_image.Draw();
 		}
 		else if (IsTargetParty(target.GetType()) == true) {
-			for (uint32 i = 0; i < target.GetParty()->size(); i++) {
-				// actor_target = TODO: need a method to get actor
-				VideoManager->Move(actor_target->GetXLocation(), actor_target->GetYLocation());
+			deque<BattleActor*>& party_target = *(target.GetParty());
+			for (uint32 i = 0; i < party_target.size(); i++) {
+				VideoManager->Move(party_target[i]->GetXLocation(),  party_target[i]->GetYLocation());
 				VideoManager->MoveRelative(0.0f, -20.0f);
 				_actor_selection_image.Draw();
 			}

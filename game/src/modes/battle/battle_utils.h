@@ -471,6 +471,17 @@ public:
 	**/
 	bool SelectNextActor(BattleActor* user, bool direction = true, bool valid_criteria = true);
 
+	/** \brief Retrieves a pointer to the actor of a party at the specified index
+	*** \param index The location in the party container of the actor to retrieves
+	*** \return NULL if the target is not a party or the index is invalid. Otherwise a pointer to the actor specified
+	***
+	*** The primary purpose for the existence of this function is for Lua to be able to access all the actors within a
+	*** party target. The GetParty() method can not be used by Lua as Lua does not understand that container format
+	*** (std::deque<BattleActor*>). To retrieve each actor, Lua code starts at index 0 and makes repeated calls to this
+	*** function while incrementing the index by 1 until it returns a NULL value.
+	**/
+	BattleActor* GetPartyActor(uint32 index);
+	
 	//! \name Class member accessor methods
 	//@{
 	hoa_global::GLOBAL_TARGET GetType() const
