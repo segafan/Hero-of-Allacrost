@@ -445,6 +445,9 @@ protected:
 	//! \brief A pointer to the global enemy object which the battle enemy represents
 	hoa_global::GlobalEnemy* _global_enemy;
 
+	//! \brief An unsorted vector containing all the skills that the enemy may use
+	std::vector<hoa_global::GlobalSkill*> _enemy_skills;
+
 	/** \brief Decides what action that the enemy should execute and the target
 	*** \todo This function is extremely rudimentary right now. Later, it should be given a more complete
 	*** AI decision making algorithm
