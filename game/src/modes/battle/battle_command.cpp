@@ -500,7 +500,7 @@ void SkillCommand::UpdateList() {
 
 
 void SkillCommand::UpdateInformation() {
-	// TODO
+
 }
 
 
@@ -511,12 +511,6 @@ void SkillCommand::DrawList() {
 
 	_skill_header.Draw();
 	_skill_list->Draw();
-}
-
-
-
-void SkillCommand::DrawInformation() {
-	// TODO
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -830,8 +824,9 @@ void CommandSupervisor::_UpdateAction() {
 	}
 
 	if (_IsSkillCategorySelected() == true) {
+		_selected_skill = _skill_command.GetSelectedSkill();
+
 		if (InputManager->ConfirmPress()) {
-			_selected_skill = _skill_command.GetSelectedSkill();
 			if (_selected_skill != NULL) {
 				_ChangeState(COMMAND_STATE_TARGET);
 			}
@@ -841,7 +836,7 @@ void CommandSupervisor::_UpdateAction() {
 		}
 
 		else if (InputManager->MenuPress()) {
-			// TODO
+			_ChangeState(COMMAND_STATE_INFORMATION);
 		}
 
 		else {
@@ -849,8 +844,9 @@ void CommandSupervisor::_UpdateAction() {
 		}
 	}
 	else if (_IsItemCategorySelected() == true) {
+		_selected_item = _item_command.GetSelectedItem();
+
 		if (InputManager->ConfirmPress()) {
-			_selected_item = _item_command.GetSelectedItem();
 			if (_selected_item != NULL) {
 				_ChangeState(COMMAND_STATE_TARGET);
 			}
@@ -860,7 +856,7 @@ void CommandSupervisor::_UpdateAction() {
 		}
 
 		else if (InputManager->MenuPress()) {
-			// TODO
+			_ChangeState(COMMAND_STATE_INFORMATION);
 		}
 
 		else {
@@ -903,8 +899,31 @@ void CommandSupervisor::_UpdateTarget() {
 
 
 void CommandSupervisor::_UpdateInformation() {
-	if (InputManager->ConfirmPress() || InputManager->CancelPress())
+	if (InputManager->CancelPress() || InputManager->MenuPress()) {
 		_state = COMMAND_STATE_ACTION;
+	}
+	
+	else if (InputManager->ConfirmPress()) { 
+		_ChangeState(COMMAND_STATE_TARGET);
+	}
+
+	// Change selected skill/item and update the information text
+	else if (InputManager->UpPress() || InputManager->DownPress()) {
+		if (_IsSkillCategorySelected() == true) {
+			_skill_command.UpdateList();
+			_selected_skill = _skill_command.GetSelectedSkill();
+		}
+		else if (_IsItemCategorySelected() == true) {
+			_item_command.UpdateList();
+			_selected_item = _item_command.GetSelectedItem();
+		}
+
+		_CreateInformationText();
+	}
+
+	else if (InputManager->RightPress() || InputManager->LeftPress()) {
+		// TODO: toggle between description text and detailed stats
+	}
 }
 
 
@@ -942,16 +961,20 @@ void CommandSupervisor::_DrawTarget() {
 	_window_header.Draw();
 	VideoManager->Move(560.0f, 85.0f);
 	_window_text.Draw();
+
+	// TODO: draw relevant status/elemental icons
 }
 
 
 
 void CommandSupervisor::_DrawInformation() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->Move(580.0f, 100.0f);
+	VideoManager->Move(560.0f, 110.0f);
 	_window_header.Draw();
-	VideoManager->Move(600.0f, 80.0f);
+	VideoManager->Move(560.0f, 85.0f);
 	_window_text.Draw();
+
+	// TODO: draw relevant status/elemental icons
 }
 
 
@@ -995,24 +1018,47 @@ void CommandSupervisor::_CreateTargetText() {
 
 
 void CommandSupervisor::_CreateInformationText() {
-	_window_header.SetText("Action Information");
-
 	ustring info_text;
+	
 	if (_IsSkillCategorySelected() == true) {
-		info_text = UTranslate("Name: ") + _selected_skill->GetName() + MakeUnicodeString("\n");
-		info_text += UTranslate("Required SP: " + NumberToString(_selected_skill->GetSPRequired())) + MakeUnicodeString("\n");
-		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_skill->GetTargetType()));
+		_window_header.SetText(_selected_skill->GetName());
+		
+		info_text = UTranslate("Skill Points: " + NumberToString(_selected_skill->GetSPRequired())) + MakeUnicodeString("\n");
+		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_skill->GetTargetType())) + MakeUnicodeString("\n");
+		info_text += UTranslate("Prep Time: ") + MakeUnicodeString(NumberToString(_selected_skill->GetWarmupTime())) + MakeUnicodeString("\n");
+		info_text += UTranslate("Cool Time: ") + MakeUnicodeString(NumberToString(_selected_skill->GetCooldownTime())) + MakeUnicodeString("\n");
 	}
 	else if (_IsItemCategorySelected() == true) {
-		info_text = UTranslate("Name: ") + _selected_item->GetItem().GetName() + MakeUnicodeString("\n");
-		info_text += UTranslate("Current Quantity: " + NumberToString(_selected_item->GetCount())) + MakeUnicodeString("\n");
-		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_item->GetItem().GetTargetType()));
+		_window_header.SetText(_selected_item->GetItem().GetName());
+
+		info_text = UTranslate("Quantity: " + NumberToString(_selected_item->GetCount())) + MakeUnicodeString("\n");
+		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_item->GetItem().GetTargetType())) + MakeUnicodeString("\n");
 	}
 	else {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "unknown category selected: " << _category_list.GetSelection() << endl;
 	}
 
 	_window_text.SetText(info_text);
+
+	
+// 	_window_header.SetText("Action Information");
+// 
+// 	ustring info_text;
+// 	if (_IsSkillCategorySelected() == true) {
+// 		info_text = UTranslate("Name: ") + _selected_skill->GetName() + MakeUnicodeString("\n");
+// 		info_text += UTranslate("Required SP: " + NumberToString(_selected_skill->GetSPRequired())) + MakeUnicodeString("\n");
+// 		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_skill->GetTargetType()));
+// 	}
+// 	else if (_IsItemCategorySelected() == true) {
+// 		info_text = UTranslate("Name: ") + _selected_item->GetItem().GetName() + MakeUnicodeString("\n");
+// 		info_text += UTranslate("Current Quantity: " + NumberToString(_selected_item->GetCount())) + MakeUnicodeString("\n");
+// 		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_item->GetItem().GetTargetType()));
+// 	}
+// 	else {
+// 		IF_PRINT_WARNING(BATTLE_DEBUG) << "unknown category selected: " << _category_list.GetSelection() << endl;
+// 	}
+// 
+// 	_window_text.SetText(info_text);
 }
 
 

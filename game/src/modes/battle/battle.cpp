@@ -231,7 +231,7 @@ void SequenceSupervisor::_DrawBackgroundGraphics() {
 
 
 void SequenceSupervisor::_DrawSprites() {
-	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
+	// TODO: Draw sprites in order based on their x and y coordinates on the screen (top to bottom, then left to right)
 	// TODO: For character sprites, draw their running animations when they come in from off screen
 
 	// Draw all character sprites
