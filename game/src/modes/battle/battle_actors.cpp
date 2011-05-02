@@ -535,6 +535,10 @@ BattleEnemy::BattleEnemy(GlobalEnemy* enemy) :
 {
 	if (_stamina_icon.Load("img/icons/actors/enemies/" + _global_actor->GetFilename() + ".png", 45, 45) == false)
 		PRINT_ERROR << "failed to load enemy stamina icon: " << _global_actor->GetFilename() << endl;
+
+	for (map<uint32, GlobalSkill*>::const_iterator i = (_global_enemy->GetSkills()).begin(); i != (_global_enemy->GetSkills()).end(); i++) {
+		_enemy_skills.push_back(i->second);
+	}
 }
 
 
@@ -658,7 +662,7 @@ void BattleEnemy::_DecideAction() {
 	// TODO: this method is mostly temporary and makes no intelligent decisions about what action to
 	// take or on what target to select. Currently this method does the following.
 	//
-	// (1): select the first skill that the enemy has available
+	// (1): select a random skill from the list that the enemy can execute
 	// (2): select a random character that is not in the dead state to target
 	// (3): select a random attack point on the selected character target
 	//
@@ -666,8 +670,11 @@ void BattleEnemy::_DecideAction() {
 	// will work. Obviously these needs will be addressed eventually.
 
 	// TEMP: select a random skill to use
-	GlobalSkill* skill = NULL;
-	skill = _global_enemy->GetSkills().begin()->second;
+	uint32 skill_index = 0;
+	if (_enemy_skills.size() > 1) {
+		skill_index = RandomBoundedInteger(0, _enemy_skills.size() - 1);
+	}
+	GlobalSkill* skill = _enemy_skills[skill_index];
 
 	// TEMP: select a random living character in the party for the target
 	BattleTarget target;
@@ -690,7 +697,7 @@ void BattleEnemy::_DecideAction() {
 	uint32 point_target = 0;
 	BattleActor* actor_target = NULL;
 
-	// TEMP: select a random alive character
+	// TEMP: select a random living character
 	if (alive_characters.size() == 1)
 		actor_target = alive_characters[0];
 	else
