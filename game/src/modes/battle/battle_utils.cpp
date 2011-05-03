@@ -79,10 +79,10 @@ bool CalculateStandardEvasionAdder(BattleTarget* target, float add_eva) {
 	else if (evasion >= 100.0f)
 		return true;
 
-	if (RandomFloat(0.0f, 100.0f) > evasion)
-		return false;
-	else
+	if (RandomFloat(0.0f, 100.0f) <= evasion)
 		return true;
+	else
+		return false;
 } // bool CalculateStandardEvasionAdder(BattleTarget* target, float add_evade)
 
 

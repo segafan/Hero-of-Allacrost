@@ -365,10 +365,12 @@ int main(int argc, char *argv[]) {
 			path.append ("/Resources/");
 			chdir(path.c_str());
 		#elif (defined(__linux__) || defined(__FreeBSD__)) && !defined(RELEASE_BUILD)
-			// Look for data files in DATADIR only if they are not available in the
-			// current directory.
-			if (ifstream("dat/config/settings.lua") == NULL)
-				chdir(DATADIR);
+			// Look for data files in DATADIR only if they are not available in the current directory.
+			if (ifstream("dat/config/settings.lua") == NULL) {
+				if (chdir(DATADIR) != 0) {
+					throw Exception("ERROR: failed to change directory to data location", __FILE__, __LINE__, __FUNCTION__);
+				}
+			}
 		#endif
 
 		// Initialize the random number generator (note: 'unsigned int' is a required usage in this case)

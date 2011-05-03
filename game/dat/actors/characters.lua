@@ -38,7 +38,8 @@ characters[CLAUDIUS] = {
 			y_position = 54,
 			fortitude_modifier = -0.20,
 			protection_modifier = 0.25,
-			evade_modifier = 0.50
+			evade_modifier = 0.50,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_LOWER] = 10.0 }
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
 			name = hoa_system.Translate("Torso"),
@@ -54,7 +55,8 @@ characters[CLAUDIUS] = {
 			y_position = 54,
 			fortitude_modifier = 0.10,
 			protection_modifier = 0.00,
-			evade_modifier = 0.10
+			evade_modifier = 0.10,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_LOWER] = 10.0 }
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
 			name = hoa_system.Translate("Legs"),
@@ -62,7 +64,8 @@ characters[CLAUDIUS] = {
 			y_position = 34,
 			fortitude_modifier = 0.20,
 			protection_modifier = 0.20,
-			evade_modifier = 0.05
+			evade_modifier = 0.05,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = 10.0 }
 		}
 	},
 
@@ -123,7 +126,8 @@ characters[MARK] = {
 			y_position = 54,
 			fortitude_modifier = -0.20,
 			protection_modifier = 0.25,
-			evade_modifier = 0.50
+			evade_modifier = 0.50,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_LOWER] = 10.0 }
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
 			name = hoa_system.Translate("Torso"),
@@ -139,7 +143,8 @@ characters[MARK] = {
 			y_position = 54,
 			fortitude_modifier = 0.10,
 			protection_modifier = 0.00,
-			evade_modifier = 0.10
+			evade_modifier = 0.10,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_LOWER] = 10.0 }
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
 			name = hoa_system.Translate("Legs"),
@@ -147,7 +152,8 @@ characters[MARK] = {
 			y_position = 34,
 			fortitude_modifier = 0.20,
 			protection_modifier = 0.20,
-			evade_modifier = 0.05
+			evade_modifier = 0.05,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = 10.0 }
 		}
 	},
 
@@ -198,7 +204,8 @@ characters[DESTER] = {
 			y_position = 54,
 			fortitude_modifier = -0.20,
 			protection_modifier = 0.25,
-			evade_modifier = 0.50
+			evade_modifier = 0.50,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_LOWER] = 10.0 }
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
 			name = hoa_system.Translate("Torso"),
@@ -214,7 +221,8 @@ characters[DESTER] = {
 			y_position = 54,
 			fortitude_modifier = 0.10,
 			protection_modifier = 0.00,
-			evade_modifier = 0.10
+			evade_modifier = 0.10,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_LOWER] = 10.0 }
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
 			name = hoa_system.Translate("Legs"),
@@ -222,7 +230,8 @@ characters[DESTER] = {
 			y_position = 34,
 			fortitude_modifier = 0.20,
 			protection_modifier = 0.20,
-			evade_modifier = 0.05
+			evade_modifier = 0.05,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = 10.0 }
 		}
 	},
 
@@ -273,7 +282,8 @@ characters[LUKAR] = {
 			y_position = 54,
 			fortitude_modifier = -0.20,
 			protection_modifier = 0.25,
-			evade_modifier = 0.50
+			evade_modifier = 0.50,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_LOWER] = 10.0 }
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
 			name = hoa_system.Translate("Torso"),
@@ -289,7 +299,8 @@ characters[LUKAR] = {
 			y_position = 54,
 			fortitude_modifier = 0.10,
 			protection_modifier = 0.00,
-			evade_modifier = 0.10
+			evade_modifier = 0.10,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_LOWER] = 10.0 }
 		},
 		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
 			name = hoa_system.Translate("Legs"),
@@ -297,7 +308,8 @@ characters[LUKAR] = {
 			y_position = 34,
 			fortitude_modifier = 0.20,
 			protection_modifier = 0.20,
-			evade_modifier = 0.05
+			evade_modifier = 0.05,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = 10.0 }
 		}
 	},
 

@@ -186,7 +186,8 @@ enemies[3] = {
 			y_position = 38,
 			fortitude_modifier = 0.0,
 			protection_modifier = 0.0,
-			evade_modifier = 0.0
+			evade_modifier = 0.0,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_LOWER] = 10.0 }
 		}
 	},
 
@@ -248,7 +249,8 @@ enemies[4] = {
 			y_position = 56,
 			fortitude_modifier = 0.0,
 			protection_modifier = 0.0,
-			evade_modifier = 0.0
+			evade_modifier = 0.0,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = 20.0 }
 		}
 	},
 
@@ -310,7 +312,8 @@ enemies[5] = {
 			y_position = 14,
 			fortitude_modifier = 0.0,
 			protection_modifier = 0.0,
-			evade_modifier = 0.0
+			evade_modifier = 0.0,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = 10.0 }
 		}
 	},
 
