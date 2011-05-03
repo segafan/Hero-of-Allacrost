@@ -57,6 +57,21 @@ bool GlobalAttackPoint::LoadData(ReadScriptDescriptor& script) {
 	_protection_modifier = script.ReadFloat("protection_modifier");
 	_evade_modifier = script.ReadFloat("evade_modifier");
 
+	// Status effect data is optional so check if a status_effect table exists first
+	if (script.DoesTableExist("status_effects") == true) {
+		script.OpenTable("status_effects");
+		
+		std::vector<int32> table_keys;
+		script.ReadTableKeys(table_keys);
+		for (uint32 i = 0; i < table_keys.size(); i++) {
+			float probability = script.ReadFloat(table_keys[i]);
+			_status_effects.push_back(make_pair(static_cast<GLOBAL_STATUS>(table_keys[i]), probability));
+		}
+
+		script.CloseTable();
+	}
+
+	
 	if (script.IsErrorDetected()) {
 		if (GLOBAL_DEBUG) {
 			PRINT_WARNING << "one or more errors occurred while reading the save game file - they are listed below" << endl;

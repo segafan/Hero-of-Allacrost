@@ -144,6 +144,12 @@ void BattleActor::ChangeState(ACTOR_STATE new_state) {
 
 
 void BattleActor::RegisterDamage(uint32 amount) {
+	RegisterDamage(amount, NULL);
+}
+
+
+
+void BattleActor::RegisterDamage(uint32 amount, BattleTarget* target) {
 	if (amount == 0) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function called with a zero value argument" << endl;
 		RegisterMiss();
@@ -158,8 +164,25 @@ void BattleActor::RegisterDamage(uint32 amount) {
 	SubtractHitPoints(amount);
 	_indicator_supervisor->AddDamageIndicator(amount);
 
-	if (GetHitPoints() == 0)
+	if (GetHitPoints() == 0) {
 		ChangeState(ACTOR_STATE_DEAD);
+	}
+
+	// If the damage dealt was to a point target type, check for and apply any status effects triggered by this point hit
+	if ((target != NULL) && (IsTargetPoint(target->GetType()) == true)) {
+		GlobalAttackPoint* damaged_point = _global_actor->GetAttackPoint(target->GetPoint());
+		if (damaged_point == NULL) {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "target argument contained an invalid point index: " << target->GetPoint() << endl;
+		}
+		else {
+			vector<pair<GLOBAL_STATUS, float> > status_effects = damaged_point->GetStatusEffects();
+			for (vector<pair<GLOBAL_STATUS, float> >::const_iterator i = status_effects.begin(); i != status_effects.end(); i++) {
+				if (RandomFloat(0.0f, 100.0f) <= i->second) {
+					RegisterStatusChange(i->first, GLOBAL_INTENSITY_POS_LESSER);
+				}
+			}
+		}
+	}
 }
 
 

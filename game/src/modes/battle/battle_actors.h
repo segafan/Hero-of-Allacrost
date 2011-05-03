@@ -115,6 +115,18 @@ public:
 	**/
 	void RegisterDamage(uint32 amount);
 
+	/** \brief Deals damage to the actor by reducing its hit points by a certain amount
+	*** \param amount The number of hit points to decrease on the actor
+	*** \param target A pointer to the target information that was used to inflict this damage
+	***
+	*** In addition to dealing damage, this function will use the second target argument to determine if this
+	*** damage was inflicted on an attack point (as opposed to the actor as a whole). If so, it analyzes the
+	*** attack point on the actor to see if it has any status effect vulnerabilities. If this is indeed the
+	*** case, then it applies the status effect to the actor if the random probability calculation determines
+	*** that the effect has been triggered.
+	**/
+	void RegisterDamage(uint32 amount, BattleTarget* target);
+
 	/** \brief Heals the actor by restoring a certain amount of hit points
 	*** \param amount The number of hit points to add to the actor
 	***

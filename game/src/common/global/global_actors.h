@@ -110,6 +110,9 @@ public:
 	float GetTotalEvadeRating() const
 		{ return _total_evade_rating; }
 
+	const std::vector<std::pair<GLOBAL_STATUS, float> >& GetStatusEffects() const
+		{ return _status_effects; }
+
 	//! \note Use this method with extreme caution. It does not update defense/evade totals or any other members
 	void SetActorOwner(GlobalActor* new_owner)
 		{ _actor_owner = new_owner; }
@@ -162,13 +165,11 @@ private:
 
 	/** \brief A vector containing all status effects that may be triggered by attacking the point
 	*** This vector contains only the status effects that have a non-zero chance of affecting their target. Therefore,
-	*** it is very possible that this vector may be empty. The first element in the pair is a floating point value from 0.0
-	*** to 1.0 that indicates the likelihood of success that should the attack point be successfully attacked by an opponent,
-	*** the status effect becomes triggered. Note that this likelihood does not take into account that the target may have a
-	*** particular defense or immunity against the status effect.
+	*** it is very possible that this vector may be empty, and usually it will contain only a single entry. The first
+	*** element of the pair is an identifier for the type of status. The second element is a floating point value from
+	*** 0.0 to 100.0, representing a 0-100% probability range for this effect to be triggered upon being hit.
 	**/
-	// TODO: Add status and elemental effects to attack points
-	// std::vector<std::pair<float, GlobalStatusEffect*> > _status_weaknesses;
+	std::vector<std::pair<GLOBAL_STATUS, float> > _status_effects;
 }; // class GlobalAttackPoint
 
 
