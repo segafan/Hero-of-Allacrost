@@ -50,7 +50,7 @@ skills[1] = {
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 5, 0));
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 5));
 			AudioManager:PlaySound("snd/swordslice1.wav");
 		else
 			target_actor:RegisterMiss();
@@ -71,8 +71,8 @@ skills[2] = {
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
 
-		if (hoa_battle.CalculateStandardEvasion(target, 5.0) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 0, 0, 0.5));
+		if (hoa_battle.CalculateStandardEvasionAdder(target, 5.0) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0, 0.5));
 			AudioManager:PlaySound("snd/swordslice1.wav");
 		else
 			target_actor:RegisterMiss();
@@ -94,8 +94,8 @@ skills[3] = {
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
 
-		if (hoa_battle.CalculateStandardEvasion(target, 5.5) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 0, 0));
+		if (hoa_battle.CalculateStandardEvasionAdder(target, 5.5) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamage(user, target));
 			-- TODO: Calculate chance for paralysis effect and activate it
 			target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
 			AudioManager:PlaySound("snd/swordslice1.wav");
@@ -118,8 +118,8 @@ skills[4] = {
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
 
-		if (hoa_battle.CalculateStandardEvasion(target, 8.5) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
+		if (hoa_battle.CalculateStandardEvasionAdder(target, 8.5) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 20));
 			AudioManager:PlaySound("snd/swordslice2.wav");
 		else
 			target_actor:RegisterMiss();
@@ -143,7 +143,7 @@ skills[1001] = {
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 10, 0));
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 10));
 			AudioManager:PlaySound("snd/slime_attack.wav");
 		else
 			target_actor:RegisterMiss();
@@ -162,7 +162,7 @@ skills[1002] = {
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 13, 0));
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 13));
 			AudioManager:PlaySound("snd/spider_attack.wav");
 		else
 			target_actor:RegisterMiss();
@@ -181,7 +181,7 @@ skills[1003] = {
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 14, 0));
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 14));
 			AudioManager:PlaySound("snd/snake_attack.wav");
 		else
 			target_actor:RegisterMiss();
@@ -200,7 +200,7 @@ skills[1004] = {
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculateStandardDamage(user, target, 20, 0));
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 20));
 			AudioManager:PlaySound("snd/skeleton_attack.wav");
 		else
 			target_actor:RegisterMiss();

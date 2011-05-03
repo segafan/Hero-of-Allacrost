@@ -174,9 +174,9 @@ enum FINISH_STATE {
 **/
 bool CalculateStandardEvasion(BattleTarget* target);
 
-/** \brief Determines if a target has evaded an attack or other action
+/** \brief Determines if a target has evaded an attack or other action, utilizing an addition modifier
 *** \param target A pointer to the target to calculate evasion for
-*** \param add_evasion A modifier value to be added to the standard evasion rating
+*** \param add_eva A modifier value to be added/subtracted to the standard evasion rating
 *** \return True if the target evasion was successful
 ***
 *** The additional_evasion may be positive or negative. If the total evasion value falls below 0.0f
@@ -184,94 +184,158 @@ bool CalculateStandardEvasion(BattleTarget* target);
 *** evade value will serve as a standard probability distribution to determine whether the evasion was
 *** successful or not.
 **/
-bool CalculateStandardEvasion(BattleTarget* target, float add_evasion);
+bool CalculateStandardEvasionAdder(BattleTarget* target, float add_eva);
 
-/** \brief Determines if a target has evaded an attack or other action
+/** \brief Determines if a target has evaded an attack or other action, utilizing a multiplication modifier
 *** \param target A pointer to the target to calculate evasion for
-*** \param mul_evasion A modifier value to be multiplied to the standard evasion rating
+*** \param mul_eva A modifier value to be multiplied to the standard evasion rating
 *** \return True if the target evasion was successful
 ***
 *** This function operates the same as the CalculateStandardEvasion(...) functions with the exception that
 *** its float argument is used as a multiple in the evasion calculation instead of an addition. So for instance
 *** if the user wants the evasion chance to increase by 20%, 1.2f would be passed in for the multiple_evasion
-*** argument. Negative values are also accepted, and -1.2f would decrease the evasion chance by 20%.
+*** argument. A decrease by 35% would need a value of 0.65f. Negative multiplier values will cause a warning to
+*** be printed and the absolute value of the multiplier will be used.
 **/
-bool CalculateStandardEvasionMultiplier(BattleTarget* target, float mul_evasion);
+bool CalculateStandardEvasionMultiplier(BattleTarget* target, float mul_eva);
 
-/** \brief Determines the amount of damage caused with a standard attack
+/** \brief Determines the amount of damage caused with a physical attack
 *** \param attacker A pointer to the attacker who is causing the damage
 *** \param target A pointer to the target that will be receiving the damage
 *** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
 ***
-*** This function uses both the physical and metaphysical attack/defense ratings to calculate the total
-*** damage caused. This function uses a gaussian random distribution with a standard deviation of ten percent
-*** to perform variation in the damage caused. Therefore this function may return different values each time
-*** it is called with the same arguments. If the amount of damage calculates out to zero, a small random
-*** non-zero value will be returned instead.
+*** This function uses the physical attack/defense ratings to calculate the total damage caused. This function 
+*** uses a gaussian random distribution with a standard deviation of ten percent to perform variation in the 
+*** damage caused. Therefore this function may return different values each time it is called with the same arguments. 
+*** If the amount of damage calculates out to zero, a small random non-zero value will be returned instead.
 **/
-uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target);
+uint32 CalculatePhysicalDamage(BattleActor* attacker, BattleTarget* target);
 
-/** \brief Determines the amount of damage caused with a standard attack
+/** \brief Determines the amount of damage caused with a physical attack
 *** \param attacker A pointer to the attacker who is causing the damage
 *** \param target A pointer to the target that will be receiving the damage
-*** \param add_phys An additional amount to add to the physical damage dealt
-*** \param add_meta An additional amount to add to the metaphyiscal damage dealt
-*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
-***
-*** The physical and metaphysical add modifiers may be positive or negative. Large negative values can often
-*** skew the calculations and cause the calculated damage dealt to drop to zero so be cautious about the
-*** add modifier values given to this function
-**/
-uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, int32 add_phys, int32 add_meta);
-
-/** \brief Determines the amount of damage caused with a standard attack
-*** \param attacker A pointer to the attacker who is causing the damage
-*** \param target A pointer to the target that will be receiving the damage
-*** \param std_dev The standard deviation to use in the gaussian distribution, where "7.5f" would represent 7.5% standard deviation
+*** \param std_dev The standard deviation to use in the gaussian distribution, where "0.075f" would represent 7.5% standard deviation
 *** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
 ***
 *** The std_dev value is always relative to the amount of absolute damage calculated prior to the gaussian randomization.
-*** This means you can not use this function to declare an absolute standard deviation, where "20.0f" would correspond to
-*** a stadnard deviation of 20HP from the absolute damage.
+*** This means that you can -not- use this function to declare an absolute standard deviation, such as a value of 20 damage
+*** points.
 **/
-uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, float std_dev);
+uint32 CalculatePhysicalDamage(BattleActor* attacker, BattleTarget* target, float std_dev);
 
-/** \brief Determines the amount of damage caused with a standard attack
+/** \brief Determines the amount of damage caused with a physical attack, utilizing an addition modifier
 *** \param attacker A pointer to the attacker who is causing the damage
 *** \param target A pointer to the target that will be receiving the damage
-*** \param add_phys An additional amount to add to the physical damage dealt
-*** \param add_meta An additional amount to add to the metaphyiscal damage dealt
-*** \param std_dev The standard deviation to use in the gaussian distribution, where "7.5f" would represent 7.5% standard deviation
-*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
-**/
-uint32 CalculateStandardDamage(BattleActor* attacker, BattleTarget* target, int32 add_phys, int32 add_meta, float std_dev);
-
-/** \brief Determines the amount of damage caused with a standard attack
-*** \param attacker A pointer to the attacker who is causing the damage
-*** \param target A pointer to the target that will be receiving the damage
-*** \param mul_phys An additional amount to be multiplied to the physical damage dealt
-*** \param mul_meta An additional amount to be multiplied to the metaphyiscal damage dealt
+*** \param add_atk An additional amount to add to the physical damage dealt
 *** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
 ***
-*** This function operates the same as the CalculateStandardDamage(...) functions with the exception that
-*** its float arguments are used as multiplers in the damage calculation instead of an addition multipler.
-*** So for instance if the user wants the physical damage to increase by 20% and the metaphysical damage to
-*** decrease by 15%, the values of mul_phys and mul_meta would be 1.2f and -1.15f respectively. A zero value
-*** for the multiplier will have no effect on the damage calculation.
+*** The add_atk argument may be positive or negative. Large negative values can skew the damage calculation
+*** and cause the damage dealt to drop to zero, so be cautious when setting this argument to a negative value.
 **/
-uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta);
+uint32 CalculatePhysicalDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk);
 
-/** \brief Determines the amount of damage caused with a standard attack
+/** \brief Determines the amount of damage caused with a physical attack, utilizing an addition modifier
 *** \param attacker A pointer to the attacker who is causing the damage
 *** \param target A pointer to the target that will be receiving the damage
-*** \param mul_phys An additional amount to be multiplied to the physical damage dealt
-*** \param mul_meta An additional amount to be multiplied to the metaphyiscal damage dealt
-*** \param std_dev The standard deviation to use in the gaussian distribution, where "7.5f" would represent 7.5% standard deviation
+*** \param add_atk An additional amount to add to the physical damage dealt
+*** \param std_dev The standard deviation to use in the gaussian distribution, where "0.075f" would represent 7.5% standard deviation
+*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
+**/
+uint32 CalculatePhysicalDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk, float std_dev);
+
+/** \brief Determines the amount of damage caused with a physical attack, utilizing a mulitplication modifier
+*** \param attacker A pointer to the attacker who is causing the damage
+*** \param target A pointer to the target that will be receiving the damage
+*** \param mul_atk An additional amount to be multiplied to the physical damage dealt
+*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
+***
+*** This function operates the same as the CalculatePhysicalDamageAdder(...) functions with the exception that
+*** its float argument is used as a multipler in the damage calculation instead of an integer addition modifier.
+*** So for instance if the user wants the physical damage to decrease by 20% the value of mul_atk would
+*** be 0.8f. If a negative multiplier value is passed to this function, its absoute value will be used and
+*** a warning will be printed.
+**/
+uint32 CalculatePhysicalDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys);
+
+/** \brief Determines the amount of damage caused with a physical attack, utilizing a multiplication modifier
+*** \param attacker A pointer to the attacker who is causing the damage
+*** \param target A pointer to the target that will be receiving the damage
+*** \param mul_atk A modifier to be multiplied to the physical damage dealt
+*** \param std_dev The standard deviation to use in the gaussian distribution, where "0.075f" would represent 7.5% standard deviation
 *** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
 ***
 *** This function signature allows the additional option of setting the standard deviation in the gaussian random value calculation.
 **/
-uint32 CalculateStandardDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float mul_meta, float std_dev);
+uint32 CalculatePhysicalDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_atk, float std_dev);
+
+/** \brief Determines the amount of damage caused with a metaphysical attack
+*** \param attacker A pointer to the attacker who is causing the damage
+*** \param target A pointer to the target that will be receiving the damage
+*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
+***
+*** This function uses the metaphysical attack/defense ratings to calculate the total damage caused. This function
+*** uses a gaussian random distribution with a standard deviation of ten percent to perform variation in the
+*** damage caused. Therefore this function may return different values each time it is called with the same arguments.
+*** If the amount of damage calculates out to zero, a small random non-zero value will be returned instead.
+**/
+uint32 CalculateMetaphysicalDamage(BattleActor* attacker, BattleTarget* target);
+
+/** \brief Determines the amount of damage caused with a metaphysical attack
+*** \param attacker A pointer to the attacker who is causing the damage
+*** \param target A pointer to the target that will be receiving the damage
+*** \param std_dev The standard deviation to use in the gaussian distribution, where "0.075f" would represent 7.5% standard deviation
+*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
+***
+*** The std_dev value is always relative to the amount of absolute damage calculated prior to the gaussian randomization.
+*** This means that you can -not- use this function to declare an absolute standard deviation, such as a value of 20 damage
+*** points.
+**/
+uint32 CalculateMetaphysicalDamage(BattleActor* attacker, BattleTarget* target, float std_dev);
+
+/** \brief Determines the amount of damage caused with a metaphysical attack, utilizing an addition modifier
+*** \param attacker A pointer to the attacker who is causing the damage
+*** \param target A pointer to the target that will be receiving the damage
+*** \param add_atk An additional amount to add to the metaphysical damage dealt
+*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
+***
+*** The add_atk argument may be positive or negative. Large negative values can skew the damage calculation
+*** and cause the damage dealt to drop to zero, so be cautious when setting this argument to a negative value.
+**/
+uint32 CalculateMetaphysicalDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk);
+
+/** \brief Determines the amount of damage caused with a physical attack, utilizing an addition modifier
+*** \param attacker A pointer to the attacker who is causing the damage
+*** \param target A pointer to the target that will be receiving the damage
+*** \param add_atk An additional amount to add to the metaphyiscal damage dealt
+*** \param std_dev The standard deviation to use in the gaussian distribution, where "0.075f" would represent 7.5% standard deviation
+*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
+**/
+uint32 CalculateMetaphysicalDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk, float std_dev);
+
+/** \brief Determines the amount of damage caused with a physical attack, utilizing a mulitplication modifier
+*** \param attacker A pointer to the attacker who is causing the damage
+*** \param target A pointer to the target that will be receiving the damage
+*** \param mul_phys An additional amount to be multiplied to the metaphysical damage dealt
+*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
+***
+*** This function operates the same as the CalculateMetaphysicalDamageAdder(...) functions with the exception that
+*** its float argument is used as a multipler in the damage calculation instead of an integer addition modifier.
+*** So for instance if the user wants the metaphysical damage to decrease by 20% the value of mul_atk would
+*** be 0.8f. If a negative multiplier value is passed to this function, its absoute value will be used and
+*** a warning will be printed.
+**/
+uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_atk);
+
+/** \brief Determines the amount of damage caused with a metaphysical attack, utilizing a multiplication modifier
+*** \param attacker A pointer to the attacker who is causing the damage
+*** \param target A pointer to the target that will be receiving the damage
+*** \param mul_atk A modifier to be multiplied to the metaphysical damage dealt
+*** \param std_dev The standard deviation to use in the gaussian distribution, where "0.075f" would represent 7.5% standard deviation
+*** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
+***
+*** This function signature allows the additional option of setting the standard deviation in the gaussian random value calculation.
+**/
+uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_atk, float std_dev);
 //@}
 
 
