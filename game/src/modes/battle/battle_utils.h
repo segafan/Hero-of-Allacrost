@@ -104,7 +104,6 @@ enum ACTOR_STATE {
 };
 
 
-
 //! \brief Enums for the various states that the CommandSupervisor class may be in
 enum COMMAND_STATE {
 	COMMAND_STATE_INVALID = -1,
@@ -118,37 +117,6 @@ enum COMMAND_STATE {
 	COMMAND_STATE_INFORMATION = 3,
 	COMMAND_STATE_TOTAL = 4
 };
-
-
-//! \brief Enums for the various states that the FinishWindow class may be in
-enum FINISH_STATE {
-	FINISH_INVALID = -1,
-	//! Announces that the player is victorious and notes any characters who have gained an experience level
-	FINISH_WIN_ANNOUNCE = 0,
-	//! Initial display of character stats
-	FINISH_WIN_SHOW_GROWTH = 1,
-	//! Performs countdown of XP (adding it to chars) and triggers level ups
-	FINISH_WIN_COUNTDOWN_GROWTH = 2,
-	//! All XP has been added (or should be added instantly), shows final stats
-	FINISH_WIN_RESOLVE_GROWTH = 3,
-	//! Display of any skills learned
-	FINISH_WIN_SHOW_SKILLS = 4,
-	//! Reports all drunes earned and dropped items obtained
-	FINISH_WIN_SHOW_SPOILS = 5,
-	//! Adds $ earned to party's pot
-	FINISH_WIN_COUNTDOWN_SPOILS = 6,
-	//! All money and items have been added
-	FINISH_WIN_RESOLVE_SPOILS = 7,
-	//! We've gone through all the states of the FinishWindow in Win form
-	FINISH_WIN_COMPLETE = 8,
-	//! Announces that the player has lost and queries the player for an action
-	FINISH_LOSE_ANNOUNCE = 9,
-	//! Used to double-confirm when the player selects to quit the game or return to the main menu
-	FINISH_LOSE_CONFIRM = 10,
-	FINISH_TOTAL = 11
-};
-
-
 
 
 /** \name Command battle calculation functions

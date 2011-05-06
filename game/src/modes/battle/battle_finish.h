@@ -33,6 +33,41 @@ namespace hoa_battle {
 
 namespace private_battle {
 
+//! \brief Enums for the various states that the FinishWindow class may be in
+enum FINISH_STATE {
+	FINISH_INVALID = -1,
+	FINISH_ANNOUNCE_RESULT = 0, //!< Short sequence announcing outcome of the battle (victory or defeat) and showing GUI objects
+	FINISH_DEFEAT_SELECT   = 1, //!< Player selects what to do after defeat (go to main menu, exit game, etc.)
+	FINISH_DEFEAT_CONFIRM  = 2, //!< Player confirms defeat selection
+	FINISH_VICTORY_GROWTH  = 4, //!< XP earned is displayed and gradually awarded to characters
+	FINISH_VICTORY_SPOILS  = 5, //!< Drunes and objects dropped are displayed and gradually awarded to party
+	FINISH_END             = 6, //!< Short sequence of hiding finish GUI objects
+	
+// 	//! Announces that the player is victorious and notes any characters who have gained an experience level
+// 	FINISH_WIN_ANNOUNCE = 0,
+// 	//! Initial display of character stats
+// 	FINISH_WIN_SHOW_GROWTH = 1,
+// 	//! Performs countdown of XP (adding it to chars) and triggers level ups
+// 	FINISH_WIN_COUNTDOWN_GROWTH = 2,
+// 	//! All XP has been added (or should be added instantly), shows final stats
+// 	FINISH_WIN_RESOLVE_GROWTH = 3,
+// 	//! Display of any skills learned
+// 	FINISH_WIN_SHOW_SKILLS = 4,
+// 	//! Reports all drunes earned and dropped items obtained
+// 	FINISH_WIN_SHOW_SPOILS = 5,
+// 	//! Adds $ earned to party's pot
+// 	FINISH_WIN_COUNTDOWN_SPOILS = 6,
+// 	//! All money and items have been added
+// 	FINISH_WIN_RESOLVE_SPOILS = 7,
+// 	//! We've gone through all the states of the FinishWindow in Win form
+// 	FINISH_WIN_COMPLETE = 8,
+// 	//! Announces that the player has lost and queries the player for an action
+// 	FINISH_LOSE_ANNOUNCE = 9,
+// 	//! Used to double-confirm when the player selects to quit the game or return to the main menu
+// 	FINISH_LOSE_CONFIRM = 10,
+// 	FINISH_TOTAL = 11
+};
+	
 //! \brief The set of defeat options that the player can select
 //@{
 const uint32 DEFEAT_OPTION_RETRY     = 0;
@@ -41,30 +76,28 @@ const uint32 DEFEAT_OPTION_RETURN    = 2;
 const uint32 DEFEAT_OPTION_RETIRE    = 3;
 //@}
 
-//! \brief The maximum number of times that the player can retry the battle if they lose
-const uint32 MAX_NUMBER_RETRIES   = 2;
+//! \brief The maximum number of times that the player can try to win the battle
+const uint32 MAX_BATTLE_ATTEMPTS   = 3;
 
 /** ****************************************************************************
-*** \brief A collection of GUI objects drawn when the player loses the battle
+*** \brief Represents a collection of GUI objects drawn when the player loses the battle
 ***
 *** This class assists the FinishSupervisor class. It is only utilized when the
 *** player's characters are defeated in battle and presents the player with a
-*** number of options
+*** number of options.
 ***
-*** - Retry: resets the state of the battle to the beginning and allows the
+*** - Retry: resets the state of the battle to the beginning
 *** - Restart: loads the game state from the last save point
 *** - Return: brings the player back to boot mode
 *** - Retire: exits the game
 *** ***************************************************************************/
-class FinishDefeat {
+class FinishDefeatAssistant {
 public:
-	FinishDefeat();
+	FinishDefeatAssistant(FINISH_STATE& state);
 
-	~FinishDefeat()
-		{}
+	~FinishDefeatAssistant();
 
-	uint32 GetNumberRetryTimes() const
-		{ return _number_retry_times; }
+	void Initialize(uint32 retries_left);
 
 	//! \brief Processes user input and updates the GUI controls
 	void Update();
@@ -72,9 +105,16 @@ public:
 	//! \brief Draws the finish window and GUI contents to the screen
 	void Draw();
 
+	//! \brief Returns the defeat option that the player selected
+	uint32 GetDefeatOption() const
+		{ return _options.GetSelection(); }
+
 private:
-	//! \brief The number of times that the player has lost and chosen to retry the battle
-	uint32 _number_retry_times;
+	//! \brief A reference to where the state of the finish GUI menus is maintained
+	FINISH_STATE& _state;
+	
+	//! \brief The number of chances the player has left to retry the battle
+	uint32 _retries_left;
 
 	//! \brief The window that the defeat message and options are displayed upon
 	hoa_gui::MenuWindow _options_window;
@@ -82,43 +122,145 @@ private:
 	//! \brief The window that the defeat message and options are displayed upon
 	hoa_gui::MenuWindow _tooltip_window;
 
-	//! \brief Text that displays the battle's outcome
-	hoa_gui::TextBox _outcome_message;
-
 	//! \brief The list of options that the player may choose from when they lose the battle
 	hoa_gui::OptionBox _options;
 
+	//! \brief A simple "yes/no" confirmation to the selected option
+	hoa_gui::OptionBox _confirm_options;
+	
 	//! \brief Tooltip text explaining the currently selected option
 	hoa_gui::TextBox _tooltip;
-}; // class FinishDefeat
+
+	//! \brief Changes the text displayed by the tooltip based on the current state and selected option
+	void _SetTooltipText();
+}; // class FinishDefeatAssistant
 
 
 /** ****************************************************************************
-*** \brief The window displayed once a battle has either been won or lost
+*** \brief Manages game state after the battle has been won and processes rewards
 ***
-*** This window is located in the center right portion of the screen and only appears
-*** when an outcome has been decided in the battle. The contents of this window differ
-*** depending on whether the battle was victorious or a loss. If the player won
-*** the battle, they will have their victory spoils written to the screen along
-*** with any character growth information (e.g. experience level up). If the player
-*** lost the battle, they will be presented with a number of options. The player
-*** may choose to:
+*** This class presents the user with the results of the battle. More specifically,
+*** the following events are accomplished
+*** 
+*** -#) Display experience points gained and any change in stats for each character
+*** -#) Display the number of drunes earned and the type and quantity of any objects recovered
 ***
-*** - Retry the battle from the beginning
-*** - Load the game from the last save point
-*** - Return to the game's main menu
-*** - Exit the game
-***
-*** \todo Add feature where spoils (XP, drunes, etc) are quickly counted down as
-*** they go into the party's posession.
+*** If the player lost the battle one or more times before they achieved victory, their XP and
+*** drune rewards will be cut significantly for each retry.
 *** ***************************************************************************/
-class FinishWindow : public hoa_gui::MenuWindow {
+class FinishVictoryAssistant {
+public:
+	FinishVictoryAssistant(FINISH_STATE& state);
+
+	~FinishVictoryAssistant();
+
+	/** \brief Instructs the class to prepare itself for future updating and drawing
+	*** \param retries_used The number of retries that the player used before the battle was won
+	**/
+	void Initialize(uint32 retries_used);
+
+	//! \brief Updates the state of the victory displays
+	void Update();
+
+	//! \brief Draws the appropriate information to the screen
+	void Draw();
+
+private:
+	//! \brief A reference to where the state of the finish GUI menus is maintained
+	FINISH_STATE& _state;
+
+	//! \brief The number of retries the player used before achieving this victory
+	uint32 _retries_used;
+
+	//! \brief The total number of characters in the victorious party, living or dead
+	uint32 _number_characters;
+
+	//! \brief The amount of xp earned for the victory (per character)
+	int32 _xp_earned;
+
+	//! \brief The amount of drunes dropped by the enemy party
+	int32 _drunes_dropped;
+
+	//! \brief Retains the number of character windows that were created
+	uint32 _number_character_windows_created;
+
+	//! \brief Pointers to all characters who took part in the battle
+	std::vector<hoa_global::GlobalCharacter*> _characters;
+
+	//! \brief The growth members for all members of the _characters table
+	std::vector<hoa_global::GlobalCharacterGrowth*> _character_growths;
+
+	//! \brief Holds portrait images for each character portraits
+	hoa_video::StillImage _character_portraits[4];
+
+	//! \brief Holds all objects that were dropped by the defeated enemy party (<ID, quantity>)
+	std::map<hoa_global::GlobalObject*, int32> _objects_dropped;
+
+	//! \brief The top window in the GUI display that contains header text
+	hoa_gui::MenuWindow _header_window;
+	
+	//! \brief A window for each character showing any change to their attributes
+	hoa_gui::MenuWindow _character_window[4];
+
+	//! \brief A window used to display details about objects dropped by the defeated enemies
+	hoa_gui::MenuWindow _spoils_window;
+
+	//! \brief Drawn to the top header window displaying information about the
+	hoa_gui::TextBox _header_text;
+	
+	//! \brief Four row, four column option box for each character to display their stat growth
+	hoa_gui::OptionBox _growth_list[4];
+
+	//! \brief Holds the experience level and XP points remaining for each character
+	hoa_gui::TextBox _level_xp_text[4];
+
+	//! \brief Holds the text indicating new skills that each character has learned
+	hoa_gui::TextBox _skill_text[4];
+	
+	//! \brief Header text for the object list option box
+	hoa_gui::TextBox _object_header_text;
+	
+	//! \brief Displays all objects obtained by the character party
+	hoa_gui::OptionBox _object_list;
+
+	//! \brief Creates the character windows and any GUI objects that populate them
+	void _CreateCharacterGUIObjects();
+
+	//! \brief Populates the object list with the objects contained in the _dropped_objects container
+	void _CreateObjectList();
+
+	//! \brief Sets the text to display in the header window depending upon the current state
+	void _SetHeaderText();
+
+	//! \brief Gradually rewards the characters with the XP that they earned
+	void _UpdateGrowth();
+
+	//! \brief Gradually counts out the amount of drunes that the party has earned
+	void _UpdateSpoils();
+
+	//! \brief Draws the XP earned by the party and any attribute growth they have made
+	void _DrawGrowth(uint32 index);
+	
+	//! \brief Draws the number of drunes and items dropped by the enemy party
+	void _DrawSpoils();
+}; // class FinishVictoryAssistant
+
+
+/** ****************************************************************************
+*** \brief Manages game state after the battle has been either won or lost
+***
+*** Most of the grunt work is done by either the FinishDefeatAssistant or FinishVictoryAssistant
+*** classes, depending on what the outcome of the battle was. This class does
+*** some of the display and update work on its own however, such as adjusting
+*** the scene lighting and displaying the victory/defeat message.
+*** ***************************************************************************/
+class FinishSupervisor {
 	friend class hoa_battle::BattleMode;
 
 public:
-	FinishWindow();
+	FinishSupervisor();
 
-	~FinishWindow();
+	~FinishSupervisor();
 
 	/** \brief Un-hides the window display and creates the window contents
 	*** \param victory Set to true if the player's party was victorious in battle; false if he/she was defeated
@@ -135,113 +277,21 @@ public:
 		{ return _state; }
 
 private:
-	//! \brief The state that the window is in, which determines its contents
+	//! \brief Maintains state information to determine how to process user input and what to draw to the screen
 	FINISH_STATE _state;
 
-	//! \brief The amount of money won
-	int32 _victory_money;
+	//! \brief Boolean used to determine if the battle was victorious for the player (true) or if the player was defeated (false)
+	bool _battle_victory;
+	
+	//! \brief Assists this class when the player was defeated in battle
+	FinishDefeatAssistant _defeat_assistant;
 
-	//! \brief The amount of xp earned (per character)
-	int32 _victory_xp;
+	//! \brief Assists this class when the player was victorious in battle
+	FinishVictoryAssistant _victory_assistant;
 
-	//! \brief Tallies the amount of growth each character has received for each stat
-	int _growth_gained[4][8];
-
-	//! \brief Pointers to all characters who took part in the battle
-	std::vector<hoa_global::GlobalCharacter*> _characters;
-
-	//! \brief The growth members for all object pointers in the _characters table
-	std::vector<hoa_global::GlobalCharacterGrowth*> _character_growths;
-
-	//! \brief The music to play if the character party is victorious
-	hoa_audio::MusicDescriptor _victory_music;
-
-	//! \brief The music to play if the character party is defeated
-	hoa_audio::MusicDescriptor _defeat_music;
-
-	//! \brief Text that displays the battle's outcome (victory or defeat)
-	hoa_gui::TextBox _finish_outcome;
-
-	//! \brief The list of options that the player may choose from when they lose the battle
-	hoa_gui::OptionBox _lose_options;
-
-	//! \brief The window containing the XP and money won
-	hoa_gui::MenuWindow _xp_and_money_window;
-
-	//! \brief The windows that show character portraits and stats
-	hoa_gui::MenuWindow _character_window[4];
-
-	//! \brief Lists the items won
-	hoa_gui::MenuWindow _items_window;
-
-	//! \brief Character portraits
-	hoa_video::StillImage _char_portraits[4];
-
-	//! \brief Items won from battle (<ID, quantity>)
-	std::map<hoa_global::GlobalObject*, int32> _victory_items;
-
-	// ----- Private methods
-
-	/** \brief Creates 4 character windows
-	*** \param start_x The x coordinate for the upper left corner of the window
-	*** \param start_y The y coordinate for the upper left corner of the window
-	**/
-	void _InitCharacterWindows(float start_x, float start_y);
-
-	/** \brief Creates _xp_and_money_window and _items_window
-	*** \param start_x The x coordinate for the upper left corner of the window
-	*** \param start_y The y coordinate for the upper left corner of the window
-	**/
-	void _InitSpoilsWindows(float start_x, float start_y);
-
-	//! \brief Sets up the OptionBox for things like retrying the battle
-	void _InitLoseOptions();
-
-	//! \brief Either victory or death
-	void _InitVictoryText();
-
-	//! \brief Tallies up the xp, money, and items earned from killing the enemies
-	void _TallyXPMoneyAndItems();
-
-	//! \brief Use this to clear learned skills after they've been shown so that they don't render every battle
-	void _ClearLearnedSkills();
-
-	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_WIN
-	void _UpdateAnnounceWin();
-
-	//! \brief Handles update processing when the _state member is FINISH_WIN_GROWTH
-	void _UpdateWinGrowth();
-
-	//! \brief Just waits for the player to press OK, then moves on
-	void _UpdateWinWaitForOK();
-
-	//! \brief Handles update processing when the _state member is FINISH_WIN_SPOILS
-	void _UpdateWinSpoils();
-
-	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_LOSE
-	void _UpdateAnnounceLose();
-
-	//! \brief Handles update processing when the _state member is FINISH_LOSE_CONFIRM
-	void _UpdateLoseConfirm();
-
-	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_WIN
-	void _DrawAnnounceWin();
-
-	//! \brief Handles update processing when the _state member is FINISH_WIN_GROWTH
-	void _DrawWinGrowth();
-
-	//! \brief Handles update processing when the _state member is FINISH_WIN_GROWTH
-	void _DrawWinSkills();
-
-	//! \brief Handles update processing when the _state member is FINISH_WIN_SPOILS
-	void _DrawWinSpoils();
-
-	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_LOSE
-	void _DrawAnnounceLose();
-
-	//! \brief Handles update processing when the _state member is FINISH_LOSE_CONFIRM
-	void _DrawLoseConfirm();
-}; // class FinishWindow : public hoa_video:MenuWindow
+	//! \brief Used to announce the battle's outcome (victory or defeat)
+	hoa_gui::TextBox _outcome_text;
+}; // class FinishSupervisor
 
 } // namespace private_battle
 

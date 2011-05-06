@@ -42,44 +42,84 @@ namespace hoa_battle {
 
 namespace private_battle {
 
+//! \brief Draw position and dimension constants used for GUI objects
+//@{
+const float TOP_WINDOW_XPOS        = 512.0f;
+const float TOP_WINDOW_YPOS        = 664.0f;
+const float TOP_WINDOW_WIDTH       = 512.0f;
+const float TOP_WINDOW_HEIGHT      = 64.0f;
+
+const float TOOLTIP_WINDOW_XPOS    = TOP_WINDOW_XPOS;
+const float TOOLTIP_WINDOW_YPOS    = TOP_WINDOW_YPOS - TOP_WINDOW_HEIGHT + 16.0f;
+const float TOOLTIP_WINDOW_WIDTH   = TOP_WINDOW_WIDTH;
+const float TOOLTIP_WINDOW_HEIGHT  = 112.0f;
+
+const float CHAR_WINDOW_XPOS       = TOP_WINDOW_XPOS;
+const float CHAR_WINDOW_YPOS       = TOOLTIP_WINDOW_YPOS;
+const float CHAR_WINDOW_WIDTH      = TOP_WINDOW_WIDTH;
+const float CHAR_WINDOW_HEIGHT     = 120.0f;
+
+const float SPOILS_WINDOW_XPOS     = TOP_WINDOW_XPOS;
+const float SPOILS_WINDOW_YPOS     = TOOLTIP_WINDOW_YPOS;
+const float SPOILS_WINDOW_WIDTH    = TOP_WINDOW_WIDTH;
+const float SPOILS_WINDOW_HEIGHT   = 220.0f;
+//@}
+
 ////////////////////////////////////////////////////////////////////////////////
-// FinishDefeat class
+// FinishDefeatAssistant class
 ////////////////////////////////////////////////////////////////////////////////
 
-FinishDefeat::FinishDefeat() :
-	_number_retry_times(0)
+FinishDefeatAssistant::FinishDefeatAssistant(FINISH_STATE& state) :
+	_state(state),
+	_retries_left(0)
 {
-	_options_window.Create(512.0f, 64.0f);
-	_options_window.SetPosition(512.0f, 60.0f);
+	_options_window.Create(TOP_WINDOW_WIDTH, TOP_WINDOW_HEIGHT, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_options_window.SetPosition(TOP_WINDOW_XPOS, TOP_WINDOW_YPOS);
 	_options_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_options_window.Show();
 
-	_tooltip_window.Create(512.0f, 112.0f);
-	_tooltip_window.SetPosition(512.0f, 124.0f);
+	_tooltip_window.Create(TOOLTIP_WINDOW_WIDTH, TOOLTIP_WINDOW_HEIGHT);
+	_tooltip_window.SetPosition(TOOLTIP_WINDOW_XPOS, TOOLTIP_WINDOW_YPOS);
 	_tooltip_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_tooltip_window.Show();
 
-	_outcome_message.SetPosition(512.0f, 384.0f);
-	_outcome_message.SetDimensions(400.0f, 100.0f);
-	_outcome_message.SetDisplaySpeed(30);
-	_outcome_message.SetTextStyle(TextStyle("text24", Color::white));
-	_outcome_message.SetDisplayMode(VIDEO_TEXT_INSTANT);
-	_outcome_message.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_outcome_message.SetTextAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_outcome_message.SetDisplayText(Translate("But the heroes were defeated..."));
-
-	_options.AddOption(UTranslate("Retry"));
-	_options.AddOption(UTranslate("Restart"));
-	_options.AddOption(UTranslate("Return"));
-	_options.AddOption(UTranslate("Retire"));
-	_options.SetPosition(270.0f, 130.0f);
-	_options.SetDimensions(128.0f, 200.0f, 1, 4, 1, 4);
+	_options.SetOwner(&_options_window);
+	_options.SetPosition(TOP_WINDOW_WIDTH / 2, TOP_WINDOW_HEIGHT / 2 + 4.0f);
+	_options.SetDimensions(480.0f, 50.0f, 4, 1, 4, 1);
 	_options.SetTextStyle(TextStyle("title22", Color::white, VIDEO_TEXT_SHADOW_DARK));
 	_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_options.SetCursorOffset(-60.0f, 25.0f);
+	_options.AddOption(UTranslate("Retry"));
+	_options.AddOption(UTranslate("Restart"));
+	_options.AddOption(UTranslate("Return"));
+	_options.AddOption(UTranslate("Retire"));
 	_options.SetSelection(0);
-	_options.SetOwner(&_options_window);
+
+	_confirm_options.SetOwner(&_options_window);
+	_confirm_options.SetPosition(TOP_WINDOW_WIDTH / 2, TOP_WINDOW_HEIGHT / 2 + 4.0f);
+	_confirm_options.SetDimensions(240.0f, 50.0f, 2, 1, 2, 1);
+	_confirm_options.SetTextStyle(TextStyle("title22", Color::white, VIDEO_TEXT_SHADOW_DARK));
+	_confirm_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_confirm_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_confirm_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_confirm_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_confirm_options.SetCursorOffset(-60.0f, 25.0f);
+	_confirm_options.AddOption(UTranslate("Yes"));
+	_confirm_options.AddOption(UTranslate("No"));
+	_confirm_options.SetSelection(0);
+
+	_tooltip.SetOwner(&_tooltip_window);
+	_tooltip.SetPosition(32.0f, TOOLTIP_WINDOW_HEIGHT - 40.0f);
+	_tooltip.SetDimensions(480.0f, 80.0f);
+	_tooltip.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_tooltip.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_tooltip.SetDisplaySpeed(30);
+	_tooltip.SetTextStyle(TextStyle("text20", Color::white));
+	_tooltip.SetDisplayMode(VIDEO_TEXT_INSTANT);
+
 	// TEMP: these two options are disabled because their features are not yet implemented
 	_options.EnableOption(0, false);
 	_options.EnableOption(1, false);
@@ -87,752 +127,627 @@ FinishDefeat::FinishDefeat() :
 
 
 
-void FinishDefeat::Update() {
-	if (InputManager->ConfirmPress()) {
-		switch (_options.GetSelection()) {
-			case DEFEAT_OPTION_RETRY:
-				// TODO: feature not yet implemented. Reset the battle from the beginning.
-				_number_retry_times++;
-				break;
-			case DEFEAT_OPTION_RESTART:
-				// TODO: feature not yet implemented. Either auto-load last saved game or enter save
-				// mode and allow user to select file to load (but do not allow user to save a file)
-				break;
-			case DEFEAT_OPTION_RETURN:
-				ModeManager->PopAll();
-				ModeManager->Push(new hoa_boot::BootMode());
-				break;
-			case DEFEAT_OPTION_RETIRE:
-				SystemManager->ExitGame();
-				break;
-			default:
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid option selection: " << _options.GetSelection() << endl;
-				break;
-		}
-	}
-
-	else if (InputManager->LeftPress()) {
-		_options.InputLeft();
-	}
-	else if (InputManager->RightPress()) {
-		_options.InputRight();
-	}
+FinishDefeatAssistant::~FinishDefeatAssistant() {
+	_options_window.Destroy();
+	_tooltip_window.Destroy();
 }
 
 
 
-void FinishDefeat::Draw() {
+void FinishDefeatAssistant::Initialize(uint32 retries_left) {
+	_retries_left = retries_left;
+
+	if (_retries_left == 0) {
+		_options.EnableOption(0, false);
+	}
+
+	_SetTooltipText();
+
+	_options_window.Show();
+	_tooltip_window.Show();
+}
+
+
+
+void FinishDefeatAssistant::Update() {
+	switch (_state) {
+		case FINISH_DEFEAT_SELECT:
+			if (InputManager->ConfirmPress()) {
+				_state = FINISH_DEFEAT_CONFIRM;
+				_confirm_options.SetSelection(1); // Set default confirm option to "No"
+				_SetTooltipText();
+			}
+
+			else if (InputManager->LeftPress()) {
+				_options.InputLeft();
+				_SetTooltipText();
+			}
+			else if (InputManager->RightPress()) {
+				_options.InputRight();
+				_SetTooltipText();
+			}
+			
+			break;
+
+		case FINISH_DEFEAT_CONFIRM:
+			if (InputManager->ConfirmPress()) {
+				switch (_confirm_options.GetSelection()) {
+					case 0: // "Yes"
+						_state = FINISH_END;
+						_options_window.Hide();
+						_tooltip_window.Hide();
+						break;
+					case 1: // "No"
+						_state = FINISH_DEFEAT_SELECT;
+						_SetTooltipText();
+						break;
+					default:
+						IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid confirm option selection: " << _confirm_options.GetSelection() << endl;
+						break;
+				}
+			}
+
+			else if (InputManager->CancelPress()) {
+				_state = FINISH_DEFEAT_SELECT;
+				_SetTooltipText();
+			}
+
+			else if (InputManager->LeftPress()) {
+				_confirm_options.InputLeft();
+			}
+			else if (InputManager->RightPress()) {
+				_confirm_options.InputRight();
+			}
+			
+			break;
+
+		case FINISH_END:
+			break;
+
+		default:
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid finish state: " << _state << endl;
+			break;
+	}
+} // void FinishDefeatAssistant::Update()
+
+
+
+void FinishDefeatAssistant::Draw() {
 	_options_window.Draw();
 	_tooltip_window.Draw();
-	_outcome_message.Draw();
-	_options.Draw();
+
+	if (_state == FINISH_DEFEAT_SELECT) {
+		_options.Draw();
+	}
+	else if (_state == FINISH_DEFEAT_CONFIRM) {
+		_confirm_options.Draw();
+	}
+
 	_tooltip.Draw();
 }
 
+
+
+void FinishDefeatAssistant::_SetTooltipText() {
+	_tooltip.SetDisplayText("");
+	
+	if (_state == FINISH_DEFEAT_SELECT) {
+		switch (_options.GetSelection()) {
+			case DEFEAT_OPTION_RETRY:
+				_tooltip.SetDisplayText("Start over from the beginning of this battle.");
+				break;
+			case DEFEAT_OPTION_RESTART:
+				_tooltip.SetDisplayText("Load the game from the last save game point.");
+				break;
+			case DEFEAT_OPTION_RETURN:
+				_tooltip.SetDisplayText("Returns the game to the main boot menu.");
+				break;
+			case DEFEAT_OPTION_RETIRE:
+				_tooltip.SetDisplayText("Exit the game.");
+				break;
+		}
+	}
+	else if (_state == FINISH_DEFEAT_CONFIRM) {
+		switch (_options.GetSelection()) {
+			case DEFEAT_OPTION_RETRY:
+				_tooltip.SetDisplayText("Confirm: retry battle.");
+				break;
+			case DEFEAT_OPTION_RESTART:
+				_tooltip.SetDisplayText("Confirm: restart from last save.");
+				break;
+			case DEFEAT_OPTION_RETURN:
+				_tooltip.SetDisplayText("Confirm: return to main menu.");
+				break;
+			case DEFEAT_OPTION_RETIRE:
+				_tooltip.SetDisplayText("Confirm: exit game.");
+				break;
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
-// FinishWindow class
+// FinishVictoryAssistant class
 ////////////////////////////////////////////////////////////////////////////////
 
-FinishWindow::FinishWindow()
+FinishVictoryAssistant::FinishVictoryAssistant(FINISH_STATE& state) :
+	_state(state),
+	_retries_used(0),
+	_number_characters(0),
+	_xp_earned(0),
+	_drunes_dropped(0),
+	_number_character_windows_created(0)
 {
-	//CD: We should really move all this to Initialize() instead
+	_header_window.Create(TOP_WINDOW_WIDTH, TOP_WINDOW_HEIGHT, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_header_window.SetPosition(TOP_WINDOW_XPOS, TOP_WINDOW_YPOS);
+	_header_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_header_window.Show();
 
-	// TODO: declare the MenuSkin to be used
-	//Just like the ones in Menu Mode
-	float start_x = (1024 - 800) / 2 + 144;
-	float start_y = 768 - ((768 - 600) / 2 + 15);
+	// Note: Character windows are created later when the Initialize() function is called. This is done because the borders
+	// used with these windows depend on the number of characters in the party.
 
-	if (!MenuWindow::Create(480.0f, 560.0f))
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "the call to MenuWindow::Create() failed" << endl;
+	_spoils_window.Create(SPOILS_WINDOW_WIDTH, SPOILS_WINDOW_HEIGHT);
+	_spoils_window.SetPosition(SPOILS_WINDOW_XPOS, SPOILS_WINDOW_YPOS);
+	_spoils_window.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+	_spoils_window.Show();
 
-	MenuWindow::SetPosition(start_x, start_y);
+	_header_text.SetOwner(&_header_window);
+	_header_text.SetPosition(TOP_WINDOW_WIDTH / 2 - 50.0f, TOP_WINDOW_HEIGHT - 20.0f);
+	_header_text.SetDimensions(400.0f, 40.0f);
+	_header_text.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_header_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_header_text.SetDisplaySpeed(30);
+	_header_text.SetTextStyle(TextStyle("text20", Color::white));
+	_header_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
 
-	for (int32 i = 0; i < 4; ++i)
-	{
-		for (int32 j = 0; j < 8; ++j)
-			_growth_gained[i][j] = 0;
+
+	for (uint32 i = 0; i < 4; i++) {
+		_growth_list[i].SetOwner(&(_character_window[i]));
 	}
 
-	_state = FINISH_INVALID;
+	_object_header_text.SetOwner(&_spoils_window);
+	_object_header_text.SetPosition(SPOILS_WINDOW_WIDTH / 2 - 50.0f, SPOILS_WINDOW_HEIGHT - 10.0f);
+	_object_header_text.SetDimensions(200.0f, 40.0f);
+	_object_header_text.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_object_header_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_object_header_text.SetDisplaySpeed(30);
+	_object_header_text.SetTextStyle(TextStyle("title20", Color::white));
+	_object_header_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	_object_header_text.SetDisplayText(UTranslate("Items Found"));
 
-	//Create character windows
-	_InitCharacterWindows(start_x, start_y);
-	//Create items and xp & money window
-	_InitSpoilsWindows(start_x, start_y);
-	//Initalize victory text (but don't set the string yet)
-	_InitVictoryText();
-	//Retry, quit, etc.
-	_InitLoseOptions();
+	_object_list.SetOwner(&_spoils_window);
+	_object_list.SetPosition(100.0f, SPOILS_WINDOW_HEIGHT - 35.0f);
+	_object_list.SetDimensions(300.0f, 160.0f, 1, 8, 1, 8);
+	_object_list.SetTextStyle(TextStyle("text20", Color::white));
+	_object_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_object_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_object_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
 
 
 
-FinishWindow::~FinishWindow() {
-	_character_window[0].Destroy();
-	_character_window[1].Destroy();
-	_character_window[2].Destroy();
-	_character_window[3].Destroy();
+FinishVictoryAssistant::~FinishVictoryAssistant() {
+	_header_window.Destroy();
+	_spoils_window.Destroy();
 
-	_xp_and_money_window.Destroy();
-	_items_window.Destroy();
+	for (uint32 i = 0; i < _number_character_windows_created; i++) {
+		_character_window[i].Destroy();
+	}
 
-	MenuWindow::Destroy();
+	// Clear away any skills that characters may have learned so that they do not persist in the growth manager
+	for (uint32 i = 0; i < _number_characters; i++) {
+		if (_character_growths[i] != NULL) {
+			_character_growths[i]->GetSkillsLearned()->clear();
+		}
+	}
+
+	// Add all the objects that were dropped by enemies to the party's inventory
+	for (map<GlobalObject*, int32>::iterator i = _objects_dropped.begin(); i != _objects_dropped.end(); i++) {
+		GlobalManager->AddToInventory(i->first->GetID(), i->second);
+	}
 }
 
 
 
-void FinishWindow::Initialize(bool victory) {
-	MenuWindow::Show();
+void FinishVictoryAssistant::Initialize(uint32 retries_used) {
+	_retries_used = retries_used;
+	if (_retries_used >= MAX_BATTLE_ATTEMPTS) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received invalid argument value: " << retries_used << endl;
+		_retries_used = MAX_BATTLE_ATTEMPTS - 1;
+	}
 
-	_victory_money = 0;
-	_victory_xp = 0;
-	_victory_items.clear();
+	// ----- (1): Prepare all character data
+	deque<BattleCharacter*>& all_characters = BattleMode::CurrentInstance()->GetCharacterActors();
+	_number_characters = all_characters.size();
+	uint32 num_alive_characters = 0;
 
-	for (uint32 i = 0; i < BattleMode::CurrentInstance()->_character_actors.size(); i++) {
-		_characters.push_back(BattleMode::CurrentInstance()->_character_actors[i]->GetGlobalCharacter());
+	if (_number_characters > 4) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "party exceeded maximum number of characters: " << _number_characters;
+		_number_characters = 4;
+	}
+
+	for (uint32 i = 0; i < _number_characters; i++) {
+		_characters.push_back(all_characters[i]->GetGlobalCharacter());
 		_character_growths.push_back(_characters[i]->GetGrowth());
-		_char_portraits[i].Load("img/portraits/map/" + BattleMode::CurrentInstance()->_character_actors[i]->GetFilename() + ".png", 100.0f, 100.0f);
+		_character_portraits[i].Load("img/portraits/map/" + _characters[i]->GetFilename() + ".png", 100.0f, 100.0f);
+
+		if (all_characters[i]->IsAlive()) {
+			num_alive_characters++;
+		}
+		else {
+			_character_portraits[i].EnableGrayScale();
+		}
 	}
 
-	if (victory) {
-		_state = FINISH_WIN_ANNOUNCE;
-		_finish_outcome.SetDisplayText("The heroes are victorious!");
-		_TallyXPMoneyAndItems();
-	}
-	else {
-		_state = FINISH_LOSE_ANNOUNCE;
-		_finish_outcome.SetDisplayText("The heroes have been defeated...");
-	}
-}
-
-void FinishWindow::_InitCharacterWindows(float start_x, float start_y)
-{
-	_character_window[0].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[0].SetPosition(start_x, start_y - 12.0f);
-	_character_window[0].Show();
-
-	_character_window[1].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[1].SetPosition(start_x, start_y - 12.0f - 140.0f);
-	_character_window[1].Show();
-
-	_character_window[2].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[2].SetPosition(start_x, start_y - 11.0f - 140.0f * 2.0f);
-	_character_window[2].Show();
-
-	_character_window[3].Create(480.0f, 140.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);//~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[3].SetPosition(start_x, start_y - 10.0f - 140.0f * 3.0f);
-	_character_window[3].Show();
-}
-
-
-void FinishWindow::_InitSpoilsWindows(float start_x, float start_y)
-{
-	_xp_and_money_window.Create(480.0f, 72.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);
-	_xp_and_money_window.SetPosition(start_x, start_y + 50.0f);
-	_xp_and_money_window.Show();
-
-	_items_window.Create(480.0f, 560.0f, ~VIDEO_MENU_EDGE_TOP, VIDEO_MENU_EDGE_TOP);
-	_items_window.SetPosition(start_x, start_y - 13.0f);
-	_items_window.Show();
-}
-
-
-void FinishWindow::_InitLoseOptions()
-{
-	vector<ustring> lose_text;
-	lose_text.push_back(UTranslate("Retry the battle"));
-	lose_text.push_back(UTranslate("Load from last save point"));
-	lose_text.push_back(UTranslate("Return to main menu"));
-	lose_text.push_back(UTranslate("Exit the game"));
-	_lose_options.SetOptions(lose_text);
-	_lose_options.SetPosition(270.0f, 130.0f);
-	_lose_options.SetDimensions(128.0f, 200.0f, 1, 4, 1, 4);
-	_lose_options.SetTextStyle(TextStyle("text22", Color::white, VIDEO_TEXT_SHADOW_DARK));
-	_lose_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_lose_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_lose_options.SetSelectMode(VIDEO_SELECT_SINGLE);
-	_lose_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_lose_options.SetCursorOffset(-60.0f, 25.0f);
-	_lose_options.SetSelection(0);
-	_lose_options.SetOwner(this);
-	_lose_options.EnableOption(0, false);
-	_lose_options.EnableOption(1, false);
-}
-
-
-void FinishWindow::_InitVictoryText()
-{
-	_finish_outcome.SetPosition(512.0f, 384.0f);
-	_finish_outcome.SetDimensions(400.0f, 100.0f);
-	_finish_outcome.SetDisplaySpeed(30);
-	_finish_outcome.SetTextStyle(TextStyle("text24", Color::white));
-	_finish_outcome.SetDisplayMode(VIDEO_TEXT_INSTANT);
-	_finish_outcome.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_finish_outcome.SetTextAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-}
-
-// ----- Tallies all the stuff we've won (xp, money, items)
-
-void FinishWindow::_TallyXPMoneyAndItems()
-{
-	GlobalEnemy* ge;
+	// ----- (2): Collect the XP, drunes, and dropped objects for each defeated enemy
+	deque<BattleEnemy*>& all_enemies = BattleMode::CurrentInstance()->GetEnemyActors();
+	GlobalEnemy* enemy;
 	vector<GlobalObject*> objects;
 	map<GlobalObject*, int32>::iterator iter;
 
-	deque<BattleEnemy*>& all_enemies = BattleMode::CurrentInstance()->GetEnemyActors();
 	for (uint32 i = 0; i < all_enemies.size(); ++i)
 	{
-		ge = all_enemies[i]->GetGlobalEnemy();
-		_victory_money += ge->GetDrunesDropped();
-		_victory_xp += ge->GetExperiencePoints();
-		ge->DetermineDroppedObjects(objects);
+		enemy = all_enemies[i]->GetGlobalEnemy();
+		_xp_earned += enemy->GetExperiencePoints();
+		_drunes_dropped += enemy->GetDrunesDropped();
+		enemy->DetermineDroppedObjects(objects);
 
 		for (uint32 j = 0; j < objects.size(); ++j)
 		{
-			iter = _victory_items.find(objects[j]);
-			if (iter != _victory_items.end())
+			// Check if the object to add is already in our list. If so, just increase the quantity of that object.
+			iter = _objects_dropped.find(objects[j]);
+			if (iter != _objects_dropped.end())
 			{
 				iter->second++;
 			}
 			else
 			{
-				_victory_items.insert(make_pair(objects[j], 1));
+				_objects_dropped.insert(make_pair(objects[j], 1));
 			}
 		}
-		// also add 1 SP per enemy to each character in the party
-		GlobalParty *party = GlobalManager->GetActiveParty();
-		for (uint32 i = 0; i < party->GetPartySize(); ++i)
-			party->GetActorAtIndex(i)->AddSkillPoints(1);
 	}
 
-	deque<BattleCharacter*>& all_characters = BattleMode::CurrentInstance()->GetCharacterActors();
-	uint32 num_alive_characters = 0;
-	for (uint32 i = 0; i < all_characters.size(); ++i)
-	{
-		if (all_characters[i]->IsAlive())
-		{
-			++num_alive_characters;
-		}
+	// ----- (3): Divide up the XP and drunes earnings by the number of living players and apply the penalty for any battle retries
+	_xp_earned /= num_alive_characters;
+
+	if (_retries_used > 0) {
+		float penalty = 1.0f - (retries_used / MAX_BATTLE_ATTEMPTS);
+		_xp_earned = static_cast<uint32>(_xp_earned * penalty);
+		_drunes_dropped = static_cast<uint32>(_drunes_dropped * penalty);
 	}
-	_victory_xp /= num_alive_characters;
-}
 
-void FinishWindow::_ClearLearnedSkills()
-{
-	for (uint32 i = 0; i < _characters.size(); ++i)
-	{
-		_character_growths[i]->GetSkillsLearned()->clear();
-	}
-}
+	_CreateCharacterGUIObjects();
+	_CreateObjectList();
+	_SetHeaderText();
+} // void FinishVictoryAssistant::Initialize(uint32 retries_used)
 
-// ----- UPDATE METHODS
 
-void FinishWindow::Update() {
-	MenuWindow::Update(SystemManager->GetUpdateTime());
 
+void FinishVictoryAssistant::Update() {
 	switch (_state) {
-		case FINISH_WIN_ANNOUNCE:
-			_UpdateAnnounceWin();
-			break;
-		case FINISH_WIN_SHOW_GROWTH:
-		case FINISH_WIN_RESOLVE_GROWTH:
-		case FINISH_WIN_SHOW_SKILLS:
-		case FINISH_WIN_SHOW_SPOILS:
-		case FINISH_WIN_RESOLVE_SPOILS:
-			_UpdateWinWaitForOK();
-			break;
-		case FINISH_WIN_COUNTDOWN_GROWTH:
-			_UpdateWinGrowth();
-			break;
-		case FINISH_WIN_COUNTDOWN_SPOILS:
-			_UpdateWinSpoils();
-			break;
-		case FINISH_WIN_COMPLETE:
-			BattleMode::CurrentInstance()->Exit();
-			break;
-		case FINISH_LOSE_ANNOUNCE:
-			_UpdateAnnounceLose();
-			break;
-		case FINISH_LOSE_CONFIRM:
-			_UpdateLoseConfirm();
-			break;
-		case FINISH_INVALID:
-		case FINISH_TOTAL:
-		default:
-			if (BATTLE_DEBUG)
-				cerr << "BATTLE ERROR: In FinishWindow::Update(), the window state was invalid: " << _state << endl;
-			return;
-	}
-} // void FinishWindow::Update()
+		case FINISH_VICTORY_GROWTH:
+			_UpdateGrowth();
 
-
-
-void FinishWindow::_UpdateAnnounceWin() {
-//	This block is for gradual text. Currently, battle mode uses full text.
-// This block causes the game to freeze at the end of battle.
-/*	if (_finish_outcome.IsFinished() == false) {
-		_finish_outcome.Update(SystemManager->GetUpdateTime());
-
-		if (InputManager->ConfirmPress())
-			_finish_outcome.ForceFinish();
-		return;
-	} */
-
-	if (InputManager->ConfirmPress())
-		_state = FINISH_WIN_SHOW_GROWTH;
-}
-
-// If OK was pressed, just move to the next state
-void FinishWindow::_UpdateWinWaitForOK()
-{
-	if (InputManager->ConfirmPress())
-	{
-		switch (_state)
-		{
-			case FINISH_WIN_SHOW_GROWTH:
-				_state = FINISH_WIN_COUNTDOWN_GROWTH;
-				break;
-			case FINISH_WIN_RESOLVE_GROWTH:
-				_state = FINISH_WIN_SHOW_SKILLS;
-				break;
-			case FINISH_WIN_SHOW_SKILLS:
-				_state = FINISH_WIN_SHOW_SPOILS;
-				_ClearLearnedSkills(); //so we don't render them every battle
-				break;
-			case FINISH_WIN_SHOW_SPOILS:
-				_state = FINISH_WIN_COUNTDOWN_SPOILS;
-				break;
-			case FINISH_WIN_RESOLVE_SPOILS:
-				_state = FINISH_WIN_COMPLETE;
-				break;
-			default:
-				if (BATTLE_DEBUG)
-					cerr << "BATTLE ERROR: In FinishWindow::_UpdateWinWaitForOK(), the window state was invalid: " << _state << endl;
-				return;
-		}
-	}
-}
-
-void FinishWindow::_UpdateWinGrowth() {
-	static uint32 time_of_next_update = SDL_GetTicks();
-	uint32 xp_to_add = 1;
-
-	if (InputManager->ConfirmPress())
-	{
-		xp_to_add = _victory_xp;
-		_victory_xp = 0;
-	}
-	else if (SDL_GetTicks() < time_of_next_update)
-	{
-		return;
-	}
-	else
-	{
-		--_victory_xp;
-	}
-
-	for (uint32 i = 0; i < _characters.size(); ++i)
-	{
-		if (_characters[i]->IsAlive())
-		{
-			if (_characters[i]->AddExperiencePoints(xp_to_add))
-			{
-				do {
-					//Record growth stats for each character for rendering
-					//HP
-					_growth_gained[i][0] += _character_growths[i]->GetHitPointsGrowth();
-					//SP
-					_growth_gained[i][1] += _character_growths[i]->GetSkillPointsGrowth();
-					//STR
-					_growth_gained[i][2] += _character_growths[i]->GetStrengthGrowth();
-					//VIG
-					_growth_gained[i][3] += _character_growths[i]->GetVigorGrowth();
-					//FOR
-					_growth_gained[i][4] += _character_growths[i]->GetFortitudeGrowth();
-					//PRO
-					_growth_gained[i][5] += _character_growths[i]->GetProtectionGrowth();
-					//AGI
-					_growth_gained[i][6] += _character_growths[i]->GetAgilityGrowth();
-					//EVD
-					_growth_gained[i][7] += static_cast<int>(_character_growths[i]->GetEvadeGrowth());
-
-					if (_character_growths[i]->IsExperienceLevelGained())
-					{
-						//Play Sound
-					}
-					_character_growths[i]->AcknowledgeGrowth();
-				} while(_character_growths[i]->IsGrowthDetected());
+			if (InputManager->ConfirmPress()) {
+				_state = FINISH_VICTORY_SPOILS;
+				_SetHeaderText();
 			}
-		}
+			break;
+
+		case FINISH_VICTORY_SPOILS:
+			_UpdateSpoils();
+
+			if (InputManager->ConfirmPress()) {
+				_state = FINISH_END;
+			}
+			break;
+
+		case FINISH_END:
+			break;
+
+		default:
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid finish state: " << _state << endl;
+			break;
 	}
-
-	//We've allocated all the XP
-	if (!_victory_xp)
-		_state = FINISH_WIN_RESOLVE_GROWTH;
-
-	//Every 50 milliseconds we update
-	time_of_next_update += 50;
-}
-
-void FinishWindow::_UpdateWinSpoils() {
-	static uint32 time_of_next_update = SDL_GetTicks();
-	uint32 money_to_add = 1;
-
-	if (InputManager->ConfirmPress())
-	{
-		money_to_add = _victory_money;
-		_victory_money = 0;
-	}
-	else if (SDL_GetTicks() < time_of_next_update)
-	{
-		return;
-	}
-	else
-	{
-		--_victory_money;
-	}
-
-	GlobalManager->AddDrunes(money_to_add);
-
-	if (!_victory_money)
-	{
-		std::map<GlobalObject*, int32>::iterator iter;
-
-		for (iter = _victory_items.begin(); iter != _victory_items.end(); ++iter)
-		{
-			GlobalManager->AddToInventory(iter->first->GetID(), iter->second);
-		}
-
-		_state = FINISH_WIN_RESOLVE_SPOILS;
-	}
-
-	//Every 50 milliseconds we update
-	time_of_next_update += 50;
 }
 
 
 
-void FinishWindow::_UpdateAnnounceLose() {
-	_lose_options.Update();
+void FinishVictoryAssistant::Draw() {
+	_header_window.Draw();
+	_header_text.Draw();
 
-//	This block is for gradual text. Currently, battle mode uses full text.
-// This block causes the game to freeze at the end of battle.
-/*	if (_finish_outcome.IsFinished() == false) {
-		_finish_outcome.Update(SystemManager->GetUpdateTime());
-
-		if (InputManager->ConfirmPress())
-			_finish_outcome.ForceFinish();
-		return;
-	} */
-
-	if (InputManager->UpPress()) {
-		_lose_options.InputUp();
-	}
-	else if (InputManager->DownPress()) {
-		_lose_options.InputDown();
-	}
-	else if (InputManager->ConfirmPress()) {
-		switch (_lose_options.GetSelection()) {
-			case 0: // Retry the battle
-				// TODO
-				break;
-			case 1: // Load from last save point
-				// TODO
-				break;
-			case 2: // Return to main menu
-			case 3: // Exit game
-				_state = FINISH_LOSE_CONFIRM;
-				break;
+	if (_state == FINISH_VICTORY_GROWTH) {
+		for (uint32 i = 0; i < _number_characters; i++) {
+			_character_window[i].Draw();
+			_DrawGrowth(i);
 		}
 	}
-
+	else if (_state == FINISH_VICTORY_SPOILS) {
+		_spoils_window.Draw();
+		_DrawSpoils();
+		_object_list.Draw();
+	}
 }
 
 
-void FinishWindow::_UpdateLoseConfirm() {
-	if (_lose_options.GetSelection() == 2) {
-		// Remove all game modes on the stack and return to boot mode
-		ModeManager->PopAll();
-		ModeManager->Push(new hoa_boot::BootMode());
+
+void FinishVictoryAssistant::_SetHeaderText() {
+	if (_state == FINISH_VICTORY_GROWTH) {
+		_header_text.SetDisplayText(UTranslate("XP Earned: ") + MakeUnicodeString(NumberToString(_xp_earned)));
+	}
+	else if (_state == FINISH_VICTORY_SPOILS) {
+		_header_text.SetDisplayText(UTranslate("Drunes Recovered: ") + MakeUnicodeString(NumberToString(_drunes_dropped)));
 	}
 	else {
-		SystemManager->ExitGame();
-	}
-}
-
-// ----- DRAW METHODS
-
-void FinishWindow::Draw() {
-	VideoManager->DisableSceneLighting();
-	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
-	//TEMP!
-	//Two different window arrangements for win and lose would be best
-	//Win has all the elaborate windows, lose just has the game over options
-	//MenuWindow::Draw();
-	//_items_window.Draw();
-
-	//TEMP!!!
-	//Just so everyone has an idea of the potential setup for the finishwindow
-
-	switch (_state) {
-		case FINISH_WIN_ANNOUNCE:
-			_DrawAnnounceWin();
-			break;
-		case FINISH_WIN_SHOW_GROWTH:
-		case FINISH_WIN_COUNTDOWN_GROWTH:
-		case FINISH_WIN_RESOLVE_GROWTH:
-			_character_window[0].Draw();
-			_character_window[1].Draw();
-			_character_window[2].Draw();
-			_character_window[3].Draw();
-
-			_xp_and_money_window.Draw();
-			_DrawWinGrowth();
-			break;
-		case FINISH_WIN_SHOW_SKILLS:
-			_character_window[0].Draw();
-			_character_window[1].Draw();
-			_character_window[2].Draw();
-			_character_window[3].Draw();
-
-			_xp_and_money_window.Draw();
-			_DrawWinSkills();
-			break;
-		case FINISH_WIN_SHOW_SPOILS:
-		case FINISH_WIN_COUNTDOWN_SPOILS:
-		case FINISH_WIN_RESOLVE_SPOILS:
-			_items_window.Draw();
-			_xp_and_money_window.Draw();
-			_DrawWinSpoils();
-			break;
-		case FINISH_LOSE_ANNOUNCE:
-			_DrawAnnounceLose();
-			break;
-		case FINISH_LOSE_CONFIRM:
-			_DrawLoseConfirm();
-			break;
-		case FINISH_WIN_COMPLETE:
-			break;
-		case FINISH_INVALID:
-		case FINISH_TOTAL:
-		default:
-			if (BATTLE_DEBUG)
-				cerr << "BATTLE ERROR: In FinishWindow::Draw(), the window state was invalid: " << _state << endl;
-			return;
+		_header_text.SetDisplayText("");
 	}
 }
 
 
-void FinishWindow::_DrawAnnounceWin() {
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->Move(512.0f, 384.0f);
-// 	_finish_outcome.Draw();
-	VideoManager->Text()->Draw(UTranslate("Victory!!!"), TextStyle("title24"));
-}
 
-
-
-void FinishWindow::_DrawWinGrowth() {
-	//Draw XP Earned
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->Move(496, 683);
-	VideoManager->Text()->Draw(UTranslate("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
-
-	//Now draw char info
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
-	//VideoManager->Move(265, 580);
-	VideoManager->Move(270, 595);
-
-	ustring display_text;
-	for (uint32 i = 0; i < _characters.size(); ++i)
-	{
-		//Portraits
-		_char_portraits[i].Draw();
-
-		VideoManager->MoveRelative(5,-55);
-		VideoManager->Text()->Draw(UTranslate("Lv. ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetExperienceLevel())));
-		VideoManager->MoveRelative(0, -15);
-		VideoManager->Text()->Draw(UTranslate("XP To Next: ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetExperienceForNextLevel() - _characters[i]->GetExperiencePoints())));
-
-		//First column
-		//VideoManager->MoveRelative(150, 40);
-		//VideoManager->MoveRelative(150, 25);
-		VideoManager->MoveRelative(140, 105);
-
-		//HP
-		display_text = UTranslate("HP: ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetMaxHitPoints()));
-		if (_growth_gained[i][0])
-		{
-			display_text += MakeUnicodeString(" (") +
-			MakeUnicodeString(NumberToString(_growth_gained[i][0])) + MakeUnicodeString(")");
+void FinishVictoryAssistant::_CreateCharacterGUIObjects() {
+	// ----- (1): Create the character windows. The lowest one does not have its lower border removed
+	float next_ypos = CHAR_WINDOW_YPOS;
+	for (uint32 i = 0; i < _number_characters; i++) {
+		_number_character_windows_created++;
+		if ((i + 1) >= _number_characters) {
+			_character_window[i].Create(CHAR_WINDOW_WIDTH, CHAR_WINDOW_HEIGHT);
 		}
-		VideoManager->Text()->Draw(display_text);
-
-		//SP
-		VideoManager->MoveRelative(0, -26);
-		display_text = UTranslate("SP: ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetMaxSkillPoints()));
-		if (_growth_gained[i][1])
-		{
-			display_text += MakeUnicodeString(" (") +
-			MakeUnicodeString(NumberToString(_growth_gained[i][1])) + MakeUnicodeString(")");
+		else {
+			_character_window[i].Create(CHAR_WINDOW_WIDTH, CHAR_WINDOW_HEIGHT, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
 		}
-		VideoManager->Text()->Draw(display_text);
 
-		//STR
-		VideoManager->MoveRelative(0, -26);
-		display_text = UTranslate("STR: ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
-		if (_growth_gained[i][2])
-		{
-			display_text += MakeUnicodeString(" (") +
-			MakeUnicodeString(NumberToString(_growth_gained[i][2])) + MakeUnicodeString(")");
+		_character_window[i].SetPosition(CHAR_WINDOW_XPOS, next_ypos);
+		_character_window[i].SetAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
+		_character_window[i].Show();
+		next_ypos -= CHAR_WINDOW_HEIGHT;
+	}
+
+	// ----- (2): Construct GUI objects that will fill each character window
+	for (uint32 i = 0; i < _number_characters; i++) {
+		_growth_list[i].SetOwner(&_character_window[i]);
+		_growth_list[i].SetPosition(290.0f, 115.0f);
+		_growth_list[i].SetDimensions(200.0f, 100.0f, 4, 4, 4, 4);
+		_growth_list[i].SetTextStyle(TextStyle("text20", Color::white, VIDEO_TEXT_SHADOW_DARK));
+		_growth_list[i].SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+		_growth_list[i].SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
+		_growth_list[i].SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+		for (uint32 j = 0; j < 16; j ++) {
+			_growth_list[i].AddOption();
 		}
-		VideoManager->Text()->Draw(display_text);
 
-		//VIG
-		VideoManager->MoveRelative(0, -26);
-		display_text = UTranslate("VIG: ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetVigor()));
-		if (_growth_gained[i][3])
-		{
-			display_text += MakeUnicodeString(" (") +
-			MakeUnicodeString(NumberToString(_growth_gained[i][3])) + MakeUnicodeString(")");
-		}
-		VideoManager->Text()->Draw(display_text);
+		_level_xp_text[i].SetOwner(&_character_window[i]);
+		_level_xp_text[i].SetPosition(130.0f, 110.0f);
+		_level_xp_text[i].SetDimensions(200.0f, 40.0f);
+		_level_xp_text[i].SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+		_level_xp_text[i].SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+		_level_xp_text[i].SetDisplaySpeed(30);
+		_level_xp_text[i].SetTextStyle(TextStyle("text20", Color::white));
+		_level_xp_text[i].SetDisplayMode(VIDEO_TEXT_INSTANT);
+		_level_xp_text[i].SetDisplayText(UTranslate("Level: ") + MakeUnicodeString(NumberToString(_characters[i]->GetExperienceLevel())) +
+			MakeUnicodeString("\n") + UTranslate("XP: ") + MakeUnicodeString(NumberToString(_characters[i]->GetExperienceForNextLevel())));
 
-		//Second Column
-		//FOR
-		VideoManager->MoveRelative(155, 78);
-		display_text = UTranslate("FOR: ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
-		if (_growth_gained[i][4])
-		{
-			display_text += MakeUnicodeString(" (") +
-			MakeUnicodeString(NumberToString(_growth_gained[i][4])) + MakeUnicodeString(")");
-		}
-		VideoManager->Text()->Draw(display_text);
+		_skill_text[i].SetOwner(&_character_window[i]);
+		_skill_text[i].SetPosition(130.0f, 60.0f);
+		_skill_text[i].SetDimensions(200.0f, 40.0f);
+		_skill_text[i].SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+		_skill_text[i].SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+		_skill_text[i].SetDisplaySpeed(30);
+		_skill_text[i].SetTextStyle(TextStyle("text20", Color::white));
+		_skill_text[i].SetDisplayMode(VIDEO_TEXT_INSTANT);
+	}
+} // void FinishVictoryAssistant::_CreateCharacterGUIObjects()
 
-		//PRO
-		VideoManager->MoveRelative(0, -26);
-		display_text = UTranslate("PRO: ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetProtection()));
-		if (_growth_gained[i][5])
-		{
-			display_text += MakeUnicodeString(" (") +
-			MakeUnicodeString(NumberToString(_growth_gained[i][5])) + MakeUnicodeString(")");
-		}
-		VideoManager->Text()->Draw(display_text);
 
-		//AGI
-		VideoManager->MoveRelative(0, -26);
-		display_text = UTranslate("AGI: ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetAgility()));
-		if (_growth_gained[i][6])
-		{
-			display_text += MakeUnicodeString(" (") +
-			MakeUnicodeString(NumberToString(_growth_gained[i][6])) + MakeUnicodeString(")");
-		}
-		VideoManager->Text()->Draw(display_text);
 
-		//EVD
-		VideoManager->MoveRelative(0, -26);
-		display_text = UTranslate("EVD: ") +
-			MakeUnicodeString(NumberToString(_characters[i]->GetEvade()));
-		if (_growth_gained[i][7])
-		{
-			display_text += MakeUnicodeString(" (") +
-			MakeUnicodeString(NumberToString(_growth_gained[i][7])) + MakeUnicodeString(")");
-		}
-		VideoManager->Text()->Draw(display_text);
+void FinishVictoryAssistant::_CreateObjectList() {
+	for (map<hoa_global::GlobalObject*, int32>::iterator i = _objects_dropped.begin(); i != _objects_dropped.end(); i++) {
+		GlobalObject* obj = i->first;
+		_object_list.AddOption(MakeUnicodeString("<" + obj->GetIconImage().GetFilename() + "><30>")
+			+ obj->GetName() + MakeUnicodeString("<R>x" + NumberToString(i->second)));
+	}
 
-		VideoManager->MoveRelative(-300,-140 + 43);
+	// Resize all icon images so that they are the same height as the text
+	for (uint32 i = 0; i < _object_list.GetNumberOptions(); i++) {
+		_object_list.GetEmbeddedImage(i)->SetDimensions(30.0f, 30.0f);
 	}
 }
 
-void FinishWindow::_DrawWinSkills()
-{
-	//Draw XP Earned
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->Move(496, 683);
-	VideoManager->Text()->Draw(UTranslate("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
 
-	//Now draw char info
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
-	//VideoManager->Move(265, 580);
-	VideoManager->Move(270, 595);
+void FinishVictoryAssistant::_UpdateGrowth() {
+	// TODO: Add XP growth gradually instead of all at once
+	static uint32 xp_to_add = _xp_earned;
 
-	std::vector<GlobalSkill*>* skills_learned = NULL;
-	ustring display_text;
-	for (uint32 i = 0; i < _characters.size(); ++i)
-	{
-		//Portrait
-		_char_portraits[i].Draw();
-		//TEMP
-		VideoManager->MoveRelative(140, 35);
-		VideoManager->Text()->Draw(UTranslate("Skills Learned"));
-		VideoManager->MoveRelative(50, -30);
-
-		skills_learned = _character_growths[i]->GetSkillsLearned();
-
-		for (uint32 j = 0; j < skills_learned->size(); ++j)
-		{
-			VideoManager->Text()->Draw(skills_learned->at(j)->GetName());
-			VideoManager->MoveRelative(0, -20);
+	if (xp_to_add == 0) {
+		return;
+	}
+	
+	for (uint32 i = 0; i < _number_characters; i++) {
+		// Don't add experience points to dead characters
+		if (_characters[i]->IsAlive() == false) {
+			continue;
 		}
 
-		VideoManager->MoveRelative(-190, -5 + (20 * (float)(skills_learned->size())) - 140);
+		if (_characters[i]->AddExperiencePoints(xp_to_add) == true) {
+			do {
+				// TODO: Only add the  that experienced growth
+				_growth_list[i].SetOptionText(0, UTranslate("HP:"));
+				if (_character_growths[i]->GetHitPointsGrowth() > 0)
+					_growth_list[i].SetOptionText(1, MakeUnicodeString(NumberToString(_character_growths[i]->GetHitPointsGrowth())));
+				_growth_list[i].SetOptionText(2, UTranslate("SP:"));
+				if (_character_growths[i]->GetSkillPointsGrowth() > 0)
+					_growth_list[i].SetOptionText(3, MakeUnicodeString(NumberToString(_character_growths[i]->GetSkillPointsGrowth())));
+				_growth_list[i].SetOptionText(4, UTranslate("STR:"));
+				if (_character_growths[i]->GetStrengthGrowth() > 0)
+					_growth_list[i].SetOptionText(5, MakeUnicodeString(NumberToString(_character_growths[i]->GetStrengthGrowth())));
+				_growth_list[i].SetOptionText(6, UTranslate("VIG:"));
+				if (_character_growths[i]->GetVigorGrowth() > 0)
+					_growth_list[i].SetOptionText(7, MakeUnicodeString(NumberToString(_character_growths[i]->GetVigorGrowth())));
+				_growth_list[i].SetOptionText(8, UTranslate("FOR:"));
+				if (_character_growths[i]->GetFortitudeGrowth() > 0)
+					_growth_list[i].SetOptionText(9, MakeUnicodeString(NumberToString(_character_growths[i]->GetFortitudeGrowth())));
+				_growth_list[i].SetOptionText(10, UTranslate("PRO:"));
+				if (_character_growths[i]->GetProtectionGrowth() > 0)
+					_growth_list[i].SetOptionText(11, MakeUnicodeString(NumberToString(_character_growths[i]->GetProtectionGrowth())));
+				_growth_list[i].SetOptionText(12, UTranslate("AGI:"));
+				if (_character_growths[i]->GetAgilityGrowth() > 0)
+					_growth_list[i].SetOptionText(13, MakeUnicodeString(NumberToString(_character_growths[i]->GetAgilityGrowth())));
+				_growth_list[i].SetOptionText(14, UTranslate("EVA:"));
+				if (_character_growths[i]->GetEvadeGrowth() > 0.0f)
+					_growth_list[i].SetOptionText(15, MakeUnicodeString(NumberToString(_character_growths[i]->GetEvadeGrowth())));
+
+				_character_growths[i]->AcknowledgeGrowth();
+			} while (_character_growths[i]->IsGrowthDetected());
+
+			std::vector<GlobalSkill*>* new_skills = _character_growths[i]->GetSkillsLearned();
+			if (new_skills->empty() == false) {
+				_skill_text[i].SetDisplayText(UTranslate("New Skill Learned:   ") + new_skills->at(0)->GetName());
+			}
+		}
+
+		// TODO: check for new experience level
+		_level_xp_text[i].SetDisplayText(UTranslate("Level: ") + MakeUnicodeString(NumberToString(_characters[i]->GetExperienceLevel())) +
+			MakeUnicodeString("\n") + UTranslate("XP: ") + MakeUnicodeString(NumberToString(_characters[i]->GetExperienceForNextLevel())));
 	}
+
+	xp_to_add = 0;
 }
 
-void FinishWindow::_DrawWinSpoils()
-{
-	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
-	//VideoManager->Move(496, 683);
-	//VideoManager->Move(96, 683);
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
-	VideoManager->Move(280, 683);
-	VideoManager->Text()->Draw(UTranslate("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money)));
 
-	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_CENTER, 0);
-	VideoManager->Move(712, 683);
-	VideoManager->Text()->Draw(MakeUnicodeString("$ ") + MakeUnicodeString(NumberToString(GlobalManager->GetDrunes())));
 
+void FinishVictoryAssistant::_UpdateSpoils() {
+	// TODO: Add drunes gradually instead of all at once
+	static uint32 drunes_to_add = _drunes_dropped;
+
+	if (drunes_to_add == 0) {
+		return;
+	}
+	
+	GlobalManager->AddDrunes(drunes_to_add);
+	drunes_to_add = 0;
+}
+
+
+
+void FinishVictoryAssistant::_DrawGrowth(uint32 index) {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
-	//VideoManager->Move(700, 640);
-	VideoManager->Move(475, 640);
-	VideoManager->Text()->Draw(UTranslate("Items"));
-	//VideoManager->MoveRelative(-140, -25);
-	VideoManager->MoveRelative(-200, -35);
+	VideoManager->Move(CHAR_WINDOW_XPOS - (CHAR_WINDOW_WIDTH / 2) + 20.0f, (CHAR_WINDOW_YPOS - 15.0f) - (CHAR_WINDOW_HEIGHT * index));
+	_character_portraits[index].Draw();
 
-	std::map<GlobalObject*, int32>::iterator iter;
+	_level_xp_text[index].Draw();
+	_growth_list[index].Draw();
+	_skill_text[index].Draw();
+}
 
-	for (iter = _victory_items.begin(); iter != _victory_items.end(); ++iter)
-	{
-		VideoManager->Text()->Draw(iter->first->GetName());
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, 0);
-		VideoManager->MoveRelative(425, 0);
-		VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(iter->second)));
-		VideoManager->MoveRelative(-425, -25);
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+
+
+void FinishVictoryAssistant::_DrawSpoils() {
+	_object_header_text.Draw();
+	_object_list.Draw();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// FinishSupervisor class
+////////////////////////////////////////////////////////////////////////////////
+
+FinishSupervisor::FinishSupervisor() :
+	_state(FINISH_INVALID),
+	_battle_victory(false),
+	_defeat_assistant(_state),
+	_victory_assistant(_state)
+{
+	_outcome_text.SetPosition(400.0f, 700.0f);
+	_outcome_text.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_outcome_text.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_outcome_text.SetDimensions(400.0f, 50.0f);
+	_outcome_text.SetDisplaySpeed(30);
+	_outcome_text.SetTextStyle(TextStyle("text24", Color::white));
+	_outcome_text.SetDisplayMode(VIDEO_TEXT_INSTANT);
+}
+
+
+
+FinishSupervisor::~FinishSupervisor() {
+
+}
+
+
+
+void FinishSupervisor::Initialize(bool victory) {
+	_battle_victory = victory;
+	_state = FINISH_ANNOUNCE_RESULT;
+
+	if (_battle_victory == true) {
+		_outcome_text.SetDisplayText("The heroes were victorious!");
+	}
+	else {
+		_outcome_text.SetDisplayText("But the heroes fell in battle...");
 	}
 }
 
 
 
-void FinishWindow::_DrawAnnounceLose() {
+void FinishSupervisor::Update() {
+	if (_state == FINISH_ANNOUNCE_RESULT) {
+		if (_battle_victory == true) {
+			_state = FINISH_VICTORY_GROWTH;
+			_victory_assistant.Initialize(0);
+		}
+		else {
+			_state = FINISH_DEFEAT_SELECT;
+			_defeat_assistant.Initialize(0);
+		}
+		return;
+	}
+	
+	if (_battle_victory == true) {
+		_victory_assistant.Update();
+	}
+	else {
+		_defeat_assistant.Update();
+	}
 
-	_lose_options.Draw();
+	if (_state == FINISH_END) {
+		if (_battle_victory == true) {
+			// TODO: start battle end sequence instead of exiting immediately
+			BattleMode::CurrentInstance()->Exit();
+		}
 
+		else {
+			switch (_defeat_assistant.GetDefeatOption()) {
+				case DEFEAT_OPTION_RETRY:
+					// TODO: reset battle to initial state
+					break;
+				case DEFEAT_OPTION_RESTART:
+					// TODO: Load last saved game
+					break;
+				case DEFEAT_OPTION_RETURN:
+					ModeManager->PopAll();
+					ModeManager->Push(new hoa_boot::BootMode());
+					break;
+				case DEFEAT_OPTION_RETIRE:
+					SystemManager->ExitGame();
+					break;
+				default:
+					IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid defeat option selected: " << _defeat_assistant.GetDefeatOption() << endl;
+					break;
+			}
+		}
+	}
 }
 
 
 
-void FinishWindow::_DrawLoseConfirm() {
-
+void FinishSupervisor::Draw() {
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	_outcome_text.Draw();
+	
+	if (_battle_victory == true) {
+		_victory_assistant.Draw();
+	}
+	else {
+		_defeat_assistant.Draw();
+	}
 }
 
 } // namespace private_battle

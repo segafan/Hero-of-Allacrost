@@ -115,19 +115,19 @@ enum SelectMode {
 };
 
 enum HORIZONTAL_ARROWS_POSITION {
-  H_POSITION_INVALID = -1,
-  H_POSITION_BOTTOM = 0,
-  H_POSITION_MIDDLE = 1,
-  H_POSITION_TOP = 2,
-  H_POSITION_TOTAL = 3
+	H_POSITION_INVALID = -1,
+	H_POSITION_BOTTOM = 0,
+	H_POSITION_MIDDLE = 1,
+	H_POSITION_TOP = 2,
+	H_POSITION_TOTAL = 3
 };
 
 enum VERTICAL_ARROWS_POSITION {
-  V_POSITION_INVALID = -1,
-  V_POSITION_LEFT = 0,
-  V_POSITION_CENTER = 1,
-  V_POSITION_RIGHT = 2,
-  V_POSITION_TOTAL = 3
+	V_POSITION_INVALID = -1,
+	V_POSITION_LEFT = 0,
+	V_POSITION_CENTER = 1,
+	V_POSITION_RIGHT = 2,
+	V_POSITION_TOTAL = 3
 };
 
 
@@ -222,7 +222,7 @@ public:
 	hoa_video::StillImage* image;
 }; // class Option
 
-} // namespace private_video
+} // namespace private_gui
 
 
 /** ****************************************************************************
@@ -641,7 +641,7 @@ private:
 
 	//! \brief Draws an outline of the option box and the inner cell boundaries
 	void _DEBUG_DrawOutline();
-}; // class OptionBox : public private_video::GUIControl
+}; // class OptionBox : public private_gui::GUIControl
 
 } // namespace hoa_gui
 

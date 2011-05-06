@@ -321,7 +321,7 @@ BattleMode::BattleMode() :
 	_state(BATTLE_STATE_INVALID),
 	_sequence_supervisor(this),
 	_command_supervisor(new CommandSupervisor()),
-	_finish_window(new FinishWindow()),
+	_finish_supervisor(new FinishSupervisor()),
 	_current_number_swaps(0),
 	_default_music("mus/Confrontation.ogg"),
 	_winning_music("mus/Allacrost_Fanfare.ogg"),
@@ -391,7 +391,7 @@ BattleMode::~BattleMode() {
 	_ready_queue.clear();
 
 	delete _command_supervisor;
-	delete _finish_window;
+	delete _finish_supervisor;
 
 	if (_current_instance == this) {
 		_current_instance = NULL;
@@ -442,7 +442,7 @@ void BattleMode::Update() {
 	}
 
 	if (IsBattleFinished() == true) {
-		_finish_window->Update();
+		_finish_supervisor->Update();
 		return;
 	}
 
@@ -618,12 +618,12 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 		case BATTLE_STATE_VICTORY:
 			AddMusic(_winning_music);
 			PlayMusic(_winning_music);
-			_finish_window->Initialize(true);
+			_finish_supervisor->Initialize(true);
 			break;
 		case BATTLE_STATE_DEFEAT:
 			AddMusic(_losing_music);
 			PlayMusic(_losing_music);
-			_finish_window->Initialize(false);
+			_finish_supervisor->Initialize(false);
 			break;
 		default:
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "changed to invalid battle state: " << _state << endl;
@@ -899,6 +899,7 @@ void BattleMode::_Initialize() {
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		uint32 max_init_timer = _character_actors[i]->GetIdleStateTime() / 2;
 		_character_actors[i]->GetStateTimer().Update(RandomBoundedInteger(0, max_init_timer));
+
 	}
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		uint32 max_init_timer = _enemy_actors[i]->GetIdleStateTime() / 2;
@@ -1089,7 +1090,7 @@ void BattleMode::_DrawGUI() {
 		_command_supervisor->Draw();
 	}
 	if ((_state == BATTLE_STATE_VICTORY || _state == BATTLE_STATE_DEFEAT)) {// && _after_scripts_finished) {
-		_finish_window->Draw();
+		_finish_supervisor->Draw();
 	}
 }
 

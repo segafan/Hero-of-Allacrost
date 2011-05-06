@@ -121,7 +121,6 @@ private:
 *** ***************************************************************************/
 class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::SequenceSupervisor;
-	friend class private_battle::FinishWindow;
 
 public:
 	BattleMode();
@@ -343,11 +342,8 @@ private:
 	//! \brief Manages state and visuals when the player is selecting a command for a character
 	private_battle::CommandSupervisor* _command_supervisor;
 
-	/** \brief Window which presents information and options after a battle is concluded
-	*** Located at the center of the screen, this window only appears after one party in the battle has defeated
-	*** the other.
-	**/
-	private_battle::FinishWindow* _finish_window;
+	//! \brief Presents player with information and options after a battle has concluded
+	private_battle::FinishSupervisor* _finish_supervisor;
 	//@}
 
 	//! \name Character Swap Data
