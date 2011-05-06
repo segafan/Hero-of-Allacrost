@@ -157,7 +157,7 @@ void TextBox::Draw() {
 		text_xpos = left;
 	}
 	else if (_text_xalign == VIDEO_X_CENTER) {
-		text_xpos = (left + right) * 0.5f;
+		text_xpos = (left + right) * 0.5f; // TODO: Is this logic right? It doesn't seem so...
 	}
 	else { // (_text_xalign == VIDEO_X_RIGHT)
 		text_xpos = right;

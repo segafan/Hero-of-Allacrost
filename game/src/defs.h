@@ -239,7 +239,9 @@ namespace hoa_battle {
 		class CharacterCommand;
 		class CommandSupervisor;
 
-		class FinishWindow;
+		class FinishDefeatAssistant;
+		class FinishVictoryAssistant;
+		class FinishSupervisor;
 
 		class BattleTimer;
 		class BattleTarget;
