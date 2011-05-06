@@ -83,6 +83,23 @@ BattleActor::~BattleActor() {
 
 
 
+void BattleActor::ResetActor() {
+	_effects_supervisor->RemoveAllStatus();
+	
+	ResetHitPoints();
+	ResetSkillPoints();
+	ResetStrength();
+	ResetVigor();
+	ResetFortitude();
+	ResetProtection();
+	ResetAgility();
+	ResetEvade();
+
+	ChangeState(ACTOR_STATE_IDLE);
+}
+
+
+
 void BattleActor::ChangeState(ACTOR_STATE new_state) {
 	if (_state == new_state) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "actor was already in new state: " << new_state << endl;
@@ -354,6 +371,14 @@ BattleCharacter::~BattleCharacter() {
 
 
 
+void BattleCharacter::ResetActor() {
+	BattleActor::ResetActor();
+
+	_global_character->RetrieveBattleAnimation("idle")->GetCurrentFrame()->DisableGrayScale();
+}
+
+
+
 void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
 	BattleActor::ChangeState(new_state);
 
@@ -578,6 +603,15 @@ bool BattleEnemy::operator<(const BattleEnemy & other) const {
 	//if ((_y_location - ((*GetActor()).GetHeight())) > (other.GetYLocation() - (*(other.GetActor()).GetHeight())))
 	//	return true;
 	return false;
+}
+
+
+
+void BattleEnemy::ResetActor() {
+	BattleActor::ResetActor();
+
+	vector<StillImage>& sprite_frames = *(_global_enemy->GetBattleSpriteFrames());
+	sprite_frames[3].DisableGrayScale();
 }
 
 

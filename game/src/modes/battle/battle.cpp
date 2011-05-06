@@ -555,6 +555,25 @@ void BattleMode::AddMusic(const string& filename) {
 
 
 
+void BattleMode::RestartBattle() {
+	// Reset the state of all characters and enemies
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		_character_actors[i]->ResetActor();
+	}
+
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		_enemy_actors[i]->ResetActor();
+	}
+
+	_current_music = _default_music;
+	_battle_music[_default_music].Rewind();
+	_battle_music[_default_music].Play();
+
+	ChangeState(BATTLE_STATE_INITIAL);
+}
+
+
+
 void BattleMode::FreezeTimers() {
 	// Pause scripts
 // 	list<BattleAction*>::iterator it = _action_queue.begin();

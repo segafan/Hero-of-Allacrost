@@ -175,6 +175,12 @@ public:
 	**/
 	void AddMusic(const std::string& filename);
 
+	/** \brief Restores the battle to its initial state, allowing the player another attempt to achieve victory
+	***
+	***
+	**/
+	void RestartBattle();
+
 	//! \brief Pauses all timers used in any battle mode classes
 	void FreezeTimers();
 
