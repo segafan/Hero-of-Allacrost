@@ -84,6 +84,12 @@ public:
 	void AddSkill(uint32 skill_id)
 		{}
 
+	/** \brief Restores an actor to the initial state it was in when the battle began
+	***
+	*** This includes resetting the actor's state, attributes, status effect, and animations.
+	**/
+	virtual void ResetActor();
+
 	/** \brief Changes the state of the actor and modifies the actor's properties accordingly
 	*** \param new_state The state to set the actor to
 	**/
@@ -365,6 +371,8 @@ public:
 	bool IsEnemy() const
 		{ return false; }
 
+	void ResetActor();
+
 	void ChangeState(ACTOR_STATE new_state);
 
 	float GetSpriteWidth() const
@@ -429,6 +437,8 @@ public:
 
 	bool IsEnemy() const
 		{ return true; }
+
+	void ResetActor();
 
 	void ChangeState(ACTOR_STATE new_state);
 

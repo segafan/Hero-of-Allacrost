@@ -13,6 +13,7 @@
 *** \brief   Source file for battle finish menu
 *** ***************************************************************************/
 
+#include "audio.h"
 #include "mode_manager.h"
 #include "input.h"
 #include "system.h"
@@ -120,9 +121,8 @@ FinishDefeatAssistant::FinishDefeatAssistant(FINISH_STATE& state) :
 	_tooltip.SetTextStyle(TextStyle("text20", Color::white));
 	_tooltip.SetDisplayMode(VIDEO_TEXT_INSTANT);
 
-	// TEMP: these two options are disabled because their features are not yet implemented
-	_options.EnableOption(0, false);
-	_options.EnableOption(1, false);
+	// TEMP: disabled because feature is not yet available
+	_options.EnableOption(DEFEAT_OPTION_RESTART, false);
 }
 
 
@@ -138,7 +138,7 @@ void FinishDefeatAssistant::Initialize(uint32 retries_left) {
 	_retries_left = retries_left;
 
 	if (_retries_left == 0) {
-		_options.EnableOption(0, false);
+		_options.EnableOption(DEFEAT_OPTION_RETRY, false);
 	}
 
 	_SetTooltipText();
@@ -153,9 +153,14 @@ void FinishDefeatAssistant::Update() {
 	switch (_state) {
 		case FINISH_DEFEAT_SELECT:
 			if (InputManager->ConfirmPress()) {
-				_state = FINISH_DEFEAT_CONFIRM;
-				_confirm_options.SetSelection(1); // Set default confirm option to "No"
-				_SetTooltipText();
+				if (_options.IsOptionEnabled(_options.GetSelection()) == false) {
+					AudioManager->PlaySound("snd/cancel.wav");
+				}
+				else {
+					_state = FINISH_DEFEAT_CONFIRM;
+					_confirm_options.SetSelection(1); // Set default confirm option to "No"
+					_SetTooltipText();
+				}
 			}
 
 			else if (InputManager->LeftPress()) {
@@ -231,10 +236,10 @@ void FinishDefeatAssistant::Draw() {
 void FinishDefeatAssistant::_SetTooltipText() {
 	_tooltip.SetDisplayText("");
 	
-	if (_state == FINISH_DEFEAT_SELECT) {
+	if ((_state == FINISH_ANNOUNCE_RESULT) || (_state == FINISH_DEFEAT_SELECT)) {
 		switch (_options.GetSelection()) {
 			case DEFEAT_OPTION_RETRY:
-				_tooltip.SetDisplayText("Start over from the beginning of this battle.");
+				_tooltip.SetDisplayText("Start over from the beginning of this battle.\nAttempts Remaining: " + NumberToString(_retries_left));
 				break;
 			case DEFEAT_OPTION_RESTART:
 				_tooltip.SetDisplayText("Load the game from the last save game point.");
@@ -652,6 +657,7 @@ void FinishVictoryAssistant::_DrawSpoils() {
 
 FinishSupervisor::FinishSupervisor() :
 	_state(FINISH_INVALID),
+	_attempt_number(0),
 	_battle_victory(false),
 	_defeat_assistant(_state),
 	_victory_assistant(_state)
@@ -674,13 +680,22 @@ FinishSupervisor::~FinishSupervisor() {
 
 
 void FinishSupervisor::Initialize(bool victory) {
+	if (_attempt_number >= MAX_BATTLE_ATTEMPTS) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "exceeded maximum allowed number of battle attempts" << endl;
+	}
+	else {
+		_attempt_number++;
+	}
+
 	_battle_victory = victory;
 	_state = FINISH_ANNOUNCE_RESULT;
 
 	if (_battle_victory == true) {
+		_victory_assistant.Initialize(_attempt_number - 1);
 		_outcome_text.SetDisplayText("The heroes were victorious!");
 	}
 	else {
+		_defeat_assistant.Initialize(MAX_BATTLE_ATTEMPTS - _attempt_number);
 		_outcome_text.SetDisplayText("But the heroes fell in battle...");
 	}
 }
@@ -691,11 +706,9 @@ void FinishSupervisor::Update() {
 	if (_state == FINISH_ANNOUNCE_RESULT) {
 		if (_battle_victory == true) {
 			_state = FINISH_VICTORY_GROWTH;
-			_victory_assistant.Initialize(0);
 		}
 		else {
 			_state = FINISH_DEFEAT_SELECT;
-			_defeat_assistant.Initialize(0);
 		}
 		return;
 	}
@@ -716,7 +729,7 @@ void FinishSupervisor::Update() {
 		else {
 			switch (_defeat_assistant.GetDefeatOption()) {
 				case DEFEAT_OPTION_RETRY:
-					// TODO: reset battle to initial state
+					BattleMode::CurrentInstance()->RestartBattle();
 					break;
 				case DEFEAT_OPTION_RESTART:
 					// TODO: Load last saved game
@@ -739,7 +752,6 @@ void FinishSupervisor::Update() {
 
 
 void FinishSupervisor::Draw() {
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	_outcome_text.Draw();
 	
 	if (_battle_victory == true) {

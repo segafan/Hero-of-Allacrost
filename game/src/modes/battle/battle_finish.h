@@ -77,7 +77,7 @@ const uint32 DEFEAT_OPTION_RETIRE    = 3;
 //@}
 
 //! \brief The maximum number of times that the player can try to win the battle
-const uint32 MAX_BATTLE_ATTEMPTS   = 3;
+const uint32 MAX_BATTLE_ATTEMPTS     = 3;
 
 /** ****************************************************************************
 *** \brief Represents a collection of GUI objects drawn when the player loses the battle
@@ -255,8 +255,6 @@ private:
 *** the scene lighting and displaying the victory/defeat message.
 *** ***************************************************************************/
 class FinishSupervisor {
-	friend class hoa_battle::BattleMode;
-
 public:
 	FinishSupervisor();
 
@@ -279,6 +277,9 @@ public:
 private:
 	//! \brief Maintains state information to determine how to process user input and what to draw to the screen
 	FINISH_STATE _state;
+
+	//! \brief Tracks how many attempts the player has made thus far to win this battle
+	uint32 _attempt_number;
 
 	//! \brief Boolean used to determine if the battle was victorious for the player (true) or if the player was defeated (false)
 	bool _battle_victory;
