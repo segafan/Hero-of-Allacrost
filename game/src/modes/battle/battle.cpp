@@ -134,8 +134,7 @@ void SequenceSupervisor::_UpdateInitialSequence() {
 
 		for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
 			_battle->_character_actors[i]->SetXLocation(_battle->_character_actors[i]->GetXOrigin() - MAX_CHARACTER_OFFSET);
-			// TODO: Use character's running animation
-			// _battle->_character_actors[i]->ChangeSpriteAnimation("run");
+			_battle->_character_actors[i]->ChangeSpriteAnimation("run");
 		}
 
 		for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
@@ -172,8 +171,7 @@ void SequenceSupervisor::_UpdateInitialSequence() {
 			// Done to ensure that all actors are at their correct locations
 			for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
 				_battle->_character_actors[i]->SetXLocation(_battle->_character_actors[i]->GetXOrigin());
-				// TODO: switch character sprite back to idle after running in
-				// _battle->_character_actors[i]->ChangeSpriteAnimation("idle");
+				_battle->_character_actors[i]->ChangeSpriteAnimation("idle");
 			}
 			for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
 				_battle->_enemy_actors[i]->SetXLocation(_battle->_enemy_actors[i]->GetXOrigin());

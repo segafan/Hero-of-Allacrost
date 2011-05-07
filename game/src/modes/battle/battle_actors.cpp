@@ -434,8 +434,11 @@ void BattleCharacter::DrawSprite() {
 	if (_sprite_animation_alias == "idle") {
 		// no need to do anything
 	}
+	else if (_sprite_animation_alias == "run") {
+		// no need to do anything
+	}
 	else if (_animation_timer.IsFinished()) {
-		_sprite_animation_alias = "idle";
+		ChangeSpriteAnimation("idle");
 	}
 	else {
 		uint32 dist = 120 * _animation_timer.GetTimeExpired() / _animation_timer.GetDuration();
