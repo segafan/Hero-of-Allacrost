@@ -85,7 +85,8 @@ enum BATTLE_STATE {
 	BATTLE_STATE_EVENT     =  3, //!< A scripted event is taking place, suspending all standard action
 	BATTLE_STATE_VICTORY   =  4, //!< Battle has ended with the characters victorious
 	BATTLE_STATE_DEFEAT    =  5, //!< Battle has ended with the characters defeated
-	BATTLE_STATE_TOTAL     =  6
+	BATTLE_STATE_EXITING   =  6, //!< Player has closed battle windows and battle mode is fading out
+	BATTLE_STATE_TOTAL     =  7
 };
 
 
