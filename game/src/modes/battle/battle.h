@@ -87,8 +87,14 @@ private:
 	//! \brief Updates state when the battle is in its initial sequence
 	void _UpdateInitialSequence();
 
+	//! \brief Updates state when the battle is in its exiting sequence
+	void _UpdateExitingSequence();
+
 	//! \brief Main draw function for the initial sequence
 	void _DrawInitialSequence();
+
+	//! \brief Main draw function for the exiting sequence
+	void _DrawExitingSequence();
 
 	//! \brief Draws the battle background and other environmental graphics
 	void _DrawBackgroundGraphics();

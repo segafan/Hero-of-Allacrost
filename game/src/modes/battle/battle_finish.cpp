@@ -722,8 +722,9 @@ void FinishSupervisor::Update() {
 
 	if (_state == FINISH_END) {
 		if (_battle_victory == true) {
-			// TODO: start battle end sequence instead of exiting immediately
-			BattleMode::CurrentInstance()->Exit();
+			BattleMode::CurrentInstance()->ChangeState(BATTLE_STATE_EXITING);
+// 			// TODO: start battle end sequence instead of exiting immediately
+// 			BattleMode::CurrentInstance()->Exit();
 		}
 
 		else {
