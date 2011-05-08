@@ -197,10 +197,18 @@ void Grid::LoadMap()
 	ReadScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
-	if (read_data.OpenFile(string(_file_name.toAscii()), true) == false)
+	if (read_data.OpenFile(string(_file_name.toAscii()), true) == false) {
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
+		return;
+	}
 
-	read_data.OpenTable(string(_file_name.section('/', -1).remove(".lua").toAscii()));
+	string main_map_table = string(_file_name.section('/', -1).remove(".lua").toAscii());
+	if (read_data.DoesTableExist(main_map_table) == false) {
+		QMessageBox::warning(this, "Loading File...", QString("ERROR: file did not contain the main map table: %1").arg(QString::fromStdString(main_map_table)));
+		return;
+	}
+
+	read_data.OpenTable(main_map_table);
 
 	music_files.clear();
 	tileset_names.clear();
@@ -213,6 +221,13 @@ void Grid::LoadMap()
 	int num_contexts = read_data.ReadInt("num_map_contexts");
 	_height = read_data.ReadInt("num_tile_rows");
 	_width  = read_data.ReadInt("num_tile_cols");
+
+	if (read_data.IsErrorDetected()) {
+		QMessageBox::warning(this, "Loading File...", QString("ERROR: read data failure occurred for global map variables"));
+		// TODO: add the error message(s) returned by read_data.GetErrorMessages()
+		return;
+	}
+	
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
 
 	// Create selection layer
@@ -239,6 +254,12 @@ void Grid::LoadMap()
 	for (uint32 i = 1; i <= table_size; i++)
 		music_files << QString(read_data.ReadString(i).c_str()).remove(0,4);
 	read_data.CloseTable();
+
+	if (read_data.IsErrorDetected()) {
+		QMessageBox::warning(this, "Loading File...", QString("ERROR: read data failure occurred for string tables"));
+		// TODO: add the error message(s) returned by read_data.GetErrorMessages()
+		return;
+	}
 	
 	// Loading the tileset images using LoadMultiImage is done in editor.cpp in
 	// FileOpen via creation of the TilesetTable(s)
@@ -279,6 +300,12 @@ void Grid::LoadMap()
 		vect.clear();
 	} // iterate through the rows of the upper layer
 	read_data.CloseTable();
+
+	if (read_data.IsErrorDetected()) {
+		QMessageBox::warning(this, "Loading File...", QString("ERROR: read data failure occurred for tile layer tables"));
+		// TODO: add the error message(s) returned by read_data.GetErrorMessages()
+		return;
+	}
 
 	// Load sprites
 	/*
@@ -395,6 +422,12 @@ void Grid::LoadMap()
 			} // switch on the layers
 		} // iterate through all tiles in this context
 	} // iterate through all existing contexts
+
+	if (read_data.IsErrorDetected()) {
+		QMessageBox::warning(this, "Loading File...", QString("ERROR: read data failure occurred for context tables"));
+		// TODO: add the error message(s) returned by read_data.GetErrorMessages()
+		return;
+	}
 
 	read_data.CloseTable();
 } // LoadMap()
