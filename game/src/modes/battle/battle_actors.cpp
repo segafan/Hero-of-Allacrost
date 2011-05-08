@@ -55,6 +55,7 @@ BattleActor::BattleActor(GlobalActor* actor) :
 	_execution_finished(false),
 	_state_paused(false),
 	_idle_state_time(0),
+	_animation_timer(0),
 	_effects_supervisor(new EffectsSupervisor(this)),
 	_indicator_supervisor(new IndicatorSupervisor(this))
 {
@@ -183,6 +184,21 @@ void BattleActor::RegisterDamage(uint32 amount, BattleTarget* target) {
 
 	if (GetHitPoints() == 0) {
 		ChangeState(ACTOR_STATE_DEAD);
+	}
+
+	// Apply a stun to the actor timer depending on the amount of damage dealt
+	float damage_percent = static_cast<float>(amount) / static_cast<float>(GetMaxHitPoints());
+	if (damage_percent < 0.10f) {
+		_state_timer.StunTimer(250);
+	}
+	else if (damage_percent < 0.25f) {
+		_state_timer.StunTimer(500);
+	}
+	else if (damage_percent < 0.50f) {
+		_state_timer.StunTimer(750);
+	}
+	else { // (damage_percent >= 0.50f)
+		_state_timer.StunTimer(1000);
 	}
 
 	// If the damage dealt was to a point target type, check for and apply any status effects triggered by this point hit
@@ -344,8 +360,7 @@ float BattleActor::TotalEvadeRating() {
 BattleCharacter::BattleCharacter(GlobalCharacter* character) :
 	BattleActor(character),
 	_global_character(character),
-	_sprite_animation_alias("idle"),
-	_animation_timer(0)
+	_sprite_animation_alias("idle")
 {
 	if (_stamina_icon.Load("img/icons/actors/characters/" + character->GetFilename() + ".png", 45, 45) == false)
 		PRINT_ERROR << "unable to load stamina icon for character: " << character->GetFilename() << endl;

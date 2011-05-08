@@ -285,7 +285,7 @@ public:
 	hoa_video::StillImage& GetStaminaIcon()
 		{ return _stamina_icon; }
 
-	hoa_system::SystemTimer& GetStateTimer()
+	BattleTimer& GetStateTimer()
 		{ return _state_timer; }
 
 	void SetXOrigin(float x_origin)
@@ -338,7 +338,10 @@ protected:
 	uint32 _idle_state_time;
 
 	//! \brief A timer used as the character progresses through the standard series of actor states
-	hoa_system::SystemTimer _state_timer;
+	BattleTimer _state_timer;
+
+	//! \brief Used to assist in the animation of actors as they move on the battlefield
+	hoa_system::SystemTimer _animation_timer;
 
 	// TODO: add later for effects such as "petrify"
 //	//! \brief When set to true, the actor essentially has immunity and can not be targeted by attacks
@@ -409,9 +412,6 @@ protected:
 
 	//! \brief Contains the identifier text of the current sprite animation
 	std::string _sprite_animation_alias;
-
-	//! \brief Contains countdown timer of current animation
-	hoa_system::SystemTimer _animation_timer;
 
 	//! \brief Rendered text of the character's name
 	hoa_video::TextImage _name_text;
