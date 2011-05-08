@@ -322,7 +322,7 @@ uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget
 *** Evaluate the needs of a timer in the battle code and determine whether or not
 *** it should use this class or if the standard SystemTimer will meet its needs.
 *** ***************************************************************************/
-class BattleTimer : hoa_system::SystemTimer {
+class BattleTimer : public hoa_system::SystemTimer {
 	friend class SystemEngine; // For allowing SystemEngine to call the _AutoUpdate() method
 
 public:
@@ -345,6 +345,9 @@ public:
 	**/
 	void Update(uint32 time);
 
+	//! \brief Overrides the SystemTimer::Reset() method
+	void Reset();
+
 	/** \brief Sets the time expired member and updates the timer object appropriately
 	*** \param time The value to set for the expiration time
 	***
@@ -362,6 +365,16 @@ public:
 	**/
 	void SetTimeExpired(uint32 time);
 
+	/** \brief Stops the timer for the amount of time specified before it can continue
+	*** \param time The number of milliseconds for the timer to remain "stunned"
+	***
+	*** You can call this function multiple times and the stun time values will accumulate. For example, if you
+	*** call the function with a value of 100, then 20ms later call it again with a value of 50, the stun time
+	*** will be 130ms after the second call (100 - 20 + 50).
+	**/
+	void StunTimer(uint32 time)
+		{ _stun_time += time; }
+
 	/** \brief Activates or deactivates the timer multiplier
 	*** \param activate True will activate and set the multiplier while false will deactivate.
 	*** \param multiplier The multiplier value to apply towards the timer, which should be positive.
@@ -371,28 +384,55 @@ public:
 	*** So for example if the raw update time is 25 and the multiplier value is 0.8f, the actual
 	*** update time for the class will be 20.
 	**/
-	void ActivateTimeMultiplier(bool activate, float multiplier);
+	void ActivateMultiplier(bool activate, float multiplier);
 
 	//! \name Class member accessor methods
 	//@{
-	bool IsTimeMultiplierActive() const
-		{ return _time_multiplier_active; }
+	bool IsStunActive() const
+		{ return (_stun_time > 0); }
 
-	float GetTimeMultiplier() const
-		{ return _time_multiplier; }
+	bool IsMultiplierActive() const
+		{ return _multiplier_active; }
+
+	float GetMultiplierFactor() const
+		{ return _multiplier_factor; }
 	//@}
 
 protected:
+	//! \brief This value must be consumed by the update process before the _time_expired member can continue to be updated
+	uint32 _stun_time;
+
+	/** \brief Constantly tries to approach the value of _time_expired in a gradual manner
+	*** 
+	*** This member allows us to show "gradual shifts" whenever the _time_expired member jumps to a new value. For example,
+	*** if a battle skill is used that reduces the _time_expired value of the target to zero, instead of instantly jumping the
+	*** stamina portrait of the target to the zero mark on the stamina bar, this member will show a quick but gradual move downward.
+	**/
+	uint32 _visible_time_expired;
+	
 	//! \brief When true the timer multiplier is applied to all timer updates
-	bool _time_multiplier_active;
+	bool _multiplier_active;
 
 	//! \brief A zero or positive value that is multiplied to the update time
-	float _time_multiplier;
+	float _multiplier_factor;
+
+	//! \brief Accumulates fractions of a millisecond that were applied by a mutliplier (ie, an update of 15.5ms would store the 0.5)
+	float _multiplier_fraction_accumulator;
 
 	//! \brief Overrides the SystemTimer::_AutoUpdate() method
 	virtual void _AutoUpdate();
 
 private:
+	/** \brief Computes and returns the update time after any stun duration has been accounted for 
+	*** \param time The update time to apply to any active stun effect
+	*** \return The modified update time after stun has been acounted for
+	***
+	*** If the value of _stun_time is zero, this function will do nothing and return the value that it was passed.
+	*** It is possible that this function may consume the entire update time to reduce an active stun effect, and
+	*** thus would return a zero value.
+	**/
+	uint32 _ApplyStun(uint32 time);
+
 	/** \brief Computes and returns the update time after the multiplier has been applied
 	*** \param time The raw update time to use in the calculation
 	*** \return The modified update time
@@ -400,9 +440,24 @@ private:
 	*** This method does not do any error checking such as whether the multiplier is a valid number
 	*** (non-negative) or whether or not the multiplier is active. The code that calls this function
 	*** is responsible for that condition checking.
+	*** 
+	*** This function also adds any remainders after applying the multiplier to the accumulator. If it
+	*** finds the value of the accumulator is greater than or equal to 1.0f, it adds the integer amount
+	*** to the return value and subtracts this amount from the accumulator. For example, if the accumulator
+	*** held a value of 0.85f before this function was called, and the multiplier application left an additional
+	*** 0.5f remainder, the value of the accumulator after the call returns will be 0.35f and a value of 1 will
+	*** be added into the value that the function returns.
 	**/
 	uint32 _ApplyMultiplier(uint32 time);
-}; // class BattleTimer : hoa_system::SystemTimer
+
+	/** \brief Updates the value of the _visible_time_expired member to reduce the distance between it and _UpdateTime
+	*** \param time The amount of time that the actual timer was just updated by. Zero if no update was applied to the timer.
+	***
+	*** This function aims to make the _visible_time_expired member equal to the _time_expired member over a series of gradual steps. 
+	*** The time argument is used to keep the two members in sync when they are already equal in value.
+	**/
+	void _UpdateVisibleTimeExpired(uint32 time);
+}; // class BattleTimer : public hoa_system::SystemTimer
 
 
 /** ****************************************************************************

@@ -311,7 +311,7 @@ void IndicatorSupervisor::AddDamageIndicator(uint32 amount) {
 	string text = NumberToString(amount);
 	TextStyle style;
 
-	float damage_percent = static_cast<float>(amount / _actor->GetMaxHitPoints());
+	float damage_percent = static_cast<float>(amount) / static_cast<float>(_actor->GetMaxHitPoints());
 	if (damage_percent < 0.10f) {
 		style.font = "text18";
 		style.color = Color(1.0f, 0.275f, 0.275f, 1.0f);

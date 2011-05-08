@@ -434,16 +434,22 @@ uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget
 
 BattleTimer::BattleTimer() :
 	SystemTimer(),
-	_time_multiplier_active(false),
-	_time_multiplier(0.0f)
+	_stun_time(0),
+	_visible_time_expired(0),
+	_multiplier_active(false),
+	_multiplier_factor(0.0f),
+	_multiplier_fraction_accumulator(0.0f)
 {}
 
 
 
 BattleTimer::BattleTimer(uint32 duration, int32 loops) :
 	SystemTimer(duration, loops),
-	_time_multiplier_active(false),
-	_time_multiplier(0.0f)
+	_stun_time(0),
+	_visible_time_expired(0),
+	_multiplier_active(false),
+	_multiplier_factor(0.0f),
+	_multiplier_fraction_accumulator(0.0f)
 {}
 
 
@@ -455,10 +461,27 @@ void BattleTimer::Update() {
 
 
 void BattleTimer::Update(uint32 time) {
-	if (_time_multiplier_active == false)
-		SystemTimer::Update(time);
-	else
-		SystemTimer::Update(_ApplyMultiplier(time));
+	if (_auto_update == true) {
+		IF_PRINT_WARNING(SYSTEM_DEBUG) << "update failed because timer is in automatic update mode" << endl;
+		return;
+	}
+	if (IsRunning() == false) {
+		return;
+	}
+
+	if (_multiplier_active == true) {
+		time = _ApplyMultiplier(time);
+	}
+	time = _ApplyStun(time);
+	SystemTimer::_UpdateTimer(time);
+	_UpdateVisibleTimeExpired(time);
+}
+
+
+
+void BattleTimer::Reset() {
+	SystemTimer::Reset();
+	_multiplier_fraction_accumulator = 0.0f;
 }
 
 
@@ -483,28 +506,29 @@ void BattleTimer::SetTimeExpired(uint32 time) {
 
 
 
-void BattleTimer::ActivateTimeMultiplier(bool activate, float multiplier) {
-	_time_multiplier_active = activate;
+void BattleTimer::ActivateMultiplier(bool activate, float multiplier) {
+	_multiplier_active = activate;
 
 	if (activate == true) {
 		if (multiplier < 0.0f) {
-			IF_PRINT_WARNING(BATTLE_DEBUG) << "tried to activate a negative multiplier: " << multiplier << endl;
-			_time_multiplier_active = false;
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "attempted to activate a negative multiplier factor: " << multiplier << endl;
+			_multiplier_active = false;
 		}
 		else {
-			_time_multiplier = multiplier;
+			_multiplier_factor = multiplier;
+			// Note: the fraction accumulator is not reset in this case. This allows the multiplier factor to
+			// change without reseting the fraction. Fractions are only reset when the multiplier is deactivated
 		}
+	}
+	else {
+		_multiplier_factor = 0.0f;
+		_multiplier_fraction_accumulator = 0.0f;
 	}
 }
 
 
 
 void BattleTimer::_AutoUpdate() {
-	if (_time_multiplier_active == false) {
-		SystemTimer::_AutoUpdate();
-		return;
-	}
-
 	if (_auto_update == false) {
 		IF_PRINT_WARNING(SYSTEM_DEBUG) << "tried to automatically update a timer that does not have auto updates enabled" << endl;
 		return;
@@ -513,16 +537,53 @@ void BattleTimer::_AutoUpdate() {
 		return;
 	}
 
-	_UpdateTimer(_ApplyMultiplier(SystemManager->GetUpdateTime()));
+	uint32 time = SystemManager->GetUpdateTime();
+	if (_multiplier_active == true) {
+		time = _ApplyMultiplier(time);
+	}
+	time = _ApplyStun(time);
+	SystemTimer::_UpdateTimer(time);
+	_UpdateVisibleTimeExpired(time);
+}
+
+
+
+uint32 BattleTimer::_ApplyStun(uint32 time) {
+	if (_stun_time > 0) {
+		if (_stun_time >= time) {
+			_stun_time -= time;
+			time = 0;
+		}
+		else {
+			_stun_time = 0;
+			time -= _stun_time;
+		}
+	}
+
+	return time;
 }
 
 
 
 uint32 BattleTimer::_ApplyMultiplier(uint32 time) {
-	// NOTE: This static cast doesn't round the float to the nearest whole integer, it uses a floor
-	// function instead. So 24.99 would return 24 instead of 25. This should probably be changed to
-	// use a standard rounding function (didn't see anything available in utils.h for this).
-	return static_cast<uint32>(_time_multiplier * time);
+	float update_time = _multiplier_factor * static_cast<float>(time);
+	uint32 return_time = static_cast<uint32>(_multiplier_factor * time);
+
+	_multiplier_fraction_accumulator += (update_time - return_time);
+
+	if (_multiplier_fraction_accumulator >= 1.0f) {
+		uint32 accumulator_overflow = static_cast<uint32>(_multiplier_fraction_accumulator);
+		_multiplier_fraction_accumulator -= accumulator_overflow;
+		return_time += accumulator_overflow;
+	}
+
+	return return_time;
+}
+
+
+
+void BattleTimer::_UpdateVisibleTimeExpired(uint32 time) {
+	// TODO: adjust the _visible_time_expired member accordingly
 }
 
 ////////////////////////////////////////////////////////////////////////////////
