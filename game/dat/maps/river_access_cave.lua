@@ -1,6 +1,6 @@
 local ns = {}
 setmetatable(ns, {__index = _G})
-water_access_cave = ns;
+river_access_cave = ns;
 setfenv(1, ns);
 local_chest_counter = 500;
 
