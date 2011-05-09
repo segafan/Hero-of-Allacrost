@@ -590,7 +590,7 @@ void Editor::_ViewTextures() {
 		{
 			VideoManager->Textures()->DEBUG_NextTexSheet();
 		}
-		_ed_scrollview->_map->SetTexturesOn(_textures_on);
+		_ed_scrollview->_map->SetDebugTexturesOn(_textures_on);
 	} // map must exist in order to view things on it
 }
 
@@ -796,7 +796,7 @@ void Editor::_MapSelectMusic() {
 		// will understand
 		QStringList  music_names;
 		QListWidget* music_list = music->GetMusicList();
-		for (unsigned int i = 0; i < music_list->count(); i++)
+		for (int i = 0; i < music_list->count(); i++)
 			music_names << music_list->item(i)->text();
 
 		_ed_scrollview->_map->music_files = music_names;
@@ -987,7 +987,7 @@ void Editor::_MapProperties() {
 
 
 void Editor::_MapAddContext() {
-	if (_ed_scrollview->_map->context_names.size() >= MAX_CONTEXTS)
+	if (static_cast<uint32>(_ed_scrollview->_map->context_names.size()) >= MAX_CONTEXTS)
 	{
 		_error_max_contexts->move(this->pos().x() + this->width()/2  - _error_max_contexts->width()/2,
 		                          this->pos().y() + this->height()/2 - _error_max_contexts->height()/2);

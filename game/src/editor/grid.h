@@ -55,7 +55,14 @@ class EditorScrollView;
 *** \brief Used for the OpenGL map portion where tiles are painted, edited, etc.
 ***
 *** This class utilizes the video engine from the game to draw all of the tiles
-*** and objects to the editor's main window screen.
+*** and objects to the editor's main window screen. Its members store all of the
+*** map data that the editor can manipulate.
+***
+*** \note The tileset images are not loaded by this class. They are created elsewhere
+*** and then this class is populated with those images. Only after this class has
+*** initialized its own members and received the tileset data is it ready for normal
+*** operation. It is the responsibility of the user of this widget to call
+*** SetInitialized(true), which will enable this class' drawing operation.
 *** ***************************************************************************/
 class Grid : public QGLWidget {
 	Q_OBJECT // macro needed to use QT's slots and signals
@@ -108,8 +115,8 @@ public:
 	void SetSelectOn(bool value)
 		{ _select_on = value; updateGL(); }
 
-	void SetTexturesOn(bool value)
-		{ _textures_on = value; updateGL(); }
+	void SetDebugTexturesOn(bool value)
+		{ _debug_textures_on = value; updateGL(); }
 
 	void SetLLOn(bool value)
 		{ _ll_on = value; updateGL(); }
@@ -127,10 +134,15 @@ public:
 	/** \brief Creates a new context for each layer.
 	*** \param inherit_context The index of the context to inherit from.
 	**/
-	void CreateNewContext(int inherit_context);
+	void CreateNewContext(uint32 inherit_context);
 
-	//! \brief Loads a map from a Lua file when the user selects "Open Map" from the "File" menu.
-	void LoadMap();
+	/** \brief Loads a map from a Lua file when the user selects "Open Map" from the "File" menu.
+	*** \return True only when the map data was loaded successfully
+	***
+	*** \note Loading of the tileset images is not performed in this function. This operation is done via the FileOpen
+	*** Editor::FileOpen() during the creation of the TilesetTable object(s).
+	**/
+	bool LoadMap();
 
 	//! \brief Saves the map to a Lua file when the user selects "Save", "Save as", or "Quit" from the "File" menu.
 	void SaveMap();
@@ -144,10 +156,10 @@ public:
 	*** tile index is passed as a parameter.
 	**/
 	//{@
-	void InsertRow(int tile_index);
-	void InsertCol(int tile_index);
-	void DeleteRow(int tile_index);
-	void DeleteCol(int tile_index);
+	void InsertRow(uint32 tile_index);
+	void InsertCol(uint32 tile_index);
+	void DeleteRow(uint32 tile_index);
+	void DeleteCol(uint32 tile_index);
 	//@}
 
 	//! \brief List of the tileset names being used.
@@ -190,6 +202,9 @@ private:
 	//! \brief The width of the map in tiles.
 	uint32 _width;
 
+	//! \brief The number of contexts that exist on the map.
+	uint32 _number_contexts;
+
 	//! \brief The active context for editing tiles.
 	uint32 _context;
 
@@ -206,7 +221,7 @@ private:
 	bool _select_on;
 
 	//! \brief When TRUE the texture sheets are displayed.
-	bool _textures_on;
+	bool _debug_textures_on;
 
 	//! \brief When TRUE the lower layer of tiles is displayed.
 	bool _ll_on;
@@ -230,7 +245,7 @@ private:
 	std::vector<std::vector<int32> > _upper_layer;
 
 	//! \brief A vector of sprites in the object layer.
-	std::vector<int32 > _object_layer;
+	std::vector<int32> _object_layer;
 
 	/** \brief A vector of tiles in the selection rectangle.
 	***
