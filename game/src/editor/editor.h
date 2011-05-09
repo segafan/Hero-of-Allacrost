@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QProgressDialog>
-#include <Q3ScrollView>
+#include <QScrollArea>
 #include <QSplitter>
 #include <QSpinBox>
 #include <QStatusBar>
@@ -319,7 +319,7 @@ private:
 
 
 
-class EditorScrollView: public Q3ScrollView {
+class EditorScrollView : public QScrollArea {
 	//! Macro needed to use Qt's slots and signals.
 	Q_OBJECT
 
@@ -437,7 +437,7 @@ private:
 	std::vector<int32> _previous_tiles;//! A vector of indeces into tilesets of the modified tiles before they were modified.
 	std::vector<int32> _modified_tiles;//! A vector of indeces into tilesets of the modified tiles after they were modified.
 	//@}
-}; // class EditorScrollView: public Q3ScrollView
+}; // class EditorScrollView : public QScrollArea
 
 
 
