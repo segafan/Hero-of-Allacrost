@@ -32,7 +32,7 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QProgressDialog>
-#include <QScrollArea>
+#include <Q3ScrollView>
 #include <QSplitter>
 #include <QSpinBox>
 #include <QStatusBar>
@@ -318,8 +318,8 @@ private:
 }; // class Editor
 
 
-
-class EditorScrollView : public QScrollArea {
+// TODO: Q3ScrollView is a deprecated QT class. It should be replaced to a QT4 equivalent class such as QScrollArea
+class EditorScrollView : public Q3ScrollView {
 	//! Macro needed to use Qt's slots and signals.
 	Q_OBJECT
 
@@ -437,7 +437,7 @@ private:
 	std::vector<int32> _previous_tiles;//! A vector of indeces into tilesets of the modified tiles before they were modified.
 	std::vector<int32> _modified_tiles;//! A vector of indeces into tilesets of the modified tiles after they were modified.
 	//@}
-}; // class EditorScrollView : public QScrollArea
+}; // class EditorScrollView : public Q3ScrollView
 
 
 
