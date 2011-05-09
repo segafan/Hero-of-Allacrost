@@ -926,7 +926,7 @@ void Grid::paintGL() {
 			col++;
 			col %= _width;
 			if (col == 0)
-				VideoManager->MoveRelative(-_width + 1, 1.0f);
+				VideoManager->MoveRelative(1.0f - static_cast<float>(_width), 1.0f);
 			else
 				VideoManager->MoveRelative(1.0f, 0.0f);
 		}
@@ -965,7 +965,7 @@ void Grid::paintGL() {
 			col++;
 			col %= _width;
 			if (col == 0)
-				VideoManager->MoveRelative(-_width + 1, 1.0f);
+				VideoManager->MoveRelative(1.0f - static_cast<float>(_width), 1.0f);
 			else
 				VideoManager->MoveRelative(1.0f, 0.0f);
 		}
@@ -983,7 +983,7 @@ void Grid::paintGL() {
 			col++;
 			col %= _width;
 			if (col == 0)
-				VideoManager->MoveRelative(-_width + 1, 1.0f);
+				VideoManager->MoveRelative(1.0f - static_cast<float>(_width), 1.0f);
 			else
 				VideoManager->MoveRelative(1.0f, 0.0f);
 		}
