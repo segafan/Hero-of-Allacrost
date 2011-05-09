@@ -77,13 +77,13 @@ public:
 	QString GetFileName() const
 		{ return _file_name; }
 
-	int GetHeight() const
+	uint32 GetHeight() const
 		{ return _height; }
 
-	int GetWidth() const
+	uint32 GetWidth() const
 		{ return _width; }
 
-	int GetContext() const
+	uint32 GetContext() const
 		{ return _context; }
 
 	bool GetChanged() const
@@ -94,13 +94,13 @@ public:
 	void SetFileName(QString filename)
 		{ _file_name = filename; }
 
-	void SetHeight(int height)
+	void SetHeight(uint32 height)
 		{ _height = height; _changed = true; }
 
-	void SetWidth(int width)
+	void SetWidth(uint32 width)
 		{ _width = width; _changed = true; }
 
-	void SetContext(int context)
+	void SetContext(uint32 context)
 		{ _context = context; }
 
 	void SetChanged(bool value)

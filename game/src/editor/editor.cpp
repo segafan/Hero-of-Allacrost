@@ -1426,7 +1426,7 @@ bool Editor::_EraseOK() {
 ////////////////////////////////////////////////////////////////////////////////
 
 EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int width, int height) :
-	QScrollArea(parent)
+	Q3ScrollView(parent, (const char*)name, Qt::WNoAutoErase | Qt::WStaticContents)
 {
 	// Set default editing modes.
 	_tile_mode  = PAINT_TILE;
@@ -1447,7 +1447,7 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 	// Create a new map.
 	_map = new Grid(viewport(), "Untitled", width, height);
 	_map->_ed_scrollview = this;
-	setWidget(_map);
+	addChild(_map);
 
 	// Create menu actions related to the Context menu.
 	_insert_row_action = new QAction("Insert row", this);
