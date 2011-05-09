@@ -267,7 +267,7 @@ void Editor::_FileNew() {
 					TilesetTable* a_tileset = new TilesetTable();
 					if (a_tileset->Load(tilesets->topLevelItem(i)->text(0)) == false)
 						QMessageBox::critical(this, tr("HoA Level Editor"),
-							tr("Failed to load tileset image: " + 
+							tr("Failed to load tileset image: " +
 							   tilesets->topLevelItem(i)->text(0)));
 
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
@@ -479,7 +479,7 @@ void Editor::_FileClose() {
 			delete _ed_scrollview;
 			_ed_scrollview = NULL;
 			_undo_stack->clear();
-			
+
 			// Clear the context combobox
 			// _context_cbox->clear() doesn't work, it seg faults.
 			// I guess it can't have an empty combobox?
@@ -490,13 +490,13 @@ void Editor::_FileClose() {
 			// Enable appropriate actions
 			_TilesEnableActions();
 		} // scrollview must exist first
-		
+
 		if (_ed_tabs != NULL)
 		{
 			delete _ed_tabs;
 			_ed_tabs = NULL;
 		} // tabs must exist first
-		
+
 		setCaption("Hero of Allacrost Level Editor");
 	} // make sure an unsaved map is not lost
 }
@@ -798,7 +798,7 @@ void Editor::_MapSelectMusic() {
 		QListWidget* music_list = music->GetMusicList();
 		for (unsigned int i = 0; i < music_list->count(); i++)
 			music_names << music_list->item(i)->text();
-		
+
 		_ed_scrollview->_map->music_files = music_names;
 		_ed_scrollview->_map->SetChanged(true);
 	} // only process results if user selected okay
@@ -1106,7 +1106,7 @@ void Editor::_CreateActions() {
 	_save_action->setShortcut(tr("Ctrl+S"));
 	_save_action->setStatusTip("Save the map");
 	connect(_save_action, SIGNAL(triggered()), this, SLOT(_FileSave()));
-	
+
 	_close_action = new QAction("&Close", this);
 	_close_action->setShortcut(tr("Ctrl+W"));
 	_close_action->setStatusTip("Close the map");
@@ -1426,7 +1426,7 @@ bool Editor::_EraseOK() {
 ////////////////////////////////////////////////////////////////////////////////
 
 EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int width, int height) :
-	Q3ScrollView(parent, (const char*) name, Qt::WNoAutoErase|Qt::WStaticContents)
+	QScrollArea(parent)
 {
 	// Set default editing modes.
 	_tile_mode  = PAINT_TILE;
@@ -1447,7 +1447,7 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 	// Create a new map.
 	_map = new Grid(viewport(), "Untitled", width, height);
 	_map->_ed_scrollview = this;
-	addChild(_map);
+	setWidget(_map);
 
 	// Create menu actions related to the Context menu.
 	_insert_row_action = new QAction("Insert row", this);
@@ -1933,15 +1933,15 @@ void EditorScrollView::_PaintTile(int32 index) {
 			{
 				int32 tileset_index = (selection.topRow() + i) * 16 + (selection.leftCol() + j);
 				int32 tile = (map_row + i) * _map->GetWidth() + map_col + j;
-				
+
 				// perform randomization for autotiles
 				_AutotileRandomize(multiplier, tileset_index);
-				
+
 				// Record information for undo/redo action.
 				_tile_indeces.push_back(tile);
 				_previous_tiles.push_back(GetCurrentLayer()[tile]);
 				_modified_tiles.push_back(tileset_index + multiplier * 256);
-		
+
 				GetCurrentLayer()[tile] = tileset_index + multiplier * 256;
 			} // iterate through columns of selection
 		} // iterate through rows of selection
