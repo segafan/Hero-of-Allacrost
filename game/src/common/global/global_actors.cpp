@@ -60,7 +60,7 @@ bool GlobalAttackPoint::LoadData(ReadScriptDescriptor& script) {
 	// Status effect data is optional so check if a status_effect table exists first
 	if (script.DoesTableExist("status_effects") == true) {
 		script.OpenTable("status_effects");
-		
+
 		std::vector<int32> table_keys;
 		script.ReadTableKeys(table_keys);
 		for (uint32 i = 0; i < table_keys.size(); i++) {
@@ -71,7 +71,7 @@ bool GlobalAttackPoint::LoadData(ReadScriptDescriptor& script) {
 		script.CloseTable();
 	}
 
-	
+
 	if (script.IsErrorDetected()) {
 		if (GLOBAL_DEBUG) {
 			PRINT_WARNING << "one or more errors occurred while reading the save game file - they are listed below" << endl;
@@ -1174,16 +1174,22 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	// ----- (5): Construct the character's initial skill set if necessary
 	if (initial) {
 		// The skills table contains key/value pairs. The key indicate the level required to learn the skill and the value is the skill's id
-		uint32 skill_id;
 		vector<uint32> skill_levels;
 		char_script.OpenTable("skills");
 		char_script.ReadTableKeys(skill_levels);
 
+		// We want to add the skills beginning with the first learned to the last. ReadTableKeys does not guarantee returing the keys in a sorted order,
+		// so sort the skills by level before checking each one.
+		sort(skill_levels.begin(), skill_levels.end());
+
 		// Only add the skills for which the experience level requirements are met
 		for (uint32 i = 0; i < skill_levels.size(); i++) {
-			skill_id = char_script.ReadUInt(skill_levels[i]);
 			if (skill_levels[i] <= _experience_level) {
-				AddSkill(skill_id);
+				AddSkill(char_script.ReadUInt(skill_levels[i]));
+			}
+			// Because skill_levels is sorted, all remaining skills will not have their level requirements met
+			else {
+				break;
 			}
 		}
 
@@ -1379,7 +1385,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) :
 	if (enemy_data.DoesBoolExist("no_stat_randomization") == true) {
 		_no_stat_randomization = enemy_data.ReadBool("no_stat_randomization");
 	}
-	
+
 	enemy_data.OpenTable("base_stats");
 	_max_hit_points = enemy_data.ReadUInt("hit_points");
 	_hit_points = _max_hit_points;
@@ -1474,7 +1480,7 @@ void GlobalEnemy::Initialize() {
 	}
 
 	// TODO: we may wish to actually define XP levels for enemies in their data table, though I don't know what purpose it may serve
-	_experience_level = 1; 
+	_experience_level = 1;
 
 	// ----- (1): Add all new skills that should be available at the current experience level
 	for (uint32 i = 0; i < _skill_set.size(); i++) {
