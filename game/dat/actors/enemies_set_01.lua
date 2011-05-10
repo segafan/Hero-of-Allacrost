@@ -340,12 +340,12 @@ enemies[6] = {
 	sprite_height = 128,
 	
 	base_stats = {
-		hit_points = 122,
-		skill_points = 10,
+		hit_points = 85,
+		skill_points = 6,
 		strength = 10,
 		vigor = 0,
 		fortitude = 10,
-		protection = 4,
+		protection = 3,
 		agility = 30,
 		evade = 18.0,
 		experience_points = 8,
@@ -355,24 +355,25 @@ enemies[6] = {
 	attack_points = {
 		[1] = {
 			name = hoa_system.Translate("Torso"),
-			x_position = -6,
-			y_position = 23,
-			fortitude_modifier = 0.0,
+			x_position = 0,
+			y_position = 95,
+			fortitude_modifier = 0.2,
 			protection_modifier = 0.0,
 			evade_modifier = 0.0
 		},
 		[2] = {
 			name = hoa_system.Translate("Wings"),
-			x_position = 7,
-			y_position = 26,
-			fortitude_modifier = 0.0,
+			x_position = -40,
+			y_position = 90,
+			fortitude_modifier = -0.5,
 			protection_modifier = 0.0,
-			evade_modifier = 0.0
+			evade_modifier = 0.4,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = 25.0 }
 		},
 	},
 
 	skills = {
-		1002
+		1002 -- TEMP: Uses spider bite attack until we have appropriate bat skill
 	},
 
 	drop_objects = {
@@ -444,70 +445,6 @@ enemies[91] = {
 }
 
 -- Traits -----------------------------------------------------------------------
--- HSP: vhigh HP, med SP
--- ATK: high phys, zero meta
--- DEF: high phys, low meta
--- SPD: med agi, low eva
--- XPD: vhigh XP, high drunes
--- Notes: First boss in prologue module
---------------------------------------------------------------------------------
-enemies[91] = {
-	name = hoa_system.Translate("Scorpion Goliath"),
-	filename = "scorpion_goliath",
-	sprite_width = 512,
-	sprite_height = 448,
-	
-	base_stats = {
-		hit_points = 122,
-		skill_points = 10,
-		strength = 10,
-		vigor = 0,
-		fortitude = 10,
-		protection = 4,
-		agility = 30,
-		evade = 18.0,
-		experience_points = 8,
-		drunes = 12
-	},
-
-	attack_points = {
-		[1] = {
-			name = hoa_system.Translate("Mesosoma"),
-			x_position = -6,
-			y_position = 23,
-			fortitude_modifier = 0.0,
-			protection_modifier = 0.0,
-			evade_modifier = 0.0
-		},
-		[2] = {
-			name = hoa_system.Translate("Pincers"),
-			x_position = 7,
-			y_position = 26,
-			fortitude_modifier = 0.0,
-			protection_modifier = 0.0,
-			evade_modifier = 0.0
-		},
-		[3] = {
-			name = hoa_system.Translate("Legs"),
-			x_position = 7,
-			y_position = 26,
-			fortitude_modifier = 0.0,
-			protection_modifier = 0.0,
-			evade_modifier = 0.0
-		},
-	},
-
-	skills = {
-
-	},
-
-	drop_objects = {
-
-	}
-}
-
-
--- Traits -----------------------------------------------------------------------
 -- HSP: high HP, med SP
 -- ATK: med phys, zero meta
 -- DEF: med phys, low meta
@@ -515,7 +452,7 @@ enemies[91] = {
 -- XPD: high XP, high drunes
 -- Notes: Second boss in prologue module
 --------------------------------------------------------------------------------
-enemies[91] = {
+enemies[92] = {
 	name = hoa_system.Translate("Armored Beast"),
 	filename = "armored_beast",
 	sprite_width = 256,

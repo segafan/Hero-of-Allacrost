@@ -60,6 +60,7 @@ function BootBattleTest()
 	battle:AddEnemy(3);
 	battle:AddEnemy(4);
 	battle:AddEnemy(5);
+	battle:AddEnemy(6);
 
 	ModeManager:Push(battle);
 end
