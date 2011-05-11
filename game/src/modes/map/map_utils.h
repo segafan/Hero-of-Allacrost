@@ -38,17 +38,17 @@ namespace private_map {
 //@{
 const float SCREEN_COLS = 32.0f;
 const float SCREEN_ROWS = 24.0f;
-const float HALF_SCREEN_COLS = 16.0f;
-const float HALF_SCREEN_ROWS = 12.0f;
+const float HALF_SCREEN_COLS = SCREEN_COLS / 2;
+const float HALF_SCREEN_ROWS = SCREEN_ROWS / 2;
 
 const uint16 TILE_COLS = 16; // Number of tile columns that fit on the screen
 const uint16 TILE_ROWS = 12; // Number of tile rows that fit on the screen
-const uint16 HALF_TILE_COLS = 8;
-const uint16 HALF_TILE_ROWS = 6;
+const uint16 HALF_TILE_COLS = TILE_COLS / 2;
+const uint16 HALF_TILE_ROWS = TILE_ROWS / 2;
 
 const uint16 GRID_LENGTH = 32; // Length of a grid element in pixels
 const uint16 TILE_LENGTH = 64; // Length of a tile in pixels
-const uint16 HALF_TILE_LENGTH = 32;
+const uint16 HALF_TILE_LENGTH = TILE_LENGTH / 2;
 //@}
 
 

@@ -581,7 +581,7 @@ void MapMode::_CalculateMapFrame() {
 	if (IsOddNumber(_camera->y_position))
 		_map_frame.tile_y_start -= 1.0f;
 
-	// The starting  row and column of tiles to draw is determined by the map camera's position
+	// The starting row and column of tiles to draw is determined by the map camera's position
 	_map_frame.starting_col = (_camera->x_position / 2) - HALF_TILE_COLS;
 	_map_frame.starting_row = (_camera->y_position / 2) - HALF_TILE_ROWS;
 
