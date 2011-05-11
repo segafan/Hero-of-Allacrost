@@ -166,29 +166,13 @@
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
 				<Compiler>
-					<Add option="-W" />
 					<Add option="-g" />
+					<Add option="-W" />
 					<Add option="-O0" />
 					<Add option="`sdl-config --cflags`" />
 					<Add option='-DDATADIR=\\\&quot;/usr/local/share/games/allacrost\\\&quot;' />
 					<Add option='-DLOCALEDIR=\\\&quot;/usr/local/share/games/allacrost/txt\\\&quot;' />
 					<Add option='-DPACKAGE=\\\&quot;allacrost\\\&quot;' />
-					<Add directory="src" />
-					<Add directory="src/common/gui" />
-					<Add directory="src/common/global" />
-					<Add directory="src/common" />
-					<Add directory="src/engine/video" />
-					<Add directory="src/editor" />
-					<Add directory="src/engine/audio" />
-					<Add directory="src/modes" />
-					<Add directory="src/engine" />
-					<Add directory="src/modes/battle" />
-					<Add directory="src/modes/boot" />
-					<Add directory="src/modes/map" />
-					<Add directory="src/modes/menu" />
-					<Add directory="src/modes/shop" />
-					<Add directory="src/modes/save" />
-					<Add directory="src/engine/script" />
 					<Add directory="/usr/include" />
 					<Add directory="/usr/include/AL" />
 					<Add directory="/usr/include/lua5.1" />
@@ -196,36 +180,8 @@
 					<Add directory="/usr/include/GL" />
 					<Add directory="/usr/include/SDL" />
 				</Compiler>
-				<ResourceCompiler>
-					<Add directory="src" />
-					<Add directory="src/common/gui" />
-					<Add directory="src/common/global" />
-					<Add directory="src/common" />
-					<Add directory="src/engine/video" />
-					<Add directory="src/editor" />
-					<Add directory="src/engine/audio" />
-					<Add directory="src/modes" />
-					<Add directory="src/engine" />
-					<Add directory="src/modes/battle" />
-					<Add directory="src/modes/boot" />
-					<Add directory="src/modes/map" />
-					<Add directory="src/modes/menu" />
-					<Add directory="src/modes/shop" />
-					<Add directory="src/modes/save" />
-					<Add directory="src/engine/script" />
-				</ResourceCompiler>
 				<Linker>
 					<Add option="`sdl-config --libs`" />
-					<Add library="luabind" />
-					<Add library="lua5.1" />
-					<Add library="SDL_ttf" />
-					<Add library="vorbisfile" />
-					<Add library="openal" />
-					<Add library="jpeg" />
-					<Add library="png" />
-					<Add library="GLU" />
-					<Add library="GL" />
-					<Add library="X11" />
 					<Add directory="/usr/lib" />
 				</Linker>
 				<MakeCommands>
@@ -233,6 +189,8 @@
 					<CompileFile command="$make -f $makefile $file" />
 					<Clean command="$make -f $makefile clean" />
 					<DistClean command="$make -f $makefile distclean" />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -s -f $makefile $target" />
 				</MakeCommands>
 			</Target>
 			<Target title="Release Linux">
@@ -248,22 +206,6 @@
 					<Add option='-DDATADIR=\\\&quot;/usr/local/share/games/allacrost\\\&quot;' />
 					<Add option='-DLOCALEDIR=\\\&quot;/usr/local/share/games/allacrost/txt\\\&quot;' />
 					<Add option='-DPACKAGE=\\\&quot;allacrost\\\&quot;' />
-					<Add directory="src" />
-					<Add directory="src/common/gui" />
-					<Add directory="src/common/global" />
-					<Add directory="src/common" />
-					<Add directory="src/engine/video" />
-					<Add directory="src/editor" />
-					<Add directory="src/engine/audio" />
-					<Add directory="src/modes" />
-					<Add directory="src/engine" />
-					<Add directory="src/modes/battle" />
-					<Add directory="src/modes/boot" />
-					<Add directory="src/modes/map" />
-					<Add directory="src/modes/menu" />
-					<Add directory="src/modes/shop" />
-					<Add directory="src/modes/save" />
-					<Add directory="src/engine/script" />
 					<Add directory="/usr/include" />
 					<Add directory="/usr/include/AL" />
 					<Add directory="/usr/include/lua5.1" />
@@ -271,36 +213,7 @@
 					<Add directory="/usr/include/GL" />
 					<Add directory="/usr/include/SDL" />
 				</Compiler>
-				<ResourceCompiler>
-					<Add directory="src" />
-					<Add directory="src/common/gui" />
-					<Add directory="src/common/global" />
-					<Add directory="src/common" />
-					<Add directory="src/engine/video" />
-					<Add directory="src/editor" />
-					<Add directory="src/engine/audio" />
-					<Add directory="src/modes" />
-					<Add directory="src/engine" />
-					<Add directory="src/modes/battle" />
-					<Add directory="src/modes/boot" />
-					<Add directory="src/modes/map" />
-					<Add directory="src/modes/menu" />
-					<Add directory="src/modes/shop" />
-					<Add directory="src/modes/save" />
-					<Add directory="src/engine/script" />
-				</ResourceCompiler>
 				<Linker>
-					<Add option="`sdl-config --libs`" />
-					<Add library="luabind" />
-					<Add library="lua5.1" />
-					<Add library="SDL_ttf" />
-					<Add library="vorbisfile" />
-					<Add library="openal" />
-					<Add library="jpeg" />
-					<Add library="png" />
-					<Add library="GLU" />
-					<Add library="GL" />
-					<Add library="X11" />
 					<Add directory="/usr/lib" />
 				</Linker>
 				<MakeCommands>
@@ -308,9 +221,67 @@
 					<CompileFile command="$make -f $makefile $file" />
 					<Clean command="$make -f $makefile clean" />
 					<DistClean command="$make -f $makefile distclean" />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -s -f $makefile $target" />
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Compiler>
+			<Add directory="src" />
+			<Add directory="src/common/gui" />
+			<Add directory="src/common/global" />
+			<Add directory="src/common" />
+			<Add directory="src/engine/video" />
+			<Add directory="src/editor" />
+			<Add directory="src/engine/audio" />
+			<Add directory="src/modes" />
+			<Add directory="src/engine" />
+			<Add directory="src/modes/battle" />
+			<Add directory="src/modes/boot" />
+			<Add directory="src/modes/map" />
+			<Add directory="src/modes/menu" />
+			<Add directory="src/modes/shop" />
+			<Add directory="src/modes/save" />
+			<Add directory="src/engine/script" />
+			<Add directory="src/luabind/src" />
+			<Add directory="src/luabind/luabind" />
+			<Add directory="src/luabind/luabind/detail" />
+			<Add directory="src/luabind" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="src" />
+			<Add directory="src/common/gui" />
+			<Add directory="src/common/global" />
+			<Add directory="src/common" />
+			<Add directory="src/engine/video" />
+			<Add directory="src/editor" />
+			<Add directory="src/engine/audio" />
+			<Add directory="src/modes" />
+			<Add directory="src/engine" />
+			<Add directory="src/modes/battle" />
+			<Add directory="src/modes/boot" />
+			<Add directory="src/modes/map" />
+			<Add directory="src/modes/menu" />
+			<Add directory="src/modes/shop" />
+			<Add directory="src/modes/save" />
+			<Add directory="src/engine/script" />
+			<Add directory="src/luabind/src" />
+			<Add directory="src/luabind/luabind" />
+			<Add directory="src/luabind/luabind/detail" />
+			<Add directory="src/luabind" />
+		</ResourceCompiler>
+		<Linker>
+			<Add option="`sdl-config --libs`" />
+			<Add library="lua5.1" />
+			<Add library="SDL_ttf" />
+			<Add library="vorbisfile" />
+			<Add library="openal" />
+			<Add library="jpeg" />
+			<Add library="png" />
+			<Add library="GLU" />
+			<Add library="GL" />
+			<Add library="X11" />
+		</Linker>
 		<Unit filename="icon.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

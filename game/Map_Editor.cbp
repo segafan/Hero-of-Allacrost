@@ -141,8 +141,8 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-W" />
 					<Add option="-g" />
+					<Add option="-W" />
 					<Add option="-O0" />
 					<Add option="-DQT3_SUPPORT" />
 					<Add option="-DQT_CLEAN_NAMESPACE" />
@@ -194,7 +194,6 @@
 					<Add library="openal" />
 					<Add library="lua5.1" />
 					<Add library="luabind" />
-					<Add directory="allacrost-win32-depends/lib" />
 				</Linker>
 			</Target>
 			<Target title="Release Linux">
@@ -257,7 +256,6 @@
 					<Add library="openal" />
 					<Add library="lua5.1" />
 					<Add library="luabind" />
-					<Add directory="allacrost-win32-depends/lib" />
 				</Linker>
 			</Target>
 		</Build>
