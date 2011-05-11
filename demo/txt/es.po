@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 1.0.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-07-19 18:56-0300\n"
+"POT-Creation-Date: 2011-05-11 09:08+0200\n"
 "PO-Revision-Date: 2010-03-14 23:06-0400\n"
 "Last-Translator:  <rujasu@yahoo.com>\n"
 "Language-Team: en_US <kde-i18n-doc@kde.org>\n"
@@ -20,15 +20,17 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.0\n"
 
-#: dat/actors/map_sprites_stock.lua:9
+#: dat/actors/map_sprites_stock.lua:9 dat/actors/characters.lua:13
+#: dat/maps/demo_cave.lua:389
 msgid "Claudius"
 msgstr ""
 
-#: dat/actors/map_sprites_stock.lua:22
+#: dat/actors/map_sprites_stock.lua:22 dat/actors/characters.lua:98
 msgid "Laila"
 msgstr ""
 
-#: dat/actors/map_sprites_stock.lua:35
+#: dat/actors/map_sprites_stock.lua:35 dat/actors/characters.lua:183
+#: dat/actors/enemies_set_02.lua:423
 msgid "Kyle"
 msgstr ""
 
@@ -70,6 +72,144 @@ msgstr ""
 
 #: dat/actors/map_sprites_stock.lua:148
 msgid "Karlate"
+msgstr ""
+
+#: dat/actors/characters.lua:36 dat/actors/characters.lua:121
+#: dat/actors/characters.lua:206 dat/actors/characters.lua:291
+#: dat/actors/enemies_set_01.lua:49 dat/actors/enemies_set_01.lua:111
+#: dat/actors/enemies_set_01.lua:172 dat/actors/enemies_set_01.lua:242
+#: dat/actors/enemies_set_01.lua:313 dat/actors/enemies_set_02.lua:172
+#: dat/actors/enemies_set_02.lua:241 dat/actors/enemies_set_02.lua:310
+#: dat/actors/enemies_set_02.lua:388 dat/actors/enemies_set_02.lua:457
+#: src/modes/menu/menu.cpp:847
+msgid "Head"
+msgstr "Cabeza"
+
+#: dat/actors/characters.lua:44 dat/actors/characters.lua:129
+#: dat/actors/characters.lua:214 dat/actors/characters.lua:299
+#: src/modes/menu/menu.cpp:850
+msgid "Torso"
+msgstr "Torso"
+
+#: dat/actors/characters.lua:52 dat/actors/characters.lua:137
+#: dat/actors/characters.lua:222 dat/actors/characters.lua:307
+#, fuzzy
+msgid "Arms"
+msgstr "Brazo"
+
+#: dat/actors/characters.lua:60 dat/actors/characters.lua:145
+#: dat/actors/characters.lua:230 dat/actors/characters.lua:315
+#: dat/actors/enemies_set_01.lua:258 dat/actors/enemies_set_01.lua:329
+#: dat/actors/enemies_set_02.lua:334 dat/actors/enemies_set_02.lua:473
+#: src/modes/menu/menu.cpp:856
+msgid "Legs"
+msgstr "Piernas"
+
+#: dat/actors/characters.lua:268
+msgid "Rafaela"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:16
+msgid "Green Slime"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:57 dat/actors/enemies_set_01.lua:180
+#: dat/actors/enemies_set_02.lua:180
+msgid "Body"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:77
+msgid "Spider"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:119 dat/actors/enemies_set_02.lua:249
+msgid "Abdomen"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:139
+#, fuzzy
+msgid "Snake"
+msgstr "Salvar"
+
+#: dat/actors/enemies_set_01.lua:188 dat/actors/enemies_set_02.lua:188
+#: dat/actors/enemies_set_02.lua:257
+msgid "Tail"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:208
+msgid "Skeleton"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:250 dat/actors/enemies_set_01.lua:321
+#: dat/actors/enemies_set_02.lua:318 dat/actors/enemies_set_02.lua:396
+#: dat/actors/enemies_set_02.lua:465
+msgid "Chest"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:278
+msgid "Scorpion"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:15
+msgid "Daemarbora"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:48
+msgid "Trunk"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:56
+msgid "Branches"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:76
+msgid "Aerocephal"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:110
+msgid "Forehead"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:118
+#, fuzzy
+msgid "Orifice"
+msgstr "Precio"
+
+#: dat/actors/enemies_set_02.lua:138
+msgid "Arcana Drake"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:208
+msgid "Nagaruda"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:277
+msgid "Deceleon"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:326 dat/actors/enemies_set_02.lua:404
+#: src/modes/menu/menu.cpp:853 src/modes/menu/menu_views.cpp:204
+msgid "Arm"
+msgstr "Brazo"
+
+#: dat/actors/enemies_set_02.lua:354
+msgid "Aurum Drakueli"
+msgstr ""
+
+#: dat/effects/status.lua:16 dat/effects/status.lua:60
+msgid "Defense Up"
+msgstr ""
+
+#: dat/effects/status.lua:47
+msgid "Dummy effect"
+msgstr ""
+
+#: dat/effects/status.lua:76
+msgid "Stun"
+msgstr ""
+
+#: dat/effects/status.lua:93 dat/skills/defense.lua:34
+msgid "Dodge Enemies"
 msgstr ""
 
 #: dat/maps/betrayal_room.lua:215 dat/maps/desert_barracks.lua:441
@@ -177,6 +317,243 @@ msgstr ""
 
 #: dat/maps/betrayal_room.lua:373
 msgid "Damn you, Kyle."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:358
+#, fuzzy
+msgid "Claudius, what are you doing here?"
+msgstr "¿Qué haces?"
+
+#: dat/maps/demo_cave.lua:359
+msgid "I came in this cave for training."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:360
+msgid ""
+"Well, good job getting this far all by yourself. This is a pretty dangerous "
+"place for someone as inexperienced as yourself."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:361
+msgid ""
+"Yes well, I have to train hard if I want to be able to spar with you evenly "
+"one day, Jonas. By the way, what were you doing?"
+msgstr ""
+
+#: dat/maps/demo_cave.lua:362
+msgid ""
+"The cave goes deeper than this, but it appears a collapse here has blocked "
+"the way. I was trying to find an alternative passage, but it appears that "
+"the inner chambers are now completely inaccessible."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:363
+msgid ""
+"In any case, this is as far as you can go in this demo, so thanks for....."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:364
+msgid "Wait, what was that noise? Hey, look out!"
+msgstr ""
+
+#: dat/maps/demo_cave.lua:366
+msgid ""
+"Phew, that was a shock. I've never seen such foes wandering in this cave. "
+"Nice job taking care of them Claudius, I can definitely tell that your "
+"swordsmanship has improved."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:367
+msgid "Thank you. By the way...why didn't you fight with me in that battle?"
+msgstr ""
+
+#: dat/maps/demo_cave.lua:368
+msgid ""
+"Ah, err...well you see, you'll never reach your full potential if you always "
+"have your seniors stepping in for you."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:369
+msgid "I see."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:370
+msgid ""
+"And besides, I don't even have my own battle sprite graphics yet! The "
+"development team needs more artists to help move the game along!"
+msgstr ""
+
+#: dat/maps/demo_cave.lua:371
+msgid "....."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:373
+msgid "Well, this truly is the end of the demo. Thanks for playing."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:409
+msgid "Jonas"
+msgstr ""
+
+#: dat/maps/demo_town.lua:296
+msgid "Laila, what's wrong? You have a worried look on your face."
+msgstr ""
+
+#: dat/maps/demo_town.lua:298
+msgid "You're going into the cave again, aren't you?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:302
+msgid "Yes, I intend to..."
+msgstr ""
+
+#: dat/maps/demo_town.lua:304
+#, fuzzy
+msgid "No, of course not..."
+msgstr "¡Por supuesto que no! "
+
+#: dat/maps/demo_town.lua:307
+msgid "Test Option #1"
+msgstr ""
+
+#: dat/maps/demo_town.lua:309
+msgid "Test Option #2"
+msgstr ""
+
+#: dat/maps/demo_town.lua:311
+msgid "Test Option #3"
+msgstr ""
+
+#: dat/maps/demo_town.lua:315
+msgid "But why? Its dangerous in there!"
+msgstr ""
+
+#: dat/maps/demo_town.lua:317
+msgid ""
+"Laila, if I want to be capable on the battlefield I have to fight real "
+"battles. You understand that, don't you?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:319
+msgid ""
+"I know that you're worried about me and I appreciate it, but you need to "
+"stop doing this."
+msgstr ""
+
+#: dat/maps/demo_town.lua:321
+msgid ".....Alright, I'm sorry. Just be careful in there, okay?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:323
+msgid "Will do. Thanks Laila."
+msgstr ""
+
+#: dat/maps/demo_town.lua:325
+msgid ""
+"You know Claudius, I could be of assistance to you in the cave. May I come "
+"with you?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:329
+msgid "No way, you could be hurt!"
+msgstr ""
+
+#: dat/maps/demo_town.lua:331
+msgid "Your help would be great!"
+msgstr ""
+
+#: dat/maps/demo_town.lua:334
+msgid ""
+"Oh good. I was worried you were. Please tell me if you are Claudius, just so "
+"I can know..."
+msgstr ""
+
+#: dat/maps/demo_town.lua:336
+#, fuzzy
+msgid "Of course, I promise."
+msgstr "¡Por supuesto que no! "
+
+#: dat/maps/demo_town.lua:340
+msgid "Oh....ok then. You remember to be careful."
+msgstr ""
+
+#: dat/maps/demo_town.lua:342
+msgid "I will Laila."
+msgstr ""
+
+#: dat/maps/demo_town.lua:346
+msgid "Great, I'll be sure to help you any way I can."
+msgstr ""
+
+#: dat/maps/demo_town.lua:348
+msgid "Laila has joined the party."
+msgstr ""
+
+#: dat/maps/demo_town.lua:387
+msgid "Hey there son, how's the training going?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:389
+msgid "Pretty well. The enemies in the cave aren't too tough."
+msgstr ""
+
+#: dat/maps/demo_town.lua:391
+msgid ""
+"Good to hear. Don't let your guard down though. The deeper you go into that "
+"cave, the more likely it is that you'll face stronger opponents."
+msgstr ""
+
+#: dat/maps/demo_town.lua:417
+msgid "Oh, Claudius? You seemed puzzled."
+msgstr ""
+
+#: dat/maps/demo_town.lua:419
+msgid "There are odd little icons above people's heads. What do they mean?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:421
+msgid ""
+"That is a new dialogue indicator. Any person that has something new to say "
+"that you haven't already heard will have that icon above their head. Once "
+"you've listened to everything that they have to say, the icon will disappear."
+msgstr ""
+
+#: dat/maps/demo_town.lua:427
+msgid ""
+"And remember that a person may have more thing to say, so if the icon "
+"doesn't disappear after speaking to a person, speak to them once more."
+msgstr ""
+
+#: dat/maps/demo_town.lua:453
+msgid ""
+"Choose your target wisely in battle. Its best to single out and take down "
+"one foe at a time. And don't be afraid to use a healing potion or two in "
+"battle if you're feeling weak."
+msgstr ""
+
+#: dat/maps/demo_town.lua:487
+msgid "The interior of my home is finally finished. Not too bad is it?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:489
+msgid "After its fully furnished I'm sure it will look quite nice."
+msgstr ""
+
+#: dat/maps/demo_town.lua:521
+msgid "This village is boring! There's no one I can play with here!"
+msgstr ""
+
+#: dat/maps/demo_town.lua:540
+msgid "I have merchandise for sale at affordable prices. Take a look."
+msgstr ""
+
+#: dat/maps/demo_town.lua:563
+msgid ""
+"I'm looking for my brother Torl. I sure hope he doesn't get into any trouble."
+msgstr ""
+
+#: dat/maps/demo_town.lua:581
+msgid "So much work to do!"
 msgstr ""
 
 #: dat/maps/desert_barracks.lua:411
@@ -613,6 +990,482 @@ msgstr "Creo que sí.  Vamos."
 msgid "Kyle has joined the party."
 msgstr ""
 
+#: dat/objects/arm_armor.lua:28
+msgid "Karlate Shield"
+msgstr ""
+
+#: dat/objects/arm_armor.lua:29
+msgid ""
+"Standard Karlate issued equipment. Strong wooden oak protects from all but "
+"the heaviest of assaults."
+msgstr ""
+
+#: dat/objects/arm_armor.lua:39
+msgid "Phoenix Shield"
+msgstr ""
+
+#: dat/objects/arm_armor.lua:40
+msgid "A tall steel shield with a mighty phoenix emblazoned on the front."
+msgstr ""
+
+#: dat/objects/arm_armor.lua:54
+msgid "Stone Bracelet"
+msgstr ""
+
+#: dat/objects/arm_armor.lua:55
+msgid "A bracelet crafted out of soft limestone."
+msgstr ""
+
+#: dat/objects/head_armor.lua:28
+msgid "Karlate Helmet"
+msgstr ""
+
+#: dat/objects/head_armor.lua:29
+msgid ""
+"Standard Karlate issued equipment. Battle worn but still reliable head "
+"protection."
+msgstr ""
+
+#: dat/objects/head_armor.lua:39
+msgid "Cobalt Helm"
+msgstr ""
+
+#: dat/objects/head_armor.lua:40
+msgid "A small helmet composed of a secret cobalt based alloy."
+msgstr ""
+
+#: dat/objects/head_armor.lua:54
+msgid "Butterfly Pins"
+msgstr ""
+
+#: dat/objects/head_armor.lua:55
+msgid "A feminine head ornament that offers little effective protection."
+msgstr ""
+
+#: dat/objects/head_armor.lua:65
+msgid "Winged Circlet"
+msgstr ""
+
+#: dat/objects/head_armor.lua:66
+msgid ""
+"A circlet imbued with a small magical presence, which wards off evil from "
+"its bearer."
+msgstr ""
+
+#: dat/objects/items.lua:31
+msgid "Light Healing Potion"
+msgstr ""
+
+#: dat/objects/items.lua:32
+msgid "Restores a small amount of hit points to a target."
+msgstr ""
+
+#: dat/objects/items.lua:50
+msgid "Medium Healing Potion"
+msgstr ""
+
+#: dat/objects/items.lua:51
+msgid "Restores a moderate amount of hit points to a target."
+msgstr ""
+
+#: dat/objects/items.lua:69
+msgid "Blessed Healing Potion"
+msgstr ""
+
+#: dat/objects/items.lua:70
+msgid "Restores a large amount of hit points to a target."
+msgstr ""
+
+#: dat/objects/items.lua:88
+msgid "Super Healing Potion"
+msgstr ""
+
+#: dat/objects/items.lua:89
+msgid "Restores a small amount of hit points to all party members."
+msgstr ""
+
+#: dat/objects/items.lua:125
+msgid "Bomb"
+msgstr ""
+
+#: dat/objects/items.lua:126
+msgid "Damages one enemy."
+msgstr ""
+
+#: dat/objects/items.lua:143
+msgid "Super Bomb"
+msgstr ""
+
+#: dat/objects/items.lua:144
+msgid "Major damage to all enemies."
+msgstr ""
+
+#: dat/objects/leg_armor.lua:28
+msgid "Karlate Greaves"
+msgstr ""
+
+#: dat/objects/leg_armor.lua:29
+msgid ""
+"Standard Karlate issued equipment. Light metal alloy protects the legs while "
+"minimizing the negative impact on movement."
+msgstr ""
+
+#: dat/objects/leg_armor.lua:43
+msgid "Leather Sandals"
+msgstr ""
+
+#: dat/objects/leg_armor.lua:44
+msgid ""
+"Light footwear that while fashionable, was not designed for battle and "
+"affords very poor protection for the user."
+msgstr ""
+
+#: dat/objects/leg_armor.lua:54
+msgid "Leather Boots"
+msgstr ""
+
+#: dat/objects/leg_armor.lua:55
+msgid ""
+"Comfortable leather that protects the entire foot and lower region of the "
+"shin."
+msgstr ""
+
+#: dat/objects/torso_armor.lua:28
+msgid "Karlate Breastplate"
+msgstr ""
+
+#: dat/objects/torso_armor.lua:29
+msgid ""
+"Standard Karlate issued equipment. Effectively protects the torso from most "
+"types of attack."
+msgstr ""
+
+#: dat/objects/torso_armor.lua:39
+msgid "Leather Chain Mail"
+msgstr ""
+
+#: dat/objects/torso_armor.lua:40
+msgid "A light chain mail woven into a tough, leather cuirass."
+msgstr ""
+
+#: dat/objects/torso_armor.lua:54
+msgid "Willow Dress"
+msgstr ""
+
+#: dat/objects/torso_armor.lua:55
+msgid ""
+"A comfortable dress that does not restrict the user's movement. Woven out of "
+"surprisingly tough materials."
+msgstr ""
+
+#: dat/objects/weapons.lua:28
+msgid "Karlate Sword"
+msgstr ""
+
+#: dat/objects/weapons.lua:29
+msgid ""
+"Standard Karlate issued equipment. A light weight iron sword suitable for "
+"most skirmishes."
+msgstr ""
+
+#: dat/objects/weapons.lua:39
+msgid "Iron Sword"
+msgstr ""
+
+#: dat/objects/weapons.lua:40
+msgid ""
+"A sturdy but somewhat dull sword forged from a single block of solid iron."
+msgstr ""
+
+#: dat/objects/weapons.lua:54
+msgid "Quick Crossbow"
+msgstr ""
+
+#: dat/objects/weapons.lua:55
+msgid "A lightweight but effective crossbow."
+msgstr ""
+
+#: dat/objects/weapons.lua:65
+msgid "Standard Crossbow"
+msgstr ""
+
+#: dat/objects/weapons.lua:66
+msgid ""
+"Standard issued equipment for archers. A crossbow designed for accuracy and "
+"ease of use."
+msgstr ""
+
+#: dat/objects/weapons.lua:76
+msgid "Reinforced Crossbow"
+msgstr ""
+
+#: dat/objects/weapons.lua:77
+msgid "An improved version of the standard crossbow that mitigates recoil."
+msgstr ""
+
+#: dat/objects/weapons.lua:87
+msgid "Arbalest"
+msgstr ""
+
+#: dat/objects/weapons.lua:88
+msgid "Heavy crossbow designed for piercing through thick armor."
+msgstr ""
+
+#: dat/skills/attack.lua:20
+msgid "Slicing Rain"
+msgstr ""
+
+#: dat/skills/attack.lua:21
+msgid "A simple but effective sword slash."
+msgstr ""
+
+#: dat/skills/attack.lua:42
+msgid "Forward Thrust"
+msgstr ""
+
+#: dat/skills/attack.lua:43 dat/skills/attack.lua:66
+msgid "A quick and daring thrust into an opponent's flesh."
+msgstr ""
+
+#: dat/skills/attack.lua:65
+msgid "Stun Slash"
+msgstr ""
+
+#: dat/skills/attack.lua:89
+msgid "Whirlwind"
+msgstr ""
+
+#: dat/skills/attack.lua:90
+msgid "Damage all enemies"
+msgstr ""
+
+#: dat/skills/attack.lua:111
+msgid "Quick Shot"
+msgstr ""
+
+#: dat/skills/attack.lua:112
+msgid "A quick but weak crossbow attack."
+msgstr ""
+
+#: dat/skills/attack.lua:133
+msgid "Side Slash"
+msgstr ""
+
+#: dat/skills/attack.lua:134
+msgid "A very basic sword attack."
+msgstr ""
+
+#: dat/skills/attack.lua:155
+msgid "Blade Rush"
+msgstr ""
+
+#: dat/skills/attack.lua:156
+msgid "Attempt for a powerful blow."
+msgstr ""
+
+#: dat/skills/attack.lua:177
+msgid "Stab"
+msgstr ""
+
+#: dat/skills/attack.lua:178
+msgid "Stab enemy with dagger."
+msgstr ""
+
+#: dat/skills/attack.lua:199
+msgid "Dagger Throw"
+msgstr ""
+
+#: dat/skills/attack.lua:200
+msgid "Throw dagger at an enemy."
+msgstr ""
+
+#: dat/skills/defense.lua:20
+msgid "Karlate Guard"
+msgstr ""
+
+#: dat/skills/defense.lua:21
+msgid "Take a strong defensive stance."
+msgstr ""
+
+#: dat/skills/defense.lua:35
+msgid "Increases evasion ability for a brief period."
+msgstr ""
+
+#: dat/skills/support.lua:20
+msgid "Refresh"
+msgstr ""
+
+#: dat/skills/support.lua:21
+msgid "Heals a party member by restoring a small amount of life force."
+msgstr ""
+
+#: src/modes/pause.cpp:57
+msgid "Paused"
+msgstr ""
+
+#: src/modes/pause.cpp:69
+msgid "Quit Game"
+msgstr ""
+
+#: src/modes/pause.cpp:70
+msgid "Quit to Main Menu"
+msgstr ""
+
+#: src/modes/pause.cpp:71 src/modes/boot/boot.cpp:882
+#: src/modes/boot/boot_welcome.cpp:82 src/modes/save/save_mode.cpp:87
+#: src/modes/save/save_mode.cpp:100
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: src/modes/battle/battle_command.cpp:247
+msgid "Item<R>Count"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:454
+#, fuzzy
+msgid "Skill<R>SP"
+msgstr "Técnicas"
+
+#: src/modes/battle/battle_command.cpp:552
+#: src/modes/battle/battle_command.cpp:558
+msgid "Attack"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:553
+#: src/modes/battle/battle_command.cpp:559
+#, fuzzy
+msgid "Defend"
+msgstr "fin"
+
+#: src/modes/battle/battle_command.cpp:554
+#: src/modes/battle/battle_command.cpp:560
+msgid "Support"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:555
+#: src/modes/battle/battle_command.cpp:561
+msgid "Item"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1002
+#: src/modes/battle/battle_command.cpp:1007
+#, fuzzy
+msgid "Name: "
+msgstr "Nombre"
+
+#: src/modes/battle/battle_command.cpp:1003
+msgid "Required SP: "
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1004
+#: src/modes/battle/battle_command.cpp:1009
+msgid "Target Type: "
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1008
+msgid "Current Quantity: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:67
+msgid "But the heroes were defeated..."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:69
+msgid "Retry"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:70
+msgid "Restart"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:71
+msgid "Return"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:72
+msgid "Retire"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:243
+msgid "Retry the battle"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:244
+msgid "Load from last save point"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:245
+msgid "Return to main menu"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:246
+msgid "Exit the game"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:630
+msgid "Victory!!!"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:639
+#: src/modes/battle/battle_finish.cpp:761
+msgid "XP Gained: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:653
+msgid "Lv. "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:656
+msgid "XP To Next: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:665 src/modes/menu/menu_views.cpp:99
+#: src/modes/menu/menu_views.cpp:559
+msgid "HP: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:676 src/modes/menu/menu_views.cpp:104
+#: src/modes/menu/menu_views.cpp:563
+msgid "SP: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:687 src/modes/menu/menu.cpp:822
+msgid "STR: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:698 src/modes/menu/menu.cpp:825
+msgid "VIG: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:710
+msgid "FOR: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:721 src/modes/menu/menu.cpp:831
+msgid "PRO: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:732 src/modes/menu/menu.cpp:834
+msgid "AGI: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:743 src/modes/menu/menu.cpp:837
+msgid "EVD: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:776
+#, fuzzy
+msgid "Skills Learned"
+msgstr "Técnicas"
+
+#: src/modes/battle/battle_finish.cpp:798 src/modes/menu/menu.cpp:1018
+msgid "Drunes: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:807 src/modes/shop/shop.cpp:126
+msgid "Items"
+msgstr ""
+
 #: src/modes/boot/boot.cpp:87
 msgid "Demo 1.0.0"
 msgstr "Versión Demo 1.0.0"
@@ -809,12 +1662,6 @@ msgstr "Mover al derecho"
 #: src/modes/shop/shop.cpp:1030
 msgid "Confirm"
 msgstr "Confirmar"
-
-#: src/modes/boot/boot.cpp:882 src/modes/boot/boot_welcome.cpp:82
-#: src/modes/pause.cpp:71 src/modes/save/save_mode.cpp:87
-#: src/modes/save/save_mode.cpp:100
-msgid "Cancel"
-msgstr "Cancelar"
 
 #: src/modes/boot/boot.cpp:884 src/modes/boot/boot_welcome.cpp:88
 msgid "Swap"
@@ -1098,28 +1945,8 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: src/modes/menu/menu.cpp:822
-msgid "STR: "
-msgstr ""
-
-#: src/modes/menu/menu.cpp:825
-msgid "VIG: "
-msgstr ""
-
 #: src/modes/menu/menu.cpp:828
 msgid "FRT: "
-msgstr ""
-
-#: src/modes/menu/menu.cpp:831
-msgid "PRO: "
-msgstr ""
-
-#: src/modes/menu/menu.cpp:834
-msgid "AGI: "
-msgstr ""
-
-#: src/modes/menu/menu.cpp:837
-msgid "EVD: "
 msgstr ""
 
 #: src/modes/menu/menu.cpp:841
@@ -1129,22 +1956,6 @@ msgstr ""
 #: src/modes/menu/menu.cpp:844 src/modes/menu/menu_views.cpp:1395
 msgid "Weapon"
 msgstr "Arma"
-
-#: src/modes/menu/menu.cpp:847
-msgid "Head"
-msgstr "Cabeza"
-
-#: src/modes/menu/menu.cpp:850
-msgid "Torso"
-msgstr "Torso"
-
-#: src/modes/menu/menu.cpp:853 src/modes/menu/menu_views.cpp:204
-msgid "Arm"
-msgstr "Brazo"
-
-#: src/modes/menu/menu.cpp:856
-msgid "Legs"
-msgstr "Piernas"
 
 #: src/modes/menu/menu.cpp:861
 msgid "PHYS ATK: "
@@ -1182,20 +1993,8 @@ msgstr ""
 msgid "META DEF:"
 msgstr ""
 
-#: src/modes/menu/menu.cpp:1018
-msgid "Drunes: "
-msgstr ""
-
 #: src/modes/menu/menu_views.cpp:95
 msgid "Lv: "
-msgstr ""
-
-#: src/modes/menu/menu_views.cpp:99 src/modes/menu/menu_views.cpp:559
-msgid "HP: "
-msgstr ""
-
-#: src/modes/menu/menu_views.cpp:104 src/modes/menu/menu_views.cpp:563
-msgid "SP: "
 msgstr ""
 
 #: src/modes/menu/menu_views.cpp:109 src/modes/menu/menu_views.cpp:567
@@ -1282,18 +2081,6 @@ msgstr ""
 msgid "Leggings"
 msgstr ""
 
-#: src/modes/pause.cpp:57
-msgid "Paused"
-msgstr ""
-
-#: src/modes/pause.cpp:69
-msgid "Quit Game"
-msgstr ""
-
-#: src/modes/pause.cpp:70
-msgid "Quit to Main Menu"
-msgstr ""
-
 #: src/modes/save/save_mode.cpp:85
 msgid "Save Game"
 msgstr ""
@@ -1320,10 +2107,6 @@ msgstr ""
 
 #: src/modes/save/save_mode.cpp:106
 msgid "File #6"
-msgstr ""
-
-#: src/modes/shop/shop.cpp:126
-msgid "Items"
 msgstr ""
 
 #: src/modes/shop/shop.cpp:128
