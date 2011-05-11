@@ -13,11 +13,11 @@
 	<File name="src/common/gui/option.h" open="0" top="0" tabpos="1">
 		<Cursor position="20498" topLine="526" />
 	</File>
-	<File name="src/engine/script/script.h" open="1" top="0" tabpos="0">
+	<File name="src/engine/script/script.h" open="0" top="0" tabpos="0">
 		<Cursor position="4983" topLine="129" />
 	</File>
-	<File name="src/engine/system.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="6543" topLine="274" />
+	<File name="src/engine/system.cpp" open="0" top="0" tabpos="1">
+		<Cursor position="6543" topLine="290" />
 	</File>
 	<File name="src/engine/system.h" open="0" top="0" tabpos="5">
 		<Cursor position="0" topLine="0" />
