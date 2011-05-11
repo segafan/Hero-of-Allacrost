@@ -7,26 +7,181 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 0.2.2\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2010-07-19 18:56-0300\n"
+"POT-Creation-Date: 2011-05-10 23:38-0300\n"
 "PO-Revision-Date: 2010-05-10 00:47-0300\n"
 "Last-Translator: Marcos Avila Isidoro <marcavis@yahoo.com.br>\n"
 "Language-Team: German\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: dat/actors/map_sprites_stock.lua:9
+#: dat/actors/characters.lua:13 dat/actors/map_sprites_stock.lua:9
+#: dat/maps/demo_cave.lua:389
 msgid "Claudius"
+msgstr ""
+
+#: dat/actors/characters.lua:36 dat/actors/characters.lua:124
+#: dat/actors/characters.lua:202 dat/actors/characters.lua:280
+#: dat/actors/enemies_set_01.lua:114 dat/actors/enemies_set_01.lua:168
+#: dat/actors/enemies_set_01.lua:231 dat/actors/enemies_set_01.lua:294
+#: dat/actors/enemies_set_02.lua:131 dat/actors/enemies_set_02.lua:187
+#: dat/actors/enemies_set_02.lua:243 dat/actors/enemies_set_02.lua:308
+#: dat/actors/enemies_set_02.lua:363 src/modes/menu/menu.cpp:847
+msgid "Head"
+msgstr ""
+
+#: dat/actors/characters.lua:45 dat/actors/characters.lua:133
+#: dat/actors/characters.lua:211 dat/actors/characters.lua:289
+#: dat/actors/enemies_set_01.lua:357 src/modes/menu/menu.cpp:850
+msgid "Torso"
+msgstr ""
+
+#: dat/actors/characters.lua:53 dat/actors/characters.lua:141
+#: dat/actors/characters.lua:219 dat/actors/characters.lua:297
+msgid "Arms"
+msgstr ""
+
+#: dat/actors/characters.lua:62 dat/actors/characters.lua:150
+#: dat/actors/characters.lua:228 dat/actors/characters.lua:306
+#: dat/actors/enemies_set_01.lua:247 dat/actors/enemies_set_01.lua:310
+#: dat/actors/enemies_set_01.lua:429 dat/actors/enemies_set_01.lua:492
+#: dat/actors/enemies_set_02.lua:267 dat/actors/enemies_set_02.lua:379
+#: src/modes/menu/menu.cpp:856
+msgid "Legs"
+msgstr ""
+
+#: dat/actors/characters.lua:101
+msgid "Mark"
+msgstr ""
+
+#: dat/actors/characters.lua:179
+msgid "Dester"
+msgstr ""
+
+#: dat/actors/characters.lua:257
+msgid "Lukar"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:48
+msgid "Green Slime"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:68 dat/actors/enemies_set_01.lua:176
+#: dat/actors/enemies_set_02.lua:139
+msgid "Body"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:94
+msgid "Spider"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:122 dat/actors/enemies_set_02.lua:195
+msgid "Abdomen"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:148
+msgid "Snake"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:184 dat/actors/enemies_set_02.lua:147
+#: dat/actors/enemies_set_02.lua:203
+msgid "Tail"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:211
+msgid "Skeleton"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:239 dat/actors/enemies_set_02.lua:251
+#: dat/actors/enemies_set_02.lua:316 dat/actors/enemies_set_02.lua:371
+msgid "Chest"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:274
+msgid "Scorpion"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:302
+msgid "Thorax"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:337
+msgid "Bat"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:365
+msgid "Wings"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:393
+msgid "Scorpion Goliath"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:413 dat/actors/enemies_set_01.lua:476
+msgid "Mesosoma"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:421 dat/actors/enemies_set_01.lua:484
+msgid "Pincers"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:456
+msgid "Armored Beast"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:15
+msgid "Daemarbora"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:35
+msgid "Trunk"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:43
+msgid "Branches"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:63
+msgid "Aerocephal"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:83
+msgid "Forehead"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:91
+msgid "Orifice"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:111
+msgid "Arcana Drake"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:167
+msgid "Nagaruda"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:223
+msgid "Deceleon"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:259 dat/actors/enemies_set_02.lua:324
+#: src/modes/menu/menu.cpp:853 src/modes/menu/menu_views.cpp:204
+msgid "Arm"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:287
+msgid "Aurum Drakueli"
+msgstr ""
+
+#: dat/actors/enemies_set_02.lua:343 dat/actors/map_sprites_stock.lua:35
+msgid "Kyle"
 msgstr ""
 
 #: dat/actors/map_sprites_stock.lua:22
 msgid "Laila"
-msgstr ""
-
-#: dat/actors/map_sprites_stock.lua:35
-msgid "Kyle"
 msgstr ""
 
 #: dat/actors/map_sprites_stock.lua:47
@@ -67,6 +222,78 @@ msgstr ""
 
 #: dat/actors/map_sprites_stock.lua:148
 msgid "Karlate"
+msgstr ""
+
+#: dat/effects/status.lua:48
+msgid "Raise Strength"
+msgstr ""
+
+#: dat/effects/status.lua:94
+msgid "Lower Strength"
+msgstr ""
+
+#: dat/effects/status.lua:140
+msgid "Raise Vigor"
+msgstr ""
+
+#: dat/effects/status.lua:186
+msgid "Lower Vigor"
+msgstr ""
+
+#: dat/effects/status.lua:232
+msgid "Raise Fortitude"
+msgstr ""
+
+#: dat/effects/status.lua:278
+msgid "Lower Fortitude"
+msgstr ""
+
+#: dat/effects/status.lua:324
+msgid "Raise Protection"
+msgstr ""
+
+#: dat/effects/status.lua:370
+msgid "Lower Protection"
+msgstr ""
+
+#: dat/effects/status.lua:416
+msgid "Raise Agility"
+msgstr ""
+
+#: dat/effects/status.lua:463
+msgid "Lower Agility"
+msgstr ""
+
+#: dat/effects/status.lua:510
+msgid "Raise Evasion"
+msgstr ""
+
+#: dat/effects/status.lua:559
+msgid "Lower Evasion"
+msgstr ""
+
+#: dat/effects/status.lua:605
+msgid "Regenerate HP"
+msgstr ""
+
+#: dat/effects/status.lua:624
+msgid "Drain HP"
+msgstr ""
+
+#: dat/effects/status.lua:643
+msgid "Regenerate SP"
+msgstr ""
+
+#: dat/effects/status.lua:662
+msgid "Drain SP"
+msgstr ""
+
+#: dat/effects/status.lua:681
+msgid "Paralysis"
+msgstr ""
+
+#: dat/effects/status.lua:700
+msgid "Stasis"
 msgstr ""
 
 #: dat/maps/betrayal_room.lua:215 dat/maps/desert_barracks.lua:441
@@ -173,6 +400,240 @@ msgstr ""
 
 #: dat/maps/betrayal_room.lua:373
 msgid "Damn you, Kyle."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:358
+msgid "Claudius, what are you doing here?"
+msgstr ""
+
+#: dat/maps/demo_cave.lua:359
+msgid "I came in this cave for training."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:360
+msgid ""
+"Well, good job getting this far all by yourself. This is a pretty dangerous "
+"place for someone as inexperienced as yourself."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:361
+msgid ""
+"Yes well, I have to train hard if I want to be able to spar with you evenly "
+"one day, Jonas. By the way, what were you doing?"
+msgstr ""
+
+#: dat/maps/demo_cave.lua:362
+msgid ""
+"The cave goes deeper than this, but it appears a collapse here has blocked "
+"the way. I was trying to find an alternative passage, but it appears that "
+"the inner chambers are now completely inaccessible."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:363
+msgid ""
+"In any case, this is as far as you can go in this demo, so thanks for....."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:364
+msgid "Wait, what was that noise? Hey, look out!"
+msgstr ""
+
+#: dat/maps/demo_cave.lua:366
+msgid ""
+"Phew, that was a shock. I've never seen such foes wandering in this cave. "
+"Nice job taking care of them Claudius, I can definitely tell that your "
+"swordsmanship has improved."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:367
+msgid "Thank you. By the way...why didn't you fight with me in that battle?"
+msgstr ""
+
+#: dat/maps/demo_cave.lua:368
+msgid ""
+"Ah, err...well you see, you'll never reach your full potential if you always "
+"have your seniors stepping in for you."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:369
+msgid "I see."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:370
+msgid ""
+"And besides, I don't even have my own battle sprite graphics yet! The "
+"development team needs more artists to help move the game along!"
+msgstr ""
+
+#: dat/maps/demo_cave.lua:371
+msgid "....."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:373
+msgid "Well, this truly is the end of the demo. Thanks for playing."
+msgstr ""
+
+#: dat/maps/demo_cave.lua:409
+msgid "Jonas"
+msgstr ""
+
+#: dat/maps/demo_town.lua:296
+msgid "Laila, what's wrong? You have a worried look on your face."
+msgstr ""
+
+#: dat/maps/demo_town.lua:298
+msgid "You're going into the cave again, aren't you?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:302
+msgid "Yes, I intend to..."
+msgstr ""
+
+#: dat/maps/demo_town.lua:304
+msgid "No, of course not..."
+msgstr ""
+
+#: dat/maps/demo_town.lua:307
+msgid "Test Option #1"
+msgstr ""
+
+#: dat/maps/demo_town.lua:309
+msgid "Test Option #2"
+msgstr ""
+
+#: dat/maps/demo_town.lua:311
+msgid "Test Option #3"
+msgstr ""
+
+#: dat/maps/demo_town.lua:315
+msgid "But why? Its dangerous in there!"
+msgstr ""
+
+#: dat/maps/demo_town.lua:317
+msgid ""
+"Laila, if I want to be capable on the battlefield I have to fight real "
+"battles. You understand that, don't you?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:319
+msgid ""
+"I know that you're worried about me and I appreciate it, but you need to "
+"stop doing this."
+msgstr ""
+
+#: dat/maps/demo_town.lua:321
+msgid ".....Alright, I'm sorry. Just be careful in there, okay?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:323
+msgid "Will do. Thanks Laila."
+msgstr ""
+
+#: dat/maps/demo_town.lua:325
+msgid ""
+"You know Claudius, I could be of assistance to you in the cave. May I come "
+"with you?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:329
+msgid "No way, you could be hurt!"
+msgstr ""
+
+#: dat/maps/demo_town.lua:331
+msgid "Your help would be great!"
+msgstr ""
+
+#: dat/maps/demo_town.lua:334
+msgid ""
+"Oh good. I was worried you were. Please tell me if you are Claudius, just so "
+"I can know..."
+msgstr ""
+
+#: dat/maps/demo_town.lua:336
+msgid "Of course, I promise."
+msgstr ""
+
+#: dat/maps/demo_town.lua:340
+msgid "Oh....ok then. You remember to be careful."
+msgstr ""
+
+#: dat/maps/demo_town.lua:342
+msgid "I will Laila."
+msgstr ""
+
+#: dat/maps/demo_town.lua:346
+msgid "Great, I'll be sure to help you any way I can."
+msgstr ""
+
+#: dat/maps/demo_town.lua:348
+msgid "Laila has joined the party."
+msgstr ""
+
+#: dat/maps/demo_town.lua:387
+msgid "Hey there son, how's the training going?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:389
+msgid "Pretty well. The enemies in the cave aren't too tough."
+msgstr ""
+
+#: dat/maps/demo_town.lua:391
+msgid ""
+"Good to hear. Don't let your guard down though. The deeper you go into that "
+"cave, the more likely it is that you'll face stronger opponents."
+msgstr ""
+
+#: dat/maps/demo_town.lua:417
+msgid "Oh, Claudius? You seemed puzzled."
+msgstr ""
+
+#: dat/maps/demo_town.lua:419
+msgid "There are odd little icons above people's heads. What do they mean?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:421
+msgid ""
+"That is a new dialogue indicator. Any person that has something new to say "
+"that you haven't already heard will have that icon above their head. Once "
+"you've listened to everything that they have to say, the icon will disappear."
+msgstr ""
+
+#: dat/maps/demo_town.lua:427
+msgid ""
+"And remember that a person may have more thing to say, so if the icon "
+"doesn't disappear after speaking to a person, speak to them once more."
+msgstr ""
+
+#: dat/maps/demo_town.lua:453
+msgid ""
+"Choose your target wisely in battle. Its best to single out and take down "
+"one foe at a time. And don't be afraid to use a healing potion or two in "
+"battle if you're feeling weak."
+msgstr ""
+
+#: dat/maps/demo_town.lua:487
+msgid "The interior of my home is finally finished. Not too bad is it?"
+msgstr ""
+
+#: dat/maps/demo_town.lua:489
+msgid "After its fully furnished I'm sure it will look quite nice."
+msgstr ""
+
+#: dat/maps/demo_town.lua:521
+msgid "This village is boring! There's no one I can play with here!"
+msgstr ""
+
+#: dat/maps/demo_town.lua:540
+msgid "I have merchandise for sale at affordable prices. Take a look."
+msgstr ""
+
+#: dat/maps/demo_town.lua:563
+msgid ""
+"I'm looking for my brother Torl. I sure hope he doesn't get into any trouble."
+msgstr ""
+
+#: dat/maps/demo_town.lua:581
+msgid "So much work to do!"
 msgstr ""
 
 #: dat/maps/desert_barracks.lua:411
@@ -425,7 +886,7 @@ msgstr ""
 msgid "Well done, Claudius."
 msgstr ""
 
-#: dat/maps/desert_training.lua:601
+#: dat/maps/desert_training.lua:601 dat/maps/scene1_desert.lua:459
 msgid "Yes, sir."
 msgstr ""
 
@@ -606,6 +1067,580 @@ msgstr ""
 
 #: dat/maps/opening_scene.lua:241
 msgid "Kyle has joined the party."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:502
+msgid "Watch your step and keep moving. Its not far to the river bed."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:507
+msgid "Uuuurrrnnnnnggghhhh!"
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:512
+msgid "(Wimpering)"
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:517
+msgid "She's terrified and won't budge."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:519
+msgid "For being such large animals, Mak hounds sure can act cowardly."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:521
+msgid ""
+"Go on ahead of our group. We'll catch up when we can get her moving again."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:526
+msgid ""
+"A corpse. That's always a reassuring thing to find in a place like this."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:528
+msgid "Hey, I see something under his hand."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:533
+msgid "Hey! Over here!"
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:538
+msgid ""
+"The river bed is just through this passage. Be careful, the walls are a "
+"little unstable."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:543
+msgid "Woah, are you men alright?"
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:545
+msgid "We're all fine. But the passage has caved in."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:547
+msgid "There's another way. Its a longer route though. Head through there."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:552
+msgid "I'll direct everyone remaining to the longer route. Keep going."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:557
+msgid ""
+"Damnit, another dead end. I hope that guy was right about there being "
+"another way through."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:559
+msgid "Did you guys hear that? What the hell was that noise?"
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:561
+msgid "I don't know, but I've got a bad feeling about this mission."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:563
+msgid ""
+"Well the sooner we achieve our objective, the sooner we get out of here and "
+"go home. So move your ass instead of your mouth."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:568
+msgid ""
+"This path leads down deeper into the cave. You don't need to go there ... "
+"and trust me, you don't want to."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:573
+msgid "Ow ow ow..."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:578
+msgid ""
+"He sprained his ankle on a loose rock so we're treating his injury. Move on "
+"ahead, you're almost there."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:583
+msgid "Hey check it out. The water is still running here."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:585
+msgid "That's good news. Lets stop here briefly and fill up."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:590
+msgid "Finally made it."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:592
+msgid ""
+"Listen up! There's a large boulder obstructing the underground river that "
+"flows through here. When we move it aside, we get to head out of this place."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:594
+msgid ""
+"Mikal! Torren! Take your units and secure the ropes around that overgrown "
+"rock. Jasper's unit will prepare the Maks to help us move it. The rest of "
+"you stay alert and watch our backs. Who knows what the hell may be in this "
+"cave with us."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:599
+msgid "Hey! I heard that noise earlier. It sounds like its closer now."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:601
+msgid "Keep your eyes peeled and your swords ready men."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:603
+msgid ""
+"I don't know how you expect to see shit in here. I can barely see my own "
+"hand."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:605
+msgid "Over there! Watch out!."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:610
+msgid "Don't panic! Surround it and we'll take it down together!"
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:405
+msgid "Methus"
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:409
+msgid "Knight"
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:413
+msgid "Narrator"
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:441
+msgid ""
+"A Muabi tribe member stands in the distance, surveying a caravan of marching "
+"Harrvahn knights who are led by Mak’ok hounds. In the back of this caravan "
+"is Claudius. The knights continue marching single file until reaching their "
+"destination: the bank of the river. The Maubi member continues to watch from "
+"a distance."
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:443
+msgid ""
+"Open your ears and shut your mouths. Our mission is to unblock the water "
+"supply. Stay together and on guard, I don't want any heroes or fools dying "
+"on the surgeon's table tonight."
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:445
+msgid ""
+"Some knights begin setting a perimeter around their location, while others "
+"scout the area. The spying Maubi disappears into the darkness. Claudius "
+"moves to help some of the knights scout."
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:447
+msgid ""
+"Stay by the riverside Claudius, with the Mak’ok’s. You’re not a knight yet."
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:449
+msgid ""
+"Claudius observes the knights work to establish their presence in the area. "
+"He sees as some of the knights approach the nearby cave where the water is "
+"coming from. Once the perimeter is secure the knights regroup where Claudius "
+"is, by the riverside."
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:451
+msgid ""
+"The water is definitely blocked somewhere in the cave. You can normally hear "
+"it from here when it's running full force. There can't be more than a "
+"trickle moving toward the city."
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:453
+msgid "All right. Draw your steel and prepare yourselves, we’re going in."
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:455
+msgid ""
+"Claudius, who has been holding the leashes to the Mak’ok’s, drops them and "
+"draws his sword."
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:457
+msgid ""
+"Claudius, this is your first mission and you’re still in training. Your job "
+"is to man the Makok’s and be observant of your superiors."
+msgstr ""
+
+#: dat/maps/scene1_desert.lua:461
+msgid ""
+"Claudius sheaths his sword and picks up the leashes. The knights, along with "
+"Claudius, enter the cave."
+msgstr ""
+
+#: dat/objects/arm_armor.lua:40
+msgid "Wooden Shield"
+msgstr ""
+
+#: dat/objects/arm_armor.lua:41
+msgid "Robust wooden oak protects from all but the heaviest of assaults."
+msgstr ""
+
+#: dat/objects/arm_armor.lua:51
+msgid "Metal Shield"
+msgstr ""
+
+#: dat/objects/arm_armor.lua:52
+msgid ""
+"A shield formed completely out of a light-weight but cheap metallic alloy."
+msgstr ""
+
+#: dat/objects/arm_armor.lua:62
+msgid "Phoenix Shield"
+msgstr ""
+
+#: dat/objects/arm_armor.lua:63
+msgid "A tall steel shield with a mighty phoenix emblazoned on the front."
+msgstr ""
+
+#: dat/objects/arm_armor.lua:73
+msgid "Trident Shield"
+msgstr ""
+
+#: dat/objects/arm_armor.lua:74
+msgid ""
+"A large shield with enough fortitude to withstand waves of powerful attacks."
+msgstr ""
+
+#: dat/objects/head_armor.lua:40
+msgid "Karlate Helmet"
+msgstr ""
+
+#: dat/objects/head_armor.lua:41
+msgid ""
+"Standard Karlate issued equipment. Battle worn but reliable head protection."
+msgstr ""
+
+#: dat/objects/head_armor.lua:51
+msgid "Cobalt Helm"
+msgstr ""
+
+#: dat/objects/head_armor.lua:52
+msgid "A small helmet composed of a secret cobalt based alloy."
+msgstr ""
+
+#: dat/objects/head_armor.lua:62
+msgid "Crested Helmet"
+msgstr ""
+
+#: dat/objects/head_armor.lua:63
+msgid ""
+"A sturdy helmet with a hinged face guard offering additional protection."
+msgstr ""
+
+#: dat/objects/items.lua:46
+msgid "Minor Healing Potion"
+msgstr ""
+
+#: dat/objects/items.lua:47
+msgid "Restores a small amount of hit points to a target."
+msgstr ""
+
+#: dat/objects/items.lua:69
+msgid "Minor Elixir"
+msgstr ""
+
+#: dat/objects/items.lua:70
+msgid "Reduces ailing status effects by a limited degree."
+msgstr ""
+
+#: dat/objects/leg_armor.lua:40
+msgid "Standard Greaves"
+msgstr ""
+
+#: dat/objects/leg_armor.lua:41
+msgid ""
+"Standard equipment. Light metal alloy protects the legs while minimizing the "
+"negative impact on movement."
+msgstr ""
+
+#: dat/objects/leg_armor.lua:51
+msgid "Tempered Greaves"
+msgstr ""
+
+#: dat/objects/leg_armor.lua:52
+msgid ""
+"Standard greaves that have undergone an additional tempering process, "
+"increasing their durability and strength."
+msgstr ""
+
+#: dat/objects/torso_armor.lua:40
+msgid "Leather Chain Mail"
+msgstr ""
+
+#: dat/objects/torso_armor.lua:41
+msgid "A light chain mail woven into a tough leather cuirass."
+msgstr ""
+
+#: dat/objects/torso_armor.lua:51
+msgid "Karlate Breastplate"
+msgstr ""
+
+#: dat/objects/torso_armor.lua:52
+msgid ""
+"Standard Karlate issued equipment. Effectively protects the torso from most "
+"types of attack."
+msgstr ""
+
+#: dat/objects/torso_armor.lua:62
+msgid "Shouldered Breastplate"
+msgstr ""
+
+#: dat/objects/torso_armor.lua:63
+msgid ""
+"A breastplate with slightly thicker armor than is commonly found and "
+"additional shoulder guards."
+msgstr ""
+
+#: dat/objects/weapons.lua:40
+msgid "Karlate Sword"
+msgstr ""
+
+#: dat/objects/weapons.lua:41
+msgid ""
+"Standard Karlate issued equipment. A light weight iron sword suitable for "
+"most skirmishes."
+msgstr ""
+
+#: dat/objects/weapons.lua:51
+msgid "Iron Sword"
+msgstr ""
+
+#: dat/objects/weapons.lua:52
+msgid ""
+"A sturdy but somewhat dull sword whose blade was forged from a single block "
+"of solid iron."
+msgstr ""
+
+#: dat/objects/weapons.lua:62
+msgid "Knight's Blade"
+msgstr ""
+
+#: dat/objects/weapons.lua:63
+msgid ""
+"A weapon bestowed to seasoned veterans of the knighthood in several kingdoms "
+"throughout the world."
+msgstr ""
+
+#: dat/skills/attack.lua:41
+msgid "Sword Slash"
+msgstr ""
+
+#: dat/skills/attack.lua:42
+msgid "A textbook manuever that deals an effective blow."
+msgstr ""
+
+#: dat/skills/attack.lua:63
+msgid "Forward Thrust"
+msgstr ""
+
+#: dat/skills/attack.lua:64
+msgid ""
+"A more powerful blow than the standard sword slash, but also less likely to "
+"hit its intended target."
+msgstr ""
+
+#: dat/skills/attack.lua:86
+msgid "Stun Strike"
+msgstr ""
+
+#: dat/skills/attack.lua:87
+msgid "A blow which targets vital areas and temporarily stun its target."
+msgstr ""
+
+#: dat/skills/attack.lua:110
+msgid "Blade Rush"
+msgstr ""
+
+#: dat/skills/attack.lua:111
+msgid ""
+"A strong and aggressive attack with a blade that deals significant damage."
+msgstr ""
+
+#: dat/skills/defense.lua:41
+msgid "Defensive Stance"
+msgstr ""
+
+#: dat/skills/defense.lua:42
+msgid "Take a stance to better defend user against incoming attacks."
+msgstr ""
+
+#: dat/skills/support.lua:49
+msgid "First Aid"
+msgstr ""
+
+#: dat/skills/support.lua:50
+msgid ""
+"Performs basic medical assistance, healing the target by a minor degree."
+msgstr ""
+
+#: dat/skills/support.lua:69
+msgid "Encouraging Shout"
+msgstr ""
+
+#: dat/skills/support.lua:70
+msgid "Increases the strength of all allies."
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:247
+msgid "Item<R>Count"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:454
+msgid "Skill<R>SP"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:546
+#: src/modes/battle/battle_command.cpp:552
+msgid "Attack"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:547
+#: src/modes/battle/battle_command.cpp:553
+msgid "Defend"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:548
+#: src/modes/battle/battle_command.cpp:554
+msgid "Support"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:549
+#: src/modes/battle/battle_command.cpp:555
+msgid "Item"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1010
+msgid "All Allies"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1012
+msgid "All Enemies"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1029
+msgid "Skill Points: "
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1030
+#: src/modes/battle/battle_command.cpp:1038
+msgid "Target Type: "
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1031
+msgid "Prep Time: "
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1032
+msgid "Cool Time: "
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1037
+msgid "Quantity: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:96
+msgid "Retry"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:97
+msgid "Restart"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:98
+msgid "Return"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:99
+msgid "Retire"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:111 src/modes/shop/shop_confirm.cpp:127
+msgid "Yes"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:112 src/modes/shop/shop_confirm.cpp:126
+msgid "No"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:320
+msgid "Items Found"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:481
+msgid "XP Earned: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:484
+msgid "Drunes Recovered: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:532
+#: src/modes/battle/battle_finish.cpp:614
+msgid "Level: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:533
+#: src/modes/battle/battle_finish.cpp:615
+msgid "XP: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:579
+msgid "HP:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:582
+msgid "SP:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:585
+msgid "STR:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:588
+msgid "VIG:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:591
+msgid "FOR:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:594
+msgid "PRO:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:597
+msgid "AGI:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:600
+msgid "EVA:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:609
+msgid "New Skill Learned:   "
 msgstr ""
 
 #: src/modes/boot/boot.cpp:87
@@ -1125,22 +2160,6 @@ msgstr ""
 msgid "Weapon"
 msgstr ""
 
-#: src/modes/menu/menu.cpp:847
-msgid "Head"
-msgstr ""
-
-#: src/modes/menu/menu.cpp:850
-msgid "Torso"
-msgstr ""
-
-#: src/modes/menu/menu.cpp:853 src/modes/menu/menu_views.cpp:204
-msgid "Arm"
-msgstr ""
-
-#: src/modes/menu/menu.cpp:856
-msgid "Legs"
-msgstr ""
-
 #: src/modes/menu/menu.cpp:861
 msgid "PHYS ATK: "
 msgstr ""
@@ -1468,14 +2487,6 @@ msgstr ""
 
 #: src/modes/shop/shop_confirm.cpp:117
 msgid "This will remove all marked purchases, sales, and trades. Are you sure?"
-msgstr ""
-
-#: src/modes/shop/shop_confirm.cpp:126
-msgid "No"
-msgstr ""
-
-#: src/modes/shop/shop_confirm.cpp:127
-msgid "Yes"
 msgstr ""
 
 #: src/modes/shop/shop_confirm.cpp:669 src/modes/shop/shop_confirm.cpp:676
