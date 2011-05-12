@@ -326,7 +326,7 @@ void TileSupervisor::Update() {
 
 
 void TileSupervisor::DrawLowerLayer(const MapFrame* const frame) {
-	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
 	for (uint32 r = static_cast<uint32>(frame->starting_row);
 			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++)
