@@ -303,6 +303,7 @@ bool EnableDebugging(string vars) {
 			hoa_audio::AUDIO_DEBUG                  = true;
 			hoa_battle::BATTLE_DEBUG                = true;
 			hoa_boot::BOOT_DEBUG                    = true;
+			hoa_common::COMMON_DEBUG                = true;
 			hoa_script::SCRIPT_DEBUG                = true;
 			hoa_mode_manager::MODE_MANAGER_DEBUG    = true;
 			hoa_input::INPUT_DEBUG                  = true;
@@ -324,6 +325,9 @@ bool EnableDebugging(string vars) {
 		}
 		else if (args[i] == "boot") {
 			hoa_boot::BOOT_DEBUG = true;
+		}
+		else if (args[i] == "common") {
+			hoa_common::COMMON_DEBUG = true;
 		}
 		else if (args[i] == "data") {
 			hoa_script::SCRIPT_DEBUG = true;

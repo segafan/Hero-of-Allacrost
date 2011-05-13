@@ -233,6 +233,10 @@ gui_SOURCES = \
 
 COMMON_DIR = src/common
 common_SOURCES = \
+	$(COMMON_DIR)/common.cpp \
+	$(COMMON_DIR)/common.h \
+	$(COMMON_DIR)/dialogue.cpp \
+	$(COMMON_DIR)/dialogue.h \
 	$(global_SOURCES) \
 	$(gui_SOURCES)
 

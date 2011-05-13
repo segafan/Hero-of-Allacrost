@@ -127,23 +127,6 @@ namespace hoa_video {
 	}
 }
 
-namespace hoa_gui {
-	class GUISystem;
-	class MenuWindow;
-	class TextBox;
-	class OptionBox;
-
-	namespace private_gui {
-		class GUIElement;
-		class GUIControl;
-		class MenuSkin;
-
-		class Option;
-		class OptionElement;
-		class OptionCellBounds;
-	}
-}
-
 // Script declarations, see src/engine/script/
 namespace hoa_script {
 	extern bool SCRIPT_DEBUG;
@@ -177,10 +160,19 @@ namespace hoa_system {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Global Code Declarations
+// Common Code Declarations
 ////////////////////////////////////////////////////////////////////////////////
 
-// Global declarations, see src/global/
+// Common declarations, see src/common
+namespace hoa_common {
+	extern bool COMMON_DEBUG;
+	class CommonDialogue;
+	class CommonDialogueOptions;
+	class CommonDialogueWindow;
+	class CommonDialogueSupervisor;
+}
+
+// Global declarations, see src/common/global/
 namespace hoa_global {
 	extern bool GLOBAL_DEBUG;
 	class GameGlobal;
@@ -205,6 +197,24 @@ namespace hoa_global {
 	class GlobalParty;
 }
 
+// GUI declarations, see src/common/gui
+namespace hoa_gui {
+	class GUISystem;
+	class MenuWindow;
+	class TextBox;
+	class OptionBox;
+
+	namespace private_gui {
+		class GUIElement;
+		class GUIControl;
+		class MenuSkin;
+
+		class Option;
+		class OptionElement;
+		class OptionCellBounds;
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Game Mode Declarations
 ////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +227,7 @@ namespace hoa_battle {
 
 	namespace private_battle {
 		class SequenceSupervisor;
-		
+
 		class BattleActor;
 		class BattleCharacter;
 		class BattleEnemy;
