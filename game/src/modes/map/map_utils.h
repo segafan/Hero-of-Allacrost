@@ -230,8 +230,9 @@ enum EVENT_TYPE {
 
 //! \brief Defines the different states the dialogue can be in.
 enum DIALOGUE_STATE {
-	DIALOGUE_STATE_LINE     =  0, //!< Active when the dialogue window is in the process of displaying a line of text
-	DIALOGUE_STATE_OPTION   =  1, //!< Active when player-selectable options are present in the dialogue window
+	DIALOGUE_STATE_INACTIVE =  0, //!< Active when the dialogue window is in the process of displaying a line of text
+	DIALOGUE_STATE_LINE     =  1, //!< Active when the dialogue window is in the process of displaying a line of text
+	DIALOGUE_STATE_OPTION   =  2, //!< Active when player-selectable options are present in the dialogue window
 };
 
 

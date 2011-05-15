@@ -56,13 +56,13 @@ CommonDialogue::~CommonDialogue() {
 
 
 
-void CommonDialogue::AddText(string text) {
-	AddText(text, COMMON_DIALOGUE_NEXT_LINE);
+void CommonDialogue::AddLine(string text) {
+	AddLine(text, COMMON_DIALOGUE_NEXT_LINE);
 }
 
 
 
-void CommonDialogue::AddText(string text, int32 next_line) {
+void CommonDialogue::AddLine(string text, int32 next_line) {
 	_line_count++;
 	_text.push_back(MakeUnicodeString(text));
 	_next_lines.push_back(next_line);
@@ -72,13 +72,13 @@ void CommonDialogue::AddText(string text, int32 next_line) {
 
 
 
-void CommonDialogue::AddTextTimed(string text, uint32 display_time) {
-	AddTextTimed(text, COMMON_DIALOGUE_NEXT_LINE, display_time);
+void CommonDialogue::AddLineTimed(string text, uint32 display_time) {
+	AddLineTimed(text, COMMON_DIALOGUE_NEXT_LINE, display_time);
 }
 
 
 
-void CommonDialogue::AddTextTimed(string text, int32 next_line, uint32 display_time) {
+void CommonDialogue::AddLineTimed(string text, int32 next_line, uint32 display_time) {
 	_line_count++;
 	_text.push_back(MakeUnicodeString(text));
 	_next_lines.push_back(next_line);
@@ -306,8 +306,8 @@ void CommonDialogueSupervisor::BeginDialogue(uint32 dialogue_id) {
 	_current_dialogue = dialogue;
 	_current_options = _current_dialogue->GetLineOptions(_line_counter);
 	// Setup the line timer only if the first line has a display time
-	if (_current_dialogue->GetLineDisplayTime(0) >= 0) {
-		_line_timer.Initialize(_current_dialogue->GetLineDisplayTime(0));
+	if (_current_dialogue->GetLineDisplayTime(_line_counter) >= 0) {
+		_line_timer.Initialize(_current_dialogue->GetLineDisplayTime(_line_counter));
 	}
 	else {
 		_line_timer.Finish();

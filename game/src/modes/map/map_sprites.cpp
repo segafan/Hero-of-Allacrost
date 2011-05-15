@@ -623,7 +623,21 @@ void MapSprite::Draw() {
 
 void MapSprite::AddDialogueReference(uint32 dialogue_id) {
 	_dialogue_references.push_back(dialogue_id);
-	MapMode::CurrentInstance()->GetDialogueSupervisor()->AddSpriteReference(dialogue_id, GetObjectID());
+}
+
+
+
+void MapSprite::InitiateDialogue() {
+	if (_dialogue_references.empty() == true) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "sprite: " << object_id << " has no dialogue referenced" << endl;
+		return;
+	}
+
+	SaveState();
+	moving = false;
+	SetDirection(CalculateOppositeDirection(MapMode::CurrentInstance()->GetCamera()->GetDirection()));
+	MapMode::CurrentInstance()->GetDialogueSupervisor()->BeginDialogue(_dialogue_references[_next_dialogue]);
+	IncrementNextDialogue();
 }
 
 
@@ -633,7 +647,7 @@ void MapSprite::UpdateDialogueStatus() {
 	_has_unseen_dialogue = false;
 
 	for (uint32 i = 0; i < _dialogue_references.size(); i++) {
-		MapDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[i]);
+		SpriteDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[i]);
 		if (dialogue == NULL) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "sprite: " << object_id << " is referencing unknown dialogue: " << _dialogue_references[i] << endl;
 			continue;
@@ -669,7 +683,7 @@ void MapSprite::IncrementNextDialogue() {
 		if (static_cast<uint16>(_next_dialogue) >= _dialogue_references.size())
 			_next_dialogue = 0;
 
-		MapDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[_next_dialogue]);
+		SpriteDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[_next_dialogue]);
 		if (dialogue != NULL && dialogue->IsAvailable() == true) {
 			return;
 		}

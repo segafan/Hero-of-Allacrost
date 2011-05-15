@@ -436,7 +436,7 @@ void MapMode::_UpdateExplore() {
 			MapSprite *sp = reinterpret_cast<MapSprite*>(obj);
 
 			if (sp->HasAvailableDialogue()) {
-				_dialogue_supervisor->BeginDialogue(sp);
+				sp->InitiateDialogue();
 				return;
 			}
 		}

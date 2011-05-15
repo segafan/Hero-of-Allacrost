@@ -85,14 +85,14 @@ public:
 	//! \param id The id number to represent the dialogue, which should be unique to other dialogue ids within the same gamemode context
 	CommonDialogue(uint32 id);
 
-	virtual ~CommonDialogue();
+	~CommonDialogue();
 
 	/** \brief Adds a new line of text to the dialogue
 	*** \param text The text to show on the screen
 	***
 	*** Uses the default set of options for this line of text: proceed to next sequential line, no display timer.
 	**/
-	virtual void AddText(std::string text);
+	void AddLine(std::string text);
 
 	/** \brief Adds a new line of text to the dialogue
 	*** \param text The text to show on the screen
@@ -100,38 +100,38 @@ public:
 	***
 	*** No display timer is set for this version of AddText
 	**/
-	virtual void AddText(std::string text, int32 next_line);
+	void AddLine(std::string text, int32 next_line);
 
-	/** \brief Adds a new line of text to the dialogue
+	/** \brief Adds a new line of text to the dialogue that uses a display time
 	*** \param text The text to show on the screen
 	*** \param display_time The number of milliseconds that the line should be displayed for
 	***
 	*** The dialogue will proceed to the next sequential line for this line of text.
 	**/
-	virtual void AddTextTimed(std::string text, uint32 display_time);
+	void AddLineTimed(std::string text, uint32 display_time);
 
-	/** \brief Adds a new line of text to the dialogue
+	/** \brief Adds a new line of text to the dialogue that uses a display time
 	*** \param text The text to show on the screen
 	*** \param next_line The line of dialogue which should follow this one
 	*** \param display_time The number of milliseconds that the line should be displayed for
 	***
 	*** The dialogue will proceed to the next sequential line for this line of text.
 	**/
-	virtual void AddTextTimed(std::string text, int32 next_line, uint32 display_time);
+	void AddLineTimed(std::string text, int32 next_line, uint32 display_time);
 
 	/** \brief Adds an option to the most recently added line of text
 	*** \param text The text for this particular option
 	*** \note The next line will be the next sequential line should this option be selected
-	*** \note If no lines have been added ot the dialogue yet, this option will not be added and a warning will be issued
+	*** \note If no lines have been added to the dialogue yet, this option will not be added and a warning will be issued
 	**/
-	virtual void AddOption(std::string text);
+	void AddOption(std::string text);
 
 	/** \brief Adds an option to the most recently added line of text
 	*** \param text The text for this particular option
 	*** \param next_line The index value of the next line of dialogue to display should this option be selected
-	*** \note If no lines have been added ot the dialogue yet, this option will not be added and a warning will be issued
+	*** \note If no lines have been added to the dialogue yet, this option will not be added and a warning will be issued
 	**/
-	virtual void AddOption(std::string text, int32 next_line);
+	void AddOption(std::string text, int32 next_line);
 
 	//! \brief Indicates if this dialogue has already been seen by the player.
 	bool HasAlreadySeen() const
@@ -149,7 +149,7 @@ public:
 	*** that doesn't exist. Any issues that raise concern will cause the function to return false. Additionally if debugging is enabled,
 	*** messages will be printed to the console providing details about any bad data discovered.
 	**/
-	virtual bool Validate();
+	bool Validate();
 
 	//! \name Methods for retrieving properties of a specific line
 	//@{
@@ -242,14 +242,14 @@ public:
 	virtual ~CommonDialogueOptions()
 		{}
 
-	/** \brief Adds a new option to the OptionBox
+	/** \brief Adds a new option to the set of options
 	*** \param text The text for the new option
 	***
 	*** \note The next line to be read for this option will be the sequential next line of the dialogue
 	**/
 	virtual void AddOption(std::string text);
 
-	/** \brief Adds a new option to the OptionBox
+	/** \brief Adds a new option to the set of options
 	*** \param text The text for the new option
 	*** \param next_line An integer index of the next line of dialogue should this option be selected.
 	**/
@@ -270,7 +270,7 @@ public:
 	uint32 GetNumberOptions() const
 		{ return _text.size(); }
 
-private:
+protected:
 	//! \brief Contains the text of each option
 	std::vector<hoa_utils::ustring> _text;
 
@@ -301,8 +301,6 @@ private:
 *** portrait.
 *** ***************************************************************************/
 class CommonDialogueWindow {
-	friend class CommonDialogueSupervisor;
-
 public:
 	CommonDialogueWindow();
 

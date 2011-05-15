@@ -22,9 +22,15 @@
 *** \note To most C++ programmers, the syntax of the binding code found in this
 *** file may be very unfamiliar and obtuse. Refer to the Luabind documentation
 *** as necessary to gain an understanding of this code style.
+***
+*** \todo All commond code is bound here for now, not just the global code. This
+*** should probably be changed in the future as global is a subset of common, not
+*** the other way around.
 *** **************************************************************************/
 
 #include "defs.h"
+
+#include "dialogue.h"
 
 #include "global.h"
 #include "global_actors.h"
@@ -39,6 +45,20 @@ namespace hoa_defs {
 
 void BindGlobalsToLua()
 {
+	// ---------- Bind Common Components
+	{
+	using namespace hoa_common;
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_common")
+	[
+		class_<CommonDialogue>("CommonDialogue")
+			.def("SetTimesSeen", &CommonDialogue::SetTimesSeen)
+			.def("SetMaxViews", &CommonDialogue::SetMaxViews)
+	];
+
+	} // End using common namespace
+
+
 	// ---------- Bind Global Components
 	{
 	using namespace hoa_global;
