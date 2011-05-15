@@ -20,6 +20,9 @@
 #include "utils.h"
 #include "defs.h"
 
+// Allacrost engine
+#include "system.h"
+
 namespace hoa_map {
 
 namespace private_map {
@@ -38,15 +41,15 @@ namespace private_map {
 *** ***************************************************************************/
 class ZoneSection {
 public:
-	ZoneSection(uint16 col1, uint16 row1, uint16 col2, uint16 row2) :
-		top_row(row1), bottom_row(row2), left_col(col1), right_col(col2)
+	ZoneSection(uint16 left, uint16 right, uint16 top, uint16 bottom) :
+		left_col(left), right_col(right), top_row(top), bottom_row(bottom)
 		{}
-
-	//! \brief Collision grid rows for the top and bottom section of the area
-	uint16 top_row, bottom_row;
 
 	//! \brief Collision grid columns for the top and bottom section of the area
 	uint16 left_col, right_col;
+
+	//! \brief Collision grid rows for the top and bottom section of the area
+	uint16 top_row, bottom_row;
 }; // class ZoneSection
 
 
@@ -58,32 +61,49 @@ public:
 *** is not very useful, but serves as a base for other derived classes. Note
 *** that a MapZone may be relevant in only certain map contexts but not others.
 ***
-*** \note ZoneSections in the MapZone may overlap without any problem. However
-*** you should try to create a MapZone using as few ZoneSections as possible to
-*** improve performance.
+*** \note ZoneSections in the MapZone may overlap without any problem. In general,
+*** however, you should try to create a MapZone using as few ZoneSections as possible
+*** to improve performance.
 *** ***************************************************************************/
 class MapZone {
+	// This friend declaration is necessary because EnemyZone, although it dervies from MapZone, also keeps a pointer
+	// to a MapZone object and needs to access the protected members and methods of this object pointer.
+	friend class EnemyZone;
+
 public:
 	MapZone()
 		{}
+
+	/** \brief Constructs a map zone that is initialized with a single zone section
+	*** \param left_col The left edge of the section to add
+	*** \param right_col The right edge of the section to add
+	*** \param top_row The top edge of the section to add
+	*** \param bottom_row The bottom edge of the section to add
+	**/
+	MapZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
 
 	virtual ~MapZone()
 		{}
 
 	/** \brief Adds a new zone section to the map zone
-	*** \param section A pointer to the section to create
+	*** \param left_col The left edge of the section to add
+	*** \param right_col The right edge of the section to add
+	*** \param top_row The top edge of the section to add
+	*** \param bottom_row The bottom edge of the section to add
 	***
-	*** The implementation of this function is designed with Lua in mind. The
-	*** ZoneSection argument is deleted before the function returns.
-	***
-	*** \todo Determine if the pointer deletion is necessary. Having the argument
-	*** as a reference instead of a pointer would be more preferrable.
+	*** \note The value of left shoult be less than right, and top should be less that
+	*** bottom. If these conditions are not true, a warning will be printed and the section
+	*** will not be added.
 	**/
-	void AddSection(ZoneSection* section);
+	virtual void AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
 
-	/** \brief Returns true if the position coordinates are located inside the zone
+	/** \brief Returns true if the position coordinates are located inside the zone (inclusive to the zone boundary edges)
 	*** \param pos_x The x position to check
 	*** \param pos_y The y position to check
+	***
+	*** \note This function ignores the fractional part of map coordinates for performance reasons. So whenever an object is being
+	*** checked as to whether or not it may be found in this zone, the floating point portion of its map coordinates are not taken
+	*** into account.
 	**/
 	bool IsInsideZone(uint16 pos_x, uint16 pos_y);
 
@@ -109,19 +129,38 @@ protected:
 *** This zone will spawn enemy sprites somewhere within its boundaries. It also
 *** regenerates dead enemies after a certain amount of time. The enemies can be
 *** constrained within the zone area or be made free to roam the entire map
-*** after spawning.
+*** after spawning. If desired, the class has the option to declare seperate zones
+*** for where enemies may spawn and where they may roam.
 ***
-*** \note All time/timer members are in number of milliseconds
+*** \note It makes no sense to use seperate zones for spawning if the enemies are
+*** not restrained in their roaming. If free roaming is enabled for this zone, construct
+*** the zone sections the standard way.
+***
+*** \note By default, enemies are restricted to move about within their zones and
+*** a default regeneration timer is used. These properties can be changed after
+*** the class object is constructed.
+***
+*** \todo Consider adding a call that will disable additional enemies from spawning in
+*** the zone, or limit the maximum number of enemies that may ever spawn in the zone.
 *** ***************************************************************************/
 class EnemyZone : public MapZone {
 public:
-	/** \param regen_time The number of milliseconds to wait before spawning an enemy
-	*** \param restrained If true, spawned enemy sprites may not leave the zone
-	**/
-	EnemyZone(uint32 regen_time, bool restrained);
+	EnemyZone();
 
-	virtual ~EnemyZone()
-		{}
+	/** \brief Constructs an enemy zone that is initialized with a single zone section
+	*** \param left_col The left edge of the section to add
+	*** \param right_col The right edge of the section to add
+	*** \param top_row The top edge of the section to add
+	*** \param bottom_row The bottom edge of the section to add
+	**/
+	EnemyZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
+
+	~EnemyZone()
+		{ if (_spawn_zone != NULL) delete _spawn_zone; }
+
+	EnemyZone(const EnemyZone& copy);
+
+	EnemyZone& operator=(const EnemyZone& copy);
 
 	/** \brief Adds a new enemy sprite to the zone
 	*** \param enemy A pointer to the EnemySprite object instance to add
@@ -130,43 +169,70 @@ public:
 	**/
 	void AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count = 1);
 
+	/** \brief Adds a new zone section to the zone where enemies may spawn
+	*** \param left_col The left edge of the section to add
+	*** \param right_col The right edge of the section to add
+	*** \param top_row The top edge of the section to add
+	*** \param bottom_row The bottom edge of the section to add
+	***
+	*** Calling this method automatically enables this zone to have seperate areas for spawning
+	*** and roaming. Upon successfully adding a single spawn section, enemies will no longer be
+	*** allowed to spawn in the sections added directly to the class object. Each spawn zone section
+	*** must reside completely inside a roaming zone section for it to be added successfully. The reason
+	*** for this is that we do not want to allow enemies to spawn at a location where they are "stuck" and
+	*** can't roam anywhere. And for zones that do not restrict roaming, it makes no sense to add zones
+	*** specific to spawning in the first place.
+	***
+	*** \note The value of left shoult be less than right, and top should be less that
+	*** bottom. If these conditions are not true, a warning will be printed and the section
+	*** will not be added.
+	**/
+	void AddSpawnSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
+
 	//! \brief Decrements the number of active enemies by one
 	void EnemyDead();
 
 	//! \brief Gradually spawns enemy sprites in the zone
 	void Update();
 
+	//! \brief Returns true if this zone has seperate zones for roaming and spawning
+	bool HasSeparateSpawnZone() const
+		{ return (_spawn_zone != NULL); }
+
 	//! \name Class Member Access Functions
 	//@{
-	bool IsRestrained() const
-		{ return _restrained; }
+	bool IsRoamingRestrained() const
+		{ return _roaming_restrained; }
 
-	void SetRestrained(bool restrain)
-		{ _restrained = restrain; }
+	uint32 GetSpawnTime() const
+		{ return _spawn_timer.GetDuration(); }
 
-	void SetRegenTime(uint32 rtime)
-		{ _regen_time = rtime; }
+	void SetRoamingRestrained(bool restrain)
+		{ _roaming_restrained = restrain; }
+
+	//! \note Calling this function will reset the elapsed spawn time
+	void SetSpawnTime(uint32 time)
+		{ _spawn_timer.Reset(); _spawn_timer.SetDuration(time); _spawn_timer.Run(); }
 	//@}
 
 private:
-	//! \brief The amount of time that should elapse before spawning the next enemy sprite
-	uint32 _regen_time;
-
-	//! \brief A timer used for the respawning of enemies within the zone
-	uint32 _spawn_timer;
+	//! \brief If true, enemies of this zone are not allowed to roam outside of the zone boundaries
+	bool _roaming_restrained;
 
 	//! \brief The number of enemies that are currently not in the DEAD state
 	uint8 _active_enemies;
 
-	//! \brief If true, enemies of this zone are not allowed to roam outside of the zone boundaries
-	bool _restrained;
+	//! \brief Used for the respawning of enemies within the zone
+	hoa_system::SystemTimer _spawn_timer;
+
+	//! \brief An optional zone which specifies where enemies may spawn
+	MapZone* _spawn_zone;
 
 	/** \brief Contains all of the enemies that may exist in this zone.
-	*** \note These sprites will be deleted by the map object manager, not the
-	*** destructor of this class.
+	*** \note These sprites will be deleted by the map object manager, not the destructor of this class.
 	**/
 	std::vector<EnemySprite*> _enemies;
-}; // class EnemyZone
+}; // class EnemyZone : public MapZone
 
 
 /** ****************************************************************************
@@ -191,12 +257,6 @@ private:
 ***  - Sky objects should also be able to change their context via context zones
 ***  - There should be an option for having the context zone not to apply to either the
 ***    ground or sky object layers
-***
-*** \bug MapZone::AddSection() is invalid for this function
-*** If the MapZone::AddSection() function is called instead of the ContextZone
-*** one (which has a different signature), then the _section_contexts vector will
-*** be unequal in size to the _sections vector, and this could result in an out
-*** of bounds access error later during the game's execution.
 *** ***************************************************************************/
 class ContextZone : public MapZone {
 public:
@@ -205,14 +265,23 @@ public:
 	**/
 	ContextZone(MAP_CONTEXT one, MAP_CONTEXT two);
 
-	/** \brief Adds a new rectangular section to the zone
-	*** \param section The section to add (the pointer will be deleted upon adding the section)
-	*** \param context True indicates that the new section belongs to context one, false to context two
+	/** \brief Overrides the virtual base method
 	***
-	*** \todo Determine if the pointer deletion is necessary. Having the argument
-	*** as a reference instead of a pointer would be more preferrable.
+	*** This method should not be called for this class as zone sections which are added need to be
+	*** instructed as to which context they should belong to. The only reason this method is defined
+	*** here is to override the MapZone class' base method. This function prints a warning and will not
+	*** add the new section
 	**/
-	void AddSection(ZoneSection *section, bool context);
+	void AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
+
+	/** \brief Adds a new rectangular section to the zone
+	*** \param left_col The left edge of the section to add
+	*** \param right_col The right edge of the section to add
+	*** \param top_row The top edge of the section to add
+	*** \param bottom_row The bottom edge of the section to add
+	*** \param context True indicates that the new section belongs to context one, false to context two
+	**/
+	void AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, bool context);
 
 	//! \brief Updates the active contexts of any map objects that exist within the zone
 	void Update();
@@ -230,21 +299,6 @@ private:
 	**/
 	int16 _IsInsideZone(MapObject* object);
 }; // class ContextZone : public MapZone
-
-
-/** ****************************************************************************
-*** \brief Represents an area where the active map context may switch
-***
-***
-*** ***************************************************************************/
-class AudioZone : public MapZone {
-public:
-	AudioZone();
-
-	~AudioZone();
-
-private:
-}; // class AudioZone : public MapZone
 
 } // namespace private_map
 

@@ -33,20 +33,29 @@ namespace private_map {
 // ********** MapZone Class Functions
 // *****************************************************************************
 
-void MapZone::AddSection(ZoneSection* section) {
-	if (section == NULL) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
+MapZone::MapZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) {
+	AddSection(left_col, right_col, top_row, bottom_row);
+}
+
+
+void MapZone::AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) {
+	if (left_col >= right_col) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "left and right coordinates are mismatched: section will not be added" << endl;
 		return;
 	}
 
-	_sections.push_back(*section);
-	delete section;
+	if (top_row >= bottom_row) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "top and bottom coordinates are mismatched: section will not be added" << endl;
+		return;
+	}
+
+	_sections.push_back(ZoneSection(left_col, right_col, top_row, bottom_row));
 }
 
 
 
 bool MapZone::IsInsideZone(uint16 pos_x, uint16 pos_y) {
-	// Verify each section of the zone to make sure the position is in bounds.
+	// Verify each section of the zone and check if the position is within the section bounds.
 	for (vector<ZoneSection>::const_iterator i = _sections.begin(); i != _sections.end(); ++i) {
 		if (pos_x >= i->left_col && pos_x <= i->right_col &&
 			pos_y >= i->top_row && pos_y <= i->bottom_row)
@@ -72,18 +81,61 @@ void MapZone::_RandomPosition(uint16& x, uint16& y) {
 // ********** EnemyZone Class Functions
 // *****************************************************************************
 
-EnemyZone::EnemyZone(uint32 regen_time, bool restrained) :
-	_regen_time(regen_time),
-	_spawn_timer(0),
+EnemyZone::EnemyZone() :
+	MapZone(),
+	_roaming_restrained(true),
 	_active_enemies(0),
-	_restrained(restrained)
+	_spawn_timer(3000), // TEMP: use default spawn time constant,
+	_spawn_zone(NULL)
 {}
+
+
+
+EnemyZone::EnemyZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) :
+	MapZone(left_col, right_col, top_row, bottom_row),
+	_roaming_restrained(true),
+	_active_enemies(0),
+	_spawn_timer(3000), // TEMP: use default spawn time constant,
+	_spawn_zone(NULL)
+{}
+
+
+
+EnemyZone::EnemyZone(const EnemyZone& copy) :
+	MapZone(copy)
+{
+	_roaming_restrained = copy._roaming_restrained;
+	_active_enemies = copy._active_enemies;
+	_spawn_timer = copy._spawn_timer;
+	if (copy._spawn_zone == NULL)
+		_spawn_zone = NULL;
+	else
+		_spawn_zone = new MapZone(*(copy._spawn_zone));
+}
+
+
+
+EnemyZone& EnemyZone::operator=(const EnemyZone& copy) {
+	if (this == &copy) // Handle self-assignment case
+		return *this;
+
+	MapZone::operator=(copy);
+	_roaming_restrained = copy._roaming_restrained;
+	_active_enemies = copy._active_enemies;
+	_spawn_timer = copy._spawn_timer;
+	if (copy._spawn_zone == NULL)
+		_spawn_zone = NULL;
+	else
+		_spawn_zone = new MapZone(*(copy._spawn_zone));
+
+	return *this;
+}
 
 
 
 void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 	if (count == 0) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "function called with a count argument equal to zero" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "function called with a zero value count argument" << endl;
 		return;
 	}
 
@@ -99,8 +151,47 @@ void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 		// Add a 10% random margin of error to make enemies look less synchronized
 		copy->SetTimeToChange(static_cast<uint32>(copy->GetTimeToChange() * (1 + RandomFloat() * 10)));
 		copy->Reset();
+
 		map->AddGroundObject(copy);
 		_enemies.push_back(copy);
+	}
+}
+
+
+
+void EnemyZone::AddSpawnSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) {
+	if (left_col >= right_col) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "left and right coordinates are mismatched: section will not be added" << endl;
+		return;
+	}
+
+	if (top_row >= bottom_row) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "top and bottom coordinates are mismatched: section will not be added" << endl;
+		return;
+	}
+
+	// Make sure that this spawn section fits entirely inside one of the roaming sections
+	bool okay_to_add = false;
+	for (uint32 i = 0; i < _sections.size(); i++) {
+		if ((left_col >= _sections[i].left_col) && (right_col <= _sections[i].right_col)
+			&& (top_row >= _sections[i].top_row) && (bottom_row <= _sections[i].bottom_row))
+		{
+			okay_to_add = true;
+			break;
+		}
+	}
+
+	if (okay_to_add == false) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "could not add section as it did not fit inside any single roaming zone section" << endl;
+		return;
+	}
+
+	// Create the spawn zone if it does not exist and add the new section
+	if (_spawn_zone == NULL) {
+		_spawn_zone = new MapZone(left_col, right_col, top_row, bottom_row);
+	}
+	else {
+		_spawn_zone->AddSection(left_col, right_col, top_row, bottom_row);
 	}
 }
 
@@ -128,12 +219,12 @@ void EnemyZone::Update() {
 		return;
 
 	// Spawn new enemies only if there is at least one enemy that is not active
-	if (_active_enemies == _enemies.size())
+	if (_active_enemies >= _enemies.size())
 		return;
 
 	// Update the regeneration timer and return if the spawn time has not yet been reached
-	_spawn_timer += hoa_system::SystemManager->GetUpdateTime();
-	if (_spawn_timer < _regen_time) {
+	_spawn_timer.Update();
+	if (_spawn_timer.IsFinished() == false) {
 		return;
 	}
 
@@ -146,16 +237,22 @@ void EnemyZone::Update() {
 		}
 	}
 
-
 	uint16 x, y; // Used to retain random position coordinates in the zone
 	int8 retries = SPAWN_RETRIES; // Number of times to try finding a valid spawning location
 	bool collision; // Holds the result of a collision detection check
 
 	// Select a random position inside the zone to place the spawning enemy
-	// If there is a collision, retry a different location
 	_enemies[index]->no_collision = false;
+	MapZone* spawning_zone = NULL;
+	if (HasSeparateSpawnZone() == false) {
+		spawning_zone = this;
+	}
+	else {
+		spawning_zone = _spawn_zone;
+	}
+	// If there is a collision, retry a different location
 	do {
-		_RandomPosition(x, y);
+		spawning_zone->_RandomPosition(x, y);
 		_enemies[index]->SetXPosition(x, 0.0f);
 		_enemies[index]->SetYPosition(y, 0.0f);
 		collision = MapMode::CurrentInstance()->GetObjectSupervisor()->DetectCollision(_enemies[index], NULL);
@@ -166,9 +263,11 @@ void EnemyZone::Update() {
 	if (collision) {
 		_enemies[index]->no_collision = true;
 	}
+
 	// Otherwise, spawn the enemy and reset the spawn timer
 	else {
-		_spawn_timer = 0;
+		_spawn_timer.Reset();
+		_spawn_timer.Run();
 		_enemies[index]->ChangeStateSpawning();
 		_active_enemies++;
 	}
@@ -190,15 +289,25 @@ ContextZone::ContextZone(MAP_CONTEXT one, MAP_CONTEXT two) :
 
 
 
-void ContextZone::AddSection(ZoneSection* section, bool context) {
-	if (section == NULL) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "function argument was NULL" << endl;
+void ContextZone::AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) {
+	IF_PRINT_WARNING(MAP_DEBUG) << "this method is invalid for this class and should not be called: section will not be added" << endl;
+}
+
+
+
+void ContextZone::AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, bool context) {
+	if (left_col >= right_col) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "left and right coordinates are mismatched: section will not be added" << endl;
 		return;
 	}
 
-	_sections.push_back(*section);
+	if (top_row >= bottom_row) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "top and bottom coordinates are mismatched: section will not be added" << endl;
+		return;
+	}
+
+	_sections.push_back(ZoneSection(left_col, right_col, top_row, bottom_row));
 	_section_contexts.push_back(context);
-	delete section;
 }
 
 
@@ -227,7 +336,7 @@ void ContextZone::Update() {
 
 
 int16 ContextZone::_IsInsideZone(MapObject* object) {
-	// NOTE: argument is not checked here for performance reasons
+	// NOTE: argument is not NULL-checked here for performance reasons
 
 	// Check each section of the zone to see if the object is located within
 	for (uint16 i = 0; i < _sections.size(); i++) {
@@ -237,6 +346,7 @@ int16 ContextZone::_IsInsideZone(MapObject* object) {
 			return i;
 		}
 	}
+
 	return -1;
 }
 
