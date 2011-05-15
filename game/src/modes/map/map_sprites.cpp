@@ -838,7 +838,7 @@ void EnemySprite::Update() {
 			ydelta = ComputeYLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeYLocation();
 
 			// If the sprite has moved outside of its zone and it should not, reverse the sprite's direction
-			if ( _zone != NULL && _zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestrained() ) {
+			if ( _zone != NULL && _zone->IsInsideZone(x_position, y_position) == false && _zone->IsRoamingRestrained() ) {
 				// Make sure it wasn't already out (stuck on boundaries fix)
 				if( !_out_of_zone )
 				{
@@ -854,7 +854,7 @@ void EnemySprite::Update() {
 				// Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
 				// The order of comparaisons here is important, the NULL check MUST come before the rest or a null pointer exception could happen if no zone is registered
 				if ( _zone == NULL || ( fabs(xdelta) <= _aggro_range && fabs(ydelta) <= _aggro_range
-					 && (!_zone->IsRestrained() || _zone->IsInsideZone(MapMode::CurrentInstance()->GetCamera()->x_position, MapMode::CurrentInstance()->GetCamera()->y_position)) ) )
+					 && (!_zone->IsRoamingRestrained() || _zone->IsInsideZone(MapMode::CurrentInstance()->GetCamera()->x_position, MapMode::CurrentInstance()->GetCamera()->y_position)) ) )
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
 						SetDirection(SOUTH);

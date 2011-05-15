@@ -235,37 +235,31 @@ void BindModesToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ZoneSection>("ZoneSection")
-			.def(constructor<uint16, uint16, uint16, uint16>())
-			.def_readwrite("top_row", &ZoneSection::top_row)
-			.def_readwrite("bottom_row", &ZoneSection::bottom_row)
-			.def_readwrite("left_col", &ZoneSection::left_col)
-			.def_readwrite("right_col", &ZoneSection::right_col)
-	];
-
-	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
-	[
 		class_<MapZone>("MapZone")
 			.def(constructor<>())
-			.def("AddSection", &MapZone::AddSection, adopt(_2))
+			.def(constructor<uint16, uint16, uint16, uint16>())
+			.def("AddSection", &MapZone::AddSection)
 			.def("IsInsideZone", &MapZone::IsInsideZone)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<EnemyZone, MapZone>("EnemyZone")
-			.def(constructor<uint32, bool>())
+			.def(constructor<>())
+			.def(constructor<uint16, uint16, uint16, uint16>())
 			.def("AddEnemy", &EnemyZone::AddEnemy, adopt(_2))
-			.def("IsRestrained", &EnemyZone::IsRestrained)
-			.def("SetRestrained", &EnemyZone::SetRestrained)
-			.def("SetRegenTime", &EnemyZone::SetRegenTime)
+			.def("AddSpawnSection", &EnemyZone::AddSpawnSection)
+			.def("IsRoamingRestrained", &EnemyZone::IsRoamingRestrained)
+			.def("GetSpawnTime", &EnemyZone::GetSpawnTime)
+			.def("SetRoamingRestrained", &EnemyZone::SetRoamingRestrained)
+			.def("SetSpawnTime", &EnemyZone::SetSpawnTime)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<ContextZone, MapZone>("ContextZone")
 			.def(constructor<MAP_CONTEXT, MAP_CONTEXT>())
-			.def("AddSection", &ContextZone::AddSection, adopt(_2))
+			.def("AddSection", (void(ContextZone::*)(uint16, uint16, uint16, uint16, bool))&ContextZone::AddSection)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
