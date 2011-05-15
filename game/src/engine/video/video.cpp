@@ -412,6 +412,8 @@ void VideoEngine::Display(uint32 frame_time) {
 	if (TextureManager->debug_current_sheet >= 0)
 		TextureManager->DEBUG_ShowTexSheet();
 
+	DrawFPS(frame_time); // Draw FPS Counter If We Need To
+		
 	PopState();
 
 	SDL_GL_SwapBuffers();

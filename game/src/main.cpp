@@ -418,8 +418,6 @@ int main(int argc, char *argv[]) {
 			// 5) Update the game status
 			ModeManager->Update();
 
-			// 6) Draw the FPS
-			//GUISystem->DrawFPS(SystemManager->GetUpdateTime());
 		} // while (SystemManager->NotDone())
 	} catch (Exception& e) {
 		#ifdef WIN32
