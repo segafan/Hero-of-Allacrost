@@ -564,123 +564,123 @@ function CreateDialogue()
 	local dialogue;
 	local text;
 
-	dialogue = hoa_map.MapDialogue(1);
+	dialogue = hoa_map.SpriteDialogue(1);
 		text = hoa_system.Translate("Watch your step and keep moving. Its not far to the river bed.");
-		dialogue:AddText(text, 2000, -1, 0, false);
+		dialogue:AddLine(text, 2000);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(2);
+	dialogue = hoa_map.SpriteDialogue(2);
 		text = hoa_system.Translate("Uuuurrrnnnnnggghhhh!");
-		dialogue:AddText(text, 2001, -1, 0, false);
+		dialogue:AddLine(text, 2001);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(3);
+	dialogue = hoa_map.SpriteDialogue(3);
 		text = hoa_system.Translate("(Wimpering)");
-		dialogue:AddText(text, 2002, -1, 0, false);
+		dialogue:AddLine(text, 2002);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(4);
+	dialogue = hoa_map.SpriteDialogue(4);
 		text = hoa_system.Translate("She's terrified and won't budge.");
-		dialogue:AddText(text, 2003, 1, 0, false);
+		dialogue:AddLine(text, 2003);
 		text = hoa_system.Translate("For being such large animals, Mak hounds sure can act cowardly.");
-		dialogue:AddText(text, 1000, 2, 0, false);
+		dialogue:AddLine(text, 1000);
 		text = hoa_system.Translate("Go on ahead of our group. We'll catch up when we can get her moving again.");
-		dialogue:AddText(text, 2003, -1, 0, false);
+		dialogue:AddLine(text, 2003);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(5);
+	dialogue = hoa_map.SpriteDialogue(5);
 		text = hoa_system.Translate("A corpse. That's always a reassuring thing to find in a place like this.");
-		dialogue:AddText(text, 1000, 1, 0, false);
+		dialogue:AddLine(text, 1000);
 		text = hoa_system.Translate("Hey, I see something under his hand.");
-		dialogue:AddText(text, 1000, -1, 0, false);
+		dialogue:AddLine(text, 1000);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Event: Player tries to go long route before short route
-	dialogue = hoa_map.MapDialogue(6);
+	dialogue = hoa_map.SpriteDialogue(6);
 		text = hoa_system.Translate("Hey! Over here!");
-		dialogue:AddText(text, 2004, -1, 0, false);
+		dialogue:AddLine(text, 2004);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(7);
+	dialogue = hoa_map.SpriteDialogue(7);
 		text = hoa_system.Translate("The river bed is just through this passage. Be careful, the walls are a little unstable.");
-		dialogue:AddText(text, 2004, -1, 0, false);
+		dialogue:AddLine(text, 2004);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Event: After cave in occurs
-	dialogue = hoa_map.MapDialogue(8);
+	dialogue = hoa_map.SpriteDialogue(8);
 		text = hoa_system.Translate("Woah, are you men alright?");
-		dialogue:AddText(text, 2004, -1, 0, false);
+		dialogue:AddLine(text, 2004);
 		text = hoa_system.Translate("We're all fine. But the passage has caved in.");
-		dialogue:AddText(text, 1000, -1, 0, false);
+		dialogue:AddLine(text, 1000);
 		text = hoa_system.Translate("There's another way. Its a longer route though. Head through there.");
-		dialogue:AddText(text, 2004, -1, 0, false);
+		dialogue:AddLine(text, 2004);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Event: After cave occurs, this dialogue added to knight guide
-	dialogue = hoa_map.MapDialogue(9);
+	dialogue = hoa_map.SpriteDialogue(9);
 		text = hoa_system.Translate("I'll direct everyone remaining to the longer route. Keep going.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 2004);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(10);
+	dialogue = hoa_map.SpriteDialogue(10);
 		text = hoa_system.Translate("Damnit, another dead end. I hope that guy was right about there being another way through.");
-		dialogue:AddText(text, 2006, 1, 0, false); -- TODO: Add play sound event after this line
+		dialogue:AddLine(text, 2006); -- TODO: Add play sound event after this line
 		text = hoa_system.Translate("Did you guys hear that? What the hell was that noise?");
-		dialogue:AddText(text, 2006, 2, 0, false);
+		dialogue:AddLine(text, 2006);
 		text = hoa_system.Translate("I don't know, but I've got a bad feeling about this mission.");
-		dialogue:AddText(text, 1000, 3, 0, false);
+		dialogue:AddLine(text, 1000);
 		text = hoa_system.Translate("Well the sooner we achieve our objective, the sooner we get out of here and go home. So move your ass instead of your mouth.");
-		dialogue:AddText(text, 1000, -1, 0, false);
+		dialogue:AddLine(text, 1000);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(11);
+	dialogue = hoa_map.SpriteDialogue(11);
 		text = hoa_system.Translate("This path leads down deeper into the cave. You don't need to go there ... and trust me, you don't want to.");
-		dialogue:AddText(text, 2007, -1, 0, false);
+		dialogue:AddLine(text, 2007);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(12);
+	dialogue = hoa_map.SpriteDialogue(12);
 		text = hoa_system.Translate("Ow ow ow...");
-		dialogue:AddText(text, 2008, -1, 0, false);
+		dialogue:AddLine(text, 2008);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(13);
+	dialogue = hoa_map.SpriteDialogue(13);
 		text = hoa_system.Translate("He sprained his ankle on a loose rock so we're treating his injury. Move on ahead, you're almost there.");
-		dialogue:AddText(text, 2009, -1, 0, false);
+		dialogue:AddLine(text, 2009);
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	-- Event: encountering the pool of running water near the end of the cave
-	dialogue = hoa_map.MapDialogue(14);
+	dialogue = hoa_map.SpriteDialogue(14);
 		text = hoa_system.Translate("Hey check it out. The water is still running here.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 1000);
 		text = hoa_system.Translate("That's good news. Lets stop here briefly and fill up.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 1000);
 	dialogue_supervisor:AddDialogue(dialogue);
-
+--]]
 	-- Event: Player reaches dry river bed
 	--[[ TODO
-	dialogue = hoa_map.MapDialogue(15);
+	dialogue = hoa_map.SpriteDialogue(15);
 		text = hoa_system.Translate("Finally made it.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 4);
 		text = hoa_system.Translate("Listen up! There's a large boulder obstructing the underground river that flows through here. When we move it aside, we get to head out of this place.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 4);
 		text = hoa_system.Translate("Mikal! Torren! Take your units and secure the ropes around that overgrown rock. Jasper's unit will prepare the Maks to help us move it. The rest of you stay alert and watch our backs. Who knows what the hell may be in this cave with us.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 4);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(16);
+	dialogue = hoa_map.SpriteDialogue(16);
 		text = hoa_system.Translate("Hey! I heard that noise earlier. It sounds like its closer now.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 4);
 		text = hoa_system.Translate("Keep your eyes peeled and your swords ready men.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 4);
 		text = hoa_system.Translate("I don't know how you expect to see shit in here. I can barely see my own hand.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 4);
 		text = hoa_system.Translate("Over there! Watch out!.");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 4);
 	dialogue_supervisor:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(17);
+	dialogue = hoa_map.SpriteDialogue(17);
 		text = hoa_system.Translate("Don't panic! Surround it and we'll take it down together!");
-		dialogue:AddText(text, 4, -1, 0, false);
+		dialogue:AddLine(text, 4);
 	dialogue_supervisor:AddDialogue(dialogue);
 	--]]
 end -- function CreateDialogue

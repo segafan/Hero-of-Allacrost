@@ -293,9 +293,8 @@ namespace hoa_map {
 		class EnemySprite;
 
 		class DialogueSupervisor;
-		class MapDialogue;
+		class SpriteDialogue;
 		class MapDialogueOptions;
-		class DialogueWindow;
 
 		class EventSupervisor;
 		class MapEvent;

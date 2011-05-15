@@ -235,6 +235,14 @@ public:
 	**/
 	void AddDialogueReference(uint32 dialogue_id);
 
+	/** \brief Begins a new dialogue with this sprite using its next referenced dialogue
+	***
+	*** If the sprite has no dialogues referenced or has dialogues that are referenced but are unavailable,
+	*** a warning will be printed and no dialogue will take place. It is the caller's responsibility to first
+	*** check that the sprite has dialogue available.
+	**/
+	void InitiateDialogue();
+
 	//! \brief Updates all dialogue status members based on the status of all referenced dialogues
 	void UpdateDialogueStatus();
 
@@ -326,7 +334,7 @@ protected:
 	**/
 	std::vector<hoa_video::AnimatedImage> _animations;
 
-	//! \brief Contains the id values of all dialogues refenced by the sprite
+	//! \brief Contains the id values of all dialogues referenced by the sprite
 	std::vector<uint32> _dialogue_references;
 
 	/** \brief An index to the dialogue_references vector, representing the next dialogue the sprite should reference
@@ -334,14 +342,14 @@ protected:
 	**/
 	int16 _next_dialogue;
 
-	/** \brief True is sprite references at least one available dialogue
+	/** \brief True if the sprite references at least one available dialogue
 	*** \note A dialogue may become unavailable if it reaches its max view count
 	**/
 	bool _has_available_dialogue;
 
 	//! \brief True if at least one dialogue referenced by this sprite has not yet been viewed -and- is available to be viewed
 	bool _has_unseen_dialogue;
-	
+
 	//! \brief True if a custom animation is in use
 	bool _custom_animation_on;
 
@@ -476,7 +484,7 @@ public:
 
 	void AddBattleEvent(uint32 n)
 		{ hoa_battle::BattleEvent* thisEvent = new hoa_battle::BattleEvent(n); _battle_events.push_back(thisEvent); }
-	
+
 	std::vector<hoa_battle::BattleEvent*> GetBattleEvents() { return _battle_events; }
 	//@}
 

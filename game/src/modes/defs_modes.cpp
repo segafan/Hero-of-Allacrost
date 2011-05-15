@@ -26,6 +26,11 @@
 
 #include "defs.h"
 
+// Common code headers
+#include "dialogue.h"
+#include "global_actors.h"
+#include "global_effects.h"
+
 #include "battle.h"
 #include "battle_actors.h"
 #include "battle_effects.h"
@@ -39,9 +44,6 @@
 #include "map_utils.h"
 #include "map_zones.h"
 #include "shop.h"
-
-#include "global_actors.h"
-#include "global_effects.h"
 
 using namespace luabind;
 
@@ -270,7 +272,7 @@ void BindModesToLua()
 	[
 		class_<DialogueSupervisor>("DialogueSupervisor")
 			.def("AddDialogue", &DialogueSupervisor::AddDialogue, adopt(_2))
-			.def("BeginDialogue", (void(DialogueSupervisor::*)(uint32))&DialogueSupervisor::BeginDialogue)
+			.def("BeginDialogue", &DialogueSupervisor::BeginDialogue)
 			.def("EndDialogue", &DialogueSupervisor::EndDialogue)
 			.def("GetDialogue", &DialogueSupervisor::GetDialogue)
 			.def("GetCurrentDialogue", &DialogueSupervisor::GetCurrentDialogue)
@@ -278,11 +280,23 @@ void BindModesToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<MapDialogue>("MapDialogue")
+		class_<SpriteDialogue, hoa_common::CommonDialogue>("SpriteDialogue")
 			.def(constructor<uint32>())
-			.def("AddText", &MapDialogue::AddText)
-			.def("AddOption", &MapDialogue::AddOption)
-			.def("SetMaxViews", &MapDialogue::SetMaxViews)
+			.def("AddLine", (void(SpriteDialogue::*)(std::string, uint32))&SpriteDialogue::AddLine)
+			.def("AddLine", (void(SpriteDialogue::*)(std::string, uint32, int32))&SpriteDialogue::AddLine)
+			.def("AddLineTimed", (void(SpriteDialogue::*)(std::string, uint32, uint32))&SpriteDialogue::AddLineTimed)
+			.def("AddLineTimed", (void(SpriteDialogue::*)(std::string, uint32, int32, uint32))&SpriteDialogue::AddLineTimed)
+			.def("AddLineEvent", (void(SpriteDialogue::*)(std::string, uint32, uint32))&SpriteDialogue::AddLineEvent)
+			.def("AddLineEvent", (void(SpriteDialogue::*)(std::string, uint32, int32, uint32))&SpriteDialogue::AddLineEvent)
+			.def("AddLineTimedEvent", (void(SpriteDialogue::*)(std::string, uint32, uint32, uint32))&SpriteDialogue::AddLineTimedEvent)
+			.def("AddLineTimedEvent", (void(SpriteDialogue::*)(std::string, uint32, int32, uint32, uint32))&SpriteDialogue::AddLineTimedEvent)
+			.def("AddOption", (void(SpriteDialogue::*)(std::string))&SpriteDialogue::AddOption)
+			.def("AddOption", (void(SpriteDialogue::*)(std::string, int32))&SpriteDialogue::AddOption)
+			.def("AddOptionEvent", (void(SpriteDialogue::*)(std::string, uint32))&SpriteDialogue::AddOptionEvent)
+			.def("AddOptionEvent", (void(SpriteDialogue::*)(std::string, int32, uint32))&SpriteDialogue::AddOptionEvent)
+			.def("Validate", &SpriteDialogue::Validate)
+			.def("SetInputBlocked", &SpriteDialogue::SetInputBlocked)
+			.def("SetRestoreState", &SpriteDialogue::SetRestoreState)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

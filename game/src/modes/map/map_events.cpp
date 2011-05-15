@@ -68,8 +68,8 @@ void DialogueEvent::_Start() {
 
 
 bool DialogueEvent::_Update() {
-	MapDialogue* active_dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetCurrentDialogue();
-	if (active_dialogue != NULL && active_dialogue->GetDialogueID() == _dialogue_id)
+	SpriteDialogue* active_dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetCurrentDialogue();
+	if ((active_dialogue != NULL) && (active_dialogue->GetDialogueID() == _dialogue_id))
 		return true;
 	else
 		return false;
