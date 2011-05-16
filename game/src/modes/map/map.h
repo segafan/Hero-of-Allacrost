@@ -119,9 +119,6 @@ public:
 	**/
 	private_map::MAP_STATE CurrentState();
 
-	void PlayNewMusic(uint32 n)
-		{ _music.at(n).Play(); }
-
 	/** \brief Opens the map tablespace of the map script
 	*** \param use_global Has the same effect as in ReadScriptDescriptor#OpenTable
 	**/
@@ -145,6 +142,11 @@ public:
 	*** \return True if the enemy is loaded
 	**/
 	bool IsEnemyLoaded(uint32 id) const;
+
+	void PlayMusic(uint32 track_num);
+
+	void PlayNewMusic(uint32 n)
+		{ _music.at(n).Play(); }
 
 	//! \brief Class member accessor functions
 	//@{
@@ -190,11 +192,11 @@ public:
 	private_map::MAP_CONTEXT GetCurrentContext() const
 		{ return _current_context; }
 
-	bool IsShowDialogueIcons() const
-		{ return _show_dialogue_icons; }
+	bool IsShowGUI() const
+		{ return _show_gui; }
 
-	void SetShowDialogueIcons(bool state)
-		{ _show_dialogue_icons = state; }
+	void SetShowGUI(bool state)
+		{ _show_gui = state; }
 
 	const hoa_video::AnimatedImage& GetDialogueIcon() const
 		{ return _dialogue_icon; }
@@ -202,8 +204,6 @@ public:
 	const hoa_video::StillImage& GetLocationGraphic() const
 		{ return _location_graphic; }
 	//@}
-
-	void PlayMusic(uint32 track_num);
 
 private:
 	// ----- Members : Names and Identifiers -----
@@ -248,7 +248,7 @@ private:
 	//! \brief Instance of helper class to map mode. Responsible for dialogue execution and display operations.
 	private_map::DialogueSupervisor* _dialogue_supervisor;
 
-	//! \brief Class member object which processes all information related to treasure discovery
+	//! \brief Instance of helper class to map mode. Responsible for processing all information related to treasure discovery.
 	private_map::TreasureSupervisor* _treasure_supervisor;
 
 	/** \brief A script function which assists with the MapMode#Update method
@@ -280,31 +280,28 @@ private:
 	**/
 	private_map::MAP_CONTEXT _current_context;
 
+	//! \brief If true, the player is not allowed to run.
+	bool _running_disabled;
+
+	//! \brief If true, the player's stamina will not drain for actions and the stamina bar will not be shown
+	bool _unlimited_stamina;
+
+	//! \brief When false, dialogue icons, stamina bar, and other GUI elements will not be drawn to the screen
+	bool _show_gui;
+
+	//! \brief Index of current music track to play
+	uint32 _current_track;
+
+	/** \brief A counter for the player's stamina
+	*** This value ranges from STAMINA_EMPTY to STAMINA_FULL. It takes twice as long to regenerate stamina as
+	*** it does to consume it when running.
+	**/
+	uint32 _run_stamina;
+
 	/** \brief Maintains a stack state for the different modes of operation that the map may be in
 	*** The top (back) of the stack is the active mode
 	**/
 	std::vector<private_map::MAP_STATE> _state_stack;
-
-	//! \brief While true, all user input commands to map mode are ignored
-	bool _ignore_input;
-
-	//! \brief While true, the player is not allowed to run at all.
-	bool _run_disabled;
-
-	//! \brief If true, the player's stamina will not drain as they run
-	bool _run_forever;
-
-	/** \brief A counter for the player's stamina
-	*** This value ranges from 0 (empty) to 10000 (full). Stamina takes 10 seconds to completely fill from
-	*** the empty state and 5 seconds to empty from the full state.
-	**/
-	uint32 _run_stamina;
-
-	//! \brief Indicates if dialogue icons should be drawn above NPCs who have unread dialogue
-	bool _show_dialogue_icons;
-
-	//! \brief Index of current music track to play
-	uint32 _current_track;
 
 	// ----- Members : Timing and Graphics -----
 

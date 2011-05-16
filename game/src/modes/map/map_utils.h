@@ -237,11 +237,19 @@ enum DIALOGUE_STATE {
 
 
 //! \brief The maximum number of options that a line of dialogue can present to the player
-const uint32 MAX_OPTIONS = 5;
+const uint32 MAX_DIALOGUE_OPTIONS = 5;
 
 
 //! \brief The number of milliseconds to take to fade out the map
-const uint32 FADE_OUT_TIME = 2000;
+const uint32 MAP_FADE_OUT_TIME = 2000;
+
+
+//! \brief The standard number of milliseconds it takes for enemies to spawn in an enemy zone
+const uint32 STANDARD_ENEMY_SPAWN_TIME = 3000;
+
+
+const uint32 STAMINA_EMPTY  = 0;
+const uint32 STAMINA_FULL   = 10000;
 
 
 /** \brief Returns the opposite facing direction of the direction given in parameter.
