@@ -66,9 +66,8 @@ void BindModesToLua()
 			.def_readonly("map_event_group", &MapMode::_map_event_group)
 
 			.def_readwrite("camera", &MapMode::_camera)
-			.def_readwrite("ignore_input", &MapMode::_ignore_input)
-			.def_readwrite("run_forever", &MapMode::_run_forever)
-			.def_readwrite("run_disabled", &MapMode::_run_disabled)
+			.def_readwrite("unlimited_stamina", &MapMode::_unlimited_stamina)
+			.def_readwrite("running_disabled", &MapMode::_running_disabled)
 			.def_readwrite("run_stamina", &MapMode::_run_stamina)
 
 			.def("PlayMusic", &MapMode::PlayMusic)
@@ -77,8 +76,9 @@ void BindModesToLua()
 			.def("AddSkyObject", &MapMode::AddSkyObject, adopt(_2))
 			.def("AddZone", &MapMode::AddZone, adopt(_2))
 			.def("SetCamera", &MapMode::SetCamera)
-			.def("SetShowDialogueIcons", &MapMode::SetShowDialogueIcons)
-			.def("IsShowDialogueIcons", &MapMode::IsShowDialogueIcons)
+			.def("SetShowGUI", &MapMode::SetShowGUI)
+			.def("IsShowGUI", &MapMode::IsShowGUI)
+			.def("GetMapEventGroup", &MapMode::GetMapEventGroup)
 			.def("DrawMapLayers", &MapMode::_DrawMapLayers)
 
 			// Namespace constants
@@ -310,7 +310,10 @@ void BindModesToLua()
 	[
 		class_<MapEvent>("MapEvent")
 			.def("GetEventID", &MapEvent::GetEventID)
-			.def("AddEventLink", &MapEvent::AddEventLink)
+			.def("AddEventLinkAtStart", (void(MapEvent::*)(uint32))&MapEvent::AddEventLinkAtStart)
+			.def("AddEventLinkAtStart", (void(MapEvent::*)(uint32, uint32))&MapEvent::AddEventLinkAtStart)
+			.def("AddEventLinkAtEnd", (void(MapEvent::*)(uint32))&MapEvent::AddEventLinkAtEnd)
+			.def("AddEventLinkAtEnd", (void(MapEvent::*)(uint32, uint32))&MapEvent::AddEventLinkAtEnd)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

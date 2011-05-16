@@ -71,11 +71,10 @@ MapMode::MapMode(string filename) :
 	_camera(NULL),
 	_num_map_contexts(0),
 	_current_context(MAP_CONTEXT_01),
-	_ignore_input(false),
-	_run_disabled(false),
-	_run_forever(false),
+	_running_disabled(false),
+	_unlimited_stamina(false),
 	_run_stamina(10000),
-	_show_dialogue_icons(true),
+	_show_gui(true),
 	_current_track(0)
 {
 	mode_type = MODE_MANAGER_MAP_MODE;
@@ -232,7 +231,7 @@ void MapMode::Draw() {
 	if (CurrentState() == STATE_DIALOGUE) {
 		_dialogue_supervisor->Draw();
 	}
-} // void MapMode::_Draw()
+}
 
 
 
@@ -304,6 +303,8 @@ bool MapMode::IsEnemyLoaded(uint32 id) const {
 	}
 	return false;
 }
+
+
 
 void MapMode::PlayMusic(uint32 track_num) {
 	_music[_current_track].Stop();
@@ -406,10 +407,10 @@ void MapMode::_UpdateExplore() {
 	// Update the running state of the camera object. Check if the player wishes to continue running and if so,
 	// update the stamina value if the operation is permitted
 	_camera->is_running = false;
-	if (_run_disabled == false && InputManager->CancelState() == true &&
+	if (_running_disabled == false && InputManager->CancelState() == true &&
 		(InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState()))
 	{
-		if (_run_forever) {
+		if (_unlimited_stamina) {
 			_camera->is_running = true;
 		}
 		else if (_run_stamina > SystemManager->GetUpdateTime() * 2) {
@@ -494,10 +495,10 @@ void MapMode::_UpdateDialogue() {
 	// Update the running state of the camera object. Check if the player wishes to continue running and if so,
 	// update the stamina value if the operation is permitted
 	_camera->is_running = false;
-	if (_run_disabled == false && InputManager->CancelState() == true &&
+	if (_running_disabled == false && InputManager->CancelState() == true &&
 		(InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState()))
 	{
-		if (_run_forever) {
+		if (_unlimited_stamina) {
 			_camera->is_running = true;
 		}
 		else if (_run_stamina > SystemManager->GetUpdateTime() * 2) {
@@ -755,7 +756,7 @@ void MapMode::_DrawGUI() {
 		VideoManager->DrawRectangle((200 * fill_size) - 4, 1, bright_yellow);
 	}
 
-	if (_run_forever) { // Draw the infinity symbol over the stamina bar
+	if (_unlimited_stamina) { // Draw the infinity symbol over the stamina bar
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Move(780, 747);
 		_stamina_bar_infinite_overlay.Draw();

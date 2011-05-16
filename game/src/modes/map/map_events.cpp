@@ -70,9 +70,9 @@ void DialogueEvent::_Start() {
 bool DialogueEvent::_Update() {
 	SpriteDialogue* active_dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetCurrentDialogue();
 	if ((active_dialogue != NULL) && (active_dialogue->GetDialogueID() == _dialogue_id))
-		return true;
-	else
 		return false;
+	else
+		return true;
 }
 
 // ****************************************************************************
@@ -152,7 +152,7 @@ MapTransitionEvent::MapTransitionEvent(uint32 event_id, std::string filename) :
 	MapEvent(event_id, MAP_TRANSITION_EVENT),
 	_transition_map_filename(filename)
 {
-	_fade_timer.Initialize(FADE_OUT_TIME, SYSTEM_TIMER_NO_LOOPS);
+	_fade_timer.Initialize(MAP_FADE_OUT_TIME, SYSTEM_TIMER_NO_LOOPS);
 }
 
 

@@ -109,13 +109,31 @@ public:
 	EVENT_TYPE GetEventType() const
 		{ return _event_type; }
 
-	/** \brief Declares a child event to be linked to this event
+	/** \brief Declares a child event to be launched immediately at the start of this event
 	*** \param child_event_id The event id of the child event
-	*** \param launch_at_start The child starts relative to the start of the event if true, its finish if false
-	*** \param launch_timer The number of milliseconds to wait before starting the child event
 	**/
-	void AddEventLink(uint32 child_event_id, bool launch_at_start, uint32 launch_timer)
-		{ _event_links.push_back(EventLink(child_event_id, launch_at_start, launch_timer)); }
+	void AddEventLinkAtStart(uint32 child_event_id)
+		{ _AddEventLink(child_event_id, true, 0); }
+
+	/** \brief Declares a child event to be launched after the start of this event
+	*** \param child_event_id The event id of the child event
+	*** \param launch_time The number of milliseconds to wait before launching the child event
+	**/
+	void AddEventLinkAtStart(uint32 child_event_id, uint32 launch_time)
+		{ _AddEventLink(child_event_id, true, launch_time); }
+
+	/** \brief Declares a child event to be launched immediately at the end of this event
+	*** \param child_event_id The event id of the child event
+	**/
+	void AddEventLinkAtEnd(uint32 child_event_id)
+		{ _AddEventLink(child_event_id, false, 0); }
+
+	/** \brief Declares a child event to be launched after the end of this event
+	*** \param child_event_id The event id of the child event
+	*** \param launch_time The number of milliseconds to wait before launching the child event
+	**/
+	void AddEventLinkAtEnd(uint32 child_event_id, uint32 launch_time)
+		{ _AddEventLink(child_event_id, false, launch_time); }
 
 protected:
 	/** \brief Starts the event
@@ -130,6 +148,14 @@ protected:
 	*** code for the event with the goal of eventually brining the event to a finished state.
 	**/
 	virtual bool _Update() = 0;
+
+	/** \brief Declares a child event to be linked to this event
+	*** \param child_event_id The event id of the child event
+	*** \param launch_at_start The child starts relative to the start of the event if true, its finish if false
+	*** \param launch_time The number of milliseconds to wait before launching the child event
+	**/
+	void _AddEventLink(uint32 child_event_id, bool launch_at_start, uint32 launch_time)
+		{ _event_links.push_back(EventLink(child_event_id, launch_at_start, launch_time)); }
 
 private:
 	//! \brief A unique ID number for the event. A value of zero is invalid
@@ -180,8 +206,7 @@ protected:
 *** ***************************************************************************/
 class ShopEvent : public MapEvent {
 public:
-	/** \param event_id The ID of this event
-	**/
+	//! \param event_id The ID of this event
 	ShopEvent(uint32 event_id);
 
 	~ShopEvent();
