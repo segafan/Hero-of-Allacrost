@@ -96,6 +96,8 @@
 		D4B00DE00D15F25F00A5DBB1 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4E0AF407BE004DD3A3 /* system.cpp */; };
 		D4B00DE40D15F29F00A5DBB1 /* mode_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */; };
 		D4B020BA0EA18DAF002644B9 /* libintl.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D49A54B80DB2BD8400FBD800 /* libintl.dylib */; };
+		D4B2018613804EC8006BA3FD /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4B2018213804EC8006BA3FD /* common.cpp */; };
+		D4B2018713804EC8006BA3FD /* dialogue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4B2018413804EC8006BA3FD /* dialogue.cpp */; };
 		D4B34E5B0E2327270067C913 /* dialog_boxes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F900F20DA2010800F10953 /* dialog_boxes.cpp */; };
 		D4B34E5C0E23272A0067C913 /* skill_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB260D111B4300A2F1D7 /* skill_editor.cpp */; };
 		D4B34E5D0E23272D0067C913 /* sprites.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49A54680DB28D2E00FBD800 /* sprites.cpp */; };
@@ -336,6 +338,10 @@
 		D49D57030C65B1D2006E6ABA /* audio_effects.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_effects.h; sourceTree = "<group>"; };
 		D49FEDEF0E14B94C0083CF3E /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		D4A1AEBC0E8A122500488ECD /* libiconv.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.2.dylib; path = "../allacrost-dep/lib/libiconv.2.dylib"; sourceTree = SOURCE_ROOT; };
+		D4B2018213804EC8006BA3FD /* common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = common.cpp; path = common/common.cpp; sourceTree = "<group>"; };
+		D4B2018313804EC8006BA3FD /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = common.h; path = common/common.h; sourceTree = "<group>"; };
+		D4B2018413804EC8006BA3FD /* dialogue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dialogue.cpp; path = common/dialogue.cpp; sourceTree = "<group>"; };
+		D4B2018513804EC8006BA3FD /* dialogue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dialogue.h; path = common/dialogue.h; sourceTree = "<group>"; };
 		D4BA6CE00EC7872C00F2DEB0 /* allacrost.pot */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = allacrost.pot; sourceTree = "<group>"; };
 		D4BA6CE10EC7872C00F2DEB0 /* boldquot.sed */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = boldquot.sed; sourceTree = "<group>"; };
 		D4BA6CE20EC7872C00F2DEB0 /* en@boldquot.header */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "en@boldquot.header"; sourceTree = "<group>"; };
@@ -728,6 +734,10 @@
 		579479391117E0F00042721A /* common */ = {
 			isa = PBXGroup;
 			children = (
+				D4B2018213804EC8006BA3FD /* common.cpp */,
+				D4B2018313804EC8006BA3FD /* common.h */,
+				D4B2018413804EC8006BA3FD /* dialogue.cpp */,
+				D4B2018513804EC8006BA3FD /* dialogue.h */,
 				572AF8E6111CB426009A7AF6 /* global */,
 				573C3FC0110F13DB00ED72C9 /* gui */,
 			);
@@ -1114,6 +1124,8 @@
 				57BD397511438C0400692A73 /* battle_indicators.cpp in Sources */,
 				57BD397611438C0400692A73 /* battle_utils.cpp in Sources */,
 				57BD397B11438C2200692A73 /* global_utils.cpp in Sources */,
+				D4B2018613804EC8006BA3FD /* common.cpp in Sources */,
+				D4B2018713804EC8006BA3FD /* dialogue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
