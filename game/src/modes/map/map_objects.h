@@ -404,6 +404,12 @@ public:
 	**/
 	MapObject* GetObject(uint32 object_id);
 
+	/** \brief Retrieves a pointer to a sprite on this map
+	*** \param object_id The id number of the sprite to retreive
+	*** \return A pointer to the sprite object, or NULL if the object was not found or was not a sprite type
+	**/
+	VirtualSprite* GetSprite(uint32 object_id);
+
 	//! \brief Sorts objects on all three layers according to their draw order
 	void SortObjects();
 

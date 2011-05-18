@@ -315,6 +315,7 @@ namespace hoa_map {
 
 		class ZoneSection;
 		class MapZone;
+		class ResidentZone;
 		class EnemyZone;
 		class ContextZone;
 	}
