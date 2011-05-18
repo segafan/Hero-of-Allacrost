@@ -220,6 +220,24 @@ MapObject* ObjectSupervisor::GetObject(uint32 object_id) {
 
 
 
+VirtualSprite* ObjectSupervisor::GetSprite(uint32 object_id) {
+	MapObject* object = GetObject(object_id);
+
+	if (object == NULL) {
+		return NULL;
+	}
+
+	VirtualSprite* sprite = dynamic_cast<VirtualSprite*>(object);
+	if (sprite == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "could not cast map object to sprite type, object id: " << object_id << endl;
+		return NULL;
+	}
+
+	return sprite;
+}
+
+
+
 void ObjectSupervisor::SortObjects() {
 	std::sort(_ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less());
 	std::sort(_pass_objects.begin(), _pass_objects.end(), MapObject_Ptr_Less());

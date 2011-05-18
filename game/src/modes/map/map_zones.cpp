@@ -29,9 +29,9 @@ namespace hoa_map {
 
 namespace private_map {
 
-// *****************************************************************************
-// ********** MapZone Class Functions
-// *****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- MapZone Class Functions
+// -----------------------------------------------------------------------------
 
 MapZone::MapZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) {
 	AddSection(left_col, right_col, top_row, bottom_row);
@@ -54,7 +54,7 @@ void MapZone::AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint
 
 
 
-bool MapZone::IsInsideZone(uint16 pos_x, uint16 pos_y) {
+bool MapZone::IsInsideZone(uint16 pos_x, uint16 pos_y) const {
 	// Verify each section of the zone and check if the position is within the section bounds.
 	for (vector<ZoneSection>::const_iterator i = _sections.begin(); i != _sections.end(); ++i) {
 		if (pos_x >= i->left_col && pos_x <= i->right_col &&
@@ -77,9 +77,66 @@ void MapZone::_RandomPosition(uint16& x, uint16& y) {
 	y = RandomBoundedInteger(_sections[i].top_row, _sections[i].bottom_row);
 }
 
-// *****************************************************************************
-// ********** EnemyZone Class Functions
-// *****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- ResidentZone Class Functions
+// -----------------------------------------------------------------------------
+
+ResidentZone::ResidentZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) :
+	MapZone(left_col, right_col, top_row, bottom_row)
+{}
+
+
+
+ResidentZone::ResidentZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, MAP_CONTEXT contexts) :
+	MapZone(left_col, right_col, top_row, bottom_row),
+	_active_contexts(contexts)
+{}
+
+
+
+void ResidentZone::Update() {
+	_entering_residents.clear();
+	_exiting_residents.clear();
+}
+
+
+
+bool ResidentZone::_IsSpriteInList(const list<VirtualSprite*>& list, VirtualSprite* sprite) const {
+	if (sprite == NULL) {
+		return false;
+	}
+
+	for (std::list<VirtualSprite*>::const_iterator i = list.begin(); i != list.end(); i++) {
+		if (sprite == (*i)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+
+VirtualSprite* ResidentZone::_GetSpriteInList(const list<VirtualSprite*>& list, uint32 index) const {
+	if (index >= list.size()) {
+		return NULL;
+	}
+
+	uint32 counter = 0;
+	for (std::list<VirtualSprite*>::const_iterator i = list.begin(); i != list.end(); i++) {
+		if (index == counter) {
+			return *i;
+		}
+		counter++;
+	}
+
+	IF_PRINT_WARNING(MAP_DEBUG) << "sprite not found after reaching end of list -- this should never happen" << endl;
+	return NULL;
+}
+
+// -----------------------------------------------------------------------------
+// ---------- EnemyZone Class Functions
+// -----------------------------------------------------------------------------
 
 EnemyZone::EnemyZone() :
 	MapZone(),
@@ -273,9 +330,9 @@ void EnemyZone::Update() {
 	}
 } // void EnemyZone::Update()
 
-// *****************************************************************************
-// ********** ContextZone Class Functions
-// *****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- ContextZone Class Functions
+// -----------------------------------------------------------------------------
 
 ContextZone::ContextZone(MAP_CONTEXT one, MAP_CONTEXT two) :
 	_context_one(one),

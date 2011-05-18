@@ -58,8 +58,7 @@ public:
 ***
 *** The area is made up of many ZoneSection instances, so it can be any shape
 *** (specifically, any combination of rectangular shapes). A MapZone itself
-*** is not very useful, but serves as a base for other derived classes. Note
-*** that a MapZone may be relevant in only certain map contexts but not others.
+*** is not very useful, but serves as a base for other derived classes.
 ***
 *** \note ZoneSections in the MapZone may overlap without any problem. In general,
 *** however, you should try to create a MapZone using as few ZoneSections as possible
@@ -97,6 +96,10 @@ public:
 	**/
 	virtual void AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
 
+	//! \brief Updates the state of the zone
+	virtual void Update()
+		{}
+
 	/** \brief Returns true if the position coordinates are located inside the zone (inclusive to the zone boundary edges)
 	*** \param pos_x The x position to check
 	*** \param pos_y The y position to check
@@ -105,11 +108,7 @@ public:
 	*** checked as to whether or not it may be found in this zone, the floating point portion of its map coordinates are not taken
 	*** into account.
 	**/
-	bool IsInsideZone(uint16 pos_x, uint16 pos_y);
-
-	//! \brief Updates the state of the zone
-	virtual void Update()
-		{}
+	bool IsInsideZone(uint16 pos_x, uint16 pos_y) const;
 
 protected:
 	//! \brief The rectangular sections which compose the map zone
@@ -121,6 +120,204 @@ protected:
 	**/
 	void _RandomPosition(uint16& x, uint16& y);
 }; // class MapZone
+
+
+/** ****************************************************************************
+*** \brief An advanced map zone which keeps track of its resident sprites
+***
+*** This zone class enhances the skeletal MapZone by adding features which keep
+*** track of the sprites which exist in this zone, as well as when those sprites
+*** enter and exit the zone area. This is very useful information for zones which
+*** trigger map events, for instance, when a sprite interacts with the zone area.
+*** Sprites inhabiting the zone are called "residents", hence the nomenclature for
+*** this class.
+***
+*** ResidentZones are updated by the ObjectSupervisor. Every time a sprite's position
+*** is changed, it is marked and all zones that share the same context as the sprite
+*** are examined to see if the sprite has entered or left any zones. Because it is
+*** quite common to want to determine if the sprite pointed to by the camera has interacted
+*** with the zone area, there are specific functions that provide for that ability, to
+*** ease the burden on the map script writers.
+***
+*** It is necessary to define which map contexts the zone takes effect on so that
+*** only sprites that share a common context with a zone are taken into account. Note that
+*** a zone can be active in any number of the available map contexts, since it stores a bit
+*** mask value of contexts where the zone is active. Also note that this class examines
+*** resident sprites, but not lower classes of objects (which typically do not move and
+*** likewise we would not want to trigger any sort of event).
+*** ***************************************************************************/
+class ResidentZone : public MapZone {
+public:
+	ResidentZone()
+		{}
+
+	/** \brief Constructs a map zone that is initialized with a single zone section
+	*** \param left_col The left edge of the section to add
+	*** \param right_col The right edge of the section to add
+	*** \param top_row The top edge of the section to add
+	*** \param bottom_row The bottom edge of the section to add
+	**/
+	ResidentZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
+
+	/** \brief Constructs a map zone that is initialized with a single zone section
+	*** \param left_col The left edge of the section to add
+	*** \param right_col The right edge of the section to add
+	*** \param top_row The top edge of the section to add
+	*** \param bottom_row The bottom edge of the section to add
+	*** \param contexts A bit-mask of which contexts this zone is active in
+	**/
+	ResidentZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, MAP_CONTEXT contexts);
+
+	~ResidentZone()
+		{}
+
+	//! \brief TODO
+	void Update();
+
+	//! \brief Returns true if any sprites have recently entered this zone
+	bool IsResidentEntering() const
+		{ return !_entering_residents.empty(); }
+
+	//! \brief Returns true if any sprites have recently exited this zone
+	bool IsResidentExiting() const
+		{ return !_exiting_residents.empty(); }
+
+	/** \brief Returns true if a specific sprite resides inside the zone
+	*** \param object_id The object ID number of the sprite to check for
+	*** \return True if the object ID is valid and the sprite is inside the zone
+	**/
+	bool IsSpriteResident(uint32 object_id) const
+		{ return IsSpriteResident(MapMode::CurrentInstance()->GetObjectSupervisor()->GetSprite(object_id)); }
+
+	/** \brief Returns true if a specific sprite resides inside the zone
+	*** \param sprite A pointer to the sprite to check
+	*** \return True if the sprite is inside the zone
+	**/
+	bool IsSpriteResident(VirtualSprite* sprite) const
+		 { return _IsSpriteInList(_residents, sprite); }
+
+	//! \brief Returns true if the sprite pointed to by the map camera is inside the zone
+	bool IsCameraResident() const
+		{ return _IsSpriteInList(_residents, MapMode::CurrentInstance()->GetCamera()); }
+
+	/** \brief Returns true if a specific sprite is currently entering the zone
+	*** \param object_id The object ID number of the sprite to check for
+	*** \return True if the object ID is valid and the sprite is entering the zone
+	**/
+	bool IsSpriteEntering(uint32 object_id) const
+		{ return IsSpriteEntering(MapMode::CurrentInstance()->GetObjectSupervisor()->GetSprite(object_id)); }
+
+	/** \brief Returns true if a specific sprite is currently entering the zone
+	*** \param sprite A pointer to the sprite to check
+	*** \return True if the sprite is entering the zone
+	**/
+	bool IsSpriteEntering(VirtualSprite* sprite) const
+		{ return _IsSpriteInList(_entering_residents, sprite); }
+
+	//! \brief Returns true if the sprite pointed to by the camera has recently entered this zone
+	bool IsCameraEntering() const
+		{ return _IsSpriteInList(_entering_residents, MapMode::CurrentInstance()->GetCamera()); }
+
+	/** \brief Returns true if a specific sprite is currently exiting the zone
+	*** \param object_id The object ID number of the sprite to check for
+	*** \return True if the object ID is valid and the sprite is exitingg the zone
+	**/
+	bool IsSpritExiting(uint32 object_id) const
+		{ return IsSpriteExiting(MapMode::CurrentInstance()->GetObjectSupervisor()->GetSprite(object_id)); }
+
+	/** \brief Returns true if a specific sprite is currently exiting the zone
+	*** \param sprite A pointer to the sprite to check
+	*** \return True if the sprite is exiting the zone
+	**/
+	bool IsSpriteExiting(VirtualSprite* sprite) const
+		{ return _IsSpriteInList(_exiting_residents, sprite); }
+
+	//! \brief Returns true of the sprite pointed to by the camera has recently exited this zone
+	bool IsCameraExiting() const
+		{ return _IsSpriteInList(_exiting_residents, MapMode::CurrentInstance()->GetCamera()); }
+
+	/** \brief Retrieves a pointer to a sprite that resides inside the zone
+	*** \param index The index of the resident sprite to retrieve
+	*** \return A pointer to the sprite, or NULL if there is no resident for the given index
+	***
+	*** \note This function is designed to allow Lua access to all sprite residents
+	**/
+	VirtualSprite* GetResident(uint32 index) const
+		{ return _GetSpriteInList(_residents, index); }
+
+	/** \brief Retrieves a pointer to a sprite has recently entered the zone
+	*** \param index The index of the entering resident to retrieve
+	*** \return A pointer to the sprite, or NULL if there is no entering resident for the given index
+	***
+	*** \note This function is designed to allow Lua access to all entering residents
+	**/
+	VirtualSprite* GetEnteringResident(uint32 index) const
+		{ return _GetSpriteInList(_entering_residents, index); }
+
+	/** \brief Retrieves a pointer to a sprite that recently exited the zone
+	*** \param index The index of the exiting sprite to retrieve
+	*** \return A pointer to the sprite, or NULL if there is no exiting resident for the given index
+	***
+	*** \note This function is designed to allow Lua access to all exiting residents
+	**/
+	VirtualSprite* GetExitingResident(uint32 index) const
+		{ return _GetSpriteInList(_exiting_residents, index); }
+
+	//! \brief Returns the number of sprites that are currently located within the zone boundaries
+	uint32 GetNumberResidents() const
+		{ return _residents.size(); }
+
+	//! \brief Returns the number of sprites that are entering the zone boundaries
+	uint32 GetNumberEnteringResidents() const
+		{ return _entering_residents.size(); }
+
+	//! \brief Returns the number of sprites that are exiting the zone boundaries
+	uint32 GetNumberExitingResidents() const
+		{ return _exiting_residents.size(); }
+
+	//! \name Class member accessor methods
+	//@{
+	MAP_CONTEXT GetActiveContexts() const
+		{ return _active_contexts; }
+
+	void SetActiveContexts(MAP_CONTEXT contexts)
+		{ _active_contexts = contexts; }
+	//@}
+
+protected:
+	//! \brief A bit mask used to determine on which contexts this zone is valid
+	MAP_CONTEXT _active_contexts;
+
+	//! \brief A container that retains pointers to all sprites which occupy this zone
+	std::list<VirtualSprite*> _residents;
+
+	/** \brief Temporarily retains all sprites which have entered the zone
+	*** \note This list is cleared on every update, so there is only one opportunity to
+	*** observe which sprites have entered the zone.
+	**/
+	std::list<VirtualSprite*> _entering_residents;
+
+	/** \brief Temporarily retains all sprites which have exited the zone
+	*** \note This list is cleared on every update, so there is only one opportunity to
+	*** observe which sprites have exited the zone.
+	**/
+	std::list<VirtualSprite*> _exiting_residents;
+
+	/** \brief A helper function which determines if a sprite may be found in a std::list of sprites
+	*** \param list A reference to the list of sprites to use
+	*** \param sprite A pointer to the sprite to look for
+	*** \return True if the sprite is found in the list
+	**/
+	bool _IsSpriteInList(const std::list<VirtualSprite*>& list, VirtualSprite* sprite) const;
+
+	/** \brief A helper function which retrieves a sprite at a specific index in a std::list of sprites
+	*** \param list A reference to the list of sprites to use
+	*** \param index The index into the list of where to retrieve the sprite from
+	*** \return A pointer to the sprite at the specified index, or NULL if no sprite exists at that index
+	**/
+	VirtualSprite* _GetSpriteInList(const std::list<VirtualSprite*>& list, uint32 index) const;
+}; // class ResidentZone : public MapZone
+
 
 
 /** ****************************************************************************
