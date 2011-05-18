@@ -73,9 +73,9 @@ MapMode::MapMode(string filename) :
 	_current_context(MAP_CONTEXT_01),
 	_running_disabled(false),
 	_unlimited_stamina(false),
-	_run_stamina(10000),
 	_show_gui(true),
-	_current_track(0)
+	_current_track(0),
+	_run_stamina(10000)
 {
 	mode_type = MODE_MANAGER_MAP_MODE;
 	_current_instance = this;
