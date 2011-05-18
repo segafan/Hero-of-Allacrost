@@ -279,10 +279,16 @@ public:
 
 	/** \brief Returns the currently selected skill
 	*** This function will return NULL if the class has not been initialized and there is no list of
-	*** skills to select from. It will also return NULL if the selected skill is disabled in the _skill_list
-	*** option box.
+	*** skills to select from.
 	**/
 	hoa_global::GlobalSkill* GetSelectedSkill();
+
+	/** \brief Returns if the selected skill is enabled
+	*** This function will return true, if the selected skill is enabled and false otherwise. It will
+	*** also return false, if the class has not been initialized and there is no list of
+	*** skills to select from.
+	**/
+	bool GetSelectedSkillEnabled();
 
 	//! \brief Updates the skill list and processes user input
 	void UpdateList();

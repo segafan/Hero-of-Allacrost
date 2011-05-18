@@ -119,7 +119,7 @@ CharacterCommandSettings::CharacterCommandSettings(BattleCharacter* character, M
 		_defend_list.AddOptionElementAlignment(i, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
 		_defend_list.AddOptionElementText(i, MakeUnicodeString(NumberToString(skill_list->at(i)->GetSPRequired())));
 		if (skill_list->at(i)->GetSPRequired() > _character->GetGlobalCharacter()->GetSkillPoints()) {
-			_attack_list.EnableOption(i, false);
+			_defend_list.EnableOption(i, false);
 		}
 	}
 	if (skill_list->empty() == false)
@@ -477,13 +477,21 @@ GlobalSkill* SkillCommand::GetSelectedSkill() {
 		return NULL;
 
 	uint32 selection = _skill_list->GetSelection();
-	if (_skill_list->IsOptionEnabled(selection) == false)
-		return NULL;
-	else
-		return _skills->at(selection);
+    // _skills needs to be returned even if not enabled due to low SP in order to print information
+    // of both, enabled and disabled skills.
+//	if (_skill_list->IsOptionEnabled(selection) == false)
+//		return NULL;
+//	else
+    return _skills->at(selection);
 }
 
+bool SkillCommand::GetSelectedSkillEnabled() {
+	if ((_skills == NULL) || (_skill_list == NULL))
+		return false;
 
+	uint32 selection = _skill_list->GetSelection();
+    return _skill_list->IsOptionEnabled(selection);
+}
 
 void SkillCommand::UpdateList() {
 	if (_skill_list == NULL)
@@ -597,6 +605,8 @@ void CommandSupervisor::Initialize(BattleCharacter* character) {
 
 	_ChangeState(COMMAND_STATE_CATEGORY);
 	_active_settings = &(_character_settings.find(character)->second);
+    // Update _skill_list to check, if some skills need to be deactivated due to low amount of SP
+    _active_settings->RefreshLists();
 	_category_list.SetSelection(_active_settings->GetLastCategory());
 
 	// Determine which categories should be enabled or disabled
@@ -827,7 +837,8 @@ void CommandSupervisor::_UpdateAction() {
 		_selected_skill = _skill_command.GetSelectedSkill();
 
 		if (InputManager->ConfirmPress()) {
-			if (_selected_skill != NULL) {
+            bool is_skill_enabled = _skill_command.GetSelectedSkillEnabled();
+			if (is_skill_enabled == true) {
 				_ChangeState(COMMAND_STATE_TARGET);
 			}
 			else {
@@ -902,8 +913,8 @@ void CommandSupervisor::_UpdateInformation() {
 	if (InputManager->CancelPress() || InputManager->MenuPress()) {
 		_state = COMMAND_STATE_ACTION;
 	}
-	
-	else if (InputManager->ConfirmPress()) { 
+
+	else if (InputManager->ConfirmPress()) {
 		_ChangeState(COMMAND_STATE_TARGET);
 	}
 
@@ -1022,10 +1033,10 @@ void CommandSupervisor::_CreateTargetText() {
 
 void CommandSupervisor::_CreateInformationText() {
 	ustring info_text;
-	
+
 	if (_IsSkillCategorySelected() == true) {
 		_window_header.SetText(_selected_skill->GetName());
-		
+
 		info_text = UTranslate("Skill Points: " + NumberToString(_selected_skill->GetSPRequired())) + MakeUnicodeString("\n");
 		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_skill->GetTargetType())) + MakeUnicodeString("\n");
 		info_text += UTranslate("Prep Time: ") + MakeUnicodeString(NumberToString(_selected_skill->GetWarmupTime())) + MakeUnicodeString("\n");
