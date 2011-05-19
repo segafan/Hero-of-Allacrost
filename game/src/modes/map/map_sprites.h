@@ -77,7 +77,7 @@ public:
 
 	/** \brief Set to true whenever the sprite's position was changed due to movement
 	*** This is distinctly different than the moving member. Whereas the moving member
-	*** indicates desired movement, this member indicates that positionaly change due to
+	*** indicates desired movement, this member indicates that positional change due to
 	*** movement actually occurred. It is used for drawing functions to determine if they
 	*** should draw the sprite in motion or not in motion
 	**/

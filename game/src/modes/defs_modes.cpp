@@ -238,13 +238,27 @@ void BindModesToLua()
 		class_<MapZone>("MapZone")
 			.def(constructor<>())
 			.def(constructor<uint16, uint16, uint16, uint16>())
+			.def(constructor<uint16, uint16, uint16, uint16, MAP_CONTEXT>())
 			.def("AddSection", &MapZone::AddSection)
 			.def("IsInsideZone", &MapZone::IsInsideZone)
+			.def("GetActiveContexts", &MapZone::GetActiveContexts)
+			.def("SetActiveContexts", &MapZone::SetActiveContexts)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ResidentZone, MapZone>("MapZone")
+		class_<CameraZone, MapZone>("CameraZone")
+			.def(constructor<>())
+			.def(constructor<uint16, uint16, uint16, uint16>())
+			.def(constructor<uint16, uint16, uint16, uint16, MAP_CONTEXT>())
+			.def("IsCameraInside", &CameraZone::IsCameraInside)
+			.def("IsCameraEntering", &CameraZone::IsCameraEntering)
+			.def("IsCameraExiting", &CameraZone::IsCameraExiting)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<ResidentZone, MapZone>("ResidentZone")
 			.def(constructor<>())
 			.def(constructor<uint16, uint16, uint16, uint16>())
 			.def(constructor<uint16, uint16, uint16, uint16, MAP_CONTEXT>())
@@ -265,8 +279,7 @@ void BindModesToLua()
 			.def("GetNumberResidents", &ResidentZone::GetNumberResidents)
 			.def("GetNumberEnteringResidents", &ResidentZone::GetNumberEnteringResidents)
 			.def("GetNumberExitingResidents", &ResidentZone::GetNumberExitingResidents)
-			.def("GetActiveContexts", &ResidentZone::GetActiveContexts)
-			.def("SetActiveContexts", &ResidentZone::SetActiveContexts)
+
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

@@ -487,12 +487,10 @@ end
 
 -- Mandatory function for map updates
 function Update()
-	if (long_route_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
-		if (event_supervisor:IsEventActive(10) == false) then
-			if (map:GetMapEventGroup():DoesEventExist("passage_collapsed") == false) then
-				event_supervisor:StartEvent(10);
-				map.camera:SetXPosition(map.camera.x_position + 2, 0); -- TEMP: Move sprite back outside of zone
-			end
+	if (long_route_zone:IsCameraEntering() == true) then
+		if (map:GetMapEventGroup():DoesEventExist("passage_collapsed") == false) then
+			event_supervisor:StartEvent(10);
+			map.camera:SetXPosition(map.camera.x_position + 2, 0); -- TEMP: Move sprite back outside of zone
 		end
 	end
 	
@@ -732,7 +730,7 @@ function CreateEvents()
 	
 	-- If player tries to go long route before cave collapse
 	-- TODO: add event links: release player control and move player sprite back
-	long_route_zone = hoa_map.MapZone(132, 136, 70, 80);
+	long_route_zone = hoa_map.CameraZone(132, 136, 70, 80, 1);
 	map:AddZone(long_route_zone);
 	event = hoa_map.DialogueEvent(10, 6);
 	-- event:AddEventLinkAtEnd(11);
