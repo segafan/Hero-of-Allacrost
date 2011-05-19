@@ -409,6 +409,12 @@ public:
 	void SetHorizontalWrapMode(WrapMode mode)
 		{ _horizontal_wrap_mode = mode; }
 
+    /** \brief Enables to skip disabled items while moving the cursor
+    *** \param toggle True skippes disabled items
+    **/
+    void SetSkipDisabled(bool toggle)
+        { _skip_disabled = toggle; }
+
 	/** \brief Enables or disables the ability to switch the location of two options
 	*** \param enable True enables switching, false disables it
 	*** \note Switching is disabled by default
@@ -509,6 +515,9 @@ private:
 
 	//! \brief The wrapping modes used for horizontal and vertical cursor movement
 	WrapMode _horizontal_wrap_mode, _vertical_wrap_mode;
+
+	//! \brief Skippes disabled items while moving the cursor
+	bool _skip_disabled;
 
 	//! \brief When set to true, the user may switch the locations of two different options
 	bool _enable_switching;

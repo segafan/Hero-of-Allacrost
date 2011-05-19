@@ -101,6 +101,7 @@ OptionBox::OptionBox() :
 	_selection_mode(VIDEO_SELECT_SINGLE),
 	_horizontal_wrap_mode(VIDEO_WRAP_MODE_NONE),
 	_vertical_wrap_mode(VIDEO_WRAP_MODE_NONE),
+	_skip_disabled(false),
 	_enable_switching(false),
 	_draw_left_column(0),
 	_draw_top_row(0),
@@ -643,6 +644,17 @@ void OptionBox::InputUp() {
 
 	if (_ChangeSelection(-1, false) == false)
 		_event = VIDEO_OPTION_BOUNDS_UP;
+
+	int32 row = _selection / _number_columns;
+
+    if (_skip_disabled) {
+        while (_options[_selection].disabled == true) {
+            if (row <= 0 && _vertical_wrap_mode == VIDEO_WRAP_MODE_NONE)
+                InputDown();
+            else
+                InputUp();
+        }
+    }
 }
 
 
@@ -654,6 +666,17 @@ void OptionBox::InputDown() {
 
 	if(_ChangeSelection(1, false) == false)
 		_event = VIDEO_OPTION_BOUNDS_DOWN;
+
+	int32 row = _selection / _number_columns;
+
+    if (_skip_disabled) {
+        while (_options[_selection].disabled == true) {
+            if (row >= _number_rows-1 && _vertical_wrap_mode == VIDEO_WRAP_MODE_NONE)
+                InputUp();
+            else
+                InputDown();
+        }
+    }
 }
 
 
@@ -665,6 +688,17 @@ void OptionBox::InputLeft() {
 
 	if (_ChangeSelection(-1, true) == false)
 		_event = VIDEO_OPTION_BOUNDS_LEFT;
+
+	int32 col = _selection % _number_columns;
+
+    if (_skip_disabled) {
+        while (_options[_selection].disabled == true) {
+            if (col <= 0 && _horizontal_wrap_mode == VIDEO_WRAP_MODE_NONE)
+                InputRight();
+            else
+                InputLeft();
+        }
+    }
 }
 
 
@@ -676,6 +710,17 @@ void OptionBox::InputRight() {
 
 	if (_ChangeSelection(1, true) == false)
 		_event = VIDEO_OPTION_BOUNDS_RIGHT;
+
+	int32 col = _selection % _number_columns;
+
+    if (_skip_disabled) {
+        while (_options[_selection].disabled == true) {
+            if (col >= _number_columns-1 && _horizontal_wrap_mode == VIDEO_WRAP_MODE_NONE)
+                InputLeft();
+            else
+                InputRight();
+        }
+    }
 }
 
 // -----------------------------------------------------------------------------
