@@ -779,8 +779,8 @@ void Editor::_TilesetEdit() {
 	if (tileset_editor->exec() == QDialog::Accepted)
 	{
 	} // only process results if user selected okay
-	else
-		statusBar()->showMessage("Properties not modified!", 5000);
+//	else
+//		statusBar()->showMessage("Properties not modified!", 5000);
 
 	delete tileset_editor;
 }
