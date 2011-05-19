@@ -509,6 +509,7 @@ void BootMode::_SetupMainMenu() {
 		_main_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 		_main_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 		_main_menu.SetCursorOffset(-50.0f, 28.0f);
+		_main_menu.SetSkipDisabled(true);
 
 		// Add all the needed menu options to the main menu
 		_main_menu.AddOption(UTranslate("New Game"), &BootMode::_OnNewGame);
@@ -559,6 +560,7 @@ void BootMode::_SetupOptionsMenu() {
 	_options_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_options_menu.SetCursorOffset(-50.0f, 28.0f);
+	_options_menu.SetSkipDisabled(true);
 
 	_options_menu.AddOption(UTranslate("Video"), &BootMode::_OnVideoOptions);
 	_options_menu.AddOption(UTranslate("Audio"), &BootMode::_OnAudioOptions);
@@ -581,6 +583,7 @@ void BootMode::_SetupVideoOptionsMenu() {
 	_video_options_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_video_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_video_options_menu.SetCursorOffset(-50.0f, 28.0f);
+	_video_options_menu.SetSkipDisabled(true);
 
 	_video_options_menu.AddOption(UTranslate("Resolution:"), &BootMode::_OnResolution);
 	// Left & right will change window mode as well as confirm
@@ -604,6 +607,7 @@ void BootMode::_SetupAudioOptionsMenu() {
 	_audio_options_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_audio_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_audio_options_menu.SetCursorOffset(-50.0f, 28.0f);
+	_audio_options_menu.SetSkipDisabled(true);
 
 	_audio_options_menu.AddOption(UTranslate("Sound Volume: "), NULL, NULL, NULL, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
 	_audio_options_menu.AddOption(UTranslate("Music Volume: "), NULL, NULL, NULL, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
@@ -621,6 +625,7 @@ void BootMode::_SetupLanguageOptionsMenu() {
 	_language_options_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_language_options_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_language_options_menu.SetCursorOffset(-50.0f, 28.0f);
+	_language_options_menu.SetSkipDisabled(true);
 
 
 	// Get the list of languages from the Lua file.
@@ -663,6 +668,7 @@ void BootMode::_SetupKeySetttingsMenu() {
 	_key_settings_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_key_settings_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_key_settings_menu.SetCursorOffset(-50.0f, 28.0f);
+	_key_settings_menu.SetSkipDisabled(true);
 
 	_key_settings_menu.AddOption(UTranslate("Up: "), &BootMode::_RedefineUpKey);
 	_key_settings_menu.AddOption(UTranslate("Down: "), &BootMode::_RedefineDownKey);
@@ -689,6 +695,7 @@ void BootMode::_SetupJoySetttingsMenu() {
 	_joy_settings_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_joy_settings_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_joy_settings_menu.SetCursorOffset(-50.0f, 28.0f);
+	_joy_settings_menu.SetSkipDisabled(true);
 
 	ustring dummy;
 	_joy_settings_menu.AddOption(dummy, &BootMode::_RedefineXAxisJoy);
@@ -718,6 +725,7 @@ void BootMode::_SetupResolutionMenu() {
 	_resolution_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_resolution_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_resolution_menu.SetCursorOffset(-50.0f, 28.0f);
+	_resolution_menu.SetSkipDisabled(true);
 
 	_resolution_menu.AddOption(MakeUnicodeString("640 x 480"), &BootMode::_OnResolution640x480);
 	_resolution_menu.AddOption(MakeUnicodeString("800 x 600"), &BootMode::_OnResolution800x600);
@@ -745,6 +753,7 @@ void BootMode::_SetupProfileMenu() {
 	_profiles_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_profiles_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_profiles_menu.SetCursorOffset(-50.0f, 28.0f);
+	_profiles_menu.SetSkipDisabled(true);
 
 	_profiles_menu.AddOption(UTranslate("Save"), &BootMode::_OnSaveProfile);
 	_profiles_menu.AddOption(UTranslate("Load"), &BootMode::_OnLoadProfile);
@@ -761,6 +770,7 @@ void BootMode::_SetupLoadProfileMenu() {
 	_load_profile_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_load_profile_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_load_profile_menu.SetCursorOffset(-50.0f, 28.0f);
+	_load_profile_menu.SetSkipDisabled(true);
 
 	_AddProfileOptions(&_load_profile_menu);
 }
@@ -775,6 +785,7 @@ void BootMode::_SetupSaveProfileMenu() {
 	_save_profile_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_save_profile_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_save_profile_menu.SetCursorOffset(-50.0f, 28.0f);
+	_save_profile_menu.SetSkipDisabled(true);
 
 	//this option is selected when user wants to create a new file
 	_save_profile_menu.AddOption(UTranslate("New Profile"), &BootMode::_OnSaveFile);
@@ -792,6 +803,7 @@ void BootMode::_SetupDeleteProfileMenu() {
 	_delete_profile_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_delete_profile_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_delete_profile_menu.SetCursorOffset(-50.0f, 28.0f);
+	_delete_profile_menu.SetSkipDisabled(true);
 
 	_AddProfileOptions(&_delete_profile_menu);
 }
@@ -808,6 +820,7 @@ void BootMode::_SetupUserInputMenu() {
 	_user_input_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_user_input_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_user_input_menu.SetCursorOffset(-50.0f, 28.0f);
+	_user_input_menu.SetSkipDisabled(true);
 
 
 	//add in the letters :)
@@ -1717,7 +1730,7 @@ bool BootMode::_SaveSettingsFile(const std::string& filename) {
 	//Save language settings
 	settings_lua.ModifyString("settings.language", SystemManager->GetLanguage());
 //	std::string lang_name = SystemManager->GetLanguage();
-	
+
 //	if (lang_name == "en@quot") settings_lua.ModifyInt("settings.lang_code", 1);
 //	else if (lang_name == "fr") settings_lua.ModifyInt("settings.lang_code", 2);
 //	else if (lang_name == "pt_br") settings_lua.ModifyInt("settings.lang_code", 3);
