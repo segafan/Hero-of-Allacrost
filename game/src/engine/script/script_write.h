@@ -161,10 +161,10 @@ public:
 	void WriteIntVector(const int32 key, std::vector<int32> &vect)
 		{ _WriteDataVector(key, vect); }
 
-	void WriteUIntVector(const std::string &key, std::vector<int32> &vect)
+	void WriteUIntVector(const std::string &key, std::vector<uint32> &vect)
 		{ _WriteDataVector(key, vect); }
 
-	void WriteUIntVector(const int32 key, std::vector<int32> &vect)
+	void WriteUIntVector(const int32 key, std::vector<uint32> &vect)
 		{ _WriteDataVector(key, vect); }
 
 	void WriteFloatVector(const std::string &key, std::vector<float> &vect)

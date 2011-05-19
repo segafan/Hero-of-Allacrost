@@ -75,7 +75,7 @@ public:
 
 	~Grid();
 
-	//! \name Class member accessor functions
+	//! \brief Class member accessor functions
 	//@{
 	QString GetFileName() const { return _file_name; }
 	uint32  GetHeight()   const { return _height; }
