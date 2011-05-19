@@ -261,10 +261,6 @@ void ObjectSupervisor::Load(ReadScriptDescriptor& map_file) {
 
 
 void ObjectSupervisor::Update() {
-	for (uint32 i = 0; i < _zones.size(); i++) {
-		_zones[i]->Update();
-	}
-
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		_ground_objects[i]->Update();
 	}
@@ -274,6 +270,12 @@ void ObjectSupervisor::Update() {
 	for (uint32 i = 0; i < _sky_objects.size(); i++) {
 		_sky_objects[i]->Update();
 	}
+
+	for (uint32 i = 0; i < _zones.size(); i++) {
+		_zones[i]->Update();
+	}
+
+	// TODO: examine all sprites for movement and context change, then check all resident zones to see if the sprite has entered
 }
 
 

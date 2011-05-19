@@ -33,9 +33,20 @@ namespace private_map {
 // ---------- MapZone Class Functions
 // -----------------------------------------------------------------------------
 
-MapZone::MapZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) {
+MapZone::MapZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) :
+	_active_contexts(MAP_CONTEXT_NONE)
+{
 	AddSection(left_col, right_col, top_row, bottom_row);
 }
+
+
+
+MapZone::MapZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, MAP_CONTEXT contexts) :
+	_active_contexts(contexts)
+{
+	AddSection(left_col, right_col, top_row, bottom_row);
+}
+
 
 
 void MapZone::AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) {
@@ -78,6 +89,42 @@ void MapZone::_RandomPosition(uint16& x, uint16& y) {
 }
 
 // -----------------------------------------------------------------------------
+// ---------- CameraZone Class Functions
+// -----------------------------------------------------------------------------
+
+CameraZone::CameraZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) :
+	MapZone(left_col, right_col, top_row, bottom_row),
+	_camera_inside(false),
+	_was_camera_inside(false)
+{}
+
+
+
+CameraZone::CameraZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, MAP_CONTEXT contexts) :
+	MapZone(left_col, right_col, top_row, bottom_row, contexts),
+	_camera_inside(false),
+	_was_camera_inside(false)
+{}
+
+
+
+void CameraZone::Update() {
+	_was_camera_inside = _camera_inside;
+
+	VirtualSprite* camera = MapMode::CurrentInstance()->GetCamera();
+	if (camera == NULL) {
+		_camera_inside = false;
+	}
+	// Camera must share a context with the zone and be within its borders
+	else if ((_active_contexts & camera->GetContext()) && (IsInsideZone(camera->x_position, camera->y_position) == true)) {
+		_camera_inside = true;
+	}
+	else {
+		_camera_inside = false;
+	}
+}
+
+// -----------------------------------------------------------------------------
 // ---------- ResidentZone Class Functions
 // -----------------------------------------------------------------------------
 
@@ -88,8 +135,7 @@ ResidentZone::ResidentZone(uint16 left_col, uint16 right_col, uint16 top_row, ui
 
 
 ResidentZone::ResidentZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, MAP_CONTEXT contexts) :
-	MapZone(left_col, right_col, top_row, bottom_row),
-	_active_contexts(contexts)
+	MapZone(left_col, right_col, top_row, bottom_row, contexts)
 {}
 
 
@@ -97,40 +143,63 @@ ResidentZone::ResidentZone(uint16 left_col, uint16 right_col, uint16 top_row, ui
 void ResidentZone::Update() {
 	_entering_residents.clear();
 	_exiting_residents.clear();
-}
 
+	// Holds a list of sprites that should be removed from the resident zone. This is necessary because we can't iterate through
+	// the resident list and erase former residents without messing up the set iteration.
+	vector<VirtualSprite*> remove_list;
 
-
-bool ResidentZone::_IsSpriteInList(const list<VirtualSprite*>& list, VirtualSprite* sprite) const {
-	if (sprite == NULL) {
-		return false;
-	}
-
-	for (std::list<VirtualSprite*>::const_iterator i = list.begin(); i != list.end(); i++) {
-		if (sprite == (*i)) {
-			return true;
+	// Examine all residents to see if they still reside in the zone. If not, move them to the exiting residents list
+	for (set<VirtualSprite*>::iterator i = _residents.begin(); i != _residents.end(); i++) {
+		// Make sure that the resident is still in a context shared by the zone and located within the zone boundaries
+		if ((((*i)->GetContext() & _active_contexts) == 0x0) || (IsInsideZone((*i)->x_position, (*i)->y_position) == false)) {
+			remove_list.push_back(*i);
 		}
 	}
 
-	return false;
+	for (uint32 i = 0; i < remove_list.size(); i++) {
+		_exiting_residents.insert(remove_list[i]);
+		_residents.erase(remove_list[i]);
+	}
 }
 
 
 
-VirtualSprite* ResidentZone::_GetSpriteInList(const list<VirtualSprite*>& list, uint32 index) const {
-	if (index >= list.size()) {
+void ResidentZone::AddPotentialResident(VirtualSprite* sprite) {
+	if (sprite == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function received NULL argument" << endl;
+		return;
+	}
+
+	// Check that sprite is not already a resident
+	if (IsSpriteResident(sprite) == true) {
+		return;
+	}
+
+	// Check that the sprite's context is compatible with this zone and is located within the zone boundaries
+	if (sprite->GetContext() & _active_contexts) {
+		if (IsInsideZone(sprite->x_position, sprite->y_position) == true) {
+			_entering_residents.insert(sprite);
+			_residents.insert(sprite);
+		}
+	}
+}
+
+
+
+VirtualSprite* ResidentZone::_GetSpriteInSet(const set<VirtualSprite*>& local_set, uint32 index) const {
+	if (index >= local_set.size()) {
 		return NULL;
 	}
 
 	uint32 counter = 0;
-	for (std::list<VirtualSprite*>::const_iterator i = list.begin(); i != list.end(); i++) {
+	for (set<VirtualSprite*>::const_iterator i = local_set.begin(); i != local_set.end(); i++) {
 		if (index == counter) {
 			return *i;
 		}
 		counter++;
 	}
 
-	IF_PRINT_WARNING(MAP_DEBUG) << "sprite not found after reaching end of list -- this should never happen" << endl;
+	IF_PRINT_WARNING(MAP_DEBUG) << "sprite not found after reaching end of set -- this should never happen" << endl;
 	return NULL;
 }
 
