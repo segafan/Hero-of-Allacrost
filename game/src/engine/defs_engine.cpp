@@ -167,7 +167,7 @@ void BindEngineToLua()
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_video")
 	[
 		class_<VideoEngine>("GameVideo")
-			.def("ShakeScreen", (void(*)(float, float)) &VideoEngine::ShakeScreen)
+			.def("ShakeScreen", &VideoEngine::ShakeScreen)
 	];
 
 	} // End using video namespaces
