@@ -168,6 +168,16 @@ void BindEngineToLua()
 	[
 		class_<VideoEngine>("GameVideo")
 			.def("ShakeScreen", &VideoEngine::ShakeScreen)
+
+			// Namespace constants
+			.enum_("constants") [
+				// Shake fall off types
+				value("VIDEO_FALLOFF_NONE", VIDEO_FALLOFF_NONE),
+				value("VIDEO_FALLOFF_EASE", VIDEO_FALLOFF_EASE),
+				value("VIDEO_FALLOFF_LINEAR", VIDEO_FALLOFF_LINEAR),
+				value("VIDEO_FALLOFF_GRADUAL", VIDEO_FALLOFF_GRADUAL),
+				value("VIDEO_FALLOFF_SUDDEN", VIDEO_FALLOFF_SUDDEN)
+			]
 	];
 
 	} // End using video namespaces

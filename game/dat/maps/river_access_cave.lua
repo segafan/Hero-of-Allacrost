@@ -751,7 +751,7 @@ function CreateEvents()
 --	event = hoa_map.PathMoveSpriteEvent(20, knight_path_sprite, 216, 54);
 	event = hoa_map.PathMoveSpriteEvent(20, knight_path_sprite, 212, 62);
 	event:AddEventLinkAtStart(21);
-	event:AddEventLinkAtStart(22, 4000);
+	event:AddEventLinkAtStart(22, 2000);
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.ScriptedEvent(21, 2, 0);
 	event_supervisor:RegisterEvent(event);
@@ -767,8 +767,11 @@ function CreateEvents()
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.SoundEvent(31, "snd/cave-in.ogg");
 	event_supervisor:RegisterEvent(event);
-	event:AddEventLinkAtStart(32, 1000);
-	event = hoa_map.ScriptedEvent(32, 3, 0);
+	event:AddEventLinkAtStart(32, 250);
+	event = hoa_map.ScriptedEvent(32, 6, 0);
+	event:AddEventLinkAtEnd(33);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(33, 3, 0);
 	event_supervisor:RegisterEvent(event);
 	
 	-- Sound played during conversation with knight
@@ -808,6 +811,7 @@ map_functions[3] = function()
 end
 
 
+
 map_functions[4] = function()
 	map.camera:SetXPosition(114, 0);
 	map.camera:SetYPosition(22, 0);
@@ -822,5 +826,7 @@ end
 
 
 
-
+map_functions[6] = function()
+	VideoManager:ShakeScreen(2.0, 2000.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
+end
 
