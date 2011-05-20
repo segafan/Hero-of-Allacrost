@@ -291,32 +291,89 @@ bool BattleEncounterEvent::_Update() {
 // ****************************************************************************
 
 ScriptedEvent::ScriptedEvent(uint32 event_id, uint32 start_index, uint32 update_index) :
-	MapEvent(event_id, SCRIPTED_EVENT)
+	MapEvent(event_id, SCRIPTED_EVENT),
+	_start_function(NULL),
+	_update_function(NULL)
 {
 	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
 	MapMode::CurrentInstance()->OpenMapTablespace(true);
 	map_script.OpenTable("map_functions");
-	_start_function = map_script.ReadFunctionPointer(start_index);
-	_update_function = map_script.ReadFunctionPointer(update_index);
+	if (start_index != 0) {
+		_start_function = new ScriptObject();
+		*_start_function = map_script.ReadFunctionPointer(start_index);
+	}
+	if (update_index != 0) {
+		_update_function = new ScriptObject();
+		*_update_function = map_script.ReadFunctionPointer(update_index);
+	}
 	map_script.CloseTable();
 	map_script.CloseTable();
 }
 
 
 
-ScriptedEvent::~ScriptedEvent()
-{}
+ScriptedEvent::~ScriptedEvent() {
+	if (_start_function != NULL) {
+		delete _start_function;
+		_start_function = NULL;
+	}
+	if (_update_function != NULL) {
+		delete _update_function;
+		_update_function = NULL;
+	}
+}
+
+
+
+ScriptedEvent::ScriptedEvent(const ScriptedEvent& copy) :
+	MapEvent(copy)
+{
+	if (copy._start_function == NULL)
+		_start_function = NULL;
+	else
+		_start_function = new ScriptObject(*copy._start_function);
+
+	if (copy._update_function == NULL)
+		_update_function = NULL;
+	else
+		_update_function = new ScriptObject(*copy._update_function);
+}
+
+
+
+ScriptedEvent& ScriptedEvent::operator=(const ScriptedEvent& copy) {
+	if (this == &copy) // Handle self-assignment case
+		return *this;
+
+	MapEvent::operator=(copy);
+
+	if (copy._start_function == NULL)
+		_start_function = NULL;
+	else
+		_start_function = new ScriptObject(*copy._start_function);
+
+	if (copy._update_function == NULL)
+		_update_function = NULL;
+	else
+		_update_function = new ScriptObject(*copy._update_function);
+
+	return *this;
+}
 
 
 
 void ScriptedEvent::_Start() {
-	ScriptCallFunction<void>(_start_function);
+	if (_start_function != NULL)
+		ScriptCallFunction<void>(*_start_function);
 }
 
 
 
 bool ScriptedEvent::_Update() {
-	return ScriptCallFunction<bool>(_update_function);
+	if (_update_function != NULL)
+		return ScriptCallFunction<bool>(*_update_function);
+	else
+		return true;
 }
 
 // ****************************************************************************

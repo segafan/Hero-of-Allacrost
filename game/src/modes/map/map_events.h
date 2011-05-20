@@ -373,7 +373,7 @@ protected:
 *** \brief An event with its _Start and _Update functions implemented in Lua.
 ***
 *** All events that do not fall into the other categories of events will be
-*** implemented here. This event uses Lua functions to implement the _StartEvent()
+*** implemented here. This event uses Lua functions to implement the _Start()
 *** and _Update() functions (all these C++ functions do is call the
 *** corresponding Lua functions). Note that any type of event can be implemented
 *** in Lua, including alternative implementations of the other C++ event types.
@@ -384,23 +384,31 @@ class ScriptedEvent : public MapEvent {
 public:
 	/** \param event_id The ID of this event
 	*** \param start_index An index in the map file's function table that references the start function
-	*** \param check_index An index in the map file's function table that references the check function
+	*** \param update_index An index in the map file's function table that references the update function
+	***
+	*** \note A value of zero for either the start or update index arguments will result in no start or
+	*** update function being defined. If no update function is defined, the call to _Update() will always
+	*** return true, meaning that this event will end immediately after it starts.
 	**/
 	ScriptedEvent(uint32 event_id, uint32 start_index, uint32 check_index);
 
 	~ScriptedEvent();
 
+	ScriptedEvent(const ScriptedEvent& copy);
+
+	ScriptedEvent& operator=(const ScriptedEvent& copy);
+
 protected:
 	//! \brief A pointer to the Lua function that starts the event
-	ScriptObject _start_function;
+	ScriptObject* _start_function;
 
 	//! \brief A pointer to the Lua function that returns a boolean value if the event is finished
-	ScriptObject _update_function;
+	ScriptObject* _update_function;
 
 	//! \brief Calls the Lua _start_function
 	void _Start();
 
-	//! \brief Calls the Lua _check_function
+	//! \brief Calls the Lua _update_function. If no
 	bool _Update();
 }; // class ScriptedEvent : public MapEvent
 

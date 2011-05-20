@@ -158,6 +158,12 @@ public:
 	void SetMovementSpeed(float speed)
 		{ movement_speed = speed; }
 
+	void SetMoving(bool motion)
+		{ moving = motion; }
+
+	bool GetMoving() const
+		{ return moving; }
+
 	uint16 GetDirection() const
 		{ return direction; }
 

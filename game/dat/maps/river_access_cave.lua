@@ -473,10 +473,10 @@ function Load(m)
 	local chest;
 
 	-- Create the sprite that the player controls
-	sprite = ConstructSprite("Claudius", 1000, 12, 157);
-	sprite:SetDirection(hoa_map.MapMode.NORTH);
-	map:AddGroundObject(sprite);
-	map:SetCamera(sprite);
+	claudius = ConstructSprite("Claudius", 1000, 12, 157);
+	claudius:SetDirection(hoa_map.MapMode.NORTH);
+	map:AddGroundObject(claudius);
+	map:SetCamera(claudius);
 
 	CreateCharacters();
 	CreateEnemies();
@@ -490,21 +490,20 @@ function Update()
 	if (long_route_zone:IsCameraEntering() == true) then
 		if (map:GetMapEventGroup():DoesEventExist("passage_collapsed") == false) then
 			event_supervisor:StartEvent(10);
-			map.camera:SetXPosition(map.camera.x_position + 2, 0); -- TEMP: Move sprite back outside of zone
 		end
 	end
 	
-	if (short_route_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+	if (short_route_zone:IsCameraEntering() == true) then
 		if (map:GetMapEventGroup():DoesEventExist("knight_moved") == false) then
-			event_supervisor:StartEvent(20);
 			map:GetMapEventGroup():AddNewEvent("knight_moved", 1);
+			event_supervisor:StartEvent(20);
 		end
 	end
 	
-	if (collapse_zone:IsInsideZone(map.camera.x_position, map.camera.y_position) == true) then
+	if (collapse_zone:IsCameraEntering() == true) then
 		if (map:GetMapEventGroup():DoesEventExist("passage_collapsed") == false) then
-			event_supervisor:StartEvent(30);
 			map:GetMapEventGroup():AddNewEvent("passage_collapsed", 1);
+			event_supervisor:StartEvent(30);
 		end
 	end
 
@@ -560,6 +559,7 @@ function CreateCharacters()
 	-- Knight walking ahead through short-cut passage
 	sprite = ConstructSprite("Karlate", 2005, 162, 62);
 	sprite:SetDirection(hoa_map.MapMode.EAST);
+	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	map:AddGroundObject(sprite);
 	knight_path_sprite = sprite;
 	
@@ -729,25 +729,46 @@ function CreateEvents()
 	-- TODO
 	
 	-- If player tries to go long route before cave collapse
-	-- TODO: add event links: release player control and move player sprite back
 	long_route_zone = hoa_map.CameraZone(132, 136, 70, 80, 1);
 	map:AddZone(long_route_zone);
+
 	event = hoa_map.DialogueEvent(10, 6);
-	-- event:AddEventLinkAtEnd(11);
+	event:AddEventLinkAtEnd(11);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(11, 2, 0);
+	event:AddEventLinkAtEnd(12);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.PathMoveSpriteEvent(12, claudius, 138, 75);
+	event:AddEventLinkAtEnd(13);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(13, 3, 0);
 	event_supervisor:RegisterEvent(event);
 
 	-- Knight moves safely through short route while player watches
-	short_route_zone = hoa_map.MapZone(156, 160, 60, 63);
+	short_route_zone = hoa_map.CameraZone(156, 160, 60, 63, 1);
 	map:AddZone(short_route_zone);
+	
 --	event = hoa_map.PathMoveSpriteEvent(20, knight_path_sprite, 216, 54);
 	event = hoa_map.PathMoveSpriteEvent(20, knight_path_sprite, 212, 62);
+	event:AddEventLinkAtStart(21);
+	event:AddEventLinkAtStart(22, 4000);
 	event_supervisor:RegisterEvent(event);
-	-- TODO: force player to wait a number of seconds
+	event = hoa_map.ScriptedEvent(21, 2, 0);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(22, 3, 0);
+	event_supervisor:RegisterEvent(event);
 	
 	-- Short route passage collapses
-	collapse_zone = hoa_map.MapZone(186, 189, 60, 63);
+	collapse_zone = hoa_map.CameraZone(186, 189, 60, 63, 1);
 	map:AddZone(collapse_zone);
-	event = hoa_map.SoundEvent(30, "snd/cave-in.ogg");
+	
+	event = hoa_map.ScriptedEvent(30, 2, 0);
+	event:AddEventLinkAtStart(31);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.SoundEvent(31, "snd/cave-in.ogg");
+	event_supervisor:RegisterEvent(event);
+	event:AddEventLinkAtStart(32, 1000);
+	event = hoa_map.ScriptedEvent(32, 3, 0);
 	event_supervisor:RegisterEvent(event);
 	
 	-- Sound played during conversation with knight
@@ -757,46 +778,49 @@ function CreateEvents()
 	-- Moving forward through wall passage
 	forward_passage_zone = hoa_map.MapZone(78, 79, 6, 7);
 	map:AddZone(forward_passage_zone);
-	event = hoa_map.ScriptedEvent(50, 3, 1);
+	event = hoa_map.ScriptedEvent(50, 4, 0);
 	event_supervisor:RegisterEvent(event);
 	
 	-- Moving backward through wall passage
 	backward_passage_zone = hoa_map.MapZone(110, 111, 20, 21);
 	map:AddZone(backward_passage_zone);
-	event = hoa_map.ScriptedEvent(60, 4, 1);
+	event = hoa_map.ScriptedEvent(60, 5, 0);
 	event_supervisor:RegisterEvent(event);
 end -- function CreateEvents()
 
 
 
--- Event: Party discovers a corpse in the cave, causes conversation and an item to be found
 map_functions[1] = function()
 	return true;
 end
 
 
--- Event: If player tries to take long route before short path caves in
-map_functions[2] = function()
 
+map_functions[2] = function()
+	map.camera:SetMoving(false);
+	map:PushState(hoa_map.MapMode.STATE_SCENE);
 end
 
 
--- Event: Short route caves in as player tries to pass through
+
 map_functions[3] = function()
+	map:PopState();
+end
+
+
+map_functions[4] = function()
 	map.camera:SetXPosition(114, 0);
 	map.camera:SetYPosition(22, 0);
 end
 
 
--- Event: Party comes upon clean water and characters begin talking
-map_functions[4] = function()
+
+map_functions[5] = function()
 	map.camera:SetXPosition(75, 0);
 	map.camera:SetYPosition(8, 0);
 end
 
 
--- Event: Party arrives at river bed
-map_functions[5] = function()
 
-end
+
 
