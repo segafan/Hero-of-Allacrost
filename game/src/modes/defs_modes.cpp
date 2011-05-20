@@ -78,6 +78,8 @@ void BindModesToLua()
 			.def("SetCamera", &MapMode::SetCamera)
 			.def("SetShowGUI", &MapMode::SetShowGUI)
 			.def("IsShowGUI", &MapMode::IsShowGUI)
+			.def("PushState", &MapMode::PushState)
+			.def("PopState", &MapMode::PopState)
 			.def("GetMapEventGroup", &MapMode::GetMapEventGroup)
 			.def("DrawMapLayers", &MapMode::_DrawMapLayers)
 
@@ -85,9 +87,9 @@ void BindModesToLua()
 			.enum_("constants") [
 				// Map states
 				value("STATE_EXPLORE", STATE_EXPLORE),
-				value("STATE_SCENE", STATE_EXPLORE),
-				value("STATE_DIALOGUE", STATE_EXPLORE),
-				value("STATE_TREASURE", STATE_EXPLORE),
+				value("STATE_SCENE", STATE_SCENE),
+				value("STATE_DIALOGUE", STATE_DIALOGUE),
+				value("STATE_TREASURE", STATE_TREASURE),
 				// Object types
 				value("PHYSICAL_TYPE", PHYSICAL_TYPE),
 				value("VIRTUAL_TYPE", VIRTUAL_TYPE),
@@ -187,8 +189,10 @@ void BindModesToLua()
 	[
 		class_<VirtualSprite, MapObject>("VirtualSprite")
 			.def(constructor<>())
+			.def("SetMoving", &VirtualSprite::SetMoving)
 			.def("SetDirection", &VirtualSprite::SetDirection)
 			.def("SetMovementSpeed", &VirtualSprite::SetMovementSpeed)
+			.def("GetMoving", &VirtualSprite::GetMoving)
 			.def("GetDirection", &VirtualSprite::GetDirection)
 			.def("GetMovementSpeed", &VirtualSprite::GetMovementSpeed)
 	];

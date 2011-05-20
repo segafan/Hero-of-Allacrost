@@ -45,17 +45,6 @@ extern "C" {
 #include "utils.h"
 #include "defs.h"
 
-/** \brief A macro for a reference to a Lua object
-*** The object may be any type of Lua data, including booleans, integers, floats, strings, tables,
-*** functions, etc. This member is typically used outside of this engine as a reference to make
-*** Lua function calls.
-**/
-#define ScriptObject luabind::object
-
-//! \brief A macro for making Lua function calls
-#define ScriptCallFunction luabind::call_function
-
-
 //! \brief All calls to the scripting engine are wrapped in this namespace.
 namespace hoa_script {
 
@@ -74,6 +63,16 @@ enum SCRIPT_ACCESS_MODE {
 	SCRIPT_WRITE   = 2,
 	SCRIPT_MODIFY  = 3
 };
+
+/** \brief A macro for a reference to a Lua object
+*** The object may be any type of Lua data, including booleans, integers, floats, strings, tables,
+*** functions, etc. This member is typically used outside of this engine as a reference to make
+*** Lua function calls.
+**/
+#define ScriptObject luabind::object
+
+//! \brief A macro for making Lua function calls
+#define ScriptCallFunction luabind::call_function
 
 //! An internal namespace to be used only by the scripting engine itself. Don't use this namespace anywhere else!
 namespace private_script {
