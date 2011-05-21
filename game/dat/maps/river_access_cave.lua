@@ -472,21 +472,38 @@ function Load(m)
 	local event;
 	local chest;
 
-	-- Create the sprite that the player controls
-	claudius = ConstructSprite("Claudius", 1000, 12, 157);
-	claudius:SetDirection(hoa_map.MapMode.NORTH);
-	map:AddGroundObject(claudius);
-	map:SetCamera(claudius);
-
 	CreateCharacters();
 	CreateEnemies();
 	CreateDialogue();
 	CreateEvents();
+	
+	-- Adds a skeleton corpse to the bottom right area of the map
+	local object = hoa_map.PhysicalObject();
+	object:SetObjectID(3000);
+	object:SetContext(1);
+	object:SetImgHalfWidth(2.0);
+	object:SetImgHeight(2.0);
+	object:SetCollHalfWidth(2.0);
+	object:SetCollHeight(1.0);
+	object:SetXPosition(206, 0.0);
+	object:SetYPosition(147, 0.0);
+	object:SetUpdatable(false);
+	object:SetVisible(true);
+	object:SetNoCollision(false);
+	object:AddAnimation("img/misc/skeleton_corpse.png");
+	map:AddGroundObject(object);
 end
 
 
 -- Mandatory function for map updates
 function Update()
+	if (corpse_zone:IsCameraEntering() == true) then
+		if (map:GetMapEventGroup():DoesEventExist("corpse_found") == false) then
+			map:GetMapEventGroup():AddNewEvent("corpse_found", 1);
+			event_supervisor:StartEvent(1);
+		end
+	end
+
 	if (long_route_zone:IsCameraEntering() == true) then
 		if (map:GetMapEventGroup():DoesEventExist("passage_collapsed") == false) then
 			event_supervisor:StartEvent(10);
@@ -527,7 +544,14 @@ end
 function CreateCharacters()
 	-- Sprites here are ordered roughly by when they are encountered by the player
 	local sprite = {};
+	claudius = {};
 	knight_path_sprite = {};
+	
+	-- Create the sprite that the player controls
+	claudius = ConstructSprite("Claudius", 1000, 12, 157);
+	claudius:SetDirection(hoa_map.MapMode.NORTH);
+	map:AddGroundObject(claudius);
+	map:SetCamera(claudius);
 
 	-- Knight at cave entrance
 	sprite = ConstructSprite("Karlate", 2000, 10, 147);
@@ -625,7 +649,7 @@ function CreateDialogue()
 	dialogue_supervisor:AddDialogue(dialogue);
 
 	dialogue = hoa_map.SpriteDialogue(5);
-		text = hoa_system.Translate("A corpse. That's always a reassuring thing to find in a place like this.");
+		text = hoa_system.Translate("A corpse. That's always a reassuring find in a place like this.");
 		dialogue:AddLine(text, 1000);
 		text = hoa_system.Translate("Hey, I see something under his hand.");
 		dialogue:AddLine(text, 1000);
@@ -724,9 +748,14 @@ end -- function CreateDialogue()
 
 function CreateEvents()
 	local event = {};
-	
+
 	-- Discovery of corpse in cave
-	-- TODO
+	corpse_zone = hoa_map.CameraZone(202, 210, 145, 149, 1);
+	map:AddZone(corpse_zone);
+	
+	event = hoa_map.DialogueEvent(1, 5);
+	event_supervisor:RegisterEvent(event);
+	-- TODO: add a treasure event (potion)
 	
 	-- If player tries to go long route before cave collapse
 	long_route_zone = hoa_map.CameraZone(132, 136, 70, 80, 1);
@@ -735,13 +764,13 @@ function CreateEvents()
 	event = hoa_map.DialogueEvent(10, 6);
 	event:AddEventLinkAtEnd(11);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(11, 2, 0);
+	event = hoa_map.ScriptedEvent(11, 1, 0);
 	event:AddEventLinkAtEnd(12);
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.PathMoveSpriteEvent(12, claudius, 138, 75);
 	event:AddEventLinkAtEnd(13);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(13, 3, 0);
+	event = hoa_map.ScriptedEvent(13, 2, 0);
 	event_supervisor:RegisterEvent(event);
 
 	-- Knight moves safely through short route while player watches
@@ -753,25 +782,25 @@ function CreateEvents()
 	event:AddEventLinkAtStart(21);
 	event:AddEventLinkAtStart(22, 2000);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(21, 2, 0);
+	event = hoa_map.ScriptedEvent(21, 1, 0);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(22, 3, 0);
+	event = hoa_map.ScriptedEvent(22, 2, 0);
 	event_supervisor:RegisterEvent(event);
 	
 	-- Short route passage collapses
 	collapse_zone = hoa_map.CameraZone(186, 189, 60, 63, 1);
 	map:AddZone(collapse_zone);
 	
-	event = hoa_map.ScriptedEvent(30, 2, 0);
+	event = hoa_map.ScriptedEvent(30, 1, 0);
 	event:AddEventLinkAtStart(31);
 	event_supervisor:RegisterEvent(event);
 	event = hoa_map.SoundEvent(31, "snd/cave-in.ogg");
 	event_supervisor:RegisterEvent(event);
 	event:AddEventLinkAtStart(32, 250);
-	event = hoa_map.ScriptedEvent(32, 6, 0);
+	event = hoa_map.ScriptedEvent(32, 3, 0);
 	event:AddEventLinkAtEnd(33);
 	event_supervisor:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(33, 3, 0);
+	event = hoa_map.ScriptedEvent(33, 2, 0);
 	event_supervisor:RegisterEvent(event);
 	
 	-- Sound played during conversation with knight
@@ -792,24 +821,23 @@ function CreateEvents()
 end -- function CreateEvents()
 
 
-
+-- Stop camera sprite and enter scene state
 map_functions[1] = function()
-	return true;
-end
-
-
-
-map_functions[2] = function()
 	map.camera:SetMoving(false);
 	map:PushState(hoa_map.MapMode.STATE_SCENE);
 end
 
 
-
-map_functions[3] = function()
+-- Restore previous map state (typically from "scene" to "explore")
+map_functions[2] = function()
 	map:PopState();
 end
 
+
+-- Short screen shake during the passage collapse event chain
+map_functions[3] = function()
+	VideoManager:ShakeScreen(2.0, 2000.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
+end
 
 
 map_functions[4] = function()
@@ -826,7 +854,5 @@ end
 
 
 
-map_functions[6] = function()
-	VideoManager:ShakeScreen(2.0, 2000.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
-end
+
 

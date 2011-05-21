@@ -174,6 +174,19 @@ void PhysicalObject::Draw() {
 		animations[current_animation].Draw();
 }
 
+
+
+void PhysicalObject::AddAnimation(string filename) {
+	AnimatedImage new_animation;
+	new_animation.SetDimensions(img_half_width * 2, img_height);
+	if (new_animation.AddFrame(filename, 100000) == false) { // TODO: 1000000 is an arbitrary frame time
+		IF_PRINT_WARNING(MAP_DEBUG) << "could not add animation because image filename was invalid: " << filename << endl;
+		return;
+	}
+
+	animations.push_back(new_animation);
+}
+
 // *****************************************************************************
 // ********** ObjectSupervisor Class Functions
 // *****************************************************************************

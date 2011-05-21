@@ -168,7 +168,7 @@ void BindModesToLua()
 	[
 		class_<PhysicalObject, MapObject>("PhysicalObject")
 			.def(constructor<>())
-			.def("AddAnimation", &PhysicalObject::AddAnimation)
+			.def("AddAnimation", (void(PhysicalObject::*)(std::string))&PhysicalObject::AddAnimation)
 			.def("SetCurrentAnimation", &PhysicalObject::SetCurrentAnimation)
 			.def("SetAnimationProgress", &PhysicalObject::SetAnimationProgress)
 			.def("GetCurrentAnimation", &PhysicalObject::GetCurrentAnimation)
