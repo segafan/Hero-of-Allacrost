@@ -23,71 +23,34 @@
 // Allacrost engines
 #include "video.h"
 
+// Allacrost common code
+#include "gui.h"
+
 // Local map mode headers
 #include "map_utils.h"
-#include "map_objects.h"
 
 namespace hoa_map {
 
 namespace private_map {
 
 /** ****************************************************************************
-*** \brief Represents a treasure on the map which the player may access
+*** \brief A container class for treasures procured by the player
 ***
-*** A treasure is a specific type of physical object. Treasures may contain
-*** multiple quantities and types of items, weapons, armor, or any other type of
-*** global object. They may additionally contain any amount of drunes (money).
-*** As one would expect, the contents of a treasure can only be retrieved by the
-*** player once. Each treasure object on a map has a simple boolean in the
-*** saved game file to determine whether the treasure has already been retrieved
-*** by the player or not.
-***
-*** Image files for treasures are single row multi images where the frame ordering
-*** goes from closed, to opening, to open. This means each map treasure has exactly
-*** three animations. The closed and open animations are usually single frame images.
-***
-*** \todo Add support for more treasure features, such as locked chests, chests which
-*** trigger a battle, etc.
+*** Treasures may contain multiple quantities and types of items, weapons, armor,
+*** or any other type of global object. They may additionally contain any amount
+*** of drunes (money). As one would expect, the contents of a treasure should only
+*** be retrieved by the player one time. This class holds a member for tracking whether
+*** the treasure has been taken or not, but it is not responsible for determining
+*** if a treasure was taken in the past (by a previous visit to the map or from the
+*** saved game file).
 *** ***************************************************************************/
-class MapTreasure : public PhysicalObject {
+class MapTreasure {
 	friend class TreasureSupervisor;
 
 public:
-	/** \param image_file The name of the multi image file to load for the treasure
-	*** \param num_total_frames The total number of frame images in the multi image file
-	*** \param num_closed_frames The number of frames to use as the closed animation (default value == 1)
-	*** \param num_open_frames The number of frames to use as the open animation (default value == 1)
-	*** \note The opening animation will be created based on the total number of frames in the image file
-	*** subtracted by the number of closed and open frames. If this value is zero, then the opening animation
-	*** will simply be the same as the open animation
-	**/
-	MapTreasure(std::string image_file, uint8 num_total_frames, uint8 num_closed_frames = 1, uint8 num_open_frames = 1);
+	MapTreasure();
 
 	~MapTreasure();
-
-	//! \brief Defines for all three treasure animations
-	enum {
-		TREASURE_CLOSED_ANIM = 0,
-		TREASURE_OPENING_ANIM = 1,
-		TREASURE_OPEN_ANIM = 2
-	};
-
-	//! \brief Loads the state of the chest from the event group corresponding to the current map
-	void LoadSaved();
-
-	//! \brief Changes the current animation if it has finished looping
-	void Update();
-
-	/** \name Lua Access Functions
-	*** These functions are specifically written to enable Lua to access the members of this class.
- 	**/
-	//@{
-	/** \brief Adds an object to the contents of the MapTreasure
-	*** \param id The id of the GlobalObject to add
-	*** \param number The number of the object to add (default == 1)
-	*** \throw Exception An Exception object if nothing could be added to the treasure
-	**/
-	bool AddObject(uint32 id, uint32 number = 1);
 
 	/** \brief Adds a number of drunes to be the chest's contents
 	*** \note The overflow condition is not checked here: we just assume it will never occur
@@ -95,17 +58,25 @@ public:
 	void AddDrunes(uint32 amount)
 		{ _drunes += amount; }
 
-	//! \brief Indicates if the treasure contains any
-	bool IsEmpty() const
-		{ return _empty; }
+	/** \brief Adds an object to the contents of the MapTreasure
+	*** \param id The id of the GlobalObject to add
+	*** \param quantity The number of the object to add (default == 1)
+	*** \return True if the object was added succesfully
+	**/
+	bool AddObject(uint32 id, uint32 quantity = 1);
 
-	//! \brief Opens the treasure, which changes the active animation and initializes the treasure menu
-	void Open();
+	//! \name Class member access methods
+	//@{
+	bool IsTaken() const
+		{ return _taken; }
+
+	void SetTaken(bool taken)
+		{ _taken = taken; }
 	//@}
 
 private:
-	//! \brief Set to true when the contents of the treasure have been procured
-	bool _empty;
+	//! \brief Set to true when the contents of the treasure have been added to the player's inventory
+	bool _taken;
 
 	//! \brief The number of drunes contained in the chest
 	uint32 _drunes;
@@ -162,7 +133,12 @@ public:
 
 	~TreasureSupervisor();
 
-	/** \brief Un-hides the menu window and initializes it to display the contents of a new treasure
+	/** \brief Displays the menu window and initializes it to display the contents of a new treasure
+	*** \param map_object A pointer to the object on the map holding the treasure to procure
+	**/
+	void Initialize(TreasureObject* map_object);
+
+	/** \brief Displays the menu window and initializes it to display the contents of a new treasure
 	*** \param treasure A pointer to the treasure to display the contents of
 	**/
 	void Initialize(MapTreasure* treasure);

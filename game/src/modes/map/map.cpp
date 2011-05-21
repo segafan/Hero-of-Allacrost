@@ -433,20 +433,22 @@ void MapMode::_UpdateExplore() {
 	if (InputManager->ConfirmPress()) {
 		MapObject* obj = _object_supervisor->FindNearestObject(_camera);
 
-		if (obj && (obj->GetType() == SPRITE_TYPE)) {
-			MapSprite *sp = reinterpret_cast<MapSprite*>(obj);
+		if (obj != NULL) {
+			if (obj->GetType() == SPRITE_TYPE) {
+				MapSprite *sp = reinterpret_cast<MapSprite*>(obj);
 
-			if (sp->HasAvailableDialogue()) {
-				sp->InitiateDialogue();
-				return;
+				if (sp->HasAvailableDialogue()) {
+					sp->InitiateDialogue();
+					return;
+				}
 			}
-		}
-		else if (obj && obj->GetType() == TREASURE_TYPE) {
-			MapTreasure* treasure = reinterpret_cast<MapTreasure*>(obj);
+			else if (obj->GetType() == TREASURE_TYPE) {
+				TreasureObject* treasure_object = reinterpret_cast<TreasureObject*>(obj);
 
-			if (treasure->IsEmpty() == false) {
-			    _camera->moving = false;
-				treasure->Open();
+				if (treasure_object->GetTreasure()->IsTaken() == false) {
+				    _camera->moving = false;
+					treasure_object->Open();
+				}
 			}
 		}
 	}

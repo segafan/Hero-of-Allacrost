@@ -25,6 +25,7 @@
 
 // Local map mode headers
 #include "map_utils.h"
+#include "map_treasure.h"
 
 namespace hoa_map {
 
@@ -376,6 +377,71 @@ public:
 		{ return current_animation; }
 	//@}
 }; // class PhysicalObject : public MapObject
+
+
+/** ****************************************************************************
+*** \brief Represents an obtainable treasure on the map which the player may access
+***
+*** A treasure is a specific type of physical object, usually in the form of a
+*** treasure chest. When the player accesses these treasures, the chest animates as
+*** it is being opened and the treasure supervisor is initialized once the opening
+*** animation is complete. Each treasure object on a map has a global event associated
+*** with it to determine whether the treasure contents have already been retrieved by
+*** the player.
+***
+*** Image files for treasures are single row multi images where the frame ordering
+*** goes from closed, to opening, to open. This means each map treasure has exactly
+*** three animations. The closed and open animations are usually single frame images.
+***
+*** To add contents to the treasure for this object, you will need to retreive the
+*** pointer to the MapTreasure object via the GetTreasure() method, then add drunes
+*** and/or objects (items/equipment/etc) to the MapTreasure.
+***
+*** \todo Add support for more treasure features, such as locked chests, chests which
+*** trigger a battle, etc.
+*** ***************************************************************************/
+class TreasureObject : public PhysicalObject {
+	//! \brief Constants representing the three types of animations for the treasure
+	enum {
+		TREASURE_CLOSED_ANIM   = 0,
+		TREASURE_OPENING_ANIM  = 1,
+		TREASURE_OPEN_ANIM     = 2
+	};
+
+public:
+	/** \param image_file The name of the multi image file to load for the treasure
+	*** \param num_total_frames The total number of frame images in the multi image file
+	*** \param num_closed_frames The number of frames to use as the closed animation (default value == 1)
+	*** \param num_open_frames The number of frames to use as the open animation (default value == 1)
+	*** \note The opening animation will be created based on the total number of frames in the image file
+	*** subtracted by the number of closed and open frames. If this value is zero, then the opening animation
+	*** will simply be the same as the open animation
+	**/
+	TreasureObject(std::string image_file, uint8 num_total_frames, uint8 num_closed_frames = 1, uint8 num_open_frames = 1);
+
+	~TreasureObject()
+		{}
+
+	std::string GetEventName() const
+		{ return ("treasure_" + hoa_utils::NumberToString(GetObjectID())); }
+
+	//! \brief Loads the state of the chest from the global event corresponding to the current map
+	void LoadState();
+
+	//! \brief Opens the treasure, which changes the active animation and initializes the treasure supervisor when the opening animation finishes.
+	void Open();
+
+	//! \brief Changes the current animation if it has finished looping
+	void Update();
+
+	//! \brief Retrieves a pointer to the MapTreasure object holding the treasure. Always guanateed to be non-NULL.
+	MapTreasure* GetTreasure()
+		{ return &_treasure; }
+
+private:
+	//! \brief Stores the contents of the treasure which will be processed by the treasure supervisor
+	MapTreasure _treasure;
+}; // class TreasureObject : public PhysicalObject
 
 
 /** ****************************************************************************

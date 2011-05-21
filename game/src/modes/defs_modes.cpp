@@ -63,6 +63,7 @@ void BindModesToLua()
 			.def_readonly("object_supervisor", &MapMode::_object_supervisor)
 			.def_readonly("event_supervisor", &MapMode::_event_supervisor)
 			.def_readonly("dialogue_supervisor", &MapMode::_dialogue_supervisor)
+			.def_readonly("treasure_supervisor", &MapMode::_treasure_supervisor)
 			.def_readonly("map_event_group", &MapMode::_map_event_group)
 
 			.def_readwrite("camera", &MapMode::_camera)
@@ -176,13 +177,9 @@ void BindModesToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<MapTreasure, PhysicalObject>("MapTreasure")
-			.def(constructor<std::string, uint8>())
+		class_<TreasureObject, PhysicalObject>("TreasureObject")
 			.def(constructor<std::string, uint8, uint8, uint8>())
-			.def("AddObject", &MapTreasure::AddObject)
-			.def("AddDrunes", &MapTreasure::AddDrunes)
-			.def("IsEmpty", &MapTreasure::IsEmpty)
-			.def("Open", &MapTreasure::Open)
+			.def("GetTreasure", &TreasureObject::GetTreasure)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -417,6 +414,23 @@ void BindModesToLua()
 			.def("SetBackground", &BattleEncounterEvent::SetBackground)
 			.def("AddBattleEvent", &BattleEncounterEvent::AddBattleEvent)
 			.def("AddEnemy", &BattleEncounterEvent::AddEnemy)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<MapTreasure>("MapTreasure")
+			.def(constructor<>())
+			.def("AddDrunes", &MapTreasure::AddDrunes)
+			.def("AddObject", &MapTreasure::AddObject)
+			.def("IsTaken", &MapTreasure::IsTaken)
+			.def("SetTaken", &MapTreasure::SetTaken)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<TreasureSupervisor>("TreasureSupervisor")
+			.def("Initialize", (void(TreasureSupervisor::*)(TreasureObject*))&TreasureSupervisor::Initialize)
+			.def("Initialize", (void(TreasureSupervisor::*)(MapTreasure*))&TreasureSupervisor::Initialize)
 	];
 
 	} // End using map mode namespaces

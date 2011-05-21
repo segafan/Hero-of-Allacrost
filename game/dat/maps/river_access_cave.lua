@@ -464,8 +464,9 @@ function Load(m)
 	-- First, record the current map in the map variable that is global to this script
 	map = m;
 	map.unlimited_stamina = true; -- TEMP: enabled for development. Change this to false prior to release
-	dialogue_supervisor = m.dialogue_supervisor;
-	event_supervisor = m.event_supervisor;
+	dialogue_supervisor = map.dialogue_supervisor;
+	event_supervisor = map.event_supervisor;
+	treasure_supervisor = map.treasure_supervisor;
 
 	local sprite;
 	local dialogue;
@@ -754,6 +755,9 @@ function CreateEvents()
 	map:AddZone(corpse_zone);
 	
 	event = hoa_map.DialogueEvent(1, 5);
+	event:AddEventLinkAtEnd(2);
+	event_supervisor:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(2, 6, 0);
 	event_supervisor:RegisterEvent(event);
 	-- TODO: add a treasure event (potion)
 	
@@ -840,19 +844,26 @@ map_functions[3] = function()
 end
 
 
+-- TEMP
 map_functions[4] = function()
 	map.camera:SetXPosition(114, 0);
 	map.camera:SetYPosition(22, 0);
 end
 
 
-
+-- TEMP
 map_functions[5] = function()
 	map.camera:SetXPosition(75, 0);
 	map.camera:SetYPosition(8, 0);
 end
 
 
+-- Gives a potion to the player via the treasure menu
+map_functions[6] = function()
+	corpse_treasure = hoa_map.MapTreasure();
+	corpse_treasure:AddObject(1, 1);
+	treasure_supervisor:Initialize(corpse_treasure);
+end
 
 
 
