@@ -357,6 +357,12 @@ public:
 	*** These functions are specifically to enable Lua to access the members of this class.
 	**/
 	//@{
+	/** \brief Adds a new still animation using the image filename provided
+	*** \param filename The name of the image file to use for the animation
+	*** \note If the image fails to load, a warning message is printed and no animation is added.
+	**/
+	void AddAnimation(std::string filename);
+
 	void AddAnimation(hoa_video::AnimatedImage new_img)
 		{ animations.push_back(new_img); }
 
