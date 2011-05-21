@@ -287,6 +287,7 @@ namespace hoa_map {
 		class ObjectSupervisor;
 		class MapObject;
 		class PhysicalObject;
+		class TreasureObject;
 
 		class VirtualSprite;
 		class MapSprite;
