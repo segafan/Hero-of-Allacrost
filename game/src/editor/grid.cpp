@@ -924,9 +924,14 @@ void Grid::initializeGL()
 void Grid::paintGL()
 {
 	int32 col, row;                  // tile array loop index
+	int layer_index;
 	vector<int32>::iterator it;      // used to iterate through tile arrays
 	int tileset_index;               // index into the tileset_names vector
 	int tile_index;                  // ranges from 0-255
+	int left_tile;
+	int right_tile;
+	int top_tile;
+	int bottom_tile;
 
 	if (_initialized == false)
 		return;
@@ -937,35 +942,25 @@ void Grid::paintGL()
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	VideoManager->Clear(Color::black);
 
+	// Setup drawing bounds so only visible tiles are drawn. These bounds are
+	// valid for all layers.
+	int num_tiles_width  = _ed_scrollview->visibleWidth() / TILE_WIDTH;
+	int num_tiles_height = _ed_scrollview->visibleHeight() / TILE_HEIGHT;
+	left_tile   = _ed_scrollview->horizontalScrollBar()->value() / TILE_WIDTH;
+	top_tile    = _ed_scrollview->verticalScrollBar()->value() / TILE_HEIGHT;
+	right_tile  = left_tile + num_tiles_width + 1;
+	bottom_tile = top_tile + num_tiles_height + 1;
+	right_tile  = (right_tile  < _width)  ? right_tile  : _width  - 1;
+	bottom_tile = (bottom_tile < _height) ? bottom_tile : _height - 1;
+
 	// Draw lower tile layer if it is enabled for viewing
 	if (_ll_on)
 	{
-		// First calculate which tiles are visible.
-		// Set left edge, right edge, and width
-		int sbval = _ed_scrollview->horizontalScrollBar()->value();
-		int viewwidth = _ed_scrollview->width();
-		int num_tiles_width = ((viewwidth - 21) / 32) + 1;
-
-		int left_tile = sbval / 32;
-		int right_tile = left_tile + num_tiles_width;
-		right_tile = (right_tile < _width) ? right_tile : _width - 1;
-
-		// Set top edge, bottom edge, and height
-		sbval = _ed_scrollview->verticalScrollBar()->value();
-		int viewheight = _ed_scrollview->height();
-		int num_tiles_height = ((viewheight - 21) / 32) + 1;
-
-		int top_tile = sbval / 32;
-		int bottom_tile = top_tile + num_tiles_height;
-		bottom_tile = (bottom_tile < _height) ? bottom_tile : _height - 1;
-
 		// Start drawing from the top left
 		VideoManager->Move(left_tile, top_tile);
 
-		int layer_index;
 		col = left_tile;
 		row = top_tile;
-		int i = 0;
 		while (row <= bottom_tile)
 		{
 			layer_index = _lower_layer[_context][row * _width + col];
@@ -980,6 +975,7 @@ void Grid::paintGL()
 					tile_index = layer_index % (tileset_index * 256);
 				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
+
 			if (col == right_tile)
 			{
 				col = left_tile;
@@ -991,36 +987,43 @@ void Grid::paintGL()
 				col++;
 				VideoManager->MoveRelative(1.0f, 0.0f);
 			}
-			i++;
 		} // iterate through lower layer
 	} // lower layer must be viewable
 
 	// Draw middle tile layer if it is enabled for viewing
 	if (_ml_on)
 	{
-		VideoManager->Move(0.0f, 0.0f);
-		col = 0;
-		for (it = _middle_layer[_context].begin();
-		     it != _middle_layer[_context].end(); it++)
+		// Start drawing from the top left
+		VideoManager->Move(left_tile, top_tile);
+
+		col = left_tile;
+		row = top_tile;
+		while (row <= bottom_tile)
 		{
+			layer_index = _middle_layer[_context][row * _width + col];
 			// Draw tile if one exists at this location
-			if (*it != -1)
+			if (layer_index != -1)
 			{
-				tileset_index = *it / 256;
+				tileset_index = layer_index / 256;
 				// Don't divide by zero
 				if (tileset_index == 0)
-					tile_index = *it;
+					tile_index = layer_index;
 				else
-					tile_index = *it % (tileset_index * 256);
+					tile_index = layer_index % (tileset_index * 256);
 				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
 
-			col++;
-			col %= _width;
-			if (col == 0)
-				VideoManager->MoveRelative(1.0f - static_cast<float>(_width), 1.0f);
+			if (col == right_tile)
+			{
+				col = left_tile;
+				row++;
+				VideoManager->MoveRelative(-(right_tile - left_tile), 1.0f);
+			}
 			else
+		   	{
+				col++;
 				VideoManager->MoveRelative(1.0f, 0.0f);
+			}
 		} // iterate through middle layer
 	} // middle layer must be viewable
 
@@ -1047,29 +1050,37 @@ void Grid::paintGL()
 	// Draw upper tile layer if it is enabled for viewing
 	if (_ul_on)
 	{
-		VideoManager->Move(0.0f, 0.0f);
-		col = 0;
-		for (it = _upper_layer[_context].begin();
-		     it != _upper_layer[_context].end(); it++)
+		// Start drawing from the top left
+		VideoManager->Move(left_tile, top_tile);
+
+		col = left_tile;
+		row = top_tile;
+		while (row <= bottom_tile)
 		{
+			layer_index = _upper_layer[_context][row * _width + col];
 			// Draw tile if one exists at this location
-			if (*it != -1)
-		   	{
-				tileset_index = *it / 256;
+			if (layer_index != -1)
+			{
+				tileset_index = layer_index / 256;
 				// Don't divide by zero
 				if (tileset_index == 0)
-					tile_index = *it;
+					tile_index = layer_index;
 				else
-					tile_index = *it % (tileset_index * 256);
+					tile_index = layer_index % (tileset_index * 256);
 				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
 
-			col++;
-			col %= _width;
-			if (col == 0)
-				VideoManager->MoveRelative(1.0f - static_cast<float>(_width), 1.0f);
+			if (col == right_tile)
+			{
+				col = left_tile;
+				row++;
+				VideoManager->MoveRelative(-(right_tile - left_tile), 1.0f);
+			}
 			else
+		   	{
+				col++;
 				VideoManager->MoveRelative(1.0f, 0.0f);
+			}
 		} // iterate through upper layer
 	} // upper layer must be viewable
 
@@ -1077,20 +1088,30 @@ void Grid::paintGL()
 	if (_select_on)
 	{
 		Color blue_selection(0.0f, 0.0f, 255.0f, 0.5f);
-		VideoManager->Move(0.0f, 0.0f);
-		col = 0;
-		for (it = _select_layer.begin(); it != _select_layer.end(); it++)
+
+		// Start drawing from the top left
+		VideoManager->Move(left_tile, top_tile);
+
+		col = left_tile;
+		row = top_tile;
+		while (row <= bottom_tile)
 		{
-			// a tile exists to draw
-			if (*it != -1)
+			layer_index = _select_layer[row * _width + col];
+			// Draw tile if one exists at this location
+			if (layer_index != -1)
 				VideoManager->DrawRectangle(1.0f, 1.0f, blue_selection);
 
-			col++;
-			col %= _width;
-			if (col == 0)
-				VideoManager->MoveRelative(1.0f - static_cast<float>(_width), 1.0f);
+			if (col == right_tile)
+			{
+				col = left_tile;
+				row++;
+				VideoManager->MoveRelative(-(right_tile - left_tile), 1.0f);
+			}
 			else
+		   	{
+				col++;
 				VideoManager->MoveRelative(1.0f, 0.0f);
+			}
 		} // iterate through selection layer
 	} // selection rectangle must be viewable
 
