@@ -48,7 +48,7 @@ namespace private_map {
 
 MapObject::MapObject() :
 	object_id(-1),
-	context(MAP_CONTEXT_01),
+	context(CONTEXT_01),
 	x_position(-1),
 	y_position(-1),
 	x_offset(0.0f),
