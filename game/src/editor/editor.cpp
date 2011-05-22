@@ -186,7 +186,7 @@ void Editor::_TilesEnableActions() {
 		_edit_ul_action->setEnabled(false);
 		_edit_ol_action->setEnabled(false);
 		_context_cbox->setEnabled(false);
-	} // map does not exist, can't paint it*/
+	} // map does not exist, can't paint it
 }
 
 
