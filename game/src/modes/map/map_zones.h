@@ -72,7 +72,7 @@ class MapZone {
 	friend class EnemyZone;
 
 public:
-	MapZone() : _active_contexts(MAP_CONTEXT_NONE)
+	MapZone() : _active_contexts(CONTEXT_NONE)
 		{}
 
 	/** \brief Constructs a map zone that is initialized with a single zone section

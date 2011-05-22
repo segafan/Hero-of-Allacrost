@@ -34,7 +34,7 @@ namespace private_map {
 // -----------------------------------------------------------------------------
 
 MapZone::MapZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) :
-	_active_contexts(MAP_CONTEXT_NONE)
+	_active_contexts(CONTEXT_NONE)
 {
 	AddSection(left_col, right_col, top_row, bottom_row);
 }
