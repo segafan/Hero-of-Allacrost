@@ -470,6 +470,19 @@ public:
 	uint16 GenerateObjectID()
 		{ return ++_last_id; }
 
+	//! \brief Returns the number of objects stored by the supervisor, regardless of what layer they exist on
+	uint32 GetNumberObjects() const
+		{ return _all_objects.size(); }
+
+	/** \brief Retrieves an object by its position in the _all_objects container
+	*** \param index The index of the object to retrieve
+	*** \return A pointer to the object at this index, or NULL if no object exists at the given index
+	***
+	*** \note It is uncommon to require the use of this function in a map. It exists for Lua to be able to access
+	*** all available map objects even when the IDs of those objects are unknown.
+	**/
+	MapObject* GetObjectByIndex(uint32 index);
+
 	/** \brief Retrieves a pointer to an object on this map
 	*** \param object_id The id number of the object to retreive
 	*** \return A pointer to the map object, or NULL if no object with that ID was found

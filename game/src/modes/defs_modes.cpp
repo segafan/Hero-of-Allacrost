@@ -131,6 +131,9 @@ void BindModesToLua()
 	[
 		class_<ObjectSupervisor>("ObjectSupervisor")
 			.def("GenerateObjectID", &ObjectSupervisor::GenerateObjectID)
+			.def("GetNumberObjects", &ObjectSupervisor::GetNumberObjects)
+			.def("GetObjectByIndex", &ObjectSupervisor::GetObjectByIndex)
+			.def("GetObject", &ObjectSupervisor::GetObject)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

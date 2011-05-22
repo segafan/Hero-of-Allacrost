@@ -333,6 +333,25 @@ ObjectSupervisor::~ObjectSupervisor() {
 
 
 
+MapObject* ObjectSupervisor::GetObjectByIndex(uint32 index) {
+	if (index >= GetNumberObjects()) {
+		return NULL;
+	}
+
+	uint32 counter = 0;
+	for (map<uint16, MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); i++) {
+		if (counter == index)
+			return i->second;
+		else
+			counter++;
+	}
+
+	IF_PRINT_WARNING(MAP_DEBUG) << "object not found after reaching end of set -- this should never happen" << endl;
+	return NULL;
+}
+
+
+
 MapObject* ObjectSupervisor::GetObject(uint32 object_id) {
 	map<uint16, MapObject*>::iterator i = _all_objects.find(object_id);
 

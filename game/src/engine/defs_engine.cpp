@@ -166,7 +166,12 @@ void BindEngineToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_video")
 	[
+		class_<Color>("Color")
+			.def(constructor<float, float, float, float>()),
+
 		class_<VideoEngine>("GameVideo")
+			.def("FadeScreen", &VideoEngine::FadeScreen)
+			.def("IsFading", &VideoEngine::IsFading)
 			.def("ShakeScreen", &VideoEngine::ShakeScreen)
 
 			// Namespace constants
