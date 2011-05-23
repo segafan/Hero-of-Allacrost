@@ -8,6 +8,7 @@ image = "img/tilesets/desert_cave_walls2.png"
 num_tile_cols = 16
 num_tile_rows = 16
 
+-- The general walkability of the tiles in the tileset. Zero indicates walkable. One tile has four walkable quadrants listed as: NW corner, NE corner, SW corner, SE corner.
 walkability = {}
 walkability[0] = {}
 walkability[0][0] = { 0, 0, 0, 0 }
@@ -70,12 +71,12 @@ walkability[3][5] = { 0, 0, 0, 0 }
 walkability[3][6] = { 0, 0, 0, 0 }
 walkability[3][7] = { 0, 1, 0, 0 }
 walkability[3][8] = { 1, 1, 1, 1 }
-walkability[3][9] = { 1, 1, 1, 1 }
+walkability[3][9] = { 0, 0, 0, 0 }
 walkability[3][10] = { 1, 1, 1, 1 }
 walkability[3][11] = { 0, 0, 0, 0 }
 walkability[3][12] = { 0, 0, 0, 0 }
 walkability[3][13] = { 1, 1, 1, 1 }
-walkability[3][14] = { 1, 1, 1, 1 }
+walkability[3][14] = { 0, 0, 0, 0 }
 walkability[3][15] = { 1, 1, 1, 1 }
 walkability[4] = {}
 walkability[4][0] = { 0, 0, 0, 0 }
@@ -281,3 +282,4 @@ walkability[15][12] = { 0, 0, 0, 0 }
 walkability[15][13] = { 0, 0, 0, 0 }
 walkability[15][14] = { 0, 0, 0, 0 }
 walkability[15][15] = { 0, 0, 0, 0 }
+
