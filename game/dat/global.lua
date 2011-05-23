@@ -6,9 +6,12 @@ DESTER    = 4;
 LUKAR     = 8;
 
 function NewGame()
+	GlobalManager:AddCharacter(LUKAR);
+	GlobalManager:AddCharacter(DESTER);
+	GlobalManager:AddCharacter(MARK);
 	GlobalManager:AddCharacter(CLAUDIUS);
-	GlobalManager:SetDrunes(250);
-	GlobalManager:AddToInventory(1, 2);
+	GlobalManager:SetDrunes(100);
+	GlobalManager:AddToInventory(1, 4);
 	GlobalManager:SetLocation("dat/maps/river_access_cave.lua");
 end
 
