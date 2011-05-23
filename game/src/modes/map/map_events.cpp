@@ -410,6 +410,8 @@ void PathMoveSpriteEvent::_Start() {
 	// If a path already exists and the current position of the sprite is the same as the source position for this path,
 	// then we will re-use it and not bother to compute a new path.
 	if ((_path.empty() == false) && (_source_col == _sprite->x_position) && (_source_row == _sprite->y_position)) {
+		_sprite->moving = true;
+		_SetDirection();
 		return;
 	}
 
@@ -425,6 +427,9 @@ void PathMoveSpriteEvent::_Start() {
 	if (MapMode::CurrentInstance()->GetObjectSupervisor()->FindPath(_sprite, _path, _destination) == true) {
 		_sprite->moving = true;
 		_SetDirection();
+	}
+	else {
+		IF_PRINT_WARNING(MAP_DEBUG) << "failed to find a path for sprite with id: " << _sprite->GetObjectID() << endl;
 	}
 }
 
