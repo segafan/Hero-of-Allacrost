@@ -644,14 +644,26 @@ void MapMode::_CalculateMapFrame() {
 		_map_frame.num_draw_rows = TILE_ROWS + 1;
 	}
 
-	// Comment this out to print out debugging info about each map frame that is drawn
-// 	printf("--- MAP DRAW INFO ---\n");
-// 	printf("Starting row, col: [%d, %d]\n", _map_frame.starting_row, _map_frame.starting_col);
-// 	printf("# draw rows, cols: [%d, %d]\n", _map_frame.num_draw_rows, _map_frame.num_draw_cols);
-// 	printf("Camera position:   [%f, %f]\n", camera_x, camera_y);
-// 	printf("Tile draw start:   [%f, %f]\n", _map_frame.tile_x_start, _map_frame.tile_y_start);
-// 	printf("Edges (T,B,L,R):   [%f, %f, %f, %f]\n", _map_frame.screen_edges.top, _map_frame.screen_edges.bottom,
-// 		_map_frame.screen_edges.left, _map_frame.screen_edges.right);
+	// Comment this out to print out map draw debugging info about once a second
+// 	static int loops = 0;
+// 	if (loops == 0) {
+// 		printf("--- MAP DRAW INFO ---\n");
+// 		printf("Pixel Size:        [%f, %f]\n", x_pixel_length, y_pixel_length);
+// 		printf("Rounded offsets:   [%f, %f]\n", rounded_x_offset, rounded_y_offset);
+// 		printf("Starting row, col: [%d, %d]\n", _map_frame.starting_row, _map_frame.starting_col);
+// 		printf("# draw rows, cols: [%d, %d]\n", _map_frame.num_draw_rows, _map_frame.num_draw_cols);
+// 		printf("Camera position:   [%f, %f]\n", camera_x, camera_y);
+// 		printf("Tile draw start:   [%f, %f]\n", _map_frame.tile_x_start, _map_frame.tile_y_start);
+// 		printf("Edges (T,B,L,R):   [%f, %f, %f, %f]\n", _map_frame.screen_edges.top, _map_frame.screen_edges.bottom,
+// 			_map_frame.screen_edges.left, _map_frame.screen_edges.right);
+// 	}
+//
+// 	if (loops >= 60) {
+// 		loops = 0;
+// 	}
+// 	else {
+// 		loops++;
+// 	}
 } // void MapMode::_CalculateMapFrame()
 
 
