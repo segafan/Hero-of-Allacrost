@@ -241,6 +241,15 @@ public:
 	**/
 	void AddDialogueReference(uint32 dialogue_id);
 
+    /** \brief Removes all dialogue references from a sprite
+    **/
+	void ClearDialogueReferences();
+
+	/** \brief Removes a specific dialogue reference from a sprite
+	*** \param dialogue_id The ID number of the dialogue that should be removed
+	**/
+	void RemoveDialogueReference(uint32 dialogue_id);
+
 	/** \brief Begins a new dialogue with this sprite using its next referenced dialogue
 	***
 	*** If the sprite has no dialogues referenced or has dialogues that are referenced but are unavailable,
