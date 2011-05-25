@@ -943,7 +943,7 @@ function CreateEvents()
 		event = hoa_map.ScriptedEvent(45, 8, 9);
 		event:AddEventLinkAtEnd(46);
 		EventManager:RegisterEvent(event);
-		-- Fade screen back in
+		-- Change dialogue of sprite guide
 		event = hoa_map.ScriptedEvent(46, 15, 0);
 		event:AddEventLinkAtEnd(47);
 		EventManager:RegisterEvent(event);
