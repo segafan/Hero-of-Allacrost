@@ -1065,7 +1065,7 @@ void GlobalCharacterGrowth::_DetermineNextLevelExperience() {
 	new_xp = GaussianRandomValue(base_xp, base_xp / 10.0f);
 
 	_experience_for_last_level = _experience_for_next_level;
-	_experience_for_next_level = new_xp;
+	_experience_for_next_level = _experience_for_last_level + new_xp;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
