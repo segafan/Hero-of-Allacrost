@@ -244,6 +244,8 @@ void BindModesToLua()
 			.def("LoadRunningAnimations", &MapSprite::LoadRunningAnimations)
 			.def("LoadAttackAnimations", &MapSprite::LoadAttackAnimations)
 			.def("AddDialogueReference", &MapSprite::AddDialogueReference)
+			.def("ClearDialogueReferences", &MapSprite::ClearDialogueReferences)
+			.def("RemoveDialogueReference", &MapSprite::RemoveDialogueReference)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

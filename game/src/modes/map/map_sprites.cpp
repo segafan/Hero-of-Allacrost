@@ -623,6 +623,25 @@ void MapSprite::Draw() {
 
 void MapSprite::AddDialogueReference(uint32 dialogue_id) {
 	_dialogue_references.push_back(dialogue_id);
+    UpdateDialogueStatus();
+}
+
+
+
+void MapSprite::ClearDialogueReferences() {
+    _dialogue_references.clear();
+    UpdateDialogueStatus();
+}
+
+
+
+void MapSprite::RemoveDialogueReference(uint32 dialogue_id) {
+    // Remove all dialogues with the given reference (for the case, the same dialogue was add several times)
+    for (uint32 i = 0; i < _dialogue_references.size(); i++) {
+        if (_dialogue_references[i] == dialogue_id)
+            _dialogue_references.erase(_dialogue_references.begin()+i);
+    }
+    UpdateDialogueStatus();
 }
 
 

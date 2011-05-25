@@ -593,6 +593,7 @@ function CreateNPCs()
 	-- Sprites here are ordered roughly by when they are encountered by the player
 	local sprite;
 	knight_path_sprite = {};
+    knight_talk_sprite = {};
 
 	-- Knight at cave entrance
 	sprite = ConstructSprite("Karlate", 2000, 10, 147);
@@ -620,6 +621,7 @@ function CreateNPCs()
 	sprite:SetDirection(hoa_map.MapMode.SOUTH);
 	sprite:AddDialogueReference(30);
 	Map:AddGroundObject(sprite);
+    knight_talk_sprite = sprite;
 	
 	-- Knight walking ahead through short-cut passage
 	sprite = ConstructSprite("Karlate", 2005, 162, 62);
@@ -941,8 +943,12 @@ function CreateEvents()
 		event = hoa_map.ScriptedEvent(45, 8, 9);
 		event:AddEventLinkAtEnd(46);
 		EventManager:RegisterEvent(event);
+		-- Fade screen back in
+		event = hoa_map.ScriptedEvent(46, 15, 0);
+		event:AddEventLinkAtEnd(47);
+		EventManager:RegisterEvent(event);
 		-- Exit scene state
-		event = hoa_map.ScriptedEvent(46, 2, 0);
+		event = hoa_map.ScriptedEvent(47, 2, 0);
 		EventManager:RegisterEvent(event);
 	
 	-- Event Chain 05: Moving forward through wall passage
@@ -1115,6 +1121,12 @@ map_functions[14] = function()
 	Map:PopState();
 	Map.camera:SetVisible(true);
 	Map.camera:SetNoCollision(false);
+end
+
+map_functions[15] = function()
+    knight_talk_sprite:RemoveDialogueReference(30);
+    -- knight_talk_sprite:ClearDialogueReferences();
+    knight_talk_sprite:AddDialogueReference(31);
 end
 
 
