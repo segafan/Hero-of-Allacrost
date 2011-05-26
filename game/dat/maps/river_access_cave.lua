@@ -662,56 +662,192 @@ function CreateEnemies()
 	local spawn_zone = {};
 	local roam_zone = {};
 
---[[
-	enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map.object_supervisor:GenerateObjectID());
-	enemy:SetContext(hoa_map.MapMode.CONTEXT_01);
-	enemy:SetCollHalfWidth(1.0);
-	enemy:SetCollHeight(2.0);
-	enemy:SetImgHalfWidth(1.0);
-	enemy:SetImgHeight(4.0);
-	enemy:SetMovementSpeed(hoa_map.MapMode.FAST_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(2);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(3);
-	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
-	enemy:SetBattleBackground("img/backdrops/battle/desert_cave.png");
---]]
-
 	-- Zone #01: Near entrance
 	roam_zone = hoa_map.EnemyZone(26, 79, 130, 141);
+
+	enemy = ConstructEnemySprite("slime", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(2);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(6);
+	roam_zone:AddEnemy(enemy, Map, 1);
+
 	Map:AddZone(roam_zone);
 	
 	-- Zone #02: Along narrow southern passage between pit and wall
 	roam_zone = hoa_map.EnemyZone(108, 140, 145, 148);
+
+	enemy = ConstructEnemySprite("snake", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(3);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(6);
+	roam_zone:AddEnemy(enemy, Map, 1);
+	
 	Map:AddZone(roam_zone);
 	
 	-- Zone #03: Near ceiling overpass entrance and around corpse
-	roam_zone = hoa_map.EnemyZone(158, 130, 167, 145);
-	roam_zone:AddSection(168, 134, 215, 142);
+	roam_zone = hoa_map.EnemyZone(158, 167, 130, 145);
+	roam_zone:AddSection(168, 215, 134, 142);
+	
+	enemy = ConstructEnemySprite("scorpion", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	roam_zone:AddEnemy(enemy, Map, 1);
+
 	Map:AddZone(roam_zone);
 	
 	-- Zone #04: In ceiling overpass
-	roam_zone = hoa_map.EnemyZone(146, 90, 157, 113);
+	roam_zone = hoa_map.EnemyZone(146, 157, 90, 113);
+	
+	enemy = ConstructEnemySprite("snake", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(6);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	roam_zone:AddEnemy(enemy, Map, 1);
+	
 	Map:AddZone(roam_zone);
 	
 	-- Zone #05: Wide open area at beginning of long route
-	roam_zone = hoa_map.EnemyZone(26, 68, 115, 89);
+	roam_zone = hoa_map.EnemyZone(26, 115, 68, 89);
 	roam_zone:AddSection(4, 72, 25, 83);
+
+	enemy = ConstructEnemySprite("slime", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(2);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(6);
+	roam_zone:AddEnemy(enemy, Map, 2);
+
+	enemy = ConstructEnemySprite("snake", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(6);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	roam_zone:AddEnemy(enemy, Map, 1);
+
+	enemy = ConstructEnemySprite("scorpion", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	roam_zone:AddEnemy(enemy, Map, 1);
+	
 	Map:AddZone(roam_zone);
 	
 	-- Zone #06: Above pits and before wall passage
-	roam_zone = hoa_map.EnemyZone(24, 12, 89, 47);
-	roam_zone:AddSection(24, 6, 73, 12);
+	roam_zone = hoa_map.EnemyZone(24, 89, 12, 47);
+	roam_zone:AddSection(24, 73, 6, 12);
+	
+	enemy = ConstructEnemySprite("scorpion", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	roam_zone:AddEnemy(enemy, Map, 3);
+	
 	Map:AddZone(roam_zone);
 	
 	-- Zone #07: Through wall passage and before spring
-	roam_zone = hoa_map.EnemyZone(116, 6, 143, 29);
-	roam_zone:AddSection(144, 6, 167, 13);
+	roam_zone = hoa_map.EnemyZone(116, 143, 6, 29);
+	roam_zone:AddSection(144, 167, 6, 13);
+	
+	enemy = ConstructEnemySprite("snake", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(6);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	roam_zone:AddEnemy(enemy, Map, 1);
+
+	enemy = ConstructEnemySprite("scorpion", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	roam_zone:AddEnemy(enemy, Map, 1);
+
 	Map:AddZone(roam_zone);
 
 end -- function CreateEnemies()
@@ -1137,5 +1273,12 @@ swap_context_all_objects = function(new_context)
 	for i=0,max_index do
 		ObjectManager:GetObjectByIndex(i):SetContext(new_context);
 	end
+end
+
+
+-- Sets common battle environment settings for enemy sprites
+SetBattleEnvironment = function(enemy)
+	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
+	enemy:SetBattleBackground("img/backdrops/battle/desert_cave.png");
 end
 
