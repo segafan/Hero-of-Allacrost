@@ -145,25 +145,27 @@ ustring ustring::substr(size_t pos, size_t n) const
 
 
 // Concatenates string to another
-ustring & ustring::operator + (const ustring& s)
+ustring ustring::operator + (const ustring& s)
 {
+    ustring temp = *this;
+
 	// nothing to do for empty string
 	if (s.empty())
-		return *this;
+		return temp;
 
 	// add first character of string into the null character spot
-	_str[length()] = s[0];
+	temp._str[length()] = s[0];
 
 	// add rest of characters afterward
 	size_t len = s.length();
 	for (size_t j = 1; j < len; ++j) {
-		_str.push_back(s[j]);
+		temp._str.push_back(s[j]);
 	}
 
 	// Finish off with a null character
-	_str.push_back(0);
+	temp._str.push_back(0);
 
-	return *this;
+	return temp;
 }
 
 
