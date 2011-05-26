@@ -213,7 +213,9 @@ EnemyZone::EnemyZone() :
 	_active_enemies(0),
 	_spawn_timer(3000), // TEMP: use default spawn time constant,
 	_spawn_zone(NULL)
-{}
+{
+	_spawn_timer.Run();
+}
 
 
 
@@ -223,7 +225,9 @@ EnemyZone::EnemyZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 b
 	_active_enemies(0),
 	_spawn_timer(3000), // TEMP: use default spawn time constant,
 	_spawn_zone(NULL)
-{}
+{
+	_spawn_timer.Run();
+}
 
 
 
