@@ -1154,7 +1154,7 @@ function CreateEvents()
 	----------------------------------------------------------------------------
 
 	-- Sound played during conversation with knight
-	event = hoa_map.SoundEvent(1000, "snd/makok_howl.ogg");
+	event = hoa_map.SoundEvent(1000, "snd/evil_hiss.ogg");
 	EventManager:RegisterEvent(event);
 end -- function CreateEvents()
 
