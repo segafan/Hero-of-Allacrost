@@ -4,7 +4,7 @@ opening_scene = ns;
 setfenv(1, ns);
 
 -- The map name and location graphic
-map_name = ""
+map_name = " "
 location_filename = "blank.png"
 
 -- Allacrost map editor begin. Do not edit this line. --
@@ -22,7 +22,7 @@ sound_filenames = {}
 
 -- The music files used as background music on this map.
 music_filenames = {}
-music_filenames[1] = "mus/wind.ogg"
+music_filenames[1] = "snd/wind.ogg"
 
 -- The names of the contexts used to improve Editor user-friendliness
 context_names = {}
@@ -181,6 +181,9 @@ function Load(m)
 	CreateEvents();
 	
 	Map:SetCamera(claudius);
+	
+--	VideoManager:EnableSceneLighting(hoa_video.Color(1.0, 1.0, 1.0, 1.0));
+--	VideoManager:DisableSceneLighting();
 
 	-- This entire map is played out in scene state. As soon as the map is loaded, we start the chain of events.
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
@@ -197,9 +200,10 @@ end
 
 function Draw()
 	Map:DrawMapLayers();
+--	VideoManager:ApplyLightingOverlay();
+
 	-- TODO: Draw night-time scene lighting
 end
-
 
 
 -- Creates the sprites for all characters in the party
@@ -253,6 +257,7 @@ function CreateDialogue()
 
 	-- Dialogue 
 	dialogue = hoa_map.SpriteDialogue(10);
+		dialogue:SetInputBlocked(true);
 		text = hoa_system.Translate("I watched the men in the pale light of the blue moon. The dark cloaks they wore for warmth only better distinguishing them against the light sand for my trained eye.");
 		dialogue:AddLineTimed(text, 2500, 5000);
 		text = hoa_system.Translate("The Harrvah Knights, though powerful in their great city of stone, were powerless in the might of the desert. The desert was the land of the Muabi tribe, my tribe. Out here, a squad of troops such as this was no match for even a small group of Muabi.");
@@ -284,8 +289,8 @@ function CreateEvents()
 	local event = {};
 	
 	-- Move all sprites toward the cave entrance
-	event = hoa_map.PathMoveSpriteEvent(10, claudius, 100, 24);
-	event:AddEventLinkAtEnd(50, 1000);
+	event = hoa_map.PathMoveSpriteEvent(10, claudius, 375, 24);
+--	event:AddEventLinkAtStart(50, 1000);
 	EventManager:RegisterEvent(event);
 	
 	-- Begins the initial dialogue

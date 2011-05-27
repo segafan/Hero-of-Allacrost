@@ -173,6 +173,9 @@ void BindEngineToLua()
 			.def("FadeScreen", &VideoEngine::FadeScreen)
 			.def("IsFading", &VideoEngine::IsFading)
 			.def("ShakeScreen", &VideoEngine::ShakeScreen)
+			.def("EnableSceneLighting", &VideoEngine::EnableSceneLighting)
+			.def("DisableSceneLighting", &VideoEngine::DisableSceneLighting)
+			.def("ApplyLightingOverlay", &VideoEngine::ApplyLightingOverlay)
 
 			// Namespace constants
 			.enum_("constants") [
