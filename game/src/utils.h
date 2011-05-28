@@ -85,7 +85,9 @@
 	// Even though Allacrost is platform independent, OpenGL on Windows requires windows.h to be included
 	#include <windows.h>
 	// Case-insensitive string compare is called stricmp in Windows and strcasecmp everywhere else
+	#ifndef strcasecmp
 	#define strcasecmp stricmp
+	#endif
 #endif
 
 

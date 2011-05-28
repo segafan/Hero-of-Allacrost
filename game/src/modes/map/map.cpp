@@ -70,7 +70,7 @@ MapMode::MapMode(string filename) :
 	_treasure_supervisor(NULL),
 	_camera(NULL),
 	_num_map_contexts(0),
-	_current_context(CONTEXT_01),
+	_current_context(MAP_CONTEXT_01),
 	_running_disabled(false),
 	_unlimited_stamina(false),
 	_show_gui(true),
