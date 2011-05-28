@@ -12,7 +12,7 @@ function NewGame()
 	GlobalManager:AddCharacter(CLAUDIUS);
 	GlobalManager:SetDrunes(100);
 	GlobalManager:AddToInventory(1, 4);
-	GlobalManager:SetLocation("dat/maps/river_access_cave.lua");
+	GlobalManager:SetLocation("dat/maps/opening_scene.lua");
 end
 
 
