@@ -1017,6 +1017,7 @@ function CreateEvents()
 
 		-- Throw up dialogue calling out player's party
 		event = hoa_map.DialogueEvent(20, 510);
+		event:SetStopCameraMovement(true);
 		event:AddEventLinkAtEnd(21);
 		EventManager:RegisterEvent(event);
 		-- Enter scene state

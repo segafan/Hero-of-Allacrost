@@ -290,7 +290,7 @@ function CreateEvents()
 	
 	-- Move all sprites toward the cave entrance
 	event = hoa_map.PathMoveSpriteEvent(10, claudius, 375, 24);
---	event:AddEventLinkAtStart(50, 1000);
+	event:AddEventLinkAtStart(50, 1000);
 	EventManager:RegisterEvent(event);
 	
 	-- Begins the initial dialogue

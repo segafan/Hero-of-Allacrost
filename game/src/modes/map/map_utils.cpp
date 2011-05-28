@@ -34,6 +34,8 @@ bool MapRectangle::CheckIntersection(const MapRectangle& first, const MapRectang
 		return true;
 }
 
+
+
 uint16 CalculateOppositeDirection(const uint16 direction) {
 	switch (direction) {
 		case NORTH:      return SOUTH;
