@@ -45,9 +45,9 @@ namespace hoa_map {
 
 namespace private_map {
 
-// ****************************************************************************
-// ********** DialogueEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- DialogueEvent Class Functions
+// -----------------------------------------------------------------------------
 
 DialogueEvent::DialogueEvent(uint32 event_id, uint32 dialogue_id) :
 	MapEvent(event_id, DIALOGUE_EVENT),
@@ -75,9 +75,9 @@ bool DialogueEvent::_Update() {
 		return true;
 }
 
-// ****************************************************************************
-// ********** ShopEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- ShopEvent Class Functions
+// -----------------------------------------------------------------------------
 
 ShopEvent::ShopEvent(uint32 event_id) :
 	MapEvent(event_id, SHOP_EVENT)
@@ -109,9 +109,9 @@ bool ShopEvent::_Update() {
 	return true;
 }
 
-// ****************************************************************************
-// ********** SoundEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- SoundEvent Class Functions
+// -----------------------------------------------------------------------------
 
 SoundEvent::SoundEvent(uint32 event_id, string sound_filename) :
 	MapEvent(event_id, SOUND_EVENT)
@@ -144,9 +144,9 @@ bool SoundEvent::_Update() {
 	return false;
 }
 
-// ****************************************************************************
-// ********** MapTransitionEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- MapTransitionEvent Class Functions
+// -----------------------------------------------------------------------------
 
 MapTransitionEvent::MapTransitionEvent(uint32 event_id, std::string filename) :
 	MapEvent(event_id, MAP_TRANSITION_EVENT),
@@ -196,9 +196,9 @@ bool MapTransitionEvent::_Update() {
 	return false;
 }
 
-// ****************************************************************************
-// ********** JoinPartyEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- JoinPartyEvent Class Functions
+// -----------------------------------------------------------------------------
 
 JoinPartyEvent::JoinPartyEvent(uint32 event_id) :
 	MapEvent(event_id, JOIN_PARTY_EVENT)
@@ -225,9 +225,9 @@ bool JoinPartyEvent::_Update() {
 	return true;
 }
 
-// ****************************************************************************
-// ********** BattleEncounterEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- BattleEncounterEvent Class Functions
+// -----------------------------------------------------------------------------
 
 BattleEncounterEvent::BattleEncounterEvent(uint32 event_id, uint32 enemy_id) :
 	MapEvent(event_id, BATTLE_ENCOUNTER_EVENT),
@@ -286,9 +286,9 @@ bool BattleEncounterEvent::_Update() {
 	return true;
 }
 
-// ****************************************************************************
-// ********** ScriptedEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- ScriptedEvent Class Functions
+// -----------------------------------------------------------------------------
 
 ScriptedEvent::ScriptedEvent(uint32 event_id, uint32 start_index, uint32 update_index) :
 	MapEvent(event_id, SCRIPTED_EVENT),
@@ -376,26 +376,65 @@ bool ScriptedEvent::_Update() {
 		return true;
 }
 
-// ****************************************************************************
-// ********** PathMoveSpriteEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- PathMoveSpriteEvent Class Functions
+// -----------------------------------------------------------------------------
 
-PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 x_coord, uint32 y_coord) :
-	SpriteEvent(event_id, PATH_MOVE_SPRITE_EVENT, sprite),
+PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, uint16 sprite_id, int16 x_coord, int16 y_coord) :
+	SpriteEvent(event_id, PATH_MOVE_SPRITE_EVENT, NULL),
+	_relative_destination(false),
 	_source_col(-1),
 	_source_row(-1),
-	_current_node(0),
+	_destination_col(x_coord),
+	_destination_row(y_coord),
 	_last_x_position(0),
-	_last_y_position(0)
+	_last_y_position(0),
+	_current_node(0)
 {
-	// TODO: check that x/y coordinates are within map boundaries
-	_destination.col = x_coord;
-	_destination.row = y_coord;
+	_sprite = MapMode::CurrentInstance()->GetObjectSupervisor()->GetSprite(sprite_id);
+	if (_sprite == NULL)
+		IF_PRINT_WARNING(MAP_DEBUG) << "sprite_id argument did not correspond to a known sprite object: " << sprite_id << endl;
 }
 
 
 
-PathMoveSpriteEvent::~PathMoveSpriteEvent() {
+PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, int16 x_coord, int16 y_coord) :
+	SpriteEvent(event_id, PATH_MOVE_SPRITE_EVENT, sprite),
+	_relative_destination(false),
+	_source_col(-1),
+	_source_row(-1),
+	_destination_col(x_coord),
+	_destination_row(y_coord),
+	_last_x_position(0),
+	_last_y_position(0),
+	_current_node(0)
+{
+	if (sprite == NULL)
+		IF_PRINT_WARNING(MAP_DEBUG) << "NULL sprite object passed into constructor" << endl;
+}
+
+
+
+void PathMoveSpriteEvent::SetRelativeDestination(bool relative) {
+	if (MapMode::CurrentInstance()->GetEventSupervisor()->IsEventActive(GetEventID()) == true) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted illegal operation while event was active: " << GetEventID() << endl;
+		return;
+	}
+
+	_relative_destination = relative;
+	_path.clear();
+}
+
+
+
+void PathMoveSpriteEvent::SetDestination(int16 x_coord, int16 y_coord) {
+	if (MapMode::CurrentInstance()->GetEventSupervisor()->IsEventActive(GetEventID()) == true) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted illegal operation while event was active: " << GetEventID() << endl;
+		return;
+	}
+
+	_destination_col = x_coord;
+	_destination_row = y_coord;
 	_path.clear();
 }
 
@@ -403,33 +442,54 @@ PathMoveSpriteEvent::~PathMoveSpriteEvent() {
 
 void PathMoveSpriteEvent::_Start() {
 	SpriteEvent::_Start();
+
 	_current_node = 0;
 	_last_x_position = _sprite->x_position;
 	_last_y_position = _sprite->y_position;
 
-	// If a path already exists and the current position of the sprite is the same as the source position for this path,
-	// then we will re-use it and not bother to compute a new path.
-	if ((_path.empty() == false) && (_source_col == _sprite->x_position) && (_source_row == _sprite->y_position)) {
-		_sprite->moving = true;
-		_SetDirection();
-		return;
-	}
-
-	// Set the source position for this new path to the sprite's current location and compute the new path
+	// Set and check the source position
 	_source_col = _sprite->x_position;
 	_source_row = _sprite->y_position;
 	if (_source_col < 0 || _source_row < 0) {
 		// TODO: Also check if the source position is beyond the maximum row/col map boundaries
-		PRINT_ERROR << "sprite position is invalid" << endl;
+		IF_PRINT_WARNING(MAP_DEBUG) << "sprite position is invalid" << endl;
+		_path.clear();
 		return;
 	}
 
-	if (MapMode::CurrentInstance()->GetObjectSupervisor()->FindPath(_sprite, _path, _destination) == true) {
+	// Set and check the destination position
+	if (_relative_destination == false) {
+		_destination_node.col = _destination_col;
+		_destination_node.row = _destination_row;
+	}
+	else {
+		_destination_node.col = _source_col + _destination_col;
+		_destination_node.row = _source_row + _destination_row;
+	}
+
+	// TODO: check if destination node exceeds map boundaries
+	if (_destination_node.col < 0 || _destination_node.row < 0) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "invalid destination coordinates" << endl;
+		_path.clear();
+		return;
+	}
+
+	// TODO: If we already have a path from this source to this destination, re-use it and do not compute a new path
+// 	if ((_path.empty() == false) && (_source_col == _sprite->x_position) && (_source_row == _sprite->y_position)) {
+// 		_sprite->moving = true;
+// 		_SetDirection();
+// 		return;
+// 	}
+
+	printf("SOURCE: %d, %d  ---  DEST: %d, %d\n", _source_col, _source_row, _destination_node.col, _destination_node.row);
+
+	if (MapMode::CurrentInstance()->GetObjectSupervisor()->FindPath(_sprite, _path, _destination_node) == true) {
 		_sprite->moving = true;
-		_SetDirection();
+		_SetSpriteDirection();
 	}
 	else {
 		IF_PRINT_WARNING(MAP_DEBUG) << "failed to find a path for sprite with id: " << _sprite->GetObjectID() << endl;
+		_path.clear();
 	}
 }
 
@@ -452,14 +512,14 @@ bool PathMoveSpriteEvent::_Update() {
 			return true;
 		}
 		else {
-			_SetDirection();
+			_SetSpriteDirection();
 		}
 	}
 	// If the sprite has moved to a new position other than the next node, adjust its direction so it is trying to move to the next node
 	else if ((_sprite->x_position != _last_x_position) || (_sprite->y_position != _last_y_position)) {
 		_last_x_position = _sprite->x_position;
 		_last_y_position = _sprite->y_position;
-		_SetDirection();
+		_SetSpriteDirection();
 	}
 
 	return false;
@@ -467,7 +527,7 @@ bool PathMoveSpriteEvent::_Update() {
 
 
 
-void PathMoveSpriteEvent::_SetDirection() {
+void PathMoveSpriteEvent::_SetSpriteDirection() {
 	uint16 direction = 0;
 
 	if (_sprite->y_position > _path[_current_node].row) { // Need to move north
@@ -525,7 +585,7 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 	// If the code has reached this point, then we are dealing with an object collision
 
 	// Determine if the obstructing object is blocking the destination of this path
-	bool destination_blocked = MapMode::CurrentInstance()->GetObjectSupervisor()->IsPositionOccupiedByObject(_destination.row, _destination.col, coll_obj);
+	bool destination_blocked = MapMode::CurrentInstance()->GetObjectSupervisor()->IsPositionOccupiedByObject(_destination_node.row, _destination_node.col, coll_obj);
 	VirtualSprite* coll_sprite = NULL;
 
 	switch (coll_obj->GetObjectType()) {
@@ -572,9 +632,9 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 	}
 } // void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj)
 
-// ****************************************************************************
-// ********** RandomMoveSpriteEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- RandomMoveSpriteEvent Class Functions
+// -----------------------------------------------------------------------------
 
 RandomMoveSpriteEvent::RandomMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time, uint32 direction_time) :
 	SpriteEvent(event_id, RANDOM_MOVE_SPRITE_EVENT, sprite),
@@ -628,9 +688,9 @@ void RandomMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObjec
 	}
 }
 
-// ****************************************************************************
-// ********** AnimateSpriteEvent Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- AnimateSpriteEvent Class Functions
+// -----------------------------------------------------------------------------
 
 AnimateSpriteEvent::AnimateSpriteEvent(uint32 event_id, VirtualSprite* sprite) :
 	SpriteEvent(event_id, ANIMATE_SPRITE_EVENT, sprite),
@@ -688,9 +748,9 @@ bool AnimateSpriteEvent::_Update() {
 }
 
 
-// ****************************************************************************
-// ********** EventSupervisor Class Functions
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// ---------- EventSupervisor Class Functions
+// -----------------------------------------------------------------------------
 
 EventSupervisor::~EventSupervisor() {
 	_active_events.clear();

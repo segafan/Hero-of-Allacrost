@@ -463,6 +463,9 @@ protected:
 /** ****************************************************************************
 *** \brief An event which moves a single sprite to a destination
 ***
+*** This class allows for both absolute and relative destinations. A relative
+*** destination
+***
 *** Using event linking, it is very simple to have a single event represent
 *** a sprite traveling to multiple destinations, or multiple sprites travel to
 *** multiple destinations.
@@ -474,29 +477,57 @@ class PathMoveSpriteEvent : public SpriteEvent {
 
 public:
 	/** \param event_id The ID of this event
+	*** \param sprite_id The ID of the sprite that is to be moved
+	*** \param x_coord The X coordinate to move the sprite to
+	*** \param y_coord The Y coordinate to move the sprite to
+	**/
+	PathMoveSpriteEvent(uint32 event_id, uint16 sprite_id, int16 x_coord, int16 y_coord);
+
+	/** \param event_id The ID of this event
 	*** \param sprite A pointer to the sprite to move
 	*** \param x_coord The X coordinate to move the sprite to
 	*** \param y_coord The Y coordinate to move the sprite to
 	**/
-	PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 x_coord, uint32 y_coord);
+	PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, int16 x_coord, int16 y_coord);
 
-	~PathMoveSpriteEvent();
+	~PathMoveSpriteEvent()
+		{}
+
+	/** \brief Used to toggle whether or not the destination provided in the constructor is relative or absolute
+	*** \note Any previous existing paths are cleared when this function is called. If this function is called when
+	*** the event is active, no change will take place.
+	**/
+	void SetRelativeDestination(bool relative);
+
+	/** \brief Used to change the destination coordinates after the class object has been constructed
+	*** \param x_coord The X coordinate to move the sprite to
+	*** \param y_coord The Y coordinate to move the sprite to
+	*** \note Any previous existing paths are cleared when this function is called. If this function is called when
+	*** the event is active, no change will take place.
+	**/
+	void SetDestination(int16 x_coord, int16 y_coord);
 
 protected:
-	//! \brief The source coordinates for this path movement
+	//! \brief When true, the destination coordinates are relative to the current position of the sprite. Otherwise the destination is absolute.
+	bool _relative_destination;
+
+	//! \brief Stores the source coordinates for the path movement (the sprite's position when the event is started).
 	int16 _source_col, _source_row;
 
-	//! \brief The destination coordinates for this path movement
-	PathNode _destination;
+	//! \brief Stores the destination coordinates for the path movement. These may be either absolute or relative coordinates.
+	int16 _destination_col, _destination_row;
 
-	//! \brief Holds the path needed to traverse from source to destination
-	std::vector<PathNode> _path;
+	//! \brief Used to store the previous coordinates of the sprite during path movement, so as to set the proper direction of the sprite as it moves
+	uint16 _last_x_position, _last_y_position;
 
 	//! \brief An index to the path vector containing the node that the sprite currently occupies
 	uint32 _current_node;
 
-	//! \brief Used to store the previous known position of the sprite
-	uint16 _last_x_position, _last_y_position;
+	//! \brief Holds the final destination coordinates for the path movement
+	PathNode _destination_node;
+
+	//! \brief Holds the path needed to traverse from source to destination
+	std::vector<PathNode> _path;
 
 	//! \brief Calculates a path for the sprite to move to the destination
 	void _Start();
@@ -505,7 +536,7 @@ protected:
 	bool _Update();
 
 	//! \brief Sets the correct direction for the sprite to move to the next node in the path
-	void _SetDirection();
+	void _SetSpriteDirection();
 
 	/** \brief Determines an appropriate resolution when the sprite collides with an obstruction
 	*** \param coll_type The type of collision that has occurred
