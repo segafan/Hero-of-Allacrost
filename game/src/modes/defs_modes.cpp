@@ -397,6 +397,14 @@ void BindModesToLua()
 			.def("AddEventLinkAtEnd", (void(MapEvent::*)(uint32, uint32))&MapEvent::AddEventLinkAtEnd)
 	];
 
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<DialogueEvent, MapEvent>("DialogueEvent")
+			.def(constructor<uint32, uint32>())
+			.def("SetStopCameraMovement", &DialogueEvent::SetStopCameraMovement)
+	];
+
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<SoundEvent, MapEvent>("SoundEvent")
@@ -441,12 +449,6 @@ void BindModesToLua()
 			.def(constructor<uint32, VirtualSprite*>())
 			.def("AddFrame", &AnimateSpriteEvent::AddFrame)
 			.def("SetLoopCount", &AnimateSpriteEvent::SetLoopCount)
-	];
-
-	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
-	[
-		class_<DialogueEvent, MapEvent>("DialogueEvent")
-			.def(constructor<uint32, uint32>())
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

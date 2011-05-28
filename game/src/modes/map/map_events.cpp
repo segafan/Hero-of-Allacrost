@@ -51,17 +51,18 @@ namespace private_map {
 
 DialogueEvent::DialogueEvent(uint32 event_id, uint32 dialogue_id) :
 	MapEvent(event_id, DIALOGUE_EVENT),
-	_dialogue_id(dialogue_id)
-{}
-
-
-
-DialogueEvent::~DialogueEvent()
+	_dialogue_id(dialogue_id),
+	_stop_camera_movement(false)
 {}
 
 
 
 void DialogueEvent::_Start() {
+	if (_stop_camera_movement == true) {
+		MapMode::CurrentInstance()->GetCamera()->moving = false;
+		MapMode::CurrentInstance()->GetCamera()->is_running = false;
+	}
+
 	MapMode::CurrentInstance()->GetDialogueSupervisor()->BeginDialogue(_dialogue_id);
 }
 
@@ -480,8 +481,6 @@ void PathMoveSpriteEvent::_Start() {
 // 		_SetDirection();
 // 		return;
 // 	}
-
-	printf("SOURCE: %d, %d  ---  DEST: %d, %d\n", _source_col, _source_row, _destination_node.col, _destination_node.row);
 
 	if (MapMode::CurrentInstance()->GetObjectSupervisor()->FindPath(_sprite, _path, _destination_node) == true) {
 		_sprite->moving = true;

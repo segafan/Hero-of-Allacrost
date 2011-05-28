@@ -624,6 +624,10 @@ void MapSprite::Draw() {
 void MapSprite::AddDialogueReference(uint32 dialogue_id) {
 	_dialogue_references.push_back(dialogue_id);
     UpdateDialogueStatus();
+	// TODO: The call above causes a warning to be printed out if the sprite has been created but the dialogue has not yet.
+	// Map scripts typically create all sprites first (including their dialogue references) before creating the dialogues.
+	// We need a safe way to add dialogue references to the sprite without causing these warnings to be printed when the
+	// map is loading.
 }
 
 

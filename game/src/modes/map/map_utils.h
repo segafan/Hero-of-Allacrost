@@ -57,12 +57,12 @@ const uint16 HALF_TILE_LENGTH = TILE_LENGTH / 2;
 **/
 //@{
 enum MAP_STATE {
-	STATE_INVALID    = 0,
-	STATE_EXPLORE    = 1, //!< Standard state, player has control to move about map
-	STATE_SCENE      = 2, //!< Like the explore state but player has no control (input is ignored)
-	STATE_DIALOGUE   = 3, //!< When a dialogue is active
-	STATE_TREASURE   = 4, //!< Active when a treasure has been procured by the player
-	STATE_TOTAL      = 5
+	STATE_INVALID          = 0,
+	STATE_EXPLORE          = 1, //!< Standard state, player has control to move about the map
+	STATE_SCENE            = 2, //!< Like the explore state but player has no control (input is ignored)
+	STATE_DIALOGUE         = 3, //!< When a dialogue is active
+	STATE_TREASURE         = 4, //!< Active when a treasure has been procured by the player
+	STATE_TOTAL            = 5
 };
 //@}
 

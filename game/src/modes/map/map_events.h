@@ -176,6 +176,10 @@ private:
 *** like events but technically are not events. Children events that are implemented
 *** in Lua can take advantage of options selected by the player in these dialogues
 *** to determine what events should follow down the event chain
+***
+*** Sometimes you may want a dialogue event to stop the camera from moving, especially
+*** if it is the first event in an event chain. When this behavior is desired, call the
+*** StopCameraMovement() method after creating the event object.
 *** ***************************************************************************/
 class DialogueEvent : public MapEvent {
 public:
@@ -184,11 +188,19 @@ public:
 	**/
 	DialogueEvent(uint32 event_id, uint32 dialogue_id);
 
-	~DialogueEvent();
+	~DialogueEvent()
+		{}
+
+	//! \brief Toggles whether or not camera movement should be stopped when the dialogue begins
+	void SetStopCameraMovement(bool stop)
+		{ _stop_camera_movement = stop; }
 
 protected:
 	//! \brief The ID of the dialogue to invoke
 	uint32 _dialogue_id;
+
+	//! \brief When true, any camera movement will be stopped when the event begins
+	bool _stop_camera_movement;
 
 	//! \brief Begins the dialogue
 	void _Start();
