@@ -295,11 +295,17 @@ void ItemCommand::Initialize(uint32 item_index) {
 			break;
 		}
 	}
-	for (uint32 i = item_index - 1; i >= 0; i--) {
-		if (_item_mappings[i] >= 0) {
-			prev_item_index = i;
-			break;
-		}
+	if (item_index != 0) {
+		uint32 i = item_index - 1;
+
+		do {
+			if (_item_mappings[i] >= 0) {
+				prev_item_index = i;
+				break;
+			}
+
+			i--;
+		} while (i != 0);
 	}
 
 	// If this case is true there are no items in the list. This should not happen because the item
