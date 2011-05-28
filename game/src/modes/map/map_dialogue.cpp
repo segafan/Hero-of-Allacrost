@@ -171,8 +171,7 @@ bool SpriteDialogue::Validate() {
 
 	// Check that all sprites and events referrenced by the dialogue exist
 	for (set<uint32>::iterator i = sprite_ids.begin(); i != sprite_ids.end(); i++) {
-		// TODO: Should this also check that the map object with this id is pointing to a sprite type?
-		if (MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(*i) == NULL) {
+		if (MapMode::CurrentInstance()->GetObjectSupervisor()->GetSprite(*i) == NULL) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "Validation failed for dialogue #" << _dialogue_id
 				<< ": dialogue referenced invalid sprite with id: " << *i << endl;
 			return false;
@@ -253,7 +252,7 @@ void DialogueSupervisor::Update() {
 		return;
 	}
 
-	// TODO: Update the line timer here
+	_line_timer.Update();
 
 	switch (_state) {
 		case DIALOGUE_STATE_LINE:
@@ -371,9 +370,16 @@ SpriteDialogue* DialogueSupervisor::GetDialogue(uint32 dialogue_id) {
 void DialogueSupervisor::_UpdateLine() {
 	_dialogue_window.GetDisplayTextBox().Update();
 
-	// If this dialogue does not allow user input, we are finished
-	if (_current_dialogue->IsInputBlocked() == true)
+	// If the line has a valid display time and the timer is finished, move on to the next line
+	if ((_line_timer.GetDuration() > 0) && (_line_timer.IsFinished() == true)) {
+		_EndLine();
 		return;
+	}
+
+	// If this dialogue does not allow user input, we are finished
+	if (_current_dialogue->IsInputBlocked() == true) {
+		return;
+	}
 
 	if (InputManager->ConfirmPress()) {
 		// If the line is not yet finished displaying, display the rest of the text
@@ -413,11 +419,14 @@ void DialogueSupervisor::_BeginLine() {
 	_state = DIALOGUE_STATE_LINE;
 	_current_options = dynamic_cast<MapDialogueOptions*>(_current_dialogue->GetLineOptions(_line_counter));
 
-	// Setup the line timer if the line has a display time
+	// Initialize the line timer
 	if (_current_dialogue->GetLineDisplayTime(_line_counter) >= 0) {
 		_line_timer.Initialize(_current_dialogue->GetLineDisplayTime(_line_counter));
+		_line_timer.Run();
 	}
+	// If the line has no timer specified, set the line time to zero and put the timer in the finished state
 	else {
+		_line_timer.Initialize(0);
 		_line_timer.Finish();
 	}
 

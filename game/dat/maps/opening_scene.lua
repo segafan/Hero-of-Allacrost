@@ -259,11 +259,11 @@ function CreateDialogue()
 	dialogue = hoa_map.SpriteDialogue(10);
 		dialogue:SetInputBlocked(true);
 		text = hoa_system.Translate("I watched the men in the pale light of the blue moon. The dark cloaks they wore for warmth only better distinguishing them against the light sand for my trained eye.");
-		dialogue:AddLineTimed(text, 2500, 5000);
+		dialogue:AddLineTimed(text, 2500, 10000);
 		text = hoa_system.Translate("The Harrvah Knights, though powerful in their great city of stone, were powerless in the might of the desert. The desert was the land of the Muabi tribe, my tribe. Out here, a squad of troops such as this was no match for even a small group of Muabi.");
-		dialogue:AddLineTimed(text, 2500, 7500);
+		dialogue:AddLineTimed(text, 2500, 15000);
 		text = hoa_system.Translate("I knew where they were headed. We had seen that their water supply had been blocked, but such problems were not Muabi problems. The outsiders had built their grand city away from the water, because they could not tame the creatures there.");
-		dialogue:AddLineTimed(text, 2500, 5000);
+		dialogue:AddLineTimed(text, 2500, 10000);
 	DialogueManager:AddDialogue(dialogue);
 	
 	dialogue = hoa_map.SpriteDialogue(20);
@@ -290,7 +290,7 @@ function CreateEvents()
 	
 	-- Move all sprites toward the cave entrance
 	event = hoa_map.PathMoveSpriteEvent(10, claudius, 375, 24);
-	event:AddEventLinkAtStart(50, 1000);
+	event:AddEventLinkAtStart(50, 2500);
 	EventManager:RegisterEvent(event);
 	
 	-- Begins the initial dialogue
