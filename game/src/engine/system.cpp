@@ -17,7 +17,9 @@
 #ifdef _WIN32
 	#include <direct.h>
 	#include <stdlib.h>          // defines _MAX_PATH constant
+	#ifndef PATH_MAX
 	#define PATH_MAX _MAX_PATH   // redefine _MAX_PATH to be compatible with Darwin's PATH_MAX
+	#endif
 #elif defined __MACH__
 	#include <unistd.h>
 	#include <cstdlib>

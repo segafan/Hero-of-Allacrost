@@ -105,9 +105,9 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 
 	// Create and add the 2D tile grid for the base context
 	_tile_grid.clear();
-	_tile_grid.insert(make_pair(CONTEXT_01, vector<vector<MapTile> >(_num_tile_rows)));
+	_tile_grid.insert(make_pair(MAP_CONTEXT_01, vector<vector<MapTile> >(_num_tile_rows)));
 	for (uint32 r = 0; r < _num_tile_rows; r++) {
-		_tile_grid[CONTEXT_01][r].resize(_num_tile_cols);
+		_tile_grid[MAP_CONTEXT_01][r].resize(_num_tile_cols);
 	}
 
 	vector<int32> table_row; // Used to temporarily store a row of table indeces
@@ -118,7 +118,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
 		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[CONTEXT_01][r][c].lower_layer = table_row[c];
+			_tile_grid[MAP_CONTEXT_01][r][c].lower_layer = table_row[c];
 		}
 	}
 	map_file.CloseTable();
@@ -128,7 +128,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
 		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[CONTEXT_01][r][c].middle_layer = table_row[c];
+			_tile_grid[MAP_CONTEXT_01][r][c].middle_layer = table_row[c];
 		}
 	}
 	map_file.CloseTable();
@@ -138,7 +138,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
 		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[CONTEXT_01][r][c].upper_layer = table_row[c];
+			_tile_grid[MAP_CONTEXT_01][r][c].upper_layer = table_row[c];
 		}
 	}
 	map_file.CloseTable();
@@ -154,7 +154,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		context_name += NumberToString(i);
 
 		// Initialize this context by making a copy of the base map context first, as most contexts re-use many of the same tiles from the base context
-		_tile_grid.insert(make_pair(this_context, _tile_grid[CONTEXT_01]));
+		_tile_grid.insert(make_pair(this_context, _tile_grid[MAP_CONTEXT_01]));
 
 		// Read the table corresponding to this context and modify each tile accordingly.
 		// The context table is an array of integer data. The size of this array should be divisible by four, as every consecutive group of four integers in
