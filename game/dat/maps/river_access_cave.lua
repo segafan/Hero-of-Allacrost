@@ -1024,7 +1024,8 @@ function CreateEvents()
 		event:AddEventLinkAtEnd(22);
 		EventManager:RegisterEvent(event);
 		-- Move player sprite to NPC that called out
-		event = hoa_map.PathMoveSpriteEvent(22, claudius, 138, 75); -- TODO: Change destination to 149, 68 once pathfinding fixed
+		event = hoa_map.PathMoveSpriteEvent(22, 1000, 5, 0); -- TODO: Change absolute destination to 149, 68 once pathfinding fixed
+		event:SetRelativeDestination(true);
 		event:AddEventLinkAtEnd(23);
 		EventManager:RegisterEvent(event);
 		-- Exit scene state
