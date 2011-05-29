@@ -684,8 +684,8 @@ template <class T> void GameGlobal::_SaveInventory(hoa_script::WriteScriptDescri
 			file.WriteLine("\t", false);
 		else
 			file.WriteLine(", ", false);
-		file.WriteLine("[" + NumberToString(inv[i]->GetID()) + "] = "
-			+ NumberToString(inv[i]->GetCount()), false);
+		file.WriteLine("[" + hoa_utils::NumberToString(inv[i]->GetID()) + "] = "
+			+ hoa_utils::NumberToString(inv[i]->GetCount()), false);
 	}
 	file.InsertNewLine();
 	file.WriteLine("}");
