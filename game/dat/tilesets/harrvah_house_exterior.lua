@@ -8,6 +8,7 @@ image = "img/tilesets/harrvah_house_exterior.png"
 num_tile_cols = 16
 num_tile_rows = 16
 
+-- The general walkability of the tiles in the tileset. Zero indicates walkable. One tile has four walkable quadrants listed as: NW corner, NE corner, SW corner, SE corner.
 walkability = {}
 walkability[0] = {}
 walkability[0][0] = { 0, 0, 0, 0 }
@@ -134,8 +135,8 @@ walkability[7][1] = { 1, 1, 1, 1 }
 walkability[7][2] = { 1, 1, 1, 1 }
 walkability[7][3] = { 1, 1, 1, 1 }
 walkability[7][4] = { 1, 1, 1, 1 }
-walkability[7][5] = { 1, 0, 1, 0 }
-walkability[7][6] = { 0, 1, 0, 1 }
+walkability[7][5] = { 1, 1, 1, 0 }
+walkability[7][6] = { 1, 1, 0, 1 }
 walkability[7][7] = { 1, 1, 1, 1 }
 walkability[7][8] = { 1, 1, 1, 1 }
 walkability[7][9] = { 1, 1, 1, 1 }
@@ -281,3 +282,4 @@ walkability[15][12] = { 0, 0, 0, 0 }
 walkability[15][13] = { 0, 0, 0, 0 }
 walkability[15][14] = { 0, 0, 0, 0 }
 walkability[15][15] = { 0, 0, 0, 0 }
+
