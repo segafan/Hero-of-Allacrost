@@ -69,9 +69,14 @@ enum MAP_STATE {
 
 /** \name Map Context Constants
 *** \brief Constants used to represent all 32 possible map contexts
+***
 *** Note that only one bit is set for each context. This is done so that the collision
 *** grid for all contexts can be stored in a single integer. This also simplifies the
 *** complexity of collision detection for map sprites.
+***
+*** \note Ideally these names would omit the "MAP_" affix. However, doing so creates some naming conflicts
+*** with 64-bit versions of Windows so we cannot. In Lua though, we bind these names without the "MAP_" since
+*** no conflict exists in the Lua environment.
 **/
 enum MAP_CONTEXT {
 	MAP_CONTEXT_NONE  = 0x00000000,
@@ -233,17 +238,18 @@ enum COLLISION_TYPE {
 
 //! \brief Identifiers for the similarly named classes of map events
 enum EVENT_TYPE {
-	INVALID_EVENT              = 0,
-	DIALOGUE_EVENT             = 1,
-	SHOP_EVENT                 = 2,
-	SOUND_EVENT                = 3,
-	MAP_TRANSITION_EVENT       = 4,
-	JOIN_PARTY_EVENT           = 5,
-	BATTLE_ENCOUNTER_EVENT     = 6,
-	SCRIPTED_EVENT             = 7,
-	PATH_MOVE_SPRITE_EVENT     = 8,
-	RANDOM_MOVE_SPRITE_EVENT   = 9,
-	ANIMATE_SPRITE_EVENT       = 10,
+	INVALID_EVENT                   = 0,
+	DIALOGUE_EVENT                  = 1,
+	SHOP_EVENT                      = 2,
+	SOUND_EVENT                     = 3,
+	MAP_TRANSITION_EVENT            = 4,
+	JOIN_PARTY_EVENT                = 5,
+	BATTLE_ENCOUNTER_EVENT          = 6,
+	SCRIPTED_EVENT                  = 7,
+	CHANGE_DIRECTION_SPRITE_EVENT   = 8,
+	PATH_MOVE_SPRITE_EVENT          = 9,
+	RANDOM_MOVE_SPRITE_EVENT        = 10,
+	ANIMATE_SPRITE_EVENT            = 11,
 };
 
 

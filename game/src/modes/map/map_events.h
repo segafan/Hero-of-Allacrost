@@ -453,8 +453,13 @@ public:
 	*** \param event_type The type of this event
 	*** \param sprite A pointer to the sprite that this event will control
 	**/
-	SpriteEvent(uint32 event_id, EVENT_TYPE event_type, VirtualSprite* sprite) :
-		MapEvent(event_id, event_type), _sprite(sprite) {}
+	SpriteEvent(uint32 event_id, EVENT_TYPE event_type, VirtualSprite* sprite);
+
+	/** \param event_id The ID of this event
+	*** \param event_type The type of this event
+	*** \param sprite_id The id of the sprite that this event will control
+	**/
+	SpriteEvent(uint32 event_id, EVENT_TYPE event_type, uint16 sprite_id);
 
 	~SpriteEvent()
 		{}
@@ -473,6 +478,49 @@ protected:
 
 
 /** ****************************************************************************
+*** \brief A simple event used to set the direction of a sprite
+***
+*** This event finishes immediately after it starts, as all that it performs is
+*** to set the direction of a sprite in a particular orientation. Normally such
+*** a minor event would be better suited as a ScriptedEvent with no update function,
+*** but because a set direction operation is so common, it makes sense to create a
+*** specific event for it for convenience.
+***
+*** \note The only directions you should set in the clas constructor are: NORTH,
+*** SOUTH, EAST, and WEST. This event is used when a sprite is stationary, so
+*** the other types of directions (which also infer movement) are unnecessary.
+*** Using a direction other than these four will result in a warning being printed.
+*** ***************************************************************************/
+class ChangeDirectionSpriteEvent : public SpriteEvent {
+public:
+	/** \param event_id The ID of this event
+	*** \param sprite _id The ID of the sprite to change the direction of
+	*** \param direction The direction to face the sprite
+	**/
+	ChangeDirectionSpriteEvent(uint32 event_id, uint16 sprite_id, uint16 direction);
+
+	/** \param event_id The ID of this event
+	*** \param sprite A pointer to the sprite that this event will effect
+	*** \param direction The direction to face the sprite
+	**/
+	ChangeDirectionSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint16 direction);
+
+	~ChangeDirectionSpriteEvent()
+		{}
+
+protected:
+	//! \brief Retains the direction to move the sprite when the event starts
+	uint16 _direction;
+
+	//! \brief Immediately changes the sprite's direction
+	void _Start();
+
+	//! \brief Always returns true immediately, terminating the event
+	bool _Update();
+}; // class ChangeDirectionSpriteEvent : public SpriteEvent
+
+
+/** ****************************************************************************
 *** \brief An event which moves a single sprite to a destination
 ***
 *** This class allows for both absolute and relative destinations. A relative
@@ -481,8 +529,6 @@ protected:
 *** Using event linking, it is very simple to have a single event represent
 *** a sprite traveling to multiple destinations, or multiple sprites travel to
 *** multiple destinations.
-***
-*** \todo Should we write a public function to allow the path destination to change?
 *** ***************************************************************************/
 class PathMoveSpriteEvent : public SpriteEvent {
 	friend class VirtualSprite;

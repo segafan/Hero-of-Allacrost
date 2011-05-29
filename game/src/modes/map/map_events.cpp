@@ -46,7 +46,7 @@ namespace hoa_map {
 namespace private_map {
 
 // -----------------------------------------------------------------------------
-// ---------- DialogueEvent Class Functions
+// ---------- DialogueEvent Class Methods
 // -----------------------------------------------------------------------------
 
 DialogueEvent::DialogueEvent(uint32 event_id, uint32 dialogue_id) :
@@ -77,7 +77,7 @@ bool DialogueEvent::_Update() {
 }
 
 // -----------------------------------------------------------------------------
-// ---------- ShopEvent Class Functions
+// ---------- ShopEvent Class Methods
 // -----------------------------------------------------------------------------
 
 ShopEvent::ShopEvent(uint32 event_id) :
@@ -111,7 +111,7 @@ bool ShopEvent::_Update() {
 }
 
 // -----------------------------------------------------------------------------
-// ---------- SoundEvent Class Functions
+// ---------- SoundEvent Class Methods
 // -----------------------------------------------------------------------------
 
 SoundEvent::SoundEvent(uint32 event_id, string sound_filename) :
@@ -146,7 +146,7 @@ bool SoundEvent::_Update() {
 }
 
 // -----------------------------------------------------------------------------
-// ---------- MapTransitionEvent Class Functions
+// ---------- MapTransitionEvent Class Methods
 // -----------------------------------------------------------------------------
 
 MapTransitionEvent::MapTransitionEvent(uint32 event_id, std::string filename) :
@@ -198,7 +198,7 @@ bool MapTransitionEvent::_Update() {
 }
 
 // -----------------------------------------------------------------------------
-// ---------- JoinPartyEvent Class Functions
+// ---------- JoinPartyEvent Class Methods
 // -----------------------------------------------------------------------------
 
 JoinPartyEvent::JoinPartyEvent(uint32 event_id) :
@@ -227,7 +227,7 @@ bool JoinPartyEvent::_Update() {
 }
 
 // -----------------------------------------------------------------------------
-// ---------- BattleEncounterEvent Class Functions
+// ---------- BattleEncounterEvent Class Methods
 // -----------------------------------------------------------------------------
 
 BattleEncounterEvent::BattleEncounterEvent(uint32 event_id, uint32 enemy_id) :
@@ -288,7 +288,7 @@ bool BattleEncounterEvent::_Update() {
 }
 
 // -----------------------------------------------------------------------------
-// ---------- ScriptedEvent Class Functions
+// ---------- ScriptedEvent Class Methods
 // -----------------------------------------------------------------------------
 
 ScriptedEvent::ScriptedEvent(uint32 event_id, uint32 start_index, uint32 update_index) :
@@ -378,11 +378,67 @@ bool ScriptedEvent::_Update() {
 }
 
 // -----------------------------------------------------------------------------
-// ---------- PathMoveSpriteEvent Class Functions
+// ---------- SpriteEvent Class Methods
+// -----------------------------------------------------------------------------
+
+SpriteEvent::SpriteEvent(uint32 event_id, EVENT_TYPE event_type, uint16 sprite_id) :
+	MapEvent(event_id, event_type),
+	_sprite(NULL)
+{
+	_sprite = MapMode::CurrentInstance()->GetObjectSupervisor()->GetSprite(sprite_id);
+	if (_sprite == NULL)
+		IF_PRINT_WARNING(MAP_DEBUG) << "sprite_id argument did not correspond to a known sprite object: " << event_id << endl;
+}
+
+
+SpriteEvent::SpriteEvent(uint32 event_id, EVENT_TYPE event_type, VirtualSprite* sprite) :
+	MapEvent(event_id, event_type),
+	_sprite(sprite)
+{
+	if (sprite == NULL)
+		IF_PRINT_WARNING(MAP_DEBUG) << "NULL sprite object passed into constructor: " << event_id << endl;
+}
+
+// -----------------------------------------------------------------------------
+// ---------- ChangeDirectionSpriteEvent Class Methods
+// -----------------------------------------------------------------------------
+
+ChangeDirectionSpriteEvent::ChangeDirectionSpriteEvent(uint32 event_id, uint16 sprite_id, uint16 direction) :
+	SpriteEvent(event_id, CHANGE_DIRECTION_SPRITE_EVENT, sprite_id),
+	_direction(direction)
+{
+	if ((_direction != NORTH) && (_direction != SOUTH) && (_direction != EAST) && (_direction != WEST))
+		IF_PRINT_WARNING(MAP_DEBUG) << "non-standard direction specified: " << event_id << endl;
+}
+
+
+
+ChangeDirectionSpriteEvent::ChangeDirectionSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint16 direction) :
+	SpriteEvent(event_id, CHANGE_DIRECTION_SPRITE_EVENT, sprite),
+	_direction(direction)
+{
+	if ((_direction != NORTH) && (_direction != SOUTH) && (_direction != EAST) && (_direction != WEST))
+		IF_PRINT_WARNING(MAP_DEBUG) << "non-standard direction specified: " << event_id << endl;
+}
+
+
+
+void ChangeDirectionSpriteEvent::_Start() {
+	_sprite->SetDirection(_direction);
+}
+
+
+
+bool ChangeDirectionSpriteEvent::_Update() {
+	return true;
+}
+
+// -----------------------------------------------------------------------------
+// ---------- PathMoveSpriteEvent Class Methods
 // -----------------------------------------------------------------------------
 
 PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, uint16 sprite_id, int16 x_coord, int16 y_coord) :
-	SpriteEvent(event_id, PATH_MOVE_SPRITE_EVENT, NULL),
+	SpriteEvent(event_id, PATH_MOVE_SPRITE_EVENT, sprite_id),
 	_relative_destination(false),
 	_source_col(-1),
 	_source_row(-1),
@@ -391,11 +447,7 @@ PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, uint16 sprite_id, int1
 	_last_x_position(0),
 	_last_y_position(0),
 	_current_node(0)
-{
-	_sprite = MapMode::CurrentInstance()->GetObjectSupervisor()->GetSprite(sprite_id);
-	if (_sprite == NULL)
-		IF_PRINT_WARNING(MAP_DEBUG) << "sprite_id argument did not correspond to a known sprite object: " << sprite_id << endl;
-}
+{}
 
 
 
@@ -409,10 +461,7 @@ PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite,
 	_last_x_position(0),
 	_last_y_position(0),
 	_current_node(0)
-{
-	if (sprite == NULL)
-		IF_PRINT_WARNING(MAP_DEBUG) << "NULL sprite object passed into constructor" << endl;
-}
+{}
 
 
 
@@ -632,7 +681,7 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 } // void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj)
 
 // -----------------------------------------------------------------------------
-// ---------- RandomMoveSpriteEvent Class Functions
+// ---------- RandomMoveSpriteEvent Class Methods
 // -----------------------------------------------------------------------------
 
 RandomMoveSpriteEvent::RandomMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time, uint32 direction_time) :
@@ -688,7 +737,7 @@ void RandomMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObjec
 }
 
 // -----------------------------------------------------------------------------
-// ---------- AnimateSpriteEvent Class Functions
+// ---------- AnimateSpriteEvent Class Methods
 // -----------------------------------------------------------------------------
 
 AnimateSpriteEvent::AnimateSpriteEvent(uint32 event_id, VirtualSprite* sprite) :
@@ -748,7 +797,7 @@ bool AnimateSpriteEvent::_Update() {
 
 
 // -----------------------------------------------------------------------------
-// ---------- EventSupervisor Class Functions
+// ---------- EventSupervisor Class Methods
 // -----------------------------------------------------------------------------
 
 EventSupervisor::~EventSupervisor() {
