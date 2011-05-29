@@ -417,10 +417,10 @@ protected:
 	//! \brief A pointer to the Lua function that returns a boolean value if the event is finished
 	ScriptObject* _update_function;
 
-	//! \brief Calls the Lua _start_function
+	//! \brief Calls the Lua _start_function, if one was defined
 	void _Start();
 
-	//! \brief Calls the Lua _update_function. If no
+	//! \brief Calls the Lua _update_function. If no update function was defined, does nothing and returns true
 	bool _Update();
 }; // class ScriptedEvent : public MapEvent
 
@@ -444,22 +444,20 @@ protected:
 *** changing some members of the sprite object inside the _Start() and _Update() methods
 *** as these methods are called <i>after</i> the sprite's own Update() method. Keep
 *** this property in mind when designing a derived sprite event class.
-***
-*** \todo Should we also have a constructor that takes a sprite's integer ID?
 *** ***************************************************************************/
 class SpriteEvent : public MapEvent {
 public:
 	/** \param event_id The ID of this event
 	*** \param event_type The type of this event
-	*** \param sprite A pointer to the sprite that this event will control
-	**/
-	SpriteEvent(uint32 event_id, EVENT_TYPE event_type, VirtualSprite* sprite);
-
-	/** \param event_id The ID of this event
-	*** \param event_type The type of this event
 	*** \param sprite_id The id of the sprite that this event will control
 	**/
 	SpriteEvent(uint32 event_id, EVENT_TYPE event_type, uint16 sprite_id);
+
+	/** \param event_id The ID of this event
+	*** \param event_type The type of this event
+	*** \param sprite A pointer to the sprite that this event will control
+	**/
+	SpriteEvent(uint32 event_id, EVENT_TYPE event_type, VirtualSprite* sprite);
 
 	~SpriteEvent()
 		{}
@@ -475,6 +473,61 @@ protected:
 	//! \brief Updates the state of the sprite and returns true if the event is finished
 	virtual bool _Update() = 0;
 }; // class SpriteEvent : public MapEvent
+
+
+/** ****************************************************************************
+*** \brief A scripted event which operates on a sprite
+***
+*** This class is a cross between a SpriteEvent and ScriptedEvent class. The class
+*** itself inherits from SpriteEvent (it does not also inherit from ScriptedEvent).
+*** The key feature of this class is that it passes a pointer to a VirtualSprite
+*** object in the argument list when it makes its Lua function calls. The Lua functions
+*** are then able to take any allowable action on the sprite object. Otherwise, this
+*** class behaves just like a standard ScriptedEvent class.
+*** ***************************************************************************/
+class ScriptedSpriteEvent : public SpriteEvent {
+public:
+	/** \param event_id The ID of this event
+	*** \param sprite_id The id of the sprite that will be passed to the Lua script functions
+	*** \param start_index An index in the map file's function table that references the start function
+	*** \param update_index An index in the map file's function table that references the update function
+	***
+	*** \note A value of zero for either the start or update index arguments will result in no start or
+	*** update function being defined. If no update function is defined, the call to _Update() will always
+	*** return true, meaning that this event will end immediately after it starts.
+	**/
+	ScriptedSpriteEvent(uint32 event_id, uint16 sprite_id, uint32 start_index, uint32 check_index);
+
+	/** \param event_id The ID of this event
+	*** \param sprite A pointer to the sprite that will be passed to the Lua script functions
+	*** \param start_index An index in the map file's function table that references the start function
+	*** \param update_index An index in the map file's function table that references the update function
+	***
+	*** \note A value of zero for either the start or update index arguments will result in no start or
+	*** update function being defined. If no update function is defined, the call to _Update() will always
+	*** return true, meaning that this event will end immediately after it starts.
+	**/
+	ScriptedSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 start_index, uint32 check_index);
+
+	~ScriptedSpriteEvent();
+
+	ScriptedSpriteEvent(const ScriptedSpriteEvent& copy);
+
+	ScriptedSpriteEvent& operator=(const ScriptedSpriteEvent& copy);
+
+protected:
+	//! \brief A pointer to the Lua function that starts the event
+	ScriptObject* _start_function;
+
+	//! \brief A pointer to the Lua function that returns a boolean value if the event is finished
+	ScriptObject* _update_function;
+
+	//! \brief Calls the Lua _start_function, if one was defined
+	void _Start();
+
+	//! \brief Calls the Lua _update_function. If no update function was defined, does nothing and returns true
+	bool _Update();
+}; // class ScriptedSpriteEvent : public SpriteEvent
 
 
 /** ****************************************************************************
