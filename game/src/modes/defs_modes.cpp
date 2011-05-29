@@ -430,6 +430,13 @@ void BindModesToLua()
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
+		class_<ChangeDirectionSpriteEvent, SpriteEvent>("ChangeDirectionSpriteEvent")
+			.def(constructor<uint32, uint16, uint16>())
+			.def(constructor<uint32, VirtualSprite*, uint16>())
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
 		class_<PathMoveSpriteEvent, SpriteEvent>("PathMoveSpriteEvent")
 			.def(constructor<uint32, uint32, int16, int16>())
 			.def(constructor<uint32, VirtualSprite*, int16, int16>())
