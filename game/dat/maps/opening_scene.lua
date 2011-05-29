@@ -298,7 +298,7 @@ function CreateDialogue()
 	local dialogue;
 	local text;
 
-	-- Dialogue 
+	-- Introduction Dialogue
 	dialogue = hoa_map.SpriteDialogue(10);
 		dialogue:SetInputBlocked(true);
 		text = hoa_system.Translate("I watched the men in the pale light of the blue moon. The dark cloaks they wore for warmth only better distinguishing them against the light sand for my trained eye.");
@@ -311,8 +311,14 @@ function CreateDialogue()
 		dialogue:AddLineTimed(text, 2500, 10000);
 	DialogueManager:AddDialogue(dialogue);
 	
+	-- Captain's orders after troop movement
 	dialogue = hoa_map.SpriteDialogue(20);
-		text = hoa_system.Translate("Alright listen up! Our scouts report that somewhere in this cave, the underground river vein that supplies our city has been blocked. Our mission is to remove the obstruction and restore the water supply.");
+		text = hoa_system.Translate("Alright, listen up!");
+		dialogue:AddLine(text, 2001);
+	DialogueManager:AddDialogue(dialogue);
+	
+	dialogue = hoa_map.SpriteDialogue(21);
+		text = hoa_system.Translate("Our scouts report that somewhere in this cave, the underground river vein that supplies our city has been blocked. Our mission is to remove the obstruction and restore the water supply.");
 		dialogue:AddLine(text, 2001);
 		text = hoa_system.Translate("I don't need to remind you all of how important this mission is. The great sand storms that have swept over this land for the past several days have prevented us from achieving this objective sooner, and our local reserves of water are nearly dry. If we fail to succeed here, our people will perish.");
 		dialogue:AddLine(text, 2001);
@@ -322,6 +328,7 @@ function CreateDialogue()
 		dialogue:AddLine(text, 2001);
 	DialogueManager:AddDialogue(dialogue);
 	
+	-- Character party after captain's orders
 	dialogue = hoa_map.SpriteDialogue(30);
 		text = hoa_system.Translate("Mark, Dester, Claudius. You're my squad. The creatures that inhabit this cave are not friendly, so be on your guard at all times. Now let's get moving.");
 		dialogue:AddLine(text, 1003);
@@ -401,61 +408,108 @@ function CreateEvents()
 	-- Move the captain forward to the cave entrance to give his speech to the troops
 	event = hoa_map.PathMoveSpriteEvent(100, 2000, 0, -6);
 	event:SetRelativeDestination(true);
-	event:AddEventLinkAtEnd(101, 250);
+	event:AddEventLinkAtStart(101, 250);
+	event:AddEventLinkAtStart(103, 250);
+	event:AddEventLinkAtStart(104, 350);
+	event:AddEventLinkAtStart(105, 250);
+	event:AddEventLinkAtStart(106, 450);
+	event:AddEventLinkAtStart(107, 250);
+	event:AddEventLinkAtStart(108, 150);
+	event:AddEventLinkAtStart(109, 250);
+	event:AddEventLinkAtStart(110, 450);
+	event:AddEventLinkAtStart(111, 350);
+	event:AddEventLinkAtStart(112, 550);
+	event:AddEventLinkAtStart(113, 550);
+	event:AddEventLinkAtEnd(130);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(101, 2000, -10, -2);
+	
+	event = hoa_map.ChangeDirectionSpriteEvent(101, 1000, hoa_map.MapMode.SOUTH);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(102, 1001, hoa_map.MapMode.NORTH);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(103, 1002, hoa_map.MapMode.EAST);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(104, 1003, hoa_map.MapMode.WEST);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(105, 2001, hoa_map.MapMode.SOUTH);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(106, 2002, hoa_map.MapMode.NORTH);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(107, 2003, hoa_map.MapMode.WEST);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(108, 2004, hoa_map.MapMode.WEST);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(109, 2005, hoa_map.MapMode.SOUTH);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(110, 2006, hoa_map.MapMode.WEST);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(111, 2007, hoa_map.MapMode.NORTH);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(112, 2008, hoa_map.MapMode.EAST);
+	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent(113, 2009, hoa_map.MapMode.EAST);
+	EventManager:RegisterEvent(event);	
+	
+	event = hoa_map.PathMoveSpriteEvent(130, 2000, -10, -2);
 	event:SetRelativeDestination(true);
-	event:AddEventLinkAtEnd(102);
-	event:AddEventLinkAtEnd(103, 250);
-	event:AddEventLinkAtEnd(104, 350);
-	event:AddEventLinkAtEnd(105, 250);
-	event:AddEventLinkAtEnd(106, 450);
-	event:AddEventLinkAtEnd(107, 250);
-	event:AddEventLinkAtEnd(108, 150);
-	event:AddEventLinkAtEnd(109, 250);
-	event:AddEventLinkAtEnd(110, 450);
-	event:AddEventLinkAtEnd(111, 350);
-	event:AddEventLinkAtEnd(112, 550);
-	event:AddEventLinkAtEnd(113, 550);
-	event:AddEventLinkAtEnd(114, 150);
-	event:AddEventLinkAtEnd(115, 350);
-	event:AddEventLinkAtEnd(116, 750);
+	event:AddEventLinkAtEnd(131);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(102, 2000, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(131, 2000, hoa_map.MapMode.SOUTH);
+	event:AddEventLinkAtEnd(150, 250);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(103, 1000, hoa_map.MapMode.NORTH);
+	
+	-- Captain calls attention to troops, who all look north toward him
+	event = hoa_map.DialogueEvent(150, 20);
+	event:AddEventLinkAtEnd(151, 250);
+	event:AddEventLinkAtEnd(152, 350);
+	event:AddEventLinkAtEnd(153, 250);
+	event:AddEventLinkAtEnd(154, 450);
+	event:AddEventLinkAtEnd(155, 250);
+	event:AddEventLinkAtEnd(156, 150);
+	event:AddEventLinkAtEnd(157, 250);
+	event:AddEventLinkAtEnd(158, 450);
+	event:AddEventLinkAtEnd(159, 350);
+	event:AddEventLinkAtEnd(160, 550);
+	event:AddEventLinkAtEnd(161, 550);
+	event:AddEventLinkAtEnd(162, 150);
+	event:AddEventLinkAtEnd(163, 350);
+	event:AddEventLinkAtEnd(200, 750);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(104, 1001, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(151, 1000, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(105, 1002, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(152, 1001, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(106, 1003, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(153, 1002, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(107, 2001, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(154, 1003, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(108, 2002, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(155, 2001, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(109, 2003, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(156, 2002, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(110, 2004, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(157, 2003, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(111, 2005, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(158, 2004, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(112, 2006, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(159, 2005, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(113, 2007, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(160, 2006, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(114, 2008, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(161, 2007, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(115, 2009, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent(162, 2008, hoa_map.MapMode.NORTH);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.DialogueEvent(116, 20);
+	event = hoa_map.ChangeDirectionSpriteEvent(163, 2009, hoa_map.MapMode.NORTH);
+	EventManager:RegisterEvent(event);
+	
+	-- Captain gives his orders
+	event = hoa_map.DialogueEvent(200, 21);
 	EventManager:RegisterEvent(event);
 end
 
 
 
 map_functions[1] = function()
-
+	Map:SetCamera()
 end
 
