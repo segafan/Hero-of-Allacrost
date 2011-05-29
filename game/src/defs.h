@@ -307,6 +307,8 @@ namespace hoa_map {
 		class JoinPartyEvent;
 		class BattleEncounterEvent;
 		class SpriteEvent;
+		class ScriptedSpriteEvent;
+		class ChangeDirectionSpriteEvent;
 		class PathMoveSpriteEvent;
 		class RandomMoveSpriteEvent;
 		class AnimateSpriteEvent;

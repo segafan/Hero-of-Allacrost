@@ -400,6 +400,128 @@ SpriteEvent::SpriteEvent(uint32 event_id, EVENT_TYPE event_type, VirtualSprite* 
 }
 
 // -----------------------------------------------------------------------------
+// ---------- ScriptedSpriteEvent Class Methods
+// -----------------------------------------------------------------------------
+
+ScriptedSpriteEvent::ScriptedSpriteEvent(uint32 event_id, uint16 sprite_id, uint32 start_index, uint32 update_index) :
+	SpriteEvent(event_id, SCRIPTED_SPRITE_EVENT, sprite_id),
+	_start_function(NULL),
+	_update_function(NULL)
+{
+	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
+	MapMode::CurrentInstance()->OpenMapTablespace(true);
+	map_script.OpenTable("map_functions");
+	if (start_index != 0) {
+		_start_function = new ScriptObject();
+		*_start_function = map_script.ReadFunctionPointer(start_index);
+	}
+	if (update_index != 0) {
+		_update_function = new ScriptObject();
+		*_update_function = map_script.ReadFunctionPointer(update_index);
+	}
+	map_script.CloseTable();
+	map_script.CloseTable();
+}
+
+
+
+ScriptedSpriteEvent::ScriptedSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 start_index, uint32 update_index) :
+	SpriteEvent(event_id, SCRIPTED_SPRITE_EVENT, sprite),
+	_start_function(NULL),
+	_update_function(NULL)
+{
+	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
+	MapMode::CurrentInstance()->OpenMapTablespace(true);
+	map_script.OpenTable("map_functions");
+	if (start_index != 0) {
+		_start_function = new ScriptObject();
+		*_start_function = map_script.ReadFunctionPointer(start_index);
+	}
+	if (update_index != 0) {
+		_update_function = new ScriptObject();
+		*_update_function = map_script.ReadFunctionPointer(update_index);
+	}
+	map_script.CloseTable();
+	map_script.CloseTable();
+}
+
+
+
+ScriptedSpriteEvent::~ScriptedSpriteEvent() {
+	if (_start_function != NULL) {
+		delete _start_function;
+		_start_function = NULL;
+	}
+	if (_update_function != NULL) {
+		delete _update_function;
+		_update_function = NULL;
+	}
+}
+
+
+
+ScriptedSpriteEvent::ScriptedSpriteEvent(const ScriptedSpriteEvent& copy) :
+	SpriteEvent(copy)
+{
+	if (copy._start_function == NULL)
+		_start_function = NULL;
+	else
+		_start_function = new ScriptObject(*copy._start_function);
+
+	if (copy._update_function == NULL)
+		_update_function = NULL;
+	else
+		_update_function = new ScriptObject(*copy._update_function);
+}
+
+
+
+ScriptedSpriteEvent& ScriptedSpriteEvent::operator=(const ScriptedSpriteEvent& copy) {
+	if (this == &copy) // Handle self-assignment case
+		return *this;
+
+	SpriteEvent::operator=(copy);
+
+	if (copy._start_function == NULL)
+		_start_function = NULL;
+	else
+		_start_function = new ScriptObject(*copy._start_function);
+
+	if (copy._update_function == NULL)
+		_update_function = NULL;
+	else
+		_update_function = new ScriptObject(*copy._update_function);
+
+	return *this;
+}
+
+
+
+void ScriptedSpriteEvent::_Start() {
+	if (_start_function != NULL) {
+		SpriteEvent::_Start();
+		ScriptCallFunction<void>(*_start_function, _sprite);
+	}
+}
+
+
+
+bool ScriptedSpriteEvent::_Update() {
+	bool finished = false;
+	if (_update_function != NULL) {
+		finished = ScriptCallFunction<bool>(*_update_function, _sprite);
+	}
+	else {
+		finished = true;
+	}
+
+	if (finished == true) {
+		_sprite->ReleaseControl(this);
+	}
+	return finished;
+}
+
+// -----------------------------------------------------------------------------
 // ---------- ChangeDirectionSpriteEvent Class Methods
 // -----------------------------------------------------------------------------
 
