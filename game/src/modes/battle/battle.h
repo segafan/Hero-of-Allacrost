@@ -44,7 +44,7 @@ namespace private_battle {
 ***
 *** Certain sequences such as when a battle first begins require a lot of operations that are not done for the
 *** remaining 99% of the time that a battle is active. The purpose of this class is to enable those custom operations
-*** and prevent the BattleMode class from being inundated with members and methods that are rarely used. This class 
+*** and prevent the BattleMode class from being inundated with members and methods that are rarely used. This class
 *** should support multiple different sequences so some members and methods may only pertain to one sequence or another,
 *** while other data may be shared among sequences.
 ***
@@ -55,7 +55,7 @@ namespace private_battle {
 ***
 *** \note BattleMode declares this class as a friend, and hence this class has access to all private data and methods of
 *** the BattleMode class.
-**/ 
+**/
 class SequenceSupervisor {
 public:
 	SequenceSupervisor(BattleMode* current_instance);
@@ -71,7 +71,7 @@ public:
 private:
 	//! \brief A pointer to the active battle mode instance, retained locally in this class only for convience
 	BattleMode* _battle;
-	
+
 	//! \brief Used to represent the state of which "step" we are on in producing a particular sequence
 	uint32 _sequence_step;
 
@@ -288,12 +288,15 @@ public:
 	//@{
 	hoa_video::StillImage& GetCharacterBarCovers()
 		{ return _character_bar_covers; }
+
+	private_battle::CommandSupervisor* GetCommandSupervisor()
+		{ return _command_supervisor; }
 	//@}
 
 private:
 	//! \brief A static pointer to the currently active instance of battle mode
 	static BattleMode* _current_instance;
-	
+
 	//! \brief Retains the current state of the battle
 	private_battle::BATTLE_STATE _state;
 

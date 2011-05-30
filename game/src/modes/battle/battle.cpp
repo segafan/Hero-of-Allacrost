@@ -133,7 +133,7 @@ void SequenceSupervisor::_UpdateInitialSequence() {
 	// The furtherst positions character ane enemy sprites are placed when animating them into view
 	const float MAX_CHARACTER_OFFSET = 250.0f;
 	const float MAX_ENEMY_OFFSET = 750.0f;
-	
+
 	// Step 0: Initial entry, prepare members for the steps to follow
 	if (_sequence_step == 0) {
 		_background_fade.SetAlpha(0.0f);
@@ -149,14 +149,14 @@ void SequenceSupervisor::_UpdateInitialSequence() {
 		for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
 			_battle->_enemy_actors[i]->SetXLocation(_battle->_enemy_actors[i]->GetXOrigin() + MAX_ENEMY_OFFSET);
 		}
-		
+
 		_sequence_step = INIT_STEP_BACKGROUND_FADE;
 	}
 	// Step 1: Fade in the background graphics
 	else if (_sequence_step == INIT_STEP_BACKGROUND_FADE) {
 		_sequence_timer.Update();
 		_background_fade.SetAlpha(_sequence_timer.PercentComplete());
-		
+
 		if (_sequence_timer.IsFinished() == true) {
 			_sequence_timer.Initialize(STEP_02_TIME);
 			_sequence_timer.Run();
@@ -897,14 +897,14 @@ void BattleMode::_Initialize() {
 
 	for (uint32 i = 0; i < status_types.size(); i++) {
 		GLOBAL_STATUS status = static_cast<GLOBAL_STATUS>(status_types[i]);
-		
+
 		// Check for duplicate entries of the same status effect
 		if (_status_icon_index.find(status) != _status_icon_index.end()) {
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "duplicate entry found in file " << script_file.GetFilename() <<
 				" for status type: " << status_types[i] << endl;
 			continue;
 		}
-		
+
 		script_file.OpenTable(status_types[i]);
 		if (script_file.DoesIntExist("icon_index") == true) {
 			uint32 icon_index = script_file.ReadUInt("icon_index");
@@ -915,7 +915,7 @@ void BattleMode::_Initialize() {
 		}
 		script_file.CloseTable();
 	}
-	
+
 	// (2): Construct all character battle actors from the active party
 	GlobalParty* active_party = GlobalManager->GetActiveParty();
 	if (active_party->GetPartySize() == 0) {

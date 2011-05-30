@@ -1,4 +1,3 @@
-
 ////////////////////////////////////////////////////////////////////////////////
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
@@ -14,6 +13,7 @@
 *** \brief   Source file for battle menu windows
 *** ***************************************************************************/
 
+#include "audio.h"
 #include "input.h"
 #include "system.h"
 #include "video.h"
@@ -357,10 +357,14 @@ uint32 ItemCommand::GetItemIndex() {
 void ItemCommand::UpdateList() {
 	_item_list.Update();
 
-	if (InputManager->UpPress())
+	if (InputManager->UpPress()) {
 		_item_list.InputUp();
-	else if (InputManager->DownPress())
+		BattleMode::CurrentInstance()->GetCommandSupervisor()->cursor_sound.Play();
+	}
+	else if (InputManager->DownPress()) {
 		_item_list.InputDown();
+		BattleMode::CurrentInstance()->GetCommandSupervisor()->cursor_sound.Play();
+	}
 }
 
 
@@ -491,6 +495,8 @@ GlobalSkill* SkillCommand::GetSelectedSkill() {
     return _skills->at(selection);
 }
 
+
+
 bool SkillCommand::GetSelectedSkillEnabled() {
 	if ((_skills == NULL) || (_skill_list == NULL))
 		return false;
@@ -499,16 +505,22 @@ bool SkillCommand::GetSelectedSkillEnabled() {
     return _skill_list->IsOptionEnabled(selection);
 }
 
+
+
 void SkillCommand::UpdateList() {
 	if (_skill_list == NULL)
 		return;
 
 	_skill_list->Update();
 
-	if (InputManager->UpPress())
+	if (InputManager->UpPress()) {
 		_skill_list->InputUp();
-	else if (InputManager->DownPress())
+		BattleMode::CurrentInstance()->GetCommandSupervisor()->cursor_sound.Play();
+	}
+	else if (InputManager->DownPress()) {
 		_skill_list->InputDown();
+		BattleMode::CurrentInstance()->GetCommandSupervisor()->cursor_sound.Play();
+	}
 }
 
 
@@ -581,6 +593,22 @@ CommandSupervisor::CommandSupervisor() :
 
 	_window_header.SetStyle(TextStyle("title22"));
 	_window_text.SetStyle(TextStyle("text20"));
+
+	bool sound_load_failure = false;
+	if (confirm_sound.LoadAudio("snd/confirm.wav") == false)
+		sound_load_failure = true;
+	if (cancel_sound.LoadAudio("snd/cancel.wav") == false)
+		sound_load_failure = true;
+	if (cursor_sound.LoadAudio("snd/confirm.wav") == false)
+		sound_load_failure = true;
+	if (invalid_sound.LoadAudio("snd/cancel.wav") == false)
+		sound_load_failure = true;
+	if (finish_sound.LoadAudio("snd/confirm.wav") == false)
+		sound_load_failure = true;
+
+	if (sound_load_failure == true) {
+		PRINT_WARNING << "failed to load one or more battle command menu sounds" << endl;
+	}
 }
 
 
@@ -816,18 +844,21 @@ void CommandSupervisor::_UpdateCategory() {
 		if (_category_list.IsOptionEnabled(_category_list.GetSelection()) == true) {
 			_active_settings->SetLastCategory(_category_list.GetSelection());
 			_ChangeState(COMMAND_STATE_ACTION);
+			confirm_sound.Play();
 		}
 		else {
-			// TODO: play an "invalid" sound?
+			invalid_sound.Play();
 		}
 	}
 
 	else if (InputManager->LeftPress()) {
 		_category_list.InputLeft();
+		cursor_sound.Play();
 	}
 
 	else if (InputManager->RightPress()) {
 		_category_list.InputRight();
+		cursor_sound.Play();
 	}
 }
 
@@ -836,6 +867,7 @@ void CommandSupervisor::_UpdateCategory() {
 void CommandSupervisor::_UpdateAction() {
 	if (InputManager->CancelPress()) {
 		_ChangeState(COMMAND_STATE_CATEGORY);
+		cancel_sound.Play();
 		return;
 	}
 
@@ -846,14 +878,16 @@ void CommandSupervisor::_UpdateAction() {
             bool is_skill_enabled = _skill_command.GetSelectedSkillEnabled();
 			if (is_skill_enabled == true) {
 				_ChangeState(COMMAND_STATE_TARGET);
+				confirm_sound.Play();
 			}
 			else {
-				// TODO: play "invalid" sound here?
+				invalid_sound.Play();
 			}
 		}
 
 		else if (InputManager->MenuPress()) {
 			_ChangeState(COMMAND_STATE_INFORMATION);
+			confirm_sound.Play();
 		}
 
 		else {
@@ -866,14 +900,16 @@ void CommandSupervisor::_UpdateAction() {
 		if (InputManager->ConfirmPress()) {
 			if (_selected_item != NULL) {
 				_ChangeState(COMMAND_STATE_TARGET);
+				confirm_sound.Play();
 			}
 			else {
-				// TODO: play "invalid" sound here?
+				invalid_sound.Play();
 			}
 		}
 
 		else if (InputManager->MenuPress()) {
 			_ChangeState(COMMAND_STATE_INFORMATION);
+			confirm_sound.Play();
 		}
 
 		else {
@@ -892,16 +928,19 @@ void CommandSupervisor::_UpdateAction() {
 void CommandSupervisor::_UpdateTarget() {
 	if (InputManager->CancelPress()) {
 		_state = COMMAND_STATE_ACTION;
+		cancel_sound.Play();
 	}
 
 	else if (InputManager->ConfirmPress()) {
 		_FinalizeCommand();
+		finish_sound.Play();
 	}
 
 	else if (InputManager->UpPress() || InputManager->DownPress()) {
 		if ((IsTargetPoint(_selected_target.GetType()) == true) || (IsTargetActor(_selected_target.GetType()) == true)) {
 			_selected_target.SelectNextActor(GetCommandCharacter(), InputManager->UpPress());
 			_CreateTargetText();
+			cursor_sound.Play();
 		}
 	}
 
@@ -909,6 +948,7 @@ void CommandSupervisor::_UpdateTarget() {
 		if (IsTargetPoint(_selected_target.GetType()) == true) {
 			_selected_target.SelectNextPoint(GetCommandCharacter(), InputManager->RightPress());
 			_CreateTargetText();
+			cursor_sound.Play();
 		}
 	}
 }
@@ -918,10 +958,12 @@ void CommandSupervisor::_UpdateTarget() {
 void CommandSupervisor::_UpdateInformation() {
 	if (InputManager->CancelPress() || InputManager->MenuPress()) {
 		_state = COMMAND_STATE_ACTION;
+		cancel_sound.Play();
 	}
 
 	else if (InputManager->ConfirmPress()) {
 		_ChangeState(COMMAND_STATE_TARGET);
+		cancel_sound.Play();
 	}
 
 	// Change selected skill/item and update the information text
@@ -929,10 +971,12 @@ void CommandSupervisor::_UpdateInformation() {
 		if (_IsSkillCategorySelected() == true) {
 			_skill_command.UpdateList();
 			_selected_skill = _skill_command.GetSelectedSkill();
+			cursor_sound.Play();
 		}
 		else if (_IsItemCategorySelected() == true) {
 			_item_command.UpdateList();
 			_selected_item = _item_command.GetSelectedItem();
+			cursor_sound.Play();
 		}
 
 		_CreateInformationText();
