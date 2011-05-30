@@ -353,6 +353,11 @@ public:
 
 	~CommandSupervisor();
 
+	/** \brief Various sounds that are played as the player performs actions on the command menu
+	*** These members are public so that the other command clases may access them
+	**/
+	hoa_audio::SoundDescriptor confirm_sound, cancel_sound, cursor_sound, invalid_sound, finish_sound;
+
 	/** \brief Constructs settings for all characters in the party
 	*** This should only be invoked once after the BattleMode class has initialized all of its
 	*** character actors.
