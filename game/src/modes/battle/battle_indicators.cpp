@@ -315,6 +315,11 @@ void IndicatorSupervisor::Draw() {
 
 
 void IndicatorSupervisor::AddDamageIndicator(uint32 amount) {
+	const Color low_red(1.0f, 0.75f, 0.0f, 1.0f);
+	const Color mid_red(1.0f, 0.50f, 0.0f, 1.0f);
+	const Color high_red(1.0f, 0.25f, 0.0f, 1.0f);
+	const Color full_red(Color::red);
+
 	if (amount == 0) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function was given a zero value argument" << endl;
 		return;
@@ -323,27 +328,25 @@ void IndicatorSupervisor::AddDamageIndicator(uint32 amount) {
 	string text = NumberToString(amount);
 	TextStyle style;
 
-	// TODO: use different colors/shades of red for different degrees of damage. There's a
-	// bug in rendering colored text that needs to be addressed first.
 	float damage_percent = static_cast<float>(amount) / static_cast<float>(_actor->GetMaxHitPoints());
 	if (damage_percent < 0.10f) {
 		style.font = "text18";
-		style.color = Color::red;
+		style.color = low_red;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (damage_percent < 0.20f) {
 		style.font = "text20";
-		style.color = Color::red;
+		style.color = mid_red;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (damage_percent < 0.30f) {
 		style.font = "text22";
-		style.color = Color::red;
+		style.color = high_red;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else { // (damage_percent >= 0.30f)
 		style.font = "text24";
-		style.color = Color::red;
+		style.color = full_red;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 
@@ -353,6 +356,11 @@ void IndicatorSupervisor::AddDamageIndicator(uint32 amount) {
 
 
 void IndicatorSupervisor::AddHealingIndicator(uint32 amount) {
+	const Color low_green(0.0f, 1.0f, 0.75f, 1.0f);
+	const Color mid_green(0.0f, 1.0f, 0.50f, 1.0f);
+	const Color high_green(0.0f, 1.0f, 0.25f, 1.0f);
+	const Color full_green(Color::green);
+
 	if (amount == 0) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function was given a zero value argument" << endl;
 		return;
@@ -366,22 +374,22 @@ void IndicatorSupervisor::AddHealingIndicator(uint32 amount) {
 	float healing_percent = static_cast<float>(amount / _actor->GetMaxHitPoints());
 	if (healing_percent < 0.10f) {
 		style.font = "text18";
-		style.color = Color::green;
+		style.color = low_green;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (healing_percent < 0.20f) {
 		style.font = "text20";
-		style.color = Color::green;
+		style.color = mid_green;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (healing_percent < 0.30f) {
 		style.font = "text22";
-		style.color = Color::green;
+		style.color = high_green;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else { // (healing_percent >= 0.30f)
 		style.font = "text24";
-		style.color = Color::green;
+		style.color = full_green;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 
