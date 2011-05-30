@@ -1064,9 +1064,9 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring& string, TextStyle& style, I
 	SDL_LockSurface(intermediary);
 
 	uint8 color_mult[] = {
-		(uint8) style.color[0] * 0xFF,
-		(uint8) style.color[1] * 0xFF,
-		(uint8) style.color[2] * 0xFF,
+		static_cast<uint8>(style.color[0] * 0xFF),
+		static_cast<uint8>(style.color[1] * 0xFF),
+		static_cast<uint8>(style.color[2] * 0xFF)
 	};
 
 	uint32 num_bytes = intermediary->w * intermediary->h * 4;
