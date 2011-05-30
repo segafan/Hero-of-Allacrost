@@ -37,13 +37,13 @@ namespace hoa_battle {
 namespace private_battle {
 
 //! \brief The total amount of time (in milliseconds) that the display sequence lasts for indicator elements
-const uint32 INDICTATOR_TIME = 5000;
+const uint32 INDICATOR_TIME = 5000;
 
-//! \brief The amount of time (in milliseconds) that indicator elements fade at the beginning and end of the display sequence
-const uint32 INDICATOR_FADE_TIME = 1000;
+//! \brief The amount of time (in milliseconds) that indicator elements fade at the beginning of the display sequence
+const uint32 INDICATOR_FADEIN_TIME = 500;
 
-//! \brief The total vertical distance that indictor elements travel during the display sequence
-const float INDICATOR_POSITION_CHANGE = 100.0f; // TODO: need to think of a better name for this constant
+//! \brief The amount of time (in milliseconds) that indicator elements fade at the end of the display sequence
+const uint32 INDICATOR_FADEOUT_TIME = 1000;
 
 ////////////////////////////////////////////////////////////////////////////////
 // IndicatorElement class
@@ -51,7 +51,7 @@ const float INDICATOR_POSITION_CHANGE = 100.0f; // TODO: need to think of a bett
 
 IndicatorElement::IndicatorElement(BattleActor* actor) :
 	_actor(actor),
-	_timer(INDICTATOR_TIME),
+	_timer(INDICATOR_TIME),
 	_alpha_color(1.0f, 1.0f, 1.0f, 0.0f)
 {
 	if (actor == NULL)
@@ -75,20 +75,70 @@ void IndicatorElement::Update() {
 
 
 
-bool IndicatorElement::CalculateDrawAlpha() {
+void IndicatorElement::_CalculateDrawPosition() {
+	// These constants are used to determine the draw position at various phases of the indicator animation.
+	// The animation (as it pertains to draw position) is determined in a number of phases.
+	// Phase 01: Indicator starts from below the sprite and shoots upward to a peak
+	// Phase 02: Indicator drops back down to the bottom of the sprite
+	// Phase 03: Indicator moves upward again to a smaller peak (a "bounce")
+	// Phase 04: Indicator falls back to bottom of the sprite
+	// Phase 05: Indicator rests at bottom of sprite
+	// Phase 06: Indicator falls as it fades away
+	const uint32 PHASE01_END    = 750;
+	const uint32 PHASE02_END    = 1500;
+	const uint32 PHASE03_END    = 2000;
+	const uint32 PHASE04_END    = 2500;
+	const uint32 PHASE05_END    = 4000;
+	const uint32 PHASE06_END    = INDICATOR_TIME;
+
+	const float PEAK_HEIGHT     = 40.0f;
+	const float BOUNCE_HEIGHT   = 16.0f;
+
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	// Sets the cursor position to just below the bottom center location of the sprite
+	VideoManager->Move(_actor->GetXLocation(), _actor->GetYLocation());
+
+	// TODO: Improve the animation by decreasing/increasing velocity as the element peaks (physics). This will create a much more natural and smooth effect.
+
+	float y_offset = 0.0f;
+	if (_timer.GetTimeExpired() < PHASE01_END) {
+		y_offset = ((PEAK_HEIGHT + ElementHeight()) * (static_cast<float>(_timer.GetTimeExpired()) / static_cast<float>(PHASE01_END))) - ElementHeight();
+	}
+	else if (_timer.GetTimeExpired() < PHASE02_END) {
+		y_offset = PEAK_HEIGHT - (PEAK_HEIGHT * (static_cast<float>(_timer.GetTimeExpired() - PHASE01_END) / static_cast<float>(PHASE02_END - PHASE01_END)));
+	}
+	else if (_timer.GetTimeExpired() < PHASE03_END) {
+		y_offset = BOUNCE_HEIGHT * (static_cast<float>(_timer.GetTimeExpired() - PHASE02_END) / static_cast<float>(PHASE03_END - PHASE02_END));
+	}
+	else if (_timer.GetTimeExpired() < PHASE04_END) {
+		y_offset = BOUNCE_HEIGHT - (BOUNCE_HEIGHT * (static_cast<float>(_timer.GetTimeExpired() - PHASE03_END) / static_cast<float>(PHASE04_END - PHASE03_END)));
+	}
+	else if (_timer.GetTimeExpired() < PHASE05_END) {
+		y_offset = 0.0f;
+	}
+	else {
+		y_offset = 0.0f - (ElementHeight() * (static_cast<float>(_timer.GetTimeExpired() - PHASE05_END) / static_cast<float>(PHASE06_END - PHASE05_END)));
+	}
+
+	VideoManager->MoveRelative(0.0f, y_offset);
+}
+
+
+
+bool IndicatorElement::_CalculateDrawAlpha() {
 	// Case 1: Timer is not running nor paused so indicator should not be drawn
 	if ((_timer.GetState() == SYSTEM_TIMER_RUNNING) && (_timer.GetState() == SYSTEM_TIMER_PAUSED)) {
 		_alpha_color.SetAlpha(0.0f);
 		return true;
 	}
 	// Case 2: Timer is in beginning stage and indicator graphic is fading in
-	else if (_timer.GetTimeExpired() < INDICATOR_FADE_TIME) {
-		_alpha_color.SetAlpha(static_cast<float>(_timer.GetTimeExpired()) / static_cast<float>(INDICATOR_FADE_TIME));
+	else if (_timer.GetTimeExpired() < INDICATOR_FADEIN_TIME) {
+		_alpha_color.SetAlpha(static_cast<float>(_timer.GetTimeExpired()) / static_cast<float>(INDICATOR_FADEIN_TIME));
 		return true;
 	}
 	// Case 3: Timer is in final stage and indicator graphic is fading out
-	else if (_timer.TimeLeft() < INDICATOR_FADE_TIME) {
-		_alpha_color.SetAlpha(static_cast<float>(_timer.TimeLeft()) / static_cast<float>(INDICATOR_FADE_TIME));
+	else if (_timer.TimeLeft() < INDICATOR_FADEOUT_TIME) {
+		_alpha_color.SetAlpha(static_cast<float>(_timer.TimeLeft()) / static_cast<float>(INDICATOR_FADEOUT_TIME));
 		return true;
 	}
 	// Case 4: Timer is in middle stage and indicator graphic should be drawn with no transparency
@@ -109,22 +159,9 @@ IndicatorText::IndicatorText(BattleActor* actor, string& text, TextStyle& style)
 
 
 void IndicatorText::Draw() {
-	VideoManager->Move(_actor->GetXLocation(), _actor->GetYLocation());
+	_CalculateDrawPosition();
 
-	// Draw to the left of the sprite for characters and to the right of the sprite for enemys
-	if (_actor->IsEnemy() == false) {
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->MoveRelative(-20.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image
-	}
-	else {
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->MoveRelative(_actor->GetSpriteWidth() / 2.0f, 0.0f);
-	}
-
-	float y_position = INDICATOR_POSITION_CHANGE * _timer.PercentComplete();
-	VideoManager->MoveRelative(0.0f, y_position);
-
-	if (CalculateDrawAlpha() == true)
+	if (_CalculateDrawAlpha() == true)
 		_text_image.Draw(_alpha_color);
 	else
 		_text_image.Draw();
@@ -151,22 +188,10 @@ IndicatorImage::IndicatorImage(BattleActor* actor, const StillImage& image) :
 
 
 void IndicatorImage::Draw() {
+	_CalculateDrawPosition();
 	VideoManager->Move(_actor->GetXLocation(), _actor->GetYLocation());
 
-	// Draw to the left of the sprite for characters and to the right of the sprite for enemys
-	if (_actor->IsEnemy() == false) {
-		VideoManager->MoveRelative(-40.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image, not -40.0f
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	}
-	else {
-		VideoManager->MoveRelative(40.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image, not 40.0f
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	}
-
-	float y_position = INDICATOR_POSITION_CHANGE * _timer.PercentComplete();
-	VideoManager->MoveRelative(0.0f, y_position);
-
-	if (CalculateDrawAlpha() == true)
+	if (_CalculateDrawAlpha() == true)
 		_image.Draw(_alpha_color);
 	else
 		_image.Draw();
@@ -198,45 +223,32 @@ IndicatorBlendedImage::IndicatorBlendedImage(BattleActor* actor, const StillImag
 
 
 void IndicatorBlendedImage::Draw() {
-	VideoManager->Move(_actor->GetXLocation(), _actor->GetYLocation());
-
-	// Draw to the left of the sprite for characters and to the right of the sprite for enemys
-	if (_actor->IsEnemy() == false) {
-		VideoManager->MoveRelative(-40.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image, not -40.0f
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	}
-	else {
-		VideoManager->MoveRelative(40.0f, 0.0f); // TEMP: should move to just past the edge of the sprite image, not 40.0f
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	}
-
-	float y_position = INDICATOR_POSITION_CHANGE * _timer.PercentComplete();
-	VideoManager->MoveRelative(0.0f, y_position);
+	_CalculateDrawPosition();
 
 	// Case 1: Initial fade in of first image
-	if (_timer.GetTimeExpired() <= INDICATOR_FADE_TIME) {
-		CalculateDrawAlpha();
+	if (_timer.GetTimeExpired() <= INDICATOR_FADEIN_TIME) {
+		_CalculateDrawAlpha();
 		_first_image.Draw(_alpha_color);
 	}
 	// Case 2: Opaque draw of first image
-	else if (_timer.GetTimeExpired() <= (INDICATOR_FADE_TIME * 2)) {
+	else if (_timer.GetTimeExpired() <= 2000) { // TEMP: (INDICATOR_FADE_TIME * 2)
 		_first_image.Draw();
 	}
 	// Case 3: Blended draw of first and second images
-	else if (_timer.GetTimeExpired() <= (INDICATOR_FADE_TIME * 3)) {
-		_alpha_color.SetAlpha(static_cast<float>((INDICATOR_FADE_TIME * 3) - _timer.GetTimeExpired())
-			/ static_cast<float>(INDICATOR_FADE_TIME));
+	else if (_timer.GetTimeExpired() <= 3000) { // TEMP: (INDICATOR_FADE_TIME * 3)
+		_alpha_color.SetAlpha(static_cast<float>(3000 - _timer.GetTimeExpired())
+			/ static_cast<float>(1000));
 		_second_alpha_color.SetAlpha(1.0f - _alpha_color.GetAlpha());
 		_first_image.Draw(_alpha_color);
 		_second_image.Draw(_second_alpha_color);
 	}
 	// Case 4: Opaque draw of second image
-	else if (_timer.GetTimeExpired() <= (INDICATOR_FADE_TIME * 4)) {
+	else if (_timer.GetTimeExpired() <= 4000) { // TEMP: (INDICATOR_FADE_TIME * 4)
 		_second_image.Draw();
 	}
 	// Case 5: Final fade out of second image
 	else { // (_timer.GetTimeExpired() <= INDICATOR_TIME)
-		CalculateDrawAlpha();
+		_CalculateDrawAlpha();
 		_second_image.Draw(_alpha_color);
 	}
 }
@@ -311,22 +323,28 @@ void IndicatorSupervisor::AddDamageIndicator(uint32 amount) {
 	string text = NumberToString(amount);
 	TextStyle style;
 
+	// TODO: use different colors/shades of red for different degrees of damage. There's a
+	// bug in rendering colored text that needs to be addressed first.
 	float damage_percent = static_cast<float>(amount) / static_cast<float>(_actor->GetMaxHitPoints());
 	if (damage_percent < 0.10f) {
 		style.font = "text18";
-		style.color = Color(1.0f, 0.275f, 0.275f, 1.0f);
+		style.color = Color::red;
+		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (damage_percent < 0.20f) {
 		style.font = "text20";
-		style.color = Color(1.0f, 0.0f, 0.0f, 1.0f);
+		style.color = Color::red;
+		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (damage_percent < 0.30f) {
 		style.font = "text22";
-		style.color = Color(0.784f, 0.0f, 0.0f, 1.0f);
+		style.color = Color::red;
+		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else { // (damage_percent >= 0.30f)
 		style.font = "text24";
-		style.color = Color(0.627f, 0.0f, 0.0f, 1.0f);
+		style.color = Color::red;
+		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 
 	_wait_queue.push_back(new IndicatorText(_actor, text, style));
@@ -343,22 +361,28 @@ void IndicatorSupervisor::AddHealingIndicator(uint32 amount) {
 	string text = NumberToString(amount);
 	TextStyle style;
 
+	// TODO: use different colors/shades of green for different degrees of damage. There's a
+	// bug in rendering colored text that needs to be addressed first.
 	float healing_percent = static_cast<float>(amount / _actor->GetMaxHitPoints());
 	if (healing_percent < 0.10f) {
 		style.font = "text18";
-		style.color = Color(0.0f, 1.0f, 0.0f, 1.0f);
+		style.color = Color::green;
+		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (healing_percent < 0.20f) {
 		style.font = "text20";
-		style.color = Color(0.06f, 1.0f, 0.0f, 1.0f);
+		style.color = Color::green;
+		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (healing_percent < 0.30f) {
 		style.font = "text22";
-		style.color = Color(0.0f, 1.0f, 0.0f, 1.0f);
+		style.color = Color::green;
+		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else { // (healing_percent >= 0.30f)
 		style.font = "text24";
-		style.color = Color(0.0f, 1.0f, 0.0f, 1.0f);
+		style.color = Color::green;
+		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 
 	_wait_queue.push_back(new IndicatorText(_actor, text, style));

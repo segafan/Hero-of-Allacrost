@@ -67,16 +67,6 @@ public:
 	//! \brief Draws the indicator information to the screen
 	virtual void Draw() = 0;
 
-	/** \brief Calculates the standard alpha (transparency) value for drawing the element
-	*** \return True if the alpha value is 1.0f and thus the indicator should be drawn with no alpha applied
-	***
-	*** Calling this function will set the alpha value of the _alpha_color member. Indicator elements
-	*** generally fade in and fade out to make their appearance more seamless on the battle field.
-	*** Alpha gradually increases from 0.0f to 1.0f in the first stage, remains at 1.0f for a majority
-	*** of the time, then gradually decreases back to 0.0f as the display finishes.
-	**/
-	bool CalculateDrawAlpha();
-
 	//! \brief Returns true when the indicator element has expired and should be removed
 	bool IsExpired() const
 		{ return _timer.IsFinished(); }
@@ -91,7 +81,7 @@ public:
 	//@}
 
 protected:
-	//! \brief The actor that the indicator element
+	//! \brief The actor that the indicator element will be displayed for
 	BattleActor* _actor;
 
 	//! \brief Used to monitor the display progress
@@ -99,6 +89,24 @@ protected:
 
 	//! \brief A modulation color used to modify the alpha (transparency) of the drawn element
 	hoa_video::Color _alpha_color;
+
+
+	/** \brief Calculates and sets the draw cursor position to the place where the indicator should be drawn
+	***
+	*** This method also sets the appropriate draw flags for the indicator. This method should be called at
+	*** the beginning of every Draw() method in derived classes.
+	**/
+	void _CalculateDrawPosition();
+
+	/** \brief Calculates the standard alpha (transparency) value for drawing the element
+	*** \return True if the alpha value is 1.0f and thus the indicator should be drawn with no alpha applied
+	***
+	*** Calling this function will set the alpha value of the _alpha_color member. Indicator elements
+	*** generally fade in and fade out to make their appearance more seamless on the battle field.
+	*** Alpha gradually increases from 0.0f to 1.0f in the first stage, remains at 1.0f for a majority
+	*** of the time, then gradually decreases back to 0.0f as the display finishes.
+	**/
+	bool _CalculateDrawAlpha();
 }; // class IndicatorElement
 
 
