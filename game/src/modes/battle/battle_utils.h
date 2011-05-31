@@ -107,16 +107,18 @@ enum ACTOR_STATE {
 
 //! \brief Enums for the various states that the CommandSupervisor class may be in
 enum COMMAND_STATE {
-	COMMAND_STATE_INVALID = -1,
+	COMMAND_STATE_INVALID         = -1,
 	//! Player is selecting the type of action to execute
-	COMMAND_STATE_CATEGORY = 0,
+	COMMAND_STATE_CATEGORY        = 0,
 	//! Player is selecting from a list of actions to execute
-	COMMAND_STATE_ACTION = 1,
-	//! Player is selecting the target to execute the action on
-	COMMAND_STATE_TARGET = 2,
+	COMMAND_STATE_ACTION          = 1,
+	//! Player is selecting the actor target to execute the action on
+	COMMAND_STATE_ACTOR           = 2,
+	//! Player is selecting the point target to execute the action on
+	COMMAND_STATE_POINT           = 3,
 	//! Player is viewing information about the selected action
-	COMMAND_STATE_INFORMATION = 3,
-	COMMAND_STATE_TOTAL = 4
+	COMMAND_STATE_INFORMATION     = 4,
+	COMMAND_STATE_TOTAL           = 5
 };
 
 
@@ -173,9 +175,9 @@ bool CalculateStandardEvasionMultiplier(BattleTarget* target, float mul_eva);
 *** \param target A pointer to the target that will be receiving the damage
 *** \return The amount of damage dealt, which will always be a non-zero value unless there was an error
 ***
-*** This function uses the physical attack/defense ratings to calculate the total damage caused. This function 
-*** uses a gaussian random distribution with a standard deviation of ten percent to perform variation in the 
-*** damage caused. Therefore this function may return different values each time it is called with the same arguments. 
+*** This function uses the physical attack/defense ratings to calculate the total damage caused. This function
+*** uses a gaussian random distribution with a standard deviation of ten percent to perform variation in the
+*** damage caused. Therefore this function may return different values each time it is called with the same arguments.
 *** If the amount of damage calculates out to zero, a small random non-zero value will be returned instead.
 **/
 uint32 CalculatePhysicalDamage(BattleActor* attacker, BattleTarget* target);
@@ -403,13 +405,13 @@ protected:
 	uint32 _stun_time;
 
 	/** \brief Constantly tries to approach the value of _time_expired in a gradual manner
-	*** 
+	***
 	*** This member allows us to show "gradual shifts" whenever the _time_expired member jumps to a new value. For example,
 	*** if a battle skill is used that reduces the _time_expired value of the target to zero, instead of instantly jumping the
 	*** stamina portrait of the target to the zero mark on the stamina bar, this member will show a quick but gradual move downward.
 	**/
 	uint32 _visible_time_expired;
-	
+
 	//! \brief When true the timer multiplier is applied to all timer updates
 	bool _multiplier_active;
 
@@ -423,7 +425,7 @@ protected:
 	virtual void _AutoUpdate();
 
 private:
-	/** \brief Computes and returns the update time after any stun duration has been accounted for 
+	/** \brief Computes and returns the update time after any stun duration has been accounted for
 	*** \param time The update time to apply to any active stun effect
 	*** \return The modified update time after stun has been acounted for
 	***
@@ -440,7 +442,7 @@ private:
 	*** This method does not do any error checking such as whether the multiplier is a valid number
 	*** (non-negative) or whether or not the multiplier is active. The code that calls this function
 	*** is responsible for that condition checking.
-	*** 
+	***
 	*** This function also adds any remainders after applying the multiplier to the accumulator. If it
 	*** finds the value of the accumulator is greater than or equal to 1.0f, it adds the integer amount
 	*** to the return value and subtracts this amount from the accumulator. For example, if the accumulator
@@ -453,7 +455,7 @@ private:
 	/** \brief Updates the value of the _visible_time_expired member to reduce the distance between it and _UpdateTime
 	*** \param time The amount of time that the actual timer was just updated by. Zero if no update was applied to the timer.
 	***
-	*** This function aims to make the _visible_time_expired member equal to the _time_expired member over a series of gradual steps. 
+	*** This function aims to make the _visible_time_expired member equal to the _time_expired member over a series of gradual steps.
 	*** The time argument is used to keep the two members in sync when they are already equal in value.
 	**/
 	void _UpdateVisibleTimeExpired(uint32 time);
@@ -569,7 +571,7 @@ public:
 	*** function while incrementing the index by 1 until it returns a NULL value.
 	**/
 	BattleActor* GetPartyActor(uint32 index);
-	
+
 	//! \name Class member accessor methods
 	//@{
 	hoa_global::GLOBAL_TARGET GetType() const
