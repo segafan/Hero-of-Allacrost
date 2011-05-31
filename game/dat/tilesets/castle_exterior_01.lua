@@ -8,6 +8,7 @@ image = "img/tilesets/castle_exterior_01.png"
 num_tile_cols = 16
 num_tile_rows = 16
 
+-- The general walkability of the tiles in the tileset. Zero indicates walkable. One tile has four walkable quadrants listed as: NW corner, NE corner, SW corner, SE corner.
 walkability = {}
 walkability[0] = {}
 walkability[0][0] = { 0, 0, 0, 0 }
@@ -64,7 +65,7 @@ walkability[3] = {}
 walkability[3][0] = { 1, 1, 1, 1 }
 walkability[3][1] = { 1, 1, 1, 1 }
 walkability[3][2] = { 1, 1, 1, 1 }
-walkability[3][3] = { 0, 0, 0, 0 }
+walkability[3][3] = { 1, 1, 1, 1 }
 walkability[3][4] = { 0, 0, 0, 0 }
 walkability[3][5] = { 0, 0, 0, 0 }
 walkability[3][6] = { 0, 0, 0, 0 }
@@ -281,3 +282,4 @@ walkability[15][12] = { 0, 0, 0, 0 }
 walkability[15][13] = { 0, 0, 0, 0 }
 walkability[15][14] = { 0, 0, 0, 0 }
 walkability[15][15] = { 0, 0, 0, 0 }
+
