@@ -1123,7 +1123,7 @@ void BattleMode::_DrawSprites() {
 	BattleActor* actor_target = target.GetActor(); // A pointer to an actor being targetted (value may be NULL if target is party)
 
 	// Determine if selector graphics should be drawn
-	if ((_state == BATTLE_STATE_COMMAND) && (_command_supervisor->GetState() == COMMAND_STATE_TARGET)) {
+	if ((_state == BATTLE_STATE_COMMAND) && ((_command_supervisor->GetState() == COMMAND_STATE_ACTOR) || (_command_supervisor->GetState() == COMMAND_STATE_POINT))) {
 		draw_actor_selection = true;
 		if (IsTargetPoint(target.GetType()) == true)
 			draw_point_selection = true;
@@ -1250,7 +1250,7 @@ void BattleMode::_DrawStaminaBar() {
 	BattleActor* selected_actor = NULL; // A pointer to the selected actor
 
 	// ----- (1): Determine if selector graphics should be drawn
-	if ((_state == BATTLE_STATE_COMMAND) && (_command_supervisor->GetState() == COMMAND_STATE_TARGET)) {
+	if ((_state == BATTLE_STATE_COMMAND) && ((_command_supervisor->GetState() == COMMAND_STATE_ACTOR) || (_command_supervisor->GetState() == COMMAND_STATE_POINT))) {
 		BattleTarget target = _command_supervisor->GetSelectedTarget();
 
 		draw_icon_selection = true;

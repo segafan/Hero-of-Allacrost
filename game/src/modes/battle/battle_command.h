@@ -186,7 +186,7 @@ public:
 	*** If the selection is invalid (because the list is empty) or the item could not be found,
 	*** the value 0xFFFFFFFF will be returned.
 	**/
-	uint32 GetItemIndex();
+	uint32 GetItemIndex() const;
 
 	/** \brief Returns a pointer to the item at the selected index
 	*** \param item_index The index of the item to retrieve
@@ -281,7 +281,7 @@ public:
 	*** This function will return NULL if the class has not been initialized and there is no list of
 	*** skills to select from.
 	**/
-	hoa_global::GlobalSkill* GetSelectedSkill();
+	hoa_global::GlobalSkill* GetSelectedSkill() const;
 
 	/** \brief Returns if the selected skill is enabled
 	*** This function will return true, if the selected skill is enabled and false otherwise. It will
@@ -443,7 +443,13 @@ private:
 	*** Typically this list includes "attack", "defend", "support", and "item". More types may appear
 	*** under special circumstances and conditions.
 	**/
-	hoa_gui::OptionBox _category_list;
+	hoa_gui::OptionBox _category_options;
+
+	/** \brief Contains a list of the possible targets that a player may select from
+	***
+	*** This option box is used for the selection of both actors and attack points.
+	**/
+	hoa_gui::OptionBox _target_options;
 
 	// ---------- Private methods
 
@@ -452,6 +458,9 @@ private:
 
 	//! \brief Returns true if the selected action category is an item action
 	bool _IsItemCategorySelected() const;
+
+	//! \brief Returns the type of target for the selected action
+	hoa_global::GLOBAL_TARGET _ActionTargetType();
 
 	//! \brief Returns true if the character parameter has already had a settings instance created for it
 	bool _HasCharacterSettings(BattleCharacter* character) const
@@ -477,8 +486,11 @@ private:
 	//! \brief Updates state when the player is selecting an action
 	void _UpdateAction();
 
-	//! \brief Updates state when the player is selecting a target
-	void _UpdateTarget();
+	//! \brief Updates state when the player is selecting an actor target
+	void _UpdateActorTarget();
+
+	//! \brief Updates state when the player is selecting an attack point target
+	void _UpdateAttackPointTarget();
 
 	//! \brief Updates state when the player is viewing information about an action
 	void _UpdateInformation();
@@ -489,14 +501,20 @@ private:
 	//! \brief Draws visible contents to the screen when the player is selecting an action
 	void _DrawAction();
 
-	//! \brief Draws visible contents to the screen when the player is selecting a target
-	void _DrawTarget();
+	//! \brief Draws visible contents to the screen when the player is selecting an actor target
+	void _DrawActorTarget();
+
+	//! \brief Draws visible contents to the screen when the player is selecting an attack point target
+	void _DrawAttackPointTarget();
 
 	//! \brief Draws visible contents to the screen when the player is viewing information about an action
 	void _DrawInformation();
 
 	//! \brief Sets the text for _window_header and _window_text to represent information about the selected target
-	void _CreateTargetText();
+	void _CreateActorTargetText();
+
+	//! \brief Sets the text for _window_header and _window_text to represent information about the selected target
+	void _CreateAttackPointTargetText();
 
 	//! \brief Sets the text for _window_header and _window_text to represent information about the selected skill or item
 	void _CreateInformationText();
