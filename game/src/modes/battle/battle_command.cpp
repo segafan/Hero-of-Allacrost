@@ -789,6 +789,60 @@ GLOBAL_TARGET CommandSupervisor::_ActionTargetType() {
 
 
 
+void CommandSupervisor::_SetInitialTarget() {
+	BattleActor* user = GetCommandCharacter();
+	GLOBAL_TARGET target_type = _ActionTargetType();
+
+	// Party targets are simple because we don't have to restore the last save target, since there is either the
+	// ally party or foe party, and both parties are always valid targets (because otherwise the battle would have
+	// already ended).
+	if (IsTargetParty(target_type) == true) {
+		// Party-type targets are always the same, so we don't need to recall the last target in this case
+		_selected_target.SetInitialTarget(user, target_type);
+		return;
+	}
+
+	// Retrieved the last saved target depending on the type (self/ally/foe)
+	if (IsTargetSelf(target_type) == true) {
+		_selected_target = _active_settings->GetLastSelfTarget();
+	}
+	else if (IsTargetAlly(target_type) == true) {
+		_selected_target = _active_settings->GetLastCharacterTarget();
+	}
+	else if (IsTargetFoe(target_type) == true) {
+		_selected_target = _active_settings->GetLastEnemyTarget();
+	}
+	else {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "no conditions met for invalid target type: " << target_type << endl;
+	}
+
+	// If the target type is invalid that means that there is no previous target so grab the initial target
+	if (_selected_target.GetType() == GLOBAL_TARGET_INVALID) {
+		_selected_target.SetInitialTarget(user, target_type);
+	}
+	// Otherwise if the last target is no longer valid, select the next valid target
+	else if (_selected_target.IsValid() == false) {
+		// Party targets should always be valid and attack points on actors do not disappear, so only the actor
+		// must be invalid
+		if (_selected_target.SelectNextActor(user) == false) {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "no valid targets found" << endl;
+		}
+	}
+
+	// This case occurs when our last target was an actor type and we're now using an action with a point targetl,
+	// or vice versa. We need to modify the target type while still retaining the original target actor.
+	if (_selected_target.GetType() != target_type) {
+		if (IsTargetPoint(target_type) == true) {
+			_selected_target.SetPointTarget(target_type, 0);
+		}
+		else { // then IsTargetActor(target_type) == true
+			_selected_target.SetActorTarget(target_type, _selected_target.GetActor());
+		}
+	}
+}
+
+
+
 void CommandSupervisor::_ChangeState(COMMAND_STATE new_state) {
 	if (_state == new_state) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "class was already in state to change to: " << new_state << endl;
@@ -829,34 +883,7 @@ void CommandSupervisor::_ChangeState(COMMAND_STATE new_state) {
 	else if (new_state == COMMAND_STATE_ACTOR) {
 		// Set the initial target if we're coming from the action selection state
 		if (_state == COMMAND_STATE_ACTION) {
-			BattleActor* user = GetCommandCharacter();
-			GLOBAL_TARGET target_type = _ActionTargetType();
-
-			// Retrieved the saved target depending on the type, or set the target if the target type is a party
-			if (IsTargetParty(target_type) == true)
-				_selected_target.SetInitialTarget(user, target_type);
-			else if (IsTargetSelf(target_type) == true)
-				_selected_target = _active_settings->GetLastSelfTarget();
-			else if (IsTargetAlly(target_type) == true)
-				_selected_target = _active_settings->GetLastCharacterTarget();
-			else if (IsTargetFoe(target_type) == true)
-				_selected_target = _active_settings->GetLastEnemyTarget();
-			else
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "no conditions met for invalid target type: " << target_type << endl;
-
-
-			// If the target type is invalid that means that there is no previous target so grab the initial target
-			if (_selected_target.GetType() == GLOBAL_TARGET_INVALID) {
-				_selected_target.SetInitialTarget(user, target_type);
-			}
-			// Otherwise if the last target is no longer valid, select the next valid target
-			else if (_selected_target.IsValid() == false) {
-				// Party targets should always be valid and attack points on actors do not disappear, so only the actor
-				// must be invalid
-				if (_selected_target.SelectNextActor(user) == false) {
-					IF_PRINT_WARNING(BATTLE_DEBUG) << "no valid targets found" << endl;
-				}
-			}
+			_SetInitialTarget();
 		}
 
 		_CreateActorTargetText();
@@ -968,7 +995,7 @@ void CommandSupervisor::_UpdateActorTarget() {
 	}
 
 	else if (InputManager->ConfirmPress()) {
-		if (IsTargetPoint(_ActionTargetType()) == true) {
+		if (IsTargetPoint(_selected_target.GetType()) == true) {
 			_ChangeState(COMMAND_STATE_POINT);
 		}
 		else {
@@ -977,7 +1004,7 @@ void CommandSupervisor::_UpdateActorTarget() {
 	}
 
 	else if (InputManager->UpPress() || InputManager->DownPress()) {
-		if ((IsTargetActor(_ActionTargetType()) == true) || (IsTargetPoint(_ActionTargetType()) == true)) {
+		if ((IsTargetActor(_selected_target.GetType()) == true) || (IsTargetPoint(_selected_target.GetType()) == true)) {
 			_selected_target.SelectNextActor(GetCommandCharacter(), InputManager->UpPress());
 			_CreateActorTargetText();
 			cursor_sound.Play();
