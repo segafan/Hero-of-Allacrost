@@ -1125,7 +1125,7 @@ void BattleMode::_DrawSprites() {
 	// Determine if selector graphics should be drawn
 	if ((_state == BATTLE_STATE_COMMAND) && ((_command_supervisor->GetState() == COMMAND_STATE_ACTOR) || (_command_supervisor->GetState() == COMMAND_STATE_POINT))) {
 		draw_actor_selection = true;
-		if (IsTargetPoint(target.GetType()) == true)
+		if ((_command_supervisor->GetState() == COMMAND_STATE_POINT) && (IsTargetPoint(target.GetType()) == true))
 			draw_point_selection = true;
 	}
 
