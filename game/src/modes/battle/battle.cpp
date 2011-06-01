@@ -380,14 +380,18 @@ void SequenceSupervisor::_DrawGUI() {
 // 	sort(draw_positions.begin(), draw_positions.end());
 
 	// ----- (3): Draw the stamina bar
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->Move(1010.0f + _gui_position_offset, 128.0f);
+	const float STAMINA_BAR_POSITION_X = 970.0f, STAMINA_BAR_POSITION_Y = 128.0f; // The X and Y position of the stamina bar
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
+	VideoManager->Move(STAMINA_BAR_POSITION_X + _gui_position_offset, STAMINA_BAR_POSITION_Y);
 	_battle->_stamina_meter.Draw();
 
-	// ----- (4): Draw all stamina icons in order along with the selector graphic
+	// ----- (4): Draw all stamina icons in order
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	for (uint32 i = 0; i < live_actors.size(); i++) {
-		VideoManager->Move(1000.0f + _gui_position_offset, draw_positions[i]);
+		if (live_actors[i]->IsEnemy() == false)
+			VideoManager->Move(STAMINA_BAR_POSITION_X - 25.0f + _gui_position_offset, draw_positions[i]);
+		else
+			VideoManager->Move(STAMINA_BAR_POSITION_X + 25.0f + _gui_position_offset, draw_positions[i]);
 		live_actors[i]->GetStaminaIcon().Draw();
 	}
 } // void BattleMode::_DrawStaminaBar()
@@ -1316,14 +1320,18 @@ void BattleMode::_DrawStaminaBar() {
 // 	sort(draw_positions.begin(), draw_positions.end());
 
 	// ----- (3): Draw the stamina bar
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->Move(1010.0f, 128.0f);
+	const float STAMINA_BAR_POSITION_X = 970.0f, STAMINA_BAR_POSITION_Y = 128.0f; // The X and Y position of the stamina bar
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
+	VideoManager->Move(STAMINA_BAR_POSITION_X, STAMINA_BAR_POSITION_Y); // 1010
 	_stamina_meter.Draw();
 
 	// ----- 4): Draw all stamina icons in order along with the selector graphic
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	for (uint32 i = 0; i < live_actors.size(); i++) {
-		VideoManager->Move(1000.0f, draw_positions[i]);
+		if (live_actors[i]->IsEnemy() == false)
+			VideoManager->Move(STAMINA_BAR_POSITION_X - 25.0f, draw_positions[i]);
+		else
+			VideoManager->Move(STAMINA_BAR_POSITION_X + 25.0f, draw_positions[i]);
 		live_actors[i]->GetStaminaIcon().Draw();
 
 		if (draw_icon_selection == true) {
