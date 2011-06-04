@@ -8,6 +8,8 @@ local_chest_counter = 500;
 map_name = "River Access Cave"
 location_filename = "desert_cave.png"
 
+context_inherits = {0, 0}
+
 enemy_ids = { 1, 2, 3, 4, 5, 6 }
 
 -- Allacrost map editor begin. Do not edit this line. --
