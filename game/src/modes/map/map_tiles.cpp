@@ -72,6 +72,9 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		return;
 	}
 
+	vector<uint32> context_inherits;
+	map_file.ReadUIntVector("context_inherits", context_inherits);
+
 	// ---------- (2) Load all of the tileset images that are used by this map
 
 	// Contains all of the tileset filenames used (string does not contain path information or file extensions)
@@ -154,7 +157,16 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		context_name += NumberToString(i);
 
 		// Initialize this context by making a copy of the base map context first, as most contexts re-use many of the same tiles from the base context
-		_tile_grid.insert(make_pair(this_context, _tile_grid[MAP_CONTEXT_01]));
+		// If non-inheriting context, start with empty map!
+		if (context_inherits[i - 1] == 1) {
+			_tile_grid.insert(make_pair(this_context, _tile_grid[MAP_CONTEXT_01]));
+		}
+		else {
+			_tile_grid.insert(make_pair(this_context, vector<vector<MapTile> >(_num_tile_rows)));
+			for (uint32 r = 0; r < _num_tile_rows; r++) {
+				_tile_grid[this_context][r].resize(_num_tile_cols);
+			}
+		}
 
 		// Read the table corresponding to this context and modify each tile accordingly.
 		// The context table is an array of integer data. The size of this array should be divisible by four, as every consecutive group of four integers in

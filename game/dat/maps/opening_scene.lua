@@ -7,6 +7,8 @@ setfenv(1, ns);
 map_name = " "
 location_filename = "blank.png"
 
+context_inherits = {0}
+
 -- Allacrost map editor begin. Do not edit this line. --
 
 -- A reference to the C++ MapMode object that was created with this file
