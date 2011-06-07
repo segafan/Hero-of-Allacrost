@@ -268,7 +268,7 @@ public:
 	*** \param cell_rows The number of rows of cells that should be visible in the display area (should be non-zero)
 	***
 	*** These settings will determine the size of each cell. Cell size is computed as (width/cell_cols), (height/cell_rows).
-	*** The num_cols and num_rows must be greater than or equal to visible_rows and visible_cols. This requirement is necessary
+	*** The num_cols and num_rows must be greater than or equal to cell_rows and cell_cols. This requirement is necessary
 	*** because it is silly to try to represent a structure of 2 columns and 2 rows in a layout of 4 columns and 4 rows. Failure
 	*** to observe this requirement will result in no changes being made by this function.
 	**/
@@ -516,7 +516,7 @@ private:
 	//! \brief The wrapping modes used for horizontal and vertical cursor movement
 	WrapMode _horizontal_wrap_mode, _vertical_wrap_mode;
 
-	//! \brief Skippes disabled items while moving the cursor
+	//! \brief Skips disabled items while moving the cursor
 	bool _skip_disabled;
 
 	//! \brief When set to true, the user may switch the locations of two different options
