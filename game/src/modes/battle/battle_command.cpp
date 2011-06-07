@@ -620,7 +620,7 @@ CommandSupervisor::CommandSupervisor() :
 	_target_options.SetDimensions(TARGET_SIZE_X, TARGET_SIZE_Y, 1, 255, 1, 4);
 	_target_options.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_target_options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_target_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_target_options.SetVerticalWrapMode(VIDEO_WRAP_MODE_NONE);
 	_target_options.SetTextStyle(TextStyle("text20"));
 	_target_options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 	_target_options.SetCursorOffset(-50.0f, 25.0f);
@@ -1004,6 +1004,11 @@ void CommandSupervisor::_UpdateActorTarget() {
 	}
 
 	else if (InputManager->UpPress() || InputManager->DownPress()) {
+		if (InputManager->DownPress())
+			_target_options.InputDown();
+		else
+			_target_options.InputUp();
+
 		if ((IsTargetActor(_selected_target.GetType()) == true) || (IsTargetPoint(_selected_target.GetType()) == true)) {
 			_selected_target.SelectNextActor(GetCommandCharacter(), InputManager->UpPress());
 			_CreateActorTargetText();
@@ -1025,6 +1030,11 @@ void CommandSupervisor::_UpdateAttackPointTarget() {
 	}
 
 	else if (InputManager->UpPress() || InputManager->DownPress()) {
+		if (InputManager->DownPress())
+			_target_options.InputDown();
+		else
+			_target_options.InputUp();
+
 		_selected_target.SelectNextPoint(GetCommandCharacter(), InputManager->DownPress());
 		_CreateAttackPointTargetText();
 		cursor_sound.Play();
@@ -1046,6 +1056,7 @@ void CommandSupervisor::_UpdateInformation() {
 
 	// Change selected skill/item and update the information text
 	else if (InputManager->UpPress() || InputManager->DownPress()) {
+
 		if (_IsSkillCategorySelected() == true) {
 			_skill_command.UpdateList();
 			_selected_skill = _skill_command.GetSelectedSkill();
@@ -1101,6 +1112,7 @@ void CommandSupervisor::_DrawActorTarget() {
 	VideoManager->Move(560.0f, 85.0f);
 	_window_text.Draw();
 
+// 	_target_options.Draw();
 	// TODO: draw relevant status/elemental icons
 }
 
@@ -1111,8 +1123,9 @@ void CommandSupervisor::_DrawAttackPointTarget() {
 	VideoManager->Move(560.0f, 110.0f);
 	_window_header.Draw();
 	VideoManager->Move(560.0f, 85.0f);
-	_window_text.Draw();
+// 	_window_text.Draw();
 
+	_target_options.Draw();
 	// TODO: draw relevant status/elemental icons
 }
 
@@ -1131,39 +1144,69 @@ void CommandSupervisor::_DrawInformation() {
 
 
 void CommandSupervisor::_CreateActorTargetText() {
-	_window_header.SetText("Select Target");
+	_window_header.SetText(UTranslate("Select Target"));
 
-	ustring target_text;
-	if ((IsTargetActor(_selected_target.GetType()) == true) || (IsTargetPoint(_selected_target.GetType()) == true)) {
-		BattleActor* actor = _selected_target.GetActor();
-		target_text = actor->GetName();
+	_target_options.ClearOptions();
+	if (IsTargetParty(_selected_target.GetType()) == true) {
+		if (_selected_target.GetType() == GLOBAL_TARGET_ALL_ALLIES) {
+			_target_options.AddOption(UTranslate("All Allies"));
+		}
+		else {
+			_target_options.AddOption(UTranslate("All Enemies"));
+		}
 	}
-	else if (IsTargetParty(_selected_target.GetType()) == true) {
-		if (_selected_target.GetType() == GLOBAL_TARGET_ALL_ALLIES)
-			target_text = UTranslate("All Allies");
-		else
-			target_text = UTranslate("All Enemies");
+	else if (IsTargetSelf(_selected_target.GetType()) == true) {
+		_target_options.AddOption(_selected_target.GetActor()->GetName());
+	}
+	else if (IsTargetAlly(_selected_target.GetType()) == true) {
+		for (uint32 i = 0; i < BattleMode::CurrentInstance()->GetCharacterActors().size(); i++) {
+			_target_options.AddOption(BattleMode::CurrentInstance()->GetCharacterActors().at(i)->GetName());
+			if (BattleMode::CurrentInstance()->GetCharacterActors().at(i)->IsAlive() == false) {
+				_target_options.EnableOption(i, false);
+			}
+		}
+	}
+	else if (IsTargetFoe(_selected_target.GetType()) == true) {
+		for (uint32 i = 0; i < BattleMode::CurrentInstance()->GetEnemyActors().size(); i++) {
+			_target_options.AddOption(BattleMode::CurrentInstance()->GetEnemyActors().at(i)->GetName());
+			if (BattleMode::CurrentInstance()->GetEnemyActors().at(i)->IsAlive() == false) {
+				_target_options.EnableOption(i, false);
+			}
+		}
 	}
 	else {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << _selected_target.GetType() << endl;
 	}
 
-	_window_text.SetText(target_text);
+	// TEMP: remove once _target_options box works properly
+	if (IsTargetParty(_selected_target.GetType()) == true) {
+		if (_selected_target.GetType() == GLOBAL_TARGET_ALL_ALLIES) {
+			_window_text.SetText(UTranslate("All Allies"));
+		}
+		else {
+			_window_text.SetText(UTranslate("All Enemies"));
+		}
+	}
+	else {
+		_window_text.SetText(_selected_target.GetActor()->GetName());
+	}
+
 }
 
 
 
 void CommandSupervisor::_CreateAttackPointTargetText() {
-	_window_header.SetText("Select Attack Point");
+	_window_header.SetText(UTranslate("Select Attack Point"));
 
 	BattleActor* actor = _selected_target.GetActor();
-	uint32 point = _selected_target.GetPoint();
+	uint32 selected_point = _selected_target.GetPoint();
 
-	ustring target_text;
-	target_text = actor->GetName();
-	target_text += MakeUnicodeString(" — ") + actor->GetAttackPoints().at(point)->GetName();
+	_target_options.ClearOptions();
+	for (uint32 i = 0; i < actor->GetAttackPoints().size(); i++) {
+		_target_options.AddOption(actor->GetAttackPoints().at(i)->GetName());
+	}
 
-	_window_text.SetText(target_text);
+	_target_options.SetSelection(selected_point);
 }
 
 
