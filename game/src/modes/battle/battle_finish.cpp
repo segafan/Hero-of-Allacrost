@@ -465,14 +465,14 @@ void FinishVictoryAssistant::Draw() {
 
 
 void FinishVictoryAssistant::_SetHeaderText() {
-	if (_state == FINISH_VICTORY_GROWTH) {
+	if ((_state == FINISH_ANNOUNCE_RESULT) || (_state == FINISH_VICTORY_GROWTH)) {
 		_header_text.SetDisplayText(UTranslate("XP Earned: ") + MakeUnicodeString(NumberToString(_xp_earned)));
 	}
 	else if (_state == FINISH_VICTORY_SPOILS) {
 		_header_text.SetDisplayText(UTranslate("Drunes Recovered: ") + MakeUnicodeString(NumberToString(_drunes_dropped)));
 	}
 	else {
-		_header_text.SetDisplayText("");
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid finish state: " << _state << endl;
 	}
 }
 
@@ -597,9 +597,10 @@ void FinishVictoryAssistant::_UpdateGrowth() {
 	}
 
 	// ---------- (3): Add the XP amount to the characters appropriately
+	deque<BattleCharacter*>& battle_characters = BattleMode::CurrentInstance()->GetCharacterActors();
 	for (uint32 i = 0; i < _number_characters; i++) {
 		// Don't add experience points to dead characters
-		if (_characters[i]->IsAlive() == false) {
+		if (battle_characters[i]->IsAlive() == false) {
 			continue;
 		}
 
