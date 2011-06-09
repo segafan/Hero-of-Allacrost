@@ -171,7 +171,7 @@ void FinishDefeatAssistant::Update() {
 				_options.InputRight();
 				_SetTooltipText();
 			}
-			
+
 			break;
 
 		case FINISH_DEFEAT_CONFIRM:
@@ -203,7 +203,7 @@ void FinishDefeatAssistant::Update() {
 			else if (InputManager->RightPress()) {
 				_confirm_options.InputRight();
 			}
-			
+
 			break;
 
 		case FINISH_END:
@@ -235,36 +235,36 @@ void FinishDefeatAssistant::Draw() {
 
 void FinishDefeatAssistant::_SetTooltipText() {
 	_tooltip.SetDisplayText("");
-	
+
 	if ((_state == FINISH_ANNOUNCE_RESULT) || (_state == FINISH_DEFEAT_SELECT)) {
 		switch (_options.GetSelection()) {
 			case DEFEAT_OPTION_RETRY:
-				_tooltip.SetDisplayText("Start over from the beginning of this battle.\nAttempts Remaining: " + NumberToString(_retries_left));
+				_tooltip.SetDisplayText(Translate("Start over from the beginning of this battle.\nAttempts Remaining: ") + NumberToString(_retries_left));
 				break;
 			case DEFEAT_OPTION_RESTART:
-				_tooltip.SetDisplayText("Load the game from the last save game point.");
+				_tooltip.SetDisplayText(UTranslate("Load the game from the last save game point."));
 				break;
 			case DEFEAT_OPTION_RETURN:
-				_tooltip.SetDisplayText("Returns the game to the main boot menu.");
+				_tooltip.SetDisplayText(UTranslate("Returns the game to the main boot menu."));
 				break;
 			case DEFEAT_OPTION_RETIRE:
-				_tooltip.SetDisplayText("Exit the game.");
+				_tooltip.SetDisplayText(UTranslate("Exit the game."));
 				break;
 		}
 	}
 	else if (_state == FINISH_DEFEAT_CONFIRM) {
 		switch (_options.GetSelection()) {
 			case DEFEAT_OPTION_RETRY:
-				_tooltip.SetDisplayText("Confirm: retry battle.");
+				_tooltip.SetDisplayText(UTranslate("Confirm: retry battle."));
 				break;
 			case DEFEAT_OPTION_RESTART:
-				_tooltip.SetDisplayText("Confirm: restart from last save.");
+				_tooltip.SetDisplayText(UTranslate("Confirm: restart from last save."));
 				break;
 			case DEFEAT_OPTION_RETURN:
-				_tooltip.SetDisplayText("Confirm: return to main menu.");
+				_tooltip.SetDisplayText(UTranslate("Confirm: return to main menu."));
 				break;
 			case DEFEAT_OPTION_RETIRE:
-				_tooltip.SetDisplayText("Confirm: exit game.");
+				_tooltip.SetDisplayText(UTranslate("Confirm: exit game."));
 				break;
 		}
 	}
@@ -363,7 +363,6 @@ void FinishVictoryAssistant::Initialize(uint32 retries_used) {
 	// ----- (1): Prepare all character data
 	deque<BattleCharacter*>& all_characters = BattleMode::CurrentInstance()->GetCharacterActors();
 	_number_characters = all_characters.size();
-	uint32 num_alive_characters = 0;
 
 	if (_number_characters > 4) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "party exceeded maximum number of characters: " << _number_characters;
@@ -375,10 +374,8 @@ void FinishVictoryAssistant::Initialize(uint32 retries_used) {
 		_character_growths.push_back(_characters[i]->GetGrowth());
 		_character_portraits[i].Load("img/portraits/map/" + _characters[i]->GetFilename() + ".png", 100.0f, 100.0f);
 
-		if (all_characters[i]->IsAlive()) {
-			num_alive_characters++;
-		}
-		else {
+		// Grey out portraits of deceased characters
+		if (all_characters[i]->IsAlive() == false) {
 			_character_portraits[i].EnableGrayScale();
 		}
 	}
@@ -411,8 +408,8 @@ void FinishVictoryAssistant::Initialize(uint32 retries_used) {
 		}
 	}
 
-	// ----- (3): Divide up the XP and drunes earnings by the number of living players and apply the penalty for any battle retries
-	_xp_earned /= num_alive_characters;
+	// ----- (3): Divide up the XP and drunes earnings by the number of players (both living and dead) and apply the penalty for any battle retries
+	_xp_earned /= _number_characters;
 
 	if (_retries_used > 0) {
 		float penalty = 1.0f - (retries_used / MAX_BATTLE_ATTEMPTS);
@@ -431,19 +428,10 @@ void FinishVictoryAssistant::Update() {
 	switch (_state) {
 		case FINISH_VICTORY_GROWTH:
 			_UpdateGrowth();
-
-			if (InputManager->ConfirmPress()) {
-				_state = FINISH_VICTORY_SPOILS;
-				_SetHeaderText();
-			}
 			break;
 
 		case FINISH_VICTORY_SPOILS:
 			_UpdateSpoils();
-
-			if (InputManager->ConfirmPress()) {
-				_state = FINISH_END;
-			}
 			break;
 
 		case FINISH_END:
@@ -560,13 +548,55 @@ void FinishVictoryAssistant::_CreateObjectList() {
 
 
 void FinishVictoryAssistant::_UpdateGrowth() {
-	// TODO: Add XP growth gradually instead of all at once
-	static uint32 xp_to_add = _xp_earned;
+	// The number of milliseconds that we wait in between updating the XP count
+	const uint32 UPDATE_PERIOD = 50;
+	// When set to true, counting out of XP will begin
+	static bool begin_counting = false;
+	// A simple counter used to keep track of when the next XP count should begin
+	static uint32 time_counter = 0;
+	// The amount of XP to add to each character this update cycle
+	uint32 xp_to_add = 0;
 
+	// ---------- (1): Process confirm press inputs.
+	if (InputManager->ConfirmPress()) {
+		// Begin counting out XP earned
+		if (begin_counting == false) {
+			begin_counting = true;
+		}
+		// If confirm received during counting, instantly add all remaining XP
+		else if (_xp_earned != 0) {
+			xp_to_add = _xp_earned;
+		}
+		// Counting has finished. Move on to the spoils screen
+		else {
+			_state = FINISH_VICTORY_SPOILS;
+			_SetHeaderText();
+		}
+	}
+
+	// If counting has not began or counting is alreasy finished, there is nothing more to do here
+	if ((begin_counting == false) || (_xp_earned == 0)) {
+		return;
+	}
+
+	// ---------- (2): Update the timer and determine how much XP to add if the time has been reached
+	// We don't want to modify the XP to add if a confirm event occurred in step (1)
+	if (xp_to_add == 0) {
+		time_counter += SystemManager->GetUpdateTime();
+		if (time_counter >= UPDATE_PERIOD) {
+			time_counter -= UPDATE_PERIOD;
+
+			// TODO: determine an appropriate amount of XP to add here
+			xp_to_add = 1;
+		}
+	}
+
+	// If there is no XP to add this update cycle, there is nothing left for us to do
 	if (xp_to_add == 0) {
 		return;
 	}
-	
+
+	// ---------- (3): Add the XP amount to the characters appropriately
 	for (uint32 i = 0; i < _number_characters; i++) {
 		// Don't add experience points to dead characters
 		if (_characters[i]->IsAlive() == false) {
@@ -575,7 +605,7 @@ void FinishVictoryAssistant::_UpdateGrowth() {
 
 		if (_characters[i]->AddExperiencePoints(xp_to_add) == true) {
 			do {
-				// TODO: Only add the  that experienced growth
+				// TODO: Only add text for the stats that experienced growth
 				_growth_list[i].SetOptionText(0, UTranslate("HP:"));
 				if (_character_growths[i]->GetHitPointsGrowth() > 0)
 					_growth_list[i].SetOptionText(1, MakeUnicodeString(NumberToString(_character_growths[i]->GetHitPointsGrowth())));
@@ -606,31 +636,71 @@ void FinishVictoryAssistant::_UpdateGrowth() {
 
 			std::vector<GlobalSkill*>* new_skills = _character_growths[i]->GetSkillsLearned();
 			if (new_skills->empty() == false) {
-				_skill_text[i].SetDisplayText(UTranslate("New Skill Learned:   ") + new_skills->at(0)->GetName());
+				_skill_text[i].SetDisplayText(UTranslate("New Skill Learned:\n   ") + new_skills->at(0)->GetName());
 			}
 		}
 
 		// TODO: check for new experience level
-		_level_xp_text[i].SetDisplayText(UTranslate("Level: ") + MakeUnicodeString(NumberToString(_characters[i]->GetExperienceLevel())) +
-			MakeUnicodeString("\n") + UTranslate("XP: ") + MakeUnicodeString(NumberToString(_characters[i]->GetExperienceForNextLevel())));
+		_level_xp_text[i].SetDisplayText(Translate("Level: ") + NumberToString(_characters[i]->GetExperienceLevel()) +
+			"\n" + Translate("XP: ") + NumberToString(_characters[i]->GetExperienceForNextLevel() - _characters[i]->GetExperiencePoints()));
 	}
 
-	xp_to_add = 0;
-}
+	_xp_earned -= xp_to_add;
+	_SetHeaderText();
+} // void FinishVictoryAssistant::_UpdateGrowth()
 
 
 
 void FinishVictoryAssistant::_UpdateSpoils() {
+	// The number of milliseconds that we wait in between updating the drunes count
+	const uint32 UPDATE_PERIOD = 50;
+	// When set to true, counting out of drunes will begin
+	static bool begin_counting = false;
+	// A simple counter used to keep track of when the next drunes count should begin
+	static uint32 time_counter = 0;
 	// TODO: Add drunes gradually instead of all at once
-	static uint32 drunes_to_add = _drunes_dropped;
+	static uint32 drunes_to_add = 0;
 
-	if (drunes_to_add == 0) {
+	// ---------- (1): Process confirm press inputs.
+	if (InputManager->ConfirmPress()) {
+		// Begin counting out drunes dropped
+		if (begin_counting == false) {
+			begin_counting = true;
+		}
+		// If confirm received during counting, instantly add all remaining drunes
+		else if (_drunes_dropped != 0) {
+			drunes_to_add = _drunes_dropped;
+		}
+		// Counting is done. Finish supervisor should now terminate
+		else {
+			_state = FINISH_END;
+		}
+	}
+
+	// If counting has not began or counting is alreasy finished, there is nothing more to do here
+	if ((begin_counting == false) || (_drunes_dropped == 0)) {
 		return;
 	}
-	
-	GlobalManager->AddDrunes(drunes_to_add);
-	drunes_to_add = 0;
-}
+
+	// ---------- (2): Update the timer and determine how many drunes to add if the time has been reached
+	// We don't want to modify the drunes to add if a confirm event occurred in step (1)
+	if (drunes_to_add == 0) {
+		time_counter += SystemManager->GetUpdateTime();
+		if (time_counter >= UPDATE_PERIOD) {
+			time_counter -= UPDATE_PERIOD;
+
+			// TODO: determine an appropriate amount of drunes to add here
+			drunes_to_add = 1;
+		}
+	}
+
+	// ---------- (2): Add drunes and update the display
+	if (drunes_to_add != 0) {
+		GlobalManager->AddDrunes(drunes_to_add);
+		_drunes_dropped -= drunes_to_add;
+		_SetHeaderText();
+	}
+} // void FinishVictoryAssistant::_UpdateSpoils()
 
 
 
@@ -692,11 +762,11 @@ void FinishSupervisor::Initialize(bool victory) {
 
 	if (_battle_victory == true) {
 		_victory_assistant.Initialize(_attempt_number - 1);
-		_outcome_text.SetDisplayText("The heroes were victorious!");
+		_outcome_text.SetDisplayText(UTranslate("The heroes were victorious!"));
 	}
 	else {
 		_defeat_assistant.Initialize(MAX_BATTLE_ATTEMPTS - _attempt_number);
-		_outcome_text.SetDisplayText("But the heroes fell in battle...");
+		_outcome_text.SetDisplayText(UTranslate("But the heroes fell in battle..."));
 	}
 }
 
@@ -712,7 +782,7 @@ void FinishSupervisor::Update() {
 		}
 		return;
 	}
-	
+
 	if (_battle_victory == true) {
 		_victory_assistant.Update();
 	}
@@ -754,7 +824,7 @@ void FinishSupervisor::Update() {
 
 void FinishSupervisor::Draw() {
 	_outcome_text.Draw();
-	
+
 	if (_battle_victory == true) {
 		_victory_assistant.Draw();
 	}
