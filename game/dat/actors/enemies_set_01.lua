@@ -244,7 +244,7 @@ enemies[4] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = hoa_system.Translate("Legs"),
+			name = hoa_system.Translate("Leg"),
 			x_position = -26,
 			y_position = 56,
 			fortitude_modifier = 0.0,
@@ -299,7 +299,7 @@ enemies[5] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = hoa_system.Translate("Thorax"),
+			name = hoa_system.Translate("Abdomen"),
 			x_position = 7,
 			y_position = 26,
 			fortitude_modifier = 0.0,
@@ -307,7 +307,7 @@ enemies[5] = {
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = hoa_system.Translate("Legs"),
+			name = hoa_system.Translate("Leg"),
 			x_position = 16,
 			y_position = 14,
 			fortitude_modifier = 0.0,
@@ -362,7 +362,7 @@ enemies[6] = {
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = hoa_system.Translate("Wings"),
+			name = hoa_system.Translate("Wing"),
 			x_position = -40,
 			y_position = 90,
 			fortitude_modifier = -0.5,
@@ -396,39 +396,39 @@ enemies[91] = {
 	sprite_height = 448,
 	
 	base_stats = {
-		hit_points = 122,
-		skill_points = 10,
-		strength = 10,
+		hit_points = 500,
+		skill_points = 45,
+		strength = 55,
 		vigor = 0,
-		fortitude = 10,
-		protection = 4,
-		agility = 30,
-		evade = 18.0,
-		experience_points = 8,
-		drunes = 12
+		fortitude = 20,
+		protection = 5,
+		agility = 25,
+		evade = 3.0,
+		experience_points = 242,
+		drunes = 135
 	},
 
 	attack_points = {
 		[1] = {
-			name = hoa_system.Translate("Mesosoma"),
-			x_position = -6,
-			y_position = 23,
+			name = hoa_system.Translate("Head"),
+			x_position = -30,
+			y_position = 125,
 			fortitude_modifier = 0.0,
 			protection_modifier = 0.0,
 			evade_modifier = 0.0
 		},
 		[2] = {
-			name = hoa_system.Translate("Pincers"),
-			x_position = 7,
-			y_position = 26,
+			name = hoa_system.Translate("Pincer"),
+			x_position = -190,
+			y_position = 120,
 			fortitude_modifier = 0.0,
 			protection_modifier = 0.0,
 			evade_modifier = 0.0
 		},
 		[3] = {
-			name = hoa_system.Translate("Legs"),
-			x_position = 7,
-			y_position = 26,
+			name = hoa_system.Translate("Leg"),
+			x_position = 200,
+			y_position = 160,
 			fortitude_modifier = 0.0,
 			protection_modifier = 0.0,
 			evade_modifier = 0.0
@@ -436,7 +436,7 @@ enemies[91] = {
 	},
 
 	skills = {
-
+		1002 -- TEMP until specific boss skills available
 	},
 
 	drop_objects = {
