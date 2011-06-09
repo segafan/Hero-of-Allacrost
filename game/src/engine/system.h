@@ -359,7 +359,6 @@ public:
 	void ExamineSystemTimers();
 
 	/** \brief Retrieves the amount of time that the game should be updated by for time-based movement.
-	*** This function should \b only be called in the main game loop, located in main.cpp.
 	*** \return The number of milliseconds that have transpired since the last update.
 	***
 	*** \note There's a chance we could get errors in other parts of the program code if the

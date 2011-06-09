@@ -42,7 +42,7 @@ enum FINISH_STATE {
 	FINISH_VICTORY_GROWTH  = 4, //!< XP earned is displayed and gradually awarded to characters
 	FINISH_VICTORY_SPOILS  = 5, //!< Drunes and objects dropped are displayed and gradually awarded to party
 	FINISH_END             = 6, //!< Short sequence of hiding finish GUI objects
-	
+
 // 	//! Announces that the player is victorious and notes any characters who have gained an experience level
 // 	FINISH_WIN_ANNOUNCE = 0,
 // 	//! Initial display of character stats
@@ -67,7 +67,7 @@ enum FINISH_STATE {
 // 	FINISH_LOSE_CONFIRM = 10,
 // 	FINISH_TOTAL = 11
 };
-	
+
 //! \brief The set of defeat options that the player can select
 //@{
 const uint32 DEFEAT_OPTION_RETRY     = 0;
@@ -112,7 +112,7 @@ public:
 private:
 	//! \brief A reference to where the state of the finish GUI menus is maintained
 	FINISH_STATE& _state;
-	
+
 	//! \brief The number of chances the player has left to retry the battle
 	uint32 _retries_left;
 
@@ -127,7 +127,7 @@ private:
 
 	//! \brief A simple "yes/no" confirmation to the selected option
 	hoa_gui::OptionBox _confirm_options;
-	
+
 	//! \brief Tooltip text explaining the currently selected option
 	hoa_gui::TextBox _tooltip;
 
@@ -141,7 +141,7 @@ private:
 ***
 *** This class presents the user with the results of the battle. More specifically,
 *** the following events are accomplished
-*** 
+***
 *** -#) Display experience points gained and any change in stats for each character
 *** -#) Display the number of drunes earned and the type and quantity of any objects recovered
 ***
@@ -176,10 +176,10 @@ private:
 	uint32 _number_characters;
 
 	//! \brief The amount of xp earned for the victory (per character)
-	int32 _xp_earned;
+	uint32 _xp_earned;
 
 	//! \brief The amount of drunes dropped by the enemy party
-	int32 _drunes_dropped;
+	uint32 _drunes_dropped;
 
 	//! \brief Retains the number of character windows that were created
 	uint32 _number_character_windows_created;
@@ -198,7 +198,7 @@ private:
 
 	//! \brief The top window in the GUI display that contains header text
 	hoa_gui::MenuWindow _header_window;
-	
+
 	//! \brief A window for each character showing any change to their attributes
 	hoa_gui::MenuWindow _character_window[4];
 
@@ -207,7 +207,7 @@ private:
 
 	//! \brief Drawn to the top header window displaying information about the
 	hoa_gui::TextBox _header_text;
-	
+
 	//! \brief Four row, four column option box for each character to display their stat growth
 	hoa_gui::OptionBox _growth_list[4];
 
@@ -216,10 +216,10 @@ private:
 
 	//! \brief Holds the text indicating new skills that each character has learned
 	hoa_gui::TextBox _skill_text[4];
-	
+
 	//! \brief Header text for the object list option box
 	hoa_gui::TextBox _object_header_text;
-	
+
 	//! \brief Displays all objects obtained by the character party
 	hoa_gui::OptionBox _object_list;
 
@@ -240,7 +240,7 @@ private:
 
 	//! \brief Draws the XP earned by the party and any attribute growth they have made
 	void _DrawGrowth(uint32 index);
-	
+
 	//! \brief Draws the number of drunes and items dropped by the enemy party
 	void _DrawSpoils();
 }; // class FinishVictoryAssistant
@@ -283,7 +283,7 @@ private:
 
 	//! \brief Boolean used to determine if the battle was victorious for the player (true) or if the player was defeated (false)
 	bool _battle_victory;
-	
+
 	//! \brief Assists this class when the player was defeated in battle
 	FinishDefeatAssistant _defeat_assistant;
 
