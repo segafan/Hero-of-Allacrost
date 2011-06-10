@@ -8,7 +8,7 @@ local_chest_counter = 500;
 map_name = "River Access Cave"
 location_filename = "desert_cave.png"
 
-context_inherits = {0, 0}
+context_inherits = {1, 1}
 
 enemy_ids = { 1, 2, 3, 4, 5, 6 }
 
@@ -482,9 +482,11 @@ function Load(m)
 	
 	Map:SetCamera(claudius);
 
-	-- TEMP: sets camera to locations close to testing areas
---	Map.camera:SetXPosition(65, 0);
---	Map.camera:SetYPosition(12, 0);
+
+	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas
+	
+	-- Location: just before enemy boss
+	-- Map.camera:SetXPosition(205, 0); Map.camera:SetYPosition(5, 0);
 end
 
 
@@ -531,6 +533,13 @@ function Update()
 			EventManager:StartEvent(70);
 		end
 	end
+	
+	if ((riverbed_zone:IsCameraEntering() == true)) then
+		if (GlobalEvents:DoesEventExist("riverbed_entered") == false) then
+			GlobalEvents:AddNewEvent("riverbed_entered", 1);
+			EventManager:StartEvent(80);
+		end
+	end
 end -- function Update()
 
 
@@ -559,7 +568,7 @@ function CreateObjects()
 	object:SetNoCollision(false);
 	object:AddAnimation("img/misc/skeleton_corpse.png");
 	Map:AddGroundObject(object);
-end
+end -- function CreateObjects()
 
 
 -- Creates the sprites for all characters in the party
@@ -587,7 +596,7 @@ function CreateCharacters()
 	lukar:SetDirection(hoa_map.MapMode.NORTH);
 	sprite:SetName(hoa_system.Translate("Lukar"));
 	Map:AddGroundObject(lukar);
-end
+end -- function CreateCharacters()
 
 
 -- Creates all non-playable character spirtes
@@ -655,7 +664,53 @@ function CreateNPCs()
 	sprite:SetDirection(hoa_map.MapMode.NORTH);
 	sprite:AddDialogueReference(61);
 	Map:AddGroundObject(sprite);
-end -- function CreateCharacters()
+	
+	
+	-- All of the following NPCs are encountered at the end of the cave in the riverbed
+	sprite = ConstructSprite("Captain", 2500, 248, 16);
+	sprite:SetDirection(hoa_map.MapMode.WEST);
+	Map:AddGroundObject(sprite);
+	
+	sprite = ConstructSprite("Karlate", 2501, 249, 19);
+	sprite:SetDirection(hoa_map.MapMode.WEST);
+	Map:AddGroundObject(sprite);
+	
+	sprite = ConstructSprite("Karlate", 2502, 245, 11);
+	sprite:SetDirection(hoa_map.MapMode.SOUTH);
+	Map:AddGroundObject(sprite);
+	
+	sprite = ConstructSprite("Karlate", 2503, 242, 8);
+	sprite:SetDirection(hoa_map.MapMode.SOUTH);
+	Map:AddGroundObject(sprite);
+	
+	sprite = ConstructSprite("Karlate", 2504, 239, 9);
+	sprite:SetDirection(hoa_map.MapMode.SOUTH);
+	Map:AddGroundObject(sprite);
+
+	sprite = ConstructSprite("Karlate", 2505, 240, 22);
+	sprite:SetDirection(hoa_map.MapMode.NORTH);
+	Map:AddGroundObject(sprite);
+
+	sprite = ConstructSprite("Karlate", 2506, 243, 23);
+	sprite:SetDirection(hoa_map.MapMode.NORTH);
+	Map:AddGroundObject(sprite);
+	
+	sprite = ConstructSprite("Karlate", 2507, 245, 21);
+	sprite:SetDirection(hoa_map.MapMode.NORTH);
+	Map:AddGroundObject(sprite);
+	
+	sprite = ConstructSprite("Karlate", 2508, 234, 20);
+	sprite:SetDirection(hoa_map.MapMode.EAST);
+	Map:AddGroundObject(sprite);
+	
+	sprite = ConstructSprite("Karlate", 2509, 233, 17);
+	sprite:SetDirection(hoa_map.MapMode.EAST);
+	Map:AddGroundObject(sprite);
+	
+	sprite = ConstructSprite("Karlate", 2510, 235, 14);
+	sprite:SetDirection(hoa_map.MapMode.EAST);
+	Map:AddGroundObject(sprite);
+end -- function CreateNPCs()
 
 
 -- Creates all enemy sprites
@@ -851,7 +906,6 @@ function CreateEnemies()
 	roam_zone:AddEnemy(enemy, Map, 1);
 
 	Map:AddZone(roam_zone);
-
 end -- function CreateEnemies()
 
 
@@ -966,32 +1020,35 @@ function CreateDialogue()
 	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: Player reaches dry river bed
-	--[[ TODO
 	dialogue = hoa_map.SpriteDialogue(540);
 		text = hoa_system.Translate("Finally made it.");
-		dialogue:AddLine(text, 4);
+		dialogue:AddLine(text, 1002);
+	DialogueManager:AddDialogue(dialogue);
+	
+	dialogue = hoa_map.SpriteDialogue(541);
 		text = hoa_system.Translate("Listen up! There's a large boulder obstructing the underground river that flows through here. When we move it aside, we get to head out of this place.");
-		dialogue:AddLine(text, 4);
+		dialogue:AddLine(text, 2500);
 		text = hoa_system.Translate("Mikal! Torren! Take your units and secure the ropes around that overgrown rock. Jasper's unit will prepare the Maks to help us move it. The rest of you stay alert and watch our backs. Who knows what the hell may be in this cave with us.");
-		dialogue:AddLine(text, 4);
+		dialogue:AddLine(text, 2500);
 	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.SpriteDialogue(160);
-		text = hoa_system.Translate("Hey! I heard that noise earlier. It sounds like its closer now.");
-		dialogue:AddLine(text, 4);
+	dialogue = hoa_map.SpriteDialogue(542);
+		text = hoa_system.Translate("Hey, I heard that noise earlier. It sounds like its closer now.");
+		dialogue:AddLine(text, 2505);
 		text = hoa_system.Translate("Keep your eyes peeled and your swords ready men.");
-		dialogue:AddLine(text, 4);
+		dialogue:AddLine(text, 1003);
 		text = hoa_system.Translate("I don't know how you expect to see shit in here. I can barely see my own hand.");
-		dialogue:AddLine(text, 4);
-		text = hoa_system.Translate("Over there! Watch out!.");
-		dialogue:AddLine(text, 4);
+		dialogue:AddLine(text, 1002);
+		text = hoa_system.Translate("Over there! Watch out!");
+		dialogue:AddLine(text, 1000);
 	DialogueManager:AddDialogue(dialogue);
-
-	dialogue = hoa_map.SpriteDialogue(170);
-		text = hoa_system.Translate("Don't panic! Surround it and we'll take it down together!");
-		dialogue:AddLine(text, 4);
+	
+	-- Event: After boss battle
+	dialogue = hoa_map.SpriteDialogue(550);
+		text = hoa_system.Translate("End of map.");
+		dialogue:AddLine(text, 1000);
 	DialogueManager:AddDialogue(dialogue);
-	--]]
+	
 end -- function CreateDialogue()
 
 
@@ -1148,16 +1205,60 @@ function CreateEvents()
 		EventManager:RegisterEvent(event);
 	
 	-- Event Chain 08: Arriving at riverbed
-	-- TODO
+	riverbed_zone = hoa_map.CameraZone(220, 221, 2, 11, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	Map:AddZone(riverbed_zone);
 	
+		-- Put map in scene state
+		event = hoa_map.ScriptedEvent(80, 4, 0);
+		event:AddEventLinkAtEnd(81);
+		EventManager:RegisterEvent(event);
+		-- Move player sprite in to the gathering of knights in the river bed
+		event = hoa_map.PathMoveSpriteEvent(81, claudius, 238, 12);
+		event:AddEventLinkAtEnd(82);
+		EventManager:RegisterEvent(event);
+		-- Make sure player sprite is facing the captain
+		event = hoa_map.ChangeDirectionSpriteEvent(82, claudius, hoa_map.MapMode.EAST);
+		event:AddEventLinkAtEnd(83);
+		EventManager:RegisterEvent(event);
+		-- Remove map scene state
+		event = hoa_map.ScriptedEvent(83, 5, 0);
+		event:AddEventLinkAtEnd(84);
+		EventManager:RegisterEvent(event);
+		-- Begin dialogue among party characters
+		event = hoa_map.DialogueEvent(84, 540);
+		event:AddEventLinkAtEnd(85);
+		EventManager:RegisterEvent(event);
+		-- Begin dialogue given from captain
+		event = hoa_map.DialogueEvent(85, 541);
+		event:AddEventLinkAtEnd(1000);
+		event:AddEventLinkAtEnd(86, 1000);
+		EventManager:RegisterEvent(event);
+		-- Begin dialogue preceeding boss battle encounter
+		event = hoa_map.DialogueEvent(86, 542);
+		event:AddEventLinkAtEnd(87);
+		EventManager:RegisterEvent(event);
+		-- Boss battle
+		event = hoa_map.BattleEncounterEvent(87, 91);
+		event:SetMusic("mus/The_Creature_Awakens.ogg");
+		event:SetBackground("img/backdrops/battle/desert_cave.png");
+		event:AddEventLinkAtEnd(90);
+		EventManager:RegisterEvent(event);
+		
 	-- Event Chain 09: After boss battle
-	-- TODO
+		
+		-- Change all objects to context "water unblocked"
+		event = hoa_map.ScriptedEvent(90, 11, 0);
+		event:AddEventLinkAtEnd(91, 500);
+		EventManager:RegisterEvent(event);
+		-- TEMP: End of map dialogue
+		event = hoa_map.DialogueEvent(91, 550);
+		EventManager:RegisterEvent(event);
 
 	----------------------------------------------------------------------------
 	---------- Miscellaneous Events
 	----------------------------------------------------------------------------
 
-	-- Sound played during conversation with knight
+	-- Sound played during conversation with knight and just before boss battle
 	event = hoa_map.SoundEvent(1000, "snd/evil_hiss.ogg");
 	EventManager:RegisterEvent(event);
 end -- function CreateEvents()
@@ -1182,17 +1283,15 @@ map_functions[3] = function()
 end
 
 
--- TEMP
+-- Change map to scene state
 map_functions[4] = function()
-	Map.camera:SetXPosition(114, 0);
-	Map.camera:SetYPosition(22, 0);
+	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 end
 
 
--- TEMP
+-- Pop current map state
 map_functions[5] = function()
-	Map.camera:SetXPosition(75, 0);
-	Map.camera:SetYPosition(8, 0);
+	Map:PopState();
 end
 
 
@@ -1239,11 +1338,10 @@ map_functions[11] = function()
 end
 
 
-
--- Moves a knight to the riverbed area
+-- Makes the knight that moved along the short path disappear
 map_functions[12] = function()
-	knight_path_sprite:SetXPosition(230, 0.0);
-	knight_path_sprite:SetYPosition(7, 0.0);
+	knight_path_sprite:SetNoCollision(true);
+	knight_path_sprite:SetVisible(false);
 end
 
 
@@ -1263,9 +1361,10 @@ map_functions[14] = function()
 	Map.camera:SetNoCollision(false);
 end
 
+
+-- Replace dialogue of the knight that guides the player to the right path after the passage collapse
 map_functions[15] = function()
     knight_talk_sprite:RemoveDialogueReference(30);
-    -- knight_talk_sprite:ClearDialogueReferences();
     knight_talk_sprite:AddDialogueReference(31);
 end
 
