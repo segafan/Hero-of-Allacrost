@@ -15,7 +15,9 @@ credits_text =
 	"Tyler Olsen (Roots)\n" ..
 	"\n\n" ..
 
-	"Deputy Lead\n\n" ..
+	"Project Leads/Administrators\n\n" ..
+	"Tyler Olsen (Roots)\n" ..
+	"Jacob Rudolph (rujasu)\n" ..
 	"Philip Vorsilak (gorzuate)\n" ..
 	"\n\n" ..
 
@@ -25,7 +27,7 @@ credits_text =
 	"Baris Soner Usakli (Black Knight) - game editor\n" ..
 	"Daniel Steuernol (Steu) - game engine\n" ..
 	"Guillaume Anctil (Drakkoon) - map code\n" ..
-	"Jacob Rudolph (rujasu) - menu code\n" ..
+	"Jacob Rudolph (rujasu) - various game modes, content scripting\n" ..
 	"Lindsay Roberts (Linds) - video engine\n" ..
 	"Moises Ferrer Serra (byaku) - video engine, audio engine\n" ..
 	"Philip Vorsilak (gorzuate) - game editor\n" ..
@@ -53,11 +55,13 @@ credits_text =
 	"Translation Team\n\n" ..
 	"Marcos Avila Isidoro (marcavis) - Portuguese translation\n" ..
 	"Yohann Ferreira (Bertram) - French translation\n" ..
+	"(nemesis) - German translation\n" ..
 	"\n\n" ..
 
 	"Map Designers\n\n" ..
 	"Richard Kettering (Jetryl)\n" ..
 	"Tyler Olsen (Roots)\n" ..
+	"Jacob Rudolph (rujasu)\n" ..
 	"\n\n" ..
 
 	"Team Managers\n\n" ..
@@ -80,9 +84,9 @@ credits_text =
 	"\n\n" ..
 
 	"Packaging\n\n" ..
-	"Brandon Barnes (Winter Knight) - Windows distribution\n" ..
 	"Dmitry Marakasov (AMDmi3) - FreeBSD distribution\n" ..
 	"Jorda Polo (ettin) - Debian distribution\n" ..
+	"Jacob Rudolph (rujasu) - Windows distribution\n" ..
 	"Philip Vorsilak (gorzuate) - OS X distribution\n" ..
 	"Tyler Olsen (Roots) - Source distribution\n" ..
 	"\n\n" ..
@@ -91,7 +95,7 @@ credits_text =
 	"Additional Programming\n\n" ..
 	"Aaron Smith (Etherstar) - audio engine\n" ..
 	"Alastair Lynn (prophile) - various code, Mac OS X maintenance\n" ..
-	"Brandon Barnes (Winter Knight) - game engine, game modes\n" ..
+	"Brandon Barnes (Winter Knight) - game engine, game modes, Windows build scripts\n" ..
 	"Corey Hoffstein (visage) - battle code\n" ..
 	"Dale Ma (eguitarz) - map editor\n" ..
 	"DongHa Lee (MoOshiCow) - internationalization\n" ..
@@ -100,6 +104,8 @@ credits_text =
 	"Nick Weihs (nickw) - video engine\n" ..
 	"Raj Sharma (roos) - video engine\n" ..
 	"Vladimir Mitrovic (snipe714) - scripting engine\n" ..
+	"(densuke) - video engine\n" ..
+	"(nemesis) - various code\n" ..
 	"\n\n" ..
 
 	"Additional Artwork\n\n" ..
@@ -122,6 +128,7 @@ credits_text =
 	"Tyler Stroud (gloomcover) - map tiles\n" ..
 	"Victoria Smith (alenacat) - map sprites, map tiles\n" ..
 	"(Jarks) - map tiles, inventory icons\n" ..
+	"(Namakoro) - enemy sprites\n" ..
 	"\n\n" ..
 
 	"Additional Music and Sound\n\n" ..
