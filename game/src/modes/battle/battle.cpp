@@ -68,6 +68,8 @@ static const uint32 EXIT_STEP_GUI_POSITIONING  =  1;
 static const uint32 EXIT_STEP_SCREEN_FADE      =  2;
 //@}
 
+
+
 SequenceSupervisor::SequenceSupervisor(BattleMode* current_instance) :
 	_battle(current_instance),
 	_sequence_step(0),
@@ -1027,9 +1029,9 @@ void BattleMode::_Initialize() {
 void BattleMode::_DetermineActorLocations() {
 	// Temporary static positions for enemies
 	const float TEMP_ENEMY_LOCATIONS[][2] = {
-		{ 515.0f, 768.0f - 360.0f }, // 768.0f - because of reverse Y-coordinate system
+		{ 515.0f, 768.0f - 600.0f }, // 768.0f - because of reverse Y-coordinate system
 		{ 494.0f, 768.0f - 450.0f },
-		{ 510.0f, 768.0f - 550.0f },
+		{ 560.0f, 768.0f - 550.0f },
 		{ 580.0f, 768.0f - 630.0f },
 		{ 675.0f, 768.0f - 390.0f },
 		{ 655.0f, 768.0f - 494.0f },

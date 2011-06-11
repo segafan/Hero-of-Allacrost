@@ -50,7 +50,10 @@ void GlobalObject::_LoadObjectData(hoa_script::ReadScriptDescriptor& script) {
 ////////////////////////////////////////////////////////////////////////////////
 
 GlobalItem::GlobalItem(uint32 id, uint32 count) :
-	GlobalObject(id, count)
+	GlobalObject(id, count),
+	_target_type(GLOBAL_TARGET_INVALID),
+	_battle_use_function(NULL),
+	_field_use_function(NULL)
 {
 	if ((_id == 0) || (_id > MAX_ITEM_ID)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "invalid id in constructor: " << _id << endl;
@@ -70,11 +73,11 @@ GlobalItem::GlobalItem(uint32 id, uint32 count) :
 	_LoadObjectData(script_file);
 
 	_target_type = static_cast<GLOBAL_TARGET>(script_file.ReadInt("target_type"));
-	if (script_file.DoesFunctionExist("BattleUse")) {
+	if (script_file.DoesFunctionExist("BattleUse") == true) {
 		_battle_use_function = new ScriptObject();
 		*_battle_use_function = script_file.ReadFunctionPointer("BattleUse");
 	}
-	if (script_file.DoesFunctionExist("FieldUse")) {
+	if (script_file.DoesFunctionExist("FieldUse") == true) {
 		_field_use_function = new ScriptObject();
 		*_field_use_function = script_file.ReadFunctionPointer("FieldUse");
 	}
