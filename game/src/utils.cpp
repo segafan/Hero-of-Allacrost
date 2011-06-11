@@ -472,6 +472,7 @@ float RandomFloat(float a, float b) {
 	return a + (b - a) * r / 10000.0f;
 }
 
+
 // Returns a random integer between two inclusive bounds
 int32 RandomBoundedInteger(int32 lower_bound, int32 upper_bound) {
 	int32 range;  // The number of possible values we may return
@@ -488,6 +489,7 @@ int32 RandomBoundedInteger(int32 lower_bound, int32 upper_bound) {
 
 	return static_cast<int32>(result);
 } // int32 RandomBoundedInteger(int32 lower_bound, int32 upper_bound)
+
 
 // Creates a Gaussian random interger value.
 // std_dev and positive_value are optional arguments with default values 10.0f and true respectively
@@ -526,7 +528,8 @@ int32 GaussianRandomValue(int32 mean, float std_dev, bool positive_value) {
 		return 0;
 	else
 		return static_cast<int32>(result);
-} // int32 GaussianValue(int32 mean, float std_dev = 6.667f, bool positive_value = false)
+} // int32 GaussianValue(int32 mean, float std_dev, bool positive_value)
+
 
 // Returns true/false depending on the chance
 bool Probability(uint32 chance) {

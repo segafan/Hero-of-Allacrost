@@ -278,7 +278,7 @@ private:
 	std::vector<hoa_video::TextImage> _target_type_text;
 
 	//! \brief Booleans that indicate whether the item is usable on maps and/or in battles
-	bool  _map_usable, _battle_usable;
+	bool _map_usable, _battle_usable;
 
 	//! \brief Index into the _target_type_text vector to get the appropriate descriptor for this item
 	uint32 _target_type_index;
