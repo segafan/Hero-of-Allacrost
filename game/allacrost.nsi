@@ -6,7 +6,7 @@
 !define PRODUCT_VERSION "Development Release"
 !define PRODUCT_PUBLISHER "The Allacrost Team"
 !define PRODUCT_WEB_SITE "http://www.allacrost.org"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\Allacrost.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\allacrost.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
@@ -60,14 +60,18 @@ Section "MainSection" SEC01
   File /r mus\*
   SetOutPath "$INSTDIR\snd"
   File /r snd\*
+  SetOutPath "$INSTDIR\txt"
+  File /r txt\*
 
   SetOutPath "$INSTDIR"
-  File Allacrost.exe
+  File allacrost.exe
+  File allacrost-editor.exe
   File *.dll
   File Microsoft.VC80.CRT.manifest
 
   CreateDirectory "$SMPROGRAMS\Allacrost"
   CreateShortCut "$SMPROGRAMS\Allacrost\$0.lnk" "$INSTDIR\$0.exe"
+  CreateShortCut "$SMPROGRAMS\Allacrost\allacrost-editor.lnk" "$INSTDIR\allacrost-editor.exe"
 ; CreateShortCut "$DESKTOP\$0.lnk" "$INSTDIR\$0.exe"
 SectionEnd
  
@@ -103,6 +107,7 @@ Section Uninstall
   Delete "$SMPROGRAMS\Allacrost\Uninstall.lnk"
 ; Delete "$DESKTOP\$0.lnk"
   Delete "$SMPROGRAMS\Allacrost\$0.lnk"
+  Delete "$SMPROGRAMS\Allacrost\allacrost-editor.lnk"
  
   RMDir "$SMPROGRAMS\Allacrost"
   RMDir /r "$INSTDIR"
