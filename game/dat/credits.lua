@@ -104,7 +104,7 @@ credits_text =
 	"Nick Weihs (nickw) - video engine\n" ..
 	"Raj Sharma (roos) - video engine\n" ..
 	"Vladimir Mitrovic (snipe714) - scripting engine\n" ..
-	"(densuke) - video engine\n" ..
+	"(densuke) - various code\n" ..
 	"(nemesis) - various code\n" ..
 	"\n\n" ..
 
