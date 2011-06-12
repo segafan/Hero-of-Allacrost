@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Allacrost Demo 0.3.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2011-05-10 23:38-0300\n"
+"POT-Creation-Date: 2011-06-12 16:27-0500\n"
 "PO-Revision-Date: 2010-08-23 13:27+0100\n"
 "Last-Translator: Yohann Ferreira <yohann__ferreira_at_orange_at_efer>\n"
 "Language-Team: French <team@allacrost.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "X-Poedit-Language: French\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: dat/actors/characters.lua:13 dat/actors/map_sprites_stock.lua:9
+#: dat/actors/characters.lua:13 dat/actors/map_sprites_stock.lua:10
 #: dat/maps/demo_cave.lua:389
 msgid "Claudius"
 msgstr "Claudius"
@@ -27,9 +27,10 @@ msgstr "Claudius"
 #: dat/actors/characters.lua:202 dat/actors/characters.lua:280
 #: dat/actors/enemies_set_01.lua:114 dat/actors/enemies_set_01.lua:168
 #: dat/actors/enemies_set_01.lua:231 dat/actors/enemies_set_01.lua:294
-#: dat/actors/enemies_set_02.lua:131 dat/actors/enemies_set_02.lua:187
-#: dat/actors/enemies_set_02.lua:243 dat/actors/enemies_set_02.lua:308
-#: dat/actors/enemies_set_02.lua:363 src/modes/menu/menu.cpp:847
+#: dat/actors/enemies_set_01.lua:413 dat/actors/enemies_set_02.lua:131
+#: dat/actors/enemies_set_02.lua:187 dat/actors/enemies_set_02.lua:243
+#: dat/actors/enemies_set_02.lua:308 dat/actors/enemies_set_02.lua:363
+#: src/modes/menu/menu.cpp:847
 msgid "Head"
 msgstr "Tête"
 
@@ -46,22 +47,23 @@ msgstr ""
 
 #: dat/actors/characters.lua:62 dat/actors/characters.lua:150
 #: dat/actors/characters.lua:228 dat/actors/characters.lua:306
-#: dat/actors/enemies_set_01.lua:247 dat/actors/enemies_set_01.lua:310
-#: dat/actors/enemies_set_01.lua:429 dat/actors/enemies_set_01.lua:492
-#: dat/actors/enemies_set_02.lua:267 dat/actors/enemies_set_02.lua:379
-#: src/modes/menu/menu.cpp:856
+#: dat/actors/enemies_set_01.lua:492 dat/actors/enemies_set_02.lua:267
+#: dat/actors/enemies_set_02.lua:379 src/modes/menu/menu.cpp:856
 msgid "Legs"
 msgstr "Jambes"
 
-#: dat/actors/characters.lua:101
+#: dat/actors/characters.lua:101 dat/maps/opening_scene.lua:231
+#: dat/maps/river_access_cave.lua:588
 msgid "Mark"
 msgstr ""
 
-#: dat/actors/characters.lua:179
+#: dat/actors/characters.lua:179 dat/maps/opening_scene.lua:236
+#: dat/maps/river_access_cave.lua:593
 msgid "Dester"
 msgstr ""
 
-#: dat/actors/characters.lua:257
+#: dat/actors/characters.lua:257 dat/maps/opening_scene.lua:241
+#: dat/maps/river_access_cave.lua:598
 msgid "Lukar"
 msgstr ""
 
@@ -78,7 +80,8 @@ msgstr ""
 msgid "Spider"
 msgstr ""
 
-#: dat/actors/enemies_set_01.lua:122 dat/actors/enemies_set_02.lua:195
+#: dat/actors/enemies_set_01.lua:122 dat/actors/enemies_set_01.lua:302
+#: dat/actors/enemies_set_02.lua:195
 msgid "Abdomen"
 msgstr ""
 
@@ -100,12 +103,13 @@ msgstr ""
 msgid "Chest"
 msgstr ""
 
+#: dat/actors/enemies_set_01.lua:247 dat/actors/enemies_set_01.lua:310
+#: dat/actors/enemies_set_01.lua:429 src/modes/menu/menu_views.cpp:205
+msgid "Leg"
+msgstr "Jmb"
+
 #: dat/actors/enemies_set_01.lua:274
 msgid "Scorpion"
-msgstr ""
-
-#: dat/actors/enemies_set_01.lua:302
-msgid "Thorax"
 msgstr ""
 
 #: dat/actors/enemies_set_01.lua:337
@@ -115,23 +119,27 @@ msgstr "Combat"
 
 #: dat/actors/enemies_set_01.lua:365
 #, fuzzy
-msgid "Wings"
+msgid "Wing"
 msgstr "Jambières"
 
 #: dat/actors/enemies_set_01.lua:393
 msgid "Scorpion Goliath"
 msgstr ""
 
-#: dat/actors/enemies_set_01.lua:413 dat/actors/enemies_set_01.lua:476
-msgid "Mesosoma"
-msgstr ""
-
-#: dat/actors/enemies_set_01.lua:421 dat/actors/enemies_set_01.lua:484
-msgid "Pincers"
+#: dat/actors/enemies_set_01.lua:421
+msgid "Pincer"
 msgstr ""
 
 #: dat/actors/enemies_set_01.lua:456
 msgid "Armored Beast"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:476
+msgid "Mesosoma"
+msgstr ""
+
+#: dat/actors/enemies_set_01.lua:484
+msgid "Pincers"
 msgstr ""
 
 #: dat/actors/enemies_set_02.lua:15
@@ -179,51 +187,51 @@ msgstr "Bras"
 msgid "Aurum Drakueli"
 msgstr ""
 
-#: dat/actors/enemies_set_02.lua:343 dat/actors/map_sprites_stock.lua:35
+#: dat/actors/enemies_set_02.lua:343 dat/actors/map_sprites_stock.lua:36
 msgid "Kyle"
 msgstr "Kyle"
 
-#: dat/actors/map_sprites_stock.lua:22
+#: dat/actors/map_sprites_stock.lua:23
 msgid "Laila"
 msgstr "Laila"
 
-#: dat/actors/map_sprites_stock.lua:47
+#: dat/actors/map_sprites_stock.lua:48
 msgid "Captain"
 msgstr "Capitaine"
 
-#: dat/actors/map_sprites_stock.lua:58
+#: dat/actors/map_sprites_stock.lua:59
 msgid "Marcus"
 msgstr "Marcus"
 
-#: dat/actors/map_sprites_stock.lua:70
+#: dat/actors/map_sprites_stock.lua:71
 msgid "Vanica"
 msgstr "Vanica"
 
-#: dat/actors/map_sprites_stock.lua:82
+#: dat/actors/map_sprites_stock.lua:83
 msgid "Alexander"
 msgstr "Alexandre"
 
-#: dat/actors/map_sprites_stock.lua:93
+#: dat/actors/map_sprites_stock.lua:94
 msgid "Laine"
 msgstr "Laine"
 
-#: dat/actors/map_sprites_stock.lua:104
+#: dat/actors/map_sprites_stock.lua:105
 msgid "Torl"
 msgstr "Torl"
 
-#: dat/actors/map_sprites_stock.lua:115
+#: dat/actors/map_sprites_stock.lua:116
 msgid "Female Merchant"
 msgstr "Marchande"
 
-#: dat/actors/map_sprites_stock.lua:126
+#: dat/actors/map_sprites_stock.lua:127
 msgid "Livia"
 msgstr "Livia"
 
-#: dat/actors/map_sprites_stock.lua:137
+#: dat/actors/map_sprites_stock.lua:138
 msgid "Octavia"
 msgstr "Octavia"
 
-#: dat/actors/map_sprites_stock.lua:148
+#: dat/actors/map_sprites_stock.lua:149
 msgid "Karlate"
 msgstr "Karlate"
 
@@ -924,7 +932,7 @@ msgstr "Souviens-toi de ce que tu as appris."
 msgid "Well done, Claudius."
 msgstr "Bien joué, Claudius."
 
-#: dat/maps/desert_training.lua:601 dat/maps/scene1_desert.lua:459
+#: dat/maps/desert_training.lua:601
 msgid "Yes, sir."
 msgstr "Oui, Monsieur."
 
@@ -1056,205 +1064,201 @@ msgstr "Non. Je fais ça pour moi. Je ne m'attends pas à ce que tu comprennes."
 msgid "Then you leave me no choice."
 msgstr "Alors tu ne me laisses pas le choix."
 
-#: dat/maps/opening_scene.lua:209
+#: dat/maps/opening_scene.lua:258
+#, fuzzy
+msgid "Captain Bravis"
+msgstr "Capitaine"
+
+#: dat/maps/opening_scene.lua:308
 msgid ""
-"You know the only reason I’m doing this is because of my family. There was "
-"never any discussion. If it was my choice I’d be far away from here."
+"I watched the men in the pale light of the blue moon. The dark cloaks they "
+"wore for warmth only better distinguishing them against the light sand for "
+"my trained eye."
 msgstr ""
-"Tu sais, la seule raison pour laquelle je fais tout cela, c'est pour ma "
-"famille. Je n'ai jamais pu en discuter. Si je pouvais choisir, je serais "
-"loin d'ici."
 
-#: dat/maps/opening_scene.lua:211
-msgid "And go where? You should be happy. It’s an honor to serve your country."
-msgstr ""
-"Pour aller où ? Tu devrais être heureux. C'est un honneur de servir ta "
-"patrie."
-
-#: dat/maps/opening_scene.lua:213
-msgid "I can do that on my own."
-msgstr "Je peux le faire seul."
-
-#: dat/maps/opening_scene.lua:215
+#: dat/maps/opening_scene.lua:310
 msgid ""
-"It’s more effective to work together. Besides, the Captain has our best "
-"interest at heart."
+"The Harrvah Knights, though powerful in their great city of stone, were "
+"powerless in the might of the desert. The desert was the land of the Muabi "
+"tribe, my tribe. Out here, a squad of troops such as this was no match for "
+"even a small group of Muabi."
 msgstr ""
-"C'est plus efficace de travailler ensemble. Qui plus est, le Capitaine se "
-"préoccupe beaucoup de notre formation."
 
-#: dat/maps/opening_scene.lua:217
+#: dat/maps/opening_scene.lua:312
 msgid ""
-"That’s where you’re wrong, Claudius. As far as he’s concerned we’re "
-"expendable."
+"I knew where they were headed. We had seen that their water supply had been "
+"blocked, but such problems were not Muabi problems. The outsiders had built "
+"their grand city away from the water, because they could not tame the "
+"creatures there."
 msgstr ""
-"C'est là que tu te trompes, Claudius. En ce qui me concerne, nous sommes "
-"remplaçables."
 
-#: dat/maps/opening_scene.lua:219
-msgid "You’re crazy."
-msgstr "Tu es fou."
+#: dat/maps/opening_scene.lua:314
+msgid ""
+"Although the great sand storms that had swept through our lands for the past "
+"several days had finally vanished, the winds still howled throughout the "
+"desert..."
+msgstr ""
 
-#: dat/maps/opening_scene.lua:221
-msgid "You’ve never thought about leaving the knighthood?"
-msgstr "Tu n'as jamais penser à quitter l'Ordre ?"
+#: dat/maps/opening_scene.lua:320
+msgid "Alright, listen up!"
+msgstr ""
 
-#: dat/maps/opening_scene.lua:223
-msgid "Of course not."
-msgstr "Bien sûr que non."
+#: dat/maps/opening_scene.lua:325
+msgid ""
+"Our scouts report that somewhere in this cave, the underground river vein "
+"that supplies our city has been blocked. Our mission is to remove the "
+"obstruction and restore the water supply."
+msgstr ""
 
-#: dat/maps/opening_scene.lua:225
-msgid "I didn’t think so."
-msgstr "Je ne pensais pas."
+#: dat/maps/opening_scene.lua:327
+msgid ""
+"I don't need to remind you all of how important this mission is. The great "
+"sand storms that have swept over this land for the past several days have "
+"prevented us from achieving this objective sooner, and our local reserves of "
+"water are nearly dry. If we fail to succeed here, our people will perish."
+msgstr ""
 
-#: dat/maps/opening_scene.lua:227
-msgid "You’ll be all right."
-msgstr "Ça va aller..."
+#: dat/maps/opening_scene.lua:329
+msgid ""
+"The passages in this cave are too narrow to move our entire unit through. "
+"We'll make our way through one squad at a time and re-assemble at the river "
+"bed."
+msgstr ""
 
-#: dat/maps/opening_scene.lua:229
-msgid "I just don’t understand you sometimes."
-msgstr "... Il y a des fois où je ne te comprends pas."
+#: dat/maps/opening_scene.lua:331
+msgid "Now form your squads and get moving. I'll see you all underground."
+msgstr ""
 
-#: dat/maps/opening_scene.lua:231
-msgid "Hey, what time is it?"
-msgstr "Au fait, Quelle heure est-il ?"
+#: dat/maps/opening_scene.lua:337
+msgid "Mark, Dester, Claudius. You're in my squad."
+msgstr ""
 
-#: dat/maps/opening_scene.lua:233
-msgid "I don’t know."
-msgstr "Je ne sais pas."
+#: dat/maps/opening_scene.lua:341
+msgid ""
+"The creatures that inhabit this cave are not friendly, so be on your guard "
+"at all times. Now let's get moving."
+msgstr ""
 
-#: dat/maps/opening_scene.lua:235
-msgid "Aren’t we supposed to be sparring right now?"
-msgstr "Ne sommes nous pas plutôt supposés nous entraîner en ce moment ?"
-
-#: dat/maps/opening_scene.lua:237
-msgid "Who cares?"
-msgstr "Et alors ?"
-
-#: dat/maps/opening_scene.lua:239
-msgid "I think we are. Come on."
-msgstr "Je pense que nous le sommes. Allons-y."
-
-#: dat/maps/opening_scene.lua:241
-msgid "Kyle has joined the party."
-msgstr "Kyle a rejoint votre équipe."
-
-#: dat/maps/river_access_cave.lua:502
+#: dat/maps/river_access_cave.lua:922
 msgid "Watch your step and keep moving. Its not far to the river bed."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:507
+#: dat/maps/river_access_cave.lua:927
 msgid "Uuuurrrnnnnnggghhhh!"
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:512
+#: dat/maps/river_access_cave.lua:932
 msgid "(Wimpering)"
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:517
+#: dat/maps/river_access_cave.lua:937
 msgid "She's terrified and won't budge."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:519
+#: dat/maps/river_access_cave.lua:939
 msgid "For being such large animals, Mak hounds sure can act cowardly."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:521
+#: dat/maps/river_access_cave.lua:941
 msgid ""
 "Go on ahead of our group. We'll catch up when we can get her moving again."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:526
-msgid ""
-"A corpse. That's always a reassuring thing to find in a place like this."
-msgstr ""
-
-#: dat/maps/river_access_cave.lua:528
-msgid "Hey, I see something under his hand."
-msgstr ""
-
-#: dat/maps/river_access_cave.lua:533
-msgid "Hey! Over here!"
-msgstr ""
-
-#: dat/maps/river_access_cave.lua:538
+#: dat/maps/river_access_cave.lua:946
 msgid ""
 "The river bed is just through this passage. Be careful, the walls are a "
 "little unstable."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:543
-#, fuzzy
-msgid "Woah, are you men alright?"
-msgstr "Claudius ! Est-ce que ça va ?"
-
-#: dat/maps/river_access_cave.lua:545
-msgid "We're all fine. But the passage has caved in."
-msgstr ""
-
-#: dat/maps/river_access_cave.lua:547
-msgid "There's another way. Its a longer route though. Head through there."
-msgstr ""
-
-#: dat/maps/river_access_cave.lua:552
+#: dat/maps/river_access_cave.lua:952
 msgid "I'll direct everyone remaining to the longer route. Keep going."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:557
+#: dat/maps/river_access_cave.lua:957
 msgid ""
 "Damnit, another dead end. I hope that guy was right about there being "
 "another way through."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:559
+#: dat/maps/river_access_cave.lua:959
 msgid "Did you guys hear that? What the hell was that noise?"
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:561
+#: dat/maps/river_access_cave.lua:961
 msgid "I don't know, but I've got a bad feeling about this mission."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:563
+#: dat/maps/river_access_cave.lua:963
 msgid ""
 "Well the sooner we achieve our objective, the sooner we get out of here and "
 "go home. So move your ass instead of your mouth."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:568
+#: dat/maps/river_access_cave.lua:968
 msgid ""
 "This path leads down deeper into the cave. You don't need to go there ... "
 "and trust me, you don't want to."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:573
-msgid "Ow ow ow..."
+#: dat/maps/river_access_cave.lua:973
+msgid "Dammit, ow ow ow..."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:578
+#: dat/maps/river_access_cave.lua:978
 msgid ""
 "He sprained his ankle on a loose rock so we're treating his injury. Move on "
 "ahead, you're almost there."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:583
+#: dat/maps/river_access_cave.lua:987
+msgid "A corpse. That's always a reassuring find in a place like this."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:989
+msgid "Hey, I see something under its hand."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:995
+msgid "Hey! Over here!"
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:1001
+msgid "Look out!"
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:1007
+#, fuzzy
+msgid "Woah, are you men alright?"
+msgstr "Claudius ! Est-ce que ça va ?"
+
+#: dat/maps/river_access_cave.lua:1009
+msgid "We're all fine. But the passage has caved in."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:1011
+msgid ""
+"There's another way around. Its a longer route though. Head through there."
+msgstr ""
+
+#: dat/maps/river_access_cave.lua:1017
 msgid "Hey check it out. The water is still running here."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:585
+#: dat/maps/river_access_cave.lua:1019
 msgid "That's good news. Lets stop here briefly and fill up."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:590
+#: dat/maps/river_access_cave.lua:1025
 msgid "Finally made it."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:592
+#: dat/maps/river_access_cave.lua:1030
 msgid ""
 "Listen up! There's a large boulder obstructing the underground river that "
 "flows through here. When we move it aside, we get to head out of this place."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:594
+#: dat/maps/river_access_cave.lua:1032
 msgid ""
 "Mikal! Torren! Take your units and secure the ropes around that overgrown "
 "rock. Jasper's unit will prepare the Maks to help us move it. The rest of "
@@ -1262,105 +1266,27 @@ msgid ""
 "cave with us."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:599
-msgid "Hey! I heard that noise earlier. It sounds like its closer now."
+#: dat/maps/river_access_cave.lua:1037
+msgid "Hey, I heard that noise earlier. It sounds like its closer now."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:601
+#: dat/maps/river_access_cave.lua:1039
 msgid "Keep your eyes peeled and your swords ready men."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:603
+#: dat/maps/river_access_cave.lua:1041
 msgid ""
 "I don't know how you expect to see shit in here. I can barely see my own "
 "hand."
 msgstr ""
 
-#: dat/maps/river_access_cave.lua:605
+#: dat/maps/river_access_cave.lua:1043
 #, fuzzy
-msgid "Over there! Watch out!."
+msgid "Over there! Watch out!"
 msgstr "Par ici, Claudius !"
 
-#: dat/maps/river_access_cave.lua:610
-msgid "Don't panic! Surround it and we'll take it down together!"
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:405
-msgid "Methus"
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:409
-#, fuzzy
-msgid "Knight"
-msgstr "Droite"
-
-#: dat/maps/scene1_desert.lua:413
-msgid "Narrator"
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:441
-msgid ""
-"A Muabi tribe member stands in the distance, surveying a caravan of marching "
-"Harrvahn knights who are led by Mak’ok hounds. In the back of this caravan "
-"is Claudius. The knights continue marching single file until reaching their "
-"destination: the bank of the river. The Maubi member continues to watch from "
-"a distance."
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:443
-msgid ""
-"Open your ears and shut your mouths. Our mission is to unblock the water "
-"supply. Stay together and on guard, I don't want any heroes or fools dying "
-"on the surgeon's table tonight."
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:445
-msgid ""
-"Some knights begin setting a perimeter around their location, while others "
-"scout the area. The spying Maubi disappears into the darkness. Claudius "
-"moves to help some of the knights scout."
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:447
-msgid ""
-"Stay by the riverside Claudius, with the Mak’ok’s. You’re not a knight yet."
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:449
-msgid ""
-"Claudius observes the knights work to establish their presence in the area. "
-"He sees as some of the knights approach the nearby cave where the water is "
-"coming from. Once the perimeter is secure the knights regroup where Claudius "
-"is, by the riverside."
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:451
-msgid ""
-"The water is definitely blocked somewhere in the cave. You can normally hear "
-"it from here when it's running full force. There can't be more than a "
-"trickle moving toward the city."
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:453
-msgid "All right. Draw your steel and prepare yourselves, we’re going in."
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:455
-msgid ""
-"Claudius, who has been holding the leashes to the Mak’ok’s, drops them and "
-"draws his sword."
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:457
-msgid ""
-"Claudius, this is your first mission and you’re still in training. Your job "
-"is to man the Makok’s and be observant of your superiors."
-msgstr ""
-
-#: dat/maps/scene1_desert.lua:461
-msgid ""
-"Claudius sheaths his sword and picks up the leashes. The knights, along with "
-"Claudius, enter the cave."
+#: dat/maps/river_access_cave.lua:1049
+msgid "End of map."
 msgstr ""
 
 #: dat/objects/arm_armor.lua:40
@@ -1579,66 +1505,77 @@ msgstr ""
 msgid "Increases the strength of all allies."
 msgstr ""
 
-#: src/modes/battle/battle_command.cpp:247
+#: src/modes/battle/battle_command.cpp:252
 msgid "Item<R>Count"
 msgstr ""
 
-#: src/modes/battle/battle_command.cpp:454
+#: src/modes/battle/battle_command.cpp:469
 #, fuzzy
 msgid "Skill<R>SP"
 msgstr "Compétences"
 
-#: src/modes/battle/battle_command.cpp:546
-#: src/modes/battle/battle_command.cpp:552
+#: src/modes/battle/battle_command.cpp:593
+#: src/modes/battle/battle_command.cpp:599
 msgid "Attack"
 msgstr ""
 
-#: src/modes/battle/battle_command.cpp:547
-#: src/modes/battle/battle_command.cpp:553
+#: src/modes/battle/battle_command.cpp:594
+#: src/modes/battle/battle_command.cpp:600
 msgid "Defend"
 msgstr ""
 
-#: src/modes/battle/battle_command.cpp:548
-#: src/modes/battle/battle_command.cpp:554
+#: src/modes/battle/battle_command.cpp:595
+#: src/modes/battle/battle_command.cpp:601
 msgid "Support"
 msgstr ""
 
-#: src/modes/battle/battle_command.cpp:549
-#: src/modes/battle/battle_command.cpp:555
+#: src/modes/battle/battle_command.cpp:596
+#: src/modes/battle/battle_command.cpp:602
 #, fuzzy
 msgid "Item"
 msgstr "Objets"
 
-#: src/modes/battle/battle_command.cpp:1010
+#: src/modes/battle/battle_command.cpp:1147
+#, fuzzy
+msgid "Select Target"
+msgstr "Cible :"
+
+#: src/modes/battle/battle_command.cpp:1152
+#: src/modes/battle/battle_command.cpp:1184
 #, fuzzy
 msgid "All Allies"
 msgstr "Tous"
 
-#: src/modes/battle/battle_command.cpp:1012
+#: src/modes/battle/battle_command.cpp:1155
+#: src/modes/battle/battle_command.cpp:1187
 #, fuzzy
 msgid "All Enemies"
 msgstr "Tous"
 
-#: src/modes/battle/battle_command.cpp:1029
+#: src/modes/battle/battle_command.cpp:1199
+msgid "Select Attack Point"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1220
 #, fuzzy
 msgid "Skill Points: "
 msgstr "Compétences"
 
-#: src/modes/battle/battle_command.cpp:1030
-#: src/modes/battle/battle_command.cpp:1038
+#: src/modes/battle/battle_command.cpp:1221
+#: src/modes/battle/battle_command.cpp:1229
 #, fuzzy
 msgid "Target Type: "
 msgstr "Cible :"
 
-#: src/modes/battle/battle_command.cpp:1031
+#: src/modes/battle/battle_command.cpp:1222
 msgid "Prep Time: "
 msgstr ""
 
-#: src/modes/battle/battle_command.cpp:1032
+#: src/modes/battle/battle_command.cpp:1223
 msgid "Cool Time: "
 msgstr ""
 
-#: src/modes/battle/battle_command.cpp:1037
+#: src/modes/battle/battle_command.cpp:1228
 msgid "Quantity: "
 msgstr ""
 
@@ -1666,70 +1603,117 @@ msgstr "Oui"
 msgid "No"
 msgstr "Non"
 
+#: src/modes/battle/battle_finish.cpp:242
+msgid ""
+"Start over from the beginning of this battle.\n"
+"Attempts Remaining: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:245
+msgid "Load the game from the last save game point."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:248
+msgid "Returns the game to the main boot menu."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:251
+#, fuzzy
+msgid "Exit the game."
+msgstr "Met le jeu en pause"
+
+#: src/modes/battle/battle_finish.cpp:258
+#, fuzzy
+msgid "Confirm: retry battle."
+msgstr "Confirmer la commande"
+
+#: src/modes/battle/battle_finish.cpp:261
+msgid "Confirm: restart from last save."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:264
+msgid "Confirm: return to main menu."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:267
+#, fuzzy
+msgid "Confirm: exit game."
+msgstr "Valider :"
+
 #: src/modes/battle/battle_finish.cpp:320
 #, fuzzy
 msgid "Items Found"
 msgstr "Objets"
 
-#: src/modes/battle/battle_finish.cpp:481
+#: src/modes/battle/battle_finish.cpp:469
 msgid "XP Earned: "
 msgstr ""
 
-#: src/modes/battle/battle_finish.cpp:484
+#: src/modes/battle/battle_finish.cpp:472
 #, fuzzy
 msgid "Drunes Recovered: "
 msgstr "Drunes : "
 
-#: src/modes/battle/battle_finish.cpp:532
-#: src/modes/battle/battle_finish.cpp:614
+#: src/modes/battle/battle_finish.cpp:520
+#: src/modes/battle/battle_finish.cpp:645
 msgid "Level: "
 msgstr ""
 
-#: src/modes/battle/battle_finish.cpp:533
-#: src/modes/battle/battle_finish.cpp:615
+#: src/modes/battle/battle_finish.cpp:521
+#: src/modes/battle/battle_finish.cpp:646
 msgid "XP: "
 msgstr ""
 
-#: src/modes/battle/battle_finish.cpp:579
+#: src/modes/battle/battle_finish.cpp:610
 #, fuzzy
 msgid "HP:"
 msgstr "PV : "
 
-#: src/modes/battle/battle_finish.cpp:582
+#: src/modes/battle/battle_finish.cpp:613
 #, fuzzy
 msgid "SP:"
 msgstr "PM : "
 
-#: src/modes/battle/battle_finish.cpp:585
+#: src/modes/battle/battle_finish.cpp:616
 #, fuzzy
 msgid "STR:"
 msgstr "FOR : "
 
-#: src/modes/battle/battle_finish.cpp:588
+#: src/modes/battle/battle_finish.cpp:619
 #, fuzzy
 msgid "VIG:"
 msgstr "VIG : "
 
-#: src/modes/battle/battle_finish.cpp:591
+#: src/modes/battle/battle_finish.cpp:622
 msgid "FOR:"
 msgstr ""
 
-#: src/modes/battle/battle_finish.cpp:594
+#: src/modes/battle/battle_finish.cpp:625
 #, fuzzy
 msgid "PRO:"
 msgstr "PRO : "
 
-#: src/modes/battle/battle_finish.cpp:597
+#: src/modes/battle/battle_finish.cpp:628
 #, fuzzy
 msgid "AGI:"
 msgstr "AGI : "
 
-#: src/modes/battle/battle_finish.cpp:600
+#: src/modes/battle/battle_finish.cpp:631
 msgid "EVA:"
 msgstr ""
 
-#: src/modes/battle/battle_finish.cpp:609
-msgid "New Skill Learned:   "
+#: src/modes/battle/battle_finish.cpp:640
+msgid ""
+"New Skill Learned:\n"
+"   "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:766
+msgid "The heroes were victorious!"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:770
+msgid "But the heroes fell in battle..."
 msgstr ""
 
 #: src/modes/boot/boot.cpp:87
@@ -1740,270 +1724,270 @@ msgstr "Démo 1.0.0"
 msgid "© 2004 — 2010 The Allacrost Project"
 msgstr "© 2004 — 2010 The Allacrost Project"
 
-#: src/modes/boot/boot.cpp:514 src/modes/boot/boot.cpp:534
+#: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
 msgid "New Game"
 msgstr "Nv. jeu"
 
-#: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
+#: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
 #: src/modes/save/save_mode.cpp:86
 msgid "Load Game"
 msgstr "Continuer"
 
-#: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
+#: src/modes/boot/boot.cpp:517 src/modes/boot/boot.cpp:537
 msgid "Options"
 msgstr "Options"
 
-#: src/modes/boot/boot.cpp:517 src/modes/boot/boot.cpp:537
+#: src/modes/boot/boot.cpp:518 src/modes/boot/boot.cpp:538
 msgid "Credits"
 msgstr "Crédits"
 
-#: src/modes/boot/boot.cpp:518 src/modes/menu/menu_views.cpp:705
+#: src/modes/boot/boot.cpp:519 src/modes/menu/menu_views.cpp:705
 msgid "Battle"
 msgstr "Combat"
 
-#: src/modes/boot/boot.cpp:519 src/modes/boot/boot.cpp:883
+#: src/modes/boot/boot.cpp:520 src/modes/boot/boot.cpp:896
 #: src/modes/boot/boot_welcome.cpp:85
 msgid "Menu"
 msgstr "Menu"
 
-#: src/modes/boot/boot.cpp:520
+#: src/modes/boot/boot.cpp:521
 msgid "Shop"
 msgstr "Magasin"
 
-#: src/modes/boot/boot.cpp:521 src/modes/boot/boot.cpp:538
+#: src/modes/boot/boot.cpp:522 src/modes/boot/boot.cpp:539
 #: src/modes/boot/boot_welcome.cpp:100
 msgid "Quit"
 msgstr "Quitter"
 
-#: src/modes/boot/boot.cpp:563
+#: src/modes/boot/boot.cpp:565
 msgid "Video"
 msgstr "Vidéo"
 
-#: src/modes/boot/boot.cpp:564
+#: src/modes/boot/boot.cpp:566
 msgid "Audio"
 msgstr "Audio"
 
-#: src/modes/boot/boot.cpp:565
+#: src/modes/boot/boot.cpp:567
 msgid "Language"
 msgstr "Langage"
 
-#: src/modes/boot/boot.cpp:566
+#: src/modes/boot/boot.cpp:568
 msgid "Key Settings"
 msgstr "Configuration des touches"
 
-#: src/modes/boot/boot.cpp:567
+#: src/modes/boot/boot.cpp:569
 msgid "Joystick Settings"
 msgstr "Configuration du Joystick"
 
-#: src/modes/boot/boot.cpp:568
+#: src/modes/boot/boot.cpp:570
 msgid "Profiles"
 msgstr "Profiles"
 
-#: src/modes/boot/boot.cpp:585
+#: src/modes/boot/boot.cpp:588
 msgid "Resolution:"
 msgstr "Résolution :"
 
-#: src/modes/boot/boot.cpp:587
+#: src/modes/boot/boot.cpp:590
 msgid "Window mode:"
 msgstr "Mode d'affichage :"
 
-#: src/modes/boot/boot.cpp:588
+#: src/modes/boot/boot.cpp:591
 msgid "Brightness:"
 msgstr "Luminosité :"
 
-#: src/modes/boot/boot.cpp:589
+#: src/modes/boot/boot.cpp:592
 msgid "Image quality:"
 msgstr "Qualité d'image :"
 
-#: src/modes/boot/boot.cpp:608 src/modes/boot/boot.cpp:869
+#: src/modes/boot/boot.cpp:612 src/modes/boot/boot.cpp:882
 msgid "Sound Volume: "
 msgstr "Volume des effets :"
 
-#: src/modes/boot/boot.cpp:609 src/modes/boot/boot.cpp:870
+#: src/modes/boot/boot.cpp:613 src/modes/boot/boot.cpp:883
 msgid "Music Volume: "
 msgstr "Volume de la musique :"
 
-#: src/modes/boot/boot.cpp:667
+#: src/modes/boot/boot.cpp:673
 msgid "Up: "
 msgstr "Haut :"
 
-#: src/modes/boot/boot.cpp:668
+#: src/modes/boot/boot.cpp:674
 msgid "Down: "
 msgstr "Bas :"
 
-#: src/modes/boot/boot.cpp:669
+#: src/modes/boot/boot.cpp:675
 msgid "Left: "
 msgstr "Gauche :"
 
-#: src/modes/boot/boot.cpp:670
+#: src/modes/boot/boot.cpp:676
 msgid "Right: "
 msgstr "Droite :"
 
-#: src/modes/boot/boot.cpp:671
+#: src/modes/boot/boot.cpp:677
 msgid "Confirm: "
 msgstr "Valider :"
 
-#: src/modes/boot/boot.cpp:672
+#: src/modes/boot/boot.cpp:678
 msgid "Cancel: "
 msgstr "Annuler :"
 
-#: src/modes/boot/boot.cpp:673
+#: src/modes/boot/boot.cpp:679
 msgid "Menu: "
 msgstr "Menu :"
 
-#: src/modes/boot/boot.cpp:674
+#: src/modes/boot/boot.cpp:680
 msgid "Swap: "
 msgstr "Echanger :"
 
-#: src/modes/boot/boot.cpp:675
+#: src/modes/boot/boot.cpp:681
 msgid "Left Select: "
 msgstr "Sélection gauche :"
 
-#: src/modes/boot/boot.cpp:676
+#: src/modes/boot/boot.cpp:682
 msgid "Right Select: "
 msgstr "Sélection droite :"
 
-#: src/modes/boot/boot.cpp:677
+#: src/modes/boot/boot.cpp:683
 msgid "Pause: "
 msgstr "Pause :"
 
-#: src/modes/boot/boot.cpp:678 src/modes/boot/boot.cpp:707
+#: src/modes/boot/boot.cpp:684 src/modes/boot/boot.cpp:714
 msgid "Restore defaults"
 msgstr "Paramètres par défaut"
 
-#: src/modes/boot/boot.cpp:749 src/modes/menu/menu.cpp:523
+#: src/modes/boot/boot.cpp:758 src/modes/menu/menu.cpp:523
 #: src/modes/menu/menu.cpp:591 src/modes/menu/menu.cpp:606
 msgid "Save"
 msgstr "Sauvegarder"
 
-#: src/modes/boot/boot.cpp:750
+#: src/modes/boot/boot.cpp:759
 msgid "Load"
 msgstr "Charger"
 
-#: src/modes/boot/boot.cpp:751
+#: src/modes/boot/boot.cpp:760
 msgid "Delete"
 msgstr "Effacer"
 
-#: src/modes/boot/boot.cpp:780
+#: src/modes/boot/boot.cpp:791
 msgid "New Profile"
 msgstr "Nouveau profile"
 
-#: src/modes/boot/boot.cpp:842
+#: src/modes/boot/boot.cpp:855
 msgid "back"
 msgstr "Retour"
 
-#: src/modes/boot/boot.cpp:845
+#: src/modes/boot/boot.cpp:858
 msgid "end"
 msgstr "Fin"
 
-#: src/modes/boot/boot.cpp:858
+#: src/modes/boot/boot.cpp:871
 msgid "Window mode: fullscreen"
 msgstr "Mode d'affichage : Plein écran"
 
-#: src/modes/boot/boot.cpp:860
+#: src/modes/boot/boot.cpp:873
 msgid "Window mode: windowed"
 msgstr "Mode d'affichage : Fenêtré"
 
-#: src/modes/boot/boot.cpp:863
+#: src/modes/boot/boot.cpp:876
 msgid "Brightness: "
 msgstr "Luminosité :"
 
-#: src/modes/boot/boot.cpp:877
+#: src/modes/boot/boot.cpp:890
 msgid "Move Up"
 msgstr "Haut"
 
-#: src/modes/boot/boot.cpp:878
+#: src/modes/boot/boot.cpp:891
 msgid "Move Down"
 msgstr "Bas"
 
-#: src/modes/boot/boot.cpp:879
+#: src/modes/boot/boot.cpp:892
 msgid "Move Left"
 msgstr "Gauche"
 
-#: src/modes/boot/boot.cpp:880
+#: src/modes/boot/boot.cpp:893
 msgid "Move Right"
 msgstr "Droite"
 
-#: src/modes/boot/boot.cpp:881 src/modes/boot/boot_welcome.cpp:79
+#: src/modes/boot/boot.cpp:894 src/modes/boot/boot_welcome.cpp:79
 #: src/modes/shop/shop.cpp:1030
 msgid "Confirm"
 msgstr "Valider"
 
-#: src/modes/boot/boot.cpp:882 src/modes/boot/boot_welcome.cpp:82
+#: src/modes/boot/boot.cpp:895 src/modes/boot/boot_welcome.cpp:82
 #: src/modes/pause.cpp:71 src/modes/save/save_mode.cpp:87
 #: src/modes/save/save_mode.cpp:100
 msgid "Cancel"
 msgstr "Annuler"
 
-#: src/modes/boot/boot.cpp:884 src/modes/boot/boot_welcome.cpp:88
+#: src/modes/boot/boot.cpp:897 src/modes/boot/boot_welcome.cpp:88
 msgid "Swap"
 msgstr "Echanger"
 
-#: src/modes/boot/boot.cpp:885 src/modes/boot/boot_welcome.cpp:91
+#: src/modes/boot/boot.cpp:898 src/modes/boot/boot_welcome.cpp:91
 msgid "Left Select"
 msgstr "Sélection gauche"
 
-#: src/modes/boot/boot.cpp:886 src/modes/boot/boot_welcome.cpp:94
+#: src/modes/boot/boot.cpp:899 src/modes/boot/boot_welcome.cpp:94
 msgid "Right Select"
 msgstr "Sélection droite"
 
-#: src/modes/boot/boot.cpp:887 src/modes/boot/boot_welcome.cpp:97
+#: src/modes/boot/boot.cpp:900 src/modes/boot/boot_welcome.cpp:97
 msgid "Pause"
 msgstr "Pause"
 
-#: src/modes/boot/boot.cpp:894
+#: src/modes/boot/boot.cpp:907
 msgid "X Axis"
 msgstr "Axe X"
 
-#: src/modes/boot/boot.cpp:895
+#: src/modes/boot/boot.cpp:908
 msgid "Y Axis"
 msgstr "Axe Y"
 
-#: src/modes/boot/boot.cpp:896
+#: src/modes/boot/boot.cpp:909
 msgid "Confirm: Button"
 msgstr "Valider : Touche"
 
-#: src/modes/boot/boot.cpp:897
+#: src/modes/boot/boot.cpp:910
 msgid "Cancel: Button"
 msgstr "Annuler : Touche"
 
-#: src/modes/boot/boot.cpp:898
+#: src/modes/boot/boot.cpp:911
 msgid "Menu: Button"
 msgstr "Menu : Touche"
 
-#: src/modes/boot/boot.cpp:899
+#: src/modes/boot/boot.cpp:912
 msgid "Swap: Button"
 msgstr "Echanger : Touche"
 
-#: src/modes/boot/boot.cpp:900
+#: src/modes/boot/boot.cpp:913
 msgid "Left Select: Button"
 msgstr "Sélection gauche : Touche"
 
-#: src/modes/boot/boot.cpp:901
+#: src/modes/boot/boot.cpp:914
 msgid "Right Select: Button"
 msgstr "Sélection droite : Touche"
 
-#: src/modes/boot/boot.cpp:902
+#: src/modes/boot/boot.cpp:915
 msgid "Pause: Button"
 msgstr "Pause : Touche"
 
-#: src/modes/boot/boot.cpp:1233
+#: src/modes/boot/boot.cpp:1246
 msgid "Please enter a name for your new profile"
 msgstr "Veuillez entrer un nom pour votre nouveau profile"
 
-#: src/modes/boot/boot.cpp:1241
+#: src/modes/boot/boot.cpp:1254
 msgid "Overwrite? Confirm/Cancel"
 msgstr "Ecraser ? Valider/Annuler"
 
-#: src/modes/boot/boot.cpp:1523
+#: src/modes/boot/boot.cpp:1536
 msgid "Please press a new joystick button."
 msgstr "Veuillez appuyer sur une touche du joystick."
 
-#: src/modes/boot/boot.cpp:1525
+#: src/modes/boot/boot.cpp:1538
 msgid "Please press a new key."
 msgstr "Veuillez appuyer sur une nouvelle touche."
 
-#: src/modes/boot/boot.cpp:1527
+#: src/modes/boot/boot.cpp:1540
 msgid "Please move an axis."
 msgstr "Veuillez bouger un axe du joystick."
 
@@ -2153,23 +2137,23 @@ msgstr ""
 msgid "Press any key to continue."
 msgstr "Veuillez appuyer sur une touche pour continuer."
 
-#: src/modes/map/map_treasure.cpp:194
+#: src/modes/map/map_treasure.cpp:85
 msgid "Treasure Contents"
 msgstr "Contenu du coffre"
 
-#: src/modes/map/map_treasure.cpp:218
+#: src/modes/map/map_treasure.cpp:109
 msgid "Finished"
 msgstr "Terminé"
 
-#: src/modes/map/map_treasure.cpp:453
+#: src/modes/map/map_treasure.cpp:345
 msgid "Drunes"
 msgstr "Drunes"
 
-#: src/modes/map/map_treasure.cpp:455
+#: src/modes/map/map_treasure.cpp:347
 msgid "With the additional "
 msgstr "En ajoutant les "
 
-#: src/modes/map/map_treasure.cpp:456
+#: src/modes/map/map_treasure.cpp:348
 msgid " drunes found in this treasure added, the party now holds a total of "
 msgstr ""
 " drunes trouvées dans ce coffre, l'équipe possède maintenant un total de "
@@ -2328,10 +2312,6 @@ msgstr "Csq"
 #: src/modes/menu/menu_views.cpp:203
 msgid "Tor"
 msgstr "Trs"
-
-#: src/modes/menu/menu_views.cpp:205
-msgid "Leg"
-msgstr "Jmb"
 
 #: src/modes/menu/menu_views.cpp:206
 msgid "Key"
@@ -2635,3 +2615,74 @@ msgstr "\"Bienvenue ! Faites votre choix.\""
 #: src/modes/shop/shop_trade.cpp:48
 msgid "This feature is not yet available."
 msgstr "Cette fonctionnalité n'est pas encore disponible."
+
+#~ msgid ""
+#~ "You know the only reason I’m doing this is because of my family. There "
+#~ "was never any discussion. If it was my choice I’d be far away from here."
+#~ msgstr ""
+#~ "Tu sais, la seule raison pour laquelle je fais tout cela, c'est pour ma "
+#~ "famille. Je n'ai jamais pu en discuter. Si je pouvais choisir, je serais "
+#~ "loin d'ici."
+
+#~ msgid ""
+#~ "And go where? You should be happy. It’s an honor to serve your country."
+#~ msgstr ""
+#~ "Pour aller où ? Tu devrais être heureux. C'est un honneur de servir ta "
+#~ "patrie."
+
+#~ msgid "I can do that on my own."
+#~ msgstr "Je peux le faire seul."
+
+#~ msgid ""
+#~ "It’s more effective to work together. Besides, the Captain has our best "
+#~ "interest at heart."
+#~ msgstr ""
+#~ "C'est plus efficace de travailler ensemble. Qui plus est, le Capitaine se "
+#~ "préoccupe beaucoup de notre formation."
+
+#~ msgid ""
+#~ "That’s where you’re wrong, Claudius. As far as he’s concerned we’re "
+#~ "expendable."
+#~ msgstr ""
+#~ "C'est là que tu te trompes, Claudius. En ce qui me concerne, nous sommes "
+#~ "remplaçables."
+
+#~ msgid "You’re crazy."
+#~ msgstr "Tu es fou."
+
+#~ msgid "You’ve never thought about leaving the knighthood?"
+#~ msgstr "Tu n'as jamais penser à quitter l'Ordre ?"
+
+#~ msgid "Of course not."
+#~ msgstr "Bien sûr que non."
+
+#~ msgid "I didn’t think so."
+#~ msgstr "Je ne pensais pas."
+
+#~ msgid "You’ll be all right."
+#~ msgstr "Ça va aller..."
+
+#~ msgid "I just don’t understand you sometimes."
+#~ msgstr "... Il y a des fois où je ne te comprends pas."
+
+#~ msgid "Hey, what time is it?"
+#~ msgstr "Au fait, Quelle heure est-il ?"
+
+#~ msgid "I don’t know."
+#~ msgstr "Je ne sais pas."
+
+#~ msgid "Aren’t we supposed to be sparring right now?"
+#~ msgstr "Ne sommes nous pas plutôt supposés nous entraîner en ce moment ?"
+
+#~ msgid "Who cares?"
+#~ msgstr "Et alors ?"
+
+#~ msgid "I think we are. Come on."
+#~ msgstr "Je pense que nous le sommes. Allons-y."
+
+#~ msgid "Kyle has joined the party."
+#~ msgstr "Kyle a rejoint votre équipe."
+
+#, fuzzy
+#~ msgid "Knight"
+#~ msgstr "Droite"
