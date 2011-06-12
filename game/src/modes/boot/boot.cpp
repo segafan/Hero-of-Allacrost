@@ -1559,7 +1559,6 @@ void BootMode::_ChangeResolution(int32 width, int32 height) {
 
 
 bool BootMode::_LoadSettingsFile(const std::string& filename) {
-
 	ReadScriptDescriptor settings;
 
 	if (settings.OpenFile(filename) == false)
@@ -1604,6 +1603,13 @@ bool BootMode::_LoadSettingsFile(const std::string& filename) {
 	}
 
 	settings.OpenTable("joystick_settings");
+	// TEMP: this is a hack to disable joystick input to fix a bug with "phantom" joysticks on certain systems.
+	// In the future it should call a method of the input engine to disable the joysticks.
+	if (settings.DoesBoolExist("input_disabled") && settings.ReadBool("input_disabled") == true) {
+		IF_PRINT_DEBUG(BOOT_DEBUG) << "settings file specified to disable joystick input" << endl;
+		SDL_JoystickEventState(SDL_IGNORE);
+		SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+	}
 	InputManager->SetJoyIndex(static_cast<int32>(settings.ReadInt("index")));
 	InputManager->SetConfirmJoy(static_cast<uint8>(settings.ReadInt("confirm")));
 	InputManager->SetCancelJoy(static_cast<uint8>(settings.ReadInt("cancel")));
