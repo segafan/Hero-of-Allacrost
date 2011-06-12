@@ -14,7 +14,6 @@ dat/maps/desert_training.lua
 dat/maps/new_cave.lua
 dat/maps/opening_scene.lua
 dat/maps/river_access_cave.lua
-dat/maps/scene1_desert.lua
 dat/objects/arm_armor.lua
 dat/objects/head_armor.lua
 dat/objects/items.lua
