@@ -84,9 +84,9 @@ BootMode::BootMode() :
 	_welcome_window = new WelcomeWindow();
 
 	_version_text.SetStyle(TextStyle("text20"));
-	_version_text.SetText(UTranslate("Demo 1.0.0"));
+	_version_text.SetText(UTranslate("Development Release"));
 	_copyright_text.SetStyle(TextStyle("text20"));
-	_copyright_text.SetText(UTranslate("© 2004 — 2010 The Allacrost Project"));
+	_copyright_text.SetText(UTranslate("© 2004 — 2011 The Allacrost Project"));
 
 	ReadScriptDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
