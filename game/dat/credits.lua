@@ -55,7 +55,7 @@ credits_text =
 	"Translation Team\n\n" ..
 	"Marcos Avila Isidoro (marcavis) - Portuguese translation\n" ..
 	"Yohann Ferreira (Bertram) - French translation\n" ..
-	"(nemesis) - German translation\n" ..
+	"Andreas Pawlak(nemesis) - German translation\n" ..
 	"\n\n" ..
 
 	"Map Designers\n\n" ..
@@ -105,7 +105,7 @@ credits_text =
 	"Raj Sharma (roos) - video engine\n" ..
 	"Vladimir Mitrovic (snipe714) - scripting engine\n" ..
 	"(densuke) - various code\n" ..
-	"(nemesis) - various code\n" ..
+	"Andreas Pawlak (nemesis) - various code\n" ..
 	"\n\n" ..
 
 	"Additional Artwork\n\n" ..
