@@ -396,7 +396,14 @@ void FinishVictoryAssistant::Initialize(uint32 retries_used) {
 		for (uint32 j = 0; j < objects.size(); ++j)
 		{
 			// Check if the object to add is already in our list. If so, just increase the quantity of that object.
-			iter = _objects_dropped.find(objects[j]);
+            // iter = _objects_dropped.find(objects[j]); // Will not work since each item is created with new.
+            // Need to search for the item ID instead.
+            iter = _objects_dropped.begin();
+            while (iter != _objects_dropped.end()) {
+                if (iter->first->GetID() == objects[j]->GetID()) break;
+                iter++;
+            }
+
 			if (iter != _objects_dropped.end())
 			{
 				iter->second++;
