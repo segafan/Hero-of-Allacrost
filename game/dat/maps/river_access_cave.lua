@@ -1065,6 +1065,7 @@ function CreateEvents()
 	
 		-- Start dialogue about corpse
 		event = hoa_map.DialogueEvent(10, 500);
+		event:SetStopCameraMovement(true);
 		event:AddEventLinkAtEnd(11);
 		EventManager:RegisterEvent(event);
 		-- Add treasure
@@ -1210,7 +1211,7 @@ function CreateEvents()
 	Map:AddZone(riverbed_zone);
 	
 		-- Put map in scene state
-		event = hoa_map.ScriptedEvent(80, 4, 0);
+		event = hoa_map.ScriptedEvent(80, 1, 0);
 		event:AddEventLinkAtEnd(81);
 		EventManager:RegisterEvent(event);
 		-- Move player sprite in to the gathering of knights in the river bed
@@ -1236,6 +1237,7 @@ function CreateEvents()
 		EventManager:RegisterEvent(event);
 		-- Begin dialogue preceeding boss battle encounter
 		event = hoa_map.DialogueEvent(86, 542);
+		event:SetStopCameraMovement(true);
 		event:AddEventLinkAtEnd(87);
 		EventManager:RegisterEvent(event);
 		-- Boss battle
