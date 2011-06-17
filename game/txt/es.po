@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost - Demo 1.0.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2011-06-12 16:27-0500\n"
+"POT-Creation-Date: 2011-06-12 17:00-0500\n"
 "PO-Revision-Date: 2010-03-14 23:06-0400\n"
 "Last-Translator:  <rujasu@yahoo.com>\n"
 "Language-Team: en_US <kde-i18n-doc@kde.org>\n"
@@ -1645,11 +1645,11 @@ msgid "But the heroes fell in battle..."
 msgstr ""
 
 #: src/modes/boot/boot.cpp:87
-msgid "Demo 1.0.0"
-msgstr "Versión Demo 1.0.0"
+msgid "Development Release"
+msgstr ""
 
 #: src/modes/boot/boot.cpp:89
-msgid "© 2004 — 2010 The Allacrost Project"
+msgid "© 2004 — 2011 The Allacrost Project"
 msgstr ""
 
 #: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
@@ -2536,6 +2536,9 @@ msgstr ""
 #: src/modes/shop/shop_trade.cpp:48
 msgid "This feature is not yet available."
 msgstr ""
+
+#~ msgid "Demo 1.0.0"
+#~ msgstr "Versión Demo 1.0.0"
 
 #~ msgid "I can do that on my own."
 #~ msgstr "Puedo hacerlo yo solo."

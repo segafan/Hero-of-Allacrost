@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Allacrost Demo 0.3.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2011-06-12 16:27-0500\n"
+"POT-Creation-Date: 2011-06-12 17:00-0500\n"
 "PO-Revision-Date: 2010-08-23 13:27+0100\n"
 "Last-Translator: Yohann Ferreira <yohann__ferreira_at_orange_at_efer>\n"
 "Language-Team: French <team@allacrost.org>\n"
@@ -1717,11 +1717,12 @@ msgid "But the heroes fell in battle..."
 msgstr ""
 
 #: src/modes/boot/boot.cpp:87
-msgid "Demo 1.0.0"
-msgstr "Démo 1.0.0"
+msgid "Development Release"
+msgstr ""
 
 #: src/modes/boot/boot.cpp:89
-msgid "© 2004 — 2010 The Allacrost Project"
+#, fuzzy
+msgid "© 2004 — 2011 The Allacrost Project"
 msgstr "© 2004 — 2010 The Allacrost Project"
 
 #: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
@@ -2615,6 +2616,9 @@ msgstr "\"Bienvenue ! Faites votre choix.\""
 #: src/modes/shop/shop_trade.cpp:48
 msgid "This feature is not yet available."
 msgstr "Cette fonctionnalité n'est pas encore disponible."
+
+#~ msgid "Demo 1.0.0"
+#~ msgstr "Démo 1.0.0"
 
 #~ msgid ""
 #~ "You know the only reason I’m doing this is because of my family. There "

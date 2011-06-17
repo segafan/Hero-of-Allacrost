@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2011-06-12 16:27-0500\n"
+"POT-Creation-Date: 2011-06-12 17:00-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1633,11 +1633,11 @@ msgid "But the heroes fell in battle..."
 msgstr ""
 
 #: src/modes/boot/boot.cpp:87
-msgid "Demo 1.0.0"
+msgid "Development Release"
 msgstr ""
 
 #: src/modes/boot/boot.cpp:89
-msgid "© 2004 — 2010 The Allacrost Project"
+msgid "© 2004 — 2011 The Allacrost Project"
 msgstr ""
 
 #: src/modes/boot/boot.cpp:515 src/modes/boot/boot.cpp:535
