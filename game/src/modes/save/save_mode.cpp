@@ -53,10 +53,13 @@ const uint8 SAVE_CANCEL         = 2;
 
 //! \name SaveMode States
 //@{
-const uint8 SAVE_MODE_NORMAL    = 0;
-const uint8 SAVE_MODE_SAVING    = 1;
-const uint8 SAVE_MODE_LOADING   = 2;
-const uint8 SAVE_MODE_FADING_OUT= 3;
+const uint8 SAVE_MODE_NORMAL          = 0;
+const uint8 SAVE_MODE_SAVING          = 1;
+const uint8 SAVE_MODE_LOADING         = 2;
+const uint8 SAVE_MODE_CONFIRMING_SAVE = 3;
+const uint8 SAVE_MODE_SAVE_COMPLETE   = 4;
+const uint8 SAVE_MODE_SAVE_FAILED     = 5;
+const uint8 SAVE_MODE_FADING_OUT      = 6;
 //@}
 
 SaveMode::SaveMode(bool enable_saving) :
@@ -67,8 +70,8 @@ SaveMode::SaveMode(bool enable_saving) :
 {
 	mode_type = MODE_MANAGER_SAVE_MODE;
 
-	_window.Create(400.0f, 500.0f);
-	_window.SetPosition(312.0f, 630.0f);
+	_window.Create(600.0f, 500.0f);
+	_window.SetPosition(212.0f, 630.0f);
 	_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 	_window.Hide();
 
@@ -88,7 +91,7 @@ SaveMode::SaveMode(bool enable_saving) :
 	_save_options.SetSelection(SAVE_CANCEL);
 
 	// Initialize the save options box
-	_file_list.SetPosition(512.0f, 384.0f);
+	_file_list.SetPosition(362.0f, 384.0f);
 	_file_list.SetDimensions(250.0f, 500.0f, 1, 7, 1, 7);
 	_file_list.SetTextStyle(TextStyle("title22"));
 
@@ -105,6 +108,34 @@ SaveMode::SaveMode(bool enable_saving) :
 	_file_list.AddOption(UTranslate("File #5"));
 	_file_list.AddOption(UTranslate("File #6"));
 	_file_list.SetSelection(0);
+
+	// Initialize the confirmation option box
+	_confirm_save_optionbox.SetPosition(512.0f, 284.0f);
+	_confirm_save_optionbox.SetDimensions(250.0f, 500.0f, 1, 7, 1, 7);
+	_confirm_save_optionbox.SetTextStyle(TextStyle("title22"));
+
+	_confirm_save_optionbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_confirm_save_optionbox.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_confirm_save_optionbox.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_confirm_save_optionbox.SetCursorOffset(-58.0f, 18.0f);
+
+	_confirm_save_optionbox.AddOption(UTranslate("Confirm Save"));
+	_confirm_save_optionbox.AddOption(UTranslate("Cancel"));
+	_confirm_save_optionbox.SetSelection(0);
+
+	// Initialize the save successful message box
+	_save_success_message.SetPosition(512.0f, 384.0f);
+	_save_success_message.SetDimensions(250.0f, 100.0f);
+	_save_success_message.SetTextStyle(TextStyle("title22"));
+	_save_success_message.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_save_success_message.SetDisplayText("Save successful!");
+
+	// Initialize the save failure message box
+	_save_failure_message.SetPosition(512.0f, 384.0f);
+	_save_failure_message.SetDimensions(250.0f, 100.0f);
+	_save_failure_message.SetTextStyle(TextStyle("title22"));
+	_save_failure_message.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_save_failure_message.SetDisplayText("Unable to save game!\nSave FAILED!");
 
 	if (_saving_enabled == false) {
 		_save_options.EnableOption(SAVE_GAME, false);
@@ -189,18 +220,36 @@ void SaveMode::Update() {
 
 			case SAVE_MODE_SAVING:
 				if (_file_list.GetSelection() > 0) {
+					_current_state = SAVE_MODE_CONFIRMING_SAVE;
+				}
+				else {
+					_current_state = SAVE_MODE_NORMAL;
+				}
+				break;
+
+			case SAVE_MODE_CONFIRMING_SAVE:
+				if (_confirm_save_optionbox.GetSelection() == 0) {
 					// note: using int here, because uint8 will NOT work
 					// do not change unless you understand this and can test it properly!
 					int id = _file_list.GetSelection();
 					ostringstream f;
 					f << GetUserDataPath(true) + "saved_game_" << id << ".lua";
 					string filename = f.str();
-					cout << filename << endl;
-					GlobalManager->SaveGame(filename);
+					// now, attempt to save the game.  If failure, we need to tell the user that!
+					if (GlobalManager->SaveGame(filename) == true) {
+						_current_state = SAVE_MODE_SAVE_COMPLETE;
+					}
+					else {
+						_current_state = SAVE_MODE_SAVE_FAILED;
+					}
 				}
 				else {
-					_current_state = SAVE_MODE_NORMAL;
+					_current_state = SAVE_MODE_SAVING;
 				}
+				break;
+
+			case SAVE_MODE_SAVE_COMPLETE: case SAVE_MODE_SAVE_FAILED:
+				_current_state = SAVE_MODE_SAVING;
 				break;
 
 			case SAVE_MODE_LOADING:
@@ -211,8 +260,8 @@ void SaveMode::Update() {
 					_current_state = SAVE_MODE_NORMAL;
 				}
 				break;
-		}
-	}
+		} // end switch (_current_state)
+	} // end if (InputManager->ConfirmPress() == true)
 
 	else if (InputManager->CancelPress() == true) {
 		switch (_current_state) {
@@ -223,8 +272,12 @@ void SaveMode::Update() {
 			case SAVE_MODE_SAVING: case SAVE_MODE_LOADING:
 				_current_state = SAVE_MODE_NORMAL;
 				break;
-		}
-	}
+
+			case SAVE_MODE_CONFIRMING_SAVE:
+				_current_state = SAVE_MODE_SAVING;
+				break;
+		} // end switch (_current_state)
+	} // end if (InputManager->CancelPress() == true)
 
 	else if (InputManager->UpPress() == true) {
 		switch (_current_state) {
@@ -235,8 +288,12 @@ void SaveMode::Update() {
 			case SAVE_MODE_SAVING: case SAVE_MODE_LOADING:
 				_file_list.InputUp();
 				break;
-		}
-	}
+
+			case SAVE_MODE_CONFIRMING_SAVE:
+				_confirm_save_optionbox.InputUp();
+				break;
+		} // end switch (_current_state)
+	} // end if (InputManager->UpPress() == true)
 
 	else if (InputManager->DownPress() == true) {
 		switch (_current_state) {
@@ -247,8 +304,12 @@ void SaveMode::Update() {
 			case SAVE_MODE_SAVING: case SAVE_MODE_LOADING:
 				_file_list.InputDown();
 				break;
-		}
-	}
+
+			case SAVE_MODE_CONFIRMING_SAVE:
+				_confirm_save_optionbox.InputDown();
+				break;
+		} // end switch (_current_state)
+	} // end if (InputManager->DownPress() == true)
 } // void SaveMode::Update()
 
 
@@ -266,11 +327,26 @@ void SaveMode::Draw() {
 
 	_window.Draw();
 
-	if (_current_state == SAVE_MODE_NORMAL) {
-		_save_options.Draw();
-	}
-	else {
-		_file_list.Draw();
+	switch (_current_state) {
+		case SAVE_MODE_NORMAL:
+			_save_options.Draw();
+			break;
+		case SAVE_MODE_SAVING:
+		case SAVE_MODE_LOADING:
+			_file_list.Draw();
+			break;
+		case SAVE_MODE_CONFIRMING_SAVE:
+			_confirm_save_optionbox.Draw();
+			break;
+		case SAVE_MODE_SAVE_COMPLETE:
+			_save_success_message.Draw();
+			break;
+		case SAVE_MODE_SAVE_FAILED:
+			_save_failure_message.Draw();
+			break;
+		case SAVE_MODE_FADING_OUT:
+			
+			break;
 	}
 }
 

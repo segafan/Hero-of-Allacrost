@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2010 by The Allacrost Project
+//            Copyright (C) 2004-2011 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software
@@ -73,6 +73,15 @@ private:
 
 	//! \brief The list of files to save/load from
 	hoa_gui::OptionBox _file_list;
+
+	//! \brief Box to confirm saving current file
+	hoa_gui::OptionBox _confirm_save_optionbox;
+
+	//! \brief Displays message that game was saved successfully
+	hoa_gui::TextBox _save_success_message;
+
+	//! \brief Displays message that game was saved successfully
+	hoa_gui::TextBox _save_failure_message;
 
 	//! \brief Tracks whether games can be saved, or only loaded.
 	bool _saving_enabled;
