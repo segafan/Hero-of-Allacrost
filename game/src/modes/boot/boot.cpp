@@ -661,10 +661,10 @@ void BootMode::_SetupLanguageOptionsMenu() {
 
 void BootMode::_SetupKeySetttingsMenu() {
 	_key_settings_menu.SetPosition(512.0f, 300.0f);
-	_key_settings_menu.SetDimensions(300.0f, 500.0f, 1, 11, 1, 11);
+	_key_settings_menu.SetDimensions(250.0f, 500.0f, 1, 12, 1, 12);
 	_key_settings_menu.SetTextStyle(TextStyle("title22"));
 	_key_settings_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_key_settings_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_key_settings_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_key_settings_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_key_settings_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_key_settings_menu.SetCursorOffset(-50.0f, 28.0f);
@@ -688,10 +688,10 @@ void BootMode::_SetupKeySetttingsMenu() {
 
 void BootMode::_SetupJoySetttingsMenu() {
 	_joy_settings_menu.SetPosition(512.0f, 300.0f);
-	_joy_settings_menu.SetDimensions(300.0f, 500.0f, 1, 10, 1, 10);
+	_joy_settings_menu.SetDimensions(250.0f, 500.0f, 1, 10, 1, 10);
 	_joy_settings_menu.SetTextStyle(TextStyle("title22"));
 	_joy_settings_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_joy_settings_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_joy_settings_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_joy_settings_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_joy_settings_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_joy_settings_menu.SetCursorOffset(-50.0f, 28.0f);
