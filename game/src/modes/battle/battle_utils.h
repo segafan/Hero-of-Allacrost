@@ -70,7 +70,7 @@ const float STAMINA_LOCATION_TOP = STAMINA_LOCATION_BOTTOM + 508.0f;
 const uint32 INVALID_BATTLE_ACTOR_INDEX = 999;
 
 //! \brief This is the idle state wait time for the fastest actor, used to set idle state timers for all other actors
-const uint32 MIN_IDLE_WAIT_TIME = 7500;
+const uint32 MIN_IDLE_WAIT_TIME = 10000;
 
 //! \brief Warm up time for using items (try to keep short, should be constant regardless of item used)
 const uint32 ITEM_WARM_UP_TIME = 1000;
@@ -571,6 +571,14 @@ public:
 	*** function while incrementing the index by 1 until it returns a NULL value.
 	**/
 	BattleActor* GetPartyActor(uint32 index);
+
+	/** \brief Returns the name of the target
+	***
+	*** Party type targets will return "All Allies" or "All Enemies". Actor type targets return the name of the character or
+	*** enemy, for example "Claudius" or "Red Spider" . Attack point type targets return the name of the character or enemy
+	*** seperated by a hyphen and followed by the point name, for example "Bat — Wing". Invalid targets will return "[Invalid Target]".
+	**/
+	hoa_utils::ustring GetName();
 
 	//! \name Class member accessor methods
 	//@{

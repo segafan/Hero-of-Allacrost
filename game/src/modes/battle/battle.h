@@ -193,6 +193,9 @@ public:
 	//! \brief Unpauses all timers used in any battle mode classes
 	void UnFreezeTimers();
 
+	private_battle::BATTLE_STATE GetState() const
+		{ return _state; }
+
 	/** \brief Changes the state of the battle and performs any initializations and updates needed
 	*** \param new_state The new state to change the battle to
 	**/
@@ -219,6 +222,12 @@ public:
 	//! \brief Returns the number of enemy actors in the battle, both living and dead
 	uint32 GetNumberOfEnemies() const
 		{ return _enemy_actors.size(); }
+
+	/** \brief Retrieves a specific button icon for character action
+	*** \param index The index of the button to retrieve
+	*** \return A pointer to the appropriate button image, or NULL if the index argument was out of bounds
+	**/
+	hoa_video::StillImage* GetCharacterActionButton(uint32 index);
 
 	/** \brief Retrieves a specific status icon with the proper type and intensity
 	*** \param type The type of status effect the user is trying to retrieve the icon for
@@ -300,11 +309,23 @@ private:
 	//! \brief Retains the current state of the battle
 	private_battle::BATTLE_STATE _state;
 
+	//! \name Battle supervisor classes
+	//@{
 	//! \brief Manages update and draw calls during special battle sequences
 	private_battle::SequenceSupervisor _sequence_supervisor;
 
+	//! \brief Manages state and visuals when the player is selecting a command for a character
+	private_battle::CommandSupervisor* _command_supervisor;
+
+	//! \brief Presents player with information and options after a battle has concluded
+	private_battle::FinishSupervisor* _finish_supervisor;
+	//@}
+
 	//! \name Battle Actor Containers
 	//@{
+	//! \brief A pointer to the character that the player is currently selecting a command for
+	private_battle::BattleCharacter* _command_character;
+
 	/** \brief Characters that are presently fighting in the battle
 	*** No more than four characters may be fighting at any given time, thus this structure will never
 	*** contain more than four BattleCharacter objects. This structure does not include any characters
@@ -332,17 +353,6 @@ private:
 	**/
 	std::deque<private_battle::BattleActor*> _enemy_party;
 
-	/** \brief A FIFO queue for characters who are awaiting their turn to have a command selected by the player
-	*** When a character completes the wait time for their idle state, they enter the command state and are
-	*** automatically placed in this queue. This structure is necessary as while the player is selecting
-	*** commands for one character, a different character's idle time may expire. If the battle is played in
-	*** "wait" mode where the battle becomes effectively paused when the player is selecting a command, this
-	*** structure is unnecessary, but it is still used regardless of whether the play mode is "wait" or "active".
-	*** Note that only characters enter this queue and not enemies, as enemies have their commands automatically
-	*** and immediately selected by the game's AI.
-	**/
-	std::list<private_battle::BattleCharacter*> _command_queue;
-
 	/** \brief A FIFO queue of all actors that are ready to perform an action
 	*** When an actor has completed the wait time for their warm-up state, they enter the ready state and are
 	*** placed in this queue. The actor at the front of the queue is in the acting state, meaning that they are
@@ -350,15 +360,6 @@ private:
 	*** be removed from the queue before they can take their turn.
 	**/
 	std::list<private_battle::BattleActor*> _ready_queue;
-	//@}
-
-	//! \name Battle supervisor classes
-	//@{
-	//! \brief Manages state and visuals when the player is selecting a command for a character
-	private_battle::CommandSupervisor* _command_supervisor;
-
-	//! \brief Presents player with information and options after a battle has concluded
-	private_battle::FinishSupervisor* _finish_supervisor;
 	//@}
 
 	//! \name Character Swap Data
@@ -411,8 +412,11 @@ private:
 	**/
 	hoa_video::AnimatedImage _attack_point_indicator;
 
-	//! \brief Used to provide a background highlight a selected character's stats
-	hoa_video::StillImage _character_selection;
+	//! \brief Used to provide a background highlight for a selected character
+	hoa_video::StillImage _character_selected_highlight;
+
+	//! \brief Used to provide a background highlight for a character that needs a command set
+	hoa_video::StillImage _character_command_highlight;
 
 	//! \brief An image which contains the covers for the HP and SP bars
 	hoa_video::StillImage _character_bar_covers;
@@ -439,6 +443,15 @@ private:
 	*** available to be used. It is not drawn when the player has no swaps available.
 	**/
 	hoa_video::StillImage _swap_card;
+
+	/** \brief Small button icons used to indicate when a player can select an action for their characters
+	*** These buttons are used to indicate to the player what button to press to bring up a character's command
+	*** menu. This vector is built from a 2-row, 5-column multi-image. The rows represent the buttons for when
+	*** the character can be given a command (first row) versus when they may not (second row). The first element
+	*** in each row is a "blank" button that is not used. The next four elements correspond to the characters on
+	*** the screen, from top to bottom.
+	**/
+	std::vector<hoa_video::StillImage> _character_action_buttons;
 
 	/** \brief Container for all music to be played during the battle
 	*** The first element in this vector is the primary battle track. For most battles, only a primary track
