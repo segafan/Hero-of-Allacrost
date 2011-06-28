@@ -90,6 +90,8 @@ SaveMode::SaveMode(bool enable_saving) :
 	_save_options.AddOption(UTranslate("Cancel"));
 	_save_options.SetSelection(SAVE_CANCEL);
 
+	_save_options.SetSkipDisabled(true);
+
 	// Initialize the save options box
 	_file_list.SetPosition(362.0f, 384.0f);
 	_file_list.SetDimensions(250.0f, 500.0f, 1, 7, 1, 7);
@@ -345,7 +347,7 @@ void SaveMode::Draw() {
 			_save_failure_message.Draw();
 			break;
 		case SAVE_MODE_FADING_OUT:
-			
+
 			break;
 	}
 }

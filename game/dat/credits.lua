@@ -55,7 +55,7 @@ credits_text =
 	"Translation Team\n\n" ..
 	"Marcos Avila Isidoro (marcavis) - Portuguese translation\n" ..
 	"Yohann Ferreira (Bertram) - French translation\n" ..
-	"Andreas Pawlak(nemesis) - German translation\n" ..
+	"Andreas Pawlak (nemesis) - German translation\n" ..
 	"\n\n" ..
 
 	"Map Designers\n\n" ..
