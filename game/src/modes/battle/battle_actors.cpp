@@ -86,7 +86,7 @@ BattleActor::~BattleActor() {
 
 void BattleActor::ResetActor() {
 	_effects_supervisor->RemoveAllStatus();
-	
+
 	ResetHitPoints();
 	ResetSkillPoints();
 	ResetStrength();
@@ -282,12 +282,19 @@ void BattleActor::Update(bool animation_only) {
 	_indicator_supervisor->Update();
 
 	if (_state_timer.IsFinished() == true) {
-		if (_state == ACTOR_STATE_IDLE)
-			ChangeState(ACTOR_STATE_COMMAND);
-		else if (_state == ACTOR_STATE_WARM_UP)
+		if (_state == ACTOR_STATE_IDLE) {
+			// If an action is already set for the actor, skip the command state and immediately begin the warm up state
+			if (_action == NULL)
+				ChangeState(ACTOR_STATE_COMMAND);
+			else
+				ChangeState(ACTOR_STATE_WARM_UP);
+		}
+		else if (_state == ACTOR_STATE_WARM_UP) {
 			ChangeState(ACTOR_STATE_READY);
-		else if (_state == ACTOR_STATE_COOL_DOWN)
+		}
+		else if (_state == ACTOR_STATE_COOL_DOWN) {
 			ChangeState(ACTOR_STATE_IDLE);
+		}
 	}
 }
 
@@ -304,13 +311,11 @@ void BattleActor::SetAction(BattleAction* action) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL argument" << endl;
 		return;
 	}
-	if (_state != ACTOR_STATE_COMMAND) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "actor was not in the command state when function was called" << endl;
-		delete action;
-		return;
-	}
 	if (_action != NULL) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "actor already had another action set -- overridding" << endl;
+		// Note: we do not display any warning if we are overwriting a previously set action in idle or command states. This is a valid operation in those states
+		if ((_state != ACTOR_STATE_IDLE) && (_state != ACTOR_STATE_COMMAND)) {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "overwriting previously set action while in actor state: " << _state << endl;
+		}
 		delete _action;
 	}
 
@@ -371,6 +376,11 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character) :
 	_hit_points_text.SetText(NumberToString(GetHitPoints()));
 	_skill_points_text.SetStyle(TextStyle("text20"));
 	_skill_points_text.SetText(NumberToString(GetSkillPoints()));
+
+	_action_selection_text.SetStyle(TextStyle("text20"));
+	_action_selection_text.SetText("");
+	_target_selection_text.SetStyle(TextStyle("text20"));
+	_target_selection_text.SetText("");
 }
 
 
@@ -399,7 +409,6 @@ void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
 
 	switch (_state) {
 		case ACTOR_STATE_COMMAND:
-			BattleMode::CurrentInstance()->NotifyCharacterCommand(this);
 			break;
 		case ACTOR_STATE_ACTING:
 			// TODO: reset state timer?
@@ -411,6 +420,10 @@ void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
 		default:
 			break;
 	}
+
+	// The action/target text for the character is always updated when the character's state changes. Technically we do not need to update
+	// this text display for every possible state change, but we do it anyway just to be safe and to not add unnecessary code complexity.
+	ChangeActionText();
 }
 
 
@@ -472,6 +485,27 @@ void BattleCharacter::ChangeSpriteAnimation(const std::string& alias) {
 	_animation_timer.Reset();
 	_animation_timer.SetDuration(300);
 	_animation_timer.Run();
+}
+
+
+
+void BattleCharacter::ChangeActionText() {
+	// If the character has no action selected to be used, clear both action and target text
+	if (_action == NULL) {
+		// If the character is able to have an action selected, notify the player
+		if ((_state == ACTOR_STATE_IDLE) || (_state == ACTOR_STATE_COMMAND)) {
+			_action_selection_text.SetText(Translate("[Select Action]"));
+		}
+		else {
+			_action_selection_text.SetText("");
+		}
+		_target_selection_text.SetText("");
+	}
+
+	else {
+		_action_selection_text.SetText(_action->GetName());
+		_target_selection_text.SetText(_action->GetTarget().GetName());
+	}
 }
 
 
@@ -588,6 +622,34 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		VideoManager->MoveRelative(110.0f, 0.0f);
 		_skill_points_text.SetText(NumberToString(GetSkillPoints()));
 		_skill_points_text.Draw();
+	}
+
+	// If the command menu active, there's no further status information to draw.
+	if (BattleMode::CurrentInstance()->GetState() != BATTLE_STATE_COMMAND) {
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, VIDEO_BLEND, 0);
+
+		// Move to the position wher command button icons are drawn
+		VideoManager->Move(545.0f, 95.0f + y_offset);
+
+		// If this character can be issued a command, draw the appropriate command button to indicate this. The type of button drawn depends on
+		// whether or not the character already has an action set. Characters that can not be issued a command have no button drawn
+		if (CanSelectCommand() == true) {
+			uint32 button_index = 0;
+			if (IsActionSet() == false)
+				button_index = 1;
+			else
+				button_index = 6;
+			button_index += order;
+			BattleMode::CurrentInstance()->GetCharacterActionButton(button_index)->Draw();
+		}
+
+		// Draw the action text
+		VideoManager->MoveRelative(40.0f, 0.0f);
+		_action_selection_text.Draw();
+
+		// Draw the target text
+		VideoManager->MoveRelative(225.0f, 0.0f);
+		_target_selection_text.Draw();
 	}
 } // void BattleCharacter::DrawStatus()
 

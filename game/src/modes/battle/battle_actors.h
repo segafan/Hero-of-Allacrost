@@ -267,6 +267,9 @@ public:
 	BattleAction* GetAction()
 		{ return _action; }
 
+	bool IsActionSet() const
+		{ return (_action != NULL); }
+
 	float GetXOrigin() const
 		{ return _x_origin; }
 
@@ -386,6 +389,13 @@ public:
 
 	void ChangeSpriteAnimation(const std::string& alias);
 
+	//! \brief Changes the action and target selection text to reflect the character's current state
+	void ChangeActionText();
+
+	//! \brief Returns true if the player may select a command for the character to execute
+	bool CanSelectCommand() const
+		{ return (_state == ACTOR_STATE_IDLE) || (_state == ACTOR_STATE_COMMAND); }
+
 	//! \brief Updates the state of the character. Must be called every frame loop.
 	void Update(bool animation_only = false);
 
@@ -421,6 +431,12 @@ protected:
 
 	//! \brief Rendered text of the character's current skill points
 	hoa_video::TextImage _skill_points_text;
+
+	//! \brief Rendered text of the character's currently selected action
+	hoa_video::TextImage _action_selection_text;
+
+	//! \brief Rendered text of the character's currently selected target
+	hoa_video::TextImage _target_selection_text;
 }; // class BattleCharacter
 
 

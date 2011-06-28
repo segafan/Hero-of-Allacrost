@@ -900,6 +900,7 @@ bool BattleTarget::SelectNextActor(BattleActor* user, bool direction, bool valid
 } // bool BattleTarget::SelectNextActor(BattleActor* user, bool direction, bool valid_criteria)
 
 
+
 BattleActor* BattleTarget::GetPartyActor(uint32 index) {
 	if (_party == NULL) {
 		return NULL;
@@ -910,6 +911,25 @@ BattleActor* BattleTarget::GetPartyActor(uint32 index) {
 	}
 
 	return (*_party)[index];
+}
+
+
+
+ustring BattleTarget::GetName() {
+	if ((_type == GLOBAL_TARGET_SELF_POINT) || (_type == GLOBAL_TARGET_ALLY_POINT) || (_type == GLOBAL_TARGET_FOE_POINT)) {
+		return (_actor->GetName() + UTranslate(" — ") + (_actor->GetAttackPoints()).at(_point)->GetName());
+	}
+	else if ((_type == GLOBAL_TARGET_SELF) || (_type == GLOBAL_TARGET_ALLY) || (_type == GLOBAL_TARGET_FOE)) {
+		return _actor->GetName();
+	}
+	else if (_type == GLOBAL_TARGET_ALL_ALLIES) {
+		return UTranslate("All Allies");
+	}
+	else if (_type == GLOBAL_TARGET_ALL_FOES) {
+		return UTranslate("All Enemies");
+	}
+
+	return UTranslate("[Invalid Target]");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

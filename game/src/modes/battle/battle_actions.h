@@ -65,6 +65,9 @@ public:
 	**/
 	virtual bool Execute() = 0;
 
+	//! \brief Returns the name of the action that the player would read
+	virtual hoa_utils::ustring GetName() const = 0;
+
 	//! \brief Returns the number of milliseconds that the owner actor must wait in the warm up state
 	virtual uint32 GetWarmUpTime() const = 0;
 
@@ -122,6 +125,8 @@ public:
 
 	bool Execute();
 
+	hoa_utils::ustring GetName() const;
+
 	uint32 GetWarmUpTime() const;
 
 	uint32 GetCoolDownTime() const;
@@ -153,6 +158,8 @@ public:
 		{ return true; }
 
 	bool Execute();
+
+	hoa_utils::ustring GetName() const;
 
 	uint32 GetWarmUpTime() const
 		{ return ITEM_WARM_UP_TIME; }

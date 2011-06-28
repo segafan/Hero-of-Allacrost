@@ -234,6 +234,7 @@ void SequenceSupervisor::_UpdateExitingSequence() {
 			_battle->_enemy_actors[i]->SetXLocation(1500.0f);
 		}
 
+		// Restore characters to their idle animations
 		for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
 			_battle->_character_actors[i]->ChangeSpriteAnimation("idle");
 		}
@@ -413,6 +414,7 @@ BattleMode::BattleMode() :
 	_sequence_supervisor(this),
 	_command_supervisor(new CommandSupervisor()),
 	_finish_supervisor(new FinishSupervisor()),
+	_command_character(NULL),
 	_current_number_swaps(0),
 	_default_music("mus/Confrontation.ogg"),
 	_winning_music("mus/Allacrost_Fanfare.ogg"),
@@ -441,22 +443,28 @@ BattleMode::BattleMode() :
 		PRINT_ERROR << "failed to load time meter." << endl;
 
 	if (_actor_selection_image.Load("img/icons/battle/character_selector.png") == false)
-		PRINT_ERROR << "unable to load player selector image." << endl;
+		PRINT_ERROR << "unable to load player selector image" << endl;
 
-	if (_character_selection.Load("img/menus/battle_character_selection.png") == false)
-		PRINT_ERROR << "failed to load character selection image" << endl;
+	if (_character_selected_highlight.Load("img/menus/battle_character_selection.png") == false)
+		PRINT_ERROR << "failed to load character selection highlight image" << endl;
+
+	if (_character_command_highlight.Load("img/menus/battle_character_command.png") == false)
+		PRINT_ERROR << "failed to load character command highlight image" << endl;
 
 	if (_character_bar_covers.Load("img/menus/battle_character_bars.png") == false)
 		PRINT_ERROR << "failed to load character bars image" << endl;
 
 	if (_bottom_menu_image.Load("img/menus/battle_bottom_menu.png") == false)
-		PRINT_ERROR << "failed to load bottom menu image: " << endl;
+		PRINT_ERROR << "failed to load bottom menu image" << endl;
 
 	if (_swap_icon.Load("img/icons/battle/swap_icon.png") == false)
-		PRINT_ERROR << "failed to load swap icon: " << endl;
+		PRINT_ERROR << "failed to load swap icon" << endl;
 
 	if (_swap_card.Load("img/icons/battle/swap_card.png") == false)
-		PRINT_ERROR << "failed to load swap card: " << endl;
+		PRINT_ERROR << "failed to load swap card" << endl;
+
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_character_action_buttons, "img/menus/battle_command_buttons.png", 2, 5) == false)
+		PRINT_ERROR << "failed to load character action buttons" << endl;
 } // BattleMode::BattleMode()
 
 
@@ -466,6 +474,7 @@ BattleMode::~BattleMode() {
 		i->second.FreeAudio();
 
 	// Delete all character and enemy actors
+	_command_character = NULL;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		delete _character_actors[i];
 	}
@@ -478,7 +487,6 @@ BattleMode::~BattleMode() {
 	_enemy_actors.clear();
 	_enemy_party.clear();
 
-	_command_queue.clear();
 	_ready_queue.clear();
 
 	delete _command_supervisor;
@@ -523,6 +531,7 @@ void BattleMode::Reset() {
 void BattleMode::Update() {
 	_attack_point_indicator.Update(); // Required update to animated image
 
+	// Pause/quit requests take priority
 	if (InputManager->QuitPress()) {
 		ModeManager->Push(new PauseMode(true));
 		return;
@@ -532,19 +541,67 @@ void BattleMode::Update() {
 		return;
 	}
 
-	if (IsBattleFinished() == true) {
-		_finish_supervisor->Update();
-		return;
-	}
-
+	// If the battle is transitioning to/from a different mode, the sequenece supervisor has control
 	if (_state == BATTLE_STATE_INITIAL || _state == BATTLE_STATE_EXITING) {
 		_sequence_supervisor.Update();
 		return;
 	}
+	// If the battle is in its typical state and player is not selecting a command, check for player input
+	else if (_state == BATTLE_STATE_NORMAL) {
+		// Holds a pointer to the character to select an action for
+		BattleCharacter* character_selection = NULL;
 
-	if (_state == BATTLE_STATE_COMMAND) {
+		// The four keys below (up/down/left/right) correspond to each character, from top to bottom. Since the character party
+		// does not always have four characters, for all but the first key we have to check that a character exists for the
+		// corresponding key. If a character does exist, we then have to check whether or not the player is allowed to select a command
+		// for it (characters can only have commands selected during certain states). If command selection is permitted, then we begin
+		// the command supervisor.
+
+		if (InputManager->UpPress()) {
+			if  (_character_actors.size() >= 1) { // Should always evaluate to true
+				character_selection = _character_actors[0];
+			}
+		}
+
+		else if (InputManager->DownPress()) {
+			if  (_character_actors.size() >= 2) {
+				character_selection = _character_actors[1];
+			}
+		}
+
+		else if (InputManager->LeftPress()) {
+			if  (_character_actors.size() >= 3) {
+				character_selection = _character_actors[2];
+			}
+		}
+
+		else if (InputManager->RightPress()) {
+			if  (_character_actors.size() >= 4) {
+				character_selection = _character_actors[3];
+			}
+		}
+
+		if (character_selection != NULL) {
+			if (character_selection->CanSelectCommand() == true) {
+				_command_character = character_selection;
+				ChangeState(BATTLE_STATE_COMMAND);
+			}
+		}
+
+		// TODO: Determine whether we should play a sound if the player presses an invalid key and/or the selected character is not currently
+		// allowed to select a command.
+	}
+	// If the player is selecting a command for a character, the command supervisor has control
+	else if (_state == BATTLE_STATE_COMMAND) {
 		_command_supervisor->Update();
-		return; // This return effectively pauses the state of the actors while the player selects another command
+
+		// TODO: If the battle is running in "wait mode", return here so that the actors are paused
+// 		return; // This return effectively pauses the state of the actors while the player selects another command
+	}
+	// If the battle is in either finish state, the finish supervisor has control
+	else if ((_state == private_battle::BATTLE_STATE_VICTORY) || (_state == private_battle::BATTLE_STATE_DEFEAT)) {
+		_finish_supervisor->Update();
+		return;
 	}
 
 	// Process the actor ready queue
@@ -714,12 +771,12 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 		case BATTLE_STATE_NORMAL:
 			break;
 		case BATTLE_STATE_COMMAND:
-			if (_command_queue.empty() == true) {
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "command queue was empty after changing battle state to the command state" << endl;
+			if (_command_character == NULL) {
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "no character selected when changing battle to the command state" << endl;
 				_state = BATTLE_STATE_NORMAL;
 			}
 			else {
-				_command_supervisor->Initialize(_command_queue.front());
+				_command_supervisor->Initialize(_command_character);
 			}
 			break;
 		case BATTLE_STATE_EVENT:
@@ -773,6 +830,17 @@ void BattleMode::PlayMusic(const string& filename) {
 
 
 
+StillImage* BattleMode:: GetCharacterActionButton(uint32 index) {
+	if (index >= _character_action_buttons.size()) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received invalid index argument: " << index << endl;
+		return NULL;
+	}
+
+	return &(_character_action_buttons[index]);
+}
+
+
+
 StillImage* BattleMode::GetStatusIcon(GLOBAL_STATUS type, GLOBAL_INTENSITY intensity) {
 	if ((type <= GLOBAL_STATUS_INVALID) || (type >= GLOBAL_STATUS_TOTAL)) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "type argument was invalid: " << type << endl;
@@ -797,17 +865,13 @@ StillImage* BattleMode::GetStatusIcon(GLOBAL_STATUS type, GLOBAL_INTENSITY inten
 
 
 void BattleMode::NotifyCharacterCommand(BattleCharacter* character) {
-	for (list<BattleCharacter*>::iterator i = _command_queue.begin(); i != _command_queue.end(); i++) {
-		if (character == (*i)) {
-			IF_PRINT_WARNING(BATTLE_DEBUG) << "character was already present in the command queue" << endl;
-			return;
-		}
+	if (_command_character != NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "command is already being selected for another character" << endl;
+		return;
 	}
 
-	_command_queue.push_back(character);
-	if (_state != BATTLE_STATE_COMMAND) {
-		ChangeState(BATTLE_STATE_COMMAND);
-	}
+	_command_character = character;
+	ChangeState(BATTLE_STATE_COMMAND);
 }
 
 
@@ -817,21 +881,25 @@ void BattleMode::NotifyCharacterCommandComplete(BattleCharacter* character) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL argument" << endl;
 		return;
 	}
-	if (_command_queue.empty() == true) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "no characters were in the command queue when function was called" << endl;
+	if (_command_character == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "no character was selected for command entry when this function was called" << endl;
 		return;
 	}
-	if (character != _command_queue.front()) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "function argument was not the same character as the front of the command queue" << endl;
+	if (character != _command_character) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function argument was not equal to command character pointer" << endl;
 	}
 
-	character->ChangeState(ACTOR_STATE_WARM_UP);
+	// Update the action text to reflect the action and target now set for the character
+	character->ChangeActionText();
 
-	_command_queue.pop_front();
-	if (_command_queue.empty() == true)
-		ChangeState(BATTLE_STATE_NORMAL);
-	else
-		_command_supervisor->Initialize(_command_queue.front());
+	// If the character was in the command state when it had its command set, the actor needs to move on the the warmup state to prepare to
+	// execute the command. Otherwise if the character was in any other state (likely the idle state), the character should remain in that state.
+	if (character->GetState() == ACTOR_STATE_COMMAND) {
+		character->ChangeState(ACTOR_STATE_WARM_UP);
+	}
+
+	_command_character = NULL;
+	ChangeState(BATTLE_STATE_NORMAL);
 }
 
 
@@ -855,10 +923,15 @@ void BattleMode::NotifyActorDeath(BattleActor* actor) {
 		return;
 	}
 
-	// Remove actor from command and ready queues if it is found in either one
-	if (actor->IsEnemy() == false)
-		_command_queue.remove(dynamic_cast<BattleCharacter*>(actor));
+	// Try removing the actor from the ready queue
 	_ready_queue.remove(actor);
+
+	if (actor->IsEnemy() == false) {
+		// If the player was selecting a command for the character that just died, the command character pointer needs to be reset to prevent future warnings.
+		if (dynamic_cast<BattleCharacter*>(actor) == _command_character) {
+			_command_character = NULL;
+		}
+	}
 
 	// Notify the command supervisor about the death event if it is active
 	if (_state == BATTLE_STATE_COMMAND) {
@@ -867,11 +940,7 @@ void BattleMode::NotifyActorDeath(BattleActor* actor) {
 		// If the actor who died was the character that the player was selecting a command for, this will cause the
 		// command supervisor will return to the invalid state.
 		if (_command_supervisor->GetState() == COMMAND_STATE_INVALID) {
-			// Either re-initialize the command supervisor with another character, or return to the normal state
-			if (_command_queue.empty() == false)
-				_command_supervisor->Initialize(_command_queue.front());
-			else
-				ChangeState(BATTLE_STATE_NORMAL);
+			ChangeState(BATTLE_STATE_NORMAL);
 		}
 	}
 
@@ -1196,6 +1265,7 @@ void BattleMode::_DrawGUI() {
 // 	if (_state == BATTLE_STATE_EVENT) {
 // 		_dialogue_window.Draw(&_speaker_name, NULL);
 // 	}
+
 	if (_command_supervisor->GetState() != COMMAND_STATE_INVALID) {
 		_command_supervisor->Draw();
 	}
@@ -1221,28 +1291,46 @@ void BattleMode::_DrawBottomMenu() {
 		VideoManager->MoveRelative(4.0f, -4.0f);
 	}
 
-	// Draw the selection highlight and portrait for the active character having a command selected by the player
-	if (_state == BATTLE_STATE_COMMAND) {
-		BattleCharacter* character = _command_supervisor->GetCommandCharacter();
-		uint32 character_position = 0xFFFFFFFF; // Initial value used to check for warning condition
+	// If the player is selecting a command for a particular character, draw that character's portrait
+	if (_command_character != NULL)
+		_command_character->DrawPortrait();
 
-		for (uint32 i = 0; i < _character_actors.size(); i++) {
-			if (_character_actors[i] == character) {
-				character_position = i;
-				break;
-			}
+	// Draw the highlight images for the character that a command is being selected for (if any) and/or any characters
+	// that are in the "command" state. The latter indicates that these characters needs a command selected as soon as possible
+
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		if (_character_actors[i] == _command_character) {
+			VideoManager->Move(148.0f, 85.0f - (25.0f * i));
+			_character_selected_highlight.Draw();
 		}
-		if (character_position == 0xFFFFFFFF) {
-			IF_PRINT_WARNING(BATTLE_DEBUG) << "the command character was not found in the character actor containers" << endl;
-			character_position = 0;
+		else if (_character_actors[i]->GetState() == ACTOR_STATE_COMMAND) {
+			VideoManager->Move(148.0f, 85.0f - (25.0f * i));
+			_character_command_highlight.Draw();
 		}
-
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->Move(148.0f, 85.0f - (character_position * 25.0f));
-		_character_selection.Draw();
-
-		character->DrawPortrait();
 	}
+
+// 	// Draw the selection highlight and portrait for the active character having a command selected by the player
+// 	if (_state == BATTLE_STATE_COMMAND) {
+// 		BattleCharacter* character = _command_supervisor->GetCommandCharacter();
+// 		uint32 character_position = 0xFFFFFFFF; // Initial value used to check for warning condition
+//
+// 		for (uint32 i = 0; i < _character_actors.size(); i++) {
+// 			if (_character_actors[i] == character) {
+// 				character_position = i;
+// 				break;
+// 			}
+// 		}
+// 		if (character_position == 0xFFFFFFFF) {
+// 			IF_PRINT_WARNING(BATTLE_DEBUG) << "the command character was not found in the character actor containers" << endl;
+// 			character_position = 0;
+// 		}
+//
+// 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+// 		VideoManager->Move(148.0f, 85.0f - (character_position * 25.0f));
+// 		_character_selected_highlight.Draw();
+//
+// 		character->DrawPortrait();
+// 	}
 
 	// Draw the status information of all character actors
 	for (uint32 i = 0; i < _character_actors.size(); i++) {

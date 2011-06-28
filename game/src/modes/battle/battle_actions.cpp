@@ -76,24 +76,6 @@ SkillAction::SkillAction(BattleActor* actor, BattleTarget target, GlobalSkill* s
 
 
 
-uint32 SkillAction::GetWarmUpTime() const {
-	if (_skill == NULL)
-		return 0;
-	else
-		return _skill->GetWarmupTime();
-}
-
-
-
-uint32 SkillAction::GetCoolDownTime() const {
-	if (_skill == NULL)
-		return 0;
-	else
-		return _skill->GetCooldownTime();
-}
-
-
-
 bool SkillAction::Execute() {
 	// (1): First check that the actor has sufficient XP to use the skill
 	if (_actor->GetSkillPoints() < _skill->GetSPRequired()) {
@@ -156,6 +138,34 @@ bool SkillAction::Execute() {
 	return true;
 }
 
+
+
+ustring SkillAction::GetName() const {
+	if (_skill == NULL)
+		return ustring();
+	else
+		return _skill->GetName();
+}
+
+
+
+
+uint32 SkillAction::GetWarmUpTime() const {
+	if (_skill == NULL)
+		return 0;
+	else
+		return _skill->GetWarmupTime();
+}
+
+
+
+uint32 SkillAction::GetCoolDownTime() const {
+	if (_skill == NULL)
+		return 0;
+	else
+		return _skill->GetCooldownTime();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // ItemAction class
 ////////////////////////////////////////////////////////////////////////////////
@@ -194,6 +204,15 @@ bool ItemAction::Execute() {
 	}
 
 	return true;
+}
+
+
+
+ustring ItemAction::GetName() const {
+	if (_item == NULL)
+		return UTranslate("Use: [error]");
+	else
+		return (UTranslate("Use: ") + (_item->GetItem()).GetName());
 }
 
 } // namespace private_battle
