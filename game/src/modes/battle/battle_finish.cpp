@@ -704,6 +704,11 @@ void FinishVictoryAssistant::_UpdateSpoils() {
 
 	// ---------- (2): Add drunes and update the display
 	if (drunes_to_add != 0) {
+		// Avoid making _drunes_dropped a negative value
+		if (drunes_to_add > _drunes_dropped) {
+			drunes_to_add = _drunes_dropped;
+		}
+
 		GlobalManager->AddDrunes(drunes_to_add);
 		_drunes_dropped -= drunes_to_add;
 		_SetHeaderText();

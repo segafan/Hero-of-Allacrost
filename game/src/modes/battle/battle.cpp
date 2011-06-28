@@ -414,7 +414,6 @@ BattleMode::BattleMode() :
 	_sequence_supervisor(this),
 	_command_supervisor(new CommandSupervisor()),
 	_finish_supervisor(new FinishSupervisor()),
-	_command_character(NULL),
 	_current_number_swaps(0),
 	_default_music("mus/Confrontation.ogg"),
 	_winning_music("mus/Allacrost_Fanfare.ogg"),
@@ -474,7 +473,6 @@ BattleMode::~BattleMode() {
 		i->second.FreeAudio();
 
 	// Delete all character and enemy actors
-	_command_character = NULL;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		delete _character_actors[i];
 	}
@@ -583,7 +581,7 @@ void BattleMode::Update() {
 
 		if (character_selection != NULL) {
 			if (character_selection->CanSelectCommand() == true) {
-				_command_character = character_selection;
+				_command_supervisor->Initialize(character_selection);
 				ChangeState(BATTLE_STATE_COMMAND);
 			}
 		}
@@ -771,12 +769,9 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 		case BATTLE_STATE_NORMAL:
 			break;
 		case BATTLE_STATE_COMMAND:
-			if (_command_character == NULL) {
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "no character selected when changing battle to the command state" << endl;
+			if (_command_supervisor->GetCommandCharacter() == NULL) {
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "no character was selected when changing battle to the command state" << endl;
 				_state = BATTLE_STATE_NORMAL;
-			}
-			else {
-				_command_supervisor->Initialize(_command_character);
 			}
 			break;
 		case BATTLE_STATE_EVENT:
@@ -817,13 +812,12 @@ void BattleMode::Exit() {
 
 
 void BattleMode::PlayMusic(const string& filename) {
-	if (_battle_music.find(filename) == _battle_music.end()) {
+	map<string, MusicDescriptor>::iterator i = _battle_music.find(filename);
+	if (i == _battle_music.end()) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "requested music file was not loaded: " << filename << endl;
 		return;
 	}
 
-	// TODO: this isn't playing the requested music in the argument, its playing the first track
-	map<string, MusicDescriptor>::iterator i = _battle_music.begin();
 	i->second.Play();
 	_current_music = i->first;
 }
@@ -864,14 +858,17 @@ StillImage* BattleMode::GetStatusIcon(GLOBAL_STATUS type, GLOBAL_INTENSITY inten
 
 
 
-void BattleMode::NotifyCharacterCommand(BattleCharacter* character) {
-	if (_command_character != NULL) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "command is already being selected for another character" << endl;
+void BattleMode::NotifyCommandCancel() {
+	if (_state != BATTLE_STATE_COMMAND) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "battle was not in command state when function was called" << endl;
+		return;
+	}
+	else if (_command_supervisor->GetCommandCharacter() != NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "command supervisor still had a character selected when function was called" << endl;
 		return;
 	}
 
-	_command_character = character;
-	ChangeState(BATTLE_STATE_COMMAND);
+	ChangeState(BATTLE_STATE_NORMAL);
 }
 
 
@@ -880,13 +877,6 @@ void BattleMode::NotifyCharacterCommandComplete(BattleCharacter* character) {
 	if (character == NULL) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL argument" << endl;
 		return;
-	}
-	if (_command_character == NULL) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "no character was selected for command entry when this function was called" << endl;
-		return;
-	}
-	if (character != _command_character) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "function argument was not equal to command character pointer" << endl;
 	}
 
 	// Update the action text to reflect the action and target now set for the character
@@ -898,7 +888,6 @@ void BattleMode::NotifyCharacterCommandComplete(BattleCharacter* character) {
 		character->ChangeState(ACTOR_STATE_WARM_UP);
 	}
 
-	_command_character = NULL;
 	ChangeState(BATTLE_STATE_NORMAL);
 }
 
@@ -923,15 +912,8 @@ void BattleMode::NotifyActorDeath(BattleActor* actor) {
 		return;
 	}
 
-	// Try removing the actor from the ready queue
+	// Remove the actor from the ready queue if it is there
 	_ready_queue.remove(actor);
-
-	if (actor->IsEnemy() == false) {
-		// If the player was selecting a command for the character that just died, the command character pointer needs to be reset to prevent future warnings.
-		if (dynamic_cast<BattleCharacter*>(actor) == _command_character) {
-			_command_character = NULL;
-		}
-	}
 
 	// Notify the command supervisor about the death event if it is active
 	if (_state == BATTLE_STATE_COMMAND) {
@@ -1292,14 +1274,13 @@ void BattleMode::_DrawBottomMenu() {
 	}
 
 	// If the player is selecting a command for a particular character, draw that character's portrait
-	if (_command_character != NULL)
-		_command_character->DrawPortrait();
+	if (_command_supervisor->GetCommandCharacter() != NULL)
+		_command_supervisor->GetCommandCharacter()->DrawPortrait();
 
 	// Draw the highlight images for the character that a command is being selected for (if any) and/or any characters
 	// that are in the "command" state. The latter indicates that these characters needs a command selected as soon as possible
-
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		if (_character_actors[i] == _command_character) {
+		if (_character_actors[i] == _command_supervisor->GetCommandCharacter()) {
 			VideoManager->Move(148.0f, 85.0f - (25.0f * i));
 			_character_selected_highlight.Draw();
 		}
@@ -1308,29 +1289,6 @@ void BattleMode::_DrawBottomMenu() {
 			_character_command_highlight.Draw();
 		}
 	}
-
-// 	// Draw the selection highlight and portrait for the active character having a command selected by the player
-// 	if (_state == BATTLE_STATE_COMMAND) {
-// 		BattleCharacter* character = _command_supervisor->GetCommandCharacter();
-// 		uint32 character_position = 0xFFFFFFFF; // Initial value used to check for warning condition
-//
-// 		for (uint32 i = 0; i < _character_actors.size(); i++) {
-// 			if (_character_actors[i] == character) {
-// 				character_position = i;
-// 				break;
-// 			}
-// 		}
-// 		if (character_position == 0xFFFFFFFF) {
-// 			IF_PRINT_WARNING(BATTLE_DEBUG) << "the command character was not found in the character actor containers" << endl;
-// 			character_position = 0;
-// 		}
-//
-// 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-// 		VideoManager->Move(148.0f, 85.0f - (character_position * 25.0f));
-// 		_character_selected_highlight.Draw();
-//
-// 		character->DrawPortrait();
-// 	}
 
 	// Draw the status information of all character actors
 	for (uint32 i = 0; i < _character_actors.size(); i++) {

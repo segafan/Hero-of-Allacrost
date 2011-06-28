@@ -547,13 +547,7 @@ bool ParticleManager::Update(int32 frame_time)
 	{
 		if(!(iEffect->second)->IsAlive())
 		{
-			(iEffect->second)->_Destroy();
-
-			map<ParticleEffectID, ParticleEffect *>::iterator iEffectNext = iEffect;
-			++iEffectNext;
-
-			_effects.erase(iEffect);
-			iEffect = iEffectNext;
+			_effects.erase(iEffect++);
 		}
 		else
 		{
