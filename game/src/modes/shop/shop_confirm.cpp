@@ -707,13 +707,17 @@ void ConfirmInterface::_LeaveInterface() {
 	map<uint32, ShopObject*>* sell_list = ShopMode::CurrentInstance()->GetSellList();
 
 	// Go through the lists and remove any entries that have had their counts set to zero
-	for (map<uint32, ShopObject*>::iterator i = buy_list->begin(); i != buy_list->end(); i++) {
+	for (map<uint32, ShopObject*>::iterator i = buy_list->begin(); i != buy_list->end();) {
 		if (i->second->GetBuyCount() == 0)
-			buy_list->erase(i);
+			buy_list->erase(i++);
+		else
+			i++;
 	}
-	for (map<uint32, ShopObject*>::iterator i = sell_list->begin(); i != sell_list->end(); i++) {
+	for (map<uint32, ShopObject*>::iterator i = sell_list->begin(); i != sell_list->end();) {
 		if (i->second->GetSellCount() == 0)
-			sell_list->erase(i);
+			sell_list->erase(i++);
+		else
+			i++;
 	}
 
 	ShopMode::CurrentInstance()->ChangeState(SHOP_STATE_ROOT);

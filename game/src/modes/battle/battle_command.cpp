@@ -903,7 +903,14 @@ void CommandSupervisor::_ChangeState(COMMAND_STATE new_state) {
 void CommandSupervisor::_UpdateCategory() {
 	_category_options.Update();
 
-	if (InputManager->ConfirmPress()) {
+	// Event priority is given to the player requesting to abort the command selection process
+	if (InputManager->CancelPress()) {
+		_ChangeState(COMMAND_STATE_INVALID);
+		BattleMode::CurrentInstance()->NotifyCommandCancel();
+		cancel_sound.Play();
+	}
+
+	else if (InputManager->ConfirmPress()) {
 		if (_category_options.IsOptionEnabled(_category_options.GetSelection()) == true) {
 			_active_settings->SetLastCategory(_category_options.GetSelection());
 			_ChangeState(COMMAND_STATE_ACTION);

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,7 +152,9 @@ void ImageMemory::RGBAToRGB() {
 	}
 
 	// Reduce the memory consumed by 1/4 since we no longer need to contain alpha data
-	pixels = realloc(pixels, width * height * 3);
+	void* new_pixels = realloc(pixels, width * height * 3);
+	if (new_pixels != NULL)
+		pixels = new_pixels;
 	rgb_format = true;
 }
 
@@ -270,7 +272,7 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 		PRINT_ERROR << "failed to malloc sufficient memory for .png file: " << filename << endl;
 		return false;
 	}
-	
+
 	// convert the damn thing so that it works in our format
 	// this is mostly just byteswapping and adding extra data - we want everything in four channels
 	// for the moment, anyway

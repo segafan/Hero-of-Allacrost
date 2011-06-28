@@ -21,6 +21,7 @@
 #include "battle.h"
 #include "battle_actions.h"
 #include "battle_actors.h"
+#include "battle_command.h"
 #include "battle_effects.h"
 #include "battle_indicators.h"
 #include "battle_utils.h"
@@ -409,6 +410,13 @@ void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
 
 	switch (_state) {
 		case ACTOR_STATE_COMMAND:
+			break;
+		case ACTOR_STATE_WARM_UP:
+			// BattleActor::Update() changes to the warm up state if the actor has an action set when the idle time is expired. However for characters, we do not
+			// want to proceed forward in this case if the player is currently setting a different action for that same character. Instead we place the character
+			// in the command state and wait until the player exits the command menu before moving on to the warm up state.
+			if (BattleMode::CurrentInstance()->GetCommandSupervisor()->GetCommandCharacter() == this)
+				ChangeState(ACTOR_STATE_COMMAND);
 			break;
 		case ACTOR_STATE_ACTING:
 			// TODO: reset state timer?

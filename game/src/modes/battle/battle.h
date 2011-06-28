@@ -239,13 +239,11 @@ public:
 	/** \name Battle notification methods
 	*** These methods are called by other battle classes to indicate events such as when an actor
 	*** changes its state. Often BattleMode will respond by updating the state of one or more of its
-	*** members and calling other battle classes to notify them of the event.
+	*** members and calling other battle classes to notify them of the event as well.
 	**/
 	//@{
-	/** \brief Performs any necessary changes in response to a character entering the command state
-	*** \param character A pointer to the character who is now in the ACTOR_STATE_COMMAND state
-	**/
-	void NotifyCharacterCommand(private_battle::BattleCharacter* character);
+	//! \brief Called whenever the player is in the command menu and exits it without selecting an action
+	void NotifyCommandCancel();
 
 	/** \brief Called whenever the player has finished selecting a command for a character
 	*** \param character A pointer to the character that just had its command completed.
@@ -323,9 +321,6 @@ private:
 
 	//! \name Battle Actor Containers
 	//@{
-	//! \brief A pointer to the character that the player is currently selecting a command for
-	private_battle::BattleCharacter* _command_character;
-
 	/** \brief Characters that are presently fighting in the battle
 	*** No more than four characters may be fighting at any given time, thus this structure will never
 	*** contain more than four BattleCharacter objects. This structure does not include any characters
