@@ -464,6 +464,12 @@ BattleMode::BattleMode() :
 
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_character_action_buttons, "img/menus/battle_command_buttons.png", 2, 5) == false)
 		PRINT_ERROR << "failed to load character action buttons" << endl;
+
+	// Check that the global manager has a valid battle setting stored.
+	if ((GlobalManager->GetBattleSetting() <= GLOBAL_BATTLE_INVALID) || (GlobalManager->GetBattleSetting() >= GLOBAL_BATTLE_TOTAL)) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "global manager had invalid battle setting active, changing setting to GLOBAL_BATTLE_WAIT" << endl;
+		GlobalManager->SetBattleSetting(GLOBAL_BATTLE_WAIT);
+	}
 } // BattleMode::BattleMode()
 
 
@@ -580,10 +586,7 @@ void BattleMode::Update() {
 		}
 
 		if (character_selection != NULL) {
-			if (character_selection->CanSelectCommand() == true) {
-				_command_supervisor->Initialize(character_selection);
-				ChangeState(BATTLE_STATE_COMMAND);
-			}
+			OpenCommandMenu(character_selection);
 		}
 
 		// TODO: Determine whether we should play a sound if the player presses an invalid key and/or the selected character is not currently
@@ -592,14 +595,26 @@ void BattleMode::Update() {
 	// If the player is selecting a command for a character, the command supervisor has control
 	else if (_state == BATTLE_STATE_COMMAND) {
 		_command_supervisor->Update();
-
-		// TODO: If the battle is running in "wait mode", return here so that the actors are paused
-// 		return; // This return effectively pauses the state of the actors while the player selects another command
 	}
 	// If the battle is in either finish state, the finish supervisor has control
 	else if ((_state == private_battle::BATTLE_STATE_VICTORY) || (_state == private_battle::BATTLE_STATE_DEFEAT)) {
 		_finish_supervisor->Update();
 		return;
+	}
+
+	// If the battle is running in the "wait" setting, we need to pause the battle whenever any character reaches the
+	// command state to allow the player to enter a command for that character before resuming. We also want to make sure
+	// that the command menu is open whenever we find a character in the command state. If the command menu is not open, we
+	// forcibly open it and make the player choose a command for the character so that the battle may continue.
+	if (GlobalManager->GetBattleSetting() == GLOBAL_BATTLE_WAIT) {
+		for (uint32 i = 0; i < _character_actors.size(); i++) {
+			if (_character_actors[i]->GetState() == ACTOR_STATE_COMMAND) {
+				if (_state != BATTLE_STATE_COMMAND) {
+					OpenCommandMenu(_character_actors[i]);
+				}
+				return;
+			}
+		}
 	}
 
 	// Process the actor ready queue
@@ -791,6 +806,26 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "changed to invalid battle state: " << _state << endl;
 			break;
 	}
+}
+
+
+
+bool BattleMode::OpenCommandMenu(BattleCharacter* character) {
+	if (character == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL argument" << endl;
+		return false;
+	}
+	if (_state == BATTLE_STATE_COMMAND) {
+		return false;
+	}
+
+	if (character->CanSelectCommand() == true) {
+		_command_supervisor->Initialize(character);
+		ChangeState(BATTLE_STATE_COMMAND);
+		return true;
+	}
+
+	return false;
 }
 
 

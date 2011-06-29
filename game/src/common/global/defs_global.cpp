@@ -96,13 +96,15 @@ void BindGlobalsToLua()
 			.def("GetNumberEventGroups", &GameGlobal::GetNumberEventGroups)
 			.def("GetNumberEvents", &GameGlobal::GetNumberEvents)
 			.def("SetLocation", (void(GameGlobal::*)(const std::string&)) &GameGlobal::SetLocation)
+			.def("GetBattleSetting", &GameGlobal::GetBattleSetting)
+			.def("SetBattleSetting", &GameGlobal::SetBattleSetting)
 
 			// Namespace constants
 			.enum_("constants") [
-				// Character type constants
+				// Character types
 				value("GLOBAL_CHARACTER_INVALID", GLOBAL_CHARACTER_INVALID),
 				value("GLOBAL_CHARACTER_ALL", GLOBAL_CHARACTER_ALL),
-				// Object type constants
+				// Object types
 				value("GLOBAL_OBJECT_INVALID", GLOBAL_OBJECT_INVALID),
 				value("GLOBAL_OBJECT_ITEM", GLOBAL_OBJECT_ITEM),
 				value("GLOBAL_OBJECT_WEAPON", GLOBAL_OBJECT_WEAPON),
@@ -122,11 +124,16 @@ void BindGlobalsToLua()
 				value("GLOBAL_POSITION_TORSO", GLOBAL_POSITION_TORSO),
 				value("GLOBAL_POSITION_ARMS", GLOBAL_POSITION_ARMS),
 				value("GLOBAL_POSITION_LEGS", GLOBAL_POSITION_LEGS),
-				// Global skill types
+				// Skill types
 				value("GLOBAL_SKILL_INVALID", GLOBAL_SKILL_INVALID),
 				value("GLOBAL_SKILL_ATTACK", GLOBAL_SKILL_ATTACK),
 				value("GLOBAL_SKILL_DEFEND", GLOBAL_SKILL_DEFEND),
 				value("GLOBAL_SKILL_SUPPORT", GLOBAL_SKILL_SUPPORT),
+				// Battle settings
+				value("GLOBAL_BATTLE_INVALID", GLOBAL_BATTLE_INVALID),
+				value("GLOBAL_BATTLE_WAIT", GLOBAL_BATTLE_WAIT),
+				value("GLOBAL_BATTLE_ACTIVE", GLOBAL_BATTLE_ACTIVE),
+				value("GLOBAL_BATTLE_TOTAL", GLOBAL_BATTLE_TOTAL),
 				// Elemental type constants
 				value("GLOBAL_ELEMENTAL_FIRE", GLOBAL_ELEMENTAL_FIRE),
 				value("GLOBAL_ELEMENTAL_WATER", GLOBAL_ELEMENTAL_WATER),

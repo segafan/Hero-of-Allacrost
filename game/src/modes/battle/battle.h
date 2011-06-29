@@ -201,6 +201,15 @@ public:
 	**/
 	void ChangeState(private_battle::BATTLE_STATE new_state);
 
+	/** \brief Requests battle mode to enter the command state and to open the command menu for a specific character
+	*** \param character A pointer to the character to enter commands for
+	*** \return True only if the requested operation was accepted
+	***
+	*** This method does not guarantee that any change will take place. If the command menu is already open for a
+	*** different character, it will reject the request.
+	**/
+	bool OpenCommandMenu(private_battle::BattleCharacter* character);
+
 	//! \brief Returns true if the battle has finished and entered either the victory or defeat state
 	bool IsBattleFinished() const
 		 { return ((_state == private_battle::BATTLE_STATE_VICTORY) || (_state == private_battle::BATTLE_STATE_DEFEAT)); }
