@@ -188,6 +188,10 @@ public:
 
     void SetCamera(private_map::VirtualSprite* sprite, uint16 num_frames);
 
+    void MoveCameraSprite(uint16 loc_x, uint16 loc_y);
+
+    void MoveCameraSprite(uint16 loc_x, uint16 loc_y, uint16 num_frames);
+
 	uint8 GetNumMapContexts() const
 		{ return _num_map_contexts; }
 
@@ -273,6 +277,9 @@ private:
 
 	//! \brief A pointer to the map sprite that the map camera will focus on
 	private_map::VirtualSprite* _camera;
+
+	//! \brief A virtual sprite allowing the camera to move temporarly to any place
+	private_map::VirtualSprite* _camera_sprite;
 
 	//! \brief Determines, if the map is currently at a smooth camera transition
 	bool _inside_camera_transistion;

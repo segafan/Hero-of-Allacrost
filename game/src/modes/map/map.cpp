@@ -69,6 +69,7 @@ MapMode::MapMode(string filename) :
 	_dialogue_supervisor(NULL),
 	_treasure_supervisor(NULL),
 	_camera(NULL),
+	_camera_sprite(NULL),
 	_inside_camera_transistion(false),
 	_x_origin(0),
 	_y_origin(0),
@@ -108,6 +109,13 @@ MapMode::MapMode(string filename) :
 	_intro_timer.Initialize(7000, 0);
 	_intro_timer.EnableAutoUpdate(this);
 
+	// Create the virtual sprite for map movement
+	_camera_sprite = new VirtualSprite();
+	_camera_sprite->SetNoCollision(true);
+	_camera_sprite->SetVisible(false);
+	_camera_sprite->SetXPosition(0, 0.0f);
+	_camera_sprite->SetYPosition(0, 0.0f);
+
 	// TODO: Load the map data in a seperate thread
 	_Load();
 
@@ -144,6 +152,8 @@ MapMode::~MapMode() {
 	delete(_event_supervisor);
 	delete(_dialogue_supervisor);
 	delete(_treasure_supervisor);
+
+	delete(_camera_sprite);
 
 	_map_script.CloseFile();
 }
@@ -314,6 +324,49 @@ void MapMode::PlayMusic(uint32 track_num) {
 	_music[_current_track].Stop();
 	_current_track = track_num;
 	_music[_current_track].Play();
+}
+
+
+
+void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint16 num_frames) {
+    if (_camera == sprite) {
+        IF_PRINT_WARNING(MAP_DEBUG) << "Camera was moved to the same sprite" << endl;
+    }
+    else {
+        if (num_frames > 0) {
+            _inside_camera_transistion = true;
+            float x_offset, y_offset;
+            _camera->GetXPosition(_x_origin, x_offset);
+            _camera->GetYPosition(_y_origin, y_offset);
+            _num_transition_frames = num_frames;
+            _count_transition_frames = 0;
+        }
+        _camera = sprite;
+    }
+}
+
+
+
+void MapMode::MoveCameraSprite(uint16 loc_x, uint16 loc_y) {
+    _camera_sprite->SetXPosition(loc_x, 0.0f);
+    _camera_sprite->SetYPosition(loc_y, 0.0f);
+}
+
+void MapMode::MoveCameraSprite(uint16 loc_x, uint16 loc_y, uint16 num_frames) {
+    if (_camera != _camera_sprite) {
+        IF_PRINT_WARNING(MAP_DEBUG) << "Attempt to move camera although on different sprite" << endl;
+    }
+    else {
+        if (num_frames > 0) {
+            _inside_camera_transistion = true;
+            float x_offset, y_offset;
+            _camera_sprite->GetXPosition(_x_origin, x_offset);
+            _camera_sprite->GetYPosition(_y_origin, y_offset);
+            _num_transition_frames = num_frames;
+            _count_transition_frames = 0;
+        }
+        MoveCameraSprite(loc_x, loc_y);
+    }
 }
 
 // ****************************************************************************
@@ -758,23 +811,6 @@ void MapMode::_DrawGUI() {
 	if (_treasure_supervisor->IsActive() == true)
 		_treasure_supervisor->Draw();
 } // void MapMode::_DrawGUI()
-
-void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint16 num_frames) {
-    if (_camera == sprite) {
-        IF_PRINT_WARNING(MAP_DEBUG) << "Camera was moved to the same sprite" << endl;
-    }
-    else {
-        if (num_frames > 0) {
-            _inside_camera_transistion = true;
-            float x_offset, y_offset;
-            _camera->GetXPosition(_x_origin, x_offset);
-            _camera->GetYPosition(_y_origin, y_offset);
-            _num_transition_frames = num_frames;
-            _count_transition_frames = 0;
-        }
-        _camera = sprite;
-    }
-}
 
 } // namespace hoa_map
 
