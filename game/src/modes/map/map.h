@@ -186,7 +186,7 @@ public:
 	void SetCamera(private_map::VirtualSprite* sprite)
 		{ _camera = sprite; }
 
-    void SetCamera(private_map::VirtualSprite* sprite, uint8 num_frames);
+    void SetCamera(private_map::VirtualSprite* sprite, uint16 num_frames);
 
 	uint8 GetNumMapContexts() const
 		{ return _num_map_contexts; }
@@ -284,10 +284,10 @@ private:
 	uint16 _y_origin;
 
 	//! \brief Number of frames for a camera transition
-	uint8 _num_transition_frames;
+	uint16 _num_transition_frames;
 
 	//! \brief Counter for frames in camera transition
-	uint8 _count_transition_frames;
+	uint16 _count_transition_frames;
 
 	//! \brief The number of contexts that this map uses (at least 1, at most 32)
 	uint8 _num_map_contexts;
