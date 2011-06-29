@@ -1398,11 +1398,11 @@ end
 
 -- The following function are only for test purpose and should be deleted for the next release
 map_functions[100] = function()
-	Map:SetCamera(knight_talk_sprite,400);
+	Map:SetCamera(knight_talk_sprite,200);
 end
 
 map_functions[101] = function()
-	Map:SetCamera(claudius,400);
+	Map:SetCamera(claudius,40);
 end
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
