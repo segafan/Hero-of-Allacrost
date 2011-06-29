@@ -233,6 +233,17 @@ enum GLOBAL_SKILL {
 };
 
 
+/** \name Battle setting type
+*** \brief Represents the play types of battle that the player may choose between
+**/
+enum GLOBAL_BATTLE_SETTING {
+	GLOBAL_BATTLE_INVALID   = -1,
+	GLOBAL_BATTLE_WAIT      =  0, //!< Battles will pause ("wait") while player selects commands
+	GLOBAL_BATTLE_ACTIVE    =  1, //!< Battles will continue progressing while player selects commands
+	GLOBAL_BATTLE_TOTAL     =  2
+};
+
+
 /** \brief Retrieves a string representation for any GLOBAL_TARGET enum value
 *** \param target The target enum value to find the string for
 *** \return Translated text that describes the target

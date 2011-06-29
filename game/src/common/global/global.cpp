@@ -74,7 +74,9 @@ void GlobalEventGroup::SetEvent(const string& event_name, int32 event_value) {
 // GameGlobal class - Initialization and Destruction
 ////////////////////////////////////////////////////////////////////////////////
 
-GameGlobal::GameGlobal() {
+GameGlobal::GameGlobal() :
+	_battle_setting(GLOBAL_BATTLE_INVALID)
+{
 	IF_PRINT_DEBUG(GLOBAL_DEBUG) << "GameGlobal constructor invoked" << endl;
 }
 
@@ -652,7 +654,11 @@ bool GameGlobal::SaveGame(const string& filename) {
 	// ----- (1) Write out namespace information
 	file.WriteNamespace("save_game1");
 
-	// ----- (2) Save simple play data
+	// ----- (2) Save play settings
+	file.InsertNewLine();
+	file.WriteInt("battle_setting", _battle_setting);
+
+	// ----- (3) Save simple play data
 	file.InsertNewLine();
 	file.WriteString("location_name", MakeStandardString(_location_name));
 	file.WriteUInt("play_hours", SystemManager->GetPlayHours());
@@ -660,7 +666,7 @@ bool GameGlobal::SaveGame(const string& filename) {
 	file.WriteUInt("play_seconds", SystemManager->GetPlaySeconds());
 	file.WriteUInt("drunes", _drunes);
 
-	// ----- (3) Save the inventory (object id + object count pairs)
+	// ----- (4) Save the inventory (object id + object count pairs)
 	// NOTE: This does not save any weapons/armor that are equipped on the characters. That data
 	// is stored alongside the character data when it is saved
 	_SaveInventory(file, "items", _inventory_items);
@@ -672,7 +678,7 @@ bool GameGlobal::SaveGame(const string& filename) {
 	_SaveInventory(file, "shards", _inventory_shards);
 	_SaveInventory(file, "key_items", _inventory_key_items);
 
-	// ----- (4) Save character data
+	// ----- (5) Save character data
 	file.InsertNewLine();
 	file.WriteLine("characters = {");
 	// First save the order of the characters in the party
@@ -694,7 +700,7 @@ bool GameGlobal::SaveGame(const string& filename) {
 	}
 	file.WriteLine("}");
 
-	// ----- (4) Save event data
+	// ----- (6) Save event data
 	file.InsertNewLine();
 	file.WriteLine("event_groups = {");
 	for (map<string, GlobalEventGroup*>::iterator i = _event_groups.begin(); i != _event_groups.end(); i++) {
@@ -704,7 +710,7 @@ bool GameGlobal::SaveGame(const string& filename) {
 
 	file.InsertNewLine();
 
-	// ----- (5) Report any errors detected from the previous write operations
+	// ----- (7) Report any errors detected from the previous write operations
 	if (file.IsErrorDetected()) {
 		if (GLOBAL_DEBUG) {
 			PRINT_WARNING << "one or more errors occurred while writing the save game file - they are listed below" << endl;
@@ -730,7 +736,10 @@ bool GameGlobal::LoadGame(const string& filename) {
 	// open the namespace that the save game is encapsulated in.
 	file.OpenTable("save_game1");
 
-	// ----- (1) Load play data
+	// ----- (1) Load play settings
+	_battle_setting = static_cast<GLOBAL_BATTLE_SETTING>(file.ReadInt("battle_setting"));
+
+	// ----- (2) Load play data
 	_location_name = MakeUnicodeString(file.ReadString("location_name"));
 	uint8 hours, minutes, seconds;
 	hours = file.ReadUInt("play_hours");
@@ -739,7 +748,7 @@ bool GameGlobal::LoadGame(const string& filename) {
 	SystemManager->SetPlayTime(hours, minutes, seconds);
 	_drunes = file.ReadUInt("drunes");
 
-	// ----- (2) Load inventory
+	// ----- (3) Load inventory
 	_LoadInventory(file, "items");
 	_LoadInventory(file, "weapons");
 	_LoadInventory(file, "head_armor");
@@ -749,7 +758,7 @@ bool GameGlobal::LoadGame(const string& filename) {
 	_LoadInventory(file, "shards");
 	_LoadInventory(file, "key_items");
 
-	// ----- (3) Load characters into the party in the correct order
+	// ----- (4) Load characters into the party in the correct order
 	file.OpenTable("characters");
 	vector<uint32> char_ids;
 	file.ReadUIntVector("order", char_ids);
@@ -758,7 +767,7 @@ bool GameGlobal::LoadGame(const string& filename) {
 	}
 	file.CloseTable();
 
-	// ----- (4) Load event data
+	// ----- (5) Load event data
 	vector<string> group_names;
 	file.OpenTable("event_groups");
 	file.ReadTableKeys(group_names);
@@ -766,7 +775,7 @@ bool GameGlobal::LoadGame(const string& filename) {
 		_LoadEvents(file, group_names[i]);
 	file.CloseTable();
 
-	// ----- (5) Report any errors detected from the previous read operations
+	// ----- (6) Report any errors detected from the previous read operations
 	if (file.IsErrorDetected()) {
 		if (GLOBAL_DEBUG) {
 			PRINT_WARNING << "one or more errors occurred while reading the save game file - they are listed below" << endl;

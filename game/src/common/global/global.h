@@ -388,6 +388,9 @@ public:
 	void SetDrunes(uint32 amount)
 		{ _drunes = amount; }
 
+	void SetBattleSetting(GLOBAL_BATTLE_SETTING new_setting)
+		{ _battle_setting = new_setting; }
+
 	uint32 GetDrunes() const
 		{ return _drunes; }
 
@@ -398,7 +401,10 @@ public:
 		{ return _location_graphic; }
 
 	std::vector<GlobalCharacter*>* GetCharacterOrder()
-		{ return &_character_order; };
+		{ return &_character_order; }
+
+	GLOBAL_BATTLE_SETTING GetBattleSetting() const
+		{ return _battle_setting; }
 
 	GlobalParty* GetActiveParty()
 		{ return &_active_party; }
@@ -475,6 +481,9 @@ private:
 
 	//! \brief The graphical image which represents the current location
 	hoa_video::StillImage _location_graphic;
+
+	//! \brief Retains the play type setting for battle that the user requested (e.g. wait mode, active mode, etc).
+	GLOBAL_BATTLE_SETTING _battle_setting;
 
 	/** \brief A map containing all characters that the player has discovered
 	*** This map contains all characters that the player has met with, regardless of whether or not they are in the active party.

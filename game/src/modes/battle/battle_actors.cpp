@@ -410,6 +410,8 @@ void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
 
 	switch (_state) {
 		case ACTOR_STATE_COMMAND:
+			// When the "wait" setting is active in battle mode we want the command menu to be brought up for the character as soon as we can when the character
+			// enters this state. This is done within the BattleMode::Update() method
 			break;
 		case ACTOR_STATE_WARM_UP:
 			// BattleActor::Update() changes to the warm up state if the actor has an action set when the idle time is expired. However for characters, we do not

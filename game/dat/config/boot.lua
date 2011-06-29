@@ -45,6 +45,9 @@ sound_files = { "snd/confirm.wav",
 function BootBattleTest()
 	print("BootBattleTest");
 
+	GlobalManager:SetBattleSetting(hoa_global.GameGlobal.GLOBAL_BATTLE_WAIT);
+--	GlobalManager:SetBattleSetting(hoa_global.GameGlobal.GLOBAL_BATTLE_ACTIVE);
+
 	GlobalManager:AddCharacter(1);
 	GlobalManager:AddCharacter(2);
 	GlobalManager:AddCharacter(4);
