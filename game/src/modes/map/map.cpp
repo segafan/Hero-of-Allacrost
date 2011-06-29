@@ -759,17 +759,19 @@ void MapMode::_DrawGUI() {
 		_treasure_supervisor->Draw();
 } // void MapMode::_DrawGUI()
 
-void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint8 num_frames) {
+void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint16 num_frames) {
     if (_camera == sprite) {
         IF_PRINT_WARNING(MAP_DEBUG) << "Camera was moved to the same sprite" << endl;
     }
     else {
-        _inside_camera_transistion = true;
-        float x_offset, y_offset;
-        _camera->GetXPosition(_x_origin, x_offset);
-        _camera->GetYPosition(_y_origin, y_offset);
-        _num_transition_frames = num_frames;
-        _count_transition_frames = 0;
+        if (num_frames > 0) {
+            _inside_camera_transistion = true;
+            float x_offset, y_offset;
+            _camera->GetXPosition(_x_origin, x_offset);
+            _camera->GetYPosition(_y_origin, y_offset);
+            _num_transition_frames = num_frames;
+            _count_transition_frames = 0;
+        }
         _camera = sprite;
     }
 }
