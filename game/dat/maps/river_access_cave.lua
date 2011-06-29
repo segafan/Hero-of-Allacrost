@@ -472,7 +472,7 @@ function Load(m)
 	GlobalEvents = Map.map_event_group;
 
 	Map.unlimited_stamina = true; -- TEMP: enabled for development. Change this to false prior to release
-
+	
 	CreateObjects();
 	CreateCharacters();
 	CreateNPCs();
@@ -481,8 +481,8 @@ function Load(m)
 	CreateEvents();
 	
 	Map:SetCamera(claudius);
-
-
+    Map:MoveCameraSprite(80, 130);
+	
 	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas
 	
 	-- Location: just before enemy boss
@@ -1076,13 +1076,19 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(301);
 	EventManager:RegisterEvent(event);	
 	event = hoa_map.ScriptedEvent(301, 100, 0);
-	event:AddEventLinkAtEnd(302, 5000);
+	event:AddEventLinkAtEnd(302, 1000);
 	EventManager:RegisterEvent(event);	
 	event = hoa_map.ScriptedEvent(302, 101, 0);
-	event:AddEventLinkAtEnd(303);
+	event:AddEventLinkAtEnd(303, 1000);
 	EventManager:RegisterEvent(event);	
-	event = hoa_map.ScriptedEvent(303, 2, 0);
+	event = hoa_map.ScriptedEvent(303, 102, 0);
+	event:AddEventLinkAtEnd(304, 5000);
 	EventManager:RegisterEvent(event);
+	event = hoa_map.ScriptedEvent(304, 103, 0);
+	event:AddEventLinkAtEnd(305);
+	EventManager:RegisterEvent(event);	
+	event = hoa_map.ScriptedEvent(305, 2, 0);
+	EventManager:RegisterEvent(event);	
 	
 	-- Event Chain 01: Discovery of corpse in cave
 	corpse_zone = hoa_map.CameraZone(202, 210, 145, 149, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
@@ -1398,10 +1404,18 @@ end
 
 -- The following function are only for test purpose and should be deleted for the next release
 map_functions[100] = function()
-	Map:SetCamera(knight_talk_sprite,200);
+	Map:SetCamera(Map.camera_sprite, 50);
 end
 
 map_functions[101] = function()
+	Map:MoveCameraSprite(150, 135, 50);
+end
+
+map_functions[102] = function()
+	Map:SetCamera(knight_talk_sprite,100);
+end
+
+map_functions[103] = function()
 	Map:SetCamera(claudius,40);
 end
 
