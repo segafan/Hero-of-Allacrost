@@ -69,6 +69,11 @@ MapMode::MapMode(string filename) :
 	_dialogue_supervisor(NULL),
 	_treasure_supervisor(NULL),
 	_camera(NULL),
+	_inside_camera_transistion(false),
+	_x_origin(0),
+	_y_origin(0),
+	_num_transition_frames(0),
+	_count_transition_frames(0),
 	_num_map_contexts(0),
 	_current_context(MAP_CONTEXT_01),
 	_running_disabled(false),
@@ -504,24 +509,60 @@ void MapMode::_CalculateMapFrame() {
 	// change the coordinate system in map mode, then this should be done only once and the calculated values should be saved for re-use.
 	// However, we've discussed the possiblity of adding a zoom feature to maps, in which case we need to continually re-calculate the pixel size
 	VideoManager->GetPixelSize(x_pixel_length, y_pixel_length);
+
+	uint16 current_x;
+	uint16 current_y;
+
+	if (!_inside_camera_transistion) {
+	    current_x = _camera->x_position;
+	    current_y = _camera->y_position;
+	}
+	else {
+	    // Calculate path
+	    int16 del_x = (_camera->x_position - _x_origin);
+	    int16 del_y = (_camera->y_position - _y_origin);
+	    float length = sqrt(del_x*del_x+del_y*del_y);
+	    float angle = atan(static_cast<float>(del_y)/static_cast<float>(del_x));
+
+	    if (del_x<0) angle = angle+3.14159265;
+
+	    float actual_way = (static_cast<float>(_count_transition_frames))/(static_cast<float>(_num_transition_frames))*length;
+
+	    current_x = round(_x_origin+cos(angle)*actual_way);
+	    current_y = round(_y_origin+sin(angle)*actual_way);
+
+	    _count_transition_frames++;
+	    if (_count_transition_frames == _num_transition_frames) {
+	        _inside_camera_transistion = false;
+	    }
+
+//	    printf("Actual count:   %i of %i\n", _count_transition_frames, _num_transition_frames);
+//        printf("Origin:         %i, %i\n", _x_origin, _y_origin);
+//        printf("Destination:    %i, %i\n", _camera->x_position, _camera->y_position);
+//	    printf("Distances:      %i, %i\n", del_x, del_y);
+//	    printf("Direction:      %f, %f\n", length, angle);
+//	    printf("Moved so far:   %f\n", actual_way);
+//	    printf("Current camera: %i, %i\n\n", current_x, current_y);
+	}
+
 	rounded_x_offset = FloorToFloatMultiple(_camera->x_offset, x_pixel_length);
 	rounded_y_offset = FloorToFloatMultiple(_camera->y_offset, y_pixel_length);
-	camera_x = static_cast<float>(_camera->x_position) + rounded_x_offset;
-	camera_y = static_cast<float>(_camera->y_position) + rounded_y_offset;
+	camera_x = static_cast<float>(current_x) + rounded_x_offset;
+	camera_y = static_cast<float>(current_y) + rounded_y_offset;
 
 	// ---------- (2) Calculate all four screen edges and determine
 	// Determine the draw coordinates of the top left corner using the camera's current position
 	_map_frame.tile_x_start = 1.0f - rounded_x_offset;
-	if (IsOddNumber(_camera->x_position))
+	if (IsOddNumber(current_x))
 		_map_frame.tile_x_start -= 1.0f;
 
 	_map_frame.tile_y_start = 2.0f - rounded_y_offset;
-	if (IsOddNumber(_camera->y_position))
+	if (IsOddNumber(current_y))
 		_map_frame.tile_y_start -= 1.0f;
 
 	// The starting row and column of tiles to draw is determined by the map camera's position
-	_map_frame.starting_col = (_camera->x_position / 2) - HALF_TILE_COLS;
-	_map_frame.starting_row = (_camera->y_position / 2) - HALF_TILE_ROWS;
+	_map_frame.starting_col = (current_x / 2) - HALF_TILE_COLS;
+	_map_frame.starting_row = (current_y / 2) - HALF_TILE_ROWS;
 
 	_map_frame.screen_edges.top    = camera_y - HALF_SCREEN_ROWS;
 	_map_frame.screen_edges.bottom = camera_y + HALF_SCREEN_ROWS;
@@ -717,6 +758,21 @@ void MapMode::_DrawGUI() {
 	if (_treasure_supervisor->IsActive() == true)
 		_treasure_supervisor->Draw();
 } // void MapMode::_DrawGUI()
+
+void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint8 num_frames) {
+    if (_camera == sprite) {
+        IF_PRINT_WARNING(MAP_DEBUG) << "Camera was moved to the same sprite" << endl;
+    }
+    else {
+        _inside_camera_transistion = true;
+        float x_offset, y_offset;
+        _camera->GetXPosition(_x_origin, x_offset);
+        _camera->GetYPosition(_y_origin, y_offset);
+        _num_transition_frames = num_frames;
+        _count_transition_frames = 0;
+        _camera = sprite;
+    }
+}
 
 } // namespace hoa_map
 
