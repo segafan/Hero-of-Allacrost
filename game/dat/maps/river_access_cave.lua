@@ -492,6 +492,15 @@ end
 
 -- Mandatory function for map updates
 function Update()
+    -- The following zone event is only for test purpose and should be deleted for the next release
+	if (test_zone:IsCameraEntering() == true) then
+	    if (GlobalEvents:DoesEventExist("test_event") == false) then
+			GlobalEvents:AddNewEvent("test_event", 1);
+			EventManager:StartEvent(300);
+		end
+	end
+    -- Test end
+
 	if (corpse_zone:IsCameraEntering() == true) then
 		if (GlobalEvents:DoesEventExist("corpse_found") == false) then
 			GlobalEvents:AddNewEvent("corpse_found", 1);
@@ -1059,6 +1068,22 @@ function CreateEvents()
 	----------------------------------------------------------------------------
 	---------- Event sequences 
 	----------------------------------------------------------------------------
+	
+    -- The following zone and events are only for test purpose and should be deleted for the next release
+	test_zone = hoa_map.CameraZone(20, 30, 135, 150, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	Map:AddZone(test_zone);	
+	event = hoa_map.ScriptedEvent(300, 1, 0);
+	event:AddEventLinkAtEnd(301);
+	EventManager:RegisterEvent(event);	
+	event = hoa_map.ScriptedEvent(301, 100, 0);
+	event:AddEventLinkAtEnd(302, 5000);
+	EventManager:RegisterEvent(event);	
+	event = hoa_map.ScriptedEvent(302, 101, 0);
+	event:AddEventLinkAtEnd(303);
+	EventManager:RegisterEvent(event);	
+	event = hoa_map.ScriptedEvent(303, 2, 0);
+	EventManager:RegisterEvent(event);
+	
 	-- Event Chain 01: Discovery of corpse in cave
 	corpse_zone = hoa_map.CameraZone(202, 210, 145, 149, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
 	Map:AddZone(corpse_zone);
@@ -1371,6 +1396,14 @@ map_functions[15] = function()
     knight_talk_sprite:AddDialogueReference(31);
 end
 
+-- The following function are only for test purpose and should be deleted for the next release
+map_functions[100] = function()
+	Map:SetCamera(knight_talk_sprite,400);
+end
+
+map_functions[101] = function()
+	Map:SetCamera(claudius,400);
+end
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
 swap_context_all_objects = function(new_context)
