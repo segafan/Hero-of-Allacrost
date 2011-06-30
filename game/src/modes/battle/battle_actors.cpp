@@ -373,9 +373,9 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character) :
 
 	_name_text.SetStyle(TextStyle("title22"));
 	_name_text.SetText(GetName());
-	_hit_points_text.SetStyle(TextStyle("text20"));
+	_hit_points_text.SetStyle(TextStyle("text24", VIDEO_TEXT_SHADOW_BLACK));
 	_hit_points_text.SetText(NumberToString(GetHitPoints()));
-	_skill_points_text.SetStyle(TextStyle("text20"));
+	_skill_points_text.SetStyle(TextStyle("text24", VIDEO_TEXT_SHADOW_BLACK));
 	_skill_points_text.SetText(NumberToString(GetSkillPoints()));
 
 	_action_selection_text.SetStyle(TextStyle("text20"));
@@ -561,6 +561,10 @@ void BattleCharacter::DrawStatus(uint32 order) {
 	// Used to determine where to draw the character's status
 	float y_offset = 0.0f;
 
+	// Colors used for the HP/SP bars
+	const Color green_hp(0.294f, 0.776f, 0.184f, 1.0f);
+	const Color blue_sp(0.196f, 0.522f, 0.859f, 1.0f);
+
 	// Determine what vertical order the character is in and set the y_offset accordingly
 	switch (order) {
 		case 0:
@@ -602,7 +606,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		VideoManager->Move(312.0f, 90.0f + y_offset);
 
 		if (GetHitPoints() > 0) {
-			VideoManager->DrawRectangle(bar_size, 6, Color(0.133f, 0.455f, 0.133f, 1.0f));
+			VideoManager->DrawRectangle(bar_size, 6, green_hp);
 		}
 
 		// Draw SP bar in blue
@@ -610,7 +614,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		VideoManager->Move(420.0f, 90.0f + y_offset);
 
 		if (GetSkillPoints() > 0) {
-			VideoManager->DrawRectangle(bar_size, 6, Color(0.129f, 0.263f, 0.451f, 1.0f));
+			VideoManager->DrawRectangle(bar_size, 6, blue_sp);
 		}
 
 		// Draw the cover image over the top of the bar
@@ -624,7 +628,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
 		// Draw the character's current health on top of the middle of the HP bar
-		VideoManager->Move(355.0f, 90.0f + y_offset);
+		VideoManager->Move(355.0f, 88.0f + y_offset);
 		_hit_points_text.SetText(NumberToString(GetHitPoints()));
 		_hit_points_text.Draw();
 

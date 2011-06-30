@@ -330,17 +330,17 @@ void IndicatorSupervisor::AddDamageIndicator(uint32 amount) {
 
 	float damage_percent = static_cast<float>(amount) / static_cast<float>(_actor->GetMaxHitPoints());
 	if (damage_percent < 0.10f) {
-		style.font = "text18";
+		style.font = "text24";
 		style.color = low_red;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (damage_percent < 0.20f) {
-		style.font = "text20";
+		style.font = "text24";
 		style.color = mid_red;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (damage_percent < 0.30f) {
-		style.font = "text22";
+		style.font = "text24";
 		style.color = high_red;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
@@ -373,17 +373,17 @@ void IndicatorSupervisor::AddHealingIndicator(uint32 amount) {
 	// bug in rendering colored text that needs to be addressed first.
 	float healing_percent = static_cast<float>(amount / _actor->GetMaxHitPoints());
 	if (healing_percent < 0.10f) {
-		style.font = "text18";
+		style.font = "text24";
 		style.color = low_green;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (healing_percent < 0.20f) {
-		style.font = "text20";
+		style.font = "text24";
 		style.color = mid_green;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
 	else if (healing_percent < 0.30f) {
-		style.font = "text22";
+		style.font = "text24";
 		style.color = high_green;
 		style.shadow_style = VIDEO_TEXT_SHADOW_BLACK;
 	}
@@ -400,7 +400,7 @@ void IndicatorSupervisor::AddHealingIndicator(uint32 amount) {
 
 void IndicatorSupervisor::AddMissIndicator() {
 	string text = Translate("Miss");
-	TextStyle style("text18", Color::white);
+	TextStyle style("text24", Color::white);
 	_wait_queue.push_back(new IndicatorText(_actor, text, style));
 }
 
