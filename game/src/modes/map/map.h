@@ -192,6 +192,9 @@ public:
 
     void MoveCameraSprite(uint16 loc_x, uint16 loc_y, uint16 num_frames);
 
+    bool IsCameraOnCameraSprite() const
+        { return _camera == _camera_sprite; }
+
 	uint8 GetNumMapContexts() const
 		{ return _num_map_contexts; }
 
@@ -284,11 +287,11 @@ private:
 	//! \brief Determines, if the map is currently at a smooth camera transition
 	bool _inside_camera_transistion;
 
-	//! \brief Holds the informations about the x-location of the origin in a transition
-	uint16 _x_origin;
+	//! \brief The way in x-direction, the camera will move
+	float _delta_x;
 
-	//! \brief Holds the informations about the y-location of the origin in a transition
-	uint16 _y_origin;
+	//! \brief The way in y-direction, the camera will move
+	float _delta_y;
 
 	//! \brief Number of frames for a camera transition
 	uint16 _num_transition_frames;

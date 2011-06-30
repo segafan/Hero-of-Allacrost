@@ -492,19 +492,17 @@ end
 
 -- Mandatory function for map updates
 function Update()
-    -- The following zone event is only for test purpose and should be deleted for the next release
-	if (test_zone:IsCameraEntering() == true) then
-	    if (GlobalEvents:DoesEventExist("test_event") == false) then
-			GlobalEvents:AddNewEvent("test_event", 1);
-			EventManager:StartEvent(300);
+	if (corpse_dicovery_zone:IsCameraEntering() == true) then
+		if (GlobalEvents:DoesEventExist("corpse_seen") == false) then
+			GlobalEvents:AddNewEvent("corpse_seen", 1);
+			EventManager:StartEvent(10);
 		end
 	end
-    -- Test end
-
-	if (corpse_zone:IsCameraEntering() == true) then
+    
+	if (corpse_zone:IsCameraEntering() == true and not Map:IsCameraOnCameraSprite()) then
 		if (GlobalEvents:DoesEventExist("corpse_found") == false) then
 			GlobalEvents:AddNewEvent("corpse_found", 1);
-			EventManager:StartEvent(10);
+			EventManager:StartEvent(11);
 		end
 	end
 
@@ -994,7 +992,10 @@ function CreateDialogue()
 	-- Event: Discovery of corpse in south east part of cave
 	dialogue = hoa_map.SpriteDialogue(500);
 		text = hoa_system.Translate("A corpse. That's always a reassuring find in a place like this.");
-		dialogue:AddLine(text, 1002);
+		dialogue:AddLine(text, 1002);        
+	DialogueManager:AddDialogue(dialogue);
+
+    dialogue = hoa_map.SpriteDialogue(501);    
 		text = hoa_system.Translate("Hey, I see something under its hand.");
 		dialogue:AddLine(text, 1001);
 	DialogueManager:AddDialogue(dialogue);
@@ -1068,39 +1069,32 @@ function CreateEvents()
 	----------------------------------------------------------------------------
 	---------- Event sequences 
 	----------------------------------------------------------------------------
-	
-    -- The following zone and events are only for test purpose and should be deleted for the next release
-	test_zone = hoa_map.CameraZone(20, 30, 135, 150, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
-	Map:AddZone(test_zone);	
-	event = hoa_map.ScriptedEvent(300, 1, 0);
-	event:AddEventLinkAtEnd(301);
-	EventManager:RegisterEvent(event);	
-	event = hoa_map.ScriptedEvent(301, 100, 0);
-	event:AddEventLinkAtEnd(302, 1000);
-	EventManager:RegisterEvent(event);	
-	event = hoa_map.ScriptedEvent(302, 101, 0);
-	event:AddEventLinkAtEnd(303, 1000);
-	EventManager:RegisterEvent(event);	
-	event = hoa_map.ScriptedEvent(303, 102, 0);
-	event:AddEventLinkAtEnd(304, 5000);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(304, 103, 0);
-	event:AddEventLinkAtEnd(305);
-	EventManager:RegisterEvent(event);	
-	event = hoa_map.ScriptedEvent(305, 2, 0);
-	EventManager:RegisterEvent(event);	
-	
+		
 	-- Event Chain 01: Discovery of corpse in cave
+    corpse_dicovery_zone = hoa_map.CameraZone(185, 200, 135, 150, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+    Map:AddZone(corpse_dicovery_zone);
+        -- Dialog when seeing the corpse
+		event = hoa_map.DialogueEvent(10, 500);
+		event:SetStopCameraMovement(true);
+		event:AddEventLinkAtEnd(13);
+		EventManager:RegisterEvent(event);        
+		-- Add treasure
+		event = hoa_map.ScriptedEvent(13, 16, 0);
+		event:AddEventLinkAtEnd(14, 5000);
+		EventManager:RegisterEvent(event);
+		event = hoa_map.ScriptedEvent(14, 17, 0);
+		EventManager:RegisterEvent(event);
+    
 	corpse_zone = hoa_map.CameraZone(202, 210, 145, 149, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
 	Map:AddZone(corpse_zone);
 	
 		-- Start dialogue about corpse
-		event = hoa_map.DialogueEvent(10, 500);
+		event = hoa_map.DialogueEvent(11, 501);
 		event:SetStopCameraMovement(true);
-		event:AddEventLinkAtEnd(11);
+		event:AddEventLinkAtEnd(12);
 		EventManager:RegisterEvent(event);
 		-- Add treasure
-		event = hoa_map.ScriptedEvent(11, 6, 0);
+		event = hoa_map.ScriptedEvent(12, 6, 0);
 		EventManager:RegisterEvent(event);
 	
 	-- Event Chain 02: Prevent player from going long route before cave collapse
@@ -1402,22 +1396,17 @@ map_functions[15] = function()
     knight_talk_sprite:AddDialogueReference(31);
 end
 
--- The following function are only for test purpose and should be deleted for the next release
-map_functions[100] = function()
-	Map:SetCamera(Map.camera_sprite, 50);
+-- Move camera to corpse
+map_functions[16] = function()
+    Map:MoveCameraSprite(206, 147);
+    Map:SetCamera(Map.camera_sprite, 150);
 end
 
-map_functions[101] = function()
-	Map:MoveCameraSprite(150, 135, 50);
+-- Move camera back to player
+map_functions[17] = function()
+    Map:SetCamera(claudius, 50);
 end
-
-map_functions[102] = function()
-	Map:SetCamera(knight_talk_sprite,100);
-end
-
-map_functions[103] = function()
-	Map:SetCamera(claudius,40);
-end
+    
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
 swap_context_all_objects = function(new_context)
