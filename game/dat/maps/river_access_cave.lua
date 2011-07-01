@@ -1078,10 +1078,11 @@ function CreateEvents()
 		event:SetStopCameraMovement(true);
 		event:AddEventLinkAtEnd(13);
 		EventManager:RegisterEvent(event);        
-		-- Add treasure
+		-- Move camera to corpse
 		event = hoa_map.ScriptedEvent(13, 16, 0);
 		event:AddEventLinkAtEnd(14, 5000);
 		EventManager:RegisterEvent(event);
+        -- Move camera back to Cladius
 		event = hoa_map.ScriptedEvent(14, 17, 0);
 		EventManager:RegisterEvent(event);
     
@@ -1101,42 +1102,59 @@ function CreateEvents()
 	long_route_zone = hoa_map.CameraZone(132, 136, 70, 80, hoa_map.MapMode.CONTEXT_01);
 	Map:AddZone(long_route_zone);
 
-		-- Throw up dialogue calling out player's party
-		event = hoa_map.DialogueEvent(20, 510);
-		event:SetStopCameraMovement(true);
+		-- Enter scene state
+		event = hoa_map.ScriptedEvent(20, 1, 0);
 		event:AddEventLinkAtEnd(21);
 		EventManager:RegisterEvent(event);
-		-- Enter scene state
-		event = hoa_map.ScriptedEvent(21, 1, 0);
-		event:AddEventLinkAtEnd(22);
-		EventManager:RegisterEvent(event);
-		-- Move player sprite to NPC that called out
-		event = hoa_map.PathMoveSpriteEvent(22, 1000, 5, 0); -- TODO: Change absolute destination to 149, 68 once pathfinding fixed
-		event:SetRelativeDestination(true);
+        -- Move camera to karlate sprite
+        event = hoa_map.ScriptedEvent(21, 18, 0);
+        event:AddEventLinkAtEnd(22, 1000);
+        EventManager:RegisterEvent(event);
+		-- Throw up dialogue calling out player's party
+        event = hoa_map.DialogueEvent(22, 510);
+        event:SetStopCameraMovement(true);
 		event:AddEventLinkAtEnd(23);
 		EventManager:RegisterEvent(event);
+        -- Move camera back to Cladius
+		event = hoa_map.ScriptedEvent(23, 17, 0);
+		event:AddEventLinkAtEnd(24);
+		EventManager:RegisterEvent(event);
+		-- Move player sprite to NPC that called out
+		event = hoa_map.PathMoveSpriteEvent(24, 1000, 5, 0); -- TODO: Change absolute destination to 149, 68 once pathfinding fixed
+		event:SetRelativeDestination(true);
+		event:AddEventLinkAtEnd(25);
+		EventManager:RegisterEvent(event);
 		-- Exit scene state
-		event = hoa_map.ScriptedEvent(23, 2, 0);
+		event = hoa_map.ScriptedEvent(25, 2, 0);
 		EventManager:RegisterEvent(event);
 
 	-- Event Chain 03: Knight moves safely through short route while player watches
 	short_route_zone = hoa_map.CameraZone(156, 160, 60, 63, hoa_map.MapMode.CONTEXT_01);
 	Map:AddZone(short_route_zone);
 	
-		-- Move knight sprite down passage
-		event = hoa_map.PathMoveSpriteEvent(30, knight_path_sprite, 178, 61);
-		event:AddEventLinkAtStart(31);
-		event:AddEventLinkAtStart(32, 2000);
-		event:AddEventLinkAtEnd(33);
-		EventManager:RegisterEvent(event);
 		-- Enter scene state
-		event = hoa_map.ScriptedEvent(31, 1, 0);
+		event = hoa_map.ScriptedEvent(30, 1, 0);
+        event:AddEventLinkAtEnd(31);
+		EventManager:RegisterEvent(event);
+        -- Move camera to karlate sprite
+        event = hoa_map.ScriptedEvent(31, 19, 0);
+        event:AddEventLinkAtEnd(32, 300);
+        EventManager:RegisterEvent(event);
+		-- Move knight sprite down passage
+		event = hoa_map.PathMoveSpriteEvent(32, knight_path_sprite, 220, 61);
+		--event:AddEventLinkAtStart(32);
+		event:AddEventLinkAtStart(33, 2000);
+		event:AddEventLinkAtStart(34, 3000);
+		event:AddEventLinkAtEnd(35);
+		EventManager:RegisterEvent(event);
+        -- Move camera back
+		event = hoa_map.ScriptedEvent(33, 17, 0);
 		EventManager:RegisterEvent(event);
 		-- Exit scene state
-		event = hoa_map.ScriptedEvent(32, 2, 0);
+		event = hoa_map.ScriptedEvent(34, 2, 0);
 		EventManager:RegisterEvent(event);
 		-- Move knight sprite to river bed area
-		event = hoa_map.ScriptedEvent(33, 12, 0);
+		event = hoa_map.ScriptedEvent(35, 12, 0);
 		EventManager:RegisterEvent(event);
 	
 	-- Event Chain 04: Short route passage collapses
@@ -1150,29 +1168,38 @@ function CreateEvents()
 		-- Play collapse sound
 		event = hoa_map.SoundEvent(41, "snd/cave-in.ogg");
 		EventManager:RegisterEvent(event);
-		event:AddEventLinkAtStart(42, 250);
-		-- Shake the screen
-		event = hoa_map.ScriptedEvent(42, 3, 0);
+		event:AddEventLinkAtStart(42, 250); 
+		EventManager:RegisterEvent(event);
+        -- Warning message
+        event = hoa_map.DialogueEvent(42, 520);
 		event:AddEventLinkAtEnd(43);
 		EventManager:RegisterEvent(event);
-		-- Fade screen to black
-		event = hoa_map.ScriptedEvent(43, 7, 9);
+		-- Shake the screen
+		event = hoa_map.ScriptedEvent(43, 3, 0);
 		event:AddEventLinkAtEnd(44);
 		EventManager:RegisterEvent(event);
-		-- Change all objects to context "passage collapsed"
-		event = hoa_map.ScriptedEvent(44, 10, 0);
+		-- Fade screen to black
+		event = hoa_map.ScriptedEvent(44, 7, 9);
 		event:AddEventLinkAtEnd(45);
 		EventManager:RegisterEvent(event);
-		-- Fade screen back in
-		event = hoa_map.ScriptedEvent(45, 8, 9);
+		-- Change all objects to context "passage collapsed"
+		event = hoa_map.ScriptedEvent(45, 10, 0);
 		event:AddEventLinkAtEnd(46);
 		EventManager:RegisterEvent(event);
-		-- Change dialogue of sprite guide
-		event = hoa_map.ScriptedEvent(46, 15, 0);
+		-- Fade screen back in
+		event = hoa_map.ScriptedEvent(46, 8, 9);
 		event:AddEventLinkAtEnd(47);
 		EventManager:RegisterEvent(event);
+        -- Dialogue after passage has collapsed        
+        event = hoa_map.DialogueEvent(47, 521);
+		event:AddEventLinkAtEnd(48);
+		EventManager:RegisterEvent(event);
+		-- Change dialogue of sprite guide
+		event = hoa_map.ScriptedEvent(48, 15, 0);
+		event:AddEventLinkAtEnd(49);
+		EventManager:RegisterEvent(event);
 		-- Exit scene state
-		event = hoa_map.ScriptedEvent(47, 2, 0);
+		event = hoa_map.ScriptedEvent(49, 2, 0);
 		EventManager:RegisterEvent(event);
 	
 	-- Event Chain 05: Moving forward through wall passage
@@ -1406,7 +1433,17 @@ end
 map_functions[17] = function()
     Map:SetCamera(claudius, 50);
 end
-    
+
+-- Move camera to talking karlate sprite
+map_functions[18] = function()
+    Map:MoveCameraSprite(149, 62);
+    Map:SetCamera(Map.camera_sprite, 50);
+end
+
+-- Move camera to talking karlate sprite
+map_functions[19] = function()
+    Map:SetCamera(knight_path_sprite, 50);
+end    
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
 swap_context_all_objects = function(new_context)

@@ -111,6 +111,11 @@ CameraZone::CameraZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16
 void CameraZone::Update() {
 	_was_camera_inside = _camera_inside;
 
+	// Update only if camera is on a real sprite
+	if (MapMode::CurrentInstance()->IsCameraOnCameraSprite()) {
+		return;
+	}
+
 	VirtualSprite* camera = MapMode::CurrentInstance()->GetCamera();
 	if (camera == NULL) {
 		_camera_inside = false;
