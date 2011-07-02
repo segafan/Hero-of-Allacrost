@@ -365,6 +365,12 @@ bool MapMode::IsCameraOnVirtualFocus() {
     return _camera == _object_supervisor->VirtualFocus();
 }
 
+
+
+bool MapMode::AttackAllowed() {
+    return (CurrentState() != STATE_DIALOGUE && CurrentState() != STATE_TREASURE && !IsCameraOnVirtualFocus());
+}
+
 // ****************************************************************************
 // ********** MapMode Private Class Methods
 // ****************************************************************************
