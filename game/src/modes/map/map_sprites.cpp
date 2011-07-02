@@ -604,7 +604,7 @@ void MapSprite::Draw() {
 	if (MapObject::ShouldDraw() == true) {
 		_animations[_current_animation].Draw();
 
-		if (_has_available_dialogue == true && _has_unseen_dialogue == true && MapMode::CurrentInstance()->IsShowGUI() == true && !MapMode::CurrentInstance()->IsCameraOnCameraSprite()) {
+		if (_has_available_dialogue == true && _has_unseen_dialogue == true && MapMode::CurrentInstance()->IsShowGUI() == true && !MapMode::CurrentInstance()->IsCameraOnVirtualFocus()) {
 			Color icon_color(1.0f, 1.0f, 1.0f, 0.0f);
 			float icon_alpha = 1.0f - (fabs(ComputeXLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeXLocation()) + fabs(ComputeYLocation() -
 				MapMode::CurrentInstance()->GetCamera()->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;

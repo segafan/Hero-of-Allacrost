@@ -69,7 +69,6 @@ MapMode::MapMode(string filename) :
 	_dialogue_supervisor(NULL),
 	_treasure_supervisor(NULL),
 	_camera(NULL),
-	_camera_sprite(NULL),
 	_inside_camera_transistion(false),
 	_delta_x(0),
 	_delta_y(0),
@@ -109,13 +108,6 @@ MapMode::MapMode(string filename) :
 	_intro_timer.Initialize(7000, 0);
 	_intro_timer.EnableAutoUpdate(this);
 
-	// Create the virtual sprite for map movement
-	_camera_sprite = new VirtualSprite();
-	_camera_sprite->SetNoCollision(true);
-	_camera_sprite->SetVisible(false);
-	_camera_sprite->SetXPosition(0, 0.0f);
-	_camera_sprite->SetYPosition(0, 0.0f);
-
 	// TODO: Load the map data in a seperate thread
 	_Load();
 
@@ -152,8 +144,6 @@ MapMode::~MapMode() {
 	delete(_event_supervisor);
 	delete(_dialogue_supervisor);
 	delete(_treasure_supervisor);
-
-	delete(_camera_sprite);
 
 	_map_script.CloseFile();
 }
@@ -346,27 +336,33 @@ void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint16 num_frames) {
 
 
 
-void MapMode::MoveCameraSprite(uint16 loc_x, uint16 loc_y) {
-    _camera_sprite->SetXPosition(loc_x, 0.0f);
-    _camera_sprite->SetYPosition(loc_y, 0.0f);
+void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y) {
+    _object_supervisor->VirtualFocus()->SetXPosition(loc_x, 0.0f);
+    _object_supervisor->VirtualFocus()->SetYPosition(loc_y, 0.0f);
 }
 
 
 
-void MapMode::MoveCameraSprite(uint16 loc_x, uint16 loc_y, uint16 num_frames) {
-    if (_camera != _camera_sprite) {
+void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint16 num_frames) {
+    if (_camera != _object_supervisor->VirtualFocus()) {
         IF_PRINT_WARNING(MAP_DEBUG) << "Attempt to move camera although on different sprite" << endl;
     }
     else {
         if (num_frames > 0) {
             _inside_camera_transistion = true;
-            _delta_x = _camera_sprite->ComputeXLocation() - static_cast<float>(loc_x);
-            _delta_y = _camera_sprite->ComputeYLocation() - static_cast<float>(loc_y);
+            _delta_x = _object_supervisor->VirtualFocus()->ComputeXLocation() - static_cast<float>(loc_x);
+            _delta_y = _object_supervisor->VirtualFocus()->ComputeYLocation() - static_cast<float>(loc_y);
             _num_transition_frames = num_frames;
             _count_transition_frames = num_frames;
         }
-        MoveCameraSprite(loc_x, loc_y);
+        MoveVirtualFocus(loc_x, loc_y);
     }
+}
+
+
+
+bool MapMode::IsCameraOnVirtualFocus() {
+    return _camera == _object_supervisor->VirtualFocus();
 }
 
 // ****************************************************************************

@@ -112,7 +112,7 @@ void CameraZone::Update() {
 	_was_camera_inside = _camera_inside;
 
 	// Update only if camera is on a real sprite
-	if (MapMode::CurrentInstance()->IsCameraOnCameraSprite()) {
+	if (MapMode::CurrentInstance()->IsCameraOnVirtualFocus()) {
 		return;
 	}
 
