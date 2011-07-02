@@ -1141,7 +1141,7 @@ function CreateEvents()
         event:AddEventLinkAtEnd(32, 300);
         EventManager:RegisterEvent(event);
 		-- Move knight sprite down passage
-		event = hoa_map.PathMoveSpriteEvent(32, knight_path_sprite, 220, 61);
+		event = hoa_map.PathMoveSpriteEvent(32, knight_path_sprite, 210, 61);
 		--event:AddEventLinkAtStart(32);
 		event:AddEventLinkAtStart(33, 2000);
 		event:AddEventLinkAtStart(34, 3000);
