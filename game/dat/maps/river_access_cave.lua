@@ -481,7 +481,7 @@ function Load(m)
 	CreateEvents();
 	
 	Map:SetCamera(claudius);
-    Map:MoveCameraSprite(80, 130);
+    Map:MoveVirtualFocus(80, 130);
 	
 	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas
 	
@@ -499,7 +499,7 @@ function Update()
 		end
 	end
     
-	if (corpse_zone:IsCameraEntering() == true and not Map:IsCameraOnCameraSprite()) then
+	if (corpse_zone:IsCameraEntering() == true and not Map:IsCameraOnVirtualFocus()) then
 		if (GlobalEvents:DoesEventExist("corpse_found") == false) then
 			GlobalEvents:AddNewEvent("corpse_found", 1);
 			EventManager:StartEvent(11);
@@ -1425,8 +1425,8 @@ end
 
 -- Move camera to corpse
 map_functions[16] = function()
-    Map:MoveCameraSprite(206, 147);
-    Map:SetCamera(Map.camera_sprite, 150);
+    Map:MoveVirtualFocus(206, 147);
+    Map:SetCamera(ObjectManager.virtual_focus, 150);
 end
 
 -- Move camera back to player
@@ -1436,8 +1436,8 @@ end
 
 -- Move camera to talking karlate sprite
 map_functions[18] = function()
-    Map:MoveCameraSprite(149, 62);
-    Map:SetCamera(Map.camera_sprite, 50);
+    Map:MoveVirtualFocus(149, 62);
+    Map:SetCamera(ObjectManager.virtual_focus, 50);
 end
 
 -- Move camera to talking karlate sprite

@@ -460,6 +460,7 @@ class ObjectSupervisor {
 	friend class hoa_map::MapMode;
 	// TEMP: for allowing context zones to access all objects
 	friend class hoa_map::private_map::ContextZone;
+	friend void hoa_defs::BindModesToLua();
 
 public:
 	ObjectSupervisor();
@@ -631,6 +632,12 @@ public:
 	*** \note If an error is detected or a path could not be found, the function will empty the path vector before returning
 	**/
 	bool FindPath(private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
+
+	/** \brief Returns the pointer to the virtual focus.
+	**/
+	private_map::VirtualSprite* VirtualFocus() {
+	    return _virtual_focus;
+	}
 
 private:
 	/** \brief The number of rows and columns in the collision gride
