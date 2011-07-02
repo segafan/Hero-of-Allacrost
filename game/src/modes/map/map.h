@@ -211,6 +211,8 @@ public:
 
 	const hoa_video::StillImage& GetLocationGraphic() const
 		{ return _location_graphic; }
+
+    bool AttackAllowed();
 	//@}
 
 private:

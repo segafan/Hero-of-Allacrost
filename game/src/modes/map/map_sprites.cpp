@@ -288,7 +288,7 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 		}
 
 		// If these two conditions are true, begin the battle
-		if (enemy != NULL && enemy->IsHostile()) {
+		if (enemy != NULL && enemy->IsHostile() && MapMode::CurrentInstance()->AttackAllowed()) {
 			enemy->ChangeStateDead();
 
 			BattleMode *BM = new BattleMode();
@@ -876,8 +876,8 @@ void EnemySprite::Update() {
 
 				// Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
 				// The order of comparaisons here is important, the NULL check MUST come before the rest or a null pointer exception could happen if no zone is registered
-				if ( _zone == NULL || ( fabs(xdelta) <= _aggro_range && fabs(ydelta) <= _aggro_range
-					 && (!_zone->IsRoamingRestrained() || _zone->IsInsideZone(MapMode::CurrentInstance()->GetCamera()->x_position, MapMode::CurrentInstance()->GetCamera()->y_position)) ) )
+				if ( MapMode::CurrentInstance()->AttackAllowed() && (_zone == NULL || ( fabs(xdelta) <= _aggro_range && fabs(ydelta) <= _aggro_range
+					 && (!_zone->IsRoamingRestrained() || _zone->IsInsideZone(MapMode::CurrentInstance()->GetCamera()->x_position, MapMode::CurrentInstance()->GetCamera()->y_position)) )) )
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
 						SetDirection(SOUTH);
