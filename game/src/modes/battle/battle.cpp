@@ -411,9 +411,9 @@ void SequenceSupervisor::_DrawGUI() {
 
 BattleMode::BattleMode() :
 	_state(BATTLE_STATE_INVALID),
-	_sequence_supervisor(this),
-	_command_supervisor(new CommandSupervisor()),
-	_finish_supervisor(new FinishSupervisor()),
+	_sequence_supervisor(NULL),
+	_command_supervisor(NULL),
+	_finish_supervisor(NULL),
 	_current_number_swaps(0),
 	_default_music("mus/Confrontation.ogg"),
 	_winning_music("mus/Allacrost_Fanfare.ogg"),
@@ -465,11 +465,18 @@ BattleMode::BattleMode() :
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_character_action_buttons, "img/menus/battle_command_buttons.png", 2, 5) == false)
 		PRINT_ERROR << "failed to load character action buttons" << endl;
 
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_target_type_icons, "img/icons/effects/targets.png", 1, 8) == false)
+		PRINT_ERROR << "failed to load character action buttons" << endl;
+
 	// Check that the global manager has a valid battle setting stored.
 	if ((GlobalManager->GetBattleSetting() <= GLOBAL_BATTLE_INVALID) || (GlobalManager->GetBattleSetting() >= GLOBAL_BATTLE_TOTAL)) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "global manager had invalid battle setting active, changing setting to GLOBAL_BATTLE_WAIT" << endl;
 		GlobalManager->SetBattleSetting(GLOBAL_BATTLE_WAIT);
 	}
+
+	_sequence_supervisor = new SequenceSupervisor(this);
+	_command_supervisor = new CommandSupervisor();
+	_finish_supervisor = new FinishSupervisor();
 } // BattleMode::BattleMode()
 
 
@@ -493,6 +500,7 @@ BattleMode::~BattleMode() {
 
 	_ready_queue.clear();
 
+	delete _sequence_supervisor;
 	delete _command_supervisor;
 	delete _finish_supervisor;
 
@@ -547,7 +555,7 @@ void BattleMode::Update() {
 
 	// If the battle is transitioning to/from a different mode, the sequenece supervisor has control
 	if (_state == BATTLE_STATE_INITIAL || _state == BATTLE_STATE_EXITING) {
-		_sequence_supervisor.Update();
+		_sequence_supervisor->Update();
 		return;
 	}
 	// If the battle is in its typical state and player is not selecting a command, check for player input
@@ -660,7 +668,7 @@ void BattleMode::Draw() {
 	}
 
 	if (_state == BATTLE_STATE_INITIAL || _state == BATTLE_STATE_EXITING) {
-		_sequence_supervisor.Draw();
+		_sequence_supervisor->Draw();
 		return;
 	}
 
@@ -870,6 +878,32 @@ StillImage* BattleMode:: GetCharacterActionButton(uint32 index) {
 
 
 
+StillImage* BattleMode::GetTargetTypeIcon(hoa_global::GLOBAL_TARGET target_type) {
+	switch (target_type) {
+		case GLOBAL_TARGET_SELF_POINT:
+			return &_target_type_icons[0];
+		case GLOBAL_TARGET_ALLY_POINT:
+			return &_target_type_icons[1];
+		case GLOBAL_TARGET_FOE_POINT:
+			return &_target_type_icons[2];
+		case GLOBAL_TARGET_SELF:
+			return &_target_type_icons[3];
+		case GLOBAL_TARGET_ALLY:
+			return &_target_type_icons[4];
+		case GLOBAL_TARGET_FOE:
+			return &_target_type_icons[5];
+		case GLOBAL_TARGET_ALL_ALLIES:
+			return &_target_type_icons[6];
+		case GLOBAL_TARGET_ALL_FOES:
+			return &_target_type_icons[7];
+		default:
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "function received invalid target type argument: " << target_type << endl;
+			return NULL;
+	}
+}
+
+
+
 StillImage* BattleMode::GetStatusIcon(GLOBAL_STATUS type, GLOBAL_INTENSITY intensity) {
 	if ((type <= GLOBAL_STATUS_INVALID) || (type >= GLOBAL_STATUS_TOTAL)) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "type argument was invalid: " << type << endl;
@@ -1012,7 +1046,7 @@ void BattleMode::_Initialize() {
 		script_file.CloseTable();
 	}
 
-	// (2): Construct all character battle actors from the active party
+	// (2): Construct all character battle actors from the active party, as well as the menus that populate the command supervisor
 	GlobalParty* active_party = GlobalManager->GetActiveParty();
 	if (active_party->GetPartySize() == 0) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "no characters in the active party, exiting battle" << endl;
@@ -1025,7 +1059,7 @@ void BattleMode::_Initialize() {
 		_character_actors.push_back(new_actor);
 		_character_party.push_back(new_actor);
 	}
-	_command_supervisor->ConstructCharacterSettings();
+	_command_supervisor->ConstructMenus();
 
 // 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 // 		_enemy_actors[i]->GetGlobalEnemy()->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
@@ -1101,8 +1135,6 @@ void BattleMode::_Initialize() {
 		uint32 max_init_timer = _enemy_actors[i]->GetIdleStateTime() / 2;
 		_enemy_actors[i]->GetStateTimer().Update(RandomBoundedInteger(0, max_init_timer));
 	}
-
-	_command_supervisor->ConstructCharacterSettings();
 
 	// (6): Invoke any events that should occur when the battle begins
 // 	ScriptObject* before_func;

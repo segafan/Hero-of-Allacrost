@@ -54,6 +54,9 @@ const float TARGET_POSITION_Y = 115.0f;
 const float TARGET_SIZE_X = 450.0f;
 const float TARGET_SIZE_Y = 100.0f;
 
+// Offset used to properly align the target icons in the skill and item selection lists
+const uint32 TARGET_ICON_OFFSET = 288;
+
 ////////////////////////////////////////////////////////////////////////////////
 // CharacterCommandSettings class
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +111,8 @@ CharacterCommandSettings::CharacterCommandSettings(BattleCharacter* character, M
 	for (uint32 i = 0; i < skill_list->size(); i++) {
 		_attack_list.AddOption(ustring());
 		_attack_list.AddOptionElementText(i, skill_list->at(i)->GetName());
+		_attack_list.AddOptionElementPosition(i, TARGET_ICON_OFFSET);
+		_attack_list.AddOptionElementImage(i, BattleMode::CurrentInstance()->GetTargetTypeIcon(skill_list->at(i)->GetTargetType()));
 		_attack_list.AddOptionElementAlignment(i, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
 		_attack_list.AddOptionElementText(i, MakeUnicodeString(NumberToString(skill_list->at(i)->GetSPRequired())));
 		if (skill_list->at(i)->GetSPRequired() > _character->GetGlobalCharacter()->GetSkillPoints()) {
@@ -121,6 +126,8 @@ CharacterCommandSettings::CharacterCommandSettings(BattleCharacter* character, M
 	for (uint32 i = 0; i < skill_list->size(); i++) {
 		_defend_list.AddOption(ustring());
 		_defend_list.AddOptionElementText(i, skill_list->at(i)->GetName());
+		_defend_list.AddOptionElementPosition(i, TARGET_ICON_OFFSET);
+		_defend_list.AddOptionElementImage(i, BattleMode::CurrentInstance()->GetTargetTypeIcon(skill_list->at(i)->GetTargetType()));
 		_defend_list.AddOptionElementAlignment(i, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
 		_defend_list.AddOptionElementText(i, MakeUnicodeString(NumberToString(skill_list->at(i)->GetSPRequired())));
 		if (skill_list->at(i)->GetSPRequired() > _character->GetGlobalCharacter()->GetSkillPoints()) {
@@ -134,6 +141,8 @@ CharacterCommandSettings::CharacterCommandSettings(BattleCharacter* character, M
 	for (uint32 i = 0; i < skill_list->size(); i++) {
 		_support_list.AddOption(ustring());
 		_support_list.AddOptionElementText(i, skill_list->at(i)->GetName());
+		_support_list.AddOptionElementPosition(i, TARGET_ICON_OFFSET);
+		_support_list.AddOptionElementImage(i, BattleMode::CurrentInstance()->GetTargetTypeIcon(skill_list->at(i)->GetTargetType()));
 		_support_list.AddOptionElementAlignment(i, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
 		_support_list.AddOptionElementText(i, MakeUnicodeString(NumberToString(skill_list->at(i)->GetSPRequired())));
 		if (skill_list->at(i)->GetSPRequired() > _character->GetGlobalCharacter()->GetSkillPoints()) {
@@ -249,7 +258,7 @@ ItemCommand::ItemCommand(MenuWindow& window) {
 	_item_header.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_item_header.SetTextStyle(TextStyle("title22"));
 	_item_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	_item_header.AddOption(UTranslate("Item<R>Count"));
+	_item_header.AddOption(UTranslate("Item<R>Type   ×"));
 
 	_item_list.SetOwner(&window);
 	_item_list.SetPosition(LIST_POSITION_X, LIST_POSITION_Y);
@@ -272,8 +281,36 @@ ItemCommand::ItemCommand(MenuWindow& window) {
 		}
 	}
 	_item_mappings.resize(_items.size(), -1);
+}
 
-	_ReconstructList();
+
+
+void ItemCommand::ConstructList() {
+	_item_list.ClearOptions();
+
+	uint32 option_index = 0;
+	for (uint32 i = 0; i < _items.size(); i++) {
+		// Don't add any items with a non-zero count
+		if (_items[i].GetAvailableCount() == 0) {
+			_item_mappings[i] = -1;
+			continue;
+		}
+
+		_item_list.AddOption();
+		_item_list.AddOptionElementText(option_index, _items[i].GetItem().GetName());
+		_item_list.AddOptionElementPosition(option_index, TARGET_ICON_OFFSET);
+		_item_list.AddOptionElementImage(option_index, BattleMode::CurrentInstance()->GetTargetTypeIcon(_items[i].GetTargetType()));
+		_item_list.AddOptionElementAlignment(option_index, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
+		_item_list.AddOptionElementText(option_index, MakeUnicodeString(NumberToString(_items[i].GetAvailableCount())));
+
+		_item_mappings[i] = option_index;
+		option_index++;
+	}
+
+	if (_item_list.GetNumberOptions() == 0)
+		_item_list.SetSelection(-1);
+	else
+		_item_list.SetSelection(0);
 }
 
 
@@ -404,33 +441,6 @@ void ItemCommand::CommitInventoryChanges() {
 }
 
 
-
-void ItemCommand::_ReconstructList() {
-	_item_list.ClearOptions();
-
-	uint32 option_index = 0;
-	for (uint32 i = 0; i < _items.size(); i++) {
-		// Don't add any items with a non-zero count
-		if (_items[i].GetAvailableCount() == 0) {
-			_item_mappings[i] = -1;
-			continue;
-		}
-
-		ustring option_text = _items[i].GetItem().GetName();
-		option_text += MakeUnicodeString("<R>×" + NumberToString(_items[i].GetAvailableCount()));
-		_item_list.AddOption(option_text);
-		_item_mappings[i] = option_index;
-		option_index++;
-	}
-
-	if (_item_list.GetNumberOptions() == 0)
-		_item_list.SetSelection(-1);
-	else
-		_item_list.SetSelection(0);
-}
-
-
-
 void ItemCommand::_RefreshEntry(uint32 entry) {
 	if (entry >= _item_list.GetNumberOptions()) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "entry argument was out-of-range: " << entry << endl;
@@ -446,9 +456,13 @@ void ItemCommand::_RefreshEntry(uint32 entry) {
 		}
 	}
 
-	ustring option_text = _items[item_index].GetItem().GetName();
-	option_text += MakeUnicodeString("<R>×" + NumberToString(_items[item_index].GetAvailableCount()));
-	_item_list.SetOptionText(entry, option_text);
+	// Clear the option and repopulate its elements
+	_item_list.SetOptionText(entry, ustring());
+	_item_list.AddOptionElementText(entry, _items[item_index].GetItem().GetName());
+	_item_list.AddOptionElementPosition(entry, TARGET_ICON_OFFSET);
+	_item_list.AddOptionElementImage(entry, BattleMode::CurrentInstance()->GetTargetTypeIcon(_items[item_index].GetTargetType()));
+	_item_list.AddOptionElementAlignment(entry, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
+	_item_list.AddOptionElementText(entry, MakeUnicodeString(NumberToString(_items[item_index].GetAvailableCount())));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +480,7 @@ SkillCommand::SkillCommand(MenuWindow& window) :
 	_skill_header.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_skill_header.SetTextStyle(TextStyle("title22"));
 	_skill_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	_skill_header.AddOption(UTranslate("Skill<R>SP"));
+	_skill_header.AddOption(UTranslate("Skill<R>Type SP"));
 }
 
 
@@ -634,7 +648,9 @@ CommandSupervisor::~CommandSupervisor() {
 
 
 
-void CommandSupervisor::ConstructCharacterSettings() {
+void CommandSupervisor::ConstructMenus() {
+	_item_command.ConstructList();
+
 	deque<BattleCharacter*>& characters = BattleMode::CurrentInstance()->GetCharacterActors();
 	for (uint32 i = 0; i < characters.size(); i++)
 		_CreateCharacterSettings(characters[i]);

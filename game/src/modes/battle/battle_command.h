@@ -170,6 +170,12 @@ public:
 	~ItemCommand()
 		{}
 
+	/** \brief Constructs the _item_list option box from scratch using the _items container
+	*** This will also reset the selection on the item list to the first element. Typically this only needs to be
+	*** called once, during battle mode initialization.
+	**/
+	void ConstructList();
+
 	/** \brief Initializes the item list by setting the selected list option
 	*** \param item_index The index of the item to select
 	*** \note If the selection argument is out-of-range, no change will take place.
@@ -239,11 +245,6 @@ private:
 
 	//! \brief A display list of all usable items
 	hoa_gui::OptionBox _item_list;
-
-	/** \brief Reconstructs the _item_list from scratch using the _items container
-	*** This will also reset the selection on the item list to the first element
-	**/
-	void _ReconstructList();
 
 	/** \brief Refreshes a single entry in the _item_list
 	*** \param entry An index to the element of the OptionBox to refresh
@@ -358,11 +359,12 @@ public:
 	**/
 	hoa_audio::SoundDescriptor confirm_sound, cancel_sound, cursor_sound, invalid_sound, finish_sound;
 
-	/** \brief Constructs settings for all characters in the party
+	/** \brief Builds all of the varous command menus and prepares them for use
 	*** This should only be invoked once after the BattleMode class has initialized all of its
-	*** character actors.
+	*** character actors. It will create a command menu for the list of usable items as well as
+	*** the various skill menus for each character in the party.
 	**/
-	void ConstructCharacterSettings();
+	void ConstructMenus();
 
 	/** \brief Resets the command supervisor state and members
 	*** \param character A pointer to the character that the player should select a command for

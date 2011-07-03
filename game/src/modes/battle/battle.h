@@ -238,6 +238,12 @@ public:
 	**/
 	hoa_video::StillImage* GetCharacterActionButton(uint32 index);
 
+	/** \brief Retrieves the appropriate icon image given a valid target type
+	*** \param target_type The enumerated value that represents the type of target
+	*** \return A pointer to the appropriate icon image, or NULL if the target type was invalid
+	**/
+	hoa_video::StillImage* GetTargetTypeIcon(hoa_global::GLOBAL_TARGET target_type);
+
 	/** \brief Retrieves a specific status icon with the proper type and intensity
 	*** \param type The type of status effect the user is trying to retrieve the icon for
 	*** \param intensity The intensity level of the icon to retrieve
@@ -319,7 +325,7 @@ private:
 	//! \name Battle supervisor classes
 	//@{
 	//! \brief Manages update and draw calls during special battle sequences
-	private_battle::SequenceSupervisor _sequence_supervisor;
+	private_battle::SequenceSupervisor* _sequence_supervisor;
 
 	//! \brief Manages state and visuals when the player is selecting a command for a character
 	private_battle::CommandSupervisor* _command_supervisor;
@@ -456,6 +462,11 @@ private:
 	*** the screen, from top to bottom.
 	**/
 	std::vector<hoa_video::StillImage> _character_action_buttons;
+
+	/** \brief Holds icon images that represent the different types of targets
+	*** Target types include attack points, ally/enemy, and different parties.
+	**/
+	std::vector<hoa_video::StillImage> _target_type_icons;
 
 	/** \brief Container for all music to be played during the battle
 	*** The first element in this vector is the primary battle track. For most battles, only a primary track
