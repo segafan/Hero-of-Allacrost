@@ -457,6 +457,22 @@ void OptionBox::AddOptionElementAlignment(uint32 option_index, OptionElementType
 
 
 
+void OptionBox::AddOptionElementPosition(uint32 option_index, uint32 position_length) {
+	if (option_index >= GetNumberOptions()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "out-of-range option_index argument: " << option_index << endl;
+		return;
+	}
+
+	Option& this_option = _options[option_index];
+	OptionElement new_element;
+
+	new_element.type = VIDEO_OPTION_ELEMENT_POSITION;
+	new_element.value = position_length;
+	this_option.elements.push_back(new_element);
+}
+
+
+
 bool OptionBox::SetOptionText(uint32 index, const hoa_utils::ustring &text) {
 	if (index >= GetNumberOptions()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument was invalid (out of bounds): " << index << endl;

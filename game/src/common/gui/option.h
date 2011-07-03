@@ -325,6 +325,12 @@ public:
 	**/
 	void AddOptionElementAlignment(uint32 option_index, OptionElementType position_type);
 
+	/** \brief Appends a position element to an existing option
+	*** \param option_index The index of the option to append the alignment element to
+	*** \param postion_length The number of pixels to move the draw cursor position
+	**/
+	void AddOptionElementPosition(uint32 option_index, uint32 position_length);
+
 	/** \brief Changes the stored information of a particular option
 	*** \param index The index of the option to change
 	*** \param text The text to change the option to
