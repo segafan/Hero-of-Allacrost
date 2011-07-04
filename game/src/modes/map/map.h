@@ -186,11 +186,11 @@ public:
 	void SetCamera(private_map::VirtualSprite* sprite)
 		{ _camera = sprite; }
 
-    void SetCamera(private_map::VirtualSprite* sprite, uint16 num_frames);
+    void SetCamera(private_map::VirtualSprite* sprite, uint32 duration);
 
     void MoveVirtualFocus(uint16 loc_x, uint16 loc_y);
 
-    void MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint16 num_frames);
+    void MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint32 duration);
 
     bool IsCameraOnVirtualFocus();
 
@@ -282,20 +282,14 @@ private:
 	//! \brief A pointer to the map sprite that the map camera will focus on
 	private_map::VirtualSprite* _camera;
 
-	//! \brief Determines, if the map is currently at a smooth camera transition
-	bool _inside_camera_transistion;
-
 	//! \brief The way in x-direction, the camera will move
 	float _delta_x;
 
 	//! \brief The way in y-direction, the camera will move
 	float _delta_y;
 
-	//! \brief Number of frames for a camera transition
-	uint16 _num_transition_frames;
-
-	//! \brief Counter for frames in camera transition
-	uint16 _count_transition_frames;
+	//! \brief A time for camera movement
+	hoa_system::SystemTimer _camera_timer;
 
 	//! \brief The number of contexts that this map uses (at least 1, at most 32)
 	uint8 _num_map_contexts;

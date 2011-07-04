@@ -1080,7 +1080,7 @@ function CreateEvents()
 		EventManager:RegisterEvent(event);        
 		-- Move camera to corpse
 		event = hoa_map.ScriptedEvent(13, 16, 0);
-		event:AddEventLinkAtEnd(14, 5000);
+		event:AddEventLinkAtEnd(14, 3000);
 		EventManager:RegisterEvent(event);
         -- Move camera back to Cladius
 		event = hoa_map.ScriptedEvent(14, 17, 0);
@@ -1426,23 +1426,23 @@ end
 -- Move camera to corpse
 map_functions[16] = function()
     Map:MoveVirtualFocus(206, 147);
-    Map:SetCamera(ObjectManager.virtual_focus, 150);
+    Map:SetCamera(ObjectManager.virtual_focus, 2000);
 end
 
 -- Move camera back to player
 map_functions[17] = function()
-    Map:SetCamera(claudius, 50);
+    Map:SetCamera(claudius, 500);
 end
 
 -- Move camera to talking karlate sprite
 map_functions[18] = function()
     Map:MoveVirtualFocus(149, 62);
-    Map:SetCamera(ObjectManager.virtual_focus, 50);
+    Map:SetCamera(ObjectManager.virtual_focus, 1000);
 end
 
 -- Move camera to talking karlate sprite
 map_functions[19] = function()
-    Map:SetCamera(knight_path_sprite, 50);
+    Map:SetCamera(knight_path_sprite, 500);
 end    
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
