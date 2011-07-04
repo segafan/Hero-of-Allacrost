@@ -109,8 +109,12 @@ public:
 	*** sprites. The reason this method is defined for all actors is so that the same skills may be
 	*** reused for both characters and enemies, since some skill implementations will wish to call
 	*** this method on the actor performing the skill.
+	***
+	*** \warning This function is not a pure virtual one because it needs to be accessed by Lua
+	*** and there is an issue with using Luabind on pure virtual functions.
 	**/
-	virtual void ChangeSpriteAnimation(const std::string& alias) = 0;
+	virtual void ChangeSpriteAnimation(const std::string& alias)
+		{}
 
 	/** \brief Deals damage to the actor by reducing its hit points by a certain amount
 	*** \param amount The number of hit points to decrease on the actor
