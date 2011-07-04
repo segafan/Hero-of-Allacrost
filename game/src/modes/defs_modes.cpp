@@ -536,6 +536,7 @@ void BindModesToLua()
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
 	[
 		class_<BattleActor, hoa_global::GlobalActor>("BattleActor")
+			.def("ChangeSpriteAnimation", &BattleActor::ChangeSpriteAnimation)
 			.def("RegisterDamage", (void(BattleActor::*)(uint32)) &BattleActor::RegisterDamage)
 			.def("RegisterDamage", (void(BattleActor::*)(uint32, BattleTarget*)) &BattleActor::RegisterDamage)
 			.def("RegisterHealing", &BattleActor::RegisterHealing)
