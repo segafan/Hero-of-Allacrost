@@ -69,11 +69,8 @@ MapMode::MapMode(string filename) :
 	_dialogue_supervisor(NULL),
 	_treasure_supervisor(NULL),
 	_camera(NULL),
-	_inside_camera_transistion(false),
 	_delta_x(0),
 	_delta_y(0),
-	_num_transition_frames(0),
-	_count_transition_frames(0),
 	_num_map_contexts(0),
 	_current_context(MAP_CONTEXT_01),
 	_running_disabled(false),
@@ -107,6 +104,8 @@ MapMode::MapMode(string filename) :
 
 	_intro_timer.Initialize(7000, 0);
 	_intro_timer.EnableAutoUpdate(this);
+
+	_camera_timer.Initialize(0, 1);
 
 	// TODO: Load the map data in a seperate thread
 	_Load();
@@ -217,7 +216,10 @@ void MapMode::Update() {
 			break;
 	}
 
-	// ---------- (4) Update all active map events
+	// ---------- (4) Update the camera timer
+	_camera_timer.Update();
+
+	// ---------- (5) Update all active map events
 	_event_supervisor->Update();
 } // void MapMode::Update()
 
@@ -318,17 +320,17 @@ void MapMode::PlayMusic(uint32 track_num) {
 
 
 
-void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint16 num_frames) {
+void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint32 duration) {
     if (_camera == sprite) {
         IF_PRINT_WARNING(MAP_DEBUG) << "Camera was moved to the same sprite" << endl;
     }
     else {
-        if (num_frames > 0) {
-            _inside_camera_transistion = true;
+        if (duration > 0) {
             _delta_x = _camera->ComputeXLocation() - sprite->ComputeXLocation();
             _delta_y = _camera->ComputeYLocation() - sprite->ComputeYLocation();
-            _num_transition_frames = num_frames;
-            _count_transition_frames = num_frames;
+            _camera_timer.Reset();
+            _camera_timer.SetDuration(duration);
+            _camera_timer.Run();
         }
         _camera = sprite;
     }
@@ -343,17 +345,17 @@ void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y) {
 
 
 
-void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint16 num_frames) {
+void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint32 duration) {
     if (_camera != _object_supervisor->VirtualFocus()) {
         IF_PRINT_WARNING(MAP_DEBUG) << "Attempt to move camera although on different sprite" << endl;
     }
     else {
-        if (num_frames > 0) {
-            _inside_camera_transistion = true;
+        if (duration > 0) {
             _delta_x = _object_supervisor->VirtualFocus()->ComputeXLocation() - static_cast<float>(loc_x);
             _delta_y = _object_supervisor->VirtualFocus()->ComputeYLocation() - static_cast<float>(loc_y);
-            _num_transition_frames = num_frames;
-            _count_transition_frames = num_frames;
+            _camera_timer.Reset();
+            _camera_timer.SetDuration(duration);
+            _camera_timer.Run();
         }
         MoveVirtualFocus(loc_x, loc_y);
     }
@@ -568,28 +570,20 @@ void MapMode::_CalculateMapFrame() {
 	// However, we've discussed the possiblity of adding a zoom feature to maps, in which case we need to continually re-calculate the pixel size
 	VideoManager->GetPixelSize(x_pixel_length, y_pixel_length);
 
-	if (!_inside_camera_transistion) {
+	if (!_camera_timer.IsRunning()) {
 	    _camera->GetXPosition(current_x, current_offset_x);
 	    _camera->GetYPosition(current_y, current_offset_y);
 	}
 	else {
 	    // Calculate path
-	    float fract = (static_cast<float>(_count_transition_frames))/(static_cast<float>(_num_transition_frames));
-
-	    float path_x = _camera->ComputeXLocation()+fract*_delta_x;
-	    float path_y = _camera->ComputeYLocation()+fract*_delta_y;
+	    float path_x = _camera->ComputeXLocation()+(1-_camera_timer.PercentComplete())*_delta_x;
+	    float path_y = _camera->ComputeYLocation()+(1-_camera_timer.PercentComplete())*_delta_y;
 
 	    current_x = GetFloatInteger(path_x);
 	    current_y = GetFloatInteger(path_y);
 
 	    current_offset_x = GetFloatFraction(path_x);
 	    current_offset_y = GetFloatFraction(path_y);
-
-	    _count_transition_frames--;
-	    // Check for finish of the movement
-	    if (_count_transition_frames == 0) {
-	        _inside_camera_transistion = false;
-	    }
 	}
 
 	rounded_x_offset = FloorToFloatMultiple(current_offset_x, x_pixel_length);
