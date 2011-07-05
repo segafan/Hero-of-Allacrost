@@ -30,6 +30,30 @@ namespace hoa_battle {
 
 namespace private_battle {
 
+//! \brief The total amount of time (in milliseconds) that the display sequence lasts for indicator elements
+const uint32 INDICATOR_TIME = 5000;
+
+//! \brief The amount of time (in milliseconds) that indicator elements fade at the beginning of the display sequence
+const uint32 INDICATOR_FADEIN_TIME = 500;
+
+//! \brief The amount of time (in milliseconds) that indicator elements fade at the end of the display sequence
+const uint32 INDICATOR_FADEOUT_TIME = 1000;
+
+// These constants are used to determine the draw position at various phases of the indicator animation.
+// The animation (as it pertains to draw position) is determined in a number of phases.
+// Phase 01: Indicator starts from below the sprite and shoots upward to a peak
+// Phase 02: Indicator drops back down to the bottom of the sprite
+// Phase 03: Indicator moves upward again to a smaller peak (a "bounce")
+// Phase 04: Indicator falls back to bottom of the sprite
+// Phase 05: Indicator rests at bottom of sprite
+// Phase 06: Indicator falls as it fades away
+const uint32 PHASE01_END    = 750;
+const uint32 PHASE02_END    = 1500;
+const uint32 PHASE03_END    = 2000;
+const uint32 PHASE04_END    = 2500;
+const uint32 PHASE05_END    = 4000;
+const uint32 PHASE06_END    = INDICATOR_TIME;
+
 /** ****************************************************************************
 *** \brief An abstract class for displaying information about a change in an actor's state
 ***
@@ -70,6 +94,10 @@ public:
 	//! \brief Returns true when the indicator element has expired and should be removed
 	bool IsExpired() const
 		{ return _timer.IsFinished(); }
+
+	//! \brief Returns if the indicator has already be started. Here, started means the indicator has gone half the way from PHASE 1
+	bool HasStarted() const
+		{ return _timer.GetTimeExpired() >= PHASE01_END/2; }
 
 	//! \name Class member accessor methods
 	//@{
