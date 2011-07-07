@@ -236,6 +236,14 @@ namespace hoa_battle {
 		class SkillAction;
 		class ItemAction;
 
+		class BattleTimer;
+		class BattleTarget;
+		class BattleItem;
+
+		class BattleSpeaker;
+		class BattleDialogue;
+		class DialogueSupervisor;
+
 		class BattleStatusEffect;
 		class EffectsSupervisor;
 
@@ -252,10 +260,6 @@ namespace hoa_battle {
 		class FinishDefeatAssistant;
 		class FinishVictoryAssistant;
 		class FinishSupervisor;
-
-		class BattleTimer;
-		class BattleTarget;
-		class BattleItem;
 	}
 }
 

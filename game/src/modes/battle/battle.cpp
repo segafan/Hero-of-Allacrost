@@ -27,6 +27,7 @@
 #include "battle_actors.h"
 #include "battle_actions.h"
 #include "battle_command.h"
+#include "battle_dialogue.h"
 #include "battle_events.h"
 #include "battle_finish.h"
 #include "battle_utils.h"
