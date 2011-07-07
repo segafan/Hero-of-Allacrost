@@ -53,6 +53,9 @@ private:
 	//! \brief Attempts to load a game. returns true on success, false on fail
 	bool _LoadGame(int);
 
+	//! \brief Loads preview data for the highlighted game
+	bool _PreviewGame(int);
+
 	//! \brief The MenuWindow for the backdrop
 	hoa_gui::MenuWindow _window;
 
@@ -61,6 +64,15 @@ private:
 
 	//! \brief Current state of SaveMode
 	uint8 _current_state;
+
+	//! \brief Current location for highlighted saved game
+	hoa_utils::ustring _location_name;
+
+	//! \brief Game time for highlighted saved game
+	uint8 _hours, _minutes, _seconds;
+
+	//! \brief Drunes/money for highlighted saved game
+	uint32 _drunes;
 
 	//! \brief A screen capture of the last frame rendered on the screen before SaveMode was invoked
 	hoa_video::StillImage _screen_capture;
@@ -82,6 +94,9 @@ private:
 
 	//! \brief Displays message that game was saved successfully
 	hoa_gui::TextBox _save_failure_message;
+
+	//! \brief Displays preview info for highlighted game
+	hoa_gui::TextBox _file_preview_text;
 
 	//! \brief Tracks whether games can be saved, or only loaded.
 	bool _saving_enabled;

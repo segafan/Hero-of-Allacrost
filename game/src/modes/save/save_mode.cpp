@@ -65,9 +65,15 @@ const uint8 SAVE_MODE_FADING_OUT      = 6;
 SaveMode::SaveMode(bool enable_saving) :
 	GameMode(),
 	_current_state(SAVE_MODE_NORMAL),
+	_hours(0),
+	_minutes(0),
+	_seconds(0),
+	_drunes(0),
 	_dim_color(0.35f, 0.35f, 0.35f, 1.0f), // A grayish opaque color
 	_saving_enabled(enable_saving)
 {
+	_location_name = MakeUnicodeString("");
+
 	mode_type = MODE_MANAGER_SAVE_MODE;
 
 	_window.Create(600.0f, 500.0f);
@@ -138,6 +144,13 @@ SaveMode::SaveMode(bool enable_saving) :
 	_save_failure_message.SetTextStyle(TextStyle("title22"));
 	_save_failure_message.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_save_failure_message.SetDisplayText("Unable to save game!\nSave FAILED!");
+
+	// Initialize the save failure message box
+	_file_preview_text.SetPosition(512.0f, 384.0f);
+	_file_preview_text.SetDimensions(250.0f, 100.0f);
+	_file_preview_text.SetTextStyle(TextStyle("title22"));
+	_file_preview_text.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_file_preview_text.SetDisplayText("Preview here...");
 
 	if (_saving_enabled == false) {
 		_save_options.EnableOption(SAVE_GAME, false);
@@ -289,6 +302,12 @@ void SaveMode::Update() {
 
 			case SAVE_MODE_SAVING: case SAVE_MODE_LOADING:
 				_file_list.InputUp();
+				if (_file_list.GetSelection() > 0) {
+					_PreviewGame( _file_list.GetSelection() );
+				}
+				else {
+					_file_preview_text.SetDisplayText(" ");
+				}
 				break;
 
 			case SAVE_MODE_CONFIRMING_SAVE:
@@ -305,6 +324,9 @@ void SaveMode::Update() {
 
 			case SAVE_MODE_SAVING: case SAVE_MODE_LOADING:
 				_file_list.InputDown();
+				if (_file_list.GetSelection() > 0) {
+					_PreviewGame( _file_list.GetSelection() );
+				}
 				break;
 
 			case SAVE_MODE_CONFIRMING_SAVE:
@@ -336,6 +358,7 @@ void SaveMode::Draw() {
 		case SAVE_MODE_SAVING:
 		case SAVE_MODE_LOADING:
 			_file_list.Draw();
+			_file_preview_text.Draw();
 			break;
 		case SAVE_MODE_CONFIRMING_SAVE:
 			_confirm_save_optionbox.Draw();
@@ -372,5 +395,53 @@ bool SaveMode::_LoadGame(int id) {
 		return false;
 	}
 }
+
+
+bool SaveMode::_PreviewGame(int id) {
+	ostringstream f;
+	f << GetUserDataPath(true) + "saved_game_" << id << ".lua";
+	string filename = f.str();
+
+	ReadScriptDescriptor file;
+	if (file.OpenFile(filename, true) == false) {
+		_file_preview_text.SetDisplayText("No Data");
+		return false;
+	}
+
+	// open the namespace that the save game is encapsulated in.
+	file.OpenTable("save_game1");
+
+	_location_name = MakeUnicodeString(file.ReadString("location_name"));
+
+	_hours = file.ReadUInt("play_hours");
+	_minutes = file.ReadUInt("play_minutes");
+	_seconds = file.ReadUInt("play_seconds");
+	SystemManager->SetPlayTime(_hours, _minutes, _seconds);
+	_drunes = file.ReadUInt("drunes");
+
+
+/*	file.OpenTable("characters");
+	vector<uint32> char_ids;
+	file.ReadUIntVector("order", char_ids);
+	for (uint32 i = 0; i < char_ids.size(); i++) {
+		_LoadCharacter(file, char_ids[i]);
+	}
+	file.CloseTable();
+*/
+
+	// Report any errors detected from the previous read operations
+	if (file.IsErrorDetected()) {
+		if (GLOBAL_DEBUG) {
+			PRINT_WARNING << "one or more errors occurred while reading the save game file - they are listed below" << endl;
+			cerr << file.GetErrorMessages() << endl;
+			file.ClearErrors();
+		}
+	}
+
+	file.CloseFile();
+
+	_file_preview_text.SetDisplayText(_location_name);
+	return true;
+} // bool SaveMode::_PreviewGame(string& filename)
 
 } // namespace hoa_save
