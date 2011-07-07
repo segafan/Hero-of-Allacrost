@@ -125,6 +125,36 @@ DialogueSupervisor::~DialogueSupervisor() {
 
 
 
+void DialogueSupervisor::Update() {
+	if (_current_dialogue == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "attempted to update when no dialogue was active" << endl;
+		return;
+	}
+
+	_line_timer.Update();
+
+	switch (_state) {
+		case DIALOGUE_STATE_LINE:
+			_UpdateLine();
+			break;
+		case DIALOGUE_STATE_OPTION:
+			_UpdateOptions();
+			break;
+		default:
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "dialogue supervisor was in an unknown state: " << _state << endl;
+			_state = DIALOGUE_STATE_LINE;
+			break;
+	}
+}
+
+
+
+void DialogueSupervisor::Draw() {
+	_dialogue_window.Draw();
+}
+
+
+
 void DialogueSupervisor::AddDialogue(BattleDialogue* dialogue) {
 	if (dialogue == NULL) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL argument" << endl;

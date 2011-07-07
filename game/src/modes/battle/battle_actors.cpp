@@ -638,33 +638,34 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		_skill_points_text.Draw();
 	}
 
-	// If the command menu active, there's no further status information to draw.
-	if (BattleMode::CurrentInstance()->GetState() != BATTLE_STATE_COMMAND) {
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, VIDEO_BLEND, 0);
+	// Note: if the command menu is visible, it will be drawn over all of the components that follow below. We still perform these draw calls
+	// regardless because sometimes even if the battle is in the command state, the command menu may not be drawn if a dialogue is active or if
+	// a scripted scene is taking place. Its easier (and not costly) to just always draw this information rather than check for all possible
+	// conditions where the command menu is not drawn.
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, VIDEO_BLEND, 0);
 
-		// Move to the position wher command button icons are drawn
-		VideoManager->Move(545.0f, 95.0f + y_offset);
+	// Move to the position wher command button icons are drawn
+	VideoManager->Move(545.0f, 95.0f + y_offset);
 
-		// If this character can be issued a command, draw the appropriate command button to indicate this. The type of button drawn depends on
-		// whether or not the character already has an action set. Characters that can not be issued a command have no button drawn
-		if (CanSelectCommand() == true) {
-			uint32 button_index = 0;
-			if (IsActionSet() == false)
-				button_index = 1;
-			else
-				button_index = 6;
-			button_index += order;
-			BattleMode::CurrentInstance()->GetCharacterActionButton(button_index)->Draw();
-		}
-
-		// Draw the action text
-		VideoManager->MoveRelative(40.0f, 0.0f);
-		_action_selection_text.Draw();
-
-		// Draw the target text
-		VideoManager->MoveRelative(225.0f, 0.0f);
-		_target_selection_text.Draw();
+	// If this character can be issued a command, draw the appropriate command button to indicate this. The type of button drawn depends on
+	// whether or not the character already has an action set. Characters that can not be issued a command have no button drawn
+	if (CanSelectCommand() == true) {
+		uint32 button_index = 0;
+		if (IsActionSet() == false)
+			button_index = 1;
+		else
+			button_index = 6;
+		button_index += order;
+		BattleMode::CurrentInstance()->GetCharacterActionButton(button_index)->Draw();
 	}
+
+	// Draw the action text
+	VideoManager->MoveRelative(40.0f, 0.0f);
+	_action_selection_text.Draw();
+
+	// Draw the target text
+	VideoManager->MoveRelative(225.0f, 0.0f);
+	_target_selection_text.Draw();
 } // void BattleCharacter::DrawStatus()
 
 // /////////////////////////////////////////////////////////////////////////////
