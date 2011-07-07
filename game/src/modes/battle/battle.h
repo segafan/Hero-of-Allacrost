@@ -313,6 +313,9 @@ public:
 
 	private_battle::CommandSupervisor* GetCommandSupervisor()
 		{ return _command_supervisor; }
+
+	private_battle::DialogueSupervisor* GetDialogueSupervisor()
+		{ return _dialogue_supervisor; }
 	//@}
 
 private:
@@ -329,6 +332,9 @@ private:
 
 	//! \brief Manages state and visuals when the player is selecting a command for a character
 	private_battle::CommandSupervisor* _command_supervisor;
+
+	//! \brief Stores and processes any dialogue that is to occur on the battle
+	private_battle::DialogueSupervisor* _dialogue_supervisor;
 
 	//! \brief Presents player with information and options after a battle has concluded
 	private_battle::FinishSupervisor* _finish_supervisor;

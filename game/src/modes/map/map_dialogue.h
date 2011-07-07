@@ -290,7 +290,7 @@ private:
 ***
 *** The MapMode class creates an instance of this class to handle all dialogue
 *** processing that occurs on the map. This includes containing the dialogue objects,
-*** handling user input, processing of sdialogue events, and display timing of the
+*** handling user input, processing of dialogue events, and display timing of the
 *** dialogue.
 ***
 *** \todo Add support so that the player may backtrack through lines in a
