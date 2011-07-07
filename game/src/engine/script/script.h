@@ -124,11 +124,11 @@ public:
 	//@}
 
 	//! \brief Returns true if the file is open.
-	bool IsFileOpen()
+	bool IsFileOpen() const
 		{ return (_access_mode != SCRIPT_CLOSED); }
 
 	//! \brief Returns true if any errors have been detected but not retrieved
-	bool IsErrorDetected()
+	bool IsErrorDetected() const
 		{ return (_error_messages.str() != ""); }
 
 	//! \name Class Member Access Functions

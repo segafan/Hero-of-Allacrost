@@ -26,6 +26,7 @@
 
 #include "audio.h"
 #include "mode_manager.h"
+#include "script.h"
 #include "system.h"
 #include "video.h"
 
@@ -108,6 +109,7 @@ private:
 
 } // namespace private_battle
 
+
 /** ****************************************************************************
 *** \brief Manages all objects, events, and scenes that occur in a battle
 ***
@@ -117,9 +119,6 @@ private:
 *** the added enemies are ready for the battle to come. This should all be done
 *** prior the Reset() method being called. If you fail to add any enemies,
 *** an error will occur and the battle will self-terminate itself.
-***
-*** \todo Add a RestartBattle() function that re-initializes all battle data and
-*** begins the battle over from the start.
 ***
 *** \bug If timers are paused when then the game enters pause mod or quit mode, when
 *** it returns to battle mode the paused timers will incorrectly be resumed. Need
@@ -173,6 +172,15 @@ public:
 	**/
 	void SetBackground(const std::string& filename);
 
+	/** \brief Sets the name of the script to execute during the battle
+	*** \param filename The filename of the Lua script to load
+	***
+	*** This function should only be called once before the BattleMode class object is initialized (before Reset()
+	*** is called for the first time). Calling it after the battle has been initialized will have no effect and
+	*** print out a warning.
+	**/
+	void SetBattleScript(const std::string& filename);
+
 	/** \brief Adds a piece of music to the battle soundtrack
 	*** \param filename The full filename of the music to play
 	*** Note that the first piece of music added is the one that will be played upon entering battle. All subsequent pieces
@@ -209,6 +217,10 @@ public:
 	*** different character, it will reject the request.
 	**/
 	bool OpenCommandMenu(private_battle::BattleCharacter* character);
+
+	//! \brief Returns true if the battle has an open and active script file running
+	bool IsBattleScripted() const
+		{ return (_battle_script.IsFileOpen() == true); }
 
 	//! \brief Returns true if the battle has finished and entered either the victory or defeat state
 	bool IsBattleFinished() const
@@ -289,25 +301,7 @@ public:
 
 	std::deque<private_battle::BattleActor*>& GetEnemyParty()
 		{ return _enemy_party; }
-	//@}
 
-	/** \brief Adds a new event to the battle
-	*** \param event A pointer to the event to add
-	**/
-// 	void AddEvent(BattleEvent* event)
-// 		{ _events.push_back(event); }
-
-	/** \brief Adds a line of dialogue to display during the battle
-	*** \param speaker_name The name of the speaker of the line of dialogue
-	*** \param text The dialogue text
-	**/
-// 	void AddDialogue(std::string speaker_name, std::string text);
-
-	//! \brief Shows the next line of dialogue
-// 	void ShowDialogue();
-
-	//! \name Class Member Accessor Methods
-	//@{
 	hoa_video::StillImage& GetCharacterBarCovers()
 		{ return _character_bar_covers; }
 
@@ -324,6 +318,31 @@ private:
 
 	//! \brief Retains the current state of the battle
 	private_battle::BATTLE_STATE _state;
+
+	//! \name Battle script data
+	//@{
+	//! \brief The name of the Lua file used for scripting this battle
+	std::string _script_filename;
+
+	/** \brief The interface to the file which contains the battle's scripted routines
+	*** The script remains open for as long as the BattleMode object exists. The script is required to
+	*** have the following functions defined: "Initialize", "Update", and "Draw"
+	**/
+	hoa_script::ReadScriptDescriptor _battle_script;
+
+	/** \brief A script function which assists with the BattleMode#Update method
+	*** This function executes any code that needs to be performed on an update call. An example of
+	*** one common operation is to detect certain conditions in battle and respond appropriately, such as
+	*** triggering a dialogue.
+	**/
+	ScriptObject _update_function;
+
+	/** \brief Script function which assists with the MapMode#Draw method
+	*** This function executes any code that needs to be performed on a draw call. This allows us battle's to
+	*** utilize custom lighting or other visual effects.
+	**/
+	ScriptObject _draw_function;
+	//@}
 
 	//! \name Battle supervisor classes
 	//@{

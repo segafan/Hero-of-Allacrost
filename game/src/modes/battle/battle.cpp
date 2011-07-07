@@ -412,15 +412,15 @@ void SequenceSupervisor::_DrawGUI() {
 
 BattleMode::BattleMode() :
 	_state(BATTLE_STATE_INVALID),
+	_script_filename(""),
 	_sequence_supervisor(NULL),
 	_command_supervisor(NULL),
+	_dialogue_supervisor(NULL),
 	_finish_supervisor(NULL),
 	_current_number_swaps(0),
 	_default_music("mus/Confrontation.ogg"),
 	_winning_music("mus/Allacrost_Fanfare.ogg"),
 	_losing_music("mus/Allacrost_Intermission.ogg")
-// 	_dialogue_window(true),
-// 	_after_scripts_finished(false)
 {
 	IF_PRINT_DEBUG(BATTLE_DEBUG) << "constructor invoked" << endl;
 
@@ -477,6 +477,7 @@ BattleMode::BattleMode() :
 
 	_sequence_supervisor = new SequenceSupervisor(this);
 	_command_supervisor = new CommandSupervisor();
+	_dialogue_supervisor = new DialogueSupervisor();
 	_finish_supervisor = new FinishSupervisor();
 } // BattleMode::BattleMode()
 
@@ -503,6 +504,7 @@ BattleMode::~BattleMode() {
 
 	delete _sequence_supervisor;
 	delete _command_supervisor;
+	delete _dialogue_supervisor;
 	delete _finish_supervisor;
 
 	if (_current_instance == this) {
@@ -552,6 +554,18 @@ void BattleMode::Update() {
 	if (InputManager->PausePress()) {
 		ModeManager->Push(new PauseMode(false));
 		return;
+	}
+
+	if (_battle_script.IsFileOpen() == true) {
+		ScriptCallFunction<void>(_update_function);
+	}
+
+	if (_dialogue_supervisor->IsDialogueActive() == true) {
+		_dialogue_supervisor->Update();
+
+		if (_dialogue_supervisor->GetCurrentDialogue()->IsHaltBattleAction() == true) {
+			return;
+		}
 	}
 
 	// If the battle is transitioning to/from a different mode, the sequenece supervisor has control
@@ -676,6 +690,10 @@ void BattleMode::Draw() {
 	_DrawBackgroundGraphics();
 	_DrawSprites();
 	_DrawGUI();
+
+	if (_battle_script.IsFileOpen() == true) {
+		ScriptCallFunction<void>(_draw_function);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -707,6 +725,17 @@ void BattleMode::SetBackground(const string& filename) {
 		if (_battle_background.Load("img/backdrops/battle/desert_cave.png") == false)
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load default background image" << endl;
 	}
+}
+
+
+
+void BattleMode::SetBattleScript(const std::string& filename) {
+	if (_state != BATTLE_STATE_INVALID) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "function was called when battle mode was already initialized" << endl;
+		return;
+	}
+
+	_script_filename = filename;
 }
 
 
@@ -1062,10 +1091,6 @@ void BattleMode::_Initialize() {
 	}
 	_command_supervisor->ConstructMenus();
 
-// 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-// 		_enemy_actors[i]->GetGlobalEnemy()->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
-// 	}
-
 	// (3): Determine the origin position for all characters and enemies
 	_DetermineActorLocations();
 
@@ -1137,12 +1162,34 @@ void BattleMode::_Initialize() {
 		_enemy_actors[i]->GetStateTimer().Update(RandomBoundedInteger(0, max_init_timer));
 	}
 
-	// (6): Invoke any events that should occur when the battle begins
-// 	ScriptObject* before_func;
-// 	for (uint32 i = 0; i < _events.size(); i++) {
-// 		before_func = _events[i]->GetBeforeFunction();
-// 		ScriptCallFunction<void>(*before_func, this);
-// 	}
+	// (6): Determine if the battle is scripted and if so, open the script file and perform additional scripted initialization
+	if (_script_filename != "") {
+		if (_battle_script.OpenFile(_script_filename) == true) {
+			// If any of the three required function signatures are not found, close the file and do not allow the script to be executed
+			if (_battle_script.DoesFunctionExist("Initialize") == false) {
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "required \"Initialize\" function not found within battle script: " << _script_filename << endl;
+				_battle_script.CloseFile();
+			}
+			else if (_battle_script.DoesFunctionExist("Update") == false) {
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "required \"Initialize\" function not found within battle script: " << _script_filename << endl;
+				_battle_script.CloseFile();
+			}
+			else if (_battle_script.DoesFunctionExist("Draw") == false) {
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "required \"Initialize\" function not found within battle script: " << _script_filename << endl;
+				_battle_script.CloseFile();
+			}
+			else {
+				_update_function = _battle_script.ReadFunctionPointer("Update");
+				_draw_function = _battle_script.ReadFunctionPointer("Draw");
+
+				ScriptObject init_function = _battle_script.ReadFunctionPointer("Initialization");
+				ScriptCallFunction<void>(init_function);
+			}
+		}
+		else {
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to open requested battle script: " << _script_filename << endl;
+		}
+	}
 
 	ChangeState(BATTLE_STATE_INITIAL);
 } // void BattleMode::_Initialize()
@@ -1311,15 +1358,18 @@ void BattleMode::_DrawGUI() {
 	_DrawStaminaBar();
 	_DrawIndicators();
 
-	// TODO: draw dialogue window if it is active
-// 	if (_state == BATTLE_STATE_EVENT) {
-// 		_dialogue_window.Draw(&_speaker_name, NULL);
-// 	}
-
 	if (_command_supervisor->GetState() != COMMAND_STATE_INVALID) {
-		_command_supervisor->Draw();
+		if ((_dialogue_supervisor->IsDialogueActive() == true) && (_dialogue_supervisor->GetCurrentDialogue()->IsHaltBattleAction() == true)) {
+			// Do not draw the command selection GUI if a dialogue is active that halts the battle action
+		}
+		else {
+			_command_supervisor->Draw();
+		}
 	}
-	if ((_state == BATTLE_STATE_VICTORY || _state == BATTLE_STATE_DEFEAT)) {// && _after_scripts_finished) {
+	if (_dialogue_supervisor->IsDialogueActive() == true) {
+		_dialogue_supervisor->Draw();
+	}
+	if ((_state == BATTLE_STATE_VICTORY || _state == BATTLE_STATE_DEFEAT)) {
 		_finish_supervisor->Draw();
 	}
 }
