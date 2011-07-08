@@ -65,10 +65,6 @@ const uint8 SAVE_MODE_FADING_OUT      = 6;
 SaveMode::SaveMode(bool enable_saving) :
 	GameMode(),
 	_current_state(SAVE_MODE_NORMAL),
-	_hours(0),
-	_minutes(0),
-	_seconds(0),
-	_drunes(0),
 	_dim_color(0.35f, 0.35f, 0.35f, 1.0f), // A grayish opaque color
 	_saving_enabled(enable_saving)
 {
@@ -80,6 +76,11 @@ SaveMode::SaveMode(bool enable_saving) :
 	_window.SetPosition(212.0f, 630.0f);
 	_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 	_window.Hide();
+
+	_left_window.Create(150.0f, 500.0f);
+	_left_window.SetPosition(212.0f, 630.0f);
+	_left_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+	_left_window.Hide();
 
 	// Initialize the save options box
 	_save_options.SetPosition(512.0f, 384.0f);
@@ -99,8 +100,8 @@ SaveMode::SaveMode(bool enable_saving) :
 	_save_options.SetSkipDisabled(true);
 
 	// Initialize the save options box
-	_file_list.SetPosition(362.0f, 384.0f);
-	_file_list.SetDimensions(250.0f, 500.0f, 1, 7, 1, 7);
+	_file_list.SetPosition(315.0f, 384.0f);
+	_file_list.SetDimensions(150.0f, 500.0f, 1, 7, 1, 7);
 	_file_list.SetTextStyle(TextStyle("title22"));
 
 	_file_list.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -123,7 +124,7 @@ SaveMode::SaveMode(bool enable_saving) :
 	_confirm_save_optionbox.SetTextStyle(TextStyle("title22"));
 
 	_confirm_save_optionbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_confirm_save_optionbox.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_confirm_save_optionbox.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_confirm_save_optionbox.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_confirm_save_optionbox.SetCursorOffset(-58.0f, 18.0f);
 
@@ -145,12 +146,31 @@ SaveMode::SaveMode(bool enable_saving) :
 	_save_failure_message.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_save_failure_message.SetDisplayText("Unable to save game!\nSave FAILED!");
 
-	// Initialize the save failure message box
-	_file_preview_text.SetPosition(512.0f, 384.0f);
-	_file_preview_text.SetDimensions(250.0f, 100.0f);
-	_file_preview_text.SetTextStyle(TextStyle("title22"));
-	_file_preview_text.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	_file_preview_text.SetDisplayText("Preview here...");
+	// Initialize the save preview text boxes
+	_location_name_textbox.SetPosition(600.0f, 220.0f);
+	_location_name_textbox.SetDimensions(250.0f, 25.0f);
+	_location_name_textbox.SetTextStyle(TextStyle("title22"));
+	_location_name_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_location_name_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_location_name_textbox.SetDisplayText("Location Name");
+
+	_time_textbox.SetPosition(600.0f, 190.0f);
+	_time_textbox.SetDimensions(250.0f, 25.0f);
+	_time_textbox.SetTextStyle(TextStyle("title22"));
+	_time_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_time_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_time_textbox.SetDisplayText("Time - 00:00:00");
+
+	_drunes_textbox.SetPosition(600.0f, 160.0f);
+	_drunes_textbox.SetDimensions(250.0f, 25.0f);
+	_drunes_textbox.SetTextStyle(TextStyle("title22"));
+	_drunes_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_drunes_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_drunes_textbox.SetDisplayText("Drunes - 0");
+
+	hoa_gui::TextBox _location_name_textbox;
+		hoa_gui::TextBox _time_textbox;
+		hoa_gui::TextBox _drunes_textbox;
 
 	if (_saving_enabled == false) {
 		_save_options.EnableOption(SAVE_GAME, false);
@@ -163,6 +183,7 @@ SaveMode::SaveMode(bool enable_saving) :
 	}
 
 	_window.Show();
+	_left_window.Show();
 }
 
 
@@ -265,6 +286,7 @@ void SaveMode::Update() {
 
 			case SAVE_MODE_SAVE_COMPLETE: case SAVE_MODE_SAVE_FAILED:
 				_current_state = SAVE_MODE_SAVING;
+				_PreviewGame( _file_list.GetSelection() );
 				break;
 
 			case SAVE_MODE_LOADING:
@@ -290,6 +312,7 @@ void SaveMode::Update() {
 
 			case SAVE_MODE_CONFIRMING_SAVE:
 				_current_state = SAVE_MODE_SAVING;
+				_PreviewGame( _file_list.GetSelection() );
 				break;
 		} // end switch (_current_state)
 	} // end if (InputManager->CancelPress() == true)
@@ -306,7 +329,9 @@ void SaveMode::Update() {
 					_PreviewGame( _file_list.GetSelection() );
 				}
 				else {
-					_file_preview_text.SetDisplayText(" ");
+					_location_name_textbox.SetDisplayText(" ");
+					_time_textbox.SetDisplayText(" ");
+					_drunes_textbox.SetDisplayText(" ");
 				}
 				break;
 
@@ -357,8 +382,11 @@ void SaveMode::Draw() {
 			break;
 		case SAVE_MODE_SAVING:
 		case SAVE_MODE_LOADING:
+			_left_window.Draw(); // draw a panel on the left for the file list
 			_file_list.Draw();
-			_file_preview_text.Draw();
+			_location_name_textbox.Draw();
+			_time_textbox.Draw();
+			_drunes_textbox.Draw();
 			break;
 		case SAVE_MODE_CONFIRMING_SAVE:
 			_confirm_save_optionbox.Draw();
@@ -404,7 +432,9 @@ bool SaveMode::_PreviewGame(int id) {
 
 	ReadScriptDescriptor file;
 	if (file.OpenFile(filename, true) == false) {
-		_file_preview_text.SetDisplayText("No Data");
+		_location_name_textbox.SetDisplayText("No Data");
+		_time_textbox.SetDisplayText(" ");
+		_drunes_textbox.SetDisplayText(" ");
 		return false;
 	}
 
@@ -413,11 +443,12 @@ bool SaveMode::_PreviewGame(int id) {
 
 	_location_name = MakeUnicodeString(file.ReadString("location_name"));
 
-	_hours = file.ReadUInt("play_hours");
-	_minutes = file.ReadUInt("play_minutes");
-	_seconds = file.ReadUInt("play_seconds");
-	SystemManager->SetPlayTime(_hours, _minutes, _seconds);
-	_drunes = file.ReadUInt("drunes");
+	// using ints to store temp data to populate text boxes
+	int hours, minutes, seconds, drunes;
+	hours = file.ReadInt("play_hours");
+	minutes = file.ReadInt("play_minutes");
+	seconds = file.ReadInt("play_seconds");
+	drunes = file.ReadInt("drunes");
 
 
 /*	file.OpenTable("characters");
@@ -440,7 +471,20 @@ bool SaveMode::_PreviewGame(int id) {
 
 	file.CloseFile();
 
-	_file_preview_text.SetDisplayText(_location_name);
+	_location_name_textbox.SetDisplayText(_location_name);
+
+	std::ostringstream time_text;
+	time_text << "Time - ";
+	time_text << (hours < 10 ? "0" : "") << static_cast<uint32>(hours) << ":";
+	time_text << (minutes < 10 ? "0" : "") << static_cast<uint32>(minutes) << ":";
+	time_text << (seconds < 10 ? "0" : "") << static_cast<uint32>(seconds);
+
+	_time_textbox.SetDisplayText( time_text.str() );
+
+	std::ostringstream drunes_text;
+	drunes_text << "Drunes - " << drunes;
+
+	_drunes_textbox.SetDisplayText( drunes_text.str() );
 	return true;
 } // bool SaveMode::_PreviewGame(string& filename)
 
