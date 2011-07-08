@@ -152,21 +152,21 @@ SaveMode::SaveMode(bool enable_saving) :
 	_location_name_textbox.SetTextStyle(TextStyle("title22"));
 	_location_name_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_location_name_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_location_name_textbox.SetDisplayText("Location Name");
+	_location_name_textbox.SetDisplayText(" ");
 
 	_time_textbox.SetPosition(600.0f, 190.0f);
 	_time_textbox.SetDimensions(250.0f, 25.0f);
 	_time_textbox.SetTextStyle(TextStyle("title22"));
 	_time_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_time_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_time_textbox.SetDisplayText("Time - 00:00:00");
+	_time_textbox.SetDisplayText(" ");
 
 	_drunes_textbox.SetPosition(600.0f, 160.0f);
 	_drunes_textbox.SetDimensions(250.0f, 25.0f);
 	_drunes_textbox.SetTextStyle(TextStyle("title22"));
 	_drunes_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_drunes_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_drunes_textbox.SetDisplayText("Drunes - 0");
+	_drunes_textbox.SetDisplayText(" ");
 
 	hoa_gui::TextBox _location_name_textbox;
 		hoa_gui::TextBox _time_textbox;
