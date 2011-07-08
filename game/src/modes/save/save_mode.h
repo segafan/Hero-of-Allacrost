@@ -59,6 +59,9 @@ private:
 	//! \brief The MenuWindow for the backdrop
 	hoa_gui::MenuWindow _window;
 
+	//! \brief The MenuWindow for the left panel
+	hoa_gui::MenuWindow _left_window;
+
 	//! \brief The music file to be played
 	hoa_audio::MusicDescriptor _save_music;
 
@@ -67,12 +70,6 @@ private:
 
 	//! \brief Current location for highlighted saved game
 	hoa_utils::ustring _location_name;
-
-	//! \brief Game time for highlighted saved game
-	uint8 _hours, _minutes, _seconds;
-
-	//! \brief Drunes/money for highlighted saved game
-	uint32 _drunes;
 
 	//! \brief A screen capture of the last frame rendered on the screen before SaveMode was invoked
 	hoa_video::StillImage _screen_capture;
@@ -96,7 +93,9 @@ private:
 	hoa_gui::TextBox _save_failure_message;
 
 	//! \brief Displays preview info for highlighted game
-	hoa_gui::TextBox _file_preview_text;
+	hoa_gui::TextBox _location_name_textbox;
+	hoa_gui::TextBox _time_textbox;
+	hoa_gui::TextBox _drunes_textbox;
 
 	//! \brief Tracks whether games can be saved, or only loaded.
 	bool _saving_enabled;
