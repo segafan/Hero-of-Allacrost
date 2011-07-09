@@ -31,6 +31,38 @@ namespace hoa_save {
 extern bool SAVE_DEBUG;
 
 /** ****************************************************************************
+*** \brief Represents an individual character window
+***
+*** There should be one of these windows for each character in the game.
+*** It will contain all the information of the character and handle its draw
+*** placement.
+*** ***************************************************************************/
+class SmallCharacterWindow : public hoa_gui::MenuWindow {
+private:
+	//! The name of the character that this window corresponds) to
+	hoa_global::GlobalCharacter* _character;
+
+	//! The image of the character
+	hoa_video::StillImage _portrait;
+
+public:
+	SmallCharacterWindow();
+
+	~SmallCharacterWindow();
+
+	/** \brief Set the character for this window
+	*** \param character the character to associate with this window
+	**/
+	void SetCharacter(hoa_global::GlobalCharacter *character);
+
+	/** \brief render this window to the screen
+	*** \return success/failure
+	**/
+	void Draw();
+}; // class SmallCharacterWindow : public hoa_video::MenuWindow
+
+
+/** ****************************************************************************
 *** \brief Handles saving and loading
 ***
 *** ***************************************************************************/
@@ -61,6 +93,9 @@ private:
 
 	//! \brief The MenuWindow for the left panel
 	hoa_gui::MenuWindow _left_window;
+
+	//! \brief Windows to display character previews
+	hoa_save::SmallCharacterWindow _character_window;
 
 	//! \brief The music file to be played
 	hoa_audio::MusicDescriptor _save_music;
