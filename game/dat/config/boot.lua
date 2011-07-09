@@ -64,6 +64,7 @@ function BootBattleTest()
 	battle:AddEnemy(4);
 	battle:AddEnemy(5);
 	battle:AddEnemy(6);
+	battle:LoadBattleScript("dat/battles/first_battle.lua");
 
 	ModeManager:Push(battle);
 end

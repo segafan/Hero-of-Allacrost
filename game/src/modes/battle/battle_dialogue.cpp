@@ -279,14 +279,8 @@ void DialogueSupervisor::BeginDialogue(uint32 dialogue_id) {
 
 	_line_counter = 0;
 	_current_dialogue = dialogue;
-	_current_options = _current_dialogue->GetLineOptions(_line_counter);
-	// Setup the line timer only if the first line has a display time
-	if (_current_dialogue->GetLineDisplayTime(_line_counter) >= 0) {
-		_line_timer.Initialize(_current_dialogue->GetLineDisplayTime(_line_counter));
-	}
-	else {
-		_line_timer.Finish();
-	}
+
+	_BeginLine();
 }
 
 
@@ -297,6 +291,7 @@ void DialogueSupervisor::EndDialogue() {
 		return;
 	}
 
+	_current_dialogue->IncrementTimesSeen();
 	_current_dialogue = NULL;
 	_current_options = NULL;
 	_line_timer.Finish();
@@ -414,7 +409,7 @@ void DialogueSupervisor::_BeginLine() {
 
 	BattleSpeaker* line_speaker = GetSpeaker(_current_dialogue->GetLineSpeaker(_line_counter));
 	if (line_speaker == NULL) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "dailogue #" << _current_dialogue->GetDialogueID()
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "dialogue #" << _current_dialogue->GetDialogueID()
 			<< " referenced a speaker that did not exist with id: " << _current_dialogue->GetLineSpeaker(_line_counter) << endl;
 		_dialogue_window.GetNameText().SetText("");
 		_dialogue_window.SetPortraitImage(NULL);

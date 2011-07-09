@@ -78,7 +78,6 @@ public:
 }; // class BattleSpeaker
 
 
-
 /** ****************************************************************************
 *** \brief Represents a dialogue that occurs during the midst of battle
 ***
