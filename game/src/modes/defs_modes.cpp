@@ -33,6 +33,8 @@
 
 #include "battle.h"
 #include "battle_actors.h"
+#include "battle_command.h"
+#include "battle_dialogue.h"
 #include "battle_effects.h"
 #include "battle_utils.h"
 #include "map.h"
@@ -528,9 +530,34 @@ void BindModesToLua()
 	[
 		class_<BattleMode, hoa_mode_manager::GameMode>("BattleMode")
 			.def(constructor<>())
+			.def("LoadBattleScript", &BattleMode::LoadBattleScript)
 			.def("AddEnemy", (void(BattleMode::*)(uint32)) &BattleMode::AddEnemy)
-// 			.def("AddDialogue", &BattleMode::AddDialogue)
-// 			.def("ShowDialogue", &BattleMode::ShowDialogue)
+			.def("AddMusic", &BattleMode::AddMusic)
+			.def("SetBackground", &BattleMode::SetBackground)
+			.def("RestartBattle", &BattleMode::RestartBattle)
+			.def("FreezeTimers", &BattleMode::FreezeTimers)
+			.def("UnFreezeTimers", &BattleMode::UnFreezeTimers)
+			.def("GetState", &BattleMode::GetState)
+			.def("ChangeState", &BattleMode::ChangeState)
+			.def("OpenCommandMenu", &BattleMode::OpenCommandMenu)
+			.def("IsBattleFinished", &BattleMode::IsBattleFinished)
+			.def("PlayMusic", &BattleMode::PlayMusic)
+			.def("GetNumberOfCharacters", &BattleMode::GetNumberOfCharacters)
+			.def("GetNumberOfEnemies", &BattleMode::GetNumberOfEnemies)
+			.def("GetDialogueSupervisor", &BattleMode::GetDialogueSupervisor)
+			.def("GetCommandSupervisor", &BattleMode::GetCommandSupervisor)
+
+			// Namespace constants
+			.enum_("constants") [
+				// Battle states
+				value("BATTLE_STATE_INITIAL", BATTLE_STATE_INITIAL),
+				value("BATTLE_STATE_NORMAL", BATTLE_STATE_NORMAL),
+				value("BATTLE_STATE_COMMAND", BATTLE_STATE_COMMAND),
+				value("BATTLE_STATE_EVENT", BATTLE_STATE_EVENT),
+				value("BATTLE_STATE_VICTORY", BATTLE_STATE_VICTORY),
+				value("BATTLE_STATE_DEFEAT", BATTLE_STATE_DEFEAT),
+				value("BATTLE_STATE_EXITING", BATTLE_STATE_EXITING)
+			]
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
@@ -568,6 +595,42 @@ void BindModesToLua()
 	[
 		class_<BattleEnemy, BattleActor>("BattleEnemy")
 			.def("ChangeSpriteAnimation", &BattleEnemy::ChangeSpriteAnimation)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
+		class_<CommandSupervisor>("CommandSupervisor")
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
+		class_<BattleDialogue, hoa_common::CommonDialogue>("BattleDialogue")
+			.def(constructor<uint32>())
+			.def("AddLine", (void(BattleDialogue::*)(std::string, uint32))&BattleDialogue::AddLine)
+			.def("AddLine", (void(BattleDialogue::*)(std::string, uint32, int32))&BattleDialogue::AddLine)
+			.def("AddLineTimed", (void(BattleDialogue::*)(std::string, uint32, uint32))&BattleDialogue::AddLineTimed)
+			.def("AddLineTimed", (void(BattleDialogue::*)(std::string, uint32, int32, uint32))&BattleDialogue::AddLineTimed)
+			.def("AddOption", (void(BattleDialogue::*)(std::string))&BattleDialogue::AddOption)
+			.def("AddOption", (void(BattleDialogue::*)(std::string, int32))&BattleDialogue::AddOption)
+			.def("Validate", &BattleDialogue::Validate)
+			.def("SetHaltBattleAction", &BattleDialogue::SetHaltBattleAction)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
+		class_<DialogueSupervisor>("DialogueSupervisor")
+			.def("AddDialogue", &DialogueSupervisor::AddDialogue, adopt(_2))
+			.def("AddCharacterSpeaker", &DialogueSupervisor::AddCharacterSpeaker)
+			.def("AddEnemySpeaker", &DialogueSupervisor::AddEnemySpeaker)
+			.def("AddCustomSpeaker", &DialogueSupervisor::AddCustomSpeaker)
+			.def("ChangeSpeakerName", &DialogueSupervisor::ChangeSpeakerName)
+			.def("ChangeSpeakerPortrait", &DialogueSupervisor::ChangeSpeakerPortrait)
+			.def("BeginDialogue", &DialogueSupervisor::BeginDialogue)
+			.def("EndDialogue", &DialogueSupervisor::EndDialogue)
+			.def("ForceNextLine", &DialogueSupervisor::ForceNextLine)
+			.def("IsDialogueActive", &DialogueSupervisor::IsDialogueActive)
+			.def("GetCurrentDialogue", &DialogueSupervisor::GetCurrentDialogue)
+			.def("GetLineCounter", &DialogueSupervisor::GetLineCounter)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")

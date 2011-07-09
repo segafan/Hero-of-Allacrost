@@ -502,6 +502,8 @@ BattleMode::~BattleMode() {
 
 	_ready_queue.clear();
 
+	_battle_script.CloseFile();
+
 	delete _sequence_supervisor;
 	delete _command_supervisor;
 	delete _dialogue_supervisor;
@@ -563,8 +565,11 @@ void BattleMode::Update() {
 	if (_dialogue_supervisor->IsDialogueActive() == true) {
 		_dialogue_supervisor->Update();
 
-		if (_dialogue_supervisor->GetCurrentDialogue()->IsHaltBattleAction() == true) {
-			return;
+		// Because the dialogue may have ended in the call to Update(), we have to check it again here.
+		if (_dialogue_supervisor->IsDialogueActive() == true) {
+			if (_dialogue_supervisor->GetCurrentDialogue()->IsHaltBattleAction() == true) {
+				return;
+			}
 		}
 	}
 
@@ -729,7 +734,7 @@ void BattleMode::SetBackground(const string& filename) {
 
 
 
-void BattleMode::SetBattleScript(const std::string& filename) {
+void BattleMode::LoadBattleScript(const std::string& filename) {
 	if (_state != BATTLE_STATE_INVALID) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function was called when battle mode was already initialized" << endl;
 		return;
@@ -1167,23 +1172,23 @@ void BattleMode::_Initialize() {
 		if (_battle_script.OpenFile(_script_filename) == true) {
 			// If any of the three required function signatures are not found, close the file and do not allow the script to be executed
 			if (_battle_script.DoesFunctionExist("Initialize") == false) {
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "required \"Initialize\" function not found within battle script: " << _script_filename << endl;
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "required function [Initialize] not found within battle script: " << _script_filename << endl;
 				_battle_script.CloseFile();
 			}
 			else if (_battle_script.DoesFunctionExist("Update") == false) {
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "required \"Initialize\" function not found within battle script: " << _script_filename << endl;
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "required function [Update] not found within battle script: " << _script_filename << endl;
 				_battle_script.CloseFile();
 			}
 			else if (_battle_script.DoesFunctionExist("Draw") == false) {
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "required \"Initialize\" function not found within battle script: " << _script_filename << endl;
+				IF_PRINT_WARNING(BATTLE_DEBUG) << "required function [Draw] not found within battle script: " << _script_filename << endl;
 				_battle_script.CloseFile();
 			}
 			else {
 				_update_function = _battle_script.ReadFunctionPointer("Update");
 				_draw_function = _battle_script.ReadFunctionPointer("Draw");
 
-				ScriptObject init_function = _battle_script.ReadFunctionPointer("Initialization");
-				ScriptCallFunction<void>(init_function);
+				ScriptObject init_function = _battle_script.ReadFunctionPointer("Initialize");
+				ScriptCallFunction<void>(init_function, this);
 			}
 		}
 		else {
@@ -1528,26 +1533,5 @@ void BattleMode::_DrawIndicators() {
 		_enemy_actors[i]->DrawIndicators();
 	}
 }
-
-
-
-// void BattleMode::AddDialogue(string speaker_name, string text) {
-// 	_dialogue_text.push_back(MakeUnicodeString(speaker_name));
-// 	_dialogue_text.push_back(MakeUnicodeString(text));
-// }
-
-
-
-// void BattleMode::ShowDialogue() {
-// 	_speaker_name = _dialogue_text.front();
-// 	_dialogue_text.pop_front();
-// 	hoa_utils::ustring text = _dialogue_text.front();
-// 	_dialogue_text.pop_front();
-//
-// 	_dialogue_window.Reset();
-// 	_dialogue_window._display_textbox.SetDisplayText(text);
-// 	_dialogue_window.Initialize();
-// 	ChangeState(BATTLE_STATE_DIALOGUE);
-// }
 
 } // namespace hoa_battle

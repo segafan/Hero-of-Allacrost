@@ -148,6 +148,15 @@ public:
 	void Draw();
 	//@}
 
+	/** \brief Sets the name of the script to execute during the battle
+	*** \param filename The filename of the Lua script to load
+	***
+	*** This function should only be called once before the BattleMode class object is initialized (before Reset()
+	*** is called for the first time). Calling it after the battle has been initialized will have no effect and
+	*** print out a warning.
+	**/
+	void LoadBattleScript(const std::string& filename);
+
 	/** \brief Adds a new active enemy to the battle field
 	*** \param new_enemy A copy of the GlobalEnemy object to add to the battle
 	*** This method uses the GlobalEnemy copy constructor to create a copy of the enemy. The GlobalEnemy
@@ -167,20 +176,6 @@ public:
 	void AddEnemy(uint32 new_enemy_id)
 		{ AddEnemy(new hoa_global::GlobalEnemy(new_enemy_id)); }
 
-	/** \brief Sets the background image for the battle
-	*** \param filename The filename of the new background image to load
-	**/
-	void SetBackground(const std::string& filename);
-
-	/** \brief Sets the name of the script to execute during the battle
-	*** \param filename The filename of the Lua script to load
-	***
-	*** This function should only be called once before the BattleMode class object is initialized (before Reset()
-	*** is called for the first time). Calling it after the battle has been initialized will have no effect and
-	*** print out a warning.
-	**/
-	void SetBattleScript(const std::string& filename);
-
 	/** \brief Adds a piece of music to the battle soundtrack
 	*** \param filename The full filename of the music to play
 	*** Note that the first piece of music added is the one that will be played upon entering battle. All subsequent pieces
@@ -188,6 +183,11 @@ public:
 	*** for a battle, a default battle theme will be played.
 	**/
 	void AddMusic(const std::string& filename);
+
+	/** \brief Sets the background image for the battle
+	*** \param filename The filename of the new background image to load
+	**/
+	void SetBackground(const std::string& filename);
 
 	/** \brief Restores the battle to its initial state, allowing the player another attempt to achieve victory
 	***
