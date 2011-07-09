@@ -80,7 +80,10 @@ SaveMode::SaveMode(bool enable_saving) :
 	_left_window.Create(150.0f, 500.0f);
 	_left_window.SetPosition(212.0f, 630.0f);
 	_left_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
-	_left_window.Hide();
+
+	_character_window.Create(450.0f, 100.0f);
+	_character_window.SetPosition(355.0f, 630.0f);
+	_character_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 
 	// Initialize the save options box
 	_save_options.SetPosition(512.0f, 384.0f);
@@ -184,6 +187,7 @@ SaveMode::SaveMode(bool enable_saving) :
 
 	_window.Show();
 	_left_window.Show();
+	_character_window.Show();
 }
 
 
@@ -383,6 +387,7 @@ void SaveMode::Draw() {
 		case SAVE_MODE_SAVING:
 		case SAVE_MODE_LOADING:
 			_left_window.Draw(); // draw a panel on the left for the file list
+			_character_window.Draw();
 			_file_list.Draw();
 			_location_name_textbox.Draw();
 			_time_textbox.Draw();
@@ -451,14 +456,31 @@ bool SaveMode::_PreviewGame(int id) {
 	drunes = file.ReadInt("drunes");
 
 
-/*	file.OpenTable("characters");
+	file.OpenTable("characters");
 	vector<uint32> char_ids;
 	file.ReadUIntVector("order", char_ids);
+	GlobalCharacter* character[4];
+
 	for (uint32 i = 0; i < char_ids.size(); i++) {
-		_LoadCharacter(file, char_ids[i]);
+		// Create a new GlobalCharacter object using the provided id
+		// This loads all of the character's "static" data, such as their name, etc.
+		character[i] = new GlobalCharacter(char_ids[i], false);
+
+		file.OpenTable(char_ids[i]);
+
+		// Read in all of the character's stats data
+		character[i]->SetExperienceLevel(file.ReadUInt("experience_level"));
+		character[i]->SetExperiencePoints(file.ReadUInt("experience_points"));
+
+		character[i]->SetMaxHitPoints(file.ReadUInt("max_hit_points"));
+		character[i]->SetHitPoints(file.ReadUInt("hit_points"));
+		character[i]->SetMaxSkillPoints(file.ReadUInt("max_skill_points"));
+		character[i]->SetSkillPoints(file.ReadUInt("skill_points"));
+
+		file.CloseTable();
 	}
 	file.CloseTable();
-*/
+
 
 	// Report any errors detected from the previous read operations
 	if (file.IsErrorDetected()) {
@@ -470,6 +492,8 @@ bool SaveMode::_PreviewGame(int id) {
 	}
 
 	file.CloseFile();
+
+	_character_window.SetCharacter(character[0]);
 
 	_location_name_textbox.SetDisplayText(_location_name);
 
@@ -487,5 +511,77 @@ bool SaveMode::_PreviewGame(int id) {
 	_drunes_textbox.SetDisplayText( drunes_text.str() );
 	return true;
 } // bool SaveMode::_PreviewGame(string& filename)
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// SmallCharacterWindow Class
+////////////////////////////////////////////////////////////////////////////////
+
+SmallCharacterWindow::SmallCharacterWindow() : _character(NULL) {
+}
+
+
+
+SmallCharacterWindow::~SmallCharacterWindow() {
+}
+
+
+
+void SmallCharacterWindow::SetCharacter(GlobalCharacter *character) {
+	_character = character;
+
+//	_portrait.SetStatic(true);
+//	_portrait.Load("img/portraits/menu/" + character->GetFilename() + "_small.png", 100, 100);
+} // void SmallCharacterWindow::SetCharacter(GlobalCharacter *character)
+
+
+
+// Draw the window to the screen
+void SmallCharacterWindow::Draw() {
+	// Call parent Draw method, if failed pass on fail result
+	MenuWindow::Draw();
+
+	// check to see if this window is an actual character
+	if (_character == NULL)
+		return;
+
+	if (_character->GetID() == hoa_global::GLOBAL_CHARACTER_INVALID)
+		return;
+
+//	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+
+	// Get the window metrics
+	float x, y, w, h;
+	GetPosition(x,y);
+	GetDimensions(w,h);
+	// Adjust the current position to make it look better
+	y += 5;
+
+	//Draw character portrait
+	VideoManager->Move(x + 50, y);
+//	_portrait.Draw();
+
+	// Write character name
+	VideoManager->MoveRelative(0, -35);
+	VideoManager->Text()->Draw(_character->GetName(), TextStyle("title22"));
+
+	// Level
+	VideoManager->MoveRelative(0,-20);
+	VideoManager->Text()->Draw(UTranslate("Lv: ") + MakeUnicodeString(NumberToString(_character->GetExperienceLevel())), TextStyle("text20"));
+
+	// HP
+	VideoManager->MoveRelative(0,-20);
+	VideoManager->Text()->Draw(UTranslate("HP: ") + MakeUnicodeString(NumberToString(_character->GetHitPoints()) +
+		" / " + NumberToString(_character->GetMaxHitPoints())), TextStyle("text20"));
+
+	// SP
+	VideoManager->MoveRelative(0,-20);
+	VideoManager->Text()->Draw(UTranslate("SP: ") + MakeUnicodeString(NumberToString(_character->GetSkillPoints()) +
+		" / " + NumberToString(_character->GetMaxSkillPoints())), TextStyle("text20"));
+
+	return;
+}
 
 } // namespace hoa_save
