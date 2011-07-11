@@ -201,22 +201,22 @@ enemies[3] = {
 }
 
 -- Traits -----------------------------------------------------------------------
--- HSP: med HP, med SP
--- ATK: high phys, zero meta
--- DEF: high phys, low meta
--- SPD: low agi, low eva
--- XPD: med XP, med drunes
+-- HSP: med HP, low SP
+-- ATK: med phys, zero meta
+-- DEF: med phys, low meta
+-- SPD: med agi, med eva
+-- XPD: low XP, med drunes
 --------------------------------------------------------------------------------
 enemies[4] = {
-	name = hoa_system.Translate("Skeleton"),
-	filename = "skeleton",
+	name = hoa_system.Translate("Rat"),
+	filename = "rat",
 	sprite_width = 64,
-	sprite_height = 128,
+	sprite_height = 64,
 	
 	base_stats = {
-		hit_points = 124,
-		skill_points = 10,
-		strength = 15,
+		hit_points = 90,
+		skill_points = 5,
+		strength = 12,
 		vigor = 0,
 		fortitude = 14,
 		protection = 4,
@@ -229,28 +229,19 @@ enemies[4] = {
 	attack_points = {
 		[1] = {
 			name = hoa_system.Translate("Head"),
-			x_position = -23,
-			y_position = 108,
+			x_position = -24,
+			y_position = 50,
 			fortitude_modifier = 0.0,
 			protection_modifier = 0.0,
 			evade_modifier = 0.0
 		},
 		[2] = {
 			name = hoa_system.Translate("Chest"),
-			x_position = -12,
-			y_position = 82,
+			x_position = -8,
+			y_position = 25,
 			fortitude_modifier = 0.0,
 			protection_modifier = 0.0,
 			evade_modifier = 0.0
-		},
-		[3] = {
-			name = hoa_system.Translate("Leg"),
-			x_position = -26,
-			y_position = 56,
-			fortitude_modifier = 0.0,
-			protection_modifier = 0.0,
-			evade_modifier = 0.0,
-			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = 20.0 }
 		}
 	},
 
@@ -378,6 +369,247 @@ enemies[6] = {
 
 	drop_objects = {
 		{ 1, 0.15 } -- Minor Healing Potion
+	}
+}
+
+-- Traits -----------------------------------------------------------------------
+-- HSP: ??? HP, ??? SP
+-- ATK: ??? phys, ??? meta
+-- DEF: ??? phys, ??? meta
+-- SPD: ??? agi, ??? eva
+-- XPD: ??? XP, ??? drunes
+--------------------------------------------------------------------------------
+enemies[7] = {
+	name = hoa_system.Translate("Dune Crawler"),
+	filename = "dune_crawler",
+	sprite_width = 64,
+	sprite_height = 64,
+	
+	base_stats = {
+		hit_points = 122,
+		skill_points = 10,
+		strength = 18,
+		vigor = 0,
+		fortitude = 12,
+		protection = 4,
+		agility = 14,
+		evade = 2.0,
+		experience_points = 8,
+		drunes = 12
+	},
+
+	attack_points = {
+		[1] = {
+			name = hoa_system.Translate("Head"),
+			x_position = -5,
+			y_position = 22,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		},
+		[2] = {
+			name = hoa_system.Translate("Tail"),
+			x_position = 18,
+			y_position = 45,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		}
+	},
+
+	skills = {
+		1002
+	},
+
+	drop_objects = {
+
+	}
+}
+
+-- Traits -----------------------------------------------------------------------
+-- HSP: med HP, med SP
+-- ATK: high phys, zero meta
+-- DEF: high phys, low meta
+-- SPD: low agi, low eva
+-- XPD: med XP, med drunes
+--------------------------------------------------------------------------------
+enemies[8] = {
+	name = hoa_system.Translate("Skeleton"),
+	filename = "skeleton",
+	sprite_width = 64,
+	sprite_height = 128,
+	
+	base_stats = {
+		hit_points = 124,
+		skill_points = 10,
+		strength = 15,
+		vigor = 0,
+		fortitude = 14,
+		protection = 4,
+		agility = 13,
+		evade = 2.0,
+		experience_points = 5,
+		drunes = 18
+	},
+
+	attack_points = {
+		[1] = {
+			name = hoa_system.Translate("Head"),
+			x_position = -23,
+			y_position = 108,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		},
+		[2] = {
+			name = hoa_system.Translate("Chest"),
+			x_position = -12,
+			y_position = 82,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		},
+		[3] = {
+			name = hoa_system.Translate("Leg"),
+			x_position = -26,
+			y_position = 56,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0,
+			status_effects = { [hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = 20.0 }
+		}
+	},
+
+	skills = {
+		1004
+	},
+
+	drop_objects = {
+		{ 1, 0.15 } -- Minor Healing Potion
+	}
+}
+
+-- Traits -----------------------------------------------------------------------
+-- HSP: high HP, med SP
+-- ATK: med phys, zero meta
+-- DEF: med phys, low meta
+-- SPD: low agi, low eva
+-- XPD: med XP, high drunes
+--------------------------------------------------------------------------------
+enemies[9] = {
+	name = hoa_system.Translate("Stygian Lizard"),
+	filename = "stygian_lizard",
+	sprite_width = 192,
+	sprite_height = 192,
+	
+	base_stats = {
+		hit_points = 124,
+		skill_points = 10,
+		strength = 15,
+		vigor = 0,
+		fortitude = 14,
+		protection = 4,
+		agility = 13,
+		evade = 2.0,
+		experience_points = 5,
+		drunes = 18
+	},
+
+	attack_points = {
+		[1] = {
+			name = hoa_system.Translate("Eye"),
+			x_position = 10,
+			y_position = 160,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		},
+		[2] = {
+			name = hoa_system.Translate("Torso"),
+			x_position = -13,
+			y_position = 80,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		},
+		[3] = {
+			name = hoa_system.Translate("Claw"),
+			x_position = -60,
+			y_position = 115,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		}
+	},
+
+	skills = {
+		1004
+	},
+
+	drop_objects = {
+
+	}
+}
+
+-- Traits -----------------------------------------------------------------------
+-- HSP: med HP, med SP
+-- ATK: low phys, med meta
+-- DEF: low phys, med meta
+-- SPD: med agi, med eva
+-- XPD: med XP, med drunes
+--------------------------------------------------------------------------------
+enemies[10] = {
+	name = hoa_system.Translate("Demonic Essence"),
+	filename = "demonic_essence",
+	sprite_width = 128,
+	sprite_height = 192,
+	
+	base_stats = {
+		hit_points = 124,
+		skill_points = 10,
+		strength = 15,
+		vigor = 0,
+		fortitude = 14,
+		protection = 4,
+		agility = 13,
+		evade = 2.0,
+		experience_points = 5,
+		drunes = 18
+	},
+
+	attack_points = {
+		[1] = {
+			name = hoa_system.Translate("Face"),
+			x_position = 0,
+			y_position = 166,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		},
+		[2] = {
+			name = hoa_system.Translate("Body"),
+			x_position = -8,
+			y_position = 114,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		},
+		[3] = {
+			name = hoa_system.Translate("Claw"),
+			x_position = -48,
+			y_position = 108,
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
+		}
+	},
+
+	skills = {
+		1004
+	},
+
+	drop_objects = {
+
 	}
 }
 
