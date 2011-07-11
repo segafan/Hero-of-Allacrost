@@ -95,7 +95,7 @@ private:
 	hoa_gui::MenuWindow _left_window;
 
 	//! \brief Windows to display character previews
-	hoa_save::SmallCharacterWindow _character_window;
+	hoa_save::SmallCharacterWindow _character_window[4];
 
 	//! \brief The music file to be played
 	hoa_audio::MusicDescriptor _save_music;
