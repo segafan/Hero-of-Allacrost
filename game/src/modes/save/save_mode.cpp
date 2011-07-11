@@ -159,21 +159,21 @@ SaveMode::SaveMode(bool enable_saving) :
 
 	// Initialize the save preview text boxes
 	_location_name_textbox.SetPosition(600.0f, 215.0f);
-	_location_name_textbox.SetDimensions(250.0f, 25.0f);
+	_location_name_textbox.SetDimensions(250.0f, 26.0f);
 	_location_name_textbox.SetTextStyle(TextStyle("title22"));
 	_location_name_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_location_name_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_location_name_textbox.SetDisplayText(" ");
 
 	_time_textbox.SetPosition(600.0f, 185.0f);
-	_time_textbox.SetDimensions(250.0f, 25.0f);
+	_time_textbox.SetDimensions(250.0f, 26.0f);
 	_time_textbox.SetTextStyle(TextStyle("title22"));
 	_time_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_time_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_time_textbox.SetDisplayText(" ");
 
 	_drunes_textbox.SetPosition(600.0f, 155.0f);
-	_drunes_textbox.SetDimensions(250.0f, 25.0f);
+	_drunes_textbox.SetDimensions(250.0f, 26.0f);
 	_drunes_textbox.SetTextStyle(TextStyle("title22"));
 	_drunes_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_drunes_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -445,7 +445,8 @@ bool SaveMode::_PreviewGame(int id) {
 	f << GetUserDataPath(true) + "saved_game_" << id << ".lua";
 	string filename = f.str();
 
-	ReadScriptDescriptor file;
+	ReadScriptDescriptor file, map_file;
+
 	if (file.OpenFile(filename, true) == false) {
 		_location_name_textbox.SetDisplayText("No Data");
 		_time_textbox.SetDisplayText(" ");
@@ -459,7 +460,7 @@ bool SaveMode::_PreviewGame(int id) {
 	// open the namespace that the save game is encapsulated in.
 	file.OpenTable("save_game1");
 
-	_location_name = MakeUnicodeString(file.ReadString("location_name"));
+	string location_filename = file.ReadString("location_name");
 
 	// using ints to store temp data to populate text boxes
 	int hours, minutes, seconds, drunes;
@@ -506,11 +507,30 @@ bool SaveMode::_PreviewGame(int id) {
 
 	file.CloseFile();
 
+	// Load map file to get location name
+	if (map_file.OpenFile(location_filename) == false) {
+		return false;
+	}
+
+	// Determine the map's tablespacename and then open it. The tablespace is the name of the map file without
+	// file extension or path information (for example, 'dat/maps/demo.lua' has a tablespace name of 'demo').
+	int32 period = location_filename.find(".");
+	int32 last_slash = location_filename.find_last_of("/");
+	string map_tablespace = location_filename.substr(last_slash + 1, period - (last_slash + 1));
+	map_file.OpenTable(map_tablespace);
+
+	// Read the name of the map
+	ustring location_name = MakeUnicodeString(map_file.ReadString("map_name"));
+
+	map_file.CloseTable();
+	map_file.CloseFile();
+
+
 	for (uint32 i = 0; i < 4; i++) {
 		_character_window[i].SetCharacter(character[i]);
 	}
 
-	_location_name_textbox.SetDisplayText(_location_name);
+	_location_name_textbox.SetDisplayText(location_name);
 
 	std::ostringstream time_text;
 	time_text << "Time - ";
@@ -547,8 +567,10 @@ SmallCharacterWindow::~SmallCharacterWindow() {
 void SmallCharacterWindow::SetCharacter(GlobalCharacter *character) {
 	_character = character;
 
-//	_portrait.SetStatic(true);
-//	_portrait.Load("img/portraits/menu/" + character->GetFilename() + "_small.png", 100, 100);
+	if (character != NULL) {
+		_portrait.SetStatic(true);
+		_portrait.Load("img/portraits/menu/" + character->GetFilename() + "_small.png", 100, 100);
+	}
 } // void SmallCharacterWindow::SetCharacter(GlobalCharacter *character)
 
 
@@ -575,11 +597,11 @@ void SmallCharacterWindow::Draw() {
 	y += 5;
 
 	//Draw character portrait
-	VideoManager->Move(x + 150, y);
-//	_portrait.Draw();
+	VideoManager->Move(x + 50, y - 110);
+	_portrait.Draw();
 
 	// Write character name
-	VideoManager->MoveRelative(0, -35);
+	VideoManager->MoveRelative(125, 75);
 	VideoManager->Text()->Draw(_character->GetName(), TextStyle("title22"));
 
 	// Level
