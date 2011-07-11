@@ -80,10 +80,18 @@ SaveMode::SaveMode(bool enable_saving) :
 	_left_window.Create(150.0f, 500.0f);
 	_left_window.SetPosition(212.0f, 630.0f);
 	_left_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+	_left_window.Show();
 
-	_character_window.Create(450.0f, 100.0f);
-	_character_window.SetPosition(355.0f, 630.0f);
-	_character_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+	for (int i = 0; i < 4; i++) {
+		_character_window[i].Create(450.0f, 100.0f);
+		_character_window[i].SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+		_character_window[i].Show();
+	}
+
+	_character_window[0].SetPosition(355.0f, 630.0f);
+	_character_window[1].SetPosition(355.0f, 530.0f);
+	_character_window[2].SetPosition(355.0f, 430.0f);
+	_character_window[3].SetPosition(355.0f, 330.0f);
 
 	// Initialize the save options box
 	_save_options.SetPosition(512.0f, 384.0f);
@@ -150,21 +158,21 @@ SaveMode::SaveMode(bool enable_saving) :
 	_save_failure_message.SetDisplayText("Unable to save game!\nSave FAILED!");
 
 	// Initialize the save preview text boxes
-	_location_name_textbox.SetPosition(600.0f, 220.0f);
+	_location_name_textbox.SetPosition(600.0f, 215.0f);
 	_location_name_textbox.SetDimensions(250.0f, 25.0f);
 	_location_name_textbox.SetTextStyle(TextStyle("title22"));
 	_location_name_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_location_name_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_location_name_textbox.SetDisplayText(" ");
 
-	_time_textbox.SetPosition(600.0f, 190.0f);
+	_time_textbox.SetPosition(600.0f, 185.0f);
 	_time_textbox.SetDimensions(250.0f, 25.0f);
 	_time_textbox.SetTextStyle(TextStyle("title22"));
 	_time_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_time_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_time_textbox.SetDisplayText(" ");
 
-	_drunes_textbox.SetPosition(600.0f, 160.0f);
+	_drunes_textbox.SetPosition(600.0f, 155.0f);
 	_drunes_textbox.SetDimensions(250.0f, 25.0f);
 	_drunes_textbox.SetTextStyle(TextStyle("title22"));
 	_drunes_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -186,8 +194,6 @@ SaveMode::SaveMode(bool enable_saving) :
 	}
 
 	_window.Show();
-	_left_window.Show();
-	_character_window.Show();
 }
 
 
@@ -387,7 +393,11 @@ void SaveMode::Draw() {
 		case SAVE_MODE_SAVING:
 		case SAVE_MODE_LOADING:
 			_left_window.Draw(); // draw a panel on the left for the file list
-			_character_window.Draw();
+			if (_file_list.GetSelection() > 0) {
+				for (uint32 i = 0; i < 4; i++) {
+					_character_window[i].Draw();
+				}
+			}
 			_file_list.Draw();
 			_location_name_textbox.Draw();
 			_time_textbox.Draw();
@@ -440,6 +450,9 @@ bool SaveMode::_PreviewGame(int id) {
 		_location_name_textbox.SetDisplayText("No Data");
 		_time_textbox.SetDisplayText(" ");
 		_drunes_textbox.SetDisplayText(" ");
+		for (uint32 i = 0; i < 4; i++) {
+			_character_window[i].SetCharacter(NULL);
+		}
 		return false;
 	}
 
@@ -493,7 +506,9 @@ bool SaveMode::_PreviewGame(int id) {
 
 	file.CloseFile();
 
-	_character_window.SetCharacter(character[0]);
+	for (uint32 i = 0; i < 4; i++) {
+		_character_window[i].SetCharacter(character[i]);
+	}
 
 	_location_name_textbox.SetDisplayText(_location_name);
 
@@ -560,7 +575,7 @@ void SmallCharacterWindow::Draw() {
 	y += 5;
 
 	//Draw character portrait
-	VideoManager->Move(x + 50, y);
+	VideoManager->Move(x + 150, y);
 //	_portrait.Draw();
 
 	// Write character name
