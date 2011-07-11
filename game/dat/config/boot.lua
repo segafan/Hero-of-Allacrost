@@ -58,12 +58,11 @@ function BootBattleTest()
 	-- claudius:AddSkill(10001);
 	
 	local battle = hoa_battle.BattleMode();
-	battle:AddEnemy(1);
-	battle:AddEnemy(2);
-	battle:AddEnemy(3);
-	battle:AddEnemy(4);
-	battle:AddEnemy(5);
 	battle:AddEnemy(6);
+	battle:AddEnemy(7);
+	battle:AddEnemy(8);
+	battle:AddEnemy(9);
+	battle:AddEnemy(10);
 	battle:LoadBattleScript("dat/battles/first_battle.lua");
 
 	ModeManager:Push(battle);
