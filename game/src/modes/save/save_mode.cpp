@@ -199,6 +199,13 @@ SaveMode::SaveMode(bool enable_saving) :
 
 
 SaveMode::~SaveMode() {
+	_window.Destroy();
+
+	_left_window.Destroy();
+
+	for (int i = 0; i < 4; i++) {
+		_character_window[i].Destroy();
+	}
 
 }
 
