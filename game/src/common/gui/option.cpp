@@ -659,8 +659,9 @@ void OptionBox::InputUp() {
 		return;
 
 	if (_ChangeSelection(-1, false) == false)
-		_event = VIDEO_OPTION_BOUNDS_UP;
+		return;
 
+	_event = VIDEO_OPTION_BOUNDS_UP;
 	int32 row = _selection / _number_columns;
 
     if (_skip_disabled) {
@@ -680,9 +681,10 @@ void OptionBox::InputDown() {
 	if (_scrolling || _event)
 		return;
 
-	if(_ChangeSelection(1, false) == false)
-		_event = VIDEO_OPTION_BOUNDS_DOWN;
+	if (_ChangeSelection(1, false) == false)
+		return;
 
+	_event = VIDEO_OPTION_BOUNDS_DOWN;
 	int32 row = _selection / _number_columns;
 
     if (_skip_disabled) {
@@ -703,8 +705,9 @@ void OptionBox::InputLeft() {
 		return;
 
 	if (_ChangeSelection(-1, true) == false)
-		_event = VIDEO_OPTION_BOUNDS_LEFT;
+		return;
 
+	_event = VIDEO_OPTION_BOUNDS_LEFT;
 	int32 col = _selection % _number_columns;
 
     if (_skip_disabled) {
@@ -725,8 +728,9 @@ void OptionBox::InputRight() {
 		return;
 
 	if (_ChangeSelection(1, true) == false)
-		_event = VIDEO_OPTION_BOUNDS_RIGHT;
+		return;
 
+	_event = VIDEO_OPTION_BOUNDS_RIGHT;
 	int32 col = _selection % _number_columns;
 
     if (_skip_disabled) {
@@ -886,11 +890,11 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 
 bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 	// Do nothing if the movement is horizontal and there is only one column with no horizontal wrap shifting
-	if (horizontal == true && _number_cell_columns == 1 && _horizontal_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
+	if ((horizontal == true) && (_number_cell_columns == 1) &&( _horizontal_wrap_mode != VIDEO_WRAP_MODE_SHIFTED))
 		return false;
 
 	// Do nothing if the movement is vertical and there is only one row with no vertical wrap shifting
-	if (horizontal == false && _number_cell_rows == 1 && _vertical_wrap_mode != VIDEO_WRAP_MODE_SHIFTED)
+	if ((horizontal == false) && (_number_cell_rows == 1) && (_vertical_wrap_mode != VIDEO_WRAP_MODE_SHIFTED))
 		return false;
 
 	// Get the row, column coordinates for the current selection
