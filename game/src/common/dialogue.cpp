@@ -175,6 +175,8 @@ void CommonDialogueOptions::AddOption(string text, int32 next_line) {
 ///////////////////////////////////////////////////////////////////////////////
 
 CommonDialogueWindow::CommonDialogueWindow() :
+	_pos_x(512.0f),
+	_pos_y(512.0f),
 	_portrait_image(NULL)
 {
 	if (_parchment_image.Load("img/menus/black_sleet_parch.png") == false)
@@ -191,11 +193,11 @@ CommonDialogueWindow::CommonDialogueWindow() :
 	_display_textbox.SetDimensions(700.0f, 126.0f);
 	_display_textbox.SetTextStyle(TextStyle("text20", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_display_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
-	_display_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_display_textbox.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_display_textbox.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
 	_display_optionbox.SetPosition(300.0f, 630.0f);
-	_display_optionbox.SetDimensions(660.0f, 90.0f, 1, 255, 1, 3);
+	_display_optionbox.SetDimensions(660.0f, 90.0f, 1, 255, 1, 4);
 	_display_optionbox.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_display_optionbox.SetTextStyle(TextStyle("title20", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 	_display_optionbox.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -206,6 +208,16 @@ CommonDialogueWindow::CommonDialogueWindow() :
 	_name_text.SetStyle(TextStyle("title22", Color::black, VIDEO_TEXT_SHADOW_LIGHT));
 
 	VideoManager->PopState();
+}
+
+
+
+void CommonDialogueWindow::SetPosition(float pos_x, float pos_y) {
+	_pos_x = pos_x;
+	_pos_y = pos_y;
+
+	_display_textbox.SetPosition(_pos_x + 120.0f, _pos_y - 90.0f);
+	_display_optionbox.SetPosition(_pos_x - 220.0f, _pos_y - 112.0f);
 }
 
 
@@ -223,22 +235,21 @@ void CommonDialogueWindow::Draw() {
 	// Temporarily change the coordinate system to 1024x768 and draw the contents of the dialogue window
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
-	VideoManager->Move(18.0f, 744.0f);
+	VideoManager->Move(_pos_x, _pos_y);
 	_parchment_image.Draw();
 
 	// TODO: nameplate is not drawn for now because its not visually appealing. Eventually we'll either decide
 	// to remove it entirely or re-enable it with an improved nameplate.
-// 	VideoManager->Move(47.0f, 726.0f);
+// 	VideoManager->MoveRelative(-370.0f, -10.0f);
 // 	_nameplate_image.Draw();
 
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
-	VideoManager->MoveRelative(120.0f, -20.0f);
+	VideoManager->MoveRelative(-370.0f, -15.0f);
 	_name_text.Draw();
 
 	if (_portrait_image != NULL) {
-		VideoManager->MoveRelative(0.0f, -20.0f);
+		VideoManager->MoveRelative(0.0f, -25.0f);
 		_portrait_image->Draw();
 	}
 

@@ -229,7 +229,9 @@ DialogueSupervisor::DialogueSupervisor() :
 	_line_timer(),
 	_line_counter(0),
 	_dialogue_window()
-{}
+{
+	_dialogue_window.SetPosition(512.0f, 760.0f);
+}
 
 
 

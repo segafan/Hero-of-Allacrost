@@ -110,7 +110,9 @@ DialogueSupervisor::DialogueSupervisor() :
 	_line_timer(),
 	_line_counter(0),
 	_dialogue_window()
-{}
+{
+	_dialogue_window.SetPosition(512.0f, 170.0f);
+}
 
 
 
@@ -336,6 +338,13 @@ BattleSpeaker* DialogueSupervisor::GetSpeaker(uint32 speaker_id) {
 void DialogueSupervisor::_UpdateLine() {
 	_dialogue_window.GetDisplayTextBox().Update();
 
+	if (_current_options != NULL) {
+		if (_dialogue_window.GetDisplayTextBox().IsFinished() == true) {
+			_state = DIALOGUE_STATE_OPTION;
+			return;
+		}
+	}
+
 	// If the line has a valid display time and the timer is finished, move on to the next line
 	if ((_line_timer.GetDuration() > 0) && (_line_timer.IsFinished() == true)) {
 		_EndLine();
@@ -365,6 +374,8 @@ void DialogueSupervisor::_UpdateLine() {
 
 
 void DialogueSupervisor::_UpdateOptions() {
+	_dialogue_window.GetDisplayOptionBox().Update();
+
 	if (InputManager->ConfirmPress()) {
 		_dialogue_window.GetDisplayOptionBox().InputConfirm();
 		_EndLine();

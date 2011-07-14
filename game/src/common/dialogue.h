@@ -307,7 +307,16 @@ public:
 	~CommonDialogueWindow()
 		{}
 
-	//! \brief Clears all text and images, except for the background images
+	/** \brief Sets the draw position for the window
+	*** \param pos_x The x coordinate for the center of the window
+	*** \param pos_y The y coordinate for the bottom of the window
+	***
+	*** These positions take effect in a 1024x768 coordinate system and a a (VIDEO_X_LEFT, VIDEO_Y_BOTTOM) draw alignment|
+	*** This function should always be called once when setting up the dialogue window before the first draw call is made.
+	**/
+	void SetPosition(float pos_x, float pos_y);
+
+	//! \brief Clears all text from the window
 	void Clear();
 
 	//! \brief Draws the dialogue window and all other visuals
@@ -332,6 +341,9 @@ public:
 	//@}
 
 private:
+	//! \brief Stores the draw coordinates for the bottom center of the dialogue window
+	float _pos_x, _pos_y;
+
 	//! \brief A parchment paper image embedded within the dialogue window
 	hoa_video::StillImage _parchment_image;
 
