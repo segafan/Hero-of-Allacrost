@@ -106,6 +106,7 @@
 		D4B34E640E23275A0067C913 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
 		D4B34E650E23275B0067C913 /* skill_editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F2EB2E0D111C7D00A2F1D7 /* skill_editor.moc.cpp */; };
 		D4B34E660E23275C0067C913 /* tileset_editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F0F4330CDE7CD000EFE9B0 /* tileset_editor.moc.cpp */; };
+		D4B47F5713D21F6E00D99A4D /* battle_dialogue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4B47F5613D21F6E00D99A4D /* battle_dialogue.cpp */; };
 		D4B8AA8C0F2D507600B4D975 /* battle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6900AC1D86400D65B8E /* battle.cpp */; };
 		D4B8AA8D0F2D507A00B4D975 /* battle_actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DDE3930C4A15EE00937677 /* battle_actions.cpp */; };
 		D4B8AA8E0F2D507D00B4D975 /* battle_actors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6920AC1D86400D65B8E /* battle_actors.cpp */; };
@@ -342,6 +343,8 @@
 		D4B2018313804EC8006BA3FD /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = common.h; path = common/common.h; sourceTree = "<group>"; };
 		D4B2018413804EC8006BA3FD /* dialogue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dialogue.cpp; path = common/dialogue.cpp; sourceTree = "<group>"; };
 		D4B2018513804EC8006BA3FD /* dialogue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dialogue.h; path = common/dialogue.h; sourceTree = "<group>"; };
+		D4B47F5613D21F6E00D99A4D /* battle_dialogue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = battle_dialogue.cpp; sourceTree = "<group>"; };
+		D4B47F5813D21F7B00D99A4D /* battle_dialogue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = battle_dialogue.h; sourceTree = "<group>"; };
 		D4BA6CE00EC7872C00F2DEB0 /* allacrost.pot */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = allacrost.pot; sourceTree = "<group>"; };
 		D4BA6CE10EC7872C00F2DEB0 /* boldquot.sed */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = boldquot.sed; sourceTree = "<group>"; };
 		D4BA6CE20EC7872C00F2DEB0 /* en@boldquot.header */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "en@boldquot.header"; sourceTree = "<group>"; };
@@ -558,6 +561,8 @@
 		4941A68F0AC1D86400D65B8E /* battle */ = {
 			isa = PBXGroup;
 			children = (
+				D4B47F5613D21F6E00D99A4D /* battle_dialogue.cpp */,
+				D4B47F5813D21F7B00D99A4D /* battle_dialogue.h */,
 				57BD396811438C0400692A73 /* battle_command.cpp */,
 				57BD396911438C0400692A73 /* battle_command.h */,
 				57BD396A11438C0400692A73 /* battle_effects.cpp */,
@@ -1126,6 +1131,7 @@
 				57BD397B11438C2200692A73 /* global_utils.cpp in Sources */,
 				D4B2018613804EC8006BA3FD /* common.cpp in Sources */,
 				D4B2018713804EC8006BA3FD /* dialogue.cpp in Sources */,
+				D4B47F5713D21F6E00D99A4D /* battle_dialogue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
