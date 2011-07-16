@@ -1059,9 +1059,9 @@ function CreateDialogue()
 		text = hoa_system.Translate("Damnit, the captain's been wounded along with half our troops.");
 		dialogue:AddLine(text, 1000);
 		text = hoa_system.Translate("*cough cough*\nI'll be alright. Great job taking down that monster men, I'm proud.");
-		dialogue:AddLine(text, 1000);
-		text = hoa_system.Translate("We've achieved our objective here. Tend to the wounded and then lets make our way back home.");
-		dialogue:AddLine(text, 1000);
+		dialogue:AddLine(text, 2500);
+		text = hoa_system.Translate("We've achieved our objective here. Tend to the wounded and then let's make our way back home.");
+		dialogue:AddLine(text, 2500);
 	DialogueManager:AddDialogue(dialogue);
 	
 end -- function CreateDialogue()
