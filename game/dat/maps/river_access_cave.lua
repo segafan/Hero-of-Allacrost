@@ -1056,7 +1056,11 @@ function CreateDialogue()
 	
 	-- Event: After boss battle
 	dialogue = hoa_map.SpriteDialogue(550);
-		text = hoa_system.Translate("End of map.");
+		text = hoa_system.Translate("Damnit, the captain's been wounded along with half our troops.");
+		dialogue:AddLine(text, 1000);
+		text = hoa_system.Translate("*cough cough*\nI'll be alright. Great job taking down that monster men, I'm proud.");
+		dialogue:AddLine(text, 1000);
+		text = hoa_system.Translate("We've achieved our objective here. Tend to the wounded and then lets make our way back home.");
 		dialogue:AddLine(text, 1000);
 	DialogueManager:AddDialogue(dialogue);
 	
@@ -1305,8 +1309,12 @@ function CreateEvents()
 		event = hoa_map.ScriptedEvent(90, 11, 0);
 		event:AddEventLinkAtEnd(91, 500);
 		EventManager:RegisterEvent(event);
-		-- TEMP: End of map dialogue
+		-- Post-battle dialogue
 		event = hoa_map.DialogueEvent(91, 550);
+		EventManager:RegisterEvent(event);
+		event:AddEventLinkAtEnd(92);
+		-- Transition back to the opening scene map
+		event = hoa_map.MapTransitionEvent(92, "dat/maps/opening_scene.lua");
 		EventManager:RegisterEvent(event);
 
 	----------------------------------------------------------------------------
@@ -1443,7 +1451,9 @@ end
 -- Move camera to talking karlate sprite
 map_functions[19] = function()
     Map:SetCamera(knight_path_sprite, 500);
-end    
+end
+
+
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
 swap_context_all_objects = function(new_context)
