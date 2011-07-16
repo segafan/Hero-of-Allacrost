@@ -126,9 +126,10 @@ credits_text =
 	"Richard Marks (DeveloperX) - map tiles\n" ..
 	"Tyler Olsen (Roots) - various art\n" ..
 	"Tyler Stroud (gloomcover) - map tiles\n" ..
+	"Vicki Beinhart (Namakoro) - enemy sprites\n" ..
 	"Victoria Smith (alenacat) - map sprites, map tiles\n" ..
 	"(Jarks) - map tiles, inventory icons\n" ..
-	"(Namakoro) - enemy sprites\n" ..
+	"(Psiweapon) - map tiles, battle sprites\n" ..
 	"\n\n" ..
 
 	"Additional Music and Sound\n\n" ..
