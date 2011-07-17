@@ -1121,11 +1121,10 @@ function CreateEvents()
 		EventManager:RegisterEvent(event);
         -- Move camera back to Cladius
 		event = hoa_map.ScriptedEvent(23, 17, 0);
-		event:AddEventLinkAtEnd(24);
+		event:AddEventLinkAtEnd(24, 500);
 		EventManager:RegisterEvent(event);
 		-- Move player sprite to NPC that called out
-		event = hoa_map.PathMoveSpriteEvent(24, 1000, 5, 0); -- TODO: Change absolute destination to 149, 68 once pathfinding fixed
-		event:SetRelativeDestination(true);
+		event = hoa_map.PathMoveSpriteEvent(24, 1000, 149, 68);
 		event:AddEventLinkAtEnd(25);
 		EventManager:RegisterEvent(event);
 		-- Exit scene state
