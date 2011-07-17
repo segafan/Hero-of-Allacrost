@@ -366,17 +366,22 @@ float BattleActor::TotalEvadeRating() {
 BattleCharacter::BattleCharacter(GlobalCharacter* character) :
 	BattleActor(character),
 	_global_character(character),
+	_last_rendered_hp(0),
+	_last_rendered_sp(0),
 	_sprite_animation_alias("idle")
 {
 	if (_stamina_icon.Load("img/icons/actors/characters/" + character->GetFilename() + ".png", 45, 45) == false)
 		PRINT_ERROR << "unable to load stamina icon for character: " << character->GetFilename() << endl;
 
+	_last_rendered_hp = GetHitPoints();
+	_last_rendered_sp = GetSkillPoints();
+
 	_name_text.SetStyle(TextStyle("title22"));
 	_name_text.SetText(GetName());
 	_hit_points_text.SetStyle(TextStyle("text24", VIDEO_TEXT_SHADOW_BLACK));
-	_hit_points_text.SetText(NumberToString(GetHitPoints()));
+	_hit_points_text.SetText(NumberToString(_last_rendered_hp));
 	_skill_points_text.SetStyle(TextStyle("text24", VIDEO_TEXT_SHADOW_BLACK));
-	_skill_points_text.SetText(NumberToString(GetSkillPoints()));
+	_skill_points_text.SetText(NumberToString(_last_rendered_sp));
 
 	_action_selection_text.SetStyle(TextStyle("text20"));
 	_action_selection_text.SetText("");
@@ -485,7 +490,6 @@ void BattleCharacter::DrawSprite() {
 
 	_global_character->RetrieveBattleAnimation(_sprite_animation_alias)->Draw();
 } // void BattleCharacter::DrawSprite()
-
 
 
 
@@ -629,13 +633,24 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
 		// Draw the character's current health on top of the middle of the HP bar
 		VideoManager->Move(355.0f, 88.0f + y_offset);
-		_hit_points_text.SetText(NumberToString(GetHitPoints()));
 		_hit_points_text.Draw();
 
 		// Draw the character's current skill points on top of the middle of the SP bar
 		VideoManager->MoveRelative(110.0f, 0.0f);
-		_skill_points_text.SetText(NumberToString(GetSkillPoints()));
 		_skill_points_text.Draw();
+
+		// Update hit and skill points after drawing to reduce gpu stall
+		if (_last_rendered_hp != GetHitPoints())
+		{
+			_last_rendered_hp = GetHitPoints();
+			_hit_points_text.SetText(NumberToString(_last_rendered_hp));
+		}
+
+		if (_last_rendered_sp != GetSkillPoints())
+		{
+			_last_rendered_sp = GetSkillPoints();
+			_skill_points_text.SetText(NumberToString(_last_rendered_sp));
+		}
 	}
 
 	// Note: if the command menu is visible, it will be drawn over all of the components that follow below. We still perform these draw calls
