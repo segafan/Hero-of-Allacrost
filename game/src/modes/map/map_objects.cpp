@@ -774,14 +774,13 @@ bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 
 	// Temporary delta variables used in calculation of a node's heuristic (h score)
 	uint32 x_delta, y_delta;
-	// The number of grid elements that the sprite's collision rectange spreads outward and upward
-	int16 x_span, y_span;
 	// The number to add to a node's g_score, depending on whether it is a lateral or diagonal movement
 	int16 g_add;
 
+	// Original offset for sprite
+	float x_offset, y_offset;
+
 	path.clear();
-	x_span = static_cast<int16>(sprite->coll_half_width);
-	y_span = static_cast<int16>(sprite->coll_height);
 
 	// Check that the source node is not the same as the destination node
 	if (source_node == dest) {
@@ -790,19 +789,22 @@ bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 	}
 
 	// Check that the destination is valid for the sprite to move to
-	if ((dest.col - x_span < 0) || (dest.row - y_span < 0) ||
-		(dest.col + x_span >= (_num_grid_cols)) || (dest.row >= (_num_grid_rows)))
-	{
-		PRINT_ERROR << "sprite can not move to destination node on path because it exceeds map boundaries" << endl;
+	x_offset = sprite->x_offset;
+	y_offset = sprite->y_offset;
+
+	sprite->x_position = dest.col;
+	sprite->y_position = dest.row;
+	// Don't use 0.0f here for both since errors at the border between two positions may occure, especially when running
+	sprite->x_offset = 0.5f;
+	sprite->y_offset = 0.5f;
+
+	if (DetectCollision(sprite, NULL) != NO_COLLISION) {
+		sprite->x_position = source_node.col;
+		sprite->y_position = source_node.row;
+		sprite->x_offset = x_offset;
+		sprite->y_offset = y_offset;
+		PRINT_ERROR << "sprite can not move to destination node on path because one or more grid tiles are unwalkable" << endl;
 		return false;
-	}
-	for (int16 r = dest.row - y_span; r < dest.row; r++) {
-		for (int16 c = dest.col - x_span; c < dest.col + x_span; c++) {
-			if ((_collision_grid[r][c] & sprite->context) > 0) {
-				PRINT_ERROR << "sprite can not move to destination node on path because one or more grid tiles are unwalkable" << endl;
-				return false;
-			}
-		}
 	}
 
 	open_list.push_back(source_node);
@@ -830,32 +832,20 @@ bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 
 		// Check the eight adjacent nodes
 		for (uint8 i = 0; i < 8; ++i) {
-			// ---------- (A): Check that the sprite's collision rectangle will not be outside the map's boundaries
-			if ((nodes[i].col - x_span < 0) || (nodes[i].row - y_span < 0) ||
-				(nodes[i].col + x_span >= _num_grid_cols) || (nodes[i].row >= _num_grid_rows)) {
+			// ---------- (A): Check if all tiles are walkable
+			sprite->x_position = nodes[i].col;
+			sprite->y_position = nodes[i].row;
+
+			if (DetectCollision(sprite, NULL) != NO_COLLISION) {
 				continue;
 			}
 
-			// ---------- (B): Check that all grid nodes that the sprite's collision rectangle will overlap are walkable
-			bool continue_loop = true;
-			for (int16 r = nodes[i].row - y_span; r < nodes[i].row && continue_loop; r++) {
-				for (int16 c = nodes[i].col - x_span; c < nodes[i].col + x_span; c++) {
-					if ((_collision_grid[r][c] & sprite->context) > 0) {
-						continue_loop = false;
-						break;
-					}
-				}
-			}
-			if (continue_loop == false) {
-				continue;
-			}
-
-			// ---------- (C): Check if the node is already in the closed list
+			// ---------- (B): Check if the node is already in the closed list
 			if (find(closed_list.begin(), closed_list.end(), nodes[i]) != closed_list.end()) {
 				continue;
 			}
 
-			// ---------- (D): If this point has been reached, the node is valid for the sprite to move to
+			// ---------- (C): If this point has been reached, the node is valid for the sprite to move to
 			// If this is a lateral adjacent node, g_score is +10, otherwise diagonal adjacent node is +14
 			if (i < 4)
 				g_add = 10;
@@ -867,7 +857,7 @@ bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 			nodes[i].parent_col = best_node.col;
 			nodes[i].g_score = best_node.g_score + g_add;
 
-			// ---------- (E): Check to see if the node is already on the open list and update it if necessary
+			// ---------- (D): Check to see if the node is already on the open list and update it if necessary
 			vector<PathNode>::iterator iter = find(open_list.begin(), open_list.end(), nodes[i]);
 			if (iter != open_list.end()) {
 				// If its G is higher, it means that the path we are on is better, so switch the parent
@@ -878,7 +868,7 @@ bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 					iter->parent_col = nodes[i].parent_col;
 				}
 			}
-			// ---------- (F): Add the new node to the open list
+			// ---------- (E): Add the new node to the open list
 			else {
 				// Calculate the H and F score of the new node (the heuristic used is diagonal)
 				x_delta = abs(dest.col - nodes[i].col);
@@ -914,6 +904,12 @@ bool ObjectSupervisor::FindPath(VirtualSprite* sprite, vector<PathNode>& path, c
 		}
 	}
 	std::reverse(path.begin(), path.end());
+
+	// Move sprite back to original position
+	sprite->x_position = source_node.col;
+	sprite->y_position = source_node.row;
+	sprite->x_offset = x_offset;
+	sprite->y_offset = y_offset;
 
 	return true;
 } // bool ObjectSupervisor::FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest)
@@ -1258,6 +1254,7 @@ bool ObjectSupervisor::_MoveSpriteAroundCollisionDiagonal(VirtualSprite* sprite,
 
 	// Reconstruct the sprite's collision rectangle at the state when it encountered the collision
 	MapRectangle mod_sprite_rect = sprite_coll_rect;
+
 	float distance_moved = sprite->CalculateDistanceMoved();
 	if (north_or_south == true) {
 		mod_sprite_rect.top -= distance_moved;
