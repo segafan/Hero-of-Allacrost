@@ -424,6 +424,9 @@ protected:
 	//! \brief A pointer to the global character object which the battle character represents
 	hoa_global::GlobalCharacter* _global_character;
 
+	//! \brief Retrains the last HP and SP values that were rendered to text
+	uint32 _last_rendered_hp, _last_rendered_sp;
+
 	//! \brief Contains the identifier text of the current sprite animation
 	std::string _sprite_animation_alias;
 
