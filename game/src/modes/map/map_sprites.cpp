@@ -292,10 +292,6 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 			enemy->ChangeStateDead();
 
 			BattleMode *BM = new BattleMode();
-// 			for (uint32 ctr = 0; ctr < enemy->GetBattleEvents().size(); ctr++) {
-// 				BM->AddEvent(enemy->GetBattleEvents().at(ctr));
-// 			}
-			ModeManager->Push(BM);
 
 			string enemy_battle_music = enemy->GetBattleMusicTheme();
 			if (enemy_battle_music != "")
@@ -309,6 +305,12 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 			for (uint32 i = 0; i < enemy_party.size(); i++) {
 				BM->AddEnemy(enemy_party[i]);
 			}
+
+			string enemy_battle_script = enemy->GetBattleScript();
+			if (enemy_battle_script != "")
+				BM->LoadBattleScript(enemy_battle_script);
+
+			ModeManager->Push(BM);
 
 			// TODO: some sort of map-to-battle transition animation sequence needs to start here
 			return;
@@ -760,7 +762,8 @@ EnemySprite::EnemySprite() :
 	_time_dir_change(2500),
 	_time_to_spawn(3500),
 	_music_theme(""),
-	_bg_file("")
+	_bg_file(""),
+	_script_file("")
 {
 	filename = "";
 	MapObject::_object_type = ENEMY_TYPE;
@@ -775,7 +778,10 @@ EnemySprite::EnemySprite(std::string file) :
 	_color(1.0f, 1.0f, 1.0f, 0.0f),
 	_aggro_range(8.0f),
 	_time_dir_change(2500),
-	_time_to_spawn(3500)
+	_time_to_spawn(3500),
+	_music_theme(""),
+	_bg_file(""),
+	_script_file("")
 {
 	filename = file;
 	MapObject::_object_type = ENEMY_TYPE;
