@@ -550,7 +550,7 @@ function Load(m)
 	-- First, record the current map in the map variable that is global to this script
 	map = m;
 	map.unlimited_stamina = true;
-	dialogue_supervisor = m.dialogue_supervisor;
+	DialogueManager = m.dialogue_supervisor;
 	event_supervisor = m.event_supervisor;
 
 	local dialogue;
@@ -616,6 +616,11 @@ end -- function CreateDoors()
 function CreateCharacters()
 	local sprite = {};
 
+	sprite = ConstructSprite("Laila", 2000, 214, 170);
+	sprite:SetDirection(hoa_map.MapMode.SOUTH);
+	sprite:AddDialogueReference(10);
+	sprite:AddDialogueReference(11);
+	map:AddGroundObject(sprite);
 end -- function CreateCharacters()
 
 
@@ -627,7 +632,26 @@ end -- function CreateEnemies()
 
 -- Creates all dialogue that takes place through characters and events
 function CreateDialogue()
+	local dialogue;
+	local text;
 
+	dialogue = hoa_map.SpriteDialogue(10);
+		text = hoa_system.Translate("Laila! I heard the city was burning?!");
+		dialogue:AddLine(text, 1000);
+		text = hoa_system.Translate("Well unfortunately this is as far as this release goes. There's only a partly constructed city here right now.");
+		dialogue:AddLine(text, 2000);
+		text = hoa_system.Translate("You can explore this area if you like. Some of the buildings here may be entered by walking up to the doors, but not all of them.");
+		dialogue:AddLine(text, 2000);
+		text = hoa_system.Translate("Also I would recommend that you not save your game while you are on this map, because you are stuck here with no way to go back.");
+		dialogue:AddLine(text, 2000);
+	DialogueManager:AddDialogue(dialogue);
+	
+	dialogue = hoa_map.SpriteDialogue(11);
+		text = hoa_system.Translate("The next release should see this city in a more completed state. Once its finished, when you visit here it will be under attack by an army of demons that you will have to do battle with to save the people that live here.");
+		dialogue:AddLine(text, 2000);
+		text = hoa_system.Translate("Thanks for playing and see you next time!");
+		dialogue:AddLine(text, 2000);
+	DialogueManager:AddDialogue(dialogue);
 end -- function CreateDialogue()
 
 

@@ -1,13 +1,32 @@
 -- This script executes for the very first battle that the player encounters in a new game.
 -- Its purpose is to present a dialogue to the player at the start of the battle to provide
--- a brief explanation of the battle system
+-- a brief explanation of the battle system.
+--
+-- This script is only used by the river cave access map. All battles on that map load this script,
+-- but we only want the script to execute for the first battle. So the "global_events" event group is
+-- used to record when the first battle occurs. If it has already occurred, this script effectively does
+-- nothing
 
 function Initialize(battle_instance)
+	stop_script = false;
+
+	if (GlobalManager:DoesEventGroupExist("global_events") == false) then
+		GlobalManager:AddNewEventGroup("global_events");
+	end
+	
+	local event_group = GlobalManager:GetEventGroup("global_events");
+	if (event_group:DoesEventExist("first_battle") == false) then
+		event_group:AddNewEvent("first_battle", 1);
+		stop_script = false;
+	else
+		stop_script = true;
+		return;
+	end
+
 	Battle = battle_instance;
 	DialogueManager = Battle:GetDialogueSupervisor();
 
 	main_dialogue = {};
-	local text;
 	
 	-- Add all speakers for the dialogues to be added
 	-- TODO: all of these custom speaker calls should be replaced with calls to AddCharacterSpeaker() later
@@ -15,6 +34,7 @@ function Initialize(battle_instance)
 	DialogueManager:AddCustomSpeaker(1001, "Mark", "");
 	DialogueManager:AddCustomSpeaker(1002, "Lukar", "");
 
+	local text;
 	-- The dialogue constructed below offers the player instructions on how to do battle. It is displayed only once in the first few seconds
 	-- of battle, before any action can be taken. The player is presented with several options that they can read to get more information on
 	-- the battle system. One of the options that the player may select from will finish the dialogue, allow the battle to resume.
@@ -107,6 +127,10 @@ end
 
 
 function Update()
+	if (stop_script == true) then
+		return;
+	end
+
 	start_timer:Update();
 
 	-- Wait until the initial battle sequence ends to begin running the dialogue start timer
