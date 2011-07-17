@@ -349,6 +349,9 @@ FinishVictoryAssistant::~FinishVictoryAssistant() {
 	for (map<GlobalObject*, int32>::iterator i = _objects_dropped.begin(); i != _objects_dropped.end(); i++) {
 		GlobalManager->AddToInventory(i->first->GetID(), i->second);
 	}
+
+	// Update the HP and SP of all characters before leaving
+	_SetCharacterStatus();
 }
 
 
@@ -552,6 +555,24 @@ void FinishVictoryAssistant::_CreateObjectList() {
 		_object_list.GetEmbeddedImage(i)->SetDimensions(30.0f, 30.0f);
 	}
 }
+
+
+
+void FinishVictoryAssistant::_SetCharacterStatus() {
+	deque<BattleCharacter*>& battle_characters = BattleMode::CurrentInstance()->GetCharacterActors();
+
+	for (deque<BattleCharacter*>::iterator i = battle_characters.begin(); i != battle_characters.end(); i++) {
+		GlobalCharacter* character = (*i)->GetGlobalCharacter();
+
+		character->SetHitPoints((*i)->GetHitPoints());
+
+		// TODO: SP setting is disabled for now because we have no means to restore SP in the game, so we just always want to
+		// leave the global character with the max SP at the start of every battle. When SP regeneration is figured out, add
+		// the line below back in.
+// 		character->SetSkillPoints((*i)->SetSkillPoints());
+	}
+}
+
 
 
 void FinishVictoryAssistant::_UpdateGrowth() {

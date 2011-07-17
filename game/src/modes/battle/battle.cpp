@@ -487,6 +487,13 @@ BattleMode::~BattleMode() {
 	for (map<string, MusicDescriptor>::iterator i = _battle_music.begin(); i != _battle_music.end(); i++)
 		i->second.FreeAudio();
 
+	_battle_script.CloseFile();
+
+	delete _sequence_supervisor;
+	delete _command_supervisor;
+	delete _dialogue_supervisor;
+	delete _finish_supervisor;
+
 	// Delete all character and enemy actors
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		delete _character_actors[i];
@@ -501,13 +508,6 @@ BattleMode::~BattleMode() {
 	_enemy_party.clear();
 
 	_ready_queue.clear();
-
-	_battle_script.CloseFile();
-
-	delete _sequence_supervisor;
-	delete _command_supervisor;
-	delete _dialogue_supervisor;
-	delete _finish_supervisor;
 
 	if (_current_instance == this) {
 		_current_instance = NULL;

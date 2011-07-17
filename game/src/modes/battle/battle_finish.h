@@ -229,6 +229,9 @@ private:
 	//! \brief Populates the object list with the objects contained in the _dropped_objects container
 	void _CreateObjectList();
 
+	//! \brief Updates the character HP/SP before the battle exits
+	void _SetCharacterStatus();
+
 	//! \brief Sets the text to display in the header window depending upon the current state
 	void _SetHeaderText();
 
