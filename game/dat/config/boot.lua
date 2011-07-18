@@ -45,8 +45,8 @@ sound_files = { "snd/confirm.wav",
 function BootBattleTest()
 	print("BootBattleTest");
 
-	GlobalManager:SetBattleSetting(hoa_global.GameGlobal.GLOBAL_BATTLE_WAIT);
---	GlobalManager:SetBattleSetting(hoa_global.GameGlobal.GLOBAL_BATTLE_ACTIVE);
+--	GlobalManager:SetBattleSetting(hoa_global.GameGlobal.GLOBAL_BATTLE_WAIT);
+	GlobalManager:SetBattleSetting(hoa_global.GameGlobal.GLOBAL_BATTLE_ACTIVE);
 
 	GlobalManager:AddCharacter(1);
 	GlobalManager:AddCharacter(2);
@@ -63,7 +63,7 @@ function BootBattleTest()
 	battle:AddEnemy(8);
 	battle:AddEnemy(9);
 	battle:AddEnemy(10);
-	battle:LoadBattleScript("dat/battles/first_battle.lua");
+--	battle:LoadBattleScript("dat/battles/first_battle.lua");
 
 	ModeManager:Push(battle);
 end
