@@ -13,7 +13,7 @@ function NewGame()
 	GlobalManager:AddNewEventGroup("global_events"); -- this group stores the primary list of events completed in the game
 	GlobalManager:SetDrunes(100);
 	GlobalManager:AddToInventory(1, 4);
-	GlobalManager:SetLocation("dat/maps/opening_scene.lua");
+	GlobalManager:SetLocation("dat/maps/harrvah_city.lua");
 end
 
 
