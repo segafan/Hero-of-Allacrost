@@ -694,7 +694,7 @@ function ReturnCreateNPCs()
 	sprite = ConstructSprite("Karlate", 2010, 20, group_start_y);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
-	sprite:SetNoCollision(true);d
+	sprite:SetNoCollision(true);
 	Map:AddGroundObject(sprite);
 end
 
