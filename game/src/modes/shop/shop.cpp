@@ -921,7 +921,7 @@ void ShopObjectViewer::_DrawEquipment() {
 	VideoManager->SetDrawFlags(VIDEO_Y_TOP, 0);
 	if (_view_mode == SHOP_VIEW_MODE_LIST) {
 		// In list view mode, draw the sprites to the right of the icons
-		VideoManager->MoveRelative(60.0f, 140.0f);
+		VideoManager->MoveRelative(60.0f, 115.0f);
 	}
 	else { // (_view_mode == SHOP_VIEW_MODE_INFO)
 		// In info view mode, draw the spites centered on the screen in a row below the other equipment data
