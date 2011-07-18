@@ -29,8 +29,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Hero of Allacrost 0.1.0\n"
 "Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
-"POT-Creation-Date: 2011-06-12 17:00-0500\n"
-"PO-Revision-Date: 2011-06-12 17:00-0500\n"
+"POT-Creation-Date: 2011-07-17 23:34-0500\n"
+"PO-Revision-Date: 2011-07-17 23:34-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -47,8 +47,9 @@ msgstr "Claudius"
 #: dat/actors/characters.lua:36 dat/actors/characters.lua:124
 #: dat/actors/characters.lua:202 dat/actors/characters.lua:280
 #: dat/actors/enemies_set_01.lua:114 dat/actors/enemies_set_01.lua:168
-#: dat/actors/enemies_set_01.lua:231 dat/actors/enemies_set_01.lua:294
-#: dat/actors/enemies_set_01.lua:413 dat/actors/enemies_set_02.lua:131
+#: dat/actors/enemies_set_01.lua:231 dat/actors/enemies_set_01.lua:285
+#: dat/actors/enemies_set_01.lua:403 dat/actors/enemies_set_01.lua:457
+#: dat/actors/enemies_set_01.lua:645 dat/actors/enemies_set_02.lua:131
 #: dat/actors/enemies_set_02.lua:187 dat/actors/enemies_set_02.lua:243
 #: dat/actors/enemies_set_02.lua:308 dat/actors/enemies_set_02.lua:363
 #: src/modes/menu/menu.cpp:847
@@ -57,7 +58,8 @@ msgstr "Head"
 
 #: dat/actors/characters.lua:45 dat/actors/characters.lua:133
 #: dat/actors/characters.lua:211 dat/actors/characters.lua:289
-#: dat/actors/enemies_set_01.lua:357 src/modes/menu/menu.cpp:850
+#: dat/actors/enemies_set_01.lua:348 dat/actors/enemies_set_01.lua:528
+#: src/modes/menu/menu.cpp:850
 msgid "Torso"
 msgstr "Torso"
 
@@ -68,23 +70,23 @@ msgstr "Arms"
 
 #: dat/actors/characters.lua:62 dat/actors/characters.lua:150
 #: dat/actors/characters.lua:228 dat/actors/characters.lua:306
-#: dat/actors/enemies_set_01.lua:492 dat/actors/enemies_set_02.lua:267
+#: dat/actors/enemies_set_01.lua:724 dat/actors/enemies_set_02.lua:267
 #: dat/actors/enemies_set_02.lua:379 src/modes/menu/menu.cpp:856
 msgid "Legs"
 msgstr "Legs"
 
-#: dat/actors/characters.lua:101 dat/maps/opening_scene.lua:231
-#: dat/maps/river_access_cave.lua:588
+#: dat/actors/characters.lua:101 dat/maps/opening_scene.lua:257
+#: dat/maps/opening_scene.lua:620 dat/maps/river_access_cave.lua:595
 msgid "Mark"
 msgstr "Mark"
 
-#: dat/actors/characters.lua:179 dat/maps/opening_scene.lua:236
-#: dat/maps/river_access_cave.lua:593
+#: dat/actors/characters.lua:179 dat/maps/opening_scene.lua:263
+#: dat/maps/opening_scene.lua:626 dat/maps/river_access_cave.lua:600
 msgid "Dester"
 msgstr "Dester"
 
-#: dat/actors/characters.lua:257 dat/maps/opening_scene.lua:241
-#: dat/maps/river_access_cave.lua:598
+#: dat/actors/characters.lua:257 dat/maps/opening_scene.lua:269
+#: dat/maps/opening_scene.lua:632 dat/maps/river_access_cave.lua:605
 msgid "Lukar"
 msgstr "Lukar"
 
@@ -93,7 +95,7 @@ msgid "Green Slime"
 msgstr "Green Slime"
 
 #: dat/actors/enemies_set_01.lua:68 dat/actors/enemies_set_01.lua:176
-#: dat/actors/enemies_set_02.lua:139
+#: dat/actors/enemies_set_01.lua:590 dat/actors/enemies_set_02.lua:139
 msgid "Body"
 msgstr "Body"
 
@@ -101,7 +103,7 @@ msgstr "Body"
 msgid "Spider"
 msgstr "Spider"
 
-#: dat/actors/enemies_set_01.lua:122 dat/actors/enemies_set_01.lua:302
+#: dat/actors/enemies_set_01.lua:122 dat/actors/enemies_set_01.lua:293
 #: dat/actors/enemies_set_02.lua:195
 msgid "Abdomen"
 msgstr "Abdomen"
@@ -110,54 +112,83 @@ msgstr "Abdomen"
 msgid "Snake"
 msgstr "Snake"
 
-#: dat/actors/enemies_set_01.lua:184 dat/actors/enemies_set_02.lua:147
-#: dat/actors/enemies_set_02.lua:203
+#: dat/actors/enemies_set_01.lua:184 dat/actors/enemies_set_01.lua:411
+#: dat/actors/enemies_set_02.lua:147 dat/actors/enemies_set_02.lua:203
 msgid "Tail"
 msgstr "Tail"
 
 #: dat/actors/enemies_set_01.lua:211
-msgid "Skeleton"
-msgstr "Skeleton"
+msgid "Rat"
+msgstr "Rat"
 
-#: dat/actors/enemies_set_01.lua:239 dat/actors/enemies_set_02.lua:251
-#: dat/actors/enemies_set_02.lua:316 dat/actors/enemies_set_02.lua:371
+#: dat/actors/enemies_set_01.lua:239 dat/actors/enemies_set_01.lua:465
+#: dat/actors/enemies_set_02.lua:251 dat/actors/enemies_set_02.lua:316
+#: dat/actors/enemies_set_02.lua:371
 msgid "Chest"
 msgstr "Chest"
 
-#: dat/actors/enemies_set_01.lua:247 dat/actors/enemies_set_01.lua:310
-#: dat/actors/enemies_set_01.lua:429 src/modes/menu/menu_views.cpp:205
-msgid "Leg"
-msgstr "Leg"
-
-#: dat/actors/enemies_set_01.lua:274
+#: dat/actors/enemies_set_01.lua:265
 msgid "Scorpion"
 msgstr "Scorpion"
 
-#: dat/actors/enemies_set_01.lua:337
+#: dat/actors/enemies_set_01.lua:301 dat/actors/enemies_set_01.lua:473
+#: dat/actors/enemies_set_01.lua:661 src/modes/menu/menu_views.cpp:205
+msgid "Leg"
+msgstr "Leg"
+
+#: dat/actors/enemies_set_01.lua:328
 msgid "Bat"
 msgstr "Bat"
 
-#: dat/actors/enemies_set_01.lua:365
+#: dat/actors/enemies_set_01.lua:356
 msgid "Wing"
 msgstr "Wing"
 
-#: dat/actors/enemies_set_01.lua:393
+#: dat/actors/enemies_set_01.lua:383
+msgid "Dune Crawler"
+msgstr "Dune Crawler"
+
+#: dat/actors/enemies_set_01.lua:437
+msgid "Skeleton"
+msgstr "Skeleton"
+
+#: dat/actors/enemies_set_01.lua:500
+msgid "Stygian Lizard"
+msgstr "Stygian Lizard"
+
+#: dat/actors/enemies_set_01.lua:520
+msgid "Eye"
+msgstr "Eye"
+
+#: dat/actors/enemies_set_01.lua:536 dat/actors/enemies_set_01.lua:598
+msgid "Claw"
+msgstr "Claw"
+
+#: dat/actors/enemies_set_01.lua:562
+msgid "Demonic Essence"
+msgstr "Demonic Essence"
+
+#: dat/actors/enemies_set_01.lua:582
+msgid "Face"
+msgstr "Face"
+
+#: dat/actors/enemies_set_01.lua:625
 msgid "Scorpion Goliath"
 msgstr "Scorpion Goliath"
 
-#: dat/actors/enemies_set_01.lua:421
+#: dat/actors/enemies_set_01.lua:653
 msgid "Pincer"
 msgstr "Pincer"
 
-#: dat/actors/enemies_set_01.lua:456
+#: dat/actors/enemies_set_01.lua:688
 msgid "Armored Beast"
 msgstr "Armored Beast"
 
-#: dat/actors/enemies_set_01.lua:476
+#: dat/actors/enemies_set_01.lua:708
 msgid "Mesosoma"
 msgstr "Mesosoma"
 
-#: dat/actors/enemies_set_01.lua:484
+#: dat/actors/enemies_set_01.lua:716
 msgid "Pincers"
 msgstr "Pincers"
 
@@ -1096,11 +1127,11 @@ msgstr "No. I’m doing this for me. I don’t expect you to understand."
 msgid "Then you leave me no choice."
 msgstr "Then you leave me no choice."
 
-#: dat/maps/opening_scene.lua:258
+#: dat/maps/opening_scene.lua:287 dat/maps/opening_scene.lua:644
 msgid "Captain Bravis"
 msgstr "Captain Bravis"
 
-#: dat/maps/opening_scene.lua:308
+#: dat/maps/opening_scene.lua:346
 msgid ""
 "I watched the men in the pale light of the blue moon. The dark cloaks they "
 "wore for warmth only better distinguishing them against the light sand for "
@@ -1110,7 +1141,7 @@ msgstr ""
 "wore for warmth only better distinguishing them against the light sand for "
 "my trained eye."
 
-#: dat/maps/opening_scene.lua:310
+#: dat/maps/opening_scene.lua:348
 msgid ""
 "The Harrvah Knights, though powerful in their great city of stone, were "
 "powerless in the might of the desert. The desert was the land of the Muabi "
@@ -1122,7 +1153,7 @@ msgstr ""
 "tribe, my tribe. Out here, a squad of troops such as this was no match for "
 "even a small group of Muabi."
 
-#: dat/maps/opening_scene.lua:312
+#: dat/maps/opening_scene.lua:350
 msgid ""
 "I knew where they were headed. We had seen that their water supply had been "
 "blocked, but such problems were not Muabi problems. The outsiders had built "
@@ -1134,7 +1165,7 @@ msgstr ""
 "their grand city away from the water, because they could not tame the "
 "creatures there."
 
-#: dat/maps/opening_scene.lua:314
+#: dat/maps/opening_scene.lua:352
 msgid ""
 "Although the great sand storms that had swept through our lands for the past "
 "several days had finally vanished, the winds still howled throughout the "
@@ -1144,11 +1175,11 @@ msgstr ""
 "several days had finally vanished, the winds still howled throughout the "
 "desert..."
 
-#: dat/maps/opening_scene.lua:320
+#: dat/maps/opening_scene.lua:358
 msgid "Alright, listen up!"
 msgstr "Alright, listen up!"
 
-#: dat/maps/opening_scene.lua:325
+#: dat/maps/opening_scene.lua:363
 msgid ""
 "Our scouts report that somewhere in this cave, the underground river vein "
 "that supplies our city has been blocked. Our mission is to remove the "
@@ -1158,7 +1189,7 @@ msgstr ""
 "that supplies our city has been blocked. Our mission is to remove the "
 "obstruction and restore the water supply."
 
-#: dat/maps/opening_scene.lua:327
+#: dat/maps/opening_scene.lua:365
 msgid ""
 "I don't need to remind you all of how important this mission is. The great "
 "sand storms that have swept over this land for the past several days have "
@@ -1170,7 +1201,7 @@ msgstr ""
 "prevented us from achieving this objective sooner, and our local reserves of "
 "water are nearly dry. If we fail to succeed here, our people will perish."
 
-#: dat/maps/opening_scene.lua:329
+#: dat/maps/opening_scene.lua:367
 msgid ""
 "The passages in this cave are too narrow to move our entire unit through. "
 "We'll make our way through one squad at a time and re-assemble at the river "
@@ -1180,15 +1211,15 @@ msgstr ""
 "We'll make our way through one squad at a time and re-assemble at the river "
 "bed."
 
-#: dat/maps/opening_scene.lua:331
+#: dat/maps/opening_scene.lua:369
 msgid "Now form your squads and get moving. I'll see you all underground."
 msgstr "Now form your squads and get moving. I'll see you all underground."
 
-#: dat/maps/opening_scene.lua:337
+#: dat/maps/opening_scene.lua:375
 msgid "Mark, Dester, Claudius. You're in my squad."
 msgstr "Mark, Dester, Claudius. You're in my squad."
 
-#: dat/maps/opening_scene.lua:341
+#: dat/maps/opening_scene.lua:379
 msgid ""
 "The creatures that inhabit this cave are not friendly, so be on your guard "
 "at all times. Now let's get moving."
@@ -1196,33 +1227,73 @@ msgstr ""
 "The creatures that inhabit this cave are not friendly, so be on your guard "
 "at all times. Now let's get moving."
 
-#: dat/maps/river_access_cave.lua:922
+#: dat/maps/opening_scene.lua:709
+msgid ""
+"I can't wait to get back home. Maybe now that the water supply is restored "
+"they'll finally let us take a shower. I've been covered in sand for days."
+msgstr ""
+"I can't wait to get back home. Maybe now that the water supply is restored "
+"they'll finally let us take a shower. I've been covered in sand for days."
+
+#: dat/maps/opening_scene.lua:715
+msgid "That's odd, the sky is brighter in the direction of the city."
+msgstr "That's odd, the sky is brighter in the direction of the city."
+
+#: dat/maps/opening_scene.lua:717
+msgid ""
+"I bet the citizens are out celebrating now that the water's returned. "
+"They're probably preparing to welcome us back as heroes!"
+msgstr ""
+"I bet the citizens are out celebrating now that the water's returned. "
+"They're probably preparing to welcome us back as heroes!"
+
+#: dat/maps/opening_scene.lua:719
+msgid "Maybe...but who would still be awake at this hour?"
+msgstr "Maybe...but who would still be awake at this hour?"
+
+#: dat/maps/opening_scene.lua:721
+msgid "Our scout should be returning soon, we'll find out then."
+msgstr "Our scout should be returning soon, we'll find out then."
+
+#: dat/maps/opening_scene.lua:726
+msgid "Sir!"
+msgstr "Sir!"
+
+#: dat/maps/opening_scene.lua:728
+msgid "Catch your breath soldier. What's wrong?"
+msgstr "Catch your breath soldier. What's wrong?"
+
+#: dat/maps/opening_scene.lua:730
+msgid "The city! *huff* The city...it's ablaze!"
+msgstr "The city! *huff* The city...it's ablaze!"
+
+#: dat/maps/river_access_cave.lua:929
 msgid "Watch your step and keep moving. Its not far to the river bed."
 msgstr "Watch your step and keep moving. Its not far to the river bed."
 
-#: dat/maps/river_access_cave.lua:927
+#: dat/maps/river_access_cave.lua:934
 msgid "Uuuurrrnnnnnggghhhh!"
 msgstr "Uuuurrrnnnnnggghhhh!"
 
-#: dat/maps/river_access_cave.lua:932
+#: dat/maps/river_access_cave.lua:939
 msgid "(Wimpering)"
 msgstr "(Wimpering)"
 
-#: dat/maps/river_access_cave.lua:937
+#: dat/maps/river_access_cave.lua:944
 msgid "She's terrified and won't budge."
 msgstr "She's terrified and won't budge."
 
-#: dat/maps/river_access_cave.lua:939
+#: dat/maps/river_access_cave.lua:946
 msgid "For being such large animals, Mak hounds sure can act cowardly."
 msgstr "For being such large animals, Mak hounds sure can act cowardly."
 
-#: dat/maps/river_access_cave.lua:941
+#: dat/maps/river_access_cave.lua:948
 msgid ""
 "Go on ahead of our group. We'll catch up when we can get her moving again."
 msgstr ""
 "Go on ahead of our group. We'll catch up when we can get her moving again."
 
-#: dat/maps/river_access_cave.lua:946
+#: dat/maps/river_access_cave.lua:953
 msgid ""
 "The river bed is just through this passage. Be careful, the walls are a "
 "little unstable."
@@ -1230,11 +1301,11 @@ msgstr ""
 "The river bed is just through this passage. Be careful, the walls are a "
 "little unstable."
 
-#: dat/maps/river_access_cave.lua:952
+#: dat/maps/river_access_cave.lua:959
 msgid "I'll direct everyone remaining to the longer route. Keep going."
 msgstr "I'll direct everyone remaining to the longer route. Keep going."
 
-#: dat/maps/river_access_cave.lua:957
+#: dat/maps/river_access_cave.lua:964
 msgid ""
 "Damnit, another dead end. I hope that guy was right about there being "
 "another way through."
@@ -1242,15 +1313,15 @@ msgstr ""
 "Damnit, another dead end. I hope that guy was right about there being "
 "another way through."
 
-#: dat/maps/river_access_cave.lua:959
+#: dat/maps/river_access_cave.lua:966
 msgid "Did you guys hear that? What the hell was that noise?"
 msgstr "Did you guys hear that? What the hell was that noise?"
 
-#: dat/maps/river_access_cave.lua:961
+#: dat/maps/river_access_cave.lua:968
 msgid "I don't know, but I've got a bad feeling about this mission."
 msgstr "I don't know, but I've got a bad feeling about this mission."
 
-#: dat/maps/river_access_cave.lua:963
+#: dat/maps/river_access_cave.lua:970
 msgid ""
 "Well the sooner we achieve our objective, the sooner we get out of here and "
 "go home. So move your ass instead of your mouth."
@@ -1258,7 +1329,7 @@ msgstr ""
 "Well the sooner we achieve our objective, the sooner we get out of here and "
 "go home. So move your ass instead of your mouth."
 
-#: dat/maps/river_access_cave.lua:968
+#: dat/maps/river_access_cave.lua:975
 msgid ""
 "This path leads down deeper into the cave. You don't need to go there ... "
 "and trust me, you don't want to."
@@ -1266,11 +1337,11 @@ msgstr ""
 "This path leads down deeper into the cave. You don't need to go there ... "
 "and trust me, you don't want to."
 
-#: dat/maps/river_access_cave.lua:973
+#: dat/maps/river_access_cave.lua:980
 msgid "Dammit, ow ow ow..."
 msgstr "Dammit, ow ow ow..."
 
-#: dat/maps/river_access_cave.lua:978
+#: dat/maps/river_access_cave.lua:985
 msgid ""
 "He sprained his ankle on a loose rock so we're treating his injury. Move on "
 "ahead, you're almost there."
@@ -1278,49 +1349,49 @@ msgstr ""
 "He sprained his ankle on a loose rock so we're treating his injury. Move on "
 "ahead, you're almost there."
 
-#: dat/maps/river_access_cave.lua:987
+#: dat/maps/river_access_cave.lua:994
 msgid "A corpse. That's always a reassuring find in a place like this."
 msgstr "A corpse. That's always a reassuring find in a place like this."
 
-#: dat/maps/river_access_cave.lua:989
+#: dat/maps/river_access_cave.lua:999
 msgid "Hey, I see something under its hand."
 msgstr "Hey, I see something under its hand."
 
-#: dat/maps/river_access_cave.lua:995
+#: dat/maps/river_access_cave.lua:1005
 msgid "Hey! Over here!"
 msgstr "Hey! Over here!"
 
-#: dat/maps/river_access_cave.lua:1001
+#: dat/maps/river_access_cave.lua:1011
 msgid "Look out!"
 msgstr "Look out!"
 
-#: dat/maps/river_access_cave.lua:1007
+#: dat/maps/river_access_cave.lua:1017
 msgid "Woah, are you men alright?"
 msgstr "Woah, are you men alright?"
 
-#: dat/maps/river_access_cave.lua:1009
+#: dat/maps/river_access_cave.lua:1019
 msgid "We're all fine. But the passage has caved in."
 msgstr "We're all fine. But the passage has caved in."
 
-#: dat/maps/river_access_cave.lua:1011
+#: dat/maps/river_access_cave.lua:1021
 msgid ""
 "There's another way around. Its a longer route though. Head through there."
 msgstr ""
 "There's another way around. Its a longer route though. Head through there."
 
-#: dat/maps/river_access_cave.lua:1017
+#: dat/maps/river_access_cave.lua:1027
 msgid "Hey check it out. The water is still running here."
 msgstr "Hey check it out. The water is still running here."
 
-#: dat/maps/river_access_cave.lua:1019
+#: dat/maps/river_access_cave.lua:1029
 msgid "That's good news. Lets stop here briefly and fill up."
 msgstr "That's good news. Lets stop here briefly and fill up."
 
-#: dat/maps/river_access_cave.lua:1025
+#: dat/maps/river_access_cave.lua:1035
 msgid "Finally made it."
 msgstr "Finally made it."
 
-#: dat/maps/river_access_cave.lua:1030
+#: dat/maps/river_access_cave.lua:1040
 msgid ""
 "Listen up! There's a large boulder obstructing the underground river that "
 "flows through here. When we move it aside, we get to head out of this place."
@@ -1328,7 +1399,7 @@ msgstr ""
 "Listen up! There's a large boulder obstructing the underground river that "
 "flows through here. When we move it aside, we get to head out of this place."
 
-#: dat/maps/river_access_cave.lua:1032
+#: dat/maps/river_access_cave.lua:1042
 msgid ""
 "Mikal! Torren! Take your units and secure the ropes around that overgrown "
 "rock. Jasper's unit will prepare the Maks to help us move it. The rest of "
@@ -1340,15 +1411,15 @@ msgstr ""
 "you stay alert and watch our backs. Who knows what the hell may be in this "
 "cave with us."
 
-#: dat/maps/river_access_cave.lua:1037
+#: dat/maps/river_access_cave.lua:1047
 msgid "Hey, I heard that noise earlier. It sounds like its closer now."
 msgstr "Hey, I heard that noise earlier. It sounds like its closer now."
 
-#: dat/maps/river_access_cave.lua:1039
+#: dat/maps/river_access_cave.lua:1049
 msgid "Keep your eyes peeled and your swords ready men."
 msgstr "Keep your eyes peeled and your swords ready men."
 
-#: dat/maps/river_access_cave.lua:1041
+#: dat/maps/river_access_cave.lua:1051
 msgid ""
 "I don't know how you expect to see shit in here. I can barely see my own "
 "hand."
@@ -1356,13 +1427,29 @@ msgstr ""
 "I don't know how you expect to see shit in here. I can barely see my own "
 "hand."
 
-#: dat/maps/river_access_cave.lua:1043
+#: dat/maps/river_access_cave.lua:1053
 msgid "Over there! Watch out!"
 msgstr "Over there! Watch out!"
 
-#: dat/maps/river_access_cave.lua:1049
-msgid "End of map."
-msgstr "End of map."
+#: dat/maps/river_access_cave.lua:1059
+msgid "Damnit, the captain's been wounded along with half our troops."
+msgstr "Damnit, the captain's been wounded along with half our troops."
+
+#: dat/maps/river_access_cave.lua:1061
+msgid ""
+"*cough cough*\n"
+"I'll be alright. Great job taking down that monster men, I'm proud."
+msgstr ""
+"*cough cough*\n"
+"I'll be alright. Great job taking down that monster men, I'm proud."
+
+#: dat/maps/river_access_cave.lua:1063
+msgid ""
+"We've achieved our objective here. Tend to the wounded and then let's make "
+"our way back home."
+msgstr ""
+"We've achieved our objective here. Tend to the wounded and then let's make "
+"our way back home."
 
 #: dat/objects/arm_armor.lua:40
 msgid "Wooden Shield"
@@ -1600,70 +1687,74 @@ msgstr "Encouraging Shout"
 msgid "Increases the strength of all allies."
 msgstr "Increases the strength of all allies."
 
-#: src/modes/battle/battle_command.cpp:252
-msgid "Item<R>Count"
-msgstr "Item<R>Count"
+#: src/modes/battle/battle_actors.cpp:511
+msgid "[Select Action]"
+msgstr "[Select Action]"
 
-#: src/modes/battle/battle_command.cpp:469
-msgid "Skill<R>SP"
-msgstr "Skill<R>SP"
+#: src/modes/battle/battle_command.cpp:261
+msgid "Item<R>Type   ×"
+msgstr "Item<R>Type   ×"
 
-#: src/modes/battle/battle_command.cpp:593
-#: src/modes/battle/battle_command.cpp:599
+#: src/modes/battle/battle_command.cpp:483
+msgid "Skill<R>Type SP"
+msgstr "Skill<R>Type SP"
+
+#: src/modes/battle/battle_command.cpp:607
+#: src/modes/battle/battle_command.cpp:613
 msgid "Attack"
 msgstr "Attack"
 
-#: src/modes/battle/battle_command.cpp:594
-#: src/modes/battle/battle_command.cpp:600
+#: src/modes/battle/battle_command.cpp:608
+#: src/modes/battle/battle_command.cpp:614
 msgid "Defend"
 msgstr "Defend"
 
-#: src/modes/battle/battle_command.cpp:595
-#: src/modes/battle/battle_command.cpp:601
+#: src/modes/battle/battle_command.cpp:609
+#: src/modes/battle/battle_command.cpp:615
 msgid "Support"
 msgstr "Support"
 
-#: src/modes/battle/battle_command.cpp:596
-#: src/modes/battle/battle_command.cpp:602
+#: src/modes/battle/battle_command.cpp:610
+#: src/modes/battle/battle_command.cpp:616
 msgid "Item"
 msgstr "Item"
 
-#: src/modes/battle/battle_command.cpp:1147
+#: src/modes/battle/battle_command.cpp:1178
 msgid "Select Target"
 msgstr "Select Target"
 
-#: src/modes/battle/battle_command.cpp:1152
-#: src/modes/battle/battle_command.cpp:1184
+#: src/modes/battle/battle_command.cpp:1183
+#: src/modes/battle/battle_command.cpp:1215
 msgid "All Allies"
 msgstr "All Allies"
 
-#: src/modes/battle/battle_command.cpp:1155
-#: src/modes/battle/battle_command.cpp:1187
+#: src/modes/battle/battle_command.cpp:1186
+#: src/modes/battle/battle_command.cpp:1218
 msgid "All Enemies"
 msgstr "All Enemies"
 
-#: src/modes/battle/battle_command.cpp:1199
+#: src/modes/battle/battle_command.cpp:1230
 msgid "Select Attack Point"
 msgstr "Select Attack Point"
 
-#: src/modes/battle/battle_command.cpp:1220
+#: src/modes/battle/battle_command.cpp:1251
 msgid "Skill Points: "
 msgstr "Skill Points: "
 
-#: src/modes/battle/battle_command.cpp:1221
-#: src/modes/battle/battle_command.cpp:1229
+#: src/modes/battle/battle_command.cpp:1252
+#: src/modes/battle/battle_command.cpp:1260
 msgid "Target Type: "
 msgstr "Target Type: "
 
-#: src/modes/battle/battle_command.cpp:1222
+#: src/modes/battle/battle_command.cpp:1253
 msgid "Prep Time: "
 msgstr "Prep Time: "
 
-#: src/modes/battle/battle_command.cpp:1223
+#: src/modes/battle/battle_command.cpp:1254
 msgid "Cool Time: "
 msgstr "Cool Time: "
 
-#: src/modes/battle/battle_command.cpp:1228
+#: src/modes/battle/battle_command.cpp:1259
 msgid "Quantity: "
 msgstr "Quantity: "
 
@@ -1731,57 +1822,57 @@ msgstr "Confirm: exit game."
 msgid "Items Found"
 msgstr "Items Found"
 
-#: src/modes/battle/battle_finish.cpp:469
+#: src/modes/battle/battle_finish.cpp:479
 msgid "XP Earned: "
 msgstr "XP Earned: "
 
-#: src/modes/battle/battle_finish.cpp:472
+#: src/modes/battle/battle_finish.cpp:482
 msgid "Drunes Recovered: "
 msgstr "Drunes Recovered: "
 
-#: src/modes/battle/battle_finish.cpp:520
-#: src/modes/battle/battle_finish.cpp:645
+#: src/modes/battle/battle_finish.cpp:530
+#: src/modes/battle/battle_finish.cpp:673
 msgid "Level: "
 msgstr "Level: "
 
-#: src/modes/battle/battle_finish.cpp:521
-#: src/modes/battle/battle_finish.cpp:646
+#: src/modes/battle/battle_finish.cpp:531
+#: src/modes/battle/battle_finish.cpp:674
 msgid "XP: "
 msgstr "XP: "
 
-#: src/modes/battle/battle_finish.cpp:610
+#: src/modes/battle/battle_finish.cpp:638
 msgid "HP:"
 msgstr "HP:"
 
-#: src/modes/battle/battle_finish.cpp:613
+#: src/modes/battle/battle_finish.cpp:641
 msgid "SP:"
 msgstr "SP:"
 
-#: src/modes/battle/battle_finish.cpp:616
+#: src/modes/battle/battle_finish.cpp:644
 msgid "STR:"
 msgstr "STR:"
 
-#: src/modes/battle/battle_finish.cpp:619
+#: src/modes/battle/battle_finish.cpp:647
 msgid "VIG:"
 msgstr "VIG:"
 
-#: src/modes/battle/battle_finish.cpp:622
+#: src/modes/battle/battle_finish.cpp:650
 msgid "FOR:"
 msgstr "FOR:"
 
-#: src/modes/battle/battle_finish.cpp:625
+#: src/modes/battle/battle_finish.cpp:653
 msgid "PRO:"
 msgstr "PRO:"
 
-#: src/modes/battle/battle_finish.cpp:628
+#: src/modes/battle/battle_finish.cpp:656
 msgid "AGI:"
 msgstr "AGI:"
 
-#: src/modes/battle/battle_finish.cpp:631
+#: src/modes/battle/battle_finish.cpp:659
 msgid "EVA:"
 msgstr "EVA:"
 
-#: src/modes/battle/battle_finish.cpp:640
+#: src/modes/battle/battle_finish.cpp:668
 msgid ""
 "New Skill Learned:\n"
 "   "
@@ -1789,11 +1880,11 @@ msgstr ""
 "New Skill Learned:\n"
 "   "
 
-#: src/modes/battle/battle_finish.cpp:766
+#: src/modes/battle/battle_finish.cpp:799
 msgid "The heroes were victorious!"
 msgstr "The heroes were victorious!"
 
-#: src/modes/battle/battle_finish.cpp:770
+#: src/modes/battle/battle_finish.cpp:803
 msgid "But the heroes fell in battle..."
 msgstr "But the heroes fell in battle..."
 
@@ -1810,7 +1901,7 @@ msgid "New Game"
 msgstr "New Game"
 
 #: src/modes/boot/boot.cpp:516 src/modes/boot/boot.cpp:536
-#: src/modes/save/save_mode.cpp:86
+#: src/modes/save/save_mode.cpp:107
 msgid "Load Game"
 msgstr "Load Game"
 
@@ -1995,8 +2086,8 @@ msgid "Confirm"
 msgstr "Confirm"
 
 #: src/modes/boot/boot.cpp:895 src/modes/boot/boot_welcome.cpp:82
-#: src/modes/pause.cpp:71 src/modes/save/save_mode.cpp:87
-#: src/modes/save/save_mode.cpp:100
+#: src/modes/pause.cpp:71 src/modes/save/save_mode.cpp:108
+#: src/modes/save/save_mode.cpp:123 src/modes/save/save_mode.cpp:143
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -2357,15 +2448,17 @@ msgstr "META DEF:"
 msgid "Drunes: "
 msgstr "Drunes: "
 
-#: src/modes/menu/menu_views.cpp:95
+#: src/modes/menu/menu_views.cpp:95 src/modes/save/save_mode.cpp:616
 msgid "Lv: "
 msgstr "Lv: "
 
 #: src/modes/menu/menu_views.cpp:99 src/modes/menu/menu_views.cpp:559
+#: src/modes/save/save_mode.cpp:620
 msgid "HP: "
 msgstr "HP: "
 
 #: src/modes/menu/menu_views.cpp:104 src/modes/menu/menu_views.cpp:563
+#: src/modes/save/save_mode.cpp:625
 msgid "SP: "
 msgstr "SP: "
 
@@ -2461,33 +2554,37 @@ msgstr "Quit Game"
 msgid "Quit to Main Menu"
 msgstr "Quit to Main Menu"
 
-#: src/modes/save/save_mode.cpp:85
+#: src/modes/save/save_mode.cpp:106
 msgid "Save Game"
 msgstr "Save Game"
 
-#: src/modes/save/save_mode.cpp:101
+#: src/modes/save/save_mode.cpp:124
 msgid "File #1"
 msgstr "File #1"
 
-#: src/modes/save/save_mode.cpp:102
+#: src/modes/save/save_mode.cpp:125
 msgid "File #2"
 msgstr "File #2"
 
-#: src/modes/save/save_mode.cpp:103
+#: src/modes/save/save_mode.cpp:126
 msgid "File #3"
 msgstr "File #3"
 
-#: src/modes/save/save_mode.cpp:104
+#: src/modes/save/save_mode.cpp:127
 msgid "File #4"
 msgstr "File #4"
 
-#: src/modes/save/save_mode.cpp:105
+#: src/modes/save/save_mode.cpp:128
 msgid "File #5"
 msgstr "File #5"
 
-#: src/modes/save/save_mode.cpp:106
+#: src/modes/save/save_mode.cpp:129
 msgid "File #6"
 msgstr "File #6"
+
+#: src/modes/save/save_mode.cpp:142
+msgid "Confirm Save"
+msgstr "Confirm Save"
 
 #: src/modes/shop/shop.cpp:126
 msgid "Items"
