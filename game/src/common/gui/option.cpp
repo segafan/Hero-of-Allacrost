@@ -661,9 +661,8 @@ void OptionBox::InputUp() {
 	if (_ChangeSelection(-1, false) == false)
 		return;
 
-	_event = VIDEO_OPTION_BOUNDS_UP;
 	int32 row = _selection / _number_columns;
-/*
+
     if (_skip_disabled) {
         while (_options[_selection].disabled == true) {
             if (row <= 0 && _vertical_wrap_mode == VIDEO_WRAP_MODE_NONE)
@@ -671,7 +670,9 @@ void OptionBox::InputUp() {
             else
                 InputUp();
         }
-    }*/
+    }
+
+	_event = VIDEO_OPTION_BOUNDS_UP;
 }
 
 
@@ -684,9 +685,8 @@ void OptionBox::InputDown() {
 	if (_ChangeSelection(1, false) == false)
 		return;
 
-	_event = VIDEO_OPTION_BOUNDS_DOWN;
 	int32 row = _selection / _number_columns;
-/*
+
     if (_skip_disabled) {
         while (_options[_selection].disabled == true) {
             if (row >= _number_rows-1 && _vertical_wrap_mode == VIDEO_WRAP_MODE_NONE)
@@ -694,7 +694,9 @@ void OptionBox::InputDown() {
             else
                 InputDown();
         }
-    }*/
+    }
+
+	_event = VIDEO_OPTION_BOUNDS_DOWN;
 }
 
 
@@ -707,9 +709,8 @@ void OptionBox::InputLeft() {
 	if (_ChangeSelection(-1, true) == false)
 		return;
 
-	_event = VIDEO_OPTION_BOUNDS_LEFT;
 	int32 col = _selection % _number_columns;
-/*
+
     if (_skip_disabled) {
         while (_options[_selection].disabled == true) {
             if (col <= 0 && _horizontal_wrap_mode == VIDEO_WRAP_MODE_NONE)
@@ -717,7 +718,9 @@ void OptionBox::InputLeft() {
             else
                 InputLeft();
         }
-    }*/
+    }
+
+	_event = VIDEO_OPTION_BOUNDS_LEFT;
 }
 
 
@@ -730,9 +733,8 @@ void OptionBox::InputRight() {
 	if (_ChangeSelection(1, true) == false)
 		return;
 
-	_event = VIDEO_OPTION_BOUNDS_RIGHT;
 	int32 col = _selection % _number_columns;
-/*
+
     if (_skip_disabled) {
         while (_options[_selection].disabled == true) {
             if (col >= _number_columns-1 && _horizontal_wrap_mode == VIDEO_WRAP_MODE_NONE)
@@ -740,7 +742,9 @@ void OptionBox::InputRight() {
             else
                 InputRight();
         }
-    }*/
+    }
+
+	_event = VIDEO_OPTION_BOUNDS_RIGHT;
 }
 
 // -----------------------------------------------------------------------------
