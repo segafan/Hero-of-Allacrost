@@ -235,6 +235,9 @@ public:
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	virtual void Draw();
 
+    //! \brief Draws the dialogue icon at the top of the sprite
+    virtual void DrawDialog();
+
 	/** \brief Adds a new reference to a dialogue that the sprite uses
 	*** \param dialogue_id The ID number of the dialogue
 	*** \note It is valid for a dialogue to be referenced more than once by a sprite

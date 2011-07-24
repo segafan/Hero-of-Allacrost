@@ -447,7 +447,15 @@ void ObjectSupervisor::DrawSkyObjects(const MapFrame* const frame) {
 	}
 }
 
-
+void ObjectSupervisor::DrawDialogIcons(const MapFrame* const frame) {
+    MapSprite *mapSprite;
+	for (uint32 i = 0; i < _ground_objects.size(); i++) {
+		if (_ground_objects[i]->GetObjectType() == SPRITE_TYPE) {
+		    mapSprite = static_cast<MapSprite*>(_ground_objects[i]);
+			mapSprite->DrawDialog();
+		}
+	}
+}
 
 MapObject* ObjectSupervisor::FindNearestObject(const VirtualSprite* sprite, float search_distance) {
 	// NOTE: We don't check if the argument is NULL here for performance reasons

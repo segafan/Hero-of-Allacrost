@@ -698,6 +698,8 @@ void MapMode::_DrawMapLayers() {
 	_tile_supervisor->DrawUpperLayer(&_map_frame);
 
 	_object_supervisor->DrawSkyObjects(&_map_frame);
+
+	_object_supervisor->DrawDialogIcons(&_map_frame);
 } // void MapMode::_DrawMapLayers()
 
 
