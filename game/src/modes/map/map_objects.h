@@ -522,6 +522,7 @@ public:
 	void DrawGroundObjects(const MapFrame* const frame, const bool second_pass);
 	void DrawPassObjects(const MapFrame* const frame);
 	void DrawSkyObjects(const MapFrame* const frame);
+	void DrawDialogIcons(const MapFrame* const frame);
 	//@}
 
 	/** \brief Finds the nearest map object within a certain distance of a sprite
