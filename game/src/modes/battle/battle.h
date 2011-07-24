@@ -9,6 +9,7 @@
 
 /** ****************************************************************************
 *** \file    battle.h
+*** \author  Tyler Olsen, roots@allacrost.org
 *** \author  Viljami Korhonen, mindflayer@allacrost.org
 *** \author  Corey Hoffstein, visage@allacrost.org
 *** \author  Andy Gardner, chopperdave@allacrost.org
@@ -37,77 +38,6 @@
 namespace hoa_battle {
 
 extern bool BATTLE_DEBUG;
-
-//! \brief An internal namespace to be used only within the battle code. Don't use this namespace anywhere else!
-namespace private_battle {
-
-/** \brief Assists BattleMode process certain sequences such as the start and end of the battle
-***
-*** Certain sequences such as when a battle first begins require a lot of operations that are not done for the
-*** remaining 99% of the time that a battle is active. The purpose of this class is to enable those custom operations
-*** and prevent the BattleMode class from being inundated with members and methods that are rarely used. This class
-*** should support multiple different sequences so some members and methods may only pertain to one sequence or another,
-*** while other data may be shared among sequences.
-***
-*** Currently this class supports the following sequences:
-***   - Battle initialization
-***   - TODO: End of battle action to finish screen
-***   - Battle exit
-***
-*** \note BattleMode declares this class as a friend, and hence this class has access to all private data and methods of
-*** the BattleMode class.
-**/
-class SequenceSupervisor {
-public:
-	SequenceSupervisor(BattleMode* current_instance);
-
-	~SequenceSupervisor();
-
-	//! \brief Main function which processes the sequence from its start to its completion
-	void Update();
-
-	//! \brief Draws all contents of the battle to the screen appropriately
-	void Draw();
-
-private:
-	//! \brief A pointer to the active battle mode instance, retained locally in this class only for convience
-	BattleMode* _battle;
-
-	//! \brief Used to represent the state of which "step" we are on in producing a particular sequence
-	uint32 _sequence_step;
-
-	//! \brief A timer utilized for many different purposes when playing out a sequence
-	hoa_system::SystemTimer _sequence_timer;
-
-	//! \brief Color whose alpha value is used for fading background graphics in and out
-	hoa_video::Color _background_fade;
-
-	//! \brief A position offset used to move GUI objects from off screen to their permanent positions
-	float _gui_position_offset;
-
-	//! \brief Updates state when the battle is in its initial sequence
-	void _UpdateInitialSequence();
-
-	//! \brief Updates state when the battle is in its exiting sequence
-	void _UpdateExitingSequence();
-
-	//! \brief Main draw function for the initial sequence
-	void _DrawInitialSequence();
-
-	//! \brief Main draw function for the exiting sequence
-	void _DrawExitingSequence();
-
-	//! \brief Draws the battle background and other environmental graphics
-	void _DrawBackgroundGraphics();
-
-	//! \brief Draws all sprites to the screen
-	void _DrawSprites();
-
-	//! \brief Draws the bottom battle menu, stamina bar, and other GUI objects
-	void _DrawGUI();
-}; // class SequenceSupervisor
-
-} // namespace private_battle
 
 
 /** ****************************************************************************

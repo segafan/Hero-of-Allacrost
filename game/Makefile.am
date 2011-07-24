@@ -261,6 +261,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/battle/battle_finish.h \
 	$(MODES_DIR)/battle/battle_indicators.cpp \
 	$(MODES_DIR)/battle/battle_indicators.h \
+	$(MODES_DIR)/battle/battle_sequence.cpp \
+	$(MODES_DIR)/battle/battle_sequence.h \
 	$(MODES_DIR)/battle/battle_utils.cpp \
 	$(MODES_DIR)/battle/battle_utils.h \
 	$(MODES_DIR)/boot/boot.cpp \
