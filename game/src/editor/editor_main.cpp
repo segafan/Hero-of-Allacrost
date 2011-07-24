@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 	GlobalManager = GameGlobal::SingletonCreate();
 	GlobalManager->SingletonInitialize();
 
-	hoa_defs::BindGlobalsToLua();
+	hoa_defs::BindCommonCode();
 
 	Editor* editor = new Editor();
 	editor->setCaption("Hero of Allacrost Level Editor");

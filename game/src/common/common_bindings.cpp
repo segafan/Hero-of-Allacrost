@@ -8,28 +8,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /** ***************************************************************************
-*** \file    defs_global.cpp
+*** \file    common_bindings.cpp
 *** \author  Daniel Steuernol, steu@allacrost.org
-*** \brief   Source file for Lua binding code
+*** \brief   Lua bindings for common game code
 ***
-*** All binding code for the globals is contained within this file.
+*** All bindings for the common code is contained within this file.
 *** Therefore, everything that you see bound within this file will be made
-*** available in Lua. All binding code is contained within this single file
-*** because the binding code greatly increases the compilation time, but this
-*** effect is mitigated if it is contained within a single file (Note: Binding
-*** is now split out according to dependency level (engine, global, modes).
+*** available in Lua. This file also binds some of the Allacrost utility code
+*** found in src/utils.h.
 ***
 *** \note To most C++ programmers, the syntax of the binding code found in this
 *** file may be very unfamiliar and obtuse. Refer to the Luabind documentation
 *** as necessary to gain an understanding of this code style.
-***
-*** \todo All commond code is bound here for now, not just the global code. This
-*** should probably be changed in the future as global is a subset of common, not
-*** the other way around.
 *** **************************************************************************/
 
 #include "defs.h"
+#include "utils.h"
 
+#include "common.h"
 #include "dialogue.h"
 
 #include "global.h"
@@ -43,8 +39,20 @@ using namespace luabind;
 
 namespace hoa_defs {
 
-void BindGlobalsToLua()
-{
+void BindCommonCode() {
+	// ---------- Bind Utils Functions
+	{
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_utils")
+	[
+		def("RandomFloat", (float(*)(void)) &hoa_utils::RandomFloat)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_utils")
+	[
+		def("RandomBoundedInteger", &hoa_utils::RandomBoundedInteger)
+	];
+	}
+
 	// ---------- Bind Common Components
 	{
 	using namespace hoa_common;
@@ -370,9 +378,9 @@ void BindGlobalsToLua()
 
 	} // End using global namespaces
 
-	// Bind GlobalManager to Lua
+	// Bind the GlobalManager object to Lua
 	luabind::object global_table = luabind::globals(hoa_script::ScriptManager->GetGlobalState());
 	global_table["GlobalManager"] = hoa_global::GlobalManager;
-} // BindGlobalsToLua
+} // void BindCommonCode()
 
 } // namespace hoa_defs

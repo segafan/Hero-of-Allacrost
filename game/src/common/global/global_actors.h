@@ -590,7 +590,7 @@ protected:
 class GlobalCharacterGrowth {
 	friend class GameGlobal;
 	friend class GlobalCharacter;
-	friend void hoa_defs::BindGlobalsToLua();
+	friend void hoa_defs::BindCommonCode();
 
 public:
 	GlobalCharacterGrowth(GlobalCharacter* owner);
@@ -913,7 +913,7 @@ protected:
 *** enemies (notably bosses) do not have this randomization applied to their stats
 *** in order to make sure that bosses are challenging, but not overwhemlingly strong
 *** or surprisingly weak.
-*** 
+***
 *** Enemies have one to several different skills that they may use in battle. An enemy
 *** has to have at least one skill defined for it, otherwise they would not be able to
 *** perform any action in battle. Enemy's may also carry a small chance of dropping an
@@ -929,9 +929,9 @@ public:
 	/** \brief Initializes the enemy and prepares it for battle
 	***
 	*** This function sets the enemy's experience level, modifies its stats using Guassian
-	*** random values, and constructs the skills that the enemy is capable of using. Call this 
-	*** function once only, because after the enemy has skills enabled it will not be able to 
-	*** re-initialize. If you need to initialize the enemy once more, you'll have to create a 
+	*** random values, and constructs the skills that the enemy is capable of using. Call this
+	*** function once only, because after the enemy has skills enabled it will not be able to
+	*** re-initialize. If you need to initialize the enemy once more, you'll have to create a
 	*** brand new GlobalEnemy object and initialize that instead.
 	***
 	*** \note Certain enemies will skip the stat modification step.

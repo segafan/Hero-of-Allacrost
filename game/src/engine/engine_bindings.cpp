@@ -8,16 +8,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /** ***************************************************************************
-*** \file    defs_engine.cpp
+*** \file    engine_bindings.cpp
 *** \author  Daniel Steuernol, steu@allacrost.org
-*** \brief   Source file for Lua binding code
+*** \brief   Lua bindings for Allacrost engine code
 ***
-*** All binding code for the game engine is contained within this file.
+*** All bindings for the engine code is contained within this file.
 *** Therefore, everything that you see bound within this file will be made
-*** available in Lua. All binding code is contained within this single file
-*** because the binding code greatly increases the compilation time, but this
-*** effect is mitigated if it is contained within a single file (Note: Binding
-*** is now split out according to dependency level (engine, global, modes).
+*** available in Lua.
 ***
 *** \note To most C++ programmers, the syntax of the binding code found in this
 *** file may be very unfamiliar and obtuse. Refer to the Luabind documentation
@@ -39,8 +36,7 @@ using namespace luabind;
 
 namespace hoa_defs {
 
-void BindEngineToLua()
-{
+void BindEngineCode() {
 	// ----- Audio Engine Bindings
 	{
 	using namespace hoa_audio;
@@ -198,6 +194,6 @@ void BindEngineToLua()
 	global_table["ScriptManager"]    = hoa_script::ScriptManager;
 	global_table["SystemManager"]    = hoa_system::SystemManager;
 	global_table["VideoManager"]     = hoa_video::VideoManager;
-} // BindEngineToLua
+} // void BindEngineCode()
 
 } // namespace hoa_defs

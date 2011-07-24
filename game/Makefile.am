@@ -199,7 +199,7 @@ engine_SOURCES = \
 	$(ENGINE_DIR)/input.h \
 	$(ENGINE_DIR)/mode_manager.cpp \
 	$(ENGINE_DIR)/mode_manager.h \
-	$(ENGINE_DIR)/defs_engine.cpp \
+	$(ENGINE_DIR)/engine_bindings.cpp \
 	$(audio_SOURCES) \
 	$(video_SOURCES) \
 	$(script_SOURCES)
@@ -217,8 +217,7 @@ global_SOURCES = \
 	$(GLOBAL_DIR)/global_skills.cpp \
 	$(GLOBAL_DIR)/global_skills.h \
 	$(GLOBAL_DIR)/global_utils.cpp \
-	$(GLOBAL_DIR)/global_utils.h \
-	$(GLOBAL_DIR)/defs_global.cpp
+	$(GLOBAL_DIR)/global_utils.h
 
 GUI_DIR = src/common/gui
 gui_SOURCES = \
@@ -235,6 +234,7 @@ COMMON_DIR = src/common
 common_SOURCES = \
 	$(COMMON_DIR)/common.cpp \
 	$(COMMON_DIR)/common.h \
+	$(COMMON_DIR)/common_bindings.cpp \
 	$(COMMON_DIR)/dialogue.cpp \
 	$(COMMON_DIR)/dialogue.h \
 	$(global_SOURCES) \
@@ -242,7 +242,7 @@ common_SOURCES = \
 
 MODES_DIR = src/modes
 modes_SOURCES = \
-	$(MODES_DIR)/defs_modes.cpp \
+	$(MODES_DIR)/mode_bindings.cpp \
 	$(MODES_DIR)/battle/battle.cpp \
 	$(MODES_DIR)/battle/battle.h \
 	$(MODES_DIR)/battle/battle_actions.cpp \
@@ -349,7 +349,7 @@ allacrost_editor_SOURCES = \
 	src/utils.cpp \
 	src/utils.h \
 	$(luabind_SOURCES) \
-	$(global_SOURCES) \
+	$(common_SOURCES) \
 	$(ENGINE_DIR)/mode_manager.cpp \
 	$(ENGINE_DIR)/mode_manager.h \
 	$(ENGINE_DIR)/system.cpp \
@@ -366,7 +366,6 @@ allacrost_SOURCES = \
 	src/main.cpp \
 	src/main_options.cpp \
 	src/main_options.h \
-	src/defs.cpp \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h \
