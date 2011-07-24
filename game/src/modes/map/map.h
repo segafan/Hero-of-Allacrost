@@ -84,7 +84,7 @@ namespace private_map {
 *** classes should be viewed as extensions of the MapMode class.
 *** ***************************************************************************/
 class MapMode : public hoa_mode_manager::GameMode {
-	friend void hoa_defs::BindModesToLua();
+	friend void hoa_defs::BindModeCode();
 
 public:
 	//! \param filename The name of the Lua file that retains all data about the map to create

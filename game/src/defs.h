@@ -379,7 +379,7 @@ namespace hoa_shop {
 // Miscellaneous Declarations
 ////////////////////////////////////////////////////////////////////////////////
 
-// Utils declarations, see src/
+// Utils declarations, see src/utils.h
 namespace hoa_utils {
 	extern bool UTILS_DEBUG;
 	class ustring;
@@ -391,17 +391,16 @@ namespace hoa_utils {
 // Binding Declarations
 ////////////////////////////////////////////////////////////////////////////////
 
-//! \brief Namespace which contains the single Lua binding function
+//! \brief Namespace which contains all binding functions
 namespace hoa_defs {
 
 /** \brief Contains the binding code which makes the C++ engine available to Lua
 *** This method should <b>only be called once</b>. It must be called after the
 *** ScriptEngine is initialized, otherwise the application will crash.
 **/
-void BindEngineToLua();
-void BindGlobalsToLua();
-void BindModesToLua();
-void BindUtilsToLua();
+void BindEngineCode();
+void BindCommonCode();
+void BindModeCode();
 
 } // namespace hoa_defs
 

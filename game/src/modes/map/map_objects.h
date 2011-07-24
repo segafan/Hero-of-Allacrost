@@ -460,7 +460,7 @@ class ObjectSupervisor {
 	friend class hoa_map::MapMode;
 	// TEMP: for allowing context zones to access all objects
 	friend class hoa_map::private_map::ContextZone;
-	friend void hoa_defs::BindModesToLua();
+	friend void hoa_defs::BindModeCode();
 
 public:
 	ObjectSupervisor();
