@@ -293,13 +293,13 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 
 			BattleMode *BM = new BattleMode();
 
-			string enemy_battle_music = enemy->GetBattleMusicTheme();
-			if (enemy_battle_music != "")
-				BM->AddMusic(enemy_battle_music);
-
 			string battle_background = enemy->GetBattleBackground();
 			if (battle_background != "")
-				BM->SetBackground(battle_background);
+				BM->GetMedia().SetBackgroundImage(battle_background);
+
+			string enemy_battle_music = enemy->GetBattleMusicTheme();
+			if (enemy_battle_music != "")
+				BM->GetMedia().SetBattleMusic(enemy_battle_music);
 
 			const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
 			for (uint32 i = 0; i < enemy_party.size(); i++) {

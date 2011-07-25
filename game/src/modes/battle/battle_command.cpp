@@ -112,7 +112,7 @@ CharacterCommandSettings::CharacterCommandSettings(BattleCharacter* character, M
 		_attack_list.AddOption(ustring());
 		_attack_list.AddOptionElementText(i, skill_list->at(i)->GetName());
 		_attack_list.AddOptionElementPosition(i, TARGET_ICON_OFFSET);
-		_attack_list.AddOptionElementImage(i, BattleMode::CurrentInstance()->GetTargetTypeIcon(skill_list->at(i)->GetTargetType()));
+		_attack_list.AddOptionElementImage(i, BattleMode::CurrentInstance()->GetMedia().GetTargetTypeIcon(skill_list->at(i)->GetTargetType()));
 		_attack_list.AddOptionElementAlignment(i, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
 		_attack_list.AddOptionElementText(i, MakeUnicodeString(NumberToString(skill_list->at(i)->GetSPRequired())));
 		if (skill_list->at(i)->GetSPRequired() > _character->GetGlobalCharacter()->GetSkillPoints()) {
@@ -127,7 +127,7 @@ CharacterCommandSettings::CharacterCommandSettings(BattleCharacter* character, M
 		_defend_list.AddOption(ustring());
 		_defend_list.AddOptionElementText(i, skill_list->at(i)->GetName());
 		_defend_list.AddOptionElementPosition(i, TARGET_ICON_OFFSET);
-		_defend_list.AddOptionElementImage(i, BattleMode::CurrentInstance()->GetTargetTypeIcon(skill_list->at(i)->GetTargetType()));
+		_defend_list.AddOptionElementImage(i, BattleMode::CurrentInstance()->GetMedia().GetTargetTypeIcon(skill_list->at(i)->GetTargetType()));
 		_defend_list.AddOptionElementAlignment(i, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
 		_defend_list.AddOptionElementText(i, MakeUnicodeString(NumberToString(skill_list->at(i)->GetSPRequired())));
 		if (skill_list->at(i)->GetSPRequired() > _character->GetGlobalCharacter()->GetSkillPoints()) {
@@ -142,7 +142,7 @@ CharacterCommandSettings::CharacterCommandSettings(BattleCharacter* character, M
 		_support_list.AddOption(ustring());
 		_support_list.AddOptionElementText(i, skill_list->at(i)->GetName());
 		_support_list.AddOptionElementPosition(i, TARGET_ICON_OFFSET);
-		_support_list.AddOptionElementImage(i, BattleMode::CurrentInstance()->GetTargetTypeIcon(skill_list->at(i)->GetTargetType()));
+		_support_list.AddOptionElementImage(i, BattleMode::CurrentInstance()->GetMedia().GetTargetTypeIcon(skill_list->at(i)->GetTargetType()));
 		_support_list.AddOptionElementAlignment(i, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
 		_support_list.AddOptionElementText(i, MakeUnicodeString(NumberToString(skill_list->at(i)->GetSPRequired())));
 		if (skill_list->at(i)->GetSPRequired() > _character->GetGlobalCharacter()->GetSkillPoints()) {
@@ -299,7 +299,7 @@ void ItemCommand::ConstructList() {
 		_item_list.AddOption();
 		_item_list.AddOptionElementText(option_index, _items[i].GetItem().GetName());
 		_item_list.AddOptionElementPosition(option_index, TARGET_ICON_OFFSET);
-		_item_list.AddOptionElementImage(option_index, BattleMode::CurrentInstance()->GetTargetTypeIcon(_items[i].GetTargetType()));
+		_item_list.AddOptionElementImage(option_index, BattleMode::CurrentInstance()->GetMedia().GetTargetTypeIcon(_items[i].GetTargetType()));
 		_item_list.AddOptionElementAlignment(option_index, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
 		_item_list.AddOptionElementText(option_index, MakeUnicodeString(NumberToString(_items[i].GetAvailableCount())));
 
@@ -401,11 +401,11 @@ void ItemCommand::UpdateList() {
 
 	if (InputManager->UpPress()) {
 		_item_list.InputUp();
-		BattleMode::CurrentInstance()->GetCommandSupervisor()->cursor_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 	}
 	else if (InputManager->DownPress()) {
 		_item_list.InputDown();
-		BattleMode::CurrentInstance()->GetCommandSupervisor()->cursor_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 	}
 }
 
@@ -460,7 +460,7 @@ void ItemCommand::_RefreshEntry(uint32 entry) {
 	_item_list.SetOptionText(entry, ustring());
 	_item_list.AddOptionElementText(entry, _items[item_index].GetItem().GetName());
 	_item_list.AddOptionElementPosition(entry, TARGET_ICON_OFFSET);
-	_item_list.AddOptionElementImage(entry, BattleMode::CurrentInstance()->GetTargetTypeIcon(_items[item_index].GetTargetType()));
+	_item_list.AddOptionElementImage(entry, BattleMode::CurrentInstance()->GetMedia().GetTargetTypeIcon(_items[item_index].GetTargetType()));
 	_item_list.AddOptionElementAlignment(entry, VIDEO_OPTION_ELEMENT_RIGHT_ALIGN);
 	_item_list.AddOptionElementText(entry, MakeUnicodeString(NumberToString(_items[item_index].GetAvailableCount())));
 }
@@ -534,11 +534,11 @@ void SkillCommand::UpdateList() {
 
 	if (InputManager->UpPress()) {
 		_skill_list->InputUp();
-		BattleMode::CurrentInstance()->GetCommandSupervisor()->cursor_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 	}
 	else if (InputManager->DownPress()) {
 		_skill_list->InputDown();
-		BattleMode::CurrentInstance()->GetCommandSupervisor()->cursor_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 	}
 }
 
@@ -570,22 +570,6 @@ CommandSupervisor::CommandSupervisor() :
 	_item_command(_command_window),
 	_skill_command(_command_window)
 {
-	bool sound_load_failure = false;
-	if (confirm_sound.LoadAudio("snd/confirm.wav") == false)
-		sound_load_failure = true;
-	if (cancel_sound.LoadAudio("snd/cancel.wav") == false)
-		sound_load_failure = true;
-	if (cursor_sound.LoadAudio("snd/confirm.wav") == false)
-		sound_load_failure = true;
-	if (invalid_sound.LoadAudio("snd/cancel.wav") == false)
-		sound_load_failure = true;
-	if (finish_sound.LoadAudio("snd/confirm.wav") == false)
-		sound_load_failure = true;
-
-	if (sound_load_failure == true) {
-		PRINT_WARNING << "failed to load one or more battle command menu sounds" << endl;
-	}
-
 	if (_command_window.Create(512.0f, 128.0f) == false) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to create menu window" << endl;
 	}
@@ -930,7 +914,7 @@ void CommandSupervisor::_UpdateCategory() {
 		else {
 			_ChangeState(COMMAND_STATE_INVALID);
 			BattleMode::CurrentInstance()->NotifyCommandCancel();
-			cancel_sound.Play();
+			BattleMode::CurrentInstance()->GetMedia().cancel_sound.Play();
 		}
 	}
 
@@ -938,21 +922,21 @@ void CommandSupervisor::_UpdateCategory() {
 		if (_category_options.IsOptionEnabled(_category_options.GetSelection()) == true) {
 			_active_settings->SetLastCategory(_category_options.GetSelection());
 			_ChangeState(COMMAND_STATE_ACTION);
-			confirm_sound.Play();
+			BattleMode::CurrentInstance()->GetMedia().confirm_sound.Play();
 		}
 		else {
-			invalid_sound.Play();
+			BattleMode::CurrentInstance()->GetMedia().invalid_sound.Play();
 		}
 	}
 
 	else if (InputManager->LeftPress()) {
 		_category_options.InputLeft();
-		cursor_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 	}
 
 	else if (InputManager->RightPress()) {
 		_category_options.InputRight();
-		cursor_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 	}
 }
 
@@ -961,7 +945,7 @@ void CommandSupervisor::_UpdateCategory() {
 void CommandSupervisor::_UpdateAction() {
 	if (InputManager->CancelPress()) {
 		_ChangeState(COMMAND_STATE_CATEGORY);
-		cancel_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cancel_sound.Play();
 		return;
 	}
 
@@ -972,16 +956,16 @@ void CommandSupervisor::_UpdateAction() {
             bool is_skill_enabled = _skill_command.GetSelectedSkillEnabled();
 			if (is_skill_enabled == true) {
 				_ChangeState(COMMAND_STATE_ACTOR);
-				confirm_sound.Play();
+				BattleMode::CurrentInstance()->GetMedia().confirm_sound.Play();
 			}
 			else {
-				invalid_sound.Play();
+				BattleMode::CurrentInstance()->GetMedia().invalid_sound.Play();
 			}
 		}
 
 		else if (InputManager->MenuPress()) {
 			_ChangeState(COMMAND_STATE_INFORMATION);
-			confirm_sound.Play();
+			BattleMode::CurrentInstance()->GetMedia().confirm_sound.Play();
 		}
 
 		else {
@@ -994,16 +978,16 @@ void CommandSupervisor::_UpdateAction() {
 		if (InputManager->ConfirmPress()) {
 			if (_selected_item != NULL) {
 				_ChangeState(COMMAND_STATE_ACTOR);
-				confirm_sound.Play();
+				BattleMode::CurrentInstance()->GetMedia().confirm_sound.Play();
 			}
 			else {
-				invalid_sound.Play();
+				BattleMode::CurrentInstance()->GetMedia().invalid_sound.Play();
 			}
 		}
 
 		else if (InputManager->MenuPress()) {
 			_ChangeState(COMMAND_STATE_INFORMATION);
-			confirm_sound.Play();
+			BattleMode::CurrentInstance()->GetMedia().confirm_sound.Play();
 		}
 
 		else {
@@ -1022,7 +1006,7 @@ void CommandSupervisor::_UpdateAction() {
 void CommandSupervisor::_UpdateActorTarget() {
 	if (InputManager->CancelPress()) {
 		_ChangeState(COMMAND_STATE_ACTION);
-		cancel_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cancel_sound.Play();
 	}
 
 	else if (InputManager->ConfirmPress()) {
@@ -1043,7 +1027,7 @@ void CommandSupervisor::_UpdateActorTarget() {
 		if ((IsTargetActor(_selected_target.GetType()) == true) || (IsTargetPoint(_selected_target.GetType()) == true)) {
 			_selected_target.SelectNextActor(GetCommandCharacter(), InputManager->UpPress());
 			_CreateActorTargetText();
-			cursor_sound.Play();
+			BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 		}
 	}
 }
@@ -1053,7 +1037,7 @@ void CommandSupervisor::_UpdateActorTarget() {
 void CommandSupervisor::_UpdateAttackPointTarget() {
 	if (InputManager->CancelPress()) {
 		_ChangeState(COMMAND_STATE_ACTOR);
-		cancel_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cancel_sound.Play();
 	}
 
 	else if (InputManager->ConfirmPress()) {
@@ -1068,7 +1052,7 @@ void CommandSupervisor::_UpdateAttackPointTarget() {
 
 		_selected_target.SelectNextPoint(GetCommandCharacter(), InputManager->DownPress());
 		_CreateAttackPointTargetText();
-		cursor_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 	}
 }
 
@@ -1077,12 +1061,12 @@ void CommandSupervisor::_UpdateAttackPointTarget() {
 void CommandSupervisor::_UpdateInformation() {
 	if (InputManager->CancelPress() || InputManager->MenuPress()) {
 		_state = COMMAND_STATE_ACTION;
-		cancel_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cancel_sound.Play();
 	}
 
 	else if (InputManager->ConfirmPress()) {
 		_ChangeState(COMMAND_STATE_ACTOR);
-		cancel_sound.Play();
+		BattleMode::CurrentInstance()->GetMedia().cancel_sound.Play();
 	}
 
 	// Change selected skill/item and update the information text
@@ -1091,12 +1075,12 @@ void CommandSupervisor::_UpdateInformation() {
 		if (_IsSkillCategorySelected() == true) {
 			_skill_command.UpdateList();
 			_selected_skill = _skill_command.GetSelectedSkill();
-			cursor_sound.Play();
+			BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 		}
 		else if (_IsItemCategorySelected() == true) {
 			_item_command.UpdateList();
 			_selected_item = _item_command.GetSelectedItem();
-			cursor_sound.Play();
+			BattleMode::CurrentInstance()->GetMedia().cursor_sound.Play();
 		}
 
 		_CreateInformationText();
@@ -1287,7 +1271,7 @@ void CommandSupervisor::_FinalizeCommand() {
 
 	_ChangeState(COMMAND_STATE_INVALID);
 	BattleMode::CurrentInstance()->NotifyCharacterCommandComplete(character);
-	finish_sound.Play();
+	BattleMode::CurrentInstance()->GetMedia().finish_sound.Play();
 }
 
 } // namespace private_battle

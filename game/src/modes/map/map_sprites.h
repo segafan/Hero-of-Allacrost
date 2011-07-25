@@ -23,8 +23,6 @@
 // Allacrost engines
 #include "video.h"
 
-#include "battle_events.h"
-
 // Local map mode headers
 #include "map_utils.h"
 #include "map_objects.h"
@@ -505,11 +503,6 @@ public:
 
 	void ChangeStateHostile()
 		{ updatable = true; _state = HOSTILE; no_collision = false; _color.SetAlpha(1.0); }
-
-	void AddBattleEvent(uint32 n)
-		{ hoa_battle::BattleEvent* thisEvent = new hoa_battle::BattleEvent(n); _battle_events.push_back(thisEvent); }
-
-	std::vector<hoa_battle::BattleEvent*> GetBattleEvents() { return _battle_events; }
 	//@}
 
 private:
@@ -550,9 +543,6 @@ private:
 	*** The numbers contained within this member are ID numbers for the enemy. If the
 	**/
 	std::vector<std::vector<uint32> > _enemy_parties;
-
-	//! \brief Vector containing custom scripts for this battle
-	std::vector<hoa_battle::BattleEvent*> _battle_events;
 }; // class EnemySprite : public MapSprite
 
 } // namespace private_map

@@ -624,7 +624,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		// Draw the cover image over the top of the bar
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Move(293.0f, 84.0f + y_offset);
-		BattleMode::CurrentInstance()->GetCharacterBarCovers().Draw();
+		BattleMode::CurrentInstance()->GetMedia().character_bar_covers.Draw();
 
 		// TODO: The SetText calls below should not be done here. They should be made whenever the character's HP/SP
 		// is modified. This re-renders the text every frame regardless of whether or not the HP/SP changed so its
@@ -671,7 +671,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		else
 			button_index = 6;
 		button_index += order;
-		BattleMode::CurrentInstance()->GetCharacterActionButton(button_index)->Draw();
+		BattleMode::CurrentInstance()->GetMedia().GetCharacterActionButton(button_index)->Draw();
 	}
 
 	// Draw the action text

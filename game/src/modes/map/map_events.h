@@ -359,13 +359,10 @@ public:
 	void SetMusic(std::string filename);
 	void SetBackground(std::string filename);
 	void AddEnemy(uint32 enemy_id);
-	void AddBattleEvent(uint32 event_id);
+
 protected:
 	//! \brief ID numbers for enemies to generate
 	std::vector<uint32> _enemy_ids;
-
-	//! \brief ID numbers for BattleEvents to add (not to be confused with map events)
-	std::vector<uint32> _battle_event_ids;
 
 	//! \brief Filename for battle music
 	std::string _battle_music;

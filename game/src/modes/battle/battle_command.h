@@ -345,7 +345,7 @@ private:
 *** Another example would be when another character has not used an item that they had intended to
 *** (either due to that character's death or being unable to find a valid target). In this situation,
 *** the item list needs to be updated to reflect the newly available item. Notifications are sent to
-*** this class by BattleMode, and it may pass on some notifacations to the ItemCommand and SkilLCommand
+*** this class by BattleMode, and it may pass on some notifacations to the ItemCommand and SkillCommand
 *** class where appropriate.
 *** ***************************************************************************/
 class CommandSupervisor {
@@ -353,11 +353,6 @@ public:
 	CommandSupervisor();
 
 	~CommandSupervisor();
-
-	/** \brief Various sounds that are played as the player performs actions on the command menu
-	*** These members are public so that the other command clases may access them
-	**/
-	hoa_audio::SoundDescriptor confirm_sound, cancel_sound, cursor_sound, invalid_sound, finish_sound;
 
 	/** \brief Builds all of the varous command menus and prepares them for use
 	*** This should only be invoked once after the BattleMode class has initialized all of its

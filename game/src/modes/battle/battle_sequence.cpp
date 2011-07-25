@@ -293,7 +293,7 @@ void SequenceSupervisor::_DrawExitingSequence() {
 void SequenceSupervisor::_DrawBackgroundGraphics() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(0.0f, 0.0f);
-	_battle->_battle_background.Draw(_background_fade);
+	_battle->GetMedia().background_image.Draw(_background_fade);
 
 
 	// TODO: Draw other background objects and animations
@@ -323,11 +323,11 @@ void SequenceSupervisor::_DrawGUI() {
 	// Draw the static image for the lower menu
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(0.0f, 0.0f -  _gui_position_offset);
-	_battle->_bottom_menu_image.Draw();
+	_battle->GetMedia().bottom_menu_image.Draw();
 
 	// Draw the swap icon
 	VideoManager->MoveRelative(6.0f, 16.0f);
-	_battle->_swap_icon.Draw(Color::gray);
+	_battle->GetMedia().swap_icon.Draw(Color::gray);
 
 	// TODO: Decide if we want to draw this information during initial sequence or not
 // 	// Draw the status information of all character actors
@@ -372,7 +372,7 @@ void SequenceSupervisor::_DrawGUI() {
 	const float STAMINA_BAR_POSITION_X = 970.0f, STAMINA_BAR_POSITION_Y = 128.0f; // The X and Y position of the stamina bar
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(STAMINA_BAR_POSITION_X + _gui_position_offset, STAMINA_BAR_POSITION_Y);
-	_battle->_stamina_meter.Draw();
+	_battle->GetMedia().stamina_meter.Draw();
 
 	// ----- (4): Draw all stamina icons in order
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
