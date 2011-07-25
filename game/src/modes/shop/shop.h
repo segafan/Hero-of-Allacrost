@@ -43,12 +43,7 @@ namespace private_shop {
 ***
 *** All of the shop mode interfaces share media data in forming their presentations.
 *** This class retains all of this common media data and makes it available for
-*** the shop interfaces to utilize. Like ShopMode, this class contains a static
-*** pointer to an object of the class type that represents the current instance
-*** of the class. This makes it easier for the code to get access to the data.
-*** Below is a typical use case for this class:
-***
-*** ShopMedia::CurrentInstance()->GetObjectCategoryImages();
+*** the shop interfaces to utilize.
 ***
 *** \note The accessor methods return non-const pointers to the relevant data
 *** structures and objects. This is done for reasons of convenience as many places

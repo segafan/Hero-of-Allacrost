@@ -37,7 +37,157 @@
 
 namespace hoa_battle {
 
+//! \brief Determines whether the code in the hoa_battle namespace should print debug statements or not.
 extern bool BATTLE_DEBUG;
+
+//! \brief An internal namespace to be used only within the battle code. Don't use this namespace anywhere else!
+namespace private_battle {
+
+/** ****************************************************************************
+*** \brief A companion class to BattleMode that holds various multimedia data
+***
+*** Many of the battle mode interfaces require access to a common set of media data.
+*** This class retains all of this common media data and makes it available for these
+*** classes to utilize. It also serves to reduce the number of methods and members of
+*** the BattleMode class.
+***
+*** \note Although most of the images and audio data here are public, you should take
+*** extreme care when modifying any of the properties of this data, such as loading out
+*** a different image or changing its size, as this could have implications for other
+*** battle classes that also use this data.
+*** ***************************************************************************/
+class BattleMedia {
+public:
+	BattleMedia();
+
+	~BattleMedia();
+
+	/** \brief Sets the background image for the battle
+	*** \param filename The filename of the new background image to load
+	**/
+	void SetBackgroundImage(const std::string& filename);
+
+	/** \brief Sets the battle music to use
+	*** \param filename The full filename of the music to play
+	**/
+	void SetBattleMusic(const std::string& filename);
+
+	/** \brief Retrieves a specific button icon for character action
+	*** \param index The index of the button to retrieve
+	*** \return A pointer to the appropriate button image, or NULL if the index argument was out of bounds
+	**/
+	hoa_video::StillImage* GetCharacterActionButton(uint32 index);
+
+	/** \brief Retrieves the appropriate icon image given a valid target type
+	*** \param target_type The enumerated value that represents the type of target
+	*** \return A pointer to the appropriate icon image, or NULL if the target type was invalid
+	**/
+	hoa_video::StillImage* GetTargetTypeIcon(hoa_global::GLOBAL_TARGET target_type);
+
+	/** \brief Retrieves a specific status icon with the proper type and intensity
+	*** \param type The type of status effect the user is trying to retrieve the icon for
+	*** \param intensity The intensity level of the icon to retrieve
+	*** \return The icon representation of the element type and intensity, or NULL if no appropriate image was found
+	**/
+	hoa_video::StillImage* GetStatusIcon(hoa_global::GLOBAL_STATUS type, hoa_global::GLOBAL_INTENSITY intensity);
+
+	// ---------- Public members
+
+	//! \brief The static background image to be used for the battle
+	hoa_video::StillImage background_image;
+
+	//! \brief The static image that is drawn for the bottom menus
+	hoa_video::StillImage bottom_menu_image;
+
+	/** \brief An image that indicates that a particular actor has been selected
+	*** This image best suites character sprites and enemy sprites of similar size. It does not work
+	*** well with larger or smaller sprites.
+	**/
+	hoa_video::StillImage actor_selection_image;
+
+	/** \brief An image that points out the location of specific attack points on an actor
+	*** This image may be used for both character and enemy actors. It is used to indicate an actively selected
+	*** attack point, <b>not</b> just any attack points present.
+	**/
+	hoa_video::AnimatedImage attack_point_indicator;
+
+	//! \brief Used to provide a background highlight for a selected character
+	hoa_video::StillImage character_selected_highlight;
+
+	//! \brief Used to provide a background highlight for a character that needs a command set
+	hoa_video::StillImage character_command_highlight;
+
+	//! \brief An image which contains the covers for the HP and SP bars
+	hoa_video::StillImage character_bar_covers;
+
+	/** \brief The universal stamina bar that is used to represent the state of battle actors
+	*** All battle actors have a portrait that moves along this meter to signify their
+	*** turn in the rotation.  The meter and corresponding portraits must be drawn after the
+	*** character sprites.
+	**/
+	hoa_video::StillImage stamina_meter;
+
+	//! \brief The image used to highlight stamina icons for selected actors
+	hoa_video::StillImage stamina_icon_selected;
+
+	/** \brief Image that indicates when a player may perform character swapping
+	*** This image is drawn in the lower left corner of the screen. When no swaps are available to the player,
+	*** the image is drawn in gray-scale.
+	**/
+	hoa_video::StillImage swap_icon;
+
+	/** \brief Used for visual display of how many swaps a character may perform
+	*** This image is drawn in the lower left corner of the screen, just above the swap indicator. This image
+	*** may be drawn on the screen up to four times (in a card-stack fashion), one for each swap that is
+	*** available to be used. It is not drawn when the player has no swaps available.
+	**/
+	hoa_video::StillImage swap_card;
+
+	/** \brief Small button icons used to indicate when a player can select an action for their characters
+	*** These buttons are used to indicate to the player what button to press to bring up a character's command
+	*** menu. This vector is built from a 2-row, 5-column multi-image. The rows represent the buttons for when
+	*** the character can be given a command (first row) versus when they may not (second row). The first element
+	*** in each row is a "blank" button that is not used. The next four elements correspond to the characters on
+	*** the screen, from top to bottom.
+	**/
+	std::vector<hoa_video::StillImage> character_action_buttons;
+
+	//! \brief The music played during the battle
+	hoa_audio::MusicDescriptor battle_music;
+
+	//! \brief The music played after the player has won the battle
+	hoa_audio::MusicDescriptor victory_music;
+
+	//! \brief The music played after the player has lost the battle
+	hoa_audio::MusicDescriptor defeat_music;
+
+	//! \brief Various sounds that are played as the player performs menu actions
+	//@{
+	hoa_audio::SoundDescriptor confirm_sound;
+	hoa_audio::SoundDescriptor cancel_sound;
+	hoa_audio::SoundDescriptor cursor_sound;
+	hoa_audio::SoundDescriptor invalid_sound;
+	hoa_audio::SoundDescriptor finish_sound;
+	//@}
+
+private:
+	/** \brief Container used to find the appropriate row index for each status type
+	*** Status icons for all types of status are all contained within a single image. This container is used to
+	*** quickly determine which row of icons in that image corresponds to each status type.
+	**/
+	std::map<hoa_global::GLOBAL_STATUS, uint32> _status_indeces;
+
+	/** \brief Holds icon images that represent the different types of targets
+	*** Target types include attack points, ally/enemy, and different parties.
+	**/
+	std::vector<hoa_video::StillImage> _target_type_icons;
+
+	//! \brief Contains the entire set of status effect icons
+	std::vector<hoa_video::StillImage> _status_icons;
+
+}; // class BattleMedia
+
+} // namespace private_battle
 
 
 /** ****************************************************************************
@@ -65,6 +215,10 @@ public:
 	//! \brief Returns a pointer to the currently active instance of battle mode
 	static BattleMode* CurrentInstance()
 		{ return _current_instance; }
+
+	//! \brief Provides access to the BattleMedia class object
+	private_battle::BattleMedia& GetMedia()
+		{ return _battle_media; }
 
 	//! \name Inherited methods for the GameMode class
 	//@{
@@ -106,19 +260,6 @@ public:
 	void AddEnemy(uint32 new_enemy_id)
 		{ AddEnemy(new hoa_global::GlobalEnemy(new_enemy_id)); }
 
-	/** \brief Adds a piece of music to the battle soundtrack
-	*** \param filename The full filename of the music to play
-	*** Note that the first piece of music added is the one that will be played upon entering battle. All subsequent pieces
-	*** of music added must be explicitly triggered to play by certain scripted conditions in battle. If no music is added
-	*** for a battle, a default battle theme will be played.
-	**/
-	void AddMusic(const std::string& filename);
-
-	/** \brief Sets the background image for the battle
-	*** \param filename The filename of the new background image to load
-	**/
-	void SetBackground(const std::string& filename);
-
 	/** \brief Restores the battle to its initial state, allowing the player another attempt to achieve victory
 	***
 	***
@@ -159,13 +300,6 @@ public:
 	//! \brief Exits the battle performing any final changes as needed
 	void Exit();
 
-	/** \brief Plays the specified piece of music that has already been added to the battle soundtrack
-	*** \param filename The filename of the music to play
-	***
-	*** If the requested music was not found no change to music playback will take place.
-	**/
-	void PlayMusic(const std::string& filename);
-
 	//! \brief Returns the number of character actors in the battle, both living and dead
 	uint32 GetNumberOfCharacters() const
 		{ return _character_actors.size(); }
@@ -173,25 +307,6 @@ public:
 	//! \brief Returns the number of enemy actors in the battle, both living and dead
 	uint32 GetNumberOfEnemies() const
 		{ return _enemy_actors.size(); }
-
-	/** \brief Retrieves a specific button icon for character action
-	*** \param index The index of the button to retrieve
-	*** \return A pointer to the appropriate button image, or NULL if the index argument was out of bounds
-	**/
-	hoa_video::StillImage* GetCharacterActionButton(uint32 index);
-
-	/** \brief Retrieves the appropriate icon image given a valid target type
-	*** \param target_type The enumerated value that represents the type of target
-	*** \return A pointer to the appropriate icon image, or NULL if the target type was invalid
-	**/
-	hoa_video::StillImage* GetTargetTypeIcon(hoa_global::GLOBAL_TARGET target_type);
-
-	/** \brief Retrieves a specific status icon with the proper type and intensity
-	*** \param type The type of status effect the user is trying to retrieve the icon for
-	*** \param intensity The intensity level of the icon to retrieve
-	*** \return The icon representation of the element type and intensity, or NULL if no appropriate image was found
-	**/
-	hoa_video::StillImage* GetStatusIcon(hoa_global::GLOBAL_STATUS type, hoa_global::GLOBAL_INTENSITY intensity);
 
 	/** \name Battle notification methods
 	*** These methods are called by other battle classes to indicate events such as when an actor
@@ -232,9 +347,6 @@ public:
 	std::deque<private_battle::BattleActor*>& GetEnemyParty()
 		{ return _enemy_party; }
 
-	hoa_video::StillImage& GetCharacterBarCovers()
-		{ return _character_bar_covers; }
-
 	private_battle::CommandSupervisor* GetCommandSupervisor()
 		{ return _command_supervisor; }
 
@@ -248,6 +360,9 @@ private:
 
 	//! \brief Retains the current state of the battle
 	private_battle::BATTLE_STATE _state;
+
+	//! \brief A pointer to the BattleMedia object created to coincide with this instance of BattleMode
+	private_battle::BattleMedia _battle_media;
 
 	//! \name Battle script data
 	//@{
@@ -327,114 +442,11 @@ private:
 	std::list<private_battle::BattleActor*> _ready_queue;
 	//@}
 
-	//! \name Character Swap Data
-	//@{
 	/** \brief The number of character swaps that the player may currently perform
 	*** The maximum number of swaps ever allowed is four, thus the value of this class member will always have the range [0, 4].
 	*** This member is also used to determine how many swap cards to draw on the battle screen.
 	**/
 	uint8 _current_number_swaps;
-	//@}
-
-	//! \brief The default battle music to play during battles
-	std::string _default_music;
-
-	//! \brief The currently playing music
-	std::string _current_music;
-
-	//! \brief the winning music
-	std::string _winning_music;
-
-	//! \brief the losing music
-	std::string _losing_music;
-
-	//! \brief Contains BattleEvents applicable to current battle
-	std::vector<BattleEvent*> _events;
-
-	//! \name Battle Media Data
-	//@{
-	//! \brief The full-screen, static background image to be used for the battle
-	hoa_video::StillImage _battle_background;
-
-	//! \brief Container for images (both still and animated) that are to be drawn in the background
-	std::vector<hoa_video::ImageDescriptor*> _background_images;
-
-	//! \brief Contains the entire set of status effect icons
-	std::vector<hoa_video::StillImage> _status_icons;
-
-	//! \brief The static image that is drawn for the bottom menus
-	hoa_video::StillImage _bottom_menu_image;
-
-	/** \brief An image that indicates that a particular actor has been selected
-	*** This image best suites character sprites and enemy sprites of similar size. It does not work
-	*** well with larger or smaller sprites.
-	**/
-	hoa_video::StillImage _actor_selection_image;
-
-	/** \brief An image that points out the location of specific attack points on an actor
-	*** This image may be used for both character and enemy actors. It is used to indicate an actively selected
-	*** attack point, <b>not</b> just any attack points present.
-	**/
-	hoa_video::AnimatedImage _attack_point_indicator;
-
-	//! \brief Used to provide a background highlight for a selected character
-	hoa_video::StillImage _character_selected_highlight;
-
-	//! \brief Used to provide a background highlight for a character that needs a command set
-	hoa_video::StillImage _character_command_highlight;
-
-	//! \brief An image which contains the covers for the HP and SP bars
-	hoa_video::StillImage _character_bar_covers;
-
-	/** \brief The universal stamina bar that is used to represent the state of battle actors
-	*** All battle actors have a portrait that moves along this meter to signify their
-	*** turn in the rotation.  The meter and corresponding portraits must be drawn after the
-	*** character sprites.
-	**/
-	hoa_video::StillImage _stamina_meter;
-
-	//! \brief The image used to highlight stamina icons for selected actors
-	hoa_video::StillImage _stamina_icon_selected;
-
-	/** \brief Image that indicates when a player may perform character swapping
-	*** This image is drawn in the lower left corner of the screen. When no swaps are available to the player,
-	*** the image is drawn in gray-scale.
-	**/
-	hoa_video::StillImage _swap_icon;
-
-	/** \brief Used for visual display of how many swaps a character may perform
-	*** This image is drawn in the lower left corner of the screen, just above the swap indicator. This image
-	*** may be drawn on the screen up to four times (in a card-stack fashion), one for each swap that is
-	*** available to be used. It is not drawn when the player has no swaps available.
-	**/
-	hoa_video::StillImage _swap_card;
-
-	/** \brief Small button icons used to indicate when a player can select an action for their characters
-	*** These buttons are used to indicate to the player what button to press to bring up a character's command
-	*** menu. This vector is built from a 2-row, 5-column multi-image. The rows represent the buttons for when
-	*** the character can be given a command (first row) versus when they may not (second row). The first element
-	*** in each row is a "blank" button that is not used. The next four elements correspond to the characters on
-	*** the screen, from top to bottom.
-	**/
-	std::vector<hoa_video::StillImage> _character_action_buttons;
-
-	/** \brief Holds icon images that represent the different types of targets
-	*** Target types include attack points, ally/enemy, and different parties.
-	**/
-	std::vector<hoa_video::StillImage> _target_type_icons;
-
-	/** \brief Container for all music to be played during the battle
-	*** The first element in this vector is the primary battle track. For most battles, only a primary track
-	*** is required. However, some battles may require additional tracks to toggle between.
-	**/
-	std::map<std::string, hoa_audio::MusicDescriptor> _battle_music;
-
-	/** \brief Container used to find the appropriate row index for each status type
-	*** Status icons for all types of status are all contained within a single image. This container is used to
-	*** quickly determine which row of icons in that image corresponds to each status type.
-	**/
-	std::map<hoa_global::GLOBAL_STATUS, uint32> _status_icon_index;
-	//@}
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
 

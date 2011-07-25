@@ -476,7 +476,6 @@ void BindModeCode() {
 			.def(constructor<uint32, uint32>())
 			.def("SetMusic", &BattleEncounterEvent::SetMusic)
 			.def("SetBackground", &BattleEncounterEvent::SetBackground)
-			.def("AddBattleEvent", &BattleEncounterEvent::AddBattleEvent)
 			.def("AddEnemy", &BattleEncounterEvent::AddEnemy)
 	];
 
@@ -529,10 +528,8 @@ void BindModeCode() {
 	[
 		class_<BattleMode, hoa_mode_manager::GameMode>("BattleMode")
 			.def(constructor<>())
-			.def("LoadBattleScript", &BattleMode::LoadBattleScript)
 			.def("AddEnemy", (void(BattleMode::*)(uint32)) &BattleMode::AddEnemy)
-			.def("AddMusic", &BattleMode::AddMusic)
-			.def("SetBackground", &BattleMode::SetBackground)
+			.def("LoadBattleScript", &BattleMode::LoadBattleScript)
 			.def("RestartBattle", &BattleMode::RestartBattle)
 			.def("FreezeTimers", &BattleMode::FreezeTimers)
 			.def("UnFreezeTimers", &BattleMode::UnFreezeTimers)
@@ -540,9 +537,9 @@ void BindModeCode() {
 			.def("ChangeState", &BattleMode::ChangeState)
 			.def("OpenCommandMenu", &BattleMode::OpenCommandMenu)
 			.def("IsBattleFinished", &BattleMode::IsBattleFinished)
-			.def("PlayMusic", &BattleMode::PlayMusic)
 			.def("GetNumberOfCharacters", &BattleMode::GetNumberOfCharacters)
 			.def("GetNumberOfEnemies", &BattleMode::GetNumberOfEnemies)
+			.def("GetMedia", &BattleMode::GetMedia)
 			.def("GetDialogueSupervisor", &BattleMode::GetDialogueSupervisor)
 			.def("GetCommandSupervisor", &BattleMode::GetCommandSupervisor)
 
@@ -557,6 +554,13 @@ void BindModeCode() {
 				value("BATTLE_STATE_DEFEAT", BATTLE_STATE_DEFEAT),
 				value("BATTLE_STATE_EXITING", BATTLE_STATE_EXITING)
 			]
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
+		class_<BattleMedia>("BattleMedia")
+			.def("SetBackgroundImage", &BattleMedia::SetBackgroundImage)
+			.def("SetBattleMusic", &BattleMedia::SetBattleMusic)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")

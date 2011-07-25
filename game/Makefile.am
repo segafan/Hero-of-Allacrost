@@ -255,8 +255,6 @@ modes_SOURCES = \
 	$(MODES_DIR)/battle/battle_dialogue.h \
 	$(MODES_DIR)/battle/battle_effects.cpp \
 	$(MODES_DIR)/battle/battle_effects.h \
-	$(MODES_DIR)/battle/battle_events.cpp \
-	$(MODES_DIR)/battle/battle_events.h \
 	$(MODES_DIR)/battle/battle_finish.cpp \
 	$(MODES_DIR)/battle/battle_finish.h \
 	$(MODES_DIR)/battle/battle_indicators.cpp \

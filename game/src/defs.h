@@ -223,9 +223,10 @@ namespace hoa_gui {
 namespace hoa_battle {
 	extern bool BATTLE_DEBUG;
 	class BattleMode;
-	class BattleEvent;
 
 	namespace private_battle {
+		class BattleMedia;
+
 		class SequenceSupervisor;
 
 		class BattleActor;
