@@ -26,6 +26,7 @@
 
 using namespace std;
 
+using namespace hoa_system;
 using namespace hoa_utils;
 using namespace hoa_video;
 using namespace hoa_gui;
@@ -177,6 +178,9 @@ void CommonDialogueOptions::AddOption(string text, int32 next_line) {
 CommonDialogueWindow::CommonDialogueWindow() :
 	_pos_x(512.0f),
 	_pos_y(512.0f),
+	_indicator_symbol(COMMON_DIALOGUE_NO_INDICATOR),
+	_blink_time(0),
+	_blink_state(true),
 	_portrait_image(NULL)
 {
 	if (_parchment_image.Load("img/menus/black_sleet_parch.png") == false)
@@ -184,6 +188,12 @@ CommonDialogueWindow::CommonDialogueWindow() :
 
 	if (_nameplate_image.Load("img/menus/dialogue_nameplate.png") == false)
 		PRINT_ERROR << "failed to load dialogue image: " << _nameplate_image.GetFilename() << endl;
+
+	if (_next_line_image.Load("img/menus/dialogue_cont_arrow.png") == false)
+		PRINT_ERROR << "failed to load dialogue image: " << _next_line_image.GetFilename() << endl;
+
+	if (_last_line_image.Load("img/menus/dialogue_last_ind.png") == false)
+		PRINT_ERROR << "failed to load dialogue image: " << _last_line_image.GetFilename() << endl;
 
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
@@ -251,6 +261,22 @@ void CommonDialogueWindow::Draw() {
 	if (_portrait_image != NULL) {
 		VideoManager->MoveRelative(0.0f, -25.0f);
 		_portrait_image->Draw();
+		VideoManager->MoveRelative(0.0f, 25.0f);
+	}
+
+	_blink_time += SystemManager->GetUpdateTime();
+	if (_blink_time > 500) {
+		_blink_time -= 500;
+		_blink_state = _blink_state ? false : true;
+	}
+
+	if (_indicator_symbol == COMMON_DIALOGUE_NEXT_INDICATOR && _blink_state) {
+		VideoManager->MoveRelative(830.0f, 0.0f);
+		_next_line_image.Draw();
+	}
+	else if (_indicator_symbol == COMMON_DIALOGUE_LAST_INDICATOR && _blink_state) {
+		VideoManager->MoveRelative(830.0f, 0.0f);
+		_last_line_image.Draw();
 	}
 
 	_display_textbox.Draw();

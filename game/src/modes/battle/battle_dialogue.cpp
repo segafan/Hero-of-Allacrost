@@ -351,6 +351,17 @@ void DialogueSupervisor::_UpdateLine() {
 		return;
 	}
 
+	// Set the correct indicator
+	if (_current_dialogue->IsHaltBattleAction() == false || _current_options != NULL || _dialogue_window.GetDisplayTextBox().IsFinished() == false) {
+		_dialogue_window.SetIndicator(COMMON_DIALOGUE_NO_INDICATOR);
+	}
+	else if (_line_counter == _current_dialogue->GetLineCount()-1) {
+		_dialogue_window.SetIndicator(COMMON_DIALOGUE_LAST_INDICATOR);
+	}
+	else {
+		_dialogue_window.SetIndicator(COMMON_DIALOGUE_NEXT_INDICATOR);
+	}
+
 	// If this dialogue does not halt the battle action, user input is not processed so we are finished
 	if (_current_dialogue->IsHaltBattleAction() == false) {
 		return;

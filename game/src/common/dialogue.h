@@ -40,6 +40,13 @@ const int32 COMMON_DIALOGUE_NO_TIMER         = -1;
 const int32 COMMON_DIALOGUE_INFINITE_VIEWS   = -1;
 //! \brief Returned by numerous dialogue functions to indicate a bad/invalid function call was made
 const int32 COMMON_DIALOGUE_BAD_VALUE        = -5555;
+
+//! \brief The dialogue window should have no indicator (i.e. for automated text)
+const uint8 COMMON_DIALOGUE_NO_INDICATOR   = 0;
+//! \brief The dialogue window should have the indicator that more lines exist
+const uint8 COMMON_DIALOGUE_NEXT_INDICATOR = 1;
+//! \brief The dialogue window should have the indicator that the last line is reached
+const uint8 COMMON_DIALOGUE_LAST_INDICATOR = 2;
 //@}
 
 
@@ -338,6 +345,9 @@ public:
 
 	void SetPortraitImage(hoa_video::StillImage* image)
 		{ _portrait_image = image; }
+
+	uint8 SetIndicator(uint8 type)
+		{ _indicator_symbol = type; }
 	//@}
 
 private:
@@ -349,6 +359,21 @@ private:
 
 	//! \brief The nameplate image used along with the dialogue box image
 	hoa_video::StillImage _nameplate_image;
+
+	//! \brief The image indicating following dialogue lines
+	hoa_video::StillImage _next_line_image;
+
+	//! \brief The image indicating the last line of a dialogue
+	hoa_video::StillImage _last_line_image;
+
+	//! \brief The indicator symbol to use (arrow, end_of_dialogue_symbol, or none)
+	uint8 _indicator_symbol;
+
+	//! \brief The counter for the blinking indicators
+	uint16 _blink_time;
+
+	//! \brief The status of the blinking indicators
+	bool _blink_state;
 
 	//! \brief The textbox used for rendering the dialogue text
 	hoa_gui::TextBox _display_textbox;
