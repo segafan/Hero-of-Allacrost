@@ -378,6 +378,17 @@ void DialogueSupervisor::_UpdateLine() {
 		return;
 	}
 
+	// Set the correct indicator
+	if (_current_dialogue->IsInputBlocked() || _current_options != NULL || _dialogue_window.GetDisplayTextBox().IsFinished() == false) {
+		_dialogue_window.SetIndicator(COMMON_DIALOGUE_NO_INDICATOR);
+	}
+	else if (_line_counter == _current_dialogue->GetLineCount()-1) {
+		_dialogue_window.SetIndicator(COMMON_DIALOGUE_LAST_INDICATOR);
+	}
+	else {
+		_dialogue_window.SetIndicator(COMMON_DIALOGUE_NEXT_INDICATOR);
+	}
+
 	// If this dialogue does not allow user input, we are finished
 	if (_current_dialogue->IsInputBlocked() == true) {
 		return;
@@ -435,6 +446,7 @@ void DialogueSupervisor::_BeginLine() {
 	// Setup the text and graphics for the dialogue window
 	_dialogue_window.Clear();
 	_dialogue_window.GetDisplayTextBox().SetDisplayText(_current_dialogue->GetLineText(_line_counter));
+
 	if (_current_options != NULL) {
 		for (uint32 i = 0; i < _current_options->GetNumberOptions(); i++) {
 			_dialogue_window.GetDisplayOptionBox().AddOption(_current_options->GetOptionText(i));
