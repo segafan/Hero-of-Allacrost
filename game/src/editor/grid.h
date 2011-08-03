@@ -16,6 +16,9 @@
 #ifndef __GRID_HEADER__
 #define __GRID_HEADER__
 
+#ifdef _VS
+	#include <GL/glew.h>
+#endif
 #include <QGLWidget>
 #include <QStringList>
 #include <QMessageBox>

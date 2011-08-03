@@ -29,8 +29,14 @@
 #ifndef __VIDEO_HEADER__
 #define __VIDEO_HEADER__
 
+// required for Code::Blocks and VS
 #ifdef _WIN32
 	#include <windows.h> // needs to be included before gl.h
+#endif
+
+// just required for VS
+#ifdef _VS
+	#include <GL/glew.h>
 #endif
 
 #ifdef __APPLE__

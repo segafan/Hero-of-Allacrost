@@ -41,6 +41,10 @@
 #ifndef __TEXTURE_HEADER__
 #define __TEXTURE_HEADER__
 
+#ifdef _VS
+	#include <GL/glew.h>
+#endif
+
 // OpenGL includes
 #ifdef __APPLE__
 	#include <OpenGL/gl.h>

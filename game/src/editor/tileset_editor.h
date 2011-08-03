@@ -18,8 +18,11 @@
 
 #include <vector>
 
-#include <QDialog>
+#ifdef _VS
+	#include <GL/glew.h>
+#endif
 #include <QGLWidget>
+#include <QDialog>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QAction>

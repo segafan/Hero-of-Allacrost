@@ -346,7 +346,7 @@ public:
 	void SetPortraitImage(hoa_video::StillImage* image)
 		{ _portrait_image = image; }
 
-	uint8 SetIndicator(uint8 type)
+	void SetIndicator(uint8 type)
 		{ _indicator_symbol = type; }
 	//@}
 
