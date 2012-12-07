@@ -93,9 +93,10 @@ void QuitAllacrost() {
 	GUISystem::SingletonDestroy();
 	AudioEngine::SingletonDestroy();
 	InputEngine::SingletonDestroy();
-	ScriptEngine::SingletonDestroy();
 	SystemEngine::SingletonDestroy();
 	VideoEngine::SingletonDestroy();
+	// Destroy the script engine last because all Luabind objects must be freed before closing the lua state.
+	ScriptEngine::SingletonDestroy();
 } // void QuitAllacrost()
 
 /** \brief Reads in all of the saved game settings and sets values in the according game manager classes
@@ -110,15 +111,6 @@ bool LoadSettings()
 	settings.OpenTable("settings");
 
 	// Load language settings
-//	uint32 lang_code = static_cast<uint32>(settings.ReadInt("lang_code"));
-
-//	if (lang_code == 1) SystemManager->SetLanguage("en@quot");
-//	else if (lang_code == 2) SystemManager->SetLanguage("fr");
-//	else if (lang_code == 3) SystemManager->SetLanguage("pt_BR");
-//	else if (lang_code == 4) SystemManager->SetLanguage("es");
-//	else if (lang_code == 5) SystemManager->SetLanguage("de");
-//	else SystemManager->SetLanguage("en@quot");
-
 	SystemManager->SetLanguage(static_cast<std::string>(settings.ReadString("language")));
 
 	settings.OpenTable("key_settings");
@@ -136,8 +128,8 @@ bool LoadSettings()
 	settings.CloseTable();
 
 	if (settings.IsErrorDetected()) {
-		cerr << "SETTINGS LOAD ERROR: failure while trying to retrieve key map "
-			<< "information from file: " << GetSettingsFilename() << endl;
+		PRINT_ERROR << "failure while trying to retrieve key map information from file: "
+			<< GetSettingsFilename() << endl;
 		cerr << settings.GetErrorMessages() << endl;
 		return false;
 	}
@@ -165,27 +157,16 @@ bool LoadSettings()
 	if (settings.DoesIntExist("y_axis"))
 		InputManager->SetYAxisJoy(static_cast<int8>(settings.ReadInt("y_axis")));
 
-	// WinterKnight: These are hidden settings. You can change them by editing settings.lua,
-	// but they are not available in the options menu at this time.
+	// This is a hidden setting. You can change them by editing settings.lua,
+	// but they are not available in the in-game options menu at this time.
 	if (settings.DoesIntExist("threshold"))
 		InputManager->SetThresholdJoy(static_cast<uint16>(settings.ReadInt("threshold")));
 
 	settings.CloseTable();
 
-	// battle_settings.timer_multiplier is also a hidden setting
-	if (settings.DoesTableExist("battle_settings")) {
-		settings.OpenTable("battle_settings");
-		// TEMP: I don't think that we should do this... - Roots
-// 		if (settings.DoesFloatExist("timer_multiplier"))
-// 			hoa_battle::timer_multiplier = static_cast<float>(settings.ReadFloat("timer_multiplier"));
-// 		if (settings.DoesBoolExist("wait"))
-// 			hoa_battle::wait = static_cast<bool>(settings.ReadBool("wait"));
-		settings.CloseTable();
-	}
-
 	if (settings.IsErrorDetected()) {
-		cerr << "SETTINGS LOAD ERROR: an error occured while trying to retrieve joystick mapping information "
-			<< "from file: " << GetSettingsFilename() << endl;
+		PRINT_ERROR << "an error occured while trying to retrieve joystick mapping information from file: "
+			<< GetSettingsFilename() << endl;
 		cerr << settings.GetErrorMessages() << endl;
 		return false;
 	}
@@ -200,8 +181,8 @@ bool LoadSettings()
 	settings.CloseTable();
 
 	if (settings.IsErrorDetected()) {
-		cerr << "SETTINGS LOAD ERROR: failure while trying to retrieve video settings "
-			<< "information from file: " << GetSettingsFilename() << endl;
+		PRINT_ERROR << "failure while trying to retrieve video settings information from file: "
+			<< GetSettingsFilename() << endl;
 		cerr << settings.GetErrorMessages() << endl;
 		return false;
 	}
@@ -215,8 +196,8 @@ bool LoadSettings()
 	settings.CloseAllTables();
 
 	if (settings.IsErrorDetected()) {
-		cerr << "SETTINGS LOAD ERROR: failure while trying to retrieve audio settings "
-			<< "information from file: " << GetSettingsFilename() << endl;
+		PRINT_ERROR << "failure while trying to retrieve audio settings information from file: "
+			<< GetSettingsFilename() << endl;
 		cerr << settings.GetErrorMessages() << endl;
 		return false;
 	}
@@ -237,10 +218,11 @@ void InitializeEngine() throw (Exception) {
 	}
 
 	// Create and initialize singleton class managers
+	// Initialize the ScriptManager first as other managers may utilize it in their own initialization routines
+	ScriptManager = ScriptEngine::SingletonCreate();
 	AudioManager = AudioEngine::SingletonCreate();
 	InputManager = InputEngine::SingletonCreate();
 	VideoManager = VideoEngine::SingletonCreate();
-	ScriptManager = ScriptEngine::SingletonCreate();
 	SystemManager = SystemEngine::SingletonCreate();
 	ModeManager = ModeEngine::SingletonCreate();
 	GUIManager = GUISystem::SingletonCreate();
@@ -258,6 +240,7 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("ERROR: unable to initialize ScriptManager", __FILE__, __LINE__, __FUNCTION__);
 	}
 
+	// Bind the C++ interfaces to Lua
 	hoa_defs::BindEngineCode();
 	hoa_defs::BindCommonCode();
 	hoa_defs::BindModeCode();
@@ -293,13 +276,18 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
 	if (VideoManager->FinalizeInitialization() == false)
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
+
+	// TODO: Add this config file and function call; remove manual loading
+// 	LoadGUIThemes("dat/config/themes.lua");
 	if (GUIManager->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
 		throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
 	}
 	// NOTE: This function call should have its argument set to false for release builds
 	GUIManager->DEBUG_EnableGUIOutlines(false);
 
+	// TODO: Add this config file and function call; remove manual loading
 	// Load all standard font sets used across the game
+// 	LoadFonts("dat/config/fonts.lua");
 	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title20", 20) == false) {
 		throw Exception("Failed to load libertine_capitals.ttf font at size 20", __FILE__, __LINE__, __FUNCTION__);
 	}

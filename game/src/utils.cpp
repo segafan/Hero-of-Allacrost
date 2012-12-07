@@ -795,6 +795,7 @@ bool DeleteFile(const std::string &filename) {
 
 const std::string GetUserDataPath(bool user_files) {
 	#if defined _WIN32
+		user_files = true; // Does nothing. This is here to prevent the compiler warning about the unused argument
 		TCHAR path[MAX_PATH];
 
 		if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, path))) {
@@ -818,6 +819,7 @@ const std::string GetUserDataPath(bool user_files) {
 		}
 
 	#else // Linux, BSD, other POSIX systems
+		user_files = true; // Does nothing. This is here to prevent the compiler warning about the unused argument
 		passwd *pw = getpwuid(getuid());
 		if (pw) {
 			string path = string(pw->pw_dir) + "/.allacrost/";

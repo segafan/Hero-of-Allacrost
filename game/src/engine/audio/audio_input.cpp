@@ -210,7 +210,15 @@ uint32 WavFile::Read(uint8* buffer, uint32 size, bool& end) {
 // OggFile class methods
 ////////////////////////////////////////////////////////////////////////////////
 
+OggFile::~OggFile() {
+	if (_initialized == true) {
+		ov_clear(&_vorbis_file);
+		_initialized = false;
+	}
+}
+
 bool OggFile::Initialize() {
+	_initialized = false;
 	// Windows requires a special loading method in order load ogg files
 	// properly when dynamically linking vorbis libs. The workaround is
 	// to use the ov_open_callbacks function
@@ -224,6 +232,10 @@ bool OggFile::Initialize() {
 		};
 
 		FILE* file = fopen(_filename.c_str(), "rb");
+		if (file == NULL) {
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to open file for reading: " << _filename << endl;
+			return false;
+		}
 
 		if (ov_open_callbacks(file, &_vorbis_file, NULL, 0, callbacks) < 0) {
 			fclose(file);
@@ -233,7 +245,11 @@ bool OggFile::Initialize() {
 
 	#else
 		// File loading code for non Win32 platforms.  Much simpler.
-		FILE* file = fopen (_filename.c_str(), "rb");
+		FILE* file = fopen(_filename.c_str(), "rb");
+		if (file == NULL) {
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to open file for reading: " << _filename << endl;
+			return false;
+		}
 
 		if (ov_open(file, &_vorbis_file, NULL, 0) < 0) {
 			fclose(file);
@@ -250,6 +266,7 @@ bool OggFile::Initialize() {
 	_sample_size = _number_channels * _bits_per_sample / 8;
 	_data_size = _total_number_samples * _sample_size;
 
+	_initialized = true;
 	return true;
 } // bool OggFile::Initialize()
 
