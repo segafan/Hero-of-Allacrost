@@ -215,20 +215,21 @@ float GetFloatFraction(float value);
 float GetFloatInteger(float value);
 
 
-//! \brief Rounds down a float to a multiple of another float
-/*!
- *  \return Rounded float
- *  \param value Number to be rounded
- *  \param multiple Multiple to be considered when rounding
- */
+/** \brief Rounds down a float to a multiple of another float
+*** \return Rounded float
+*** \param value Number to be rounded
+*** \param multiple Multiple to be considered when rounding
+**/
 float FloorToFloatMultiple(const float value, const float multiple);
 
 
-//!	\brief Converts data to string
-/*! Thi function convers ata to string, if it has the sstring::operator<< implementated
- *  \param s String to be filled
- *  \param data Data to convert to string
- */
+/**	\brief Converts data to string
+*** \param s String to be filled
+*** \param data Data to convert to string
+***
+*** This function convers data to string. It will only work if the data type has the
+*** sstring::operator<< implemented.
+**/
 template<class T>
 void DataToString(std::string &s, const T &data)
 {
@@ -665,10 +666,10 @@ bool DeleteFile(const std::string& filename);
 **/
 const std::string GetUserDataPath(bool user_files = true);
 
-/** \brief returns the directory path to save/load/delete user profiles
+/** \brief Returns the directory path to save/load/delete user profiles
 *** \return A string containing the path to the profiles directory
-*** \TODO: might have to add in special support for OSX if we want to
-*** 	   keep the profiles under the user creatd content
+*** \TODO: Might have to add in special support for OSX if we want to
+*** 	keep the profiles under the user created content.
 **/
 const std::string GetUserProfilePath();
 

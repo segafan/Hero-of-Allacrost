@@ -34,6 +34,7 @@
 
 #include "defs.h"
 #include "utils.h"
+#include </home/olsent/dev/valyria_tear/src/engine/audio/audio_input.h>
 
 #include <vorbis/vorbisfile.h>
 #include <fstream>
@@ -151,7 +152,7 @@ public:
 		AudioInput() { _filename = file_name; }
 
 	~WavFile()
-		{ if (_file_input) _file_input.close(); }
+		{ if (_file_input.is_open() == true) _file_input.close(); }
 
 	//! \brief Inherited functions from AudioInput class
 	//@{
@@ -182,10 +183,9 @@ private:
 class OggFile : public AudioInput {
 public:
 	OggFile(const std::string& file_name) :
-		AudioInput(), _read_buffer_position(0), _read_buffer_size(0) { _filename = file_name; }
+		AudioInput(), _initialized(false), _read_buffer_position(0), _read_buffer_size(0) { _filename = file_name; }
 
-	~OggFile()
-		{ ov_clear(&_vorbis_file); }
+	~OggFile();
 
 	//! \brief Inherited functions from AudioInput class
 	//@{
@@ -197,6 +197,9 @@ public:
 	//@}
 
 private:
+	//! \brief Set to true only when the object has been initialized successfully
+	bool _initialized;
+
 	//! \brief Contains information about the Vorbis Ogg file
 	OggVorbis_File _vorbis_file;
 
@@ -239,7 +242,7 @@ public:
 	*** fill that memory with the audio data read from the input argument
 	**/
 	AudioMemory(AudioInput* input);
-	
+
 	AudioMemory(const AudioMemory& audio_memory);
 	AudioMemory& operator=(const AudioMemory& other_audio_memory);
 

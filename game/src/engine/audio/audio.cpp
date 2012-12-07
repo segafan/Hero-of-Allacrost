@@ -54,7 +54,7 @@ AudioEngine::AudioEngine () :
 
 
 bool AudioEngine::SingletonInitialize() {
-	if (!AUDIO_ENABLE)
+	if (AUDIO_ENABLE == false)
 		return true;
 
 	const ALCchar* best_device = 0; // Will store the name of the 'best' device for audio playback
@@ -152,7 +152,7 @@ bool AudioEngine::SingletonInitialize() {
 
 
 AudioEngine::~AudioEngine() {
-	if (!AUDIO_ENABLE)
+	if (AUDIO_ENABLE == false)
 		return;
 
 	// Delete any active audio effects
@@ -176,11 +176,37 @@ AudioEngine::~AudioEngine() {
 	// We shouldn't have any descriptors registered now -- check that this is true
 	if (_registered_sounds.empty() == false) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << _registered_sounds.size() << " SoundDescriptor objects were still "
-			"registered when destructor was invoked" << endl;
+			"registered when destructor was invoked. The objects will now be freed." << endl;
+
+		for (list<SoundDescriptor*>::iterator i = _registered_sounds.begin(); i != _registered_sounds.end(); ++i) {
+			string filename = (*i)->GetFilename();
+			if (filename.empty() == false) {
+				IF_PRINT_WARNING(AUDIO_DEBUG) << "Freeing sound file that was never unloaded: " << filename << endl;
+			}
+			else {
+				IF_PRINT_WARNING(AUDIO_DEBUG) << "Freeing sound file that was never unloaded. Sound did not have an associated filename." << endl;
+			}
+			// TODO: the following delete sometimes causes a seg fault. Investigation is needed because this should not happen here
+			delete *i;
+		}
+		_registered_sounds.clear();
 	}
 	if (_registered_music.empty() == false) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << _registered_music.size() << " MusicDescriptor objects were still "
-			"registered when destructor was invoked" << endl;
+			"registered when destructor was invoked. The objects will now be freed." << endl;
+
+		for (list<MusicDescriptor*>::iterator i = _registered_music.begin(); i != _registered_music.end(); ++i) {
+			string filename = (*i)->GetFilename();
+			if (filename.empty() == false) {
+				IF_PRINT_WARNING(AUDIO_DEBUG) << "Freeing music file that was never unloaded: " << filename << endl;
+			}
+			else {
+				IF_PRINT_WARNING(AUDIO_DEBUG) << "Freeing sound file that was never unloaded. Sound did not have an associated filename." << endl;
+			}
+			// TODO: the following delete sometimes causes a seg fault. Investigation is needed because this should not happen here
+			delete *i;
+		}
+		_registered_music.clear();
 	}
 
 	alcMakeContextCurrent(0);
@@ -191,7 +217,7 @@ AudioEngine::~AudioEngine() {
 
 
 void AudioEngine::Update() {
-	if (!AUDIO_ENABLE)
+	if (AUDIO_ENABLE == false)
 		return;
 
 	for (vector<AudioSource*>::iterator i = _audio_sources.begin(); i != _audio_sources.end(); i++) {
@@ -355,6 +381,9 @@ void AudioEngine::SetListenerOrientation(const float orientation[3]) {
 
 
 bool AudioEngine::LoadSound(const std::string& filename) {
+	if (DoesFileExist(filename) == false)
+		return false;
+
 	SoundDescriptor* new_sound = new SoundDescriptor();
 
 	if (_LoadAudio(new_sound, filename) == false) {
@@ -474,6 +503,29 @@ SoundDescriptor* AudioEngine::RetrieveSound(const std::string& filename) {
 		return dynamic_cast<SoundDescriptor*>(element->second.audio);
 	}
 }
+
+
+
+// void AudioEngine::RemoveOwner(GameMode* gm) {
+// 	if (gm == NULL) {
+// 		IF_PRINT_WARNING(AUDIO_DEBUG) << "function invoked with NULL argument" << endl;
+// 		return;
+// 	}
+//
+// 	// Tells all audio descriptor the owner can be removed.
+// 	map<string, AudioCacheElement>::iterator i = _audio_cache.begin();
+// 	for(; i != _audio_cache.end();) {
+// 		// If the audio buffers are erased, we can remove the descriptor from the cache.
+// 		if (i->second.audio->RemoveOwner(gm)) {
+// 			delete i->second.audio;
+// 			// Make sure the iterator doesn't get flawed after erase.
+// 			i = _audio_cache.erase(i);
+// 		}
+// 		else {
+// 			i++;
+// 		}
+// 	}
+// }
 
 
 

@@ -273,6 +273,11 @@ public:
 	MusicDescriptor* RetrieveMusic(const std::string& filename);
 	//@}
 
+	/** \brief Indicates that a game mode has ended and that it's owned resources may be freed
+	*** \param gm A pointer to the game mode that has been terminated
+    **/
+//     void RemoveOwner(hoa_mode_manager::GameMode* gm);
+
 	/** \name Error Detection and Processing methods
 	*** Code external to the audio engine should not need to make use of the following methods,
 	*** as error detection is routinely done by the engine itself.

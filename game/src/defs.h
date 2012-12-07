@@ -258,6 +258,7 @@ namespace hoa_battle {
 		class CharacterCommand;
 		class CommandSupervisor;
 
+		class CharacterGrowth;
 		class FinishDefeatAssistant;
 		class FinishVictoryAssistant;
 		class FinishSupervisor;
