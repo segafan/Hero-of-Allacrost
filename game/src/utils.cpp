@@ -25,8 +25,9 @@
 #endif
 
 #include <fstream>
-#include <sys/stat.h>
 #include <iconv.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "utils.h"
 #include <SDL/SDL.h>
