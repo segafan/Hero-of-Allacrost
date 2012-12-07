@@ -181,8 +181,8 @@ BootMode::BootMode() :
 	_SetupVideoOptionsMenu();
 	_SetupAudioOptionsMenu();
 	_SetupLanguageOptionsMenu();
-	_SetupKeySetttingsMenu();
-	_SetupJoySetttingsMenu();
+	_SetupKeySettingsMenu();
+	_SetupJoySettingsMenu();
 	_SetupResolutionMenu();
 	_SetupProfileMenu();
 	_SetupLoadProfileMenu();
@@ -659,7 +659,7 @@ void BootMode::_SetupLanguageOptionsMenu() {
 
 
 
-void BootMode::_SetupKeySetttingsMenu() {
+void BootMode::_SetupKeySettingsMenu() {
 	_key_settings_menu.SetPosition(512.0f, 300.0f);
 	_key_settings_menu.SetDimensions(250.0f, 500.0f, 1, 12, 1, 12);
 	_key_settings_menu.SetTextStyle(TextStyle("title22"));
@@ -686,7 +686,7 @@ void BootMode::_SetupKeySetttingsMenu() {
 
 
 
-void BootMode::_SetupJoySetttingsMenu() {
+void BootMode::_SetupJoySettingsMenu() {
 	_joy_settings_menu.SetPosition(512.0f, 300.0f);
 	_joy_settings_menu.SetDimensions(250.0f, 500.0f, 1, 10, 1, 10);
 	_joy_settings_menu.SetTextStyle(TextStyle("title22"));

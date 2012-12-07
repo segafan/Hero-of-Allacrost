@@ -68,20 +68,26 @@ protected:
 private:
 	//! Copy constructor is private, because making a copy of a game mode object is a \b bad idea.
 	GameMode(const GameMode& other);
+
 	//! Copy assignment operator is private, because making a copy of a game mode object is a \b bad idea.
 	GameMode& operator=(const GameMode& other);
-	// Note: Should I make the delete and delete[] operators private too?
+
+	// TODO: Should I make the delete and delete[] operators private too?
 public:
 	GameMode();
+
 	//! \param mt The mode_type to set the new GameMode object to.
 	GameMode(uint8 mt);
+
 	//! Destructor is virutal, since the inherited class holds all the important data.
 	virtual ~GameMode();
 
 	//! Updates the state of the game mode.
 	virtual void Update() = 0;
+
 	//! Draws the next screen frame for the game mode.
 	virtual void Draw() = 0;
+
 	/** \brief Resets the state of the class.
 	***
 	*** This function is called whenever the game mode is made active (ie, it is made the new active game mode
