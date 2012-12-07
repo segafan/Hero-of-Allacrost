@@ -246,7 +246,7 @@ SystemEngine::SystemEngine() {
 	IF_PRINT_DEBUG(SYSTEM_DEBUG) << "constructor invoked" << endl;
 
 	_not_done = true;
-	SetLanguage("en"); //Default language is English
+	SetLanguage("en@quot"); // Default language is English
 }
 
 
@@ -393,7 +393,7 @@ void SystemEngine::ExamineSystemTimers() {
 
 
 
-void SystemEngine::SetLanguage(std::string lang) {
+void SystemEngine::SetLanguage(const string& lang) {
 	_language = lang;
 
 	/// @TODO, implement a cross-platform wrapper for setenv in utils code
