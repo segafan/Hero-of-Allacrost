@@ -541,14 +541,13 @@ public:
 
 	//-- Lighting -----------------------------------------------------
 
-	/** \brief turn on the ligt color for the scene
-	 * \param color the light color to use
-	 */
-	void EnableSceneLighting(const Color& color);
+	/** \brief Uses a color overlay for the screen
+	*** \param color The color to use for lighting
+	**/
+	void EnableLightingOverlay(const Color& color);
 
-	/** \brief disables scene lighting
-	*/
-	void DisableSceneLighting();
+	//! \brief Disables the active light overlay
+	void DisableLightingOverlay();
 
 	/** \brief returns the scene lighting color
 	 * \return the light color used in the scene
@@ -574,10 +573,10 @@ public:
 	 */
 	void DrawLight(float radius, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
-	/** \brief call after all map images are drawn to apply lighting. All
-	 *         menu and text rendering should occur AFTER this call, so that
-	 *         they are not affected by lighting.
-	 */
+	/** \brief Applies lighting after all images have been drawn.
+	*** \note All GUI and text rendering should be done AFTER this call is made, so that they are not affected by
+	*** the lighting.
+	**/
 	void ApplyLightingOverlay();
 
 	//-- Overlays / lightning -------------------------------------------------------
@@ -774,7 +773,7 @@ private:
 
 	//! fps display flag. If true, FPS is displayed
 	bool _fps_display;
-	
+
 	//! \brief A circular array of FPS samples used for calculating average FPS
 	uint32 _fps_samples[private_video::FPS_SAMPLES];
 
@@ -823,14 +822,8 @@ private:
 	//! keep track of number of draw calls per frame
 	int32 _num_draw_calls;
 
-	//! true if real lights are enabled
-	bool _uses_lights;
-
-	//! lighting overlay texture
-	GLuint _light_overlay;
-
-	//! lighting overlay FBO
-	GLuint _light_overlay_fbo;
+	//! \brief The image used as the overlay for ambient lighting
+	StillImage* _light_overlay_img;
 
 	//! X offset to shake the screen by (if any)
 	float  _x_shake;

@@ -160,48 +160,22 @@ bool ParticleSystem::Draw()
 	float img_width_half = img_width * 0.5f;
 	float img_height_half = img_height * 0.5f;
 
-	Color scene_light_modifier;
-
-	bool use_scene_lighting = false;
-
-	if(_system_def->scene_lighting != 0.0f)
-	{
-		scene_light_modifier = VideoManager->GetSceneLightingColor();
-
-		if(scene_light_modifier[0] != 1.0f ||
-		   scene_light_modifier[1] != 1.0f ||
-		   scene_light_modifier[2] != 1.0f ||
-		   scene_light_modifier[3] != 1.0f )
-		{
-			use_scene_lighting = true;
-
-			if(_system_def->scene_lighting != 1.0f)
-				scene_light_modifier = Color::white * (1.0f - _system_def->scene_lighting) + scene_light_modifier * (_system_def->scene_lighting);
-		}
-	}
-
-
 	// fill the vertex array
-
-	if(_system_def->rotation_used)
-	{
+	if (_system_def->rotation_used) {
 		int32 v = 0;
 
-		for(int32 j = 0; j < _num_particles; ++j)
-		{
+		for (int32 j = 0; j < _num_particles; ++j) {
 			float scaled_width_half  = img_width_half * _particles[j].size_x;
 			float scaled_height_half = img_height_half * _particles[j].size_y;
 
 			float rotation_angle = _particles[j].rotation_angle;
 
-			if(_system_def->rotate_to_velocity)
-			{
+			if (_system_def->rotate_to_velocity) {
 				// calculate the angle based on the velocity
 				rotation_angle += UTILS_HALF_PI + atan2f(_particles[j].combined_velocity_y, _particles[j].combined_velocity_x);
 
 				// calculate the scaling due to speed
-				if(_system_def->speed_scale_used)
-				{
+				if (_system_def->speed_scale_used) {
 					// speed is magnitude of velocity
 					float speed = sqrtf(_particles[j].combined_velocity_x * _particles[j].combined_velocity_x + _particles[j].combined_velocity_y * _particles[j].combined_velocity_y);
 					float scale_factor = _system_def->speed_scale * speed;
@@ -246,16 +220,12 @@ bool ParticleSystem::Draw()
 			_particle_vertices[v]._x += _particles[j].x;
 			_particle_vertices[v]._y += _particles[j].y;
 			++v;
-
-
 		}
 	}
-	else
-	{
+	else {
 		int32 v = 0;
 
-		for(int32 j = 0; j < _num_particles; ++j)
-		{
+		for (int32 j = 0; j < _num_particles; ++j) {
 			float scaled_width_half  = img_width_half * _particles[j].size_x;
 			float scaled_height_half = img_height_half * _particles[j].size_y;
 
@@ -282,17 +252,12 @@ bool ParticleSystem::Draw()
 	}
 
 	// fill the color array
-
 	int32 c = 0;
-	for(int32 j = 0; j < _num_particles; ++j)
-	{
+	for (int32 j = 0; j < _num_particles; ++j) {
 		Color color = _particles[j].color;
 
 		if(_system_def->smooth_animation)
 			color = color * (1.0f - frame_progress);
-
-		if(use_scene_lighting)
-			color = color * scene_light_modifier;
 
 		_particle_colors[c] = color;
 		++c;
@@ -307,8 +272,7 @@ bool ParticleSystem::Draw()
 	// fill the texcoord array
 
 	int32 t = 0;
-	for(int32 j = 0; j < _num_particles; ++j)
-	{
+	for (int32 j = 0; j < _num_particles; ++j) {
 		// upper-left
 		_particle_texcoords[t]._t0 = u1;
 		_particle_texcoords[t]._t1 = v1;
@@ -341,8 +305,7 @@ bool ParticleSystem::Draw()
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 
-	if(_system_def->smooth_animation)
-	{
+	if(_system_def->smooth_animation) {
 		glEnableClientState(GL_VERTEX_ARRAY);
 
 		int findex = _animation.GetCurrentFrameIndex();
@@ -360,8 +323,7 @@ bool ParticleSystem::Draw()
 
 
 		t = 0;
-		for(int32 j = 0; j < _num_particles; ++j)
-		{
+		for(int32 j = 0; j < _num_particles; ++j) {
 			// upper-left
 			_particle_texcoords[t]._t0 = u1;
 			_particle_texcoords[t]._t1 = v1;
@@ -386,12 +348,9 @@ bool ParticleSystem::Draw()
 
 
 		c = 0;
-		for(int32 j = 0; j < _num_particles; ++j)
-		{
+		for(int32 j = 0; j < _num_particles; ++j) {
 			Color color = _particles[j].color;
 			color = color * frame_progress;
-			if(use_scene_lighting)
-				color = color * scene_light_modifier;
 
 			_particle_colors[c] = color;
 			++c;
