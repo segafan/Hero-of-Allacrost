@@ -169,8 +169,8 @@ void BindEngineCode() {
 			.def("FadeScreen", &VideoEngine::FadeScreen)
 			.def("IsFading", &VideoEngine::IsFading)
 			.def("ShakeScreen", &VideoEngine::ShakeScreen)
-			.def("EnableSceneLighting", &VideoEngine::EnableSceneLighting)
-			.def("DisableSceneLighting", &VideoEngine::DisableSceneLighting)
+			.def("EnableSceneLighting", &VideoEngine::EnableLightingOverlay)
+			.def("DisableSceneLighting", &VideoEngine::DisableLightingOverlay)
 			.def("ApplyLightingOverlay", &VideoEngine::ApplyLightingOverlay)
 
 			// Namespace constants

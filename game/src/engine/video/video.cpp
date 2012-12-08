@@ -31,36 +31,6 @@ template<> hoa_video::VideoEngine* Singleton<hoa_video::VideoEngine>::_singleton
 
 namespace hoa_video {
 
-namespace {
-// OpenGL extensions
-bool extension_FBO;
-
-typedef void (*eglGenFramebuffers_ptr)(GLsizei, GLuint*);
-typedef void (*eglFramebufferTexture2D_ptr)(GLenum, GLenum, GLenum, GLuint, GLint);
-typedef void (*eglDeleteFramebuffers_ptr)(GLsizei, GLuint*);
-typedef void (*eglBindFramebuffer_ptr)(GLenum, GLuint);
-
-eglGenFramebuffers_ptr eglGenFramebuffers;
-eglFramebufferTexture2D_ptr eglFramebufferTexture2D;
-eglDeleteFramebuffers_ptr eglDeleteFramebuffers;
-eglBindFramebuffer_ptr eglBindFramebuffer;
-
-static void InitExtensions()
-{
-	const char* extensions = (const char*)glGetString(GL_EXTENSIONS);
-	extension_FBO = (bool)strstr(extensions, "GL_EXT_framebuffer_object");
-	eglGenFramebuffers      =
-	                    (eglGenFramebuffers_ptr)SDL_GL_GetProcAddress("glGenFramebuffersEXT");
-	eglFramebufferTexture2D =
-	               (eglFramebufferTexture2D_ptr)SDL_GL_GetProcAddress("glFramebufferTexture2DEXT");
-	eglDeleteFramebuffers   =
-					(eglDeleteFramebuffers_ptr)SDL_GL_GetProcAddress("glDeleteFramebuffersEXT");
-	eglBindFramebuffer      =
-					   (eglBindFramebuffer_ptr)SDL_GL_GetProcAddress("glBindFramebufferEXT");
-}
-
-}
-
 VideoEngine* VideoManager = NULL;
 bool VIDEO_DEBUG = false;
 
@@ -114,14 +84,11 @@ VideoEngine::VideoEngine() :
 	_temp_width = 0;
 	_temp_height = 0;
 	_temp_fullscreen = false;
-	_uses_lights = false;
-	_light_overlay = INVALID_TEXTURE_ID;
-	_light_overlay_fbo = 0;
 	_advanced_display = false;
 	_x_shake = 0;
 	_y_shake = 0;
 	_gamma_value = 1.0f;
-	_light_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	_light_overlay_img = NULL;
 	_gl_error_code = GL_NO_ERROR;
 	_animation_counter = 0;
 	_current_frame_diff = 0;
@@ -149,6 +116,22 @@ VideoEngine::VideoEngine() :
 	for (uint32 sample = 0; sample < FPS_SAMPLES; sample++)
 		 _fps_samples[sample] = 0;
 }
+
+
+VideoEngine::~VideoEngine() {
+	// Remove any existing overlay image
+	if (_light_overlay_img != NULL)
+		delete _light_overlay_img;
+
+	_particle_manager.Destroy();
+	TextManager->SingletonDestroy();
+
+	_default_menu_cursor.Clear();
+	_rectangle_image.Clear();
+
+	TextureManager->SingletonDestroy();
+}
+
 
 
 void VideoEngine::DrawFPS(uint32 frame_time) {
@@ -210,17 +193,6 @@ void VideoEngine::DrawFPS(uint32 frame_time) {
 } // void GUISystem::_DrawFPS(uint32 frame_time)
 
 
-VideoEngine::~VideoEngine() {
-	_particle_manager.Destroy();
-	TextManager->SingletonDestroy();
-
-	_default_menu_cursor.Clear();
-	_rectangle_image.Clear();
-
-	TextureManager->SingletonDestroy();
-}
-
-
 
 bool VideoEngine::SingletonInitialize() {
 	// check to see if the singleton is already initialized
@@ -232,7 +204,7 @@ bool VideoEngine::SingletonInitialize() {
 		return false;
 	}
 
-	
+
 
 	return true;
 } // bool VideoEngine::SingletonInitialize()
@@ -390,17 +362,12 @@ void VideoEngine::Display(uint32 frame_time) {
 	if (_lightning_current_time > _lightning_end_time)
 		_lightning_active = false;
 
-	// Draw a screen overlay if we are in the process of fading fading
+	// Apply any active ambient lightning
+	ApplyLightingOverlay();
+
+	// Draw a screen overlay if we are in the process of fading
 	if (_screen_fader.ShouldUseFadeOverlay()) {
-		Color fade_color = _screen_fader.GetFadeOverlayColor();
-		StillImage fade_overlay;
-		fade_overlay.SetColor(fade_color);
-		fade_overlay.Load("", 1024.0f, 768.0f);
-		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-		PushState();
-		Move(0, 0);
-		fade_overlay.Draw();
-		PopState();
+		_screen_fader.Draw();
 	}
 
 	// This must be called before DrawFPS, because we only want to count
@@ -413,7 +380,7 @@ void VideoEngine::Display(uint32 frame_time) {
 		TextureManager->DEBUG_ShowTexSheet();
 
 	DrawFPS(frame_time); // Draw FPS Counter If We Need To
-		
+
 	PopState();
 
 	SDL_GL_SwapBuffers();
@@ -499,8 +466,6 @@ bool VideoEngine::ApplySettings() {
 			}
 		}
 
-		InitExtensions();
-
 		// Turn off writing to the depth buffer
 		glDepthMask(GL_FALSE);
 
@@ -522,8 +487,6 @@ bool VideoEngine::ApplySettings() {
 
 		return true;
 	}
-	
-	InitExtensions();
 
 	return false;
 } // bool VideoEngine::ApplySettings()
@@ -716,98 +679,34 @@ void VideoEngine::SetTransform(float matrix[16]) {
 
 
 
-void VideoEngine::EnableSceneLighting(const Color& color) {
-	if (!extension_FBO)
-		return;
-	_light_color = color;
-
-	if (IsFloatEqual(color[3], 1.0f) == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "color argument had alpha not equal to 1.0f" << endl;
-		_light_color[3] = 1.0f;
+void VideoEngine::EnableLightingOverlay(const Color& color) {
+	if (_light_overlay_img != NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "function was called when another lighting overlay was already enabled. Overwriting existing lighting." << endl;
+		DisableLightingOverlay();
 	}
-	
-	_light_overlay = TextureManager->_CreateBlankGLTexture(1024, 1024);
-	eglGenFramebuffers(1, &_light_overlay_fbo);
-	eglBindFramebuffer(GL_FRAMEBUFFER_EXT, _light_overlay_fbo);
-	eglFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, _light_overlay, 0);
-	glViewport(0, 0, 1024, 1024);
-	glClearColor(_light_color.GetRed(),
-	             _light_color.GetGreen(), 
-				 _light_color.GetBlue(), 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glViewport(0, 0, _screen_width, _screen_height);
-	eglBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-	_uses_lights = true;
+
+	_light_overlay_img = new StillImage();
+	_light_overlay_img->SetColor(color);
+	_light_overlay_img->Load("", 1024.0f, 768.0f);
 }
 
 
-void VideoEngine::DisableSceneLighting() {
-	if (!extension_FBO)
-		return;
-	_light_color = Color::white;
-	
-	if (_light_overlay != INVALID_TEXTURE_ID) {
-		TextureManager->_DeleteTexture(_light_overlay);
-	}
-	if (_light_overlay_fbo != 0) {
-		eglDeleteFramebuffers(1, &_light_overlay_fbo);
-	}
-	_light_overlay = INVALID_TEXTURE_ID;
-	_light_overlay_fbo = 0;
-	_uses_lights = false;
+void VideoEngine::DisableLightingOverlay() {
+	delete _light_overlay_img;
+	_light_overlay_img = NULL;
 }
+
 
 
 void VideoEngine::ApplyLightingOverlay() {
-	if (!extension_FBO)
+	if (_light_overlay_img == NULL)
 		return;
-	
-	if (_light_overlay == INVALID_TEXTURE_ID) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "light overlay texture was invalid" << endl;
-		return;
-	}
 
-	TextureManager->_BindTexture(_light_overlay);
-
-	glEnable(GL_TEXTURE_2D);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-
-	TextureManager->_BindTexture(_light_overlay);
-
-	GLfloat vertices[8] = { -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f };
-	GLfloat tex_coords[8] = { 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f };
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	glVertexPointer(2, GL_FLOAT, 0, vertices);
-	glTexCoordPointer(2, GL_FLOAT, 0, tex_coords);
-
-	glDrawArrays(GL_QUADS, 0, 4);
-
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-	
-	eglBindFramebuffer(GL_FRAMEBUFFER_EXT, _light_overlay_fbo);
-	glViewport(0, 0, 1024, 1024);
-	glClearColor(_light_color.GetRed(),
-	             _light_color.GetGreen(), 
-				 _light_color.GetBlue(), 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	eglBindFramebuffer(GL_FRAMEBUFFER_EXT, _light_overlay_fbo);
-	glViewport(0, 0, _screen_width, _screen_height);
+	PushState();
+	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	Move(0.0f, 0.0f);
+	_light_overlay_img->Draw();
+	PopState();
 }
 
 
@@ -1253,56 +1152,9 @@ void VideoEngine::DrawHalo(const ImageDescriptor &id, float x, float y, const Co
 
 
 void VideoEngine::DrawLight(float radius, float x, float y, const Color &color) {
-	static const int NUM_SIDES = 32;
-
-	if (!extension_FBO)
-		return;
-	if (_uses_lights == false) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: called DrawLight() even though real lighting was not enabled!" << endl;
-	}
-
-	eglBindFramebuffer(GL_FRAMEBUFFER_EXT, _light_overlay_fbo);
-	glViewport(0, 0, 1024, 1024);
-
-	PushMatrix();
-	Move(x, y);
-	
-	glEnable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-	// generate a vertex array
-	GLfloat vertices[2+(2*NUM_SIDES)];
-	GLfloat colours[4+(4*NUM_SIDES)];
-	vertices[0] = 0.0f;
-	vertices[1] = 0.0f;
-	memset(colours, 0, sizeof(float)*(4+(4*NUM_SIDES)));
-	colours[0] = color.GetRed();
-	colours[1] = color.GetGreen();
-	colours[2] = color.GetBlue();
-	colours[3] = color.GetAlpha();
-	for (int i = 0; i < NUM_SIDES; i++)
-	{
-		float fraction = i / (float)(NUM_SIDES - 1);
-		float angle = fraction * M_PI * 2.0f;
-		vertices[2+(i*2)+0] = cosf(angle) * radius;
-		vertices[2+(i*2)+1] = sinf(angle) * radius;
-	}
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(2, GL_FLOAT, 0, vertices);
-	glColorPointer(4, GL_FLOAT, 0, colours);
-	
-	glDrawArrays(GL_TRIANGLE_FAN, 0, NUM_SIDES+1);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	
-	PopMatrix();
-
-	eglBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-	glViewport(0, 0, _screen_width, _screen_height);
+	// This function has been left unimplemented as the old implementation was broken
+	// FBOs have been removed and the old implementation was no longer valid
+	// TODO: Re-implement this method
 }
 
 }  // namespace hoa_video
