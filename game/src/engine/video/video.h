@@ -544,10 +544,12 @@ public:
 	/** \brief Uses a color overlay for the screen
 	*** \param color The color to use for lighting
 	**/
-	void EnableLightingOverlay(const Color& color);
+	void EnableLightOverlay(const Color& color)
+		{ _light_overlay_enabled = true; _light_overlay_image.SetColor(color); }
 
 	//! \brief Disables the active light overlay
-	void DisableLightingOverlay();
+	void DisableLightOverlay()
+		{ _light_overlay_enabled = false; }
 
 	/** \brief returns the scene lighting color
 	 * \return the light color used in the scene
@@ -555,6 +557,30 @@ public:
 	const Color& GetSceneLightingColor()
 		{ return _light_color; }
 
+	/** \brief Enables the ambient overlay and loads a new image to use
+	*** \param filename The name of the image file to use as the overlay
+	*** \param x_speed The speed at which the overlay slides across the screen in the horizontal direction
+	*** \param y_speed The speed at which the overlay slides across the screen in the vertical direction
+	**/
+	void EnableAmbientOverlay(const std::string &filename, float x_speed, float y_speed);
+
+	//! \brief Disables the use of the ambient overlay
+	void DisableAmbientOverlay()
+		{ _ambient_overlay_enabled = false; }
+
+	/** \brief Applies all lighting and texture overlays to the current draw screen
+	*** \note GUI, text, and other images that should not be affected by overlays should only
+	*** be drawn <b>after</b> this call is made.
+	**/
+	void ApplyOverlays();
+
+	/** \brief Disables all the active image overlay effects
+	*** \note This is useful when the game is switching to a different mode or area, and we want to be
+	*** sure that no active effects still appear when the new game context begins.
+	**/
+	void DisableOverlays();
+
+	//TODO: review the DrawHalo, DrawLight, DrawFullscreenOverlay, DrawLightning, MakeLightning functions.
 	/** \brief draws a halo at the given spot
 	 *
 	 *  \param id    image descriptor for the halo image
@@ -822,14 +848,26 @@ private:
 	//! keep track of number of draw calls per frame
 	int32 _num_draw_calls;
 
-	//! \brief The image used as the overlay for ambient lighting
-	StillImage* _light_overlay_img;
+	//! \brief Set to true when the lighting overlay is enabled
+	bool _light_overlay_enabled;
+
+	//! \brief Set to true when the ambient overlay is enabled
+	bool _ambient_overlay_enabled;
+
+	//! \brief The image used as the overlay for lighting
+	StillImage _light_overlay_image;
+
+	//! \brief The image used as the overlay for ambient effects
+	StillImage _ambient_overlay_image;
+
+	//! \brief The movement speeds of the ambient overlay, in pixels per second
+	float _ambient_x_speed, _ambient_y_speed;
+
+	//! \brief The current shift position of the ambient overlay
+	float _ambient_x_shift, _ambient_y_shift;
 
 	//! X offset to shake the screen by (if any)
-	float  _x_shake;
-
-	//! Y offset to shake the screen by (if any)
-	float _y_shake;
+	float _x_shake, _y_shake;
 
 	//! Current gamma value
 	float _gamma_value;

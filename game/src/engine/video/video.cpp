@@ -21,11 +21,13 @@
 
 #include "video.h"
 #include "script.h"
+#include "system.h"
 
 using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video::private_video;
+using namespace hoa_system;
 
 template<> hoa_video::VideoEngine* Singleton<hoa_video::VideoEngine>::_singleton_reference = NULL;
 
@@ -88,7 +90,6 @@ VideoEngine::VideoEngine() :
 	_x_shake = 0;
 	_y_shake = 0;
 	_gamma_value = 1.0f;
-	_light_overlay_img = NULL;
 	_gl_error_code = GL_NO_ERROR;
 	_animation_counter = 0;
 	_current_frame_diff = 0;
@@ -115,19 +116,27 @@ VideoEngine::VideoEngine() :
 
 	for (uint32 sample = 0; sample < FPS_SAMPLES; sample++)
 		 _fps_samples[sample] = 0;
+
+	_light_overlay_enabled = false;
+	_ambient_overlay_enabled = false;
+	_ambient_x_speed = 0.0f;
+	_ambient_y_speed = 0.0f;
+	_ambient_x_shift = 0.0f;
+	_ambient_y_shift = 0.0f;
+	_light_overlay_image.Load("", 1024.0f, 768.0f);
 }
 
 
 VideoEngine::~VideoEngine() {
-	// Remove any existing overlay image
-	if (_light_overlay_img != NULL)
-		delete _light_overlay_img;
-
 	_particle_manager.Destroy();
 	TextManager->SingletonDestroy();
 
+	// Unload images prior to destroying the texture manager.
+	// Otherwise bad things will happen (memory corruption).
 	_default_menu_cursor.Clear();
 	_rectangle_image.Clear();
+	_light_overlay_image.Clear();
+	_ambient_overlay_image.Clear();
 
 	TextureManager->SingletonDestroy();
 }
@@ -362,13 +371,8 @@ void VideoEngine::Display(uint32 frame_time) {
 	if (_lightning_current_time > _lightning_end_time)
 		_lightning_active = false;
 
-	// Apply any active ambient lightning
-	ApplyLightingOverlay();
-
-	// Draw a screen overlay if we are in the process of fading
-	if (_screen_fader.ShouldUseFadeOverlay()) {
-		_screen_fader.Draw();
-	}
+	// Apply any active overlay images
+	ApplyOverlays();
 
 	// This must be called before DrawFPS, because we only want to count
 	// texture switches related to the game's normal operation, not the
@@ -679,34 +683,72 @@ void VideoEngine::SetTransform(float matrix[16]) {
 
 
 
-void VideoEngine::EnableLightingOverlay(const Color& color) {
-	if (_light_overlay_img != NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "function was called when another lighting overlay was already enabled. Overwriting existing lighting." << endl;
-		DisableLightingOverlay();
+void VideoEngine::EnableAmbientOverlay(const string &filename, float x_speed, float y_speed) {
+	// Note: The StillImage class handles clearing an image when loading another one.
+	if (_ambient_overlay_image.Load(filename) == true) {
+		_ambient_x_speed = x_speed;
+		_ambient_y_speed = y_speed;
+		_ambient_overlay_enabled = true;
+	}
+	else {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to load ambient overlay image: " << filename
+			<< ", ambient overlay will be disalbed" << endl;
+		_ambient_overlay_enabled = false;
+	}
+}
+
+
+
+void VideoEngine::ApplyOverlays() {
+	// Draw the textured ambient overlay
+	if (_ambient_overlay_enabled == true) {
+		PushState();
+		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+		float width = _ambient_overlay_image.GetWidth();
+		float height = _ambient_overlay_image.GetHeight();
+		for (float x = _ambient_x_shift; x <= 1024.0f; x = x + width) {
+			for (float y = _ambient_y_shift; y <= 768.0f; y = y + height) {
+				Move(x, y);
+				_ambient_overlay_image.Draw();
+			}
+		}
+		PopState();
+
+		// Update the shifting
+		float elapsed_ms = static_cast<float>(SystemManager->GetUpdateTime());
+		_ambient_x_shift += elapsed_ms / 1000 * _ambient_x_speed;
+		_ambient_y_shift += elapsed_ms / 1000 * _ambient_y_speed;
+
+		// Shift to the left edge so that the ambient image can be drawn across the entire screen
+		while (_ambient_x_shift > 0.0f) {
+			_ambient_x_shift -= width;
+		}
+		if (_ambient_x_shift < 2 * -width) {
+			_ambient_x_shift += width;
+		}
+
+		// Shift to the top edge so that the ambient image can be drawn across the entire screen
+		while (_ambient_y_shift > 0.0f) {
+			_ambient_y_shift -= height;
+		}
+		if (_ambient_y_shift < 2 * -height) {
+			_ambient_y_shift += height;
+		}
 	}
 
-	_light_overlay_img = new StillImage();
-	_light_overlay_img->SetColor(color);
-	_light_overlay_img->Load("", 1024.0f, 768.0f);
-}
+	// Draw the light overlay
+	if (_light_overlay_enabled == true) {
+		PushState();
+		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+		Move(0.0f, 0.0f);
+		_light_overlay_image.Draw();
+		PopState();
+	}
 
-
-void VideoEngine::DisableLightingOverlay() {
-	delete _light_overlay_img;
-	_light_overlay_img = NULL;
-}
-
-
-
-void VideoEngine::ApplyLightingOverlay() {
-	if (_light_overlay_img == NULL)
-		return;
-
-	PushState();
-	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	Move(0.0f, 0.0f);
-	_light_overlay_img->Draw();
-	PopState();
+	// Draw a screen overlay if we are in the process of fading
+	if (_screen_fader.ShouldUseFadeOverlay()) {
+		_screen_fader.Draw();
+	}
 }
 
 
