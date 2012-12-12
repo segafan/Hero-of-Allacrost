@@ -341,6 +341,7 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/tileset.h \
 	$(EDITOR_DIR)/tileset_editor.cpp \
 	$(EDITOR_DIR)/tileset_editor.h \
+	$(audio_SOURCES) \
 	$(video_SOURCES) \
 	$(script_SOURCES) \
 	src/defs.h \

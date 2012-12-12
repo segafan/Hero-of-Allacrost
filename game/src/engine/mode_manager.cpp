@@ -20,8 +20,6 @@ using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_system;
-using namespace hoa_boot;
-
 
 template<> hoa_mode_manager::ModeEngine* Singleton<hoa_mode_manager::ModeEngine>::_singleton_reference = NULL;
 
@@ -30,9 +28,9 @@ namespace hoa_mode_manager {
 ModeEngine* ModeManager = NULL;
 bool MODE_MANAGER_DEBUG = false;
 
-// ****************************************************************************
-// ***** GameMode class
-// ****************************************************************************
+////////////////////////////////////////////////////////////////////////////////
+// GameMode class methods
+////////////////////////////////////////////////////////////////////////////////
 
 GameMode::GameMode() {
 	IF_PRINT_DEBUG(MODE_MANAGER_DEBUG) << "constructor invoked" << endl;
@@ -54,11 +52,10 @@ GameMode::~GameMode() {
 	IF_PRINT_DEBUG(MODE_MANAGER_DEBUG) << "destructor invoked" << endl;
 }
 
-// ****************************************************************************
-// ***** ModeEngine class
-// ****************************************************************************
+////////////////////////////////////////////////////////////////////////////////
+// ModeEngine class methods
+////////////////////////////////////////////////////////////////////////////////
 
-// This constructor must be defined for the singleton macro
 ModeEngine::ModeEngine() {
 	IF_PRINT_DEBUG(MODE_MANAGER_DEBUG) << "constructor invoked" << endl;
 	_pop_count = 0;
@@ -66,7 +63,7 @@ ModeEngine::ModeEngine() {
 }
 
 
-// The destructor frees all the modes still on the stack
+
 ModeEngine::~ModeEngine() {
 	IF_PRINT_DEBUG(MODE_MANAGER_DEBUG) << "destructor invoked" << endl;
 	// Delete any game modes on the stack
@@ -83,7 +80,7 @@ ModeEngine::~ModeEngine() {
 }
 
 
-// Deletes any game modes on the stack or the push stack and resets all counters
+
 bool ModeEngine::SingletonInitialize() {
 	// Delete any game modes on the stack
 	while (_game_stack.size() != 0) {
@@ -104,27 +101,27 @@ bool ModeEngine::SingletonInitialize() {
 }
 
 
-// Free the top mode on the stack and pop it off
+
 void ModeEngine::Pop() {
 	_pop_count++;
 	_state_change = true;
 }
 
 
-// Pop off all game modes
+
 void ModeEngine::PopAll() {
 	_pop_count = static_cast<uint32>(_game_stack.size());
 }
 
 
-// Push a new game mode onto the stack
+
 void ModeEngine::Push(GameMode* gm) {
 	_push_stack.push_back(gm);
 	_state_change = true;
 }
 
 
-// Returns the mode type of the game mode on the top of the stack
+
 uint8 ModeEngine::GetGameType() {
 	if (_game_stack.empty())
 		return MODE_MANAGER_DUMMY_MODE;
@@ -133,7 +130,7 @@ uint8 ModeEngine::GetGameType() {
 }
 
 
-// Returns the mode type of a game mode on the stack
+
 uint8 ModeEngine::GetGameType(uint32 index) {
 	if (_game_stack.size() < index)
 		return MODE_MANAGER_DUMMY_MODE;
@@ -142,7 +139,7 @@ uint8 ModeEngine::GetGameType(uint32 index) {
 }
 
 
-// Returns a pointer to the game mode that's currently on the top of the stack
+
 GameMode* ModeEngine::GetTop() {
 	if (_game_stack.empty())
 		return NULL;
@@ -151,7 +148,7 @@ GameMode* ModeEngine::GetTop() {
 }
 
 
-// Returns a pointer to a game mode on the stack
+
 GameMode* ModeEngine::Get(uint32 index) {
 	if (_game_stack.size() < index)
 		return NULL;
@@ -160,7 +157,7 @@ GameMode* ModeEngine::Get(uint32 index) {
 }
 
 
-// Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
+
 void ModeEngine::Update() {
 	// If a Push() or Pop() function was called, we need to adjust the state of the game stack.
 	if (_state_change == true) {
@@ -206,7 +203,7 @@ void ModeEngine::Update() {
 }
 
 
-// Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
+
 void ModeEngine::Draw() {
 	if (_game_stack.size() == 0) {
 		return;
@@ -216,7 +213,7 @@ void ModeEngine::Draw() {
 }
 
 
-// Used for debugging purposes ONLY. Prints the contents of the game mode stack.
+
 void ModeEngine::DEBUG_PrintStack() {
 	PRINT_DEBUG << "printing game stack" << endl;
 	if (_game_stack.size() == 0) {

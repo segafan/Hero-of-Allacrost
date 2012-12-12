@@ -211,8 +211,11 @@ function Load(m)
 	
 	Map:SetCamera(claudius);
 	
---	VideoManager:EnableSceneLighting(hoa_video.Color(1.0, 1.0, 1.0, 1.0));
---	VideoManager:DisableSceneLighting();
+	-- Visual effects: night lightning, during a sand storm, with occasional lightning
+	VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.3, 0.6));
+	VideoManager:EnableAmbientOverlay("img/effects/sand_storm.png", -450.0, 25.0);
+	VideoManager:LoadLightningEffect("dat/effects/lightning.lua", 2);
+	VideoManager:EnableLightning(true);
 
 	-- This entire map is played out in scene state. As soon as the map is loaded, we start the chain of events.
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);

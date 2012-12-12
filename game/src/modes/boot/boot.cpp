@@ -80,6 +80,11 @@ BootMode::BootMode() :
 	IF_PRINT_DEBUG(BOOT_DEBUG) << "BootMode constructor invoked" << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
 
+	// Disable any active visual effects
+	VideoManager->DisableLightOverlay();
+	VideoManager->DisableAmbientOverlay();
+	VideoManager->DisableLightning();
+
 	_credits_window = new CreditsWindow();
 	_welcome_window = new WelcomeWindow();
 
@@ -1483,9 +1488,10 @@ void BootMode::_AnimateLogo() {
 		_DrawBackgroundItems();
 		Color targetColor(Color::white);
 		targetColor.SetAlpha(delta);
-		VideoManager->DrawFullscreenOverlay(targetColor);
+		VideoManager->EnableLightOverlay(targetColor);
 	}
 	else if (total_time >= SEQUENCE_SEVEN) {
+		VideoManager->DisableLightOverlay();
 		_EndLogoAnimation();
 		_DrawBackgroundItems();
 	}

@@ -19,13 +19,13 @@
 #include "utils.h"
 #include "defs.h"
 
-//! All calls to the mode management code are wrapped inside this namespace
+//! \brief All calls to the mode management code are wrapped inside this namespace
 namespace hoa_mode_manager {
 
-//! The singleton pointer responsible for maintaining and updating the game mode state.
+//! \brief The singleton pointer responsible for maintaining and updating the game mode state.
 extern ModeEngine* ModeManager;
 
-//! Determines whether the code in the hoa_mode_manager namespace should print debug statements or not.
+//! \brief Determines whether the code in the hoa_mode_manager namespace should print debug statements or not.
 extern bool MODE_MANAGER_DEBUG;
 
 //! \name Game States/Modes
@@ -62,14 +62,14 @@ class GameMode {
 	friend class ModeEngine;
 
 protected:
-	//! Indicates what 'mode' this object is in (what type of inherited class).
+	//! \brief Indicates what 'mode' this object is in (what type of inherited class).
 	uint8 mode_type;
 
 private:
-	//! Copy constructor is private, because making a copy of a game mode object is a \b bad idea.
+	//! \brief Copy constructor is private, because making a copy of a game mode object is a \b bad idea.
 	GameMode(const GameMode& other);
 
-	//! Copy assignment operator is private, because making a copy of a game mode object is a \b bad idea.
+	//! \brief Copy assignment operator is private, because making a copy of a game mode object is a \b bad idea.
 	GameMode& operator=(const GameMode& other);
 
 	// TODO: Should I make the delete and delete[] operators private too?
@@ -79,13 +79,13 @@ public:
 	//! \param mt The mode_type to set the new GameMode object to.
 	GameMode(uint8 mt);
 
-	//! Destructor is virutal, since the inherited class holds all the important data.
+	//! \brief Destructor is virutal, since the inherited class holds all the important data.
 	virtual ~GameMode();
 
-	//! Updates the state of the game mode.
+	//! \brief Updates the state of the game mode.
 	virtual void Update() = 0;
 
-	//! Draws the next screen frame for the game mode.
+	//! \brief Draws the next screen frame for the game mode.
 	virtual void Draw() = 0;
 
 	/** \brief Resets the state of the class.
@@ -134,13 +134,13 @@ private:
 	**/
 	std::vector<GameMode*> _game_stack;
 
-	//! A vector of game modes to push to the stack on the next call to ModeEngine#Update().
+	//! \brief A vector of game modes to push to the stack on the next call to ModeEngine#Update().
 	std::vector<GameMode*> _push_stack;
 
-	//! True if a state change occured and we need to change the active game mode.
+	//! \brief True if a state change occured and we need to change the active game mode.
 	bool _state_change;
 
-	//! The number of game modes to pop from the back of the stack on the next call to ModeEngine#Update().
+	//! \brief The number of game modes to pop from the back of the stack on the next call to ModeEngine#Update().
 	uint32 _pop_count;
 
 public:
@@ -168,13 +168,13 @@ public:
 	**/
 	void Push(GameMode* gm);
 
-	/**  \brief  Gets the type of the currently active game mode.
-	***  \return The value of the mode_type member of the GameMode object on the top of the stack.
+	/** \brief Gets the type of the currently active game mode.
+	*** \return The value of the mode_type member of the GameMode object on the top of the stack.
 	**/
 	uint8 GetGameType();
 
-	/**  \brief  Gets the type of a game mode in the stack.
-	***  \return The value of the mode_type member of the GameMode object on the top of the stack.
+	/** \brief Gets the type of a game mode in the stack.
+	*** \return The value of the mode_type member of the GameMode object on the top of the stack.
 	**/
 	uint8 GetGameType(uint32 index);
 

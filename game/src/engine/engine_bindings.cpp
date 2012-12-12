@@ -173,7 +173,10 @@ void BindEngineCode() {
 			.def("DisableLightOverlay", &VideoEngine::DisableLightOverlay)
 			.def("EnableAmbientOverlay", &VideoEngine::EnableAmbientOverlay)
 			.def("DisableAmbientOverlay", &VideoEngine::DisableAmbientOverlay)
-			.def("ApplyOverlays", &VideoEngine::ApplyOverlays)
+			.def("LoadLightningEffect", &VideoEngine::LoadLightningEffect)
+			.def("EnableLightning", &VideoEngine::EnableLightning)
+			.def("DisableLightning", &VideoEngine::DisableLightning)
+			.def("DrawOverlays", &VideoEngine::DrawOverlays)
 
 			// Namespace constants
 			.enum_("constants") [
