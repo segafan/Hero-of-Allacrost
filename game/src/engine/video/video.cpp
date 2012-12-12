@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "video.h"
+#include "audio.h"
 #include "script.h"
 #include "system.h"
 
@@ -27,6 +28,8 @@ using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video::private_video;
+using namespace hoa_audio;
+using namespace hoa_script;
 using namespace hoa_system;
 
 template<> hoa_video::VideoEngine* Singleton<hoa_video::VideoEngine>::_singleton_reference = NULL;
@@ -123,7 +126,12 @@ VideoEngine::VideoEngine() :
 	_ambient_y_speed = 0.0f;
 	_ambient_x_shift = 0.0f;
 	_ambient_y_shift = 0.0f;
+	_lightning_active = false;
+	_lightning_looped = false;
+	_lightning_current_time = 0;
+	_lightning_end_time = 0;
 	_light_overlay_image.Load("", 1024.0f, 768.0f);
+	_lightning_overlay_image.Load("", 1024.0f, 768.0f);
 }
 
 
@@ -360,19 +368,13 @@ void VideoEngine::Display(uint32 frame_time) {
 	// Update all particle effects
 	_particle_manager.Update(frame_time);
 
+	if (_lightning_active == true)
+		_UpdateLightning(frame_time);
+
 	// Update shaking effect
 	PushState();
 	SetCoordSys(0, 1024, 0, 768);
 	_UpdateShake(frame_time);
-
-	// Update lightning timer
-	_lightning_current_time += frame_time;
-
-	if (_lightning_current_time > _lightning_end_time)
-		_lightning_active = false;
-
-	// Apply any active overlay images
-	ApplyOverlays();
 
 	// This must be called before DrawFPS, because we only want to count
 	// texture switches related to the game's normal operation, not the
@@ -699,11 +701,188 @@ void VideoEngine::EnableAmbientOverlay(const string &filename, float x_speed, fl
 
 
 
-void VideoEngine::ApplyOverlays() {
+bool VideoEngine::LoadLightningEffect(const string& file, uint32 effect_number) {
+	_lightning_data.clear();
+	_lightning_sounds.clear();
+	_lightning_current_time = 0;
+	_lightning_end_time = 0;
+	_next_lightning_sound = 0;
+	_lightning_active = false;
+
+	ReadScriptDescriptor script;
+	if (script.OpenFile(file) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to open file: " << file
+			<< ", the lightning effect will be disabled" << endl;
+		_lightning_active = false;
+		return false;
+	}
+
+	uint32 number_of_effects = script.ReadUInt("number_of_effects");
+	if (effect_number > number_of_effects) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to load effect number: " << effect_number
+			<< ", because it exceeded the total number of effects: " << number_of_effects << endl;
+		_lightning_data.clear();
+		_lightning_sounds.clear();
+		script.CloseFile();
+		return false;
+	}
+
+	// Read the light intensity data
+	script.OpenTable("light_intensities");
+	script.ReadFloatVector(effect_number, _lightning_data);
+	script.CloseTable();
+
+	// Check the data to make sure that values are appropriate.
+	for (uint32 i = 0; i < _lightning_data.size(); i++) {
+		if (_lightning_data[i] < 0.0f) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "for effect number: " << effect_number
+				<< "invalid light_intensities data was discovered at index: " << i
+				<< " (" << _lightning_data[i] << "), setting value to 0.0f" << endl;
+			_lightning_data[i] = 0.0f;
+		}
+		else if (_lightning_data[i] > 1.0f) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "for effect number: " << effect_number
+				<< "invalid light_intensities data was discovered at index: " << i
+				<< " (" << _lightning_data[i] << "), setting value to 1.0f" << endl;
+			_lightning_data[i] = 1.0f;
+		}
+	}
+
+	// Read the sounds and sound timing data
+	vector<string> sound_filenames;
+	vector<uint32> sound_times;
+	script.OpenTable("sound_filenames");
+	script.ReadStringVector(effect_number, sound_filenames);
+	script.CloseTable();
+	script.OpenTable("sound_times");
+	script.ReadUIntVector(effect_number, sound_times);
+	script.CloseTable();
+
+	// Make sure that the table sizes are the same
+	if (sound_filenames.size() != sound_times.size()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to load effect number: " << effect_number
+			<< ", because the size of the sound_filenames and sound_times tables were unequal" << endl;
+		_lightning_data.clear();
+		_lightning_sounds.clear();
+		script.CloseFile();
+		return false;
+	}
+
+	// Determine the amount of time the entire sequence will take. Each entry in the data correspodns to 10 milliseconds
+	uint32 sequence_time = _lightning_data.size() * 10;
+
+	// Check the sound_timings to make sure that they all occur within the sequence time range
+	for (uint32 i = 0; i < sound_times.size(); ++i) {
+		if (sound_times[i] > sequence_time) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "for effect number: " << effect_number << ", the total time of the "
+				<< "sequence was determined to be " << sequence_time << " milliseconds, but a sound was defined "
+				<< "to play at the " << sound_times[i] << " millisecond mark. As a result, this sound will never "
+				<< "be played in this sequence" << endl;
+		}
+	}
+
+	// Now load the sound data into the proper vector container
+	_lightning_sounds.resize(sound_filenames.size());
+	for (uint32 i = 0; i < _lightning_sounds.size(); ++i) {
+		_lightning_sounds[i].filename = sound_filenames[i];
+		_lightning_sounds[i].time = sound_times[i];
+	}
+
+	// Reset the effect timers
+	_lightning_current_time = 0;
+	_lightning_end_time = sequence_time;
+
+	script.CloseFile();
+	return true;
+}
+
+
+
+void VideoEngine::EnableLightning(bool loop) {
+	if (_lightning_data.empty() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "function called when no lighting effect appeared to be loaded" << endl;
+		return;
+	}
+
+	_lightning_active = true;
+	_lightning_looped = loop;
+}
+
+
+
+void VideoEngine::_UpdateLightning(uint32 frame_time) {
+	if (_lightning_active == false)
+		return;
+
+	_lightning_current_time += frame_time;
+
+	// Check if the next sound is ready to be played and update to the next sound
+	// Note: we let the _next_lightning_sound counter increment past the end of the _lightning_sounds container
+	// to indicate when there are no more sounds to play in the sequence. Thus this loop has to be protected by
+	// this if statement to make sure we do not make an out-of-bounds access error
+	if (_next_lightning_sound < _lightning_sounds.size()) {
+		// This is done in a loop in case two sounds are played at the same time, or very similar times
+		while (_lightning_current_time >= _lightning_sounds[_next_lightning_sound].time) {
+			AudioManager->PlaySound(_lightning_sounds[_next_lightning_sound].filename);
+			_next_lightning_sound++;
+
+			// If we just played the last sound in the sequence, exit the loop
+			if (_next_lightning_sound >= _lightning_sounds.size()) {
+				break;
+			}
+		}
+	}
+
+	// Check if the sequence has reached its end
+	if (_lightning_current_time >= _lightning_end_time) {
+		if (_lightning_looped == false) {
+			DisableLightning();
+		}
+		else {
+			// Restart the sequence timer, but don't throw away any "remainder time" that occurred during this loop
+			_lightning_current_time = _lightning_current_time - _lightning_end_time;
+			_next_lightning_sound = 0;
+		}
+	}
+}
+
+
+
+void VideoEngine::DrawLightning() {
+	if (_lightning_active == false)
+		return;
+
+	// Convert milliseconds elapsed into data points elapsed
+	float t = _lightning_current_time / 10.0f;
+
+	int32 rounded_t = static_cast<int32>(t);
+	t -= rounded_t;
+
+	// Safety check
+	if (rounded_t + 1 >= static_cast<int32>(_lightning_data.size()))
+		return;
+
+	// Get two separate data points and blend them together in a linear interpolation
+	float data1 = _lightning_data[rounded_t];
+	float data2 = _lightning_data[rounded_t + 1];
+	float intensity = data1 * (1 - t) + data2 * t;
+
+	PushState();
+	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	Move(0.0f, 0.0f);
+	_lightning_overlay_image.Draw(Color(1.0f, 1.0f, 1.0f, intensity));
+	PopState();
+}
+
+
+
+void VideoEngine::DrawOverlays() {
+	PushState();
+	SetCoordSys(0, 1024, 0, 768);
+	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+
 	// Draw the textured ambient overlay
 	if (_ambient_overlay_enabled == true) {
-		PushState();
-		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		float width = _ambient_overlay_image.GetWidth();
 		float height = _ambient_overlay_image.GetHeight();
 		for (float x = _ambient_x_shift; x <= 1024.0f; x = x + width) {
@@ -712,7 +891,6 @@ void VideoEngine::ApplyOverlays() {
 				_ambient_overlay_image.Draw();
 			}
 		}
-		PopState();
 
 		// Update the shifting
 		float elapsed_ms = static_cast<float>(SystemManager->GetUpdateTime());
@@ -738,17 +916,21 @@ void VideoEngine::ApplyOverlays() {
 
 	// Draw the light overlay
 	if (_light_overlay_enabled == true) {
-		PushState();
-		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		Move(0.0f, 0.0f);
 		_light_overlay_image.Draw();
-		PopState();
+	}
+
+	// Draw the lightning overlay
+	if (_lightning_active) {
+		DrawLightning();
 	}
 
 	// Draw a screen overlay if we are in the process of fading
 	if (_screen_fader.ShouldUseFadeOverlay()) {
 		_screen_fader.Draw();
 	}
+
+	PopState();
 }
 
 
@@ -1000,93 +1182,6 @@ int32 VideoEngine::_ScreenCoordY(float y) {
 
 
 
-bool VideoEngine::MakeLightning(const std::string &lit_file) {
-	FILE *fp = fopen(lit_file.c_str(), "rb");
-	if(!fp)
-		return false;
-
-	int32 data_size;
-	if(!fread(&data_size, 4, 1, fp))
-	{
-		fclose(fp);
-		return false;
-	}
-
-	// since this file was created on windows, it uses little endian byte order
-	// Check if this processor uses big endian, and reorder bytes if so.
-
-	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		data_size = ((data_size & 0xFF000000) >> 24) |
-		           ((data_size & 0x00FF0000) >> 8) |
-		           ((data_size & 0x0000FF00) << 8) |
-		           ((data_size & 0x000000FF) << 24);
-	#endif
-
-	uint8 *data = new uint8[data_size];
-
-	if(!fread(data, data_size, 1, fp))
-	{
-		delete [] data;
-		fclose(fp);
-		return false;
-	}
-
-	fclose(fp);
-
-	_lightning_data.clear();
-
-	for(int32 j = 0; j < data_size; ++j)
-	{
-		float f = float(data[j]) / 255.0f;
-		_lightning_data.push_back(f);
-	}
-
-	delete [] data;
-
-	_lightning_active = true;
-	_lightning_current_time = 0;
-	_lightning_end_time = data_size * 1000 / 100;
-
-	return true;
-}
-
-
-
-void VideoEngine::DrawLightning() {
-	if(!_lightning_active)
-		return;
-
-	// convert milliseconds elapsed into data points elapsed
-
-	float t = _lightning_current_time * 100.0f / 1000.0f;
-
-	int32 rounded_t = static_cast<int32>(t);
-	t -= rounded_t;
-
-	// get 2 separate data points and blend together (linear interpolation)
-
-	float data1 = _lightning_data[rounded_t];
-	float data2 = _lightning_data[rounded_t+1];
-
-	float intensity = data1 * (1-t) + data2 * t;
-
-	DrawFullscreenOverlay(Color(1.0f, 1.0f, 1.0f, intensity));
-}
-
-
-
-void VideoEngine::DrawFullscreenOverlay(const Color& color) {
-	PushState();
-
-	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
-	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	Move(0.0f, 0.0f);
-	StillImage img;
-	img.Load("", 1.0f, 1.0f);
-	img.Draw(color);
-
-	PopState();
-}
 
 
 
@@ -1177,6 +1272,7 @@ void VideoEngine::DrawRectangleOutline(float left, float right, float bottom, fl
 	DrawLine(left, bottom, left, top, width, color);
 	DrawLine(right, bottom, right, top, width, color);
 }
+
 
 
 void VideoEngine::DrawHalo(const ImageDescriptor &id, float x, float y, const Color &color) {

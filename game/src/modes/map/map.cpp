@@ -82,6 +82,11 @@ MapMode::MapMode(string filename) :
 	mode_type = MODE_MANAGER_MAP_MODE;
 	_current_instance = this;
 
+	// Disable any active visual effects
+	VideoManager->DisableLightOverlay();
+	VideoManager->DisableAmbientOverlay();
+	VideoManager->DisableLightning();
+
 	ResetState();
 	PushState(STATE_EXPLORE);
 
@@ -232,6 +237,8 @@ void MapMode::Draw() {
 		ScriptCallFunction<void>(_draw_function);
 	else
 		_DrawMapLayers();
+
+	VideoManager->DrawOverlays();
 
 	_DrawGUI();
 	if (CurrentState() == STATE_DIALOGUE) {

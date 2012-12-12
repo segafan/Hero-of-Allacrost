@@ -572,7 +572,7 @@ public:
 	*** \note GUI, text, and other images that should not be affected by overlays should only
 	*** be drawn <b>after</b> this call is made.
 	**/
-	void ApplyOverlays();
+	void DrawOverlays();
 
 	/** \brief Disables all the active image overlay effects
 	*** \note This is useful when the game is switching to a different mode or area, and we want to be
@@ -580,7 +580,7 @@ public:
 	**/
 	void DisableOverlays();
 
-	//TODO: review the DrawHalo, DrawLight, DrawFullscreenOverlay, DrawLightning, MakeLightning functions.
+	//TODO: review the DrawHalo and DrawLight functions.
 	/** \brief draws a halo at the given spot
 	 *
 	 *  \param id    image descriptor for the halo image
@@ -605,25 +605,34 @@ public:
 	**/
 	void ApplyLightingOverlay();
 
-	//-- Overlays / lightning -------------------------------------------------------
+	/** \brief Loads a lightning effect
+	*** \param file The file which contains the lightning intensity data, stored as floats ranging from 0.0f to 1.0f
+	*** \param effect_number The effect ID number, used to load the correct effect data from the file
+	*** \return True if the data was loaded successfully, false upon failure
+	***
+	*** \note The standard file with the lighting effect data is located at dat/effects/lightning.lua
+	**/
+	bool LoadLightningEffect(const std::string& file, uint32 effect_number);
 
-	/** \brief draws a full screen overlay of the given color
-	 *  \note  This is very slow, so use sparingly!
-	 */
-	void DrawFullscreenOverlay(const Color& color);
+	/** \brief Enables the lightning overlay effect
+	*** \param loop Set to true to loop this effect (default value of false)
+	*** the speed x and y factor are used to make the overlay slide on the screen.
+	***
+	*** \note If the last call to LoadLightningEffect failed (or this function was never called at all),
+	*** then no change will take place.
+	**/
+	void EnableLightning(bool loop = false);
 
-	/** \brief call to create lightning effect
-	 *  \param lit_file a .lit file which contains lightning intensities stored
-	 *                 as bytes (0-255).
-	 * \return success/failure
-	 */
-	bool MakeLightning(const std::string& lit_file);
+	//! \brief Disables the lightning overlay and resets the lightning timer
+	void DisableLightning()
+		{ _lightning_active = false; _lightning_current_time = 0; _next_lightning_sound = 0; }
 
-	/** \brief call this every frame to draw any lightning effects. You should make
-	 *         sure to place this call in an appropriate spot. In particular, you should
-	 *         draw the lightning before drawing the GUI. The lightning is drawn by
-	 *         using a fullscreen overlay.
-	 */
+	/** \brief Draws the active lighting effect
+	***
+	*** Lightning is drawn by using a fullscreen overlay image. Lightning should be drawn
+	*** prior to drawing GUI, text, or other elements that should not be affected by the
+	*** lightning.
+	**/
 	void DrawLightning();
 
 	//-- Fading ---------------------------------------------------------------
@@ -860,14 +869,46 @@ private:
 	//! \brief The image used as the overlay for ambient effects
 	StillImage _ambient_overlay_image;
 
+	//! \brief The image overlay used to produce the lightning effect
+	StillImage _lightning_overlay_image;
+
 	//! \brief The movement speeds of the ambient overlay, in pixels per second
 	float _ambient_x_speed, _ambient_y_speed;
 
 	//! \brief The current shift position of the ambient overlay
 	float _ambient_x_shift, _ambient_y_shift;
 
-	//! X offset to shake the screen by (if any)
+	//! \brief Offset values that are used when a screen shake is active
 	float _x_shake, _y_shake;
+
+	//! \brief Set to true when a lightning effect is active
+	bool _lightning_active;
+
+	//! \brief When true, the loaded lightning effect will loop
+	bool _lightning_looped;
+
+	//! \brief The number of milliseconds that has expired since the active lightning effect started
+	uint32 _lightning_current_time;
+
+	//! \brief The number of milliseconds that the lightning effect will run for
+	uint32 _lightning_end_time;
+
+	//! \brief The intensity data for the active lightning effect
+	std::vector<float> _lightning_data;
+
+	//! \brief Ties together the sounds and play times of those sounds used in a lightning sequence
+	struct LightningSoundEvent {
+		//! \brief The filename of the sound to play for the event
+		std::string filename;
+		//! \brief The time to trigger the sound, in milliseconds
+		uint32 time;
+	};
+
+	//! \brief Holds all sounds used for the currently loaded lightning sequence
+	std::vector<LightningSoundEvent> _lightning_sounds;
+
+	//! \brief An index into the _lightning_sounds container which points to the next sound that should be played in the sequence
+	uint32 _next_lightning_sound;
 
 	//! Current gamma value
 	float _gamma_value;
@@ -899,18 +940,6 @@ private:
 
 	//! current scene lighting color (essentially just modulates vertex colors of all the images)
 	Color _light_color;
-
-	//! true if a lightning effect is active
-	bool _lightning_active;
-
-	//! current time of lightning effect (time since it started)
-	int32 _lightning_current_time;
-
-	//! how many milliseconds to do the lightning effect for
-	int32 _lightning_end_time;
-
-	//! intensity data for lightning effect
-	std::vector <float> _lightning_data;
 
 	//! counter to keep track of milliseconds since game started for animations
 	int32 _animation_counter;
@@ -983,6 +1012,14 @@ private:
 	//! \brief Returns true if textures should be smoothed (used for non natural screen resolutions)
 	bool _ShouldSmooth()
 		{ return ( _screen_width != VIDEO_STANDARD_RES_WIDTH || _screen_height != VIDEO_STANDARD_RES_HEIGHT); }
+
+	/** \brief Updates the lighting sequence and triggers any sound events
+	*** \param frame_time The number of milliseconds that have elapsed since the last draw frame
+	**/
+	void _UpdateLightning(uint32 frame_time);
+
+	//! \brief Called every frame whenever a lighting sequence is active
+	void _DrawLightning();
 
 	/** \brief Shows graphical statistics useful for performance tweaking
 	*** This includes, for instance, the number of texture switches made during a frame.
