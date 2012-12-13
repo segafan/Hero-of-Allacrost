@@ -17,9 +17,11 @@
 #include <math.h>
 
 #include "video.h"
+#include "engine/system.h"
 
 using namespace std;
 using namespace hoa_utils;
+using namespace hoa_system;
 using namespace hoa_video::private_video;
 
 namespace hoa_video {
@@ -643,7 +645,7 @@ void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows
 	// check the signature - make sure it is actually a PNG! otherwise BAD THINGS would happen
 	uint8 test_buffer[8];
 
-	fread(test_buffer, 1, 8, fp);
+	size_t bytes_read = fread(test_buffer, 1, 8, fp);
 	if (png_sig_cmp(test_buffer, 0, 8)) {
 		throw Exception("png_sig_cmp() failed for file: " + filename, __FILE__, __LINE__, __FUNCTION__);
 		fclose(fp);
@@ -1169,6 +1171,7 @@ void AnimatedImage::Clear() {
 	ImageDescriptor::Clear();
 	_frame_index = 0;
 	_frame_counter = 0;
+	_animation_length = 0;
 	// clear all animation frame images
 	for (vector<AnimationFrame>::iterator i = _frames.begin(); i != _frames.end(); ++i)
 		(*i).image.Clear();
@@ -1207,6 +1210,7 @@ bool AnimatedImage::LoadFromFrameSize(const string& filename, const vector<uint3
 		image_frames[i].SetDimensions(_width, _height);
 		_frames.back().image = image_frames[i];
 		_frames.back().frame_time = timings[i];
+		_animation_length += timings[i];
 		if (timings[i] == 0) {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "added a frame time value of zero when loading file: " << filename << endl;
 		}
@@ -1238,12 +1242,19 @@ bool AnimatedImage::LoadFromFrameGrid(const string& filename, const vector<uint3
 		return false;
 	}
 
+	// If the animation dimensions are not set yet, use the size of the first frame
+	if (IsFloatEqual(_width, 0.0f) && IsFloatEqual(_height, 0.0f)) {
+		_width = image_frames.begin()->GetWidth();
+		_height = image_frames.begin()->GetHeight();
+	}
+
 	// Add the loaded frame image and timing information
 	for (uint32 i = 0; i < frame_rows * frame_cols - trim; i++) {
 		_frames.push_back(AnimationFrame());
 		image_frames[i].SetDimensions(_width, _height);
 		_frames.back().image = image_frames[i];
 		_frames.back().frame_time = timings[i];
+		_animation_length += timings[i];
 		if (timings[i] == 0) {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "added zero frame time for an image frame when loading file: " << filename << endl;
 		}
@@ -1327,13 +1338,13 @@ void AnimatedImage::Update() {
 	if (_loops_finished)
 		return;
 
-	// Get the amount of time that expired since the last frame
-	uint32 frame_change = VideoManager->GetFrameChange();
-	_frame_counter += frame_change;
+	// Get the amount of milliseconds that have pass since the last display
+	uint32 update_time = SystemManager->GetUpdateTime();
+	_frame_counter += update_time;
 
 	// If the frame time has expired, update the frame index and counter.
 	while (_frame_counter >= _frames[_frame_index].frame_time) {
-		frame_change = _frame_counter - _frames[_frame_index].frame_time;
+		update_time = _frame_counter - _frames[_frame_index].frame_time;
 		_frame_index++;
 		if (_frame_index >= _frames.size()) {
 				// Check if the animation has looping enabled and if so, increment the loop counter
@@ -1346,7 +1357,7 @@ void AnimatedImage::Update() {
 			}
 			_frame_index = 0;
 		}
-		_frame_counter = frame_change;
+		_frame_counter = update_time;
 	}
 } // void AnimatedImage::Update()
 

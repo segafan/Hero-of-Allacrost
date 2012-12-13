@@ -565,9 +565,9 @@ public:
 		{ _frame_index = 0; _frame_counter = 0; _loop_counter = 0; _loops_finished = false; }
 
 	/** \brief Called every frame to update the animation's current frame
-	*** This will automatically synchronize the animation to VIDEO_ANIMATION_FRAME_PERIOD,
-	*** i.e. 30 frames per second. If you want to update the frames yourself using some custom
-	*** algorithm, then use the SetFrame() method instead of calling this function
+	***
+	*** This will automatically synchronize the animation according to the time passed
+	*** since the last call.
 	***
 	*** \note This method will do nothing if there are no frames contained in the animation,
 	*** or if the _loops_finished member is set to true.
@@ -600,7 +600,7 @@ public:
 	//! \name Class Member Access Functions
 	//@{
 	//! \brief Returns the number of frames in this animation
-	uint32 GetNumFrames() const
+	uint32 GetNumberOfFrames() const
 		{ return _frames.size(); }
 
 	//! \brief Retuns a pointer to the StillImage representing the current frame
@@ -610,6 +610,10 @@ public:
 	//! \brief Returns the index number of the current frame in the animation.
 	uint32 GetCurrentFrameIndex() const
 		{ return _frame_index; }
+
+	//! \brief Returns the total time used to play the animation in milliseconds.
+	uint32 GetAnimationLength() const
+		{ return _animation_length; }
 
 	/** \brief Returns a pointer to the StillImage at a specified frame.
 	*** \param index index of the frame you want
@@ -716,6 +720,9 @@ private:
 
     //! \brief Counts how long each frame has been shown for.
 	uint32 _frame_counter;
+
+	//! \brief The total time in milliseconds that it takes to play the animation from start to finish (for a single loop)
+	uint32 _animation_length;
 
 	/** \brief The number of times to loop the animation frames.
 	*** A negative value indicates to loop forever, which is the default.
