@@ -1222,6 +1222,11 @@ bool AnimatedImage::LoadFromFrameSize(const string& filename, const vector<uint3
 
 
 bool AnimatedImage::LoadFromFrameGrid(const string& filename, const vector<uint32>& timings, const uint32 frame_rows, const uint32 frame_cols, const uint32 trim) {
+	if (DoesFileExist(filename) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "file does not exist: " << filename << endl;
+		return false;
+	}
+
 	if (trim >= frame_rows * frame_cols) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempt to trim away more frames than requested to load for file: " << filename << endl;
 		return false;
