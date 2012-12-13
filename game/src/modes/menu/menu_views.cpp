@@ -54,10 +54,17 @@ CharacterWindow::~CharacterWindow() {
 
 void CharacterWindow::SetCharacter(GlobalCharacter *character) {
 	_char_id = character->GetID();
-
 	_portrait.SetStatic(true);
-	_portrait.Load("img/portraits/menu/" + character->GetFilename() + "_small.png", 100, 100);
-} // void CharacterWindow::SetCharacter(GlobalCharacter *character)
+
+	std::string portrait_filename = "img/portraits/menu/" + character->GetFilename() + "_small.png";
+	if (DoesFileExist(portrait_filename) == false) {
+		PRINT_WARNING << "Portrait file not found: " << portrait_filename << endl;
+		_portrait.Load("", 100.0f, 100.0f); // Load an empty image
+	}
+	else {
+		_portrait.Load(portrait_filename, 100.0f, 100.0f);
+	}
+}
 
 
 
@@ -112,11 +119,9 @@ void CharacterWindow::Draw() {
 	return;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // InventoryWindow Class
 ////////////////////////////////////////////////////////////////////////////////
-
 
 InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE) {
 	_InitCategory();
@@ -462,7 +467,16 @@ StatusWindow::StatusWindow() :
 	for (uint32 i = 0; i < partysize; i++) {
 		ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(i));
 		portrait.SetStatic(true);
-		portrait.Load("img/portraits/menu/" + ch->GetFilename() + "_large.png");
+
+		string portrait_filename = "img/portraits/menu/" + ch->GetFilename() + "_large.png";
+		if (DoesFileExist(portrait_filename) == false) {
+			IF_PRINT_WARNING(MENU_DEBUG) << "character portrait image file did not exist: " << portrait_filename << endl;
+			portrait.Load("");
+		}
+		else {
+			portrait.Load(portrait_filename);
+		}
+		_full_portraits.push_back(portrait);
 		_full_portraits.push_back(portrait);
 	}
 

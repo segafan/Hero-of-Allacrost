@@ -370,8 +370,14 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character) :
 	_last_rendered_sp(0),
 	_sprite_animation_alias("idle")
 {
-	if (_stamina_icon.Load("img/icons/actors/characters/" + character->GetFilename() + ".png", 45, 45) == false)
-		PRINT_ERROR << "unable to load stamina icon for character: " << character->GetFilename() << endl;
+	string icon_filename = "img/icons/actors/characters/" + character->GetFilename() + ".png";
+	if (DoesFileExist(icon_filename) == false) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "character icon image file did not exist: " << icon_filename << endl;
+		_stamina_icon.Load("", 45.0f, 45.0f); // Load an empty image file
+	}
+	else {
+		_stamina_icon.Load(icon_filename, 45.0f, 45.0f);
+	}
 
 	_last_rendered_hp = GetHitPoints();
 	_last_rendered_sp = GetSkillPoints();
@@ -691,8 +697,14 @@ BattleEnemy::BattleEnemy(GlobalEnemy* enemy) :
 	BattleActor(enemy),
 	_global_enemy(enemy)
 {
-	if (_stamina_icon.Load("img/icons/actors/enemies/" + _global_actor->GetFilename() + ".png", 45, 45) == false)
-		PRINT_ERROR << "failed to load enemy stamina icon: " << _global_actor->GetFilename() << endl;
+	string icon_filename = "img/icons/actors/enemies/" + _global_actor->GetFilename() + ".png";
+	if (DoesFileExist(icon_filename) == false) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "enemy icon image file did not exist: " << icon_filename << endl;
+		_stamina_icon.Load("", 45.0f, 45.0f); // Load an empty image
+	}
+	else {
+		_stamina_icon.Load(icon_filename, 45.0f, 45.0f);
+	}
 
 	for (map<uint32, GlobalSkill*>::const_iterator i = (_global_enemy->GetSkills()).begin(); i != (_global_enemy->GetSkills()).end(); i++) {
 		_enemy_skills.push_back(i->second);
