@@ -94,8 +94,6 @@ VideoEngine::VideoEngine() :
 	_y_shake = 0;
 	_gamma_value = 1.0f;
 	_gl_error_code = GL_NO_ERROR;
-	_animation_counter = 0;
-	_current_frame_diff = 0;
 	_lightning_active = false;
 	_lightning_current_time = 0;
 	_lightning_end_time = 0;
@@ -365,13 +363,14 @@ void VideoEngine::Clear(const Color &c) {
 
 
 void VideoEngine::Display(uint32 frame_time) {
-	// Update all particle effects
-	_particle_manager.Update(frame_time);
-
+	if (_screen_fader.IsFadeActive() == true)
+		_screen_fader.Update(frame_time);
 	if (_ambient_overlay_enabled == true)
 		_UpdateAmbientOverlay(frame_time);
 	if (_lightning_active == true)
 		_UpdateLightning(frame_time);
+	// Update all particle effects
+	_particle_manager.Update(frame_time);
 
 	// Update shaking effect
 	PushState();
@@ -393,13 +392,6 @@ void VideoEngine::Display(uint32 frame_time) {
 
 	SDL_GL_SwapBuffers();
 
-	_screen_fader.Update(frame_time);
-
-	// Update animation timers
-	int32 old_frame_index = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
-	_animation_counter += frame_time;
-	int32 current_frame_index = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
-	_current_frame_diff = current_frame_index - old_frame_index;
 } // void VideoEngine::Display(uint32 frame_time)
 
 

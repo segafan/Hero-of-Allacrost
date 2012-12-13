@@ -484,7 +484,7 @@ void BattleCharacter::DrawSprite() {
 		ChangeSpriteAnimation("idle");
 	}
 	else {
-		uint32 dist = 120 * _animation_timer.GetTimeExpired() / _animation_timer.GetDuration();
+		uint32 dist = _animation_timer.GetDuration() > 0 ? 120 * _animation_timer.GetTimeExpired() / _animation_timer.GetDuration() : 0;
 		VideoManager->MoveRelative(dist, 0.0f);
 	}
 
@@ -497,7 +497,7 @@ void BattleCharacter::ChangeSpriteAnimation(const std::string& alias) {
 	_sprite_animation_alias = alias;
 	_global_character->RetrieveBattleAnimation(_sprite_animation_alias)->ResetAnimation();
 	_animation_timer.Reset();
-	_animation_timer.SetDuration(300);
+	_animation_timer.SetDuration(_global_character->RetrieveBattleAnimation(_sprite_animation_alias)->GetAnimationLength());
 	_animation_timer.Run();
 }
 

@@ -309,7 +309,7 @@ bool ParticleSystem::Draw()
 		glEnableClientState(GL_VERTEX_ARRAY);
 
 		int findex = _animation.GetCurrentFrameIndex();
-		findex = (findex + 1) % _animation.GetNumFrames();
+		findex = (findex + 1) % _animation.GetNumberOfFrames();
 
 		StillImage *id2 = _animation.GetFrame(findex);
 		ImageTexture *img2 = id2->_image_texture;
