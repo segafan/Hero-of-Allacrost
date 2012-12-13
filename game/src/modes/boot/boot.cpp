@@ -471,6 +471,7 @@ void BootMode::Draw() {
 	// If we're animating logo at the moment, handle all drawing in there and simply return
 	if (_initial_entry) {
 		_AnimateLogo();
+		VideoManager->DrawOverlays();
 		return;
 	}
 
@@ -498,6 +499,8 @@ void BootMode::Draw() {
 	_message_window.Draw();
 	_file_name_alert.Draw();
 	_file_name_window.Draw();
+
+	VideoManager->DrawOverlays();
 }
 
 // ****************************************************************************

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2010 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,53 +12,40 @@
 using namespace std;
 using namespace hoa_video::private_video;
 
-namespace hoa_video 
-{
+namespace hoa_video {
 
-
-//-----------------------------------------------------------------------------
-// AddParticleEffect: adds a new particle effect to the particle manager. Once you
-//                    call this function, you don't have to do any more work. The
-//                    effect will display until it's over, and then it will automatically
-//                    get destroyed by the particle manager. However, an ID is returned
-//                    by this function in case you want to do things like move the
-//                    position of the effect around. (for exmaple, if you want to
-//                    attach a flame effect to a sword or something)
-//-----------------------------------------------------------------------------
-
-ParticleEffectID VideoEngine::AddParticleEffect(const string &filename, float x, float y, bool reload)
-{
+ParticleEffectID VideoEngine::AddParticleEffect(const string &filename, float x, float y, bool reload) {
 	ParticleEffectDef *def = NULL;
-	
+
 	bool effect_loaded = _particle_effect_defs.find(filename) != _particle_effect_defs.end();
-		
+
 	if(effect_loaded && !reload)
 	{
 		def = _particle_effect_defs[filename];
 	}
 	else
 	{
-		def = _particle_manager.LoadEffect(filename);		
+		def = _particle_manager.LoadEffect(filename);
 		if(effect_loaded)
-			delete _particle_effect_defs[filename];			
+			delete _particle_effect_defs[filename];
 		_particle_effect_defs[filename] = def;
 	}
-	
+
 	if(!def)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: failed to load particle definition file: " << filename << endl;
 		return VIDEO_INVALID_EFFECT;
 	}
-		
+
 	ParticleEffectID id = _particle_manager.AddEffect(def, x, y);
-	
+
 	if(id == VIDEO_INVALID_EFFECT)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: failed to add effect to particle manager in VideoEngine::AddParticleEffect()!" << endl;
 	}
-	
+
 	return id;
 }
 
@@ -81,9 +68,9 @@ bool VideoEngine::DrawParticleEffects()
 //                         to simply stop emitting new particles
 //-----------------------------------------------------------------------------
 
-void VideoEngine::StopAllParticleEffects(bool kill_immediate)
+void VideoEngine::StopAllParticleEffects(bool kill_immediately)
 {
-	return _particle_manager.StopAll();
+	return _particle_manager.StopAll(kill_immediately);
 }
 
 

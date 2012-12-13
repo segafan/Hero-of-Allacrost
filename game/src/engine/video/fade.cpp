@@ -29,19 +29,19 @@ ScreenFader::ScreenFader() :
 	_final_color(0.0f, 0.0f, 0.0f, 0.0f),
 	_current_time(0),
 	_end_time(0),
-	_is_fading(false),
+	_fade_active(false),
 	_use_fade_overlay(false),
 	_fade_overlay_color(0.0f, 0.0f, 0.0f, 0.0f),
 	_fade_modulation(1.0f),
 	_interpolate_rgb_values(false)
 {
-	_fade_image.Load("", 1024.0f, 768.0f);
+	_fade_image.Load("", 1.0f, 1.0f);
 }
 
 
 
 void ScreenFader::BeginFade(const Color &final, uint32 time) {
-	_is_fading = true;
+	_fade_active = true;
 	_end_time = time;
 
 	_initial_color = _current_color;
@@ -87,13 +87,13 @@ void ScreenFader::BeginFade(const Color &final, uint32 time) {
 
 
 void ScreenFader::Update(uint32 time) {
-	if (_is_fading == false)
+	if (_fade_active == false)
 		return;
 
 	// Check for fading finish condition
 	if (_current_time >= _end_time) {
 		_current_color = _final_color;
-		_is_fading = false;
+		_fade_active = false;
 
 		if (_use_fade_overlay == true) {
 			// Check if we have faded to black or clear. If so, we can use modulation
