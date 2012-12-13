@@ -7,14 +7,6 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
-extern "C" {
-	#include <lua.h>
-	#include <lauxlib.h>
-	#include <lualib.h>
-}
-
 #include "video.h"
 #include "script.h"
 
@@ -24,503 +16,356 @@ extern "C" {
 #include "particle_keyframe.h"
 
 using namespace std;
+using namespace hoa_utils;
 using namespace hoa_script;
-using namespace hoa_video;
 
+namespace hoa_video {
 
-#define LOAD_INT(str, var)  \
-{ \
-	lua_pushstring(L, str); \
-	lua_gettable(L, -2); \
-	if(!lua_isnumber(L, -1))  \
-	{\
-		if(VIDEO_DEBUG) \
-			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		return false; \
-	}\
-	(var) = (int32)lua_tonumber(L, -1);\
-	lua_pop(L, 1); \
-}
+namespace private_video {
 
+// -----------------------------------------------------------------------------
+// ParticleManager class methods
+// -----------------------------------------------------------------------------
 
-#define LOAD_FLOAT(str, var)  \
-{ \
-	lua_pushstring(L, str); \
-	lua_gettable(L, -2); \
-	if(!lua_isnumber(L, -1))  \
-	{\
-		if(VIDEO_DEBUG) \
-			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		return false; \
-	}\
-	(var) = (float)lua_tonumber(L, -1);\
-	lua_pop(L, 1); \
-}
+ParticleEffectDef* ParticleManager::LoadEffect(const string& filename) {
+	ReadScriptDescriptor script;
 
-
-#define LOAD_BOOL(str, var)  \
-{ \
-	lua_pushstring(L, str); \
-	lua_gettable(L, -2); \
-	if(!lua_isnumber(L, -1))  \
-	{\
-		if(VIDEO_DEBUG) \
-			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		return false; \
-	}\
-	(var) = (bool)lua_tonumber(L, -1);\
-	lua_pop(L, 1); \
-}
-
-
-#define LOAD_STRING(str, var)  \
-{ \
-	lua_pushstring(L, str); \
-	lua_gettable(L, -2); \
-	if(!lua_isstring(L, -1))  \
-	{\
-		if(VIDEO_DEBUG) \
-			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		return false; \
-	}\
-	var = string(lua_tostring(L, -1));\
-	lua_pop(L, 1); \
-}
-
-
-#define LOAD_COLOR(str, var)  \
-{ \
-	lua_pushstring(L, str); \
-	lua_gettable(L, -2); \
-	if(!lua_istable(L, -1))  \
-	{\
-		if(VIDEO_DEBUG) \
-			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		return false; \
-	}\
-	int32 num_color_components = lua_objlen(L, -1); \
-	if(num_color_components != 4)\
-	{\
-		if(VIDEO_DEBUG) \
-			cerr << "VIDEO ERROR: wrong number of components while loading color " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		return false; \
-	}\
-	for(int32 cmp = 1; cmp <= 4; ++cmp) \
-	{\
-		lua_rawgeti(L, -1, cmp);\
-		if(!lua_isnumber(L, -1)) \
-		{\
-			if(VIDEO_DEBUG) \
-				cerr << "VIDEO ERROR: lua_isnumber() returned false while trying to load " << str << " in ParticleManager::LoadEffect()!" << endl; \
-			return false; \
-		}\
-		var[cmp-1] = (float)lua_tonumber(L, -1);\
-		lua_pop(L, 1);\
-	}\
-	lua_pop(L, 1); \
-}
-
-
-
-namespace hoa_video
-{
-
-namespace private_video
-{
-
-
-//-----------------------------------------------------------------------------
-// Loads the effect, returns false on failure. This is a temporary function, until
-// the ScriptEngine code is finished
-//-----------------------------------------------------------------------------
-
-bool TEMP_LoadEffectHelper(const string &filename, lua_State *L, ParticleEffectDef *def)
-{
-	if(!L)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: lua_open() failed in ParticleManager::LoadEffect()!" << endl;
-		return false;
-	}
-
-	luaopen_base(L);
-	luaopen_io(L);
-	luaopen_string(L);
-	luaopen_math(L);
-
-	if(luaL_loadfile(L, filename.c_str()) || lua_pcall(L, 0, 0, 0))
-	{
-		cerr << "VIDEO ERROR: could not load particle effect " << filename << " :: " << lua_tostring(L, -1) << endl;
-		return false;
-	}
-
-
-	lua_getglobal(L, "systems");
-	if(!lua_istable(L, -1))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: could not find 'systems' in particle effect " << filename << endl;
-		return false;
-	}
-
-
-	int32 num_systems = lua_objlen(L, -1);
-
-	if(num_systems < 1)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: num_systems less than 1 while opening particle effect " << filename << endl;
-		return false;
-	}
-
-	for(int32 sys = 1; sys <= num_systems; ++sys)
-	{
-		// open the table for the sys'th system
-		lua_rawgeti(L, -1, sys);
-		if(!lua_istable(L, -1))
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: could not find system #" << sys << " in particle effect " << filename << endl;
-			return false;
-		}
-
-		// open up the emitter table
-		lua_pushstring(L, "emitter");
-		lua_gettable(L, -2);
-		if(!lua_istable(L, -1))
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: could not find emitter in system #" << sys << " in particle effect " << filename << endl;
-			return false;
-		}
-
-		ParticleSystemDef *sys_def = new ParticleSystemDef;
-
-		LOAD_FLOAT("x", sys_def->emitter._x);
-		LOAD_FLOAT("y", sys_def->emitter._y);
-		LOAD_FLOAT("x2", sys_def->emitter._x2);
-		LOAD_FLOAT("y2", sys_def->emitter._y2);
-		LOAD_FLOAT("center_x", sys_def->emitter._center_x);
-		LOAD_FLOAT("center_y", sys_def->emitter._center_y);
-		LOAD_FLOAT("x_variation", sys_def->emitter._x_variation);
-		LOAD_FLOAT("y_variation", sys_def->emitter._y_variation);
-		LOAD_FLOAT("radius", sys_def->emitter._radius);
-
-		string shape_string;
-		LOAD_STRING("shape", shape_string);
-
-		if(!strcasecmp(shape_string.c_str(), "point"))
-			sys_def->emitter._shape = EMITTER_SHAPE_POINT;
-		else if(!strcasecmp(shape_string.c_str(), "line"))
-			sys_def->emitter._shape = EMITTER_SHAPE_LINE;
-		else if(!strcasecmp(shape_string.c_str(), "circle outline"))
-			sys_def->emitter._shape = EMITTER_SHAPE_CIRCLE;
-		else if(!strcasecmp(shape_string.c_str(), "circle"))
-			sys_def->emitter._shape = EMITTER_SHAPE_FILLED_CIRCLE;
-		else if(!strcasecmp(shape_string.c_str(), "rectangle"))
-			sys_def->emitter._shape = EMITTER_SHAPE_FILLED_RECTANGLE;
-
-		LOAD_BOOL("omnidirectional", sys_def->emitter._omnidirectional);
-		LOAD_FLOAT("orientation", sys_def->emitter._orientation);
-		LOAD_FLOAT("outer_cone", sys_def->emitter._outer_cone);
-		LOAD_FLOAT("inner_cone", sys_def->emitter._inner_cone);
-		LOAD_FLOAT("initial_speed", sys_def->emitter._initial_speed);
-		LOAD_FLOAT("initial_speed_variation", sys_def->emitter._initial_speed_variation);
-		LOAD_FLOAT("emission_rate", sys_def->emitter._emission_rate);
-		LOAD_FLOAT("start_time", sys_def->emitter._start_time);
-
-		string emitter_mode_string;
-		LOAD_STRING("emitter_mode", emitter_mode_string);
-
-		if(!strcasecmp(emitter_mode_string.c_str(), "looping"))
-			sys_def->emitter._emitter_mode = EMITTER_MODE_LOOPING;
-		else if(!strcasecmp(emitter_mode_string.c_str(), "one shot"))
-			sys_def->emitter._emitter_mode = EMITTER_MODE_ONE_SHOT;
-		else if(!strcasecmp(emitter_mode_string.c_str(), "burst"))
-			sys_def->emitter._emitter_mode = EMITTER_MODE_BURST;
-		else //.. if(!strcasecmp(emitter_mode_string.c_str(), "always"))
-			sys_def->emitter._emitter_mode = EMITTER_MODE_ALWAYS;
-
-		string spin_string;
-		LOAD_STRING("spin", spin_string);
-
-		if(!strcasecmp(spin_string.c_str(), "random"))
-			sys_def->emitter._spin = EMITTER_SPIN_RANDOM;
-		else if(!strcasecmp(spin_string.c_str(), "counterclockwise"))
-			sys_def->emitter._spin = EMITTER_SPIN_COUNTERCLOCKWISE;
-		else //..if(!strcasecmp(spin_string.c_str(), "clockwise"))
-			sys_def->emitter._spin = EMITTER_SPIN_CLOCKWISE;
-
-		// OK! done loading the emitter data. Now, load the keyframes
-
-		lua_pop(L, 1);   // pop the emitter table
-		lua_pushstring(L, "keyframes");
-		lua_gettable(L, -2);
-
-		if(!lua_istable(L, -1))
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: could not locate keyframes while loading particle effect " << filename << endl;
-			return false;
-		}
-
-		int32 num_keyframes = lua_objlen(L, -1);
-
-		sys_def->keyframes.resize(num_keyframes);
-
-
-		for(int32 kf = 0; kf < num_keyframes; ++kf)
-		{
-			sys_def->keyframes[kf] = new ParticleKeyframe;
-
-			// get the kf'th keyframe table
-			lua_rawgeti(L, -1, kf+1);
-
-			LOAD_FLOAT("size_x", sys_def->keyframes[kf]->size_x);
-			LOAD_FLOAT("size_y", sys_def->keyframes[kf]->size_y);
-			LOAD_COLOR("color", sys_def->keyframes[kf]->color);
-			LOAD_FLOAT("rotation_speed", sys_def->keyframes[kf]->rotation_speed);
-			LOAD_FLOAT("size_variation_x", sys_def->keyframes[kf]->size_variation_x);
-			LOAD_FLOAT("size_variation_y", sys_def->keyframes[kf]->size_variation_y);
-			LOAD_COLOR("color_variation", sys_def->keyframes[kf]->color_variation);
-			LOAD_FLOAT("rotation_speed_variation", sys_def->keyframes[kf]->rotation_speed_variation);
-			LOAD_FLOAT("time", sys_def->keyframes[kf]->time);
-
-			// pop the current keyframe
-			lua_pop(L, 1);
-		}
-
-		// pop the keyframes table
-		lua_pop(L, 1);
-
-		lua_pushstring(L, "animation_frames");
-		lua_gettable(L, -2);
-
-		if(!lua_istable(L, -1))
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: could not locate 'animation_frames' in the effect file " << filename << endl;
-			return false;
-		}
-
-		int32 num_animation_frames = lua_objlen(L, -1);
-
-		if(num_animation_frames < 1)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: the 'animation_frames' table was empty in effect file " << filename << endl;
-			return false;
-		}
-
-		for(int32 n_frame = 0; n_frame < num_animation_frames; ++n_frame)
-		{
-			lua_rawgeti(L, -1, n_frame+1);
-
-			if(!lua_isstring(L, -1))
-			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: encountered a non-string element in animation frames array, in effect file " << filename << endl;
-				return false;
-			}
-
-			string anim_filename = lua_tostring(L, -1);
-			sys_def->animation_frame_filenames.push_back(anim_filename);
-
-			// pop the current animation frame filename
-			lua_pop(L, 1);
-		}
-
-		// pop the animation_frames table
-		lua_pop(L, 1);
-
-		lua_pushstring(L, "animation_frame_times");
-		lua_gettable(L, -2);
-
-		if(!lua_istable(L, -1))
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: could not locate 'animation_frame_times' in the effect file " << filename << endl;
-			return false;
-		}
-
-		int32 num_animation_frame_times = lua_objlen(L, -1);
-
-		if(num_animation_frame_times < 1)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: the 'animation_frame_times' table was empty in effect file " << filename << endl;
-			return false;
-		}
-
-		for(int32 n_frame_time = 0; n_frame_time < num_animation_frame_times; ++n_frame_time)
-		{
-			lua_rawgeti(L, -1, n_frame_time+1);
-
-			if(!lua_isnumber(L, -1))
-			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: encountered a non-numeric element in animation frame times array, in effect file " << filename << endl;
-				return false;
-			}
-
-			int32 anim_frame_time = (int32)lua_tonumber(L, -1);
-			sys_def->animation_frame_times.push_back(anim_frame_time);
-
-			// pop the current animation frame time
-			lua_pop(L, 1);
-		}
-
-		// pop the animation_frame times table
-		lua_pop(L, 1);
-
-		LOAD_BOOL("enabled", sys_def->enabled);
-		LOAD_INT ("blend_mode", sys_def->blend_mode);
-		LOAD_FLOAT("system_lifetime", sys_def->system_lifetime);
-
-		LOAD_FLOAT("particle_lifetime", sys_def->particle_lifetime);
-		LOAD_FLOAT("particle_lifetime_variation", sys_def->particle_lifetime_variation);
-		LOAD_INT  ("max_particles", sys_def->max_particles);
-		LOAD_FLOAT("damping", sys_def->damping);
-		LOAD_FLOAT("damping_variation", sys_def->damping_variation);
-		LOAD_FLOAT("acceleration_x", sys_def->acceleration_x);
-		LOAD_FLOAT("acceleration_y", sys_def->acceleration_y);
-		LOAD_FLOAT("acceleration_variation_x", sys_def->acceleration_variation_x);
-		LOAD_FLOAT("acceleration_variation_y", sys_def->acceleration_variation_y);
-		LOAD_FLOAT("wind_velocity_x", sys_def->wind_velocity_x);
-		LOAD_FLOAT("wind_velocity_y", sys_def->wind_velocity_y);
-		LOAD_FLOAT("wind_velocity_variation_x", sys_def->wind_velocity_variation_x);
-		LOAD_FLOAT("wind_velocity_variation_y", sys_def->wind_velocity_variation_y);
-		LOAD_BOOL ("wave_motion_used", sys_def->wave_motion_used);
-		LOAD_FLOAT("wave_length", sys_def->wave_length);
-		LOAD_FLOAT("wave_length_variation", sys_def->wave_length_variation);
-		LOAD_FLOAT("wave_amplitude", sys_def->wave_amplitude);
-		LOAD_FLOAT("wave_amplitude_variation", sys_def->wave_amplitude_variation);
-		LOAD_FLOAT("tangential_acceleration", sys_def->tangential_acceleration);
-		LOAD_FLOAT("tangential_acceleration_variation", sys_def->tangential_acceleration_variation);
-		LOAD_FLOAT("radial_acceleration", sys_def->radial_acceleration);
-		LOAD_FLOAT("radial_acceleration_variation", sys_def->radial_acceleration_variation);
-		LOAD_BOOL ("user_defined_attractor", sys_def->user_defined_attractor);
-		LOAD_FLOAT("attractor_falloff", sys_def->attractor_falloff);
-		LOAD_BOOL ("rotation_used", sys_def->rotation_used);
-		LOAD_BOOL ("rotate_to_velocity", sys_def->rotate_to_velocity);
-		LOAD_BOOL ("speed_scale_used", sys_def->speed_scale_used);
-		LOAD_FLOAT("speed_scale", sys_def->speed_scale);
-		LOAD_FLOAT("min_speed_scale", sys_def->min_speed_scale);
-		LOAD_FLOAT("max_speed_scale", sys_def->max_speed_scale);
-		LOAD_BOOL ("smooth_animation", sys_def->smooth_animation);
-		LOAD_BOOL ("modify_stencil", sys_def->modify_stencil);
-
-		string stencil_op_string;
-		LOAD_STRING("stencil_op", stencil_op_string);
-
-		if(!strcasecmp(stencil_op_string.c_str(), "incr"))
-			sys_def->stencil_op = VIDEO_STENCIL_OP_INCREASE;
-		else if(!strcasecmp(stencil_op_string.c_str(), "decr"))
-			sys_def->stencil_op = VIDEO_STENCIL_OP_DECREASE;
-		else if(!strcasecmp(stencil_op_string.c_str(), "zero"))
-			sys_def->stencil_op = VIDEO_STENCIL_OP_ZERO;
-		else //..if(!strcasecmp(stencil_op_string.c_str(), "one"))
-			sys_def->stencil_op = VIDEO_STENCIL_OP_ONE;
-
-		LOAD_BOOL("use_stencil", sys_def->use_stencil);
-		LOAD_BOOL ("random_initial_angle", sys_def->random_initial_angle);
-
-		// pop the system table
-		lua_pop(L, 1);
-
-		def->_systems.push_back(sys_def);
-	}
-
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// LoadEffect: loads an effect definition from disk given the filename
-//             Returns NULL if there is a problem with loading
-//-----------------------------------------------------------------------------
-
-ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
-{
-	ParticleEffectDef *def = new ParticleEffectDef;
-	lua_State *L = lua_open();
-
-	bool could_load = TEMP_LoadEffectHelper(filename, L, def);
-
-	if(!could_load)
-	{
-		lua_close(L);
-		delete def;
+	if (script.OpenFile(filename) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to open the particle definition file: "
+			<< filename << ", the particle effect was not loaded" << endl;
 		return NULL;
 	}
 
-	return def;
-}
+	if (script.DoesTableExist("systems") == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "missing 'systems' table in particle definition file: "
+			<< filename << endl;
+		script.CloseFile();
+		return NULL;
+	}
+
+	script.OpenTable("systems");
+	uint32 number_of_systems = script.GetTableSize();
+	if (number_of_systems == 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "no particle systems were defined in the particle definition file: "
+			<< filename << endl;
+		script.CloseAllTables();
+		script.CloseFile();
+		return NULL;
+	}
+
+	ParticleEffectDef* effect_definition = new ParticleEffectDef;
+
+	// Read each particle system table
+	for (uint32 system_number = 0; system_number < number_of_systems; ++system_number) {
+		if (script.DoesTableExist(system_number) == false) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to read system table #" << system_number
+				<< " in particle defintion file: " << filename << endl;
+			delete effect_definition;
+			script.CloseAllTables();
+			script.CloseFile();
+			return NULL;
+		}
+		script.OpenTable(system_number);
+
+		// Read the emitter table
+		if (script.DoesTableExist("emitter") == false) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to read emitter table in system table #" << system_number
+				<< " in particle defintion file: " << filename << endl;
+			delete effect_definition;
+			script.CloseAllTables();
+			script.CloseFile();
+			return NULL;
+		}
+		script.OpenTable("emitter");
+
+		ParticleSystemDef* system_definition = new ParticleSystemDef;
+		// By putting the new system definition in the effect object, the effect object now takes responsibility
+		// for delete the system object. Thus if we need to exit this function prematurely, we only need to delete
+		// the effect definition and we do not need to delete the system definition.
+		effect_definition->_systems.push_back(system_definition);
+
+		system_definition->emitter._x = script.ReadFloat("x");
+		system_definition->emitter._y = script.ReadFloat("y");
+		system_definition->emitter._x2 = script.ReadFloat("x2");
+		system_definition->emitter._y2 = script.ReadFloat("y2");
+		system_definition->emitter._center_x = script.ReadFloat("center_x");
+		system_definition->emitter._center_y = script.ReadFloat("center_y");
+		system_definition->emitter._x_variation = script.ReadFloat("x_variation");
+		system_definition->emitter._y_variation = script.ReadFloat("y_variation");
+		system_definition->emitter._radius = script.ReadFloat("radius");
+
+		string shape_string = script.ReadString("shape");
+		if (strcasecmp(shape_string.c_str(), "point") != 0)
+			system_definition->emitter._shape = EMITTER_SHAPE_POINT;
+		else if (strcasecmp(shape_string.c_str(), "line") != 0)
+			system_definition->emitter._shape = EMITTER_SHAPE_LINE;
+		else if (strcasecmp(shape_string.c_str(), "circle outline") != 0)
+			system_definition->emitter._shape = EMITTER_SHAPE_CIRCLE;
+		else if (strcasecmp(shape_string.c_str(), "circle") != 0)
+			system_definition->emitter._shape = EMITTER_SHAPE_FILLED_CIRCLE;
+		else if (strcasecmp(shape_string.c_str(), "rectangle") != 0)
+			system_definition->emitter._shape = EMITTER_SHAPE_FILLED_RECTANGLE;
+		else {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown emitter shape: " << shape_string
+				<< ", when reading system table #" << system_number
+				<< " in particle defintion file: " << filename << endl;
+		}
+
+		system_definition->emitter._omnidirectional = script.ReadBool("omnidirectional");
+		system_definition->emitter._orientation = script.ReadFloat("orientation");
+		system_definition->emitter._outer_cone = script.ReadFloat("outer_cone");
+		system_definition->emitter._inner_cone = script.ReadFloat("inner_cone");
+		system_definition->emitter._initial_speed = script.ReadFloat("initial_speed");
+		system_definition->emitter._initial_speed_variation = script.ReadFloat("initial_speed_variation");
+		system_definition->emitter._emission_rate = script.ReadFloat("emission_rate");
+		system_definition->emitter._start_time = script.ReadFloat("start_time");
+
+		string mode_string = script.ReadString("emitter_mode");
+		if (strcasecmp(mode_string.c_str(), "looping") != 0)
+			system_definition->emitter._emitter_mode = EMITTER_MODE_LOOPING;
+		else if (strcasecmp(mode_string.c_str(), "one shot") != 0)
+			system_definition->emitter._emitter_mode = EMITTER_MODE_ONE_SHOT;
+		else if (strcasecmp(mode_string.c_str(), "burst") != 0)
+			system_definition->emitter._emitter_mode = EMITTER_MODE_BURST;
+		else if (strcasecmp(mode_string.c_str(), "always")  != 0)
+			system_definition->emitter._emitter_mode = EMITTER_MODE_ALWAYS;
+		else {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown emitter mode: " << mode_string
+				<< ", when reading system table #" << system_number
+				<< " in particle defintion file: " << filename << endl;
+		}
+
+		string spin_string = script.ReadString("spin");
+		if (strcasecmp(spin_string.c_str(), "random") != 0)
+			system_definition->emitter._spin = EMITTER_SPIN_RANDOM;
+		else if (strcasecmp(spin_string.c_str(), "counterclockwise") != 0)
+			system_definition->emitter._spin = EMITTER_SPIN_COUNTERCLOCKWISE;
+		else if (strcasecmp(spin_string.c_str(), "clockwise") != 0)
+			system_definition->emitter._spin = EMITTER_SPIN_CLOCKWISE;
+		else {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown emitter spin: " << spin_string
+				<< ", when reading system table #" << system_number
+				<< " in particle defintion file: " << filename << endl;
+		}
+
+		script.CloseTable(); // close the emitter table
+
+		// Read the keyframes table
+		if (script.DoesTableExist("keyframes") == false) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to read keyframes table in system table #" << system_number
+				<< " in particle defintion file: " << filename << endl;
+			delete effect_definition;
+			script.CloseAllTables();
+			script.CloseFile();
+			return NULL;
+		}
+		script.OpenTable("keyframes");
+
+		uint32 number_of_keyframes = script.GetTableSize();
+		system_definition->keyframes.resize(number_of_keyframes);
+
+		// Read each keyframe table
+		for (uint32 i = 0; i < number_of_keyframes; ++i) {
+			system_definition->keyframes[i] = new ParticleKeyframe;
+
+			// Keyframe tables are unnamed in the definition file. Unnammed Lua tables begin at index 1, not 0.
+			script.OpenTable(i + 1);
+
+			system_definition->keyframes[i]->size_x = script.ReadFloat("size_x");
+			system_definition->keyframes[i]->size_y = script.ReadFloat("size_y");
+			system_definition->keyframes[i]->color = _ReadColor(script, "color");
+			system_definition->keyframes[i]->rotation_speed = script.ReadFloat("rotation_speed");
+			system_definition->keyframes[i]->size_variation_x = script.ReadFloat("size_variation_x");
+			system_definition->keyframes[i]->size_variation_y = script.ReadFloat("size_variation_y");
+			system_definition->keyframes[i]->color_variation = _ReadColor(script, "color_variation");
+			system_definition->keyframes[i]->rotation_speed_variation = script.ReadFloat("rotation_speed_variation");
+			system_definition->keyframes[i]->time = script.ReadFloat("time");
+
+			script.CloseTable();
+		}
+		script.CloseTable(); // close the keyframes table
+
+		// Read the animation frames and times
+		script.ReadStringVector("animation_frames", system_definition->animation_frame_filenames);
+		// At least one animation frame must be present
+		if (system_definition->animation_frame_filenames.empty() == true) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to read animation frames in system table #" << system_number
+				<< " in particle defintion file: " << filename << endl;
+			delete effect_definition;
+			script.CloseAllTables();
+			script.CloseFile();
+			return NULL;
+		}
+
+		script.ReadIntVector("animation_frame_times", system_definition->animation_frame_times);
+		// Make sure that the frames and times tables are of equal size
+		if (system_definition->animation_frame_times.size() != system_definition->animation_frame_filenames.size()) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "animation_frames and animation_frame_times tables were of unequal size"
+					<< " in system table #" << system_number << " in particle defintion file: " << filename << endl;
+			delete effect_definition;
+			script.CloseAllTables();
+			script.CloseFile();
+			return NULL;
+		}
+
+		// Test that each animation frame file exists
+		for (uint32 i = 0; i < system_definition->animation_frame_filenames.size(); i++) {
+			if (DoesFileExist(system_definition->animation_frame_filenames[i]) == false) {
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "animation frame file did not exist: " << system_definition->animation_frame_filenames[i]
+					<< ", in system table #" << system_number << " in particle defintion file: " << filename << endl;
+				delete effect_definition;
+				script.CloseAllTables();
+				script.CloseFile();
+				return NULL;
+			}
+		}
+
+		// Read the remaining particle system data
+		system_definition->enabled = script.ReadBool("enabled");
+		system_definition->blend_mode = script.ReadInt("blend_mode");
+		system_definition->system_lifetime = script.ReadFloat("system_lifetime");
+
+		system_definition->particle_lifetime = script.ReadFloat("particle_lifetime");
+		system_definition->particle_lifetime_variation = script.ReadFloat("particle_lifetime_variation");
+		system_definition->max_particles = script.ReadInt("max_particles");
+
+		system_definition->damping = script.ReadFloat("damping");
+		system_definition->damping_variation = script.ReadFloat("damping_variation");
+
+		system_definition->acceleration_x = script.ReadFloat("acceleration_x");
+		system_definition->acceleration_y = script.ReadFloat("acceleration_y");
+		system_definition->acceleration_variation_x = script.ReadFloat("acceleration_variation_x");
+		system_definition->acceleration_variation_y = script.ReadFloat("acceleration_variation_y");
+
+		system_definition->wind_velocity_x = script.ReadFloat("wind_velocity_x");
+		system_definition->wind_velocity_y = script.ReadFloat("wind_velocity_y");
+		system_definition->wind_velocity_variation_x = script.ReadFloat("wind_velocity_variation_x");
+		system_definition->wind_velocity_variation_y = script.ReadFloat("wind_velocity_variation_y");
+
+		system_definition->wave_motion_used = script.ReadBool("wave_motion_used");
+		system_definition->wave_length = script.ReadFloat("wave_length");
+		system_definition->wave_length_variation = script.ReadFloat("wave_length_variation");
+		system_definition->wave_amplitude = script.ReadFloat("wave_amplitude");
+		system_definition->wave_amplitude_variation = script.ReadFloat("wave_amplitude_variation");
+
+		system_definition->tangential_acceleration = script.ReadFloat("tangential_acceleration");
+		system_definition->tangential_acceleration_variation = script.ReadFloat("tangential_acceleration_variation");
+
+		system_definition->radial_acceleration = script.ReadFloat("radial_acceleration");
+		system_definition->radial_acceleration_variation = script.ReadFloat("radial_acceleration_variation");
+
+		system_definition->user_defined_attractor = script.ReadBool("user_defined_attractor");
+		system_definition->attractor_falloff = script.ReadFloat("attractor_falloff");
+
+		system_definition->rotation_used = script.ReadBool("rotation_used");
+		system_definition->rotate_to_velocity = script.ReadBool("rotate_to_velocity");
+
+		system_definition->speed_scale_used = script.ReadBool("speed_scale_used");
+		system_definition->speed_scale = script.ReadFloat("speed_scale");
+		system_definition->min_speed_scale = script.ReadFloat("min_speed_scale");
+		system_definition->max_speed_scale = script.ReadFloat("max_speed_scale");
+
+		system_definition->smooth_animation = script.ReadBool("smooth_animation");
+		system_definition->modify_stencil = script.ReadBool("modify_stencil");
+
+		string stencil_string = script.ReadString("stencil_op");
+		if (strcasecmp(stencil_string.c_str(), "incr") != 0)
+			system_definition->stencil_op = VIDEO_STENCIL_OP_INCREASE;
+		else if (strcasecmp(stencil_string.c_str(), "decr") != 0)
+			system_definition->stencil_op = VIDEO_STENCIL_OP_DECREASE;
+		else if (strcasecmp(stencil_string.c_str(), "zero") != 0)
+			system_definition->stencil_op = VIDEO_STENCIL_OP_ZERO;
+		else if (strcasecmp(stencil_string.c_str(), "one") != 0)
+			system_definition->stencil_op = VIDEO_STENCIL_OP_ONE;
+		else {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown stencil_op: " << stencil_string
+				<< ", when reading system table #" << system_number
+				<< " in particle defintion file: " << filename << endl;
+		}
+
+		system_definition->use_stencil = script.ReadBool("use_stencil");
+		system_definition->random_initial_angle = script.ReadBool("random_initial_angle");
+
+		script.CloseTable(); // close the system_number table
+	} // for (uint32 system_number = 0; system_number < number_of_systems; ++system_number)
+	script.CloseFile(); // close the systems table
+
+	return effect_definition;
+} // ParticleEffectDef* ParticleManager::LoadEffect(const string& filename)
 
 
-//-----------------------------------------------------------------------------
-// AddEffect: adds a new particle effect to the list
-//-----------------------------------------------------------------------------
 
-ParticleEffectID ParticleManager::AddEffect(const ParticleEffectDef *def, float x, float y)
-{
-	if(!def)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ParticleManager::AddEffect() failed because def was NULL!" << endl;
+ParticleEffectID ParticleManager::AddEffect(const ParticleEffectDef* definition, float x, float y) {
+	if (definition == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to add effect because function received a NULL argument" << endl;
 		return VIDEO_INVALID_EFFECT;
 	}
 
-	if(def->_systems.empty())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ParticleManager::AddEffect() failed because def->_systems was empty!" << endl;
+	if (definition->_systems.empty() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to add effect because particle definition contained no systems" << endl;
 		return VIDEO_INVALID_EFFECT;
 	}
 
-	ParticleEffect *effect = _CreateEffect(def);
-	if(!effect)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: could not create particle effect in ParticleManager::AddEffect()!" << endl;
+	ParticleEffect* effect = _CreateEffect(definition);
+	if (effect == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to add effect because the effect failed to create from the particle definition" << endl;
 		return VIDEO_INVALID_EFFECT;
 	}
 
 	effect->Move(x, y);
 	_effects[_current_id] = effect;
-
 	++_current_id;
 
-	return _current_id - 1;
-};
+	// Take care to return the id of the created particle, not the id of the next particle to create
+	return (_current_id - 1);
+}
 
 
-//-----------------------------------------------------------------------------
-// Draw: draws all particle effects
-//-----------------------------------------------------------------------------
 
-bool ParticleManager::Draw()
-{
+bool ParticleManager::Update(int32 frame_time) {
+	float frame_time_seconds = static_cast<float>(frame_time) / 1000.0f;
+	bool success = true;
+	_num_particles = 0;
+
+	for (map<ParticleEffectID, ParticleEffect*>::iterator i = _effects.begin(); i != _effects.end();) {
+		// Remove any particle effects that have completed their life cycle
+		if ((i->second)->IsAlive() == false) {
+			map<ParticleEffectID, ParticleEffect*>::iterator finished_effect = i;
+			++i;
+			_effects.erase(finished_effect);
+		}
+		else {
+			if ((i->second)->_Update(frame_time_seconds) == false) {
+				success = false;
+				IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to update particle effect with ID #" << i->first << endl;
+			}
+
+			_num_particles += i->second->GetNumParticles();
+			++i;
+		}
+	}
+
+	return success;
+}
+
+
+
+bool ParticleManager::Draw() {
 	VideoManager->PushState();
+	// NOTE: the particle manager is using inverted y coordinates compared to how most of the rest of the code aligns the y axis
 	VideoManager->SetCoordSys(CoordSys(0.0f, 1024.0f, 768.0f, 0.0f));
 	VideoManager->DisableScissoring();
-
-	map<ParticleEffectID, ParticleEffect *>::iterator iEffect = _effects.begin();
 
 	glClearStencil(0);
 	glClear(GL_STENCIL_BUFFER_BIT);
 
 	bool success = true;
 
-	while(iEffect != _effects.end())
-	{
-		if(!(iEffect->second)->_Draw())
-		{
+	for (map<ParticleEffectID, ParticleEffect*>::iterator i = _effects.begin(); i != _effects.end(); ++i) {
+		if ((i->second)->_Draw() == false) {
 			success = false;
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: effect failed to draw in ParticleManager::Draw()!" << endl;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to draw particle effect with ID #" << i->first << endl;
 		}
-		++iEffect;
 	}
 
 	VideoManager->PopState();
@@ -528,158 +373,71 @@ bool ParticleManager::Draw()
 }
 
 
-//-----------------------------------------------------------------------------
-// Update: updates all particle effects
-//-----------------------------------------------------------------------------
 
-bool ParticleManager::Update(int32 frame_time)
-{
-	float frame_time_seconds = static_cast<float>(frame_time) / 1000.0f;
-
-	map<ParticleEffectID, ParticleEffect *>::iterator iEffect = _effects.begin();
-
-	bool success = true;
-
-	_num_particles = 0;
-
-	while(iEffect != _effects.end())
-	{
-		if(!(iEffect->second)->IsAlive())
-		{
-			_effects.erase(iEffect++);
-		}
-		else
-		{
-			if(!(iEffect->second)->_Update(frame_time_seconds))
-			{
-				success = false;
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: effect failed to update in ParticleManager::Update()!" << endl;
-			}
-
-			_num_particles += iEffect->second->GetNumParticles();
-			++iEffect;
-		}
-	}
-
-	return success;
-}
-
-
-//-----------------------------------------------------------------------------
-// StopAll: stops all particle effects
-//-----------------------------------------------------------------------------
-
-void ParticleManager::StopAll(bool kill_immediate)
-{
-	map<ParticleEffectID, ParticleEffect *>::iterator iEffect = _effects.begin();
-
-	while(iEffect != _effects.end())
-	{
-		(iEffect->second)->Stop(kill_immediate);
+void ParticleManager::StopAll(bool kill_immediately) {
+	for (map<ParticleEffectID, ParticleEffect*>::iterator i = _effects.begin(); i != _effects.end(); ++i) {
+		(i->second)->Stop(kill_immediately);
 	}
 }
 
 
-//-----------------------------------------------------------------------------
-// Destroy: destroys all particle effects
-//-----------------------------------------------------------------------------
 
-void ParticleManager::Destroy()
-{
-	map<ParticleEffectID, ParticleEffect *>::iterator iEffect = _effects.begin();
+ParticleEffect* ParticleManager::GetEffect(ParticleEffectID id) {
+	map<ParticleEffectID, ParticleEffect*>::iterator i = _effects.find(id);
+	if (i == _effects.end())
+		return NULL;
+	else
+		return (i->second);
+}
 
-	while(iEffect != _effects.end())
-	{
-		(iEffect->second)->_Destroy();
-		delete (iEffect->second);
-		++iEffect;
+
+
+void ParticleManager::Destroy() {
+	for (map<ParticleEffectID, ParticleEffect*>::iterator i = _effects.begin(); i != _effects.end(); ++i) {
+		(i->second)->_Destroy();
+		delete (i->second);
 	}
 
 	_effects.clear();
 }
 
 
-//-----------------------------------------------------------------------------
-// GetEffect: returns a pointer to the effect with the given ID. Only valid
-//            up until the next call to ParticleManager::Update(). In other words,
-//            don't store any pointers yourself, store the ID and call GetEffect()
-//
-//            Returns NULL if the effect cannot be found (perhaps it died)
-//-----------------------------------------------------------------------------
 
-ParticleEffect *ParticleManager::GetEffect(ParticleEffectID id)
-{
-	map<ParticleEffectID, ParticleEffect *>::iterator iEffect = _effects.find(id);
-	if(iEffect == _effects.end())
+ParticleEffect *ParticleManager::_CreateEffect(const ParticleEffectDef *definition) {
+	if (definition == NULL) {
 		return NULL;
-	else
-		return iEffect->second;
-}
+	}
 
+	if (definition->_systems.empty() == true) {
+		return NULL;
+	}
 
-//-----------------------------------------------------------------------------
-// GetNumParticles: returns the entire number of live particles between all
-//                  currently displaying effects
-//-----------------------------------------------------------------------------
+	ParticleEffect* effect = new ParticleEffect;
+	effect->_effect_def = definition;
 
-int32 ParticleManager::GetNumParticles()
-{
-	return _num_particles;
-}
-
-
-//-----------------------------------------------------------------------------
-// _CreateEffect: helper to AddEffect(), does the job of initializing a new effect
-//                given its definition. Returns NULL on failure
-//
-//                NOTE: assumes that def isn't NULL and def->_systems is non-empty
-//-----------------------------------------------------------------------------
-
-ParticleEffect *ParticleManager::_CreateEffect(const ParticleEffectDef *def)
-{
-	list<ParticleSystemDef *>::const_iterator iSystem = def->_systems.begin();
-	list<ParticleSystemDef *>::const_iterator iEnd = def->_systems.end();
-
-	ParticleEffect *effect = new ParticleEffect;
-
-
-	// store pointer of effect properties
-
-	effect->_effect_def = def;
-
-
-	// initialize systems
-
-	while(iSystem != iEnd)
-	{
-		if((*iSystem)->enabled)
-		{
-			ParticleSystem *sys = new ParticleSystem;
-			if(!sys->Create(*iSystem))
-			{
-				// if a system could not be created then we bail out
-				sys->Destroy();
-				delete sys;
-
-				list<ParticleSystem *>::iterator iEffectSystem = effect->_systems.begin();
-				list<ParticleSystem *>::iterator iEffectEnd = effect->_systems.end();
-
-				while(iEffectSystem != iEffectEnd)
-				{
-					(*iEffectSystem)->Destroy();
-					delete (*iEffectSystem);
-					++iEffectSystem;
-				}
-
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: sys->Create() returned false while trying to create effect!" << endl;
-				return NULL;
-
-			}
-			effect->_systems.push_back(sys);
+	for (list<ParticleSystemDef*>::const_iterator i = definition->_systems.begin(); i != definition->_systems.end(); ++i) {
+		if ((*i)->enabled == false) {
+			continue;
 		}
-		++iSystem;
+
+		ParticleSystem* system = new ParticleSystem;
+		// If any systems fail to create, delete all allocated resources and bail
+		if (system->Create(*i) == false) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to create particle system for effect. The effect was not created." << endl;
+			system->Destroy();
+			delete system;
+
+			// Delete all previously loaded systems
+			for (list<ParticleSystem*>::const_iterator j = effect->_systems.begin(); j != effect->_systems.end(); ++j) {
+				(*j)->Destroy();
+				delete (*j);
+			}
+
+			delete effect;
+			return NULL;
+		}
+
+		effect->_systems.push_back(system);
 	}
 
 	effect->_alive = true;
@@ -688,5 +446,20 @@ ParticleEffect *ParticleManager::_CreateEffect(const ParticleEffectDef *def)
 }
 
 
-}  // namespace private_video
-}  // namespace hoa_video
+
+Color ParticleManager::_ReadColor(ReadScriptDescriptor& script, string parameter_name) {
+	vector<float> color_values;
+
+	script.ReadFloatVector(parameter_name, color_values);
+	if (color_values.size() < 4) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid read operation: failed to read parameter " << parameter_name
+			<< " from script file " << script.GetFilename() << parameter_name << endl;
+		return Color();
+	}
+
+	return Color(color_values[0], color_values[1], color_values[2], color_values[3]);
+}
+
+} // namespace private_video
+
+} // namespace hoa_video

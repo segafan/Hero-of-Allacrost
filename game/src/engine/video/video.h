@@ -646,7 +646,7 @@ public:
 
 	//! \brief Returns true if a screen fade is currently in progress
 	bool IsFading()
-		{ return _screen_fader.IsFading(); }
+		{ return _screen_fader.IsFadeActive(); }
 
 	//-- Screen shaking -------------------------------------------------------
 
@@ -670,18 +670,18 @@ public:
 
 	// ----------  Particle effect methods
 
-	/** \brief add a particle effect at the given point x and y
-	 *  \param particle_effect_filename - file containing the particle effect definition
-	 *  \param x - X coordinate of the effect
-	 *  \param y - Y coordinate of the effect
-	 *  \param reload - reload the effect from file if it already exists
-	 *  \return id corresponding to the loaded particle effect
-	 *  \note  set the reload parameter to true to reload the effect definition file
-	 *         every time the effect is played. This is useful if you are working on an
-	 *         effect and want to see how it looks. When we actually release the game,
-	 *         reload should be false since it adds some cost to the loading
-	 */
-	ParticleEffectID AddParticleEffect(const std::string &particle_effect_filename, float x, float y, bool reload=false);
+	/** \brief Adds a new particle effect at the given point x and y
+	*** \param filename The name of the file containing the particle effect definition
+	*** \param x The X coordinate of the effect
+	*** \param y The Y coordinate of the effect
+	*** \param reload Reload the effect from the file if it has already been loaded (default value = false)
+	*** \return The ID corresponding to the newly added particle effect
+	***
+	*** \note Set the reload parameter to true to reload the effect definition file  time the effect is played.
+	*** This is useful if you are working on an effect and want to see how it looks. This parameter should be used
+	*** for development/testing purposes only, and in release-quality code should always be set to false.
+	**/
+	ParticleEffectID AddParticleEffect(const std::string &filename, float x, float y, bool reload = false);
 
 	/** \brief draws all active particle effects
 	 * \return success/failure
@@ -1012,6 +1012,11 @@ private:
 	//! \brief Returns true if textures should be smoothed (used for non natural screen resolutions)
 	bool _ShouldSmooth()
 		{ return ( _screen_width != VIDEO_STANDARD_RES_WIDTH || _screen_height != VIDEO_STANDARD_RES_HEIGHT); }
+
+	/** \brief Updates the position of the ambient overlay image
+	*** \param frame_time The number of milliseconds that have elapsed since the last draw frame
+	**/
+	void _UpdateAmbientOverlay(uint32 frame_time);
 
 	/** \brief Updates the lighting sequence and triggers any sound events
 	*** \param frame_time The number of milliseconds that have elapsed since the last draw frame

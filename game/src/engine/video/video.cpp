@@ -130,8 +130,8 @@ VideoEngine::VideoEngine() :
 	_lightning_looped = false;
 	_lightning_current_time = 0;
 	_lightning_end_time = 0;
-	_light_overlay_image.Load("", 1024.0f, 768.0f);
-	_lightning_overlay_image.Load("", 1024.0f, 768.0f);
+	_light_overlay_image.Load("", 1.0f, 1.0f);
+	_lightning_overlay_image.Load("", 1.0f, 1.0f);
 }
 
 
@@ -368,6 +368,8 @@ void VideoEngine::Display(uint32 frame_time) {
 	// Update all particle effects
 	_particle_manager.Update(frame_time);
 
+	if (_ambient_overlay_enabled == true)
+		_UpdateAmbientOverlay(frame_time);
 	if (_lightning_active == true)
 		_UpdateLightning(frame_time);
 
@@ -810,44 +812,6 @@ void VideoEngine::EnableLightning(bool loop) {
 
 
 
-void VideoEngine::_UpdateLightning(uint32 frame_time) {
-	if (_lightning_active == false)
-		return;
-
-	_lightning_current_time += frame_time;
-
-	// Check if the next sound is ready to be played and update to the next sound
-	// Note: we let the _next_lightning_sound counter increment past the end of the _lightning_sounds container
-	// to indicate when there are no more sounds to play in the sequence. Thus this loop has to be protected by
-	// this if statement to make sure we do not make an out-of-bounds access error
-	if (_next_lightning_sound < _lightning_sounds.size()) {
-		// This is done in a loop in case two sounds are played at the same time, or very similar times
-		while (_lightning_current_time >= _lightning_sounds[_next_lightning_sound].time) {
-			AudioManager->PlaySound(_lightning_sounds[_next_lightning_sound].filename);
-			_next_lightning_sound++;
-
-			// If we just played the last sound in the sequence, exit the loop
-			if (_next_lightning_sound >= _lightning_sounds.size()) {
-				break;
-			}
-		}
-	}
-
-	// Check if the sequence has reached its end
-	if (_lightning_current_time >= _lightning_end_time) {
-		if (_lightning_looped == false) {
-			DisableLightning();
-		}
-		else {
-			// Restart the sequence timer, but don't throw away any "remainder time" that occurred during this loop
-			_lightning_current_time = _lightning_current_time - _lightning_end_time;
-			_next_lightning_sound = 0;
-		}
-	}
-}
-
-
-
 void VideoEngine::DrawLightning() {
 	if (_lightning_active == false)
 		return;
@@ -878,7 +842,7 @@ void VideoEngine::DrawLightning() {
 
 void VideoEngine::DrawOverlays() {
 	PushState();
-	SetCoordSys(0, 1024, 0, 768);
+	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
 	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
 	// Draw the textured ambient overlay
@@ -890,27 +854,6 @@ void VideoEngine::DrawOverlays() {
 				Move(x, y);
 				_ambient_overlay_image.Draw();
 			}
-		}
-
-		// Update the shifting
-		float elapsed_ms = static_cast<float>(SystemManager->GetUpdateTime());
-		_ambient_x_shift += elapsed_ms / 1000 * _ambient_x_speed;
-		_ambient_y_shift += elapsed_ms / 1000 * _ambient_y_speed;
-
-		// Shift to the left edge so that the ambient image can be drawn across the entire screen
-		while (_ambient_x_shift > 0.0f) {
-			_ambient_x_shift -= width;
-		}
-		if (_ambient_x_shift < 2 * -width) {
-			_ambient_x_shift += width;
-		}
-
-		// Shift to the top edge so that the ambient image can be drawn across the entire screen
-		while (_ambient_y_shift > 0.0f) {
-			_ambient_y_shift -= height;
-		}
-		if (_ambient_y_shift < 2 * -height) {
-			_ambient_y_shift += height;
 		}
 	}
 
@@ -926,7 +869,7 @@ void VideoEngine::DrawOverlays() {
 	}
 
 	// Draw a screen overlay if we are in the process of fading
-	if (_screen_fader.ShouldUseFadeOverlay()) {
+	if (_screen_fader.IsFadeActive() == true) {
 		_screen_fader.Draw();
 	}
 
@@ -1182,6 +1125,69 @@ int32 VideoEngine::_ScreenCoordY(float y) {
 
 
 
+void VideoEngine::_UpdateAmbientOverlay(uint32 frame_time) {
+	// Update the position of the overlay image based on the time elapsed
+	float elapsed_ms = static_cast<float>(frame_time);
+	_ambient_x_shift += elapsed_ms / 1000 * _ambient_x_speed;
+	_ambient_y_shift += elapsed_ms / 1000 * _ambient_y_speed;
+
+	float width = _ambient_overlay_image.GetWidth();
+	float height = _ambient_overlay_image.GetHeight();
+
+	// Shift to the left edge so that the ambient image can be drawn across the entire screen
+	while (_ambient_x_shift > 0.0f) {
+		_ambient_x_shift -= width;
+	}
+	if (_ambient_x_shift < 2 * -width) {
+		_ambient_x_shift += width;
+	}
+
+	// Shift to the top edge so that the ambient image can be drawn across the entire screen
+	while (_ambient_y_shift > 0.0f) {
+		_ambient_y_shift -= height;
+	}
+	if (_ambient_y_shift < 2 * -height) {
+		_ambient_y_shift += height;
+	}
+}
+
+
+
+void VideoEngine::_UpdateLightning(uint32 frame_time) {
+	if (_lightning_active == false)
+		return;
+
+	_lightning_current_time += frame_time;
+
+	// Check if the next sound is ready to be played and update to the next sound
+	// Note: we let the _next_lightning_sound counter increment past the end of the _lightning_sounds container
+	// to indicate when there are no more sounds to play in the sequence. Thus this loop has to be protected by
+	// this if statement to make sure we do not make an out-of-bounds access error
+	if (_next_lightning_sound < _lightning_sounds.size()) {
+		// This is done in a loop in case two sounds are played at the same time, or very similar times
+		while (_lightning_current_time >= _lightning_sounds[_next_lightning_sound].time) {
+			AudioManager->PlaySound(_lightning_sounds[_next_lightning_sound].filename);
+			_next_lightning_sound++;
+
+			// If we just played the last sound in the sequence, exit the loop
+			if (_next_lightning_sound >= _lightning_sounds.size()) {
+				break;
+			}
+		}
+	}
+
+	// Check if the sequence has reached its end
+	if (_lightning_current_time >= _lightning_end_time) {
+		if (_lightning_looped == false) {
+			DisableLightning();
+		}
+		else {
+			// Restart the sequence timer, but don't throw away any "remainder time" that occurred during this loop
+			_lightning_current_time = _lightning_current_time - _lightning_end_time;
+			_next_lightning_sound = 0;
+		}
+	}
+}
 
 
 

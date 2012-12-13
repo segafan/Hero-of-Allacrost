@@ -55,7 +55,7 @@ public:
 	void Draw();
 
 	//! \brief Class Member Accessor Functions
-	bool ShouldUseFadeOverlay() const
+	bool IsUseFadeOverlay() const
 		{ return _use_fade_overlay; }
 
 	const Color& GetFadeOverlayColor() const
@@ -64,8 +64,8 @@ public:
 	float GetFadeModulation() const
 		{ return _fade_modulation; }
 
-	bool IsFading() const
-		{ return _is_fading; }
+	bool IsFadeActive() const
+		{ return _fade_active; }
 
 private:
 	//! \brief The color that the screen is currently faded to.
@@ -87,7 +87,7 @@ private:
 	uint32 _end_time;
 
 	//! \brief True if the class is currently in the process of fading
-	bool _is_fading;
+	bool _fade_active;
 
 	//! \brief Set to true if using an overlay, false if using modulation.
 	bool _use_fade_overlay;

@@ -214,7 +214,7 @@ function Load(m)
 	-- Visual effects: night lightning, during a sand storm, with occasional lightning
 	VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.3, 0.6));
 	VideoManager:EnableAmbientOverlay("img/effects/sand_storm.png", -450.0, 25.0);
-	VideoManager:LoadLightningEffect("dat/effects/lightning.lua", 2);
+	VideoManager:LoadLightningEffect("dat/graphics/lightning.lua", 2);
 	VideoManager:EnableLightning(true);
 
 	-- This entire map is played out in scene state. As soon as the map is loaded, we start the chain of events.
