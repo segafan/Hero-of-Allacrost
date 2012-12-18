@@ -13,12 +13,6 @@
 *** \brief   Source file for video engine interface.
 *** ***************************************************************************/
 
-
-#include <cassert>
-#include <cstdarg>
-#include <math.h>
-#include <vector>
-
 #include "video.h"
 #include "audio.h"
 #include "script.h"
@@ -89,6 +83,7 @@ VideoEngine::VideoEngine() :
 	_temp_width = 0;
 	_temp_height = 0;
 	_temp_fullscreen = false;
+	_smooth_textures = true;
 	_advanced_display = false;
 	_x_shake = 0;
 	_y_shake = 0;
@@ -374,7 +369,7 @@ void VideoEngine::Display(uint32 frame_time) {
 
 	// Update shaking effect
 	PushState();
-	SetCoordSys(0, 1024, 0, 768);
+	SetStandardCoordSys();
 	_UpdateShake(frame_time);
 
 	// This must be called before DrawFPS, because we only want to count
@@ -559,10 +554,10 @@ void VideoEngine::DisableScissoring() {
 void VideoEngine::SetScissorRect(float left, float right, float bottom, float top) {
 	_current_context.scissor_rectangle = CalculateScreenRect(left, right, bottom, top);
 
-	glScissor(static_cast<GLint>((_current_context.scissor_rectangle.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _current_context.viewport.width),
-		static_cast<GLint>((_current_context.scissor_rectangle.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _current_context.viewport.height),
-		static_cast<GLsizei>((_current_context.scissor_rectangle.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _current_context.viewport.width),
-		static_cast<GLsizei>((_current_context.scissor_rectangle.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _current_context.viewport.height)
+	glScissor(static_cast<GLint>((_current_context.scissor_rectangle.left / static_cast<float>(VIDEO_STANDARD_RESOLUTION_WIDTH)) * _current_context.viewport.width),
+		static_cast<GLint>((_current_context.scissor_rectangle.top / static_cast<float>(VIDEO_STANDARD_RESOLUTION_HEIGHT)) * _current_context.viewport.height),
+		static_cast<GLsizei>((_current_context.scissor_rectangle.width / static_cast<float>(VIDEO_STANDARD_RESOLUTION_WIDTH)) * _current_context.viewport.width),
+		static_cast<GLsizei>((_current_context.scissor_rectangle.height / static_cast<float>(VIDEO_STANDARD_RESOLUTION_HEIGHT)) * _current_context.viewport.height)
 	);
 }
 
@@ -571,10 +566,10 @@ void VideoEngine::SetScissorRect(float left, float right, float bottom, float to
 void VideoEngine::SetScissorRect(const ScreenRect& rect) {
 	_current_context.scissor_rectangle = rect;
 
-	glScissor(static_cast<GLint>((_current_context.scissor_rectangle.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _current_context.viewport.width),
-		static_cast<GLint>((_current_context.scissor_rectangle.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _current_context.viewport.height),
-		static_cast<GLsizei>((_current_context.scissor_rectangle.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _current_context.viewport.width),
-		static_cast<GLsizei>((_current_context.scissor_rectangle.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _current_context.viewport.height)
+	glScissor(static_cast<GLint>((_current_context.scissor_rectangle.left / static_cast<float>(VIDEO_STANDARD_RESOLUTION_WIDTH)) * _current_context.viewport.width),
+		static_cast<GLint>((_current_context.scissor_rectangle.top / static_cast<float>(VIDEO_STANDARD_RESOLUTION_HEIGHT)) * _current_context.viewport.height),
+		static_cast<GLsizei>((_current_context.scissor_rectangle.width / static_cast<float>(VIDEO_STANDARD_RESOLUTION_WIDTH)) * _current_context.viewport.width),
+		static_cast<GLsizei>((_current_context.scissor_rectangle.height / static_cast<float>(VIDEO_STANDARD_RESOLUTION_HEIGHT)) * _current_context.viewport.height)
 	);
 }
 
@@ -658,10 +653,10 @@ void VideoEngine::PopState() {
 
 	if (_current_context.scissoring_enabled) {
 		glEnable(GL_SCISSOR_TEST);
-		glScissor(static_cast<GLint>((_current_context.scissor_rectangle.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _current_context.viewport.width),
-			static_cast<GLint>((_current_context.scissor_rectangle.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _current_context.viewport.height),
-			static_cast<GLsizei>((_current_context.scissor_rectangle.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _current_context.viewport.width),
-			static_cast<GLsizei>((_current_context.scissor_rectangle.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _current_context.viewport.height)
+		glScissor(static_cast<GLint>((_current_context.scissor_rectangle.left / static_cast<float>(VIDEO_STANDARD_RESOLUTION_WIDTH)) * _current_context.viewport.width),
+			static_cast<GLint>((_current_context.scissor_rectangle.top / static_cast<float>(VIDEO_STANDARD_RESOLUTION_HEIGHT)) * _current_context.viewport.height),
+			static_cast<GLsizei>((_current_context.scissor_rectangle.width / static_cast<float>(VIDEO_STANDARD_RESOLUTION_WIDTH)) * _current_context.viewport.width),
+			static_cast<GLsizei>((_current_context.scissor_rectangle.height / static_cast<float>(VIDEO_STANDARD_RESOLUTION_HEIGHT)) * _current_context.viewport.height)
 		);
 	}
 	else {
@@ -680,6 +675,9 @@ void VideoEngine::SetTransform(float matrix[16]) {
 
 
 void VideoEngine::EnableAmbientOverlay(const string &filename, float x_speed, float y_speed) {
+	// Clear any image data before trying to load a new image
+	 _ambient_overlay_image.Clear();
+
 	// Note: The StillImage class handles clearing an image when loading another one.
 	if (_ambient_overlay_image.Load(filename) == true) {
 		_ambient_x_speed = x_speed;
@@ -1273,13 +1271,12 @@ void VideoEngine::DrawRectangleOutline(float left, float right, float bottom, fl
 
 
 
-void VideoEngine::DrawHalo(const ImageDescriptor &id, float x, float y, const Color &color) {
+void VideoEngine::DrawHalo(const ImageDescriptor& image, float x, float y, const Color &color) {
 	PushMatrix();
 	Move(x, y);
-
-	char old_blend_mode = _current_context.blend;
+	int8 old_blend_mode = _current_context.blend;
 	_current_context.blend = VIDEO_BLEND_ADD;
-	id.Draw(color);
+	image.Draw(color);
 	_current_context.blend = old_blend_mode;
 	PopMatrix();
 }

@@ -13,9 +13,6 @@
 *** \brief   Source file for image classes
 *** ***************************************************************************/
 
-#include <cstdarg>
-#include <math.h>
-
 #include "video.h"
 #include "engine/system.h"
 
@@ -678,15 +675,20 @@ void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows
 		return;
 	}
 
+	// TODO: Examine if the following png calls are still required. libpng15 changed the way some operations are done
 	// open up the IO stuff and read the PNG
 	png_init_io(png_ptr, fp);
 	png_set_sig_bytes(png_ptr, 8);
 	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
 
-	// grab the relevant data...
-	cols = info_ptr->width;
-	rows = info_ptr->height;
-	bpp = info_ptr->channels * 8;
+	cols = png_get_image_width(png_ptr, info_ptr);
+	rows = png_get_image_height(png_ptr, info_ptr);
+	bpp = png_get_bit_depth(png_ptr, info_ptr) * 8;
+
+	// In versions of libpng prior to 15, this is how we retrieved the information
+// 	cols = info_ptr->width;
+// 	rows = info_ptr->height;
+// 	bpp = info_ptr->channels * 8;
 
 	// and clean up.
 	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);

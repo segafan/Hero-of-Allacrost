@@ -170,11 +170,12 @@ enum VIDEO_STENCIL_OP {
 	VIDEO_STENCIL_OP_TOTAL = 4
 };
 
+
 //! \brief The standard screen resolution for Allacrost
-enum {
-	VIDEO_STANDARD_RES_WIDTH  = 1024,
-	VIDEO_STANDARD_RES_HEIGHT = 768
-};
+//@{
+const float VIDEO_STANDARD_RESOLUTION_WIDTH  = 1024.0f;
+const float VIDEO_STANDARD_RESOLUTION_HEIGHT = 768.0f;
+//@}
 
 
 /** \brief Linearly interpolates a value which is (alpha * 100) percent between initial and final
@@ -328,6 +329,12 @@ public:
 	void ToggleFullscreen()
 		{ SetFullscreen(!_temp_fullscreen); }
 
+	bool IsSmoothTextures() const
+		{ return _smooth_textures; }
+
+	void SetSmoothTextures(bool smooth)
+		{ _smooth_textures = smooth; }
+
 	//! \brief Returns a reference to the current coordinate system
 	const CoordSys& GetCoordSys() const
 		{ return _current_context.coordinate_system; }
@@ -374,6 +381,10 @@ public:
 	*** \param coordinate_system The coordinate system to set the screen to use
 	**/
 	void SetCoordSys(const CoordSys& coordinate_system);
+
+	//! \brief Sets the active coordinate system to the standard resolution
+	void SetStandardCoordSys()
+		{ SetCoordSys(CoordSys(0.0f, VIDEO_STANDARD_RESOLUTION_WIDTH, 0.0f, VIDEO_STANDARD_RESOLUTION_HEIGHT)); }
 
 	/** \brief Enables the scissoring effect in the video engine
 	*** Scisorring is where you can specify a rectangle of the screen which is affected
@@ -570,24 +581,21 @@ public:
 	**/
 	void DisableOverlays();
 
-	//TODO: review the DrawHalo and DrawLight functions.
-	/** \brief draws a halo at the given spot
-	 *
-	 *  \param id    image descriptor for the halo image
-	 *  \param x     x coordinate of halo
-	 *  \param y     y coordinate of halo
-	 *  \param color color of halo
-	 */
-	void DrawHalo(const ImageDescriptor &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
+	/** \brief Draws a halo at a specified location
+	*** \param image The halo image to draw
+	*** \param x The x coordinate of the halo on the screen
+	*** \param y The y coordinate of the halo on the screen
+	*** \param color The color to draw the halo (default: white)
+	***/
+	void DrawHalo(const ImageDescriptor &id, float x, float y, const Color &color = Color::white);
 
-	/** \brief draws a real light at the given spot
-	 *
-	 *  \param radius light radius
-	 *  \param x      x coordinate of light
-	 *  \param y      y coordinate of light
-	 *  \param color  color of light
-	 */
-	void DrawLight(float radius, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
+	/** \brief Draws a light at a specified location
+	*** \param radius The radius that the light extends to
+	*** \param x The x coordinate of light
+	*** \param y The y coordinate of light
+	*** \param color The color of the light to draw (default: white)
+	**/
+	void DrawLight(float radius, float x, float y, const Color &color = Color::white);
 
 	/** \brief Applies lighting after all images have been drawn.
 	*** \note All GUI and text rendering should be done AFTER this call is made, so that they are not affected by
@@ -829,6 +837,9 @@ private:
     //! \brief True if the game is currently running fullscreen
 	bool _fullscreen;
 
+	//! \brief Enables or disables smoothing of textures
+	bool _smooth_textures;
+
 	//! \brief The x and y coordinates of the current draw cursor position
 	float _x_cursor, _y_cursor;
 
@@ -992,10 +1003,6 @@ private:
 	*** \param frame_time The number of milliseconds that have elapsed for the current rendering frame
 	**/
 	void _UpdateShake(uint32 frame_time);
-
-	//! \brief Returns true if textures should be smoothed (used for non natural screen resolutions)
-	bool _ShouldSmooth()
-		{ return ( _screen_width != VIDEO_STANDARD_RES_WIDTH || _screen_height != VIDEO_STANDARD_RES_HEIGHT); }
 
 	/** \brief Updates the position of the ambient overlay image
 	*** \param frame_time The number of milliseconds that have elapsed since the last draw frame
