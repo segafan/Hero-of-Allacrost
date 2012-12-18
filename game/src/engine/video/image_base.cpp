@@ -325,10 +325,23 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 			for (uint32 x = 0; x < info_ptr->width; x++) {
 				img_pixel = row_pointers[y] + (x * bpp);
 				dst_pixel = ((uint8*)pixels) + ((y * info_ptr->width) + x) * 4;
-				dst_pixel[0] = img_pixel[0];
-				dst_pixel[1] = img_pixel[1];
-				dst_pixel[2] = img_pixel[2];
-				dst_pixel[3] = img_pixel[3];
+				// When a pixel is fully transparent and the texture smoothing option is enabled in the video engine,
+				// this causes OpenGL to use GL_LINEAR, which performs a linear average between pixels. Unfortunately,
+				// this results in a white outline to be seen when moving between transparent and non-transparent pixels
+				// in an image. To eliminate this unwanted artifact, we set the RGB values for all transparent pixels to
+				// 0 (black).
+				if (img_pixel[3] == 0) {
+					dst_pixel[0] = 0;
+					dst_pixel[1] = 0;
+					dst_pixel[2] = 0;
+					dst_pixel[3] = img_pixel[3];
+				}
+				else {
+					dst_pixel[0] = img_pixel[0];
+					dst_pixel[1] = img_pixel[1];
+					dst_pixel[2] = img_pixel[2];
+					dst_pixel[3] = img_pixel[3];
+				}
 			}
 		}
 	}
