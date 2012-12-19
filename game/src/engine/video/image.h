@@ -49,6 +49,7 @@
 #include "defs.h"
 #include "utils.h"
 
+#include "system.h"
 #include "image_base.h"
 #include "color.h"
 #include "texture.h"
@@ -410,6 +411,16 @@ public:
 	void SetHeight(float height)
 		{ _height = height; }
 
+	/** \brief Sets width of the image and adjusts height to maintain the same width:height ratio
+	*** \param width The width to set the image to
+	**/
+	void SetWidthKeepRatio(float width);
+
+	/** \brief Sets height of the image and adjusts width to maintain the same width:height ratio
+	*** \param height The height to set the image to
+	**/
+	void SetHeightKeepRatio(float height);
+
 	/** \brief Sets the dimensions of the image for a desired coordinate system
 	*** \param width The width of the image
 	*** \param height The height of the image
@@ -564,15 +575,24 @@ public:
 	void ResetAnimation()
 		{ _frame_index = 0; _frame_counter = 0; _loop_counter = 0; _loops_finished = false; }
 
-	/** \brief Called every frame to update the animation's current frame
-	***
-	*** This will automatically synchronize the animation according to the time passed
-	*** since the last call.
+	/** \brief Call on every game loop to update the animation's current frame image
+	*** \param time The number of milliseconds to update the animation by
 	***
 	*** \note This method will do nothing if there are no frames contained in the animation,
 	*** or if the _loops_finished member is set to true.
 	**/
-	void Update();
+	void Update(uint32 time);
+
+	/** \brief Call on every game loop to update the animation's current frame image
+	***
+	*** This will update the animation according to the amount of time that has passed since
+	*** the last iteration of the main game loop.
+	***
+	*** \note This method will do nothing if there are no frames contained in the animation,
+	*** or if the _loops_finished member is set to true.
+	**/
+	void Update()
+		{ Update(hoa_system::SystemManager->GetUpdateTime()); }
 
 	/** \brief Adds an animation frame using the filename of the image to add.
 	*** \param frame The filename of the frame image to add.
@@ -605,7 +625,7 @@ public:
 
 	//! \brief Retuns a pointer to the StillImage representing the current frame
 	StillImage* GetCurrentFrame() const
-		{ return const_cast<StillImage*>(&(_frames[_frame_index].image)); }
+		{ return GetFrame(_frame_index); }
 
 	//! \brief Returns the index number of the current frame in the animation.
 	uint32 GetCurrentFrameIndex() const
@@ -651,6 +671,16 @@ public:
 	*** \param height Height to set each frame (in coordinate system units)
 	**/
 	void SetHeight(float height);
+
+	/** \brief Sets width of all animation frames and adjusts height to maintain the same width:height ratio
+	*** \param width The width to set each frame to
+	**/
+	void SetWidthKeepRatio(float width);
+
+	/** \brief Sets height of all animation frames and adjusts width to maintain the same width:height ratio
+	*** \param height The height to set each frame to
+	**/
+	void SetHeightKeepRatio(float height);
 
 	/** \brief Sets all animation frames to be a certain width and height
 	*** \param width Width to set each frame (in coordinate system units)

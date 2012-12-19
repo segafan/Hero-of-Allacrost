@@ -117,10 +117,12 @@ bool TextureController::UnloadTextures() {
 	while (j != TextManager->_font_map.end()) {
 		FontProperties *fp = j->second;
 
-		if (fp->glyph_cache) {
-			for (map<uint16, FontGlyph*>::iterator k = fp->glyph_cache->begin(); k != fp->glyph_cache->end(); k++) {
-				_DeleteTexture((*k).second->texture);
-				delete (*k).second;
+		if (fp->glyph_cache != NULL) {
+			for (uint32 k = 0; k < fp->glyph_cache->size(); ++k) {
+				if (fp->glyph_cache->at(k) != NULL) {
+					_DeleteTexture(fp->glyph_cache->at(k)->texture);
+					delete fp->glyph_cache->at(k);
+				}
 			}
 
 			fp->glyph_cache->clear();

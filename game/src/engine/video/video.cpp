@@ -418,6 +418,16 @@ bool VideoEngine::ApplySettings() {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to delete OpenGL textures during a context change" << endl;
 		}
 
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_ALPHA_TEST);
+		glDisable(GL_STENCIL_TEST);
+		_current_context.scissoring_enabled = false;
+		glDisable(GL_SCISSOR_TEST);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
 		int32 flags = SDL_OPENGL;
 
 		if (_temp_fullscreen == true) {
@@ -514,8 +524,8 @@ void VideoEngine::SetViewport(float left, float right, float bottom, float top) 
 	if (t > _screen_height)
 		t = _screen_height;
 
-	_current_context.viewport = ScreenRect(l, b, r - l + 1, t - b + 1);
-	glViewport(l, b, r - l + 1, t - b + 1);
+	_current_context.viewport = ScreenRect(l, b, r - l, t - b);
+	glViewport(l, b, r - l, t - b);
 }
 
 
@@ -1242,6 +1252,7 @@ void VideoEngine::DrawGrid(float x, float y, float x_step, float y_step, const C
 		num_vertices += 2;
 	}
 	glColor4fv(&c[0]);
+	glDisable(GL_TEXTURE_2D);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(2, GL_FLOAT, 0, &(vertices[0]));
 	glDrawArrays(GL_LINES, 0, num_vertices);
