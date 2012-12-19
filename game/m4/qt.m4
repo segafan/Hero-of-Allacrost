@@ -100,7 +100,7 @@ AC_DEFUN([HOA_FIND_QT4],
 have_qt4=no
 dnl Search paths for Qt4 - not much real experience with this yet.
 qt4_incdirs="/usr/local/qt/include /usr/include/qt4 /usr/include/qt /usr/include /usr/X11R6/include/X11/qt /usr/X11R6/include/qt /usr/lib/qt/include /usr/lib/qt4/include"
-qt4_libdirs="/usr/local/qt/lib /usr/lib/qt /usr/lib /usr/X11R6/lib/X11/qt /usr/X11R6/lib/qt /usr/lib/qt/lib /usr/lib/qt4/lib /usr/lib/qt4"
+qt4_libdirs="/usr/local/qt/lib /usr/lib/qt /usr/lib /usr/X11R6/lib/X11/qt /usr/X11R6/lib/qt /usr/lib/qt/lib /usr/lib/qt4/lib /usr/lib/qt4 /usr/lib/i386-linux-gnu /usr/lib/x86_64-linux-gnu"
 
 if test -n "$QTDIR" ; then
     qt4_incdirs="$QTDIR/include $qt4_incdirs"
@@ -198,7 +198,7 @@ AC_DEFUN([HOA_FIND_QT4TEST],
 have_qt4testlib=no
 
 qt4_incdirs="/usr/local/qt/include /usr/include/qt4 /usr/include/qt /usr/include /usr/X11R6/include/X11/qt /usr/X11R6/include/qt /usr/lib/qt/include"
-qt4_libdirs="/usr/local/qt/lib /usr/lib/qt /usr/lib /usr/X11R6/lib/X11/qt /usr/X11R6/lib/qt /usr/lib/qt/lib"
+qt4_libdirs="/usr/local/qt/lib /usr/lib/qt /usr/lib /usr/X11R6/lib/X11/qt /usr/X11R6/lib/qt /usr/lib/qt/lib /usr/lib/i386-linux-gnu /usr/lib/x86_64-linux-gnu"
 
 if test -n "$QTDIR" ; then
     qt4_incdirs="$QTDIR/include $qt4_incdirs"
