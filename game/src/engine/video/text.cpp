@@ -451,7 +451,7 @@ void TextImage::_Regenerate() {
 	TextManager->_CacheGlyphs(_string.c_str(), fp);
 
 	// 1) Dissect the unicode string into an array of lines of text
-	std::vector<uint16*> line_array;
+	vector<uint16*> line_array;
 	uint16* reformatted_text = new uint16[_string.size() + 1];
 	uint16* text_iter = reformatted_text;
 	uint16* last_line = reformatted_text;
@@ -520,9 +520,10 @@ TextSupervisor::~TextSupervisor() {
 		if (fp->ttf_font)
 			TTF_CloseFont(fp->ttf_font);
 
-		if (fp->glyph_cache) {
-			for (std::map<uint16, FontGlyph*>::iterator j = fp->glyph_cache->begin(); j != fp->glyph_cache->end(); j++) {
-				delete (*j).second;
+		if (fp->glyph_cache != NULL) {
+			for (uint32 j = 0; j < fp->glyph_cache->size(); j++) {
+				if (fp->glyph_cache->at(j) != NULL)
+					delete fp->glyph_cache->at(j);
 			}
 			delete fp->glyph_cache;
 		}
@@ -581,14 +582,14 @@ bool TextSupervisor::LoadFont(const string& filename, const string& font_name, u
 	fp->descent = TTF_FontDescent(font);
 
 	// Create the glyph cache for the font and add it to the font map
-	fp->glyph_cache = new std::map<uint16, FontGlyph*>;
+	fp->glyph_cache = new vector<FontGlyph*>;
 	_font_map[font_name] = fp;
 	return true;
 } // bool TextSupervisor::LoadFont(...)
 
 
 
-void TextSupervisor::FreeFont(const std::string& font_name) {
+void TextSupervisor::FreeFont(const string& font_name) {
 	if (_font_map.find(font_name) == _font_map.end()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
 		return;
@@ -599,7 +600,7 @@ void TextSupervisor::FreeFont(const std::string& font_name) {
 
 
 
-FontProperties* TextSupervisor::GetFontProperties(const std::string& font_name) {
+FontProperties* TextSupervisor::GetFontProperties(const string& font_name) {
 	if (IsFontValid(font_name) == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument font name was invalid: " << font_name << endl;
 		return NULL;
@@ -670,7 +671,7 @@ void TextSupervisor::Draw(const ustring& text, const TextStyle& style) {
 
 
 
-int32 TextSupervisor::CalculateTextWidth(const std::string& font_name, const hoa_utils::ustring& text) {
+int32 TextSupervisor::CalculateTextWidth(const string& font_name, const hoa_utils::ustring& text) {
 	if (IsFontValid(font_name) == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "font name argument was invalid: " << font_name << endl;
 		return -1;
@@ -687,7 +688,7 @@ int32 TextSupervisor::CalculateTextWidth(const std::string& font_name, const hoa
 
 
 
-int32 TextSupervisor::CalculateTextWidth(const std::string& font_name, const std::string& text) {
+int32 TextSupervisor::CalculateTextWidth(const string& font_name, const string& text) {
 	if (IsFontValid(font_name) == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "font name argument was invalid: " << font_name << endl;
 		return -1;
@@ -761,14 +762,26 @@ void TextSupervisor::_CacheGlyphs(const uint16* text, FontProperties* fp) {
 	int32 w, h;
 	GLuint texture;
 
+	// First find the maximum character and make sure that the glyph cache is large enough to hold it
+	uint16 max_character = 0;
+	for (const uint16* character_ptr = text; *character_ptr != 0; ++character_ptr) {
+		if (*character_ptr > max_character)
+			max_character = *character_ptr;
+	}
+	// Now update the glyph cache size if it is not large enough to index all characters in the string
+	if (max_character >= fp->glyph_cache->size()) {
+		fp->glyph_cache->resize(max_character + 1, NULL);
+	}
+
 	// Go through each character in the string and cache those glyphs that have not already been cached
 	for (const uint16* character_ptr = text; *character_ptr != 0; ++character_ptr) {
 		// A reference for legibility
 		const uint16& character = *character_ptr;
 
-		// Check if glyph already cached. If so, move on to the next character
-		if (fp->glyph_cache->find(character) != fp->glyph_cache->end())
+		// Check if the glyph is already cached. If so, move on to the next character
+		if (fp->glyph_cache->at(character) != NULL) {
 			continue;
+		}
 
 		// Attempt to create the initial SDL_Surface that contains the rendered glyph
 		initial = TTF_RenderGlyph_Blended(font, character, glyph_color);
@@ -846,7 +859,7 @@ void TextSupervisor::_CacheGlyphs(const uint16* text, FontProperties* fp) {
 		glyph->max_y = static_cast<float>(initial->h + 1) / static_cast<float>(h);
 		glyph->advance = advance;
 
-		fp->glyph_cache->insert(pair<uint16, FontGlyph*>(character, glyph));
+		fp->glyph_cache->at(character) = glyph;
 
 		SDL_FreeSurface(initial);
 		SDL_FreeSurface(intermediary);
@@ -904,7 +917,7 @@ void TextSupervisor::_DrawTextHelper(const uint16* const text, FontProperties* f
 
 	// Iterate through each character in the string and render the character glyphs one at a time
 	int xpos = 0;
-	for (const uint16* glyph = text; *glyph != 0; glyph++) {
+	for (const uint16* glyph = text; *glyph != 0; ++glyph) {
 		FontGlyph* glyph_info = (*fp->glyph_cache)[*glyph];
 
 		int x_hi = glyph_info->width;

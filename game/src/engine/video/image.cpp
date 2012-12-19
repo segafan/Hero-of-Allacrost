@@ -13,12 +13,11 @@
 *** \brief   Source file for image classes
 *** ***************************************************************************/
 
+#include "image.h"
 #include "video.h"
-#include "engine/system.h"
 
 using namespace std;
 using namespace hoa_utils;
-using namespace hoa_system;
 using namespace hoa_video::private_video;
 
 namespace hoa_video {
@@ -481,11 +480,8 @@ void ImageDescriptor::_RemoveTextureReference() {
 void ImageDescriptor::_DrawOrientation() const {
 	Context& current_context = VideoManager->_current_context;
 
-	// Calculate x and y draw offsets due to any screen shaking effects
-	float x_shake = VideoManager->_x_shake * (current_context.coordinate_system.GetRight() - current_context.coordinate_system.GetLeft()) / 1024.0f;
-	float y_shake = VideoManager->_y_shake * (current_context.coordinate_system.GetTop() - current_context.coordinate_system.GetBottom()) / 768.0f;
-
-	// TODO: I honestly have no idea what this is >_>
+	// Fix the image offset according to the current context alignement. Take the image width/height and divide it in half (equal to * 0.5f),
+	// then apply the offset (left, right, center/top, bottom, center).
 	float x_align_offset = ((current_context.x_align + 1) * _width) * 0.5f * -current_context.coordinate_system.GetHorizontalDirection();
 	float y_align_offset = ((current_context.y_align + 1) * _height) * 0.5f * -current_context.coordinate_system.GetVerticalDirection();
 
@@ -500,8 +496,14 @@ void ImageDescriptor::_DrawOrientation() const {
 	if (current_context.y_flip) {
 		y_off = _height;
 	}
-	x_off += x_shake;
-	y_off += y_shake;
+
+	// Calculate x and y draw offsets due to any screen shaking effects
+	if (VideoManager->_shake_forces.empty() == false) {
+		float x_shake = VideoManager->_x_shake * (current_context.coordinate_system.GetRight() - current_context.coordinate_system.GetLeft()) / 1024.0f;
+		float y_shake = VideoManager->_y_shake * (current_context.coordinate_system.GetTop() - current_context.coordinate_system.GetBottom()) / 768.0f;
+		x_off += x_shake;
+		y_off += y_shake;
+	}
 
 	VideoManager->MoveRelative(x_off * current_context.coordinate_system.GetHorizontalDirection(), y_off * current_context.coordinate_system.GetVerticalDirection());
 
@@ -549,6 +551,9 @@ void ImageDescriptor::_DrawTexture(const Color* draw_color) const {
 		glDisable(GL_BLEND);
 	}
 
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(2, GL_FLOAT, 0, vert_coords);
+
 	// If we have a valid image texture poiner, setup texture coordinates and the texture coordinate array for glDrawArrays()
 	if (_texture != NULL) {
 		// Set the texture coordinates
@@ -592,6 +597,7 @@ void ImageDescriptor::_DrawTexture(const Color* draw_color) const {
 
 		if (_unichrome_vertices == true) {
 			glColor4fv((GLfloat*)draw_color[0].GetColors());
+			glDisableClientState(GL_COLOR_ARRAY);
 		}
 		else {
 			glEnableClientState(GL_COLOR_ARRAY);
@@ -616,9 +622,14 @@ void ImageDescriptor::_DrawTexture(const Color* draw_color) const {
 	}
 
 	// Use a vertex array to draw all of the vertices
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(2, GL_FLOAT, 0, vert_coords);
 	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	if (_texture != NULL)
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	if (glIsEnabled(GL_COLOR_ARRAY))
+		glDisableClientState(GL_COLOR_ARRAY);
 
 	if (VideoManager->_current_context.blend || _blend == true)
 		glDisable(GL_BLEND);
@@ -642,7 +653,7 @@ void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows
 	// check the signature - make sure it is actually a PNG! otherwise BAD THINGS would happen
 	uint8 test_buffer[8];
 
-	size_t bytes_read = fread(test_buffer, 1, 8, fp);
+	fread(test_buffer, 1, 8, fp);
 	if (png_sig_cmp(test_buffer, 0, 8)) {
 		throw Exception("png_sig_cmp() failed for file: " + filename, __FILE__, __LINE__, __FUNCTION__);
 		fclose(fp);
@@ -1122,6 +1133,7 @@ void StillImage::EnableGrayScale() {
 } // void StillImage::EnableGrayScale()
 
 
+
 void StillImage::DisableGrayScale() {
 	if (_grayscale == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "grayscale mode was already disabled" << endl;
@@ -1148,6 +1160,20 @@ void StillImage::DisableGrayScale() {
 	// decrement when the grayscale version was enabled
 	_texture = _image_texture;
 } // void StillImage::DisableGrayScale()
+
+
+
+void StillImage::SetWidthKeepRatio(float width) {
+	float img_ratio = (_width > 0.0f ? width / _width : 0.0f);
+	SetDimensions(width, _height * img_ratio);
+}
+
+
+
+void StillImage::SetHeightKeepRatio(float height) {
+	float img_ratio = (_height > 0.0f ? height / _height : 0.0f);
+	SetDimensions(_width * img_ratio, height);
+}
 
 // -----------------------------------------------------------------------------
 // AnimatedImage class
@@ -1338,20 +1364,18 @@ void AnimatedImage::DisableGrayScale() {
 
 
 
-void AnimatedImage::Update() {
+void AnimatedImage::Update(uint32 time) {
 	if (_frames.size() <= 1)
 		return;
 
 	if (_loops_finished)
 		return;
 
-	// Get the amount of milliseconds that have pass since the last display
-	uint32 update_time = SystemManager->GetUpdateTime();
-	_frame_counter += update_time;
+	_frame_counter += time;
 
 	// If the frame time has expired, update the frame index and counter.
 	while (_frame_counter >= _frames[_frame_index].frame_time) {
-		update_time = _frame_counter - _frames[_frame_index].frame_time;
+		time = _frame_counter - _frames[_frame_index].frame_time;
 		_frame_index++;
 		if (_frame_index >= _frames.size()) {
 				// Check if the animation has looping enabled and if so, increment the loop counter
@@ -1364,13 +1388,19 @@ void AnimatedImage::Update() {
 			}
 			_frame_index = 0;
 		}
-		_frame_counter = update_time;
+		_frame_counter = time;
 	}
 } // void AnimatedImage::Update()
 
 
 
 bool AnimatedImage::AddFrame(const string& frame, uint32 frame_time) {
+	if (frame_time == 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempted to add frame \"" << frame << "\" with a zero frame time. "
+			<< "The frame was not added." << endl;
+		return false;
+	}
+
 	StillImage img;
 	img.SetStatic(_is_static);
 	img.SetVertexColors(_color[0], _color[1], _color[2], _color[3]);
@@ -1388,6 +1418,12 @@ bool AnimatedImage::AddFrame(const string& frame, uint32 frame_time) {
 
 
 bool AnimatedImage::AddFrame(const StillImage& frame, uint32 frame_time) {
+	if (frame_time == 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempted to add a frame image with a zero frame time. "
+			<< "The frame was not added." << endl;
+		return false;
+	}
+
 	if (frame._image_texture == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "StillImage argument did not contain any image elements" << endl;
 		return false;
@@ -1418,6 +1454,30 @@ void AnimatedImage::SetHeight(float height) {
 
 	for (uint32 i = 0; i < _frames.size(); i++) {
 		_frames[i].image.SetHeight(height);
+	}
+}
+
+
+
+void AnimatedImage::SetWidthKeepRatio(float width) {
+	float img_ratio = (_width > 0.0f ? width / _width : 0.0f);
+	_width = width;
+	_height = _height * img_ratio;
+
+	for (uint32 i = 0; i < _frames.size(); i++) {
+		_frames[i].image.SetDimensions(_width, _height);
+	}
+}
+
+
+
+void AnimatedImage::SetHeightKeepRatio(float height) {
+	float img_ratio = (_height > 0.0f ? height / _height : 0.0f);
+	_width = _width * img_ratio;
+	_height = height;
+
+	for (uint32 i = 0; i < _frames.size(); i++) {
+		_frames[i].image.SetDimensions(_width, _height);
 	}
 }
 
