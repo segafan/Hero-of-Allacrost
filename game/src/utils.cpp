@@ -24,10 +24,8 @@
 	#include <pwd.h>
 #endif
 
-#include <fstream>
 #include <iconv.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "utils.h"
 #include <SDL/SDL.h>

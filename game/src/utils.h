@@ -55,6 +55,7 @@
 #include <cstring> // For C string manipulation functions like strcmp
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -64,6 +65,8 @@
 #include <stack>
 #include <stdexcept>
 #include <sstream>
+
+#include <unistd.h>
 
 // We include SDL_config.h, which compensates for non ISO C99 compilers.
 // SDL_config.h defines the int??_t types for non ISO C99 compilers,

@@ -23,13 +23,10 @@
 #ifndef __SYSTEM_HEADER__
 #define __SYSTEM_HEADER__
 
-#include <set>
 #include <SDL/SDL.h>
 
-#include "utils.h"
 #include "defs.h"
-
-#include "mode_manager.h"
+#include "utils.h"
 
 #define NO_THREADS 0
 #define SDL_THREADS 1
@@ -396,7 +393,7 @@ public:
 	/** \brief Used to determine what language the game is running in.
 	*** \return The language that the game is running in.
 	**/
-	std::string GetLanguage() const
+	const std::string& GetLanguage() const
 		{ return _language; }
 
 	/** \brief Sets the language that the game should use.
