@@ -179,107 +179,6 @@ public:
 class InputEngine : public hoa_utils::Singleton<InputEngine> {
 	friend class hoa_utils::Singleton<InputEngine>;
 
-private:
-	InputEngine();
-
-	//! Holds the current user-defined key settings
-	private_input::KeyState _key;
-
-	//! Holds the current user-defined joystick settings
-	private_input::JoystickState _joystick;
-
-	//! Any key (or joystick button) pressed
-	bool _any_key_press;
-
-	//! Any key released
-	bool _any_key_release;
-
-	//! Any joystick axis moved
-	int8 _last_axis_moved;
-
-	/** \name  Input State Members
-	*** \brief Retain whether an input key/button is currently being held down
-	**/
-	//@{
-	bool _up_state;
-	bool _down_state;
-	bool _left_state;
-	bool _right_state;
-	bool _confirm_state;
-	bool _cancel_state;
-	bool _menu_state;
-	bool _swap_state;
-	bool _left_select_state;
-	bool _right_select_state;
-	//@}
-
-	/** \name  Input Press Members
-	*** \brief Retain whether an input key/button was just pressed
-	**/
-	//@{
-	bool _up_press;
-	bool _down_press;
-	bool _left_press;
-	bool _right_press;
-	bool _confirm_press;
-	bool _cancel_press;
-	bool _menu_press;
-	bool _swap_press;
-	bool _left_select_press;
-	bool _right_select_press;
-	bool _pause_press;
-	bool _quit_press;
-	//@}
-
-	/** \name  Input Release Members
-	*** \brief Retain whether an input key/button was just released
-	**/
-	//@{
-	bool _up_release;
-	bool _down_release;
-	bool _left_release;
-	bool _right_release;
-	bool _confirm_release;
-	bool _cancel_release;
-	bool _menu_release;
-	bool _swap_release;
-	bool _left_select_release;
-	bool _right_select_release;
-	//@}
-
-	/** \name  First Joystick Axis Motion
-	*** \brief Retains whether a joystick axis event has already occured or not
-	**/
-	//@{
-	bool _joyaxis_x_first;
-	bool _joyaxis_y_first;
-	//@}
-
-	/** \brief Most recent SDL event
-	 **/
-	SDL_Event _event;
-
-	/** \brief Processes all keyboard input events
-	*** \param key_event The event to process
-	**/
-	void _KeyEventHandler(SDL_KeyboardEvent& key_event);
-
-	/** \brief Processes all joystick input events
-	*** \param js_event The event to process
-	**/
-	void _JoystickEventHandler(SDL_Event& js_event);
-
-	/** \brief Sets a new key over an older one. If the same key is used elsewhere, the older one is removed
-	*** \param old_key key to be replaced (_key.up for example)
-	*** \param new_key key to replace the old value
-	**/
-	void _SetNewKey(SDLKey & old_key, SDLKey new_key);
-
-	/** \brief Sets a new joystick button over an older one. If the same button is used elsewhere, the older one is removed
-	*** \param old_button to be replaced (_joystick.confirm for example)
-	*** \param new_button button to replace the old value
-	**/
-	void _SetNewJoyButton(uint8 & old_button, uint8 new_button);
 public:
 	~InputEngine();
 
@@ -640,6 +539,108 @@ public:
 	//! \brief Returns the most recent event retrieved from SDL
 	const SDL_Event& GetMostRecentEvent() const
 		{ return _event; }
+
+private:
+	InputEngine();
+
+	//! Holds the current user-defined key settings
+	private_input::KeyState _key;
+
+	//! Holds the current user-defined joystick settings
+	private_input::JoystickState _joystick;
+
+	//! Any key (or joystick button) pressed
+	bool _any_key_press;
+
+	//! Any key released
+	bool _any_key_release;
+
+	//! Any joystick axis moved
+	int8 _last_axis_moved;
+
+	/** \name  Input State Members
+	*** \brief Retain whether an input key/button is currently being held down
+	**/
+	//@{
+	bool _up_state;
+	bool _down_state;
+	bool _left_state;
+	bool _right_state;
+	bool _confirm_state;
+	bool _cancel_state;
+	bool _menu_state;
+	bool _swap_state;
+	bool _left_select_state;
+	bool _right_select_state;
+	//@}
+
+	/** \name  Input Press Members
+	*** \brief Retain whether an input key/button was just pressed
+	**/
+	//@{
+	bool _up_press;
+	bool _down_press;
+	bool _left_press;
+	bool _right_press;
+	bool _confirm_press;
+	bool _cancel_press;
+	bool _menu_press;
+	bool _swap_press;
+	bool _left_select_press;
+	bool _right_select_press;
+	bool _pause_press;
+	bool _quit_press;
+	//@}
+
+	/** \name  Input Release Members
+	*** \brief Retain whether an input key/button was just released
+	**/
+	//@{
+	bool _up_release;
+	bool _down_release;
+	bool _left_release;
+	bool _right_release;
+	bool _confirm_release;
+	bool _cancel_release;
+	bool _menu_release;
+	bool _swap_release;
+	bool _left_select_release;
+	bool _right_select_release;
+	//@}
+
+	/** \name  First Joystick Axis Motion
+	*** \brief Retains whether a joystick axis event has already occured or not
+	**/
+	//@{
+	bool _joyaxis_x_first;
+	bool _joyaxis_y_first;
+	//@}
+
+	/** \brief Most recent SDL event
+	 **/
+	SDL_Event _event;
+
+	/** \brief Processes all keyboard input events
+	*** \param key_event The event to process
+	**/
+	void _KeyEventHandler(SDL_KeyboardEvent& key_event);
+
+	/** \brief Processes all joystick input events
+	*** \param js_event The event to process
+	**/
+	void _JoystickEventHandler(SDL_Event& js_event);
+
+	/** \brief Sets a new key over an older one. If the same key is used elsewhere, the older one is removed
+	*** \param old_key key to be replaced (_key.up for example)
+	*** \param new_key key to replace the old value
+	**/
+	void _SetNewKey(SDLKey & old_key, SDLKey new_key);
+
+	/** \brief Sets a new joystick button over an older one. If the same button is used elsewhere, the older one is removed
+	*** \param old_button to be replaced (_joystick.confirm for example)
+	*** \param new_button button to replace the old value
+	**/
+	void _SetNewJoyButton(uint8 & old_button, uint8 new_button);
 }; // class InputEngine : public hoa_utils::Singleton<InputEngine>
 
 } // namespace hoa_input

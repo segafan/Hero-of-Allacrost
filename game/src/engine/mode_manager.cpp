@@ -60,6 +60,7 @@ ModeEngine::ModeEngine() {
 	IF_PRINT_DEBUG(MODE_MANAGER_DEBUG) << "constructor invoked" << endl;
 	_pop_count = 0;
 	_state_change = false;
+	_debug_graphics_enabled = false;
 }
 
 
@@ -149,7 +150,7 @@ GameMode* ModeEngine::GetTop() {
 
 
 
-GameMode* ModeEngine::Get(uint32 index) {
+GameMode* ModeEngine::GetMode(uint32 index) {
 	if (_game_stack.size() < index)
 		return NULL;
 	else

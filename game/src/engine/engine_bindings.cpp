@@ -80,7 +80,7 @@ void BindEngineCode() {
 			.def("Pop", &ModeEngine::Pop)
 			.def("PopAll", &ModeEngine::PopAll)
 			.def("GetTop", &ModeEngine::GetTop)
-			.def("Get", &ModeEngine::Get)
+			.def("GetMode", &ModeEngine::GetMode)
 			.def("GetGameType", (uint8 (ModeEngine::*)(uint32))&ModeEngine::GetGameType)
 			.def("GetGameType", (uint8 (ModeEngine::*)())&ModeEngine::GetGameType)
 	];

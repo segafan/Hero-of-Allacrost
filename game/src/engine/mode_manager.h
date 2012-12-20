@@ -186,7 +186,7 @@ public:
 	/** \brief Gets a pointer to a game stack object.
 	*** \return A pointer to the GameMode object at (index) from the top.
 	**/
-	GameMode* Get(uint32 index);
+	GameMode* GetMode(uint32 index);
 
 	//! \brief Checks if the game stack needs modes pushed or popped, then calls Update on the active game mode.
 	void Update();
@@ -196,6 +196,22 @@ public:
 
 	//! \brief Prints the contents of the game_stack member to standard output.
 	void DEBUG_PrintStack();
+
+	//! \brief Returns true if the game mode should display any graphical debugging information on the screen
+	bool DEBUG_IsGraphicsEnabled() const
+		{ return _debug_graphics_enabled; }
+
+	//! \brief Toggles the state of game mode graphical debugging
+	void DEBUG_ToggleGraphicsEnabled()
+		{ _debug_graphics_enabled = ~_debug_graphics_enabled; }
+
+	//! \brief Sets game mode graphical debugging on or off
+	void DEBUG_SetGraphicsEnabled(bool debug)
+		{ _debug_graphics_enabled = debug; }
+
+private:
+	//! \brief Set to true if game modes should draw graphical debugging information
+	bool _debug_graphics_enabled;
 }; // class ModeEngine : public hoa_utils::Singleton<ModeEngine>
 
 } // namespace hoa_mode_manager
