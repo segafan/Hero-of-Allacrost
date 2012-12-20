@@ -271,6 +271,22 @@ public:
 	*** finished reading data from it.
 	**/
 	//@{
+	/** \brief Opens the tablespace in the Lua file.
+	*** \return The name of the tablespace or an empty string upon failure
+	***
+	*** It's useful to permit having several lua files with their own functions and data without
+	*** needing to worry about name collisions. The tablespace must be named according to the Lua
+	*** filename, but without using the path or file extension. For example, dat/script/my_script.lua
+	*** should have a 'my_script' tablespace defined at the beginning of the file with the following
+	*** code:
+	***
+	*** local ns = {}
+	*** setmetatable(ns, {__index = _G})
+	*** my_script = ns;
+	*** setfenv(1, ns);
+	**/
+	std::string OpenTablespace();
+
 	//! \param table_name The name of the table to open
 	//! \param use_global This overrides the open_tables vector, the reason for this is
 	//! when a function is called from lua, any open tables are no longer on the stack passed to the function
@@ -349,6 +365,24 @@ public:
 		{ OpenTable(table_name); _ReadTableKeys(keys); CloseTable(); }
 	//@}
 	//@}
+
+	/** \brief Executes a Lua function defined inside the file
+	*** \param function_name The name of the function to execute
+	*** \return True if the function executed successfully
+	***
+	*** \note This method will only work for functions that do not have a return value.
+	*** \todo In the future, this method should probably be expanded into a template to allow for any type of return value.
+	**/
+	bool ExecuteFunction(const std::string& function_name);
+
+	/** \brief Executes a Lua function defined inside the file
+	*** \param object A reference to the ScriptObject to use to execute the function
+	*** \return True if the function executed successfully
+	***
+	*** \note This method will only work for functions that do not have a return value.
+	*** \todo In the future, this method should probably be expanded into a template to allow for any type of return value.
+	**/
+	bool ExecuteFunction(const ScriptObject& object);
 
 	//! \brief Returns a pointer to the local lua state (use with caution)
 	lua_State* GetLuaState()

@@ -50,7 +50,7 @@ bool ReadScriptDescriptor::OpenFile(const string& filename) {
 
 
 bool ReadScriptDescriptor::OpenFile(const string& filename, bool force_reload) {
-	// check for file extensions
+	// Check for file extensions
 	string file_name = filename;
 	if (DoesFileExist(file_name + ".lua")) {
 		file_name = filename + ".lua";
@@ -61,9 +61,7 @@ bool ReadScriptDescriptor::OpenFile(const string& filename, bool force_reload) {
 	}
 
 	if (ScriptManager->IsFileOpen(file_name) == true) {
-		if (SCRIPT_DEBUG)
-			cerr << "SCRIPT WARNING: ReadScriptDescriptor::OpenFile() attempted to open file that is already opened: "
-				<< file_name << endl;
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "attempted to open file that is already opened: " << file_name << endl;
 		return false;
 	}
 
@@ -235,7 +233,7 @@ object ReadScriptDescriptor::ReadFunctionPointer(const string& key) {
 
 		luabind::object o(from_stack(_lstack, STACK_TOP));
 
-		if (!o) {
+		if (o.is_valid() == false) {
 			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because it was unable to access the function "
 				<< "for the global key: " << key << endl;
 			return luabind::object();
@@ -292,6 +290,28 @@ object ReadScriptDescriptor::ReadFunctionPointer(int32 key) {
 // Table Operation Functions
 //-----------------------------------------------------------------------------
 
+string ReadScriptDescriptor::OpenTablespace() {
+	if (IsFileOpen() == false) {
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "Function invoked when file was not open." << endl;
+		return string();
+	}
+
+	// Extract the tablespace name from the filename. For example, 'dat/maps/demo.lua' has a tablespace name of 'demo')\.
+	uint32 period = _filename.find(".");
+	uint32 last_slash = _filename.find_last_of("/");
+	string tablespace = _filename.substr(last_slash + 1, period - (last_slash + 1));
+
+	if (tablespace.empty() == true) {
+	    IF_PRINT_WARNING(SCRIPT_DEBUG) << "Failed to open tablespace for file: " << _filename << endl;
+		return tablespace;
+	}
+
+	OpenTable(tablespace);
+	return tablespace;
+}
+
+
+
 void ReadScriptDescriptor::OpenTable(const string& table_name, bool use_global) {
 	if (_open_tables.size() == 0 || use_global) { // Fetch the table from the global space
 		lua_getglobal(_lstack, table_name.c_str());
@@ -332,7 +352,8 @@ void ReadScriptDescriptor::OpenTable(int32 table_name) {
 		<< "table, or the table does not exist for the table element key: " << table_name << endl;
 	}
 
-	lua_gettable(_lstack, STACK_TOP - 1); // sometimes, this line will cause a major b0rk and kill Allacrost silently
+	// Note: This call is unsafe and might make the game crash. TODO: investigate alternative solution
+	lua_gettable(_lstack, STACK_TOP - 1);
 
 	if (!lua_istable(_lstack, STACK_TOP)) {
 		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed because the data retrieved was not a table "
@@ -416,6 +437,54 @@ uint32 ReadScriptDescriptor::GetTableSize() {
 		table_size++;
 
 	return table_size;
+}
+
+//-----------------------------------------------------------------------------
+// Function Execution Functions
+//-----------------------------------------------------------------------------
+
+bool ReadScriptDescriptor::ExecuteFunction(const string& function_name) {
+	if (IsFileOpen() == false) {
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "function invoked when the file was not open: " << _filename << endl;
+		return false;
+	}
+
+	try {
+	    ScriptCallFunction<void>(GetLuaState(), function_name.c_str());
+	}
+	catch (luabind::error e) {
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "caught Luabind error while trying to execute function \"" << function_name
+			<< "\" in file: " << _filename << endl;
+		ScriptManager->HandleLuaError(e);
+		return false;
+	}
+
+	return true;
+}
+
+
+bool ReadScriptDescriptor::ExecuteFunction(const ScriptObject& object) {
+	if (IsFileOpen() == false) {
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "function invoked when the file was not open: " << _filename << endl;
+		return false;
+	}
+
+	if (object.is_valid() == false) {
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "tried to execute function with an invalid object for file: " << _filename << endl;
+		return false;
+	}
+
+	try {
+	    ScriptCallFunction<void>(object);
+	}
+	catch(luabind::error e) {
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "caught Luabind error while trying to execute script object in file: "
+			<< _filename << endl;
+		ScriptManager->HandleLuaError(e);
+		return false;
+	}
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------

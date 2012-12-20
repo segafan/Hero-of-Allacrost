@@ -137,7 +137,7 @@ public:
 		{ return _filename; }
 
 	//! \note This can also be used to determine what type of derived object this object points to (read, write, modify)
-	const SCRIPT_ACCESS_MODE GetAccessMode()
+	SCRIPT_ACCESS_MODE GetAccessMode()
 		{ return _access_mode; }
 
 	/** \brief Clears any error messages that have been logged
@@ -210,6 +210,22 @@ public:
 	*** \return True if the filename is registered to a ScriptDescriptor object who has the file opened.
 	**/
 	bool IsFileOpen(const std::string& filename);
+
+	/** \brief Opens a file and executes a single Lua function
+	*** \param filename The name of the file to open
+	*** \param function_name The name of the function to execute
+	*** \param open_tablepace When true, attempts to open the file's tablespace (default value == false)
+	*** \return True if the function executed successfully
+	***
+	*** This method is provided as a convenient way to execute a single function in a file. Because the file is
+	*** opened and closed each time, you should not use this call if you intend to execute functions in a file repeatedly.
+	*** Instead, use a ReadScriptDescriptor class object to keep the file persistently open and use the ExecuteFunction
+	*** methods of that class.
+	***
+	*** \note This method will only work for functions that do not have a return value.
+	*** \todo In the future, this method should probably be expanded into a template to allow for any type of return value.
+	**/
+	bool ExecuteLuaFunction(const std::string& filename, const std::string& function_name, bool open_tablespace = true);
 
 	/** \brief Handles run-time errors generated in Lua
 	*** \param err A reference to the luabind::error instance that was thrown
