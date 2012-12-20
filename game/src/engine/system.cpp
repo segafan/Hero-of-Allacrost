@@ -30,15 +30,12 @@
 // #include "gettext.h"
 #include <libintl.h>
 
+#include "mode_manager.h"
 #include "system.h"
-#include "audio.h"
-#include "script.h"
 
 using namespace std;
 
 using namespace hoa_utils;
-using namespace hoa_audio;
-using namespace hoa_script;
 using namespace hoa_mode_manager;
 
 template<> hoa_system::SystemEngine* Singleton<hoa_system::SystemEngine>::_singleton_reference = NULL;
@@ -271,8 +268,7 @@ bool SystemEngine::SingletonInitialize() {
 		bind_textdomain_codeset("allacrost", "UTF-8");
 		textdomain("allacrost");
 	#elif (defined(__linux__) || defined(__FreeBSD__)) && !defined(RELEASE_BUILD)
-		// Look for translation files in LOCALEDIR only if they are not available in the
-		// current directory.
+		// Look for translation files in LOCALEDIR only if they are not available in the current directory.
 		if (ifstream("dat/config/settings.lua") == NULL) {
 			bindtextdomain(PACKAGE, LOCALEDIR);
 			bind_textdomain_codeset(PACKAGE, "UTF-8");
