@@ -66,12 +66,41 @@ bool ScriptEngine::SingletonInitialize() {
 
 
 bool ScriptEngine::IsFileOpen(const std::string& filename) {
-	return false; // TEMP: working on resolving the issue with files being opened multiple times
-
 	if (_open_files.find(filename) != _open_files.end()) {
 		return true;
 	}
+
 	return false;
+}
+
+
+
+
+bool ScriptEngine::ExecuteLuaFunction(const string& filename, const string& function_name, bool open_tablespace) {
+	ReadScriptDescriptor script;
+
+	if (script.OpenFile(filename) == false) {
+	    return false;
+	}
+
+	if (script.DoesFunctionExist(function_name) == false) {
+		IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed to find function \"" << function_name << "\" to execute in file: "
+			<< filename << endl;
+		script.CloseFile();
+		return false;
+	}
+
+	if (open_tablespace == true) {
+		if (script.OpenTablespace() == "") {
+			IF_PRINT_WARNING(SCRIPT_DEBUG) << "failed to open tablespace in file: " << filename << endl;
+		}
+		script.CloseFile();
+		return false;
+	}
+
+	bool result = script.ExecuteFunction(function_name);
+	script.CloseFile();
+	return result;
 }
 
 
