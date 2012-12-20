@@ -39,8 +39,8 @@ bool INPUT_DEBUG = false;
 // Initializes class members
 InputEngine::InputEngine() {
 	if (INPUT_DEBUG) cout << "INPUT: InputEngine constructor invoked" << endl;
-	_any_key_press		    = false;
-	_any_key_release	    = false;
+	_any_key_press        = false;
+	_any_key_release      = false;
 	_last_axis_moved      = -1;
 	_up_state             = false;
 	_up_press             = false;
@@ -204,7 +204,7 @@ bool InputEngine::AnyKeyRelease() {
 // Handles all of the event processing for the game.
 void InputEngine::EventHandler() {
 	SDL_Event event; // Holds the game event
-	
+
 	// Reset all of the press and release flags so that they don't get detected twice.
 	_any_key_press   = false;
 	_any_key_release = false;
@@ -290,29 +290,36 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 
 		_any_key_press = true;
 
-		if (key_event.keysym.mod & KMOD_CTRL || key_event.keysym.sym == SDLK_LCTRL || key_event.keysym.sym == SDLK_RCTRL) { // CTRL key was held down
-
+		// CTRL key was held down
+		if (key_event.keysym.mod & KMOD_CTRL || key_event.keysym.sym == SDLK_LCTRL || key_event.keysym.sym == SDLK_RCTRL) {
 			_any_key_press = false; // CTRL isn't "any key"! :)
 
 			if (key_event.keysym.sym == SDLK_a) {
-				// Toggle the display of advanced video engine information
+				// Ctrl+A: "Advanced" display of video engine information
 				VideoManager->ToggleAdvancedDisplay();
 			}
 			else if (key_event.keysym.sym == SDLK_f) {
-				// Toggle between full-screen and windowed mode
+				// Ctrl+F: "Fullscreen" toggle
 				VideoManager->ToggleFullscreen();
 				VideoManager->ApplySettings();
 				return;
 			}
+			else if (key_event.keysym.sym == SDLK_g) {
+				// Ctrl+G: "Graphical" debug toggle
+				ModeManager->DEBUG_ToggleGraphicsEnabled();
+				return;
+			}
 			else if (key_event.keysym.sym == SDLK_q) {
+				// Ctrl+Q: "Quit" command requested
 				_quit_press = true;
 			}
 			else if (key_event.keysym.sym == SDLK_r) {
+				// Ctrl+R: "Rate" of frames drawn per second toggle
 				VideoManager->ToggleFPS();
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_s) {
-				// Take a screenshot of the current game
+				// Ctrl+S: "Screenshot" generation request
 				static uint32 i = 1;
 				string path = "";
 				while (true)
@@ -326,12 +333,10 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_t) {
-				// Display and cycle through the texture sheets
+				// Ctrl:+T: "Texture" sheet display and cycle
 				VideoManager->Textures()->DEBUG_NextTexSheet();
 				return;
 			}
-
-			//return;
 		} // endif CTRL pressed
 
 		// Note: a switch-case statement won't work here because Key.up is not an

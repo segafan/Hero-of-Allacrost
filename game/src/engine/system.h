@@ -413,6 +413,7 @@ public:
 	void ExitGame()
 		{ _not_done = false; }
 
+
 	//! Threading classes
 	template <class T> Thread* SpawnThread(void (T::*)(), T *);
 	void WaitForThread(Thread* thread);
@@ -421,7 +422,6 @@ public:
 	void UnlockThread(Semaphore *);
 	Semaphore * CreateSemaphore(int max);
 	void DestroySemaphore(Semaphore *);
-
 
 private:
 	SystemEngine();
