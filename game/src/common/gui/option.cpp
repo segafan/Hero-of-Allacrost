@@ -207,7 +207,7 @@ void OptionBox::Draw() {
 	bounds.y_bottom = (bounds.y_center * 2.0f) - bounds.y_top;
 
 
-  // ---------- (3) Iterate through all the visible option cells and draw them and the draw cursor
+	// ---------- (3) Iterate through all the visible option cells and draw them and the draw cursor
 	for (uint32 row = _draw_top_row; row < _draw_top_row + _number_cell_rows && finished == false; row++) {
 
 		bounds.x_left = left;
@@ -231,8 +231,16 @@ void OptionBox::Draw() {
 			if ((static_cast<int32>(index) == _selection || static_cast<int32>(index) == _first_selection) &&
 				_cursor_state != VIDEO_CURSOR_STATE_HIDDEN && (_cursor_state != VIDEO_CURSOR_STATE_BLINKING || _blink == true))
 			{
-				// If this option was the first selection, draw it darkened so that it has a different appearance
-				bool darken = (static_cast<int32>(index) == _first_selection) ? true : false;
+				// Determine if the cursor should be drawn darkened
+				bool darken = false;
+				if (_cursor_state == VIDEO_CURSOR_STATE_DARKENED) {
+					darken = true;
+				}
+				else {
+					// If this option was the first selection, draw it darkened so that it has a different appearance
+					darken = (static_cast<int32>(index) == _first_selection) ? true : false;
+				}
+
 				_DrawCursor(bounds, _scroll_offset, left_edge, darken);
 			}
 
@@ -519,24 +527,13 @@ void OptionBox::EnableOption(uint32 index, bool enable) {
 
 
 
-bool OptionBox::IsOptionEnabled(uint32 index) {
+bool OptionBox::IsOptionEnabled(uint32 index) const {
 	if (index >= GetNumberOptions()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument index was invalid: " << index << endl;
 		return false;
 	}
 
 	return (!_options[index].disabled);
-}
-
-
-
-bool OptionBox::IsEnabled(uint32 index) const {
-	if (index >= GetNumberOptions()) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument index was invalid: " << index << endl;
-		return false;
-	}
-
-	return !_options[index].disabled;
 }
 
 

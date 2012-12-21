@@ -107,7 +107,7 @@ ustring::ustring() {
 
 
 
-ustring::ustring(const uint16 *s) {
+ustring::ustring(const uint16* s) {
 	_str.clear();
 
 	if (!s) {
@@ -169,7 +169,7 @@ ustring ustring::operator + (const ustring& s)
 
 
 // Adds a character to end of this string
-ustring & ustring::operator += (uint16 c) {
+ustring& ustring::operator += (uint16 c) {
 	_str[length()] = c;
 	_str.push_back(0);
 
@@ -178,7 +178,7 @@ ustring & ustring::operator += (uint16 c) {
 
 
 // Concatenate another string on to the end of this string
-ustring & ustring::operator += (const ustring &s) {
+ustring& ustring::operator += (const ustring& s) {
 	// nothing to do for empty string
 	if (s.empty())
 		return *this;
@@ -200,12 +200,28 @@ ustring & ustring::operator += (const ustring &s) {
 
 
 // Will assign the current string to this string
-ustring & ustring::operator = (const ustring &s) {
+ustring& ustring::operator = (const ustring& s) {
 	clear();
 	operator += (s);
 
 	return *this;
-} // ustring & ustring::operator = (const ustring &s)
+}
+
+
+
+bool ustring::operator == (const ustring& s)
+{
+    size_t len = length();
+    if (s.length() != len)
+        return false;
+
+    for (size_t j = 0; j < len; ++j) {
+        if (_str[j] != s[j] )
+            return false;
+    }
+
+    return true;
+}
 
 
 // Finds a character within a string, starting at pos. If nothing is found, npos is returned
@@ -218,11 +234,11 @@ size_t ustring::find(uint16 c, size_t pos) const {
 	}
 
 	return npos;
-} // size_t ustring::find(uint16 c, size_t pos) const
+}
 
 
 // Finds a string within a string, starting at pos. If nothing is found, npos is returned
-size_t ustring::find(const ustring &s, size_t pos) const {
+size_t ustring::find(const ustring& s, size_t pos) const {
 	size_t len = length();
 	size_t total_chars = s.length();
 	size_t chars_found = 0;
@@ -240,8 +256,7 @@ size_t ustring::find(const ustring &s, size_t pos) const {
 	}
 
 	return npos;
-} // size_t ustring::find(const ustring &s, size_t pos) const
-
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// Exception class

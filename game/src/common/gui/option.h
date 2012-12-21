@@ -86,7 +86,9 @@ enum CursorState {
 	VIDEO_CURSOR_STATE_VISIBLE  =  1,
 	//! Causes the cursor to continuously blink
 	VIDEO_CURSOR_STATE_BLINKING =  2,
-	VIDEO_CURSOR_STATE_TOTAL    =  3
+	//! The cursor is darkened to indicate that it is not the active cursor
+	VIDEO_CURSOR_STATE_DARKENED =  3,
+	VIDEO_CURSOR_STATE_TOTAL    =  4
 };
 
 
@@ -356,13 +358,7 @@ public:
 	*** \param index The index of the option in the list to check
 	*** \return True if the option is enabled, false if it is not
 	**/
-	bool IsOptionEnabled(uint32 index);
-
-	/** \brief Returns true if the given option is enabled
-	*** \param index The index of the option to check
-	*** \return True if option is enabled, false if it's not
-	**/
-	bool IsEnabled(uint32 index) const;
+	bool IsOptionEnabled(uint32 index) const;
 
 	/** \brief Retrieves a pointer to the image embedded within the option
 	*** \param index The index of the option to retrieve the image
