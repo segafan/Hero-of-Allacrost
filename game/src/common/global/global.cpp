@@ -611,14 +611,38 @@ GlobalEventGroup* GameGlobal::GetEventGroup(const string& group_name) const {
 
 int32 GameGlobal::GetEventValue(const string& group_name, const string& event_name) const {
 	map<string, GlobalEventGroup*>::const_iterator group_iter = _event_groups.find(group_name);
-	if (group_iter == _event_groups.end())
+	if (group_iter == _event_groups.end()) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "event group \"" << group_name << "\" did not exist" << endl;
 		return GLOBAL_BAD_EVENT;
+	}
 
-	map<string, int32>::const_iterator event_iter = group_iter->second->GetEvents().find(event_name);
-	if (event_iter == group_iter->second->GetEvents().end())
+	int32 value = group_iter->second->GetEvent(event_name);
+	if (value == GLOBAL_BAD_EVENT) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "event name \"" << event_name << "\" did not exist in group: "
+			<< group_name << endl;
 		return GLOBAL_BAD_EVENT;
+	}
 
-	return event_iter->second;
+	return value;
+}
+
+
+
+void GameGlobal::SetEventValue(const string& group_name, const string& event_name, int32 event_value) {
+	map<string, GlobalEventGroup*>::iterator group_iter = _event_groups.find(group_name);
+	if (group_iter == _event_groups.end()) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "event group \"" << group_name << "\" did not exist" << endl;
+		return;
+	}
+
+	int32 value = group_iter->second->GetEvent(event_name);
+	if (value == GLOBAL_BAD_EVENT) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "event name \"" << event_name << "\" did not exist in group: "
+			<< group_name << endl;
+		return;
+	}
+
+	group_iter->second->SetEvent(event_name, event_value);
 }
 
 

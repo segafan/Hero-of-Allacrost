@@ -41,7 +41,7 @@ std::string GetElementName(GLOBAL_ELEMENTAL type);
 *** \return Translated text that describes the status
 ***
 *** \note Each call to this function requires the status name to be retrieved from
-*** a Lua script so its a slightly costly operation. If you need to make repeated 
+*** a Lua script so its a slightly costly operation. If you need to make repeated
 *** queries to retrieve status names, consider caching results locally to reduce the
 *** number of script file accesses that need to take place.
 **/

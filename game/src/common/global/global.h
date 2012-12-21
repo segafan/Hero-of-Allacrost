@@ -322,6 +322,15 @@ public:
 	**/
 	int32 GetEventValue(const std::string& group_name, const std::string& event_name) const;
 
+	/** \brief Set the value of an event inside of a specified group
+	*** \param group_name The name of the event group where the event is contained
+	*** \param event_name The name of the event whose value should be set
+	***
+	*** \note If the specified event grounp or event name do not exist, a warning will be printed and no
+	*** change will take place.
+	**/
+	void SetEventValue(const std::string& group_name, const std::string& event_name, int32 event_value);
+
 	//! \brief Returns the number of event groups stored in the class
 	uint32 GetNumberEventGroups() const
 		{ return _event_groups.size(); }
@@ -369,7 +378,7 @@ public:
 
 	//! \brief Executes function NewGame() from global script
 	void NewGame()
-		{ ScriptCallFunction<void>(_global_script.GetLuaState(), "NewGame"); }
+		{ ClearAllData(); ScriptCallFunction<void>(_global_script.GetLuaState(), "NewGame"); }
 
 	/** \brief Saves all global data to a saved game file
 	*** \param filename The filename of the saved game file where to write the data to

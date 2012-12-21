@@ -132,7 +132,7 @@ GlobalObject* GlobalCreateNewObject(uint32 id, uint32 count) {
 		delete new_object;
 		new_object = NULL;
 	}
-	
+
 	return new_object;
 }
 
