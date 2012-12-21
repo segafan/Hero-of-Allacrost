@@ -229,7 +229,7 @@ BootMode::~BootMode() {
 
 void BootMode::Reset() {
 	// Set the coordinate system that BootMode uses
-	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 
 	GlobalManager->ClearAllData(); // Resets the game universe to a NULL state
@@ -466,6 +466,9 @@ void BootMode::Update() {
 
 
 void BootMode::Draw() {
+	// TODO: This SetCoordSys call should not be needed since it is called in Reset(), but if it is not here then the screen gets drawn
+	// upside down. Fix this bug. The coordinate system is probably be changed somewhere (likely in the video engine) and not being restored appropriately
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 
 	// If we're animating logo at the moment, handle all drawing in there and simply return
