@@ -382,9 +382,9 @@ public:
 	**/
 	void SetCoordSys(const CoordSys& coordinate_system);
 
-	//! \brief Sets the active coordinate system to the standard resolution
+	//! \brief Sets the active coordinate system to the standard resolution (top left corner is [0, 0])
 	void SetStandardCoordSys()
-		{ SetCoordSys(CoordSys(0.0f, VIDEO_STANDARD_RESOLUTION_WIDTH, 0.0f, VIDEO_STANDARD_RESOLUTION_HEIGHT)); }
+		{ SetCoordSys(CoordSys(0.0f, VIDEO_STANDARD_RESOLUTION_WIDTH, VIDEO_STANDARD_RESOLUTION_HEIGHT, 0.0f)); }
 
 	/** \brief Enables the scissoring effect in the video engine
 	*** Scisorring is where you can specify a rectangle of the screen which is affected
