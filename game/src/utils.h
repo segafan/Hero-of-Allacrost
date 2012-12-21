@@ -295,22 +295,24 @@ public:
 
 	size_t find(uint16 c, size_t pos = 0) const;
 
-	size_t find(const ustring &s, size_t pos = 0) const;
+	size_t find(const ustring& s, size_t pos = 0) const;
 
 	ustring substr(size_t pos = 0, size_t n = npos) const;
 
 	ustring operator + (const ustring& s);
 
-	ustring & operator += (uint16 c);
+	ustring& operator += (uint16 c);
 
-	ustring & operator += (const ustring& s);
+	ustring& operator += (const ustring& s);
 
-	ustring & operator = (const ustring& s);
+	ustring& operator = (const ustring& s);
 
-	uint16 & operator [] (size_t pos)
+	bool operator == (const ustring& s);
+
+	uint16& operator [] (size_t pos)
 		{ return _str[pos]; }
 
-	const uint16 & operator [] (size_t pos) const
+	const uint16& operator [] (size_t pos) const
 		{ return _str[pos]; }
 
 private:

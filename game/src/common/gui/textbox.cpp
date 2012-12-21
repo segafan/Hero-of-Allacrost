@@ -62,8 +62,9 @@ TextBox::~TextBox() {
 
 void TextBox::ClearText() {
 	_finished = true;
-	_text.clear();
 	_num_chars = 0;
+	_text.clear();
+	_text_save.clear();
 }
 
 
@@ -250,6 +251,10 @@ void TextBox::SetDisplayText(const ustring& text) {
 		return;
 	}
 
+	// If the display text to set is unchanged from the current text, do nothing
+	if (_text_save == text)
+		return;
+
 	_text_save = text;
 	_ReformatText();
 
@@ -290,30 +295,31 @@ void TextBox::SetDisplayText(const ustring& text) {
 
 void TextBox::_ReformatText() {
 	// (1): Go through the text ustring and determine where the newline characters can be found, examining one line at a time and adding it to the _text vector.
+	size_t start_pos = 0;
 	size_t newline_pos;
 	ustring temp_str = _text_save;
+	const size_t temp_length = temp_str.length();
 	_text.clear();
 	_num_chars = 0;
 
-
 	// If font not set, return (leave _text vector empty)
-	if (!_font_properties) {
+	if (_font_properties == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "textbox font is invalid" << endl;
 		return;
 	}
 
-	while (true) {
-		newline_pos = temp_str.find(NEWLINE_CHARACTER);
+	while (start_pos < temp_length) {
+		newline_pos = temp_str.find(NEWLINE_CHARACTER, start_pos);
 
 		// If the end of the string has been reached, add the new line and exit
 		if (newline_pos == ustring::npos) {
-			_AddLine(temp_str);
+			_AddLine(temp_str.substr(start_pos, temp_length - start_pos));
 			break;
 		}
 		// Otherwise, add the new line segment and proceed to find the next
 		else {
-			_AddLine(temp_str.substr(0, newline_pos));
-			temp_str = temp_str.substr(newline_pos + 1, temp_str.length() - newline_pos);
+			_AddLine(temp_str.substr(start_pos, temp_length - newline_pos));
+			start_pos = newline_pos + 1;
 		}
 	}
 
