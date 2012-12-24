@@ -83,10 +83,10 @@ public:
 
 private:
 	//! \brief Attempts to load a game. returns true on success, false on fail
-	bool _LoadGame(int);
+	bool _LoadGame(int32);
 
 	//! \brief Loads preview data for the highlighted game
-	bool _PreviewGame(int);
+	bool _PreviewGame(int32);
 
 	//! \brief The MenuWindow for the backdrop
 	hoa_gui::MenuWindow _window;

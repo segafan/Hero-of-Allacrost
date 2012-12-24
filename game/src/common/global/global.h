@@ -378,19 +378,26 @@ public:
 
 	//! \brief Executes function NewGame() from global script
 	void NewGame()
-		{ ClearAllData(); ScriptCallFunction<void>(_global_script.GetLuaState(), "NewGame"); }
+		{ ClearAllData(); _global_script.ExecuteFunction("NewGame"); }
 
 	/** \brief Saves all global data to a saved game file
 	*** \param filename The filename of the saved game file where to write the data to
+	*** \param slot_used The save slot number that is used to perform this operation
+	*** \param x_position The x position of the character to save (default == 0)
+	*** \param y_position The y position of the character to save (default == 0)
 	*** \return True if the game was successfully saved, false if it was not
+	***
+	*** \note The x/y position arguments are optional and are usually used to indicate the player's
+	*** position on a map when they saved their game.
 	**/
-	bool SaveGame(const std::string& filename);
+	bool SaveGame(const std::string& filename, uint32 slot_used, uint32 x_position = 0, uint32 y_position = 0);
 
 	/** \brief Loads all global data from a saved game file
 	*** \param filename The filename of the saved game file where to read the data from
+	*** \param slot_used The save slot number that is used to perform this operation
 	*** \return True if the game was successfully loaded, false if it was not
 	**/
-	bool LoadGame(const std::string& filename);
+	bool LoadGame(const std::string& filename, uint32 slot_used);
 
 	//! \name Class Member Access Functions
 	//@{
@@ -402,6 +409,15 @@ public:
 
 	uint32 GetDrunes() const
 		{ return _drunes; }
+
+	uint32 GetLastSaveSlotUsed() const
+		{ return _last_save_slot_used; }
+
+	uint32 GetSavePositionX() const
+		{ return _save_position_x; }
+
+	uint32 GetSavePositionY() const
+		{ return _save_position_y; }
 
 	hoa_utils::ustring& GetLocationName()
 		{ return _location_name; }
@@ -463,6 +479,9 @@ public:
 	hoa_script::ReadScriptDescriptor& GetLegArmorScript()
 		{ return _leg_armor_script; }
 
+	hoa_script::ReadScriptDescriptor& GetKeyItemsScript()
+		{ return _key_items_script; }
+
 	hoa_script::ReadScriptDescriptor& GetAttackSkillsScript()
 		{ return _attack_skills_script; }
 
@@ -484,6 +503,12 @@ private:
 
 	//! \brief The amount of financial resources (drunes) that the party currently has
 	uint32 _drunes;
+
+	//! \brief Retains the last slot that the player loaded a game from or saved a game to
+	uint32 _last_save_slot_used;
+
+	//! \brief The coordinates where the player last saved or loaded the game
+	uint32 _save_position_x, _save_position_y;
 
 	//! \brief The name of the map that the current party is on
 	hoa_utils::ustring _location_name;
@@ -561,7 +586,7 @@ private:
 	// hoa_script::ReadScriptDescriptor _shard_script;
 
 	//! \brief Contains data definitions for all key items
-	// hoa_script::ReadScriptDescriptor _key_items_script;
+	hoa_script::ReadScriptDescriptor _key_items_script;
 
 	//! \brief Contains data and functional definitions for all attack skills
 	hoa_script::ReadScriptDescriptor _attack_skills_script;

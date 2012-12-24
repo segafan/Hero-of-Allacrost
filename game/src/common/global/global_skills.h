@@ -102,6 +102,9 @@ public:
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
 
+	const std::string& GetActionName() const
+		{ return _action_name; }
+
 	/** \brief Returns a pointer to the ScriptObject of the battle execution function
 	*** \note This function will return NULL if the skill is not executable in battle
 	**/
@@ -154,6 +157,14 @@ private:
 	*** Target types include attack points, actors, and parties. This enum type is defined in global_actors.h
 	**/
 	GLOBAL_TARGET _target_type;
+
+	/** \brief The identifier name of the sprite animation to play when it executes the function
+	***
+	*** \note This identifier is only valid for characters who are executing the skill, as enemies are not animated
+	*** in a battle. If an enemy executes the skill, this information will be ignored. It is fine to leave the action
+	*** name undefined ("") for skills which no character is able to execute (skills specific to enemies).
+	**/
+	std::string _action_name;
 
 	//! \brief A pointer to the skill's execution function for battles
 	ScriptObject* _battle_execute_function;

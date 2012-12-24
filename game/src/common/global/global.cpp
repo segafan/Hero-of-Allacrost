@@ -75,6 +75,10 @@ void GlobalEventGroup::SetEvent(const string& event_name, int32 event_value) {
 ////////////////////////////////////////////////////////////////////////////////
 
 GameGlobal::GameGlobal() :
+	_drunes(0),
+	_last_save_slot_used(0),
+	_save_position_x(0),
+	_save_position_y(0),
 	_battle_setting(GLOBAL_BATTLE_INVALID)
 {
 	IF_PRINT_DEBUG(GLOBAL_DEBUG) << "GameGlobal constructor invoked" << endl;
@@ -107,6 +111,9 @@ GameGlobal::~GameGlobal() {
 
 	_leg_armor_script.CloseTable();
 	_leg_armor_script.CloseFile();
+
+	_key_items_script.CloseTable();
+	_key_items_script.CloseFile();
 
 	_attack_skills_script.CloseTable();
 	_attack_skills_script.CloseFile();
@@ -163,6 +170,11 @@ bool GameGlobal::SingletonInitialize() {
 		return false;
 	}
 	_leg_armor_script.OpenTable("armor");
+
+	if (_key_items_script.OpenFile("dat/objects/key_items.lua") == false) {
+		return false;
+	}
+	_key_items_script.OpenTable("key_items");
 
 	if (_attack_skills_script.OpenFile("dat/skills/attack.lua") == false) {
 		return false;
@@ -356,9 +368,9 @@ void GameGlobal::AddToInventory(uint32 obj_id, uint32 obj_count) {
 // 		_inventory_shards.push_back(new_obj);
 	}
 	else if ((obj_id > MAX_SHARD_ID) && (obj_id <= MAX_KEY_ITEM_ID)) {
-// 		GlobalKeyItem *new_obj = new GlobalKeyItem(obj_id, obj_count);
-// 		_inventory.insert(make_pair(obj_id, new_obj));
-// 		_inventory_key_items.push_back(new_obj);
+		GlobalKeyItem *new_obj = new GlobalKeyItem(obj_id, obj_count);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_key_items.push_back(new_obj);
 	}
 	else {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "attempted to add invalid object to inventory with id: " << obj_id << endl;
@@ -420,9 +432,9 @@ void GameGlobal::AddToInventory(GlobalObject* object) {
 // 		_inventory_shards.push_back(new_obj);
 	}
 	else if ((obj_id > MAX_SHARD_ID) && (obj_id <= MAX_KEY_ITEM_ID)) {
-// 		GlobalKeyItem *new_obj = dynamic_cast<GlobalKeyItem*>(object);
-// 		_inventory.insert(make_pair(obj_id, new_obj));
-// 		_inventory_key_items.push_back(new_obj);
+		GlobalKeyItem *new_obj = dynamic_cast<GlobalKeyItem*>(object);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_key_items.push_back(new_obj);
 	}
 	else {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "attempted to add invalid object to inventory with id: " << obj_id << endl;
@@ -669,11 +681,15 @@ void GameGlobal::SetLocation(const ustring& location_name, const string& locatio
 
 
 
-bool GameGlobal::SaveGame(const string& filename) {
+bool GameGlobal::SaveGame(const string& filename, uint32 slot_used, uint32 x_position, uint32 y_position) {
 	WriteScriptDescriptor file;
 	if (file.OpenFile(filename) == false) {
 		return false;
 	}
+
+	_last_save_slot_used = slot_used;
+	_save_position_x = x_position;
+	_save_position_y = y_position;
 
 	// ----- (1) Write out namespace information
 	file.WriteNamespace("save_game1");
@@ -689,6 +705,8 @@ bool GameGlobal::SaveGame(const string& filename) {
 	file.WriteUInt("play_minutes", SystemManager->GetPlayMinutes());
 	file.WriteUInt("play_seconds", SystemManager->GetPlaySeconds());
 	file.WriteUInt("drunes", _drunes);
+	file.WriteUInt("save_position_x", _save_position_x);
+	file.WriteUInt("save_position_y", _save_position_y);
 
 	// ----- (4) Save the inventory (object id + object count pairs)
 	// NOTE: This does not save any weapons/armor that are equipped on the characters. That data
@@ -749,13 +767,14 @@ bool GameGlobal::SaveGame(const string& filename) {
 
 
 
-bool GameGlobal::LoadGame(const string& filename) {
+bool GameGlobal::LoadGame(const string& filename, uint32 slot_used) {
 	ReadScriptDescriptor file;
 	if (file.OpenFile(filename, true) == false) {
 		return false;
 	}
 
 	ClearAllData();
+	_last_save_slot_used = slot_used;
 
 	// open the namespace that the save game is encapsulated in.
 	file.OpenTable("save_game1");
@@ -771,6 +790,8 @@ bool GameGlobal::LoadGame(const string& filename) {
 	seconds = file.ReadUInt("play_seconds");
 	SystemManager->SetPlayTime(hours, minutes, seconds);
 	_drunes = file.ReadUInt("drunes");
+	_save_position_x = file.ReadUInt("save_position_x");
+	_save_position_y = file.ReadUInt("save_position_y");
 
 	// ----- (3) Load inventory
 	_LoadInventory(file, "items");

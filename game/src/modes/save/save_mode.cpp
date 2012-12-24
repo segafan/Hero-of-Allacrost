@@ -284,12 +284,12 @@ void SaveMode::Update() {
 				if (_confirm_save_optionbox.GetSelection() == 0) {
 					// note: using int here, because uint8 will NOT work
 					// do not change unless you understand this and can test it properly!
-					int id = _file_list.GetSelection();
+					int32 id = _file_list.GetSelection();
 					ostringstream f;
 					f << GetUserDataPath(true) + "saved_game_" << id << ".lua";
 					string filename = f.str();
 					// now, attempt to save the game.  If failure, we need to tell the user that!
-					if (GlobalManager->SaveGame(filename) == true) {
+					if (GlobalManager->SaveGame(filename, static_cast<uint32>(id)) == true) {
 						_current_state = SAVE_MODE_SAVE_COMPLETE;
 					}
 					else {
@@ -425,7 +425,7 @@ void SaveMode::Draw() {
 	}
 }
 
-bool SaveMode::_LoadGame(int id) {
+bool SaveMode::_LoadGame(int32 id) {
 	ostringstream f;
 	f << GetUserDataPath(true) + "saved_game_" << id << ".lua";
 	string filename = f.str();
@@ -435,7 +435,7 @@ bool SaveMode::_LoadGame(int id) {
 		VideoManager->FadeScreen(Color::black, 1000);
 		// TODO: stop music, if it's playing
 
-		GlobalManager->LoadGame(filename);
+		GlobalManager->LoadGame(filename, static_cast<uint32>(id));
 
 		return true;
 	}
@@ -447,7 +447,7 @@ bool SaveMode::_LoadGame(int id) {
 }
 
 
-bool SaveMode::_PreviewGame(int id) {
+bool SaveMode::_PreviewGame(int32 id) {
 	ostringstream f;
 	f << GetUserDataPath(true) + "saved_game_" << id << ".lua";
 	string filename = f.str();
