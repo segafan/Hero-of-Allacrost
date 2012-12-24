@@ -73,12 +73,14 @@ GlobalSkill::GlobalSkill(uint32 id) :
 
 	skill_script->OpenTable(_id);
 	_name = MakeUnicodeString(skill_script->ReadString("name"));
-	if (skill_script->DoesStringExist("description"))
+	if (skill_script->DoesStringExist("description") == true)
 		_description = MakeUnicodeString(skill_script->ReadString("description"));
 	_sp_required = skill_script->ReadUInt("sp_required");
 	_warmup_time = skill_script->ReadUInt("warmup_time");
 	_cooldown_time = skill_script->ReadUInt("cooldown_time");
 	_target_type = static_cast<GLOBAL_TARGET>(skill_script->ReadInt("target_type"));
+	if (skill_script->DoesStringExist("action_name") == true)
+		_action_name = skill_script->ReadString("action_name");
 
 	if (skill_script->DoesFunctionExist("BattleExecute")) {
 		_battle_execute_function = new ScriptObject();
@@ -124,6 +126,7 @@ GlobalSkill::GlobalSkill(const GlobalSkill& copy) {
 	_warmup_time = copy._warmup_time;
 	_cooldown_time = copy._cooldown_time;
 	_target_type = copy._target_type;
+	_action_name = copy._action_name;
 
 	// Make copies of valid ScriptObject function pointers
 	if (copy._battle_execute_function == NULL)
@@ -151,6 +154,7 @@ GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy) {
 	_warmup_time = copy._warmup_time;
 	_cooldown_time = copy._cooldown_time;
 	_target_type = copy._target_type;
+	_action_name = copy._action_name;
 
 	// Make copies of valid ScriptObject function pointers
 	if (copy._battle_execute_function == NULL)
