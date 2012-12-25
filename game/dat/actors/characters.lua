@@ -69,26 +69,51 @@ characters[CLAUDIUS] = {
 		}
 	},
 
-	growth_stats = {
-		[1] = {
-			hit_points = 5.0,
-			skill_points = 1.0,
-			strength = 2.0,
-			vigor = 1.0,
-			fortitude = 2.0,
-			protection = 1.0,
-			agility = 1.0,
-			evade = 0.0
+	-- Begin character growth tables. Every line within these tables contains 10 elements to represent the stat growth for every 10 levels
+	growth = {
+		experience_for_next_level = {
+			100, 112, 126, 142, 161, 183, 209, 238, 273, 315,
+			363, 421, 490, 572, 670, 788, 931, 1105, 1316, 1575
 		},
-		[6] = {
-			hit_points = 5.0,
-			skill_points = 2.0,
-			strength = 3.0,
-			vigor = 2.0,
-			fortitude = 3.0,
-			protection = 1.0,
-			agility = 1.0,
-			evade = 0.0
+
+		hit_points = {
+			5, 5, 5, 5, 13, 13, 13, 13, 21, 21,
+			21, 21, 29, 29, 29, 29, 37, 37, 37, 37
+		},
+
+		skill_points = {
+			1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
+			3, 3, 3, 3, 3, 4, 4, 4, 4, 4
+		},
+
+		strength = {
+			2, 2, 2, 2, 2, 2, 3, 3, 3, 3,
+			3, 3, 4, 4, 4, 4, 4, 4, 5, 5
+		},
+
+		vigor = {
+			1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
+			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+		},
+
+		fortitude = {
+			2, 2, 2, 2, 2, 2, 3, 3, 3, 3,
+			3, 3, 4, 4, 4, 4, 4, 4, 5, 5
+		},
+
+		protection = {
+			1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
+			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+		},
+
+		agility = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
+		evade = {
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0
 		}
 	},
 
@@ -157,16 +182,51 @@ characters[MARK] = {
 		}
 	},
 
-	growth_stats = {
-		[1] = {
-			hit_points = 10.0,
-			skill_points = 3.0,
-			strength = 4.0,
-			vigor = 1.5,
-			fortitude = 4.4,
-			protection = 0.8,
-			agility = 1.8,
-			evade = 0.0
+	-- Begin character growth tables. Every line within these tables contains 10 elements to represent the stat growth for every 10 levels
+	growth = {
+		experience_for_next_level = {
+			100, 112, 126, 142, 161, 183, 209, 238, 273, 315,
+			363, 421, 490, 572, 670, 788, 931, 1105, 1316, 1575
+		},
+
+		hit_points = {
+			5, 5, 5, 5, 13, 13, 13, 13, 21, 21,
+			21, 21, 29, 29, 29, 29, 37, 37, 37, 37
+		},
+
+		skill_points = {
+			1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
+			3, 3, 3, 3, 3, 4, 4, 4, 4, 4
+		},
+
+		strength = {
+			2, 2, 2, 2, 2, 2, 3, 3, 3, 3,
+			3, 3, 4, 4, 4, 4, 4, 4, 5, 5
+		},
+
+		vigor = {
+			1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
+			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+		},
+
+		fortitude = {
+			2, 2, 2, 2, 2, 2, 3, 3, 3, 3,
+			3, 3, 4, 4, 4, 4, 4, 4, 5, 5
+		},
+
+		protection = {
+			1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
+			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+		},
+
+		agility = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
+		evade = {
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0
 		}
 	},
 
@@ -235,16 +295,51 @@ characters[DESTER] = {
 		}
 	},
 
-	growth_stats = {
-		[1] = {
-			hit_points = 5.0,
-			skill_points = 1.0,
-			strength = 2.0,
-			vigor = 1.0,
-			fortitude = 2.0,
-			protection = 1.0,
-			agility = 1.0,
-			evade = 0.0
+	-- Begin character growth tables. Every line within these tables contains 10 elements to represent the stat growth for every 10 levels
+	growth = {
+		experience_for_next_level = {
+			100, 112, 126, 142, 161, 183, 209, 238, 273, 315,
+			363, 421, 490, 572, 670, 788, 931, 1105, 1316, 1575
+		},
+
+		hit_points = {
+			5, 5, 5, 5, 13, 13, 13, 13, 21, 21,
+			21, 21, 29, 29, 29, 29, 37, 37, 37, 37
+		},
+
+		skill_points = {
+			1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
+			3, 3, 3, 3, 3, 4, 4, 4, 4, 4
+		},
+
+		strength = {
+			2, 2, 2, 2, 2, 2, 3, 3, 3, 3,
+			3, 3, 4, 4, 4, 4, 4, 4, 5, 5
+		},
+
+		vigor = {
+			1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
+			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+		},
+
+		fortitude = {
+			2, 2, 2, 2, 2, 2, 3, 3, 3, 3,
+			3, 3, 4, 4, 4, 4, 4, 4, 5, 5
+		},
+
+		protection = {
+			1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
+			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+		},
+
+		agility = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
+		evade = {
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0
 		}
 	},
 
@@ -313,16 +408,51 @@ characters[LUKAR] = {
 		}
 	},
 
-	growth_stats = {
-		[1] = {
-			hit_points = 5.0,
-			skill_points = 1.0,
-			strength = 2.0,
-			vigor = 1.0,
-			fortitude = 2.0,
-			protection = 1.0,
-			agility = 1.0,
-			evade = 0.0
+	-- Begin character growth tables. Every line within these tables contains 10 elements to represent the stat growth for every 10 levels
+	growth = {
+		experience_for_next_level = {
+			100, 112, 126, 142, 161, 183, 209, 238, 273, 315,
+			363, 421, 490, 572, 670, 788, 931, 1105, 1316, 1575
+		},
+
+		hit_points = {
+			5, 5, 5, 5, 13, 13, 13, 13, 21, 21,
+			21, 21, 29, 29, 29, 29, 37, 37, 37, 37
+		},
+
+		skill_points = {
+			1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
+			3, 3, 3, 3, 3, 4, 4, 4, 4, 4
+		},
+
+		strength = {
+			2, 2, 2, 2, 2, 2, 3, 3, 3, 3,
+			3, 3, 4, 4, 4, 4, 4, 4, 5, 5
+		},
+
+		vigor = {
+			1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
+			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+		},
+
+		fortitude = {
+			2, 2, 2, 2, 2, 2, 3, 3, 3, 3,
+			3, 3, 4, 4, 4, 4, 4, 4, 5, 5
+		},
+
+		protection = {
+			1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
+			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+		},
+
+		agility = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
+		evade = {
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0
 		}
 	},
 
@@ -331,60 +461,106 @@ characters[LUKAR] = {
 
 
 ------------------------------------------------------------------------------[[
--- \brief Called everytime a character reaches a new experience level. 
--- \param character A pointer to the GlobalCharacter who has gained the new level
--- 
--- Before this function is called, the character should already have their 
--- _experience_level member incremented. What this function does is determine
--- the amount that each stat will grow by on the next level and if any new
--- skills are learned on this level. 
+-- \brief Sets the growth data for a character when they have gained a level
+-- \param character A pointer to the GlobalCharacter object to act on
+--
+-- Before this function is called, the character should already have their
+-- _experience_level member incremented to the new level. What this function does
+-- is determine the amount that each stat will grow by on the -next- level gained
+-- (-not- the current level gained). This function should be called every time a
+-- character gains a level, and also when a new character is constructed from an
+-- initial state.
 ------------------------------------------------------------------------------]]
-function DetermineGrowth(character)
+function DetermineNextLevelGrowth(character)
 	local new_level = character:GetExperienceLevel();        -- The value of the character's new XP level
 	local character_table = characters[character:GetID()];   -- Reference to the character's definition table
-	local growth_table = nil;                                -- Reference to the table containing the growth stats for this level
-	local new_skills = character_table["skills"][new_level]; -- Reference to the number or table of the new skills learned
-	local character_growth = character:GetGrowth();          -- Reference to the growth object contained within the character
+	local growth_table = nil;                                -- Reference to the table containing the character's growth stats
 
 	if (character_table == nil) then
-		print("LUA ERROR: characters.lua::GainExperienceLevel() failed because the character's ID was invalid");
+		print("LUA ERROR: characters.lua::DetermineNextLevelGrowth() failed because the character's ID was invalid");
 		return;
 	end
 
-	-- Find the appropriate index in the growth_stats table for determining how much the stats should grow by this level
-	local growth_index = new_level 
-	while (growth_index > 0) do
-		if (character_table["growth_stats"][growth_index] ~= nil) then
-			growth_table = character_table["growth_stats"][growth_index];
-			break;
-		end
-		growth_index = growth_index - 1;
-	end
-	
+	growth_table = character_table["growth"];
 	if (growth_table == nil) then
-		print("LUA ERROR: characters.lua::GainExperienceLevel() failed because no growth stats were found");
+		print("LUA ERROR: characters.lua::DetermineNextLevelGrowth() failed because no growth table for the character was found");
 		return;
 	end
 
-	-- Calculate how much the character's stats are going to grow by the next level
-	character_growth._hit_points_growth = growth_table["hit_points"];
-	character_growth._skill_points_growth = growth_table["skill_points"];
-	character_growth._strength_growth = growth_table["strength"];
-	character_growth._vigor_growth = growth_table["vigor"];
-	character_growth._fortitude_growth = growth_table["fortitude"];
-	character_growth._protection_growth = growth_table["protection"];
-	character_growth._agility_growth = growth_table["agility"];
-	character_growth._evade_growth = 0;
-	
-	-- Determine if the character learns any skills at this new level	
-	if (type(new_skills) == "number") then
-		character_growth:_AddSkill(new_skills);
+	character:AddExperienceForNextLevel(growth_table["experience_for_next_level"][new_level]);
+
+	-- All growth members should be zero when this function is called. Warn if this is not the case
+	if (character._hit_points_growth ~= 0) then
+		print("LUA WARN: character.lua:DetermineNextLevelGrowth() called when hit_points_growth was non-zero.");
+	end
+	if (character._skill_points_growth ~= 0) then
+		print("LUA WARN: character.lua:DetermineNextLevelGrowth() called when skill_points_growth was non-zero.");
+	end
+	if (character._strength_growth ~= 0) then
+		print("LUA WARN: character.lua:DetermineNextLevelGrowth() called when strength_growth was non-zero.");
+	end
+	if (character._vigor_growth ~= 0) then
+		print("LUA WARN: character.lua:DetermineNextLevelGrowth() called when vigor_growth was non-zero.");
+	end
+	if (character._fortitude_growth ~= 0) then
+		print("LUA WARN: character.lua:DetermineNextLevelGrowth() called when fortitude_growth was non-zero.");
+	end
+	if (character._protection_growth ~= 0) then
+		print("LUA WARN: character.lua:DetermineNextLevelGrowth() called when protection_growth was non-zero.");
+	end
+	if (character._agility_growth ~= 0) then
+		print("LUA WARN: character.lua:DetermineNextLevelGrowth() called when agility_growth was non-zero.");
+	end
+	if (character._evade_growth ~= 0) then
+		print("LUA WARN: character.lua:DetermineNextLevelGrowth() called when evade_growth was non-zero.");
+	end
+
+	-- Copy over the character's stat growth data
+	character._hit_points_growth = growth_table["hit_points"][new_level];
+	character._skill_points_growth = growth_table["skill_points"][new_level];
+	character._strength_growth = growth_table["strength"][new_level];
+	character._vigor_growth = growth_table["vigor"][new_level];
+	character._fortitude_growth = growth_table["fortitude"][new_level];
+	character._protection_growth = growth_table["protection"][new_level];
+	character._agility_growth = growth_table["agility"][new_level];
+	character._evade_growth = growth_table["evade"][new_level];
+end -- function DetermineNextLevelGrowth(character)
+
+
+------------------------------------------------------------------------------[[
+-- \brief Adds any learned skills for a character based on their current experience level
+-- \param character A pointer to the GlobalCharacter object to act on
+--
+-- Before this function is called, the character should already have their
+-- _experience_level member incremented to the new level. What this function does
+-- is determine the amount that each stat will grow by on the -next- level gained
+-- (-not- the current level gained) and if any new skills will be learned by
+-- reaching this level.
+------------------------------------------------------------------------------]]
+function DetermineNewSkillsLearned(character)
+	local new_level = character:GetExperienceLevel();	      -- The value of the character's new XP level
+	local character_table = characters[character:GetID()];  -- Reference to the character's definition table
+	local new_skills = nil;                                 -- Reference to the number or table of the new skills learned
+
+	if (character_table == nil) then
+		print("LUA ERROR: characters.lua::DeterminedNewSkillsLearned() failed because the character's ID was invalid");
+		return;
+	end
+
+	new_skills = character_table["skills"][new_level]
+
+	-- Case 1: no new skills are learned
+	if (type(new_skills) == nil) then
+		return;
+	-- Case 2: one new skill is learned
+	elseif (type(new_skills) == "number") then
+		character:AddNewSkillLearned(new_skills);
+	-- Case 3: multiple new skills are learned
 	elseif (type(new_skills) == "table") then
 		for i, skill in ipairs(new_skills) do
-			character_growth:_AddSkill(skill);
+			character:AddNewSkillLearned(skill);
 		end
-	elseif (type(new_skills) ~= "nil") then
-		print("LUA ERROR: characters.lua::GainExperienceLevel() failed because of an unknown skill type");
-		return;
+	else
+		print("LUA ERROR: characters.lua::DetermineNewSkillsLearned() failed because of an unexpected skill table key type");
 	end
-end -- function DetermineGrowth(character)
+end -- function DetermineSkillsLearned(character)

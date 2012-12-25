@@ -67,6 +67,64 @@ const float SPOILS_WINDOW_HEIGHT   = 220.0f;
 //@}
 
 ////////////////////////////////////////////////////////////////////////////////
+// CharacterGrowth class
+////////////////////////////////////////////////////////////////////////////////
+
+CharacterGrowth::CharacterGrowth(GlobalCharacter* ch) :
+	hit_points(0),
+	skill_points(0),
+	strength(0),
+	vigor(0),
+	fortitude(0),
+	protection(0),
+	agility(0),
+	evade(0.0f),
+	_character(ch),
+	_experience_levels_gained(0)
+{
+	if (ch == NULL) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "NULL pointer passed to constructor" << endl;
+	}
+}
+
+
+void CharacterGrowth::UpdateGrowthData() {
+	bool remaining_growth = true;
+	bool level_gained = false;
+
+	// The logic required to update this data can be a bit tricky. We have to retrieve all of the stat growth
+	// prior to calling AcknowledgeGrowth() because that call will reset the stat data. However, the list of
+	// new skills learned is not available until after calling AcknowledgeGrowth to process the new level gained
+	// (if any). And of course multiple AcknowledgeGrowth() calls may have to be made. The structure of the loop
+	// below addresses all of these cases.
+	while (remaining_growth == true) {
+		hit_points += _character->GetHitPointsGrowth();
+		skill_points += _character->GetSkillPointsGrowth();
+		strength += _character->GetStrengthGrowth();
+		vigor += _character->GetVigorGrowth();
+		fortitude += _character->GetFortitudeGrowth();
+		protection += _character->GetProtectionGrowth();
+		agility += _character->GetAgilityGrowth();
+		evade += _character->GetEvadeGrowth();
+
+		level_gained = _character->ReachedNewExperienceLevel();
+		remaining_growth = _character->AcknowledgeGrowth();
+
+		if (level_gained == true) {
+			_experience_levels_gained++;
+
+			// New skills are only found in growth data when the character has reached a new level
+			// Note that the character's new skills learned container will be cleared upon the next
+			// call to AcknowledgeGrowth, so skills will not be duplicated in the skills_learned container
+			vector<GlobalSkill*>* skills = _character->GetNewSkillsLearned();
+			for (uint32 i = 0; i < skills->size(); i++) {
+				skills_learned.push_back(skills->at(i));
+			}
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // FinishDefeatAssistant class
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -338,13 +396,6 @@ FinishVictoryAssistant::~FinishVictoryAssistant() {
 		_character_window[i].Destroy();
 	}
 
-	// Clear away any skills that characters may have learned so that they do not persist in the growth manager
-	for (uint32 i = 0; i < _number_characters; i++) {
-		if (_character_growths[i] != NULL) {
-			_character_growths[i]->GetSkillsLearned()->clear();
-		}
-	}
-
 	// Add all the objects that were dropped by enemies to the party's inventory
 	for (map<GlobalObject*, int32>::iterator i = _objects_dropped.begin(); i != _objects_dropped.end(); i++) {
 		GlobalManager->AddToInventory(i->first->GetID(), i->second);
@@ -374,7 +425,7 @@ void FinishVictoryAssistant::Initialize(uint32 retries_used) {
 
 	for (uint32 i = 0; i < _number_characters; i++) {
 		_characters.push_back(all_characters[i]->GetGlobalCharacter());
-		_character_growths.push_back(_characters[i]->GetGrowth());
+		 _character_growths.push_back(CharacterGrowth(_characters[i]));
 		_character_portraits[i].Load("img/portraits/map/" + _characters[i]->GetFilename() + ".png", 100.0f, 100.0f);
 
 		// Grey out portraits of deceased characters
@@ -396,8 +447,7 @@ void FinishVictoryAssistant::Initialize(uint32 retries_used) {
 		_drunes_dropped += enemy->GetDrunesDropped();
 		enemy->DetermineDroppedObjects(objects);
 
-		for (uint32 j = 0; j < objects.size(); ++j)
-		{
+		for (uint32 j = 0; j < objects.size(); ++j) {
 			// Check if the object to add is already in our list. If so, just increase the quantity of that object.
             // iter = _objects_dropped.find(objects[j]); // Will not work since each item is created with new.
             // Need to search for the item ID instead.
@@ -633,40 +683,71 @@ void FinishVictoryAssistant::_UpdateGrowth() {
 		}
 
 		if (_characters[i]->AddExperiencePoints(xp_to_add) == true) {
-			do {
-				// TODO: Only add text for the stats that experienced growth
-				_growth_list[i].SetOptionText(0, UTranslate("HP:"));
-				if (_character_growths[i]->GetHitPointsGrowth() > 0)
-					_growth_list[i].SetOptionText(1, MakeUnicodeString(NumberToString(_character_growths[i]->GetHitPointsGrowth())));
-				_growth_list[i].SetOptionText(2, UTranslate("SP:"));
-				if (_character_growths[i]->GetSkillPointsGrowth() > 0)
-					_growth_list[i].SetOptionText(3, MakeUnicodeString(NumberToString(_character_growths[i]->GetSkillPointsGrowth())));
-				_growth_list[i].SetOptionText(4, UTranslate("STR:"));
-				if (_character_growths[i]->GetStrengthGrowth() > 0)
-					_growth_list[i].SetOptionText(5, MakeUnicodeString(NumberToString(_character_growths[i]->GetStrengthGrowth())));
-				_growth_list[i].SetOptionText(6, UTranslate("VIG:"));
-				if (_character_growths[i]->GetVigorGrowth() > 0)
-					_growth_list[i].SetOptionText(7, MakeUnicodeString(NumberToString(_character_growths[i]->GetVigorGrowth())));
-				_growth_list[i].SetOptionText(8, UTranslate("FOR:"));
-				if (_character_growths[i]->GetFortitudeGrowth() > 0)
-					_growth_list[i].SetOptionText(9, MakeUnicodeString(NumberToString(_character_growths[i]->GetFortitudeGrowth())));
-				_growth_list[i].SetOptionText(10, UTranslate("PRO:"));
-				if (_character_growths[i]->GetProtectionGrowth() > 0)
-					_growth_list[i].SetOptionText(11, MakeUnicodeString(NumberToString(_character_growths[i]->GetProtectionGrowth())));
-				_growth_list[i].SetOptionText(12, UTranslate("AGI:"));
-				if (_character_growths[i]->GetAgilityGrowth() > 0)
-					_growth_list[i].SetOptionText(13, MakeUnicodeString(NumberToString(_character_growths[i]->GetAgilityGrowth())));
-				_growth_list[i].SetOptionText(14, UTranslate("EVA:"));
-				if (_character_growths[i]->GetEvadeGrowth() > 0.0f)
-					_growth_list[i].SetOptionText(15, MakeUnicodeString(NumberToString(_character_growths[i]->GetEvadeGrowth())));
+            _character_growths[i].UpdateGrowthData();
+            // Only add text for the stats that experienced growth
+            uint32 line = 0;
 
-				_character_growths[i]->AcknowledgeGrowth();
-			} while (_character_growths[i]->IsGrowthDetected());
+            // HP
+            if(_character_growths[i].hit_points > 0) {
+                _growth_list[i].SetOptionText(line, UTranslate("HP:"));
+                _growth_list[i].SetOptionText(line + 1, MakeUnicodeString(NumberToString(_character_growths[i].hit_points)));
+                line = line + 2;
+            }
 
-			std::vector<GlobalSkill*>* new_skills = _character_growths[i]->GetSkillsLearned();
-			if (new_skills->empty() == false) {
-				_skill_text[i].SetDisplayText(UTranslate("New Skill Learned:\n   ") + new_skills->at(0)->GetName());
-			}
+            // SP
+            if(_character_growths[i].skill_points > 0) {
+                _growth_list[i].SetOptionText(line, UTranslate("SP:"));
+                _growth_list[i].SetOptionText(line + 1, MakeUnicodeString(NumberToString(_character_growths[i].skill_points)));
+                line = line + 2;
+            }
+
+            // Strength
+            if(_character_growths[i].strength > 0) {
+                _growth_list[i].SetOptionText(line, UTranslate("STR:"));
+                _growth_list[i].SetOptionText(line + 1, MakeUnicodeString(NumberToString(_character_growths[i].strength)));
+                line = line + 2;
+            }
+
+            // Vigor
+            if(_character_growths[i].vigor > 0) {
+                _growth_list[i].SetOptionText(line, UTranslate("VIG:"));
+                _growth_list[i].SetOptionText(line + 1, MakeUnicodeString(NumberToString(_character_growths[i].vigor)));
+                line = line + 2;
+            }
+
+            // Fortitude
+            if(_character_growths[i].fortitude > 0) {
+                _growth_list[i].SetOptionText(line, UTranslate("FOR:"));
+                _growth_list[i].SetOptionText(line + 1, MakeUnicodeString(NumberToString(_character_growths[i].fortitude)));
+                line = line + 2;
+            }
+
+            // Protection
+            if(_character_growths[i].protection > 0) {
+                _growth_list[i].SetOptionText(line, UTranslate("PRO:"));
+                _growth_list[i].SetOptionText(line + 1, MakeUnicodeString(NumberToString(_character_growths[i].protection)));
+                line = line + 2;
+            }
+
+            // Agility
+            if(_character_growths[i].agility > 0) {
+                _growth_list[i].SetOptionText(line, UTranslate("AGI:"));
+                _growth_list[i].SetOptionText(line + 1, MakeUnicodeString(NumberToString(_character_growths[i].agility)));
+                line = line + 2;
+            }
+
+            // Evade
+            if(_character_growths[i].evade > 0.0f) {
+                _growth_list[i].SetOptionText(line, UTranslate("EVA:"));
+                _growth_list[i].SetOptionText(line + 1, MakeUnicodeString(NumberToString(_character_growths[i].evade)));
+                line = line + 2;
+            }
+
+            if(_character_growths[i].skills_learned.empty() == false) {
+                // TODO: this currently only shows the first skill learned. We need this interface to support showing multiple
+                // skills that were learned for each character
+                _skill_text[i].SetDisplayText(UTranslate("New Skill Learned:\n ") + _character_growths[i].skills_learned[0]->GetName());
+            }
 		}
 
 		// TODO: check for new experience level
