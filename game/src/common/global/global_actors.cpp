@@ -61,7 +61,7 @@ bool GlobalAttackPoint::LoadData(ReadScriptDescriptor& script) {
 	if (script.DoesTableExist("status_effects") == true) {
 		script.OpenTable("status_effects");
 
-		std::vector<int32> table_keys;
+		vector<int32> table_keys;
 		script.ReadTableKeys(table_keys);
 		for (uint32 i = 0; i < table_keys.size(); i++) {
 			float probability = script.ReadFloat(table_keys[i]);
@@ -118,7 +118,7 @@ void GlobalAttackPoint::CalculateTotalEvade() {
 	}
 
 	// Calculate evade ratings from owning actor's base evade stat and the evade modifier
-	if (_fortitude_modifier <= -1.0f) // If the modifier is less than or equal to -100%, set the total evade to zero
+	if (_evade_modifier <= -1.0f) // If the modifier is less than or equal to -100%, set the total evade to zero
 		_total_evade_rating = 0.0f;
 	else
 		_total_evade_rating = _actor_owner->GetEvade() + (_actor_owner->GetEvade() * _evade_modifier);
@@ -681,399 +681,19 @@ void GlobalActor::_CalculateEvadeRatings() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// GlobalCharacterGrowth class
-////////////////////////////////////////////////////////////////////////////////
-
-GlobalCharacterGrowth::GlobalCharacterGrowth(GlobalCharacter* owner) :
-	_character_owner(owner),
-	_experience_level_gained(false),
-	_growth_detected(false),
-	_experience_for_next_level(0),
-	_experience_for_last_level(0),
-	_hit_points_growth(0),
-	_skill_points_growth(0),
-	_strength_growth(0),
-	_vigor_growth(0),
-	_fortitude_growth(0),
-	_protection_growth(0),
-	_agility_growth(0),
-	_evade_growth(0.0f)
-{}
-
-
-
-GlobalCharacterGrowth::~GlobalCharacterGrowth() {
-	for (uint32 i = 0; i < _skills_learned.size(); i++)
-		delete _skills_learned[i];
-	_skills_learned.clear();
-}
-
-
-
-void GlobalCharacterGrowth::AcknowledgeGrowth() {
-	if (_growth_detected == false) {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function was invoked when there was no character growth detected" << endl;
-		return;
-	}
-
-	_growth_detected = false;
-
-	// Add all growth stats to the character actor
-	if (_hit_points_growth != 0) {
-		_character_owner->AddMaxHitPoints(_hit_points_growth);
-		_character_owner->AddHitPoints(_hit_points_growth);
-	}
-	if (_skill_points_growth != 0) {
-		_character_owner->AddMaxSkillPoints(_skill_points_growth);
-		_character_owner->AddSkillPoints(_skill_points_growth);
-	}
-	if (_strength_growth != 0)
-		_character_owner->AddStrength(_strength_growth);
-	if (_vigor_growth != 0)
-		_character_owner->AddVigor(_vigor_growth);
-	if (_fortitude_growth != 0)
-		_character_owner->AddFortitude(_fortitude_growth);
-	if (_protection_growth != 0)
-		_character_owner->AddProtection(_protection_growth);
-	if (_agility_growth != 0)
-		_character_owner->AddAgility(_agility_growth);
-	if (IsFloatEqual(_evade_growth, 0.0f) == false)
-		_character_owner->AddEvade(_evade_growth);
-
-	_hit_points_growth = 0;
-	_skill_points_growth = 0;
-	_strength_growth = 0;
-	_vigor_growth = 0;
-	_fortitude_growth = 0;
-	_protection_growth = 0;
-	_agility_growth = 0;
-	_evade_growth = 0.0f;
-
-	// If a new experience level has been gained, we must retrieve the growth data for the new experience level
-	if (_experience_level_gained) {
-		_character_owner->_experience_level += 1;
-		_experience_level_gained = false;
-		_DetermineNextLevelExperience();
-
-		string filename = "dat/actors/characters.lua";
-		ReadScriptDescriptor character_script;
-		if (character_script.OpenFile(filename) == false) {
-			IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to open character data file: " << filename << endl;
-			return;
-		}
-
-		try {
-			ScriptCallFunction<void>(character_script.GetLuaState(), "DetermineGrowth", _character_owner);
-			_ConstructPeriodicGrowth();
-			_CheckForGrowth();
-		}
-		catch (luabind::error e) {
-			ScriptManager->HandleLuaError(e);
-		}
-		catch (luabind::cast_failed e) {
-			ScriptManager->HandleCastError(e);
-		}
-
-		character_script.CloseFile();
-
-		// Add any newly learned skills
-		for (uint32 i = 0; i < _skills_learned.size(); i++) {
-			GlobalSkill* skill = _skills_learned[i];
-			if (_character_owner->_skills.find(skill->GetID()) != _character_owner->_skills.end()) {
-				IF_PRINT_WARNING(GLOBAL_DEBUG) << "character had already learned the skill with the id: " << skill->GetID() << endl;
-				delete _skills_learned[i];
-				continue;
-			}
-
-			// Insert the pointer to the new skill inside of the global skills map and the skill type vector
-			_character_owner->_skills.insert(make_pair(skill->GetID(), skill));
-			switch (skill->GetType()) {
-				case GLOBAL_SKILL_ATTACK:
-					_character_owner->_attack_skills.push_back(skill);
-					break;
-				case GLOBAL_SKILL_DEFEND:
-					_character_owner->_defense_skills.push_back(skill);
-					break;
-				case GLOBAL_SKILL_SUPPORT:
-					_character_owner->_support_skills.push_back(skill);
-					break;
-				default:
-					IF_PRINT_WARNING(GLOBAL_DEBUG) << "newly learned skill had an unknown skill type: " << skill->GetType() << endl;
-					break;
-			}
-		}
-		// skills have been given out, clean out the vector
-		//CD: Negatory!  Leeave the vector as is.  I need it in order to display the
-		// correct stuff in the skills learned window in FinishWindow.  I will clear it
-		// myself from there.  Not only that, but if they level up multiple times, I need
-		// to save the whole list so I can show all the skills they learned across
-		// multiple levels.  If this were called, they would never know they learned a skill
-		// at level 3 because they jumped to level 4 in the same battle
-		//_skills_learned.clear();
-	} // if (_experience_level_gained)
-} // void GlobalCharacterGrowth::AcknowledgeGrowth()
-
-
-
-void GlobalCharacterGrowth::_AddSkill(uint32 skill_id) {
-	if (skill_id == 0) {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid skill_id argument: " << skill_id << endl;
-		return;
-	}
-	// Make sure we don't add a skill to learn more than once
-	for (vector<GlobalSkill*>::iterator i = _skills_learned.begin(); i != _skills_learned.end(); i++) {
-		if (skill_id == (*i)->GetID()) {
-			IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add was already present in the list of skills to learn: " << skill_id << endl;
-			return;
-		}
-	}
-
-	GlobalSkill* skill = new GlobalSkill(skill_id);
-	if (skill->IsValid() == false) {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add failed to load: " << skill_id << endl;
-		delete skill;
-	}
-	else {
-		_skills_learned.push_back(skill);
-	}
-}
-
-
-
-void GlobalCharacterGrowth::_CheckForGrowth() {
-	// ----- (1): If a new experience level is gained, empty the periodic growth containers into the growth members
-	if (_character_owner->GetExperiencePoints() >= _experience_for_next_level) {
-		_experience_level_gained = true;
-		_growth_detected = true;
-
-		for (uint32 i = 0; i < _hit_points_periodic_growth.size(); i++)
-			_hit_points_growth += _hit_points_periodic_growth[i].second;
-		_hit_points_periodic_growth.clear();
-
-		for (uint32 i = 0; i < _skill_points_periodic_growth.size(); i++)
-			_skill_points_growth += _skill_points_periodic_growth[i].second;
-		_skill_points_periodic_growth.clear();
-
-		for (uint32 i = 0; i < _strength_periodic_growth.size(); i++)
-			_strength_growth += _strength_periodic_growth[i].second;
-		_strength_periodic_growth.clear();
-
-		for (uint32 i = 0; i < _vigor_periodic_growth.size(); i++)
-			_vigor_growth += _vigor_periodic_growth[i].second;
-		_vigor_periodic_growth.clear();
-
-		for (uint32 i = 0; i < _fortitude_periodic_growth.size(); i++)
-			_fortitude_growth += _fortitude_periodic_growth[i].second;
-		_fortitude_periodic_growth.clear();
-
-		for (uint32 i = 0; i < _protection_periodic_growth.size(); i++)
-			_protection_growth += _protection_periodic_growth[i].second;
-		_protection_periodic_growth.clear();
-
-		for (uint32 i = 0; i < _agility_periodic_growth.size(); i++)
-			_agility_growth += _agility_periodic_growth[i].second;
-		_agility_periodic_growth.clear();
-
-		for (uint32 i = 0; i < _evade_periodic_growth.size(); i++)
-			_evade_growth += _evade_periodic_growth[i].second;
-		_evade_periodic_growth.clear();
-
-
-		return;
-	} // if (_actor_ower->GetExperiencePoints() >= _experience_for_next_level)
-
-	// ----- (2): If there is no growth detected, check all periodic growth containers
-	switch (_growth_detected) { // switch statement used instead of if statement here so we can break out of it early
-		case true:
-			break;
-		case false:
-			if (_hit_points_periodic_growth.empty() == false) {
-				if (_character_owner->GetExperiencePoints() >= _hit_points_periodic_growth.front().first) {
-					_growth_detected = true;
-					break;
-				}
-			}
-
-			if (_skill_points_periodic_growth.empty() == false) {
-				if (_character_owner->GetExperiencePoints() >= _skill_points_periodic_growth.front().first) {
-					_growth_detected = true;
-					break;
-				}
-			}
-
-			if (_strength_periodic_growth.empty() == false) {
-				if (_character_owner->GetExperiencePoints() >= _strength_periodic_growth.front().first) {
-					_growth_detected = true;
-					break;
-				}
-			}
-
-			if (_vigor_periodic_growth.empty() == false) {
-				if (_character_owner->GetExperiencePoints() >= _vigor_periodic_growth.front().first) {
-					_growth_detected = true;
-					break;
-				}
-			}
-
-			if (_fortitude_periodic_growth.empty() == false) {
-				if (_character_owner->GetExperiencePoints() >= _fortitude_periodic_growth.front().first) {
-					_growth_detected = true;
-					break;
-				}
-			}
-
-			if (_protection_periodic_growth.empty() == false) {
-				if (_character_owner->GetExperiencePoints() >= _protection_periodic_growth.front().first) {
-					_growth_detected = true;
-					break;
-				}
-			}
-
-			if (_agility_periodic_growth.empty() == false) {
-				if (_character_owner->GetExperiencePoints() >= _agility_periodic_growth.front().first) {
-					_growth_detected = true;
-					break;
-				}
-			}
-
-			if (_evade_periodic_growth.empty() == false) {
-				if (_character_owner->GetExperiencePoints() >= _evade_periodic_growth.front().first) {
-					_growth_detected = true;
-					break;
-				}
-			}
-			break;
-	} // switch (_growth_detected)
-
-	// ----- (3): If there is growth detected update all periodic growth containers
-	if (_growth_detected == true) {
-		while (_hit_points_periodic_growth.begin() != _hit_points_periodic_growth.end()) {
-			if (_character_owner->GetExperiencePoints() >= _hit_points_periodic_growth.begin()->first) {
-				_hit_points_growth += _hit_points_periodic_growth.begin()->second;
-				_hit_points_periodic_growth.pop_front();
-			}
-			else {
-				break;
-			}
-		}
-
-		while (_skill_points_periodic_growth.begin() != _skill_points_periodic_growth.end()) {
-			if (_character_owner->GetExperiencePoints() >= _skill_points_periodic_growth.begin()->first) {
-				_skill_points_growth += _skill_points_periodic_growth.begin()->second;
-				_skill_points_periodic_growth.pop_front();
-			}
-			else {
-				break;
-			}
-		}
-
-		while (_strength_periodic_growth.begin() != _strength_periodic_growth.end()) {
-			if (_character_owner->GetExperiencePoints() >= _strength_periodic_growth.begin()->first) {
-				_strength_growth += _strength_periodic_growth.begin()->second;
-				_strength_periodic_growth.pop_front();
-			}
-			else {
-				break;
-			}
-		}
-
-		while (_vigor_periodic_growth.begin() != _vigor_periodic_growth.end()) {
-			if (_character_owner->GetExperiencePoints() >= _vigor_periodic_growth.begin()->first) {
-				_vigor_growth += _vigor_periodic_growth.begin()->second;
-				_vigor_periodic_growth.pop_front();
-			}
-			else {
-				break;
-			}
-		}
-
-		while (_fortitude_periodic_growth.begin() != _fortitude_periodic_growth.end()) {
-			if (_character_owner->GetExperiencePoints() >= _fortitude_periodic_growth.begin()->first) {
-				_fortitude_growth += _fortitude_periodic_growth.begin()->second;
-				_fortitude_periodic_growth.pop_front();
-			}
-			else {
-				break;
-			}
-		}
-
-		while (_protection_periodic_growth.begin() != _protection_periodic_growth.end()) {
-			if (_character_owner->GetExperiencePoints() >= _protection_periodic_growth.begin()->first) {
-				_protection_growth += _protection_periodic_growth.begin()->second;
-				_protection_periodic_growth.pop_front();
-			}
-			else {
-				break;
-			}
-		}
-
-		while (_agility_periodic_growth.begin() != _agility_periodic_growth.end()) {
-			if (_character_owner->GetExperiencePoints() >= _agility_periodic_growth.begin()->first) {
-				_agility_growth += _agility_periodic_growth.begin()->second;
-				_agility_periodic_growth.pop_front();
-			}
-			else {
-				break;
-			}
-		}
-
-		while (_evade_periodic_growth.begin() != _evade_periodic_growth.end()) {
-			if (_character_owner->GetExperiencePoints() >= _evade_periodic_growth.begin()->first) {
-				_evade_growth += _evade_periodic_growth.begin()->second;
-				_evade_periodic_growth.pop_front();
-			}
-			else {
-				break;
-			}
-		}
-	} // if (_growth_detected == true)
-} // void GlobalCharacterGrowth::_CheckForGrowth()
-
-
-
-void GlobalCharacterGrowth::_ConstructPeriodicGrowth() {
-	// TODO: Implement a gradual growth algorithm
-
-	// TEMP: all growth is done when the experience level is gained
-	_hit_points_periodic_growth.push_back(make_pair(_experience_for_next_level, _hit_points_growth));
-	_skill_points_periodic_growth.push_back(make_pair(_experience_for_next_level, _skill_points_growth));
-	_strength_periodic_growth.push_back(make_pair(_experience_for_next_level, _strength_growth));
-	_vigor_periodic_growth.push_back(make_pair(_experience_for_next_level, _vigor_growth));
-	_fortitude_periodic_growth.push_back(make_pair(_experience_for_next_level, _fortitude_growth));
-	_protection_periodic_growth.push_back(make_pair(_experience_for_next_level, _protection_growth));
-	_agility_periodic_growth.push_back(make_pair(_experience_for_next_level, _agility_growth));
-	_evade_periodic_growth.push_back(make_pair(_experience_for_next_level, _evade_growth));
-
-	_hit_points_growth = 0;
-	_skill_points_growth = 0;
-	_strength_growth = 0;
-	_vigor_growth = 0;
-	_fortitude_growth = 0;
-	_protection_growth = 0;
-	_agility_growth = 0;
-	_evade_growth = 0.0f;
-}
-
-
-
-void GlobalCharacterGrowth::_DetermineNextLevelExperience() {
-	uint32 base_xp = 0;
-	uint32 new_xp = 0;
-
-	// TODO: implement a real algorithm for determining the next experience goal
-	base_xp = _character_owner->GetExperienceLevel() * 40;
-	new_xp = GaussianRandomValue(base_xp, base_xp / 10.0f);
-
-	_experience_for_last_level = _experience_for_next_level;
-	_experience_for_next_level = _experience_for_last_level + new_xp;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // GlobalCharacter class
 ////////////////////////////////////////////////////////////////////////////////
 
 GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
-	_growth(this)
+    _experience_for_next_level(0),
+    _hit_points_growth(0),
+    _skill_points_growth(0),
+    _strength_growth(0),
+    _vigor_growth(0),
+    _fortitude_growth(0),
+    _protection_growth(0),
+    _agility_growth(0),
+    _evade_growth(0.0f)
 {
 	_id = id;
 
@@ -1207,13 +827,9 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 
 	// ----- (6): Determine the character's initial growth if necessary
 	if (initial) {
-		// Initialize the experience level milestones
-		_growth._experience_for_last_level = _experience_points;
-		_growth._experience_for_next_level = _experience_points;
-		_growth._DetermineNextLevelExperience();
 		try {
-			ScriptCallFunction<void>(char_script.GetLuaState(), "DetermineGrowth", this);
-			_growth._ConstructPeriodicGrowth();
+			ScriptCallFunction<void>(char_script.GetLuaState(), "DetermineNextLevelGrowth", this);
+			_ConstructPeriodicGrowth();
 		}
 		catch (luabind::error e) {
 			ScriptManager->HandleLuaError(e);
@@ -1299,8 +915,8 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 
 bool GlobalCharacter::AddExperiencePoints(uint32 xp) {
 	_experience_points += xp;
-	_growth._CheckForGrowth();
-	return _growth.IsGrowthDetected();
+	_experience_for_next_level -= xp;
+	return _CheckForGrowth();
 }
 
 
@@ -1338,6 +954,362 @@ void GlobalCharacter::AddSkill(uint32 skill_id) {
 			IF_PRINT_WARNING(GLOBAL_DEBUG) << "loaded a new skill with an unknown skill type: " << skill->GetType() << endl;
 			break;
 	}
+}
+
+
+
+void GlobalCharacter::AddNewSkillLearned(uint32 skill_id) {
+	if (skill_id == 0) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid skill_id argument: " << skill_id << endl;
+		return;
+	}
+
+	// Make sure we don't add a skill more than once
+	for (vector<GlobalSkill*>::iterator i = _new_skills_learned.begin(); i != _new_skills_learned.end(); i++) {
+		if (skill_id == (*i)->GetID()) {
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add was already present in the list of newly learned skills: " << skill_id << endl;
+			return;
+		}
+	}
+
+	AddSkill(skill_id);
+
+	map<uint32, GlobalSkill *>::iterator skill = _skills.find(skill_id);
+	if (skill == _skills.end()) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed because the new skill was not added successfully: " << skill_id << endl;
+		return;
+	}
+
+	_new_skills_learned.push_back(skill->second);
+}
+
+
+
+bool GlobalCharacter::HasUnacknowledgedGrowth() const {
+	if (ReachedNewExperienceLevel() == true) {
+		return true;
+	}
+
+	if (_hit_points_growth != 0)
+		return true;
+	if (_skill_points_growth != 0)
+		return true;
+	if (_strength_growth != 0)
+		return true;
+	if (_vigor_growth != 0)
+		return true;
+	if (_fortitude_growth != 0)
+		return true;
+	if (_protection_growth != 0)
+		return true;
+	if (_agility_growth != 0)
+		return true;
+	if (IsFloatEqual(_evade_growth, 0.0f) == false)
+		return true;
+
+	return false;
+}
+
+
+
+bool GlobalCharacter::AcknowledgeGrowth() {
+	if (HasUnacknowledgedGrowth() == false) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function called when no unacknowledged growth was available" << endl;
+		return false;
+	}
+
+	// Add all growth stats to the character actor
+	if (_hit_points_growth != 0) {
+		AddMaxHitPoints(_hit_points_growth);
+		if (_hit_points > 0)
+			AddHitPoints(_hit_points_growth);
+	}
+	if (_skill_points_growth != 0) {
+		AddMaxSkillPoints(_skill_points_growth);
+		if (_skill_points > 0)
+			AddSkillPoints(_skill_points_growth);
+	}
+	if (_strength_growth != 0)
+		AddStrength(_strength_growth);
+	if (_vigor_growth != 0)
+		AddVigor(_vigor_growth);
+	if (_fortitude_growth != 0)
+		AddFortitude(_fortitude_growth);
+	if (_protection_growth != 0)
+		AddProtection(_protection_growth);
+	if (_agility_growth != 0)
+		AddAgility(_agility_growth);
+	if (IsFloatEqual(_evade_growth, 0.0f) == false)
+		AddEvade(_evade_growth);
+
+	_hit_points_growth = 0;
+	_skill_points_growth = 0;
+	_strength_growth = 0;
+	_vigor_growth = 0;
+	_fortitude_growth = 0;
+	_protection_growth = 0;
+	_agility_growth = 0;
+	_evade_growth = 0.0f;
+
+	if (ReachedNewExperienceLevel() == false) {
+		return false;
+	}
+
+	// A new experience level has been gained. Retrieve the growth data for the new experience level
+	_experience_level += 1;
+
+	// Retrieve the growth data for the new experience level and check for any additional growth
+	bool additional_growth_detected = false;
+	string filename = "dat/actors/characters.lua";
+	ReadScriptDescriptor character_script;
+	if (character_script.OpenFile(filename) == false) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to open character data file: " << filename << endl;
+		return false;
+	}
+
+	try {
+		ScriptCallFunction<void>(character_script.GetLuaState(), "DetermineNextLevelGrowth", this);
+		_ConstructPeriodicGrowth();
+		additional_growth_detected = _CheckForGrowth();
+	} catch(luabind::error& e) {
+		ScriptManager->HandleLuaError(e);
+	} catch(luabind::cast_failed& e) {
+		ScriptManager->HandleCastError(e);
+	}
+
+	// Reset the skills learned container and add any skills learned at this level
+	_new_skills_learned.clear();
+	try {
+		ScriptCallFunction<void>(character_script.GetLuaState(), "DetermineNewSkillsLearned", this);
+	} catch(luabind::error& e) {
+		ScriptManager->HandleLuaError(e);
+	} catch(luabind::cast_failed& e) {
+		ScriptManager->HandleCastError(e);
+	}
+
+	character_script.CloseFile();
+	return additional_growth_detected;
+} // bool GlobalCharacter::AcknowledgeGrowth()
+
+
+
+bool GlobalCharacter::_CheckForGrowth() {
+	// ----- (1): If a new experience level is gained, empty the periodic growth containers into the growth members
+	if (ReachedNewExperienceLevel() == true) {
+		_ProcessPeriodicGrowth();
+		return true;
+	}
+
+	// ----- (2): If there is no growth detected, check all periodic growth containers
+	if (_hit_points_periodic_growth.empty() == false) {
+		if (_experience_for_next_level <= static_cast<int32>(_hit_points_periodic_growth.front().first)) {
+			_ProcessPeriodicGrowth();
+			return true;
+		}
+	}
+
+	if (_skill_points_periodic_growth.empty() == false) {
+		if (_experience_for_next_level <= static_cast<int32>(_skill_points_periodic_growth.front().first)) {
+			_ProcessPeriodicGrowth();
+			return true;
+		}
+	}
+
+	if (_strength_periodic_growth.empty() == false) {
+		if (_experience_for_next_level <= static_cast<int32>(_strength_periodic_growth.front().first)) {
+			_ProcessPeriodicGrowth();
+			return true;
+		}
+	}
+
+	if (_vigor_periodic_growth.empty() == false) {
+		if (_experience_for_next_level <= static_cast<int32>(_vigor_periodic_growth.front().first)) {
+			_ProcessPeriodicGrowth();
+			return true;
+		}
+	}
+
+	if (_fortitude_periodic_growth.empty() == false) {
+		if (_experience_for_next_level <= static_cast<int32>(_fortitude_periodic_growth.front().first)) {
+			_ProcessPeriodicGrowth();
+			return true;
+		}
+	}
+
+	if (_protection_periodic_growth.empty() == false) {
+		if (_experience_for_next_level <= static_cast<int32>(_protection_periodic_growth.front().first)) {
+			_ProcessPeriodicGrowth();
+			return true;
+		}
+	}
+
+	if (_agility_periodic_growth.empty() == false) {
+		if (_experience_for_next_level <= static_cast<int32>(_agility_periodic_growth.front().first)) {
+			_ProcessPeriodicGrowth();
+			return true;
+		}
+	}
+
+	if (_evade_periodic_growth.empty() == false) {
+		if (_experience_for_next_level <= static_cast<int32>(_evade_periodic_growth.front().first)) {
+			_ProcessPeriodicGrowth();
+			return true;
+		}
+	}
+
+	return false;
+} // bool GlobalCharacter::_CheckForGrowth()
+
+
+
+void GlobalCharacter::_ProcessPeriodicGrowth() {
+	// When a new level is gained, we can simply empty all of the periodic growth containers
+	if (ReachedNewExperienceLevel() == true) {
+		for (uint32 i = 0; i < _hit_points_periodic_growth.size(); i++)
+			_hit_points_growth += _hit_points_periodic_growth[i].second;
+		_hit_points_periodic_growth.clear();
+
+		for (uint32 i = 0; i < _skill_points_periodic_growth.size(); i++)
+			_skill_points_growth += _skill_points_periodic_growth[i].second;
+		_skill_points_periodic_growth.clear();
+
+		for (uint32 i = 0; i < _strength_periodic_growth.size(); i++)
+			_strength_growth += _strength_periodic_growth[i].second;
+		_strength_periodic_growth.clear();
+
+		for (uint32 i = 0; i < _vigor_periodic_growth.size(); i++)
+			_vigor_growth += _vigor_periodic_growth[i].second;
+		_vigor_periodic_growth.clear();
+
+		for (uint32 i = 0; i < _fortitude_periodic_growth.size(); i++)
+			_fortitude_growth += _fortitude_periodic_growth[i].second;
+		_fortitude_periodic_growth.clear();
+
+		for (uint32 i = 0; i < _protection_periodic_growth.size(); i++)
+			_protection_growth += _protection_periodic_growth[i].second;
+		_protection_periodic_growth.clear();
+
+		for (uint32 i = 0; i < _agility_periodic_growth.size(); i++)
+			_agility_growth += _agility_periodic_growth[i].second;
+		_agility_periodic_growth.clear();
+
+		for (uint32 i = 0; i < _evade_periodic_growth.size(); i++)
+			_evade_growth += _evade_periodic_growth[i].second;
+		_evade_periodic_growth.clear();
+	}
+	// Otherwise if no level was gained, process each growth container to deal out any growth that has been earned
+	else {
+		while (_hit_points_periodic_growth.begin() != _hit_points_periodic_growth.end()) {
+			if (_experience_for_next_level <= static_cast<int32>(_hit_points_periodic_growth.begin()->first)) {
+				_hit_points_growth += _hit_points_periodic_growth.begin()->second;
+				_hit_points_periodic_growth.pop_front();
+			}
+			else {
+				break;
+			}
+		}
+
+		while (_skill_points_periodic_growth.begin() != _skill_points_periodic_growth.end()) {
+			if (_experience_for_next_level <= static_cast<int32>(_skill_points_periodic_growth.begin()->first)) {
+				_skill_points_growth += _skill_points_periodic_growth.begin()->second;
+				_skill_points_periodic_growth.pop_front();
+			}
+			else {
+				break;
+			}
+		}
+
+		while (_strength_periodic_growth.begin() != _strength_periodic_growth.end()) {
+			if (_experience_for_next_level <= static_cast<int32>(_strength_periodic_growth.begin()->first)) {
+				_strength_growth += _strength_periodic_growth.begin()->second;
+				_strength_periodic_growth.pop_front();
+			}
+			else {
+				break;
+			}
+		}
+
+		while (_vigor_periodic_growth.begin() != _vigor_periodic_growth.end()) {
+			if (_experience_for_next_level <= static_cast<int32>(_vigor_periodic_growth.begin()->first)) {
+				_vigor_growth += _vigor_periodic_growth.begin()->second;
+				_vigor_periodic_growth.pop_front();
+			}
+			else {
+				break;
+			}
+		}
+
+		while (_fortitude_periodic_growth.begin() != _fortitude_periodic_growth.end()) {
+			if (_experience_for_next_level <= static_cast<int32>(_fortitude_periodic_growth.begin()->first)) {
+				_fortitude_growth += _fortitude_periodic_growth.begin()->second;
+				_fortitude_periodic_growth.pop_front();
+			}
+			else {
+				break;
+			}
+		}
+
+		while (_protection_periodic_growth.begin() != _protection_periodic_growth.end()) {
+			if (_experience_for_next_level <= static_cast<int32>(_protection_periodic_growth.begin()->first)) {
+				_protection_growth += _protection_periodic_growth.begin()->second;
+				_protection_periodic_growth.pop_front();
+			}
+			else {
+				break;
+			}
+		}
+
+		while (_agility_periodic_growth.begin() != _agility_periodic_growth.end()) {
+			if (_experience_for_next_level <= static_cast<int32>(_agility_periodic_growth.begin()->first)) {
+				_agility_growth += _agility_periodic_growth.begin()->second;
+				_agility_periodic_growth.pop_front();
+			}
+			else {
+				break;
+			}
+		}
+
+		while (_evade_periodic_growth.begin() != _evade_periodic_growth.end()) {
+			if (_experience_for_next_level <= static_cast<int32>(_evade_periodic_growth.begin()->first)) {
+				_evade_growth += _evade_periodic_growth.begin()->second;
+				_evade_periodic_growth.pop_front();
+			}
+			else {
+				break;
+			}
+		}
+	}
+} // void GlobalCharacter::_ProcessPeriodicGrowth()
+
+
+
+void GlobalCharacter::_ConstructPeriodicGrowth() {
+	// TODO: Implement a gradual growth algorithm.
+	// The following scheme is suggested for this algorithm:
+	// 1) Divide all stat gains by 2. Half is rewarded gradually, while the other half is rewarded when the next level is reached
+	// 2) If a stat does not grow by more than one point, award all growth for that stat at the next level
+	// 3) Divide the gradual amount of the growth into a number of small sections (ie, +10 HP => +2 HP 5 times)
+	// 4) Evenly space the growth distributed based on the range of current XP to the XP needed to reach the next level
+
+	// TEMP: currently all growth is added when the experience level is gained
+	_hit_points_periodic_growth.push_back(make_pair(0, _hit_points_growth));
+	_skill_points_periodic_growth.push_back(make_pair(0, _skill_points_growth));
+	_strength_periodic_growth.push_back(make_pair(0, _strength_growth));
+	_vigor_periodic_growth.push_back(make_pair(0, _vigor_growth));
+	_fortitude_periodic_growth.push_back(make_pair(0, _fortitude_growth));
+	_protection_periodic_growth.push_back(make_pair(0, _protection_growth));
+	_agility_periodic_growth.push_back(make_pair(0, _agility_growth));
+	_evade_periodic_growth.push_back(make_pair(0, _evade_growth));
+
+	// Reset all growth accumulators
+	_hit_points_growth = 0;
+	_skill_points_growth = 0;
+	_strength_growth = 0;
+	_vigor_growth = 0;
+	_fortitude_growth = 0;
+	_protection_growth = 0;
+	_agility_growth = 0;
+	_evade_growth = 0.0f;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

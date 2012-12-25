@@ -147,14 +147,31 @@ class GameGlobal : public hoa_utils::Singleton<GameGlobal> {
 public:
 	~GameGlobal();
 
-	bool SingletonInitialize();
+	bool SingletonInitialize()
+		{ return _LoadGlobalScripts(); }
 
 	/** \brief Deletes all data stored within the GameGlobal class object
+	***
 	*** This function is meant to be called when the user quits the current game instance
 	*** and returns to the boot screen. It will delete all characters, inventory, and other
-	*** data relevant to the current game.
+	*** data relevant to the current game. It does not close any of the persistent script files.
 	**/
 	void ClearAllData();
+
+	/** \brief Loads all global persistent scripts
+	*** \return True if all scripts were loaded successfully
+	**/
+	bool _LoadGlobalScripts();
+
+	//! \brief Closes any global persistent script files that are open
+	void _CloseGlobalScripts();
+
+	/** \brief Closes and reloads all global persistent script files
+	*** \return True if all scripts were loaded successfully
+	*** \note This method is useful when changing the game's language to reload the appropriate text
+	**/
+	bool ReloadGlobalScripts()
+		{ _CloseGlobalScripts(); return _LoadGlobalScripts(); }
 
 	//! \name Character Functions
 	//@{

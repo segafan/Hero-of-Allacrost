@@ -192,7 +192,6 @@ namespace hoa_global {
 	class GlobalAttackPoint;
 	class GlobalActor;
 	class GlobalCharacter;
-	class GlobalCharacterGrowth;
 	class GlobalEnemy;
 	class GlobalParty;
 }

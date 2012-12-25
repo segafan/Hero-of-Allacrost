@@ -1181,6 +1181,9 @@ void BootMode::_OnLanguageSelect() {
 
 	// TODO: when the new language is set by the above call, we need to reload/refresh all text,
 	// otherwise the new language will not take effect.
+
+	// Update the strings of global objects
+	GlobalManager->ReloadGlobalScripts();
 }
 
 
