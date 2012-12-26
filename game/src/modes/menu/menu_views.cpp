@@ -56,7 +56,7 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character) {
 	_char_id = character->GetID();
 	_portrait.SetStatic(true);
 
-	std::string portrait_filename = "img/portraits/menu/" + character->GetFilename() + "_small.png";
+	std::string portrait_filename = "img/portraits/face/" + character->GetFilename() + "_small.png";
 	if (DoesFileExist(portrait_filename) == false) {
 		PRINT_WARNING << "Portrait file not found: " << portrait_filename << endl;
 		_portrait.Load("", 100.0f, 100.0f); // Load an empty image
@@ -468,7 +468,7 @@ StatusWindow::StatusWindow() :
 		ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(i));
 		portrait.SetStatic(true);
 
-		string portrait_filename = "img/portraits/menu/" + ch->GetFilename() + "_large.png";
+		string portrait_filename = "img/portraits/full/" + ch->GetFilename() + "_large.png";
 		if (DoesFileExist(portrait_filename) == false) {
 			IF_PRINT_WARNING(MENU_DEBUG) << "character portrait image file did not exist: " << portrait_filename << endl;
 			portrait.Load("");

@@ -14,9 +14,9 @@ sprites["Claudius"] = {
 	img_height = 4.0,
 	movement_speed = NORMAL_SPEED,
 
-	standard_animations = "img/sprites/map/claudius_walk.png",
-	running_animations = "img/sprites/map/claudius_run.png",
-	face_portrait = "img/portraits/map/claudius.png"
+	standard_animations = "img/sprites/characters/claudius_walk.png",
+	running_animations = "img/sprites/characters/claudius_run.png",
+	face_portrait = "img/portraits/face/claudius.png"
 }
 
 sprites["Laila"] = {
@@ -27,9 +27,9 @@ sprites["Laila"] = {
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 
-	standard_animations = "img/sprites/map/laila_walk.png",
-	running_animations = "img/sprites/map/laila_run.png",
-	face_portrait = "img/portraits/map/laila.png"
+	standard_animations = "img/sprites/characters/laila_walk.png",
+	running_animations = "img/sprites/characters/laila_run.png",
+	face_portrait = "img/portraits/face/laila.png"
 }
 
 sprites["Kyle"] = {
@@ -40,8 +40,8 @@ sprites["Kyle"] = {
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 
-	standard_animations = "img/sprites/map/kyle_walk.png",
-	face_portrait = "img/portraits/map/kyle.png"
+	standard_animations = "img/sprites/characters/kyle_walk.png",
+	face_portrait = "img/portraits/face/kyle.png"
 }
 
 sprites["Captain"] = {
@@ -52,7 +52,7 @@ sprites["Captain"] = {
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 
-	standard_animations = "img/sprites/map/soldier_npc02_walk.png"
+	standard_animations = "img/sprites/characters/soldier_npc02_walk.png"
 }
 
 sprites["Marcus"] = {
@@ -63,8 +63,8 @@ sprites["Marcus"] = {
 	img_height = 4.0,
 	movement_speed = VERY_SLOW_SPEED,
 
-	standard_animations = "img/sprites/map/marcus_walk.png",
-	face_portrait = "img/portraits/map/marcus.png"
+	standard_animations = "img/sprites/characters/marcus_walk.png",
+	face_portrait = "img/portraits/face/marcus.png"
 }
 
 sprites["Vanica"] = {
@@ -75,8 +75,8 @@ sprites["Vanica"] = {
 	img_height = 4.0,
 	movement_speed = VERY_SLOW_SPEED,
 	
-	standard_animations = "img/sprites/map/vanica_walk.png",
-	face_portrait = "img/portraits/map/vanica.png"
+	standard_animations = "img/sprites/characters/vanica_walk.png",
+	face_portrait = "img/portraits/face/vanica.png"
 }
 
 sprites["Alexander"] = {
@@ -87,7 +87,7 @@ sprites["Alexander"] = {
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 	
-	standard_animations = "img/sprites/map/man_npc02_walk.png"
+	standard_animations = "img/sprites/characters/man_npc02_walk.png"
 }
 
 sprites["Laine"] = {
@@ -98,7 +98,7 @@ sprites["Laine"] = {
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 	
-	standard_animations = "img/sprites/map/man_npc01_walk.png"
+	standard_animations = "img/sprites/characters/man_npc01_walk.png"
 }
 
 sprites["Torl"] = {
@@ -109,7 +109,7 @@ sprites["Torl"] = {
 	img_height = 4.0,
 	movement_speed = VERY_FAST_SPEED,
 	
-	standard_animations = "img/sprites/map/boy_npc01_walk.png"
+	standard_animations = "img/sprites/characters/boy_npc01_walk.png"
 }
 
 sprites["Female Merchant"] = {
@@ -120,7 +120,7 @@ sprites["Female Merchant"] = {
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 	
-	standard_animations = "img/sprites/map/woman_npc01_walk.png"
+	standard_animations = "img/sprites/characters/woman_npc01_walk.png"
 }
 
 sprites["Livia"] = {
@@ -131,7 +131,7 @@ sprites["Livia"] = {
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 	
-	standard_animations = "img/sprites/map/girl_npc02_walk.png"
+	standard_animations = "img/sprites/characters/girl_npc02_walk.png"
 }
 
 sprites["Octavia"] = {
@@ -142,7 +142,7 @@ sprites["Octavia"] = {
 	img_height = 4.0,
 	movement_speed = NORMAL_SPEED,
 	
-	standard_animations = "img/sprites/map/woman_npc02_walk.png"
+	standard_animations = "img/sprites/characters/woman_npc02_walk.png"
 }
 
 sprites["Karlate"] = {
@@ -153,7 +153,7 @@ sprites["Karlate"] = {
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 
-	standard_animations = "img/sprites/map/soldier_npc01_walk.png"
+	standard_animations = "img/sprites/characters/soldier_npc01_walk.png"
 }
 
 sprites["Rubble"] = {
@@ -164,7 +164,7 @@ sprites["Rubble"] = {
 	img_height = 4.0,
 	movement_speed = NORMAL_SPEED,
 
-	standard_animations = "img/sprites/map/rocks.png"
+	standard_animations = "img/sprites/objects/rocks.png"
 }
 
 
@@ -174,7 +174,7 @@ enemies["slime"] = {
 	img_half_width = 1.0,
 	img_height = 4.0,
 	movement_speed = NORMAL_SPEED,
-	standard_animations = "img/sprites/map/slime_walk.png"
+	standard_animations = "img/sprites/enemies/slime_walk.png"
 }
 
 
@@ -184,7 +184,7 @@ enemies["snake"] = {
 	img_half_width = 1.0,
 	img_height = 4.0,
 	movement_speed = NORMAL_SPEED,
-	standard_animations = "img/sprites/map/snake_walk.png"
+	standard_animations = "img/sprites/enemies/snake_walk.png"
 }
 
 
@@ -194,7 +194,7 @@ enemies["scorpion"] = {
 	img_half_width = 1.0,
 	img_height = 4.0,
 	movement_speed = NORMAL_SPEED,
-	standard_animations = "img/sprites/map/scorpion_walk.png"
+	standard_animations = "img/sprites/enemies/scorpion_walk.png"
 }
 
 

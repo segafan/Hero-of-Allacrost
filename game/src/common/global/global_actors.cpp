@@ -855,7 +855,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	// ----- (8) Load character sprite and portrait images
 	// NOTE: The code below is all TEMP and is subject to great change or removal in the future
 	// TEMP: load standard map sprite walking frames
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(_map_frames_standard, "img/sprites/map/" + _filename + "_walk.png", 4, 6) == false) {
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_map_frames_standard, "img/sprites/characters/" + _filename + "_walk.png", 4, 6) == false) {
 		exit(1);
 	}
 
@@ -863,7 +863,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	AnimatedImage run;
 	vector<StillImage> run_frames;
 
-	if (ImageDescriptor::LoadMultiImageFromElementGrid(run_frames, "img/sprites/map/" + _filename + "_run.png", 4, 6) == false) {
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(run_frames, "img/sprites/characters/" + _filename + "_run.png", 4, 6) == false) {
 		exit(1);
 	}
 
@@ -879,7 +879,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	idle.SetDimensions(128, 128);
 	vector<uint32> idle_timings(4, 150);
 
-	if (idle.LoadFromFrameGrid("img/sprites/map/" + _filename + "_idle.png", idle_timings, 1, 4) == false) {
+	if (idle.LoadFromFrameGrid("img/sprites/characters/" + _filename + "_idle.png", idle_timings, 1, 4) == false) {
 		exit(1);
 	}
 	_battle_animation["idle"] = idle;
@@ -889,7 +889,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	attack.SetDimensions(128, 128);
 	vector<uint32> attack_timings(5, 100);
 
-	if (attack.LoadFromFrameGrid("img/sprites/map/" + _filename + "_attack.png", attack_timings, 1, 5) == false) {
+	if (attack.LoadFromFrameGrid("img/sprites/characters/" + _filename + "_attack.png", attack_timings, 1, 5) == false) {
 		exit(1);
 	}
 	_battle_animation["attack"] = attack;
@@ -899,7 +899,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	for (uint32 i = 0; i < _battle_portraits.size(); i++) {
 		_battle_portraits[i].SetDimensions(100.0f, 100.0f);
 	}
-	string portrait_filename = "img/portraits/battle/" + _filename + "_damage.png";
+	string portrait_filename = "img/portraits/damage/" + _filename + ".png";
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_battle_portraits, portrait_filename, 1, 5) == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to load battle portrait for character: " << portrait_filename << endl;
 
@@ -1356,7 +1356,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) :
 
 	// ----- (4): Attempt to load the MultiImage for the sprite's frames, which should contain one row and four columns of images
 	_battle_sprite_frames.assign(4, StillImage());
-	string sprite_filename = "img/sprites/battle/enemies/" + _filename + ".png";
+	string sprite_filename = "img/sprites/enemies/" + _filename + ".png";
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_battle_sprite_frames, sprite_filename, 1, 4) == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to load sprite frames for enemy: " << sprite_filename << endl;
 	}

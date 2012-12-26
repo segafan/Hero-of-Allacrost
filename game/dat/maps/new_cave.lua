@@ -873,7 +873,7 @@ function QuickEnemySnakes(x1, y1, x2, y2, n)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.FAST_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/snake_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(2);
@@ -904,7 +904,7 @@ function QuickEnemySlime(x1, y1, x2, y2, n)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/slime_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(1);
@@ -936,7 +936,7 @@ function QuickEnemyGiant(x1, y1, x2, y2, n)
 	enemy:SetImgHalfWidth(2.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/gigas_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/gigas_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(104);
 	enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");

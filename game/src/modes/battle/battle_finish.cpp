@@ -426,7 +426,7 @@ void FinishVictoryAssistant::Initialize(uint32 retries_used) {
 	for (uint32 i = 0; i < _number_characters; i++) {
 		_characters.push_back(all_characters[i]->GetGlobalCharacter());
 		 _character_growths.push_back(CharacterGrowth(_characters[i]));
-		_character_portraits[i].Load("img/portraits/map/" + _characters[i]->GetFilename() + ".png", 100.0f, 100.0f);
+		_character_portraits[i].Load("img/portraits/face/" + _characters[i]->GetFilename() + ".png", 100.0f, 100.0f);
 
 		// Grey out portraits of deceased characters
 		if (all_characters[i]->IsAlive() == false) {
