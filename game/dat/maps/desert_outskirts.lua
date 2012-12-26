@@ -743,7 +743,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/scorpion_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(2);
@@ -770,7 +770,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png"); -- enemy party will appear on map as snake
+	enemy:LoadStandardAnimations("img/sprites/enemies/snake_walk.png"); -- enemy party will appear on map as snake
 	enemy:NewEnemyParty(); -- First potential enemy party
 	enemy:AddEnemy(3); -- add a snake
 	enemy:AddEnemy(2); -- add a spider
@@ -792,7 +792,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png"); -- enemy party will appear on map as snake
+	enemy:LoadStandardAnimations("img/sprites/enemies/snake_walk.png"); -- enemy party will appear on map as snake
 	enemy:NewEnemyParty(); -- First potential enemy party
 	enemy:AddEnemy(3); -- add a snake
 	enemy:AddEnemy(2); -- add a spider

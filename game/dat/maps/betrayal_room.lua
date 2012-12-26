@@ -198,7 +198,7 @@ function Load(m)
 
 	-- Add NPCs
 	kyle = ConstructSprite("Kyle", 2, 38, 30, 0.0, 0.0);
-	kyle:LoadAttackAnimations("img/sprites/map/kyle_attack_w.png");
+	kyle:LoadAttackAnimations("img/sprites/characters/kyle_attack_w.png");
 	kyle:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 	kyle:SetNoCollision(true);
 	if (battle_scene == true) then

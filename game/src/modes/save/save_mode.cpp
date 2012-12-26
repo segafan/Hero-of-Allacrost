@@ -578,7 +578,7 @@ void SmallCharacterWindow::SetCharacter(GlobalCharacter *character) {
 	_character = character;
 	_portrait.SetStatic(true);
 
-	string portrait_filename = "img/portraits/menu/" + character->GetFilename() + "_small.png";
+	string portrait_filename = "img/portraits/face/" + character->GetFilename() + "_small.png";
 	if (DoesFileExist(portrait_filename) == false) {
 		IF_PRINT_WARNING(SAVE_DEBUG) << "character portrait image file did not exist: " << portrait_filename << endl;
 		_portrait.Load("", 100.0f, 100.0f); // Load an empty image

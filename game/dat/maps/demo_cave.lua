@@ -397,9 +397,9 @@ function Load(m)
 	sprite:SetImgHeight(4.0);
 	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprite:SetDirection(hoa_map.MapMode.EAST);
-	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
-	sprite:LoadRunningAnimations("img/sprites/map/claudius_run.png");
-	sprite:LoadFacePortrait("img/portraits/map/claudius.png");
+	sprite:LoadStandardAnimations("img/sprites/characters/claudius_walk.png");
+	sprite:LoadRunningAnimations("img/sprites/characters/claudius_run.png");
+	sprite:LoadFacePortrait("img/portraits/face/claudius.png");
 	map:AddGroundObject(sprite);
 
 	-- Set the camera to focus on the player''s sprite
@@ -417,7 +417,7 @@ function Load(m)
 	sprite:SetImgHeight(4.0);
 	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprite:SetDirection(hoa_map.MapMode.SOUTH);
-	sprite:LoadStandardAnimations("img/sprites/map/soldier_npc01_walk.png");
+	sprite:LoadStandardAnimations("img/sprites/characters/soldier_npc01_walk.png");
 
 	sprite:AddDialogueReference(1);
 	sprite:AddDialogueReference(2);
@@ -470,7 +470,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/scorpion_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(2);
@@ -495,7 +495,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/scorpion_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(2);
@@ -509,7 +509,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/slime_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(1);
@@ -531,7 +531,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/snake_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(3);
@@ -550,7 +550,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/slime_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(2);
@@ -578,7 +578,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/scorpion_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(5);
@@ -602,7 +602,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/snake_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(4);
 	enemy:AddEnemy(2);
@@ -632,7 +632,7 @@ function Load(m)
 	enemy:SetImgHalfWidth(1.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/scorpion_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(4);
 	enemy:AddEnemy(1);
@@ -728,7 +728,7 @@ map_functions[2] = function()
 	enemy:SetImgHalfWidth(2.0);
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/gigas_walk.png");
+	enemy:LoadStandardAnimations("img/sprites/enemies/gigas_walk.png");
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(103);
 	enemy:AddEnemy(104);

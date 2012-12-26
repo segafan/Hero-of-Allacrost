@@ -30,7 +30,7 @@ function Initialize(battle_instance)
 	
 	-- Add all speakers for the dialogues to be added
 	-- TODO: all of these custom speaker calls should be replaced with calls to AddCharacterSpeaker() later
-	DialogueManager:AddCustomSpeaker(1000, "Claudius", "img/portraits/menu/claudius_small.png");
+	DialogueManager:AddCustomSpeaker(1000, "Claudius", "img/portraits/face/claudius_small.png");
 	DialogueManager:AddCustomSpeaker(1001, "Mark", "");
 	DialogueManager:AddCustomSpeaker(1002, "Lukar", "");
 

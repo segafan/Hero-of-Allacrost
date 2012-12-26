@@ -404,7 +404,7 @@ function Load(m)
 
 	-- prepare sprite for the protagonist, Claudius
 	claudius_sprite = ConstructSprite("Claudius", 1000, 65, 90);
-	claudius_sprite:LoadAttackAnimations("img/sprites/map/claudius_attack.png");
+	claudius_sprite:LoadAttackAnimations("img/sprites/characters/claudius_attack.png");
 
 	-- determine which entrance to start at
 	if (GlobalManager:GetEventGroup("last_visited"):GetEvent("map_number") == 0) then

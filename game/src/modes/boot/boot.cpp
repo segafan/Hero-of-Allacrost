@@ -1016,7 +1016,7 @@ void BootMode::_TEMP_OnMenu() {
 	GlobalManager->AddCharacter(2);
 	GlobalManager->AddCharacter(4);
 	GlobalManager->AddCharacter(8);
-	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("The Boot Screen"), "img/menus/locations/desert_cave.png");
+	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("The Boot Screen"), "img/portraits/locations/desert_cave.png");
 	ModeManager->Push(MM);
 }
 
