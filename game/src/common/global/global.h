@@ -393,9 +393,13 @@ public:
 	void SetLocation(const std::string& location_name)
 		{ _location_name = hoa_utils::MakeUnicodeString(location_name); }
 
-	//! \brief Executes function NewGame() from global script
+	/** \brief Executes function NewGame() from the global.lua script
+	***
+	*** This will reset all global data, create the initial party, load the first map and add it to the game stack,
+	*** and remove the game mode that is currently on top of the stack.
+	**/
 	void NewGame()
-		{ ClearAllData(); _global_script.ExecuteFunction("NewGame"); }
+		{ _global_script.ExecuteFunction("NewGame"); }
 
 	/** \brief Saves all global data to a saved game file
 	*** \param filename The filename of the saved game file where to write the data to

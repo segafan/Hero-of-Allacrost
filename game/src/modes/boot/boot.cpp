@@ -89,9 +89,10 @@ BootMode::BootMode() :
 	_welcome_window = new WelcomeWindow();
 
 	_version_text.SetStyle(TextStyle("text20"));
-	_version_text.SetText(UTranslate("Development Release"));
+	string date_text(__DATE__);
+	_version_text.SetText(UTranslate("Development Release") + MakeUnicodeString(" - ") + MakeUnicodeString(date_text));
 	_copyright_text.SetStyle(TextStyle("text20"));
-	_copyright_text.SetText(UTranslate("© 2004 — 2011 The Allacrost Project"));
+	_copyright_text.SetText(UTranslate("© 2004 — 2013 The Allacrost Project"));
 
 	ReadScriptDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
@@ -229,7 +230,7 @@ BootMode::~BootMode() {
 
 void BootMode::Reset() {
 	// Set the coordinate system that BootMode uses
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	VideoManager->SetCoordSys(0.0f, VIDEO_STANDARD_RESOLUTION_WIDTH, 0.0f, VIDEO_STANDARD_RESOLUTION_HEIGHT);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 
 	GlobalManager->ClearAllData(); // Resets the game universe to a NULL state
@@ -252,19 +253,10 @@ void BootMode::Update() {
 	}
 
 	// Screen is in the process of fading out
-	if (_fade_out)
-	{
-		// When the screen is finished fading to black, create a new map mode and fade back in
+	if (_fade_out) {
+		// When the screen is finished fading to black, start the new game and fade the screen back in
 		if (!VideoManager->IsFading()) {
-			ModeManager->Pop();
-			try {
-				hoa_map::MapMode *MM = new hoa_map::MapMode(MakeStandardString(GlobalManager->GetLocationName()));
-				ModeManager->Push(MM);
-			} catch (luabind::error e) {
-				PRINT_ERROR << "Map::_Load -- Error loading map " << MakeStandardString(GlobalManager->GetLocationName()) << ", returning to BootMode." << endl;
-				cerr << "Exception message:" << endl;
-				ScriptManager->HandleLuaError(e);
-			}
+			GlobalManager->NewGame();
 			VideoManager->FadeScreen(Color::clear, 1000);
 		}
 		return;
@@ -468,7 +460,7 @@ void BootMode::Update() {
 void BootMode::Draw() {
 	// TODO: This SetCoordSys call should not be needed since it is called in Reset(), but if it is not here then the screen gets drawn
 	// upside down. Fix this bug. The coordinate system is probably be changed somewhere (likely in the video engine) and not being restored appropriately
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	VideoManager->SetCoordSys(0.0f, VIDEO_STANDARD_RESOLUTION_WIDTH, 0.0f, VIDEO_STANDARD_RESOLUTION_HEIGHT);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 
 	// If we're animating logo at the moment, handle all drawing in there and simply return
@@ -941,8 +933,7 @@ void BootMode::_RefreshSaveAndLoadProfiles() {
 // ****************************************************************************
 
 void BootMode::_OnNewGame() {
-	GlobalManager->NewGame();
-
+	// When the screen fading is complete, the new game data will be loaded
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1000); // Fade to black over the course of one second
 //	_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
@@ -985,7 +976,7 @@ void BootMode::_TEMP_OnBattle() {
 		PRINT_ERROR << "failed to load boot data file" << endl;
 	}
 
-	ScriptCallFunction<void>(read_data.GetLuaState(), "BootBattleTest");
+	read_data.ExecuteFunction("BootBattleTest");
 
 	if (read_data.IsErrorDetected()) {
 		PRINT_ERROR << "an error occured during reading of the boot data file" << endl;
@@ -1002,7 +993,7 @@ void BootMode::_TEMP_OnMenu() {
 		PRINT_ERROR << "failed to load boot data file" << endl;
 	}
 
-	ScriptCallFunction<void>(read_data.GetLuaState(), "BootMenuTest");
+	read_data.ExecuteFunction("BootMenuTest");
 
 	if (read_data.IsErrorDetected()) {
 		PRINT_ERROR << "an error occured during reading of the boot data file" << endl;
@@ -1028,7 +1019,7 @@ void BootMode::_TEMP_OnShop() {
 		PRINT_ERROR << "failed to load boot data file" << endl;
 	}
 
-	ScriptCallFunction<void>(read_data.GetLuaState(), "BootShopTest");
+	read_data.ExecuteFunction("BootShopTest");
 
 	if (read_data.IsErrorDetected()) {
 		PRINT_ERROR << "an error occured during reading of the boot data file" << endl;
