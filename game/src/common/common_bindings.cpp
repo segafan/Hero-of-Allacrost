@@ -93,6 +93,7 @@ void BindCommonCode() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GameGlobal>("GameGlobal")
+			.def("ClearAllData", &GameGlobal::ClearAllData)
 			.def("AddCharacter", (void(GameGlobal::*)(uint32)) &GameGlobal::AddCharacter)
 			.def("RemoveCharacter", (void(GameGlobal::*)(uint32)) &GameGlobal::RemoveCharacter)
 			.def("GetCharacter", &GameGlobal::GetCharacter)

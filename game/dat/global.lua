@@ -6,6 +6,10 @@ DESTER    = 4;
 LUKAR     = 8;
 
 function NewGame()
+	-- Make sure that any global data is cleared away
+	GlobalManager:ClearAllData();
+
+	-- Create the initial party, drunes, and inventory
 	GlobalManager:AddCharacter(LUKAR);
 	GlobalManager:AddCharacter(DESTER);
 	GlobalManager:AddCharacter(MARK);
@@ -13,17 +17,25 @@ function NewGame()
 	GlobalManager:AddNewEventGroup("global_events"); -- this group stores the primary list of events completed in the game
 	GlobalManager:SetDrunes(100);
 	GlobalManager:AddToInventory(1, 4);
-	GlobalManager:SetLocation("dat/maps/opening_scene.lua");
+
+	-- Set the location, load the opening map and add it to the game stack, and remove boot mode from the game stack
+	local location_name = "dat/maps/opening_scene.lua"
+	GlobalManager:SetLocation(location_name);
+	local opening_map = hoa_map.MapMode(location_name);
+
+	ModeManager:Pop();	
+	ModeManager:Push(opening_map);
 end
 
 
 -- Helper functions
-
 function LoadNewMap(map_name)
 	ModeManager:Pop();
 	local new_map = hoa_map.MapMode("dat/maps/" .. map_name .. ".lua");
 	ModeManager:Push(new_map);
 end
+
+
 
 function LoadNewShop(...)
 	local i, v, item;
