@@ -986,9 +986,7 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 
 	file.InsertNewLine();
 	file.WriteLine("\t\tgrowth = {");
-	file.WriteLine("\t\t\texperience_for_next_level = " + NumberToString(character->_experience_for_next_level) + ",");
 
-	file.InsertNewLine();
 	file.WriteLine("\t\t\thit_points = { ");
 	for (uint32 i = 0; i < character->_hit_points_periodic_growth.size(); i++) {
 		if (i == 0)
@@ -1077,7 +1075,6 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 	}
 	file.WriteLine("\n\t\t\t},");
 
-	file.InsertNewLine();
 	file.WriteLine("\t\t\tnew_skills_learned = {");
 	skill_vector = character->GetNewSkillsLearned();
 	for (uint32 i = 0; i < skill_vector->size(); i++) {
@@ -1160,6 +1157,7 @@ void GameGlobal::_LoadCharacter(ReadScriptDescriptor& file, uint32 id) {
 	// ----- (2): Read in all of the character's stats data
 	character->SetExperienceLevel(file.ReadUInt("experience_level"));
 	character->SetExperiencePoints(file.ReadUInt("experience_points"));
+	character->SetExperienceForNextLevel(file.ReadUInt("experience_points_next"));
 
 	character->SetMaxHitPoints(file.ReadUInt("max_hit_points"));
 	character->SetHitPoints(file.ReadUInt("hit_points"));
@@ -1230,7 +1228,6 @@ void GameGlobal::_LoadCharacter(ReadScriptDescriptor& file, uint32 id) {
 	vector<uint32> growth_keys;
 
 	file.OpenTable("growth");
-	character->SetExperienceForNextLevel(file.ReadUInt("experience_for_next_level"));
 
 	growth_keys.clear();
 	file.OpenTable("hit_points");
