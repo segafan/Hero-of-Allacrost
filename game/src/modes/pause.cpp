@@ -93,7 +93,7 @@ void PauseMode::Reset() {
 		IF_PRINT_WARNING(PAUSE_DEBUG) << e.ToString() << endl;
 	}
 
-	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
+	VideoManager->SetCoordSys(0.0f, VIDEO_STANDARD_RESOLUTION_WIDTH, 0.0f, VIDEO_STANDARD_RESOLUTION_HEIGHT);
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 }
 
@@ -166,7 +166,7 @@ void PauseMode::Draw() {
 	_screen_capture.Draw(_dim_color);
 
 	// Re-set the coordinate system for everything else
-	VideoManager->SetCoordSys(0.0f, 1023.0f, 0.0f, 767.0f);
+	VideoManager->SetCoordSys(0.0f, VIDEO_STANDARD_RESOLUTION_WIDTH, 0.0f, VIDEO_STANDARD_RESOLUTION_HEIGHT);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(512.0f, 384.0f);
 
