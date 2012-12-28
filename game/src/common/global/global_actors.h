@@ -666,17 +666,21 @@ public:
 
 	//! \name Public Member Access Functions
 	//@{
-	/** \note The reason why next level experience requirements are added and not simply set is so that any
-	*** additional experience that was earned above the amount that was needed to achieve the next level will
-	*** be factored in to reducing the amount of experience required for the next level. This is possible because
-	*** the _experience_for_next_level member is allowed to become a negative value.
+	/** \note When a character gains a level and needs to have this member updated, you should use this
+	*** "Add" method instead of the "Set" method. The reason why is so that any additional experience that
+	*** was earned above the amount that was needed to achieve the new level will  be factored in to reducing
+	*** the amount of experience required for the next level. This is possible because the _experience_for_next_level
+	*** member is allowed to become a negative value.
 	**/
 	void AddExperienceForNextLevel(uint32 xp) {
 		_experience_for_next_level += xp;
 	}
 
-	uint32 GetExperienceForNextLevel() const
+	int32 GetExperienceForNextLevel() const
 		{ return _experience_for_next_level; }
+
+	void SetExperienceForNextLevel(int32 xp)
+		{ _experience_for_next_level = xp; }
 
 	GlobalArmor* GetHeadArmorEquipped()
 		{ return _armor_equipped[GLOBAL_POSITION_HEAD]; }

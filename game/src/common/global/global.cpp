@@ -979,27 +979,16 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 	}
 	file.WriteLine("\n\t\t},");
 
-	file.InsertNewLine();
-	file.WriteLine("\t\tnew_skills_learned = {");
-	skill_vector = character->GetNewSkillsLearned();
-	for (uint32 i = 0; i < skill_vector->size(); i++) {
-		if (i == 0)
-			file.WriteLine("\t\t\t", false);
-		else
-			file.WriteLine(", ", false);
-		file.WriteLine(NumberToString(skill_vector->at(i)->GetID()), false);
-	}
-	file.WriteLine("\n\t\t},");
-
 	// ----- (4): Write out the character's growth data
 	if (character->HasUnacknowledgedGrowth() == true) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "discovered unacknowledged character growth while saving game file" << endl;
 	}
 
 	file.InsertNewLine();
-	file.WriteLine("\t\tcharacter = {");
+	file.WriteLine("\t\tgrowth = {");
 	file.WriteLine("\t\t\texperience_for_next_level = " + NumberToString(character->_experience_for_next_level) + ",");
 
+	file.InsertNewLine();
 	file.WriteLine("\t\t\thit_points = { ");
 	for (uint32 i = 0; i < character->_hit_points_periodic_growth.size(); i++) {
 		if (i == 0)
@@ -1087,8 +1076,22 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 			+ NumberToString(character->_evade_periodic_growth[i].second), false);
 	}
 	file.WriteLine("\n\t\t\t},");
-	file.WriteLine("\t\t}");
 
+	file.InsertNewLine();
+	file.WriteLine("\t\t\tnew_skills_learned = {");
+	skill_vector = character->GetNewSkillsLearned();
+	for (uint32 i = 0; i < skill_vector->size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine(NumberToString(skill_vector->at(i)->GetID()), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+
+	file.WriteLine("\t\t}"); // End of growth table
+
+	// End of character table
 	if (last == true)
 		file.WriteLine("\t}");
 	else
@@ -1223,25 +1226,11 @@ void GameGlobal::_LoadCharacter(ReadScriptDescriptor& file, uint32 id) {
 		character->AddSkill(skill_ids[i]);
 	}
 
-	skill_ids.clear();
-	file.ReadUIntVector("new_skills_learned", skill_ids);
-	vector<GlobalSkill*>* new_skills = character->GetNewSkillsLearned();
-	for (uint32 i = 0; i < skill_ids.size(); i++) {
-		GlobalSkill* skill = character->GetSkill(skill_ids[i]);
-		if (skill == NULL) {
-			IF_PRINT_WARNING(GLOBAL_DEBUG) << "skill learned was not found in character's existing set of skills: " << skill_ids[i] << endl;
-		}
-		else {
-			new_skills->push_back(skill);
-		}
-	}
-
 	// ----- (5): Reset the character's growth from the saved data
 	vector<uint32> growth_keys;
 
 	file.OpenTable("growth");
-
-	character->_experience_for_next_level = file.ReadUInt("experience_for_next_level");
+	character->SetExperienceForNextLevel(file.ReadUInt("experience_for_next_level"));
 
 	growth_keys.clear();
 	file.OpenTable("hit_points");
@@ -1307,8 +1296,21 @@ void GameGlobal::_LoadCharacter(ReadScriptDescriptor& file, uint32 id) {
 	}
 	file.CloseTable();
 
-	file.CloseTable();
-	file.CloseTable();
+	skill_ids.clear();
+	file.ReadUIntVector("new_skills_learned", skill_ids);
+	vector<GlobalSkill*>* new_skills = character->GetNewSkillsLearned();
+	for (uint32 i = 0; i < skill_ids.size(); i++) {
+		GlobalSkill* skill = character->GetSkill(skill_ids[i]);
+		if (skill == NULL) {
+			IF_PRINT_WARNING(GLOBAL_DEBUG) << "skill learned was not found in character's existing set of skills: " << skill_ids[i] << endl;
+		}
+		else {
+			new_skills->push_back(skill);
+		}
+	}
+
+	file.CloseTable(); // growth table
+	file.CloseTable(); // character table
 
 	AddCharacter(character);
 } // void GameGlobal::_LoadCharacter(ReadScriptDescriptor& file, uint32 id);
