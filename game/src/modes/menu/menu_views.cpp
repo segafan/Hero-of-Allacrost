@@ -114,7 +114,7 @@ void CharacterWindow::Draw() {
 	// XP to level up
 	VideoManager->MoveRelative(0, 20);
 	VideoManager->Text()->Draw(UTranslate("XP to Next: ") +
-		MakeUnicodeString(NumberToString(character->GetExperienceForNextLevel() - character->GetExperiencePoints())), TextStyle("text20"));
+		MakeUnicodeString(NumberToString(character->GetExperienceForNextLevel())), TextStyle("text20"));
 
 	return;
 }
@@ -578,7 +578,7 @@ void StatusWindow::Draw() {
 		" (" + NumberToString(ch->GetMaxSkillPoints()) + ")"));
 
 	VideoManager->MoveRelative(0, 25);
-	VideoManager->Text()->Draw(UTranslate("XP to Next: ") + MakeUnicodeString(NumberToString(ch->GetExperienceForNextLevel() - ch->GetExperiencePoints())));
+	VideoManager->Text()->Draw(UTranslate("XP to Next: ") + MakeUnicodeString(NumberToString(ch->GetExperienceForNextLevel())));
 
 	VideoManager->MoveRelative(0, 25);
 	VideoManager->Text()->Draw(UTranslate("Strength: ") + MakeUnicodeString(NumberToString(ch->GetStrength())));

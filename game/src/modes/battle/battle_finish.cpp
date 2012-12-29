@@ -752,7 +752,7 @@ void FinishVictoryAssistant::_UpdateGrowth() {
 
 		// TODO: check for new experience level
 		_level_xp_text[i].SetDisplayText(Translate("Level: ") + NumberToString(_characters[i]->GetExperienceLevel()) +
-			"\n" + Translate("XP: ") + NumberToString(_characters[i]->GetExperienceForNextLevel() - _characters[i]->GetExperiencePoints()));
+			"\n" + Translate("XP: ") + NumberToString(_characters[i]->GetExperienceForNextLevel()));
 	}
 
 	_xp_earned -= xp_to_add;
