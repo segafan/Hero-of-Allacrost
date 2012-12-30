@@ -1063,7 +1063,7 @@ void Editor::_HelpAbout() {
     QMessageBox::about(this, "HoA Level Editor -- About",
 		"<center><h1><font color=blue>Hero of Allacrost Level Editor<font>"
 		"</h1></center>"
-		"<center><h2><font color=blue>Copyright (c) 2004-2010<font></h2></center>"
+		"<center><h2><font color=blue>Copyright (c) 2004-2013<font></h2></center>"
 		"<p>A level editor created for the Hero of Allacrost project."
 		" See 'http://www.allacrost.org/' for more details</p>");
 }
