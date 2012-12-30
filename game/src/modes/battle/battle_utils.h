@@ -70,7 +70,7 @@ const float STAMINA_LOCATION_TOP = STAMINA_LOCATION_BOTTOM + 508.0f;
 const uint32 INVALID_BATTLE_ACTOR_INDEX = 999;
 
 //! \brief This is the idle state wait time for the fastest actor, used to set idle state timers for all other actors
-const uint32 MIN_IDLE_WAIT_TIME = 10000;
+const uint32 MIN_IDLE_WAIT_TIME = 7500;
 
 //! \brief Warm up time for using items (try to keep short, should be constant regardless of item used)
 const uint32 ITEM_WARM_UP_TIME = 1000;
