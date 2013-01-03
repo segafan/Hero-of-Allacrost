@@ -255,7 +255,7 @@ public:
 	//@{
 	uint32 TotalPhysicalDefense();
 
-	uint32 TotalMetaphysicalDefense();
+	uint32 TotalEtherealDefense();
 
 	float TotalEvadeRating();
 	//@}

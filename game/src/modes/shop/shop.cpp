@@ -268,16 +268,16 @@ StillImage* ShopMedia::GetElementalIcon(GLOBAL_ELEMENTAL element_type, GLOBAL_IN
 		case GLOBAL_ELEMENTAL_EARTH:
 			row = 3;
 			break;
-		case GLOBAL_ELEMENTAL_SLICING:
+		case GLOBAL_ELEMENTAL_SLASHING:
 			row = 4;
 			break;
-		case GLOBAL_ELEMENTAL_SMASHING:
+		case GLOBAL_ELEMENTAL_PIERCING:
 			row = 5;
 			break;
-		case GLOBAL_ELEMENTAL_MAULING:
+		case GLOBAL_ELEMENTAL_CRUSHING:
 			row = 6;
 			break;
-		case GLOBAL_ELEMENTAL_PIERCING:
+		case GLOBAL_ELEMENTAL_MAULING:
 			row = 7;
 			break;
 		default:
@@ -389,11 +389,11 @@ ShopObjectViewer::ShopObjectViewer() :
 
 	_phys_header.SetStyle(TextStyle("text22"));
 	_phys_header.SetText(UTranslate("Phys:"));
-	_meta_header.SetStyle(TextStyle("text22"));
-	_meta_header.SetText(UTranslate("Meta:"));
+	_eth_header.SetStyle(TextStyle("text22"));
+	_eth_header.SetText(UTranslate("Eth:"));
 
 	_phys_rating.SetStyle(TextStyle("text22"));
-	_meta_rating.SetStyle(TextStyle("text22"));
+	_eth_rating.SetStyle(TextStyle("text22"));
 	_socket_text.SetStyle(TextStyle("text22"));
 
 	// Size elemental and status icon containers to the total number of avaiable elementals/status effects
@@ -418,7 +418,7 @@ void ShopObjectViewer::Initialize() {
 		_character_sprites.push_back(ShopMode::CurrentInstance()->Media()->GetCharacterSprites()->at(i));
 		_character_equipped.push_back(false);
 		_phys_change_text.push_back(TextImage());
-		_meta_change_text.push_back(TextImage());
+		_eth_change_text.push_back(TextImage());
 	}
 }
 
@@ -607,7 +607,7 @@ void ShopObjectViewer::_SetEquipmentData() {
 
 	if (selected_weapon != NULL) {
 		_phys_rating.SetText(NumberToString(selected_weapon->GetPhysicalAttack()));
-		_meta_rating.SetText(NumberToString(selected_weapon->GetMetaphysicalAttack()));
+		_eth_rating.SetText(NumberToString(selected_weapon->GetEtherealAttack()));
 		_socket_text.SetText("x" + NumberToString(selected_weapon->GetSockets().size()));
 		_SetElementalIcons(selected_weapon->GetElementalEffects());
 		// TODO
@@ -615,7 +615,7 @@ void ShopObjectViewer::_SetEquipmentData() {
 	}
 	else if (selected_armor != NULL) {
 		_phys_rating.SetText(NumberToString(selected_armor->GetPhysicalDefense()));
-		_meta_rating.SetText(NumberToString(selected_armor->GetMetaphysicalDefense()));
+		_eth_rating.SetText(NumberToString(selected_armor->GetEtherealDefense()));
 		_socket_text.SetText("x" + NumberToString(selected_armor->GetSockets().size()));
 		_SetElementalIcons(selected_armor->GetElementalEffects());
 		// TODO
@@ -627,9 +627,9 @@ void ShopObjectViewer::_SetEquipmentData() {
 	GlobalCharacter* character = NULL;
 	GlobalWeapon* equipped_weapon = NULL;
 	GlobalArmor* equipped_armor = NULL;
-	int32 phys_diff = 0, meta_diff = 0; // Holds the difference in attack power from equipped weapon/armor to selected weapon/armor
+	int32 phys_diff = 0, eth_diff = 0; // Holds the difference in attack power from equipped weapon/armor to selected weapon/armor
 
-	// NOTE: In this block of code, entries to the _phys_change_text and _meta_change_text members are only modified if that information is to be
+	// NOTE: In this block of code, entries to the _phys_change_text and _eth_change_text members are only modified if that information is to be
 	// displayed for the character (meaning that the character can use the weapon/armor and does not already have it equipped). This means
 	// that these two container members may contain stale data from previous objects. This is acceptable, however, as the stale data should
 	// never be drawn. The stale data is allowed to remain so that we do not waste time re-rendering text for which we will not display.
@@ -655,7 +655,7 @@ void ShopObjectViewer::_SetEquipmentData() {
 			// Case 2: if the player does not have any weapon equipped, the stat diff is equal to the selected weapon's ratings
 			if (equipped_weapon == NULL) {
 				phys_diff = static_cast<int32>(selected_weapon->GetPhysicalAttack());
-				meta_diff = static_cast<int32>(selected_weapon->GetMetaphysicalAttack());
+				eth_diff = static_cast<int32>(selected_weapon->GetEtherealAttack());
 			}
 			// Case 3: if the player already has this weapon equipped, indicate thus and move on to the next character
 			if (selected_weapon->GetID() == equipped_weapon->GetID()) {
@@ -666,12 +666,12 @@ void ShopObjectViewer::_SetEquipmentData() {
 			else {
 				phys_diff = static_cast<int32>(selected_weapon->GetPhysicalAttack()) -
 					static_cast<int32>(equipped_weapon->GetPhysicalAttack());
-				meta_diff = static_cast<int32>(selected_weapon->GetMetaphysicalAttack()) -
-					static_cast<int32>(equipped_weapon->GetMetaphysicalAttack());
+				eth_diff = static_cast<int32>(selected_weapon->GetEtherealAttack()) -
+					static_cast<int32>(equipped_weapon->GetEtherealAttack());
 			}
 
-			// If this line has been reached, either case (2) or case (4) were evaluated as true. Render the phys/meta stat variation text
-			_SetChangeText(i, phys_diff, meta_diff);
+			// If this line has been reached, either case (2) or case (4) were evaluated as true. Render the phys/eth stat variation text
+			_SetChangeText(i, phys_diff, eth_diff);
 		}
 	}
 	else { // (selected_armor != NULL)
@@ -696,7 +696,7 @@ void ShopObjectViewer::_SetEquipmentData() {
 			// Case 2: if the player does not have any armor equipped, the stat diff is equal to the selected armor's ratings
 			if (equipped_armor == NULL) {
 				phys_diff = static_cast<int32>(selected_armor->GetPhysicalDefense());
-				meta_diff = static_cast<int32>(selected_armor->GetMetaphysicalDefense());
+				eth_diff = static_cast<int32>(selected_armor->GetEtherealDefense());
 			}
 			// Case 3: if the player already has this armor equipped, indicate thus and move on to the next character
 			if (selected_armor->GetID() == equipped_armor->GetID()) {
@@ -707,12 +707,12 @@ void ShopObjectViewer::_SetEquipmentData() {
 			else {
 				phys_diff = static_cast<int32>(selected_armor->GetPhysicalDefense()) -
 					static_cast<int32>(equipped_armor->GetPhysicalDefense());
-				meta_diff = static_cast<int32>(selected_armor->GetMetaphysicalDefense()) -
-					static_cast<int32>(equipped_armor->GetMetaphysicalDefense());
+				eth_diff = static_cast<int32>(selected_armor->GetEtherealDefense()) -
+					static_cast<int32>(equipped_armor->GetEtherealDefense());
 			}
 
-			// If this line has been reached, either case (2) or case (4) were evaluated as true. Render the phys/meta stat variation text
-			_SetChangeText(i, phys_diff, meta_diff);
+			// If this line has been reached, either case (2) or case (4) were evaluated as true. Render the phys/eth stat variation text
+			_SetChangeText(i, phys_diff, eth_diff);
 		}
 	}
 } // void ShopObjectViewer::_SetEquipmentData()
@@ -751,7 +751,7 @@ void ShopObjectViewer::_SetDescriptionText() {
 
 
 
-void ShopObjectViewer::_SetChangeText(uint32 index, int32 phys_diff, int32 meta_diff) {
+void ShopObjectViewer::_SetChangeText(uint32 index, int32 phys_diff, int32 eth_diff) {
 	if (index >= _character_sprites.size()) {
 		IF_PRINT_WARNING(SHOP_DEBUG) << "index argument was out of bounds: " << index << endl;
 		return;
@@ -771,18 +771,18 @@ void ShopObjectViewer::_SetChangeText(uint32 index, int32 phys_diff, int32 meta_
 		_phys_change_text[index].SetText(NumberToString(phys_diff));
 	}
 
-	_meta_change_text[index].Clear();
-	if (meta_diff > 0) {
-		_meta_change_text[index].SetStyle(TextStyle("text18", Color::green));
-		_meta_change_text[index].SetText("+" + NumberToString(meta_diff));
+	_eth_change_text[index].Clear();
+	if (eth_diff > 0) {
+		_eth_change_text[index].SetStyle(TextStyle("text18", Color::green));
+		_eth_change_text[index].SetText("+" + NumberToString(eth_diff));
 	}
-	else if (meta_diff < 0) {
-		_meta_change_text[index].SetStyle(TextStyle("text18", Color::red));
-		_meta_change_text[index].SetText(NumberToString(meta_diff));
+	else if (eth_diff < 0) {
+		_eth_change_text[index].SetStyle(TextStyle("text18", Color::red));
+		_eth_change_text[index].SetText(NumberToString(eth_diff));
 	}
-	else { // (meta_diff == 0)
-		_meta_change_text[index].SetStyle(TextStyle("text18", Color::white));
-		_meta_change_text[index].SetText(NumberToString(meta_diff));
+	else { // (eth_diff == 0)
+		_eth_change_text[index].SetStyle(TextStyle("text18", Color::white));
+		_eth_change_text[index].SetText(NumberToString(eth_diff));
 	}
 }
 
@@ -805,16 +805,16 @@ void ShopObjectViewer::_SetElementalIcons(const map<GLOBAL_ELEMENTAL, GLOBAL_INT
 			case GLOBAL_ELEMENTAL_EARTH:
 				index = 3;
 				break;
-			case GLOBAL_ELEMENTAL_SLICING:
+			case GLOBAL_ELEMENTAL_SLASHING:
 				index = 4;
 				break;
-			case GLOBAL_ELEMENTAL_SMASHING:
+			case GLOBAL_ELEMENTAL_PIERCING:
 				index = 5;
 				break;
-			case GLOBAL_ELEMENTAL_MAULING:
+			case GLOBAL_ELEMENTAL_CRUSHING:
 				index = 6;
 				break;
-			case GLOBAL_ELEMENTAL_PIERCING:
+			case GLOBAL_ELEMENTAL_MAULING:
 				index = 7;
 				break;
 			default:
@@ -879,13 +879,13 @@ void ShopObjectViewer::_DrawEquipment() {
 	VideoManager->MoveRelative(80.0f, 15.0f);
 	_phys_header.Draw();
 	VideoManager->MoveRelative(0.0f, -30.0f);
-	_meta_header.Draw();
+	_eth_header.Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, 0);
 	VideoManager->MoveRelative(90.0f, 30.0f);
 	_phys_rating.Draw();
 	VideoManager->MoveRelative(0.0f, -30.0f);
-		_meta_rating.Draw();
+	_eth_rating.Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
 	VideoManager->MoveRelative(20.0f, 15.0f);
@@ -943,12 +943,12 @@ void ShopObjectViewer::_DrawEquipment() {
 			_equip_icon.Draw();
 			VideoManager->MoveRelative(0.0f, 78.0f);
 		}
-		// Case 2: Draw the phys/meta change text below the sprite
+		// Case 2: Draw the phys/eth change text below the sprite
 		else if (_character_sprites[i].IsGrayScale() == false) {
 			VideoManager->MoveRelative(0.0f, -65.0f);
 			_phys_change_text[i].Draw();
 			VideoManager->MoveRelative(0.0f, -20.0f);
-			_meta_change_text[i].Draw();
+			_eth_change_text[i].Draw();
 			VideoManager->MoveRelative(0.0f, 85.0f);
 		}
 		// Case 3: Nothing needs to be drawn below the sprite

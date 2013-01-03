@@ -281,11 +281,11 @@ private:
 
 	//! \name Data used only for weapon and armor object types
 	//@{
-	//! \brief Header text identifying the physical and metaphysical ratings
-	hoa_video::TextImage _phys_header, _meta_header;
+	//! \brief Header text identifying the physical and ethereal ratings
+	hoa_video::TextImage _phys_header, _eth_header;
 
-	//! \brief A rendering of the physical and metaphysical attack/defense ratings
-	hoa_video::TextImage _phys_rating, _meta_rating;
+	//! \brief A rendering of the physical and ethereal attack/defense ratings
+	hoa_video::TextImage _phys_rating, _eth_rating;
 
 	//! \brief An icon image of a shard socket
 	hoa_video::StillImage _socket_icon;
@@ -311,8 +311,8 @@ private:
 	//! \brief For weapons and armor, this member is set to true for each character that has the object equipped
 	std::vector<bool> _character_equipped;
 
-	//! \brief For weapons and armor, text to indicate changes in phys/meta stats from current equipment
-	std::vector<hoa_video::TextImage> _phys_change_text, _meta_change_text;
+	//! \brief For weapons and armor, text to indicate changes in phys/eth stats from current equipment
+	std::vector<hoa_video::TextImage> _phys_change_text, _eth_change_text;
 	//@}
 
 	/** \brief Updates the data and visuals associated specifically with items for the selected object
@@ -333,12 +333,12 @@ private:
 	//! \brief Determines the proper window owner, position, dimensions for description text
 	void _SetDescriptionText();
 
-	/** \brief Renders the desired physical and metaphysical change text
-	*** \param index The index into the _phys_change_text and _meta_change_text containers to re-render
+	/** \brief Renders the desired physical and ethereal change text
+	*** \param index The index into the _phys_change_text and _eth_change_text containers to re-render
 	*** \param phys_diff The physical change amount
-	*** \param meta_diff The metaphysical change amount
+	*** \param eth_diff The ethereal change amount
 	**/
-	void _SetChangeText(uint32 index, int32 phys_diff, int32 meta_diff);
+	void _SetChangeText(uint32 index, int32 phys_diff, int32 eth_diff);
 
 	/** \brief Sets all elemental icons to the proper image when given a container
 	*** \param elemental_effects A const reference to a map of elemental effect types and their associated intensities

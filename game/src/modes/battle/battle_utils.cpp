@@ -279,25 +279,25 @@ uint32 CalculatePhysicalDamageMultiplier(BattleActor* attacker, BattleTarget* ta
 
 
 
-uint32 CalculateMetaphysicalDamage(BattleActor* attacker, BattleTarget* target) {
-	return CalculateMetaphysicalDamageAdder(attacker, target, 0, 0.10f);
+uint32 CalculateEtherealDamage(BattleActor* attacker, BattleTarget* target) {
+	return CalculateEtherealDamageAdder(attacker, target, 0, 0.10f);
 }
 
 
 
-uint32 CalculateMetaphysicalDamage(BattleActor* attacker, BattleTarget* target, float std_dev) {
-	return CalculateMetaphysicalDamageAdder(attacker, target, 0, std_dev);
+uint32 CalculateEtherealDamage(BattleActor* attacker, BattleTarget* target, float std_dev) {
+	return CalculateEtherealDamageAdder(attacker, target, 0, std_dev);
 }
 
 
 
-uint32 CalculateMetaphysicalDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk) {
-	return CalculateMetaphysicalDamageAdder(attacker, target, add_atk, 0.10f);
+uint32 CalculateEtherealDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk) {
+	return CalculateEtherealDamageAdder(attacker, target, add_atk, 0.10f);
 }
 
 
 
-uint32 CalculateMetaphysicalDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk, float std_dev) {
+uint32 CalculateEtherealDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk, float std_dev) {
 	if (attacker == NULL) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL attacker argument" << endl;
 		return 0;
@@ -315,20 +315,20 @@ uint32 CalculateMetaphysicalDamageAdder(BattleActor* attacker, BattleTarget* tar
 		std_dev = fabs(std_dev);
 	}
 
-	// Holds the total physical attack of the attacker and modifier
-	int32 total_meta_atk = 0;
-	total_meta_atk = attacker->GetTotalMetaphysicalAttack() + add_atk;
-	if (total_meta_atk < 0)
-		total_meta_atk = 0;
+	// Holds the total ethereal attack of the attacker and modifier
+	int32 total_eth_atk = 0;
+	total_eth_atk = attacker->GetTotalEtherealAttack() + add_atk;
+	if (total_eth_atk < 0)
+		total_eth_atk = 0;
 
-	// Holds the total physical defense of the target
-	int32 total_meta_def = 0;
+	// Holds the total ethereal defense of the target
+	int32 total_eth_def = 0;
 
 	if (IsTargetPoint(target->GetType()) == true) {
-		total_meta_def = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalMetaphysicalDefense();
+		total_eth_def = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalEtherealDefense();
 	}
 	else if (IsTargetActor(target->GetType()) == true) {
-		total_meta_def = target->GetActor()->TotalMetaphysicalDefense();
+		total_eth_def = target->GetActor()->TotalEtherealDefense();
 	}
 	else {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << target->GetType() << endl;
@@ -336,7 +336,7 @@ uint32 CalculateMetaphysicalDamageAdder(BattleActor* attacker, BattleTarget* tar
 	}
 
 	// Holds the total damage dealt
-	int32 total_dmg = total_meta_atk - total_meta_def;
+	int32 total_dmg = total_eth_atk - total_eth_def;
 	if (total_dmg < 0)
 		total_dmg = 0;
 
@@ -355,17 +355,17 @@ uint32 CalculateMetaphysicalDamageAdder(BattleActor* attacker, BattleTarget* tar
 		return static_cast<uint32>(RandomBoundedInteger(1, 5));
 
 	return static_cast<uint32>(total_dmg);
-} // uint32 CalculateMetaphysicalDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk, float std_dev)
+} // uint32 CalculateEtherealDamageAdder(BattleActor* attacker, BattleTarget* target, int32 add_atk, float std_dev)
 
 
 
-uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_atk) {
-	return CalculateMetaphysicalDamageMultiplier(attacker, target, mul_atk, 0.10f);
+uint32 CalculateEtherealDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_atk) {
+	return CalculateEtherealDamageMultiplier(attacker, target, mul_atk, 0.10f);
 }
 
 
 
-uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_atk, float std_dev) {
+uint32 CalculateEtherealDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_atk, float std_dev) {
 	if (attacker == NULL) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "function received NULL attacker argument" << endl;
 		return 0;
@@ -387,20 +387,20 @@ uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget
 		std_dev = fabs(std_dev);
 	}
 
-	// Retrieve the total physical attack of the attacker and apply the modifier
-	int32 total_meta_atk = static_cast<int32>(static_cast<float>(attacker->GetTotalMetaphysicalAttack()) * mul_atk);
+	// Retrieve the total ethereal attack of the attacker and apply the modifier
+	int32 total_eth_atk = static_cast<int32>(static_cast<float>(attacker->GetTotalEtherealAttack()) * mul_atk);
 
-	if (total_meta_atk < 0)
-		total_meta_atk = 0;
+	if (total_eth_atk < 0)
+		total_eth_atk = 0;
 
-	// Holds the total physical defense of the target
-	int32 total_meta_def = 0;
+	// Holds the total etheral defense of the target
+	int32 total_eth_def = 0;
 
 	if (IsTargetPoint(target->GetType()) == true) {
-		total_meta_def = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalMetaphysicalDefense();
+		total_eth_def = target->GetActor()->GetAttackPoint(target->GetPoint())->GetTotalEtherealDefense();
 	}
 	else if (IsTargetActor(target->GetType()) == true) {
-		total_meta_def = target->GetActor()->TotalMetaphysicalDefense();
+		total_eth_def = target->GetActor()->TotalEtherealDefense();
 	}
 	else {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid target type: " << target->GetType() << endl;
@@ -408,7 +408,7 @@ uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget
 	}
 
 	// Holds the total damage dealt
-	int32 total_dmg = total_meta_atk - total_meta_def;
+	int32 total_dmg = total_eth_atk - total_eth_def;
 
 	// If the total damage is zero, fall back to causing a small non-zero damage value
 	if (total_dmg <= 0)
@@ -426,7 +426,7 @@ uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget
 		return static_cast<uint32>(RandomBoundedInteger(1, 5));
 
 	return static_cast<uint32>(total_dmg);
-} // uint32 CalculateMetaphysicalDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float std_dev)
+} // uint32 CalculateEtherealDamageMultiplier(BattleActor* attacker, BattleTarget* target, float mul_phys, float std_dev)
 
 ////////////////////////////////////////////////////////////////////////////////
 // BattleTimer class

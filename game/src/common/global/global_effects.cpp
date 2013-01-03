@@ -38,14 +38,14 @@ string GetElementName(GLOBAL_ELEMENTAL type) {
 			return Translate("Volt");
 		case GLOBAL_ELEMENTAL_EARTH:
 			return Translate("Earth");
-		case GLOBAL_ELEMENTAL_SLICING:
-			return Translate("Slicing");
-		case GLOBAL_ELEMENTAL_SMASHING:
-			return Translate("Smashing");
-		case GLOBAL_ELEMENTAL_MAULING:
-			return Translate("Mauling");
+		case GLOBAL_ELEMENTAL_SLASHING:
+			return Translate("Slashing");
 		case GLOBAL_ELEMENTAL_PIERCING:
 			return Translate("Piercing");
+		case GLOBAL_ELEMENTAL_CRUSHING:
+			return Translate("Crushing");
+		case GLOBAL_ELEMENTAL_MAULING:
+			return Translate("Mauling");
 		default:
 			return Translate("Invalid Elemental");
 	}
