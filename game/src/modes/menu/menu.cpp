@@ -875,19 +875,19 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->Move(550, 577);
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("META ATK: ") + MakeUnicodeString(NumberToString(ch->GetWeaponEquipped()->GetMetaphysicalAttack())));
+		VideoManager->Text()->Draw(UTranslate("ETH ATK: ") + MakeUnicodeString(NumberToString(ch->GetWeaponEquipped()->GetEtherealAttack())));
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("META DEF: ") + MakeUnicodeString(NumberToString(ch->GetHeadArmorEquipped()->GetMetaphysicalDefense())));
+		VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetHeadArmorEquipped()->GetEtherealDefense())));
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("META DEF: ") + MakeUnicodeString(NumberToString(ch->GetTorsoArmorEquipped()->GetMetaphysicalDefense())));
+		VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetTorsoArmorEquipped()->GetEtherealDefense())));
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("META DEF: ") + MakeUnicodeString(NumberToString(ch->GetArmArmorEquipped()->GetMetaphysicalDefense())));
+		VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetArmArmorEquipped()->GetEtherealDefense())));
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("META DEF: ") + MakeUnicodeString(NumberToString(ch->GetLegArmorEquipped()->GetMetaphysicalDefense())));
+		VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetLegArmorEquipped()->GetEtherealDefense())));
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
 
 
@@ -907,9 +907,9 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(weapon->GetPhysicalAttack())));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->Text()->Draw(UTranslate("META ATK:"));
+					VideoManager->Text()->Draw(UTranslate("ETH ATK:"));
 					VideoManager->MoveRelative(0, 20);
-					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(weapon->GetMetaphysicalAttack())));
+					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(weapon->GetEtherealAttack())));
 					VideoManager->MoveRelative(0, 20);
 
 					break;
@@ -926,9 +926,9 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetPhysicalDefense())));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->Text()->Draw(UTranslate("META DEF:"));
+					VideoManager->Text()->Draw(UTranslate("ETH DEF:"));
 					VideoManager->MoveRelative(0, 20);
-					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetMetaphysicalDefense())));
+					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetEtherealDefense())));
 					VideoManager->MoveRelative(0, 20);
 
 					break;
@@ -945,9 +945,9 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetPhysicalDefense())));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->Text()->Draw(UTranslate("META DEF:"));
+					VideoManager->Text()->Draw(UTranslate("ETH DEF:"));
 					VideoManager->MoveRelative(0, 20);
-					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetMetaphysicalDefense())));
+					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetEtherealDefense())));
 					VideoManager->MoveRelative(0, 20);
 
 					break;
@@ -964,9 +964,9 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetPhysicalDefense())));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->Text()->Draw(UTranslate("META DEF:"));
+					VideoManager->Text()->Draw(UTranslate("ETH DEF:"));
 					VideoManager->MoveRelative(0, 20);
-					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetMetaphysicalDefense())));
+					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetEtherealDefense())));
 					VideoManager->MoveRelative(0, 20);
 
 					break;
@@ -983,9 +983,9 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetPhysicalDefense())));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->Text()->Draw(UTranslate("META DEF:"));
+					VideoManager->Text()->Draw(UTranslate("ETH DEF:"));
 					VideoManager->MoveRelative(0, 20);
-					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetMetaphysicalDefense())));
+					VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(armor->GetEtherealDefense())));
 					VideoManager->MoveRelative(0, 20);
 
 					break;

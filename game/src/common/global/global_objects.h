@@ -222,7 +222,7 @@ private:
 *** All classes of weapons (swords, bows, spears, etc.) are represented by this
 *** class. Typically, a weapon may only be used by a select few and can not be
 *** equipped on every character. Weapons have two attack ratings: physical
-*** and metaphysical, both of which are included in the damage calculation
+*** and ethereal, both of which are included in the damage calculation
 *** formulae when a character or enemy attacks using the weapon. Weapons may also
 *** have a small number of "sockets" in which shards can be inserted to improve
 *** or alter the weapon's properties. Some weapons have zero sockets available.
@@ -247,8 +247,8 @@ public:
 	uint32 GetPhysicalAttack() const
 		{ return _physical_attack; }
 
-	uint32 GetMetaphysicalAttack() const
-		{ return _metaphysical_attack; }
+	uint32 GetEtherealAttack() const
+		{ return _ethereal_attack; }
 
 	uint32 GetUsableBy() const
 		{ return _usable_by; }
@@ -264,8 +264,8 @@ private:
 	//! \brief The amount of physical damage that the weapon causes
 	uint32 _physical_attack;
 
-	//! \brief The amount of metaphysical damage that the weapon causes
-	uint32 _metaphysical_attack;
+	//! \brief The amount of ethereal damage that the weapon causes
+	uint32 _ethereal_attack;
 
 	/** \brief A bit-mask that determines which characters can use or equip the object
 	*** See the game character ID constants in global_actors.h for more information
@@ -297,7 +297,7 @@ private:
 *** between different types of armor is where they may be equipped on an actor. Not
 *** all armor can be equipped by any character or enemy. Typically, armor may only
 *** be used by a select few and can not be equipped on every character. Armor have
-*** two defense ratings: physical and metaphysical, both of which are included in
+*** two defense ratings: physical and etheral, both of which are included in
 *** the damage calculation formulae when a character or enemy is attacked at the
 *** location where the armor is equipped. Armor may also have a small number of
 *** "sockets" in which shards can be inserted to improve or alter the armor's
@@ -318,8 +318,8 @@ public:
 	uint32 GetPhysicalDefense() const
 		{ return _physical_defense; }
 
-	uint32 GetMetaphysicalDefense() const
-		{ return _metaphysical_defense; }
+	uint32 GetEtherealDefense() const
+		{ return _ethereal_defense; }
 
 	uint32 GetUsableBy() const
 		{ return _usable_by; }
@@ -334,8 +334,8 @@ private:
 	//! \brief The amount of physical defense that the armor provides
 	uint32 _physical_defense;
 
-	//! \brief The amount of metaphysical defense that the armor provides
-	uint32 _metaphysical_defense;
+	//! \brief The amount of ethereal defense that the armor provides
+	uint32 _ethereal_defense;
 
 	/** \brief A bit-mask that determines which characters can use or equip the object
 	*** See the game character ID constants in global_actors.h for more information

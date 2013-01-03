@@ -20,7 +20,7 @@
 -- {description}: A brief description about the armor.
 -- {icon}: The filepath to the image icon representing this armor.
 -- {physical_defense}: The amount of physical defense that the armor provides.
--- {metaphysical_defense}: The amount of metaphysical defense that the armor casues.
+-- {ethereal_defense}: The amount of ethereal defense that the armor casues.
 -- {standard_price}: The standard asking price of this armor from merchants.
 -- {usable_by}: A list of characters which may equip this armor,
 -- {slots}: The number of slots available to equip shards on the armor.
@@ -41,7 +41,7 @@ armor[20001] = {
 	description = hoa_system.Translate("Standard Karlate issued equipment. Battle worn but reliable head protection."),
 	icon = "img/icons/armor/karlate_helmet.png",
 	physical_defense = 6,
-	metaphysical_defense = 2,
+	ethereal_defense = 2,
 	standard_price = 80,
 	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0
@@ -52,7 +52,7 @@ armor[20002] = {
 	description = hoa_system.Translate("A small helmet composed of a secret cobalt based alloy."),
 	icon = "img/icons/armor/cobalt_helm.png",
 	physical_defense = 8,
-	metaphysical_defense = 4,
+	ethereal_defense = 4,
 	standard_price = 140,
 	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0
@@ -63,7 +63,7 @@ armor[20003] = {
 	description = hoa_system.Translate("A sturdy helmet with a hinged face guard offering additional protection."),
 	icon = "img/icons/armor/crested_helmet.png",
 	physical_defense = 11,
-	metaphysical_defense = 6,
+	ethereal_defense = 6,
 	standard_price = 220,
 	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0

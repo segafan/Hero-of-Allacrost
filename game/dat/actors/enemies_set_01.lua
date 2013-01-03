@@ -13,16 +13,16 @@
 --
 -- Traits -----------------------------------------------------------------------
 -- HSP: high HP, low SP
--- ATK: low phys, no meta
--- DEF: low phys, med meta
+-- ATK: low phys, no eth
+-- DEF: low phys, med eth
 -- SPD: med agi, low eva
 -- XPD: med XP, vlow drunes
 --------------------------------------------------------------------------------
 --
 -- The three letter acronym categories mean the following
 -- HSP = HP/SP
--- ATK = Attack Ratings (physical and metaphysical)
--- DEF = Defense Ratings (physical and metaphysical)
+-- ATK = Attack Ratings (physical and ethereal)
+-- DEF = Defense Ratings (physical and ethereal)
 -- SPD = Speed Ratings (agility and evade)
 -- XPD = Experience points and drunes rewarded
 --
@@ -39,8 +39,8 @@ end
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: low HP, vlow SP
--- ATK: low phys, zero meta
--- DEF: low phys, vlow meta
+-- ATK: low phys, zero eth
+-- DEF: low phys, vlow eth
 -- SPD: low agi, low eva
 -- XPD: low XP, vlow drunes
 --------------------------------------------------------------------------------
@@ -85,8 +85,8 @@ enemies[1] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: low HP, vlow SP
--- ATK: low phys, zero meta
--- DEF: med phys, low meta
+-- ATK: low phys, zero eth
+-- DEF: med phys, low eth
 -- SPD: low agi, low eva
 -- XPD: low XP, low drunes
 --------------------------------------------------------------------------------
@@ -139,8 +139,8 @@ enemies[2] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: med HP, low SP
--- ATK: med phys, zero meta
--- DEF: med phys, low meta
+-- ATK: med phys, zero eth
+-- DEF: med phys, low eth
 -- SPD: med agi, low eva
 -- XPD: low XP, med drunes
 --------------------------------------------------------------------------------
@@ -202,8 +202,8 @@ enemies[3] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: med HP, low SP
--- ATK: med phys, zero meta
--- DEF: med phys, low meta
+-- ATK: med phys, zero eth
+-- DEF: med phys, low eth
 -- SPD: med agi, med eva
 -- XPD: low XP, med drunes
 --------------------------------------------------------------------------------
@@ -256,8 +256,8 @@ enemies[4] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: low HP, low SP
--- ATK: med phys, zero meta
--- DEF: med phys, low meta
+-- ATK: med phys, zero eth
+-- DEF: med phys, low eth
 -- SPD: high agi, med eva
 -- XPD: med XP, low drunes
 --------------------------------------------------------------------------------
@@ -319,8 +319,8 @@ enemies[5] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: med HP, low SP
--- ATK: low phys, zero meta
--- DEF: low phys, low meta
+-- ATK: low phys, zero eth
+-- DEF: low phys, low eth
 -- SPD: high agi, med eva
 -- XPD: low XP, low drunes
 --------------------------------------------------------------------------------
@@ -374,8 +374,8 @@ enemies[6] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: ??? HP, ??? SP
--- ATK: ??? phys, ??? meta
--- DEF: ??? phys, ??? meta
+-- ATK: ??? phys, ??? eth
+-- DEF: ??? phys, ??? eth
 -- SPD: ??? agi, ??? eva
 -- XPD: ??? XP, ??? drunes
 --------------------------------------------------------------------------------
@@ -428,8 +428,8 @@ enemies[7] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: med HP, med SP
--- ATK: high phys, zero meta
--- DEF: high phys, low meta
+-- ATK: high phys, zero eth
+-- DEF: high phys, low eth
 -- SPD: low agi, low eva
 -- XPD: med XP, med drunes
 --------------------------------------------------------------------------------
@@ -491,8 +491,8 @@ enemies[8] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: high HP, med SP
--- ATK: med phys, zero meta
--- DEF: med phys, low meta
+-- ATK: med phys, zero eth
+-- DEF: med phys, low eth
 -- SPD: low agi, low eva
 -- XPD: med XP, high drunes
 --------------------------------------------------------------------------------
@@ -553,8 +553,8 @@ enemies[9] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: med HP, med SP
--- ATK: low phys, med meta
--- DEF: low phys, med meta
+-- ATK: low phys, med eth
+-- DEF: low phys, med eth
 -- SPD: med agi, med eva
 -- XPD: med XP, med drunes
 --------------------------------------------------------------------------------
@@ -615,8 +615,8 @@ enemies[10] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: vhigh HP, med SP
--- ATK: high phys, zero meta
--- DEF: high phys, low meta
+-- ATK: high phys, zero eth
+-- DEF: high phys, low eth
 -- SPD: med agi, low eva
 -- XPD: vhigh XP, high drunes
 -- Notes: First boss in prologue module
@@ -678,8 +678,8 @@ enemies[91] = {
 
 -- Traits -----------------------------------------------------------------------
 -- HSP: high HP, med SP
--- ATK: med phys, zero meta
--- DEF: med phys, low meta
+-- ATK: med phys, zero eth
+-- DEF: med phys, low eth
 -- SPD: med agi, low eva
 -- XPD: high XP, high drunes
 -- Notes: Second boss in prologue module

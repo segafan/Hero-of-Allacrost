@@ -158,7 +158,7 @@ enum GLOBAL_OBJECT {
 
 /** \name Elemental Effect Types
 *** \brief Used to identify the eight different types of elementals
-*** There are a total of four physical and four metaphysical elemental effects
+*** There are a total of four physical and four ethereal elemental effects
 **/
 enum GLOBAL_ELEMENTAL {
 	GLOBAL_ELEMENTAL_INVALID    = -1,
@@ -166,10 +166,10 @@ enum GLOBAL_ELEMENTAL {
 	GLOBAL_ELEMENTAL_WATER      =  1,
 	GLOBAL_ELEMENTAL_VOLT       =  2,
 	GLOBAL_ELEMENTAL_EARTH      =  3,
-	GLOBAL_ELEMENTAL_SLICING    =  4,
-	GLOBAL_ELEMENTAL_SMASHING   =  5,
-	GLOBAL_ELEMENTAL_MAULING    =  6,
-	GLOBAL_ELEMENTAL_PIERCING   =  7,
+	GLOBAL_ELEMENTAL_SLASHING   =  4,
+	GLOBAL_ELEMENTAL_PIERCING   =  5,
+	GLOBAL_ELEMENTAL_CRUSHING   =  6,
+	GLOBAL_ELEMENTAL_MAULING    =  7,
 	GLOBAL_ELEMENTAL_TOTAL      =  8
 };
 

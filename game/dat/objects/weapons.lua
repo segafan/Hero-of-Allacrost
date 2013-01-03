@@ -20,7 +20,7 @@
 -- {description}: A brief description about the weapon.
 -- {icon}: The filepath to the image icon representing this weapon.
 -- {physical_attack}: The amount of physical damage that the weapon causes.
--- {metaphysical_attack}: The amount of metaphysical damage that the weapon causes.
+-- {ethereal_attack}: The amount of ethereal damage that the weapon causes.
 -- {standard_price}: The standard asking price of this weapon from merchants.
 -- {usable_by}: A list of characters which may equip this weapon.
 -- {slots}: The number of slots available to equip shards on the weapon.
@@ -41,7 +41,7 @@ weapons[10001] = {
 	description = hoa_system.Translate("Standard Karlate issued equipment. A light weight iron sword suitable for most skirmishes."),
 	icon = "img/icons/weapons/karlate_sword.png",
 	physical_attack = 12,
-	metaphysical_attack = 0,
+	ethereal_attack = 0,
 	standard_price = 120,
 	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0
@@ -52,7 +52,7 @@ weapons[10002] = {
 	description = hoa_system.Translate("A sturdy but somewhat dull sword whose blade was forged from a single block of solid iron."),
 	icon = "img/icons/weapons/iron_sword.png",
 	physical_attack = 16,
-	metaphysical_attack = 0,
+	ethereal_attack = 0,
 	standard_price = 250,
 	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0
@@ -63,7 +63,7 @@ weapons[10003] = {
 	description = hoa_system.Translate("A weapon bestowed to seasoned veterans of the knighthood in several kingdoms throughout the world."),
 	icon = "img/icons/weapons/knights_blade.png",
 	physical_attack = 34,
-	metaphysical_attack = 0,
+	ethereal_attack = 0,
 	standard_price = 800,
 	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 1

@@ -20,7 +20,7 @@
 -- {description}: A brief description about the armor.
 -- {icon}: The filepath to the image icon representing this armor.
 -- {physical_defense}: The amount of physical defense that the armor provides.
--- {metaphysical_defense}: The amount of metaphysical defense that the armor casues.
+-- {ethereal_defense}: The amount of ethereal defense that the armor casues.
 -- {standard_price}: The standard asking price of this armor from merchants.
 -- {usable_by}: A list of characters which may equip this armor,
 -- {slots}: The number of slots available to equip shards on the armor.
@@ -41,7 +41,7 @@ armor[30001] = {
 	description = hoa_system.Translate("A light chain mail woven into a tough leather cuirass."),
 	icon = "img/icons/armor/leather_chain_mail.png",
 	physical_defense = 8,
-	metaphysical_defense = 2,
+	ethereal_defense = 2,
 	standard_price = 170,
 	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0
@@ -52,7 +52,7 @@ armor[30002] = {
 	description = hoa_system.Translate("Standard Karlate issued equipment. Effectively protects the torso from most types of attack."),
 	icon = "img/icons/armor/karlate_breastplate.png",
 	physical_defense = 14,
-	metaphysical_defense = 3,
+	ethereal_defense = 3,
 	standard_price = 320,
 	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0
@@ -63,7 +63,7 @@ armor[30003] = {
 	description = hoa_system.Translate("A breastplate with slightly thicker armor than is commonly found and additional shoulder guards."),
 	icon = "img/icons/armor/shouldered_breastplate.png",
 	physical_defense = 20,
-	metaphysical_defense = 5,
+	ethereal_defense = 5,
 	standard_price = 600,
 	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
 	slots = 0

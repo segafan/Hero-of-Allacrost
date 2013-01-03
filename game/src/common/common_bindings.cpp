@@ -157,10 +157,10 @@ void BindCommonCode() {
 				value("GLOBAL_ELEMENTAL_WATER", GLOBAL_ELEMENTAL_WATER),
 				value("GLOBAL_ELEMENTAL_VOLT", GLOBAL_ELEMENTAL_VOLT),
 				value("GLOBAL_ELEMENTAL_EARTH", GLOBAL_ELEMENTAL_EARTH),
-				value("GLOBAL_ELEMENTAL_SLICING", GLOBAL_ELEMENTAL_SLICING),
-				value("GLOBAL_ELEMENTAL_SMASHING", GLOBAL_ELEMENTAL_SMASHING),
-				value("GLOBAL_ELEMENTAL_MAULING", GLOBAL_ELEMENTAL_MAULING),
+				value("GLOBAL_ELEMENTAL_SLASHING", GLOBAL_ELEMENTAL_SLASHING),
 				value("GLOBAL_ELEMENTAL_PIERCING", GLOBAL_ELEMENTAL_PIERCING),
+				value("GLOBAL_ELEMENTAL_CRUSHING", GLOBAL_ELEMENTAL_CRUSHING),
+				value("GLOBAL_ELEMENTAL_MAULING", GLOBAL_ELEMENTAL_MAULING),
 				// Status type constants
 				value("GLOBAL_STATUS_INVALID", GLOBAL_STATUS_INVALID),
 				value("GLOBAL_STATUS_STRENGTH_RAISE", GLOBAL_STATUS_STRENGTH_RAISE),
@@ -226,7 +226,7 @@ void BindCommonCode() {
 			.def("GetEvadeModifier", &GlobalAttackPoint::GetEvadeModifier)
 			.def("GetActorOwner", &GlobalAttackPoint::GetActorOwner)
 			.def("GetTotalPhysicalDefense", &GlobalAttackPoint::GetTotalPhysicalDefense)
-			.def("GetTotalMetaphysicalDefense", &GlobalAttackPoint::GetTotalMetaphysicalDefense)
+			.def("GetTotalEtherealDefense", &GlobalAttackPoint::GetTotalEtherealDefense)
 			.def("GetTotalEvadeRating", &GlobalAttackPoint::GetTotalEvadeRating)
 	];
 
@@ -250,7 +250,7 @@ void BindCommonCode() {
 			.def("GetEvade", &GlobalActor::GetEvade)
 
 			.def("GetTotalPhysicalAttack", &GlobalActor::GetTotalPhysicalAttack)
-			.def("GetTotalMetaphysicalAttack", &GlobalActor::GetTotalMetaphysicalAttack)
+			.def("GetTotalEtherealAttack", &GlobalActor::GetTotalEtherealAttack)
 			.def("GetAttackPoint", &GlobalActor::GetAttackPoint)
 // 			.def("GetWeaponEquipped", &GlobalActor::GetWeaponEquipped)
 // 			.def("GetArmorEquipped", (GlobalArmor* (GlobalActor::*)(uint32)) &GlobalActor::GetArmorEquipped)

@@ -160,10 +160,10 @@ GlobalWeapon::GlobalWeapon(uint32 id, uint32 count) :
 	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_WATER, GLOBAL_INTENSITY_NEUTRAL));
 	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_VOLT, GLOBAL_INTENSITY_NEUTRAL));
 	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_EARTH, GLOBAL_INTENSITY_NEUTRAL));
-	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SLICING, GLOBAL_INTENSITY_NEUTRAL));
-	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SMASHING, GLOBAL_INTENSITY_NEUTRAL));
-	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_MAULING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SLASHING, GLOBAL_INTENSITY_NEUTRAL));
 	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_PIERCING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_CRUSHING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_MAULING, GLOBAL_INTENSITY_NEUTRAL));
 
 	if ((_id <= MAX_ITEM_ID) || (_id > MAX_WEAPON_ID)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "invalid id in constructor: " << _id << endl;
@@ -183,7 +183,7 @@ GlobalWeapon::GlobalWeapon(uint32 id, uint32 count) :
 	_LoadObjectData(script_file);
 
 	_physical_attack = script_file.ReadUInt("physical_attack");
-	_metaphysical_attack = script_file.ReadUInt("metaphysical_attack");
+	_ethereal_attack = script_file.ReadUInt("ethereal_attack");
 	_usable_by = script_file.ReadUInt("usable_by");
 
 	script_file.CloseTable();
@@ -208,10 +208,10 @@ GlobalArmor::GlobalArmor(uint32 id, uint32 count) :
 	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_WATER, GLOBAL_INTENSITY_NEUTRAL));
 	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_VOLT, GLOBAL_INTENSITY_NEUTRAL));
 	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_EARTH, GLOBAL_INTENSITY_NEUTRAL));
-	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SLICING, GLOBAL_INTENSITY_NEUTRAL));
-	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SMASHING, GLOBAL_INTENSITY_NEUTRAL));
-	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_MAULING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_SLASHING, GLOBAL_INTENSITY_NEUTRAL));
 	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_PIERCING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_CRUSHING, GLOBAL_INTENSITY_NEUTRAL));
+	_elemental_effects.insert(pair<GLOBAL_ELEMENTAL, GLOBAL_INTENSITY>(GLOBAL_ELEMENTAL_MAULING, GLOBAL_INTENSITY_NEUTRAL));
 
 	if ((_id <= MAX_WEAPON_ID) || (_id > MAX_LEG_ARMOR_ID)) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "invalid id in constructor: " << _id << endl;
@@ -251,7 +251,7 @@ GlobalArmor::GlobalArmor(uint32 id, uint32 count) :
 	_LoadObjectData(*script_file);
 
 	_physical_defense = script_file->ReadUInt("physical_defense");
-	_metaphysical_defense = script_file->ReadUInt("metaphysical_defense");
+	_ethereal_defense = script_file->ReadUInt("ethereal_defense");
 	_usable_by = script_file->ReadUInt("usable_by");
 
 	script_file->CloseTable();

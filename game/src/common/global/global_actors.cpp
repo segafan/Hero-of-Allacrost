@@ -39,7 +39,7 @@ GlobalAttackPoint::GlobalAttackPoint(GlobalActor* owner) :
 	_protection_modifier(0.0f),
 	_evade_modifier(0.0f),
 	_total_physical_defense(0),
-	_total_metaphysical_defense(0),
+	_total_ethereal_defense(0),
 	_total_evade_rating(0)
 {}
 
@@ -98,14 +98,14 @@ void GlobalAttackPoint::CalculateTotalDefense(const GlobalArmor* equipped_armor)
 		_total_physical_defense = _actor_owner->GetFortitude() + static_cast<int32>(_actor_owner->GetFortitude() * _fortitude_modifier);
 
 	if (_protection_modifier <= -1.0f) // If the modifier is less than or equal to -100%, set the total defense to zero
-		_total_metaphysical_defense = 0;
+		_total_ethereal_defense = 0;
 	else
-		_total_metaphysical_defense = _actor_owner->GetProtection() + static_cast<int32>(_actor_owner->GetProtection() * _protection_modifier);
+		_total_ethereal_defense = _actor_owner->GetProtection() + static_cast<int32>(_actor_owner->GetProtection() * _protection_modifier);
 
 	// If present, add defense ratings from the armor equipped
 	if (equipped_armor != NULL) {
 		_total_physical_defense += equipped_armor->GetPhysicalDefense();
-		_total_metaphysical_defense += equipped_armor->GetMetaphysicalDefense();
+		_total_ethereal_defense += equipped_armor->GetEtherealDefense();
 	}
 }
 
@@ -143,7 +143,7 @@ GlobalActor::GlobalActor() :
 	_agility(0),
 	_evade(0.0f),
 	_total_physical_attack(0),
-	_total_metaphysical_attack(0),
+	_total_ethereal_attack(0),
 	_weapon_equipped(NULL)
 {}
 
@@ -191,7 +191,7 @@ GlobalActor::GlobalActor(const GlobalActor& copy) {
 	_agility = copy._agility;
 	_evade = copy._evade;
 	_total_physical_attack = copy._total_physical_attack;
-	_total_metaphysical_attack = copy._total_metaphysical_attack;
+	_total_ethereal_attack = copy._total_ethereal_attack;
 
 	// Copy all attack points
 	for (uint32 i = 0; i < copy._attack_points.size(); i++) {
@@ -240,7 +240,7 @@ GlobalActor& GlobalActor::operator=(const GlobalActor& copy) {
 	_agility = copy._agility;
 	_evade = copy._evade;
 	_total_physical_attack = copy._total_physical_attack;
-	_total_metaphysical_attack = copy._total_metaphysical_attack;
+	_total_ethereal_attack = copy._total_ethereal_attack;
 
 	// Copy all attack points
 	for (uint32 i = 0; i < copy._attack_points.size(); i++) {
@@ -311,13 +311,13 @@ uint32 GlobalActor::GetTotalPhysicalDefense(uint32 index) const {
 
 
 
-uint32 GlobalActor::GetTotalMetaphysicalDefense(uint32 index) const {
+uint32 GlobalActor::GetTotalEtherealDefense(uint32 index) const {
 	if (index >= _attack_points.size()) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "index argument exceeded number of attack points: " << index << endl;
 		return 0;
 	}
 
-	return _attack_points[index]->GetTotalMetaphysicalDefense();
+	return _attack_points[index]->GetTotalEtherealDefense();
 }
 
 
@@ -651,11 +651,11 @@ void GlobalActor::SubtractEvade(float amount) {
 
 void GlobalActor::_CalculateAttackRatings() {
 	_total_physical_attack = _strength;
-	_total_metaphysical_attack = _vigor;
+	_total_ethereal_attack = _vigor;
 
 	if (_weapon_equipped != NULL) {
 		_total_physical_attack += _weapon_equipped->GetPhysicalAttack();
-		_total_metaphysical_attack += _weapon_equipped->GetMetaphysicalAttack();
+		_total_ethereal_attack += _weapon_equipped->GetEtherealAttack();
 	}
 }
 

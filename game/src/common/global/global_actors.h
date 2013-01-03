@@ -61,11 +61,11 @@ public:
 	**/
 	bool LoadData(hoa_script::ReadScriptDescriptor& script);
 
-	/** \brief Determines the total physical and metaphysical defense of the attack point
+	/** \brief Determines the total physical and ethereal defense of the attack point
 	*** \param equipped_armor A pointer to the armor equipped on the attack point, or NULL if no armor is equipped
 	***
 	*** This method uses the owning GlobalActor's base defense stats, the attack point's defense modifiers stats,
-	*** and the properties of the equipped armor to calculate the attack point's total physical and metaphysical defense.
+	*** and the properties of the equipped armor to calculate the attack point's total physical and etheral defense.
 	*** This method should be called whenever the actor's base defense stats or equipped armor on this point changes.
 	**/
 	void CalculateTotalDefense(const GlobalArmor* equipped_armor);
@@ -104,8 +104,8 @@ public:
 	uint16 GetTotalPhysicalDefense() const
 		{ return _total_physical_defense; }
 
-	uint16 GetTotalMetaphysicalDefense() const
-		{ return _total_metaphysical_defense; }
+	uint16 GetTotalEtherealDefense() const
+		{ return _total_ethereal_defense; }
 
 	float GetTotalEvadeRating() const
 		{ return _total_evade_rating; }
@@ -159,7 +159,7 @@ private:
 	**/
 	//@{
 	uint16 _total_physical_defense;
-	uint16 _total_metaphysical_defense;
+	uint16 _total_ethereal_defense;
 	float _total_evade_rating;
 	//@}
 
@@ -277,12 +277,12 @@ public:
 	uint32 GetTotalPhysicalAttack() const
 		{ return _total_physical_attack; }
 
-	uint32 GetTotalMetaphysicalAttack() const
-		{ return _total_metaphysical_attack; }
+	uint32 GetTotalEtherealAttack() const
+		{ return _total_ethereal_attack; }
 
 	uint32 GetTotalPhysicalDefense(uint32 index) const;
 
-	uint32 GetTotalMetaphysicalDefense(uint32 index) const;
+	uint32 GetTotalEtherealDefense(uint32 index) const;
 
 	float GetTotalEvadeRating(uint32 index) const;
 
@@ -456,13 +456,13 @@ protected:
 	//! \brief Used to determine the actor's physical attack rating
 	uint32 _strength;
 
-	//! \brief Used to determine the actor's metaphysical attack rating
+	//! \brief Used to determine the actor's ethereal attack rating
 	uint32 _vigor;
 
 	//! \brief Used to determine the actor's physical defense rating
 	uint32 _fortitude;
 
-	//! \brief Used to determine the actor's metaphysical defense rating
+	//! \brief Used to determine the actor's ethereal defense rating
 	uint32 _protection;
 
 	//! \brief Used to calculate the time it takes to recover stamina in battles
@@ -475,8 +475,8 @@ protected:
 	//! \brief The sum of the character's strength and their weapon's physical attack
 	uint32 _total_physical_attack;
 
-	//! \brief The sum of the character's vigor and their weapon's metaphysical attack
-	uint32 _total_metaphysical_attack;
+	//! \brief The sum of the character's vigor and their weapon's ethereal attack
+	uint32 _total_ethereal_attack;
 
 	/** \brief The attack points that are located on the actor
 	*** \note All actors must have at least one attack point.
@@ -540,13 +540,13 @@ protected:
 
 	// ---------- Private methods
 
-	/** \brief Calculates an actor's physical and metaphysical attack ratings
+	/** \brief Calculates an actor's physical and ethereal attack ratings
 	*** This function sums the actor's strength/vigor with their weapon's attack ratings
-	*** and places the result in total physical/metaphysical attack members
+	*** and places the result in total physical/ethereal attack members
 	**/
 	void _CalculateAttackRatings();
 
-	//! \brief Calculates the physical and metaphysical defense ratings for each attack point
+	//! \brief Calculates the physical and ethereal defense ratings for each attack point
 	void _CalculateDefenseRatings();
 
 	//! \brief Calculates the evade rating for each attack point

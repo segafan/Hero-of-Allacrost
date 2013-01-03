@@ -516,12 +516,12 @@ void BindModeCode() {
 		def("CalculatePhysicalDamageAdder", (uint32(*)(BattleActor*, BattleTarget*, int32, float)) &CalculatePhysicalDamageAdder),
 		def("CalculatePhysicalDamageMultiplier", (uint32(*)(BattleActor*, BattleTarget*, float)) &CalculatePhysicalDamageMultiplier),
 		def("CalculatePhysicalDamageMultiplier", (uint32(*)(BattleActor*, BattleTarget*, float, float)) &CalculatePhysicalDamageMultiplier),
-		def("CalculateMetaphysicalDamage", (uint32(*)(BattleActor*, BattleTarget*)) &CalculateMetaphysicalDamage),
-		def("CalculateMetaphysicalDamage", (uint32(*)(BattleActor*, BattleTarget*, float)) &CalculateMetaphysicalDamage),
-		def("CalculateMetaphysicalDamageAdder", (uint32(*)(BattleActor*, BattleTarget*, int32)) &CalculateMetaphysicalDamageAdder),
-		def("CalculateMetaphysicalDamageAdder", (uint32(*)(BattleActor*, BattleTarget*, int32, float)) &CalculateMetaphysicalDamageAdder),
-		def("CalculateMetaphysicalDamageMultiplier", (uint32(*)(BattleActor*, BattleTarget*, float)) &CalculateMetaphysicalDamageMultiplier),
-		def("CalculateMetaphysicalDamageMultiplier", (uint32(*)(BattleActor*, BattleTarget*, float, float)) &CalculateMetaphysicalDamageMultiplier)
+		def("CalculateEtherealDamage", (uint32(*)(BattleActor*, BattleTarget*)) &CalculateEtherealDamage),
+		def("CalculateEtherealDamage", (uint32(*)(BattleActor*, BattleTarget*, float)) &CalculateEtherealDamage),
+		def("CalculateEtherealDamageAdder", (uint32(*)(BattleActor*, BattleTarget*, int32)) &CalculateEtherealDamageAdder),
+		def("CalculateEtherealDamageAdder", (uint32(*)(BattleActor*, BattleTarget*, int32, float)) &CalculateEtherealDamageAdder),
+		def("CalculateEtherealDamageMultiplier", (uint32(*)(BattleActor*, BattleTarget*, float)) &CalculateEtherealDamageMultiplier),
+		def("CalculateEtherealDamageMultiplier", (uint32(*)(BattleActor*, BattleTarget*, float, float)) &CalculateEtherealDamageMultiplier)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
@@ -583,7 +583,7 @@ void BindModeCode() {
 			.def("ResetAgility", &BattleActor::ResetAgility)
 			.def("ResetEvade", &BattleActor::ResetEvade)
 			.def("TotalPhysicalDefense", &BattleActor::TotalPhysicalDefense)
-			.def("TotalMetaphysicalDefense", &BattleActor::TotalMetaphysicalDefense)
+			.def("TotalEtherealDefense", &BattleActor::TotalEtherealDefense)
 			.def("TotalEvadeRating", &BattleActor::TotalEvadeRating)
 			.def("SetStatePaused", &BattleActor::SetStatePaused)
 	];

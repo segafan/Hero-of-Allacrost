@@ -337,14 +337,14 @@ uint32 BattleActor::TotalPhysicalDefense() {
 
 
 
-uint32 BattleActor::TotalMetaphysicalDefense() {
-	uint32 meta_defense = 0;
+uint32 BattleActor::TotalEtherealDefense() {
+	uint32 eth_defense = 0;
 
 	for (uint32 i = 0; i < _attack_points.size(); i++)
-		meta_defense += _attack_points[i]->GetTotalMetaphysicalDefense();
-	meta_defense /= _attack_points.size();
+		eth_defense += _attack_points[i]->GetTotalEtherealDefense();
+	eth_defense /= _attack_points.size();
 
-	return meta_defense;
+	return eth_defense;
 }
 
 
