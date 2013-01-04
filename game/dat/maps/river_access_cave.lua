@@ -482,7 +482,10 @@ function Load(m)
 	
 	Map:SetCamera(claudius);
     Map:MoveVirtualFocus(80, 130);
-	
+
+	-- Visual effects: dark lighting, various light halos
+    VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.0, 0.6));
+    
 	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas
 	
 	-- Location: just before enemy boss
