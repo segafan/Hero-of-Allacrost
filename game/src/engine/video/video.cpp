@@ -696,7 +696,7 @@ void VideoEngine::EnableAmbientOverlay(const string &filename, float x_speed, fl
 	}
 	else {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to load ambient overlay image: " << filename
-			<< ", ambient overlay will be disalbed" << endl;
+			<< ", ambient overlay will be disabled" << endl;
 		_ambient_overlay_enabled = false;
 	}
 }
@@ -842,20 +842,22 @@ void VideoEngine::DrawLightning() {
 
 void VideoEngine::DrawOverlays() {
 	PushState();
-	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
 	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
 	// Draw the textured ambient overlay
 	if (_ambient_overlay_enabled == true) {
+		SetCoordSys(0.0f, VIDEO_STANDARD_RESOLUTION_WIDTH, 0.0f, VIDEO_STANDARD_RESOLUTION_HEIGHT);
 		float width = _ambient_overlay_image.GetWidth();
 		float height = _ambient_overlay_image.GetHeight();
-		for (float x = _ambient_x_shift; x <= 1024.0f; x = x + width) {
-			for (float y = _ambient_y_shift; y <= 768.0f; y = y + height) {
+		for (float x = _ambient_x_shift; x <= VIDEO_STANDARD_RESOLUTION_WIDTH; x = x + width) {
+			for (float y = _ambient_y_shift; y <= VIDEO_STANDARD_RESOLUTION_HEIGHT; y = y + height) {
 				Move(x, y);
 				_ambient_overlay_image.Draw();
 			}
 		}
 	}
+
+	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
 
 	// Draw the light overlay
 	if (_light_overlay_enabled == true) {
@@ -1138,6 +1140,7 @@ void VideoEngine::_UpdateAmbientOverlay(uint32 frame_time) {
 	while (_ambient_x_shift > 0.0f) {
 		_ambient_x_shift -= width;
 	}
+	// Handle negative x shifting
 	if (_ambient_x_shift < 2 * -width) {
 		_ambient_x_shift += width;
 	}
@@ -1146,6 +1149,7 @@ void VideoEngine::_UpdateAmbientOverlay(uint32 frame_time) {
 	while (_ambient_y_shift > 0.0f) {
 		_ambient_y_shift -= height;
 	}
+	// Handle negative y shifting
 	if (_ambient_y_shift < 2 * -height) {
 		_ambient_y_shift += height;
 	}
