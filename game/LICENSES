@@ -23,6 +23,9 @@ The following websites are where the majority of this content was procured from.
 - [VT]   Valyria Tear:  http://valyriatear.blogspot.com/
 - [TMW]  TheManaWorld:  http://themanaworld.org/
 
+Note that some files may include multiple sources of content. Especially map tileset images. Such files may therefore be under
+multiple licenses, and you should inquire which parts of the file correspond to what license prior to using this content.
+
 
 =====   Licenses   =====
 
@@ -54,9 +57,10 @@ img/sprites/map/scening/butterfly_spritesheet.png               GPLv2           
 img/sprites/map/scening/chicken_spritesheet.png                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu), [OGA]
 img/sprites/map/scening/squirrel_spritesheet.png                GPLv2                    [TMW]
 
-img/tilesets/outdoor_market.png                                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu) and Joshua Taylor, [OGA]
 img/tilesets/castle_exterior_01.png                             CC-BY 3.0                Hyptosis + Zabin, [OGA]
 img/tilesets/desert_town_exterior.png                           CC-BY 3.0                Hyptosis + Zabin, [OGA]
+img/tilesets/harrvah_house_exterior.png                         CC-BY 3.0                Hyptosis + Zabin, [OGA], window art
+img/tilesets/outdoor_market.png                                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu) and Joshua Taylor, [OGA]
 
 ___ Sounds ___
 
