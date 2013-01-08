@@ -22,6 +22,8 @@ The following websites are where the majority of this content was procured from.
 - [OGA]  OpenGameArt:   http://opengameart.org
 - [VT]   Valyria Tear:  http://valyriatear.blogspot.com/
 - [TMW]  TheManaWorld:  http://themanaworld.org/
+- [BFW]  Battle for Wesnoth: http://www.wesnoth.org
+- [FLR]  FLARE: http://www.flare.org
 
 Note that some files may include multiple sources of content. Especially map tileset images. Such files may therefore be under
 multiple licenses, and you should inquire which parts of the file correspond to what license prior to using this content.
@@ -44,6 +46,24 @@ img/ambient/sandstorm.png                                       GPLv2           
 img/backdrops/battle/forest_background.png                      CC-BY-SA 3.0             Tamara Ramsay (Ramtam), [OGA], vectorgurl.com
 img/backdrops/battle/forest_background_evening.png              CC-BY-SA 3.0             Tamara Ramsay (Ramtam), [OGA], vectorgurl.com
 
+img/icons/armor/buckler.png                                     CC0                      blarumyrran, [FLR]
+img/icons/armor/leather_armor.png                               CC0                      blarumyrran, [FLR]
+img/icons/armor/steel_armor.png                                 CC0                      blarumyrran, [FLR]
+img/icons/armor/sturdy_shield.png                               CC0                      blarumyrran, [FLR]
+img/icons/armor/tunic.png                                       CC0                      blarumyrran, [FLR]
+img/icons/weapons/dagger.png                                    CC0                      blarumyrran, [FLR]
+img/icons/weapons/earth_staff.png                               CC0                      blarumyrran, [FLR]
+img/icons/weapons/fire_staff.png                                CC0                      blarumyrran, [FLR]
+img/icons/weapons/great_bow.png                                 CC0                      blarumyrran, [FLR]
+img/icons/weapons/great_sword.png                               CC0                      blarumyrran, [FLR]
+img/icons/weapons/ice_staff.png                                 CC0                      blarumyrran, [FLR]
+img/icons/weapons/long_bow.png                                  CC0                      blarumyrran, [FLR]
+img/icons/weapons/long_sword.png                                CC0                      blarumyrran, [FLR]
+img/icons/weapons/short_bow.png                                 CC0                      blarumyrran, [FLR]
+img/icons/weapons/short_sword.png                               CC0                      blarumyrran, [FLR]
+img/icons/weapons/slingshot.png                                 CC0                      blarumyrran, [FLR]
+img/icons/weapons/wand.png                                      CC0                      blarumyrran, [FLR]
+
 img/sprites/battle/characters/claudius_jump_backward.png        CC-BY-SA 3.0             Jetrel + Bertram, [OGA] + [VT]
 img/sprites/battle/characters/claudius_jump_forward.png         CC-BY-SA 3.0             Jetrel + Bertram, [OGA] + [VT]
 img/sprites/battle/characters/claudius_kneeling.png             GPLv2                    Allacrost + Valyria Tear
@@ -60,7 +80,9 @@ img/sprites/map/scening/squirrel_spritesheet.png                GPLv2           
 img/tilesets/castle_exterior_01.png                             CC-BY 3.0                Hyptosis + Zabin, [OGA]
 img/tilesets/desert_town_exterior.png                           CC-BY 3.0                Hyptosis + Zabin, [OGA]
 img/tilesets/harrvah_house_exterior.png                         CC-BY 3.0                Hyptosis + Zabin, [OGA], window art
-img/tilesets/outdoor_market.png                                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu) and Joshua Taylor, [OGA]
+img/tilesets/outdoor_market.png                                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu), [OGA]
+                                                                CC-BY-SA 3.0             Joshua Taylor, [OGA]
+                                                                CC-BY 3.0                Zabin + Hyptosis, [OGA], market stalls, anvil, light, latern, sack, bottles, cutting boards
 
 ___ Sounds ___
 
