@@ -298,6 +298,9 @@ public:
 	uint8 GetCurrentAnimation() const
 		{ return _current_animation; }
 
+	hoa_video::AnimatedImage& GetCurrentAnimation()
+		{ return _animations[_current_animation]; }
+
 	bool HasAvailableDialogue() const
 		{ return _has_available_dialogue; }
 
