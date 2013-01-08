@@ -1,0 +1,75 @@
+This file explains the licensing terms for Allacrost code and content. It also lists the appropriate attributions and 
+licenses for third-party content that is used.
+
+
+=====    Code      =====
+
+All code is licensed under the GNU GPL Version 2 open source software license. Code is defined as anything contained within
+the src/ and dat/ directories. Code includes both C++ and Lua source files.
+
+
+=====   Content    =====
+
+All original Allacrost content is licensed under the GNU GPL Version 2. Content is defined as anything contained within the img/,
+snd/, and mus/ directories. Content includes PNG and JPEG images, WAV files, and Vorbis OGG music files.
+
+
+=====   Sources    =====
+
+Allacrost uses many pieces of content that were created external to the project and provided for use under a compatible license.
+The following websites are where the majority of this content was procured from.
+
+- [OGA]  OpenGameArt:   http://opengameart.org
+- [VT]   Valyria Tear:  http://valyriatear.blogspot.com/
+- [TMW]  TheManaWorld:  http://themanaworld.org/
+
+
+=====   Licenses   =====
+
+The following is a list of all files which contain artwork developed by a third-party. Please respect the original authors by
+complying with the terms of their license before using their content. Any files not present in this list should be presumed to
+be original Allacrost content and is provided under the terms of the Allacrost content license.
+
+___ Artwork ___
+
+Files                                                           License                  Authors, Source, and Details
+--------------------------------------------------------------- ------------------------ --------------------------------------------------------------------
+img/ambient/dark.png                                            CC0                      Bertram, [VT]
+img/ambient/fog.png                                             GPLv2                    Bertram, [VT]
+img/ambient/sandstorm.png                                       GPLv2                    Bertram, [TMW] + [VT]
+
+img/backdrops/battle/forest_background.png                      CC-BY-SA 3.0             Tamara Ramsay (Ramtam), [OGA], vectorgurl.com
+img/backdrops/battle/forest_background_evening.png              CC-BY-SA 3.0             Tamara Ramsay (Ramtam), [OGA], vectorgurl.com
+
+img/sprites/battle/characters/claudius_jump_backward.png        CC-BY-SA 3.0             Jetrel + Bertram, [OGA] + [VT]
+img/sprites/battle/characters/claudius_jump_forward.png         CC-BY-SA 3.0             Jetrel + Bertram, [OGA] + [VT]
+img/sprites/battle/characters/claudius_kneeling.png             GPLv2                    Allacrost + Valyria Tear
+
+img/sprites/map/enemies/bat_spritesheet.png                     CC-BY-SA 3.0             Liberated Pixel Cup, [OGA], http://lpc.opengameart.org/ 
+img/sprites/map/enemies/big_slime_idle.lua                      GPLv2                    Bertram, [VT]
+img/sprites/map/enemies/big_slime_spritesheet.png               CC-BY-SA 3.0             Liberated Pixel Cup, [OGA], http://lpc.opengameart.org/
+img/sprites/map/enemies/big_slime_walk.lua                      GPLv2                    Bertram, [VT]
+
+img/sprites/map/scening/butterfly_spritesheet.png               GPLv2                    [TMW]
+img/sprites/map/scening/chicken_spritesheet.png                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu), [OGA]
+img/sprites/map/scening/squirrel_spritesheet.png                GPLv2                    [TMW]
+
+img/tilesets/outdoor_market.png                                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu) and Joshua Taylor, [OGA]
+
+
+___ Sounds ___
+
+Files                                                           License                  Authors, Source, and Details
+--------------------------------------------------------------- ------------------------ --------------------------------------------------------------------
+
+snd/lightning.wav                                               CC0                      Bertram, [VT]
+snd/thunder.wav                                                 CC0                      Bertram, [VT]
+
+
+
+___ Music ___
+
+Files                                                           License                  Authors, Source, and Details
+--------------------------------------------------------------- ------------------------ --------------------------------------------------------------------
+
+
