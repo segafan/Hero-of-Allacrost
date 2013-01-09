@@ -41,9 +41,9 @@ GameMode::GameMode() {
 
 
 
-GameMode::GameMode(uint8 mt) {
+GameMode::GameMode(uint8 type) {
 	IF_PRINT_DEBUG(MODE_MANAGER_DEBUG) << "constructor invoked" << endl;
-	mode_type = mt;
+	mode_type = type;
 }
 
 
@@ -123,7 +123,7 @@ void ModeEngine::Push(GameMode* gm) {
 
 
 
-uint8 ModeEngine::GetGameType() {
+uint8 ModeEngine::GetModeType() {
 	if (_game_stack.empty())
 		return MODE_MANAGER_DUMMY_MODE;
 	else
@@ -132,7 +132,7 @@ uint8 ModeEngine::GetGameType() {
 
 
 
-uint8 ModeEngine::GetGameType(uint32 index) {
+uint8 ModeEngine::GetModeType(uint32 index) {
 	if (_game_stack.size() < index)
 		return MODE_MANAGER_DUMMY_MODE;
 	else
@@ -155,6 +155,17 @@ GameMode* ModeEngine::GetMode(uint32 index) {
 		return NULL;
 	else
 		return _game_stack.at(_game_stack.size() - index);
+}
+
+
+
+bool ModeEngine::IsModeTypeInStack(uint8 type) {
+	for (uint32 i = 0; i < _game_stack.size(); ++i) {
+		if (_game_stack.at(i)->mode_type == type)
+			return true;
+	}
+
+	return false;
 }
 
 

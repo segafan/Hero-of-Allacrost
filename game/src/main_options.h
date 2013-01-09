@@ -19,6 +19,12 @@
 **/
 namespace hoa_main {
 
+//! \brief Set to true when it is requested that the application begin in TestMode instead of BootMode
+extern bool start_in_test_mode;
+
+//! \brief The specific test number to begin immediate execution of. If zero, this value is ignored
+extern uint32 test_number;
+
 /** \brief Parses command-line options and takes appropriate action on those options
 *** \param return_code A reference to the return code to exit the program with.
 *** \param argc The number of arguments given to the program

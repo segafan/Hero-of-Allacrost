@@ -31,16 +31,17 @@ extern bool MODE_MANAGER_DEBUG;
 //! \name Game States/Modes
 //@{
 //! \brief Different modes of operation that the game can be in.
-const uint8 MODE_MANAGER_DUMMY_MODE  = 0;
-const uint8 MODE_MANAGER_BOOT_MODE   = 1;
-const uint8 MODE_MANAGER_MAP_MODE    = 2;
-const uint8 MODE_MANAGER_BATTLE_MODE = 3;
-const uint8 MODE_MANAGER_MENU_MODE   = 4;
-const uint8 MODE_MANAGER_SHOP_MODE   = 5;
-const uint8 MODE_MANAGER_PAUSE_MODE  = 6;
-const uint8 MODE_MANAGER_SCENE_MODE  = 7;
-const uint8 MODE_MANAGER_WORLD_MODE  = 8;
-const uint8 MODE_MANAGER_SAVE_MODE   = 9;
+const uint8 MODE_MANAGER_DUMMY_MODE  =  0;
+const uint8 MODE_MANAGER_BOOT_MODE   =  1;
+const uint8 MODE_MANAGER_MAP_MODE    =  2;
+const uint8 MODE_MANAGER_BATTLE_MODE =  3;
+const uint8 MODE_MANAGER_MENU_MODE   =  4;
+const uint8 MODE_MANAGER_SHOP_MODE   =  5;
+const uint8 MODE_MANAGER_PAUSE_MODE  =  6;
+const uint8 MODE_MANAGER_SCENE_MODE  =  7;
+const uint8 MODE_MANAGER_WORLD_MODE  =  8;
+const uint8 MODE_MANAGER_SAVE_MODE   =  9;
+const uint8 MODE_MANAGER_TEST_MODE   = 10;
 //@}
 
 
@@ -61,23 +62,11 @@ const uint8 MODE_MANAGER_SAVE_MODE   = 9;
 class GameMode {
 	friend class ModeEngine;
 
-protected:
-	//! \brief Indicates what 'mode' this object is in (what type of inherited class).
-	uint8 mode_type;
-
-private:
-	//! \brief Copy constructor is private, because making a copy of a game mode object is a \b bad idea.
-	GameMode(const GameMode& other);
-
-	//! \brief Copy assignment operator is private, because making a copy of a game mode object is a \b bad idea.
-	GameMode& operator=(const GameMode& other);
-
-	// TODO: Should I make the delete and delete[] operators private too?
 public:
 	GameMode();
 
-	//! \param mt The mode_type to set the new GameMode object to.
-	GameMode(uint8 mt);
+	//! \param type The mode_type to set the new GameMode object to.
+	GameMode(uint8 type);
 
 	//! \brief Destructor is virutal, since the inherited class holds all the important data.
 	virtual ~GameMode();
@@ -95,6 +84,19 @@ public:
 	*** game stack, so in that manner it can also be viewed as a helper function to the constructor.
 	**/
 	virtual void Reset() = 0;
+
+protected:
+	//! \brief Indicates what 'mode' this object is in (what type of inherited class).
+	uint8 mode_type;
+
+private:
+	//! \brief Copy constructor is private, because making a copy of a game mode object is a \b bad idea.
+	GameMode(const GameMode& other);
+
+	//! \brief Copy assignment operator is private, because making a copy of a game mode object is a \b bad idea.
+	GameMode& operator=(const GameMode& other);
+
+	// TODO: Should I make the delete and delete[] operators private too?
 }; // class GameMode
 
 
@@ -126,23 +128,6 @@ public:
 class ModeEngine : public hoa_utils::Singleton<ModeEngine> {
 	friend class hoa_utils::Singleton<ModeEngine>;
 
-private:
-	ModeEngine();
-
-	/** \brief A stack containing all the live game modes.
-	*** \note The back/last element of the vector is the top of the stack.
-	**/
-	std::vector<GameMode*> _game_stack;
-
-	//! \brief A vector of game modes to push to the stack on the next call to ModeEngine#Update().
-	std::vector<GameMode*> _push_stack;
-
-	//! \brief True if a state change occured and we need to change the active game mode.
-	bool _state_change;
-
-	//! \brief The number of game modes to pop from the back of the stack on the next call to ModeEngine#Update().
-	uint32 _pop_count;
-
 public:
 	~ModeEngine();
 
@@ -168,15 +153,19 @@ public:
 	**/
 	void Push(GameMode* gm);
 
+	//! \brief Returns the number of game modes that are currently on the stack
+	uint32 GetModeStackSize() const
+		{ return _game_stack.size(); }
+
 	/** \brief Gets the type of the currently active game mode.
 	*** \return The value of the mode_type member of the GameMode object on the top of the stack.
 	**/
-	uint8 GetGameType();
+	uint8 GetModeType();
 
 	/** \brief Gets the type of a game mode in the stack.
 	*** \return The value of the mode_type member of the GameMode object on the top of the stack.
 	**/
-	uint8 GetGameType(uint32 index);
+	uint8 GetModeType(uint32 index);
 
 	/** \brief Gets a pointer to the top game stack object.
 	*** \return A pointer to the GameMode object on the top of the stack.
@@ -187,6 +176,12 @@ public:
 	*** \return A pointer to the GameMode object at (index) from the top.
 	**/
 	GameMode* GetMode(uint32 index);
+
+	/** \brief Examines the game mode stack to find if the stack contains any mode instances of the specified type
+	*** \param type The type of game mode to search for in the stack
+	*** \return True if one or more instances of the mode type are found, or false otherwise
+	**/
+	bool IsModeTypeInStack(uint8 type);
 
 	//! \brief Checks if the game stack needs modes pushed or popped, then calls Update on the active game mode.
 	void Update();
@@ -210,6 +205,22 @@ public:
 		{ _debug_graphics_enabled = debug; }
 
 private:
+	ModeEngine();
+
+	/** \brief A stack containing all the live game modes.
+	*** \note The back/last element of the vector is the top of the stack.
+	**/
+	std::vector<GameMode*> _game_stack;
+
+	//! \brief A vector of game modes to push to the stack on the next call to ModeEngine#Update().
+	std::vector<GameMode*> _push_stack;
+
+	//! \brief True if a state change occured and we need to change the active game mode.
+	bool _state_change;
+
+	//! \brief The number of game modes to pop from the back of the stack on the next call to ModeEngine#Update().
+	uint32 _pop_count;
+
 	//! \brief Set to true if game modes should draw graphical debugging information
 	bool _debug_graphics_enabled;
 }; // class ModeEngine : public hoa_utils::Singleton<ModeEngine>

@@ -333,7 +333,22 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_t) {
-				// Ctrl:+T: "Texture" sheet display and cycle
+				// Ctrl:+T: "Test" mode return request
+				// This command is only processed only when a test mode instance is already on the stack. Otherwise it is ignored
+				if (ModeManager->IsModeTypeInStack(MODE_MANAGER_TEST_MODE) == true) {
+					// Removes all game modes from the stack except for the bottom most one, which should be the TestMode instance
+					for (uint32 i = 1; i < ModeManager->GetModeStackSize(); ++i) {
+						ModeManager->Pop();
+					}
+					// NOTE: Although it is rare, there may also be some game modes that are preparing to be pushed onto the stack
+					// when this command is invoked. In that case, the newly pushed mode will be on the top, requiring the user to
+					// enter this command once again. This bug is simple enough to get around but could be trick to provide a fix for
+					// due to memory allocations of the modes about to be pushed. So for now this issue remains unaddressed.
+				}
+				return;
+			}
+			else if (key_event.keysym.sym == SDLK_x) {
+				// Ctrl:+X: "Texture" sheet display and cycle
 				VideoManager->Textures()->DEBUG_NextTexSheet();
 				return;
 			}

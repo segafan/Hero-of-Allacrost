@@ -88,12 +88,6 @@ enum PICK_LETTER {
 *** controls for the player. This screen is only visible the very first time the player
 *** installs and starts the application and is hidden otherwise.
 ***
-*** \note BootMode is currently "hacked" to make it easy to arrive at and test
-*** the various other game modes. This is temporary because we don't have any other
-*** form of a testing interface for the game at this time. There are several methods
-*** and variables pre-fixed with "TEMP" to indicate these testing routines. At some
-*** point in the future, they should be removed permanently.
-***
 *** \todo BootMode uses SDL functions directly for many of its functions that handle
 *** keyboard/joystick input. This code should probably be moved to the input engine
 *** so that boot mode does not have to directly interface with one of the game's
@@ -256,10 +250,6 @@ private:
 	void _OnOptions();
 	void _OnCredits();
 	void _OnQuit();
-
-	void _TEMP_OnBattle();
-	void _TEMP_OnMenu();
-	void _TEMP_OnShop();
 	//@}
 
 	//! \brief Handler methods for the primary options menu
