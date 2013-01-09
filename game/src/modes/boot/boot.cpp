@@ -29,10 +29,6 @@
 
 #include "map.h"
 #include "save_mode.h"
-// Files below are included temporarily, used for boot mode to do a test launch of other modes
-#include "battle.h"
-#include "menu.h"
-#include "shop.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -52,11 +48,6 @@ using namespace hoa_boot::private_boot;
 namespace hoa_boot {
 
 bool BOOT_DEBUG = false;
-
-// A temporary hack to boot mode used to make it possible to enter battle mode, menu mode, and
-// shop mode from the main boot menu. Set this member to true to enable those options or false
-// to disable them. Make sure to set this boolean to false for release builds!
-bool TEMP_BOOT_TEST = true;
 
 // Initialize static members here
 bool BootMode::_initial_entry = true;
@@ -503,44 +494,21 @@ void BootMode::Draw() {
 // ****************************************************************************
 
 void BootMode::_SetupMainMenu() {
-	if (TEMP_BOOT_TEST == true) {
-		_main_menu.SetPosition(512.0f, 80.0f);
-		_main_menu.SetDimensions(1000.0f, 50.0f, 8, 1, 8, 1);
-		_main_menu.SetTextStyle(TextStyle("title24"));
-		_main_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		_main_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		_main_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
-		_main_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-		_main_menu.SetCursorOffset(-50.0f, 28.0f);
-		_main_menu.SetSkipDisabled(true);
+	_main_menu.SetPosition(512.0f, 80.0f);
+	_main_menu.SetDimensions(800.0f, 50.0f, 5, 1, 5, 1);
+	_main_menu.SetTextStyle(TextStyle("title24"));
+	_main_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_main_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_main_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_main_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_main_menu.SetCursorOffset(-50.0f, 28.0f);
 
-		// Add all the needed menu options to the main menu
-		_main_menu.AddOption(UTranslate("New Game"), &BootMode::_OnNewGame);
-		_main_menu.AddOption(UTranslate("Load Game"), &BootMode::_OnLoadGame);
-		_main_menu.AddOption(UTranslate("Options"), &BootMode::_OnOptions);
-		_main_menu.AddOption(UTranslate("Credits"), &BootMode::_OnCredits);
-		_main_menu.AddOption(UTranslate("Battle"), &BootMode::_TEMP_OnBattle);
-		_main_menu.AddOption(UTranslate("Menu"), &BootMode::_TEMP_OnMenu);
-		_main_menu.AddOption(UTranslate("Shop"), &BootMode::_TEMP_OnShop);
-		_main_menu.AddOption(UTranslate("Quit"), &BootMode::_OnQuit);
-	}
-	else {
-		_main_menu.SetPosition(512.0f, 80.0f);
-		_main_menu.SetDimensions(800.0f, 50.0f, 5, 1, 5, 1);
-		_main_menu.SetTextStyle(TextStyle("title24"));
-		_main_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		_main_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		_main_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
-		_main_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-		_main_menu.SetCursorOffset(-50.0f, 28.0f);
-
-		// Add all the needed menu options to the main menu
-		_main_menu.AddOption(UTranslate("New Game"), &BootMode::_OnNewGame);
-		_main_menu.AddOption(UTranslate("Load Game"), &BootMode::_OnLoadGame);
-		_main_menu.AddOption(UTranslate("Options"), &BootMode::_OnOptions);
-		_main_menu.AddOption(UTranslate("Credits"), &BootMode::_OnCredits);
-		_main_menu.AddOption(UTranslate("Quit"), &BootMode::_OnQuit);
-	}
+	// Add all the needed menu options to the main menu
+	_main_menu.AddOption(UTranslate("New Game"), &BootMode::_OnNewGame);
+	_main_menu.AddOption(UTranslate("Load Game"), &BootMode::_OnLoadGame);
+	_main_menu.AddOption(UTranslate("Options"), &BootMode::_OnOptions);
+	_main_menu.AddOption(UTranslate("Credits"), &BootMode::_OnCredits);
+	_main_menu.AddOption(UTranslate("Quit"), &BootMode::_OnQuit);
 
 	string path = GetUserDataPath(true) + "saved_game_1.lua";
 	if (DoesFileExist(path) == false) {
@@ -966,66 +934,6 @@ void BootMode::_OnCredits() {
 
 void BootMode::_OnQuit() {
 	SystemManager->ExitGame();
-}
-
-
-
-void BootMode::_TEMP_OnBattle() {
-	ReadScriptDescriptor read_data;
-	if (!read_data.OpenFile("dat/config/boot.lua")) {
-		PRINT_ERROR << "failed to load boot data file" << endl;
-	}
-
-	read_data.ExecuteFunction("BootBattleTest");
-
-	if (read_data.IsErrorDetected()) {
-		PRINT_ERROR << "an error occured during reading of the boot data file" << endl;
-		PRINT_ERROR << read_data.GetErrorMessages() << endl;
-	}
-	read_data.CloseFile();
-}
-
-
-
-void BootMode::_TEMP_OnMenu() {
-	ReadScriptDescriptor read_data;
-	if (!read_data.OpenFile("dat/config/boot.lua")) {
-		PRINT_ERROR << "failed to load boot data file" << endl;
-	}
-
-	read_data.ExecuteFunction("BootMenuTest");
-
-	if (read_data.IsErrorDetected()) {
-		PRINT_ERROR << "an error occured during reading of the boot data file" << endl;
-		PRINT_ERROR << read_data.GetErrorMessages() << endl;
-	}
-	read_data.CloseFile();
-
-	// TEMP: remove this once menu mode can be created in Lua and then add to boot.lua
-	GlobalManager->AddToInventory(1, 5);
-	GlobalManager->AddCharacter(1);
-	GlobalManager->AddCharacter(2);
-	GlobalManager->AddCharacter(4);
-	GlobalManager->AddCharacter(8);
-	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("The Boot Screen"), "img/portraits/locations/desert_cave.png");
-	ModeManager->Push(MM);
-}
-
-
-
-void BootMode::_TEMP_OnShop() {
-	ReadScriptDescriptor read_data;
-	if (!read_data.OpenFile("dat/config/boot.lua")) {
-		PRINT_ERROR << "failed to load boot data file" << endl;
-	}
-
-	read_data.ExecuteFunction("BootShopTest");
-
-	if (read_data.IsErrorDetected()) {
-		PRINT_ERROR << "an error occured during reading of the boot data file" << endl;
-		PRINT_ERROR << read_data.GetErrorMessages() << endl;
-	}
-	read_data.CloseFile();
 }
 
 

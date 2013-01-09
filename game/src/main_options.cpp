@@ -32,6 +32,11 @@ using namespace hoa_utils;
 
 namespace hoa_main {
 
+bool start_in_test_mode = false;
+uint32 test_number = 0;
+
+
+
 bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 	// Convert the argument list to a vector of strings for convenience
 	vector<string> options(argv, argv + argc);
@@ -87,6 +92,13 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 			return_code = 0;
 			return false;
 		}
+		else if (options[i] == "-t" || options[i] == "--test") {
+			start_in_test_mode = true;
+			// TODO: write code to process the optional test number option
+// 			if (IsStringNumeric(options[i + 1]) == true) {
+// 				test_number = StringToNumber(options[i + 1]);
+// 			}
+		}
 		else {
 			cerr << "Unrecognized option: " << options[i] << endl;
 			PrintUsage();
@@ -137,14 +149,15 @@ void PrintUsage() {
 	cout << "  --check/-c        :: checks all files for integrity" << endl;
 	cout << "  --debug/-d <args> :: enables debug statements in specifed sections of the" << endl;
 	cout << "                       program, where <args> can be:" << endl;
-	cout << "                       all, audio, battle, boot, data, global, input," << endl;
+	cout << "                       all, engine, modes," << endl;
+	cout << "                       audio, battle, boot, data, global, input," << endl;
 	cout << "                       map, mode_manager, pause, quit, scene, system" << endl;
-	cout << "                       utils, video" << endl;
+	cout << "                       test, utils, video" << endl;
 	cout << "  --disable-audio   :: disables loading and playing audio" << endl;
 	cout << "  --help/-h         :: prints this help menu" << endl;
 	cout << "  --info/-i         :: prints information about the user's system" << endl;
 	cout << "  --reset/-r        :: resets game configuration to use default settings" << endl;
-	cout << "  --version/-v      :: checks for newer versions of Allacrost online" << endl;
+	cout << "  --test/-t <test>  :: start the application in test mode, optionally specifying a specific test to immediately execute" << endl;
 }
 
 
@@ -314,8 +327,27 @@ bool EnableDebugging(string vars) {
 			hoa_pause::PAUSE_DEBUG                  = true;
 			hoa_shop::SHOP_DEBUG                    = true;
 			hoa_scene::SCENE_DEBUG                  = true;
+			hoa_test::TEST_DEBUG                    = true;
 			hoa_utils::UTILS_DEBUG                  = true;
 			hoa_video::VIDEO_DEBUG                  = true;
+		}
+		if (args[i] == "engine") {
+			hoa_audio::AUDIO_DEBUG                  = true;
+			hoa_script::SCRIPT_DEBUG                = true;
+			hoa_mode_manager::MODE_MANAGER_DEBUG    = true;
+			hoa_input::INPUT_DEBUG                  = true;
+			hoa_system::SYSTEM_DEBUG                = true;
+			hoa_video::VIDEO_DEBUG                  = true;
+		}
+		if (args[i] == "modes") {
+			hoa_battle::BATTLE_DEBUG                = true;
+			hoa_boot::BOOT_DEBUG                    = true;
+			hoa_map::MAP_DEBUG                      = true;
+			hoa_menu::MENU_DEBUG                    = true;
+			hoa_pause::PAUSE_DEBUG                  = true;
+			hoa_shop::SHOP_DEBUG                    = true;
+			hoa_scene::SCENE_DEBUG                  = true;
+			hoa_test::TEST_DEBUG                    = true;
 		}
 		else if (args[i] == "audio") {
 			hoa_audio::AUDIO_DEBUG = true;
@@ -358,6 +390,9 @@ bool EnableDebugging(string vars) {
 		}
 		else if (args[i] == "shop") {
 			hoa_shop::SHOP_DEBUG = true;
+		}
+		else if (args[i] == "test") {
+			hoa_test::TEST_DEBUG = true;
 		}
 		else if (args[i] == "utils") {
 			hoa_utils::UTILS_DEBUG = true;

@@ -49,7 +49,7 @@
 
 #include "mode_manager.h"
 #include "boot.h"
-#include "map.h"
+#include "test.h"
 #include "main_options.h"
 
 
@@ -64,7 +64,7 @@ using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_script;
 using namespace hoa_boot;
-using namespace hoa_map;
+using namespace hoa_test;
 
 
 /** \brief Frees all data allocated by Allacrost by destroying the singleton classes
@@ -391,7 +391,16 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	ModeManager->Push(new BootMode());
+	// Create the first mode object to add to the game stack
+	if (hoa_main::start_in_test_mode == true) {
+		if (hoa_main::test_number != 0)
+			ModeManager->Push(new TestMode());
+		else
+			ModeManager->Push(new TestMode(hoa_main::test_number));
+	}
+	else {
+		ModeManager->Push(new BootMode());
+	}
 
 	try {
 		// This is the main loop for the game. The loop iterates once for every frame drawn to the screen.

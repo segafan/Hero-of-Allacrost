@@ -81,8 +81,8 @@ void BindEngineCode() {
 			.def("PopAll", &ModeEngine::PopAll)
 			.def("GetTop", &ModeEngine::GetTop)
 			.def("GetMode", &ModeEngine::GetMode)
-			.def("GetGameType", (uint8 (ModeEngine::*)(uint32))&ModeEngine::GetGameType)
-			.def("GetGameType", (uint8 (ModeEngine::*)())&ModeEngine::GetGameType)
+			.def("GetModeType", (uint8 (ModeEngine::*)(uint32))&ModeEngine::GetModeType)
+			.def("GetModeType", (uint8 (ModeEngine::*)())&ModeEngine::GetModeType)
 	];
 
 	} // End using mode manager namespaces

@@ -314,7 +314,9 @@ modes_SOURCES = \
 	$(MODES_DIR)/shop/shop_trade.h \
 	$(MODES_DIR)/shop/shop_trade.cpp \
 	$(MODES_DIR)/shop/shop_utils.h \
-	$(MODES_DIR)/shop/shop_utils.cpp
+	$(MODES_DIR)/shop/shop_utils.cpp \
+    $(MODES_DIR)/test.cpp \
+	$(MODES_DIR)/test.h
 
 if COND_EDITOR
 EDITOR_DIR = src/editor
