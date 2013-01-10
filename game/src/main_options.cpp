@@ -331,7 +331,7 @@ bool EnableDebugging(string vars) {
 			hoa_utils::UTILS_DEBUG                  = true;
 			hoa_video::VIDEO_DEBUG                  = true;
 		}
-		if (args[i] == "engine") {
+		else if (args[i] == "engine") {
 			hoa_audio::AUDIO_DEBUG                  = true;
 			hoa_script::SCRIPT_DEBUG                = true;
 			hoa_mode_manager::MODE_MANAGER_DEBUG    = true;
@@ -339,7 +339,7 @@ bool EnableDebugging(string vars) {
 			hoa_system::SYSTEM_DEBUG                = true;
 			hoa_video::VIDEO_DEBUG                  = true;
 		}
-		if (args[i] == "modes") {
+		else if (args[i] == "modes") {
 			hoa_battle::BATTLE_DEBUG                = true;
 			hoa_boot::BOOT_DEBUG                    = true;
 			hoa_map::MAP_DEBUG                      = true;
