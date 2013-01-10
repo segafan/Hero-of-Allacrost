@@ -20,7 +20,6 @@
 #include "utils.h"
 
 #include "mode_manager.h"
-#include "script.h"
 #include "gui.h"
 
 /** \brief Namespace containing code used only for testing purposes
@@ -31,11 +30,50 @@ namespace hoa_test {
 //! \brief Determines whether the code in the hoa_test namespace should print debug statements or not.
 extern bool TEST_DEBUG;
 
+
+
+namespace private_test {
+
 //! \brief Used to define an invalid test identifier
 const uint32 INVALID_TEST = 0;
 
 //! \brief The path and name of the Lua file where the test directory list is stored
 const std::string TEST_MAIN_FILENAME = "dat/test/test_main.lua";
+
+/** ****************************************************************************
+*** \brief A container class to hold data about a related set of tests
+***
+*** This container is populated with data read from two Lua files. The main test
+*** file contains the test category name, category description, min/max test IDs,
+*** and the test filename. The file for the test is then used to read the
+*** test ids, test names, and test descriptions.
+*** ***************************************************************************/
+class TestData {
+public:
+	//! \brief The name of the category that will displayed in the test menu
+	hoa_utils::ustring category_name;
+
+	//! \brief The text that describes the category
+	hoa_utils::ustring category_description;
+
+	//! \brief Defines the range of possible test ID numbers
+	uint32 minimum_test_id, maximum_test_id;
+
+	//! \brief The name of the Lua file that contains the code to execute all of the tests
+	std::string test_filename;
+
+	//! \brief Holds all of the IDs for the test in question
+	std::vector<uint32> test_ids;
+
+	//! \brief The names of all tests contained within this category
+	std::vector<hoa_utils::ustring> test_names;
+
+	//! \brief The descriptions for all tests contained within this category
+	std::vector<hoa_utils::ustring> test_descriptions;
+};
+
+} // namespace private_test
+
 
 /** ****************************************************************************
 *** \brief A game mode used for debugging and testing purposes
@@ -93,11 +131,13 @@ private:
 	//! \brief Where the user focus is currently at, used to update the mode state appropriately
 	UserFocus _user_focus;
 
-	//! \brief The key strings that are used to identify each category. This is not the same as the text displayed in _category_list
-	std::vector<std::string> _test_categories;
+	//! \brief Contains all of the data that will be displayed in the TestMode GUI. Each element represents one category of test data
+	std::vector<private_test::TestData> _test_data;
 
-	//! \brief The main script file that contains the directory listing of available tests and test categories
-	hoa_script::ReadScriptDescriptor _main_script;
+	// ---------- GUI Objects
+
+	//! \brief Used to display information in the test window when a test category contains no tests
+	hoa_video::TextImage _no_tests_message;
 
 	//! \brief Vertical window on the left side of the screen. Used to display the _category_list OptionBox
 	hoa_gui::MenuWindow _category_window;
@@ -112,7 +152,7 @@ private:
 	hoa_gui::OptionBox _category_list;
 
 	//! \brief The lists of available tests for each test category
-	std::vector<hoa_gui::OptionBox> _all_test_lists;
+	std::vector<hoa_gui::OptionBox*> _all_test_lists;
 
 	//! \brief A pointer to the list of all tests for the selected category in _all_test_lists
 	hoa_gui::OptionBox* _test_list;
@@ -120,16 +160,30 @@ private:
 	//! \brief Holds the descriptive text of the highlighted test category or test
 	hoa_gui::TextBox _description_text;
 
-	//! \brief Closes and re-opens the dat/test/test_main.lua script and re-populates all class members as necessary
-	void _ReloadMainScript();
+	// ---------- Methods
+
+	//! \brief Defines the static properties of the various GUI objects
+	void _Initialize();
+	
+	//! \brief Clears out and reloads all test data
+	void _ReloadTestData();
+
+	/** \brief Checks each test ID and test ID range for any potential problems
+	***
+	*** This is called at the end of _ReloadTestData as a means to test the integrity of that data. The function checks for two things.
+	*** First, it ensures that the test ID ranges for each test category do not overlap. Second, it checks to see that each defined test
+	*** ID lies within the valid range of it's category. If either of these checks fail, warning messages will be printed to the console
+	*** (if TEST_DEBUG is enabled), but no corrective action will take place.
+	**/
+	void _CheckForInvalidTestID();
 
 	/** \brief Runs the Lua function to execute the test that is identified by _test_number
 	*** \note This may result in a new game mode being added to the stack, making TestMode no longer active
 	**/
 	void _ExecuteTest();
 
-	//! \brief Updates the text in _description_text based on the currently selected test category or test
-	void _UpdateDescription();
+	//! \brief Clears and updates the description text to reflect the currently selected test or test category
+	void _SetDescriptionText();
 }; // class PauseMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_test

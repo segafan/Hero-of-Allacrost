@@ -17,32 +17,37 @@
 -- You should declare a range of IDs that are reserved for each category of tests
 ------------------------------------------------------------------------------]]
 
+local ns = {}
+setmetatable(ns, {__index = _G})
+test_main = ns;
+setfenv(1, ns);
 
+-- A table which holds the names of each test category table in this file
+categories = {}
 
 --------------------------------------------------------------------------------
 -- Mode code tests: Reserve test IDs 1 - 10,000
 --------------------------------------------------------------------------------
 
 ----- maps: Reserve test IDs 1 - 1,000
+table.insert(categories, "maps");
 maps = {
-    name = "Test Map Files";
+    name = "Test Maps";
     description = "These tests load a declared map file and set any custom criteria prior to placing the user on the map. This may include declaring the character party, inventory, what global events have been triggered, setting a custom spawn position, and so on.";
+    min_id = 1;
+    max_id = 1000;
+    file = "dat/test/maps.lua";
 }
-
-maps[1] = {
-    name = "First Cave Dungeon Map";
-    description = "Places the user in the first dungeon, effectively skipping over the introduction of the game";
-}
-
-
 
 ----- battles: Reserve test IDs 1,001 - 2,000
+table.insert(categories, "battles");
 battles = {
-    name = "Test Battle Configurations";
+    name = "Test Battles";
     description = "These tests declare the character and enemy parties, inventory, skills, and any other relevant battle information such as locations or battle scripts to use. They are very useful for game balancing and testing possible battle settings and configurations";
+    min_id = 1001;
+    max_id = 2000;
+    file = "dat/test/battles.lua";
 }
-
-
 
 --------------------------------------------------------------------------------
 -- Common code tests: Reserve test IDs 10,001 - 20,000
