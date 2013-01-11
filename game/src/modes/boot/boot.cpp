@@ -27,8 +27,8 @@
 #include "boot_credits.h"
 #include "boot_welcome.h"
 
-#include "map.h"
 #include "save_mode.h"
+#include "test.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -238,6 +238,7 @@ void BootMode::Reset() {
 
 void BootMode::Update() {
 	_options_window.Update(SystemManager->GetUpdateTime());
+
 	if (InputManager->QuitPress() == true) {
 		SystemManager->ExitGame();
 		return;
@@ -286,6 +287,12 @@ void BootMode::Update() {
 
 	// Check for waiting keypresses or joystick button presses
 	SDL_Event ev = InputManager->GetMostRecentEvent();
+	// Check to see if Ctrl+T was pressed. If so, end BootMode and enter TestMode
+	if ((ev.type == SDL_KEYDOWN) && (ev.key.keysym.mod & KMOD_CTRL) && (ev.key.keysym.sym == SDLK_t)) {
+		ModeManager->PopAll();
+		ModeManager->Push(new hoa_test::TestMode());
+	}
+	
 	if (_joy_setting_function != NULL)
 	{
 		if (InputManager->AnyKeyPress() && ev.type == SDL_JOYBUTTONDOWN)

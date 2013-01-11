@@ -230,7 +230,7 @@ float FloorToFloatMultiple(const float value, const float multiple);
 *** \param s String to be filled
 *** \param data Data to convert to string
 ***
-*** This function convers data to string. It will only work if the data type has the
+*** This function converts any type of data to a string. It will only work if the data type has the
 *** sstring::operator<< implemented.
 **/
 template<class T>

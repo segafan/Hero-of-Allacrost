@@ -393,7 +393,7 @@ int main(int argc, char *argv[]) {
 
 	// Create the first mode object to add to the game stack
 	if (hoa_main::start_in_test_mode == true) {
-		if (hoa_main::test_number != 0)
+		if (hoa_main::test_number == 0)
 			ModeManager->Push(new TestMode());
 		else
 			ModeManager->Push(new TestMode(hoa_main::test_number));

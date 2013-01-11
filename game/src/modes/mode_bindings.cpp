@@ -44,6 +44,7 @@
 #include "map_zones.h"
 #include "menu.h"
 #include "shop.h"
+#include "test.h"
 
 using namespace luabind;
 
@@ -687,6 +688,19 @@ void BindModeCode() {
 	];
 
 	} // End using shop mode namespaces
+
+	// ----- Test Mode bindings
+	{
+	using namespace hoa_test;
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_test")
+	[
+		class_<TestMode, hoa_mode_manager::GameMode>("TestMode")
+			.def("SetImmediateTestID", &TestMode::SetImmediateTestID)
+	];
+
+	} // End using test mode namespaces
+
 } // void BindModeCode()
 
 } // namespace hoa_defs

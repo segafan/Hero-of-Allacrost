@@ -99,7 +99,7 @@ public:
 	TestMode();
 
 	/** \brief Creates a TestMode instance and immediately begins the specified test
-	*** \param test_number The id number of the test to begin executing
+	*** \param test_id The id number of the test to begin executing immediately once this instance becomes the active game mode
 	*** \note If the test_number is invalid, a warning will be printed and TestMode will run as normal
 	**/
 	TestMode(uint32 test_number);
@@ -115,18 +115,27 @@ public:
 	//! \brief Draws the GUI objects to the screen
 	void Draw();
 
+	/** \brief Specifies a test to immediately begin the next time that TestMode is made the active game mode (ie when the Reset() method is invoked)
+	*** \param id The ID of the test to execute
+	***
+	*** If the id does not point to an invalid test, a warning message will be issued and no test will be executed. This method is bound to Lua to make
+	*** it easy to chain tests together. When a test makes this call, the next test will be issued whenever TestMode becomes active again.
+	***
+	*** \note Exercise caution when calling this function in your tests. If you create a loop of tests (A -> B, B -> C, C -> A, ...) then you will be unable
+	*** to return to the TestMode interface and you will have to quit the application to get out of the infinite loop.
+	**/
+	void SetImmediateTestID(uint32 id)
+		{ _immediate_test_id = id; }
+
 private:
 	//! \brief Defines the places where the user input may be focused
 	typedef enum {
 		SELECTING_CATEGORY,
 		SELECTING_TEST
 	} UserFocus;
-
-	//! \brief When true, the test defined by _test_number will be executed immediately when the game mode becomes active
-	bool _run_test_immediately;
 	
-	//! \brief The number of the test to execute
-	uint32 _test_number;
+	//! \brief Holds the ID number of the test to execute immediately if TestMode was created and told to immediately run a specific test
+	uint32 _immediate_test_id;
 
 	//! \brief Where the user focus is currently at, used to update the mode state appropriately
 	UserFocus _user_focus;
@@ -137,7 +146,7 @@ private:
 	// ---------- GUI Objects
 
 	//! \brief Used to display information in the test window when a test category contains no tests
-	hoa_video::TextImage _no_tests_message;
+	hoa_video::TextImage _missing_tests_text;
 
 	//! \brief Vertical window on the left side of the screen. Used to display the _category_list OptionBox
 	hoa_gui::MenuWindow _category_window;
@@ -154,7 +163,7 @@ private:
 	//! \brief The lists of available tests for each test category
 	std::vector<hoa_gui::OptionBox*> _all_test_lists;
 
-	//! \brief A pointer to the list of all tests for the selected category in _all_test_lists
+	//! \brief A pointer to the list inside _all_test_lists that represent the selected category
 	hoa_gui::OptionBox* _test_list;
 
 	//! \brief Holds the descriptive text of the highlighted test category or test
@@ -170,22 +179,29 @@ private:
 
 	/** \brief Checks each test ID and test ID range for any potential problems
 	***
-	*** This is called at the end of _ReloadTestData as a means to test the integrity of that data. The function checks for two things.
+	*** This is called at the end of _ReloadTestData as a means to ensure the integrity of that data. The function checks for three things.
 	*** First, it ensures that the test ID ranges for each test category do not overlap. Second, it checks to see that each defined test
-	*** ID lies within the valid range of it's category. If either of these checks fail, warning messages will be printed to the console
-	*** (if TEST_DEBUG is enabled), but no corrective action will take place.
+	*** ID lies within the valid range of it's category. And finally, it makes sure that all test IDs are unique among the entire set of
+	*** tests. Warning messages will be printed to the console if these checks detect any issues. But if TEST_DEBUG is not set to true, 
+	*** the function will do nothing since it's only output is printing debug messages.
 	**/
 	void _CheckForInvalidTestID();
 
 	/** \brief Runs the Lua function to execute the test that is identified by _test_number
-	*** \note This may result in a new game mode being added to the stack, making TestMode no longer active
-	*** \note All global game data is cleared prior to beginning the test to help ensure that the test behavior remains repeatable
+	*** \param request_id Optional argument to specify the ID number of a specific test to run. By default this is set to an invalid test number
+	***
+	*** When a test nuumber is defined, this function finds the appropriate test data and updates the GUI lists so that the specified test
+	*** is selected. Otherwise, the currently selected category and test are used to begin executing a test. Depending on the test, a new
+	*** game mode may be pushed on to the stack, removing TestMode as the active game mode. Usually a test will not destroy the TestMode
+	*** instance by popping it off the stack, however, making it simple to return to.
+	***
+	*** \note All global game data is cleared prior to beginning a test to help ensure that the test behavior remains repeatable
 	**/
-	void _ExecuteTest();
+	void _ExecuteTest(uint32 request_id = private_test::INVALID_TEST);
 
 	//! \brief Clears and updates the description text to reflect the currently selected test or test category
 	void _SetDescriptionText();
-}; // class PauseMode : public hoa_mode_manager::GameMode
+}; // class TestMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_test
 

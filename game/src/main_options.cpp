@@ -94,10 +94,25 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 		}
 		else if (options[i] == "-t" || options[i] == "--test") {
 			start_in_test_mode = true;
-			// TODO: write code to process the optional test number option
-// 			if (IsStringNumeric(options[i + 1]) == true) {
-// 				test_number = StringToNumber(options[i + 1]);
-// 			}
+			// Check for the optional argument that may follow the test option
+			if (((i + 1) < options.size()) && (options[i + 1].at(0) != '-')) {
+				if (IsStringNumeric(options[i + 1]) == true) {
+					int32 number = 0;
+					istringstream(options[i + 1]) >> number;
+					if (number < 0) {
+						cerr << "Parameter \"" << options[i + 1] << "\" for argument \"" << options[i] <<
+							"\" must be an unsigned integer" << endl;
+						return false;
+					}
+					test_number = static_cast<uint32>(number);
+				}
+				else {
+					cerr << "Parameter \"" << options[i + 1] << "\" for argument \"" << options[i] <<
+						"\" must be an unsigned integer" << endl;
+					return false;
+				}
+				i++;
+			}
 		}
 		else {
 			cerr << "Unrecognized option: " << options[i] << endl;
