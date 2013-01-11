@@ -52,6 +52,12 @@ MenuMode* MenuMode::_current_instance = NULL;
 // MenuMode class -- Initialization and Destruction Code
 ////////////////////////////////////////////////////////////////////////////////
 
+MenuMode::MenuMode() {
+	
+}
+
+
+
 MenuMode::MenuMode(ustring locale_name, string locale_image) :
 	_message_window(NULL)
 {

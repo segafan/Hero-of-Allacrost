@@ -20,6 +20,9 @@
 #include "mode_manager.h"
 #include "script.h"
 #include "video.h"
+
+#include "global.h"
+#include "gui.h"
 #include "pause.h"
 
 using namespace std;
@@ -31,6 +34,7 @@ using namespace hoa_mode_manager;
 using namespace hoa_script;
 using namespace hoa_video;
 
+using namespace hoa_global;
 using namespace hoa_gui;
 using namespace hoa_pause;
 using namespace hoa_test::private_test;
@@ -112,6 +116,8 @@ void TestMode::Update() {
 			if (_test_list != NULL) {
 				_category_list.InputConfirm();
 				_user_focus = SELECTING_TEST;
+				_category_list.SetCursorState(VIDEO_CURSOR_STATE_DARKENED);
+				_test_list->SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				_SetDescriptionText();
 			}
 			else {
@@ -120,10 +126,12 @@ void TestMode::Update() {
 		}
 		else if (InputManager->UpPress()) {
 			_category_list.InputUp();
+			_test_list = _all_test_lists[_category_list.GetSelection()];
 			_SetDescriptionText();
 		}
 		else if (InputManager->DownPress()) {
 			_category_list.InputDown();
+			_test_list = _all_test_lists[_category_list.GetSelection()];
 			_SetDescriptionText();
 		}
 	}
@@ -135,6 +143,8 @@ void TestMode::Update() {
 		if (InputManager->CancelPress()) {
 			_test_list->InputCancel();
 			_user_focus = SELECTING_CATEGORY;
+			_category_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_test_list->SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 			_SetDescriptionText();
 		}
 		else if (InputManager->UpPress()) {
@@ -174,7 +184,7 @@ void TestMode::Draw() {
 
 void TestMode::_Initialize() {
 	_no_tests_message.SetStyle(TextStyle("text22"));
-	_no_tests_message.SetText("No tests are defined for this test category.");
+	_no_tests_message.SetText(MakeUnicodeString("No tests are defined for this test category."));
 	
 	_category_window.Create(400.0f, 600.0f);
 	_category_window.SetPosition(0.0f, 0.0f);
@@ -305,6 +315,7 @@ void TestMode::_ReloadTestData() {
 		new_list->SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 		new_list->SetTextStyle(TextStyle("text22"));
 		new_list->SetCursorOffset(-50.0f, -20.0f);
+		new_list->SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 		new_list->SetSelectMode(VIDEO_SELECT_SINGLE);
 		new_list->SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 
@@ -342,6 +353,8 @@ void TestMode::_ExecuteTest() {
 	uint32 category = _category_list.GetSelection();
 	uint32 test_id = _test_data[category].test_ids[_test_list->GetSelection()];
 	ReadScriptDescriptor test_file;
+
+	GlobalManager->ClearAllData();
 
 	if (test_file.OpenFile(_test_data[category].test_filename) == false) {
 		IF_PRINT_WARNING(TEST_DEBUG) << "failed to execute test because the test file could not be opened for reading: "
