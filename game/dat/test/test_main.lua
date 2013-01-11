@@ -37,8 +37,8 @@ maps = {
 	description = "Used for testing specific features of MapMode and playtesting maps that are under developed. " ..
 		"These tests begin by initializing some set of global data (character, inventory, past events completed, etc.), " ..
 		"specifying the map file to be used, and then configuring additional properties prior to starting the map. " ..
-		"For example, placing the player sprite at a specific position on the map, or marking any nuber of events that" .. 
-		"take place on the map as complete.";
+		"For example, placing the player sprite at a specific position on the map, or marking any number of events that " .. 
+		"take place on the map as completed.";
 	min_id = 1;
 	max_id = 1000;
 	file = "dat/test/maps.lua";

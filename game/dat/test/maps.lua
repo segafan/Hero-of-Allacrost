@@ -6,6 +6,10 @@
 -- Generally it is a good idea to create a test for each map file, or possibly 
 -- multiple tests for a file so that it is easy to get to a certain point in the
 -- just before an important event or sequence, such as a boss encounter.
+--
+-- Note: It is strongly advised to state the name of the map that will be opened
+-- in the test name. This makes the life of the user much easier. Recommended format:
+-- "[Name Of Map] - Configuration Details".
 ------------------------------------------------------------------------------]]
 
 local ns = {}

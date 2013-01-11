@@ -47,8 +47,7 @@ bool TEST_DEBUG = false;
 
 TestMode::TestMode() :
 	GameMode(MODE_MANAGER_TEST_MODE),
-	_run_test_immediately(false),
-	_test_number(INVALID_TEST),
+	_immediate_test_id(INVALID_TEST),
 	_user_focus(SELECTING_CATEGORY),
 	_test_list(NULL)
 {
@@ -59,8 +58,7 @@ TestMode::TestMode() :
 
 TestMode::TestMode(uint32 test_number) :
 	GameMode(MODE_MANAGER_TEST_MODE),
-	_run_test_immediately(false),
-	_test_number(INVALID_TEST),
+	_immediate_test_id(test_number),
 	_user_focus(SELECTING_CATEGORY),
 	_test_list(NULL)
 {
@@ -86,15 +84,21 @@ TestMode::~TestMode() {
 
 void TestMode::Reset() {
 	VideoManager->SetStandardCoordSys();
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, VIDEO_BLEND, 0);
 
+	// Usually this condition is only true when the class object has just been constructed and has been promoted
+	// to the active game state for the first time.
 	if (_test_data.empty() == true)
 		_ReloadTestData();
 
-	if (_run_test_immediately == true) {
-		_ExecuteTest();
+	// Run any immediate test that has been specified
+	if (_immediate_test_id != INVALID_TEST) {
+		// _immediate_test_id must be reset before ExecuteTest is called (and not after) so that a test may set this
+		// member to a new value when it is executed if it so desires.
+		uint32 id = _immediate_test_id;
+		_immediate_test_id = INVALID_TEST;
+		_ExecuteTest(id);
 	}
-	_run_test_immediately = false;
 }
 
 
@@ -173,8 +177,8 @@ void TestMode::Draw() {
 		VideoManager->PushState();
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 		// Move the draw cursor to the middle of the test window
-		VideoManager->Move(612.0f, 300.0f);
-		_no_tests_message.Draw();
+		VideoManager->Move(712.0f, 300.0f);
+		_missing_tests_text.Draw();
 		VideoManager->PopState();
 	}
 	_description_text.Draw();
@@ -183,8 +187,8 @@ void TestMode::Draw() {
 
 
 void TestMode::_Initialize() {
-	_no_tests_message.SetStyle(TextStyle("text22"));
-	_no_tests_message.SetText(MakeUnicodeString("No tests are defined for this test category."));
+	_missing_tests_text.SetStyle(TextStyle("text22"));
+	_missing_tests_text.SetText(MakeUnicodeString("No tests are currently defined for this test category."));
 	
 	_category_window.Create(400.0f, 600.0f);
 	_category_window.SetPosition(0.0f, 0.0f);
@@ -344,17 +348,114 @@ void TestMode::_CheckForInvalidTestID() {
 		return;
 	}
 
-	// TODO: this method needs to be implemented
-}
+	// ----- (1): Check for any pair of test categories that have overlapping ID ranges
+	for (uint32 i = 0; i < _test_data.size(); ++i) {
+		for (uint32 j = i + 1; j < _test_data.size(); ++j) {
+			if (((_test_data[i].minimum_test_id <= _test_data[j].maximum_test_id) &&
+				(_test_data[i].maximum_test_id >= _test_data[j].maximum_test_id)) ||
+				((_test_data[i].minimum_test_id <= _test_data[j].minimum_test_id) &&
+				(_test_data[i].maximum_test_id >= _test_data[j].minimum_test_id)))
+			{
+				string cat_i_name = MakeStandardString(_test_data[i].category_name);
+				string cat_j_name = MakeStandardString(_test_data[j].category_name);
+				uint32 i_min = _test_data[i].minimum_test_id;
+				uint32 i_max = _test_data[i].maximum_test_id;
+				uint32 j_min = _test_data[j].minimum_test_id;
+				uint32 j_max = _test_data[j].maximum_test_id;
+				
+				PRINT_WARNING << "Two test categories had overlapping ID ranges. Please correct this data in the main test file.\n" <<
+					"\tCategory \"" << cat_i_name << "\" has range [" << i_min << ", " << i_max << "].\n" <<
+					"\tCategory \"" << cat_j_name << "\" has range [" << j_min << ", " << j_max << "]." << endl;
+			}
+		}
+	}
+
+	// ----- (2): Check that the IDs for all tests within a category fall within the valid range
+	for (uint32 i = 0; i < _test_data.size(); ++i) {
+		for (uint32 j = 0; j < _test_data[i].test_ids.size(); ++j) {
+			if ((_test_data[i].minimum_test_id > _test_data[i].test_ids[j]) || (_test_data[i].maximum_test_id < _test_data[i].test_ids[j])) {
+				string cat_name = MakeStandardString(_test_data[i].category_name);
+				string test_name = MakeStandardString(_test_data[i].test_names[j]);
+				uint32 min = _test_data[i].minimum_test_id;
+				uint32 max = _test_data[i].maximum_test_id;
+				uint32 id =_test_data[i].test_ids[j];
+				
+				PRINT_WARNING << "Test category \"" << cat_name << "\" contained a test with ID [" << id << "] " <<
+					" which falls outside ofthe category's valid ID range: [" << min << ", " << max << "].\n" <<
+					"\tThe name of the test corresponding to this ID is: \"" << test_name << "\"." << endl;
+			}
+		}
+	}
+
+	// ----- (3): Check that each test ID is unique among all of the tests in every category
+	set<uint32> unique_ids;
+	for (uint32 i = 0; i < _test_data.size(); ++i) {
+		for (uint32 j = 0; j < _test_data[i].test_ids.size(); ++j) {
+			pair<set<uint32>::iterator, bool> result;
+			result = unique_ids.insert(_test_data[i].test_ids[j]);
+			if (result.second == false) {
+				PRINT_WARNING << "Two or more tests were found sharing the same ID number: " << _test_data[i].test_ids[j] << endl;
+			}
+		}
+	}
+} // void TestMode::_CheckForInvalidTestID()
 
 
 
-void TestMode::_ExecuteTest() {
-	uint32 category = _category_list.GetSelection();
-	uint32 test_id = _test_data[category].test_ids[_test_list->GetSelection()];
-	ReadScriptDescriptor test_file;
+void TestMode::_ExecuteTest(uint32 request_id) {
+	uint32 category = 0;
+	uint32 test_id = 0;
 
+	// If a request_id has been declared, look up the category and test in the test list
+	if (request_id != INVALID_TEST) {
+		bool request_successful = false;
+		
+		// Loop through all test data and find the category that the request_id belongs in
+		for (uint32 i = 0; i < _test_data.size(); ++i) {
+			if ((_test_data[i].minimum_test_id <= request_id) && (request_id <= _test_data[i].maximum_test_id)) {
+				// Valid category found. Now loop through all of the tests and make sure that there is one that matches the request id
+				for (uint32 j = 0; j < _test_data[i].test_ids.size(); ++j) {
+					if (_test_data[i].test_ids[j] == request_id) {
+						// Valid test found. Update the selected GUI lists to point to the test that will be executed
+						_category_list.SetSelection(i);
+						_test_list = _all_test_lists[i];
+						_test_list->SetSelection(j);
+						category = i;
+						test_id = request_id;
+						request_successful = true;
+						break;
+					}
+				}
+
+				if (request_successful == false) {
+					IF_PRINT_WARNING(TEST_DEBUG) << "Request to execute test number [" << request_id << "] failed because " <<
+						"although a valid test category was found [" << MakeStandardString(_test_data[i].category_name) <<
+						"], the test in that category was not defined." << endl;
+					return;
+				}
+				break;
+			}
+		}
+
+		if (request_successful == false) {
+			IF_PRINT_WARNING(TEST_DEBUG) << "Request to execute test number [" << request_id << "] failed because " <<
+				"no test categories contained a test with this ID number." << endl;
+			return;
+		}
+		else {
+			// Update the focus to the test list for when the user returns after the test completes
+			_user_focus = SELECTING_TEST;
+		}
+	}
+	// When no specific test ID was requested, fetch the test to run from the currently selected item in the GUI lists
+	else {
+		category = _category_list.GetSelection();
+		test_id = _test_data[category].test_ids[_test_list->GetSelection()];
+	}
+
+	// Clear any global data set, open the appropriate test file, and execute the test's script function
 	GlobalManager->ClearAllData();
+	ReadScriptDescriptor test_file;
 
 	if (test_file.OpenFile(_test_data[category].test_filename) == false) {
 		IF_PRINT_WARNING(TEST_DEBUG) << "failed to execute test because the test file could not be opened for reading: "
@@ -379,7 +480,7 @@ void TestMode::_ExecuteTest() {
 	test_file.CloseTable();
 	test_file.CloseTable();
 	test_file.CloseFile();
-}
+} // void TestMode::_ExecuteTest(uint32 request_id)
 
 
 
@@ -390,7 +491,8 @@ void TestMode::_SetDescriptionText() {
 		_description_text.SetDisplayText(_test_data[_category_list.GetSelection()].category_description);
 	}
 	else if (_user_focus == SELECTING_TEST) {
-		// Note that the user is not allowed to enter this focus unless there is a valid test list for the active category
+		// Note that the user is not allowed to enter this focus unless there is a valid test list for the active category, so there
+		// is no need to ensure that _test_list is not NULL here
 		_description_text.SetDisplayText(_test_data[_category_list.GetSelection()].test_descriptions[_test_list->GetSelection()]);
 	}
 	else {
