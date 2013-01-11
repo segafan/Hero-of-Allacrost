@@ -1,9 +1,11 @@
 ------------------------------------------------------------------------------[[
 -- Filename: maps.lua
 --
--- Description: This file contains all tests that create an instance of MapMode
--- with various configurations. The tests here are primarily for testing map files
--- and scripting.
+-- Description: This file contains all tests that create an instance of MapMode.
+-- The tests here are primarily for testing map files and their scripted code.
+-- Generally it is a good idea to create a test for each map file, or possibly 
+-- multiple tests for a file so that it is easy to get to a certain point in the
+-- just before an important event or sequence, such as a boss encounter.
 ------------------------------------------------------------------------------]]
 
 local ns = {}
@@ -11,31 +13,65 @@ setmetatable(ns, {__index = _G})
 maps = ns;
 setfenv(1, ns);
 
+-- Character IDs. Each ID can have only a single bit active as IDs are used in bitmask operations.
+CLAUDIUS  = 1;
+MARK      = 2;
+DESTER    = 4;
+LUKAR     = 8;
+
+--------------------------------------------------------------------------------
+-- Common Functions
+--------------------------------------------------------------------------------
+
+-- Sets the map location and creates and pushes the MapMode instance
+function StartMap(location)
+	GlobalManager:SetLocation(location);
+	local map = hoa_map.MapMode(location);
+	ModeManager:Push(map);
+end
+
 -- Test IDs 1 - 1,000 are reserved for maps
 tests = {}
 
 tests[1] = {
-	name = "First Cave Dungeon Map";
-	description = "Places the user in the first dungeon, effectively skipping over the introduction of the game";
+	name = "[River Access Cave] - New Game Data";
+	description = "Places the user in the first dungeon with the party and status that the player receives upon beginning a new game. " ..
+		"Effectively, this test is a way to start a new game and skip over the intro sequence seen on the opening map.";
 	ExecuteTest = function()
-		-- Make sure that any global data is cleared away
-		GlobalManager:ClearAllData();
+		-- Note: These calls should match what is found in the NewGame() function in dat/global.lua. Update this test accordingly 
+		-- if the contents of that function change
 
-		-- Create the initial party, drunes, and inventory
 		GlobalManager:AddCharacter(LUKAR);
 		GlobalManager:AddCharacter(DESTER);
 		GlobalManager:AddCharacter(MARK);
 		GlobalManager:AddCharacter(CLAUDIUS);
-		GlobalManager:AddNewEventGroup("global_events"); -- this group stores the primary list of events completed in the game
+		GlobalManager:AddNewEventGroup("global_events");
 		GlobalManager:SetDrunes(100);
 		GlobalManager:AddToInventory(1, 4);
 
-		-- Set the location, load the opening map and add it to the game stack, and remove boot mode from the game stack
-		local location_name = "dat/maps/river_access_cave.lua"
-		GlobalManager:SetLocation(location_name);
-		local opening_map = hoa_map.MapMode(location_name);
-
-		ModeManager:Push(opening_map);
+		StartMap("dat/maps/river_access_cave.lua");
 	end
 }
 
+-- tests[2]: Reserved for a test of the River Access Cave that spawns the player just before the boss battle at the end of the dungeon
+
+-- tests[3]: Reserved for testing the return scene on the opening map
+
+tests[4] = {
+	name = "[Harrvah City] - First Visit, City Under Attack";
+	description = "Places the player at the entrance to Harrvah for the first visit to the city. This is when Claudius is " ..
+		"joined by other knights returning from their mission to the cave, where they find the city under attack by the " ..
+		"demonic forces.";
+
+	ExecuteTest = function()
+		GlobalManager:AddCharacter(LUKAR);
+		GlobalManager:AddCharacter(DESTER);
+		GlobalManager:AddCharacter(MARK);
+		GlobalManager:AddCharacter(CLAUDIUS);
+		GlobalManager:AddNewEventGroup("global_events");
+		GlobalManager:SetDrunes(200);
+		GlobalManager:AddToInventory(1, 5);
+
+		StartMap("dat/maps/harrvah_city.lua");
+	end
+}

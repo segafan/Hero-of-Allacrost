@@ -179,6 +179,7 @@ private:
 
 	/** \brief Runs the Lua function to execute the test that is identified by _test_number
 	*** \note This may result in a new game mode being added to the stack, making TestMode no longer active
+	*** \note All global game data is cleared prior to beginning the test to help ensure that the test behavior remains repeatable
 	**/
 	void _ExecuteTest();
 

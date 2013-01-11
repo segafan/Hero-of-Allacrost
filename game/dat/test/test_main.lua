@@ -2,19 +2,20 @@
 -- Filename: test_main.lua
 --
 -- Description: This file serves as a directory for all available functional tests
--- that are used by the TestMode class. Tests are organized into categories, where
--- each category is given a string handle (it's table name), name (that will be
--- seen by the user in the test menu), and description of what the test category
--- contains.
+-- that are used by the TestMode class. All test categories and the properties of
+-- those categories are listed in this file. Categories reserve a range of test IDs
+-- so that every test ID is a unique integer. Each category is required to have the
+-- following information defined.
 --
--- Within each category are numerous tests which have a unique integer ID, that
--- serve as the test's table key. Additional information that tests are required to
--- have are a name that will be used to briefly describe the test, a description
--- that describes the test in further detail, and the instructions for executing the
--- test (TODO: define what data is needed to execute tests).
+-- name: A short name for the category of tests
+-- description: A longer piece of text describing what the tests in this category perform
+-- min_id: The low end of the range of test IDs reserved by the category
+-- max_id: The high end of the range of test IDs reserved by the category
+-- file: The filename where the tests for this category are defined
 --
--- Test IDs are unsigned integers. Do not use the value of zero, as that is reserved.
--- You should declare a range of IDs that are reserved for each category of tests
+-- If any of this information is missing, the test category will not appear in TestMode.
+-- Although note that it is acceptable for a test file to contain no tests and the category
+-- for the test will still appear in this case.
 ------------------------------------------------------------------------------]]
 
 local ns = {}
@@ -32,21 +33,66 @@ categories = {}
 ----- maps: Reserve test IDs 1 - 1,000
 table.insert(categories, "maps");
 maps = {
-    name = "Test Maps";
-    description = "These tests load a declared map file and set any custom criteria prior to placing the user on the map. This may include declaring the character party, inventory, what global events have been triggered, setting a custom spawn position, and so on.";
-    min_id = 1;
-    max_id = 1000;
-    file = "dat/test/maps.lua";
+	name = "Test Map Mode";
+	description = "Used for testing specific features of MapMode and playtesting maps that are under developed. " ..
+		"These tests begin by initializing some set of global data (character, inventory, past events completed, etc.), " ..
+		"specifying the map file to be used, and then configuring additional properties prior to starting the map. " ..
+		"For example, placing the player sprite at a specific position on the map, or marking any nuber of events that" .. 
+		"take place on the map as complete.";
+	min_id = 1;
+	max_id = 1000;
+	file = "dat/test/maps.lua";
 }
 
 ----- battles: Reserve test IDs 1,001 - 2,000
 table.insert(categories, "battles");
 battles = {
-    name = "Test Battles";
-    description = "These tests declare the character and enemy parties, inventory, skills, and any other relevant battle information such as locations or battle scripts to use. They are very useful for game balancing and testing possible battle settings and configurations";
-    min_id = 1001;
-    max_id = 2000;
-    file = "dat/test/battles.lua";
+	name = "Test Battle Mode";
+	description = "Used to test battles and perform balance testing. These tests specify the character and enemy parties " ..
+		"that will partcipate in the battle. The test may also add custom properties to an actor, such as granting them " ..
+		"access to a particular skill that they may otherwise not have. Note that battles can be chained together so that " ..
+		"one test involves participating in multiple battles one right after the other. The battles may contain scripted  " ..
+		"sequences as well.";
+	min_id = 1001;
+	max_id = 2000;
+	file = "dat/test/battles.lua";
+}
+
+----- menus: Reserve test IDs 2,001 - 3,000
+table.insert(categories, "menus");
+menus = {
+	name = "Test Menu Mode";
+	description = "Opens up a MenuMode instance. The differences between these sets of tests are all based on the character " ..
+		"party, inventory, and other global data. These tests are primarily used for debugging various features of MenuMode " ..
+		"and are not used for any sort of game balance testing.";
+	min_id = 2001;
+	max_id = 3000;
+	file = "dat/test/menus.lua";
+}
+
+----- shops: Reserve test IDs 3,001 - 4,000
+table.insert(categories, "shops");
+shops = {
+	name = "Test Shop Mode";
+	description = "Opens up a shop with custom wares and buy/sell prices. The number of drunes and inventory held by the party are " ..
+		"commonly adjusted to ensure that the wares for sale can be afforded or not. These tests are commonly used to adjust " ..
+		"the prices of items and equipment sold in the game so that they are a fair price. Tests are also manufactured to debug " ..
+		"certain features of ShopMode itself.";
+	min_id = 3001;
+	max_id = 4000;
+	file = "dat/test/shops.lua";
+}
+
+----- saves: Reserve test IDs 4,001 - 5,000
+table.insert(categories, "saves");
+saves = {
+	name = "Test Save Mode";
+	description = "Tests the Save/Load game interface. These tests only cover either saving or loading of a game, but not both within " ..
+		"the same test. Loading a game also requires that saved game files currently exist, as these tests will not write custom saved " ..
+		"game files. It is common to rely on existing saves that the user generated by playing through the game,";
+	min_id = 4001;
+	max_id = 5000;
+	file = "dat/test/saves.lua";
 }
 
 --------------------------------------------------------------------------------
