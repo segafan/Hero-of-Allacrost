@@ -157,11 +157,6 @@ class MenuMode : public hoa_mode_manager::GameMode {
 public:
 	MenuMode();
 
-	/** \param location_name The name of the current map that will be displayed on the menu screen.
-	*** \param locale_image The filename for the location image that is displayed in the menus.
-	**/
-	MenuMode(hoa_utils::ustring locale_name, std::string locale_image);
-
 	~MenuMode();
 
 	//! \brief Returns a pointer to the active instance of menu mode
@@ -187,11 +182,6 @@ private:
 
 	//! \brief Text image which displays the name of the location in the game where MenuMode was invoked
 	hoa_video::TextImage _locale_name;
-
-	/** \brief The graphic that represents the current map that the player is exploring
-	*** This image is set using the string in the MenuMode constructor
-	**/
-	hoa_video::StillImage _locale_graphic;
 
 	/** \brief Retains a snap-shot of the screen just prior to when menu mode was entered
 	*** This image is perpetually drawn as the background while in menu mode
@@ -299,9 +289,8 @@ private:
 
 	//! \brief Draws the 'Name' and 'Qty' tags for the item list.
 	void _DrawItemListHeader();
-
 }; // class MenuMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_menu
 
-#endif
+#endif // __MENU_HEADER__
