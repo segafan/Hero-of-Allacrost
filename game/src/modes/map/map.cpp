@@ -163,7 +163,7 @@ void MapMode::Reset() {
 	MapMode::_current_instance = this;
 
 	// Make the map location known globally to other code that may need to know this information
-	GlobalManager->SetLocation(MakeUnicodeString(_map_filename), _location_graphic.GetFilename());
+	GlobalManager->SetLocation(_map_name, _location_graphic.GetFilename());
 
 	if (_music.size() > _current_track && _music[_current_track].GetState() != AUDIO_STATE_PLAYING) {
 		_music[_current_track].Play();
@@ -403,6 +403,7 @@ void MapMode::_Load() {
 	if (_location_graphic.Load("img/portraits/locations/" + _map_script.ReadString("location_filename")) == false) {
 		PRINT_ERROR << "failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
 	}
+	GlobalManager->SetLocation(_map_name, _location_graphic.GetFilename());
 
 	// ---------- (2) Instruct the supervisor classes to perform their portion of the load operation
 	_tile_supervisor->Load(_map_script, this);
@@ -467,7 +468,7 @@ void MapMode::_Load() {
 void MapMode::_UpdateExplore() {
 	// First go to menu mode if the user requested it
 	if (InputManager->MenuPress()) {
-		MenuMode *MM = new MenuMode(_map_name, _location_graphic.GetFilename());
+		MenuMode *MM = new MenuMode();
 		ModeManager->Push(MM);
 		return;
 	}

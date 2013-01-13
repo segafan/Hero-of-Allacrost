@@ -52,27 +52,14 @@ MenuMode* MenuMode::_current_instance = NULL;
 // MenuMode class -- Initialization and Destruction Code
 ////////////////////////////////////////////////////////////////////////////////
 
-MenuMode::MenuMode() {
-	
-}
-
-
-
-MenuMode::MenuMode(ustring locale_name, string locale_image) :
+MenuMode::MenuMode() :
 	_message_window(NULL)
 {
 	if (MENU_DEBUG)
 		cout << "MENU: MenuMode constructor invoked." << endl;
 
 	_locale_name.SetStyle(TextStyle("title22"));
-	_locale_name.SetText(locale_name);
-
-	// Initialize the location graphic
-	_locale_graphic.SetStatic(true);
-	if (_locale_graphic.Load(locale_image, 500, 125) == false) {
-		cerr << "MENU ERROR: failed to load locale graphic in MenuMode constructor: " << locale_image << endl;
-		exit(1);
-	}
+	_locale_name.SetText(GlobalManager->GetLocationName());
 
 	try {
 		_saved_screen = VideoManager->CaptureScreen();
@@ -1026,7 +1013,7 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		VideoManager->Move(390, 685);
-		_locale_graphic.Draw();
+		GlobalManager->GetLocationGraphic().Draw();
 	}
 } // void MenuMode::_DrawBottomMenu()
 
