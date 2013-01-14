@@ -403,7 +403,6 @@ void MapMode::_Load() {
 	if (_location_graphic.Load("img/portraits/locations/" + _map_script.ReadString("location_filename")) == false) {
 		PRINT_ERROR << "failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
 	}
-	GlobalManager->SetLocation(_map_name, _location_graphic.GetFilename());
 
 	// ---------- (2) Instruct the supervisor classes to perform their portion of the load operation
 	_tile_supervisor->Load(_map_script, this);
