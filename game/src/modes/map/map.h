@@ -47,6 +47,9 @@ namespace hoa_map {
 //! An internal namespace to be used only within the map code. Don't use this namespace anywhere else!
 namespace private_map {
 
+//! \brief Used to set the current music track to invalid, effectively stops any music from playing
+const uint32 INVALID_TRACK = 0xFFFFFFFF;
+
 } // namespace private_map
 
 /** ****************************************************************************
@@ -145,9 +148,6 @@ public:
 
 	void PlayMusic(uint32 track_num);
 
-	void PlayNewMusic(uint32 n)
-		{ _music.at(n).Play(); }
-
 	//! \brief Class member accessor functions
 	//@{
 	static MapMode* const CurrentInstance()
@@ -205,6 +205,13 @@ public:
 
 	void SetShowGUI(bool state)
 		{ _show_gui = state; }
+
+	/** \note This sets the track, but does not stop current music or play new music. It is mostly
+	*** used in the map script's Load() function to set the track that should begin playing when the
+	*** map mode instance becomes active for the first time.
+	**/
+	void SetCurrentTrack(uint32 track)
+		{ _current_track = track; }
 
 	const hoa_video::AnimatedImage& GetDialogueIcon() const
 		{ return _dialogue_icon; }

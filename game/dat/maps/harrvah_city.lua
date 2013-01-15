@@ -554,9 +554,8 @@ function Load(m)
 	DialogueManager = m.dialogue_supervisor;
 	event_supervisor = m.event_supervisor;
 
-	local dialogue;
-	local event;
-	local chest;
+	-- Play music once the map becomes active for the first time
+	map:SetCurrentTrack(0);
 
 	-- Create the sprite that the player controls
 	claudius_sprite = ConstructSprite("Claudius", 1000, 214, 185);

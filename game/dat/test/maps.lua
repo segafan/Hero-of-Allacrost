@@ -59,7 +59,27 @@ tests[1] = {
 
 -- tests[2]: Reserved for a test of the River Access Cave that spawns the player just before the boss battle at the end of the dungeon
 
--- tests[3]: Reserved for testing the return scene on the opening map
+
+tests[3] = {
+	name = "[Opening Scene] - Return to City";
+	description = "Places the user in the first dungeon with the party and status that the player receives upon beginning a new game. " ..
+		"Effectively, this test is a way to start a new game and skip over the intro sequence seen on the opening map.";
+	ExecuteTest = function()
+
+		GlobalManager:AddCharacter(LUKAR);
+		GlobalManager:AddCharacter(DESTER);
+		GlobalManager:AddCharacter(MARK);
+		GlobalManager:AddCharacter(CLAUDIUS);
+		GlobalManager:AddNewEventGroup("global_events");
+		GlobalManager:SetDrunes(200);
+		GlobalManager:AddToInventory(1, 5);
+
+		-- This is what the map uses to determine whether to begin the first scene (opening) or the second scene (return)
+		GlobalManager:AddNewEventGroup("dat_maps_river_access_cave_lua");
+
+		StartMap("dat/maps/opening_scene.lua");
+	end
+}
 
 tests[4] = {
 	name = "[Harrvah City] - First Visit, City Under Attack";
