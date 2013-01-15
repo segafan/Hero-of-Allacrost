@@ -83,6 +83,7 @@ void BindModeCode() {
 			.def("IsCameraOnVirtualFocus", &MapMode::IsCameraOnVirtualFocus)
 			.def("SetShowGUI", &MapMode::SetShowGUI)
 			.def("IsShowGUI", &MapMode::IsShowGUI)
+			.def("SetCurrentTrack", &MapMode::SetCurrentTrack)
 			.def("PushState", &MapMode::PushState)
 			.def("PopState", &MapMode::PopState)
 			.def("GetMapEventGroup", &MapMode::GetMapEventGroup)

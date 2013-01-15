@@ -184,7 +184,6 @@ function Load(m)
 	group_start_x = 0;
 	group_start_y = 0;
 	
-	
 	-- If the river access cave map has not been visited yet, it won't register as an event group. When this is true
 	-- we want to display the initial scene. Otherwise, we display the return scene.
 	if (GlobalManager:DoesEventGroupExist("dat_maps_river_access_cave_lua") == false) then
@@ -195,6 +194,18 @@ function Load(m)
 		initial_scene = false;
 		group_start_x = 300;
 		group_start_y = 24;
+	end
+
+	-- Visuals: night lightning, during a sand storm, with occasional lightning. The sand storm and lightning are omitted for the return scene
+	-- The wind "music" is only played in the initial scene. The return scene is silent.
+	if (initial_scene == true) then
+		VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.3, 0.6));
+		VideoManager:EnableAmbientOverlay("img/effects/sand_storm.png", -450.0, 25.0);
+		VideoManager:LoadLightningEffect("dat/graphics/lightning.lua", 2);
+		VideoManager:EnableLightning(true);
+		Map:SetCurrentTrack(0);
+	else
+		VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.3, 0.6));
 	end
 	
 	if (initial_scene == true) then
@@ -210,12 +221,6 @@ function Load(m)
 	end
 	
 	Map:SetCamera(claudius);
-	
-	-- Visual effects: night lightning, during a sand storm, with occasional lightning
-	VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.3, 0.6));
-	VideoManager:EnableAmbientOverlay("img/effects/sand_storm.png", -450.0, 25.0);
-	VideoManager:LoadLightningEffect("dat/graphics/lightning.lua", 2);
-	VideoManager:EnableLightning(true);
 
 	-- This entire map is played out in scene state. As soon as the map is loaded, we start the chain of events.
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);

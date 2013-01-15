@@ -76,7 +76,7 @@ MapMode::MapMode(string filename) :
 	_running_disabled(false),
 	_unlimited_stamina(false),
 	_show_gui(true),
-	_current_track(0),
+	_current_track(INVALID_TRACK),
 	_run_stamina(10000)
 {
 	mode_type = MODE_MANAGER_MAP_MODE;
@@ -320,7 +320,10 @@ bool MapMode::IsEnemyLoaded(uint32 id) const {
 
 
 void MapMode::PlayMusic(uint32 track_num) {
-	_music[_current_track].Stop();
+	if (_current_track <= _music.size()) {
+		_music[_current_track].Stop();
+	}
+
 	_current_track = track_num;
 	_music[_current_track].Play();
 }
