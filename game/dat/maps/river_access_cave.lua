@@ -490,6 +490,7 @@ function Load(m)
 	
 	-- Location: just before enemy boss
 	-- Map.camera:SetXPosition(205, 0); Map.camera:SetYPosition(5, 0);
+	Map:SetCurrentTrack(0);
 end
 
 

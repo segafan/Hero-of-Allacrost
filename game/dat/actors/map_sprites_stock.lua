@@ -156,6 +156,19 @@ sprites["Karlate"] = {
 	standard_animations = "img/sprites/characters/soldier_npc01_walk.png"
 }
 
+
+sprites["Mak Hound"] = {
+	name = hoa_system.Translate("Mak Hound"),
+	coll_half_width = 3.0,
+	coll_height = 3.0,
+	img_half_width = 4.0,
+	img_height = 8.0,
+	movement_speed = SLOW_SPEED,
+
+	standard_animations = "img/sprites/creatures/mak_hound.png"
+}
+
+
 sprites["Rubble"] = {
 	name = "????",
 	coll_half_width = 1.0,
@@ -201,13 +214,13 @@ enemies["scorpion"] = {
 sprite = {}
 enemy = {}
 
-function ConstructSprite(name, id, x, y, x_off, y_off)
-	if (x_off == nil) then
-		x_off = 0.5;
-	end
-	if (y_off == nil) then
-		y_off = 0.5;
-	end
+function ConstructSprite(name, id, x, y)
+	-- Convert the X/Y cooridnates into integer + offset values
+	local x_int = math.floor(x);
+	local x_off = x - x_int;
+	local y_int = math.floor(y);
+	local y_off = y - y_int;
+
 	dir = (2 ^ math.random(0, 3));
 
 	if (sprites[name]) then
@@ -215,8 +228,8 @@ function ConstructSprite(name, id, x, y, x_off, y_off)
 		sprite:SetName(sprites[name].name);
 		sprite:SetObjectID(id);
 		sprite:SetContext(1);
-		sprite:SetXPosition(x, x_off);
-		sprite:SetYPosition(y, y_off);
+		sprite:SetXPosition(x_int, x_off);
+		sprite:SetYPosition(y_int, y_off);
 		sprite:SetCollHalfWidth(sprites[name].coll_half_width);
 		sprite:SetCollHeight(sprites[name].coll_height);
 		sprite:SetImgHalfWidth(sprites[name].img_half_width);
