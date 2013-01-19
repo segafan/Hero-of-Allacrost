@@ -200,11 +200,32 @@ public:
 	private_map::MAP_CONTEXT GetCurrentContext() const
 		{ return _current_context; }
 
-	bool IsShowGUI() const
-		{ return _show_gui; }
+	//! \brief Returns true if dialogue icons appear above sprites with dialogue
+	bool IsDialogueIconsVisible() const
+		{ return _dialogue_icons_visible; }
 
-	void SetShowGUI(bool state)
-		{ _show_gui = state; }
+	/** \brief Toggles the display of dialogue icons above a sprite's head
+	*** \param state Set to true to make the icons visible, or false to hide them
+	**/
+	void ShowDialogueIcons(bool state)
+		{ _dialogue_icons_visible = state; }
+
+	//! \brief Returns true if the stamina bar in the lower right corner of the screen is not visible
+	bool IsStaminaBarVisible() const
+		{ return _stamina_bar_visible; }
+
+	/** \brief Toggles the display of the stamina bar in the lower right corner of the screen
+	*** \param state Set to true to make the stamina bar visible, or false to hide it
+	**/
+	void ShowStaminaBar(bool state)
+		{ _stamina_bar_visible = state; }
+
+	/** \brief Prevents the display of any map introduction graphic or text
+	*** \note Because the introduction visuals are only displayed for a brief period of time when a map first loads,
+	*** it really only makes sense to call this method from the map's load function.
+	**/
+	void DisableIntroductionVisuals()
+		{ _intro_timer.Finish(); }
 
 	/** \note This sets the track, but does not stop current music or play new music. It is mostly
 	*** used in the map script's Load() function to set the track that should begin playing when the
@@ -312,8 +333,11 @@ private:
 	//! \brief If true, the player's stamina will not drain for actions and the stamina bar will not be shown
 	bool _unlimited_stamina;
 
-	//! \brief When false, dialogue icons, stamina bar, and other GUI elements will not be drawn to the screen
-	bool _show_gui;
+	//! \brief When true, icons will be drawn above sprites that have dialogue to share
+	bool _dialogue_icons_visible;
+
+	//! \brief When false, the stamina bar in the lower right corner of the screen will not be drawn
+	bool _stamina_bar_visible;
 
 	//! \brief Index of current music track to play
 	uint32 _current_track;

@@ -75,7 +75,8 @@ MapMode::MapMode(string filename) :
 	_current_context(MAP_CONTEXT_01),
 	_running_disabled(false),
 	_unlimited_stamina(false),
-	_show_gui(true),
+	_dialogue_icons_visible(false),
+	_stamina_bar_visible(false),
 	_current_track(INVALID_TRACK),
 	_run_stamina(10000)
 {
@@ -747,65 +748,67 @@ void MapMode::_DrawGUI() {
 	}
 
 	// ---------- (2) Draw the stamina bar in the lower right corner
-	// TODO: the code in this section needs better comments to explain what each coloring step is doing
-	float fill_size = static_cast<float>(_run_stamina) / 10000.0f;
+	if (_stamina_bar_visible == true) {
+		// TODO: the code in this section needs better comments to explain what each coloring step is doing
+		float fill_size = static_cast<float>(_run_stamina) / 10000.0f;
 
-	VideoManager->PushState();
-	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+		VideoManager->PushState();
+		VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
-	// Draw the background image
-	VideoManager->Move(780, 747);
-	_stamina_bar_background.Draw();
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
-
-	// Draw the base color of the bar
-	VideoManager->Move(800, 740);
-	VideoManager->DrawRectangle(200 * fill_size, 10, unknown);
-
-	// Shade the bar with a faux lighting effect
-	VideoManager->Move(800,739);
-	VideoManager->DrawRectangle(200 * fill_size, 2, dark_green);
-	VideoManager->Move(800, 737);
-	VideoManager->DrawRectangle(200 * fill_size, 7, darkish_green);
-
-	// Only do this if the bar is at least 4 pixels long
-	if ((200 * fill_size) >= 4) {
-		VideoManager->Move(801, 739);
-		VideoManager->DrawRectangle((200 * fill_size) -2, 1, darkish_green);
-
-		VideoManager->Move(801, 738);
-		VideoManager->DrawRectangle(1, 2, medium_green);
-		VideoManager->Move(800 + (fill_size * 200 - 2), 738); // Automatically reposition to be at moving endcap
-		VideoManager->DrawRectangle(1, 2, medium_green);
-	}
-
-	VideoManager->Move(800, 736);
-	VideoManager->DrawRectangle(200 * fill_size, 5, medium_green);
-
-	// Only do this if the bar is at least 4 pixels long
-	if ((200 * fill_size) >= 4) {
-		VideoManager->Move(801, 735);
-		VideoManager->DrawRectangle(1, 1, lighter_green);
-		VideoManager->Move(800 + (fill_size * 200 - 2), 735); // automatically reposition to be at moving endcap
-		VideoManager->DrawRectangle(1, 1, lighter_green);
-		VideoManager->Move(800, 734);
-		VideoManager->DrawRectangle(200 * fill_size, 2, lighter_green);
-	}
-
-	// Only do this if the bar is at least 6 pixels long
-	if ((200 * fill_size) >= 6) {
-		VideoManager->Move(802, 733);
-		VideoManager->DrawRectangle((200 * fill_size) - 4, 1, bright_yellow);
-	}
-
-	if (_unlimited_stamina) { // Draw the infinity symbol over the stamina bar
-		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		// Draw the background image
 		VideoManager->Move(780, 747);
-		_stamina_bar_infinite_overlay.Draw();
-	}
+		_stamina_bar_background.Draw();
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
 
-	VideoManager->PopState();
+		// Draw the base color of the bar
+		VideoManager->Move(800, 740);
+		VideoManager->DrawRectangle(200 * fill_size, 10, unknown);
+
+		// Shade the bar with a faux lighting effect
+		VideoManager->Move(800,739);
+		VideoManager->DrawRectangle(200 * fill_size, 2, dark_green);
+		VideoManager->Move(800, 737);
+		VideoManager->DrawRectangle(200 * fill_size, 7, darkish_green);
+
+		// Only do this if the bar is at least 4 pixels long
+		if ((200 * fill_size) >= 4) {
+			VideoManager->Move(801, 739);
+			VideoManager->DrawRectangle((200 * fill_size) -2, 1, darkish_green);
+
+			VideoManager->Move(801, 738);
+			VideoManager->DrawRectangle(1, 2, medium_green);
+			VideoManager->Move(800 + (fill_size * 200 - 2), 738); // Automatically reposition to be at moving endcap
+			VideoManager->DrawRectangle(1, 2, medium_green);
+		}
+
+		VideoManager->Move(800, 736);
+		VideoManager->DrawRectangle(200 * fill_size, 5, medium_green);
+
+		// Only do this if the bar is at least 4 pixels long
+		if ((200 * fill_size) >= 4) {
+			VideoManager->Move(801, 735);
+			VideoManager->DrawRectangle(1, 1, lighter_green);
+			VideoManager->Move(800 + (fill_size * 200 - 2), 735); // automatically reposition to be at moving endcap
+			VideoManager->DrawRectangle(1, 1, lighter_green);
+			VideoManager->Move(800, 734);
+			VideoManager->DrawRectangle(200 * fill_size, 2, lighter_green);
+		}
+
+		// Only do this if the bar is at least 6 pixels long
+		if ((200 * fill_size) >= 6) {
+			VideoManager->Move(802, 733);
+			VideoManager->DrawRectangle((200 * fill_size) - 4, 1, bright_yellow);
+		}
+
+		if (_unlimited_stamina) { // Draw the infinity symbol over the stamina bar
+			VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+			VideoManager->Move(780, 747);
+			_stamina_bar_infinite_overlay.Draw();
+		}
+
+		VideoManager->PopState();
+	} // if (_hide_stamina_bar == false)
 
 	// ---------- (3) Draw the treasure menu if necessary
 	if (_treasure_supervisor->IsActive() == true)
