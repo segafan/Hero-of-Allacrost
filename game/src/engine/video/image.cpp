@@ -1412,6 +1412,7 @@ bool AnimatedImage::AddFrame(const string& frame, uint32 frame_time) {
 	new_frame.frame_time = frame_time;
 	new_frame.image = img;
 	_frames.push_back(new_frame);
+	_animation_length += frame_time;
 	return true;
 }
 
@@ -1432,9 +1433,36 @@ bool AnimatedImage::AddFrame(const StillImage& frame, uint32 frame_time) {
 	AnimationFrame new_frame;
 	new_frame.image = frame;
 	new_frame.frame_time = frame_time;
-
 	_frames.push_back(new_frame);
+	_animation_length += frame_time;
 	return true;
+}
+
+
+
+void AnimatedImage::RandomizeCurrentLoopProgress() {
+	if (_frames.empty() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "function called when animation had no frames loaded" << endl;
+		return;
+	}
+	
+	if (_loops_finished == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "function called when animation had already finished all loops" << endl;
+		return;
+	}
+
+	// Retrieve a random time between 0 and the length of an entire animation loop
+	uint32 index = 0;
+	uint32 random_time = static_cast<uint32>(RandomBoundedInteger(0, GetAnimationLength() - 1));
+
+	// Subtract each frame time from the random time until we arrive at the correct frame
+	while (random_time >= _frames[index].frame_time) {
+		random_time -= _frames[index].frame_time;
+		index++;
+	}
+
+	_frame_index = index;
+	_frame_counter = random_time;
 }
 
 
