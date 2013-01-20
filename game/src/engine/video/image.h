@@ -617,6 +617,17 @@ public:
 	**/
 	bool AddFrame(const StillImage& frame, uint32 frame_time);
 
+	/** \brief Randomizes the progress of the current loop
+	***
+	*** This function will set the frame index and time progress for that frame to random values.
+	*** This is useful to "desynchronize" multiple instances of the same animation on the screen so that,
+	*** for example, a series of sprites walking together do not appear to be marching as a synchronized unit.
+	*** Note that if the _loops_finished member is set to true when this method is called, it will effectively
+	*** achieve nothing since the animation can no longer be updated, thus a warning is printed when this case
+	*** occurs.
+	**/
+	void RandomizeCurrentLoopProgress();
+
 	//! \name Class Member Access Functions
 	//@{
 	//! \brief Returns the number of frames in this animation

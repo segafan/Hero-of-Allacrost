@@ -250,6 +250,7 @@ void BindModeCode() {
 			.def("SetCurrentAnimation", &MapSprite::SetCurrentAnimation)
 			.def("GetCurrentAnimation", (uint8(MapSprite::*)()const)&MapSprite::GetCurrentAnimation)
 			.def("GetCurrentAnimation", (hoa_video::AnimatedImage&(MapSprite::*)())&MapSprite::GetCurrentAnimation)
+			.def("GetAnimation", &MapSprite::GetAnimation)
 			.def("LoadFacePortrait", &MapSprite::LoadFacePortrait)
 			.def("LoadStandardAnimations", &MapSprite::LoadStandardAnimations)
 			.def("LoadRunningAnimations", &MapSprite::LoadRunningAnimations)

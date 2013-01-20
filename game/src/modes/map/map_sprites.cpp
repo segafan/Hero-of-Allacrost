@@ -525,8 +525,8 @@ void MapSprite::Update() {
 	// Set the sprite's animation to the standing still position if movement has just stopped
 	else if (moved_position == false) {
 		if (was_moved == true) {
-			// Set the current movement animation to zero progress
-			_animations[_current_animation].SetTimeProgress(0);
+			// Reset the movement animation to zero progress
+			_animations[_current_animation].ResetAnimation();
 		}
 
 		// Determine the correct standing frame to display
@@ -580,7 +580,7 @@ void MapSprite::Update() {
 		// "start and stop" whenever the direction is changed.
 		if (_current_animation != last_animation) {
 			_animations[_current_animation].SetTimeProgress(_animations[last_animation].GetTimeProgress());
-			_animations[last_animation].SetTimeProgress(0);
+			_animations[last_animation].ResetAnimation();
 		}
 		_animations[_current_animation].Update();
 	}

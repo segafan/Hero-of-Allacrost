@@ -200,6 +200,7 @@ void BindEngineCode() {
 			.def("Update", (void(AnimatedImage::*)(uint32))&AnimatedImage::Update)
 			.def("AddFrame", (bool(AnimatedImage::*)(const std::string&, uint32))&AnimatedImage::AddFrame)
 			.def("AddFrame", (bool(AnimatedImage::*)(const StillImage&, uint32))&AnimatedImage::AddFrame)
+			.def("RandomizeCurrentLoopProgress", &AnimatedImage::RandomizeCurrentLoopProgress)
 			.def("GetNumberOfFrames", &AnimatedImage::GetNumberOfFrames)
 			.def("GetCurrentFrame", &AnimatedImage::GetCurrentFrame)
 			.def("GetCurrentFrameIndex", &AnimatedImage::GetCurrentFrameIndex)

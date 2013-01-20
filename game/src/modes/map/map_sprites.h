@@ -301,6 +301,12 @@ public:
 	hoa_video::AnimatedImage& GetCurrentAnimation()
 		{ return _animations[_current_animation]; }
 
+	/** \brief Retrieves the image corresponding to a particular animation
+	*** \return A pointer to the AnimatedImage. Returns NULL if the requested animation did not exist
+	**/
+	hoa_video::AnimatedImage* GetAnimation(uint8 animation)
+		{ return (animation >= _animations.size() ? NULL : &(_animations.at(animation))); }
+
 	bool HasAvailableDialogue() const
 		{ return _has_available_dialogue; }
 
