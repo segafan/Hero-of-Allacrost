@@ -969,6 +969,41 @@ void EventSupervisor::StartEvent(MapEvent* event) {
 
 
 
+void EventSupervisor::StartEvent(uint32 event_id, uint32 wait_time) {
+	MapEvent* event = GetEvent(event_id);
+	if (event == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "no event with this ID existed: " << event_id << endl;
+		return;
+	}
+
+	if (wait_time == 0) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "specified a wait_time of 0 for event_id: " << event_id << endl;
+		StartEvent(event);
+		return;
+	}
+
+	_launch_events.push_back(make_pair(static_cast<int32>(wait_time), event));
+}
+
+
+
+void EventSupervisor::StartEvent(MapEvent* event, uint32 wait_time) {
+	if (event == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "NULL argument passed to function" << endl;
+		return;
+	}
+
+	if (wait_time == 0) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "specified a wait_time of 0 for event with id: " << event->GetEventID() << endl;
+		StartEvent(event);
+		return;
+	}
+
+	_launch_events.push_back(make_pair(static_cast<int32>(wait_time), event));
+}
+
+
+
 void EventSupervisor::PauseEvent(uint32 event_id) {
 	for (list<MapEvent*>::iterator i = _active_events.begin(); i != _active_events.end(); i++) {
 		if ((*i)->_event_id == event_id) {
