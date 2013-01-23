@@ -780,11 +780,13 @@ protected:
 *** \brief Manages, processes, and launches map events
 ***
 *** The EventSupervisor serves as an assistant to the MapMode class, much like the
-*** other map supervisor classes. As such, this class is only created as a member
+*** other map supervisor classes. As such, this class is only instantiated as a member
 *** of the MapMode class. The first responsibility of the EventSupervisor is to
 *** retain all of the MapEvent objects that have been created. The second responsibility
-*** of this class is to initialize and begin the first event in a n-length chain
-*** of events, where n can be equal to one or any higher interger value.
+*** of this class is to start and run events to their completion. Because events may be
+*** linked together in a chain, starting one event may cause several other chains to start
+*** as well. Each event can be thought of as the base of a n-length event chain, where n
+*** is an integer greater than or equal to one.
 ***
 *** When an event chain begins, the first (base) event of the chain is started.
 *** Immediately after starting the first event, the supervisor will examine its event
@@ -813,21 +815,33 @@ public:
 	**/
 	void RegisterEvent(MapEvent* new_event);
 
-	/** \brief Marks a specified event as active and starts the event
-	*** \param event_id The ID of the event to activate
-	*** The specified event to start may be linked to several children, grandchildren, etc. events.
-	*** If the event has no children, it will activate only the single event requested. Otherwise
-	*** all events in the chain will become activated at the appropriate time.
+	/** \brief Marks a specified event as active and immediately starts the event
+	*** \param event_id The ID of the event to start
 	**/
 	void StartEvent(uint32 event_id);
 
-	/** \brief Marks a specified event as active and starts the event
+	/** \brief Marks a specified event as active and immediately starts the event
 	*** \param event A pointer to the event to begin
-	*** The specified event to start may be linked to several children, grandchildren, etc. events.
-	*** If the event has no children, it will activate only the single event requested. Otherwise
-	*** all events in the chain will become activated at the appropriate time.
 	**/
 	void StartEvent(MapEvent* event);
+
+	/** \brief Begins an event after a specified wait period expires
+	*** \param event_id The ID of the event to activate
+	*** \param wait_time The number of milliseconds to wait before starting the event
+	*** \note Passing a zero value for wait_time will result in a warning message and start the
+	*** event immediately. If you wish to start the event immediately, use the version of StartEvent
+	*** that does not require a wait_time to be specified.
+	**/
+	void StartEvent(uint32 event_id, uint32 wait_time);
+
+	/** \brief Begins an event after a specified wait period expires
+	*** \param event A pointer to the event to start
+	*** \param wait_time The number of milliseconds to wait before starting the event
+	*** \note Passing a zero value for wait_time will result in a warning message and start the
+	*** event immediately. If you wish to start the event immediately, use the version of StartEvent
+	*** that does not require a wait_time to be specified.
+	**/
+	void StartEvent(MapEvent* event, uint32 wait_time);
 
 	/** \brief Pauses an active event by preventing the event from updating
 	*** \param event_id The ID of the active event to pause

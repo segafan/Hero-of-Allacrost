@@ -393,6 +393,8 @@ void BindModeCode() {
 			.def("RegisterEvent", &EventSupervisor::RegisterEvent, adopt(_2))
 			.def("StartEvent", (void(EventSupervisor::*)(uint32))&EventSupervisor::StartEvent)
 			.def("StartEvent", (void(EventSupervisor::*)(MapEvent*))&EventSupervisor::StartEvent)
+			.def("StartEvent", (void(EventSupervisor::*)(uint32, uint32))&EventSupervisor::StartEvent)
+			.def("StartEvent", (void(EventSupervisor::*)(MapEvent*, uint32))&EventSupervisor::StartEvent)
 			.def("TerminateEvent", &EventSupervisor::TerminateEvent)
 			.def("IsEventActive", &EventSupervisor::IsEventActive)
 			.def("HasActiveEvent", &EventSupervisor::HasActiveEvent)
