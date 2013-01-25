@@ -169,6 +169,9 @@ upper_layer[23] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
 -- All, if any, existing contexts follow.
 -- Allacrost map editor end. Do not edit this line. --
 
+-- Map class object containers
+functions = {};
+
 function Load(m)
 	Map = m;
 	ObjectManager = Map.object_supervisor;
@@ -213,6 +216,10 @@ function Load(m)
 		InitialCreateDialogue();
 		InitialCreateEvents();
 		EventManager:StartEvent(10);
+
+		local event = hoa_map.ScriptedSpriteEvent(1000, 10, "FocusCameraOnSprite", "");
+		EventManager:RegisterEvent(event);
+		--EventManager:StartEvent(1000);
 	else
 		ReturnCreateCharacters();
 		ReturnCreateNPCs();
@@ -744,7 +751,7 @@ function InitialCreateEvents()
 	event = hoa_map.ChangeDirectionSpriteEvent(161, 12, hoa_map.MapMode.SOUTH);
 	EventManager:RegisterEvent(event);
 	-- Center the camera on the captain while the squad is moving
-	event = hoa_map.ScriptedSpriteEvent(162, 10, 1, 0);
+	event = hoa_map.ScriptedSpriteEvent(162, 10, "FocusCameraOnSprite", "");
 	EventManager:RegisterEvent(event);
 	-- Finally have the sergeant step forward just before he is to speak
 	event = hoa_map.PathMoveSpriteEvent(163, 11, 0, 5);
@@ -845,17 +852,17 @@ function InitialCreateEvents()
 	event = hoa_map.PathMoveSpriteEvent(251, 10, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(252);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(252, 10, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(252, 10, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	event = hoa_map.PathMoveSpriteEvent(253, 11, cave_entrance_x + 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(254);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(254, 11, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(254, 11, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	event = hoa_map.PathMoveSpriteEvent(255, 12, cave_entrance_x - 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(256);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(256, 12, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(256, 12, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	-- After the dialogue, the sprites turn toward each other once again
 
@@ -872,7 +879,7 @@ function InitialCreateEvents()
 	event = hoa_map.PathMoveSpriteEvent(302, 70, cave_entrance_x + 0.5, cave_entrance_y);
 	event:AddEventLinkAtEnd(303);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(303, 70, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(303, 70, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	event = hoa_map.PathMoveSpriteEvent(304, 71, cave_entrance_x - 5, cave_entrance_y + 7);
 	event:AddEventLinkAtEnd(305);
@@ -880,7 +887,7 @@ function InitialCreateEvents()
 	event = hoa_map.PathMoveSpriteEvent(305, 71, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(306);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(306, 71, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(306, 71, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	event = hoa_map.PathMoveSpriteEvent(307, 72, cave_entrance_x - 5, cave_entrance_y + 7);
 	event:AddEventLinkAtEnd(308);
@@ -888,7 +895,7 @@ function InitialCreateEvents()
 	event = hoa_map.PathMoveSpriteEvent(308, 72, cave_entrance_x - 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(309);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(309, 72, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(309, 72, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	-- Hound squads
 	event = hoa_map.ChangeDirectionSpriteEvent(320, 22, hoa_map.MapMode.SOUTH);
@@ -927,7 +934,7 @@ function InitialCreateEvents()
 	event = hoa_map.PathMoveSpriteEvent(363, 40, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(364);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(364, 40, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(364, 40, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	event = hoa_map.PathMoveSpriteEvent(365, 41, 0, -6);
 	event:SetRelativeDestination(true);
@@ -936,7 +943,7 @@ function InitialCreateEvents()
 	event = hoa_map.PathMoveSpriteEvent(366, 41, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(367);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(367, 41, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(367, 41, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	event = hoa_map.PathMoveSpriteEvent(368, 42, 0, -6);
 	event:SetRelativeDestination(true);
@@ -945,7 +952,7 @@ function InitialCreateEvents()
 	event = hoa_map.PathMoveSpriteEvent(369, 42, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(370);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(370, 42, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(370, 42, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 
 	-- Bottom left squad
@@ -957,7 +964,7 @@ function InitialCreateEvents()
 
 	-- Event Group #8: Dialogue between the members of the character party, who then move to the cave
 	-- Move the camera to focus on Lukar, turn him toward his party, and open his first dialogue
-	event = hoa_map.ScriptedSpriteEvent(400, 3, 1, 0);
+	event = hoa_map.ScriptedSpriteEvent(400, 3, "FocusCameraOnSprite", "");
 	event:AddEventLinkAtEnd(401);
 	EventManager:RegisterEvent(event);
 	event = hoa_map.ChangeDirectionSpriteEvent(401, 3, hoa_map.MapMode.SOUTH);
@@ -982,17 +989,17 @@ function InitialCreateEvents()
 	event = hoa_map.PathMoveSpriteEvent(407, 3, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(408);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(408, 3, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(408, 3, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	event = hoa_map.PathMoveSpriteEvent(409, 2, cave_entrance_x + 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(410);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(410, 2, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(410, 2, "DisableCollisionAndVisibility", "");
 	EventManager:RegisterEvent(event);
 	event = hoa_map.PathMoveSpriteEvent(411, 1, cave_entrance_x - 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(412);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(412, 1, 2, 0);
+	event = hoa_map.ScriptedSpriteEvent(412, 1, "DisableCollisionAndVisibility", "");
 	event:AddEventLinkAtEnd(413, 1000);
 	EventManager:RegisterEvent(event);
 	-- Once the cave has been reached, transition to the cave map
@@ -1235,33 +1242,33 @@ function ReturnCreateEvents()
 	event:AddEventLinkAtStart(263);
 	event:AddEventLinkAtStart(264);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(251, 1001, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(251, 1001, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(252, 1002, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(252, 1002, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(253, 1003, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(253, 1003, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(254, 2000, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(254, 2000, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(255, 2001, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(255, 2001, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(256, 2002, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(256, 2002, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(257, 2003, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(257, 2003, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(258, 2004, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(258, 2004, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(259, 2005, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(259, 2005, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(260, 2006, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(260, 2006, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(261, 2007, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(261, 2007, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(262, 2008, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(262, 2008, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(263, 2009, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(263, 2009, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(264, 2010, 3, 0);
+	event = hoa_map.ScriptedSpriteEvent(264, 2010, "ChangeSpriteMovementSpeed", "");
 	EventManager:RegisterEvent(event);
 
 	-- Rush off to the city
@@ -1332,19 +1339,19 @@ end
 
 
 -- Sprite function: Focus map camera on sprite
-map_functions[1] = function(sprite)
+functions["FocusCameraOnSprite"] = function(sprite)
 	Map:SetCamera(sprite, 1000);
 end
 
 
 -- Sprite function: Disable collision and visibility on sprite
-map_functions[2] = function(sprite)
+functions["DisableCollisionAndVisibility"] = function(sprite)
 	sprite:SetVisible(false);
 	sprite:SetNoCollision(true);
 end
 
 -- Sprite function: Change movement speed of a sprite
-map_functions[3] = function(sprite)
+functions["ChangeSpriteMovementSpeed"] = function(sprite)
 	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 end
 

@@ -285,24 +285,28 @@ bool BattleEncounterEvent::_Update() {
 // ---------- ScriptedEvent Class Methods
 // -----------------------------------------------------------------------------
 
-ScriptedEvent::ScriptedEvent(uint32 event_id, uint32 start_index, uint32 update_index) :
+ScriptedEvent::ScriptedEvent(uint32 event_id, string start_name, string update_name) :
 	MapEvent(event_id, SCRIPTED_EVENT),
 	_start_function(NULL),
 	_update_function(NULL)
 {
 	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
 	MapMode::CurrentInstance()->OpenMapTablespace(true);
-	map_script.OpenTable("map_functions");
-	if (start_index != 0) {
+	map_script.OpenTable("functions");
+	if (start_name != "") {
 		_start_function = new ScriptObject();
-		*_start_function = map_script.ReadFunctionPointer(start_index);
+		*_start_function = map_script.ReadFunctionPointer(start_name);
 	}
-	if (update_index != 0) {
+	if (update_name != "") {
 		_update_function = new ScriptObject();
-		*_update_function = map_script.ReadFunctionPointer(update_index);
+		*_update_function = map_script.ReadFunctionPointer(update_name);
 	}
 	map_script.CloseTable();
 	map_script.CloseTable();
+
+	if ((_start_function == NULL) && (_update_function == NULL)) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "no start or update functions were declared for event: " << event_id << endl;
+	}
 }
 
 
@@ -394,128 +398,6 @@ SpriteEvent::SpriteEvent(uint32 event_id, EVENT_TYPE event_type, VirtualSprite* 
 }
 
 // -----------------------------------------------------------------------------
-// ---------- ScriptedSpriteEvent Class Methods
-// -----------------------------------------------------------------------------
-
-ScriptedSpriteEvent::ScriptedSpriteEvent(uint32 event_id, uint16 sprite_id, uint32 start_index, uint32 update_index) :
-	SpriteEvent(event_id, SCRIPTED_SPRITE_EVENT, sprite_id),
-	_start_function(NULL),
-	_update_function(NULL)
-{
-	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
-	MapMode::CurrentInstance()->OpenMapTablespace(true);
-	map_script.OpenTable("map_functions");
-	if (start_index != 0) {
-		_start_function = new ScriptObject();
-		*_start_function = map_script.ReadFunctionPointer(start_index);
-	}
-	if (update_index != 0) {
-		_update_function = new ScriptObject();
-		*_update_function = map_script.ReadFunctionPointer(update_index);
-	}
-	map_script.CloseTable();
-	map_script.CloseTable();
-}
-
-
-
-ScriptedSpriteEvent::ScriptedSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 start_index, uint32 update_index) :
-	SpriteEvent(event_id, SCRIPTED_SPRITE_EVENT, sprite),
-	_start_function(NULL),
-	_update_function(NULL)
-{
-	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
-	MapMode::CurrentInstance()->OpenMapTablespace(true);
-	map_script.OpenTable("map_functions");
-	if (start_index != 0) {
-		_start_function = new ScriptObject();
-		*_start_function = map_script.ReadFunctionPointer(start_index);
-	}
-	if (update_index != 0) {
-		_update_function = new ScriptObject();
-		*_update_function = map_script.ReadFunctionPointer(update_index);
-	}
-	map_script.CloseTable();
-	map_script.CloseTable();
-}
-
-
-
-ScriptedSpriteEvent::~ScriptedSpriteEvent() {
-	if (_start_function != NULL) {
-		delete _start_function;
-		_start_function = NULL;
-	}
-	if (_update_function != NULL) {
-		delete _update_function;
-		_update_function = NULL;
-	}
-}
-
-
-
-ScriptedSpriteEvent::ScriptedSpriteEvent(const ScriptedSpriteEvent& copy) :
-	SpriteEvent(copy)
-{
-	if (copy._start_function == NULL)
-		_start_function = NULL;
-	else
-		_start_function = new ScriptObject(*copy._start_function);
-
-	if (copy._update_function == NULL)
-		_update_function = NULL;
-	else
-		_update_function = new ScriptObject(*copy._update_function);
-}
-
-
-
-ScriptedSpriteEvent& ScriptedSpriteEvent::operator=(const ScriptedSpriteEvent& copy) {
-	if (this == &copy) // Handle self-assignment case
-		return *this;
-
-	SpriteEvent::operator=(copy);
-
-	if (copy._start_function == NULL)
-		_start_function = NULL;
-	else
-		_start_function = new ScriptObject(*copy._start_function);
-
-	if (copy._update_function == NULL)
-		_update_function = NULL;
-	else
-		_update_function = new ScriptObject(*copy._update_function);
-
-	return *this;
-}
-
-
-
-void ScriptedSpriteEvent::_Start() {
-	if (_start_function != NULL) {
-		SpriteEvent::_Start();
-		ScriptCallFunction<void>(*_start_function, _sprite);
-	}
-}
-
-
-
-bool ScriptedSpriteEvent::_Update() {
-	bool finished = false;
-	if (_update_function != NULL) {
-		finished = ScriptCallFunction<bool>(*_update_function, _sprite);
-	}
-	else {
-		finished = true;
-	}
-
-	if (finished == true) {
-		_sprite->ReleaseControl(this);
-	}
-	return finished;
-}
-
-// -----------------------------------------------------------------------------
 // ---------- ChangeDirectionSpriteEvent Class Methods
 // -----------------------------------------------------------------------------
 
@@ -547,6 +429,121 @@ void ChangeDirectionSpriteEvent::_Start() {
 
 bool ChangeDirectionSpriteEvent::_Update() {
 	return true;
+}
+
+// -----------------------------------------------------------------------------
+// ---------- AnimateSpriteEvent Class Methods
+// -----------------------------------------------------------------------------
+
+AnimateSpriteEvent::AnimateSpriteEvent(uint32 event_id, VirtualSprite* sprite) :
+	SpriteEvent(event_id, ANIMATE_SPRITE_EVENT, sprite),
+	_current_frame(0),
+	_display_timer(0),
+	_loop_count(0),
+	_number_loops(0)
+{}
+
+
+
+AnimateSpriteEvent::~AnimateSpriteEvent()
+{}
+
+
+
+void AnimateSpriteEvent::_Start() {
+	SpriteEvent::_Start();
+	_current_frame = 0;
+	_display_timer = 0;
+	_loop_count = 0;
+	dynamic_cast<MapSprite*>(_sprite)->SetCustomAnimation(true);
+	dynamic_cast<MapSprite*>(_sprite)->SetCurrentAnimation(static_cast<uint8>(_frames[_current_frame]));
+}
+
+
+
+bool AnimateSpriteEvent::_Update() {
+	_display_timer += SystemManager->GetUpdateTime();
+
+	if (_display_timer > _frame_times[_current_frame]) {
+		_display_timer = 0;
+		_current_frame++;
+
+		// Check if we are past the final frame to display in the loop
+		if (_current_frame >= _frames.size()) {
+			_current_frame = 0;
+
+			// If this animation is not infinitely looped, increment the loop counter
+			if (_number_loops >= 0) {
+				_loop_count++;
+				if (_loop_count > _number_loops) {
+					_loop_count = 0;
+					dynamic_cast<MapSprite*>(_sprite)->SetCustomAnimation(false);
+					_sprite->ReleaseControl(this);
+					return true;
+				 }
+			}
+		}
+
+		dynamic_cast<MapSprite*>(_sprite)->SetCurrentAnimation(static_cast<uint8>(_frames[_current_frame]));
+	}
+
+	return false;
+}
+
+// -----------------------------------------------------------------------------
+// ---------- RandomMoveSpriteEvent Class Methods
+// -----------------------------------------------------------------------------
+
+RandomMoveSpriteEvent::RandomMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time, uint32 direction_time) :
+	SpriteEvent(event_id, RANDOM_MOVE_SPRITE_EVENT, sprite),
+	_total_movement_time(move_time),
+	_total_direction_time(direction_time),
+	_movement_timer(0),
+	_direction_timer(0)
+{}
+
+
+
+RandomMoveSpriteEvent::~RandomMoveSpriteEvent()
+{}
+
+
+
+void RandomMoveSpriteEvent::_Start() {
+	SpriteEvent::_Start();
+	_sprite->SetRandomDirection();
+	_sprite->moving = true;
+}
+
+
+
+bool RandomMoveSpriteEvent::_Update() {
+	_direction_timer += SystemManager->GetUpdateTime();
+	_movement_timer += SystemManager->GetUpdateTime();
+
+	// Check if we should change the sprite's direction
+	if (_direction_timer >= _total_direction_time) {
+		_direction_timer -= _total_direction_time;
+		_sprite->SetRandomDirection();
+	}
+
+	if (_movement_timer >= _total_movement_time) {
+		_movement_timer = 0;
+		_sprite->moving = false;
+		_sprite->ReleaseControl(this);
+		return true;
+	}
+
+	return false;
+}
+
+
+
+void RandomMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj) {
+	// Try to adjust the sprite's position around the collision. If that fails, change the sprite's direction
+	if (MapMode::CurrentInstance()->GetObjectSupervisor()->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj) == false) {
+		_sprite->SetRandomDirection();
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -797,120 +794,134 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 } // void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj)
 
 // -----------------------------------------------------------------------------
-// ---------- RandomMoveSpriteEvent Class Methods
+// ---------- ScriptedSpriteEvent Class Methods
 // -----------------------------------------------------------------------------
 
-RandomMoveSpriteEvent::RandomMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time, uint32 direction_time) :
-	SpriteEvent(event_id, RANDOM_MOVE_SPRITE_EVENT, sprite),
-	_total_movement_time(move_time),
-	_total_direction_time(direction_time),
-	_movement_timer(0),
-	_direction_timer(0)
-{}
+ScriptedSpriteEvent::ScriptedSpriteEvent(uint32 event_id, uint16 sprite_id, string start_name, string update_name) :
+	SpriteEvent(event_id, SCRIPTED_SPRITE_EVENT, sprite_id),
+	_start_function(NULL),
+	_update_function(NULL)
+{
+	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
+	MapMode::CurrentInstance()->OpenMapTablespace(true);
+	map_script.OpenTable("functions");
+	if (start_name != "") {
+		_start_function = new ScriptObject();
+		*_start_function = map_script.ReadFunctionPointer(start_name);
+	}
+	if (update_name != "") {
+		_update_function = new ScriptObject();
+		*_update_function = map_script.ReadFunctionPointer(update_name);
+	}
+	map_script.CloseTable();
+	map_script.CloseTable();
 
-
-
-RandomMoveSpriteEvent::~RandomMoveSpriteEvent()
-{}
-
-
-
-void RandomMoveSpriteEvent::_Start() {
-	SpriteEvent::_Start();
-	_sprite->SetRandomDirection();
-	_sprite->moving = true;
+	if ((_start_function == NULL) && (_update_function == NULL)) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "no start or update functions were declared for event: " << event_id << endl;
+	}
 }
 
 
 
-bool RandomMoveSpriteEvent::_Update() {
-	_direction_timer += SystemManager->GetUpdateTime();
-	_movement_timer += SystemManager->GetUpdateTime();
+ScriptedSpriteEvent::ScriptedSpriteEvent(uint32 event_id, VirtualSprite* sprite, string start_name, string update_name) :
+	SpriteEvent(event_id, SCRIPTED_SPRITE_EVENT, sprite),
+	_start_function(NULL),
+	_update_function(NULL)
+{
+	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
+	MapMode::CurrentInstance()->OpenMapTablespace(true);
+	map_script.OpenTable("functions");
+	if (start_name != "") {
+		_start_function = new ScriptObject();
+		*_start_function = map_script.ReadFunctionPointer(start_name);
+	}
+	if (update_name != "") {
+		_update_function = new ScriptObject();
+		*_update_function = map_script.ReadFunctionPointer(update_name);
+	}
+	map_script.CloseTable();
+	map_script.CloseTable();
 
-	// Check if we should change the sprite's direction
-	if (_direction_timer >= _total_direction_time) {
-		_direction_timer -= _total_direction_time;
-		_sprite->SetRandomDirection();
+	if ((_start_function == NULL) && (_update_function == NULL)) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "no start or update functions were declared for event: " << event_id << endl;
+	}
+}
+
+
+
+ScriptedSpriteEvent::~ScriptedSpriteEvent() {
+	if (_start_function != NULL) {
+		delete _start_function;
+		_start_function = NULL;
+	}
+	if (_update_function != NULL) {
+		delete _update_function;
+		_update_function = NULL;
+	}
+}
+
+
+
+ScriptedSpriteEvent::ScriptedSpriteEvent(const ScriptedSpriteEvent& copy) :
+	SpriteEvent(copy)
+{
+	if (copy._start_function == NULL)
+		_start_function = NULL;
+	else
+		_start_function = new ScriptObject(*copy._start_function);
+
+	if (copy._update_function == NULL)
+		_update_function = NULL;
+	else
+		_update_function = new ScriptObject(*copy._update_function);
+}
+
+
+
+ScriptedSpriteEvent& ScriptedSpriteEvent::operator=(const ScriptedSpriteEvent& copy) {
+	if (this == &copy) // Handle self-assignment case
+		return *this;
+
+	SpriteEvent::operator=(copy);
+
+	if (copy._start_function == NULL)
+		_start_function = NULL;
+	else
+		_start_function = new ScriptObject(*copy._start_function);
+
+	if (copy._update_function == NULL)
+		_update_function = NULL;
+	else
+		_update_function = new ScriptObject(*copy._update_function);
+
+	return *this;
+}
+
+
+
+void ScriptedSpriteEvent::_Start() {
+	if (_start_function != NULL) {
+		SpriteEvent::_Start();
+		ScriptCallFunction<void>(*_start_function, _sprite);
+	}
+}
+
+
+
+bool ScriptedSpriteEvent::_Update() {
+	bool finished = false;
+	if (_update_function != NULL) {
+		finished = ScriptCallFunction<bool>(*_update_function, _sprite);
+	}
+	else {
+		finished = true;
 	}
 
-	if (_movement_timer >= _total_movement_time) {
-		_movement_timer = 0;
-		_sprite->moving = false;
+	if (finished == true) {
 		_sprite->ReleaseControl(this);
-		return true;
 	}
-
-	return false;
+	return finished;
 }
-
-
-
-void RandomMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj) {
-	// Try to adjust the sprite's position around the collision. If that fails, change the sprite's direction
-	if (MapMode::CurrentInstance()->GetObjectSupervisor()->AdjustSpriteAroundCollision(_sprite, coll_type, coll_obj) == false) {
-		_sprite->SetRandomDirection();
-	}
-}
-
-// -----------------------------------------------------------------------------
-// ---------- AnimateSpriteEvent Class Methods
-// -----------------------------------------------------------------------------
-
-AnimateSpriteEvent::AnimateSpriteEvent(uint32 event_id, VirtualSprite* sprite) :
-	SpriteEvent(event_id, ANIMATE_SPRITE_EVENT, sprite),
-	_current_frame(0),
-	_display_timer(0),
-	_loop_count(0),
-	_number_loops(0)
-{}
-
-
-
-AnimateSpriteEvent::~AnimateSpriteEvent()
-{}
-
-
-
-void AnimateSpriteEvent::_Start() {
-	SpriteEvent::_Start();
-	_current_frame = 0;
-	_display_timer = 0;
-	_loop_count = 0;
-	dynamic_cast<MapSprite*>(_sprite)->SetCustomAnimation(true);
-	dynamic_cast<MapSprite*>(_sprite)->SetCurrentAnimation(static_cast<uint8>(_frames[_current_frame]));
-}
-
-
-
-bool AnimateSpriteEvent::_Update() {
-	_display_timer += SystemManager->GetUpdateTime();
-
-	if (_display_timer > _frame_times[_current_frame]) {
-		_display_timer = 0;
-		_current_frame++;
-
-		// Check if we are past the final frame to display in the loop
-		if (_current_frame >= _frames.size()) {
-			_current_frame = 0;
-
-			// If this animation is not infinitely looped, increment the loop counter
-			if (_number_loops >= 0) {
-				_loop_count++;
-				if (_loop_count > _number_loops) {
-					_loop_count = 0;
-					dynamic_cast<MapSprite*>(_sprite)->SetCustomAnimation(false);
-					_sprite->ReleaseControl(this);
-					return true;
-				 }
-			}
-		}
-
-		dynamic_cast<MapSprite*>(_sprite)->SetCurrentAnimation(static_cast<uint8>(_frames[_current_frame]));
-	}
-
-	return false;
-}
-
 
 // -----------------------------------------------------------------------------
 // ---------- EventSupervisor Class Methods

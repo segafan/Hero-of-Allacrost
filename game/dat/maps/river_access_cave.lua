@@ -612,6 +612,17 @@ context_02 = { 0, 1, 127, 1040, 0, 1, 128, 1041, 0, 1, 129, 1041, 0, 1, 130, 104
 
 -- Allacrost map editor end. Do not edit this line. --
 
+-- Containers used to hold pointers to various class objects.
+-- A unique string key is used for each object entered into these tables.
+objects = {};
+sprites = {};
+dialogues = {};
+events = {};
+zones = {};
+-- All custom map functions are contained within the following table..
+-- String keys in this table serves as the names of these functions. 
+functions = {};
+
 function Load(m)
 	-- Setup global pointers for the MapMode instance as well as the various supervisors for convenience
 	Map = m;
@@ -620,14 +631,6 @@ function Load(m)
 	EventManager = Map.event_supervisor;
 	TreasureManager = Map.treasure_supervisor;
 	GlobalEvents = Map.map_event_group;
-	
-	-- Hold pointers to various class objects. A unique string key is used for each object entered into
-	-- these tables.
-	objects = {};
-	sprites = {};
-	dialogues = {};
-	events = {};
-	zones = {};
 
 	print "CREATE OBJECTS"
 	CreateObjects();
@@ -1361,7 +1364,7 @@ function CreateEvents()
 	event = hoa_map.PathMoveSpriteEvent(25, 3, 0, 4);
 	event:SetRelativeDestination(true);
 	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedEvent(26, 1, 0);
+	event = hoa_map.ScriptedEvent(26, "EndOpeningScene", "");
 	EventManager:RegisterEvent(event);
 
 	----- Event Chain 02: First enemy encounter
@@ -1619,8 +1622,9 @@ function CreateEvents()
 --]]
 end -- function CreateEvents()
 
--- Hide Mark and Lukar sprites, make Claudius collidable, and remove scene mode
-map_functions[1] = function()
+-- Called at the end of the first event chain to hide all character sprites but Claudius
+-- and give control over to the player.
+functions["EndOpeningScene"] = function()
 	sprites["mark"]:SetVisible(false);
 	sprites["lukar"]:SetVisible(false);
 	sprites["claudius"]:SetNoCollision(false);
@@ -1629,38 +1633,38 @@ end
 
 
 -- Stop camera sprite and enter scene state
---map_functions[1] = function()
+--functions[1] = function()
 --	Map.camera:SetMoving(false);
 --	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 --end
 
 
 -- Restore previous map state (typically from "scene" to "explore")
-map_functions[2] = function()
+functions[2] = function()
 	Map:PopState();
 end
 
 
 -- Short screen shake during the passage collapse event chain
-map_functions[3] = function()
+functions[3] = function()
 	VideoManager:ShakeScreen(2.0, 2000.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
 end
 
 
 -- Change map to scene state
-map_functions[4] = function()
+functions[4] = function()
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 end
 
 
 -- Pop current map state
-map_functions[5] = function()
+functions[5] = function()
 	Map:PopState();
 end
 
 
 -- Gives a potion to the player via the treasure menu
-map_functions[6] = function()
+functions[6] = function()
 	AudioManager:PlaySound("snd/obtain.wav");
 	corpse_treasure = hoa_map.MapTreasure();
 	corpse_treasure:AddObject(1, 1);
@@ -1669,19 +1673,19 @@ end
 
 
 -- Quickly Fades the screen to black
-map_functions[7] = function()
+functions[7] = function()
 	VideoManager:FadeScreen(hoa_video.Color(0.0, 0.0, 0.0, 1.0), 1000);
 end
 
 
 -- Quickly fades screen from back into full view
-map_functions[8] = function()
+functions[8] = function()
 	VideoManager:FadeScreen(hoa_video.Color(0.0, 0.0, 0.0, 0.0), 1000);
 end
 
 
 -- Returns true when screen is no longer in the process of fading
-map_functions[9] = function()
+functions[9] = function()
 	if (VideoManager:IsFading() == true) then
 		return false;
 	else
@@ -1691,26 +1695,26 @@ end
 
 
 -- Switches the map context of all map objects to the "passage collapsed" context
-map_functions[10] = function()
+functions[10] = function()
 	swap_context_all_objects(hoa_map.MapMode.CONTEXT_02);
 end
 
 
 -- Switches the map context of all map objects to the "water unblocked" context
-map_functions[11] = function()
+functions[11] = function()
 	swap_context_all_objects(hoa_map.MapMode.CONTEXT_03);
 end
 
 
 -- Makes the knight that moved along the short path disappear
-map_functions[12] = function()
+functions[12] = function()
 	--knight_path_sprite:SetNoCollision(true);
 	--knight_path_sprite:SetVisible(false);
 end
 
 
 -- Change to scene state and make camera sprite invisible with no collision
-map_functions[13] = function()
+functions[13] = function()
 	Map.camera:SetMoving(false);
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 	Map.camera:SetVisible(false);
@@ -1719,7 +1723,7 @@ end
 
 
 -- Exit scene state and restore camera sprite visibility and collision status
-map_functions[14] = function()
+functions[14] = function()
 	Map:PopState();
 	Map.camera:SetVisible(true);
 	Map.camera:SetNoCollision(false);
@@ -1727,30 +1731,30 @@ end
 
 
 -- Replace dialogue of the knight that guides the player to the right path after the passage collapse
-map_functions[15] = function()
+functions[15] = function()
     --knight_talk_sprite:RemoveDialogueReference(30);
     --knight_talk_sprite:AddDialogueReference(31);
 end
 
 -- Move camera to corpse
-map_functions[16] = function()
+functions[16] = function()
     Map:MoveVirtualFocus(206, 147);
     Map:SetCamera(ObjectManager.virtual_focus, 2000);
 end
 
 -- Move camera back to player
-map_functions[17] = function()
+functions[17] = function()
     Map:SetCamera(claudius, 500);
 end
 
 -- Move camera to talking karlate sprite
-map_functions[18] = function()
+functions[18] = function()
     Map:MoveVirtualFocus(149, 62);
     Map:SetCamera(ObjectManager.virtual_focus, 1000);
 end
 
 -- Move camera to talking karlate sprite
-map_functions[19] = function()
+functions[19] = function()
     Map:SetCamera(knight_path_sprite, 500);
 end
 

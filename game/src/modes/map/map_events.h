@@ -379,27 +379,29 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief An event with its _Start and _Update functions implemented in Lua.
+*** \brief An event with its _Start() and _Update() functions implemented in Lua.
 ***
 *** All events that do not fall into the other categories of events will be
 *** implemented here. This event uses Lua functions to implement the _Start()
-*** and _Update() functions (all these C++ functions do is call the
+*** and _Update() functions (the C++ functions implemented here just call the
 *** corresponding Lua functions). Note that any type of event can be implemented
 *** in Lua, including alternative implementations of the other C++ event types.
-*** You should only use this event type if there is no way to implement your
-*** event in the other event types provided.
+*** You should use this event type only when the other event classes do not meet
+*** your needs.
 *** ***************************************************************************/
 class ScriptedEvent : public MapEvent {
 public:
 	/** \param event_id The ID of this event
-	*** \param start_index An index in the map file's function table that references the start function
-	*** \param update_index An index in the map file's function table that references the update function
+	*** \param start_index The name of the start function to call
+	*** \param update_index The name of the update function to call
 	***
-	*** \note A value of zero for either the start or update index arguments will result in no start or
-	*** update function being defined. If no update function is defined, the call to _Update() will always
-	*** return true, meaning that this event will end immediately after it starts.
+	*** \note Passing an empty string for either the start_name or update_name will result in
+	*** no corresponding function defined. If no update function is defined, the call to _Update()
+	*** will always return true, meaning that this event will end immediately after it starts.
+	*** If both names are given empty string arguments, the event effectively does nothing and a
+	*** warning message is printed out for this case.
 	**/
-	ScriptedEvent(uint32 event_id, uint32 start_index, uint32 check_index);
+	ScriptedEvent(uint32 event_id, std::string start_name, std::string update_name);
 
 	~ScriptedEvent();
 
@@ -411,13 +413,13 @@ protected:
 	//! \brief A pointer to the Lua function that starts the event
 	ScriptObject* _start_function;
 
-	//! \brief A pointer to the Lua function that returns a boolean value if the event is finished
+	//! \brief A pointer to the Lua function that updates the status of an event, returning true when the event is finished
 	ScriptObject* _update_function;
 
-	//! \brief Calls the Lua _start_function, if one was defined
+	//! \brief Calls the Lua _start_function if one was defined
 	void _Start();
 
-	//! \brief Calls the Lua _update_function. If no update function was defined, does nothing and returns true
+	//! \brief Calls the Lua _update_function. If no update function was defined, immediately returns true
 	bool _Update();
 }; // class ScriptedEvent : public MapEvent
 
@@ -473,61 +475,6 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief A scripted event which operates on a sprite
-***
-*** This class is a cross between a SpriteEvent and ScriptedEvent class. The class
-*** itself inherits from SpriteEvent (it does not also inherit from ScriptedEvent).
-*** The key feature of this class is that it passes a pointer to a VirtualSprite
-*** object in the argument list when it makes its Lua function calls. The Lua functions
-*** are then able to take any allowable action on the sprite object. Otherwise, this
-*** class behaves just like a standard ScriptedEvent class.
-*** ***************************************************************************/
-class ScriptedSpriteEvent : public SpriteEvent {
-public:
-	/** \param event_id The ID of this event
-	*** \param sprite_id The id of the sprite that will be passed to the Lua script functions
-	*** \param start_index An index in the map file's function table that references the start function
-	*** \param update_index An index in the map file's function table that references the update function
-	***
-	*** \note A value of zero for either the start or update index arguments will result in no start or
-	*** update function being defined. If no update function is defined, the call to _Update() will always
-	*** return true, meaning that this event will end immediately after it starts.
-	**/
-	ScriptedSpriteEvent(uint32 event_id, uint16 sprite_id, uint32 start_index, uint32 check_index);
-
-	/** \param event_id The ID of this event
-	*** \param sprite A pointer to the sprite that will be passed to the Lua script functions
-	*** \param start_index An index in the map file's function table that references the start function
-	*** \param update_index An index in the map file's function table that references the update function
-	***
-	*** \note A value of zero for either the start or update index arguments will result in no start or
-	*** update function being defined. If no update function is defined, the call to _Update() will always
-	*** return true, meaning that this event will end immediately after it starts.
-	**/
-	ScriptedSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 start_index, uint32 check_index);
-
-	~ScriptedSpriteEvent();
-
-	ScriptedSpriteEvent(const ScriptedSpriteEvent& copy);
-
-	ScriptedSpriteEvent& operator=(const ScriptedSpriteEvent& copy);
-
-protected:
-	//! \brief A pointer to the Lua function that starts the event
-	ScriptObject* _start_function;
-
-	//! \brief A pointer to the Lua function that returns a boolean value if the event is finished
-	ScriptObject* _update_function;
-
-	//! \brief Calls the Lua _start_function, if one was defined
-	void _Start();
-
-	//! \brief Calls the Lua _update_function. If no update function was defined, does nothing and returns true
-	bool _Update();
-}; // class ScriptedSpriteEvent : public SpriteEvent
-
-
-/** ****************************************************************************
 *** \brief A simple event used to set the direction of a sprite
 ***
 *** This event finishes immediately after it starts, as all that it performs is
@@ -571,14 +518,138 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief An event which moves a single sprite to a destination
+*** \brief Displays specific sprite frames for a certain period of time
 ***
-*** This class allows for both absolute and relative destinations. A relative
-*** destination
+*** This event displays a certain animation of a sprite for a specified amount of time.
+*** Its primary purpose is to allow complete control over how a sprite appears to the
+*** player and to show the sprite interacting with its surroundings, such as flipping
+*** through a book taken from a bookshelf. Looping of these animations is also supported.
 ***
-*** Using event linking, it is very simple to have a single event represent
-*** a sprite traveling to multiple destinations, or multiple sprites travel to
-*** multiple destinations.
+*** \note You <b>must</b> add at least one frame to this object
+***
+*** \note These actions can not be used with VirtualSprite objects, since this
+*** class explicitly needs animation images to work and virtual sprites have no
+*** images.
+*** ***************************************************************************/
+class AnimateSpriteEvent : public SpriteEvent {
+public:
+	/** \param event_id The ID of this event
+	*** \param sprite A pointer to the sprite to move
+	**/
+	AnimateSpriteEvent(uint32 event_id, VirtualSprite* sprite);
+
+	~AnimateSpriteEvent();
+
+	/** \brief Adds a new frame to the animation set
+	*** \param frame The index of the sprite's animations to display
+	*** \param time The amount of time, in milliseconds, to display this frame
+	**/
+	void AddFrame(uint16 frame, uint32 time)
+		{ _frames.push_back(frame); _frame_times.push_back(time); }
+
+	/** \brief Sets the loop
+	***
+	**/
+	void SetLoopCount(int32 count)
+		{ _loop_count = count; }
+
+protected:
+	//! \brief Index to the current frame to display from the frames vector
+	uint32 _current_frame;
+
+	//! \brief Used to count down the display time of the current frame
+	uint32 _display_timer;
+
+	//! \brief A counter for the number of animation loops that have been performed
+	int32 _loop_count;
+
+	/** \brief The number of times to loop the display of the frame set before finishing
+	*** A value less than zero indicates to loop forever. Be careful with this,
+	*** because that means that the action would never arrive at the "finished"
+	*** state.
+	***
+	*** \note The default value of this member is zero, which indicates that the
+	*** animations will not be looped (they will run exactly once to completion).
+	**/
+	int32 _number_loops;
+
+	/** \brief Holds the sprite animations to display for this action
+	*** The values contained here are indeces to the sprite's animations vector
+	**/
+	std::vector<uint16> _frames;
+
+	/** \brief Indicates how long to display each frame
+	*** The size of this vector should be equal to the size of the frames vector
+	**/
+	std::vector<uint32> _frame_times;
+
+	//! \brief Calculates a path for the sprite to move to the destination
+	void _Start();
+
+	//! \brief Returns true when the sprite has reached the destination
+	bool _Update();
+}; // class AnimateSpriteEvent : public SpriteEvent
+
+
+/** ****************************************************************************
+*** \brief An event which randomizes movement of a sprite
+*** ***************************************************************************/
+class RandomMoveSpriteEvent : public SpriteEvent {
+	friend class VirtualSprite;
+
+public:
+	/** \param event_id The ID of this event
+	*** \param sprite A pointer to the sprite to move
+	*** \param move_time The total amount of time that this event should take
+	*** \param direction_time The amount of time to wait before changing the sprite's direction randomly
+	**/
+	RandomMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time = 10000, uint32 direction_time = 2000);
+
+	~RandomMoveSpriteEvent();
+
+protected:
+	/** \brief The amount of time (in milliseconds) to perform random movement before ending this action
+	*** Set this member to hoa_system::INFINITE_TIME in order to continue the random movement
+	*** forever. The default value of this member will be set to 10 seconds if it is not specified.
+	**/
+	uint32 _total_movement_time;
+
+	/** \brief The amount of time (in milliseconds) that the sprite should continue moving in its current direction
+	*** The default value for this timer is 1.5 seconds (1500ms).
+	**/
+	uint32 _total_direction_time;
+
+	//! \brief A timer which keeps track of how long the sprite has been in random movement
+	uint32 _movement_timer;
+
+	//! \brief A timer which keeps track of how long the sprite has been moving around since the last change in direction.
+	uint32 _direction_timer;
+
+	//! \brief Calculates a path for the sprite to move to the destination
+	void _Start();
+
+	//! \brief Returns true when the sprite has reached the destination
+	bool _Update();
+
+	/** \brief Tries to adjust the sprite's position around the collision. Will randomally change the sprite's direction if that fails.
+	*** \param coll_type The type of collision that has occurred
+	*** \param coll_obj A pointer to the MapObject that the sprite has collided with, if any
+	**/
+	void _ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj);
+}; // class RandomMoveSpriteEvent : public SpriteEvent
+
+
+/** ****************************************************************************
+*** \brief An event which moves a sprite to a destination
+***
+*** This class allows for both absolute and relative destinations. Absolute destinations
+*** are defined by specifying an X,Y coordinate on the map to move the sprite to. A relative
+*** destination is the change in the X and Y directions to move the sprite from their current
+*** position. The default destination type is absolute.
+***
+*** Using event linking, it is very simple to create an event chain where a sprite
+*** travels between multiple destinations, or multiple sprites travel to multiple
+*** destinations.
 *** ***************************************************************************/
 class PathMoveSpriteEvent : public SpriteEvent {
 	friend class VirtualSprite;
@@ -655,125 +726,62 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief An event which randomizes movement of a sprite
+*** \brief A scripted event which operates on a sprite
+***
+*** This class is a cross between a SpriteEvent and ScriptedEvent class. The class
+*** inherits from SpriteEvent, but it does not inherit from ScriptedEvent. The key
+*** feature of this class is that it passes a pointer to a VirtualSprite object in
+*** the argument list when it makes its Lua function calls. The Lua functions are
+*** then able to take any allowable action on the sprite object. Otherwise, this
+*** class behaves just like a standard ScriptedEvent class.
 *** ***************************************************************************/
-class RandomMoveSpriteEvent : public SpriteEvent {
-	friend class VirtualSprite;
-
+class ScriptedSpriteEvent : public SpriteEvent {
 public:
 	/** \param event_id The ID of this event
-	*** \param sprite A pointer to the sprite to move
-	*** \param move_time The total amount of time that this event should take
-	*** \param direction_time The amount of time to wait before changing the sprite's direction randomly
+	*** \param sprite_id The id of the sprite that will be passed to the Lua script functions
+	*** \param start_index The name of the start function to call
+	*** \param update_index The name of the update function to call
+	***
+	*** \note Passing an empty string for either the start_name or update_name will result in
+	*** no corresponding function defined. If no update function is defined, the call to _Update()
+	*** will always return true, meaning that this event will end immediately after it starts.
+	*** If both names are given empty string arguments, the event effectively does nothing and a
+	*** warning message is printed out for this case.
 	**/
-	RandomMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time = 10000, uint32 direction_time = 2000);
+	ScriptedSpriteEvent(uint32 event_id, uint16 sprite_id, std::string start_name, std::string check_name);
 
-	~RandomMoveSpriteEvent();
-
-protected:
-	/** \brief The amount of time (in milliseconds) to perform random movement before ending this action
-	*** Set this member to hoa_system::INFINITE_TIME in order to continue the random movement
-	*** forever. The default value of this member will be set to 10 seconds if it is not specified.
-	**/
-	uint32 _total_movement_time;
-
-	/** \brief The amount of time (in milliseconds) that the sprite should continue moving in its current direction
-	*** The default value for this timer is 1.5 seconds (1500ms).
-	**/
-	uint32 _total_direction_time;
-
-	//! \brief A timer which keeps track of how long the sprite has been in random movement
-	uint32 _movement_timer;
-
-	//! \brief A timer which keeps track of how long the sprite has been moving around since the last change in direction.
-	uint32 _direction_timer;
-
-	//! \brief Calculates a path for the sprite to move to the destination
-	void _Start();
-
-	//! \brief Returns true when the sprite has reached the destination
-	bool _Update();
-
-	/** \brief Tries to adjust the sprite's position around the collision. Will randomally change the sprite's direction if that fails.
-	*** \param coll_type The type of collision that has occurred
-	*** \param coll_obj A pointer to the MapObject that the sprite has collided with, if any
-	**/
-	void _ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_obj);
-}; // class RandomMoveSpriteEvent : public SpriteEvent
-
-
-/** ****************************************************************************
-*** \brief Displays specific sprite frames for a certain period of time
-***
-*** This event displays a certain animation of a sprite for a specified amount of time.
-*** Its primary purpose is to allow complete control over how a sprite appears to the
-*** player and to show the sprite interacting with its surroundings, such as flipping
-*** through a book taken from a bookshelf. Looping of these animations is also supported.
-***
-*** \note You <b>must</b> add at least one frame to this object
-***
-*** \note These actions can not be used with VirtualSprite objects, since this
-*** class explicitly needs animation images to work and virtual sprites have no
-*** images.
-*** ***************************************************************************/
-class AnimateSpriteEvent : public SpriteEvent {
-public:
 	/** \param event_id The ID of this event
-	*** \param sprite A pointer to the sprite to move
-	**/
-	AnimateSpriteEvent(uint32 event_id, VirtualSprite* sprite);
-
-	~AnimateSpriteEvent();
-
-	/** \brief Adds a new frame to the animation set
-	*** \param frame The index of the sprite's animations to display
-	*** \param time The amount of time, in milliseconds, to display this frame
-	**/
-	void AddFrame(uint16 frame, uint32 time)
-		{ _frames.push_back(frame); _frame_times.push_back(time); }
-
-	/** \brief Sets the loop
+	*** \param sprite A pointer to the sprite that will be passed to the Lua script functions
+	*** \param start_index The name of the start function to call
+	*** \param update_index The name of the update function to call
 	***
+	*** \note Passing an empty string for either the start_name or update_name will result in
+	*** no corresponding function defined. If no update function is defined, the call to _Update()
+	*** will always return true, meaning that this event will end immediately after it starts.
+	*** If both names are given empty string arguments, the event effectively does nothing and a
+	*** warning message is printed out for this case.
 	**/
-	void SetLoopCount(int32 count)
-		{ _loop_count = count; }
+	ScriptedSpriteEvent(uint32 event_id, VirtualSprite* sprite, std::string start_name, std::string check_name);
+
+	~ScriptedSpriteEvent();
+
+	ScriptedSpriteEvent(const ScriptedSpriteEvent& copy);
+
+	ScriptedSpriteEvent& operator=(const ScriptedSpriteEvent& copy);
 
 protected:
-	//! \brief Index to the current frame to display from the frames vector
-	uint32 _current_frame;
+	//! \brief A pointer to the Lua function that starts the event
+	ScriptObject* _start_function;
 
-	//! \brief Used to count down the display time of the current frame
-	uint32 _display_timer;
+	//! \brief A pointer to the Lua function that returns a boolean value if the event is finished
+	ScriptObject* _update_function;
 
-	//! \brief A counter for the number of animation loops that have been performed
-	int32 _loop_count;
-
-	/** \brief The number of times to loop the display of the frame set before finishing
-	*** A value less than zero indicates to loop forever. Be careful with this,
-	*** because that means that the action would never arrive at the "finished"
-	*** state.
-	***
-	*** \note The default value of this member is zero, which indicates that the
-	*** animations will not be looped (they will run exactly once to completion).
-	**/
-	int32 _number_loops;
-
-	/** \brief Holds the sprite animations to display for this action
-	*** The values contained here are indeces to the sprite's animations vector
-	**/
-	std::vector<uint16> _frames;
-
-	/** \brief Indicates how long to display each frame
-	*** The size of this vector should be equal to the size of the frames vector
-	**/
-	std::vector<uint32> _frame_times;
-
-	//! \brief Calculates a path for the sprite to move to the destination
+	//! \brief Calls the Lua _start_function, if one was defined
 	void _Start();
 
-	//! \brief Returns true when the sprite has reached the destination
+	//! \brief Calls the Lua _update_function. If no update function was defined, does nothing and returns true
 	bool _Update();
-}; // class AnimateSpriteEvent : public SpriteEvent
+}; // class ScriptedSpriteEvent : public SpriteEvent
 
 
 /** ****************************************************************************

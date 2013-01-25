@@ -435,7 +435,7 @@ void BindModeCode() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<ScriptedEvent, MapEvent>("ScriptedEvent")
-			.def(constructor<uint32, uint32, uint32>())
+			.def(constructor<uint32, std::string, std::string>())
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -445,16 +445,23 @@ void BindModeCode() {
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ScriptedSpriteEvent, SpriteEvent>("ScriptedSpriteEvent")
-			.def(constructor<uint32, uint16, uint32, uint32>())
-			.def(constructor<uint32, VirtualSprite*, uint32, uint32>())
+		class_<ChangeDirectionSpriteEvent, SpriteEvent>("ChangeDirectionSpriteEvent")
+			.def(constructor<uint32, uint16, uint16>())
+			.def(constructor<uint32, VirtualSprite*, uint16>())
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ChangeDirectionSpriteEvent, SpriteEvent>("ChangeDirectionSpriteEvent")
-			.def(constructor<uint32, uint16, uint16>())
-			.def(constructor<uint32, VirtualSprite*, uint16>())
+		class_<AnimateSpriteEvent, MapEvent>("AnimateSpriteEvent")
+			.def(constructor<uint32, VirtualSprite*>())
+			.def("AddFrame", &AnimateSpriteEvent::AddFrame)
+			.def("SetLoopCount", &AnimateSpriteEvent::SetLoopCount)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<RandomMoveSpriteEvent, SpriteEvent>("RandomMoveSpriteEvent")
+			.def(constructor<uint32, VirtualSprite*, uint32, uint32>())
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -468,16 +475,9 @@ void BindModeCode() {
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<RandomMoveSpriteEvent, SpriteEvent>("RandomMoveSpriteEvent")
-			.def(constructor<uint32, VirtualSprite*, uint32, uint32>())
-	];
-
-	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
-	[
-		class_<AnimateSpriteEvent, MapEvent>("AnimateSpriteEvent")
-			.def(constructor<uint32, VirtualSprite*>())
-			.def("AddFrame", &AnimateSpriteEvent::AddFrame)
-			.def("SetLoopCount", &AnimateSpriteEvent::SetLoopCount)
+		class_<ScriptedSpriteEvent, SpriteEvent>("ScriptedSpriteEvent")
+			.def(constructor<uint32, uint16, std::string, std::string>())
+			.def(constructor<uint32, VirtualSprite*, std::string, std::string>())
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
