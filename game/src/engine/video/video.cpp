@@ -418,16 +418,6 @@ bool VideoEngine::ApplySettings() {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to delete OpenGL textures during a context change" << endl;
 		}
 
-		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_ALPHA_TEST);
-		glDisable(GL_STENCIL_TEST);
-		_current_context.scissoring_enabled = false;
-		glDisable(GL_SCISSOR_TEST);
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
 		int32 flags = SDL_OPENGL;
 
 		if (_temp_fullscreen == true) {
@@ -471,6 +461,17 @@ bool VideoEngine::ApplySettings() {
 			}
 		}
 
+		// Only now that SDL_SetVideoMode(...) has been called can we make OpenGL calls
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_ALPHA_TEST);
+		glDisable(GL_STENCIL_TEST);
+		_current_context.scissoring_enabled = false;
+		glDisable(GL_SCISSOR_TEST);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        
 		// Turn off writing to the depth buffer
 		glDepthMask(GL_FALSE);
 
