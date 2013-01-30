@@ -96,13 +96,6 @@ public:
 class MapEvent {
 	friend class EventSupervisor;
 public:
-	//! \param id The ID for the map event (a zero value is invalid)
-	MapEvent(uint32 id, EVENT_TYPE type) :
-		_event_id(id), _event_type(type) {}
-
-	~MapEvent()
-		{}
-
 	uint32 GetEventID() const
 		{ return _event_id; }
 
@@ -136,6 +129,13 @@ public:
 		{ _AddEventLink(child_event_id, false, launch_time); }
 
 protected:
+	//! \param id The ID for the map event (a zero value is invalid)
+	MapEvent(uint32 id, EVENT_TYPE type) :
+		_event_id(id), _event_type(type) {}
+
+	virtual ~MapEvent()
+		{}
+
 	/** \brief Starts the event
 	*** This function is only called once per event execution
 	**/
@@ -183,19 +183,23 @@ private:
 *** ***************************************************************************/
 class DialogueEvent : public MapEvent {
 public:
-	/** \param event_id The ID of this event
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
 	*** \param dialogue_id The ID of the dialogue to execute through this event
+	*** \return A pointer to the instance of the event created
 	**/
-	DialogueEvent(uint32 event_id, uint32 dialogue_id);
-
-	~DialogueEvent()
-		{}
+	static DialogueEvent* Create(uint32 event_id, uint32 dialogue_id);
 
 	//! \brief Toggles whether or not camera movement should be stopped when the dialogue begins
 	void SetStopCameraMovement(bool stop)
 		{ _stop_camera_movement = stop; }
 
 protected:
+	DialogueEvent(uint32 event_id, uint32 dialogue_id);
+
+	~DialogueEvent()
+		{}
+
 	//! \brief The ID of the dialogue to invoke
 	uint32 _dialogue_id;
 
@@ -218,10 +222,11 @@ protected:
 *** ***************************************************************************/
 class ShopEvent : public MapEvent {
 public:
-	//! \param event_id The ID of this event
-	ShopEvent(uint32 event_id);
-
-	~ShopEvent();
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \return A pointer to the instance of the event created
+	**/
+	static ShopEvent* Create(uint32 event_id);
 
 	/** \brief Adds a ware to the list of objects for sale
 	*** \param object_id The ID of the GlobalObject to make available for purchase
@@ -232,6 +237,12 @@ public:
 	void AddWare(uint32 object_id, uint32 stock);
 
 protected:
+	//! \param event_id The ID of this event
+	ShopEvent(uint32 event_id);
+
+	~ShopEvent()
+		{}
+
 	//! \brief The GlobalObject IDs and stock count of all objects to be sold in the shop
 	std::set<std::pair<uint32, uint32> > _wares;
 
@@ -269,26 +280,30 @@ protected:
 *** ***************************************************************************/
 class SoundEvent : public MapEvent {
 public:
-	/** \param event_id The ID of this event
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
 	*** \param sound_filename The name of the sound file to load
+	*** \return A pointer to the instance of the event created
 	**/
-	SoundEvent(uint32 event_id, std::string sound_filename);
-
-	~SoundEvent();
+	static SoundEvent* Create(uint32 event_id, std::string sound_filename);
 
 	//! \brief Accessor which allows the properties of the sound to be customized
 	hoa_audio::SoundDescriptor& GetSound()
 		{ return _sound; }
 
 protected:
+	SoundEvent(uint32 event_id, std::string sound_filename);
+
+	~SoundEvent();
+
+	//! \brief The sound that this event will play
+	hoa_audio::SoundDescriptor _sound;
+
 	//! \brief Begins playback of the sound
 	void _Start();
 
 	//! \brief Returns true when the sound has finished playing, or finished looping
 	bool _Update();
-
-	//! \brief The sound that this event will play
-	hoa_audio::SoundDescriptor _sound;
 }; // class SoundEvent : public MapEvent
 
 
@@ -299,25 +314,30 @@ protected:
 *** ***************************************************************************/
 class MapTransitionEvent : public MapEvent {
 public:
-	/** \param event_id The ID of this event
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
 	*** \param filename The name of the map file to transition to
+	*** \return A pointer to the instance of the event created
 	**/
-	MapTransitionEvent(uint32 event_id, std::string filneame);
-
-	~MapTransitionEvent();
+	static MapTransitionEvent* Create(uint32 event_id, std::string filename);
 
 protected:
-	//! \brief Begins the transition process by fading out the screen and music
-	void _Start();
+	MapTransitionEvent(uint32 event_id, std::string filneame);
 
-	//! \brief Once the fading process completes, creates the new map mode to transition to
-	bool _Update();
+	~MapTransitionEvent()
+		{}
 
 	//! \brief The filename of the map to transition to
 	std::string _transition_map_filename;
 
 	//! \brief A timer used for fading out the current map
 	hoa_system::SystemTimer _fade_timer;
+
+	//! \brief Begins the transition process by fading out the screen and music
+	void _Start();
+
+	//! \brief Once the fading process completes, creates the new map mode to transition to
+	bool _Update();
 }; // class MapTransitionEvent : public MapEvent
 
 
@@ -328,13 +348,19 @@ protected:
 *** ***************************************************************************/
 class JoinPartyEvent : public MapEvent {
 public:
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \return A pointer to the instance of the event created
+	**/
+	static JoinPartyEvent* Create(uint32 event_id);
+
+protected:
 	/** \param event_id The ID of this event
 	**/
 	JoinPartyEvent(uint32 event_id);
 
 	~JoinPartyEvent();
 
-protected:
 	//! \brief
 	void _Start();
 
@@ -350,17 +376,23 @@ protected:
 *** ***************************************************************************/
 class BattleEncounterEvent : public MapEvent {
 public:
-	/** \param event_id The ID of this event
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \return A pointer to the instance of the event created
 	**/
-	BattleEncounterEvent(uint32 event_id, uint32 enemy_id);
-
-	~BattleEncounterEvent();
+	static BattleEncounterEvent* Create(uint32 event_id);
 
 	void SetMusic(std::string filename);
+
 	void SetBackground(std::string filename);
+
 	void AddEnemy(uint32 enemy_id);
 
 protected:
+	BattleEncounterEvent(uint32 event_id);
+
+	~BattleEncounterEvent();
+
 	//! \brief ID numbers for enemies to generate
 	std::vector<uint32> _enemy_ids;
 
@@ -389,11 +421,17 @@ protected:
 *** You should use this event type only when the other event classes do not meet
 *** your needs.
 *** ***************************************************************************/
-class ScriptedEvent : public MapEvent {
+class CustomEvent : public MapEvent {
 public:
-	/** \param event_id The ID of this event
-	*** \param start_index The name of the start function to call
-	*** \param update_index The name of the update function to call
+	CustomEvent(const CustomEvent& copy);
+
+	CustomEvent& operator=(const CustomEvent& copy);
+
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \param start_name The name of the start function to call
+	*** \param update_name The name of the update function to call
+	*** \return A pointer to the instance of the event created
 	***
 	*** \note Passing an empty string for either the start_name or update_name will result in
 	*** no corresponding function defined. If no update function is defined, the call to _Update()
@@ -401,15 +439,13 @@ public:
 	*** If both names are given empty string arguments, the event effectively does nothing and a
 	*** warning message is printed out for this case.
 	**/
-	ScriptedEvent(uint32 event_id, std::string start_name, std::string update_name);
-
-	~ScriptedEvent();
-
-	ScriptedEvent(const ScriptedEvent& copy);
-
-	ScriptedEvent& operator=(const ScriptedEvent& copy);
+	static CustomEvent* Create(uint32 event_id, std::string start_name, std::string update_name);
 
 protected:
+	CustomEvent(uint32 event_id, std::string start_name, std::string update_name);
+
+	~CustomEvent();
+
 	//! \brief A pointer to the Lua function that starts the event
 	ScriptObject* _start_function;
 
@@ -421,7 +457,7 @@ protected:
 
 	//! \brief Calls the Lua _update_function. If no update function was defined, immediately returns true
 	bool _Update();
-}; // class ScriptedEvent : public MapEvent
+}; // class CustomEvent : public MapEvent
 
 
 /** ****************************************************************************
@@ -445,23 +481,16 @@ protected:
 *** this property in mind when designing a derived sprite event class.
 *** ***************************************************************************/
 class SpriteEvent : public MapEvent {
-public:
-	/** \param event_id The ID of this event
-	*** \param event_type The type of this event
-	*** \param sprite_id The id of the sprite that this event will control
-	**/
-	SpriteEvent(uint32 event_id, EVENT_TYPE event_type, uint16 sprite_id);
-
+protected:
 	/** \param event_id The ID of this event
 	*** \param event_type The type of this event
 	*** \param sprite A pointer to the sprite that this event will control
 	**/
 	SpriteEvent(uint32 event_id, EVENT_TYPE event_type, VirtualSprite* sprite);
 
-	~SpriteEvent()
+	virtual ~SpriteEvent()
 		{}
 
-protected:
 	//! \brief A pointer to the map sprite that the event controls
 	VirtualSprite* _sprite;
 
@@ -479,7 +508,7 @@ protected:
 ***
 *** This event finishes immediately after it starts, as all that it performs is
 *** to set the direction of a sprite in a particular orientation. Normally such
-*** a minor event would be better suited as a ScriptedEvent with no update function,
+*** a minor event would be better suited as a CustomEvent with no update function,
 *** but because a set direction operation is so common, it makes sense to create a
 *** specific event for it for convenience.
 ***
@@ -490,22 +519,28 @@ protected:
 *** ***************************************************************************/
 class ChangeDirectionSpriteEvent : public SpriteEvent {
 public:
-	/** \param event_id The ID of this event
-	*** \param sprite _id The ID of the sprite to change the direction of
-	*** \param direction The direction to face the sprite
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \param sprite A pointer to the sprite to enact the event on
+	*** \param direction The direction in which to turn the sprite
+	*** \return A pointer to the instance of the event created
 	**/
-	ChangeDirectionSpriteEvent(uint32 event_id, uint16 sprite_id, uint16 direction);
+	static ChangeDirectionSpriteEvent* Create(uint32 event_id, VirtualSprite* sprite, uint16 direction);
 
-	/** \param event_id The ID of this event
-	*** \param sprite A pointer to the sprite that this event will effect
-	*** \param direction The direction to face the sprite
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \param sprite_id The ID of the sprite to enact the event on
+	*** \param direction The direction in which to turn the sprite
+	*** \return A pointer to the instance of the event created
 	**/
+	static ChangeDirectionSpriteEvent* Create(uint32 event_id, uint16 sprite_id, uint16 direction);
+
+protected:
 	ChangeDirectionSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint16 direction);
 
 	~ChangeDirectionSpriteEvent()
 		{}
 
-protected:
 	//! \brief Retains the direction to move the sprite when the event starts
 	uint16 _direction;
 
@@ -533,12 +568,20 @@ protected:
 *** ***************************************************************************/
 class AnimateSpriteEvent : public SpriteEvent {
 public:
-	/** \param event_id The ID of this event
-	*** \param sprite A pointer to the sprite to move
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \param sprite_id The ID of the sprite to enact the event on
+	*** \param sprite A pointer to the sprite to enact the event on
+	*** \return A pointer to the instance of the event created
 	**/
-	AnimateSpriteEvent(uint32 event_id, VirtualSprite* sprite);
+	static AnimateSpriteEvent* Create(uint32 event_id, VirtualSprite* sprite);
 
-	~AnimateSpriteEvent();
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \param sprite_id The ID of the sprite to enact the event on
+	*** \return A pointer to the instance of the event created
+	**/
+	static AnimateSpriteEvent* Create(uint32 event_id, uint16 sprite_id);
 
 	/** \brief Adds a new frame to the animation set
 	*** \param frame The index of the sprite's animations to display
@@ -554,6 +597,13 @@ public:
 		{ _loop_count = count; }
 
 protected:
+	/** \param event_id The ID of this event
+	*** \param sprite A pointer to the sprite to move
+	**/
+	AnimateSpriteEvent(uint32 event_id, VirtualSprite* sprite);
+
+	~AnimateSpriteEvent();
+
 	//! \brief Index to the current frame to display from the frames vector
 	uint32 _current_frame;
 
@@ -598,16 +648,29 @@ class RandomMoveSpriteEvent : public SpriteEvent {
 	friend class VirtualSprite;
 
 public:
-	/** \param event_id The ID of this event
-	*** \param sprite A pointer to the sprite to move
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \param sprite A pointer to the sprite to enact the event on
 	*** \param move_time The total amount of time that this event should take
 	*** \param direction_time The amount of time to wait before changing the sprite's direction randomly
+	*** \return A pointer to the instance of the event created
 	**/
-	RandomMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time = 10000, uint32 direction_time = 2000);
+	static RandomMoveSpriteEvent* Create(uint32 event_id, VirtualSprite* sprite, uint32 move_time, uint32 direction_time);
+
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \param sprite_id The ID of the sprite to enact the event on
+	*** \param move_time The total amount of time that this event should take
+	*** \param direction_time The amount of time to wait before changing the sprite's direction randomly
+	*** \return A pointer to the instance of the event created
+	**/
+	static RandomMoveSpriteEvent* Create(uint32 event_id, uint16 sprite_id, uint32 move_time, uint32 direction_time);
+
+protected:
+	RandomMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, uint32 move_time, uint32 direction_time);
 
 	~RandomMoveSpriteEvent();
 
-protected:
 	/** \brief The amount of time (in milliseconds) to perform random movement before ending this action
 	*** Set this member to hoa_system::INFINITE_TIME in order to continue the random movement
 	*** forever. The default value of this member will be set to 10 seconds if it is not specified.
@@ -655,22 +718,23 @@ class PathMoveSpriteEvent : public SpriteEvent {
 	friend class VirtualSprite;
 
 public:
-	/** \param event_id The ID of this event
-	*** \param sprite_id The ID of the sprite that is to be moved
-	*** \param x_coord The X coordinate to move the sprite to
-	*** \param y_coord The Y coordinate to move the sprite to
-	**/
-	PathMoveSpriteEvent(uint32 event_id, uint16 sprite_id, int16 x_coord, int16 y_coord);
-
-	/** \param event_id The ID of this event
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
 	*** \param sprite A pointer to the sprite to move
 	*** \param x_coord The X coordinate to move the sprite to
 	*** \param y_coord The Y coordinate to move the sprite to
+	*** \return A pointer to the instance of the event created
 	**/
-	PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, int16 x_coord, int16 y_coord);
+	static PathMoveSpriteEvent* Create(uint32 event_id, VirtualSprite* sprite, int16 x_coord, int16 y_coord);
 
-	~PathMoveSpriteEvent()
-		{}
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \param sprite_id The ID of the sprite that is to be moved
+	*** \param x_coord The X coordinate to move the sprite to
+	*** \param y_coord The Y coordinate to move the sprite to
+	*** \return A pointer to the instance of the event created
+	**/
+	static PathMoveSpriteEvent* Create(uint32 event_id, uint16 sprite_id, int16 x_coord, int16 y_coord);
 
 	/** \brief Used to toggle whether or not the destination provided in the constructor is relative or absolute
 	*** \note Any previous existing paths are cleared when this function is called. If this function is called when
@@ -687,6 +751,11 @@ public:
 	void SetDestination(int16 x_coord, int16 y_coord);
 
 protected:
+	PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, int16 x_coord, int16 y_coord);
+
+	~PathMoveSpriteEvent()
+		{}
+
 	//! \brief When true, the destination coordinates are relative to the current position of the sprite. Otherwise the destination is absolute.
 	bool _relative_destination;
 
@@ -726,34 +795,23 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief A scripted event which operates on a sprite
+*** \brief A custom event which operates on a sprite
 ***
-*** This class is a cross between a SpriteEvent and ScriptedEvent class. The class
-*** inherits from SpriteEvent, but it does not inherit from ScriptedEvent. The key
-*** feature of this class is that it passes a pointer to a VirtualSprite object in
-*** the argument list when it makes its Lua function calls. The Lua functions are
-*** then able to take any allowable action on the sprite object. Otherwise, this
-*** class behaves just like a standard ScriptedEvent class.
+*** This class is a cross between a SpriteEvent and CustomEvent class. The class
+*** inherits from SpriteEvent, but not from CustomEvent. The key feature of this
+*** class is that it passes a pointer to a VirtualSprite object in the argument
+*** list when it makes its Lua function calls. The Lua functions are then able
+*** to take any allowable action on the sprite object. Otherwise, this class
+*** behaves just like a standard CustomEvent class.
 *** ***************************************************************************/
-class ScriptedSpriteEvent : public SpriteEvent {
+class CustomSpriteEvent : public SpriteEvent {
 public:
-	/** \param event_id The ID of this event
-	*** \param sprite_id The id of the sprite that will be passed to the Lua script functions
-	*** \param start_index The name of the start function to call
-	*** \param update_index The name of the update function to call
-	***
-	*** \note Passing an empty string for either the start_name or update_name will result in
-	*** no corresponding function defined. If no update function is defined, the call to _Update()
-	*** will always return true, meaning that this event will end immediately after it starts.
-	*** If both names are given empty string arguments, the event effectively does nothing and a
-	*** warning message is printed out for this case.
-	**/
-	ScriptedSpriteEvent(uint32 event_id, uint16 sprite_id, std::string start_name, std::string check_name);
-
-	/** \param event_id The ID of this event
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
 	*** \param sprite A pointer to the sprite that will be passed to the Lua script functions
-	*** \param start_index The name of the start function to call
-	*** \param update_index The name of the update function to call
+	*** \param start_name The name of the start function to call
+	*** \param update_name The name of the update function to call
+	*** \return A pointer to the instance of the event created
 	***
 	*** \note Passing an empty string for either the start_name or update_name will result in
 	*** no corresponding function defined. If no update function is defined, the call to _Update()
@@ -761,15 +819,32 @@ public:
 	*** If both names are given empty string arguments, the event effectively does nothing and a
 	*** warning message is printed out for this case.
 	**/
-	ScriptedSpriteEvent(uint32 event_id, VirtualSprite* sprite, std::string start_name, std::string check_name);
+	static CustomSpriteEvent* Create(uint32 event_id, VirtualSprite* sprite, std::string start_name, std::string update_name);
 
-	~ScriptedSpriteEvent();
+	/** \brief Creates an instance of the class and registers it with the event supervisor
+	*** \param event_id The ID of this event
+	*** \param sprite_id The id of the sprite that will be passed to the Lua script functions
+	*** \param start_name The name of the start function to call
+	*** \param update_name The name of the update function to call
+	*** \return A pointer to the instance of the event created
+	***
+	*** \note Passing an empty string for either the start_name or update_name will result in
+	*** no corresponding function defined. If no update function is defined, the call to _Update()
+	*** will always return true, meaning that this event will end immediately after it starts.
+	*** If both names are given empty string arguments, the event effectively does nothing and a
+	*** warning message is printed out for this case.
+	**/
+	static CustomSpriteEvent* Create(uint32 event_id, uint16 sprite_id, std::string start_name, std::string update_name);
 
-	ScriptedSpriteEvent(const ScriptedSpriteEvent& copy);
+	CustomSpriteEvent(const CustomSpriteEvent& copy);
 
-	ScriptedSpriteEvent& operator=(const ScriptedSpriteEvent& copy);
+	CustomSpriteEvent& operator=(const CustomSpriteEvent& copy);
 
 protected:
+	CustomSpriteEvent(uint32 event_id, VirtualSprite* sprite, std::string start_name, std::string check_name);
+
+	~CustomSpriteEvent();
+
 	//! \brief A pointer to the Lua function that starts the event
 	ScriptObject* _start_function;
 
@@ -781,7 +856,7 @@ protected:
 
 	//! \brief Calls the Lua _update_function. If no update function was defined, does nothing and returns true
 	bool _Update();
-}; // class ScriptedSpriteEvent : public SpriteEvent
+}; // class CustomSpriteEvent : public SpriteEvent
 
 
 /** ****************************************************************************

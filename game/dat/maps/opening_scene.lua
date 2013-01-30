@@ -217,8 +217,7 @@ function Load(m)
 		InitialCreateEvents();
 		EventManager:StartEvent(10);
 
-		local event = hoa_map.ScriptedSpriteEvent(1000, 10, "FocusCameraOnSprite", "");
-		EventManager:RegisterEvent(event);
+		local event = hoa_map.CustomSpriteEvent.Create(1000, 10, "FocusCameraOnSprite", "");
 		--EventManager:StartEvent(1000);
 	else
 		ReturnCreateCharacters();
@@ -234,7 +233,7 @@ function Load(m)
 	Map:DisableIntroductionVisuals();
 	Map:ShowStaminaBar(false);
 	Map:ShowDialogueIcons(false);
-end
+end -- Load(m)
 
 
 
@@ -272,7 +271,6 @@ function InitialCreateSprites()
 	claudius:SetNoCollision(true);
 	animation = claudius:GetAnimation(hoa_map.MapMode.ANIM_WALKING_EAST);
 	animation:RandomizeCurrentLoopProgress();
-	--animation:SetTimeProgress(math.random(0, animation.GetAnimationLength()));
 	Map:AddGroundObject(claudius);
 
 	mark = ConstructSprite("Karlate", 2, group_start_x - 10.5, group_start_y + 2.5);
@@ -510,7 +508,7 @@ function InitialCreateEvents()
 	-- Event Group #1: Move all sprites toward the cave entrance. 
 	-- The distance that the troops will march for. Note that some sprites will move slightly more or less
 	local march_distance = 280;
-	event = hoa_map.PathMoveSpriteEvent(10, 1, march_distance - 0.5, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(10, 1, march_distance - 0.5, 0);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtStart(11);
 	event:AddEventLinkAtStart(12);
@@ -539,90 +537,66 @@ function InitialCreateEvents()
 	event:AddEventLinkAtStart(50, 5000); -- Narration dialogue starts 5 seconds after map begins
 	event:AddEventLinkAtEnd(100, 250); -- Sprites begin turning in various directions after stopping to speak to one another
 	event:AddEventLinkAtEnd(150, 2500); -- Captain's squad begins moving toward the top of the screen
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(11, 2, march_distance - 0.25, 0);
+	
+	event = hoa_map.PathMoveSpriteEvent.Create(11, 2, march_distance - 0.25, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(12, 3, march_distance + 0.25, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(12, 3, march_distance + 0.25, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(13, 10, march_distance + 0.5, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(13, 10, march_distance + 0.5, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(14, 11, march_distance + 0.25, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(14, 11, march_distance + 0.25, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(15, 12, march_distance + 0.4, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(15, 12, march_distance + 0.4, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(16, 20, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(16, 20, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(17, 21, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(17, 21, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(18, 22, march_distance - 0.25, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(18, 22, march_distance - 0.25, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(19, 30, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(19, 30, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(20, 31, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(20, 31, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(21, 32, march_distance + 1.5, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(21, 32, march_distance + 1.5, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(22, 40, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(22, 40, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(23, 41, march_distance + 0.25, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(23, 41, march_distance + 0.25, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(24, 42, march_distance + 0.5, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(24, 42, march_distance + 0.5, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(25, 50, march_distance + 0.25, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(25, 50, march_distance + 0.25, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(26, 51, march_distance + 0.5, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(26, 51, march_distance + 0.5, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(27, 52, march_distance + 0.75, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(27, 52, march_distance + 0.75, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(28, 60, march_distance + 0.25, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(28, 60, march_distance + 0.25, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(29, 61, march_distance + 0.5, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(29, 61, march_distance + 0.5, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(30, 62, march_distance + 1, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(30, 62, march_distance + 1, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(31, 70, march_distance - 0.25, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(31, 70, march_distance - 0.25, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(32, 71, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(32, 71, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(33, 72, march_distance + 0.25, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(33, 72, march_distance + 0.25, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
+	
 	-- This event moves the invisible sprite serving as a focus for the map camera
-	event = hoa_map.PathMoveSpriteEvent(34, 100, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(34, 100, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
 
 	-- Event Group #2: The narration dialogue
-	event = hoa_map.DialogueEvent(50, 10);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.DialogueEvent.Create(50, 10);
 
 	-- Event Group #3: Various sprites begin turning toward each other as if they were talking
 	-- This first event doesn't do anything since the sprite is already facing east. It is used as
 	-- a base to set the timings of the other events in this group
-	event = hoa_map.ChangeDirectionSpriteEvent(100, 1, hoa_map.MapMode.EAST);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(100, 1, hoa_map.MapMode.EAST);
+	
 	event:AddEventLinkAtStart(101, 2400);
 	event:AddEventLinkAtStart(102, 2600);
 	event:AddEventLinkAtStart(103, 1720);
@@ -647,120 +621,88 @@ function InitialCreateEvents()
 	event:AddEventLinkAtStart(122, 3600);
 	event:AddEventLinkAtStart(123, 3750);
 	event:AddEventLinkAtStart(124, 5000);
-	event = hoa_map.ChangeDirectionSpriteEvent(101, 2, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(102, 3, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(103, 70, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(104, 71, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(105, 72, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(106, 22, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(107, 21, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(108, 32, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(109, 31, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(110, 61, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(111, 60, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(112, 52, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(113, 51, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(114, 50, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(115, 40, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(116, 41, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(117, 42, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(101, 2, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(102, 3, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(103, 70, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(104, 71, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(105, 72, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(106, 22, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(107, 21, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(108, 32, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(109, 31, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(110, 61, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(111, 60, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(112, 52, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(113, 51, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(114, 50, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(115, 40, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(116, 41, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(117, 42, hoa_map.MapMode.NORTH);
+	
 	-- These sprites change their directions more than once before the captain's speech
-	event = hoa_map.ChangeDirectionSpriteEvent(118, 2, hoa_map.MapMode.EAST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(119, 72, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(120, 31, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(121, 52, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(122, 41, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(123, 42, hoa_map.MapMode.EAST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(124, 3, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(118, 2, hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(119, 72, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(120, 31, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(121, 52, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(122, 41, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(123, 42, hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(124, 3, hoa_map.MapMode.SOUTH);
 
 	-- Event Group #4: The captain's squad turns as if discussing before moving to the top of the screen
 	-- First change the directions of the sprites in the squad
-	event = hoa_map.ChangeDirectionSpriteEvent(150, 10, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(150, 10, hoa_map.MapMode.WEST);
 	event:AddEventLinkAtStart(151, 200);
 	event:AddEventLinkAtStart(152, 450);
 	event:AddEventLinkAtStart(153, 2400);
 	event:AddEventLinkAtStart(156, 2600);
 	event:AddEventLinkAtStart(159, 2800);
 	event:AddEventLinkAtStart(162, 2000);
-	event = hoa_map.ChangeDirectionSpriteEvent(151, 11, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(152, 12, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(151, 11, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(152, 12, hoa_map.MapMode.NORTH);
+	
 	-- Next begin moving the squad to the top of the screen
 	local captain_move_x1 = 0;
 	local captain_move_y1 = -6;
 	local captain_move_x2 = -15;
 	local captain_move_y2 = -6;
 	-- Sergeant movements
-	event = hoa_map.PathMoveSpriteEvent(153, 11, captain_move_x1, captain_move_y1);
+	event = hoa_map.PathMoveSpriteEvent.Create(153, 11, captain_move_x1, captain_move_y1);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(154);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(154, 11, captain_move_x2 - 1, captain_move_y2);
+	event = hoa_map.PathMoveSpriteEvent.Create(154, 11, captain_move_x2 - 1, captain_move_y2);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(155);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(155, 11, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(155, 11, hoa_map.MapMode.SOUTH);
 	event:AddEventLinkAtEnd(163, 1500);
-	EventManager:RegisterEvent(event);
+	
 	-- Captain movements
-	event = hoa_map.PathMoveSpriteEvent(156, 10, captain_move_x1, captain_move_y1);
+	event = hoa_map.PathMoveSpriteEvent.Create(156, 10, captain_move_x1, captain_move_y1);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(157);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(157, 10, captain_move_x2, captain_move_y2);
+	event = hoa_map.PathMoveSpriteEvent.Create(157, 10, captain_move_x2, captain_move_y2);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(158);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(158, 10, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(158, 10, hoa_map.MapMode.SOUTH);
+	
 	-- Senior knight movements
-	event = hoa_map.PathMoveSpriteEvent(159, 12, captain_move_x1, captain_move_y1);
+	event = hoa_map.PathMoveSpriteEvent.Create(159, 12, captain_move_x1, captain_move_y1);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(160, 500);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(160, 12, captain_move_x2 + 5, captain_move_y2 - 2);
+	event = hoa_map.PathMoveSpriteEvent.Create(160, 12, captain_move_x2 + 5, captain_move_y2 - 2);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(161);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(161, 12, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(161, 12, hoa_map.MapMode.SOUTH);
+	
 	-- Center the camera on the captain while the squad is moving
-	event = hoa_map.ScriptedSpriteEvent(162, 10, "FocusCameraOnSprite", "");
-	EventManager:RegisterEvent(event);
+	event = hoa_map.CustomSpriteEvent.Create(162, 10, "FocusCameraOnSprite", "");
+	
 	-- Finally have the sergeant step forward just before he is to speak
-	event = hoa_map.PathMoveSpriteEvent(163, 11, 0, 5);
+	event = hoa_map.PathMoveSpriteEvent.Create(163, 11, 0, 5);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(200);
-	EventManager:RegisterEvent(event);
 
 	-- Event Group #5: The sergeant calls attention to the troops, who all look north toward him
-	event = hoa_map.DialogueEvent(200, 20);
+	event = hoa_map.DialogueEvent.Create(200, 20);
 	event:AddEventLinkAtEnd(201, 250);
 	event:AddEventLinkAtEnd(202, 350);
 	event:AddEventLinkAtEnd(203, 225);
@@ -781,62 +723,40 @@ function InitialCreateEvents()
 	event:AddEventLinkAtEnd(218, 480);
 	event:AddEventLinkAtEnd(219, 555);
 	event:AddEventLinkAtEnd(220, 1250);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(201, 1, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(202, 2, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(203, 3, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(204, 21, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(205, 22, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(206, 31, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(207, 32, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(208, 40, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(209, 41, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(210, 42, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(211, 50, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(212, 51, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(213, 52, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(214, 60, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(215, 61, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(216, 62, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(217, 70, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(218, 71, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(219, 72, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(201, 1, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(202, 2, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(203, 3, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(204, 21, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(205, 22, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(206, 31, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(207, 32, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(208, 40, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(209, 41, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(210, 42, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(211, 50, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(212, 51, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(213, 52, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(214, 60, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(215, 61, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(216, 62, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(217, 70, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(218, 71, hoa_map.MapMode.NORTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(219, 72, hoa_map.MapMode.NORTH);
+	
 	-- Sergeant moves northward back behind the captain, captain takes small step forward
-	event = hoa_map.PathMoveSpriteEvent(220, 11, 0, -5);
+	event = hoa_map.PathMoveSpriteEvent.Create(220, 11, 0, -5);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(221);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(221, 11, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(221, 11, hoa_map.MapMode.SOUTH);
 	event:AddEventLinkAtEnd(222, 250);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(222, 10, 0, 4);
+	event = hoa_map.PathMoveSpriteEvent.Create(222, 10, 0, 4);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(250, 250);
-	EventManager:RegisterEvent(event);
 
 	-- Event Group #6: Dialogue where the captain gives out his orders
 	local cave_entrance_x = 371;
 	local cave_entrance_y = 5;
-	event = hoa_map.DialogueEvent(250, 21);
+	event = hoa_map.DialogueEvent.Create(250, 21);
 	event:AddEventLinkAtEnd(251, 500);
 	event:AddEventLinkAtEnd(253, 500);
 	event:AddEventLinkAtEnd(255, 500);
@@ -847,164 +767,118 @@ function InitialCreateEvents()
 	event:AddEventLinkAtEnd(360, 2200);
 	event:AddEventLinkAtEnd(380, 2500);
 	event:AddEventLinkAtEnd(400, 750);
-	EventManager:RegisterEvent(event);
+
 	-- Captain's squad moves into the cave and disappears
-	event = hoa_map.PathMoveSpriteEvent(251, 10, cave_entrance_x, cave_entrance_y);
+	event = hoa_map.PathMoveSpriteEvent.Create(251, 10, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(252);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(252, 10, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(253, 11, cave_entrance_x + 0.25, cave_entrance_y);
+	event = hoa_map.CustomSpriteEvent.Create(252, 10, "DisableCollisionAndVisibility", "");
+	event = hoa_map.PathMoveSpriteEvent.Create(253, 11, cave_entrance_x + 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(254);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(254, 11, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(255, 12, cave_entrance_x - 0.25, cave_entrance_y);
+	event = hoa_map.CustomSpriteEvent.Create(254, 11, "DisableCollisionAndVisibility", "");
+	event = hoa_map.PathMoveSpriteEvent.Create(255, 12, cave_entrance_x - 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(256);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(256, 12, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
-	-- After the dialogue, the sprites turn toward each other once again
+	event = hoa_map.CustomSpriteEvent.Create(256, 12, "DisableCollisionAndVisibility", "");
 
 	-- Event Group #7: Other squads turn toward each other again, then begin moving into the cave
 	-- Rear squad
-	event = hoa_map.ChangeDirectionSpriteEvent(300, 70, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(300, 70, hoa_map.MapMode.SOUTH);
 	event:AddEventLinkAtEnd(301, 400);
 	event:AddEventLinkAtEnd(304, 500);
 	event:AddEventLinkAtEnd(307, 700);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(301, 70, cave_entrance_x - 5, cave_entrance_y + 7);
+	event = hoa_map.PathMoveSpriteEvent.Create(301, 70, cave_entrance_x - 5, cave_entrance_y + 7);
 	event:AddEventLinkAtEnd(302);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(302, 70, cave_entrance_x + 0.5, cave_entrance_y);
+	event = hoa_map.PathMoveSpriteEvent.Create(302, 70, cave_entrance_x + 0.5, cave_entrance_y);
 	event:AddEventLinkAtEnd(303);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(303, 70, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(304, 71, cave_entrance_x - 5, cave_entrance_y + 7);
+	event = hoa_map.CustomSpriteEvent.Create(303, 70, "DisableCollisionAndVisibility", "");
+	event = hoa_map.PathMoveSpriteEvent.Create(304, 71, cave_entrance_x - 5, cave_entrance_y + 7);
 	event:AddEventLinkAtEnd(305);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(305, 71, cave_entrance_x, cave_entrance_y);
+	event = hoa_map.PathMoveSpriteEvent.Create(305, 71, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(306);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(306, 71, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(307, 72, cave_entrance_x - 5, cave_entrance_y + 7);
+	event = hoa_map.CustomSpriteEvent.Create(306, 71, "DisableCollisionAndVisibility", "");
+	event = hoa_map.PathMoveSpriteEvent.Create(307, 72, cave_entrance_x - 5, cave_entrance_y + 7);
 	event:AddEventLinkAtEnd(308);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(308, 72, cave_entrance_x - 0.25, cave_entrance_y);
+	event = hoa_map.PathMoveSpriteEvent.Create(308, 72, cave_entrance_x - 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(309);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(309, 72, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
+	event = hoa_map.CustomSpriteEvent.Create(309, 72, "DisableCollisionAndVisibility", "");
+	
 	-- Hound squads
-	event = hoa_map.ChangeDirectionSpriteEvent(320, 22, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(320, 22, hoa_map.MapMode.SOUTH);
 	event:AddEventLinkAtStart(321, 500);
 	event:AddEventLinkAtStart(322, 2500);
 	event:AddEventLinkAtStart(323, 2200);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(321, 21, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(322, 32, hoa_map.MapMode.EAST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(323, 31, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(321, 21, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(322, 32, hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(323, 31, hoa_map.MapMode.WEST);
+	
 	-- Middle squad
-	event = hoa_map.ChangeDirectionSpriteEvent(340, 60, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(340, 60, hoa_map.MapMode.WEST);
 	event:AddEventLinkAtStart(341);
 	event:AddEventLinkAtStart(342);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(341, 61, hoa_map.MapMode.SOUTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(342, 62, hoa_map.MapMode.EAST);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(341, 61, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(342, 62, hoa_map.MapMode.EAST);
+	
 	-- Top right squad
-	event = hoa_map.ChangeDirectionSpriteEvent(360, 40, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(360, 40, hoa_map.MapMode.SOUTH);
 	event:AddEventLinkAtStart(361);
 	event:AddEventLinkAtEnd(362, 400);
 	event:AddEventLinkAtEnd(365, 500);
 	event:AddEventLinkAtEnd(368, 700);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(361, 41, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(362, 40, 0, -6);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(361, 41, hoa_map.MapMode.WEST);
+	event = hoa_map.PathMoveSpriteEvent.Create(362, 40, 0, -6);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(363);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(363, 40, cave_entrance_x, cave_entrance_y);
+	event = hoa_map.PathMoveSpriteEvent.Create(363, 40, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(364);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(364, 40, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(365, 41, 0, -6);
+	event = hoa_map.CustomSpriteEvent.Create(364, 40, "DisableCollisionAndVisibility", "");
+	event = hoa_map.PathMoveSpriteEvent.Create(365, 41, 0, -6);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(366);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(366, 41, cave_entrance_x, cave_entrance_y);
+	event = hoa_map.PathMoveSpriteEvent.Create(366, 41, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(367);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(367, 41, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(368, 42, 0, -6);
+	event = hoa_map.CustomSpriteEvent.Create(367, 41, "DisableCollisionAndVisibility", "");
+	event = hoa_map.PathMoveSpriteEvent.Create(368, 42, 0, -6);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(369);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(369, 42, cave_entrance_x, cave_entrance_y);
+	event = hoa_map.PathMoveSpriteEvent.Create(369, 42, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(370);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(370, 42, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
+	event = hoa_map.CustomSpriteEvent.Create(370, 42, "DisableCollisionAndVisibility", "");
 
 	-- Bottom left squad
-	event = hoa_map.ChangeDirectionSpriteEvent(380, 52, hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(380, 52, hoa_map.MapMode.EAST);
 	event:AddEventLinkAtStart(381);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(381, 50, hoa_map.MapMode.WEST);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(381, 50, hoa_map.MapMode.WEST);
 
 	-- Event Group #8: Dialogue between the members of the character party, who then move to the cave
 	-- Move the camera to focus on Lukar, turn him toward his party, and open his first dialogue
-	event = hoa_map.ScriptedSpriteEvent(400, 3, "FocusCameraOnSprite", "");
+	event = hoa_map.CustomSpriteEvent.Create(400, 3, "FocusCameraOnSprite", "");
 	event:AddEventLinkAtEnd(401);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(401, 3, hoa_map.MapMode.SOUTH);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(401, 3, hoa_map.MapMode.SOUTH);
 	event:AddEventLinkAtEnd(402, 250);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.DialogueEvent(402, 30);
+	event = hoa_map.DialogueEvent.Create(402, 30);
 	event:AddEventLinkAtEnd(403, 500);
 	event:AddEventLinkAtEnd(404, 500);
 	event:AddEventLinkAtEnd(406, 1000);
 	-- Turn Claudius and Mark to face Lukar, who speaks again
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(403, 1, hoa_map.MapMode.EAST);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ChangeDirectionSpriteEvent(404, 2, hoa_map.MapMode.NORTH);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.DialogueEvent(406, 31);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(403, 1, hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(404, 2, hoa_map.MapMode.NORTH);
+	event = hoa_map.DialogueEvent.Create(406, 31);
 	event:AddEventLinkAtEnd(407, 500);
 	event:AddEventLinkAtEnd(409, 500);
 	event:AddEventLinkAtEnd(411, 1000);
-	EventManager:RegisterEvent(event);
 	-- Move character squad into the cave and make the sprites disappear as they enter
-	event = hoa_map.PathMoveSpriteEvent(407, 3, cave_entrance_x, cave_entrance_y);
+	event = hoa_map.PathMoveSpriteEvent.Create(407, 3, cave_entrance_x, cave_entrance_y);
 	event:AddEventLinkAtEnd(408);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(408, 3, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(409, 2, cave_entrance_x + 0.25, cave_entrance_y);
+	event = hoa_map.CustomSpriteEvent.Create(408, 3, "DisableCollisionAndVisibility", "");
+	event = hoa_map.PathMoveSpriteEvent.Create(409, 2, cave_entrance_x + 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(410);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(410, 2, "DisableCollisionAndVisibility", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(411, 1, cave_entrance_x - 0.25, cave_entrance_y);
+	event = hoa_map.CustomSpriteEvent.Create(410, 2, "DisableCollisionAndVisibility", "");
+	event = hoa_map.PathMoveSpriteEvent.Create(411, 1, cave_entrance_x - 0.25, cave_entrance_y);
 	event:AddEventLinkAtEnd(412);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(412, 1, "DisableCollisionAndVisibility", "");
+	event = hoa_map.CustomSpriteEvent.Create(412, 1, "DisableCollisionAndVisibility", "");
 	event:AddEventLinkAtEnd(413, 1000);
-	EventManager:RegisterEvent(event);
+	
 	-- Once the cave has been reached, transition to the cave map
-	event = hoa_map.MapTransitionEvent(413, "dat/maps/river_access_cave.lua");
-	EventManager:RegisterEvent(event);
+	event = hoa_map.MapTransitionEvent.Create(413, "dat/maps/river_access_cave.lua");
 end -- function InitialCreateEvents()
 
 --------------------------------------------------------------------------------
@@ -1154,7 +1028,7 @@ function ReturnCreateEvents()
 	-- Move all sprites away from the cave entrance
 	local total_march_distance = 280;
 	local march_distance = -220;
-	event = hoa_map.PathMoveSpriteEvent(10, 1000, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(10, 1000, march_distance, 0);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtStart(11);
 	event:AddEventLinkAtStart(12);
@@ -1173,60 +1047,42 @@ function ReturnCreateEvents()
 	event:AddEventLinkAtStart(51, 20000);
 	event:AddEventLinkAtEnd(24); -- The scout moves towards the main party as the dialogue ends
 	event:AddEventLinkAtEnd(52, 2000); -- The scout makes his report
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(11, 1001, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(11, 1001, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(12, 1002, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(12, 1002, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(13, 1003, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(13, 1003, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(14, 2000, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(14, 2000, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(15, 2001, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(15, 2001, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(16, 2002, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(16, 2002, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(17, 2003, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(17, 2003, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(18, 2004, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(18, 2004, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(19, 2005, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(19, 2005, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(20, 2006, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(20, 2006, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(21, 2007, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(21, 2007, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(22, 2008, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(22, 2008, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(23, 2009, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(23, 2009, march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(24, 2010, total_march_distance + march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(24, 2010, total_march_distance + march_distance, 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
 
 	-- Create the dialogue
-	event = hoa_map.DialogueEvent(50, 10);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.DialogueEvent(51, 20);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.DialogueEvent(52, 30);
-	EventManager:RegisterEvent(event);
+	event = hoa_map.DialogueEvent.Create(50, 10);
+	event = hoa_map.DialogueEvent.Create(51, 20);
+	event = hoa_map.DialogueEvent.Create(52, 30);
 
 	-- Change movement speed of all sprites
-	event = hoa_map.ScriptedSpriteEvent(250, 1000, 3, 0);
+	event = hoa_map.CustomSpriteEvent.Create(250, 1000, 3, 0);
 	event:AddEventLinkAtStart(251);
 	event:AddEventLinkAtStart(252);
 	event:AddEventLinkAtStart(253);
@@ -1241,38 +1097,23 @@ function ReturnCreateEvents()
 	event:AddEventLinkAtStart(262);
 	event:AddEventLinkAtStart(263);
 	event:AddEventLinkAtStart(264);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(251, 1001, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(252, 1002, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(253, 1003, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(254, 2000, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(255, 2001, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(256, 2002, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(257, 2003, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(258, 2004, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(259, 2005, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(260, 2006, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(261, 2007, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(262, 2008, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(263, 2009, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
-	event = hoa_map.ScriptedSpriteEvent(264, 2010, "ChangeSpriteMovementSpeed", "");
-	EventManager:RegisterEvent(event);
+	event = hoa_map.CustomSpriteEvent.Create(251, 1001, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(252, 1002, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(253, 1003, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(254, 2000, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(255, 2001, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(256, 2002, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(257, 2003, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(258, 2004, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(259, 2005, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(260, 2006, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(261, 2007, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(262, 2008, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(263, 2009, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(264, 2010, "ChangeSpriteMovementSpeed", "");
 
 	-- Rush off to the city
-	event = hoa_map.PathMoveSpriteEvent(310, 1000, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(310, 1000, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtStart(250);
 	event:AddEventLinkAtStart(311);
@@ -1290,52 +1131,36 @@ function ReturnCreateEvents()
 	event:AddEventLinkAtStart(323);
 	event:AddEventLinkAtStart(324);
 	event:AddEventLinkAtEnd(500);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(311, 1001, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(311, 1001, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(312, 1002, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(312, 1002, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(313, 1003, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(313, 1003, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(314, 2000, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(314, 2000, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(315, 2001, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(315, 2001, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(316, 2002, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(316, 2002, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(317, 2003, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(317, 2003, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(318, 2004, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(318, 2004, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(319, 2005, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(319, 2005, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(320, 2006, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(320, 2006, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(321, 2007, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(321, 2007, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(322, 2008, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(322, 2008, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(323, 2009, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(323, 2009, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.PathMoveSpriteEvent(324, 2010, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(324, 2010, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	EventManager:RegisterEvent(event);
-	event = hoa_map.MapTransitionEvent(500, "dat/maps/harrvah_city.lua");
-	EventManager:RegisterEvent(event);
-end
+	event = hoa_map.MapTransitionEvent.Create(500, "dat/maps/harrvah_city.lua");
+end -- function ReturnCreateEvents()
 
 
 -- Sprite function: Focus map camera on sprite
