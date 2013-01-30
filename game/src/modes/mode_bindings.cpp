@@ -416,26 +416,50 @@ void BindModeCode() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<DialogueEvent, MapEvent>("DialogueEvent")
-			.def(constructor<uint32, uint32>())
+			.scope
+			[
+				def("Create", &DialogueEvent::Create)
+			]
 			.def("SetStopCameraMovement", &DialogueEvent::SetStopCameraMovement)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<SoundEvent, MapEvent>("SoundEvent")
-			.def(constructor<uint32, std::string>())
+			.scope
+			[
+				def("Create", &SoundEvent::Create)
+			]
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapTransitionEvent, MapEvent>("MapTransitionEvent")
-			.def(constructor<uint32, std::string>())
+			.scope
+			[
+				def("Create", &MapTransitionEvent::Create)
+			]
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ScriptedEvent, MapEvent>("ScriptedEvent")
-			.def(constructor<uint32, std::string, std::string>())
+		class_<BattleEncounterEvent, MapEvent>("BattleEncounterEvent")
+			.scope
+			[
+				def("Create", &CustomEvent::Create)
+			]
+			.def("SetMusic", &BattleEncounterEvent::SetMusic)
+			.def("SetBackground", &BattleEncounterEvent::SetBackground)
+			.def("AddEnemy", &BattleEncounterEvent::AddEnemy)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<CustomEvent, MapEvent>("CustomEvent")
+			.scope
+			[
+				def("Create", &CustomEvent::Create)
+			]
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -446,14 +470,21 @@ void BindModeCode() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<ChangeDirectionSpriteEvent, SpriteEvent>("ChangeDirectionSpriteEvent")
-			.def(constructor<uint32, uint16, uint16>())
-			.def(constructor<uint32, VirtualSprite*, uint16>())
+			.scope
+			[
+				def("Create", (ChangeDirectionSpriteEvent*(*)(uint32, VirtualSprite*, uint16))&ChangeDirectionSpriteEvent::Create),
+				def("Create", (ChangeDirectionSpriteEvent*(*)(uint32, uint16, uint16))&ChangeDirectionSpriteEvent::Create)
+			]
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<AnimateSpriteEvent, MapEvent>("AnimateSpriteEvent")
-			.def(constructor<uint32, VirtualSprite*>())
+			.scope
+			[
+				def("Create", (AnimateSpriteEvent*(*)(uint32, VirtualSprite*))&AnimateSpriteEvent::Create),
+				def("Create", (AnimateSpriteEvent*(*)(uint32, uint16))&AnimateSpriteEvent::Create)
+			]
 			.def("AddFrame", &AnimateSpriteEvent::AddFrame)
 			.def("SetLoopCount", &AnimateSpriteEvent::SetLoopCount)
 	];
@@ -461,38 +492,38 @@ void BindModeCode() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<RandomMoveSpriteEvent, SpriteEvent>("RandomMoveSpriteEvent")
-			.def(constructor<uint32, VirtualSprite*, uint32, uint32>())
+			.scope
+			[
+				def("Create", (RandomMoveSpriteEvent*(*)(uint32, VirtualSprite*, uint32, uint32))&RandomMoveSpriteEvent::Create),
+				def("Create", (RandomMoveSpriteEvent*(*)(uint32, uint16, uint32, uint32))&RandomMoveSpriteEvent::Create)
+			]
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<PathMoveSpriteEvent, SpriteEvent>("PathMoveSpriteEvent")
-			.def(constructor<uint32, uint32, int16, int16>())
-			.def(constructor<uint32, VirtualSprite*, int16, int16>())
+			.scope
+			[
+				def("Create", (PathMoveSpriteEvent*(*)(uint32, VirtualSprite*, int16, int16))&PathMoveSpriteEvent::Create),
+				def("Create", (PathMoveSpriteEvent*(*)(uint32, uint16, int16, int16))&PathMoveSpriteEvent::Create)
+			]
 			.def("SetRelativeDestination", &PathMoveSpriteEvent::SetRelativeDestination)
 			.def("SetDestination", &PathMoveSpriteEvent::SetDestination)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<ScriptedSpriteEvent, SpriteEvent>("ScriptedSpriteEvent")
-			.def(constructor<uint32, uint16, std::string, std::string>())
-			.def(constructor<uint32, VirtualSprite*, std::string, std::string>())
-	];
-
-	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
-	[
-		class_<BattleEncounterEvent, MapEvent>("BattleEncounterEvent")
-			.def(constructor<uint32, uint32>())
-			.def("SetMusic", &BattleEncounterEvent::SetMusic)
-			.def("SetBackground", &BattleEncounterEvent::SetBackground)
-			.def("AddEnemy", &BattleEncounterEvent::AddEnemy)
+		class_<CustomSpriteEvent, SpriteEvent>("CustomSpriteEvent")
+			.scope
+			[
+				def("Create", (CustomSpriteEvent*(*)(uint32, VirtualSprite*, std::string, std::string))&CustomSpriteEvent::Create),
+				def("Create", (CustomSpriteEvent*(*)(uint32, uint16, std::string, std::string))&CustomSpriteEvent::Create)
+			]
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapTreasure>("MapTreasure")
-			.def(constructor<>())
 			.def("AddDrunes", &MapTreasure::AddDrunes)
 			.def("AddObject", &MapTreasure::AddObject)
 			.def("IsTaken", &MapTreasure::IsTaken)
