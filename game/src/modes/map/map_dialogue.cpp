@@ -56,10 +56,53 @@ namespace private_map {
 const uint32 NO_DIALOGUE_EVENT = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
-// SpriteDialogue Class Functions
+// DialogueEventData Class Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-SpriteDialogue::SpriteDialogue(uint32 id) :
+void DialogueEventData::AddEvent(uint32 event_id, bool launch_at_start, uint32 launch_timing) {
+	if (event_id == 0) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to add an event with an invalid ID (0). The event was not added" << endl;
+		return;
+	}
+
+	_event_ids.push_back(event_id);
+	_launches_at_start.push_back(launch_at_start);
+	_launch_timings.push_back(launch_timing);
+}
+
+
+void DialogueEventData::ProcessEvents(bool at_start) {
+	for (uint32 i = 0; i < _event_ids.size(); ++i) {
+		if (_launches_at_start[i] == at_start) {
+			if (_launch_timings[i] == 0) {
+				MapMode::CurrentInstance()->GetEventSupervisor()->StartEvent(_event_ids[i]);
+			}
+			else {
+				MapMode::CurrentInstance()->GetEventSupervisor()->StartEvent(_event_ids[i], _launch_timings[i]);
+			}
+		}
+	}
+}
+
+
+bool DialogueEventData::ValidateEvents() {
+	bool return_value = true;
+
+	for (uint32 i = 0; i < _event_ids.size(); ++i) {
+		if (MapMode::CurrentInstance()->GetEventSupervisor()->GetEvent(_event_ids[i]) == NULL) {
+			return_value = false;
+			IF_PRINT_WARNING(MAP_DEBUG) << "no event was registered for the event ID: " << _event_ids[i] << endl;
+		}
+	}
+
+	return return_value;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MapDialogue Class Functions
+///////////////////////////////////////////////////////////////////////////////
+
+MapDialogue::MapDialogue(uint32 id) :
 	CommonDialogue(id),
 	_input_blocked(false),
 	_restore_state(true),
@@ -68,49 +111,49 @@ SpriteDialogue::SpriteDialogue(uint32 id) :
 
 
 
-void SpriteDialogue::AddLine(string text, uint32 speaker) {
+void MapDialogue::AddLine(string text, uint32 speaker) {
 	AddLineTimedEvent(text, speaker, COMMON_DIALOGUE_NEXT_LINE, COMMON_DIALOGUE_NO_TIMER, NO_DIALOGUE_EVENT);
 }
 
 
 
-void SpriteDialogue::AddLine(string text, uint32 speaker, int32 next_line) {
+void MapDialogue::AddLine(string text, uint32 speaker, int32 next_line) {
 	AddLineTimedEvent(text, speaker, next_line, COMMON_DIALOGUE_NO_TIMER, NO_DIALOGUE_EVENT);
 }
 
 
 
-void SpriteDialogue::AddLineTimed(string text, uint32 speaker, uint32 display_time) {
+void MapDialogue::AddLineTimed(string text, uint32 speaker, uint32 display_time) {
 	AddLineTimedEvent(text, speaker, COMMON_DIALOGUE_NEXT_LINE, display_time, NO_DIALOGUE_EVENT);
 }
 
 
 
-void SpriteDialogue::AddLineTimed(string text, uint32 speaker, int32 next_line, uint32 display_time) {
+void MapDialogue::AddLineTimed(string text, uint32 speaker, int32 next_line, uint32 display_time) {
 	AddLineTimedEvent(text, speaker, next_line, display_time, NO_DIALOGUE_EVENT);
 }
 
 
 
-void SpriteDialogue::AddLineEvent(string text, uint32 speaker, uint32 event_id) {
+void MapDialogue::AddLineEvent(string text, uint32 speaker, uint32 event_id) {
 	AddLineTimedEvent(text, speaker, COMMON_DIALOGUE_NEXT_LINE, COMMON_DIALOGUE_NO_TIMER, event_id);
 }
 
 
 
-void SpriteDialogue::AddLineEvent(string text, uint32 speaker, int32 next_line, uint32 event_id) {
+void MapDialogue::AddLineEvent(string text, uint32 speaker, int32 next_line, uint32 event_id) {
 	AddLineTimedEvent(text, speaker, next_line, COMMON_DIALOGUE_NO_TIMER, event_id);
 }
 
 
 
-void SpriteDialogue::AddLineTimedEvent(string text, uint32 speaker, uint32 display_time, uint32 event_id) {
+void MapDialogue::AddLineTimedEvent(string text, uint32 speaker, uint32 display_time, uint32 event_id) {
 	AddLineTimedEvent(text, speaker, COMMON_DIALOGUE_NEXT_LINE, display_time, event_id);
 }
 
 
 
-void SpriteDialogue::AddLineTimedEvent(string text, uint32 speaker, int32 next_line, uint32 display_time, uint32 event_id) {
+void MapDialogue::AddLineTimedEvent(string text, uint32 speaker, int32 next_line, uint32 display_time, uint32 event_id) {
 	CommonDialogue::AddLineTimed(text, next_line, display_time);
 	_speakers.push_back(speaker);
 	_events.push_back(event_id);
@@ -118,25 +161,25 @@ void SpriteDialogue::AddLineTimedEvent(string text, uint32 speaker, int32 next_l
 
 
 
-void SpriteDialogue::AddOption(string text) {
+void MapDialogue::AddOption(string text) {
 	AddOptionEvent(text, COMMON_DIALOGUE_NEXT_LINE, NO_DIALOGUE_EVENT);
 }
 
 
 
-void SpriteDialogue::AddOption(string text, int32 next_line) {
+void MapDialogue::AddOption(string text, int32 next_line) {
 	AddOptionEvent(text, next_line, NO_DIALOGUE_EVENT);
 }
 
 
 
-void SpriteDialogue::AddOptionEvent(string text, uint32 event_id) {
+void MapDialogue::AddOptionEvent(string text, uint32 event_id) {
 	AddOptionEvent(text, COMMON_DIALOGUE_NEXT_LINE, event_id);
 }
 
 
 
-void SpriteDialogue::AddOptionEvent(string text, int32 next_line, uint32 event_id) {
+void MapDialogue::AddOptionEvent(string text, int32 next_line, uint32 event_id) {
 	if (_line_count == 0) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "Attempted to add an option to a dialogue with no lines" << endl;
 		return;
@@ -155,7 +198,7 @@ void SpriteDialogue::AddOptionEvent(string text, int32 next_line, uint32 event_i
 
 
 
-bool SpriteDialogue::Validate() {
+bool MapDialogue::Validate() {
 	if (CommonDialogue::Validate() == false) {
 		// The CommonDialogue::Validate() call will print the appropriate warning if debugging is enabled (common code debugging that is)
 		return false;
@@ -240,7 +283,7 @@ DialogueSupervisor::~DialogueSupervisor() {
 	_current_options = NULL;
 
 	// Delete all dialogues
-	for (map<uint32, SpriteDialogue*>::iterator i = _dialogues.begin(); i != _dialogues.end(); i++) {
+	for (map<uint32, MapDialogue*>::iterator i = _dialogues.begin(); i != _dialogues.end(); i++) {
 		delete i->second;
 	}
 	_dialogues.clear();
@@ -278,7 +321,7 @@ void DialogueSupervisor::Draw() {
 
 
 
-void DialogueSupervisor::AddDialogue(SpriteDialogue* dialogue) {
+void DialogueSupervisor::AddDialogue(MapDialogue* dialogue) {
 	if (dialogue == NULL) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "function received NULL argument" << endl;
 		return;
@@ -297,7 +340,7 @@ void DialogueSupervisor::AddDialogue(SpriteDialogue* dialogue) {
 
 
 void DialogueSupervisor::BeginDialogue(uint32 dialogue_id) {
-	SpriteDialogue* dialogue = GetDialogue(dialogue_id);
+	MapDialogue* dialogue = GetDialogue(dialogue_id);
 
 	if (dialogue == NULL) {
 		IF_PRINT_WARNING(COMMON_DEBUG) << "could not begin dialogue because none existed for id# " << dialogue_id << endl;
@@ -357,8 +400,8 @@ void DialogueSupervisor::EndDialogue() {
 
 
 
-SpriteDialogue* DialogueSupervisor::GetDialogue(uint32 dialogue_id) {
-	map<uint32, SpriteDialogue*>::iterator location = _dialogues.find(dialogue_id);
+MapDialogue* DialogueSupervisor::GetDialogue(uint32 dialogue_id) {
+	map<uint32, MapDialogue*>::iterator location = _dialogues.find(dialogue_id);
 	if (location == _dialogues.end()) {
 		return NULL;
 	}

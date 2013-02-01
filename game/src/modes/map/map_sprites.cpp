@@ -665,7 +665,7 @@ void MapSprite::UpdateDialogueStatus() {
 	_has_unseen_dialogue = false;
 
 	for (uint32 i = 0; i < _dialogue_references.size(); i++) {
-		SpriteDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[i]);
+		MapDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[i]);
 		if (dialogue == NULL) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "sprite: " << object_id << " is referencing unknown dialogue: " << _dialogue_references[i] << endl;
 			continue;
@@ -701,7 +701,7 @@ void MapSprite::IncrementNextDialogue() {
 		if (static_cast<uint16>(_next_dialogue) >= _dialogue_references.size())
 			_next_dialogue = 0;
 
-		SpriteDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[_next_dialogue]);
+		MapDialogue* dialogue = MapMode::CurrentInstance()->GetDialogueSupervisor()->GetDialogue(_dialogue_references[_next_dialogue]);
 		if (dialogue != NULL && dialogue->IsAvailable() == true) {
 			return;
 		}

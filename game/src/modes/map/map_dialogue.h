@@ -36,14 +36,63 @@ namespace hoa_map {
 namespace private_map {
 
 /** ****************************************************************************
+*** \brief A simple class used to define events that are launched from dialogues
+***
+*** Every line or option in a dialogue has the capability to launch any number of
+*** events. This class is used to manage all of that information.
+***
+*** \note This class is not related to the DialogueEvent class. That class is an event
+*** which begins a dialogue, whereas this class contains the data of events that may be
+*** launched from within an active dialogue.
+*** ***************************************************************************/
+class DialogueEventData {
+public:
+	DialogueEventData()
+		{}
+
+	~DialogueEventData()
+		{}
+
+	/** \brief Adds a new event to the container
+	*** \param event_id The ID of the event to add (must be non-zero)
+	*** \param launch_at_start If true, the event launches as soon as the line begins. Default value is false
+	*** \param launch_timing The number of milliseconds to wait before launching the event. Default value is zero
+	***
+	*** \note All events should be added via this method.
+	**/
+	void AddEvent(uint32 event_id, bool launch_at_start = false, uint32 launch_timing = 0);
+
+	/** \brief Processes all events, sending any events to activate to the launch supervisor
+	*** \param at_start If true, only events set to launch at start will be processed. If false, events set to launch at end will be processed
+	**/
+	void ProcessEvents(bool at_start);
+
+	/** \brief Examines all event ids to check that a corresponding event is constructed and registered with the event manager
+	*** \return True if no invalid events were found
+	**/
+	bool ValidateEvents();
+
+private:
+	//! \brief The list of ids for each events that should be launched for the dialogue piece
+	std::vector<uint32> _event_ids;
+
+	//! \brief Determines whether the event launches at the start or the end of the dialogue piece
+	std::vector<bool> _launches_at_start;
+
+	//! \brief The number of milliseconds to wait before launching the event. A zero value will launch the event immediately
+	std::vector<uint32> _launch_timings;
+}; // class DialogueEventData
+
+
+/** ****************************************************************************
 *** \brief Represents a dialogue that occurs between one or more sprites on a map
 *** ***************************************************************************/
-class SpriteDialogue : public hoa_common::CommonDialogue {
+class MapDialogue : public hoa_common::CommonDialogue {
 public:
 	//! \param id The id number to represent the dialogue, which should be unique to other dialogue ids within this map
-	SpriteDialogue(uint32 id);
+	MapDialogue(uint32 id);
 
-	~SpriteDialogue()
+	~MapDialogue()
 		{}
 
 	/** \brief Adds a new line of text to the dialogue
@@ -217,7 +266,7 @@ private:
 
 	//! \brief An optional MapEvent that may occur after each line is completed
 	std::vector<uint32> _events;
-}; // class SpriteDialogue : public hoa_common::CommonDialogue
+}; // class MapDialogue : public hoa_common::CommonDialogue
 
 
 /** ***************************************************************************************
@@ -317,7 +366,7 @@ public:
 	*** be later deleted when this class' destructor is invoked, so make sure you only pass in objects
 	*** that were created with the "new" operator.
 	**/
-	void AddDialogue(SpriteDialogue* dialogue);
+	void AddDialogue(MapDialogue* dialogue);
 
 	/** \brief Prepares the dialogue manager to begin processing a new dialogue
 	*** \param dialogue_id The id number of the dialogue to begin
@@ -331,14 +380,14 @@ public:
 	*** \param dialogue_id The identification number of the dialogue to retrieve
 	*** \return A pointer to the dialogue requested, or NULL if no such dialogue was found
 	**/
-	SpriteDialogue* GetDialogue(uint32 dialogue_id);
+	MapDialogue* GetDialogue(uint32 dialogue_id);
 
 	//! \name Class member access functions
 	//@{
 	DIALOGUE_STATE GetDialogueState() const
 		{ return _state; }
 
-	SpriteDialogue* GetCurrentDialogue() const
+	MapDialogue* GetCurrentDialogue() const
 		{ return _current_dialogue; }
 
 	MapDialogueOptions* GetCurrentOptions() const
@@ -356,10 +405,10 @@ private:
 	DIALOGUE_STATE _state;
 
 	//! \brief Contains all dialogues used in the map in a std::map structure. The dialogue IDs serve as the map keys
-	std::map<uint32, SpriteDialogue*> _dialogues;
+	std::map<uint32, MapDialogue*> _dialogues;
 
 	//! \brief A pointer to the current piece of dialogue that is active
-	SpriteDialogue* _current_dialogue;
+	MapDialogue* _current_dialogue;
 
 	//! \brief A pointer to the current set of options for the active dialogue line
 	MapDialogueOptions* _current_options;
