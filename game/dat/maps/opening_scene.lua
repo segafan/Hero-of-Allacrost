@@ -460,7 +460,7 @@ function InitialCreateDialogue()
 	local text;
 
 	-- Introduction Dialogue
-	dialogue = hoa_map.SpriteDialogue(10);
+	dialogue = hoa_map.MapDialogue(10);
 		dialogue:SetInputBlocked(true);
 		text = hoa_system.Translate("Behold, the barren desert that stretches out across the kingdom of Harrvah.");
 		dialogue:AddLineTimed(text, 100, 8000);
@@ -473,12 +473,12 @@ function InitialCreateDialogue()
 	DialogueManager:AddDialogue(dialogue);		
 	
 	-- Captain's orders after troop movement
-	dialogue = hoa_map.SpriteDialogue(20);
+	dialogue = hoa_map.MapDialogue(20);
 		text = hoa_system.Translate("Alright, listen up!");
 		dialogue:AddLine(text, 10);
 	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.SpriteDialogue(21);
+	dialogue = hoa_map.MapDialogue(21);
 		text = hoa_system.Translate("Our intelligence reports that somewhere in this cave, the underground river vein that supplies our city has been blocked. Our mission is to remove the obstruction and restore our water supply.");
 		dialogue:AddLine(text, 10);
 		text = hoa_system.Translate("I don't need to remind you all of how important this mission is. That monster of a storm has prevented us from achieving this objective sooner, and our local reserves of water are nearly dry. If we fail to succeed here, our people will perish.");
@@ -490,11 +490,11 @@ function InitialCreateDialogue()
 	DialogueManager:AddDialogue(dialogue);
 
 	-- Character party after captain's orders
-	dialogue = hoa_map.SpriteDialogue(30);
+	dialogue = hoa_map.MapDialogue(30);
 		text = hoa_system.Translate("Mark. Claudius. Let's go.");
 		dialogue:AddLine(text, 3);
 	DialogueManager:AddDialogue(dialogue);
-	dialogue = hoa_map.SpriteDialogue(31);
+	dialogue = hoa_map.MapDialogue(31);
 		text = hoa_system.Translate("The creatures that inhabit this cave are not friendly, so be on your guard at all times. Now let's get moving.");
 		dialogue:AddLine(text, 3);
 	DialogueManager:AddDialogue(dialogue);
@@ -992,13 +992,13 @@ function ReturnCreateDialogue()
 	local dialogue;
 	local text;
 
-	dialogue = hoa_map.SpriteDialogue(10);
+	dialogue = hoa_map.MapDialogue(10);
 		dialogue:SetInputBlocked(true);
 		text = hoa_system.Translate("I can't wait to get back home. Maybe now that the water supply is restored they'll finally let us take a shower. I've been covered in sand for days.");
 		dialogue:AddLineTimed(text, 1001, 8000);
 	DialogueManager:AddDialogue(dialogue);
 		
-	dialogue = hoa_map.SpriteDialogue(20);
+	dialogue = hoa_map.MapDialogue(20);
 		dialogue:SetInputBlocked(true);
 		text = hoa_system.Translate("That's odd, the sky is brighter in the direction of the city.");
 		dialogue:AddLineTimed(text, 2005, 4000);
@@ -1010,7 +1010,7 @@ function ReturnCreateDialogue()
 		dialogue:AddLineTimed(text, 1003, 4000);
 	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.SpriteDialogue(30);
+	dialogue = hoa_map.MapDialogue(30);
 		text = hoa_system.Translate("Sir!");
 		dialogue:AddLineTimed(text, 2009, 3000);
 		text = hoa_system.Translate("Catch your breath soldier. What's wrong?");
