@@ -460,25 +460,27 @@ function InitialCreateDialogue()
 	local text;
 
 	-- Introduction Dialogue
-	dialogue = hoa_map.MapDialogue(10);
+	dialogue = hoa_map.MapDialogue.Create(10);
 		dialogue:SetInputBlocked(true);
 		text = hoa_system.Translate("Behold, the barren desert that stretches out across the kingdom of Harrvah.");
-		dialogue:AddLineTimed(text, 100, 8000);
+		dialogue:AddLine(text, 100);
+		dialogue:AddLineTiming(8000);
 		text = hoa_system.Translate("The Harrvah Knights, though formidable in their great city of stone, were powerless against the might of this great desert.");
-		dialogue:AddLineTimed(text, 100, 8000);
+		dialogue:AddLine(text, 100);
+		dialogue:AddLineTiming(8000);
 		text = hoa_system.Translate("On this auspicious night, a large unit of knights is marching through the desert, making their way toward a cave a fair distance from the city walls.");
-		dialogue:AddLineTimed(text, 100, 8000);
+		dialogue:AddLine(text, 100);
+		dialogue:AddLineTiming(8000);
 		text = hoa_system.Translate("Although the great sand storms that had swept through the lands for the past several days had finally weakened, the winds still howled throughout the desert...");
-		dialogue:AddLineTimed(text, 100, 8000);
-	DialogueManager:AddDialogue(dialogue);		
-	
+		dialogue:AddLine(text, 100);
+		dialogue:AddLineTiming(8000);	
+
 	-- Captain's orders after troop movement
-	dialogue = hoa_map.MapDialogue(20);
+	dialogue = hoa_map.MapDialogue.Create(20);
 		text = hoa_system.Translate("Alright, listen up!");
 		dialogue:AddLine(text, 10);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(21);
+	dialogue = hoa_map.MapDialogue.Create(21);
 		text = hoa_system.Translate("Our intelligence reports that somewhere in this cave, the underground river vein that supplies our city has been blocked. Our mission is to remove the obstruction and restore our water supply.");
 		dialogue:AddLine(text, 10);
 		text = hoa_system.Translate("I don't need to remind you all of how important this mission is. That monster of a storm has prevented us from achieving this objective sooner, and our local reserves of water are nearly dry. If we fail to succeed here, our people will perish.");
@@ -487,17 +489,16 @@ function InitialCreateDialogue()
 		dialogue:AddLine(text, 10);
 		text = hoa_system.Translate("Now form your squads and get moving. I'll see you all underground.");
 		dialogue:AddLine(text, 10);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Character party after captain's orders
-	dialogue = hoa_map.MapDialogue(30);
+	dialogue = hoa_map.MapDialogue.Create(30);
 		text = hoa_system.Translate("Mark. Claudius. Let's go.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
-	dialogue = hoa_map.MapDialogue(31);
+
+	dialogue = hoa_map.MapDialogue.Create(31);
 		text = hoa_system.Translate("The creatures that inhabit this cave are not friendly, so be on your guard at all times. Now let's get moving.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
+
 end -- function InitialCreateDialogue()
 
 
@@ -992,32 +993,38 @@ function ReturnCreateDialogue()
 	local dialogue;
 	local text;
 
-	dialogue = hoa_map.MapDialogue(10);
+	dialogue = hoa_map.MapDialogue.Create(10);
 		dialogue:SetInputBlocked(true);
 		text = hoa_system.Translate("I can't wait to get back home. Maybe now that the water supply is restored they'll finally let us take a shower. I've been covered in sand for days.");
-		dialogue:AddLineTimed(text, 1001, 8000);
-	DialogueManager:AddDialogue(dialogue);
+		dialogue:AddLine(text, 1001);
+		dialogue:AddLineTiming(8000);
 		
-	dialogue = hoa_map.MapDialogue(20);
+	dialogue = hoa_map.MapDialogue.Create(20);
 		dialogue:SetInputBlocked(true);
 		text = hoa_system.Translate("That's odd, the sky is brighter in the direction of the city.");
-		dialogue:AddLineTimed(text, 2005, 4000);
+		dialogue:AddLine(text, 2005);
+		dialogue:AddLineTiming(4000);
 		text = hoa_system.Translate("I bet the citizens are out celebrating now that the water's returned. They're probably preparing to welcome us back as heroes!");
-		dialogue:AddLineTimed(text, 1001, 7000);
+		dialogue:AddLine(text, 1001);
+		dialogue:AddLineTiming(7000);
 		text = hoa_system.Translate("Maybe...but who would still be awake at this hour?");
-		dialogue:AddLineTimed(text, 1002, 3000);
+		dialogue:AddLine(text, 1002);
+		dialogue:AddLineTiming(3000);
 		text = hoa_system.Translate("Our scout should be returning soon, we'll find out then.");
-		dialogue:AddLineTimed(text, 1003, 4000);
-	DialogueManager:AddDialogue(dialogue);
+		dialogue:AddLine(text, 1003);
+		dialogue:AddLineTiming(4000);
 
-	dialogue = hoa_map.MapDialogue(30);
+	dialogue = hoa_map.MapDialogue.Create(30);
 		text = hoa_system.Translate("Sir!");
-		dialogue:AddLineTimed(text, 2009, 3000);
+		dialogue:AddLine(text, 2009);
+		dialogue:AddLineTiming(3000);
 		text = hoa_system.Translate("Catch your breath soldier. What's wrong?");
-		dialogue:AddLineTimed(text, 2000, 4000);
+		dialogue:AddLine(text, 2000);
+		dialogue:AddLineTiming(4000);
 		text = hoa_system.Translate("The city! *huff* The city...it's ablaze!");
-		dialogue:AddLineTimedEvent(text, 2009, 3000, 310);
-	DialogueManager:AddDialogue(dialogue);
+		dialogue:AddLine(text, 2009);
+		dialogue:AddLineTiming(3000);
+		dialogue:AddLineEventAtEnd(310);
 end
 
 

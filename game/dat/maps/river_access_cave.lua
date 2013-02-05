@@ -1087,61 +1087,52 @@ function CreateDialogue()
 	----------------------------------------------------------------------------
 	---------- Dialogues that are attached to characters
 	----------------------------------------------------------------------------
-	dialogue = hoa_map.MapDialogue(10);
+	dialogue = hoa_map.MapDialogue.Create(10);
 		text = hoa_system.Translate("Watch your step and keep moving. It's not far to the river bed.");
 		dialogue:AddLine(text, 10);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(11);
+	dialogue = hoa_map.MapDialogue.Create(11);
 		text = hoa_system.Translate("She's terrified and won't budge.");
 		dialogue:AddLine(text, 11);
 		text = hoa_system.Translate("For being such large animals, Mak hounds sure can act cowardly.");
 		dialogue:AddLine(text, 2);
 		text = hoa_system.Translate("Go on ahead. We'll catch up when we get her moving again.");
 		dialogue:AddLine(text, 11);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(20);
+	dialogue = hoa_map.MapDialogue.Create(20);
 		text = hoa_system.Translate("The river bed is just through this passage. Be careful, the walls are a little unstable.");
 		dialogue:AddLine(text, 2004);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- After the passage collapse event, this dialogue is added to the knight guide
-	dialogue = hoa_map.MapDialogue(21);
+	dialogue = hoa_map.MapDialogue.Create(21);
 		text = hoa_system.Translate("I'll direct everyone remaining to take the longer route.");
 		dialogue:AddLine(text, 2004);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(30);
+	dialogue = hoa_map.MapDialogue.Create(30);
 		text = hoa_system.Translate("Dammit, ow ow ow...");
 		dialogue:AddLine(text, 2008);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(31);
+	dialogue = hoa_map.MapDialogue.Create(31);
 		text = hoa_system.Translate("He sprained his ankle on a loose rock so we're treating his injury. Move on ahead, you're almost there.");
 		dialogue:AddLine(text, 2009);
-	DialogueManager:AddDialogue(dialogue);
 
 	----------------------------------------------------------------------------
 	---------- Dialogues that are triggered by events
 	----------------------------------------------------------------------------
 	-- Event: Entering the cave
-	dialogue = hoa_map.MapDialogue(100);
+	dialogue = hoa_map.MapDialogue.Create(100);
 		text = hoa_system.Translate("Claudius. I want you to lead us down to the riverbed.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(101);
+	dialogue = hoa_map.MapDialogue.Create(101);
 		text = hoa_system.Translate("Woah, wait a damn minute Lukar! Why are you putting a rookie like him in charge?");
 		dialogue:AddLine(text, 2);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(102);
+	dialogue = hoa_map.MapDialogue.Create(102);
 		text = hoa_system.Translate("Relax, Mark. It's not like I'm going to let him lead us off a cliff. This is the best way for him to get experience.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(103);
+	dialogue = hoa_map.MapDialogue.Create(103);
 		text = hoa_system.Translate("Claudius, I realize that this is your first real mission as a knight. If you're not up to this task, that's okay.");
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("No, I can do it. I won't lead us astray.");
@@ -1150,17 +1141,15 @@ function CreateDialogue()
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("Tcsh. Just try not to get us all killed, okay rookie?");
 		dialogue:AddLine(text, 2);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(104);
+	dialogue = hoa_map.MapDialogue.Create(104);
 		text = hoa_system.Translate("Use the [ARROW KEYS] to walk around. You can hold down two orthogonal keys to move diagonally.");
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("Hold down the [CANCEL] key while moving to run. Running drains stamina, however, so you can't run for more than a short period of time. The stamina meter in the lower right corner of the screen shows you how much stamina you have remaining. Once you stop running, stamina will gradually accumulate until the meter is full again.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: First battle encounter
-	dialogue = hoa_map.MapDialogue(110);
+	dialogue = hoa_map.MapDialogue.Create(110);
 		text = hoa_system.Translate("Wait, look up ahead. There's an enemy in our way.");
 		dialogue:AddLine(text, 2);
 		text = hoa_system.Translate("A battle will occur whenever you and an enemy collide. Sometimes you can avoid a battle by sneaking past or running by an enemy before it has a chance to engage you. But if it catches you and you enter a battle, you can no longer run away. At that point you must defeat your opponent before they defeat you.");
@@ -1169,10 +1158,9 @@ function CreateDialogue()
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("Yeah rookie, let's see how useful you are in a real fight.");
 		dialogue:AddLine(text, 2);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: After first battle victory
-	dialogue = hoa_map.MapDialogue(120);
+	dialogue = hoa_map.MapDialogue.Create(120);
 		text = hoa_system.Translate("Nicely done. After a battle ends you'll have a short moment of invulnerability to get away from any other enemies that may be roaming nearby. If you are surrounded by multiple foes when a battle begins, be ready to make a break for it as soon as the battle ends if you don't want to keep fighting.");
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("Or, you can not be a dumbass and get yourself surrounded in the first place.");
@@ -1183,10 +1171,9 @@ function CreateDialogue()
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("Ah, one more thing. You can access the party menu by pressing the [MENU] key while on a map. You won't be able to access this menu when a dialogue is taking place nor during a scene that is occuring on the map. In the party menu you can heal your characters, change out your equipment, and check out other information.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: Encountering first NPCs in the cave
-	dialogue = hoa_map.MapDialogue(130);
+	dialogue = hoa_map.MapDialogue.Create(130);
 		text = hoa_system.Translate("Hold. There are some friendly units up ahead. Characters that have information to share will have a small icon appear above them. As you get closer to the character, the icon will gradually appear. Stand facing a character and hit the [CONFIRM] key to hear what they have to say.");
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("Note that a character may have more than one piece of information to share, or may have something new to say after a particular event has occurred. The icon will look differently if the character has dialogue that you have not seen before.");
@@ -1195,87 +1182,77 @@ function CreateDialogue()
 		dialogue:AddLine(text, 1);
 		text = hoa_system.Translate("Look out, boys. We got a regular genius over here. Maybe you should have become a scholar instead of a knight.");
 		dialogue:AddLine(text, 2);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: Discovery of corpse in south east part of cave
-	dialogue = hoa_map.MapDialogue(140);
+	dialogue = hoa_map.MapDialogue.Create(140);
 		text = hoa_system.Translate("A corpse. That's always a reassuring find in a place like this.");
 		dialogue:AddLine(text, 2);
 		text = hoa_system.Translate("Hey, I think I see something under its hand.");
 		dialogue:AddLine(text, 1);
 		text = hoa_system.Translate("Good eye, Claudius. Go near it and press the [CONFIRM] key to acquire the item.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(141);
+	dialogue = hoa_map.MapDialogue.Create(141);
 		text = hoa_system.Translate("Hidden objects will glimmer periodically like we just saw.");
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("Be vigilant when you are exploring a new area and look around for such hidden treasures.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: Player tries to go long route before short route
-	dialogue = hoa_map.MapDialogue(150);
+	dialogue = hoa_map.MapDialogue.Create(150);
 		text = hoa_system.Translate("Hey! Over here!");
 		dialogue:AddLine(text, 20);
-	DialogueManager:AddDialogue(dialogue);
 	
 	-- Event: As passage is collapsing
-	dialogue = hoa_map.MapDialogue(160);
+	dialogue = hoa_map.MapDialogue.Create(160);
 		text = hoa_system.Translate("Look out!");
-		dialogue:AddLineTimed(text, 3, 1000);
-	DialogueManager:AddDialogue(dialogue);
+		dialogue:AddLine(text, 3);
+		dialogue:AddLineTiming(1000);
 
 	-- Event: After passage collapse occurs
-	dialogue = hoa_map.MapDialogue(161);
+	dialogue = hoa_map.MapDialogue.Create(161);
 		text = hoa_system.Translate("Woah! Are you guys alright?");
 		dialogue:AddLine(text, 20);
 		text = hoa_system.Translate("We're all fine. But the passage has caved in.");
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("There's another way around, although it's a longer route. Follow me.");
 		dialogue:AddLine(text, 20);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: Stopping player from trying to proceed to lower levels of the cave
-	dialogue = hoa_map.MapDialogue(170);
+	dialogue = hoa_map.MapDialogue.Create(170);
 		text = hoa_system.Translate("Wait. This path looks like it leads down into the earth. The area we're trying to reach likely isn't down there. Let's head another direction..");
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("Good. Who knows what could be lurking in the darkness down there..");
 		dialogue:AddLine(text, 2);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: While crossing the narrow bridge between the two pits after hearing an evil hiss
-	dialogue = hoa_map.MapDialogue(180);
+	dialogue = hoa_map.MapDialogue.Create(180);
 		text = hoa_system.Translate("Did you hear that? What the hell was that sound?");
 		dialogue:AddLine(text, 1);
 		text = hoa_system.Translate("I don't know, but I've got a bad feeling about this mission.");
 		dialogue:AddLine(text, 2);
 		text = hoa_system.Translate("Well the sooner we achieve our objective, the sooner we get out of here and go home. So move your ass instead of your mouth.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: Encountering the pool of running water near the end of the cave
-	dialogue = hoa_map.MapDialogue(190);
+	dialogue = hoa_map.MapDialogue.Create(190);
 		text = hoa_system.Translate("Hey check it out. The water is still running here.");
 		dialogue:AddLine(text, 2);
 		text = hoa_system.Translate("That's a good sign. The river obstruction must be close.");
 		dialogue:AddLine(text, 3);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: Player reaches dry river bed
-	dialogue = hoa_map.MapDialogue(200);
+	dialogue = hoa_map.MapDialogue.Create(200);
 		text = hoa_system.Translate("Finally made it.");
 		dialogue:AddLine(text, 2);
-	DialogueManager:AddDialogue(dialogue);
 	
-	dialogue = hoa_map.MapDialogue(201);
+	dialogue = hoa_map.MapDialogue.Create(201);
 		text = hoa_system.Translate("Listen up! There's a large boulder obstructing the underground river that flows through here. When we move it aside, we get to head out of this place.");
 		dialogue:AddLine(text, 2500);
 		text = hoa_system.Translate("Mikal! Torren! Take your units and secure the ropes around that overgrown rock. Jasper's unit will prepare the Maks to help us move it. The rest of you stay alert and watch our backs. Who knows what the hell may be in this cave with us.");
 		dialogue:AddLine(text, 2500);
-	DialogueManager:AddDialogue(dialogue);
 
-	dialogue = hoa_map.MapDialogue(202);
+	dialogue = hoa_map.MapDialogue.Create(202);
 		text = hoa_system.Translate("Hey, I heard that noise earlier. It sounds like its closer now.");
 		dialogue:AddLine(text, 2505);
 		text = hoa_system.Translate("Keep your eyes peeled and your swords ready men.");
@@ -1284,17 +1261,15 @@ function CreateDialogue()
 		dialogue:AddLine(text, 1002);
 		text = hoa_system.Translate("Over there! Watch out!");
 		dialogue:AddLine(text, 1000);
-	DialogueManager:AddDialogue(dialogue);
 
 	-- Event: After boss battle
-	dialogue = hoa_map.MapDialogue(210);
+	dialogue = hoa_map.MapDialogue.Create(210);
 		text = hoa_system.Translate("Damnit, the captain's been wounded along with half our troops.");
 		dialogue:AddLine(text, 1);
 		text = hoa_system.Translate("*cough cough*\nI'll be alright. Great job taking down that monster men, I'm proud.");
 		dialogue:AddLine(text, 2500);
 		text = hoa_system.Translate("We've achieved our objective here. Tend to the wounded and then let's make our way back home.");
 		dialogue:AddLine(text, 2500);
-	DialogueManager:AddDialogue(dialogue);
 end -- function CreateDialogue()
 
 

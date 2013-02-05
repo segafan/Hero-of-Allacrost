@@ -45,12 +45,12 @@ namespace private_map {
 *** which begins a dialogue, whereas this class contains the data of events that may be
 *** launched from within an active dialogue.
 *** ***************************************************************************/
-class DialogueEventData {
+class MapDialogueEventData {
 public:
-	DialogueEventData()
+	MapDialogueEventData()
 		{}
 
-	~DialogueEventData()
+	~MapDialogueEventData()
 		{}
 
 	/** \brief Adds a new event to the container
@@ -65,12 +65,12 @@ public:
 	/** \brief Processes all events, sending any events to activate to the launch supervisor
 	*** \param at_start If true, only events set to launch at start will be processed. If false, events set to launch at end will be processed
 	**/
-	void ProcessEvents(bool at_start);
+	void ProcessEvents(bool at_start) const;
 
 	/** \brief Examines all event ids to check that a corresponding event is constructed and registered with the event manager
 	*** \return True if no invalid events were found
 	**/
-	bool ValidateEvents();
+	bool ValidateEvents() const;
 
 private:
 	//! \brief The list of ids for each events that should be launched for the dialogue piece
@@ -81,7 +81,7 @@ private:
 
 	//! \brief The number of milliseconds to wait before launching the event. A zero value will launch the event immediately
 	std::vector<uint32> _launch_timings;
-}; // class DialogueEventData
+}; // class MapDialogueEventData
 
 
 /** ****************************************************************************
@@ -89,18 +89,21 @@ private:
 *** ***************************************************************************/
 class MapDialogue : public hoa_common::CommonDialogue {
 public:
-	//! \param id The id number to represent the dialogue, which should be unique to other dialogue ids within this map
-	MapDialogue(uint32 id);
-
 	~MapDialogue()
 		{}
+
+	/** \brief Creates an instance of the class and registers it with the dialogue supervisor
+	*** \param event_id The unique ID of the dialogue to be created
+	*** \return A pointer to the instance of the event created
+	**/
+	static MapDialogue* Create(uint32 id);
 
 	/** \brief Adds a new line of text to the dialogue
 	*** \param text The text to show on the screen
 	*** \param speaker The object ID of the sprite speaking this line
 	***
 	*** The following line properties are set when using this call:
-	*** - proceed to next sequential line, no display time, no event
+	*** - proceed to next sequential line, no display time
 	**/
 	void AddLine(std::string text, uint32 speaker);
 
@@ -110,78 +113,49 @@ public:
 	*** \param next_line The line of dialogue which should follow this one
 	***
 	*** The following line properties are set when using this call:
-	*** - no display time, no event
+	*** - no display time
 	**/
 	void AddLine(std::string text, uint32 speaker, int32 next_line);
 
-	/** \brief Adds a new line of text to the dialogue that uses a display time
-	*** \param text The text to show on the screen
-	*** \param speaker The object ID of the sprite speaking this line
+	/** \brief Sets a a display time for the last line of dialogue added
 	*** \param display_time The number of milliseconds that the line should be displayed for
-	***
-	*** The following line properties are set when using this call:
-	*** - proceed to next sequential line, no event
 	**/
-	void AddLineTimed(std::string text, uint32 speaker, uint32 display_time);
+	void AddLineTiming(uint32 display_time);
 
-	/** \brief Adds a new line of text to the dialogue that uses a display time
-	*** \param text The text to show on the screen
-	*** \param speaker The object ID of the sprite speaking this line
-	*** \param next_line The line of dialogue which should follow this one
+	/** \brief Sets a a display time for a specific line of dialogue
 	*** \param display_time The number of milliseconds that the line should be displayed for
-	***
-	*** The following line properties are set when using this call:
-	*** - no event
+	*** \param line The index of the line to set the timing for
 	**/
-	void AddLineTimed(std::string text, uint32 speaker, int32 next_line, uint32 display_time);
+	void AddLineTiming(uint32 display_time, uint32 line);
 
-	/** \brief Adds a new line of text to the dialogue that uses a map event
-	*** \param text The text to show on the screen
-	*** \param speaker The object ID of the sprite speaking this line
-	*** \param event_id The ID of the event to execute after this line finishes
-	***
-	*** The following line properties are set when using this call:
-	*** - proceed to next sequential line, no display time
+	/** \brief Adds an event to the most recently added line of text that will be launched when the line begins
+	*** \param event_id The ID of the event to add
 	**/
-	void AddLineEvent(std::string text, uint32 speaker, uint32 event_id);
+	void AddLineEventAtStart(uint32 event_id);
 
-	/** \brief Adds a new line of text to the dialogue that uses a map event
-	*** \param text The text to show on the screen
-	*** \param speaker The object ID of the sprite speaking this line
-	*** \param next_line The line of dialogue which should follow this one
-	*** \param display_time The number of milliseconds that the line should be displayed for
-	***
-	*** The following line properties are set when using this call:
-	*** - no event
+	/** \brief Adds an event to the most recently added line of text that will be launched when the line begins
+	*** \param event_id The ID of the event to add
+	*** \param delay_ms The number of milliseconds to wait after the line begins before launching the event. Should be non-zero
 	**/
-	void AddLineEvent(std::string text, uint32 speaker, int32 next_line, uint32 event_id);
+	void AddLineEventAtStart(uint32 event_id, uint32 delay_ms);
 
-	/** \brief Adds a new line of text to the dialogue that uses a map event
-	*** \param text The text to show on the screen
-	*** \param speaker The object ID of the sprite speaking this line
-	*** \param display_time The number of milliseconds that the line should be displayed for
-	*** \param event_id The ID of the event to execute after this line finishes
-	***
-	*** The following line properties are set when using this call:
-	*** - proceed to next sequential line
+	/** \brief Adds an event to the most recently added line of text that will be launched when the line ends
+	*** \param event_id The ID of the event to add
 	**/
-	void AddLineTimedEvent(std::string text, uint32 speaker, uint32 display_time, uint32 event_id);
+	void AddLineEventAtEnd(uint32 event_id);
 
-	/** \brief Adds a new line of text to the dialogue that uses a map event
-	*** \param text The text to show on the screen
-	*** \param speaker The object ID of the sprite speaking this line
-	*** \param next_line The line of dialogue which should follow this one
-	*** \param display_time The number of milliseconds that the line should be displayed for
-	*** \param event_id The ID of the event to execute after this line finishes
+	/** \brief Adds an event to the most recently added line of text that will be launched when the line ends
+	*** \param event_id The ID of the event to add
+	*** \param delay_ms The number of milliseconds to wait after the line ends before launching the event. Should be non-zero
 	**/
-	void AddLineTimedEvent(std::string text, uint32 speaker, int32 next_line, uint32 display_time, uint32 event_id);
+	void AddLineEventAtEnd(uint32 event_id, uint32 delay_ms);
 
 	/** \brief Adds an option to the most recently added line of text
 	*** \param text The text for this particular option
 	*** \note If no lines have been added to the dialogue yet, this option will not be added and a warning will be issued
 	***
 	*** The following option properties are set when using this call:
-	*** - proceed to next sequential line, no event
+	*** - proceed to next sequential line
 	**/
 	void AddOption(std::string text);
 
@@ -189,54 +163,41 @@ public:
 	*** \param text The text for this particular option
 	*** \param next_line The index value of the next line of dialogue to display should this option be selected
 	*** \note If no lines have been added to the dialogue yet, this option will not be added and a warning will be issued
-	***
-	*** The following option properties are set when using this call:
-	*** - no event
 	**/
 	void AddOption(std::string text, int32 next_line);
 
-	/** \brief Adds an option to the most recently added line of text
-	*** \param text The text for this particular option
+	/** \brief Adds an event to the most recently added option
 	*** \param event_id The ID of the event to execute should this option be selected
-	*** \note If no lines have been added to the dialogue yet, this option will not be added and a warning will be issued
-	***
-	*** The following option properties are set when using this call:
-	*** - proceed to next sequential line
 	**/
-	void AddOptionEvent(std::string text, uint32 event_id);
+	void AddOptionEvent(uint32 event_id);
 
-	/** \brief Adds an option to the most recently added line of text
-	*** \param text The text for this particular option
-	*** \param next_line The index value of the next line of dialogue to display should this option be selected
+	/** \brief Adds an event to the most recently added option
 	*** \param event_id The ID of the event to execute should this option be selected
-	*** \note If no lines have been added to the dialogue yet, this option will not be added and a warning will be issued
+	*** \param delay_ms The number of milliseconds to wait after the option is selected before launching the event. Should be non-zero
 	**/
-	void AddOptionEvent(std::string text, int32 next_line, uint32 event_id);
+	void AddOptionEvent(uint32 event_id, uint32 delay_ms);
 
 	/** \brief Checks all the data stored by the dialogue class to ensure that it is acceptable and ready for use
 	*** \return True if the validation was successful, false if any problems were discovered
 	***
-	*** \note This function should not be called until after all map sprites have been added. The function checks that each
+	*** \note This function should not be called until after all map sprites and map events have been added. The function checks that each
 	*** speaker is valid and stored in the map's object list, so if you perform this check before you've added all the speakers
 	*** to the object list of MapMode, the validation will fail.
 	**/
 	bool Validate();
 
-	//! \name Methods for retrieving properties of a specific line
-	//@{
 	//! \brief Returns the object ID of the speaker for the line specified (or zero if the line index was invalid)
 	uint32 GetLineSpeaker(uint32 line) const
 		{ if (line >= _line_count) return 0; else return _speakers[line]; }
 
-	//! \brief Returns the ID of the event to execute for the line specified (or zero if the line index was invalid)
-	uint32 GetLineEvent(uint32 line) const
-		{ if (line >= _line_count) return 0; else return _events[line]; }
-	//@}
+	//! \brief Returns the event data for the line specified (NULL if the line index was invalid)
+	MapDialogueEventData* GetLineEventData(uint32 line)
+		{ return (line >= _line_count) ? NULL : &_line_events[line]; }
 
 	//! \name Class Member Access Functions
 	//@{
-	std::string GetEventName() const
-		{ return _event_name; }
+	std::string GetDialogueName() const
+		{ return _dialogue_name; }
 
 	bool IsInputBlocked() const
 		{ return _input_blocked; }
@@ -251,7 +212,10 @@ public:
 		{ _restore_state = restore; }
 	//@}
 
-private:
+protected:
+	//! \param id The id number to represent the dialogue, which should be unique to other dialogue ids within this map
+	MapDialogue(uint32 id);
+
 	//! \brief If true, dialogue will ignore user input and instead execute independently
 	bool _input_blocked;
 
@@ -259,13 +223,13 @@ private:
 	bool _restore_state;
 
 	//! \brief The event name for this dialogue that is stored in the saved game file, of the form "dialogue#"
-	std::string _event_name;
+	std::string _dialogue_name;
 
 	//! \brief Contains object ID numbers that declare the speaker of each line
 	std::vector<uint32> _speakers;
 
-	//! \brief An optional MapEvent that may occur after each line is completed
-	std::vector<uint32> _events;
+	//! \brief Maintains the list of map events that may activate after each line of the dialogue
+	std::vector<MapDialogueEventData> _line_events;
 }; // class MapDialogue : public hoa_common::CommonDialogue
 
 
@@ -302,35 +266,28 @@ public:
 	**/
 	void AddOption(std::string text, int32 next_line);
 
-	/** \brief Adds a new option to the set of options with the addition of a map event to be executed
-	*** \param text The text for the new option
-	*** \param event_id The ID of the event to execute should this option be selected
-	***
-	*** The following option properties are set when using this call:
-	*** - proceed to next sequential line
-	**/
-	void AddOptionEvent(std::string text, uint32 event_id);
-
-	/** \brief Adds a new option to the set of options with the addition of a map event to be executed
-	*** \param text The text for the new option
-	*** \param next_line An integer index of the next line of dialogue should this option be selected.
+	/** \brief Adds an event to the most recently added option
 	*** \param event_id The ID of the event to execute should this option be selected
 	**/
-	void AddOptionEvent(std::string text, int32 next_line, uint32 event_id);
+	void AddOptionEvent(uint32 event_id);
 
-	//! \name Methods for retrieving properties of a specific line
-	//@{
-	uint32 GetOptionEvent(uint32 option) const
-		{ if (option >= GetNumberOptions()) return 0; else return _events[option]; }
-	//@}
+	/** \brief Adds an event to the most recently added option
+	*** \param event_id The ID of the event to execute should this option be selected
+	*** \param delay_ms The number of milliseconds to wait after the option is selected before launching the event. Should be non-zero
+	**/
+	void AddOptionEvent(uint32 event_id, uint32 delay_ms);
 
 	//! \brief Returns the number of options stored by this class
 	uint32 GetNumberOptions() const
 		{ return _text.size(); }
 
+	//! \brief Returns the event data for a particular option (returns NULL if the option index was invalid)
+	MapDialogueEventData* GetOptionEventData(uint32 option)
+		{ return (option >= _option_events.size()) ? NULL : &_option_events[option]; }
+
 private:
 	//! \brief An optional MapEvent that may occur as a result of selecting each option
-	std::vector<uint32> _events;
+	std::vector<MapDialogueEventData> _option_events;
 }; // class MapDialogueOptions : public hoa_common::CommonDialogueOptions
 
 
@@ -366,7 +323,7 @@ public:
 	*** be later deleted when this class' destructor is invoked, so make sure you only pass in objects
 	*** that were created with the "new" operator.
 	**/
-	void AddDialogue(MapDialogue* dialogue);
+	void RegisterDialogue(MapDialogue* dialogue);
 
 	/** \brief Prepares the dialogue manager to begin processing a new dialogue
 	*** \param dialogue_id The id number of the dialogue to begin
