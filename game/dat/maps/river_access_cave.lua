@@ -763,10 +763,6 @@ function CreateCharacters()
 	knight_talk_sprite = {};
 	local sprite;
 
---	claudius = ConstructSprite("Claudius", 1, 10, 217);
---	claudius:SetDirection(hoa_map.MapMode.NORTH);
---	Map:AddGroundObject(claudius);
-
 	-- Squad #1: Playable character sprites
 	sprites["claudius"] = ConstructSprite("Claudius", 1, 11, 227);
 	sprites["claudius"]:SetDirection(hoa_map.MapMode.NORTH);
@@ -1094,7 +1090,7 @@ function CreateDialogue()
 	dialogue = hoa_map.MapDialogue.Create(11);
 		text = hoa_system.Translate("She's terrified and won't budge.");
 		dialogue:AddLine(text, 11);
-		text = hoa_system.Translate("For being such large animals, Mak hounds sure can act cowardly.");
+		text = hoa_system.Translate("For such large animals, Mak hounds sure can be cowardly.");
 		dialogue:AddLine(text, 2);
 		text = hoa_system.Translate("Go on ahead. We'll catch up when we get her moving again.");
 		dialogue:AddLine(text, 11);
@@ -1129,7 +1125,7 @@ function CreateDialogue()
 		dialogue:AddLine(text, 2);
 
 	dialogue = hoa_map.MapDialogue.Create(102);
-		text = hoa_system.Translate("Relax, Mark. It's not like I'm going to let him lead us off a cliff. This is the best way for him to get experience.");
+		text = hoa_system.Translate("Relax, Mark. This is the best way for him to get experience.");
 		dialogue:AddLine(text, 3);
 
 	dialogue = hoa_map.MapDialogue.Create(103);
@@ -1145,30 +1141,36 @@ function CreateDialogue()
 	dialogue = hoa_map.MapDialogue.Create(104);
 		text = hoa_system.Translate("Use the [ARROW KEYS] to walk around. You can hold down two orthogonal keys to move diagonally.");
 		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Hold down the [CANCEL] key while moving to run. Running drains stamina, however, so you can't run for more than a short period of time. The stamina meter in the lower right corner of the screen shows you how much stamina you have remaining. Once you stop running, stamina will gradually accumulate until the meter is full again.");
+		text = hoa_system.Translate("Hold down the [CANCEL] key while moving to run. Running drains stamina, so you can only run for a short period of time. The stamina meter in the lower right corner of the screen shows you how much stamina you have remaining. Once you stop running, stamina will gradually accumulate until the meter is full again.");
 		dialogue:AddLine(text, 3);
 
 	-- Event: First battle encounter
 	dialogue = hoa_map.MapDialogue.Create(110);
-		text = hoa_system.Translate("Wait, look up ahead. There's an enemy in our way.");
+		text = hoa_system.Translate("Wait, look up ahead.");
 		dialogue:AddLine(text, 2);
-		text = hoa_system.Translate("A battle will occur whenever you and an enemy collide. Sometimes you can avoid a battle by sneaking past or running by an enemy before it has a chance to engage you. But if it catches you and you enter a battle, you can no longer run away. At that point you must defeat your opponent before they defeat you.");
+
+	dialogue = hoa_map.MapDialogue.Create(111);
+		text = hoa_system.Translate("There's an enemy in our way.");
+		dialogue:AddLine(text, 2);
+		text = hoa_system.Translate("A battle occurs whenever you and an enemy collide. Sometimes you can avoid a battle by sneaking past or running by an enemy before it has a chance to engage you. When you enter a battle you can no longer run away. At that point you must defeat your opponent before they defeat you.");
 		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("That enemy doesn't appear to be much of a threat, so instead of running let it engage us. I want to make sure you remember how a knight does battle.");
+		text = hoa_system.Translate("That enemy doesn't appear to be much of a threat. Instead of running let it engage us. I want to make sure you remember how a knight does battle.");
 		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Yeah rookie, let's see how useful you are in a real fight.");
+		text = hoa_system.Translate("Let's see how useful you are in a real fight, rookie.");
 		dialogue:AddLine(text, 2);
 
 	-- Event: After first battle victory
 	dialogue = hoa_map.MapDialogue.Create(120);
 		text = hoa_system.Translate("Nicely done. After a battle ends you'll have a short moment of invulnerability to get away from any other enemies that may be roaming nearby. If you are surrounded by multiple foes when a battle begins, be ready to make a break for it as soon as the battle ends if you don't want to keep fighting.");
 		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Or, you can not be a dumbass and get yourself surrounded in the first place.");
+		text = hoa_system.Translate("Or you can not get yourself surrounded in the first place like a dumbass.");
 		dialogue:AddLine(text, 2);
 		text = hoa_system.Translate("Well, Mark is correct even though he could have phrased that better.");
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("You must also be careful as sometimes an enemy will re-spawn after a short period of time, so don't sit around thinking that you're out of danger. Other times an enemy that is defeated will not appear again. It appears that the enemy we just defeated will not respawn.");
 		dialogue:AddLine(text, 3);
+
+	dialogue = hoa_map.MapDialogue.Create(121);
 		text = hoa_system.Translate("Ah, one more thing. You can access the party menu by pressing the [MENU] key while on a map. You won't be able to access this menu when a dialogue is taking place nor during a scene that is occuring on the map. In the party menu you can heal your characters, change out your equipment, and check out other information.");
 		dialogue:AddLine(text, 3);
 
@@ -1327,6 +1329,20 @@ function CreateEvents()
 	event = hoa_map.CustomEvent.Create(26, "EndOpeningScene", "");
 
 	----- Event Chain 02: First enemy encounter
+	event = hoa_map.DialogueEvent.Create(30, 120);
+	event:AddEventLinkAtStart(31);
+	event = hoa_map.CustomEvent.Create(31, "SpawnFirstEnemy", "");
+	event:AddEventLinkAtEnd(32, 500);
+	event = hoa_map.DialogueEvent.Create(32, 121);
+	event:AddEventLinkAtEnd(33);
+	event = hoa_map.CustomEvent.Create(33, "EngageFirstEnemy", "");
+	event:AddEventLinkAtEnd(34);
+	-- Follow-up dialogue begins immediately after the battle ends
+	event = hoa_map.DialogueEvent.Create(34, 130);
+	event:AddEventLinkAtEnd(35, 750);
+	event = hoa_map.DialgueEvent.Create(35, 131);
+
+	-- Event Chain 03: 
 
 --[[
 	-- Event Chain 01: Discovery of corpse in cave
@@ -1569,6 +1585,17 @@ functions["EndOpeningScene"] = function()
 	sprites["claudius"]:SetNoCollision(false);
 	Map:PopState();
 end
+
+
+functions["SpawnFirstEnemy"] = function()
+
+end
+
+
+functions["EngageFirstEnemy"] = function()
+
+end
+
 
 
 -- Stop camera sprite and enter scene state
