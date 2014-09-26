@@ -86,7 +86,7 @@ BootMode::BootMode() :
 	_copyright_text.SetText(UTranslate("© 2004 — 2013 The Allacrost Project"));
 
 	ReadScriptDescriptor read_data;
-	if (!read_data.OpenFile("dat/config/boot.lua")) {
+	if (!read_data.OpenFile("lua/data/config/boot.lua")) {
 		PRINT_ERROR << "failed to load boot data file" << endl;
 	}
 
@@ -1643,7 +1643,7 @@ bool BootMode::_SaveSettingsFile(const std::string& filename) {
 
 	//copy the default file so we have an already set up lua file and then we can modify its settings
 	if (!DoesFileExist(file))
-		CopyFile(string("dat/config/settings.lua"), file);
+		CopyFile(string("lua/data/config/settings.lua"), file);
 
 	ModifyScriptDescriptor settings_lua;
 	if (!settings_lua.OpenFile(file)) {

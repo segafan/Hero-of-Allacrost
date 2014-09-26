@@ -395,7 +395,7 @@ void MapMode::_Load() {
 	}
 
 	// Determine the map's tablespacename and then open it. The tablespace is the name of the map file without
-	// file extension or path information (for example, 'dat/maps/demo.lua' has a tablespace name of 'demo').
+	// file extension or path information (for example, 'lua/data/maps/demo.lua' has a tablespace name of 'demo').
 	int32 period = _map_filename.find(".");
 	int32 last_slash = _map_filename.find_last_of("/");
 	_map_tablespace = _map_filename.substr(last_slash + 1, period - (last_slash + 1));

@@ -52,7 +52,7 @@ QString Tileset::CreateImageFilename(const QString& tileset_name)
 
 QString Tileset::CreateDataFilename(const QString& tileset_name)
 {
-	return QString("dat/tilesets/" + tileset_name + ".lua");
+	return QString("lua/data/tilesets/" + tileset_name + ".lua");
 } // Tileset::CreateDataFilename(...)
 
 

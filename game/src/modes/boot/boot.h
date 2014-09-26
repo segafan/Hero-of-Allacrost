@@ -37,7 +37,7 @@ extern bool BOOT_DEBUG;
 //! \brief An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_boot {
 
-const std::string _LANGUAGE_FILE = "dat/config/languages.lua";
+const std::string _LANGUAGE_FILE = "lua/data/config/languages.lua";
 
 //! \brief Various states that boot mode may be in
 enum BOOT_STATE {

@@ -296,7 +296,7 @@ string ReadScriptDescriptor::OpenTablespace() {
 		return string();
 	}
 
-	// Extract the tablespace name from the filename. For example, 'dat/maps/demo.lua' has a tablespace name of 'demo')\.
+	// Extract the tablespace name from the filename. For example, 'lua/data/maps/demo.lua' has a tablespace name of 'demo')\.
 	uint32 period = _filename.find(".");
 	uint32 last_slash = _filename.find_last_of("/");
 	string tablespace = _filename.substr(last_slash + 1, period - (last_slash + 1));

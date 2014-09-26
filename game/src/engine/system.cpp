@@ -269,7 +269,7 @@ bool SystemEngine::SingletonInitialize() {
 		textdomain("allacrost");
 	#elif (defined(__linux__) || defined(__FreeBSD__)) && !defined(RELEASE_BUILD)
 		// Look for translation files in LOCALEDIR only if they are not available in the current directory.
-		if (ifstream("dat/config/settings.lua") == NULL) {
+		if (ifstream("lua/data/config/settings.lua") == NULL) {
 			bindtextdomain(PACKAGE, LOCALEDIR);
 			bind_textdomain_codeset(PACKAGE, "UTF-8");
 			textdomain(PACKAGE);

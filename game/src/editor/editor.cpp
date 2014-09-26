@@ -338,7 +338,7 @@ void Editor::_FileOpen() {
 	{
 		// file to open
 		QString file_name = QFileDialog::getOpenFileName(this, "HoA Level Editor -- File Open",
-			"dat/maps", "Maps (*.lua)");
+			"lua/data/maps", "Maps (*.lua)");
 
 		if (!file_name.isEmpty())
 		{
@@ -442,7 +442,7 @@ void Editor::_FileOpen() {
 void Editor::_FileSaveAs() {
 	// get the file name from the user
 	QString file_name = QFileDialog::getSaveFileName(this,
-		"HoA Level Editor -- File Save", "dat/maps", "Maps (*.lua)");
+		"HoA Level Editor -- File Save", "lua/data/maps", "Maps (*.lua)");
 
 	if (!file_name.isEmpty())
 	{
@@ -1991,9 +1991,9 @@ void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index)
 	{
 		// Set up for opening autotiling.lua.
 		ReadScriptDescriptor read_data;
-		if (read_data.OpenFile("dat/tilesets/autotiling.lua", true) == false)
+		if (read_data.OpenFile("lua/data/tilesets/autotiling.lua", true) == false)
 			QMessageBox::warning(this, "Loading File...",
-				QString("ERROR: could not open dat/tilesets/autotiling.lua for reading!"));
+				QString("ERROR: could not open lua/data/tilesets/autotiling.lua for reading!"));
 
 		read_data.OpenTable(it->second);
 		int32 random_index = RandomBoundedInteger(1, static_cast<int32>(read_data.GetTableSize()));
@@ -2123,9 +2123,9 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 
 		// Set up for opening autotiling.lua.
 		ReadScriptDescriptor read_data;
-		if (read_data.OpenFile("dat/tilesets/autotiling.lua", true) == false)
+		if (read_data.OpenFile("lua/data/tilesets/autotiling.lua", true) == false)
 			QMessageBox::warning(this, "Loading File...",
-				QString("ERROR: could not open dat/tilesets/autotiling.lua for reading!"));
+				QString("ERROR: could not open lua/data/tilesets/autotiling.lua for reading!"));
 
 		// Extract the correct transition tile from autotiling.lua as determined by
 		// _CheckForTransitionPattern(...).

@@ -133,70 +133,70 @@ void GameGlobal::ClearAllData() {
 
 bool GameGlobal::_LoadGlobalScripts() {
 	// Open up the persistent script files
-	if (_global_script.OpenFile("dat/global.lua") == false) {
+	if (_global_script.OpenFile("lua/global.lua") == false) {
 		return false;
 	}
 
-	if (_items_script.OpenFile("dat/objects/items.lua") == false) {
+	if (_items_script.OpenFile("lua/data/inventory/items.lua") == false) {
 		return false;
 	}
 	_items_script.OpenTable("items");
 
-	if (_weapons_script.OpenFile("dat/objects/weapons.lua") == false) {
+	if (_weapons_script.OpenFile("lua/data/inventory/weapons.lua") == false) {
 		return false;
 	}
 	_weapons_script.OpenTable("weapons");
 
-	if (_head_armor_script.OpenFile("dat/objects/head_armor.lua") == false) {
+	if (_head_armor_script.OpenFile("lua/data/inventory/head_armor.lua") == false) {
 		return false;
 	}
 	_head_armor_script.OpenTable("armor");
 
-	if (_torso_armor_script.OpenFile("dat/objects/torso_armor.lua") == false) {
+	if (_torso_armor_script.OpenFile("lua/data/inventory/torso_armor.lua") == false) {
 		return false;
 	}
 	_torso_armor_script.OpenTable("armor");
 
-	if (_arm_armor_script.OpenFile("dat/objects/arm_armor.lua") == false) {
+	if (_arm_armor_script.OpenFile("lua/data/inventory/arm_armor.lua") == false) {
 		return false;
 	}
 	_arm_armor_script.OpenTable("armor");
 
-	if (_leg_armor_script.OpenFile("dat/objects/leg_armor.lua") == false) {
+	if (_leg_armor_script.OpenFile("lua/data/inventory/leg_armor.lua") == false) {
 		return false;
 	}
 	_leg_armor_script.OpenTable("armor");
 
-	if (_key_items_script.OpenFile("dat/objects/key_items.lua") == false) {
+	if (_key_items_script.OpenFile("lua/data/inventory/key_items.lua") == false) {
 		return false;
 	}
 	_key_items_script.OpenTable("key_items");
 
-	if (_attack_skills_script.OpenFile("dat/skills/attack.lua") == false) {
+	if (_attack_skills_script.OpenFile("lua/data/skills/attack.lua") == false) {
 		return false;
 	}
 	_attack_skills_script.OpenTable("skills");
 
-	if (_support_skills_script.OpenFile("dat/skills/support.lua") == false) {
+	if (_support_skills_script.OpenFile("lua/data/skills/support.lua") == false) {
 		return false;
 	}
 	_support_skills_script.OpenTable("skills");
 
-	if (_defend_skills_script.OpenFile("dat/skills/defense.lua") == false) {
+	if (_defend_skills_script.OpenFile("lua/data/skills/defense.lua") == false) {
 		return false;
 	}
 	_defend_skills_script.OpenTable("skills");
 
-	if (_status_effects_script.OpenFile("dat/effects/status.lua") == false) {
+	if (_status_effects_script.OpenFile("lua/data/effects/status.lua") == false) {
 		return false;
 	}
 	_status_effects_script.OpenTable("status_effects");
 
-	if (_map_sprites_script.OpenFile("dat/actors/map_sprites_stock.lua") == false) {
+	if (_map_sprites_script.OpenFile("lua/data/actors/map_sprites_stock.lua") == false) {
 		return false;
 	}
 
-	if (_battle_events_script.OpenFile("dat/battle_events.lua") == false) {
+	if (_battle_events_script.OpenFile("lua/scripts/battles/battle_events.lua") == false) {
 		return false;
 	}
 	_battle_events_script.OpenTable("battle_events");

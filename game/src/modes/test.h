@@ -38,7 +38,7 @@ namespace private_test {
 const uint32 INVALID_TEST = 0;
 
 //! \brief The path and name of the Lua file where the test directory list is stored
-const std::string TEST_MAIN_FILENAME = "dat/test/test_main.lua";
+const std::string TEST_MAIN_FILENAME = "lua/test/test_main.lua";
 
 /** ****************************************************************************
 *** \brief A container class to hold data about a related set of tests
