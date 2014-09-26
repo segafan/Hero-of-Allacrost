@@ -95,7 +95,7 @@ void CreditsWindow::Show() {
 
 	// Load the credits text from the Lua file
 	ReadScriptDescriptor credits_file;
-	if (credits_file.OpenFile("dat/credits.lua") == false) {
+	if (credits_file.OpenFile("lua/data/credits.lua") == false) {
 		IF_PRINT_WARNING(BOOT_DEBUG) << "failed to open the Lua credits file" << endl;
 	}
 	_credits_text.SetText(MakeUnicodeString(credits_file.ReadString("credits_text")));

@@ -698,7 +698,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	_id = id;
 
 	// ----- (1): Open the characters script file
-	string filename = "dat/actors/characters.lua";
+	string filename = "lua/data/actors/characters.lua";
 	ReadScriptDescriptor char_script;
 	if (char_script.OpenFile(filename) == false) {
 		PRINT_ERROR << "failed to open character data file: " << filename << endl;
@@ -1060,7 +1060,7 @@ bool GlobalCharacter::AcknowledgeGrowth() {
 
 	// Retrieve the growth data for the new experience level and check for any additional growth
 	bool additional_growth_detected = false;
-	string filename = "dat/actors/characters.lua";
+	string filename = "lua/data/actors/characters.lua";
 	ReadScriptDescriptor character_script;
 	if (character_script.OpenFile(filename) == false) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to open character data file: " << filename << endl;
@@ -1336,7 +1336,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) :
 	else if ((_id > 100) && (_id <= 200))
 		file_ext = "02";
 
-	filename = "dat/actors/enemies_set_" + file_ext + ".lua";
+	filename = "lua/data/actors/enemies_set_" + file_ext + ".lua";
 
 	// ----- (2): Open the script file and table that store the enemy data
 	ReadScriptDescriptor enemy_data;

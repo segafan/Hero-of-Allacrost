@@ -276,7 +276,7 @@ public:
 	***
 	*** It's useful to permit having several lua files with their own functions and data without
 	*** needing to worry about name collisions. The tablespace must be named according to the Lua
-	*** filename, but without using the path or file extension. For example, dat/script/my_script.lua
+	*** filename, but without using the path or file extension. For example, lua/scripts/my_script.lua
 	*** should have a 'my_script' tablespace defined at the beginning of the file with the following
 	*** code:
 	***

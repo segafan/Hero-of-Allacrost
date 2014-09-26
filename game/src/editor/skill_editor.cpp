@@ -102,7 +102,7 @@ void SkillEditor::_RightButtonClicked()
 
 void SkillEditor::_LoadSkills()
 {
-	string path = string("dat/skills/");
+	string path = string("lua/data/skills/");
 	ReadScriptDescriptor script;
 	script.OpenFile(path + "defense.lua", true);
 	script.CloseFile();

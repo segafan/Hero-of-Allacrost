@@ -278,7 +278,7 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("ERROR: Unable to apply video settings", __FILE__, __LINE__, __FUNCTION__);
 
 	// TODO: Add this config file and function call; remove manual loading
-// 	LoadGUIThemes("dat/config/themes.lua");
+// 	LoadGUIThemes("lua/data/config/themes.lua");
 	if (GUIManager->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
 		throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
 	}
@@ -287,7 +287,7 @@ void InitializeEngine() throw (Exception) {
 
 	// TODO: Add this config file and function call; remove manual loading
 	// Load all standard font sets used across the game
-// 	LoadFonts("dat/config/fonts.lua");
+// 	LoadFonts("lua/data/config/fonts.lua");
 	if (VideoManager->Text()->LoadFont("img/fonts/libertine_capitals.ttf", "title20", 20) == false) {
 		throw Exception("Failed to load libertine_capitals.ttf font at size 20", __FILE__, __LINE__, __FUNCTION__);
 	}
@@ -361,7 +361,7 @@ int main(int argc, char *argv[]) {
 			chdir(path.c_str());
 		#elif (defined(__linux__) || defined(__FreeBSD__)) && !defined(RELEASE_BUILD)
 			// Look for data files in DATADIR only if they are not available in the current directory.
-			if (ifstream("dat/config/settings.lua") == NULL) {
+			if (ifstream("lua/data/config/settings.lua") == NULL) {
 				if (chdir(DATADIR) != 0) {
 					throw Exception("ERROR: failed to change directory to data location", __FILE__, __LINE__, __FUNCTION__);
 				}

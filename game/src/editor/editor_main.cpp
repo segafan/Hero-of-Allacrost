@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 #ifndef __MACH__
 	// Look for data files in DATADIR only if they are not available in the
 	// current directory.
-	if (ifstream("./dat/config/settings.lua") == NULL) {
+	if (ifstream("./lua/data/config/settings.lua") == NULL) {
 		if (chdir(DATADIR) != 0) {
 			PRINT_ERROR << "failed to change directory to data location" << endl;
 		}

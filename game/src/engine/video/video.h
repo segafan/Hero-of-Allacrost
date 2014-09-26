@@ -608,7 +608,7 @@ public:
 	*** \param effect_number The effect ID number, used to load the correct effect data from the file
 	*** \return True if the data was loaded successfully, false upon failure
 	***
-	*** \note The standard file with the lighting effect data is located at dat/effects/lightning.lua
+	*** \note The standard file with the lighting effect data is located at lua/graphics/lightning.lua
 	**/
 	bool LoadLightningEffect(const std::string& file, uint32 effect_number);
 

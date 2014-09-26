@@ -260,7 +260,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 	map<uint32, AnimatedImage*> tile_animations;
 
 	for (uint32 i = 0; i < tileset_filenames.size(); i++) {
-		if (tileset_script.OpenFile("dat/tilesets/" + tileset_filenames[i] + ".lua") == false) {
+		if (tileset_script.OpenFile("lua/data/tilesets/" + tileset_filenames[i] + ".lua") == false) {
 			PRINT_ERROR << "map failed to load because it could not open a tileset definition file: " << tileset_script.GetFilename() << endl;
 			exit(1);
 		}

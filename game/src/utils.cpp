@@ -845,13 +845,15 @@ const std::string GetUserDataPath(bool user_files) {
 	// Default path if a specific solution could not be found. Note that this path may
 	// not be writable by the user since it could be installed in administrator/root space
 	PRINT_WARNING << "could not idenfity user path, defaulting to system path" << endl;
-	return "dat/";
+	return "lua/";
 }
+
+
 
 const std::string GetUserProfilePath()
 {
 	string profile_path = GetUserDataPath(false) + "profiles/";
-	if(!DoesFileExist(profile_path))
+	if (!DoesFileExist(profile_path))
 		MakeDirectory(profile_path);
 
 	return profile_path;
@@ -864,9 +866,9 @@ const std::string GetSettingsFilename() {
 
 	settings_file = GetUserProfilePath() + "settings.lua";
 	if (DoesFileExist(settings_file) == false) {
-		settings_file = "dat/config/settings.lua";
+		settings_file = "lua/data/config/settings.lua";
 		if (DoesFileExist(settings_file) == false) {
-			PRINT_WARNING << "settings.lua file not found." << endl;
+			PRINT_WARNING << "lua/data/config/settings.lua file not found." << endl;
 		}
 	}
 
