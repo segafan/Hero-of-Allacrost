@@ -402,8 +402,8 @@ void Grid::SaveMap()
 	ifstream file;
 	string before_text;
 	string after_text;
-	const char * BEFORE_TEXT_MARKER = "-- Allacrost map editor begin. Do not edit this line. --";
-	const char * AFTER_TEXT_MARKER =  "-- Allacrost map editor end. Do not edit this line. --";
+	const char * BEFORE_TEXT_MARKER = "---------- BEGIN: Map Editor Generated Content ----------";
+	const char * AFTER_TEXT_MARKER =  "---------- END: Map Editor Generated Content ----------";
 
 	// First, get the non-editor data (such as map scripting) from the file to save, so we don't clobber it.
 	file.open(_file_name.toAscii(), ifstream::in);
@@ -451,22 +451,22 @@ void Grid::SaveMap()
 
 	write_data.WriteLine(BEFORE_TEXT_MARKER);
 	write_data.InsertNewLine();
-	write_data.WriteComment("A reference to the C++ MapMode object that was created with this file");
+	// A reference to the C++ MapMode object that was created with this file
 	write_data.WriteLine("map = {}\n");
 
-	write_data.WriteComment("The number of contexts, rows, and columns that compose the map");
+	// The number of contexts, rows, and columns that compose the map
 	write_data.WriteInt("num_map_contexts", context_names.size());
 	write_data.WriteInt("num_tile_cols", _width);
 	write_data.WriteInt("num_tile_rows", _height);
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("The sound files used on this map.");
+	// The sound files used on this map.
 	write_data.BeginTable("sound_filenames");
 	// TODO: currently sound_filenames table is not populated with sounds
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("The music files used as background music on this map.");
+	// The music files used as background music on this map
 	write_data.BeginTable("music_filenames");
 	QString music_file;
 	i = 0;
@@ -480,7 +480,7 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("The names of the contexts used to improve Editor user-friendliness");
+	// The names of the contexts used to improve Editor user-friendliness
 	write_data.BeginTable("context_names");
 	i = 0;
 	// First entry is the default base context. Every map has it, so no need to save it.
@@ -494,7 +494,7 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("The names of the tilesets used, with the path and file extension omitted");
+	// The names of the tilesets used, with the path and file extension omitted
 	write_data.BeginTable("tileset_filenames");
 	i = 0;
 	for (QStringList::Iterator qit = tileset_names.begin();
@@ -506,8 +506,8 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables");
-	write_data.WriteComment("Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]");
+	// The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables
+	// Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]
 	write_data.BeginTable("map_grid");
 	vector<int32> ll_vect;
 	vector<int32> ml_vect;
@@ -631,7 +631,7 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
+	// The lower tile layer. The numbers are indeces to the tile_mappings table
 	write_data.BeginTable("lower_layer");
 	vector<int32>::iterator it;    // used to iterate through the layers
 	vector<int32> layer_row;       // one row of a layer
@@ -649,7 +649,7 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
+	// The middle tile layer. The numbers are indeces to the tile_mappings table
 	write_data.BeginTable("middle_layer");
 	it = _middle_layer[0].begin();
 	for (uint32 row = 0; row < _height; row++)
@@ -665,7 +665,7 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
+	// The upper tile layer. The numbers are indeces to the tile_mappings table
 	write_data.BeginTable("upper_layer");
 	it = _upper_layer[0].begin();
 	for (uint32 row = 0; row < _height; row++)
@@ -681,7 +681,7 @@ void Grid::SaveMap()
 	write_data.EndTable();
 	write_data.InsertNewLine();
 
-	write_data.WriteComment("All, if any, existing contexts follow.");
+	// All, if any, existing contexts follow.
 	vector<int32>::iterator base_it;  // used to iterate through the base layers
 	vector<int32> context_data;  // one vector of ints contains all the context info
 	// Iterate through all contexts of all layers.

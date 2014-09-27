@@ -2,34 +2,23 @@ local ns = {}
 setmetatable(ns, {__index = _G})
 harrvah_city = ns;
 setfenv(1, ns);
-local_chest_counter = 500;
-
--- The map name and location graphic
-map_name = "Harrvah City"
-location_filename = "blank.png"
 
 context_inherits = {0, 0, 0}
 
--- Allacrost map editor begin. Do not edit this line. --
+---------- BEGIN: Map Editor Generated Content ----------
 
--- A reference to the C++ MapMode object that was created with this file
 map = {}
 
--- The number of contexts, rows, and columns that compose the map
 num_map_contexts = 1
 num_tile_cols = 60
 num_tile_rows = 82
 
--- The sound files used on this map.
 sound_filenames = {}
 
--- The music files used as background music on this map.
 music_filenames = {}
 
--- The names of the contexts used to improve Editor user-friendliness
 context_names = {}
 
--- The names of the tilesets used, with the path and file extension omitted
 tileset_filenames = {}
 tileset_filenames[1] = "building_interior_objects_01"
 tileset_filenames[2] = "castle_exterior_01"
@@ -38,8 +27,6 @@ tileset_filenames[4] = "harrvah_house_exterior"
 tileset_filenames[5] = "harrvah_house_interior"
 tileset_filenames[6] = "desert_ground"
 
--- The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables
--- Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]
 map_grid = {}
 map_grid[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 map_grid[1] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
@@ -206,7 +193,6 @@ map_grid[161] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 map_grid[162] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 map_grid[163] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 
--- The lower tile layer. The numbers are indeces to the tile_mappings table.
 lower_layer = {}
 lower_layer[0] = { 1340, 1340, 1339, 1338, 1289, 1403, 1338, 1340, 1339, 1289, 1325, 1325, 1325, 1403, 1403, 1338, 1321, 1325, 1289, 1289, 1338, 1321, 1339, 1321, 1321, 1340, 1289, 1403, 1338, 1289, 1338, 1321, 1403, 1289, 1340, 1403, 1289, 1325, 1340, 1340, 1338, 1289, 1321, 1403, 1289, 1321, 1338, 1325, 1338, 1338, 1325, 1403, 1339, 1403, 1289, 1403, 1340, 1289, 1340, 1321 }
 lower_layer[1] = { 1321, 1321, 1338, 1289, 1325, 1321, 1289, 1325, 1338, 1340, 1321, 1289, 1403, 1325, 1403, 1403, 1338, 1325, 1321, 1403, 1340, 1339, 1340, 1338, 1339, 1403, 1325, 1325, 1289, 1321, 1339, 1321, 1338, 1289, 1325, 1403, 1325, 1325, 1321, 1403, 1321, 1325, 1403, 1289, 1340, 1340, 1289, 1321, 1289, 1325, 1321, 1403, 1403, 1289, 1325, 1339, 1403, 1340, 1289, 1403 }
@@ -291,7 +277,6 @@ lower_layer[79] = { 1289, 1321, 1325, 1338, 1403, 1321, 1340, 1403, 1289, 1321, 
 lower_layer[80] = { 1340, 1289, 1338, 1340, 1325, 1321, 1321, 1340, 1325, 1321, 1340, 1338, 1338, 1339, 1339, 1338, 1289, 1340, 1339, 1403, 1321, 1338, 1403, 1338, 1340, 1321, 1339, 1325, 1340, 1321, 1289, 1340, 1289, 1403, 1297, 1320, 1325, 1339, 1325, 1403, 1321, 1403, 1338, 1339, 1338, 1289, 1321, 1339, 1403, 1403, 1339, 1338, 1340, 1338, 1340, 1289, 1321, 1340, 1340, 1339 }
 lower_layer[81] = { 1339, 1340, 1338, 1289, 1338, 1339, 1289, 1340, 1340, 1325, 1403, 1289, 1321, 1325, 1339, 1289, 1340, 1321, 1339, 1321, 1289, 1403, 1289, 1325, 1338, 1340, 1321, 1403, 1340, 1325, 1325, 1339, 1321, 1340, 1315, 1280, 1403, 1339, 1403, 1339, 1289, 1338, 1338, 1321, 1338, 1325, 1325, 1338, 1321, 1339, 1321, 1325, 1325, 1338, 1321, 1339, 1338, 1338, 1403, 1289 }
 
--- The middle tile layer. The numbers are indeces to the tile_mappings table.
 middle_layer = {}
 middle_layer[0] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 middle_layer[1] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
@@ -376,7 +361,6 @@ middle_layer[79] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 middle_layer[80] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 middle_layer[81] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 
--- The upper tile layer. The numbers are indeces to the tile_mappings table.
 upper_layer = {}
 upper_layer[0] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 upper_layer[1] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
@@ -461,120 +445,5 @@ upper_layer[79] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
 upper_layer[80] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 upper_layer[81] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 
--- All, if any, existing contexts follow.
--- Allacrost map editor end. Do not edit this line. --
+---------- END: Map Editor Generated Content ----------
 
-claudius_sprite = nil;
-
-function Load(m)
-	-- First, record the current map in the map variable that is global to this script
-	map = m;
-	map.unlimited_stamina = true;
-	DialogueManager = m.dialogue_supervisor;
-	event_supervisor = m.event_supervisor;
-
-	-- Play music once the map becomes active for the first time
-	map:SetCurrentTrack(0);
-
-	-- Create the sprite that the player controls
-	claudius_sprite = ConstructSprite("Claudius", 1000, 14, 85);
-	claudius_sprite:SetDirection(hoa_map.MapMode.NORTH);
-	map:AddGroundObject(claudius_sprite);
-	map:SetCamera(claudius_sprite);
-
-	CreateDoors();
-	CreateCharacters();
-	CreateEnemies();
-	CreateDialogue();
-	CreateEvents();
-end
-
-
--- Mandatory function for map updates
-function Update()
-
-end
-
-
--- Mandatory function for custom drawing
-function Draw()
-	map:DrawMapLayers();
-end
-
-
--- Create zones for switching the map context (usually doors or stairs)
-function CreateDoors()
-	context_zone = hoa_map.ContextZone(1, 2);
-	context_zone:AddSection(154, 157, 156, 157, false);
-	context_zone:AddSection(154, 157, 158, 159, true);
-	map:AddZone(context_zone);
-
-	context_zone = hoa_map.ContextZone(1, 2);
-	context_zone:AddSection(154, 157, 120, 121, false);
-	context_zone:AddSection(154, 157, 122, 123, true);
-	map:AddZone(context_zone);
-
-	context_zone = hoa_map.ContextZone(1, 2);
-	context_zone:AddSection(378, 381, 142, 143, false);
-	context_zone:AddSection(378, 381, 144, 145, true);
-	map:AddZone(context_zone);
-
-	context_zone = hoa_map.ContextZone(1, 2);
-	context_zone:AddSection(314, 317, 116, 117, false);
-	context_zone:AddSection(314, 317, 118, 119, true);
-	map:AddZone(context_zone);
-	
-	context_zone = hoa_map.ContextZone(1, 2);
-	context_zone:AddSection(346, 349,  80,  81, false);
-	context_zone:AddSection(346, 349,  82,  83, true);
-	map:AddZone(context_zone);
-end -- function CreateDoors()
-
-
--- Creates all non-playable character spirtes
-function CreateCharacters()
-	local sprite = {};
-
-	sprite = ConstructSprite("Laila", 2000, 14, 70);
-	sprite:SetDirection(hoa_map.MapMode.SOUTH);
-	sprite:AddDialogueReference(10);
-	sprite:AddDialogueReference(11);
-	map:AddGroundObject(sprite);
-end -- function CreateCharacters()
-
-
--- Creates all enemy sprites
-function CreateEnemies()
-
-end -- function CreateEnemies()
-
-
--- Creates all dialogue that takes place through characters and events
-function CreateDialogue()
-	local dialogue;
-	local text;
-
-	dialogue = hoa_map.SpriteDialogue(10);
-		text = hoa_system.Translate("Laila! I heard the city was burning?!");
-		dialogue:AddLine(text, 1000);
-		text = hoa_system.Translate("Well unfortunately this is as far as this release goes. There's only a partly constructed city here right now.");
-		dialogue:AddLine(text, 2000);
-		text = hoa_system.Translate("You can explore this area if you like. Some of the buildings here may be entered by walking up to the doors, but not all of them.");
-		dialogue:AddLine(text, 2000);
-		text = hoa_system.Translate("Also I would recommend that you not save your game while you are on this map, because you are stuck here with no way to go back.");
-		dialogue:AddLine(text, 2000);
-	DialogueManager:AddDialogue(dialogue);
-	
-	dialogue = hoa_map.SpriteDialogue(11);
-		text = hoa_system.Translate("The next release should see this city in a more completed state. Once its finished, when you visit here it will be under attack by an army of demons that you will have to do battle with to save the people that live here.");
-		dialogue:AddLine(text, 2000);
-		text = hoa_system.Translate("Thanks for playing and see you next time!");
-		dialogue:AddLine(text, 2000);
-	DialogueManager:AddDialogue(dialogue);
-end -- function CreateDialogue()
-
-
--- Creates all events
-function CreateEvents()
-
-end -- function CreateEvents()

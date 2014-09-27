@@ -20,6 +20,7 @@
 #include "system.h"
 
 // Allacrost globals
+#include "common.h"
 #include "global.h"
 
 // Other mode headers
@@ -38,6 +39,7 @@
 
 using namespace std;
 using namespace hoa_utils;
+using namespace hoa_common;
 using namespace hoa_audio;
 using namespace hoa_input;
 using namespace hoa_mode_manager;
@@ -58,10 +60,11 @@ MapMode* MapMode::_current_instance = NULL;
 // ********** MapMode Public Class Methods
 // ****************************************************************************
 
-MapMode::MapMode(string filename) :
+MapMode::MapMode(string script_filename) :
 	GameMode(),
-	_map_filename(filename),
-	_map_tablespace(""),
+	_data_filename(""),
+	_script_filename(script_filename),
+	_script_tablespace(""),
 	_map_event_group(NULL),
 	_tile_supervisor(NULL),
 	_object_supervisor(NULL),
@@ -90,13 +93,9 @@ MapMode::MapMode(string filename) :
 
 	ResetState();
 	PushState(STATE_EXPLORE);
-
-	// Create the event group name by modifying the filename to consists only of alphanumeric characters and underscores
-	// This will make it a valid identifier name in Lua syntax
-	string event_group_name = _map_filename;
-	std::replace(event_group_name.begin(), event_group_name.end(), '/', '_');
-	std::replace(event_group_name.begin(), event_group_name.end(), '.', '_');
-
+	
+	// Creates a unique event group identifier string by using the script's tablespace name prefixed with "map_"
+	string event_group_name = "map_" + DetermineLuaFileTablespaceName(_script_filename);
 	if (GlobalManager->DoesEventGroupExist(event_group_name) == false) {
 		GlobalManager->AddNewEventGroup(event_group_name);
 	}
@@ -113,8 +112,8 @@ MapMode::MapMode(string filename) :
 
 	_camera_timer.Initialize(0, 1);
 
-	// TODO: Load the map data in a seperate thread
-	_Load();
+	// TODO: Load the map file data in a seperate thread
+	_LoadFileData();
 
 	// Load miscellaneous map graphics
 	vector<uint32> timings(16, 100); // holds the timing data for the new dialogue animation; 16 frames at 100ms each
@@ -388,33 +387,46 @@ bool MapMode::AttackAllowed() {
 // ********** MapMode Private Class Methods
 // ****************************************************************************
 
-void MapMode::_Load() {
-	// ---------- (1) Open map script file and read in the basic map properties and tile definitions
-	if (_map_script.OpenFile(_map_filename) == false) {
+void MapMode::_LoadFileData() {
+	// ---------- (1) Open the map script file and read in the map data file name
+	if (_map_script.OpenFile(_script_filename) == false) {
+		PRINT_ERROR << "failed to open map script file: " << _script_filename << endl;
 		return;
 	}
-
-	// Determine the map's tablespacename and then open it. The tablespace is the name of the map file without
-	// file extension or path information (for example, 'lua/data/maps/demo.lua' has a tablespace name of 'demo').
-	int32 period = _map_filename.find(".");
-	int32 last_slash = _map_filename.find_last_of("/");
-	_map_tablespace = _map_filename.substr(last_slash + 1, period - (last_slash + 1));
-	_map_script.OpenTable(_map_tablespace);
-
-	// Read the number of map contexts, the name of the map, and load the location graphic image
-	_num_map_contexts = _map_script.ReadUInt("num_map_contexts");
-	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
-	if (_location_graphic.Load("img/portraits/locations/" + _map_script.ReadString("location_filename")) == false) {
-		PRINT_ERROR << "failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
+	_script_tablespace = DetermineLuaFileTablespaceName(_script_filename);
+	_map_script.OpenTable(_script_tablespace);
+	_data_filename = _map_script.ReadString("data_file");
+	
+	// ---------- (2) Open the map data file
+	ReadScriptDescriptor data_file;
+	if (data_file.OpenFile(_data_filename) == false) {
+		PRINT_ERROR << "failed to open map data file: " << _data_filename << endl;
+		return;
 	}
+	
+	// ---------- (3) Load the contents of both map files
+	data_file.OpenTable(DetermineLuaFileTablespaceName(_data_filename));
+	_LoadMapData(data_file);
+	data_file.CloseAllTables();
+	data_file.CloseFile();
+	
+	_LoadMapScript();
+	_map_script.CloseAllTables();
+}
+
+
+
+void MapMode::_LoadMapData(ReadScriptDescriptor& map_data) {
+	// Read the number of map contexts, the name of the map, and load the location graphic image
+	_num_map_contexts = map_data.ReadUInt("num_map_contexts");
 
 	// ---------- (2) Instruct the supervisor classes to perform their portion of the load operation
-	_tile_supervisor->Load(_map_script, this);
-	_object_supervisor->Load(_map_script);
+	_tile_supervisor->Load(map_data, this);
+	_object_supervisor->Load(map_data);
 
 	// ---------- (3) Load map sounds and music
 	vector<string> sound_filenames;
-	_map_script.ReadStringVector("sound_filenames", sound_filenames);
+	map_data.ReadStringVector("sound_filenames", sound_filenames);
 
 	for (uint32 i = 0; i < sound_filenames.size(); i++) {
 		_sounds.push_back(SoundDescriptor());
@@ -425,7 +437,7 @@ void MapMode::_Load() {
 	}
 
 	vector<string> music_filenames;
-	_map_script.ReadStringVector("music_filenames", music_filenames);
+	map_data.ReadStringVector("music_filenames", music_filenames);
 	_music.resize(music_filenames.size(), MusicDescriptor());
 	for (uint32 i = 0; i < music_filenames.size(); i++) {
 		if (_music[i].LoadAudio(music_filenames[i]) == false) {
@@ -433,15 +445,25 @@ void MapMode::_Load() {
 			return;
 		}
 	}
+}
 
-	// ---------- (4) Create and store all enemies that may appear on this map
+
+
+void MapMode::_LoadMapScript() {
+	// ---------- (1) Read the map's location graphic and name
+	if (_location_graphic.Load(_map_script.ReadString("location_filename")) == false) {
+		PRINT_ERROR << "failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
+	}
+	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
+	
+	// ---------- (2) Create all enemies that may appear on this map
 	vector<int32> enemy_ids;
 	_map_script.ReadIntVector("enemy_ids", enemy_ids);
 	for (uint32 i = 0; i < enemy_ids.size(); i++) {
 		_enemies.push_back(new GlobalEnemy(enemy_ids[i]));
 	}
 
-	// ---------- (5) Call the map script's custom load function and get a reference to all other script function pointers
+	// ---------- (3) Call the map script's Load function and get a reference to all other script function pointers
 	ScriptObject map_table(luabind::from_stack(_map_script.GetLuaState(), hoa_script::private_script::STACK_TOP));
 	ScriptObject function = map_table["Load"];
 	ScriptCallFunction<void>(function, this);
@@ -449,7 +471,7 @@ void MapMode::_Load() {
 	_update_function = _map_script.ReadFunctionPointer("Update");
 	_draw_function = _map_script.ReadFunctionPointer("Draw");
 
-	// ---------- (6) Prepare all sprites with dialogue
+	// ---------- (4) Prepare all sprites with dialogue
 	// This is done at this stage because the map script's load function creates the sprite and dialogue objects. Only after
 	// both sets are created can we determine which sprites have active dialogue.
 
@@ -462,9 +484,7 @@ void MapMode::_Load() {
 			sprite->UpdateDialogueStatus();
 		}
 	}
-
-	_map_script.CloseAllTables();
-} // void MapMode::_Load()
+}
 
 
 

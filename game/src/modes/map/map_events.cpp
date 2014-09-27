@@ -327,7 +327,7 @@ CustomEvent::CustomEvent(uint32 event_id, string start_name, string update_name)
 	_update_function(NULL)
 {
 	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
-	MapMode::CurrentInstance()->OpenMapTablespace(true);
+	MapMode::CurrentInstance()->OpenScriptTablespace(true);
 	map_script.OpenTable("functions");
 	if (start_name != "") {
 		_start_function = new ScriptObject();
@@ -917,7 +917,7 @@ CustomSpriteEvent::CustomSpriteEvent(uint32 event_id, VirtualSprite* sprite, str
 	_update_function(NULL)
 {
 	ReadScriptDescriptor& map_script = MapMode::CurrentInstance()->GetMapScript();
-	MapMode::CurrentInstance()->OpenMapTablespace(true);
+	MapMode::CurrentInstance()->OpenScriptTablespace(true);
 	map_script.OpenTable("functions");
 	if (start_name != "") {
 		_start_function = new ScriptObject();

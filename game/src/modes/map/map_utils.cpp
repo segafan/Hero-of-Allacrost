@@ -24,18 +24,6 @@ bool MAP_DEBUG = false;
 
 namespace private_map {
 
-bool MapRectangle::CheckIntersection(const MapRectangle& first, const MapRectangle& second) {
-	if ((first.left > second.right) ||
-		(first.right < second.left) ||
-		(first.top > second.bottom) ||
-		(first.bottom < second.top))
-		return false;
-	else
-		return true;
-}
-
-
-
 uint16 CalculateOppositeDirection(const uint16 direction) {
 	switch (direction) {
 		case NORTH:      return SOUTH;
@@ -54,6 +42,18 @@ uint16 CalculateOppositeDirection(const uint16 direction) {
 			IF_PRINT_WARNING(MAP_DEBUG) << "invalid direction argument: " << direction << endl;
 			return SOUTH;
 	}
+}
+
+
+
+bool MapRectangle::CheckIntersection(const MapRectangle& first, const MapRectangle& second) {
+	if ((first.left > second.right) ||
+		(first.right < second.left) ||
+		(first.top > second.bottom) ||
+		(first.bottom < second.top))
+		return false;
+	else
+		return true;
 }
 
 } // namespace private_map
