@@ -38,13 +38,9 @@ end
 tests = {}
 
 tests[1] = {
-	name = "[River Access Cave] - New Game Data";
-	description = "Places the user in the first dungeon with the party and status that the player receives upon beginning a new game. " ..
-		"Effectively, this test is a way to start a new game and skip over the intro sequence seen on the opening map.";
+	name = "[01_opening_scene] - New Game";
+	description = "Equivalent to selecting the \"New Game\" option on the boot screen.";
 	ExecuteTest = function()
-		-- Note: These calls should match what is found in the NewGame() function in lua/global.lua. Update this test accordingly 
-		-- if the contents of that function change
-
 		GlobalManager:AddCharacter(LUKAR);
 		GlobalManager:AddCharacter(DESTER);
 		GlobalManager:AddCharacter(MARK);
@@ -53,17 +49,34 @@ tests[1] = {
 		GlobalManager:SetDrunes(100);
 		GlobalManager:AddToInventory(1, 4);
 
-		StartMap("lua/data/maps/river_access_cave.lua");
+		StartMap("lua/scripts/maps/01_opening_scene.lua");
 	end
 }
 
--- tests[2]: Reserved for a test of the River Access Cave that spawns the player just before the boss battle at the end of the dungeon
 
-
-tests[3] = {
-	name = "[Opening Scene] - Return to City";
+tests[2] = {
+	name = "[01_unblock_underground_river] - New Game Data";
 	description = "Places the user in the first dungeon with the party and status that the player receives upon beginning a new game. " ..
-		"Effectively, this test is a way to start a new game and skip over the intro sequence seen on the opening map.";
+		"Effectively, this test is a way to start a new game and skip over the opening scene.";
+	ExecuteTest = function()
+		GlobalManager:AddCharacter(LUKAR);
+		GlobalManager:AddCharacter(DESTER);
+		GlobalManager:AddCharacter(MARK);
+		GlobalManager:AddCharacter(CLAUDIUS);
+		GlobalManager:AddNewEventGroup("global_events");
+		GlobalManager:SetDrunes(100);
+		GlobalManager:AddToInventory(1, 4);
+
+		StartMap("lua/scripts/maps/01_unblock_underground_river.lua");
+	end
+}
+
+-- tests[3]: Reserved for a test of s01_unblock_underground_river that spawns the player just before the boss battle at the end of the dungeon
+
+
+tests[4] = {
+	name = "[01_opening_scene] - Return to City";
+	description = "The map scene that takes place after the events in the cave when the group of knights is returning to the city";
 	ExecuteTest = function()
 
 		GlobalManager:AddCharacter(LUKAR);
@@ -75,14 +88,15 @@ tests[3] = {
 		GlobalManager:AddToInventory(1, 5);
 
 		-- This is what the map uses to determine whether to begin the first scene (opening) or the second scene (return)
-		GlobalManager:AddNewEventGroup("dat_maps_river_access_cave_lua");
+		GlobalManager:AddNewEventGroup("map_a01_unblock_underground_river");
 
-		StartMap("lua/data/maps/opening_scene.lua");
+		StartMap("lua/scripts/maps/01_opening_scene.lua");
 	end
 }
 
-tests[4] = {
-	name = "[Harrvah City] - First Visit, City Under Attack";
+
+tests[5] = {
+	name = "[01_harrvah_city_attack] - First Visit to Harrvah, City Under Attack";
 	description = "Places the player at the entrance to Harrvah for the first visit to the city. This is when Claudius is " ..
 		"joined by other knights returning from their mission to the cave, where they find the city under attack by the " ..
 		"demonic forces.";
@@ -96,6 +110,6 @@ tests[4] = {
 		GlobalManager:SetDrunes(200);
 		GlobalManager:AddToInventory(1, 5);
 
-		StartMap("lua/data/maps/harrvah_city.lua");
+		StartMap("lua/scripts/maps/01_harrvah_city_attack.lua");
 	end
 }

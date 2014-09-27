@@ -287,10 +287,13 @@ public:
 	**/
 	std::string OpenTablespace();
 
-	//! \param table_name The name of the table to open
-	//! \param use_global This overrides the open_tables vector, the reason for this is
-	//! when a function is called from lua, any open tables are no longer on the stack passed to the function
-	//! so to start a new chain of open tables we have to ignore the open tables vector
+	/** \param table_name The name of the table to open
+	*** \param use_global If true, overrides the open_tables vector. 
+	*** 
+	*** The reason for the use_global argument is for when a function is called from Lua, as any open tables 
+	*** are no longer on the stack when passed to the function. So to start a new chain of open tables we 
+	*** have to ignore the _open_tables data.
+	**/
 	void OpenTable(const std::string& table_name, bool use_global = false);
 
 	/** \param table_name The integer key of the table to open

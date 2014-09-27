@@ -274,7 +274,7 @@ const uint32 MAP_FADE_OUT_TIME = 2000;
 //! \brief The standard number of milliseconds it takes for enemies to spawn in an enemy zone
 const uint32 STANDARD_ENEMY_SPAWN_TIME = 3000;
 
-
+//! \brief The stamina counter amounts when the guage is either empty or full
 const uint32 STAMINA_EMPTY  = 0;
 const uint32 STAMINA_FULL   = 10000;
 
@@ -284,7 +284,6 @@ const uint32 STAMINA_FULL   = 10000;
 *** \note This is mostly used as an helper function to make sprites face each other in a conversation.
 **/
 uint16 CalculateOppositeDirection(const uint16 direction);
-
 
 /** ****************************************************************************
 *** \brief Represents a rectangular section of a map
