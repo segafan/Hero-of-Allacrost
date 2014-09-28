@@ -19,7 +19,7 @@ function NewGame()
 	GlobalManager:AddToInventory(1, 4);
 
 	-- Set the location, load the opening map and add it to the game stack, and remove boot mode from the game stack
-	local location_name = "lua/scripts/maps/01_opening_scene.lua"
+	local location_name = "lua/scripts/maps/a01_opening_scene.lua"
 	GlobalManager:SetLocation(location_name);
 	local opening_map = hoa_map.MapMode(location_name);
 

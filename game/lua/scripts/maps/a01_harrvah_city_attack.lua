@@ -98,7 +98,7 @@ function CreateDialogue()
 	local dialogue;
 	local text;
 
-	dialogue = hoa_map.SpriteDialogue(10);
+	dialogue = hoa_map.MapDialogue(10);
 		text = hoa_system.Translate("Laila! I heard the city was burning?!");
 		dialogue:AddLine(text, 1000);
 		text = hoa_system.Translate("Well unfortunately this is as far as this release goes. There's only a partly constructed city here right now.");
@@ -109,7 +109,7 @@ function CreateDialogue()
 		dialogue:AddLine(text, 2000);
 	DialogueManager:AddDialogue(dialogue);
 	
-	dialogue = hoa_map.SpriteDialogue(11);
+	dialogue = hoa_map.MapDialogue(11);
 		text = hoa_system.Translate("The next release should see this city in a more completed state. Once its finished, when you visit here it will be under attack by an army of demons that you will have to do battle with to save the people that live here.");
 		dialogue:AddLine(text, 2000);
 		text = hoa_system.Translate("Thanks for playing and see you next time!");
