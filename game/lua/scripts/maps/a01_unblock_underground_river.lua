@@ -960,8 +960,8 @@ function CreateEvents()
 		event = hoa_map.DialogueEvent.Create(91, 550);
 		
 		event:AddEventLinkAtEnd(92);
-		-- Transition back to the opening scene map
-		event = hoa_map.MapTransitionEvent.Create(92, "lua/scripts/maps/01_opening_scene.lua");
+		-- Transition to the return to city scene
+		event = hoa_map.MapTransitionEvent.Create(92, "lua/scripts/maps/a01_return_to_harrvah_city.lua");
 		
 
 	----------------------------------------------------------------------------

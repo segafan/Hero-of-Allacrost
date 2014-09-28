@@ -49,7 +49,7 @@ tests[1] = {
 		GlobalManager:SetDrunes(100);
 		GlobalManager:AddToInventory(1, 4);
 
-		StartMap("lua/scripts/maps/01_opening_scene.lua");
+		StartMap("lua/scripts/maps/a01_opening_scene.lua");
 	end
 }
 
@@ -67,7 +67,7 @@ tests[2] = {
 		GlobalManager:SetDrunes(100);
 		GlobalManager:AddToInventory(1, 4);
 
-		StartMap("lua/scripts/maps/01_unblock_underground_river.lua");
+		StartMap("lua/scripts/maps/a01_unblock_underground_river.lua");
 	end
 }
 
@@ -90,7 +90,7 @@ tests[4] = {
 		-- This is what the map uses to determine whether to begin the first scene (opening) or the second scene (return)
 		GlobalManager:AddNewEventGroup("map_a01_unblock_underground_river");
 
-		StartMap("lua/scripts/maps/01_opening_scene.lua");
+		StartMap("lua/scripts/maps/a01_return_to_harrvah_city.lua");
 	end
 }
 
@@ -110,6 +110,6 @@ tests[5] = {
 		GlobalManager:SetDrunes(200);
 		GlobalManager:AddToInventory(1, 5);
 
-		StartMap("lua/scripts/maps/01_harrvah_city_attack.lua");
+		StartMap("lua/scripts/maps/a01_harrvah_city_attack.lua");
 	end
 }
