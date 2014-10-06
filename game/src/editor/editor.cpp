@@ -30,8 +30,8 @@ namespace hoa_editor {
 // Editor class -- public functions
 ///////////////////////////////////////////////////////////////////////////////
 
-Editor::Editor() : QMainWindow(),
-	_skill_editor(NULL)
+Editor::Editor() :
+	QMainWindow()
 {
 	// create the undo stack
 	_undo_stack = new QUndoStack();
@@ -85,9 +85,6 @@ Editor::~Editor() {
 		delete _ed_tabs;
 
 	delete _ed_splitter;
-
-	if (_skill_editor != NULL)
-		delete _skill_editor;
 
 	delete _undo_stack;
 
@@ -214,12 +211,6 @@ void Editor::_MapMenuSetup() {
 		_map_properties_action->setEnabled(false);
 		_context_properties_action->setEnabled(false);
 	} // map does not exist, can't modify it
-}
-
-
-
-void Editor::_ScriptMenuSetup() {
-	_edit_skill_action->setEnabled(false);
 }
 
 
@@ -1038,21 +1029,6 @@ void Editor::_MapAddContext() {
 
 
 
-void Editor::_ScriptEditSkills() {
-	if (_skill_editor == NULL)
-	{
-		// create the skill editor window
-		_skill_editor = new SkillEditor(NULL, "skill_editor");
-		_skill_editor->resize(600,400);
-	}
-	_skill_editor->show();
-	//SkillEditor *skill_editor = new SkillEditor(this, "skill_editor");
-	//skill_editor->exec();
-	//delete skill_editor;
-}
-
-
-
 void Editor::_HelpHelp() {
 	statusBar()->showMessage(tr("See http://allacrost.sourceforge.net/wiki/index.php/Code_Documentation#Map_Editor_Documentation for more details"), 10000);
 }
@@ -1270,11 +1246,6 @@ void Editor::_CreateActions() {
 	_map_properties_action->setStatusTip("Modify the properties of the map");
 	connect(_map_properties_action, SIGNAL(triggered()), this, SLOT(_MapProperties()));
 
-	// Create menu actions related to the Script menu
-	_edit_skill_action = new QAction("Edit S&kills", this);
-	_edit_skill_action->setStatusTip("Add/Edit skills");
-	connect(_edit_skill_action, SIGNAL(triggered()), this, SLOT(_ScriptEditSkills()));
-
 	// Create menu actions related to the Help menu
 	_help_action = new QAction("&Help", this);
 	_help_action->setShortcut(Qt::Key_F1);
@@ -1355,11 +1326,6 @@ void Editor::_CreateMenus() {
 	_map_menu->addSeparator();
 	_map_menu->addAction(_map_properties_action);
 	connect(_map_menu, SIGNAL(aboutToShow()), this, SLOT(_MapMenuSetup()));
-
-	// script menu creation
-	_script_menu = menuBar()->addMenu("&Script");
-	_script_menu->addAction(_edit_skill_action);
-	connect(_script_menu, SIGNAL(aboutToShow()), this, SLOT(_ScriptMenuSetup()));
 
 	// help menu creation
 	_help_menu = menuBar()->addMenu("&Help");
@@ -1530,31 +1496,6 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt) {
 			_first_corner_index = _tile_index;
 			_map->GetLayer(SELECT_LAYER, 0)[_tile_index] = 1;
 		} // selection mode is on
-	} else {
-		// select sprites
-
-		// check for selection amounts
-		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
-			if( (*it)->is_selected == true )
-				selection_count++;
-
-		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
-		{
-			if( (*it)->IsInHoverArea(static_cast<float>(evt->x())/TILE_WIDTH, static_cast<float>(evt->y())/ TILE_HEIGHT) )
-			{	// in the hovering area
-
-				(*it)->is_selected = true;
-				if(selection_count <= 0)	// the last one selection, if there's 2 more selections, substract it...
-					break;
-				else						// deselect it unless we got the last one selection
-				{
-					selection_count--;
-					(*it)->is_selected = false;
-				}
-			}
-			else	// if not in the hovering area, deselect it
-				(*it)->is_selected = false;
-		}
 	}
 
 	if (_layer_edit != OBJECT_LAYER)
@@ -1613,24 +1554,10 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt) {
 		return;
 	}
 
-	// Move sprites
-	bool is_object_layer = (_layer_edit == OBJECT_LAYER);
-	if(is_object_layer && evt->buttons() == Qt::LeftButton) {
-		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
-			if( (*it)->is_selected ) {
-				float x = evt->x();
-				float y = evt->y();
-				float x_position = x*2/TILE_WIDTH + (*it)->img_half_width/2;
-				float y_position = y*2/TILE_HEIGHT + (*it)->img_height/2;
-				(*it)->SetXPosition( x_position, 0 );
-				(*it)->SetYPosition( y_position, 0 );
-			}
-	}
 		int32 index = static_cast<int32>
 			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 
-	if (index != _tile_index && !is_object_layer)  // user has moved onto another tile
-	                                               // ignore the object layer
+	if (index != _tile_index)  // user has moved onto another tile
 	{
 		_tile_index = index;
 
@@ -1873,12 +1800,7 @@ void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt) {
 
 
 void EditorScrollView::keyPressEvent(QKeyEvent *evt) {
-	if (evt->key() == Qt::Key_Delete && _layer_edit == OBJECT_LAYER)
-		for( std::list<MapSprite*>::iterator it=_map->sprites.begin(); it!=_map->sprites.end(); it++ )
-		if( (*it)->is_selected ) {
-			_map->sprites.remove(*it);
-			break;	// break is needed for preventing iterator error
-	}
+
 
 }
 

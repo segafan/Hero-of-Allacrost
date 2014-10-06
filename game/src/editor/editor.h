@@ -42,8 +42,6 @@
 
 #include "dialog_boxes.h"
 #include "grid.h"
-#include "sprites.h"
-#include "skill_editor.h"
 #include "tileset_editor.h"
 
 //! \brief All editor code is contained within this namespace.
@@ -117,7 +115,6 @@ private slots:
 	void _TilesEnableActions();
 	void _TilesetMenuSetup();
 	void _MapMenuSetup();
-	void _ScriptMenuSetup();
 	//@}
 
 	//! \name File Menu Item Slots
@@ -171,12 +168,6 @@ private slots:
 	void _MapSelectMusic();
 	void _MapProperties();
 	void _MapAddContext();
-	//@}
-
-	//! \name Script Menu Item Slots
-	//! \brief These slots handle the events for the Script menu
-	//{@
-	void _ScriptEditSkills();
 	//@}
 
 	//! \name Help Menu Item Slots
@@ -263,8 +254,6 @@ private:
 	QAction* _map_properties_action;
 	QAction* _select_music_action;
 
-	QAction* _edit_skill_action;
-
 	QAction* _help_action;
 	QAction* _about_action;
 	QAction* _about_qt_action;
@@ -275,9 +264,6 @@ private:
 
 	//! Used to add scrollbars to the QGLWidget of the map.
 	EditorScrollView* _ed_scrollview;
-
-	//! The skills editor window
-	SkillEditor *_skill_editor;
 
 	//! Used as the main widget in the editor since it enables user-sizable sub-widgets.
 	QSplitter* _ed_splitter;
