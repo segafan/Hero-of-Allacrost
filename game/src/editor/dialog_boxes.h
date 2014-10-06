@@ -58,15 +58,14 @@ public:
 
 	//! \name Class member accessor functions
 	//@{
-	//! \brief Returns the map height from the height spinbox.
 	uint32 GetHeight() const
 		{ return _height_sbox->value(); }
-	//! \brief Returns the map width from the width spinbox.
+
 	uint32 GetWidth() const
 		{ return  _width_sbox->value(); }
 
-	QTreeWidget* GetTilesetTree()
-		const { return _tileset_tree; }
+	QTreeWidget* GetTilesetTree() const
+		{ return _tileset_tree; }
 	//@}
 
 private slots:
@@ -178,11 +177,11 @@ public:
 	//@{
 	//! \brief Returns the context name entered into the line edit widget by
 	//         the user.
-	QString GetName()
-		const { return _name_ledit->text(); }
+	QString GetName() const
+		{ return _name_ledit->text(); }
 
-	QTreeWidget* GetContextTree()
-		const { return _context_tree; }
+	QTreeWidget* GetContextTree() const
+		{ return _context_tree; }
 	//@}
 
 private slots:
@@ -239,8 +238,8 @@ public:
 
 	//! \name Class member accessor functions
 	//@{
-	QListWidget* GetMusicList()
-		const { return _used_music_list; }
+	QListWidget* GetMusicList() const
+		{ return _used_music_list; }
 	//@}
 
 private slots:

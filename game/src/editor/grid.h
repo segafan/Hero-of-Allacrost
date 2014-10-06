@@ -24,7 +24,6 @@
 #include <QMessageBox>
 
 #include "tileset.h"
-#include "sprites.h"
 
 namespace hoa_editor {
 
@@ -150,9 +149,6 @@ public:
 
 	//! \brief A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage.
 	std::vector<Tileset*> tilesets;
-
-	//! \brief A list which contains a pointer to each sprite; using list because of its efficiency.
-	std::list<MapSprite*> sprites;
 
 	/** \brief The names of each individual context
 	*** \note Maximum size is 32 entries, the maximum amount of contexts that a

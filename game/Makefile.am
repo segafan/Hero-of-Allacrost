@@ -18,7 +18,6 @@ INCLUDES = \
 	-I$(top_srcdir)/src/engine/audio \
 	-I$(top_srcdir)/src/engine/video \
 	-I$(top_srcdir)/src/engine/script \
-	-I$(top_srcdir)/src/global \
 	-I$(top_srcdir)/src/common \
 	-I$(top_srcdir)/src/common/global \
 	-I$(top_srcdir)/src/common/gui \
@@ -326,26 +325,21 @@ BUILT_SOURCES = $(allacrost_editor_MOC)
 CLEANFILES = $(BUILT_SOURCES) $(EDITOR_BIN)
 $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 	$(MOC) -o $@ $<
-allacrost_editor_MOC = $(EDITOR_DIR)/dialog_boxes.moc.cpp $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp $(EDITOR_DIR)/skill_editor.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp
+allacrost_editor_MOC = $(EDITOR_DIR)/dialog_boxes.moc.cpp $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp
 allacrost_editor_SOURCES = \
-	$(EDITOR_DIR)/editor_main.cpp \
+	$(EDITOR_DIR)/dialog_boxes.cpp \
+	$(EDITOR_DIR)/dialog_boxes.h \
 	$(EDITOR_DIR)/editor.cpp \
 	$(EDITOR_DIR)/editor.h \
-	$(EDITOR_DIR)/dialog_boxes.h \
-	$(EDITOR_DIR)/dialog_boxes.cpp \
+	$(EDITOR_DIR)/editor_main.cpp \
 	$(EDITOR_DIR)/grid.cpp \
 	$(EDITOR_DIR)/grid.h \
-	$(EDITOR_DIR)/skill_editor.cpp \
-	$(EDITOR_DIR)/skill_editor.h \
-	$(EDITOR_DIR)/sprites.cpp \
-	$(EDITOR_DIR)/sprites.h \
 	$(EDITOR_DIR)/tileset.cpp \
 	$(EDITOR_DIR)/tileset.h \
 	$(EDITOR_DIR)/tileset_editor.cpp \
 	$(EDITOR_DIR)/tileset_editor.h \
-	$(audio_SOURCES) \
-	$(video_SOURCES) \
 	$(script_SOURCES) \
+	$(video_SOURCES) \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h \
