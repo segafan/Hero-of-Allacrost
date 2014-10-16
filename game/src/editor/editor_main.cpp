@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    editor_main.cpp
 *** \author  Philip Vorsilak, gorzuate@allacrost.org
-*** \brief   Source file for editor's main() function.
+*** \brief   Source file for the map editor's main function
 *** ***************************************************************************/
 
 #ifdef __MACH__
@@ -30,16 +30,12 @@ using namespace std;
 
 using namespace hoa_global;
 using namespace hoa_script;
-
 using namespace hoa_editor;
 
-
-
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 #ifndef _WIN32
 #ifndef __MACH__
-	// Look for data files in DATADIR only if they are not available in the
-	// current directory.
+	// Look for data files in DATADIR only if they are not available in the current directory
 	if (ifstream("./lua/data/config/settings.lua") == NULL) {
 		if (chdir(DATADIR) != 0) {
 			PRINT_ERROR << "failed to change directory to data location" << endl;

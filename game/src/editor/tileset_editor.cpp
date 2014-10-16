@@ -64,7 +64,7 @@ void TilesetDisplay::initializeGL()
 
 void TilesetDisplay::paintGL()
 {
-	VideoManager->SetCoordSys(0.0f, VideoManager->GetScreenWidth() / TILE_WIDTH,
+	VideoManager->SetCoordSys(0.0f, VideoManager->GetScreenWidth() / TILE_LENGTH,
 		VideoManager->GetScreenHeight() / TILE_HEIGHT, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	VideoManager->Clear(Color::blue);
@@ -126,7 +126,7 @@ void TilesetDisplay::mousePressEvent(QMouseEvent* evt)
 		int32 tile_x, tile_y;
 		tile_x = evt->x() / 32;
 		tile_y = evt->y() / 32;
-	
+
 		// Now determine which quadrant of that tile was clicked, and change it's walkability status
 		if (((evt->x() % 32) < 16) && ((evt->y() % 32) < 16)) { // Upper left quadrant (index 0)
 			tileset->walkability[tile_y * 16 + tile_x][0] = (tileset->walkability[tile_y * 16 + tile_x][0] ? 0 : 1);

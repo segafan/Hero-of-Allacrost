@@ -26,17 +26,9 @@
 
 #include "script_read.h"
 #include "script_write.h"
+#include "editor_utils.h"
 
 namespace hoa_editor {
-
-//! \brief The value used to indicate that no tile is placed at a particular location
-const int32 NO_TILE = -1;
-
-//! \brief Used to indicate a non-existing or invalid tile context ID
-const int32 NO_CONTEXT = -1;
-
-//! \brief The maximum number of contexts allowed on a map
-const uint32 MAX_CONTEXTS = 32;
 
 /** ****************************************************************************
 *** \brief Represents a layer of tiles on the map
@@ -47,12 +39,11 @@ const uint32 MAX_CONTEXTS = 32;
 *** the layer, but any operations that change the size of the layer are kept private and
 *** are only able to be modified by the layer's containing TileContext.
 ***
-*** \note All tile layers are named, but their name string is not stored here since all
-*** contexts have the same set of named layers. The shared layer names are stored in the
-*** TileDataModel class instead.
-***
-*** \note TileLayer does not store or handle any of the collision information that is defined
-*** for each file. That data is handled elsewhere.
+*** \note There are additional properties about a tile layer that are not stored here. For
+*** example, the layer's visibility, whether or not collision data is active, and the tileset's
+*** name. This is because every map context shares the same layers, and these properties would
+*** need to be duplicated for every TileLayer object. Instead, look to the class TileLayerProperties,
+*** which contains a single set of these properties for every tile layer shared across all contexts.
 *** ***************************************************************************/
 class TileLayer {
 	friend class TileDataModel;
@@ -115,8 +106,6 @@ public:
 		{ return _tiles; }
 
 private:
-	TileLayer& operator=(const TileLayer& copy);
-
     //! \brief Represents the tile indeces, where a tile at (x,y) is accessed as _tiles[y][x]
     std::vector<std::vector<int32> > _tiles;
 
@@ -161,7 +150,7 @@ private:
 		{ _AddLayerCol(col_index, NO_TILE); }
 
 	/** \brief Delets a row from the tile layer at a specific index
-	/** \param row_index The index of the row to delete
+	*** \param row_index The index of the row to delete
 	***
 	*** All tile rows will be shifted over to accomodate the deleted row. A row_index that exceeds the
 	*** height of the map will result in no operation.
@@ -169,7 +158,7 @@ private:
 	void _DeleteLayerRow(uint32 row_index);
 
 	/** \brief Delets a column from the tile layer at a specific index
-	/** \param col_index The index of the column to delete
+	*** \param col_index The index of the column to delete
 	***
 	*** All tile columns will be shifted over to accomodate the deleted column. A col_index that exceeds the
 	*** length of the map will result in no operation.
@@ -187,6 +176,65 @@ private:
 	**/
 	void _ResizeLayer(uint32 length, uint height);
 }; // class TileLayer
+
+
+/** ****************************************************************************
+*** \brief A container class holding properties of tile layers that are shared across contexts
+***
+*** This simple class retains properties of a tile layer that must remain the same for the layer
+*** across all map contexts. This includes the layer's name, whether or not it is visible, and whether
+*** or not it's collision data is active.
+*** ***************************************************************************/
+class TileLayerProperties {
+public:
+	TileLayerProperties() :
+		_name(QString("")), _visible(true), _collision_enabled(true) {}
+
+	TileLayerProperties(QString name) :
+		_name(name), _visible(true), _collision_enabled(true) {}
+
+	TileLayerProperties(QString name, bool visible, bool collisions) :
+		_name(name), _visible(visible), _collision_enabled(collisions) {}
+
+	//! \name Class member accessor functions
+	//@{
+	QString GetName() const
+		{ return _name; }
+
+	bool IsVisible() const
+		{ return _visible; }
+
+	bool IsCollisionEnabled() const
+		{ return _collision_enabled; }
+
+	void SetName(QString name)
+		{ _name = name; }
+
+	void SetVisible(bool visible)
+		{ _visible = visible; }
+
+	void SetCollisionEnabled(bool collisions)
+		{ _collision_enabled = collisions; }
+	//@}
+
+private:
+	/** \brief The name of the layer as it will be seen by the user of the editor
+	*** \note Although this data is saved to the map file, it is used only by the editor and not the game.
+	**/
+	QString _name;
+
+	/** \brief Indicates whether or not the layer is visible in the editor
+	*** \note This data is not saved to the map file. Any newly created or loaded tile layer will be visible by default.
+	**/
+	bool _visible;
+
+	/** \brief Indicates whether the collision properties of the tile in this layer should take effect
+	***
+	*** This member is best set to true for layers that comprise the ground or floor of a tileset. Layers which constitute
+	*** the higher part of ceilings, the tops of trees, and other unwalkable locations usually should have this property disabled.
+	**/
+	bool _collision_enabled;
+}; // class TileLayerProperties
 
 
 /** ****************************************************************************
@@ -228,6 +276,9 @@ public:
 	int32 GetContextID() const
 		{ return _context_id; }
 
+	QString GetContextName() const
+		{ return _context_name; }
+
 	bool IsInheritingContext() const
 		{ return (_inherited_context_id != NO_CONTEXT); }
 
@@ -239,7 +290,10 @@ public:
 
 	//! \note Returns NULL if layer_index is invalid
 	TileLayer* GetTileLayer(uint32 layer_index)
-		{ if (layer_index < _tile_layers.size()) return _tile_layers[layer_index]; else return NULL; }
+		{ if (layer_index < _tile_layers.size()) return &(_tile_layers[layer_index]); else return NULL; }
+
+	void SetContextName(QString name)
+		{ _context_name = name; }
 	//@}
 
 private:
@@ -247,8 +301,8 @@ private:
 	***
 	*** This constructor is used when not inheriting from another context
 	**/
-	TileContext(int32 id) :
-		_context_id(id), _inherited_context_id(NO_CONTEXT) {}
+	TileContext(int32 id, QString name) :
+		_context_id(id), _context_name(name), _inherited_context_id(NO_CONTEXT) {}
 
 	/** \param id The ID to set the newly created context (should be unique among all TileContext objects)
 	*** \param inherited_context_id The ID of the context that this newly created context should inherit from
@@ -257,11 +311,14 @@ private:
 	*** exists with the provided ID). The constructor has no means to determine if there is a valid context with this
 	*** ID, other than ensuring that the value provided lies within the range 1-MAX_CONTEXTS.
 	**/
-	TileContext(int32 id, int32 inherited_context_id) :
-		_context_id(id), _inherited_context_id(inherited_context_id) {}
+	TileContext(int32 id, QString name, int32 inherited_context_id) :
+		_context_id(id), _context_name(name), _inherited_context_id(inherited_context_id) {}
 
 	//! \brief The ID number of the context which has an acceptable range of [1 - MAX_CONTEXTS]
 	int32 _context_id;
+
+	//! \brief The name of the context as it will be seen by the user in the editor
+	QString _context_name;
 
 	/** \brief The ID of the context that this context inherits from
 	*** If this context does not inherit from another, then this member is set to NO_CONTEXT.
@@ -284,8 +341,21 @@ private:
 	void _SetInheritingContext(int32 inherited_context_id)
 		{ _inherited_context_id = inherited_context_id; }
 
-	void _AddTileLayer(TileLayer& layer)
-		{ _tile_layers.push_back(layer); }
+	/** \brief Adds a new tile layer to the end of the layer container
+	*** \param layer A reference to the pre-created TileLayer to add
+	**/
+	void _AddTileLayer(TileLayer& layer);
+
+	/** \brief Removes an existing tile layer from the context
+	*** \param layer_index The index of the layer to remove
+	**/
+	void _RemoveTileLayer(uint32 layer_index);
+
+	/** \brief Swaps the position of two tile layers
+	*** \param first_index The index of the first layer to swap
+	*** \param second_index The index of the second layer to swap
+	**/
+	void _SwapTileLayers(uint32 first_index, uint32 second_index);
 }; // class TileContext
 
 
@@ -315,14 +385,14 @@ public:
 		{ return (_tile_context_count > 0); }
 
 	/** \brief Call when creating a new map to initialize the first TileContext object
-	/** \param map_length The length of the new map data, in number of tiles
-	/** \param map_height The height of the new map data, in number of tiles
+	*** \param map_length The length of the new map data, in number of tiles
+	*** \param map_height The height of the new map data, in number of tiles
 	*** \return True only if initialization was successful
 	***
 	*** If this class currently holds any TileContext data, it will refuse to destroy it and
 	*** return false. Call DestroyData() first to safely remove any TileContext data.
 	**/
-	bool InitializeData(uint32 map_length, uint32 map_height);
+	bool CreateData(uint32 map_length, uint32 map_height);
 
 	/** \brief Call whenever closing an open map to destroy all layers, contexts, and other data
 	*** \note Any calls to GetContext or other functions that returned a TileContext or TileLayer
@@ -339,7 +409,7 @@ public:
 	*** The function will do nothing if it detects that there is already map data loaded. Call DestroyData()
 	*** prior to calling this function
 	**/
-	bool LoadMap(hoa_script::ReadScriptDescriptor& data_file);
+	bool LoadData(hoa_script::ReadScriptDescriptor& data_file);
 
 	/** \brief Saves all the map context data to an open map file
 	*** \param data_file A reference to the open map data file to save to
@@ -348,56 +418,110 @@ public:
 	*** This function presumes that the file is open to the location where the relevant data
 	*** should be saved to.
 	**/
-	bool SaveMap(hoa_script::WriteScriptDescriptor& data_file);
+	bool SaveData(hoa_script::WriteScriptDescriptor& data_file);
 
 	//! \name Class member accessor functions
 	//@{
 	uint32 GetTileLayerCount() const
 		{ return _tile_layer_count; }
 
-	QStringList GetTileLayerNames() const
-		{ return _tile_layer_names; }
+	uint32 GetTileContextCount() const
+		{ return _tile_context_count; }
 
 	TileLayer* GetSelectedTileLayer() const
 		{ return _selected_tile_layer; }
 
-	void ShowTileLayer(uint32 layer_index)
-		{ if (layer_index <= _tile_layer_count) _tile_layer_visible[layer_index] = true; }
-
-	void HideTileLayer(uint32 layer_index)
-		{ if (layer_index <= _tile_layer_count) _tile_layer_visible[layer_index] = false; }
-
-	void ToggleTileLayerVisibility(uint32 layer_index)
-		{ if (layer_index <= _tile_layer_count) _tile_layer_visible[layer_index] = !_tile_layer_visible[layer_index]; }
-
-	void EnableTileLayerCollision(uint32 layer_index)
-		{ if (layer_index <= _tile_layer_count) _tile_layer_collision[layer_index] = true; }
-
-	void DisableTileLayerCollision(uint32 layer_index)
-		{ if (layer_index <= _tile_layer_count) _tile_layer_collision[layer_index] = false; }
-
-	void ToggleTileLayerCollision(uint32 layer_index)
-		{ if (layer_index <= _tile_layer_count) _tile_layer_collision[layer_index] = !_tile_layer_collision[layer_index]; }
-
-	uint32 GetTileContextCount() const
-		{ return _tile_context_count; }
-
-	QStringList GetTileContextNames() const
-		{ return _tile_context_names; }
-
 	TileContext* GetSelectedTileContext() const
 		{ return _selected_tile_context; }
+
+	//! \brief Gets the most recent error message generated by a call and clears that error
+	QString GetErrorMessage()
+		{ QString error = _error_message; _error_message.clear(); return error; }
 	//@}
 
-	void AddTileLayer(QString name, bool collision_on);
+	//! \name Tile Layer Manipulation Methods
+	//@{
+	//! \brief Return the ordered list of names for all tile layers
+	QStringList GetTileLayerNames() const;
 
-	bool DeleteTileLayer(uint32 index);
+	/** \brief Makes a tile layer visible in the editor
+	*** \param layer_index The index of the layer to show
+	**/
+	void ShowTileLayer(uint32 layer_index)
+		{ if (layer_index <= _tile_layer_count) _tile_layer_properties[layer_index].SetVisible(true); }
 
+	/** \brief Removes visibility of a tile layer in the editor
+	*** \param layer_index The index of the layer to hide
+	**/
+	void HideTileLayer(uint32 layer_index)
+		{ if (layer_index <= _tile_layer_count) _tile_layer_properties[layer_index].SetVisible(false); }
+
+	/** \brief Toggles whether or not a tile layer is visible in the editor
+	*** \param layer_index The index of the tile layer to toggle visibility for
+	**/
+	void ToggleTileLayerVisibility(uint32 layer_index);
+
+	/** \brief Activates a tile layer's collision data
+	*** \param layer_index The index of the tile layer to activate collisions for
+	**/
+	void EnableTileLayerCollision(uint32 layer_index)
+		{ if (layer_index <= _tile_layer_count) _tile_layer_properties[layer_index].SetCollisionEnabled(true); }
+
+	/** \brief Deactivates a tile layer's collision data
+	*** \param layer_index The index of the tile layer to deactivate collisions for
+	**/
+	void DisableTileLayerCollision(uint32 layer_index)
+		{ if (layer_index <= _tile_layer_count) _tile_layer_properties[layer_index].SetCollisionEnabled(false); }
+
+	/** \brief Toggles the activation of a tile layer's collision data
+	*** \param layer_index The index of the tile layer to toggle collision data for
+	**/
+	void ToggleTileLayerCollision(uint32 layer_index);
+
+	/** \brief Adds a new tile layer to all active contexts
+	*** \param name The name of the layer to add, as will be see in the editor
+	*** \param collision_enabled If true, the tile layer's collision data will be active in the map
+	*** \return True if the layer was added successfully
+	*** \note The layer name should be unique amongst all existing tile layers
+	**/
+	bool AddTileLayer(QString name, bool collision_enabled);
+
+	/** \brief Removes a tile later from all active contexts
+	*** \param layer_index The index of the layer to remove
+	*** \return True if the layer was deleted successfully
+	**/
+	bool DeleteTileLayer(uint32 layer_index);
+
+	/** \brief Renames an existing tile layer
+	*** \param layer_index The index of the layer to rename
+	*** \param new_name The new name for the tile layer
+	*** \return True if the layer was renamed successfully
+	*** \note The layer name should be unique amongst all existing tile layers
+	**/
 	bool RenameTileLayer(uint32 layer_index, QString new_name);
 
-	void MoveTileLayerUp(uint32 layer_index);
+	/** \brief Moves a tile layer one position up in the layer list
+	*** \param layer_index The index of the layer that should be moved upward
+	*** \return True if the layer was moved successfully
+	**/
+	bool MoveTileLayerUp(uint32 layer_index);
 
-	void MoveTileLayerDown(uint32 layer_index);
+	/** \brief Moves a tile layer one position down in the layer list
+	*** \param layer_index The index of the layer that should be moved downward
+	*** \return True if the layer was moved successfully
+	**/
+	bool MoveTileLayerDown(uint32 layer_index);
+	//@}
+
+	//! \name Tile Context Manipulation Methods
+	//@{
+	//! \brief Returns the ordered list of names for all tile contexts
+	QStringList GetTileContextNames() const;
+
+	/** \brief Returns an ordered list of all names of the contexts that each context inherits from
+	*** \note Contexts which do not inherit from another context will be represented with an empty string
+	**/
+	QStringList GetInheritedTileContextNames() const;
 
 	/** \brief Creates a new TileContext object and add it to the end of the context list
 	*** \param name The name to assign to the context (must be a non-empty string)
@@ -408,9 +532,9 @@ public:
 	*** Possible errors that could prevent context creation include exceeding the maximum number of
 	*** contexts allowed (MAX_CONTEXTS), an existing context with the same name, or an invalid context ID argument.
 	**/
-	TileContext* AddTileContext(QString name, int32 inherting_context_id = NO_CONTEXT);
+	TileContext* AddTileContext(QString name, int32 inheriting_context_id = NO_CONTEXT);
 
-	/** \brief Deletes an existing Mapcontext object
+	/** \brief Deletes an existing TileContext object
 	*** \param context A pointer to the context to delete
 	*** \return True only if the context was deleted successfully
 	***
@@ -419,12 +543,29 @@ public:
 	**/
 	bool DeleteTileContext(TileContext* context);
 
+	/** \brief Renames an existing TileContext object
+	*** \param context_index The index of the context to rename
+	*** \param new_name The name to set for the context
+	*** \return True if the context was renamed successfully
+	***
+	*** The name should be unique among all existing TileContext names. Note that any previous calls to
+	*** GetTileContextNames() or GetInheritedTileContextNames() that retained the QStringList from those
+	*** calls will be outdated if this function completes successfully. You should always remember to
+	*** update any external context name lists after a rename operation.
+	**/
 	bool RenameTileContext(uint32 context_index, QString new_name);
 
-	/** \brief Returns an ordered list of all names of the contexts that each context inherits from
-	*** \note Contexts which do not inherit from another context will be represented with an empty string
+	/** \brief Moves a context up in the list
+	*** \param context A pointer to the context to move
+	*** \return True if the move operation was successful (fails if the context is already at the top of the list)
 	**/
-	QStringList GetInheritedTileContextNames() const;
+	bool MoveTileContextUp(TileContext* context);
+
+	/** \brief Moves a context down in the list
+	*** \param context A pointer to the context to move
+	*** \return True if the move operation was successful (fails if the context is already at the bottom of the list)
+	**/
+	bool MoveTileContextDown(TileContext* context);
 
 	/** \brief Returns a pointer to a TileContext with a specified id
 	*** \param context_id The ID of the context to retrieve
@@ -445,53 +586,22 @@ public:
 	*** \note Context names are guaranteed to be unique, so a name will never map to more than one context
 	**/
 	TileContext* FindTileContextByIndex(uint32 context_index) const;
-
-	/** \brief Moves a context up in the list
-	*** \param context A pointer to the context to move
-	*** \return True if the move operation was successful (fails if the context is already at the top of the list)
-	**/
-	bool MoveTileContextUp(TileContext* context);
-
-	/** \brief Moves a context down in the list
-	*** \param context A pointer to the context to move
-	*** \return True if the move operation was successful (fails if the context is already at the bottom of the list)
-	**/
-	bool MoveTileContextDown(TileContext* context);
+	//@}
 
 private:
 	//! \brief The number of tile layers that the open map contains
 	uint32 _tile_layer_count;
+
+	//! \brief The number of map (tile) contexts that the open map contains
+	uint32 _tile_context_count;
 
 	/** \brief A pointer to the tile layer currently selected by the user
 	*** \note This tile layer exists in the _active_tile_context
 	**/
 	TileLayer* _selected_tile_layer;
 
-	//! \brief Booleans indicating which tile layers are currently visible to the editor
-	std::vector<bool> _tile_layer_visible;
-
-	//! \brief Booleans indicating which tile layers should use collision data
-	std::vector<bool> _tile_layer_collision;
-
-	//! \brief An ordered list of the names of each tile layer (0th element is the first layer drawn)
-	QStringList _tile_layer_names;
-
-	/** \brief A tile layer that contains nothing but empty tiles, used for TileContext construction
-	***
-	*** This structure is maintained to the current height and length of the open map so that when a new
-	*** context is created or tile layer is added, this member can be used to create a new empty layer
-	*** of the correct size.
-	**/
-	TileLayer _empty_tile_layer;
-
-	//! \brief The number of map (tile) contexts that the open map contains
-	uint32 _tile_context_count;
-
 	//! \brief A pointer to the map context currently selected by the user
 	TileContext* _selected_tile_context;
-
-	//! \brief An ordered list of the names of each map context
-	QStringList _tile_context_names;
 
 	/** \brief Stores all TileContext objects for the given map
 	***
@@ -502,6 +612,20 @@ private:
 	*** values inbetween valid context objects. The context at index i will always have an ID value of i+1.
 	**/
 	std::vector<TileContext*> _all_tile_contexts;
+
+	//! \brief An ordered container of the shared properties for each tile layer across all contexts
+	std::vector<TileLayerProperties> _tile_layer_properties;
+
+	/** \brief A tile layer that contains nothing but empty tiles, used for TileContext construction
+	***
+	*** This structure is maintained to the current height and length of the open map so that when a new
+	*** context is created or tile layer is added, this member can be used to create a new empty layer
+	*** of the correct size.
+	**/
+	TileLayer _empty_tile_layer;
+
+	//! \brief Contains the error message generated by the most recently called method that failed
+	QString _error_message;
 
 	//! \brief Returns the index where the context object is stored
 	uint32 _GetTileContextIndex(TileContext* context)
@@ -517,6 +641,19 @@ private:
 	*** to be checked to maintain consistency.
 	**/
 	void _SwapTileContexts(TileContext* first, TileContext* second);
+
+	/** \brief Computes the collision grid data from the available map information
+	*** \param data A reference to a 2D vector where the resulting data should be written to
+	***
+	*** The collision grid is four times the size of the tile grid (twice as long, and twice as high).
+	*** The tileset data contains the collision information for every quadrant of its map tiles. The
+	*** data is computed by looking at the collsion data for each tile in every position of the map
+	*** grid on every layer that has the layer collision property enabled. This is done for each tile
+	*** context, and the results are bitmasked together so that the collision data for all potential
+	*** 32 contexts can fit within a single 32-bit integer.
+	***
+	**/
+	void _ComputeCollisionData(std::vector<std::vector<uint32> >& data);
 }; // class TileDataModel
 
 } // namespace hoa_editor

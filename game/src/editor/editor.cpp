@@ -272,7 +272,7 @@ void Editor::_FileNew() {
 			new_map_progress->setValue(checked_items);
 
 			_ed_scrollview->_map->SetInitialized(true);
-			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
+			_ed_scrollview->resize(new_map->GetWidth() * TILE_LENGTH, new_map->GetHeight() * TILE_HEIGHT);
 			_ed_splitter->show();
 
 			_grid_on = false;
@@ -918,8 +918,8 @@ void Editor::_MapProperties() {
 
 		// Resize the map, QOpenGL and QScrollView widgets.
 		_ed_scrollview->_map->SetHeight(props->GetHeight());
-		_ed_scrollview->_map->resize(props->GetWidth() * TILE_WIDTH, props->GetHeight() * TILE_HEIGHT);
-		_ed_scrollview->resize(props->GetWidth() * TILE_WIDTH, props->GetHeight() * TILE_HEIGHT);
+		_ed_scrollview->_map->resize(props->GetWidth() * TILE_LENGTH, props->GetHeight() * TILE_HEIGHT);
+		_ed_scrollview->resize(props->GetWidth() * TILE_LENGTH, props->GetHeight() * TILE_HEIGHT);
 #endif
 
 
@@ -1455,7 +1455,7 @@ EditorScrollView::~EditorScrollView() {
 
 
 void EditorScrollView::Resize(int width, int height) {
-	_map->resize(width * TILE_WIDTH, height * TILE_HEIGHT);
+	_map->resize(width * TILE_LENGTH, height * TILE_HEIGHT);
 	_map->SetHeight(height);
 	_map->SetWidth(width);
 }
@@ -1474,7 +1474,7 @@ vector<int32>& EditorScrollView::GetCurrentLayer() {
 void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt) {
 	// don't draw outside the map
 	if ((evt->y() / TILE_HEIGHT) >= static_cast<uint32>(_map->GetHeight()) ||
-		(evt->x() / TILE_WIDTH)  >= static_cast<uint32>(_map->GetWidth()) ||
+		(evt->x() / TILE_LENGTH)  >= static_cast<uint32>(_map->GetWidth()) ||
 		evt->x() < 0 || evt->y() < 0)
 		return;
 
@@ -1487,7 +1487,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt) {
 	if(_layer_edit != OBJECT_LAYER) {
 		// record location of pressed tile
 		_tile_index = static_cast<int32>
-			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_LENGTH);
 
 		// record the location of the beginning of the selection rectangle
 		if (evt->button() == Qt::LeftButton && editor->_select_on == true &&
@@ -1547,7 +1547,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt) {
 
 	// don't draw outside the map
 	if ((evt->y() / TILE_HEIGHT) >= static_cast<uint32>(_map->GetHeight()) ||
-		(evt->x() / TILE_WIDTH)  >= static_cast<uint32>(_map->GetWidth()) ||
+		(evt->x() / TILE_LENGTH)  >= static_cast<uint32>(_map->GetWidth()) ||
 		evt->x() < 0 || evt->y() < 0 )
 	{
 		editor->statusBar()->clear();
@@ -1555,7 +1555,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt) {
 	}
 
 		int32 index = static_cast<int32>
-			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+			(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_LENGTH);
 
 	if (index != _tile_index)  // user has moved onto another tile
 	{
@@ -1623,13 +1623,13 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt) {
 	// Display mouse position in the format specified by _coord_type
 	QString position;
 	if (editor->_coord_type == 0)
-		position = QString("x: %1  y: %2").arg(static_cast<double>(evt->x() / TILE_WIDTH), 0, 'f', 0).arg(
+		position = QString("x: %1  y: %2").arg(static_cast<double>(evt->x() / TILE_LENGTH), 0, 'f', 0).arg(
 			static_cast<double>(evt->y() / TILE_HEIGHT), 0, 'f', 0);
 	else if (editor->_coord_type == 1)
-		position = QString("x: %1  y: %2").arg(static_cast<double>(evt->x() * 2 / TILE_WIDTH), 0, 'f', 0).arg(
+		position = QString("x: %1  y: %2").arg(static_cast<double>(evt->x() * 2 / TILE_LENGTH), 0, 'f', 0).arg(
 			static_cast<double>(evt->y() * 2 / TILE_HEIGHT), 0, 'f', 0);
 	else
-		position = QString("x: %1  y: %2").arg(evt->x() / static_cast<float>(TILE_WIDTH), 0, 'f', 1).arg(
+		position = QString("x: %1  y: %2").arg(evt->x() / static_cast<float>(TILE_LENGTH), 0, 'f', 1).arg(
 			evt->y() / static_cast<float>(TILE_HEIGHT), 0, 'f', 1);
 	editor->statusBar()->showMessage(position);
 
@@ -1681,7 +1681,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt) {
 				{
 					// record location of released tile
 					_tile_index = static_cast<int32>
-						(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
+						(evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_LENGTH);
 					vector<int32>& layer = GetCurrentLayer();
 
 					if (editor->_select_on == false)
@@ -1788,11 +1788,11 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt) {
 void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt) {
 	// Don't popup a menu outside the map.
 	if ((evt->y() / TILE_HEIGHT) >= static_cast<uint32>(_map->GetHeight()) ||
-		(evt->x() / TILE_WIDTH)  >= static_cast<uint32>(_map->GetWidth()) ||
+		(evt->x() / TILE_LENGTH)  >= static_cast<uint32>(_map->GetWidth()) ||
 		evt->x() < 0 || evt->y() < 0)
 		return;
 
-	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
+	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_LENGTH;
 	_context_menu->exec(QCursor::pos());
 	(static_cast<Editor*> (topLevelWidget()))->statusBar()->clear();
 }
