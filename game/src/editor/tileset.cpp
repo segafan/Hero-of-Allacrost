@@ -334,7 +334,7 @@ TilesetTable::TilesetTable() :
 	for (int32 i = 0; i < table->numRows(); i++)
 		table->setRowHeight(i, TILE_HEIGHT);
 	for (int32 i = 0; i < table->numCols(); i++)
-		table->setColumnWidth(i, TILE_WIDTH);
+		table->setColumnWidth(i, TILE_LENGTH);
 } // TilesetTable constructor
 
 
@@ -376,7 +376,7 @@ bool TilesetTable::Load(const QString& set_name)
 	{
 		for (uint32 col = 0; col < 16; col++)
 		{
-			rectangle.setRect(col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH,
+			rectangle.setRect(col * TILE_LENGTH, row * TILE_HEIGHT, TILE_LENGTH,
 			                  TILE_HEIGHT);
 			QVariant variant = entire_tileset.copy(rectangle);
 			if (!variant.isNull())

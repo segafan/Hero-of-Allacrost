@@ -24,21 +24,14 @@
 //#include <QTableWidgetItem>
 #include <QVariant>
 
+#include "editor_utils.h"
 #include "defs.h"
 #include "script.h"
 #include "utils.h"
 #include "video.h"
 
 //! All calls to the editor are wrapped in this namespace.
-namespace hoa_editor
-{
-
-//! \brief Standard tile dimensions in number of pixels.
-//@{
-const unsigned int TILE_WIDTH  = 32;
-const unsigned int TILE_HEIGHT = 32;
-//@}
-
+namespace hoa_editor {
 
 /** ***************************************************************************
 *** \brief Represents an animated tile

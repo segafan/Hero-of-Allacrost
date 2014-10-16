@@ -51,7 +51,7 @@ Grid::Grid(QWidget* parent, const QString& name, uint32 width, uint32 height) :
 {
 	context_names << "Base";
 
-	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+	resize(_width * TILE_LENGTH, _height * TILE_HEIGHT);
 	setMouseTracking(true);
 
 	// Initialize layers with -1 to indicate that no tile/object/etc. is
@@ -170,7 +170,7 @@ bool Grid::LoadMap()
 
 	// Resize the widget to match the width and height of the map we are in the
 	// process of loading
-	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+	resize(_width * TILE_LENGTH, _height * TILE_HEIGHT);
 
 	// Create selection layer
 	for (uint32 i = 0; i < _width * _height; i++)
@@ -711,7 +711,7 @@ void Grid::InsertRow(uint32 tile_index)
 	} // iterate through all contexts
 
 	_height++;
-	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+	resize(_width * TILE_LENGTH, _height * TILE_HEIGHT);
 #endif
 } // Grid::InsertRow(...)
 
@@ -751,7 +751,7 @@ void Grid::InsertCol(uint32 tile_index)
 	} // iterate through all contexts
 
 	_width++;
-	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+	resize(_width * TILE_LENGTH, _height * TILE_HEIGHT);
 #endif
 } // Grid::InsertCol(...)
 
@@ -778,7 +778,7 @@ void Grid::DeleteRow(uint32 tile_index)
 	} // iterate through all contexts
 
 	_height--;
-	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+	resize(_width * TILE_LENGTH, _height * TILE_HEIGHT);
 #endif
 } // Grid::DeleteRow(...)
 
@@ -820,7 +820,7 @@ void Grid::DeleteCol(uint32 tile_index)
 	} // iterate through all contexts
 
 	_width--;
-	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+	resize(_width * TILE_LENGTH, _height * TILE_HEIGHT);
 #endif
 } // Grid::DeleteCol(...)
 
@@ -861,16 +861,16 @@ void Grid::paintGL()
 		return;
 
 	// Setup drawing parameters
-	VideoManager->SetCoordSys(0.0f, VideoManager->GetScreenWidth() / TILE_WIDTH,
+	VideoManager->SetCoordSys(0.0f, VideoManager->GetScreenWidth() / TILE_LENGTH,
 	                          VideoManager->GetScreenHeight() / TILE_HEIGHT, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	VideoManager->Clear(Color::black);
 
 	// Setup drawing bounds so only visible tiles are drawn. These bounds are
 	// valid for all layers.
-	int num_tiles_width  = _ed_scrollview->visibleWidth() / TILE_WIDTH;
+	int num_tiles_width  = _ed_scrollview->visibleWidth() / TILE_LENGTH;
 	int num_tiles_height = _ed_scrollview->visibleHeight() / TILE_HEIGHT;
-	left_tile   = _ed_scrollview->horizontalScrollBar()->value() / TILE_WIDTH;
+	left_tile   = _ed_scrollview->horizontalScrollBar()->value() / TILE_LENGTH;
 	top_tile    = _ed_scrollview->verticalScrollBar()->value() / TILE_HEIGHT;
 	right_tile  = left_tile + num_tiles_width + 1;
 	bottom_tile = top_tile + num_tiles_height + 1;

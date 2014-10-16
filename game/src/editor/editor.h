@@ -43,43 +43,10 @@
 #include "dialog_boxes.h"
 #include "grid.h"
 #include "tileset_editor.h"
+#include "editor_utils.h"
 
 //! \brief All editor code is contained within this namespace.
 namespace hoa_editor {
-
-//! \brief Various modes for tile editing
-enum TILE_MODE_TYPE {
-	INVALID_TILE   = -1,
-	PAINT_TILE     = 0,
-	MOVE_TILE      = 1,
-	DELETE_TILE    = 2,
-	TOTAL_TILE     = 3
-};
-
-
-//! \brief Represents different types of transition patterns for autotileable tiles.
-enum TRANSITION_PATTERN_TYPE
-{
-	INVALID_PATTERN     = -1,
-	NW_BORDER_PATTERN   = 0,
-	N_BORDER_PATTERN    = 1,
-	NE_BORDER_PATTERN   = 2,
-	E_BORDER_PATTERN    = 3,
-	SE_BORDER_PATTERN   = 4,
-	S_BORDER_PATTERN    = 5,
-	SW_BORDER_PATTERN   = 6,
-	W_BORDER_PATTERN    = 7,
-	NW_CORNER_PATTERN   = 8,
-	NE_CORNER_PATTERN   = 9,
-	SE_CORNER_PATTERN   = 10,
-	SW_CORNER_PATTERN   = 11,
-	TOTAL_PATTERN       = 12
-};
-
-
-//! \brief The maximum number of allowable contexts on a map.
-const uint32 MAX_CONTEXTS = 32;
-
 
 class EditorScrollView;
 

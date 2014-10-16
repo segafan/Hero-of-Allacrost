@@ -332,14 +332,19 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/editor.cpp \
 	$(EDITOR_DIR)/editor.h \
 	$(EDITOR_DIR)/editor_main.cpp \
+	$(EDITOR_DIR)/editor_utils.cpp \
+	$(EDITOR_DIR)/editor_utils.h \
 	$(EDITOR_DIR)/grid.cpp \
 	$(EDITOR_DIR)/grid.h \
+	$(EDITOR_DIR)/tile_model.cpp \
+	$(EDITOR_DIR)/tile_model.h \
 	$(EDITOR_DIR)/tileset.cpp \
 	$(EDITOR_DIR)/tileset.h \
 	$(EDITOR_DIR)/tileset_editor.cpp \
 	$(EDITOR_DIR)/tileset_editor.h \
 	$(script_SOURCES) \
 	$(video_SOURCES) \
+	$(audio_SOURCES) \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h \
