@@ -47,47 +47,46 @@ const uint32 TILESET_LENGTH = 512;
 const uint32 TILESET_HEIGHT = 512;
 //@}
 
-//! \brief The dimensions of a tile's collision quadrant, in pixels
-//@{
-const uint32 COLLISION_QUADRANT_LENGTH = TILE_LENGTH / 2;
-const uint32 COLLISION_QUADRANT_HEIGHT = TILE_HEIGHT / 2;
-//@}
-
 //! \brief The dimensions of a tileset image file in number of tiles
 //@{
 const uint32 TILESET_NUM_COLS = 16;
 const uint32 TILESET_NUM_ROWS = 16;
 //@}
 
-//! \brief The number of collision data for each tile
-const uint32 COLLISION_QUADRANTS = 4;
+//! \brief The dimensions of a tile's collision quadrant, in pixels
+//@{
+const uint32 TILE_QUADRANT_LENGTH = TILE_LENGTH / 2;
+const uint32 TILE_QUADRANT_HEIGHT = TILE_HEIGHT / 2;
+//@}
+
+//! \brief The number of collision quadrants in a single tile
+const uint32 TILE_NUM_QUADRANTS = 4;
 
 //! \brief Various modes for tile editing
 enum TILE_MODE_TYPE {
 	INVALID_TILE   = -1,
-	PAINT_TILE     = 0,
-	MOVE_TILE      = 1,
-	DELETE_TILE    = 2,
-	TOTAL_TILE     = 3
+	PAINT_TILE     =  0,
+	MOVE_TILE      =  1,
+	DELETE_TILE    =  2,
+	TOTAL_TILE     =  3
 };
 
 //! \brief Represents different types of transition patterns for autotileable tiles.
-enum TRANSITION_PATTERN_TYPE
-{
+enum TRANSITION_PATTERN_TYPE {
 	INVALID_PATTERN     = -1,
-	NW_BORDER_PATTERN   = 0,
-	N_BORDER_PATTERN    = 1,
-	NE_BORDER_PATTERN   = 2,
-	E_BORDER_PATTERN    = 3,
-	SE_BORDER_PATTERN   = 4,
-	S_BORDER_PATTERN    = 5,
-	SW_BORDER_PATTERN   = 6,
-	W_BORDER_PATTERN    = 7,
-	NW_CORNER_PATTERN   = 8,
-	NE_CORNER_PATTERN   = 9,
-	SE_CORNER_PATTERN   = 10,
-	SW_CORNER_PATTERN   = 11,
-	TOTAL_PATTERN       = 12
+	NW_BORDER_PATTERN   =  0,
+	N_BORDER_PATTERN    =  1,
+	NE_BORDER_PATTERN   =  2,
+	E_BORDER_PATTERN    =  3,
+	SE_BORDER_PATTERN   =  4,
+	S_BORDER_PATTERN    =  5,
+	SW_BORDER_PATTERN   =  6,
+	W_BORDER_PATTERN    =  7,
+	NW_CORNER_PATTERN   =  8,
+	NE_CORNER_PATTERN   =  9,
+	SE_CORNER_PATTERN   =  10,
+	SW_CORNER_PATTERN   =  11,
+	TOTAL_PATTERN       =  12
 };
 
 } // namespace hoa_editor

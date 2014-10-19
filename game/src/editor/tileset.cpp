@@ -28,6 +28,18 @@ using namespace hoa_common;
 
 namespace hoa_editor {
 
+/** \name Tile Collision Quadrant Bitmasks
+***
+*** In the TDF, the collision information for each tile is stored in a single number.
+*** These bitmasks are used to extact the collision data for each quadrant of a tile.
+**/
+//@{
+uint32 NORTHWEST_TILE_QUADRANT = 0x08;
+uint32 NORTHEAST_TILE_QUADRANT = 0x04;
+uint32 SOUTHWEST_TILE_QUADRANT = 0x02;
+uint32 SOUTHEAST_TILE_QUADRANT = 0x01;
+//@}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Tileset class
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +50,7 @@ Tileset::Tileset() :
 	_tileset_image_filename(""),
 	_tileset_definition_filename(""),
 	_tile_images(TILESET_NUM_ROWS * TILESET_NUM_COLS, QPixmap()),
-	_tile_collisions(TILESET_NUM_ROWS * TILESET_NUM_COLS * COLLISION_QUADRANTS, 0)
+	_tile_collisions(TILESET_NUM_ROWS * TILESET_NUM_COLS * TILE_NUM_QUADRANTS, 0)
 {}
 
 
@@ -103,13 +115,21 @@ bool Tileset::Load(const QString& def_filename, bool single_image) {
 		vector<uint32> collision_row;  // Temporarily stores one tile row worth of collision data
 		read_file.ReadUIntVector(i, collision_row);
 		// Ensure that the row is the correct size
-		if (collision_row.size() != (TILESET_NUM_COLS * COLLISION_QUADRANTS)) {
+		if (collision_row.size() != TILESET_NUM_COLS) {
 			_ClearData();
 			return false;
 		}
 
+		// Every entry in collision_row contains the collision data for all four tile quadrants. We
+		// apply some simple bit arithmetic to extract the collision state for each quadrant
 		for (uint32 j = 0; j < collision_row.size(); ++j) {
-			_tile_collisions[(i * (TILESET_NUM_COLS * COLLISION_QUADRANTS)) + j] = collision_row[j];
+			// Determine the starting index for the next four quadrants of data
+			uint32 index = (i * (TILESET_NUM_COLS * TILE_NUM_QUADRANTS)) + (j * TILE_NUM_QUADRANTS);
+
+			_tile_collisions[index] = (collision_row[j] & NORTHWEST_TILE_QUADRANT) ? 1 : 0;
+			_tile_collisions[index + 1] = (collision_row[j] & NORTHEAST_TILE_QUADRANT) ? 1 : 0;
+			_tile_collisions[index + 2] = (collision_row[j] & SOUTHWEST_TILE_QUADRANT) ? 1 : 0;
+			_tile_collisions[index + 3] = (collision_row[j] & SOUTHEAST_TILE_QUADRANT) ? 1 : 0;
 		}
 	}
 	read_file.CloseTable();
@@ -177,11 +197,22 @@ bool Tileset::Save() {
 	// Write the collision data one row at a time
 	write_file.BeginTable("collisions");
 	for (uint32 row = 0; row < TILESET_NUM_ROWS; row++) {
-		// Extract a sub vector from the collision data to write
-		vector<uint32>::const_iterator row_start = _tile_collisions.begin() + (row * TILESET_NUM_COLS * COLLISION_QUADRANTS);
-		vector<uint32>::const_iterator row_end = row_start + (TILESET_NUM_COLS * COLLISION_QUADRANTS);
-		vector<uint32> collision_row(row_start, row_end);
-		write_file.WriteUIntVector(row, collision_row);
+		// The row of data needs to be transformed so all four tile quadrants fit in one number
+		vector<uint32> combined_row(TILESET_NUM_COLS, 0);
+		for (uint32 i = 0; i < combined_row.size(); ++i) {
+			// Determine the starting index for the next four quadrants of data in _tile_collisions
+			uint32 index = row * (TILESET_NUM_COLS * TILE_NUM_QUADRANTS) + (i * TILE_NUM_QUADRANTS);
+
+			if (_tile_collisions[index] != 0)
+				combined_row[i] |= NORTHWEST_TILE_QUADRANT;
+			if (_tile_collisions[index + 1] != 0)
+				combined_row[i] |= NORTHEAST_TILE_QUADRANT;
+			if (_tile_collisions[index + 2] != 0)
+				combined_row[i] |= SOUTHWEST_TILE_QUADRANT;
+			if (_tile_collisions[index + 3] != 0)
+				combined_row[i] |= SOUTHEAST_TILE_QUADRANT;
+		}
+		write_file.WriteUIntVector(row, combined_row);
 	}
 	write_file.EndTable();
 	write_file.InsertNewLine();

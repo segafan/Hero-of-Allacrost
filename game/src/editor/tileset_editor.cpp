@@ -37,7 +37,7 @@ TilesetDisplay::TilesetDisplay() :
 	_last_x(-1),
 	_last_y(-1),
 	_tileset_data(new Tileset()),
-	_red_square(QPixmap(COLLISION_QUADRANT_LENGTH, COLLISION_QUADRANT_HEIGHT))
+	_red_square(QPixmap(TILE_QUADRANT_LENGTH, TILE_QUADRANT_HEIGHT))
 {
 	// Red color with 50% transparency
 	_red_square.fill(QColor(255, 0, 0, 125));
@@ -62,7 +62,7 @@ void TilesetDisplay::DrawTileset() {
     for (uint32 row = 0; row < TILESET_NUM_ROWS; ++row) {
         for (uint32 col = 0; col < TILESET_NUM_COLS; ++col) {
 			// The index into the collision grid of the four quadrants
-			uint32 collision_index = (row * TILESET_NUM_ROWS) + (col * COLLISION_QUADRANTS);
+			uint32 collision_index = (row * TILESET_NUM_ROWS) + (col * TILE_NUM_QUADRANTS);
 			// Screen coordinates of the top left corner of the tile
 			uint32 tile_x = col * TILE_LENGTH;
 			uint32 tile_y = row * TILE_HEIGHT;
@@ -71,13 +71,13 @@ void TilesetDisplay::DrawTileset() {
 				addPixmap(_red_square)->setPos(tile_x, tile_y);
 			}
 			if (collision_grid[collision_index+1] != 0) { // NE quadrant
-				addPixmap(_red_square)->setPos(tile_x + COLLISION_QUADRANT_LENGTH, tile_y);
+				addPixmap(_red_square)->setPos(tile_x + TILE_QUADRANT_LENGTH, tile_y);
 			}
 			if (collision_grid[collision_index+2] != 0) { // SW quadrant
-				addPixmap(_red_square)->setPos(tile_x, tile_y + COLLISION_QUADRANT_HEIGHT);
+				addPixmap(_red_square)->setPos(tile_x, tile_y + TILE_QUADRANT_HEIGHT);
 			}
 			if (collision_grid[collision_index+3] != 0) { // SE quadrant
-				addPixmap(_red_square)->setPos(tile_x + COLLISION_QUADRANT_LENGTH, tile_y + COLLISION_QUADRANT_HEIGHT);
+				addPixmap(_red_square)->setPos(tile_x + TILE_QUADRANT_LENGTH, tile_y + TILE_QUADRANT_HEIGHT);
 			}
         }
     }
@@ -105,8 +105,8 @@ void TilesetDisplay::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 		// The collision value to set should be the opposite of the value for the coordinate of this click
         _set_collision_state = _IsCollisionQuadrantEnabled(event) ? 0 : 1;
 
-		_last_x = pos.x() / COLLISION_QUADRANT_LENGTH;
-		_last_y = pos.y() / COLLISION_QUADRANT_HEIGHT;
+		_last_x = pos.x() / TILE_QUADRANT_LENGTH;
+		_last_y = pos.y() / TILE_QUADRANT_HEIGHT;
 
 		_UpdateCollisionQuadrant(event);
     }
@@ -135,11 +135,11 @@ void TilesetDisplay::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         return;
 
     // Do nothing if the mouse event occured over the same collision coordinate as the last move event
-    if (_last_x == (pos.x() / COLLISION_QUADRANT_LENGTH) && _last_y == (pos.y() / COLLISION_QUADRANT_HEIGHT))
+    if (_last_x == (pos.x() / TILE_QUADRANT_LENGTH) && _last_y == (pos.y() / TILE_QUADRANT_HEIGHT))
         return;
 
-    _last_x = pos.x() / COLLISION_QUADRANT_LENGTH;
-    _last_y = pos.y() / COLLISION_QUADRANT_HEIGHT;
+    _last_x = pos.x() / TILE_QUADRANT_LENGTH;
+    _last_y = pos.y() / TILE_QUADRANT_HEIGHT;
 
     _UpdateCollisionQuadrant(event);
 }
@@ -176,13 +176,13 @@ uint32 TilesetDisplay::_DetermineCollisionQuadrantIndex(QGraphicsSceneMouseEvent
     uint32 quadrant_index = (tile_y * TILESET_NUM_ROWS) + tile_x;
 
     // Now determine which quadrant of that tile was clicked, and change it's walkability status
-    if ((x_offset < COLLISION_QUADRANT_LENGTH) && (y_offset < COLLISION_QUADRANT_HEIGHT))  // NW quadrant
+    if ((x_offset < TILE_QUADRANT_LENGTH) && (y_offset < TILE_QUADRANT_HEIGHT))  // NW quadrant
         quadrant_index += 0;
-    else if ((x_offset >= COLLISION_QUADRANT_LENGTH) && (y_offset < COLLISION_QUADRANT_HEIGHT)) // NE quadrant
+    else if ((x_offset >= TILE_QUADRANT_LENGTH) && (y_offset < TILE_QUADRANT_HEIGHT)) // NE quadrant
         quadrant_index += 1;
-    else if ((x_offset < COLLISION_QUADRANT_LENGTH) && (y_offset >= COLLISION_QUADRANT_HEIGHT)) // SW quadrant
+    else if ((x_offset < TILE_QUADRANT_LENGTH) && (y_offset >= TILE_QUADRANT_HEIGHT)) // SW quadrant
         quadrant_index += 2;
-    else if ((x_offset >= COLLISION_QUADRANT_LENGTH) && (y_offset >= COLLISION_QUADRANT_HEIGHT)) // SE quadrant
+    else if ((x_offset >= TILE_QUADRANT_LENGTH) && (y_offset >= TILE_QUADRANT_HEIGHT)) // SE quadrant
         quadrant_index += 3;
 
 	return quadrant_index;
@@ -192,8 +192,8 @@ uint32 TilesetDisplay::_DetermineCollisionQuadrantIndex(QGraphicsSceneMouseEvent
 
 void TilesetDisplay::_DrawGridLines() {
 	// Draw dashed lines outlining each tile collision quadrant
-    for (uint32 y = 0; y < TILESET_HEIGHT; y += COLLISION_QUADRANT_HEIGHT) {
-        for (uint32 x = 0; x < TILESET_LENGTH; x += COLLISION_QUADRANT_LENGTH) {
+    for (uint32 y = 0; y < TILESET_HEIGHT; y += TILE_QUADRANT_HEIGHT) {
+        for (uint32 x = 0; x < TILESET_LENGTH; x += TILE_QUADRANT_LENGTH) {
             addLine(x, 0, x, TILESET_HEIGHT, QPen(Qt::DashLine));
             addLine(0, y, TILESET_LENGTH, y, QPen(Qt::DashLine));
         }

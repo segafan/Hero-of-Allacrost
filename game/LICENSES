@@ -19,11 +19,15 @@ snd/, and mus/ directories. Content includes PNG and JPEG images, WAV files, and
 Allacrost uses many pieces of content that were created external to the project and provided for use under a compatible license.
 The following websites are where the majority of this content was procured from.
 
-- [OGA]  OpenGameArt:   http://opengameart.org
-- [VT]   Valyria Tear:  http://valyriatear.blogspot.com/
-- [TMW]  TheManaWorld:  http://themanaworld.org/
-- [BFW]  Battle for Wesnoth: http://www.wesnoth.org
-- [FLR]  FLARE: http://www.flare.org
+Identifier  Project                             Website
+----------- ----------------------------------- -----------------------------------
+[BFW]       Battle for Wesnoth                  http://www.wesnoth.org
+[FLR]       FLARE                               http://www.flare.org
+[OGA]       OpenGameArt                         http://opengameart.org
+[TIL]       Tiled Map Editor                    http://mapeditor.org/
+[TMW]       TheManaWorld                        http://themanaworld.org/
+[VAT]       Valyria Tear                        http://valyriatear.blogspot.com/
+
 
 Note that some files may include multiple sources of content. Especially map tileset images. Such files may therefore be under
 multiple licenses, and you should inquire which parts of the file correspond to what license prior to using this content.
@@ -86,7 +90,14 @@ img/tilesets/destruction.png                                    CC-BY 3.0       
 img/tilesets/harrvah_house_exterior.png                         CC-BY 3.0                Hyptosis + Zabin, [OGA], window art
 img/tilesets/outdoor_market.png                                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu), [OGA]
                                                                 CC-BY-SA 3.0             Joshua Taylor, [OGA]
-                                                                CC-BY 3.0                Zabin + Hyptosis, [OGA], market stalls, anvil, light, latern, sack, bottles, cutting boards
+                                                                CC-BY 3.0                Zabin + Hyptosis, [OGA], market stalls, anvil, light, latern, sack, 
+img/misc/editor_tools/
+img/misc/editor-tools/new.png                                   GPLv2+                   Bjorn Lindeijer, [TIL]
+img/misc/editor-tools/delete.png                                GPLv2+                   Bjorn Lindeijer, [TIL]
+img/misc/editor-tools/eye.png                                   GPLv2+                   Bjorn Lindeijer, [TIL]
+img/misc/editor-tools/move_down.png                             GPLv2+                   Bjorn Lindeijer, [TIL]
+img/misc/editor-tools/move_up.png                               GPLv2+                   Bjorn Lindeijer, [TIL]
+
 
 ___ Sounds ___
 
