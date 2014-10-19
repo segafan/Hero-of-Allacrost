@@ -40,6 +40,7 @@
 #include <QToolBar>
 #include <QUndoCommand>
 
+#include "video.h"
 #include "dialog_boxes.h"
 #include "grid.h"
 #include "tileset_editor.h"

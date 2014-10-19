@@ -10,149 +10,245 @@
 /** ***************************************************************************
 *** \file    tileset.h
 *** \author  Philip Vorsilak, gorzuate@allacrost.org
-*** \brief   Header file for editor's tileset, used for maintaining a visible
-***          "list" of tiles to select from for painting on a map.
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Header file for tileset data and display code
 *** **************************************************************************/
 
 #ifndef __TILESET_HEADER__
 #define __TILESET_HEADER__
 
-//#include <QHeaderView>
-#include <QImageReader>
 #include <QRect>
-#include <Q3Table>
-//#include <QTableWidgetItem>
-#include <QVariant>
+#include <QImageReader>
+#include <QTableWidget>
 
 #include "editor_utils.h"
-#include "defs.h"
+#include <boost/concept_check.hpp>
 #include "script.h"
-#include "utils.h"
-#include "video.h"
 
-//! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor {
 
 /** ***************************************************************************
-*** \brief Represents an animated tile
+*** \brief Represents one frame of an animated tile
+***
+*** Animated tiles are created from two or more tile images in the same tileset.
+*** Each tile in the animation sequence has a display time indicatin how long the
+*** frame should remain visible for.
 *** **************************************************************************/
-struct AnimatedTileData
-{
-	//! \brief Index into tileset represents tile which will be part of the
-	//         animation sequence.
+class AnimatedTileData {
+public:
+	AnimatedTileData(uint32 tile, uint32 frame_time) :
+		tile_id(tile), time(frame_time) {}
+
+	//! \brief Index into tileset that represents tile which will be part of the animation sequence.
 	uint32 tile_id;
+
 	//! \brief Time in milliseconds to display this particular tile.
 	uint32 time;
 };
 
 
 /** ***************************************************************************
-*** \brief Represents a tileset and retains the tileset's image and properties
+*** \brief Retains a tileset's image and other properties
 ***
-*** This is a container of tileset data. The tileset's properties are contained
-*** within a Lua file specific to the tileset. The Lua file is located in a
-*** separate path from the tileset's image file. Currently this class assumes
-*** and only supports the Allacrost standard tileset of 512x512 pixels with
-*** 32x32 pixel tiles (256 total tiles in one tileset file).
+*** Tileset data comes from two different files:
+***     - The tileset image file (.png), located in img/tilesets
+***     - The tileset data file (.lua), located in lua/data/tilesets
 ***
-*** \todo Add support for animated tiles (display, editing)
+*** Every tileset image file (TIF) has the same dimensions of 512x512 pixels. This means
+*** that they can all hold 256 32x32 pixel tiles in 16 rows and 16 columns. Although
+*** not every tile area within a tileset image is guaranteed to contain image data
+*** (some tile areas may simply be empty/transparent space).
+***
+*** The tileset definition file (TDF) defineds the properties of the tileset file.
+*** The name of the TDF matches the name of the TIF. So for example, a TIF named
+*** "desert_landscape.png" would have a corresponding TDF named "desert_landscape.lua".
+*** The TDF contains a user-friendly name of the tileset (as it will be seen in the editor),
+*** collision information about which quadrants of each tile may not be moved over by
+*** sprites on a map, any animations built from tiles in the tileset, and autotile data
+*** that is used to improve map editing.
+***
+*** This class is responsible for the loading of data from the TDF and TIF and saving
+*** modified data back to the TDF. The TIF is never modified by this class.
+***
+*** \note It is possible for multiple TDFs to map to a single TIF, although it would be
+*** highly uncommon. One reason might be if  you wanted certain tiles to have different
+*** collision properties on one map versus another. In this case, obviously you couldn't
+*** match the name of both TDFs to the TIF file. This is why the TDF contains the name of
+*** the TIF it uses.
 *** **************************************************************************/
-class Tileset
-{
+class Tileset {
 public:
 	Tileset();
 
-	~Tileset();
-
-	/** \brief Returns the filename of a tileset image given the tileset's name
-	*** \param tileset_name The name of the tileset (e.g. "mountain_village")
-	**/
-	static QString CreateImageFilename(const QString& tileset_name);
-
-	/** \brief Returns the filename of a tileset definition file given the
-	***        tileset's name
-	*** \param tileset_name The name of the tileset (e.g. "mountain_village")
-	**/
-	static QString CreateDataFilename(const QString& tileset_name);
-
-	/** \brief Returns the tileset name that corresponds to either an image or
-	***        data filename
-	*** \param filename The name of the file, which may or may not include the
-	***                 path
-	**/
-	static QString CreateTilesetName(const QString& filename);
+	virtual ~Tileset()
+		{ _ClearData(); }
 
 	//! \brief Class member accessor functions
 	//@{
-	bool IsInitialized() const { return _initialized; }
+	bool IsInitialized() const
+		{ return _initialized; }
+
+	QString GetTilesetName() const
+		{ return _tileset_name; }
+
+	QString GetTilesetImageFilename() const
+		{ return _tileset_image_filename; }
+
+	QString GetTilesetDefinitionFilename() const
+		{ return _tileset_definition_filename; }
+
+	const std::vector<QPixmap>& GetTileImages() const
+		{ return _tile_images; }
+
+	const std::vector<uint32>& GetTileCollisions() const
+		{ return _tile_collisions; }
 	//@}
 
 	/** \brief Creates a new tileset object using only a tileset image
-	*** \param img_filename The path + name of the image file to use for the
-	***                     tileset
-	*** \param one_image If true, the tiles vector will contain a single image
-	***                  for the entire tileset
+	*** \param img_filename The path and name of the image file to use for the new tileset
+	*** \param single_image If true, the tiles vector will contain a single image for the entire tileset
 	*** \return True if the tileset image was loaded successfully
-	*** \note A tileset image is required to use this function, but nothing else
+	***
+	*** \note There will be no tileset definition filename until the SaveAs() function is called. Calling
+	*** the Save() function will result in an error until SaveAs() returns successfully.
 	**/
-	virtual bool New(const QString& img_filename, bool one_image = false);
+	virtual bool New(const QString& img_filename, bool single_image = false);
 
-	/** \brief Loads the tileset definition file and stores its data in the
-	***        class containers
-	*** \param set_name The unique name that identifies the tileset (not a
-	***                 filename)
-	*** \param one_image If true, the tiles vector will contain a single image
-	***                  for the entire tileset
-	*** \return True if the tileset was loaded successfully
-	*** \note This function will clear the previously loaded contents when it
-	***       is called
+	/** \brief Loads a tileset definition file and image file and populates the data containers for the object
+	*** \param def_filename The name of the tileset definition file to load the data from
+	*** \param single_image If true, the tiles vector will contain a single image for the entire tileset
+	*** \return True if all tileset data was loaded successfully
+	*** \note This function will clear the previously loaded contents when it is called
+	*** \note If the load operation fails, any and all existing data will remain cleared
 	**/
-	virtual bool Load(const QString& set_name, bool one_image = false);
+	virtual bool Load(const QString& def_filename, bool single_image = false);
 
 	/** \brief Saves the tileset data to its tileset definition file
 	*** \return True if the save operation was successful
 	**/
 	bool Save();
 
-	//! \brief The name of the tileset this table is representing.
-	QString tileset_name;
+	/** \brief Saves the tileset data into a new tileset definition file
+	*** \param def_filename The name and path of the new definition file to save the data to
+	*** \return True if the save operation is successful
+	*** \note The _tileset_definition_filename will be updated if and only if the function returns true
+	*** \note If the file with the givien filename already exists, it will be overwritten without warning
+	**/
+	bool SaveAs(const QString& def_filename);
 
-	//! \brief Contains the StillImage tiles of the tileset, used in grid.cpp.
-	std::vector<hoa_video::StillImage> tiles;
+	/** \brief Returns the tile image corresponding to a specific index
+	*** \param index The index of the image to retrieve, should be between 0 and (TILESET_NUM_ROWS * TILESET_NUM_COLS - 1)
+	*** \return A pointer to the image, or NULL if the index was out-of-bounds
+	**/
+	const QPixmap* GetTileImage(uint32 index) const
+		{ if (index >= _tile_images.size()) return NULL; else return &_tile_images[index]; }
 
-	//! \brief Contains walkability information for each tile.
-	std::map<int, std::vector<int32> > walkability;
+	/** \brief Returns the tile image corresponding to a specific x and y location on the tileset
+	*** \param x The x coordinator of the tile, equivalent to the tile column
+	*** \param y The y coordinator of the tile, equivalent to the tile row
+	*** \return A pointer to the image, or NULL if the coordinates were out-of-bounds
+	**/
+	const QPixmap* GetTileImage(uint32 x, uint32 y) const
+		{ return GetTileImage((y * TILESET_NUM_ROWS) + x); }
 
-	//! \brief Contains autotiling information for any autotileable tile.
-	std::map<int, std::string> autotileability;
+	/** \brief Retrieves a pointer to the entire tileset image
+	*** \note This method is only valid if the tileset was loaded with the single_image argument of New() or Load()
+	*** set to true. Otherwise it will just return the first tile in the tileset image
+	**/
+	const QPixmap* GetTilesetImage() const
+		{ return &_tile_images[0]; }
 
+	/** \brief Used to retrieve the collision data for a specific quadrant
+	*** \param index The index of the data into _tile_collisions to retrieve
+	*** \return The value of the collision quadrant. Returns 0 if the index was invalid
+	**/
+	uint32 GetQuadrantCollision(uint32 index) const
+		{ if (index >= _tile_collisions.size()) return 0; else return _tile_collisions[index]; }
+
+	/** \brief Used to set the collision data for a specific quadrant
+	*** \param index The index of the data into _tile_collisions to set
+	*** \param value The value to set the collision data (should be a 0 or 1)
+	**/
+	void SetQuadrantCollision(uint32 index, uint32 value)
+		{ if (index >= _tile_collisions.size()) return; else _tile_collisions[index] = value; }
 protected:
-	//! \brief True if the class is holding valid, loaded tileset data.
+	//! \brief True when the class is holding loaded tileset data.
 	bool _initialized;
 
-	//! \brief Contains animated tile information for any animated tile.
-	std::vector<std::vector<AnimatedTileData> > _animated_tiles;
+	//! \brief The name of the tileset that will be seen in the editor
+	QString _tileset_name;
+
+	//! \brief The name and path of the tileset image file
+	QString _tileset_image_filename;
+
+	//! \brief The name and path of the tileset definition file
+	QString _tileset_definition_filename;
+
+	/** \brief Contains the QPixmap image for each tile in the tileset
+	*** \note The QPixmap class is optimized to show images on screen, but QImage is used for image data loading
+	**/
+	std::vector<QPixmap> _tile_images;
+
+	/** \brief Holds the collision data for each quadrant of every tile
+	***
+	*** The size of this container will always be four times the size of the image_tiles container. Every entry in
+	*** is either a 1 or a 0, where a 1 indicates that quadrant has a collision. Every consecutive four entries corresponds
+	*** to the data for one tile. For a set of entries {A, B, C, D} for tile at index X, the entries correspond to:
+	***   - A: Northwest quadrant
+	***   - B: Northeast quadrant
+	***   - C: Southwest quadrant
+	***   - D: Southeast quadrant
+	**/
+	std::vector<uint32> _tile_collisions;
+
+	//! \brief Contains all information for any animated tile
+	std::vector<std::vector<AnimatedTileData> > _tile_animations;
+
+	/** \brief Contains all of the information for every autotileable tile
+	*** \TODO What are the integer key and string value for?
+	**/
+	std::map<uint32, std::string> _tile_autotiles;
+
+	//! \brief Clears all data and sets the _initialized member to false
+	void _ClearData();
+
+	/** \brief Loads the tileset image and populates the _tile_images container with each tile image
+	*** \param single_image When true, the tileset image will be loaded into a single entry in _tile_images
+	*** \return True if the image data was loaded successfully
+	***
+	*** This is a helper function to New() and Load(). It loads the data from the file described by
+	*** _tileset_image_filename, so this member must be set prior to calling this function.
+	**/
+	bool _LoadImageData(bool single_image);
+
+	/** \brief Creates a default name for the tileset from a a filename
+	*** \param filename The filename to use
+	***
+	*** This method is useful when creating a new tileset or when using a tileset
+	*** definition file that does not have a tileset name defined. The name is
+	*** constructed by removing the path and file extention from the filename.
+	**/
+	void _CreateTilesetNameFromFilename(const QString &filename);
 }; // class Tileset
 
 
 /** ***************************************************************************
-*** \brief Used to visually represent a tileset via a QT table
+*** \brief Used to visually represent a tileset via a QTableWidget
+***
+*** \todo Add support for displaying and editing animated tiles
 *** **************************************************************************/
-class TilesetTable : public Tileset
-{
+class TilesetTable : public Tileset {
 public:
 	TilesetTable();
 
-	~TilesetTable();
+	~TilesetTable()
+		{ delete table; table = NULL; }
 
-	//! \note Inherited methods from Tileset class that need to be overridden
-	//@{
-// 	bool New(const QString& img_filename);
+	//! \brief Inherited method from Tileset class
 	bool Load(const QString& set_name);
-	//@}
 
 	//! Reference to the table implementation of this tileset
-	Q3Table* table;
+	QTableWidget *table;
 }; // class TilesetTable : public Tileset
 
 } // namespace hoa_editor

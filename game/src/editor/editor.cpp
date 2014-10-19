@@ -13,6 +13,8 @@
  * \brief   Source file for editor's main window and user interface.
  *****************************************************************************/
 
+#include <Q3Table>
+
 #include "editor.h"
 
 using namespace std;
@@ -266,7 +268,7 @@ void Editor::_FileNew() {
 
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);
-					_ed_scrollview->_map->tileset_names.push_back(a_tileset->tileset_name);
+					_ed_scrollview->_map->tileset_names.push_back(a_tileset->GetTilesetName());
 				} // tileset must be checked
 			} // iterate through all possible tilesets
 			new_map_progress->setValue(checked_items);
@@ -765,7 +767,7 @@ void Editor::_TileEditOL() {
 
 
 void Editor::_TilesetEdit() {
-	TilesetEditor* tileset_editor = new TilesetEditor(this, "tileset_editor", true);
+	TilesetEditor* tileset_editor = new TilesetEditor(this);
 
 	if (tileset_editor->exec() == QDialog::Accepted)
 	{
@@ -1906,31 +1908,31 @@ void EditorScrollView::_DeleteTile(int32 index) {
 
 
 void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index) {
-	map<int, string>::iterator it = _map->tilesets[tileset_num]->
-		autotileability.find(tile_index);
-
-	if (it != _map->tilesets[tileset_num]->autotileability.end())
-	{
-		// Set up for opening autotiling.lua.
-		ReadScriptDescriptor read_data;
-		if (read_data.OpenFile("lua/data/tilesets/autotiling.lua", true) == false)
-			QMessageBox::warning(this, "Loading File...",
-				QString("ERROR: could not open lua/data/tilesets/autotiling.lua for reading!"));
-
-		read_data.OpenTable(it->second);
-		int32 random_index = RandomBoundedInteger(1, static_cast<int32>(read_data.GetTableSize()));
-		read_data.OpenTable(random_index);
-		string tileset_name = read_data.ReadString(1);
-		tile_index = read_data.ReadInt(2);
-		read_data.CloseTable();
-		tileset_num = _map->tileset_names.indexOf(
-			QString(tileset_name.c_str()));
-		read_data.CloseTable();
-
-		read_data.CloseFile();
-
-		_AutotileTransitions(tileset_num, tile_index, it->second);
-	} // must have an autotileable tile
+// 	map<int, string>::iterator it = _map->tilesets[tileset_num]->
+// 		autotileability.find(tile_index);
+//
+// 	if (it != _map->tilesets[tileset_num]->autotileability.end())
+// 	{
+// 		// Set up for opening autotiling.lua.
+// 		ReadScriptDescriptor read_data;
+// 		if (read_data.OpenFile("lua/data/tilesets/autotiling.lua", true) == false)
+// 			QMessageBox::warning(this, "Loading File...",
+// 				QString("ERROR: could not open lua/data/tilesets/autotiling.lua for reading!"));
+//
+// 		read_data.OpenTable(it->second);
+// 		int32 random_index = RandomBoundedInteger(1, static_cast<int32>(read_data.GetTableSize()));
+// 		read_data.OpenTable(random_index);
+// 		string tileset_name = read_data.ReadString(1);
+// 		tile_index = read_data.ReadInt(2);
+// 		read_data.CloseTable();
+// 		tileset_num = _map->tileset_names.indexOf(
+// 			QString(tileset_name.c_str()));
+// 		read_data.CloseTable();
+//
+// 		read_data.CloseFile();
+//
+// 		_AutotileTransitions(tileset_num, tile_index, it->second);
+// 	} // must have an autotileable tile
 }
 
 
@@ -2001,35 +2003,35 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 
 
 	// Now figure out what groups the existing tiles belong to.
-	for (unsigned int i = 0; i < existing_tiles.size(); i++)
-	{
-		int32 multiplier    = existing_tiles[i] / 256;
-		int32 tileset_index = existing_tiles[i] % 256;
-		map<int, string>::iterator it = _map->tilesets[multiplier]->
-			autotileability.find(tileset_index);
-
-		// Here we check to make sure the tile exists in the autotileability
-		// table. But if the tile in question is a transition tile with multiple
-		// variations, we want to assign it a group name of "none", otherwise
-		// the pattern detection algorithm won't work properly. Transition tiles
-		// with multiple variations are still handled correctly.
-		if (it != _map->tilesets[multiplier]->autotileability.end() &&
-			it->second.find("east", 0)      == string::npos &&
-			it->second.find("north", 0)     == string::npos &&
-			it->second.find("_ne", 0)       == string::npos &&
-			it->second.find("ne_corner", 0) == string::npos &&
-			it->second.find("_nw", 0)       == string::npos &&
-			it->second.find("nw_corner", 0) == string::npos &&
-			it->second.find("_se", 0)       == string::npos &&
-			it->second.find("se_corner", 0) == string::npos &&
-			it->second.find("south", 0)     == string::npos &&
-			it->second.find("_sw", 0)       == string::npos &&
-			it->second.find("sw_corner", 0) == string::npos &&
-			it->second.find("west", 0)      == string::npos)
-			existing_groups.push_back(it->second);
-		else
-			existing_groups.push_back("none");
-	} // iterate through the existing_tiles vector
+// 	for (unsigned int i = 0; i < existing_tiles.size(); i++)
+// 	{
+// 		int32 multiplier    = existing_tiles[i] / 256;
+// 		int32 tileset_index = existing_tiles[i] % 256;
+// 		map<int, string>::iterator it = _map->tilesets[multiplier]->
+// 			autotileability.find(tileset_index);
+//
+// 		// Here we check to make sure the tile exists in the autotileability
+// 		// table. But if the tile in question is a transition tile with multiple
+// 		// variations, we want to assign it a group name of "none", otherwise
+// 		// the pattern detection algorithm won't work properly. Transition tiles
+// 		// with multiple variations are still handled correctly.
+// 		if (it != _map->tilesets[multiplier]->autotileability.end() &&
+// 			it->second.find("east", 0)      == string::npos &&
+// 			it->second.find("north", 0)     == string::npos &&
+// 			it->second.find("_ne", 0)       == string::npos &&
+// 			it->second.find("ne_corner", 0) == string::npos &&
+// 			it->second.find("_nw", 0)       == string::npos &&
+// 			it->second.find("nw_corner", 0) == string::npos &&
+// 			it->second.find("_se", 0)       == string::npos &&
+// 			it->second.find("se_corner", 0) == string::npos &&
+// 			it->second.find("south", 0)     == string::npos &&
+// 			it->second.find("_sw", 0)       == string::npos &&
+// 			it->second.find("sw_corner", 0) == string::npos &&
+// 			it->second.find("west", 0)      == string::npos)
+// 			existing_groups.push_back(it->second);
+// 		else
+// 			existing_groups.push_back("none");
+// 	} // iterate through the existing_tiles vector
 
 
 	// Transition tiles exist only for certain patterns of tiles surrounding the painted tile.
