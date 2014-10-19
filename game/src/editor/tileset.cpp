@@ -10,386 +10,359 @@
 /** ***************************************************************************
 *** \file    tileset.cpp
 *** \author  Philip Vorsilak, gorzuate@allacrost.org
-*** \brief   Source file for editor's tileset, used for maintaining a visible
-***          "list" of tiles to select from for painting on the map.
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Source file for tileset data and display code
 *** **************************************************************************/
 
+#include <QFile>
+#include <QImage>
+#include <QVariant>
+#include <QHeaderView>
+
+#include "common.h"
 #include "tileset.h"
 
 using namespace std;
-using namespace hoa_video;
 using namespace hoa_script;
+using namespace hoa_common;
 
-
-namespace hoa_editor
-{
-
+namespace hoa_editor {
 
 ////////////////////////////////////////////////////////////////////////////////
-// Tileset class -- all functions
+// Tileset class
 ////////////////////////////////////////////////////////////////////////////////
 
 Tileset::Tileset() :
-	tileset_name(""),
-	_initialized(false)
-{} // Tileset constructor
+	_initialized(false),
+	_tileset_name(""),
+	_tileset_image_filename(""),
+	_tileset_definition_filename(""),
+	_tile_images(TILESET_NUM_ROWS * TILESET_NUM_COLS, QPixmap()),
+	_tile_collisions(TILESET_NUM_ROWS * TILESET_NUM_COLS * COLLISION_QUADRANTS, 0)
+{}
 
 
-Tileset::~Tileset()
-{
-	for (std::vector<hoa_video::StillImage>::iterator it = tiles.begin();
-	     it != tiles.end(); it++)
-		(*it).Clear();
-	tiles.clear();
-} // Tileset destructor
 
-
-QString Tileset::CreateImageFilename(const QString& tileset_name)
-{
-	return QString("img/tilesets/" + tileset_name + ".png");
-} // Tileset::CreateImageFilename(...)
-
-
-QString Tileset::CreateDataFilename(const QString& tileset_name)
-{
-	return QString("lua/data/tilesets/" + tileset_name + ".lua");
-} // Tileset::CreateDataFilename(...)
-
-
-QString Tileset::CreateTilesetName(const QString& filename)
-{
-	QString tname = filename;
-	// Remove everything up to and including the final '/' character
-	tname.remove(0, tname.lastIndexOf("/") + 1);
-	// Chop off the appended four characters (the filename extension)
-	tname.chop(4);
-	return tname;
-} // Tileset::CreateTilesetName(...)
-
-
-bool Tileset::New(const QString& img_filename, bool one_image)
-{
-	_initialized = false;
-
-	// Retrieve the tileset name from the image filename
-	tileset_name = CreateTilesetName(img_filename);
-
-	// Prepare the tile vector and load the tileset image
-	if (one_image == true)
-	{
-		tiles.clear();
-		tiles.resize(1);
-		tiles[0].SetDimensions(16.0f, 16.0f);
-		if (tiles[0].Load(string(img_filename.toAscii()), 16, 16) == false)
-		{
-			qDebug("Failed to load tileset image: %s",
-			       img_filename.toStdString().c_str());
-			return false;
-		}
-	}
-	else
-	{
-		tiles.clear();
-		tiles.resize(256);
-		for (uint32 i = 0; i < 256; i++)
-			tiles[i].SetDimensions(1.0f, 1.0f);
-		if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles,
-				string(img_filename.toAscii()), 16, 16) == false)
-		{
-			qDebug("Failed to load tileset image: %s",
-			       img_filename.toStdString().c_str());
-			return false;
-		}
-	}
-
-	// Initialize the rest of the tileset data
-	vector<int32> blank_entry(4, 0);
-	for (uint32 i = 0; i < 16; i++)
-		for (uint32 j = 0; j < 16; j++)
-			walkability.insert(make_pair(i * 16 + j, blank_entry));
-
-	autotileability.clear();
-	_animated_tiles.clear();
-
-	_initialized = true;
-	return true;
-} // Tileset::New(...)
-
-
-bool Tileset::Load(const QString& set_name, bool one_image)
-{
-	_initialized = false;
-
-	// Reset container data
-	autotileability.clear();
-	walkability.clear();
-	_animated_tiles.clear();
-
-	// Create filenames from the tileset name
-	QString img_filename = CreateImageFilename(set_name);
-	QString dat_filename = CreateDataFilename(set_name);
-	tileset_name = set_name;
-
-	// Prepare the tile vector and load the tileset image
-	if (one_image == true)
-	{
-		tiles.clear();
-		tiles.resize(1);
-		tiles[0].SetDimensions(16.0f, 16.0f);
-		if (tiles[0].Load(string(img_filename.toAscii()), 16, 16) == false)
-			return false;
-	}
-	else
-	{
-		tiles.clear();
-		tiles.resize(256);
-		for (uint32 i = 0; i < 256; i++)
-			tiles[i].SetDimensions(1.0f, 1.0f);
-		if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles,
-				string(img_filename.toAscii()), 16, 16) == false)
-			return false;
-	}
-
-	// Set up for reading the tileset definition file.
-	ReadScriptDescriptor read_data;
-	if (read_data.OpenFile(string(dat_filename.toAscii()), true) == false)
-	{
-		_initialized = false;
+bool Tileset::New(const QString& img_filename, bool single_image) {
+	if (img_filename.isEmpty()) {
+		qDebug("Missing image filename");
 		return false;
 	}
 
-	read_data.OpenTable(string(tileset_name.toAscii()));
+	_ClearData();
 
-	// Read in autotiling information.
-	if (read_data.DoesTableExist("autotiling") == true)
-	{
-		// Contains the keys (indeces, if you will) of this table's entries
-		vector<int32> keys;
-		uint32 table_size = read_data.GetTableSize("autotiling");
-		read_data.OpenTable("autotiling");
+	_tileset_image_filename = img_filename;
+	_CreateTilesetNameFromFilename(img_filename);
+	if (_LoadImageData(single_image) == false) {
+		_ClearData();
+		return false;
+	}
 
-		read_data.ReadTableKeys(keys);
-		for (uint32 i = 0; i < table_size; i++)
-			autotileability[keys[i]] = read_data.ReadString(keys[i]);
-		read_data.CloseTable();
-	} // make sure table exists first
+	_initialized = true;
+	return true;
+}
 
-	// Read in walkability information.
-	if (read_data.DoesTableExist("walkability") == true)
-	{
-		vector<int32> vect;  // used to read in vectors from the data file
-		read_data.OpenTable("walkability");
 
-		for (int32 i = 0; i < 16; i++)
-		{
-			read_data.OpenTable(i);
-			// Make sure that at least one row exists
-			if (read_data.IsErrorDetected() == true)
-			{
-				read_data.CloseTable();
-				read_data.CloseTable();
-				read_data.CloseFile();
-				_initialized = false;
-				return false;
+
+bool Tileset::Load(const QString& def_filename, bool single_image) {
+	_ClearData();
+
+	if (def_filename.isEmpty())
+		return false;
+
+	// ---------- 1) Open the tileset definition file
+	ReadScriptDescriptor read_file;
+	_tileset_definition_filename = def_filename;
+	if (read_file.OpenFile(_tileset_definition_filename.toStdString()) == false) {
+		_ClearData();
+		return false;
+	}
+
+	// ---------- 2) Load the tileset name and image data
+	if (read_file.DoesStringExist("tileset_name")) {
+		_tileset_name = QString::fromStdString(read_file.ReadString("tileset_name"));
+	}
+	else {
+		_CreateTilesetNameFromFilename(def_filename);
+	}
+	_tileset_image_filename = QString::fromStdString(read_file.ReadString("image"));
+
+	if (_LoadImageData(single_image) == false) {
+		_ClearData();
+		return false;
+	}
+
+	// ---------- 3) Load in the collision data
+	if (read_file.DoesTableExist("collisions") == false) {
+		_ClearData();
+		return false;
+	}
+
+	read_file.OpenTable("collisions");
+	for (uint32 i = 0; i < TILESET_NUM_ROWS; ++i) {
+		vector<uint32> collision_row;  // Temporarily stores one tile row worth of collision data
+		read_file.ReadUIntVector(i, collision_row);
+		// Ensure that the row is the correct size
+		if (collision_row.size() != (TILESET_NUM_COLS * COLLISION_QUADRANTS)) {
+			_ClearData();
+			return false;
+		}
+
+		for (uint32 j = 0; j < collision_row.size(); ++j) {
+			_tile_collisions[(i * (TILESET_NUM_COLS * COLLISION_QUADRANTS)) + j] = collision_row[j];
+		}
+	}
+	read_file.CloseTable();
+
+	// ---------- 4) Read in animation data if the TDF contains animations
+	if (read_file.DoesTableExist("animations") == true) {
+		uint32 table_size = read_file.GetTableSize("animations");
+		read_file.OpenTable("animations");
+
+		for (uint32 i = 0; i < table_size; ++i) {
+			// Determine how many entries (tile + time) are in this animations
+			vector<uint32> animation_data;
+			read_file.ReadUIntVector(i, animation_data);
+			_tile_animations.push_back(vector<AnimatedTileData>());
+
+			for (uint32 j = 0; j < animation_data.size(); j += 2) {
+				_tile_animations.back().push_back(AnimatedTileData(animation_data[j], animation_data[j + 1]));
 			}
+		}
+		read_file.CloseTable();
+	}
 
-			for (int32 j = 0; j < 16; j++)
-			{
-				read_data.ReadIntVector(j, vect);
-				if (read_data.IsErrorDetected() == false)
-					walkability[i * 16 + j] = vect;
-				vect.clear();
-			} // iterate through all tiles in a row
-			read_data.CloseTable();
-		} // iterate through all rows of the walkability table
-		read_data.CloseTable();
-	} // make sure table exists first
+	// ---------- 5) Read in autotiling data if the TDF contains autotiling
+	if (read_file.DoesTableExist("autotiling") == true) {
+		// Read in the set of autotiling keys followed by their string values
+		vector<uint32> keys;
+		read_file.OpenTable("autotiling");
+		read_file.ReadTableKeys(keys);
 
-	// Read in animated tiles.
-	if (read_data.DoesTableExist("animated_tiles") == true)
-	{
-		uint32 table_size = read_data.GetTableSize("animated_tiles");
-		read_data.OpenTable("animated_tiles");
+		for (uint32 i = 0; i < keys.size(); ++i) {
+			_tile_autotiles[keys[i]] = read_file.ReadString(keys[i]);
+		}
+		read_file.CloseTable();
+	}
 
-		for (uint32 i = 1; i <= table_size; i++)
-		{
-			_animated_tiles.push_back(vector<AnimatedTileData>());
-			vector<AnimatedTileData>& tiles = _animated_tiles.back();
-			// Calculate loop end: an animated tile is comprised of a tile id
-			// and a time, so the loop end is really half the table size.
-			uint32 tile_count = read_data.GetTableSize(i) / 2;
-			read_data.OpenTable(i);
-			for(uint32 index = 1; index <= tile_count; index++)
-			{
-				AnimatedTileData anim_tile;
-				anim_tile.tile_id = read_data.ReadUInt(index * 2 - 1);
-				anim_tile.time    = read_data.ReadUInt(index * 2);
-				tiles.push_back(anim_tile);
-			} // iterate through all tiles in one animated tile
-			read_data.CloseTable();
-		} // iterate through all animated tiles in the table
-		read_data.CloseTable();
-	} // make sure table exists first
-
-	read_data.CloseTable();
-	read_data.CloseFile();
-
+	read_file.CloseFile();
 	_initialized = true;
 	return true;
-} // Tileset::Load(...)
+} // bool Tileset::Load(const QString& def_filename, bool single_image)
 
 
-bool Tileset::Save()
-{
-	string dat_filename = string(CreateDataFilename(tileset_name).toAscii());
-	string img_filename = string(CreateImageFilename(tileset_name).toAscii());
-	WriteScriptDescriptor write_data;
 
-	if (write_data.OpenFile(dat_filename) == false)
+bool Tileset::Save() {
+	// We can't save the data if we don't have a file specified
+	if (_tileset_definition_filename.isEmpty() == true) {
 		return false;
+	}
 
-	// Write the localization namespace for the tileset file
-	write_data.WriteNamespace(tileset_name.toStdString());
-	write_data.InsertNewLine();
 
-	// Write basic tileset properties
-	write_data.WriteString("file_name", dat_filename);
-	write_data.WriteString("image", img_filename);
-	write_data.WriteInt("num_tile_cols", 16);
-	write_data.WriteInt("num_tile_rows", 16);
-	write_data.InsertNewLine();
+	WriteScriptDescriptor write_file;
+	if (write_file.OpenFile(_tileset_definition_filename.toStdString()) == false) {
+		return false;
+	}
 
-	// Write autotiling data
-	if (autotileability.empty() == false)
-	{
-	 	write_data.BeginTable("autotiling");
-	 	for (map<int, string>::iterator it = autotileability.begin();
-		     it != autotileability.end(); it++)
- 			write_data.WriteString((*it).first, (*it).second);
- 		write_data.EndTable();
-		write_data.InsertNewLine();
+	// Write the tablespace header to the TDF, using a transformation of the TDF filename as the tablespace name
+	string tablespace_name = DetermineLuaFileTablespaceName(_tileset_definition_filename.toStdString());
+	write_file.WriteNamespace(tablespace_name);
+	write_file.InsertNewLine();
+
+	// Write the basic properties: the tileset name and image filename
+	write_file.WriteString("tileset_name", _tileset_name.toStdString());
+	write_file.WriteString("image", _tileset_image_filename.toStdString());
+	write_file.InsertNewLine();
+
+	// Write the collision data one row at a time
+	write_file.BeginTable("collisions");
+	for (uint32 row = 0; row < TILESET_NUM_ROWS; row++) {
+		// Extract a sub vector from the collision data to write
+		vector<uint32>::const_iterator row_start = _tile_collisions.begin() + (row * TILESET_NUM_COLS * COLLISION_QUADRANTS);
+		vector<uint32>::const_iterator row_end = row_start + (TILESET_NUM_COLS * COLLISION_QUADRANTS);
+		vector<uint32> collision_row(row_start, row_end);
+		write_file.WriteUIntVector(row, collision_row);
+	}
+	write_file.EndTable();
+	write_file.InsertNewLine();
+
+	// Write the animation data, if the tileset has animations
+	if (_tile_animations.empty() == false) {
+ 		write_file.BeginTable("animations");
+
+
+		for (uint32 i = 0; i < _tile_animations.size(); ++i) {
+			vector<uint32> animation_data;
+			for (uint32 j = 0; j < _tile_animations[i].size(); ++j) {
+				animation_data.push_back(_tile_animations[i][j].tile_id);
+				animation_data.push_back(_tile_animations[i][j].time);
+			}
+			write_file.WriteUIntVector(i, animation_data);
+		}
+
+ 		write_file.EndTable();
+		write_file.InsertNewLine();
+	}
+
+	// Write the autotile data, if the tileset has autotiling
+	if (_tile_autotiles.empty() == false) {
+	 	write_file.BeginTable("autotiling");
+	 	for (map<uint32, string>::iterator i = _tile_autotiles.begin(); i != _tile_autotiles.end(); ++i)
+ 			write_file.WriteString((*i).first, (*i).second);
+ 		write_file.EndTable();
+		write_file.InsertNewLine();
 	} // data must exist in order to save it
 
-	// Write walkability data
-	write_data.WriteComment("The general walkability of the tiles in the tileset. Zero indicates walkable. One tile has four walkable quadrants listed as: NW corner, NE corner, SW corner, SE corner.");
-	write_data.BeginTable("walkability");
-	for (uint32 row = 0; row < 16; row++)
-	{
-		write_data.BeginTable(row);
-		for (uint32 col = 0; col < 16; col++)
-			write_data.WriteIntVector(col, walkability[row * 16 + col]);
-		write_data.EndTable();
-	} // iterate through all rows of the tileset
-	write_data.EndTable();
-	write_data.InsertNewLine();
 
-	// Write animated tile data
-	if (_animated_tiles.empty() == false)
-	{
-		write_data.WriteComment("The animated tiles table has one row per animated tile, with each entry in a row indicating which tile in the tileset is the next part of the animation, followed by the time in ms that the tile will be displayed for.");
- 		write_data.BeginTable("animated_tiles");
-		vector<uint32> vect;
- 		for (uint32 anim_tile = 0; anim_tile < _animated_tiles.size(); anim_tile++)
-		{
- 			for (uint32 i = 0; i < _animated_tiles[anim_tile].size(); i++)
-			{
- 				vect.push_back(_animated_tiles[anim_tile][i].tile_id);
- 				vect.push_back(_animated_tiles[anim_tile][i].time);
- 			} // iterate through all tiles in one animated tile
- 			write_data.WriteUIntVector(anim_tile + 1, vect);
-			vect.clear();
- 		} // iterate through all animated tiles of the tileset
- 		write_data.EndTable();
-	} // data must exist in order to save it
-
-	if (write_data.IsErrorDetected() == true)
-	{
-		cerr << "Errors were detected when saving tileset file. The errors include: " << endl;
-		cerr << write_data.GetErrorMessages() << endl;
-		write_data.CloseFile();
+	if (write_file.IsErrorDetected() == true) {
+		cerr << "Errors were detected when saving tileset file. The errors include:\n" << write_file.GetErrorMessages() << endl;
+		write_file.CloseFile();
 		return false;
-	} // errors were found
-	else
-	{
-		write_data.CloseFile();
-		return true;
-	} // no errors found
-} // Tileset::Save()
+	}
 
+	write_file.CloseFile();
+	return true;
+} // bool Tileset::Save()
+
+
+
+bool Tileset::SaveAs(const QString& def_filename) {
+	QString old_def_filename = _tileset_definition_filename;
+	_tileset_definition_filename = def_filename;
+
+	if (Save() == false) {
+		_tileset_definition_filename = old_def_filename;
+		return false;
+	}
+
+	return true;
+}
+
+
+
+void Tileset::_ClearData() {
+	_initialized = false;
+	_tileset_name = "";
+	_tileset_image_filename = "";
+	_tileset_definition_filename = "";
+
+	for (uint32 i = 0; i < _tile_images.size(); ++i)
+		_tile_images[i] = QPixmap();
+	for (uint32 i = 0; i < _tile_collisions.size(); ++i)
+		_tile_collisions[i] = 0;
+	_tile_animations.clear();
+	_tile_autotiles.clear();
+}
+
+
+
+bool Tileset::_LoadImageData(bool single_image) {
+	QRect rectangle;
+	QImage entire_tileset;
+	if (entire_tileset.load(_tileset_image_filename, "png") == false) {
+		qDebug("Failed to load tileset image: %s", _tileset_image_filename.toStdString().c_str());
+		_ClearData();
+		return false;
+	}
+
+	if (single_image == true) {
+		_tile_images[0].convertFromImage(entire_tileset);
+	}
+	else {
+		for (uint32 row = 0; row < TILESET_NUM_ROWS; ++row) {
+			for (uint32 col = 0; col < TILESET_NUM_COLS; ++col) {
+				rectangle.setRect(col * TILE_LENGTH, row * TILE_HEIGHT, TILE_LENGTH, TILE_HEIGHT);
+				QImage tile = entire_tileset.copy(rectangle);
+				if (tile.isNull()) {
+					qDebug("Image loading error!");
+				} else {
+					uint32 index = (row * TILESET_NUM_ROWS) + col;
+					_tile_images[index].convertFromImage(tile);
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+
+
+void Tileset::_CreateTilesetNameFromFilename(const QString &filename) {
+	_tileset_name = filename;
+	// Remove everything up to and including the final '/' character
+	_tileset_name.remove(0, _tileset_name.lastIndexOf("/") + 1);
+	// Chop off the appended four characters (the filename extension)
+	_tileset_name.chop(4);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
-// TilesetTable class -- all functions
+// TilesetTable class
 ///////////////////////////////////////////////////////////////////////////////
 
 TilesetTable::TilesetTable() :
-	Tileset()
+	Tileset(),
+	table(new QTableWidget(TILESET_NUM_ROWS, TILESET_NUM_COLS))
 {
 	// Set up the QT table
-	table = new Q3Table(16, 16);
-	table->setReadOnly(true);
 	table->setShowGrid(false);
-	table->setSelectionMode(Q3Table::Multi);
-	table->setTopMargin(0);
-	table->setLeftMargin(0);
-	for (int32 i = 0; i < table->numRows(); i++)
+	table->setSelectionMode(QTableWidget::ContiguousSelection);
+	table->setEditTriggers(QTableWidget::NoEditTriggers);
+	table->setContentsMargins(0, 0, 0, 0);
+	table->setDragEnabled(false);
+	table->setAcceptDrops(false);
+	table->setHorizontalHeaderLabels(QStringList());
+	table->setVerticalHeaderLabels(QStringList());
+	table->verticalHeader()->hide();
+	table->verticalHeader()->setContentsMargins(0, 0, 0, 0);
+	table->horizontalHeader()->hide();
+	table->horizontalHeader()->setContentsMargins(0, 0, 0, 0);
+
+	for (uint32 i = 0; i < TILESET_NUM_ROWS; ++i)
 		table->setRowHeight(i, TILE_HEIGHT);
-	for (int32 i = 0; i < table->numCols(); i++)
+	for (uint32 i = 0; i < TILESET_NUM_COLS; ++i)
 		table->setColumnWidth(i, TILE_LENGTH);
-} // TilesetTable constructor
+}
 
 
-TilesetTable::~TilesetTable()
-{
-	delete table;
-} // TilesetTable destructor
 
-
-// TilesetTable::New(const QString& img_filename)
-// {
-// } // TilesetTable::New(...)
-
-
-bool TilesetTable::Load(const QString& set_name)
-{
-	if (Tileset::Load(set_name) == false)
+bool TilesetTable::Load(const QString& def_filename) {
+	if (Tileset::Load(def_filename) == false)
 		return false;
 
-	// Read in tiles and create table items.
-	// FIXME: this is one ugly hack. It loads each individual tile's image and
-	// puts it into a table. But each tile's image only exists together with a
-	// bunch of other tiles in a tileset image. So we have to split them up.
-	// Qt has no built-in function to split a big image into little ones (as
-	// of Qt 4.4). This image information has already been loaded by the above
-	// call to Tileset::Load(...). If we could somehow take that info and put
-	// it into a Qt table, that would be ideal.
-	//
-	// This piece of code is what takes so long for the editor to load one
-	// tileset.
-	//
-	// <<FIXED>>: The ugly hack has been fixed, I use the QImage to handle
-	// directly to the bits, it's much faster. Contact me if there's any
-	// problem with this fix, eguitarz (dalema22@gmail.com)
-	QRect rectangle;
+	// Load the tileset image into a single file, then make a copy of the individual tiles
+	// within it and place them in the pixmap
 	QImage entire_tileset;
-	entire_tileset.load(CreateImageFilename(set_name), "png");
-	for (uint32 row = 0; row < 16; row++)
-	{
-		for (uint32 col = 0; col < 16; col++)
-		{
-			rectangle.setRect(col * TILE_LENGTH, row * TILE_HEIGHT, TILE_LENGTH,
-			                  TILE_HEIGHT);
-			QVariant variant = entire_tileset.copy(rectangle);
-			if (!variant.isNull())
-			{
-				QPixmap tile_pixmap = variant.value<QPixmap>();
-				table->setPixmap(row, col, tile_pixmap);
+	if (entire_tileset.load(_tileset_image_filename) == false) {
+		qDebug("ERROR: failed to load tileset image file");
+		return false;
+	}
+
+	// Go through every tile location in the tileset image, copy out the image data for that tile,
+	// and place it in the table's pixmap
+	QRect rectangle;
+	QVariant variant;
+	QPixmap tile_pixmap;
+	for (uint32 row = 0; row < TILESET_NUM_ROWS; ++row) {
+		for (uint32 col = 0; col < TILESET_NUM_COLS; ++col) {
+			rectangle.setRect(col * TILE_LENGTH, row * TILE_HEIGHT, TILE_LENGTH, TILE_HEIGHT);
+			variant = entire_tileset.copy(rectangle);
+			if (variant.isNull() == true) {
+				qDebug("Error occurred while copying a tileset image tile");
 			}
-			else
-				qDebug("Image loading error!");
-		} // iterate through the columns of the tileset
-	} // iterate through the rows of the tileset
+			else {
+				QTableWidgetItem* item = new QTableWidgetItem(QTableWidgetItem::UserType);
+				item->setData(Qt::DecorationRole, variant);
+				item->setFlags(item->flags() &~ Qt::ItemIsEditable);
+				table->setItem(row, col, item);
+			}
+		}
+	}
+
+	// Select the top left item
+	table->setCurrentCell(0, 0);
 
 	return true;
-} // TilesetTable::Load(...)
+}
 
 } // namespace hoa_editor

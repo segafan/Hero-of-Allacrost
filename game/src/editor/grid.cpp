@@ -471,7 +471,7 @@ void Grid::SaveMap()
 				else
 				{
 					missing_tile = false;
-					ll_vect = tilesets[tileset_index]->walkability[tile_index];
+// 					ll_vect = tilesets[tileset_index]->walkability[tile_index];
 				}
 
 				// Get walkability for middle layer tile.
@@ -491,7 +491,7 @@ void Grid::SaveMap()
 				else
 				{
 					missing_tile = false;
-					ml_vect = tilesets[tileset_index]->walkability[tile_index];
+// 					ml_vect = tilesets[tileset_index]->walkability[tile_index];
 				}
 
 				// Get walkability for upper layer tile.
@@ -511,7 +511,7 @@ void Grid::SaveMap()
 				else
 				{
 					missing_tile = false;
-					ul_vect = tilesets[tileset_index]->walkability[tile_index];
+// 					ul_vect = tilesets[tileset_index]->walkability[tile_index];
 				}
 
 				if (missing_tile == true)
@@ -897,7 +897,7 @@ void Grid::paintGL()
 					tile_index = layer_index;
 				else
 					tile_index = layer_index % (tileset_index * 256);
-				tilesets[tileset_index]->tiles[tile_index].Draw();
+// 				tilesets[tileset_index]->GetTileImage(tile_index)->Draw();
 			} // a tile exists to draw
 
 			if (col == right_tile)
@@ -934,7 +934,7 @@ void Grid::paintGL()
 					tile_index = layer_index;
 				else
 					tile_index = layer_index % (tileset_index * 256);
-				tilesets[tileset_index]->tiles[tile_index].Draw();
+// 				tilesets[tileset_index]->GetTileImage(tile_index)->Draw();
 			} // a tile exists to draw
 
 			if (col == right_tile)
@@ -971,7 +971,7 @@ void Grid::paintGL()
 					tile_index = layer_index;
 				else
 					tile_index = layer_index % (tileset_index * 256);
-				tilesets[tileset_index]->tiles[tile_index].Draw();
+// 				tilesets[tileset_index]->GetTileImage(tile_index)->Draw();
 			} // a tile exists to draw
 
 			if (col == right_tile)

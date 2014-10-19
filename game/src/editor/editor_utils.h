@@ -13,10 +13,10 @@
 *** \brief   Header file for map editor utility code
 *** *****************************************************************************/
 
-#include "utils.h"
-
 #ifndef __EDITOR_UTILS_HEADER__
 #define __EDITOR_UTILS_HEADER__
+
+#include "utils.h"
 
 namespace hoa_editor {
 
@@ -33,13 +33,34 @@ const int32 TILE_SELECTED = -2;
 const int32 NO_CONTEXT = -1;
 
 //! \brief The maximum number of contexts allowed on a map
-const int32 MAX_CONTEXTS = 32;
+const uint32 MAX_CONTEXTS = 32;
 
-//! \brief The tile dimension sizes in number of pixels.
+//! \brief The tile dimension sizes in number of pixels
 //@{
-const unsigned int TILE_LENGTH = 32;
-const unsigned int TILE_HEIGHT = 32;
+const uint32 TILE_LENGTH = 32;
+const uint32 TILE_HEIGHT = 32;
 //@}
+
+//! \brief The dimensions of a tileset image file in number of pixels
+//@{
+const uint32 TILESET_LENGTH = 512;
+const uint32 TILESET_HEIGHT = 512;
+//@}
+
+//! \brief The dimensions of a tile's collision quadrant, in pixels
+//@{
+const uint32 COLLISION_QUADRANT_LENGTH = TILE_LENGTH / 2;
+const uint32 COLLISION_QUADRANT_HEIGHT = TILE_HEIGHT / 2;
+//@}
+
+//! \brief The dimensions of a tileset image file in number of tiles
+//@{
+const uint32 TILESET_NUM_COLS = 16;
+const uint32 TILESET_NUM_ROWS = 16;
+//@}
+
+//! \brief The number of collision data for each tile
+const uint32 COLLISION_QUADRANTS = 4;
 
 //! \brief Various modes for tile editing
 enum TILE_MODE_TYPE {
