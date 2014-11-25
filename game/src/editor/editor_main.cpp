@@ -18,9 +18,9 @@
 	#include <string>
 #endif
 
+#include "utils.h"
+
 #include "editor.h"
-#include "script.h"
-#include "global.h"
 
 #if defined(main) && !defined(_WIN32)
 	#undef main
@@ -28,8 +28,6 @@
 
 using namespace std;
 
-using namespace hoa_global;
-using namespace hoa_script;
 using namespace hoa_editor;
 
 int main(int argc, char** argv) {
@@ -61,12 +59,6 @@ int main(int argc, char** argv) {
 #endif
 
 	QApplication app(argc, argv);
-	ScriptManager = ScriptEngine::SingletonCreate();
-	ScriptManager->SingletonInitialize();
-	GlobalManager = GameGlobal::SingletonCreate();
-	GlobalManager->SingletonInitialize();
-
-	hoa_defs::BindCommonCode();
 
 	Editor* editor = new Editor();
 	editor->setCaption("Hero of Allacrost Map Editor");

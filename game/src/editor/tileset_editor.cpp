@@ -23,8 +23,6 @@
 #include "tileset_editor.h"
 
 using namespace std;
-using namespace hoa_script;
-using namespace hoa_video;
 
 namespace hoa_editor {
 

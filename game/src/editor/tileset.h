@@ -19,11 +19,11 @@
 
 #include <QRect>
 #include <QImageReader>
+#include <QString>
 #include <QTableWidget>
 
 #include "editor_utils.h"
 #include <boost/concept_check.hpp>
-#include "script.h"
 
 namespace hoa_editor {
 
@@ -88,13 +88,13 @@ public:
 	bool IsInitialized() const
 		{ return _initialized; }
 
-	QString GetTilesetName() const
+	const QString& GetTilesetName() const
 		{ return _tileset_name; }
 
-	QString GetTilesetImageFilename() const
+	const QString& GetTilesetImageFilename() const
 		{ return _tileset_image_filename; }
 
-	QString GetTilesetDefinitionFilename() const
+	const QString& GetTilesetDefinitionFilename() const
 		{ return _tileset_definition_filename; }
 
 	const std::vector<QPixmap>& GetTileImages() const
@@ -171,6 +171,7 @@ public:
 	**/
 	void SetQuadrantCollision(uint32 index, uint32 value)
 		{ if (index >= _tile_collisions.size()) return; else _tile_collisions[index] = value; }
+
 protected:
 	//! \brief True when the class is holding loaded tileset data.
 	bool _initialized;
@@ -233,23 +234,48 @@ protected:
 
 
 /** ***************************************************************************
-*** \brief Used to visually represent a tileset via a QTableWidget
+*** \brief Visualizes a tileset as a QTableWidget
+***
+*** This class creates a copy of all of the image data from a tileset and populates
+*** a 2D grid where each tile represents an element. The class maintains a pointer
+*** to the most recent Tileset object that was used in loading the image data, but
+*** it does not require that the Tileset object remain valid as the pointer is not
+*** used again after the load completes. Still, you should be mindful of any
+*** TilesetTable objects that may exist when deleting a Tileset object, as it may
+*** not be the case that you still want to visually represent a Tileset object that
+*** is no longer active.
 ***
 *** \todo Add support for displaying and editing animated tiles
 *** **************************************************************************/
-class TilesetTable : public Tileset {
+class TilesetTable : public QTableWidget {
 public:
 	TilesetTable();
 
+	/** \brief Constructs the object and immediately invokes the Load() method
+	*** \param tileset A pointer to the tileset to pass to the Load() method
+	**/
+	TilesetTable(Tileset* tileset);
+
 	~TilesetTable()
-		{ delete table; table = NULL; }
+		{ Clear(); }
 
-	//! \brief Inherited method from Tileset class
-	bool Load(const QString& set_name);
+	Tileset* GetTileset() const
+		{ return _tileset; }
 
-	//! Reference to the table implementation of this tileset
-	QTableWidget *table;
-}; // class TilesetTable : public Tileset
+	//! \brief Clears all loaded tileset and image data
+	void Clear()
+		{ clear(); _tileset = NULL; }
+
+	/** \brief Populates the images of table with the tiles from a tileset
+	*** \param tileset A pointer to the tileset to use, which should already be initialized
+	*** \return True if the image data was loaded into the table successfully
+	**/
+	bool Load(Tileset* tileset);
+
+private:
+	//! \brief A pointer to the most recent tileset object that the table loaded image data from
+	Tileset* _tileset;
+}; // class TilesetTable : public QTableWidget
 
 } // namespace hoa_editor
 

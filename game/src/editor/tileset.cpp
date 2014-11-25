@@ -19,6 +19,7 @@
 #include <QVariant>
 #include <QHeaderView>
 
+#include "script.h"
 #include "common.h"
 #include "tileset.h"
 
@@ -332,40 +333,65 @@ void Tileset::_CreateTilesetNameFromFilename(const QString &filename) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TilesetTable::TilesetTable() :
-	Tileset(),
-	table(new QTableWidget(TILESET_NUM_ROWS, TILESET_NUM_COLS))
+	QTableWidget(TILESET_NUM_ROWS, TILESET_NUM_COLS),
+	_tileset(NULL)
 {
 	// Set up the QT table
-	table->setShowGrid(false);
-	table->setSelectionMode(QTableWidget::ContiguousSelection);
-	table->setEditTriggers(QTableWidget::NoEditTriggers);
-	table->setContentsMargins(0, 0, 0, 0);
-	table->setDragEnabled(false);
-	table->setAcceptDrops(false);
-	table->setHorizontalHeaderLabels(QStringList());
-	table->setVerticalHeaderLabels(QStringList());
-	table->verticalHeader()->hide();
-	table->verticalHeader()->setContentsMargins(0, 0, 0, 0);
-	table->horizontalHeader()->hide();
-	table->horizontalHeader()->setContentsMargins(0, 0, 0, 0);
+	setShowGrid(false);
+	setSelectionMode(QTableWidget::ContiguousSelection);
+	setEditTriggers(QTableWidget::NoEditTriggers);
+	setContentsMargins(0, 0, 0, 0);
+	setDragEnabled(false);
+	setAcceptDrops(false);
+	setHorizontalHeaderLabels(QStringList());
+	setVerticalHeaderLabels(QStringList());
+	verticalHeader()->hide();
+	verticalHeader()->setContentsMargins(0, 0, 0, 0);
+	horizontalHeader()->hide();
+	horizontalHeader()->setContentsMargins(0, 0, 0, 0);
 
 	for (uint32 i = 0; i < TILESET_NUM_ROWS; ++i)
-		table->setRowHeight(i, TILE_HEIGHT);
+		setRowHeight(i, TILE_HEIGHT);
 	for (uint32 i = 0; i < TILESET_NUM_COLS; ++i)
-		table->setColumnWidth(i, TILE_LENGTH);
+		setColumnWidth(i, TILE_LENGTH);
 }
 
 
 
-bool TilesetTable::Load(const QString& def_filename) {
-	if (Tileset::Load(def_filename) == false)
-		return false;
+TilesetTable::TilesetTable(Tileset* tileset) :
+	TilesetTable()
+{
+	_tileset = tileset;
+	// While using a NULL argument won't produce any problems, it is not the expected behavior for this constructor
+	if (tileset == NULL) {
+		qDebug("WARNING: TilesetTable constructor was passed a NULL Tileset pointer");
+	}
+	else {
+		Load(_tileset);
+	}
+}
 
-	// Load the tileset image into a single file, then make a copy of the individual tiles
-	// within it and place them in the pixmap
+
+
+bool TilesetTable::Load(Tileset* tileset) {
+	if (tileset == NULL) {
+		qDebug("WARNING: TilesetTable::Load() was passed a NULL pointer. Call Clear() instead.");
+		return false;
+	}
+
+	if (_tileset->IsInitialized() == false) {
+		qDebug("WARNING: TilesetTable::Load() was passed a pointer to an uninitialized Tileset object");
+	}
+
+	Clear();
+	_tileset = tileset;
+
+	// TODO: Instead of reloading the image here, see if we can use the existing image data in the Tileset object
+
+	// Load the tileset image into a single file, then make a copy of the individual tiles within it and place them in the pixmap
 	QImage entire_tileset;
-	if (entire_tileset.load(_tileset_image_filename) == false) {
-		qDebug("ERROR: failed to load tileset image file");
+	if (entire_tileset.load(_tileset->GetTilesetImageFilename()) == false) {
+		qDebug("ERROR: failed to load tileset image file %s", _tileset->GetTilesetImageFilename().toStdString().c_str());
 		return false;
 	}
 
@@ -373,7 +399,6 @@ bool TilesetTable::Load(const QString& def_filename) {
 	// and place it in the table's pixmap
 	QRect rectangle;
 	QVariant variant;
-	QPixmap tile_pixmap;
 	for (uint32 row = 0; row < TILESET_NUM_ROWS; ++row) {
 		for (uint32 col = 0; col < TILESET_NUM_COLS; ++col) {
 			rectangle.setRect(col * TILE_LENGTH, row * TILE_HEIGHT, TILE_LENGTH, TILE_HEIGHT);
@@ -385,13 +410,13 @@ bool TilesetTable::Load(const QString& def_filename) {
 				QTableWidgetItem* item = new QTableWidgetItem(QTableWidgetItem::UserType);
 				item->setData(Qt::DecorationRole, variant);
 				item->setFlags(item->flags() &~ Qt::ItemIsEditable);
-				table->setItem(row, col, item);
+				setItem(row, col, item);
 			}
 		}
 	}
 
 	// Select the top left item
-	table->setCurrentCell(0, 0);
+	setCurrentCell(0, 0);
 
 	return true;
 }
