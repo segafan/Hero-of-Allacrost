@@ -314,7 +314,7 @@ modes_SOURCES = \
 	$(MODES_DIR)/shop/shop_trade.cpp \
 	$(MODES_DIR)/shop/shop_utils.h \
 	$(MODES_DIR)/shop/shop_utils.cpp \
-    $(MODES_DIR)/test.cpp \
+    	$(MODES_DIR)/test.cpp \
 	$(MODES_DIR)/test.h
 
 if COND_EDITOR
@@ -325,7 +325,7 @@ BUILT_SOURCES = $(allacrost_editor_MOC)
 CLEANFILES = $(BUILT_SOURCES) $(EDITOR_BIN)
 $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 	$(MOC) -o $@ $<
-allacrost_editor_MOC = $(EDITOR_DIR)/dialog_boxes.moc.cpp $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp
+allacrost_editor_MOC = $(EDITOR_DIR)/dialog_boxes.moc.cpp $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/map_view.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp
 allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/dialog_boxes.cpp \
 	$(EDITOR_DIR)/dialog_boxes.h \
@@ -334,26 +334,23 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/editor_main.cpp \
 	$(EDITOR_DIR)/editor_utils.cpp \
 	$(EDITOR_DIR)/editor_utils.h \
-	$(EDITOR_DIR)/grid.cpp \
-	$(EDITOR_DIR)/grid.h \
-	$(EDITOR_DIR)/tile_model.cpp \
-	$(EDITOR_DIR)/tile_model.h \
+	$(EDITOR_DIR)/map_data.cpp \
+	$(EDITOR_DIR)/map_data.h \
+	$(EDITOR_DIR)/map_view.cpp \
+	$(EDITOR_DIR)/map_view.h \
+	$(EDITOR_DIR)/tile_layers.cpp \
+	$(EDITOR_DIR)/tile_layers.h \
 	$(EDITOR_DIR)/tileset.cpp \
 	$(EDITOR_DIR)/tileset.h \
 	$(EDITOR_DIR)/tileset_editor.cpp \
 	$(EDITOR_DIR)/tileset_editor.h \
 	$(script_SOURCES) \
-	$(video_SOURCES) \
-	$(audio_SOURCES) \
+	$(luabind_SOURCES) \
+	$(COMMON_DIR)/common.cpp \
+	$(COMMON_DIR)/common.h \
 	src/defs.h \
 	src/utils.cpp \
-	src/utils.h \
-	$(luabind_SOURCES) \
-	$(common_SOURCES) \
-	$(ENGINE_DIR)/mode_manager.cpp \
-	$(ENGINE_DIR)/mode_manager.h \
-	$(ENGINE_DIR)/system.cpp \
-	$(ENGINE_DIR)/system.h
+	src/utils.h
 nodist_allacrost_editor_SOURCES = $(allacrost_editor_MOC)
 allacrost_editor_LDADD = $(QT_GUILINK) $(QT_LDADD)
 else

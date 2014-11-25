@@ -16,6 +16,8 @@
 #ifndef __EDITOR_UTILS_HEADER__
 #define __EDITOR_UTILS_HEADER__
 
+#include <QString>
+
 #include "utils.h"
 
 namespace hoa_editor {
@@ -53,6 +55,9 @@ const uint32 TILESET_NUM_COLS = 16;
 const uint32 TILESET_NUM_ROWS = 16;
 //@}
 
+//! \brief The number of tiles that a tileset holds (TILESET_NUM_COLS * TILESET_NUM_ROWS)
+const uint32 TILESET_NUM_TILES = 256;
+
 //! \brief The dimensions of a tile's collision quadrant, in pixels
 //@{
 const uint32 TILE_QUADRANT_LENGTH = TILE_LENGTH / 2;
@@ -63,7 +68,7 @@ const uint32 TILE_QUADRANT_HEIGHT = TILE_HEIGHT / 2;
 const uint32 TILE_NUM_QUADRANTS = 4;
 
 //! \brief Various modes for tile editing
-enum TILE_MODE_TYPE {
+enum TILE_EDIT_MODE {
 	INVALID_TILE   = -1,
 	PAINT_TILE     =  0,
 	MOVE_TILE      =  1,
@@ -88,6 +93,9 @@ enum TRANSITION_PATTERN_TYPE {
 	SW_CORNER_PATTERN   =  11,
 	TOTAL_PATTERN       =  12
 };
+
+//! \brief The name of the editor application
+const QString APP_NAME("Allacrost Map Editor");
 
 } // namespace hoa_editor
 

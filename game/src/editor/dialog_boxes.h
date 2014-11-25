@@ -42,7 +42,7 @@ class MapPropertiesDialog : public QDialog {
 
 	// Needed for accessing map properties.
 	friend class Editor;
-	friend class EditorScrollView;
+
 public:
 	/** \param parent The widget from which this dialog was invoked.
 	*** \param name The name of this widget.
@@ -111,6 +111,7 @@ class LayerDialog : public QDialog {
 
     // Needed for accessing map properties
     friend class Editor;
+
 public:
     /** \param parent The widget from which this dialog was invoked
     *** \param name The name of this widget
@@ -118,10 +119,6 @@ public:
     LayerDialog(QWidget *parent, const QString &name);
 
     ~LayerDialog();
-
-private slots:
-    //! \brief Retrieves the layer info written in the dialog box
-//     LayerInfo _GetLayerInfo();
 
 private:
     //! \brief A pushbutton for cancelling the action
@@ -164,7 +161,7 @@ class ContextPropertiesDialog : public QDialog {
 
 	// Needed for accessing map properties.
 	friend class Editor;
-	friend class EditorScrollView;
+
 public:
 	/** \param parent The widget from which this dialog was invoked.
 	*** \param name The name of this widget.
@@ -207,73 +204,6 @@ private:
 	//! \brief A layout to manage all the labels, buttons, and line edits
 	QGridLayout* _dia_layout;
 }; // class ContextPropertiesDialog : public QDialog
-
-
-
-/** ***************************************************************************
-*** \brief A dialog box that allows the user to declare what music files to
-***        load for this map.
-***
-*** This only defines the music files that the map should load. It does not
-*** define when or how each file should be played. It populates two lists of
-*** music files: one containing the music already chosen for the map, and the
-*** other with all the remaining music files that are not chosen. Each file is
-*** mutually exclusive and is only found in one list or the other, preventing
-*** the user from declaring to use the same music file more than once.
-*** **************************************************************************/
-class MusicDialog : public QDialog {
-	// Macro needed to use Qt's slots and signals.
-	Q_OBJECT
-
-	// Needed for accessing map properties.
-	friend class Editor;
-	friend class EditorScrollView;
-public:
-	/** \param parent The widget from which this dialog was invoked.
-	*** \param name The name of this widget.
-	**/
-	MusicDialog(QWidget* parent, const QString& name);
-
-	~MusicDialog();
-
-	//! \name Class member accessor functions
-	//@{
-	QListWidget* GetMusicList() const
-		{ return _used_music_list; }
-	//@}
-
-private slots:
-	//! \brief Adds music to the used music list and removes it from the available music list
-	void _AddMusic();
-
-	//! \brief Removes music from the used music list and adds it to the  available must list
-	void _RemoveMusic();
-
-private:
-	//! \brief A pushbutton for adding music to the map.
-	QPushButton* _add_pbut;
-
-	//! \brief A pushbutton for removing music from the map.
-	QPushButton* _remove_pbut;
-
-	//! \brief A pushbutton for finishing map music selection.
-	QPushButton* _ok_pbut;
-
-	//! \brief Label for listview showing available music to select from.
-	QLabel* _available_label;
-
-	//! \brief Label for listview showing music already in use by the map.
-	QLabel* _used_label;
-
-	//! \brief A listview with all the remaining music files.
-	QListWidget* _available_music_list;
-
-	//! \brief A listview with all the already used music files.
-	QListWidget* _used_music_list;
-
-	//! \brief A layout to manage all the labels, buttons, and listviews.
-	QGridLayout* _dia_layout;
-}; // class MusicDialog : public QDialog
 
 } // namespace hoa_editor
 

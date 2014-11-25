@@ -8,244 +8,42 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /** ***************************************************************************
-*** \file    tile_model.cpp
+*** \file    map_data.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Source file for the tile data model classes
+*** \brief   Source file for map data class
 *** **************************************************************************/
 
 #include "script.h"
 #include "editor_utils.h"
-#include "tile_model.h"
+#include "map_data.h"
 
 using namespace hoa_script;
+using namespace hoa_utils;
 using namespace std;
 
 namespace hoa_editor {
 
 ///////////////////////////////////////////////////////////////////////////////
-// TileLayer class
+// MapData class -- General Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-int32 TileLayer::GetTile(uint32 x, uint32 y) const {
-	// Make sure that there is at least one column and one row
-	if (_tiles.empty() == true)
-		return NO_TILE;
-	if (_tiles[0].empty() == true)
-		return NO_TILE;
-
-	// Check that the coordinates do not exceed the bounds of the layer
-	if (y >= _tiles.size())
-		return NO_TILE;
-	if (x >= _tiles[0].size())
-		return NO_TILE;
-
-	return _tiles[y][x];
-}
-
-
-
-void TileLayer::SetTile(uint32 x, uint32 y, int32 value) {
-	// Make sure that there is at least one column and one row
-	if (_tiles.empty() == true)
-		return;
-	if (_tiles[0].empty() == true)
-		return;
-
-	// Check that the coordinates do not exceed the bounds of the layer
-	if (y >= _tiles.size())
-		return;
-	if (x >= _tiles[0].size())
-		return;
-
-	_tiles[y][x] = value;
-}
-
-
-
-void TileLayer::FillLayer(int32 tile_id) {
-	for (uint32 y = 0; y < _tiles.size(); ++y) {
-		for (uint32 x = 0; x < _tiles[y].size(); ++x) {
-			_tiles[y][x] = tile_id;
-		}
-	}
-}
-
-
-
-void TileLayer::_AddLayerRow(uint32 row_index, int32 value) {
-	uint32 old_height = GetHeight();
-	uint32 length = GetLength();
-
-	if (old_height == 0) {
-		return;
-	}
-	if (row_index > old_height) {
-		return;
-	}
-
-	// And an empty tile row to the bottom
-	_tiles.push_back(vector<int32>(length, NO_TILE));
-	// Shift the appropriate rows one position down to make room for the row to add
-	for (uint32 i = _tiles.size() - 1; i > row_index; --i) {
-		_tiles[i] = _tiles[i-1];
-	}
-	// Now set the tiles at the new row to NO_TILE
-	for (uint32 i = 0; i < length; ++i) {
-		_tiles[row_index][i] = NO_TILE;
-	}
-}
-
-
-
-void TileLayer::_AddLayerCol(uint32 col_index, int32 value) {
-	uint32 height = GetHeight();
-	uint32 old_length = GetLength();
-
-	if (height == 0) {
-		return;
-	}
-	if (col_index > old_length) {
-		return;
-	}
-
-	for (uint32 i = 0; i < height; ++i) {
-		// Add an empty tile column to the back of each row.
-		_tiles[i].push_back(NO_TILE);
-		// Shift the columns one position right to make room for the column to add.
-		for (uint32 j = _tiles[i].size() - 1; j > col_index; --j) {
-			_tiles[i][j] = _tiles[i][j-1];
-		}
-		// Set the value in the new column to NO_TILE
-		_tiles[i][col_index] = NO_TILE;
-	}
-}
-
-
-
-void TileLayer::_DeleteLayerRow(uint32 row_index) {
-	uint32 old_height = GetHeight();
-
-	if (old_height == 0) {
-		return;
-	}
-	if (row_index >= old_height) {
-		return;
-	}
-
-	// Swap all rows below the index one position up to replace the deleted row
-	for (uint32 i = row_index; i < _tiles.size() - 1; ++i) {
-		_tiles[i] = _tiles[i+1];
-	}
-	// Now remove the last row
-	_tiles.pop_back();
-}
-
-
-
-void TileLayer::_DeleteLayerCol(uint32 col_index) {
-	uint32 height = GetHeight();
-	uint32 old_length = GetLength();
-
-	if (height == 0) {
-		return;
-	}
-	if (col_index > old_length) {
-		return;
-	}
-
-	// Swap all columns to the right of col_index one position left to replace the deleted column
-	for (uint32 i = 0; i < height; ++i) {
-		for (uint32 j = col_index; j < old_length - 1; ++j) {
-			_tiles[i][j] = _tiles[i][j+1];
-		}
-		// Now remove the last column
-		_tiles[i].pop_back();
-	}
-}
-
-
-
-void TileLayer::_ResizeLayer(uint32 length, uint height) {
-	_tiles.resize(height, vector<int32>(length));
-	for (uint32 y = 0; y < height; ++y) {
-		_tiles[y].resize(length, NO_TILE);
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// TileContext class
-///////////////////////////////////////////////////////////////////////////////
-
-void TileContext::_AddTileLayer(TileLayer& layer) {
-	if (layer.GetHeight() == 0 || layer.GetLength() == 0) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not add layer because one or both dimensions are zero" << endl;
-		return;
-	}
-
-	// If no tile layers exist, we don't need to do any layer size checking
-	if (_tile_layers.empty() == true) {
-		_tile_layers.push_back(layer);
-		return;
-	}
-
-	// Ensure that the height and length of the layer match an existing layer
-	if (layer.GetHeight() != _tile_layers[0].GetHeight()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not add layer because its height does not match the existing layers" << endl;
-		return;
-	}
-	if (layer.GetLength() != _tile_layers[0].GetLength()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not add layer because its length does not match the existing layers" << endl;
-		return;
-	}
-
-	_tile_layers.push_back(layer);
-}
-
-
-
-void TileContext::_RemoveTileLayer(uint32 layer_index) {
-	if (layer_index >= _tile_layers.size()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not remove layer because the layer_index argument (" << layer_index
-			<< ") exceeds the number of layers (" << layer_index << ")" << endl;
-		return;
-	}
-
-	for (uint32 i = layer_index; i < _tile_layers.size() - 1; ++i) {
-		_tile_layers[i] = _tile_layers[i+1];
-	}
-	_tile_layers.pop_back();
-}
-
-
-
-void TileContext::_SwapTileLayers(uint32 first_index, uint32 second_index) {
-	if (first_index >= _tile_layers.size() || second_index >= _tile_layers.size()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not remove layer because one or both index arguments (" << first_index
-			<< ", " << second_index << ") exceeds the number of layers (" << _tile_layers.size() << ")" << endl;
-		return;
-	}
-
-	// TODO: see if this can be replaced with a call to std::swap
-	TileLayer swap = _tile_layers[first_index];
-	_tile_layers[first_index] = _tile_layers[second_index];
-	_tile_layers[second_index] = _tile_layers[first_index];
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// TileDataModel class
-///////////////////////////////////////////////////////////////////////////////
-
-TileDataModel::TileDataModel() :
+MapData::MapData() :
+	_map_filename(""),
+	_map_name(""),
+	_map_length(0),
+	_map_height(0),
+	_map_modified(false),
 	_tile_layer_count(0),
 	_tile_context_count(0),
 	_selected_tile_layer(NULL),
 	_selected_tile_context(NULL),
-	_all_tile_contexts(MAX_CONTEXTS, NULL)
+	_all_tile_contexts(MAX_CONTEXTS, NULL),
+	_error_message("")
 {}
 
 
 
-bool TileDataModel::CreateData(uint32 map_length, uint32 map_height) {
+bool MapData::CreateData(uint32 map_length, uint32 map_height) {
 	if (IsInitialized() == true) {
 		return false;
 	}
@@ -269,9 +67,18 @@ bool TileDataModel::CreateData(uint32 map_length, uint32 map_height) {
 
 
 
-void TileDataModel::DestroyData() {
+void MapData::DestroyData() {
+	_map_filename = "";
+	_map_name = "";
+	_map_length = 0;
+	_map_height = 0;
 	_tile_layer_count = 0;
 	_tile_layer_properties.clear();
+
+	for (uint32 i = 0; i < _tilesets.size(); ++i) {
+		delete _tilesets[i];
+	}
+	_tilesets.clear();
 
 	for (uint32 i = 0; i < _all_tile_contexts.size(); ++i) {
 		if (_all_tile_contexts[i] == NULL)
@@ -284,38 +91,95 @@ void TileDataModel::DestroyData() {
 	_selected_tile_context = NULL;
 	_selected_tile_layer = NULL;
 	_tile_context_count = 0;
+
+	_error_message = "";
 }
 
 
 
-bool TileDataModel::LoadData(ReadScriptDescriptor& data_file) {
+bool MapData::LoadData(QString filename) {
 	if (IsInitialized() == true) {
 		return false;
 	}
+
+	_map_filename = filename;
 
 	// TODO: save number of contexts, number of layers, context names, layer names
 	// TODO: save context inheriting information, layer collision properties
 	// TODO: save collision data
 	// TODO: for each context, save layers
 
+	ReadScriptDescriptor read_data;
+
+	// Used as the window title for any errors that are detected and to notify the user via a message box
+	QString error_box_title("Map File Load Error");
+
+	// Open the map file for reading
+	if (read_data.OpenFile(string(filename.toAscii()), true) == false) {
+		_error_message = "Could not open file " + _map_filename + "for reading.";
+		return false;
+	}
+
+	// Check that the main table containing the map exists and open it
+	string main_map_table = string(_map_filename.section('/', -1).remove(".lua").toAscii());
+	if (read_data.DoesTableExist(main_map_table) == false) {
+		_error_message = "File did not contain the main map table: " + QString(main_map_table.c_str());
+		return false;
+	}
+
+	read_data.OpenTable(main_map_table);
+
+	// Reset container data
+	_tileset_names.clear();
+	_tilesets.clear();
+
+	// Read the various map descriptor variables
+// 	uint32 num_contexts = read_data.ReadUInt("num_map_contexts");
+	_map_length  = read_data.ReadUInt("num_tile_cols");
+	_map_height = read_data.ReadUInt("num_tile_rows");
+
+	if (read_data.IsErrorDetected()) {
+		_error_message = "Data read failure occurred for global map variables. Error messages:\n" + QString(read_data.GetErrorMessages().c_str());
+		return false;
+	}
+
+	// Create selection layer
+	// TODO: resize select layer here
+
+	// Base context is default and not saved in the map file
+	read_data.OpenTable("context_names");
+	uint32 table_size = read_data.GetTableSize();
+	for (uint32 i = 1; i <= table_size; i++)
+// 		context_names.append(QString(read_data.ReadString(i).c_str()));
+	read_data.CloseTable();
+
+	if (read_data.IsErrorDetected()) {
+		_error_message = "Data read failure occurred for string tables. Error messages:\n" + QString(read_data.GetErrorMessages().c_str());
+		return false;
+	}
+
+	read_data.CloseFile();
+
 	return true;
-} // bool TileDataModel::LoadData(ReadScriptDescriptor& data_file)
+} // bool MapData::LoadData(ReadScriptDescriptor& data_file)
 
 
 
-bool TileDataModel::SaveData(WriteScriptDescriptor& data_file) {
+bool MapData::SaveData(QString filename) {
 	if (IsInitialized() == false) {
 		return false;
 	}
 
-	if (data_file.IsFileOpen() == false) {
+	WriteScriptDescriptor data_file;
+	if (data_file.OpenFile(filename.toStdString()) == false) {
+		_error_message = "Could not open file for writing: " + filename;
 		return false;
 	}
 
 	// ---------- (1): Write basic map data properties
-	data_file.WriteInt("map_length", _empty_tile_layer.GetLength());
-	data_file.WriteInt("map_height", _empty_tile_layer.GetHeight());
-// 	data_file.WriteInt("number_tilesets", _tileset_count);
+	data_file.WriteInt("map_length", _map_length);
+	data_file.WriteInt("map_height", _map_height);
+ 	data_file.WriteInt("number_tilesets", _tilesets.size());
 	data_file.WriteInt("number_tile_layers", _tile_layer_count);
 	data_file.WriteInt("number_map_contexts", _tile_context_count);
 	data_file.InsertNewLine();
@@ -379,11 +243,114 @@ bool TileDataModel::SaveData(WriteScriptDescriptor& data_file) {
 	// TODO: for each context, save layers
 
 	return true;
-} // bool TileDataModel::SaveData(WriteScriptDescriptor& data_file)
+} // bool MapData::SaveData(WriteScriptDescriptor& data_file)
 
 
 
-QStringList TileDataModel::GetTileLayerNames() const {
+void MapData::ResizeMap(uint32 number_cols, uint32 number_rows) {
+	// TODO: modify the size of all layers in each context
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MapData class -- Tileset Functions
+///////////////////////////////////////////////////////////////////////////////
+
+bool MapData::AddTileset(Tileset* new_tileset) {
+	if (new_tileset == NULL) {
+		_error_message = "ERROR: function received NULL pointer argument";
+		return false;
+	}
+
+	if (new_tileset->IsInitialized() == false) {
+		_error_message = "ERROR: function received uninitialized tileset object";
+		return false;
+	}
+
+	for (uint32 i = 0; i < _tilesets.size(); ++i) {
+		if (_tilesets[i] == new_tileset) {
+			_error_message = "ERROR: tileset was already added to map data";
+			return false;
+		}
+
+		if (_tilesets[i]->GetTilesetDefinitionFilename() == new_tileset->GetTilesetDefinitionFilename()) {
+			_error_message = "ERROR: a tileset with the same definition file already exists within the map data";
+			return false;
+		}
+	}
+
+	_tilesets.push_back(new_tileset);
+	_tileset_names.push_back(new_tileset->GetTilesetName());
+	return true;
+}
+
+
+
+void MapData::RemoveTileset(uint32 tileset_index) {
+	if (tileset_index >= _tilesets.size()) {
+		_error_message = "ERROR: no tileset exists at index " + QString(NumberToString(tileset_index).c_str());
+		return;
+	}
+
+	delete _tilesets[tileset_index];
+
+	// Shift all remaining tilesets over, then remove the last entry in the list
+	for (uint32 i = tileset_index + 1; i < _tilesets.size(); ++i) {
+		_tilesets[i-1] = _tilesets[i];
+		_tileset_names[i-1] = _tileset_names[i];
+	}
+	_tilesets.pop_back();
+	_tileset_names.pop_back();
+}
+
+
+
+void MapData::MoveTilesetUp(uint32 tileset_index) {
+	if (tileset_index >= _tilesets.size()) {
+		_error_message = "ERROR: no tileset exists at index " + QString(NumberToString(tileset_index).c_str());
+		return;
+	}
+
+	if (tileset_index == 0) {
+		_error_message = "WARN: tileset could not be moved further down at index " + QString(NumberToString(tileset_index).c_str());
+		return;
+	}
+
+	Tileset* temp_tileset = _tilesets[tileset_index - 1];
+	_tilesets[tileset_index - 1] = _tilesets[tileset_index];
+	_tilesets[tileset_index] = temp_tileset;
+
+	QString temp_name = _tileset_names[tileset_index - 1];
+	_tileset_names[tileset_index - 1] = _tileset_names[tileset_index];
+	_tileset_names[tileset_index] = temp_name;
+}
+
+
+
+void MapData::MoveTilesetDown(uint32 tileset_index) {
+	if (tileset_index >= _tilesets.size()) {
+		_error_message = "ERROR: no tileset exists at index " + QString(NumberToString(tileset_index).c_str());
+		return;
+	}
+
+	if (tileset_index == _tilesets.size() - 1) {
+		_error_message = "WARN: tileset could not be moved further up at index " + QString(NumberToString(tileset_index).c_str());
+		return;
+	}
+
+	Tileset* temp_tileset = _tilesets[tileset_index + 1];
+	_tilesets[tileset_index + 1] = _tilesets[tileset_index];
+	_tilesets[tileset_index] = temp_tileset;
+
+	QString temp_name = _tileset_names[tileset_index + 1];
+	_tileset_names[tileset_index + 1] = _tileset_names[tileset_index];
+	_tileset_names[tileset_index] = temp_name;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MapData class -- Tile Layer Functions
+///////////////////////////////////////////////////////////////////////////////
+
+QStringList MapData::GetTileLayerNames() const {
 	QStringList layer_names;
 	for (uint32 i = 0; i < _tile_layer_count; ++i) {
 		layer_names.append(_tile_layer_properties[i].GetName());
@@ -394,7 +361,7 @@ QStringList TileDataModel::GetTileLayerNames() const {
 
 
 
-void TileDataModel::ToggleTileLayerVisibility(uint32 layer_index) {
+void MapData::ToggleTileLayerVisibility(uint32 layer_index) {
 	if (layer_index > _tile_layer_count)
 		return;
 
@@ -404,7 +371,7 @@ void TileDataModel::ToggleTileLayerVisibility(uint32 layer_index) {
 
 
 
-void TileDataModel::ToggleTileLayerCollision(uint32 layer_index) {
+void MapData::ToggleTileLayerCollision(uint32 layer_index) {
 	if (layer_index > _tile_layer_count)
 		return;
 
@@ -414,7 +381,7 @@ void TileDataModel::ToggleTileLayerCollision(uint32 layer_index) {
 
 
 
-bool TileDataModel::AddTileLayer(QString name, bool collision_on) {
+bool MapData::AddTileLayer(QString name, bool collision_on) {
 	// Check that the name will be unique among all existing tile layers before adding
 	QStringList layer_names = GetTileLayerNames();
 	int32 name_index = layer_names.indexOf(name);
@@ -434,7 +401,7 @@ bool TileDataModel::AddTileLayer(QString name, bool collision_on) {
 
 
 
-bool TileDataModel::DeleteTileLayer(uint32 layer_index) {
+bool MapData::DeleteTileLayer(uint32 layer_index) {
 	if (layer_index > _tile_layer_count) {
 		_error_message = "ERROR: no tile layer exists at this index";
 		return false;
@@ -457,7 +424,7 @@ bool TileDataModel::DeleteTileLayer(uint32 layer_index) {
 
 
 
-bool TileDataModel::RenameTileLayer(uint32 layer_index, QString new_name) {
+bool MapData::RenameTileLayer(uint32 layer_index, QString new_name) {
 	if (layer_index > _tile_layer_count) {
 		_error_message = "ERROR: no tile layer exists at this index";
 		return false;
@@ -481,7 +448,7 @@ bool TileDataModel::RenameTileLayer(uint32 layer_index, QString new_name) {
 
 
 
-bool TileDataModel::MoveTileLayerUp(uint32 layer_index) {
+bool MapData::MoveTileLayerUp(uint32 layer_index) {
 	if (layer_index >= _tile_layer_count) {
 		_error_message = "ERROR: no tile layer exists at this index";
 		return false;
@@ -508,7 +475,7 @@ bool TileDataModel::MoveTileLayerUp(uint32 layer_index) {
 
 
 
-bool TileDataModel::MoveTileLayerDown(uint32 layer_index) {
+bool MapData::MoveTileLayerDown(uint32 layer_index) {
 	if (layer_index >= _tile_layer_count) {
 		_error_message = "ERROR: no tile layer exists at this index";
 		return false;
@@ -535,7 +502,65 @@ bool TileDataModel::MoveTileLayerDown(uint32 layer_index) {
 
 
 
-QStringList TileDataModel::GetTileContextNames() const {
+void MapData::InsertTileLayerRows(uint32 row_index, uint32 row_count) {
+	if (row_index >= _map_height) {
+		return;
+	}
+
+	if (row_count == 0) {
+		return;
+	}
+
+	// TODO
+}
+
+
+
+void MapData::RemoveTileLayerRows(uint32 row_index, uint32 row_count) {
+	if (row_index >= _map_height) {
+		return;
+	}
+
+	if (row_count == 0) {
+		return;
+	}
+
+	// TODO
+}
+
+
+
+void MapData::InsertTileLayerColumns(uint32 col_index, uint32 col_count) {
+	if (col_index >= _map_length) {
+		return;
+	}
+
+	if (col_count == 0) {
+		return;
+	}
+
+	// TODO
+}
+
+
+
+void MapData::RemoveTileLayerColumns(uint32 col_index, uint32 col_count) {
+	if (col_index >= _map_length) {
+		return;
+	}
+
+	if (col_count == 0) {
+		return;
+	}
+
+	// TODO
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MapData class -- Tile Context Functions
+///////////////////////////////////////////////////////////////////////////////
+
+QStringList MapData::GetTileContextNames() const {
 	QStringList context_names;
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
 		if (_all_tile_contexts[i] == NULL)
@@ -549,7 +574,7 @@ QStringList TileDataModel::GetTileContextNames() const {
 
 
 
-QStringList TileDataModel::GetInheritedTileContextNames() const {
+QStringList MapData::GetInheritedTileContextNames() const {
 	QStringList name_list;
 
 	// Contexts that do not inherit have an empty string placed in the name list
@@ -567,7 +592,7 @@ QStringList TileDataModel::GetInheritedTileContextNames() const {
 }
 
 
-TileContext* TileDataModel::AddTileContext(QString name, int32 inheriting_context_id) {
+TileContext* MapData::AddTileContext(QString name, int32 inheriting_context_id) {
 	// Check all conditions where we would not be able to create the new context
 
 	if (_all_tile_contexts.back() != NULL) {
@@ -583,7 +608,7 @@ TileContext* TileDataModel::AddTileContext(QString name, int32 inheriting_contex
 		return NULL;
 	}
 	if (inheriting_context_id != NO_CONTEXT) {
-		if (inheriting_context_id <= 0 || inheriting_context_id > MAX_CONTEXTS) {
+		if (inheriting_context_id <= 0 || static_cast<uint32>(inheriting_context_id) > MAX_CONTEXTS) {
 			_error_message = "ERROR: invalid value for inhertiting context ID";
 			return NULL;
 		}
@@ -607,7 +632,7 @@ TileContext* TileDataModel::AddTileContext(QString name, int32 inheriting_contex
 
 
 
-bool TileDataModel::DeleteTileContext(TileContext* context) {
+bool MapData::DeleteTileContext(TileContext* context) {
 	// Check all conditions where we would not be able to create the new context
 	if (context == NULL) {
 		_error_message = "ERROR: received NULL context argument";
@@ -635,7 +660,7 @@ bool TileDataModel::DeleteTileContext(TileContext* context) {
 
 
 
-bool TileDataModel::RenameTileContext(uint32 context_index, QString new_name) {
+bool MapData::RenameTileContext(uint32 context_index, QString new_name) {
 	if (context_index >= _tile_context_count) {
 		_error_message = "ERROR: context_index exceeds size of context list";
 		return false;
@@ -657,7 +682,7 @@ bool TileDataModel::RenameTileContext(uint32 context_index, QString new_name) {
 
 
 
-bool TileDataModel::MoveTileContextUp(TileContext* context) {
+bool MapData::MoveTileContextUp(TileContext* context) {
 	if (context == NULL)
 		return false;
 
@@ -679,7 +704,7 @@ bool TileDataModel::MoveTileContextUp(TileContext* context) {
 
 
 
-bool TileDataModel::MoveTileContextDown(TileContext* context) {
+bool MapData::MoveTileContextDown(TileContext* context) {
 	if (context == NULL)
 		return false;
 
@@ -703,8 +728,8 @@ bool TileDataModel::MoveTileContextDown(TileContext* context) {
 
 
 
-TileContext* TileDataModel::FindTileContextByID(int32 context_id) const {
-	if (context_id <= 0 || context_id > MAX_CONTEXTS) {
+TileContext* MapData::FindTileContextByID(int32 context_id) const {
+	if (context_id <= 0 || static_cast<uint32>(context_id) > MAX_CONTEXTS) {
 		return NULL;
 	}
 
@@ -717,7 +742,7 @@ TileContext* TileDataModel::FindTileContextByID(int32 context_id) const {
 
 
 
-TileContext* TileDataModel::FindTileContextByName(QString context_name) const {
+TileContext* MapData::FindTileContextByName(QString context_name) const {
 	for (uint32 i = 0; i < _all_tile_contexts.size(); ++i) {
 		if (_all_tile_contexts[i] == NULL)
 			break;
@@ -731,7 +756,7 @@ TileContext* TileDataModel::FindTileContextByName(QString context_name) const {
 
 
 
-TileContext* TileDataModel::FindTileContextByIndex(uint32 context_index) const {
+TileContext* MapData::FindTileContextByIndex(uint32 context_index) const {
 	if (context_index >= _all_tile_contexts.size())
 		return NULL;
 
@@ -740,11 +765,7 @@ TileContext* TileDataModel::FindTileContextByIndex(uint32 context_index) const {
 
 
 
-
-
-
-
-void TileDataModel::_SwapTileContexts(TileContext* first, TileContext* second) {
+void MapData::_SwapTileContexts(TileContext* first, TileContext* second) {
 	int32 first_id = first->GetContextID();
 	int32 second_id = second->GetContextID();
 	uint32 first_index = static_cast<uint32>(first_id - 1);
@@ -771,7 +792,7 @@ void TileDataModel::_SwapTileContexts(TileContext* first, TileContext* second) {
 
 
 
-void TileDataModel::_ComputeCollisionData(std::vector<std::vector<uint32> >& data) {
+void MapData::_ComputeCollisionData(std::vector<std::vector<uint32> >& data) {
 	// TODO: this function needs to be rewritten from scratch to account for multiple
 	// tile layers, each with their own collision data toggability
 
@@ -881,6 +902,6 @@ void TileDataModel::_ComputeCollisionData(std::vector<std::vector<uint32> >& dat
 // 	} // iterate through the rows of the layers
 // 	write_data.EndTable();
 // 	write_data.InsertNewLine();
-} // void TileDataModel::_ComputeCollisionData(std::vector<std::vector<uint32> >& data)
+} // void MapData::_ComputeCollisionData(std::vector<std::vector<uint32> >& data)
 
 } // namespace hoa_editor
