@@ -14,12 +14,17 @@
 *** **************************************************************************/
 
 #include "script.h"
+#include "common.h"
+
 #include "editor_utils.h"
 #include "map_data.h"
 
-using namespace hoa_script;
-using namespace hoa_utils;
 using namespace std;
+
+using namespace hoa_utils;
+using namespace hoa_script;
+using namespace hoa_common;
+
 
 namespace hoa_editor {
 
@@ -102,66 +107,80 @@ bool MapData::LoadData(QString filename) {
 		return false;
 	}
 
+	// ---------- (1): Open the file and open the tablespace table, then clear any existing data before reading begins
+	ReadScriptDescriptor data_file;
+	if (data_file.OpenFile(string(filename.toAscii()), true) == false) {
+		_error_message = "Could not open file " + filename + " for reading.";
+		return false;
+	}
+
+	string tablespace = DetermineLuaFileTablespaceName(filename.toStdString());
+	if (data_file.DoesTableExist(tablespace) == false) {
+		_error_message = "Map file " + filename.toAscii() + " did not have the expected namespace table " + tablespace.c_str();
+		return false;
+	}
+
+	data_file.OpenTable(tablespace);
+
+	DestroyData();
 	_map_filename = filename;
 
-	// TODO: save number of contexts, number of layers, context names, layer names
-	// TODO: save context inheriting information, layer collision properties
-	// TODO: save collision data
-	// TODO: for each context, save layers
+	// ---------- (2): Read the basic map data properties
+	_map_length = data_file.ReadUInt("map_length");
+	_map_height = data_file.ReadUInt("map_height");
+ 	uint32 number_tilesets = data_file.ReadUInt("number_tilesets");
+	_tile_layer_count = data_file.ReadUInt("number_tile_layers");
+	_tile_context_count = data_file.ReadUInt("number_map_contexts");
 
-	ReadScriptDescriptor read_data;
-
-	// Used as the window title for any errors that are detected and to notify the user via a message box
-	QString error_box_title("Map File Load Error");
-
-	// Open the map file for reading
-	if (read_data.OpenFile(string(filename.toAscii()), true) == false) {
-		_error_message = "Could not open file " + _map_filename + "for reading.";
-		return false;
+	// ---------- (3): Construct the tileset, tile layers, and tile context objects
+	vector<string> tileset_names;
+	data_file.ReadStringVector("tileset_names", tileset_names);
+	for (uint32 i = 0; i < number_tilesets; ++i) {
+		Tileset* tileset = new Tileset();
+		QString tileset_qname = QString(tileset_names[i].c_str());
+		if (tileset->Load(tileset_qname) == false) {
+			_error_message = QString("Failed to load tileset file ") + tileset_qname + QString(" during loading of map file ") + _map_filename;
+			delete tileset;
+			return false;
+		}
+		AddTileset(tileset);
 	}
 
-	// Check that the main table containing the map exists and open it
-	string main_map_table = string(_map_filename.section('/', -1).remove(".lua").toAscii());
-	if (read_data.DoesTableExist(main_map_table) == false) {
-		_error_message = "File did not contain the main map table: " + QString(main_map_table.c_str());
-		return false;
-	}
+	vector<string> tile_layer_names;
+	vector<bool> tile_layer_collision_enabled;
+	data_file.ReadStringVector("tile_layer_names", tile_layer_names);
+	data_file.ReadBoolVector("tile_layer_collision_enabled", tile_layer_collision_enabled);
 
-	read_data.OpenTable(main_map_table);
+	// TODO: construct layers
 
-	// Reset container data
-	_tileset_names.clear();
-	_tilesets.clear();
+	vector<string> tile_context_names;
+	vector<int32> tile_context_inheritance;
+	data_file.ReadStringVector("map_context_names", tile_context_names);
+	data_file.ReadIntVector("map_context_inheritance", tile_context_inheritance);
 
-	// Read the various map descriptor variables
-// 	uint32 num_contexts = read_data.ReadUInt("num_map_contexts");
-	_map_length  = read_data.ReadUInt("num_tile_cols");
-	_map_height = read_data.ReadUInt("num_tile_rows");
+	// TODO: construct tile contexts
 
-	if (read_data.IsErrorDetected()) {
-		_error_message = "Data read failure occurred for global map variables. Error messages:\n" + QString(read_data.GetErrorMessages().c_str());
+	// ---------- (4): Read collision grid data
+
+	// TODO: Currently collision data is only computed and written when the map file is saved. In the future,
+	// the collision data should always be available and optionally visible on the map view.
+
+	// ---------- (5): Read the tile value for each layer and each context
+
+
+	if (data_file.IsErrorDetected()) {
+		_error_message = QString("Data read failure occurred for global map variables. Error messages:\n") + QString(data_file.GetErrorMessages().c_str());
 		return false;
 	}
 
 	// Create selection layer
 	// TODO: resize select layer here
 
-	// Base context is default and not saved in the map file
-	read_data.OpenTable("context_names");
-	uint32 table_size = read_data.GetTableSize();
-	for (uint32 i = 1; i <= table_size; i++)
-// 		context_names.append(QString(read_data.ReadString(i).c_str()));
-	read_data.CloseTable();
-
-	if (read_data.IsErrorDetected()) {
-		_error_message = "Data read failure occurred for string tables. Error messages:\n" + QString(read_data.GetErrorMessages().c_str());
-		return false;
-	}
-
-	read_data.CloseFile();
+	data_file.CloseTable();
+	data_file.CloseFile();
 
 	return true;
-} // bool MapData::LoadData(ReadScriptDescriptor& data_file)
+} // bool MapData::LoadData(QString filename)
 
 
 
@@ -170,32 +189,52 @@ bool MapData::SaveData(QString filename) {
 		return false;
 	}
 
+	// ---------- (1): Open the file and write the tablespace header and map header comment
 	WriteScriptDescriptor data_file;
 	if (data_file.OpenFile(filename.toStdString()) == false) {
 		_error_message = "Could not open file for writing: " + filename;
 		return false;
 	}
 
-	// ---------- (1): Write basic map data properties
-	data_file.WriteInt("map_length", _map_length);
-	data_file.WriteInt("map_height", _map_height);
- 	data_file.WriteInt("number_tilesets", _tilesets.size());
-	data_file.WriteInt("number_tile_layers", _tile_layer_count);
-	data_file.WriteInt("number_map_contexts", _tile_context_count);
+	data_file.WriteNamespace(DetermineLuaFileTablespaceName(filename.toStdString()));
 	data_file.InsertNewLine();
 
-	// ---------- (2): Write properties of tilesets, tile layers, and contexts
-// 	data_file.BeginTable("tileset_names");
-// 	for (uint32 i = 0; i < _tile_layer_names.size(); ++i) {
-// 		data_file.WriteString((i+1), _tileset_names[i].toAscii());
-// 	}
-// 	data_file.EndTable();
-// 	data_file.InsertNewLine();
+	// TODO: add this information at a later time when the user has the ability to add this
+	// data to the map properties in the editor.
+	data_file.WriteComment("------------------------------------------------------------");
+	data_file.WriteComment("Map Name: ");
+	data_file.WriteComment("Map Designer(s): ");
+	data_file.WriteComment("Description:");
+	data_file.WriteComment("------------------------------------------------------------");
+	data_file.InsertNewLine();
+
+	// ---------- (2): Write the basic map data properties
+	data_file.WriteUInt("map_length", _map_length);
+	data_file.WriteUInt("map_height", _map_height);
+ 	data_file.WriteUInt("number_tilesets", _tilesets.size());
+	data_file.WriteUInt("number_tile_layers", _tile_layer_count);
+	data_file.WriteUInt("number_map_contexts", _tile_context_count);
+	data_file.InsertNewLine();
+
+	// ---------- (3): Write properties of tilesets, tile layers, and map contexts
+	data_file.BeginTable("tileset_names");
+	for (uint32 i = 0; i < _tilesets.size(); ++i) {
+		data_file.WriteString((i+1), _tileset_names[i].toStdString());
+	}
+	data_file.EndTable();
+	data_file.InsertNewLine();
 
 	data_file.BeginTable("tile_layer_names");
 	QStringList layer_names = GetTileLayerNames();
 	for (int32 i = 0; i < layer_names.size(); ++i) {
 		data_file.WriteString((i+1), layer_names[i].toStdString());
+	}
+	data_file.EndTable();
+	data_file.InsertNewLine();
+
+	data_file.BeginTable("tile_layer_collision_enabled");
+	for (uint32 i = 0; i < _tile_layer_properties.size(); ++i) {
+		data_file.WriteBool((i+1), _tile_layer_properties[i].IsCollisionEnabled());
 	}
 	data_file.EndTable();
 	data_file.InsertNewLine();
@@ -208,6 +247,14 @@ bool MapData::SaveData(QString filename) {
 	data_file.EndTable();
 	data_file.InsertNewLine();
 
+	data_file.BeginTable("map_context_inheritance");
+	for (uint32 i = 0; i < _tile_context_count; ++i) {
+		data_file.WriteInt((i+1), _all_tile_contexts[i]->GetInheritedContextID());
+	}
+	data_file.EndTable();
+	data_file.InsertNewLine();
+
+	// ---------- (4): Write collision grid data
 	data_file.BeginTable("collision_grid");
 	vector<vector<uint32> > collision_grid;
 	_ComputeCollisionData(collision_grid);
@@ -217,33 +264,31 @@ bool MapData::SaveData(QString filename) {
 	data_file.EndTable();
 	data_file.InsertNewLine();
 
-	data_file.BeginTable("map_context_inheritance");
-	for (uint32 i = 0; i < _tile_context_count; ++i) {
-		data_file.WriteInt((i+1), _all_tile_contexts[i]->GetInheritedContextID());
+	// ---------- (5): For each tile, write the tile value for each layer and each context
+	data_file.BeginTable("map_tiles");
+	for (uint32 y = 0; y < _map_height; ++y) {
+		for (uint32 x = 0; x < _map_length; ++x) {
+			string tile_id = "map_tiles[" + NumberToString(y) + "][" + NumberToString(x) + "] = ";
+			vector<int32> tiles;
+			for (uint32 c = 0; c < _tile_context_count; ++c) {
+				for (uint32 l = 0; l < _tile_layer_count; ++l) {
+					// TODO: push context/layer data into tiles vecotr
+				}
+			}
+			// TODO: write tiles vector
+		}
 	}
 	data_file.EndTable();
 	data_file.InsertNewLine();
 
-	// ---------- (3): Compute and write layer collision data
-	vector<vector<uint32> > collision_data;
-	_ComputeCollisionData(collision_data);
-	data_file.BeginTable("collision_grid");
-	for (uint32 i = 0; i < collision_data.size(); ++i) {
-
+	if (data_file.IsErrorDetected()) {
+		_error_message = "One or more errors occurred when writing map file. Error messages:\n" + QString(data_file.GetErrorMessages().c_str());
+		return false;
 	}
-	data_file.EndTable();
-	data_file.InsertNewLine();
-
-
-	// ---------- (4): Write all layers for each context
-
-	// TODO: save number of contexts, number of layers, context names, layer names
-	// TODO: save context inheriting information, layer collision properties
-	// TODO: save collision data
-	// TODO: for each context, save layers
+	data_file.CloseFile();
 
 	return true;
-} // bool MapData::SaveData(WriteScriptDescriptor& data_file)
+} // bool MapData::SaveData(QString filename)
 
 
 
