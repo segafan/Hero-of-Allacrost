@@ -14,7 +14,7 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_GNU_SOURCE
-CXXFLAGS="-Wall"
+CXXFLAGS="-Wall -std=c++11"
 
 dnl Check for compiler optimization option.
 AC_MSG_CHECKING(whether to enable -O3 compiler optimization)

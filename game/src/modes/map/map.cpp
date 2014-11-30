@@ -93,7 +93,7 @@ MapMode::MapMode(string script_filename) :
 
 	ResetState();
 	PushState(STATE_EXPLORE);
-	
+
 	// Creates a unique event group identifier string by using the script's tablespace name prefixed with "map_"
 	string event_group_name = "map_" + DetermineLuaFileTablespaceName(_script_filename);
 	if (GlobalManager->DoesEventGroupExist(event_group_name) == false) {
@@ -396,20 +396,20 @@ void MapMode::_LoadFileData() {
 	_script_tablespace = DetermineLuaFileTablespaceName(_script_filename);
 	_map_script.OpenTable(_script_tablespace);
 	_data_filename = _map_script.ReadString("data_file");
-	
+
 	// ---------- (2) Open the map data file
 	ReadScriptDescriptor data_file;
 	if (data_file.OpenFile(_data_filename) == false) {
 		PRINT_ERROR << "failed to open map data file: " << _data_filename << endl;
 		return;
 	}
-	
+
 	// ---------- (3) Load the contents of both map files
 	data_file.OpenTable(DetermineLuaFileTablespaceName(_data_filename));
 	_LoadMapData(data_file);
 	data_file.CloseAllTables();
 	data_file.CloseFile();
-	
+
 	_LoadMapScript();
 	_map_script.CloseAllTables();
 }
@@ -455,7 +455,7 @@ void MapMode::_LoadMapScript() {
 		PRINT_ERROR << "failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
 	}
 	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
-	
+
 	// ---------- (2) Create all enemies that may appear on this map
 	vector<int32> enemy_ids;
 	_map_script.ReadIntVector("enemy_ids", enemy_ids);
@@ -654,8 +654,8 @@ void MapMode::_CalculateMapFrame() {
 		_map_frame.screen_edges.right = SCREEN_COLS;
 	}
 	// Camera exceeds the right boundary of the map
-	else if (_map_frame.starting_col + TILE_COLS >= _tile_supervisor->_num_tile_cols) {
-		_map_frame.starting_col = static_cast<int16>(_tile_supervisor->_num_tile_cols - TILE_COLS);
+	else if (_map_frame.starting_col + TILE_COLS >= _tile_supervisor->GetColumnCount()) {
+		_map_frame.starting_col = static_cast<int16>(_tile_supervisor->GetColumnCount() - TILE_COLS);
 		_map_frame.tile_x_start = 1.0f;
 		_map_frame.screen_edges.right = static_cast<float>(_object_supervisor->_num_grid_cols);
 		_map_frame.screen_edges.left = _map_frame.screen_edges.right - SCREEN_COLS;
@@ -669,8 +669,8 @@ void MapMode::_CalculateMapFrame() {
 		_map_frame.screen_edges.bottom = SCREEN_ROWS;
 	}
 	// Camera exceeds the bottom boundary of the map
-	else if (_map_frame.starting_row + TILE_ROWS >= _tile_supervisor->_num_tile_rows) {
-		_map_frame.starting_row = static_cast<int16>(_tile_supervisor->_num_tile_rows - TILE_ROWS);
+	else if (_map_frame.starting_row + TILE_ROWS >= _tile_supervisor->GetRowCount()) {
+		_map_frame.starting_row = static_cast<int16>(_tile_supervisor->GetRowCount() - TILE_ROWS);
 		_map_frame.tile_y_start = 2.0f;
 		_map_frame.screen_edges.bottom = static_cast<float>(_object_supervisor->_num_grid_rows);
 		_map_frame.screen_edges.top = _map_frame.screen_edges.bottom - SCREEN_ROWS;
@@ -719,14 +719,14 @@ void MapMode::_CalculateMapFrame() {
 void MapMode::_DrawMapLayers() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 
-	_tile_supervisor->DrawLowerLayer(&_map_frame);
-	_tile_supervisor->DrawMiddleLayer(&_map_frame);
+	_tile_supervisor->DrawTileLayer(0, &_map_frame);
+	_tile_supervisor->DrawTileLayer(1, &_map_frame);
 
 	_object_supervisor->DrawGroundObjects(&_map_frame, false); // First draw pass of ground objects
 	_object_supervisor->DrawPassObjects(&_map_frame);
 	_object_supervisor->DrawGroundObjects(&_map_frame, true); // Second draw pass of ground objects
 
-	_tile_supervisor->DrawUpperLayer(&_map_frame);
+	_tile_supervisor->DrawTileLayer(2, &_map_frame);
 
 	_object_supervisor->DrawSkyObjects(&_map_frame);
 

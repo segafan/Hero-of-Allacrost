@@ -31,42 +31,71 @@ namespace hoa_map {
 namespace private_map {
 
 /** ****************************************************************************
-*** \brief Represents a single image tile on the map.
+*** \brief Holds the indeces to the images used for a particular tile on the map
 ***
 *** The images that a tile uses are not stored within this class. This class
 *** only holds indices to the container class holding those images. This class
-*** also does not contain any information about walkability or the collision grid.
-*** That information is maintained in the map object manager.
+*** also does not contain any information about the collision grid. That information
+*** is maintained in the map object manager.
 ***
-*** \note The reason that tiles do not contain walkability information is that
-*** each tile is 32x32 pixels, but walkability is defined on a 16x16 granularity,
-*** meaning that there are four "walkable" sections to each tile. Certain code
-*** such as pathfinding is more simple if all walkability information is kept in
+*** \note The reason that tiles do not contain collision information is that
+*** each tile is 32x32 pixels, but collision is defined on a 16x16 granularity,
+*** meaning that there are four collision sections to each tile. Certain code
+*** such as pathfinding is more simple if all collision information is kept in
 *** in another form of container.
 *** ***************************************************************************/
 class MapTile {
 public:
 	/** \name Tile Layer Indeces
-	*** \brief Indeces to the tile image container, mapping the three tile layers.
-	*** \note A negative value means that no image is registered to that tile layer.
+	*** \brief Indeces to the tile image container, where each element corresponds to a different tile layer
+	*** \note A negative value means that no image is registered to that tile layer
 	**/
-	//@{
-	int16 lower_layer, middle_layer, upper_layer;
-	//@}
+	std::vector<int16> tile_layers;
 
 	MapTile()
-		{ lower_layer = -1; middle_layer = -1; upper_layer = -1; }
+		{}
 
-	MapTile(int16 lower, int16 middle, int16 upper)
-		{ lower_layer = lower; middle_layer = middle; upper_layer = upper; }
+	MapTile(uint32 layer_count) :
+		tile_layers(layer_count, -1) { tile_layers.shrink_to_fit(); }
 }; // class MapTile
+
+
+/** ****************************************************************************
+*** \brief Represents a layer of tiles on a map independently of any map context
+***
+*** This class does little more than enable layers of tiles to be drawn interspersed with
+*** layers of objects and sprites. All of the heavy lifting is done by the TileSupervisor
+*** class.
+*** ***************************************************************************/
+class TileLayer : public MapLayer {
+public:
+	TileLayer(uint32 order) :
+		MapLayer(), _tile_layer_order(order) {}
+
+	uint32 GetTileLayerOrder() const
+		{ return _tile_layer_order; }
+
+	//! \brief Does nothing. Animated tiles are updated by the TileSupervisor class across all layers
+	void Update()
+		{}
+
+	//! \brief
+	void Draw() const;
+
+private:
+	/** \brief Holds the draw order of this layer amongst all tile layers (0 represents the first tile layer)
+	*** \note This only represents the order of tile layers as they were defined in the map data file. The existence of
+	*** any other layer type (objects, sprites, etc) in the draw order does not affect the value of this member.
+	**/
+	uint32 _tile_layer_order;
+}; // class TileLayer
 
 
 /** ****************************************************************************
 *** \brief A helper class to MapMode responsible for all tile data and operations
 ***
 *** This class is responsible for loading, updating, and drawing all tile images
-*** and managing the tile grid. The TileSupervisor does <b>not</b> manage the map
+*** and managing the tile grid. The TileSupervisor does not manage the map
 *** collision grid, which is used by map objects and sprites.
 ***
 *** Maps have a minimum size of 24 rows and 32 columns of tiles. Theoretically
@@ -80,6 +109,18 @@ public:
 
 	~TileSupervisor();
 
+	//! \name Class Member Accessor Methods
+	//@{
+	uint16 GetLayerCount() const
+		{ return _layer_count; }
+
+	uint16 GetRowCount() const
+		{ return _row_count; }
+
+	uint16 GetColumnCount() const
+		{ return _column_count; }
+	//@}
+
 	/** \brief Handles all operations on loading tilesets and tile images from the map data file
 	*** \param map_file A reference to the Lua file containing the map data
 	*** \param map_instance A pointer to the MapMode object which invoked this function
@@ -90,38 +131,30 @@ public:
 	//! \brief Updates all animated tile images
 	void Update();
 
-	/** \brief Draws the various tile layers to the screen
+	/** \brief Draws a tile layer to the screen
+	*** \param layer_index The index of the layer that should be drawn
 	*** \param frame A pointer to the computed information required to draw this frame
 	***
-	*** The implementation of these functions are nearly identical except for using
-	*** a different layer index to reference the tile image and some minor
-	*** differences in draw flags. We do not attempt to apply code reuse to these
-	*** functions because we need them to be as fast as possible since they are
-	*** each executed for every frame.
-	***
-	*** \note These functions do not reset the coordinate system and hence require
-	*** that the proper coordinate system is already set prior to these function
-	*** calls (0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f). These functions do make
-	*** modifications to the blending draw flag and the draw cursor position
-	*** which are not restored by the function upon its return, so take measures
-	*** to retain this information before calling these functions if necessary.
+	*** \note This function does not reset the coordinate system and hence require that the proper coordinate system is
+	*** already set prior to this function call (0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f). These functions do make
+	*** modifications to the blending draw flag and the draw cursor position which are not restored by the function upon
+	*** its return, so take measures to retain this information before calling these functions if necessary.
 	**/
-	//@{
-	void DrawLowerLayer(const MapFrame* const frame);
-	void DrawMiddleLayer(const MapFrame* const frame);
-	void DrawUpperLayer(const MapFrame* const frame);
-	//@}
+	void DrawTileLayer(uint16 layer_index, const MapFrame* const frame);
 
 private:
+	//! \brief The number of tile layers on the map
+	uint16 _layer_count;
+
 	/** \brief The number of rows of tiles in the map.
 	*** This number must be greater than or equal to 24 for the map to be valid.
 	**/
-	uint16 _num_tile_rows;
+	uint16 _row_count;
 
 	/** \brief The number of columns of tiles in the map.
 	*** This number must be greater than or equal to 32 for the map to be valid.
 	**/
-	uint16 _num_tile_cols;
+	uint16 _column_count;
 
 	/** \brief A map of 2D vectors that contains all of the map's tile objects.
 	*** Each key-value pair in the std::map represents a map context, thus the size of the std::map is equal to
