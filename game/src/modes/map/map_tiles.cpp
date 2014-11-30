@@ -31,8 +31,8 @@ namespace hoa_map {
 namespace private_map {
 
 TileSupervisor::TileSupervisor() :
-	_num_tile_rows(0),
-	_num_tile_cols(0)
+	_row_count(0),
+	_column_count(0)
 {}
 
 
@@ -54,20 +54,21 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 	// TODO: Add some more error checking in this function (such as checking for script errors after reading blocks of data from the map file)
 
 	// ---------- (1) Load the map dimensions and do some basic sanity checks
-	_num_tile_rows = map_file.ReadInt("num_tile_rows");
-	_num_tile_cols = map_file.ReadInt("num_tile_cols");
+	_layer_count = 3;
+	_row_count = map_file.ReadUInt("num_tile_rows");
+	_column_count = map_file.ReadUInt("num_tile_cols");
 
 	// Check to make sure tables are of the proper size
 	// TODO: we only check that the number of rows are correct, but not the number of columns
-	if (map_file.GetTableSize("lower_layer") != _num_tile_rows) {
+	if (map_file.GetTableSize("lower_layer") != _row_count) {
 		PRINT_ERROR << "the lower_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
 	}
-	if (map_file.GetTableSize("middle_layer") != _num_tile_rows) {
+	if (map_file.GetTableSize("middle_layer") != _row_count) {
 		PRINT_ERROR << "the middle_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
 	}
-	if (map_file.GetTableSize("upper_layer") != _num_tile_rows) {
+	if (map_file.GetTableSize("upper_layer") != _row_count) {
 		PRINT_ERROR << "the upper_layer table size was not equal to the number of tile rows specified by the map" << endl;
 		return;
 	}
@@ -107,41 +108,42 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 	// where the first 16 indeces in the tileset range are the tiles of the first row (left to right), and so on.
 
 	// Create and add the 2D tile grid for the base context
+	MapTile blank_tile(_layer_count); // Used to size each MapTile in the _tile_grid appropriately
 	_tile_grid.clear();
-	_tile_grid.insert(make_pair(MAP_CONTEXT_01, vector<vector<MapTile> >(_num_tile_rows)));
-	for (uint32 r = 0; r < _num_tile_rows; r++) {
-		_tile_grid[MAP_CONTEXT_01][r].resize(_num_tile_cols);
+	_tile_grid.insert(make_pair(MAP_CONTEXT_01, vector<vector<MapTile> >(_row_count)));
+	for (uint32 r = 0; r < _row_count; r++) {
+		_tile_grid[MAP_CONTEXT_01][r].resize(_column_count, blank_tile);
 	}
 
 	vector<int32> table_row; // Used to temporarily store a row of table indeces
 
 	// Read the base context tables for all three layers
 	map_file.OpenTable("lower_layer");
-	for (uint32 r = 0; r < _num_tile_rows; r++) {
+	for (uint32 r = 0; r < _row_count; r++) {
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
-		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[MAP_CONTEXT_01][r][c].lower_layer = table_row[c];
+		for (uint32 c = 0; c < _column_count; c++) {
+			_tile_grid[MAP_CONTEXT_01][r][c].tile_layers[0] = table_row[c];
 		}
 	}
 	map_file.CloseTable();
 
 	map_file.OpenTable("middle_layer");
-	for (uint32 r = 0; r < _num_tile_rows; r++) {
+	for (uint32 r = 0; r < _row_count; r++) {
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
-		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[MAP_CONTEXT_01][r][c].middle_layer = table_row[c];
+		for (uint32 c = 0; c < _column_count; c++) {
+			_tile_grid[MAP_CONTEXT_01][r][c].tile_layers[1] = table_row[c];
 		}
 	}
 	map_file.CloseTable();
 
 	map_file.OpenTable("upper_layer");
-	for (uint32 r = 0; r < _num_tile_rows; r++) {
+	for (uint32 r = 0; r < _row_count; r++) {
 		table_row.clear();
 		map_file.ReadIntVector(r, table_row);
-		for (uint32 c = 0; c < _num_tile_cols; c++) {
-			_tile_grid[MAP_CONTEXT_01][r][c].upper_layer = table_row[c];
+		for (uint32 c = 0; c < _column_count; c++) {
+			_tile_grid[MAP_CONTEXT_01][r][c].tile_layers[2] = table_row[c];
 		}
 	}
 	map_file.CloseTable();
@@ -162,9 +164,9 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 			_tile_grid.insert(make_pair(this_context, _tile_grid[MAP_CONTEXT_01]));
 		}
 		else {
-			_tile_grid.insert(make_pair(this_context, vector<vector<MapTile> >(_num_tile_rows)));
-			for (uint32 r = 0; r < _num_tile_rows; r++) {
-				_tile_grid[this_context][r].resize(_num_tile_cols);
+			_tile_grid.insert(make_pair(this_context, vector<vector<MapTile> >(_row_count)));
+			for (uint32 r = 0; r < _row_count; r++) {
+				_tile_grid[this_context][r].resize(_column_count, blank_tile);
 			}
 		}
 
@@ -184,13 +186,13 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		for (uint32 j = 0; j < context_data.size(); j += 4) {
 			switch (context_data[j]) {
 				case 0: // lower layer
-					_tile_grid[this_context][context_data[j+1]][context_data[j+2]].lower_layer = context_data[j+3];
+					_tile_grid[this_context][context_data[j+1]][context_data[j+2]].tile_layers[0] = context_data[j+3];
 					break;
 				case 1: // middle layer
-					_tile_grid[this_context][context_data[j+1]][context_data[j+2]].middle_layer = context_data[j+3];
+					_tile_grid[this_context][context_data[j+1]][context_data[j+2]].tile_layers[1] = context_data[j+3];
 					break;
 				case 2: // upper layer
-					_tile_grid[this_context][context_data[j+1]][context_data[j+2]].upper_layer = context_data[j+3];
+					_tile_grid[this_context][context_data[j+1]][context_data[j+2]].tile_layers[2] = context_data[j+3];
 					break;
 				default:
 					IF_PRINT_WARNING(MAP_DEBUG) << "unknown tile layer index reference when loading map context tiles" << endl;
@@ -208,14 +210,14 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 	tile_references.assign(tileset_filenames.size() * TILES_PER_TILESET, -1);
 
 	for (map<MAP_CONTEXT, vector<vector<MapTile> > >::iterator i = _tile_grid.begin(); i != _tile_grid.end(); i++) {
-		for (uint32 r = 0; r < _num_tile_rows; r++) {
-			for (uint32 c = 0; c < _num_tile_cols; c++) {
-				if ((i->second)[r][c].lower_layer >= 0)
-					tile_references[(i->second)[r][c].lower_layer] = 0;
-				if ((i->second)[r][c].middle_layer >= 0)
-					tile_references[(i->second)[r][c].middle_layer] = 0;
-				if ((i->second)[r][c].upper_layer >= 0)
-					tile_references[(i->second)[r][c].upper_layer] = 0;
+		for (uint32 r = 0; r < _row_count; r++) {
+			for (uint32 c = 0; c < _column_count; c++) {
+				if ((i->second)[r][c].tile_layers[0] >= 0)
+					tile_references[(i->second)[r][c].tile_layers[0]] = 0;
+				if ((i->second)[r][c].tile_layers[1] >= 0)
+					tile_references[(i->second)[r][c].tile_layers[1]] = 0;
+				if ((i->second)[r][c].tile_layers[2] >= 0)
+					tile_references[(i->second)[r][c].tile_layers[2]] = 0;
 			}
 		}
 	}
@@ -238,14 +240,14 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 
 	// Now, go back and re-assign all lower, middle, and upper tile layer indeces with the translated indeces
 	for (map<MAP_CONTEXT, vector<vector<MapTile> > >::iterator i = _tile_grid.begin(); i != _tile_grid.end(); i++) {
-		for (uint32 r = 0; r < _num_tile_rows; r++) {
-			for (uint32 c = 0; c < _num_tile_cols; c++) {
-				if ((i->second)[r][c].lower_layer >= 0)
-					(i->second)[r][c].lower_layer = tile_references[(i->second)[r][c].lower_layer];
-				if ((i->second)[r][c].middle_layer >= 0)
-					(i->second)[r][c].middle_layer = tile_references[(i->second)[r][c].middle_layer];
-				if ((i->second)[r][c].upper_layer >= 0)
-					(i->second)[r][c].upper_layer = tile_references[(i->second)[r][c].upper_layer];
+		for (uint32 r = 0; r < _row_count; r++) {
+			for (uint32 c = 0; c < _column_count; c++) {
+				if ((i->second)[r][c].tile_layers[0] >= 0)
+					(i->second)[r][c].tile_layers[0] = tile_references[(i->second)[r][c].tile_layers[0]];
+				if ((i->second)[r][c].tile_layers[1] >= 0)
+					(i->second)[r][c].tile_layers[1] = tile_references[(i->second)[r][c].tile_layers[1]];
+				if ((i->second)[r][c].tile_layers[2] >= 0)
+					(i->second)[r][c].tile_layers[2] = tile_references[(i->second)[r][c].tile_layers[2]];
 			}
 		}
 	}
@@ -337,64 +339,20 @@ void TileSupervisor::Update() {
 
 
 
-void TileSupervisor::DrawLowerLayer(const MapFrame* const frame) {
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
-	for (uint32 r = static_cast<uint32>(frame->starting_row);
-			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++)
-		{
-		for (uint32 c = static_cast<uint32>(frame->starting_col);
-				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++)
-		{
-			// Draw a tile image if it exists at this location
-			if (_tile_grid[MapMode::CurrentInstance()->GetCurrentContext()][r][c].lower_layer >= 0)
-			{
-				_tile_images[_tile_grid[MapMode::CurrentInstance()->GetCurrentContext()][r][c].lower_layer]->Draw();
-			}
-			VideoManager->MoveRelative(2.0f, 0.0f);
-		}
-		VideoManager->MoveRelative(-static_cast<float>(frame->num_draw_cols * 2), 2.0f);
+void TileSupervisor::DrawTileLayer(uint16 layer_index, const MapFrame* const frame) {
+	if (layer_index >= _layer_count) {
+		PRINT_ERROR << "tried to draw a tile layer at an invalid index: " << layer_index << endl;
+		return;
 	}
-}
 
-
-
-void TileSupervisor::DrawMiddleLayer(const MapFrame* const frame) {
+	MAP_CONTEXT current_context = MapMode::CurrentInstance()->GetCurrentContext();
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
-	for (uint32 r = static_cast<uint32>(frame->starting_row);
-			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++)
-	{
-		for (uint32 c = static_cast<uint32>(frame->starting_col);
-				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++)
-		{
+	for (uint32 r = static_cast<uint32>(frame->starting_row); r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); ++r)	{
+		for (uint32 c = static_cast<uint32>(frame->starting_col); c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); ++c)	{
 			// Draw a tile image if it exists at this location
-			if (_tile_grid[MapMode::CurrentInstance()->GetCurrentContext()][r][c].middle_layer >= 0)
-			{
-				_tile_images[_tile_grid[MapMode::CurrentInstance()->GetCurrentContext()][r][c].middle_layer]->Draw();
-			}
-			VideoManager->MoveRelative(2.0f, 0.0f);
-		}
-
-		VideoManager->MoveRelative(-static_cast<float>(frame->num_draw_cols * 2), 2.0f);
-	}
-}
-
-
-
-void TileSupervisor::DrawUpperLayer(const MapFrame* const frame) {
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
-	for (uint32 r = static_cast<uint32>(frame->starting_row);
-			r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); r++)
-	{
-		for (uint32 c = static_cast<uint32>(frame->starting_col);
-				c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); c++)
-		{
-			// Draw a tile image if it exists at this location
-			if (_tile_grid[MapMode::CurrentInstance()->GetCurrentContext()][r][c].upper_layer >= 0)
-			{
-				_tile_images[_tile_grid[MapMode::CurrentInstance()->GetCurrentContext()][r][c].upper_layer]->Draw();
+			if (_tile_grid[current_context][r][c].tile_layers[layer_index] >= 0) {
+				_tile_images[_tile_grid[current_context][r][c].tile_layers[layer_index]]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}

@@ -353,6 +353,22 @@ public:
 
 
 /** ****************************************************************************
+*** \brief Abstract representation of a layer of visible items on a map
+***
+*** This simple abstract class is used to maintain the order of drawable layers of tiles and objects on the map.
+*** Its sole purpose is to allow for an ordered container to hold pointers to the different layer types.
+*** ***************************************************************************/
+class MapLayer {
+public:
+	//! \brief Updates all the objects on this layer (animations, position, etc.)
+	virtual void Update() = 0;
+
+	//! \brief
+	virtual void Draw() const = 0;
+}; // class MapLayer
+
+
+/** ****************************************************************************
 *** \brief A container class for node information in pathfinding.
 ***
 *** This class is used in the MapMode#_FindPath function to find an optimal

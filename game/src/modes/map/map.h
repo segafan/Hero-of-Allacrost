@@ -261,10 +261,10 @@ private:
 
 	//! \brief The name of the Lua file that holds the map data
 	std::string _data_filename;
-	
+
 	//! \brief The name of the Lua file that contains the map's scripting code
 	std::string _script_filename;
-	
+
 	//! \brief The name of the tablespace that encapsulates the map script file
 	std::string _script_tablespace;
 
@@ -397,10 +397,10 @@ private:
 	std::vector<hoa_global::GlobalEnemy*> _enemies;
 
 	// ----- Methods -----
-	
+
 	//! \brief Opens both the map data and script files and load the contents of their data
 	void _LoadFileData();
-	
+
 	/** \brief Loads all map data contained in the Lua map data file
 	*** \param map_data A references to the already opened map descriptor file
 	**/
