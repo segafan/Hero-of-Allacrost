@@ -136,15 +136,6 @@ public:
 	void OpenScriptTablespace(bool use_global = false)
 		{ _map_script.OpenTable(_script_tablespace, use_global); }
 
-	//! \brief Adds a new object to the ground object layer
-	void AddGroundObject(private_map::MapObject *obj);
-
-	//! \brief Adds a new object to the pass object layer
-	void AddPassObject(private_map::MapObject *obj);
-
-	//! \brief Adds a new object to the sky object layer
-	void AddSkyObject(private_map::MapObject *obj);
-
 	//! \brief Adds a new zone to the map
 	void AddZone(private_map::MapZone *zone);
 

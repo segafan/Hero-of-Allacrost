@@ -60,8 +60,7 @@ MapObject::MapObject() :
 	updatable(true),
 	visible(true),
 	no_collision(false),
-	sky_object(false),
-	draw_on_second_pass(false)
+	_object_layer_id(DEFAULT_LAYER_ID)
 {}
 
 
@@ -299,6 +298,58 @@ void TreasureObject::Update() {
 }
 
 // ----------------------------------------------------------------------------
+// ---------- ObjectLayer Class Functions
+// ----------------------------------------------------------------------------
+
+void ObjectLayer::Update() {
+	for (uint32 i = 0; i < _objects.size(); ++i) {
+		_objects[i]->Update();
+	}
+}
+
+
+
+void ObjectLayer::Draw() const {
+	for (uint32 i = 0; i < _objects.size(); ++i) {
+		_objects[i]->Draw();
+	}
+}
+
+
+
+void ObjectLayer::AddObject(MapObject* object) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to add a NULL object to object layer " << _object_layer_id << endl;
+		return;
+	}
+
+	if (find(_objects.begin(), _objects.end(), object) != _objects.end()) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to add an object that already existed in object layer " << _object_layer_id << endl;
+		return;
+	}
+
+	object->SetObjectLayerID(_object_layer_id);
+	_objects.push_back(object);
+}
+
+
+
+void ObjectLayer::RemoveObject(MapObject* object) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to remove a NULL object from object layer " << _object_layer_id << endl;
+		return;
+	}
+
+	vector<MapObject*>::iterator location = find(_objects.begin(), _objects.end(), object);
+	if (location == _objects.end()) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "attempted to remove an object that did not exist in object layer " << _object_layer_id << endl;
+		return;
+	}
+
+	_objects.erase(location);
+}
+
+// ----------------------------------------------------------------------------
 // ---------- ObjectSupervisor Class Functions
 // ----------------------------------------------------------------------------
 
@@ -313,22 +364,18 @@ ObjectSupervisor::ObjectSupervisor() :
 	_virtual_focus->movement_speed = NORMAL_SPEED;
 	_virtual_focus->SetNoCollision(true);
 	_virtual_focus->SetVisible(false);
+
+	_object_layers.push_back(ObjectLayer(DEFAULT_LAYER_ID));
+	_object_layers[DEFAULT_LAYER_ID].AddObject(_virtual_focus);
 }
 
 
 
 ObjectSupervisor::~ObjectSupervisor() {
 	// Delete all of the map objects
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		delete(_ground_objects[i]);
+	for (map<uint16, MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); ++i) {
+		delete i->second;
 	}
-	for (uint32 i = 0; i < _pass_objects.size(); i++) {
-		delete(_pass_objects[i]);
-	}
-	for (uint32 i = 0; i < _sky_objects.size(); i++) {
-		delete(_sky_objects[i]);
-	}
-	delete(_virtual_focus);
 }
 
 
@@ -339,7 +386,7 @@ MapObject* ObjectSupervisor::GetObjectByIndex(uint32 index) {
 	}
 
 	uint32 counter = 0;
-	for (map<uint16, MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); i++) {
+	for (map<uint16, MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); ++i) {
 		if (counter == index)
 			return i->second;
 		else
@@ -381,19 +428,11 @@ VirtualSprite* ObjectSupervisor::GetSprite(uint32 object_id) {
 
 
 
-void ObjectSupervisor::SortObjects() {
-	std::sort(_ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less());
-	std::sort(_pass_objects.begin(), _pass_objects.end(), MapObject_Ptr_Less());
-	std::sort(_sky_objects.begin(), _sky_objects.end(), MapObject_Ptr_Less());
-}
-
-
-
 void ObjectSupervisor::Load(ReadScriptDescriptor& map_file) {
 	// ---------- Construct the collision grid
 	map_file.OpenTable("map_grid");
 	_num_grid_rows = map_file.GetTableSize();
-	for (uint16 r = 0; r < _num_grid_rows; r++) {
+	for (uint16 r = 0; r < _num_grid_rows; ++r) {
 		_collision_grid.push_back(vector<uint32>());
 		map_file.ReadUIntVector(r, _collision_grid.back());
 	}
@@ -404,14 +443,8 @@ void ObjectSupervisor::Load(ReadScriptDescriptor& map_file) {
 
 
 void ObjectSupervisor::Update() {
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		_ground_objects[i]->Update();
-	}
-	for (uint32 i = 0; i < _pass_objects.size(); i++) {
-		_pass_objects[i]->Update();
-	}
-	for (uint32 i = 0; i < _sky_objects.size(); i++) {
-		_sky_objects[i]->Update();
+	for (uint32 i = 0; i < _object_layers.size(); ++i) {
+		_object_layers[i].Update();
 	}
 
 	for (uint32 i = 0; i < _zones.size(); i++) {
@@ -423,39 +456,75 @@ void ObjectSupervisor::Update() {
 
 
 
-void ObjectSupervisor::DrawGroundObjects(const MapFrame* const frame, const bool second_pass) {
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		if (_ground_objects[i]->draw_on_second_pass == second_pass) {
-			_ground_objects[i]->Draw();
+void ObjectSupervisor::DrawDialogIcons() {
+	MapSprite *sprite;
+
+	for (uint32 i = 0; i < _object_layers.size(); ++i) {
+		vector<MapObject*>* objects = _object_layers[i].GetObjects();
+
+		for (uint32 j = 0; j < objects->size(); ++j) {
+			if (objects->at(j)->GetObjectType() == SPRITE_TYPE) {
+				sprite = dynamic_cast<MapSprite*>(objects->at(j));
+				sprite->DrawDialog();
+			}
 		}
 	}
 }
 
 
 
-void ObjectSupervisor::DrawPassObjects(const MapFrame* const frame) {
-	for (uint32 i = 0; i < _pass_objects.size(); i++) {
-		_pass_objects[i]->Draw();
-	}
+uint32 ObjectSupervisor::AddObjectLayer() {
+	uint32 new_layer_id = _object_layers.size();
+	_object_layers.push_back(ObjectLayer(new_layer_id));
+	return new_layer_id;
 }
 
 
 
-void ObjectSupervisor::DrawSkyObjects(const MapFrame* const frame) {
-	for (uint32 i = 0; i < _sky_objects.size(); i++) {
-		_sky_objects[i]->Draw();
+void ObjectSupervisor::AddObject(MapObject* new_object, uint32 layer_id) {
+	if (new_object == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function received NULL MapObject pointer" << endl;
+		return;
+	}
+
+	if (layer_id >= _object_layers.size()) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "no object layer exists with layer id: " << layer_id << endl;
+		layer_id = DEFAULT_LAYER_ID;
+	}
+
+	_all_objects.insert(make_pair(new_object->GetObjectID(), new_object));
+	_object_layers[layer_id].AddObject(new_object);
+}
+
+
+
+void ObjectSupervisor::MoveObjectToLayer(MapObject* object, uint32 layer_id) {
+	if (object == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function received NULL MapObject pointer" << endl;
+		return;
+	}
+
+	if (layer_id >= _object_layers.size()) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "no object layer exists with layer id: " << layer_id << endl;
+		return;
+	}
+
+	uint32 current_layer = object->GetObjectLayerID();
+	_object_layers[current_layer].RemoveObject(object);
+	_object_layers[layer_id].AddObject(object);
+
+	return;
+}
+
+
+
+void ObjectSupervisor::SortObjectLayers() {
+	for (vector<ObjectLayer>::iterator i = _object_layers.begin(); i != _object_layers.end(); ++i) {
+		i->SortObjects();
 	}
 }
 
-void ObjectSupervisor::DrawDialogIcons(const MapFrame* const frame) {
-    MapSprite *mapSprite;
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		if (_ground_objects[i]->GetObjectType() == SPRITE_TYPE) {
-		    mapSprite = static_cast<MapSprite*>(_ground_objects[i]);
-			mapSprite->DrawDialog();
-		}
-	}
-}
+
 
 MapObject* ObjectSupervisor::FindNearestObject(const VirtualSprite* sprite, float search_distance) {
 	// NOTE: We don't check if the argument is NULL here for performance reasons
@@ -488,11 +557,8 @@ MapObject* ObjectSupervisor::FindNearestObject(const VirtualSprite* sprite, floa
 	vector<MapObject*> valid_objects; // A vector to hold objects which are inside the search area (either partially or fully)
 	vector<MapObject*>* search_vector = NULL; // A pointer to the vector of objects to search
 
-	// Only search the object layer that the sprite resides on. Note that we do not consider searching the pass layer.
-	if (sprite->sky_object == true)
-		search_vector = &_sky_objects;
-	else
-		search_vector = &_ground_objects;
+	// TODO: use the object layer that the sprite belongs to instead of the default layer_id
+	search_vector = _object_layers[DEFAULT_LAYER_ID].GetObjects();
 
 	for (vector<MapObject*>::iterator i = (*search_vector).begin(); i != (*search_vector).end(); i++) {
 		if (*i == sprite) // Don't allow the sprite itself to be considered in the search
@@ -506,7 +572,7 @@ MapObject* ObjectSupervisor::FindNearestObject(const VirtualSprite* sprite, floa
 		(*i)->GetCollisionRectangle(object_rect);
 		if (MapRectangle::CheckIntersection(object_rect, search_area) == true)
 			valid_objects.push_back(*i);
-	} // for (map<MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); i++)
+	}
 
 	// ---------- (3) Check for early exit conditions
 	if (valid_objects.empty() == true) {
@@ -553,11 +619,6 @@ bool ObjectSupervisor::CheckMapCollision(const private_map::MapObject* const obj
 	if (coll_rect.left < 0.0f || coll_rect.right >= static_cast<float>(_num_grid_cols) ||
 		coll_rect.top < 0.0f || coll_rect.bottom >= static_cast<float>(_num_grid_rows)) {
 		return true;
-	}
-
-	// Grid based collision is not done for objects in the sky layer
-	if (obj->sky_object == true) {
-		return false;
 	}
 
 	// Determine if the object's collision rectangle overlaps any unwalkable tiles
@@ -625,18 +686,15 @@ COLLISION_TYPE ObjectSupervisor::DetectCollision(VirtualSprite* sprite, MapObjec
 		return BOUNDARY_COLLISION;
 	}
 
-	// ---------- (2) Check if the object's collision rectangel overlaps with any unwalkable elements on the collision grid
-	// Grid based collision is not done for objects in the sky layer
-	if (sprite->sky_object == false) {
-		// Determine if the object's collision rectangle overlaps any unwalkable tiles
-		// Note that because the sprite's collision rectangle was previously determined to be within the map bounds,
-		// the map grid tile indeces referenced in this loop are all valid entries and do not need to be checked for out-of-bounds conditions
-		for (uint32 r = static_cast<uint32>(coll_rect.top); r <= static_cast<uint32>(coll_rect.bottom); r++) {
-			for (uint32 c = static_cast<uint32>(coll_rect.left); c <= static_cast<uint32>(coll_rect.right); c++) {
-				// Checks the collision grid at the row-column at the object's current context
-				if ((_collision_grid[r][c] & sprite->context) != 0) {
-					return GRID_COLLISION;
-				}
+	// ---------- (2) Check if the object's collision rectangle overlaps with any unwalkable elements on the collision grid
+	// Determine if the object's collision rectangle overlaps any unwalkable tiles
+	// Note that because the sprite's collision rectangle was previously determined to be within the map bounds,
+	// the map grid tile indeces referenced in this loop are all valid entries and do not need to be checked for out-of-bounds conditions
+	for (uint32 r = static_cast<uint32>(coll_rect.top); r <= static_cast<uint32>(coll_rect.bottom); r++) {
+		for (uint32 c = static_cast<uint32>(coll_rect.left); c <= static_cast<uint32>(coll_rect.right); c++) {
+			// Checks the collision grid at the row-column at the object's current context
+			if ((_collision_grid[r][c] & sprite->context) != 0) {
+				return GRID_COLLISION;
 			}
 		}
 	}
@@ -644,10 +702,8 @@ COLLISION_TYPE ObjectSupervisor::DetectCollision(VirtualSprite* sprite, MapObjec
 	// ---------- (3) Determine which set of objects to do collision detection with
 	MapObject* obstruction_object = NULL;
 	vector<MapObject*>* objects = NULL; // A pointer to the layer of objects to do the collision detection with
-	if (sprite->sky_object == false)
-		objects = &_ground_objects;
-	else
-		objects = &_sky_objects;
+	// TODO: use the object layer that the sprite belongs to instead of the default layer_id
+	objects = _object_layers[DEFAULT_LAYER_ID].GetObjects();
 
 	// ---------- (4) Check collision areas for all objects matching the layer and context of the sprite
 	MapRectangle sprite_rect;
@@ -681,7 +737,8 @@ COLLISION_TYPE ObjectSupervisor::DetectCollision(VirtualSprite* sprite, MapObjec
 
 
 MapObject* ObjectSupervisor::IsPositionOccupied(int16 row, int16 col) {
-	vector<MapObject*>* objects = &_ground_objects;
+	// TODO: currently only examines the default object layer. Needs to be able to examine the appropriate layer
+	vector<MapObject*>* objects = _object_layers[DEFAULT_LAYER_ID].GetObjects();
 
 	uint16 tmp_x;
 	uint16 tmp_y;

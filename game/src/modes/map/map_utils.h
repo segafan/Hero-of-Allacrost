@@ -278,6 +278,8 @@ const uint32 STANDARD_ENEMY_SPAWN_TIME = 3000;
 const uint32 STAMINA_EMPTY  = 0;
 const uint32 STAMINA_FULL   = 10000;
 
+//! \brief The only layer ID for both tile layers and object layers that is guaranteed to exist
+const uint32 DEFAULT_LAYER_ID = 0;
 
 /** \brief Returns the opposite facing direction of the direction given in parameter.
 *** \return A direction that faces opposite to the argument direction

@@ -12,24 +12,28 @@ claudius_sprite = nil;
 
 function Load(m)
 	-- First, record the current map in the map variable that is global to this script
-	map = m;
-	map.unlimited_stamina = true;
-	DialogueManager = m.dialogue_supervisor;
-	event_supervisor = m.event_supervisor;
+	Map = m;
+	Map.unlimited_stamina = true;
+	ObjectManager = Map.object_supervisor;
+	DialogueManager = Map.dialogue_supervisor;
+	EventManager = Map.event_supervisor;
+	TreasureManager = Map.treasure_supervisor;
+	GlobalEvents = Map.map_event_group;
 
 	-- Play music once the map becomes active for the first time
-	map:SetCurrentTrack(0);
+	Map:SetCurrentTrack(0);
 
 	-- Create the sprite that the player controls
 	claudius_sprite = ConstructSprite("Claudius", 1000, 14, 85);
 	claudius_sprite:SetDirection(hoa_map.MapMode.NORTH);
-	map:AddGroundObject(claudius_sprite);
-	map:SetCamera(claudius_sprite);
+	ObjectManager:AddObject(claudius_sprite, 0);
+	Map:SetCamera(claudius_sprite);
 
 	CreateDoors();
 	CreateCharacters();
 	CreateEnemies();
-	CreateDialogue();
+	-- TODO: throws a run-time error when creating dialogue. Fix this issue and then uncomment function call below
+	-- CreateDialogue();
 	CreateEvents();
 end
 
@@ -42,7 +46,7 @@ end
 
 -- Mandatory function for custom drawing
 function Draw()
-	map:DrawMapLayers();
+	Map:DrawMapLayers();
 end
 
 
@@ -51,27 +55,27 @@ function CreateDoors()
 	context_zone = hoa_map.ContextZone(1, 2);
 	context_zone:AddSection(154, 157, 156, 157, false);
 	context_zone:AddSection(154, 157, 158, 159, true);
-	map:AddZone(context_zone);
+	Map:AddZone(context_zone);
 
 	context_zone = hoa_map.ContextZone(1, 2);
 	context_zone:AddSection(154, 157, 120, 121, false);
 	context_zone:AddSection(154, 157, 122, 123, true);
-	map:AddZone(context_zone);
+	Map:AddZone(context_zone);
 
 	context_zone = hoa_map.ContextZone(1, 2);
 	context_zone:AddSection(378, 381, 142, 143, false);
 	context_zone:AddSection(378, 381, 144, 145, true);
-	map:AddZone(context_zone);
+	Map:AddZone(context_zone);
 
 	context_zone = hoa_map.ContextZone(1, 2);
 	context_zone:AddSection(314, 317, 116, 117, false);
 	context_zone:AddSection(314, 317, 118, 119, true);
-	map:AddZone(context_zone);
+	Map:AddZone(context_zone);
 	
 	context_zone = hoa_map.ContextZone(1, 2);
 	context_zone:AddSection(346, 349,  80,  81, false);
 	context_zone:AddSection(346, 349,  82,  83, true);
-	map:AddZone(context_zone);
+	Map:AddZone(context_zone);
 end -- function CreateDoors()
 
 
@@ -83,7 +87,7 @@ function CreateCharacters()
 	sprite:SetDirection(hoa_map.MapMode.SOUTH);
 	sprite:AddDialogueReference(10);
 	sprite:AddDialogueReference(11);
-	map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 end -- function CreateCharacters()
 
 

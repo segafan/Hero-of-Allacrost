@@ -26,6 +26,7 @@
 // Local map mode headers
 #include "map_utils.h"
 #include "map_treasure.h"
+#include <boost/concept_check.hpp>
 
 namespace hoa_map {
 
@@ -36,15 +37,14 @@ namespace private_map {
 ***
 *** A map object can be anything from a sprite to a tree to a house. To state
 *** it simply, a map object is a map image that is not tiled and need not be fixed
-*** in place. Map objects are drawn in one of three layers: ground, pass, and sky
-*** object layers.
+*** in place. All map objects exist on one of the available object layers for the map.
 
 *** All map objects have both a collision rectangle and an image rectangle.
 *** The collision rectangle indicates what parts of the object may not overlap
 *** with other collision rectangles and unwalkable sections of the map. The image
 *** rectangle determines the size of the object as it is visible on the screen.
 *** The collision rectangle and image rectangles do not need to be the same size.
-*** Typically the collision rectangle is smaller than the image rectangle. It is
+*** Typically, the collision rectangle is smaller than the image rectangle. It is
 *** also possible to disable both rectangles via special properties that can be
 *** enabled in this class. This would prevent the object from being a factor in
 *** collision detection and/or it would never be drawn to the screen.
@@ -52,14 +52,14 @@ namespace private_map {
 *** State information about map objects may need to be retained upon leaving a
 *** map. For example, a treasure (which is a type of map object) needs to know
 *** whether or not the player has retrieved its contents already so that they
-*** can not be gained a second time. This data is stored in the saved game file
+*** can not be gained a second time. This data is stored in the global event manager
 *** so that even when the player exits the game, the state information can be
 *** retrieved when the application starts again later.
 ***
 *** \note It is advised not to attempt to make map objects with dynamic sizes (i.e.
 *** the various image frames that compose the object should all be the same size).
 *** In theory, dynamically sized objects are feasible to implement in maps, but
-*** they are much easier to be subject to bugs and other issues.
+*** they are much more likely to be subject to bugs and other issues.
 *** ***************************************************************************/
 class MapObject {
 public:
@@ -135,20 +135,6 @@ public:
 
 	//! \brief When true, the object will not be examined for collision detection (default == false).
 	bool no_collision;
-
-	/** \brief When true, indicates that the object exists on the sky object layer (default == false).
-	*** This member is necessary for collision detection purposes. When a sprite needs to detect
-	*** if it has encountered a collision, that collision must be examined with other objects on
-	*** the appropriate layer (the ground/pass layers or the sky layer).
-	**/
-	bool sky_object;
-
-	/** \brief When true, objects in the ground object layer will be drawn after the pass objects
-	*** This member is only checked for objects that exist in the ground layer. It has no meaning
-	*** for objects in the pass or sky layers. Its purpose is so that objects (such as a bridge)
-	*** in the pass layer can be both walked over and walked under by sprites in the ground layer.
-	**/
-	bool draw_on_second_pass;
 	//@}
 
 	// ---------- Methods
@@ -258,8 +244,9 @@ public:
 	void SetNoCollision(bool coll)
 		{ no_collision = coll; }
 
-	void SetDrawOnSecondPass(bool pass)
-		{ draw_on_second_pass = pass; }
+	//! \note Should be called only by ObjectSupervisor class
+	void SetObjectLayerID(uint32 layer)
+		{ _object_layer_id = layer; }
 
 	int16 GetObjectID() const
 		{ return object_id; }
@@ -267,10 +254,10 @@ public:
 	MAP_CONTEXT GetContext() const
 		{ return context; }
 
-	void GetXPosition(uint16 &x, float &offset) const
+	void GetXPosition(uint16& x, float& offset) const
 		{ x = x_position; offset = x_offset; }
 
-	void GetYPosition(uint16 &y, float &offset) const
+	void GetYPosition(uint16& y, float& offset) const
 		{ y = y_position; offset = y_offset; }
 
 	float GetImgHalfWidth() const
@@ -294,8 +281,8 @@ public:
 	bool IsNoCollision() const
 		{ return no_collision; }
 
-	bool IsDrawOnSecondPass() const
-		{ return draw_on_second_pass; }
+	uint32 GetObjectLayerID() const
+		{ return _object_layer_id; }
 
 	MAP_OBJECT_TYPE GetType() const
 		{ return _object_type; }
@@ -304,6 +291,9 @@ public:
 protected:
 	//! \brief This is used to identify the type of map object for inheriting classes.
 	MAP_OBJECT_TYPE _object_type;
+
+	//! \brief The ID of the object layer that this object exists on
+	uint32 _object_layer_id;
 }; // class MapObject
 
 
@@ -311,7 +301,7 @@ protected:
 *** \return True if the MapObject pointed by a should be drawn behind MapObject pointed by b
 *** \note A simple '<' operator cannot be used with the sorting algorithm because it is sorting pointers.
 **/
-struct MapObject_Ptr_Less {
+struct MapObject_Sort_Compare {
 	const bool operator()(const MapObject* a, const MapObject* b) {
 		return (a->y_position + a->y_offset) < (b->y_position + b->y_offset);
 	}
@@ -445,6 +435,81 @@ private:
 
 
 /** ****************************************************************************
+*** \brief Represents a layer of objects on the map
+***
+*** This class holds a container of map objects that exist on the layer. The objects
+*** are continuously sorted according to their draw order. Objects can only exist on
+*** one layer at a time and are allowed to transition between one layer and another.
+*** The ObjectSupervisor manages a container of all object layers and facilitiates the
+*** transfer of objects to and from each layer.
+***
+*** Each object layer has an order member which indicates the order that the layer
+*** was added to the map. This should also be the order in which the layers are drawn on top
+*** of each other. Layer ordering should remain consistent throughout the lifetime
+*** of the MapMode object and layers should never be destroyed until the termination of the map
+*** that the layer belongs to.
+***
+*** \note You should never need to call the constructor to this class. Instead, call
+*** the AddObjectLayer() method on the ObjectSupervisor class. This will construct
+*** the layer object and enable the ObjectSupervisor to safely manage all of the
+*** object layer objects.
+***
+*** \note Each map has a default object layer created when a new MapMode is constucted.
+*** This guarantees that every map has at least one object layer. Most maps will be fine
+*** with just using this default object layer. More complex maps may have to add separate
+*** layers.
+*** ***************************************************************************/
+class ObjectLayer : public MapLayer {
+public:
+	ObjectLayer(uint32 id) :
+		MapLayer(), _object_layer_id(id) {}
+
+	//! \name Class Member Accessor Methods
+	//@{
+	uint32 GetObjectLayerID() const
+		{ return _object_layer_id; }
+
+	std::vector<MapObject*>* GetObjects()
+		{ return &_objects; }
+	//@}
+
+	//! \brief Calls the Update() method for all objects on this layer
+	void Update();
+
+	/** \brief Calls the Draw() method for all objects on this layer
+	*** \note SortObjects() should be called prior to this function so that objects are drawn in the correct draw order
+	**/
+	void Draw() const;
+
+	/** \brief Adds an object to this object layer
+	*** \param object A pointer to the object to add
+	*** \note No checks are done to ensure that the object does not exist in other layers. Do not attempt to add an object to
+	*** a layer if it already exists in another layer.
+	**/
+	void AddObject(MapObject* object);
+
+	/** \brief Removes an object from the layer
+	*** \param object A pointer to the object that should be removed
+	*** \note The object's _object_layer_id member will retain the value corresponding to this layer. It is important
+	*** that the object be added to a new layer immediately, otherwise incorrect run-time behavior may be observed.
+	**/
+	void RemoveObject(MapObject* object);
+
+	//! \brief Sorts all objects so that they are in the correct draw order
+	void SortObjects()
+		{ std::sort(_objects.begin(), _objects.end(), MapObject_Sort_Compare()); }
+
+private:
+	//! \brief Holds the unique id of this layer. The first layer created for a map should use the value DEFAULT_LAYER_ID
+	uint32 _object_layer_id;
+
+	//! \brief Container holding all objects that exist on this layer
+	std::vector<MapObject*> _objects;
+}; // class ObjectLayer : public MapLayer
+
+
+
+/** ****************************************************************************
 *** \brief A helper class to MapMode responsible for management of all object and sprite data
 ***
 *** This class is responsible for loading, updating, and drawing all map objects
@@ -496,9 +561,6 @@ public:
 	**/
 	VirtualSprite* GetSprite(uint32 object_id);
 
-	//! \brief Sorts objects on all three layers according to their draw order
-	void SortObjects();
-
 	/** \brief Loads the collision grid data and saved state of all map objects
 	*** \param map_file A reference to the open map script file
 	***
@@ -508,22 +570,46 @@ public:
 	**/
 	void Load(hoa_script::ReadScriptDescriptor& map_file);
 
-	//! \brief Updates the state of all map zones and objects
+	//! \brief Updates the state of all map zones and objects across all layers
 	void Update();
 
-	/** \brief Draws the various object layers to the screen
-	*** \param frame A pointer to the information required to draw this frame
+	/** \brief Draws an object layer to the screen
+	*** \param layer_id The ID of the layer to draw
 	*** \note These functions do not reset the coordinate system and hence depend that the proper coordinate system
 	*** is already set prior to these function calls (0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f). These functions do make
 	*** modifications to the draw flags and the draw cursor position, which are not restored by the function
 	*** upon its return. Take measures to retain this information before calling these functions if necessary.
 	**/
-	//@{
-	void DrawGroundObjects(const MapFrame* const frame, const bool second_pass);
-	void DrawPassObjects(const MapFrame* const frame);
-	void DrawSkyObjects(const MapFrame* const frame);
-	void DrawDialogIcons(const MapFrame* const frame);
-	//@}
+	void DrawObjectLayer(uint32 layer_id)
+		{ if (layer_id >= _object_layers.size()) return; _object_layers[layer_id].Draw(); }
+
+	//! \brief Calls the DrawDialog method for each MapSprite object
+	void DrawDialogIcons();
+
+	/** \brief Adds a new empty object layer to the map
+	*** \return The ID of the newly created layer
+	**/
+	uint32 AddObjectLayer();
+
+	/** \brief Adds a newly created object to the map on a specified object layer
+	*** \param new_object A pointer to the already created map object to add to the map
+	*** \param layer_id The ID of the object layer to add the object to
+	***
+	*** If no layer exists with the given layer_id, a warning will be printed and the object
+	*** will be added to the DEFAULT_LAYER_ID. Note that when an object is passed to this method,
+	*** this class assumes the memory management responsibility for this map object. You should not
+	*** delete an object that has been added to the map.
+	**/
+	void AddObject(MapObject* new_object, uint32 layer_id);
+
+	/** \brief Transfers an object from its current object layer to a new layer
+	*** \param object A pointer to the object that is to be moved
+	*** \param layer_id The ID of the layer to move the object to
+	**/
+	void MoveObjectToLayer(MapObject* object, uint32 layer_id);
+
+	//! \brief Sorts the objects in each object layer
+	void SortObjectLayers();
 
 	/** \brief Finds the nearest map object within a certain distance of a sprite
 	*** \param sprite The sprite who is trying to find its nearest object
@@ -664,31 +750,14 @@ private:
 	**/
 	std::vector<std::vector<uint32> > _collision_grid;
 
-	/** \brief A map containing pointers to all of the sprites on a map.
-	*** This map does not include a pointer to the _virtual_focus object. The
-	*** sprite's unique identifier integer is used as the map key.
+	/** \brief A map containing pointers to all of the objects on a map.
+	*** The sprite's unique identifier integer is used as the map key.
+	*** \note This map does not include a pointer to the _virtual_focus object.
 	**/
 	std::map<uint16, MapObject*> _all_objects;
 
-	/** \brief A container for all of the map objects located on the ground layer.
-	*** The ground object layer is where most objects and sprites exist in a typical map.
-	**/
-	std::vector<MapObject*> _ground_objects;
-
-	/** \brief A container for all of the map objects located on the pass layer.
-	*** The pass object layer is named so because objects on this layer can both be
-	*** walked under or above by objects in the ground object layer. A good example
-	*** of an object that would typically go on this layer would be a bridge. This
-	*** layer usually has very few objects for the map.
-	**/
-	std::vector<MapObject*> _pass_objects;
-
-	/** \brief A container for all of the map objects located on the sky layer.
-	*** The sky object layer contains the last series of elements that are drawn on
-	*** a map. These objects exist high in the sky above all other tiles and objects.
-	*** Translucent clouds can make good use of this object layer, for instance.
-	**/
-	std::vector<MapObject*> _sky_objects;
+	//! \brief Holds all object layers used by the map
+	std::vector<ObjectLayer> _object_layers;
 
 	//! \brief Container for all zones used in this map
 	std::vector<MapZone*> _zones;
