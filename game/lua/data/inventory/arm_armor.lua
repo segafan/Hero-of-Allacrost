@@ -43,7 +43,7 @@ armor[40001] = {
 	physical_defense = 2,
 	ethereal_defense = 0,
 	standard_price = 90,
-	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
+	usable_by = CLAUDIUS + MARK + LUKAR,
 	slots = 0
 }
 
@@ -54,7 +54,7 @@ armor[40002] = {
 	physical_defense = 5,
 	ethereal_defense = 2,
 	standard_price = 170,
-	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
+	usable_by = CLAUDIUS + MARK + LUKAR,
 	slots = 0
 }
 
@@ -65,7 +65,7 @@ armor[40003] = {
 	physical_defense = 10,
 	ethereal_defense = 6,
 	standard_price = 310,
-	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
+	usable_by = CLAUDIUS + MARK + LUKAR,
 	slots = 0
 }
 
@@ -76,7 +76,7 @@ armor[40004] = {
 	physical_defense = 10,
 	ethereal_defense = 6,
 	standard_price = 310,
-	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
+	usable_by = CLAUDIUS + MARK + LUKAR,
 	slots = 1
 }
 

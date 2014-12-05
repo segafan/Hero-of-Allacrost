@@ -68,7 +68,6 @@ end
 function CreateCharacters()
 	claudius = {};
 	mark = {};
-	dester = {};
 	lukar = {};
 
 	claudius = ConstructSprite("Claudius", 1000, group_start_x + 0.5, group_start_y + 0.5);
@@ -77,19 +76,13 @@ function CreateCharacters()
 	claudius:SetNoCollision(true);
 	ObjectManager:AddObject(claudius, 0);
 
-	mark = ConstructSprite("Karlate", 1001, group_start_x + 1.5, group_start_y + 3);
+	mark = ConstructSprite("Knight01", 1001, group_start_x + 1.5, group_start_y + 3);
 	mark:SetDirection(hoa_map.MapMode.WEST);
 	mark:SetName(hoa_system.Translate("Mark"));
 	mark:SetNoCollision(true);
 	ObjectManager:AddObject(mark, 0);
 
-	dester = ConstructSprite("Karlate", 1002, group_start_x + 2.5, group_start_y - 2);
-	dester:SetDirection(hoa_map.MapMode.WEST);
-	dester:SetName(hoa_system.Translate("Dester"));
-	dester:SetNoCollision(true);
-	ObjectManager:AddObject(dester, 0);
-
-	lukar = ConstructSprite("Karlate", 1003, group_start_x + 4, group_start_y);
+	lukar = ConstructSprite("Knight01", 1002, group_start_x + 4, group_start_y);
 	lukar:SetDirection(hoa_map.MapMode.WEST);
 	lukar:SetName(hoa_system.Translate("Lukar"));
 	lukar:SetNoCollision(true);
@@ -101,64 +94,70 @@ end
 function CreateNPCs()
 	local sprite;
 
-	sprite = ConstructSprite("Captain", 2000, group_start_x + 8, group_start_y);
+	sprite = ConstructSprite("Knight06", 2000, group_start_x + 8, group_start_y);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetName(hoa_system.Translate("Captain Bravis"));
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2001, group_start_x + 6, group_start_y - 3.5);
+	sprite = ConstructSprite("Knight05", 2020, group_start_x + 2.5, group_start_y - 2);
+	sprite:SetDirection(hoa_map.MapMode.WEST);
+	sprite:SetName(hoa_system.Translate("Sergeant Methus"));
+	sprite:SetNoCollision(true);
+	ObjectManager:AddObject(sprite, 0);
+
+	sprite = ConstructSprite("Knight01", 2001, group_start_x + 6, group_start_y - 3.5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2001, group_start_x + 6, group_start_y - 3.5);
+	sprite = ConstructSprite("Knight02", 2001, group_start_x + 6, group_start_y - 3.5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2002, group_start_x + 6.5, group_start_y + 2);
+	sprite = ConstructSprite("Knight03", 2002, group_start_x + 6.5, group_start_y + 2);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2003, group_start_x - 3, group_start_y - 3);
+	sprite = ConstructSprite("Knight02", 2003, group_start_x - 3, group_start_y - 3);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2004, group_start_x - 4, group_start_y + 5);
+	sprite = ConstructSprite("Knight01", 2004, group_start_x - 4, group_start_y + 5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2005, group_start_x - 5, group_start_y - 1);
+	sprite = ConstructSprite("Knight02", 2005, group_start_x - 5, group_start_y - 1);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2006, group_start_x - 5, group_start_y - 5);
+	sprite = ConstructSprite("Knight03", 2006, group_start_x - 5, group_start_y - 5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2007, group_start_x - 6, group_start_y + 2);
+	sprite = ConstructSprite("Knight02", 2007, group_start_x - 6, group_start_y + 2);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2008, group_start_x - 8, group_start_y - 4);
+	sprite = ConstructSprite("Knight01", 2008, group_start_x - 8, group_start_y - 4);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 
-	sprite = ConstructSprite("Karlate", 2009, group_start_x - 9, group_start_y + 5);
+	sprite = ConstructSprite("Knight02", 2009, group_start_x - 9, group_start_y + 5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
 	ObjectManager:AddObject(sprite, 0);
 	
 	-- This sprite is the scout that runs in from the left side of the screen
-	sprite = ConstructSprite("Karlate", 2010, 20, group_start_y);
+	sprite = ConstructSprite("Knight03", 2010, 20, group_start_y);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 	sprite:SetNoCollision(true);
@@ -186,10 +185,10 @@ function CreateDialogue()
 		dialogue:AddLine(text, 1001);
 		dialogue:AddLineTiming(7000);
 		text = hoa_system.Translate("Maybe...but who would still be awake at this hour?");
-		dialogue:AddLine(text, 1002);
+		dialogue:AddLine(text, 2020);
 		dialogue:AddLineTiming(3000);
 		text = hoa_system.Translate("Our scout should be returning soon, we'll find out then.");
-		dialogue:AddLine(text, 1003);
+		dialogue:AddLine(text, 1002);
 		dialogue:AddLineTiming(4000);
 
 	dialogue = hoa_map.MapDialogue.Create(30);
@@ -199,7 +198,7 @@ function CreateDialogue()
 		text = hoa_system.Translate("Catch your breath soldier. What's wrong?");
 		dialogue:AddLine(text, 2000);
 		dialogue:AddLineTiming(4000);
-		text = hoa_system.Translate("The city! *huff* The city...it's ablaze!");
+		text = hoa_system.Translate("The city! *huff* The city...its ablaze!");
 		dialogue:AddLine(text, 2009);
 		dialogue:AddLineTiming(3000);
 		dialogue:AddLineEventAtEnd(310);
@@ -234,9 +233,9 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(52, 2000); -- The scout makes his report
 	event = hoa_map.PathMoveSpriteEvent.Create(11, 1001, march_distance, 0);
 	event:SetRelativeDestination(true);
-	event = hoa_map.PathMoveSpriteEvent.Create(12, 1002, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(12, 2020, march_distance, 0);
 	event:SetRelativeDestination(true);
-	event = hoa_map.PathMoveSpriteEvent.Create(13, 1003, march_distance, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(13, 1002, march_distance, 0);
 	event:SetRelativeDestination(true);
 	event = hoa_map.PathMoveSpriteEvent.Create(14, 2000, march_distance, 0);
 	event:SetRelativeDestination(true);
@@ -283,8 +282,8 @@ function CreateEvents()
 	event:AddEventLinkAtStart(263);
 	event:AddEventLinkAtStart(264);
 	event = hoa_map.CustomSpriteEvent.Create(251, 1001, "ChangeSpriteMovementSpeed", "");
-	event = hoa_map.CustomSpriteEvent.Create(252, 1002, "ChangeSpriteMovementSpeed", "");
-	event = hoa_map.CustomSpriteEvent.Create(253, 1003, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(252, 2020, "ChangeSpriteMovementSpeed", "");
+	event = hoa_map.CustomSpriteEvent.Create(253, 1002, "ChangeSpriteMovementSpeed", "");
 	event = hoa_map.CustomSpriteEvent.Create(254, 2000, "ChangeSpriteMovementSpeed", "");
 	event = hoa_map.CustomSpriteEvent.Create(255, 2001, "ChangeSpriteMovementSpeed", "");
 	event = hoa_map.CustomSpriteEvent.Create(256, 2002, "ChangeSpriteMovementSpeed", "");
@@ -318,9 +317,9 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(500);
 	event = hoa_map.PathMoveSpriteEvent.Create(311, 1001, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	event = hoa_map.PathMoveSpriteEvent.Create(312, 1002, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(312, 2020, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	event = hoa_map.PathMoveSpriteEvent.Create(313, 1003, -(total_march_distance + march_distance), 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(313, 1002, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
 	event = hoa_map.PathMoveSpriteEvent.Create(314, 2000, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);

@@ -2,8 +2,7 @@
 -- Character IDs. Each ID can have only a single bit active as IDs are used in bitmask operations.
 CLAUDIUS  = 1;
 MARK      = 2;
-DESTER    = 4;
-LUKAR     = 8;
+LUKAR     = 4;
 
 function NewGame()
 	-- Make sure that any global data is cleared away
@@ -11,7 +10,6 @@ function NewGame()
 
 	-- Create the initial party, drunes, and inventory
 	GlobalManager:AddCharacter(LUKAR);
-	GlobalManager:AddCharacter(DESTER);
 	GlobalManager:AddCharacter(MARK);
 	GlobalManager:AddCharacter(CLAUDIUS);
 	GlobalManager:AddNewEventGroup("global_events"); -- this group stores the primary list of events completed in the game

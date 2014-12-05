@@ -44,16 +44,78 @@ sprites["Kyle"] = {
 	face_portrait = "img/portraits/face/kyle.png"
 }
 
-sprites["Captain"] = {
-	name = hoa_system.Translate("Captain"),
+
+sprites["Knight01"] = {
+	name = hoa_system.Translate("Knight"),
 	coll_half_width = 0.95,
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
 	movement_speed = SLOW_SPEED,
 
-	standard_animations = "img/sprites/characters/soldier_npc02_walk.png"
+	standard_animations = "img/sprites/characters/knight_01_walk.png"
 }
+
+
+sprites["Knight02"] = {
+	name = hoa_system.Translate("Knight"),
+	coll_half_width = 0.95,
+	coll_height = 1.9,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = SLOW_SPEED,
+
+	standard_animations = "img/sprites/characters/knight_02_walk.png"
+}
+
+
+sprites["Knight03"] = {
+	name = hoa_system.Translate("Knight"),
+	coll_half_width = 0.95,
+	coll_height = 1.9,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = SLOW_SPEED,
+
+	standard_animations = "img/sprites/characters/knight_03_walk.png"
+}
+
+
+sprites["Knight04"] = {
+	name = hoa_system.Translate("Knight"),
+	coll_half_width = 0.95,
+	coll_height = 1.9,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = SLOW_SPEED,
+
+	standard_animations = "img/sprites/characters/knight_04_walk.png"
+}
+
+
+sprites["Knight05"] = {
+	name = hoa_system.Translate("Knight"),
+	coll_half_width = 0.95,
+	coll_height = 1.9,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = SLOW_SPEED,
+
+	standard_animations = "img/sprites/characters/knight_05_walk.png"
+}
+
+
+sprites["Knight06"] = {
+	name = hoa_system.Translate("Knight"),
+	coll_half_width = 0.95,
+	coll_height = 1.9,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = SLOW_SPEED,
+
+	standard_animations = "img/sprites/characters/knight_06_walk.png"
+}
+
 
 sprites["Marcus"] = {
 	name = hoa_system.Translate("Marcus"),
@@ -143,17 +205,6 @@ sprites["Octavia"] = {
 	movement_speed = NORMAL_SPEED,
 	
 	standard_animations = "img/sprites/characters/woman_npc02_walk.png"
-}
-
-sprites["Karlate"] = {
-	name = hoa_system.Translate("Karlate"),
-	coll_half_width = 0.95,
-	coll_height = 1.9,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
-
-	standard_animations = "img/sprites/characters/soldier_npc01_walk.png"
 }
 
 
