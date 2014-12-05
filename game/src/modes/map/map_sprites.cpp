@@ -596,13 +596,15 @@ void MapSprite::Draw() {
 	}
 }
 
-void MapSprite::DrawDialog()
-{
+
+
+void MapSprite::DrawDialog() {
     // Update the alpha of the dialogue icon according to it's distance from the player sprite
 	const float DIALOGUE_ICON_VISIBLE_RANGE = 10.0f;
 
     if (MapObject::ShouldDraw() == true)
-        if (_has_available_dialogue == true && _has_unseen_dialogue == true && MapMode::CurrentInstance()->IsDialogueIconsVisible() == true && !MapMode::CurrentInstance()->IsCameraOnVirtualFocus()) {
+        if (_has_available_dialogue == true && _has_unseen_dialogue == true &&
+			MapMode::CurrentInstance()->IsDialogueIconsVisible() == true && !MapMode::CurrentInstance()->IsCameraOnVirtualFocus()) {
                 Color icon_color(1.0f, 1.0f, 1.0f, 0.0f);
                 float icon_alpha = 1.0f - (fabs(ComputeXLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeXLocation()) + fabs(ComputeYLocation() -
                     MapMode::CurrentInstance()->GetCamera()->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
@@ -615,6 +617,8 @@ void MapSprite::DrawDialog()
                 MapMode::CurrentInstance()->GetDialogueIcon().Draw(icon_color);
         }
 }
+
+
 
 void MapSprite::AddDialogueReference(uint32 dialogue_id) {
 	_dialogue_references.push_back(dialogue_id);

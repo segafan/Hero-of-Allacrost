@@ -339,24 +339,26 @@ void TileSupervisor::Update() {
 
 
 
-void TileSupervisor::DrawTileLayer(uint16 layer_index, const MapFrame* const frame) {
+void TileSupervisor::DrawTileLayer(uint16 layer_index) {
 	if (layer_index >= _layer_count) {
 		PRINT_ERROR << "tried to draw a tile layer at an invalid index: " << layer_index << endl;
 		return;
 	}
 
+	const MapFrame& frame = MapMode::CurrentInstance()->GetMapFrame();
+
 	MAP_CONTEXT current_context = MapMode::CurrentInstance()->GetCurrentContext();
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->Move(frame->tile_x_start, frame->tile_y_start);
-	for (uint32 r = static_cast<uint32>(frame->starting_row); r < static_cast<uint32>(frame->starting_row + frame->num_draw_rows); ++r)	{
-		for (uint32 c = static_cast<uint32>(frame->starting_col); c < static_cast<uint32>(frame->starting_col + frame->num_draw_cols); ++c)	{
+	VideoManager->Move(frame.tile_x_start, frame.tile_y_start);
+	for (uint32 r = static_cast<uint32>(frame.starting_row); r < static_cast<uint32>(frame.starting_row + frame.num_draw_rows); ++r)	{
+		for (uint32 c = static_cast<uint32>(frame.starting_col); c < static_cast<uint32>(frame.starting_col + frame.num_draw_cols); ++c)	{
 			// Draw a tile image if it exists at this location
 			if (_tile_grid[current_context][r][c].tile_layers[layer_index] >= 0) {
 				_tile_images[_tile_grid[current_context][r][c].tile_layers[layer_index]]->Draw();
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}
-		VideoManager->MoveRelative(-static_cast<float>(frame->num_draw_cols * 2), 2.0f);
+		VideoManager->MoveRelative(-static_cast<float>(frame.num_draw_cols * 2), 2.0f);
 	}
 }
 

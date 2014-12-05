@@ -72,9 +72,6 @@ void BindModeCode() {
 			.def_readwrite("run_stamina", &MapMode::_run_stamina)
 
 			.def("PlayMusic", &MapMode::PlayMusic)
-			.def("AddGroundObject", &MapMode::AddGroundObject, adopt(_2))
-			.def("AddPassObject", &MapMode::AddPassObject, adopt(_2))
-			.def("AddSkyObject", &MapMode::AddSkyObject, adopt(_2))
 			.def("AddZone", &MapMode::AddZone, adopt(_2))
 			.def("SetCamera", (void(MapMode::*)(private_map::VirtualSprite*))&MapMode::SetCamera)
 			.def("SetCamera", (void(MapMode::*)(private_map::VirtualSprite*, uint32))&MapMode::SetCamera)
@@ -179,6 +176,9 @@ void BindModeCode() {
 			.def("GetNumberObjects", &ObjectSupervisor::GetNumberObjects)
 			.def("GetObjectByIndex", &ObjectSupervisor::GetObjectByIndex)
 			.def("GetObject", &ObjectSupervisor::GetObject)
+			.def("AddObjectLayer", &ObjectSupervisor::AddObjectLayer)
+			.def("AddObject", &ObjectSupervisor::AddObject, adopt(_2))
+			.def("MoveObjectToLayer", &ObjectSupervisor::MoveObjectToLayer)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -195,8 +195,8 @@ void BindModeCode() {
 			.def("SetUpdatable", &MapObject::SetUpdatable)
 			.def("SetVisible", &MapObject::SetVisible)
 			.def("SetNoCollision", &MapObject::SetNoCollision)
-			.def("SetDrawOnSecondPass", &MapObject::SetDrawOnSecondPass)
 			.def("GetObjectID", &MapObject::GetObjectID)
+			.def("GetObjectLayerID", &MapObject::GetObjectLayerID)
 			.def("GetContext", &MapObject::GetContext)
 //			.def("GetXPosition", &MapObject::GetXPosition)
 //			.def("GetYPosition", &MapObject::GetYPosition)
@@ -207,7 +207,6 @@ void BindModeCode() {
 			.def("IsUpdatable", &MapObject::IsUpdatable)
 			.def("IsVisible", &MapObject::IsVisible)
 			.def("IsNoCollision", &MapObject::IsNoCollision)
-			.def("IsDrawOnSecondPass", &MapObject::IsDrawOnSecondPass)
 			// TEMP: because GetXPosition and GetYPostiion seem to give a runtime error in Lua
 			.def_readonly("x_position", &MapObject::x_position)
 			.def_readonly("y_position", &MapObject::y_position)

@@ -276,7 +276,8 @@ void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 
 	// Prepare the first enemy
 	enemy->SetZone(this);
-	map->AddGroundObject(enemy);
+	// TODO: use proper layer ID instead of the default
+	map->GetObjectSupervisor()->AddObject(enemy, DEFAULT_LAYER_ID);
 	_enemies.push_back(enemy);
 
 	// Create any additional copies of the enemy and add them as well
@@ -287,7 +288,8 @@ void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 		copy->SetTimeToChange(static_cast<uint32>(copy->GetTimeToChange() * (1 + RandomFloat() * 10)));
 		copy->Reset();
 
-		map->AddGroundObject(copy);
+		// TODO: use proper layer ID instead of the default
+		map->GetObjectSupervisor()->AddObject(copy, DEFAULT_LAYER_ID);
 		_enemies.push_back(copy);
 	}
 }
@@ -451,19 +453,19 @@ void ContextZone::Update() {
 	int16 index;
 
 	// Check every ground object and determine if its context should be changed by this zone
-	for (std::vector<MapObject*>::iterator i = MapMode::CurrentInstance()->GetObjectSupervisor()->_ground_objects.begin();
-		i != MapMode::CurrentInstance()->GetObjectSupervisor()->_ground_objects.end(); i++)
-	{
+	// TODO: get the object container from the proper layer, not just the default layer
+	vector<MapObject*>* objects = MapMode::CurrentInstance()->GetObjectSupervisor()->_object_layers[DEFAULT_LAYER_ID].GetObjects();
+	for (uint32 i = 0;	i < objects->size(); ++i) {
 		// If the object does not have a context equal to one of the two switching contexts, do not examine it further
-		if ((*i)->GetContext() != _context_one && (*i)->GetContext() != _context_two) {
+		if (objects->at(i)->GetContext() != _context_one && objects->at(i)->GetContext() != _context_two) {
 			continue;
 		}
 
 		// If the object is inside the zone, set their context to that zone's context
 		// (This may result in no change from the object's current context depending on the zone section)
-		index = _IsInsideZone(*i);
+		index = _IsInsideZone(objects->at(i));
 		if (index >= 0) {
-			(*i)->SetContext(_section_contexts[index] ? _context_one : _context_two);
+			objects->at(i)->SetContext(_section_contexts[index] ? _context_one : _context_two);
 		}
 	}
 }

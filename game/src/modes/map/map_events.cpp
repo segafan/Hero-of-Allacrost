@@ -861,7 +861,6 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 
 	// Determine if the obstructing object is blocking the destination of this path
 	bool destination_blocked = MapMode::CurrentInstance()->GetObjectSupervisor()->IsPositionOccupiedByObject(_destination_node.row, _destination_node.col, coll_obj);
-	VirtualSprite* coll_sprite = NULL;
 
 	switch (coll_obj->GetObjectType()) {
 		case PHYSICAL_TYPE:
@@ -886,7 +885,6 @@ void PathMoveSpriteEvent::_ResolveCollision(COLLISION_TYPE coll_type, MapObject*
 		case VIRTUAL_TYPE:
 		case SPRITE_TYPE:
 		case ENEMY_TYPE:
-			coll_sprite = dynamic_cast<VirtualSprite*>(coll_obj);
 			if (destination_blocked == true) {
 				// Do nothing but wait for the obstructing sprite to move out of the way
 				return;

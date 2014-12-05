@@ -75,25 +75,25 @@ function CreateCharacters()
 	claudius:SetDirection(hoa_map.MapMode.WEST);
 	claudius:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	claudius:SetNoCollision(true);
-	Map:AddGroundObject(claudius);
+	ObjectManager:AddObject(claudius, 0);
 
 	mark = ConstructSprite("Karlate", 1001, group_start_x + 1.5, group_start_y + 3);
 	mark:SetDirection(hoa_map.MapMode.WEST);
 	mark:SetName(hoa_system.Translate("Mark"));
 	mark:SetNoCollision(true);
-	Map:AddGroundObject(mark);
+	ObjectManager:AddObject(mark, 0);
 
 	dester = ConstructSprite("Karlate", 1002, group_start_x + 2.5, group_start_y - 2);
 	dester:SetDirection(hoa_map.MapMode.WEST);
 	dester:SetName(hoa_system.Translate("Dester"));
 	dester:SetNoCollision(true);
-	Map:AddGroundObject(dester);
+	ObjectManager:AddObject(dester, 0);
 
 	lukar = ConstructSprite("Karlate", 1003, group_start_x + 4, group_start_y);
 	lukar:SetDirection(hoa_map.MapMode.WEST);
 	lukar:SetName(hoa_system.Translate("Lukar"));
 	lukar:SetNoCollision(true);
-	Map:AddGroundObject(lukar);	
+	ObjectManager:AddObject(lukar, 0);
 end
 
 
@@ -105,64 +105,64 @@ function CreateNPCs()
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetName(hoa_system.Translate("Captain Bravis"));
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2001, group_start_x + 6, group_start_y - 3.5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2001, group_start_x + 6, group_start_y - 3.5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2002, group_start_x + 6.5, group_start_y + 2);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2003, group_start_x - 3, group_start_y - 3);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2004, group_start_x - 4, group_start_y + 5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2005, group_start_x - 5, group_start_y - 1);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2006, group_start_x - 5, group_start_y - 5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2007, group_start_x - 6, group_start_y + 2);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2008, group_start_x - 8, group_start_y - 4);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2009, group_start_x - 9, group_start_y + 5);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 	
 	-- This sprite is the scout that runs in from the left side of the screen
 	sprite = ConstructSprite("Karlate", 2010, 20, group_start_y);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
 	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 	sprite:SetNoCollision(true);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 end
 
 

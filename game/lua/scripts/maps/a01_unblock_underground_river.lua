@@ -150,7 +150,7 @@ function CreateObjects()
 	objects["corpse"]:SetVisible(true);
 	objects["corpse"]:SetNoCollision(false);
 	objects["corpse"]:AddAnimation("img/misc/skeleton_corpse.png");
-	Map:AddGroundObject(objects["corpse"]);
+	ObjectManager:AddObject(objects["corpse"], 0);
 end -- function CreateObjects()
 
 
@@ -164,53 +164,53 @@ function CreateCharacters()
 	sprites["claudius"] = ConstructSprite("Claudius", 1, 11, 227);
 	sprites["claudius"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["claudius"]:SetNoCollision(true);
-	Map:AddGroundObject(sprites["claudius"]);
+	ObjectManager:AddObject(sprites["claudius"], 0);
 
 	sprites["mark"] = ConstructSprite("Karlate", 2, 17, 227);
 	sprites["mark"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["mark"]:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprites["mark"]:SetNoCollision(true);
 	sprites["mark"]:SetName(hoa_system.Translate("Mark"));
-	Map:AddGroundObject(sprites["mark"]);
+	ObjectManager:AddObject(sprites["mark"], 0);
 	
 	sprites["lukar"] = ConstructSprite("Karlate", 3, 14, 225);
 	sprites["lukar"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["lukar"]:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprites["lukar"]:SetNoCollision(true);
 	sprites["lukar"]:SetName(hoa_system.Translate("Lukar"));
-	Map:AddGroundObject(sprites["lukar"]);
+	ObjectManager:AddObject(sprites["lukar"], 0);
 
 	-- Squad #2: Mak Hound squad found close to the cave entrance
 	-- Knight at cave entrance
 	sprites["entrance_knight1"] = ConstructSprite("Karlate", 10, 14, 150);
 	sprites["entrance_knight1"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["entrance_knight1"]:AddDialogueReference(10);
-	Map:AddGroundObject(sprites["entrance_knight1"]);
+	ObjectManager:AddObject(sprites["entrance_knight1"], 0);
 
 	-- Knight trying to pull Mak hound
 	sprites["entrance_knight2"] = ConstructSprite("Karlate", 11, 17, 148);
 	sprites["entrance_knight2"]:SetDirection(hoa_map.MapMode.WEST);
 	sprites["entrance_knight2"]:AddDialogueReference(11);
-	Map:AddGroundObject(sprites["entrance_knight2"]);
+	ObjectManager:AddObject(sprites["entrance_knight2"], 0);
 
 	-- Frightened Mack Hound
 	sprites["entrance_mak"] = ConstructSprite("Mak Hound", 12, 13, 148);
 	sprites["entrance_mak"]:SetDirection(hoa_map.MapMode.EAST);
-	Map:AddGroundObject(sprites["entrance_mak"]);
+	ObjectManager:AddObject(sprites["entrance_mak"], 0);
 	
 	-- Squad #3: Knights near the passage that collapses
 	-- Knight guiding others through the short passage
 	sprites["passage_knight1"] = ConstructSprite("Karlate", 20, 149, 62);
 	sprites["passage_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
 	sprites["passage_knight1"]:AddDialogueReference(20);
-	Map:AddGroundObject(sprites["passage_knight1"]);
+	ObjectManager:AddObject(sprites["passage_knight1"], 0);
 	--knight_talk_sprite = sprite;
 	
 	-- Knight seen walking ahead through the short passage
 	sprites["passage_knight2"] = ConstructSprite("Karlate", 21, 162, 62);
 	sprites["passage_knight2"]:SetDirection(hoa_map.MapMode.EAST);
 	sprites["passage_knight2"]:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
-	Map:AddGroundObject(sprites["passage_knight2"]);
+	ObjectManager:AddObject(sprites["passage_knight2"], 0);
 	--knight_path_sprite = sprite;
 	
 	-- Squad #4: Knights near the end of the passage treating an injury
@@ -218,59 +218,59 @@ function CreateCharacters()
 	sprites["injury_knight1"] = ConstructSprite("Karlate", 30, 142, 30);
 	sprites["injury_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
 	sprites["injury_knight1"]:AddDialogueReference(30);
-	Map:AddGroundObject(sprites["injury_knight1"]);
+	ObjectManager:AddObject(sprites["injury_knight1"], 0);
 	
 	-- Knight assisting injured knight
 	sprites["injury_knight2"] = ConstructSprite("Karlate", 31, 142, 33);
 	sprites["injury_knight2"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["injury_knight2"]:AddDialogueReference(31);
-	Map:AddGroundObject(sprites["injury_knight2"]);
+	ObjectManager:AddObject(sprites["injury_knight2"], 0);
 
 --[[
 	-- All of the following NPCs are encountered at the end of the cave in the riverbed
 	sprite = ConstructSprite("Captain", 2500, 248, 16);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 	
 	sprite = ConstructSprite("Karlate", 2501, 249, 19);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 	
 	sprite = ConstructSprite("Karlate", 2502, 245, 11);
 	sprite:SetDirection(hoa_map.MapMode.SOUTH);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 	
 	sprite = ConstructSprite("Karlate", 2503, 242, 8);
 	sprite:SetDirection(hoa_map.MapMode.SOUTH);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 	
 	sprite = ConstructSprite("Karlate", 2504, 239, 9);
 	sprite:SetDirection(hoa_map.MapMode.SOUTH);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2505, 240, 22);
 	sprite:SetDirection(hoa_map.MapMode.NORTH);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 
 	sprite = ConstructSprite("Karlate", 2506, 243, 23);
 	sprite:SetDirection(hoa_map.MapMode.NORTH);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 	
 	sprite = ConstructSprite("Karlate", 2507, 245, 21);
 	sprite:SetDirection(hoa_map.MapMode.NORTH);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 	
 	sprite = ConstructSprite("Karlate", 2508, 234, 20);
 	sprite:SetDirection(hoa_map.MapMode.EAST);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 	
 	sprite = ConstructSprite("Karlate", 2509, 233, 17);
 	sprite:SetDirection(hoa_map.MapMode.EAST);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 	
 	sprite = ConstructSprite("Karlate", 2510, 235, 14);
 	sprite:SetDirection(hoa_map.MapMode.EAST);
-	Map:AddGroundObject(sprite);
+	ObjectManager:AddObject(sprite, 0);
 --]]
 end -- function CreateCharacters()
 

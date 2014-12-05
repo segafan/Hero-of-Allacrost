@@ -88,7 +88,7 @@ private:
 	*** any other layer type (objects, sprites, etc) in the draw order does not affect the value of this member.
 	**/
 	uint32 _tile_layer_order;
-}; // class TileLayer
+}; // class TileLayer : public MapLayer
 
 
 /** ****************************************************************************
@@ -133,14 +133,13 @@ public:
 
 	/** \brief Draws a tile layer to the screen
 	*** \param layer_index The index of the layer that should be drawn
-	*** \param frame A pointer to the computed information required to draw this frame
 	***
 	*** \note This function does not reset the coordinate system and hence require that the proper coordinate system is
 	*** already set prior to this function call (0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f). These functions do make
 	*** modifications to the blending draw flag and the draw cursor position which are not restored by the function upon
 	*** its return, so take measures to retain this information before calling these functions if necessary.
 	**/
-	void DrawTileLayer(uint16 layer_index, const MapFrame* const frame);
+	void DrawTileLayer(uint16 layer_index);
 
 private:
 	//! \brief The number of tile layers on the map

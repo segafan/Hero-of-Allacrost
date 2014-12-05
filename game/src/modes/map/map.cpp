@@ -199,7 +199,7 @@ void MapMode::Update() {
 	// ---------- (2) Update all animated tile images
 	_tile_supervisor->Update();
 	_object_supervisor->Update();
-	_object_supervisor->SortObjects();
+	_object_supervisor->SortObjectLayers();
 
 	// ---------- (3) Update the active state of the map
 	switch (CurrentState()) {
@@ -277,27 +277,6 @@ MAP_STATE MapMode::CurrentState() {
 		_state_stack.push_back(STATE_INVALID);
 	}
 	return _state_stack.back();
-}
-
-
-
-void MapMode::AddGroundObject(MapObject *obj) {
-	_object_supervisor->_ground_objects.push_back(obj);
-	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
-}
-
-
-
-void MapMode::AddPassObject(MapObject *obj) {
-	_object_supervisor->_pass_objects.push_back(obj);
-	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
-}
-
-
-
-void MapMode::AddSkyObject(MapObject *obj) {
-	_object_supervisor->_sky_objects.push_back(obj);
-	_object_supervisor->_all_objects.insert(make_pair(obj->object_id, obj));
 }
 
 
@@ -719,18 +698,10 @@ void MapMode::_CalculateMapFrame() {
 void MapMode::_DrawMapLayers() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 
-	_tile_supervisor->DrawTileLayer(0, &_map_frame);
-	_tile_supervisor->DrawTileLayer(1, &_map_frame);
-
-	_object_supervisor->DrawGroundObjects(&_map_frame, false); // First draw pass of ground objects
-	_object_supervisor->DrawPassObjects(&_map_frame);
-	_object_supervisor->DrawGroundObjects(&_map_frame, true); // Second draw pass of ground objects
-
-	_tile_supervisor->DrawTileLayer(2, &_map_frame);
-
-	_object_supervisor->DrawSkyObjects(&_map_frame);
-
-	_object_supervisor->DrawDialogIcons(&_map_frame);
+	_tile_supervisor->DrawTileLayer(0);
+	_tile_supervisor->DrawTileLayer(1);
+	_object_supervisor->DrawObjectLayer(0);
+	_tile_supervisor->DrawTileLayer(2);
 } // void MapMode::_DrawMapLayers()
 
 
@@ -745,7 +716,10 @@ void MapMode::_DrawGUI() {
 	const Color dark_green(0.0196f, 0.207f, 0.0196f, 1.0f);
 	const Color bright_yellow(0.937f, 1.0f, 0.725f, 1.0f);
 
-	// ---------- (1) Draw the introductory location name and graphic if necessary
+	// ---------- (1) Draw dialog icons above each sprite that meets the visiblity criteria
+	_object_supervisor->DrawDialogIcons();
+
+	// ---------- (2) Draw the introductory location name and graphic if necessary
 	if (_intro_timer.IsFinished() == false) {
 		uint32 time = _intro_timer.GetTimeExpired();
 
@@ -767,7 +741,7 @@ void MapMode::_DrawGUI() {
 		VideoManager->PopState();
 	}
 
-	// ---------- (2) Draw the stamina bar in the lower right corner
+	// ---------- (3) Draw the stamina bar in the lower right corner
 	if (_stamina_bar_visible == true) {
 		// TODO: the code in this section needs better comments to explain what each coloring step is doing
 		float fill_size = static_cast<float>(_run_stamina) / 10000.0f;
@@ -828,9 +802,9 @@ void MapMode::_DrawGUI() {
 		}
 
 		VideoManager->PopState();
-	} // if (_hide_stamina_bar == false)
+	} // if (_stamina_bar_visible == true)
 
-	// ---------- (3) Draw the treasure menu if necessary
+	// ---------- (4) Draw the treasure menu if necessary
 	if (_treasure_supervisor->IsActive() == true)
 		_treasure_supervisor->Draw();
 } // void MapMode::_DrawGUI()
