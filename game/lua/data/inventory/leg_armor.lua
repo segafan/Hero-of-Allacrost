@@ -43,7 +43,7 @@ armor[50001] = {
 	physical_defense = 3,
 	ethereal_defense = 0,
 	standard_price = 120,
-	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
+	usable_by = CLAUDIUS + MARK + LUKAR,
 	slots = 0
 }
 
@@ -54,7 +54,7 @@ armor[50002] = {
 	physical_defense = 5,
 	ethereal_defense = 0,
 	standard_price = 195,
-	usable_by = CLAUDIUS + MARK + DESTER + LUKAR,
+	usable_by = CLAUDIUS + MARK + LUKAR,
 	slots = 0
 }
 

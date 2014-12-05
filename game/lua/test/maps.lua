@@ -20,8 +20,7 @@ setfenv(1, ns);
 -- Character IDs. Each ID can have only a single bit active as IDs are used in bitmask operations.
 CLAUDIUS  = 1;
 MARK      = 2;
-DESTER    = 4;
-LUKAR     = 8;
+LUKAR     = 4;
 
 --------------------------------------------------------------------------------
 -- Common Functions
@@ -42,7 +41,6 @@ tests[1] = {
 	description = "Equivalent to selecting the \"New Game\" option on the boot screen.";
 	ExecuteTest = function()
 		GlobalManager:AddCharacter(LUKAR);
-		GlobalManager:AddCharacter(DESTER);
 		GlobalManager:AddCharacter(MARK);
 		GlobalManager:AddCharacter(CLAUDIUS);
 		GlobalManager:AddNewEventGroup("global_events");
@@ -60,7 +58,6 @@ tests[2] = {
 		"Effectively, this test is a way to start a new game and skip over the opening scene.";
 	ExecuteTest = function()
 		GlobalManager:AddCharacter(LUKAR);
-		GlobalManager:AddCharacter(DESTER);
 		GlobalManager:AddCharacter(MARK);
 		GlobalManager:AddCharacter(CLAUDIUS);
 		GlobalManager:AddNewEventGroup("global_events");
@@ -80,7 +77,6 @@ tests[4] = {
 	ExecuteTest = function()
 
 		GlobalManager:AddCharacter(LUKAR);
-		GlobalManager:AddCharacter(DESTER);
 		GlobalManager:AddCharacter(MARK);
 		GlobalManager:AddCharacter(CLAUDIUS);
 		GlobalManager:AddNewEventGroup("global_events");
@@ -103,7 +99,6 @@ tests[5] = {
 
 	ExecuteTest = function()
 		GlobalManager:AddCharacter(LUKAR);
-		GlobalManager:AddCharacter(DESTER);
 		GlobalManager:AddCharacter(MARK);
 		GlobalManager:AddCharacter(CLAUDIUS);
 		GlobalManager:AddNewEventGroup("global_events");
