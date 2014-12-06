@@ -69,25 +69,22 @@ public:
 *** ***************************************************************************/
 class TileLayer : public MapLayer {
 public:
-	TileLayer(uint32 order) :
-		MapLayer(), _tile_layer_order(order) {}
+	TileLayer(uint32 id) :
+		MapLayer(), _tile_layer_id(id) {}
 
-	uint32 GetTileLayerOrder() const
-		{ return _tile_layer_order; }
+	uint32 GetTileLayerID() const
+		{ return _tile_layer_id; }
 
 	//! \brief Does nothing. Animated tiles are updated by the TileSupervisor class across all layers
 	void Update()
 		{}
 
-	//! \brief
+	//! \brief Makes the appropriate call to TileSupervisor::DrawTileLayer()
 	void Draw() const;
 
 private:
-	/** \brief Holds the draw order of this layer amongst all tile layers (0 represents the first tile layer)
-	*** \note This only represents the order of tile layers as they were defined in the map data file. The existence of
-	*** any other layer type (objects, sprites, etc) in the draw order does not affect the value of this member.
-	**/
-	uint32 _tile_layer_order;
+	//! \brief Holds the unique id of this tile layer. The first layer created for a map should use the value DEFAULT_LAYER_ID
+	uint32 _tile_layer_id;
 }; // class TileLayer : public MapLayer
 
 
@@ -111,14 +108,21 @@ public:
 
 	//! \name Class Member Accessor Methods
 	//@{
-	uint16 GetLayerCount() const
-		{ return _layer_count; }
-
 	uint16 GetRowCount() const
 		{ return _row_count; }
 
 	uint16 GetColumnCount() const
 		{ return _column_count; }
+
+	uint32 GetTileLayerCount() const
+		{ return _tile_layers.size(); }
+
+	/** \brief Retrieves a pointer to a layer object with a specified ID
+	*** \param layer_id The ID of the layer requested
+	*** \return A pointer to the layer object, or NULL if no layer existed with that layer ID
+	**/
+	TileLayer* GetTileLayer(uint32 layer_id)
+		{ if (layer_id >= _tile_layers.size()) return NULL; else return &_tile_layers[layer_id]; }
 	//@}
 
 	/** \brief Handles all operations on loading tilesets and tile images from the map data file
@@ -142,9 +146,6 @@ public:
 	void DrawTileLayer(uint16 layer_index);
 
 private:
-	//! \brief The number of tile layers on the map
-	uint16 _layer_count;
-
 	/** \brief The number of rows of tiles in the map.
 	*** This number must be greater than or equal to 24 for the map to be valid.
 	**/
@@ -154,6 +155,9 @@ private:
 	*** This number must be greater than or equal to 32 for the map to be valid.
 	**/
 	uint16 _column_count;
+
+	//! \brief Holds a TileLayer object for each tile layer loaded from the map
+	std::vector<TileLayer> _tile_layers;
 
 	/** \brief A map of 2D vectors that contains all of the map's tile objects.
 	*** Each key-value pair in the std::map represents a map context, thus the size of the std::map is equal to

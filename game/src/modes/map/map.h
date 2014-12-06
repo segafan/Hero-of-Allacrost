@@ -147,6 +147,14 @@ public:
 
 	void PlayMusic(uint32 track_num);
 
+	void MoveVirtualFocus(uint16 loc_x, uint16 loc_y);
+
+    void MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint32 duration);
+
+	//! \brief Returns true if the player may enter a battle upon colliding with an enemy sprite
+    bool AttackAllowed()
+		{ return (CurrentState() != private_map::STATE_DIALOGUE && CurrentState() != private_map::STATE_TREASURE && !IsCameraOnVirtualFocus()); }
+
 	//! \brief Class member accessor functions
 	//@{
 	static MapMode* const CurrentInstance()
@@ -185,13 +193,23 @@ public:
 	void SetCamera(private_map::VirtualSprite* sprite)
 		{ _camera = sprite; }
 
-    void SetCamera(private_map::VirtualSprite* sprite, uint32 duration);
+	void SetCamera(private_map::VirtualSprite* sprite, uint32 duration);
 
-    void MoveVirtualFocus(uint16 loc_x, uint16 loc_y);
+	bool IsCameraOnVirtualFocus();
 
-    void MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint32 duration);
+	//! \brief Empties out the draw layer order
+	void ClearLayerOrder()
+		{ _layer_order.clear(); }
 
-    bool IsCameraOnVirtualFocus();
+	/** \brief Adds a tile layer to the draw layer order
+	*** \param layer_id The ID of the tile layer to add
+	**/
+	void AddTileLayerToOrder(uint32 layer_id);
+
+	/** \brief Adds an object layer to the draw layer order
+	*** \param layer_id The ID of the object layer to add
+	**/
+	void AddObjectLayerToOrder(uint32 layer_id);
 
 	uint8 GetNumMapContexts() const
 		{ return _num_map_contexts; }
@@ -239,7 +257,6 @@ public:
 	const hoa_video::StillImage& GetLocationGraphic() const
 		{ return _location_graphic; }
 
-    bool AttackAllowed();
 	//@}
 
 private:
@@ -351,6 +368,9 @@ private:
 	*** The top (back) of the stack is the active mode
 	**/
 	std::vector<private_map::MAP_STATE> _state_stack;
+
+	//! \brief Holds pointers to the tile and object layers in their correct draw order
+	std::vector<private_map::MapLayer*> _layer_order;
 
 	// ----- Members : Timing and Graphics -----
 

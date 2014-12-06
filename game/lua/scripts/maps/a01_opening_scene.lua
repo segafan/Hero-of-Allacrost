@@ -24,6 +24,13 @@ function Load(m)
 	EventManager = Map.event_supervisor;
 	TreasureManager = Map.treasure_supervisor;
 	GlobalEvents = Map.map_event_group;
+
+	-- Setup the order in which we wish to draw the tile and object layers
+	Map:ClearLayerOrder();
+	Map:AddTileLayerToOrder(0);
+	Map:AddTileLayerToOrder(1);
+	Map:AddObjectLayerToOrder(0);
+	Map:AddTileLayerToOrder(2);
 	
 	-- Global starting coordinates for the center of the group of knights. All sprites
 	-- use these coordinates in determining their initial positions.

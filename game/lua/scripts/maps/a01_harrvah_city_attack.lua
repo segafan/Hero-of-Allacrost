@@ -20,6 +20,13 @@ function Load(m)
 	TreasureManager = Map.treasure_supervisor;
 	GlobalEvents = Map.map_event_group;
 
+	-- Setup the order in which we wish to draw the tile and object layers
+	Map:ClearLayerOrder();
+	Map:AddTileLayerToOrder(0);
+	Map:AddTileLayerToOrder(1);
+	Map:AddObjectLayerToOrder(0);
+	Map:AddTileLayerToOrder(2);
+
 	-- Play music once the map becomes active for the first time
 	Map:SetCurrentTrack(0);
 
