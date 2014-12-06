@@ -45,27 +45,6 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_tile_mode(PAINT_TILE),
 	_select_layer(data->GetMapLength(), data->GetMapHeight())
 {
-	// Right-click menu action creation
-	_insert_row_action = new QAction("Insert Tile Rows", this);
-	_insert_row_action->setStatusTip("Inserts one or more rows of empty tiles above or below the selected tile");
-	connect(_insert_row_action, SIGNAL(triggered()), this, SLOT(_InsertTileRow()));
-	_insert_column_action = new QAction("Insert Tile Columns", this);
-	_insert_column_action->setStatusTip("Inserts one or more columns of empty tiles above or below the selected tile");
-	connect(_insert_column_action, SIGNAL(triggered()), this, SLOT(_InsertTileColumn()));
-	_delete_row_action = new QAction("Delete Tile Rows", this);
-	_delete_row_action->setStatusTip("Deletes the currently selected row of tiles from all layers");
-	connect(_delete_row_action, SIGNAL(triggered()), this, SLOT(_DeleteTileRow()));
-	_delete_column_action = new QAction("Delete Tile Columns", this);
- 	_delete_column_action->setStatusTip("Deletes the currently selected column of tiles from all layers");
-	connect(_delete_column_action, SIGNAL(triggered()), this, SLOT(_DeleteTileColumn()));
-
-	_right_click_menu = new QMenu(_graphics_view);
-	_right_click_menu->addAction(_insert_row_action);
-	_right_click_menu->addAction(_insert_column_action);
-	_right_click_menu->addSeparator();
-	_right_click_menu->addAction(_delete_row_action);
-	_right_click_menu->addAction(_delete_column_action);
-
 	// Create the graphics view
 	_graphics_view = new QGraphicsView(parent);
 	_graphics_view->setRenderHints(QPainter::Antialiasing);
@@ -88,6 +67,27 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_graphics_view->viewport()->setAttribute(Qt::WA_StaticContents); // Helps during screen resizing
 
 	setSceneRect(0, 0, data->GetMapLength() * TILE_LENGTH, data->GetMapHeight() * TILE_HEIGHT);
+
+	// Right-click menu action creation
+	_insert_row_action = new QAction("Insert Tile Rows", this);
+	_insert_row_action->setStatusTip("Inserts one or more rows of empty tiles above or below the selected tile");
+	connect(_insert_row_action, SIGNAL(triggered()), this, SLOT(_InsertTileRow()));
+	_insert_column_action = new QAction("Insert Tile Columns", this);
+	_insert_column_action->setStatusTip("Inserts one or more columns of empty tiles above or below the selected tile");
+	connect(_insert_column_action, SIGNAL(triggered()), this, SLOT(_InsertTileColumn()));
+	_delete_row_action = new QAction("Delete Tile Rows", this);
+	_delete_row_action->setStatusTip("Deletes the currently selected row of tiles from all layers");
+	connect(_delete_row_action, SIGNAL(triggered()), this, SLOT(_DeleteTileRow()));
+	_delete_column_action = new QAction("Delete Tile Columns", this);
+ 	_delete_column_action->setStatusTip("Deletes the currently selected column of tiles from all layers");
+	connect(_delete_column_action, SIGNAL(triggered()), this, SLOT(_DeleteTileColumn()));
+
+	_right_click_menu = new QMenu(_graphics_view);
+	_right_click_menu->addAction(_insert_row_action);
+	_right_click_menu->addAction(_insert_column_action);
+	_right_click_menu->addSeparator();
+	_right_click_menu->addAction(_delete_row_action);
+	_right_click_menu->addAction(_delete_column_action);
 
 	// Blue selection tile with 50% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);

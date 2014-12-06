@@ -33,13 +33,13 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, b
 	setWindowTitle("Map Properties...");
 
 	// Set up the height spinbox
-	_height_label = new QLabel("Height (in tiles):", this);
+	_height_label = new QLabel("Map Height (tiles):", this);
 	_height_sbox = new QSpinBox(this);
 	_height_sbox->setMinimum(MINIMUM_MAP_HEIGHT);
 	_height_sbox->setMaximum(MAXIMUM_MAP_HEIGHT);
 
 	// Set up the width spinbox
-	_width_label = new QLabel(" Width (in tiles):", this);
+	_width_label = new QLabel("Map Length (tiles):", this);
 	_width_sbox = new QSpinBox(this);
 	_width_sbox->setMinimum(MINIMUM_MAP_WIDTH);
 	_width_sbox->setMaximum(MAXIMUM_MAP_WIDTH);

@@ -569,8 +569,9 @@ void Editor::_FileNew() {
 
 		// Load the tileset data from the definition file, add it to the map data, and create the TilesetTable to display it
 		Tileset* tileset = new Tileset();
-		if (tileset->Load(tilesets->topLevelItem(i)->text(0)) == false) {
-			QMessageBox::critical(this, APP_NAME, "Failed to load tileset: " + tilesets->topLevelItem(i)->text(0));
+		QString filename = QString("lua/data/tilesets/") + tilesets->topLevelItem(i)->text(0) + (".lua");
+		if (tileset->Load(filename) == false) {
+			QMessageBox::critical(this, APP_NAME, "Failed to load tileset: " + filename);
 			delete tileset;
 		}
 
