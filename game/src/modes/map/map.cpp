@@ -140,14 +140,14 @@ MapMode::~MapMode() {
 	_sounds.clear();
 
 	for (uint32 i = 0; i < _enemies.size(); i++)
-		delete(_enemies[i]);
+		delete _enemies[i];
 	_enemies.clear();
 
-	delete(_tile_supervisor);
-	delete(_object_supervisor);
-	delete(_event_supervisor);
-	delete(_dialogue_supervisor);
-	delete(_treasure_supervisor);
+	delete _tile_supervisor;
+	delete _object_supervisor;
+	delete _event_supervisor;
+	delete _dialogue_supervisor;
+	delete _treasure_supervisor;
 
 	_map_script.CloseFile();
 }
@@ -310,56 +310,74 @@ void MapMode::PlayMusic(uint32 track_num) {
 
 
 void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint32 duration) {
-    if (_camera == sprite) {
-        IF_PRINT_WARNING(MAP_DEBUG) << "Camera was moved to the same sprite" << endl;
-    }
-    else {
-        if (duration > 0) {
-            _delta_x = _camera->ComputeXLocation() - sprite->ComputeXLocation();
-            _delta_y = _camera->ComputeYLocation() - sprite->ComputeYLocation();
-            _camera_timer.Reset();
-            _camera_timer.SetDuration(duration);
-            _camera_timer.Run();
-        }
-        _camera = sprite;
-    }
-}
-
-
-
-void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y) {
-    _object_supervisor->VirtualFocus()->SetXPosition(loc_x, 0.0f);
-    _object_supervisor->VirtualFocus()->SetYPosition(loc_y, 0.0f);
-}
-
-
-
-void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint32 duration) {
-    if (_camera != _object_supervisor->VirtualFocus()) {
-        IF_PRINT_WARNING(MAP_DEBUG) << "Attempt to move camera although on different sprite" << endl;
-    }
-    else {
-        if (duration > 0) {
-            _delta_x = _object_supervisor->VirtualFocus()->ComputeXLocation() - static_cast<float>(loc_x);
-            _delta_y = _object_supervisor->VirtualFocus()->ComputeYLocation() - static_cast<float>(loc_y);
-            _camera_timer.Reset();
-            _camera_timer.SetDuration(duration);
-            _camera_timer.Run();
-        }
-        MoveVirtualFocus(loc_x, loc_y);
-    }
+	if (_camera == sprite) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "Camera was moved to the same sprite" << endl;
+	}
+	else {
+		if (duration > 0) {
+			_delta_x = _camera->ComputeXLocation() - sprite->ComputeXLocation();
+			_delta_y = _camera->ComputeYLocation() - sprite->ComputeYLocation();
+			_camera_timer.Reset();
+			_camera_timer.SetDuration(duration);
+			_camera_timer.Run();
+		}
+		_camera = sprite;
+	}
 }
 
 
 
 bool MapMode::IsCameraOnVirtualFocus() {
-    return _camera == _object_supervisor->VirtualFocus();
+	return _camera == _object_supervisor->VirtualFocus();
 }
 
 
 
-bool MapMode::AttackAllowed() {
-    return (CurrentState() != STATE_DIALOGUE && CurrentState() != STATE_TREASURE && !IsCameraOnVirtualFocus());
+void MapMode::AddTileLayerToOrder(uint32 layer_id) {
+	TileLayer* layer = _tile_supervisor->GetTileLayer(layer_id);
+	if (layer == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "tried to add a tile layer with an invalid layer ID: " << layer_id << endl;
+		return;
+	}
+
+	_layer_order.push_back(layer);
+}
+
+
+
+void MapMode::AddObjectLayerToOrder(uint32 layer_id) {
+	ObjectLayer* layer = _object_supervisor->GetObjectLayer(layer_id);
+	if (layer == NULL) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "tried to add an object layer with an invalid layer ID: " << layer_id << endl;
+		return;
+	}
+
+	_layer_order.push_back(layer);
+}
+
+
+
+void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y) {
+	_object_supervisor->VirtualFocus()->SetXPosition(loc_x, 0.0f);
+	_object_supervisor->VirtualFocus()->SetYPosition(loc_y, 0.0f);
+}
+
+
+
+void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint32 duration) {
+	if (_camera != _object_supervisor->VirtualFocus()) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "Attempt to move camera although on different sprite" << endl;
+	}
+	else {
+		if (duration > 0) {
+			_delta_x = _object_supervisor->VirtualFocus()->ComputeXLocation() - static_cast<float>(loc_x);
+			_delta_y = _object_supervisor->VirtualFocus()->ComputeYLocation() - static_cast<float>(loc_y);
+			_camera_timer.Reset();
+			_camera_timer.SetDuration(duration);
+			_camera_timer.Run();
+		}
+		MoveVirtualFocus(loc_x, loc_y);
+	}
 }
 
 // ****************************************************************************
@@ -698,10 +716,9 @@ void MapMode::_CalculateMapFrame() {
 void MapMode::_DrawMapLayers() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 
-	_tile_supervisor->DrawTileLayer(0);
-	_tile_supervisor->DrawTileLayer(1);
-	_object_supervisor->DrawObjectLayer(0);
-	_tile_supervisor->DrawTileLayer(2);
+	for (uint32 i = 0; i < _layer_order.size(); ++i) {
+		_layer_order[i]->Draw();
+	}
 } // void MapMode::_DrawMapLayers()
 
 

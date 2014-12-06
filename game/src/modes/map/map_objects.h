@@ -500,7 +500,7 @@ public:
 		{ std::sort(_objects.begin(), _objects.end(), MapObject_Sort_Compare()); }
 
 private:
-	//! \brief Holds the unique id of this layer. The first layer created for a map should use the value DEFAULT_LAYER_ID
+	//! \brief Holds the unique id of this object layer. The first layer created for a map should use the value DEFAULT_LAYER_ID
 	uint32 _object_layer_id;
 
 	//! \brief Container holding all objects that exist on this layer
@@ -560,6 +560,13 @@ public:
 	*** \return A pointer to the sprite object, or NULL if the object was not found or was not a sprite type
 	**/
 	VirtualSprite* GetSprite(uint32 object_id);
+
+	/** \brief Retrieves a pointer to a layer object with a specified ID
+	*** \param layer_id The ID of the layer requested
+	*** \return A pointer to the layer object, or NULL if no layer existed with that layer ID
+	**/
+	ObjectLayer* GetObjectLayer(uint32 layer_id)
+		{ if (layer_id >= _object_layers.size()) return NULL; else return &_object_layers[layer_id]; }
 
 	/** \brief Loads the collision grid data and saved state of all map objects
 	*** \param map_file A reference to the open map script file

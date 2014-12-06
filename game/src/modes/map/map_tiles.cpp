@@ -30,6 +30,12 @@ namespace hoa_map {
 
 namespace private_map {
 
+void TileLayer::Draw() const {
+	MapMode::CurrentInstance()->GetTileSupervisor()->DrawTileLayer(_tile_layer_id);
+}
+
+
+
 TileSupervisor::TileSupervisor() :
 	_row_count(0),
 	_column_count(0)
@@ -54,7 +60,9 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 	// TODO: Add some more error checking in this function (such as checking for script errors after reading blocks of data from the map file)
 
 	// ---------- (1) Load the map dimensions and do some basic sanity checks
-	_layer_count = 3;
+	_tile_layers.push_back(TileLayer(0));
+	_tile_layers.push_back(TileLayer(1));
+	_tile_layers.push_back(TileLayer(2));
 	_row_count = map_file.ReadUInt("num_tile_rows");
 	_column_count = map_file.ReadUInt("num_tile_cols");
 
@@ -108,7 +116,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 	// where the first 16 indeces in the tileset range are the tiles of the first row (left to right), and so on.
 
 	// Create and add the 2D tile grid for the base context
-	MapTile blank_tile(_layer_count); // Used to size each MapTile in the _tile_grid appropriately
+	MapTile blank_tile(_tile_layers.size()); // Used to size each MapTile in the _tile_grid appropriately
 	_tile_grid.clear();
 	_tile_grid.insert(make_pair(MAP_CONTEXT_01, vector<vector<MapTile> >(_row_count)));
 	for (uint32 r = 0; r < _row_count; r++) {
@@ -340,7 +348,7 @@ void TileSupervisor::Update() {
 
 
 void TileSupervisor::DrawTileLayer(uint16 layer_index) {
-	if (layer_index >= _layer_count) {
+	if (layer_index >= _tile_layers.size()) {
 		PRINT_ERROR << "tried to draw a tile layer at an invalid index: " << layer_index << endl;
 		return;
 	}
