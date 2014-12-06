@@ -83,7 +83,7 @@ bool Tileset::Load(const QString& def_filename, bool single_image) {
 	if (def_filename.isEmpty())
 		return false;
 
-	// ---------- 1) Open the tileset definition file
+	// ---------- 1) Open the tileset definition file and tablespace
 	ReadScriptDescriptor read_file;
 	_tileset_definition_filename = def_filename;
 	if (read_file.OpenFile(_tileset_definition_filename.toStdString()) == false) {
@@ -91,13 +91,23 @@ bool Tileset::Load(const QString& def_filename, bool single_image) {
 		return false;
 	}
 
+	string tablespace = DetermineLuaFileTablespaceName(_tileset_definition_filename.toStdString());
+	if (read_file.DoesTableExist(tablespace) == false) {
+		_ClearData();
+		PRINT_DEBUG << "failed to open tablespace name: " << tablespace << endl;
+		return false;
+	}
+	read_file.OpenTable(tablespace);
+
 	// ---------- 2) Load the tileset name and image data
-	if (read_file.DoesStringExist("tileset_name")) {
+	if (read_file.DoesStringExist("tileset_name") == true) {
 		_tileset_name = QString::fromStdString(read_file.ReadString("tileset_name"));
 	}
 	else {
 		_CreateTilesetNameFromFilename(def_filename);
 	}
+
+	PRINT_DEBUG << "image filename is: " << read_file.ReadString("image") << endl;
 	_tileset_image_filename = QString::fromStdString(read_file.ReadString("image"));
 
 	if (_LoadImageData(single_image) == false) {
@@ -166,6 +176,7 @@ bool Tileset::Load(const QString& def_filename, bool single_image) {
 		read_file.CloseTable();
 	}
 
+	read_file.CloseTable();
 	read_file.CloseFile();
 	_initialized = true;
 	return true;
