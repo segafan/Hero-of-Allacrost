@@ -195,6 +195,10 @@ public:
 	//! \brief Return an ordered list of names for all tile layers
 	QStringList GetTileLayerNames() const;
 
+	//! \brief Returns an ordered list of the properties of each tile layer
+	std::vector<TileLayerProperties>& GetTileLayerProperties()
+		{ return _tile_layer_properties; }
+
 	/** \brief Makes a tile layer visible in the editor
 	*** \param layer_index The index of the layer to show
 	**/

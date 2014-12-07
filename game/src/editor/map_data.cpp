@@ -55,8 +55,10 @@ bool MapData::CreateData(uint32 map_length, uint32 map_height) {
 
 	_empty_tile_layer._ResizeLayer(map_length, map_height);
 
-	// Create a single tile layer called "Ground"
+	// Create three tile layers, the last of which has no collision enabled initially
 	_tile_layer_properties.push_back(TileLayerProperties(QString("Ground"), true, true));
+	_tile_layer_properties.push_back(TileLayerProperties(QString("Detail"), true, true));
+	_tile_layer_properties.push_back(TileLayerProperties(QString("Sky"), true, false));
 	_tile_layer_count = 1;
 
 	// Create a single TileContext called "Base"
