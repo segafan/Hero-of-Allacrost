@@ -271,6 +271,27 @@ private slots:
 
 
 /** ****************************************************************************
+*** \brief Displays the sortable list of tile layers on the map
+***
+*** This widget is located in the top right section of the main editor window.
+*** The user can see the order of tile layers and some of the properties of those
+*** layers. The user interacts with this widget to query information about a layer,
+*** change the order of the layer, or change the active property of a layer.
+***
+*** \todo This is a placeholder class that has yet to be implemented. It will replace the
+*** _layer_view member and related functionality in the Editor class.
+*** ***************************************************************************/
+class LayerView : public QTreeWidget {
+public:
+	LayerView()
+		{}
+
+	~LayerView()
+		{}
+}; // class LayerView : public QTreeWidget
+
+
+/** ****************************************************************************
 *** \brief Holds the previous state of map tiles during editing, used for undo/redo actions
 ***
 *** \todo This entire class needs to be revisited and modified so that it can handle operations
