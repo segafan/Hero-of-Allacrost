@@ -17,12 +17,6 @@
 
 namespace hoa_editor {
 
-// The limits to the size dimensions of a map, in number of tiles
-const int32 MINIMUM_MAP_HEIGHT  = 24;
-const int32 MAXIMUM_MAP_HEIGHT  = 1000;
-const int32 MINIMUM_MAP_WIDTH   = 32;
-const int32 MAXIMUM_MAP_WIDTH   = 1000;
-
 ///////////////////////////////////////////////////////////////////////////////
 // MapPropertiesDialog class
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,17 +32,21 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, b
 	_height_sbox->setMinimum(MINIMUM_MAP_HEIGHT);
 	_height_sbox->setMaximum(MAXIMUM_MAP_HEIGHT);
 
-	// Set up the width spinbox
-	_width_label = new QLabel("Map Length (tiles):", this);
-	_width_sbox = new QSpinBox(this);
-	_width_sbox->setMinimum(MINIMUM_MAP_WIDTH);
-	_width_sbox->setMaximum(MAXIMUM_MAP_WIDTH);
+	// Set up the length spinbox
+	_length_label = new QLabel("Map Length (tiles):", this);
+	_length_sbox = new QSpinBox(this);
+	_length_sbox->setMinimum(MINIMUM_MAP_LENGTH);
+	_length_sbox->setMaximum(MAXIMUM_MAP_LENGTH);
 
-	// Get the existing map's height and width and set the spin boxes to those values
-	if (prop) {
-		Editor* editor = static_cast<Editor*>(parent);
-		_width_sbox->setValue(editor->GetMapData()->GetMapLength());
-		_height_sbox->setValue(editor->GetMapData()->GetMapHeight());
+	// If map data already exists, get the length and height. Otherwise use the minimum values as the default
+	MapData* existing_data = static_cast<Editor*>(parent)->GetMapData();
+	if (existing_data->IsInitialized() == true) {
+		_length_sbox->setValue(existing_data->GetMapLength());
+		_height_sbox->setValue(existing_data->GetMapHeight());
+	}
+	else {
+		_length_sbox->setValue(MINIMUM_MAP_LENGTH);
+		_height_sbox->setValue(MINIMUM_MAP_HEIGHT);
 	}
 
 	// Set up the cancel and okay push buttons
@@ -101,8 +99,8 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, b
 	_dia_layout = new QGridLayout(this);
 	_dia_layout->addWidget(_height_label, 0, 0);
 	_dia_layout->addWidget(_height_sbox,  1, 0);
-	_dia_layout->addWidget(_width_label,  2, 0);
-	_dia_layout->addWidget(_width_sbox,   3, 0);
+	_dia_layout->addWidget(_length_label,  2, 0);
+	_dia_layout->addWidget(_length_sbox,   3, 0);
 	_dia_layout->addWidget(_tileset_tree, 0, 1, 5, -1);
 	_dia_layout->addWidget(_cancel_pbut,  6, 0);
 	_dia_layout->addWidget(_ok_pbut,      6, 1);
@@ -114,8 +112,8 @@ MapPropertiesDialog::~MapPropertiesDialog() {
 	delete _tileset_tree;
 	delete _height_label;
 	delete _height_sbox;
-	delete _width_label;
-	delete _width_sbox;
+	delete _length_label;
+	delete _length_sbox;
 	delete _cancel_pbut;
 	delete _ok_pbut;
 	delete _dia_layout;

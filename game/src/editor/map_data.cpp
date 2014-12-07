@@ -53,6 +53,8 @@ bool MapData::CreateData(uint32 map_length, uint32 map_height) {
 		return false;
 	}
 
+	_map_length = map_length;
+	_map_height = map_height;
 	_empty_tile_layer._ResizeLayer(map_length, map_height);
 
 	// Create three tile layers, the last of which has no collision enabled initially
