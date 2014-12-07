@@ -92,8 +92,6 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	// Blue selection tile with 50% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
 	_selection_tile.fill(QColor(0, 0, 255, 125));
-
-	DrawMap();
 } // MapView::MapView(QWidget* parent, MapData* data)
 
 
@@ -375,8 +373,9 @@ void MapView::keyPressEvent(QKeyEvent* event) {
 
 
 void MapView::DrawMap() {
-	if (_map_data->IsInitialized() == false)
+	if (_map_data->IsInitialized() == false) {
 		return;
+	}
 
 	// Setup drawing parameters
 	clear();
@@ -384,15 +383,16 @@ void MapView::DrawMap() {
 	setBackgroundBrush(QBrush(Qt::gray));
 
 	vector<TileLayer>& tile_layers = _map_data->GetSelectedTileContext()->GetTileLayers();
+	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
 	vector<Tileset*>& tilesets = _map_data->GetTilesets();
 
 	// Start drawing from the top left through all the visible tile layers in order
 	for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
 		for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
 			for (uint32 layer_id = 0; layer_id < tile_layers.size(); ++layer_id) {
-				// TODO: Don't draw the layer if its not visible, access properties from Editor class
-// 				if (tile_layers[layer_id].IsVisible() == false)
-// 					continue;
+				// Don't draw the layer if its not visible
+ 				if (layer_properties[layer_id].IsVisible() == false)
+ 					continue;
 
 				 int32 layer_index = tile_layers[layer_id].GetTile(x, y);
 				 // Draw tile if one exists at this location
@@ -406,6 +406,8 @@ void MapView::DrawMap() {
 					tile_index = layer_index;
 				else
 					tile_index = layer_index % (tileset_index * TILESET_NUM_TILES);
+
+// 				PRINT_DEBUG << "addPixmap: " << tileset_index << ", POS: " << x * TILE_LENGTH << ", " << y * TILE_HEIGHT << endl;
 				addPixmap(*tilesets[tileset_index]->GetTileImage(tile_index))->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
 			}
 

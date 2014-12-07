@@ -201,7 +201,7 @@ void Editor::_CreateActions() {
 	_layer_clear_action->setStatusTip("Clears current layer from any tiles");
 	connect(_layer_clear_action, SIGNAL(triggered()), this, SLOT(_TileLayerClear()));
 
-	_toggle_select_action = new QAction(QIcon("img/misc/editor_tools/select_rectangle.png"), "Marquee &Select", this);
+	_toggle_select_action = new QAction(QIcon("img/misc/editor_tools/selection_rectangle.png"), "Marquee &Select", this);
 	_toggle_select_action->setShortcut(tr("Shift+S"));
 	_toggle_select_action->setStatusTip("Rectangularly select tiles on the map");
 	_toggle_select_action->setCheckable(true);
@@ -543,7 +543,7 @@ void Editor::_FileNew() {
 
 	// ---------- 2) Initialize the map data and map view widget
 	_map_data.DestroyData();
-	_map_data.CreateData(new_dialog->GetWidth(), new_dialog->GetHeight());
+	_map_data.CreateData(new_dialog->GetLength(), new_dialog->GetHeight());
 
 	if (_map_view)
 		delete _map_view;
@@ -576,6 +576,7 @@ void Editor::_FileNew() {
 		if (tilesets->topLevelItem(i)->checkState(0) != Qt::Checked) {
 			continue;
 		}
+
 
 		// Increment the progress dialog counter
 		load_tileset_progress->setValue(num_checked_items++);
@@ -624,6 +625,7 @@ void Editor::_FileNew() {
 	statusBar()->showMessage("New map created", 5000);
 
 	delete new_dialog;
+	_map_view->DrawMap();
 } // void Editor::_FileNew()
 
 

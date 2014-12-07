@@ -49,7 +49,7 @@ public:
 	*** \param prop True when accessing an already loaded map's properties, false otherwise.
 	***
 	*** This class is used in two instances. For presenting a dialog to the user to (1) create a new map,
-	*** or (2) modify the properties of an already existing map (such as height, width, or tilesets loaded in the bottom
+	*** or (2) modify the properties of an already existing map (such as height, length, or tilesets loaded in the bottom
 	*** portion of the editor). For case #1, the parameter prop is false, and for case #2, it is true.
 	**/
 	MapPropertiesDialog(QWidget* parent, const QString& name, bool prop);
@@ -61,8 +61,8 @@ public:
 	uint32 GetHeight() const
 		{ return _height_sbox->value(); }
 
-	uint32 GetWidth() const
-		{ return  _width_sbox->value(); }
+	uint32 GetLength() const
+		{ return  _length_sbox->value(); }
 
 	QTreeWidget* GetTilesetTree() const
 		{ return _tileset_tree; }
@@ -79,14 +79,14 @@ private:
 	//! \brief A spinbox for specifying the map's height
 	QSpinBox* _height_sbox;
 
-	//! \brief A spinbox for specifying the map's width
-	QSpinBox* _width_sbox;
+	//! \brief A spinbox for specifying the map's length
+	QSpinBox* _length_sbox;
 
 	//! \brief A label used to visually name the height spinbox
 	QLabel* _height_label;
 
-	//! \brief A label used to visually name the width spinbox
-	QLabel* _width_label;
+	//! \brief A label used to visually name the length spinbox
+	QLabel* _length_label;
 
 	//! \brief A pushbutton for canceling the new map dialog.
 	QPushButton* _cancel_pbut;

@@ -37,6 +37,14 @@ const int32 NO_CONTEXT = -1;
 //! \brief The maximum number of contexts allowed on a map
 const uint32 MAX_CONTEXTS = 32;
 
+//! \brief The limits to the size dimensions of a map, in number of tiles
+//@{
+const int32 MINIMUM_MAP_LENGTH = 32;
+const int32 MAXIMUM_MAP_LENGTH = 1000;
+const int32 MINIMUM_MAP_HEIGHT = 24;
+const int32 MAXIMUM_MAP_HEIGHT = 1000;
+//@}
+
 //! \brief The tile dimension sizes in number of pixels
 //@{
 const uint32 TILE_LENGTH = 32;
