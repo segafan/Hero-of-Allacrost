@@ -560,7 +560,14 @@ void MapData::InsertTileLayerRows(uint32 row_index, uint32 row_count) {
 		return;
 	}
 
-	// TODO
+	for (uint32 i = 0; i < _tile_context_count; ++i) {
+		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
+		for (uint32 j = 0; j < _tile_layer_count; ++j) {
+			layers[j]._AddLayerRow(row_index, NO_TILE);
+		}
+	}
+
+	_map_height = _map_height + row_count;
 }
 
 
@@ -574,7 +581,18 @@ void MapData::RemoveTileLayerRows(uint32 row_index, uint32 row_count) {
 		return;
 	}
 
-	// TODO
+	if (row_count > (_map_height - MINIMUM_MAP_HEIGHT)) {
+		return;
+	}
+
+	for (uint32 i = 0; i < _tile_context_count; ++i) {
+		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
+		for (uint32 j = 0; j < _tile_layer_count; ++j) {
+			layers[j]._AddLayerRow(row_index, NO_TILE);
+		}
+	}
+
+	_map_height = _map_height - row_count;
 }
 
 
@@ -588,7 +606,14 @@ void MapData::InsertTileLayerColumns(uint32 col_index, uint32 col_count) {
 		return;
 	}
 
-	// TODO
+	for (uint32 i = 0; i < _tile_context_count; ++i) {
+		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
+		for (uint32 j = 0; j < _tile_layer_count; ++j) {
+			layers[j]._AddLayerCol(col_index, NO_TILE);
+		}
+	}
+
+	_map_length = _map_length + col_count;
 }
 
 
@@ -602,7 +627,18 @@ void MapData::RemoveTileLayerColumns(uint32 col_index, uint32 col_count) {
 		return;
 	}
 
-	// TODO
+	if (col_count > (_map_length - MINIMUM_MAP_LENGTH)) {
+		return;
+	}
+
+	for (uint32 i = 0; i < _tile_context_count; ++i) {
+		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
+		for (uint32 j = 0; j < _tile_layer_count; ++j) {
+			layers[j]._DeleteLayerCol(col_index);
+		}
+	}
+
+	_map_length = _map_length - col_count;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
