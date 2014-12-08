@@ -407,7 +407,6 @@ void MapView::DrawMap() {
 				else
 					tile_index = layer_index % (tileset_index * TILESET_NUM_TILES);
 
-// 				PRINT_DEBUG << "addPixmap: " << tileset_index << ", POS: " << x * TILE_LENGTH << ", " << y * TILE_HEIGHT << endl;
 				addPixmap(*tilesets[tileset_index]->GetTileImage(tile_index))->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
 			}
 
@@ -435,24 +434,28 @@ void MapView::DrawMap() {
 
 void MapView::_InsertTileRow() {
 	_map_data->InsertTileLayerRows(_cursor_tile_y);
+	DrawMap();
 }
 
 
 
 void MapView::_InsertTileColumn() {
 	_map_data->InsertTileLayerColumns(_cursor_tile_x);
+	DrawMap();
 }
 
 
 
 void MapView::_DeleteTileRow() {
 	_map_data->RemoveTileLayerRows(_cursor_tile_y);
+	DrawMap();
 }
 
 
 
 void MapView::_DeleteTileColumn() {
 	_map_data->RemoveTileLayerColumns(_cursor_tile_x);
+	DrawMap();
 }
 
 
