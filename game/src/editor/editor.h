@@ -42,6 +42,7 @@
 #include "dialog_boxes.h"
 #include "map_data.h"
 #include "map_view.h"
+#include "tile_layers.h"
 #include "tileset_editor.h"
 
 //! \brief All editor code is contained within this namespace.
@@ -60,8 +61,7 @@ namespace hoa_editor {
 *** are layed out within the application window.
 *** ***************************************************************************/
 class Editor : public QMainWindow {
-	//! \brief Macro needed to use Qt's slots and signals.
-	Q_OBJECT
+	Q_OBJECT // Macro needed to use QT's slots and signals
 
 	// Needed for tile editing and accessing the map properties.
 // 	friend class MapGridView;
@@ -107,7 +107,7 @@ private:
 	QTabWidget* _tileset_tabs;
 
 	//! \brief Widget used to display and edit the ordered list of all tile layers
-	QTreeWidget* _layer_view;
+	LayerView* _layer_view;
 
 	//! \brief Toolbar containing icons for modifying properties of the tile layers
 	QToolBar* _layer_toolbar;

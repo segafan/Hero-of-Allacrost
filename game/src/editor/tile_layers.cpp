@@ -257,7 +257,6 @@ LayerView::LayerView(MapData* data) :
 	// Setup all signals and slots
     connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(_ChangeSelectedLayer(QTreeWidgetItem*)));
 	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeLayerProperties(QTreeWidgetItem*, int)));
-
 }
 
 
@@ -281,6 +280,7 @@ void LayerView::_ChangeSelectedLayer(QTreeWidgetItem* item) {
 	if (item == NULL)
 		return;
 
+	PRINT_DEBUG << "selected layer item # " << item->text(0).toStdString() << endl;
 	// Retrieve the ID of the layer that was just selected
 // 	uint32 layer_id = item->text(0).toUInt();
 
@@ -292,6 +292,7 @@ void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 	if (item == NULL)
 		return;
 
+	PRINT_DEBUG << "edited layer item # " << item->text(0).toStdString() << ", column # " << column << endl;
 	// TODO
 }
 

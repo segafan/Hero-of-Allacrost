@@ -340,30 +340,8 @@ void Editor::_SetupMainView() {
 	// Create the tile layer selection tree widget
     if (_layer_view != NULL)
         delete _layer_view;
-    _layer_view = new QTreeWidget();
-
-    connect(_layer_view, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
-		this, SLOT(_UpdateSelectedLayer(QTreeWidgetItem*)));
-    _layer_view->setColumnCount(3);
-
-    QStringList layer_headers;
-    layer_headers << "ID" << " " << "Layer" << "Collisions";
-    _layer_view->setHeaderLabels(layer_headers);
-    // Hide the ID column as we only use it internally
-    _layer_view->setColumnHidden(0, true);
-
-	// Add all tile layers from the map data
-	QIcon icon(QString("img/misc/editor_tools/eye.png"));
-	QStringList layer_names = _map_data.GetTileLayerNames();
-	vector<TileLayerProperties>& layer_properties = _map_data.GetTileLayerProperties();
-	for (uint32 i = 0; i < layer_properties.size(); ++i) {
-		QTreeWidgetItem* layer_item = new QTreeWidgetItem(_layer_view);
-		layer_item->setText(0, QString::number(i));
-		// When a map is initially created or loaded, all layers are set to visible
-		layer_item->setIcon(1, icon);
-		layer_item->setText(2, layer_properties[i].GetName());
-		layer_item->setText(3, layer_properties[i].IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
-	}
+    _layer_view = new LayerView(&_map_data);
+	_layer_view->RefreshView();
 
     // Create and add all buttons for the layer editing toolbar
     if (_layer_toolbar != NULL)
