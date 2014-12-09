@@ -372,6 +372,8 @@ private:
 *** _layer_view member and related functionality in the Editor class.
 *** ***************************************************************************/
 class LayerView : public QTreeWidget {
+	Q_OBJECT // Macro needed to use QT's slots and signals
+
 public:
 	LayerView(MapData* data);
 
