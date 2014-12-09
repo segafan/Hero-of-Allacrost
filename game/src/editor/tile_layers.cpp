@@ -15,6 +15,7 @@
 
 #include "script.h"
 #include "editor_utils.h"
+#include "map_data.h"
 #include "tile_layers.h"
 
 using namespace hoa_script;
@@ -229,6 +230,69 @@ void TileContext::_SwapTileLayers(uint32 first_index, uint32 second_index) {
 	TileLayer swap = _tile_layers[first_index];
 	_tile_layers[first_index] = _tile_layers[second_index];
 	_tile_layers[second_index] = _tile_layers[first_index];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// LayerView class
+///////////////////////////////////////////////////////////////////////////////
+
+LayerView::LayerView(MapData* data) :
+	QTreeWidget(),
+	_map_data(data),
+	_visibility_icon(QString("img/misc/editor_tools/eye.png"))
+{
+	if (data == NULL) {
+		IF_PRINT_WARNING(EDITOR_DEBUG) << "constructor received NULL map data argument" << endl;
+		return;
+	}
+
+	// Create column dimensions, headers, and properties
+    setColumnCount(4);
+	QStringList layer_headers;
+	layer_headers << "ID" << " " << "Layer" << "Collisions";
+	setHeaderLabels(layer_headers);
+	// Hide the ID column as we only use it internally
+	setColumnHidden(0, true);
+
+	// Setup all signals and slots
+    connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(_ChangeSelectedLayer(QTreeWidgetItem*)));
+	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeLayerProperties(QTreeWidgetItem*, int)));
+
+}
+
+
+
+void LayerView::RefreshView() {
+	// Add all tile layers from the map data
+	QStringList layer_names = _map_data->GetTileLayerNames();
+	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
+	for (uint32 i = 0; i < layer_properties.size(); ++i) {
+		QTreeWidgetItem* layer_item = new QTreeWidgetItem(this);
+		layer_item->setText(0, QString::number(i));
+		layer_item->setIcon(1, _visibility_icon);
+		layer_item->setText(2, layer_properties[i].GetName());
+		layer_item->setText(3, layer_properties[i].IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
+	}
+}
+
+
+
+void LayerView::_ChangeSelectedLayer(QTreeWidgetItem* item) {
+	if (item == NULL)
+		return;
+
+	// Retrieve the ID of the layer that was just selected
+// 	uint32 layer_id = item->text(0).toUInt();
+
+	// TODO: set the layer_id somewhere so it can be known what layer is currently being edited
+}
+
+
+void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
+	if (item == NULL)
+		return;
+
+	// TODO
 }
 
 } // namespace hoa_editor

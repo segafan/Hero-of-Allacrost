@@ -10,7 +10,7 @@
 /** ***************************************************************************
 *** \file    tile_layers.h
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Header file for tile layer data classes
+*** \brief   Header file for tile layer data and view classes
 ***
 *** This file contains classes that represent components of the data model for
 *** a map. This data includes layers of tiles and map contexts, and a data
@@ -23,11 +23,14 @@
 
 #include <QString>
 #include <QStringList>
+#include <QTreeWidget>
 
 #include "editor_utils.h"
 #include "tileset.h"
 
 namespace hoa_editor {
+
+class MapData;
 
 /** ****************************************************************************
 *** \brief Represents a layer of tiles on the map
@@ -355,6 +358,55 @@ private:
 	**/
 	void _SwapTileLayers(uint32 first_index, uint32 second_index);
 }; // class TileContext
+
+
+/** ****************************************************************************
+*** \brief Displays the sortable list of tile layers on the map
+***
+*** This widget is located in the top right section of the main editor window.
+*** The user can see the order of tile layers and some of the properties of those
+*** layers. The user interacts with this widget to query information about a layer,
+*** change the order of the layer, or change the active property of a layer.
+***
+*** \todo This is a placeholder class that has yet to be implemented. It will replace the
+*** _layer_view member and related functionality in the Editor class.
+*** ***************************************************************************/
+class LayerView : public QTreeWidget {
+public:
+	LayerView(MapData* data);
+
+	~LayerView()
+		{}
+
+	//! \brief Refreshes the viewable contents of the widget. Should be called whenever any of the map layer data changes
+	void RefreshView();
+
+private slots:
+	/** \brief Changes which tile layer is selected and active for editing
+	*** \param item A pointer to the layer item to set as the selected layer
+	***
+	*** This function is called whenever the user single-clicks one of the layer items in the widget
+	**/
+	void _ChangeSelectedLayer(QTreeWidgetItem* item);
+
+	/** \brief Modifies one of the properties of a tile layer
+	*** \param item A pointer to the layer where the property change will happen
+	*** \param column The column number of the property which should be changed
+	***
+	*** This function is called whenever the user double-clicks one of the layer items in the widget
+	**/
+	void _ChangeLayerProperties(QTreeWidgetItem* item, int column);
+
+private:
+	//! \brief A pointer to the active map data that contains the tile layers
+	MapData* _map_data;
+
+	//! \brief An icon used to indicate the visibility property of a tile layer
+	QIcon _visibility_icon;
+	// SIGNALS:
+	// itemClicked (	QTreeWidgetItem *item	, int column	...)
+	// itemDoubleClicked (	QTreeWidgetItem *item	, int column	...)
+}; // class LayerView : public QTreeWidget
 
 } // namespace hoa_editor
 
