@@ -40,7 +40,7 @@ Editor::Editor() :
 	_map_view(NULL),
 	_tileset_tabs(NULL),
 	_layer_view(NULL),
-	_layer_toolbar(NULL),
+	_context_view(NULL),
 	_undo_stack(NULL),
 	_error_max_contexts(NULL),
 	_file_menu(NULL),
@@ -128,10 +128,10 @@ Editor::~Editor() {
 		delete _map_view;
 	if (_tileset_tabs != NULL)
 		delete _tileset_tabs;
-	if (_layer_toolbar)
-		delete _layer_toolbar;
 	if (_layer_view != NULL)
 		delete _layer_view;
+	if (_context_view != NULL)
+		delete _context_view;
 
 	delete _right_vertical_splitter;
 	delete _horizontal_splitter;
@@ -343,59 +343,16 @@ void Editor::_SetupMainView() {
     _layer_view = new LayerView(&_map_data);
 	_layer_view->RefreshView();
 
-    // Create and add all buttons for the layer editing toolbar
-    if (_layer_toolbar != NULL)
-        delete _layer_toolbar;
-    _layer_toolbar = new QToolBar("Layers", _right_vertical_splitter);
-
-    _layer_new_button = new QPushButton(QIcon(QString("img/misc/editor_tools/new.png")), QString(), _layer_toolbar);
-    _layer_new_button->setContentsMargins(1, 1, 1, 1);
-    _layer_new_button->setFixedSize(20, 20);
-    _layer_new_button->setToolTip(tr("Add Layer"));
-    connect(_layer_new_button, SIGNAL(clicked(bool)), this, SLOT(_AddLayer()));
-    _layer_toolbar->addWidget(_layer_new_button);
-
-    _layer_rename_button = new QPushButton(QIcon(QString("img/misc/editor_tools/rename.png")), QString(), _layer_toolbar);
-    _layer_rename_button->setContentsMargins(1, 1, 1, 1);
-    _layer_rename_button->setFixedSize(20, 20);
-    _layer_rename_button->setToolTip(tr("Rename Layer"));
-    _layer_toolbar->addWidget(_layer_rename_button);
-    _layer_rename_button->setDisabled(true);
-
-    _layer_delete_button = new QPushButton(QIcon(QString("img/misc/editor_tools/delete.png")), QString(), _layer_toolbar);
-    _layer_delete_button->setContentsMargins(1, 1, 1, 1);
-    _layer_delete_button->setFixedSize(20, 20);
-    _layer_delete_button->setToolTip(tr("Delete Layer"));
-    connect(_layer_delete_button, SIGNAL(clicked(bool)), this, SLOT(_DeleteLayer()));
-    _layer_toolbar->addWidget(_layer_delete_button);
-
-    _layer_up_button = new QPushButton(QIcon(QString("img/misc/editor_tools/move_up.png")), QString(), _layer_toolbar);
-    _layer_up_button->setContentsMargins(1, 1, 1, 1);
-    _layer_up_button->setFixedSize(20, 20);
-    _layer_up_button->setToolTip(tr("Move Layer Up"));
-    _layer_toolbar->addWidget(_layer_up_button);
-    connect(_layer_up_button, SIGNAL(clicked(bool)), this, SLOT(_MoveLayerUp()));
-
-    _layer_down_button = new QPushButton(QIcon(QString("img/misc/editor_tools/move_down.png")), QString(), _layer_toolbar);
-    _layer_down_button->setContentsMargins(1, 1, 1, 1);
-    _layer_down_button->setFixedSize(20, 20);
-    _layer_down_button->setToolTip(tr("Move Layer Down"));
-    _layer_toolbar->addWidget(_layer_down_button);
-    connect(_layer_down_button, SIGNAL(clicked(bool)), this, SLOT(_MoveLayerDown()));
-
-    _layer_visible_button = new QPushButton(QIcon(QString("img/misc/editor_tools/eye.png")), QString(), _layer_toolbar);
-    _layer_visible_button->setContentsMargins(1, 1, 1, 1);
-    _layer_visible_button->setFixedSize(20, 20);
-    _layer_visible_button->setToolTip(tr("Toggle Layer Visibility"));
-    _layer_toolbar->addWidget(_layer_visible_button);
-    connect(_layer_visible_button, SIGNAL(clicked(bool)), this, SLOT(_ToggleLayerVisibility()));
+	if (_context_view != NULL)
+        delete _context_view;
+    _context_view = new ContextView(&_map_data);
 
     // Setup widgets on the left side of the screen
     _horizontal_splitter->addWidget(_map_view->GetGraphicsView());
 
     // Setup widgets on the right side of the screen
     _right_vertical_splitter->addWidget(_layer_view);
-    _right_vertical_splitter->addWidget(_layer_toolbar);
+	_right_vertical_splitter->addWidget(_context_view);
     _right_vertical_splitter->addWidget(_tileset_tabs);
 
     _horizontal_splitter->addWidget(_right_vertical_splitter);
