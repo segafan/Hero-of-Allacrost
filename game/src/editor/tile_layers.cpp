@@ -13,12 +13,12 @@
 *** \brief   Source file for tile layer data classes
 *** **************************************************************************/
 
-#include "script.h"
+#include <QMouseEvent>
+
 #include "editor_utils.h"
 #include "map_data.h"
 #include "tile_layers.h"
 
-using namespace hoa_script;
 using namespace std;
 
 namespace hoa_editor {
@@ -236,6 +236,11 @@ void TileContext::_SwapTileLayers(uint32 first_index, uint32 second_index) {
 // LayerView class
 ///////////////////////////////////////////////////////////////////////////////
 
+const uint32 LayerView::ID_COLUMN;
+const uint32 LayerView::VISIBLE_COLUMN;
+const uint32 LayerView::NAME_COLUMN;
+const uint32 LayerView::COLLISION_COLUMN;
+
 LayerView::LayerView(MapData* data) :
 	QTreeWidget(),
 	_map_data(data),
@@ -249,31 +254,52 @@ LayerView::LayerView(MapData* data) :
 	// Create column dimensions, headers, and properties
     setColumnCount(4);
 	QStringList layer_headers;
-	layer_headers << "ID" << " " << "Layer" << "Collisions";
+	layer_headers << "ID" << "" << "Layer" << "Collisions";
 	setHeaderLabels(layer_headers);
 	// Hide the ID column as we only use it internally
 	setColumnHidden(0, true);
 
 	// Setup all signals and slots
-    connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(_ChangeSelectedLayer(QTreeWidgetItem*)));
+    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(_ChangeSelectedLayer(QTreeWidgetItem*)));
+	connect(this, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(_HandleMouseClick(QTreeWidgetItem*, int)));
+// 	connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeLayerProperties(QTreeWidgetItem*, int)));
 	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeLayerProperties(QTreeWidgetItem*, int)));
 }
 
 
 
-void LayerView::RefreshView() {
-	// Add all tile layers from the map data
-	QStringList layer_names = _map_data->GetTileLayerNames();
-	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
-	for (uint32 i = 0; i < layer_properties.size(); ++i) {
-		QTreeWidgetItem* layer_item = new QTreeWidgetItem(this);
-		layer_item->setText(0, QString::number(i));
-		layer_item->setIcon(1, _visibility_icon);
-		layer_item->setText(2, layer_properties[i].GetName());
-		layer_item->setText(3, layer_properties[i].IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
+void LayerView::mousePressEvent(QMouseEvent* event) {
+	// Handle left clicks the standard way. Right clicks bring up the layer selection menu
+	if (event->button() == Qt::LeftButton) {
+		QTreeWidget::mousePressEvent(event);
+	}
+	else {
+		PRINT_DEBUG << "right click detected" << endl;
+		return;
 	}
 }
 
+
+
+void LayerView::RefreshView() {
+	clear();
+	// Add all tile layers from the map data
+	QStringList layer_names = _map_data->GetTileLayerNames();
+	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
+
+	for (uint32 i = 0; i < layer_properties.size(); ++i) {
+		QTreeWidgetItem* item = new QTreeWidgetItem(this);
+		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
+
+		item->setText(ID_COLUMN, QString::number(i));
+		if (layer_properties[i].IsVisible() == true)
+			item->setIcon(VISIBLE_COLUMN, _visibility_icon);
+		else
+			item->setIcon(VISIBLE_COLUMN, QIcon());
+		item->setText(NAME_COLUMN, layer_properties[i].GetName());
+		item->setText(COLLISION_COLUMN, layer_properties[i].IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
+	}
+}
 
 
 void LayerView::_ChangeSelectedLayer(QTreeWidgetItem* item) {
@@ -293,7 +319,64 @@ void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 		return;
 
 	PRINT_DEBUG << "edited layer item # " << item->text(0).toStdString() << ", column # " << column << endl;
-	// TODO
+	uint32 layer_id = item->text(0).toUInt();
+	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
+	if (column == VISIBLE_COLUMN) {
+		layer_properties[layer_id].ToggleVisible();
+		if (layer_properties[layer_id].IsVisible() == true)
+			item->setIcon(VISIBLE_COLUMN, _visibility_icon);
+		else
+			item->setIcon(VISIBLE_COLUMN, QIcon());
+		// TODO: send update to MapView class
+	}
+	else if (column == NAME_COLUMN) {
+// 		openPersistentEditor(item, column);
+// 		closePersistentEditor(item, column);
+	}
+	else if (column == COLLISION_COLUMN) {
+		layer_properties[layer_id].ToggleCollisionEnabled();
+		item->setText(COLLISION_COLUMN, layer_properties[layer_id].IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
+	}
+	else {
+		IF_PRINT_WARNING(EDITOR_DEBUG) << "invalid column clicked: " << column << endl;
+	}
+}
+
+
+void LayerView::_HandleMouseClick(QTreeWidgetItem* item, int column) {
+	if (item != NULL) {
+		PRINT_DEBUG << "item clicked, no action wil be taken" << endl;
+		return;
+	}
+
+	PRINT_DEBUG << "clicked inside widget" << endl;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ContextView class
+///////////////////////////////////////////////////////////////////////////////
+
+ContextView::ContextView(MapData* data) :
+	QTreeWidget(),
+	_map_data(data)
+{
+	if (data == NULL) {
+		IF_PRINT_WARNING(EDITOR_DEBUG) << "constructor received NULL map data argument" << endl;
+		return;
+	}
+
+	// Create column dimensions, headers, and properties
+    setColumnCount(3);
+	QStringList layer_headers;
+	layer_headers << "ID" << "Context Title" << "Inherits From";
+	setHeaderLabels(layer_headers);
+
+	// TEMP: should generate initial contents from map_data instead
+	QTreeWidgetItem* item = new QTreeWidgetItem(this);
+	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+	item->setText(0, QString::number(1));
+	item->setText(1, QString("Base"));
+	item->setText(2, QString(""));
 }
 
 } // namespace hoa_editor

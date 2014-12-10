@@ -64,7 +64,6 @@ class Editor : public QMainWindow {
 	Q_OBJECT // Macro needed to use QT's slots and signals
 
 	// Needed for tile editing and accessing the map properties.
-// 	friend class MapGridView;
 // 	friend class MapPropertiesDialog;
 // 	friend class ContextPropertiesDialog;
 // 	friend class LayerCommand;
@@ -109,8 +108,8 @@ private:
 	//! \brief Widget used to display and edit the ordered list of all tile layers
 	LayerView* _layer_view;
 
-	//! \brief Toolbar containing icons for modifying properties of the tile layers
-	QToolBar* _layer_toolbar;
+	//! \brief Widget used to display and edit the properties of map contexts
+	ContextView* _context_view;
 
 	//! \brief The stack that contains the undo and redo operations.
 	QUndoStack* _undo_stack;
@@ -167,15 +166,6 @@ private:
 	QAction* _about_action;
 	QAction* _about_qt_action;
 	//@}
-
-    //! The layer up/down buttons reference. Used to set their enabled state depending on the selected layer.
-    // Created and deleted by the layer view toolbar. Don't delete it.
-	QPushButton* _layer_new_button;
-	QPushButton* _layer_rename_button;
-	QPushButton* _layer_delete_button;
-    QPushButton* _layer_up_button;
-    QPushButton* _layer_down_button;
-	QPushButton* _layer_visible_button;
 
 	//! \brief Helper function to the class constructor which creates actions for use by menus and toolbars
 	void _CreateActions();

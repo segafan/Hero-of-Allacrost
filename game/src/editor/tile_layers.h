@@ -24,6 +24,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 #include "editor_utils.h"
 #include "tileset.h"
@@ -217,6 +218,12 @@ public:
 
 	void SetCollisionEnabled(bool collisions)
 		{ _collision_enabled = collisions; }
+
+	void ToggleVisible()
+		{ _visible = !_visible; }
+
+	void ToggleCollisionEnabled()
+		{ _collision_enabled = !_collision_enabled; }
 	//@}
 
 private:
@@ -367,18 +374,31 @@ private:
 *** The user can see the order of tile layers and some of the properties of those
 *** layers. The user interacts with this widget to query information about a layer,
 *** change the order of the layer, or change the active property of a layer.
-***
-*** \todo This is a placeholder class that has yet to be implemented. It will replace the
-*** _layer_view member and related functionality in the Editor class.
 *** ***************************************************************************/
 class LayerView : public QTreeWidget {
+private:
 	Q_OBJECT // Macro needed to use QT's slots and signals
+
+	//! \name Widget Column Header Numbers
+	//@{
+	static const uint32 ID_COLUMN = 0;
+	static const uint32 VISIBLE_COLUMN = 1;
+	static const uint32 NAME_COLUMN = 2;
+	static const uint32 COLLISION_COLUMN = 3;
+	//@}
 
 public:
 	LayerView(MapData* data);
 
 	~LayerView()
 		{}
+
+	/** \brief Reimplemented from QTreeWidget to process left and right clicks separately
+	*** \param event A pointer to the mouse event which occurred
+	**/
+	void mousePressEvent(QMouseEvent* event);
+
+	// TODO: look into context menu events for doing right click menus
 
 	//! \brief Refreshes the viewable contents of the widget. Should be called whenever any of the map layer data changes
 	void RefreshView();
@@ -399,16 +419,41 @@ private slots:
 	**/
 	void _ChangeLayerProperties(QTreeWidgetItem* item, int column);
 
+	void _HandleMouseClick(QTreeWidgetItem* item, int column);
+
 private:
 	//! \brief A pointer to the active map data that contains the tile layers
 	MapData* _map_data;
 
 	//! \brief An icon used to indicate the visibility property of a tile layer
 	QIcon _visibility_icon;
-	// SIGNALS:
-	// itemClicked (	QTreeWidgetItem *item	, int column	...)
-	// itemDoubleClicked (	QTreeWidgetItem *item	, int column	...)
 }; // class LayerView : public QTreeWidget
+
+
+/** ****************************************************************************
+*** \brief Displays the sortable list of tile contexts for a map
+***
+*** This widget is located below the layer view widget in the right section of the main editor window.
+*** The active map context is highlighted and shows each context's ID, name, and inheriting context
+*** if any is active. These properties can be modified except for the ID, which is automatically
+*** set according to the order of each context in the context list.
+***
+*** TODO: this is a skeleton class that will be fleshed out later
+*** ***************************************************************************/
+class ContextView : public QTreeWidget {
+private:
+	Q_OBJECT // Macro needed to use QT's slots and signals
+
+public:
+	ContextView(MapData* data);
+
+	~ContextView()
+		{}
+
+private:
+	//! \brief A pointer to the active map data that contains the tile contexts
+	MapData* _map_data;
+}; // class ContextView : public QTreeWidget
 
 } // namespace hoa_editor
 
