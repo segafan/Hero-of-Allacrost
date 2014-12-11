@@ -59,6 +59,11 @@ namespace hoa_editor {
 ***
 *** \todo Add a section here listing the subwidgets that are created and how they
 *** are layed out within the application window.
+***
+*** \todo Add save/restore state information for the QSplitter objects used by this
+*** class so that the editor remembers the size that the user last left the editor
+*** window at. This information should be saved to a Lua file called "editor_state.lua"
+*** or something similar.
 *** ***************************************************************************/
 class Editor : public QMainWindow {
 	Q_OBJECT // Macro needed to use QT's slots and signals
@@ -78,6 +83,10 @@ public:
 
 	QTabWidget* GetTilesetTabs() const
 		{ return _tileset_tabs; }
+
+	//! \brief Used to update the map view visuals when map data has been modified
+	void UpdateMapView()
+		{ if (_map_view != NULL) _map_view->DrawMap(); }
 
 protected:
 	/** \brief Handles close and/or quit events

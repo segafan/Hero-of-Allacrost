@@ -379,7 +379,7 @@ class LayerView : public QTreeWidget {
 private:
 	Q_OBJECT // Macro needed to use QT's slots and signals
 
-	//! \name Widget Column Header Numbers
+	//! \name Widget Column Identifiers
 	//@{
 	static const uint32 ID_COLUMN = 0;
 	static const uint32 VISIBLE_COLUMN = 1;
@@ -398,18 +398,17 @@ public:
 	**/
 	void mousePressEvent(QMouseEvent* event);
 
-	// TODO: look into context menu events for doing right click menus
+	// TODO: look into cusing ontext menu events for doing right click menus
 
 	//! \brief Refreshes the viewable contents of the widget. Should be called whenever any of the map layer data changes
 	void RefreshView();
 
 private slots:
-	/** \brief Changes which tile layer is selected and active for editing
-	*** \param item A pointer to the layer item to set as the selected layer
+	/** \brief Updates the selected layer for editing in the map view widget
 	***
 	*** This function is called whenever the user single-clicks one of the layer items in the widget
 	**/
-	void _ChangeSelectedLayer(QTreeWidgetItem* item);
+	void _ChangeSelectedLayer();
 
 	/** \brief Modifies one of the properties of a tile layer
 	*** \param item A pointer to the layer where the property change will happen
@@ -418,8 +417,6 @@ private slots:
 	*** This function is called whenever the user double-clicks one of the layer items in the widget
 	**/
 	void _ChangeLayerProperties(QTreeWidgetItem* item, int column);
-
-	void _HandleMouseClick(QTreeWidgetItem* item, int column);
 
 private:
 	//! \brief A pointer to the active map data that contains the tile layers
@@ -444,6 +441,12 @@ class ContextView : public QTreeWidget {
 private:
 	Q_OBJECT // Macro needed to use QT's slots and signals
 
+	//! \name Widget Column Identifiers
+	//@{
+	static const uint32 ID_COLUMN = 0;
+	static const uint32 NAME_COLUMN = 1;
+	static const uint32 INHERITS_COLUMN = 2;
+	//@}
 public:
 	ContextView(MapData* data);
 
