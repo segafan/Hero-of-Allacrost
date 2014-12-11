@@ -94,7 +94,7 @@ Editor::Editor() :
 	_right_vertical_splitter = new QSplitter(_horizontal_splitter);
 	_right_vertical_splitter->setOrientation(Qt::Vertical);
 	setCentralWidget(_horizontal_splitter);
-	resize(800, 600);
+	resize(1000, 800);
 
 	setWindowIcon(QIcon("img/logos/program_icon.ico"));
 }
@@ -533,13 +533,13 @@ void Editor::_FileNew() {
 		_tileset_tabs->addTab(tileset_table, tilesets->topLevelItem(i)->text(0));
 	}
 
-	// ---------- 5) Set the sizes of the splitters
+	// ---------- 5) Set the sizes of the splitters (for an initial window size of 1000x800)
     QList<int> sizes;
-    sizes << 600 << 200;
+    sizes << 460 << 540;
     _horizontal_splitter->setSizes(sizes);
 
     sizes.clear();
-    sizes << 150 << 50 << 400;
+    sizes << 80 << 80 << 640;
     _right_vertical_splitter->setSizes(sizes);
 
     _horizontal_splitter->show();

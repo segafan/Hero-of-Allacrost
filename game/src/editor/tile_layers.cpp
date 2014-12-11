@@ -16,6 +16,7 @@
 #include <QMouseEvent>
 
 #include "editor_utils.h"
+#include "editor.h"
 #include "map_data.h"
 #include "tile_layers.h"
 
@@ -260,9 +261,7 @@ LayerView::LayerView(MapData* data) :
 	setColumnHidden(0, true);
 
 	// Setup all signals and slots
-    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(_ChangeSelectedLayer(QTreeWidgetItem*)));
-	connect(this, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(_HandleMouseClick(QTreeWidgetItem*, int)));
-// 	connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeLayerProperties(QTreeWidgetItem*, int)));
+    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(_ChangeSelectedLayer()));
 	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeLayerProperties(QTreeWidgetItem*, int)));
 }
 
@@ -302,39 +301,44 @@ void LayerView::RefreshView() {
 }
 
 
-void LayerView::_ChangeSelectedLayer(QTreeWidgetItem* item) {
-	if (item == NULL)
+
+void LayerView::_ChangeSelectedLayer() {
+	// We only allow one selected layer at a time. The size of selected items should only ever be 0 or 1.
+	QList<QTreeWidgetItem*> selected_items = selectedItems();
+	if (selected_items.size() != 1) {
 		return;
+	}
 
-	PRINT_DEBUG << "selected layer item # " << item->text(0).toStdString() << endl;
-	// Retrieve the ID of the layer that was just selected
-// 	uint32 layer_id = item->text(0).toUInt();
-
-	// TODO: set the layer_id somewhere so it can be known what layer is currently being edited
+	QTreeWidgetItem* selection = selected_items.first();
+	uint32 layer_id = selection->text(ID_COLUMN).toUInt();
+	if (_map_data->ChangeSelectedTileLayer(layer_id) == NULL) {
+		IF_PRINT_WARNING(EDITOR_DEBUG) << "failed to change map data selected layer to layer: " << layer_id << endl;
+	}
 }
+
 
 
 void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 	if (item == NULL)
 		return;
 
-	PRINT_DEBUG << "edited layer item # " << item->text(0).toStdString() << ", column # " << column << endl;
-	uint32 layer_id = item->text(0).toUInt();
+	uint32 layer_id = item->text(ID_COLUMN).toUInt();
 	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
 	if (column == VISIBLE_COLUMN) {
-		layer_properties[layer_id].ToggleVisible();
+		_map_data->ToggleTileLayerVisibility(layer_id);
 		if (layer_properties[layer_id].IsVisible() == true)
 			item->setIcon(VISIBLE_COLUMN, _visibility_icon);
 		else
 			item->setIcon(VISIBLE_COLUMN, QIcon());
-		// TODO: send update to MapView class
+
+		static_cast<Editor*>(topLevelWidget())->UpdateMapView();
 	}
 	else if (column == NAME_COLUMN) {
 // 		openPersistentEditor(item, column);
 // 		closePersistentEditor(item, column);
 	}
 	else if (column == COLLISION_COLUMN) {
-		layer_properties[layer_id].ToggleCollisionEnabled();
+		_map_data->ToggleTileLayerCollision(layer_id);
 		item->setText(COLLISION_COLUMN, layer_properties[layer_id].IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
 	}
 	else {
@@ -342,19 +346,13 @@ void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 	}
 }
 
-
-void LayerView::_HandleMouseClick(QTreeWidgetItem* item, int column) {
-	if (item != NULL) {
-		PRINT_DEBUG << "item clicked, no action wil be taken" << endl;
-		return;
-	}
-
-	PRINT_DEBUG << "clicked inside widget" << endl;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // ContextView class
 ///////////////////////////////////////////////////////////////////////////////
+
+const uint32 ContextView::ID_COLUMN;
+const uint32 ContextView::NAME_COLUMN;
+const uint32 ContextView::INHERITS_COLUMN;
 
 ContextView::ContextView(MapData* data) :
 	QTreeWidget(),

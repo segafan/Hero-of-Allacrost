@@ -192,6 +192,12 @@ public:
 
 	//! \name Tile Layer Manipulation Methods
 	//@{
+	/** \brief Changes which tile layer is selected for editing
+	*** \param layer_index The index of the layer to select
+	*** \return A pointer to the newly selected TileLayer, or NULL if the selected layer could not be changed
+	**/
+	TileLayer* ChangeSelectedTileLayer(uint32 layer_index);
+
 	//! \brief Return an ordered list of names for all tile layers
 	QStringList GetTileLayerNames() const;
 

@@ -56,15 +56,18 @@ bool MapData::CreateData(uint32 map_length, uint32 map_height) {
 	_map_length = map_length;
 	_map_height = map_height;
 	_empty_tile_layer._ResizeLayer(map_length, map_height);
+	_empty_tile_layer.FillLayer(NO_TILE);
 
 	// Create three tile layers, the last of which has no collision enabled initially
 	_tile_layer_properties.push_back(TileLayerProperties(QString("Ground"), true, true));
 	_tile_layer_properties.push_back(TileLayerProperties(QString("Detail"), true, true));
 	_tile_layer_properties.push_back(TileLayerProperties(QString("Sky"), true, false));
-	_tile_layer_count = 1;
+	_tile_layer_count = 3;
 
 	// Create a single TileContext called "Base"
 	TileContext* new_context = new TileContext(1, "Base"); // Give an ID of 1 since no other contexts exist yet
+	new_context->_AddTileLayer(_empty_tile_layer);
+	new_context->_AddTileLayer(_empty_tile_layer);
 	new_context->_AddTileLayer(_empty_tile_layer);
 	_all_tile_contexts[0] = new_context;
 	_tile_context_count = 1;
@@ -398,6 +401,18 @@ void MapData::MoveTilesetDown(uint32 tileset_index) {
 ///////////////////////////////////////////////////////////////////////////////
 // MapData class -- Tile Layer Functions
 ///////////////////////////////////////////////////////////////////////////////
+
+TileLayer* MapData::ChangeSelectedTileLayer(uint32 layer_index) {
+	if (layer_index >= _tile_layer_count) {
+		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not change selection because no layer with this index exists: " << layer_index << endl;
+		return NULL;
+	}
+
+	_selected_tile_layer = _selected_tile_context->GetTileLayer(layer_index);
+	return _selected_tile_layer;
+}
+
+
 
 QStringList MapData::GetTileLayerNames() const {
 	QStringList layer_names;
