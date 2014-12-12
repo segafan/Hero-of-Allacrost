@@ -252,6 +252,13 @@ LayerView::LayerView(MapData* data) :
 		return;
 	}
 
+	// Enable settings so that layers can be dragged and reordered
+	setSelectionMode(QAbstractItemView::SingleSelection);
+	setDragEnabled(true);
+	viewport()->setAcceptDrops(true);
+	setDropIndicatorShown(true);
+	setDragDropMode(QAbstractItemView::InternalMove);
+
 	// Create column dimensions, headers, and properties
     setColumnCount(4);
 	QStringList layer_headers;
@@ -276,6 +283,42 @@ void LayerView::mousePressEvent(QMouseEvent* event) {
 		PRINT_DEBUG << "right click detected" << endl;
 		return;
 	}
+}
+
+
+
+void LayerView::dropEvent(QDropEvent* event) {
+	QTreeWidget::dropEvent(event);
+	vector<uint32> layer_order; // Holds the new layer positions
+
+	// Update the IDs for each tile layer to correspond to the new layer order
+	QTreeWidgetItem* root = invisibleRootItem();
+	for (uint32 i = 0; i < static_cast<uint32>(root->childCount()); ++i) {
+		QTreeWidgetItem* child = root->child(i);
+		layer_order.push_back(child->text(ID_COLUMN).toUInt());
+		child->setText(ID_COLUMN, QString::number(i));
+	}
+
+	// Make the appropriate changes corresponding to the layer order in the map data
+	for (uint32 i = 0; i < layer_order.size(); ++i) {
+		// Skip over layers that haven't been affected by the reordering
+		if (layer_order[i] == i) {
+			continue;
+		}
+
+		// Find the new location of this layer and swap it with other layer
+		for (uint32 j = 0; j < _map_data->GetTileLayerCount(); ++j) {
+			if (layer_order[j] == i) {
+				uint32 temp = layer_order[i];
+				layer_order[i] = layer_order[j];
+				layer_order[j] = temp;
+				_map_data->SwapTileLayers(i, j);
+				break;
+			}
+		}
+	}
+
+	static_cast<Editor*>(topLevelWidget())->UpdateMapView();
 }
 
 
