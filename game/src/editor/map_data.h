@@ -265,13 +265,22 @@ public:
 	*** \param layer_index The index of the layer that should be moved upward
 	*** \return True if the layer was moved successfully
 	**/
-	bool MoveTileLayerUp(uint32 layer_index);
+	bool MoveTileLayerUp(uint32 layer_index)
+		{ return SwapTileLayers(layer_index, layer_index - 1); }
 
 	/** \brief Moves a tile layer one position down in the layer list
 	*** \param layer_index The index of the layer that should be moved downward
 	*** \return True if the layer was moved successfully
 	**/
-	bool MoveTileLayerDown(uint32 layer_index);
+	bool MoveTileLayerDown(uint32 layer_index)
+		{ return SwapTileLayers(layer_index, layer_index + 1); }
+
+	/** \brief Swaps the order position of two tile layers
+	*** \param index_one Index of the first layer to swap
+	*** \param index_two Index of the second layer to swap
+	*** \return True if the two layers were swapped successfully
+	**/
+	bool SwapTileLayers(uint32 index_one, uint32 index_two);
 
 	/** \brief Inserts one or more blank tile rows to all tile layers in each context
 	*** \param row_index Indicates the place where the row(s) should be inserted

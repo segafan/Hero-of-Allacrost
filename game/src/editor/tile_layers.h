@@ -393,15 +393,21 @@ public:
 	~LayerView()
 		{}
 
+	// TODO: look into cusing ontext menu events for doing right click menus
+
+	//! \brief Refreshes the viewable contents of the widget. Should be called whenever any of the map layer data changes
+	void RefreshView();
+
+protected:
 	/** \brief Reimplemented from QTreeWidget to process left and right clicks separately
 	*** \param event A pointer to the mouse event which occurred
 	**/
 	void mousePressEvent(QMouseEvent* event);
 
-	// TODO: look into cusing ontext menu events for doing right click menus
-
-	//! \brief Refreshes the viewable contents of the widget. Should be called whenever any of the map layer data changes
-	void RefreshView();
+	/** \brief Reimplemented from QTreeWidget to change map data when layers are reordered
+	*** \param event A pointer to the drop event which occurred
+	**/
+	void dropEvent(QDropEvent* event);
 
 private slots:
 	/** \brief Updates the selected layer for editing in the map view widget

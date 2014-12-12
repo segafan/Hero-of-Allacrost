@@ -512,54 +512,28 @@ bool MapData::RenameTileLayer(uint32 layer_index, QString new_name) {
 
 
 
-bool MapData::MoveTileLayerUp(uint32 layer_index) {
-	if (layer_index >= _tile_layer_count) {
-		_error_message = "ERROR: no tile layer exists at this index";
+bool MapData::SwapTileLayers(uint32 index_one, uint32 index_two) {
+	if (index_one == index_two) {
+		_error_message = "WARN: tried to use same index to swap two tile layers";
 		return false;
 	}
-	if (layer_index == 0) {
-		_error_message = "WARN: tile layer could not be moved further up";
+	if (index_one >= _tile_layer_count) {
+		_error_message = "ERROR: no tile layer exists at first layer index";
+		return false;
+	}
+	if (index_two >= _tile_layer_count) {
+		_error_message = "ERROR: no tile layer exists at second layer index";
 		return false;
 	}
 
-	uint32 swap_index = layer_index - 1;
-
-	// Move the tile layer up across all contexts
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
-		_all_tile_contexts[i]->_SwapTileLayers(layer_index, swap_index);
+		_all_tile_contexts[i]->_SwapTileLayers(index_one, index_two);
 	}
 
 	// Move the layer properties up
-	TileLayerProperties swap = _tile_layer_properties[swap_index];
-	_tile_layer_properties[swap_index] = _tile_layer_properties[layer_index];
-	_tile_layer_properties[layer_index] = _tile_layer_properties[swap_index];
-
-	return true;
-}
-
-
-
-bool MapData::MoveTileLayerDown(uint32 layer_index) {
-	if (layer_index >= _tile_layer_count) {
-		_error_message = "ERROR: no tile layer exists at this index";
-		return false;
-	}
-	if (layer_index == (_tile_layer_count - 1)) {
-		_error_message = "WARN: tile layer could not be moved further down";
-		return false;
-	}
-
-	uint32 swap_index = layer_index + 1;
-
-	// Move the tile layer up across all contexts
-	for (uint32 i = 0; i < _tile_context_count; ++i) {
-		_all_tile_contexts[i]->_SwapTileLayers(layer_index, swap_index);
-	}
-
-	// Move the layer properties up
-	TileLayerProperties swap = _tile_layer_properties[swap_index];
-	_tile_layer_properties[swap_index] = _tile_layer_properties[layer_index];
-	_tile_layer_properties[layer_index] = _tile_layer_properties[swap_index];
+	TileLayerProperties swap = _tile_layer_properties[index_two];
+	_tile_layer_properties[index_two] = _tile_layer_properties[index_one];
+	_tile_layer_properties[index_one] = _tile_layer_properties[index_two];
 
 	return true;
 }
