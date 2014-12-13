@@ -245,6 +245,7 @@ const uint32 LayerView::COLLISION_COLUMN;
 LayerView::LayerView(MapData* data) :
 	QTreeWidget(),
 	_map_data(data),
+	_original_layer_name(),
 	_visibility_icon(QString("img/misc/editor_tools/eye.png")),
 	_right_click_item(NULL)
 {
@@ -361,13 +362,6 @@ void LayerView::dropEvent(QDropEvent* event) {
 }
 
 
-void LayerView::_SetTileLayerName(QTreeWidgetItem* item, int column) {
-// 	PRINT_DEBUG << item->text(NAME_COLUMN).toStdString() << ", column: " << column << endl;
-// 	item->setFlags(item->flags() | ~Qt::ItemIsEditable);
-// 	closePersistentEditor(item, column);
-}
-
-
 
 void LayerView::RefreshView() {
 	clear();
@@ -424,17 +418,36 @@ void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 		static_cast<Editor*>(topLevelWidget())->UpdateMapView();
 	}
 	else if (column == NAME_COLUMN) {
-// 		openPersistentEditor(item, column);
-// 		item->setFlags(Qt::ItemIsEditable);
-// 		editItem(_right_click_item, column);
+		// While technically this was not a right-click event, this allows us to use the same code path for performing rename operations
+		_right_click_item = item;
+		_RenameTileLayer();
 	}
 	else if (column == COLLISION_COLUMN) {
 		_map_data->ToggleTileLayerCollision(layer_id);
 		item->setText(COLLISION_COLUMN, layer_properties[layer_id].IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
 	}
 	else {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "invalid column clicked: " << column << endl;
+		QMessageBox::warning(this, "Layer Property Change Failure", "Invalid column clicked");
 	}
+}
+
+
+
+void LayerView::_SetTileLayerName(QTreeWidgetItem* item, int column) {
+	if ((item != _right_click_item) || (column != NAME_COLUMN) || (_original_layer_name.isEmpty() == true))
+		return;
+
+	closePersistentEditor(item, column);
+	if (_map_data->RenameTileLayer(item->text(ID_COLUMN).toUInt(), item->text(NAME_COLUMN)) == false) {
+		// To prevent an infinite recursion loop, we must nullify _right_click_item before restoring the layer's name
+		_right_click_item = NULL;
+		item->setText(NAME_COLUMN, _original_layer_name);
+		_original_layer_name.clear();
+		QMessageBox::warning(this, "Layer Rename Failure", _map_data->GetErrorMessage());
+		return;
+	}
+
+	_original_layer_name.clear();
 }
 
 
@@ -475,10 +488,8 @@ void LayerView::_RenameTileLayer() {
 	if (_right_click_item == NULL)
 		return;
 
-	int test = indexOfTopLevelItem(_right_click_item);
-// 	openPersistentEditor(_right_click_item, NAME_COLUMN);
-	_right_click_item->setFlags(_right_click_item->flags() | Qt::ItemIsEditable);
-	editItem(_right_click_item, NAME_COLUMN);
+	_original_layer_name = _right_click_item->text(NAME_COLUMN);
+	openPersistentEditor(_right_click_item, NAME_COLUMN);
 }
 
 

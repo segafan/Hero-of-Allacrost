@@ -373,7 +373,19 @@ private:
 *** This widget is located in the top right section of the main editor window.
 *** The user can see the order of tile layers and some of the properties of those
 *** layers. The user interacts with this widget to query information about a layer,
-*** change the order of the layer, or change the active property of a layer.
+*** change the order of the layer, or change the active property of a layer. The
+*** layer properties include: visibility, name, and collisions enabled
+***
+*** Single clicking a layer row will select that layer. Double-clicking a layer's column
+*** will either toggle the property for that column, or open up a persistent editor for
+*** the user to input new information (ie, layer renaming). A right click anywhere in the
+*** widget brings up a menu allowing the user to add a new layer, or delete or rename an
+*** existing layer if the click occurred over an existing layer in the widget.
+***
+*** The widget places no restrictions on the number of layers that can be added. The user
+*** is not permitted to delete a layer if it is the only remaining layer for the map. All layer
+*** names must be unique, so a rename operation will fail if the user tries to rename a layer
+*** and uses a name that already exists.
 *** ***************************************************************************/
 class LayerView : public QTreeWidget {
 private:
@@ -392,9 +404,7 @@ public:
 
 	~LayerView();
 
-	// TODO: look into cusing ontext menu events for doing right click menus
-
-	//! \brief Refreshes the viewable contents of the widget. Should be called whenever any of the map layer data changes
+	//! \brief Refreshes the viewable contents of the widget. Should be called whenever the map layer data changes outside of this widget
 	void RefreshView();
 
 protected:
@@ -423,6 +433,13 @@ private slots:
 	**/
 	void _ChangeLayerProperties(QTreeWidgetItem* item, int column);
 
+	/** \brief Closes the persistent editor that was opened by the _RenameTileLayer method and changes the layer name in the map data
+	*** \param item A pointer to the item with the modified name
+	*** \param column The column that is being edited (should be NAME_COLUMN)
+	***
+	*** This function is connected to the signal that is sent whenever any item in the widget is changed, not just
+	*** when the name of a layer has been renamed. Any change event other than a rename event will be ignored.
+	**/
 	void _SetTileLayerName(QTreeWidgetItem* item, int column);
 
 	//! \brief Creates a new empty tile layer and adds it to the end of the layer list
@@ -437,6 +454,9 @@ private slots:
 private:
 	//! \brief A pointer to the active map data that contains the tile layers
 	MapData* _map_data;
+
+	//! \brief While renaming a layer, holds the original name in case the renaming operation is cancelled for fails
+	QString _original_layer_name;
 
 	//! \brief An icon used to indicate the visibility property of a tile layer
 	QIcon _visibility_icon;
