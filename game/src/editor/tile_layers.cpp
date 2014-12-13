@@ -245,7 +245,8 @@ const uint32 LayerView::COLLISION_COLUMN;
 LayerView::LayerView(MapData* data) :
 	QTreeWidget(),
 	_map_data(data),
-	_visibility_icon(QString("img/misc/editor_tools/eye.png"))
+	_visibility_icon(QString("img/misc/editor_tools/eye.png")),
+	_right_click_item(NULL)
 {
 	if (data == NULL) {
 		IF_PRINT_WARNING(EDITOR_DEBUG) << "constructor received NULL map data argument" << endl;
@@ -267,9 +268,34 @@ LayerView::LayerView(MapData* data) :
 	// Hide the ID column as we only use it internally
 	setColumnHidden(0, true);
 
-	// Setup all signals and slots
-    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(_ChangeSelectedLayer()));
+	// Setup actions for the right click menu
+	_add_layer_action = new QAction("Add New Layer", this);
+	_add_layer_action->setStatusTip("Adds a new empty tile layer to the end of the layer list");
+	_rename_layer_action = new QAction("Rename Layer", this);
+	_rename_layer_action->setStatusTip("Renames the selected layer (can also be activated by double-clicking the layer's name)");
+	_delete_layer_action = new QAction("Delete Tile Layer", this);
+	_delete_layer_action->setStatusTip("Deletes the selected layer");
+
+	_right_click_menu = new QMenu(this);
+	_right_click_menu->addAction(_add_layer_action);
+	_right_click_menu->addAction(_rename_layer_action);
+	_right_click_menu->addAction(_delete_layer_action);
+
+	// Connect all signals and slots
+	connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(_ChangeSelectedLayer()));
 	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeLayerProperties(QTreeWidgetItem*, int)));
+	connect(_add_layer_action, SIGNAL(triggered()), this, SLOT(_AddTileLayer()));
+	connect(_rename_layer_action, SIGNAL(triggered()), this, SLOT(_RenameTileLayer()));
+	connect(_delete_layer_action, SIGNAL(triggered()), this, SLOT(_DeleteTileLayer()));
+}
+
+
+
+LayerView::~LayerView() {
+	delete _right_click_menu;
+	delete _add_layer_action;
+	delete _rename_layer_action;
+	delete _delete_layer_action;
 }
 
 
@@ -280,7 +306,19 @@ void LayerView::mousePressEvent(QMouseEvent* event) {
 		QTreeWidget::mousePressEvent(event);
 	}
 	else {
-		PRINT_DEBUG << "right click detected" << endl;
+		// Determine which QTreeWidgetItem was selected, if any. Enable/disable menu actions appropriately
+		_right_click_item = itemAt(event->pos());
+		if (_right_click_item != NULL) {
+			_rename_layer_action->setEnabled(true);
+			_delete_layer_action->setEnabled(true);
+		}
+		else {
+			// Clicked a space in the widget that did not point to any item
+			_rename_layer_action->setEnabled(false);
+			_delete_layer_action->setEnabled(false);
+		}
+
+		_right_click_menu->exec(QCursor::pos());
 		return;
 	}
 }
@@ -355,6 +393,7 @@ void LayerView::_ChangeSelectedLayer() {
 	QTreeWidgetItem* selection = selected_items.first();
 	uint32 layer_id = selection->text(ID_COLUMN).toUInt();
 	if (_map_data->ChangeSelectedTileLayer(layer_id) == NULL) {
+		QMessageBox::warning(this, "Layer Selection Failure", "You may not delete the last remaining layer for a map.");
 		IF_PRINT_WARNING(EDITOR_DEBUG) << "failed to change map data selected layer to layer: " << layer_id << endl;
 	}
 }
@@ -387,6 +426,76 @@ void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 	else {
 		IF_PRINT_WARNING(EDITOR_DEBUG) << "invalid column clicked: " << column << endl;
 	}
+}
+
+
+
+void LayerView::_AddTileLayer() {
+	static uint32 new_layer_number = 1; // Used so that each new tile layer added is written as "New Layer (#)"
+
+	// Add the new layer. If it fails, increment the number to use a different layer name and try again
+	QString layer_name;
+	while (true) {
+		layer_name.clear();
+		layer_name = "New Layer (" + QString::number(new_layer_number) + QString(")");
+
+		if (_map_data->AddTileLayer(layer_name, true) == true) {
+			_map_data->SetMapModified(true);
+			break;
+		}
+		else {
+			new_layer_number++;
+		}
+	}
+
+	// Recreate all layer items and remove the _right_click_item since the pointer is no longer valid
+	RefreshView();
+	_right_click_item = NULL;
+	new_layer_number++;
+}
+
+
+
+void LayerView::_RenameTileLayer() {
+	if (_right_click_item == NULL)
+		return;
+
+	int test = indexOfTopLevelItem(_right_click_item);
+	PRINT_DEBUG << "rename layer: " << test << endl;
+// 	openPersistentEditor(_right_click_item, NAME_COLUMN);
+// 	editItem(_right_click_item, NAME_COLUMN);
+}
+
+
+
+void LayerView::_DeleteTileLayer() {
+	if (_right_click_item == NULL)
+		return;
+
+	if (_map_data->GetTileLayerCount() == 1) {
+		QMessageBox::warning(this, "Layer Deletion Failure", "You may not delete the last remaining layer for a map.");
+		return;
+	}
+
+	// Delete the layer from the map data first and make sure that it was successful
+	if (_map_data->DeleteTileLayer(static_cast<uint32>(indexOfTopLevelItem(_right_click_item))) == false) {
+		QMessageBox::warning(this, "Layer Deletion Failure", _map_data->GetErrorMessage());
+		return;
+	}
+	_map_data->SetMapModified(true);
+
+	// Deleting the item directly also removes it from the QTreeWidget automatically
+	delete _right_click_item;
+	_right_click_item = NULL;
+
+	// Update the IDs of the remaining layers
+	QTreeWidgetItem* root = invisibleRootItem();
+	for (uint32 i = 0; i < static_cast<uint32>(root->childCount()); ++i) {
+		root->child(i)->setText(ID_COLUMN, QString::number(i));
+	}
+
+	// Redraw the map view now that the layer is removed
+	static_cast<Editor*>(topLevelWidget())->UpdateMapView();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -165,7 +165,7 @@ private:
 	//! \brief Menu for right-clicks events on the map
     QMenu* _right_click_menu;
 
-	/** \name Right-click Menu Actions
+	/** \name Right-Click Menu Actions
 	*** \brief Correspond to the private slots functions for user actions
 	**/
 	//{@

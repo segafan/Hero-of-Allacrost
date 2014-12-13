@@ -390,8 +390,7 @@ private:
 public:
 	LayerView(MapData* data);
 
-	~LayerView()
-		{}
+	~LayerView();
 
 	// TODO: look into cusing ontext menu events for doing right click menus
 
@@ -424,12 +423,36 @@ private slots:
 	**/
 	void _ChangeLayerProperties(QTreeWidgetItem* item, int column);
 
+	//! \brief Creates a new empty tile layer and adds it to the end of the layer list
+	void _AddTileLayer();
+
+	//! \brief Opens up an editor to rename the layer pointed to by _right_click_item
+	void _RenameTileLayer();
+
+	//! \brief Deletes the layer item pointed to by _right_click_item
+	void _DeleteTileLayer();
+
 private:
 	//! \brief A pointer to the active map data that contains the tile layers
 	MapData* _map_data;
 
 	//! \brief An icon used to indicate the visibility property of a tile layer
 	QIcon _visibility_icon;
+
+	//! \brief A pointer to the most recent item that was right clicked. Set to NULL if no item was clicked
+	QTreeWidgetItem* _right_click_item;
+
+	//! \brief Menu for right-clicks events on the widget
+    QMenu* _right_click_menu;
+
+	/** \name Right-Click Menu Actions
+	*** \brief The possible actions the user can take on the right-click menu
+	**/
+	//{@
+	QAction* _add_layer_action;
+	QAction* _rename_layer_action;
+	QAction* _delete_layer_action;
+	//@}
 }; // class LayerView : public QTreeWidget
 
 

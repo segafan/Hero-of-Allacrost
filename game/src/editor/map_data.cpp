@@ -466,7 +466,7 @@ bool MapData::AddTileLayer(QString name, bool collision_on) {
 
 
 bool MapData::DeleteTileLayer(uint32 layer_index) {
-	if (layer_index > _tile_layer_count) {
+	if (layer_index >= _tile_layer_count) {
 		_error_message = "ERROR: no tile layer exists at this index";
 		return false;
 	}
