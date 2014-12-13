@@ -262,11 +262,11 @@ LayerView::LayerView(MapData* data) :
 
 	// Create column dimensions, headers, and properties
     setColumnCount(4);
+	hideColumn(ID_COLUMN); // Hide the ID column as we only use it internally
+	setColumnWidth(VISIBLE_COLUMN, 25); // Make this column small as it only contains the eye icon
 	QStringList layer_headers;
 	layer_headers << "ID" << "" << "Layer" << "Collisions";
 	setHeaderLabels(layer_headers);
-	// Hide the ID column as we only use it internally
-	setColumnHidden(0, true);
 
 	// Setup actions for the right click menu
 	_add_layer_action = new QAction("Add New Layer", this);
@@ -283,6 +283,7 @@ LayerView::LayerView(MapData* data) :
 
 	// Connect all signals and slots
 	connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(_ChangeSelectedLayer()));
+	connect(this, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(_SetTileLayerName(QTreeWidgetItem*, int)));
 	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeLayerProperties(QTreeWidgetItem*, int)));
 	connect(_add_layer_action, SIGNAL(triggered()), this, SLOT(_AddTileLayer()));
 	connect(_rename_layer_action, SIGNAL(triggered()), this, SLOT(_RenameTileLayer()));
@@ -360,17 +361,23 @@ void LayerView::dropEvent(QDropEvent* event) {
 }
 
 
+void LayerView::_SetTileLayerName(QTreeWidgetItem* item, int column) {
+// 	PRINT_DEBUG << item->text(NAME_COLUMN).toStdString() << ", column: " << column << endl;
+// 	item->setFlags(item->flags() | ~Qt::ItemIsEditable);
+// 	closePersistentEditor(item, column);
+}
+
+
 
 void LayerView::RefreshView() {
 	clear();
+
 	// Add all tile layers from the map data
-	QStringList layer_names = _map_data->GetTileLayerNames();
 	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
 
 	for (uint32 i = 0; i < layer_properties.size(); ++i) {
 		QTreeWidgetItem* item = new QTreeWidgetItem(this);
 		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
-
 		item->setText(ID_COLUMN, QString::number(i));
 		if (layer_properties[i].IsVisible() == true)
 			item->setIcon(VISIBLE_COLUMN, _visibility_icon);
@@ -379,6 +386,8 @@ void LayerView::RefreshView() {
 		item->setText(NAME_COLUMN, layer_properties[i].GetName());
 		item->setText(COLLISION_COLUMN, layer_properties[i].IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
 	}
+
+	setCurrentItem(itemAt(0, 0));
 }
 
 
@@ -393,8 +402,7 @@ void LayerView::_ChangeSelectedLayer() {
 	QTreeWidgetItem* selection = selected_items.first();
 	uint32 layer_id = selection->text(ID_COLUMN).toUInt();
 	if (_map_data->ChangeSelectedTileLayer(layer_id) == NULL) {
-		QMessageBox::warning(this, "Layer Selection Failure", "You may not delete the last remaining layer for a map.");
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "failed to change map data selected layer to layer: " << layer_id << endl;
+		QMessageBox::warning(this, "Layer Selection Failure", "Cannot delete the last remaining layer for a map.");
 	}
 }
 
@@ -417,7 +425,8 @@ void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 	}
 	else if (column == NAME_COLUMN) {
 // 		openPersistentEditor(item, column);
-// 		closePersistentEditor(item, column);
+// 		item->setFlags(Qt::ItemIsEditable);
+// 		editItem(_right_click_item, column);
 	}
 	else if (column == COLLISION_COLUMN) {
 		_map_data->ToggleTileLayerCollision(layer_id);
@@ -433,7 +442,7 @@ void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 void LayerView::_AddTileLayer() {
 	static uint32 new_layer_number = 1; // Used so that each new tile layer added is written as "New Layer (#)"
 
-	// Add the new layer. If it fails, increment the number to use a different layer name and try again
+	// Add the new layer to the map data. If it fails, increment the number to use a different layer name and try again
 	QString layer_name;
 	while (true) {
 		layer_name.clear();
@@ -448,9 +457,15 @@ void LayerView::_AddTileLayer() {
 		}
 	}
 
-	// Recreate all layer items and remove the _right_click_item since the pointer is no longer valid
-	RefreshView();
-	_right_click_item = NULL;
+	// Add the new item to the view. All new tile layers will have vision and collisions enableed
+	QTreeWidgetItem* item = new QTreeWidgetItem(this);
+	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
+	item->setText(ID_COLUMN, QString::number(_map_data->GetTileLayerCount() - 1));
+	item->setIcon(VISIBLE_COLUMN, _visibility_icon);
+	item->setText(NAME_COLUMN, layer_name);
+	item->setText(COLLISION_COLUMN, "Enabled");
+
+	setCurrentItem(item); // Select the newly added item
 	new_layer_number++;
 }
 
@@ -461,9 +476,9 @@ void LayerView::_RenameTileLayer() {
 		return;
 
 	int test = indexOfTopLevelItem(_right_click_item);
-	PRINT_DEBUG << "rename layer: " << test << endl;
 // 	openPersistentEditor(_right_click_item, NAME_COLUMN);
-// 	editItem(_right_click_item, NAME_COLUMN);
+	_right_click_item->setFlags(_right_click_item->flags() | Qt::ItemIsEditable);
+	editItem(_right_click_item, NAME_COLUMN);
 }
 
 
@@ -483,6 +498,14 @@ void LayerView::_DeleteTileLayer() {
 		return;
 	}
 	_map_data->SetMapModified(true);
+
+	// If the item being deleted is the selected item, change the selction to the item before it (or after if its the first item)
+	if (currentItem() == _right_click_item) {
+		QTreeWidgetItem* new_selection = itemAbove(_right_click_item);
+		if (new_selection == NULL)
+			new_selection = itemBelow(_right_click_item);
+		setCurrentItem(new_selection);
+	}
 
 	// Deleting the item directly also removes it from the QTreeWidget automatically
 	delete _right_click_item;

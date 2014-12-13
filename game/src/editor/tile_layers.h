@@ -423,6 +423,8 @@ private slots:
 	**/
 	void _ChangeLayerProperties(QTreeWidgetItem* item, int column);
 
+	void _SetTileLayerName(QTreeWidgetItem* item, int column);
+
 	//! \brief Creates a new empty tile layer and adds it to the end of the layer list
 	void _AddTileLayer();
 
