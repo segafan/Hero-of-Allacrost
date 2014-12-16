@@ -643,7 +643,16 @@ TileContext* MapData::ChangeSelectedTileContext(int32 context_id) {
 		return NULL;
 	}
 
+	// Before changing the context, figure out the index of the selected tile layer for the current context
+	uint32 layer_index = 0;
+	for (uint32 i = 0; i < _tile_layer_count; ++i) {
+		if (_selected_tile_context->GetTileLayer(i) == _selected_tile_layer) {
+			layer_index = i;
+			break;
+		}
+	}
 	_selected_tile_context = _all_tile_contexts[context_id - 1];
+	ChangeSelectedTileLayer(layer_index);
 	return _selected_tile_context;
 }
 
