@@ -25,7 +25,8 @@
 #include <QStringList>
 
 #include "editor_utils.h"
-#include "tile_layers.h"
+#include "tile_context.h"
+#include "tile_layer.h"
 #include "tileset.h"
 
 namespace hoa_editor {
@@ -311,6 +312,12 @@ public:
 
 	//! \name Tile Context Manipulation Methods
 	//@{
+	/** \brief Changes which tile context is selected for editing
+	*** \param context_id The ID of the context to select
+	*** \return A pointer to the newly selected TileContext, or NULL if the context did not exist
+	**/
+	TileContext* ChangeSelectedTileContext(int32 context_id);
+
 	//! \brief Returns the ordered list of names for all tile contexts
 	QStringList GetTileContextNames() const;
 
@@ -331,16 +338,16 @@ public:
 	TileContext* AddTileContext(QString name, int32 inheriting_context_id = NO_CONTEXT);
 
 	/** \brief Deletes an existing TileContext object
-	*** \param context A pointer to the context to delete
+	*** \param context_id The ID of the context to delete
 	*** \return True only if the context was deleted successfully
 	***
 	*** A context may fail to be deleted if it's the final base context in the context list or one or more
 	*** contexts inherit from the context.
 	**/
-	bool DeleteTileContext(TileContext* context);
+	bool DeleteTileContext(int32 context_id);
 
 	/** \brief Renames an existing TileContext object
-	*** \param context_index The index of the context to rename
+	*** \param context_id The ID of the context to rename
 	*** \param new_name The name to set for the context
 	*** \return True if the context was renamed successfully
 	***
@@ -349,19 +356,28 @@ public:
 	*** calls will be outdated if this function completes successfully. You should always remember to
 	*** update any external context name lists after a rename operation.
 	**/
-	bool RenameTileContext(uint32 context_index, QString new_name);
+	bool RenameTileContext(int32 context_index, QString new_name);
 
 	/** \brief Moves a context up in the list
-	*** \param context A pointer to the context to move
-	*** \return True if the move operation was successful (fails if the context is already at the top of the list)
+	*** \param context_id The ID of the context to move
+	*** \return True if the move operation was successful. Will fail if the context is already at the top of the list
 	**/
-	bool MoveTileContextUp(TileContext* context);
+	bool MoveTileContextUp(int32 context_id)
+		{ return SwapTileContexts(context_id, context_id - 1); }
 
 	/** \brief Moves a context down in the list
-	*** \param context A pointer to the context to move
-	*** \return True if the move operation was successful (fails if the context is already at the bottom of the list)
+	*** \param context_id The ID of the context to move
+	*** \return True if the move operation was successful. Will fail if the context is already at the bottom of the list
 	**/
-	bool MoveTileContextDown(TileContext* context);
+	bool MoveTileContextDown(int32 context_id)
+		{ return SwapTileContexts(context_id, context_id + 1); }
+
+	/** \brief Swaps the order position of two tile contexts
+	*** \param first_id ID of the first context to swap
+	*** \param second_id ID of the second context to swap
+	*** \return True if the two contexts were swapped successfully
+	**/
+	bool SwapTileContexts(int32 first_id, int32 second_id);
 
 	/** \brief Returns a pointer to a TileContext with a specified id
 	*** \param context_id The ID of the context to retrieve

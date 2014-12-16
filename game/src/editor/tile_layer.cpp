@@ -8,9 +8,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /** ***************************************************************************
-*** \file    tile_layers.cpp
+*** \file    tile_layer.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
-*** \brief   Source file for tile layer data classes
+*** \brief   Source file for tile layer data and view classes
 *** **************************************************************************/
 
 #include <QMouseEvent>
@@ -18,7 +18,7 @@
 #include "editor_utils.h"
 #include "editor.h"
 #include "map_data.h"
-#include "tile_layers.h"
+#include "tile_layer.h"
 
 using namespace std;
 
@@ -175,65 +175,6 @@ void TileLayer::_ResizeLayer(uint32 length, uint height) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// TileContext class
-///////////////////////////////////////////////////////////////////////////////
-
-void TileContext::_AddTileLayer(TileLayer& layer) {
-	if (layer.GetHeight() == 0 || layer.GetLength() == 0) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not add layer because one or both dimensions are zero" << endl;
-		return;
-	}
-
-	// If no tile layers exist, we don't need to do any layer size checking
-	if (_tile_layers.empty() == true) {
-		_tile_layers.push_back(layer);
-		return;
-	}
-
-	// Ensure that the height and length of the layer match an existing layer
-	if (layer.GetHeight() != _tile_layers[0].GetHeight()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not add layer because its height does not match the existing layers" << endl;
-		return;
-	}
-	if (layer.GetLength() != _tile_layers[0].GetLength()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not add layer because its length does not match the existing layers" << endl;
-		return;
-	}
-
-	_tile_layers.push_back(layer);
-}
-
-
-
-void TileContext::_RemoveTileLayer(uint32 layer_index) {
-	if (layer_index >= _tile_layers.size()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not remove layer because the layer_index argument (" << layer_index
-			<< ") exceeds the number of layers (" << layer_index << ")" << endl;
-		return;
-	}
-
-	for (uint32 i = layer_index; i < _tile_layers.size() - 1; ++i) {
-		_tile_layers[i] = _tile_layers[i+1];
-	}
-	_tile_layers.pop_back();
-}
-
-
-
-void TileContext::_SwapTileLayers(uint32 first_index, uint32 second_index) {
-	if (first_index >= _tile_layers.size() || second_index >= _tile_layers.size()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not remove layer because one or both index arguments (" << first_index
-			<< ", " << second_index << ") exceeds the number of layers (" << _tile_layers.size() << ")" << endl;
-		return;
-	}
-
-	// TODO: see if this can be replaced with a call to std::swap
-	TileLayer swap = _tile_layers[first_index];
-	_tile_layers[first_index] = _tile_layers[second_index];
-	_tile_layers[second_index] = _tile_layers[first_index];
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // LayerView class
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -303,7 +244,7 @@ LayerView::~LayerView() {
 
 
 void LayerView::mousePressEvent(QMouseEvent* event) {
-	// Handle left clicks the standard way. Right clicks bring up the layer selection menu
+	// Handle left clicks the standard way. Right clicks bring up the layer action menu
 	if (event->button() == Qt::LeftButton) {
 		QTreeWidget::mousePressEvent(event);
 	}
@@ -396,7 +337,7 @@ void LayerView::_ChangeSelectedLayer() {
 	QTreeWidgetItem* selection = selected_items.first();
 	uint32 layer_id = selection->text(ID_COLUMN).toUInt();
 	if (_map_data->ChangeSelectedTileLayer(layer_id) == NULL) {
-		QMessageBox::warning(this, "Layer Selection Failure", "Cannot delete the last remaining layer for a map.");
+		QMessageBox::warning(this, "Layer Selection Failure", _map_data->GetErrorMessage());
 	}
 }
 
@@ -530,37 +471,6 @@ void LayerView::_DeleteTileLayer() {
 
 	// Redraw the map view now that the layer is removed
 	static_cast<Editor*>(topLevelWidget())->UpdateMapView();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// ContextView class
-///////////////////////////////////////////////////////////////////////////////
-
-const uint32 ContextView::ID_COLUMN;
-const uint32 ContextView::NAME_COLUMN;
-const uint32 ContextView::INHERITS_COLUMN;
-
-ContextView::ContextView(MapData* data) :
-	QTreeWidget(),
-	_map_data(data)
-{
-	if (data == NULL) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "constructor received NULL map data argument" << endl;
-		return;
-	}
-
-	// Create column dimensions, headers, and properties
-    setColumnCount(3);
-	QStringList layer_headers;
-	layer_headers << "ID" << "Context Title" << "Inherits From";
-	setHeaderLabels(layer_headers);
-
-	// TEMP: should generate initial contents from map_data instead
-	QTreeWidgetItem* item = new QTreeWidgetItem(this);
-	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	item->setText(0, QString::number(1));
-	item->setText(1, QString("Base"));
-	item->setText(2, QString(""));
 }
 
 } // namespace hoa_editor

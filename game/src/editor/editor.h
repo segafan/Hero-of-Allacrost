@@ -42,7 +42,7 @@
 #include "dialog_boxes.h"
 #include "map_data.h"
 #include "map_view.h"
-#include "tile_layers.h"
+#include "tile_layer.h"
 #include "tileset_editor.h"
 
 //! \brief All editor code is contained within this namespace.
@@ -311,5 +311,4 @@ private:
 
 } // namespace hoa_editor
 
-#endif
-// __EDITOR_HEADER__
+#endif // __EDITOR_HEADER__
