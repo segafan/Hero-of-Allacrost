@@ -111,10 +111,12 @@ ContextView::ContextView(MapData* data) :
 
 	// Create column dimensions, headers, and properties
     setColumnCount(3);
-	setColumnWidth(ID_COLUMN, 25); // Make this column small as it only contains the eye icon
+	setColumnWidth(ID_COLUMN, 25); // Make this column small as it only contains the ID integer
+	setColumnWidth(NAME_COLUMN, 200);
 	QStringList context_headers;
 	context_headers << "ID" << "Context" << "Inherits From";
 	setHeaderLabels(context_headers);
+	setIndentation(0);
 
 	// Setup actions for the right click menu
 	_add_context_action = new QAction("Add New Context", this);
@@ -136,13 +138,6 @@ ContextView::ContextView(MapData* data) :
 	connect(_add_context_action, SIGNAL(triggered()), this, SLOT(_AddTileContext()));
 	connect(_rename_context_action, SIGNAL(triggered()), this, SLOT(_RenameTileContext()));
 	connect(_delete_context_action, SIGNAL(triggered()), this, SLOT(_DeleteTileContext()));
-
-	// TEMP: should generate initial contents from map_data instead
-// 	QTreeWidgetItem* item = new QTreeWidgetItem(this);
-// 	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-// 	item->setText(0, QString::number(1));
-// 	item->setText(1, QString("Base"));
-// 	item->setText(2, QString(""));
 }
 
 
@@ -191,7 +186,7 @@ void ContextView::dropEvent(QDropEvent* event) {
 	for (uint32 i = 0; i < static_cast<uint32>(root->childCount()); ++i) {
 		QTreeWidgetItem* child = root->child(i);
 		context_order.push_back(child->text(ID_COLUMN).toUInt());
-		child->setText(ID_COLUMN, QString::number(i));
+		child->setText(ID_COLUMN, QString::number(i + 1));
 	}
 
 	// Make the appropriate changes corresponding to the context order in the map data
@@ -262,8 +257,7 @@ void ContextView::_ChangeSelectedContext() {
 		return;
 	}
 
-	// TODO: this causes a seg fault on a new map creation
-// 	static_cast<Editor*>(topLevelWidget())->UpdateMapView(); // Redraw the map view to show the newly selected context
+	static_cast<Editor*>(topLevelWidget())->UpdateMapView(); // Redraw the map view to show the newly selected context
 }
 
 
@@ -367,7 +361,7 @@ void ContextView::_DeleteTileContext() {
 	}
 
 	// Delete the context from the map data first and make sure that it was successful
-	if (_map_data->DeleteTileContext(static_cast<uint32>(indexOfTopLevelItem(_right_click_item))) == false) {
+	if (_map_data->DeleteTileContext(_right_click_item->text(ID_COLUMN).toInt()) == false) {
 		QMessageBox::warning(this, "Context Deletion Failure", _map_data->GetErrorMessage());
 		return;
 	}

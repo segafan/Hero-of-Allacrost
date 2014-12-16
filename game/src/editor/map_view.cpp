@@ -34,7 +34,7 @@ namespace hoa_editor {
 MapView::MapView(QWidget* parent, MapData* data) :
 	QGraphicsScene(),
 	_map_data(data),
-	_grid_visible(true),
+	_grid_visible(false),
 	_selection_visible(false),
 	_cursor_tile_x(-1),
 	_cursor_tile_y(-1),
@@ -98,8 +98,7 @@ MapView::MapView(QWidget* parent, MapData* data) :
 
 MapView::~MapView() {
 	// TODO: uncomment when tileset data is moved to this class
-// 	for (vector<Tileset*>::iterator i = tilesets.begin(); i != tilesets.end(); ++i)
-// 		delete *i;
+
 
 	delete _insert_row_action;
 	delete _insert_column_action;

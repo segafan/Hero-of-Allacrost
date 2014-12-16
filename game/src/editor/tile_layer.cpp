@@ -206,9 +206,11 @@ LayerView::LayerView(MapData* data) :
     setColumnCount(4);
 	hideColumn(ID_COLUMN); // Hide the ID column as we only use it internally
 	setColumnWidth(VISIBLE_COLUMN, 25); // Make this column small as it only contains the eye icon
+	setColumnWidth(NAME_COLUMN, 200);
 	QStringList layer_headers;
 	layer_headers << "ID" << "" << "Layer" << "Collisions";
 	setHeaderLabels(layer_headers);
+	setIndentation(0);
 
 	// Setup actions for the right click menu
 	_add_layer_action = new QAction("Add New Layer", this);

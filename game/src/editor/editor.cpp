@@ -341,12 +341,10 @@ void Editor::_SetupMainView() {
     if (_layer_view != NULL)
         delete _layer_view;
     _layer_view = new LayerView(&_map_data);
-	_layer_view->RefreshView();
 
 	if (_context_view != NULL)
         delete _context_view;
     _context_view = new ContextView(&_map_data);
-	_context_view->RefreshView();
 
     // Setup widgets on the left side of the screen
     _horizontal_splitter->addWidget(_map_view->GetGraphicsView());
@@ -357,6 +355,9 @@ void Editor::_SetupMainView() {
     _right_vertical_splitter->addWidget(_tileset_tabs);
 
     _horizontal_splitter->addWidget(_right_vertical_splitter);
+
+	_layer_view->RefreshView();
+	_context_view->RefreshView();
 }
 
 
