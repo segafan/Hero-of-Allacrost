@@ -681,6 +681,7 @@ QStringList MapData::GetInheritedTileContextNames() const {
 }
 
 
+
 TileContext* MapData::AddTileContext(QString name, int32 inheriting_context_id) {
 	// Check all conditions where we would not be able to create the new context
 
@@ -828,7 +829,7 @@ TileContext* MapData::FindTileContextByID(int32 context_id) const {
 		return NULL;
 	}
 
-	if (context_id >= static_cast<int32>(_tile_context_count)) {
+	if (context_id > static_cast<int32>(_tile_context_count)) {
 		return NULL;
 	}
 
