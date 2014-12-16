@@ -346,6 +346,7 @@ void Editor::_SetupMainView() {
 	if (_context_view != NULL)
         delete _context_view;
     _context_view = new ContextView(&_map_data);
+	_context_view->RefreshView();
 
     // Setup widgets on the left side of the screen
     _horizontal_splitter->addWidget(_map_view->GetGraphicsView());

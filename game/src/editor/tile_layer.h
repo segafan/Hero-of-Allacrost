@@ -8,18 +8,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /** ***************************************************************************
-*** \file    tile_layers.h
+*** \file    tile_layer.h
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Header file for tile layer data and view classes
 ***
-*** This file contains classes that represent components of the data model for
-*** a map. This data includes layers of tiles and map contexts, and a data
-*** managing class that provides an interface for the TileView class to request
-*** changes to the data.
+*** This file contains the implementation of tile layers for maps. Each map contains one
+*** or more tile layers that indicate which tiles from the list of tilesets are placed at
+*** each location on the map. All map contexts share the same number of layers and the properties
+*** of tile layers are consistent across each context. This file also contains the definition of a
+*** widget class that lists each tile layer in the editor and allows the user to view and modify
+*** those properties.
 *** **************************************************************************/
 
-#ifndef __TILE_LAYERS_HEADER__
-#define __TILE_LAYERS_HEADER__
+#ifndef __TILE_LAYER_HEADER__
+#define __TILE_LAYER_HEADER__
 
 #include <QString>
 #include <QStringList>
@@ -247,127 +249,6 @@ private:
 
 
 /** ****************************************************************************
-*** \brief A collection of tile layers
-***
-*** A tile context is a group of TileLayer objects that together compose the makeup of a map view.
-*** Every tile context corresponds to a map context, the difference between the two being that the
-*** tile context only handles the tile data whereas a map context has tiles, objects, sprites, and
-*** separate collision data. The editor user interface, however, does not mention the word "tile context"
-*** and only uses the term "map context" to avoid confusing the user with this difference.
-***
-*** Every map must contain at least one TileContext, and can contain a maximum of MAX_CONTEXTS. Every
-*** context has an ID that should be unique amongst any and all other contexts. Contexts can also inherit
-*** from one (and only only one) other context. When a context inherits from another context, what happens is
-*** that the context that was inherited from is drawn first and the inherting context is drawn on top of that.
-*** The effect of this is that sections of the map can be easily replaced with other tiles without having to
-*** load an entirely different map. For example, consider a small map with a single building. One context would
-*** represent the outside of the building, while a second context inherits from the first and places tiles over
-*** the building to show it's interior for when the player moves inside.
-***
-*** Due to the nature of inheriting contexts, TileContext objects must be constructed with care. Deleting a context
-*** can potentially break the map data if it is not handled properly. Therefore, the constructors and several other
-*** methods for this class are made private and can only be accessed by the the TileDataModel class. This class
-*** manages all instances of TileContext for the open map and ensures that there is no violation of context data.
-***
-*** \note All contexts are named, but the name data is not stored within this class. This is because storing all
-*** context names in a single container is more efficient for returning the list of context names and performing name
-*** lookups. The name data is stored in the TileDataModel class.
-***
-*** \note TileContext, like TileLayer, does not store any collision data information.
-*** ***************************************************************************/
-class TileContext {
-	friend class MapData;
-
-public:
-	//! \name Class member accessor functions
-	//@{
-	int32 GetContextID() const
-		{ return _context_id; }
-
-	QString GetContextName() const
-		{ return _context_name; }
-
-	bool IsInheritingContext() const
-		{ return (_inherited_context_id != NO_CONTEXT); }
-
-	int32 GetInheritedContextID() const
-		{ return _inherited_context_id; }
-
-	std::vector<TileLayer>& GetTileLayers()
-		{ return _tile_layers; }
-
-	//! \note Returns NULL if layer_index is invalid
-	TileLayer* GetTileLayer(uint32 layer_index)
-		{ if (layer_index < _tile_layers.size()) return &(_tile_layers[layer_index]); else return NULL; }
-
-	void SetContextName(QString name)
-		{ _context_name = name; }
-	//@}
-
-private:
-	/** \param id The ID to set the newly created context
-	***
-	*** This constructor is used when not inheriting from another context
-	**/
-	TileContext(int32 id, QString name) :
-		_context_id(id), _context_name(name), _inherited_context_id(NO_CONTEXT) {}
-
-	/** \param id The ID to set the newly created context (should be unique among all TileContext objects)
-	*** \param inherited_context_id The ID of the context that this newly created context should inherit from
-	***
-	*** It is the caller's responsibility to ensure that the inherited_context_id is valid (ie, another TileContext
-	*** exists with the provided ID). The constructor has no means to determine if there is a valid context with this
-	*** ID, other than ensuring that the value provided lies within the range 1-MAX_CONTEXTS.
-	**/
-	TileContext(int32 id, QString name, int32 inherited_context_id) :
-		_context_id(id), _context_name(name), _inherited_context_id(inherited_context_id) {}
-
-	//! \brief The ID number of the context which has an acceptable range of [1 - MAX_CONTEXTS]
-	int32 _context_id;
-
-	//! \brief The name of the context as it will be seen by the user in the editor
-	QString _context_name;
-
-	/** \brief The ID of the context that this context inherits from
-	*** If this context does not inherit from another, then this member is set to NO_CONTEXT.
-	**/
-	int32 _inherited_context_id;
-
-	//! \brief All tile layers that belong to the context
-	std::vector<TileLayer> _tile_layers;
-
-	void _SetContextID(int32 id)
-		{ _context_id = id; }
-
-	//! \brief Removes inheriting context data, if any exists
-	void _ClearInheritingContext()
-		{ _inherited_context_id = NO_CONTEXT; }
-
-	/** \brief Transforms the context into an inheriting context
-	*** \param inherited_context_id The ID of the context that this context should inherit from
-	**/
-	void _SetInheritingContext(int32 inherited_context_id)
-		{ _inherited_context_id = inherited_context_id; }
-
-	/** \brief Adds a new tile layer to the end of the layer container
-	*** \param layer A reference to the pre-created TileLayer to add
-	**/
-	void _AddTileLayer(TileLayer& layer);
-
-	/** \brief Removes an existing tile layer from the context
-	*** \param layer_index The index of the layer to remove
-	**/
-	void _RemoveTileLayer(uint32 layer_index);
-
-	/** \brief Swaps the position of two tile layers
-	*** \param first_index The index of the first layer to swap
-	*** \param second_index The index of the second layer to swap
-	**/
-	void _SwapTileLayers(uint32 first_index, uint32 second_index);
-}; // class TileContext
-
-
-/** ****************************************************************************
 *** \brief Displays the sortable list of tile layers on the map
 ***
 *** This widget is located in the top right section of the main editor window.
@@ -386,6 +267,12 @@ private:
 *** is not permitted to delete a layer if it is the only remaining layer for the map. All layer
 *** names must be unique, so a rename operation will fail if the user tries to rename a layer
 *** and uses a name that already exists.
+***
+*** \todo Renaming tile layers can result in weird behavior if the user changes the focus to
+*** another widget before finishing the renaming. Also pressing the ESC button does not cancel
+*** the rename operation, and starting a rename without making any changes and selecting a different
+*** layer behaves poorly also. The rename functionality needs to be improved to eliminate all of these
+*** undesirable behaviors.
 *** ***************************************************************************/
 class LayerView : public QTreeWidget {
 private:
@@ -477,38 +364,6 @@ private:
 	//@}
 }; // class LayerView : public QTreeWidget
 
-
-/** ****************************************************************************
-*** \brief Displays the sortable list of tile contexts for a map
-***
-*** This widget is located below the layer view widget in the right section of the main editor window.
-*** The active map context is highlighted and shows each context's ID, name, and inheriting context
-*** if any is active. These properties can be modified except for the ID, which is automatically
-*** set according to the order of each context in the context list.
-***
-*** TODO: this is a skeleton class that will be fleshed out later
-*** ***************************************************************************/
-class ContextView : public QTreeWidget {
-private:
-	Q_OBJECT // Macro needed to use QT's slots and signals
-
-	//! \name Widget Column Identifiers
-	//@{
-	static const uint32 ID_COLUMN = 0;
-	static const uint32 NAME_COLUMN = 1;
-	static const uint32 INHERITS_COLUMN = 2;
-	//@}
-public:
-	ContextView(MapData* data);
-
-	~ContextView()
-		{}
-
-private:
-	//! \brief A pointer to the active map data that contains the tile contexts
-	MapData* _map_data;
-}; // class ContextView : public QTreeWidget
-
 } // namespace hoa_editor
 
-#endif // __TILE_LAYERS_HEADER__
+#endif // __TILE_LAYER_HEADER__

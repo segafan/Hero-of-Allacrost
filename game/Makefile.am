@@ -328,7 +328,8 @@ $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 allacrost_editor_MOC = $(EDITOR_DIR)/dialog_boxes.moc.cpp \
 	$(EDITOR_DIR)/editor.moc.cpp \
 	$(EDITOR_DIR)/map_view.moc.cpp \
-	$(EDITOR_DIR)/tile_layers.moc.cpp \
+	$(EDITOR_DIR)/tile_context.moc.cpp \
+	$(EDITOR_DIR)/tile_layer.moc.cpp \
 	$(EDITOR_DIR)/tileset_editor.moc.cpp	
 allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/dialog_boxes.cpp \
@@ -342,8 +343,10 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/map_data.h \
 	$(EDITOR_DIR)/map_view.cpp \
 	$(EDITOR_DIR)/map_view.h \
-	$(EDITOR_DIR)/tile_layers.cpp \
-	$(EDITOR_DIR)/tile_layers.h \
+	$(EDITOR_DIR)/tile_context.cpp \
+	$(EDITOR_DIR)/tile_context.h \
+	$(EDITOR_DIR)/tile_layer.cpp \
+	$(EDITOR_DIR)/tile_layer.h \
 	$(EDITOR_DIR)/tileset.cpp \
 	$(EDITOR_DIR)/tileset.h \
 	$(EDITOR_DIR)/tileset_editor.cpp \

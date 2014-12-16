@@ -634,6 +634,21 @@ void MapData::RemoveTileLayerColumns(uint32 col_index, uint32 col_count) {
 // MapData class -- Tile Context Functions
 ///////////////////////////////////////////////////////////////////////////////
 
+TileContext* MapData::ChangeSelectedTileContext(int32 context_id) {
+	if (context_id <= 0) {
+		return NULL;
+	}
+	if (static_cast<uint32>(context_id) > _tile_context_count) {
+		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not change selection because no context with this ID exists: " << context_id << endl;
+		return NULL;
+	}
+
+	_selected_tile_context = _all_tile_contexts[context_id - 1];
+	return _selected_tile_context;
+}
+
+
+
 QStringList MapData::GetTileContextNames() const {
 	QStringList context_names;
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
@@ -706,41 +721,48 @@ TileContext* MapData::AddTileContext(QString name, int32 inheriting_context_id) 
 
 
 
-bool MapData::DeleteTileContext(TileContext* context) {
-	// Check all conditions where we would not be able to create the new context
+bool MapData::DeleteTileContext(int32 context_id) {
+	TileContext* context = FindTileContextByID(context_id);
+	// Check all conditions where we would not be able to delete the context
 	if (context == NULL) {
-		_error_message = "ERROR: received NULL context argument";
+		_error_message = "ERROR: received invalid context ID";
 		return false;
 	}
-	if (FindTileContextByID(context->GetContextID()) != context) {
-		_error_message = "function received a pointer to a TileContext object that is not managed";
+	if (_tile_context_count <= 1) {
+		_error_message = "ERROR: can not delete the last remaining context for the map";
 		return false;
 	}
-	// TODO case: Context is the final base context remaining
-	// TODO case: Other contexts inherit from this context
-
-
-	// Move the context all the way to the bottom of the context list and then delete it
-	int32 remove_index = static_cast<int32>(_tile_context_count - 1);
-	// This loop works because MoveTileContextDown updates the context ID to its new position
-	while (context->GetContextID() < remove_index) {
-		MoveTileContextDown(context);
+	for (uint32 i = 0; i < _tile_context_count; ++i) {
+		if (context_id == _all_tile_contexts[i]->GetInheritedContextID()) {
+			_error_message = "ERROR: could not delete context as it is being inherited by one or more additional contexts";
+			return false;
+		}
 	}
 
-	delete _all_tile_contexts[remove_index];
-	_all_tile_contexts[remove_index] = NULL;
+	// Move the context to delete to the end of the list
+	for (uint32 i = static_cast<uint32>(context_id); i < _tile_context_count; ++i) {
+		SwapTileContexts(i, i + 1);
+	}
+
+	delete context;
+	_all_tile_contexts[_tile_context_count - 1] = NULL;
+	_tile_context_count--;
+
 	return true;
 }
 
 
 
-bool MapData::RenameTileContext(uint32 context_index, QString new_name) {
-	if (context_index >= _tile_context_count) {
-		_error_message = "ERROR: context_index exceeds size of context list";
+bool MapData::RenameTileContext(int32 context_id, QString new_name) {
+	if (context_id <= 0) {
+		return false;
+	}
+	if (static_cast<uint32>(context_id) > _tile_context_count) {
+		_error_message = "ERROR: context_id exceeds size of context list";
 		return false;
 	}
 
-	if (_all_tile_contexts[context_index]->GetContextName() == new_name) {
+	if (_all_tile_contexts[context_id - 1]->GetContextName() == new_name) {
 		return true;
 	}
 
@@ -750,53 +772,52 @@ bool MapData::RenameTileContext(uint32 context_index, QString new_name) {
 		return false;
 	}
 
-	_all_tile_contexts[context_index]->SetContextName(new_name);
+	_all_tile_contexts[context_id - 1]->SetContextName(new_name);
 	return true;
 }
 
 
 
-bool MapData::MoveTileContextUp(TileContext* context) {
-	if (context == NULL)
+bool MapData::SwapTileContexts(int32 first_id, int32 second_id) {
+	if (first_id <= 0 || second_id <= 0) {
+		_error_message = "ERROR: invalid context ID passed when trying to swap context positions";
 		return false;
-
-	uint32 index = _GetTileContextIndex(context);
-
-	// Make sure that we didn't receive a pointer to an unmanaged TileContext
-	if (context != _all_tile_contexts[index]) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "function received a pointer to a TileContext object that is not managed by this class" << endl;
+	}
+	if (first_id == second_id) {
+		_error_message = "ERROR: tried to swap two contexts with the same ID";
+		return false;
+	}
+	if (static_cast<uint32>(first_id) > _tile_context_count) {
+		_error_message = "ERROR: no tile context exists at first context ID";
+		return false;
+	}
+	if (static_cast<uint32>(second_id) > _tile_layer_count) {
+		_error_message = "ERROR: no tile context exists at second context ID";
 		return false;
 	}
 
-	// If the context is already at the top, we can't move it any further up the list
-	if (index == 0)
-		return false;
+	uint32 first_index = static_cast<uint32>(first_id - 1);
+	uint32 second_index = static_cast<uint32>(second_id - 1);
 
-	_SwapTileContexts(context, _all_tile_contexts[index - 1]);
-	return true;
-}
+	// Perform the swap and update each context's ID to match it's new position in the container
+	TileContext* swap = _all_tile_contexts[first_index];
+	_all_tile_contexts[first_index] = _all_tile_contexts[second_index];
+	_all_tile_contexts[first_index]->_SetContextID(first_id);
+	_all_tile_contexts[second_index] = swap;
+	_all_tile_contexts[second_index]->_SetContextID(second_id);
 
+	// Go through each context and see if it inherited from either the first or the second context. Update these values appropriately
+	for (uint32 i = 0; i < _all_tile_contexts.size(); ++i) {
+		if (_all_tile_contexts[i] == NULL)
+			break;
 
-
-bool MapData::MoveTileContextDown(TileContext* context) {
-	if (context == NULL)
-		return false;
-
-	uint32 index = _GetTileContextIndex(context);
-
-	// Make sure that we didn't receive a pointer to an unmanaged TileContext
-	if (context != _all_tile_contexts[index]) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "function received a pointer to a TileContext object not managed by this class" << endl;
-		return false;
+		int32 inherited_id = _all_tile_contexts[i]->GetInheritedContextID();
+		if (inherited_id == first_id)
+			_all_tile_contexts[i]->_SetInheritingContext(second_id);
+		else if (inherited_id == second_id)
+			_all_tile_contexts[i]->_SetInheritingContext(first_id);
 	}
 
-	// If the context is already at the bottom, we can't move it any further down the list
-	if (index == _all_tile_contexts.size() - 1)
-		return false;
-	else if (_all_tile_contexts[index + 1] == NULL)
-		return false;
-
-	_SwapTileContexts(context, _all_tile_contexts[index + 1]);
 	return true;
 }
 
@@ -835,33 +856,6 @@ TileContext* MapData::FindTileContextByIndex(uint32 context_index) const {
 		return NULL;
 
 	return _all_tile_contexts[context_index];
-}
-
-
-
-void MapData::_SwapTileContexts(TileContext* first, TileContext* second) {
-	int32 first_id = first->GetContextID();
-	int32 second_id = second->GetContextID();
-	uint32 first_index = static_cast<uint32>(first_id - 1);
-	uint32 second_index = static_cast<uint32>(second_id - 1);
-
-	// Perform the swap and update each context's ID to match it's new position in the container
-	_all_tile_contexts[first_index] = second;
-	second->_SetContextID(first_id);
-	_all_tile_contexts[second_index] = first;
-	first->_SetContextID(second_id);
-
-	// Go through each context and see if it inherited from either the first or the second context. Update these values appropriately
-	for (uint32 i = 0; i < _all_tile_contexts.size(); ++i) {
-		if (_all_tile_contexts[i] == NULL)
-			break;
-
-		int32 inherited_id = _all_tile_contexts[i]->GetInheritedContextID();
-		if (inherited_id == first_id)
-			_all_tile_contexts[i]->_SetInheritingContext(second_id);
-		else if (inherited_id == second_id)
-			_all_tile_contexts[i]->_SetInheritingContext(first_id);
-	}
 }
 
 
