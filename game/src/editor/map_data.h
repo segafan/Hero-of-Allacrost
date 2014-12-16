@@ -193,7 +193,7 @@ public:
 
 	//! \name Tile Layer Manipulation Methods
 	//@{
-	/** \brief Changes which tile layer is selected for editing
+	/** \brief Changes which tile layer is selected for editing on the currently selected map context
 	*** \param layer_index The index of the layer to select
 	*** \return A pointer to the newly selected TileLayer, or NULL if the selected layer could not be changed
 	**/
@@ -315,6 +315,7 @@ public:
 	/** \brief Changes which tile context is selected for editing
 	*** \param context_id The ID of the context to select
 	*** \return A pointer to the newly selected TileContext, or NULL if the context did not exist
+	*** \note This function also changes the selected tile layer to point to the corresponding layer in the newly selected context
 	**/
 	TileContext* ChangeSelectedTileContext(int32 context_id);
 

@@ -97,9 +97,6 @@ MapView::MapView(QWidget* parent, MapData* data) :
 
 
 MapView::~MapView() {
-	// TODO: uncomment when tileset data is moved to this class
-
-
 	delete _insert_row_action;
 	delete _insert_column_action;
 	delete _delete_row_action;
