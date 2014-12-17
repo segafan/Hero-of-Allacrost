@@ -395,13 +395,15 @@ void WriteScriptDescriptor::WriteNamespace(const string &ns)
 // Table Write Functions
 //-----------------------------------------------------------------------------
 
-void WriteScriptDescriptor::BeginTable(const string &key) {
-	if (_open_tables.size() == 0) {
-		_outfile << key << " = {}" << endl;
-	}
-	else {
-		_WriteTablePath();
-		_outfile << '.' << key << " = {}" << endl;
+void WriteScriptDescriptor::BeginTable(const string &key, bool write_declaration) {
+	if (write_declaration == true) {
+		if (_open_tables.size() == 0) {
+			_outfile << key << " = {}" << endl;
+		}
+		else {
+			_WriteTablePath();
+			_outfile << '.' << key << " = {}" << endl;
+		}
 	}
 
 	_open_tables.push_back(key);
@@ -409,12 +411,14 @@ void WriteScriptDescriptor::BeginTable(const string &key) {
 
 
 
-void WriteScriptDescriptor::BeginTable(int32 key) {
-	if (_open_tables.size() == 0)
-		_outfile << key << " = {}" << endl;
-	else {
-		_WriteTablePath();
-		_outfile << '[' << key << "] = {}" << endl;
+void WriteScriptDescriptor::BeginTable(int32 key, bool write_declaration) {
+	if (write_declaration == true) {
+		if (_open_tables.size() == 0)
+			_outfile << key << " = {}" << endl;
+		else {
+			_WriteTablePath();
+			_outfile << '[' << key << "] = {}" << endl;
+		}
 	}
 
 	_open_tables.push_back(NumberToString<int32>(key));

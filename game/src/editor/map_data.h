@@ -410,6 +410,12 @@ private:
 	//! \brief The name of the map as seen in the editor
  	QString _map_name;
 
+	//! \brief Comma-delimited string of the names of the designers who created the map
+	QString _map_designers;
+
+	//! \brief A user-provided description of the map
+	QString _map_description;
+
 	//! \brief The length of the map in number of tiles
 	uint32 _map_length;
 
@@ -435,6 +441,9 @@ private:
 
 	//! \brief Stores all tilesets used by the map
 	std::vector<Tileset*> _tilesets;
+
+	//! \brief Holds the collision data computed from each context and tile layer
+	std::vector<std::vector<uint32> > _collision_data;
 
 	//! \brief An ordered list of each tileset name for every entry in _tilesets
 	QStringList _tileset_names;
@@ -478,8 +487,7 @@ private:
 	**/
 	void _SwapTileContexts(TileContext* first, TileContext* second);
 
-	/** \brief Computes the collision grid data from the available map information
-	*** \param data A reference to a 2D vector where the resulting data should be written to
+	/** \brief Computes the collision grid from the current map data and saves the result to _collision_data
 	***
 	*** The collision grid is four times the size of the tile grid (twice as long, and twice as high).
 	*** The tileset data contains the collision information for every quadrant of its map tiles. The
@@ -489,7 +497,7 @@ private:
 	*** 32 contexts can fit within a single 32-bit integer.
 	***
 	**/
-	void _ComputeCollisionData(std::vector<std::vector<uint32> >& data);
+	void _ComputeCollisionData();
 }; // class MapData
 
 } // namespace hoa_editor
