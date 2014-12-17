@@ -35,6 +35,8 @@ namespace hoa_editor {
 MapData::MapData() :
 	_map_filename(""),
 	_map_name(""),
+	_map_designers(""),
+	_map_description(""),
 	_map_length(0),
 	_map_height(0),
 	_map_modified(false),
@@ -208,11 +210,9 @@ bool MapData::SaveData(QString filename) {
 
 	// TODO: add this information at a later time when the user has the ability to add this
 	// data to the map properties in the editor.
-	data_file.WriteComment("------------------------------------------------------------");
-	data_file.WriteComment("Map Name: ");
-	data_file.WriteComment("Map Designer(s): ");
-	data_file.WriteComment("Description:");
-	data_file.WriteComment("------------------------------------------------------------");
+	data_file.WriteString("map_name", _map_name.toStdString());
+	data_file.WriteString("map_designers", _map_designers.toStdString());
+	data_file.WriteString("map_description", _map_description.toStdString());
 	data_file.InsertNewLine();
 
 	// ---------- (2): Write the basic map data properties
@@ -263,37 +263,39 @@ bool MapData::SaveData(QString filename) {
 
 	// ---------- (4): Write collision grid data
 	data_file.BeginTable("collision_grid");
-	vector<vector<uint32> > collision_grid;
-	_ComputeCollisionData(collision_grid);
-	for (uint32 i = 0; i < collision_grid.size(); ++i) {
-		data_file.WriteUIntVector(static_cast<int32>(i+1), collision_grid[i]);
+	_ComputeCollisionData();
+	for (uint32 i = 0; i < _collision_data.size(); ++i) {
+		data_file.WriteUIntVector(i, _collision_data[i]);
 	}
 	data_file.EndTable();
 	data_file.InsertNewLine();
 
 	// ---------- (5): For each tile, write the tile value for each layer and each context
+	vector<int32> tiles(_tile_context_count * _tile_layer_count, NO_TILE);
 	data_file.BeginTable("map_tiles");
 	for (uint32 y = 0; y < _map_height; ++y) {
+		data_file.BeginTable(y, false);
 		for (uint32 x = 0; x < _map_length; ++x) {
-			string tile_id = "map_tiles[" + NumberToString(y) + "][" + NumberToString(x) + "] = ";
-			vector<int32> tiles;
 			for (uint32 c = 0; c < _tile_context_count; ++c) {
 				for (uint32 l = 0; l < _tile_layer_count; ++l) {
-					// TODO: push context/layer data into tiles vecotr
+					tiles.push_back(_all_tile_contexts[c]->GetTileLayer(l)->GetTile(x, y));
 				}
 			}
-			// TODO: write tiles vector
+			data_file.WriteIntVector(x, tiles);
+			tiles.clear();
 		}
+		data_file.EndTable();
 	}
 	data_file.EndTable();
 	data_file.InsertNewLine();
 
 	if (data_file.IsErrorDetected()) {
 		_error_message = "One or more errors occurred when writing map file. Error messages:\n" + QString(data_file.GetErrorMessages().c_str());
+		data_file.CloseFile();
 		return false;
 	}
-	data_file.CloseFile();
 
+	data_file.CloseFile();
 	return true;
 } // bool MapData::SaveData(QString filename)
 
@@ -870,116 +872,72 @@ TileContext* MapData::FindTileContextByIndex(uint32 context_index) const {
 
 
 
-void MapData::_ComputeCollisionData(std::vector<std::vector<uint32> >& data) {
-	// TODO: this function needs to be rewritten from scratch to account for multiple
-	// tile layers, each with their own collision data toggability
+void MapData::_ComputeCollisionData() {
+	// Resize the container to hold each grid element that will be computed
+	_collision_data.resize(_map_height * 2);
+	for (uint32 i = 0; i < _map_height * 2; ++i) {
+		_collision_data[i].resize(_map_length * 2, 0);
+	}
 
-// 	// Used to save the northern walkability info of tiles in all layers of
-// 	// all contexts; initialize to walkable.
-// 	vector<int32> map_row_north(_length * 2, 0);
-// 	// Used to save the southern walkability info of tiles in all layers of
-// 	// all contexts; initialize to walkable.
-// 	vector<int32> map_row_south(_length * 2, 0);
-// 	for (uint32 row = 0; row < _height; row++) {
-// 		// Iterate through all contexts of all layers, column by column,
-// 		// row by row.
-// 		for (int context = 0; context < static_cast<int>(_lower_layer.size()); context++) {
-// 			for (uint32 col = row * _length; col < row * _length + _length; col++) {
-// 				// Used to know if any tile at all on all combined layers exists.
-// 				bool missing_tile = true;
-//
-// 				// Get walkability for lower layer tile.
-// 				tileset_index = _lower_layer[context][col] / 256;
-// 				if (tileset_index == 0)
-// 					tile_index = _lower_layer[context][col];
-// 				else  // Don't divide by 0
-// 					tile_index = _lower_layer[context][col] %
-// 						(tileset_index * 256);
-// 				if (tile_index == -1) {
-// 					ll_vect.push_back(0);
-// 					ll_vect.push_back(0);
-// 					ll_vect.push_back(0);
-// 					ll_vect.push_back(0);
-// 				}
-// 				else {
-// 					missing_tile = false;
-// 					ll_vect = tilesets[tileset_index]->walkability[tile_index];
-// 				}
-//
-// 				// Get walkability for middle layer tile.
-// 				tileset_index = _middle_layer[context][col] / 256;
-// 				if (tileset_index == 0)
-// 					tile_index = _middle_layer[context][col];
-// 				else  // Don't divide by 0
-// 					tile_index = _middle_layer[context][col] %
-// 						(tileset_index * 256);
-// 				if (tile_index == -1) {
-// 					ml_vect.push_back(0);
-// 					ml_vect.push_back(0);
-// 					ml_vect.push_back(0);
-// 					ml_vect.push_back(0);
-// 				}
-// 				else {
-// 					missing_tile = false;
-// 					ml_vect = tilesets[tileset_index]->walkability[tile_index];
-// 				}
-//
-// 				// Get walkability for upper layer tile.
-// 				tileset_index = _upper_layer[context][col] / 256;
-// 				if (tileset_index == 0)
-// 					tile_index = _upper_layer[context][col];
-// 				else  // Don't divide by 0
-// 					tile_index = _upper_layer[context][col] %
-// 						(tileset_index * 256);
-// 				if (tile_index == -1) {
-// 					ul_vect.push_back(0);
-// 					ul_vect.push_back(0);
-// 					ul_vect.push_back(0);
-// 					ul_vect.push_back(0);
-// 				}
-// 				else {
-// 					missing_tile = false;
-// 					ul_vect = tilesets[tileset_index]->walkability[tile_index];
-// 				}
-//
-// 				if (missing_tile == true) {
-// 					// NW corner
-// 					map_row_north[col % _length * 2]     |= 1 << context;
-// 					// NE corner
-// 					map_row_north[col % _length * 2 + 1] |= 1 << context;
-// 					// SW corner
-// 					map_row_south[col % _length * 2]     |= 1 << context;
-// 					// SE corner
-// 					map_row_south[col % _length * 2 + 1] |= 1 << context;
-// 				}
-// 				else {
-// 					// NW corner
-// 					map_row_north[col % _length * 2]     |=
-// 						((ll_vect[0] | ml_vect[0] | ul_vect[0]) << context);
-// 					// NE corner
-// 					map_row_north[col % _length * 2 + 1] |=
-// 						((ll_vect[1] | ml_vect[1] | ul_vect[1]) << context);
-// 					// SW corner
-// 					map_row_south[col % _length * 2]     |=
-// 						((ll_vect[2] | ml_vect[2] | ul_vect[2]) << context);
-// 					// SE corner
-// 					map_row_south[col % _length * 2 + 1] |=
-// 						((ll_vect[3] | ml_vect[3] | ul_vect[3]) << context);
-// 				} // a real tile exists at current location
-//
-// 				ll_vect.clear();
-// 				ml_vect.clear();
-// 				ul_vect.clear();
-// 			} // iterate through the columns of the layers
-// 		} // iterate through each context
-//
-// 		write_data.WriteIntVector(row*2,   map_row_north);
-// 		write_data.WriteIntVector(row*2+1, map_row_south);
-// 		map_row_north.assign(_length*2, 0);
-// 		map_row_south.assign(_length*2, 0);
-// 	} // iterate through the rows of the layers
-// 	write_data.EndTable();
-// 	write_data.InsertNewLine();
-} // void MapData::_ComputeCollisionData(std::vector<std::vector<uint32> >& data)
+	// Holds the indexes of only the tile layers that have their collision data enabled
+	vector<uint32> collision_layers;
+	for (uint32 i = 0; i < _tile_layer_properties.size(); ++i) {
+		if (_tile_layer_properties[i].IsCollisionEnabled() == true)
+			collision_layers.push_back(i);
+	}
+
+	// The context being processed
+	TileContext* context = NULL;
+	// A bit-mask used to put the collision data into the proper bit based on the context's ID
+	uint32 context_mask = 0;
+
+	// The value of the current tile being processed
+	int32 tile = 0;
+	// The indexes to the proper tileset and that tileset's collision data for the tile being processed
+	uint32 tileset_index = 0;
+	uint32 tileset_collision_index = 0;
+
+	// Holds the indexes to the _collision_data for each of the four collision quadrants of a single tile
+	uint32 north_index = 0;
+	uint32 south_index = 0;
+	uint32 west_index = 0;
+	uint32 east_index = 0;
+	for (uint32 c = 0; c < _tile_context_count; ++c) {
+		// This mask is used to set the appropriate bit for this context
+		context_mask = 0x00000001 << c;
+		context = _all_tile_contexts[c];
+
+		// Iterate through each tile in the map and extract the collision data from each
+		for (uint32 y = 0; y < _map_height; ++y) {
+			north_index = y * 2;
+			south_index = north_index + 1;
+			for (uint32 x = 0; x < _map_length; ++x) {
+				west_index = x * 2;
+				east_index = west_index + 1;
+				for (uint32 l = 0; l < collision_layers.size(); ++l) {
+					tile = context->GetTileLayer(collision_layers[l])->GetTile(x, y);
+					// TODO: if this tile comes from an inherited context, do we want to include the collision data from that inherited tile?
+					// Or do we want to leave out all collision information entirely, as we do here currently?
+					if (tile < 0) {
+						continue;
+					}
+					// Determine the tileset that this tile belongs to and the location of the tile within that set
+					tileset_index = tile % TILESET_NUM_TILES;
+					tile = tile / TILESET_NUM_TILES;
+					tileset_collision_index = tile * TILE_NUM_QUADRANTS;
+
+					if (_tilesets[tileset_index]->GetQuadrantCollision(tileset_collision_index) != 0)
+						_collision_data[north_index][west_index] |= context_mask;
+					if (_tilesets[tileset_index]->GetQuadrantCollision(tileset_collision_index + 1) != 0)
+						_collision_data[north_index][east_index] |= context_mask;
+					if (_tilesets[tileset_index]->GetQuadrantCollision(tileset_collision_index + 2) != 0)
+						_collision_data[south_index][west_index] |= context_mask;
+					if (_tilesets[tileset_index]->GetQuadrantCollision(tileset_collision_index + 3) != 0)
+						_collision_data[south_index][east_index] |= context_mask;
+				}
+			}
+		}
+	}
+} // void MapData::_ComputeCollisionData()
 
 } // namespace hoa_editor

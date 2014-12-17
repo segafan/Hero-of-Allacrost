@@ -187,13 +187,14 @@ public:
 	/** \name Table Write Functions
 	*** \brief These functions write the beginning and ends of Lua tables
 	*** \param key The name of the table to write.
+	*** \param write_declaration If true (default value), will write the table declaration in the Lua file (e.g. "my_table = {}")
 	*** \note If you begin a new table and then begin another when you haven't ended the first one, the
 	*** new table will become a key to the first. A table will only become global when there are no other
 	*** write tables open.
 	**/
 	//@{
-	void BeginTable(const std::string &key);
-	void BeginTable(int32 key);
+	void BeginTable(const std::string &key, bool write_declaration = true);
+	void BeginTable(int32 key, bool write_declaration = true);
 	void EndTable();
 	//@}
 
