@@ -588,13 +588,12 @@ void Editor::_FileOpen() {
 		_map_view = NULL;
 	}
 
-
-	for (uint32 i = 0; i < static_cast<uint32>(_tileset_tabs->count()); ++i) {
-		delete _tileset_tabs->widget(i);
+	if (_tileset_tabs != NULL) {
+		for (uint32 i = 0; i < static_cast<uint32>(_tileset_tabs->count()); ++i) {
+			delete _tileset_tabs->widget(i);
+		}
+		_tileset_tabs->clear();
 	}
-	_tileset_tabs->clear();
-
-	// TODO: delete context view data
 
 	// ---------- 3) Load the map data and setup the tileset tabs
 	if (_map_data.LoadData(filename) == false) {
@@ -602,6 +601,8 @@ void Editor::_FileOpen() {
 		return;
 	}
 
+	if (_map_view)
+		delete _map_view;
 	_map_view = new MapView(_horizontal_splitter, &_map_data);
 	_SetupMainView();
 
@@ -610,12 +611,21 @@ void Editor::_FileOpen() {
 	for (uint32 i = 0; i < tilesets.size(); ++i) {
 		_tileset_tabs->addTab(new TilesetTable(tilesets[i]), tileset_names[i]);
 	}
-	// _UpdateLayersView();
 
-	// TODO: recreate the context view data here
+	// ---------- Set the sizes of the splitters (for an initial window size of 1000x800)
+    QList<int> sizes;
+    sizes << 460 << 540;
+    _horizontal_splitter->setSizes(sizes);
 
-	_horizontal_splitter->addWidget(_map_view->GetGraphicsView());
-	_horizontal_splitter->show();
+    sizes.clear();
+    sizes << 80 << 80 << 640;
+    _right_vertical_splitter->setSizes(sizes);
+
+    _horizontal_splitter->show();
+	_right_vertical_splitter->show();
+
+	_map_view->SetGridVisible(false);
+	_map_view->SetSelectionVisible(false);
 
 	_toggle_select_action->setChecked(false);
 	_toggle_grid_action->setChecked(false);
@@ -626,6 +636,7 @@ void Editor::_FileOpen() {
 	// Set default edit mode
 	_map_view->SetEditMode(PAINT_TILE);
 
+	_map_view->DrawMap();
 	_undo_stack->setClean();
 	statusBar()->showMessage(QString("Opened map \'%1\'").arg(_map_data.GetMapFilename()), 5000);
 } // void Editor::_FileOpen()

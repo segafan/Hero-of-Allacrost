@@ -143,10 +143,49 @@ bool MapData::LoadData(QString filename) {
  	uint32 number_tilesets = data_file.ReadUInt("number_tilesets");
 	_tile_layer_count = data_file.ReadUInt("number_tile_layers");
 	_tile_context_count = data_file.ReadUInt("number_map_contexts");
+	_empty_tile_layer._ResizeLayer(_map_length, _map_height);
+	_empty_tile_layer.FillLayer(NO_TILE);
 
-	// ---------- (3): Construct the tileset, tile layers, and tile context objects
+	if (_map_length < MINIMUM_MAP_LENGTH) {
+		_error_message = QString("Error when loading map file. Map was smaller (%1) than the minimum length.").arg(_map_length);
+		data_file.CloseTable();
+		data_file.CloseFile();
+		DestroyData();
+		return false;
+	}
+	if (_map_height < MINIMUM_MAP_HEIGHT) {
+		_error_message = QString("Error when loading map file. Map was smaller (%1) than the minimum height.").arg(_map_height);
+		data_file.CloseTable();
+		data_file.CloseFile();
+		DestroyData();
+		return false;
+	}
+	if (_tile_layer_count == 0) {
+		_error_message = QString("Error when loading map file. Map did not have any tile layers.");
+		data_file.CloseTable();
+		data_file.CloseFile();
+		DestroyData();
+		return false;
+	}
+	if (_tile_context_count == 0) {
+		_error_message = QString("Error when loading map file. Map did not have any contexts.");
+		data_file.CloseTable();
+		data_file.CloseFile();
+		DestroyData();
+		return false;
+	}
+
+	// ---------- (3): Construct each tileset object for the map
 	vector<string> tileset_filenames;
 	data_file.ReadStringVector("tileset_filenames", tileset_filenames);
+	if (tileset_filenames.empty() == true) {
+		_error_message = QString("Error when loading map file. Map did use any tile contexts.");
+		data_file.CloseTable();
+		data_file.CloseFile();
+		DestroyData();
+		return false;
+	}
+
 	for (uint32 i = 0; i < number_tilesets; ++i) {
 		Tileset* tileset = new Tileset();
 		QString tileset_qname = QString::fromStdString(tileset_filenames[i].c_str());
@@ -158,39 +197,86 @@ bool MapData::LoadData(QString filename) {
 		AddTileset(tileset);
 	}
 
+	// ---------- (4): Read in the properties of tile layers and tile contexts
 	vector<string> tile_layer_names;
 	vector<bool> tile_layer_collision_enabled;
 	data_file.ReadStringVector("tile_layer_names", tile_layer_names);
 	data_file.ReadBoolVector("tile_layer_collision_enabled", tile_layer_collision_enabled);
-
-	// TODO: construct layers
 
 	vector<string> tile_context_names;
 	vector<int32> tile_context_inheritance;
 	data_file.ReadStringVector("map_context_names", tile_context_names);
 	data_file.ReadIntVector("map_context_inheritance", tile_context_inheritance);
 
-	// TODO: construct tile contexts
+	// ---------- (5): Construct each tile context and layer and initialize it with empty data
+	for (uint32 i = 0; i < _tile_layer_count; ++i) {
+		_tile_layer_properties.push_back(TileLayerProperties(QString::fromStdString(tile_layer_names[i]), true, tile_layer_collision_enabled[i]));
+	}
 
-	// ---------- (4): Read collision grid data
+	for (uint32 i = 0; i < _tile_context_count; ++i) {
+		TileContext* new_context = new TileContext(i + 1, QString::fromStdString(tile_context_names[i]));
+		if (tile_context_inheritance[i] != NO_CONTEXT) {
+			new_context->_SetInheritingContext(tile_context_inheritance[i]);
+		}
+		for (uint32 j = 0; j < _tile_layer_count; ++j) {
+			new_context->_AddTileLayer(_empty_tile_layer);
+		}
 
-	// TODO: Currently collision data is only computed and written when the map file is saved. In the future,
-	// the collision data should always be available and optionally visible on the map view.
+		_all_tile_contexts[i] = new_context;
+	}
 
-	// ---------- (5): Read the tile value for each layer and each context
+	_selected_tile_context = _all_tile_contexts[0];
+	_selected_tile_layer = _selected_tile_context->GetTileLayer(0);
 
+	// ---------- (6): Read in the collision grid data
+	_collision_data.resize(_map_height * 2);
+	for (uint32 y = 0; y < _map_height * 2; ++y) {
+		_collision_data[y].reserve(_map_length * 2);
+	}
+
+	data_file.OpenTable("collision_grid");
+	for (uint32 y = 0; y < _map_height * 2; ++y) {
+		data_file.ReadUIntVector(y, _collision_data[y]);
+	}
+	data_file.CloseTable();
+
+	// ---------- (7): Read the map tile data into the appropriate layers of each tile context
+	vector<int32> tile_data; // Container used to read in all the data for a tile corresponding to one X, Y coordinate
+	tile_data.reserve(_tile_context_count * _tile_layer_count);
+
+	vector<vector<std::vector<int32> >* > layer_tiles; // Holds pointers to the tile vectors within each context and layer
+	for (uint32 c = 0; c < _tile_context_count; ++c) {
+		for (uint32 l = 0; l < _tile_layer_count; ++l) {
+			layer_tiles.push_back(&_all_tile_contexts[c]->GetTileLayer(l)->GetTiles());
+		}
+	}
+
+	PRINT_DEBUG << "About to open map_tiles table. Map size: " << _map_length << ", " << _map_height << endl;
+	data_file.OpenTable("map_tiles");
+	for (uint32 y = 0; y < _map_height; ++y) {
+		data_file.OpenTable(y);
+		for (uint32 x = 0; x < _map_length; ++x) {
+			tile_data.clear();
+			data_file.ReadIntVector(x, tile_data);
+			for (uint32 t = 0; t < tile_data.size(); ++t) {
+				(*layer_tiles[t])[y][x] = tile_data[t];
+			}
+		}
+		data_file.CloseTable();
+	}
+	data_file.CloseTable();
 
 	if (data_file.IsErrorDetected()) {
-		_error_message = QString("Data read failure occurred for global map variables. Error messages:\n") + QString(data_file.GetErrorMessages().c_str());
+		_error_message = QString("One or more errors were detected when reading in the map file:\n") + QString::fromStdString(data_file.GetErrorMessages());
+		data_file.CloseTable();
+		data_file.CloseFile();
+		_map_modified = false;
 		return false;
 	}
 
-	// Create selection layer
-	// TODO: resize select layer here
-
 	data_file.CloseTable();
 	data_file.CloseFile();
-
+	_map_modified = false;
 	return true;
 } // bool MapData::LoadData(QString filename)
 
@@ -275,7 +361,10 @@ bool MapData::SaveData(QString filename) {
 	vector<int32> tiles(_tile_context_count * _tile_layer_count, NO_TILE);
 	data_file.BeginTable("map_tiles");
 	for (uint32 y = 0; y < _map_height; ++y) {
-		data_file.BeginTable(y, false);
+		data_file.DeclareTable(y);
+	}
+	for (uint32 y = 0; y < _map_height; ++y) {
+		data_file.OpenTable(y);
 		for (uint32 x = 0; x < _map_length; ++x) {
 			for (uint32 c = 0; c < _tile_context_count; ++c) {
 				for (uint32 l = 0; l < _tile_layer_count; ++l) {
@@ -290,8 +379,9 @@ bool MapData::SaveData(QString filename) {
 	data_file.InsertNewLine();
 
 	if (data_file.IsErrorDetected()) {
-		_error_message = "One or more errors occurred when writing map file. Error messages:\n" + QString(data_file.GetErrorMessages().c_str());
+		_error_message = "One or more errors occurred when writing map file:\n" + QString::fromStdString(data_file.GetErrorMessages());
 		data_file.CloseFile();
+		_map_modified = false;
 		return false;
 	}
 
