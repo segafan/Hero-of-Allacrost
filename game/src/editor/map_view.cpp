@@ -230,10 +230,11 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 		}
 	}
 
-	// Display the mouse position coordinates and the tile that the position it corresponds to
-	QString position = QString("Position [%1,  %2]").arg(static_cast<float>(mouse_x * 2 / TILE_LENGTH), 0, 'f', 2)
-		.arg(static_cast<float>(mouse_y * 2 / TILE_HEIGHT), 0, 'f', 2);
-	position.append(QString(" - Tile [%1,  %2]").arg(tile_x).arg(tile_y));
+	// Display the mouse position coordinates and the tile that the position corresponds to.
+	// Note that the position coordinates are in units of the collision grid, not the tile grid.
+	QString position = QString("Tile: [%1,  %2]").arg(tile_x).arg(tile_y);
+	position.append(QString(" -- Position: [%1,  %2]").arg(event->scenePos().x() * 2 / TILE_LENGTH, 0, 'f', 2)
+		.arg(event->scenePos().y() * 2 / TILE_HEIGHT, 0, 'f', 2));
 	editor->statusBar()->showMessage(position);
 } // void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 

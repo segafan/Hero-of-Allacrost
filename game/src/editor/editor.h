@@ -39,7 +39,7 @@
 #include <QUndoCommand>
 
 #include "editor_utils.h"
-#include "dialog_boxes.h"
+#include "dialogs.h"
 #include "map_data.h"
 #include "map_view.h"
 #include "tile_layer.h"
@@ -68,11 +68,6 @@ namespace hoa_editor {
 class Editor : public QMainWindow {
 	Q_OBJECT // Macro needed to use QT's slots and signals
 
-	// Needed for tile editing and accessing the map properties.
-// 	friend class MapPropertiesDialog;
-// 	friend class ContextPropertiesDialog;
-// 	friend class LayerCommand;
-
 public:
 	Editor();
 
@@ -86,7 +81,7 @@ public:
 
 	//! \brief Used to update the map view visuals when map data has been modified
 	void UpdateMapView()
-		{ if (_map_view != NULL) _map_view->DrawMap(); }
+		{ _map_view->DrawMap(); }
 
 protected:
 	/** \brief Handles close and/or quit events
@@ -185,9 +180,6 @@ private:
 	//! \brief Helper function to the class constructor which creates the toolbars
 	void _CreateToolbars();
 
-	//! \brief Helper function to _FileNew() and _FileOpen() that sets up the user interface components
-	void _SetupMainView();
-
 	/** \brief Called whenever an operation occurs that could discard unsaved map data
 	*** \return False if the user cancelled the operation that would cause the data to be discarded
 	***
@@ -262,11 +254,6 @@ private slots:
 	void _HelpAbout();
 	void _HelpAboutQt();
 	//@}
-
-    /** \brief Switches to the new map layer using the Item selected
-	*** \param item A pointer to the widget corresponding to the selected layer
-	**/
-    void _UpdateSelectedLayer(QTreeWidgetItem* item);
 }; // class Editor : public QMainWindow
 
 

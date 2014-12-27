@@ -8,12 +8,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /** ***************************************************************************
-*** \file    dialog_boxes.cpp
+*** \file    dialogs.cpp
 *** \author  Philip Vorsilak, gorzuate@allacrost.org
-*** \brief   Source file for all of the editor's dialog boxes.
+*** \brief   Source file for all of the editor's dialog windows
 *** **************************************************************************/
 
-#include "dialog_boxes.h"
+#include "dialogs.h"
 
 namespace hoa_editor {
 
@@ -134,122 +134,6 @@ void MapPropertiesDialog::_EnableOKButton() {
 
 	// If this point is reached, no tilesets are checked.
 	_ok_pbut->setEnabled(false);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// LayerDialog class
-///////////////////////////////////////////////////////////////////////////////
-
-LayerDialog::LayerDialog(QWidget* parent, const QString& name)
-    : QDialog(parent)
-{
-	setWindowTitle("Layer Properties");
-
-	// Set up the push buttons
-	_cancel_pbut = new QPushButton("Cancel", this);
-	_ok_pbut = new QPushButton("OK", this);
-	_ok_pbut->setDefault(true);
-	connect(_ok_pbut, SIGNAL(released()), this, SLOT(accept()));
-	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
-
-	_name_label = new QLabel("Layer name: ", this);
-	_name_edit = new QLineEdit(this);
-	_name_label->setBuddy(_name_edit);
-
-	_type_label = new QLabel("Type: ", this);
-	_type_cbox = new QComboBox(this);
-	_type_label->setBuddy(_type_cbox);
-
-	// Add the possible layer types
-	_type_cbox->addItem("Ground");
-	_type_cbox->addItem("Sky");
-
-	// Add all of the aforementioned widgets into a nice-looking grid layout
-	_dialog_layout = new QGridLayout(this);
-	_dialog_layout->addWidget(_name_label,   0, 0);
-	_dialog_layout->addWidget(_name_edit,    1, 0);
-	_dialog_layout->addWidget(_type_label,   0, 1);
-	_dialog_layout->addWidget(_type_cbox,    1, 1);
-	_dialog_layout->addWidget(_cancel_pbut,  2, 0);
-	_dialog_layout->addWidget(_ok_pbut,      2, 1);
-} // LayerDialog::LayerDialog(QWidget* parent, const QString& name)
-
-
-
-LayerDialog::~LayerDialog() {
-	delete _cancel_pbut;
-	delete _ok_pbut;
-	delete _name_label;
-	delete _type_label;
-	delete _name_edit;
-	delete _type_cbox;
-	delete _dialog_layout;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// ContextPropertiesDialog class
-////////////////////////////////////////////////////////////////////////////////
-
-ContextPropertiesDialog::ContextPropertiesDialog(QWidget* parent, const QString& name) :
-	QDialog(parent, (const char*)name)
-{
-	setWindowTitle("Context Properties");
-	_name_label = new QLabel("Context name", this);
-	_name_ledit = new QLineEdit(this);
-	connect(_name_ledit, SIGNAL(textEdited(const QString&)), this, SLOT(_EnableOKButton()));
-
-	// Set up the cancel and okay push buttons
-	_cancel_pbut = new QPushButton("Cancel", this);
-	_ok_pbut = new QPushButton("OK", this);
-	_cancel_pbut->setDefault(true);
-	// At construction nothing has been entered so disable the ok button
-	_ok_pbut->setEnabled(false);
-	connect(_ok_pbut, SIGNAL(released()), this, SLOT(accept()));
-	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
-
-	// Set up the list of inheritable contexts
-	_context_tree = new QTreeWidget(this);
-	_context_tree->setColumnCount(1);
-	_context_tree->setHeaderLabels(QStringList("Inherit from context:"));
-	QList<QTreeWidgetItem*> contexts;
-
-// 	// Get a reference to the Editor
-// 	Editor* editor = static_cast<Editor*>(parent);
-
-	// Loop through all files that are present in the tileset directory
-	QStringList context_names; // TODO: = editor->_ed_scrollview->_map->context_names;
-	for (QStringList::Iterator qit = context_names.begin(); qit != context_names.end(); ++qit)
-		contexts.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(*qit)));
-	_context_tree->insertTopLevelItems(0, contexts);
-
-	// Add all of the aforementioned widgets into a nice-looking grid layout
-	_dia_layout = new QGridLayout(this);
-	_dia_layout->addWidget(_name_label,   0, 0);
-	_dia_layout->addWidget(_name_ledit,   0, 1);
-	_dia_layout->addWidget(_context_tree, 1, 1, 5, -1);
-	_dia_layout->addWidget(_cancel_pbut,  6, 0);
-	_dia_layout->addWidget(_ok_pbut,      6, 1);
-} // ContextPropertiesDialog constructor
-
-
-
-ContextPropertiesDialog::~ContextPropertiesDialog() {
-	delete _name_label;
-	delete _name_ledit;
-	delete _cancel_pbut;
-	delete _ok_pbut;
-	delete _context_tree;
-	delete _dia_layout;
-}
-
-
-
-void ContextPropertiesDialog::_EnableOKButton() {
-	// Disable the ok button if the line edit is empty. The default inheritable context is the base context.
-	if (_name_ledit->text() == "")
-		_ok_pbut->setEnabled(false);
-	else
-		_ok_pbut->setEnabled(true);
 }
 
 } // namespace hoa_editor

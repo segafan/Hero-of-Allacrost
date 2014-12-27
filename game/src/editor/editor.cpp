@@ -74,7 +74,7 @@ Editor::Editor() :
 	_about_action(NULL),
 	_about_qt_action(NULL)
 {
-	// Create and initialize singleton objects that the editor code uses
+	// Create and initialize the script engine that the editor code uses
 	ScriptManager = ScriptEngine::SingletonCreate();
 	ScriptManager->SingletonInitialize();
 
@@ -88,13 +88,40 @@ Editor::Editor() :
 	connect(_undo_stack, SIGNAL(canRedoChanged(bool)), _redo_action, SLOT(setEnabled(bool)));
 	connect(_undo_stack, SIGNAL(canUndoChanged(bool)), _undo_action, SLOT(setEnabled(bool)));
 
-	// Created the central widget and widget layout with the QSplitter objects
+	// Create and size each widget that forms the main window
+	resize(1200, 800);
+    QList<int> splitter_size;
+
 	_horizontal_splitter = new QSplitter(this);
 	_horizontal_splitter->setOrientation(Qt::Horizontal);
+    splitter_size << 660 << 540;
+    _horizontal_splitter->setSizes(splitter_size);
+	_horizontal_splitter->show();
+	setCentralWidget(_horizontal_splitter);
+
 	_right_vertical_splitter = new QSplitter(_horizontal_splitter);
 	_right_vertical_splitter->setOrientation(Qt::Vertical);
-	setCentralWidget(_horizontal_splitter);
-	resize(1000, 800);
+    splitter_size.clear();
+    splitter_size << 80 << 80 << 640;
+    _right_vertical_splitter->setSizes(splitter_size);
+	_right_vertical_splitter->show();
+
+    _map_view = new MapView(_horizontal_splitter, &_map_data);
+    _layer_view = new LayerView(&_map_data);
+    _context_view = new ContextView(&_map_data);
+    _tileset_tabs = new QTabWidget();
+    _tileset_tabs->setTabPosition(QTabWidget::South);
+
+    // Setup widgets on the left side of the screen
+    _horizontal_splitter->addWidget(_map_view->GetGraphicsView());
+    _horizontal_splitter->addWidget(_right_vertical_splitter);
+    _right_vertical_splitter->addWidget(_layer_view);
+	_right_vertical_splitter->addWidget(_context_view);
+    _right_vertical_splitter->addWidget(_tileset_tabs);
+
+	_map_view->DrawMap();
+	_layer_view->RefreshView();
+	_context_view->RefreshView();
 
 	setWindowIcon(QIcon("img/logos/program_icon.ico"));
 }
@@ -326,42 +353,6 @@ void Editor::_CreateToolbars() {
 
 
 
-void Editor::_SetupMainView() {
-    // Can't be initialized if there is no map widget ready
-    if (_map_view == NULL)
-        return;
-
-	// Create the tileset selection tab widget
-    if (_tileset_tabs != NULL)
-        delete _tileset_tabs;
-    _tileset_tabs = new QTabWidget();
-    _tileset_tabs->setTabPosition(QTabWidget::South);
-
-	// Create the tile layer selection tree widget
-    if (_layer_view != NULL)
-        delete _layer_view;
-    _layer_view = new LayerView(&_map_data);
-
-	if (_context_view != NULL)
-        delete _context_view;
-    _context_view = new ContextView(&_map_data);
-
-    // Setup widgets on the left side of the screen
-    _horizontal_splitter->addWidget(_map_view->GetGraphicsView());
-
-    // Setup widgets on the right side of the screen
-    _right_vertical_splitter->addWidget(_layer_view);
-	_right_vertical_splitter->addWidget(_context_view);
-    _right_vertical_splitter->addWidget(_tileset_tabs);
-
-    _horizontal_splitter->addWidget(_right_vertical_splitter);
-
-	_layer_view->RefreshView();
-	_context_view->RefreshView();
-}
-
-
-
 bool Editor::_UnsavedDataPrompt() {
 	if (_map_data.IsInitialized() == false)
 		return true;
@@ -482,12 +473,6 @@ void Editor::_FileNew() {
 	_map_data.DestroyData();
 	_map_data.CreateData(new_dialog->GetLength(), new_dialog->GetHeight());
 
-	if (_map_view)
-		delete _map_view;
-	_map_view = new MapView(_horizontal_splitter, &_map_data);
-
-	_SetupMainView();
-
 	// ---------- 3) Determine the number of tilesets that will be used by the new map and create a load progress dialog
 	QTreeWidget* tilesets = new_dialog->GetTilesetTree();
 	int32 num_tileset_items = tilesets->topLevelItemCount();
@@ -514,7 +499,6 @@ void Editor::_FileNew() {
 			continue;
 		}
 
-
 		// Increment the progress dialog counter
 		load_tileset_progress->setValue(num_checked_items++);
 
@@ -535,23 +519,8 @@ void Editor::_FileNew() {
 		_tileset_tabs->addTab(tileset_table, tilesets->topLevelItem(i)->text(0));
 	}
 
-	// ---------- 5) Set the sizes of the splitters (for an initial window size of 1000x800)
-    QList<int> sizes;
-    sizes << 460 << 540;
-    _horizontal_splitter->setSizes(sizes);
-
-    sizes.clear();
-    sizes << 80 << 80 << 640;
-    _right_vertical_splitter->setSizes(sizes);
-
-    _horizontal_splitter->show();
-	_right_vertical_splitter->show();
-
 	_map_view->SetGridVisible(false);
 	_map_view->SetSelectionVisible(false);
-
-	// Enable appropriate menu actions
-	_TilesMenuSetup();
 
 	_undo_stack->setClean();
 
@@ -583,17 +552,11 @@ void Editor::_FileOpen() {
 
 	// ---------- 2) Clear out any existing map data
 	_map_data.DestroyData();
-	if (_map_view != NULL) {
-		delete _map_view;
-		_map_view = NULL;
-	}
 
-	if (_tileset_tabs != NULL) {
-		for (uint32 i = 0; i < static_cast<uint32>(_tileset_tabs->count()); ++i) {
-			delete _tileset_tabs->widget(i);
-		}
-		_tileset_tabs->clear();
+	for (uint32 i = 0; i < static_cast<uint32>(_tileset_tabs->count()); ++i) {
+		delete _tileset_tabs->widget(i);
 	}
+	_tileset_tabs->clear();
 
 	// ---------- 3) Load the map data and setup the tileset tabs
 	if (_map_data.LoadData(filename) == false) {
@@ -601,28 +564,11 @@ void Editor::_FileOpen() {
 		return;
 	}
 
-	if (_map_view)
-		delete _map_view;
-	_map_view = new MapView(_horizontal_splitter, &_map_data);
-	_SetupMainView();
-
 	vector<Tileset*> tilesets = _map_data.GetTilesets();
 	QStringList tileset_names = _map_data.GetTilesetNames();
 	for (uint32 i = 0; i < tilesets.size(); ++i) {
 		_tileset_tabs->addTab(new TilesetTable(tilesets[i]), tileset_names[i]);
 	}
-
-	// ---------- Set the sizes of the splitters (for an initial window size of 1000x800)
-    QList<int> sizes;
-    sizes << 460 << 540;
-    _horizontal_splitter->setSizes(sizes);
-
-    sizes.clear();
-    sizes << 80 << 80 << 640;
-    _right_vertical_splitter->setSizes(sizes);
-
-    _horizontal_splitter->show();
-	_right_vertical_splitter->show();
 
 	_map_view->SetGridVisible(false);
 	_map_view->SetSelectionVisible(false);
@@ -630,10 +576,6 @@ void Editor::_FileOpen() {
 	_toggle_select_action->setChecked(false);
 	_toggle_grid_action->setChecked(false);
 
-	// Enable appropriate user actions
-	_TilesMenuSetup();
-
-	// Set default edit mode
 	_map_view->SetEditMode(PAINT_TILE);
 
 	_map_view->DrawMap();
@@ -809,40 +751,23 @@ void Editor::_MapProperties() {
 
 
 void Editor::_HelpHelp() {
-	statusBar()->showMessage(tr("See http://allacrost.sourceforge.net/wiki/index.php/Code_Documentation#Map_Editor_Documentation for more details"), 10000);
+    QMessageBox::about(this, "Hero of Allacrost Map Editor -- Help",
+		"<p>In-editor documentation is not yet available. Please visit http://wiki.allacrost.org for available documentation.</p>");
 }
 
 
 
 void Editor::_HelpAbout() {
     QMessageBox::about(this, "Hero of Allacrost Map Editor -- About",
-		"<center><h1><font color=blue>Hero of Allacrost Level Editor<font></h1></center>"
-		"<center><h2><font color=blue>Copyright (c) 2004-2015<font></h2></center>"
-		"<p>A map editor created for the Hero of Allacrost project."
-		" See 'http://www.allacrost.org/' for more details</p>");
+		"<center><h2><font color=blue>Hero of Allacrost Map Editor<font></h2></center>"
+		"<center><h3><font color=blue>Copyright (c) 2004-2015<font></h3></center>"
+		"<p>A map editor created for the Hero of Allacrost project. See 'http://www.allacrost.org/' for more information</p>");
 }
 
 
 
 void Editor::_HelpAboutQt() {
-    QMessageBox::aboutQt(this, "Hero of Allacrost Map Editor -- About Qt");
-}
-
-
-
-void Editor::_UpdateSelectedLayer(QTreeWidgetItem* item) {
-	if (item == NULL)
-		return;
-
-	// Retrieve the ID of the layer that was just selected
-// 	uint32 layer_id = item->text(0).toUInt();
-
-	// TODO: set the layer_id somewhere so it can be known what layer is currently being edited
-
-	// TODO: enable layer buttons appropriately based on the layer's properties
-// 	_layer_up_button->setEnabled(_CanLayerMoveUp(item));
-// 	_layer_down_button->setEnabled(_CanLayerMoveDown(item));
-// 	_delete_layer_button->setEnabled(_CanDeleteLayer(item));
+    QMessageBox::aboutQt(this, "Hero of Allacrost Map Editor -- About QT");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

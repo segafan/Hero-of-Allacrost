@@ -325,15 +325,15 @@ BUILT_SOURCES = $(allacrost_editor_MOC)
 CLEANFILES = $(BUILT_SOURCES) $(EDITOR_BIN)
 $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 	$(MOC) -o $@ $<
-allacrost_editor_MOC = $(EDITOR_DIR)/dialog_boxes.moc.cpp \
+allacrost_editor_MOC = $(EDITOR_DIR)/dialogs.moc.cpp \
 	$(EDITOR_DIR)/editor.moc.cpp \
 	$(EDITOR_DIR)/map_view.moc.cpp \
 	$(EDITOR_DIR)/tile_context.moc.cpp \
 	$(EDITOR_DIR)/tile_layer.moc.cpp \
 	$(EDITOR_DIR)/tileset_editor.moc.cpp	
 allacrost_editor_SOURCES = \
-	$(EDITOR_DIR)/dialog_boxes.cpp \
-	$(EDITOR_DIR)/dialog_boxes.h \
+	$(EDITOR_DIR)/dialogs.cpp \
+	$(EDITOR_DIR)/dialogs.h \
 	$(EDITOR_DIR)/editor.cpp \
 	$(EDITOR_DIR)/editor.h \
 	$(EDITOR_DIR)/editor_main.cpp \
