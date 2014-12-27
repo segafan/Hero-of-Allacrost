@@ -395,39 +395,32 @@ void WriteScriptDescriptor::WriteNamespace(const string &ns)
 // Table Write Functions
 //-----------------------------------------------------------------------------
 
-void WriteScriptDescriptor::BeginTable(const string &key, bool write_declaration) {
-	if (write_declaration == true) {
-		if (_open_tables.size() == 0) {
-			_outfile << key << " = {}" << endl;
-		}
-		else {
-			_WriteTablePath();
-			_outfile << '.' << key << " = {}" << endl;
-		}
+void WriteScriptDescriptor::DeclareTable(const string &key) {
+	if (_open_tables.empty() == true) {
+		_outfile << key << " = {}" << endl;
 	}
-
-	_open_tables.push_back(key);
+	else {
+		_WriteTablePath();
+		_outfile << '.' << key << " = {}" << endl;
+	}
 }
 
 
 
-void WriteScriptDescriptor::BeginTable(int32 key, bool write_declaration) {
-	if (write_declaration == true) {
-		if (_open_tables.size() == 0)
-			_outfile << key << " = {}" << endl;
-		else {
-			_WriteTablePath();
-			_outfile << '[' << key << "] = {}" << endl;
-		}
+void WriteScriptDescriptor::DeclareTable(int32 key) {
+	if (_open_tables.empty() == true) {
+		_outfile << key << " = {}" << endl;
 	}
-
-	_open_tables.push_back(NumberToString<int32>(key));
+	else {
+		_WriteTablePath();
+		_outfile << '[' << key << "] = {}" << endl;
+	}
 }
 
 
-// This doesn't actually do any file write operations, but the user still needs to call it.
+// This doesn't actually do any file write operations, but the user still needs to call it to close opened tables
 void WriteScriptDescriptor::EndTable() {
-	if (_open_tables.empty()) {
+	if (_open_tables.empty() == true) {
 		_error_messages << "* WriteScriptDescriptor::EndTable() failed because no tables were open" << endl;
 	}
 	else {

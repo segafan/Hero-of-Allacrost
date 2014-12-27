@@ -185,16 +185,40 @@ public:
 	void WriteNamespace(const std::string &ns);
 
 	/** \name Table Write Functions
-	*** \brief These functions write the beginning and ends of Lua tables
-	*** \param key The name of the table to write.
-	*** \param write_declaration If true (default value), will write the table declaration in the Lua file (e.g. "my_table = {}")
-	*** \note If you begin a new table and then begin another when you haven't ended the first one, the
-	*** new table will become a key to the first. A table will only become global when there are no other
-	*** write tables open.
+	*** \brief These functions write the beginning and ends of Lua tables.
+	*** \param key The name of the table to write or open.
+	***
+	*** The most common usage for these functions are to make the following calls:
+	*** * BeginTable("my_table");
+	*** * (Make a number of write data calls)
+	*** * EndTable();
+	***
+	*** The DeclareTable() methods simply write a declaration for the table. For example, "my_table[1] = {}". OpenTable()
+	*** methods are used to tell the descriptor object that you are currently writing data to this table. BeginTable() is a
+	*** shorthand for calling DeclareTable() and OpenTable() together. EndTable() closes the most recent table that was opened.
+	***
+	*** \note A table will only become global when there are no other write tables open.
+	*** \note DeclareTable() declares the table as a member of the current table stack. So for example, if the tables "data" and "context" are open,
+	*** calling DeclareTable("values") will write "data.context.values = {}" to the Lua file.
+	*** \note Do not call OpenTable() and write data to it if you've never called DeclareTable(). This will cause a read error in the Lua file as
+	*** tables must be declared for them to be used.
 	**/
 	//@{
-	void BeginTable(const std::string &key, bool write_declaration = true);
-	void BeginTable(int32 key, bool write_declaration = true);
+	void DeclareTable(const std::string &key);
+	void DeclareTable(int32 key);
+
+	void OpenTable(const std::string &key)
+		{ _open_tables.push_back(key); }
+
+	void OpenTable(int32 key)
+		{ _open_tables.push_back(hoa_utils::NumberToString<int32>(key)); }
+
+	void BeginTable(const std::string &key)
+		{ DeclareTable(key); OpenTable(key); }
+
+	void BeginTable(int32 key)
+		{ DeclareTable(key); OpenTable(key); }
+
 	void EndTable();
 	//@}
 
