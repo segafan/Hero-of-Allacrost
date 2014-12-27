@@ -135,6 +135,9 @@ bool MapData::LoadData(QString filename) {
 	_map_filename = filename;
 
 	// ---------- (2): Read the basic map data properties
+	_map_name = QString::fromStdString(data_file.ReadString("map_name"));
+	_map_designers = QString::fromStdString(data_file.ReadString("map_designers"));
+	_map_description = QString::fromStdString(data_file.ReadString("map_description"));
 	_map_length = data_file.ReadUInt("map_length");
 	_map_height = data_file.ReadUInt("map_height");
  	uint32 number_tilesets = data_file.ReadUInt("number_tilesets");
@@ -142,11 +145,11 @@ bool MapData::LoadData(QString filename) {
 	_tile_context_count = data_file.ReadUInt("number_map_contexts");
 
 	// ---------- (3): Construct the tileset, tile layers, and tile context objects
-	vector<string> tileset_names;
-	data_file.ReadStringVector("tileset_names", tileset_names);
+	vector<string> tileset_filenames;
+	data_file.ReadStringVector("tileset_filenames", tileset_filenames);
 	for (uint32 i = 0; i < number_tilesets; ++i) {
 		Tileset* tileset = new Tileset();
-		QString tileset_qname = QString(tileset_names[i].c_str());
+		QString tileset_qname = QString::fromStdString(tileset_filenames[i].c_str());
 		if (tileset->Load(tileset_qname) == false) {
 			_error_message = QString("Failed to load tileset file ") + tileset_qname + QString(" during loading of map file ") + _map_filename;
 			delete tileset;
@@ -198,7 +201,7 @@ bool MapData::SaveData(QString filename) {
 		return false;
 	}
 
-	// ---------- (1): Open the file and write the tablespace header and map header comment
+	// ---------- (1): Open the file and write the tablespace header and map header information
 	WriteScriptDescriptor data_file;
 	if (data_file.OpenFile(filename.toStdString()) == false) {
 		_error_message = "Could not open file for writing: " + filename;
@@ -208,8 +211,6 @@ bool MapData::SaveData(QString filename) {
 	data_file.WriteNamespace(DetermineLuaFileTablespaceName(filename.toStdString()));
 	data_file.InsertNewLine();
 
-	// TODO: add this information at a later time when the user has the ability to add this
-	// data to the map properties in the editor.
 	data_file.WriteString("map_name", _map_name.toStdString());
 	data_file.WriteString("map_designers", _map_designers.toStdString());
 	data_file.WriteString("map_description", _map_description.toStdString());
@@ -224,9 +225,9 @@ bool MapData::SaveData(QString filename) {
 	data_file.InsertNewLine();
 
 	// ---------- (3): Write properties of tilesets, tile layers, and map contexts
-	data_file.BeginTable("tileset_names");
+	data_file.BeginTable("tileset_filenames");
 	for (uint32 i = 0; i < _tilesets.size(); ++i) {
-		data_file.WriteString((i+1), _tileset_names[i].toStdString());
+		data_file.WriteString((i+1), _tilesets[i]->GetTilesetDefinitionFilename().toStdString());
 	}
 	data_file.EndTable();
 	data_file.InsertNewLine();
@@ -278,11 +279,10 @@ bool MapData::SaveData(QString filename) {
 		for (uint32 x = 0; x < _map_length; ++x) {
 			for (uint32 c = 0; c < _tile_context_count; ++c) {
 				for (uint32 l = 0; l < _tile_layer_count; ++l) {
-					tiles.push_back(_all_tile_contexts[c]->GetTileLayer(l)->GetTile(x, y));
+					tiles[(c * _tile_layer_count) + l] = _all_tile_contexts[c]->GetTileLayer(l)->GetTile(x, y);
 				}
 			}
 			data_file.WriteIntVector(x, tiles);
-			tiles.clear();
 		}
 		data_file.EndTable();
 	}
@@ -296,6 +296,7 @@ bool MapData::SaveData(QString filename) {
 	}
 
 	data_file.CloseFile();
+	_map_modified = false;
 	return true;
 } // bool MapData::SaveData(QString filename)
 
@@ -921,9 +922,10 @@ void MapData::_ComputeCollisionData() {
 					if (tile < 0) {
 						continue;
 					}
+
 					// Determine the tileset that this tile belongs to and the location of the tile within that set
-					tileset_index = tile % TILESET_NUM_TILES;
-					tile = tile / TILESET_NUM_TILES;
+					tileset_index = tile / TILESET_NUM_TILES;
+					tile = tile % TILESET_NUM_TILES;
 					tileset_collision_index = tile * TILE_NUM_QUADRANTS;
 
 					if (_tilesets[tileset_index]->GetQuadrantCollision(tileset_collision_index) != 0)
