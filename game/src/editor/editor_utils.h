@@ -28,8 +28,11 @@ extern bool EDITOR_DEBUG;
 //! \brief The value used to indicate that no tile is placed at a particular location
 const int32 NO_TILE = -1;
 
+//! \brief The value used to indicate that the tile at this location is inherited from another context
+const int32 INHERITED_TILE = -2;
+
 //! \brief Used to indicate a tile that has been selected as part of a multi-select
-const int32 TILE_SELECTED = -2;
+const int32 TILE_SELECTED = -10;
 
 //! \brief Used to indicate a non-existing or invalid tile context ID
 const int32 NO_CONTEXT = -1;
@@ -75,13 +78,13 @@ const uint32 TILE_QUADRANT_HEIGHT = TILE_HEIGHT / 2;
 //! \brief The number of collision quadrants in a single tile
 const uint32 TILE_NUM_QUADRANTS = 4;
 
-//! \brief Various modes for tile editing
-enum TILE_EDIT_MODE {
-	INVALID_TILE   = -1,
-	PAINT_TILE     =  0,
-	MOVE_TILE      =  1,
-	DELETE_TILE    =  2,
-	TOTAL_TILE     =  3
+//! \brief Various modes for map tile editing
+enum EDIT_MODE {
+	INVALID_MODE   = -1,
+	PAINT_MODE     =  0,
+	MOVE_MODE      =  1,
+	ERASE_MODE     =  2,
+	TOTAL_MODE     =  3
 };
 
 //! \brief Represents different types of transition patterns for autotileable tiles.

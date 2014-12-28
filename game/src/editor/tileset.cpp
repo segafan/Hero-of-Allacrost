@@ -345,7 +345,7 @@ TilesetTable::TilesetTable() :
 	QTableWidget(TILESET_NUM_ROWS, TILESET_NUM_COLS),
 	_tileset(NULL)
 {
-	// Set up the QT table
+	// Set the table properties
 	setShowGrid(false);
 	setSelectionMode(QTableWidget::ContiguousSelection);
 	setEditTriggers(QTableWidget::NoEditTriggers);
@@ -358,6 +358,8 @@ TilesetTable::TilesetTable() :
 	verticalHeader()->setContentsMargins(0, 0, 0, 0);
 	horizontalHeader()->hide();
 	horizontalHeader()->setContentsMargins(0, 0, 0, 0);
+// 	setStyleSheet("QTableView::item { border-bottom: 1px solid white; border-right: 1px solid white; }");
+// 	setStyleSheet("QTableView::item { border: 0px; padding: 1px; }");
 
 	for (uint32 i = 0; i < TILESET_NUM_ROWS; ++i)
 		setRowHeight(i, TILE_HEIGHT);

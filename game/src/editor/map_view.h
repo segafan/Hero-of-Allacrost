@@ -61,7 +61,7 @@ public:
 	bool ToggleSelectionVisible()
 		{ _selection_visible = !_selection_visible; return _selection_visible; }
 
-	void SetEditMode(TILE_EDIT_MODE new_mode)
+	void SetEditMode(EDIT_MODE new_mode)
 		{ _tile_mode = new_mode; }
 	//@}
 
@@ -154,7 +154,7 @@ private:
 	//@}
 
 	//! \brief The current tile editing tool that is active
-	TILE_EDIT_MODE _tile_mode;
+	EDIT_MODE _tile_mode;
 
 	/** \brief A tile layer used for indicating a selected area of a tile layer
 	*** This data exists only in the editor and is not a part of the map file. It acts similar to an
@@ -187,11 +187,11 @@ private:
 	**/
 	void _PaintTile(uint32 x, uint32 y);
 
-	/** \brief Deletes the tile at the chosen location on the map
-	*** \param x The x coordinate of the tile to delete
-	*** \param y The y coordinate of the tile to delete
+	/** \brief Erases the tile at the chosen location on the map
+	*** \param x The x coordinate of the tile to erase
+	*** \param y The y coordinate of the tile to erase
 	**/
-	void _DeleteTile(int32 x, int32 y);
+	void _EraseTile(int32 x, int32 y);
 
 	//! \brief A helper function to DrawMap() that draws the tile grid over the tiles
 	void _DrawGrid();
