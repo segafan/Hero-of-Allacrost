@@ -53,12 +53,15 @@ namespace hoa_editor {
 ***
 *** This class is responsible for creating the application menus and toolbars and
 *** processing the actions when those items are selected. As the top-level widget,
-*** it is also responsible for the creation and layout of all lower-level widgets.
-*** Many of the user actions processed by this class will make calls into the
+*** it is also responsible for the creation and layout of all lower-level widgets
+*** as well as holding the active instance of the map data. Several of the actions
+*** that a user takes that are processed by this class will make calls into the
 *** appropriate sub widget to reflect the changes.
 ***
-*** \todo Add a section here listing the subwidgets that are created and how they
-*** are layed out within the application window.
+*** The MapView widget, which represents the viewble and editable area of the map,
+*** is located on the left side of the window. The right side of the window contains
+*** three widgets. From top to bottom, they are: the LayerView widget, ContextView widget,
+*** and TilesetTab widget.
 ***
 *** \todo Add save/restore state information for the QSplitter objects used by this
 *** class so that the editor remembers the size that the user last left the editor
@@ -73,22 +76,16 @@ public:
 
 	~Editor();
 
+	//! \brief Returns a pointer to the map data
 	MapData* GetMapData()
 		{ return &_map_data; }
 
 	QTabWidget* GetTilesetTabs() const
 		{ return _tileset_tabs; }
 
-	//! \brief Used to update the map view visuals when map data has been modified
+	//! \brief Used by other subwidgets to update the map view when the map data has been modified external to it
 	void UpdateMapView()
 		{ _map_view->DrawMap(); }
-
-protected:
-	/** \brief Handles close and/or quit events
-	*** \param event Pointer to a QCloseEvent object
-	**/
-	void closeEvent(QCloseEvent* event)
-		{ _FileQuit(); }
 
 private:
 	//! \brief Contains all data for the open map file and methods for manipulating that data
@@ -100,14 +97,11 @@ private:
 	//! \brief Splits the widget into two horizontal sections
 	QSplitter* _horizontal_splitter;
 
-	//! \brief Splits the right horizontal section into two vertical sections
+	//! \brief Splits the right horizontal section into three vertical sections
 	QSplitter* _right_vertical_splitter;
 
 	//! \brief The left sub-widget containing the editable map area
 	MapView* _map_view;
-
-	//! \brief Tabbed widget that contains each tileset open
-	QTabWidget* _tileset_tabs;
 
 	//! \brief Widget used to display and edit the ordered list of all tile layers
 	LayerView* _layer_view;
@@ -115,11 +109,11 @@ private:
 	//! \brief Widget used to display and edit the properties of map contexts
 	ContextView* _context_view;
 
+	//! \brief Tabbed widget that contains each tileset open
+	QTabWidget* _tileset_tabs;
+
 	//! \brief The stack that contains the undo and redo operations.
 	QUndoStack* _undo_stack;
-
-	//! \brief An error dialog for exceeding the maximum allowable number of contexts.
-	QErrorMessage* _error_max_contexts;
 
 	/** \name Application Menus
 	*** \brief Represent the various top-level menus found in the menu bar
@@ -171,6 +165,10 @@ private:
 	QAction* _about_qt_action;
 	//@}
 
+	//! \brief Handles close and quit events
+	void closeEvent(QCloseEvent* event)
+		{ _FileQuit(); }
+
 	//! \brief Helper function to the class constructor which creates actions for use by menus and toolbars
 	void _CreateActions();
 
@@ -179,6 +177,11 @@ private:
 
 	//! \brief Helper function to the class constructor which creates the toolbars
 	void _CreateToolbars();
+
+	/** \brief Sets the editor to its default state for editing mode, checkboxes, and so on
+	*** This is called whenever the application starts, a new map is created, or an existing map is loaded
+	**/
+	void _ClearEditorState();
 
 	/** \brief Called whenever an operation occurs that could discard unsaved map data
 	*** \return False if the user cancelled the operation that would cause the data to be discarded
