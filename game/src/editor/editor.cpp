@@ -15,8 +15,6 @@
 *** ***************************************************************************/
 
 #include <QGraphicsView>
-#include <QScrollBar>
-#include <QTableWidgetItem>
 
 #include "script.h"
 #include "editor.h"
@@ -38,11 +36,10 @@ Editor::Editor() :
 	_horizontal_splitter(NULL),
 	_right_vertical_splitter(NULL),
 	_map_view(NULL),
-	_tileset_tabs(NULL),
 	_layer_view(NULL),
 	_context_view(NULL),
+	_tileset_tabs(NULL),
 	_undo_stack(NULL),
-	_error_max_contexts(NULL),
 	_file_menu(NULL),
 	_view_menu(NULL),
 	_tiles_menu(NULL),
@@ -82,48 +79,43 @@ Editor::Editor() :
 	_CreateActions();
 	_CreateMenus();
 	_CreateToolbars();
-	_TilesMenuSetup();
 
 	_undo_stack = new QUndoStack();
 	connect(_undo_stack, SIGNAL(canRedoChanged(bool)), _redo_action, SLOT(setEnabled(bool)));
 	connect(_undo_stack, SIGNAL(canUndoChanged(bool)), _undo_action, SLOT(setEnabled(bool)));
 
-	// Create and size each widget that forms the main window
-	resize(1200, 800);
-    QList<int> splitter_size;
-
+	// Create each widget that forms the main window
 	_horizontal_splitter = new QSplitter(this);
 	_horizontal_splitter->setOrientation(Qt::Horizontal);
-    splitter_size << 660 << 540;
-    _horizontal_splitter->setSizes(splitter_size);
-	_horizontal_splitter->show();
 	setCentralWidget(_horizontal_splitter);
-
 	_right_vertical_splitter = new QSplitter(_horizontal_splitter);
 	_right_vertical_splitter->setOrientation(Qt::Vertical);
-    splitter_size.clear();
-    splitter_size << 80 << 80 << 640;
-    _right_vertical_splitter->setSizes(splitter_size);
-	_right_vertical_splitter->show();
 
     _map_view = new MapView(_horizontal_splitter, &_map_data);
     _layer_view = new LayerView(&_map_data);
     _context_view = new ContextView(&_map_data);
     _tileset_tabs = new QTabWidget();
-    _tileset_tabs->setTabPosition(QTabWidget::South);
+    _tileset_tabs->setTabPosition(QTabWidget::North);
 
-    // Setup widgets on the left side of the screen
     _horizontal_splitter->addWidget(_map_view->GetGraphicsView());
     _horizontal_splitter->addWidget(_right_vertical_splitter);
     _right_vertical_splitter->addWidget(_layer_view);
 	_right_vertical_splitter->addWidget(_context_view);
     _right_vertical_splitter->addWidget(_tileset_tabs);
 
-	_map_view->DrawMap();
-	_layer_view->RefreshView();
-	_context_view->RefreshView();
+	// Size the window and each widget in it appropriately
+	resize(1200, 800);
+    QList<int> splitter_size;
+    splitter_size << 660 << 540;
+    _horizontal_splitter->setSizes(splitter_size);
+	_horizontal_splitter->show();
+    splitter_size.clear();
+    splitter_size << 80 << 80 << 640;
+    _right_vertical_splitter->setSizes(splitter_size);
+	_right_vertical_splitter->show();
 
 	setWindowIcon(QIcon("img/logos/program_icon.ico"));
+	_ClearEditorState();
 }
 
 
@@ -353,23 +345,42 @@ void Editor::_CreateToolbars() {
 
 
 
-bool Editor::_UnsavedDataPrompt() {
-	if (_map_data.IsInitialized() == false)
-		return true;
+void Editor::_ClearEditorState() {
+	_map_view->SetGridVisible(false);
+	_map_view->SetSelectionVisible(false);
+	_map_view->SetEditMode(PAINT_TILE);
 
-	if (_map_data.IsMapModified() == false)
+	_toggle_select_action->setChecked(false);
+	_toggle_grid_action->setChecked(false);
+
+	_undo_stack->setClean();
+
+	// Done so that the appropriate icons on the toolbar are enabled or disabled
+	_TilesMenuSetup();
+
+	// Update the visual display of each sub-widget
+	_map_view->DrawMap();
+	_layer_view->RefreshView();
+	_context_view->RefreshView();
+}
+
+
+
+bool Editor::_UnsavedDataPrompt() {
+	if (_map_data.IsInitialized() == false || _map_data.IsMapModified() == false)
 		return true;
 
 	switch (QMessageBox::warning(this, "Unsaved File", "The document contains unsaved changes.\n"
 		"Do you want to save these changes before proceeding?", "&Save", "&Discard", "Cancel", 0, 2))
 	{
-		case 0: // Save clicked -or- Alt+S pressed -or- Enter pressed
+		case 0: // Selected Save
 			_FileSave();
 			break;
-		case 1: // Discard clicked -or- Alt+D pressed
+		case 1: // Selected Discard
 			break;
-		default: // Cancel clicked -or- Escape pressed
-			statusBar()->showMessage("Save abandoned", 5000);
+		case 2: // Selected Cancel
+		default:
+			statusBar()->showMessage("Abandoned save", 5000);
 			return false;
 	}
 
@@ -519,19 +530,13 @@ void Editor::_FileNew() {
 		_tileset_tabs->addTab(tileset_table, tilesets->topLevelItem(i)->text(0));
 	}
 
-	_map_view->SetGridVisible(false);
-	_map_view->SetSelectionVisible(false);
-
-	_undo_stack->setClean();
-
-	// Hide and delete progress bar
+	// Clean up the editor state and report success
 	load_tileset_progress->hide();
 	delete load_tileset_progress;
-
-	statusBar()->showMessage("New map created", 5000);
-
 	delete new_dialog;
-	_map_view->DrawMap();
+
+	_ClearEditorState();
+	statusBar()->showMessage("New map created", 5000);
 } // void Editor::_FileNew()
 
 
@@ -543,8 +548,7 @@ void Editor::_FileOpen() {
 	}
 
 	// ---------- 1) Attempt to open the file that the user requested
-	QString filename = QFileDialog::getOpenFileName(this, APP_NAME + " -- Open Map File",
-		"lua/data/maps", "Maps (*.lua)");
+	QString filename = QFileDialog::getOpenFileName(this, APP_NAME + " -- Open Map File", "lua/data/maps", "Maps (*.lua)");
 	if (filename.isEmpty() == true) {
 		statusBar()->showMessage("No map file was opened (empty filename)", 5000);
 		return;
@@ -552,15 +556,14 @@ void Editor::_FileOpen() {
 
 	// ---------- 2) Clear out any existing map data
 	_map_data.DestroyData();
-
 	for (uint32 i = 0; i < static_cast<uint32>(_tileset_tabs->count()); ++i) {
 		delete _tileset_tabs->widget(i);
 	}
 	_tileset_tabs->clear();
 
-	// ---------- 3) Load the map data and setup the tileset tabs
+	// ---------- 3) Load the map data and setup the TilesetTab widget with the loaded tileset data
 	if (_map_data.LoadData(filename) == false) {
-		// TODO: report error message
+		QMessageBox::critical(this, APP_NAME, "Error while opening map file '" + filename + "'. Report errors:\n" + _map_data.GetErrorMessage());
 		return;
 	}
 
@@ -570,16 +573,7 @@ void Editor::_FileOpen() {
 		_tileset_tabs->addTab(new TilesetTable(tilesets[i]), tileset_names[i]);
 	}
 
-	_map_view->SetGridVisible(false);
-	_map_view->SetSelectionVisible(false);
-
-	_toggle_select_action->setChecked(false);
-	_toggle_grid_action->setChecked(false);
-
-	_map_view->SetEditMode(PAINT_TILE);
-
-	_map_view->DrawMap();
-	_undo_stack->setClean();
+	_ClearEditorState();
 	statusBar()->showMessage(QString("Opened map \'%1\'").arg(_map_data.GetMapFilename()), 5000);
 } // void Editor::_FileOpen()
 
@@ -630,12 +624,8 @@ void Editor::_FileClose() {
 		return;
 	}
 
-	// Clear all existing map data
 	_map_data.DestroyData();
-	_undo_stack->setClean();
-
-	// TODO: delete/update view objects appropriately
-
+	_ClearEditorState();
 	setWindowTitle("Hero of Allacrost Map Editor");
 }
 

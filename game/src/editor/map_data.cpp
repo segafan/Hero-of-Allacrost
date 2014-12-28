@@ -251,7 +251,6 @@ bool MapData::LoadData(QString filename) {
 		}
 	}
 
-	PRINT_DEBUG << "About to open map_tiles table. Map size: " << _map_length << ", " << _map_height << endl;
 	data_file.OpenTable("map_tiles");
 	for (uint32 y = 0; y < _map_height; ++y) {
 		data_file.OpenTable(y);

@@ -44,6 +44,12 @@ namespace hoa_editor {
 *** example, when the user adds a new tile layer, this class will make sure that the layer is added
 *** to every tile context. When the user requests a context to be removed, the class ensures that
 *** there are no other contexts that inherit from the context being removed.
+***
+*** Many methods on this class return a boolean to indicate success or failure. Because this class is
+*** not in any way tied to the user interface, it does not generate any error messages. Instead, it stores
+*** the string of the most recent error message. The user interface code should always check for the return status
+*** of functions that can produce an error, and upon an error can call GetErrorMessage() to retrieve the error string
+*** and decide how to handle it.
 *** ***************************************************************************/
 class MapData {
 public:
