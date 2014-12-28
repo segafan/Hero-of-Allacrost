@@ -67,6 +67,10 @@ namespace hoa_editor {
 *** class so that the editor remembers the size that the user last left the editor
 *** window at. This information should be saved to a Lua file called "editor_state.lua"
 *** or something similar.
+***
+*** \todo In the File menu, add a "Recent Files >" action with a submenu below the Open action.
+*** The submenu should contain around 5 files maximum along with a "Clear Recent Files" option.
+*** Mimic the way this is done in the Tiled map editor.
 *** ***************************************************************************/
 class Editor : public QMainWindow {
 	Q_OBJECT // Macro needed to use QT's slots and signals
@@ -116,16 +120,14 @@ private:
 	QUndoStack* _undo_stack;
 
 	/** \name Application Menus
-	*** \brief Represent the various top-level menus found in the menu bar
+	*** \brief The top-level menus found in the menu bar: File, Edit, View, Tools, Help
 	**/
 	//{@
 	QMenu* _file_menu;
+	QMenu* _edit_menu;
 	QMenu* _view_menu;
-	QMenu* _tiles_menu;
-	QMenu* _map_menu;
+	QMenu* _tools_menu;
 	QMenu* _help_menu;
-	QMenu* _tileset_menu;
-	QMenu* _script_menu;
 	//@}
 
 	/** \name Application Menu Actions
@@ -133,6 +135,7 @@ private:
 	***
 	*** These are Qt's way of associating the same back-end functionality to occur whether a user
 	*** invokes a menu through the menu bar, a keyboard shortcut, a toolbar button, or other means.
+	*** They are organized in the order in which they appear in the application menus.
 	**/
 	//{@
 	QAction* _new_action;
@@ -142,40 +145,43 @@ private:
 	QAction* _close_action;
 	QAction* _quit_action;
 
-	QAction* _toggle_grid_action;
-	QAction* _coord_tile_action;
-	QAction* _coord_collision_action;
-
 	QAction* _undo_action;
 	QAction* _redo_action;
-	QAction* _layer_fill_action;
-	QAction* _layer_clear_action;
-	QAction* _toggle_select_action;
-	QAction* _mode_paint_action;
-	QAction* _mode_move_action;
-	QAction* _mode_delete_action;
-	QActionGroup* _mode_group;
-
-	QAction* _edit_tileset_action;
-
+	QAction* _cut_action;
+	QAction* _copy_action;
+	QAction* _paste_action;
+	QAction* _tileset_properties_action;
 	QAction* _map_properties_action;
+
+	QAction* _view_grid_action;
+	QAction* _view_collisions_action;
+
+	QAction* _edit_mode_paint_action;
+	QAction* _edit_mode_move_action;
+	QAction* _edit_mode_erase_action;
+	QAction* _edit_fill_action;
+	QAction* _edit_clear_action;
+	QAction* _toggle_select_action;
 
 	QAction* _help_action;
 	QAction* _about_action;
 	QAction* _about_qt_action;
 	//@}
 
+	//! \brief Used to group the various edit modes together so that only one may be active at a given time
+	QActionGroup* _edit_mode_action_group;
+
 	//! \brief Handles close and quit events
 	void closeEvent(QCloseEvent* event)
 		{ _FileQuit(); }
 
-	//! \brief Helper function to the class constructor which creates actions for use by menus and toolbars
+	//! \brief Creates actions for use by menus, toolbars, and keyboard shortcuts
 	void _CreateActions();
 
-	//! \brief Helper function to the class constructor which creates the menus
+	//! \brief Creates the main menus
 	void _CreateMenus();
 
-	//! \brief Helper function to the class constructor which creates the toolbars
+	//! \brief Creates the main toolbar
 	void _CreateToolbars();
 
 	/** \brief Sets the editor to its default state for editing mode, checkboxes, and so on
@@ -193,19 +199,18 @@ private:
 	bool _UnsavedDataPrompt();
 
 private slots:
-	/** \name Menu Toolbar Setup Slots
-	*** \brief Used to gray out items in the menus and toolbars
+	/** \name Action Setup Slots
+	*** \brief Used to enable or disable actions in the menus and toolbars based on the current state of the editor
 	**/
 	//{@
-	void _FileMenuSetup();
-	void _ViewMenuSetup();
-	void _TilesMenuSetup();
-	void _TilesetMenuSetup();
-	void _MapMenuSetup();
+	void _CheckFileActions();
+	void _CheckEditActions();
+	void _CheckViewActions();
+	void _CheckToolsActions();
 	//@}
 
-	/** \name File Menu Item Slots
-	*** \brief Process user selection for items in the File menu
+	/** \name Action Execution Slots
+	*** \brief Processes the various actions commanded by the user
 	**/
 	//{@
 	void _FileNew();
@@ -214,45 +219,23 @@ private slots:
 	void _FileSaveAs();
 	void _FileClose();
 	void _FileQuit();
-	//@}
 
-	/** \name View Menu Item Slots
-	*** \brief Process user selection for items in the View menu
-	**/
-	//{@
-	void _ViewToggleGrid();
-	//@}
+	void _CutSelection();
+	void _CopySelection();
+	void _PasteSelection();
+	void _EditTilesetProperties();
+	void _EditMapProperties();
 
-	/** \name Tiles Menu Item Slots
-	*** \brief Process user selection for items in the Tiles menu
-	**/
-	//{@
-	void _TileLayerFill();
-	void _TileLayerClear();
-	void _TileToggleSelect();
-	void _TileModePaint();
-	void _TileModeMove();
-	void _TileModeDelete();
-	//@}
+	void _ViewTileGrid();
+	void _ViewCollisionData();
 
-	/** \name Tileset Menu Item Slots
-	*** \brief Process user selection for items in the Tileset menu
-	**/
-	//{@
-	void _TilesetEdit();
-	//@}
+	void _SelectPaintMode();
+	void _SelectMoveMode();
+	void _SelectEraseMode();
+	void _FillSelection();
+	void _ClearSelection();
+	void _ToggleSelectArea();
 
-	/** \name Map Menu Item Slots
-	*** \brief Process user selection for items in the Map menu
-	**/
-	//{@
-	void _MapProperties();
-	//@}
-
-	/** \name Help Menu Item Slots
-	*** \brief Process user selection for items in the Help menu
-	**/
-	//{@
 	void _HelpHelp();
 	void _HelpAbout();
 	void _HelpAboutQt();

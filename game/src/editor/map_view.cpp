@@ -42,7 +42,7 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_move_source_tile_y(-1),
 	_selection_start_tile_x(-1),
 	_selection_start_tile_y(-1),
-	_tile_mode(PAINT_TILE),
+	_tile_mode(PAINT_MODE),
 	_select_layer(data->GetMapLength(), data->GetMapHeight())
 {
 	// Create the graphics view
@@ -124,19 +124,19 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
 	if (_selection_visible == false && event->button() == Qt::LeftButton) {
 		switch (_tile_mode) {
-			case PAINT_TILE:
+			case PAINT_MODE:
 				_PaintTile(_cursor_tile_x, _cursor_tile_y);
 				_map_data->SetMapModified(true);
 				DrawMap();
 				break;
 
-			case MOVE_TILE:
+			case MOVE_MODE:
 				_move_source_tile_x = _cursor_tile_x;
 				_move_source_tile_y = _cursor_tile_y;
 				break;
 
-			case DELETE_TILE:
-				_DeleteTile(_cursor_tile_x, _cursor_tile_y);
+			case ERASE_MODE:
+				_EraseTile(_cursor_tile_x, _cursor_tile_y);
 				_map_data->SetMapModified(true);
 				DrawMap();
 				break;
@@ -210,16 +210,16 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 
 		if (_selection_visible == false && event->buttons() == Qt::LeftButton) {
 			switch (_tile_mode) {
-				case PAINT_TILE:
+				case PAINT_MODE:
 					_PaintTile(_cursor_tile_x, _cursor_tile_y);
 					DrawMap();
 					break;
 
-				case MOVE_TILE:
+				case MOVE_MODE:
 					break;
 
-				case DELETE_TILE:
-					_DeleteTile(_cursor_tile_x, _cursor_tile_y);
+				case ERASE_MODE:
+					_EraseTile(_cursor_tile_x, _cursor_tile_y);
 					DrawMap();
 					break;
 
@@ -245,7 +245,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 	int32 mouse_y = event->scenePos().y();
 
 	switch (_tile_mode) {
-		case PAINT_TILE: {
+		case PAINT_MODE: {
 			if (_selection_visible == true) {
 				vector<vector<int32> > select_layer = _select_layer.GetTiles();
 				for (uint32 x = 0; x < _select_layer.GetLength(); ++x) {
@@ -265,7 +265,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 			break;
 		}
 
-		case MOVE_TILE: {
+		case MOVE_MODE: {
 			_cursor_tile_x = mouse_x / TILE_LENGTH;
 			_cursor_tile_y = mouse_y / TILE_HEIGHT;
 			std::vector<std::vector<int32> >& layer = _map_data->GetSelectedTileLayer()->GetTiles();
@@ -313,13 +313,13 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 			break;
 		}
 
-		case DELETE_TILE: {
+		case ERASE_MODE: {
 			if (_selection_visible == true) {
 				vector<vector<int32> > select_layer = _select_layer.GetTiles();
 				for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
 					for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
 						if (select_layer[y][x] != NO_TILE)
-							_DeleteTile(x, y);
+							_EraseTile(x, y);
 					}
 				}
 				DrawMap();
@@ -526,7 +526,7 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 
 
-void MapView::_DeleteTile(int32 x, int32 y) {
+void MapView::_EraseTile(int32 x, int32 y) {
 	// TODO: Record information for undo/redo action.
 // 	_tile_indeces.push_back(QPoint(x, y));
 // 	_previous_tiles.push_back(GetCurrentLayer()[y][x]);
