@@ -57,27 +57,34 @@ void TilesetDisplay::DrawTileset() {
 
     // For each tile, draw the red square over the quadrants that have collisions enabled
 	const vector<uint32>& collision_grid = _tileset_data->GetTileCollisions();
-    for (uint32 row = 0; row < TILESET_NUM_ROWS; ++row) {
-        for (uint32 col = 0; col < TILESET_NUM_COLS; ++col) {
-			// The index into the collision grid of the four quadrants
-			uint32 collision_index = (row * TILESET_NUM_ROWS) + (col * TILE_NUM_QUADRANTS);
-			// Screen coordinates of the top left corner of the tile
-			uint32 tile_x = col * TILE_LENGTH;
-			uint32 tile_y = row * TILE_HEIGHT;
+	// Counters used to track the X and Y coordinates of the current tile being evaluated
+	uint32 tile_x = 0;
+	uint32 tile_y = 0;
+	// Holds the screen coordinates to draw the collision grid sections to for the tile
+	uint32 pos_x = 0;
+	uint32 pos_y = 0;
+	// Iterate through the collision grid. Every four consecutive elements correspond to a single tile.
+    for (uint32 i = 0; i < collision_grid.size(); i += TILE_NUM_QUADRANTS, ++tile_x) {
+		if (tile_x >= TILESET_NUM_COLS) {
+			tile_x = 0;
+			tile_y++;
+		}
+		pos_x = tile_x * TILE_LENGTH;
+		pos_y = tile_y * TILE_LENGTH;
 
-			if (collision_grid[collision_index] != 0) { // NW quadrant
-				addPixmap(_red_square)->setPos(tile_x, tile_y);
-			}
-			if (collision_grid[collision_index+1] != 0) { // NE quadrant
-				addPixmap(_red_square)->setPos(tile_x + TILE_QUADRANT_LENGTH, tile_y);
-			}
-			if (collision_grid[collision_index+2] != 0) { // SW quadrant
-				addPixmap(_red_square)->setPos(tile_x, tile_y + TILE_QUADRANT_HEIGHT);
-			}
-			if (collision_grid[collision_index+3] != 0) { // SE quadrant
-				addPixmap(_red_square)->setPos(tile_x + TILE_QUADRANT_LENGTH, tile_y + TILE_QUADRANT_HEIGHT);
-			}
-        }
+
+		if (collision_grid[i] != 0) { // NW quadrant
+			addPixmap(_red_square)->setPos(pos_x, pos_y);
+		}
+		if (collision_grid[i+1] != 0) { // NE quadrant
+			addPixmap(_red_square)->setPos(pos_x + TILE_QUADRANT_LENGTH, pos_y);
+		}
+		if (collision_grid[i+2] != 0) { // SW quadrant
+			addPixmap(_red_square)->setPos(pos_x, pos_y + TILE_QUADRANT_HEIGHT);
+		}
+		if (collision_grid[i+3] != 0) { // SE quadrant
+			addPixmap(_red_square)->setPos(pos_x + TILE_QUADRANT_LENGTH, pos_y + TILE_QUADRANT_HEIGHT);
+		}
     }
 
     _DrawGridLines();
@@ -298,7 +305,6 @@ void TilesetEditor::_OpenFile() {
         QMessageBox::warning(this, "Allacrost Map Editor", "Failed to load existing tileset.");
     }
 
-    // Refreshes the scene
     _tileset_display.DrawTileset();
 }
 
