@@ -789,7 +789,7 @@ void Editor::_HelpHelp() {
 void Editor::_HelpAbout() {
     QMessageBox::about(this, "Hero of Allacrost Map Editor -- About",
 		"<center><h2>Hero of Allacrost Map Editor</h2></center>"
-		"<center><h3>Copyright© 2004-2015</h3></center>"
+		"<center><h3>Copyright 2004-2015</h3></center>"
 		"<p>A map editor created for the Hero of Allacrost project. See 'http://www.allacrost.org/' for more information</p>");
 }
 
