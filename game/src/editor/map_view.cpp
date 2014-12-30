@@ -370,12 +370,12 @@ void MapView::keyPressEvent(QKeyEvent* event) {
 
 
 void MapView::DrawMap() {
+	clear();
 	if (_map_data->IsInitialized() == false) {
 		return;
 	}
 
 	// Setup drawing parameters
-	clear();
 	setSceneRect(0, 0, _map_data->GetMapLength() * TILE_LENGTH, _map_data->GetMapHeight() * TILE_HEIGHT);
 	setBackgroundBrush(QBrush(Qt::gray));
 
@@ -528,11 +528,6 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 void MapView::_EraseTile(int32 x, int32 y) {
 	// TODO: Record information for undo/redo action.
-// 	_tile_indeces.push_back(QPoint(x, y));
-// 	_previous_tiles.push_back(GetCurrentLayer()[y][x]);
-// 	_modified_tiles.push_back(-1);
-
-	// Delete the tile
 	_map_data->GetSelectedTileLayer()->SetTile(x, y, NO_TILE);
 }
 

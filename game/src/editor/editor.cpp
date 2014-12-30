@@ -711,6 +711,7 @@ void Editor::_EditMapProperties() {
 void Editor::_ViewTileGrid() {
 	bool grid_active = _map_view->ToggleGridVisible();
 	_view_grid_action->setChecked(grid_active);
+	_map_view->DrawMap();
 }
 
 
