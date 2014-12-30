@@ -54,17 +54,17 @@ public:
 
 protected:
 	//! \brief Called when the display area is resized
-    void resizeScene(int length, int height);
+	void resizeScene(int length, int height);
 
-    /** \name Mouse Event Functions
-    *** \brief Process mouse events that occur on the display, inherited from QGraphicsScene
+	/** \name Mouse Event Functions
+	*** \brief Process mouse events that occur on the display, inherited from QGraphicsScene
 	*** \param event A pointer to the QGraphicsSceneMouseEvent that was generated
 	**/
-    //{@
-    void mousePressEvent(QGraphicsSceneMouseEvent* event);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
-    //@}
+	//{@
+	void mousePressEvent(QGraphicsSceneMouseEvent* event);
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+	//@}
 
 private:
 	/** \brief Holds the value to set quadrants when the user clicks or drags the mouse over them
@@ -76,14 +76,14 @@ private:
 	*** \note The value of this member will only ever be 0 or 1. It is not a boolean because the Tileset class
 	*** uses uint32 to store its collision data.
 	**/
-    uint32 _set_collision_state;
+	uint32 _set_collision_state;
 
-    /** \brief The coordinates of the most recent edited collision grid tile
+	/** \brief The coordinates of the most recent edited collision grid tile
 	*** This data is used to improve performance by not processing mouse events unless the selected tile quadrant has changed.
 	**/
 	//@{
-    int32 _last_x;
-    int32 _last_y;
+	int32 _last_x;
+	int32 _last_y;
 	//@}
 
 	//! \brief The current tileset that is being edited.
@@ -92,19 +92,19 @@ private:
 	//! \brief A red, translucent square that is one quarter the size of a tile
 	QPixmap _red_square;
 
-    //! \brief Determines if the collision quadrant corresponding to _last_x and _last_y is enabled
-    bool _IsCollisionQuadrantEnabled();
+	//! \brief Determines if the collision quadrant corresponding to _last_x and _last_y is enabled
+	bool _IsCollisionQuadrantEnabled();
 
-    //! \brief Updates the collision quadrant pointed to by _last_x and _last_y according to _set_collision_state
-    void _UpdateCollisionQuadrant();
+	//! \brief Updates the collision quadrant pointed to by _last_x and _last_y according to _set_collision_state
+	void _UpdateCollisionQuadrant();
 
-    /** \brief Finds the index into the tileset's collision data where a mouse event occured
+	/** \brief Finds the index into the tileset's collision data where a mouse event occured
 	*** \return uint32 The index of the quadrant where the event took place
 	**/
-    uint32 _DetermineCollisionQuadrantIndex();
+	uint32 _DetermineCollisionQuadrantIndex();
 
-    //! \brief A helper function to DrawTileset that draws the tile and tile quadrant grids over the tileset image
-    void _DrawGridLines();
+	//! \brief A helper function to DrawTileset that draws the tile and tile quadrant grids over the tileset image
+	void _DrawGridLines();
 }; // class TilesetDisplay : public QGraphicsScene
 
 
@@ -141,7 +141,7 @@ private:
 	TilesetDisplay _tileset_display;
 
 	//! \brief  The view widget for the tileset display
-    QGraphicsView* _tileset_view;
+	QGraphicsView* _tileset_view;
 
 	//! \brief A push button for creating a new tileset
 	QPushButton* _new_button;
