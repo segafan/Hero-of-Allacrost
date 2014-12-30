@@ -231,7 +231,6 @@ bool Tileset::Save() {
 	if (_tile_animations.empty() == false) {
  		write_file.BeginTable("animations");
 
-
 		for (uint32 i = 0; i < _tile_animations.size(); ++i) {
 			vector<uint32> animation_data;
 			for (uint32 j = 0; j < _tile_animations[i].size(); ++j) {
@@ -252,8 +251,7 @@ bool Tileset::Save() {
  			write_file.WriteString((*i).first, (*i).second);
  		write_file.EndTable();
 		write_file.InsertNewLine();
-	} // data must exist in order to save it
-
+	}
 
 	if (write_file.IsErrorDetected() == true) {
 		cerr << "Errors were detected when saving tileset file. The errors include:\n" << write_file.GetErrorMessages() << endl;

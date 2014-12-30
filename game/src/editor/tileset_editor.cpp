@@ -20,9 +20,11 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>
 
+#include "utils.h"
 #include "tileset_editor.h"
 
 using namespace std;
+using namespace hoa_utils;
 
 namespace hoa_editor {
 
@@ -107,23 +109,13 @@ void TilesetDisplay::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 		if ((pos.x() < 0) || (pos.y() < 0) || pos.x() >= TILESET_LENGTH || pos.y() >= TILESET_HEIGHT)
 			return;
 
-		// The collision value to set should be the opposite of the value for the coordinate of this click
-        _set_collision_state = _IsCollisionQuadrantEnabled(event) ? 0 : 1;
-
 		_last_x = pos.x() / TILE_QUADRANT_LENGTH;
 		_last_y = pos.y() / TILE_QUADRANT_HEIGHT;
 
-		_UpdateCollisionQuadrant(event);
-    }
-}
+		// The collision value to set should be the opposite of the value for the coordinate of this click
+        _set_collision_state = _IsCollisionQuadrantEnabled() ? 0 : 1;
 
-
-
-void TilesetDisplay::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-    if (event->button() == Qt::LeftButton) {
-        // Reset the last position to permit drawing again
-        _last_x = -1;
-        _last_y = -1;
+		_UpdateCollisionQuadrant();
     }
 }
 
@@ -139,58 +131,67 @@ void TilesetDisplay::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     if ((pos.x() < 0) || (pos.y() < 0) || pos.x() >= TILESET_LENGTH || pos.y() >= TILESET_HEIGHT)
         return;
 
-    // Do nothing if the mouse event occured over the same collision coordinate as the last move event
-    if (_last_x == (pos.x() / TILE_QUADRANT_LENGTH) && _last_y == (pos.y() / TILE_QUADRANT_HEIGHT))
-        return;
-
-    _last_x = pos.x() / TILE_QUADRANT_LENGTH;
-    _last_y = pos.y() / TILE_QUADRANT_HEIGHT;
-
-    _UpdateCollisionQuadrant(event);
+    // If the mouse event occurred over a different collision coordinate, save the new location and update the collision coordinate.
+    // Otherwise the move event casuse no change to occur
+	int32 x = pos.x() / TILE_QUADRANT_LENGTH;
+	int32 y = pos.y() / TILE_QUADRANT_HEIGHT;
+    if (_last_x != x || _last_y != y) {
+		_last_x = x;
+		_last_y = y;
+		_UpdateCollisionQuadrant();
+	}
 }
 
 
 
-void TilesetDisplay::_UpdateCollisionQuadrant(QGraphicsSceneMouseEvent* event) {
+void TilesetDisplay::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        // Reset the last position to permit drawing again
+        _last_x = -1;
+        _last_y = -1;
+    }
+}
+
+
+
+void TilesetDisplay::_UpdateCollisionQuadrant() {
     if (_tileset_data->IsInitialized() == false)
         return;
 
-	_tileset_data->SetQuadrantCollision(_DetermineCollisionQuadrantIndex(event), _set_collision_state);
+	_tileset_data->SetQuadrantCollision(_DetermineCollisionQuadrantIndex(), _set_collision_state);
     DrawTileset();
 }
 
 
 
-bool TilesetDisplay::_IsCollisionQuadrantEnabled(QGraphicsSceneMouseEvent* event) {
+bool TilesetDisplay::_IsCollisionQuadrantEnabled() {
     if (_tileset_data->IsInitialized() == false)
         return false;
 
-	return _tileset_data->GetQuadrantCollision(_DetermineCollisionQuadrantIndex(event));
+	return _tileset_data->GetQuadrantCollision(_DetermineCollisionQuadrantIndex());
 }
 
 
 
-uint32 TilesetDisplay::_DetermineCollisionQuadrantIndex(QGraphicsSceneMouseEvent* event) {
-    // Determine the tile and quadrant that the event took place over
-	QPointF pos = event->scenePos();
-    uint32 tile_x = static_cast<uint32>(pos.x()) / TILE_LENGTH;
-	uint32 tile_y = static_cast<uint32>(pos.y()) / TILE_HEIGHT;
-    uint32 x_offset = static_cast<uint32>(pos.x()) % TILE_LENGTH;
-    uint32 y_offset = static_cast<uint32>(pos.y()) % TILE_HEIGHT;
+uint32 TilesetDisplay::_DetermineCollisionQuadrantIndex() {
+    // Determine which tile that the last location took place over
+    uint32 tile_x = _last_x / 2;
+	uint32 tile_y = _last_y / 2;
+    bool x_offset = IsOddNumber(_last_x) ? 1 : 0;
+    bool y_offset = IsOddNumber(_last_y) ? 1 : 0;
 
-    uint32 quadrant_index = (tile_y * TILESET_NUM_ROWS) + tile_x;
-
-    // Now determine which quadrant of that tile was clicked, and change it's walkability status
-    if ((x_offset < TILE_QUADRANT_LENGTH) && (y_offset < TILE_QUADRANT_HEIGHT))  // NW quadrant
+    // Now determine which quadrant of that tile was clicked.
+    uint32 quadrant_index = ((tile_y * TILESET_NUM_COLS) + tile_x) * TILE_NUM_QUADRANTS;
+    if ((x_offset == 0) && (y_offset == 0))  // NW quadrant
         quadrant_index += 0;
-    else if ((x_offset >= TILE_QUADRANT_LENGTH) && (y_offset < TILE_QUADRANT_HEIGHT)) // NE quadrant
+    else if ((x_offset == 1) && (y_offset == 0)) // NE quadrant
         quadrant_index += 1;
-    else if ((x_offset < TILE_QUADRANT_LENGTH) && (y_offset >= TILE_QUADRANT_HEIGHT)) // SW quadrant
+    else if ((x_offset == 0) && (y_offset == 1)) // SW quadrant
         quadrant_index += 2;
-    else if ((x_offset >= TILE_QUADRANT_LENGTH) && (y_offset >= TILE_QUADRANT_HEIGHT)) // SE quadrant
+    else if ((x_offset == 1) && (y_offset == 1)) // SE quadrant
         quadrant_index += 3;
 
-	return quadrant_index;
+ 	return quadrant_index;
 }
 
 
