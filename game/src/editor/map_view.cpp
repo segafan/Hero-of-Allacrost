@@ -256,12 +256,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 				}
 				DrawMap();
 			}
-			// TODO: add the paint command to the Editor undo stack
-// 			LayerCommand *paint_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles, layer_id, editor, "Paint");
-// 			editor->_undo_stack->push(paint_command);
-// 			_tile_indeces.clear();
-// 			_previous_tiles.clear();
-// 			_modified_tiles.clear();
+			// TODO: Record information for undo/redo stack
 			break;
 		}
 
@@ -271,13 +266,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 			std::vector<std::vector<int32> >& layer = _map_data->GetSelectedTileLayer()->GetTiles();
 
 			if (_selection_visible == false) {
-				// TODO: Record information for undo/redo action.
-	// 			_tile_indeces.push_back(_move_source_index);
-	// 			_previous_tiles.push_back(layer[_move_source_tile_y][_move_source_tile_x]);
-	// 			_modified_tiles.push_back(NO_TILE);
-	// 			_tile_indeces.push_back(_tile_index);
-	// 			_previous_tiles.push_back(layer[_cursor_tile_y][_cursor_tile_x]);
-	// 			_modified_tiles.push_back(layer[_move_source_tile_y][_move_source_tile_x]);
+				// TODO: Record information for undo/redo stack
 
 				layer[_cursor_tile_y][_cursor_tile_x] = layer[_move_source_tile_y][_move_source_tile_x];
 				layer[_move_source_tile_y][_move_source_tile_x] = NO_TILE;
@@ -287,13 +276,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 				for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
 					for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
 						if (select_layer[y][x] != NO_TILE) {
-							// TODO: Record information for undo/redo action.
-	// 						_tile_indeces.push_back(QPoint(x, y));
-	// 						_previous_tiles.push_back(layer[y][x]);
-	// 						_modified_tiles.push_back(-1);
-	// 						_tile_indeces.push_back(QPoint(x + _cursor_tile_x - _move_source_tile_x, y + _cursor_tile_y - _move_source_tile_y));
-	// 						_previous_tiles.push_back(layer[y + _cursor_tile_y - _move_source_tile_y][x + _cursor_tile_x - _move_source_tile_x]);
-	// 						_modified_tiles.push_back(layer[y][x]);
+							// TODO: Record information for undo/redo stack
 
 							layer[y + _cursor_tile_y - _move_source_tile_y][x + _cursor_tile_x - _move_source_tile_x] = layer[y][x];
 							layer[y][x] = NO_TILE;
@@ -302,12 +285,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 				}
 			}
 
-			// TODO: Push the move command on to the undo stack
-	// 		LayerCommand *move_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles, _layer_id, editor, "Move");
-	// 		editor->_undo_stack->push(move_command);
-	// 		_tile_indeces.clear();
-	// 		_previous_tiles.clear();
-	// 		_modified_tiles.clear();
+			// TODO: Record information for undo/redo stack
 
 			DrawMap();
 			break;
@@ -325,12 +303,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 				DrawMap();
 			}
 
-			// TODO: add the delete command to the Editor undo stack
-	// 		LayerCommand* delete_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles, _layer_id, editor, "Delete");
-	// 		editor->_undo_stack->push(delete_command);
-	// 		_tile_indeces.clear();
-	// 		_previous_tiles.clear();
-	// 		_modified_tiles.clear();
+			// TODO: Record information for undo/redo stack
 			break;
 		}
 
@@ -493,15 +466,10 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 			for (int32 j = 0; j < selection.columnCount() && x + j < _map_data->GetMapLength(); j++) {
 				int32 tileset_index = (selection.topRow() + i) * 16 + (selection.leftColumn() + j);
 
-				// Perform randomization for autotiles
-				// TODO: reenable autotiling feature
+				// TODO: Perform randomization for autotiles
 				// _AutotileRandomize(multiplier, tileset_index);
 
-				// Record information for undo/redo action.
-				// TODO: put this data into a LayerCommand object
-// 				_tile_indeces.push_back(QPoint(index_x + j, index_y + i));
-// 				_previous_tiles.push_back(GetCurrentLayer()[index_y + i][index_x + j]);
-// 				_modified_tiles.push_back(tileset_index + multiplier * 256);
+				// TODO: Record information for undo/redo stack
 
 				_map_data->GetSelectedTileLayer()->SetTile(x + j, y + i, tileset_index + multiplier * TILESET_NUM_TILES);
 			} // iterate through columns of selection
@@ -511,14 +479,10 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 		// put selected tile from tileset into tile array at correct position
 		int32 tileset_index = table->currentRow() * TILESET_NUM_COLS + table->currentColumn();
 
-		// perform randomization for autotiles
+		// TODO: Perform randomization for autotiles
 		// _AutotileRandomize(multiplier, tileset_index);
 
-		// Record information for undo/redo action.
-		// TODO: put this data into a LayerCommand object
-// 		_tile_indeces.push_back(QPoint(index_x, index_y));
-// 		_previous_tiles.push_back(GetCurrentLayer()[index_y][index_x]);
-// 		_modified_tiles.push_back(tileset_index + multiplier * 256);
+		// TODO: Record information for undo/redo stack
 
 		_map_data->GetSelectedTileLayer()->SetTile(x, y, tileset_index + multiplier * 256);
 	} // a single tile is selected
@@ -527,7 +491,7 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 
 void MapView::_EraseTile(int32 x, int32 y) {
-	// TODO: Record information for undo/redo action.
+	// TODO: Record information for undo/redo stack
 	_map_data->GetSelectedTileLayer()->SetTile(x, y, NO_TILE);
 }
 
