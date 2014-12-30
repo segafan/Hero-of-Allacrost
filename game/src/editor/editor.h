@@ -244,43 +244,35 @@ private slots:
 
 
 /** ****************************************************************************
-*** \brief Holds the previous state of map tiles during editing, used for undo/redo actions
+*** \brief Holds the previous state of the map data, which is used to undo or redo past actions
 ***
-*** \todo This entire class needs to be revisited and modified so that it can handle operations
-*** such as map resizing, multi layer changes, and multi context changes.
+*** Whenever map tiles are modified by the user, a new instance of this class gets created so that those
+*** changes can be rolled back or reapplied via undo/redo requests by the user. This class handles both
+*** map resizing events (adding or removing columns and/or rows) and changes to the values of the map tiles
+***
+*** \todo This entire class needs to be implemented so that it can handle operations such as map resizing,
+*** multi layer changes, and multi context changes.
+***
+*** \todo There needs to be more QUndoCommand-derived classes for the other types of map edits: map properties,
+*** layers, contexts, and tilesets.
 *** ***************************************************************************/
-class LayerCommand : public QUndoCommand {
-	// Needed for accessing the current map's layers.
-	friend class Editor;
-
+class EditTileCommand : public QUndoCommand {
 public:
-	LayerCommand(std::vector<int32> indeces, std::vector<int32> previous, std::vector<int32> modified, int context, Editor* editor,
-		const QString& text = "Layer Operation", QUndoCommand* parent = 0);
+	/** \param action_text The type of action that occured (eg "paint", "erase", "resize")
+	*** \param parent THe parent command of this new command
+	**/
+	EditTileCommand(const QString& action_text, QUndoCommand* parent = 0);
 
-	//! \name Undo Functions
-	//! \brief Reimplemented from the QUndoCommand class to provide specific undo/redo capability towards the map.
+	/** \name Undo Functions
+	*** \brief Takes the actions necessary to undo or redo the command
+	**/
 	//{@
 	void undo();
 	void redo();
 	//@}
 
 private:
-	//! \name Tile Vectors
-	//! \brief The following three vectors are used to know how to perform undo and redo operations
-	//!        for this command. They should be the same size and one-to-one. So, the j-th element
-	//!        of each vector should correspond to the j-th element of the other vectors.
-	//{@
-	std::vector<int32> _tile_indeces;  //! A vector of tile indeces in the map that were modified by this command.
-	std::vector<int32> _previous_tiles;//! A vector of indeces into tilesets of the modified tiles before they were modified.
-	std::vector<int32> _modified_tiles;//! A vector of indeces into tilesets of the modified tiles after they were modified.
-	//@}
-
-	//! A record of the active context when this command was performed.
-	int _context;
-
-	//! A reference to the main window so we can get the current map.
-	Editor* _editor;
-}; // class LayerCommand : public QUndoCommand
+}; // class EditTileCommand : public QUndoCommand
 
 } // namespace hoa_editor
 

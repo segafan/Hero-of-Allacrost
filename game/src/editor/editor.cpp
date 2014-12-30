@@ -801,36 +801,23 @@ void Editor::_HelpAboutQt() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// LayerCommand class -- public functions
+// EditTileCommand class
 ///////////////////////////////////////////////////////////////////////////////
 
-LayerCommand::LayerCommand(vector<int32> indeces, vector<int32> previous, vector<int32> modified,
-		int context, Editor* editor, const QString& text, QUndoCommand* parent) :
-	QUndoCommand(text, parent),
-	_tile_indeces(indeces),
-	_previous_tiles(previous),
-	_modified_tiles(modified),
-	_context(context),
-	_editor(editor)
+EditTileCommand::EditTileCommand(const QString& action_text, QUndoCommand* parent) :
+	QUndoCommand(action_text, parent)
 {}
 
 
 
-void LayerCommand::undo() {
-// 	for (int32 i = 0; i < static_cast<int32>(_tile_indeces.size()); i++) {
-// 		_map_view->GetLayer(_context)[_tile_indeces[i]] = _previous_tiles[i];
-// 	}
-//
-// 	_map_view->updateScene();
+void EditTileCommand::undo() {
+	// TODO: restore tiles / map size and redraw the map view
 }
 
 
 
-void LayerCommand::redo() {
-// 	for (int32 i = 0; i < static_cast<int32>(_tile_indeces.size()); i++) {
-// 		_map_view->GetLayer(_context)[_tile_indeces[i]] = _modified_tiles[i];
-// 	}
-// 	_map_view->updateScene();
+void EditTileCommand::redo() {
+	// TODO: restore tiles / map size and redraw the map view
 }
 
 } // namespace hoa_editor
