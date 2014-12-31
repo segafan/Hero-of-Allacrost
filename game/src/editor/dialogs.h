@@ -30,7 +30,7 @@
 namespace hoa_editor {
 
 /** ***************************************************************************
-*** \brief A dialog box that allows the user to modify some properties of an existing map.
+*** \brief A dialog window that allows the user to modify some properties of an existing map.
 ***
 *** The properties that may be modified through this dialog include the following:
 *** - The map dimensions (in tiles)

@@ -880,6 +880,37 @@ bool MapData::RenameTileContext(int32 context_id, QString new_name) {
 
 
 
+bool MapData::ChangeInheritanceTileContext(int32 context_id, int32 inherit_id) {
+	PRINT_DEBUG << "NOW HERE" << endl;
+	if (context_id <= 0 || static_cast<uint32>(context_id) > _tile_context_count) {
+		_error_message = "ERROR: invalid context id";
+		return false;
+	}
+	// Removing inheritance from a context is always a valid operation
+	if (inherit_id == NO_CONTEXT) {
+		_all_tile_contexts[context_id - 1]->_SetInheritingContext(inherit_id);
+		return true;
+	}
+	// If the inheriting context ID isn't changing, do nothing and report success
+	if (_all_tile_contexts[context_id - 1]->GetInheritedContextID() == inherit_id) {
+		return true;
+	}
+
+	if (inherit_id <= 0 || static_cast<uint32>(inherit_id) > _tile_context_count) {
+		_error_message = "ERROR: invalid inheriting context id";
+		return false;
+	}
+	else if (_all_tile_contexts[inherit_id - 1]->GetInheritedContextID() != NO_CONTEXT) {
+		_error_message = QString("ERROR: can not inherit from context %1 because it inherits from a context itself").arg(inherit_id);
+		return false;
+	}
+
+	_all_tile_contexts[context_id - 1]->_SetInheritingContext(inherit_id);
+	return true;
+}
+
+
+
 bool MapData::SwapTileContexts(int32 first_id, int32 second_id) {
 	if (first_id <= 0 || second_id <= 0) {
 		_error_message = "ERROR: invalid context ID passed when trying to swap context positions";
