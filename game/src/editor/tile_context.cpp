@@ -21,6 +21,7 @@
 #include "tile_context.h"
 
 using namespace std;
+using namespace hoa_utils;
 
 namespace hoa_editor {
 
@@ -95,6 +96,7 @@ ContextView::ContextView(MapData* data) :
 	QTreeWidget(),
 	_map_data(data),
 	_original_context_name(),
+	_original_context_inheritance(),
 	_right_click_item(NULL)
 {
 	if (data == NULL) {
@@ -133,7 +135,7 @@ ContextView::ContextView(MapData* data) :
 
 	// Connect all signals and slots
 	connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(_ChangeSelectedContext()));
-	connect(this, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(_SetTileContextName(QTreeWidgetItem*, int)));
+	connect(this, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(_ValidateChangedData(QTreeWidgetItem*, int)));
 	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeContextProperties(QTreeWidgetItem*, int)));
 	connect(_add_context_action, SIGNAL(triggered()), this, SLOT(_AddTileContext()));
 	connect(_rename_context_action, SIGNAL(triggered()), this, SLOT(_RenameTileContext()));
@@ -233,7 +235,7 @@ void ContextView::RefreshView() {
 				item->setText(INHERITS_COLUMN, "");
 			}
 			else {
-				item->setText(INHERITS_COLUMN, inherited_context->GetContextName());
+				item->setText(INHERITS_COLUMN, QString::fromStdString(NumberToString(inherited_context->GetContextID())));
 			}
 		}
 	}
@@ -266,7 +268,6 @@ void ContextView::_ChangeContextProperties(QTreeWidgetItem* item, int column) {
 	if (item == NULL)
 		return;
 
-// 	int32 context_id = item->text(ID_COLUMN).toInt();
 	if (column == ID_COLUMN) {
 		// User is not allowed to modify the IDs of contexts
 		return;
@@ -277,7 +278,10 @@ void ContextView::_ChangeContextProperties(QTreeWidgetItem* item, int column) {
 		_RenameTileContext();
 	}
 	else if (column == INHERITS_COLUMN) {
-		// TODO: present user with dropdown selection
+		// While technically this was not a right-click event, this is needed so that _ValidateChangedData knows to process these changes
+		_right_click_item = item;
+		_original_context_inheritance = _right_click_item->text(INHERITS_COLUMN);
+		openPersistentEditor(item, INHERITS_COLUMN);
 	}
 	else {
 		QMessageBox::warning(this, "Context Property Change Failure", "Invalid column clicked");
@@ -286,21 +290,70 @@ void ContextView::_ChangeContextProperties(QTreeWidgetItem* item, int column) {
 
 
 
-void ContextView::_SetTileContextName(QTreeWidgetItem* item, int column) {
-	if ((item != _right_click_item) || (column != NAME_COLUMN) || (_original_context_name.isEmpty() == true))
+void ContextView::_ValidateChangedData(QTreeWidgetItem* item, int column) {
+	if (item != _right_click_item)
 		return;
 
-	closePersistentEditor(item, column);
-	if (_map_data->RenameTileContext(item->text(ID_COLUMN).toInt(), item->text(NAME_COLUMN)) == false) {
-		// To prevent an infinite recursion loop, we must nullify _right_click_item before restoring the context's name
+	if (column == NAME_COLUMN) {
+		if (_original_context_name.isEmpty() == true)
+			return;
+
+		closePersistentEditor(item, column);
+		if (_map_data->RenameTileContext(item->text(ID_COLUMN).toInt(), item->text(NAME_COLUMN)) == false) {
+			// To prevent an infinite recursion loop, we must nullify _right_click_item before restoring the context's name
+			_right_click_item = NULL;
+			item->setText(NAME_COLUMN, _original_context_name);
+			_original_context_name.clear();
+			QMessageBox::warning(this, "Context Rename Failure", _map_data->GetErrorMessage());
+		}
+		else {
+			_map_data->SetMapModified(true);
+		}
+
 		_right_click_item = NULL;
-		item->setText(NAME_COLUMN, _original_context_name);
 		_original_context_name.clear();
-		QMessageBox::warning(this, "Context Rename Failure", _map_data->GetErrorMessage());
-		return;
 	}
+	else if (column == INHERITS_COLUMN) {
+		PRINT_DEBUG << "here" << endl;
+		closePersistentEditor(item, column);
+		int32 new_inheritance = NO_CONTEXT;
+		bool valid_change = false;
+		QString error_message;
+		// Check that the new value for this column is a valid value (must be blank or an integer value)
+		if (item->text(INHERITS_COLUMN).isEmpty() == true) {
+			new_inheritance = NO_CONTEXT;
+			valid_change = true;
+		}
+		else {
+			new_inheritance = item->text(INHERITS_COLUMN).toInt(&valid_change);
+			if (valid_change == false) {
+				error_message = "ERROR: Column must be set to an integer value.";
+			}
+		}
 
-	_original_context_name.clear();
+		// Now try setting the new context inheritance value
+		if (valid_change == true) {
+			if (_map_data->ChangeInheritanceTileContext(item->text(ID_COLUMN).toInt(), new_inheritance) == false) {
+				valid_change = false;
+				error_message = _map_data->GetErrorMessage();
+			}
+		}
+
+		// If any errors occurred, restore the original contents of the column and display an appropriate aerror message
+		if (valid_change == false) {
+			// To prevent an infinite recursion loop, we must nullify _right_click_item before restoring the context's inheritance
+			_right_click_item = NULL;
+			item->setText(INHERITS_COLUMN, _original_context_inheritance);
+			_original_context_inheritance.clear();
+			QMessageBox::warning(this, "Context Inheritance Change Failure", error_message);
+		}
+		else {
+			_map_data->SetMapModified(true);
+		}
+
+		_right_click_item = NULL;
+		_original_context_inheritance.clear();
+	}
 }
 
 
@@ -354,11 +407,6 @@ void ContextView::_RenameTileContext() {
 void ContextView::_DeleteTileContext() {
 	if (_right_click_item == NULL)
 		return;
-
-	if (_map_data->GetTileContextCount() == 1) {
-		QMessageBox::warning(this, "Context Deletion Failure", "You may not delete the last remaining context for a map.");
-		return;
-	}
 
 	// Delete the context from the map data first and make sure that it was successful
 	if (_map_data->DeleteTileContext(_right_click_item->text(ID_COLUMN).toInt()) == false) {

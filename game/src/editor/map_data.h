@@ -365,6 +365,20 @@ public:
 	**/
 	bool RenameTileContext(int32 context_index, QString new_name);
 
+	/** \brief Changes the inheritance property of a tile context
+	*** \param context_id The ID of the context to change
+	*** \param inherit_id The ID of the context which should be inherited from (use NO_CONTEXT to remove inheritance)
+	*** \return True if the inheritance was changed successfully
+	**/
+	bool ChangeInheritanceTileContext(int32 context_id, int32 inherit_id);
+
+	/** \brief Removes the inheritance property of a tile context
+	*** \param context_id The ID of the context to remove the inheritance from
+	*** \return True if the inheritance was removed successfully
+	**/
+	bool RemoveInheritanceTileContext(int32 context_id)
+		{ return ChangeInheritanceTileContext(context_id, NO_CONTEXT); }
+
 	/** \brief Moves a context up in the list
 	*** \param context_id The ID of the context to move
 	*** \return True if the move operation was successful. Will fail if the context is already at the top of the list

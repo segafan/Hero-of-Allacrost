@@ -54,7 +54,7 @@ class MapData;
 ***
 *** Due to the nature of inheriting contexts, TileContext objects must be constructed with care. Deleting a context
 *** can potentially break the map data if it is not handled properly. Therefore, the constructors and several other
-*** methods for this class are made private and can only be accessed by the the TileDataModel class. This class
+*** methods for this class are made private and can only be accessed by the the MapData class. This class
 *** manages all instances of TileContext for the open map and ensures that there is no violation of context data.
 ***
 *** \note All contexts are named, but the name data is not stored within this class. This is because storing all
@@ -154,7 +154,6 @@ private:
 	void _SwapTileLayers(uint32 first_index, uint32 second_index);
 }; // class TileContext
 
-
 /** ****************************************************************************
 *** \brief Displays the sortable list of tile contexts for a map
 ***
@@ -210,14 +209,13 @@ private slots:
 	**/
 	void _ChangeContextProperties(QTreeWidgetItem* item, int column);
 
-	/** \brief Closes the persistent editor that was opened by the _RenameTileContext method and changes the context name in the map data
-	*** \param item A pointer to the item with the modified name
-	*** \param column The column that is being edited (should be NAME_COLUMN)
+	/** \brief Closes any open persistence editor and validates that the data which was changed is valid
+	*** \param item A pointer to the item that has been modified
+	*** \param column The column that has been modified
 	***
-	*** This function is connected to the signal that is sent whenever any item in the widget is changed, not just
-	*** when the name of a context has been renamed. Any change event other than a rename event will be ignored.
+	*** \note If the new data is not valid, the old data will be restored and a warning message window sent to the user
 	**/
-	void _SetTileContextName(QTreeWidgetItem* item, int column);
+	void _ValidateChangedData(QTreeWidgetItem* item, int column);
 
 	//! \brief Creates a new empty tile context and adds it to the end of the context list
 	void _AddTileContext();
@@ -234,6 +232,9 @@ private:
 
 	//! \brief While renaming a context, holds the original name in case the renaming operation is cancelled for fails
 	QString _original_context_name;
+
+	//! \brief While changing the inheritance of a context, holds the original value in case the operation fails
+	QString _original_context_inheritance;
 
 	//! \brief A pointer to the most recent item that was right clicked. Set to NULL if no item was clicked
 	QTreeWidgetItem* _right_click_item;
