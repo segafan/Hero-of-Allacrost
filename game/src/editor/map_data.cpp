@@ -293,6 +293,7 @@ bool MapData::SaveData(QString filename) {
 		return false;
 	}
 
+	_map_filename = filename;
 	data_file.WriteNamespace(DetermineLuaFileTablespaceName(filename.toStdString()));
 	data_file.InsertNewLine();
 

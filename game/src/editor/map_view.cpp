@@ -157,6 +157,17 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 				DrawMap();
 				break;
 
+			case FILL_AREA_MODE:
+				// TODO
+				break;
+
+			case CLEAR_AREA_MODE:
+				// TODO
+				break;
+
+			case INHERIT_AREA_MODE:
+				// TODO
+				break;
 
 			default:
 				QMessageBox::warning(_graphics_view, "Tile editing mode", "ERROR: Invalid tile editing mode!");
@@ -243,6 +254,18 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 				case INHERIT_MODE:
 					_SetTile(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
 					DrawMap();
+					break;
+
+				case FILL_AREA_MODE:
+					// TODO
+					break;
+
+				case CLEAR_AREA_MODE:
+					// TODO
+					break;
+
+				case INHERIT_AREA_MODE:
+					// TODO
 					break;
 
 				default:
@@ -344,6 +367,18 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 			// TODO: Record information for undo/redo stack
 			break;
 		}
+
+		case FILL_AREA_MODE:
+			// TODO
+			break;
+
+		case CLEAR_AREA_MODE:
+			// TODO
+			break;
+
+		case INHERIT_AREA_MODE:
+			// TODO
+			break;
 
 		default:
 			QMessageBox::warning(_graphics_view, "Tile editing mode", "ERROR: Invalid tile editing mode!");
@@ -555,7 +590,7 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 		// TODO: Record information for undo/redo stack
 
-		_map_data->GetSelectedTileLayer()->SetTile(x, y, tileset_index + multiplier * 256);
+		_map_data->GetSelectedTileLayer()->SetTile(x, y, tileset_index + multiplier * TILESET_NUM_TILES);
 	} // a single tile is selected
 }
 

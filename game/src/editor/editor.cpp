@@ -62,12 +62,13 @@ Editor::Editor() :
 	_view_missing_action(NULL),
 	_view_inherited_action(NULL),
 	_view_collisions_action(NULL),
-	_edit_mode_paint_action(NULL),
-	_edit_mode_swap_action(NULL),
-	_edit_mode_erase_action(NULL),
-	_edit_mode_inherit_action(NULL),
-	_edit_fill_action(NULL),
-	_edit_clear_action(NULL),
+	_mode_paint_action(NULL),
+	_mode_swap_action(NULL),
+	_mode_erase_action(NULL),
+	_mode_inherit_action(NULL),
+	_mode_area_fill_action(NULL),
+	_mode_area_clear_action(NULL),
+	_mode_area_inherit_action(NULL),
 	_toggle_select_action(NULL),
 	_help_action(NULL),
 	_about_action(NULL),
@@ -117,6 +118,7 @@ Editor::Editor() :
     _right_vertical_splitter->setSizes(splitter_size);
 	_right_vertical_splitter->show();
 
+	setWindowTitle("Allacrost Map Editor");
 	setWindowIcon(QIcon("img/logos/program_icon.ico"));
 	_ClearEditorState();
 }
@@ -144,12 +146,13 @@ Editor::~Editor() {
 	delete _view_inherited_action;
 	delete _view_collisions_action;
 
-	delete _edit_mode_paint_action;
-	delete _edit_mode_swap_action;
-	delete _edit_mode_erase_action;
-	delete _edit_mode_inherit_action;
-	delete _edit_fill_action;
-	delete _edit_clear_action;
+	delete _mode_paint_action;
+	delete _mode_swap_action;
+	delete _mode_erase_action;
+	delete _mode_inherit_action;
+	delete _mode_area_fill_action;
+	delete _mode_area_clear_action;
+	delete _mode_area_inherit_action;
 	delete _toggle_select_action;
 	delete _edit_mode_action_group;
 
@@ -264,44 +267,57 @@ void Editor::_CreateActions() {
 	connect(_view_collisions_action, SIGNAL(triggered()), this, SLOT(_ViewCollisionData()));
 
 	// Create actions found in the Tools menu
-	_edit_mode_paint_action = new QAction(QIcon("img/misc/editor_tools/pencil.png"), "&Paint Tiles", this);
-	_edit_mode_paint_action->setShortcut(tr("P"));
-	_edit_mode_paint_action->setStatusTip("Switches the edit mode to allowing painting of tiles to the map");
-	_edit_mode_paint_action->setCheckable(true);
-	connect(_edit_mode_paint_action, SIGNAL(triggered()), this, SLOT(_SelectPaintMode()));
+	_mode_paint_action = new QAction(QIcon("img/misc/editor_tools/pencil.png"), "&Paint Tiles", this);
+	_mode_paint_action->setShortcut(tr("1"));
+	_mode_paint_action->setStatusTip("Switches the edit mode to allowing painting of tiles to the map");
+	_mode_paint_action->setCheckable(true);
+	connect(_mode_paint_action, SIGNAL(triggered()), this, SLOT(_SelectPaintMode()));
 
-	_edit_mode_swap_action = new QAction(QIcon("img/misc/editor_tools/arrow.png"), "S&wap Tiles", this);
-	_edit_mode_swap_action->setShortcut(tr("W"));
-	_edit_mode_swap_action->setStatusTip("Switches the edit mode to allowing swapping of tiles at different positions");
-	_edit_mode_swap_action->setCheckable(true);
-	connect(_edit_mode_swap_action, SIGNAL(triggered()), this, SLOT(_SelectSwapMode()));
+	_mode_swap_action = new QAction(QIcon("img/misc/editor_tools/arrow.png"), "S&wap Tiles", this);
+	_mode_swap_action->setShortcut(tr("2"));
+	_mode_swap_action->setStatusTip("Switches the edit mode to allowing swapping of tiles at different positions");
+	_mode_swap_action->setCheckable(true);
+	connect(_mode_swap_action, SIGNAL(triggered()), this, SLOT(_SelectSwapMode()));
 
-	_edit_mode_erase_action = new QAction(QIcon("img/misc/editor_tools/eraser.png"), "&Erase Tiles", this);
-	_edit_mode_erase_action->setShortcut(tr("E"));
-	_edit_mode_erase_action->setStatusTip("Switches the edit mode to erase tiles from the map");
-	_edit_mode_erase_action->setCheckable(true);
-	connect(_edit_mode_erase_action, SIGNAL(triggered()), this, SLOT(_SelectEraseMode()));
+	_mode_erase_action = new QAction(QIcon("img/misc/editor_tools/eraser.png"), "&Erase Tiles", this);
+	_mode_erase_action->setShortcut(tr("3"));
+	_mode_erase_action->setStatusTip("Switches the edit mode to erase tiles from the map");
+	_mode_erase_action->setCheckable(true);
+	connect(_mode_erase_action, SIGNAL(triggered()), this, SLOT(_SelectEraseMode()));
 
-	_edit_mode_inherit_action = new QAction(QIcon("img/misc/editor_tools/inherited.png"), "&Inherit Tiles", this);
-	_edit_mode_inherit_action->setShortcut(tr("I"));
-	_edit_mode_inherit_action->setStatusTip("Switches the edit mode to inherit tiles from the inherited context");
-	_edit_mode_inherit_action->setCheckable(true);
-	connect(_edit_mode_inherit_action, SIGNAL(triggered()), this, SLOT(_SelectInheritMode()));
+	_mode_inherit_action = new QAction(QIcon("img/misc/editor_tools/inherited.png"), "&Inherit Tiles", this);
+	_mode_inherit_action->setShortcut(tr("4"));
+	_mode_inherit_action->setStatusTip("Switches the edit mode to inherit tiles from the inherited context");
+	_mode_inherit_action->setCheckable(true);
+	connect(_mode_inherit_action, SIGNAL(triggered()), this, SLOT(_SelectInheritMode()));
+
+	_mode_area_fill_action = new QAction(QIcon("img/misc/editor_tools/fill.png"), "&Fill Area", this);
+	_mode_area_fill_action->setShortcut(tr("5"));
+	_mode_area_fill_action->setStatusTip("Fills the selection area or tile area with the chosen tile(s)");
+	_mode_area_fill_action->setCheckable(true);
+	connect(_mode_area_fill_action, SIGNAL(triggered()), this, SLOT(_SelectFillAreaMode()));
+
+	_mode_area_clear_action = new QAction(QIcon("img/misc/editor_tools/clear.png"), "&Clear Area", this);
+	_mode_area_clear_action->setShortcut(tr("6"));
+	_mode_area_clear_action->setStatusTip("Clears all tiles from the selection area or tile area");
+	_mode_area_clear_action->setCheckable(true);
+	connect(_mode_area_clear_action, SIGNAL(triggered()), this, SLOT(_SelectClearAreaMode()));
+
+	_mode_area_inherit_action = new QAction(QIcon("img/misc/editor_tools/inherited.png"), "I&nherit Area", this);
+	_mode_area_inherit_action->setShortcut(tr("7"));
+	_mode_area_inherit_action->setStatusTip("Inherits all tiles from the selection area or tile area");
+	_mode_area_inherit_action->setCheckable(true);
+	connect(_mode_area_inherit_action, SIGNAL(triggered()), this, SLOT(_SelectInheritAreaMode()));
 
 	_edit_mode_action_group = new QActionGroup(this);
-	_edit_mode_action_group->addAction(_edit_mode_paint_action);
-	_edit_mode_action_group->addAction(_edit_mode_swap_action);
-	_edit_mode_action_group->addAction(_edit_mode_erase_action);
-	_edit_mode_action_group->addAction(_edit_mode_inherit_action);
-	_edit_mode_paint_action->setChecked(true);
-
-	_edit_fill_action = new QAction(QIcon("img/misc/editor_tools/fill.png"), "&Fill Area", this);
-	_edit_fill_action->setStatusTip("Fills the selection area or tile area with the chosen tile(s)");
-	connect(_edit_fill_action, SIGNAL(triggered()), this, SLOT(_FillArea()));
-
-	_edit_clear_action = new QAction(QIcon("img/misc/editor_tools/clear.png"), "&Clear Area", this);
-	_edit_clear_action->setStatusTip("Clears all tiles from the selection area or tile area");
-	connect(_edit_clear_action, SIGNAL(triggered()), this, SLOT(_ClearArea()));
+	_edit_mode_action_group->addAction(_mode_paint_action);
+	_edit_mode_action_group->addAction(_mode_swap_action);
+	_edit_mode_action_group->addAction(_mode_erase_action);
+	_edit_mode_action_group->addAction(_mode_inherit_action);
+	_edit_mode_action_group->addAction(_mode_area_fill_action);
+	_edit_mode_action_group->addAction(_mode_area_clear_action);
+	_edit_mode_action_group->addAction(_mode_area_inherit_action);
+	_mode_paint_action->setChecked(true);
 
 	_toggle_select_action = new QAction(QIcon("img/misc/editor_tools/selection_rectangle.png"), "&Select Area", this);
 	_toggle_select_action->setShortcut(tr("S"));
@@ -359,13 +375,14 @@ void Editor::_CreateMenus() {
 	connect(_view_menu, SIGNAL(aboutToShow()), this, SLOT(_CheckViewActions()));
 
 	_tools_menu = menuBar()->addMenu("&Tools");
-	_tools_menu->addAction(_edit_mode_paint_action);
-	_tools_menu->addAction(_edit_mode_swap_action);
-	_tools_menu->addAction(_edit_mode_erase_action);
-	_tools_menu->addAction(_edit_mode_inherit_action);
+	_tools_menu->addAction(_mode_paint_action);
+	_tools_menu->addAction(_mode_swap_action);
+	_tools_menu->addAction(_mode_erase_action);
+	_tools_menu->addAction(_mode_inherit_action);
 	_tools_menu->addSeparator();
-	_tools_menu->addAction(_edit_fill_action);
-	_tools_menu->addAction(_edit_clear_action);
+	_tools_menu->addAction(_mode_area_fill_action);
+	_tools_menu->addAction(_mode_area_clear_action);
+	_tools_menu->addAction(_mode_area_inherit_action);
 	_tools_menu->addSeparator();
 	_tools_menu->addAction(_toggle_select_action);
 	connect(_tools_menu, SIGNAL(aboutToShow()), this, SLOT(_CheckToolsActions()));
@@ -383,13 +400,14 @@ void Editor::_CreateToolbars() {
 	_tiles_toolbar->addAction(_undo_action);
 	_tiles_toolbar->addAction(_redo_action);
 	_tiles_toolbar->addSeparator();
-	_tiles_toolbar->addAction(_edit_mode_paint_action);
-	_tiles_toolbar->addAction(_edit_mode_swap_action);
-	_tiles_toolbar->addAction(_edit_mode_erase_action);
-	_tiles_toolbar->addAction(_edit_mode_inherit_action);
+	_tiles_toolbar->addAction(_mode_paint_action);
+	_tiles_toolbar->addAction(_mode_swap_action);
+	_tiles_toolbar->addAction(_mode_erase_action);
+	_tiles_toolbar->addAction(_mode_inherit_action);
 	_tiles_toolbar->addSeparator();
-	_tiles_toolbar->addAction(_edit_fill_action);
-	_tiles_toolbar->addAction(_edit_clear_action);
+	_tiles_toolbar->addAction(_mode_area_fill_action);
+	_tiles_toolbar->addAction(_mode_area_clear_action);
+	_tiles_toolbar->addAction(_mode_area_inherit_action);
 	_tiles_toolbar->addSeparator();
 	_tiles_toolbar->addAction(_toggle_select_action);
 }
@@ -449,7 +467,10 @@ bool Editor::_UnsavedDataPrompt() {
 
 void Editor::_CheckFileActions() {
 	if (_map_data.IsInitialized() == true) {
-		_save_action->setEnabled(_map_data.IsMapModified());
+		if (_map_data.GetMapFilename().isEmpty() == true) // Don't allow normal saves with a newly created map
+			_save_action->setEnabled(false);
+		else
+			_save_action->setEnabled(_map_data.IsMapModified());
 		_save_as_action->setEnabled(true);
 		_close_action->setEnabled(true);
 	}
@@ -513,21 +534,23 @@ void Editor::_CheckViewActions() {
 
 void Editor::_CheckToolsActions() {
 	if (_map_data.IsInitialized() == true) {
-		_edit_mode_paint_action->setEnabled(true);
-		_edit_mode_swap_action->setEnabled(true);
-		_edit_mode_erase_action->setEnabled(true);
-		_edit_mode_inherit_action->setEnabled(true);
-		_edit_fill_action->setEnabled(true);
-		_edit_clear_action->setEnabled(true);
+		_mode_paint_action->setEnabled(true);
+		_mode_swap_action->setEnabled(true);
+		_mode_erase_action->setEnabled(true);
+		_mode_inherit_action->setEnabled(true);
+		_mode_area_fill_action->setEnabled(true);
+		_mode_area_clear_action->setEnabled(true);
+		_mode_area_inherit_action->setEnabled(true);
 		_toggle_select_action->setEnabled(true);
 	}
 	else {
-		_edit_mode_paint_action->setEnabled(false);
-		_edit_mode_swap_action->setEnabled(false);
-		_edit_mode_erase_action->setEnabled(false);
-		_edit_mode_inherit_action->setEnabled(false);
-		_edit_fill_action->setEnabled(false);
-		_edit_clear_action->setEnabled(false);
+		_mode_paint_action->setEnabled(false);
+		_mode_swap_action->setEnabled(false);
+		_mode_erase_action->setEnabled(false);
+		_mode_inherit_action->setEnabled(false);
+		_mode_area_fill_action->setEnabled(false);
+		_mode_area_clear_action->setEnabled(false);
+		_mode_area_inherit_action->setEnabled(false);
 		_toggle_select_action->setEnabled(false);
 	}
 }
@@ -605,6 +628,7 @@ void Editor::_FileNew() {
 
 	_ClearEditorState();
 	statusBar()->showMessage("New map created", 5000);
+	setWindowTitle("Allacrost Map Editor -- New Map");
 } // void Editor::_FileNew()
 
 
@@ -643,6 +667,7 @@ void Editor::_FileOpen() {
 
 	_ClearEditorState();
 	statusBar()->showMessage(QString("Opened map \'%1\'").arg(_map_data.GetMapFilename()), 5000);
+	setWindowTitle(QString("Allacrost Map Editor -- %1").arg(_map_data.GetMapFilename()));
 }
 
 
@@ -658,21 +683,20 @@ void Editor::_FileSave() {
 
 	_undo_stack->setClean();
 	setWindowTitle(QString("%1").arg(_map_data.GetMapFilename()));
-	statusBar()->showMessage(QString("Saved \'%1\' successfully!").arg(_map_data.GetMapFilename()), 5000);
+	statusBar()->showMessage(QString("Saved map \'%1\' successfully!").arg(_map_data.GetMapFilename()), 5000);
 }
 
 
 
 void Editor::_FileSaveAs() {
-	// Get the file name to save to from the user
-	QString filename = QFileDialog::getSaveFileName(this, "Allacrost Map Editor -- File Save", "lua/data/maps", "Maps (*.lua)");
-
-	if (filename.isEmpty() == true) {
-		statusBar()->showMessage("Save abandoned.", 5000);
+	if (_map_data.IsInitialized() == false) {
 		return;
 	}
 
-	if (_map_data.IsInitialized() == false) {
+	// Get the file name to save to from the user
+	QString filename = QFileDialog::getSaveFileName(this, "Allacrost Map Editor -- File Save", "lua/data/maps", "Maps (*.lua)");
+	if (filename.isEmpty() == true) {
+		statusBar()->showMessage("Save abandoned.", 5000);
 		return;
 	}
 
@@ -681,8 +705,8 @@ void Editor::_FileSaveAs() {
 	}
 
 	_undo_stack->setClean();
-	setWindowTitle(QString("%1").arg(_map_data.GetMapFilename()));
-	statusBar()->showMessage(QString("Saved \'%1\' successfully!").arg(_map_data.GetMapFilename()), 5000);
+	setWindowTitle(QString("Allacrost Map Editor -- %1").arg(_map_data.GetMapFilename()));
+	statusBar()->showMessage(QString("Saved map \'%1\' successfully").arg(_map_data.GetMapFilename()), 5000);
 }
 
 
@@ -694,7 +718,7 @@ void Editor::_FileClose() {
 
 	_map_data.DestroyData();
 	_ClearEditorState();
-	setWindowTitle("Hero of Allacrost Map Editor");
+	setWindowTitle("Allacrost Map Editor");
 }
 
 
@@ -774,79 +798,6 @@ void Editor::_ViewCollisionData() {
 
 
 
-void Editor::_SelectPaintMode() {
-	_map_view->ClearSelectionLayer();
-	_map_view->SetEditMode(PAINT_MODE);
-}
-
-
-
-void Editor::_SelectSwapMode() {
-	_map_view->ClearSelectionLayer();
-	_map_view->SetEditMode(SWAP_MODE);
-}
-
-
-
-void Editor::_SelectEraseMode() {
-	_map_view->ClearSelectionLayer();
-	_map_view->SetEditMode(ERASE_MODE);
-}
-
-
-
-void Editor::_SelectInheritMode() {
-	_map_view->ClearSelectionLayer();
-	_map_view->SetEditMode(INHERIT_MODE);
-}
-
-
-
-
-void Editor::_FillArea() {
-	// TODO: if selection area is active, fill to selection. Otherwise fill the layer.
-
-	// TODO: fetch the currently selected tile/tileset and fill the entire layer with that tile for the active tile context
-
-	// TODO: perform autotile randomization for the tile when available
-
-	// TODO: record map data for undo/redo stack
-
-	// Draw the changes.
-	_map_data.SetMapModified(true);
-	_map_view->DrawMap();
-}
-
-
-
-void Editor::_ClearArea() {
-	// TODO: if selection area is active, clear the selection. Otherwise clear the layer.
-
-	// TODO: fetch the current tile layer and clear it only for the active tile context
-
-	// TODO: record map data for undo/redo stack
-
-	// Draw the changes.
-	_map_data.SetMapModified(true);
-	_map_view->DrawMap();
-}
-
-
-
-void Editor::_InheritArea() {
-	// TODO: if selection area is active, inherit the selection. Otherwise clear the layer.
-
-	// TODO: fetch the current tile layer and inherit it only for the active tile context
-
-	// TODO: record map data for undo/redo stack
-
-	// Draw the changes.
-	_map_data.SetMapModified(true);
-	_map_view->DrawMap();
-}
-
-
-
 void Editor::_ToggleSelectArea() {
 	bool selection = _map_view->ToggleSelectionOverlayVisible();
 	_toggle_select_action->setChecked(selection);
@@ -855,14 +806,14 @@ void Editor::_ToggleSelectArea() {
 
 
 void Editor::_HelpHelp() {
-    QMessageBox::about(this, "Hero of Allacrost Map Editor -- Help",
+    QMessageBox::about(this, "Allacrost Map Editor -- Help",
 		"<p>In-editor documentation is not yet available. Please visit http://wiki.allacrost.org for available documentation.</p>");
 }
 
 
 
 void Editor::_HelpAbout() {
-    QMessageBox::about(this, "Hero of Allacrost Map Editor -- About",
+    QMessageBox::about(this, "Allacrost Map Editor -- About",
 		"<center><h2>Hero of Allacrost Map Editor</h2></center>"
 		"<center><h3>Copyright 2004-2015</h3></center>"
 		"<p>A map editor created for the Hero of Allacrost project. See 'http://www.allacrost.org/' for more information</p>");
@@ -871,7 +822,7 @@ void Editor::_HelpAbout() {
 
 
 void Editor::_HelpAboutQt() {
-    QMessageBox::aboutQt(this, "Hero of Allacrost Map Editor -- About QT");
+    QMessageBox::aboutQt(this, "Allacrost Map Editor -- About QT");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -61,7 +61,6 @@ int main(int argc, char** argv) {
 	QApplication app(argc, argv);
 
 	Editor* editor = new Editor();
-	editor->setCaption("Hero of Allacrost Map Editor");
 	app.setMainWidget(editor);
 	editor->show();
 
