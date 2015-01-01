@@ -59,10 +59,13 @@ Editor::Editor() :
 	_tileset_properties_action(NULL),
 	_map_properties_action(NULL),
 	_view_grid_action(NULL),
+	_view_missing_action(NULL),
+	_view_inherited_action(NULL),
 	_view_collisions_action(NULL),
 	_edit_mode_paint_action(NULL),
-	_edit_mode_move_action(NULL),
+	_edit_mode_swap_action(NULL),
 	_edit_mode_erase_action(NULL),
+	_edit_mode_inherit_action(NULL),
 	_edit_fill_action(NULL),
 	_edit_clear_action(NULL),
 	_toggle_select_action(NULL),
@@ -81,8 +84,8 @@ Editor::Editor() :
 	_CreateToolbars();
 
 	_undo_stack = new QUndoStack();
-	connect(_undo_stack, SIGNAL(canRedoChanged(bool)), _redo_action, SLOT(setEnabled(bool)));
 	connect(_undo_stack, SIGNAL(canUndoChanged(bool)), _undo_action, SLOT(setEnabled(bool)));
+	connect(_undo_stack, SIGNAL(canRedoChanged(bool)), _redo_action, SLOT(setEnabled(bool)));
 
 	// Create each widget that forms the main window
 	_horizontal_splitter = new QSplitter(this);
@@ -137,11 +140,14 @@ Editor::~Editor() {
 	delete _map_properties_action;
 
 	delete _view_grid_action;
+	delete _view_missing_action;
+	delete _view_inherited_action;
 	delete _view_collisions_action;
 
 	delete _edit_mode_paint_action;
-	delete _edit_mode_move_action;
+	delete _edit_mode_swap_action;
 	delete _edit_mode_erase_action;
+	delete _edit_mode_inherit_action;
 	delete _edit_fill_action;
 	delete _edit_clear_action;
 	delete _toggle_select_action;
@@ -169,57 +175,57 @@ Editor::~Editor() {
 
 void Editor::_CreateActions() {
 	// Create actions found in the File menu
-	_new_action = new QAction("&New...", this);
+	_new_action = new QAction(QIcon("img/misc/editor_tools/new.png"), "&New...", this);
 	_new_action->setShortcut(tr("Ctrl+N"));
 	_new_action->setStatusTip("Create a new map");
 	connect(_new_action, SIGNAL(triggered()), this, SLOT(_FileNew()));
 
-	_open_action = new QAction("&Open...", this);
+	_open_action = new QAction(QIcon("img/misc/editor_tools/open.png"), "&Open...", this);
 	_open_action->setShortcut(tr("Ctrl+O"));
 	_open_action->setStatusTip("Open an existing map file");
 	connect(_open_action, SIGNAL(triggered()), this, SLOT(_FileOpen()));
 
-	_save_as_action = new QAction("Save &As...", this);
-	_save_as_action->setStatusTip("Save the map to a new file");
-	connect(_save_as_action, SIGNAL(triggered()), this, SLOT(_FileSaveAs()));
-
-	_save_action = new QAction("&Save", this);
+	_save_action = new QAction(QIcon("img/misc/editor_tools/save.png"), "&Save", this);
 	_save_action->setShortcut(tr("Ctrl+S"));
 	_save_action->setStatusTip("Save the map file");
 	connect(_save_action, SIGNAL(triggered()), this, SLOT(_FileSave()));
 
-	_close_action = new QAction("&Close", this);
+	_save_as_action = new QAction(QIcon("img/misc/editor_tools/save_as.png"), "Save &As...", this);
+	_save_as_action->setStatusTip("Save the map to a new file");
+	connect(_save_as_action, SIGNAL(triggered()), this, SLOT(_FileSaveAs()));
+
+	_close_action = new QAction(QIcon("img/misc/editor_tools/close.png"), "&Close", this);
 	_close_action->setShortcut(tr("Ctrl+W"));
 	_close_action->setStatusTip("Close the map");
 	connect(_close_action, SIGNAL(triggered()), this, SLOT(_FileClose()));
 
-	_quit_action = new QAction("&Quit", this);
+	_quit_action = new QAction(QIcon("img/misc/editor_tools/exit.png"), "&Quit", this);
 	_quit_action->setShortcut(tr("Ctrl+Q"));
 	_quit_action->setStatusTip("Exit the application");
 	connect(_quit_action, SIGNAL(triggered()), this, SLOT(_FileQuit()));
 
 	// Create actions found in the Edit menu
-	_undo_action = new QAction(QIcon("img/misc/editor_tools/arrow_left.png"), "&Undo", this);
+	_undo_action = new QAction(QIcon("img/misc/editor_tools/undo.png"), "&Undo", this);
 	_undo_action->setShortcut(tr("Ctrl+Z"));
 	_undo_action->setStatusTip("Undo the previous command");
 	connect(_undo_action, SIGNAL(triggered()), _undo_stack, SLOT(undo()));
 
-	_redo_action = new QAction(QIcon("img/misc/editor_tools/arrow_right.png"), "&Redo", this);
+	_redo_action = new QAction(QIcon("img/misc/editor_tools/redo.png"), "&Redo", this);
 	_redo_action->setShortcut(tr("Ctrl+Y"));
 	_redo_action->setStatusTip("Redo the next command");
 	connect(_redo_action, SIGNAL(triggered()), _undo_stack, SLOT(redo()));
 
-	_cut_action = new QAction("Cu&t", this);
+	_cut_action = new QAction(QIcon("img/misc/editor_tools/cut.png"), "Cu&t", this);
 	_cut_action->setShortcut(tr("Ctrl+X"));
 	_cut_action->setStatusTip("Cut the selected area");
 	connect(_cut_action, SIGNAL(triggered()), this, SLOT(_CutSelection()));
 
-	_copy_action = new QAction("&Copy", this);
+	_copy_action = new QAction(QIcon("img/misc/editor_tools/copy.png"), "&Copy", this);
 	_copy_action->setShortcut(tr("Ctrl+C"));
 	_copy_action->setStatusTip("Copy the selected area");
 	connect(_copy_action, SIGNAL(triggered()), this, SLOT(_CopySelection()));
 
-	_paste_action = new QAction("&Paste", this);
+	_paste_action = new QAction(QIcon("img/misc/editor_tools/paste.png"), "&Paste", this);
 	_paste_action->setShortcut(tr("Ctrl+V"));
 	_paste_action->setStatusTip("Paste the copied selection");
 	connect(_paste_action, SIGNAL(triggered()), this, SLOT(_PasteSelection()));
@@ -239,6 +245,18 @@ void Editor::_CreateActions() {
 	_view_grid_action->setCheckable(true);
 	connect(_view_grid_action, SIGNAL(triggered()), this, SLOT(_ViewTileGrid()));
 
+	_view_missing_action = new QAction("&Missing Tiles", this);
+	_view_missing_action->setStatusTip("Toggles the display of an overlay for all missing tiles on the selected tile layer");
+	_view_missing_action->setShortcut(tr("M"));
+	_view_missing_action->setCheckable(true);
+	connect(_view_missing_action, SIGNAL(triggered()), this, SLOT(_ViewMissingTiles()));
+
+	_view_inherited_action = new QAction("&Inherited Tiles", this);
+	_view_inherited_action->setStatusTip("Toggles the display of an overlay for all inherited tiles on the selected tile layer");
+	_view_inherited_action->setShortcut(tr("I"));
+	_view_inherited_action->setCheckable(true);
+	connect(_view_inherited_action, SIGNAL(triggered()), this, SLOT(_ViewInheritedTiles()));
+
 	_view_collisions_action = new QAction("&Collision &Data", this);
 	_view_collisions_action->setStatusTip("Shows which quadrants on the map have collisions enabled");
 	_view_collisions_action->setShortcut(tr("C"));
@@ -252,11 +270,11 @@ void Editor::_CreateActions() {
 	_edit_mode_paint_action->setCheckable(true);
 	connect(_edit_mode_paint_action, SIGNAL(triggered()), this, SLOT(_SelectPaintMode()));
 
-	_edit_mode_move_action = new QAction(QIcon("img/misc/editor_tools/arrow.png"), "Mo&ve Tiles", this);
-	_edit_mode_move_action->setShortcut(tr("M"));
-	_edit_mode_move_action->setStatusTip("Switches the edit mode to allowing swapping of tiles at different positions");
-	_edit_mode_move_action->setCheckable(true);
-	connect(_edit_mode_move_action, SIGNAL(triggered()), this, SLOT(_SelectMoveMode()));
+	_edit_mode_swap_action = new QAction(QIcon("img/misc/editor_tools/arrow.png"), "S&wap Tiles", this);
+	_edit_mode_swap_action->setShortcut(tr("W"));
+	_edit_mode_swap_action->setStatusTip("Switches the edit mode to allowing swapping of tiles at different positions");
+	_edit_mode_swap_action->setCheckable(true);
+	connect(_edit_mode_swap_action, SIGNAL(triggered()), this, SLOT(_SelectSwapMode()));
 
 	_edit_mode_erase_action = new QAction(QIcon("img/misc/editor_tools/eraser.png"), "&Erase Tiles", this);
 	_edit_mode_erase_action->setShortcut(tr("E"));
@@ -264,19 +282,26 @@ void Editor::_CreateActions() {
 	_edit_mode_erase_action->setCheckable(true);
 	connect(_edit_mode_erase_action, SIGNAL(triggered()), this, SLOT(_SelectEraseMode()));
 
+	_edit_mode_inherit_action = new QAction(QIcon("img/misc/editor_tools/inherited.png"), "&Inherit Tiles", this);
+	_edit_mode_inherit_action->setShortcut(tr("I"));
+	_edit_mode_inherit_action->setStatusTip("Switches the edit mode to inherit tiles from the inherited context");
+	_edit_mode_inherit_action->setCheckable(true);
+	connect(_edit_mode_inherit_action, SIGNAL(triggered()), this, SLOT(_SelectInheritMode()));
+
 	_edit_mode_action_group = new QActionGroup(this);
 	_edit_mode_action_group->addAction(_edit_mode_paint_action);
-	_edit_mode_action_group->addAction(_edit_mode_move_action);
+	_edit_mode_action_group->addAction(_edit_mode_swap_action);
 	_edit_mode_action_group->addAction(_edit_mode_erase_action);
+	_edit_mode_action_group->addAction(_edit_mode_inherit_action);
 	_edit_mode_paint_action->setChecked(true);
 
-	_edit_fill_action = new QAction(QIcon("img/misc/editor_tools/fill.png"), "&Fill Selection", this);
-	_edit_fill_action->setStatusTip("Fills the selection area or current tile layer with the chosen tile(s)");
-	connect(_edit_fill_action, SIGNAL(triggered()), this, SLOT(_FillSelection()));
+	_edit_fill_action = new QAction(QIcon("img/misc/editor_tools/fill.png"), "&Fill Area", this);
+	_edit_fill_action->setStatusTip("Fills the selection area or tile area with the chosen tile(s)");
+	connect(_edit_fill_action, SIGNAL(triggered()), this, SLOT(_FillArea()));
 
-	_edit_clear_action = new QAction("&Clear Selection", this);
-	_edit_clear_action->setStatusTip("Clears all tiles from the selection area or current tile layer");
-	connect(_edit_clear_action, SIGNAL(triggered()), this, SLOT(_ClearSelection()));
+	_edit_clear_action = new QAction(QIcon("img/misc/editor_tools/clear.png"), "&Clear Area", this);
+	_edit_clear_action->setStatusTip("Clears all tiles from the selection area or tile area");
+	connect(_edit_clear_action, SIGNAL(triggered()), this, SLOT(_ClearArea()));
 
 	_toggle_select_action = new QAction(QIcon("img/misc/editor_tools/selection_rectangle.png"), "&Select Area", this);
 	_toggle_select_action->setShortcut(tr("S"));
@@ -328,13 +353,16 @@ void Editor::_CreateMenus() {
 
 	_view_menu = menuBar()->addMenu("&View");
 	_view_menu->addAction(_view_grid_action);
+	_view_menu->addAction(_view_missing_action);
+	_view_menu->addAction(_view_inherited_action);
 	_view_menu->addAction(_view_collisions_action);
 	connect(_view_menu, SIGNAL(aboutToShow()), this, SLOT(_CheckViewActions()));
 
 	_tools_menu = menuBar()->addMenu("&Tools");
 	_tools_menu->addAction(_edit_mode_paint_action);
-	_tools_menu->addAction(_edit_mode_move_action);
+	_tools_menu->addAction(_edit_mode_swap_action);
 	_tools_menu->addAction(_edit_mode_erase_action);
+	_tools_menu->addAction(_edit_mode_inherit_action);
 	_tools_menu->addSeparator();
 	_tools_menu->addAction(_edit_fill_action);
 	_tools_menu->addAction(_edit_clear_action);
@@ -356,8 +384,9 @@ void Editor::_CreateToolbars() {
 	_tiles_toolbar->addAction(_redo_action);
 	_tiles_toolbar->addSeparator();
 	_tiles_toolbar->addAction(_edit_mode_paint_action);
-	_tiles_toolbar->addAction(_edit_mode_move_action);
+	_tiles_toolbar->addAction(_edit_mode_swap_action);
 	_tiles_toolbar->addAction(_edit_mode_erase_action);
+	_tiles_toolbar->addAction(_edit_mode_inherit_action);
 	_tiles_toolbar->addSeparator();
 	_tiles_toolbar->addAction(_edit_fill_action);
 	_tiles_toolbar->addAction(_edit_clear_action);
@@ -369,11 +398,15 @@ void Editor::_CreateToolbars() {
 
 void Editor::_ClearEditorState() {
 	_map_view->SetGridVisible(false);
-	_map_view->SetSelectionVisible(false);
+	_map_view->SetSelectionOverlayVisible(false);
+	_map_view->SetMissingOverlayVisible(false);
+	_map_view->SetInheritedOverlayVisible(false);
 	_map_view->SetEditMode(PAINT_MODE);
 
 	_toggle_select_action->setChecked(false);
 	_view_grid_action->setChecked(false);
+	_view_missing_action->setChecked(false);
+	_view_inherited_action->setChecked(false);
 
 	_undo_stack->setClean();
 
@@ -463,11 +496,15 @@ void Editor::_CheckEditActions() {
 void Editor::_CheckViewActions() {
 	if (_map_data.IsInitialized() == true) {
 		_view_grid_action->setEnabled(true);
+		_view_missing_action->setEnabled(true);
+		_view_inherited_action->setEnabled(true);
 		// TODO: View collision grid feature has not yet been implement. Option permanently disabled until it is
 		_view_collisions_action->setEnabled(false);
 	}
 	else {
 		_view_grid_action->setEnabled(false);
+		_view_missing_action->setEnabled(false);
+		_view_inherited_action->setEnabled(false);
 		_view_collisions_action->setEnabled(false);
 	}
 }
@@ -477,16 +514,18 @@ void Editor::_CheckViewActions() {
 void Editor::_CheckToolsActions() {
 	if (_map_data.IsInitialized() == true) {
 		_edit_mode_paint_action->setEnabled(true);
-		_edit_mode_move_action->setEnabled(true);
+		_edit_mode_swap_action->setEnabled(true);
 		_edit_mode_erase_action->setEnabled(true);
+		_edit_mode_inherit_action->setEnabled(true);
 		_edit_fill_action->setEnabled(true);
 		_edit_clear_action->setEnabled(true);
 		_toggle_select_action->setEnabled(true);
 	}
 	else {
 		_edit_mode_paint_action->setEnabled(false);
-		_edit_mode_move_action->setEnabled(false);
+		_edit_mode_swap_action->setEnabled(false);
 		_edit_mode_erase_action->setEnabled(false);
+		_edit_mode_inherit_action->setEnabled(false);
 		_edit_fill_action->setEnabled(false);
 		_edit_clear_action->setEnabled(false);
 		_toggle_select_action->setEnabled(false);
@@ -709,8 +748,21 @@ void Editor::_EditMapProperties() {
 
 
 void Editor::_ViewTileGrid() {
-	bool grid_active = _map_view->ToggleGridVisible();
-	_view_grid_action->setChecked(grid_active);
+	_view_grid_action->setChecked(_map_view->ToggleGridVisible());
+	_map_view->DrawMap();
+}
+
+
+
+void Editor::_ViewMissingTiles() {
+	_view_grid_action->setChecked(_map_view->ToggleMissingOverlayVisible());
+	_map_view->DrawMap();
+}
+
+
+
+void Editor::_ViewInheritedTiles() {
+	_view_grid_action->setChecked(_map_view->ToggleInheritedOverlayVisible());
 	_map_view->DrawMap();
 }
 
@@ -729,9 +781,9 @@ void Editor::_SelectPaintMode() {
 
 
 
-void Editor::_SelectMoveMode() {
+void Editor::_SelectSwapMode() {
 	_map_view->ClearSelectionLayer();
-	_map_view->SetEditMode(MOVE_MODE);
+	_map_view->SetEditMode(SWAP_MODE);
 }
 
 
@@ -743,7 +795,15 @@ void Editor::_SelectEraseMode() {
 
 
 
-void Editor::_FillSelection() {
+void Editor::_SelectInheritMode() {
+	_map_view->ClearSelectionLayer();
+	_map_view->SetEditMode(INHERIT_MODE);
+}
+
+
+
+
+void Editor::_FillArea() {
 	// TODO: if selection area is active, fill to selection. Otherwise fill the layer.
 
 	// TODO: fetch the currently selected tile/tileset and fill the entire layer with that tile for the active tile context
@@ -759,7 +819,7 @@ void Editor::_FillSelection() {
 
 
 
-void Editor::_ClearSelection() {
+void Editor::_ClearArea() {
 	// TODO: if selection area is active, clear the selection. Otherwise clear the layer.
 
 	// TODO: fetch the current tile layer and clear it only for the active tile context
@@ -773,8 +833,22 @@ void Editor::_ClearSelection() {
 
 
 
+void Editor::_InheritArea() {
+	// TODO: if selection area is active, inherit the selection. Otherwise clear the layer.
+
+	// TODO: fetch the current tile layer and inherit it only for the active tile context
+
+	// TODO: record map data for undo/redo stack
+
+	// Draw the changes.
+	_map_data.SetMapModified(true);
+	_map_view->DrawMap();
+}
+
+
+
 void Editor::_ToggleSelectArea() {
-	bool selection = _map_view->ToggleSelectionVisible();
+	bool selection = _map_view->ToggleSelectionOverlayVisible();
 	_toggle_select_action->setChecked(selection);
 }
 

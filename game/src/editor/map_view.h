@@ -38,7 +38,7 @@ class MapView : public QGraphicsScene {
 
 public:
 	/** \param parent The parent widget of the grid, which should be the main editor window
-	*** \param data A pointer to the map data to draw
+	*** \param data A pointer to the map data to manipulate and draw
 	**/
 	MapView(QWidget* parent, MapData* data);
 
@@ -52,14 +52,26 @@ public:
 	void SetGridVisible(bool value)
 		{ _grid_visible = value; DrawMap(); }
 
-	void SetSelectionVisible(bool value)
-		{ _selection_visible = value; DrawMap(); }
+	void SetSelectionOverlayVisible(bool value)
+		{ _selection_overlay_visible = value; DrawMap(); }
+
+	void SetMissingOverlayVisible(bool value)
+		{ _missing_overlay_visible = value; DrawMap(); }
+
+	void SetInheritedOverlayVisible(bool value)
+		{ _inherited_overlay_visible = value; DrawMap(); }
 
 	bool ToggleGridVisible()
 		{ _grid_visible = !_grid_visible; return _grid_visible; }
 
-	bool ToggleSelectionVisible()
-		{ _selection_visible = !_selection_visible; return _selection_visible; }
+	bool ToggleSelectionOverlayVisible()
+		{ _selection_overlay_visible = !_selection_overlay_visible; return _selection_overlay_visible; }
+
+	bool ToggleMissingOverlayVisible()
+		{ _missing_overlay_visible = !_missing_overlay_visible; return _missing_overlay_visible; }
+
+	bool ToggleInheritedOverlayVisible()
+		{ _inherited_overlay_visible = !_inherited_overlay_visible; return _inherited_overlay_visible; }
 
 	void SetEditMode(EDIT_MODE new_mode)
 		{ _tile_mode = new_mode; }
@@ -94,14 +106,6 @@ public:
 	//! \brief Draws the entire map to the tile grid area
     void DrawMap();
 
-	/** \brief The names of each individual context
-	*** \note Maximum size is 32 entries, the maximum amount of contexts that a single map supports.
-	**/
-	QStringList context_names;
-
-	//! \brief A list storing the background music filenames.
-	QStringList music_files;
-
 protected:
 	/** \name User Input Event Processing Functions
 	*** \brief Functions to process mouse and keyboard events on the map
@@ -130,11 +134,17 @@ private:
 	//! \brief A pointer to the underlying map data to read and manipulate
 	MapData* _map_data;
 
-	//! \brief When TRUE the grid between tiles is displayed.
+	//! \brief When true, a series of grid lines between tiles are drawn
 	bool _grid_visible;
 
-	//! \brief When TRUE the rectangle of chosen tiles is displayed.
-	bool _selection_visible;
+	//! \brief When true, an overlay is drawn over each tile in the area selected by the user
+	bool _selection_overlay_visible;
+
+	//! \brief When true, an overlay is drawn over each missing tile (NO_TILE) for the selected tile layer
+	bool _missing_overlay_visible;
+
+	//! \brief When true, an overlay is drawn over each inherited tile (INHERITED_TILE) for the selected tile layer
+	bool _inherited_overlay_visible;
 
 	/** \name Tile Coordinates
 	*** These members constitute the x and y (column and row) coorindates of a tile. The coordinates are
@@ -158,7 +168,7 @@ private:
 
 	/** \brief A tile layer used for indicating a selected area of a tile layer
 	*** This data exists only in the editor and is not a part of the map file. It acts similar to an
-	*** actual tile layer as far as drawing is concerned, and is not managed by _data_model.
+	*** actual tile layer as far as drawing is concerned, and is not managed by _map_data.
 	**/
 	TileLayer _select_layer;
 
@@ -178,6 +188,12 @@ private:
 	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 50% opacity)
 	QPixmap _selection_tile;
 
+	//! \brief A one-tile sized square used to highlight missing tiles (colored red at 20% opacity)
+	QPixmap _missing_tile;
+
+	//! \brief A one-tile sized square used to highlight inherited tiles (colored yellow at 20% opacity)
+	QPixmap _inherited_tile;
+
 	//! \brief Used to display the graphics widgets
 	QGraphicsView* _graphics_view;
 
@@ -187,11 +203,12 @@ private:
 	**/
 	void _PaintTile(uint32 x, uint32 y);
 
-	/** \brief Erases the tile at the chosen location on the map
-	*** \param x The x coordinate of the tile to erase
-	*** \param y The y coordinate of the tile to erase
+	/** \brief Sets the value of a single tile on the map
+	*** \param x The x coordinate of the tile to set
+	*** \param y The y coordinate of the tile to set
+	*** \param value The value to set the tile to
 	**/
-	void _EraseTile(int32 x, int32 y);
+	void _SetTile(int32 x, int32 y, int32 value);
 
 	//! \brief A helper function to DrawMap() that draws the tile grid over the tiles
 	void _DrawGrid();

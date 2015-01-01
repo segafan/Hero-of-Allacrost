@@ -17,7 +17,7 @@
 
 namespace hoa_editor {
 
-bool EDITOR_DEBUG = false;
+// TODO: If no utility functions can be realized for the editor, delete this file from the repository
 
 } // namespace hoa_editor
 

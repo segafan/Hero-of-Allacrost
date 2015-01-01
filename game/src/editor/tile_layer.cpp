@@ -13,6 +13,7 @@
 *** \brief   Source file for tile layer data and view classes
 *** **************************************************************************/
 
+#include <QDebug>
 #include <QMouseEvent>
 
 #include "editor_utils.h"
@@ -191,7 +192,7 @@ LayerView::LayerView(MapData* data) :
 	_right_click_item(NULL)
 {
 	if (data == NULL) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "constructor received NULL map data argument" << endl;
+		qDebug() << "constructor received NULL map data argument" << endl;
 		return;
 	}
 
