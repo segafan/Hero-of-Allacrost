@@ -158,12 +158,13 @@ private:
 	QAction* _view_inherited_action;
 	QAction* _view_collisions_action;
 
-	QAction* _edit_mode_paint_action;
-	QAction* _edit_mode_swap_action;
-	QAction* _edit_mode_erase_action;
-	QAction* _edit_mode_inherit_action;
-	QAction* _edit_fill_action;
-	QAction* _edit_clear_action;
+	QAction* _mode_paint_action;
+	QAction* _mode_swap_action;
+	QAction* _mode_erase_action;
+	QAction* _mode_inherit_action;
+	QAction* _mode_area_fill_action;
+	QAction* _mode_area_clear_action;
+	QAction* _mode_area_inherit_action;
 	QAction* _toggle_select_action;
 
 	QAction* _help_action;
@@ -234,13 +235,20 @@ private slots:
 	void _ViewInheritedTiles();
 	void _ViewCollisionData();
 
-	void _SelectPaintMode();
-	void _SelectSwapMode();
-	void _SelectEraseMode();
-	void _SelectInheritMode();
-	void _FillArea();
-	void _ClearArea();
-	void _InheritArea();
+	void _SelectPaintMode()
+		{ _map_view->SetEditMode(PAINT_MODE); }
+	void _SelectSwapMode()
+		{ _map_view->SetEditMode(SWAP_MODE); }
+	void _SelectEraseMode()
+		{ _map_view->SetEditMode(ERASE_MODE); }
+	void _SelectInheritMode()
+		{ _map_view->SetEditMode(INHERIT_MODE); }
+	void _SelectFillAreaMode()
+		{ _map_view->SetEditMode(FILL_AREA_MODE); }
+	void _SelectClearAreaMode()
+		{ _map_view->SetEditMode(CLEAR_AREA_MODE); }
+	void _SelectInheritAreaMode()
+		{ _map_view->SetEditMode(INHERIT_AREA_MODE); }
 	void _ToggleSelectArea();
 
 	void _HelpHelp();

@@ -77,12 +77,15 @@ const uint32 TILE_NUM_QUADRANTS = 4;
 
 //! \brief Various modes for map tile editing
 enum EDIT_MODE {
-	INVALID_MODE   = -1,
-	PAINT_MODE     =  0,
-	SWAP_MODE      =  1,
-	ERASE_MODE     =  2,
-	INHERIT_MODE   =  3,
-	TOTAL_MODE     =  4
+	INVALID_MODE        = -1,
+	PAINT_MODE          =  0,
+	SWAP_MODE           =  1,
+	ERASE_MODE          =  2,
+	INHERIT_MODE        =  3,
+	FILL_AREA_MODE      =  4,
+	CLEAR_AREA_MODE     =  5,
+	INHERIT_AREA_MODE   =  6,
+	TOTAL_MODE          =  7
 };
 
 //! \brief Represents different types of transition patterns for autotileable tiles.
