@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2013 by The Allacrost Project
+//            Copyright (C) 2004-2015 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software
@@ -83,7 +83,7 @@ BootMode::BootMode() :
 	string date_text(__DATE__);
 	_version_text.SetText(UTranslate("Development Release") + MakeUnicodeString(" - ") + MakeUnicodeString(date_text));
 	_copyright_text.SetStyle(TextStyle("text20"));
-	_copyright_text.SetText(UTranslate("© 2004 — 2013 The Allacrost Project"));
+	_copyright_text.SetText(UTranslate("© 2004 — 2015 The Allacrost Project"));
 
 	ReadScriptDescriptor read_data;
 	if (!read_data.OpenFile("lua/data/config/boot.lua")) {
