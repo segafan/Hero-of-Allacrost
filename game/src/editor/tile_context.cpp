@@ -13,6 +13,7 @@
 *** \brief   Source file for tile context data and view classes
 *** **************************************************************************/
 
+#include <QDebug>
 #include <QMouseEvent>
 
 #include "editor_utils.h"
@@ -31,7 +32,7 @@ namespace hoa_editor {
 
 void TileContext::_AddTileLayer(TileLayer& layer) {
 	if (layer.GetHeight() == 0 || layer.GetLength() == 0) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not add layer because one or both dimensions are zero" << endl;
+		qDebug() << "could not add layer because one or both dimensions are zero" << endl;
 		return;
 	}
 
@@ -43,11 +44,11 @@ void TileContext::_AddTileLayer(TileLayer& layer) {
 
 	// Ensure that the height and length of the layer match an existing layer
 	if (layer.GetHeight() != _tile_layers[0].GetHeight()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not add layer because its height does not match the existing layers" << endl;
+		qDebug() << "could not add layer because its height does not match the existing layers" << endl;
 		return;
 	}
 	if (layer.GetLength() != _tile_layers[0].GetLength()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not add layer because its length does not match the existing layers" << endl;
+		qDebug() << "could not add layer because its length does not match the existing layers" << endl;
 		return;
 	}
 
@@ -58,7 +59,7 @@ void TileContext::_AddTileLayer(TileLayer& layer) {
 
 void TileContext::_RemoveTileLayer(uint32 layer_index) {
 	if (layer_index >= _tile_layers.size()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not remove layer because the layer_index argument (" << layer_index
+		qDebug() << "could not remove layer because the layer_index argument (" << layer_index
 			<< ") exceeds the number of layers (" << layer_index << ")" << endl;
 		return;
 	}
@@ -73,7 +74,7 @@ void TileContext::_RemoveTileLayer(uint32 layer_index) {
 
 void TileContext::_SwapTileLayers(uint32 first_index, uint32 second_index) {
 	if (first_index >= _tile_layers.size() || second_index >= _tile_layers.size()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not remove layer because one or both index arguments (" << first_index
+		qDebug() << "could not remove layer because one or both index arguments (" << first_index
 			<< ", " << second_index << ") exceeds the number of layers (" << _tile_layers.size() << ")" << endl;
 		return;
 	}
@@ -100,7 +101,7 @@ ContextView::ContextView(MapData* data) :
 	_right_click_item(NULL)
 {
 	if (data == NULL) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "constructor received NULL map data argument" << endl;
+		qDebug() << "constructor received NULL map data argument" << endl;
 		return;
 	}
 
@@ -141,7 +142,6 @@ ContextView::ContextView(MapData* data) :
 	connect(_rename_context_action, SIGNAL(triggered()), this, SLOT(_RenameTileContext()));
 	connect(_delete_context_action, SIGNAL(triggered()), this, SLOT(_DeleteTileContext()));
 }
-
 
 
 
@@ -314,7 +314,6 @@ void ContextView::_ValidateChangedData(QTreeWidgetItem* item, int column) {
 		_original_context_name.clear();
 	}
 	else if (column == INHERITS_COLUMN) {
-		PRINT_DEBUG << "here" << endl;
 		closePersistentEditor(item, column);
 		int32 new_inheritance = NO_CONTEXT;
 		bool valid_change = false;

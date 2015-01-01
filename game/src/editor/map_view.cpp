@@ -14,6 +14,7 @@
 *** \brief   Source file for the map view widget
 *** **************************************************************************/
 
+#include <QDebug>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QGraphicsSceneMouseEvent>
@@ -35,7 +36,9 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	QGraphicsScene(),
 	_map_data(data),
 	_grid_visible(false),
-	_selection_visible(false),
+	_selection_overlay_visible(false),
+	_missing_overlay_visible(false),
+	_inherited_overlay_visible(false),
 	_cursor_tile_x(-1),
 	_cursor_tile_y(-1),
 	_move_source_tile_x(-1),
@@ -89,9 +92,16 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_right_click_menu->addAction(_delete_row_action);
 	_right_click_menu->addAction(_delete_column_action);
 
-	// Blue selection tile with 50% transparency
+	// Blue tile with 50% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
-	_selection_tile.fill(QColor(0, 0, 255, 125));
+	_selection_tile.fill(QColor(0, 0, 255, 128));
+	// Red tile with 20% transparency
+	_missing_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
+	_missing_tile.fill(QColor(255, 0, 0, 50));
+	// Yellow tile with 20% transparency
+	_inherited_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
+	_inherited_tile.fill(QColor(255, 255, 0, 50));
+
 } // MapView::MapView(QWidget* parent, MapData* data)
 
 
@@ -122,7 +132,7 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 	_cursor_tile_x = x / TILE_LENGTH;
 	_cursor_tile_y = y / TILE_HEIGHT;
 
-	if (_selection_visible == false && event->button() == Qt::LeftButton) {
+	if (_selection_overlay_visible == false && event->button() == Qt::LeftButton) {
 		switch (_tile_mode) {
 			case PAINT_MODE:
 				_PaintTile(_cursor_tile_x, _cursor_tile_y);
@@ -130,16 +140,23 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 				DrawMap();
 				break;
 
-			case MOVE_MODE:
+			case SWAP_MODE:
 				_move_source_tile_x = _cursor_tile_x;
 				_move_source_tile_y = _cursor_tile_y;
 				break;
 
 			case ERASE_MODE:
-				_EraseTile(_cursor_tile_x, _cursor_tile_y);
+				_SetTile(_cursor_tile_x, _cursor_tile_y, NO_TILE);
 				_map_data->SetMapModified(true);
 				DrawMap();
 				break;
+
+			case INHERIT_MODE:
+				_SetTile(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
+				_map_data->SetMapModified(true);
+				DrawMap();
+				break;
+
 
 			default:
 				QMessageBox::warning(_graphics_view, "Tile editing mode", "ERROR: Invalid tile editing mode!");
@@ -180,7 +197,7 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 		_cursor_tile_x = tile_x;
 		_cursor_tile_y = tile_y;
 
-		if (_selection_visible == true && event->buttons() == Qt::LeftButton) {
+		if (_selection_overlay_visible == true && event->buttons() == Qt::LeftButton) {
 			uint32 left_x, right_x, top_y, bottom_y;
 
 			// Use the current tile and the selection start tiles to determine which tiles are selected
@@ -208,18 +225,23 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 			}
 		}
 
-		if (_selection_visible == false && event->buttons() == Qt::LeftButton) {
+		if (_selection_overlay_visible == false && event->buttons() == Qt::LeftButton) {
 			switch (_tile_mode) {
 				case PAINT_MODE:
 					_PaintTile(_cursor_tile_x, _cursor_tile_y);
 					DrawMap();
 					break;
 
-				case MOVE_MODE:
+				case SWAP_MODE:
 					break;
 
 				case ERASE_MODE:
-					_EraseTile(_cursor_tile_x, _cursor_tile_y);
+					_SetTile(_cursor_tile_x, _cursor_tile_y, NO_TILE);
+					DrawMap();
+					break;
+
+				case INHERIT_MODE:
+					_SetTile(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
 					DrawMap();
 					break;
 
@@ -246,7 +268,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 	switch (_tile_mode) {
 		case PAINT_MODE: {
-			if (_selection_visible == true) {
+			if (_selection_overlay_visible == true) {
 				vector<vector<int32> > select_layer = _select_layer.GetTiles();
 				for (uint32 x = 0; x < _select_layer.GetLength(); ++x) {
 					for (uint32 y = 0; y < _select_layer.GetHeight(); ++y) {
@@ -260,12 +282,12 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 			break;
 		}
 
-		case MOVE_MODE: {
+		case SWAP_MODE: {
 			_cursor_tile_x = mouse_x / TILE_LENGTH;
 			_cursor_tile_y = mouse_y / TILE_HEIGHT;
 			std::vector<std::vector<int32> >& layer = _map_data->GetSelectedTileLayer()->GetTiles();
 
-			if (_selection_visible == false) {
+			if (_selection_overlay_visible == false) {
 				// TODO: Record information for undo/redo stack
 
 				layer[_cursor_tile_y][_cursor_tile_x] = layer[_move_source_tile_y][_move_source_tile_x];
@@ -292,12 +314,28 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 		}
 
 		case ERASE_MODE: {
-			if (_selection_visible == true) {
+			if (_selection_overlay_visible == true) {
 				vector<vector<int32> > select_layer = _select_layer.GetTiles();
 				for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
 					for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
 						if (select_layer[y][x] != NO_TILE)
-							_EraseTile(x, y);
+							_SetTile(x, y, NO_TILE);
+					}
+				}
+				DrawMap();
+			}
+
+			// TODO: Record information for undo/redo stack
+			break;
+		}
+
+		case INHERIT_MODE: {
+			if (_selection_overlay_visible == true) {
+				vector<vector<int32> > select_layer = _select_layer.GetTiles();
+				for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
+					for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
+						if (select_layer[y][x] != INHERITED_TILE)
+							_SetTile(x, y, INHERITED_TILE);
 					}
 				}
 				DrawMap();
@@ -352,42 +390,75 @@ void MapView::DrawMap() {
 	setSceneRect(0, 0, _map_data->GetMapLength() * TILE_LENGTH, _map_data->GetMapHeight() * TILE_HEIGHT);
 	setBackgroundBrush(QBrush(Qt::gray));
 
-	vector<TileLayer>& tile_layers = _map_data->GetSelectedTileContext()->GetTileLayers();
+	vector<TileLayer>* tile_layers = &(_map_data->GetSelectedTileContext()->GetTileLayers());
+	vector<TileLayer>* inherited_tile_layers = NULL;
 	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
 	vector<Tileset*>& tilesets = _map_data->GetTilesets();
 
-	// Start drawing from the top left through all the visible tile layers in order
-	for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
-		for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
-			for (uint32 layer_id = 0; layer_id < tile_layers.size(); ++layer_id) {
-				// Don't draw the layer if its not visible
- 				if (layer_properties[layer_id].IsVisible() == false)
- 					continue;
+	// If this is an inheriting context, we also want to pull in the tile layers for the inherited context
+	if (_map_data->GetSelectedTileContext()->IsInheritingContext() == true) {
+		// Inherited context should never be NULL in this case
+		TileContext* inherited_context = _map_data->FindTileContextByID(_map_data->GetSelectedTileContext()->GetInheritedContextID());
+		inherited_tile_layers = &(inherited_context->GetTileLayers());
+	}
 
-				 int32 layer_index = tile_layers[layer_id].GetTile(x, y);
-				 // Draw tile if one exists at this location
-				 if (layer_index == NO_TILE)
-					 continue;
+	// Start drawing each tile from the tile layers in order
+	for (uint32 l = 0; l < tile_layers->size(); ++l) {
+		// Holds the value of the tile from a specific X/Y coordinate on this layer
+		int32 tile = NO_TILE;
+		// The index value of the tile within its tileset
+		int32 tile_index = 0;
+		// The index of the tileset that holds the value referred to by tile
+		int32 tileset_index = 0;
+		// Set to true whenever we are dealing with an inherited tile
+		bool inherited_tile = false;
+		// Set to true if this layer is the currently selected layer that the user is viewing or editing
+		bool selected_layer = (_map_data->GetSelectedTileLayer() == &(*tile_layers)[l]);
 
-				int32 tileset_index = layer_index / TILESET_NUM_TILES;
-				// Don't divide by zero
-				int32 tile_index = 0;
-				if (tileset_index == 0)
-					tile_index = layer_index;
-				else
-					tile_index = layer_index % (tileset_index * TILESET_NUM_TILES);
+		if (layer_properties[l].IsVisible() == false)
+			continue;
+
+		for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
+			for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
+				tile = (*tile_layers)[l].GetTile(x, y);
+				inherited_tile = (tile == INHERITED_TILE);
+
+				// Draw the missing tile overlay if needed and move on to the next tile
+				if (tile == NO_TILE) {
+					if (selected_layer == true && _missing_overlay_visible == true)
+						addPixmap(_missing_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+					continue;
+				}
+
+				if (inherited_tile == true) {
+					tile = (*inherited_tile_layers)[l].GetTile(x, y);
+				}
+				tile_index = tile;
+				tileset_index = tile / TILESET_NUM_TILES;
+				if (tileset_index != 0) // Don't divide by zero
+					tile_index = tile % (tileset_index * TILESET_NUM_TILES);
 
 				addPixmap(*tilesets[tileset_index]->GetTileImage(tile_index))->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
-			}
 
-			// Draw the selection square over this tile if selection mode is active and the tile is inside the selected area
-			if (_selection_visible && _select_layer.GetTile(x, y) != NO_TILE) {
-				addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				// Draw the inherited overlay over the inherited tile
+				if (inherited_tile == true && selected_layer == true && _inherited_overlay_visible == true) {
+					addPixmap(_inherited_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				}
 			}
 		}
 	}
 
-	// Draw the tile grid over the tiles if it's visibility is enabled
+	// If the selection tool is active, draw the overlay for all tiles currently selected
+	if (_selection_overlay_visible) {
+		for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
+			for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
+				if (_select_layer.GetTile(x, y) != NO_TILE) {
+					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				}
+			}
+		}
+	}
+
 	if (_grid_visible)
 		_DrawGrid();
 
@@ -454,8 +525,8 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 		}
 	}
 
-	if (multiplier == all_tilesets.size()) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not paint tile at location [" << x << ", " << y << "] "
+	if (multiplier >= all_tilesets.size()) {
+		qDebug() << "could not paint tile at location [" << x << ", " << y << "] "
 			<< "because there was no tileset data that matched the tileset in the tileset table." << endl;
 		return;
 	}
@@ -490,9 +561,9 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 
 
-void MapView::_EraseTile(int32 x, int32 y) {
+void MapView::_SetTile(int32 x, int32 y, int32 value) {
 	// TODO: Record information for undo/redo stack
-	_map_data->GetSelectedTileLayer()->SetTile(x, y, NO_TILE);
+	_map_data->GetSelectedTileLayer()->SetTile(x, y, value);
 }
 
 

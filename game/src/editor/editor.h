@@ -154,11 +154,14 @@ private:
 	QAction* _map_properties_action;
 
 	QAction* _view_grid_action;
+	QAction* _view_missing_action;
+	QAction* _view_inherited_action;
 	QAction* _view_collisions_action;
 
 	QAction* _edit_mode_paint_action;
-	QAction* _edit_mode_move_action;
+	QAction* _edit_mode_swap_action;
 	QAction* _edit_mode_erase_action;
+	QAction* _edit_mode_inherit_action;
 	QAction* _edit_fill_action;
 	QAction* _edit_clear_action;
 	QAction* _toggle_select_action;
@@ -227,13 +230,17 @@ private slots:
 	void _EditMapProperties();
 
 	void _ViewTileGrid();
+	void _ViewMissingTiles();
+	void _ViewInheritedTiles();
 	void _ViewCollisionData();
 
 	void _SelectPaintMode();
-	void _SelectMoveMode();
+	void _SelectSwapMode();
 	void _SelectEraseMode();
-	void _FillSelection();
-	void _ClearSelection();
+	void _SelectInheritMode();
+	void _FillArea();
+	void _ClearArea();
+	void _InheritArea();
 	void _ToggleSelectArea();
 
 	void _HelpHelp();

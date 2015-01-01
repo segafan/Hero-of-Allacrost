@@ -22,9 +22,6 @@
 
 namespace hoa_editor {
 
-//! Determines whether the code in the hoa_editor namespace should print debug statements or not.
-extern bool EDITOR_DEBUG;
-
 //! \brief The value used to indicate that no tile is placed at a particular location
 const int32 NO_TILE = -1;
 
@@ -82,9 +79,10 @@ const uint32 TILE_NUM_QUADRANTS = 4;
 enum EDIT_MODE {
 	INVALID_MODE   = -1,
 	PAINT_MODE     =  0,
-	MOVE_MODE      =  1,
+	SWAP_MODE      =  1,
 	ERASE_MODE     =  2,
-	TOTAL_MODE     =  3
+	INHERIT_MODE   =  3,
+	TOTAL_MODE     =  4
 };
 
 //! \brief Represents different types of transition patterns for autotileable tiles.
@@ -107,6 +105,9 @@ enum TRANSITION_PATTERN_TYPE {
 
 //! \brief The name of the editor application
 const QString APP_NAME("Allacrost Map Editor");
+
+//! \brief Pathname where editor icon files are stored
+const QString ICON_PATH("img/misc/editor_tools/");
 
 } // namespace hoa_editor
 

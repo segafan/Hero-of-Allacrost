@@ -496,7 +496,7 @@ void MapData::MoveTilesetDown(uint32 tileset_index) {
 
 TileLayer* MapData::ChangeSelectedTileLayer(uint32 layer_index) {
 	if (layer_index >= _tile_layer_count) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not change selection because no layer with this index exists: " << layer_index << endl;
+		_error_message = "WARN: could not change selected tile layer because no layer existed with this index";
 		return NULL;
 	}
 
@@ -731,7 +731,7 @@ TileContext* MapData::ChangeSelectedTileContext(int32 context_id) {
 		return NULL;
 	}
 	if (static_cast<uint32>(context_id) > _tile_context_count) {
-		IF_PRINT_WARNING(EDITOR_DEBUG) << "could not change selection because no context with this ID exists: " << context_id << endl;
+		_error_message = "WARN: could not change selected context because no context existed with this index";
 		return NULL;
 	}
 
@@ -881,7 +881,6 @@ bool MapData::RenameTileContext(int32 context_id, QString new_name) {
 
 
 bool MapData::ChangeInheritanceTileContext(int32 context_id, int32 inherit_id) {
-	PRINT_DEBUG << "NOW HERE" << endl;
 	if (context_id <= 0 || static_cast<uint32>(context_id) > _tile_context_count) {
 		_error_message = "ERROR: invalid context id";
 		return false;
