@@ -27,6 +27,8 @@
 
 namespace hoa_editor {
 
+class MapData;
+
 /** ***************************************************************************
 *** \brief Represents one frame of an animated tile
 ***
@@ -276,6 +278,39 @@ private:
 	//! \brief A pointer to the most recent tileset object that the table loaded image data from
 	Tileset* _tileset;
 }; // class TilesetTable : public QTableWidget
+
+
+/** ***************************************************************************
+*** \brief GUI widget that displays all open tilesets in tabbed windows
+***
+*** This class is placed in the lower right corner of the main window. Each tileset
+*** opened by the map is placed in its own tab, with the tab name corresponding to the
+*** name of the tileset.
+*** **************************************************************************/
+class TilesetView : public QTabWidget {
+public:
+	/** \param parent The parent widget of this object
+	*** \param data A pointer to the map data to manipulate and draw
+	**/
+	TilesetView(QWidget* parent, MapData* data);
+
+	~TilesetView()
+		{ ClearData(); }
+
+	//! \brief Returns a pointer to the TilesetTable of the currently open tab
+	TilesetTable* GetCurrentTable()
+		{ return static_cast<TilesetTable*>(currentWidget()); }
+
+	//! \brief Removes all tileset tabs from the widget
+	void ClearData();
+
+	//! \brief Clears the data and reconstructs all the tabs from the tilesets loaded in the map data
+	void RefreshData();
+
+private:
+	//! \brief A pointer to the active map data that contains the tile layers
+	MapData* _map_data;
+}; // class TilesetView : public QTabWidget
 
 } // namespace hoa_editor
 
