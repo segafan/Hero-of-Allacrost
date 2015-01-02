@@ -427,7 +427,6 @@ bool TilesetTable::Load(Tileset* tileset) {
 
 	// Select the top left item
 	setCurrentCell(0, 0);
-
 	return true;
 }
 
@@ -437,9 +436,12 @@ bool TilesetTable::Load(Tileset* tileset) {
 
 TilesetView::TilesetView(QWidget* parent, MapData* data) :
 	QTabWidget(parent),
-	_map_data(data)
+	_map_data(data),
+	_current_tileset_table(NULL),
+	_current_tileset_index(-1)
 {
 	setTabPosition(QTabWidget::North);
+	connect(this, SIGNAL(currentChanged(int)), this, SLOT(_CurrentTabChanged()));
 }
 
 
@@ -449,17 +451,32 @@ void TilesetView::ClearData() {
 		delete widget(i);
 	}
 	clear();
+
+	_current_tileset_table = NULL;
+	_current_tileset_index = -1;
 }
 
 
 
-void TilesetView::RefreshData() {
+void TilesetView::RefreshView() {
 	ClearData();
 
 	vector<Tileset*>& tilesets = _map_data->GetTilesets();
 	for (vector<Tileset*>::iterator i = tilesets.begin(); i != tilesets.end(); ++i) {
 		TilesetTable* table = new TilesetTable(*i);
 		addTab(table, (*i)->GetTilesetName());
+	}
+}
+
+
+
+void TilesetView::_CurrentTabChanged() {
+	_current_tileset_index = currentIndex();
+	if (_current_tileset_index == -1) {
+		_current_tileset_table = NULL;
+	}
+	else {
+		_current_tileset_table = static_cast<TilesetTable*>(currentWidget());
 	}
 }
 

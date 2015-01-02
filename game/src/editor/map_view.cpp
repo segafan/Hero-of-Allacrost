@@ -558,7 +558,7 @@ void MapView::_DeleteTileColumn() {
 void MapView::_PaintTile(uint32 x, uint32 y) {
 	// Get a reference to the current tileset
 	Editor* editor = static_cast<Editor*>(_graphics_view->topLevelWidget());
-	TilesetTable* tileset_table = editor->GetTilesetView()->GetCurrentTable();
+	TilesetTable* tileset_table = editor->GetTilesetView()->GetCurrentTilesetTable();
 
 	// Detect the first selection range and use to paint an area
 	QList<QTableWidgetSelectionRange> selections = tileset_table->selectedRanges();
@@ -568,20 +568,13 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 	// Determine the index of the current tileset in the tileset list to determine its multiplier for calculating the image index
 	vector<Tileset*> all_tilesets = _map_data->GetTilesets();
-	uint32 multiplier = all_tilesets.size(); // Initially set to a value that is a known bad tileset index for error checking
-
-	for (uint32 i = 0; i < all_tilesets.size(); ++i) {
-		if (all_tilesets[i] == tileset_table->GetTileset()) {
-			multiplier = i;
-			break;
-		}
-	}
-
-	if (multiplier >= all_tilesets.size()) {
+	uint32 multiplier = editor->GetTilesetView()->GetCurrentTilesetIndex();
+	if (multiplier < 0) {
 		qDebug() << "could not paint tile at location [" << x << ", " << y << "] "
 			<< "because there was no tileset data that matched the tileset in the tileset table." << endl;
 		return;
 	}
+	multiplier *= TILESET_NUM_TILES;
 
 	if (selections.size() > 0 && (selection.columnCount() * selection.rowCount() > 1)) {
 		// Draw tiles from tileset selection onto map, one tile at a time.
@@ -594,7 +587,7 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 				// TODO: Record information for undo/redo stack
 
-				_map_data->GetSelectedTileLayer()->SetTile(x + j, y + i, tileset_index + multiplier * TILESET_NUM_TILES);
+				_map_data->GetSelectedTileLayer()->SetTile(x + j, y + i, tileset_index + multiplier);
 			} // iterate through columns of selection
 		} // iterate through rows of selection
 	} // multiple tiles are selected
@@ -607,7 +600,7 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 		// TODO: Record information for undo/redo stack
 
-		_map_data->GetSelectedTileLayer()->SetTile(x, y, tileset_index + multiplier * TILESET_NUM_TILES);
+		_map_data->GetSelectedTileLayer()->SetTile(x, y, tileset_index + multiplier);
 	} // a single tile is selected
 }
 

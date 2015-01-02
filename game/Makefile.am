@@ -330,6 +330,7 @@ allacrost_editor_MOC = $(EDITOR_DIR)/dialogs.moc.cpp \
 	$(EDITOR_DIR)/map_view.moc.cpp \
 	$(EDITOR_DIR)/tile_context.moc.cpp \
 	$(EDITOR_DIR)/tile_layer.moc.cpp \
+	$(EDITOR_DIR)/tileset.moc.cpp \
 	$(EDITOR_DIR)/tileset_editor.moc.cpp	
 allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/dialogs.cpp \

@@ -160,9 +160,9 @@ Editor::~Editor() {
 	delete _about_qt_action;
 
 	delete _map_view;
-	delete _tileset_view;
 	delete _layer_view;
 	delete _context_view;
+	delete _tileset_view;
 
 	delete _right_vertical_splitter;
 	delete _horizontal_splitter;
@@ -435,6 +435,7 @@ void Editor::_ClearEditorState() {
 	_map_view->DrawMap();
 	_layer_view->RefreshView();
 	_context_view->RefreshView();
+	_tileset_view->RefreshView();
 }
 
 
@@ -626,7 +627,6 @@ void Editor::_FileNew() {
 			delete tileset;
 		}
 	}
-	_tileset_view->RefreshData();
 
 	// Clean up the editor state and report success
 	load_tileset_progress->hide();
@@ -664,7 +664,6 @@ void Editor::_FileOpen() {
 
 	vector<Tileset*> tilesets = _map_data.GetTilesets();
 	QStringList tileset_names = _map_data.GetTilesetNames();
-	_tileset_view->RefreshData();
 
 	_ClearEditorState();
 	statusBar()->showMessage(QString("Opened map \'%1\'").arg(_map_data.GetMapFilename()), 5000);
