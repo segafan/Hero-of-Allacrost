@@ -154,6 +154,7 @@ private:
 	void _SwapTileLayers(uint32 first_index, uint32 second_index);
 }; // class TileContext
 
+
 /** ****************************************************************************
 *** \brief Displays the sortable list of tile contexts for a map
 ***

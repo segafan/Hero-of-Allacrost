@@ -286,8 +286,16 @@ private:
 *** This class is placed in the lower right corner of the main window. Each tileset
 *** opened by the map is placed in its own tab, with the tab name corresponding to the
 *** name of the tileset.
+***
+*** The tabs and their ordering in this widget should reflect the tilesets and their
+*** ordering from the map data at all times.
+***
+*** \todo Allow reordering of tabs within this widget by enabling setMovable(). Any tab
+*** reordering will need to reorder the tileset in the MapData object as well.
 *** **************************************************************************/
 class TilesetView : public QTabWidget {
+	Q_OBJECT // Macro needed to use QT's slots and signals
+
 public:
 	/** \param parent The parent widget of this object
 	*** \param data A pointer to the map data to manipulate and draw
@@ -297,19 +305,36 @@ public:
 	~TilesetView()
 		{ ClearData(); }
 
-	//! \brief Returns a pointer to the TilesetTable of the currently open tab
-	TilesetTable* GetCurrentTable()
+	//! \name Class Member Accessor Methods
+	//@{
+	TilesetTable* GetCurrentTilesetTable()
 		{ return static_cast<TilesetTable*>(currentWidget()); }
+
+	//! \brief Returns the value that all tiles in this tileset should be multiplied by before being placed in the map data
+	int32 GetCurrentTilesetIndex() const
+		{ return _current_tileset_index; }
+	//@}
 
 	//! \brief Removes all tileset tabs from the widget
 	void ClearData();
 
-	//! \brief Clears the data and reconstructs all the tabs from the tilesets loaded in the map data
-	void RefreshData();
+	//! \brief Clears all existing data and reconstructs all the tabs from the tilesets loaded in the map data
+	void RefreshView();
 
 private:
 	//! \brief A pointer to the active map data that contains the tile layers
 	MapData* _map_data;
+
+	TilesetTable* _current_tileset_table;
+
+	/** \brief Holds the index value corresponding to the current tab
+	*** Set to -1 when no tabs are loaded
+	**/
+	int32 _current_tileset_index;
+
+private slots:
+	//! \brief Called whenever the selected tab is changed and sets _current_tileset_table and _current_tileset_multiplier appropriately
+	void _CurrentTabChanged();
 }; // class TilesetView : public QTabWidget
 
 } // namespace hoa_editor
