@@ -208,6 +208,11 @@ public:
 	//! \brief Return an ordered list of names for all tile layers
 	QStringList GetTileLayerNames() const;
 
+	/** \brief Retrieves the properties of the selected tile layer
+	*** \return A pointer to the TileLayerProperties corresponding to the selected layer, or NULL if no tile layer is selected
+	**/
+	TileLayerProperties* GetSelectedTileLayerProperties();
+
 	//! \brief Returns an ordered list of the properties of each tile layer
 	std::vector<TileLayerProperties>& GetTileLayerProperties()
 		{ return _tile_layer_properties; }

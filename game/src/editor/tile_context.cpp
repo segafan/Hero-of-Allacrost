@@ -259,7 +259,8 @@ void ContextView::_ChangeSelectedContext() {
 		return;
 	}
 
-	static_cast<Editor*>(topLevelWidget())->UpdateMapView(); // Redraw the map view to show the newly selected context
+	// Update the available edit tools (some tools are only enabled for inheriting contexts) and redraw the map view to show the newly selected context
+	static_cast<Editor*>(topLevelWidget())->UpdateSelectedContext();
 }
 
 
@@ -348,6 +349,7 @@ void ContextView::_ValidateChangedData(QTreeWidgetItem* item, int column) {
 		}
 		else {
 			_map_data->SetMapModified(true);
+			static_cast<Editor*>(topLevelWidget())->UpdateSelectedContext(); // This must be done to activate or deactivate the inheriting tools
 		}
 
 		_right_click_item = NULL;
