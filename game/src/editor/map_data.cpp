@@ -42,8 +42,9 @@ MapData::MapData() :
 	_map_modified(false),
 	_tile_layer_count(0),
 	_tile_context_count(0),
-	_selected_tile_layer(NULL),
 	_selected_tile_context(NULL),
+	_selected_tile_layer(NULL),
+	_selected_tile_layer_properties(NULL),
 	_all_tile_contexts(MAX_CONTEXTS, NULL),
 	_error_message("")
 {}
@@ -76,6 +77,7 @@ bool MapData::CreateData(uint32 map_length, uint32 map_height) {
 
 	_selected_tile_context = new_context;
 	_selected_tile_layer = new_context->GetTileLayer(0);
+	_selected_tile_layer_properties = &_tile_layer_properties[0];
 	return true;
 }
 
@@ -86,8 +88,6 @@ void MapData::DestroyData() {
 	_map_name = "";
 	_map_length = 0;
 	_map_height = 0;
-	_tile_layer_count = 0;
-	_tile_layer_properties.clear();
 
 	for (uint32 i = 0; i < _tilesets.size(); ++i) {
 		delete _tilesets[i];
@@ -102,9 +102,12 @@ void MapData::DestroyData() {
 		_all_tile_contexts[i] = NULL;
 	}
 
+	_tile_context_count = 0;
+	_tile_layer_count = 0;
+	_tile_layer_properties.clear();
 	_selected_tile_context = NULL;
 	_selected_tile_layer = NULL;
-	_tile_context_count = 0;
+	_selected_tile_layer_properties = NULL;
 
 	_error_message = "";
 }
@@ -227,6 +230,7 @@ bool MapData::LoadData(QString filename) {
 
 	_selected_tile_context = _all_tile_contexts[0];
 	_selected_tile_layer = _selected_tile_context->GetTileLayer(0);
+	_selected_tile_layer_properties = &_tile_layer_properties[0];
 
 	// ---------- (6): Read in the collision grid data
 	_collision_data.resize(_map_height * 2);
@@ -502,6 +506,7 @@ TileLayer* MapData::ChangeSelectedTileLayer(uint32 layer_index) {
 	}
 
 	_selected_tile_layer = _selected_tile_context->GetTileLayer(layer_index);
+	_selected_tile_layer_properties = &_tile_layer_properties[layer_index];
 	return _selected_tile_layer;
 }
 
@@ -514,23 +519,6 @@ QStringList MapData::GetTileLayerNames() const {
 	}
 
 	return layer_names;
-}
-
-
-
-TileLayerProperties* MapData::GetSelectedTileLayerProperties() {
-	if (_selected_tile_layer == NULL)
-		return NULL;
-
-	uint32 layer_index = 0;
-	for (uint32 i = 0; i < _tile_layer_count; ++i) {
-		if (_selected_tile_context->GetTileLayer(i) == _selected_tile_layer) {
-			layer_index = i;
-			break;
-		}
-	}
-
-	return &_tile_layer_properties[layer_index];
 }
 
 
@@ -601,6 +589,11 @@ bool MapData::DeleteTileLayer(uint32 layer_index) {
 bool MapData::RenameTileLayer(uint32 layer_index, QString new_name) {
 	if (layer_index > _tile_layer_count) {
 		_error_message = "ERROR: no tile layer exists at this index";
+		return false;
+	}
+
+	if (new_name.isEmpty() == true) {
+		_error_message = "ERROR: can not set layer name to an empty string";
 		return false;
 	}
 
@@ -879,6 +872,11 @@ bool MapData::RenameTileContext(int32 context_id, QString new_name) {
 	}
 	if (static_cast<uint32>(context_id) > _tile_context_count) {
 		_error_message = "ERROR: context_id exceeds size of context list";
+		return false;
+	}
+
+	if (new_name.isEmpty() == true) {
+		_error_message = "ERROR: can not set context name to an empty string";
 		return false;
 	}
 

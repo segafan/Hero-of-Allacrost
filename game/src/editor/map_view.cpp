@@ -45,7 +45,7 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_move_source_tile_y(-1),
 	_selection_start_tile_x(-1),
 	_selection_start_tile_y(-1),
-	_tile_mode(PAINT_MODE),
+	_edit_mode(PAINT_MODE),
 	_select_layer(data->GetMapLength(), data->GetMapHeight())
 {
 	// Create the graphics view
@@ -137,7 +137,7 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 	_cursor_tile_y = y / TILE_HEIGHT;
 
 	if (_selection_overlay_visible == false && event->button() == Qt::LeftButton) {
-		switch (_tile_mode) {
+		switch (_edit_mode) {
 			case PAINT_MODE:
 				_PaintTile(_cursor_tile_x, _cursor_tile_y);
 				_map_data->SetMapModified(true);
@@ -251,7 +251,7 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 		}
 
 		if (_selection_overlay_visible == false && event->buttons() == Qt::LeftButton) {
-			switch (_tile_mode) {
+			switch (_edit_mode) {
 				case PAINT_MODE:
 					_PaintTile(_cursor_tile_x, _cursor_tile_y);
 					DrawMap();
@@ -307,7 +307,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 	int32 mouse_x = event->scenePos().x();
 	int32 mouse_y = event->scenePos().y();
 
-	switch (_tile_mode) {
+	switch (_edit_mode) {
 		case PAINT_MODE: {
 			if (_selection_overlay_visible == true) {
 				vector<vector<int32> > select_layer = _select_layer.GetTiles();
@@ -400,7 +400,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 		default:
 			QMessageBox::warning(_graphics_view, "Tile editing mode", "ERROR: Invalid tile editing mode!");
-	} // switch (_tile_mode)
+	} // switch (_edit_mode)
 } // void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 
