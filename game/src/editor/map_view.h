@@ -50,7 +50,7 @@ public:
 		{ return _graphics_view; }
 
 	EDIT_MODE GetEditMode() const
-		{ return _tile_mode; }
+		{ return _edit_mode; }
 
 	void SetGridVisible(bool value)
 		{ _grid_visible = value; DrawMap(); }
@@ -77,7 +77,7 @@ public:
 		{ _inherited_overlay_visible = !_inherited_overlay_visible; return _inherited_overlay_visible; }
 
 	void SetEditMode(EDIT_MODE new_mode)
-		{ _tile_mode = new_mode; }
+		{ _edit_mode = new_mode; }
 	//@}
 
 	/** \brief Creates a new context for each layer.
@@ -167,7 +167,7 @@ private:
 	//@}
 
 	//! \brief The current tile editing tool that is active
-	EDIT_MODE _tile_mode;
+	EDIT_MODE _edit_mode;
 
 	/** \brief A tile layer used for indicating a selected area of a tile layer
 	*** This data exists only in the editor and is not a part of the map file. It acts similar to an
