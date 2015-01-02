@@ -84,8 +84,8 @@ public:
 	MapData* GetMapData()
 		{ return &_map_data; }
 
-	QTabWidget* GetTilesetTabs() const
-		{ return _tileset_tabs; }
+	TilesetView* GetTilesetView() const
+		{ return _tileset_view; }
 
 	//! \brief Used by other subwidgets to update the map view when the map data has been modified external to it
 	void UpdateMapView()
@@ -117,8 +117,8 @@ private:
 	//! \brief Widget used to display and edit the properties of map contexts
 	ContextView* _context_view;
 
-	//! \brief Tabbed widget that contains each tileset open
-	QTabWidget* _tileset_tabs;
+	//! \brief Widget used to display each tileset
+	TilesetView* _tileset_view;
 
 	//! \brief The stack that contains the undo and redo operations.
 	QUndoStack* _undo_stack;

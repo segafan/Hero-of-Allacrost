@@ -37,7 +37,7 @@ class MapView : public QGraphicsScene {
 	Q_OBJECT // Macro needed to use QT's slots and signals
 
 public:
-	/** \param parent The parent widget of the grid, which should be the main editor window
+	/** \param parent The parent widget, which should be the main editor window
 	*** \param data A pointer to the map data to manipulate and draw
 	**/
 	MapView(QWidget* parent, MapData* data);

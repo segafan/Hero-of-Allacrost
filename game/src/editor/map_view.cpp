@@ -33,7 +33,7 @@ using namespace std;
 namespace hoa_editor {
 
 MapView::MapView(QWidget* parent, MapData* data) :
-	QGraphicsScene(),
+	QGraphicsScene(parent),
 	_map_data(data),
 	_grid_visible(false),
 	_selection_overlay_visible(false),
@@ -558,17 +558,15 @@ void MapView::_DeleteTileColumn() {
 void MapView::_PaintTile(uint32 x, uint32 y) {
 	// Get a reference to the current tileset
 	Editor* editor = static_cast<Editor*>(_graphics_view->topLevelWidget());
-	QTableWidget* table = static_cast<QTableWidget*>(editor->GetTilesetTabs()->currentWidget());
-	QString tileset_name = editor->GetTilesetTabs()->tabText(editor->GetTilesetTabs()->currentIndex());
+	TilesetTable* tileset_table = editor->GetTilesetView()->GetCurrentTable();
 
 	// Detect the first selection range and use to paint an area
-	QList<QTableWidgetSelectionRange> selections = table->selectedRanges();
+	QList<QTableWidgetSelectionRange> selections = tileset_table->selectedRanges();
 	QTableWidgetSelectionRange selection;
 	if (selections.size() > 0)
 		selection = selections.at(0);
 
 	// Determine the index of the current tileset in the tileset list to determine its multiplier for calculating the image index
-	TilesetTable* tileset_table = static_cast<TilesetTable*>(table);
 	vector<Tileset*> all_tilesets = _map_data->GetTilesets();
 	uint32 multiplier = all_tilesets.size(); // Initially set to a value that is a known bad tileset index for error checking
 
@@ -602,7 +600,7 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 	} // multiple tiles are selected
 	else {
 		// put selected tile from tileset into tile array at correct position
-		int32 tileset_index = table->currentRow() * TILESET_NUM_COLS + table->currentColumn();
+		int32 tileset_index = tileset_table->currentRow() * TILESET_NUM_COLS + tileset_table->currentColumn();
 
 		// TODO: Perform randomization for autotiles
 		// _AutotileRandomize(multiplier, tileset_index);

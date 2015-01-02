@@ -22,6 +22,7 @@
 #include "script.h"
 #include "common.h"
 #include "tileset.h"
+#include "map_data.h"
 
 using namespace std;
 using namespace hoa_script;
@@ -428,6 +429,38 @@ bool TilesetTable::Load(Tileset* tileset) {
 	setCurrentCell(0, 0);
 
 	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// TilesetView class
+///////////////////////////////////////////////////////////////////////////////
+
+TilesetView::TilesetView(QWidget* parent, MapData* data) :
+	QTabWidget(parent),
+	_map_data(data)
+{
+	setTabPosition(QTabWidget::North);
+}
+
+
+
+void TilesetView::ClearData() {
+	for (uint32 i = 0; i < static_cast<uint32>(count()); ++i) {
+		delete widget(i);
+	}
+	clear();
+}
+
+
+
+void TilesetView::RefreshData() {
+	ClearData();
+
+	vector<Tileset*>& tilesets = _map_data->GetTilesets();
+	for (vector<Tileset*>::iterator i = tilesets.begin(); i != tilesets.end(); ++i) {
+		TilesetTable* table = new TilesetTable(*i);
+		addTab(table, (*i)->GetTilesetName());
+	}
 }
 
 } // namespace hoa_editor

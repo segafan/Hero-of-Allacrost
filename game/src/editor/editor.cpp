@@ -38,7 +38,7 @@ Editor::Editor() :
 	_map_view(NULL),
 	_layer_view(NULL),
 	_context_view(NULL),
-	_tileset_tabs(NULL),
+	_tileset_view(NULL),
 	_undo_stack(NULL),
 	_file_menu(NULL),
 	_edit_menu(NULL),
@@ -98,14 +98,13 @@ Editor::Editor() :
     _map_view = new MapView(_horizontal_splitter, &_map_data);
     _layer_view = new LayerView(&_map_data);
     _context_view = new ContextView(&_map_data);
-    _tileset_tabs = new QTabWidget();
-    _tileset_tabs->setTabPosition(QTabWidget::North);
+    _tileset_view = new TilesetView(_right_vertical_splitter, &_map_data);
 
     _horizontal_splitter->addWidget(_map_view->GetGraphicsView());
     _horizontal_splitter->addWidget(_right_vertical_splitter);
     _right_vertical_splitter->addWidget(_layer_view);
 	_right_vertical_splitter->addWidget(_context_view);
-    _right_vertical_splitter->addWidget(_tileset_tabs);
+    _right_vertical_splitter->addWidget(_tileset_view);
 
 	// Size the window and each widget in it appropriately
 	resize(1200, 800);
@@ -161,7 +160,7 @@ Editor::~Editor() {
 	delete _about_qt_action;
 
 	delete _map_view;
-	delete _tileset_tabs;
+	delete _tileset_view;
 	delete _layer_view;
 	delete _context_view;
 
@@ -614,7 +613,7 @@ void Editor::_FileNew() {
 		// Increment the progress dialog counter
 		load_tileset_progress->setValue(num_checked_items++);
 
-		// Load the tileset data from the definition file, add it to the map data, and create the TilesetTable to display it
+		// Load the tileset data from the definition file and add it to the map data
 		Tileset* tileset = new Tileset();
 		QString filename = QString("lua/data/tilesets/") + tilesets->topLevelItem(i)->text(0) + (".lua");
 		if (tileset->Load(filename) == false) {
@@ -626,10 +625,8 @@ void Editor::_FileNew() {
 			QMessageBox::critical(this, APP_NAME, "Failed to add tileset to map data: " + _map_data.GetErrorMessage());
 			delete tileset;
 		}
-
-		TilesetTable* tileset_table = new TilesetTable(tileset);
-		_tileset_tabs->addTab(tileset_table, tilesets->topLevelItem(i)->text(0));
 	}
+	_tileset_view->RefreshData();
 
 	// Clean up the editor state and report success
 	load_tileset_progress->hide();
@@ -658,10 +655,6 @@ void Editor::_FileOpen() {
 
 	// ---------- 2) Clear out any existing map data
 	_map_data.DestroyData();
-	for (uint32 i = 0; i < static_cast<uint32>(_tileset_tabs->count()); ++i) {
-		delete _tileset_tabs->widget(i);
-	}
-	_tileset_tabs->clear();
 
 	// ---------- 3) Load the map data and setup the TilesetTab widget with the loaded tileset data
 	if (_map_data.LoadData(filename) == false) {
@@ -671,9 +664,7 @@ void Editor::_FileOpen() {
 
 	vector<Tileset*> tilesets = _map_data.GetTilesets();
 	QStringList tileset_names = _map_data.GetTilesetNames();
-	for (uint32 i = 0; i < tilesets.size(); ++i) {
-		_tileset_tabs->addTab(new TilesetTable(tilesets[i]), tileset_names[i]);
-	}
+	_tileset_view->RefreshData();
 
 	_ClearEditorState();
 	statusBar()->showMessage(QString("Opened map \'%1\'").arg(_map_data.GetMapFilename()), 5000);
