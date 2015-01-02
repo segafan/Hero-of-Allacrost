@@ -118,6 +118,10 @@ MapView::~MapView() {
 
 
 void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+	// Don't allow edits to the selected layer if it's not visible
+	if (_map_data->GetSelectedTileLayerProperties()->IsVisible() == false)
+		return;
+
 	// Takes into account the current scrolling
 	int32 x = event->scenePos().x();
 	int32 y = event->scenePos().y();
@@ -203,6 +207,16 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 	int32 tile_x = mouse_x / TILE_LENGTH;
 	int32 tile_y = mouse_y / TILE_HEIGHT;
 
+	// Don't allow edits to the selected layer if it's not visible
+	if (_map_data->GetSelectedTileLayerProperties()->IsVisible() == false) {
+		// TODO: this is duplicated at the end of the function, figure out a way to reuse this code
+		QString position = QString("Tile: [%1,  %2]").arg(tile_x).arg(tile_y);
+		position.append(QString(" -- Position: [%1,  %2]").arg(event->scenePos().x() * 2 / TILE_LENGTH, 0, 'f', 2)
+			.arg(event->scenePos().y() * 2 / TILE_HEIGHT, 0, 'f', 2));
+		editor->statusBar()->showMessage(position);
+		return;
+	}
+
 	// Check if the user has moved the cursor over a different tile
 	if (tile_x != _cursor_tile_x || tile_y != _cursor_tile_y) {
 		_cursor_tile_x = tile_x;
@@ -286,6 +300,10 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 
 
 void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+	// Don't allow edits to the selected layer if it's not visible
+	if (_map_data->GetSelectedTileLayerProperties()->IsVisible() == false)
+		return;
+
 	int32 mouse_x = event->scenePos().x();
 	int32 mouse_y = event->scenePos().y();
 
@@ -308,7 +326,7 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 		case SWAP_MODE: {
 			_cursor_tile_x = mouse_x / TILE_LENGTH;
 			_cursor_tile_y = mouse_y / TILE_HEIGHT;
-			std::vector<std::vector<int32> >& layer = _map_data->GetSelectedTileLayer()->GetTiles();
+			vector<vector<int32> >& layer = _map_data->GetSelectedTileLayer()->GetTiles();
 
 			if (_selection_overlay_visible == false) {
 				// TODO: Record information for undo/redo stack
@@ -457,27 +475,28 @@ void MapView::DrawMap() {
 			for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
 				tile = (*tile_layers)[l].GetTile(x, y);
 				inherited_tile = (tile == INHERITED_TILE);
-
-				// Draw the missing tile overlay if needed and move on to the next tile
-				if (tile == NO_TILE) {
-					if (selected_layer == true && _missing_overlay_visible == true)
-						addPixmap(_missing_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
-					continue;
-				}
-
 				if (inherited_tile == true) {
 					tile = (*inherited_tile_layers)[l].GetTile(x, y);
 				}
-				tile_index = tile;
-				tileset_index = tile / TILESET_NUM_TILES;
-				if (tileset_index != 0) // Don't divide by zero
-					tile_index = tile % (tileset_index * TILESET_NUM_TILES);
 
-				addPixmap(*tilesets[tileset_index]->GetTileImage(tile_index))->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				// If we're pointing to a valid tile, retrieve the appropriate indexes to the image and draw it
+				if (tile >= 0) {
+					tileset_index = tile / TILESET_NUM_TILES;
+					tile_index = tile;
+					if (tileset_index != 0) // Don't divide by zero
+						tile_index = tile % (tileset_index * TILESET_NUM_TILES);
+					addPixmap(*tilesets[tileset_index]->GetTileImage(tile_index))->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				}
 
-				// Draw the inherited overlay over the inherited tile
-				if (inherited_tile == true && selected_layer == true && _inherited_overlay_visible == true) {
-					addPixmap(_inherited_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				// Draw the missing tile overlay if needed and move on to the next tile
+				if (selected_layer == true) {
+					if (inherited_tile == false && tile == NO_TILE && _missing_overlay_visible == true) {
+						addPixmap(_missing_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+					}
+					// Draw the inherited overlay over the inherited tile
+					if (inherited_tile == true && _inherited_overlay_visible == true) {
+						addPixmap(_inherited_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+					}
 				}
 			}
 		}

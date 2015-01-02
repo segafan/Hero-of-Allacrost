@@ -285,7 +285,7 @@ void Editor::_CreateActions() {
 	_mode_erase_action->setCheckable(true);
 	connect(_mode_erase_action, SIGNAL(triggered()), this, SLOT(_SelectEraseMode()));
 
-	_mode_inherit_action = new QAction(QIcon("img/misc/editor_tools/inherited.png"), "&Inherit Tiles", this);
+	_mode_inherit_action = new QAction(QIcon("img/misc/editor_tools/inherit.png"), "&Inherit Tiles", this);
 	_mode_inherit_action->setShortcut(tr("4"));
 	_mode_inherit_action->setStatusTip("Switches the edit mode to inherit tiles from the inherited context");
 	_mode_inherit_action->setCheckable(true);
@@ -303,7 +303,7 @@ void Editor::_CreateActions() {
 	_mode_area_clear_action->setCheckable(true);
 	connect(_mode_area_clear_action, SIGNAL(triggered()), this, SLOT(_SelectClearAreaMode()));
 
-	_mode_area_inherit_action = new QAction(QIcon("img/misc/editor_tools/inherited.png"), "I&nherit Area", this);
+	_mode_area_inherit_action = new QAction(QIcon("img/misc/editor_tools/inherit_area.png"), "I&nherit Area", this);
 	_mode_area_inherit_action->setShortcut(tr("7"));
 	_mode_area_inherit_action->setStatusTip("Inherits all tiles from the selection area or tile area");
 	_mode_area_inherit_action->setCheckable(true);
@@ -537,11 +537,21 @@ void Editor::_CheckToolsActions() {
 		_mode_paint_action->setEnabled(true);
 		_mode_swap_action->setEnabled(true);
 		_mode_erase_action->setEnabled(true);
-		_mode_inherit_action->setEnabled(true);
+		_mode_inherit_action->setEnabled(false);
 		_mode_area_fill_action->setEnabled(true);
 		_mode_area_clear_action->setEnabled(true);
-		_mode_area_inherit_action->setEnabled(true);
+		_mode_area_inherit_action->setEnabled(false);
 		_toggle_select_action->setEnabled(true);
+
+		// These tools can only be active when a context is inheriting
+		if (_map_data.GetSelectedTileContext()->IsInheritingContext() == true) {
+			_mode_inherit_action->setEnabled(true);
+			_mode_area_inherit_action->setEnabled(true);
+		}
+		// When moving from an inheriting context to a non-inheriting one, reset the edit mode if either of the inherit tools are active
+		else if ((_map_view->GetEditMode() == INHERIT_MODE) || (_map_view->GetEditMode() == INHERIT_AREA_MODE)) {
+			_mode_paint_action->setChecked(true);
+		}
 	}
 	else {
 		_mode_paint_action->setEnabled(false);

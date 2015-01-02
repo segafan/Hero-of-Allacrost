@@ -91,6 +91,10 @@ public:
 	void UpdateMapView()
 		{ _map_view->DrawMap(); }
 
+	//! \brief Used by other subwidgets to inform the editor that the selected context has changed
+	void UpdateSelectedContext()
+		{ _CheckToolsActions(); _map_view->DrawMap(); }
+
 private:
 	//! \brief Contains all data for the open map file and methods for manipulating that data
 	MapData _map_data;

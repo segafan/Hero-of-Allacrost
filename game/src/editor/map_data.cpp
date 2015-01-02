@@ -518,6 +518,23 @@ QStringList MapData::GetTileLayerNames() const {
 
 
 
+TileLayerProperties* MapData::GetSelectedTileLayerProperties() {
+	if (_selected_tile_layer == NULL)
+		return NULL;
+
+	uint32 layer_index = 0;
+	for (uint32 i = 0; i < _tile_layer_count; ++i) {
+		if (_selected_tile_context->GetTileLayer(i) == _selected_tile_layer) {
+			layer_index = i;
+			break;
+		}
+	}
+
+	return &_tile_layer_properties[layer_index];
+}
+
+
+
 void MapData::ToggleTileLayerVisibility(uint32 layer_index) {
 	if (layer_index > _tile_layer_count)
 		return;

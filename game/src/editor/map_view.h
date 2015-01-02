@@ -49,6 +49,9 @@ public:
 	QGraphicsView* GetGraphicsView() const
 		{ return _graphics_view; }
 
+	EDIT_MODE GetEditMode() const
+		{ return _tile_mode; }
+
 	void SetGridVisible(bool value)
 		{ _grid_visible = value; DrawMap(); }
 
