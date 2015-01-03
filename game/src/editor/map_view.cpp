@@ -118,6 +118,9 @@ MapView::~MapView() {
 
 
 void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+	if (_map_data->IsInitialized() == false)
+		return;
+
 	// Don't allow edits to the selected layer if it's not visible
 	if (_map_data->GetSelectedTileLayerProperties()->IsVisible() == false)
 		return;
@@ -191,6 +194,9 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
 
 void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+	if (_map_data->IsInitialized() == false)
+		return;
+
 	Editor* editor = static_cast<Editor*>(_graphics_view->topLevelWidget());
 
 	int32 mouse_x = event->scenePos().x();
@@ -300,6 +306,9 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 
 
 void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+	if (_map_data->IsInitialized() == false)
+		return;
+
 	// Don't allow edits to the selected layer if it's not visible
 	if (_map_data->GetSelectedTileLayerProperties()->IsVisible() == false)
 		return;
@@ -406,6 +415,21 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 
 void MapView::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
+	if (_map_data->IsInitialized() == false) {
+		// Show the menu, but disable all options
+		_insert_row_action->setEnabled(false);
+		_insert_column_action->setEnabled(false);
+		_delete_row_action->setEnabled(false);
+		_delete_column_action->setEnabled(false);
+		_right_click_menu->exec(QCursor::pos());
+		return;
+	}
+
+	_insert_row_action->setEnabled(true);
+	_insert_column_action->setEnabled(true);
+	_delete_row_action->setEnabled(true);
+	_delete_column_action->setEnabled(true);
+
 	// Retrieve the coordinates of the right click event and translate them into tile coordinates
 	int32 mouse_x = event->scenePos().x();
 	int32 mouse_y = event->scenePos().y();
@@ -419,7 +443,6 @@ void MapView::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 	_cursor_tile_x = mouse_x / TILE_LENGTH;
 	_cursor_tile_y = mouse_y / TILE_HEIGHT;
 	_right_click_menu->exec(QCursor::pos());
-	static_cast<Editor*>(_graphics_view->topLevelWidget())->statusBar()->clearMessage();
 }
 
 

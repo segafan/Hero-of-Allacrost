@@ -22,6 +22,7 @@
 #include "script.h"
 #include "common.h"
 #include "tileset.h"
+#include "editor.h"
 #include "map_data.h"
 
 using namespace std;
@@ -438,10 +439,34 @@ TilesetView::TilesetView(QWidget* parent, MapData* data) :
 	QTabWidget(parent),
 	_map_data(data),
 	_current_tileset_table(NULL),
-	_current_tileset_index(-1)
+	_current_tileset_index(-1),
+	_right_click_menu(NULL),
+	_add_tileset_action(NULL),
+	_remove_tileset_action(NULL)
 {
 	setTabPosition(QTabWidget::North);
 	connect(this, SIGNAL(currentChanged(int)), this, SLOT(_CurrentTabChanged()));
+
+	// Right-click menu action creation
+	_add_tileset_action = new QAction("Add Tilesets...", this);
+	_add_tileset_action->setStatusTip("Opens a dialog window to select one or more tilesets to add to the map");
+	connect(_add_tileset_action, SIGNAL(triggered()), this, SLOT(_OpenAddTilesetDialog()));
+	_remove_tileset_action = new QAction("Remove Current Tileset", this);
+	_remove_tileset_action->setStatusTip("Removes the tileset that is currently visible on the widget");
+	connect(_remove_tileset_action, SIGNAL(triggered()), this, SLOT(_RemoveCurrentTileset()));
+
+	_right_click_menu = new QMenu(this);
+	_right_click_menu->addAction(_add_tileset_action);
+	_right_click_menu->addAction(_remove_tileset_action);
+}
+
+
+
+TilesetView::~TilesetView() {
+	ClearData();
+	delete _right_click_menu;
+	delete _add_tileset_action;
+	delete _remove_tileset_action;
 }
 
 
@@ -470,6 +495,25 @@ void TilesetView::RefreshView() {
 
 
 
+void TilesetView::contextMenuEvent(QContextMenuEvent* event) {
+	if (_map_data->IsInitialized() == false) {
+		_add_tileset_action->setEnabled(false);
+		_remove_tileset_action->setEnabled(false);
+	}
+	else if (_current_tileset_table == NULL) { // If true, no tilesets are loaded and thus can not be removed
+		_add_tileset_action->setEnabled(true);
+		_remove_tileset_action->setEnabled(false);
+	}
+	else {
+		_add_tileset_action->setEnabled(true);
+		_remove_tileset_action->setEnabled(true);
+	}
+
+	_right_click_menu->exec(QCursor::pos());
+}
+
+
+
 void TilesetView::_CurrentTabChanged() {
 	_current_tileset_index = currentIndex();
 	if (_current_tileset_index == -1) {
@@ -478,6 +522,36 @@ void TilesetView::_CurrentTabChanged() {
 	else {
 		_current_tileset_table = static_cast<TilesetTable*>(currentWidget());
 	}
+}
+
+
+
+void TilesetView::_OpenAddTilesetDialog() {
+
+}
+
+
+
+void TilesetView::_RemoveCurrentTileset() {
+	QString tileset_name = _current_tileset_table->GetTileset()->GetTilesetName();
+	QString warning_text = "Deleting a tileset from the map will nullify all drawn tiles from that tileset.";
+	warning_text = warning_text.append(" Are you sure that you wish to proceed with the deletion of the tileset '%1'?");
+	warning_text = warning_text.arg(tileset_name);
+	switch (QMessageBox::warning(this, "Remove Tileset Confirmation", warning_text, "&Confirm", "C&ancel", 0, 1))
+	{
+		case 0: // Selected Confirm
+			break;
+		case 1: // Selected Cancel
+		default:
+			return;
+	}
+
+	_map_data->RemoveTileset(_current_tileset_index);
+
+ 	delete currentWidget();
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->UpdateMapView();
+	editor->statusBar()->showMessage(QString("Removed tileset '%1'").arg(tileset_name), 5000);
 }
 
 } // namespace hoa_editor
