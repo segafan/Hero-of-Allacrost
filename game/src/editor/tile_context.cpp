@@ -160,14 +160,22 @@ void ContextView::mousePressEvent(QMouseEvent* event) {
 		QTreeWidget::mousePressEvent(event);
 	}
 	else {
-		// Determine which QTreeWidgetItem was selected, if any. Enable/disable menu actions appropriately
-		_right_click_item = itemAt(event->pos());
-		if (_right_click_item != NULL) {
-			_rename_context_action->setEnabled(true);
-			_delete_context_action->setEnabled(true);
+		if (_map_data->IsInitialized() == true) {
+			// Determine which QTreeWidgetItem was selected, if any. Enable/disable menu actions appropriately
+			_right_click_item = itemAt(event->pos());
+			_add_context_action->setEnabled(true);
+			if (_right_click_item != NULL) {
+				_rename_context_action->setEnabled(true);
+				_delete_context_action->setEnabled(true);
+			}
+			else {
+				// Clicked a space in the widget that did not point to any item
+				_rename_context_action->setEnabled(false);
+				_delete_context_action->setEnabled(false);
+			}
 		}
 		else {
-			// Clicked a space in the widget that did not point to any item
+			_add_context_action->setEnabled(false);
 			_rename_context_action->setEnabled(false);
 			_delete_context_action->setEnabled(false);
 		}
