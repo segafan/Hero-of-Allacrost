@@ -78,6 +78,7 @@ bool MapData::CreateData(uint32 map_length, uint32 map_height) {
 	_selected_tile_context = new_context;
 	_selected_tile_layer = new_context->GetTileLayer(0);
 	_selected_tile_layer_properties = &_tile_layer_properties[0];
+	SetMapModified(true);
 	return true;
 }
 
@@ -110,6 +111,7 @@ void MapData::DestroyData() {
 	_selected_tile_layer_properties = NULL;
 
 	_error_message = "";
+	SetMapModified(false);
 }
 
 
@@ -279,7 +281,7 @@ bool MapData::LoadData(QString filename) {
 
 	data_file.CloseTable();
 	data_file.CloseFile();
-	_map_modified = false;
+	SetMapModified(false);
 	return true;
 } // bool MapData::LoadData(QString filename)
 
@@ -390,7 +392,7 @@ bool MapData::SaveData(QString filename) {
 	}
 
 	data_file.CloseFile();
-	_map_modified = false;
+	SetMapModified(false);
 	return true;
 } // bool MapData::SaveData(QString filename)
 
@@ -398,6 +400,7 @@ bool MapData::SaveData(QString filename) {
 
 void MapData::ResizeMap(uint32 number_cols, uint32 number_rows) {
 	// TODO: modify the size of all layers in each context
+	SetMapModified(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -429,6 +432,7 @@ bool MapData::AddTileset(Tileset* new_tileset) {
 
 	_tilesets.push_back(new_tileset);
 	_tileset_names.push_back(new_tileset->GetTilesetName());
+	SetMapModified(true);
 	return true;
 }
 
@@ -449,6 +453,33 @@ void MapData::RemoveTileset(uint32 tileset_index) {
 	}
 	_tilesets.pop_back();
 	_tileset_names.pop_back();
+
+	// When a tileset is removed, two things need to happen to the map data. First, any tiles from the removed tileset need to be nullified (set to NO_TILE).
+	// Second, the values for any tile from a tileset that was ordered after the removed tileset need to be updated to reflect the new tileset indexes. In other
+	// words, TILESET_NUM_TILES must be subtracted from each of these tilesets.
+	int32 tile_null_start = tileset_index * TILESET_NUM_TILES; // The starting value for all tiles that need to be nullified
+	int32 tile_update_start = tile_null_start + TILESET_NUM_TILES; // The starting value for all tiles that need to be updated
+
+	for (uint32 c = 0; c < _tile_context_count; ++c) {
+		vector<TileLayer>& layers = _all_tile_contexts[c]->GetTileLayers();
+		for (uint32 l = 0; l < _tile_layer_count; ++l) {
+			vector<vector<int32> >& tiles = layers[l].GetTiles();
+			for (uint32 y = 0; y < _map_height; ++y) {
+				for (uint32 x = 0; x < _map_length; ++x) {
+					if (tiles[y][x] >= tile_null_start) {
+						if (tiles[y][x] < tile_update_start) {
+							tiles[y][x] = NO_TILE;
+						}
+						else {
+							tiles[y][x] -= TILESET_NUM_TILES;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	SetMapModified(true);
 }
 
 
@@ -471,6 +502,9 @@ void MapData::MoveTilesetUp(uint32 tileset_index) {
 	QString temp_name = _tileset_names[tileset_index - 1];
 	_tileset_names[tileset_index - 1] = _tileset_names[tileset_index];
 	_tileset_names[tileset_index] = temp_name;
+
+	// TODO: update tile values on the map
+	SetMapModified(true);
 }
 
 
@@ -493,6 +527,9 @@ void MapData::MoveTilesetDown(uint32 tileset_index) {
 	QString temp_name = _tileset_names[tileset_index + 1];
 	_tileset_names[tileset_index + 1] = _tileset_names[tileset_index];
 	_tileset_names[tileset_index] = temp_name;
+
+	// TODO: update tile values on the map
+	SetMapModified(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -539,6 +576,7 @@ void MapData::ToggleTileLayerCollision(uint32 layer_index) {
 
 	bool collisions = _tile_layer_properties[layer_index].IsCollisionEnabled();
 	_tile_layer_properties[layer_index].SetCollisionEnabled(!collisions);
+	SetMapModified(true);
 }
 
 
@@ -558,6 +596,7 @@ bool MapData::AddTileLayer(QString name, bool collision_on) {
 	}
 	_tile_layer_properties.push_back(TileLayerProperties(name, true, collision_on));
 
+	SetMapModified(true);
 	return true;
 }
 
@@ -581,6 +620,7 @@ bool MapData::DeleteTileLayer(uint32 layer_index) {
 	_tile_layer_properties.pop_back();
 
 	_tile_layer_count--;
+	SetMapModified(true);
 	return true;
 }
 
@@ -610,6 +650,7 @@ bool MapData::RenameTileLayer(uint32 layer_index, QString new_name) {
 	}
 
 	_tile_layer_properties[layer_index].SetName(new_name);
+	SetMapModified(true);
 	return true;
 }
 
@@ -638,6 +679,7 @@ bool MapData::SwapTileLayers(uint32 index_one, uint32 index_two) {
 	_tile_layer_properties[index_two] = _tile_layer_properties[index_one];
 	_tile_layer_properties[index_one] = _tile_layer_properties[index_two];
 
+	SetMapModified(true);
 	return true;
 }
 
@@ -660,6 +702,7 @@ void MapData::InsertTileLayerRows(uint32 row_index, uint32 row_count) {
 	}
 
 	_map_height = _map_height + row_count;
+	SetMapModified(true);
 }
 
 
@@ -685,6 +728,7 @@ void MapData::RemoveTileLayerRows(uint32 row_index, uint32 row_count) {
 	}
 
 	_map_height = _map_height - row_count;
+	SetMapModified(true);
 }
 
 
@@ -706,6 +750,7 @@ void MapData::InsertTileLayerColumns(uint32 col_index, uint32 col_count) {
 	}
 
 	_map_length = _map_length + col_count;
+	SetMapModified(true);
 }
 
 
@@ -731,6 +776,7 @@ void MapData::RemoveTileLayerColumns(uint32 col_index, uint32 col_count) {
 	}
 
 	_map_length = _map_length - col_count;
+	SetMapModified(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -829,6 +875,7 @@ TileContext* MapData::AddTileContext(QString name, int32 inheriting_context_id) 
 	_all_tile_contexts[_tile_context_count] = new_context;
 	_tile_context_count++;
 
+	SetMapModified(true);
 	return new_context;
 }
 
@@ -861,6 +908,7 @@ bool MapData::DeleteTileContext(int32 context_id) {
 	_all_tile_contexts[_tile_context_count - 1] = NULL;
 	_tile_context_count--;
 
+	SetMapModified(true);
 	return true;
 }
 
@@ -891,6 +939,7 @@ bool MapData::RenameTileContext(int32 context_id, QString new_name) {
 	}
 
 	_all_tile_contexts[context_id - 1]->SetContextName(new_name);
+	SetMapModified(true);
 	return true;
 }
 
@@ -921,6 +970,7 @@ bool MapData::ChangeInheritanceTileContext(int32 context_id, int32 inherit_id) {
 	}
 
 	_all_tile_contexts[context_id - 1]->_SetInheritingContext(inherit_id);
+	SetMapModified(true);
 	return true;
 }
 
@@ -966,6 +1016,7 @@ bool MapData::SwapTileContexts(int32 first_id, int32 second_id) {
 			_all_tile_contexts[i]->_SetInheritingContext(first_id);
 	}
 
+	SetMapModified(true);
 	return true;
 }
 

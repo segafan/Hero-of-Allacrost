@@ -17,9 +17,11 @@
 #ifndef __TILESET_HEADER__
 #define __TILESET_HEADER__
 
-#include <QRect>
-#include <QImageReader>
+#include <QAction>
+#include <QContextMenuEvent>
+#include <QMenu>
 #include <QString>
+#include <QTabWidget>
 #include <QTableWidget>
 
 #include "editor_utils.h"
@@ -302,8 +304,7 @@ public:
 	**/
 	TilesetView(QWidget* parent, MapData* data);
 
-	~TilesetView()
-		{ ClearData(); }
+	~TilesetView();
 
 	//! \name Class Member Accessor Methods
 	//@{
@@ -332,9 +333,31 @@ private:
 	**/
 	int32 _current_tileset_index;
 
+	//! \brief Menu for right-clicks events on the widget
+    QMenu* _right_click_menu;
+
+	/** \name Right-Click Menu Actions
+	*** \brief Correspond to the private slots functions for user actions
+	**/
+	//@{
+	QAction* _add_tileset_action;
+	QAction* _remove_tileset_action;
+	//@}
+
 private slots:
+	/** \brief Inherited slot that is called whenever the user right clicks the widget
+	*** \param event A pointer to the object that contains the details about the event
+	**/
+	void contextMenuEvent(QContextMenuEvent* event);
+
 	//! \brief Called whenever the selected tab is changed and sets _current_tileset_table and _current_tileset_multiplier appropriately
 	void _CurrentTabChanged();
+
+	//! \brief Opens a dialog window to allow additional tilesets to be opened and added to the widget
+	void _OpenAddTilesetDialog();
+
+	//! \brief Removes the current tileset table from the widget and the corresponding tileset from the map data
+	void _RemoveCurrentTileset();
 }; // class TilesetView : public QTabWidget
 
 } // namespace hoa_editor
