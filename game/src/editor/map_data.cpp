@@ -552,7 +552,7 @@ TileLayer* MapData::ChangeSelectedTileLayer(uint32 layer_index) {
 QStringList MapData::GetTileLayerNames() const {
 	QStringList layer_names;
 	for (uint32 i = 0; i < _tile_layer_count; ++i) {
-		layer_names.append(_tile_layer_properties[i].GetName());
+		layer_names.append(_tile_layer_properties[i].GetLayerName());
 	}
 
 	return layer_names;
@@ -584,8 +584,7 @@ void MapData::ToggleTileLayerCollision(uint32 layer_index) {
 bool MapData::AddTileLayer(QString name, bool collision_on) {
 	// Check that the name will be unique among all existing tile layers before adding
 	QStringList layer_names = GetTileLayerNames();
-	int32 name_index = layer_names.indexOf(name);
-	if (name_index != -1) {
+	if (layer_names.indexOf(name) != -1) {
 		_error_message = "ERROR: a tile layer with this name already exists";
 		return false;
 	}
@@ -626,6 +625,28 @@ bool MapData::DeleteTileLayer(uint32 layer_index) {
 
 
 
+bool MapData::CloneTileLayer(uint32 layer_index) {
+	if (layer_index >= _tile_layer_count) {
+		_error_message = "ERROR: no tile layer exists at this index";
+		return false;
+	}
+
+	// First clone the properties of the layer. Layers can't share the same name, so generate a name for the clone layer
+	TileLayerProperties clone_properties = _tile_layer_properties[layer_index];
+	clone_properties.SetLayerName(_CreateCloneName(clone_properties.GetLayerName(), GetTileLayerNames()));
+	_tile_layer_properties.push_back(clone_properties);
+
+	// Go through each tile context and clone the appropriate layer data
+	for (uint32 i = 0; i < _tile_context_count; ++i) {
+		_all_tile_contexts[i]->_CloneTileLayer(layer_index);
+	}
+
+	_tile_layer_count++;
+	return true;
+}
+
+
+
 bool MapData::RenameTileLayer(uint32 layer_index, QString new_name) {
 	if (layer_index > _tile_layer_count) {
 		_error_message = "ERROR: no tile layer exists at this index";
@@ -638,7 +659,7 @@ bool MapData::RenameTileLayer(uint32 layer_index, QString new_name) {
 	}
 
 	// Check for the case where the name doesn't actually change
-	if (_tile_layer_properties[layer_index].GetName() == new_name) {
+	if (_tile_layer_properties[layer_index].GetLayerName() == new_name) {
 		return true;
 	}
 
@@ -649,7 +670,7 @@ bool MapData::RenameTileLayer(uint32 layer_index, QString new_name) {
 		return false;
 	}
 
-	_tile_layer_properties[layer_index].SetName(new_name);
+	_tile_layer_properties[layer_index].SetLayerName(new_name);
 	SetMapModified(true);
 	return true;
 }
@@ -810,9 +831,6 @@ TileContext* MapData::ChangeSelectedTileContext(int32 context_id) {
 QStringList MapData::GetTileContextNames() const {
 	QStringList context_names;
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
-		if (_all_tile_contexts[i] == NULL)
-			break;
-
 		context_names.append(_all_tile_contexts[i]->GetContextName());
 	}
 
@@ -843,7 +861,7 @@ QStringList MapData::GetInheritedTileContextNames() const {
 TileContext* MapData::AddTileContext(QString name, int32 inheriting_context_id) {
 	// Check all conditions where we would not be able to create the new context
 
-	if (_all_tile_contexts.back() != NULL) {
+	if (_tile_context_count == MAX_CONTEXTS) {
 		_error_message = "ERROR: could not add new context as the maximum number of contexts has been reached";
 		return NULL;
 	}
@@ -910,6 +928,29 @@ bool MapData::DeleteTileContext(int32 context_id) {
 
 	SetMapModified(true);
 	return true;
+}
+
+
+
+TileContext* MapData::CloneTileContext(int32 context_id) {
+	TileContext* context = FindTileContextByID(context_id);
+	// Check all conditions where we would not be able to clone the context
+	if (context == NULL) {
+		_error_message = "ERROR: received invalid context ID";
+		return NULL;
+	}
+	if (_tile_context_count == MAX_CONTEXTS) {
+		_error_message = "ERROR: could not clone context as the maximum number of contexts has been reached";
+		return NULL;
+	}
+
+	TileContext* clone_context = new TileContext(*context);
+	clone_context->_SetContextID(_tile_context_count + 1);
+	clone_context->SetContextName(_CreateCloneName(clone_context->GetContextName(), GetTileContextNames()));
+
+	_all_tile_contexts[_tile_context_count] = clone_context;
+	_tile_context_count++;
+	return clone_context;
 }
 
 
@@ -1055,6 +1096,19 @@ TileContext* MapData::FindTileContextByIndex(uint32 context_index) const {
 		return NULL;
 
 	return _all_tile_contexts[context_index];
+}
+
+
+
+QString MapData::_CreateCloneName(const QString& name, const QStringList& taken_names) const {
+	uint32 clone_id = 1;
+	QString clone_name = name + " (Clone)";
+
+	while (taken_names.contains(clone_name) == true) {
+		clone_name = name + " (Clone #" + QString::number(clone_id) + ")";
+		clone_id++;
+	}
+	return clone_name;
 }
 
 
