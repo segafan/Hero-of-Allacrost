@@ -147,6 +147,11 @@ private:
 	**/
 	void _RemoveTileLayer(uint32 layer_index);
 
+	/** \brief Creates a copy of an existing tile layer
+	*** \param layer_index The index of the layer to clone
+	**/
+	void _CloneTileLayer(uint32 layer_index);
+
 	/** \brief Swaps the position of two tile layers
 	*** \param first_index The index of the first layer to swap
 	*** \param second_index The index of the second layer to swap
@@ -221,6 +226,9 @@ private slots:
 	//! \brief Creates a new empty tile context and adds it to the end of the context list
 	void _AddTileContext();
 
+	//! \brief Creates a new tile context that clones all the data and properties of an existing context
+	void _CloneTileContext();
+
 	//! \brief Opens up an editor to rename the layer pointed to by _right_click_item
 	void _RenameTileContext();
 
@@ -248,6 +256,7 @@ private:
 	**/
 	//{@
 	QAction* _add_context_action;
+	QAction* _clone_context_action;
 	QAction* _rename_context_action;
 	QAction* _delete_context_action;
 	//@}

@@ -215,6 +215,9 @@ public:
 	std::vector<TileLayerProperties>& GetTileLayerProperties()
 		{ return _tile_layer_properties; }
 
+	TileLayerProperties* GetTileLayerProperties(uint32 layer_index)
+		{ if (layer_index >= _tile_layer_count) return NULL; else return &_tile_layer_properties[layer_index]; }
+
 	/** \brief Makes a tile layer visible in the editor
 	*** \param layer_index The index of the layer to show
 	**/
@@ -262,6 +265,12 @@ public:
 	*** \return True if the layer was deleted successfully
 	**/
 	bool DeleteTileLayer(uint32 layer_index);
+
+	/** \brief Creates a new tile layer by cloning the properties and data of an existing layer
+	*** \param layer_index The index of the layer to clone
+	*** \return True if the layer was added successfully
+	**/
+	bool CloneTileLayer(uint32 layer_index);
 
 	/** \brief Renames an existing tile layer
 	*** \param layer_index The index of the layer to rename
@@ -355,6 +364,12 @@ public:
 	*** contexts inherit from the context.
 	**/
 	bool DeleteTileContext(int32 context_id);
+
+	/** \brief Creates a new TileContext object by copying the data and properties of an existing TileContext
+	*** \param context_id The ID of the context to clone
+	*** \return A pointer to the newly created TileContext, or NULL if an error prevented the context from being cloned
+	**/
+	TileContext* CloneTileContext(int32 context_id);
 
 	/** \brief Renames an existing TileContext object
 	*** \param context_id The ID of the context to rename
@@ -502,16 +517,15 @@ private:
 	uint32 _GetTileContextIndex(TileContext* context)
 		{ return static_cast<uint32>(context->GetContextID() - 1); }
 
-	/** \brief Swaps the postion of two contexts in the _all_map_contexts list
-	*** \param first A pointer to the first context to swap
-	*** \param second A pointer to the second context to swap
+	/** \brief Given a string, creates a modified version of the string that appends text to indicate that it is a clone
+	*** \param name A reference to the string containing the name to clone
+	*** \param taken_names A reference to a list of names that the return value can not be
+	*** \return The name of the cloned string
 	***
-	*** This function does not do any error checking on the TileContext arguments, so the caller is
-	*** responsible for ensuring that they point to valid entries in _all_map_contexts. This operation will
-	*** potentially modify more contexts than just the two being swapped, since inherited context IDs need
-	*** to be checked to maintain consistency.
+	*** This function will first try to append " (Clone)". If that name is taken, it will try the name (Clone #1). The number
+	*** value will continue to increment until it finds a name that is not in the taken_names list.
 	**/
-	void _SwapTileContexts(TileContext* first, TileContext* second);
+	QString _CreateCloneName(const QString& name, const QStringList& taken_names) const;
 
 	/** \brief Computes the collision grid from the current map data and saves the result to _collision_data
 	***

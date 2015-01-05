@@ -189,7 +189,12 @@ LayerView::LayerView(MapData* data) :
 	_map_data(data),
 	_original_layer_name(),
 	_visibility_icon(QString("img/misc/editor_tools/eye.png")),
-	_right_click_item(NULL)
+	_right_click_item(NULL),
+	_right_click_menu(NULL),
+	_add_layer_action(NULL),
+	_clone_layer_action(NULL),
+	_rename_layer_action(NULL),
+	_delete_layer_action(NULL)
 {
 	if (data == NULL) {
 		qDebug() << "constructor received NULL map data argument" << endl;
@@ -216,6 +221,8 @@ LayerView::LayerView(MapData* data) :
 	// Setup actions for the right click menu
 	_add_layer_action = new QAction("Add New Layer", this);
 	_add_layer_action->setStatusTip("Adds a new empty tile layer to the end of the layer list");
+	_clone_layer_action = new QAction("Clone Layer", this);
+	_clone_layer_action->setStatusTip("Adds a new layer that clones the data and properties of an existing layer");
 	_rename_layer_action = new QAction("Rename Layer", this);
 	_rename_layer_action->setStatusTip("Renames the selected layer (can also be activated by double-clicking the layer's name)");
 	_delete_layer_action = new QAction("Delete Tile Layer", this);
@@ -223,6 +230,7 @@ LayerView::LayerView(MapData* data) :
 
 	_right_click_menu = new QMenu(this);
 	_right_click_menu->addAction(_add_layer_action);
+	_right_click_menu->addAction(_clone_layer_action);
 	_right_click_menu->addAction(_rename_layer_action);
 	_right_click_menu->addAction(_delete_layer_action);
 
@@ -231,6 +239,7 @@ LayerView::LayerView(MapData* data) :
 	connect(this, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(_SetTileLayerName(QTreeWidgetItem*, int)));
 	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeLayerProperties(QTreeWidgetItem*, int)));
 	connect(_add_layer_action, SIGNAL(triggered()), this, SLOT(_AddTileLayer()));
+	connect(_clone_layer_action, SIGNAL(triggered()), this, SLOT(_CloneTileLayer()));
 	connect(_rename_layer_action, SIGNAL(triggered()), this, SLOT(_RenameTileLayer()));
 	connect(_delete_layer_action, SIGNAL(triggered()), this, SLOT(_DeleteTileLayer()));
 }
@@ -240,6 +249,7 @@ LayerView::LayerView(MapData* data) :
 LayerView::~LayerView() {
 	delete _right_click_menu;
 	delete _add_layer_action;
+	delete _clone_layer_action;
 	delete _rename_layer_action;
 	delete _delete_layer_action;
 }
@@ -250,31 +260,33 @@ void LayerView::mousePressEvent(QMouseEvent* event) {
 	// Handle left clicks the standard way. Right clicks bring up the layer action menu
 	if (event->button() == Qt::LeftButton) {
 		QTreeWidget::mousePressEvent(event);
+		return;
+	}
+
+	if (_map_data->IsInitialized() == false) {
+		_add_layer_action->setEnabled(false);
+		_clone_layer_action->setEnabled(false);
+		_rename_layer_action->setEnabled(false);
+		_delete_layer_action->setEnabled(false);
 	}
 	else {
-		if (_map_data->IsInitialized() == true) {
-			// Determine which QTreeWidgetItem was selected, if any. Enable/disable menu actions appropriately
-			_right_click_item = itemAt(event->pos());
-			_add_layer_action->setEnabled(true);
-			if (_right_click_item != NULL) {
-				_rename_layer_action->setEnabled(true);
-				_delete_layer_action->setEnabled(true);
-			}
-			else {
-				// Clicked a space in the widget that did not point to any item
-				_rename_layer_action->setEnabled(false);
-				_delete_layer_action->setEnabled(false);
-			}
+		// Determine which QTreeWidgetItem was selected, if any. Enable/disable menu actions appropriately
+		_right_click_item = itemAt(event->pos());
+		_add_layer_action->setEnabled(true);
+		if (_right_click_item != NULL) {
+			_clone_layer_action->setEnabled(true);
+			_rename_layer_action->setEnabled(true);
+			_delete_layer_action->setEnabled(true);
 		}
 		else {
-			_add_layer_action->setEnabled(false);
+			// Clicked a space in the widget that did not point to any item
+			_clone_layer_action->setEnabled(false);
 			_rename_layer_action->setEnabled(false);
 			_delete_layer_action->setEnabled(false);
 		}
-
-		_right_click_menu->exec(QCursor::pos());
-		return;
 	}
+
+	_right_click_menu->exec(QCursor::pos());
 }
 
 
@@ -329,7 +341,7 @@ void LayerView::RefreshView() {
 			item->setIcon(VISIBLE_COLUMN, _visibility_icon);
 		else
 			item->setIcon(VISIBLE_COLUMN, QIcon());
-		item->setText(NAME_COLUMN, layer_properties[i].GetName());
+		item->setText(NAME_COLUMN, layer_properties[i].GetLayerName());
 		item->setText(COLLISION_COLUMN, layer_properties[i].IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
 	}
 
@@ -350,6 +362,9 @@ void LayerView::_ChangeSelectedLayer() {
 	if (_map_data->ChangeSelectedTileLayer(layer_id) == NULL) {
 		QMessageBox::warning(this, "Layer Selection Failure", _map_data->GetErrorMessage());
 	}
+
+	// Certain map overlays change depending on which layer is selected, which is why we have to update the map view here
+	static_cast<Editor*>(topLevelWidget())->UpdateMapView();
 }
 
 
@@ -360,6 +375,7 @@ void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 
 	uint32 layer_id = item->text(ID_COLUMN).toUInt();
 	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
+
 	if (column == VISIBLE_COLUMN) {
 		_map_data->ToggleTileLayerVisibility(layer_id);
 		if (layer_properties[layer_id].IsVisible() == true)
@@ -436,6 +452,31 @@ void LayerView::_AddTileLayer() {
 
 
 
+void LayerView::_CloneTileLayer() {
+	if (_right_click_item == NULL)
+		return;
+
+	// Clone the layer data
+	uint32 layer_id = _right_click_item->text(ID_COLUMN).toUInt();
+	_map_data->CloneTileLayer(layer_id);
+
+	// Retrieve the properties of the most recently added layer and construct a new widget item with them
+	TileLayerProperties* clone_properties = _map_data->GetTileLayerProperties(_map_data->GetTileLayerCount() - 1);
+	QTreeWidgetItem* item = new QTreeWidgetItem(this);
+	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
+	item->setText(ID_COLUMN, QString::number(_map_data->GetTileLayerCount() - 1));
+	if (clone_properties->IsVisible() == true)
+		item->setIcon(VISIBLE_COLUMN, _visibility_icon);
+	else
+		item->setIcon(VISIBLE_COLUMN, QIcon());
+	item->setText(NAME_COLUMN, clone_properties->GetLayerName());
+	item->setText(COLLISION_COLUMN, clone_properties->IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
+
+	setCurrentItem(item);
+}
+
+
+
 void LayerView::_RenameTileLayer() {
 	if (_right_click_item == NULL)
 		return;
@@ -455,12 +496,25 @@ void LayerView::_DeleteTileLayer() {
 		return;
 	}
 
+	uint32 layer_index = static_cast<uint32>(indexOfTopLevelItem(_right_click_item));
+	QString layer_name = _map_data->GetTileLayerProperties().at(layer_index).GetLayerName();
+	QString warning_text = "Deleting a tile layer from the map will delete the layer from all map contexts.";
+	warning_text = warning_text.append(" Are you sure that you wish to proceed with the deletion of the tile layer '%1'?");
+	warning_text = warning_text.arg(layer_name);
+	switch (QMessageBox::warning(this, "Delete Layer Confirmation", warning_text, "&Confirm", "C&ancel", 0, 1))
+	{
+		case 0: // Selected Confirm
+			break;
+		case 1: // Selected Cancel
+		default:
+			return;
+	}
+
 	// Delete the layer from the map data first and make sure that it was successful
-	if (_map_data->DeleteTileLayer(static_cast<uint32>(indexOfTopLevelItem(_right_click_item))) == false) {
+	if (_map_data->DeleteTileLayer(layer_index) == false) {
 		QMessageBox::warning(this, "Layer Deletion Failure", _map_data->GetErrorMessage());
 		return;
 	}
-	_map_data->SetMapModified(true);
 
 	// If the item being deleted is the selected item, change the selction to the item before it (or after if its the first item)
 	if (currentItem() == _right_click_item) {
@@ -481,7 +535,9 @@ void LayerView::_DeleteTileLayer() {
 	}
 
 	// Redraw the map view now that the layer is removed
-	static_cast<Editor*>(topLevelWidget())->UpdateMapView();
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->UpdateMapView();
+	editor->statusBar()->showMessage(QString("Deleted tile layer '%1'").arg(layer_name), 5000);
 }
 
 } // namespace hoa_editor

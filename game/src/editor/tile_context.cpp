@@ -72,6 +72,18 @@ void TileContext::_RemoveTileLayer(uint32 layer_index) {
 
 
 
+void TileContext::_CloneTileLayer(uint32 layer_index) {
+	if (layer_index >= _tile_layers.size()) {
+		qDebug() << "could not remove layer because the layer_index argument (" << layer_index
+			<< ") exceeds the number of layers (" << layer_index << ")" << endl;
+		return;
+	}
+
+	_tile_layers.push_back(_tile_layers[layer_index]);
+}
+
+
+
 void TileContext::_SwapTileLayers(uint32 first_index, uint32 second_index) {
 	if (first_index >= _tile_layers.size() || second_index >= _tile_layers.size()) {
 		qDebug() << "could not remove layer because one or both index arguments (" << first_index
@@ -82,7 +94,7 @@ void TileContext::_SwapTileLayers(uint32 first_index, uint32 second_index) {
 	// TODO: see if this can be replaced with a call to std::swap
 	TileLayer swap = _tile_layers[first_index];
 	_tile_layers[first_index] = _tile_layers[second_index];
-	_tile_layers[second_index] = _tile_layers[first_index];
+	_tile_layers[second_index] = swap;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,7 +110,12 @@ ContextView::ContextView(MapData* data) :
 	_map_data(data),
 	_original_context_name(),
 	_original_context_inheritance(),
-	_right_click_item(NULL)
+	_right_click_item(NULL),
+	_right_click_menu(NULL),
+	_add_context_action(NULL),
+	_clone_context_action(NULL),
+	_rename_context_action(NULL),
+	_delete_context_action(NULL)
 {
 	if (data == NULL) {
 		qDebug() << "constructor received NULL map data argument" << endl;
@@ -124,6 +141,8 @@ ContextView::ContextView(MapData* data) :
 	// Setup actions for the right click menu
 	_add_context_action = new QAction("Add New Context", this);
 	_add_context_action->setStatusTip("Adds a new empty context to the end of the context list");
+	_clone_context_action = new QAction("Clone Context", this);
+	_clone_context_action->setStatusTip("Adds a new context that clones the data and properties of an existing context");
 	_rename_context_action = new QAction("Rename Context", this);
 	_rename_context_action->setStatusTip("Renames the selected context (can also be activated by double-clicking the context's name)");
 	_delete_context_action = new QAction("Delete Tile Context", this);
@@ -131,6 +150,7 @@ ContextView::ContextView(MapData* data) :
 
 	_right_click_menu = new QMenu(this);
 	_right_click_menu->addAction(_add_context_action);
+	_right_click_menu->addAction(_clone_context_action);
 	_right_click_menu->addAction(_rename_context_action);
 	_right_click_menu->addAction(_delete_context_action);
 
@@ -139,6 +159,7 @@ ContextView::ContextView(MapData* data) :
 	connect(this, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(_ValidateChangedData(QTreeWidgetItem*, int)));
 	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(_ChangeContextProperties(QTreeWidgetItem*, int)));
 	connect(_add_context_action, SIGNAL(triggered()), this, SLOT(_AddTileContext()));
+	connect(_clone_context_action, SIGNAL(triggered()), this, SLOT(_CloneTileContext()));
 	connect(_rename_context_action, SIGNAL(triggered()), this, SLOT(_RenameTileContext()));
 	connect(_delete_context_action, SIGNAL(triggered()), this, SLOT(_DeleteTileContext()));
 }
@@ -148,6 +169,7 @@ ContextView::ContextView(MapData* data) :
 ContextView::~ContextView() {
 	delete _right_click_menu;
 	delete _add_context_action;
+	delete _clone_context_action;
 	delete _rename_context_action;
 	delete _delete_context_action;
 }
@@ -165,17 +187,20 @@ void ContextView::mousePressEvent(QMouseEvent* event) {
 			_right_click_item = itemAt(event->pos());
 			_add_context_action->setEnabled(true);
 			if (_right_click_item != NULL) {
+				_clone_context_action->setEnabled(true);
 				_rename_context_action->setEnabled(true);
 				_delete_context_action->setEnabled(true);
 			}
 			else {
 				// Clicked a space in the widget that did not point to any item
+				_clone_context_action->setEnabled(false);
 				_rename_context_action->setEnabled(false);
 				_delete_context_action->setEnabled(false);
 			}
 		}
 		else {
 			_add_context_action->setEnabled(false);
+			_clone_context_action->setEnabled(false);
 			_rename_context_action->setEnabled(false);
 			_delete_context_action->setEnabled(false);
 		}
@@ -403,6 +428,34 @@ void ContextView::_AddTileContext() {
 
 
 
+void ContextView::_CloneTileContext() {
+	if (_right_click_item == NULL)
+		return;
+
+	// Clone the context data
+	uint32 context_id = _right_click_item->text(ID_COLUMN).toInt();
+	TileContext* clone_context = _map_data->CloneTileContext(context_id);
+
+	if (clone_context == NULL) {
+		QMessageBox::warning(this, "Context Clone Failure", _map_data->GetErrorMessage());
+		return;
+	}
+
+	// Construct a new widget item using the context object that was just cloned
+	QTreeWidgetItem* item = new QTreeWidgetItem(this);
+	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
+	item->setText(ID_COLUMN, QString::number(clone_context->GetContextID()));
+	item->setText(NAME_COLUMN, clone_context->GetContextName());
+	if (clone_context->GetInheritedContextID() == NO_CONTEXT)
+		item->setText(INHERITS_COLUMN, "");
+	else
+		item->setText(INHERITS_COLUMN, QString::number(clone_context->GetInheritedContextID()));
+
+	setCurrentItem(item);
+}
+
+
+
 void ContextView::_RenameTileContext() {
 	if (_right_click_item == NULL)
 		return;
@@ -417,8 +470,27 @@ void ContextView::_DeleteTileContext() {
 	if (_right_click_item == NULL)
 		return;
 
-	// Delete the context from the map data first and make sure that it was successful
-	if (_map_data->DeleteTileContext(_right_click_item->text(ID_COLUMN).toInt()) == false) {
+	if (_map_data->GetTileContextCount() == 1) {
+		QMessageBox::warning(this, "Context Deletion Failure", "You may not delete the last remaining context for a map.");
+		return;
+	}
+
+	uint32 context_id = _right_click_item->text(ID_COLUMN).toInt();
+	QString context_name = _map_data->FindTileContextByID(context_id)->GetContextName();
+	QString warning_text = "Deleting a tile context from the map is an irreversible operation and all tile data on the context will be permanently lost.";
+	warning_text = warning_text.append(" Are you sure that you wish to proceed with the deletion of the tile context '%1'?");
+	warning_text = warning_text.arg(context_name);
+	switch (QMessageBox::warning(this, "Delete Context Confirmation", warning_text, "&Confirm", "C&ancel", 0, 1))
+	{
+		case 0: // Selected Confirm
+			break;
+		case 1: // Selected Cancel
+		default:
+			return;
+	}
+
+	// Delete the context from the map data and make sure that it was successful
+	if (_map_data->DeleteTileContext(context_id) == false) {
 		QMessageBox::warning(this, "Context Deletion Failure", _map_data->GetErrorMessage());
 		return;
 	}
@@ -441,6 +513,10 @@ void ContextView::_DeleteTileContext() {
 	for (uint32 i = 0; i < static_cast<uint32>(root->childCount()); ++i) {
 		root->child(i)->setText(ID_COLUMN, QString::number(i + 1));
 	}
+
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->UpdateMapView();
+	editor->statusBar()->showMessage(QString("Deleted map context '%1'").arg(context_name), 5000);
 }
 
 } // namespace hoa_editor

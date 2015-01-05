@@ -193,18 +193,18 @@ private:
 class TileLayerProperties {
 public:
 	TileLayerProperties() :
-		_name(QString("")), _visible(true), _collision_enabled(true) {}
+		_layer_name(QString("")), _visible(true), _collision_enabled(true) {}
 
 	TileLayerProperties(QString name) :
-		_name(name), _visible(true), _collision_enabled(true) {}
+		_layer_name(name), _visible(true), _collision_enabled(true) {}
 
 	TileLayerProperties(QString name, bool visible, bool collisions) :
-		_name(name), _visible(visible), _collision_enabled(collisions) {}
+		_layer_name(name), _visible(visible), _collision_enabled(collisions) {}
 
 	//! \name Class member accessor functions
 	//@{
-	QString GetName() const
-		{ return _name; }
+	QString GetLayerName() const
+		{ return _layer_name; }
 
 	bool IsVisible() const
 		{ return _visible; }
@@ -212,8 +212,8 @@ public:
 	bool IsCollisionEnabled() const
 		{ return _collision_enabled; }
 
-	void SetName(QString name)
-		{ _name = name; }
+	void SetLayerName(QString name)
+		{ _layer_name = name; }
 
 	void SetVisible(bool visible)
 		{ _visible = visible; }
@@ -232,7 +232,7 @@ private:
 	/** \brief The name of the layer as it will be seen by the user of the editor
 	*** \note Although this data is saved to the map file, it is used only by the editor and not the game.
 	**/
-	QString _name;
+	QString _layer_name;
 
 	/** \brief Indicates whether or not the layer is visible in the editor
 	*** \note This data is not saved to the map file. Any newly created or loaded tile layer will be visible by default.
@@ -332,6 +332,9 @@ private slots:
 	//! \brief Creates a new empty tile layer and adds it to the end of the layer list
 	void _AddTileLayer();
 
+	//! \brief Creates a new tile layer that clones all the data and properties of an existing layer
+	void _CloneTileLayer();
+
 	//! \brief Opens up an editor to rename the layer pointed to by _right_click_item
 	void _RenameTileLayer();
 
@@ -359,6 +362,7 @@ private:
 	**/
 	//{@
 	QAction* _add_layer_action;
+	QAction* _clone_layer_action;
 	QAction* _rename_layer_action;
 	QAction* _delete_layer_action;
 	//@}
