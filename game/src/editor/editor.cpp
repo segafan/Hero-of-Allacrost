@@ -662,9 +662,6 @@ void Editor::_FileOpen() {
 		return;
 	}
 
-	vector<Tileset*> tilesets = _map_data.GetTilesets();
-	QStringList tileset_names = _map_data.GetTilesetNames();
-
 	_ClearEditorState();
 	statusBar()->showMessage(QString("Opened map \'%1\'").arg(_map_data.GetMapFilename()), 5000);
 	setWindowTitle(QString("Allacrost Map Editor -- %1").arg(_map_data.GetMapFilename()));

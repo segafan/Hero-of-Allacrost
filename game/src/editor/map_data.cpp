@@ -407,6 +407,17 @@ void MapData::ResizeMap(uint32 number_cols, uint32 number_rows) {
 // MapData class -- Tileset Functions
 ///////////////////////////////////////////////////////////////////////////////
 
+QStringList MapData::GetTilesetFilenames() const {
+	QStringList tileset_filenames;
+	for (uint32 i = 0; i < _tilesets.size(); ++i) {
+		tileset_filenames.append(_tilesets[i]->GetTilesetDefinitionFilename());
+	}
+
+	return tileset_filenames;
+}
+
+
+
 bool MapData::AddTileset(Tileset* new_tileset) {
 	if (new_tileset == NULL) {
 		_error_message = "ERROR: function received NULL pointer argument";
@@ -431,7 +442,6 @@ bool MapData::AddTileset(Tileset* new_tileset) {
 	}
 
 	_tilesets.push_back(new_tileset);
-	_tileset_names.push_back(new_tileset->GetTilesetName());
 	SetMapModified(true);
 	return true;
 }
@@ -449,10 +459,8 @@ void MapData::RemoveTileset(uint32 tileset_index) {
 	// Shift all remaining tilesets over, then remove the last entry in the list
 	for (uint32 i = tileset_index + 1; i < _tilesets.size(); ++i) {
 		_tilesets[i-1] = _tilesets[i];
-		_tileset_names[i-1] = _tileset_names[i];
 	}
 	_tilesets.pop_back();
-	_tileset_names.pop_back();
 
 	// When a tileset is removed, two things need to happen to the map data. First, any tiles from the removed tileset need to be nullified (set to NO_TILE).
 	// Second, the values for any tile from a tileset that was ordered after the removed tileset need to be updated to reflect the new tileset indexes. In other
@@ -499,10 +507,6 @@ void MapData::MoveTilesetUp(uint32 tileset_index) {
 	_tilesets[tileset_index - 1] = _tilesets[tileset_index];
 	_tilesets[tileset_index] = temp_tileset;
 
-	QString temp_name = _tileset_names[tileset_index - 1];
-	_tileset_names[tileset_index - 1] = _tileset_names[tileset_index];
-	_tileset_names[tileset_index] = temp_name;
-
 	// TODO: update tile values on the map
 	SetMapModified(true);
 }
@@ -523,10 +527,6 @@ void MapData::MoveTilesetDown(uint32 tileset_index) {
 	Tileset* temp_tileset = _tilesets[tileset_index + 1];
 	_tilesets[tileset_index + 1] = _tilesets[tileset_index];
 	_tilesets[tileset_index] = temp_tileset;
-
-	QString temp_name = _tileset_names[tileset_index + 1];
-	_tileset_names[tileset_index + 1] = _tileset_names[tileset_index];
-	_tileset_names[tileset_index] = temp_name;
 
 	// TODO: update tile values on the map
 	SetMapModified(true);

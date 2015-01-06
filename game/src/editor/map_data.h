@@ -82,9 +82,6 @@ public:
 	std::vector<Tileset*>& GetTilesets()
 		{ return _tilesets; }
 
-	const QStringList& GetTilesetNames() const
-		{ return _tileset_names; }
-
 	uint32 GetTileContextCount() const
 		{ return _tile_context_count; }
 
@@ -166,6 +163,9 @@ public:
 	//@{
 	Tileset* GetTileset(uint32 tileset_index) const
 		{ if (tileset_index < _tilesets.size()) return _tilesets[tileset_index]; else return NULL; }
+
+	//! \brief Return an ordered list of the definition filenames for each tileset
+	QStringList GetTilesetFilenames() const;
 
 	/** \brief Adds a new tileset object to the end of the tileset list
 	*** \param new_tileset A pointer to the already created tileset object to add
@@ -480,14 +480,11 @@ private:
 	//! \brief A pointer to the map context currently selected by the user
 	TileLayerProperties* _selected_tile_layer_properties;
 
-	//! \brief Stores all tilesets used by the map
-	std::vector<Tileset*> _tilesets;
-
 	//! \brief Holds the collision data computed from each context and tile layer
 	std::vector<std::vector<uint32> > _collision_data;
 
-	//! \brief An ordered list of each tileset name for every entry in _tilesets
-	QStringList _tileset_names;
+	//! \brief Stores all tilesets used by the map
+	std::vector<Tileset*> _tilesets;
 
 	/** \brief Stores all TileContext objects for the given map
 	***
