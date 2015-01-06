@@ -21,11 +21,10 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QListWidget>
+#include <QSpinBox>
 #include <QTreeWidget>
 
-#include "utils.h"
-
-#include "editor.h"
+#include "map_data.h"
 
 namespace hoa_editor {
 
@@ -93,6 +92,55 @@ private:
 	//! \brief A layout to manage all the labels, spinboxes, and listviews.
 	QGridLayout* _dia_layout;
 }; // class MapPropertiesDialog : public QDialog
+
+
+/** ***************************************************************************
+*** \brief A dialog window that allows the user to add additional tilesets to a map
+***
+*** This presents the user with a list of all available tilesets that can be added to
+*** the map. Tilesets which are already loaded and in use by the map are also shown, but
+*** they are greyed out and the user can not interact with them. The user can add more than
+*** one tileset to the map at a time with this widget.
+*** **************************************************************************/
+class AddTilesetsDialog : public QDialog {
+	Q_OBJECT // Macro needed to use QT's slots and signals
+
+public:
+	/** \param parent The widget from which this dialog was invoked
+	*** \param data A pointer to the active map data
+	**/
+	AddTilesetsDialog(QWidget* parent, MapData* data);
+
+	~AddTilesetsDialog();
+
+	/** \brief Adds the tilesets selected by the user to the map data
+	*** \return The number of tilesets that were added
+	***
+	*** This should be called only after the user clicks the "Add" button. It may generate error message dialogs to the user if any
+	*** of the tilesets failed to load.
+	**/
+	uint32 AddTilesetsToMapData();
+
+private:
+	//! \brief A pointer to the active map data containing the list of open tilesets
+	MapData* _map_data;
+
+	//! \brief A tree for showing all available tilesets
+	QTreeWidget* _tileset_tree;
+
+	//! \brief A button to confirm adding the new tilesets
+	QPushButton* _add_button;
+
+	//! \brief A button for cancelling the add operation
+	QPushButton* _cancel_button;
+
+	//! \brief Defines the layout of all widgets in the dialog window
+	QGridLayout* _widget_layout;
+
+private slots:
+	//! \brief Enables or disables the add push button of this dialog depending on whether any tilesets are selected
+	void _EnableAddButton();
+}; // class AddTilesetsDialog : public QDialog
 
 } // namespace hoa_editor
 

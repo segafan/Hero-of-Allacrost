@@ -21,9 +21,11 @@
 
 #include "script.h"
 #include "common.h"
-#include "tileset.h"
+
+#include "dialogs.h"
 #include "editor.h"
 #include "map_data.h"
+#include "tileset.h"
 
 using namespace std;
 using namespace hoa_script;
@@ -527,7 +529,20 @@ void TilesetView::_CurrentTabChanged() {
 
 
 void TilesetView::_OpenAddTilesetDialog() {
+	AddTilesetsDialog add_dialog(this, _map_data);
+	if (add_dialog.exec() != QDialog::Accepted) {
+		return;
+	}
 
+	uint32 tilesets_added = add_dialog.AddTilesetsToMapData();
+	static_cast<Editor*>(topLevelWidget())->statusBar()->showMessage(QString("Added %1 tilesets to the map data").arg(tilesets_added), 5000);
+
+	vector<Tileset*>& tilesets = _map_data->GetTilesets();
+	uint32 first_index = tilesets.size() - tilesets_added;
+	for (uint32 i = 0; i < tilesets_added; ++i) {
+		TilesetTable* table = new TilesetTable(tilesets[first_index + i]);
+		addTab(table, tilesets[first_index + i]->GetTilesetName());
+	}
 }
 
 

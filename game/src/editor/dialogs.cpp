@@ -13,6 +13,8 @@
 *** \brief   Source file for all of the editor's dialog windows
 *** **************************************************************************/
 
+#include "editor.h"
+#include "map_data.h"
 #include "dialogs.h"
 
 namespace hoa_editor {
@@ -134,6 +136,127 @@ void MapPropertiesDialog::_EnableOKButton() {
 
 	// If this point is reached, no tilesets are checked.
 	_ok_pbut->setEnabled(false);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// AddTilesetsDialog class
+///////////////////////////////////////////////////////////////////////////////
+
+AddTilesetsDialog::AddTilesetsDialog(QWidget* parent, MapData* data) :
+	QDialog(parent),
+	_map_data(data),
+	_tileset_tree(NULL),
+	_add_button(NULL),
+	_cancel_button(NULL),
+	_widget_layout(NULL)
+{
+	setWindowTitle("Add Tilesets...");
+
+	if (_map_data == NULL) {
+		qDebug("ERROR: AddTilesetsDialog constructor received a NULL map data pointer");
+	}
+
+	_add_button = new QPushButton("Add", this);
+	_cancel_button = new QPushButton("Cancel", this);
+	_cancel_button->setDefault(true);
+
+	connect(_add_button, SIGNAL(released()), this, SLOT(accept()));
+	connect(_cancel_button, SIGNAL(released()), this, SLOT(reject()));
+
+	// Set up the list of selectable tilesets
+	_tileset_tree = new QTreeWidget(this);
+	_tileset_tree->setColumnCount(1);
+	_tileset_tree->setHeaderLabels(QStringList("Tilesets"));
+	connect(_tileset_tree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(_EnableAddButton()));
+
+	// Retrieve all files found in the tileset definition directory (lua/data/tilesets).
+	QList<QTreeWidgetItem*> file_items;
+	QDir tileset_filenames("lua/data/tilesets");
+	QStringList loaded_tileset_filenames = _map_data->GetTilesetFilenames();
+
+	// Start the loop at 2 to skip over the present and parent working directories ("." and "..")
+	for (uint32 i = 2; i < tileset_filenames.count(); i++) {
+		// Exclude the file autotiling.lua, as it is not a tileset defition files
+		if (tileset_filenames[i] == QString("autotiling.lua"))
+			continue;
+
+		QTreeWidgetItem* new_item = new QTreeWidgetItem(_tileset_tree, QStringList(tileset_filenames[i].remove(".lua")));
+		if (loaded_tileset_filenames.contains("lua/data/tilesets/" + tileset_filenames[i]) == true) {
+			new_item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
+			new_item->setCheckState(0, Qt::Checked);
+		}
+		else {
+			new_item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+			new_item->setCheckState(0, Qt::Unchecked);
+		}
+		file_items.append(new_item);
+	}
+
+	_tileset_tree->insertTopLevelItems(0, file_items);
+
+	_widget_layout = new QGridLayout(this);
+	_widget_layout->addWidget(_tileset_tree, 0, 0, 10, -1);
+	_widget_layout->addWidget(_cancel_button, 11, 0);
+	_widget_layout->addWidget(_add_button, 11, 1);
+}
+
+
+
+AddTilesetsDialog::~AddTilesetsDialog() {
+	delete _tileset_tree;
+	delete _add_button;
+	delete _cancel_button;
+	delete _widget_layout;
+}
+
+
+
+uint32 AddTilesetsDialog::AddTilesetsToMapData() {
+	uint32 tilesets_added = 0;
+
+	for (int i = 0; i < _tileset_tree->topLevelItemCount(); i++) {
+		QTreeWidgetItem* item = _tileset_tree->topLevelItem(i);
+		// At least one tileset must be checked in order to enable push button
+		if (item->checkState(0) == Qt::Checked && item->isDisabled() == false) {
+			Tileset* tileset = new Tileset();
+			QString filename = QString("lua/data/tilesets/") + item->text(0) + (".lua");
+
+			if (tileset->Load(filename) == false) {
+				QMessageBox::critical(this, APP_NAME, "Failed to load tileset: " + filename);
+				delete tileset;
+				item->setCheckState(0, Qt::Unchecked);
+				continue;
+			}
+
+			if (_map_data->AddTileset(tileset) == false) {
+				QMessageBox::critical(this, APP_NAME, "Failed to add tileset to map data: " + _map_data->GetErrorMessage());
+				delete tileset;
+				item->setCheckState(0, Qt::Unchecked);
+				continue;
+			}
+
+			item->setFlags(item->flags() ^ Qt::ItemIsEnabled); // Disable this item now that it has been loaded
+			tilesets_added++;
+		}
+	}
+
+	return tilesets_added;
+}
+
+
+
+void AddTilesetsDialog::_EnableAddButton() {
+	// Disable the add button if no tilesets are checked, otherwise enable it
+	for (int i = 0; i < _tileset_tree->topLevelItemCount(); i++) {
+		// At least one tileset must be checked in order to enable push button
+		if (_tileset_tree->topLevelItem(i)->checkState(0) == Qt::Checked && _tileset_tree->topLevelItem(i)->isDisabled() == false) {
+			_add_button->setEnabled(true);
+			return;
+		}
+	}
+
+	// If this point is reached, no tilesets are checked.
+	_add_button->setEnabled(false);
 }
 
 } // namespace hoa_editor
