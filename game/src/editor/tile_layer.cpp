@@ -169,7 +169,7 @@ void TileLayer::_DeleteLayerCol(uint32 col_index) {
 
 
 void TileLayer::_ResizeLayer(uint32 length, uint height) {
-	_tiles.resize(height, vector<int32>(length));
+	_tiles.resize(height, vector<int32>(length, NO_TILE));
 	for (uint32 y = 0; y < height; ++y) {
 		_tiles[y].resize(length, NO_TILE);
 	}

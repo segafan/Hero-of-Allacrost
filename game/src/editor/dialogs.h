@@ -95,6 +95,122 @@ private:
 
 
 /** ***************************************************************************
+*** \brief Allows the user to resize the map by adding or removing rows and columns from its end
+***
+*** This dialog allows the user to specify the new height and length of the map. New rows and columns
+*** are either added or removed from the right and bottom sides.
+***
+*** \todo This class needs to be enhanced in the future. Instead of the current format, the user should
+*** be able to select the new height and length of the map and an x/y offset that determines where rows
+*** and columns are added and removed. Refer to the Tiled map editor's "Resize Map" menu option for how
+*** this should be done.
+*** **************************************************************************/
+class MapResizeDialog : public QDialog {
+	Q_OBJECT // Macro needed to use QT's slots and signals
+
+public:
+	/** \param parent The widget from which this dialog was invoked
+	*** \param data A pointer to the active map data
+	**/
+	MapResizeDialog(QWidget* parent, MapData* data);
+
+	~MapResizeDialog();
+
+	//! \brief Makes the changes to the map data and redraws the map
+	void ModifyMapData();
+
+private:
+	//! \brief A pointer to the active map data containing the list of open tilesets
+	MapData* _map_data;
+
+	//! \brief Spinboxes that allow the user to specify the new dimensions of the map
+	//@{
+	QSpinBox* _height_spinbox;
+	QSpinBox* _length_spinbox;
+	//@}
+
+	//! \brief Labels used to identify the height or length segements of the dialog
+	//@{
+	QLabel* _height_title;
+	QLabel* _length_title;
+	//@}
+
+	//! \brief Labels used to specify the number of rows or columns that will be added or deleted
+	//@{
+	QLabel* _height_change;
+	QLabel* _length_change;
+	//@}
+
+	//! \brief A button to confirm the resize operation
+	QPushButton* _ok_button;
+
+	//! \brief A button for cancelling the resize operation
+	QPushButton* _cancel_button;
+
+	//! \brief Defines the layout of all widgets in the dialog window
+	QGridLayout* _grid_layout;
+
+private slots:
+	//! \brief Processes changes in height to update the _height_change label
+	void _HeightChanged();
+
+	//! \brief Processes changes in height to update the _height_change label
+	void _LengthChanged();
+}; // class MapResizeDialog : public QDialog
+
+
+/** ***************************************************************************
+*** \brief A dialog window that allows the user to insert or delete multiple rows or columns of tiles from a chosen location
+***
+***
+*** **************************************************************************/
+class MapResizeInternalDialog : public QDialog {
+	Q_OBJECT // Macro needed to use QT's slots and signals
+
+public:
+	/** \param parent The widget from which this dialog was invoked
+	*** \param data A pointer to the active map data
+	*** \param start_row The starting tile row coordinate for the operation
+	*** \param start_column The starting tile column coordinate for the operation
+	*** \param insert_operation If true, this widget should be inserting rows and columns. If false, it will be deleting them
+	***
+	**/
+	MapResizeInternalDialog(QWidget* parent, MapData* data, uint32 start_row, uint32 start_column, bool insert_operation);
+
+	~MapResizeInternalDialog();
+
+private:
+	//! \brief A pointer to the active map data containing the list of open tilesets
+	MapData* _map_data;
+
+	//! \brief A spinbox for specifying the number of rows
+	QSpinBox* _row_spinbox;
+
+	//! \brief A spinbox for specifying the map's length
+	QSpinBox* _column_spinbox;
+
+	//! \brief A label used to visually name the row spinbox
+	QLabel* _row_label;
+
+	//! \brief A label used to visually name the column spinbox
+	QLabel* _column_label;
+
+	//! \brief A button to confirm the insert/delete operation
+	QPushButton* _ok_button;
+
+	//! \brief A button for cancelling the insert/delete operation
+	QPushButton* _cancel_button;
+
+	//! \brief Defines the layout of all widgets in the dialog window
+	QGridLayout* _widget_layout;
+
+private slots:
+	//! \brief Used to determine whether the Ok button should be enabled based on the values of the spinbox widgets
+	void _EnableOkButton();
+}; // class MapResizeInternalDialog : public QDialog
+
+
+/** ***************************************************************************
 *** \brief A dialog window that allows the user to add additional tilesets to a map
 ***
 *** This presents the user with a list of all available tilesets that can be added to

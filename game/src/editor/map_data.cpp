@@ -63,12 +63,12 @@ bool MapData::CreateData(uint32 map_length, uint32 map_height) {
 
 	// Create three tile layers, the last of which has no collision enabled initially
 	_tile_layer_properties.push_back(TileLayerProperties(QString("Ground"), true, true));
-	_tile_layer_properties.push_back(TileLayerProperties(QString("Detail"), true, true));
+	_tile_layer_properties.push_back(TileLayerProperties(QString("Middle"), true, true));
 	_tile_layer_properties.push_back(TileLayerProperties(QString("Sky"), true, false));
 	_tile_layer_count = 3;
 
 	// Create a single TileContext called "Base"
-	TileContext* new_context = new TileContext(1, "Base"); // Give an ID of 1 since no other contexts exist yet
+	TileContext* new_context = new TileContext(1, "Base"); // Given an ID of 1 since no other contexts exist yet
 	new_context->_AddTileLayer(_empty_tile_layer);
 	new_context->_AddTileLayer(_empty_tile_layer);
 	new_context->_AddTileLayer(_empty_tile_layer);
@@ -398,8 +398,23 @@ bool MapData::SaveData(QString filename) {
 
 
 
-void MapData::ResizeMap(uint32 number_cols, uint32 number_rows) {
-	// TODO: modify the size of all layers in each context
+void MapData::ResizeMap(uint32 map_length, uint32 map_height) {
+	// If the dimensions of the map will not change, return with no notice as this is a harmless operation
+	if ((map_length == _map_length) && (map_height == _map_height)) {
+		return;
+	}
+
+	// Each tile layer in every context must be resized along with the empty tile layer
+	_empty_tile_layer._ResizeLayer(map_length, map_height);
+	for (uint32 i = 0; i < _tile_context_count; ++i) {
+		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
+		for (uint32 j = 0; j < layers.size(); ++j) {
+			layers[j]._ResizeLayer(map_length, map_height);
+		}
+	}
+
+	_map_length = map_length;
+	_map_height = map_height;
 	SetMapModified(true);
 }
 

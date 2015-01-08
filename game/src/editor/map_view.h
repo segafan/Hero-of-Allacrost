@@ -175,8 +175,13 @@ private:
 	**/
 	TileLayer _select_layer;
 
-	//! \brief Menu for right-clicks events on the map
+	//! \brief Menus for right-clicks events on the map
+	//@{
     QMenu* _right_click_menu;
+	QMenu* _insert_menu;
+	QMenu* _delete_menu;
+	QMenu* _selection_menu;
+	//@}
 
 	/** \name Right-Click Menu Actions
 	*** \brief Correspond to the private slots functions for user actions

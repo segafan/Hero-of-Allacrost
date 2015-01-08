@@ -29,13 +29,13 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, b
 	setWindowTitle("Map Properties...");
 
 	// Set up the height spinbox
-	_height_label = new QLabel("Map Height (tiles):", this);
+	_height_label = new QLabel("Map Height:", this);
 	_height_sbox = new QSpinBox(this);
 	_height_sbox->setMinimum(MINIMUM_MAP_HEIGHT);
 	_height_sbox->setMaximum(MAXIMUM_MAP_HEIGHT);
 
 	// Set up the length spinbox
-	_length_label = new QLabel("Map Length (tiles):", this);
+	_length_label = new QLabel("Map Length:", this);
 	_length_sbox = new QSpinBox(this);
 	_length_sbox->setMinimum(MINIMUM_MAP_LENGTH);
 	_length_sbox->setMaximum(MAXIMUM_MAP_LENGTH);
@@ -136,6 +136,140 @@ void MapPropertiesDialog::_EnableOKButton() {
 
 	// If this point is reached, no tilesets are checked.
 	_ok_pbut->setEnabled(false);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MapResizeDialog class
+///////////////////////////////////////////////////////////////////////////////
+
+MapResizeDialog::MapResizeDialog(QWidget* parent, MapData* data) :
+	QDialog(parent),
+	_map_data(data),
+	_height_spinbox(NULL),
+	_length_spinbox(NULL),
+	_height_title(NULL),
+	_length_title(NULL),
+	_height_change(NULL),
+	_length_change(NULL),
+	_ok_button(NULL),
+	_cancel_button(NULL),
+	_grid_layout(NULL)
+{
+	setWindowTitle("Resize Map");
+
+	if (_map_data == NULL) {
+		qDebug("ERROR: MapResizesDialog constructor received a NULL map data pointer");
+	}
+
+	_height_spinbox = new QSpinBox(this);
+	_height_spinbox->setMinimum(MINIMUM_MAP_HEIGHT);
+	_height_spinbox->setMaximum(MAXIMUM_MAP_HEIGHT);
+	_height_spinbox->setValue(_map_data->GetMapHeight());
+	connect(_height_spinbox, SIGNAL(valueChanged(int)), this, SLOT(_HeightChanged()));
+	_length_spinbox = new QSpinBox(this);
+	_length_spinbox->setMinimum(MINIMUM_MAP_LENGTH);
+	_length_spinbox->setMaximum(MAXIMUM_MAP_LENGTH);
+	_length_spinbox->setValue(_map_data->GetMapLength());
+	connect(_length_spinbox, SIGNAL(valueChanged(int)), this, SLOT(_LengthChanged()));
+
+	_height_title = new QLabel("Map Height:", this);
+	_length_title = new QLabel("Map Length:", this);
+	_height_change = new QLabel("Change: 0", this);
+	_length_change = new QLabel("Change: 0", this);
+
+	_cancel_button = new QPushButton("Cancel", this);
+	_cancel_button->setDefault(true);
+	connect(_cancel_button, SIGNAL(released()), this, SLOT(reject()));
+	_ok_button = new QPushButton("OK", this);
+	connect(_ok_button, SIGNAL(released()), this, SLOT(accept()));
+
+	_grid_layout = new QGridLayout(this);
+	_grid_layout->addWidget(_height_title, 0, 0);
+	_grid_layout->addWidget(_height_spinbox, 0, 1);
+	_grid_layout->addWidget(_height_change, 0, 2);
+	_grid_layout->addWidget(_length_title, 1, 0);
+	_grid_layout->addWidget(_length_spinbox, 1, 1);
+	_grid_layout->addWidget(_length_change, 1, 2);
+	_grid_layout->addWidget(_ok_button, 2, 1);
+	_grid_layout->addWidget(_cancel_button, 2, 2);
+}
+
+
+
+MapResizeDialog::~MapResizeDialog() {
+	delete _height_spinbox;
+	delete _length_spinbox;
+	delete _height_title;
+	delete _length_title;
+	delete _height_change;
+	delete _length_change;
+	delete _ok_button;
+	delete _cancel_button;
+	delete _grid_layout;
+}
+
+
+
+void MapResizeDialog::ModifyMapData() {
+	uint32 new_height = static_cast<uint32>(_height_spinbox->value());
+	uint32 new_length = static_cast<uint32>(_length_spinbox->value());
+	Editor* editor = static_cast<Editor*>(parent());
+
+	if ((new_height == _map_data->GetMapHeight()) && (new_length == _map_data->GetMapLength())) {
+		editor->statusBar()->showMessage("Map size was not changed", 5000);
+		return;
+	}
+
+	_map_data->ResizeMap(new_length, new_height);
+	editor->UpdateMapView();
+	editor->statusBar()->showMessage("Map resized", 5000);
+}
+
+
+
+void MapResizeDialog::_HeightChanged() {
+	int32 change = _height_spinbox->value() - static_cast<int32>(_map_data->GetMapHeight());
+	if (change <= 0) {
+		_height_change->setText("Change: " + QString::number(change));
+	}
+	else {
+		_height_change->setText("Change: +" + QString::number(change));
+	}
+}
+
+
+
+void MapResizeDialog::_LengthChanged() {
+	int32 change = _length_spinbox->value() - static_cast<int32>(_map_data->GetMapLength());
+	if (change <= 0) {
+		_length_change->setText("Change: " + QString::number(change));
+	}
+	else {
+		_length_change->setText("Change: +" + QString::number(change));
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MapResizeInternalDialog class
+///////////////////////////////////////////////////////////////////////////////
+
+MapResizeInternalDialog::MapResizeInternalDialog(QWidget* parent, MapData* data, uint32 start_row, uint32 start_column, bool insert_operation) :
+	QDialog(parent),
+	_map_data(data)
+{
+
+}
+
+
+
+MapResizeInternalDialog::~MapResizeInternalDialog() {
+
+}
+
+
+
+void MapResizeInternalDialog::_EnableOkButton() {
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

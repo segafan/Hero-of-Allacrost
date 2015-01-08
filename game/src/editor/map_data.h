@@ -151,13 +151,13 @@ public:
 	bool SaveData(QString filename);
 
 	/** \brief Resizes the map by adding or removing the appropriate number of rows and columns
-	*** \param number_cols
-	*** \param number_rows
+	*** \param map_length The length of the new map data, in number of tiles
+	*** \param map_height The height of the new map data, in number of tiles
 	***
 	*** New rows and columns are appended to the bottom and right of the map respectively.
 	*** Rows and columns removed are also taken from the bottom and right of the map.
 	**/
-	void ResizeMap(uint32 number_cols, uint32 number_rows);
+	void ResizeMap(uint32 map_length, uint32 map_height);
 
 	//! \name Tileset Manipulation Methods
 	//@{
