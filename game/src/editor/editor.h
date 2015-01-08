@@ -156,6 +156,7 @@ private:
 	QAction* _paste_action;
 	QAction* _tileset_properties_action;
 	QAction* _map_properties_action;
+	QAction* _map_resize_action;
 
 	QAction* _view_grid_action;
 	QAction* _view_missing_action;
@@ -233,6 +234,7 @@ private slots:
 	void _PasteSelection();
 	void _EditTilesetProperties();
 	void _EditMapProperties();
+	void _EditMapResize();
 
 	void _ViewTileGrid();
 	void _ViewMissingTiles();

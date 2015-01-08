@@ -58,6 +58,7 @@ Editor::Editor() :
 	_paste_action(NULL),
 	_tileset_properties_action(NULL),
 	_map_properties_action(NULL),
+	_map_resize_action(NULL),
 	_view_grid_action(NULL),
 	_view_missing_action(NULL),
 	_view_inherited_action(NULL),
@@ -139,6 +140,7 @@ Editor::~Editor() {
 	delete _paste_action;
 	delete _tileset_properties_action;
 	delete _map_properties_action;
+	delete _map_resize_action;
 
 	delete _view_grid_action;
 	delete _view_missing_action;
@@ -239,6 +241,10 @@ void Editor::_CreateActions() {
 	_map_properties_action = new QAction("Edit &Map Properties...", this);
 	_map_properties_action->setStatusTip("Modify the properties of the active map");
 	connect(_map_properties_action, SIGNAL(triggered()), this, SLOT(_EditMapProperties()));
+
+	_map_resize_action = new QAction("&Resize Map...", this);
+	_map_resize_action->setStatusTip("Change the dimensions of the active map");
+	connect(_map_resize_action, SIGNAL(triggered()), this, SLOT(_EditMapResize()));
 
 	// Create actions found in the View menu
 	_view_grid_action = new QAction("Tile &Grid", this);
@@ -364,6 +370,7 @@ void Editor::_CreateMenus() {
 	_edit_menu->addSeparator();
 	_edit_menu->addAction(_tileset_properties_action);
 	_edit_menu->addAction(_map_properties_action);
+	_edit_menu->addAction(_map_resize_action);
 	connect(_edit_menu, SIGNAL(aboutToShow()), this, SLOT(_CheckEditActions()));
 
 	_view_menu = menuBar()->addMenu("&View");
@@ -500,6 +507,7 @@ void Editor::_CheckEditActions() {
 		_paste_action->setEnabled(false);
 		_tileset_properties_action->setEnabled(false);
 		_map_properties_action->setEnabled(true);
+		_map_resize_action->setEnabled(true);
 	}
 	else {
 		_undo_action->setEnabled(false);
@@ -509,6 +517,7 @@ void Editor::_CheckEditActions() {
 		_paste_action->setEnabled(false);
 		_tileset_properties_action->setEnabled(true);
 		_map_properties_action->setEnabled(false);
+		_map_resize_action->setEnabled(false);
 
 	}
 }
@@ -764,6 +773,15 @@ void Editor::_EditMapProperties() {
 	// TODO: adjust size of map appropriately
 	// TODO: add or remove tilesets
 	delete props;
+}
+
+
+
+void Editor::_EditMapResize() {
+	MapResizeDialog resize_dialog(this, &_map_data);
+	if (resize_dialog.exec() == QDialog::Accepted) {
+		resize_dialog.ModifyMapData();
+	}
 }
 
 

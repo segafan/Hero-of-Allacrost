@@ -46,7 +46,11 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_selection_start_tile_x(-1),
 	_selection_start_tile_y(-1),
 	_edit_mode(PAINT_MODE),
-	_select_layer(data->GetMapLength(), data->GetMapHeight())
+	_select_layer(data->GetMapLength(), data->GetMapHeight()),
+	_right_click_menu(NULL),
+	_insert_menu(NULL),
+	_delete_menu(NULL),
+	_selection_menu(NULL)
 {
 	// Create the graphics view
 	_graphics_view = new QGraphicsView(parent);
@@ -72,25 +76,33 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	setSceneRect(0, 0, data->GetMapLength() * TILE_LENGTH, data->GetMapHeight() * TILE_HEIGHT);
 
 	// Right-click menu action creation
-	_insert_row_action = new QAction("Insert Tile Rows", this);
-	_insert_row_action->setStatusTip("Inserts one or more rows of empty tiles above or below the selected tile");
+	_insert_row_action = new QAction("Insert Single Row", this);
+	_insert_row_action->setStatusTip("Inserts a single row of empty tiles at the selected location");
 	connect(_insert_row_action, SIGNAL(triggered()), this, SLOT(_InsertTileRow()));
-	_insert_column_action = new QAction("Insert Tile Columns", this);
-	_insert_column_action->setStatusTip("Inserts one or more columns of empty tiles above or below the selected tile");
+	_insert_column_action = new QAction("Insert Single Column", this);
+	_insert_column_action->setStatusTip("Inserts a single column of empty tiles at the selected location");
 	connect(_insert_column_action, SIGNAL(triggered()), this, SLOT(_InsertTileColumn()));
-	_delete_row_action = new QAction("Delete Tile Rows", this);
-	_delete_row_action->setStatusTip("Deletes the currently selected row of tiles from all layers");
+	_delete_row_action = new QAction("Delete Single Row", this);
+	_delete_row_action->setStatusTip("Deletes the row of tiles corresponding to the selected location");
 	connect(_delete_row_action, SIGNAL(triggered()), this, SLOT(_DeleteTileRow()));
-	_delete_column_action = new QAction("Delete Tile Columns", this);
- 	_delete_column_action->setStatusTip("Deletes the currently selected column of tiles from all layers");
+	_delete_column_action = new QAction("Delete Single Column", this);
+ 	_delete_column_action->setStatusTip("Deletes the column of tiles corresponding to the selected location");
 	connect(_delete_column_action, SIGNAL(triggered()), this, SLOT(_DeleteTileColumn()));
 
 	_right_click_menu = new QMenu(_graphics_view);
-	_right_click_menu->addAction(_insert_row_action);
-	_right_click_menu->addAction(_insert_column_action);
-	_right_click_menu->addSeparator();
-	_right_click_menu->addAction(_delete_row_action);
-	_right_click_menu->addAction(_delete_column_action);
+	_insert_menu = new QMenu("Insert", _right_click_menu);
+	_delete_menu = new QMenu("Delete", _right_click_menu);
+	_selection_menu = new QMenu("Selection", _right_click_menu);
+
+	_right_click_menu->addMenu(_insert_menu);
+	_right_click_menu->addMenu(_delete_menu);
+	_right_click_menu->addMenu(_selection_menu);
+
+	_insert_menu->addAction(_insert_row_action);
+	_insert_menu->addAction(_insert_column_action);
+
+	_delete_menu->addAction(_delete_row_action);
+	_delete_menu->addAction(_delete_column_action);
 
 	// Blue tile with 50% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
@@ -112,6 +124,9 @@ MapView::~MapView() {
 	delete _delete_row_action;
 	delete _delete_column_action;
 	delete _right_click_menu;
+	delete _insert_menu;
+	delete _delete_menu;
+	delete _selection_menu;
 	delete _graphics_view;
 }
 
