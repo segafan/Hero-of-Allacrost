@@ -22,7 +22,6 @@
 #include <QTreeWidgetItem>
 
 #include "map_data.h"
-#include "tileset.h"
 
 namespace hoa_editor {
 
@@ -89,23 +88,6 @@ public:
 	void ClearSelectionLayer()
 		{ _select_layer.ClearLayer(); }
 
-	/** \name Map Modification Functions (Right-Click)
-	*** \brief Functions to insert or delete rows or columns of tiles from the map.
-	*** \param tile_index An ID (range: {0, length * height - 1}) of the tile
-	***        used to determine the row or column upon which to perform the
-	***        operation.
-	***
-	*** \note This feature is accessed by right-clicking on the map. It could
-	***       be used elsewhere if the proper tile index is passed as a
-	***       parameter.
-	**/
-	//{@
-	void InsertTileRow(uint32 tile_index);
-	void InsertTileCol(uint32 tile_index);
-	void DeleteTileRow(uint32 tile_index);
-	void DeleteTileCol(uint32 tile_index);
-	//@}
-
 	//! \brief Draws the entire map to the tile grid area
     void DrawMap();
 
@@ -123,14 +105,19 @@ protected:
 	//@}
 
 private slots:
-	/** \name Map Modification Functions (Right-Click)
-	*** \brief Functions available from right-clicking a tile on the map vie
+	/** \name Right-click menu functions
+	*** \brief Functions available from right-clicking on the map view.
+	*** \note The location of the click may effect where or how the following operations take place
 	**/
 	//{@
-	void _InsertTileRow();
-	void _InsertTileColumn();
-	void _DeleteTileRow();
-	void _DeleteTileColumn();
+	void _InsertSingleTileRow();
+	void _InsertMultipleTileRows();
+	void _InsertSingleTileColumn();
+	void _InsertMultipleTileColumns();
+	void _DeleteSingleTileRow();
+	void _DeleteMultipleTileRows();
+	void _DeleteSingleTileColumn();
+	void _DeleteMultipleTileColumns();
 	//@}
 
 private:
@@ -187,10 +174,14 @@ private:
 	*** \brief Correspond to the private slots functions for user actions
 	**/
 	//{@
-	QAction* _insert_row_action;
-	QAction* _insert_column_action;
-	QAction* _delete_row_action;
-	QAction* _delete_column_action;
+	QAction* _insert_single_row_action;
+	QAction* _insert_multiple_rows_action;
+	QAction* _insert_single_column_action;
+	QAction* _insert_multiple_columns_action;
+	QAction* _delete_single_row_action;
+	QAction* _delete_multiple_rows_action;
+	QAction* _delete_single_column_action;
+	QAction* _delete_multiple_columns_action;
 	//@}
 
 	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 50% opacity)

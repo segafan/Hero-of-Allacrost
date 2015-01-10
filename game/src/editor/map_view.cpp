@@ -25,8 +25,10 @@
 	#include <QGLWidget>
 #endif
 
-#include "map_view.h"
+#include "dialogs.h"
 #include "editor.h"
+#include "map_view.h"
+#include "tileset.h"
 
 using namespace std;
 
@@ -75,19 +77,31 @@ MapView::MapView(QWidget* parent, MapData* data) :
 
 	setSceneRect(0, 0, data->GetMapLength() * TILE_LENGTH, data->GetMapHeight() * TILE_HEIGHT);
 
-	// Right-click menu action creation
-	_insert_row_action = new QAction("Insert Single Row", this);
-	_insert_row_action->setStatusTip("Inserts a single row of empty tiles at the selected location");
-	connect(_insert_row_action, SIGNAL(triggered()), this, SLOT(_InsertTileRow()));
-	_insert_column_action = new QAction("Insert Single Column", this);
-	_insert_column_action->setStatusTip("Inserts a single column of empty tiles at the selected location");
-	connect(_insert_column_action, SIGNAL(triggered()), this, SLOT(_InsertTileColumn()));
-	_delete_row_action = new QAction("Delete Single Row", this);
-	_delete_row_action->setStatusTip("Deletes the row of tiles corresponding to the selected location");
-	connect(_delete_row_action, SIGNAL(triggered()), this, SLOT(_DeleteTileRow()));
-	_delete_column_action = new QAction("Delete Single Column", this);
- 	_delete_column_action->setStatusTip("Deletes the column of tiles corresponding to the selected location");
-	connect(_delete_column_action, SIGNAL(triggered()), this, SLOT(_DeleteTileColumn()));
+	// Right-click menu creation
+	_insert_single_row_action = new QAction("Insert Single Row", this);
+	_insert_single_row_action->setStatusTip("Inserts a single row of empty tiles at the selected location");
+	connect(_insert_single_row_action, SIGNAL(triggered()), this, SLOT(_InsertSingleTileRow()));
+	_insert_multiple_rows_action = new QAction("Insert Multiple Rows...", this);
+	_insert_multiple_rows_action->setStatusTip("Opens a dialog window to insert one or more empty tile rows at the selected location");
+	connect(_insert_multiple_rows_action, SIGNAL(triggered()), this, SLOT(_InsertMultipleTileRows()));
+	_insert_single_column_action = new QAction("Insert Single Column", this);
+	_insert_single_column_action->setStatusTip("Inserts a single column of empty tiles at the selected location");
+	connect(_insert_single_column_action, SIGNAL(triggered()), this, SLOT(_InsertSingleTileColumn()));
+	_insert_multiple_columns_action = new QAction("Insert Multiple Columns...", this);
+	_insert_multiple_columns_action->setStatusTip("Opens a dialog window to insert one or more empty tile columns at the selected location");
+	connect(_insert_multiple_columns_action, SIGNAL(triggered()), this, SLOT(_InsertMultipleTileColumns()));
+	_delete_single_row_action = new QAction("Delete Single Row", this);
+	_delete_single_row_action->setStatusTip("Deletes a single row of tiles corresponding to the selected location");
+	connect(_delete_single_row_action, SIGNAL(triggered()), this, SLOT(_DeleteSingleTileRow()));
+	_delete_multiple_rows_action = new QAction("Delete Multiple Rows...", this);
+	_delete_multiple_rows_action->setStatusTip("Opens a dialog window to delete one or more rows of tiles at the selected location");
+	connect(_delete_multiple_rows_action, SIGNAL(triggered()), this, SLOT(_DeleteMultipleTileRows()));
+	_delete_single_column_action = new QAction("Delete Single Column", this);
+ 	_delete_single_column_action->setStatusTip("Deletes a single column of tiles corresponding to the selected location");
+	connect(_delete_single_column_action, SIGNAL(triggered()), this, SLOT(_DeleteSingleTileColumn()));
+	_delete_multiple_columns_action = new QAction("Delete Multiple Columns...", this);
+ 	_delete_multiple_columns_action->setStatusTip("Opens a dialog window to delete one or more columns of tiles at the selected location");
+	connect(_delete_multiple_columns_action, SIGNAL(triggered()), this, SLOT(_DeleteMultipleTileColumns()));
 
 	_right_click_menu = new QMenu(_graphics_view);
 	_insert_menu = new QMenu("Insert", _right_click_menu);
@@ -98,11 +112,15 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_right_click_menu->addMenu(_delete_menu);
 	_right_click_menu->addMenu(_selection_menu);
 
-	_insert_menu->addAction(_insert_row_action);
-	_insert_menu->addAction(_insert_column_action);
+	_insert_menu->addAction(_insert_single_row_action);
+	_insert_menu->addAction(_insert_multiple_rows_action);
+	_insert_menu->addAction(_insert_single_column_action);
+	_insert_menu->addAction(_insert_multiple_columns_action);
 
-	_delete_menu->addAction(_delete_row_action);
-	_delete_menu->addAction(_delete_column_action);
+	_delete_menu->addAction(_delete_single_row_action);
+	_delete_menu->addAction(_delete_multiple_rows_action);
+	_delete_menu->addAction(_delete_single_column_action);
+	_delete_menu->addAction(_delete_multiple_columns_action);
 
 	// Blue tile with 50% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
@@ -119,10 +137,14 @@ MapView::MapView(QWidget* parent, MapData* data) :
 
 
 MapView::~MapView() {
-	delete _insert_row_action;
-	delete _insert_column_action;
-	delete _delete_row_action;
-	delete _delete_column_action;
+	delete _insert_single_row_action;
+	delete _insert_multiple_rows_action;
+	delete _insert_single_column_action;
+	delete _insert_multiple_columns_action;
+	delete _delete_single_row_action;
+	delete _delete_multiple_rows_action;
+	delete _delete_single_column_action;
+	delete _delete_multiple_columns_action;
 	delete _right_click_menu;
 	delete _insert_menu;
 	delete _delete_menu;
@@ -432,18 +454,29 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 void MapView::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 	if (_map_data->IsInitialized() == false) {
 		// Show the menu, but disable all options
-		_insert_row_action->setEnabled(false);
-		_insert_column_action->setEnabled(false);
-		_delete_row_action->setEnabled(false);
-		_delete_column_action->setEnabled(false);
+		_insert_single_row_action->setEnabled(false);
+		_insert_multiple_rows_action->setEnabled(false);
+		_insert_single_column_action->setEnabled(false);
+		_insert_multiple_columns_action->setEnabled(false);
+		_delete_single_row_action->setEnabled(false);
+		_delete_multiple_rows_action->setEnabled(false);
+		_delete_single_column_action->setEnabled(false);
+		_delete_multiple_columns_action->setEnabled(false);
 		_right_click_menu->exec(QCursor::pos());
 		return;
 	}
 
-	_insert_row_action->setEnabled(true);
-	_insert_column_action->setEnabled(true);
-	_delete_row_action->setEnabled(true);
-	_delete_column_action->setEnabled(true);
+	// We could check the map size here to see if an insert or delete operation is possible or not. We leave these options enabled because
+	// we don't want to confuse the user as to why these options would suddenly be disabled. Instead, the slot functions for these actions
+	// do the check and if they find it to be invalid, they'll present a warning dialog window to the user.
+	_insert_single_row_action->setEnabled(true);
+	_insert_multiple_rows_action->setEnabled(true);
+	_insert_single_column_action->setEnabled(true);
+	_insert_multiple_columns_action->setEnabled(true);
+	_delete_single_row_action->setEnabled(true);
+	_delete_multiple_rows_action->setEnabled(true);
+	_delete_single_column_action->setEnabled(true);
+	_delete_multiple_columns_action->setEnabled(true);
 
 	// Retrieve the coordinates of the right click event and translate them into tile coordinates
 	int32 mouse_x = event->scenePos().x();
@@ -561,34 +594,118 @@ void MapView::DrawMap() {
 	addLine(0, _map_data->GetMapHeight() * TILE_HEIGHT, _map_data->GetMapLength() * TILE_LENGTH, _map_data->GetMapHeight() * TILE_HEIGHT, pen);
 	addLine(0, 0, 0, _map_data->GetMapHeight() * TILE_HEIGHT, pen);
 	addLine(_map_data->GetMapLength() * TILE_LENGTH, 0, _map_data->GetMapLength() * TILE_LENGTH, _map_data->GetMapHeight() * TILE_HEIGHT, pen);
-}
+} // void MapView::DrawMap()
 
 
 
-void MapView::_InsertTileRow() {
+void MapView::_InsertSingleTileRow() {
+	if (_map_data->GetMapHeight() == MAXIMUM_MAP_HEIGHT) {
+		QMessageBox::warning(static_cast<QWidget*>(parent()), "Insert Tile Row Failure",
+			"Could not insert additional tile rows as the map height is currently at its maximum limit.");
+		return;
+	}
+
 	_map_data->InsertTileLayerRows(_cursor_tile_y);
 	DrawMap();
 }
 
 
 
-void MapView::_InsertTileColumn() {
+void MapView::_InsertMultipleTileRows() {
+	if (_map_data->GetMapHeight() == MAXIMUM_MAP_HEIGHT) {
+		QMessageBox::warning(static_cast<QWidget*>(parent()), "Insert Tile Row Failure",
+			"Could not insert additional tile rows as the map height is currently at its maximum limit.");
+		return;
+	}
+
+	MapResizeInternalDialog resize_dialog(static_cast<QWidget*>(parent()->parent()), _map_data, _cursor_tile_y, _cursor_tile_x, true, false);
+	if (resize_dialog.exec() == QDialog::Accepted) {
+		resize_dialog.ModifyMapData();
+	}
+}
+
+
+
+void MapView::_InsertSingleTileColumn() {
+	if (_map_data->GetMapHeight() == MAXIMUM_MAP_LENGTH) {
+		QMessageBox::warning(static_cast<QWidget*>(parent()), "Insert Tile Column Failure",
+			"Could not insert additional tile columns as the map length is currently at its maximum limit.");
+		return;
+	}
+
 	_map_data->InsertTileLayerColumns(_cursor_tile_x);
 	DrawMap();
 }
 
 
 
-void MapView::_DeleteTileRow() {
+void MapView::_InsertMultipleTileColumns() {
+	if (_map_data->GetMapHeight() == MAXIMUM_MAP_LENGTH) {
+		QMessageBox::warning(static_cast<QWidget*>(parent()), "Insert Tile Column Failure",
+			"Could not insert additional tile columns as the map length is currently at its maximum limit.");
+		return;
+	}
+
+	MapResizeInternalDialog resize_dialog(static_cast<QWidget*>(parent()->parent()), _map_data, _cursor_tile_y, _cursor_tile_x, true, true);
+	if (resize_dialog.exec() == QDialog::Accepted) {
+		resize_dialog.ModifyMapData();
+	}
+}
+
+
+
+void MapView::_DeleteSingleTileRow() {
+	if (_map_data->GetMapHeight() == MINIMUM_MAP_HEIGHT) {
+		QMessageBox::warning(static_cast<QWidget*>(parent()), "Delete Tile Row Failure",
+			"Could not delete any tile rows as the map height is currently at its minimum limit.");
+		return;
+	}
+
 	_map_data->RemoveTileLayerRows(_cursor_tile_y);
 	DrawMap();
 }
 
 
 
-void MapView::_DeleteTileColumn() {
+void MapView::_DeleteMultipleTileRows() {
+	if (_map_data->GetMapHeight() == MINIMUM_MAP_HEIGHT) {
+		QMessageBox::warning(static_cast<QWidget*>(parent()), "Delete Tile Row Failure",
+			"Could not delete any tile rows as the map height is currently at its minimum limit.");
+		return;
+	}
+
+	MapResizeInternalDialog resize_dialog(static_cast<QWidget*>(parent()->parent()), _map_data, _cursor_tile_y, _cursor_tile_x, false, false);
+	if (resize_dialog.exec() == QDialog::Accepted) {
+		resize_dialog.ModifyMapData();
+	}
+}
+
+
+
+void MapView::_DeleteSingleTileColumn() {
+	if (_map_data->GetMapHeight() == MINIMUM_MAP_LENGTH) {
+		QMessageBox::warning(static_cast<QWidget*>(parent()), "Delete Tile Column Failure",
+			"Could not delete any tile columns as the map length is currently at its minimum limit.");
+		return;
+	}
+
 	_map_data->RemoveTileLayerColumns(_cursor_tile_x);
 	DrawMap();
+}
+
+
+
+void MapView::_DeleteMultipleTileColumns() {
+	if (_map_data->GetMapHeight() == MINIMUM_MAP_LENGTH) {
+		QMessageBox::warning(static_cast<QWidget*>(parent()), "Delete Tile Column Failure",
+			"Could not delete any tile columns as the map length is currently at its minimum limit.");
+		return;
+	}
+
+	MapResizeInternalDialog resize_dialog(static_cast<QWidget*>(parent()->parent()), _map_data, _cursor_tile_y, _cursor_tile_x, false, true);
+	if (resize_dialog.exec() == QDialog::Accepted) {
+		resize_dialog.ModifyMapData();
+	}
 }
 
 
