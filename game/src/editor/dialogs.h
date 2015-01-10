@@ -162,7 +162,16 @@ private slots:
 /** ***************************************************************************
 *** \brief A dialog window that allows the user to insert or delete multiple rows or columns of tiles from a chosen location
 ***
+*** The values passed to the constructor of this class determine whether the object instance will be manipulating rows or columns,
+*** and whether it will be inserting or deleting them. The user can not change the operation from insert to delete or from rows to
+*** columns once this class object is constructed. The position from where the insert/delete operation takes place also can not be
+*** changed.
 ***
+*** When rows or columns are inserted, the number to insert are all placed at the selected position. This means that the existing rows
+*** at and past this position (right for columns, down for rows) are "pushed out" to allow space for the new columns and rows to be placed.
+*** All rows and columns inserted are initialized to NO_TILE. When a delete operation takes place, the first row or column deleted is that
+*** corresponding to the selected location. Every additional column or row to delete are taken from the right (for columns) or bottom (for
+*** rows).
 *** **************************************************************************/
 class MapResizeInternalDialog : public QDialog {
 	Q_OBJECT // Macro needed to use QT's slots and signals
@@ -170,30 +179,42 @@ class MapResizeInternalDialog : public QDialog {
 public:
 	/** \param parent The widget from which this dialog was invoked
 	*** \param data A pointer to the active map data
-	*** \param start_row The starting tile row coordinate for the operation
-	*** \param start_column The starting tile column coordinate for the operation
-	*** \param insert_operation If true, this widget should be inserting rows and columns. If false, it will be deleting them
-	***
+	*** \param row The starting tile row coordinate for the operation
+	*** \param column The starting tile column coordinate for the operation
+	*** \param insert_operation If true, this widget should be inserting rows or columns. If false, it will be deleting them
+	*** \param column_operation If true, this widget should be manipulating columns. If false, it will be manipulating rows
 	**/
-	MapResizeInternalDialog(QWidget* parent, MapData* data, uint32 start_row, uint32 start_column, bool insert_operation);
+	MapResizeInternalDialog(QWidget* parent, MapData* data, uint32 row, uint32 column, bool insert_operation, bool column_operation);
 
 	~MapResizeInternalDialog();
+
+	//! \brief Makes the changes to the map data and redraws the map
+	void ModifyMapData();
 
 private:
 	//! \brief A pointer to the active map data containing the list of open tilesets
 	MapData* _map_data;
 
-	//! \brief A spinbox for specifying the number of rows
-	QSpinBox* _row_spinbox;
+	//! \brief The map coordinates where the operation will take place
+	//@{
+	uint32 _row_position;
+	uint32 _column_position;
+	//@}
 
-	//! \brief A spinbox for specifying the map's length
-	QSpinBox* _column_spinbox;
+	//! \brief If true, this class is performing an insert operation. False indicates a delete operation.
+	bool _insert_operation;
 
-	//! \brief A label used to visually name the row spinbox
-	QLabel* _row_label;
+	//! \brief If true, this class is manipulating tile columns. False indicates manipulation of tile rows.
+	bool _column_operation;
 
-	//! \brief A label used to visually name the column spinbox
-	QLabel* _column_label;
+	//! \brief A spinbox for specifying the number of columns or rows to insert or delete
+	QSpinBox* _change_spinbox;
+
+	//! \brief Describes the operation about to take place (insert or delete)
+	QLabel* _operation_text;
+
+	//! \brief Tells the user the map position where the operation will take place
+	QLabel* _position_text;
 
 	//! \brief A button to confirm the insert/delete operation
 	QPushButton* _ok_button;
@@ -202,10 +223,10 @@ private:
 	QPushButton* _cancel_button;
 
 	//! \brief Defines the layout of all widgets in the dialog window
-	QGridLayout* _widget_layout;
+	QGridLayout* _grid_layout;
 
 private slots:
-	//! \brief Used to determine whether the Ok button should be enabled based on the values of the spinbox widgets
+	//! \brief Enables the Ok button so long as a non-zero value is entered in the change spinbox
 	void _EnableOkButton();
 }; // class MapResizeInternalDialog : public QDialog
 

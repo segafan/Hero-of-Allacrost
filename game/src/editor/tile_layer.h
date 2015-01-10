@@ -114,61 +114,77 @@ private:
     //! \brief Represents the tile indeces, where a tile at (x,y) is accessed as _tiles[y][x]
     std::vector<std::vector<int32> > _tiles;
 
-	/** \brief Adds a new row of tiles to a specified index in the table
-	*** \param row_index The index where the row should be added
-	*** \param value The value to set each tile in the newly added row
+	/** \brief Adds new rows of tiles to a specified location
+	*** \param row_index The index where the rows should be added
+	*** \param row_count The number of rows that should be added
+	*** \param value The value to set each tile in the newly added rows
 	***
 	*** Specifying the row_index as the height of the layer results in appending the row to the end
 	*** of the existing rows. Any value beyond this range is considered invalid and no operation will
 	*** take place.
-	**/
-	void _AddLayerRow(uint32 row_index, int32 value);
-
-	/** \brief Adds a new row of empty tiles to a specified index in the table
-	*** \param row_index The index where the row should be added
 	***
-	*** Specifying the row_index as the height of the layer results in appending the row to the end
-	*** of the existing rows. Any value beyond this range is considered invalid and no operation will
-	*** take place.
+	*** \note This function does not report any error or print any debug message if an error condition is found
+	*** and the rows are not added. Additionally, the function does not check if the number of rows added
+	*** will cause the layer to exceed the MAXIMUM_MAP_HEIGHT. It is the responsibility of the caller to
+	*** ensure that the arguments passed are valid before calling this method.
 	**/
-	void _AddLayerRow(uint32 row_index)
-		{ _AddLayerRow(row_index, NO_TILE); }
+	void _AddRows(uint32 row_index, uint32 row_count, int32 value);
 
-	/** \brief Adds a new column of tiles to a specified index in the table
-	*** \param col_index The index where the column should be added
-	*** \param value The value to set each tile in the newly added column
-	***
-	*** Specifying the col_index as the length of the layer results in appending the column to the end
-	*** of the existing columns. Any value beyond this range is considered invalid and no operation will
-	*** take place.
+	/** \brief Adds new rows of tiles to a specified location in the table
+	*** \note This method calls the three argument version and uses a value of NO_TILE for the third argument
 	**/
-	void _AddLayerCol(uint32 col_index, int32 value);
+	void _AddRows(uint32 row_index, uint32 row_count)
+		{ _AddRows(row_index, row_count, NO_TILE); }
 
-	/** \brief Adds a new column of empty tiles to a specified index in the table
-	*** \param col_index The index where the column should be added
+	/** \brief Adds new columns of tiles to a specified location
+	*** \param col_index The index where the columns should be added
+	*** \param col_count The number of columns that should be added
+	*** \param value The value to set each tile in the newly added columns
 	***
 	*** Specifying the col_index as the length of the layer results in appending the column to the end
 	*** of the existing columns. Any value beyond this range is considered invalid and no operation will
 	*** take place.
-	**/
-	void _AddLayerCol(uint32 col_index)
-		{ _AddLayerCol(col_index, NO_TILE); }
-
-	/** \brief Delets a row from the tile layer at a specific index
-	*** \param row_index The index of the row to delete
 	***
-	*** All tile rows will be shifted over to accomodate the deleted row. A row_index that exceeds the
-	*** height of the map will result in no operation.
+	*** \note This function does not report any error or print any debug message if an error condition is found
+	*** and the columnss are not added. Additionally, the function does not check if the number of columns added
+	*** will cause the layer to exceed the MAXIMUM_MAP_LENGTH. It is the responsibility of the caller to
+	*** ensure that the arguments passed are valid before calling this method.
 	**/
-	void _DeleteLayerRow(uint32 row_index);
+	void _AddColumns(uint32 col_index, uint32 col_count, int32 value);
 
-	/** \brief Delets a column from the tile layer at a specific index
-	*** \param col_index The index of the column to delete
-	***
-	*** All tile columns will be shifted over to accomodate the deleted column. A col_index that exceeds the
-	*** length of the map will result in no operation.
+	/** \brief Adds new columns of tiles to a specified location in the table
+	*** \note This method calls the three argument version and uses a value of NO_TILE for the third argument
 	**/
-	void _DeleteLayerCol(uint32 col_index);
+	void _AddColumns(uint32 col_index, uint32 col_count)
+		{ _AddColumns(col_index, col_count, NO_TILE); }
+
+	/** \brief Deletes rows from the tile layer at a specified location
+	*** \param row_index The starting index of the rows to delete
+	*** \param row_count The number of rows that should be deleted
+	***
+	*** All tile rows will be shifted over to accomodate the deleted rows. If there are not enough rows between
+	*** the row_index and the maximum row, no operation will take place.
+	***
+	*** \note This function does not report any error or print any debug message if an error condition is found
+	*** and the rows are not deleted. Additionally, the function does not check if the number of rows deleted
+	*** will cause the layer to go under the MINIMUM_MAP_HEIGHT. It is the responsibility of the caller to
+	*** ensure that the arguments passed are valid before calling this method.
+	**/
+	void _DeleteRows(uint32 row_index, uint32 row_count);
+
+	/** \brief Deletes columns from the tile layer at a specified location
+	*** \param col_index The starting index of the columns to delete
+	*** \param col_count The number of columns that should be deleted
+	***
+	*** All tile columns will be shifted over to accomodate the deleted columns. If there are not enough columns between
+	*** the col_index and the maximum column, no operation will take place.
+	***
+	*** \note This function does not report any error or print any debug message if an error condition is found
+	*** and the columns are not deleted. Additionally, the function does not check if the number of columns deleted
+	*** will cause the layer to go under the MINIMUM_MAP_LENGTH. It is the responsibility of the caller to
+	*** ensure that the arguments passed are valid before calling this method.
+	**/
+	void _DeleteColumns(uint32 col_index, uint32 col_count);
 
 	/** \brief Resizes the layer to the dimensions specified
 	*** \param length The new length of the layer, in number of tiles

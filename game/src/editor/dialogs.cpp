@@ -253,23 +253,135 @@ void MapResizeDialog::_LengthChanged() {
 // MapResizeInternalDialog class
 ///////////////////////////////////////////////////////////////////////////////
 
-MapResizeInternalDialog::MapResizeInternalDialog(QWidget* parent, MapData* data, uint32 start_row, uint32 start_column, bool insert_operation) :
+MapResizeInternalDialog::MapResizeInternalDialog(QWidget* parent, MapData* data, uint32 row, uint32 column, bool insert_operation, bool column_operation) :
 	QDialog(parent),
-	_map_data(data)
+	_map_data(data),
+	_row_position(row),
+	_column_position(column),
+	_insert_operation(insert_operation),
+	_column_operation(column_operation),
+	_change_spinbox(NULL),
+	_operation_text(NULL),
+	_position_text(NULL),
+	_ok_button(NULL),
+	_cancel_button(NULL),
+	_grid_layout(NULL)
 {
+	if (_map_data == NULL) {
+		qDebug("ERROR: MapResizesDialog constructor received a NULL map data pointer");
+	}
 
+	_change_spinbox = new QSpinBox(this);
+	_change_spinbox->setMinimum(0);
+	_change_spinbox->setValue(1);
+	connect(_change_spinbox, SIGNAL(valueChanged(int)), this, SLOT(_EnableOkButton()));
+
+	_operation_text = new QLabel("", this);
+	_position_text = new QLabel("Operation will take place at\nX/Y coordinates: [" + QString::number(_column_position) +
+		", " + QString::number(_row_position) + "]", this);
+
+	_ok_button = new QPushButton("OK", this);
+	connect(_ok_button, SIGNAL(released()), this, SLOT(accept()));
+	_cancel_button = new QPushButton("Cancel", this);
+	_cancel_button->setDefault(true);
+	connect(_cancel_button, SIGNAL(released()), this, SLOT(reject()));
+
+	_grid_layout = new QGridLayout(this);
+	_grid_layout->addWidget(_operation_text, 0, 0);
+	_grid_layout->addWidget(_change_spinbox, 0, 1);
+	_grid_layout->addWidget(_position_text, 1, 0);
+	_grid_layout->addWidget(_ok_button, 2, 0);
+	_grid_layout->addWidget(_cancel_button, 2, 1);
+
+	// The max spinbox value, operation text, and window title all need to be set appropriately based on the
+	// insert_operation and column_operation booleans
+	if (_insert_operation) {
+		if (_column_operation) {
+			setWindowTitle("Insert Tile Columns");
+			_operation_text->setText("Tile columns to insert:");
+			_change_spinbox->setMaximum(MAXIMUM_MAP_LENGTH - _map_data->GetMapLength());
+		}
+		else {
+			setWindowTitle("Insert Tile Rows");
+			_operation_text->setText("Tile rows to insert:");
+			_change_spinbox->setMaximum(MAXIMUM_MAP_HEIGHT - _map_data->GetMapHeight());
+		}
+	}
+	else {
+		if (_column_operation) {
+			setWindowTitle("Delete Tile Columns");
+			_operation_text->setText("Tile columns to delete:");
+			if ((_map_data->GetMapLength() - _column_position) >= MINIMUM_MAP_LENGTH)
+				_change_spinbox->setMaximum(_map_data->GetMapLength() - _column_position);
+			else
+				_change_spinbox->setMaximum(_map_data->GetMapLength() - MINIMUM_MAP_LENGTH);
+		}
+		else {
+			setWindowTitle("Delete Tile Rows");
+			_operation_text->setText("Tile rows to delete:");
+			_change_spinbox->setMaximum(_map_data->GetMapHeight() - _row_position);
+			if ((_map_data->GetMapHeight() - _row_position) >= MINIMUM_MAP_HEIGHT)
+				_change_spinbox->setMaximum(_map_data->GetMapHeight() - _row_position);
+			else
+				_change_spinbox->setMaximum(_map_data->GetMapHeight() - MINIMUM_MAP_HEIGHT);
+		}
+	}
 }
 
 
 
 MapResizeInternalDialog::~MapResizeInternalDialog() {
+	delete _change_spinbox;
+	delete _operation_text;
+	delete _position_text;
+	delete _ok_button;
+	delete _cancel_button;
+	delete _grid_layout;
+}
 
+
+
+void MapResizeInternalDialog::ModifyMapData() {
+	uint32 change_value = static_cast<uint32>(_change_spinbox->value());
+	Editor* editor = static_cast<Editor*>(parent());
+
+	// This case should never happen. If it does, the code that invoked this call needs to be corrected
+	if (change_value == 0) {
+		qDebug("Called MapResizeInternalDialog::ModifyMapData when the change value was equal to zero");
+		return;
+	}
+
+	if (_insert_operation) {
+		if (_column_operation) {
+			_map_data->InsertTileLayerColumns(_column_position, change_value);
+			editor->statusBar()->showMessage("Inserted " + QString::number(change_value) + " tile columns to map", 5000);
+		}
+		else {
+			_map_data->InsertTileLayerRows(_row_position, change_value);
+			editor->statusBar()->showMessage("Inserted " + QString::number(change_value) + " tile rows to map", 5000);
+		}
+	}
+	else {
+		if (_column_operation) {
+			_map_data->RemoveTileLayerColumns(_column_position, change_value);
+			editor->statusBar()->showMessage("Deleted " + QString::number(change_value) + " tile columns from map", 5000);
+		}
+		else {
+			_map_data->RemoveTileLayerRows(_row_position, change_value);
+			editor->statusBar()->showMessage("Deleted " + QString::number(change_value) + " tile rows from map", 5000);
+		}
+	}
+
+	editor->UpdateMapView();
 }
 
 
 
 void MapResizeInternalDialog::_EnableOkButton() {
-
+	if (_change_spinbox->value() > 0)
+		_ok_button->setEnabled(true);
+	else
+		_ok_button->setEnabled(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

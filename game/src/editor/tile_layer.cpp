@@ -75,94 +75,96 @@ void TileLayer::FillLayer(int32 tile_id) {
 
 
 
-void TileLayer::_AddLayerRow(uint32 row_index, int32 value) {
-	uint32 old_height = GetHeight();
-	uint32 length = GetLength();
-
-	if (old_height == 0) {
+void TileLayer::_AddRows(uint32 row_index, uint32 row_count, int32 value) {
+	if (row_count == 0) {
 		return;
 	}
-	if (row_index > old_height) {
+	if (row_index > GetHeight()) {
 		return;
 	}
 
-	// And an empty tile row to the bottom
-	_tiles.push_back(vector<int32>(length, NO_TILE));
-	// Shift the appropriate rows one position down to make room for the row to add
-	for (uint32 i = _tiles.size() - 1; i > row_index; --i) {
-		_tiles[i] = _tiles[i-1];
+	// Add new rows to the bottom of the layer to allocate the necessary space
+	for (uint32 i = 0; i < row_count; ++i) {
+		_tiles.push_back(vector<int32>(GetLength()));
 	}
-	// Now set the tiles at the new row to NO_TILE
-	for (uint32 i = 0; i < length; ++i) {
-		_tiles[row_index][i] = NO_TILE;
+	// Shift existing rows down the appropriate amount
+	for (uint32 i = GetHeight() - 1; i >= row_index; --i) {
+		_tiles[i] = _tiles[i - row_count];
+	}
+	// Now set the value of the rows in their new positions
+	for (uint32 i = row_index; i < row_index + row_count; ++i) {
+		_tiles[i].assign(GetLength(), value);
 	}
 }
 
 
 
-void TileLayer::_AddLayerCol(uint32 col_index, int32 value) {
-	uint32 height = GetHeight();
-	uint32 old_length = GetLength();
-
-	if (height == 0) {
+void TileLayer::_AddColumns(uint32 col_index, uint32 col_count, int32 value) {
+	if (col_count == 0) {
 		return;
 	}
-	if (col_index > old_length) {
+	if (col_index > GetLength()) {
 		return;
 	}
 
-	for (uint32 i = 0; i < height; ++i) {
-		// Add an empty tile column to the back of each row.
-		_tiles[i].push_back(NO_TILE);
-		// Shift the columns one position right to make room for the column to add.
-		for (uint32 j = _tiles[i].size() - 1; j > col_index; --j) {
-			_tiles[i][j] = _tiles[i][j-1];
+	for (uint32 i = 0; i < GetHeight(); ++i) {
+		// Add new columns to the right of the layer to allocate the necessary space
+		for (uint32 j = 0; j < col_count; ++j) {
+			_tiles[i].push_back(value);
 		}
-		// Set the value in the new column to NO_TILE
-		_tiles[i][col_index] = NO_TILE;
+		// Shift existing rows right the appropriate amount
+		for (uint32 j = GetLength() - 1; j >= col_index; --j) {
+			_tiles[i][j] = _tiles[i][j - col_count];
+		}
+		// Now set the value of the columns in their new positions
+		for (uint32 j = col_index; j < col_index + col_count; ++j) {
+			_tiles[i][j] = value;
+		}
 	}
 }
 
 
 
-void TileLayer::_DeleteLayerRow(uint32 row_index) {
-	uint32 old_height = GetHeight();
-
-	if (old_height == 0) {
+void TileLayer::_DeleteRows(uint32 row_index, uint32 row_count) {
+	if (row_count == 0) {
 		return;
 	}
-	if (row_index >= old_height) {
+	if (row_index + row_count > GetHeight()) {
 		return;
 	}
 
-	// Swap all rows below the index one position up to replace the deleted row
-	for (uint32 i = row_index; i < _tiles.size() - 1; ++i) {
-		_tiles[i] = _tiles[i+1];
+	// Move up all rows beyond row_index + row_count
+	for (uint32 i = row_index + row_count; i < _tiles.size(); ++i) {
+		_tiles[i - row_count] = _tiles[i];
 	}
-	// Now remove the last row
-	_tiles.pop_back();
+
+	// Now remove the rows from the end
+	for (uint32 i = 0; i < row_count; ++i) {
+		_tiles.pop_back();
+	}
 }
 
 
 
-void TileLayer::_DeleteLayerCol(uint32 col_index) {
-	uint32 height = GetHeight();
-	uint32 old_length = GetLength();
-
-	if (height == 0) {
+void TileLayer::_DeleteColumns(uint32 col_index, uint32 col_count) {
+	if (col_count == 0) {
 		return;
 	}
-	if (col_index > old_length) {
+	if (col_index + col_count > GetLength()) {
 		return;
 	}
 
+	// Move left all columns beyond col_index + col_count
 	// Swap all columns to the right of col_index one position left to replace the deleted column
-	for (uint32 i = 0; i < height; ++i) {
-		for (uint32 j = col_index; j < old_length - 1; ++j) {
-			_tiles[i][j] = _tiles[i][j+1];
+	for (uint32 i = 0; i < GetHeight(); ++i) {
+		for (uint32 j = col_index + col_count; j < GetLength(); ++j) {
+			_tiles[i][j - col_count] = _tiles[i][j];
 		}
-		// Now remove the last column
-		_tiles[i].pop_back();
+
+		// Now remove the columns from the end
+		for (uint32 i = 0; i < col_count; ++i) {
+			_tiles[i].pop_back();
+		}
 	}
 }
 

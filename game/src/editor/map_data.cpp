@@ -722,20 +722,23 @@ bool MapData::SwapTileLayers(uint32 index_one, uint32 index_two) {
 
 
 void MapData::InsertTileLayerRows(uint32 row_index, uint32 row_count) {
+	if (row_count == 0) {
+		return;
+	}
 	if (row_index >= _map_height) {
 		return;
 	}
-
-	if (row_count == 0) {
+	if (_map_height + row_count > MAXIMUM_MAP_HEIGHT) {
 		return;
 	}
 
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
 		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
 		for (uint32 j = 0; j < _tile_layer_count; ++j) {
-			layers[j]._AddLayerRow(row_index, NO_TILE);
+			layers[j]._AddRows(row_index, row_count, NO_TILE);
 		}
 	}
+	_empty_tile_layer._AddRows(row_index, row_count, NO_TILE);
 
 	_map_height = _map_height + row_count;
 	SetMapModified(true);
@@ -744,14 +747,12 @@ void MapData::InsertTileLayerRows(uint32 row_index, uint32 row_count) {
 
 
 void MapData::RemoveTileLayerRows(uint32 row_index, uint32 row_count) {
-	if (row_index >= _map_height) {
-		return;
-	}
-
 	if (row_count == 0) {
 		return;
 	}
-
+	if (row_index + row_count >= _map_height) {
+		return;
+	}
 	if (row_count > (_map_height - MINIMUM_MAP_HEIGHT)) {
 		return;
 	}
@@ -759,9 +760,10 @@ void MapData::RemoveTileLayerRows(uint32 row_index, uint32 row_count) {
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
 		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
 		for (uint32 j = 0; j < _tile_layer_count; ++j) {
-			layers[j]._AddLayerRow(row_index, NO_TILE);
+			layers[j]._DeleteRows(row_index, row_count);
 		}
 	}
+	_empty_tile_layer._DeleteRows(row_index, row_count);
 
 	_map_height = _map_height - row_count;
 	SetMapModified(true);
@@ -770,20 +772,23 @@ void MapData::RemoveTileLayerRows(uint32 row_index, uint32 row_count) {
 
 
 void MapData::InsertTileLayerColumns(uint32 col_index, uint32 col_count) {
+	if (col_count == 0) {
+		return;
+	}
 	if (col_index >= _map_length) {
 		return;
 	}
-
-	if (col_count == 0) {
+	if (_map_length + col_count > MAXIMUM_MAP_LENGTH) {
 		return;
 	}
 
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
 		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
 		for (uint32 j = 0; j < _tile_layer_count; ++j) {
-			layers[j]._AddLayerCol(col_index, NO_TILE);
+			layers[j]._AddColumns(col_index, col_count, NO_TILE);
 		}
 	}
+	_empty_tile_layer._AddColumns(col_index, col_count, NO_TILE);
 
 	_map_length = _map_length + col_count;
 	SetMapModified(true);
@@ -792,14 +797,12 @@ void MapData::InsertTileLayerColumns(uint32 col_index, uint32 col_count) {
 
 
 void MapData::RemoveTileLayerColumns(uint32 col_index, uint32 col_count) {
-	if (col_index >= _map_length) {
-		return;
-	}
-
 	if (col_count == 0) {
 		return;
 	}
-
+	if (col_index + col_count >= _map_length) {
+		return;
+	}
 	if (col_count > (_map_length - MINIMUM_MAP_LENGTH)) {
 		return;
 	}
@@ -807,9 +810,10 @@ void MapData::RemoveTileLayerColumns(uint32 col_index, uint32 col_count) {
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
 		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
 		for (uint32 j = 0; j < _tile_layer_count; ++j) {
-			layers[j]._DeleteLayerCol(col_index);
+			layers[j]._DeleteColumns(col_index, col_count);
 		}
 	}
+	_empty_tile_layer._DeleteColumns(col_index, col_count);
 
 	_map_length = _map_length - col_count;
 	SetMapModified(true);
