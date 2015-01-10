@@ -750,7 +750,7 @@ void MapData::RemoveTileLayerRows(uint32 row_index, uint32 row_count) {
 	if (row_count == 0) {
 		return;
 	}
-	if (row_index + row_count >= _map_height) {
+	if (_map_height < (row_index + row_count)) {
 		return;
 	}
 	if (row_count > (_map_height - MINIMUM_MAP_HEIGHT)) {
@@ -800,7 +800,7 @@ void MapData::RemoveTileLayerColumns(uint32 col_index, uint32 col_count) {
 	if (col_count == 0) {
 		return;
 	}
-	if (col_index + col_count >= _map_length) {
+	if (_map_length < (col_index + col_count)) {
 		return;
 	}
 	if (col_count > (_map_length - MINIMUM_MAP_LENGTH)) {

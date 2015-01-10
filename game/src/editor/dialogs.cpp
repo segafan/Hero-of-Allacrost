@@ -311,7 +311,7 @@ MapResizeInternalDialog::MapResizeInternalDialog(QWidget* parent, MapData* data,
 		if (_column_operation) {
 			setWindowTitle("Delete Tile Columns");
 			_operation_text->setText("Tile columns to delete:");
-			if ((_map_data->GetMapLength() - _column_position) >= MINIMUM_MAP_LENGTH)
+			if ((_map_data->GetMapLength() - _column_position) < (_map_data->GetMapLength() - MINIMUM_MAP_LENGTH))
 				_change_spinbox->setMaximum(_map_data->GetMapLength() - _column_position);
 			else
 				_change_spinbox->setMaximum(_map_data->GetMapLength() - MINIMUM_MAP_LENGTH);
@@ -319,8 +319,7 @@ MapResizeInternalDialog::MapResizeInternalDialog(QWidget* parent, MapData* data,
 		else {
 			setWindowTitle("Delete Tile Rows");
 			_operation_text->setText("Tile rows to delete:");
-			_change_spinbox->setMaximum(_map_data->GetMapHeight() - _row_position);
-			if ((_map_data->GetMapHeight() - _row_position) >= MINIMUM_MAP_HEIGHT)
+			if ((_map_data->GetMapHeight() - _row_position) < (_map_data->GetMapHeight() - MINIMUM_MAP_HEIGHT))
 				_change_spinbox->setMaximum(_map_data->GetMapHeight() - _row_position);
 			else
 				_change_spinbox->setMaximum(_map_data->GetMapHeight() - MINIMUM_MAP_HEIGHT);

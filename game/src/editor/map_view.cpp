@@ -683,7 +683,7 @@ void MapView::_DeleteMultipleTileRows() {
 
 
 void MapView::_DeleteSingleTileColumn() {
-	if (_map_data->GetMapHeight() == MINIMUM_MAP_LENGTH) {
+	if (_map_data->GetMapLength() == MINIMUM_MAP_LENGTH) {
 		QMessageBox::warning(static_cast<QWidget*>(parent()), "Delete Tile Column Failure",
 			"Could not delete any tile columns as the map length is currently at its minimum limit.");
 		return;
@@ -696,7 +696,7 @@ void MapView::_DeleteSingleTileColumn() {
 
 
 void MapView::_DeleteMultipleTileColumns() {
-	if (_map_data->GetMapHeight() == MINIMUM_MAP_LENGTH) {
+	if (_map_data->GetMapLength() == MINIMUM_MAP_LENGTH) {
 		QMessageBox::warning(static_cast<QWidget*>(parent()), "Delete Tile Column Failure",
 			"Could not delete any tile columns as the map length is currently at its minimum limit.");
 		return;

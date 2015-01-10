@@ -88,7 +88,7 @@ void TileLayer::_AddRows(uint32 row_index, uint32 row_count, int32 value) {
 		_tiles.push_back(vector<int32>(GetLength()));
 	}
 	// Shift existing rows down the appropriate amount
-	for (uint32 i = GetHeight() - 1; i >= row_index; --i) {
+	for (uint32 i = GetHeight() - 1; i >= row_index + row_count; --i) {
 		_tiles[i] = _tiles[i - row_count];
 	}
 	// Now set the value of the rows in their new positions
@@ -113,7 +113,7 @@ void TileLayer::_AddColumns(uint32 col_index, uint32 col_count, int32 value) {
 			_tiles[i].push_back(value);
 		}
 		// Shift existing rows right the appropriate amount
-		for (uint32 j = GetLength() - 1; j >= col_index; --j) {
+		for (uint32 j = GetLength() - 1; j >= col_index + col_count; --j) {
 			_tiles[i][j] = _tiles[i][j - col_count];
 		}
 		// Now set the value of the columns in their new positions
@@ -134,7 +134,7 @@ void TileLayer::_DeleteRows(uint32 row_index, uint32 row_count) {
 	}
 
 	// Move up all rows beyond row_index + row_count
-	for (uint32 i = row_index + row_count; i < _tiles.size(); ++i) {
+	for (uint32 i = row_index + row_count; i < GetHeight(); ++i) {
 		_tiles[i - row_count] = _tiles[i];
 	}
 
@@ -154,15 +154,15 @@ void TileLayer::_DeleteColumns(uint32 col_index, uint32 col_count) {
 		return;
 	}
 
-	// Move left all columns beyond col_index + col_count
-	// Swap all columns to the right of col_index one position left to replace the deleted column
+	uint32 original_length = GetLength();
 	for (uint32 i = 0; i < GetHeight(); ++i) {
-		for (uint32 j = col_index + col_count; j < GetLength(); ++j) {
+		// Move left all columns beyond col_index + col_count
+		for (uint32 j = col_index + col_count; j < original_length; ++j) {
 			_tiles[i][j - col_count] = _tiles[i][j];
 		}
 
 		// Now remove the columns from the end
-		for (uint32 i = 0; i < col_count; ++i) {
+		for (uint32 j = 0; j < col_count; ++j) {
 			_tiles[i].pop_back();
 		}
 	}
