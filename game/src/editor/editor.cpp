@@ -62,7 +62,7 @@ Editor::Editor() :
 	_view_grid_action(NULL),
 	_view_missing_action(NULL),
 	_view_inherited_action(NULL),
-	_view_collisions_action(NULL),
+	_view_collision_action(NULL),
 	_tool_paint_action(NULL),
 	_tool_swap_action(NULL),
 	_tool_erase_action(NULL),
@@ -147,7 +147,7 @@ Editor::~Editor() {
 	delete _view_grid_action;
 	delete _view_missing_action;
 	delete _view_inherited_action;
-	delete _view_collisions_action;
+	delete _view_collision_action;
 
 	delete _tool_paint_action;
 	delete _tool_swap_action;
@@ -269,11 +269,11 @@ void Editor::_CreateActions() {
 	_view_inherited_action->setCheckable(true);
 	connect(_view_inherited_action, SIGNAL(triggered()), this, SLOT(_ViewInheritedTiles()));
 
-	_view_collisions_action = new QAction("&Collision &Data", this);
-	_view_collisions_action->setStatusTip("Shows which quadrants on the map have collisions enabled");
-	_view_collisions_action->setShortcut(Qt::Key_C);
-	_view_collisions_action->setCheckable(true);
-	connect(_view_collisions_action, SIGNAL(triggered()), this, SLOT(_ViewCollisionData()));
+	_view_collision_action = new QAction("&Collision &Data", this);
+	_view_collision_action->setStatusTip("Shows which quadrants on the map have collisions enabled");
+	_view_collision_action->setShortcut(Qt::Key_C);
+	_view_collision_action->setCheckable(true);
+	connect(_view_collision_action, SIGNAL(triggered()), this, SLOT(_ViewCollisionData()));
 
 	// Create actions found in the Tools menu
 	_tool_paint_action = new QAction(QIcon("img/misc/editor_tools/pencil.png"), "&Paint Tiles", this);
@@ -393,7 +393,7 @@ void Editor::_CreateMenus() {
 	_view_menu->addAction(_view_grid_action);
 	_view_menu->addAction(_view_missing_action);
 	_view_menu->addAction(_view_inherited_action);
-	_view_menu->addAction(_view_collisions_action);
+	_view_menu->addAction(_view_collision_action);
 	connect(_view_menu, SIGNAL(aboutToShow()), this, SLOT(_CheckViewActions()));
 
 	_tools_menu = menuBar()->addMenu("&Tools");
@@ -443,7 +443,6 @@ void Editor::_CreateToolbars() {
 
 void Editor::_ClearEditorState() {
 	_map_view->SetGridVisible(false);
-	_map_view->SetSelectionOverlayVisible(false);
 	_map_view->SetMissingOverlayVisible(false);
 	_map_view->SetInheritedOverlayVisible(false);
 	_map_view->SetEditMode(PAINT_MODE);
@@ -549,13 +548,13 @@ void Editor::_CheckViewActions() {
 		_view_missing_action->setEnabled(true);
 		_view_inherited_action->setEnabled(true);
 		// TODO: View collision grid feature has not yet been implemented. This option will remain disabled until it is.
-		_view_collisions_action->setEnabled(false);
+		_view_collision_action->setEnabled(false);
 	}
 	else {
 		_view_grid_action->setEnabled(false);
 		_view_missing_action->setEnabled(false);
 		_view_inherited_action->setEnabled(false);
-		_view_collisions_action->setEnabled(false);
+		_view_collision_action->setEnabled(false);
 	}
 }
 
@@ -808,33 +807,6 @@ void Editor::_EditMapResize() {
 	if (resize_dialog.exec() == QDialog::Accepted) {
 		resize_dialog.ModifyMapData();
 	}
-}
-
-
-
-void Editor::_ViewTileGrid() {
-	_view_grid_action->setChecked(_map_view->ToggleGridVisible());
-	_map_view->DrawMap();
-}
-
-
-
-void Editor::_ViewMissingTiles() {
-	_view_grid_action->setChecked(_map_view->ToggleMissingOverlayVisible());
-	_map_view->DrawMap();
-}
-
-
-
-void Editor::_ViewInheritedTiles() {
-	_view_grid_action->setChecked(_map_view->ToggleInheritedOverlayVisible());
-	_map_view->DrawMap();
-}
-
-
-
-void Editor::_ViewCollisionData() {
-	// TODO: toggle this property in the _map_view class similar to _ViewTileGrid above
 }
 
 

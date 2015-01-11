@@ -71,7 +71,7 @@ public:
 	/** \brief Retrieves the tile at a specific location
 	*** \param x The x (column) location of the tile
 	*** \param y The y (row) location of the tile
-	*** \return The index value of the tile. Returns NO_TILE if the coordinate arguments are invalid.
+	*** \return The index value of the tile. Returns MISSING_TILE if the coordinate arguments are invalid.
 	**/
 	int32 GetTile(uint32 x, uint32 y) const;
 
@@ -84,23 +84,23 @@ public:
 	**/
 	void SetTile(uint32 x, uint32 y, int32 value);
 
-	/** \brief Clears the tile at a specific location by setting it's value to NO_TILE
+	/** \brief Clears the tile at a specific location by setting it's value to MISSING_TILE
 	*** \param x The x (column) location of the tile
 	*** \param y The y (row) location of the tile
 	***
 	*** If the coordinates are invalid, no change will take place.
 	**/
 	void ClearTile(uint32 x, uint32 y)
-		{ SetTile(x, y, NO_TILE); }
+		{ SetTile(x, y, MISSING_TILE); }
 
 	/** \brief Sets every tile location in the layer to the same value
 	*** \param value The value to set each tile to
 	**/
 	void FillLayer(int32 value);
 
-	//! \brief Clears the layer of all data, setting each tile in the layer to NO_TILE
+	//! \brief Clears the layer of all data, setting each tile in the layer to MISSING_TILE
 	void ClearLayer()
-		{ FillLayer(NO_TILE); }
+		{ FillLayer(MISSING_TILE); }
 
 	/** \brief Returns a reference to the tile container
 	*** \note This method is provided for convenience for operations such as drawing functions.
@@ -131,10 +131,10 @@ private:
 	void _AddRows(uint32 row_index, uint32 row_count, int32 value);
 
 	/** \brief Adds new rows of tiles to a specified location in the table
-	*** \note This method calls the three argument version and uses a value of NO_TILE for the third argument
+	*** \note This method calls the three argument version and uses a value of MISSING_TILE for the third argument
 	**/
 	void _AddRows(uint32 row_index, uint32 row_count)
-		{ _AddRows(row_index, row_count, NO_TILE); }
+		{ _AddRows(row_index, row_count, MISSING_TILE); }
 
 	/** \brief Adds new columns of tiles to a specified location
 	*** \param col_index The index where the columns should be added
@@ -153,10 +153,10 @@ private:
 	void _AddColumns(uint32 col_index, uint32 col_count, int32 value);
 
 	/** \brief Adds new columns of tiles to a specified location in the table
-	*** \note This method calls the three argument version and uses a value of NO_TILE for the third argument
+	*** \note This method calls the three argument version and uses a value of MISSING_TILE for the third argument
 	**/
 	void _AddColumns(uint32 col_index, uint32 col_count)
-		{ _AddColumns(col_index, col_count, NO_TILE); }
+		{ _AddColumns(col_index, col_count, MISSING_TILE); }
 
 	/** \brief Deletes rows from the tile layer at a specified location
 	*** \param row_index The starting index of the rows to delete
@@ -193,7 +193,7 @@ private:
 	*** If the resize operation makes the layer smaller in either dimension, the appropriate
 	*** number of rows and/or columns will be removed from the rows and columns on the ends.
 	*** If the resize operations causes the layer to grow in size, the rows and columns will be
-	*** added to the end with NO_TILE.
+	*** added to the end with MISSING_TILE.
 	**/
 	void _ResizeLayer(uint32 length, uint height);
 }; // class TileLayer

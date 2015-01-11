@@ -76,7 +76,7 @@ public:
 		{ return _context_name; }
 
 	bool IsInheritingContext() const
-		{ return (_inherited_context_id != NO_CONTEXT); }
+		{ return (_inherited_context_id != INVALID_CONTEXT); }
 
 	int32 GetInheritedContextID() const
 		{ return _inherited_context_id; }
@@ -98,7 +98,7 @@ private:
 	*** This constructor is used when not inheriting from another context
 	**/
 	TileContext(int32 id, QString name) :
-		_context_id(id), _context_name(name), _inherited_context_id(NO_CONTEXT) {}
+		_context_id(id), _context_name(name), _inherited_context_id(INVALID_CONTEXT) {}
 
 	/** \param id The ID to set the newly created context (should be unique among all TileContext objects)
 	*** \param inherited_context_id The ID of the context that this newly created context should inherit from
@@ -117,7 +117,7 @@ private:
 	QString _context_name;
 
 	/** \brief The ID of the context that this context inherits from
-	*** If this context does not inherit from another, then this member is set to NO_CONTEXT.
+	*** If this context does not inherit from another, then this member is set to INVALID_CONTEXT.
 	**/
 	int32 _inherited_context_id;
 
@@ -129,7 +129,7 @@ private:
 
 	//! \brief Removes inheriting context data, if any exists
 	void _ClearInheritingContext()
-		{ _inherited_context_id = NO_CONTEXT; }
+		{ _inherited_context_id = INVALID_CONTEXT; }
 
 	/** \brief Transforms the context into an inheriting context
 	*** \param inherited_context_id The ID of the context that this context should inherit from
