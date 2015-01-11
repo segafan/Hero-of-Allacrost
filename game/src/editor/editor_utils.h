@@ -82,10 +82,11 @@ enum EDIT_MODE {
 	SWAP_MODE           =  1,
 	ERASE_MODE          =  2,
 	INHERIT_MODE        =  3,
-	FILL_AREA_MODE      =  4,
-	CLEAR_AREA_MODE     =  5,
-	INHERIT_AREA_MODE   =  6,
-	TOTAL_MODE          =  7
+	SELECT_AREA_MODE    =  4,
+	FILL_AREA_MODE      =  5,
+	CLEAR_AREA_MODE     =  6,
+	INHERIT_AREA_MODE   =  7,
+	TOTAL_MODE          =  8
 };
 
 //! \brief Represents different types of transition patterns for autotileable tiles.
