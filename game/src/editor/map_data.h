@@ -354,7 +354,7 @@ public:
 	*** Possible errors that could prevent context creation include exceeding the maximum number of
 	*** contexts allowed (MAX_CONTEXTS), an existing context with the same name, or an invalid context ID argument.
 	**/
-	TileContext* AddTileContext(QString name, int32 inheriting_context_id = NO_CONTEXT);
+	TileContext* AddTileContext(QString name, int32 inheriting_context_id = INVALID_CONTEXT);
 
 	/** \brief Deletes an existing TileContext object
 	*** \param context_id The ID of the context to delete
@@ -385,7 +385,7 @@ public:
 
 	/** \brief Changes the inheritance property of a tile context
 	*** \param context_id The ID of the context to change
-	*** \param inherit_id The ID of the context which should be inherited from (use NO_CONTEXT to remove inheritance)
+	*** \param inherit_id The ID of the context which should be inherited from (use INVALID_CONTEXT to remove inheritance)
 	*** \return True if the inheritance was changed successfully
 	**/
 	bool ChangeInheritanceTileContext(int32 context_id, int32 inherit_id);
@@ -395,7 +395,7 @@ public:
 	*** \return True if the inheritance was removed successfully
 	**/
 	bool RemoveInheritanceTileContext(int32 context_id)
-		{ return ChangeInheritanceTileContext(context_id, NO_CONTEXT); }
+		{ return ChangeInheritanceTileContext(context_id, INVALID_CONTEXT); }
 
 	/** \brief Moves a context up in the list
 	*** \param context_id The ID of the context to move

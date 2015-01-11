@@ -565,7 +565,7 @@ void TilesetView::_RemoveCurrentTileset() {
 
  	delete currentWidget();
 	Editor* editor = static_cast<Editor*>(topLevelWidget());
-	editor->UpdateMapView();
+	editor->DrawMapView();
 	editor->statusBar()->showMessage(QString("Removed tileset '%1'").arg(tileset_name), 5000);
 }
 

@@ -22,17 +22,17 @@
 
 namespace hoa_editor {
 
-//! \brief The value used to indicate that no tile is placed at a particular location
-const int32 NO_TILE = -1;
+//! \brief Indicates that no tile is placed at a particular location
+const int32 MISSING_TILE = -1;
 
-//! \brief The value used to indicate that the tile at this location is inherited from another context
+//! \brief Indicates that the tile at this location is inherited from another context
 const int32 INHERITED_TILE = -2;
 
-//! \brief Used to indicate a tile that has been selected as part of a multi-select
-const int32 TILE_SELECTED = -10;
+//! \brief Indicates that a tile is part of a user-selected area
+const int32 SELECTED_TILE = -10;
 
 //! \brief Used to indicate a non-existing or invalid tile context ID
-const int32 NO_CONTEXT = -1;
+const int32 INVALID_CONTEXT = -1;
 
 //! \brief The maximum number of contexts allowed on a map
 const uint32 MAX_CONTEXTS = 32;

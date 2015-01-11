@@ -87,8 +87,12 @@ public:
 	TilesetView* GetTilesetView() const
 		{ return _tileset_view; }
 
-	//! \brief Used by other subwidgets to update the map view when the map data has been modified external to it
-	void UpdateMapView()
+	//! \brief Sends a notification
+	void MapSizeModified()
+		{ _map_view->MapSizeModified(); _map_view->DrawMap(); }
+
+	//! \brief Used by other subwidgets to redraw the map view, tyically used when the map data has been modified
+	void DrawMapView()
 		{ _map_view->DrawMap(); }
 
 	//! \brief Used by other subwidgets to inform the editor that the selected context has changed
@@ -161,7 +165,7 @@ private:
 	QAction* _view_grid_action;
 	QAction* _view_missing_action;
 	QAction* _view_inherited_action;
-	QAction* _view_collisions_action;
+	QAction* _view_collision_action;
 
 	QAction* _tool_paint_action;
 	QAction* _tool_swap_action;
@@ -238,10 +242,14 @@ private slots:
 	void _EditMapProperties();
 	void _EditMapResize();
 
-	void _ViewTileGrid();
-	void _ViewMissingTiles();
-	void _ViewInheritedTiles();
-	void _ViewCollisionData();
+	void _ViewTileGrid()
+		{ _view_grid_action->setChecked(_map_view->ToggleGridVisible()); }
+	void _ViewMissingTiles()
+		{ _view_missing_action->setChecked(_map_view->ToggleMissingOverlayVisible()); }
+	void _ViewInheritedTiles()
+		{ _view_inherited_action->setChecked(_map_view->ToggleInheritedOverlayVisible()); }
+	void _ViewCollisionData()
+		{ _view_collision_action->setChecked(_map_view->ToggleCollisionOverlayVisible()); }
 
 	void _SelectPaintTool()
 		{ _map_view->SetEditMode(PAINT_MODE); }

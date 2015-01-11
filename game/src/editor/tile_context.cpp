@@ -349,12 +349,12 @@ void ContextView::_ValidateChangedData(QTreeWidgetItem* item, int column) {
 	}
 	else if (column == INHERITS_COLUMN) {
 		closePersistentEditor(item, column);
-		int32 new_inheritance = NO_CONTEXT;
+		int32 new_inheritance = INVALID_CONTEXT;
 		bool valid_change = false;
 		QString error_message;
 		// Check that the new value for this column is a valid value (must be blank or an integer value)
 		if (item->text(INHERITS_COLUMN).isEmpty() == true) {
-			new_inheritance = NO_CONTEXT;
+			new_inheritance = INVALID_CONTEXT;
 			valid_change = true;
 		}
 		else {
@@ -402,7 +402,7 @@ void ContextView::_AddTileContext() {
 		context_name.clear();
 		context_name = "New Context (" + QString::number(new_context_number) + QString(")");
 
-		if (_map_data->AddTileContext(context_name, NO_CONTEXT) != NULL) {
+		if (_map_data->AddTileContext(context_name, INVALID_CONTEXT) != NULL) {
 			_map_data->SetMapModified(true);
 			break;
 		}
@@ -446,7 +446,7 @@ void ContextView::_CloneTileContext() {
 	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 	item->setText(ID_COLUMN, QString::number(clone_context->GetContextID()));
 	item->setText(NAME_COLUMN, clone_context->GetContextName());
-	if (clone_context->GetInheritedContextID() == NO_CONTEXT)
+	if (clone_context->GetInheritedContextID() == INVALID_CONTEXT)
 		item->setText(INHERITS_COLUMN, "");
 	else
 		item->setText(INHERITS_COLUMN, QString::number(clone_context->GetInheritedContextID()));
@@ -515,7 +515,7 @@ void ContextView::_DeleteTileContext() {
 	}
 
 	Editor* editor = static_cast<Editor*>(topLevelWidget());
-	editor->UpdateMapView();
+	editor->DrawMapView();
 	editor->statusBar()->showMessage(QString("Deleted map context '%1'").arg(context_name), 5000);
 }
 

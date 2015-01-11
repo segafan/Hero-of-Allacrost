@@ -221,7 +221,7 @@ void MapResizeDialog::ModifyMapData() {
 	}
 
 	_map_data->ResizeMap(new_length, new_height);
-	editor->UpdateMapView();
+	editor->DrawMapView();
 	editor->statusBar()->showMessage("Map resized", 5000);
 }
 
@@ -371,7 +371,7 @@ void MapResizeInternalDialog::ModifyMapData() {
 		}
 	}
 
-	editor->UpdateMapView();
+	editor->DrawMapView();
 }
 
 

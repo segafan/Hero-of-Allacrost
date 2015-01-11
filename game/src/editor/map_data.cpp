@@ -59,7 +59,7 @@ bool MapData::CreateData(uint32 map_length, uint32 map_height) {
 	_map_length = map_length;
 	_map_height = map_height;
 	_empty_tile_layer._ResizeLayer(map_length, map_height);
-	_empty_tile_layer.FillLayer(NO_TILE);
+	_empty_tile_layer.FillLayer(MISSING_TILE);
 
 	// Create three tile layers, the last of which has no collision enabled initially
 	_tile_layer_properties.push_back(TileLayerProperties(QString("Ground"), true, true));
@@ -149,7 +149,7 @@ bool MapData::LoadData(QString filename) {
 	_tile_layer_count = data_file.ReadUInt("number_tile_layers");
 	_tile_context_count = data_file.ReadUInt("number_map_contexts");
 	_empty_tile_layer._ResizeLayer(_map_length, _map_height);
-	_empty_tile_layer.FillLayer(NO_TILE);
+	_empty_tile_layer.FillLayer(MISSING_TILE);
 
 	if (_map_length < MINIMUM_MAP_LENGTH) {
 		_error_message = QString("Error when loading map file. Map was smaller (%1) than the minimum length.").arg(_map_length);
@@ -220,7 +220,7 @@ bool MapData::LoadData(QString filename) {
 
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
 		TileContext* new_context = new TileContext(i + 1, QString::fromStdString(tile_context_names[i]));
-		if (tile_context_inheritance[i] != NO_CONTEXT) {
+		if (tile_context_inheritance[i] != INVALID_CONTEXT) {
 			new_context->_SetInheritingContext(tile_context_inheritance[i]);
 		}
 		for (uint32 j = 0; j < _tile_layer_count; ++j) {
@@ -364,7 +364,7 @@ bool MapData::SaveData(QString filename) {
 	data_file.InsertNewLine();
 
 	// ---------- (5): For each tile, write the tile value for each layer and each context
-	vector<int32> tiles(_tile_context_count * _tile_layer_count, NO_TILE);
+	vector<int32> tiles(_tile_context_count * _tile_layer_count, MISSING_TILE);
 	data_file.BeginTable("map_tiles");
 	for (uint32 y = 0; y < _map_height; ++y) {
 		data_file.DeclareTable(y);
@@ -477,7 +477,7 @@ void MapData::RemoveTileset(uint32 tileset_index) {
 	}
 	_tilesets.pop_back();
 
-	// When a tileset is removed, two things need to happen to the map data. First, any tiles from the removed tileset need to be nullified (set to NO_TILE).
+	// When a tileset is removed, two things need to happen to the map data. First, any tiles from the removed tileset need to be nullified (set to MISSING_TILE).
 	// Second, the values for any tile from a tileset that was ordered after the removed tileset need to be updated to reflect the new tileset indexes. In other
 	// words, TILESET_NUM_TILES must be subtracted from each of these tilesets.
 	int32 tile_null_start = tileset_index * TILESET_NUM_TILES; // The starting value for all tiles that need to be nullified
@@ -491,7 +491,7 @@ void MapData::RemoveTileset(uint32 tileset_index) {
 				for (uint32 x = 0; x < _map_length; ++x) {
 					if (tiles[y][x] >= tile_null_start) {
 						if (tiles[y][x] < tile_update_start) {
-							tiles[y][x] = NO_TILE;
+							tiles[y][x] = MISSING_TILE;
 						}
 						else {
 							tiles[y][x] -= TILESET_NUM_TILES;
@@ -735,10 +735,10 @@ void MapData::InsertTileLayerRows(uint32 row_index, uint32 row_count) {
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
 		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
 		for (uint32 j = 0; j < _tile_layer_count; ++j) {
-			layers[j]._AddRows(row_index, row_count, NO_TILE);
+			layers[j]._AddRows(row_index, row_count, MISSING_TILE);
 		}
 	}
-	_empty_tile_layer._AddRows(row_index, row_count, NO_TILE);
+	_empty_tile_layer._AddRows(row_index, row_count, MISSING_TILE);
 
 	_map_height = _map_height + row_count;
 	SetMapModified(true);
@@ -785,10 +785,10 @@ void MapData::InsertTileLayerColumns(uint32 col_index, uint32 col_count) {
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
 		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
 		for (uint32 j = 0; j < _tile_layer_count; ++j) {
-			layers[j]._AddColumns(col_index, col_count, NO_TILE);
+			layers[j]._AddColumns(col_index, col_count, MISSING_TILE);
 		}
 	}
-	_empty_tile_layer._AddColumns(col_index, col_count, NO_TILE);
+	_empty_tile_layer._AddColumns(col_index, col_count, MISSING_TILE);
 
 	_map_length = _map_length + col_count;
 	SetMapModified(true);
@@ -892,7 +892,7 @@ TileContext* MapData::AddTileContext(QString name, int32 inheriting_context_id) 
 		_error_message = "ERROR: a context with this name already exists";
 		return NULL;
 	}
-	if (inheriting_context_id != NO_CONTEXT) {
+	if (inheriting_context_id != INVALID_CONTEXT) {
 		if (inheriting_context_id <= 0 || static_cast<uint32>(inheriting_context_id) > MAX_CONTEXTS) {
 			_error_message = "ERROR: invalid value for inhertiting context ID";
 			return NULL;
@@ -1011,7 +1011,7 @@ bool MapData::ChangeInheritanceTileContext(int32 context_id, int32 inherit_id) {
 		return false;
 	}
 	// Removing inheritance from a context is always a valid operation
-	if (inherit_id == NO_CONTEXT) {
+	if (inherit_id == INVALID_CONTEXT) {
 		_all_tile_contexts[context_id - 1]->_SetInheritingContext(inherit_id);
 		return true;
 	}
@@ -1024,7 +1024,7 @@ bool MapData::ChangeInheritanceTileContext(int32 context_id, int32 inherit_id) {
 		_error_message = "ERROR: invalid inheriting context id";
 		return false;
 	}
-	else if (_all_tile_contexts[inherit_id - 1]->GetInheritedContextID() != NO_CONTEXT) {
+	else if (_all_tile_contexts[inherit_id - 1]->GetInheritedContextID() != INVALID_CONTEXT) {
 		_error_message = QString("ERROR: can not inherit from context %1 because it inherits from a context itself").arg(inherit_id);
 		return false;
 	}

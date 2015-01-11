@@ -32,15 +32,15 @@ namespace hoa_editor {
 int32 TileLayer::GetTile(uint32 x, uint32 y) const {
 	// Make sure that there is at least one column and one row
 	if (_tiles.empty() == true)
-		return NO_TILE;
+		return MISSING_TILE;
 	if (_tiles[0].empty() == true)
-		return NO_TILE;
+		return MISSING_TILE;
 
 	// Check that the coordinates do not exceed the bounds of the layer
 	if (y >= _tiles.size())
-		return NO_TILE;
+		return MISSING_TILE;
 	if (x >= _tiles[0].size())
-		return NO_TILE;
+		return MISSING_TILE;
 
 	return _tiles[y][x];
 }
@@ -171,9 +171,9 @@ void TileLayer::_DeleteColumns(uint32 col_index, uint32 col_count) {
 
 
 void TileLayer::_ResizeLayer(uint32 length, uint height) {
-	_tiles.resize(height, vector<int32>(length, NO_TILE));
+	_tiles.resize(height, vector<int32>(length, MISSING_TILE));
 	for (uint32 y = 0; y < height; ++y) {
-		_tiles[y].resize(length, NO_TILE);
+		_tiles[y].resize(length, MISSING_TILE);
 	}
 }
 
@@ -324,7 +324,7 @@ void LayerView::dropEvent(QDropEvent* event) {
 		}
 	}
 
-	static_cast<Editor*>(topLevelWidget())->UpdateMapView();
+	static_cast<Editor*>(topLevelWidget())->DrawMapView();
 }
 
 
@@ -366,7 +366,7 @@ void LayerView::_ChangeSelectedLayer() {
 	}
 
 	// Certain map overlays change depending on which layer is selected, which is why we have to update the map view here
-	static_cast<Editor*>(topLevelWidget())->UpdateMapView();
+	static_cast<Editor*>(topLevelWidget())->DrawMapView();
 }
 
 
@@ -385,7 +385,7 @@ void LayerView::_ChangeLayerProperties(QTreeWidgetItem* item, int column) {
 		else
 			item->setIcon(VISIBLE_COLUMN, QIcon());
 
-		static_cast<Editor*>(topLevelWidget())->UpdateMapView();
+		static_cast<Editor*>(topLevelWidget())->DrawMapView();
 	}
 	else if (column == NAME_COLUMN) {
 		// While technically this was not a right-click event, this allows us to use the same code path for performing rename operations
@@ -538,7 +538,7 @@ void LayerView::_DeleteTileLayer() {
 
 	// Redraw the map view now that the layer is removed
 	Editor* editor = static_cast<Editor*>(topLevelWidget());
-	editor->UpdateMapView();
+	editor->DrawMapView();
 	editor->statusBar()->showMessage(QString("Deleted tile layer '%1'").arg(layer_name), 5000);
 }
 
