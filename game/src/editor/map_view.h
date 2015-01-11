@@ -101,7 +101,6 @@ protected:
 	void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
-	void keyPressEvent(QKeyEvent* event);
 	//@}
 
 private slots:

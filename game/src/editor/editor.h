@@ -163,22 +163,24 @@ private:
 	QAction* _view_inherited_action;
 	QAction* _view_collisions_action;
 
-	QAction* _mode_paint_action;
-	QAction* _mode_swap_action;
-	QAction* _mode_erase_action;
-	QAction* _mode_inherit_action;
-	QAction* _mode_area_fill_action;
-	QAction* _mode_area_clear_action;
-	QAction* _mode_area_inherit_action;
-	QAction* _toggle_select_action;
+	QAction* _tool_paint_action;
+	QAction* _tool_swap_action;
+	QAction* _tool_erase_action;
+	QAction* _tool_inherit_action;
+	QAction* _tool_area_select_action;
+	QAction* _tool_area_fill_action;
+	QAction* _tool_area_clear_action;
+	QAction* _tool_area_inherit_action;
+	QAction* _tool_select_clear_action;
+	QAction* _tool_select_all_action;
 
 	QAction* _help_action;
 	QAction* _about_action;
 	QAction* _about_qt_action;
 	//@}
 
-	//! \brief Used to group the various edit modes together so that only one may be active at a given time
-	QActionGroup* _edit_mode_action_group;
+	//! \brief Used to group the various edit tools together so that only one may be active at a given time
+	QActionGroup* _tool_action_group;
 
 	//! \brief Handles close and quit events
 	void closeEvent(QCloseEvent* event)
@@ -241,25 +243,30 @@ private slots:
 	void _ViewInheritedTiles();
 	void _ViewCollisionData();
 
-	void _SelectPaintMode()
+	void _SelectPaintTool()
 		{ _map_view->SetEditMode(PAINT_MODE); }
-	void _SelectSwapMode()
+	void _SelectSwapTool()
 		{ _map_view->SetEditMode(SWAP_MODE); }
-	void _SelectEraseMode()
+	void _SelectEraseTool()
 		{ _map_view->SetEditMode(ERASE_MODE); }
-	void _SelectInheritMode()
+	void _SelectInheritTool()
 		{ _map_view->SetEditMode(INHERIT_MODE); }
-	void _SelectFillAreaMode()
+	void _SelectAreaSelectTool()
+		{ _map_view->SetEditMode(SELECT_AREA_MODE); }
+	void _SelectAreaFillTool()
 		{ _map_view->SetEditMode(FILL_AREA_MODE); }
-	void _SelectClearAreaMode()
+	void _SelectAreaClearTool()
 		{ _map_view->SetEditMode(CLEAR_AREA_MODE); }
-	void _SelectInheritAreaMode()
+	void _SelectAreaInheritTool()
 		{ _map_view->SetEditMode(INHERIT_AREA_MODE); }
-	void _ToggleSelectArea();
+	void _SelectSelectionClearTool()
+		{} // TODO: add support for this action in MapView class
+	void _SelectSelectionAllTool()
+		{} // TODO: add support for this action in MapView class
 
-	void _HelpHelp();
-	void _HelpAbout();
-	void _HelpAboutQt();
+	void _HelpMessage();
+	void _AboutMessage();
+	void _AboutQtMessage();
 	//@}
 }; // class Editor : public QMainWindow
 

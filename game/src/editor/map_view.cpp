@@ -313,6 +313,9 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 					DrawMap();
 					break;
 
+				case SELECT_AREA_MODE:
+					break;
+
 				case FILL_AREA_MODE:
 					// TODO
 					break;
@@ -376,9 +379,9 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 			if (_selection_overlay_visible == false) {
 				// TODO: Record information for undo/redo stack
-
+				int32 temp = layer[_cursor_tile_y][_cursor_tile_x];
 				layer[_cursor_tile_y][_cursor_tile_x] = layer[_move_source_tile_y][_move_source_tile_x];
-				layer[_move_source_tile_y][_move_source_tile_x] = NO_TILE;
+				layer[_move_source_tile_y][_move_source_tile_x] = temp;
 			}
 			else {
 				vector<vector<int32> > select_layer = _select_layer.GetTiles();
@@ -431,6 +434,11 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 			// TODO: Record information for undo/redo stack
 			break;
 		}
+
+		case SELECT_AREA_MODE:
+			// TODO
+			break;
+
 
 		case FILL_AREA_MODE:
 			// TODO
@@ -491,15 +499,6 @@ void MapView::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 	_cursor_tile_x = mouse_x / TILE_LENGTH;
 	_cursor_tile_y = mouse_y / TILE_HEIGHT;
 	_right_click_menu->exec(QCursor::pos());
-}
-
-
-
-void MapView::keyPressEvent(QKeyEvent* event) {
-	// TODO: map key presses to different actions
-	if (event->key() == Qt::Key_Delete) {
-		// Handle object deletion
-	}
 }
 
 
