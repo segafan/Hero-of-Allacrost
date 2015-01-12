@@ -88,8 +88,9 @@ Editor::Editor() :
 	_CreateToolbars();
 
 	_undo_stack = new QUndoStack();
-	connect(_undo_stack, SIGNAL(canUndoChanged(bool)), _undo_action, SLOT(setEnabled(bool)));
-	connect(_undo_stack, SIGNAL(canRedoChanged(bool)), _redo_action, SLOT(setEnabled(bool)));
+	// TODO: undo/redo support not implemented yet
+// 	connect(_undo_stack, SIGNAL(canUndoChanged(bool)), _undo_action, SLOT(setEnabled(bool)));
+// 	connect(_undo_stack, SIGNAL(canRedoChanged(bool)), _redo_action, SLOT(setEnabled(bool)));
 
 	// Create each widget that forms the main window
 	_horizontal_splitter = new QSplitter(this);
@@ -216,12 +217,14 @@ void Editor::_CreateActions() {
 	_undo_action = new QAction(QIcon("img/misc/editor_tools/undo.png"), "&Undo", this);
 	_undo_action->setShortcut(tr("Ctrl+Z"));
 	_undo_action->setStatusTip("Undo the previous command");
-	connect(_undo_action, SIGNAL(triggered()), _undo_stack, SLOT(undo()));
+	// TODO: undo support not implemented yet
+// 	connect(_undo_action, SIGNAL(triggered()), _undo_stack, SLOT(undo()));
 
 	_redo_action = new QAction(QIcon("img/misc/editor_tools/redo.png"), "&Redo", this);
 	_redo_action->setShortcut(tr("Ctrl+Y"));
 	_redo_action->setStatusTip("Redo the next command");
-	connect(_redo_action, SIGNAL(triggered()), _undo_stack, SLOT(redo()));
+	// TODO: redo support not implemented yet
+// 	connect(_redo_action, SIGNAL(triggered()), _undo_stack, SLOT(redo()));
 
 	_cut_action = new QAction(QIcon("img/misc/editor_tools/cut.png"), "Cu&t", this);
 	_cut_action->setShortcut(tr("Ctrl+X"));
@@ -350,15 +353,15 @@ void Editor::_CreateActions() {
 	_help_action = new QAction("&Help", this);
 	_help_action->setShortcut(Qt::Key_F1);
 	_help_action->setStatusTip("Brings up help documentation for the editor");
-	connect(_help_action, SIGNAL(triggered()), this, SLOT(_HelpHelp()));
+	connect(_help_action, SIGNAL(triggered()), this, SLOT(_HelpMessage()));
 
 	_about_action = new QAction("&About", this);
 	_about_action->setStatusTip("Brings up information about the editor");
-	connect(_about_action, SIGNAL(triggered()), this, SLOT(_HelpAbout()));
+	connect(_about_action, SIGNAL(triggered()), this, SLOT(_AboutMessage()));
 
 	_about_qt_action = new QAction("About &Qt", this);
 	_about_qt_action->setStatusTip("Brings up information about Qt");
-	connect(_about_qt_action, SIGNAL(triggered()), this, SLOT(_HelpAboutQt()));
+	connect(_about_qt_action, SIGNAL(triggered()), this, SLOT(_AboutQtMessage()));
 } // void Editor::_CreateActions()
 
 
@@ -618,6 +621,7 @@ void Editor::_FileNew() {
 	// ---------- 2) Initialize the map data and map view widget
 	_map_data.DestroyData();
 	_map_data.CreateData(new_dialog->GetLength(), new_dialog->GetHeight());
+	MapSizeModified();
 
 	// ---------- 3) Determine the number of tilesets that will be used by the new map and create a load progress dialog
 	QTreeWidget* tilesets = new_dialog->GetTilesetTree();
@@ -695,6 +699,7 @@ void Editor::_FileOpen() {
 		QMessageBox::critical(this, APP_NAME, "Error while opening map file '" + filename + "'. Report errors:\n" + _map_data.GetErrorMessage());
 		return;
 	}
+	MapSizeModified();
 
 	_ClearEditorState();
 	statusBar()->showMessage(QString("Opened map \'%1\'").arg(_map_data.GetMapFilename()), 5000);
@@ -806,6 +811,7 @@ void Editor::_EditMapResize() {
 	MapResizeDialog resize_dialog(this, &_map_data);
 	if (resize_dialog.exec() == QDialog::Accepted) {
 		resize_dialog.ModifyMapData();
+		DrawMapView();
 	}
 }
 

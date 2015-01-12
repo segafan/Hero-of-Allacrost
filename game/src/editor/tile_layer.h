@@ -58,7 +58,7 @@ public:
 		{}
 
 	TileLayer(uint32 length, uint32 height)
-		{ _ResizeLayer(length, height); }
+		{ ResizeLayer(length, height); }
 
 	//! \brief Returns the number of tiles high that the layer is
 	uint32 GetHeight() const
@@ -101,6 +101,19 @@ public:
 	//! \brief Clears the layer of all data, setting each tile in the layer to MISSING_TILE
 	void ClearLayer()
 		{ FillLayer(MISSING_TILE); }
+
+	/** \brief Resizes the layer to the dimensions specified
+	*** \param length The new length of the layer, in number of tiles
+	*** \param height The new height of the layer, in number of tiles
+	*** \note Use care when calling this function. Resizing a tile layer that is managed by the map data can
+	*** cause serious issues and will likely cause the editor to crash.
+	***
+	*** If the resize operation makes the layer smaller in either dimension, the appropriate
+	*** number of rows and/or columns will be removed from the rows and columns on the ends.
+	*** If the resize operations causes the layer to grow in size, the rows and columns will be
+	*** added to the end with MISSING_TILE.
+	**/
+	void ResizeLayer(uint32 length, uint height);
 
 	/** \brief Returns a reference to the tile container
 	*** \note This method is provided for convenience for operations such as drawing functions.
@@ -185,17 +198,6 @@ private:
 	*** ensure that the arguments passed are valid before calling this method.
 	**/
 	void _DeleteColumns(uint32 col_index, uint32 col_count);
-
-	/** \brief Resizes the layer to the dimensions specified
-	*** \param length The new length of the layer, in number of tiles
-	*** \param height The new height of the layer, in number of tiles
-	***
-	*** If the resize operation makes the layer smaller in either dimension, the appropriate
-	*** number of rows and/or columns will be removed from the rows and columns on the ends.
-	*** If the resize operations causes the layer to grow in size, the rows and columns will be
-	*** added to the end with MISSING_TILE.
-	**/
-	void _ResizeLayer(uint32 length, uint height);
 }; // class TileLayer
 
 

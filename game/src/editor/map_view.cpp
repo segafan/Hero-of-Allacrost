@@ -132,9 +132,9 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_delete_menu->addAction(_delete_single_column_action);
 	_delete_menu->addAction(_delete_multiple_columns_action);
 
-	// Blue tile with 50% transparency
+	// Blue tile with 40% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
-	_selection_tile.fill(QColor(0, 0, 255, 128));
+	_selection_tile.fill(QColor(0, 0, 255, 100));
 	// Orange tile with 20% transparency
 	_missing_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
 	_missing_tile.fill(QColor(255, 128, 0, 50));
@@ -166,9 +166,8 @@ MapView::~MapView() {
 
 
 
-void MapView::MapSizeModified() {
-	// TODO: resize _selection_area
-
+void MapView::UpdateAreaSizes() {
+	_selection_area.ResizeLayer(_map_data->GetMapLength(), _map_data->GetMapHeight());
 	_selection_area.ClearLayer();
 	_selection_area_active = false;
 }
@@ -230,13 +229,13 @@ void MapView::DrawMap() {
 					addPixmap(*tilesets[tileset_index]->GetTileImage(tile_index))->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
 				}
 
-				// Draw the missing tile overlay if needed and move on to the next tile
+				// Draw the missing or inherited tile overlays if needed and move on to the next tile
 				if (selected_layer == true) {
 					if (inherited_tile == false && tile == MISSING_TILE && _missing_overlay_visible == true) {
 						addPixmap(_missing_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
 					}
 					// Draw the inherited overlay over the inherited tile
-					if (inherited_tile == true && _inherited_overlay_visible == true) {
+					else if (inherited_tile == true && _inherited_overlay_visible == true) {
 						addPixmap(_inherited_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
 					}
 				}
@@ -245,10 +244,10 @@ void MapView::DrawMap() {
 	}
 
 	// If the selection tool is active, draw the overlay for all tiles currently selected
-	if (_selection_area_active) {
+	if (_selection_area_active == true) {
 		for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
 			for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
-				if (_selection_area.GetTile(x, y) != MISSING_TILE) {
+				if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
 					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
 				}
 			}
@@ -287,68 +286,68 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 		return;
 	}
 
-	// Determine the coordinates of the tile that was click during the mouse press
+	// Determine the coordinates of the tile that was clicked during the mouse press
 	_cursor_tile_x = x / TILE_LENGTH;
 	_cursor_tile_y = y / TILE_HEIGHT;
 
-	if (_selection_area_active == false && event->button() == Qt::LeftButton) {
-		switch (_edit_mode) {
-			case PAINT_MODE:
-				_PaintTile(_cursor_tile_x, _cursor_tile_y);
-				_map_data->SetMapModified(true);
-				DrawMap();
-				break;
+	if (event->button() != Qt::LeftButton)
+		return;
 
-			case SWAP_MODE:
-				_move_source_tile_x = _cursor_tile_x;
-				_move_source_tile_y = _cursor_tile_y;
-				break;
+	// Process the press event according to the active edit mode
+	switch (_edit_mode) {
+		case PAINT_MODE:
+			_PaintTile(_cursor_tile_x, _cursor_tile_y);
+			_map_data->SetMapModified(true);
+			DrawMap();
+			break;
 
-			case ERASE_MODE:
-				_SetTile(_cursor_tile_x, _cursor_tile_y, MISSING_TILE);
-				_map_data->SetMapModified(true);
-				DrawMap();
-				break;
+		case SWAP_MODE:
+			_move_source_tile_x = _cursor_tile_x;
+			_move_source_tile_y = _cursor_tile_y;
+			break;
 
-			case INHERIT_MODE:
-				_SetTile(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
-				_map_data->SetMapModified(true);
-				DrawMap();
-				break;
+		case ERASE_MODE:
+			_SetTile(_cursor_tile_x, _cursor_tile_y, MISSING_TILE);
+			_map_data->SetMapModified(true);
+			DrawMap();
+			break;
 
-			case SELECT_AREA_MODE:
-				// TODO:
-				break;
+		case INHERIT_MODE:
+			_SetTile(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
+			_map_data->SetMapModified(true);
+			DrawMap();
+			break;
 
-			case FILL_AREA_MODE:
-// 				_FillArea(_cursor_tile_x, _cursor_tile_y, ?? value from tileset);
-				DrawMap();
-				break;
-
-			case CLEAR_AREA_MODE:
-				_FillArea(_cursor_tile_x, _cursor_tile_y, MISSING_TILE);
-				DrawMap();
-				break;
-
-			case INHERIT_AREA_MODE:
-				_FillArea(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
-				DrawMap();
-				break;
-
-			default:
-				QMessageBox::warning(_graphics_view, "Tile editing mode", "ERROR: Invalid tile editing mode!");
-				break;
-		}
-	}
-	else {
-		// If the mutli selection is on, record the location of the beginning of the selection rectangle
-		if (event->button() == Qt::LeftButton) {
+		case SELECT_AREA_MODE:
+			SelectNoTiles();
 			_selection_start_tile_x = _cursor_tile_x;
 			_selection_start_tile_y = _cursor_tile_y;
-			_selection_area.SetTile(_cursor_tile_x, _cursor_tile_y, SELECTED_TILE);
-		}
+			_selection_area.SetTile(_selection_start_tile_x, _selection_start_tile_y, SELECTED_TILE);
+			_selection_area_active = true;
+			DrawMap();
+			break;
+
+		case FILL_AREA_MODE:
+			// TODO
+// 				_FillArea(_cursor_tile_x, _cursor_tile_y, ?? value from tileset);
+			DrawMap();
+			break;
+
+		case CLEAR_AREA_MODE:
+			_FillArea(_cursor_tile_x, _cursor_tile_y, MISSING_TILE);
+			DrawMap();
+			break;
+
+		case INHERIT_AREA_MODE:
+			_FillArea(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
+			DrawMap();
+			break;
+
+		default:
+			QMessageBox::warning(_graphics_view, "Tile editing mode", "ERROR: Invalid tile editing mode");
+			break;
 	}
-}
+} // void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 
 
@@ -387,35 +386,7 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 		_cursor_tile_x = tile_x;
 		_cursor_tile_y = tile_y;
 
-		if (_selection_area_active == true && event->buttons() == Qt::LeftButton) {
-			uint32 left_x, right_x, top_y, bottom_y;
-
-			// Use the current tile and the selection start tiles to determine which tiles are selected
-			if (_cursor_tile_x <= _selection_start_tile_x) {
-				left_x = _cursor_tile_x;
-				right_x = _selection_start_tile_x;
-			}
-			else {
-				left_x = _selection_start_tile_x;
-				right_x = _cursor_tile_x;
-			}
-			if (_cursor_tile_y <= _selection_start_tile_y) {
-				top_y = _cursor_tile_y;
-				bottom_y = _selection_start_tile_y;
-			}
-			else {
-				top_y = _selection_start_tile_y;
-				bottom_y = _cursor_tile_y;
-			}
-
-			for (uint32 x = left_x; x <= right_x; ++x) {
-				for (uint32 y = top_y; y <= bottom_y; ++y) {
-					_selection_area.SetTile(x, y, SELECTED_TILE);
-				}
-			}
-		}
-
-		if (_selection_area_active == false && event->buttons() == Qt::LeftButton) {
+		if (event->buttons() == Qt::LeftButton) {
 			switch (_edit_mode) {
 				case PAINT_MODE:
 					_PaintTile(_cursor_tile_x, _cursor_tile_y);
@@ -436,18 +407,24 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 					break;
 
 				case SELECT_AREA_MODE:
+					_SetSelectionArea(_cursor_tile_x, _cursor_tile_y, _selection_start_tile_x, _selection_start_tile_y);
+					DrawMap();
 					break;
 
 				case FILL_AREA_MODE:
 					// TODO
+// 					_FillArea(_cursor_tile_x, _cursor_tile_y, ?? value from tileset);
+					DrawMap();
 					break;
 
 				case CLEAR_AREA_MODE:
-					// TODO
+					_FillArea(_cursor_tile_x, _cursor_tile_y, MISSING_TILE);
+					DrawMap();
 					break;
 
 				case INHERIT_AREA_MODE:
-					// TODO
+					_FillArea(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
+					DrawMap();
 					break;
 
 				default:
@@ -629,6 +606,7 @@ void MapView::_InsertSingleTileRow() {
 	}
 
 	_map_data->InsertTileLayerRows(_cursor_tile_y);
+	UpdateAreaSizes();
 	DrawMap();
 }
 
@@ -644,6 +622,7 @@ void MapView::_InsertMultipleTileRows() {
 	MapResizeInternalDialog resize_dialog(_graphics_view->topLevelWidget(), _map_data, _cursor_tile_y, _cursor_tile_x, true, false);
 	if (resize_dialog.exec() == QDialog::Accepted) {
 		resize_dialog.ModifyMapData();
+		DrawMap();
 	}
 }
 
@@ -657,6 +636,7 @@ void MapView::_InsertSingleTileColumn() {
 	}
 
 	_map_data->InsertTileLayerColumns(_cursor_tile_x);
+	UpdateAreaSizes();
 	DrawMap();
 }
 
@@ -672,6 +652,7 @@ void MapView::_InsertMultipleTileColumns() {
 	MapResizeInternalDialog resize_dialog(_graphics_view->topLevelWidget(), _map_data, _cursor_tile_y, _cursor_tile_x, true, true);
 	if (resize_dialog.exec() == QDialog::Accepted) {
 		resize_dialog.ModifyMapData();
+		DrawMap();
 	}
 }
 
@@ -685,6 +666,7 @@ void MapView::_DeleteSingleTileRow() {
 	}
 
 	_map_data->RemoveTileLayerRows(_cursor_tile_y);
+	UpdateAreaSizes();
 	DrawMap();
 }
 
@@ -700,6 +682,7 @@ void MapView::_DeleteMultipleTileRows() {
 	MapResizeInternalDialog resize_dialog(_graphics_view->topLevelWidget(), _map_data, _cursor_tile_y, _cursor_tile_x, false, false);
 	if (resize_dialog.exec() == QDialog::Accepted) {
 		resize_dialog.ModifyMapData();
+		DrawMap();
 	}
 }
 
@@ -713,6 +696,7 @@ void MapView::_DeleteSingleTileColumn() {
 	}
 
 	_map_data->RemoveTileLayerColumns(_cursor_tile_x);
+	UpdateAreaSizes();
 	DrawMap();
 }
 
@@ -728,6 +712,7 @@ void MapView::_DeleteMultipleTileColumns() {
 	MapResizeInternalDialog resize_dialog(_graphics_view->topLevelWidget(), _map_data, _cursor_tile_y, _cursor_tile_x, false, true);
 	if (resize_dialog.exec() == QDialog::Accepted) {
 		resize_dialog.ModifyMapData();
+		DrawMap();
 	}
 }
 
@@ -791,17 +776,6 @@ void MapView::_SetTile(int32 x, int32 y, int32 value) {
 
 
 
-void MapView::_DrawGrid() {
-	for (uint32 x = 0; x < (_map_data->GetMapLength() * TILE_LENGTH); x+= TILE_LENGTH) {
-		for (uint32 y = 0; y < (_map_data->GetMapHeight() * TILE_HEIGHT); y+= TILE_HEIGHT) {
-			addLine(0, y, _map_data->GetMapLength() * TILE_LENGTH, y, QPen(Qt::DotLine));
-			addLine(x, 0, x, _map_data->GetMapHeight() * TILE_HEIGHT, QPen(Qt::DotLine));
-		}
-	}
-}
-
-
-
 void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
 	if (start_x >= _map_data->GetMapLength() || start_y >= _map_data->GetMapHeight()) {
 		return;
@@ -809,10 +783,24 @@ void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
 
 	// When there is a selection area active, this function will only perform the fill operation when
 	// the tile clicked is one that is inside the selection area
-	if (_selection_area_active == true && _selection_area.GetTile(start_x, start_y) == SELECTED_TILE) {
+	if (_selection_area_active == true && _selection_area.GetTile(start_x, start_y) != SELECTED_TILE) {
 		return;
 	}
 
+	TileLayer* layer = _map_data->GetSelectedTileLayer();
+	int32 original_value = layer->GetTile(start_x, start_y);
+	if (original_value == value) {
+		return;
+	}
+
+	// The coordinates of the node actively being processed
+	uint32 x, y;
+	// The left and right nodes that end the current segement
+	uint32 x_left_end, x_right_end;
+	// Queue that holds the nodes that need to be checked (x, y cooridnate pairs)
+	queue<pair<uint32, uint32> > nodes;
+
+	nodes.push(make_pair(start_x, start_y));
 
 	// This function is an implementation of a flood fill algorithm. Generally speaking, the algorithm does the following:
 	//   1) Maintain a queue of nodes (x,y coordinates) that need to be examined
@@ -822,25 +810,6 @@ void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
 	//      5) If the top or bottom point matches the old value, add it to the nodes queue
 	//   6) Repeat this process until the queue is empty
 	//
-	// There may be faster alternatives to this (each node except for the starting node is checked
-
-	TileLayer* layer = _map_data->GetSelectedTileLayer();
-
-	int32 original_value = layer->GetTile(start_x, start_y);
-	if (original_value == value) {
-		return;
-	}
-
-	// The coordinates of the node actively being processed
-	uint32 x, y;
-
-	// The left and right nodes that end the current segement
-	uint32 x_left_end, x_right_end;
-
-	// Queue that holds the nodes that need to be checked (x, y cooridnate pairs)
-	queue<pair<uint32, uint32> > nodes;
-	nodes.push(make_pair(start_x, start_y));
-
 	// The algorithm works the same way for both of these conditions. The only difference is whether the comparison
 	// check is done on the value of the current tile or whether the tile is currently selected in the selection area
 	if (_selection_area_active == false) {
@@ -876,6 +845,47 @@ void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
 	}
 	else {
 		// TODO
+	}
+} // void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value)
+
+
+
+void MapView::_SetSelectionArea(uint32 x1, uint32 y1, uint32 x2, uint32 y2) {
+	if (x1 >= _map_data->GetMapLength() || x2 >= _map_data->GetMapLength() || y1 >= _map_data->GetMapHeight() || y2 >= _map_data->GetMapHeight()) {
+		qDebug("ERROR: Called MapView::_SetSelectionArea with coordinates that exceeded map boundaries");
+		return;
+	}
+
+	uint32 xmin = x1;
+	uint32 xmax = x2;
+	uint32 ymin = y1;
+	uint32 ymax = y2;
+	if (x2 < x1) {
+		xmin = x2;
+		xmax = x1;
+	}
+	if (y2 < y1) {
+		ymin = y2;
+		ymax = y1;
+	}
+
+	SelectNoTiles();
+	for (uint32 x = xmin; x <= xmax; ++x) {
+		for (uint32 y = ymin; y <= ymax; ++y) {
+			_selection_area.SetTile(x, y, SELECTED_TILE);
+		}
+	}
+	_selection_area_active = true;
+}
+
+
+
+void MapView::_DrawGrid() {
+	for (uint32 x = 0; x < (_map_data->GetMapLength() * TILE_LENGTH); x+= TILE_LENGTH) {
+		for (uint32 y = 0; y < (_map_data->GetMapHeight() * TILE_HEIGHT); y+= TILE_HEIGHT) {
+			addLine(0, y, _map_data->GetMapLength() * TILE_LENGTH, y, QPen(Qt::DotLine));
+			addLine(x, 0, x, _map_data->GetMapHeight() * TILE_HEIGHT, QPen(Qt::DotLine));
+		}
 	}
 }
 

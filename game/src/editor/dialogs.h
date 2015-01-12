@@ -10,6 +10,7 @@
 /** ***************************************************************************
 *** \file    dialogs.h
 *** \author  Philip Vorsilak, gorzuate@allacrost.org
+*** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Header file for all of the editor's dialog windows
 *** **************************************************************************/
 
@@ -169,7 +170,7 @@ private slots:
 ***
 *** When rows or columns are inserted, the number to insert are all placed at the selected position. This means that the existing rows
 *** at and past this position (right for columns, down for rows) are "pushed out" to allow space for the new columns and rows to be placed.
-*** All rows and columns inserted are initialized to NO_TILE. When a delete operation takes place, the first row or column deleted is that
+*** All rows and columns inserted are initialized to MISSING_TILE. When a delete operation takes place, the first row or column deleted is that
 *** corresponding to the selected location. Every additional column or row to delete are taken from the right (for columns) or bottom (for
 *** rows).
 *** **************************************************************************/

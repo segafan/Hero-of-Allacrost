@@ -58,7 +58,7 @@ bool MapData::CreateData(uint32 map_length, uint32 map_height) {
 
 	_map_length = map_length;
 	_map_height = map_height;
-	_empty_tile_layer._ResizeLayer(map_length, map_height);
+	_empty_tile_layer.ResizeLayer(map_length, map_height);
 	_empty_tile_layer.FillLayer(MISSING_TILE);
 
 	// Create three tile layers, the last of which has no collision enabled initially
@@ -148,7 +148,7 @@ bool MapData::LoadData(QString filename) {
  	uint32 number_tilesets = data_file.ReadUInt("number_tilesets");
 	_tile_layer_count = data_file.ReadUInt("number_tile_layers");
 	_tile_context_count = data_file.ReadUInt("number_map_contexts");
-	_empty_tile_layer._ResizeLayer(_map_length, _map_height);
+	_empty_tile_layer.ResizeLayer(_map_length, _map_height);
 	_empty_tile_layer.FillLayer(MISSING_TILE);
 
 	if (_map_length < MINIMUM_MAP_LENGTH) {
@@ -405,11 +405,11 @@ void MapData::ResizeMap(uint32 map_length, uint32 map_height) {
 	}
 
 	// Each tile layer in every context must be resized along with the empty tile layer
-	_empty_tile_layer._ResizeLayer(map_length, map_height);
+	_empty_tile_layer.ResizeLayer(map_length, map_height);
 	for (uint32 i = 0; i < _tile_context_count; ++i) {
 		vector<TileLayer>& layers = _all_tile_contexts[i]->GetTileLayers();
 		for (uint32 j = 0; j < layers.size(); ++j) {
-			layers[j]._ResizeLayer(map_length, map_height);
+			layers[j].ResizeLayer(map_length, map_height);
 		}
 	}
 

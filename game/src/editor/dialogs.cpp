@@ -10,6 +10,7 @@
 /** ***************************************************************************
 *** \file    dialogs.cpp
 *** \author  Philip Vorsilak, gorzuate@allacrost.org
+*** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Source file for all of the editor's dialog windows
 *** **************************************************************************/
 
@@ -221,7 +222,7 @@ void MapResizeDialog::ModifyMapData() {
 	}
 
 	_map_data->ResizeMap(new_length, new_height);
-	editor->DrawMapView();
+	editor->MapSizeModified();
 	editor->statusBar()->showMessage("Map resized", 5000);
 }
 
@@ -371,7 +372,7 @@ void MapResizeInternalDialog::ModifyMapData() {
 		}
 	}
 
-	editor->DrawMapView();
+	editor->MapSizeModified();
 }
 
 

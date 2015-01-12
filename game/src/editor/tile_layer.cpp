@@ -65,11 +65,20 @@ void TileLayer::SetTile(uint32 x, uint32 y, int32 value) {
 
 
 
-void TileLayer::FillLayer(int32 tile_id) {
-	for (uint32 y = 0; y < _tiles.size(); ++y) {
-		for (uint32 x = 0; x < _tiles[y].size(); ++x) {
-			_tiles[y][x] = tile_id;
+void TileLayer::FillLayer(int32 value) {
+	for (uint32 y = 0; y < GetHeight(); ++y) {
+		for (uint32 x = 0; x < GetLength(); ++x) {
+			_tiles[y][x] = value;
 		}
+	}
+}
+
+
+
+void TileLayer::ResizeLayer(uint32 length, uint height) {
+	_tiles.resize(height, vector<int32>(length, MISSING_TILE));
+	for (uint32 y = 0; y < height; ++y) {
+		_tiles[y].resize(length, MISSING_TILE);
 	}
 }
 
@@ -165,15 +174,6 @@ void TileLayer::_DeleteColumns(uint32 col_index, uint32 col_count) {
 		for (uint32 j = 0; j < col_count; ++j) {
 			_tiles[i].pop_back();
 		}
-	}
-}
-
-
-
-void TileLayer::_ResizeLayer(uint32 length, uint height) {
-	_tiles.resize(height, vector<int32>(length, MISSING_TILE));
-	for (uint32 y = 0; y < height; ++y) {
-		_tiles[y].resize(length, MISSING_TILE);
 	}
 }
 

@@ -79,8 +79,8 @@ public:
 		{ _edit_mode = new_mode; }
 	//@}
 
-	//! \brief Clears all data from _selection_area by filling it with NO_TILE
-	void ClearSelection()
+	//! \brief Clears all data from _selection_area by filling it with MISSING_TILE
+	void SelectNoTiles()
 		{ _selection_area.ClearLayer(); _selection_area_active = false; }
 
 	//! \brief Selects the entire map in the selection area
@@ -88,10 +88,9 @@ public:
 		{ _selection_area.FillLayer(SELECTED_TILE); _selection_area_active = true; }
 
 	/** \brief This method should be called whenever the map size is modified so that the _selection_area can be resized accordingly
-	***
-	*** Calling this function will clear the selection area as well.
+	*** \note Calling this function will clear the selection area as well.
 	**/
-	void MapSizeModified();
+	void UpdateAreaSizes();
 
 	//! \brief Draws all visible tile layers from the active context as well as overlays and other visual elements
     void DrawMap();
@@ -134,7 +133,7 @@ private:
 	//! \brief When true, a series of grid lines between tiles are drawn
 	bool _grid_visible;
 
-	//! \brief When true, an overlay is drawn over each missing tile (NO_TILE) for the selected tile layer
+	//! \brief When true, an overlay is drawn over each missing tile (MISSING_TILE) for the selected tile layer
 	bool _missing_overlay_visible;
 
 	//! \brief When true, an overlay is drawn over each inherited tile (INHERITED_TILE) for the selected tile layer
@@ -193,7 +192,7 @@ private:
 	QAction* _delete_multiple_columns_action;
 	//@}
 
-	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 50% opacity)
+	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 40% opacity)
 	QPixmap _selection_tile;
 
 	//! \brief A one-tile sized square used to highlight missing tiles (colored orange at 20% opacity)
@@ -230,6 +229,17 @@ private:
 	*** to the x/y coordinates is selected, then the operation applies to all neighboring tiles that are also selected.
 	**/
 	void _FillArea(uint32 start_x, uint32 start_y, int32 value);
+
+	/** \brief Takes two coordinates representing a rectangle and selects the tiles inside that shape
+	*** \param x1 The x coordinate of the first rectangle corner
+	*** \param y1 The y coordinate of the first rectangle corner
+	*** \param x2 The x coordinate of the second rectangle corner
+	*** \param y2 The y coordinate of the second rectangle corner
+	***
+	*** \note The corners of the rectangle should be opposite of one another.
+	*** \note Calling this function will clear the existing selected area before setting the newly selected tiles.
+	**/
+	void _SetSelectionArea(uint32 x1, uint32 y1, uint32 x2, uint32 y2);
 
 	//! \brief A helper function to DrawMap() that draws the tile grid over the tiles
 	void _DrawGrid();
