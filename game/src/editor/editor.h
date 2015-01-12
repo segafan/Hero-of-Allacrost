@@ -87,9 +87,13 @@ public:
 	TilesetView* GetTilesetView() const
 		{ return _tileset_view; }
 
-	//! \brief Sends a notification
+	/** \brief Sends a notification to the MapView widget when the map size has been modified
+	*** \note Whenever the map size is modified external to the MapView class, this method must be called.
+	*** The MapView widget maintains its own layer objects separate from the map data that need to reflect
+	*** the new map size.
+	**/
 	void MapSizeModified()
-		{ _map_view->MapSizeModified(); _map_view->DrawMap(); }
+		{ _map_view->UpdateAreaSizes(); }
 
 	//! \brief Used by other subwidgets to redraw the map view, tyically used when the map data has been modified
 	void DrawMapView()
@@ -268,9 +272,9 @@ private slots:
 	void _SelectAreaInheritTool()
 		{ _map_view->SetEditMode(INHERIT_AREA_MODE); }
 	void _SelectSelectionClearTool()
-		{} // TODO: add support for this action in MapView class
+		{ _map_view->SelectNoTiles(); _map_view->DrawMap(); }
 	void _SelectSelectionAllTool()
-		{} // TODO: add support for this action in MapView class
+		{ _map_view->SelectAllTiles(); _map_view->DrawMap(); }
 
 	void _HelpMessage();
 	void _AboutMessage();
