@@ -71,7 +71,7 @@ public:
 
 	bool ToggleInheritedOverlayVisible()
 		{ _inherited_overlay_visible = !_inherited_overlay_visible; DrawMap(); return _inherited_overlay_visible; }
-		
+
 	bool ToggleCollisionOverlayVisible()
 		{ _collision_overlay_visible = !_collision_overlay_visible; DrawMap(); return _collision_overlay_visible; }
 
@@ -208,18 +208,28 @@ private:
 	//! \brief Used to display the graphics widgets
 	QGraphicsView* _graphics_view;
 
-	/** \brief Paints the currently selected tileset tile at a location on the map
-	*** \param x The x coordinate of the tile to paint to
-	*** \param y The y coordinate of the tile to paint to
-	**/
-	void _PaintTile(uint32 x, uint32 y);
-
 	/** \brief Sets the value of a single tile on the map
 	*** \param x The x coordinate of the tile to set
 	*** \param y The y coordinate of the tile to set
 	*** \param value The value to set the tile to
 	**/
 	void _SetTile(int32 x, int32 y, int32 value);
+
+	/** \brief Paints the currently selected tiles from the tileset to a location on the map
+	*** \param x The x coordinate of the tile to paint to
+	*** \param y The y coordinate of the tile to paint to
+	**/
+	void _PaintTile(uint32 x, uint32 y);
+
+	/** \brief Sets a tile to a specific value as well as all neighboring tiles that share the tile's original value
+	*** \param start_x The x coordinate to start the fill operation from
+	*** \param start_y The y coordinate to start the fill operation from
+	*** \param value The value to fill tiles in the area with
+	***
+	*** This function behaves differently if a selection area is active on the map. If _selection_area_active is true and the tile corresponding
+	*** to the x/y coordinates is selected, then the operation applies to all neighboring tiles that are also selected.
+	**/
+	void _FillArea(uint32 start_x, uint32 start_y, int32 value);
 
 	//! \brief A helper function to DrawMap() that draws the tile grid over the tiles
 	void _DrawGrid();

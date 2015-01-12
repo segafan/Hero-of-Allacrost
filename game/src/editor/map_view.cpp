@@ -14,6 +14,7 @@
 *** \brief   Source file for the map view widget
 *** **************************************************************************/
 
+#include <queue>
 #include <QDebug>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneContextMenuEvent>
@@ -315,16 +316,23 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 				DrawMap();
 				break;
 
+			case SELECT_AREA_MODE:
+				// TODO:
+				break;
+
 			case FILL_AREA_MODE:
-				// TODO
+// 				_FillArea(_cursor_tile_x, _cursor_tile_y, ?? value from tileset);
+				DrawMap();
 				break;
 
 			case CLEAR_AREA_MODE:
-				// TODO
+				_FillArea(_cursor_tile_x, _cursor_tile_y, MISSING_TILE);
+				DrawMap();
 				break;
 
 			case INHERIT_AREA_MODE:
-				// TODO
+				_FillArea(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
+				DrawMap();
 				break;
 
 			default:
@@ -443,7 +451,6 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 					break;
 
 				default:
-					QMessageBox::warning(_graphics_view, "Tile editing mode", "ERROR: Invalid tile editing mode!");
 					break;
 			}
 		}
@@ -555,15 +562,12 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 
 		case FILL_AREA_MODE:
-			// TODO
 			break;
 
 		case CLEAR_AREA_MODE:
-			// TODO
 			break;
 
 		case INHERIT_AREA_MODE:
-			// TODO
 			break;
 
 		default:
@@ -793,6 +797,85 @@ void MapView::_DrawGrid() {
 			addLine(0, y, _map_data->GetMapLength() * TILE_LENGTH, y, QPen(Qt::DotLine));
 			addLine(x, 0, x, _map_data->GetMapHeight() * TILE_HEIGHT, QPen(Qt::DotLine));
 		}
+	}
+}
+
+
+
+void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
+	if (start_x >= _map_data->GetMapLength() || start_y >= _map_data->GetMapHeight()) {
+		return;
+	}
+
+	// When there is a selection area active, this function will only perform the fill operation when
+	// the tile clicked is one that is inside the selection area
+	if (_selection_area_active == true && _selection_area.GetTile(start_x, start_y) == SELECTED_TILE) {
+		return;
+	}
+
+
+	// This function is an implementation of a flood fill algorithm. Generally speaking, the algorithm does the following:
+	//   1) Maintain a queue of nodes (x,y coordinates) that need to be examined
+	//   2) For each node in the queue, if it still needs to be set to the new value then
+	//      3) Find the left and right ends of the segment of all tiles that match the old value
+	//      4) For each point in the segement, set it to the new value and examine the top and bottom points
+	//      5) If the top or bottom point matches the old value, add it to the nodes queue
+	//   6) Repeat this process until the queue is empty
+	//
+	// There may be faster alternatives to this (each node except for the starting node is checked
+
+	TileLayer* layer = _map_data->GetSelectedTileLayer();
+
+	int32 original_value = layer->GetTile(start_x, start_y);
+	if (original_value == value) {
+		return;
+	}
+
+	// The coordinates of the node actively being processed
+	uint32 x, y;
+
+	// The left and right nodes that end the current segement
+	uint32 x_left_end, x_right_end;
+
+	// Queue that holds the nodes that need to be checked (x, y cooridnate pairs)
+	queue<pair<uint32, uint32> > nodes;
+	nodes.push(make_pair(start_x, start_y));
+
+	// The algorithm works the same way for both of these conditions. The only difference is whether the comparison
+	// check is done on the value of the current tile or whether the tile is currently selected in the selection area
+	if (_selection_area_active == false) {
+		while (nodes.empty() == false) {
+			x = nodes.front().first;
+			y = nodes.front().second;
+			nodes.pop();
+			// In this case, the node has already been set to the new value previously so we can skip over it
+			if (layer->GetTile(x, y) != original_value) {
+				continue;
+			}
+
+			// Find the left and right ends of the current line segment in row y
+			x_left_end = x;
+			while ((x_left_end > 0) && (layer->GetTile(x_left_end - 1, y) == original_value)) {
+				x_left_end--;
+			}
+			x_right_end = x;
+			while ((x_right_end < _map_data->GetMapLength() - 1) && (layer->GetTile(x_right_end + 1, y) == original_value)) {
+				x_right_end++;
+			}
+			// Go through the segment and set the values of each node, adding the element to the top and bottom to the nodes queue if necessary
+			for (uint32 i = x_left_end; i <= x_right_end; ++i) {
+				layer->SetTile(i, y, value);
+				if ((y > 0) && (layer->GetTile(i, y - 1) == original_value)) {
+					nodes.push(make_pair(i, y - 1));
+				}
+				if ((y < _map_data->GetMapHeight() - 1) && (layer->GetTile(i, y + 1) == original_value)) {
+					nodes.push(make_pair(i, y + 1));
+				}
+			}
+		}
+	}
+	else {
+		// TODO
 	}
 }
 
