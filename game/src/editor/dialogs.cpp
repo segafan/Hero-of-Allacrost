@@ -14,6 +14,8 @@
 *** \brief   Source file for all of the editor's dialog windows
 *** **************************************************************************/
 
+#include <QDebug>
+
 #include "editor.h"
 #include "map_data.h"
 #include "dialogs.h"
@@ -21,55 +23,49 @@
 namespace hoa_editor {
 
 ///////////////////////////////////////////////////////////////////////////////
-// MapPropertiesDialog class
+// NewMapDialog class
 ///////////////////////////////////////////////////////////////////////////////
 
-MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, bool prop) :
-	QDialog(parent, (const char*)name)
+NewMapDialog::NewMapDialog(QWidget* parent, MapData* data) :
+	QDialog(parent),
+	_map_data(data),
+	_height_spinbox(NULL),
+	_length_spinbox(NULL),
+	_height_title(NULL),
+	_length_title(NULL),
+	_tileset_tree(NULL),
+	_ok_button(NULL),
+	_cancel_button(NULL),
+	_grid_layout(NULL)
 {
-	setWindowTitle("Map Properties...");
+	setWindowTitle("Create New Map");
 
-	// Set up the height spinbox
-	_height_label = new QLabel("Map Height:", this);
-	_height_sbox = new QSpinBox(this);
-	_height_sbox->setMinimum(MINIMUM_MAP_HEIGHT);
-	_height_sbox->setMaximum(MAXIMUM_MAP_HEIGHT);
-
-	// Set up the length spinbox
-	_length_label = new QLabel("Map Length:", this);
-	_length_sbox = new QSpinBox(this);
-	_length_sbox->setMinimum(MINIMUM_MAP_LENGTH);
-	_length_sbox->setMaximum(MAXIMUM_MAP_LENGTH);
-
-	// If map data already exists, get the length and height. Otherwise use the minimum values as the default
-	MapData* existing_data = static_cast<Editor*>(parent)->GetMapData();
-	if (existing_data->IsInitialized() == true) {
-		_length_sbox->setValue(existing_data->GetMapLength());
-		_height_sbox->setValue(existing_data->GetMapHeight());
+	if (_map_data == NULL) {
+		qDebug() << "ERROR: NewMapDialog constructor received a NULL map data pointer";
 	}
-	else {
-		_length_sbox->setValue(MINIMUM_MAP_LENGTH);
-		_height_sbox->setValue(MINIMUM_MAP_HEIGHT);
+	else if (_map_data->IsInitialized() == true) {
+		qDebug() << "ERROR: NewMapDialog constructor received a pointer to map data that was already initialized";
 	}
 
-	// Set up the cancel and okay push buttons
-	_cancel_pbut = new QPushButton("Cancel", this);
-	_ok_pbut = new QPushButton("OK", this);
-	_cancel_pbut->setDefault(true);
+	_height_spinbox = new QSpinBox(this);
+	_height_spinbox->setMinimum(MINIMUM_MAP_HEIGHT);
+	_height_spinbox->setMaximum(MAXIMUM_MAP_HEIGHT);
+	_height_spinbox->setValue(MINIMUM_MAP_HEIGHT);
+	_length_spinbox = new QSpinBox(this);
+	_length_spinbox->setMinimum(MINIMUM_MAP_LENGTH);
+	_length_spinbox->setMaximum(MAXIMUM_MAP_LENGTH);
+	_length_spinbox->setValue(MINIMUM_MAP_LENGTH);
 
-	// At construction no tilesets are checked, so disable the ok button
-	_ok_pbut->setEnabled(false);
-	connect(_ok_pbut, SIGNAL(released()), this, SLOT(accept()));
-	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
+	_height_title = new QLabel("Map Height: ", this);
+	_length_title = new QLabel("Map Length: ", this);
 
-	// Set up the list of selectable tilesets
+	// Set up the list of selectable tilesets by grabbing each file in the tileset directory (lua/data/tilesets)
 	QDir tileset_dir("lua/data/tilesets");
 	_tileset_tree = new QTreeWidget(this);
 	_tileset_tree->setColumnCount(1);
 	_tileset_tree->setHeaderLabels(QStringList("Tilesets"));
 	connect(_tileset_tree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(_EnableOKButton()));
 
-	// Loop through all files found in the tileset definition directory (lua/data/tilesets).
 	// Start the loop at 2 to skip over the present and parent working directories ("." and "..")
 	QList<QTreeWidgetItem*> tilesets;
 	for (uint32 i = 2; i < tileset_dir.count(); i++) {
@@ -79,64 +75,107 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, b
 
 		tilesets.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(tileset_dir[i].remove(".lua"))));
 		tilesets.back()->setCheckState(0, Qt::Unchecked); // enables checkboxes
-
-		// Indicates that the user wants to edit the map's existing properties
-		if (prop) {
-// 			Editor* editor = static_cast<Editor*>(parent);
-
-			// TODO: Iterate through the names of the tabs to see which ones in the list are already present
-			// and set their checkbox appropriately
-// 			for (int j = 0; j < editor->_ed_tabs->count(); j++) {
-// 				// Both tileset names must match to set the checkbox
-// 				if (tilesets.back()->text(0) == editor->_ed_tabs->tabText(j)) {
-// 					tilesets.back()->setCheckState(0, Qt::Checked);
-// 					_ok_pbut->setEnabled(true);
-// 					break;
-// 				}
-// 			}
-		}
 	}
 	_tileset_tree->insertTopLevelItems(0, tilesets);
 
+	_ok_button = new QPushButton("OK", this);
+	_ok_button->setEnabled(false); // At construction no tilesets are checked, so the ok button is initially disabled
+	connect(_ok_button, SIGNAL(released()), this, SLOT(_CreateMapData()));
+	_cancel_button = new QPushButton("Cancel", this);
+	_cancel_button->setDefault(true);
+	connect(_cancel_button, SIGNAL(released()), this, SLOT(reject()));
+
 	// Add all of the aforementioned widgets into a nice-looking grid layout
-	_dia_layout = new QGridLayout(this);
-	_dia_layout->addWidget(_height_label, 0, 0);
-	_dia_layout->addWidget(_height_sbox,  1, 0);
-	_dia_layout->addWidget(_length_label,  2, 0);
-	_dia_layout->addWidget(_length_sbox,   3, 0);
-	_dia_layout->addWidget(_tileset_tree, 0, 1, 5, -1);
-	_dia_layout->addWidget(_cancel_pbut,  6, 0);
-	_dia_layout->addWidget(_ok_pbut,      6, 1);
-} // MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, bool prop)
+	_grid_layout = new QGridLayout(this);
+	_grid_layout->addWidget(_height_title, 0, 0);
+	_grid_layout->addWidget(_height_spinbox, 1, 0);
+	_grid_layout->addWidget(_length_title, 2, 0);
+	_grid_layout->addWidget(_length_spinbox, 3, 0);
+	_grid_layout->addWidget(_tileset_tree, 0, 1, 5, -1);
+	_grid_layout->addWidget(_ok_button, 6, 0);
+	_grid_layout->addWidget(_cancel_button, 6, 1);
+} // NewMapDialog::NewMapDialog(QWidget* parent, const QString& name, bool prop)
 
 
 
-MapPropertiesDialog::~MapPropertiesDialog() {
+NewMapDialog::~NewMapDialog() {
+	delete _height_spinbox;
+	delete _length_spinbox;
+	delete _height_title;
+	delete _length_title;
 	delete _tileset_tree;
-	delete _height_label;
-	delete _height_sbox;
-	delete _length_label;
-	delete _length_sbox;
-	delete _cancel_pbut;
-	delete _ok_pbut;
-	delete _dia_layout;
+	delete _ok_button;
+	delete _cancel_button;
+	delete _grid_layout;
 }
 
 
 
-void MapPropertiesDialog::_EnableOKButton() {
+void NewMapDialog::_EnableOKButton() {
 	// Disable the ok button if no tilesets are checked, otherwise enable it
-	int num_items = _tileset_tree->topLevelItemCount();
-	for (int i = 0; i < num_items; i++) {
+	for (uint32 i = 0; i < static_cast<uint32>(_tileset_tree->topLevelItemCount()); i++) {
 		// At least one tileset must be checked in order to enable push button
 		if (_tileset_tree->topLevelItem(i)->checkState(0) == Qt::Checked) {
-			_ok_pbut->setEnabled(true);
+			_ok_button->setEnabled(true);
 			return;
 		}
 	}
 
 	// If this point is reached, no tilesets are checked.
-	_ok_pbut->setEnabled(false);
+	_ok_button->setEnabled(false);
+}
+
+
+
+void NewMapDialog::_CreateMapData() {
+	Editor* editor = static_cast<Editor*>(parent());
+
+	// Initialize the map data
+	_map_data->CreateData(_length_spinbox->value(), _height_spinbox->value());
+	editor->MapSizeModified();
+
+	int32 num_tileset_items = _tileset_tree->topLevelItemCount();
+	int32 num_checked_items = 0;
+	for (int32 i = 0; i < num_tileset_items; ++i) {
+		if (_tileset_tree->topLevelItem(i)->checkState(0) == Qt::Checked)
+			num_checked_items++;
+	}
+
+	// Used to show the progress of tilesets that have been loaded.
+	QProgressDialog load_tileset_progress("Loading tilesets...", NULL, 0, num_checked_items, editor, Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
+	load_tileset_progress.setWindowTitle("Creating Map...");
+
+	// Set the location of the progress dialog and show it
+	load_tileset_progress.move(editor->pos().x() +  editor->width() / 2  - load_tileset_progress.width() / 2,
+		 editor->pos().y() + editor->height() / 2 - load_tileset_progress.height() / 2);
+	load_tileset_progress.show();
+
+	// Load each tileset object into the map data
+	num_checked_items = 0;
+	for (int32 i = 0; i < num_tileset_items; i++) {
+		if (_tileset_tree->topLevelItem(i)->checkState(0) != Qt::Checked) {
+			continue;
+		}
+
+		// Increment the progress dialog counter
+		load_tileset_progress.setValue(num_checked_items++);
+
+		// Load the tileset data from the definition file and add it to the map data
+		Tileset* tileset = new Tileset();
+		QString filename = QString("lua/data/tilesets/") + _tileset_tree->topLevelItem(i)->text(0) + (".lua");
+		if (tileset->Load(filename) == false) {
+			QMessageBox::critical(this, APP_NAME, "Failed to load tileset: " + filename);
+			delete tileset;
+		}
+
+		if (_map_data->AddTileset(tileset) == false) {
+			QMessageBox::critical(this, APP_NAME, "Failed to add tileset to map data: " + _map_data->GetErrorMessage());
+			delete tileset;
+		}
+	}
+
+	load_tileset_progress.hide();
+	accept(); // Hides the dialog and sets the result code
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,7 +198,7 @@ MapResizeDialog::MapResizeDialog(QWidget* parent, MapData* data) :
 	setWindowTitle("Resize Map");
 
 	if (_map_data == NULL) {
-		qDebug("ERROR: MapResizesDialog constructor received a NULL map data pointer");
+		qDebug() << "ERROR: MapResizesDialog constructor received a NULL map data pointer";
 	}
 
 	_height_spinbox = new QSpinBox(this);
@@ -269,7 +308,7 @@ MapResizeInternalDialog::MapResizeInternalDialog(QWidget* parent, MapData* data,
 	_grid_layout(NULL)
 {
 	if (_map_data == NULL) {
-		qDebug("ERROR: MapResizesDialog constructor received a NULL map data pointer");
+		qDebug() << "ERROR: MapResizesDialog constructor received a NULL map data pointer";
 	}
 
 	_change_spinbox = new QSpinBox(this);
@@ -347,7 +386,7 @@ void MapResizeInternalDialog::ModifyMapData() {
 
 	// This case should never happen. If it does, the code that invoked this call needs to be corrected
 	if (change_value == 0) {
-		qDebug("Called MapResizeInternalDialog::ModifyMapData when the change value was equal to zero");
+		qDebug() << "Called MapResizeInternalDialog::ModifyMapData when the change value was equal to zero";
 		return;
 	}
 
@@ -394,12 +433,12 @@ AddTilesetsDialog::AddTilesetsDialog(QWidget* parent, MapData* data) :
 	_tileset_tree(NULL),
 	_add_button(NULL),
 	_cancel_button(NULL),
-	_widget_layout(NULL)
+	_grid_layout(NULL)
 {
 	setWindowTitle("Add Tilesets...");
 
 	if (_map_data == NULL) {
-		qDebug("ERROR: AddTilesetsDialog constructor received a NULL map data pointer");
+		qDebug() << "ERROR: AddTilesetsDialog constructor received a NULL map data pointer";
 	}
 
 	_add_button = new QPushButton("Add", this);
@@ -440,10 +479,10 @@ AddTilesetsDialog::AddTilesetsDialog(QWidget* parent, MapData* data) :
 
 	_tileset_tree->insertTopLevelItems(0, file_items);
 
-	_widget_layout = new QGridLayout(this);
-	_widget_layout->addWidget(_tileset_tree, 0, 0, 10, -1);
-	_widget_layout->addWidget(_cancel_button, 11, 0);
-	_widget_layout->addWidget(_add_button, 11, 1);
+	_grid_layout = new QGridLayout(this);
+	_grid_layout->addWidget(_tileset_tree, 0, 0, 10, -1);
+	_grid_layout->addWidget(_cancel_button, 11, 0);
+	_grid_layout->addWidget(_add_button, 11, 1);
 }
 
 
@@ -452,7 +491,7 @@ AddTilesetsDialog::~AddTilesetsDialog() {
 	delete _tileset_tree;
 	delete _add_button;
 	delete _cancel_button;
-	delete _widget_layout;
+	delete _grid_layout;
 }
 
 

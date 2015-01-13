@@ -533,9 +533,16 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 			break;
 		}
 
-		case SELECT_AREA_MODE:
-			// TODO
+		case SELECT_AREA_MODE: {
+			// If only a single tile was selected, deselect the area
+			_cursor_tile_x = mouse_x / TILE_LENGTH;
+			_cursor_tile_y = mouse_y / TILE_HEIGHT;
+			if (_cursor_tile_x == _selection_start_tile_x && _cursor_tile_y == _selection_start_tile_y) {
+				SelectNoTiles();
+				DrawMap();
+			}
 			break;
+		}
 
 
 		case FILL_AREA_MODE:

@@ -528,7 +528,8 @@ void Editor::_CheckEditActions() {
 		_copy_action->setEnabled(false);
 		_paste_action->setEnabled(false);
 		_tileset_properties_action->setEnabled(false);
-		_map_properties_action->setEnabled(true);
+		// TODO: map properties disabled until we have a dialog class for it
+		_map_properties_action->setEnabled(false);
 		_map_resize_action->setEnabled(true);
 	}
 	else {
@@ -609,72 +610,19 @@ void Editor::_FileNew() {
 		statusBar()->showMessage("New operation cancelled due to existing unsaved map data.", 5000);
 		return;
 	}
-
-	// ---------- 1) Prompt the user with the dialog for them to enter the map properties
-	MapPropertiesDialog* new_dialog = new MapPropertiesDialog(this, "new_dialog", false);
-	if (new_dialog->exec() != QDialog::Accepted) {
-		delete new_dialog;
-		statusBar()->showMessage("New operation cancelled", 5000);
-		return;
-	}
-
-	// ---------- 2) Initialize the map data and map view widget
 	_map_data.DestroyData();
-	_map_data.CreateData(new_dialog->GetLength(), new_dialog->GetHeight());
-	MapSizeModified();
 
-	// ---------- 3) Determine the number of tilesets that will be used by the new map and create a load progress dialog
-	QTreeWidget* tilesets = new_dialog->GetTilesetTree();
-	int32 num_tileset_items = tilesets->topLevelItemCount();
-	int32 num_checked_items = 0;
-	for (int32 i = 0; i < num_tileset_items; ++i) {
-		if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
-			num_checked_items++;
+	// Prompt the user with the dialog for them to enter the new map data
+	NewMapDialog new_dialog(this, &_map_data);
+	if (new_dialog.exec() != QDialog::Accepted) {
+		statusBar()->showMessage("New map operation cancelled", 5000);
 	}
-
-	// Used to show the progress of tilesets that have been loaded.
-	QProgressDialog* load_tileset_progress = new QProgressDialog("Loading tilesets...", NULL, 0, num_checked_items, this,
-		Qt::Widget | Qt::FramelessWindowHint | Qt::WindowTitleHint);
-	load_tileset_progress->setWindowTitle("Creating Map...");
-
-	// Set the location of the progress dialog and show it
-	load_tileset_progress->move(this->pos().x() + this->width() / 2  - load_tileset_progress->width() / 2,
-		this->pos().y() + this->height() / 2 - load_tileset_progress->height() / 2);
-	load_tileset_progress->show();
-
-	// ---------- 4) Load each tileset object
-	num_checked_items = 0;
-	for (int32 i = 0; i < num_tileset_items; i++) {
-		if (tilesets->topLevelItem(i)->checkState(0) != Qt::Checked) {
-			continue;
-		}
-
-		// Increment the progress dialog counter
-		load_tileset_progress->setValue(num_checked_items++);
-
-		// Load the tileset data from the definition file and add it to the map data
-		Tileset* tileset = new Tileset();
-		QString filename = QString("lua/data/tilesets/") + tilesets->topLevelItem(i)->text(0) + (".lua");
-		if (tileset->Load(filename) == false) {
-			QMessageBox::critical(this, APP_NAME, "Failed to load tileset: " + filename);
-			delete tileset;
-		}
-
-		if (_map_data.AddTileset(tileset) == false) {
-			QMessageBox::critical(this, APP_NAME, "Failed to add tileset to map data: " + _map_data.GetErrorMessage());
-			delete tileset;
-		}
+	else {
+		_ClearEditorState();
+		statusBar()->showMessage("New map created", 5000);
+		setWindowTitle("Allacrost Map Editor -- New Map");
 	}
-
-	// Clean up the editor state and report success
-	load_tileset_progress->hide();
-	delete load_tileset_progress;
-	delete new_dialog;
-
-	_ClearEditorState();
-	statusBar()->showMessage("New map created", 5000);
-	setWindowTitle("Allacrost Map Editor -- New Map");
-} // void Editor::_FileNew()
+}
 
 
 
@@ -793,16 +741,12 @@ void Editor::_EditTilesetProperties() {
 
 
 void Editor::_EditMapProperties() {
-	MapPropertiesDialog* props = new MapPropertiesDialog(this, "map_properties", true);
-	if (props->exec() != QDialog::Accepted) {
-		statusBar()->showMessage("Map properties were not modified", 5000);
-		delete props;
-		return;
-	}
-
-	// TODO: adjust size of map appropriately
-	// TODO: add or remove tilesets
-	delete props;
+	// TODO: add once dialog class has been created
+// 	MapPropertiesDialog dialog(this, &_map_data);
+// 	if (dialog.exec() != QDialog::Accepted) {
+// 		statusBar()->showMessage("Map properties were not modified", 5000);
+// 		return;
+// 	}
 }
 
 
