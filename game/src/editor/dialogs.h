@@ -20,8 +20,8 @@
 #include <QDialog>
 #include <QGridLayout>
 #include <QLabel>
-#include <QPushButton>
 #include <QListWidget>
+#include <QPushButton>
 #include <QSpinBox>
 #include <QTreeWidget>
 
@@ -30,36 +30,25 @@
 namespace hoa_editor {
 
 /** ***************************************************************************
-*** \brief A dialog window that allows the user to modify some properties of an existing map.
+*** \brief A dialog window that allows the user to create a new map
 ***
 *** The properties that may be modified through this dialog include the following:
 *** - The map dimensions (in tiles)
 *** - Which tilesets are used by this map
 *** **************************************************************************/
-class MapPropertiesDialog : public QDialog {
+class NewMapDialog : public QDialog {
 	Q_OBJECT // Macro needed to use QT's slots and signals
 
 public:
-	/** \param parent The widget from which this dialog was invoked.
-	*** \param name The name of this widget.
-	*** \param prop True when accessing an already loaded map's properties, false otherwise.
-	***
-	*** This class is used in two instances. For presenting a dialog to the user to (1) create a new map,
-	*** or (2) modify the properties of an already existing map (such as height, length, or tilesets loaded in the bottom
-	*** portion of the editor). For case #1, the parameter prop is false, and for case #2, it is true.
+	/** \param parent The widget from which this dialog was invoked
+	*** \param data A pointer to the active map data
 	**/
-	MapPropertiesDialog(QWidget* parent, const QString& name, bool prop);
+	NewMapDialog(QWidget* parent, MapData* data);
 
-	~MapPropertiesDialog();
+	~NewMapDialog();
 
 	//! \name Class member accessor functions
 	//@{
-	uint32 GetHeight() const
-		{ return _height_sbox->value(); }
-
-	uint32 GetLength() const
-		{ return  _length_sbox->value(); }
-
 	QTreeWidget* GetTilesetTree() const
 		{ return _tileset_tree; }
 	//@}
@@ -68,31 +57,37 @@ private slots:
 	//! \brief Enables or disables the OK push button of this dialog depending on whether any tilesets are checked or not.
 	void _EnableOKButton();
 
+	//! \brief Creates the new map data based on the input that the user entered
+	void _CreateMapData();
+
 private:
+	//! \brief A pointer to the map data object to populate based on the user's input
+	MapData* _map_data;
+
+	//! \brief Spinboxes that allow the user to specify the dimensions of the new map
+	//@{
+	QSpinBox* _height_spinbox;
+	QSpinBox* _length_spinbox;
+	//@}
+
+	//! \brief Labels used to identify the height or length spinboxes
+	//@{
+	QLabel* _height_title;
+	QLabel* _length_title;
+	//@}
+
 	//! \brief A tree for showing all available tilesets
 	QTreeWidget* _tileset_tree;
 
-	//! \brief A spinbox for specifying the map's height
-	QSpinBox* _height_sbox;
-
-	//! \brief A spinbox for specifying the map's length
-	QSpinBox* _length_sbox;
-
-	//! \brief A label used to visually name the height spinbox
-	QLabel* _height_label;
-
-	//! \brief A label used to visually name the length spinbox
-	QLabel* _length_label;
+	//! \brief A pushbutton for okaying the new map dialog.
+	QPushButton* _ok_button;
 
 	//! \brief A pushbutton for canceling the new map dialog.
-	QPushButton* _cancel_pbut;
-
-	//! \brief A pushbutton for okaying the new map dialog.
-	QPushButton* _ok_pbut;
+	QPushButton* _cancel_button;
 
 	//! \brief A layout to manage all the labels, spinboxes, and listviews.
-	QGridLayout* _dia_layout;
-}; // class MapPropertiesDialog : public QDialog
+	QGridLayout* _grid_layout;
+}; // class NewMapsDialog : public QDialog
 
 
 /** ***************************************************************************
@@ -273,7 +268,7 @@ private:
 	QPushButton* _cancel_button;
 
 	//! \brief Defines the layout of all widgets in the dialog window
-	QGridLayout* _widget_layout;
+	QGridLayout* _grid_layout;
 
 private slots:
 	//! \brief Enables or disables the add push button of this dialog depending on whether any tilesets are selected
