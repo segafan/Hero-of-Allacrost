@@ -648,6 +648,8 @@ void Editor::_FileOpen() {
 		return;
 	}
 	MapSizeModified();
+	MapLayersModified();
+	MapContextsModified();
 
 	_ClearEditorState();
 	statusBar()->showMessage(QString("Opened map \'%1\'").arg(_map_data.GetMapFilename()), 5000);

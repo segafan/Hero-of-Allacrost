@@ -324,7 +324,9 @@ void LayerView::dropEvent(QDropEvent* event) {
 		}
 	}
 
-	static_cast<Editor*>(topLevelWidget())->DrawMapView();
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->MapLayersModified();
+	editor->DrawMapView();
 }
 
 
@@ -417,6 +419,8 @@ void LayerView::_SetTileLayerName(QTreeWidgetItem* item, int column) {
 		return;
 	}
 
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->MapLayersModified();
 	_original_layer_name.clear();
 }
 
@@ -448,6 +452,8 @@ void LayerView::_AddTileLayer() {
 	item->setText(NAME_COLUMN, layer_name);
 	item->setText(COLLISION_COLUMN, "Enabled");
 
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->MapLayersModified();
 	setCurrentItem(item); // Select the newly added item
 	new_layer_number++;
 }
@@ -474,6 +480,8 @@ void LayerView::_CloneTileLayer() {
 	item->setText(NAME_COLUMN, clone_properties->GetLayerName());
 	item->setText(COLLISION_COLUMN, clone_properties->IsCollisionEnabled() ? QString("Enabled") : QString("Disabled"));
 
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->MapLayersModified();
 	setCurrentItem(item);
 }
 
@@ -538,6 +546,7 @@ void LayerView::_DeleteTileLayer() {
 
 	// Redraw the map view now that the layer is removed
 	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->MapLayersModified();
 	editor->DrawMapView();
 	editor->statusBar()->showMessage(QString("Deleted tile layer '%1'").arg(layer_name), 5000);
 }

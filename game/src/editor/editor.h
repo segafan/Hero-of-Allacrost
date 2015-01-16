@@ -95,6 +95,20 @@ public:
 	void MapSizeModified()
 		{ _map_view->UpdateAreaSizes(); }
 
+	/** \brief Sends a notification to the MapView widget when the map layers have been modified
+	*** \note This only needs to be called when the layer count, order, or names are changed. Changes to any other
+	*** properties will have no effect.
+	**/
+	void MapLayersModified()
+		{ _map_view->UpdateLayerActions(); }
+
+	/** \brief Sends a notification to the MapView widget when the map contexts have been modified
+	*** \note This only needs to be called when the context count, order, or names are changed. Changes to any other
+	*** properties will have no effect.
+	**/
+	void MapContextsModified()
+		{ _map_view->UpdateContextActions(); }
+
 	//! \brief Used by other subwidgets to redraw the map view, tyically used when the map data has been modified
 	void DrawMapView()
 		{ _map_view->DrawMap(); }

@@ -55,6 +55,10 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_insert_menu(NULL),
 	_delete_menu(NULL),
 	_selection_menu(NULL),
+	_selection_move_to_layer_menu(NULL),
+	_selection_copy_to_layer_menu(NULL),
+	_selection_move_to_context_menu(NULL),
+	_selection_copy_to_context_menu(NULL),
 	_insert_single_row_action(NULL),
 	_insert_multiple_rows_action(NULL),
 	_insert_single_column_action(NULL),
@@ -100,6 +104,7 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_insert_multiple_columns_action = new QAction("Insert Multiple Columns...", this);
 	_insert_multiple_columns_action->setStatusTip("Opens a dialog window to insert one or more empty tile columns at the selected location");
 	connect(_insert_multiple_columns_action, SIGNAL(triggered()), this, SLOT(_InsertMultipleTileColumns()));
+
 	_delete_single_row_action = new QAction("Delete Single Row", this);
 	_delete_single_row_action->setStatusTip("Deletes a single row of tiles corresponding to the selected location");
 	connect(_delete_single_row_action, SIGNAL(triggered()), this, SLOT(_DeleteSingleTileRow()));
@@ -116,7 +121,15 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_right_click_menu = new QMenu(_graphics_view);
 	_insert_menu = new QMenu("Insert", _right_click_menu);
 	_delete_menu = new QMenu("Delete", _right_click_menu);
-	_selection_menu = new QMenu("Selection", _right_click_menu);
+	_selection_menu = new QMenu("Selected Area", _right_click_menu);
+	_selection_move_to_layer_menu = new QMenu("Move To Layer", _right_click_menu);
+	connect(_selection_move_to_layer_menu, SIGNAL(triggered(QAction*)), this, SLOT(_MoveSelectionToLayer(QAction*)));
+	_selection_copy_to_layer_menu = new QMenu("Copy To Layer", _right_click_menu);
+	connect(_selection_copy_to_layer_menu, SIGNAL(triggered(QAction*)), this, SLOT(_CopySelectionToLayer(QAction*)));
+	_selection_move_to_context_menu = new QMenu("Move To Context", _right_click_menu);
+	connect(_selection_move_to_context_menu, SIGNAL(triggered(QAction*)), this, SLOT(_MoveSelectionToContext(QAction*)));
+	_selection_copy_to_context_menu = new QMenu("Copy To Context", _right_click_menu);
+	connect(_selection_copy_to_context_menu, SIGNAL(triggered(QAction*)), this, SLOT(_CopySelectionToContext(QAction*)));
 
 	_right_click_menu->addMenu(_insert_menu);
 	_right_click_menu->addMenu(_delete_menu);
@@ -131,6 +144,11 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_delete_menu->addAction(_delete_multiple_rows_action);
 	_delete_menu->addAction(_delete_single_column_action);
 	_delete_menu->addAction(_delete_multiple_columns_action);
+
+	_selection_menu->addMenu(_selection_move_to_layer_menu);
+	_selection_menu->addMenu(_selection_copy_to_layer_menu);
+	_selection_menu->addMenu(_selection_move_to_context_menu);
+	_selection_menu->addMenu(_selection_copy_to_context_menu);
 
 	// Blue tile with 40% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
@@ -161,6 +179,10 @@ MapView::~MapView() {
 	delete _insert_menu;
 	delete _delete_menu;
 	delete _selection_menu;
+	delete _selection_move_to_layer_menu;
+	delete _selection_copy_to_layer_menu;
+	delete _selection_move_to_context_menu;
+	delete _selection_copy_to_context_menu;
 	delete _graphics_view;
 }
 
@@ -170,6 +192,66 @@ void MapView::UpdateAreaSizes() {
 	_selection_area.ResizeLayer(_map_data->GetMapLength(), _map_data->GetMapHeight());
 	_selection_area.ClearLayer();
 	_selection_area_active = false;
+}
+
+
+
+void MapView::UpdateLayerActions() {
+	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
+
+	// Delete and clear out existing actions
+	for (uint32 i = 0; i < _selection_move_to_layer_actions.size(); ++i) {
+		delete _selection_move_to_layer_actions[i];
+	}
+	_selection_move_to_layer_actions.clear();
+	for (uint32 i = 0; i < _selection_copy_to_layer_actions.size(); ++i) {
+		delete _selection_copy_to_layer_actions[i];
+	}
+	_selection_copy_to_layer_actions.clear();
+
+	// Re-construct all actions using the current layer property data
+	QAction* action = NULL;
+	for (uint32 i = 0; i < layer_properties.size(); ++i) {
+		action = new QAction(layer_properties[i].GetLayerName(), this);
+		_selection_move_to_layer_actions.push_back(action);
+		_selection_move_to_layer_menu->addAction(action);
+
+		action = new QAction(layer_properties[i].GetLayerName(), this);
+		_selection_copy_to_layer_actions.push_back(action);
+		_selection_copy_to_layer_menu->addAction(action);
+	}
+}
+
+
+
+void MapView::UpdateContextActions() {
+	// Get an ordered list of all active tile contexts
+	vector<TileContext*> contexts;
+	for (uint32 i = 0; i < _map_data->GetTileContextCount(); ++i) {
+		contexts.push_back(_map_data->FindTileContextByIndex(i));
+	}
+
+	// Delete and clear out existing actions
+	for (uint32 i = 0; i < _selection_move_to_context_actions.size(); ++i) {
+		delete _selection_move_to_context_actions[i];
+	}
+	_selection_move_to_context_actions.clear();
+	for (uint32 i = 0; i < _selection_copy_to_context_actions.size(); ++i) {
+		delete _selection_copy_to_context_actions[i];
+	}
+	_selection_copy_to_context_actions.clear();
+
+	// Re-construct all actions using the current context data
+	QAction* action = NULL;
+	for (uint32 i = 0; i < contexts.size(); ++i) {
+		action = new QAction(contexts[i]->GetContextName(), this);
+		_selection_move_to_context_actions.push_back(action);
+		_selection_move_to_context_menu->addAction(action);
+
+		action = new QAction(contexts[i]->GetContextName(), this);
+		_selection_copy_to_context_actions.push_back(action);
+		_selection_copy_to_context_menu->addAction(action);
+	}
 }
 
 
@@ -572,6 +654,10 @@ void MapView::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 		_delete_multiple_rows_action->setEnabled(false);
 		_delete_single_column_action->setEnabled(false);
 		_delete_multiple_columns_action->setEnabled(false);
+		_selection_move_to_layer_menu->setEnabled(false);
+		_selection_copy_to_layer_menu->setEnabled(false);
+		_selection_move_to_context_menu->setEnabled(false);
+		_selection_copy_to_context_menu->setEnabled(false);
 		_right_click_menu->exec(QCursor::pos());
 		return;
 	}
@@ -587,6 +673,42 @@ void MapView::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 	_delete_multiple_rows_action->setEnabled(true);
 	_delete_single_column_action->setEnabled(true);
 	_delete_multiple_columns_action->setEnabled(true);
+	if (_selection_area_active == false) {
+		_selection_move_to_layer_menu->setEnabled(false);
+		_selection_copy_to_layer_menu->setEnabled(false);
+		_selection_move_to_context_menu->setEnabled(false);
+		_selection_copy_to_context_menu->setEnabled(false);
+	}
+	else {
+		_selection_move_to_layer_menu->setEnabled(true);
+		_selection_copy_to_layer_menu->setEnabled(true);
+		_selection_move_to_context_menu->setEnabled(true);
+		_selection_copy_to_context_menu->setEnabled(true);
+
+		// Go through all layer and context actions. The action corresponding to the selected layer or context needs to be disabled
+		TileContext* selected_context = _map_data->GetSelectedTileContext();
+		TileLayer* selected_layer = _map_data->GetSelectedTileLayer();
+		for (uint32 i = 0; i < _map_data->GetTileLayerCount(); ++i) {
+			if (selected_layer == selected_context->GetTileLayer(i)) {
+				_selection_move_to_layer_actions[i]->setEnabled(false);
+				_selection_copy_to_layer_actions[i]->setEnabled(false);
+			}
+			else {
+				_selection_move_to_layer_actions[i]->setEnabled(true);
+				_selection_copy_to_layer_actions[i]->setEnabled(true);
+			}
+		}
+		for (uint32 i = 0; i < _map_data->GetTileContextCount(); ++i) {
+			if (selected_context == _map_data->FindTileContextByIndex(i)) {
+				_selection_move_to_context_actions[i]->setEnabled(false);
+				_selection_copy_to_context_actions[i]->setEnabled(false);
+			}
+			else {
+				_selection_move_to_context_actions[i]->setEnabled(true);
+				_selection_copy_to_context_actions[i]->setEnabled(true);
+			}
+		}
+	}
 
 	// Retrieve the coordinates of the right click event and translate them into tile coordinates
 	int32 mouse_x = event->scenePos().x();
@@ -721,6 +843,66 @@ void MapView::_DeleteMultipleTileColumns() {
 		resize_dialog.ModifyMapData();
 		DrawMap();
 	}
+}
+
+
+
+void MapView::_MoveSelectionToLayer(QAction* action) {
+	for (uint32 i = 0; i < _selection_move_to_layer_actions.size(); ++i) {
+		if (action == _selection_move_to_layer_actions[i]) {
+			_SelectionToLayer(i, false);
+			return;
+		}
+	}
+
+	// If this box ever appears, it is almost certainly a bug in the editor code and not the result of user error
+	QMessageBox::warning(_graphics_view->topLevelWidget(), "Selection Move to Layer Failure",
+		"Failed to move selected tiles to requested layer.");
+}
+
+
+
+void MapView::_CopySelectionToLayer(QAction* action) {
+	for (uint32 i = 0; i < _selection_copy_to_layer_actions.size(); ++i) {
+		if (action == _selection_copy_to_layer_actions[i]) {
+			_SelectionToLayer(i, true);
+			return;
+		}
+	}
+
+	// If this box ever appears, it is almost certainly a bug in the editor code and not the result of user error
+	QMessageBox::warning(_graphics_view->topLevelWidget(), "Selection Copy to Layer Failure",
+		"Failed to copy selected tiles to requested layer.");
+}
+
+
+
+void MapView::_MoveSelectionToContext(QAction* action) {
+	for (uint32 i = 0; i < _selection_move_to_context_actions.size(); ++i) {
+		if (action == _selection_move_to_context_actions[i]) {
+			_SelectionToContext(i, false);
+			return;
+		}
+	}
+
+	// If this box ever appears, it is almost certainly a bug in the editor code and not the result of user error
+	QMessageBox::warning(_graphics_view->topLevelWidget(), "Selection Move to Context Failure",
+		"Failed to move selected tiles to requested context.");
+}
+
+
+
+void MapView::_CopySelectionToContext(QAction* action) {
+	for (uint32 i = 0; i < _selection_copy_to_context_actions.size(); ++i) {
+		if (action == _selection_copy_to_context_actions[i]) {
+			_SelectionToContext(i, true);
+			return;
+		}
+	}
+
+	// If this box ever appears, it is almost certainly a bug in the editor code and not the result of user error
+	QMessageBox::warning(_graphics_view->topLevelWidget(), "Selection Copy to Context Failure",
+		"Failed to copy selected tiles to requested context.");
 }
 
 
@@ -883,6 +1065,75 @@ void MapView::_SetSelectionArea(uint32 x1, uint32 y1, uint32 x2, uint32 y2) {
 		}
 	}
 	_selection_area_active = true;
+}
+
+
+
+void MapView::_SelectionToLayer(uint32 layer_id, bool copy_or_move) {
+	TileContext* context = _map_data->GetSelectedTileContext();
+	TileLayer* source_layer = _map_data->GetSelectedTileLayer();
+	TileLayer* destination_layer = context->GetTileLayer(layer_id);
+
+	for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
+		for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
+			if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
+				destination_layer->SetTile(x, y, source_layer->GetTile(x, y));
+
+				if (copy_or_move == false) {
+					source_layer->SetTile(x, y, MISSING_TILE);
+				}
+			}
+		}
+	}
+
+	DrawMap();
+}
+
+
+
+void MapView::_SelectionToContext(uint32 layer_id, bool copy_or_move) {
+	TileContext* source_context = _map_data->GetSelectedTileContext();
+	TileContext* destination_context = _map_data->FindTileContextByIndex(layer_id);
+	TileLayer* source_layer = _map_data->GetSelectedTileLayer();
+	TileLayer* destination_layer = NULL;
+
+	// Find the destination_layer by determining the index of the source layer in the source context
+	for (uint32 i = 0; i < _map_data->GetTileLayerCount(); ++i) {
+		if (source_context->GetTileLayer(i) == source_layer) {
+			destination_layer = destination_context->GetTileLayer(i);
+			break;
+		}
+	}
+
+	// Used to determine if we're moving any INHERITED_TILE tiles to a non-inheriting context
+	bool inherited_tiles_nullified = false;
+
+	for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
+		for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
+			if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
+				if (source_layer->GetTile(x, y) == INHERITED_TILE && destination_context->IsInheritingContext() == false) {
+					destination_layer->SetTile(x, y, MISSING_TILE);
+					inherited_tiles_nullified = true;
+				}
+				else {
+					destination_layer->SetTile(x, y, source_layer->GetTile(x, y));
+				}
+
+
+				if (copy_or_move == false) {
+					source_layer->SetTile(x, y, MISSING_TILE);
+				}
+			}
+		}
+	}
+
+	if (inherited_tiles_nullified == true) {
+		QMessageBox::warning(_graphics_view->topLevelWidget(), "Inherited Tiles Not Supported",
+			QString("The destination context is not an inheriting context and the selected tiles contained inherited tiles. ") +
+			QString("These tiles were set to no tile in the destination context."));
+	}
+
+	DrawMap();
 }
 
 

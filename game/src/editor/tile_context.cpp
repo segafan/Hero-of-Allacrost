@@ -242,6 +242,9 @@ void ContextView::dropEvent(QDropEvent* event) {
 			}
 		}
 	}
+
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->MapContextsModified();
 }
 
 
@@ -346,6 +349,8 @@ void ContextView::_ValidateChangedData(QTreeWidgetItem* item, int column) {
 
 		_right_click_item = NULL;
 		_original_context_name.clear();
+		Editor* editor = static_cast<Editor*>(topLevelWidget());
+		editor->MapContextsModified();
 	}
 	else if (column == INHERITS_COLUMN) {
 		closePersistentEditor(item, column);
@@ -422,6 +427,8 @@ void ContextView::_AddTileContext() {
 	item->setText(NAME_COLUMN, context_name);
 	item->setText(INHERITS_COLUMN, "");
 
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->MapContextsModified();
 	setCurrentItem(item); // Select the newly added item
 	new_context_number++;
 }
@@ -451,6 +458,8 @@ void ContextView::_CloneTileContext() {
 	else
 		item->setText(INHERITS_COLUMN, QString::number(clone_context->GetInheritedContextID()));
 
+	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->MapContextsModified();
 	setCurrentItem(item);
 }
 
@@ -515,6 +524,7 @@ void ContextView::_DeleteTileContext() {
 	}
 
 	Editor* editor = static_cast<Editor*>(topLevelWidget());
+	editor->MapContextsModified();
 	editor->DrawMapView();
 	editor->statusBar()->showMessage(QString("Deleted map context '%1'").arg(context_name), 5000);
 }

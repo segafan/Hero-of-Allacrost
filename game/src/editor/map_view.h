@@ -92,6 +92,16 @@ public:
 	**/
 	void UpdateAreaSizes();
 
+	/** \brief Clears and re-creates all menu actions that take effect on a specific tile layer
+	*** This method should be called whenever the number, name, or ordering of tile layers change.
+	**/
+	void UpdateLayerActions();
+
+	/** \brief Clears and re-creates all menu actions that take effect on a specific tile context
+	*** This method should be called whenever the number, name, or ordering of tile contexts change.
+	**/
+	void UpdateContextActions();
+
 	//! \brief Draws all visible tile layers from the active context as well as overlays and other visual elements
     void DrawMap();
 
@@ -110,6 +120,7 @@ protected:
 private slots:
 	/** \name Right-click menu functions
 	*** \brief Functions available from right-clicking on the map view.
+	*** \param action The action that caused this slot function to be called
 	*** \note The location of the click may effect where or how the following operations take place
 	**/
 	//{@
@@ -121,6 +132,10 @@ private slots:
 	void _DeleteMultipleTileRows();
 	void _DeleteSingleTileColumn();
 	void _DeleteMultipleTileColumns();
+	void _MoveSelectionToLayer(QAction* action);
+	void _CopySelectionToLayer(QAction* action);
+	void _MoveSelectionToContext(QAction* action);
+	void _CopySelectionToContext(QAction* action);
 	//@}
 
 private:
@@ -176,6 +191,10 @@ private:
 	QMenu* _insert_menu;
 	QMenu* _delete_menu;
 	QMenu* _selection_menu;
+	QMenu* _selection_move_to_layer_menu;
+	QMenu* _selection_copy_to_layer_menu;
+	QMenu* _selection_move_to_context_menu;
+	QMenu* _selection_copy_to_context_menu;
 	//@}
 
 	/** \name Right-Click Menu Actions
@@ -186,10 +205,16 @@ private:
 	QAction* _insert_multiple_rows_action;
 	QAction* _insert_single_column_action;
 	QAction* _insert_multiple_columns_action;
+
 	QAction* _delete_single_row_action;
 	QAction* _delete_multiple_rows_action;
 	QAction* _delete_single_column_action;
 	QAction* _delete_multiple_columns_action;
+
+	std::vector<QAction*> _selection_move_to_layer_actions;
+	std::vector<QAction*> _selection_copy_to_layer_actions;
+	std::vector<QAction*> _selection_move_to_context_actions;
+	std::vector<QAction*> _selection_copy_to_context_actions;
 	//@}
 
 	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 40% opacity)
@@ -240,6 +265,21 @@ private:
 	*** \note Calling this function will clear the existing selected area before setting the newly selected tiles.
 	**/
 	void _SetSelectionArea(uint32 x1, uint32 y1, uint32 x2, uint32 y2);
+
+	/** \brief Moves or copies the selected tiles to a different tile layer
+	*** \param uint32 layer_id The ID of the layer to move or copy the selected tiles to
+	*** \param copy_or_move If true, copy the tiles to the new layer. Otherwise move them there and then delete the tiles from the original layer.
+	**/
+	void _SelectionToLayer(uint32 layer_id, bool copy_or_move);
+
+	/** \brief Moves or copies the selected tiles to a different tile context
+	*** \param uint32 context_index The index of the context to move or copy the selected tiles to
+	*** \param copy_or_move If true, copy the tiles to the new context. Otherwise move them there and then delete the tiles from the original context.
+	***
+	*** \note If the source context is an inheriting context, the selection contains inherited tiles, and the destination context is not an inheriting context,
+	*** then all INHERITED_TILE tiles will be converted to MISSING_TILE. A warning message also pops up to inform the user about this condition when it happens.
+	**/
+	void _SelectionToContext(uint32 context_index, bool copy_or_move);
 
 	//! \brief A helper function to DrawMap() that draws the tile grid over the tiles
 	void _DrawGrid();
