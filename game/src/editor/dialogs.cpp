@@ -133,6 +133,8 @@ void NewMapDialog::_CreateMapData() {
 	// Initialize the map data
 	_map_data->CreateData(_length_spinbox->value(), _height_spinbox->value());
 	editor->MapSizeModified();
+	editor->MapLayersModified();
+	editor->MapContextsModified();
 
 	int32 num_tileset_items = _tileset_tree->topLevelItemCount();
 	int32 num_checked_items = 0;

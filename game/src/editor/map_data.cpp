@@ -1083,7 +1083,7 @@ bool MapData::SwapTileContexts(int32 first_id, int32 second_id) {
 
 
 TileContext* MapData::FindTileContextByID(int32 context_id) const {
-	if (context_id <= 0 || static_cast<uint32>(context_id) > MAX_CONTEXTS) {
+	if (context_id <= 0 || static_cast<uint32>(context_id) >= MAX_CONTEXTS) {
 		return NULL;
 	}
 
