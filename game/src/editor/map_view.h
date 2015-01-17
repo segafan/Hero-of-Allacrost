@@ -35,6 +35,13 @@ namespace hoa_editor {
 class MapView : public QGraphicsScene {
 	Q_OBJECT // Macro needed to use QT's slots and signals
 
+	/** \brief The different modes that the select area tool can operate in
+	*** - NORMAL: Only the most recent selected area will be active and previous selections will be cleared
+	*** - ADDITIVE: Add the current area being selected to the total selected area
+	*** - SUBTRACTIVE: If the current area overlaps an already selected area, unselect the tiles that intersect the two
+	**/
+	enum SELECTION_MODE { NORMAL, ADDITIVE, SUBTRACTIVE };
+
 public:
 	/** \param parent The parent widget, which should be the main editor window
 	*** \param data A pointer to the map data to manipulate and draw
@@ -143,6 +150,9 @@ private:
 
 	//! \brief When true, an area of the map is selected by the user
 	bool _selection_area_active;
+
+	//! \brief Holds the type of selection mode that is active when using the SELECT_AREA edit mode
+	SELECTION_MODE _selection_mode;
 
 	//! \brief When true, a series of grid lines between tiles are drawn
 	bool _grid_visible;
@@ -291,6 +301,9 @@ private:
 	*** then all INHERITED_TILE tiles will be converted to MISSING_TILE. A warning message also pops up to inform the user about this condition when it happens.
 	**/
 	void _SelectionToContext(uint32 context_index, bool copy_or_move);
+
+	//! \brief A helper function to DrawMap() that draws the current selection area when the edit mode is SELECT_AREA
+	void _DrawSelectionArea();
 
 	//! \brief A helper function to DrawMap() that draws the tile grid over the tiles
 	void _DrawGrid();
