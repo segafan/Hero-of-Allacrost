@@ -39,6 +39,7 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	QGraphicsScene(parent),
 	_map_data(data),
 	_selection_area_active(false),
+	_selection_mode(NORMAL),
 	_grid_visible(false),
 	_missing_overlay_visible(false),
 	_inherited_overlay_visible(false),
@@ -345,16 +346,8 @@ void MapView::DrawMap() {
 		}
 	}
 
-	// If the selection tool is active, draw the overlay for all tiles currently selected
-	if (_selection_area_active == true) {
-		for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
-			for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
-				if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
-					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
-				}
-			}
-		}
-	}
+	if (_selection_area_active == true)
+		_DrawSelectionArea();
 
 	if (_grid_visible)
 		_DrawGrid();
@@ -420,12 +413,24 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 			DrawMap();
 			break;
 
-		case SELECT_AREA_MODE:
-			SelectNoTiles();
-			_selection_area.SetTile(_press_tile_x, _press_tile_y, SELECTED_TILE);
-			_selection_area_active = true;
+		case SELECT_AREA_MODE: {
+			if (event->modifiers() & Qt::ShiftModifier) {
+				_selection_mode = ADDITIVE;
+				_selection_area.SetTile(_press_tile_x, _press_tile_y, SELECTED_TILE);
+				_selection_area_active = true;
+			}
+			else if (event->modifiers() & Qt::ControlModifier) {
+				_selection_mode = SUBTRACTIVE;
+			}
+			else {
+				_selection_mode = NORMAL;
+				SelectNoTiles();
+				_selection_area.SetTile(_press_tile_x, _press_tile_y, SELECTED_TILE);
+				_selection_area_active = true;
+			}
 			DrawMap();
 			break;
+		}
 
 		case FILL_AREA_MODE:
 			// TODO
@@ -506,10 +511,13 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 					DrawMap();
 					break;
 
-				case SELECT_AREA_MODE:
-					_SetSelectionArea(_press_tile_x, _press_tile_y, _cursor_tile_x, _cursor_tile_y);
+				case SELECT_AREA_MODE: {
+					if (_selection_mode == NORMAL) {
+						_SetSelectionArea(_press_tile_x, _press_tile_y, _cursor_tile_x, _cursor_tile_y);
+					}
 					DrawMap();
 					break;
+				}
 
 				case FILL_AREA_MODE:
 					// TODO
@@ -558,6 +566,8 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 	int32 mouse_x = event->scenePos().x();
 	int32 mouse_y = event->scenePos().y();
+	_cursor_tile_x = mouse_x / TILE_LENGTH;
+	_cursor_tile_y = mouse_y / TILE_HEIGHT;
 
 	switch (_edit_mode) {
 		case PAINT_MODE: {
@@ -567,8 +577,6 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 		}
 
 		case SWAP_MODE: {
-			_cursor_tile_x = mouse_x / TILE_LENGTH;
-			_cursor_tile_y = mouse_y / TILE_HEIGHT;
 			vector<vector<int32> >& layer = _map_data->GetSelectedTileLayer()->GetTiles();
 
 			if (_selection_area_active == false) {
@@ -630,12 +638,15 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 		}
 
 		case SELECT_AREA_MODE: {
-			// If only a single tile was selected, deselect the area
-			_cursor_tile_x = mouse_x / TILE_LENGTH;
-			_cursor_tile_y = mouse_y / TILE_HEIGHT;
-			if (_cursor_tile_x == _press_tile_x && _cursor_tile_y == _press_tile_y) {
-				SelectNoTiles();
-				DrawMap();
+			if (_selection_mode == NORMAL) {
+				// If only a single tile was selected, deselect the area
+				if (_cursor_tile_x == _press_tile_x && _cursor_tile_y == _press_tile_y) {
+					SelectNoTiles();
+					DrawMap();
+				}
+			}
+			else {
+				_SetSelectionArea(_press_tile_x, _press_tile_y, _cursor_tile_x, _cursor_tile_y);
 			}
 			break;
 		}
@@ -1085,6 +1096,11 @@ void MapView::_SetSelectionArea(uint32 x1, uint32 y1, uint32 x2, uint32 y2) {
 		return;
 	}
 
+	// We ignore subtractive selections when there are already no selected tiles
+	if (_selection_mode == SUBTRACTIVE && _selection_area_active == false) {
+		return;
+	}
+
 	uint32 xmin = x1;
 	uint32 xmax = x2;
 	uint32 ymin = y1;
@@ -1098,13 +1114,31 @@ void MapView::_SetSelectionArea(uint32 x1, uint32 y1, uint32 x2, uint32 y2) {
 		ymax = y1;
 	}
 
-	SelectNoTiles();
+	if (_selection_mode == NORMAL)
+		SelectNoTiles();
+
 	for (uint32 x = xmin; x <= xmax; ++x) {
 		for (uint32 y = ymin; y <= ymax; ++y) {
-			_selection_area.SetTile(x, y, SELECTED_TILE);
+			if (_selection_mode == SUBTRACTIVE)
+				_selection_area.SetTile(x, y, MISSING_TILE);
+			else
+				_selection_area.SetTile(x, y, SELECTED_TILE);
 		}
 	}
 	_selection_area_active = true;
+
+	// When SUBTRACTIVE selection mode is active, we need to examine the entire area to make sure that at least one tile is still selected
+	if (_selection_mode == SUBTRACTIVE) {
+		for (uint32 x = 0; x < _selection_area.GetLength(); ++x) {
+			for (uint32 y = 0; y < _selection_area.GetHeight(); ++y) {
+				if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
+					return;
+				}
+			}
+		}
+
+		_selection_area_active = false;
+	}
 }
 
 
@@ -1174,6 +1208,53 @@ void MapView::_SelectionToContext(uint32 layer_id, bool copy_or_move) {
 	}
 
 	DrawMap();
+}
+
+
+
+void MapView::_DrawSelectionArea() {
+	// Start by determining the bounds of the area currently being selected by the user. This information is
+	// necessary for ADDITIVE or SUBTRACTIVE selection modes, but not for normal mode.
+	uint32 xmin = _press_tile_x;
+	uint32 ymin = _press_tile_y;
+	uint32 xmax = _cursor_tile_x;
+	uint32 ymax = _cursor_tile_y;
+	if (xmax < xmin) {
+		xmin = _cursor_tile_x;
+		xmax = _press_tile_x;
+	}
+	if (ymax < ymin) {
+		ymin = _cursor_tile_y;
+		ymax = _press_tile_y;
+	}
+
+	for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
+		for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
+			if (_selection_mode == NORMAL) {
+				if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
+					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				}
+			}
+			else if (_selection_mode == ADDITIVE) {
+				if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
+					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				}
+				// Determine if this tile is within the current additive selection area
+				else if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
+					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				}
+			}
+			else { // _selection_mode == SUBTRACTIVE
+				// Skip this tile if it is within the current subtractive selection area
+				if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
+					continue;
+				}
+				else if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
+					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				}
+			}
+		}
+	}
 }
 
 
