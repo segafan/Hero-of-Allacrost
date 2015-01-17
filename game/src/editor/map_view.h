@@ -156,21 +156,16 @@ private:
 	//! \brief When true, an overlay is drawn over each active collision grid element
 	bool _collision_overlay_visible;
 
-	/** \name Tile Coordinates
-	*** These members constitute the x and y (column and row) coorindates of a tile. The coordinates are
-	*** used for various actions, such as updating the status bar of the main window or moving tiles from
-	*** a source to a destination.
-	***     - _cursor_tile_x/y:           The tile that the mouse cursor currently points to
-	***     - _move_source_tile_x/y:      The location of the source when moving a tile to a new location
-	***     - _selection_start_tile_x/y:  The starting tile when selecting multiple tiles together
-	**/
+	//! \brief The coordinates of the tile that the mouse cursor is currently pointing to
 	//@{
 	int32 _cursor_tile_x;
 	int32 _cursor_tile_y;
-	int32 _move_source_tile_x;
-	int32 _move_source_tile_y;
-	int32 _selection_start_tile_x;
-	int32 _selection_start_tile_y;
+	//@}
+
+	//! \brief The coordinates of the tile where the last mouse press event occurred
+	//@{
+	int32 _press_tile_x;
+	int32 _press_tile_y;
 	//@}
 
 	//! \brief The current tile editing tool that is active

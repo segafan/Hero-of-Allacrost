@@ -45,10 +45,8 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_collision_overlay_visible(false),
 	_cursor_tile_x(-1),
 	_cursor_tile_y(-1),
-	_move_source_tile_x(-1),
-	_move_source_tile_y(-1),
-	_selection_start_tile_x(-1),
-	_selection_start_tile_y(-1),
+	_press_tile_x(-1),
+	_press_tile_y(-1),
 	_edit_mode(PAINT_MODE),
 	_preview_layer(data->GetMapLength(), data->GetMapHeight()),
 	_selection_area(data->GetMapLength(), data->GetMapHeight()),
@@ -391,8 +389,10 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 	}
 
 	// Determine the coordinates of the tile that was clicked during the mouse press
-	_cursor_tile_x = x / TILE_LENGTH;
-	_cursor_tile_y = y / TILE_HEIGHT;
+	_press_tile_x = x / TILE_LENGTH;
+	_press_tile_y = y / TILE_HEIGHT;
+	_cursor_tile_x = _press_tile_x;
+	_cursor_tile_y = _press_tile_y;
 
 	if (event->button() != Qt::LeftButton)
 		return;
@@ -406,8 +406,6 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 			break;
 
 		case SWAP_MODE:
-			_move_source_tile_x = _cursor_tile_x;
-			_move_source_tile_y = _cursor_tile_y;
 			break;
 
 		case ERASE_MODE:
@@ -424,9 +422,7 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
 		case SELECT_AREA_MODE:
 			SelectNoTiles();
-			_selection_start_tile_x = _cursor_tile_x;
-			_selection_start_tile_y = _cursor_tile_y;
-			_selection_area.SetTile(_selection_start_tile_x, _selection_start_tile_y, SELECTED_TILE);
+			_selection_area.SetTile(_press_tile_x, _press_tile_y, SELECTED_TILE);
 			_selection_area_active = true;
 			DrawMap();
 			break;
@@ -511,7 +507,7 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 					break;
 
 				case SELECT_AREA_MODE:
-					_SetSelectionArea(_cursor_tile_x, _cursor_tile_y, _selection_start_tile_x, _selection_start_tile_y);
+					_SetSelectionArea(_press_tile_x, _press_tile_y, _cursor_tile_x, _cursor_tile_y);
 					DrawMap();
 					break;
 
@@ -565,19 +561,8 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 	switch (_edit_mode) {
 		case PAINT_MODE: {
-			if (_selection_area_active == true) {
-				vector<vector<int32> > select_layer = _selection_area.GetTiles();
-				for (uint32 x = 0; x < _selection_area.GetLength(); ++x) {
-					for (uint32 y = 0; y < _selection_area.GetHeight(); ++y) {
-						if (select_layer[y][x] != MISSING_TILE)
-							_PaintTile(x, y, false);
-					}
-				}
-			}
-
 			_preview_layer.ClearLayer();
 			DrawMap();
-			// TODO: Record information for undo/redo stack
 			break;
 		}
 
@@ -589,18 +574,18 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 			if (_selection_area_active == false) {
 				// TODO: Record information for undo/redo stack
 				int32 temp = layer[_cursor_tile_y][_cursor_tile_x];
-				layer[_cursor_tile_y][_cursor_tile_x] = layer[_move_source_tile_y][_move_source_tile_x];
-				layer[_move_source_tile_y][_move_source_tile_x] = temp;
+				layer[_cursor_tile_y][_cursor_tile_x] = layer[_press_tile_y][_press_tile_x];
+				layer[_press_tile_y][_press_tile_x] = temp;
 			}
 			else {
-				vector<vector<int32> > select_layer = _selection_area.GetTiles();
+				vector<vector<int32> >& select_layer = _selection_area.GetTiles();
 				for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
 					for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
 						if (select_layer[y][x] != MISSING_TILE) {
 							// TODO: Record information for undo/redo stack
-
-							layer[y + _cursor_tile_y - _move_source_tile_y][x + _cursor_tile_x - _move_source_tile_x] = layer[y][x];
-							layer[y][x] = MISSING_TILE;
+							int32 temp = layer[y + _cursor_tile_y - _press_tile_y][x + _cursor_tile_x - _press_tile_x];
+							layer[y + _cursor_tile_y - _press_tile_y][x + _cursor_tile_x - _press_tile_x] = layer[y][x];
+							layer[y][x] = temp;
 						}
 					}
 				}
@@ -648,13 +633,12 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 			// If only a single tile was selected, deselect the area
 			_cursor_tile_x = mouse_x / TILE_LENGTH;
 			_cursor_tile_y = mouse_y / TILE_HEIGHT;
-			if (_cursor_tile_x == _selection_start_tile_x && _cursor_tile_y == _selection_start_tile_y) {
+			if (_cursor_tile_x == _press_tile_x && _cursor_tile_y == _press_tile_y) {
 				SelectNoTiles();
 				DrawMap();
 			}
 			break;
 		}
-
 
 		case FILL_AREA_MODE:
 			break;
