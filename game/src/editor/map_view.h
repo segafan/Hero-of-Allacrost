@@ -75,8 +75,7 @@ public:
 	bool ToggleCollisionOverlayVisible()
 		{ _collision_overlay_visible = !_collision_overlay_visible; DrawMap(); return _collision_overlay_visible; }
 
-	void SetEditMode(EDIT_MODE new_mode)
-		{ _edit_mode = new_mode; }
+	void SetEditMode(EDIT_MODE new_mode);
 	//@}
 
 	//! \brief Clears all data from _selection_area by filling it with MISSING_TILE
@@ -177,6 +176,11 @@ private:
 	//! \brief The current tile editing tool that is active
 	EDIT_MODE _edit_mode;
 
+	/** \brief A layer used to show where the selected tileset tiles will be painted to
+	***
+	**/
+	TileLayer _preview_layer;
+
 	/** \brief A tile layer used for indicating a selected area of the map
 	*** The values of tiles in this layer should only be MISSING_TILE or SELECTED_TILE. If all values are
 	*** MISSING_TILE, _area_selected should be set to false. Otherwise _area_selected should be set to true.
@@ -217,6 +221,9 @@ private:
 	std::vector<QAction*> _selection_copy_to_context_actions;
 	//@}
 
+	//! \brief A one-tile sized square used to highlight tiles in the preview layer (colored green at 40% opacity)
+	QPixmap _preview_tile;
+
 	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 40% opacity)
 	QPixmap _selection_tile;
 
@@ -232,18 +239,27 @@ private:
 	//! \brief Used to display the graphics widgets
 	QGraphicsView* _graphics_view;
 
-	/** \brief Sets the value of a single tile on the map
+	/** \brief Given a tile, retrieves a pointer to the QPixmap image that the value represents
+	*** \param tile_value The value of the tile to retrieve
+	*** \return A pointer to the QPixmap of the tile, or NULL if no such image existed for this value
+	**/
+	const QPixmap* _RetrieveTileImage(int32 tile_value) const;
+
+	/** \brief Sets the value of a single tile on the map for the selected tile layer
 	*** \param x The x coordinate of the tile to set
 	*** \param y The y coordinate of the tile to set
 	*** \param value The value to set the tile to
+	***
+	*** \note This should not be used for the paint tool as it does not modify the _preview_layer
 	**/
 	void _SetTile(int32 x, int32 y, int32 value);
 
 	/** \brief Paints the currently selected tiles from the tileset to a location on the map
 	*** \param x The x coordinate of the tile to paint to
 	*** \param y The y coordinate of the tile to paint to
+	*** \param preview If true, tiles should be painted to the preview layer. Otherwise tiles will be painted to the selected tile layer
 	**/
-	void _PaintTile(uint32 x, uint32 y);
+	void _PaintTile(uint32 x, uint32 y, bool preview);
 
 	/** \brief Sets a tile to a specific value as well as all neighboring tiles that share the tile's original value
 	*** \param start_x The x coordinate to start the fill operation from
