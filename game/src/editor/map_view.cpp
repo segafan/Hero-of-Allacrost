@@ -50,6 +50,7 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_selection_start_tile_x(-1),
 	_selection_start_tile_y(-1),
 	_edit_mode(PAINT_MODE),
+	_preview_layer(data->GetMapLength(), data->GetMapHeight()),
 	_selection_area(data->GetMapLength(), data->GetMapHeight()),
 	_right_click_menu(NULL),
 	_insert_menu(NULL),
@@ -150,6 +151,9 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_selection_menu->addMenu(_selection_move_to_context_menu);
 	_selection_menu->addMenu(_selection_copy_to_context_menu);
 
+	// Green tile with 20% transparency
+	_preview_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
+	_preview_tile.fill(QColor(0, 255, 0, 50));
 	// Blue tile with 40% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
 	_selection_tile.fill(QColor(0, 0, 255, 100));
@@ -188,7 +192,21 @@ MapView::~MapView() {
 
 
 
+void MapView::SetEditMode(EDIT_MODE new_mode) {
+	if (_edit_mode == PAINT_MODE) {
+		_preview_layer.ClearLayer();
+		DrawMap();
+	}
+
+	_edit_mode = new_mode;
+}
+
+
+
 void MapView::UpdateAreaSizes() {
+	_preview_layer.ResizeLayer(_map_data->GetMapLength(), _map_data->GetMapHeight());
+	_preview_layer.ClearLayer();
+
 	_selection_area.ResizeLayer(_map_data->GetMapLength(), _map_data->GetMapHeight());
 	_selection_area.ClearLayer();
 	_selection_area_active = false;
@@ -269,7 +287,6 @@ void MapView::DrawMap() {
 	vector<TileLayer>* tile_layers = &(_map_data->GetSelectedTileContext()->GetTileLayers());
 	vector<TileLayer>* inherited_tile_layers = NULL;
 	vector<TileLayerProperties>& layer_properties = _map_data->GetTileLayerProperties();
-	vector<Tileset*>& tilesets = _map_data->GetTilesets();
 
 	// If this is an inheriting context, we also want to pull in the tile layers for the inherited context
 	if (_map_data->GetSelectedTileContext()->IsInheritingContext() == true) {
@@ -282,43 +299,48 @@ void MapView::DrawMap() {
 	for (uint32 l = 0; l < tile_layers->size(); ++l) {
 		// Holds the value of the tile from a specific X/Y coordinate on this layer
 		int32 tile = MISSING_TILE;
-		// The index value of the tile within its tileset
-		int32 tile_index = 0;
-		// The index of the tileset that holds the value referred to by tile
-		int32 tileset_index = 0;
 		// Set to true whenever we are dealing with an inherited tile
 		bool inherited_tile = false;
 		// Set to true if this layer is the currently selected layer that the user is viewing or editing
 		bool selected_layer = (_map_data->GetSelectedTileLayer() == &(*tile_layers)[l]);
+		// A pointer to the tile image that should be drawn
+		const QPixmap* tile_image = NULL;
+		// Coordiantes to draw the current tile to
+		uint32 draw_x = 0, draw_y = 0;
 
 		if (layer_properties[l].IsVisible() == false)
 			continue;
 
 		for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
 			for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
+				draw_x = x * TILE_LENGTH;
+				draw_y = y * TILE_HEIGHT;
 				tile = (*tile_layers)[l].GetTile(x, y);
 				inherited_tile = (tile == INHERITED_TILE);
 				if (inherited_tile == true) {
 					tile = (*inherited_tile_layers)[l].GetTile(x, y);
 				}
-
-				// If we're pointing to a valid tile, retrieve the appropriate indexes to the image and draw it
-				if (tile >= 0) {
-					tileset_index = tile / TILESET_NUM_TILES;
-					tile_index = tile;
-					if (tileset_index != 0) // Don't divide by zero
-						tile_index = tile % (tileset_index * TILESET_NUM_TILES);
-					addPixmap(*tilesets[tileset_index]->GetTileImage(tile_index))->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+				tile_image = _RetrieveTileImage(tile);
+				if (tile_image) {
+					addPixmap(*tile_image)->setPos(draw_x, draw_y);
 				}
 
-				// Draw the missing or inherited tile overlays if needed and move on to the next tile
 				if (selected_layer == true) {
+					// Draw the missing overlay if needed
 					if (inherited_tile == false && tile == MISSING_TILE && _missing_overlay_visible == true) {
-						addPixmap(_missing_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+						addPixmap(_missing_tile)->setPos(draw_x, draw_y);
 					}
 					// Draw the inherited overlay over the inherited tile
 					else if (inherited_tile == true && _inherited_overlay_visible == true) {
-						addPixmap(_inherited_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
+						addPixmap(_inherited_tile)->setPos(draw_x, draw_y);
+					}
+
+					// Draw the preview layer and overlay if it contains a tile at this location
+					tile = _preview_layer.GetTile(x, y);
+					if (tile >= 0) {
+						tile_image = _RetrieveTileImage(tile);
+						addPixmap(*tile_image)->setPos(draw_x, draw_y);
+						addPixmap(_preview_tile)->setPos(draw_x, draw_y);
 					}
 				}
 			}
@@ -378,7 +400,7 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 	// Process the press event according to the active edit mode
 	switch (_edit_mode) {
 		case PAINT_MODE:
-			_PaintTile(_cursor_tile_x, _cursor_tile_y);
+			_PaintTile(_cursor_tile_x, _cursor_tile_y, false);
 			_map_data->SetMapModified(true);
 			DrawMap();
 			break;
@@ -471,7 +493,7 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 		if (event->buttons() == Qt::LeftButton) {
 			switch (_edit_mode) {
 				case PAINT_MODE:
-					_PaintTile(_cursor_tile_x, _cursor_tile_y);
+					_PaintTile(_cursor_tile_x, _cursor_tile_y, false);
 					DrawMap();
 					break;
 
@@ -513,6 +535,11 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 					break;
 			}
 		}
+		else if (_edit_mode == PAINT_MODE) {
+			// Paint the preview layer as the mouse is moved around
+			_PaintTile(_cursor_tile_x, _cursor_tile_y, true);
+			DrawMap();
+		}
 	}
 
 	// Display the mouse position coordinates and the tile that the position corresponds to.
@@ -543,11 +570,13 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 				for (uint32 x = 0; x < _selection_area.GetLength(); ++x) {
 					for (uint32 y = 0; y < _selection_area.GetHeight(); ++y) {
 						if (select_layer[y][x] != MISSING_TILE)
-							_PaintTile(x, y);
+							_PaintTile(x, y, false);
 					}
 				}
-				DrawMap();
 			}
+
+			_preview_layer.ClearLayer();
+			DrawMap();
 			// TODO: Record information for undo/redo stack
 			break;
 		}
@@ -907,7 +936,31 @@ void MapView::_CopySelectionToContext(QAction* action) {
 
 
 
-void MapView::_PaintTile(uint32 x, uint32 y) {
+const QPixmap* MapView::_RetrieveTileImage(int32 tile_value) const {
+	if (tile_value < 0)
+		return NULL;
+
+	vector<Tileset*>& tilesets = _map_data->GetTilesets();
+
+	// Convert the tile_value into the index of the tileset where the image can be found and the index of the tile within that tileset
+	int32 tileset_index = tile_value / TILESET_NUM_TILES;
+	int32 tile_index = tile_value;
+	if (tileset_index != 0) // Don't divide by zero
+		tile_index = tile_value % (tileset_index * TILESET_NUM_TILES);
+
+	return tilesets[tileset_index]->GetTileImage(tile_index);
+}
+
+
+
+void MapView::_SetTile(int32 x, int32 y, int32 value) {
+	// TODO: Record information for undo/redo stack
+	_map_data->GetSelectedTileLayer()->SetTile(x, y, value);
+}
+
+
+
+void MapView::_PaintTile(uint32 x, uint32 y, bool preview) {
 	// Get a reference to the current tileset
 	Editor* editor = static_cast<Editor*>(_graphics_view->topLevelWidget());
 	TilesetTable* tileset_table = editor->GetTilesetView()->GetCurrentTilesetTable();
@@ -928,7 +981,17 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 	}
 	multiplier *= TILESET_NUM_TILES;
 
-	if (selections.size() > 0 && (selection.columnCount() * selection.rowCount() > 1)) {
+	TileLayer* destination_layer;
+	if (preview == false) {
+		destination_layer = _map_data->GetSelectedTileLayer();
+	}
+	else {
+		// For the preview layer, we always clear any existing tiles in the layer before painting.
+		destination_layer = &_preview_layer;
+		destination_layer->ClearLayer();
+	}
+
+	if (selections.size() > 0 && (selection.columnCount() * selection.rowCount() > 1)) { // Multiple tiles are selected
 		// Draw tiles from tileset selection onto map, one tile at a time.
 		for (int32 i = 0; i < selection.rowCount() && y + i < _map_data->GetMapHeight(); i++) {
 			for (int32 j = 0; j < selection.columnCount() && x + j < _map_data->GetMapLength(); j++) {
@@ -939,11 +1002,11 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 				// TODO: Record information for undo/redo stack
 
-				_map_data->GetSelectedTileLayer()->SetTile(x + j, y + i, tileset_index + multiplier);
+				destination_layer->SetTile(x + j, y + i, tileset_index + multiplier);
 			} // iterate through columns of selection
 		} // iterate through rows of selection
-	} // multiple tiles are selected
-	else {
+	}
+	else { // A single tile is selected
 		// put selected tile from tileset into tile array at correct position
 		int32 tileset_index = tileset_table->currentRow() * TILESET_NUM_COLS + tileset_table->currentColumn();
 
@@ -952,15 +1015,8 @@ void MapView::_PaintTile(uint32 x, uint32 y) {
 
 		// TODO: Record information for undo/redo stack
 
-		_map_data->GetSelectedTileLayer()->SetTile(x, y, tileset_index + multiplier);
-	} // a single tile is selected
-}
-
-
-
-void MapView::_SetTile(int32 x, int32 y, int32 value) {
-	// TODO: Record information for undo/redo stack
-	_map_data->GetSelectedTileLayer()->SetTile(x, y, value);
+		destination_layer->SetTile(x, y, tileset_index + multiplier);
+	}
 }
 
 
