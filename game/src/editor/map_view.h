@@ -244,6 +244,13 @@ private:
 	//! \brief Used to display the graphics widgets
 	QGraphicsView* _graphics_view;
 
+	/** \brief Retrieves the value of the currently selected tile from the selected tileset
+	***
+	*** If more than one tile is selected from the tileset, then the top-left tile of the selection
+	*** is returned.
+	**/
+	int32 _RetrieveCurrentTileValue() const;
+	
 	/** \brief Given a tile, retrieves a pointer to the QPixmap image that the value represents
 	*** \param tile_value The value of the tile to retrieve
 	*** \return A pointer to the QPixmap of the tile, or NULL if no such image existed for this value

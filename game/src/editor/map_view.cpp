@@ -433,8 +433,7 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 		}
 
 		case FILL_AREA_MODE:
-			// TODO
-// 				_FillArea(_cursor_tile_x, _cursor_tile_y, ?? value from tileset);
+			_FillArea(_cursor_tile_x, _cursor_tile_y, _RetrieveCurrentTileValue());
 			DrawMap();
 			break;
 
@@ -520,8 +519,7 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 				}
 
 				case FILL_AREA_MODE:
-					// TODO
-// 					_FillArea(_cursor_tile_x, _cursor_tile_y, ?? value from tileset);
+					_FillArea(_cursor_tile_x, _cursor_tile_y, _RetrieveCurrentTileValue());
 					DrawMap();
 					break;
 
@@ -927,6 +925,38 @@ void MapView::_CopySelectionToContext(QAction* action) {
 	// If this box ever appears, it is almost certainly a bug in the editor code and not the result of user error
 	QMessageBox::warning(_graphics_view->topLevelWidget(), "Selection Copy to Context Failure",
 		"Failed to copy selected tiles to requested context.");
+}
+
+
+
+int32 MapView::_RetrieveCurrentTileValue() const {
+	// Get a reference to the current tileset
+	Editor* editor = static_cast<Editor*>(_graphics_view->topLevelWidget());
+	TilesetTable* tileset_table = editor->GetTilesetView()->GetCurrentTilesetTable();
+
+	// Detect the first selection range and use to paint an area
+	QList<QTableWidgetSelectionRange> selections = tileset_table->selectedRanges();
+	QTableWidgetSelectionRange selection;
+	if (selections.size() > 0)
+		selection = selections.at(0);
+	
+	// Determine the index of the current tileset in the tileset list to determine its multiplier for calculating the image index
+	vector<Tileset*> all_tilesets = _map_data->GetTilesets();
+	int32 multiplier = editor->GetTilesetView()->GetCurrentTilesetIndex();
+	if (multiplier < 0) {
+		qDebug() << "ERROR: failed to retrieve current tile value because there was no valid tileset data" << endl;
+		return MISSING_TILE;
+	}
+	multiplier *= TILESET_NUM_TILES;
+	
+	int32 tileset_index = 0;
+	if (selections.size() > 0 && (selection.columnCount() * selection.rowCount() > 1)) { // Multiple tiles are selected
+		tileset_index = (selection.topRow() * 16) + selection.leftColumn();
+	}
+	else { // A single tile is selected
+		tileset_index = tileset_table->currentRow() * TILESET_NUM_COLS + tileset_table->currentColumn();
+	}
+	return (tileset_index + multiplier);
 }
 
 
