@@ -1021,25 +1021,14 @@ void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
 		return;
 	}
 
-	// When there is a selection area active, this function will only perform the fill operation when
-	// the tile clicked is one that is inside the selection area
-	if (_selection_area_active == true && _selection_area.GetTile(start_x, start_y) != SELECTED_TILE) {
-		return;
-	}
-
+	// A pointer to the layer that the fill operation will take effect on
 	TileLayer* layer = _map_data->GetSelectedTileLayer();
-	int32 original_value = layer->GetTile(start_x, start_y);
-	if (original_value == value) {
-		return;
-	}
-
 	// The coordinates of the node actively being processed
 	uint32 x, y;
 	// The left and right nodes that end the current segement
 	uint32 x_left_end, x_right_end;
 	// Queue that holds the nodes that need to be checked (x, y cooridnate pairs)
 	queue<pair<uint32, uint32> > nodes;
-
 	nodes.push(make_pair(start_x, start_y));
 
 	// This function is an implementation of a flood fill algorithm. Generally speaking, the algorithm does the following:
@@ -1049,26 +1038,32 @@ void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
 	//      4) For each point in the segement, set it to the new value and examine the top and bottom points
 	//      5) If the top or bottom point matches the old value, add it to the nodes queue
 	//   6) Repeat this process until the queue is empty
-	//
-	// The algorithm works the same way for both of these conditions. The only difference is whether the comparison
-	// check is done on the value of the current tile or whether the tile is currently selected in the selection area
-	if (_selection_area_active == false) {
+	if (_selection_area.GetTile(start_x, start_y) == MISSING_TILE) {
+		int32 original_value = layer->GetTile(start_x, start_y);
+		if (original_value == value) {
+			return;
+		}
+
 		while (nodes.empty() == false) {
 			x = nodes.front().first;
 			y = nodes.front().second;
 			nodes.pop();
 			// In this case, the node has already been set to the new value previously so we can skip over it
-			if (layer->GetTile(x, y) != original_value) {
+			if (layer->GetTile(x, y) != original_value || _selection_area.GetTile(x, y) == SELECTED_TILE) {
 				continue;
 			}
 
 			// Find the left and right ends of the current line segment in row y
 			x_left_end = x;
-			while ((x_left_end > 0) && (layer->GetTile(x_left_end - 1, y) == original_value)) {
+			while ((x_left_end > 0) && (layer->GetTile(x_left_end - 1, y) == original_value) && 
+				(_selection_area.GetTile(x_left_end - 1, y) != SELECTED_TILE))
+			{
 				x_left_end--;
 			}
 			x_right_end = x;
-			while ((x_right_end < _map_data->GetMapLength() - 1) && (layer->GetTile(x_right_end + 1, y) == original_value)) {
+			while ((x_right_end < _map_data->GetMapLength() - 1) && (layer->GetTile(x_right_end + 1, y) == original_value) && 
+				(_selection_area.GetTile(x_right_end + 1, y) != SELECTED_TILE))
+			{
 				x_right_end++;
 			}
 			// Go through the segment and set the values of each node, adding the element to the top and bottom to the nodes queue if necessary
@@ -1083,8 +1078,41 @@ void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
 			}
 		}
 	}
+	// In this case, the fill operation needs to take place within the selection area. All tiles within the area should be set regardless
+	// of their value. To mark nodes as set, we create a copy of the selection area and set visited nodes to MISSING_TILE. Otherwise this is
+	// precisely the same algorithm as the other case.
 	else {
-		// TODO
+		TileLayer fill_area = _selection_area;
+		while (nodes.empty() == false) {
+			x = nodes.front().first;
+			y = nodes.front().second;
+			nodes.pop();
+			// In this case, the node has either already been visited or is not a part of the selection area
+			if (fill_area.GetTile(x, y) != SELECTED_TILE) {
+				continue;
+			}
+
+			// Find the left and right ends of the current line segment in row y
+			x_left_end = x;
+			while ((x_left_end > 0) && (fill_area.GetTile(x_left_end - 1, y) == SELECTED_TILE)) {
+				x_left_end--;
+			}
+			x_right_end = x;
+			while ((x_right_end < _map_data->GetMapLength() - 1) && (fill_area.GetTile(x_right_end + 1, y) == SELECTED_TILE)) {
+				x_right_end++;
+			}
+			// Go through the segment and set the values of each node, adding the element to the top and bottom to the nodes queue if necessary
+			for (uint32 i = x_left_end; i <= x_right_end; ++i) {
+				layer->SetTile(i, y, value);
+				fill_area.SetTile(i, y, MISSING_TILE);
+				if ((y > 0) && (fill_area.GetTile(i, y - 1) == SELECTED_TILE)) {
+					nodes.push(make_pair(i, y - 1));
+				}
+				if ((y < _map_data->GetMapHeight() - 1) && (fill_area.GetTile(i, y + 1) == SELECTED_TILE)) {
+					nodes.push(make_pair(i, y + 1));
+				}
+			}
+		}
 	}
 } // void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value)
 
