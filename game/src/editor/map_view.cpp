@@ -150,21 +150,21 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_selection_menu->addMenu(_selection_move_to_context_menu);
 	_selection_menu->addMenu(_selection_copy_to_context_menu);
 
-	// Green tile with 20% transparency
+	// Green tile with 10% transparency
 	_preview_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
-	_preview_tile.fill(QColor(0, 255, 0, 50));
-	// Blue tile with 40% transparency
+	_preview_tile.fill(QColor(0, 255, 0, 25));
+	// Blue tile with 30% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
-	_selection_tile.fill(QColor(0, 0, 255, 100));
-	// Orange tile with 20% transparency
+	_selection_tile.fill(QColor(0, 0, 255, 75));
+	// Orange tile with 10% transparency
 	_missing_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
-	_missing_tile.fill(QColor(255, 128, 0, 50));
-	// Yellow tile with 20% transparency
+	_missing_tile.fill(QColor(255, 128, 0, 25));
+	// Yellow tile with 10% transparency
 	_inherited_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
-	_inherited_tile.fill(QColor(255, 255, 0, 50));
-	// Red tile quadrant with 20% transparency
+	_inherited_tile.fill(QColor(255, 255, 0, 25));
+	// Red tile quadrant with 10% transparency
 	_collision_element = QPixmap(TILE_QUADRANT_LENGTH, TILE_QUADRANT_HEIGHT);
-	_collision_element.fill(QColor(255, 0, 0, 50));
+	_collision_element.fill(QColor(255, 0, 0, 25));
 } // MapView::MapView(QWidget* parent, MapData* data)
 
 
@@ -939,7 +939,7 @@ int32 MapView::_RetrieveCurrentTileValue() const {
 	QTableWidgetSelectionRange selection;
 	if (selections.size() > 0)
 		selection = selections.at(0);
-	
+
 	// Determine the index of the current tileset in the tileset list to determine its multiplier for calculating the image index
 	vector<Tileset*> all_tilesets = _map_data->GetTilesets();
 	int32 multiplier = editor->GetTilesetView()->GetCurrentTilesetIndex();
@@ -948,7 +948,7 @@ int32 MapView::_RetrieveCurrentTileValue() const {
 		return MISSING_TILE;
 	}
 	multiplier *= TILESET_NUM_TILES;
-	
+
 	int32 tileset_index = 0;
 	if (selections.size() > 0 && (selection.columnCount() * selection.rowCount() > 1)) { // Multiple tiles are selected
 		tileset_index = (selection.topRow() * 16) + selection.leftColumn();
@@ -1085,13 +1085,13 @@ void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
 
 			// Find the left and right ends of the current line segment in row y
 			x_left_end = x;
-			while ((x_left_end > 0) && (layer->GetTile(x_left_end - 1, y) == original_value) && 
+			while ((x_left_end > 0) && (layer->GetTile(x_left_end - 1, y) == original_value) &&
 				(_selection_area.GetTile(x_left_end - 1, y) != SELECTED_TILE))
 			{
 				x_left_end--;
 			}
 			x_right_end = x;
-			while ((x_right_end < _map_data->GetMapLength() - 1) && (layer->GetTile(x_right_end + 1, y) == original_value) && 
+			while ((x_right_end < _map_data->GetMapLength() - 1) && (layer->GetTile(x_right_end + 1, y) == original_value) &&
 				(_selection_area.GetTile(x_right_end + 1, y) != SELECTED_TILE))
 			{
 				x_right_end++;
@@ -1318,10 +1318,12 @@ void MapView::_DrawSelectionArea() {
 
 
 void MapView::_DrawGrid() {
+	QPen grid_pen(Qt::black);
+
 	for (uint32 x = 0; x < (_map_data->GetMapLength() * TILE_LENGTH); x+= TILE_LENGTH) {
 		for (uint32 y = 0; y < (_map_data->GetMapHeight() * TILE_HEIGHT); y+= TILE_HEIGHT) {
-			addLine(0, y, _map_data->GetMapLength() * TILE_LENGTH, y, QPen(Qt::DotLine));
-			addLine(x, 0, x, _map_data->GetMapHeight() * TILE_HEIGHT, QPen(Qt::DotLine));
+			addLine(0, y, _map_data->GetMapLength() * TILE_LENGTH, y, grid_pen);
+			addLine(x, 0, x, _map_data->GetMapHeight() * TILE_HEIGHT, grid_pen);
 		}
 	}
 }
