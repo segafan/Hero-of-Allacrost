@@ -229,13 +229,13 @@ private:
 	//! \brief A one-tile sized square used to highlight tiles in the preview layer (colored green at 40% opacity)
 	QPixmap _preview_tile;
 
-	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 40% opacity)
+	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 10% opacity)
 	QPixmap _selection_tile;
 
-	//! \brief A one-tile sized square used to highlight missing tiles (colored orange at 20% opacity)
+	//! \brief A one-tile sized square used to highlight missing tiles (colored orange at 10% opacity)
 	QPixmap _missing_tile;
 
-	//! \brief A one-tile sized square used to highlight inherited tiles (colored yellow at 20% opacity)
+	//! \brief A one-tile sized square used to highlight inherited tiles (colored yellow at 10% opacity)
 	QPixmap _inherited_tile;
 
 	//! \brief A one-quarter tile sized square used to indicate which areas of the collision grid are active (colored red at 20% opacity)
@@ -250,7 +250,7 @@ private:
 	*** is returned.
 	**/
 	int32 _RetrieveCurrentTileValue() const;
-	
+
 	/** \brief Given a tile, retrieves a pointer to the QPixmap image that the value represents
 	*** \param tile_value The value of the tile to retrieve
 	*** \return A pointer to the QPixmap of the tile, or NULL if no such image existed for this value
