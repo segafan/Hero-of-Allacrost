@@ -430,7 +430,7 @@ VirtualSprite* ObjectSupervisor::GetSprite(uint32 object_id) {
 
 void ObjectSupervisor::Load(ReadScriptDescriptor& map_file) {
 	// ---------- Construct the collision grid
-	map_file.OpenTable("map_grid");
+	map_file.OpenTable("collision_grid");
 	_num_grid_rows = map_file.GetTableSize();
 	for (uint16 r = 0; r < _num_grid_rows; ++r) {
 		_collision_grid.push_back(vector<uint32>());

@@ -409,16 +409,8 @@ private:
 
 	// ----- Methods -----
 
-	//! \brief Opens both the map data and script files and load the contents of their data
-	void _LoadFileData();
-
-	/** \brief Loads all map data contained in the Lua map data file
-	*** \param map_data A references to the already opened map descriptor file
-	**/
-	void _LoadMapData(hoa_script::ReadScriptDescriptor& map_data);
-
-	//! \brief Loads all map data contained in the Lua map script file
-	void _LoadMapScript();
+	//! \brief Opens both the map data and script files and loads all necessary data from them
+	void _LoadMapFiles();
 
 	//! \brief A helper function to Update() that is called only when the map is in the explore state
 	void _UpdateExplore();

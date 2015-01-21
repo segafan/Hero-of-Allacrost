@@ -139,11 +139,11 @@ const uint32 TILES_PER_TILESET = 256;
 
 //! \brief Used to identify the type of map object
 enum MAP_OBJECT_TYPE {
-	PHYSICAL_TYPE = 0,
-	VIRTUAL_TYPE = 1,
-	SPRITE_TYPE = 2,
-	ENEMY_TYPE = 3,
-	TREASURE_TYPE = 4
+	PHYSICAL_TYPE  = 0,
+	VIRTUAL_TYPE   = 1,
+	SPRITE_TYPE    = 2,
+	ENEMY_TYPE     = 3,
+	TREASURE_TYPE  = 4
 };
 
 
@@ -229,10 +229,10 @@ const uint32 ANIM_ATTACKING_EAST = 12;
 
 //! \brief Represents the various types of collisions which may occur for a sprite
 enum COLLISION_TYPE {
-	NO_COLLISION = 0,       //!< Indicates that no collision has occurred
-	BOUNDARY_COLLISION = 1, //!< Happens when the sprite attempts to move outside any of the map's boundaries
-	GRID_COLLISION = 2,     //!< Condition when the sprite's collision rectangle overlaps an invalid element of the map's collision grid
-	OBJECT_COLLISION = 3,   //!< Occurs when the sprite collides with another map object in the same object layer
+	NO_COLLISION        = 0, //!< Indicates that no collision has occurred
+	BOUNDARY_COLLISION  = 1, //!< Happens when the sprite attempts to move outside any of the map's boundaries
+	GRID_COLLISION      = 2, //!< Condition when the sprite's collision rectangle overlaps an invalid element of the map's collision grid
+	OBJECT_COLLISION    = 3, //!< Occurs when the sprite collides with another map object in the same object layer
 };
 
 
