@@ -7,6 +7,11 @@ data_file = "lua/data/maps/harrvah_underground_river_cave.lua";
 location_filename = "img/portraits/locations/desert_cave.png"
 map_name = "River Access Cave"
 
+sound_filenames = {};
+
+music_filenames = {};
+music_filenames[1] = "mus/Cave2.ogg";
+
 enemy_ids = { 1, 2, 3, 4, 5, 6 }
 
 -- Containers used to hold pointers to various class objects.

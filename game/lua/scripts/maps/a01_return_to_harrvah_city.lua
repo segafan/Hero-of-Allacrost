@@ -4,7 +4,6 @@
 -- Similar to a01_opening_scene.lua and using the same map. The entire map is a
 -- scene of soldiers marching through the desert back to their home.
 --------------------------------------------------------------------------------
-
 local ns = {}
 setmetatable(ns, {__index = _G})
 a01_return_to_harrvah_city = ns;
@@ -13,6 +12,11 @@ setfenv(1, ns);
 data_file = "lua/data/maps/harrvah_desert_cave_path.lua";
 location_filename = "img/portraits/locations/blank.png";
 map_name = "";
+
+sound_filenames = {};
+
+music_filenames = {};
+music_filenames[1] = "snd/wind.ogg";
 
 Map = {};
 

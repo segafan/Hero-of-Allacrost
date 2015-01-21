@@ -4,7 +4,6 @@
 -- This script controls the events that happen on the map after a player starts
 -- a new game. It is heavy on dialogue and the user has no control over the characters.
 --------------------------------------------------------------------------------
-
 local ns = {}
 setmetatable(ns, {__index = _G})
 a01_opening_scene = ns;
@@ -13,6 +12,11 @@ setfenv(1, ns);
 data_file = "lua/data/maps/harrvah_desert_cave_path.lua";
 location_filename = "img/portraits/locations/blank.png";
 map_name = "";
+
+sound_filenames = {};
+
+music_filenames = {};
+music_filenames[1] = "snd/wind.ogg";
 
 Map = {};
 

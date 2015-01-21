@@ -8,6 +8,10 @@ data_file = "lua/data/maps/harrvah_city.lua";
 location_filename = "img/portraits/locations/blank.png"
 map_name = "Harrvah City"
 
+sound_filenames = {};
+
+music_filenames = {};
+
 claudius_sprite = nil;
 
 function Load(m)
