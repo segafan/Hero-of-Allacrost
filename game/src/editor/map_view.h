@@ -154,6 +154,9 @@ private:
 	//! \brief Holds the type of selection mode that is active when using the SELECT_AREA edit mode
 	SELECTION_MODE _selection_mode;
 
+	//! \brief Set to true when the selection area is active and the tile that most recently registerd a mouse press is in that selection
+	bool _selection_area_press;
+
 	//! \brief When true, a series of grid lines between tiles are drawn
 	bool _grid_visible;
 
@@ -270,8 +273,23 @@ private:
 	*** \param x The x coordinate of the tile to paint to
 	*** \param y The y coordinate of the tile to paint to
 	*** \param preview If true, tiles should be painted to the preview layer. Otherwise tiles will be painted to the selected tile layer
+	***
+	*** When the selection area is active, a paint operation that begins in a non-selected area will not paint any tiles to the selection area,
+	*** and vice-versa if the paint operation begins in a selected area.
 	**/
-	void _PaintTile(uint32 x, uint32 y, bool preview);
+	void _PaintTiles(uint32 x, uint32 y, bool preview);
+
+	/** \brief Swaps the location of one or more tiles on more tiles on the map
+	*** \param x1 The x coordinate of the first swap position
+	*** \param y1 The y coordinate of the first swap position
+	*** \param x2 The x coordinate of the second swap position
+	*** \param y2 The y coordinate of the second swap position
+	***
+	*** Swaps are handled differently if a selection area is active and the first position was inside the selection area. Otherwise only
+	*** a single tile will be swapped. When swapping multiple tiles, if the swap location for any given tile is outside the bounds of the
+	*** map then that tile will not be swapped, but other tiles with a valid destination will swap.
+	**/
+	void _SwapTiles(uint32 x1, uint32 y1, uint32 x2, uint32 y2);
 
 	/** \brief Sets a tile to a specific value as well as all neighboring tiles that share the tile's original value
 	*** \param start_x The x coordinate to start the fill operation from
@@ -293,6 +311,16 @@ private:
 	*** \note Calling this function will clear the existing selected area before setting the newly selected tiles.
 	**/
 	void _SetSelectionArea(uint32 x1, uint32 y1, uint32 x2, uint32 y2);
+
+	/** \brief Compares a tile's selection status with that of the tile that was most recently pressed
+	*** \param x The x coordinate of the tile to check
+	*** \param y The y coordinate of the tile to check
+	*** \return True if the selection area is active or inactive for both the tile and the press tile
+	***
+	*** True will also be returned if no selection area is active. This function is used by the editing operations to ensure that if we started
+	*** an operation in a tile that was not selected, the operation will not take place in any selected tiles (or vice versa).
+	**/
+	bool _IsTileEqualToPressSelection(uint32 x, uint32 y);
 
 	/** \brief Moves or copies the selected tiles to a different tile layer
 	*** \param uint32 layer_id The ID of the layer to move or copy the selected tiles to
