@@ -40,6 +40,7 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_map_data(data),
 	_selection_area_active(false),
 	_selection_mode(NORMAL),
+	_selection_area_press(false),
 	_grid_visible(false),
 	_missing_overlay_visible(false),
 	_inherited_overlay_visible(false),
@@ -209,6 +210,7 @@ void MapView::UpdateAreaSizes() {
 	_selection_area.ResizeLayer(_map_data->GetMapLength(), _map_data->GetMapHeight());
 	_selection_area.ClearLayer();
 	_selection_area_active = false;
+	_selection_area_press = false;
 }
 
 
@@ -390,10 +392,15 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 	if (event->button() != Qt::LeftButton)
 		return;
 
+	_selection_area_press = false;
+	if (_selection_area_active == true) {
+		_selection_area_press = (_selection_area.GetTile(_press_tile_x, _press_tile_y) == SELECTED_TILE);
+	}
+
 	// Process the press event according to the active edit mode
 	switch (_edit_mode) {
 		case PAINT_MODE:
-			_PaintTile(_cursor_tile_x, _cursor_tile_y, false);
+			_PaintTiles(_cursor_tile_x, _cursor_tile_y, false);
 			_map_data->SetMapModified(true);
 			DrawMap();
 			break;
@@ -493,22 +500,28 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 		if (event->buttons() == Qt::LeftButton) {
 			switch (_edit_mode) {
 				case PAINT_MODE:
-					_PaintTile(_cursor_tile_x, _cursor_tile_y, false);
+					_PaintTiles(_cursor_tile_x, _cursor_tile_y, false);
 					DrawMap();
 					break;
 
 				case SWAP_MODE:
 					break;
 
-				case ERASE_MODE:
-					_SetTile(_cursor_tile_x, _cursor_tile_y, MISSING_TILE);
-					DrawMap();
+				case ERASE_MODE: {
+					if (_IsTileEqualToPressSelection(_cursor_tile_x, _cursor_tile_y) == true) {
+						_SetTile(_cursor_tile_x, _cursor_tile_y, MISSING_TILE);
+						DrawMap();
+					}
 					break;
+				}
 
-				case INHERIT_MODE:
-					_SetTile(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
-					DrawMap();
+				case INHERIT_MODE: {
+					if (_IsTileEqualToPressSelection(_cursor_tile_x, _cursor_tile_y) == true) {
+						_SetTile(_cursor_tile_x, _cursor_tile_y, INHERITED_TILE);
+						DrawMap();
+					}
 					break;
+				}
 
 				case SELECT_AREA_MODE: {
 					if (_selection_mode == NORMAL) {
@@ -539,7 +552,7 @@ void MapView::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 		}
 		else if (_edit_mode == PAINT_MODE) {
 			// Paint the preview layer as the mouse is moved around
-			_PaintTile(_cursor_tile_x, _cursor_tile_y, true);
+			_PaintTiles(_cursor_tile_x, _cursor_tile_y, true);
 			DrawMap();
 		}
 	}
@@ -575,63 +588,16 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 		}
 
 		case SWAP_MODE: {
-			vector<vector<int32> >& layer = _map_data->GetSelectedTileLayer()->GetTiles();
-
-			if (_selection_area_active == false) {
-				// TODO: Record information for undo/redo stack
-				int32 temp = layer[_cursor_tile_y][_cursor_tile_x];
-				layer[_cursor_tile_y][_cursor_tile_x] = layer[_press_tile_y][_press_tile_x];
-				layer[_press_tile_y][_press_tile_x] = temp;
-			}
-			else {
-				vector<vector<int32> >& select_layer = _selection_area.GetTiles();
-				for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
-					for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
-						if (select_layer[y][x] != MISSING_TILE) {
-							// TODO: Record information for undo/redo stack
-							int32 temp = layer[y + _cursor_tile_y - _press_tile_y][x + _cursor_tile_x - _press_tile_x];
-							layer[y + _cursor_tile_y - _press_tile_y][x + _cursor_tile_x - _press_tile_x] = layer[y][x];
-							layer[y][x] = temp;
-						}
-					}
-				}
-			}
-
-			// TODO: Record information for undo/redo stack
-
+			_SwapTiles(_press_tile_x, _press_tile_y, _cursor_tile_x, _cursor_tile_y);
 			DrawMap();
 			break;
 		}
 
 		case ERASE_MODE: {
-			if (_selection_area_active == true) {
-				vector<vector<int32> > select_layer = _selection_area.GetTiles();
-				for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
-					for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
-						if (select_layer[y][x] != MISSING_TILE)
-							_SetTile(x, y, MISSING_TILE);
-					}
-				}
-				DrawMap();
-			}
-
-			// TODO: Record information for undo/redo stack
 			break;
 		}
 
 		case INHERIT_MODE: {
-			if (_selection_area_active == true) {
-				vector<vector<int32> > select_layer = _selection_area.GetTiles();
-				for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
-					for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
-						if (select_layer[y][x] != INHERITED_TILE)
-							_SetTile(x, y, INHERITED_TILE);
-					}
-				}
-				DrawMap();
-			}
-
-			// TODO: Record information for undo/redo stack
 			break;
 		}
 
@@ -985,7 +951,7 @@ void MapView::_SetTile(int32 x, int32 y, int32 value) {
 
 
 
-void MapView::_PaintTile(uint32 x, uint32 y, bool preview) {
+void MapView::_PaintTiles(uint32 x, uint32 y, bool preview) {
 	// Get a reference to the current tileset
 	Editor* editor = static_cast<Editor*>(_graphics_view->topLevelWidget());
 	TilesetTable* tileset_table = editor->GetTilesetView()->GetCurrentTilesetTable();
@@ -1016,17 +982,23 @@ void MapView::_PaintTile(uint32 x, uint32 y, bool preview) {
 		destination_layer->ClearLayer();
 	}
 
+	int32 start_tile = MISSING_TILE;
+	if (_selection_area_active == true) {
+		start_tile = _selection_area.GetTile(x, y);
+	}
+
 	if (selections.size() > 0 && (selection.columnCount() * selection.rowCount() > 1)) { // Multiple tiles are selected
 		// Draw tiles from tileset selection onto map, one tile at a time.
 		for (int32 i = 0; i < selection.rowCount() && y + i < _map_data->GetMapHeight(); i++) {
 			for (int32 j = 0; j < selection.columnCount() && x + j < _map_data->GetMapLength(); j++) {
+				// Skip over tiles that do not match the selection status of the first tile
+				if (_selection_area_active == true && _selection_area.GetTile(x + j, y + i) != start_tile) {
+					continue;
+				}
 				int32 tileset_index = (selection.topRow() + i) * 16 + (selection.leftColumn() + j);
-
 				// TODO: Perform randomization for autotiles
 				// _AutotileRandomize(multiplier, tileset_index);
-
 				// TODO: Record information for undo/redo stack
-
 				destination_layer->SetTile(x + j, y + i, tileset_index + multiplier);
 			} // iterate through columns of selection
 		} // iterate through rows of selection
@@ -1042,6 +1014,49 @@ void MapView::_PaintTile(uint32 x, uint32 y, bool preview) {
 
 		destination_layer->SetTile(x, y, tileset_index + multiplier);
 	}
+}
+
+
+
+void MapView::_SwapTiles(uint32 x1, uint32 y1, uint32 x2, uint32 y2) {
+	if (x1 == x2 && y1 == y2) {
+		return;
+	}
+
+	int32 xdiff = x2 - x1;
+	int32 ydiff = y2 - y1;
+	vector<vector<int32> >& layer = _map_data->GetSelectedTileLayer()->GetTiles();
+
+	bool swap_multiple_tiles = (_selection_area_active == true && _selection_area.GetTile(x1, y1) == SELECTED_TILE);
+	if (swap_multiple_tiles == false) {
+		// TODO: Record information for undo/redo stack
+		int32 temp = layer[_cursor_tile_y][_cursor_tile_x];
+		layer[_cursor_tile_y][_cursor_tile_x] = layer[_press_tile_y][_press_tile_x];
+		layer[_press_tile_y][_press_tile_x] = temp;
+	}
+	else {
+		// TODO: Record information for undo/redo stack
+		vector<vector<int32> >& select_layer = _selection_area.GetTiles();
+		for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
+			for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
+				if (select_layer[y][x] != MISSING_TILE) {
+					int32 swapx = x + static_cast<int32>(xdiff);
+					int32 swapy = y + static_cast<int32>(ydiff);
+					// Make sure we're not going to access any tile locations that are beyond the bounds of the map
+					if (swapy < 0 || swapy >= static_cast<int32>(_map_data->GetMapHeight()) || swapx < 0 || swapx >= static_cast<int32>(_map_data->GetMapLength())) {
+						continue;
+					}
+
+					// TODO: Record information for undo/redo stack
+					int32 temp = layer[swapy][swapx];
+					layer[swapy][swapx] = layer[y][x];
+					layer[y][x] = temp;
+				}
+			}
+		}
+	}
+
+	_map_data->SetMapModified(true);
 }
 
 
@@ -1197,6 +1212,20 @@ void MapView::_SetSelectionArea(uint32 x1, uint32 y1, uint32 x2, uint32 y2) {
 
 		_selection_area_active = false;
 	}
+}
+
+
+
+bool MapView::_IsTileEqualToPressSelection(uint32 x, uint32 y) {
+	if (_selection_area_active == false)
+		return true;
+
+	if (_selection_area_press == true && _selection_area.GetTile(x, y) == SELECTED_TILE)
+		return true;
+	else if (_selection_area_press == false && _selection_area.GetTile(x, y) != SELECTED_TILE)
+		return true;
+	else
+		return false;
 }
 
 
