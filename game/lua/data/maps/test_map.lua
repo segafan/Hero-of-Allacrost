@@ -4,7 +4,7 @@ test_map = ns;
 setfenv(1, ns);
 
 map_name = "Test Map"
-map_designers = "Tyler Olsen"
+map_designers = "Tyler Olsen (Roots)"
 map_description = "A map used only for testing purposes of the map mode and map editor. It is not found anywhere in the game."
 
 map_length = 40
@@ -15,8 +15,8 @@ number_map_contexts = 2
 
 tileset_filenames = {}
 tileset_filenames[1] = "lua/data/tilesets/desert_ground.lua"
-tileset_filenames[2] = "lua/data/tilesets/harrvah_house_exterior.lua"
-tileset_filenames[3] = "lua/data/tilesets/harrvah_house_interior.lua"
+tileset_filenames[2] = "lua/data/tilesets/desert_house_exterior.lua"
+tileset_filenames[3] = "lua/data/tilesets/desert_house_interior.lua"
 tileset_filenames[4] = "lua/data/tilesets/building_interior_objects_01.lua"
 tileset_filenames[5] = "lua/data/tilesets/outdoor_market.lua"
 
