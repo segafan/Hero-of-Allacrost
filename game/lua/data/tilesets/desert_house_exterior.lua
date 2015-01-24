@@ -1,10 +1,10 @@
 local ns = {};
 setmetatable(ns, {__index = _G});
-harrvah_house_exterior = ns;
+desert_house_exterior = ns;
 setfenv(1, ns);
 
-tileset_name = "Harrvah - House Exterior"
-image = "img/tilesets/harrvah_house_exterior.png"
+tileset_name = "Desert House Exterior"
+image = "img/tilesets/desert_house_exterior.png"
 
 collisions = {}
 collisions[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 15 }
