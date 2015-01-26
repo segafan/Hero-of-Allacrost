@@ -151,21 +151,21 @@ MapView::MapView(QWidget* parent, MapData* data) :
 	_selection_menu->addMenu(_selection_move_to_context_menu);
 	_selection_menu->addMenu(_selection_copy_to_context_menu);
 
-	// Green tile with 10% transparency
+	// Green tile with 20% transparency
 	_preview_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
-	_preview_tile.fill(QColor(0, 255, 0, 25));
+	_preview_tile.fill(QColor(0, 255, 0, 50));
 	// Blue tile with 30% transparency
 	_selection_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
 	_selection_tile.fill(QColor(0, 0, 255, 75));
-	// Orange tile with 10% transparency
+	// Orange tile with 20% transparency
 	_missing_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
-	_missing_tile.fill(QColor(255, 128, 0, 25));
-	// Yellow tile with 10% transparency
+	_missing_tile.fill(QColor(255, 128, 0, 50));
+	// Yellow tile with 20% transparency
 	_inherited_tile = QPixmap(TILE_LENGTH, TILE_HEIGHT);
-	_inherited_tile.fill(QColor(255, 255, 0, 25));
-	// Red tile quadrant with 10% transparency
+	_inherited_tile.fill(QColor(255, 255, 0, 50));
+	// Red tile quadrant with 20% transparency
 	_collision_element = QPixmap(TILE_QUADRANT_LENGTH, TILE_QUADRANT_HEIGHT);
-	_collision_element.fill(QColor(255, 0, 0, 25));
+	_collision_element.fill(QColor(255, 0, 0, 50));
 } // MapView::MapView(QWidget* parent, MapData* data)
 
 

@@ -30,6 +30,16 @@ namespace hoa_editor {
 // TileContext class
 ///////////////////////////////////////////////////////////////////////////////
 
+void TileContext::_ClearInheritingContext() {
+	_inherited_context_id = INVALID_CONTEXT;
+
+	for (uint32 i = 0; i < _tile_layers.size() - 1; ++i) {
+		_tile_layers[i].ReplaceTiles(INHERITED_TILE, MISSING_TILE);
+	}
+}
+
+
+
 void TileContext::_AddTileLayer(TileLayer& layer) {
 	if (layer.GetHeight() == 0 || layer.GetLength() == 0) {
 		qDebug() << "could not add layer because one or both dimensions are zero" << endl;
@@ -315,7 +325,7 @@ void ContextView::_ChangeContextProperties(QTreeWidgetItem* item, int column) {
 		_RenameTileContext();
 	}
 	else if (column == INHERITS_COLUMN) {
-		// While technically this was not a right-click event, this is needed so that _ValidateChangedData knows to process these changes
+		// While technically this was not a right-click event, this is needed so that _ValidateChangedData() knows to process these changes
 		_right_click_item = item;
 		_original_context_inheritance = _right_click_item->text(INHERITS_COLUMN);
 		openPersistentEditor(item, INHERITS_COLUMN);

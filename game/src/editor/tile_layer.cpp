@@ -65,6 +65,18 @@ void TileLayer::SetTile(uint32 x, uint32 y, int32 value) {
 
 
 
+void TileLayer::ReplaceTiles(int32 old_tile, int32 new_tile) {
+	for (uint32 y = 0; y < GetHeight(); ++y) {
+		for (uint32 x = 0; x < GetLength(); ++x) {
+			if (_tiles[y][x] == old_tile) {
+				_tiles[y][x] = new_tile;
+			}
+		}
+	}
+}
+
+
+
 void TileLayer::FillLayer(int32 value) {
 	for (uint32 y = 0; y < GetHeight(); ++y) {
 		for (uint32 x = 0; x < GetLength(); ++x) {

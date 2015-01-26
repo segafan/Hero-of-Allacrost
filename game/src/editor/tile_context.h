@@ -127,15 +127,16 @@ private:
 	void _SetContextID(int32 id)
 		{ _context_id = id; }
 
-	//! \brief Removes inheriting context data, if any exists
-	void _ClearInheritingContext()
-		{ _inherited_context_id = INVALID_CONTEXT; }
+	/** \brief Removes inheriting context data, if any exists
+	*** \note This not only sets the _inherited_context_id, but also changes any tiles with the value of INHERITED_TILE to MISSING_TILE
+	**/
+	void _ClearInheritingContext();
 
 	/** \brief Transforms the context into an inheriting context
 	*** \param inherited_context_id The ID of the context that this context should inherit from
 	**/
 	void _SetInheritingContext(int32 inherited_context_id)
-		{ _inherited_context_id = inherited_context_id; }
+		{ if (inherited_context_id == INVALID_CONTEXT) _ClearInheritingContext(); else _inherited_context_id = inherited_context_id; }
 
 	/** \brief Adds a new tile layer to the end of the layer container
 	*** \param layer A reference to the pre-created TileLayer to add
