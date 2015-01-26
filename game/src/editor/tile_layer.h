@@ -93,6 +93,12 @@ public:
 	void ClearTile(uint32 x, uint32 y)
 		{ SetTile(x, y, MISSING_TILE); }
 
+	/** \brief Replaces all tiles that match a specified value with a new tile value
+	*** \param old_tile The tile value to be replaced
+	*** \param new_tile The tile value to set replaced tiles to
+	**/
+	void ReplaceTiles(int32 old_tile, int32 new_tile);
+
 	/** \brief Sets every tile location in the layer to the same value
 	*** \param value The value to set each tile to
 	**/

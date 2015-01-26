@@ -229,16 +229,16 @@ private:
 	std::vector<QAction*> _selection_copy_to_context_actions;
 	//@}
 
-	//! \brief A one-tile sized square used to highlight tiles in the preview layer (colored green at 40% opacity)
+	//! \brief A one-tile sized square used to highlight tiles in the preview layer (colored green at 20% opacity)
 	QPixmap _preview_tile;
 
-	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 10% opacity)
+	//! \brief A one-tile sized square used to highlight multi-tile selections (colored blue at 20% opacity)
 	QPixmap _selection_tile;
 
-	//! \brief A one-tile sized square used to highlight missing tiles (colored orange at 10% opacity)
+	//! \brief A one-tile sized square used to highlight missing tiles (colored orange at 20% opacity)
 	QPixmap _missing_tile;
 
-	//! \brief A one-tile sized square used to highlight inherited tiles (colored yellow at 10% opacity)
+	//! \brief A one-tile sized square used to highlight inherited tiles (colored yellow at 20% opacity)
 	QPixmap _inherited_tile;
 
 	//! \brief A one-quarter tile sized square used to indicate which areas of the collision grid are active (colored red at 20% opacity)
