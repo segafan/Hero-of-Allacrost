@@ -33,7 +33,7 @@ namespace hoa_editor {
 void TileContext::_ClearInheritingContext() {
 	_inherited_context_id = INVALID_CONTEXT;
 
-	for (uint32 i = 0; i < _tile_layers.size() - 1; ++i) {
+	for (uint32 i = 0; i < _tile_layers.size(); ++i) {
 		_tile_layers[i].ReplaceTiles(INHERITED_TILE, MISSING_TILE);
 	}
 }
@@ -376,6 +376,10 @@ void ContextView::_ValidateChangedData(QTreeWidgetItem* item, int column) {
 			new_inheritance = item->text(INHERITS_COLUMN).toInt(&valid_change);
 			if (valid_change == false) {
 				error_message = "ERROR: Column must be set to an integer value.";
+			}
+			if (item->text(ID_COLUMN).toInt(&valid_change) == new_inheritance) {
+				valid_change = false;
+				error_message = "ERROR: A context can not inherit from itself.";
 			}
 		}
 
