@@ -423,8 +423,6 @@ void MapView::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 		case SELECT_AREA_MODE: {
 			if (event->modifiers() & Qt::ShiftModifier) {
 				_selection_mode = ADDITIVE;
-				_selection_area.SetTile(_press_tile_x, _press_tile_y, SELECTED_TILE);
-				_selection_area_active = true;
 			}
 			else if (event->modifiers() & Qt::ControlModifier) {
 				_selection_mode = SUBTRACTIVE;
@@ -602,12 +600,10 @@ void MapView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 		}
 
 		case SELECT_AREA_MODE: {
-			if (_selection_mode == NORMAL) {
-				// If only a single tile was selected, deselect the area
-				if (_cursor_tile_x == _press_tile_x && _cursor_tile_y == _press_tile_y) {
-					SelectNoTiles();
-					DrawMap();
-				}
+			// If only a single tile was selected in normal mode, deselect the area
+			if (_selection_mode == NORMAL && _cursor_tile_x == _press_tile_x && _cursor_tile_y == _press_tile_y) {
+				SelectNoTiles();
+				DrawMap();
 			}
 			else {
 				_SetSelectionArea(_press_tile_x, _press_tile_y, _cursor_tile_x, _cursor_tile_y);
@@ -1315,14 +1311,21 @@ void MapView::_DrawSelectionArea() {
 		ymax = _press_tile_y;
 	}
 
-	for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
-		for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
-			if (_selection_mode == NORMAL) {
+	// In these two cases, we can simply draw the set selected area and return
+	if (_edit_mode != SELECT_AREA_MODE || (_edit_mode == SELECT_AREA_MODE && _selection_mode == NORMAL)) {
+		for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
+			for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
 				if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
 					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
 				}
 			}
-			else if (_selection_mode == ADDITIVE) {
+		}
+		return;
+	}
+	// Additive mode requires us to potentially draw more selection tiles than what is already set in the selection area
+	else if (_selection_mode == ADDITIVE) {
+		for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
+			for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
 				if (_selection_area.GetTile(x, y) == SELECTED_TILE) {
 					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
 				}
@@ -1331,7 +1334,12 @@ void MapView::_DrawSelectionArea() {
 					addPixmap(_selection_tile)->setPos(x * TILE_LENGTH, y * TILE_HEIGHT);
 				}
 			}
-			else { // _selection_mode == SUBTRACTIVE
+		}
+	}
+	// Subtractive mode forces us to ignore tiles set in the selection area if they overlap with the active selection box
+	else if (_selection_mode == SUBTRACTIVE) {
+		for (uint32 x = 0; x < _map_data->GetMapLength(); ++x) {
+			for (uint32 y = 0; y < _map_data->GetMapHeight(); ++y) {
 				// Skip this tile if it is within the current subtractive selection area
 				if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
 					continue;
@@ -1342,7 +1350,10 @@ void MapView::_DrawSelectionArea() {
 			}
 		}
 	}
-}
+	else {
+		qDebug("ERROR: unknown case reached in _DrawSelectionArea()");
+	}
+} // void MapView::_DrawSelectionArea()
 
 
 
