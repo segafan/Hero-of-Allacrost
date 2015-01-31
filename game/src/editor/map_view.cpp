@@ -1031,10 +1031,38 @@ void MapView::_SwapTiles(uint32 x1, uint32 y1, uint32 x2, uint32 y2) {
 		layer[_press_tile_y][_press_tile_x] = temp;
 	}
 	else {
-		// TODO: Record information for undo/redo stack
+		// The x and y order in which we update the tiles needs to coincide with the direction of the swap movement.
+		// If the swap operation moves left, then the tiles that need to be swapped should start with the left. Otherwise
+		// we will end up swapping a single tile location multiple times and not get the result that we want.
+		uint32 xstart, ystart;
+		uint32 xlast, ylast;
+		uint32 xincrement, yincrement;
+		if (xdiff <= 0) {
+			xstart = 0;
+			xlast = _map_data->GetMapLength() - 1;
+			xincrement = 1;
+		}
+		else {
+			xstart = _map_data->GetMapLength() - 1;
+			xlast = 0;
+			xincrement = -1;
+		}
+		if (ydiff <= 0) {
+			ystart = 0;
+			ylast = _map_data->GetMapHeight() - 1;
+			yincrement = 1;
+		}
+		else {
+			ystart = _map_data->GetMapHeight() - 1;
+			ylast = 0;
+			yincrement = -1;
+		}
+
 		vector<vector<int32> >& select_layer = _selection_area.GetTiles();
-		for (int32 y = 0; y < static_cast<int32>(select_layer.size()); ++y) {
-			for (int32 x = 0; x < static_cast<int32>(select_layer[y].size()); ++x) {
+		uint32 y = ystart;
+		uint32 x = xstart;
+		while (true) {
+			while (true) {
 				if (select_layer[y][x] != MISSING_TILE) {
 					int32 swapx = x + static_cast<int32>(xdiff);
 					int32 swapy = y + static_cast<int32>(ydiff);
@@ -1048,12 +1076,23 @@ void MapView::_SwapTiles(uint32 x1, uint32 y1, uint32 x2, uint32 y2) {
 					layer[swapy][swapx] = layer[y][x];
 					layer[y][x] = temp;
 				}
+
+				x += xincrement;
+				if (x == xlast)
+					break;
 			}
+
+			y += yincrement;
+			if (y == ylast) {
+				break;
+			}
+
+			x = xstart;
 		}
 	}
 
 	_map_data->SetMapModified(true);
-}
+} // void MapView::_SwapTiles(uint32 x1, uint32 y1, uint32 x2, uint32 y2)
 
 
 
