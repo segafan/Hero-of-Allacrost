@@ -17,8 +17,8 @@ tileset_filenames = {}
 tileset_filenames[1] = "lua/data/tilesets/building_interior_objects_01"
 tileset_filenames[2] = "lua/data/tilesets/castle_exterior_01"
 tileset_filenames[3] = "lua/data/tilesets/outdoor_market"
-tileset_filenames[4] = "lua/data/tilesets/harrvah_house_exterior"
-tileset_filenames[5] = "lua/data/tilesets/harrvah_house_interior"
+tileset_filenames[4] = "lua/data/tilesets/desert_house_exterior"
+tileset_filenames[5] = "lua/data/tilesets/desert_house_interior"
 tileset_filenames[6] = "lua/data/tilesets/desert_ground"
 
 tile_layer_names = {}
