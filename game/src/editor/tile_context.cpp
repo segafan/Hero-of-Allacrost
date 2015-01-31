@@ -350,17 +350,15 @@ void ContextView::_ValidateChangedData(QTreeWidgetItem* item, int column) {
 			// To prevent an infinite recursion loop, we must nullify _right_click_item before restoring the context's name
 			_right_click_item = NULL;
 			item->setText(NAME_COLUMN, _original_context_name);
-			_original_context_name.clear();
 			QMessageBox::warning(this, "Context Rename Failure", _map_data->GetErrorMessage());
 		}
 		else {
-			_map_data->SetMapModified(true);
+			Editor* editor = static_cast<Editor*>(topLevelWidget());
+			editor->MapContextsModified();
 		}
 
 		_right_click_item = NULL;
 		_original_context_name.clear();
-		Editor* editor = static_cast<Editor*>(topLevelWidget());
-		editor->MapContextsModified();
 	}
 	else if (column == INHERITS_COLUMN) {
 		closePersistentEditor(item, column);
