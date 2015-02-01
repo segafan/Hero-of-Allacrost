@@ -1194,6 +1194,8 @@ void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value) {
 			}
 		}
 	}
+
+	_map_data->SetMapModified(true);
 } // void MapView::_FillArea(uint32 start_x, uint32 start_y, int32 value)
 
 
