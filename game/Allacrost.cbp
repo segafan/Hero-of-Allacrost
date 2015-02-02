@@ -13,6 +13,7 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++11" />
 					<Add option="-W" />
 					<Add option="-O0" />
 					<Add option="-DWIN32" />
@@ -175,6 +176,8 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
+			<Add option="-m32" />
 			<Add directory="src" />
 			<Add directory="src/common/gui" />
 			<Add directory="src/common/global" />
@@ -223,11 +226,9 @@
 		</Unit>
 		<Unit filename="src/common/common.cpp" />
 		<Unit filename="src/common/common.h" />
+		<Unit filename="src/common/common_bindings.cpp" />
 		<Unit filename="src/common/dialogue.cpp" />
 		<Unit filename="src/common/dialogue.h" />
-		<Unit filename="src/common/global/defs_global.cpp">
-			<Option weight="60" />
-		</Unit>
 		<Unit filename="src/common/global/global.cpp">
 			<Option weight="60" />
 		</Unit>
@@ -258,7 +259,6 @@
 		<Unit filename="src/common/gui/option.h" />
 		<Unit filename="src/common/gui/textbox.cpp" />
 		<Unit filename="src/common/gui/textbox.h" />
-		<Unit filename="src/defs.cpp" />
 		<Unit filename="src/defs.h" />
 		<Unit filename="src/engine/audio/audio.cpp" />
 		<Unit filename="src/engine/audio/audio.h" />
@@ -270,7 +270,7 @@
 		<Unit filename="src/engine/audio/audio_input.h" />
 		<Unit filename="src/engine/audio/audio_stream.cpp" />
 		<Unit filename="src/engine/audio/audio_stream.h" />
-		<Unit filename="src/engine/defs_engine.cpp" />
+		<Unit filename="src/engine/engine_bindings.cpp" />
 		<Unit filename="src/engine/input.cpp" />
 		<Unit filename="src/engine/input.h" />
 		<Unit filename="src/engine/mode_manager.cpp" />
@@ -430,12 +430,12 @@
 		<Unit filename="src/modes/battle/battle_dialogue.h" />
 		<Unit filename="src/modes/battle/battle_effects.cpp" />
 		<Unit filename="src/modes/battle/battle_effects.h" />
-		<Unit filename="src/modes/battle/battle_events.cpp" />
-		<Unit filename="src/modes/battle/battle_events.h" />
 		<Unit filename="src/modes/battle/battle_finish.cpp" />
 		<Unit filename="src/modes/battle/battle_finish.h" />
 		<Unit filename="src/modes/battle/battle_indicators.cpp" />
 		<Unit filename="src/modes/battle/battle_indicators.h" />
+		<Unit filename="src/modes/battle/battle_sequence.cpp" />
+		<Unit filename="src/modes/battle/battle_sequence.h" />
 		<Unit filename="src/modes/battle/battle_utils.cpp" />
 		<Unit filename="src/modes/battle/battle_utils.h" />
 		<Unit filename="src/modes/boot/boot.cpp" />
@@ -446,7 +446,6 @@
 		<Unit filename="src/modes/boot/boot_menu.h" />
 		<Unit filename="src/modes/boot/boot_welcome.cpp" />
 		<Unit filename="src/modes/boot/boot_welcome.h" />
-		<Unit filename="src/modes/defs_modes.cpp" />
 		<Unit filename="src/modes/map/map.cpp" />
 		<Unit filename="src/modes/map/map.h" />
 		<Unit filename="src/modes/map/map_dialogue.cpp" />
@@ -469,6 +468,7 @@
 		<Unit filename="src/modes/menu/menu.h" />
 		<Unit filename="src/modes/menu/menu_views.cpp" />
 		<Unit filename="src/modes/menu/menu_views.h" />
+		<Unit filename="src/modes/mode_bindings.cpp" />
 		<Unit filename="src/modes/pause.cpp" />
 		<Unit filename="src/modes/pause.h" />
 		<Unit filename="src/modes/save/save_mode.cpp" />
@@ -491,6 +491,8 @@
 		<Unit filename="src/modes/shop/shop_trade.h" />
 		<Unit filename="src/modes/shop/shop_utils.cpp" />
 		<Unit filename="src/modes/shop/shop_utils.h" />
+		<Unit filename="src/modes/test.cpp" />
+		<Unit filename="src/modes/test.h" />
 		<Unit filename="src/utils.cpp" />
 		<Unit filename="src/utils.h" />
 		<Extensions>

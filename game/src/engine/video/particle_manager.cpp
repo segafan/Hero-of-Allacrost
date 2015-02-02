@@ -95,15 +95,15 @@ ParticleEffectDef* ParticleManager::LoadEffect(const string& filename) {
 		system_definition->emitter._radius = script.ReadFloat("radius");
 
 		string shape_string = script.ReadString("shape");
-		if (strcasecmp(shape_string.c_str(), "point") != 0)
+		if (shape_string == "point")
 			system_definition->emitter._shape = EMITTER_SHAPE_POINT;
-		else if (strcasecmp(shape_string.c_str(), "line") != 0)
+		else if (shape_string == "line")
 			system_definition->emitter._shape = EMITTER_SHAPE_LINE;
-		else if (strcasecmp(shape_string.c_str(), "circle outline") != 0)
+		else if (shape_string == "circle outline")
 			system_definition->emitter._shape = EMITTER_SHAPE_CIRCLE;
-		else if (strcasecmp(shape_string.c_str(), "circle") != 0)
+		else if (shape_string == "circle")
 			system_definition->emitter._shape = EMITTER_SHAPE_FILLED_CIRCLE;
-		else if (strcasecmp(shape_string.c_str(), "rectangle") != 0)
+		else if (shape_string == "rectangle")
 			system_definition->emitter._shape = EMITTER_SHAPE_FILLED_RECTANGLE;
 		else {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown emitter shape: " << shape_string
@@ -121,13 +121,13 @@ ParticleEffectDef* ParticleManager::LoadEffect(const string& filename) {
 		system_definition->emitter._start_time = script.ReadFloat("start_time");
 
 		string mode_string = script.ReadString("emitter_mode");
-		if (strcasecmp(mode_string.c_str(), "looping") != 0)
+		if (mode_string == "looping")
 			system_definition->emitter._emitter_mode = EMITTER_MODE_LOOPING;
-		else if (strcasecmp(mode_string.c_str(), "one shot") != 0)
+		else if (mode_string == "one shot")
 			system_definition->emitter._emitter_mode = EMITTER_MODE_ONE_SHOT;
-		else if (strcasecmp(mode_string.c_str(), "burst") != 0)
+		else if (mode_string == "burst")
 			system_definition->emitter._emitter_mode = EMITTER_MODE_BURST;
-		else if (strcasecmp(mode_string.c_str(), "always")  != 0)
+		else if (mode_string == "always")
 			system_definition->emitter._emitter_mode = EMITTER_MODE_ALWAYS;
 		else {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown emitter mode: " << mode_string
@@ -136,11 +136,11 @@ ParticleEffectDef* ParticleManager::LoadEffect(const string& filename) {
 		}
 
 		string spin_string = script.ReadString("spin");
-		if (strcasecmp(spin_string.c_str(), "random") != 0)
+		if (spin_string == "random")
 			system_definition->emitter._spin = EMITTER_SPIN_RANDOM;
-		else if (strcasecmp(spin_string.c_str(), "counterclockwise") != 0)
+		else if (spin_string == "counterclockwise")
 			system_definition->emitter._spin = EMITTER_SPIN_COUNTERCLOCKWISE;
-		else if (strcasecmp(spin_string.c_str(), "clockwise") != 0)
+		else if (spin_string == "clockwise")
 			system_definition->emitter._spin = EMITTER_SPIN_CLOCKWISE;
 		else {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown emitter spin: " << spin_string
@@ -269,13 +269,13 @@ ParticleEffectDef* ParticleManager::LoadEffect(const string& filename) {
 		system_definition->modify_stencil = script.ReadBool("modify_stencil");
 
 		string stencil_string = script.ReadString("stencil_op");
-		if (strcasecmp(stencil_string.c_str(), "incr") != 0)
+		if (stencil_string == "incr")
 			system_definition->stencil_op = VIDEO_STENCIL_OP_INCREASE;
-		else if (strcasecmp(stencil_string.c_str(), "decr") != 0)
+		else if (stencil_string == "decr")
 			system_definition->stencil_op = VIDEO_STENCIL_OP_DECREASE;
-		else if (strcasecmp(stencil_string.c_str(), "zero") != 0)
+		else if (stencil_string == "zero")
 			system_definition->stencil_op = VIDEO_STENCIL_OP_ZERO;
-		else if (strcasecmp(stencil_string.c_str(), "one") != 0)
+		else if (stencil_string == "one")
 			system_definition->stencil_op = VIDEO_STENCIL_OP_ONE;
 		else {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown stencil_op: " << stencil_string
