@@ -14,11 +14,11 @@ number_tile_layers = 3
 number_map_contexts = 2
 
 tileset_filenames = {}
-tileset_filenames[1] = "lua/data/tilesets/desert_cave"
-tileset_filenames[2] = "lua/data/tilesets/desert_cave_ground"
-tileset_filenames[3] = "lua/data/tilesets/desert_cave_walls"
-tileset_filenames[4] = "lua/data/tilesets/desert_cave_walls2"
-tileset_filenames[5] = "lua/data/tilesets/desert_cave_water"
+tileset_filenames[1] = "lua/data/tilesets/desert_cave.lua"
+tileset_filenames[2] = "lua/data/tilesets/desert_cave_ground.lua"
+tileset_filenames[3] = "lua/data/tilesets/desert_cave_walls.lua"
+tileset_filenames[4] = "lua/data/tilesets/desert_cave_walls2.lua"
+tileset_filenames[5] = "lua/data/tilesets/desert_cave_water.lua"
 
 tile_layer_names = {}
 tile_layer_names[1] = "Ground"

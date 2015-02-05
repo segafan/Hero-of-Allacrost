@@ -115,7 +115,6 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 	ReadScriptDescriptor definition_file;
 	map_file.ReadStringVector("tileset_filenames", tileset_definition_filenames);
 	for (uint32 i = 0; i < tileset_count; ++i) {
-		tileset_definition_filenames[i] += ".lua";
 		if (definition_file.OpenFile(tileset_definition_filenames[i]) == false) {
 			PRINT_ERROR << "failed to load tileset definition file: " << tileset_definition_filenames[i] << endl;
 			exit(1);

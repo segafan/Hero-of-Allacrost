@@ -92,7 +92,7 @@ tests[4] = {
 
 
 tests[5] = {
-	name = "[01_harrvah_city_attack] - First Visit to Harrvah, City Under Attack";
+	name = "[01_harrvah_capital_attack] - Harrvah Capital Under Attack";
 	description = "Places the player at the entrance to Harrvah for the first visit to the city. This is when Claudius is " ..
 		"joined by other knights returning from their mission to the cave, where they find the city under attack by the " ..
 		"demonic forces.";
@@ -105,6 +105,6 @@ tests[5] = {
 		GlobalManager:SetDrunes(200);
 		GlobalManager:AddToInventory(1, 5);
 
-		StartMap("lua/scripts/maps/a01_harrvah_city_attack.lua");
+		StartMap("lua/scripts/maps/a01_harrvah_capital_attack.lua");
 	end
 }
