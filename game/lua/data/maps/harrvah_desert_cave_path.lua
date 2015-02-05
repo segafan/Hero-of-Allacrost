@@ -14,7 +14,7 @@ number_tile_layers = 3
 number_map_contexts = 1
 
 tileset_filenames = {}
-tileset_filenames[1] = "lua/data/tilesets/desert_ground"
+tileset_filenames[1] = "lua/data/tilesets/desert_ground.lua"
 
 tile_layer_names = {}
 tile_layer_names[1] = "Ground"
