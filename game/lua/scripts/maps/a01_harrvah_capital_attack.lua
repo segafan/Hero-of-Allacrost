@@ -1,8 +1,9 @@
 --------------------------------------------------------------------------------
 -- a01_harrvah_capital_attack.lua
 --
--- This script controls the events that happen on the map after a player starts
--- a new game. It is heavy on dialogue and the user has no control over the characters.
+-- A script specific to the main storyline events. The Harrvah Capital is under
+-- attack by demons and the player has to navigate his party through the chaos
+-- to find the king.
 --------------------------------------------------------------------------------
 local ns = {}
 setmetatable(ns, {__index = _G})
@@ -17,11 +18,28 @@ sound_filenames = {};
 
 music_filenames = {};
 
+-- Primary Map Classes
 Map = {};
+ObjectManager = {};
+DialogueManager = {};
+EventManager = {};
+TreasureManager = {};
+GlobalEvents = {};
+
+-- Containers used to hold pointers to various types of class objects
+objects = {};
+sprites = {};
+dialogues = {};
+events = {};
+zones = {};
+
+-- All custom map event functions are contained within this table. The function name is used as the table key
+event_functions = {};
+
+
 
 function Load(m)
 	Map = m;
-
 	ObjectManager = Map.object_supervisor;
 	DialogueManager = Map.dialogue_supervisor;
 	EventManager = Map.event_supervisor;
@@ -73,7 +91,7 @@ function CreateSprites()
 
 	-- X/Y position that represents the southern middle part of the map
 	local startx = 98;
-	local starty = 252;
+	local starty = 205;
 
 	-- Create sprites for the three playable characters
 	claudius = {};
@@ -155,24 +173,21 @@ function CreateEvents()
 end -- function CreateEvents()
 
 
--- Container for all map class event functions
-functions = {};
-
 -- Sprite function: Focus map camera on sprite
-functions["FocusCameraOnSprite"] = function(sprite)
+event_functions["FocusCameraOnSprite"] = function(sprite)
 	Map:SetCamera(sprite, 1000);
 end
 
 
 -- Sprite function: Disable collision and visibility on sprite
-functions["DisableCollisionAndVisibility"] = function(sprite)
+event_functions["DisableCollisionAndVisibility"] = function(sprite)
 	sprite:SetVisible(false);
 	sprite:SetNoCollision(true);
 end
 
 
 -- Sprite function: Change movement speed of a sprite
-functions["ChangeSpriteMovementSpeed"] = function(sprite)
+event_functions["ChangeSpriteMovementSpeed"] = function(sprite)
 	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
 end
 
