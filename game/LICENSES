@@ -73,24 +73,28 @@ img/sprites/battle/characters/claudius_jump_forward.png         CC-BY-SA 3.0    
 img/sprites/battle/characters/claudius_kneeling.png             GPLv2                    Allacrost + Valyria Tear
 
 img/sprites/map/enemies/bat_spritesheet.png                     CC-BY-SA 3.0             Liberated Pixel Cup, [OGA], http://lpc.opengameart.org/ 
-img/sprites/map/enemies/big_slime_idle.lua                      GPLv2                    Bertram, [VT]
+img/sprites/map/enemies/big_slime_idle.png                      GPLv2                    Bertram, [VT]
 img/sprites/map/enemies/big_slime_spritesheet.png               CC-BY-SA 3.0             Liberated Pixel Cup, [OGA], http://lpc.opengameart.org/
-img/sprites/map/enemies/big_slime_walk.lua                      GPLv2                    Bertram, [VT]
+img/sprites/map/enemies/big_slime_walk.png                      GPLv2                    Bertram, [VT]
 
 img/sprites/map/scening/butterfly_spritesheet.png               GPLv2                    [TMW]
 img/sprites/map/scening/chicken_spritesheet.png                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu), [OGA]
 img/sprites/map/scening/squirrel_spritesheet.png                GPLv2                    [TMW]
 
 img/tilesets/castle_exterior_01.png                             CC-BY 3.0                Hyptosis + Zabin, [OGA]
-img/tilesets/castle_exterior_greystone_01.png                   GPLv2                    Krzysztof Daszuta (Irukard), [TMW]
-img/tilesets/castle_exterior_greystone_02.png                   GPLv2                    Mer + Pet + Ali, [TMW]
+img/tilesets/castle_greystone_exterior_01.png                   GPLv2                    Krzysztof Daszuta (Irukard), [TMW]
+img/tilesets/castle_greystone_exterior_02.png                   GPLv2                    Mer + Pet + Ali, [TMW]
 img/tilesets/desert_town_exterior.png                           CC-BY 3.0                Hyptosis + Zabin, [OGA]
 img/tilesets/destruction.png                                    CC-BY 3.0                Hyptosis, [OGA], Explosions
                                                                 CC-BY-SA 3.0             Hyptosis + Jetrl, [OGA], Fire
-img/tilesets/harrvah_house_exterior.png                         CC-BY 3.0                Hyptosis + Zabin, [OGA], window art
+img/tilesets/desert_house_exterior.png                          CC-BY 3.0                Hyptosis + Zabin, [OGA], window art
+                                                                CC-BY-SA 3.0             Reemax, [OGA], signs
 img/tilesets/outdoor_market.png                                 CC-BY-SA 3.0             Daniel Eddeland (Daneeklu), [OGA]
                                                                 CC-BY-SA 3.0             Joshua Taylor, [OGA]
-                                                                CC-BY 3.0                Zabin + Hyptosis, [OGA], market stalls, anvil, light, latern, sack, 
+                                                                CC-BY 3.0                Zabin + Hyptosis, [OGA], market stalls, anvil, light, latern, sacks
+img/tilesets/ship_dock.png                                      CC-BY-SA 3.0             Reid, [OGA], soft brown dock with ropes
+                                                                CC-BY 3.0                Zabin + Hyptosis, [OGA], sacks
+                                                                CC-BY-SA 3.0             Liberated Pixel Cup, [OGA], brightly colored docks
 img/misc/editor_tools/
 img/misc/editor-tools/new.png                                   GPLv2+                   Bjorn Lindeijer, [TIL]
 img/misc/editor-tools/delete.png                                GPLv2+                   Bjorn Lindeijer, [TIL]
