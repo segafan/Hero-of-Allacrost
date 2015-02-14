@@ -1,7 +1,7 @@
-local ns = {}
-setmetatable(ns, {__index = _G})
-desert_ground = ns
-setfenv(1, ns)
+local ns = {};
+setmetatable(ns, {__index = _G});
+desert_ground = ns;
+setfenv(1, ns);
 
 tileset_name = "Desert Ground"
 image = "img/tilesets/desert_ground.png"
@@ -21,8 +21,8 @@ collisions[10] = { 0, 0, 0, 0, 0, 0, 10, 0, 5, 0, 0, 0, 0, 15, 15, 15 }
 collisions[11] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15 }
 collisions[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 0, 0, 0, 0, 0, 0 }
 collisions[13] = { 0, 0, 0, 0, 0, 0, 0, 0, 12, 8, 0, 0, 0, 0, 0, 0 }
-collisions[14] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0 }
-collisions[15] = { 0, 0, 0, 0, 0, 0, 0, 0, 4, 12, 15, 15, 15, 15, 5, 10 }
+collisions[14] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+collisions[15] = { 0, 0, 0, 0, 0, 0, 0, 0, 5, 15, 15, 15, 15, 15, 5, 10 }
 
 autotiling = {}
 autotiling[0] = "TameSand"
