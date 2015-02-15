@@ -450,7 +450,7 @@ void BindModeCode() {
 		class_<BattleEncounterEvent, MapEvent>("BattleEncounterEvent")
 			.scope
 			[
-				def("Create", &CustomEvent::Create)
+				def("Create", &BattleEncounterEvent::Create)
 			]
 			.def("SetMusic", &BattleEncounterEvent::SetMusic)
 			.def("SetBackground", &BattleEncounterEvent::SetBackground)

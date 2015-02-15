@@ -21,6 +21,7 @@ sprites = {};
 dialogues = {};
 events = {};
 zones = {};
+
 -- All custom map functions are contained within the following table..
 -- String keys in this table serves as the names of these functions. 
 functions = {};
@@ -41,20 +42,20 @@ function Load(m)
 	Map:AddObjectLayerToOrder(0);
 	Map:AddTileLayerToOrder(2);
 
-	print "CREATE OBJECTS"
+	print "CreateObjects()"
 	CreateObjects();
-	print "CREATE CHARACTERS"
-	CreateCharacters();
-	print "CREATE ENEMIES"
+	print "CreateSprites()"
+	CreateSprites();
+	print "CreateEnemies()"
 	CreateEnemies();
-	print "CREATE DIALOGUE"
+	print "CreateDialogue()"
 	CreateDialogue();
-	print "CREATE EVENTS"
+	print "CreateZones()"
+	CreateZones();
+	print "CreateEvents()"
 	CreateEvents();
 	
-	print "SET CAMERA"
 	Map:SetCamera(sprites["claudius"]);
-	print "MOVE FOCUS"
 	Map:MoveVirtualFocus(80, 130);
 
 	-- Visual effects: dark lighting, various light halos
@@ -73,56 +74,55 @@ function Load(m)
 
 	-- TEMP: enabled for development. Change this to false prior to release
 	Map.unlimited_stamina = true;
-	print "DONE WITH LOAD"
+	print "LOAD COMPLETE"
 end -- function Load(m)
 
 
 -- Mandatory function for map updates
 function Update()
---[[
-	if (corpse_dicovery_zone:IsCameraEntering() == true) then
+	if (zones["corpse_discovery"]:IsCameraEntering() == true) then
 		if (GlobalEvents:DoesEventExist("corpse_seen") == false) then
 			GlobalEvents:AddNewEvent("corpse_seen", 1);
 			EventManager:StartEvent(10);
 		end
 	end
 	
-	if (corpse_zone:IsCameraEntering() == true and not Map:IsCameraOnVirtualFocus()) then
+	if (zones["corpse"]:IsCameraEntering() == true and not Map:IsCameraOnVirtualFocus()) then
 		if (GlobalEvents:DoesEventExist("corpse_found") == false) then
 			GlobalEvents:AddNewEvent("corpse_found", 1);
 			EventManager:StartEvent(11);
 		end
 	end
 
-	if (long_route_zone:IsCameraEntering() == true) then
+	if (zones["long_route"]:IsCameraEntering() == true) then
 		if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
 			EventManager:StartEvent(20);
 		end
 	end
 	
-	if (short_route_zone:IsCameraEntering() == true) then
+	if (zones["short_route"]:IsCameraEntering() == true) then
 		if (GlobalEvents:DoesEventExist("knight_moved") == false) then
 			GlobalEvents:AddNewEvent("knight_moved", 1);
 			EventManager:StartEvent(30);
 		end
 	end
 	
-	if (collapse_zone:IsCameraEntering() == true) then
+	if (zones["collapse"]:IsCameraEntering() == true) then
 		if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
 			GlobalEvents:AddNewEvent("passage_collapsed", 1);
 			EventManager:StartEvent(40);
 		end
 	end
 
-	if ((forward_passage_zone:IsCameraEntering() == true) and (Map.camera:IsVisible() == true)) then
+	if ((zones["forward_passage"]:IsCameraEntering() == true) and (Map.camera:IsVisible() == true)) then
 		EventManager:StartEvent(50);
 	end
 	
-	if ((backward_passage_zone:IsCameraEntering() == true) and (Map.camera:IsVisible() == true)) then
+	if ((zones["backward_passage"]:IsCameraEntering() == true) and (Map.camera:IsVisible() == true)) then
 		EventManager:StartEvent(60);
 	end
 	
-	if ((spring_zone:IsCameraEntering() == true)) then
+	if ((zones["spring_discovery"]:IsCameraEntering() == true)) then
 		if (GlobalEvents:DoesEventExist("spring_discovered") == false) then
 			GlobalEvents:AddNewEvent("spring_discovered", 1);
 			Map.camera:SetMoving(false);
@@ -130,13 +130,12 @@ function Update()
 		end
 	end
 	
-	if ((riverbed_zone:IsCameraEntering() == true)) then
-		if (GlobalEvents:DoesEventExist("riverbed_entered") == false) then
-			GlobalEvents:AddNewEvent("riverbed_entered", 1);
+	if ((zones["riverbed_arrival"]:IsCameraEntering() == true)) then
+		if (GlobalEvents:DoesEventExist("riverbed_arrival") == false) then
+			GlobalEvents:AddNewEvent("riverbed_arrival", 1);
 			EventManager:StartEvent(80);
 		end
 	end
---]]
 end -- function Update()
 
 
@@ -148,30 +147,12 @@ end
 
 -- Creates non-sprite map objects
 function CreateObjects()
-	-- Add a skeleton corpse to the bottom right area of the map
-	objects["corpse"] = hoa_map.PhysicalObject();
-	objects["corpse"]:SetObjectID(3000);
-	objects["corpse"]:SetContext(1);
-	objects["corpse"]:SetImgHalfWidth(2.0);
-	objects["corpse"]:SetImgHeight(2.0);
-	objects["corpse"]:SetCollHalfWidth(2.0);
-	objects["corpse"]:SetCollHeight(1.0);
-	objects["corpse"]:SetXPosition(206, 0.0);
-	objects["corpse"]:SetYPosition(147, 0.0);
-	objects["corpse"]:SetUpdatable(false);
-	objects["corpse"]:SetVisible(true);
-	objects["corpse"]:SetNoCollision(false);
-	objects["corpse"]:AddAnimation("img/misc/skeleton_corpse.png");
-	ObjectManager:AddObject(objects["corpse"], 0);
-end -- function CreateObjects()
+
+end
 
 
 -- Creates all friendly sprites. Roughly ordered by when they are encountered by the player
-function CreateCharacters()
-	knight_path_sprite = {};
-	knight_talk_sprite = {};
-	local sprite;
-
+function CreateSprites()
 	-- Squad #1: Playable character sprites
 	sprites["claudius"] = ConstructSprite("Claudius", 1, 11, 227);
 	sprites["claudius"]:SetDirection(hoa_map.MapMode.NORTH);
@@ -180,14 +161,12 @@ function CreateCharacters()
 
 	sprites["mark"] = ConstructSprite("Knight01", 2, 17, 227);
 	sprites["mark"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["mark"]:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprites["mark"]:SetNoCollision(true);
 	sprites["mark"]:SetName(hoa_system.Translate("Mark"));
 	ObjectManager:AddObject(sprites["mark"], 0);
 	
 	sprites["lukar"] = ConstructSprite("Knight01", 3, 14, 225);
 	sprites["lukar"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["lukar"]:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	sprites["lukar"]:SetNoCollision(true);
 	sprites["lukar"]:SetName(hoa_system.Translate("Lukar"));
 	ObjectManager:AddObject(sprites["lukar"], 0);
@@ -196,13 +175,13 @@ function CreateCharacters()
 	-- Knight at cave entrance
 	sprites["entrance_knight1"] = ConstructSprite("Knight01", 10, 14, 150);
 	sprites["entrance_knight1"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["entrance_knight1"]:AddDialogueReference(10);
+--	sprites["entrance_knight1"]:AddDialogueReference(10);
 	ObjectManager:AddObject(sprites["entrance_knight1"], 0);
 
 	-- Knight trying to pull Mak hound
 	sprites["entrance_knight2"] = ConstructSprite("Knight02", 11, 17, 148);
 	sprites["entrance_knight2"]:SetDirection(hoa_map.MapMode.WEST);
-	sprites["entrance_knight2"]:AddDialogueReference(11);
+--	sprites["entrance_knight2"]:AddDialogueReference(11);
 	ObjectManager:AddObject(sprites["entrance_knight2"], 0);
 
 	-- Frightened Mack Hound
@@ -214,14 +193,13 @@ function CreateCharacters()
 	-- Knight guiding others through the short passage
 	sprites["passage_knight1"] = ConstructSprite("Knight03", 20, 149, 62);
 	sprites["passage_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
-	sprites["passage_knight1"]:AddDialogueReference(20);
+--	sprites["passage_knight1"]:AddDialogueReference(20);
 	ObjectManager:AddObject(sprites["passage_knight1"], 0);
 	--knight_talk_sprite = sprite;
 	
 	-- Knight seen walking ahead through the short passage
 	sprites["passage_knight2"] = ConstructSprite("Knight02", 21, 162, 62);
 	sprites["passage_knight2"]:SetDirection(hoa_map.MapMode.EAST);
-	sprites["passage_knight2"]:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	ObjectManager:AddObject(sprites["passage_knight2"], 0);
 	--knight_path_sprite = sprite;
 	
@@ -229,16 +207,15 @@ function CreateCharacters()
 	-- Knight with injured ankle
 	sprites["injury_knight1"] = ConstructSprite("Knight03", 30, 142, 30);
 	sprites["injury_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
-	sprites["injury_knight1"]:AddDialogueReference(30);
+--	sprites["injury_knight1"]:AddDialogueReference(30);
 	ObjectManager:AddObject(sprites["injury_knight1"], 0);
 	
 	-- Knight assisting injured knight
 	sprites["injury_knight2"] = ConstructSprite("Knight01", 31, 142, 33);
 	sprites["injury_knight2"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["injury_knight2"]:AddDialogueReference(31);
+--	sprites["injury_knight2"]:AddDialogueReference(31);
 	ObjectManager:AddObject(sprites["injury_knight2"], 0);
 
---[[
 	-- All of the following NPCs are encountered at the end of the cave in the riverbed
 	sprite = ConstructSprite("Captain", 2500, 248, 16);
 	sprite:SetDirection(hoa_map.MapMode.WEST);
@@ -283,8 +260,7 @@ function CreateCharacters()
 	sprite = ConstructSprite("Knight02", 2510, 235, 14);
 	sprite:SetDirection(hoa_map.MapMode.EAST);
 	ObjectManager:AddObject(sprite, 0);
---]]
-end -- function CreateCharacters()
+end -- function CreateSprites()
 
 
 -- Creates all enemy sprites and the zones that they spawn/roam in
@@ -292,7 +268,7 @@ function CreateEnemies()
 	local enemy = {};
 	local spawn_zone = {};
 	local roam_zone = {};
---[[
+
 	-- Zone #01: Near entrance
 	roam_zone = hoa_map.EnemyZone(26, 79, 130, 141);
 
@@ -311,7 +287,7 @@ function CreateEnemies()
 	roam_zone:AddEnemy(enemy, Map, 1);
 
 	Map:AddZone(roam_zone);
-	
+--[[	
 	-- Zone #02: Along narrow southern passage between pit and wall
 	roam_zone = hoa_map.EnemyZone(108, 140, 145, 148);
 
@@ -518,7 +494,7 @@ function CreateDialogue()
 		dialogue:AddLine(text, 2008);
 
 	dialogue = hoa_map.MapDialogue.Create(31);
-		text = hoa_system.Translate("He sprained his ankle on a loose rock so we're treating his injury. Move on ahead, you're almost there.");
+		text = hoa_system.Translate("He sprained his ankle on a loose rock, so we're treating his injury. Move on ahead, you're almost there.");
 		dialogue:AddLine(text, 2009);
 
 	----------------------------------------------------------------------------
@@ -563,7 +539,7 @@ function CreateDialogue()
 		dialogue:AddLine(text, 2);
 		text = hoa_system.Translate("A battle occurs whenever you and an enemy collide. Sometimes you can avoid a battle by sneaking past or running by an enemy before it has a chance to engage you. When you enter a battle you can no longer run away. At that point you must defeat your opponent before they defeat you.");
 		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("That enemy doesn't appear to be much of a threat. Instead of running let it engage us. I want to make sure you remember how a knight does battle.");
+		text = hoa_system.Translate("That enemy doesn't appear to be much of a threat. Instead of running, let it engage us. I want to make sure you remember how a knight does battle.");
 		dialogue:AddLine(text, 3);
 		text = hoa_system.Translate("Let's see how useful you are in a real fight, rookie.");
 		dialogue:AddLine(text, 2);
@@ -685,296 +661,329 @@ end -- function CreateDialogue()
 
 
 
+function CreateZones()
+	-- Event Zones
+	zones["corpse_discovery"] = hoa_map.CameraZone(185, 200, 135, 150, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	Map:AddZone(zones["corpse_discovery"]);
+
+	zones["corpse"] = hoa_map.CameraZone(202, 210, 145, 149, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	Map:AddZone(zones["corpse"]);
+
+	zones["long_route"] = hoa_map.CameraZone(132, 136, 70, 80, hoa_map.MapMode.CONTEXT_01);
+	Map:AddZone(zones["long_route"]);
+
+	zones["short_route"] = hoa_map.CameraZone(156, 160, 60, 63, hoa_map.MapMode.CONTEXT_01);
+	Map:AddZone(zones["short_route"]);	
+
+	zones["collapse"] = hoa_map.CameraZone(186, 189, 60, 63, hoa_map.MapMode.CONTEXT_01);
+	Map:AddZone(zones["collapse"]);	
+
+	zones["forward_passage"] = hoa_map.CameraZone(78, 79, 6, 7, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	Map:AddZone(zones["forward_passage"]);
+
+	zones["backward_passage"] = hoa_map.CameraZone(110, 111, 20, 21, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	Map:AddZone(zones["backward_passage"]);
+
+	zones["spring_discovery"] = hoa_map.CameraZone(171, 186, 5, 10, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	Map:AddZone(zones["spring_discovery"]);
+
+	zones["riverbed_arrival"] = hoa_map.CameraZone(220, 221, 2, 11, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	Map:AddZone(zones["riverbed_arrival"]);
+
+	-- Enemy Zones
+	-- Zone #01: Near entrance
+	zones["enemy01"] = hoa_map.EnemyZone(26, 79, 130, 141);
+	Map:AddZone(zones["enemy01"]);
+
+	-- Zone #02: Along narrow southern passage between pit and wall
+	zones["enemy02"] = hoa_map.EnemyZone(108, 140, 145, 148);
+	Map:AddZone(zones["enemy02"]);
+	
+	-- Zone #03: Near ceiling overpass entrance and around corpse
+	zones["enemy03"] = hoa_map.EnemyZone(158, 167, 130, 145);
+	zones["enemy03"]:AddSection(168, 215, 134, 142);
+	Map:AddZone(zones["enemy03"]);
+	
+	-- Zone #04: In ceiling overpass
+	zones["enemy04"] = hoa_map.EnemyZone(146, 157, 90, 113);
+	Map:AddZone(zones["enemy04"]);
+	
+	-- Zone #05: Wide open area at beginning of long route
+	zones["enemy05"] = hoa_map.EnemyZone(26, 115, 68, 89);
+	zones["enemy05"]:AddSection(4, 72, 25, 83);
+	Map:AddZone(zones["enemy05"]);
+	
+	-- Zone #06: Above pits and before wall passage
+	zones["enemy06"] = hoa_map.EnemyZone(24, 89, 12, 47);
+	zones["enemy06"]:AddSection(24, 73, 6, 12);
+	Map:AddZone(zones["enemy06"]);
+	
+	-- Zone #07: Through wall passage and before spring
+	zones["enemy07"] = hoa_map.EnemyZone(116, 143, 6, 29);
+	zones["enemy07"]:AddSection(144, 167, 6, 13);
+	Map:AddZone(zones["enemy07"]);
+end -- function CreateZones()
+
+
+
 function CreateEvents()
 	local event = {};
+	local chain_start_id = 0; -- Holds the ID of the first event in a chain
 
-	----- Event Chain 01: Initial scene and 4-part dialogue when the player first enters the cave
+	---------- Event Chain 01: Initial scene and 4-part dialogue when the player first enters the cave
+	print "Event Chain #01";
+	chain_start_id = 10;
+
 	-- Part #1: Lukar turns around and asks Cladius to lead
-	event = hoa_map.PathMoveSpriteEvent.Create(10, 1, 0, -16);
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 0, 1, 0, -16);
 	events["opening_dialogue"] = event;
 	event:SetRelativeDestination(true);
-	event:AddEventLinkAtStart(11);
-	event:AddEventLinkAtStart(12);
-	event:AddEventLinkAtEnd(13, 1000);
-	event:AddEventLinkAtEnd(14, 1500);
-	event = hoa_map.PathMoveSpriteEvent.Create(11, 2, 0, -16);
+	event:AddEventLinkAtStart(chain_start_id + 1);
+	event:AddEventLinkAtStart(chain_start_id + 2);
+	event:AddEventLinkAtEnd(chain_start_id + 3, 1000);
+	event:AddEventLinkAtEnd(chain_start_id + 4, 1500);
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 1, 2, 0, -16);
 	event:SetRelativeDestination(true);
-	event = hoa_map.PathMoveSpriteEvent.Create(12, 3, 0, -16);
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 2, 3, 0, -16);
 	event:SetRelativeDestination(true);
-	event = hoa_map.ChangeDirectionSpriteEvent.Create(13, 3, hoa_map.MapMode.SOUTH);
-	event = hoa_map.DialogueEvent.Create(14, 100);
-	event:AddEventLinkAtEnd(15, 250);
-	event:AddEventLinkAtEnd(16, 500);
-	event:AddEventLinkAtEnd(17, 500);
-
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(chain_start_id + 3, 3, hoa_map.MapMode.SOUTH);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 4, 100);
+	event:AddEventLinkAtEnd(chain_start_id + 5, 250);
+	event:AddEventLinkAtEnd(chain_start_id + 6, 500);
+	event:AddEventLinkAtEnd(chain_start_id + 7, 500);
 	-- Part #2: Mark protests Lukar's decision
-	event = hoa_map.ChangeDirectionSpriteEvent.Create(15, 2, hoa_map.MapMode.WEST);
-	event = hoa_map.ChangeDirectionSpriteEvent.Create(16, 1, hoa_map.MapMode.EAST);
-	event = hoa_map.DialogueEvent.Create(17, 101);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(chain_start_id + 5, 2, hoa_map.MapMode.WEST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(chain_start_id + 6, 1, hoa_map.MapMode.EAST);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 7, 101);
 	event:AddEventLinkAtEnd(18, 200);
-
 	-- Part #3: Lukar reassures Mark
-	event = hoa_map.ChangeDirectionSpriteEvent.Create(18, 3, hoa_map.MapMode.EAST);
-	event:AddEventLinkAtEnd(19, 100);
-	event = hoa_map.DialogueEvent.Create(19, 102);
-	event:AddEventLinkAtEnd(20, 300);
-
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(chain_start_id + 8, 3, hoa_map.MapMode.EAST);
+	event:AddEventLinkAtEnd(chain_start_id + 9, 100);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 9, 102);
+	event:AddEventLinkAtEnd(chain_start_id + 10, 300);
 	-- Part #4: Lukar asks Claudius again, who accepts. Mark and Lukar's sprites disappear into Claudius and player is given control
-	event = hoa_map.PathMoveSpriteEvent.Create(20, 3, -5, 0);
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 10, 3, -5, 0);
 	event:SetRelativeDestination(true);
-	event:AddEventLinkAtEnd(21);
-	event = hoa_map.ChangeDirectionSpriteEvent.Create(21, 3, hoa_map.MapMode.SOUTH);
-	event:AddEventLinkAtEnd(22, 100);
-	event = hoa_map.ChangeDirectionSpriteEvent.Create(22, 1, hoa_map.MapMode.NORTH);
-	event:AddEventLinkAtEnd(23, 100);
-	event = hoa_map.DialogueEvent.Create(23, 103);
-	event:AddEventLinkAtEnd(24, 100);
-	event:AddEventLinkAtEnd(25, 100);
-	event = hoa_map.PathMoveSpriteEvent.Create(24, 2, -8, 0);
-	event:AddEventLinkAtEnd(26);
+	event:AddEventLinkAtEnd(chain_start_id + 11);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(chain_start_id + 11, 3, hoa_map.MapMode.SOUTH);
+	event:AddEventLinkAtEnd(chain_start_id + 12, 100);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(chain_start_id + 12, 1, hoa_map.MapMode.NORTH);
+	event:AddEventLinkAtEnd(chain_start_id + 13, 100);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 13, 103);
+	event:AddEventLinkAtEnd(chain_start_id + 14, 100);
+	event:AddEventLinkAtEnd(chain_start_id + 15, 100);
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 14, 2, -8, 0);
+	event:AddEventLinkAtEnd(chain_start_id + 16);
 	event:SetRelativeDestination(true);
-	event = hoa_map.PathMoveSpriteEvent.Create(25, 3, 0, 4);
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 15, 3, 0, 4);
 	event:SetRelativeDestination(true);
-	event = hoa_map.CustomEvent.Create(26, "EndOpeningScene", "");
+	event = hoa_map.CustomEvent.Create(chain_start_id + 16, "EndOpeningScene", "");
 
-	----- Event Chain 02: First enemy encounter
-	event = hoa_map.DialogueEvent.Create(30, 120);
-	event:AddEventLinkAtStart(31);
-	event = hoa_map.CustomEvent.Create(31, "SpawnFirstEnemy", "");
-	event:AddEventLinkAtEnd(32, 500);
-	event = hoa_map.DialogueEvent.Create(32, 121);
-	event:AddEventLinkAtEnd(33);
-	event = hoa_map.CustomEvent.Create(33, "EngageFirstEnemy", "");
-	event:AddEventLinkAtEnd(34);
+	---------- Event Chain 02: First enemy encounter
+	print "Event Chain #02";
+	chain_start_id = 30;
+
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 0, 120);
+	event:AddEventLinkAtStart(chain_start_id + 1);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 1, "SpawnFirstEnemy", "");
+	event:AddEventLinkAtEnd(chain_start_id + 2, 500);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 2, 121);
+	event:AddEventLinkAtEnd(chain_start_id + 3);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 3, "EngageFirstEnemy", "");
+	event:AddEventLinkAtEnd(chain_start_id + 4);
 	-- Follow-up dialogue begins immediately after the battle ends
-	event = hoa_map.DialogueEvent.Create(34, 130);
-	event:AddEventLinkAtEnd(35, 750);
-	event = hoa_map.DialogueEvent.Create(35, 131);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 4, 130);
+	event:AddEventLinkAtEnd(chain_start_id + 5, 750);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 5, 131);
 
-	-- Event Chain 03: 
+	---------- Event Chain 03: Discovery of corpse in cave
+	print "Event Chain #03";
+	chain_start_id = 40;
 
---[[
-	-- Event Chain 01: Discovery of corpse in cave
-	corpse_dicovery_zone = hoa_map.CameraZone(185, 200, 135, 150, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
-	Map:AddZone(corpse_dicovery_zone);
 	-- Dialog when seeing the corpse
-	event = hoa_map.DialogueEvent.Create(10, 500);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 0, 500);
 	event:SetStopCameraMovement(true);
-	event:AddEventLinkAtEnd(13);
+	event:AddEventLinkAtEnd(chain_start_id + 3);
 	-- Move camera to corpse
-	event = hoa_map.CustomEvent.Create(13, 16, 0);
-	event:AddEventLinkAtEnd(14, 3000);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 3, "CameraPanToCorpse", "");
+	event:AddEventLinkAtEnd(chain_start_id + 4, 3000);
 	-- Move camera back to Cladius
-	event = hoa_map.CustomEvent.Create(14, 17, 0);	
-	
-	corpse_zone = hoa_map.CameraZone(202, 210, 145, 149, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
-	Map:AddZone(corpse_zone);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 4, "SetCameraToPlayer", "");
 	-- Start dialogue about corpse
-	event = hoa_map.DialogueEvent.Create(11, 501);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 1, 501);
 	event:SetStopCameraMovement(true);
-	event:AddEventLinkAtEnd(12);
+	event:AddEventLinkAtEnd(chain_start_id + 2);
 	-- Add treasure
-	event = hoa_map.CustomEvent.Create(12, 6, 0);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 2, "RewardPotion", "");
 
-	print "EVENT CHAIN #02"
-	-- Event Chain 02: Prevent player from going long route before cave collapse
-	long_route_zone = hoa_map.CameraZone(132, 136, 70, 80, hoa_map.MapMode.CONTEXT_01);
-	Map:AddZone(long_route_zone);
+	---------- Event Chain 04: Prevent player from going long route before cave collapse
+	print "Event Chain #04";
+	chain_start_id = 50;
 
 	-- Enter scene state
-	event = hoa_map.CustomEvent.Create(20, 1, 0);
-	event:AddEventLinkAtEnd(21);
-		
+	event = hoa_map.CustomEvent.Create(chain_start_id + 0, "StopMovementAndEnterScene", "");
+	event:AddEventLinkAtEnd(chain_start_id + 1);
 	-- Move camera to knight sprite
-	event = hoa_map.CustomEvent.Create(21, 18, 0);
-	event:AddEventLinkAtEnd(22, 1000);
-	
+	event = hoa_map.CustomEvent.Create(chain_start_id + 1, "CameraToGuideSprite", "");
+	event:AddEventLinkAtEnd(chain_start_id + 2, 1000);
 	-- Throw up dialogue calling out player's party
-	event = hoa_map.DialogueEvent.Create(22, 510);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 2, 510);
 	event:SetStopCameraMovement(true);
-	event:AddEventLinkAtEnd(23);
-		
+	event:AddEventLinkAtEnd(chain_start_id + 3);
 	-- Move camera back to Cladius
-	event = hoa_map.CustomEvent.Create(23, 17, 0);
-	event:AddEventLinkAtEnd(24, 500);
-	
+	event = hoa_map.CustomEvent.Create(chain_start_id + 3, "SetCameraToPlayer", "");
+	event:AddEventLinkAtEnd(chain_start_id + 4, 500);
 	-- Move player sprite to NPC that called out
-	event = hoa_map.PathMoveSpriteEvent.Create(24, 1000, 149, 68);
-	event:AddEventLinkAtEnd(25);
-		
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 4, 20, 149, 68);
+	event:AddEventLinkAtEnd(chain_start_id + 5);
 	-- Exit scene state
-	event = hoa_map.CustomEvent.Create(25, 2, 0);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 5, "PopMapState", "");
 		
-	print "EVENT CHAIN #03"
-	-- Event Chain 03: Knight moves safely through short route while player watches
-	short_route_zone = hoa_map.CameraZone(156, 160, 60, 63, hoa_map.MapMode.CONTEXT_01);
-	Map:AddZone(short_route_zone);	
+	---------- Event Chain 05: Knight moves safely through short route while player watches
+	print "Event Chain #05";
+	chain_start_id = 60;
+
 	-- Enter scene state
-	event = hoa_map.CustomEvent.Create(30, 1, 0);
-	event:AddEventLinkAtEnd(31);		
+	event = hoa_map.CustomEvent.Create(chain_start_id + 0, "StopMovementAndEnterScene", "");
+	event:AddEventLinkAtEnd(chain_start_id + 1);		
 	-- Move camera to knight sprite
-	event = hoa_map.CustomEvent.Create(31, 19, 0);
-	event:AddEventLinkAtEnd(32, 300);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 1, "CameraFollowPathSprite", "");
+	event:AddEventLinkAtEnd(chain_start_id + 2, 300);
 	-- Move knight sprite down passage
-	event = hoa_map.PathMoveSpriteEvent.Create(32, knight_path_sprite, 210, 61);
-	--event:AddEventLinkAtStart(32);
-	event:AddEventLinkAtStart(33, 2000);
-	event:AddEventLinkAtStart(34, 3000);
-	event:AddEventLinkAtEnd(35);
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 2, sprites["passage_knight2"], 210, 61);
+	--event:AddEventLinkAtStart(chain_start_id + 2);
+	event:AddEventLinkAtStart(chain_start_id + 3, 2000);
+	event:AddEventLinkAtStart(chain_start_id + 4, 3000);
+	event:AddEventLinkAtEnd(chain_start_id + 5);
 	-- Move camera back
-	event = hoa_map.CustomEvent.Create(33, 17, 0);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 3, "SetCameraToPlayer", "");
 	-- Exit scene state
-	event = hoa_map.CustomEvent.Create(34, 2, 0);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 4, "PopMapState", "");
 	-- Move knight sprite to river bed area
-	event = hoa_map.CustomEvent.Create(35, 12, 0);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 5, "VanishPathSprite", "");
 
-	print "EVENT CHAIN #04"
-	-- Event Chain 04: Short route passage collapses
-	collapse_zone = hoa_map.CameraZone(186, 189, 60, 63, 1);
-	Map:AddZone(collapse_zone);	
+	---------- Event Chain 06: Short route passage collapses
+	print "Event Chain #06";
+	chain_start_id = 70;
+
 	-- Enter scene state
-	event = hoa_map.CustomEvent.Create(40, 1, 0);
-	event:AddEventLinkAtStart(41);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 0, "StopMovementAndEnterScene", "");
+	event:AddEventLinkAtStart(chain_start_id + 1);
 	-- Play collapse sound
-	event = hoa_map.SoundEvent.Create(41, "snd/cave-in.ogg");	
-	event:AddEventLinkAtStart(42, 250); 
+	event = hoa_map.SoundEvent.Create(chain_start_id + 1, "snd/cave-in.ogg");	
+	event:AddEventLinkAtStart(chain_start_id + 2, 250); 
 	-- Warning message
-	event = hoa_map.DialogueEvent.Create(42, 520);
-	event:AddEventLinkAtEnd(43);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 2, 520);
+	event:AddEventLinkAtEnd(chain_start_id + 3);
 	-- Shake the screen
-	event = hoa_map.CustomEvent.Create(43, 3, 0);
-	event:AddEventLinkAtEnd(44);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 3, "ShakeScreen", "");
+	event:AddEventLinkAtEnd(chain_start_id + 4);
 	-- Fade screen to black
-	event = hoa_map.CustomEvent.Create(44, 7, 9);
-	event:AddEventLinkAtEnd(45);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 4, "FadeOutScreen", "IsScreenFading");
+	event:AddEventLinkAtEnd(chain_start_id + 5);
 	-- Change all objects to context "passage collapsed"
-	event = hoa_map.CustomEvent.Create(45, 10, 0);
-	event:AddEventLinkAtEnd(46);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 5, "SwitchContextForAllSprites", "");
+	event:AddEventLinkAtEnd(chain_start_id + 6);
 	-- Fade screen back in
-	event = hoa_map.CustomEvent.Create(46, 8, 9);
-	event:AddEventLinkAtEnd(47);
+	event = hoa_map.CustomEvent.Create(chain_start_id + 6, "FadeInScreen", "IsScreenFading");
+	event:AddEventLinkAtEnd(chain_start_id + 7);
 	-- Dialogue after passage has collapsed		
-	event = hoa_map.DialogueEvent.Create(47, 521);
-	event:AddEventLinkAtEnd(48);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 7, 521);
+	event:AddEventLinkAtEnd(chain_start_id + 8);
+	-- Change dialogue of sprite guide
+	event = hoa_map.CustomEvent.Create(chain_start_id + 8, "ReplaceGuideDialogue", "");
+	event:AddEventLinkAtEnd(chain_start_id + 9);
+	-- Exit scene state
+	event = hoa_map.CustomEvent.Create(chain_start_id + 9, "PopMapState", "");
 		
-		-- Change dialogue of sprite guide
-		event = hoa_map.CustomEvent.Create(48, 15, 0);
-		event:AddEventLinkAtEnd(49);
-		
-		-- Exit scene state
-		event = hoa_map.CustomEvent.Create(49, 2, 0);
-		
-		print "EVENT CHAIN #05"
-	-- Event Chain 05: Moving forward through wall passage
-	forward_passage_zone = hoa_map.CameraZone(78, 79, 6, 7, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
-	Map:AddZone(forward_passage_zone);
+	----------  Event Chain 07: Moving forward through wall passage
+	print "Event Chain #07";
+	chain_start_id = 80;
 	
-		-- Make player sprite invisible with no collision detection
-		event = hoa_map.CustomEvent.Create(50, 13, 0);
-		event:AddEventLinkAtEnd(51);
+	-- Make player sprite invisible with no collision detection
+	event = hoa_map.CustomEvent.Create(chain_start_id + 0, "HideCameraSprite", "");
+	event:AddEventLinkAtEnd(chain_start_id + 1);
+	-- Move camera inside of wall
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 1, sprites["claudius"], 85, 6);
+	event:AddEventLinkAtEnd(chain_start_id + 2);
+	-- Move camera down and to the right near wall passage exit
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 2, sprites["claudius"], 104, 22);
+	event:AddEventLinkAtEnd(chain_start_id + 3);
+	-- Move sprite back outside of wall
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 3, sprites["claudius"], 112, 21);
+	event:AddEventLinkAtEnd(chain_start_id + 4);
+	-- Make player sprite visible and restore collision detection
+	event = hoa_map.CustomEvent.Create(chain_start_id + 4, "ShowCameraSprite", "");
 		
-		-- Move camera inside of wall
-		event = hoa_map.PathMoveSpriteEvent.Create(51, sprites["claudius"], 85, 6);
-		event:AddEventLinkAtEnd(52);
-		
-		-- Move camera down and to the right near wall passage exit
-		event = hoa_map.PathMoveSpriteEvent.Create(52, sprites["claudius"], 104, 22);
-		event:AddEventLinkAtEnd(53);
-		
-		-- Move sprite back outside of wall
-		event = hoa_map.PathMoveSpriteEvent.Create(53, sprites["claudius"], 112, 21);
-		event:AddEventLinkAtEnd(54);
-		
-		-- Make player sprite visible and restore collision detection
-		event = hoa_map.CustomEvent.Create(54, 14, 0);
-		
-		print "EVENT CHAIN #06"
-	-- Event Chain 06: Moving backward through wall passage
-	backward_passage_zone = hoa_map.CameraZone(110, 111, 20, 21, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
-	Map:AddZone(backward_passage_zone);
+	---------- Event Chain 08: Moving backward through wall passage
+	print "Event Chain #08";
+	chain_start_id = 90;
 
-		-- Make player sprite invisible with no collision detection
-		event = hoa_map.CustomEvent.Create(60, 13, 0);
-		event:AddEventLinkAtEnd(61);
+	-- Make player sprite invisible with no collision detection
+	event = hoa_map.CustomEvent.Create(chain_start_id + 0, "HideCameraSprite", "");
+	event:AddEventLinkAtEnd(chain_start_id + 1);
+	-- Move camera inside of wall
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 1, sprites["claudius"], 112, 21);
+	event:AddEventLinkAtEnd(chain_start_id + 2);
+	-- Move camera up and to the left near wall passage exit
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 2, sprites["claudius"], 85, 6);
+	event:AddEventLinkAtEnd(chain_start_id + 3);
+	-- Move sprite back outside of wall
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 3, sprites["claudius"], 76, 6);
+	event:AddEventLinkAtEnd(chain_start_id + 4);
+	-- Make player sprite visible and restore collision detection
+	event = hoa_map.CustomEvent.Create(chain_start_id + 4, "ShowCameraSprite", "");
 		
-		-- Move camera inside of wall
-		event = hoa_map.PathMoveSpriteEvent.Create(61, sprites["claudius"], 112, 21);
-		event:AddEventLinkAtEnd(62);
-		
-		-- Move camera up and to the left near wall passage exit
-		event = hoa_map.PathMoveSpriteEvent.Create(62, sprites["claudius"], 85, 6);
-		event:AddEventLinkAtEnd(63);
-		
-		-- Move sprite back outside of wall
-		event = hoa_map.PathMoveSpriteEvent.Create(63, sprites["claudius"], 76, 6);
-		event:AddEventLinkAtEnd(64);
-		
-		-- Make player sprite visible and restore collision detection
-		event = hoa_map.CustomEvent.Create(64, 14, 0);
-		
-		print "EVENT CHAIN #07"
-	-- Event Chain 07: Arriving at spring just before riverbed
-	spring_zone = hoa_map.CameraZone(171, 186, 5, 10, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
-	Map:AddZone(spring_zone);
+	---------- Event Chain 09: Arriving at spring just before riverbed
+	print "Event Chain #09";
+	chain_start_id = 100;
 	
-		-- Begin dialogue between characters
-		event = hoa_map.DialogueEvent.Create(70, 530);
+	-- Begin dialogue between characters
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 70, 530);
 		
-		print "EVENT CHAIN #08"
-	-- Event Chain 08: Arriving at riverbed
-	riverbed_zone = hoa_map.CameraZone(220, 221, 2, 11, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
-	Map:AddZone(riverbed_zone);
+	---------- Event Chain 10: Arriving at riverbed
+	print "Event Chain #10";
+	chain_start_id = 110;
 	
-		-- Put map in scene state
-		event = hoa_map.CustomEvent.Create(80, 1, 0);
-		event:AddEventLinkAtEnd(81);
-		
-		-- Move player sprite in to the gathering of knights in the river bed
-		event = hoa_map.PathMoveSpriteEvent.Create(81, sprites["claudius"], 238, 12);
-		event:AddEventLinkAtEnd(82);
-		
-		-- Make sure player sprite is facing the captain
-		event = hoa_map.ChangeDirectionSpriteEvent.Create(82, sprites["claudius"], hoa_map.MapMode.EAST);
-		event:AddEventLinkAtEnd(83);
-		
-		-- Remove map scene state
-		event = hoa_map.CustomEvent.Create(83, 5, 0);
-		event:AddEventLinkAtEnd(84);
-		
-		-- Begin dialogue among party characters
-		event = hoa_map.DialogueEvent.Create(84, 540);
-		event:AddEventLinkAtEnd(85);
-		
-		-- Begin dialogue given from captain
-		event = hoa_map.DialogueEvent.Create(85, 541);
-		event:AddEventLinkAtEnd(1000);
-		event:AddEventLinkAtEnd(86, 1000);
-		
-		-- Begin dialogue preceeding boss battle encounter
-		event = hoa_map.DialogueEvent.Create(86, 542);
-		event:SetStopCameraMovement(true);
-		event:AddEventLinkAtEnd(87);
-		
-		-- Boss battle
-		event = hoa_map.BattleEncounterEvent.Create(87, 91);
-		event:SetMusic("mus/The_Creature_Awakens.ogg");
-		event:SetBackground("img/backdrops/battle/desert_cave.png");
-		event:AddEventLinkAtEnd(90);
-		
-			print "EVENT CHAIN #09"
-	-- Event Chain 09: After boss battle
-		
-		-- Change all objects to context "water unblocked"
-		event = hoa_map.CustomEvent.Create(90, 11, 0);
-		event:AddEventLinkAtEnd(91, 500);
-		
-		-- Post-battle dialogue
-		event = hoa_map.DialogueEvent.Create(91, 550);
-		
-		event:AddEventLinkAtEnd(92);
-		-- Transition to the return to city scene
-		event = hoa_map.MapTransitionEvent.Create(92, "lua/scripts/maps/a01_return_to_harrvah_city.lua");
-		
+	-- Put map in scene state
+	event = hoa_map.CustomEvent.Create(chain_start_id + 0, "StopMovementAndEnterScene", "");
+	event:AddEventLinkAtEnd(chain_start_id + 1);
+	-- Move player sprite in to the gathering of knights in the river bed
+	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 1, sprites["claudius"], 238, 12);
+	event:AddEventLinkAtEnd(chain_start_id + 2);
+	-- Make sure player sprite is facing the captain
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(chain_start_id + 2, sprites["claudius"], hoa_map.MapMode.EAST);
+	event:AddEventLinkAtEnd(chain_start_id + 3);
+	-- Remove map scene state
+	event = hoa_map.CustomEvent.Create(chain_start_id + 3, "PopState", "");
+	event:AddEventLinkAtEnd(chain_start_id + 4);
+	-- Begin dialogue among party characters
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 4, 540);
+	event:AddEventLinkAtEnd(chain_start_id + 5);
+	-- Begin dialogue given from captain
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 5, 541);
+	event:AddEventLinkAtEnd(1000);
+	event:AddEventLinkAtEnd(chain_start_id + 86, 1000);
+	-- Begin dialogue preceeding boss battle encounter
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 6, 542);
+	event:SetStopCameraMovement(true);
+	event:AddEventLinkAtEnd(chain_start_id + 7);
+	-- Boss battle
+	event = hoa_map.BattleEncounterEvent.Create(chain_start_id + 7);
+	event:SetMusic("mus/The_Creature_Awakens.ogg");
+	event:SetBackground("img/backdrops/battle/desert_cave.png");
+	event:AddEventLinkAtEnd(120);
+
+	---------- Event Chain 11: After boss battle
+	print "Event Chain #11";
+	chain_start_id = 120;
+
+	-- TODO: show water running with another map layer or context
+	-- Post-battle dialogue
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 0, 550);	
+	event:AddEventLinkAtEnd(chain_start_id + 1);
+	-- Transition to the return to city scene
+	event = hoa_map.MapTransitionEvent.Create(chain_start_id + 1, "lua/scripts/maps/a01_return_to_harrvah_city.lua");
 
 	----------------------------------------------------------------------------
 	---------- Miscellaneous Events
@@ -982,8 +991,6 @@ function CreateEvents()
 
 	-- Sound played during conversation with knight and just before boss battle
 	event = hoa_map.SoundEvent.Create(1000, "snd/evil_hiss.ogg");
-	
---]]
 end -- function CreateEvents()
 
 -- Called at the end of the first event chain to hide all character sprites but Claudius
@@ -997,49 +1004,49 @@ end
 
 
 functions["SpawnFirstEnemy"] = function()
-
+	print "First Enemy Spawned"
 end
 
 
 functions["EngageFirstEnemy"] = function()
-
+	print "First Enemy Engaged"
 end
 
 
 
 -- Stop camera sprite and enter scene state
---functions[1] = function()
---	Map.camera:SetMoving(false);
---	Map:PushState(hoa_map.MapMode.STATE_SCENE);
---end
+functions["StopMovementAndEnterScene"] = function()
+	Map.camera:SetMoving(false);
+	Map:PushState(hoa_map.MapMode.STATE_SCENE);
+end
 
 
 -- Restore previous map state (typically from "scene" to "explore")
-functions[2] = function()
+functions["PopMapState"] = function() -- 2
 	Map:PopState();
 end
 
 
 -- Short screen shake during the passage collapse event chain
-functions[3] = function()
+functions["ShakeScreen"] = function() -- 3
 	VideoManager:ShakeScreen(2.0, 2000.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
 end
 
 
 -- Change map to scene state
-functions[4] = function()
+functions["PushSceneState"] = function() -- 4
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 end
 
 
 -- Pop current map state
-functions[5] = function()
+functions["PopState"] = function() -- 5
 	Map:PopState();
 end
 
 
 -- Gives a potion to the player via the treasure menu
-functions[6] = function()
+functions["RewardPotion"] = function() -- 6
 	AudioManager:PlaySound("snd/obtain.wav");
 	corpse_treasure = hoa_map.MapTreasure();
 	corpse_treasure:AddObject(1, 1);
@@ -1048,19 +1055,19 @@ end
 
 
 -- Quickly Fades the screen to black
-functions[7] = function()
+functions["FadeOutScreen"] = function() -- 7
 	VideoManager:FadeScreen(hoa_video.Color(0.0, 0.0, 0.0, 1.0), 1000);
 end
 
 
 -- Quickly fades screen from back into full view
-functions[8] = function()
+functions["FadeInScreen"] = function() -- 8
 	VideoManager:FadeScreen(hoa_video.Color(0.0, 0.0, 0.0, 0.0), 1000);
 end
 
 
 -- Returns true when screen is no longer in the process of fading
-functions[9] = function()
+functions["IsScreenFading"] = function() -- 9
 	if (VideoManager:IsFading() == true) then
 		return false;
 	else
@@ -1070,26 +1077,26 @@ end
 
 
 -- Switches the map context of all map objects to the "passage collapsed" context
-functions[10] = function()
+functions["SwitchContextForAllSprites"] = function() -- 10
 	swap_context_all_objects(hoa_map.MapMode.CONTEXT_02);
 end
 
 
 -- Switches the map context of all map objects to the "water unblocked" context
-functions[11] = function()
-	swap_context_all_objects(hoa_map.MapMode.CONTEXT_03);
-end
+--functions[""] = function() -- 11
+--	swap_context_all_objects(hoa_map.MapMode.CONTEXT_03);
+--end
 
 
 -- Makes the knight that moved along the short path disappear
-functions[12] = function()
+functions["VanishPathSprite"] = function() -- 12
 	--knight_path_sprite:SetNoCollision(true);
 	--knight_path_sprite:SetVisible(false);
 end
 
 
 -- Change to scene state and make camera sprite invisible with no collision
-functions[13] = function()
+functions["HideCameraSprite"] = function() -- 13
 	Map.camera:SetMoving(false);
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 	Map.camera:SetVisible(false);
@@ -1098,7 +1105,7 @@ end
 
 
 -- Exit scene state and restore camera sprite visibility and collision status
-functions[14] = function()
+functions["ShowCameraSprite"] = function() -- 14
 	Map:PopState();
 	Map.camera:SetVisible(true);
 	Map.camera:SetNoCollision(false);
@@ -1106,30 +1113,30 @@ end
 
 
 -- Replace dialogue of the knight that guides the player to the right path after the passage collapse
-functions[15] = function()
+functions["ReplaceGuideDialogue"] = function() -- 15
 	--knight_talk_sprite:RemoveDialogueReference(30);
 	--knight_talk_sprite:AddDialogueReference(31);
 end
 
 -- Move camera to corpse
-functions[16] = function()
+functions["CameraPanToCorpse"] = function() -- 16
 	Map:MoveVirtualFocus(206, 147);
 	Map:SetCamera(ObjectManager.virtual_focus, 2000);
 end
 
 -- Move camera back to player
-functions[17] = function()
+functions["SetCameraToPlayer"] = function() -- 17
 	Map:SetCamera(claudius, 500);
 end
 
 -- Move camera to talking knight sprite
-functions[18] = function()
+functions["CameraToGuideSprite"] = function() -- 18
 	Map:MoveVirtualFocus(149, 62);
 	Map:SetCamera(ObjectManager.virtual_focus, 1000);
 end
 
 -- Move camera to talking knight sprite
-functions[19] = function()
+functions["CameraFollowPathSprite"] = function() -- 19
 	Map:SetCamera(knight_path_sprite, 500);
 end
 

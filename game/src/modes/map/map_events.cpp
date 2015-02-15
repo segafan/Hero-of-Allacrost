@@ -403,6 +403,7 @@ CustomEvent* CustomEvent::Create(uint32 event_id, string start_name, string upda
 }
 
 
+
 void CustomEvent::_Start() {
 	if (_start_function != NULL)
 		ScriptCallFunction<void>(*_start_function);

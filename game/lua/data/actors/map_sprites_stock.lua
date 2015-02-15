@@ -25,7 +25,7 @@ sprites["Laila"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/characters/laila_walk.png",
 	running_animations = "img/sprites/characters/laila_run.png",
@@ -38,7 +38,7 @@ sprites["Kyle"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/characters/kyle_walk.png",
 	face_portrait = "img/portraits/face/kyle.png"
@@ -51,7 +51,7 @@ sprites["Knight01"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/characters/knight_01_walk.png"
 }
@@ -63,7 +63,7 @@ sprites["Knight02"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/characters/knight_02_walk.png"
 }
@@ -75,7 +75,7 @@ sprites["Knight03"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/characters/knight_03_walk.png"
 }
@@ -87,7 +87,7 @@ sprites["Knight04"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/characters/knight_04_walk.png"
 }
@@ -99,7 +99,7 @@ sprites["Knight05"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/characters/knight_05_walk.png"
 }
@@ -111,7 +111,7 @@ sprites["Knight06"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/characters/knight_06_walk.png"
 }
@@ -123,7 +123,7 @@ sprites["Marcus"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = VERY_SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/characters/marcus_walk.png",
 	face_portrait = "img/portraits/face/marcus.png"
@@ -135,7 +135,7 @@ sprites["Vanica"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = VERY_SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 	
 	standard_animations = "img/sprites/characters/vanica_walk.png",
 	face_portrait = "img/portraits/face/vanica.png"
@@ -147,7 +147,7 @@ sprites["Alexander"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 	
 	standard_animations = "img/sprites/characters/man_npc02_walk.png"
 }
@@ -158,7 +158,7 @@ sprites["Laine"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 	
 	standard_animations = "img/sprites/characters/man_npc01_walk.png"
 }
@@ -169,7 +169,7 @@ sprites["Torl"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = VERY_FAST_SPEED,
+	movement_speed = NORMAL_SPEED,
 	
 	standard_animations = "img/sprites/characters/boy_npc01_walk.png"
 }
@@ -180,7 +180,7 @@ sprites["Female Merchant"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 	
 	standard_animations = "img/sprites/characters/woman_npc01_walk.png"
 }
@@ -191,7 +191,7 @@ sprites["Livia"] = {
 	coll_height = 1.9,
 	img_half_width = 1.0,
 	img_height = 4.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 	
 	standard_animations = "img/sprites/characters/girl_npc02_walk.png"
 }
@@ -214,7 +214,7 @@ sprites["Mak Hound"] = {
 	coll_height = 3.0,
 	img_half_width = 4.0,
 	img_height = 8.0,
-	movement_speed = SLOW_SPEED,
+	movement_speed = NORMAL_SPEED,
 
 	standard_animations = "img/sprites/creatures/mak_hound.png"
 }
