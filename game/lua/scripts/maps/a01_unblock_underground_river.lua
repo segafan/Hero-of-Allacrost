@@ -16,11 +16,11 @@ enemy_ids = { 1, 2, 3, 4, 5, 6 }
 
 -- Containers used to hold pointers to various class objects.
 -- A unique string key is used for each object entered into these tables.
+zones = {};
 objects = {};
 sprites = {};
 dialogues = {};
 events = {};
-zones = {};
 
 -- All custom map functions are contained within the following table..
 -- String keys in this table serves as the names of these functions. 
@@ -42,16 +42,16 @@ function Load(m)
 	Map:AddObjectLayerToOrder(0);
 	Map:AddTileLayerToOrder(2);
 
+	print "CreateZones()"
+	CreateZones();
 	print "CreateObjects()"
 	CreateObjects();
 	print "CreateSprites()"
 	CreateSprites();
 	print "CreateEnemies()"
 	CreateEnemies();
-	print "CreateDialogue()"
-	CreateDialogue();
-	print "CreateZones()"
-	CreateZones();
+	print "CreateDialogues()"
+	CreateDialogues();
 	print "CreateEvents()"
 	CreateEvents();
 	
@@ -78,7 +78,7 @@ function Load(m)
 end -- function Load(m)
 
 
--- Mandatory function for map updates
+
 function Update()
 	if (zones["corpse_discovery"]:IsCameraEntering() == true) then
 		if (GlobalEvents:DoesEventExist("corpse_seen") == false) then
@@ -139,530 +139,15 @@ function Update()
 end -- function Update()
 
 
--- Mandatory function for custom drawing
+
 function Draw()
 	Map:DrawMapLayers();
 end
 
 
--- Creates non-sprite map objects
-function CreateObjects()
-
-end
-
-
--- Creates all friendly sprites. Roughly ordered by when they are encountered by the player
-function CreateSprites()
-	-- Squad #1: Playable character sprites
-	sprites["claudius"] = ConstructSprite("Claudius", 1, 11, 227);
-	sprites["claudius"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["claudius"]:SetNoCollision(true);
-	ObjectManager:AddObject(sprites["claudius"], 0);
-
-	sprites["mark"] = ConstructSprite("Knight01", 2, 17, 227);
-	sprites["mark"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["mark"]:SetNoCollision(true);
-	sprites["mark"]:SetName(hoa_system.Translate("Mark"));
-	ObjectManager:AddObject(sprites["mark"], 0);
-	
-	sprites["lukar"] = ConstructSprite("Knight01", 3, 14, 225);
-	sprites["lukar"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["lukar"]:SetNoCollision(true);
-	sprites["lukar"]:SetName(hoa_system.Translate("Lukar"));
-	ObjectManager:AddObject(sprites["lukar"], 0);
-
-	-- Squad #2: Mak Hound squad found close to the cave entrance
-	-- Knight at cave entrance
-	sprites["entrance_knight1"] = ConstructSprite("Knight01", 10, 14, 150);
-	sprites["entrance_knight1"]:SetDirection(hoa_map.MapMode.NORTH);
---	sprites["entrance_knight1"]:AddDialogueReference(10);
-	ObjectManager:AddObject(sprites["entrance_knight1"], 0);
-
-	-- Knight trying to pull Mak hound
-	sprites["entrance_knight2"] = ConstructSprite("Knight02", 11, 17, 148);
-	sprites["entrance_knight2"]:SetDirection(hoa_map.MapMode.WEST);
---	sprites["entrance_knight2"]:AddDialogueReference(11);
-	ObjectManager:AddObject(sprites["entrance_knight2"], 0);
-
-	-- Frightened Mack Hound
-	sprites["entrance_mak"] = ConstructSprite("Mak Hound", 12, 13, 148);
-	sprites["entrance_mak"]:SetDirection(hoa_map.MapMode.EAST);
-	ObjectManager:AddObject(sprites["entrance_mak"], 0);
-	
-	-- Squad #3: Knights near the passage that collapses
-	-- Knight guiding others through the short passage
-	sprites["passage_knight1"] = ConstructSprite("Knight03", 20, 149, 62);
-	sprites["passage_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
---	sprites["passage_knight1"]:AddDialogueReference(20);
-	ObjectManager:AddObject(sprites["passage_knight1"], 0);
-	--knight_talk_sprite = sprite;
-	
-	-- Knight seen walking ahead through the short passage
-	sprites["passage_knight2"] = ConstructSprite("Knight02", 21, 162, 62);
-	sprites["passage_knight2"]:SetDirection(hoa_map.MapMode.EAST);
-	ObjectManager:AddObject(sprites["passage_knight2"], 0);
-	--knight_path_sprite = sprite;
-	
-	-- Squad #4: Knights near the end of the passage treating an injury
-	-- Knight with injured ankle
-	sprites["injury_knight1"] = ConstructSprite("Knight03", 30, 142, 30);
-	sprites["injury_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
---	sprites["injury_knight1"]:AddDialogueReference(30);
-	ObjectManager:AddObject(sprites["injury_knight1"], 0);
-	
-	-- Knight assisting injured knight
-	sprites["injury_knight2"] = ConstructSprite("Knight01", 31, 142, 33);
-	sprites["injury_knight2"]:SetDirection(hoa_map.MapMode.NORTH);
---	sprites["injury_knight2"]:AddDialogueReference(31);
-	ObjectManager:AddObject(sprites["injury_knight2"], 0);
-
-	-- All of the following NPCs are encountered at the end of the cave in the riverbed
-	sprite = ConstructSprite("Captain", 2500, 248, 16);
-	sprite:SetDirection(hoa_map.MapMode.WEST);
-	ObjectManager:AddObject(sprite, 0);
-	
-	sprite = ConstructSprite("Knight01", 2501, 249, 19);
-	sprite:SetDirection(hoa_map.MapMode.WEST);
-	ObjectManager:AddObject(sprite, 0);
-	
-	sprite = ConstructSprite("Knight02", 2502, 245, 11);
-	sprite:SetDirection(hoa_map.MapMode.SOUTH);
-	ObjectManager:AddObject(sprite, 0);
-	
-	sprite = ConstructSprite("Knight03", 2503, 242, 8);
-	sprite:SetDirection(hoa_map.MapMode.SOUTH);
-	ObjectManager:AddObject(sprite, 0);
-	
-	sprite = ConstructSprite("Knight02", 2504, 239, 9);
-	sprite:SetDirection(hoa_map.MapMode.SOUTH);
-	ObjectManager:AddObject(sprite, 0);
-
-	sprite = ConstructSprite("Knight01", 2505, 240, 22);
-	sprite:SetDirection(hoa_map.MapMode.NORTH);
-	ObjectManager:AddObject(sprite, 0);
-
-	sprite = ConstructSprite("Knight02", 2506, 243, 23);
-	sprite:SetDirection(hoa_map.MapMode.NORTH);
-	ObjectManager:AddObject(sprite, 0);
-	
-	sprite = ConstructSprite("Knight03", 2507, 245, 21);
-	sprite:SetDirection(hoa_map.MapMode.NORTH);
-	ObjectManager:AddObject(sprite, 0);
-	
-	sprite = ConstructSprite("Knight02", 2508, 234, 20);
-	sprite:SetDirection(hoa_map.MapMode.EAST);
-	ObjectManager:AddObject(sprite, 0);
-	
-	sprite = ConstructSprite("Knight01", 2509, 233, 17);
-	sprite:SetDirection(hoa_map.MapMode.EAST);
-	ObjectManager:AddObject(sprite, 0);
-	
-	sprite = ConstructSprite("Knight02", 2510, 235, 14);
-	sprite:SetDirection(hoa_map.MapMode.EAST);
-	ObjectManager:AddObject(sprite, 0);
-end -- function CreateSprites()
-
-
--- Creates all enemy sprites and the zones that they spawn/roam in
-function CreateEnemies()
-	local enemy = {};
-	local spawn_zone = {};
-	local roam_zone = {};
-
-	-- Zone #01: Near entrance
-	roam_zone = hoa_map.EnemyZone(26, 79, 130, 141);
-
-	enemy = ConstructEnemySprite("slime", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(2);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(6);
-	roam_zone:AddEnemy(enemy, Map, 1);
-
-	Map:AddZone(roam_zone);
---[[	
-	-- Zone #02: Along narrow southern passage between pit and wall
-	roam_zone = hoa_map.EnemyZone(108, 140, 145, 148);
-
-	enemy = ConstructEnemySprite("snake", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(3);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(6);
-	roam_zone:AddEnemy(enemy, Map, 1);
-	
-	Map:AddZone(roam_zone);
-	
-	-- Zone #03: Near ceiling overpass entrance and around corpse
-	roam_zone = hoa_map.EnemyZone(158, 167, 130, 145);
-	roam_zone:AddSection(168, 215, 134, 142);
-	
-	enemy = ConstructEnemySprite("scorpion", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	roam_zone:AddEnemy(enemy, Map, 1);
-
-	Map:AddZone(roam_zone);
-	
-	-- Zone #04: In ceiling overpass
-	roam_zone = hoa_map.EnemyZone(146, 157, 90, 113);
-	
-	enemy = ConstructEnemySprite("snake", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(6);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	roam_zone:AddEnemy(enemy, Map, 1);
-	
-	Map:AddZone(roam_zone);
-	
-	-- Zone #05: Wide open area at beginning of long route
-	roam_zone = hoa_map.EnemyZone(26, 115, 68, 89);
-	roam_zone:AddSection(4, 72, 25, 83);
-
-	enemy = ConstructEnemySprite("slime", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(2);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(6);
-	roam_zone:AddEnemy(enemy, Map, 2);
-
-	enemy = ConstructEnemySprite("snake", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(6);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	roam_zone:AddEnemy(enemy, Map, 1);
-
-	enemy = ConstructEnemySprite("scorpion", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	roam_zone:AddEnemy(enemy, Map, 1);
-	
-	Map:AddZone(roam_zone);
-	
-	-- Zone #06: Above pits and before wall passage
-	roam_zone = hoa_map.EnemyZone(24, 89, 12, 47);
-	roam_zone:AddSection(24, 73, 6, 12);
-	
-	enemy = ConstructEnemySprite("scorpion", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	roam_zone:AddEnemy(enemy, Map, 3);
-	
-	Map:AddZone(roam_zone);
-	
-	-- Zone #07: Through wall passage and before spring
-	roam_zone = hoa_map.EnemyZone(116, 143, 6, 29);
-	roam_zone:AddSection(144, 167, 6, 13);
-	
-	enemy = ConstructEnemySprite("snake", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(6);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	roam_zone:AddEnemy(enemy, Map, 1);
-
-	enemy = ConstructEnemySprite("scorpion", Map);
-	SetBattleEnvironment(enemy);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	roam_zone:AddEnemy(enemy, Map, 1);
-
-	Map:AddZone(roam_zone);
---]]
-end -- function CreateEnemies()
-
-
--- Creates all dialogue that takes place through characters and events
-function CreateDialogue()
-	local dialogue;
-	local text;
-
-	----------------------------------------------------------------------------
-	---------- Dialogues that are attached to characters
-	----------------------------------------------------------------------------
-	dialogue = hoa_map.MapDialogue.Create(10);
-		text = hoa_system.Translate("Watch your step and keep moving. It's not far to the river bed.");
-		dialogue:AddLine(text, 10);
-
-	dialogue = hoa_map.MapDialogue.Create(11);
-		text = hoa_system.Translate("She's terrified and won't budge.");
-		dialogue:AddLine(text, 11);
-		text = hoa_system.Translate("For such large animals, Mak hounds sure can be cowardly.");
-		dialogue:AddLine(text, 2);
-		text = hoa_system.Translate("Go on ahead. We'll catch up when we get her moving again.");
-		dialogue:AddLine(text, 11);
-
-	dialogue = hoa_map.MapDialogue.Create(20);
-		text = hoa_system.Translate("The river bed is just through this passage. Be careful, the walls are a little unstable.");
-		dialogue:AddLine(text, 2004);
-
-	-- After the passage collapse event, this dialogue is added to the knight guide
-	dialogue = hoa_map.MapDialogue.Create(21);
-		text = hoa_system.Translate("I'll direct everyone remaining to take the longer route.");
-		dialogue:AddLine(text, 2004);
-
-	dialogue = hoa_map.MapDialogue.Create(30);
-		text = hoa_system.Translate("Dammit, ow ow ow...");
-		dialogue:AddLine(text, 2008);
-
-	dialogue = hoa_map.MapDialogue.Create(31);
-		text = hoa_system.Translate("He sprained his ankle on a loose rock, so we're treating his injury. Move on ahead, you're almost there.");
-		dialogue:AddLine(text, 2009);
-
-	----------------------------------------------------------------------------
-	---------- Dialogues that are triggered by events
-	----------------------------------------------------------------------------
-	-- Event: Entering the cave
-	dialogue = hoa_map.MapDialogue.Create(100);
-		text = hoa_system.Translate("Claudius. I want you to lead us down to the riverbed.");
-		dialogue:AddLine(text, 3);
-
-	dialogue = hoa_map.MapDialogue.Create(101);
-		text = hoa_system.Translate("Woah, wait a damn minute Lukar! Why are you putting a rookie like him in charge?");
-		dialogue:AddLine(text, 2);
-
-	dialogue = hoa_map.MapDialogue.Create(102);
-		text = hoa_system.Translate("Relax, Mark. This is the best way for him to get experience.");
-		dialogue:AddLine(text, 3);
-
-	dialogue = hoa_map.MapDialogue.Create(103);
-		text = hoa_system.Translate("Claudius, I realize that this is your first real mission as a knight. If you're not up to this task, that's okay.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("No, I can do it. I won't lead us astray.");
-		dialogue:AddLine(text, 1);
-		text = hoa_system.Translate("Good. The path we're taking should be pretty straight forward, so don't worry about getting lost.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Tcsh. Just try not to get us all killed, okay rookie?");
-		dialogue:AddLine(text, 2);
-
-	dialogue = hoa_map.MapDialogue.Create(104);
-		text = hoa_system.Translate("Use the [ARROW KEYS] to walk around. You can hold down two orthogonal keys to move diagonally.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Hold down the [CANCEL] key while moving to run. Running drains stamina, so you can only run for a short period of time. The stamina meter in the lower right corner of the screen shows you how much stamina you have remaining. Once you stop running, stamina will gradually accumulate until the meter is full again.");
-		dialogue:AddLine(text, 3);
-
-	-- Event: First battle encounter
-	dialogue = hoa_map.MapDialogue.Create(110);
-		text = hoa_system.Translate("Wait, look up ahead.");
-		dialogue:AddLine(text, 2);
-
-	dialogue = hoa_map.MapDialogue.Create(111);
-		text = hoa_system.Translate("There's an enemy in our way.");
-		dialogue:AddLine(text, 2);
-		text = hoa_system.Translate("A battle occurs whenever you and an enemy collide. Sometimes you can avoid a battle by sneaking past or running by an enemy before it has a chance to engage you. When you enter a battle you can no longer run away. At that point you must defeat your opponent before they defeat you.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("That enemy doesn't appear to be much of a threat. Instead of running, let it engage us. I want to make sure you remember how a knight does battle.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Let's see how useful you are in a real fight, rookie.");
-		dialogue:AddLine(text, 2);
-
-	-- Event: After first battle victory
-	dialogue = hoa_map.MapDialogue.Create(120);
-		text = hoa_system.Translate("Nicely done. After a battle ends you'll have a short moment of invulnerability to get away from any other enemies that may be roaming nearby. If you are surrounded by multiple foes when a battle begins, be ready to make a break for it as soon as the battle ends if you don't want to keep fighting.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Or you can not get yourself surrounded in the first place like a dumbass.");
-		dialogue:AddLine(text, 2);
-		text = hoa_system.Translate("Well, Mark is correct even though he could have phrased that better.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("You must also be careful as sometimes an enemy will re-spawn after a short period of time, so don't sit around thinking that you're out of danger. Other times an enemy that is defeated will not appear again. It appears that the enemy we just defeated will not respawn.");
-		dialogue:AddLine(text, 3);
-
-	dialogue = hoa_map.MapDialogue.Create(121);
-		text = hoa_system.Translate("Ah, one more thing. You can access the party menu by pressing the [MENU] key while on a map. You won't be able to access this menu when a dialogue is taking place nor during a scene that is occuring on the map. In the party menu you can heal your characters, change out your equipment, and check out other information.");
-		dialogue:AddLine(text, 3);
-
-	-- Event: Encountering first NPCs in the cave
-	dialogue = hoa_map.MapDialogue.Create(130);
-		text = hoa_system.Translate("Hold. There are some friendly units up ahead. Characters that have information to share will have a small icon appear above them. As you get closer to the character, the icon will gradually appear. Stand facing a character and hit the [CONFIRM] key to hear what they have to say.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Note that a character may have more than one piece of information to share, or may have something new to say after a particular event has occurred. The icon will look differently if the character has dialogue that you have not seen before.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("So in other words, I should keep initiating a conversation with these characters until the new dialogue icon no longer appears above their head.");
-		dialogue:AddLine(text, 1);
-		text = hoa_system.Translate("Look out, boys. We got a regular genius over here. Maybe you should have become a scholar instead of a knight.");
-		dialogue:AddLine(text, 2);
-
-	-- Event: Discovery of corpse in south east part of cave
-	dialogue = hoa_map.MapDialogue.Create(140);
-		text = hoa_system.Translate("A corpse. That's always a reassuring find in a place like this.");
-		dialogue:AddLine(text, 2);
-		text = hoa_system.Translate("Hey, I think I see something under its hand.");
-		dialogue:AddLine(text, 1);
-		text = hoa_system.Translate("Good eye, Claudius. Go near it and press the [CONFIRM] key to acquire the item.");
-		dialogue:AddLine(text, 3);
-
-	dialogue = hoa_map.MapDialogue.Create(141);
-		text = hoa_system.Translate("Hidden objects will glimmer periodically like we just saw.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Be vigilant when you are exploring a new area and look around for such hidden treasures.");
-		dialogue:AddLine(text, 3);
-
-	-- Event: Player tries to go long route before short route
-	dialogue = hoa_map.MapDialogue.Create(150);
-		text = hoa_system.Translate("Hey! Over here!");
-		dialogue:AddLine(text, 20);
-	
-	-- Event: As passage is collapsing
-	dialogue = hoa_map.MapDialogue.Create(160);
-		text = hoa_system.Translate("Look out!");
-		dialogue:AddLine(text, 3);
-		dialogue:AddLineTiming(1000);
-
-	-- Event: After passage collapse occurs
-	dialogue = hoa_map.MapDialogue.Create(161);
-		text = hoa_system.Translate("Woah! Are you guys alright?");
-		dialogue:AddLine(text, 20);
-		text = hoa_system.Translate("We're all fine. But the passage has caved in.");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("There's another way around, although it's a longer route. Follow me.");
-		dialogue:AddLine(text, 20);
-
-	-- Event: Stopping player from trying to proceed to lower levels of the cave
-	dialogue = hoa_map.MapDialogue.Create(170);
-		text = hoa_system.Translate("Wait. This path looks like it leads down into the earth. The area we're trying to reach likely isn't down there. Let's head another direction..");
-		dialogue:AddLine(text, 3);
-		text = hoa_system.Translate("Good. Who knows what could be lurking in the darkness down there..");
-		dialogue:AddLine(text, 2);
-
-	-- Event: While crossing the narrow bridge between the two pits after hearing an evil hiss
-	dialogue = hoa_map.MapDialogue.Create(180);
-		text = hoa_system.Translate("Did you hear that? What the hell was that sound?");
-		dialogue:AddLine(text, 1);
-		text = hoa_system.Translate("I don't know, but I've got a bad feeling about this mission.");
-		dialogue:AddLine(text, 2);
-		text = hoa_system.Translate("Well the sooner we achieve our objective, the sooner we get out of here and go home. So move your ass instead of your mouth.");
-		dialogue:AddLine(text, 3);
-
-	-- Event: Encountering the pool of running water near the end of the cave
-	dialogue = hoa_map.MapDialogue.Create(190);
-		text = hoa_system.Translate("Hey check it out. The water is still running here.");
-		dialogue:AddLine(text, 2);
-		text = hoa_system.Translate("That's a good sign. The river obstruction must be close.");
-		dialogue:AddLine(text, 3);
-
-	-- Event: Player reaches dry river bed
-	dialogue = hoa_map.MapDialogue.Create(200);
-		text = hoa_system.Translate("Finally made it.");
-		dialogue:AddLine(text, 2);
-	
-	dialogue = hoa_map.MapDialogue.Create(201);
-		text = hoa_system.Translate("Listen up! There's a large boulder obstructing the underground river that flows through here. When we move it aside, we get to head out of this place.");
-		dialogue:AddLine(text, 2500);
-		text = hoa_system.Translate("Mikal! Torren! Take your units and secure the ropes around that overgrown rock. Jasper's unit will prepare the Maks to help us move it. The rest of you stay alert and watch our backs. Who knows what the hell may be in this cave with us.");
-		dialogue:AddLine(text, 2500);
-
-	dialogue = hoa_map.MapDialogue.Create(202);
-		text = hoa_system.Translate("Hey, I heard that noise earlier. It sounds like its closer now.");
-		dialogue:AddLine(text, 2505);
-		text = hoa_system.Translate("Keep your eyes peeled and your swords ready men.");
-		dialogue:AddLine(text, 1003);
-		text = hoa_system.Translate("I don't know how you expect to see shit in here. I can barely see my own hand.");
-		dialogue:AddLine(text, 1002);
-		text = hoa_system.Translate("Over there! Watch out!");
-		dialogue:AddLine(text, 1000);
-
-	-- Event: After boss battle
-	dialogue = hoa_map.MapDialogue.Create(210);
-		text = hoa_system.Translate("Damnit, the captain's been wounded along with half our troops.");
-		dialogue:AddLine(text, 1);
-		text = hoa_system.Translate("*cough cough*\nI'll be alright. Great job taking down that monster men, I'm proud.");
-		dialogue:AddLine(text, 2500);
-		text = hoa_system.Translate("We've achieved our objective here. Tend to the wounded and then let's make our way back home.");
-		dialogue:AddLine(text, 2500);
-end -- function CreateDialogue()
-
-
 
 function CreateZones()
-	-- Event Zones
+	---------- Event Trigger Zones
 	zones["corpse_discovery"] = hoa_map.CameraZone(185, 200, 135, 150, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
 	Map:AddZone(zones["corpse_discovery"]);
 
@@ -690,7 +175,7 @@ function CreateZones()
 	zones["riverbed_arrival"] = hoa_map.CameraZone(220, 221, 2, 11, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
 	Map:AddZone(zones["riverbed_arrival"]);
 
-	-- Enemy Zones
+	---------- Enemy Zones
 	-- Zone #01: Near entrance
 	zones["enemy01"] = hoa_map.EnemyZone(26, 79, 130, 141);
 	Map:AddZone(zones["enemy01"]);
@@ -726,9 +211,493 @@ end -- function CreateZones()
 
 
 
+function CreateObjects()
+
+end
+
+
+
+function CreateSprites()
+	----------------------------------------------------------------------------
+	---------- Create character party sprites
+	----------------------------------------------------------------------------
+	-- Squad #1: Playable character sprites
+	sprites["claudius"] = ConstructSprite("Claudius", 1, 11, 227);
+	sprites["claudius"]:SetDirection(hoa_map.MapMode.NORTH);
+	sprites["claudius"]:SetNoCollision(true);
+	ObjectManager:AddObject(sprites["claudius"], 0);
+
+	sprites["mark"] = ConstructSprite("Knight01", 2, 17, 227);
+	sprites["mark"]:SetDirection(hoa_map.MapMode.NORTH);
+	sprites["mark"]:SetNoCollision(true);
+	sprites["mark"]:SetName(hoa_system.Translate("Mark"));
+	ObjectManager:AddObject(sprites["mark"], 0);
+	
+	sprites["lukar"] = ConstructSprite("Knight01", 3, 14, 225);
+	sprites["lukar"]:SetDirection(hoa_map.MapMode.NORTH);
+	sprites["lukar"]:SetNoCollision(true);
+	sprites["lukar"]:SetName(hoa_system.Translate("Lukar"));
+	ObjectManager:AddObject(sprites["lukar"], 0);
+
+	----------------------------------------------------------------------------
+	---------- Create NPCs in roughly the order encountered by the player
+	----------------------------------------------------------------------------
+	-- Squad #2: Mak Hound squad found close to the cave entrance
+	-- Knight at cave entrance
+	sprites["entrance_knight1"] = ConstructSprite("Knight01", 10, 14, 150);
+	sprites["entrance_knight1"]:SetDirection(hoa_map.MapMode.NORTH);
+	ObjectManager:AddObject(sprites["entrance_knight1"], 0);
+
+	-- Knight trying to pull Mak hound
+	sprites["entrance_knight2"] = ConstructSprite("Knight02", 11, 17, 148);
+	sprites["entrance_knight2"]:SetDirection(hoa_map.MapMode.WEST);
+	ObjectManager:AddObject(sprites["entrance_knight2"], 0);
+
+	-- Frightened Mack Hound
+	sprites["entrance_mak"] = ConstructSprite("Mak Hound", 12, 13, 148);
+	sprites["entrance_mak"]:SetDirection(hoa_map.MapMode.EAST);
+	ObjectManager:AddObject(sprites["entrance_mak"], 0);
+	
+	-- Squad #3: Knights near the passage that collapses
+	-- Knight guiding others through the short passage
+	sprites["passage_knight1"] = ConstructSprite("Knight03", 20, 149, 62);
+	sprites["passage_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
+	ObjectManager:AddObject(sprites["passage_knight1"], 0);
+	
+	-- Knight seen walking ahead through the short passage
+	sprites["passage_knight2"] = ConstructSprite("Knight02", 21, 162, 62);
+	sprites["passage_knight2"]:SetDirection(hoa_map.MapMode.EAST);
+	ObjectManager:AddObject(sprites["passage_knight2"], 0);
+	
+	-- Squad #4: Knights near the end of the passage treating an injury
+	-- Knight with injured ankle
+	sprites["injury_knight1"] = ConstructSprite("Knight03", 30, 142, 30);
+	sprites["injury_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
+	ObjectManager:AddObject(sprites["injury_knight1"], 0);
+	
+	-- Knight assisting injured knight
+	sprites["injury_knight2"] = ConstructSprite("Knight01", 31, 142, 33);
+	sprites["injury_knight2"]:SetDirection(hoa_map.MapMode.NORTH);
+	ObjectManager:AddObject(sprites["injury_knight2"], 0);
+
+	-- All of the following NPCs are encountered at the end of the cave in the riverbed
+	sprites["captain"] = ConstructSprite("Knight06", 2500, 248, 16);
+	sprites["captain"]:SetDirection(hoa_map.MapMode.WEST);
+	ObjectManager:AddObject(sprites["captain"], 0);
+
+	sprites["sergeant"] = ConstructSprite("Knight05", 2501, 249, 19);
+	sprites["sergeant"]:SetDirection(hoa_map.MapMode.WEST);
+	ObjectManager:AddObject(sprites["sergeant"], 0);
+	
+	sprites["river_knight1"] = ConstructSprite("Knight02", 2502, 245, 11);
+	sprites["river_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
+	ObjectManager:AddObject(sprites["river_knight1"], 0);
+	
+	sprites["river_knight2"] = ConstructSprite("Knight03", 2503, 242, 8);
+	sprites["river_knight2"]:SetDirection(hoa_map.MapMode.SOUTH);
+	ObjectManager:AddObject(sprites["river_knight2"], 0);
+	
+	sprites["river_knight3"] = ConstructSprite("Knight02", 2504, 239, 9);
+	sprites["river_knight3"]:SetDirection(hoa_map.MapMode.SOUTH);
+	ObjectManager:AddObject(sprites["river_knight3"], 0);
+
+	sprites["river_knight4"] = ConstructSprite("Knight01", 2505, 240, 22);
+	sprites["river_knight4"]:SetDirection(hoa_map.MapMode.NORTH);
+	ObjectManager:AddObject(sprites["river_knight4"], 0);
+
+	sprites["river_knight5"] = ConstructSprite("Knight02", 2506, 243, 23);
+	sprites["river_knight5"]:SetDirection(hoa_map.MapMode.NORTH);
+	ObjectManager:AddObject(sprites["river_knight5"], 0);
+	
+	sprites["river_knight6"] = ConstructSprite("Knight03", 2507, 245, 21);
+	sprites["river_knight6"]:SetDirection(hoa_map.MapMode.NORTH);
+	ObjectManager:AddObject(sprites["river_knight6"], 0);
+	
+	sprites["river_knight7"] = ConstructSprite("Knight02", 2508, 234, 20);
+	sprites["river_knight7"]:SetDirection(hoa_map.MapMode.EAST);
+	ObjectManager:AddObject(sprites["river_knight7"], 0);
+	
+	sprites["river_knight8"] = ConstructSprite("Knight01", 2509, 233, 17);
+	sprites["river_knight8"]:SetDirection(hoa_map.MapMode.EAST);
+	ObjectManager:AddObject(sprites["river_knight8"], 0);
+	
+	sprites["river_knight9"] = ConstructSprite("Knight02", 2510, 235, 14);
+	sprites["river_knight9"]:SetDirection(hoa_map.MapMode.EAST);
+	ObjectManager:AddObject(sprites["river_knight9"], 0);
+end -- function CreateSprites()
+
+
+
+function CreateEnemies()
+	local enemy = {};
+
+	---------- Create enemy sprites and adds them to the zones that they spawn/roam in
+	-- Group #01
+	enemy = ConstructEnemySprite("slime", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(2);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(6);
+	zones["enemy01"]:AddEnemy(enemy, Map, 1);
+
+	-- Group #02
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(3);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(6);
+	zones["enemy02"]:AddEnemy(enemy, Map, 1);
+	
+	-- Group #03
+	enemy = ConstructEnemySprite("scorpion", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	zones["enemy03"]:AddEnemy(enemy, Map, 1);
+
+	-- Group #04
+	enemy = ConstructEnemySprite("snake", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(6);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	zones["enemy04"]:AddEnemy(enemy, Map, 1);
+	
+	-- Group #05
+	enemy = ConstructEnemySprite("slime", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(2);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(6);
+	zones["enemy05"]:AddEnemy(enemy, Map, 1);
+
+	enemy = ConstructEnemySprite("snake", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(6);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	zones["enemy05"]:AddEnemy(enemy, Map, 1);
+
+	enemy = ConstructEnemySprite("scorpion", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	zones["enemy05"]:AddEnemy(enemy, Map, 1);
+	
+	-- Group #06
+	enemy = ConstructEnemySprite("scorpion", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	zones["enemy06"]:AddEnemy(enemy, Map, 1);
+
+	-- Group #07
+	enemy = ConstructEnemySprite("snake", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(6);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	enemy:AddEnemy(6);
+	zones["enemy07"]:AddEnemy(enemy, Map, 1);
+
+	enemy = ConstructEnemySprite("scorpion", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(5);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	zones["enemy07"]:AddEnemy(enemy, Map, 1);
+end -- function CreateEnemies()
+
+
+
+function CreateDialogues()
+	local dialogue;
+	local text;
+
+	----------------------------------------------------------------------------
+	---------- Dialogues attached to characters
+	----------------------------------------------------------------------------
+	dialogue = hoa_map.MapDialogue.Create(10);
+		text = hoa_system.Translate("Watch your step and keep moving. It's not far to the river bed.");
+		dialogue:AddLine(text, sprites["entrance_knight1"]:GetObjectID());
+	sprites["entrance_knight1"]:AddDialogueReference(10);
+
+	dialogue = hoa_map.MapDialogue.Create(11);
+		text = hoa_system.Translate("She's terrified and won't budge.");
+		dialogue:AddLine(text, sprites["entrance_knight2"]:GetObjectID());
+		text = hoa_system.Translate("For such large animals, Mak hounds sure can be cowardly.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+		text = hoa_system.Translate("Go on ahead. We'll catch up when we get her moving again.");
+		dialogue:AddLine(text, sprites["entrance_knight2"]:GetObjectID());
+	sprites["entrance_knight2"]:AddDialogueReference(11);
+
+	dialogue = hoa_map.MapDialogue.Create(20);
+		text = hoa_system.Translate("The river bed is just through this passage. Be careful, the walls are a little unstable.");
+		dialogue:AddLine(text, sprites["passage_knight1"]:GetObjectID());
+	sprites["passage_knight1"]:AddDialogueReference(20);
+
+	-- After the passage collapse event, this dialogue will be added to the passage_knight1 sprite
+	dialogue = hoa_map.MapDialogue.Create(21);
+		text = hoa_system.Translate("I'll direct everyone remaining to take the longer route.");
+		dialogue:AddLine(text, sprites["passage_knight1"]:GetObjectID());
+
+	dialogue = hoa_map.MapDialogue.Create(30);
+		text = hoa_system.Translate("Dammit, ow ow ow...");
+		dialogue:AddLine(text, sprites["injury_knight1"]:GetObjectID());
+	sprites["injury_knight1"]:AddDialogueReference(30);
+
+	dialogue = hoa_map.MapDialogue.Create(31);
+		text = hoa_system.Translate("He sprained his ankle on a loose rock, so we're treating his injury. Move on ahead, you're almost there.");
+		dialogue:AddLine(text, sprites["injury_knight2"]:GetObjectID());
+	sprites["injury_knight2"]:AddDialogueReference(31);
+
+	----------------------------------------------------------------------------
+	---------- Dialogues triggered by events
+	----------------------------------------------------------------------------
+	-- Event: Entering the cave
+	dialogue = hoa_map.MapDialogue.Create(100);
+		text = hoa_system.Translate("Claudius. I want you to lead us down to the riverbed.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	dialogue = hoa_map.MapDialogue.Create(101);
+		text = hoa_system.Translate("Woah, wait a damn minute Lukar! Why are you putting a rookie like him in charge?");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+
+	dialogue = hoa_map.MapDialogue.Create(102);
+		text = hoa_system.Translate("Relax, Mark. This is the best way for him to get experience.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	dialogue = hoa_map.MapDialogue.Create(103);
+		text = hoa_system.Translate("Claudius, I realize that this is your first real mission as a knight. If you're not up to this task, that's okay.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("No, I can do it. I won't lead us astray.");
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+		text = hoa_system.Translate("Good. The path we're taking should be pretty straight forward, so don't worry about getting lost.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("Tcsh. Just try not to get us all killed, okay rookie?");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+
+	dialogue = hoa_map.MapDialogue.Create(104);
+		text = hoa_system.Translate("Use the [ARROW KEYS] to walk around. You can hold down two orthogonal keys to move diagonally.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("Hold down the [CANCEL] key while moving to run. Running drains stamina, so you can only run for a short period of time. The stamina meter in the lower right corner of the screen shows you how much stamina you have remaining. Once you stop running, stamina will gradually accumulate until the meter is full again.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	-- Event: First battle encounter
+	dialogue = hoa_map.MapDialogue.Create(110);
+		text = hoa_system.Translate("Wait, look up ahead.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+
+	dialogue = hoa_map.MapDialogue.Create(111);
+		text = hoa_system.Translate("There's an enemy in our way.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+		text = hoa_system.Translate("A battle occurs whenever you and an enemy collide. Sometimes you can avoid a battle by sneaking past or running by an enemy before it has a chance to engage you. When you enter a battle you can no longer run away. At that point you must defeat your opponent before they defeat you.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("That enemy doesn't appear to be much of a threat. Instead of running, let it engage us. I want to make sure you remember how a knight does battle.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("Let's see how useful you are in a real fight, rookie.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+
+	-- Event: After first battle victory
+	dialogue = hoa_map.MapDialogue.Create(120);
+		text = hoa_system.Translate("Nicely done. After a battle ends you'll have a short moment of invulnerability to get away from any other enemies that may be roaming nearby. If you are surrounded by multiple foes when a battle begins, be ready to make a break for it as soon as the battle ends if you don't want to keep fighting.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("Or you can not get yourself surrounded in the first place like a dumbass.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+		text = hoa_system.Translate("Well, Mark is correct even though he could have phrased that better.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("You must also be careful as sometimes an enemy will re-spawn after a short period of time, so don't sit around thinking that you're out of danger. Other times an enemy that is defeated will not appear again. It appears that the enemy we just defeated will not respawn.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	dialogue = hoa_map.MapDialogue.Create(121);
+		text = hoa_system.Translate("Ah, one more thing. You can access the party menu by pressing the [MENU] key while on a map. You won't be able to access this menu when a dialogue is taking place nor during a scene that is occuring on the map. In the party menu you can heal your characters, change out your equipment, and check out other information.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	-- Event: Encountering first NPCs in the cave
+	dialogue = hoa_map.MapDialogue.Create(130);
+		text = hoa_system.Translate("Hold. There are some friendly units up ahead. Characters that have information to share will have a small icon appear above them. As you get closer to the character, the icon will gradually appear. Stand facing a character and hit the [CONFIRM] key to hear what they have to say.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("Note that a character may have more than one piece of information to share, or may have something new to say after a particular event has occurred. The icon will look differently if the character has dialogue that you have not seen before.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("So in other words, I should keep initiating a conversation with these characters until the new dialogue icon no longer appears above their head.");
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+		text = hoa_system.Translate("Look out, boys. We got a regular genius over here. Maybe you should have become a scholar instead of a knight.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+
+	-- Event: Discovery of corpse in south east part of cave
+	dialogue = hoa_map.MapDialogue.Create(140);
+		text = hoa_system.Translate("A corpse. That's always a reassuring find in a place like this.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+		text = hoa_system.Translate("Hey, I think I see something under its hand.");
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+		text = hoa_system.Translate("Good eye, Claudius. Go near it and press the [CONFIRM] key to acquire the item.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	dialogue = hoa_map.MapDialogue.Create(141);
+		text = hoa_system.Translate("Hidden objects will glimmer periodically like we just saw.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("Be vigilant when you are exploring a new area and look around for such hidden treasures.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	-- Event: Player tries to go long route before short route
+	dialogue = hoa_map.MapDialogue.Create(150);
+		text = hoa_system.Translate("Hey! Over here!");
+		dialogue:AddLine(text, sprites["passage_knight1"]:GetObjectID());
+	
+	-- Event: As passage is collapsing
+	dialogue = hoa_map.MapDialogue.Create(160);
+		text = hoa_system.Translate("Look out!");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		dialogue:AddLineTiming(1000);
+
+	-- Event: After passage collapse occurs
+	dialogue = hoa_map.MapDialogue.Create(161);
+		text = hoa_system.Translate("Woah! Are you guys alright?");
+		dialogue:AddLine(text, sprites["passage_knight1"]:GetObjectID());
+		text = hoa_system.Translate("We're all fine. But the passage has caved in.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("There's another way around, although it's a longer route. Follow me.");
+		dialogue:AddLine(text, sprites["passage_knight1"]:GetObjectID());
+
+	-- Event: Stopping player from trying to proceed to lower levels of the cave
+	dialogue = hoa_map.MapDialogue.Create(170);
+		text = hoa_system.Translate("Wait. This path looks like it leads down into the earth. The area we're trying to reach likely isn't down there. Let's head another direction..");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("Good. Who knows what could be lurking in the darkness down there..");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+
+	-- Event: While crossing the narrow bridge between the two pits after hearing an evil hiss
+	dialogue = hoa_map.MapDialogue.Create(180);
+		text = hoa_system.Translate("Did you hear that? What the hell was that sound?");
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+		text = hoa_system.Translate("I don't know, but I've got a bad feeling about this mission.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+		text = hoa_system.Translate("Well the sooner we achieve our objective, the sooner we get out of here and go home. So move your ass instead of your mouth.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	-- Event: Encountering the pool of running water near the end of the cave
+	dialogue = hoa_map.MapDialogue.Create(190);
+		text = hoa_system.Translate("Hey check it out. The water is still running here.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+		text = hoa_system.Translate("That's a good sign. The river obstruction must be close.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	-- Event: Player reaches dry river bed
+	dialogue = hoa_map.MapDialogue.Create(200);
+		text = hoa_system.Translate("Finally made it.");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+	
+	dialogue = hoa_map.MapDialogue.Create(201);
+		text = hoa_system.Translate("Listen up! There's a large boulder obstructing the underground river that flows through here. When we move it aside, we get to head out of this place.");
+		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
+		text = hoa_system.Translate("Mikal! Torren! Take your units and secure the ropes around that overgrown rock. Jasper's unit will prepare the Maks to help us move it. The rest of you stay alert and watch our backs. Who knows what the hell may be in this cave with us.");
+		dialogue:AddLine(text, sprites["sergeant"]:GetObjectID());
+
+	dialogue = hoa_map.MapDialogue.Create(202);
+		text = hoa_system.Translate("Hey, I heard that noise earlier. It sounds like its closer now.");
+		dialogue:AddLine(text, sprites["river_knight1"]:GetObjectID());
+		text = hoa_system.Translate("Keep your eyes peeled and your swords ready men.");
+		dialogue:AddLine(text, sprites["river_knight2"]:GetObjectID());
+		text = hoa_system.Translate("I don't know how you expect to see shit in here. I can barely see my own hand.");
+		dialogue:AddLine(text, sprites["river_knight3"]:GetObjectID());
+		text = hoa_system.Translate("Over there! Watch out!");
+		dialogue:AddLine(text, sprites["river_knight4"]:GetObjectID());
+
+	-- Event: After boss battle
+	dialogue = hoa_map.MapDialogue.Create(210);
+		text = hoa_system.Translate("Damnit, the captain's been wounded along with half our troops.");
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+		text = hoa_system.Translate("*cough cough*\nI'll be alright. Great job taking down that monster men, I'm proud.");
+		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
+		text = hoa_system.Translate("We've achieved our objective here. Tend to the wounded and then let's make our way back home.");
+		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
+end -- function CreateDialogue()
+
+
+
 function CreateEvents()
 	local event = {};
-	local chain_start_id = 0; -- Holds the ID of the first event in a chain
+	local chain_start_id = 0; -- Holds the ID of the first event in an event chain
 
 	---------- Event Chain 01: Initial scene and 4-part dialogue when the player first enters the cave
 	print "Event Chain #01";
@@ -1015,35 +984,30 @@ end
 
 
 -- Stop camera sprite and enter scene state
-functions["StopMovementAndEnterScene"] = function()
+functions["StopMovementAndEnterScene"] = function() -- 1
 	Map.camera:SetMoving(false);
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 end
-
 
 -- Restore previous map state (typically from "scene" to "explore")
 functions["PopMapState"] = function() -- 2
 	Map:PopState();
 end
 
-
 -- Short screen shake during the passage collapse event chain
 functions["ShakeScreen"] = function() -- 3
 	VideoManager:ShakeScreen(2.0, 2000.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
 end
-
 
 -- Change map to scene state
 functions["PushSceneState"] = function() -- 4
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 end
 
-
 -- Pop current map state
 functions["PopState"] = function() -- 5
 	Map:PopState();
 end
-
 
 -- Gives a potion to the player via the treasure menu
 functions["RewardPotion"] = function() -- 6
@@ -1053,18 +1017,15 @@ functions["RewardPotion"] = function() -- 6
 	TreasureManager:Initialize(corpse_treasure);
 end
 
-
 -- Quickly Fades the screen to black
 functions["FadeOutScreen"] = function() -- 7
 	VideoManager:FadeScreen(hoa_video.Color(0.0, 0.0, 0.0, 1.0), 1000);
 end
 
-
 -- Quickly fades screen from back into full view
 functions["FadeInScreen"] = function() -- 8
 	VideoManager:FadeScreen(hoa_video.Color(0.0, 0.0, 0.0, 0.0), 1000);
 end
-
 
 -- Returns true when screen is no longer in the process of fading
 functions["IsScreenFading"] = function() -- 9
@@ -1075,23 +1036,20 @@ functions["IsScreenFading"] = function() -- 9
 	end
 end
 
-
 -- Switches the map context of all map objects to the "passage collapsed" context
 functions["SwitchContextForAllSprites"] = function() -- 10
 	swap_context_all_objects(hoa_map.MapMode.CONTEXT_02);
 end
-
 
 -- Switches the map context of all map objects to the "water unblocked" context
 --functions[""] = function() -- 11
 --	swap_context_all_objects(hoa_map.MapMode.CONTEXT_03);
 --end
 
-
 -- Makes the knight that moved along the short path disappear
 functions["VanishPathSprite"] = function() -- 12
-	--knight_path_sprite:SetNoCollision(true);
-	--knight_path_sprite:SetVisible(false);
+	sprites["passage_knight2"]:SetNoCollision(true);
+	sprites["passage_knight2"]:SetVisible(false);
 end
 
 
@@ -1103,7 +1061,6 @@ functions["HideCameraSprite"] = function() -- 13
 	Map.camera:SetNoCollision(true);
 end
 
-
 -- Exit scene state and restore camera sprite visibility and collision status
 functions["ShowCameraSprite"] = function() -- 14
 	Map:PopState();
@@ -1111,11 +1068,10 @@ functions["ShowCameraSprite"] = function() -- 14
 	Map.camera:SetNoCollision(false);
 end
 
-
 -- Replace dialogue of the knight that guides the player to the right path after the passage collapse
 functions["ReplaceGuideDialogue"] = function() -- 15
-	--knight_talk_sprite:RemoveDialogueReference(30);
-	--knight_talk_sprite:AddDialogueReference(31);
+	sprites["passage_knight1"]:RemoveDialogueReference(20);
+	sprites["passage_knight1"]:AddDialogueReference(21);
 end
 
 -- Move camera to corpse
@@ -1126,20 +1082,20 @@ end
 
 -- Move camera back to player
 functions["SetCameraToPlayer"] = function() -- 17
-	Map:SetCamera(claudius, 500);
+	Map:SetCamera(sprites["claudius"], 500);
 end
 
 -- Move camera to talking knight sprite
 functions["CameraToGuideSprite"] = function() -- 18
-	Map:MoveVirtualFocus(149, 62);
-	Map:SetCamera(ObjectManager.virtual_focus, 1000);
+--	Map:MoveVirtualFocus(149, 62);
+--	Map:SetCamera(ObjectManager.virtual_focus, 1000);
+	Map:SetCamera(sprites["passage_knight1"], 1000);
 end
 
 -- Move camera to talking knight sprite
 functions["CameraFollowPathSprite"] = function() -- 19
-	Map:SetCamera(knight_path_sprite, 500);
+	Map:SetCamera(sprites["passage_knight2"], 500);
 end
-
 
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
