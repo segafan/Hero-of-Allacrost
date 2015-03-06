@@ -16,6 +16,7 @@ enemy_ids = { 1, 2, 3, 4, 5, 6 }
 
 -- Containers used to hold pointers to various class objects.
 -- A unique string key is used for each object entered into these tables.
+contexts = {};
 zones = {};
 objects = {};
 sprites = {};
@@ -25,6 +26,12 @@ events = {};
 -- All custom map functions are contained within the following table..
 -- String keys in this table serves as the names of these functions. 
 functions = {};
+
+-- Shorthand names for map contexts
+contexts["start"] = hoa_map.MapMode.CONTEXT_01; -- Upon first entering the cave
+contexts["collapsed"] = hoa_map.MapMode.CONTEXT_02; -- Active context after the passage collapse event
+
+
 
 function Load(m)
 	-- Setup global pointers for the MapMode instance as well as the various supervisors for convenience
@@ -80,6 +87,23 @@ end -- function Load(m)
 
 
 function Update()
+	if ((zones["first_enemy_encounter"]:IsCameraEntering() == true)) then
+		if (GlobalEvents:DoesEventExist("first_enemy_encounter") == false) then
+			GlobalEvents:AddNewEvent("first_enemy_encounter", 1);
+			Map.camera:SetMoving(false);
+			EventManager:StartEvent(30);
+		end
+	end
+
+	if ((zones["first_npc_encounter"]:IsCameraEntering() == true)) then
+		if (GlobalEvents:DoesEventExist("first_npc_encounter") == false) then
+			GlobalEvents:AddNewEvent("first_npc_encounter", 1);
+--			Map.camera:SetMoving(false);
+--			EventManager:StartEvent(30);
+			print "Spotted first NPC";
+		end
+	end
+
 	if (zones["corpse_discovery"]:IsCameraEntering() == true) then
 		if (GlobalEvents:DoesEventExist("corpse_seen") == false) then
 			GlobalEvents:AddNewEvent("corpse_seen", 1);
@@ -148,31 +172,37 @@ end
 
 function CreateZones()
 	---------- Event Trigger Zones
-	zones["corpse_discovery"] = hoa_map.CameraZone(185, 200, 135, 150, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	zones["first_enemy_encounter"] = hoa_map.CameraZone(6, 20, 184, 186, contexts["start"]);
+	Map:AddZone(zones["first_enemy_encounter"]);
+
+	zones["first_npc_encounter"] = hoa_map.CameraZone(10, 22, 156, 158, contexts["start"]);
+	Map:AddZone(zones["first_npc_encounter"]);
+
+	zones["corpse_discovery"] = hoa_map.CameraZone(185, 200, 135, 150, contexts["start"] + contexts["collapsed"]);
 	Map:AddZone(zones["corpse_discovery"]);
 
-	zones["corpse"] = hoa_map.CameraZone(202, 210, 145, 149, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	zones["corpse"] = hoa_map.CameraZone(202, 210, 145, 149, contexts["start"] + contexts["collapsed"]);
 	Map:AddZone(zones["corpse"]);
 
-	zones["long_route"] = hoa_map.CameraZone(132, 136, 70, 80, hoa_map.MapMode.CONTEXT_01);
+	zones["long_route"] = hoa_map.CameraZone(132, 136, 70, 80, contexts["start"]);
 	Map:AddZone(zones["long_route"]);
 
-	zones["short_route"] = hoa_map.CameraZone(156, 160, 60, 63, hoa_map.MapMode.CONTEXT_01);
+	zones["short_route"] = hoa_map.CameraZone(156, 160, 60, 63, contexts["start"]);
 	Map:AddZone(zones["short_route"]);	
 
-	zones["collapse"] = hoa_map.CameraZone(186, 189, 60, 63, hoa_map.MapMode.CONTEXT_01);
+	zones["collapse"] = hoa_map.CameraZone(186, 189, 60, 63, contexts["start"]);
 	Map:AddZone(zones["collapse"]);	
 
-	zones["forward_passage"] = hoa_map.CameraZone(78, 79, 6, 7, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	zones["forward_passage"] = hoa_map.CameraZone(78, 79, 6, 7, contexts["start"] + contexts["collapsed"]);
 	Map:AddZone(zones["forward_passage"]);
 
-	zones["backward_passage"] = hoa_map.CameraZone(110, 111, 20, 21, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	zones["backward_passage"] = hoa_map.CameraZone(110, 111, 20, 21, contexts["start"] + contexts["collapsed"]);
 	Map:AddZone(zones["backward_passage"]);
 
-	zones["spring_discovery"] = hoa_map.CameraZone(171, 186, 5, 10, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	zones["spring_discovery"] = hoa_map.CameraZone(171, 186, 5, 10, contexts["start"] + contexts["collapsed"]);
 	Map:AddZone(zones["spring_discovery"]);
 
-	zones["riverbed_arrival"] = hoa_map.CameraZone(220, 221, 2, 11, hoa_map.MapMode.CONTEXT_01 + hoa_map.MapMode.CONTEXT_02);
+	zones["riverbed_arrival"] = hoa_map.CameraZone(220, 221, 2, 11, contexts["start"] + contexts["collapsed"]);
 	Map:AddZone(zones["riverbed_arrival"]);
 
 	---------- Enemy Zones
@@ -221,7 +251,7 @@ function CreateSprites()
 	----------------------------------------------------------------------------
 	---------- Create character party sprites
 	----------------------------------------------------------------------------
-	-- Squad #1: Playable character sprites
+	-- Group #1: Playable character sprites
 	sprites["claudius"] = ConstructSprite("Claudius", 1, 11, 227);
 	sprites["claudius"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["claudius"]:SetNoCollision(true);
@@ -242,23 +272,12 @@ function CreateSprites()
 	----------------------------------------------------------------------------
 	---------- Create NPCs in roughly the order encountered by the player
 	----------------------------------------------------------------------------
-	-- Squad #2: Mak Hound squad found close to the cave entrance
+	-- Knight near cave entrance serving as a guide
 	-- Knight at cave entrance
-	sprites["entrance_knight1"] = ConstructSprite("Knight01", 10, 14, 150);
-	sprites["entrance_knight1"]:SetDirection(hoa_map.MapMode.NORTH);
-	ObjectManager:AddObject(sprites["entrance_knight1"], 0);
-
-	-- Knight trying to pull Mak hound
-	sprites["entrance_knight2"] = ConstructSprite("Knight02", 11, 17, 148);
-	sprites["entrance_knight2"]:SetDirection(hoa_map.MapMode.WEST);
-	ObjectManager:AddObject(sprites["entrance_knight2"], 0);
-
-	-- Frightened Mack Hound
-	sprites["entrance_mak"] = ConstructSprite("Mak Hound", 12, 13, 148);
-	sprites["entrance_mak"]:SetDirection(hoa_map.MapMode.EAST);
-	ObjectManager:AddObject(sprites["entrance_mak"], 0);
+	sprites["entrance_knight"] = ConstructSprite("Knight01", 10, 14, 148);
+	sprites["entrance_knight"]:SetDirection(hoa_map.MapMode.SOUTH);
+	ObjectManager:AddObject(sprites["entrance_knight"], 0);
 	
-	-- Squad #3: Knights near the passage that collapses
 	-- Knight guiding others through the short passage
 	sprites["passage_knight1"] = ConstructSprite("Knight03", 20, 149, 62);
 	sprites["passage_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
@@ -269,13 +288,12 @@ function CreateSprites()
 	sprites["passage_knight2"]:SetDirection(hoa_map.MapMode.EAST);
 	ObjectManager:AddObject(sprites["passage_knight2"], 0);
 	
-	-- Squad #4: Knights near the end of the passage treating an injury
-	-- Knight with injured ankle
+	-- Knight with injured ankle near the end of the long passage
 	sprites["injury_knight1"] = ConstructSprite("Knight03", 30, 142, 30);
 	sprites["injury_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
 	ObjectManager:AddObject(sprites["injury_knight1"], 0);
 	
-	-- Knight assisting injured knight
+	-- Knight assisting the injured knight
 	sprites["injury_knight2"] = ConstructSprite("Knight01", 31, 142, 33);
 	sprites["injury_knight2"]:SetDirection(hoa_map.MapMode.NORTH);
 	ObjectManager:AddObject(sprites["injury_knight2"], 0);
@@ -498,18 +516,15 @@ function CreateDialogues()
 	---------- Dialogues attached to characters
 	----------------------------------------------------------------------------
 	dialogue = hoa_map.MapDialogue.Create(10);
-		text = hoa_system.Translate("Watch your step and keep moving. It's not far to the river bed.");
-		dialogue:AddLine(text, sprites["entrance_knight1"]:GetObjectID());
-	sprites["entrance_knight1"]:AddDialogueReference(10);
+		text = hoa_system.Translate("Here, take the contents of this chest. Use these items to heal yourself if you become injured.");
+		dialogue:AddLine(text, sprites["entrance_knight"]:GetObjectID());
+		dialogue:AddLineEventAtStart(1000, 500);
+	sprites["entrance_knight"]:AddDialogueReference(10);
 
 	dialogue = hoa_map.MapDialogue.Create(11);
-		text = hoa_system.Translate("She's terrified and won't budge.");
-		dialogue:AddLine(text, sprites["entrance_knight2"]:GetObjectID());
-		text = hoa_system.Translate("For such large animals, Mak hounds sure can be cowardly.");
-		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
-		text = hoa_system.Translate("Go on ahead. We'll catch up when we get her moving again.");
-		dialogue:AddLine(text, sprites["entrance_knight2"]:GetObjectID());
-	sprites["entrance_knight2"]:AddDialogueReference(11);
+		text = hoa_system.Translate("Watch your step and keep moving. It's not far to the river bed.");
+		dialogue:AddLine(text, sprites["entrance_knight"]:GetObjectID());
+	sprites["entrance_knight"]:AddDialogueReference(11);
 
 	dialogue = hoa_map.MapDialogue.Create(20);
 		text = hoa_system.Translate("The river bed is just through this passage. Be careful, the walls are a little unstable.");
@@ -584,20 +599,20 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		text = hoa_system.Translate("Or you can not get yourself surrounded in the first place like a dumbass.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
-		text = hoa_system.Translate("Well, Mark is correct even though he could have phrased that better.");
+		text = hoa_system.Translate("Well, Mark is correct. Even though he could have phrased that better.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		text = hoa_system.Translate("You must also be careful as sometimes an enemy will re-spawn after a short period of time, so don't sit around thinking that you're out of danger. Other times an enemy that is defeated will not appear again. It appears that the enemy we just defeated will not respawn.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	dialogue = hoa_map.MapDialogue.Create(121);
-		text = hoa_system.Translate("Ah, one more thing. You can access the party menu by pressing the [MENU] key while on a map. You won't be able to access this menu when a dialogue is taking place nor during a scene that is occuring on the map. In the party menu you can heal your characters, change out your equipment, and check out other information.");
+		text = hoa_system.Translate("Ah, one more thing. You can access the party menu by pressing the [MENU] key while on a map. In the party menu you can heal your characters, change out your equipment, and manage your inventory.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	-- Event: Encountering first NPCs in the cave
 	dialogue = hoa_map.MapDialogue.Create(130);
-		text = hoa_system.Translate("Hold. There are some friendly units up ahead. Characters that have information to share will have a small icon appear above them. As you get closer to the character, the icon will gradually appear. Stand facing a character and hit the [CONFIRM] key to hear what they have to say.");
+		text = hoa_system.Translate("Hold. There's a friendly ahead. Characters that have information to share will have a small icon appear above them that gradually appears as you get closer. Stand facing the character and hit the [CONFIRM] key to hear what they have to say.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
-		text = hoa_system.Translate("Note that a character may have more than one piece of information to share, or may have something new to say after a particular event has occurred. The icon will look differently if the character has dialogue that you have not seen before.");
+		text = hoa_system.Translate("Keep in mind that a character may have more than one piece of information to share, or may have something new to say after a particular event has occurred. The icon will look differently if the character has dialogue that you have not seen before.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		text = hoa_system.Translate("So in other words, I should keep initiating a conversation with these characters until the new dialogue icon no longer appears above their head.");
 		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
@@ -616,7 +631,7 @@ function CreateDialogues()
 	dialogue = hoa_map.MapDialogue.Create(141);
 		text = hoa_system.Translate("Hidden objects will glimmer periodically like we just saw.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
-		text = hoa_system.Translate("Be vigilant when you are exploring a new area and look around for such hidden treasures.");
+		text = hoa_system.Translate("Be vigilant when you are exploring a new area and look around for such treasures.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	-- Event: Player tries to go long route before short route
@@ -730,7 +745,7 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(chain_start_id + 9, 100);
 	event = hoa_map.DialogueEvent.Create(chain_start_id + 9, 102);
 	event:AddEventLinkAtEnd(chain_start_id + 10, 300);
-	-- Part #4: Lukar asks Claudius again, who accepts. Mark and Lukar's sprites disappear into Claudius and player is given control
+	-- Part #4: Lukar asks Claudius again, who accepts. Mark and Lukar's sprites disappear into Claudius
 	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 10, 3, -5, 0);
 	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(chain_start_id + 11);
@@ -747,23 +762,26 @@ function CreateEvents()
 	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 15, 3, 0, 4);
 	event:SetRelativeDestination(true);
 	event = hoa_map.CustomEvent.Create(chain_start_id + 16, "EndOpeningScene", "");
+	event:AddEventLinkAtEnd(chain_start_id + 17);
+	-- Part #5: Final dialogue explains the controls to the player
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 17, 104);
 
 	---------- Event Chain 02: First enemy encounter
 	print "Event Chain #02";
 	chain_start_id = 30;
 
-	event = hoa_map.DialogueEvent.Create(chain_start_id + 0, 120);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 0, 110);
 	event:AddEventLinkAtStart(chain_start_id + 1);
 	event = hoa_map.CustomEvent.Create(chain_start_id + 1, "SpawnFirstEnemy", "");
 	event:AddEventLinkAtEnd(chain_start_id + 2, 500);
-	event = hoa_map.DialogueEvent.Create(chain_start_id + 2, 121);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 2, 111);
 	event:AddEventLinkAtEnd(chain_start_id + 3);
 	event = hoa_map.CustomEvent.Create(chain_start_id + 3, "EngageFirstEnemy", "");
 	event:AddEventLinkAtEnd(chain_start_id + 4);
 	-- Follow-up dialogue begins immediately after the battle ends
-	event = hoa_map.DialogueEvent.Create(chain_start_id + 4, 130);
-	event:AddEventLinkAtEnd(chain_start_id + 5, 750);
-	event = hoa_map.DialogueEvent.Create(chain_start_id + 5, 131);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 4, 120);
+	event:AddEventLinkAtEnd(chain_start_id + 5, 2000);
+	event = hoa_map.DialogueEvent.Create(chain_start_id + 5, 121);
 
 	---------- Event Chain 03: Discovery of corpse in cave
 	print "Event Chain #03";
@@ -931,7 +949,7 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(chain_start_id + 5);
 	-- Begin dialogue given from captain
 	event = hoa_map.DialogueEvent.Create(chain_start_id + 5, 541);
-	event:AddEventLinkAtEnd(1000);
+	event:AddEventLinkAtEnd(1010);
 	event:AddEventLinkAtEnd(chain_start_id + 86, 1000);
 	-- Begin dialogue preceeding boss battle encounter
 	event = hoa_map.DialogueEvent.Create(chain_start_id + 6, 542);
@@ -958,8 +976,13 @@ function CreateEvents()
 	---------- Miscellaneous Events
 	----------------------------------------------------------------------------
 
+	-- Places a treasure chest down by the entrance knight sprite
+	chain_start_id = 1000;
+	event = hoa_map.CustomEvent.Create(chain_start_id + 0, "EntrancePlaceChest", "");
+
 	-- Sound played during conversation with knight and just before boss battle
-	event = hoa_map.SoundEvent.Create(1000, "snd/evil_hiss.ogg");
+	chain_start_id = 1010;
+	event = hoa_map.SoundEvent.Create(chain_start_id + 0, "snd/evil_hiss.ogg");
 end -- function CreateEvents()
 
 -- Called at the end of the first event chain to hide all character sprites but Claudius
@@ -982,6 +1005,10 @@ functions["EngageFirstEnemy"] = function()
 end
 
 
+functions["EntrancePlaceChest"] = function()
+	print "Treasure placed down";
+	-- sprites["entrance_knight"] -- Turn to face chest
+end;
 
 -- Stop camera sprite and enter scene state
 functions["StopMovementAndEnterScene"] = function() -- 1
@@ -1038,7 +1065,7 @@ end
 
 -- Switches the map context of all map objects to the "passage collapsed" context
 functions["SwitchContextForAllSprites"] = function() -- 10
-	swap_context_all_objects(hoa_map.MapMode.CONTEXT_02);
+	swap_context_all_objects(contexts["collapsed"]);
 end
 
 -- Switches the map context of all map objects to the "water unblocked" context
