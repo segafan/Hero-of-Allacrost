@@ -66,7 +66,7 @@ function Load(m)
 	Map:MoveVirtualFocus(80, 130);
 
 	-- Visual effects: dark lighting, various light halos
-	VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.0, 0.6));
+	VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.0, 0.7));
 	
 	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas
 	
@@ -551,11 +551,11 @@ function CreateDialogues()
 	----------------------------------------------------------------------------
 	-- Event: Entering the cave
 	dialogue = hoa_map.MapDialogue.Create(100);
-		text = hoa_system.Translate("Claudius. I want you to lead us down to the riverbed.");
+		text = hoa_system.Translate("Claudius, I want you to lead us down to the riverbed.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	dialogue = hoa_map.MapDialogue.Create(101);
-		text = hoa_system.Translate("Woah, wait a damn minute Lukar! Why are you putting a rookie like him in charge?");
+		text = hoa_system.Translate("Wait a damn minute Lukar! Why are you putting a rookie like him in charge?");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
 	dialogue = hoa_map.MapDialogue.Create(102);
@@ -572,36 +572,28 @@ function CreateDialogues()
 		text = hoa_system.Translate("Tcsh. Just try not to get us all killed, okay rookie?");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
-	dialogue = hoa_map.MapDialogue.Create(104);
-		text = hoa_system.Translate("Use the [ARROW KEYS] to walk around. You can hold down two orthogonal keys to move diagonally.");
-		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
-		text = hoa_system.Translate("Hold down the [CANCEL] key while moving to run. Running drains stamina, so you can only run for a short period of time. The stamina meter in the lower right corner of the screen shows you how much stamina you have remaining. Once you stop running, stamina will gradually accumulate until the meter is full again.");
-		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
-
 	-- Event: First battle encounter
 	dialogue = hoa_map.MapDialogue.Create(110);
-		text = hoa_system.Translate("Wait, look up ahead.");
+		text = hoa_system.Translate("Wait, look up ahead. There's an enemy in our way.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
 	dialogue = hoa_map.MapDialogue.Create(111);
-		text = hoa_system.Translate("There's an enemy in our way.");
-		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
-		text = hoa_system.Translate("A battle occurs whenever you and an enemy collide. Sometimes you can avoid a battle by sneaking past or running by an enemy before it has a chance to engage you. When you enter a battle you can no longer run away. At that point you must defeat your opponent before they defeat you.");
+		text = hoa_system.Translate("A battle occurs whenever you collide with an enemy. Sometimes you can avoid a fight by sneaking past or running by an enemy before it has a chance to engage you. When you enter a battle you can no longer run away and must defeat your opponent.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
-		text = hoa_system.Translate("That enemy doesn't appear to be much of a threat. Instead of running, let it engage us. I want to make sure you remember how a knight does battle.");
+		text = hoa_system.Translate("That enemy doesn't appear to be much of a threat, so let it engage us. I want to make sure you remember how a knight does battle.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		text = hoa_system.Translate("Let's see how useful you are in a real fight, rookie.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
 	-- Event: After first battle victory
 	dialogue = hoa_map.MapDialogue.Create(120);
-		text = hoa_system.Translate("Nicely done. After a battle ends you'll have a short moment of invulnerability to get away from any other enemies that may be roaming nearby. If you are surrounded by multiple foes when a battle begins, be ready to make a break for it as soon as the battle ends if you don't want to keep fighting.");
+		text = hoa_system.Translate("Nicely done. After a battle ends, you'll have a short moment of invulnerability to get away from any other enemies that may be roaming nearby. If you are surrounded by multiple foes when a battle begins, be ready to make a break for it as soon as the battle ends if you don't want to keep fighting.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		text = hoa_system.Translate("Or you can not get yourself surrounded in the first place like a dumbass.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 		text = hoa_system.Translate("Well, Mark is correct. Even though he could have phrased that better.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
-		text = hoa_system.Translate("You must also be careful as sometimes an enemy will re-spawn after a short period of time, so don't sit around thinking that you're out of danger. Other times an enemy that is defeated will not appear again. It appears that the enemy we just defeated will not respawn.");
+		text = hoa_system.Translate("You must also be careful as enemies will re-spawn after a short period of time, so don't sit around thinking that you're out of danger. Other times an enemy that is defeated will not appear again.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	dialogue = hoa_map.MapDialogue.Create(121);
@@ -762,9 +754,9 @@ function CreateEvents()
 	event = hoa_map.PathMoveSpriteEvent.Create(chain_start_id + 15, 3, 0, 4);
 	event:SetRelativeDestination(true);
 	event = hoa_map.CustomEvent.Create(chain_start_id + 16, "EndOpeningScene", "");
-	event:AddEventLinkAtEnd(chain_start_id + 17);
-	-- Part #5: Final dialogue explains the controls to the player
-	event = hoa_map.DialogueEvent.Create(chain_start_id + 17, 104);
+--	event:AddEventLinkAtEnd(chain_start_id + 17);
+	-- Part #5: TODO: add a dialogue that explains the controls to the player
+--	event = hoa_map.DialogueEvent.Create(chain_start_id + 17, );
 
 	---------- Event Chain 02: First enemy encounter
 	print "Event Chain #02";
@@ -994,9 +986,23 @@ functions["EndOpeningScene"] = function()
 	Map:PopState();
 end
 
-
+-- Creates the first enemy encountered on the map. The enemy spawns more quickly than normal,
+-- is not contained within a zone, and is spawned a short distance to the north of the player.
 functions["SpawnFirstEnemy"] = function()
 	print "First Enemy Spawned"
+	
+	--[[
+	local enemy = ConstructEnemySprite("slime", Map);
+	SetBattleEnvironment(enemy);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:SetXLocation(Map.camera.x_position, 0);
+	enemy:SetYLocation(Map.camera.y_position - 4, 0);
+	enemy:SetTimeToSpawn(1000);
+	enemy:ChangeStateSpawning();
+	--]]
 end
 
 
