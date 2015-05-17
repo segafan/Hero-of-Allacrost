@@ -83,7 +83,7 @@ public:
 	void Draw() const;
 
 private:
-	//! \brief Holds the unique id of this tile layer. The first layer created for a map should use the value DEFAULT_LAYER_ID
+	//! \brief Holds the unique ID of this tile layer. The first layer created for a map should use the value DEFAULT_LAYER_ID
 	uint32 _tile_layer_id;
 }; // class TileLayer : public MapLayer
 
@@ -95,8 +95,8 @@ private:
 *** and managing the tile grid. The TileSupervisor does not manage the map
 *** collision grid, which is used by map objects and sprites.
 ***
-*** Maps have a minimum size of 24 rows and 32 columns of tiles. Theoretically
-*** there is no upper limit on size.
+*** Maps have a minimum size of 24 rows and 32 columns of tiles. There is no hard
+*** limit there is no upper limit on map size.
 *** ***************************************************************************/
 class TileSupervisor {
 	friend class hoa_map::MapMode;
@@ -123,6 +123,12 @@ public:
 	**/
 	TileLayer* GetTileLayer(uint32 layer_id)
 		{ if (layer_id >= _tile_layers.size()) return NULL; else return &_tile_layers[layer_id]; }
+
+	/** \brief Retrieves the inherting context for the given context
+	*** \param context The context to retrieve the inheriting context for
+	*** \return The inherited context ID. If the context does not inherit or does not exist, returns MAP_CONTEXT_NONE
+	**/
+	MAP_CONTEXT GetInheritedContext(MAP_CONTEXT context);
 	//@}
 
 	/** \brief Handles all operations on loading tilesets and tile images from the map data file
@@ -158,6 +164,9 @@ private:
 
 	//! \brief Holds a TileLayer object for each tile layer loaded from the map
 	std::vector<TileLayer> _tile_layers;
+
+	//! \brief A mapping of each context to the context that it inherits from. Set to MAP_CONTEXT_NONE for a context that does not inherit
+	std::map<MAP_CONTEXT, MAP_CONTEXT> _inherited_contexts;
 
 	/** \brief A map of 2D vectors that contains all of the map's tile objects.
 	*** Each key-value pair in the std::map represents a map context, thus the size of the std::map is equal to

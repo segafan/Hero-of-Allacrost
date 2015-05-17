@@ -87,6 +87,7 @@ void BindModeCode() {
 			.def("ShowStaminaBar", &MapMode::ShowStaminaBar)
 			.def("DisableIntroductionVisuals", &MapMode::DisableIntroductionVisuals)
 			.def("SetCurrentTrack", &MapMode::SetCurrentTrack)
+			.def("CurrentState", &MapMode::CurrentState)
 			.def("PushState", &MapMode::PushState)
 			.def("PopState", &MapMode::PopState)
 			.def("GetMapEventGroup", &MapMode::GetMapEventGroup)
