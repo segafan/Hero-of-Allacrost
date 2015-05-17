@@ -59,6 +59,19 @@ TileSupervisor::~TileSupervisor() {
 
 
 
+MAP_CONTEXT TileSupervisor::GetInheritedContext(MAP_CONTEXT context) {
+	map<MAP_CONTEXT, MAP_CONTEXT>::iterator context_mapping = _inherited_contexts.find(context);
+	if (context_mapping != _inherited_contexts.end()) {
+		return context_mapping->second;
+	}
+	else {
+		IF_PRINT_WARNING(MAP_DEBUG) << "no context with the requested ID exists: " << context << endl;
+		return MAP_CONTEXT_NONE;
+	}
+}
+
+
+
 void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_instance) {
 	// TODO: Add some more error checking in this function (such as checking for script errors after reading blocks of data from the map file)
 
@@ -96,14 +109,30 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		return;
 	}
 
+	// ---------- (2) Construct the tile layer and map context containers
 	for (uint32 i = 0; i < tile_layer_count; ++i)
 		_tile_layers.push_back(TileLayer(i));
 
-	vector<int32> context_inherits;
-	map_file.ReadIntVector("map_context_inheritance", context_inherits);
+	vector<MAP_CONTEXT> map_contexts;
+	vector<int32> context_inheritance;
+	map_file.ReadIntVector("map_context_inheritance", context_inheritance);
 
-	// ---------- (2) Load all of the tileset images that are used by this map
+	// For each context, populate the map_context vector and the _inherited_contexts map
+	for (uint32 i = 0; i < map_context_count; ++i) {
+		context_inheritance[i] -= 1; // The map file enumerates contexts from 1..n, so we decrement this value to the range 0..n-1
 
+		MAP_CONTEXT context = static_cast<MAP_CONTEXT>(1 << (i));
+		MAP_CONTEXT inherited_context = MAP_CONTEXT_NONE;
+		// Check if this context inherits or not. If so, translate the integer value into the context ID
+		if (context_inheritance[i] >= 0) {
+			inherited_context = static_cast<MAP_CONTEXT>(1 << (context_inheritance[i]));
+		}
+
+		map_contexts.push_back(context);
+		_inherited_contexts.insert(pair<MAP_CONTEXT, MAP_CONTEXT>(context, inherited_context));
+	}
+
+	// ---------- (3) Load all of the tileset images that are used by this map
 	// Contains all of the definition filenames used for each tileset
 	vector<string> tileset_definition_filenames;
 	// The image filename corresponding to each tileset definition
@@ -139,20 +168,17 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		}
 	}
 
-	// ---------- (3) Read in the map tile data for all layers and all contexts
+	// ---------- (4) Read in the map tile data for all layers and all contexts
 	// Tilesets contain a total of 256 tiles each, so 0-255 correspond to the first tileset, 256-511 the second, etc. The tile location
 	// within the tileset is also determined by the value, where the first 16 indeces in the tileset range are the tiles of the first row
 	// (left to right), and so on.
 
 	// First allocate all of the tile objects needed for each context before reading in the tile data
 	MapTile blank_tile(tile_layer_count); // Used to size each MapTile in the _tile_grid appropriately
-	vector<MAP_CONTEXT> map_contexts;
 	for (uint32 i = 0; i < map_context_count; ++i) {
-		MAP_CONTEXT context = static_cast<MAP_CONTEXT>(1 << (i));
-		map_contexts.push_back(context);
-		_tile_grid.insert(make_pair(context, vector<vector<MapTile> >(_row_count)));
+		_tile_grid.insert(make_pair(map_contexts[i], vector<vector<MapTile> >(_row_count)));
 		for (uint32 r = 0; r < _row_count; r++) {
-			_tile_grid[context][r].resize(_column_count, blank_tile);
+			_tile_grid[map_contexts[i]][r].resize(_column_count, blank_tile);
 		}
 	}
 
@@ -175,12 +201,11 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 	}
 	map_file.CloseTable();
 
-	// ---------- (4) Determine which tiles in each tileset are referenced in this map
-
-	// Used to determine whether each tile is used by the map or not. An entry of -1 indicates that particular tile is not used
+	// ---------- (5) Determine which tiles in each tileset are referenced in this map
+	// Used to determine whether each tile is used by the map or not. An entry of UNREFERENCED_TILE indicates that particular tile is not used
 	vector<int16> tile_references;
-	// Set size to be equal to the total number of tiles and initialize all entries to -1 (unreferenced)
-	tile_references.assign(tileset_count * TILES_PER_TILESET, -1);
+	// Set size to be equal to the total number of tiles and initialize all entries to unrefereced
+	tile_references.assign(tileset_count * TILES_PER_TILESET, UNREFERENCED_TILE);
 
 	for (map<MAP_CONTEXT, vector<vector<MapTile> > >::iterator i = _tile_grid.begin(); i != _tile_grid.end(); i++) {
 		for (uint32 r = 0; r < _row_count; r++) {
@@ -195,7 +220,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		}
 	}
 
-	// ---------- (5) Translate the tileset tile indeces into indeces for the vector of tile images
+	// ---------- (6) Translate the tileset tile indeces into indeces for the vector of tile images
 	// Here, we have to convert the original tile indeces defined in the map file into a new form. The original index
 	// indicates the tileset where the tile is used and its location in that tileset. We need to convert those indeces
 	// so that they serve as an index to the MapMode::_tile_images vector, where the tile images will soon be stored.
@@ -224,8 +249,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		}
 	}
 
-	// ---------- (6) Parse all of the tileset definition files and create any animated tile images that will be used
-
+	// ---------- (7) Parse all of the tileset definition files and create any animated tile images that will be used
 	// Temporarily retains the animation data (every two elements corresponds to a pair of tile frame index and display time)
 	vector<uint32> animation_info;
 	// Temporarily holds all animated tile images. The map key is the value of the tile index, before reference translation is done in the next step
@@ -249,7 +273,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 
 				// If the first tile frame index of this animation was not referenced anywhere in the map, then the animation is unused and
 				// we can safely skip over it and move on to the next one. Otherwise if it is referenced, we have to construct the animated image
-				if (tile_references[first_frame_index] == -1) {
+				if (tile_references[first_frame_index] == UNREFERENCED_TILE) {
 					continue;
 				}
 
@@ -269,8 +293,7 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		definition_file.CloseFile();
 	}
 
-	// ---------- (7) Add all referenced tiles to the _tile_images vector, in the proper order
-
+	// ---------- (8) Add all referenced tiles to the _tile_images vector, in the proper order
 	for (uint32 i = 0; i < tileset_images.size(); i++) {
 		for (uint32 j = 0; j < TILES_PER_TILESET; j++) {
 			uint32 reference = (i * TILES_PER_TILESET) + j;
@@ -318,6 +341,8 @@ void TileSupervisor::DrawTileLayer(uint16 layer_index) {
 	const MapFrame& frame = MapMode::CurrentInstance()->GetMapFrame();
 
 	MAP_CONTEXT current_context = MapMode::CurrentInstance()->GetCurrentContext();
+	MAP_CONTEXT inherited_context = GetInheritedContext(current_context);
+
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->Move(frame.tile_x_start, frame.tile_y_start);
 	for (uint32 r = static_cast<uint32>(frame.starting_row); r < static_cast<uint32>(frame.starting_row + frame.num_draw_rows); ++r)	{
@@ -325,6 +350,11 @@ void TileSupervisor::DrawTileLayer(uint16 layer_index) {
 			// Draw a tile image if it exists at this location
 			if (_tile_grid[current_context][r][c].tile_layers[layer_index] >= 0) {
 				_tile_images[_tile_grid[current_context][r][c].tile_layers[layer_index]]->Draw();
+			}
+			else if (_tile_grid[current_context][r][c].tile_layers[layer_index] == INHERITED_TILE) {
+				if (_tile_grid[inherited_context][r][c].tile_layers[layer_index] >= 0) {
+					_tile_images[_tile_grid[inherited_context][r][c].tile_layers[layer_index]]->Draw();
+				}
 			}
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}

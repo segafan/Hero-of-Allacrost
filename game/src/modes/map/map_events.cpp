@@ -1084,6 +1084,8 @@ void EventSupervisor::StartEvent(MapEvent* event) {
 		return;
 	}
 
+	IF_PRINT_DEBUG(MAP_DEBUG) << "Starting event: " << event->GetEventID() << endl;
+
 	_active_events.push_back(event);
 	event->_Start();
 	_ExamineEventLinks(event, true);

@@ -51,6 +51,15 @@ const uint16 TILE_LENGTH = 64; // Length of a tile in pixels
 const uint16 HALF_TILE_LENGTH = TILE_LENGTH / 2;
 //@}
 
+//! \brief The number of tiles that are found in a tileset image (512x512 pixel image containing 32x32 pixel tiles)
+const uint32 TILES_PER_TILESET = 256;
+
+//! \brief Indicates that no image is referenced at this tile location
+const int32 UNREFERENCED_TILE = -1;
+
+//! \brief Indicates that the tile drawn at this location should be the corresponding tile from the inhertiting context
+const int32 INHERITED_TILE = -2;
+
 
 /** \name Map State Enum
 *** \brief Represents the current state of operation during map mode.
@@ -131,11 +140,6 @@ enum ZONE_TYPE {
 	ZONE_CONTEXT    = 5,
 	MAP_ZONE_TOTAL  = 6,
 };
-
-
-//! \brief The number of tiles that are found in a tileset image (512x512 pixel image containing 32x32 pixel tiles)
-const uint32 TILES_PER_TILESET = 256;
-
 
 //! \brief Used to identify the type of map object
 enum MAP_OBJECT_TYPE {
