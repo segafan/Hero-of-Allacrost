@@ -108,7 +108,6 @@ function Update()
 
 	if (zones["long_route"]:IsCameraEntering() == true and Map:CurrentState() == hoa_map.MapMode.STATE_EXPLORE) then
 		if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
-			print "DEBUG: STARTING PASSAGE DENIAL EVENT CHAIN";
 			EventManager:StartEvent(event_chains["go_short_route"]);
 		end
 	end
@@ -225,7 +224,18 @@ end -- function CreateZones()
 
 
 function CreateObjects()
-	-- No non-sprite objects exist in this map
+	local object = {};
+	local treasure = {};
+
+	-- TODO: Move this treasure deeper into the cave instead of near the entrance
+	object = hoa_map.TreasureObject("img/misc/chest1.png", 4, 1, 1);
+	object:SetObjectID(1001);
+	object:SetXPosition(12, 0);
+	object:SetYPosition(205, 0);
+	treasure = object:GetTreasure();
+	treasure:AddDrunes(75);
+	treasure:AddObject(1, 2);
+	ObjectManager:AddObject(object, 0);
 end
 
 
@@ -1029,10 +1039,10 @@ functions["EngageFirstEnemy"] = function()
 	-- TODO
 end
 
-
+-- TODO: A chest placed down by the knight NPC near the entrance
 functions["EntrancePlaceChest"] = function()
 	print "Treasure placed down";
-	-- TODO
+
 	-- sprites["entrance_knight"] -- Turn to face chest
 end;
 
@@ -1094,11 +1104,6 @@ functions["SwitchContextForAllSprites"] = function()
 	swap_context_all_objects(contexts["collapsed"]);
 end
 
--- Switches the map context of all map objects to the "water unblocked" context
---functions[""] = function()
---	swap_context_all_objects(hoa_map.MapMode.CONTEXT_03);
---end
-
 -- Makes the knight that moved along the short path disappear
 functions["VanishPathSprite"] = function()
 	sprites["passage_knight2"]:SetNoCollision(true);
@@ -1149,7 +1154,6 @@ end
 functions["CameraFollowPathSprite"] = function()
 	Map:SetCamera(sprites["passage_knight2"], 500);
 end
-
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
 swap_context_all_objects = function(new_context)
