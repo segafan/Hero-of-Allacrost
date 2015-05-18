@@ -241,8 +241,12 @@ void MapMode::Draw() {
 	VideoManager->DrawOverlays();
 
 	_DrawGUI();
+
 	if (CurrentState() == STATE_DIALOGUE) {
 		_dialogue_supervisor->Draw();
+	}
+	else if (CurrentState() == STATE_TREASURE) {
+		_treasure_supervisor->Draw();
 	}
 }
 
@@ -804,10 +808,6 @@ void MapMode::_DrawGUI() {
 
 		VideoManager->PopState();
 	} // if (_stamina_bar_visible == true)
-
-	// ---------- (4) Draw the treasure menu if necessary
-	if (_treasure_supervisor->IsActive() == true)
-		_treasure_supervisor->Draw();
 } // void MapMode::_DrawGUI()
 
 } // namespace hoa_map

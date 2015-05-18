@@ -249,15 +249,15 @@ void TreasureSupervisor::Update() {
 
 
 void TreasureSupervisor::Draw() {
-	// We wait until the treasure is fully open before displaying any portions of the menu
 	VideoManager->PushState();
 
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	_action_window.Draw();
 	if (_selection != DETAIL_SELECTED) {
 		_action_options.Draw();
 	}
 	_list_window.Draw();
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+
 	VideoManager->Move(512.0f, 465.0f);
 	_window_title.Draw();
 
