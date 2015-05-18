@@ -105,15 +105,6 @@ function Update()
 			EventManager:StartEvent(event_chains["find_corpse"]);
 		end
 	end
-	
-	-- TODO: figure out what this event is supposed to be for
-	if (zones["corpse"]:IsCameraEntering() == true and not Map:IsCameraOnVirtualFocus()) then
-		if (GlobalEvents:DoesEventExist("corpse_found") == false) then
-			print "";
-			GlobalEvents:AddNewEvent("corpse_found", 1);
-			-- EventManager:StartEvent();
-		end
-	end
 
 	if (zones["long_route"]:IsCameraEntering() == true and Map:CurrentState() == hoa_map.MapMode.STATE_EXPLORE) then
 		if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
@@ -173,11 +164,8 @@ function CreateZones()
 	zones["first_enemy_encounter"] = hoa_map.CameraZone(6, 20, 184, 186, contexts["start"]);
 	Map:AddZone(zones["first_enemy_encounter"]);
 
-	zones["corpse_discovery"] = hoa_map.CameraZone(185, 200, 135, 150, contexts["start"] + contexts["collapsed"]);
+	zones["corpse_discovery"] = hoa_map.CameraZone(180, 182, 134, 140, contexts["start"] + contexts["collapsed"]);
 	Map:AddZone(zones["corpse_discovery"]);
-
-	zones["corpse"] = hoa_map.CameraZone(202, 210, 145, 149, contexts["start"] + contexts["collapsed"]);
-	Map:AddZone(zones["corpse"]);
 
 	zones["long_route"] = hoa_map.CameraZone(132, 136, 70, 80, contexts["start"]);
 	Map:AddZone(zones["long_route"]);
@@ -510,6 +498,8 @@ end -- function CreateEnemies()
 
 
 function CreateDialogues()
+	event_dialogues = {}; -- Holds IDs of the dialogues used during events
+
 	local dialogue;
 	local text;
 
@@ -553,19 +543,23 @@ function CreateDialogues()
 	---------- Dialogues triggered by events
 	----------------------------------------------------------------------------
 	-- Event: Entering the cave
-	dialogue = hoa_map.MapDialogue.Create(100);
+	event_dialogues["entrance1"] = 100;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["entrance1"]);
 		text = hoa_system.Translate("Claudius, I want you to lead us down to the riverbed.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
-	dialogue = hoa_map.MapDialogue.Create(101);
+	event_dialogues["entrance2"] = 101;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["entrance2"]);
 		text = hoa_system.Translate("Wait a damn minute Lukar! Why are you putting a rookie like him in charge?");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
-	dialogue = hoa_map.MapDialogue.Create(102);
+	event_dialogues["entrance3"] = 102;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["entrance3"]);
 		text = hoa_system.Translate("Relax, Mark. This is the best way for him to get experience.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
-	dialogue = hoa_map.MapDialogue.Create(103);
+	event_dialogues["entrance4"] = 103;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["entrance4"]);
 		text = hoa_system.Translate("Claudius, I realize that this is your first real mission as a knight. If you're not up to this task, that's okay.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		text = hoa_system.Translate("No, I can do it. I won't lead us astray.");
@@ -576,11 +570,13 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
 	-- Event: First battle encounter
-	dialogue = hoa_map.MapDialogue.Create(110);
+	event_dialogues["first_enemy_encounter1"] = 110;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["first_enemy_encounter1"]);
 		text = hoa_system.Translate("Wait, look up ahead. There's an enemy in our way.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
-	dialogue = hoa_map.MapDialogue.Create(111);
+	event_dialogues["first_enemy_encounter2"] = 111;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["first_enemy_encounter2"]);
 		text = hoa_system.Translate("A battle occurs whenever you collide with an enemy. Sometimes you can avoid a fight by sneaking past or running by an enemy before it has a chance to engage you. When you enter a battle you can no longer run away and must defeat your opponent.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		text = hoa_system.Translate("That enemy doesn't appear to be much of a threat, so let it engage us. I want to make sure you remember how a knight does battle.");
@@ -589,7 +585,8 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
 	-- Event: After first battle victory
-	dialogue = hoa_map.MapDialogue.Create(120);
+	event_dialogues["first_enemy_encounter3"] = 120;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["first_enemy_encounter3"]);
 		text = hoa_system.Translate("Nicely done. After a battle ends, you'll have a short moment of invulnerability to get away from any other enemies that may be roaming nearby. If you are surrounded by multiple foes when a battle begins, be ready to make a break for it as soon as the battle ends if you don't want to keep fighting.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		text = hoa_system.Translate("Or you can not get yourself surrounded in the first place like a dumbass.");
@@ -599,12 +596,14 @@ function CreateDialogues()
 		text = hoa_system.Translate("You must also be careful as enemies will re-spawn after a short period of time, so don't sit around thinking that you're out of danger. Other times an enemy that is defeated will not appear again.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
-	dialogue = hoa_map.MapDialogue.Create(121);
+	event_dialogues["first_enemy_encounter4"] = 121;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["first_enemy_encounter4"]);
 		text = hoa_system.Translate("Ah, one more thing. You can access the party menu by pressing the [MENU] key while on a map. In the party menu you can heal your characters, change out your equipment, and manage your inventory.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	-- Event: Encountering first NPCs in the cave
-	dialogue = hoa_map.MapDialogue.Create(130);
+	event_dialogues["first_npc_encounter"] = 130;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["first_npc_encounter"]);
 		text = hoa_system.Translate("Hold. There's a friendly ahead. Characters that have information to share will have a small icon appear above them that gradually appears as you get closer. Stand facing the character and hit the [CONFIRM] key to hear what they have to say.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		text = hoa_system.Translate("Keep in mind that a character may have more than one piece of information to share, or may have something new to say after a particular event has occurred. The icon will look differently if the character has dialogue that you have not seen before.");
@@ -615,27 +614,34 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
 	-- Event: Discovery of corpse in south east part of cave
-	dialogue = hoa_map.MapDialogue.Create(140);
+	event_dialogues["corpse_discovery1"] = 140;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["corpse_discovery1"]);
+		text = hoa_system.Translate("Wait, look over there.");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	event_dialogues["corpse_discovery2"] = 141;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["corpse_discovery2"]);
 		text = hoa_system.Translate("A corpse. That's always a reassuring find in a place like this.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 		text = hoa_system.Translate("Hey, I think I see something under its hand.");
 		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
-		text = hoa_system.Translate("Good eye, Claudius. Go near it and press the [CONFIRM] key to acquire the item.");
-		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	-- Event: Player tries to go long route before short route
-	dialogue = hoa_map.MapDialogue.Create(150);
+	event_dialogues["prevent_long_route"] = 150;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["prevent_long_route"]);
 		text = hoa_system.Translate("Hey! Over here!");
 		dialogue:AddLine(text, sprites["passage_knight1"]:GetObjectID());
 	
 	-- Event: As passage is collapsing
-	dialogue = hoa_map.MapDialogue.Create(160);
+	event_dialogues["passage_collapse1"] = 160;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["passage_collapse1"]);
 		text = hoa_system.Translate("Look out!");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 		dialogue:AddLineTiming(1000);
 
 	-- Event: After passage collapse occurs
-	dialogue = hoa_map.MapDialogue.Create(161);
+	event_dialogues["passage_collapse2"] = 161;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["passage_collapse2"]);
 		text = hoa_system.Translate("Woah! Are you guys alright?");
 		dialogue:AddLine(text, sprites["passage_knight1"]:GetObjectID());
 		text = hoa_system.Translate("We're all fine. But the passage has caved in.");
@@ -644,14 +650,16 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["passage_knight1"]:GetObjectID());
 
 	-- Event: Stopping player from trying to proceed to lower levels of the cave
-	dialogue = hoa_map.MapDialogue.Create(170);
-		text = hoa_system.Translate("Wait. This path looks like it leads down into the earth. The area we're trying to reach likely isn't down there. Let's head another direction..");
+	event_dialogues["prevent_level_descent"] = 170;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["prevent_level_descent"]);
+		text = hoa_system.Translate("Wait. This path looks like it leads deeper into the cavern. The area we're trying to reach isn't down there. Let's head another direction.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
-		text = hoa_system.Translate("Good. Who knows what could be lurking in the darkness down there..");
+		text = hoa_system.Translate("Good. Who knows what could be lurking in the darkness down there.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
 	-- Event: While crossing the narrow bridge between the two pits after hearing an evil hiss
-	dialogue = hoa_map.MapDialogue.Create(180);
+	event_dialogues["hiss_sound"] = 180;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["hiss_sound"]);
 		text = hoa_system.Translate("Did you hear that? What the hell was that sound?");
 		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
 		text = hoa_system.Translate("I don't know, but I've got a bad feeling about this mission.");
@@ -660,24 +668,29 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	-- Event: Encountering the pool of running water near the end of the cave
-	dialogue = hoa_map.MapDialogue.Create(190);
+	event_dialogues["spring_arrival"] = 190;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["spring_arrival"]);
 		text = hoa_system.Translate("Hey check it out. The water is still running here.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 		text = hoa_system.Translate("That's a good sign. The river obstruction must be close.");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	-- Event: Player reaches dry river bed
-	dialogue = hoa_map.MapDialogue.Create(200);
+	event_dialogues["riverbed_arrival1"] = 200;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["riverbed_arrival1"]);
 		text = hoa_system.Translate("Finally made it.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
-	
-	dialogue = hoa_map.MapDialogue.Create(201);
-		text = hoa_system.Translate("Listen up! There's a large boulder obstructing the underground river that flows through here. When we move it aside, we get to head out of this place.");
+
+	event_dialogues["riverbed_arrival2"] = 201;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["riverbed_arrival2"]);
+		text = hoa_system.Translate("Listen up! There's a large boulder obstructing the underground river that flows through here. When we move it aside, we get to head out of here.");
 		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
 		text = hoa_system.Translate("Mikal! Torren! Take your units and secure the ropes around that overgrown rock. Jasper's unit will prepare the Maks to help us move it. The rest of you stay alert and watch our backs. Who knows what the hell may be in this cave with us.");
 		dialogue:AddLine(text, sprites["sergeant"]:GetObjectID());
 
-	dialogue = hoa_map.MapDialogue.Create(202);
+	-- Event: Before boss battle
+	event_dialogues["before_boss"] = 202;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["before_boss"]);
 		text = hoa_system.Translate("Hey, I heard that noise earlier. It sounds like its closer now.");
 		dialogue:AddLine(text, sprites["river_knight1"]:GetObjectID());
 		text = hoa_system.Translate("Keep your eyes peeled and your swords ready men.");
@@ -688,7 +701,8 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["river_knight4"]:GetObjectID());
 
 	-- Event: After boss battle
-	dialogue = hoa_map.MapDialogue.Create(210);
+	event_dialogues["after_boss"] = 210;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["after_boss"]);
 		text = hoa_system.Translate("Damnit, the captain's been wounded along with half our troops.");
 		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
 		text = hoa_system.Translate("*cough cough*\nI'll be alright. Great job taking down that monster men, I'm proud.");
@@ -700,8 +714,8 @@ end -- function CreateDialogues()
 
 
 function CreateEvents()
-	local event = {};
 	event_chains = {}; -- Holds IDs of the starting event for each event chain
+	local event = {};
 
 	---------- Event Chain 01: Initial scene and 4-part dialogue when the player first enters the cave
 	print "Event Chain #01";
@@ -720,19 +734,19 @@ function CreateEvents()
 	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["entrance"] + 2, 3, 0, -16);
 	event:SetRelativeDestination(true);
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["entrance"] + 3, 3, hoa_map.MapMode.SOUTH);
-	event = hoa_map.DialogueEvent.Create(event_chains["entrance"] + 4, 100);
+	event = hoa_map.DialogueEvent.Create(event_chains["entrance"] + 4, event_dialogues["entrance1"]);
 	event:AddEventLinkAtEnd(event_chains["entrance"] + 5, 250);
 	event:AddEventLinkAtEnd(event_chains["entrance"] + 6, 500);
 	event:AddEventLinkAtEnd(event_chains["entrance"] + 7, 500);
 	-- Part #2: Mark protests Lukar's decision
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["entrance"] + 5, 2, hoa_map.MapMode.WEST);
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["entrance"] + 6, 1, hoa_map.MapMode.EAST);
-	event = hoa_map.DialogueEvent.Create(event_chains["entrance"] + 7, 101);
+	event = hoa_map.DialogueEvent.Create(event_chains["entrance"] + 7, event_dialogues["entrance2"]);
 	event:AddEventLinkAtEnd(18, 200);
 	-- Part #3: Lukar reassures Mark
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["entrance"] + 8, 3, hoa_map.MapMode.EAST);
 	event:AddEventLinkAtEnd(event_chains["entrance"] + 9, 100);
-	event = hoa_map.DialogueEvent.Create(event_chains["entrance"] + 9, 102);
+	event = hoa_map.DialogueEvent.Create(event_chains["entrance"] + 9, event_dialogues["entrance3"]);
 	event:AddEventLinkAtEnd(event_chains["entrance"] + 10, 300);
 	-- Part #4: Lukar asks Claudius again, who accepts. Mark and Lukar's sprites disappear into Claudius
 	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["entrance"] + 10, 3, -5, 0);
@@ -742,7 +756,7 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(event_chains["entrance"] + 12, 100);
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["entrance"] + 12, 1, hoa_map.MapMode.NORTH);
 	event:AddEventLinkAtEnd(event_chains["entrance"] + 13, 100);
-	event = hoa_map.DialogueEvent.Create(event_chains["entrance"] + 13, 103);
+	event = hoa_map.DialogueEvent.Create(event_chains["entrance"] + 13, event_dialogues["entrance4"]);
 	event:AddEventLinkAtEnd(event_chains["entrance"] + 14, 100);
 	event:AddEventLinkAtEnd(event_chains["entrance"] + 15, 100);
 	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["entrance"] + 14, 2, -8, 0);
@@ -759,38 +773,46 @@ function CreateEvents()
 	print "Event Chain #02";
 	event_chains["first_enemy"] = 30;
 
-	event = hoa_map.DialogueEvent.Create(event_chains["first_enemy"] + 0, 110);
+	event = hoa_map.DialogueEvent.Create(event_chains["first_enemy"] + 0, event_dialogues["first_enemy_encounter1"]);
 	event:AddEventLinkAtStart(event_chains["first_enemy"] + 1);
 	event = hoa_map.CustomEvent.Create(event_chains["first_enemy"] + 1, "SpawnFirstEnemy", "");
 	event:AddEventLinkAtEnd(event_chains["first_enemy"] + 2, 500);
-	event = hoa_map.DialogueEvent.Create(event_chains["first_enemy"] + 2, 111);
+	event = hoa_map.DialogueEvent.Create(event_chains["first_enemy"] + 2, event_dialogues["first_enemy_encounter2"]);
 	event:AddEventLinkAtEnd(event_chains["first_enemy"] + 3);
 	event = hoa_map.CustomEvent.Create(event_chains["first_enemy"] + 3, "EngageFirstEnemy", "");
 	event:AddEventLinkAtEnd(event_chains["first_enemy"] + 4);
 	-- Follow-up dialogue begins immediately after the battle ends
-	event = hoa_map.DialogueEvent.Create(event_chains["first_enemy"] + 4, 120);
+	event = hoa_map.DialogueEvent.Create(event_chains["first_enemy"] + 4, event_dialogues["first_enemy_encounter3"]);
 	event:AddEventLinkAtEnd(event_chains["first_enemy"] + 5, 2000);
-	event = hoa_map.DialogueEvent.Create(event_chains["first_enemy"] + 5, 121);
+	event = hoa_map.DialogueEvent.Create(event_chains["first_enemy"] + 5, event_dialogues["first_enemy_encounter4"]);
 
 	---------- Event Chain 03: Discovery of corpse in cave
 	print "Event Chain #03";
 	event_chains["find_corpse"] = 40;
 
 	-- Dialog when seeing the corpse
-	event = hoa_map.DialogueEvent.Create(event_chains["find_corpse"] + 0, 500);
+	event = hoa_map.DialogueEvent.Create(event_chains["find_corpse"] + 0, event_dialogues["corpse_discovery1"]);
 	event:SetStopCameraMovement(true);
-	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 3);
+	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 1);
 	-- Move camera to corpse
-	event = hoa_map.CustomEvent.Create(event_chains["find_corpse"] + 3, "CameraPanToCorpse", "");
-	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 4, 3000);
+	event = hoa_map.CustomEvent.Create(event_chains["find_corpse"] + 1, "CameraPanToCorpse", "");
+	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 2, 3000);
+	-- Walk Claudius over to corpse
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["find_corpse"] + 2, sprites["claudius"], 206, 149);
+	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 3);
+	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 4);
+	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 5);
+	-- Face Claudius east toward the corpse
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["find_corpse"] + 3, sprites["claudius"], hoa_map.MapMode.EAST);
 	-- Move camera back to Cladius
 	event = hoa_map.CustomEvent.Create(event_chains["find_corpse"] + 4, "SetCameraToPlayer", "");
+--	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 5);
 	-- Start dialogue about corpse
-	event = hoa_map.DialogueEvent.Create(event_chains["find_corpse"] + 1, 501);
+	event = hoa_map.DialogueEvent.Create(event_chains["find_corpse"] + 5, event_dialogues["corpse_discovery2"]);
 	event:SetStopCameraMovement(true);
-	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 2);
+	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 6);
 	-- Add treasure
-	event = hoa_map.CustomEvent.Create(event_chains["find_corpse"] + 2, "RewardPotion", "");
+	event = hoa_map.CustomEvent.Create(event_chains["find_corpse"] + 6, "RewardPotion", "");
 
 	---------- Event Chain 04: Prevent player from going long route before cave collapse
 	print "Event Chain #04";
@@ -803,7 +825,7 @@ function CreateEvents()
 	event = hoa_map.CustomEvent.Create(event_chains["go_short_route"] + 1, "CameraToGuideSprite", "");
 	event:AddEventLinkAtEnd(event_chains["go_short_route"] + 2, 1000);
 	-- Throw up dialogue calling out player's party
-	event = hoa_map.DialogueEvent.Create(event_chains["go_short_route"] + 2, 150);
+	event = hoa_map.DialogueEvent.Create(event_chains["go_short_route"] + 2, event_dialogues["prevent_long_route"]);
 	event:SetStopCameraMovement(true);
 	event:AddEventLinkAtEnd(event_chains["go_short_route"] + 3);
 	-- Move camera back to Cladius
@@ -849,7 +871,7 @@ function CreateEvents()
 	event = hoa_map.SoundEvent.Create(event_chains["passage_collapse"] + 1, "snd/cave-in.ogg");	
 	event:AddEventLinkAtStart(event_chains["passage_collapse"] + 2, 250); 
 	-- Warning message
-	event = hoa_map.DialogueEvent.Create(event_chains["passage_collapse"] + 2, 520);
+	event = hoa_map.DialogueEvent.Create(event_chains["passage_collapse"] + 2, event_dialogues["passage_collapse1"]);
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 3);
 	-- Shake the screen
 	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 3, "ShakeScreen", "");
@@ -864,7 +886,7 @@ function CreateEvents()
 	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 6, "FadeInScreen", "IsScreenFading");
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 7);
 	-- Dialogue after passage has collapsed		
-	event = hoa_map.DialogueEvent.Create(event_chains["passage_collapse"] + 7, 521);
+	event = hoa_map.DialogueEvent.Create(event_chains["passage_collapse"] + 7, event_dialogues["passage_collapse2"]);
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 8);
 	-- Change dialogue of sprite guide
 	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 8, "ReplaceGuideDialogue", "");
@@ -915,7 +937,7 @@ function CreateEvents()
 	event_chains["spring_arrival"] = 100;
 	
 	-- Begin dialogue between characters
-	event = hoa_map.DialogueEvent.Create(event_chains["spring_arrival"] + 70, 530);
+	event = hoa_map.DialogueEvent.Create(event_chains["spring_arrival"] + 70, event_dialogues["spring_arrival"]);
 		
 	---------- Event Chain 10: Arriving at riverbed
 	print "Event Chain #10";
@@ -937,11 +959,11 @@ function CreateEvents()
 	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 4, 540);
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 5);
 	-- Begin dialogue given from captain
-	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 5, 541);
+	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 5, event_dialogues["riverbed_arrival1"]);
 	event:AddEventLinkAtEnd(1010);
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 86, 1000);
 	-- Begin dialogue preceeding boss battle encounter
-	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 6, 542);
+	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 6, event_dialogues["riverbed_arrival2"]);
 	event:SetStopCameraMovement(true);
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 7);
 	-- Boss battle
@@ -956,7 +978,7 @@ function CreateEvents()
 
 	-- TODO: show water running with another map layer or context
 	-- Post-battle dialogue
-	event = hoa_map.DialogueEvent.Create(event_chains["after_boss"] + 0, 550);	
+	event = hoa_map.DialogueEvent.Create(event_chains["after_boss"] + 0, event_dialogues["after_boss"]);	
 	event:AddEventLinkAtEnd(event_chains["after_boss"] + 1);
 	-- Transition to the return to city scene
 	event = hoa_map.MapTransitionEvent.Create(event_chains["after_boss"] + 1, "lua/scripts/maps/a01_return_to_harrvah_city.lua");
