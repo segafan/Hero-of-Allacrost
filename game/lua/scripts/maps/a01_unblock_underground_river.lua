@@ -28,7 +28,7 @@ events = {};
 functions = {};
 
 -- Shorthand names for map contexts
-contexts["start"] = hoa_map.MapMode.CONTEXT_01; -- Upon first entering the cave
+contexts["base"] = hoa_map.MapMode.CONTEXT_01; -- Upon first entering the cave
 contexts["collapsed"] = hoa_map.MapMode.CONTEXT_02; -- Active context after the passage collapse event
 
 
@@ -160,31 +160,31 @@ end
 
 function CreateZones()
 	---------- Event Trigger Zones
-	zones["first_enemy_encounter"] = hoa_map.CameraZone(6, 20, 184, 186, contexts["start"]);
+	zones["first_enemy_encounter"] = hoa_map.CameraZone(6, 20, 184, 186, contexts["base"]);
 	Map:AddZone(zones["first_enemy_encounter"]);
 
-	zones["corpse_discovery"] = hoa_map.CameraZone(180, 182, 134, 140, contexts["start"] + contexts["collapsed"]);
+	zones["corpse_discovery"] = hoa_map.CameraZone(180, 182, 134, 140, contexts["base"] + contexts["collapsed"]);
 	Map:AddZone(zones["corpse_discovery"]);
 
-	zones["long_route"] = hoa_map.CameraZone(132, 136, 70, 80, contexts["start"]);
+	zones["long_route"] = hoa_map.CameraZone(132, 136, 70, 80, contexts["base"]);
 	Map:AddZone(zones["long_route"]);
 
-	zones["short_route"] = hoa_map.CameraZone(156, 160, 60, 63, contexts["start"]);
+	zones["short_route"] = hoa_map.CameraZone(156, 160, 60, 63, contexts["base"]);
 	Map:AddZone(zones["short_route"]);	
 
-	zones["collapse"] = hoa_map.CameraZone(186, 189, 60, 63, contexts["start"]);
+	zones["collapse"] = hoa_map.CameraZone(186, 189, 60, 63, contexts["base"]);
 	Map:AddZone(zones["collapse"]);	
 
-	zones["forward_passage"] = hoa_map.CameraZone(78, 79, 6, 7, contexts["start"] + contexts["collapsed"]);
+	zones["forward_passage"] = hoa_map.CameraZone(78, 79, 6, 7, contexts["base"] + contexts["collapsed"]);
 	Map:AddZone(zones["forward_passage"]);
 
-	zones["backward_passage"] = hoa_map.CameraZone(110, 111, 20, 21, contexts["start"] + contexts["collapsed"]);
+	zones["backward_passage"] = hoa_map.CameraZone(110, 111, 20, 21, contexts["base"] + contexts["collapsed"]);
 	Map:AddZone(zones["backward_passage"]);
 
-	zones["spring_discovery"] = hoa_map.CameraZone(171, 186, 5, 10, contexts["start"] + contexts["collapsed"]);
+	zones["spring_discovery"] = hoa_map.CameraZone(171, 186, 5, 10, contexts["base"] + contexts["collapsed"]);
 	Map:AddZone(zones["spring_discovery"]);
 
-	zones["riverbed_arrival"] = hoa_map.CameraZone(220, 221, 2, 11, contexts["start"] + contexts["collapsed"]);
+	zones["riverbed_arrival"] = hoa_map.CameraZone(220, 221, 2, 11, contexts["base"] + contexts["collapsed"]);
 	Map:AddZone(zones["riverbed_arrival"]);
 
 	---------- Enemy Zones
@@ -230,7 +230,7 @@ function CreateObjects()
 	-- TODO: Move this treasure deeper into the cave instead of near the entrance
 	object = hoa_map.TreasureObject("img/misc/chest1.png", 4, 1, 1);
 	object:SetObjectID(1001);
-	object:SetXPosition(34, 0);
+	object:SetXPosition(35, 0);
 	object:SetYPosition(6, 0);
 	treasure = object:GetTreasure();
 	treasure:AddDrunes(75);
@@ -971,7 +971,7 @@ function CreateEvents()
 	-- Begin dialogue given from captain
 	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 5, event_dialogues["riverbed_arrival1"]);
 	event:AddEventLinkAtEnd(1010);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 86, 1000);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 6, 1000);
 	-- Begin dialogue preceeding boss battle encounter
 	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 6, event_dialogues["riverbed_arrival2"]);
 	event:SetStopCameraMovement(true);
@@ -1101,7 +1101,7 @@ end
 
 -- Switches the map context of all map objects to the "passage collapsed" context
 functions["SwitchContextForAllSprites"] = function()
-	swap_context_all_objects(contexts["collapsed"]);
+	SwapContextForAllObjects(contexts["collapsed"]);
 end
 
 -- Makes the knight that moved along the short path disappear
@@ -1156,7 +1156,7 @@ functions["CameraFollowPathSprite"] = function()
 end
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
-swap_context_all_objects = function(new_context)
+SwapContextForAllObjects = function(new_context)
 	local max_index = ObjectManager:GetNumberObjects() - 1;
 	
 	for i = 0, max_index do

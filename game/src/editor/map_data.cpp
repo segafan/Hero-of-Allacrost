@@ -1133,10 +1133,10 @@ QString MapData::_CreateCloneName(const QString& name, const QStringList& taken_
 
 
 void MapData::_ComputeCollisionData() {
-	// Resize the container to hold each grid element that will be computed
+	// Resize the container to hold each grid element that will be computed and reset each value to 0
 	_collision_data.resize(_map_height * 2);
 	for (uint32 i = 0; i < _map_height * 2; ++i) {
-		_collision_data[i].resize(_map_length * 2, 0);
+		_collision_data[i].assign(_map_length * 2, 0);
 	}
 
 	// Holds the indexes of only the tile layers that have their collision data enabled
@@ -1146,10 +1146,12 @@ void MapData::_ComputeCollisionData() {
 			collision_layers.push_back(i);
 	}
 
-	// The context being processed
-	TileContext* context = NULL;
 	// A bit-mask used to put the collision data into the proper bit based on the context's ID
 	uint32 context_mask = 0;
+	// The context being processed
+	TileContext* context = NULL;
+	// The context that the processing context inherits from (if it is non-inheriting, will be set to NULL)
+	TileContext* inherited_context = NULL;
 
 	// The value of the current tile being processed
 	int32 tile = 0;
@@ -1166,6 +1168,12 @@ void MapData::_ComputeCollisionData() {
 		// This mask is used to set the appropriate bit for this context
 		context_mask = 0x00000001 << c;
 		context = _all_tile_contexts[c];
+		if (context->IsInheritingContext() == true) {
+			inherited_context = FindTileContextByID(context->GetInheritedContextID());
+		}
+		else {
+			inherited_context = NULL;
+		}
 
 		// Iterate through each tile in the map and extract the collision data from each
 		for (uint32 y = 0; y < _map_height; ++y) {
@@ -1176,10 +1184,14 @@ void MapData::_ComputeCollisionData() {
 				east_index = west_index + 1;
 				for (uint32 l = 0; l < collision_layers.size(); ++l) {
 					tile = context->GetTileLayer(collision_layers[l])->GetTile(x, y);
-					// TODO: if this tile comes from an inherited context, do we want to include the collision data from that inherited tile?
-					// Or do we want to leave out all collision information entirely, as we do here currently?
-					if (tile < 0) {
+					if (tile == MISSING_TILE) {
 						continue;
+					}
+					else if (tile == INHERITED_TILE) {
+						tile = inherited_context->GetTileLayer(collision_layers[l])->GetTile(x, y);
+						if (tile == MISSING_TILE) {
+							continue;
+						}
 					}
 
 					// Determine the tileset that this tile belongs to and the location of the tile within that set
