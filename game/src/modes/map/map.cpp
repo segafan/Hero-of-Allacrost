@@ -255,12 +255,14 @@ void MapMode::Draw() {
 void MapMode::ResetState() {
 	_state_stack.clear();
 	_state_stack.push_back(STATE_INVALID);
+	IF_PRINT_DEBUG(MAP_DEBUG) << "map changing to state: " << _state_stack.back() << endl;
 }
 
 
 
 void MapMode::PushState(MAP_STATE state) {
 	_state_stack.push_back(state);
+	IF_PRINT_DEBUG(MAP_DEBUG) << "map changing to state: " << state << endl;
 }
 
 
@@ -271,6 +273,7 @@ void MapMode::PopState() {
 		IF_PRINT_WARNING(MAP_DEBUG) << "stack was empty after operation, reseting state stack" << endl;
 		_state_stack.push_back(STATE_INVALID);
 	}
+	IF_PRINT_DEBUG(MAP_DEBUG) << "map changing to state: " << _state_stack.back() << endl;
 }
 
 
