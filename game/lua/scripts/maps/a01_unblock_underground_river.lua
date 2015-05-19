@@ -230,8 +230,8 @@ function CreateObjects()
 	-- TODO: Move this treasure deeper into the cave instead of near the entrance
 	object = hoa_map.TreasureObject("img/misc/chest1.png", 4, 1, 1);
 	object:SetObjectID(1001);
-	object:SetXPosition(12, 0);
-	object:SetYPosition(205, 0);
+	object:SetXPosition(34, 0);
+	object:SetYPosition(6, 0);
 	treasure = object:GetTreasure();
 	treasure:AddDrunes(75);
 	treasure:AddObject(1, 2);

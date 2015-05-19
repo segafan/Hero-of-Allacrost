@@ -249,7 +249,13 @@ void TreasureSupervisor::Update() {
 
 
 void TreasureSupervisor::Draw() {
+	if (IsActive() == false) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "treasure supervisor not initialized" << endl;
+		return;
+	}
+
 	VideoManager->PushState();
+	VideoManager->SetStandardCoordSys();
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	_action_window.Draw();
