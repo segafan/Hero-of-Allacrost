@@ -399,6 +399,72 @@ protected:
 
 
 /** ****************************************************************************
+*** \brief Represents an area where the active map context may switch
+***
+*** This type of zone enables map sprites to transfer betweeen two map contexts.
+*** Each zone section added is labeled as corresponding to one context or the
+*** other. When a sprite stands upon a particular section, their context will
+*** be set to the context of that section.
+***
+*** \todo In the future collision detection needs to be accounted for when two
+*** objects are in the context zone but have different active map contexts.
+*** Normally no collision detection is done between objects in different contexts,
+*** but context zones need to be an exception to this rule.
+***
+*** \todo Currently the Update() function checks all ground objects to determine
+*** if any context changes need to occur. This is a temporarily solution that needs
+*** to be improved by the following:
+***  - The class should have a container of objects currently located within the zone,
+***    and check only those objects (when sprites are in motion, they can check if they
+***    have stepped into a context zone there)
+***  - Sky objects should also be able to change their context via context zones
+***  - There should be an option for having the context zone not to apply to either the
+***    ground or sky object layers
+*** ***************************************************************************/
+class ContextZone : public MapZone {
+public:
+	/** \brief The constructor requires the map contexts of the zone to be declared immediately
+	*** \note These two context arguments can not be equal
+	**/
+	ContextZone(MAP_CONTEXT one, MAP_CONTEXT two);
+
+	/** \brief Overrides the virtual base method
+	***
+	*** This method should not be called for this class as zone sections which are added need to be
+	*** instructed as to which context they should belong to. The only reason this method is defined
+	*** here is to override the MapZone class' base method. This function prints a warning and will not
+	*** add the new section
+	**/
+	void AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
+
+	/** \brief Adds a new rectangular section to the zone
+	*** \param left_col The left edge of the section to add
+	*** \param right_col The right edge of the section to add
+	*** \param top_row The top edge of the section to add
+	*** \param bottom_row The bottom edge of the section to add
+	*** \param context True indicates that the new section belongs to context one, false to context two
+	**/
+	void AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, bool context);
+
+	//! \brief Updates the active contexts of any map objects that exist within the zone
+	void Update();
+
+private:
+	//! \brief The different map contexts that the context zone allows an object to transition between
+	MAP_CONTEXT _context_one, _context_two;
+
+	//! \brief Stores the context of each zone section. True indicates context one, false is context two
+	std::vector<bool> _section_contexts;
+
+	/** \brief Determines if a map object is inside the context zone
+	*** \param object A pointer to the map object
+	*** \return The index of the zone section where the object is located, or -1 if it is not in the zone
+	**/
+	int16 _IsInsideZone(MapObject* object);
+}; // class ContextZone : public MapZone
+
+
+/** ****************************************************************************
 *** \brief Represents an area where enemy sprites spawn and roam in.
 ***
 *** This zone will spawn enemy sprites somewhere within its boundaries. It also
@@ -508,72 +574,6 @@ private:
 	**/
 	std::vector<EnemySprite*> _enemies;
 }; // class EnemyZone : public MapZone
-
-
-/** ****************************************************************************
-*** \brief Represents an area where the active map context may switch
-***
-*** This type of zone enables map sprites to transfer betweeen two map contexts.
-*** Each zone section added is labeled as corresponding to one context or the
-*** other. When a sprite stands upon a particular section, their context will
-*** be set to the context of that section.
-***
-*** \todo In the future collision detection needs to be accounted for when two
-*** objects are in the context zone but have different active map contexts.
-*** Normally no collision detection is done between objects in different contexts,
-*** but context zones need to be an exception to this rule.
-***
-*** \todo Currently the Update() function checks all ground objects to determine
-*** if any context changes need to occur. This is a temporarily solution that needs
-*** to be improved by the following:
-***  - The class should have a container of objects currently located within the zone,
-***    and check only those objects (when sprites are in motion, they can check if they
-***    have stepped into a context zone there)
-***  - Sky objects should also be able to change their context via context zones
-***  - There should be an option for having the context zone not to apply to either the
-***    ground or sky object layers
-*** ***************************************************************************/
-class ContextZone : public MapZone {
-public:
-	/** \brief The constructor requires the map contexts of the zone to be declared immediately
-	*** \note These two context arguments can not be equal
-	**/
-	ContextZone(MAP_CONTEXT one, MAP_CONTEXT two);
-
-	/** \brief Overrides the virtual base method
-	***
-	*** This method should not be called for this class as zone sections which are added need to be
-	*** instructed as to which context they should belong to. The only reason this method is defined
-	*** here is to override the MapZone class' base method. This function prints a warning and will not
-	*** add the new section
-	**/
-	void AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
-
-	/** \brief Adds a new rectangular section to the zone
-	*** \param left_col The left edge of the section to add
-	*** \param right_col The right edge of the section to add
-	*** \param top_row The top edge of the section to add
-	*** \param bottom_row The bottom edge of the section to add
-	*** \param context True indicates that the new section belongs to context one, false to context two
-	**/
-	void AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, bool context);
-
-	//! \brief Updates the active contexts of any map objects that exist within the zone
-	void Update();
-
-private:
-	//! \brief The different map contexts that the context zone allows an object to transition between
-	MAP_CONTEXT _context_one, _context_two;
-
-	//! \brief Stores the context of each zone section. True indicates context one, false is context two
-	std::vector<bool> _section_contexts;
-
-	/** \brief Determines if a map object is inside the context zone
-	*** \param object A pointer to the map object
-	*** \return The index of the zone section where the object is located, or -1 if it is not in the zone
-	**/
-	int16 _IsInsideZone(MapObject* object);
-}; // class ContextZone : public MapZone
 
 } // namespace private_map
 

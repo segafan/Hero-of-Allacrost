@@ -84,6 +84,7 @@ function Load(m)
 	-- TODO: figure out if visuals should be disabled normally, or wait for control to be given to the player before they are displayed
 	-- Map:DisableIntroductionVisuals();
 
+	Map.unlimited_stamina = true; -- TODO: determine if we want this map to have unlimited stamina or not
 	Map:ShowStaminaBar(true);
 	Map:ShowDialogueIcons(true);
 	print "Load Complete";
@@ -104,10 +105,57 @@ end
 
 function CreateZones()
 	---------- Context Zones
-	zones["inn_entrance"] = hoa_map.ContextZone(contexts["exterior"], contexts["interior"]);
-	zones["inn_entrance"]:AddSection(116, 120, 181, 182, true);
-	zones["inn_entrance"]:AddSection(116, 120, 180, 181, false);
-	Map:AddZone(zones["inn_entrance"]);
+
+	-- The following zone implements the context switching for all structures found in the town.
+	-- The zone sections correspond to the area just outside of the doors to these buildings.
+	-- They are ordered starting from the bottom left of the map, going toward the right.
+	zones["town_doors"] = hoa_map.ContextZone(contexts["exterior"], contexts["interior"]);
+	-- Southwest home 1
+	zones["town_doors"]:AddSection(22, 26, 176, 177, true);
+	zones["town_doors"]:AddSection(22, 26, 175, 176, false);
+	-- Soutwest home 2
+	zones["town_doors"]:AddSection(48, 52, 180, 181, true);
+	zones["town_doors"]:AddSection(48, 52, 179, 180, false);
+	-- Item Shop
+	zones["town_doors"]:AddSection(80, 84, 180, 181, true);
+	zones["town_doors"]:AddSection(80, 84, 179, 180, false);
+	-- Inn
+	zones["town_doors"]:AddSection(116, 120, 182, 1835, true);
+	zones["town_doors"]:AddSection(116, 120, 181, 182, false);
+
+	-- West home 1
+	zones["town_doors"]:AddSection(20, 24, 152, 153, true);
+	zones["town_doors"]:AddSection(20, 24, 151, 152, false);
+	-- West home 2
+	zones["town_doors"]:AddSection(48, 52, 150, 151, true);
+	zones["town_doors"]:AddSection(48, 52, 149, 150, false);
+	-- West home 3
+	zones["town_doors"]:AddSection(78, 82, 152, 153, true);
+	zones["town_doors"]:AddSection(78, 82, 151, 152, false);
+	-- Weapon Shop
+	zones["town_doors"]:AddSection(148, 152, 154, 155, true);
+	zones["town_doors"]:AddSection(148, 152, 153, 154, false);
+	-- East home
+	zones["town_doors"]:AddSection(178, 182, 148, 149, true);
+	zones["town_doors"]:AddSection(178, 182, 147, 148, false);
+
+	-- Northwest home 1
+	zones["town_doors"]:AddSection(12, 16, 122, 123, true);
+	zones["town_doors"]:AddSection(12, 16, 121, 122, false);
+	-- Northwest home 2
+	zones["town_doors"]:AddSection(50, 54, 126, 127, true);
+	zones["town_doors"]:AddSection(50, 54, 125, 126, false);
+	-- Northeast home 1
+	zones["town_doors"]:AddSection(116, 120, 126, 127, true);
+	zones["town_doors"]:AddSection(116, 120, 125, 126, false);
+	-- Northwest home 2
+	zones["town_doors"]:AddSection(140, 144, 122, 123, true);
+	zones["town_doors"]:AddSection(140, 144, 121, 122, false);
+	-- Claudius' home
+	zones["town_doors"]:AddSection(168, 172, 124, 125, true);
+	zones["town_doors"]:AddSection(168, 172, 123, 124, false);
+
+	Map:AddZone(zones["town_doors"]);
 end
 
 
@@ -143,17 +191,17 @@ function CreateSprites()
 
 	-- Create the captain, his sergeant, and one senior knight leading the troop heading due East
 	sprites["captain"] = ConstructSprite("Knight06", 10, startx + 20, starty);
-	sprites["captain"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["captain"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["captain"]:SetName(hoa_system.Translate("Captain Bravis"));
 	ObjectManager:AddObject(sprites["captain"], 0);
 
 	sprites["sergeant"] = ConstructSprite("Knight05", 11, startx + 24, starty);
-	sprites["sergeant"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["sergeant"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["sergeant"]:SetName(hoa_system.Translate("Sergeant Methus"));
 	ObjectManager:AddObject(sprites["sergeant"], 0);
 
 	sprites["senior_knight"] = ConstructSprite("Knight04", 12, startx + 28, starty);
-	sprites["senior_knight"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["senior_knight"]:SetDirection(hoa_map.MapMode.NORTH);
 	ObjectManager:AddObject(sprites["senior_knight"], 0);
 end -- function CreateSprites()
 
