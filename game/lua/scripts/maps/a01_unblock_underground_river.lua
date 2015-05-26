@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- a01_unblock_underground_river.lua
+--
+-- Main storyline event. The first dungeon encountered in the game, the player
+-- makes his way through a cave to a riverbed, where a boss enemy is encountered.
+
+--------------------------------------------------------------------------------
 local ns = {}
 setmetatable(ns, {__index = _G})
 a01_unblock_underground_river = ns;
@@ -12,10 +19,17 @@ sound_filenames = {};
 music_filenames = {};
 music_filenames[1] = "mus/Cave2.ogg";
 
+-- Primary Map Classes
+Map = {};
+ObjectManager = {};
+DialogueManager = {};
+EventManager = {};
+TreasureManager = {};
+GlobalEvents = {};
+
 enemy_ids = { 1, 2, 3, 4, 5, 6 }
 
 -- Containers used to hold pointers to various class objects.
--- A unique string key is used for each object entered into these tables.
 contexts = {};
 zones = {};
 objects = {};
@@ -23,7 +37,7 @@ sprites = {};
 dialogues = {};
 events = {};
 
--- All custom map functions are contained within the following table..
+-- All custom map functions are contained within the following table.
 -- String keys in this table serves as the names of these functions. 
 functions = {};
 

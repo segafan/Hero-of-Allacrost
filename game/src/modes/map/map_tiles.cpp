@@ -210,12 +210,10 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 	for (map<MAP_CONTEXT, vector<vector<MapTile> > >::iterator i = _tile_grid.begin(); i != _tile_grid.end(); i++) {
 		for (uint32 r = 0; r < _row_count; r++) {
 			for (uint32 c = 0; c < _column_count; c++) {
-				if ((i->second)[r][c].tile_layers[0] >= 0)
-					tile_references[(i->second)[r][c].tile_layers[0]] = 0;
-				if ((i->second)[r][c].tile_layers[1] >= 0)
-					tile_references[(i->second)[r][c].tile_layers[1]] = 0;
-				if ((i->second)[r][c].tile_layers[2] >= 0)
-					tile_references[(i->second)[r][c].tile_layers[2]] = 0;
+				for (uint32 l = 0; l < tile_layer_count; l++) {
+					if ((i->second)[r][c].tile_layers[l] >= 0)
+						tile_references[(i->second)[r][c].tile_layers[l]] = 0;
+				}
 			}
 		}
 	}
@@ -235,16 +233,14 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		}
 	}
 
-	// Now, go back and re-assign all lower, middle, and upper tile layer indeces with the translated indeces
+	// Now, go back and re-assign all tile layer indeces with the translated indeces
 	for (map<MAP_CONTEXT, vector<vector<MapTile> > >::iterator i = _tile_grid.begin(); i != _tile_grid.end(); i++) {
 		for (uint32 r = 0; r < _row_count; r++) {
 			for (uint32 c = 0; c < _column_count; c++) {
-				if ((i->second)[r][c].tile_layers[0] >= 0)
-					(i->second)[r][c].tile_layers[0] = tile_references[(i->second)[r][c].tile_layers[0]];
-				if ((i->second)[r][c].tile_layers[1] >= 0)
-					(i->second)[r][c].tile_layers[1] = tile_references[(i->second)[r][c].tile_layers[1]];
-				if ((i->second)[r][c].tile_layers[2] >= 0)
-					(i->second)[r][c].tile_layers[2] = tile_references[(i->second)[r][c].tile_layers[2]];
+				for (uint32 l = 0; l < tile_layer_count; l++) {
+					if ((i->second)[r][c].tile_layers[l] >= 0)
+						(i->second)[r][c].tile_layers[l] = tile_references[(i->second)[r][c].tile_layers[l]];
+				}
 			}
 		}
 	}
