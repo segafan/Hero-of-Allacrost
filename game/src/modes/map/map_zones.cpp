@@ -209,6 +209,85 @@ VirtualSprite* ResidentZone::_GetSpriteInSet(const set<VirtualSprite*>& local_se
 }
 
 // -----------------------------------------------------------------------------
+// ---------- ContextZone Class Functions
+// -----------------------------------------------------------------------------
+
+ContextZone::ContextZone(MAP_CONTEXT one, MAP_CONTEXT two) :
+	_context_one(one),
+	_context_two(two)
+{
+	if (_context_one == _context_two) {
+		PRINT_ERROR << "tried to create a ContextZone with two equal context values: " << _context_one << endl;
+	}
+	else if (_context_one == MAP_CONTEXT_NONE || _context_two == MAP_CONTEXT_NONE) {
+		PRINT_ERROR << "tried to create a ContextZone without a valid context ID" << endl;
+	}
+}
+
+
+
+void ContextZone::AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) {
+	IF_PRINT_WARNING(MAP_DEBUG) << "this method is invalid for this class and should not be called: section will not be added" << endl;
+}
+
+
+
+void ContextZone::AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, bool context) {
+	if (left_col >= right_col) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "left and right coordinates are mismatched: section will not be added" << endl;
+		return;
+	}
+
+	if (top_row >= bottom_row) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "top and bottom coordinates are mismatched: section will not be added" << endl;
+		return;
+	}
+
+	_sections.push_back(ZoneSection(left_col, right_col, top_row, bottom_row));
+	_section_contexts.push_back(context);
+}
+
+
+
+void ContextZone::Update() {
+	int16 index;
+
+	// Check every ground object and determine if its context should be changed by this zone
+	// TODO: get the object container from the proper layer, not just the default layer
+	vector<MapObject*>* objects = MapMode::CurrentInstance()->GetObjectSupervisor()->_object_layers[DEFAULT_LAYER_ID].GetObjects();
+	for (uint32 i = 0;	i < objects->size(); ++i) {
+		// If the object does not have a context equal to one of the two switching contexts, do not examine it further
+		if (objects->at(i)->GetContext() != _context_one && objects->at(i)->GetContext() != _context_two) {
+			continue;
+		}
+
+		// If the object is inside the zone, set their context to that zone's context
+		// (This may result in no change from the object's current context depending on the zone section)
+		index = _IsInsideZone(objects->at(i));
+		if (index >= 0) {
+			objects->at(i)->SetContext(_section_contexts[index] ? _context_one : _context_two);
+		}
+	}
+}
+
+
+
+int16 ContextZone::_IsInsideZone(MapObject* object) {
+	// NOTE: argument is not NULL-checked here for performance reasons
+
+	// Check each section of the zone to see if the object is located within
+	for (uint16 i = 0; i < _sections.size(); i++) {
+		if (object->x_position >= _sections[i].left_col && object->x_position <= _sections[i].right_col &&
+			object->y_position >= _sections[i].top_row && object->y_position <= _sections[i].bottom_row)
+		{
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+// -----------------------------------------------------------------------------
 // ---------- EnemyZone Class Functions
 // -----------------------------------------------------------------------------
 
@@ -409,83 +488,6 @@ void EnemyZone::Update() {
 		_active_enemies++;
 	}
 } // void EnemyZone::Update()
-
-// -----------------------------------------------------------------------------
-// ---------- ContextZone Class Functions
-// -----------------------------------------------------------------------------
-
-ContextZone::ContextZone(MAP_CONTEXT one, MAP_CONTEXT two) :
-	_context_one(one),
-	_context_two(two)
-{
-	if (_context_one == _context_two) {
-		PRINT_ERROR << "tried to create a ContextZone with two equal context values: " << _context_one << endl;
-		exit(1);
-	}
-}
-
-
-
-void ContextZone::AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) {
-	IF_PRINT_WARNING(MAP_DEBUG) << "this method is invalid for this class and should not be called: section will not be added" << endl;
-}
-
-
-
-void ContextZone::AddSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, bool context) {
-	if (left_col >= right_col) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "left and right coordinates are mismatched: section will not be added" << endl;
-		return;
-	}
-
-	if (top_row >= bottom_row) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "top and bottom coordinates are mismatched: section will not be added" << endl;
-		return;
-	}
-
-	_sections.push_back(ZoneSection(left_col, right_col, top_row, bottom_row));
-	_section_contexts.push_back(context);
-}
-
-
-
-void ContextZone::Update() {
-	int16 index;
-
-	// Check every ground object and determine if its context should be changed by this zone
-	// TODO: get the object container from the proper layer, not just the default layer
-	vector<MapObject*>* objects = MapMode::CurrentInstance()->GetObjectSupervisor()->_object_layers[DEFAULT_LAYER_ID].GetObjects();
-	for (uint32 i = 0;	i < objects->size(); ++i) {
-		// If the object does not have a context equal to one of the two switching contexts, do not examine it further
-		if (objects->at(i)->GetContext() != _context_one && objects->at(i)->GetContext() != _context_two) {
-			continue;
-		}
-
-		// If the object is inside the zone, set their context to that zone's context
-		// (This may result in no change from the object's current context depending on the zone section)
-		index = _IsInsideZone(objects->at(i));
-		if (index >= 0) {
-			objects->at(i)->SetContext(_section_contexts[index] ? _context_one : _context_two);
-		}
-	}
-}
-
-
-
-int16 ContextZone::_IsInsideZone(MapObject* object) {
-	// NOTE: argument is not NULL-checked here for performance reasons
-
-	// Check each section of the zone to see if the object is located within
-	for (uint16 i = 0; i < _sections.size(); i++) {
-		if (object->x_position >= _sections[i].left_col && object->x_position <= _sections[i].right_col &&
-			object->y_position >= _sections[i].top_row && object->y_position <= _sections[i].bottom_row)
-		{
-			return i;
-		}
-	}
-
-	return -1;
-}
 
 } // namespace private_map
 
