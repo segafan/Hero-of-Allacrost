@@ -78,16 +78,21 @@ function Load(m)
 
 	-- Visuals: night lightning
 	VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.3, 0.6));
-	
-	Map:SetCamera(sprites["claudius"]);
+
+	Map:SetCurrentTrack(0);
 
 	-- TODO: figure out if visuals should be disabled normally, or wait for control to be given to the player before they are displayed
 	-- Map:DisableIntroductionVisuals();
-
-	Map.unlimited_stamina = true; -- TODO: determine if we want this map to have unlimited stamina or not
-	Map:ShowStaminaBar(true);
+	Map.unlimited_stamina = true; -- DEBUG: Set to false for release
+	Map:ShowStaminaBar(false);
 	Map:ShowDialogueIcons(true);
 	print "Load Complete";
+
+	Map:SetCamera(sprites["claudius"]);
+
+	-- The map begins with an opening scene before control is given to the player
+--	Map:PushState(hoa_map.MapMode.STATE_SCENE);
+--	EventManager:StartEvent(events["opening_scene"], 2500);
 end -- Load(m)
 
 
@@ -169,6 +174,7 @@ end
 function CreateSprites()
 	local sprite;
 	local animation;
+	local ground_object_layer = 0;
 
 	-- X/Y position that represents the southern middle part of the map
 	local startx = 98;
@@ -177,32 +183,68 @@ function CreateSprites()
 	-- Create sprites for the three playable characters
 	sprites["claudius"] = ConstructSprite("Claudius", 1, startx, starty);
 	sprites["claudius"]:SetDirection(hoa_map.MapMode.NORTH);
-	ObjectManager:AddObject(sprites["claudius"], 0);
+	ObjectManager:AddObject(sprites["claudius"], ground_object_layer);
 
 	sprites["mark"] = ConstructSprite("Knight01", 2, startx - 8, starty);
 	sprites["mark"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["mark"]:SetName(hoa_system.Translate("Mark"));
-	ObjectManager:AddObject(sprites["mark"], 0);
+	ObjectManager:AddObject(sprites["mark"], ground_object_layer);
 
 	sprites["lukar"] = ConstructSprite("Knight01", 3, startx + 8, starty);
 	sprites["lukar"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["lukar"]:SetName(hoa_system.Translate("Lukar"));
-	ObjectManager:AddObject(sprites["lukar"], 0);
+	ObjectManager:AddObject(sprites["lukar"], ground_object_layer);
 
 	-- Create the captain, his sergeant, and one senior knight leading the troop heading due East
 	sprites["captain"] = ConstructSprite("Knight06", 10, startx + 20, starty);
 	sprites["captain"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["captain"]:SetName(hoa_system.Translate("Captain Bravis"));
-	ObjectManager:AddObject(sprites["captain"], 0);
+	ObjectManager:AddObject(sprites["captain"], ground_object_layer);
 
 	sprites["sergeant"] = ConstructSprite("Knight05", 11, startx + 24, starty);
 	sprites["sergeant"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["sergeant"]:SetName(hoa_system.Translate("Sergeant Methus"));
-	ObjectManager:AddObject(sprites["sergeant"], 0);
+	ObjectManager:AddObject(sprites["sergeant"], ground_object_layer);
 
 	sprites["senior_knight"] = ConstructSprite("Knight04", 12, startx + 28, starty);
 	sprites["senior_knight"]:SetDirection(hoa_map.MapMode.NORTH);
-	ObjectManager:AddObject(sprites["senior_knight"], 0);
+	ObjectManager:AddObject(sprites["senior_knight"], ground_object_layer);
+
+	-- TEMP: townspeople that should eventually be moved to the map script for the attack aftermath
+	sprites["laila"] = ConstructSprite("Laila", 500, 180, 118);
+	sprites["laila"]:SetDirection(hoa_map.MapMode.SOUTH);
+	sprites["laila"]:SetContext(contexts["interior"]);
+	ObjectManager:AddObject(sprites["laila"], ground_object_layer);
+
+	sprites["marcus"] = ConstructSprite("Marcus", 501, 186, 112);
+	sprites["marcus"]:SetDirection(hoa_map.MapMode.NORTH);
+	sprites["marcus"]:SetContext(contexts["interior"]);
+	ObjectManager:AddObject(sprites["marcus"], ground_object_layer);
+
+	sprites["vanica"] = ConstructSprite("Vanica", 502, 166, 112);
+	sprites["vanica"]:SetDirection(hoa_map.MapMode.NORTH);
+	sprites["vanica"]:SetContext(contexts["interior"]);
+	ObjectManager:AddObject(sprites["vanica"], ground_object_layer);
+
+	sprites["weapon_merchant"] = ConstructSprite("Alexander", 510, 144, 140);
+	sprites["weapon_merchant"]:SetDirection(hoa_map.MapMode.SOUTH);
+	sprites["weapon_merchant"]:SetContext(contexts["interior"]);
+	ObjectManager:AddObject(sprites["weapon_merchant"], ground_object_layer);
+
+	sprites["item_merchant"] = ConstructSprite("Female Merchant", 520, 73, 173);
+	sprites["item_merchant"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["item_merchant"]:SetContext(contexts["interior"]);
+	ObjectManager:AddObject(sprites["item_merchant"], ground_object_layer);
+
+	sprites["inn_keeper"] = ConstructSprite("Octavia", 530, 118, 168);
+	sprites["inn_keeper"]:SetDirection(hoa_map.MapMode.SOUTH);
+	sprites["inn_keeper"]:SetContext(contexts["interior"]);
+	ObjectManager:AddObject(sprites["inn_keeper"], ground_object_layer);
+
+	sprites["inn_worker"] = ConstructSprite("Livia", 531, 113, 174);
+	sprites["inn_worker"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["inn_worker"]:SetContext(contexts["interior"]);
+	ObjectManager:AddObject(sprites["inn_worker"], ground_object_layer);
 end -- function CreateSprites()
 
 
@@ -226,6 +268,50 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
 	sprites["captain"]:AddDialogueReference(10);
 
+	-- TEMP: should eventually be moved to the map script for the attack aftermath
+	dialogue = hoa_map.MapDialogue.Create(100);
+		text = hoa_system.Translate("Welcome home, Claudius. What's the matter?");
+		dialogue:AddLine(text, sprites["laila"]:GetObjectID());
+		text = hoa_system.Translate("It's...nothing. I'm just glad you're okay.");
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+	sprites["laila"]:AddDialogueReference(100);
+
+	dialogue = hoa_map.MapDialogue.Create(101);
+		text = hoa_system.Translate("Oh dear, oh dear.");
+		dialogue:AddLine(text, sprites["vanica"]:GetObjectID());
+	sprites["vanica"]:AddDialogueReference(101);
+
+	dialogue = hoa_map.MapDialogue.Create(102);
+		text = hoa_system.Translate("Your mother and I are doing what we can for those who lost their homes in the attack.");
+		dialogue:AddLine(text, sprites["marcus"]:GetObjectID());
+		text = hoa_system.Translate("Let me help. Show me where I can make myself useful.");
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+		text = hoa_system.Translate("No, you need to rest. We may be attacked again you know, and how are you going to defend our city if you're exhausted?");
+		dialogue:AddLine(text, sprites["marcus"]:GetObjectID());
+	sprites["marcus"]:AddDialogueReference(102);
+
+	dialogue = hoa_map.MapDialogue.Create(103);
+		text = hoa_system.Translate("Sorry, this inn has converted into a shelter after the attack and we're completely full.");
+		dialogue:AddLine(text, sprites["inn_keeper"]:GetObjectID());
+	sprites["inn_keeper"]:AddDialogueReference(103);
+
+	dialogue = hoa_map.MapDialogue.Create(104);
+		text = hoa_system.Translate("So much work to do. I'm exhausted.");
+		dialogue:AddLine(text, sprites["inn_worker"]:GetObjectID());
+	sprites["inn_worker"]:AddDialogueReference(104);
+
+	dialogue = hoa_map.MapDialogue.Create(105);
+		text = hoa_system.Translate("Most of my inventory was destroyed in the attack.");
+		dialogue:AddLine(text, sprites["item_merchant"]:GetObjectID());
+		dialogue:AddLineEventAtEnd(1000); -- event_chains["item_shop"]
+	sprites["item_merchant"]:AddDialogueReference(105);
+
+	dialogue = hoa_map.MapDialogue.Create(106);
+		text = hoa_system.Translate("Demand has skyrocketed after our city was attacked. I've sold most of my armaments, but I have a few selections remaining.");
+		dialogue:AddLine(text, sprites["weapon_merchant"]:GetObjectID());
+		dialogue:AddLineEventAtEnd(1001); -- event_chains["weapon_armor_shop"] = 1001;
+	sprites["weapon_merchant"]:AddDialogueReference(106);
+
 	----------------------------------------------------------------------------
 	---------- Dialogues triggered by events
 	----------------------------------------------------------------------------
@@ -235,12 +321,19 @@ end -- function CreateDialogues()
 
 -- Creates all events and sets up the entire event sequence chain
 function CreateEvents()
+	event_chains = {}; -- Holds IDs of the starting event for each event chain
 	local event = {};
-	
-	-- TODO: Add event chains
 
 	-- Event Group #1: Initial map entrance and dialogue
 
+	----------------------------------------------------------------------------
+	---------- Miscellaneous Events
+	----------------------------------------------------------------------------
+	event_chains["item_shop"] = 1000;
+	event = hoa_map.CustomEvent.Create(event_chains["item_shop"], "LoadItemShop", "");
+
+	event_chains["weapon_armor_shop"] = 1001;
+	event = hoa_map.CustomEvent.Create(event_chains["weapon_armor_shop"], "LoadWeaponArmorShop", "");
 
 end -- function CreateEvents()
 
@@ -264,5 +357,24 @@ end
 -- Sprite function: Change movement speed of a sprite
 functions["ChangeSpriteMovementSpeed"] = function(sprite)
 	sprite:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED);
+end
+
+
+-- Puts game state into shop mode with items
+functions["LoadItemShop"] = function()
+	LoadNewShop(
+		1, 4 -- healing potions
+	);
+end
+
+
+-- Puts game state into shop mode with items
+functions["LoadWeaponArmorShop"] = function()
+	LoadNewShop(
+		10002, 1, -- iron sword
+		20001, 2, -- karlate helm
+		30001, 3, -- leather chain mail
+		30002, 1  -- karlate breast plate
+	);
 end
 
