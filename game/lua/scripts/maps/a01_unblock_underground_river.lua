@@ -75,27 +75,27 @@ function Load(m)
 	CreateDialogues();
 	print "CreateEvents()"
 	CreateEvents();
-	
-	Map:SetCamera(sprites["claudius"]);
-	sprites["claudius"]:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED); -- DEBUG
-	Map:MoveVirtualFocus(80, 130);
 
 	-- Visual effects: dark lighting, various light halos
 	VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.0, 0.7));
 	
-	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas
-	
-	-- Location: just before enemy boss
-	-- Map.camera:SetXPosition(205, 0); Map.camera:SetYPosition(5, 0);
-
 	Map:SetCurrentTrack(0);
+
+	-- TEMP: enabled for development. Change this to false prior to release
+	Map.unlimited_stamina = true;
 
 	-- The map begins with an opening scene before control is given to the player
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 	EventManager:StartEvent(events["opening_dialogue"], 2500);
+	
+	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas
+	-- Location: just before enemy boss
+	-- Map.camera:SetXPosition(205, 0); Map.camera:SetYPosition(5, 0);
 
-	-- TEMP: enabled for development. Change this to false prior to release
-	Map.unlimited_stamina = true;
+	Map:SetCamera(sprites["claudius"]);
+	sprites["claudius"]:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED); -- DEBUG
+	Map:MoveVirtualFocus(80, 130);
+
 	print "LOAD COMPLETE"
 end -- function Load(m)
 
