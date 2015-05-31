@@ -91,7 +91,7 @@ function Load(m)
 	sprites["lukar"]:SetNoCollision(true);
 
 	EventManager:StartEvent(event_chains["intro_scene"]);
-	IfPrintDebug(DEBUG, "Load Complete");
+	IfPrintDebug(DEBUG, "Map loading complete");
 end -- Load(m)
 
 
