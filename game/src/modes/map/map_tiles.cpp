@@ -258,8 +258,8 @@ void TileSupervisor::Load(ReadScriptDescriptor& map_file, const MapMode* map_ins
 		}
 		definition_file.OpenTable(DetermineLuaFileTablespaceName(tileset_definition_filenames[i]));
 
-		if (definition_file.DoesTableExist("animated_tiles") == true) {
-			definition_file.OpenTable("animated_tiles");
+		if (definition_file.DoesTableExist("animations") == true) {
+			definition_file.OpenTable("animations");
 			for (uint32 j = 1; j <= definition_file.GetTableSize(); j++) {
 				animation_info.clear();
 				definition_file.ReadUIntVector(j, animation_info);
