@@ -35,11 +35,6 @@ function Load(m)
 	Map:AddTileLayerToOrder(1);
 	Map:AddObjectLayerToOrder(0);
 	Map:AddTileLayerToOrder(2);
-	
-	-- Global starting coordinates for the center of the group of knights. All sprites
-	-- use these coordinates in determining their initial positions.
-	group_start_x = 95;
-	group_start_y = 22;
 
 	-- Visuals: night lightning, during a sand storm, with occasional lightning. The "music" is nothing more than constant wind
 	VideoManager:EnableLightOverlay(hoa_video.Color(0.0, 0.0, 0.3, 0.6));
@@ -79,6 +74,12 @@ end
 function CreateSprites()
 	local sprite;
 	local animation;
+
+	
+	-- Global starting coordinates for the center of the group of knights. All sprites
+	-- use these coordinates in determining their initial positions.
+	local group_start_x = 95;
+	local group_start_y = 22;
 
 	-- Create sprites for all three playable characters. They are at the back of the unit of troops
 	claudius = {};

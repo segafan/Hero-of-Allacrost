@@ -240,7 +240,7 @@ void BindModeCode() {
 			.def("SetMoving", &VirtualSprite::SetMoving)
 			.def("SetDirection", &VirtualSprite::SetDirection)
 			.def("SetMovementSpeed", &VirtualSprite::SetMovementSpeed)
-			.def("GetMoving", &VirtualSprite::GetMoving)
+			.def("IsMoving", &VirtualSprite::IsMoving)
 			.def("GetDirection", &VirtualSprite::GetDirection)
 			.def("GetMovementSpeed", &VirtualSprite::GetMovementSpeed)
 	];
