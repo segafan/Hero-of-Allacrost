@@ -67,7 +67,7 @@ public:
 	//! \brief The speed at which the sprite moves around the map.
 	float movement_speed;
 
-	/** \brief Set to true when the sprite is currently in motio.
+	/** \brief Set to true when the sprite is currently in motion.
 	*** This does not necessarily mean that the sprite actually is moving, but rather
 	*** that the sprite is <i>trying</i> to move in a certain direction.
 	**/
@@ -159,7 +159,7 @@ public:
 	void SetMoving(bool motion)
 		{ moving = motion; }
 
-	bool GetMoving() const
+	bool IsMoving() const
 		{ return moving; }
 
 	uint16 GetDirection() const

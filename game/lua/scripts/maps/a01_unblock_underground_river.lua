@@ -1005,7 +1005,7 @@ function CreateEvents()
 	event = hoa_map.DialogueEvent.Create(event_chains["after_boss"] + 0, event_dialogues["after_boss"]);	
 	event:AddEventLinkAtEnd(event_chains["after_boss"] + 1);
 	-- Transition to the return to city scene
-	event = hoa_map.MapTransitionEvent.Create(event_chains["after_boss"] + 1, "lua/scripts/maps/a01_return_to_harrvah_city.lua");
+	event = hoa_map.MapTransitionEvent.Create(event_chains["after_boss"] + 1, "lua/scripts/maps/a01_return_scene.lua");
 
 	----------------------------------------------------------------------------
 	---------- Miscellaneous Events

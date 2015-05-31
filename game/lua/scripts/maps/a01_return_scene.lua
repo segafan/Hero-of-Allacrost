@@ -1,12 +1,12 @@
 --------------------------------------------------------------------------------
--- 01_return_to_harrvah_city.lua
+-- 01_return_scene.lua
 --
 -- Similar to a01_opening_scene.lua and using the same map. The entire map is a
--- scene of soldiers marching through the desert back to their home.
+-- scene of soldiers marching through the desert back to their homes.
 --------------------------------------------------------------------------------
 local ns = {}
 setmetatable(ns, {__index = _G})
-a01_return_to_harrvah_city = ns;
+a01_return_scene = ns;
 setfenv(1, ns);
 
 data_file = "lua/data/maps/harrvah_desert_cave_path.lua";
@@ -354,7 +354,7 @@ function CreateEvents()
 	event:SetRelativeDestination(true);
 	event = hoa_map.PathMoveSpriteEvent.Create(324, 2010, -(total_march_distance + march_distance), 0);
 	event:SetRelativeDestination(true);
-	event = hoa_map.MapTransitionEvent.Create(500, "lua/scripts/maps/a01_harrvah_city_attack.lua");
+	event = hoa_map.MapTransitionEvent.Create(500, "lua/scripts/maps/a01_harrvah_capital_attack.lua");
 end -- function CreateEvents()
 
 
