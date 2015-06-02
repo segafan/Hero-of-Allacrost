@@ -47,6 +47,7 @@ functions = {};
 -- Shorthand names for map contexts
 contexts["base"] = hoa_map.MapMode.CONTEXT_01; -- Upon first entering the cave
 contexts["collapsed"] = hoa_map.MapMode.CONTEXT_02; -- Active context after the passage collapse event
+contexts["water_flowing"] = hoa_map.MapMode.CONTEXT_03; -- Active context after finishing the boss battle
 
 
 
@@ -317,7 +318,7 @@ function CreateSprites()
 	sprites["sergeant"]:SetDirection(hoa_map.MapMode.WEST);
 	ObjectManager:AddObject(sprites["sergeant"], 0);
 	
-	sprites["river_knight1"] = ConstructSprite("Knight02", 2502, 245, 11);
+	sprites["river_knight1"] = ConstructSprite("Knight04", 2502, 245, 11);
 	sprites["river_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
 	ObjectManager:AddObject(sprites["river_knight1"], 0);
 	
@@ -341,7 +342,7 @@ function CreateSprites()
 	sprites["river_knight6"]:SetDirection(hoa_map.MapMode.NORTH);
 	ObjectManager:AddObject(sprites["river_knight6"], 0);
 	
-	sprites["river_knight7"] = ConstructSprite("Knight02", 2508, 234, 20);
+	sprites["river_knight7"] = ConstructSprite("Knight01", 2508, 234, 20);
 	sprites["river_knight7"]:SetDirection(hoa_map.MapMode.EAST);
 	ObjectManager:AddObject(sprites["river_knight7"], 0);
 	
