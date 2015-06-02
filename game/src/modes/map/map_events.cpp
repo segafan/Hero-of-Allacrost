@@ -662,6 +662,7 @@ PathMoveSpriteEvent::PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite,
 	_destination_row(y_coord),
 	_last_x_position(0),
 	_last_y_position(0),
+	_final_direction(0),
 	_current_node(0)
 {}
 
@@ -714,6 +715,16 @@ void PathMoveSpriteEvent::SetDestination(int16 x_coord, int16 y_coord) {
 	_destination_col = x_coord;
 	_destination_row = y_coord;
 	_path.clear();
+}
+
+
+
+void PathMoveSpriteEvent::SetFinalDirection(uint16 direction) {
+	if ((direction != NORTH) && (direction != SOUTH) && (direction != EAST) && (direction != WEST))
+		IF_PRINT_WARNING(MAP_DEBUG) << "non-standard direction specified (" << direction << ") "
+			<< "for an event with id: " << GetEventID() << endl;
+
+	_final_direction = direction;
 }
 
 
@@ -785,6 +796,8 @@ bool PathMoveSpriteEvent::_Update() {
 		if (_current_node >= _path.size() - 1) {
 			_sprite->moving = false;
 			_sprite->ReleaseControl(this);
+			if (_final_direction != 0)
+				_sprite->SetDirection(_final_direction);
 			return true;
 		}
 		else {

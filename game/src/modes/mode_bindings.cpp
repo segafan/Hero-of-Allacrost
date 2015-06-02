@@ -514,6 +514,7 @@ void BindModeCode() {
 			]
 			.def("SetRelativeDestination", &PathMoveSpriteEvent::SetRelativeDestination)
 			.def("SetDestination", &PathMoveSpriteEvent::SetDestination)
+			.def("SetFinalDirection", &PathMoveSpriteEvent::SetFinalDirection)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
