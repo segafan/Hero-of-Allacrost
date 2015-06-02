@@ -78,20 +78,22 @@ function Load(m)
 	
 	Map:SetCurrentTrack(0);
 
-	-- TEMP: enabled for development. Change this to false prior to release
-	Map.unlimited_stamina = true;
+	Map.unlimited_stamina = true; -- TEMP: enabled for development. Change this to false prior to release
+	Map:ShowDialogueIcons(true);
 
 	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas
 	-- Location: just before enemy boss
-	-- Map.camera:SetXPosition(205, 0); Map.camera:SetYPosition(5, 0);
+	
 
 	Map:SetCamera(sprites["claudius"]);
-	sprites["claudius"]:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED); -- DEBUG
+--	sprites["claudius"]:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED); -- DEBUG
+	Map.camera:SetXPosition(215, 0); Map.camera:SetYPosition(8, 0); -- DEBUG: put player at the river bed entrance 
 	Map:MoveVirtualFocus(80, 130);
 
 	-- The map begins with an opening scene before control is given to the player
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
-	EventManager:StartEvent(events["opening_dialogue"], 2500);
+--	EventManager:StartEvent(events["opening_dialogue"], 2500);
+	EventManager:StartEvent(event_chains["riverbed_arrival"], 250); -- DEBUG: start riverbed scene
 	IfPrintDebug(DEBUG, "Map loading complete");
 end -- function Load(m)
 
@@ -706,39 +708,52 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
 	-- Event: Player reaches dry river bed
-	event_dialogues["riverbed_arrival1"] = 200;
-	dialogue = hoa_map.MapDialogue.Create(event_dialogues["riverbed_arrival1"]);
-		text = hoa_system.Translate("Finally made it.");
-		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
-
-	event_dialogues["riverbed_arrival2"] = 201;
-	dialogue = hoa_map.MapDialogue.Create(event_dialogues["riverbed_arrival2"]);
-		text = hoa_system.Translate("Listen up! There's a large boulder obstructing the underground river that flows through here. When we move it aside, we get to head out of here.");
+	event_dialogues["riverbed_arrival"] = 200;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["riverbed_arrival"]);
+		text = hoa_system.Translate("Alright, looks like everyone made it.");
 		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
-		text = hoa_system.Translate("Mikal! Torren! Take your units and secure the ropes around that overgrown rock. Jasper's unit will prepare the Maks to help us move it. The rest of you stay alert and watch our backs. Who knows what the hell may be in this cave with us.");
+		text = hoa_system.Translate("Listen up! There's a large boulder obstructing the underground river that flows through here. When we get the water flowing again, we get to head out of here.");
+		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
+		text = hoa_system.Translate("Mikal! Torren! Take your units and secure ropes around that overgrown rock. The rest of you stay alert and watch their backs. The residents of this cave aren't going to be pleased that we're rearranging their home.");
 		dialogue:AddLine(text, sprites["sergeant"]:GetObjectID());
 
+	-- Event: enemy battle gauntlet prior to boss fight
+	event_dialogues["enemy_gauntlet1"] = 201;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["enemy_gauntlet1"]);
+		text = hoa_system.Translate("Ready your swords. Here they come!");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+
+	event_dialogues["enemy_gauntlet2"] = 202;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["enemy_gauntlet2"]);
+		text = hoa_system.Translate("Don't let any through!");
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+
+	event_dialogues["enemy_gauntlet3"] = 203;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["enemy_gauntlet3"]);
+		text = hoa_system.Translate("Damn, there's still more?");
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
+
 	-- Event: Before boss battle
-	event_dialogues["before_boss"] = 202;
+	event_dialogues["before_boss"] = 204;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["before_boss"]);
 		text = hoa_system.Translate("Hey, I heard that noise earlier. It sounds like its closer now.");
-		dialogue:AddLine(text, sprites["river_knight1"]:GetObjectID());
+		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 		text = hoa_system.Translate("Keep your eyes peeled and your swords ready men.");
+		dialogue:AddLine(text, sprites["river_knight1"]:GetObjectID());
+		text = hoa_system.Translate("I don't know how you expect to see shit in here. I can barely see the end of my blade in here.");
 		dialogue:AddLine(text, sprites["river_knight2"]:GetObjectID());
-		text = hoa_system.Translate("I don't know how you expect to see shit in here. I can barely see my own hand.");
-		dialogue:AddLine(text, sprites["river_knight3"]:GetObjectID());
 		text = hoa_system.Translate("Over there! Watch out!");
-		dialogue:AddLine(text, sprites["river_knight4"]:GetObjectID());
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
 
 	-- Event: After boss battle
 	event_dialogues["after_boss"] = 210;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["after_boss"]);
-		text = hoa_system.Translate("Damnit, the captain's been wounded along with half our troops.");
-		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
-		text = hoa_system.Translate("*cough cough*\nI'll be alright. Great job taking down that monster men, I'm proud.");
+		text = hoa_system.Translate("Captain, you've been wounded!");
+		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
+		text = hoa_system.Translate("*cough cough*\nI'll be alright. Great job taking down that monster, men. You've done well.");
 		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
 		text = hoa_system.Translate("We've achieved our objective here. Tend to the wounded and then let's make our way back home.");
-		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
+		dialogue:AddLine(text, sprites["sergeant"]:GetObjectID());
 end -- function CreateDialogues()
 
 
@@ -838,7 +853,6 @@ function CreateEvents()
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["find_corpse"] + 3, sprites["claudius"], hoa_map.MapMode.EAST);
 	-- Move camera back to Cladius
 	event = hoa_map.CustomEvent.Create(event_chains["find_corpse"] + 4, "SetCameraToPlayer", "");
---	event:AddEventLinkAtEnd(event_chains["find_corpse"] + 5);
 	-- Start dialogue about corpse
 	event = hoa_map.DialogueEvent.Create(event_chains["find_corpse"] + 5, event_dialogues["corpse_discovery2"]);
 	event:SetStopCameraMovement(true);
@@ -964,56 +978,93 @@ function CreateEvents()
 	-- Make player sprite visible and restore collision detection
 	event = hoa_map.CustomEvent.Create(event_chains["pass_wall_backward"] + 4, "ShowCameraSprite", "");
 		
-	---------- Event Chain 09: Arriving at spring just before riverbed
+	---------- Event Chain 09: Arriving at the spring just before riverbed
 	IfPrintDebug(DEBUG, "Building event chain #09...");
 	event_chains["spring_arrival"] = 100;
 	
 	-- Begin dialogue between characters
-	event = hoa_map.DialogueEvent.Create(event_chains["spring_arrival"] + 70, event_dialogues["spring_arrival"]);
-		
+	event = hoa_map.DialogueEvent.Create(event_chains["spring_arrival"], event_dialogues["spring_arrival"]);
+	
+	-- The event chains that follow are all played out sequentially, hence why we define their event chain IDs here
+	-- so that each chain can have access to the starting event ID of the proceeding chain.
+	event_chains["riverbed_arrival"] = 110;
+	event_chains["enemy_gauntlet"] = 130;
+	event_chains["boss_encounter"] = 150;
+	event_chains["final_scene"] = 170;
+
 	---------- Event Chain 10: Arriving at riverbed
 	IfPrintDebug(DEBUG, "Building event chain #10...");
-	event_chains["riverbed_arrival"] = 110;
 	
-	-- Put map in scene state
+	-- Enter the scene state, which we will remain at for the remaind of the map outside of dialogues
 	event = hoa_map.CustomEvent.Create(event_chains["riverbed_arrival"] + 0, "StopMovementAndEnterScene", "");
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 1);
 	-- Move player sprite in to the gathering of knights in the river bed
 	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 1, sprites["claudius"], 238, 12);
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 2);
-	-- Make sure player sprite is facing the captain
-	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["riverbed_arrival"] + 2, sprites["claudius"], hoa_map.MapMode.EAST);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 3);
-	-- Remove map scene state
-	event = hoa_map.CustomEvent.Create(event_chains["riverbed_arrival"] + 3, "PopState", "");
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 4);
-	-- Begin dialogue among party characters
-	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 4, 540);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 5);
-	-- Begin dialogue given from captain
-	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 5, event_dialogues["riverbed_arrival1"]);
-	event:AddEventLinkAtEnd(1010);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 6, 1000);
-	-- Begin dialogue preceeding boss battle encounter
-	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 6, event_dialogues["riverbed_arrival2"]);
-	event:SetStopCameraMovement(true);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 7);
-	-- Boss battle
-	event = hoa_map.BattleEncounterEvent.Create(event_chains["riverbed_arrival"] + 7);
-	event:SetMusic("mus/The_Creature_Awakens.ogg");
-	event:SetBackground("img/backdrops/battle/desert_cave.png");
-	event:AddEventLinkAtEnd(120);
+	event:SetFinalDirection(hoa_map.MapMode.EAST);
+	-- Begin arrival dialogue
+	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 2, event_dialogues["riverbed_arrival"]);
+	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"], 1000);
+	-- Move the character sprite and other knights to their positions
+	-- TODO
 
-	---------- Event Chain 11: After boss battle
+	---------- Event Chain 11: Enemy gauntlet
 	IfPrintDebug(DEBUG, "Building event chain #11...");
-	event_chains["after_boss"] = 120;
+	local battle_music = "mus/Battle_Jazz.ogg";
+	local battle_background = "img/backdrops/battle/desert_cave.png";
 
+	-- First dialogue and battle
+	event = hoa_map.DialogueEvent.Create(event_chains["enemy_gauntlet"] + 0, event_dialogues["enemy_gauntlet1"]);
+	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 1, 500);
+	event = hoa_map.BattleEncounterEvent.Create(event_chains["enemy_gauntlet"] + 1);
+	event:SetMusic(battle_music);
+	event:SetBackground(battle_background);
+	event:AddEnemy(2);
+	event:AddEnemy(3);
+	event:AddEnemy(3);
+	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 2, 500);
+	-- Second dialogue and battle
+	event = hoa_map.DialogueEvent.Create(event_chains["enemy_gauntlet"] + 2, event_dialogues["enemy_gauntlet2"]);
+	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 3, 500);
+	event = hoa_map.BattleEncounterEvent.Create(event_chains["enemy_gauntlet"] + 3);
+	event:SetMusic(battle_music);
+	event:SetBackground(battle_background);
+	event:AddEnemy(4);
+	event:AddEnemy(4);
+	event:AddEnemy(6);
+	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 4, 500);
+	-- Third dialogue and battle
+	event = hoa_map.DialogueEvent.Create(event_chains["enemy_gauntlet"] + 4, event_dialogues["enemy_gauntlet3"]);
+	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 5, 500);
+	event = hoa_map.BattleEncounterEvent.Create(event_chains["enemy_gauntlet"] + 5);
+	event:SetMusic(battle_music);
+	event:SetBackground(battle_background);
+	event:AddEnemy(5);
+	event:AddEnemy(5);
+	event:AddEnemy(7);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"], 500);
+
+	---------- Event Chain 12: Boss encounter and battle
+	IfPrintDebug(DEBUG, "Building event chain #12...");
+
+	-- TODO: add sprite movement/turning, hiss sound event, enemy boss sprite appearance, screen shake as boss jumps down to riverbed
+	event = hoa_map.DialogueEvent.Create(event_chains["boss_encounter"] + 0, event_dialogues["before_boss"]);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 1, 500);
+	event = hoa_map.BattleEncounterEvent.Create(event_chains["boss_encounter"] + 1);
+	event:SetMusic("mus/The_Creature_Awakens.ogg");
+	event:SetBackground(battle_background);
+	event:AddEnemy(91);
+	event:AddEventLinkAtEnd(event_chains["final_scene"], 250);
+
+	---------- Event Chain 13: Post boss encounter and final scene
+	IfPrintDebug(DEBUG, "Building event chain #13...");
+
+	-- Part 4: post boss battle dialogue and end map transition
 	-- TODO: show water running with another map layer or context
-	-- Post-battle dialogue
-	event = hoa_map.DialogueEvent.Create(event_chains["after_boss"] + 0, event_dialogues["after_boss"]);	
-	event:AddEventLinkAtEnd(event_chains["after_boss"] + 1);
-	-- Transition to the return to city scene
-	event = hoa_map.MapTransitionEvent.Create(event_chains["after_boss"] + 1, "lua/scripts/maps/a01_return_scene.lua");
+	event = hoa_map.DialogueEvent.Create(event_chains["final_scene"] + 0, event_dialogues["after_boss"]);
+	event:AddEventLinkAtEnd(event_chains["final_scene"] + 1, 500);
+	-- Transition to the return scene map
+	event = hoa_map.MapTransitionEvent.Create(event_chains["final_scene"] + 1, "lua/scripts/maps/a01_return_scene.lua");
 
 	----------------------------------------------------------------------------
 	---------- Miscellaneous Events
@@ -1063,7 +1114,7 @@ end
 
 -- TODO: A chest placed down by the knight NPC near the entrance
 functions["EntrancePlaceChest"] = function()
-	IfPrintDebug(DEBUG, "Treasure placed down";);
+	IfPrintDebug(DEBUG, "Treasure placed down");
 
 	-- sprites["entrance_knight"] -- Turn to face chest
 end;

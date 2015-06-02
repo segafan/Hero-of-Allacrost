@@ -512,7 +512,7 @@ protected:
 *** but because a set direction operation is so common, it makes sense to create a
 *** specific event for it for convenience.
 ***
-*** \note The only directions you should set in the clas constructor are: NORTH,
+*** \note The only directions you should set in the class constructor are: NORTH,
 *** SOUTH, EAST, and WEST. This event is used when a sprite is stationary, so
 *** the other types of directions (which also infer movement) are unnecessary.
 *** Using a direction other than these four will result in a warning being printed.
@@ -750,6 +750,13 @@ public:
 	**/
 	void SetDestination(int16 x_coord, int16 y_coord);
 
+	/** \brief Optionally indicates the facing direction to set for the sprite after the movement is complete
+	*** \note The only directions you should set in the class constructor are: NORTH, SOUTH, EAST, and WEST.
+	*** The other types of directions (which also infer movement) are unnecessary. Using a direction other than
+	*** these four will result in a warning being printed.
+	**/
+	void SetFinalDirection(uint16 direction);
+
 protected:
 	PathMoveSpriteEvent(uint32 event_id, VirtualSprite* sprite, int16 x_coord, int16 y_coord);
 
@@ -767,6 +774,9 @@ protected:
 
 	//! \brief Used to store the previous coordinates of the sprite during path movement, so as to set the proper direction of the sprite as it moves
 	uint16 _last_x_position, _last_y_position;
+
+	//! \brief Allows the ability of the event to optionally set the direction that the sprite should face after completing the path movement
+	uint16 _final_direction;
 
 	//! \brief An index to the path vector containing the node that the sprite currently occupies
 	uint32 _current_node;
