@@ -3,7 +3,6 @@
 --
 -- Main storyline event. The first dungeon encountered in the game, the player
 -- makes his way through a cave to a riverbed, where a boss enemy is encountered.
-
 --------------------------------------------------------------------------------
 local ns = {}
 setmetatable(ns, {__index = _G})
@@ -312,46 +311,57 @@ function CreateSprites()
 	-- All of the following NPCs are encountered at the end of the cave in the riverbed
 	sprites["captain"] = ConstructSprite("Knight06", 2500, 248, 16);
 	sprites["captain"]:SetDirection(hoa_map.MapMode.WEST);
+	sprites["captain"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["captain"], 0);
 
 	sprites["sergeant"] = ConstructSprite("Knight05", 2501, 249, 19);
 	sprites["sergeant"]:SetDirection(hoa_map.MapMode.WEST);
+	sprites["sergeant"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["sergeant"], 0);
 	
 	sprites["river_knight1"] = ConstructSprite("Knight04", 2502, 245, 11);
 	sprites["river_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
+	sprites["river_knight1"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["river_knight1"], 0);
 	
 	sprites["river_knight2"] = ConstructSprite("Knight03", 2503, 242, 8);
 	sprites["river_knight2"]:SetDirection(hoa_map.MapMode.SOUTH);
+	sprites["river_knight2"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["river_knight2"], 0);
 	
 	sprites["river_knight3"] = ConstructSprite("Knight02", 2504, 239, 9);
 	sprites["river_knight3"]:SetDirection(hoa_map.MapMode.SOUTH);
+	sprites["river_knight3"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["river_knight3"], 0);
 
 	sprites["river_knight4"] = ConstructSprite("Knight01", 2505, 240, 22);
 	sprites["river_knight4"]:SetDirection(hoa_map.MapMode.NORTH);
+	sprites["river_knight4"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["river_knight4"], 0);
 
 	sprites["river_knight5"] = ConstructSprite("Knight02", 2506, 243, 23);
 	sprites["river_knight5"]:SetDirection(hoa_map.MapMode.NORTH);
+	sprites["river_knight5"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["river_knight5"], 0);
 	
 	sprites["river_knight6"] = ConstructSprite("Knight03", 2507, 245, 21);
 	sprites["river_knight6"]:SetDirection(hoa_map.MapMode.NORTH);
+	sprites["river_knight6"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["river_knight6"], 0);
 	
 	sprites["river_knight7"] = ConstructSprite("Knight01", 2508, 234, 20);
 	sprites["river_knight7"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["river_knight7"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["river_knight7"], 0);
 	
 	sprites["river_knight8"] = ConstructSprite("Knight01", 2509, 233, 17);
 	sprites["river_knight8"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["river_knight8"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["river_knight8"], 0);
 	
 	sprites["river_knight9"] = ConstructSprite("Knight02", 2510, 235, 14);
 	sprites["river_knight9"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["river_knight9"]:SetNoCollision(true);
 	ObjectManager:AddObject(sprites["river_knight9"], 0);
 end -- function CreateSprites()
 
@@ -904,7 +914,7 @@ function CreateEvents()
 	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 3, "SetCameraToPlayer", "");
 	-- Exit scene state
 	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 4, "PopMapState", "");
-	-- Move knight sprite to river bed area
+	-- Hide the knight sprite after he finishes walking through the passage
 	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 5, "VanishPathSprite", "");
 
 	---------- Event Chain 06: Short route passage collapses
@@ -1005,9 +1015,53 @@ function CreateEvents()
 	event:SetFinalDirection(hoa_map.MapMode.EAST);
 	-- Begin arrival dialogue
 	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 2, event_dialogues["riverbed_arrival"]);
-	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"], 1000);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 3, 0);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 5, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 6, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 7, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 8, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 9, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 10, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 11, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 12, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 13, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 14, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 15, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 16, 200);
+	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"], 5000);
+	-- Set the camera to the virtual focus and move it to the center of the knight's furture position
+	event = hoa_map.CustomEvent.Create(event_chains["riverbed_arrival"] + 3, "VirtualFocusToPlayer", "");
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 4);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 4,  ObjectManager.virtual_focus, 260, 16);
 	-- Move the character sprite and other knights to their positions
-	-- TODO
+	-- Knights to the north are working on moving the boulder
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 5, sprites["river_knight2"], 260, 13);
+	event:SetFinalDirection(hoa_map.MapMode.NORTH);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 6, sprites["river_knight3"], 256, 13);
+	event:SetFinalDirection(hoa_map.MapMode.NORTH);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 7, sprites["river_knight4"], 258, 14);
+	event:SetFinalDirection(hoa_map.MapMode.NORTH);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 8, sprites["river_knight5"], 263, 13);
+	event:SetFinalDirection(hoa_map.MapMode.WEST);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 9, sprites["captain"], 262, 15);
+	event:SetFinalDirection(hoa_map.MapMode.NORTH); -- TODO: for some reason captain sprite won't change his facing direction here
+	-- Knights to the south are defending (including Claudius)
+	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 10, sprites["river_knight7"], 264, 24);
+	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 11, sprites["river_knight8"], 260, 23);
+	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 12, sprites["claudius"], 256, 22);
+	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 13, sprites["sergeant"], 257, 19);
+	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
+	-- Knights to the west are defending
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 14, sprites["river_knight9"], 253, 15);
+	event:SetFinalDirection(hoa_map.MapMode.WEST);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 15, sprites["river_knight1"], 251, 18);
+	event:SetFinalDirection(hoa_map.MapMode.WEST);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 16, sprites["river_knight6"], 253, 19);
+	event:SetFinalDirection(hoa_map.MapMode.WEST);
 
 	---------- Event Chain 11: Enemy gauntlet
 	IfPrintDebug(DEBUG, "Building event chain #11...");
@@ -1227,6 +1281,12 @@ end
 -- Move camera to talking knight sprite
 functions["CameraFollowPathSprite"] = function()
 	Map:SetCamera(sprites["passage_knight2"], 500);
+end
+
+-- Move the virtual focus to the player sprite and set the map camera to point to the focus
+functions["VirtualFocusToPlayer"] = function()
+	Map:MoveVirtualFocus(sprites["claudius"].x_position, sprites["claudius"].y_position);
+	Map:SetCamera(ObjectManager.virtual_focus);
 end
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument
