@@ -217,6 +217,10 @@ public:
 	void SetContext(MAP_CONTEXT ctxt)
 		{ context = ctxt; }
 
+	// TODO: need to have input arguments be floats, and then seperate the values into integer and offset components
+	void SetPosition(uint16 x, uint16 y)
+		{ x_position = x; x_offset = 0.0f; y_position = y; y_offset = 0.0f; }
+
 	void SetXPosition(uint16 x, float offset)
 		{ x_position = x; x_offset = offset; }
 

@@ -190,6 +190,7 @@ void BindModeCode() {
 		class_<MapObject>("MapObject")
 			.def("SetObjectID", &MapObject::SetObjectID)
 			.def("SetContext", &MapObject::SetContext)
+			.def("SetPosition", &MapObject::SetPosition)
 			.def("SetXPosition", &MapObject::SetXPosition)
 			.def("SetYPosition", &MapObject::SetYPosition)
 			.def("SetImgHalfWidth", &MapObject::SetImgHalfWidth)
