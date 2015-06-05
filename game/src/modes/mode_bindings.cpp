@@ -181,7 +181,8 @@ void BindModeCode() {
 			.def("GetObjectByIndex", &ObjectSupervisor::GetObjectByIndex)
 			.def("GetObject", &ObjectSupervisor::GetObject)
 			.def("AddObjectLayer", &ObjectSupervisor::AddObjectLayer)
-			.def("AddObject", &ObjectSupervisor::AddObject, adopt(_2))
+			.def("AddObject", (void(private_map::ObjectSupervisor::*)(private_map::MapObject*))&ObjectSupervisor::AddObject, adopt(_2))
+			.def("AddObject", (void(private_map::ObjectSupervisor::*)(private_map::MapObject*, uint32))&ObjectSupervisor::AddObject, adopt(_2))
 			.def("MoveObjectToLayer", &ObjectSupervisor::MoveObjectToLayer)
 	];
 
