@@ -72,7 +72,7 @@ tests[2] = {
 
 
 tests[4] = {
-	name = "[01_opening_scene] - Return to City";
+	name = "[01_return_scene] - Return to City";
 	description = "The map scene that takes place after the events in the cave when the group of knights is returning to the city";
 	ExecuteTest = function()
 
@@ -83,10 +83,7 @@ tests[4] = {
 		GlobalManager:SetDrunes(200);
 		GlobalManager:AddToInventory(1, 5);
 
-		-- This is what the map uses to determine whether to begin the first scene (opening) or the second scene (return)
-		GlobalManager:AddNewEventGroup("map_a01_unblock_underground_river");
-
-		StartMap("lua/scripts/maps/a01_return_to_harrvah_city.lua");
+		StartMap("lua/scripts/maps/a01_return_scene.lua");
 	end
 }
 

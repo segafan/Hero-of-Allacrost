@@ -392,6 +392,8 @@ void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint32 duration) {
 // ****************************************************************************
 
 void MapMode::_LoadMapFiles() {
+	IF_PRINT_DEBUG(MAP_DEBUG) << "Loading map script: " << _script_filename << endl;
+
 	// ---------- (1) Open the map script file and read in the map data file name
 	if (_map_script.OpenFile(_script_filename) == false) {
 		PRINT_ERROR << "failed to open map script file: " << _script_filename << endl;

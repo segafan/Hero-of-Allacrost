@@ -602,6 +602,12 @@ public:
 	**/
 	uint32 AddObjectLayer();
 
+	/** \brief Adds a newly created object to the default object layer (ID = 0)
+	*** \param new_object A pointer to the already created map object to add to the map
+	**/
+	void AddObject(MapObject* new_object)
+		{ AddObject(new_object, DEFAULT_LAYER_ID); }
+
 	/** \brief Adds a newly created object to the map on a specified object layer
 	*** \param new_object A pointer to the already created map object to add to the map
 	*** \param layer_id The ID of the object layer to add the object to
