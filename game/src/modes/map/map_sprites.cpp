@@ -372,6 +372,55 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 	for (uint8 i = 0; i < 8; i++)
 		_animations.push_back(AnimatedImage());
 
+	// TODO: dirty, dirty hack to support a sprite animation that doesn't have the standard 6 frames per direction
+	// This needs to be fixed so sprites can have custom number of frames
+	if (filename == "img/sprites/creatures/mak_hound.png") {
+			// Load the multi-image, containing 32 frames total
+		vector<StillImage> frames(32);
+		for (uint8 i = 0; i < 32; i++)
+			frames[i].SetDimensions(img_half_width * 2, img_height);
+
+		if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, filename, 4, 7) == false) {
+			return false;
+		}
+
+		// Add standing frames to _animations
+		_animations[ANIM_STANDING_SOUTH].AddFrame(frames[0], movement_speed);
+		_animations[ANIM_STANDING_NORTH].AddFrame(frames[7], movement_speed);
+		_animations[ANIM_STANDING_WEST].AddFrame(frames[14], movement_speed);
+		_animations[ANIM_STANDING_EAST].AddFrame(frames[21], movement_speed);
+
+		// Add walking frames to _animations
+		_animations[ANIM_WALKING_SOUTH].AddFrame(frames[1], movement_speed);
+		_animations[ANIM_WALKING_SOUTH].AddFrame(frames[2], movement_speed);
+		_animations[ANIM_WALKING_SOUTH].AddFrame(frames[3], movement_speed);
+		_animations[ANIM_WALKING_SOUTH].AddFrame(frames[4], movement_speed);
+		_animations[ANIM_WALKING_SOUTH].AddFrame(frames[5], movement_speed);
+		_animations[ANIM_WALKING_SOUTH].AddFrame(frames[6], movement_speed);
+
+		_animations[ANIM_WALKING_NORTH].AddFrame(frames[8], movement_speed);
+		_animations[ANIM_WALKING_NORTH].AddFrame(frames[9], movement_speed);
+		_animations[ANIM_WALKING_NORTH].AddFrame(frames[10], movement_speed);
+		_animations[ANIM_WALKING_NORTH].AddFrame(frames[11], movement_speed);
+		_animations[ANIM_WALKING_NORTH].AddFrame(frames[12], movement_speed);
+		_animations[ANIM_WALKING_NORTH].AddFrame(frames[13], movement_speed);
+
+		_animations[ANIM_WALKING_WEST].AddFrame(frames[15], movement_speed);
+		_animations[ANIM_WALKING_WEST].AddFrame(frames[16], movement_speed);
+		_animations[ANIM_WALKING_WEST].AddFrame(frames[17], movement_speed);
+		_animations[ANIM_WALKING_WEST].AddFrame(frames[18], movement_speed);
+		_animations[ANIM_WALKING_WEST].AddFrame(frames[19], movement_speed);
+		_animations[ANIM_WALKING_WEST].AddFrame(frames[20], movement_speed);
+
+		_animations[ANIM_WALKING_EAST].AddFrame(frames[22], movement_speed);
+		_animations[ANIM_WALKING_EAST].AddFrame(frames[23], movement_speed);
+		_animations[ANIM_WALKING_EAST].AddFrame(frames[24], movement_speed);
+		_animations[ANIM_WALKING_EAST].AddFrame(frames[25], movement_speed);
+		_animations[ANIM_WALKING_EAST].AddFrame(frames[26], movement_speed);
+		_animations[ANIM_WALKING_EAST].AddFrame(frames[27], movement_speed);
+		return true;
+	}
+
 	// Load the multi-image, containing 24 frames total
 	vector<StillImage> frames(24);
 	for (uint8 i = 0; i < 24; i++)
@@ -602,20 +651,25 @@ void MapSprite::DrawDialog() {
     // Update the alpha of the dialogue icon according to it's distance from the player sprite
 	const float DIALOGUE_ICON_VISIBLE_RANGE = 10.0f;
 
-    if (MapObject::ShouldDraw() == true)
-        if (_has_available_dialogue == true && _has_unseen_dialogue == true &&
-			MapMode::CurrentInstance()->IsDialogueIconsVisible() == true && !MapMode::CurrentInstance()->IsCameraOnVirtualFocus()) {
-                Color icon_color(1.0f, 1.0f, 1.0f, 0.0f);
-                float icon_alpha = 1.0f - (fabs(ComputeXLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeXLocation()) + fabs(ComputeYLocation() -
-                    MapMode::CurrentInstance()->GetCamera()->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
+    if (MapObject::ShouldDraw() == false)
+		return;
 
-                if (icon_alpha < 0.0f)
-                    icon_alpha = 0.0f;
-                icon_color.SetAlpha(icon_alpha);
+	if (_has_available_dialogue == true && _has_unseen_dialogue == true && !MapMode::CurrentInstance()->IsCameraOnVirtualFocus()) {
+		Color icon_color(1.0f, 1.0f, 1.0f, 0.0f);
+		float icon_alpha = 1.0f - (fabs(ComputeXLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeXLocation()) + fabs(ComputeYLocation() -
+			MapMode::CurrentInstance()->GetCamera()->ComputeYLocation())) / DIALOGUE_ICON_VISIBLE_RANGE;
 
-                VideoManager->MoveRelative(0, -GetImgHeight());
-                MapMode::CurrentInstance()->GetDialogueIcon().Draw(icon_color);
-        }
+		if (icon_alpha <= 0.0f)
+			return;
+ 		icon_color.SetAlpha(icon_alpha);
+
+		// TODO: there's a bug here. The move relative assumes that the last draw position was for the current sprite's location, so it just moves the
+		// cursor up above the head of the sprite to draw the icon. However, this is almost never the case, and we can't know what the current draw cursor
+		// position is. We need to save the computed draw position of map objects when they are drawn, and then re-use that value here to draw the
+		// icon.
+		VideoManager->MoveRelative(0, -GetImgHeight());
+		MapMode::CurrentInstance()->GetDialogueIcon().Draw(icon_color);
+	}
 }
 
 

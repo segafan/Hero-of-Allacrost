@@ -96,7 +96,7 @@ bool MapObject::ShouldDraw() {
 	// ---------- Move the drawing cursor to the appropriate coordinates for this sprite
 	VideoManager->Move(x_pos - MapMode::CurrentInstance()->GetMapFrame().screen_edges.left, y_pos - MapMode::CurrentInstance()->GetMapFrame().screen_edges.top);
 	return true;
-} // bool MapObject::DrawHelper()
+} // bool MapObject::ShouldDraw()
 
 
 

@@ -117,7 +117,9 @@ MapMode::MapMode(string script_filename) :
 
 	// Load miscellaneous map graphics
 	vector<uint32> timings(16, 100); // holds the timing data for the new dialogue animation; 16 frames at 100ms each
-	_dialogue_icon.SetDimensions(2, 2);
+	// TODO: possible bug here. The icon is 32x32 pixels and is drawn in the coordinate system where one unit is 16px. However, the icon
+	// seems to be drawing as if it were 2x2 inside a 1024x768 coordinate system. Figure out if this should really be 2x2 or 32x32 dimensions
+	_dialogue_icon.SetDimensions(2.0f, 2.0f);
 	if (_dialogue_icon.LoadFromFrameSize("img/misc/dialogue_icon.png", timings, 32, 32) == false)
 		IF_PRINT_WARNING(MAP_DEBUG) << "failed to load the new dialogue icon image" << endl;
 
@@ -445,10 +447,12 @@ void MapMode::_LoadMapFiles() {
 	}
 
 	// Create all of the GlobalEnemy objects for any enemy that may appear on this map
-	vector<int32> enemy_ids;
-	_map_script.ReadIntVector("enemy_ids", enemy_ids);
-	for (uint32 i = 0; i < enemy_ids.size(); i++) {
-		_enemies.push_back(new GlobalEnemy(enemy_ids[i]));
+	if (_map_script.DoesTableExist("enemy_ids") == true) {
+		vector<int32> enemy_ids;
+		_map_script.ReadIntVector("enemy_ids", enemy_ids);
+		for (uint32 i = 0; i < enemy_ids.size(); i++) {
+			_enemies.push_back(new GlobalEnemy(enemy_ids[i]));
+		}
 	}
 
 	// ---------- (4) Call the map script's Load function and get a reference to all other script functions used
@@ -707,7 +711,7 @@ void MapMode::_CalculateMapFrame() {
 
 
 void MapMode::_DrawMapLayers() {
-	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
+ 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 
 	for (uint32 i = 0; i < _layer_order.size(); ++i) {
 		_layer_order[i]->Draw();
@@ -727,9 +731,14 @@ void MapMode::_DrawGUI() {
 	const Color bright_yellow(0.937f, 1.0f, 0.725f, 1.0f);
 
 	// ---------- (1) Draw dialog icons above each sprite that meets the visiblity criteria
-	_object_supervisor->DrawDialogIcons();
+	if (IsDialogueIconsVisible() == true)
+		_object_supervisor->DrawDialogIcons();
 
 	// ---------- (2) Draw the introductory location name and graphic if necessary
+	VideoManager->PushState();
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+
 	if (_intro_timer.IsFinished() == false) {
 		uint32 time = _intro_timer.GetTimeExpired();
 
@@ -741,14 +750,10 @@ void MapMode::_DrawGUI() {
 			blend.SetAlpha(1.0f - static_cast<float>(time - 5000) / 2000.0f);
 		}
 
-		VideoManager->PushState();
-		VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 		VideoManager->Move(512.0f, 100.0f);
 		_location_graphic.Draw(blend);
 		VideoManager->MoveRelative(0.0f, -80.0f);
 		VideoManager->Text()->Draw(_map_name, TextStyle("title24", blend, VIDEO_TEXT_SHADOW_DARK));
-		VideoManager->PopState();
 	}
 
 	// ---------- (3) Draw the stamina bar in the lower right corner
@@ -756,8 +761,6 @@ void MapMode::_DrawGUI() {
 		// TODO: the code in this section needs better comments to explain what each coloring step is doing
 		float fill_size = static_cast<float>(_run_stamina) / 10000.0f;
 
-		VideoManager->PushState();
-		VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
 		// Draw the background image
@@ -770,7 +773,7 @@ void MapMode::_DrawGUI() {
 		VideoManager->DrawRectangle(200 * fill_size, 10, unknown);
 
 		// Shade the bar with a faux lighting effect
-		VideoManager->Move(800,739);
+		VideoManager->Move(800, 739);
 		VideoManager->DrawRectangle(200 * fill_size, 2, dark_green);
 		VideoManager->Move(800, 737);
 		VideoManager->DrawRectangle(200 * fill_size, 7, darkish_green);
@@ -810,9 +813,9 @@ void MapMode::_DrawGUI() {
 			VideoManager->Move(780, 747);
 			_stamina_bar_infinite_overlay.Draw();
 		}
-
-		VideoManager->PopState();
 	} // if (_stamina_bar_visible == true)
+
+	VideoManager->PopState();
 } // void MapMode::_DrawGUI()
 
 } // namespace hoa_map
