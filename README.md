@@ -15,7 +15,7 @@ We provide support for the latest official releases and a limited amount of supp
 
 
 # **Contributors** #
-If you wish to contribute to this project, we would be glad to receive your help. Our [http://www.allacrost.org/wiki/index.php/Main_Page](wiki) contains a lot of useful information to get you started. See the wiki pages listed below to help you get started.
+If you wish to contribute to this project, we would be glad to receive your help. Our [wiki](http://www.allacrost.org/wiki/index.php/Main_Page) contains a lot of useful information to get you started. See the wiki pages listed below to help you get started.
 
 * [New contributors](http://www.allacrost.org/wiki/index.php/New_Contributors) -- general information for all new contributors
 * [New programmers](http://www.allacrost.org/wiki/index.php/New_Programmers)
