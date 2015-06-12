@@ -288,16 +288,16 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 		}
 
 		// If these two conditions are true, begin the battle
-		if (enemy != NULL && enemy->IsHostile() && MapMode::CurrentInstance()->AttackAllowed()) {
-			enemy->ChangeStateDead();
+		if (enemy != NULL && (enemy->IsStateActive() || enemy->IsStateActiveZoned()) && MapMode::CurrentInstance()->AttackAllowed()) {
+			enemy->ChangeStateInactive();
 
 			BattleMode *BM = new BattleMode();
 
-			string battle_background = enemy->GetBattleBackground();
+			string battle_background = enemy->GetBattleBackgroundFile();
 			if (battle_background != "")
 				BM->GetMedia().SetBackgroundImage(battle_background);
 
-			string enemy_battle_music = enemy->GetBattleMusicTheme();
+			string enemy_battle_music = enemy->GetBattleMusicFile();
 			if (enemy_battle_music != "")
 				BM->GetMedia().SetBattleMusic(enemy_battle_music);
 
@@ -306,7 +306,7 @@ void VirtualSprite::_ResolveCollision(COLLISION_TYPE coll_type, MapObject* coll_
 				BM->AddEnemy(enemy_party[i]);
 			}
 
-			string enemy_battle_script = enemy->GetBattleScript();
+			string enemy_battle_script = enemy->GetBattleScriptFile();
 			if (enemy_battle_script != "")
 				BM->LoadBattleScript(enemy_battle_script);
 
@@ -808,49 +808,16 @@ void MapSprite::RestoreState() {
 
 EnemySprite::EnemySprite() :
 	_zone(NULL),
-	_color(1.0f, 1.0f, 1.0f, 0.0f),
-	_aggro_range(8.0f),
-	_time_dir_change(2500),
-	_time_to_spawn(3500),
-	_music_theme(""),
-	_bg_file(""),
-	_script_file("")
+	_fade_color(1.0f, 1.0f, 1.0f, 0.0f),
+	_pursuit_range(8.0f),
+	_directional_change_time(2500),
+	_fade_time(4000),
+	_battle_music_file(""),
+	_battle_background_file(""),
+	_battle_script_file("")
 {
-	filename = "";
 	MapObject::_object_type = ENEMY_TYPE;
-	moving = true;
 	Reset();
-}
-
-
-
-EnemySprite::EnemySprite(std::string file) :
-	_zone(NULL),
-	_color(1.0f, 1.0f, 1.0f, 0.0f),
-	_aggro_range(8.0f),
-	_time_dir_change(2500),
-	_time_to_spawn(3500),
-	_music_theme(""),
-	_bg_file(""),
-	_script_file("")
-{
-	filename = file;
-	MapObject::_object_type = ENEMY_TYPE;
-	moving = true;
-	Reset();
-}
-
-
-// Load in the appropriate images and other data for the sprite from a Lua file
-bool EnemySprite::Load() {
-	ReadScriptDescriptor sprite_script;
-	if (sprite_script.OpenFile(filename) == false) {
-		return false;
-	}
-
-	ScriptCallFunction<void>(sprite_script.GetLuaState(), "Load", this);
-	string sprite_sheet = sprite_script.ReadString("sprite_sheet");
-	return MapSprite::LoadStandardAnimations(sprite_sheet);
 }
 
 
@@ -858,9 +825,9 @@ bool EnemySprite::Load() {
 void EnemySprite::Reset() {
 	updatable = false;
 	no_collision = true;
-	_state = DEAD;
-	_time_elapsed = 0;
-	_color.SetAlpha(0.0f);
+	_state = INACTIVE;
+	_state_timer.Reset();
+	_fade_color.SetAlpha(0.0f);
 	_out_of_zone = false;
 }
 
@@ -886,33 +853,46 @@ void EnemySprite::AddEnemy(uint32 enemy_id) {
 
 const std::vector<uint32>& EnemySprite::RetrieveRandomParty() {
 	if (_enemy_parties.empty()) {
-		PRINT_ERROR << "call invoked when no enemy parties existed" << endl;
-		exit(1);
+		PRINT_ERROR << "call invoked when no enemy parties existed, adding default party" << endl;
+		_enemy_parties.push_back(vector<uint32>(1));
 	}
 
-	return _enemy_parties[rand() % _enemy_parties.size()];
+	if (_enemy_parties.size() == 1) {
+		return _enemy_parties[0];
+	}
+	else {
+		return _enemy_parties[rand() % _enemy_parties.size()];
+	}
 }
 
 
 
 void EnemySprite::Update() {
 	switch (_state) {
-		// Gradually increase the alpha while the sprite is fading in during spawning
-		case SPAWNING:
-			_time_elapsed += SystemManager->GetUpdateTime();
-			if (_color.GetAlpha() < 1.0f) {
-				_color.SetAlpha((_time_elapsed / static_cast<float>(_time_to_spawn)) * 1.0f);
+		// Gradually increase the fade color alpha while the sprite is fading in spawning
+		case SPAWN:
+			_state_timer.Update();
+			if (_state_timer.IsFinished() == true) {
+				_fade_color.SetAlpha(1.0f);
+				if (_zone == NULL)
+					ChangeStateActive();
+				else
+					ChangeStateActiveZoned();
 			}
 			else {
-				ChangeStateHostile();
+				_fade_color.SetAlpha(_state_timer.PercentComplete());
 			}
 			break;
 
+		case ACTIVE:
+			MapSprite::Update();
+			break;
+
 		// Set the sprite's direction so that it seeks to collide with the map camera's position
-		case HOSTILE:
+		case ACTIVE_ZONED:
 			// Holds the x and y deltas between the sprite and map camera coordinate pairs
 			float xdelta, ydelta;
-			_time_elapsed += SystemManager->GetUpdateTime();
+			_state_timer.Update();
 
 			xdelta = ComputeXLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeXLocation();
 			ydelta = ComputeYLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeYLocation();
@@ -931,10 +911,11 @@ void EnemySprite::Update() {
 			else {
 				_out_of_zone = false;
 
-				// Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
-				// The order of comparaisons here is important, the NULL check MUST come before the rest or a null pointer exception could happen if no zone is registered
-				if ( MapMode::CurrentInstance()->AttackAllowed() && (_zone == NULL || ( fabs(xdelta) <= _aggro_range && fabs(ydelta) <= _aggro_range
-					 && (!_zone->IsRoamingRestrained() || _zone->IsInsideZone(MapMode::CurrentInstance()->GetCamera()->x_position, MapMode::CurrentInstance()->GetCamera()->y_position)) )) )
+				// Enemies will only pursue if the camera is inside the zone, or the zone is non-restrictive
+				// TODO: this logic needs to be revisited; it is messy and should be cleaned up
+				if (MapMode::CurrentInstance()->AttackAllowed() && (_zone == NULL || (fabs(xdelta) <= _pursuit_range && fabs(ydelta) <= _pursuit_range
+					 && (!_zone->IsRoamingRestrained() ||
+					 _zone->IsInsideZone(MapMode::CurrentInstance()->GetCamera()->x_position, MapMode::CurrentInstance()->GetCamera()->y_position)))))
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
 						SetDirection(SOUTH);
@@ -955,10 +936,12 @@ void EnemySprite::Update() {
 				}
 				// If the sprite is not within the aggression range, pick a random direction to move
 				else {
-					if (_time_elapsed >= GetTimeToChange()) {
-						// TODO: needs comment
-						SetDirection(1 << hoa_utils::RandomBoundedInteger(0,11));
-						_time_elapsed = 0;
+					if (_state_timer.IsFinished() == true) {
+						// Sets to one of the 12 Sprite Direction Constants found in map_utils.h
+						// TODO: this currently gives double the probabily of selecting the four types of directional movement. Rectify this
+						SetDirection(1 << hoa_utils::RandomBoundedInteger(0, 11));
+						_state_timer.Reset();
+						_state_timer.Run();
 					}
 				}
 			}
@@ -966,8 +949,22 @@ void EnemySprite::Update() {
 			MapSprite::Update();
 			break;
 
-		// Do nothing if the sprite is in the DEAD state, or any other state
-		case DEAD:
+		// Nothing should be done in this state. If the enemy has a zone, the zone will change the state back to spawning when appropriate
+		case INACTIVE:
+			break;
+
+		// Gradually decrease the fade color alpha while the sprite is fading out and disappearing
+		case DISSIPATE:
+			_state_timer.Update();
+			if (_state_timer.IsFinished() == true) {
+				_fade_color.SetAlpha(0.0f);
+				ChangeStateInactive();
+			}
+			else {
+				_fade_color.SetAlpha(1.0f - _state_timer.PercentComplete());
+			}
+			break;
+
 		default:
 			break;
 	}
@@ -976,10 +973,16 @@ void EnemySprite::Update() {
 
 
 void EnemySprite::Draw() {
-	// Otherwise, only draw it if it is not in the DEAD state
-	if (MapObject::ShouldDraw() == true && _state != DEAD) {
-		_animations[_current_animation].Draw(_color);
+	if (_state == INACTIVE)
 		return;
+
+	if (MapObject::ShouldDraw() == true) {
+		if (_state == SPAWN || _state == DISSIPATE) {
+			_animations[_current_animation].Draw(_fade_color);
+		}
+		else {
+			_animations[_current_animation].Draw();
+		}
 	}
 }
 

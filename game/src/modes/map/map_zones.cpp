@@ -364,7 +364,7 @@ void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 		EnemySprite* copy = new EnemySprite(*enemy);
 		copy->SetObjectID(map->GetObjectSupervisor()->GenerateObjectID());
 		// Add a 10% random margin of error to make enemies look less synchronized
-		copy->SetTimeToChange(static_cast<uint32>(copy->GetTimeToChange() * (1 + RandomFloat() * 10)));
+		copy->SetDirectionChangeTime(static_cast<uint32>(copy->GetDirectionChangeTime() * (1 + RandomFloat() * 10)));
 		copy->Reset();
 
 		// TODO: use proper layer ID instead of the default
@@ -444,10 +444,10 @@ void EnemyZone::Update() {
 		return;
 	}
 
-	// Otherwise, select a DEAD enemy to spawn
+	// Otherwise, select an inactive enemy to spawn
 	uint32 index = 0;
 	for (uint32 i = 0; i < _enemies.size(); i++) {
-		if (_enemies[i]->IsDead() == true) {
+		if (_enemies[i]->IsStateInactive() == true) {
 			index = i;
 			break;
 		}
@@ -484,7 +484,7 @@ void EnemyZone::Update() {
 	else {
 		_spawn_timer.Reset();
 		_spawn_timer.Run();
-		_enemies[index]->ChangeStateSpawning();
+		_enemies[index]->ChangeStateSpawn();
 		_active_enemies++;
 	}
 } // void EnemyZone::Update()

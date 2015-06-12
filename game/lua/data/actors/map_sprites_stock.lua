@@ -220,17 +220,6 @@ sprites["Mak Hound"] = {
 }
 
 
-sprites["Rubble"] = {
-	name = "????",
-	coll_half_width = 1.0,
-	coll_height = 2.0,
-	img_half_width = 1.0,
-	img_height = 4.0,
-	movement_speed = NORMAL_SPEED,
-
-	standard_animations = "img/sprites/objects/rocks.png"
-}
-
 
 enemies["slime"] = {
 	coll_half_width = 1.0,
