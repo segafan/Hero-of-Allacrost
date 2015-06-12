@@ -388,8 +388,26 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief A mobile map object that induces a battle to occur if the player touches it
+*** \brief A mobile map object that represents a hostile force
 ***
+*** Enemy sprites are have all the same features and functionality as a map sprite.
+*** In addition to this, they have some additional data and methods that are commonly
+*** needed for enemies encountered on a map, including:
+***
+*** - State information to determine if an enemy is spawning or active
+*** - Ability to be controlled by an EnemyZone, used for restricting the area where an enemy may roam
+*** - Battle data to determine what enemies, music, etc. are loaded when a battle begins
+***
+*** Enemies typically are either spawned and controlled by their owning enemy zones,
+*** or are controlled through scripting if they do not belong to any zones. You want to
+*** be very careful about performing any custom scripting for an enemy controlled by a
+*** zone, as the zone runs update logic that may counteract what you are trying to do
+*** with an enemy.
+***
+*** Every enemy has a state that determines how the enemy is being updated and drawn.
+*** This is true regardless of whether or not the enemy is controlled by a zone, but
+*** the order of state logic defers between the two.
+*
 *** There are really two types of enemy sprites. The first type behave just like
 *** map sprites and can have scripted movement sequences. The second type belong
 *** to EnemyZones, where they fade into existence and pursue after the player's
@@ -404,25 +422,17 @@ protected:
 *** ***************************************************************************/
 class EnemySprite : public MapSprite {
 private:
-	//! \brief The states that the enemy sprite may be in
+	//! \brief The possible states that the enemy sprite may be in
 	enum STATE {
-		SPAWNING,
-		HOSTILE,
-		DEAD
+		SPAWN,       //<! Enemy is in the process of "fading in"
+		ACTIVE,      //<! Enemy is fully visible and active. Behaves like a standard map sprite, even if inside a zone.
+		ACTIVE_ZONED, //<! Enemy has completed spawning and is being controlled by an EnemyZone
+		INACTIVE,    //<! Enemy is in a "dead" state, waiting to be spawned or made active by a zone or script call
+		DISSIPATE    //<! Enemy is in the process of disappearing, either due to death or a retreat
 	};
 
 public:
-
-	std::string filename;
-
-	//! \brief The default constructor which typically requires that the user make several additional calls to setup the sprite properties
 	EnemySprite();
-
-	//! \brief A constructor for when the enemy sprite is stored in the definition of a single file
-	EnemySprite(std::string file);
-
-	//! \brief Loads the enemy's data from a file and returns true if it was successful
-	bool Load();
 
 	//! \brief Resets various members of the class so that the enemy is dead, invisible, and does not produce a collision
 	void Reset();
@@ -432,11 +442,6 @@ public:
 
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	virtual void Draw();
-
-	// TODO: eventually I would like the ability for Lua to pass in a table of ints to the AddEnemyParty function, but because I'm not quite
-	// sure how to do that yet, I'm writing several smaller functions so we can just get this demo released.
-
-	// void AddEnemyParty(std::vector<uint32>& party);
 
 	/** \brief Adds a new empty vector to the _enemy_parties member
 	*** \note Make sure to populate this vector by adding at least one enemy!
@@ -454,99 +459,111 @@ public:
 	//! \brief Returns a reference to a random party of enemies
 	const std::vector<uint32>& RetrieveRandomParty();
 
+	void ChangeStateSpawn()
+		{ updatable = true; no_collision = false; _state = SPAWN; _state_timer.Initialize(_fade_time); _state_timer.Run(); _fade_color.SetAlpha(0.0f); }
+
+	void ChangeStateActive()
+		{ updatable = true; no_collision = false; _state = ACTIVE; }
+
+	void ChangeStateActiveZoned()
+		{ updatable = true; no_collision = false; _state = ACTIVE_ZONED; _state_timer.Initialize(_directional_change_time); _state_timer.Run(); }
+
+	void ChangeStateDissipate()
+		{ _state = DISSIPATE; _state_timer.Initialize(_fade_time); _state_timer.Run(); _fade_color.SetAlpha(1.0f); }
+
+	void ChangeStateInactive()
+		{ Reset(); if (_zone) _zone->EnemyDead(); }
+
 	//! \name Class Member Access Functions
 	//@{
-	float GetAggroRange() const
-		{ return _aggro_range; }
+	float GetPursuitRange() const
+		{ return _pursuit_range; }
 
-	uint32 GetTimeToChange() const
-		{ return _time_dir_change; }
+	uint32 GetDirectionChangeTime() const
+		{ return _directional_change_time; }
 
-	uint32 GetTimeToSpawn() const
-		{ return _time_to_spawn; }
+	uint32 GetFadeTime() const
+		{ return _fade_time; }
 
-	std::string GetBattleMusicTheme() const
-		{ return _music_theme; }
+	std::string GetBattleMusicFile() const
+		{ return _battle_music_file; }
 
-	std::string GetBattleBackground() const
-		{ return _bg_file; }
+	std::string GetBattleBackgroundFile() const
+		{ return _battle_background_file; }
 
-	std::string GetBattleScript() const
-		{ return _script_file; }
+	std::string GetBattleScriptFile() const
+		{ return _battle_script_file; }
 
-	bool IsDead() const
-		{ return _state == DEAD; }
+	bool IsStateSpawn() const
+		{ return _state == SPAWN; }
 
-	bool IsSpawning() const
-		{ return _state == SPAWNING; }
+	bool IsStateActive() const
+		{ return _state == ACTIVE; }
 
-	bool IsHostile() const
-		{ return _state == HOSTILE; }
+	bool IsStateActiveZoned() const
+		{ return _state == ACTIVE_ZONED; }
+
+	bool IsStateDissipate() const
+		{ return _state == DISSIPATE; }
+
+	bool IsStateInactive() const
+		{ return _state == INACTIVE; }
 
 	void SetZone(EnemyZone* zone)
 		{ _zone = zone; }
 
-	void SetAggroRange(float range)
-		{ _aggro_range = range; }
+	void SetPursuitRange(float range)
+		{ _pursuit_range = range; }
 
-	void SetTimeToChange(uint32 time)
-		{ _time_dir_change = time; }
+	void SetDirectionChangeTime(uint32 time)
+		{ _directional_change_time = time; }
 
-	void SetTimeToSpawn(uint32 time)
-		{ _time_to_spawn = time; }
+	void SetFadeTime(uint32 time)
+		{ _fade_time = time; }
 
-	void SetBattleMusicTheme(const std::string& music_theme)
-		{ _music_theme = music_theme; }
+	void SetBattleMusicFile(const std::string& file)
+		{ _battle_music_file = file; }
 
-	void SetBattleBackground(const std::string& bg_file)
-		{ _bg_file = bg_file; }
+	void SetBattleBackgroundFile(const std::string& file)
+		{ _battle_background_file = file; }
 
-	void SetBattleScript(const std::string& script_file)
-		{ _script_file = script_file; }
-
-	void ChangeStateDead()
-		{ Reset(); if (_zone) _zone->EnemyDead(); }
-
-	void ChangeStateSpawning()
-		{ updatable = true; _state = SPAWNING; no_collision = false; }
-
-	void ChangeStateHostile()
-		{ updatable = true; _state = HOSTILE; no_collision = false; _color.SetAlpha(1.0); }
+	void SetBattleScriptFile(const std::string& file)
+		{ _battle_script_file = file; }
 	//@}
 
 private:
+	//! \brief The state that the enemy sprite is currently in
+	STATE _state;
+
 	//! \brief The zone that the enemy sprite belongs to
 	private_map::EnemyZone* _zone;
 
-	//! \brief Used to gradually fade in the sprite as it is spawning by adjusting the alpha channel
-	hoa_video::Color _color;
+	//! \brief Used by states for various purposes, including fading of the enemy sprite or determing direction changes
+	hoa_system::SystemTimer _state_timer;
 
-	//! \brief A timer used for spawning
-	uint32 _time_elapsed;
+	//! \brief Used to gradually fade the sprite by adjusting the alpha channel during the SPAWN and DISSIPATE states
+	hoa_video::Color _fade_color;
 
-	//! \brief The state that the enemy sprite is in
-	STATE _state;
+	//! \brief Determines the maximum distance from the player's character before the enemy begins pursuit
+	float _pursuit_range;
 
-	//! \brief A value which determines how close the player needs to be for the enemy to aggressively seek to confront it
-	float _aggro_range;
+	//! \brief The amount of time to wait before an enemy sprite changes movement direction in the ACTIVE_ZONED state
+	uint32 _directional_change_time;
 
-	//! \brief ???
-	uint32 _time_dir_change;
-
-	//! \brief ???
-	uint32 _time_to_spawn;
+	//! \brief The total time to take to fade an enemy sprite during the SPAWN or DISSIPATE states
+	uint32 _fade_time;
 
 	//! \brief Indicates if the enemy is outside of its zone. If it is, it won't change direction until it gets back in.
 	bool _out_of_zone;
 
-	//! \brief The default battle music theme for the monster
-	std::string _music_theme;
+	//! \brief The filename of the music to play for the battle
+	std::string _battle_music_file;
 
-	//! \brief The default background for the battle
-	std::string _bg_file;
+	//! \brief The background image to use for the battle
+	std::string _battle_background_file;
 
 	//! \brief The filename of the script to pass to the battle
-	std::string _script_file;
+	std::string _battle_script_file;
 
 	/** \brief Contains the possible groups of enemies that may appear in a battle should the player encounter this enemy sprite
 	*** The numbers contained within this member are ID numbers for the enemy. If the
