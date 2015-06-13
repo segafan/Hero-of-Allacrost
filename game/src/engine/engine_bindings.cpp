@@ -221,6 +221,7 @@ void BindEngineCode() {
 			.def("FadeScreen", &VideoEngine::FadeScreen)
 			.def("IsFading", &VideoEngine::IsFading)
 			.def("ShakeScreen", &VideoEngine::ShakeScreen)
+			.def("StopShaking", &VideoEngine::StopShaking)
 			.def("EnableLightOverlay", &VideoEngine::EnableLightOverlay)
 			.def("DisableLightOverlay", &VideoEngine::DisableLightOverlay)
 			.def("EnableAmbientOverlay", &VideoEngine::EnableAmbientOverlay)
