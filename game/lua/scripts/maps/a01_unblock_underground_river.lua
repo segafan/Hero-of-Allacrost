@@ -367,10 +367,12 @@ function CreateSprites()
 	-- This sprite represents the boss encountered at the end of the map
 	-- TODO: build the sprite properly using the large scoprion sprite
 	sprites["scorpion_boss"] = ConstructEnemySprite("goliath_scorpion", Map);
-	sprites["scorpion_boss"]:SetPosition(261, 16);
+	sprites["scorpion_boss"]:SetPosition(274, 20);
 	sprites["scorpion_boss"]:SetDirection(hoa_map.MapMode.WEST);
 	sprites["scorpion_boss"]:SetNoCollision(true);
-	sprites["scorpion_boss"]:ChangeStateActive();
+	sprites["scorpion_boss"]:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	sprites["scorpion_boss"]:ChangeStateInactive();
+	sprites["scorpion_boss"]:SetFadeTime(1000);
 	ObjectManager:AddObject(sprites["scorpion_boss"]);
 end -- function CreateSprites()
 
@@ -737,24 +739,32 @@ function CreateDialogues()
 		text = hoa_system.Translate("Mikal! Torren! Take your units and secure ropes around that overgrown rock. The rest of you stay alert and watch their backs. The residents of this cave aren't going to be pleased that we're rearranging their home.");
 		dialogue:AddLine(text, sprites["sergeant"]:GetObjectID());
 
+	event_dialogues["npc_heals"] = 201;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["npc_heals"]);
+		text = hoa_system.Translate("Here, this will heal your wounds and fatigue. We need everyone to be at their full strength before we begin.");
+		dialogue:AddLine(text, sprites["river_knight1"]:GetObjectID());
+		text = hoa_system.Translate("HP and SP restored.");
+		-- TODO: this line is informational text and shouldn't be "spoken" by any sprite, but we do not yet have support for dialogue not attached to sprites
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+
 	-- Event: enemy battle gauntlet prior to boss fight
-	event_dialogues["enemy_gauntlet1"] = 201;
+	event_dialogues["enemy_gauntlet1"] = 210;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["enemy_gauntlet1"]);
 		text = hoa_system.Translate("Ready your swords. Here they come!");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
-	event_dialogues["enemy_gauntlet2"] = 202;
+	event_dialogues["enemy_gauntlet2"] = 211;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["enemy_gauntlet2"]);
 		text = hoa_system.Translate("Don't let any through!");
 		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
 
-	event_dialogues["enemy_gauntlet3"] = 203;
+	event_dialogues["enemy_gauntlet3"] = 212;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["enemy_gauntlet3"]);
 		text = hoa_system.Translate("Damn, there's still more?");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
 	-- Event: Before boss battle
-	event_dialogues["before_boss"] = 204;
+	event_dialogues["before_boss"] = 220;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["before_boss"]);
 		text = hoa_system.Translate("I heard that noise earlier. It sounds like its closer now.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
@@ -766,7 +776,7 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
 
 	-- Event: After boss battle
-	event_dialogues["after_boss"] = 210;
+	event_dialogues["after_boss"] = 230;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["after_boss"]);
 		text = hoa_system.Translate("Captain, you've been wounded!");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
@@ -940,7 +950,7 @@ function CreateEvents()
 	event = hoa_map.DialogueEvent.Create(event_chains["passage_collapse"] + 2, event_dialogues["passage_collapse1"]);
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 3);
 	-- Shake the screen
-	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 3, "ShakeScreen", "");
+	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 3, "PassageCollapseShake", "");
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 4);
 	-- Fade screen to black
 	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 4, "FadeOutScreen", "IsScreenFading");
@@ -1081,7 +1091,8 @@ function CreateEvents()
 	-- TODO: add spawning and movement of enemies to the knights before battle
 	-- First dialogue and battle
 	event = hoa_map.DialogueEvent.Create(event_chains["enemy_gauntlet"] + 0, event_dialogues["enemy_gauntlet1"]);
-	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 1, 500);
+--	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 1, 500);
+	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 2, 500); 
 	event = hoa_map.BattleEncounterEvent.Create(event_chains["enemy_gauntlet"] + 1);
 	event:SetMusic(battle_music);
 	event:SetBackground(battle_background);
@@ -1091,7 +1102,8 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 2, 500);
 	-- Second dialogue and battle
 	event = hoa_map.DialogueEvent.Create(event_chains["enemy_gauntlet"] + 2, event_dialogues["enemy_gauntlet2"]);
-	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 3, 500);
+--	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 3, 500);
+	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 4, 500);
 	event = hoa_map.BattleEncounterEvent.Create(event_chains["enemy_gauntlet"] + 3);
 	event:SetMusic(battle_music);
 	event:SetBackground(battle_background);
@@ -1101,14 +1113,15 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 4, 500);
 	-- Third dialogue and battle
 	event = hoa_map.DialogueEvent.Create(event_chains["enemy_gauntlet"] + 4, event_dialogues["enemy_gauntlet3"]);
-	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 5, 500);
+--	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"] + 5, 500);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"], 2500);
 	event = hoa_map.BattleEncounterEvent.Create(event_chains["enemy_gauntlet"] + 5);
 	event:SetMusic(battle_music);
 	event:SetBackground(battle_background);
 	event:AddEnemy(5);
 	event:AddEnemy(5);
 	event:AddEnemy(7);
-	event:AddEventLinkAtEnd(event_chains["boss_encounter"], 2500);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"], 1000);
 
 	---------- Event Chain 12: Boss encounter and battle
 	IfPrintDebug(DEBUG, "Building event chain #12...");
@@ -1136,10 +1149,16 @@ function CreateEvents()
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 9, sprites["river_knight6"], hoa_map.MapMode.SOUTH);
 	event = hoa_map.DialogueEvent.Create(event_chains["boss_encounter"] + 10, event_dialogues["before_boss"]);
 	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 11);
-	-- Shake the screen as the boss sprite crashes down to the floor
-	event = hoa_map.CustomEvent.Create(event_chains["boss_encounter"] + 11, "ShakeScreen", "");
-	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 12, 2000);
-	event = hoa_map.BattleEncounterEvent.Create(event_chains["boss_encounter"] + 12);
+	-- Spawn the boss sprite, then move it close to the knights position while shaking the screen as it walks
+	event = hoa_map.CustomEvent.Create(event_chains["boss_encounter"] + 11, "SpawnBoss", "SpawnBossComplete");
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 12);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["boss_encounter"] + 12, sprites["scorpion_boss"], 262, 20);
+	event:AddEventLinkAtStart(event_chains["boss_encounter"] + 13);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 14);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 15, 1000);
+	event = hoa_map.CustomEvent.Create(event_chains["boss_encounter"] + 13, "BossMovementShake", "");
+	event = hoa_map.CustomEvent.Create(event_chains["boss_encounter"] + 14, "StopScreenShake", "");
+	event = hoa_map.BattleEncounterEvent.Create(event_chains["boss_encounter"] + 15);
 	event:SetMusic("mus/The_Creature_Awakens.ogg");
 	event:SetBackground(battle_background);
 	event:AddEnemy(91);
@@ -1159,7 +1178,6 @@ function CreateEvents()
 	----------------------------------------------------------------------------
 	---------- Miscellaneous Events
 	----------------------------------------------------------------------------
-
 	-- Places a treasure chest down by the entrance knight sprite
 	event = hoa_map.CustomEvent.Create(1000, "EntrancePlaceChest", "");
 
@@ -1167,6 +1185,7 @@ function CreateEvents()
 	event_chains["hiss_sound"] = 1010;
 	event = hoa_map.SoundEvent.Create(event_chains["hiss_sound"], "snd/evil_hiss.ogg");
 end -- function CreateEvents()
+
 
 -- Called at the end of the first event chain to hide all character sprites but Claudius
 -- and give control over to the player.
@@ -1191,8 +1210,8 @@ functions["SpawnFirstEnemy"] = function()
 	enemy:AddEnemy(1);
 	enemy:SetXLocation(Map.camera.x_position, 0);
 	enemy:SetYLocation(Map.camera.y_position - 4, 0);
-	enemy:SetTimeToSpawn(1000);
-	enemy:ChangeStateSpawning();
+	enemy:SetFadeTime(1000);
+	enemy:ChangeStateSpawn();
 	--]]
 end
 
@@ -1222,8 +1241,20 @@ functions["PopMapState"] = function()
 end
 
 -- Short screen shake during the passage collapse event chain
-functions["ShakeScreen"] = function()
+functions["PassageCollapseShake"] = function()
 	VideoManager:ShakeScreen(2.0, 2000.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
+end
+
+
+-- Small degree of screen shaking while the boss sprite is moving
+functions["BossMovementShake"] = function()
+	-- Shake time is 0, meaning it will continue to shake until VideoManager:StopShaking() is called
+	VideoManager:ShakeScreen(1.0, 0.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
+end
+
+-- Stop any active screen shaking
+functions["StopScreenShake"] = function()
+	VideoManager:StopShaking();
 end
 
 -- Change map to scene state
@@ -1274,8 +1305,7 @@ functions["SwitchContextUnblocked"] = function()
 	SwapContextForAllObjects(contexts["unblocked"]);
 
 	-- The boss has been defeated at this point, so hide it from the map
-	sprites["scorpion_boss"]:SetNoCollision(true);
-	sprites["scorpion_boss"]:SetVisible(false);
+	sprites["scorpion_boss"]:ChangeStateInactive();
 
 	-- Move the character sprite and all NPCs so they are no longer standing in the now flowing riverbed
 	sprites["captain"]:SetPosition(250, 14);
@@ -1374,6 +1404,29 @@ SwapContextForAllObjects = function(new_context)
 	
 	for i = 0, max_index do
 		ObjectManager:GetObjectByIndex(i):SetContext(new_context);
+	end
+end
+
+-- Restores the HP and MP of each member in the character party to maximum
+functions["RestoreParty"] = function()
+	-- TODO
+end
+
+-- Begins spawning the boss sprite at the end of the cave
+functions["SpawnBoss"] = function()
+	sprites["scorpion_boss"]:ChangeStateSpawn();
+	-- Changing the state of an enemy sprite also changes the no_collision property, which we want to remain off
+	sprites["scorpion_boss"]:SetNoCollision(true);
+end
+
+-- Returns true when the boss sprite has finished spawning
+functions["SpawnBossComplete"] = function()
+	if (sprites["scorpion_boss"]:IsStateActive() == true) then
+		-- Ensure that the no collision property remains active in the sprite's new state
+		sprites["scorpion_boss"]:SetNoCollision(true);
+		return true;
+	else
+		return false;
 	end
 end
 
