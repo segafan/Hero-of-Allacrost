@@ -356,6 +356,22 @@ GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 		return (ch->second);
 }
 
+
+
+void GameGlobal::RestoreAllCharacterHitPoints() {
+	for (vector<GlobalCharacter*>::iterator i = _character_order.begin(); i != _character_order.end(); i++) {
+		(*i)->RestoreAllHitPoints();
+	}
+}
+
+
+
+void GameGlobal::RestoreAllCharacterSkillPoints() {
+	for (vector<GlobalCharacter*>::iterator i = _character_order.begin(); i != _character_order.end(); i++) {
+		(*i)->RestoreAllSkillPoints();
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // GameGlobal class - Inventory Functions
 ////////////////////////////////////////////////////////////////////////////////
