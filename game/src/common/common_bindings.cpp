@@ -96,6 +96,8 @@ void BindCommonCode() {
 			.def("ClearAllData", &GameGlobal::ClearAllData)
 			.def("AddCharacter", (void(GameGlobal::*)(uint32)) &GameGlobal::AddCharacter)
 			.def("RemoveCharacter", (void(GameGlobal::*)(uint32)) &GameGlobal::RemoveCharacter)
+			.def("RestoreAllCharacterHitPoints", &GameGlobal::RestoreAllCharacterHitPoints)
+			.def("RestoreAllCharacterSkillPoints", &GameGlobal::RestoreAllCharacterSkillPoints)
 			.def("GetCharacter", &GameGlobal::GetCharacter)
 			.def("GetDrunes", &GameGlobal::GetDrunes)
 			.def("SetDrunes", &GameGlobal::SetDrunes)
@@ -292,6 +294,8 @@ void BindCommonCode() {
 			.def("SubtractAgility", &GlobalActor::SubtractAgility)
 			.def("AddEvade", &GlobalActor::AddEvade)
 			.def("SubtractEvade", &GlobalActor::SubtractEvade)
+			.def("RestoreAllHitPoints", &GlobalActor::RestoreAllHitPoints)
+			.def("RestoreAllSkillPoints", &GlobalActor::RestoreAllSkillPoints)
 
 			.def("IsAlive", &GlobalActor::IsAlive)
 // 			.def("EquipWeapon", &GlobalActor::EquipWeapon)
@@ -318,6 +322,7 @@ void BindCommonCode() {
 	[
 		class_<GlobalParty>("GlobalParty")
 			.def("AddHitPoints", &GlobalParty::AddHitPoints)
+			.def("AddSkillPoints", &GlobalParty::AddSkillPoints)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")

@@ -1407,9 +1407,11 @@ SwapContextForAllObjects = function(new_context)
 	end
 end
 
--- Restores the HP and MP of each member in the character party to maximum
+-- Restores the HP and MP of each member in the character party to maximum and plays a sound
 functions["RestoreParty"] = function()
-	-- TODO
+	GlobalManager:RestoreAllCharacterHitPoints();
+	GlobalManager:RestoreAllCharacterSkillPoints();
+	AudioManager:PlaySound("snd/heal.wav"); -- TODO: this particular sound isn't playing, also see if there's a more appropriate sound than this
 end
 
 -- Begins spawning the boss sprite at the end of the cave
