@@ -218,6 +218,12 @@ public:
 	**/
 	bool IsCharacterInParty(uint32 id)
 		{ if (_characters.find(id) != _characters.end()) return true; else return false; }
+
+	//! \brief Sets the hit points of each character to maximum
+	void RestoreAllCharacterHitPoints();
+
+	//! \brief Sets the skill points of each character to maximum
+	void RestoreAllCharacterSkillPoints();
 	//@}
 
 	//! \name Inventory Methods

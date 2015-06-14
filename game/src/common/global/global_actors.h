@@ -421,6 +421,12 @@ public:
 	void AddEvade(float amount);
 
 	void SubtractEvade(float amount);
+
+	void RestoreAllHitPoints()
+		{ _hit_points = _max_hit_points; }
+
+	void RestoreAllSkillPoints()
+		{ _skill_points = _max_skill_points; }
 	//@}
 
 protected:
@@ -1127,10 +1133,15 @@ public:
 	**/
 	float AverageExperienceLevel() const;
 
-	/** \brief Adds a certain amount of hit points to all actors in the party
-	*** \param hp The number of health points to add
+	/** \brief Adds a certain number of hit points to all actors in the party
+	*** \param hp The number of hit points to add
 	**/
 	void AddHitPoints(uint32 hp);
+
+	/** \brief Adds a certain number of skill points to all actors in the party
+	*** \param sp The number of skill points to add
+	**/
+	void AddSkillPoints(uint32 sp);
 
 	//! \name Class member accessor methods
 	//@{

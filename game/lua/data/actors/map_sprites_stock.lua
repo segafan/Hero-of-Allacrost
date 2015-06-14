@@ -1,3 +1,11 @@
+--------------------------------------------------------------------------------
+-- map_sprites_stock.lua
+--
+-- Data definitions for sprites and functions that construct sprite objects from
+-- those definitions. This is used by map scripts to construct MapSprite and
+-- EnemySprite objects.
+--------------------------------------------------------------------------------
+
 sprites = {}
 enemies = {}
 
@@ -251,8 +259,28 @@ enemies["scorpion"] = {
 }
 
 
-sprite = {}
-enemy = {}
+
+enemies["scorpion"] = {
+	coll_half_width = 1.0,
+	coll_height = 2.0,
+	img_half_width = 1.0,
+	img_height = 4.0,
+	movement_speed = NORMAL_SPEED,
+	standard_animations = "img/sprites/enemies/scorpion_walk.png"
+}
+
+
+
+enemies["goliath_scorpion"] = {
+	coll_half_width = 3.0,
+	coll_height = 6.0,
+	img_half_width = 3.0,
+	img_height = 12.0,
+	movement_speed = NORMAL_SPEED,
+	standard_animations = "img/sprites/enemies/goliath_scorpion_walk.png"
+}
+
+
 
 function ConstructSprite(name, id, x, y)
 	-- Convert the X/Y cooridnates into integer + offset values
@@ -261,13 +289,13 @@ function ConstructSprite(name, id, x, y)
 	local y_int = math.floor(y);
 	local y_off = y - y_int;
 
-	dir = (2 ^ math.random(0, 3));
+	local direction = (2 ^ math.random(0, 3));
 
 	if (sprites[name]) then
-		sprite = hoa_map.MapSprite();
+		local sprite = hoa_map.MapSprite();
 		sprite:SetName(sprites[name].name);
 		sprite:SetObjectID(id);
-		sprite:SetContext(1);
+		sprite:SetContext(hoa_map.MapMode.CONTEXT_01);
 		sprite:SetXPosition(x_int, x_off);
 		sprite:SetYPosition(y_int, y_off);
 		sprite:SetCollHalfWidth(sprites[name].coll_half_width);
@@ -275,7 +303,7 @@ function ConstructSprite(name, id, x, y)
 		sprite:SetImgHalfWidth(sprites[name].img_half_width);
 		sprite:SetImgHeight(sprites[name].img_height);
 		sprite:SetMovementSpeed(sprites[name].movement_speed);
-		sprite:SetDirection(dir);
+		sprite:SetDirection(direction);
 		sprite:LoadStandardAnimations(sprites[name].standard_animations);
 		if (sprites[name].running_animations) then
 			sprite:LoadRunningAnimations(sprites[name].running_animations);
@@ -296,7 +324,7 @@ function ConstructEnemySprite(name, Map)
 		return nil;
 	end
 	
-	enemy = hoa_map.EnemySprite();
+	local enemy = hoa_map.EnemySprite();
 	enemy:SetObjectID(Map.object_supervisor:GenerateObjectID());
 	enemy:SetContext(hoa_map.MapMode.CONTEXT_01);
 	enemy:SetCollHalfWidth(enemies[name].coll_half_width);
