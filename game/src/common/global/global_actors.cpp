@@ -1736,4 +1736,12 @@ void GlobalParty::AddHitPoints(uint32 hp) {
 	}
 }
 
+
+
+void GlobalParty::AddSkillPoints(uint32 sp) {
+	for (vector<GlobalActor*>::iterator i = _actors.begin(); i != _actors.end(); i++) {
+		(*i)->AddSkillPoints(sp);
+	}
+}
+
 } // namespace hoa_global

@@ -69,7 +69,7 @@ function Load(m)
 	CreateZones();
 	CreateObjects();
 	CreateSprites();
---	CreateEnemies();
+	CreateEnemies();
 	CreateDialogues();
 	CreateEvents();
 
@@ -86,14 +86,11 @@ function Load(m)
 	
 
 	Map:SetCamera(sprites["claudius"]);
---	sprites["claudius"]:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED); -- DEBUG
-	Map.camera:SetXPosition(215, 0); Map.camera:SetYPosition(8, 0); -- DEBUG: put player at the river bed entrance 
 	Map:MoveVirtualFocus(80, 130);
 
 	-- The map begins with an opening scene before control is given to the player
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
---	EventManager:StartEvent(events["opening_dialogue"], 2500);
-	EventManager:StartEvent(event_chains["riverbed_arrival"], 250); -- DEBUG: start riverbed scene
+	EventManager:StartEvent(events["opening_dialogue"], 2500);
 	IfPrintDebug(DEBUG, "Map loading complete");
 end -- function Load(m)
 
@@ -366,11 +363,13 @@ function CreateSprites()
 
 	-- This sprite represents the boss encountered at the end of the map
 	-- TODO: build the sprite properly using the large scoprion sprite
-	sprites["scorpion_boss"] = ConstructEnemySprite("scorpion", Map);
-	sprites["scorpion_boss"]:SetPosition(261, 16);
+	sprites["scorpion_boss"] = ConstructEnemySprite("goliath_scorpion", Map);
+	sprites["scorpion_boss"]:SetPosition(274, 20);
 	sprites["scorpion_boss"]:SetDirection(hoa_map.MapMode.WEST);
 	sprites["scorpion_boss"]:SetNoCollision(true);
-	sprites["scorpion_boss"]:ChangeStateActive();
+	sprites["scorpion_boss"]:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	sprites["scorpion_boss"]:ChangeStateInactive();
+	sprites["scorpion_boss"]:SetFadeTime(1000);
 	ObjectManager:AddObject(sprites["scorpion_boss"]);
 end -- function CreateSprites()
 
@@ -381,9 +380,9 @@ function CreateEnemies()
 
 	-- Sets common battle environment settings for enemy sprites
 	local SetBattleEnvironment = function(enemy)
-		enemy:SetBattleMusicTheme("mus/Battle_Jazz.ogg");
-		enemy:SetBattleBackground("img/backdrops/battle/desert_cave.png");
-		enemy:SetBattleScript("lua/scripts/battles/first_battle.lua");
+		enemy:SetBattleMusicFile("mus/Battle_Jazz.ogg");
+		enemy:SetBattleBackgroundFile("img/backdrops/battle/desert_cave.png");
+		enemy:SetBattleScriptFile("lua/scripts/battles/first_battle.lua");
 	end
 
 	local enemy = {};
@@ -737,24 +736,33 @@ function CreateDialogues()
 		text = hoa_system.Translate("Mikal! Torren! Take your units and secure ropes around that overgrown rock. The rest of you stay alert and watch their backs. The residents of this cave aren't going to be pleased that we're rearranging their home.");
 		dialogue:AddLine(text, sprites["sergeant"]:GetObjectID());
 
+	event_dialogues["npc_heals"] = 201;
+	dialogue = hoa_map.MapDialogue.Create(event_dialogues["npc_heals"]);
+		text = hoa_system.Translate("Here, this will heal your wounds and fatigue. We need everyone to be at their full strength before we begin.");
+		dialogue:AddLine(text, sprites["river_knight1"]:GetObjectID());
+		dialogue:AddLineEventAtEnd(114); -- 114 = event_chains["riverbed_arrival"] + 4
+		text = hoa_system.Translate("HP and SP restored.");
+		-- TODO: this line is informational text and shouldn't be "spoken" by any sprite, but we do not yet have support for dialogue not attached to sprites
+		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
+
 	-- Event: enemy battle gauntlet prior to boss fight
-	event_dialogues["enemy_gauntlet1"] = 201;
+	event_dialogues["enemy_gauntlet1"] = 210;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["enemy_gauntlet1"]);
 		text = hoa_system.Translate("Ready your swords. Here they come!");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
 
-	event_dialogues["enemy_gauntlet2"] = 202;
+	event_dialogues["enemy_gauntlet2"] = 211;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["enemy_gauntlet2"]);
 		text = hoa_system.Translate("Don't let any through!");
 		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
 
-	event_dialogues["enemy_gauntlet3"] = 203;
+	event_dialogues["enemy_gauntlet3"] = 212;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["enemy_gauntlet3"]);
 		text = hoa_system.Translate("Damn, there's still more?");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
 
 	-- Event: Before boss battle
-	event_dialogues["before_boss"] = 204;
+	event_dialogues["before_boss"] = 220;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["before_boss"]);
 		text = hoa_system.Translate("I heard that noise earlier. It sounds like its closer now.");
 		dialogue:AddLine(text, sprites["mark"]:GetObjectID());
@@ -766,7 +774,7 @@ function CreateDialogues()
 		dialogue:AddLine(text, sprites["claudius"]:GetObjectID());
 
 	-- Event: After boss battle
-	event_dialogues["after_boss"] = 210;
+	event_dialogues["after_boss"] = 230;
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["after_boss"]);
 		text = hoa_system.Translate("Captain, you've been wounded!");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
@@ -940,7 +948,7 @@ function CreateEvents()
 	event = hoa_map.DialogueEvent.Create(event_chains["passage_collapse"] + 2, event_dialogues["passage_collapse1"]);
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 3);
 	-- Shake the screen
-	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 3, "ShakeScreen", "");
+	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 3, "PassageCollapseShake", "");
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 4);
 	-- Fade screen to black
 	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 4, "FadeOutScreen", "IsScreenFading");
@@ -1008,9 +1016,9 @@ function CreateEvents()
 	-- The event chains that follow are all played out sequentially, hence why we define their event chain IDs here
 	-- so that each chain can have access to the starting event ID of the proceeding chain.
 	event_chains["riverbed_arrival"] = 110;
-	event_chains["enemy_gauntlet"] = 130;
-	event_chains["boss_encounter"] = 150;
-	event_chains["final_scene"] = 170;
+	event_chains["enemy_gauntlet"] = 150;
+	event_chains["boss_encounter"] = 190;
+	event_chains["final_scene"] = 230;
 
 	---------- Event Chain 10: Arriving at riverbed
 	IfPrintDebug(DEBUG, "Building event chain #10...");
@@ -1020,14 +1028,18 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 1);
 	-- Move player sprite in to the gathering of knights in the river bed
 	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 1, sprites["claudius"], 238, 12);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 2);
 	event:SetFinalDirection(hoa_map.MapMode.EAST);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 2);
 	-- Begin arrival dialogue
 	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 2, event_dialogues["riverbed_arrival"]);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 3, 0);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 5, 200);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 6, 200);
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 7, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 3);
+	-- Move senior knight to the right of Claudius and begin the healing dialogue
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 3, sprites["river_knight1"], 238, 12)
+	event:SetFinalDirection(hoa_map.MapMode.WEST);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 5, 0);
+	event = hoa_map.CustomEvent.Create(event_chains["riverbed_arrival"] + 4, "RestoreParty", ""); -- This event is called within the npc_heals dialogue lines
+	event = hoa_map.DialogueEvent.Create(event_chains["riverbed_arrival"] + 5, event_dialogues["npc_heals"]);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 6, 0);
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 8, 200);
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 9, 200);
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 10, 200);
@@ -1037,39 +1049,42 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 14, 200);
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 15, 200);
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 16, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 17, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 18, 200);
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 19, 200);
 	event:AddEventLinkAtEnd(event_chains["enemy_gauntlet"], 5000);
 	-- Set the camera to the virtual focus and move it to the center of the knight's furture position
-	event = hoa_map.CustomEvent.Create(event_chains["riverbed_arrival"] + 3, "VirtualFocusToPlayer", "");
-	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 4);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 4,  ObjectManager.virtual_focus, 260, 16);
+	event = hoa_map.CustomEvent.Create(event_chains["riverbed_arrival"] + 6, "VirtualFocusToPlayer", "");
+	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 7);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 7,  ObjectManager.virtual_focus, 260, 16);
 	-- Move the character sprite and other knights to their positions
 	-- Knights to the north are working on moving the boulder
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 5, sprites["river_knight2"], 260, 13);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 8, sprites["river_knight2"], 260, 13);
 	event:SetFinalDirection(hoa_map.MapMode.NORTH);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 6, sprites["river_knight3"], 256, 13);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 9, sprites["river_knight3"], 256, 13);
 	event:SetFinalDirection(hoa_map.MapMode.NORTH);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 7, sprites["river_knight4"], 258, 14);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 10, sprites["river_knight4"], 258, 14);
 	event:SetFinalDirection(hoa_map.MapMode.NORTH);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 8, sprites["river_knight5"], 263, 13);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 11, sprites["river_knight5"], 263, 13);
 	event:SetFinalDirection(hoa_map.MapMode.WEST);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 9, sprites["captain"], 262, 15);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 12, sprites["captain"], 262, 15);
 	event:SetFinalDirection(hoa_map.MapMode.NORTH); -- TODO: for some reason captain sprite won't change his facing direction here
 	-- Knights to the south are defending (including Claudius)
 	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 10, sprites["river_knight7"], 264, 24);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 13, sprites["river_knight7"], 264, 24);
 	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 11, sprites["river_knight8"], 260, 23);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 14, sprites["river_knight8"], 260, 23);
 	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 12, sprites["claudius"], 256, 22);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 15, sprites["claudius"], 256, 22);
 	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 13, sprites["sergeant"], 257, 19);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 16, sprites["sergeant"], 257, 19);
 	event:SetFinalDirection(hoa_map.MapMode.SOUTH);
 	-- Knights to the west are defending
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 14, sprites["river_knight9"], 253, 15);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 17, sprites["river_knight9"], 253, 15);
 	event:SetFinalDirection(hoa_map.MapMode.WEST);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 15, sprites["river_knight1"], 251, 18);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 18, sprites["river_knight1"], 251, 18);
 	event:SetFinalDirection(hoa_map.MapMode.WEST);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 16, sprites["river_knight6"], 253, 19);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 19, sprites["river_knight6"], 253, 19);
 	event:SetFinalDirection(hoa_map.MapMode.WEST);
 
 	---------- Event Chain 11: Enemy gauntlet
@@ -1108,7 +1123,7 @@ function CreateEvents()
 	event:AddEnemy(5);
 	event:AddEnemy(5);
 	event:AddEnemy(7);
-	event:AddEventLinkAtEnd(event_chains["boss_encounter"], 2500);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"], 1000);
 
 	---------- Event Chain 12: Boss encounter and battle
 	IfPrintDebug(DEBUG, "Building event chain #12...");
@@ -1134,12 +1149,43 @@ function CreateEvents()
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 7, sprites["river_knight9"], hoa_map.MapMode.NORTH);
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 8, sprites["river_knight1"], hoa_map.MapMode.WEST);
 	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 9, sprites["river_knight6"], hoa_map.MapMode.SOUTH);
+	-- After the dialogue, have all sprites look toward the spawning boss enemy
 	event = hoa_map.DialogueEvent.Create(event_chains["boss_encounter"] + 10, event_dialogues["before_boss"]);
-	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 11);
-	-- Shake the screen as the boss sprite crashes down to the floor
-	event = hoa_map.CustomEvent.Create(event_chains["boss_encounter"] + 11, "ShakeScreen", "");
-	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 12, 2000);
-	event = hoa_map.BattleEncounterEvent.Create(event_chains["boss_encounter"] + 12);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 11, 50);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 12, 25);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 13, 75);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 14, 100);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 15, 50);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 16, 75);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 17, 25);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 18, 100);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 19, 50);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 20, 25);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 21, 75);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 22, 50);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 23);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 11, sprites["claudius"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 12, sprites["captain"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 13, sprites["sergeant"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 14, sprites["river_knight1"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 15, sprites["river_knight2"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 16, sprites["river_knight3"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 17, sprites["river_knight4"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 18, sprites["river_knight5"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 19, sprites["river_knight6"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 20, sprites["river_knight7"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 21, sprites["river_knight8"], hoa_map.MapMode.EAST);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["boss_encounter"] + 22, sprites["river_knight9"], hoa_map.MapMode.EAST);
+	-- Spawn the boss sprite, then move it close to the knights position while shaking the screen as it walks
+	event = hoa_map.CustomEvent.Create(event_chains["boss_encounter"] + 23, "SpawnBoss", "SpawnBossComplete");
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 24);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["boss_encounter"] + 24, sprites["scorpion_boss"], 262, 20);
+	event:AddEventLinkAtStart(event_chains["boss_encounter"] + 25);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 26);
+	event:AddEventLinkAtEnd(event_chains["boss_encounter"] + 27, 1000);
+	event = hoa_map.CustomEvent.Create(event_chains["boss_encounter"] + 25, "BossMovementShake", "");
+	event = hoa_map.CustomEvent.Create(event_chains["boss_encounter"] + 26, "StopScreenShake", "");
+	event = hoa_map.BattleEncounterEvent.Create(event_chains["boss_encounter"] + 27);
 	event:SetMusic("mus/The_Creature_Awakens.ogg");
 	event:SetBackground(battle_background);
 	event:AddEnemy(91);
@@ -1159,7 +1205,6 @@ function CreateEvents()
 	----------------------------------------------------------------------------
 	---------- Miscellaneous Events
 	----------------------------------------------------------------------------
-
 	-- Places a treasure chest down by the entrance knight sprite
 	event = hoa_map.CustomEvent.Create(1000, "EntrancePlaceChest", "");
 
@@ -1167,6 +1212,7 @@ function CreateEvents()
 	event_chains["hiss_sound"] = 1010;
 	event = hoa_map.SoundEvent.Create(event_chains["hiss_sound"], "snd/evil_hiss.ogg");
 end -- function CreateEvents()
+
 
 -- Called at the end of the first event chain to hide all character sprites but Claudius
 -- and give control over to the player.
@@ -1191,8 +1237,8 @@ functions["SpawnFirstEnemy"] = function()
 	enemy:AddEnemy(1);
 	enemy:SetXLocation(Map.camera.x_position, 0);
 	enemy:SetYLocation(Map.camera.y_position - 4, 0);
-	enemy:SetTimeToSpawn(1000);
-	enemy:ChangeStateSpawning();
+	enemy:SetFadeTime(1000);
+	enemy:ChangeStateSpawn();
 	--]]
 end
 
@@ -1222,8 +1268,20 @@ functions["PopMapState"] = function()
 end
 
 -- Short screen shake during the passage collapse event chain
-functions["ShakeScreen"] = function()
+functions["PassageCollapseShake"] = function()
 	VideoManager:ShakeScreen(2.0, 2000.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
+end
+
+
+-- Small degree of screen shaking while the boss sprite is moving
+functions["BossMovementShake"] = function()
+	-- Shake time is 0, meaning it will continue to shake until VideoManager:StopShaking() is called
+	VideoManager:ShakeScreen(1.0, 0.0, hoa_video.GameVideo.VIDEO_FALLOFF_NONE);
+end
+
+-- Stop any active screen shaking
+functions["StopScreenShake"] = function()
+	VideoManager:StopShaking();
 end
 
 -- Change map to scene state
@@ -1274,33 +1332,34 @@ functions["SwitchContextUnblocked"] = function()
 	SwapContextForAllObjects(contexts["unblocked"]);
 
 	-- The boss has been defeated at this point, so hide it from the map
-	sprites["scorpion_boss"]:SetNoCollision(true);
-	sprites["scorpion_boss"]:SetVisible(false);
+	sprites["scorpion_boss"]:ChangeStateInactive();
 
 	-- Move the character sprite and all NPCs so they are no longer standing in the now flowing riverbed
-	sprites["captain"]:SetPosition(250, 14);
+	sprites["captain"]:SetPosition(251, 13);
 	sprites["captain"]:SetDirection(hoa_map.MapMode.SOUTH);
-	sprites["sergeant"]:SetPosition(252, 14);
-	sprites["sergeant"]:SetDirection(hoa_map.MapMode.SOUTH);
-	sprites["claudius"]:SetPosition(249, 14);
-	sprites["claudius"]:SetDirection(hoa_map.MapMode.WEST);
-	sprites["river_knight1"]:SetPosition(246, 17);
+	sprites["sergeant"]:SetPosition(253, 14);
+	sprites["sergeant"]:SetDirection(hoa_map.MapMode.WEST);
+	sprites["claudius"]:SetPosition(248, 14);
+	sprites["claudius"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["river_knight1"]:SetPosition(251, 16);
 	sprites["river_knight1"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["river_knight2"]:SetPosition(249, 17);
-	sprites["river_knight2"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["river_knight3"]:SetPosition(252, 17);
-	sprites["river_knight3"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["river_knight4"]:SetPosition(246, 20);
+
+	sprites["river_knight2"]:SetPosition(240, 17);
+	sprites["river_knight2"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["river_knight3"]:SetPosition(243, 16);
+	sprites["river_knight3"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["river_knight4"]:SetPosition(241, 20);
 	sprites["river_knight4"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["river_knight5"]:SetPosition(249, 20);
+	sprites["river_knight5"]:SetPosition(243, 19);
 	sprites["river_knight5"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["river_knight6"]:SetPosition(252, 20);
+
+	sprites["river_knight6"]:SetPosition(250, 21);
 	sprites["river_knight6"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["river_knight7"]:SetPosition(246, 23);
+	sprites["river_knight7"]:SetPosition(247, 22);
 	sprites["river_knight7"]:SetDirection(hoa_map.MapMode.NORTH);
 	sprites["river_knight8"]:SetPosition(249, 23);
 	sprites["river_knight8"]:SetDirection(hoa_map.MapMode.NORTH);
-	sprites["river_knight9"]:SetPosition(252, 23);
+	sprites["river_knight9"]:SetPosition(251, 25);
 	sprites["river_knight9"]:SetDirection(hoa_map.MapMode.NORTH);
 
 	-- Set the screen to black and begin fading it back in
@@ -1374,6 +1433,32 @@ SwapContextForAllObjects = function(new_context)
 	
 	for i = 0, max_index do
 		ObjectManager:GetObjectByIndex(i):SetContext(new_context);
+	end
+end
+
+-- Restores the HP and MP of each member in the character party to maximum and plays a sound
+functions["RestoreParty"] = function()
+	GlobalManager:RestoreAllCharacterHitPoints();
+	GlobalManager:RestoreAllCharacterSkillPoints();
+	-- TODO: it seems that .wav sounds do not play, but .ogg sounds do. Also see if there's a more appropriate sound than this
+	AudioManager:PlaySound("snd/heal.wav");
+end
+
+-- Begins spawning the boss sprite at the end of the cave
+functions["SpawnBoss"] = function()
+	sprites["scorpion_boss"]:ChangeStateSpawn();
+	-- Changing the state of an enemy sprite also changes the no_collision property, which we want to remain off
+	sprites["scorpion_boss"]:SetNoCollision(true);
+end
+
+-- Returns true when the boss sprite has finished spawning
+functions["SpawnBossComplete"] = function()
+	if (sprites["scorpion_boss"]:IsStateActive() == true) then
+		-- Ensure that the no collision property remains active in the sprite's new state
+		sprites["scorpion_boss"]:SetNoCollision(true);
+		return true;
+	else
+		return false;
 	end
 end
 
