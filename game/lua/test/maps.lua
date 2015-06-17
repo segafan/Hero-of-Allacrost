@@ -47,6 +47,8 @@ tests[1] = {
 		GlobalManager:SetDrunes(100);
 		GlobalManager:AddToInventory(1, 4);
 
+		-- When selecting new game in boot mode, the screen will turn black before the map is loaded
+		VideoManager:FadeScreen(hoa_video.Color(0.0, 0.0, 0.0, 1.0), 0);
 		StartMap("lua/scripts/maps/a01_opening_scene.lua");
 	end
 }

@@ -246,10 +246,9 @@ void BootMode::Update() {
 
 	// Screen is in the process of fading out
 	if (_fade_out) {
-		// When the screen is finished fading to black, start the new game and fade the screen back in
+		// When the screen is finished fading to black, start the new game
 		if (!VideoManager->IsFading()) {
 			GlobalManager->NewGame();
-			VideoManager->FadeScreen(Color::clear, 1000);
 		}
 		return;
 	}
@@ -292,7 +291,7 @@ void BootMode::Update() {
 		ModeManager->PopAll();
 		ModeManager->Push(new hoa_test::TestMode());
 	}
-	
+
 	if (_joy_setting_function != NULL)
 	{
 		if (InputManager->AnyKeyPress() && ev.type == SDL_JOYBUTTONDOWN)
