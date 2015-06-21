@@ -1158,6 +1158,8 @@ void MapData::_ComputeCollisionData() {
 	// The indexes to the proper tileset and that tileset's collision data for the tile being processed
 	uint32 tileset_index = 0;
 	uint32 tileset_collision_index = 0;
+	// Keeps track of whether there are no tiles for a given X/Y location
+	bool no_tiles_at_coordinates = true;
 
 	// Holds the indexes to the _collision_data for each of the four collision quadrants of a single tile
 	uint32 north_index = 0;
@@ -1182,17 +1184,23 @@ void MapData::_ComputeCollisionData() {
 			for (uint32 x = 0; x < _map_length; ++x) {
 				west_index = x * 2;
 				east_index = west_index + 1;
+				no_tiles_at_coordinates = true;
 				for (uint32 l = 0; l < collision_layers.size(); ++l) {
 					tile = context->GetTileLayer(collision_layers[l])->GetTile(x, y);
 					if (tile == MISSING_TILE) {
+						// If no tile is at this location, all collision data in this area is set to true
 						continue;
 					}
 					else if (tile == INHERITED_TILE) {
 						tile = inherited_context->GetTileLayer(collision_layers[l])->GetTile(x, y);
 						if (tile == MISSING_TILE) {
+							// If no tile is at this location, all collision data in this area is set to true
+
 							continue;
 						}
 					}
+
+					no_tiles_at_coordinates = false;
 
 					// Determine the tileset that this tile belongs to and the location of the tile within that set
 					tileset_index = tile / TILESET_NUM_TILES;
@@ -1207,6 +1215,16 @@ void MapData::_ComputeCollisionData() {
 						_collision_data[south_index][west_index] |= context_mask;
 					if (_tilesets[tileset_index]->GetQuadrantCollision(tileset_collision_index + 3) != 0)
 						_collision_data[south_index][east_index] |= context_mask;
+				}
+
+				// When all tile layers that take collision properties of tiles into account contained no tile at a
+				// given location, we want to enable collision data for that tile location. This is because we don't
+				// want any sprites to be able to walk into dark pits, through walls, etc.
+				if (no_tiles_at_coordinates == true) {
+					_collision_data[north_index][west_index] |= context_mask;
+					_collision_data[north_index][east_index] |= context_mask;
+					_collision_data[south_index][west_index] |= context_mask;
+					_collision_data[south_index][east_index] |= context_mask;
 				}
 			}
 		}

@@ -466,7 +466,7 @@ public:
 		{ updatable = true; no_collision = false; _state = ACTIVE; }
 
 	void ChangeStateActiveZoned()
-		{ updatable = true; no_collision = false; _state = ACTIVE_ZONED; _state_timer.Initialize(_directional_change_time); _state_timer.Run(); }
+		{ updatable = true; no_collision = false; moving = true; _state = ACTIVE_ZONED; _state_timer.Initialize(_directional_change_time); _state_timer.Run(); }
 
 	void ChangeStateDissipate()
 		{ _state = DISSIPATE; _state_timer.Initialize(_fade_time); _state_timer.Run(); _fade_color.SetAlpha(1.0f); }
