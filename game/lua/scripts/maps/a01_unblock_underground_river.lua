@@ -79,6 +79,7 @@ function Load(m)
 	Map:SetCurrentTrack(0);
 
 	Map.unlimited_stamina = true; -- TEMP: enabled for development. Change this to false prior to release
+	Map:ShowStaminaBar(true);
 	Map:ShowDialogueIcons(true);
 
 	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas

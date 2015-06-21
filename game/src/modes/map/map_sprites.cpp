@@ -898,10 +898,9 @@ void EnemySprite::Update() {
 			ydelta = ComputeYLocation() - MapMode::CurrentInstance()->GetCamera()->ComputeYLocation();
 
 			// If the sprite has moved outside of its zone and it should not, reverse the sprite's direction
-			if ( _zone != NULL && _zone->IsInsideZone(x_position, y_position) == false && _zone->IsRoamingRestrained() ) {
+			if (_zone != NULL && _zone->IsInsideZone(x_position, y_position) == false && _zone->IsRoamingRestrained()) {
 				// Make sure it wasn't already out (stuck on boundaries fix)
-				if( !_out_of_zone )
-				{
+				if (_out_of_zone == false) {
 					SetDirection(CalculateOppositeDirection(GetDirection()));
 					// The sprite is now finding its way back into the zone
 					_out_of_zone = true;
