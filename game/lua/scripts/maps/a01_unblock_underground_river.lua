@@ -83,6 +83,7 @@ function Load(m)
 	Map:ShowDialogueIcons(true);
 
 	-- The map begins with an opening scene before control is given to the player
+	Map:SetPlayerSprite(sprites["claudius"]);
 	Map:SetCamera(sprites["claudius"]);
 	Map:MoveVirtualFocus(80, 130);
 --	Map:PushState(hoa_map.MapMode.STATE_SCENE);
@@ -107,15 +108,15 @@ function Update()
 	end
 	--]]
 
-	if (zones["corpse_discovery"]:IsCameraEntering() == true) then
-		if (GlobalEvents:DoesEventExist("corpse_seen") == false) then
+	if (GlobalEvents:DoesEventExist("corpse_seen") == false) then
+		if (zones["corpse_discovery"]:IsPlayerSpriteEntering() == true) then
 			GlobalEvents:AddNewEvent("corpse_seen", 1);
 			EventManager:StartEvent(event_chains["find_corpse"]);
 		end
 	end
 
-	if (zones["prevent_long_route"]:IsCameraEntering() == true and Map:CurrentState() == hoa_map.MapMode.STATE_EXPLORE) then
-		if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
+	if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
+		if (zones["prevent_long_route"]:IsPlayerSpriteEntering() == true and Map:CurrentState() == hoa_map.MapMode.STATE_EXPLORE) then	
 			EventManager:StartEvent(event_chains["follow_short_route"]);
 		end
 	end
@@ -127,31 +128,31 @@ function Update()
 --		end
 --	end
 	
-	if (zones["collapse"]:IsCameraEntering() == true) then
-		if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
+	if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
+		if (zones["collapse"]:IsPlayerSpriteEntering() == true) then
 			GlobalEvents:AddNewEvent("passage_collapsed", 1);
 			EventManager:StartEvent(event_chains["passage_collapse"]);
 		end
 	end
 
-	if ((zones["forward_passage"]:IsCameraEntering() == true) and (Map.camera:IsVisible() == true)) then
+	if ((zones["forward_passage"]:IsPlayerSpriteEntering() == true) and (Map.player_sprite:IsVisible() == true)) then
 		EventManager:StartEvent(event_chains["pass_wall_forward"]);
 	end
 	
-	if ((zones["backward_passage"]:IsCameraEntering() == true) and (Map.camera:IsVisible() == true)) then
+	if ((zones["backward_passage"]:IsPlayerSpriteEntering() == true) and (Map.player_sprite:IsVisible() == true)) then
 		EventManager:StartEvent(event_chains["pass_wall_backward"]);
 	end
 	
-	if ((zones["spring_discovery"]:IsCameraEntering() == true)) then
-		if (GlobalEvents:DoesEventExist("spring_discovered") == false) then
+	if (GlobalEvents:DoesEventExist("spring_discovered") == false) then
+		if ((zones["spring_discovery"]:IsPlayerSpriteEntering() == true)) then	
 			GlobalEvents:AddNewEvent("spring_discovered", 1);
 			Map.camera:SetMoving(false);
 			EventManager:StartEvent(event_chains["spring_arrival"]);
 		end
 	end
 	
-	if ((zones["riverbed_arrival"]:IsCameraEntering() == true)) then
-		if (GlobalEvents:DoesEventExist("riverbed_arrival") == false) then
+	if (GlobalEvents:DoesEventExist("riverbed_arrival") == false) then
+		if ((zones["riverbed_arrival"]:IsCameraEntering() == true)) then	
 			GlobalEvents:AddNewEvent("riverbed_arrival", 1);
 			EventManager:StartEvent(event_chains["riverbed_arrival"]);
 		end

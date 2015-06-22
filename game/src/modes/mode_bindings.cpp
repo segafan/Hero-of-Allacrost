@@ -316,6 +316,9 @@ void BindModeCode() {
 			.def("IsCameraInside", &CameraZone::IsCameraInside)
 			.def("IsCameraEntering", &CameraZone::IsCameraEntering)
 			.def("IsCameraExiting", &CameraZone::IsCameraExiting)
+			.def("IsPlayerSpriteInside", &CameraZone::IsPlayerSpriteInside)
+			.def("IsPlayerSpriteEntering", &CameraZone::IsPlayerSpriteEntering)
+			.def("IsPlayerSpriteExiting", &CameraZone::IsPlayerSpriteExiting)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
