@@ -36,6 +36,7 @@
 #include "map_tiles.h"
 #include "map_treasure.h"
 #include "map_zones.h"
+#include "map_utils.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -72,6 +73,7 @@ MapMode::MapMode(string script_filename) :
 	_dialogue_supervisor(NULL),
 	_treasure_supervisor(NULL),
 	_camera(NULL),
+	_player_sprite(NULL),
 	_delta_x(0),
 	_delta_y(0),
 	_num_map_contexts(0),
@@ -106,6 +108,17 @@ MapMode::MapMode(string script_filename) :
 	_event_supervisor = new EventSupervisor();
 	_dialogue_supervisor = new DialogueSupervisor();
 	_treasure_supervisor = new TreasureSupervisor();
+
+	// The virtual focus is added to the default object layer of the object supervisor. This means that the
+	// object supervisor will destroy the object when the map exits, so the MapMode destructor doesn't need
+	// to delete it.
+	_virtual_focus = new VirtualSprite();
+	_virtual_focus->SetXPosition(0, 0.0f);
+	_virtual_focus->SetYPosition(0, 0.0f);
+	_virtual_focus->movement_speed = NORMAL_SPEED;
+	_virtual_focus->SetNoCollision(true);
+	_virtual_focus->SetVisible(false);
+	_object_supervisor->AddObject(_virtual_focus, DEFAULT_LAYER_ID);
 
 	_intro_timer.Initialize(7000, 0);
 	_intro_timer.EnableAutoUpdate(this);
@@ -336,12 +349,6 @@ void MapMode::SetCamera(private_map::VirtualSprite* sprite, uint32 duration) {
 
 
 
-bool MapMode::IsCameraOnVirtualFocus() {
-	return _camera == _object_supervisor->VirtualFocus();
-}
-
-
-
 void MapMode::AddTileLayerToOrder(uint32 layer_id) {
 	TileLayer* layer = _tile_supervisor->GetTileLayer(layer_id);
 	if (layer == NULL) {
@@ -366,26 +373,26 @@ void MapMode::AddObjectLayerToOrder(uint32 layer_id) {
 
 
 
-void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y) {
-	_object_supervisor->VirtualFocus()->SetXPosition(loc_x, 0.0f);
-	_object_supervisor->VirtualFocus()->SetYPosition(loc_y, 0.0f);
+void MapMode::MoveVirtualFocus(uint16 x, uint16 y) {
+	_virtual_focus->SetXPosition(x, 0.0f);
+	_virtual_focus->SetYPosition(y, 0.0f);
 }
 
 
 
-void MapMode::MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint32 duration) {
-	if (_camera != _object_supervisor->VirtualFocus()) {
+void MapMode::MoveVirtualFocus(uint16 x, uint16 y, uint32 duration) {
+	if (_camera != _virtual_focus) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "Attempt to move camera although on different sprite" << endl;
 	}
 	else {
 		if (duration > 0) {
-			_delta_x = _object_supervisor->VirtualFocus()->ComputeXLocation() - static_cast<float>(loc_x);
-			_delta_y = _object_supervisor->VirtualFocus()->ComputeYLocation() - static_cast<float>(loc_y);
+			_delta_x = _virtual_focus->ComputeXLocation() - static_cast<float>(x);
+			_delta_y = _virtual_focus->ComputeYLocation() - static_cast<float>(y);
 			_camera_timer.Reset();
 			_camera_timer.SetDuration(duration);
 			_camera_timer.Run();
 		}
-		MoveVirtualFocus(loc_x, loc_y);
+		MoveVirtualFocus(x, y);
 	}
 }
 

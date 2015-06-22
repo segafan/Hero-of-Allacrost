@@ -69,7 +69,7 @@ function Load(m)
 	CreateZones();
 	CreateObjects();
 	CreateSprites();
-	CreateEnemies();
+--	CreateEnemies();
 	CreateDialogues();
 	CreateEvents();
 
@@ -82,16 +82,14 @@ function Load(m)
 	Map:ShowStaminaBar(true);
 	Map:ShowDialogueIcons(true);
 
-	-- DEBUG: uncomment the lines below to set the camera to locations close to testing areas
-	-- Location: just before enemy boss
-	
-
+	-- The map begins with an opening scene before control is given to the player
 	Map:SetCamera(sprites["claudius"]);
 	Map:MoveVirtualFocus(80, 130);
-
-	-- The map begins with an opening scene before control is given to the player
-	Map:PushState(hoa_map.MapMode.STATE_SCENE);
-	EventManager:StartEvent(events["opening_dialogue"], 2500);
+--	Map:PushState(hoa_map.MapMode.STATE_SCENE);
+--	EventManager:StartEvent(events["opening_dialogue"], 2500);
+	sprites["claudius"]:SetXPosition(152, 0);
+	sprites["claudius"]:SetYPosition(76, 0);
+	sprites["claudius"]:SetNoCollision(false);
 	IfPrintDebug(DEBUG, "Map loading complete");
 end -- function Load(m)
 
@@ -116,18 +114,18 @@ function Update()
 		end
 	end
 
-	if (zones["long_route"]:IsCameraEntering() == true and Map:CurrentState() == hoa_map.MapMode.STATE_EXPLORE) then
+	if (zones["prevent_long_route"]:IsCameraEntering() == true and Map:CurrentState() == hoa_map.MapMode.STATE_EXPLORE) then
 		if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
-			EventManager:StartEvent(event_chains["go_short_route"]);
+			EventManager:StartEvent(event_chains["follow_short_route"]);
 		end
 	end
 	
-	if (zones["short_route"]:IsCameraEntering() == true) then
-		if (GlobalEvents:DoesEventExist("knight_moved") == false) then
-			GlobalEvents:AddNewEvent("knight_moved", 1);
-			EventManager:StartEvent(event_chains["observe_passing"]);
-		end
-	end
+--	if (zones["short_route"]:IsCameraEntering() == true) then
+--		if (GlobalEvents:DoesEventExist("knight_moved") == false) then
+--			GlobalEvents:AddNewEvent("knight_moved", 1);
+--			EventManager:StartEvent(event_chains["observe_passing"]);
+--		end
+--	end
 	
 	if (zones["collapse"]:IsCameraEntering() == true) then
 		if (GlobalEvents:DoesEventExist("passage_collapsed") == false) then
@@ -178,11 +176,8 @@ function CreateZones()
 	zones["corpse_discovery"] = hoa_map.CameraZone(180, 182, 134, 140, contexts["base"] + contexts["collapsed"]);
 	Map:AddZone(zones["corpse_discovery"]);
 
-	zones["long_route"] = hoa_map.CameraZone(132, 136, 70, 80, contexts["base"]);
-	Map:AddZone(zones["long_route"]);
-
-	zones["short_route"] = hoa_map.CameraZone(156, 160, 60, 63, contexts["base"]);
-	Map:AddZone(zones["short_route"]);	
+	zones["prevent_long_route"] = hoa_map.CameraZone(132, 136, 70, 80, contexts["base"]);
+	Map:AddZone(zones["prevent_long_route"]);
 
 	zones["collapse"] = hoa_map.CameraZone(186, 189, 60, 63, contexts["base"]);
 	Map:AddZone(zones["collapse"]);	
@@ -287,13 +282,15 @@ function CreateSprites()
 	ObjectManager:AddObject(sprites["entrance_knight"]);
 	
 	-- Knight guiding others through the short passage
-	sprites["passage_knight1"] = ConstructSprite("Knight03", 20, 149, 62);
-	sprites["passage_knight1"]:SetDirection(hoa_map.MapMode.SOUTH);
+	sprites["passage_knight1"] = ConstructSprite("Knight03", 20, 156, 63);
+	sprites["passage_knight1"]:SetYPosition(62, 0.5);
+	sprites["passage_knight1"]:SetDirection(hoa_map.MapMode.EAST);
 	ObjectManager:AddObject(sprites["passage_knight1"]);
 	
 	-- Knight seen walking ahead through the short passage
-	sprites["passage_knight2"] = ConstructSprite("Knight02", 21, 162, 62);
-	sprites["passage_knight2"]:SetDirection(hoa_map.MapMode.EAST);
+	sprites["passage_knight2"] = ConstructSprite("Knight02", 21, 158, 63);
+	sprites["passage_knight2"]:SetYPosition(62, 0.5);
+	sprites["passage_knight2"]:SetDirection(hoa_map.MapMode.WEST);
 	ObjectManager:AddObject(sprites["passage_knight2"]);
 	
 	-- Knight with injured ankle near the end of the long passage
@@ -574,6 +571,7 @@ function CreateDialogues()
 	dialogue = hoa_map.MapDialogue.Create(20);
 		text = hoa_system.Translate("The river bed is just through this passage. Be careful, the walls are a little unstable.");
 		dialogue:AddLine(text, sprites["passage_knight1"]:GetObjectID());
+		dialogue:AddLineEventAtEnd(1010); -- Calls function IfStartObservePassingEvent to begin event_chains["observe_passing"]
 	sprites["passage_knight1"]:AddDialogueReference(20);
 
 	-- After the passage collapse event, this dialogue will be added to the passage_knight1 sprite
@@ -779,7 +777,7 @@ function CreateDialogues()
 	dialogue = hoa_map.MapDialogue.Create(event_dialogues["after_boss"]);
 		text = hoa_system.Translate("Captain, you've been wounded!");
 		dialogue:AddLine(text, sprites["lukar"]:GetObjectID());
-		text = hoa_system.Translate("*cough cough*\nI'll be alright. Great job taking down that monster, men. You've done well.");
+		text = hoa_system.Translate("*cough cough*\nI'll be alright. Men, great job taking down that goliath. You've done well.");
 		dialogue:AddLine(text, sprites["captain"]:GetObjectID());
 		text = hoa_system.Translate("We've achieved our objective here. Tend to the wounded and then let's make our way back home.");
 		dialogue:AddLine(text, sprites["sergeant"]:GetObjectID());
@@ -891,26 +889,29 @@ function CreateEvents()
 
 	---------- Event Chain 04: Prevent player from going long route before cave collapse
 	IfPrintDebug(DEBUG, "Building event chain #04...");
-	event_chains["go_short_route"] = 50;
+	event_chains["follow_short_route"] = 50;
 
 	-- Enter scene state
-	event = hoa_map.CustomEvent.Create(event_chains["go_short_route"] + 0, "StopMovementAndEnterScene", "");
-	event:AddEventLinkAtEnd(event_chains["go_short_route"] + 1);
+	event = hoa_map.CustomEvent.Create(event_chains["follow_short_route"] + 0, "StopMovementAndEnterScene", "");
+	event:AddEventLinkAtEnd(event_chains["follow_short_route"] + 1);
 	-- Move camera to knight sprite
-	event = hoa_map.CustomEvent.Create(event_chains["go_short_route"] + 1, "CameraToGuideSprite", "");
-	event:AddEventLinkAtEnd(event_chains["go_short_route"] + 2, 1000);
+	event = hoa_map.CustomEvent.Create(event_chains["follow_short_route"] + 1, "CameraToGuideSprite", "");
+	event:AddEventLinkAtEnd(event_chains["follow_short_route"] + 2, 500);
+	event:AddEventLinkAtEnd(event_chains["follow_short_route"] + 3, 1000);
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["follow_short_route"] + 2, sprites["passage_knight1"], hoa_map.MapMode.SOUTH);
 	-- Throw up dialogue calling out player's party
-	event = hoa_map.DialogueEvent.Create(event_chains["go_short_route"] + 2, event_dialogues["prevent_long_route"]);
+	event = hoa_map.DialogueEvent.Create(event_chains["follow_short_route"] + 3, event_dialogues["prevent_long_route"]);
 	event:SetStopCameraMovement(true);
-	event:AddEventLinkAtEnd(event_chains["go_short_route"] + 3);
+	event:AddEventLinkAtEnd(event_chains["follow_short_route"] + 4);
 	-- Move camera back to Cladius
-	event = hoa_map.CustomEvent.Create(event_chains["go_short_route"] + 3, "SetCameraToPlayer", "");
-	event:AddEventLinkAtEnd(event_chains["go_short_route"] + 4, 500);
+	event = hoa_map.CustomEvent.Create(event_chains["follow_short_route"] + 4, "SetCameraToPlayer", "");
+	event:AddEventLinkAtEnd(event_chains["follow_short_route"] + 5, 500);
 	-- Move player sprite to NPC that called out
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["go_short_route"] + 4, sprites["claudius"]:GetObjectID(), 150, 64);
-	event:AddEventLinkAtEnd(event_chains["go_short_route"] + 5);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["follow_short_route"] + 5, sprites["claudius"]:GetObjectID(), 8, 0);
+	event:SetRelativeDestination(true);
+	event:AddEventLinkAtEnd(event_chains["follow_short_route"] + 6);
 	-- Exit scene state
-	event = hoa_map.CustomEvent.Create(event_chains["go_short_route"] + 5, "PopMapState", "");
+	event = hoa_map.CustomEvent.Create(event_chains["follow_short_route"] + 6, "PopMapState", "");
 		
 	---------- Event Chain 05: Knight moves safely through short route while player watches
 	IfPrintDebug(DEBUG, "Building event chain #05...");
@@ -918,22 +919,32 @@ function CreateEvents()
 
 	-- Enter scene state
 	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 0, "StopMovementAndEnterScene", "");
-	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 1);		
+	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 1);
+	-- Move Claudius south of the guide knight (he may already be at this location, and that's fine)
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["observe_passing"] + 1, sprites["claudius"], 
+		sprites["passage_knight1"].x_position, sprites["passage_knight1"].y_position - 3);
+	event:SetFinalDirection(hoa_map.MapMode.NORTH);
+	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 2);
+	-- Move guide knight out of the way so player can access passage
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["observe_passing"] + 2, sprites["passage_knight1"], -4, 0);
+	event:SetFinalDirection(hoa_map.MapMode.EAST);
+	event:SetRelativeDestination(true);
+	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 3);
 	-- Move camera to knight sprite
-	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 1, "CameraFollowPathSprite", "");
-	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 2, 300);
+	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 3, "CameraFollowPathSprite", "");
+	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 4, 300);
 	-- Move knight sprite down passage
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["observe_passing"] + 2, sprites["passage_knight2"], 210, 61);
-	--event:AddEventLinkAtStart(event_chains["observe_passing"] + 2);
-	event:AddEventLinkAtStart(event_chains["observe_passing"] + 3, 2000);
-	event:AddEventLinkAtStart(event_chains["observe_passing"] + 4, 3000);
-	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 5);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["observe_passing"] + 4, sprites["passage_knight2"], 60, 0);
+	event:SetRelativeDestination(true);
+	event:AddEventLinkAtStart(event_chains["observe_passing"] + 5, 2500);
+	event:AddEventLinkAtStart(event_chains["observe_passing"] + 6, 3000);
+	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 7);
 	-- Move camera back
-	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 3, "SetCameraToPlayer", "");
+	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 5, "SetCameraToPlayer", "");
 	-- Exit scene state
-	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 4, "PopMapState", "");
+	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 6, "PopMapState", "");
 	-- Hide the knight sprite after he finishes walking through the passage
-	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 5, "VanishPathSprite", "");
+	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 7, "VanishPathSprite", "");
 
 	---------- Event Chain 06: Short route passage collapses
 	IfPrintDebug(DEBUG, "Building event chain #06...");
@@ -945,7 +956,7 @@ function CreateEvents()
 	-- Play collapse sound
 	event = hoa_map.SoundEvent.Create(event_chains["passage_collapse"] + 1, "snd/cave-in.ogg");	
 	event:AddEventLinkAtStart(event_chains["passage_collapse"] + 2, 250); 
-	-- Warning message
+	-- Warning dialogue
 	event = hoa_map.DialogueEvent.Create(event_chains["passage_collapse"] + 2, event_dialogues["passage_collapse1"]);
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 3);
 	-- Shake the screen
@@ -959,19 +970,30 @@ function CreateEvents()
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 6);
 	-- Fade screen back in
 	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 6, "FadeInScreen", "IsScreenFading");
-	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 7);
-	-- Dialogue after passage has collapsed		
-	event = hoa_map.DialogueEvent.Create(event_chains["passage_collapse"] + 7, event_dialogues["passage_collapse2"]);
+	event:AddEventLinkAtStart(event_chains["passage_collapse"] + 7);
+	-- Move guide knight into the screen view
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["passage_collapse"] + 7, sprites["passage_knight1"], 20, 0);
+	event:SetRelativeDestination(true);
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 8);
-	-- Change dialogue of sprite guide
-	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 8, "ReplaceGuideDialogue", "");
 	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 9);
+	-- Turn Claudius to face guide knight
+	event = hoa_map.ChangeDirectionSpriteEvent.Create(event_chains["passage_collapse"] + 8, sprites["claudius"], hoa_map.MapMode.WEST);
+	-- Dialogue after passage has collapsed
+	event = hoa_map.DialogueEvent.Create(event_chains["passage_collapse"] + 9, event_dialogues["passage_collapse2"]);
+	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 10);
+	-- Change dialogue of sprite guide
+	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 10, "ReplaceGuideDialogue", "");
+	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 11);
+	event:AddEventLinkAtEnd(event_chains["passage_collapse"] + 12, 1000);
+	-- Move guide knight to start of long passage
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["passage_collapse"] + 11, sprites["passage_knight1"], 145, 72);
+	event:SetFinalDirection(hoa_map.MapMode.SOUTH);	
 	-- Exit scene state
-	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 9, "PopMapState", "");
+	event = hoa_map.CustomEvent.Create(event_chains["passage_collapse"] + 12, "PopMapState", "");
 		
 	----------  Event Chain 07: Moving forward through wall passage
 	IfPrintDebug(DEBUG, "Building event chain #07...");
-	event_chains["pass_wall_forward"] = 80;
+	event_chains["pass_wall_forward"] = 90;
 	
 	-- Make player sprite invisible with no collision detection
 	event = hoa_map.CustomEvent.Create(event_chains["pass_wall_forward"] + 0, "HideCameraSprite", "");
@@ -990,7 +1012,7 @@ function CreateEvents()
 		
 	---------- Event Chain 08: Moving backward through wall passage
 	IfPrintDebug(DEBUG, "Building event chain #08...");
-	event_chains["pass_wall_backward"] = 90;
+	event_chains["pass_wall_backward"] = 95;
 
 	-- Make player sprite invisible with no collision detection
 	event = hoa_map.CustomEvent.Create(event_chains["pass_wall_backward"] + 0, "HideCameraSprite", "");
@@ -1057,7 +1079,7 @@ function CreateEvents()
 	-- Set the camera to the virtual focus and move it to the center of the knight's furture position
 	event = hoa_map.CustomEvent.Create(event_chains["riverbed_arrival"] + 6, "VirtualFocusToPlayer", "");
 	event:AddEventLinkAtEnd(event_chains["riverbed_arrival"] + 7);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 7,  ObjectManager.virtual_focus, 260, 16);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 7,  Map.virtual_focus, 260, 16);
 	-- Move the character sprite and other knights to their positions
 	-- Knights to the north are working on moving the boulder
 	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["riverbed_arrival"] + 8, sprites["river_knight2"], 260, 13);
@@ -1209,8 +1231,11 @@ function CreateEvents()
 	-- Places a treasure chest down by the entrance knight sprite
 	event = hoa_map.CustomEvent.Create(1000, "EntrancePlaceChest", "");
 
-	-- Sound played during conversation with knight and just before boss battle
-	event_chains["hiss_sound"] = 1010;
+	-- An event used by a dialogue to determine if event_chains["observe_passing"] should be started
+	event = hoa_map.CustomEvent.Create(1010, "IfStartObservePassingEvent", "");
+
+	-- TODO: see about having this sound event play occasionally during the map
+	event_chains["hiss_sound"] = 1020;
 	event = hoa_map.SoundEvent.Create(event_chains["hiss_sound"], "snd/evil_hiss.ogg");
 end -- function CreateEvents()
 
@@ -1301,6 +1326,14 @@ functions["RewardPotion"] = function()
 	corpse_treasure = hoa_map.MapTreasure();
 	corpse_treasure:AddObject(1, 1);
 	TreasureManager:Initialize(corpse_treasure);
+end
+
+-- Wraps the start of the observ_passing event chain so that it is only ever executed one time
+functions["IfStartObservePassingEvent"] = function()
+	if (GlobalEvents:DoesEventExist("observed_passing") == false) then
+		GlobalEvents:AddNewEvent("observed_passing", 1);
+		EventManager:StartEvent(event_chains["observe_passing"]);
+	end
 end
 
 -- Quickly Fades the screen to black
@@ -1402,7 +1435,7 @@ end
 -- Move camera to corpse
 functions["CameraPanToCorpse"] = function()
 	Map:MoveVirtualFocus(206, 147);
-	Map:SetCamera(ObjectManager.virtual_focus, 2000);
+	Map:SetCamera(Map.virtual_focus, 2000);
 end
 
 -- Move camera back to player
@@ -1412,8 +1445,6 @@ end
 
 -- Move camera to talking knight sprite
 functions["CameraToGuideSprite"] = function()
-	Map:MoveVirtualFocus(149, 62);
-	Map:SetCamera(ObjectManager.virtual_focus, 1000);
 	Map:SetCamera(sprites["passage_knight1"], 1000);
 end
 
@@ -1425,7 +1456,7 @@ end
 -- Move the virtual focus to the player sprite and set the map camera to point to the focus
 functions["VirtualFocusToPlayer"] = function()
 	Map:MoveVirtualFocus(sprites["claudius"].x_position, sprites["claudius"].y_position);
-	Map:SetCamera(ObjectManager.virtual_focus);
+	Map:SetCamera(Map.virtual_focus);
 end
 
 -- Helper function that swaps the context for all objects on the map to the context provided in the argument

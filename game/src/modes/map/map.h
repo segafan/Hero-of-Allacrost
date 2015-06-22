@@ -147,9 +147,13 @@ public:
 
 	void PlayMusic(uint32 track_num);
 
-	void MoveVirtualFocus(uint16 loc_x, uint16 loc_y);
+	/** \brief A convenience function for moving the virtual focus sprite to a new position
+	*** \param x The x coordinator to move to
+	*** \param y The y coordinator to move to
+	**/
+	void MoveVirtualFocus(uint16 x, uint16 y);
 
-    void MoveVirtualFocus(uint16 loc_x, uint16 loc_y, uint32 duration);
+    void MoveVirtualFocus(uint16 x, uint16 y, uint32 duration);
 
 	//! \brief Returns true if the player may enter a battle upon colliding with an enemy sprite
     bool AttackAllowed()
@@ -195,7 +199,20 @@ public:
 
 	void SetCamera(private_map::VirtualSprite* sprite, uint32 duration);
 
-	bool IsCameraOnVirtualFocus();
+	bool IsCameraOnVirtualFocus() const
+		{ return (_camera == _virtual_focus); }
+
+	bool IsCameraOnPlayerSprite() const
+		{ return (_camera == _player_sprite); }
+
+	private_map::VirtualSprite* GetPlayerSprite() const
+		{ return _player_sprite; }
+
+	void SetPlayerSprite(private_map::VirtualSprite* sprite)
+		{ _player_sprite = sprite; }
+
+	private_map::VirtualSprite* GetVirtualFocus() const
+		{ return _virtual_focus; }
 
 	//! \brief Empties out the draw layer order
 	void ClearLayerOrder()
@@ -325,6 +342,18 @@ private:
 
 	//! \brief A pointer to the map sprite that the map camera will focus on
 	private_map::VirtualSprite* _camera;
+
+	/** \brief A pointer to the map sprite that represents the sprite that the player currently controls
+	*** \note Typically, a map script will set this when the map loads and will not change the player sprite
+	*** to any other value. It is not a requirement for a map to set this member to be set to a non-NULL value.
+	**/
+	private_map::VirtualSprite* _player_sprite;
+
+	/** \brief A "virtual sprite" that can serve as a focus point for the camera. This sprite is not visible to
+	*** the player nor does it have any collision detection properties. Usually, the camera focuses on the player's
+	*** sprite rather than this object, but it is useful for scripted sequences and other things.
+	**/
+	private_map::VirtualSprite* _virtual_focus;
 
 	//! \brief The way in x-direction, the camera will move
 	float _delta_x;

@@ -737,12 +737,6 @@ public:
 	**/
 	bool FindPath(private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
 
-	/** \brief Returns the pointer to the virtual focus.
-	**/
-	private_map::VirtualSprite* VirtualFocus() {
-	    return _virtual_focus;
-	}
-
 private:
 	/** \brief The number of rows and columns in the collision gride
 	*** The number of collision grid rows and columns is always equal to twice
@@ -752,14 +746,6 @@ private:
 
 	//! \brief Holds the most recently generated object ID number
 	uint16 _last_id;
-
-	/** \brief A "virtual sprite" that can serve as a focus point for the camera.
-	*** This sprite is not visible to the player nor does it have any collision
-	*** detection properties. Usually, the camera focuses on the player's sprite
-	*** rather than this object, but it is useful for scripted sequences and other
-	*** things.
-	**/
-	private_map::VirtualSprite *_virtual_focus;
 
 	/** \brief A 2D vector indicating which grid element on the map sprites may be occupied by objects.
 	*** Each bit of each element in this grid corresponds to a context. So all together this entire grid

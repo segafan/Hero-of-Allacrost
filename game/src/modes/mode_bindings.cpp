@@ -66,7 +66,9 @@ void BindModeCode() {
 			.def_readonly("treasure_supervisor", &MapMode::_treasure_supervisor)
 			.def_readonly("map_event_group", &MapMode::_map_event_group)
 
-			.def_readwrite("camera", &MapMode::_camera)
+			.def_readonly("camera", &MapMode::_camera)
+			.def_readonly("player_sprite", &MapMode::_player_sprite)
+			.def_readonly("virtual_focus", &MapMode::_virtual_focus)
 			.def_readwrite("unlimited_stamina", &MapMode::_unlimited_stamina)
 			.def_readwrite("running_disabled", &MapMode::_running_disabled)
 			.def_readwrite("run_stamina", &MapMode::_run_stamina)
@@ -75,6 +77,7 @@ void BindModeCode() {
 			.def("AddZone", &MapMode::AddZone, adopt(_2))
 			.def("SetCamera", (void(MapMode::*)(private_map::VirtualSprite*))&MapMode::SetCamera)
 			.def("SetCamera", (void(MapMode::*)(private_map::VirtualSprite*, uint32))&MapMode::SetCamera)
+			.def("SetPlayerSprite", &MapMode::SetPlayerSprite)
 			.def("MoveVirtualFocus", (void(MapMode::*)(uint16, uint16))&MapMode::MoveVirtualFocus)
 			.def("MoveVirtualFocus", (void(MapMode::*)(uint16, uint16, uint32))&MapMode::MoveVirtualFocus)
 			.def("IsCameraOnVirtualFocus", &MapMode::IsCameraOnVirtualFocus)
@@ -174,8 +177,6 @@ void BindModeCode() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<ObjectSupervisor>("ObjectSupervisor")
-			.def_readonly("virtual_focus", &ObjectSupervisor::_virtual_focus)
-
 			.def("GenerateObjectID", &ObjectSupervisor::GenerateObjectID)
 			.def("GetNumberObjects", &ObjectSupervisor::GetNumberObjects)
 			.def("GetObjectByIndex", &ObjectSupervisor::GetObjectByIndex)

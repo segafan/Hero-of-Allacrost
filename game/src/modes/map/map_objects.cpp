@@ -358,15 +358,7 @@ ObjectSupervisor::ObjectSupervisor() :
 	_num_grid_cols(0),
 	_last_id(1000)
 {
-	_virtual_focus = new VirtualSprite();
-	_virtual_focus->SetXPosition(0, 0.0f);
-	_virtual_focus->SetYPosition(0, 0.0f);
-	_virtual_focus->movement_speed = NORMAL_SPEED;
-	_virtual_focus->SetNoCollision(true);
-	_virtual_focus->SetVisible(false);
-
 	_object_layers.push_back(ObjectLayer(DEFAULT_LAYER_ID));
-	_object_layers[DEFAULT_LAYER_ID].AddObject(_virtual_focus);
 }
 
 
