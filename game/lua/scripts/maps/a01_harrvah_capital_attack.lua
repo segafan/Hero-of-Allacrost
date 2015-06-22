@@ -382,9 +382,9 @@ function CreateEvents()
 	event_chains["intro_scene"] = 10;
 	event = hoa_map.CustomEvent.Create(event_chains["intro_scene"], "StartIntroScene", "");
 	event:AddEventLinkAtEnd(event_chains["intro_scene"] + 1, 2000);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["intro_scene"] + 1, ObjectManager.virtual_focus, 98, 130);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["intro_scene"] + 1, Map.virtual_focus, 98, 130);
 	event:AddEventLinkAtEnd(event_chains["intro_scene"] + 2);
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["intro_scene"] + 2, ObjectManager.virtual_focus, sprites["captain"].x_position, sprites["captain"].y_position);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["intro_scene"] + 2, Map.virtual_focus, sprites["captain"].x_position, sprites["captain"].y_position);
 	event:AddEventLinkAtEnd(event_chains["intro_scene"] + 3);
 	event:AddEventLinkAtEnd(event_chains["intro_scene"] + 4);
 	event:AddEventLinkAtEnd(event_chains["intro_scene"] + 5);
@@ -428,8 +428,8 @@ functions["StartIntroScene"] = function()
 	VideoManager:FadeScreen(hoa_video.Color(0.0, 0.0, 0.0, 0.0), 1000); -- Gradually fade the screen back in
 	Map:PushState(hoa_map.MapMode.STATE_SCENE);
 	Map:MoveVirtualFocus(130, 98);
-	Map:SetCamera(ObjectManager.virtual_focus, 0);
-	ObjectManager.virtual_focus:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED - 25); -- Custom speed for fast camera panning
+	Map:SetCamera(Map.virtual_focus, 0);
+	Map.virtual_focus:SetMovementSpeed(hoa_map.MapMode.VERY_FAST_SPEED - 25); -- Custom speed for fast camera panning
 end
 
 

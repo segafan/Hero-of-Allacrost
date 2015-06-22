@@ -945,7 +945,14 @@ void EnemySprite::Update() {
 				}
 			}
 
-			MapSprite::Update();
+			// Roaming enemies are updated the same way as any other sprite in the explore state. In other states, they stop movement and
+			// simply "walk in place".
+			if (MapMode::CurrentInstance()->CurrentState() != STATE_EXPLORE) {
+				_animations[_current_animation].Update();
+			}
+			else {
+				MapSprite::Update();
+			}
 			break;
 
 		// Nothing should be done in this state. If the enemy has a zone, the zone will change the state back to spawning when appropriate
