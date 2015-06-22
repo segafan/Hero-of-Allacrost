@@ -95,7 +95,9 @@ void MapZone::_RandomPosition(uint16& x, uint16& y) {
 CameraZone::CameraZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row) :
 	MapZone(left_col, right_col, top_row, bottom_row),
 	_camera_inside(false),
-	_was_camera_inside(false)
+	_was_camera_inside(false),
+	_player_sprite_inside(false),
+	_was_player_sprite_inside(false)
 {}
 
 
@@ -103,18 +105,16 @@ CameraZone::CameraZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16
 CameraZone::CameraZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row, MAP_CONTEXT contexts) :
 	MapZone(left_col, right_col, top_row, bottom_row, contexts),
 	_camera_inside(false),
-	_was_camera_inside(false)
+	_was_camera_inside(false),
+	_player_sprite_inside(false),
+	_was_player_sprite_inside(false)
 {}
 
 
 
 void CameraZone::Update() {
 	_was_camera_inside = _camera_inside;
-
-	// Update only if camera is on a real sprite
-	if (MapMode::CurrentInstance()->IsCameraOnVirtualFocus()) {
-		return;
-	}
+	_was_player_sprite_inside = _player_sprite_inside;
 
 	VirtualSprite* camera = MapMode::CurrentInstance()->GetCamera();
 	if (camera == NULL) {
@@ -126,6 +126,18 @@ void CameraZone::Update() {
 	}
 	else {
 		_camera_inside = false;
+	}
+
+	VirtualSprite* player = MapMode::CurrentInstance()->GetPlayerSprite();
+	if (player == NULL) {
+		_player_sprite_inside = false;
+	}
+	// Camera must share a context with the zone and be within its borders
+	else if ((_active_contexts & player->GetContext()) && (IsInsideZone(player->x_position, player->y_position) == true)) {
+		_player_sprite_inside = true;
+	}
+	else {
+		_player_sprite_inside = false;
 	}
 }
 

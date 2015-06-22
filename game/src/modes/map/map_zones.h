@@ -146,7 +146,7 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief A zone which tracks when the map camera enters or exits
+*** \brief A zone which tracks when the map camera or player sprite enters or exits
 ***
 *** A typical use of map zones is to track when the sprite controlled by the player
 *** (usually pointed to by the map camera) enters or exits a zone, triggering a
@@ -154,8 +154,8 @@ protected:
 *** map scripting code.
 ***
 *** \note An important issue to remember is that the map camera may be changed to point
-*** at any sprite at any given time. This class is not informed of such events, therefore
-*** a sprite may be seen as "entering" the zone
+*** at any sprite at any given time. This class is not informed of such events, so you
+*** must be cautious about this case.
 ***
 *** \note This zone is less powerful than the ResidentZone class, which tracks all
 *** sprites status relative to the zone. CameraZone is much simpler than ResidentZone
@@ -202,12 +202,30 @@ public:
 	bool IsCameraExiting() const
 		{ return ((_camera_inside == false) && (_was_camera_inside == true)); }
 
+	//! \brief Returns true if the player sprite is located within the zone
+	bool IsPlayerSpriteInside() const
+		{ return _player_sprite_inside; }
+
+	//! \brief Returns true if the player sprite is entering the zone
+	bool IsPlayerSpriteEntering() const
+		{ return ((_player_sprite_inside == true) && (_was_player_sprite_inside == false)); }
+
+	//! \brief Returns true if the player sprite is leaving the zone
+	bool IsPlayerSpriteExiting() const
+		{ return ((_player_sprite_inside == false) && (_was_player_sprite_inside == true)); }
+
 protected:
 	//! \brief Set to true when the sprite pointed to by the camera is inside this zone
 	bool _camera_inside;
 
 	//! \brief Holds the previous value of _camera_inside
 	bool _was_camera_inside;
+
+	//! \brief Set to true when the player sprite is inside this zone
+	bool _player_sprite_inside;
+
+	//! \brief Holds the previous value of _player_sprite_inside
+	bool _was_player_sprite_inside;
 }; // class CameraZone : public MapZone
 
 
