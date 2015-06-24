@@ -20,7 +20,7 @@ map_name = "Harrvah Capital";
 sound_filenames = {};
 
 music_filenames = {};
-music_filenames[1] = "mus/Seeking_New_Worlds.ogg";
+music_filenames[1] = "mus/Claudius.ogg";
 
 -- Primary Map Classes
 Map = {};
