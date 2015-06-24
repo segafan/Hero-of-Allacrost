@@ -344,7 +344,6 @@ void BindModeCode() {
 			.def("GetNumberResidents", &ResidentZone::GetNumberResidents)
 			.def("GetNumberEnteringResidents", &ResidentZone::GetNumberEnteringResidents)
 			.def("GetNumberExitingResidents", &ResidentZone::GetNumberExitingResidents)
-
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

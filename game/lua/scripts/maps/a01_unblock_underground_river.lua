@@ -69,7 +69,7 @@ function Load(m)
 	CreateZones();
 	CreateObjects();
 	CreateSprites();
---	CreateEnemies();
+	CreateEnemies();
 	CreateDialogues();
 	CreateEvents();
 
@@ -86,11 +86,8 @@ function Load(m)
 	Map:SetPlayerSprite(sprites["claudius"]);
 	Map:SetCamera(sprites["claudius"]);
 	Map:MoveVirtualFocus(80, 130);
---	Map:PushState(hoa_map.MapMode.STATE_SCENE);
---	EventManager:StartEvent(events["opening_dialogue"], 2500);
-	sprites["claudius"]:SetXPosition(152, 0);
-	sprites["claudius"]:SetYPosition(76, 0);
-	sprites["claudius"]:SetNoCollision(false);
+	Map:PushState(hoa_map.MapMode.STATE_SCENE);
+	EventManager:StartEvent(events["opening_dialogue"], 2500);
 	IfPrintDebug(DEBUG, "Map loading complete");
 end -- function Load(m)
 
@@ -152,7 +149,7 @@ function Update()
 	end
 	
 	if (GlobalEvents:DoesEventExist("riverbed_arrival") == false) then
-		if ((zones["riverbed_arrival"]:IsCameraEntering() == true)) then	
+		if ((zones["riverbed_arrival"]:IsPlayerSpriteEntering() == true)) then	
 			GlobalEvents:AddNewEvent("riverbed_arrival", 1);
 			EventManager:StartEvent(event_chains["riverbed_arrival"]);
 		end
@@ -283,14 +280,12 @@ function CreateSprites()
 	ObjectManager:AddObject(sprites["entrance_knight"]);
 	
 	-- Knight guiding others through the short passage
-	sprites["passage_knight1"] = ConstructSprite("Knight03", 20, 156, 63);
-	sprites["passage_knight1"]:SetYPosition(62, 0.5);
+	sprites["passage_knight1"] = ConstructSprite("Knight03", 20, 156, 62.5);
 	sprites["passage_knight1"]:SetDirection(hoa_map.MapMode.EAST);
 	ObjectManager:AddObject(sprites["passage_knight1"]);
 	
 	-- Knight seen walking ahead through the short passage
-	sprites["passage_knight2"] = ConstructSprite("Knight02", 21, 158, 63);
-	sprites["passage_knight2"]:SetYPosition(62, 0.5);
+	sprites["passage_knight2"] = ConstructSprite("Knight02", 21, 158, 62.5);
 	sprites["passage_knight2"]:SetDirection(hoa_map.MapMode.WEST);
 	ObjectManager:AddObject(sprites["passage_knight2"]);
 	
@@ -922,8 +917,8 @@ function CreateEvents()
 	event = hoa_map.CustomEvent.Create(event_chains["observe_passing"] + 0, "StopMovementAndEnterScene", "");
 	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 1);
 	-- Move Claudius south of the guide knight (he may already be at this location, and that's fine)
-	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["observe_passing"] + 1, sprites["claudius"], 
-		sprites["passage_knight1"].x_position, sprites["passage_knight1"].y_position - 3);
+	event = hoa_map.PathMoveSpriteEvent.Create(event_chains["observe_passing"] + 1, sprites["claudius"],
+		sprites["passage_knight1"].x_position, sprites["passage_knight1"].y_position + 3);
 	event:SetFinalDirection(hoa_map.MapMode.NORTH);
 	event:AddEventLinkAtEnd(event_chains["observe_passing"] + 2);
 	-- Move guide knight out of the way so player can access passage
@@ -1473,7 +1468,7 @@ end
 functions["RestoreParty"] = function()
 	GlobalManager:RestoreAllCharacterHitPoints();
 	GlobalManager:RestoreAllCharacterSkillPoints();
-	-- TODO: it seems that .wav sounds do not play, but .ogg sounds do. Also see if there's a more appropriate sound than this
+	-- TODO: it seems that this sound does not play, but others do. Also see if there's a more appropriate sound than this
 	AudioManager:PlaySound("snd/heal.wav");
 end
 
