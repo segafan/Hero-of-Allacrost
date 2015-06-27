@@ -285,6 +285,9 @@ const uint32 STAMINA_FULL   = 10000;
 //! \brief The only layer ID for both tile layers and object layers that is guaranteed to exist
 const uint32 DEFAULT_LAYER_ID = 0;
 
+//! \brief The default time to wait before enemies spawn on a map
+const uint32 DEFAULT_ENEMY_SPAWN_TIME = 30000;
+
 /** \brief Returns the opposite facing direction of the direction given in parameter.
 *** \return A direction that faces opposite to the argument direction
 *** \note This is mostly used as an helper function to make sprites face each other in a conversation.

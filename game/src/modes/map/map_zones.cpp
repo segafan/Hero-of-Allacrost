@@ -307,7 +307,7 @@ EnemyZone::EnemyZone() :
 	MapZone(),
 	_roaming_restrained(true),
 	_active_enemies(0),
-	_spawn_timer(3000), // TEMP: use default spawn time constant,
+	_spawn_timer(DEFAULT_ENEMY_SPAWN_TIME),
 	_spawn_zone(NULL)
 {
 	_spawn_timer.Run();
@@ -319,7 +319,7 @@ EnemyZone::EnemyZone(uint16 left_col, uint16 right_col, uint16 top_row, uint16 b
 	MapZone(left_col, right_col, top_row, bottom_row),
 	_roaming_restrained(true),
 	_active_enemies(0),
-	_spawn_timer(3000), // TEMP: use default spawn time constant,
+	_spawn_timer(DEFAULT_ENEMY_SPAWN_TIME),
 	_spawn_zone(NULL)
 {
 	_spawn_timer.Run();
@@ -425,6 +425,12 @@ void EnemyZone::AddSpawnSection(uint16 left_col, uint16 right_col, uint16 top_ro
 
 
 
+void EnemyZone::ForceSpawnEnemies() {
+	// TODO
+}
+
+
+
 void EnemyZone::EnemyDead() {
 	if (_active_enemies == 0) {
 		IF_PRINT_WARNING(MAP_DEBUG) << "function called when no enemies were active" << endl;
@@ -437,11 +443,16 @@ void EnemyZone::EnemyDead() {
 
 
 void EnemyZone::Update() {
+	// Enemy zones only update during the explore mode
+	if (MapMode::CurrentInstance()->CurrentState() != STATE_EXPLORE) {
+		return;
+	}
+
 	// When spawning an enemy in a random zone location, sometimes it is occupied by another
 	// object or that section is unwalkable. We try only a few different spawn locations before
 	// giving up and waiting for the next call to Update(). Otherwise this function could
 	// potentially take a noticable amount of time to complete
-	const int8 SPAWN_RETRIES = 5;
+	const int8 SPAWN_RETRIES = 10;
 
 	if (_enemies.empty() == true)
 		return;
@@ -491,7 +502,6 @@ void EnemyZone::Update() {
 	if (collision) {
 		_enemies[index]->no_collision = true;
 	}
-
 	// Otherwise, spawn the enemy and reset the spawn timer
 	else {
 		_spawn_timer.Reset();

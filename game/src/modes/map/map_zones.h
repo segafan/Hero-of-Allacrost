@@ -548,10 +548,15 @@ public:
 	**/
 	void AddSpawnSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
 
+	/** \brief Instantly spawns all enemies in the zone with no fade time
+	*** \note This is commonly used on map startup to populate the map with enemies
+	**/
+	void ForceSpawnEnemies();
+
 	//! \brief Decrements the number of active enemies by one
 	void EnemyDead();
 
-	//! \brief Gradually spawns enemy sprites in the zone
+	//! \brief Spawns enemy sprites in the zone during a map's explore state
 	void Update();
 
 	//! \brief Returns true if this zone has seperate zones for roaming and spawning
