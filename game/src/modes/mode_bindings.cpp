@@ -353,7 +353,7 @@ void BindModeCode() {
 			.def(constructor<uint16, uint16, uint16, uint16>())
 			.def("AddEnemy", &EnemyZone::AddEnemy, adopt(_2))
 			.def("AddSpawnSection", &EnemyZone::AddSpawnSection)
-			.def("ForceSpawnEnemies", &EnemyZone::ForceSpawnEnemies)
+			.def("ForceSpawnAllEnemies", &EnemyZone::ForceSpawnAllEnemies)
 			.def("IsRoamingRestrained", &EnemyZone::IsRoamingRestrained)
 			.def("GetSpawnTime", &EnemyZone::GetSpawnTime)
 			.def("SetRoamingRestrained", &EnemyZone::SetRoamingRestrained)
