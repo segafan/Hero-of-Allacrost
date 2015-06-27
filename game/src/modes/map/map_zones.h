@@ -548,10 +548,10 @@ public:
 	**/
 	void AddSpawnSection(uint16 left_col, uint16 right_col, uint16 top_row, uint16 bottom_row);
 
-	/** \brief Instantly spawns all enemies in the zone with no fade time
+	/** \brief Instantly spawns all non-active enemies
 	*** \note This is commonly used on map startup to populate the map with enemies
 	**/
-	void ForceSpawnEnemies();
+	void ForceSpawnAllEnemies();
 
 	//! \brief Decrements the number of active enemies by one
 	void EnemyDead();
@@ -596,6 +596,20 @@ private:
 	*** \note These sprites will be deleted by the map object manager, not the destructor of this class.
 	**/
 	std::vector<EnemySprite*> _enemies;
+
+	/** \brief Changes the state of a specified inactive enemy to the spawn state
+	*** \param enemy_index The index into the _enemies container to spawn
+	*** \return True if the enemy successfully spawned
+	***
+	*** When an enemy is spawning, a random area within the zone is chosen. If the spawn location happens to cause
+	*** a collision, a new location is chosen and checked again. This process repeats for a number of times, and if
+	*** a suitable spawning location is not found, then the function will give up and return false. This is done so
+	*** that we don't end up stalling or even breaking the map by having it hang up trying to find a spawn location.
+	***
+	*** \note This function does not check the state of the enemy, as that responsibility is placed upon the caller.
+	*** Thus it is possible that a currently active enemy is set back to the spawn state with this function.
+	**/
+	bool _SpawnEnemy(uint32 enemy_index);
 }; // class EnemyZone : public MapZone
 
 } // namespace private_map

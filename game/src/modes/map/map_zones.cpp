@@ -425,8 +425,16 @@ void EnemyZone::AddSpawnSection(uint16 left_col, uint16 right_col, uint16 top_ro
 
 
 
-void EnemyZone::ForceSpawnEnemies() {
-	// TODO
+void EnemyZone::ForceSpawnAllEnemies() {
+	// Spawn new enemies only if there is at least one enemy that is not active
+	if (_active_enemies >= _enemies.size())
+		return;
+
+	for (uint32 i = 0; i < _enemies.size(); ++i) {
+		if (_enemies[i]->IsStateInactive() == true) {
+			_SpawnEnemy(i);
+		}
+	}
 }
 
 
@@ -447,12 +455,6 @@ void EnemyZone::Update() {
 	if (MapMode::CurrentInstance()->CurrentState() != STATE_EXPLORE) {
 		return;
 	}
-
-	// When spawning an enemy in a random zone location, sometimes it is occupied by another
-	// object or that section is unwalkable. We try only a few different spawn locations before
-	// giving up and waiting for the next call to Update(). Otherwise this function could
-	// potentially take a noticable amount of time to complete
-	const int8 SPAWN_RETRIES = 10;
 
 	if (_enemies.empty() == true)
 		return;
@@ -476,12 +478,30 @@ void EnemyZone::Update() {
 		}
 	}
 
+	_SpawnEnemy(index);
+} // void EnemyZone::Update()
+
+
+
+bool EnemyZone::_SpawnEnemy(uint32 enemy_index) {
+	// When spawning an enemy in a random zone location, sometimes it is occupied by another
+	// object or that section is unwalkable. We try only a few different spawn locations before
+	// giving up. Otherwise this function could potentially take a noticable amount of time to complete
+	const int8 SPAWN_RETRIES = 40;
+
+	if (enemy_index >= _enemies.size()) {
+		IF_PRINT_WARNING(MAP_DEBUG) << "function called with an out-of-range index argument: " << enemy_index << endl;
+		return false;
+	}
+
 	uint16 x, y; // Used to retain random position coordinates in the zone
 	int8 retries = SPAWN_RETRIES; // Number of times to try finding a valid spawning location
 	bool collision; // Holds the result of a collision detection check
 
-	// Select a random position inside the zone to place the spawning enemy
-	_enemies[index]->no_collision = false;
+	// Select a random position inside the zone to place the spawning enemy. To do this, we need to diable the no_collision
+	// property of the enemy sprite.
+	bool saved_no_collision = _enemies[enemy_index]->no_collision;
+	_enemies[enemy_index]->no_collision = false; // This must be temporarily
 	MapZone* spawning_zone = NULL;
 	if (HasSeparateSpawnZone() == false) {
 		spawning_zone = this;
@@ -489,27 +509,30 @@ void EnemyZone::Update() {
 	else {
 		spawning_zone = _spawn_zone;
 	}
-	// If there is a collision, retry a different location
+
+	// Try to find a suitable spawn location
 	do {
 		spawning_zone->_RandomPosition(x, y);
-		_enemies[index]->SetXPosition(x, 0.0f);
-		_enemies[index]->SetYPosition(y, 0.0f);
-		collision = MapMode::CurrentInstance()->GetObjectSupervisor()->DetectCollision(_enemies[index], NULL);
+		_enemies[enemy_index]->SetXPosition(x, 0.0f);
+		_enemies[enemy_index]->SetYPosition(y, 0.0f);
+		collision = MapMode::CurrentInstance()->GetObjectSupervisor()->DetectCollision(_enemies[enemy_index], NULL);
 	} while (collision && --retries > 0);
 
 	// If we didn't find a suitable spawning location, reset the collision info
 	// on the enemy sprite and we will retry on the next call to this function
 	if (collision) {
-		_enemies[index]->no_collision = true;
+		_enemies[enemy_index]->no_collision = saved_no_collision;
+		return false;
 	}
 	// Otherwise, spawn the enemy and reset the spawn timer
 	else {
 		_spawn_timer.Reset();
 		_spawn_timer.Run();
-		_enemies[index]->ChangeStateSpawn();
+		_enemies[enemy_index]->ChangeStateSpawn();
 		_active_enemies++;
+		return true;
 	}
-} // void EnemyZone::Update()
+}
 
 } // namespace private_map
 

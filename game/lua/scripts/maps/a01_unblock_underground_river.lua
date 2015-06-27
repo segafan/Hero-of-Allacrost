@@ -82,6 +82,15 @@ function Load(m)
 	Map:ShowStaminaBar(true);
 	Map:ShowDialogueIcons(true);
 
+	-- Spawn all enemies for each enemy zone
+	zones["enemy01"]:ForceSpawnAllEnemies();
+	zones["enemy02"]:ForceSpawnAllEnemies();
+	zones["enemy03"]:ForceSpawnAllEnemies();
+	zones["enemy04"]:ForceSpawnAllEnemies();
+	zones["enemy05"]:ForceSpawnAllEnemies();
+	zones["enemy06"]:ForceSpawnAllEnemies();
+	zones["enemy07"]:ForceSpawnAllEnemies();
+
 	-- The map begins with an opening scene before control is given to the player
 	Map:SetPlayerSprite(sprites["claudius"]);
 	Map:SetCamera(sprites["claudius"]);
