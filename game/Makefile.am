@@ -1,4 +1,4 @@
-EXTRA_DIST = ABOUT-NLS AUTHORS COPYING config.rpath configure dat doc img INSTALL MANUAL mus README snd
+EXTRA_DIST = ABOUT-NLS AUTHORS COPYING config.rpath configure lua doc img INSTALL MANUAL mus README snd
 
 SUBDIRS = txt
 
@@ -147,7 +147,6 @@ luabind_SOURCES = \
 	$(LUABIND_DIR)/luabind/detail/enum_maker.hpp \
 	$(LUABIND_DIR)/luabind/detail/format_signature.hpp \
 	$(LUABIND_DIR)/luabind/detail/garbage_collector.hpp \
-	$(LUABIND_DIR)/luabind/detail/get_signature.hpp \
 	$(LUABIND_DIR)/luabind/detail/has_get_pointer.hpp \
 	$(LUABIND_DIR)/luabind/detail/inheritance.hpp \
 	$(LUABIND_DIR)/luabind/detail/instance_holder.hpp \

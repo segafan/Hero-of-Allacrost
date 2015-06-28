@@ -13,7 +13,7 @@ Install procedure:
 Once you've unpacked the tarball or checked it out of Subversion, just run 'autoreconf -i && ./configure && make && make install' from the top-level directory at the prompt.
 
 Directories included are:
-dat/ img/ mus/ snd/ src/ txt/
+img/ lua/ mus/ snd/ src/ txt/
 
 Library dependencies (you will need the following in order to compile and run the game):
 autoreconf

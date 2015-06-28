@@ -5,7 +5,7 @@ licenses for third-party content that is used.
 =====    Code      =====
 
 All code is licensed under the GNU GPL Version 2 open source software license. Code is defined as anything contained within
-the src/ and dat/ directories. Code includes both C++ and Lua source files.
+the src/ and lua/ directories. Code includes both C++ and Lua source files.
 
 
 =====   Content    =====
