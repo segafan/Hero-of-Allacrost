@@ -80,8 +80,8 @@ function Load(m)
 
 	-- TODO: figure out if visuals should be disabled normally, or wait for control to be given to the player before they are displayed
 	-- Map:DisableIntroductionVisuals();
-	Map.unlimited_stamina = DEBUG;
-	Map:ShowStaminaBar(not DEBUG);
+	Map.unlimited_stamina = true;
+	Map:ShowStaminaBar(true);
 	Map:ShowDialogueIcons(true);
 
 	-- All character sprites are initially uncollidable, since they will "merge" into one sprite at the end of the opening scene

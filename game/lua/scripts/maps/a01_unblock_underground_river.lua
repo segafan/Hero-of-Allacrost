@@ -363,6 +363,7 @@ function CreateSprites()
 	-- This sprite represents the boss encountered at the end of the map
 	-- TODO: build the sprite properly using the large scoprion sprite
 	sprites["scorpion_boss"] = ConstructEnemySprite("goliath_scorpion", Map);
+	sprites["scorpion_boss"]:SetContext(contexts["collapsed"]);
 	sprites["scorpion_boss"]:SetPosition(274, 20);
 	sprites["scorpion_boss"]:SetDirection(hoa_map.MapMode.WEST);
 	sprites["scorpion_boss"]:SetNoCollision(true);
