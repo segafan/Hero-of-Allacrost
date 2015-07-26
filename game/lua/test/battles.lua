@@ -28,11 +28,15 @@ tests[1001] = {
 	ExecuteTest = function()
 		GlobalManager:SetBattleSetting(hoa_global.GameGlobal.GLOBAL_BATTLE_WAIT);
 		GlobalManager:AddCharacter(1); -- Claudius
+		GlobalManager:AddCharacter(2); -- Claudius
+		GlobalManager:AddCharacter(4); -- Claudius
 		GlobalManager:AddToInventory(1, 3); -- Minor healing potions
 
 		local battle = hoa_battle.BattleMode();
-		battle:AddEnemy(1);
 		battle:AddEnemy(2);
+		battle:AddEnemy(2);
+		battle:AddEnemy(3);
+		battle:AddEnemy(5);
 		ModeManager:Push(battle); 
 	end
 }
