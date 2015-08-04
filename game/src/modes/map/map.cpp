@@ -120,10 +120,12 @@ MapMode::MapMode(string script_filename) :
 	_virtual_focus->SetVisible(false);
 	_object_supervisor->AddObject(_virtual_focus, DEFAULT_LAYER_ID);
 
+	// The camera must never be NULL (otherwise the game will crash), so initially set it to the virtual focus
+	_camera = _virtual_focus;
+	_camera_timer.Initialize(0, 1);
+
 	_intro_timer.Initialize(7000, 0);
 	_intro_timer.EnableAutoUpdate(this);
-
-	_camera_timer.Initialize(0, 1);
 
 	// TODO: Load the map files in a seperate thread
 	_LoadMapFiles();
