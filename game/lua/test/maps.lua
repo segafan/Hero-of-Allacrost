@@ -3,7 +3,7 @@
 --
 -- Description: This file contains all tests that create an instance of MapMode.
 -- The tests here are primarily for testing map files and their scripted code.
--- Generally it is a good idea to create a test for each map file, or possibly 
+-- Generally it is a good idea to create a test for each map file, or possibly
 -- multiple tests for a file so that it is easy to get to a certain point in the
 -- just before an important event or sequence, such as a boss encounter.
 --
@@ -107,3 +107,37 @@ tests[5] = {
 		StartMap("lua/scripts/maps/a01_harrvah_capital_attack.lua");
 	end
 }
+
+
+tests[6] = {
+	name = "[01_harrvah_capital_aftermath] - Harrvah Capital Attack Aftermath";
+	description = "Harrvah after the attack scene";
+
+	ExecuteTest = function()
+		-- TODO: below is temporary. Replace when the a01_harrvah_captial_aftermath.lua map is available
+		GlobalManager:AddCharacter(LUKAR);
+		GlobalManager:AddCharacter(MARK);
+		GlobalManager:AddCharacter(CLAUDIUS);
+		GlobalManager:AddNewEventGroup("global_events");
+		GlobalManager:SetDrunes(200);
+		GlobalManager:AddToInventory(1, 5);
+
+		StartMap("lua/scripts/maps/a01_harrvah_capital_attack.lua");
+	end
+}
+
+
+tests[7] = {
+	name = "[01_sand_dock_depature] - Harrvah Capital Sand Dock";
+	description = "Claudius departs for his journey by leaving Harrvah through the sand dock of Harrvah.";
+
+	ExecuteTest = function()
+		GlobalManager:AddCharacter(CLAUDIUS);
+		GlobalManager:AddNewEventGroup("global_events");
+		GlobalManager:SetDrunes(200);
+		GlobalManager:AddToInventory(1, 5);
+
+		StartMap("lua/scripts/maps/a01_sand_dock_departure.lua");
+	end
+}
+
