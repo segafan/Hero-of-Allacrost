@@ -157,6 +157,3 @@ function CreateEvents()
 	local event = {};
 end -- function CreateEvents()
 
-
-
-
