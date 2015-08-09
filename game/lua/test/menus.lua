@@ -34,3 +34,32 @@ tests[2001] = {
 	end
 }
 
+
+tests[2002] = {
+	name = "New Game Party Menu";
+	description = "The initial character party when the user selects a new game. Includes multiple pieces of equipment in the inventory.";
+	ExecuteTest = function()
+		GlobalManager:AddCharacter(1); -- Claudius
+		GlobalManager:AddCharacter(2); -- Mark
+		GlobalManager:AddCharacter(4); -- Lukar
+		GlobalManager:AddDrunes(12345);
+		GlobalManager:AddToInventory(1, 12);
+		GlobalManager:AddToInventory(1001, 3);
+		GlobalManager:AddToInventory(10001, 2);
+		GlobalManager:AddToInventory(10002, 1);
+		GlobalManager:AddToInventory(10003, 1);
+		GlobalManager:AddToInventory(20002, 1);
+		GlobalManager:AddToInventory(20003, 1);
+		GlobalManager:AddToInventory(30002, 1);
+		GlobalManager:AddToInventory(30003, 1);
+		GlobalManager:AddToInventory(40002, 1);
+		GlobalManager:AddToInventory(40003, 1);
+		GlobalManager:AddToInventory(40004, 3);
+		GlobalManager:AddToInventory(50001, 1);
+		GlobalManager:AddToInventory(50002, 2);
+		local menu = hoa_menu.MenuMode();
+		ModeManager:Push(menu); 
+	end
+}
+
+
