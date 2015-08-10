@@ -194,7 +194,9 @@ public:
 	**/
 	bool Validate();
 
-	//! \brief Returns the object ID of the speaker for the line specified (or zero if the line index was invalid and 100 if no speaker)
+	/** \brief Returns the object ID of the speaker for the line specified (or zero if the line index was invalid or if no speaker)
+	***	\todo Need to determine a way to differentitate an invalid index or no speaker (possibly print warning message for invalid index) 
+	**/
 	uint32 GetLineSpeaker(uint32 line) const
 		{ if (line >= _line_count) return 0; else return _speakers[line]; }
 
