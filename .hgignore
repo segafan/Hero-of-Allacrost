@@ -1,4 +1,3 @@
-/.deps/.*$
+game/allacrost-win32-depends/
 /.*\.o$
 /.*\.moc.cpp$
-
