@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Release Linux" />
+	<File name="src/common/global/defs_global.cpp" open="1" top="0" tabpos="0">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="src/common/global/global_objects.cpp" open="1" top="0" tabpos="0">
+		<Cursor position="3483" topLine="96" />
+	</File>
+	<File name="src/common/gui/option.cpp" open="0" top="0" tabpos="2">
+		<Cursor position="1911" topLine="79" />
+	</File>
+	<File name="src/common/gui/option.h" open="0" top="0" tabpos="1">
+		<Cursor position="20498" topLine="526" />
+	</File>
+	<File name="src/engine/script/script.h" open="1" top="0" tabpos="0">
+		<Cursor position="4983" topLine="129" />
+	</File>
+	<File name="src/engine/system.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="6543" topLine="274" />
+	</File>
+	<File name="src/engine/system.h" open="0" top="0" tabpos="5">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="src/main.cpp" open="0" top="0" tabpos="2">
+		<Cursor position="15182" topLine="335" />
+	</File>
+	<File name="src/main_options.h" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="34" />
+	</File>
+	<File name="src/modes/map/map.h" open="0" top="0" tabpos="3">
+		<Cursor position="6400" topLine="139" />
+	</File>
+	<File name="src/modes/map/map_sprites.cpp" open="0" top="0" tabpos="3">
+		<Cursor position="7996" topLine="282" />
+	</File>
+	<File name="src/utils.h" open="0" top="0" tabpos="1">
+		<Cursor position="2881" topLine="67" />
+	</File>
+</CodeBlocks_layout_file>
