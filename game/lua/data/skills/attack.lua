@@ -50,7 +50,7 @@ skills[1] = {
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 5), target);
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0), target);
 			AudioManager:PlaySound("snd/swordslice1.wav");
 		else
 			target_actor:RegisterMiss();
@@ -71,8 +71,8 @@ skills[2] = {
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
 
-		if (hoa_battle.CalculateStandardEvasionAdder(target, 5.0) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0, 0.5), target);
+		if (hoa_battle.CalculateStandardEvasionMultiplier(target, 1.25) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageMultiplier(user, target, 1.5), target);
 			AudioManager:PlaySound("snd/swordslice1.wav");
 		else
 			target_actor:RegisterMiss();
@@ -94,8 +94,8 @@ skills[3] = {
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
 
-		if (hoa_battle.CalculateStandardEvasionAdder(target, 5.5) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamage(user, target));
+		if (hoa_battle.CalculateStandardEvasionAdder(target, 0) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageMultiplier(user, target, 0.75));
 			-- TODO: Calculate chance for paralysis effect and activate it
 			target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
 			AudioManager:PlaySound("snd/swordslice1.wav");
@@ -128,6 +128,28 @@ skills[4] = {
 	end
 }
 
+skills[5] = {
+	name = hoa_system.Translate("Precise Strike"),
+	description = hoa_system.Translate("When you need to  bullseye some womp rats "),
+	sp_required = 2,
+	warmup_time = 2000,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
+
+	BattleExecute = function(user, target)
+		user:ChangeSpriteAnimation("attack");
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasionMultiplier(target, 0.2) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0), target);
+			AudioManager:PlaySound("snd/swordslice2.wav");
+		else
+			target_actor:RegisterMiss();
+			AudioManager:PlaySound("snd/sword_swipe.wav");
+		end
+	end
+}
+
 --------------------------------------------------------------------------------
 -- IDs 1,001 - 10,000 are reserved for enemy attack skills
 --------------------------------------------------------------------------------
@@ -143,7 +165,7 @@ skills[1001] = {
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 10), target);
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0), target);
 			AudioManager:PlaySound("snd/slime_attack.wav");
 		else
 			target_actor:RegisterMiss();
@@ -162,7 +184,7 @@ skills[1002] = {
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 13), target);
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0), target);
 			AudioManager:PlaySound("snd/spider_attack.wav");
 		else
 			target_actor:RegisterMiss();
@@ -181,7 +203,7 @@ skills[1003] = {
 		target_actor = target:GetActor();
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 14), target);
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0), target);
 			AudioManager:PlaySound("snd/snake_attack.wav");
 		else
 			target_actor:RegisterMiss();
@@ -208,3 +230,41 @@ skills[1004] = {
 	end
 }
 
+skills[1005] = {
+	name = "10x Bite",
+	sp_required = 1,
+	warmup_time = 1400,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
+
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageMultiplier(user, target, 10.0), target);
+			AudioManager:PlaySound("snd/spider_attack.wav");
+		else
+			target_actor:RegisterMiss();
+		end
+	end
+}
+
+skills[1006] = {
+	name = "Spider Bite Stun",
+	sp_required = 0,
+	warmup_time = 1400,
+	cooldown_time = 0,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
+
+	BattleExecute = function(user, target)
+		target_actor = target:GetActor();
+
+		if (hoa_battle.CalculateStandardEvasion(target) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0), target);
+			target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
+			AudioManager:PlaySound("snd/spider_attack.wav");
+		else
+			target_actor:RegisterMiss();
+		end
+	end
+}

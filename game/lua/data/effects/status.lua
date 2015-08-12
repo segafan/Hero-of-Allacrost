@@ -696,6 +696,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS] = {
 	end,
 }
 
+
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_STASIS] = {
 	name = hoa_system.Translate("Stasis"),
 	duration = 10000,

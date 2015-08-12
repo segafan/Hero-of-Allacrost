@@ -16,9 +16,9 @@ characters[CLAUDIUS] = {
 	initial_stats = {
 		experience_level = 1,
 		experience_points = 0,
-		max_hit_points = 62,
-		max_skill_points = 8,
-		strength = 12,
+		max_hit_points = 100,
+		max_skill_points = 10,
+		strength = 14,
 		vigor = 4,
 		fortitude = 15,
 		protection = 6,
@@ -129,11 +129,11 @@ characters[MARK] = {
 	initial_stats = {
 		experience_level = 7,
 		experience_points = 1128,
-		max_hit_points = 98,
-		max_skill_points = 13,
-		strength = 21,
+		max_hit_points = 100,
+		max_skill_points = 15,
+		strength = 30,
 		vigor = 8,
-		fortitude = 24,
+		fortitude = 10,
 		protection = 10,
 		agility = 35,
 		evade = 5.2,
@@ -230,7 +230,7 @@ characters[MARK] = {
 		}
 	},
 
-	skills = { [1] = 1, [3] = 2, [4] = 10001 }
+	skills = { [1] = 1, [3] = 5, [4] = 10001, [5] = 3 }
 } -- characters[MARK]
 
 
@@ -242,13 +242,13 @@ characters[LUKAR] = {
 	initial_stats = {
 		experience_level = 18,
 		experience_points = 6728,
-		max_hit_points = 237,
+		max_hit_points = 200,
 		max_skill_points = 25,
-		strength = 45,
-		vigor = 21,
-		fortitude = 47,
-		protection = 23,
-		agility = 46,
+		strength = 65,
+		vigor = 10,
+		fortitude = 30,
+		protection = 10,
+		agility = 40,
 		evade = 7.0,
 		weapon = 10003,
 		head_armor = 20003,
