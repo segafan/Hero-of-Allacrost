@@ -26,6 +26,9 @@ namespace hoa_global {
 
 namespace private_global {
 
+//! \brief Battle fatigue on a character can not reduce an actor's current max HP below this number
+const uint32 MINIMUM_FATIGUE_HIT_POINTS = 10;
+
 /** \name Object ID Range Constants
 *** These constants set the maximum valid ID ranges for each object category.
 *** The full valid range for each object category ID is:

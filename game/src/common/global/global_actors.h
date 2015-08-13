@@ -244,6 +244,12 @@ public:
 	uint32 GetMaxHitPoints() const
 		{ return _max_hit_points; }
 
+	uint32 GetCurrentMaxHitPoints() const
+		{ return _current_max_hit_points; }
+
+	uint32 GetFatigue() const
+		{ return _fatigue; }
+
 	uint32 GetSkillPoints() const
 		{ return _skill_points; }
 
@@ -270,6 +276,9 @@ public:
 
 	uint32 GetAgility() const
 		{ return _agility; }
+
+	uint32 GetStamina() const
+		{ return _stamina; }
 
 	float GetEvade() const
 		{ return _evade; }
@@ -329,43 +338,56 @@ public:
 	*** Normally you should not need to directly set the value of these members, but rather add or subtract
 	*** an amount from the current value of the member. Total attack, defense, and evade ratings are
 	*** re-calculated when an appropriately related stat is changed.
+	***
+	*** // TODO: may need more robust error checking here, especially with regard to setting fatigue and current max HP values
 	**/
 	//@{
-	void SetExperienceLevel(uint32 xp_level)
-		{ _experience_level = xp_level; }
+	void SetExperienceLevel(uint32 value)
+		{ _experience_level = value; }
 
-	void SetExperiencePoints(uint32 xp_points)
-		{ _experience_points = xp_points; }
+	void SetExperiencePoints(uint32 value)
+		{ _experience_points = value; }
 
-	void SetHitPoints(uint32 hp)
-		{ if (hp > _max_hit_points) _hit_points = _max_hit_points; else _hit_points = hp; }
+	void SetHitPoints(uint32 value)
+		{ if (value > _current_max_hit_points) _hit_points = _current_max_hit_points; else _hit_points = value; }
 
-	void SetMaxHitPoints(uint32 hp)
-		{ _max_hit_points = hp; if (_hit_points > _max_hit_points) _hit_points = _max_hit_points; }
+	void SetCurrentMaxHitPoints(uint32 value)
+		{ _current_max_hit_points = value; if (_current_max_hit_points > _max_hit_points) _current_max_hit_points = _max_hit_points;
+			if (_hit_points > _current_max_hit_points) _hit_points = _current_max_hit_points;
+		}
 
-	void SetSkillPoints(uint32 sp)
-		{ if (sp > _max_skill_points) _skill_points = _max_skill_points; else _skill_points = sp; }
+	void SetMaxHitPoints(uint32 value)
+		{ _max_hit_points = value; if (_hit_points > _max_hit_points) _hit_points = _max_hit_points; }
 
-	void SetMaxSkillPoints(uint32 sp)
-		{ _max_skill_points = sp; if (_skill_points > _max_skill_points) _skill_points = _max_skill_points; }
+	void SetSkillPoints(uint32 value)
+		{ if (value > _max_skill_points) _skill_points = _max_skill_points; else _skill_points = value; }
 
-	void SetStrength(uint32 st)
-		{ _strength = st; _CalculateAttackRatings(); }
+	void SetMaxSkillPoints(uint32 value)
+		{ _max_skill_points = value; if (_skill_points > _max_skill_points) _skill_points = _max_skill_points; }
 
-	void SetVigor(uint32 vi)
-		{ _vigor = vi; _CalculateAttackRatings(); }
+	void SetFatigue(uint32 value)
+		{ _fatigue = value; }
 
-	void SetFortitude(uint32 fo)
-		{ _fortitude = fo; _CalculateDefenseRatings(); }
+	void SetStrength(uint32 value)
+		{ _strength = value; _CalculateAttackRatings(); }
 
-	void SetProtection(uint32 pr)
-		{ _protection = pr; _CalculateDefenseRatings(); }
+	void SetVigor(uint32 value)
+		{ _vigor = value; _CalculateAttackRatings(); }
+
+	void SetFortitude(uint32 value)
+		{ _fortitude = value; _CalculateDefenseRatings(); }
+
+	void SetProtection(uint32 value)
+		{ _protection = value; _CalculateDefenseRatings(); }
 
 	void SetAgility(uint32 ag)
 		{ _agility = ag; }
 
-	void SetEvade(float ev)
-		{ _evade = ev; _CalculateEvadeRatings(); }
+	void SetStamina(uint32 value)
+		{ _stamina = value; }
+
+	void SetEvade(float value)
+		{ _evade = value; _CalculateEvadeRatings(); }
 	//@}
 
 	/** \name Class member add and subtract functions
@@ -382,8 +404,10 @@ public:
 	//@{
 	void AddHitPoints(uint32 amount);
 
+	//! \note This may also increase fatigue, which correspondingly will reduce the current max HP
 	void SubtractHitPoints(uint32 amount);
 
+	//! \note This will also will increase the current max HP and the current HP
 	void AddMaxHitPoints(uint32 amount);
 
 	//! \note The number of hit points will be decreased if they are greater than the new maximum
@@ -397,6 +421,12 @@ public:
 
 	//! \note The number of skill points will be decreased if they are greater than the new maximum
 	void SubtractMaxSkillPoints(uint32 amount);
+
+	//! \note This will also modify the current max HP
+	void AddFatigue(uint32 amount);
+
+	//! \note This will also modify the current max HP as well as add HP for every point of fatigue removed
+	void SubtractFatigue(uint32 amount);
 
 	void AddStrength(uint32 amount);
 
@@ -418,15 +448,29 @@ public:
 
 	void SubtractAgility(uint32 amount);
 
+	void AddStamina(uint32 amount);
+
+	void SubtractStamina(uint32 amount);
+
 	void AddEvade(float amount);
 
 	void SubtractEvade(float amount);
 
 	void RestoreAllHitPoints()
-		{ _hit_points = _max_hit_points; }
+		{ _hit_points = _current_max_hit_points; }
 
 	void RestoreAllSkillPoints()
 		{ _skill_points = _max_skill_points; }
+
+	/** \note Removing fatigue increases the actor's HP by the same amount. It does not necessarily
+	*** restore the character to maximum health
+	**/
+	void RestoreAllFatigue()
+		{ _current_max_hit_points = _max_hit_points; _hit_points += _fatigue; _fatigue = 0; }
+
+	//! \brief Removes all fatigue and sets HP and SP to maximum values
+	void FullRestore()
+		{ RestoreAllFatigue(); RestoreAllHitPoints(); RestoreAllSkillPoints(); }
 	//@}
 
 protected:
@@ -453,11 +497,17 @@ protected:
 	//! \brief The maximum number of hit points that the actor may have
 	uint32 _max_hit_points;
 
+	//! \brief The maximum hit points that the actor may currently have (equal to _max_hit_points - _fatigue)
+	uint32 _current_max_hit_points;
+
 	//! \brief The current number of skill points that the actor has
 	uint32 _skill_points;
 
 	//! \brief The maximum number of skill points that the actor may have
 	uint32 _max_skill_points;
+
+	//! \brief The amount of fatigue the actor has accumulated, which reduces their current max HP
+	uint32 _fatigue;
 
 	//! \brief Used to determine the actor's physical attack rating
 	uint32 _strength;
@@ -473,6 +523,9 @@ protected:
 
 	//! \brief Used to calculate the time it takes to recover stamina in battles
 	uint32 _agility;
+
+	//! \brief Used to translate HP damage into fatigue (10 stamina means every 10 HP lost produces 1 fatigue)
+	uint32 _stamina;
 
 	//! \brief The attack evade percentage of the actor, ranged from 0.0 to 1.0
 	float _evade;
@@ -845,6 +898,7 @@ private:
 	uint32 _fortitude_growth;
 	uint32 _protection_growth;
 	uint32 _agility_growth;
+	uint32 _stamina_growth;
 	float _evade_growth;
 	//@}
 
@@ -868,6 +922,7 @@ private:
 	std::deque<std::pair<uint32, uint32> > _fortitude_periodic_growth;
 	std::deque<std::pair<uint32, uint32> > _protection_periodic_growth;
 	std::deque<std::pair<uint32, uint32> > _agility_periodic_growth;
+	std::deque<std::pair<uint32, uint32> > _stamina_periodic_growth;
 	std::deque<std::pair<uint32, float> > _evade_periodic_growth;
 	//@}
 

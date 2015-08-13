@@ -908,15 +908,18 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 	file.WriteLine("\t\texperience_points_next = " + NumberToString(character->GetExperienceForNextLevel()) + ", ");
 
 	file.WriteLine("\t\tmax_hit_points = " + NumberToString(character->GetMaxHitPoints()) + ",");
+	file.WriteLine("\t\tcurrent_max_hit_points = " + NumberToString(character->GetCurrentMaxHitPoints()) + ",");
 	file.WriteLine("\t\thit_points = " + NumberToString(character->GetHitPoints()) + ",");
 	file.WriteLine("\t\tmax_skill_points = " + NumberToString(character->GetMaxSkillPoints()) + ",");
 	file.WriteLine("\t\tskill_points = " + NumberToString(character->GetSkillPoints()) + ",");
+	file.WriteLine("\t\tfatigue = " + NumberToString(character->GetFatigue()) + ",");
 
 	file.WriteLine("\t\tstrength = " + NumberToString(character->GetStrength()) + ",");
 	file.WriteLine("\t\tvigor = " + NumberToString(character->GetVigor()) + ",");
 	file.WriteLine("\t\tfortitude = " + NumberToString(character->GetFortitude()) + ",");
 	file.WriteLine("\t\tprotection = " + NumberToString(character->GetProtection()) + ",");
 	file.WriteLine("\t\tagility = " + NumberToString(character->GetAgility()) + ",");
+	file.WriteLine("\t\tstamina = " + NumberToString(character->GetStamina()) + ",");
 	file.WriteLine("\t\tevade = " + NumberToString(character->GetEvade()) + ",");
 
 	// ----- (2): Write out the character's equipment
@@ -1080,6 +1083,17 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 	}
 	file.WriteLine("\n\t\t\t},");
 
+	file.WriteLine("\t\t\tstamina = { ");
+	for (uint32 i = 0; i < character->_stamina_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(character->_stamina_periodic_growth[i].first) + "] = "
+			+ NumberToString(character->_stamina_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t},");
+
 	file.WriteLine("\t\t\tevade = { ");
 	for (uint32 i = 0; i < character->_evade_periodic_growth.size(); i++) {
 		if (i == 0)
@@ -1176,15 +1190,18 @@ void GameGlobal::_LoadCharacter(ReadScriptDescriptor& file, uint32 id) {
 	character->SetExperienceForNextLevel(file.ReadUInt("experience_points_next"));
 
 	character->SetMaxHitPoints(file.ReadUInt("max_hit_points"));
+	character->SetCurrentMaxHitPoints(file.ReadUInt("current_max_hit_points"));
 	character->SetHitPoints(file.ReadUInt("hit_points"));
 	character->SetMaxSkillPoints(file.ReadUInt("max_skill_points"));
 	character->SetSkillPoints(file.ReadUInt("skill_points"));
+	character->SetFatigue(file.ReadUInt("fatigue"));
 
 	character->SetStrength(file.ReadUInt("strength"));
 	character->SetVigor(file.ReadUInt("vigor"));
 	character->SetFortitude(file.ReadUInt("fortitude"));
 	character->SetProtection(file.ReadUInt("protection"));
 	character->SetAgility(file.ReadUInt("agility"));
+	character->SetStamina(file.ReadUInt("stamina"));
 	character->SetEvade(file.ReadFloat("evade"));
 
 	// ----- (3): Read the character's equipment and load it onto the character
@@ -1298,6 +1315,14 @@ void GameGlobal::_LoadCharacter(ReadScriptDescriptor& file, uint32 id) {
 	file.ReadTableKeys(growth_keys);
 	for (uint32 i = 0; i < growth_keys.size(); i++) {
 		character->_agility_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("stamina");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		character->_stamina_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
 	}
 	file.CloseTable();
 

@@ -18,12 +18,14 @@
 #include "global_objects.h"
 #include "global_effects.h"
 #include "global_skills.h"
+#include "global_utils.h"
 
 using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video;
 using namespace hoa_script;
+using namespace hoa_global::private_global;
 
 namespace hoa_global {
 
@@ -134,13 +136,16 @@ GlobalActor::GlobalActor() :
 	_experience_points(0),
 	_hit_points(0),
 	_max_hit_points(0),
+	_current_max_hit_points(0),
 	_skill_points(0),
 	_max_skill_points(0),
+	_fatigue(0),
 	_strength(0),
 	_vigor(0),
 	_fortitude(0),
 	_protection(0),
 	_agility(0),
+	_stamina(0),
 	_evade(0.0f),
 	_total_physical_attack(0),
 	_total_ethereal_attack(0),
@@ -182,13 +187,16 @@ GlobalActor::GlobalActor(const GlobalActor& copy) {
 	_experience_points = copy._experience_points;
 	_hit_points = copy._hit_points;
 	_max_hit_points = copy._max_hit_points;
+	_current_max_hit_points = copy._current_max_hit_points;
 	_skill_points = copy._skill_points;
 	_max_skill_points = copy._max_skill_points;
+	_fatigue = copy._fatigue;
 	_strength = copy._strength;
 	_vigor = copy._vigor;
 	_fortitude = copy._fortitude;
 	_protection = copy._protection;
 	_agility = copy._agility;
+	_stamina = copy._stamina;
 	_evade = copy._evade;
 	_total_physical_attack = copy._total_physical_attack;
 	_total_ethereal_attack = copy._total_ethereal_attack;
@@ -231,13 +239,16 @@ GlobalActor& GlobalActor::operator=(const GlobalActor& copy) {
 	_experience_points = copy._experience_points;
 	_hit_points = copy._hit_points;
 	_max_hit_points = copy._max_hit_points;
+	_current_max_hit_points = copy._current_max_hit_points;
 	_skill_points = copy._skill_points;
 	_max_skill_points = copy._max_skill_points;
+	_fatigue = copy._fatigue;
 	_strength = copy._strength;
 	_vigor = copy._vigor;
 	_fortitude = copy._fortitude;
 	_protection = copy._protection;
 	_agility = copy._agility;
+	_stamina = copy._stamina;
 	_evade = copy._evade;
 	_total_physical_attack = copy._total_physical_attack;
 	_total_ethereal_attack = copy._total_ethereal_attack;
@@ -406,9 +417,13 @@ void GlobalActor::AddMaxHitPoints(uint32 amount) {
 	if ((0xFFFFFFFF - amount) < _max_hit_points) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
 		_max_hit_points = 0xFFFFFFFF;
+		_current_max_hit_points = 0xFFFFFFFF;
+		_hit_points = 0xFFFFFFFF;
 	}
 	else {
 		_max_hit_points += amount;
+		_current_max_hit_points += amount;
+		_hit_points += amount;
 	}
 }
 
@@ -422,6 +437,9 @@ void GlobalActor::SubtractMaxHitPoints(uint32 amount) {
 	}
 	else {
 		_max_hit_points -= amount;
+
+		if (_current_max_hit_points > _max_hit_points)
+			_current_max_hit_points = _max_hit_points;
 		if (_hit_points > _max_hit_points)
 			_hit_points = _max_hit_points;
 	}
@@ -457,9 +475,11 @@ void GlobalActor::AddMaxSkillPoints(uint32 amount) {
 	if ((0xFFFFFFFF - amount) < _max_skill_points) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
 		_max_skill_points = 0xFFFFFFFF;
+		_skill_points = 0xFFFFFFFF;
 	}
 	else {
 		_max_skill_points += amount;
+		_skill_points += amount;
 	}
 }
 
@@ -475,6 +495,42 @@ void GlobalActor::SubtractMaxSkillPoints(uint32 amount) {
 		_max_skill_points -= amount;
 		if (_skill_points > _max_skill_points)
 			_skill_points = _max_skill_points;
+	}
+}
+
+
+
+void GlobalActor::AddFatigue(uint32 amount) {
+	// Stop accumulating fatigue once the _current_max_hit_points reaches MINIMUM_FATIGUE_HIT_POINTS
+	if (amount > (_current_max_hit_points - MINIMUM_FATIGUE_HIT_POINTS)) {
+		amount = _current_max_hit_points - MINIMUM_FATIGUE_HIT_POINTS;
+	}
+
+	_fatigue += amount;
+	_current_max_hit_points -= amount;
+	if (_hit_points > _current_max_hit_points)
+		_hit_points = _current_max_hit_points;
+
+}
+
+
+
+void GlobalActor::SubtractFatigue(uint32 amount) {
+	if (amount > _fatigue) {
+		amount = _fatigue;
+	}
+
+	_fatigue -= amount;
+	_current_max_hit_points += amount;
+	_hit_points += amount;
+
+	if (_current_max_hit_points > _max_hit_points) {
+		// This condition should never happen. If it does, there's likely a bug because
+		// _current_max_hit_points + _fatigue should always be equal to _max_hit_points
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "restoring fatigue caused _current_max_hit_points to exceed _max_hit_points" << endl;
+		_current_max_hit_points = _max_hit_points;
+		if (_hit_points > _max_hit_points)
+			_hit_points = _max_hit_points;
 	}
 }
 
@@ -601,6 +657,27 @@ void GlobalActor::SubtractAgility(uint32 amount) {
 
 
 
+void GlobalActor::AddStamina(uint32 amount)  {
+	if ((0xFFFFFFFF - amount) < _stamina) {
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "integer overflow condition detected: " << amount << endl;
+		_stamina = 0xFFFFFFFF;
+	}
+	else {
+		_stamina += amount;
+	}
+}
+
+
+
+void GlobalActor::SubtractStamina(uint32 amount) {
+	if (amount >= _stamina)
+		_stamina = 1; // Stamina should never be set to zero because battle fatigue damage is calculated by HP damage / stamina
+	else
+		_stamina -= amount;
+}
+
+
+
 void GlobalActor::AddEvade(float amount) {
 	if (amount < 0.0f) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received negative argument value: " << amount << endl;
@@ -693,6 +770,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
     _fortitude_growth(0),
     _protection_growth(0),
     _agility_growth(0),
+    _stamina_growth(0),
     _evade_growth(0.0f)
 {
 	_id = id;
@@ -725,6 +803,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 		_fortitude = char_script.ReadUInt("fortitude");
 		_protection = char_script.ReadUInt("protection");
 		_agility = char_script.ReadUInt("agility");
+		_stamina = char_script.ReadUInt("stamina");
 		_evade = char_script.ReadFloat("evade");
 
 		// Add the character's initial equipment. If any equipment ids are zero, that indicates nothing is to be equipped.
@@ -1299,6 +1378,7 @@ void GlobalCharacter::_ConstructPeriodicGrowth() {
 	_fortitude_periodic_growth.push_back(make_pair(0, _fortitude_growth));
 	_protection_periodic_growth.push_back(make_pair(0, _protection_growth));
 	_agility_periodic_growth.push_back(make_pair(0, _agility_growth));
+	_stamina_periodic_growth.push_back(make_pair(0, _stamina_growth));
 	_evade_periodic_growth.push_back(make_pair(0, _evade_growth));
 
 	// Reset all growth accumulators
@@ -1309,6 +1389,7 @@ void GlobalCharacter::_ConstructPeriodicGrowth() {
 	_fortitude_growth = 0;
 	_protection_growth = 0;
 	_agility_growth = 0;
+	_stamina_growth = 0;
 	_evade_growth = 0.0f;
 }
 
@@ -1377,6 +1458,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) :
 	_fortitude = enemy_data.ReadUInt("fortitude");
 	_protection = enemy_data.ReadUInt("protection");
 	_agility = enemy_data.ReadUInt("agility");
+	_stamina = enemy_data.ReadUInt("stamina");
 	_evade = enemy_data.ReadFloat("evade");
 	_drunes_dropped = enemy_data.ReadUInt("drunes");
 	enemy_data.CloseTable();
@@ -1482,6 +1564,7 @@ void GlobalEnemy::Initialize() {
 		_fortitude          = GaussianRandomValue(_fortitude, _fortitude / 10.0f);
 		_protection         = GaussianRandomValue(_protection, _protection / 10.0f);
 		_agility            = GaussianRandomValue(_agility, _agility / 10.0f);
+		_stamina            = GaussianRandomValue(_stamina, _stamina / 10.0f);
 		// TODO: need a gaussian random var function that takes a float arg
 		//_evade              = static_cast<float>(GaussianRandomValue(_evade, _evade / 10.0f));
 		_drunes_dropped     = GaussianRandomValue(_drunes_dropped, _drunes_dropped / 10.0f);
@@ -1489,7 +1572,11 @@ void GlobalEnemy::Initialize() {
 
 	// ----- (4): Set the current hit points and skill points to their new maximum values
 	_hit_points = _max_hit_points;
+	_current_max_hit_points = _max_hit_points;
 	_skill_points = _max_skill_points;
+	// Stamina should never fall below one since it is used as a divisor in fatigue damage calculations
+	if (_stamina < 1)
+		_stamina = 1;
 } // void GlobalEnemy::Initialize(uint32 xp_level)
 
 

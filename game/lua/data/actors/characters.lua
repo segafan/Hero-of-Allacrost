@@ -23,6 +23,7 @@ characters[CLAUDIUS] = {
 		fortitude = 15,
 		protection = 6,
 		agility = 30,
+		stamina = 10,
 		evade = 5.0,
 		weapon = 10001,
 		head_armor = 20001,
@@ -111,6 +112,11 @@ characters[CLAUDIUS] = {
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
 		},
 
+		stamina = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
 		evade = {
 			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
 			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0
@@ -136,6 +142,7 @@ characters[MARK] = {
 		fortitude = 24,
 		protection = 10,
 		agility = 35,
+		stamina = 10,
 		evade = 5.2,
 		weapon = 10002,
 		head_armor = 20002,
@@ -224,6 +231,11 @@ characters[MARK] = {
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
 		},
 
+		stamina = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
 		evade = {
 			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
 			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0
@@ -249,6 +261,7 @@ characters[LUKAR] = {
 		fortitude = 47,
 		protection = 23,
 		agility = 46,
+		stamina = 10,
 		evade = 7.0,
 		weapon = 10003,
 		head_armor = 20003,
@@ -333,6 +346,11 @@ characters[LUKAR] = {
 		},
 
 		agility = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
+		stamina = {
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
 		},
