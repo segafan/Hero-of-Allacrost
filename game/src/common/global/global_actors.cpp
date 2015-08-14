@@ -398,8 +398,8 @@ void GlobalActor::AddHitPoints(uint32 amount) {
 		_hit_points += amount;
 	}
 
-	if (_hit_points > _max_hit_points)
-		_hit_points = _max_hit_points;
+	if (_hit_points > _current_max_hit_points)
+		_hit_points = _current_max_hit_points;
 }
 
 
@@ -510,7 +510,6 @@ void GlobalActor::AddFatigue(uint32 amount) {
 	_current_max_hit_points -= amount;
 	if (_hit_points > _current_max_hit_points)
 		_hit_points = _current_max_hit_points;
-
 }
 
 
@@ -795,6 +794,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 		_experience_level = char_script.ReadUInt("experience_level");
 		_experience_points = char_script.ReadUInt("experience_points");
 		_max_hit_points = char_script.ReadUInt("max_hit_points");
+		_current_max_hit_points = _max_hit_points;
 		_hit_points = _max_hit_points;
 		_max_skill_points = char_script.ReadUInt("max_skill_points");
 		_skill_points = _max_skill_points;
