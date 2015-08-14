@@ -1235,7 +1235,6 @@ void CommandSupervisor::_CreateInformationText() {
 		info_text = UTranslate("Skill Points: " + NumberToString(_selected_skill->GetSPRequired())) + MakeUnicodeString("\n");
 		info_text += UTranslate("Target Type: ") + MakeUnicodeString(GetTargetText(_selected_skill->GetTargetType())) + MakeUnicodeString("\n");
 		info_text += UTranslate("Prep Time: ") + MakeUnicodeString(NumberToString(_selected_skill->GetWarmupTime())) + MakeUnicodeString("\n");
-		info_text += UTranslate("Cool Time: ") + MakeUnicodeString(NumberToString(_selected_skill->GetCooldownTime())) + MakeUnicodeString("\n");
 	}
 	else if (_IsItemCategorySelected() == true) {
 		_window_header.SetText(_selected_item->GetItem().GetName());

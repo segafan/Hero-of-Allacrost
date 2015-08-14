@@ -18,8 +18,6 @@
 --                (Zero is a valid value for this field, but a negative number is not)
 -- {warmup_time}: The number of milliseconds that the actor using the skill must wait between
 --                selecting the skill and executing it (a value of zero is valid).
--- {cooldown_time}: The number of milliseconds that the actor using the skill must wait after
---                  executing the skill before their stamina begins regenrating (zero is valid).
 -- {target_type}: The type of target the skill affects, which may be an attack point, actor, or party.
 --
 -- Each skill entry requires a function called {BattleExecute} to be defined. This function implements the
@@ -42,7 +40,6 @@ skills[1] = {
 	description = hoa_system.Translate("A textbook manuever that deals an effective blow."),
 	sp_required = 0,
 	warmup_time = 2000,
-	cooldown_time = 200,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
 	BattleExecute = function(user, target)
@@ -64,7 +61,6 @@ skills[2] = {
 	description = hoa_system.Translate("A more powerful blow than the standard sword slash, but also less likely to hit its intended target."),
 	sp_required = 2,
 	warmup_time = 500,
-	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
 	BattleExecute = function(user, target)
@@ -87,7 +83,6 @@ skills[3] = {
 	description = hoa_system.Translate("A blow which targets vital areas and temporarily stun its target."),
 	sp_required = 5,
 	warmup_time = 1200,
-	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE,
 
 	BattleExecute = function(user, target)
@@ -111,7 +106,6 @@ skills[4] = {
 	description = hoa_system.Translate("A strong and aggressive attack with a blade that deals significant damage."),
 	sp_required = 4,
 	warmup_time = 2000,
-	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
 	BattleExecute = function(user, target)
@@ -136,7 +130,6 @@ skills[1001] = {
 	name = "Slime Attack",
 	sp_required = 0,
 	warmup_time = 1100,
-	cooldown_time = 500,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
 	BattleExecute = function(user, target)
@@ -155,7 +148,6 @@ skills[1002] = {
 	name = "Spider Bite",
 	sp_required = 0,
 	warmup_time = 1400,
-	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
 	BattleExecute = function(user, target)
@@ -174,7 +166,6 @@ skills[1003] = {
 	name = "Snake Bite",
 	sp_required = 0,
 	warmup_time = 900,
-	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
 	BattleExecute = function(user, target)
@@ -193,7 +184,6 @@ skills[1004] = {
 	name = "Skeleton Sword Attack",
 	sp_required = 0,
 	warmup_time = 1400,
-	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
 	BattleExecute = function(user, target)

@@ -46,9 +46,7 @@ namespace private_battle {
 *** simulatenously.
 ***
 *** Each action used determines the amount of time that the actor using the action
-*** must wait in the warm up and cool down states. The warm up state is when the
-*** actor has chosen to use the action but has not yet used it. The cool down state
-*** occurs immediately after the actor finishes the action an
+*** must wait in the warm up state before they can execute the action.
 *** ***************************************************************************/
 class BattleAction {
 public:
@@ -70,9 +68,6 @@ public:
 
 	//! \brief Returns the number of milliseconds that the owner actor must wait in the warm up state
 	virtual uint32 GetWarmUpTime() const = 0;
-
-	//! \brief Returns the number of milliseconds that the owner actor must wait in the cool down state
-	virtual uint32 GetCoolDownTime() const = 0;
 
 	//! \name Class member access functions
 	//@{
@@ -129,8 +124,6 @@ public:
 
 	uint32 GetWarmUpTime() const;
 
-	uint32 GetCoolDownTime() const;
-
 	hoa_global::GlobalSkill* GetSkill()
 		{ return _skill; }
 
@@ -163,9 +156,6 @@ public:
 
 	uint32 GetWarmUpTime() const
 		{ return ITEM_WARM_UP_TIME; }
-
-	uint32 GetCoolDownTime() const
-		{ return 0; }
 
 	BattleItem* GetItem()
 		{ return _item; }

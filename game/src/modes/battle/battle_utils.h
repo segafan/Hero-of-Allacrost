@@ -90,7 +90,7 @@ enum BATTLE_STATE {
 };
 
 
-//! \brief Represents the possible states that a BattleActor may be in
+//! \brief Represents the possible states that a BattleActor may be in as they pertain to the stamina bar
 enum ACTOR_STATE {
 	ACTOR_STATE_INVALID       = -1,
 	ACTOR_STATE_IDLE          =  0, //!< Actor is recovering stamina so they can execute another action
@@ -98,10 +98,9 @@ enum ACTOR_STATE {
 	ACTOR_STATE_WARM_UP       =  2, //!< Actor has selected an action and is preparing to execute it
 	ACTOR_STATE_READY         =  3, //!< Actor is prepared to execute action and is waiting their turn to act
 	ACTOR_STATE_ACTING        =  4, //!< Actor is in the process of executing their selected action
-	ACTOR_STATE_COOL_DOWN     =  5, //!< Actor is finished with previous action execution and recovering
-	ACTOR_STATE_DEAD          =  6, //!< Actor has perished and is inactive in battle
-	ACTOR_STATE_PARALYZED     =  7, //!< Actor is in some state of paralysis and can not act nor recover stamina
-	ACTOR_STATE_TOTAL         =  8
+	ACTOR_STATE_DEAD          =  5, //!< Actor has perished and is inactive in battle
+	ACTOR_STATE_PARALYZED     =  6, //!< Actor is in some state of paralysis and can not act nor recover stamina
+	ACTOR_STATE_TOTAL         =  7
 };
 
 

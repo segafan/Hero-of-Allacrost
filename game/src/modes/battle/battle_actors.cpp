@@ -139,21 +139,6 @@ void BattleActor::ChangeState(ACTOR_STATE new_state) {
 				BattleMode::CurrentInstance()->NotifyActorReady(this);
 			}
 			break;
-		case ACTOR_STATE_COOL_DOWN:
-			_execution_finished = false;
-			if (_action == NULL) {
-				// TODO: This case seems to occur when the action could not be executed (due to insufficient SP, etc).
-				// When this is the case, the action gets deleted and the actor would otherwise get stuck, because we
-				// dont have a cool-down time available to give it. This case needs to be handled better
-				IF_PRINT_WARNING(BATTLE_DEBUG) << "no action available during state change: " << _state << endl;
-				// TEMP: find a better solution than this temporary hack
-				ChangeState(ACTOR_STATE_IDLE);
-			}
-			else {
-				_state_timer.Initialize(_action->GetCoolDownTime());
-				_state_timer.Run();
-			}
-			break;
 		case ACTOR_STATE_DEAD:
 			_effects_supervisor->RemoveAllStatus();
 			BattleMode::CurrentInstance()->NotifyActorDeath(this);
@@ -299,9 +284,6 @@ void BattleActor::Update(bool animation_only) {
 		}
 		else if (_state == ACTOR_STATE_WARM_UP) {
 			ChangeState(ACTOR_STATE_READY);
-		}
-		else if (_state == ACTOR_STATE_COOL_DOWN) {
-			ChangeState(ACTOR_STATE_IDLE);
 		}
 	}
 }
@@ -475,7 +457,7 @@ void BattleCharacter::Update(bool animation_only) {
 		// If the character is executing their action,
 		if (_state == ACTOR_STATE_ACTING) {
 			if (_action->Execute() == true) {
-				ChangeState(ACTOR_STATE_COOL_DOWN);
+				ChangeState(ACTOR_STATE_IDLE);
 			}
 		}
 	}
@@ -790,7 +772,7 @@ void BattleEnemy::Update(bool animation_only) {
 			_execution_finished = _action->Execute();
 
 		if ((_execution_finished == true) && (_state_timer.IsFinished() == true))
-			ChangeState(ACTOR_STATE_COOL_DOWN);
+			ChangeState(ACTOR_STATE_IDLE);
 	}
 }
 

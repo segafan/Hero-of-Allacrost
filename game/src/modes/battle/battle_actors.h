@@ -60,7 +60,6 @@ namespace private_battle {
 *** -# ACTOR_STATE_WARM_UP
 *** -# ACTOR_STATE_READY
 *** -# ACTOR_STATE_ACTING
-*** -# ACTOR_STATE_COOL_DOWN
 ***
 *** Throughout each cycle, the actor will select or be given an action to execute.
 *** This action may be to attack an actor on the opposing team, heal a teammate,
