@@ -118,6 +118,8 @@ public:
 
 	/** \brief Deals damage to the actor by reducing its hit points by a certain amount
 	*** \param amount The number of hit points to decrease on the actor
+	*** \note If the amount of damage dealt exceeds the actor's stamina, fatigue will accumulate and the current
+	*** max HP dropped accordingly
 	***
 	*** If the state of the actor is ACTOR_STATE_DEAD, this function will print a warning and change nothing.
 	*** If the amount of damage dealt is greater than the actor's current hit points, the actor will be placed
@@ -128,6 +130,8 @@ public:
 	/** \brief Deals damage to the actor by reducing its hit points by a certain amount
 	*** \param amount The number of hit points to decrease on the actor
 	*** \param target A pointer to the target information that was used to inflict this damage
+	*** \note If the amount of damage dealt exceeds the actor's stamina, fatigue will accumulate and the current
+	*** max HP dropped accordingly
 	***
 	*** In addition to dealing damage, this function will use the second target argument to determine if this
 	*** damage was inflicted on an attack point (as opposed to the actor as a whole). If so, it analyzes the
@@ -223,6 +227,9 @@ public:
 	void ResetHitPoints()
 		{ SetHitPoints(_global_actor->GetHitPoints()); }
 
+	void ResetCurrentMaxHitPoints()
+		{ SetCurrentMaxHitPoints(_global_actor->GetCurrentMaxHitPoints()); }
+
 	void ResetMaxHitPoints()
 		{ SetMaxHitPoints(_global_actor->GetMaxHitPoints()); }
 
@@ -231,6 +238,9 @@ public:
 
 	void ResetMaxSkillPoints()
 		{ SetMaxSkillPoints(_global_actor->GetMaxSkillPoints()); }
+
+	void ResetFatigue()
+		{ SetFatigue(_global_actor->GetFatigue()); }
 
 	void ResetStrength()
 		{ SetStrength(_global_actor->GetStrength()); }
@@ -246,6 +256,9 @@ public:
 
 	void ResetAgility()
 		{ SetAgility(_global_actor->GetAgility()); }
+
+	void ResetStamina()
+		{ SetStamina(_global_actor->GetStamina()); }
 
 	void ResetEvade()
 		{ SetEvade(_global_actor->GetEvade()); }

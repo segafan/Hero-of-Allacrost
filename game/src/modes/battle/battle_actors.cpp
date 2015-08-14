@@ -89,12 +89,15 @@ void BattleActor::ResetActor() {
 	_effects_supervisor->RemoveAllStatus();
 
 	ResetHitPoints();
+	ResetCurrentMaxHitPoints();
 	ResetSkillPoints();
+	ResetFatigue();
 	ResetStrength();
 	ResetVigor();
 	ResetFortitude();
 	ResetProtection();
 	ResetAgility();
+	ResetStamina();
 	ResetEvade();
 
 	ChangeState(ACTOR_STATE_IDLE);
@@ -182,6 +185,10 @@ void BattleActor::RegisterDamage(uint32 amount, BattleTarget* target) {
 
 	SubtractHitPoints(amount);
 	_indicator_supervisor->AddDamageIndicator(amount);
+	uint32 fatigue_damage = amount / GetStamina();
+	if (fatigue_damage > 0) {
+		AddFatigue(fatigue_damage); // This call also subtracts the amount from the current max HP
+	}
 
 	if (GetHitPoints() == 0) {
 		ChangeState(ACTOR_STATE_DEAD);
@@ -573,6 +580,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 
 	// Colors used for the HP/SP bars
 	const Color green_hp(0.294f, 0.776f, 0.184f, 1.0f);
+	const Color darkgreen_hp(0.110f, 0.388f, 0.090f, 1.0f);
 	const Color blue_sp(0.196f, 0.522f, 0.859f, 1.0f);
 
 	// Determine what vertical order the character is in and set the y_offset accordingly
@@ -617,6 +625,14 @@ void BattleCharacter::DrawStatus(uint32 order) {
 
 		if (GetHitPoints() > 0) {
 			VideoManager->DrawRectangle(bar_size, 6, green_hp);
+		}
+
+		// If HP isn't at it's current maximum, draw a dark green bar to display where the maximum HP value currently is. Note that
+		// this uses the current max HP. The area of the bar between the current max HP and the max HP (caused by battle fatigue) remains black
+		if (GetCurrentMaxHitPoints() != GetHitPoints()) {
+			VideoManager->Move(312.0f + bar_size, 90.0f + y_offset);
+			bar_size = static_cast<float>(90 * (GetCurrentMaxHitPoints() - GetHitPoints())) / static_cast<float>(GetMaxHitPoints());
+			VideoManager->DrawRectangle(bar_size, 6, darkgreen_hp);
 		}
 
 		// Draw SP bar in blue
