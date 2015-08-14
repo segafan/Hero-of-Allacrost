@@ -341,6 +341,9 @@ void BattleMode::Update() {
 	if (InputManager->PausePress()) {
 		ModeManager->Push(new PauseMode(false));
 		return;
+	} else if(InputManager->HelpPress() == true) {
+		ModeManager->Push(new PauseMode(false,true));
+		return;
 	}
 
 	if (_battle_script.IsFileOpen() == true) {

@@ -13,8 +13,8 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-W" />
 					<Add option="-g" />
+					<Add option="-W" />
 					<Add option="-O0" />
 					<Add option="-DQT3_SUPPORT" />
 					<Add option="-DQT_CLEAN_NAMESPACE" />
@@ -40,6 +40,8 @@
 					<Add directory="allacrost-win32-depends/include/qt4/include/QtCore" />
 					<Add directory="allacrost-win32-depends/include/qt4/include/QtGui" />
 					<Add directory="allacrost-win32-depends/include/qt4/include/QtOpenGL" />
+					<Add directory="src/luabind" />
+					<Add directory="src/common" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="src" />
@@ -259,7 +261,6 @@
 				</Linker>
 			</Target>
 		</Build>
-		<Unit filename="src/common/global/defs_global.cpp" />
 		<Unit filename="src/common/global/global.cpp" />
 		<Unit filename="src/common/global/global.h" />
 		<Unit filename="src/common/global/global_actors.cpp" />
@@ -273,17 +274,9 @@
 		<Unit filename="src/common/global/global_utils.cpp" />
 		<Unit filename="src/common/global/global_utils.h" />
 		<Unit filename="src/defs.h" />
-		<Unit filename="src/editor/dialog_boxes.cpp" />
-		<Unit filename="src/editor/dialog_boxes.h" />
 		<Unit filename="src/editor/editor.cpp" />
 		<Unit filename="src/editor/editor.h" />
 		<Unit filename="src/editor/editor_main.cpp" />
-		<Unit filename="src/editor/grid.cpp" />
-		<Unit filename="src/editor/grid.h" />
-		<Unit filename="src/editor/skill_editor.cpp" />
-		<Unit filename="src/editor/skill_editor.h" />
-		<Unit filename="src/editor/sprites.cpp" />
-		<Unit filename="src/editor/sprites.h" />
 		<Unit filename="src/editor/tileset.cpp" />
 		<Unit filename="src/editor/tileset.h" />
 		<Unit filename="src/editor/tileset_editor.cpp" />
