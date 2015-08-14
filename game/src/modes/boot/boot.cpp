@@ -271,10 +271,8 @@ void BootMode::Update() {
 	//CD: Handle key press here, just like any other time
 	if (_welcome_window->IsActive())
 	{
-		// Check for waiting keypresses or joystick button presses
-		SDL_Event ev = InputManager->GetMostRecentEvent();
-		// Check to see if F1 was pressed. If so, close Welcome Window
-		if ((ev.type == SDL_KEYDOWN) && (ev.key.keysym.sym == SDLK_F1)) {
+		if (InputManager->HelpPress())
+		{
 			_boot_sounds.at(0).Play();
 			_welcome_window->Hide();
 

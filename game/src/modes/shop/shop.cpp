@@ -1192,7 +1192,7 @@ void ShopMode::Update() {
 		ModeManager->Push(new PauseMode(false));
 		return;
 	} else if(InputManager->HelpPress()) {
-		ModeManager->Push(new PauseMode(false,true));
+		ModeManager->Push(new PauseMode(false, true));
 		return;
 	}
 
