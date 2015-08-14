@@ -420,9 +420,11 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 		else if (key_event.keysym.sym == _key.pause) {
 			_pause_press = true;
 			return;
-		}else if(key_event.keysym.sym == SDLK_F1) {
+		}
+		else if(key_event.keysym.sym == SDLK_F1) {
 			_help_press = true;
-		}else if(key_event.keysym.sym != SDLK_t && key_event.keysym.sym != SDLK_LCTRL && key_event.keysym.sym != SDLK_RCTRL ) {
+		}
+		else if(key_event.keysym.sym != SDLK_LCTRL && key_event.keysym.sym != SDLK_RCTRL) {
 			_unmapped_key_press = true;
 		}
 	}
