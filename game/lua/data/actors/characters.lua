@@ -22,8 +22,9 @@ characters[CLAUDIUS] = {
 		vigor = 4,
 		fortitude = 15,
 		protection = 6,
-		agility = 30,
 		stamina = 10,
+		resilience = 5,
+		agility = 30,
 		evade = 5.0,
 		weapon = 10001,
 		head_armor = 20001,
@@ -107,12 +108,17 @@ characters[CLAUDIUS] = {
 			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
 		},
 
-		agility = {
+		stamina = {
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
 		},
 
-		stamina = {
+		resilience = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
+		agility = {
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
 		},
@@ -141,8 +147,9 @@ characters[MARK] = {
 		vigor = 8,
 		fortitude = 24,
 		protection = 10,
-		agility = 35,
 		stamina = 10,
+		resilience = 5,
+		agility = 35,
 		evade = 5.2,
 		weapon = 10002,
 		head_armor = 20002,
@@ -226,12 +233,17 @@ characters[MARK] = {
 			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
 		},
 
-		agility = {
+		stamina = {
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
 		},
 
-		stamina = {
+		resilience = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
+		agility = {
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
 		},
@@ -260,8 +272,9 @@ characters[LUKAR] = {
 		vigor = 21,
 		fortitude = 47,
 		protection = 23,
-		agility = 46,
 		stamina = 10,
+		resilience = 5,
+		agility = 46,
 		evade = 7.0,
 		weapon = 10003,
 		head_armor = 20003,
@@ -345,12 +358,17 @@ characters[LUKAR] = {
 			2, 2, 2, 2, 3, 3, 3, 3, 3, 3
 		},
 
-		agility = {
+		stamina = {
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
 		},
 
-		stamina = {
+		resilience = {
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
+		},
+
+		agility = {
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
 			1, 0, 1, 0, 1, 0, 1, 0, 1, 0
 		},
@@ -427,6 +445,8 @@ function DetermineNextLevelGrowth(character)
 	character._vigor_growth = growth_table["vigor"][new_level];
 	character._fortitude_growth = growth_table["fortitude"][new_level];
 	character._protection_growth = growth_table["protection"][new_level];
+	character._stamina_growth = growth_table["stamina"][new_level];
+	character._resilience_growth = growth_table["resilience"][new_level];
 	character._agility_growth = growth_table["agility"][new_level];
 	character._evade_growth = growth_table["evade"][new_level];
 end -- function DetermineNextLevelGrowth(character)

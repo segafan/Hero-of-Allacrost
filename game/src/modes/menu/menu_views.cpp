@@ -104,12 +104,12 @@ void CharacterWindow::Draw() {
 	// HP
 	VideoManager->MoveRelative(0,20);
 	VideoManager->Text()->Draw(UTranslate("HP: ") + MakeUnicodeString(NumberToString(character->GetHitPoints()) +
-		" (" + NumberToString(character->GetFatigue()) + ")"), TextStyle("text20"));
+		" (-" + NumberToString(character->GetHitPointFatigue()) + ")"), TextStyle("text20"));
 
 	// SP
 	VideoManager->MoveRelative(0,20);
 	VideoManager->Text()->Draw(UTranslate("SP: ") + MakeUnicodeString(NumberToString(character->GetSkillPoints()) +
-		" / " + NumberToString(character->GetMaxSkillPoints())), TextStyle("text20"));
+		" (-" + NumberToString(character->GetSkillPointFatigue()) + ")"), TextStyle("text20"));
 
 	// XP to level up
 	VideoManager->MoveRelative(0, 20);
@@ -571,11 +571,11 @@ void StatusWindow::Draw() {
 	//Draw all character stats
 	VideoManager->MoveRelative(-55, 60);
 	VideoManager->Text()->Draw(UTranslate("HP: ") + MakeUnicodeString(NumberToString(ch->GetHitPoints()) +
-		" (" + NumberToString(ch->GetFatigue()) + "), Max: " + NumberToString(ch->GetMaxHitPoints())));
+		" (-" + NumberToString(ch->GetHitPointFatigue()) + "), Max: " + NumberToString(ch->GetMaxHitPoints())));
 
 	VideoManager->MoveRelative(0, 25);
 	VideoManager->Text()->Draw(UTranslate("SP: ") + MakeUnicodeString(NumberToString(ch->GetSkillPoints()) +
-		" (" + NumberToString(ch->GetMaxSkillPoints()) + ")"));
+		" (-" + NumberToString(ch->GetSkillPointFatigue()) + ")"));
 
 	VideoManager->MoveRelative(0, 25);
 	VideoManager->Text()->Draw(UTranslate("XP to Next: ") + MakeUnicodeString(NumberToString(ch->GetExperienceForNextLevel())));
@@ -593,10 +593,13 @@ void StatusWindow::Draw() {
 	VideoManager->Text()->Draw(UTranslate("Protection: ") + MakeUnicodeString(NumberToString(ch->GetProtection())));
 
 	VideoManager->MoveRelative(0, 25);
-	VideoManager->Text()->Draw(UTranslate("Agility: ") + MakeUnicodeString(NumberToString(ch->GetAgility())));
+	VideoManager->Text()->Draw(UTranslate("Stamina: ") + MakeUnicodeString(NumberToString(ch->GetStamina())));
 
 	VideoManager->MoveRelative(0, 25);
-	VideoManager->Text()->Draw(UTranslate("Stamina: ") + MakeUnicodeString(NumberToString(ch->GetStamina())));
+	VideoManager->Text()->Draw(UTranslate("Resilience: ") + MakeUnicodeString(NumberToString(ch->GetResilience())));
+
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->Text()->Draw(UTranslate("Agility: ") + MakeUnicodeString(NumberToString(ch->GetAgility())));
 
 	VideoManager->MoveRelative(0, 25);
 	VideoManager->Text()->Draw(UTranslate("Evade: ") + MakeUnicodeString(NumberToString(ch->GetEvade()) + "%"));

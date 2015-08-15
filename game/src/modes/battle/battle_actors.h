@@ -184,17 +184,14 @@ public:
 	**/
 	void RegisterStatusChange(hoa_global::GLOBAL_STATUS status, hoa_global::GLOBAL_INTENSITY intensity);
 
-	/** \brief Increases or decreases the current skill points of the actor
-	*** \param amount The number of skill points to increase or decrease
+	/** \brief Decreases the skill points of the actor and applies any calculated increase in SP fatigue
+	*** \param amount The number of skill points to decrease
 	***
-	*** If the actor is dead, no change will take place. If the amount is positive, the actor will
-	*** not be allowed to exceed above their maximum skill points.
-	***
-	*** Any non-zero change in skill points will be reflected via increase/decrease text that will
-	*** be drawn to the screen near the actor's sprite. If the value of the amount argument is zero,
-	*** the word "Miss" will be drawn instead;
+	*** If the actor is dead or the amount argument is zero, no change will take place. Otherwise the change in
+	*** skill points will be reflected via indicator text that will be drawn to the screen near the actor's sprite.
+	*** If the amount exceeds the number of skill points available, SP will be set to zero.
 	**/
-	void ChangeSkillPoints(int32 amount);
+	void RegisterSkillPointsConsumed(uint32 amount);
 
 	/** \brief Updates the state of the actor
 	*** \param animations_only If true, animations will be updated but actor state will not. Default value is false
@@ -226,11 +223,11 @@ public:
 	void ResetHitPoints()
 		{ SetHitPoints(_global_actor->GetHitPoints()); }
 
-	void ResetCurrentMaxHitPoints()
-		{ SetCurrentMaxHitPoints(_global_actor->GetCurrentMaxHitPoints()); }
-
 	void ResetMaxHitPoints()
 		{ SetMaxHitPoints(_global_actor->GetMaxHitPoints()); }
+
+	void ResetHitPointFatigue()
+		{ SetHitPointFatigue(_global_actor->GetHitPointFatigue()); _active_max_hit_points = _global_actor->GetMaxHitPoints() - _global_actor->GetHitPointFatigue(); }
 
 	void ResetSkillPoints()
 		{ SetSkillPoints(_global_actor->GetSkillPoints()); }
@@ -238,8 +235,8 @@ public:
 	void ResetMaxSkillPoints()
 		{ SetMaxSkillPoints(_global_actor->GetMaxSkillPoints()); }
 
-	void ResetFatigue()
-		{ SetFatigue(_global_actor->GetFatigue()); }
+	void ResetSkillPointFatigue()
+		{ SetSkillPointFatigue(_global_actor->GetSkillPointFatigue()); _active_max_skill_points = _global_actor->GetMaxSkillPoints() - _global_actor->GetSkillPointFatigue(); }
 
 	void ResetStrength()
 		{ SetStrength(_global_actor->GetStrength()); }
@@ -253,11 +250,14 @@ public:
 	void ResetProtection()
 		{ SetProtection(_global_actor->GetProtection()); }
 
-	void ResetAgility()
-		{ SetAgility(_global_actor->GetAgility()); }
-
 	void ResetStamina()
 		{ SetStamina(_global_actor->GetStamina()); }
+
+	void ResetResilience()
+		{ SetResilience(_global_actor->GetResilience()); }
+
+	void ResetAgility()
+		{ SetAgility(_global_actor->GetAgility()); }
 
 	void ResetEvade()
 		{ SetEvade(_global_actor->GetEvade()); }

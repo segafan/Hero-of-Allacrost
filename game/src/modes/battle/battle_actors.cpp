@@ -89,17 +89,19 @@ void BattleActor::ResetActor() {
 	_effects_supervisor->RemoveAllStatus();
 
 	ResetHitPoints();
-	ResetCurrentMaxHitPoints();
+	ResetHitPointFatigue();
 	ResetSkillPoints();
-	ResetFatigue();
+	ResetSkillPointFatigue();
 	ResetStrength();
 	ResetVigor();
 	ResetFortitude();
 	ResetProtection();
-	ResetAgility();
 	ResetStamina();
+	ResetResilience();
+	ResetAgility();
 	ResetEvade();
 
+	ChangeState(ACTOR_STATE_INVALID);
 	ChangeState(ACTOR_STATE_IDLE);
 }
 
@@ -111,6 +113,7 @@ void BattleActor::ChangeState(ACTOR_STATE new_state) {
 		return;
 	}
 
+	ACTOR_STATE old_state = _state;
 	_state = new_state;
 	_state_timer.Reset();
 	switch (_state) {
@@ -172,7 +175,7 @@ void BattleActor::RegisterDamage(uint32 amount, BattleTarget* target) {
 	_indicator_supervisor->AddDamageIndicator(amount);
 	uint32 fatigue_damage = amount / GetStamina();
 	if (fatigue_damage > 0) {
-		AddFatigue(fatigue_damage); // This call also subtracts the amount from the current max HP
+		AddHitPointFatigue(fatigue_damage); // This call also subtracts the amount from the active max HP
 	}
 
 	if (GetHitPoints() == 0) {
@@ -253,16 +256,18 @@ void BattleActor::RegisterStatusChange(GLOBAL_STATUS status, GLOBAL_INTENSITY in
 
 
 
-void BattleActor::ChangeSkillPoints(int32 amount) {
-	uint32 unsigned_amount = static_cast<uint32>(amount);
+void BattleActor::RegisterSkillPointsConsumed(uint32 amount) {
+	if (amount == 0 || IsAlive() == false) {
+		return;
+	}
 
-	// Modify actor's skill points accordingly
-	if (amount > 0)
-		AddSkillPoints(unsigned_amount);
-	else if (amount < 0)
-		SubtractSkillPoints(unsigned_amount);
-
-	// TODO: SP change text needs to be implemented
+	SubtractSkillPoints(amount);
+	// TODO: SP indicator change text needs to be implemented
+// 	_indicator_supervisor->AddSkillPointConsumedIndicator(amount);
+	uint32 fatigue_damage = amount / GetResilience();
+	if (fatigue_damage > 0) {
+		AddSkillPointFatigue(fatigue_damage); // This call also subtracts the amount from the active max SP
+	}
 }
 
 
@@ -406,9 +411,22 @@ void BattleCharacter::ResetActor() {
 
 
 void BattleCharacter::ChangeState(ACTOR_STATE new_state) {
+	ACTOR_STATE old_state = _state;
 	BattleActor::ChangeState(new_state);
 
 	switch (_state) {
+		case ACTOR_STATE_IDLE:
+			// Regenerate a small portion of SP so long as we are not entering from the invalid state (which indicates the start of the battle)
+			// TODO: check and make sure that actor states are restored to invalid when a battle retries, otherwise
+			// a battle retry might start off with granting an initial SP regeneration boost
+			if (old_state != ACTOR_STATE_INVALID) {
+				// Regeneration amount is based on the active SP max, not the full max. The character will always regenerate at least 1 SP
+				uint32 sp_regeneration = GetActiveMaxSkillPoints() / CHARACTER_SP_REGENERATION_RATE;
+				if (sp_regeneration == 0)
+					sp_regeneration = 1;
+				AddSkillPoints(sp_regeneration);
+				// TODO: add indicator text indicating the regeneration amount
+			}
 		case ACTOR_STATE_COMMAND:
 			// When the "wait" setting is active in battle mode we want the command menu to be brought up for the character as soon as we can when the character
 			// enters this state. This is done within the BattleMode::Update() method
@@ -564,6 +582,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 	const Color green_hp(0.294f, 0.776f, 0.184f, 1.0f);
 	const Color darkgreen_hp(0.110f, 0.388f, 0.090f, 1.0f);
 	const Color blue_sp(0.196f, 0.522f, 0.859f, 1.0f);
+	const Color darkblue_sp(0.110f, 0.430f, 0.455f, 1.0f);
 	const Color yellow_indicator = Color::yellow;
 
 	// Determine what vertical order the character is in and set the y_offset accordingly
@@ -597,12 +616,12 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		_effects_supervisor->Draw();
 	}
 
-	// Otherwise, draw the HP and SP bars (bars are 90 pixels wide and 6 pixels high)
+	// Otherwise, draw the HP and SP bars (The full bars are 90 pixels wide and 6 pixels high)
 	else {
 		float bar_size;
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_NO_BLEND, 0);
 
-		// Draw HP bar in green
+		// Draw the HP bar in green
 		bar_size = static_cast<float>(90 * GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
 		VideoManager->Move(312.0f, 90.0f + y_offset);
 
@@ -610,19 +629,19 @@ void BattleCharacter::DrawStatus(uint32 order) {
 			VideoManager->DrawRectangle(bar_size, 6, green_hp);
 		}
 
-		// If HP isn't at it's current maximum, draw a dark green bar to display where the maximum HP value currently is. Note that
-		// this uses the current max HP. The area of the bar between the current max HP and the max HP (caused by battle fatigue) remains black
-		if (GetCurrentMaxHitPoints() != GetHitPoints()) {
+		// If the current HP is less than the active max HP, draw a dark green bar to display where the active maximum HP value currently is.
+		// The area of the bar between the active max HP and the full max HP (caused by HP fatigue) will remain black
+		if (GetHitPoints() < GetActiveMaxHitPoints()) {
 			VideoManager->Move(312.0f + bar_size, 90.0f + y_offset);
-			bar_size = static_cast<float>(90 * (GetCurrentMaxHitPoints() - GetHitPoints())) / static_cast<float>(GetMaxHitPoints());
+			bar_size = static_cast<float>(90 * (GetActiveMaxHitPoints() - GetHitPoints())) / static_cast<float>(GetMaxHitPoints());
 			VideoManager->DrawRectangle(bar_size, 6, darkgreen_hp);
+
+			// Draw a small yellow indicator line to show where the active max HP is at
+			VideoManager->Move(312.0f + static_cast<float>((90 * GetActiveMaxHitPoints()) / static_cast<float>(GetMaxHitPoints())), 90.0f + y_offset);
+			VideoManager->DrawRectangle(1, 6, yellow_indicator);
 		}
 
-		// Draw a small yellow indicator bar to show where the current max HP is at
-		VideoManager->Move(312.0f + static_cast<float>((90 * GetCurrentMaxHitPoints()) / static_cast<float>(GetMaxHitPoints())), 90.0f + y_offset);
-		VideoManager->DrawRectangle(1, 6, yellow_indicator);
-
-		// Draw SP bar in blue
+		// Draw the SP bar in blue
 		bar_size = static_cast<float>(90 * GetSkillPoints()) / static_cast<float>(GetMaxSkillPoints());
 		VideoManager->Move(420.0f, 90.0f + y_offset);
 
@@ -630,7 +649,19 @@ void BattleCharacter::DrawStatus(uint32 order) {
 			VideoManager->DrawRectangle(bar_size, 6, blue_sp);
 		}
 
-		// Draw the cover image over the top of the bar
+		// If the current SP is less than at the active max SP, draw a dark blue bar to display where the active maximum SP value currently is.
+		// The area of the bar between the active max SP and the full max SP (caused by SP fatigue) will remain black
+		if (GetSkillPoints() < GetActiveMaxSkillPoints()) {
+			VideoManager->Move(420.0f + bar_size, 90.0f + y_offset);
+			bar_size = static_cast<float>(90 * (GetActiveMaxSkillPoints() - GetSkillPoints())) / static_cast<float>(GetMaxSkillPoints());
+			VideoManager->DrawRectangle(bar_size, 6, darkblue_sp);
+
+			// Draw a small yellow indicator line to show where the active max HP is at
+			VideoManager->Move(420.0f + static_cast<float>((90 * GetActiveMaxSkillPoints()) / static_cast<float>(GetMaxSkillPoints())), 90.0f + y_offset);
+			VideoManager->DrawRectangle(1, 6, yellow_indicator);
+		}
+
+		// Draw the cover image over the top of both the HP and SP bars
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Move(293.0f, 84.0f + y_offset);
 		BattleMode::CurrentInstance()->GetMedia().character_bar_covers.Draw();
@@ -649,14 +680,12 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		_skill_points_text.Draw();
 
 		// Update hit and skill points after drawing to reduce gpu stall
-		if (_last_rendered_hp != GetHitPoints())
-		{
+		if (_last_rendered_hp != GetHitPoints()) {
 			_last_rendered_hp = GetHitPoints();
 			_hit_points_text.SetText(NumberToString(_last_rendered_hp));
 		}
 
-		if (_last_rendered_sp != GetSkillPoints())
-		{
+		if (_last_rendered_sp != GetSkillPoints()) {
 			_last_rendered_sp = GetSkillPoints();
 			_skill_points_text.SetText(NumberToString(_last_rendered_sp));
 		}
