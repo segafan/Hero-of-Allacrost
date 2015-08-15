@@ -41,6 +41,7 @@ InputEngine::InputEngine() {
 	if (INPUT_DEBUG) cout << "INPUT: InputEngine constructor invoked" << endl;
 	_any_key_press        = false;
 	_any_key_release      = false;
+	_unmapped_key_press 	= false;
 	_last_axis_moved      = -1;
 	_up_state             = false;
 	_up_press             = false;
@@ -188,6 +189,10 @@ bool InputEngine::RestoreDefaultJoyButtons()
 	return true;
 }
 
+// Checks if any unmapped keyboard key or joystick button is pressed
+bool InputEngine::UnmappedKeyPress() {
+	return _unmapped_key_press;
+}
 
 // Checks if any keyboard key or joystick button is pressed
 bool InputEngine::AnyKeyPress() {
@@ -208,6 +213,7 @@ void InputEngine::EventHandler() {
 	// Reset all of the press and release flags so that they don't get detected twice.
 	_any_key_press   = false;
 	_any_key_release = false;
+	_unmapped_key_press = false;
 
 	_up_press             = false;
 	_up_release           = false;
@@ -232,6 +238,7 @@ void InputEngine::EventHandler() {
 
 	_pause_press = false;
 	_quit_press = false;
+	_help_press = false;
 
 	// Loops until there are no remaining events to process
 	while (SDL_PollEvent(&event)) {
@@ -414,11 +421,18 @@ void InputEngine::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			_pause_press = true;
 			return;
 		}
+		else if(key_event.keysym.sym == SDLK_F1) {
+			_help_press = true;
+		}
+		else if(key_event.keysym.sym != SDLK_LCTRL && key_event.keysym.sym != SDLK_RCTRL) {
+			_unmapped_key_press = true;
+		}
 	}
 
 	else { // Key was released
 
 		_any_key_press = false;
+		_unmapped_key_press = false;
 		_any_key_release = true;
 
 		if (key_event.keysym.sym == _key.up) {

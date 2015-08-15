@@ -44,13 +44,16 @@ const uint8 QUIT_TO_BOOT   = 1;
 const uint8 QUIT_CANCEL    = 2;
 //@}
 
-PauseMode::PauseMode(bool quit_state, bool pause_audio) :
+PauseMode::PauseMode(bool quit_state, bool help_state, bool pause_audio) :
 	GameMode(),
 	_quit_state(quit_state),
+	_help_state(help_state),
 	_audio_paused(pause_audio),
 	_dim_color(0.35f, 0.35f, 0.35f, 1.0f) // A grayish opaque color
 {
 	mode_type = MODE_MANAGER_PAUSE_MODE;
+
+
 
 	// Render the paused string in white text
 	_paused_text.SetStyle(TextStyle("title28", Color::white, VIDEO_TEXT_SHADOW_BLACK));
@@ -70,6 +73,13 @@ PauseMode::PauseMode(bool quit_state, bool pause_audio) :
 	_quit_options.AddOption(UTranslate("Quit to Main Menu"));
 	_quit_options.AddOption(UTranslate("Cancel"));
 	_quit_options.SetSelection(QUIT_CANCEL);
+
+	// Initialize help Window
+	_help_window = new hoa_boot::private_boot::WelcomeWindow();
+	if(_help_state == true)
+	{
+		_help_window->Show();
+	}
 }
 
 
@@ -102,6 +112,13 @@ void PauseMode::Reset() {
 void PauseMode::Update() {
 	// Don't eat up 100% of the CPU time while in pause mode
 	SDL_Delay(50); // Puts the process to sleep for 50ms
+	if(_help_window->IsActive()){
+
+		if (InputManager->HelpPress() == true) {
+			_help_window->Hide();
+		}
+		return;
+	}
 
 	if (_quit_state == false) {
 		if (InputManager->QuitPress() == true) {
@@ -111,6 +128,8 @@ void PauseMode::Update() {
 		else if (InputManager->PausePress() == true) {
 			ModeManager->Pop();
 			return;
+		}else if(InputManager->HelpPress() == true) {
+			_help_window->Show();
 		}
 	}
 
@@ -173,8 +192,12 @@ void PauseMode::Draw() {
 	if (_quit_state == false) {
 		_paused_text.Draw();
 	}
-	else {
+	else if(_quit_state == true) {
 		_quit_options.Draw();
+	}
+
+	if(_help_window->IsActive() == true) {
+		_help_window->Draw();
 	}
 }
 

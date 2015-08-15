@@ -207,6 +207,9 @@ void MapMode::Update() {
 	else if (InputManager->PausePress() == true) {
 		ModeManager->Push(new PauseMode(false));
 		return;
+	} else if(InputManager->HelpPress() == true) {
+		ModeManager->Push(new PauseMode(false, true));
+		return;
 	}
 
 	// ---------- (1) Call the map script's update function
@@ -828,4 +831,3 @@ void MapMode::_DrawGUI() {
 } // void MapMode::_DrawGUI()
 
 } // namespace hoa_map
-
