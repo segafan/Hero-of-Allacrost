@@ -113,7 +113,6 @@ void BattleActor::ChangeState(ACTOR_STATE new_state) {
 		return;
 	}
 
-	ACTOR_STATE old_state = _state;
 	_state = new_state;
 	_state_timer.Reset();
 	switch (_state) {
@@ -775,6 +774,9 @@ void BattleEnemy::ChangeState(ACTOR_STATE new_state) {
 
 	vector<StillImage>& sprite_frames = *(_global_enemy->GetBattleSpriteFrames());
 	switch (_state) {
+		case ACTOR_STATE_IDLE:
+			_execution_finished = false;
+			break;
 		case ACTOR_STATE_COMMAND:
 			_DecideAction();
 			ChangeState(ACTOR_STATE_WARM_UP);
