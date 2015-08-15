@@ -79,8 +79,7 @@ SkillAction::SkillAction(BattleActor* actor, BattleTarget target, GlobalSkill* s
 bool SkillAction::Execute() {
 	// (1): First check that the actor has sufficient XP to use the skill
 	if (_actor->GetSkillPoints() < _skill->GetSPRequired()) {
-		// TODO: I think changing state to idle while skipping cool down will not delete the skill, test this
-		// TODO: This call actually doesn't work, because another function in BattleActor sets the state to cool-down
+		// TODO: This call actually doesn't work, because another function in BattleActor sets the state to idle
 		// whenever this function returns true. Need to find a solution to this.
 		_actor->ChangeState(ACTOR_STATE_IDLE);
 		// TODO: need to indicate the the skill execution failed to the user somehow
@@ -134,7 +133,7 @@ bool SkillAction::Execute() {
 //
 // 	}
 
-	_actor->SubtractSkillPoints(_skill->GetSPRequired());
+	_actor->RegisterSkillPointsConsumed(_skill->GetSPRequired());
 	return true;
 }
 
@@ -155,15 +154,6 @@ uint32 SkillAction::GetWarmUpTime() const {
 		return 0;
 	else
 		return _skill->GetWarmupTime();
-}
-
-
-
-uint32 SkillAction::GetCoolDownTime() const {
-	if (_skill == NULL)
-		return 0;
-	else
-		return _skill->GetCooldownTime();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -189,7 +189,7 @@ void TestMode::Draw() {
 void TestMode::_Initialize() {
 	_missing_tests_text.SetStyle(TextStyle("text22"));
 	_missing_tests_text.SetText(MakeUnicodeString("No tests are currently defined for this test category."));
-	
+
 	_category_window.Create(400.0f, 600.0f);
 	_category_window.SetPosition(0.0f, 0.0f);
 	_category_window.SetDisplayMode(VIDEO_MENU_INSTANT);
@@ -228,7 +228,7 @@ void TestMode::_Initialize() {
 void TestMode::_ReloadTestData() {
 	// TODO: this function needs some additional error checking to make sure that all of the data
 	// being read from the script files is present and accurate
-	
+
 	// A handle to the main test file that contains the information for each test category
 	ReadScriptDescriptor main_script;
 	// A handle to each test file for each category
@@ -362,7 +362,7 @@ void TestMode::_CheckForInvalidTestID() {
 				uint32 i_max = _test_data[i].maximum_test_id;
 				uint32 j_min = _test_data[j].minimum_test_id;
 				uint32 j_max = _test_data[j].maximum_test_id;
-				
+
 				PRINT_WARNING << "Two test categories had overlapping ID ranges. Please correct this data in the main test file.\n" <<
 					"\tCategory \"" << cat_i_name << "\" has range [" << i_min << ", " << i_max << "].\n" <<
 					"\tCategory \"" << cat_j_name << "\" has range [" << j_min << ", " << j_max << "]." << endl;
@@ -379,7 +379,7 @@ void TestMode::_CheckForInvalidTestID() {
 				uint32 min = _test_data[i].minimum_test_id;
 				uint32 max = _test_data[i].maximum_test_id;
 				uint32 id =_test_data[i].test_ids[j];
-				
+
 				PRINT_WARNING << "Test category \"" << cat_name << "\" contained a test with ID [" << id << "] " <<
 					" which falls outside ofthe category's valid ID range: [" << min << ", " << max << "].\n" <<
 					"\tThe name of the test corresponding to this ID is: \"" << test_name << "\"." << endl;
@@ -409,7 +409,7 @@ void TestMode::_ExecuteTest(uint32 request_id) {
 	// If a request_id has been declared, look up the category and test in the test list
 	if (request_id != INVALID_TEST) {
 		bool request_successful = false;
-		
+
 		// Loop through all test data and find the category that the request_id belongs in
 		for (uint32 i = 0; i < _test_data.size(); ++i) {
 			if ((_test_data[i].minimum_test_id <= request_id) && (request_id <= _test_data[i].maximum_test_id)) {
