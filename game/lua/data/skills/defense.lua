@@ -37,14 +37,15 @@ end
 
 skills[10001] = {
 	name = hoa_system.Translate("Defensive Stance"),
-	description = hoa_system.Translate("Take a stance to better defend user against incoming attacks."),
-	sp_required = 3,
-	warmup_time = 300,
+	description = hoa_system.Translate("Take a stance to briefly increase defense and recover SP"),
+	sp_required = 0,
+	warmup_time = 2000,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_SELF,
 
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
 		target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
+		target_actor:AddSkillPoints(1);
 	end
 }
 

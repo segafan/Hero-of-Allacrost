@@ -46,7 +46,7 @@ end
 skills[20001] = {
 	name = hoa_system.Translate("First Aid"),
 	description = hoa_system.Translate("Performs basic medical assistance, healing the target by a minor degree."),
-	sp_required = 2,
+	sp_required = 5,
 	warmup_time = 1500,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
 
@@ -65,7 +65,7 @@ skills[20001] = {
 skills[20002] = {
 	name = hoa_system.Translate("Encouraging Shout"),
 	description = hoa_system.Translate("Increases the strength of all allies."),
-	sp_required = 14,
+	sp_required = 12,
 	warmup_time = 4000,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_ALLIES,
 
