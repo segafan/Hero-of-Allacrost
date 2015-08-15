@@ -564,6 +564,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 	const Color green_hp(0.294f, 0.776f, 0.184f, 1.0f);
 	const Color darkgreen_hp(0.110f, 0.388f, 0.090f, 1.0f);
 	const Color blue_sp(0.196f, 0.522f, 0.859f, 1.0f);
+	const Color yellow_indicator = Color::yellow;
 
 	// Determine what vertical order the character is in and set the y_offset accordingly
 	switch (order) {
@@ -616,6 +617,10 @@ void BattleCharacter::DrawStatus(uint32 order) {
 			bar_size = static_cast<float>(90 * (GetCurrentMaxHitPoints() - GetHitPoints())) / static_cast<float>(GetMaxHitPoints());
 			VideoManager->DrawRectangle(bar_size, 6, darkgreen_hp);
 		}
+
+		// Draw a small yellow indicator bar to show where the current max HP is at
+		VideoManager->Move(312.0f + static_cast<float>((90 * GetCurrentMaxHitPoints()) / static_cast<float>(GetMaxHitPoints())), 90.0f + y_offset);
+		VideoManager->DrawRectangle(1, 6, yellow_indicator);
 
 		// Draw SP bar in blue
 		bar_size = static_cast<float>(90 * GetSkillPoints()) / static_cast<float>(GetMaxSkillPoints());
