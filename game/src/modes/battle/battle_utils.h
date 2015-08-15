@@ -65,6 +65,8 @@ const float STAMINA_LOCATION_COMMAND = STAMINA_LOCATION_BOTTOM + 354.0f;
 const float STAMINA_LOCATION_TOP = STAMINA_LOCATION_BOTTOM + 508.0f;
 //@}
 
+//! \brief Determines how much SP a character regenerates each turn. This value is divided into the character's active max SP
+const uint32 CHARACTER_SP_REGENERATION_RATE = 10;
 
 //! \brief Returned as an index when looking for a character or enemy and they do not exist
 const uint32 INVALID_BATTLE_ACTOR_INDEX = 999;

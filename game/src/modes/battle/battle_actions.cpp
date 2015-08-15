@@ -133,7 +133,7 @@ bool SkillAction::Execute() {
 //
 // 	}
 
-	_actor->SubtractSkillPoints(_skill->GetSPRequired());
+	_actor->RegisterSkillPointsConsumed(_skill->GetSPRequired());
 	return true;
 }
 

@@ -26,7 +26,6 @@ enemies[101] = {
 		fortitude = 15,
 		protection = 7,
 		agility = 8,
-		stamina = 1,
 		evade = 1.0,
 		drunes = 55
 	},
@@ -75,7 +74,6 @@ enemies[102] = {
 		fortitude = 7,
 		protection = 4,
 		agility = 20,
-		stamina = 1,
 		evade = 10.0,
 		drunes = 60
 	},
@@ -124,7 +122,6 @@ enemies[103] = {
 		fortitude = 8,
 		protection = 5,
 		agility = 15,
-		stamina = 1,
 		evade = 2.0,
 		drunes = 80
 	},
@@ -181,7 +178,6 @@ enemies[104] = {
 		fortitude = 8,
 		protection = 4,
 		agility = 12,
-		stamina = 1,
 		evade = 2.0,
 		drunes = 70
 	},
@@ -238,7 +234,6 @@ enemies[105] = {
 		fortitude = 20,
 		protection = 4,
 		agility = 4,
-		stamina = 1,
 		evade = 1.0,
 		drunes = 85
 	},
@@ -304,7 +299,6 @@ enemies[106] = {
 		fortitude = 8,
 		protection = 4,
 		agility = 18,
-		stamina = 1,
 		evade = 2.0,
 		drunes = 100
 	},
@@ -360,7 +354,6 @@ enemies[107] = {
 		fortitude = 3.0,
 		protection = 1.0,
 		agility = 1.0,
-		stamina = 1,
 		evade = 0.0,
 		drunes = 2.0
 	},
