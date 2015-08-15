@@ -38,7 +38,6 @@ GlobalSkill::GlobalSkill(uint32 id) :
 	_type(GLOBAL_SKILL_INVALID),
 	_sp_required(0),
 	_warmup_time(0),
-	_cooldown_time(0),
 	_target_type(GLOBAL_TARGET_INVALID),
 	_battle_execute_function(NULL),
 	_field_execute_function(NULL)
@@ -77,7 +76,6 @@ GlobalSkill::GlobalSkill(uint32 id) :
 		_description = MakeUnicodeString(skill_script->ReadString("description"));
 	_sp_required = skill_script->ReadUInt("sp_required");
 	_warmup_time = skill_script->ReadUInt("warmup_time");
-	_cooldown_time = skill_script->ReadUInt("cooldown_time");
 	_target_type = static_cast<GLOBAL_TARGET>(skill_script->ReadInt("target_type"));
 	if (skill_script->DoesStringExist("action_name") == true)
 		_action_name = skill_script->ReadString("action_name");
@@ -124,7 +122,6 @@ GlobalSkill::GlobalSkill(const GlobalSkill& copy) {
 	_type = copy._type;
 	_sp_required = copy._sp_required;
 	_warmup_time = copy._warmup_time;
-	_cooldown_time = copy._cooldown_time;
 	_target_type = copy._target_type;
 	_action_name = copy._action_name;
 
@@ -152,7 +149,6 @@ GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy) {
 	_type = copy._type;
 	_sp_required = copy._sp_required;
 	_warmup_time = copy._warmup_time;
-	_cooldown_time = copy._cooldown_time;
 	_target_type = copy._target_type;
 	_action_name = copy._action_name;
 

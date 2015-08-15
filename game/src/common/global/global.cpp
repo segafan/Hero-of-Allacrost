@@ -908,14 +908,16 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 	file.WriteLine("\t\texperience_points_next = " + NumberToString(character->GetExperienceForNextLevel()) + ", ");
 
 	file.WriteLine("\t\tmax_hit_points = " + NumberToString(character->GetMaxHitPoints()) + ",");
-	file.WriteLine("\t\thit_points = " + NumberToString(character->GetHitPoints()) + ",");
+	file.WriteLine("\t\thit_point_fatigue = " + NumberToString(character->GetHitPointFatigue()) + ",");
 	file.WriteLine("\t\tmax_skill_points = " + NumberToString(character->GetMaxSkillPoints()) + ",");
-	file.WriteLine("\t\tskill_points = " + NumberToString(character->GetSkillPoints()) + ",");
+	file.WriteLine("\t\tskill_point_fatigue = " + NumberToString(character->GetSkillPointFatigue()) + ",");
 
 	file.WriteLine("\t\tstrength = " + NumberToString(character->GetStrength()) + ",");
 	file.WriteLine("\t\tvigor = " + NumberToString(character->GetVigor()) + ",");
 	file.WriteLine("\t\tfortitude = " + NumberToString(character->GetFortitude()) + ",");
 	file.WriteLine("\t\tprotection = " + NumberToString(character->GetProtection()) + ",");
+	file.WriteLine("\t\tstamina = " + NumberToString(character->GetStamina()) + ",");
+	file.WriteLine("\t\tresilience = " + NumberToString(character->GetResilience()) + ",");
 	file.WriteLine("\t\tagility = " + NumberToString(character->GetAgility()) + ",");
 	file.WriteLine("\t\tevade = " + NumberToString(character->GetEvade()) + ",");
 
@@ -1069,6 +1071,28 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 	}
 	file.WriteLine("\n\t\t\t},");
 
+	file.WriteLine("\t\t\tstamina = { ");
+	for (uint32 i = 0; i < character->_stamina_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(character->_stamina_periodic_growth[i].first) + "] = "
+			+ NumberToString(character->_stamina_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t},");
+
+	file.WriteLine("\t\t\tresilience = { ");
+	for (uint32 i = 0; i < character->_resilience_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(character->_resilience_periodic_growth[i].first) + "] = "
+			+ NumberToString(character->_resilience_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t},");
+
 	file.WriteLine("\t\t\tagility = { ");
 	for (uint32 i = 0; i < character->_agility_periodic_growth.size(); i++) {
 		if (i == 0)
@@ -1175,15 +1199,20 @@ void GameGlobal::_LoadCharacter(ReadScriptDescriptor& file, uint32 id) {
 	character->SetExperiencePoints(file.ReadUInt("experience_points"));
 	character->SetExperienceForNextLevel(file.ReadUInt("experience_points_next"));
 
+	// NOTE: the order of setting max HP/SP, then fatigue, and then the current value is important to maintain here
 	character->SetMaxHitPoints(file.ReadUInt("max_hit_points"));
-	character->SetHitPoints(file.ReadUInt("hit_points"));
+	character->SetHitPointFatigue(file.ReadUInt("hit_point_fatigue"));
+	character->SetHitPoints(character->GetActiveMaxHitPoints());
 	character->SetMaxSkillPoints(file.ReadUInt("max_skill_points"));
-	character->SetSkillPoints(file.ReadUInt("skill_points"));
+	character->SetSkillPointFatigue(file.ReadUInt("skill_point_fatigue"));
+	character->SetSkillPoints(character->GetActiveMaxSkillPoints());
 
 	character->SetStrength(file.ReadUInt("strength"));
 	character->SetVigor(file.ReadUInt("vigor"));
 	character->SetFortitude(file.ReadUInt("fortitude"));
 	character->SetProtection(file.ReadUInt("protection"));
+	character->SetStamina(file.ReadUInt("stamina"));
+	character->SetResilience(file.ReadUInt("resilience"));
 	character->SetAgility(file.ReadUInt("agility"));
 	character->SetEvade(file.ReadFloat("evade"));
 
@@ -1290,6 +1319,22 @@ void GameGlobal::_LoadCharacter(ReadScriptDescriptor& file, uint32 id) {
 	file.ReadTableKeys(growth_keys);
 	for (uint32 i = 0; i < growth_keys.size(); i++) {
 		character->_protection_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("stamina");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		character->_stamina_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("resilience");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		character->_resilience_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
 	}
 	file.CloseTable();
 

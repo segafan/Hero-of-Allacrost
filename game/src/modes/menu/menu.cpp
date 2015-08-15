@@ -228,6 +228,9 @@ void MenuMode::Update() {
 	else if (InputManager->PausePress() == true) {
 		ModeManager->Push(new PauseMode(false));
 		return;
+	} else if(InputManager->HelpPress() == true) {
+		ModeManager->Push(new PauseMode(false, true));
+		return;
 	}
 
 	// check the message window
@@ -822,6 +825,12 @@ void MenuMode::_DrawBottomMenu() {
 
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->Text()->Draw(UTranslate("PRO: ") + MakeUnicodeString(NumberToString(ch->GetProtection())));
+
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->Text()->Draw(UTranslate("STA: ") + MakeUnicodeString(NumberToString(ch->GetStamina())));
+
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->Text()->Draw(UTranslate("RES: ") + MakeUnicodeString(NumberToString(ch->GetResilience())));
 
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->Text()->Draw(UTranslate("AGI: ") + MakeUnicodeString(NumberToString(ch->GetAgility())));

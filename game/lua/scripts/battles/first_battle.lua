@@ -13,7 +13,7 @@ function Initialize(battle_instance)
 	if (GlobalManager:DoesEventGroupExist("global_events") == false) then
 		GlobalManager:AddNewEventGroup("global_events");
 	end
-	
+
 	local event_group = GlobalManager:GetEventGroup("global_events");
 	if (event_group:DoesEventExist("first_battle") == false) then
 		event_group:AddNewEvent("first_battle", 1);
@@ -27,7 +27,7 @@ function Initialize(battle_instance)
 	DialogueManager = Battle:GetDialogueSupervisor();
 
 	main_dialogue = {};
-	
+
 	-- Add all speakers for the dialogues to be added
 	-- TODO: all of these custom speaker calls should be replaced with calls to AddCharacterSpeaker() later
 	DialogueManager:AddCustomSpeaker(1000, "Claudius", "img/portraits/face/claudius_small.png");
@@ -73,7 +73,7 @@ function Initialize(battle_instance)
 		main_dialogue:AddLine(text, 1000);
 		text = hoa_system.Translate("Each character has three types of skills they may execute as an action: attack, defend, and support skills.");
 		main_dialogue:AddLine(text, 1002);
-		text = hoa_system.Translate("Battle actions requires a certain amount of time to prepare to use as well as time to recover from after using. These periods are known as the warm up time and cool down periods. In general, the more powerful the skill the longer these periods will be.");
+		text = hoa_system.Translate("Battle actions requires a certain amount of time to prepare before you can execute them. This is known as the warm up time period. In general, the more powerful the skill the longer the warm up will take.");
 		main_dialogue:AddLine(text, 1002);
 		text = hoa_system.Translate("At the bottom of the screen a directional button is shown for each character that you may select a command for. You can set or change the action and/or target issued to a character whenever these buttons are visible.");
 		main_dialogue:AddLine(text, 1002);
@@ -119,7 +119,7 @@ function Initialize(battle_instance)
 		text = hoa_system.Translate("Good. Now let us quickly dispatch of this minor threat.");
 		main_dialogue:AddLine(text, 1002);
 	DialogueManager:AddDialogue(main_dialogue);
-	
+
 	-- Construct a timer so we can start the dialogue a couple seconds after the battle begins
 	start_timer = hoa_system.SystemTimer(2000, 0);
 end
@@ -137,7 +137,7 @@ function Update()
 	if ((start_timer:IsInitial() == true) and (Battle:GetState() ~= hoa_battle.BattleMode.BATTLE_STATE_INITIAL)) then
 		start_timer:Run();
 	end
-	
+
 	-- If the dialogue has not been seen yet, check if its time to start it
 	if (main_dialogue:HasAlreadySeen() == false) then
 		if ((start_timer:IsFinished() == true) and (DialogueManager:IsDialogueActive() == false)) then

@@ -31,7 +31,6 @@ using namespace hoa_mode_manager;
 using namespace hoa_system;
 using namespace hoa_video;
 
-
 namespace hoa_battle {
 
 namespace private_battle {

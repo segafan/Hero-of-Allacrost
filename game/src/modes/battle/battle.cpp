@@ -341,6 +341,9 @@ void BattleMode::Update() {
 	if (InputManager->PausePress()) {
 		ModeManager->Push(new PauseMode(false));
 		return;
+	} else if(InputManager->HelpPress() == true) {
+		ModeManager->Push(new PauseMode(false, true));
+		return;
 	}
 
 	if (_battle_script.IsFileOpen() == true) {
@@ -1139,9 +1142,6 @@ void BattleMode::_DrawStaminaBar() {
 				break;
 			case ACTOR_STATE_ACTING:
 				draw_positions[i] = STAMINA_LOCATION_TOP + 25.0f;
-				break;
-			case ACTOR_STATE_COOL_DOWN:
-				draw_positions[i] = STAMINA_LOCATION_BOTTOM;
 				break;
 			default:
 				// This case is invalid. Instead of printing a debug message that will get echoed every

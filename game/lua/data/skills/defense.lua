@@ -18,8 +18,6 @@
 --                (Zero is a valid value for this field, but a negative number is not)
 -- {warmup_time}: The number of milliseconds that the actor using the skill must wait between
 --                selecting the skill and executing it (a value of zero is valid).
--- {cooldown_time}: The number of milliseconds that the actor using the skill must wait after
---                  executing the skill before their stamina begins regenrating (zero is valid).
 -- {target_type}: The type of target the skill affects, which may be an attack point, actor, or party.
 --
 -- Each skill entry requires a function called {BattleExecute} to be defined. This function implements the
@@ -42,7 +40,6 @@ skills[10001] = {
 	description = hoa_system.Translate("Take a stance to better defend user against incoming attacks."),
 	sp_required = 3,
 	warmup_time = 300,
-	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_SELF,
 
 	BattleExecute = function(user, target)

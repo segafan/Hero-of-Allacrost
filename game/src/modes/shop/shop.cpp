@@ -1191,6 +1191,9 @@ void ShopMode::Update() {
 	else if (InputManager->PausePress() == true) {
 		ModeManager->Push(new PauseMode(false));
 		return;
+	} else if(InputManager->HelpPress()) {
+		ModeManager->Push(new PauseMode(false, true));
+		return;
 	}
 
 	// When the state is at the root interface ,ShopMode needs to process user input and possibly change state
