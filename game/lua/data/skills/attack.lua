@@ -38,7 +38,7 @@ end
 skills[1] = {
 	name = hoa_system.Translate("Sword Slash"),
 	description = hoa_system.Translate("A textbook manuever that deals an effective blow."),
-	sp_required = 0,
+	sp_required = 2,
 	warmup_time = 2000,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
@@ -58,8 +58,8 @@ skills[1] = {
 
 skills[2] = {
 	name = hoa_system.Translate("Forward Thrust"),
-	description = hoa_system.Translate("A more powerful blow than the standard sword slash, but also less likely to hit its intended target."),
-	sp_required = 2,
+	description = hoa_system.Translate("A faster, more powerful blow than the standard sword slash, but requires more energy."),
+	sp_required = 4,
 	warmup_time = 500,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
@@ -67,7 +67,7 @@ skills[2] = {
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
 
-		if (hoa_battle.CalculateStandardEvasionMultiplier(target, 1.25) == false) then
+		if (hoa_battle.CalculateStandardEvasionMultiplier(target, 1.0) == false) then
 			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageMultiplier(user, target, 1.5), target);
 			AudioManager:PlaySound("snd/swordslice1.wav");
 		else
@@ -81,8 +81,8 @@ skills[2] = {
 skills[3] = {
 	name = hoa_system.Translate("Stun Strike"),
 	description = hoa_system.Translate("A blow which targets vital areas and temporarily stun its target."),
-	sp_required = 5,
-	warmup_time = 1200,
+	sp_required = 6,
+	warmup_time = 2000,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE,
 
 	BattleExecute = function(user, target)
@@ -104,7 +104,7 @@ skills[3] = {
 skills[4] = {
 	name = hoa_system.Translate("Blade Rush"),
 	description = hoa_system.Translate("A strong and aggressive attack with a blade that deals significant damage."),
-	sp_required = 4,
+	sp_required = 6,
 	warmup_time = 2000,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
 
@@ -112,8 +112,8 @@ skills[4] = {
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
 
-		if (hoa_battle.CalculateStandardEvasionAdder(target, 8.5) == false) then
-			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 20), target);
+		if (hoa_battle.CalculateStandardEvasionMultiplier(target, 1.0) == false) then
+			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageMultiplier(user, target, 2.0), target);
 			AudioManager:PlaySound("snd/swordslice2.wav");
 		else
 			target_actor:RegisterMiss();
@@ -124,8 +124,8 @@ skills[4] = {
 
 skills[5] = {
 	name = hoa_system.Translate("Precise Strike"),
-	description = hoa_system.Translate("When you need to  bullseye some womp rats "),
-	sp_required = 2,
+	description = hoa_system.Translate("When you need to bullseye some womp rats"),
+	sp_required = 4,
 	warmup_time = 2000,
 	cooldown_time = 0,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_FOE_POINT,
@@ -134,7 +134,7 @@ skills[5] = {
 		user:ChangeSpriteAnimation("attack");
 		target_actor = target:GetActor();
 
-		if (hoa_battle.CalculateStandardEvasionMultiplier(target, 0.2) == false) then
+		if (hoa_battle.CalculateStandardEvasionMultiplier(target, 0.1) == false) then
 			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0), target);
 			AudioManager:PlaySound("snd/swordslice2.wav");
 		else

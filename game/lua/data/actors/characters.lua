@@ -14,15 +14,15 @@ characters[CLAUDIUS] = {
 	filename = "claudius",
 
 	initial_stats = {
-		experience_level = 1,
+		experience_level = 3,
 		experience_points = 0,
-		max_hit_points = 62,
-		max_skill_points = 8,
-		strength = 12,
+		max_hit_points = 100,
+		max_skill_points = 10,
+		strength = 15,
 		vigor = 4,
 		fortitude = 15,
 		protection = 6,
-		stamina = 10,
+		stamina = 5,
 		resilience = 5,
 		agility = 30,
 		evade = 5.0,
@@ -129,7 +129,7 @@ characters[CLAUDIUS] = {
 		}
 	},
 
-	skills = { [1] = 1, [3] = 2, [4] = 10001, [8] = 3, [12] = 20001, [15] = 4 }
+	skills = { [1] = 1, [2] = 2, [3] = 10001, [8] = 3, [12] = 20001, [15] = 4 }
 } -- characters[CLAUDIUS]
 
 
@@ -141,13 +141,13 @@ characters[MARK] = {
 	initial_stats = {
 		experience_level = 7,
 		experience_points = 1128,
-		max_hit_points = 98,
-		max_skill_points = 13,
-		strength = 21,
+		max_hit_points = 150,
+		max_skill_points = 15,
+		strength = 30,
 		vigor = 8,
-		fortitude = 24,
+		fortitude = 10,
 		protection = 10,
-		stamina = 10,
+		stamina = 6,
 		resilience = 5,
 		agility = 35,
 		evade = 5.2,
@@ -254,7 +254,7 @@ characters[MARK] = {
 		}
 	},
 
-	skills = { [1] = 1, [3] = 2, [4] = 10001 }
+	skills = { [1] = 1, [2] = 5, [3] = 3, [4] = 10001 }
 } -- characters[MARK]
 
 
@@ -266,15 +266,15 @@ characters[LUKAR] = {
 	initial_stats = {
 		experience_level = 18,
 		experience_points = 6728,
-		max_hit_points = 237,
+		max_hit_points = 200,
 		max_skill_points = 25,
-		strength = 45,
+		strength = 65,
 		vigor = 21,
-		fortitude = 47,
+		fortitude = 20,
 		protection = 23,
 		stamina = 10,
 		resilience = 5,
-		agility = 46,
+		agility = 40,
 		evade = 7.0,
 		weapon = 10003,
 		head_armor = 20003,

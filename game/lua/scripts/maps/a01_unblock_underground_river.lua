@@ -78,7 +78,7 @@ function Load(m)
 	
 	Map:SetCurrentTrack(0);
 
-	Map.unlimited_stamina = true;
+	Map.unlimited_stamina = false;
 	Map:ShowStaminaBar(true);
 	Map:ShowDialogueIcons(true);
 
@@ -419,7 +419,7 @@ function CreateEnemies()
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(5);
-	enemy:AddEnemy(4);
+	enemy:AddEnemy(3);
 	enemy:AddEnemy(5);
 	zones["enemy03"]:AddEnemy(enemy, Map, 1);
 
