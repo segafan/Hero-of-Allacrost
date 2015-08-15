@@ -827,6 +827,9 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->Text()->Draw(UTranslate("AGI: ") + MakeUnicodeString(NumberToString(ch->GetAgility())));
 
 		VideoManager->MoveRelative(0, 20);
+		VideoManager->Text()->Draw(UTranslate("STA: ") + MakeUnicodeString(NumberToString(ch->GetStamina())));
+
+		VideoManager->MoveRelative(0, 20);
 		VideoManager->Text()->Draw(UTranslate("EVD: ") + MakeUnicodeString(NumberToString(ch->GetEvade()) + "%"));
 
 		VideoManager->Move(310, 577);

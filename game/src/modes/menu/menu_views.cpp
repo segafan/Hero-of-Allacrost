@@ -104,7 +104,7 @@ void CharacterWindow::Draw() {
 	// HP
 	VideoManager->MoveRelative(0,20);
 	VideoManager->Text()->Draw(UTranslate("HP: ") + MakeUnicodeString(NumberToString(character->GetHitPoints()) +
-		" / " + NumberToString(character->GetMaxHitPoints())), TextStyle("text20"));
+		" (" + NumberToString(character->GetFatigue()) + ")"), TextStyle("text20"));
 
 	// SP
 	VideoManager->MoveRelative(0,20);
@@ -571,7 +571,7 @@ void StatusWindow::Draw() {
 	//Draw all character stats
 	VideoManager->MoveRelative(-55, 60);
 	VideoManager->Text()->Draw(UTranslate("HP: ") + MakeUnicodeString(NumberToString(ch->GetHitPoints()) +
-		" (" + NumberToString(ch->GetMaxHitPoints()) + ")"));
+		" (" + NumberToString(ch->GetFatigue()) + "), Max: " + NumberToString(ch->GetMaxHitPoints())));
 
 	VideoManager->MoveRelative(0, 25);
 	VideoManager->Text()->Draw(UTranslate("SP: ") + MakeUnicodeString(NumberToString(ch->GetSkillPoints()) +
@@ -594,6 +594,9 @@ void StatusWindow::Draw() {
 
 	VideoManager->MoveRelative(0, 25);
 	VideoManager->Text()->Draw(UTranslate("Agility: ") + MakeUnicodeString(NumberToString(ch->GetAgility())));
+
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->Text()->Draw(UTranslate("Stamina: ") + MakeUnicodeString(NumberToString(ch->GetStamina())));
 
 	VideoManager->MoveRelative(0, 25);
 	VideoManager->Text()->Draw(UTranslate("Evade: ") + MakeUnicodeString(NumberToString(ch->GetEvade()) + "%"));
