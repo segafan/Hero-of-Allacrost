@@ -105,7 +105,7 @@ WelcomeWindow::WelcomeWindow() :
 	_text_additional.SetText(UTranslate("There are additional commands available which can be found in the MANUAL file."));
 
 	_text_continue.SetStyle(TextStyle("title24"));
-	_text_continue.SetText(UTranslate("Press any key to continue."));
+	_text_continue.SetText(UTranslate("Press F1 to continue."));
 } // WelcomeWindow::WelcomeWindow()
 
 
