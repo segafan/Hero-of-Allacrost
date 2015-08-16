@@ -197,6 +197,11 @@ public:
 	**/
 	bool RestoreDefaultJoyButtons();
 
+	/** \brief Checks if unmapped keyboard key or joystick button is pressed
+	*** \return True if an unmapped key/button is pressed
+	**/
+	bool UnmappedKeyPress();
+
 	/** \brief Checks if any keyboard key or joystick button is pressed
 	*** \return True if any key/button is pressed
 	**/
@@ -301,6 +306,9 @@ public:
 
 	bool QuitPress() const
 		{ return _quit_press; }
+
+	bool HelpPress() const
+		{ return _help_press; }
 	//@}
 
 	/** \name Input release member access functions
@@ -552,6 +560,9 @@ private:
 	//! Any key (or joystick button) pressed
 	bool _any_key_press;
 
+	//! Any unmapped key pressed
+	bool _unmapped_key_press;
+
 	//! Any key released
 	bool _any_key_release;
 
@@ -590,6 +601,7 @@ private:
 	bool _right_select_press;
 	bool _pause_press;
 	bool _quit_press;
+	bool _help_press;
 	//@}
 
 	/** \name  Input Release Members

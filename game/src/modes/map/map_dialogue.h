@@ -117,9 +117,17 @@ public:
 	**/
 	void AddLine(std::string text, uint32 speaker, int32 next_line);
 
+	/** \brief Adds a new line of text to the dialogue without a speaker
+	*** \param text The text to show on the screen
+	***
+	*** The following line properties are set when using this call:
+	*** - proceed to next sequential line, no display time
+	**/
+	void AddLine(std::string text);
 	/** \brief Sets a a display time for the last line of dialogue added
 	*** \param display_time The number of milliseconds that the line should be displayed for
 	**/
+
 	void AddLineTiming(uint32 display_time);
 
 	/** \brief Sets a a display time for a specific line of dialogue
@@ -186,7 +194,9 @@ public:
 	**/
 	bool Validate();
 
-	//! \brief Returns the object ID of the speaker for the line specified (or zero if the line index was invalid)
+	/** \brief Returns the object ID of the speaker for the line specified (or zero if the line index was invalid or if no speaker)
+	***	\todo Need to determine a way to differentitate an invalid index or no speaker (possibly print warning message for invalid index) 
+	**/
 	uint32 GetLineSpeaker(uint32 line) const
 		{ if (line >= _line_count) return 0; else return _speakers[line]; }
 
