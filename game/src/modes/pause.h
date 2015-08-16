@@ -22,6 +22,7 @@
 #include "video.h"
 #include "gui.h"
 #include "mode_manager.h"
+#include "boot_welcome.h"
 
 //! \brief All calls to pause mode are wrapped in this namespace.
 namespace hoa_pause {
@@ -54,9 +55,12 @@ class PauseMode : public hoa_mode_manager::GameMode {
 public:
 	/** \brief The class constructor determines the state and settings that PauseMode should be created in
 	*** \param quit_state If set to true, the user will be presented with quit options
+	*** \param help_state If set to true, the user will be presented with the
+
+	 scren
 	*** \param pause_audio If set to true, the audio is paused when PauseMode becomes active and resumes when it exits.
 	**/
-	PauseMode(bool quit_state, bool pause_audio = false);
+	PauseMode(bool quit_state, bool help_state = false, bool pause_audio = false);
 
 	~PauseMode();
 
@@ -73,6 +77,12 @@ private:
 	//! \brief When true, the player is presented with quit options. When false, "Paused" is displayed on the screen
 	bool _quit_state;
 
+	//! \brief When true, the player is presented with quit options. When false, "Paused" is displayed on the screen
+	bool _help_state;
+
+	//! \brief When true, the player is presented with quit options. When false, "Paused" is displayed on the screen
+	bool _pause_state;
+
 	//! \brief Set to true if the audio should be resumed when this mode finishes
 	bool _audio_paused;
 
@@ -87,6 +97,9 @@ private:
 
 	//! \brief The list of selectabled quit options presented to the user while the mode is in the quit state
 	hoa_gui::OptionBox _quit_options;
+
+	//! \brief A help window if paused with help_state = true
+	hoa_boot::private_boot::WelcomeWindow* _help_window;
 }; // class PauseMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_pause

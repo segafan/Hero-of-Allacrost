@@ -385,6 +385,7 @@ void BindModeCode() {
 			]
 			.def("AddLine", (void(MapDialogue::*)(std::string, uint32))&MapDialogue::AddLine)
 			.def("AddLine", (void(MapDialogue::*)(std::string, uint32, int32))&MapDialogue::AddLine)
+			.def("AddLine", (void(MapDialogue::*)(std::string))&MapDialogue::AddLine)
 			.def("AddLineTiming", (void(MapDialogue::*)(uint32))&MapDialogue::AddLineTiming)
 			.def("AddLineTiming", (void(MapDialogue::*)(uint32, uint32))&MapDialogue::AddLineTiming)
 			.def("AddLineEventAtStart", (void(MapDialogue::*)(uint32))&MapDialogue::AddLineEventAtStart)

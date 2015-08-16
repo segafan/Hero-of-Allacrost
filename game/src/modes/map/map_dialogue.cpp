@@ -131,7 +131,9 @@ void MapDialogue::AddLine(string text, uint32 speaker, int32 next_line) {
 	_line_events.push_back(MapDialogueEventData());
 }
 
-
+void MapDialogue::AddLine(string text){
+	AddLine(text,NO_SPRITE, COMMON_DIALOGUE_NEXT_LINE);
+}
 
 void MapDialogue::AddLineTiming(uint32 display_time) {
 	if (_line_count == 0) {
@@ -424,17 +426,23 @@ void DialogueSupervisor::EndDialogue() {
 	// Get a unique set of all sprites that participated in the dialogue
 	set<MapSprite*> speakers;
 	for (uint32 i = 0; i < _current_dialogue->GetLineCount(); i++) {
-		speakers.insert(dynamic_cast<MapSprite*>(MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(_current_dialogue->GetLineSpeaker(i))));
-	}
+		if(_current_dialogue->GetLineSpeaker(i) != NO_SPRITE) {
+			speakers.insert(dynamic_cast<MapSprite*>(MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(_current_dialogue->GetLineSpeaker(i))));
+		}else {
+			speakers.insert(NULL);
+		}
+			}
 
 	for (set<MapSprite*>::iterator i = speakers.begin(); i != speakers.end(); i++) {
 		// Each sprite needs to know that this dialogue completed so that they can update their data accordingly
-		(*i)->UpdateDialogueStatus();
+		if(*i != NULL) {
+			(*i)->UpdateDialogueStatus();
 
-		// Restore the state (orientation, animation, etc.) of all speaker sprites if necessary
-		if (_current_dialogue->IsRestoreState() == true) {
-			if ((*i)->IsStateSaved() == true)
-				(*i)->RestoreState();
+			// Restore the state (orientation, animation, etc.) of all speaker sprites if necessary
+			if (_current_dialogue->IsRestoreState() == true) {
+				if ((*i)->IsStateSaved() == true)
+					(*i)->RestoreState();
+			}
 		}
 	}
 
@@ -549,22 +557,30 @@ void DialogueSupervisor::_BeginLine() {
 		_dialogue_window.GetDisplayOptionBox().SetSelection(0);
 	}
 
-	MapObject* object = MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(_current_dialogue->GetLineSpeaker(_line_counter));
-	if (object == NULL) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "dialogue #" << _current_dialogue->GetDialogueID()
-			<< " referenced a sprite that did not exist with id: " << _current_dialogue->GetLineSpeaker(_line_counter) << endl;
-		return;
+	// Executes normal code if the speaker is an actual sprite i.e speaker id is not NO_SPRITE
+	if(_current_dialogue->GetLineSpeaker(_line_counter) != NO_SPRITE) {
+		MapObject* object = MapMode::CurrentInstance()->GetObjectSupervisor()->GetObject(_current_dialogue->GetLineSpeaker(_line_counter));
+		if (object == NULL) {
+			IF_PRINT_WARNING(MAP_DEBUG) << "dialogue #" << _current_dialogue->GetDialogueID()
+				<< " referenced a sprite that did not exist with id: " << _current_dialogue->GetLineSpeaker(_line_counter) << endl;
+			return;
+		}
+		else if (object->GetType() != SPRITE_TYPE) {
+			IF_PRINT_WARNING(MAP_DEBUG) << "dialogue #" << _current_dialogue->GetDialogueID()
+				<< " referenced a map object which was not a sprite with id: " << _current_dialogue->GetLineSpeaker(_line_counter) << endl;
+			return;
+		}
+		else {
+			MapSprite* speaker = dynamic_cast<MapSprite*>(object);
+			_dialogue_window.GetNameText().SetText(speaker->GetName());
+			_dialogue_window.SetPortraitImage(speaker->GetFacePortrait());
+		}
+	}else {
+		_dialogue_window.GetNameText().SetText("");
+		_dialogue_window.SetPortraitImage(NULL);
 	}
-	else if (object->GetType() != SPRITE_TYPE) {
-		IF_PRINT_WARNING(MAP_DEBUG) << "dialogue #" << _current_dialogue->GetDialogueID()
-			<< " referenced a map object which was not a sprite with id: " << _current_dialogue->GetLineSpeaker(_line_counter) << endl;
-		return;
-	}
-	else {
-		MapSprite* speaker = dynamic_cast<MapSprite*>(object);
-		_dialogue_window.GetNameText().SetText(speaker->GetName());
-		_dialogue_window.SetPortraitImage(speaker->GetFacePortrait());
-	}
+
+
 }
 
 

@@ -228,6 +228,9 @@ void MenuMode::Update() {
 	else if (InputManager->PausePress() == true) {
 		ModeManager->Push(new PauseMode(false));
 		return;
+	} else if(InputManager->HelpPress() == true) {
+		ModeManager->Push(new PauseMode(false, true));
+		return;
 	}
 
 	// check the message window

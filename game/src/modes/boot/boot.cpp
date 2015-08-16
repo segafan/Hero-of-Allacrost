@@ -271,7 +271,7 @@ void BootMode::Update() {
 	//CD: Handle key press here, just like any other time
 	if (_welcome_window->IsActive())
 	{
-		if (InputManager->AnyKeyPress())
+		if (InputManager->HelpPress())
 		{
 			_boot_sounds.at(0).Play();
 			_welcome_window->Hide();
@@ -280,7 +280,12 @@ void BootMode::Update() {
 			_has_modified_settings = true;
 			_SaveSettingsFile("");
 		}
+		return;
+	}
 
+	if(InputManager->UnmappedKeyPress() == true)
+	{
+		_welcome_window->Show();
 		return;
 	}
 
