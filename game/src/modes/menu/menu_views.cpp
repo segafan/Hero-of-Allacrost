@@ -318,10 +318,17 @@ void InventoryWindow::Update() {
 		{
 			// Activate the character select for application
 			if (event == VIDEO_OPTION_CONFIRM) {
-				_active_box = ITEM_ACTIVE_CHAR;
-				_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
-				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
+				GlobalObject* obj = _item_objects[ _inventory_items.GetSelection() ];
+				if(obj->GetObjectType() == GLOBAL_OBJECT_ITEM) {
+					GlobalItem* item = dynamic_cast<GlobalItem*>(obj);
+					if(item->IsUsableInField() == true) {
+						_active_box = ITEM_ACTIVE_CHAR;
+						_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
+						_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+						MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
+					}
+				}
+				
 			} // if VIDEO_OPTION_CONFIRM
 			// Return to category selection
 			else if (event == VIDEO_OPTION_CANCEL) {
@@ -357,6 +364,23 @@ void InventoryWindow::Update() {
 							GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 							ScriptCallFunction<void>(*script_function, ch);
 							item->DecrementCount();
+							// Go back to inventory list after 
+						}
+						// If they are anymore items in the category then go back to itrem select
+						if(_inventory_items.GetNumberOptions() > 0) {
+								_active_box =ITEM_ACTIVE_LIST;
+								_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+								_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+								
+							if(item->GetCount() < 1 && (_inventory_items.GetNumberOptions()-1) == _inventory_items.GetSelection()) {
+									_inventory_items.SetSelection(_inventory_items.GetSelection() - 1);
+								}
+						}// If they aren't anymore irems in the category then go to category select
+						else {
+								_active_box = ITEM_ACTIVE_CATEGORY;
+								_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+								_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+								_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 						}
 					}
 				} // if GLOBAL_OBJECT_ITEM
