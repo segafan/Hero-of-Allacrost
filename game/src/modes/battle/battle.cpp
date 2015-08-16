@@ -1143,9 +1143,6 @@ void BattleMode::_DrawStaminaBar() {
 			case ACTOR_STATE_ACTING:
 				draw_positions[i] = STAMINA_LOCATION_TOP + 25.0f;
 				break;
-			case ACTOR_STATE_COOL_DOWN:
-				draw_positions[i] = STAMINA_LOCATION_BOTTOM;
-				break;
 			default:
 				// This case is invalid. Instead of printing a debug message that will get echoed every
 				// loop, draw the icon at a clearly invalid position well away from the stamina bar

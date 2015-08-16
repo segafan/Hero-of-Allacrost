@@ -827,6 +827,12 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->Text()->Draw(UTranslate("PRO: ") + MakeUnicodeString(NumberToString(ch->GetProtection())));
 
 		VideoManager->MoveRelative(0, 20);
+		VideoManager->Text()->Draw(UTranslate("STA: ") + MakeUnicodeString(NumberToString(ch->GetStamina())));
+
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->Text()->Draw(UTranslate("RES: ") + MakeUnicodeString(NumberToString(ch->GetResilience())));
+
+		VideoManager->MoveRelative(0, 20);
 		VideoManager->Text()->Draw(UTranslate("AGI: ") + MakeUnicodeString(NumberToString(ch->GetAgility())));
 
 		VideoManager->MoveRelative(0, 20);

@@ -20,8 +20,6 @@
 --                (Zero is a valid value for this field, but a negative number is not)
 -- {warmup_time}: The number of milliseconds that the actor using the skill must wait between
 --                selecting the skill and executing it (a value of zero is valid).
--- {cooldown_time}: The number of milliseconds that the actor using the skill must wait after
---                  executing the skill before their stamina begins regenrating (zero is valid).
 -- {target_type}: The type of target the skill affects, which may be an attack point, actor, or party.
 --
 -- Each skill entry requires a function called {BattleExecute} to be defined. This function implements the
@@ -48,17 +46,16 @@ end
 skills[20001] = {
 	name = hoa_system.Translate("First Aid"),
 	description = hoa_system.Translate("Performs basic medical assistance, healing the target by a minor degree."),
-	sp_required = 2,
+	sp_required = 5,
 	warmup_time = 1500,
-	cooldown_time = 200,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALLY,
-   
+
 	BattleExecute = function(user, target)
 		target_actor = target:GetActor();
 		target_actor:AddHitPoints(hoa_utils.RandomBoundedInteger(30, 50));
 		AudioManager:PlaySound("snd/heal.wav");
 	end,
-   
+
 	FieldExecute = function(target, instigator)
 		target:AddHitPoints(hoa_utils.RandomBoundedInteger(30, 50));
 		AudioManager:PlaySound("snd/heal.wav");
@@ -68,11 +65,10 @@ skills[20001] = {
 skills[20002] = {
 	name = hoa_system.Translate("Encouraging Shout"),
 	description = hoa_system.Translate("Increases the strength of all allies."),
-	sp_required = 14,
+	sp_required = 12,
 	warmup_time = 4000,
-	cooldown_time = 750,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ALL_ALLIES,
-   
+
 	BattleExecute = function(user, target)
 		local index = 0;
 		while true do

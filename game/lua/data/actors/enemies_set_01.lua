@@ -51,13 +51,13 @@ enemies[1] = {
 	sprite_height = 64,
 
 	base_stats = {
-		hit_points = 55,
+		hit_points = 52,
 		skill_points = 10,
-		strength = 15,
+		strength = 45,
 		vigor = 0,
-		fortitude = 18,
+		fortitude = 10,
 		protection = 10,
-		agility = 24,
+		agility = 25,
 		evade = 2.0,
 		experience_points = 5,
 		drunes = 10
@@ -97,13 +97,13 @@ enemies[2] = {
 	sprite_height = 64,
 
 	base_stats = {
-		hit_points = 125,
+		hit_points = 52,
 		skill_points = 10,
-		strength = 15,
-		vigor = 0,
-		fortitude = 11,
-		protection = 4,
-		agility = 18,
+		strength = 25,
+		vigor = 10,
+		fortitude = 10,
+		protection = 10,
+		agility = 30,
 		evade = 2.0,
 		experience_points = 6,
 		drunes = 12
@@ -129,7 +129,7 @@ enemies[2] = {
 	},
 
 	skills = {
-		1002
+		1002, 1006
 	},
 
 	drop_objects = {
@@ -151,13 +151,13 @@ enemies[3] = {
 	sprite_height = 64,
 
 	base_stats = {
-		hit_points = 128,
+		hit_points = 200,
 		skill_points = 10,
-		strength = 14,
+		strength = 50,
 		vigor = 0,
-		fortitude = 9,
-		protection = 4,
-		agility = 15,
+		fortitude = 10,
+		protection = 5,
+		agility = 25,
 		evade = 2.0,
 		experience_points = 7,
 		drunes = 14
@@ -212,16 +212,16 @@ enemies[4] = {
 	filename = "rat",
 	sprite_width = 64,
 	sprite_height = 64,
-	
+
 	base_stats = {
-		hit_points = 90,
+		hit_points = 150,
 		skill_points = 5,
-		strength = 12,
+		strength = 35,
 		vigor = 0,
-		fortitude = 14,
-		protection = 4,
-		agility = 13,
-		evade = 2.0,
+		fortitude = 10,
+		protection = 5,
+		agility = 45,
+		evade = 5.0,
 		experience_points = 5,
 		drunes = 18
 	},
@@ -266,15 +266,15 @@ enemies[5] = {
 	filename = "scorpion",
 	sprite_width = 64,
 	sprite_height = 64,
-	
+
 	base_stats = {
-		hit_points = 122,
-		skill_points = 10,
-		strength = 18,
+		hit_points = 30,
+		skill_points = 1,
+		strength = 6,
 		vigor = 0,
-		fortitude = 12,
-		protection = 4,
-		agility = 14,
+		fortitude = 10,
+		protection = 5,
+		agility = 40,
 		evade = 2.0,
 		experience_points = 8,
 		drunes = 12
@@ -309,7 +309,7 @@ enemies[5] = {
 	},
 
 	skills = {
-		1002
+		1005,1002
 	},
 
 	drop_objects = {
@@ -329,16 +329,16 @@ enemies[6] = {
 	filename = "bat",
 	sprite_width = 64,
 	sprite_height = 128,
-	
+
 	base_stats = {
-		hit_points = 85,
+		hit_points = 53,
 		skill_points = 6,
-		strength = 10,
+		strength = 24,
 		vigor = 0,
 		fortitude = 10,
-		protection = 3,
-		agility = 30,
-		evade = 18.0,
+		protection = 5,
+		agility = 60,
+		evade = 45.0,
 		experience_points = 8,
 		drunes = 12
 	},
@@ -384,7 +384,7 @@ enemies[7] = {
 	filename = "dune_crawler",
 	sprite_width = 64,
 	sprite_height = 64,
-	
+
 	base_stats = {
 		hit_points = 122,
 		skill_points = 10,
@@ -438,7 +438,7 @@ enemies[8] = {
 	filename = "skeleton",
 	sprite_width = 64,
 	sprite_height = 128,
-	
+
 	base_stats = {
 		hit_points = 124,
 		skill_points = 10,
@@ -501,7 +501,7 @@ enemies[9] = {
 	filename = "stygian_lizard",
 	sprite_width = 192,
 	sprite_height = 192,
-	
+
 	base_stats = {
 		hit_points = 124,
 		skill_points = 10,
@@ -563,7 +563,7 @@ enemies[10] = {
 	filename = "demonic_essence",
 	sprite_width = 128,
 	sprite_height = 192,
-	
+
 	base_stats = {
 		hit_points = 124,
 		skill_points = 10,
@@ -626,7 +626,7 @@ enemies[91] = {
 	filename = "scorpion_goliath",
 	sprite_width = 512,
 	sprite_height = 448,
-	
+
 	base_stats = {
 		hit_points = 500,
 		skill_points = 45,
@@ -689,7 +689,7 @@ enemies[92] = {
 	filename = "armored_beast",
 	sprite_width = 256,
 	sprite_height = 256,
-	
+
 	base_stats = {
 		hit_points = 122,
 		skill_points = 10,

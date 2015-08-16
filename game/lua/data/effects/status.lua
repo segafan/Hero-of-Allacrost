@@ -230,7 +230,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_LOWER] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE] = {
 	name = hoa_system.Translate("Raise Fortitude"),
-	duration = 30000,
+	duration = 5000,
 	icon_index = 4,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_LOWER, 
 
@@ -695,6 +695,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS] = {
 		effect:GetAffectedActor():SetStatePaused(false);
 	end,
 }
+
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_STASIS] = {
 	name = hoa_system.Translate("Stasis"),

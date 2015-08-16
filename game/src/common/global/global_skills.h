@@ -49,7 +49,7 @@ namespace hoa_global {
 *** Because skills are scripted and can achieve almost any possible effect, this class
 *** only retains the common properties that all skills share. For example, the skill's
 *** name, type of target, and the amount of time it takes an actor to "warmup" to use
-*** the skill or "cooldown" after the skill execution is finished.
+*** the skill.
 *** ***************************************************************************/
 class GlobalSkill {
 public:
@@ -95,9 +95,6 @@ public:
 
 	uint32 GetWarmupTime() const
 		{ return _warmup_time; }
-
-	uint32 GetCooldownTime() const
-		{ return _cooldown_time; }
 
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
@@ -145,13 +142,6 @@ private:
 	*** much time must pass before the skill may be executed. It is acceptable for this member to be zero.
 	**/
 	uint32 _warmup_time;
-
-	/** \brief The amount of time (in milliseconds) that must expire after a skill hase been used
-	*** After a character or enemy uses a skill, this value instructs how much time must pass before
-	*** the actor who executed the skill can recover and begin recharging their battle stamina bar.
-	*** It is acceptable for this member to be zero.
-	**/
-	uint32 _cooldown_time;
 
 	/** \brief The type of target for the skill
 	*** Target types include attack points, actors, and parties. This enum type is defined in global_actors.h

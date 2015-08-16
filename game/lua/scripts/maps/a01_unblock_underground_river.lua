@@ -394,13 +394,8 @@ function CreateEnemies()
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
 	enemy:AddEnemy(2);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(6);
+	enemy:AddEnemy(2);
 	zones["enemy01"]:AddEnemy(enemy, Map, 1);
 
 	-- Group #02
@@ -410,10 +405,12 @@ function CreateEnemies()
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(2);
 	enemy:AddEnemy(3);
+	enemy:AddEnemy(2);
 	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
 	enemy:AddEnemy(3);
-	enemy:AddEnemy(6);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(1);
 	zones["enemy02"]:AddEnemy(enemy, Map, 1);
 	
 	-- Group #03
@@ -422,15 +419,8 @@ function CreateEnemies()
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
 	enemy:AddEnemy(5);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
 	zones["enemy03"]:AddEnemy(enemy, Map, 1);
 
 	-- Group #04
@@ -443,7 +433,7 @@ function CreateEnemies()
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(6);
 	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
+	enemy:AddEnemy(3);
 	enemy:AddEnemy(6);
 	enemy:AddEnemy(6);
 	enemy:AddEnemy(6);
@@ -456,11 +446,10 @@ function CreateEnemies()
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(1);
+	enemy:AddEnemy(6);
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(2);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
 	enemy:AddEnemy(6);
 	zones["enemy05"]:AddEnemy(enemy, Map, 1);
 
@@ -470,12 +459,7 @@ function CreateEnemies()
 	enemy:AddEnemy(6);
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(2);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(6);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
+	enemy:AddEnemy(4);
 	enemy:AddEnemy(6);
 	zones["enemy05"]:AddEnemy(enemy, Map, 1);
 
@@ -484,15 +468,11 @@ function CreateEnemies()
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(5);
+	enemy:AddEnemy(4);
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
-	enemy:AddEnemy(2);
 	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
+	enemy:AddEnemy(3);
 	zones["enemy05"]:AddEnemy(enemy, Map, 1);
 	
 	-- Group #06
@@ -501,15 +481,11 @@ function CreateEnemies()
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(2);
-	enemy:AddEnemy(5);
+	enemy:AddEnemy(3);
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(5);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
+	enemy:AddEnemy(4);
 	zones["enemy06"]:AddEnemy(enemy, Map, 1);
 
 	-- Group #07
@@ -522,10 +498,11 @@ function CreateEnemies()
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(6);
 	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
 	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
-	enemy:AddEnemy(6);
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(4);
 	zones["enemy07"]:AddEnemy(enemy, Map, 1);
 
 	enemy = ConstructEnemySprite("scorpion", Map);
@@ -533,15 +510,11 @@ function CreateEnemies()
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(5);
+	enemy:AddEnemy(4);
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
-	enemy:AddEnemy(2);
 	enemy:AddEnemy(5);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
+	enemy:AddEnemy(3);
 	zones["enemy07"]:AddEnemy(enemy, Map, 1);
 end -- function CreateEnemies()
 

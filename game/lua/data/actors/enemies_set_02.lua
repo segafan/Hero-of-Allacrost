@@ -64,7 +64,7 @@ enemies[102] = {
 	filename = "aerocephal",
 	sprite_width = 192,
 	sprite_height = 192,
-	
+
 	initial_stats = {
 		hit_points = 90,
 		skill_points = 10,
@@ -112,7 +112,7 @@ enemies[103] = {
 	filename = "arcana_drake",
 	sprite_width = 192,
 	sprite_height = 256,
-	
+
 	initial_stats = {
 		hit_points = 85,
 		skill_points = 10,
@@ -289,7 +289,7 @@ enemies[106] = {
 	sprite_width = 320,
 	sprite_height = 256,
 
-	
+
 	initial_stats = {
 		hit_points = 120,
 		skill_points = 10,

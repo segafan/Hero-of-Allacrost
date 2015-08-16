@@ -22,14 +22,14 @@ tests = {}
 -- Begin tests intended for BattleMode interface and features
 
 tests[1001] = {
-	name = "Single-Character Early Game Battle";
-	description = "Party consists of a single character versus two early game enemies. A handful of potions are available " ..
+	name = "Early Game Battle";
+	description = "The initial character party in the game against four early game enemies. A handful of potions are available " ..
 		"in the party inventory as well.";
 	ExecuteTest = function()
 		GlobalManager:SetBattleSetting(hoa_global.GameGlobal.GLOBAL_BATTLE_WAIT);
 		GlobalManager:AddCharacter(1); -- Claudius
-		GlobalManager:AddCharacter(2); -- Claudius
-		GlobalManager:AddCharacter(4); -- Claudius
+		GlobalManager:AddCharacter(2); -- Mark
+		GlobalManager:AddCharacter(4); -- Lukar
 		GlobalManager:AddToInventory(1, 3); -- Minor healing potions
 
 		local battle = hoa_battle.BattleMode();
@@ -37,7 +37,51 @@ tests[1001] = {
 		battle:AddEnemy(2);
 		battle:AddEnemy(3);
 		battle:AddEnemy(5);
-		ModeManager:Push(battle); 
+		ModeManager:Push(battle);
+	end
+}
+
+tests[1002] = {
+	name = "Fatigue Early Game Battle";
+	description = "The same battle as the previous one, but the characters begin the battle with a significant amount of fatigue " ..
+		"and low stamina/resilience for testing fatigue's effects.";
+	ExecuteTest = function()
+		GlobalManager:SetBattleSetting(hoa_global.GameGlobal.GLOBAL_BATTLE_WAIT);
+		GlobalManager:AddCharacter(1); -- Claudius
+		GlobalManager:AddCharacter(2); -- Mark
+		GlobalManager:AddCharacter(4); -- Lukar
+		GlobalManager:AddToInventory(1, 3); -- Minor healing potions
+
+		local claudius = GlobalManager:GetCharacter(1);
+		local mark = GlobalManager:GetCharacter(2);
+		local lukar = GlobalManager:GetCharacter(4);
+		claudius:SubtractHitPoints(15);
+		claudius:SubtractSkillPoints(6);
+		claudius:SetStamina(2);
+		claudius:SetResilience(1);
+		claudius:AddHitPointFatigue(20);
+		claudius:AddSkillPointFatigue(4);
+
+		mark:SubtractHitPoints(37);
+		mark:SubtractSkillPoints(5);
+		mark:SetStamina(3);
+		mark:SetResilience(1);
+		mark:AddHitPointFatigue(30);
+		mark:AddSkillPointFatigue(3);
+
+		lukar:SubtractHitPoints(62);
+		lukar:SubtractSkillPoints(12);
+		lukar:SetStamina(4);
+		lukar:SetResilience(2);
+		lukar:AddHitPointFatigue(40);
+		lukar:AddSkillPointFatigue(9);
+
+		local battle = hoa_battle.BattleMode();
+		battle:AddEnemy(2);
+		battle:AddEnemy(2);
+		battle:AddEnemy(3);
+		battle:AddEnemy(5);
+		ModeManager:Push(battle);
 	end
 }
 
