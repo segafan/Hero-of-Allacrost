@@ -421,6 +421,12 @@ public:
 	*/
 	void Activate(bool new_status);
 
+	/*!
+	* \brief Sets Remove Mode
+	* \param remove_mode true to activate Remove Mode
+	*/
+	void SetRemoveMode(bool remove_mode);
+
 private:
 
 	//! Character selector
@@ -437,6 +443,9 @@ private:
 
 	//! equipment images
 	std::vector<hoa_video::StillImage> _equip_images;
+	
+	//! True if equipment should just be removed and not replaced
+	bool _remove_mode;
 
 	/*!
 	* \brief Set up char selector
