@@ -93,7 +93,7 @@ BattleMedia::BattleMedia() {
 	if (character_bar_covers.Load("img/menus/battle_character_bars.png") == false)
 		PRINT_ERROR << "failed to load character bars image" << endl;
 
-	if (bottom_menu_image.Load("img/menus/battle_bottom_menu.png") == false)
+	if (bottom_menu_image.Load("img/menus/battle_bottom_shadow.png") == false)
 		PRINT_ERROR << "failed to load bottom menu image" << endl;
 
 	if (swap_icon.Load("img/icons/battle/swap_icon.png") == false)
