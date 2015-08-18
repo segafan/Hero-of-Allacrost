@@ -538,7 +538,7 @@ void BattleCharacter::ChangeActionText() {
 
 void BattleCharacter::DrawPortrait() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->Move(48.0f, 9.0f);
+	VideoManager->Move(5.0f, 10.0f);
 
 	vector<StillImage>& portrait_frames = *(_global_character->GetBattlePortraits());
 	float hp_percent =  static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
@@ -574,8 +574,17 @@ void BattleCharacter::DrawPortrait() {
 
 
 void BattleCharacter::DrawStatus(uint32 order) {
+	// X and Y position constants that determine where the various elements are drawn
+	const float TOP_CHARACTER_YPOS = 105.0f;
+	const float NAME_RIGHT_ALIGN_XPOS = 240.0f;
+	const float HPSP_BAR_LEFT_XPOS = NAME_RIGHT_ALIGN_XPOS + 26.0f;
+	const float HPSP_BAR_OFFSET_YPOS = 7.0f;
+	const float HP_TEXT_XPOS = 450.0f;
+	const float SP_TEXT_XPOS = HP_TEXT_XPOS + 50.0f;
+	const float COMMAND_ICON_XPOS = 545.0f;
+
 	// Used to determine where to draw the character's status
-	float y_offset = 0.0f;
+	float y_position = 0.0f;
 
 	// Colors used for the HP/SP bars
 	const Color green_hp(0.294f, 0.776f, 0.184f, 1.0f);
@@ -584,34 +593,34 @@ void BattleCharacter::DrawStatus(uint32 order) {
 	const Color darkblue_sp(0.110f, 0.430f, 0.455f, 1.0f);
 	const Color yellow_indicator = Color::yellow;
 
-	// Determine what vertical order the character is in and set the y_offset accordingly
+	// Determine what vertical order the character is in and set the y_position accordingly
 	switch (order) {
 		case 0:
-			y_offset = 0.0f;
+			y_position = TOP_CHARACTER_YPOS;
 			break;
 		case 1:
-			y_offset = -25.0f;
+			y_position = TOP_CHARACTER_YPOS - 30.0f;
 			break;
 		case 2:
-			y_offset = -50.0f;
+			y_position = TOP_CHARACTER_YPOS - 60.0f;
 			break;
 		case 3:
-			y_offset = -75.0f;
+			y_position = TOP_CHARACTER_YPOS - 90.0f;
 			break;
 		default:
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid order argument: " << order << endl;
-			y_offset = 0.0f;
+			y_position = TOP_CHARACTER_YPOS;
 	}
 
 	// Draw the character's name
-	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->Move(280.0f, 82.0f + y_offset);
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_CENTER, VIDEO_BLEND, 0);
+	VideoManager->Move(NAME_RIGHT_ALIGN_XPOS, y_position);
 	_name_text.Draw();
 
 	// If the swap key is being held down, draw status icons
 	if (InputManager->SwapState()) {
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-		VideoManager->MoveRelative(10.0f, 0.0f);
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_BLEND, 0);
+		VideoManager->MoveRelative(20.0f, 0.0f);
 		_effects_supervisor->Draw();
 	}
 
@@ -622,7 +631,7 @@ void BattleCharacter::DrawStatus(uint32 order) {
 
 		// Draw the HP bar in green
 		bar_size = static_cast<float>(90 * GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
-		VideoManager->Move(312.0f, 90.0f + y_offset);
+		VideoManager->Move(HPSP_BAR_LEFT_XPOS, y_position + HPSP_BAR_OFFSET_YPOS);
 
 		if (GetHitPoints() > 0) {
 			VideoManager->DrawRectangle(bar_size, 6, green_hp);
@@ -631,51 +640,49 @@ void BattleCharacter::DrawStatus(uint32 order) {
 		// If the current HP is less than the active max HP, draw a dark green bar to display where the active maximum HP value currently is.
 		// The area of the bar between the active max HP and the full max HP (caused by HP fatigue) will remain black
 		if (GetHitPoints() < GetActiveMaxHitPoints()) {
-			VideoManager->Move(312.0f + bar_size, 90.0f + y_offset);
+			VideoManager->Move(HPSP_BAR_LEFT_XPOS + bar_size, y_position + HPSP_BAR_OFFSET_YPOS);
 			bar_size = static_cast<float>(90 * (GetActiveMaxHitPoints() - GetHitPoints())) / static_cast<float>(GetMaxHitPoints());
-			VideoManager->DrawRectangle(bar_size, 6, darkgreen_hp);
+			VideoManager->DrawRectangle(bar_size, 6.0f, darkgreen_hp);
 
-			// Draw a small yellow indicator line to show where the active max HP is at
-			VideoManager->Move(312.0f + static_cast<float>((90 * GetActiveMaxHitPoints()) / static_cast<float>(GetMaxHitPoints())), 90.0f + y_offset);
-			VideoManager->DrawRectangle(1, 6, yellow_indicator);
+			// Draw a think yellow line to indicate where the active max HP is at
+			VideoManager->Move(HPSP_BAR_LEFT_XPOS + static_cast<float>((90 * GetActiveMaxHitPoints()) / static_cast<float>(GetMaxHitPoints())), y_position + HPSP_BAR_OFFSET_YPOS);
+			VideoManager->DrawRectangle(1.0f, 6.0f, yellow_indicator);
 		}
 
 		// Draw the SP bar in blue
 		bar_size = static_cast<float>(90 * GetSkillPoints()) / static_cast<float>(GetMaxSkillPoints());
-		VideoManager->Move(420.0f, 90.0f + y_offset);
+		VideoManager->Move(HPSP_BAR_LEFT_XPOS, y_position - HPSP_BAR_OFFSET_YPOS);
 
 		if (GetSkillPoints() > 0) {
-			VideoManager->DrawRectangle(bar_size, 6, blue_sp);
+			VideoManager->DrawRectangle(bar_size, 6.0f, blue_sp);
 		}
 
 		// If the current SP is less than at the active max SP, draw a dark blue bar to display where the active maximum SP value currently is.
 		// The area of the bar between the active max SP and the full max SP (caused by SP fatigue) will remain black
 		if (GetSkillPoints() < GetActiveMaxSkillPoints()) {
-			VideoManager->Move(420.0f + bar_size, 90.0f + y_offset);
+			VideoManager->Move(HPSP_BAR_LEFT_XPOS + bar_size, y_position - HPSP_BAR_OFFSET_YPOS);
 			bar_size = static_cast<float>(90 * (GetActiveMaxSkillPoints() - GetSkillPoints())) / static_cast<float>(GetMaxSkillPoints());
-			VideoManager->DrawRectangle(bar_size, 6, darkblue_sp);
+			VideoManager->DrawRectangle(bar_size, 6.0f, darkblue_sp);
 
-			// Draw a small yellow indicator line to show where the active max HP is at
-			VideoManager->Move(420.0f + static_cast<float>((90 * GetActiveMaxSkillPoints()) / static_cast<float>(GetMaxSkillPoints())), 90.0f + y_offset);
-			VideoManager->DrawRectangle(1, 6, yellow_indicator);
+			// Draw a think yellow line to indicate where the active max SP is at
+			VideoManager->Move(HPSP_BAR_LEFT_XPOS + static_cast<float>((90 * GetActiveMaxSkillPoints()) / static_cast<float>(GetMaxSkillPoints())), y_position - HPSP_BAR_OFFSET_YPOS);
+			VideoManager->DrawRectangle(1.0f, 6.0f, yellow_indicator);
 		}
 
 		// Draw the cover image over the top of both the HP and SP bars
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->Move(293.0f, 84.0f + y_offset);
+		VideoManager->Move(NAME_RIGHT_ALIGN_XPOS + 8.0f, y_position);
 		BattleMode::CurrentInstance()->GetMedia().character_bar_covers.Draw();
 
 		// TODO: The SetText calls below should not be done here. They should be made whenever the character's HP/SP
 		// is modified. This re-renders the text every frame regardless of whether or not the HP/SP changed so its
 		// not efficient
 
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
-		// Draw the character's current health on top of the middle of the HP bar
-		VideoManager->Move(355.0f, 88.0f + y_offset);
+		// Draw the character's current health and skill points text
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, 0);
+		VideoManager->Move(HP_TEXT_XPOS, y_position);
 		_hit_points_text.Draw();
-
-		// Draw the character's current skill points on top of the middle of the SP bar
-		VideoManager->MoveRelative(110.0f, 0.0f);
+		VideoManager->Move(SP_TEXT_XPOS, y_position);
 		_skill_points_text.Draw();
 
 		// Update hit and skill points after drawing to reduce gpu stall
@@ -696,8 +703,8 @@ void BattleCharacter::DrawStatus(uint32 order) {
 	// conditions where the command menu is not drawn.
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, VIDEO_BLEND, 0);
 
-	// Move to the position wher command button icons are drawn
-	VideoManager->Move(545.0f, 95.0f + y_offset);
+	// Move to the position where command button icons are drawn
+	VideoManager->Move(COMMAND_ICON_XPOS, y_position);
 
 	// If this character can be issued a command, draw the appropriate command button to indicate this. The type of button drawn depends on
 	// whether or not the character already has an action set. Characters that can not be issued a command have no button drawn

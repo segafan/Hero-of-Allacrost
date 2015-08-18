@@ -130,18 +130,19 @@ public:
 	//! \brief The image used to highlight stamina icons for selected actors
 	hoa_video::StillImage stamina_icon_selected;
 
+	// TODO: the character swapping feature is still undecided and for now, we don't need these images
 	/** \brief Image that indicates when a player may perform character swapping
 	*** This image is drawn in the lower left corner of the screen. When no swaps are available to the player,
 	*** the image is drawn in gray-scale.
 	**/
-	hoa_video::StillImage swap_icon;
+	//hoa_video::StillImage swap_icon;
 
 	/** \brief Used for visual display of how many swaps a character may perform
 	*** This image is drawn in the lower left corner of the screen, just above the swap indicator. This image
 	*** may be drawn on the screen up to four times (in a card-stack fashion), one for each swap that is
 	*** available to be used. It is not drawn when the player has no swaps available.
 	**/
-	hoa_video::StillImage swap_card;
+	//hoa_video::StillImage swap_card;
 
 	/** \brief Small button icons used to indicate when a player can select an action for their characters
 	*** These buttons are used to indicate to the player what button to press to bring up a character's command
