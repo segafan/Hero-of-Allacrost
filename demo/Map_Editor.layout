@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Release Linux" />
+	<File name="src/common/global/global_objects.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="3483" topLine="96" />
+	</File>
+	<File name="src/editor/dialog_boxes.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="10127" topLine="0" />
+	</File>
+	<File name="src/editor/dialog_boxes.h" open="0" top="0" tabpos="1">
+		<Cursor position="850" topLine="7" />
+	</File>
+	<File name="src/editor/editor_main.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="1266" topLine="27" />
+	</File>
+	<File name="src/engine/script/script.h" open="0" top="0" tabpos="0">
+		<Cursor position="4983" topLine="129" />
+	</File>
+	<File name="src/utils.h" open="0" top="0" tabpos="0">
+		<Cursor position="2881" topLine="68" />
+	</File>
+</CodeBlocks_layout_file>
