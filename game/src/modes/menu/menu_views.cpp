@@ -366,7 +366,7 @@ void InventoryWindow::Update() {
 							item->DecrementCount();
 							// Go back to inventory list after 
 						}
-						// If they are anymore items in the category then go back to itrem select
+						// If they are anymore items in the category then go back to item select
 						if(_inventory_items.GetNumberOptions() > 0) {
 								_active_box =ITEM_ACTIVE_LIST;
 								_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -1038,6 +1038,8 @@ void SkillsWindow::Draw() {
 EquipWindow::EquipWindow() :
 	_active_box(EQUIP_ACTIVE_NONE)
 {
+	// Start in equip mode by default
+	_remove_mode = false;
 	// Initialize option boxes
 	_InitCharSelect();
 	_InitEquipmentSelect();
@@ -1047,6 +1049,11 @@ EquipWindow::EquipWindow() :
 
 
 EquipWindow::~EquipWindow() {
+}
+
+
+void EquipWindow::SetRemoveMode(bool remove_mode) {
+	_remove_mode = remove_mode;
 }
 
 
@@ -1201,7 +1208,60 @@ void EquipWindow::Update() {
 		if (event == VIDEO_OPTION_CONFIRM) {
 			_active_box = EQUIP_ACTIVE_LIST;
 			_UpdateEquipList();
-			if (_equip_list.GetNumberOptions() > 0) {
+			// If in remove mode just remove the item and do not go to replace it
+			if(_remove_mode == true) {
+				GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+
+				switch(_equip_select.GetSelection()) {
+				case EQUIP_WEAPON:
+				{
+					if(ch->GetWeaponEquipped() != NULL) {
+						GlobalManager->AddToInventory(ch->EquipWeapon(NULL));
+						MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
+					} else {
+						MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
+					}	
+					break;}
+				case EQUIP_HEADGEAR:
+				{	
+					if(ch->GetHeadArmorEquipped() != NULL) {
+						GlobalManager->AddToInventory(ch->EquipHeadArmor(NULL));
+						MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
+					} else {
+						MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
+					}	
+					break;}
+				case EQUIP_BODYARMOR:
+				{	
+					if(ch->GetTorsoArmorEquipped() != NULL) {
+						GlobalManager->AddToInventory(ch->EquipTorsoArmor(NULL));
+						MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
+					} else {
+						MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
+					}	
+					break;}
+				case EQUIP_OFFHAND:
+				{	
+					if(ch->GetArmArmorEquipped() != NULL) {
+						GlobalManager->AddToInventory(ch->EquipArmArmor(NULL));
+						MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
+					} else {
+						MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
+					}	
+					break;}
+				case EQUIP_LEGGINGS:
+				{	
+					if(ch->GetLegArmorEquipped() != NULL) {
+						GlobalManager->AddToInventory(ch->EquipLegArmor(NULL));
+						MenuMode::CurrentInstance()->_menu_sounds["confirm"].Play();
+					} else {
+						MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
+					}
+					break;}	
+				}
+				_active_box = EQUIP_ACTIVE_SELECT;	
+			}
+			else if (_equip_list.GetNumberOptions() > 0) {
 				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_equip_list.SetSelection(0);
 				_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -1211,7 +1271,7 @@ void EquipWindow::Update() {
 				_active_box = EQUIP_ACTIVE_SELECT;
 				MenuMode::CurrentInstance()->_menu_sounds["cancel"].Play();
 			}
-		}
+		}	
 		else if (event == VIDEO_OPTION_CANCEL) {
 			_active_box = EQUIP_ACTIVE_CHAR;
 			_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -1369,29 +1429,78 @@ void EquipWindow::_UpdateEquipList() {
 		// First, update the IMAGES of the equipped items
 		_equip_images.clear();
 		StillImage i;
-
-		i.Load(ch->GetWeaponEquipped()->GetIconImage().GetFilename(), 60, 60);
-		_equip_images.push_back(i);
-
-		i.Load(ch->GetHeadArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
-		_equip_images.push_back(i);
-
-		i.Load(ch->GetTorsoArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
-		_equip_images.push_back(i);
-
-		i.Load(ch->GetArmArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
-		_equip_images.push_back(i);
-
-		i.Load(ch->GetLegArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
-		_equip_images.push_back(i);
-
+		
+		// TODO: Simplify into single function
+		if(ch->GetWeaponEquipped() != NULL) {
+			i.Load(ch->GetWeaponEquipped()->GetIconImage().GetFilename(), 60, 60);
+			_equip_images.push_back(i);
+		} else {
+			i.Load("img/icons/weapons/no_weapon.png", 60, 60);
+			_equip_images.push_back(i);
+		}
+		
+		if(ch->GetHeadArmorEquipped() != NULL) {
+			i.Load(ch->GetHeadArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
+			_equip_images.push_back(i);
+		} else {
+			i.Load("img/icons/armor/no_armor.png", 60, 60);
+			_equip_images.push_back(i);
+		}
+		
+		if(ch->GetTorsoArmorEquipped() != NULL) {
+			i.Load(ch->GetTorsoArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
+			_equip_images.push_back(i);
+		} else {
+			i.Load("img/icons/armor/no_armor.png", 60, 60);
+			_equip_images.push_back(i);
+		}
+		
+		if(ch->GetArmArmorEquipped() != NULL) {
+			i.Load(ch->GetArmArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
+			_equip_images.push_back(i);
+		} else {
+			i.Load("img/icons/armor/no_armor.png", 60, 60);
+			_equip_images.push_back(i); 
+		}
+		
+		if(ch->GetLegArmorEquipped() != NULL) {
+			i.Load(ch->GetLegArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
+			_equip_images.push_back(i);
+		} else {
+			i.Load("img/icons/armor/no_armor.png", 60, 60);
+			_equip_images.push_back(i); 
+		}
 		// Now, update the NAMES of the equipped items
-
-		options.push_back(ch->GetWeaponEquipped()->GetName());
-		options.push_back(ch->GetHeadArmorEquipped()->GetName());
-		options.push_back(ch->GetTorsoArmorEquipped()->GetName());
-		options.push_back(ch->GetArmArmorEquipped()->GetName());
-		options.push_back(ch->GetLegArmorEquipped()->GetName());
+		
+		if(ch->GetWeaponEquipped() != NULL) {
+			options.push_back(ch->GetWeaponEquipped()->GetName());
+		} else {
+			options.push_back(MakeUnicodeString(" "));
+		}
+		
+		if(ch->GetHeadArmorEquipped() != NULL) {
+			options.push_back(ch->GetHeadArmorEquipped()->GetName());
+		} else {
+			options.push_back(MakeUnicodeString(" "));
+		}
+		
+		if(ch->GetTorsoArmorEquipped() != NULL) {
+			options.push_back(ch->GetTorsoArmorEquipped()->GetName());
+		} else {
+			options.push_back(MakeUnicodeString(" "));
+		}
+		
+		if(ch->GetArmArmorEquipped() != NULL) {
+			options.push_back(ch->GetArmArmorEquipped()->GetName());
+		} else {
+			options.push_back(MakeUnicodeString(" "));
+		}
+		
+		if(ch->GetLegArmorEquipped() != NULL) {
+			options.push_back(ch->GetLegArmorEquipped()->GetName());
+		} else {
+			options.push_back(MakeUnicodeString(" "));
+		}
 
 // 		_equip_select.SetSize(1, 5);
 		_equip_select.SetOptions(options);

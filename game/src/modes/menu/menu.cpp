@@ -745,10 +745,13 @@ void MenuMode::_HandleEquipMenu() {
 	switch (_menu_equip.GetSelection()) {
 		case EQUIP_EQUIP:
 			_equip_window.Activate(true);
+			_equip_window.SetRemoveMode(false);
 			break;
 
 		case EQUIP_REMOVE:
 			// TODO: Handle the remove command
+			_equip_window.Activate(true);
+			_equip_window.SetRemoveMode(true);
 			cout << "MENU: Equip - Remove command!" << endl;
 			break;
 
@@ -860,36 +863,86 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->Move(400, 577);
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("PHYS ATK: ") + MakeUnicodeString(NumberToString(ch->GetWeaponEquipped()->GetPhysicalAttack())));
+		if(ch->GetWeaponEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("PHYS ATK: ") + MakeUnicodeString(NumberToString(ch->GetWeaponEquipped()->GetPhysicalAttack())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("PHYS ATK: 0"));
+		}
+		
+		VideoManager->MoveRelative(0, 20);
+		if(ch->GetHeadArmorEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("PHYS DEF: ") + MakeUnicodeString(NumberToString(ch->GetHeadArmorEquipped()->GetPhysicalDefense())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("PHYS DEF: 0"));
+		}
+		
+		VideoManager->MoveRelative(0, 20);
+		if(ch->GetTorsoArmorEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("PHYS DEF: ") + MakeUnicodeString(NumberToString(ch->GetTorsoArmorEquipped()->GetPhysicalDefense())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("PHYS DEF: 0"));
+		}
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("PHYS DEF: ") + MakeUnicodeString(NumberToString(ch->GetHeadArmorEquipped()->GetPhysicalDefense())));
+		if(ch->GetArmArmorEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("PHYS DEF: ") + MakeUnicodeString(NumberToString(ch->GetArmArmorEquipped()->GetPhysicalDefense())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("PHYS DEF: 0"));
+		}
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("PHYS DEF: ") + MakeUnicodeString(NumberToString(ch->GetTorsoArmorEquipped()->GetPhysicalDefense())));
-
-		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("PHYS DEF: ") + MakeUnicodeString(NumberToString(ch->GetArmArmorEquipped()->GetPhysicalDefense())));
-
-		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("PHYS DEF: ") + MakeUnicodeString(NumberToString(ch->GetLegArmorEquipped()->GetPhysicalDefense())));
-
+		if(ch->GetLegArmorEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("PHYS DEF: ") + MakeUnicodeString(NumberToString(ch->GetLegArmorEquipped()->GetPhysicalDefense())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("PHYS DEF: 0"));
+		}
+		
 		VideoManager->Move(550, 577);
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("ETH ATK: ") + MakeUnicodeString(NumberToString(ch->GetWeaponEquipped()->GetEtherealAttack())));
+		if(ch->GetWeaponEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("ETH ATK: ") + MakeUnicodeString(NumberToString(ch->GetWeaponEquipped()->GetEtherealAttack())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("ETH ATK: 0"));
+		}
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetHeadArmorEquipped()->GetEtherealDefense())));
+		if(ch->GetHeadArmorEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetHeadArmorEquipped()->GetEtherealDefense())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("ETH DEF: 0"));
+		}
+		
+		VideoManager->MoveRelative(0, 20);
+		if(ch->GetTorsoArmorEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetTorsoArmorEquipped()->GetEtherealDefense())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("ETH DEF: 0"));
+		}
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetTorsoArmorEquipped()->GetEtherealDefense())));
+		if(ch->GetArmArmorEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetArmArmorEquipped()->GetEtherealDefense())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("ETH DEF: 0"));
+		}
 
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetArmArmorEquipped()->GetEtherealDefense())));
-
-		VideoManager->MoveRelative(0, 20);
-		VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetLegArmorEquipped()->GetEtherealDefense())));
+		if(ch->GetLegArmorEquipped() != NULL)
+		{
+			VideoManager->Text()->Draw(UTranslate("ETH DEF: ") + MakeUnicodeString(NumberToString(ch->GetLegArmorEquipped()->GetEtherealDefense())));
+		}else {
+			VideoManager->Text()->Draw(UTranslate("ETH DEF: 0"));
+		}
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
 
 
