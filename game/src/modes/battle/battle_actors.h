@@ -423,8 +423,9 @@ public:
 
 	/** \brief Draws the character's status in the bottom area of the screen
 	*** \param order The order position of the character [0-3] used to determine draw positions
+	*** \param command_active If true, the player has the command window open for this character
 	**/
-	void DrawStatus(uint32 order);
+	void DrawStatus(uint32 order, bool command_active);
 
 	hoa_global::GlobalCharacter* GetGlobalCharacter()
 		{ return _global_character; }
