@@ -1071,7 +1071,13 @@ void BattleMode::_DrawBottomMenu() {
 
 	// Draw the status information of all character actors
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		_character_actors[i]->DrawStatus(i);
+		// If a command is being entered for the character, indicate this to the DrawStatus call so it can highlight the name
+		if (_character_actors[i] == _command_supervisor->GetCommandCharacter()) {
+			_character_actors[i]->DrawStatus(i, true);
+		}
+		else {
+			_character_actors[i]->DrawStatus(i, false);
+		}
 	}
 }
 
