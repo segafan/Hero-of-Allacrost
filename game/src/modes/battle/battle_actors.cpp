@@ -41,10 +41,12 @@ namespace hoa_battle {
 namespace private_battle {
 
 // Colors used for the HP/SP bars and status text
-const Color HP_GREEN(0.294f, 0.776f, 0.184f, 1.0f);
-const Color HP_DARKGREEN(0.110f, 0.388f, 0.090f, 1.0f);
-const Color SP_BLUE(0.196f, 0.522f, 0.859f, 1.0f);
-const Color SP_DARKBLUE(0.110f, 0.430f, 0.455f, 1.0f);
+const Color HP_GREEN(0.16f, 1.0f, 0.05f, 1.0f);
+const Color HP_DARKGREEN(0.07f, 0.33f, 0.03f, 1.0f);
+const Color HP_RED(1.0f, 0.07f, 0.06f, 1.0f);
+const Color HP_DARKRED(0.33f, 0.04f, 0.02f, 1.0f);
+const Color SP_BLUE(0.17f, 0.45f, 1.0f, 1.0f);
+const Color SP_DARKBLUE(0.07f, 0.18f, 0.37f, 1.0f);
 const Color INDICATOR_YELLOW = Color::yellow;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -384,9 +386,9 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character) :
 
 	_name_text.SetStyle(TextStyle("title22"));
 	_name_text.SetText(GetName());
-	_hit_points_text.SetStyle(TextStyle("text22", HP_GREEN, VIDEO_TEXT_SHADOW_BLACK, 1, 1));
+	_hit_points_text.SetStyle(TextStyle("text22", HP_GREEN, VIDEO_TEXT_SHADOW_BLACK));
 	_hit_points_text.SetText(NumberToString(_last_rendered_hp));
-	_skill_points_text.SetStyle(TextStyle("text22", SP_BLUE, VIDEO_TEXT_SHADOW_BLACK, 2, 2));
+	_skill_points_text.SetStyle(TextStyle("text22", SP_BLUE, VIDEO_TEXT_SHADOW_BLACK));
 	_skill_points_text.SetText(NumberToString(_last_rendered_sp));
 
 	_action_selection_text.SetStyle(TextStyle("text20"));
@@ -593,6 +595,9 @@ void BattleCharacter::DrawStatus(uint32 order, bool command_active) {
 	// Used to determine where to draw the character's status
 	float y_position = 0.0f;
 
+	// Set to true when the character's HP is at or below 25% of the active max
+	bool health_critical = (_hit_points <= (_active_max_hit_points / 4));
+
 	// Determine what vertical order the character is in and set the y_position accordingly
 	switch (order) {
 		case 0:
@@ -644,6 +649,10 @@ void BattleCharacter::DrawStatus(uint32 order, bool command_active) {
 		if (_last_rendered_hp != GetHitPoints()) {
 			_last_rendered_hp = GetHitPoints();
 			_hit_points_text.SetText(NumberToString(_last_rendered_hp));
+			if (health_critical == false)
+				_hit_points_text.SetColor(HP_GREEN);
+			else
+				_hit_points_text.SetColor(HP_RED);
 		}
 
 		if (_last_rendered_sp != GetSkillPoints()) {
@@ -659,7 +668,10 @@ void BattleCharacter::DrawStatus(uint32 order, bool command_active) {
 		VideoManager->Move(HPSP_BAR_LEFT_XPOS, y_position + HPSP_BAR_OFFSET_YPOS);
 
 		if (GetHitPoints() > 0) {
-			VideoManager->DrawRectangle(bar_size, 6, HP_GREEN);
+			if (health_critical == false)
+				VideoManager->DrawRectangle(bar_size, 6, HP_GREEN);
+			else
+				VideoManager->DrawRectangle(bar_size, 6, HP_RED);
 		}
 
 		// If the current HP is less than the active max HP, draw a dark green bar to display where the active maximum HP value currently is.
@@ -667,7 +679,10 @@ void BattleCharacter::DrawStatus(uint32 order, bool command_active) {
 		if (GetHitPoints() < GetActiveMaxHitPoints()) {
 			VideoManager->Move(HPSP_BAR_LEFT_XPOS + bar_size, y_position + HPSP_BAR_OFFSET_YPOS);
 			bar_size = static_cast<float>(90 * (GetActiveMaxHitPoints() - GetHitPoints())) / static_cast<float>(GetMaxHitPoints());
-			VideoManager->DrawRectangle(bar_size, 6.0f, HP_DARKGREEN);
+			if (health_critical == false)
+				VideoManager->DrawRectangle(bar_size, 6.0f, HP_DARKGREEN);
+			else
+				VideoManager->DrawRectangle(bar_size, 6.0f, HP_DARKRED);
 
 			// Draw a think yellow line to indicate where the active max HP is at
 			VideoManager->Move(HPSP_BAR_LEFT_XPOS + static_cast<float>((90 * GetActiveMaxHitPoints()) / static_cast<float>(GetMaxHitPoints())), y_position + HPSP_BAR_OFFSET_YPOS);
