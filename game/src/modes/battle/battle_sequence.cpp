@@ -324,10 +324,6 @@ void SequenceSupervisor::_DrawGUI() {
 	VideoManager->Move(0.0f, 0.0f -  _gui_position_offset);
 	_battle->GetMedia().bottom_menu_image.Draw();
 
-	// Draw the swap icon
-	VideoManager->MoveRelative(6.0f, 16.0f);
-	_battle->GetMedia().swap_icon.Draw(Color::gray);
-
 	// TODO: Decide if we want to draw this information during initial sequence or not
 // 	// Draw the status information of all character actors
 // 	for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {

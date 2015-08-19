@@ -90,17 +90,18 @@ BattleMedia::BattleMedia() {
 	if (character_command_highlight.Load("img/menus/battle_character_command.png") == false)
 		PRINT_ERROR << "failed to load character command highlight image" << endl;
 
-	if (character_bar_covers.Load("img/menus/battle_character_bars.png") == false)
+	if (character_bar_covers.Load("img/menus/hpsp_bars.png") == false)
 		PRINT_ERROR << "failed to load character bars image" << endl;
 
 	if (bottom_menu_image.Load("img/menus/battle_bottom_shadow.png") == false)
 		PRINT_ERROR << "failed to load bottom menu image" << endl;
 
-	if (swap_icon.Load("img/icons/battle/swap_icon.png") == false)
-		PRINT_ERROR << "failed to load swap icon" << endl;
-
-	if (swap_card.Load("img/icons/battle/swap_card.png") == false)
-		PRINT_ERROR << "failed to load swap card" << endl;
+	// TODO: character swap feature is not yet implemented
+// 	if (swap_icon.Load("img/icons/battle/swap_icon.png") == false)
+// 		PRINT_ERROR << "failed to load swap icon" << endl;
+//
+// 	if (swap_card.Load("img/icons/battle/swap_card.png") == false)
+// 		PRINT_ERROR << "failed to load swap card" << endl;
 
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(character_action_buttons, "img/menus/battle_command_buttons.png", 2, 5) == false)
 		PRINT_ERROR << "failed to load character action buttons" << endl;
@@ -1050,35 +1051,33 @@ void BattleMode::_DrawBottomMenu() {
 	VideoManager->Move(0.0f, 0.0f);
 	_battle_media.bottom_menu_image.Draw();
 
-	// Draw the swap icon and any swap cards
-	VideoManager->Move(6.0f, 16.0f);
-	_battle_media.swap_icon.Draw(Color::gray);
-	VideoManager->Move(6.0f, 68.0f);
-	for (uint8 i = 0; i < _current_number_swaps; i++) {
-		_battle_media.swap_card.Draw();
-		VideoManager->MoveRelative(4.0f, -4.0f);
-	}
-
 	// If the player is selecting a command for a particular character, draw that character's portrait
 	if (_command_supervisor->GetCommandCharacter() != NULL)
 		_command_supervisor->GetCommandCharacter()->DrawPortrait();
 
 	// Draw the highlight images for the character that a command is being selected for (if any) and/or any characters
 	// that are in the "command" state. The latter indicates that these characters needs a command selected as soon as possible
+	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		if (_character_actors[i] == _command_supervisor->GetCommandCharacter()) {
-			VideoManager->Move(148.0f, 85.0f - (25.0f * i));
+			VideoManager->Move(148.0f, 105.0f - (30.0f * i));
 			_battle_media.character_selected_highlight.Draw();
 		}
 		else if (_character_actors[i]->GetState() == ACTOR_STATE_COMMAND) {
-			VideoManager->Move(148.0f, 85.0f - (25.0f * i));
+			VideoManager->Move(148.0f, 105.0f - (30.0f * i));
 			_battle_media.character_command_highlight.Draw();
 		}
 	}
 
 	// Draw the status information of all character actors
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		_character_actors[i]->DrawStatus(i);
+		// If a command is being entered for the character, indicate this to the DrawStatus call so it can highlight the name
+		if (_character_actors[i] == _command_supervisor->GetCommandCharacter()) {
+			_character_actors[i]->DrawStatus(i, true);
+		}
+		else {
+			_character_actors[i]->DrawStatus(i, false);
+		}
 	}
 }
 
