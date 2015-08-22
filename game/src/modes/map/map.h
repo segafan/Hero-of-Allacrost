@@ -268,8 +268,8 @@ public:
 	void SetCurrentTrack(uint32 track)
 		{ _current_track = track; }
 
-    /** \brief Transitions to the supplied game mode from the current game mode with a graphical effect.
-    *** \param game_mode that is to be transitioned to from the current mode.
+        /** \brief Transitions to the supplied game mode from the current game mode with a graphical effect.
+        *** \param game_mode that is to be transitioned to from the current mode.
 	**/
 	void _TransitionToMode(GameMode *);
 
@@ -469,7 +469,7 @@ private:
 	//! \brief When true the map mode is transitioning and the screen should be faded out
 	bool _fade_out;
 
-    //! \brief Variable to store game mode to be transitioned into from map mode
+        //! \brief Variable to store game mode to be transitioned into from map mode
 	hoa_mode_manager::GameMode* _transition_mode;
 
 }; // class MapMode

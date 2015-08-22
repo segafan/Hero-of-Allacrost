@@ -252,15 +252,15 @@ void SequenceSupervisor::_UpdateExitingSequence() {
 		// Finished with the final step, reset the sequence step counter and exit battle mode
 		if (_sequence_timer.IsFinished() == true) {
 			_sequence_step = 0;
-            _sequence_step = EXIT_STEP_FADE_COMPLETE;
+                        _sequence_step = EXIT_STEP_FADE_COMPLETE;
 		}
-    // Step 3: Once fade to black is complete pop the battle mode and fade back to last mode
+        // Step 3: Once fade to black is complete pop the battle mode and fade back to last mode
 	} else if (_sequence_step == EXIT_STEP_FADE_COMPLETE) {
 
-        if (!VideoManager->IsFading()) {
-            ModeManager->Pop();
-            VideoManager->FadeScreen(Color::clear, 1000);
-        }
+                if (!VideoManager->IsFading()) {
+                    ModeManager->Pop();
+                    VideoManager->FadeScreen(Color::clear, 1000);
+                }
 	}
 	// If we're in at an unknown step, restart at sequence zero
 	else {

@@ -273,7 +273,7 @@ void MapMode::Draw() {
 	else if (CurrentState() == STATE_TREASURE) {
 		_treasure_supervisor->Draw();
 	} else if (CurrentState() == STATE_TRANSITION) {
-        _DrawModeTransition();
+                _DrawModeTransition();
 	}
 }
 
@@ -851,9 +851,9 @@ void MapMode::_UpdateModeTransition() {
 			ModeManager->Push(_transition_mode);
 			_fade_out = false;
 			_transition_mode = NULL;
-            PopState();
-            // This will fade the screen back in from black
-            VideoManager->FadeScreen(Color::clear, 1000);
+                        PopState();
+                        // This will fade the screen back in from black
+                        VideoManager->FadeScreen(Color::clear, 1000);
 		}
 	}
 }
