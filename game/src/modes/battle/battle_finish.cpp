@@ -904,6 +904,10 @@ void FinishSupervisor::Update() {
 
 	if (_state == FINISH_END) {
 		if (_battle_victory == true) {
+
+            // Start fading to black as exit sequence starts
+            VideoManager->FadeScreen(Color::black, 1000);
+
 			BattleMode::CurrentInstance()->ChangeState(BATTLE_STATE_EXITING);
 // 			// TODO: start battle end sequence instead of exiting immediately
 // 			BattleMode::CurrentInstance()->Exit();

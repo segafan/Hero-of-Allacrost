@@ -308,7 +308,7 @@ void BattleEncounterEvent::_Start() {
 	batt_mode->GetMedia().SetBackgroundImage(_battle_background);
 	batt_mode->GetMedia().SetBattleMusic(_battle_music);
 
-    MapMode::CurrentInstance()->_StartTransition(batt_mode);
+    MapMode::CurrentInstance()->_TransitionToMode(batt_mode);
 }
 
 

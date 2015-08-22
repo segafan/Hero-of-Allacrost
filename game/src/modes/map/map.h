@@ -268,8 +268,10 @@ public:
 	void SetCurrentTrack(uint32 track)
 		{ _current_track = track; }
 
-    //! \brief Method for inserting a transitional effect before entering the next game mode
-	void _StartTransition(GameMode *);
+    /** \brief Transitions to the supplied game mode from the current game mode with a graphical effect.
+    *** \param game_mode that is to be transitioned to from the current mode.
+	**/
+	void _TransitionToMode(GameMode *);
 
 	const hoa_video::AnimatedImage& GetDialogueIcon() const
 		{ return _dialogue_icon; }
@@ -456,17 +458,19 @@ private:
 	//! \brief Draws all GUI visuals, such as dialogue icons and the stamina bar
 	void _DrawGUI();
 
-	//! \brief Draws the battle transition effect
-	void _DrawTransition();
+	//! \brief Draws the transition effect that occurs during game mode transitions from map mode.
+	void _DrawModeTransition();
 
-	//! \brief Updates during the battle transition
-	void _UpdateTransition();
+	/** \brief Updates during the map mode transition, checking when the transition is complete
+	*** to know when to push the game mode that is to be transitioned to.
+	**/
+	void _UpdateModeTransition();
 
-	//! \brief When true boot mode is exiting and the screen should be faded out
+	//! \brief When true the map mode is transitioning and the screen should be faded out
 	bool _fade_out;
 
     //! \brief Variable to store game mode to be transitioned into from map mode
-	hoa_mode_manager::GameMode* _trans_to_mode;
+	hoa_mode_manager::GameMode* _transition_mode;
 
 }; // class MapMode
 
