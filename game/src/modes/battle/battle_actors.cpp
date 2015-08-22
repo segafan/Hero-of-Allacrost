@@ -751,8 +751,19 @@ void BattleCharacter::DrawStatus(uint32 order, bool command_active) {
 
 BattleEnemy::BattleEnemy(GlobalEnemy* enemy) :
 	BattleActor(enemy),
-	_global_enemy(enemy)
+	_global_enemy(enemy),
+	_current_sprite(ENEMY_SPRITE_OVER75),
+	_next_sprite(ENEMY_SPRITE_INVALID),
+	_sprite_transition_timer(ENEMY_SPRITE_TRANISITION_TIME)
 {
+	vector<StillImage>& frames = *(_global_enemy->GetBattleSpriteFrames());
+	for (uint32 i = 0; i < frames.size(); ++i) {
+		_sprite_frames.push_back(frames[i]);
+	}
+	// Make a second copy of the final frame (max damage variation) and set the second one to grayscale
+	_sprite_frames.push_back(frames.back());
+	_sprite_frames.back().EnableGrayScale();
+
 	string icon_filename = "img/icons/actors/enemies/" + _global_actor->GetFilename() + ".png";
 	if (DoesFileExist(icon_filename) == false) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "enemy icon image file did not exist: " << icon_filename << endl;
@@ -787,9 +798,9 @@ bool BattleEnemy::operator<(const BattleEnemy & other) const {
 
 void BattleEnemy::ResetActor() {
 	BattleActor::ResetActor();
-
-	vector<StillImage>& sprite_frames = *(_global_enemy->GetBattleSpriteFrames());
-	sprite_frames[3].DisableGrayScale();
+	_current_sprite = ENEMY_SPRITE_OVER75;
+	_next_sprite = ENEMY_SPRITE_INVALID;
+	_sprite_transition_timer.Reset();
 }
 
 
@@ -811,7 +822,11 @@ void BattleEnemy::ChangeState(ACTOR_STATE new_state) {
 			_state_timer.Run();
 			break;
 		case ACTOR_STATE_DEAD:
-			sprite_frames[3].EnableGrayScale();
+			_hit_points = 0;
+			// If the enemy sprite is not in the dead state and there is no active transition, we need to transition the sprite to the dead state
+			if (_current_sprite != ENEMY_SPRITE_0DEAD || _next_sprite != ENEMY_SPRITE_INVALID) {
+				_CheckForSpriteTransition();
+			}
 			break;
 		default:
 			break;
@@ -820,8 +835,40 @@ void BattleEnemy::ChangeState(ACTOR_STATE new_state) {
 
 
 
+void BattleEnemy::RegisterDamage(uint32 amount) {
+	BattleActor::RegisterDamage(amount, NULL);
+	_CheckForSpriteTransition();
+}
+
+
+
+void BattleEnemy::RegisterDamage(uint32 amount, BattleTarget* target) {
+	BattleActor::RegisterDamage(amount, target);
+	_CheckForSpriteTransition();
+}
+
+
+
+void BattleEnemy::RegisterHealing(uint32 amount) {
+	BattleActor::RegisterHealing(amount);
+	_CheckForSpriteTransition();
+}
+
+
+
 void BattleEnemy::Update(bool animation_only) {
 	BattleActor::Update(animation_only);
+
+	// Check for and process any sprite frame transitions
+	if (_next_sprite != ENEMY_SPRITE_INVALID) {
+		_sprite_transition_timer.Update();
+		if (_sprite_transition_timer.IsFinished() == true) {
+			_current_sprite = _next_sprite;
+			_next_sprite = ENEMY_SPRITE_INVALID;
+			// After the current transition ends, check if we need to immediately begin another
+			_CheckForSpriteTransition();
+		}
+	}
 
 	// Do nothing in this function if only animations are to be updated
 	if (animation_only == true) {
@@ -840,16 +887,12 @@ void BattleEnemy::Update(bool animation_only) {
 
 
 void BattleEnemy::DrawSprite() {
-	vector<StillImage>& sprite_frames = *(_global_enemy->GetBattleSpriteFrames());
-
-	// Draw the sprite's final damage frame, which should have grayscale enabled
-	if (_state == ACTOR_STATE_DEAD) {
-		VideoManager->Move(_x_location, _y_location);
-		sprite_frames[3].Draw();
+	// No sprite is drawn when the enemy is done with the sprite death transition
+	if (_current_sprite == ENEMY_SPRITE_0DEAD) {
 		return;
 	}
 
-	// TEMP: when the actor is acting, change its x draw position to show it move forward and then
+	// TODO: when the actor is acting, change its x draw position to show it move forward and then
 	// backward one tile as it completes its execution. In the future this functionality should be
 	// replaced by modifying the enemy's draw location members directly
 	uint32 enemy_draw_offset = 0;
@@ -859,35 +902,71 @@ void BattleEnemy::DrawSprite() {
 		else
 			enemy_draw_offset = TILE_SIZE * (2.0f - 2.0f * _state_timer.PercentComplete());
 	}
-
-	// Draw the enemy's damage-blended sprite frames
 	VideoManager->Move(_x_location - enemy_draw_offset, _y_location);
+
+	// If the sprite is transitioning between frames, draw the alpha belnded next frame on top of it
+	if (_next_sprite == ENEMY_SPRITE_INVALID) {
+		_sprite_frames[static_cast<uint32>(_current_sprite)].Draw();
+	}
+	// When transitioning to the final state, we draw only the current sprite and fade its alpha until it's gone
+	else if (_next_sprite == ENEMY_SPRITE_0DEAD) {
+		float alpha = 1.0f - _sprite_transition_timer.PercentComplete();
+		_sprite_frames[static_cast<uint32>(_current_sprite)].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
+	}
+	// For any other transition, draw the alpha belnded next frame on top of the current one
+	else {
+		_sprite_frames[static_cast<uint32>(_current_sprite)].Draw();
+		float alpha = _sprite_transition_timer.PercentComplete();
+		_sprite_frames[static_cast<uint32>(_next_sprite)].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
+	}
+}
+
+
+
+ENEMY_SPRITE_TYPE BattleEnemy::_DetermineSpriteType() {
+	if (GetHitPoints() == 0) {
+		return ENEMY_SPRITE_0DEAD;
+	}
 
 	float hp_percent = static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
 
 	// Alpha will range from 1.0 to 0.0 in the following calculations
-	if (GetHitPoints() == GetMaxHitPoints()) {
-		sprite_frames[0].Draw();
+	if (hp_percent > 0.75f) {
+		return ENEMY_SPRITE_OVER75;
 	}
-	else if (GetHitPoints() == 0) {
-		sprite_frames[3].Draw();
+	else if (hp_percent > 0.50f) {
+		return ENEMY_SPRITE_OVER50;
 	}
-	else if (hp_percent > 0.666f) {
-		sprite_frames[0].Draw();
-		float alpha = 1.0f - ((hp_percent - 0.666f) * 3.0f);
-		sprite_frames[1].Draw(Color (1.0f, 1.0f, 1.0f, alpha));
-	}
-	else if (hp_percent >  0.333f) {
-		sprite_frames[1].Draw();
-		float alpha = 1.0f - ((hp_percent - 0.333f) * 3.0f);
-		sprite_frames[2].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
+	else if (hp_percent >  0.25f) {
+		return ENEMY_SPRITE_OVER25;
 	}
 	else { // (hp_precent > 0.0f)
-		sprite_frames[2].Draw();
-		float alpha = 1.0f - (hp_percent * 3.0f);
-		sprite_frames[3].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
+		return ENEMY_SPRITE_OVER0;
 	}
-} // void BattleEnemy::DrawSprite()
+}
+
+
+
+void BattleEnemy::_CheckForSpriteTransition() {
+	// Don't interrupt active transitions. If we need another transition after this one, it will be detected and started automatically
+	if (_next_sprite != ENEMY_SPRITE_INVALID) {
+		return;
+	}
+
+	// If the current sprite is the same as the one that represents the enemy's current health, no transition is needed
+	ENEMY_SPRITE_TYPE sprite_frame = _DetermineSpriteType();
+	if (_current_sprite == sprite_frame) {
+		return;
+	}
+
+	// If the sprite is dying and we have not yet transitioned to the grayscale frame, transition to the grayscale frame now
+	_next_sprite = sprite_frame;
+	_sprite_transition_timer.Reset();
+	_sprite_transition_timer.Run();
+	if (_next_sprite == ENEMY_SPRITE_0DEAD && _current_sprite != ENEMY_SPRITE_0GRAY) {
+		_next_sprite = ENEMY_SPRITE_0GRAY;
+	}
+}
 
 
 

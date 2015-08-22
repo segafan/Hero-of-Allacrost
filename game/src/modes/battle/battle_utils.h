@@ -77,6 +77,9 @@ const uint32 MIN_IDLE_WAIT_TIME = 7500;
 //! \brief Warm up time for using items (try to keep short, should be constant regardless of item used)
 const uint32 ITEM_WARM_UP_TIME = 1000;
 
+//! \brief The amount of time to take while transitioning between sprite frames for an enemy
+const uint32 ENEMY_SPRITE_TRANISITION_TIME = 1000;
+
 
 //! \brief Used to indicate what state the overall battle is currently operating in
 enum BATTLE_STATE {
@@ -103,6 +106,19 @@ enum ACTOR_STATE {
 	ACTOR_STATE_DEAD          =  5, //!< Actor has perished and is inactive in battle
 	ACTOR_STATE_PARALYZED     =  6, //!< Actor is in some state of paralysis and can not act nor recover stamina
 	ACTOR_STATE_TOTAL         =  7
+};
+
+
+//! \brief Used for determing the proper sprite frame to draw for an enemy baed on the degree of damage that an enemy has taken, broken up into percentiles of 25%.
+enum ENEMY_SPRITE_TYPE {
+	ENEMY_SPRITE_INVALID  = -1,
+	ENEMY_SPRITE_OVER75   =  0, //!< Enemy has between 100% and 75% health
+	ENEMY_SPRITE_OVER50   =  1, //!< Enemy has between 75% and 50% health
+	ENEMY_SPRITE_OVER25   =  2, //!< Enemy has between 50% and 25% health
+	ENEMY_SPRITE_OVER0    =  3, //!< Enemy has between 25% and 0% health
+	ENEMY_SPRITE_0GRAY    =  4, //!< Enemy has 0% health and is transitioning to grayscale
+	ENEMY_SPRITE_0DEAD    =  5, //!< Enemy has 0% health and is transitioning from grayscale to vanished
+	ENEMY_SPRITE_TOTAL    =  6
 };
 
 

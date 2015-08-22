@@ -124,7 +124,7 @@ public:
 	*** If the amount of damage dealt is greater than the actor's current hit points, the actor will be placed
 	*** in the ACTOR_STATE_DEAD state.
 	**/
-	void RegisterDamage(uint32 amount);
+	virtual void RegisterDamage(uint32 amount);
 
 	/** \brief Deals damage to the actor by reducing its hit points by a certain amount
 	*** \param amount The number of hit points to decrease on the actor
@@ -138,7 +138,7 @@ public:
 	*** case, then it applies the status effect to the actor if the random probability calculation determines
 	*** that the effect has been triggered.
 	**/
-	void RegisterDamage(uint32 amount, BattleTarget* target);
+	virtual void RegisterDamage(uint32 amount, BattleTarget* target);
 
 	/** \brief Heals the actor by restoring a certain amount of hit points
 	*** \param amount The number of hit points to add to the actor
@@ -147,7 +147,7 @@ public:
 	*** The number of hit points on the actor are not allowed to increase beyond the actor's maximum hit
 	*** points.
 	**/
-	void RegisterHealing(uint32 amount);
+	virtual void RegisterHealing(uint32 amount);
 
 	//! \brief Indicates that an action failed to connect on this target
 	void RegisterMiss();
@@ -488,6 +488,15 @@ public:
 	void ChangeSpriteAnimation(const std::string& alias)
 		{ return; }
 
+	/** \note These methods call the corresponding implementation in the parent class to register the change in HP.
+	*** The only difference is that they also make a call to _CheckForDamageFrameTransition()
+	**/
+	//@{
+	void RegisterDamage(uint32 amount);
+	void RegisterDamage(uint32 amount, BattleTarget* target);
+	void RegisterHealing(uint32 amount);
+	//@}
+
 	void Update(bool animation_only = false);
 
 	//! \brief Draws the damage blended enemy sprite image on to the battle field
@@ -503,8 +512,35 @@ protected:
 	//! \brief A pointer to the global enemy object which the battle enemy represents
 	hoa_global::GlobalEnemy* _global_enemy;
 
+	//! \brief The sprite currently being displayed for the enemy. If set to ENEMY_SPRITE_0DEAD, the sprite will not be drawn
+	ENEMY_SPRITE_TYPE _current_sprite;
+
+	//! \brief The sprite to transition the enemy to. If no transition is taking place, will be set to ENEMY_SPRITE_INVALID
+	ENEMY_SPRITE_TYPE _next_sprite;
+
+	//! \brief A copy of the frames from the GlobalEnemy object. Also includes a second copy of the final damage frame in grayscale
+	std::vector<hoa_video::StillImage> _sprite_frames;
+
+	//! \brief A timer used for gradual transition between two different enemy sprite frames
+	hoa_system::SystemTimer _sprite_transition_timer;
+
 	//! \brief An unsorted vector containing all the skills that the enemy may use
 	std::vector<hoa_global::GlobalSkill*> _enemy_skills;
+
+	/** \brief Determines which sprite represents the enemy based on the enemy's current _hit_points
+	*** \return The sprite type corresponding to the enemy's health percentage. If the enemy is dead, returns ENEMY_SPRITE_0DEAD
+	**/
+	ENEMY_SPRITE_TYPE _DetermineSpriteType();
+
+	/** \brief Determines if the enemy sprite should transition to a new frame image based on the enemy's current sprite and HP
+	*** This supports bi-directional transitions (from both damage and healing). An enemy sprite transitioning to a dead state goes
+	*** through two transitions: one to a grayscale version of the full damage frame, and then another from the grayscale frame until
+	*** it fades away completely. These states correspond to ENEMY_SPRITE_0GRAY and ENEMY_SPRITE_0DEAD accordingly
+	***
+	*** \note If a transition is already active, the call will do nothing
+	*** \todo Add support for transitioning the enemy from the ENEMY_SPRITE_0DEAD state to an alive state
+	**/
+	void _CheckForSpriteTransition();
 
 	/** \brief Decides what action that the enemy should execute and the target
 	*** \todo This function is extremely rudimentary right now. Later, it should be given a more complete
