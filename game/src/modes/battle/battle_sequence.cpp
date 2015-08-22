@@ -47,6 +47,7 @@ static const uint32 INIT_STEP_GUI_POSITIONING  =  3;
 
 static const uint32 EXIT_STEP_GUI_POSITIONING  =  1;
 static const uint32 EXIT_STEP_SCREEN_FADE      =  2;
+static const uint32 EXIT_STEP_FADE_COMPLETE    =  3;
 //@}
 
 
@@ -240,8 +241,6 @@ void SequenceSupervisor::_UpdateExitingSequence() {
 	// Step 2: Run living characters right and fade screen to black
 	else if (_sequence_step == EXIT_STEP_SCREEN_FADE) {
 		_sequence_timer.Update();
-		// TODO: Screen fade doesn't work well right now (its instant instead of gradual). Add fade back in when its functional.
-// 		VideoManager->FadeScreen(Color::black, STEP_02_TIME / 2);
 
 		for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
 			if (_battle->_character_actors[i]->IsAlive() == true) {
@@ -253,8 +252,15 @@ void SequenceSupervisor::_UpdateExitingSequence() {
 		// Finished with the final step, reset the sequence step counter and exit battle mode
 		if (_sequence_timer.IsFinished() == true) {
 			_sequence_step = 0;
-			ModeManager->Pop();
+            _sequence_step = EXIT_STEP_FADE_COMPLETE;
 		}
+    // Step 3: Once fade to black is complete pop the battle mode and fade back to last mode
+	} else if (_sequence_step == EXIT_STEP_FADE_COMPLETE) {
+
+        if (!VideoManager->IsFading()) {
+            ModeManager->Pop();
+            VideoManager->FadeScreen(Color::clear, 1000);
+        }
 	}
 	// If we're in at an unknown step, restart at sequence zero
 	else {
