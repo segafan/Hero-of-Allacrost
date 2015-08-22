@@ -235,6 +235,9 @@ void MapMode::Update() {
 			_camera->moving = false;
 			_treasure_supervisor->Update();
 			break;
+        case STATE_TRANSITION:
+            _UpdateTransition();
+            break;
 		default:
 			IF_PRINT_WARNING(MAP_DEBUG) << "map was set in an unknown state: " << CurrentState() << endl;
 			ResetState();
@@ -829,5 +832,27 @@ void MapMode::_DrawGUI() {
 
 	VideoManager->PopState();
 } // void MapMode::_DrawGUI()
+
+void MapMode::_DrawTransition () {
+    _fade_out = true;
+    VideoManager->FadeScreen(Color::black, 1000);
+}
+
+void MapMode::_UpdateTransition() {
+    if (_fade_out) {
+		// When the screen is finished fading to black, clear the variables and push the battle mode
+		if (!VideoManager->IsFading()) {
+			ModeManager->Push(_trans_to_mode);
+			_fade_out = false;
+			_trans_to_mode = NULL;
+            PopState();
+		}
+	}
+}
+
+void MapMode::_StartTransition(GameMode *) {
+    MapMode::PushState(STATE_TRANSITION);
+    MapMode::_DrawTransition();
+}
 
 } // namespace hoa_map
