@@ -542,6 +542,7 @@ void BattleMode::RestartBattle() {
 		_enemy_actors[i]->ResetActor();
 	}
 
+        // Only restart battle music if it has been set
         if (_battle_media.battle_music.GetState() != AUDIO_STATE_UNLOADED) {
                 _battle_media.battle_music.Rewind();
                 _battle_media.battle_music.Play();
