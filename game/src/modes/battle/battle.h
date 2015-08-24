@@ -298,6 +298,10 @@ public:
 	bool IsBattleFinished() const
 		 { return ((_state == private_battle::BATTLE_STATE_VICTORY) || (_state == private_battle::BATTLE_STATE_DEFEAT)); }
 
+        //! \brief Whether or not to play the victory or defeat music when a battle is concluded.
+        //! \return True if victory/defeat music is to be played.
+        bool _play_victory_defeat_music;
+
 	//! \brief Exits the battle performing any final changes as needed
 	void Exit();
 
