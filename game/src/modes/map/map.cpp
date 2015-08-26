@@ -72,6 +72,7 @@ MapMode::MapMode(string script_filename) :
 	_event_supervisor(NULL),
 	_dialogue_supervisor(NULL),
 	_treasure_supervisor(NULL),
+	_transition_mode(NULL),
 	_camera(NULL),
 	_player_sprite(NULL),
 	_delta_x(0),
@@ -82,6 +83,7 @@ MapMode::MapMode(string script_filename) :
 	_unlimited_stamina(false),
 	_dialogue_icons_visible(false),
 	_stamina_bar_visible(false),
+	_fade_out(false),
 	_current_track(INVALID_TRACK),
 	_run_stamina(10000)
 {
@@ -235,6 +237,9 @@ void MapMode::Update() {
 			_camera->moving = false;
 			_treasure_supervisor->Update();
 			break;
+        case STATE_TRANSITION:
+            _UpdateModeTransition();
+            break;
 		default:
 			IF_PRINT_WARNING(MAP_DEBUG) << "map was set in an unknown state: " << CurrentState() << endl;
 			ResetState();
@@ -267,6 +272,8 @@ void MapMode::Draw() {
 	}
 	else if (CurrentState() == STATE_TREASURE) {
 		_treasure_supervisor->Draw();
+	} else if (CurrentState() == STATE_TRANSITION) {
+                _DrawModeTransition();
 	}
 }
 
@@ -829,5 +836,31 @@ void MapMode::_DrawGUI() {
 
 	VideoManager->PopState();
 } // void MapMode::_DrawGUI()
+
+void MapMode::_DrawModeTransition () {
+    if(_fade_out == false) {
+        _fade_out = true;
+        VideoManager->FadeScreen(Color::black, 1000);
+    }
+}
+
+void MapMode::_UpdateModeTransition() {
+    if (_fade_out) {
+		// When the screen is finished fading to black, clear the variables and push the battle mode
+		if (!VideoManager->IsFading()) {
+			ModeManager->Push(_transition_mode);
+			_fade_out = false;
+			_transition_mode = NULL;
+                        PopState();
+                        // This will fade the screen back in from black
+                        VideoManager->FadeScreen(Color::clear, 1000);
+		}
+	}
+}
+
+void MapMode::_TransitionToMode(GameMode * game_mode) {
+    MapMode::PushState(STATE_TRANSITION);
+    _transition_mode = game_mode;
+}
 
 } // namespace hoa_map
