@@ -62,7 +62,6 @@ namespace private_battle {
 
 // Filenames of the default music that is played when no specific music is requested
 //@{
-const char* DEFAULT_BATTLE_MUSIC   = "mus/Confrontation.ogg";
 const char* DEFAULT_VICTORY_MUSIC  = "mus/Allacrost_Fanfare.ogg";
 const char* DEFAULT_DEFEAT_MUSIC   = "mus/Allacrost_Intermission.ogg";
 //@}
@@ -259,7 +258,7 @@ BattleMode::BattleMode() :
 	_dialogue_supervisor(NULL),
 	_finish_supervisor(NULL),
 	_current_number_swaps(0),
-	_play_victory_defeat_music(false)
+	_play_finish_music(true)
 {
 	IF_PRINT_DEBUG(BATTLE_DEBUG) << "constructor invoked" << endl;
 
@@ -313,13 +312,6 @@ void BattleMode::Reset() {
 	_current_instance = this;
 
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
-
-	// Load the default battle music track if no other music has been added
-	/*if (_battle_media.battle_music.GetState() == AUDIO_STATE_UNLOADED) {
-		if (_battle_media.battle_music.LoadAudio(DEFAULT_BATTLE_MUSIC) == false) {
-			IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load default battle music: " << DEFAULT_BATTLE_MUSIC << endl;
-		}
-	}*/
 
         // Only play the battle music if it was loaded
         if (_battle_media.battle_music.GetState() != AUDIO_STATE_UNLOADED) {
@@ -612,14 +604,14 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 			break;
 		case BATTLE_STATE_VICTORY:
 		        // Play victory music if required
-		        if (_play_victory_defeat_music) {
+		        if (_play_finish_music) {
                                 _battle_media.victory_music.Play();
 		        }
 			_finish_supervisor->Initialize(true);
 			break;
 		case BATTLE_STATE_DEFEAT:
 		        // Play defeat music if required
-		        if (_play_victory_defeat_music) {
+		        if (_play_finish_music) {
                                 _battle_media.defeat_music.Play();
 		        }
 			_finish_supervisor->Initialize(false);
@@ -650,7 +642,9 @@ bool BattleMode::OpenCommandMenu(BattleCharacter* character) {
 	return false;
 }
 
-
+void BattleMode::SetPlayFinishMusic(bool to_play) {
+    _play_finish_music = to_play;
+}
 
 void BattleMode::Exit() {
 	// TEMP: Restore all dead characters back to life by giving them a single health point
