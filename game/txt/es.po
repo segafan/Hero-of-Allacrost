@@ -1,0 +1,1282 @@
+# Spanish Translations for Allacrost Demo package
+# Copyright (C) 2010 The Allacrost Project
+# This file is distributed under the same license as the Allacrost package.
+#
+# Jacob Rudolph <rujasu@allacrost.org>, 2010.
+#  <rujasu@yahoo.com>, 2010.
+msgid ""
+msgstr ""
+"Project-Id-Version: Hero of Allacrost - Demo 1.0.0\n"
+"Report-Msgid-Bugs-To: http://bugs.allacrost.org/\n"
+"POT-Creation-Date: 2015-06-28 11:21-0500\n"
+"PO-Revision-Date: 2010-03-14 23:06-0400\n"
+"Last-Translator:  <rujasu@yahoo.com>\n"
+"Language-Team: en_US <kde-i18n-doc@kde.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Spanish\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.0\n"
+
+#: src/modes/battle/battle_actors.cpp:517
+msgid "[Select Action]"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:261
+msgid "Item<R>Type   ×"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:483
+#, fuzzy
+msgid "Skill<R>Type SP"
+msgstr "Técnicas"
+
+#: src/modes/battle/battle_command.cpp:591
+#: src/modes/battle/battle_command.cpp:597
+msgid "Attack"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:592
+#: src/modes/battle/battle_command.cpp:598
+msgid "Defend"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:593
+#: src/modes/battle/battle_command.cpp:599
+msgid "Support"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:594
+#: src/modes/battle/battle_command.cpp:600
+msgid "Item"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1162
+msgid "Select Target"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1167
+#: src/modes/battle/battle_command.cpp:1199
+msgid "All Allies"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1170
+#: src/modes/battle/battle_command.cpp:1202
+msgid "All Enemies"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1214
+msgid "Select Attack Point"
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1235
+#, fuzzy
+msgid "Skill Points: "
+msgstr "Técnicas"
+
+#: src/modes/battle/battle_command.cpp:1236
+#: src/modes/battle/battle_command.cpp:1244
+msgid "Target Type: "
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1237
+msgid "Prep Time: "
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1238
+msgid "Cool Time: "
+msgstr ""
+
+#: src/modes/battle/battle_command.cpp:1243
+msgid "Quantity: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:154
+msgid "Retry"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:155
+msgid "Restart"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:156
+msgid "Return"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:157
+msgid "Retire"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:169 src/modes/shop/shop_confirm.cpp:127
+msgid "Yes"
+msgstr "Sí"
+
+#: src/modes/battle/battle_finish.cpp:170 src/modes/shop/shop_confirm.cpp:126
+msgid "No"
+msgstr "No"
+
+#: src/modes/battle/battle_finish.cpp:300
+msgid ""
+"Start over from the beginning of this battle.\n"
+"Attempts Remaining: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:303
+msgid "Load the game from the last save game point."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:306
+msgid "Returns the game to the main boot menu."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:309
+msgid "Exit the game."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:316
+msgid "Confirm: retry battle."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:319
+msgid "Confirm: restart from last save."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:322
+msgid "Confirm: return to main menu."
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:325
+#, fuzzy
+msgid "Confirm: exit game."
+msgstr "Confirmar:"
+
+#: src/modes/battle/battle_finish.cpp:378
+msgid "Items Found"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:529
+msgid "XP Earned: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:532
+msgid "Drunes Recovered: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:580
+#: src/modes/battle/battle_finish.cpp:754
+msgid "Level: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:581
+#: src/modes/battle/battle_finish.cpp:755
+msgid "XP: "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:692
+msgid "HP:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:699
+msgid "SP:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:706
+msgid "STR:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:713
+msgid "VIG:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:720
+msgid "FOR:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:727
+msgid "PRO:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:734
+msgid "AGI:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:741
+msgid "EVA:"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:749
+msgid ""
+"New Skill Learned:\n"
+" "
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:880
+msgid "The heroes were victorious!"
+msgstr ""
+
+#: src/modes/battle/battle_finish.cpp:884
+msgid "But the heroes fell in battle..."
+msgstr ""
+
+#: src/modes/boot/boot.cpp:84
+msgid "Development Release"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:86
+msgid "© 2004 — 2015 The Allacrost Project"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:513
+msgid "New Game"
+msgstr "Juego Nuevo"
+
+#: src/modes/boot/boot.cpp:514 src/modes/save/save_mode.cpp:107
+msgid "Load Game"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:515
+msgid "Options"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:516
+msgid "Credits"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:517 src/modes/boot/boot_welcome.cpp:100
+msgid "Quit"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:542
+msgid "Video"
+msgstr "Video"
+
+#: src/modes/boot/boot.cpp:543
+msgid "Audio"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:544
+msgid "Language"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:545
+msgid "Key Settings"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:546
+msgid "Joystick Settings"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:547
+msgid "Profiles"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:565
+msgid "Resolution:"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:567
+msgid "Window mode:"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:568
+msgid "Brightness:"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:569
+msgid "Image quality:"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:589 src/modes/boot/boot.cpp:859
+msgid "Sound Volume: "
+msgstr "Volumen del sonido:"
+
+#: src/modes/boot/boot.cpp:590 src/modes/boot/boot.cpp:860
+msgid "Music Volume: "
+msgstr "Volumen de la musica:"
+
+#: src/modes/boot/boot.cpp:650
+msgid "Up: "
+msgstr "Arriba:"
+
+#: src/modes/boot/boot.cpp:651
+msgid "Down: "
+msgstr "Abajo:"
+
+#: src/modes/boot/boot.cpp:652
+msgid "Left: "
+msgstr "Izquierda:"
+
+#: src/modes/boot/boot.cpp:653
+msgid "Right: "
+msgstr "Derecho:"
+
+#: src/modes/boot/boot.cpp:654
+msgid "Confirm: "
+msgstr "Confirmar:"
+
+#: src/modes/boot/boot.cpp:655
+msgid "Cancel: "
+msgstr "Cancelar:"
+
+#: src/modes/boot/boot.cpp:656
+msgid "Menu: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:657
+msgid "Swap: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:658
+msgid "Left Select: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:659
+msgid "Right Select: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:660
+msgid "Pause: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:661 src/modes/boot/boot.cpp:691
+msgid "Restore defaults"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:735 src/modes/menu/menu.cpp:516
+#: src/modes/menu/menu.cpp:584 src/modes/menu/menu.cpp:599
+msgid "Save"
+msgstr "Salvar"
+
+#: src/modes/boot/boot.cpp:736
+msgid "Load"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:737
+msgid "Delete"
+msgstr "Borrar"
+
+#: src/modes/boot/boot.cpp:768
+msgid "New Profile"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:832
+msgid "back"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:835
+msgid "end"
+msgstr "fin"
+
+#: src/modes/boot/boot.cpp:848
+msgid "Window mode: fullscreen"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:850
+msgid "Window mode: windowed"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:853
+msgid "Brightness: "
+msgstr ""
+
+#: src/modes/boot/boot.cpp:867
+msgid "Move Up"
+msgstr "Mover arriba"
+
+#: src/modes/boot/boot.cpp:868
+msgid "Move Down"
+msgstr "Mover abajo"
+
+#: src/modes/boot/boot.cpp:869
+msgid "Move Left"
+msgstr "Mover a la izquierda"
+
+#: src/modes/boot/boot.cpp:870
+msgid "Move Right"
+msgstr "Mover al derecho"
+
+#: src/modes/boot/boot.cpp:871 src/modes/boot/boot_welcome.cpp:79
+#: src/modes/shop/shop.cpp:1030
+msgid "Confirm"
+msgstr "Confirmar"
+
+#: src/modes/boot/boot.cpp:872 src/modes/boot/boot_welcome.cpp:82
+#: src/modes/pause.cpp:71 src/modes/save/save_mode.cpp:108
+#: src/modes/save/save_mode.cpp:123 src/modes/save/save_mode.cpp:143
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: src/modes/boot/boot.cpp:873 src/modes/boot/boot_welcome.cpp:85
+msgid "Menu"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:874 src/modes/boot/boot_welcome.cpp:88
+msgid "Swap"
+msgstr "Cambiar"
+
+#: src/modes/boot/boot.cpp:875 src/modes/boot/boot_welcome.cpp:91
+msgid "Left Select"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:876 src/modes/boot/boot_welcome.cpp:94
+msgid "Right Select"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:877 src/modes/boot/boot_welcome.cpp:97
+msgid "Pause"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:884
+msgid "X Axis"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:885
+msgid "Y Axis"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:886
+msgid "Confirm: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:887
+msgid "Cancel: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:888
+msgid "Menu: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:889
+msgid "Swap: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:890
+msgid "Left Select: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:891
+msgid "Right Select: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:892
+msgid "Pause: Button"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1165
+msgid "Please enter a name for your new profile"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1173
+msgid "Overwrite? Confirm/Cancel"
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1456
+msgid "Please press a new joystick button."
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1458
+msgid "Please press a new key."
+msgstr ""
+
+#: src/modes/boot/boot.cpp:1460
+msgid "Please move an axis."
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:44
+msgid "The table below lists the default game controls.\n"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:45
+msgid ""
+"The control mappings can be changed in the options menu on the next screen."
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:55
+msgid "Command"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:56
+msgid "Default Key"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:57
+msgid "General Purpose"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:67
+msgid "Up"
+msgstr "Arriba"
+
+#: src/modes/boot/boot_welcome.cpp:68
+msgid "Up Arrow"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:69
+msgid "Move position or cursor upwards"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:70
+msgid "Down"
+msgstr "Abajo"
+
+#: src/modes/boot/boot_welcome.cpp:71
+msgid "Down Arrow"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:72
+msgid "Move position or cursor downwards"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:73
+msgid "Left"
+msgstr "Izquierda"
+
+#: src/modes/boot/boot_welcome.cpp:74
+msgid "Left Arrow"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:75
+msgid "Move position or cursor to the left"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:76
+msgid "Right"
+msgstr "Derecho"
+
+#: src/modes/boot/boot_welcome.cpp:77
+msgid "Right Arrow"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:78
+msgid "Move position or cursor to the right"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:80
+msgid "F"
+msgstr "F"
+
+#: src/modes/boot/boot_welcome.cpp:81
+msgid "Confirm an action or menu command"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:83
+msgid "D"
+msgstr "D"
+
+#: src/modes/boot/boot_welcome.cpp:84
+msgid "Cancel an action or menu command"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:86
+msgid "S"
+msgstr "S"
+
+#: src/modes/boot/boot_welcome.cpp:87
+msgid "Display the character menu"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:89
+msgid "A"
+msgstr "A"
+
+#: src/modes/boot/boot_welcome.cpp:90
+msgid "Swaps active menu or character"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:92
+msgid "W"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:93
+msgid "Select multiple or backward page scroll"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:95
+msgid "E"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:96
+msgid "Select multiple or forward page scroll"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:98
+msgid "Spacebar"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:99
+msgid "Pauses the game"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:101
+msgid "Esc"
+msgstr "Esc"
+
+#: src/modes/boot/boot_welcome.cpp:102
+msgid "Quit the application"
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:105
+msgid ""
+"There are additional commands available which can be found in the MANUAL "
+"file."
+msgstr ""
+
+#: src/modes/boot/boot_welcome.cpp:108
+msgid "Press any key to continue."
+msgstr ""
+
+#: src/modes/map/map_treasure.cpp:85
+msgid "Treasure Contents"
+msgstr ""
+
+#: src/modes/map/map_treasure.cpp:109
+msgid "Finished"
+msgstr "Terminado"
+
+#: src/modes/map/map_treasure.cpp:351
+msgid "Drunes"
+msgstr "Drunes"
+
+#: src/modes/map/map_treasure.cpp:353
+msgid "With the additional "
+msgstr ""
+
+#: src/modes/map/map_treasure.cpp:354
+msgid " drunes found in this treasure added, the party now holds a total of "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:512
+msgid "Inventory"
+msgstr "Inventario"
+
+#: src/modes/menu/menu.cpp:513
+msgid "Skills"
+msgstr "Técnicas"
+
+#: src/modes/menu/menu.cpp:514 src/modes/menu/menu.cpp:629
+msgid "Equip"
+msgstr "Blandir"
+
+#: src/modes/menu/menu.cpp:515
+msgid "Status"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:517
+msgid "Formation"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:533 src/modes/menu/menu.cpp:551
+msgid "Use"
+msgstr "Usar"
+
+#: src/modes/menu/menu.cpp:535 src/modes/menu/menu.cpp:552
+#: src/modes/menu/menu.cpp:567 src/modes/menu/menu.cpp:585
+#: src/modes/menu/menu.cpp:600 src/modes/menu/menu.cpp:615
+#: src/modes/menu/menu.cpp:631
+msgid "Back"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:566
+msgid "View"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:583
+msgid "Edit"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:614
+msgid "Switch"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:630
+msgid "Remove"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:815
+msgid "STR: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:818
+msgid "VIG: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:821
+msgid "FRT: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:824
+msgid "PRO: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:827
+msgid "AGI: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:830
+msgid "EVD: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:834
+msgid "Current Equipment:"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:837 src/modes/menu/menu_views.cpp:1409
+msgid "Weapon"
+msgstr "Arma"
+
+#: src/modes/menu/menu.cpp:840
+msgid "Head"
+msgstr "Cabeza"
+
+#: src/modes/menu/menu.cpp:843
+msgid "Torso"
+msgstr "Torso"
+
+#: src/modes/menu/menu.cpp:846 src/modes/menu/menu_views.cpp:209
+msgid "Arm"
+msgstr "Brazo"
+
+#: src/modes/menu/menu.cpp:849
+msgid "Legs"
+msgstr "Piernas"
+
+#: src/modes/menu/menu.cpp:854
+msgid "PHYS ATK: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:857 src/modes/menu/menu.cpp:860
+#: src/modes/menu/menu.cpp:863 src/modes/menu/menu.cpp:866
+msgid "PHYS DEF: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:871
+msgid "ETH ATK: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:874 src/modes/menu/menu.cpp:877
+#: src/modes/menu/menu.cpp:880 src/modes/menu/menu.cpp:883
+msgid "ETH DEF: "
+msgstr ""
+
+#: src/modes/menu/menu.cpp:898
+msgid "PHYS ATK:"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:903
+msgid "ETH ATK:"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:917 src/modes/menu/menu.cpp:936
+#: src/modes/menu/menu.cpp:955 src/modes/menu/menu.cpp:974
+msgid "PHYS DEF:"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:922 src/modes/menu/menu.cpp:941
+#: src/modes/menu/menu.cpp:960 src/modes/menu/menu.cpp:979
+msgid "ETH DEF:"
+msgstr ""
+
+#: src/modes/menu/menu.cpp:1011
+msgid "Drunes: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:102 src/modes/save/save_mode.cpp:624
+msgid "Lv: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:106 src/modes/menu/menu_views.cpp:573
+#: src/modes/save/save_mode.cpp:628
+msgid "HP: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:111 src/modes/menu/menu_views.cpp:577
+#: src/modes/save/save_mode.cpp:633
+msgid "SP: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:116 src/modes/menu/menu_views.cpp:581
+msgid "XP to Next: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:204 src/modes/menu/menu_views.cpp:717
+msgid "All"
+msgstr "Todo"
+
+#: src/modes/menu/menu_views.cpp:205
+msgid "Itm"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:206
+msgid "Wpn"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:207
+msgid "Hlm"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:208
+msgid "Tor"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:210
+msgid "Leg"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:211
+msgid "Key"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:567
+msgid "Experience Level: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:584
+msgid "Strength: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:587
+msgid "Vigor: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:590
+msgid "Fortitude: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:593
+msgid "Protection: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:596
+msgid "Agility: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:599
+msgid "Evade: "
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:718
+msgid "Field"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:719
+msgid "Battle"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1387 src/modes/shop/shop.cpp:127
+msgid "Weapons"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1390 src/modes/menu/menu_views.cpp:1411
+msgid "Headgear"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1393 src/modes/menu/menu_views.cpp:1413
+msgid "Body Armor"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1396 src/modes/menu/menu_views.cpp:1415
+msgid "Offhand"
+msgstr ""
+
+#: src/modes/menu/menu_views.cpp:1399 src/modes/menu/menu_views.cpp:1417
+msgid "Leggings"
+msgstr ""
+
+#: src/modes/pause.cpp:57
+msgid "Paused"
+msgstr ""
+
+#: src/modes/pause.cpp:69
+msgid "Quit Game"
+msgstr ""
+
+#: src/modes/pause.cpp:70
+msgid "Quit to Main Menu"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:106
+msgid "Save Game"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:124
+msgid "File #1"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:125
+msgid "File #2"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:126
+msgid "File #3"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:127
+msgid "File #4"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:128
+msgid "File #5"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:129
+msgid "File #6"
+msgstr ""
+
+#: src/modes/save/save_mode.cpp:142
+#, fuzzy
+msgid "Confirm Save"
+msgstr "Confirmar:"
+
+#: src/modes/shop/shop.cpp:126
+msgid "Items"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:128
+msgid "Head Armor"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:129
+msgid "Torso Armor"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:130
+msgid "Arm Armor"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:131
+msgid "Leg Armor"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:132
+msgid "Shards"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:133
+msgid "Key Items"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:134
+msgid "All Wares"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:375
+msgid "Field Use:"
+msgstr "Usado en el campo:"
+
+#: src/modes/shop/shop.cpp:377
+msgid "Battle Use:"
+msgstr "Usado en la batalla:"
+
+#: src/modes/shop/shop.cpp:379
+msgid "Target:"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:391
+msgid "Phys:"
+msgstr "Física:"
+
+#: src/modes/shop/shop.cpp:393
+msgid "Eth:"
+msgstr ""
+
+#: src/modes/shop/shop.cpp:1027 src/modes/shop/shop_buy.cpp:69
+#: src/modes/shop/shop_confirm.cpp:187 src/modes/shop/shop_confirm.cpp:210
+#: src/modes/shop/shop_confirm.cpp:525 src/modes/shop/shop_leave.cpp:170
+#: src/modes/shop/shop_leave.cpp:190 src/modes/shop/shop_leave.cpp:442
+msgid "Buy"
+msgstr "Comprar"
+
+#: src/modes/shop/shop.cpp:1028 src/modes/shop/shop_confirm.cpp:195
+#: src/modes/shop/shop_confirm.cpp:514 src/modes/shop/shop_leave.cpp:177
+#: src/modes/shop/shop_leave.cpp:431 src/modes/shop/shop_sell.cpp:69
+msgid "Sell"
+msgstr "Vender"
+
+#: src/modes/shop/shop.cpp:1029
+msgid "Trade"
+msgstr "Intercambiar"
+
+#: src/modes/shop/shop.cpp:1038
+msgid "Leave"
+msgstr "Salir"
+
+#: src/modes/shop/shop.cpp:1524
+msgid "Funds: "
+msgstr "Fondos:"
+
+#: src/modes/shop/shop.cpp:1525
+msgid "Purchases: -"
+msgstr "Compras:"
+
+#: src/modes/shop/shop.cpp:1526
+msgid "Sales: +"
+msgstr "Ventas:"
+
+#: src/modes/shop/shop.cpp:1527
+msgid "Total: "
+msgstr "Total:"
+
+#: src/modes/shop/shop_buy.cpp:57 src/modes/shop/shop_sell.cpp:57
+msgid "Category"
+msgstr ""
+
+#: src/modes/shop/shop_buy.cpp:60 src/modes/shop/shop_confirm.cpp:79
+#: src/modes/shop/shop_leave.cpp:80 src/modes/shop/shop_sell.cpp:60
+msgid "Name"
+msgstr "Nombre"
+
+#: src/modes/shop/shop_buy.cpp:66 src/modes/shop/shop_confirm.cpp:87
+#: src/modes/shop/shop_leave.cpp:88 src/modes/shop/shop_sell.cpp:66
+msgid "Price"
+msgstr "Precio"
+
+#: src/modes/shop/shop_buy.cpp:67 src/modes/shop/shop_confirm.cpp:88
+#: src/modes/shop/shop_leave.cpp:89 src/modes/shop/shop_sell.cpp:67
+msgid "Stock"
+msgstr ""
+
+#: src/modes/shop/shop_buy.cpp:68 src/modes/shop/shop_confirm.cpp:89
+#: src/modes/shop/shop_leave.cpp:90 src/modes/shop/shop_sell.cpp:68
+msgid "Own"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:67 src/modes/shop/shop_leave.cpp:68
+msgid "Purchases"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:71 src/modes/shop/shop_leave.cpp:72
+msgid "Sales"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:75 src/modes/shop/shop_leave.cpp:76
+msgid "Trades"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:93 src/modes/shop/shop_leave.cpp:94
+msgid "No marked transactions."
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:99
+msgid "There are no marked purchases, sales, or trades."
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:102
+msgid "Will that be all?"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:111
+msgid "Modify Order"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:112
+msgid "Clear Order"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:113
+msgid "Complete Transaction"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:117
+msgid "This will remove all marked purchases, sales, and trades. Are you sure?"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:669 src/modes/shop/shop_confirm.cpp:676
+#: src/modes/shop/shop_confirm.cpp:683 src/modes/shop/shop_leave.cpp:193
+#: src/modes/shop/shop_leave.cpp:195 src/modes/shop/shop_leave.cpp:197
+msgid " count"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:670 src/modes/shop/shop_confirm.cpp:677
+#: src/modes/shop/shop_leave.cpp:194 src/modes/shop/shop_leave.cpp:196
+msgid " unique"
+msgstr ""
+
+#: src/modes/shop/shop_confirm.cpp:684 src/modes/shop/shop_leave.cpp:198
+msgid " characters"
+msgstr ""
+
+#: src/modes/shop/shop_leave.cpp:100
+msgid "Your order is not yet final. Are you sure you want to leave the shop?"
+msgstr ""
+
+#: src/modes/shop/shop_leave.cpp:109
+msgid "View Order"
+msgstr ""
+
+#: src/modes/shop/shop_leave.cpp:110
+msgid "Confirm Order"
+msgstr ""
+
+#: src/modes/shop/shop_leave.cpp:111
+msgid "Leave Shop"
+msgstr ""
+
+#: src/modes/shop/shop_root.cpp:117
+msgid "Shop Name"
+msgstr ""
+
+#: src/modes/shop/shop_root.cpp:120
+msgid "Buy prices"
+msgstr ""
+
+#: src/modes/shop/shop_root.cpp:122
+msgid "Sell prices"
+msgstr ""
+
+#: src/modes/shop/shop_root.cpp:130
+msgid "\"Welcome! Take a look around.\""
+msgstr ""
+
+#: src/modes/shop/shop_trade.cpp:48
+msgid "This feature is not yet available."
+msgstr ""
+
+#~ msgid "No!"
+#~ msgstr "¡No!"
+
+#, fuzzy
+#~ msgid "What have you done…"
+#~ msgstr "¿Qué haces?"
+
+#~ msgid "What are you doing?"
+#~ msgstr "¿Qué haces?"
+
+#~ msgid "I’m your friend!"
+#~ msgstr "¡Soy tu amigo!"
+
+#~ msgid "It’s my duty!"
+#~ msgstr "¡Es mi obligación!"
+
+#~ msgid "I don’t want to fight you."
+#~ msgstr "No quiero pelearse contigo."
+
+#~ msgid "You know I can’t."
+#~ msgstr "No puedo."
+
+#, fuzzy
+#~ msgid "Claudius, what are you doing here?"
+#~ msgstr "¿Qué haces?"
+
+#, fuzzy
+#~ msgid "No, of course not..."
+#~ msgstr "¡Por supuesto que no! "
+
+#, fuzzy
+#~ msgid "Of course, I promise."
+#~ msgstr "¡Por supuesto que no! "
+
+#~ msgid "Huh?  What?"
+#~ msgstr "¿Qué?"
+
+#~ msgid "What’s going on?"
+#~ msgstr "¿Qué pasa?"
+
+#~ msgid "Come on, Kyle, let’s go! Kyle?"
+#~ msgstr "¡Kyle, vamos!  ¿Kyle?"
+
+#~ msgid "Yes, Claudius?"
+#~ msgstr "¿Claudius?"
+
+#~ msgid "…Nothing."
+#~ msgstr "…Es nada."
+
+#~ msgid "Hey."
+#~ msgstr "Hola."
+
+#~ msgid "What are you doing? The captain wants to speak with you."
+#~ msgstr "¿Qué haces?  El capitán necesita hablar contigo."
+
+#~ msgid "He can wait."
+#~ msgstr "El capitán puede esperar."
+
+#, fuzzy
+#~ msgid "…What?"
+#~ msgstr "¿Qué?"
+
+#~ msgid "Good job."
+#~ msgstr "Buen trabajo."
+
+#~ msgid "Claudius?"
+#~ msgstr "¿Claudius?"
+
+#~ msgid "Yes?"
+#~ msgstr "¿Qué?"
+
+#~ msgid "…Let’s go."
+#~ msgstr "…Vamos."
+
+#~ msgid "Yes sir."
+#~ msgstr "Sí, señor."
+
+#~ msgid "Nicely done."
+#~ msgstr "Muy bien."
+
+#~ msgid "Thank you, sir."
+#~ msgstr "Gracias, señor."
+
+#~ msgid "I don’t know, sir."
+#~ msgstr "Yo no sé, señor."
+
+#~ msgid "Well done, Claudius."
+#~ msgstr "Muy bien, Claudius."
+
+#~ msgid "Yes, sir."
+#~ msgstr "Sí, señor."
+
+#~ msgid "You and Kyle are close."
+#~ msgstr "Kyle y tú son buen amigos."
+
+#~ msgid "We are, sir."
+#~ msgstr "Nosotros somos, señor."
+
+#~ msgid "I understand, sir."
+#~ msgstr "Yo comprendo, señor."
+
+#~ msgid "Kyle!"
+#~ msgstr "¡Kyle!"
+
+#, fuzzy
+#~ msgid "Woah, are you men alright?"
+#~ msgstr "¿Qué haces?"
+
+#~ msgid "Meta:"
+#~ msgstr "Metafísico:"
+
+#~ msgid "Demo 1.0.0"
+#~ msgstr "Versión Demo 1.0.0"
+
+#~ msgid "I can do that on my own."
+#~ msgstr "Puedo hacerlo yo solo."
+
+#~ msgid "You’re crazy."
+#~ msgstr "Tú estás loco."
+
+#~ msgid "You’ve never thought about leaving the knighthood?"
+#~ msgstr "¿No piensas que salir los caballeros?"
+
+#~ msgid "Of course not."
+#~ msgstr "¡Por supuesto que no! "
+
+#~ msgid "You’ll be all right."
+#~ msgstr "Tú vas a estar bien."
+
+#~ msgid "I just don’t understand you sometimes."
+#~ msgstr "No te comprendo a veces."
+
+#~ msgid "Hey, what time is it?"
+#~ msgstr "¿Qué hora es?"
+
+#~ msgid "I don’t know."
+#~ msgstr "No sé."
+
+#~ msgid "Who cares?"
+#~ msgstr "¿Qué más da?"
+
+#~ msgid "I think we are. Come on."
+#~ msgstr "Creo que sí.  Vamos."
+
+#, fuzzy
+#~ msgid "Knight"
+#~ msgstr "Derecho"
