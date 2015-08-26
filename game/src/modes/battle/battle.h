@@ -114,9 +114,6 @@ public:
 	//! \brief Used to provide a background highlight for a selected character
 	hoa_video::StillImage character_selected_highlight;
 
-	//! \brief Used to provide a background highlight for a character that needs a command set
-	hoa_video::StillImage character_command_highlight;
-
 	//! \brief An image which contains the covers for the HP and SP bars
 	hoa_video::StillImage character_bar_covers;
 

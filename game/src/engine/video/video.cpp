@@ -471,7 +471,7 @@ bool VideoEngine::ApplySettings() {
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        
+
 		// Turn off writing to the depth buffer
 		glDepthMask(GL_FALSE);
 
@@ -1271,9 +1271,9 @@ void VideoEngine::DrawGrid(float x, float y, float x_step, float y_step, const C
 void VideoEngine::DrawRectangle(float width, float height, const Color& color) {
 	_rectangle_image._width = width;
 	_rectangle_image._height = height;
-	_rectangle_image._color[0] = color;
+	_rectangle_image.SetColor(color);
 
-	_rectangle_image.Draw(color);
+	_rectangle_image.Draw();
 }
 
 
