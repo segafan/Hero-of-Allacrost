@@ -71,7 +71,8 @@ enum MAP_STATE {
 	STATE_SCENE            = 2, //!< Like the explore state but player has no control (input is ignored)
 	STATE_DIALOGUE         = 3, //!< When a dialogue is active
 	STATE_TREASURE         = 4, //!< Active when a treasure has been procured by the player
-	STATE_TOTAL            = 5
+	STATE_TRANSITION       = 5, //!< State for when transitioning mode
+	STATE_TOTAL            = 6
 };
 //@}
 
