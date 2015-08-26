@@ -86,9 +86,6 @@ BattleMedia::BattleMedia() {
 	if (character_selected_highlight.Load("img/menus/battle_character_selection.png") == false)
 		PRINT_ERROR << "failed to load character selection highlight image" << endl;
 
-	if (character_command_highlight.Load("img/menus/battle_character_command.png") == false)
-		PRINT_ERROR << "failed to load character command highlight image" << endl;
-
 	if (character_bar_covers.Load("img/menus/hpsp_bars.png") == false)
 		PRINT_ERROR << "failed to load character bars image" << endl;
 
@@ -1067,12 +1064,8 @@ void BattleMode::_DrawBottomMenu() {
 	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		if (_character_actors[i] == _command_supervisor->GetCommandCharacter()) {
-			VideoManager->Move(148.0f, 105.0f - (30.0f * i));
+			VideoManager->Move(120.0f, 109.0f - (30.0f * i));
 			_battle_media.character_selected_highlight.Draw();
-		}
-		else if (_character_actors[i]->GetState() == ACTOR_STATE_COMMAND) {
-			VideoManager->Move(148.0f, 105.0f - (30.0f * i));
-			_battle_media.character_command_highlight.Draw();
 		}
 	}
 
