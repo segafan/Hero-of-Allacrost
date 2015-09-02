@@ -710,10 +710,18 @@ void BindModeCode() {
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
 	[
-		class_<BattleStatusEffect, hoa_global::GlobalStatusEffect>("BattleStatusEffect")
-			.def("GetAffectedActor", &BattleStatusEffect::GetAffectedActor)
-			.def("GetTimer", &BattleStatusEffect::GetTimer)
-			.def("IsIntensityChanged", &BattleStatusEffect::IsIntensityChanged)
+		class_<BattleEffect>("BattleEffect")
+			.def("GetEffectActor", &BattleEffect::GetEffectActor)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
+		class_<StatusEffect, BattleEffect>("StatusEffect")
+			.def("GetDurationTimer", &StatusEffect::GetDurationTimer)
+			.def("IncrementIntensity", &StatusEffect::IncrementIntensity)
+			.def("DecrementIntensity", &StatusEffect::DecrementIntensity)
+			.def("SetIntensity", &StatusEffect::SetIntensity)
+			.def("IsIntensityChanged", &StatusEffect::IsIntensityChanged)
 	];
 
 	} // End using battle mode namespaces

@@ -7,6 +7,7 @@
 --
 -- Each status effect implementation requires the following data to be defined.
 -- {name} - The name of the status effect as it will be shown to the player
+-- {class_type} - A string representing the class name that represents the status effectt type
 -- {duration} - The duration that the effect lasts, in milliseconds
 -- {icon_index} - A numeric index to the row of images where the icons for this effect
 -- {opposite_effect} - The status which acts as an opposite status to this one
@@ -29,7 +30,7 @@
 -- data.
 --
 -- effect:GetTimer() - returns the BattleTimer object for the effect
--- effect:GetAffectedActor() - returns the BattleActor object that the effect is active on
+-- effect:GetEffectActor() - returns the BattleActor object that the effect is active on
 -- effect:GetIntensity() - returns the current intensity of the active effect
 -- effect:IsIntensityChanged() - returns true if the intensity level has undergone a recent change
 --
@@ -46,6 +47,7 @@ end
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_RAISE] = {
 	name = hoa_system.Translate("Raise Strength"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 0,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_LOWER,
@@ -61,11 +63,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_RAISE] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetStrength();
+		effect:GetEffectActor():ResetStrength();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetStrength();
@@ -92,6 +94,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_RAISE] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_LOWER] = {
 	name = hoa_system.Translate("Lower Strength"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 1,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_RAISE,
@@ -107,11 +110,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_LOWER] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetStrength();
+		effect:GetEffectActor():ResetStrength();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetStrength();
@@ -138,6 +141,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_STRENGTH_LOWER] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_RAISE] = {
 	name = hoa_system.Translate("Raise Vigor"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 2,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_LOWER,
@@ -153,11 +157,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_RAISE] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetVigor();
+		effect:GetEffectActor():ResetVigor();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetVigor();
@@ -184,6 +188,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_RAISE] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_LOWER] = {
 	name = hoa_system.Translate("Lower Vigor"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 3,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_RAISE,
@@ -199,11 +204,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_LOWER] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetVigor();
+		effect:GetEffectActor():ResetVigor();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetVigor();
@@ -230,6 +235,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_VIGOR_LOWER] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE] = {
 	name = hoa_system.Translate("Raise Fortitude"),
+	class_type = "StaticStatusEffect",
 	duration = 5000,
 	icon_index = 4,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_LOWER,
@@ -245,11 +251,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetFortitude();
+		effect:GetEffectActor():ResetFortitude();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetFortitude();
@@ -276,6 +282,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_LOWER] = {
 	name = hoa_system.Translate("Lower Fortitude"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 5,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_RAISE,
@@ -291,11 +298,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_LOWER] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetFortitude();
+		effect:GetEffectActor():ResetFortitude();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetFortitude();
@@ -322,6 +329,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_FORTITUDE_LOWER] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PROTECTION_RAISE] = {
 	name = hoa_system.Translate("Raise Protection"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 6,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_PROTECTION_LOWER,
@@ -337,11 +345,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PROTECTION_RAISE] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetProtection();
+		effect:GetEffectActor():ResetProtection();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetProtection();
@@ -368,6 +376,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PROTECTION_RAISE] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PROTECTION_LOWER] = {
 	name = hoa_system.Translate("Lower Protection"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 7,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_PROTECTION_RAISE,
@@ -383,11 +392,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PROTECTION_LOWER] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetProtection();
+		effect:GetEffectActor():ResetProtection();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetProtection();
@@ -414,6 +423,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PROTECTION_LOWER] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_RAISE] = {
 	name = hoa_system.Translate("Raise Agility"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 8,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER,
@@ -429,11 +439,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_RAISE] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetAgility();
+		effect:GetEffectActor():ResetAgility();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetAgility();
@@ -461,6 +471,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_RAISE] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = {
 	name = hoa_system.Translate("Lower Agility"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 9,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_RAISE,
@@ -476,11 +487,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetAgility();
+		effect:GetEffectActor():ResetAgility();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetAgility();
@@ -508,6 +519,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_AGILITY_LOWER] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_EVADE_RAISE] = {
 	name = hoa_system.Translate("Raise Evasion"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 10,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_EVADE_LOWER,
@@ -523,14 +535,14 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_EVADE_RAISE] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetEvade();
+		effect:GetEffectActor():ResetEvade();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
-		actor:ResetEvae();
+		actor:ResetEvade();
 		base_value = actor:GetEvade();
 		attribute_modifier = 1;
 
@@ -557,6 +569,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_EVADE_RAISE] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_EVADE_LOWER] = {
 	name = hoa_system.Translate("Lower Evasion"),
+	class_type = "StaticStatusEffect",
 	duration = 30000,
 	icon_index = 11,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_EVADE_RAISE,
@@ -572,11 +585,11 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_EVADE_LOWER] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():ResetEvade();
+		effect:GetEffectActor():ResetEvade();
 	end,
 
 	ModifyAttribute = function(effect)
-		actor = effect:GetAffectedActor();
+		actor = effect:GetEffectActor();
 		intensity = effect:GetIntensity();
 
 		actor:ResetEvade();
@@ -603,6 +616,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_EVADE_LOWER] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_HP_REGEN] = {
 	name = hoa_system.Translate("Regenerate HP"),
+	class_type = "PeriodicStatusEffect",
 	duration = 30000,
 	icon_index = 12,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_HP_DRAIN,
@@ -622,6 +636,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_HP_REGEN] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_HP_DRAIN] = {
 	name = hoa_system.Translate("Poison"),
+	class_type = "PeriodicStatusEffect",
 	duration = 30000,
 	icon_index = 13,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_HP_REGEN,
@@ -641,6 +656,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_HP_DRAIN] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_SP_REGEN] = {
 	name = hoa_system.Translate("Regenerate SP"),
+	class_type = "PeriodicStatusEffect",
 	duration = 30000,
 	icon_index = 14,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_SP_DRAIN,
@@ -660,6 +676,7 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_SP_REGEN] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_SP_DRAIN] = {
 	name = hoa_system.Translate("Drain SP"),
+	class_type = "PeriodicStatusEffect",
 	duration = 30000,
 	icon_index = 15,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_SP_REGEN,
@@ -679,12 +696,13 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_SP_DRAIN] = {
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS] = {
 	name = hoa_system.Translate("Paralysis"),
+	class_type = "StaticStatusEffect",
 	duration = 10000,
 	icon_index = 16,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_INVALID,
 
 	Apply = function(effect)
-		effect:GetAffectedActor():SetStatePaused(true);
+		effect:GetEffectActor():SetStatePaused(true);
 	end,
 
 	Update = function(effect)
@@ -692,13 +710,14 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS] = {
 	end,
 
 	Remove = function(effect)
-		effect:GetAffectedActor():SetStatePaused(false);
+		effect:GetEffectActor():SetStatePaused(false);
 	end,
 }
 
 
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_STASIS] = {
 	name = hoa_system.Translate("Stasis"),
+	class_type = "StaticStatusEffect",
 	duration = 10000,
 	icon_index = 17,
 	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_INVALID,

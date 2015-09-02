@@ -1054,6 +1054,7 @@ void BattleMode::_DrawBottomMenu() {
 
 	// Draw the highlight images for the character that a command is being selected for (if any) and/or any characters
 	// that are in the "command" state. The latter indicates that these characters needs a command selected as soon as possible
+	// TODO: move the draw logic in the block below to the BattleCharacter::DrawStatus() method
 	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		if (_character_actors[i] == _command_supervisor->GetCommandCharacter()) {

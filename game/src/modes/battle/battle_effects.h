@@ -32,6 +32,45 @@ namespace hoa_battle {
 namespace private_battle {
 
 /** ****************************************************************************
+*** \brief Abstract base class representing an effect that is active on an actor
+***
+*** Battle effects change the dynamic of battles. There are two different types of
+*** effects, both which inherit from this base class. Actor effects change the
+*** state of common battle operations, such as an actor being able to defend an
+*** ally from receiving damage for a short while. These effects may be the result
+*** of using a skill,
+***
+*** Status effects change the state of a single actor and have a visible indicator
+*** of the status on the screen. Status effects include things like attribute modifiers,
+*** paralsysis, and so on.
+*** ***************************************************************************/
+class BattleEffect {
+public:
+	//! \param actor A pointer to the actor that the effect is active on
+	BattleEffect(BattleActor* actor);
+
+	virtual ~BattleEffect()
+		{}
+
+	//! \brief Updates the state of the effect as necessary
+	virtual void Update() = 0;
+
+	BattleActor* GetEffectActor() const
+		{ return _effect_actor; }
+
+	const hoa_utils::ustring& GetEffectName() const
+		{ return _effect_name; }
+
+protected:
+	//! \brief Holds the translated name of the effect, if available
+	hoa_utils::ustring _effect_name;
+
+	//! \brief The actor that this effect is active upon
+	BattleActor* _effect_actor;
+};
+
+
+/** ****************************************************************************
 *** \brief Manages all data related to a single status effect in battle
 ***
 *** This class extends the GlobalStatusEffect class, which contains nothing
@@ -51,15 +90,26 @@ namespace private_battle {
 *** \todo Implement opposite types for status effects and possibly add a boolean
 *** member to indicate whether the status is aiding or ailing.
 *** ***************************************************************************/
-class BattleStatusEffect : public hoa_global::GlobalStatusEffect {
+class StatusEffect : public BattleEffect {
 public:
 	/** \param type The status type that this class object should represent
 	*** \param intensity The intensity of the status
 	*** \param actor A pointer to the actor affected by the status
 	**/
-	BattleStatusEffect(hoa_global::GLOBAL_STATUS type, hoa_global::GLOBAL_INTENSITY intensity, BattleActor* actor);
+	StatusEffect(hoa_global::GLOBAL_STATUS type, hoa_global::GLOBAL_INTENSITY intensity, BattleActor* actor);
 
-	~BattleStatusEffect();
+	virtual ~StatusEffect();
+
+	/** \brief Loads all common data for this status effect
+	*** \param script_file A reference to the script containing the status effect data, already opened to the table for the effect
+	*** \return True if all data was successfully loaded
+	***
+	*** The script does not close the open status table nor the file when it is finished. It is the responsibility of the caller
+	*** to open the file and the appropriate table, then close the table and file after the call to this function returns.
+	**/
+	virtual bool Load(hoa_script::ReadScriptDescriptor& script_file);
+
+	virtual void Update() = 0;
 
 	/** \brief Increments the status effect intensity by a positive amount
 	*** \param amount The number of intensity levels to increase the status effect by
@@ -74,84 +124,114 @@ public:
 	**/
 	bool DecrementIntensity(uint8 amount);
 
-	//! \brief Class Member Access Functions
-	//@{
-	//! \note This will cause the timer to reset and also
+	//! \note This will cause the duration timer to reset
 	void SetIntensity(hoa_global::GLOBAL_INTENSITY intensity);
 
-	const std::string& GetName() const
-		{ return _name; }
+	void ResetIntensityChanged()
+		{ _intensity_changed = false; }
 
-	const uint32 GetIconIndex() const
-		{ return _icon_index; }
+	//! \brief Returns true if the effect is no longer active because it has a neutral or invalid intensity
+	bool IsEffectFinished() const
+		{ return (_status_effect.GetIntensity() == hoa_global::GLOBAL_INTENSITY_NEUTRAL) || (_status_effect.GetIntensity() == hoa_global::GLOBAL_INTENSITY_INVALID); }
 
-	hoa_global::GLOBAL_STATUS GetOppositeEffect() const
-		{ return _opposite_effect; }
+	/** \brief Calls the corresponding script function for the status effect
+	*** \note If there is no corresponding function, no call will be made
+	**/
+	//@{
+	void CallApplyFunction() const;
 
-	BattleActor* GetAffectedActor() const
-		{ return _affected_actor; }
+	void CallUpdateFunction() const;
 
-	ScriptObject* GetApplyFunction() const
-		{ return _apply_function; }
+	void CallRemoveFunction() const;
+	//@}
 
-	ScriptObject* GetUpdateFunction() const
-		{ return _update_function; }
+	//! \brief Class Member Access Functions
+	//@{
+	hoa_global::GLOBAL_STATUS GetType() const
+		{ return _status_effect.GetType(); }
 
-	ScriptObject* GetRemoveFunction() const
-		{ return _remove_function; }
+	hoa_global::GLOBAL_INTENSITY GetIntensity() const
+		{ return _status_effect.GetIntensity(); }
 
-	//! \note Returns a pointer instead of a reference so that Lua functions can access the timer
-	hoa_system::SystemTimer* GetTimer()
-		{ return &_timer; }
-
-	hoa_video::StillImage* GetIconImage() const
-		{ return _icon_image; }
+	hoa_global::GLOBAL_STATUS GetOppositeStatusType() const
+		{ return _opposite_status_type; }
 
 	bool IsIntensityChanged() const
 		{ return _intensity_changed; }
 
-	void ResetIntensityChanged()
-		{ _intensity_changed = false; }
+	//! \note Returns a pointer instead of a reference so that Lua functions can access the timer
+	hoa_system::SystemTimer* GetDurationTimer()
+		{ return &_duration_timer; }
+
+	hoa_video::StillImage* GetIconImage() const
+		{ return _icon_image; }
 	//@}
 
-private:
-	//! \brief Holds the translated name of the status effect
-	std::string _name;
+protected:
+	//! \brief The type and intensity of the status effect represented
+	hoa_global::GlobalStatusEffect _status_effect;
 
-	//! \brief Holds the index to the row where the icons for this effect are stored in the status effect multi image
-	uint32 _icon_index;
-
-	//! \brief The opposte effect for the status, set to GLOBAL_STATUS_INVALID if no opposite effect exists
-	hoa_global::GLOBAL_STATUS _opposite_effect;
-
-	//! \brief A pointer to the script function that applies the initial effect
-	ScriptObject* _apply_function;
-
-	//! \brief A pointer to the script function that updates any necessary changes caused by the effect
-	ScriptObject* _update_function;
-
-	//! \brief A pointer to the script function that removes the effect and restores the actor to their original state
-	ScriptObject* _remove_function;
-
-	//! \brief A pointer to the actor that is affected by this status
-	BattleActor* _affected_actor;
-
-	//! \brief A timer used to determine how long the status effect lasts
-	hoa_system::SystemTimer _timer;
-
-	//! \brief A pointer to the icon image that represents the status. Will be NULL if the status is invalid
-	hoa_video::StillImage* _icon_image;
+	//! \brief The opposing status type for this effect, set to GLOBAL_STATUS_INVALID if no opposite status  exists
+	hoa_global::GLOBAL_STATUS _opposite_status_type;
 
 	//! \brief A flag set to true when the intensity value was changed and cleared when the Update method is called
 	bool _intensity_changed;
 
-	/** \brief Performs necessary operations in response to a change in intensity
-	*** \param reset_timer_only If true, this indicates that the intensity level remains unchanged and only the timer needs to be reset
-	*** 
-	*** This method should be called after every change in intensity is made.
+	//! \brief A timer used to determine how long the status effect lasts
+	hoa_system::SystemTimer _duration_timer;
+
+	//! \brief A pointer to the icon image that represents the status. Set to NULL if the status is invalid
+	hoa_video::StillImage* _icon_image;
+
+	//! \brief Called when the status effect is initially applied
+	ScriptObject* _apply_function;
+
+	//! \brief Called when the appropriate set of conditions occur and require the status effect to take action
+	ScriptObject* _update_function;
+
+	//! \brief Called when the status effect is removed
+	ScriptObject* _remove_function;
+
+	//! \brief If the timer finishes, decrements the intensity and processes changes accordingly
+	void _UpdateDurationTimer();
+}; // class StatusEffect : public BattleEffect
+
+
+/** ****************************************************************************
+*** \brief Manages all data related to a single status effect in battle
+***
+*** This class extends the GlobalStatusEffect class, which contains nothing
+*** more than two enum members representing the status type and intensity. This
+*** class provides a complete implementation of a status effect, including an
+*** image icon, a timer, and script functions to implement the effect.
+***
+*** This class represents an active effect on a single actor. Objects of this
+*** class are not shared on multiple actors in any form. Status effects only
+*** have positive intensity values and will naturally decrease in intensity over
+*** time until they reach the neutral intensity level. Some types of status
+*** effects have an opposite type. For example, one status effect may boost the
+*** actor's strength while another drains strength. We do not allow these two
+*** statuses to co-exist on the same actor, thus the two have a cancelation effect
+*** on each other and the stronger (more intense) effect will remain.
+***
+*** \todo Implement opposite types for status effects and possibly add a boolean
+*** member to indicate whether the status is aiding or ailing.
+*** ***************************************************************************/
+class StaticStatusEffect : public StatusEffect {
+public:
+	/** \param type The status type that this class object should represent
+	*** \param intensity The intensity of the status
+	*** \param actor A pointer to the actor affected by the status
 	**/
-	void _ProcessIntensityChange(bool reset_timer_only);
-}; // class BattleStatusEffect : public hoa_global::GlobalStatusEffect
+	StaticStatusEffect(hoa_global::GLOBAL_STATUS type, hoa_global::GLOBAL_INTENSITY intensity, BattleActor* actor) :
+		StatusEffect(type, intensity, actor) {}
+
+	~StaticStatusEffect()
+		{}
+
+	//! \brief Calls the _update_function when the intensity has been changed
+	void Update();
+}; // class StaticStatusEffect : public StatusEffect
 
 
 /** ****************************************************************************
@@ -161,7 +241,7 @@ private:
 *** updated regularly by this class and are removed when their timers expire or their
 *** intensity status is nullified by an external call. This class performs all the
 *** calls to the Lua script functions (Apply/Update/Remove) for each status effect at
-*** the appropriate time. The class also contains a draw function which will display 
+*** the appropriate time. The class also contains a draw function which will display
 *** icons for all the active status effects of an actor to the screen.
 ***
 *** \todo The Draw function probably should be renamed to something more specific
@@ -209,7 +289,7 @@ public:
 	*** use a combination of GetActiveStatusEffects() and repeated calls to ChangeStatus() for each effect.
 	**/
 	void RemoveAllStatus();
-	
+
 	/** \brief Changes the intensity level of a status effect
 	*** \param status The status effect type to change
 	*** \param intensity The amount of intensity to increase or decrease the status effect by
@@ -252,7 +332,7 @@ private:
 // 	std::map<hoa_global::GLOBAL_ELEMENTAL, BattleElementEffect*> _element_effects;
 
 	//! \brief Contains all active status effects
-	std::map<hoa_global::GLOBAL_STATUS, BattleStatusEffect*> _active_status_effects;
+	std::map<hoa_global::GLOBAL_STATUS, StatusEffect*> _active_status_effects;
 
 	/** \brief Creates a new status effect and applies it to the actor
 	*** \param status The type of the status to create
@@ -270,7 +350,7 @@ private:
 	*** be invalid and should not be used. It is good practice for the caller to set the pointer passed in to this function to
 	*** NULL immediately after the function call returns.
 	**/
-	void _RemoveStatus(BattleStatusEffect* status_effect);
+	void _RemoveStatus(StatusEffect* status_effect);
 }; // class EffectsSupervisor
 
 } // namespace private_battle
