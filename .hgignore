@@ -1,0 +1,5 @@
+/.deps/.*$
+/.*\.o$
+/.*\.moc.cpp$
+syntax: glob
+game/allacrost-win32-depends/
