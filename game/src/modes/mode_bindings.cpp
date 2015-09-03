@@ -594,6 +594,7 @@ void BindModeCode() {
 			.def("ChangeState", &BattleMode::ChangeState)
 			.def("OpenCommandMenu", &BattleMode::OpenCommandMenu)
 			.def("IsBattleFinished", &BattleMode::IsBattleFinished)
+			.def("SetPlayFinishMusic", &BattleMode::SetPlayFinishMusic)
 			.def("GetNumberOfCharacters", &BattleMode::GetNumberOfCharacters)
 			.def("GetNumberOfEnemies", &BattleMode::GetNumberOfEnemies)
 			.def("GetMedia", &BattleMode::GetMedia)
