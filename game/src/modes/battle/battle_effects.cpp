@@ -234,6 +234,44 @@ void StaticStatusEffect::Update() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// PeriodicStatusEffect class
+////////////////////////////////////////////////////////////////////////////////
+
+bool PeriodicStatusEffect::Load(ReadScriptDescriptor& script_file) {
+	if (StatusEffect::Load(script_file) == false)
+		return false;
+
+	_period_timer.SetDuration(script_file.ReadUInt("period"));
+
+	if (script_file.IsErrorDetected()) {
+		if (BATTLE_DEBUG) {
+			PRINT_WARNING << "one or more errors occurred while reading status effect data - they are listed below" << endl;
+			cerr << script_file.GetErrorMessages() << endl;
+		}
+		return false;
+	}
+
+	// Set the number of loops to a very high number so that it's very unlikely that we will ever reach it
+	_period_timer.SetNumberLoops(__INT_MAX__);
+	_period_timer.Reset();
+	_period_timer.Run();
+	return true;
+}
+
+
+
+void PeriodicStatusEffect::Update() {
+	_intensity_changed = false;
+	_UpdateDurationTimer();
+	uint32 last_times_completed = _period_timer.GetTimesCompleted();
+	_period_timer.Update();
+
+	if (_period_timer.GetTimesCompleted() != last_times_completed) {
+		CallUpdateFunction();
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // EffectsSupervisor class
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -477,13 +515,13 @@ void EffectsSupervisor::_CreateNewStatus(GLOBAL_STATUS status, GLOBAL_INTENSITY 
 		new_effect = new StaticStatusEffect(status, intensity, _actor);
 	}
 	else if (class_type == "PeriodicStatusEffect") {
-			// TODO: create PeriodicStatusEffect class
+		new_effect = new PeriodicStatusEffect(status, intensity, _actor);
 	}
 	else {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "Unknown status effect class type: " << class_type << endl;
 		return;
 	}
-	// TODO: load class type and figure out which class to create for the effect, then call Load(script_file)
+	new_effect->Load(script_file);
 	script_file.CloseTable();
 
 	_active_status_effects.insert(make_pair(status, new_effect));
