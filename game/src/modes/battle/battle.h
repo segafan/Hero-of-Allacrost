@@ -295,6 +295,10 @@ public:
 	bool IsBattleFinished() const
 		 { return ((_state == private_battle::BATTLE_STATE_VICTORY) || (_state == private_battle::BATTLE_STATE_DEFEAT)); }
 
+        //! \brief Sets whether or not to play the victory/defeat music when a battle is concluded.
+        //! \param to_play the victory/defeat music or not
+        void SetPlayFinishMusic(bool to_play);
+
 	//! \brief Exits the battle performing any final changes as needed
 	void Exit();
 
@@ -445,6 +449,10 @@ private:
 	*** This member is also used to determine how many swap cards to draw on the battle screen.
 	**/
 	uint8 _current_number_swaps;
+
+        //! \brief Whether or not to play the victory/defeat music when a battle is concluded.
+        //! \return True if victory/defeat music is to be played.
+        bool _play_finish_music;
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
 

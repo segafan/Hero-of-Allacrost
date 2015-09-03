@@ -62,7 +62,6 @@ namespace private_battle {
 
 // Filenames of the default music that is played when no specific music is requested
 //@{
-const char* DEFAULT_BATTLE_MUSIC   = "mus/Confrontation.ogg";
 const char* DEFAULT_VICTORY_MUSIC  = "mus/Allacrost_Fanfare.ogg";
 const char* DEFAULT_DEFEAT_MUSIC   = "mus/Allacrost_Intermission.ogg";
 //@}
@@ -255,7 +254,8 @@ BattleMode::BattleMode() :
 	_command_supervisor(NULL),
 	_dialogue_supervisor(NULL),
 	_finish_supervisor(NULL),
-	_current_number_swaps(0)
+	_current_number_swaps(0),
+	_play_finish_music(true)
 {
 	IF_PRINT_DEBUG(BATTLE_DEBUG) << "constructor invoked" << endl;
 
@@ -310,14 +310,10 @@ void BattleMode::Reset() {
 
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 
-	// Load the default battle music track if no other music has been added
-	if (_battle_media.battle_music.GetState() == AUDIO_STATE_UNLOADED) {
-		if (_battle_media.battle_music.LoadAudio(DEFAULT_BATTLE_MUSIC) == false) {
-			IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load default battle music: " << DEFAULT_BATTLE_MUSIC << endl;
-		}
-	}
-
-	_battle_media.battle_music.Play();
+        // Only play the battle music if it was loaded
+        if (_battle_media.battle_music.GetState() != AUDIO_STATE_UNLOADED) {
+                _battle_media.battle_music.Play();
+        }
 
 	if (_state == BATTLE_STATE_INVALID) {
 		_Initialize();
@@ -535,8 +531,11 @@ void BattleMode::RestartBattle() {
 		_enemy_actors[i]->ResetActor();
 	}
 
-	_battle_media.battle_music.Rewind();
-	_battle_media.battle_music.Play();
+        // Only restart battle music if it has been set
+        if (_battle_media.battle_music.GetState() != AUDIO_STATE_UNLOADED) {
+                _battle_media.battle_music.Rewind();
+                _battle_media.battle_music.Play();
+        }
 
 	ChangeState(BATTLE_STATE_INITIAL);
 }
@@ -601,11 +600,17 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 			// TODO
 			break;
 		case BATTLE_STATE_VICTORY:
-			_battle_media.victory_music.Play();
+		        // Play victory music if required
+		        if (_play_finish_music) {
+                                _battle_media.victory_music.Play();
+		        }
 			_finish_supervisor->Initialize(true);
 			break;
 		case BATTLE_STATE_DEFEAT:
-			_battle_media.defeat_music.Play();
+		        // Play defeat music if required
+		        if (_play_finish_music) {
+                                _battle_media.defeat_music.Play();
+		        }
 			_finish_supervisor->Initialize(false);
 			break;
 		default:
@@ -634,7 +639,9 @@ bool BattleMode::OpenCommandMenu(BattleCharacter* character) {
 	return false;
 }
 
-
+void BattleMode::SetPlayFinishMusic(bool to_play) {
+    _play_finish_music = to_play;
+}
 
 void BattleMode::Exit() {
 	// TEMP: Restore all dead characters back to life by giving them a single health point
