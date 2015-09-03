@@ -637,20 +637,28 @@ status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_HP_REGEN] = {
 status_effects[hoa_global.GameGlobal.GLOBAL_STATUS_HP_DRAIN] = {
 	name = hoa_system.Translate("Poison"),
 	class_type = "PeriodicStatusEffect",
-	duration = 30000,
+	duration = 20000,
+	period = 8000,
 	icon_index = 13,
-	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_HP_REGEN,
-
-	Apply = function(effect)
-		-- TODO
-	end,
+	opposite_effect = hoa_global.GameGlobal.GLOBAL_STATUS_INVALID,
 
 	Update = function(effect)
-		-- TODO
-	end,
+		actor = effect:GetEffectActor();
+		intensity = effect:GetIntensity();
 
-	Remove = function(effect)
-		-- TODO
+		if (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_NEUTRAL) then
+			return; -- This function should never be called when the intensity is neutral
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER) then
+			actor:RegisterDamage(actor:GetMaxHitPoints() / 200); -- 0.5% of max HP
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_MODERATE) then
+			actor:RegisterDamage(actor:GetMaxHitPoints() / 50); -- 2.0% of max HP
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_GREATER) then
+			actor:RegisterDamage(actor:GetMaxHitPoints() / 25); -- 4.0% of max HP
+		elseif (intensity == hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_EXTREME) then
+			actor:RegisterDamage(actor:GetMaxHitPoints() / 13.3333); -- 7.5% of max HP
+		else
+			print("Lua warning: status effect had an invalid intensity value: " .. intensity);
+		end
 	end,
 }
 

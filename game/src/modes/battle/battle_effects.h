@@ -73,22 +73,24 @@ protected:
 /** ****************************************************************************
 *** \brief Manages all data related to a single status effect in battle
 ***
-*** This class extends the GlobalStatusEffect class, which contains nothing
-*** more than two enum members representing the status type and intensity. This
-*** class provides a complete implementation of a status effect, including an
-*** image icon, a timer, and script functions to implement the effect.
+*** A status effect is a special type of battle effect that has an intensity,
+*** visual indicator, and gradually dissipates over time. An object of this class
+*** represents an active status on a single actor. Status effects never apply to
+*** more than one actor, although multiple actors may each have the same type of
+*** status effect active.
 ***
-*** This class represents an active effect on a single actor. Objects of this
-*** class are not shared on multiple actors in any form. Status effects only
-*** have positive intensity values and will naturally decrease in intensity over
-*** time until they reach the neutral intensity level. Some types of status
-*** effects have an opposite type. For example, one status effect may boost the
-*** actor's strength while another drains strength. We do not allow these two
-*** statuses to co-exist on the same actor, thus the two have a cancelation effect
-*** on each other and the stronger (more intense) effect will remain.
+*** Status effects only have positive intensity values and will naturally decrease
+*** in intensity over time until they reach the neutral intensity level, upon which
+*** they are removed. Some types of status effects have an opposite type. For example,
+*** one status effect may increase the actor's strength while another decreases strength.
+*** We do not allow these two statuses to co-exist on the same actor, thus the two have a
+*** cancelation effect on each other and the stronger (more intense) effect will remain.
 ***
-*** \todo Implement opposite types for status effects and possibly add a boolean
-*** member to indicate whether the status is aiding or ailing.
+*** This class is abstract and thus can not be instantiated. It contains all common data and
+*** functionality that other types of status effects utilize. In the Lua definition for the
+*** status effect, there are three functions which may be optionally defined: Apply, Update,
+*** and Remove. These functions are called during different points of the status effect's life
+*** cycle.
 *** ***************************************************************************/
 class StatusEffect : public BattleEffect {
 public:
@@ -186,7 +188,7 @@ protected:
 	//! \brief Called when the status effect is initially applied
 	ScriptObject* _apply_function;
 
-	//! \brief Called when the appropriate set of conditions occur and require the status effect to take action
+	//! \brief Called when the appropriate set of conditions occur (defined by the derived class) and require the status effect to make a change
 	ScriptObject* _update_function;
 
 	//! \brief Called when the status effect is removed
@@ -198,24 +200,14 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief Manages all data related to a single status effect in battle
+*** \brief A status effect that makes a static change when it is applied or changes intensity
 ***
-*** This class extends the GlobalStatusEffect class, which contains nothing
-*** more than two enum members representing the status type and intensity. This
-*** class provides a complete implementation of a status effect, including an
-*** image icon, a timer, and script functions to implement the effect.
+*** Static effects are the most basic type of status effects. Typically these status effects change
+*** one or more attributes on an actor and changes in intensity change the amount that the attribute
+*** is modified. However this effect has more uses as well, such as setting a temporary state for an
+*** actor like paralysis.
 ***
-*** This class represents an active effect on a single actor. Objects of this
-*** class are not shared on multiple actors in any form. Status effects only
-*** have positive intensity values and will naturally decrease in intensity over
-*** time until they reach the neutral intensity level. Some types of status
-*** effects have an opposite type. For example, one status effect may boost the
-*** actor's strength while another drains strength. We do not allow these two
-*** statuses to co-exist on the same actor, thus the two have a cancelation effect
-*** on each other and the stronger (more intense) effect will remain.
-***
-*** \todo Implement opposite types for status effects and possibly add a boolean
-*** member to indicate whether the status is aiding or ailing.
+*** Whenever the intensity changes for this type of effect, the _update_function is called.
 *** ***************************************************************************/
 class StaticStatusEffect : public StatusEffect {
 public:
@@ -231,7 +223,43 @@ public:
 
 	//! \brief Calls the _update_function when the intensity has been changed
 	void Update();
-}; // class StaticStatusEffect : public StatusEffect
+};
+
+
+/** ****************************************************************************
+*** \brief A status effect that makes changes periodically while it is active
+***
+*** Periodic effects make a change to the actor repeatedly over time. Every periodic effect
+*** has a separate timer with it that determines the amount of time in between updates that
+*** are made. For example, a poison effect reduces the actor's HP by some amount every few
+*** seconds.
+***
+*** In the Lua script, a period time is defined that is used to determine how often the
+*** _update_function is invoked. This time should always be less than the _duration_timer,
+*** otherwise the effect may never make any change while it is active.
+*** ***************************************************************************/
+class PeriodicStatusEffect : public StatusEffect {
+public:
+	/** \param type The status type that this class object should represent
+	*** \param intensity The intensity of the status
+	*** \param actor A pointer to the actor affected by the status
+	**/
+	PeriodicStatusEffect(hoa_global::GLOBAL_STATUS type, hoa_global::GLOBAL_INTENSITY intensity, BattleActor* actor) :
+		StatusEffect(type, intensity, actor) {}
+
+	~PeriodicStatusEffect()
+		{}
+
+	//! \brief Calls the function in the base class and additionally reads a period time from the script data
+	bool Load(hoa_script::ReadScriptDescriptor& script_file);
+
+	//! \brief Calls the _update_function when the intensity has been changed
+	void Update();
+
+protected:
+	//! \brief Used to determine when the _update_function is called
+	hoa_system::SystemTimer _period_timer;
+};
 
 
 /** ****************************************************************************
