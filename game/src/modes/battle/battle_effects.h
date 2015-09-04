@@ -149,7 +149,7 @@ public:
 
 	//! \brief Class Member Access Functions
 	//@{
-	hoa_global::GLOBAL_STATUS GetType() const
+	hoa_global::GLOBAL_STATUS GetStatusType() const
 		{ return _status_effect.GetType(); }
 
 	hoa_global::GLOBAL_INTENSITY GetIntensity() const
@@ -245,7 +245,7 @@ public:
 	*** \param actor A pointer to the actor affected by the status
 	**/
 	PeriodicStatusEffect(hoa_global::GLOBAL_STATUS type, hoa_global::GLOBAL_INTENSITY intensity, BattleActor* actor) :
-		StatusEffect(type, intensity, actor) {}
+		StatusEffect(type, intensity, actor), _period_timer(0) {}
 
 	~PeriodicStatusEffect()
 		{}

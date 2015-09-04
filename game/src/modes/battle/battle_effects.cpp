@@ -238,8 +238,9 @@ void StaticStatusEffect::Update() {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool PeriodicStatusEffect::Load(ReadScriptDescriptor& script_file) {
-	if (StatusEffect::Load(script_file) == false)
+	if (StatusEffect::Load(script_file) == false) {
 		return false;
+	}
 
 	_period_timer.SetDuration(script_file.ReadUInt("period"));
 
@@ -267,6 +268,7 @@ void PeriodicStatusEffect::Update() {
 	_period_timer.Update();
 
 	if (_period_timer.GetTimesCompleted() != last_times_completed) {
+		PRINT_DEBUG << "calling update function" << endl;
 		CallUpdateFunction();
 	}
 }
@@ -306,7 +308,7 @@ void EffectsSupervisor::Update() {
 		effects[i]->Update();
 
 		if (effects[i]->IsIntensityChanged() == true) {
-			_actor->RegisterStatusChange(effects[i]->GetType(), GLOBAL_INTENSITY_NEG_LESSER);
+			_actor->RegisterStatusChange(effects[i]->GetStatusType(), GLOBAL_INTENSITY_NEG_LESSER);
 		}
 	}
 }
@@ -392,7 +394,7 @@ bool EffectsSupervisor::ChangeStatus(GLOBAL_STATUS status, GLOBAL_INTENSITY inte
 
 	// Note: We should never run into the case where both the status and its opposite status are active simultaneously
 	for (map<GLOBAL_STATUS, StatusEffect*>::iterator i = _active_status_effects.begin(); i != _active_status_effects.end(); i++) {
-		if (i->second->GetType() == status) {
+		if (i->second->GetStatusType() == status) {
 			status_active = true;
 			active_effect = i->second;
 			break;
@@ -410,7 +412,7 @@ bool EffectsSupervisor::ChangeStatus(GLOBAL_STATUS status, GLOBAL_INTENSITY inte
 		previous_intensity = GLOBAL_INTENSITY_NEUTRAL;
 	}
 	else {
-		previous_status = active_effect->GetType();
+		previous_status = active_effect->GetStatusType();
 		previous_intensity = active_effect->GetIntensity();
 	}
 
@@ -459,7 +461,7 @@ bool EffectsSupervisor::ChangeStatus(GLOBAL_STATUS status, GLOBAL_INTENSITY inte
 
 		// Case 4a: The opposite status effect intensity was decreased. However the opposite status is still active.
 		if (intensity < previous_intensity) {
-			new_status = active_effect->GetType();
+			new_status = active_effect->GetStatusType();
 			new_intensity = active_effect->GetIntensity();
 		}
 		// Case 4b: The opposite status effect was completely nullifed. No new status is to be created
@@ -539,8 +541,8 @@ void EffectsSupervisor::_RemoveStatus(StatusEffect* status_effect) {
 	}
 
 	// Remove the status effect from the active effects list. If successful, call the remove function and then delete the status effect object
-	if (_active_status_effects.erase(status_effect->GetType()) == 0) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "attempted to remove a status effect not present on the actor with type: " << status_effect->GetType() << endl;
+	if (_active_status_effects.erase(status_effect->GetStatusType()) == 0) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "attempted to remove a status effect not present on the actor with type: " << status_effect->GetStatusType() << endl;
 	}
 	else {
 		status_effect->CallRemoveFunction();
