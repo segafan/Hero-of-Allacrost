@@ -240,7 +240,7 @@ skills[1005] = {
 }
 
 skills[1006] = {
-	name = "Spider Bite Stun",
+	name = "Spider Bite Poison",
 	sp_required = 0,
 	warmup_time = 1400,
 	cooldown_time = 0,
@@ -251,7 +251,7 @@ skills[1006] = {
 
 		if (hoa_battle.CalculateStandardEvasion(target) == false) then
 			target_actor:RegisterDamage(hoa_battle.CalculatePhysicalDamageAdder(user, target, 0), target);
-			target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_PARALYSIS, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
+			target_actor:RegisterStatusChange(hoa_global.GameGlobal.GLOBAL_STATUS_HP_DRAIN, hoa_global.GameGlobal.GLOBAL_INTENSITY_POS_LESSER);
 			AudioManager:PlaySound("snd/spider_attack.wav");
 		else
 			target_actor:RegisterMiss();

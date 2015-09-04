@@ -719,6 +719,7 @@ void BindModeCode() {
 	[
 		class_<StatusEffect, BattleEffect>("StatusEffect")
 			.def("GetDurationTimer", &StatusEffect::GetDurationTimer)
+			.def("GetIntensity", &StatusEffect::GetIntensity)
 			.def("IncrementIntensity", &StatusEffect::IncrementIntensity)
 			.def("DecrementIntensity", &StatusEffect::DecrementIntensity)
 			.def("SetIntensity", &StatusEffect::SetIntensity)
