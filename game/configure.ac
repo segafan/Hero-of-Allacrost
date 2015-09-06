@@ -73,7 +73,7 @@ AC_CHECK_LIB([SDL], [SDL_InitSubSystem], [], \
 	[echo "Could not find the SDL library. Check that it is properly installed on your system"
 	 exit -1])
 AC_CHECK_LIB([openal], [alGetError], [], \
-	[echo "You need to install the OpenAL library."
+	[echo "Could not find the OpenAL library. Check that it is properly installed on your system"
 	 exit -1])
 AC_CHECK_LIB([vorbisfile], [ov_open], [], \
 	[echo "Could not find the vorbis library. Check that it is properly installed on your system"
