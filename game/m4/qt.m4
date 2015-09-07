@@ -7,8 +7,8 @@
 AC_DEFUN([HOA_FIND_QT],
 [
 dnl Search paths for Qt 
-qt_incdirs="$QTINC /usr/local/qt/include /usr/include/qt /usr/include /usr/X11R6/include/X11/qt /usr/X11R6/include/qt /usr/lib/qt3/include /usr/lib/qt/include /usr/share/qt3/include"
-qt_libdirs="$QTLIB /usr/local/qt/lib /usr/lib/qt /usr/lib /usr/X11R6/lib/X11/qt /usr/X11R6/lib/qt /usr/lib/qt3/lib /usr/lib/qt/lib /usr/share/qt3/lib"
+qt_incdirs="$QTINC /usr/local/qt/include /usr/include/qt /usr/include /usr/X11R6/include/X11/qt /usr/X11R6/include/qt /usr/lib/qt/include"
+qt_libdirs="$QTLIB /usr/local/qt/lib /usr/lib/qt /usr/lib /usr/X11R6/lib/X11/qt /usr/X11R6/lib/qt /usr/lib/qt/lib"
 if test -n "$QTDIR" ; then
     qt_incdirs="$QTDIR/include $qt_incdirs"
     qt_libdirs="$QTDIR/lib $qt_libdirs"
@@ -160,11 +160,11 @@ if test "x$qt4_libdir" != "xno" ; then
 fi
 
 if test "x$have_qt4" == "xyes"; then
-    QT_CXXFLAGS="-I$qt4_incdir -I$qt4_incdir/QtGui -I$qt4_incdir/QtCore -I$qt4_incdir/QtOpenGL -I$qt4_incdir/Qt3Support"
+    QT_CXXFLAGS="-I$qt4_incdir -I$qt4_incdir/QtGui -I$qt4_incdir/QtCore -I$qt4_incdir/QtOpenGL"
     if test x$windows_qt = xyes; then
-	QT_LDADD="-L$qt4_libdir -lQtCore4 -lQtGui4 -lQtOpenGL4 -lQt3Support4"
+	QT_LDADD="-L$qt4_libdir -lQtCore4 -lQtGui4 -lQtOpenGL4"
     else
-	QT_LDADD="-L$qt4_libdir -lQtCore -lQtGui -lQtOpenGL -lQt3Support"
+	QT_LDADD="-L$qt4_libdir -lQtCore -lQtGui -lQtOpenGL"
     fi
 	AC_SUBST(QT_CXXFLAGS)
 	AC_SUBST(QT_LDADD)
