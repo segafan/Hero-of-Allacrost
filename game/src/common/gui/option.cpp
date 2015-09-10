@@ -27,8 +27,7 @@ namespace hoa_gui {
 ////////////////////////////////////////////////////////////////////////////////
 
 Option::Option() :
-	disabled(false),
-	image(NULL)
+	disabled(false)
 {}
 
 
@@ -44,11 +43,8 @@ Option::Option(const Option& copy) :
 	elements(copy.elements),
 	text(copy.text)
 {
-	if (copy.image == NULL) {
-		image = NULL;
-	}
-	else {
-		image = new StillImage(*(copy.image));
+	for (uint32 i = 0; i < copy.images.size(); ++i) {
+		images.push_back(new StillImage(*(copy.images[i])));
 	}
 }
 
@@ -63,11 +59,8 @@ Option& Option::operator=(const Option& copy) {
 	disabled = copy.disabled;
 	elements = copy.elements;
 	text = copy.text;
-	if (copy.image == NULL) {
-		image = NULL;
-	}
-	else {
-		image = new StillImage(*(copy.image));
+	for (uint32 i = 0; i < copy.images.size(); ++i) {
+		images.push_back(new StillImage(*(copy.images[i])));
 	}
 
 	return *this;
@@ -79,10 +72,13 @@ void Option::Clear() {
 	disabled = false;
 	elements.clear();
 	text.clear();
-	if (image != NULL) {
-		delete image;
-		image = NULL;
+	for (uint32 i = 0; i < images.size(); ++i) {
+		if (images[i] != NULL) {
+			delete images[i];
+			images[i] = NULL;
+		}
 	}
+	images.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -408,14 +404,14 @@ void OptionBox::AddOptionElementImage(uint32 option_index, string& image_filenam
 	new_element.type = VIDEO_OPTION_ELEMENT_IMAGE;
 	new_element.value = 0;
 
-	this_option.image = new StillImage();
-	if (this_option.image->Load(image_filename) == false) {
+	StillImage* new_image = new StillImage();
+	if (new_image->Load(image_filename) == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to add image element because image file load failed" << image_filename << endl;
-		delete this_option.image;
-		this_option.image = NULL;
+		delete new_image;
 		return;
 	}
 
+	this_option.images.push_back(new_image);
 	this_option.elements.push_back(new_element);
 }
 
@@ -437,7 +433,7 @@ void OptionBox::AddOptionElementImage(uint32 option_index, const StillImage* ima
 	new_element.type = VIDEO_OPTION_ELEMENT_IMAGE;
 	new_element.value = 0;
 
-	this_option.image = new StillImage(*image);
+	this_option.images.push_back(new StillImage(*image));
 	this_option.elements.push_back(new_element);
 }
 
@@ -538,13 +534,17 @@ bool OptionBox::IsOptionEnabled(uint32 index) const {
 
 
 
-StillImage* OptionBox::GetEmbeddedImage(uint32 index) const {
+StillImage* OptionBox::GetEmbeddedImage(uint32 index, uint32 image_index) const {
 	if (index >= GetNumberOptions()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument index was invalid: " << index << endl;
 		return NULL;
 	}
+	if (image_index >= _options[index].images.size()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "argument image_index exceeds number of images in element: " << image_index << endl;
+		return NULL;
+	}
 
-	return _options[index].image;
+	return _options[index].images[image_index];
 }
 
 
@@ -839,17 +839,12 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 					new_element.value = atoi(tag_text.c_str());
 				}
 				else { // Then this must be an image tag
-					if (op.image != NULL) {
-						IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because two image tags were embedded within a single option"
-							<< MakeStandardString(format_string) << endl;
+					StillImage* new_image = new StillImage();
+					if (new_image->Load(tag_text) == false) {
+						IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because of an invalid image tag: " << MakeStandardString(format_string) << endl;
 						return false;
 					}
-					op.image = new StillImage();
-					if (op.image->Load(tag_text) == false) {
-						IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because of an invalid image tag: "
-							<< MakeStandardString(format_string) << endl;
-						return false;
-					}
+					op.images.push_back(new_image);
 					new_element.type  = VIDEO_OPTION_ELEMENT_IMAGE;
 					new_element.value = 0;
 				}
@@ -1127,6 +1122,7 @@ void OptionBox::_DrawOption(const Option& op, const OptionCellBounds &bounds, fl
 	float x, y;
 	int32 xalign = _option_xalign;
 	int32 yalign = _option_yalign;
+	uint32 image_index = 0;
 	CoordSys &cs = VideoManager->_current_context.coordinate_system;
 
 	_SetupAlignment(xalign, yalign, bounds, x, y);
@@ -1155,11 +1151,11 @@ void OptionBox::_DrawOption(const Option& op, const OptionCellBounds &bounds, fl
 			case VIDEO_OPTION_ELEMENT_IMAGE:
 			{
 				if (op.disabled)
-					op.image->Draw(Color::gray);
+					op.images[image_index]->Draw(Color::gray);
 				else
-					op.image->Draw(Color::white);
+					op.images[image_index]->Draw(Color::white);
 
-				float width = op.image->GetWidth();
+				float width = op.images[image_index]->GetWidth();
 				float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
 				if (xalign == VIDEO_X_CENTER)
 					edge -= width * 0.5f * cs.GetHorizontalDirection();
@@ -1167,6 +1163,7 @@ void OptionBox::_DrawOption(const Option& op, const OptionCellBounds &bounds, fl
 					edge -= width * cs.GetHorizontalDirection();
 				if (edge < left_edge)
 					left_edge = edge;
+				image_index++;
 				break;
 			}
 			case VIDEO_OPTION_ELEMENT_POSITION:

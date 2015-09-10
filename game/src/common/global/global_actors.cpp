@@ -174,8 +174,8 @@ GlobalActor::~GlobalActor() {
 	_armor_equipped.clear();
 
 	// Delete all skills
-	for (map<uint32, GlobalSkill*>::iterator i = _skills.begin(); i != _skills.end(); i++) {
-		delete i->second;
+	for (uint32 i = 0; i < _skills.size(); ++i) {
+		delete _skills[i];
 	}
 	_skills.clear();
 }
@@ -227,8 +227,8 @@ GlobalActor::GlobalActor(const GlobalActor& copy) {
 	}
 
 	// Copy all skills
-	for (map<uint32, GlobalSkill*>::const_iterator i = copy._skills.begin(); i != copy._skills.end(); i++) {
-		_skills.insert(make_pair(i->first, new GlobalSkill(*(i->second))));
+	for (uint32 i = 0; i < copy._skills.size(); ++i) {
+		_skills.push_back(new GlobalSkill(copy._skills[i]->GetID()));
 	}
 }
 
@@ -282,8 +282,8 @@ GlobalActor& GlobalActor::operator=(const GlobalActor& copy) {
 	}
 
 	// Copy all skills
-	for (map<uint32, GlobalSkill*>::const_iterator i = copy._skills.begin(); i != copy._skills.end(); i++) {
-		_skills.insert(make_pair(i->first, new GlobalSkill(*(i->second))));
+	for (uint32 i = 0; i < copy._skills.size(); ++i) {
+		_skills.push_back(new GlobalSkill(copy._skills[i]->GetID()));
 	}
 	return *this;
 }
@@ -376,13 +376,14 @@ GlobalAttackPoint* GlobalActor::GetAttackPoint(uint32 index) const {
 
 
 GlobalSkill* GlobalActor::GetSkill(uint32 skill_id) const {
-	map<uint32, GlobalSkill*>::const_iterator skill_location = _skills.find(skill_id);
-	if (skill_location == _skills.end()) {
-		IF_PRINT_WARNING(GLOBAL_DEBUG) << "actor did not have a skill with the requested skill_id: " << skill_id << endl;
-		return NULL;
+	for (uint32 i = 0; i < _skills.size(); ++i) {
+		if (skill_id == _skills[i]->GetID()) {
+			return _skills[i];
+		}
 	}
 
-	return skill_location->second;
+	IF_PRINT_WARNING(GLOBAL_DEBUG) << "actor did not have a skill with the requested skill_id: " << skill_id << endl;
+	return NULL;
 }
 
 
@@ -1088,7 +1089,7 @@ void GlobalCharacter::AddSkill(uint32 skill_id) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid skill_id argument: " << skill_id << endl;
 		return;
 	}
-	if (_skills.find(skill_id) != _skills.end()) {
+	if (GetSkill(skill_id) != NULL) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to add skill because the character already knew this skill: " << skill_id << endl;
 		return;
 	}
@@ -1100,8 +1101,8 @@ void GlobalCharacter::AddSkill(uint32 skill_id) {
 		return;
 	}
 
-	// Insert the pointer to the new skill inside of the global skills map and the skill type vector
-	_skills.insert(make_pair(skill_id, skill));
+	// Add a pointer to the new skill in the appropriate containers
+	_skills.push_back(skill);
 	switch (skill->GetType()) {
 		case GLOBAL_SKILL_ATTACK:
 			_attack_skills.push_back(skill);
@@ -1126,7 +1127,7 @@ void GlobalCharacter::AddNewSkillLearned(uint32 skill_id) {
 		return;
 	}
 
-	// Make sure we don't add a skill more than once
+	// Make sure we don't add a newly learned skill more than once
 	for (vector<GlobalSkill*>::iterator i = _new_skills_learned.begin(); i != _new_skills_learned.end(); i++) {
 		if (skill_id == (*i)->GetID()) {
 			IF_PRINT_WARNING(GLOBAL_DEBUG) << "the skill to add was already present in the list of newly learned skills: " << skill_id << endl;
@@ -1135,14 +1136,13 @@ void GlobalCharacter::AddNewSkillLearned(uint32 skill_id) {
 	}
 
 	AddSkill(skill_id);
-
-	map<uint32, GlobalSkill *>::iterator skill = _skills.find(skill_id);
-	if (skill == _skills.end()) {
+	GlobalSkill* skill = GetSkill(skill_id);
+	if (skill == NULL) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed because the new skill was not added successfully: " << skill_id << endl;
 		return;
 	}
 
-	_new_skills_learned.push_back(skill->second);
+	_new_skills_learned.push_back(skill);
 }
 
 
@@ -1609,7 +1609,7 @@ void GlobalEnemy::AddSkill(uint32 skill_id) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function received an invalid skill_id argument: " << skill_id << endl;
 		return;
 	}
-	if (_skills.find(skill_id) != _skills.end()) {
+	if (GetSkill(skill_id) != NULL) {
 		IF_PRINT_WARNING(GLOBAL_DEBUG) << "failed to add skill because the enemy already knew this skill: " << skill_id << endl;
 		return;
 	}
@@ -1621,8 +1621,7 @@ void GlobalEnemy::AddSkill(uint32 skill_id) {
 		return;
 	}
 
-	// Insert the pointer to the new skill inside of the global skills map and the skill type vector
-	_skills.insert(make_pair(skill_id, skill));
+	_skills.push_back(skill);
 }
 
 

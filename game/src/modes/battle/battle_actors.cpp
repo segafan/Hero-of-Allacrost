@@ -777,8 +777,9 @@ BattleEnemy::BattleEnemy(GlobalEnemy* enemy) :
 		_stamina_icon.Load(icon_filename, 45.0f, 45.0f);
 	}
 
-	for (map<uint32, GlobalSkill*>::const_iterator i = (_global_enemy->GetSkills()).begin(); i != (_global_enemy->GetSkills()).end(); i++) {
-		_enemy_skills.push_back(i->second);
+	vector<GlobalSkill*>* skills = _global_enemy->GetSkills();
+	for (uint32 i = 0; i < skills->size(); ++i) {
+		_enemy_skills.push_back(skills->at(i));
 	}
 }
 
@@ -975,7 +976,7 @@ void BattleEnemy::_CheckForSpriteTransition() {
 
 
 void BattleEnemy::_DecideAction() {
-	if (_global_enemy->GetSkills().empty() == true) {
+	if (_global_enemy->GetSkills()->empty() == true) {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "enemy had no usable skills" << endl;
 		ChangeState(ACTOR_STATE_IDLE);
 	}

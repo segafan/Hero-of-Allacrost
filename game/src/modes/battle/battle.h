@@ -78,6 +78,12 @@ public:
 	**/
 	hoa_video::StillImage* GetCharacterActionButton(uint32 index);
 
+	/** \brief Retrieves the appropriate icon image given a valid skill type
+	*** \param skill_type The enumerated value that represents the type of skill
+	*** \return A pointer to the appropriate icon image, or NULL if the skill type was invalid
+	**/
+	hoa_video::StillImage* GetSkillTypeIcon(hoa_global::GLOBAL_SKILL skill_type);
+
 	/** \brief Retrieves the appropriate icon image given a valid target type
 	*** \param target_type The enumerated value that represents the type of target
 	*** \return A pointer to the appropriate icon image, or NULL if the target type was invalid
@@ -174,6 +180,9 @@ private:
 	*** quickly determine which row of icons in that image corresponds to each status type.
 	**/
 	std::map<hoa_global::GLOBAL_STATUS, uint32> _status_indeces;
+
+	//! \brief Holds icon images that represent the different types of skills (attack, defend, and support)
+	std::vector<hoa_video::StillImage> _skill_type_icons;
 
 	/** \brief Holds icon images that represent the different types of targets
 	*** Target types include attack points, ally/enemy, and different parties.

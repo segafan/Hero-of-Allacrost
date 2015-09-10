@@ -317,10 +317,10 @@ public:
 
 	GlobalAttackPoint* GetAttackPoint(uint32 index) const;
 
-	const std::map<uint32, GlobalSkill*>& GetSkills()
-		{ return _skills; }
+	std::vector<GlobalSkill*>* GetSkills()
+		{ return &_skills; }
 
-	/** \brief Retrieves a pointer to a skill with a specific id
+	/** \brief Retrieves a pointer to a skill in the _skills container
 	*** \param skill_id The unique ID of the skill to find and return
 	*** \return A pointer to the skill if it is found, or NULL if the skill was not found
 	**/
@@ -614,11 +614,11 @@ protected:
 	**/
 	std::vector<GlobalArmor*> _armor_equipped;
 
-	/** \brief A map containing all skills that the actor can use
-	*** Unlike with characters, there is no need to hold the various types of skills in seperate containers
-	*** for enemies. An enemy must have <b>at least</b> one skill in order to do anything useful in battle.
+	/** \brief An ordered vector containing all skills that the actor can use
+	*** For characters, a player may rearrange the skills in this container. An enemy must have <b>at least</b> one
+	*** skill in order to do anything useful in battle.
 	**/
-	std::map<uint32, GlobalSkill*> _skills;
+	std::vector<GlobalSkill*> _skills;
 
 	/** \brief The elemental effects added to the actor's attack
 	*** Actors may carry various elemental attack bonuses, or they may carry none. These bonuses include

@@ -102,6 +102,17 @@ BattleMedia::BattleMedia() {
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(character_action_buttons, "img/menus/battle_command_buttons.png", 2, 5) == false)
 		PRINT_ERROR << "failed to load character action buttons" << endl;
 
+	// TODO: probably want to use a multi image here instead, and also some error checking from the load operations
+	_skill_type_icons.push_back(StillImage());
+	_skill_type_icons[0].Load("img/icons/battle/attack.png");
+	_skill_type_icons[0].SetDimensions(25.0f, 25.0f);
+	_skill_type_icons.push_back(StillImage());
+	_skill_type_icons[1].Load("img/icons/battle/defend.png");
+	_skill_type_icons[1].SetDimensions(25.0f, 25.0f);
+	_skill_type_icons.push_back(StillImage());
+	_skill_type_icons[2].Load("img/icons/battle/support.png");
+	_skill_type_icons[2].SetDimensions(25.0f, 25.0f);
+
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(_target_type_icons, "img/icons/effects/targets.png", 1, 8) == false)
 		PRINT_ERROR << "failed to load character action buttons" << endl;
 
@@ -190,6 +201,22 @@ StillImage* BattleMedia:: GetCharacterActionButton(uint32 index) {
 	}
 
 	return &(character_action_buttons[index]);
+}
+
+
+
+StillImage* BattleMedia::GetSkillTypeIcon(hoa_global::GLOBAL_SKILL skill_type) {
+	switch (skill_type) {
+		case GLOBAL_SKILL_ATTACK:
+			return &_skill_type_icons[0];
+		case GLOBAL_SKILL_DEFEND:
+			return &_skill_type_icons[1];
+		case GLOBAL_SKILL_SUPPORT:
+			return &_skill_type_icons[2];
+		default:
+			IF_PRINT_WARNING(BATTLE_DEBUG) << "function received invalid skill type argument: " << skill_type << endl;
+			return NULL;
+	}
 }
 
 

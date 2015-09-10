@@ -46,10 +46,10 @@ const uint32 SCREEN_HEIGHT = 12;
 *** \brief Identifications for the types of actions a player's characters may perform
 **/
 //@{
-const uint32 CATEGORY_ATTACK    = 0;
-const uint32 CATEGORY_DEFEND    = 1;
-const uint32 CATEGORY_SUPPORT   = 2;
-const uint32 CATEGORY_ITEM      = 3;
+const uint32 CATEGORY_RECENT    = 0;
+const uint32 CATEGORY_SKILL     = 1;
+const uint32 CATEGORY_ITEM      = 2;
+const uint32 CATEGORY_RECOVER   = 3;
 //@}
 
 
