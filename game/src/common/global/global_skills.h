@@ -87,7 +87,7 @@ public:
 	uint32 GetID() const
 		{ return _id; }
 
-	uint8 GetType() const
+	GLOBAL_SKILL GetType() const
 		{ return _type; }
 
 	uint32 GetSPRequired() const

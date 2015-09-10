@@ -221,7 +221,7 @@ public:
 	std::vector<hoa_utils::ustring> text;
 
 	//! \brief Contains all images used for this option
-	hoa_video::StillImage* image;
+	std::vector<hoa_video::StillImage*> images;
 }; // class Option
 
 } // namespace private_gui
@@ -360,11 +360,12 @@ public:
 	**/
 	bool IsOptionEnabled(uint32 index) const;
 
-	/** \brief Retrieves a pointer to the image embedded within the option
-	*** \param index The index of the option to retrieve the image
-	*** \return NULL if the index is invalid or the option does not embed an image, otherwise a valid pointer to a StillImage
+	/** \brief Retrieves a pointer to an image embedded within the option
+	*** \param index The index of the option to retrieve the image|
+	*** \param image_index The index number of the image to retrieve between all images in the option. Default value of 0 takes the first image element
+	*** \return NULL if either argument is invalid or the option does not embed an image, otherwise a valid pointer to a StillImage object
 	**/
-	hoa_video::StillImage* GetEmbeddedImage(uint32 index) const;
+	hoa_video::StillImage* GetEmbeddedImage(uint32 index, uint32 image_index = 0) const;
 
 	/** \brief Used to determine whether the option box is initialized and ready for use
 	*** \param error_messages Used to report the list of reasons why the option box is not initialized

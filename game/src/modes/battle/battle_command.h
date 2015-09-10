@@ -108,14 +108,8 @@ public:
 	BattleTarget GetLastEnemyTarget() const
 		{ return _last_enemy_target; }
 
-	hoa_gui::OptionBox* GetAttackList()
-		{ return &_attack_list; }
-
-	hoa_gui::OptionBox* GetDefendList()
-		{ return &_defend_list; }
-
-	hoa_gui::OptionBox* GetSupportList()
-		{ return &_support_list; }
+	hoa_gui::OptionBox* GetSkillList()
+		{ return &_skill_list; }
 	//@}
 
 private:
@@ -137,14 +131,8 @@ private:
 	//! \brief The last enemy target that the player selected for this character
 	BattleTarget _last_enemy_target;
 
-	//! \brief A display list of all usable items
-	hoa_gui::OptionBox _attack_list;
-
-	//! \brief A display list of all usable items
-	hoa_gui::OptionBox _defend_list;
-
-	//! \brief A display list of all usable items
-	hoa_gui::OptionBox _support_list;
+	//! \brief Display list of all skills that the character can use in battle
+	hoa_gui::OptionBox _skill_list;
 }; // class CharacterCommandSettings
 
 
@@ -289,7 +277,7 @@ public:
 	*** also return false, if the class has not been initialized and there is no list of
 	*** skills to select from.
 	**/
-	bool GetSelectedSkillEnabled();
+	bool IsSelectedSkillEnabled();
 
 	//! \brief Updates the skill list and processes user input
 	void UpdateList();
@@ -420,9 +408,6 @@ private:
 	std::map<BattleCharacter*, CharacterCommandSettings> _character_settings;
 
 	// ---------- Graphics and GUI members
-
-	//! \brief Contains the icon images that represent each action category
-	std::vector<hoa_video::StillImage> _category_icons;
 
 	//! \brief Contains the text that represent each action category
 	std::vector<hoa_video::TextImage> _category_text;
