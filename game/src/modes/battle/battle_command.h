@@ -260,7 +260,7 @@ public:
 	~SkillCommand()
 		{}
 
-	/** \brief Initializes the class
+	/** \brief Initializes the skill list
 	*** \param skills A pointer to the set of skills that the class will
 	*** \param skill_list A pointer to the option box
 	**/
@@ -301,6 +301,76 @@ private:
 	//! \brief A pointer to the list of skills that the class should operate on
 	hoa_gui::OptionBox* _skill_list;
 }; // class SkillCommand
+
+
+/** ****************************************************************************
+*** \brief Manages the display of target information
+***
+*** This class is initialized by passing in a target type for the player's selected action.
+*** This determines the contents of what appears in the targeting GUI objects, and also determine
+*** how user input is processed. Specifically, an attack point target requires additional input for
+*** the command to be selected.
+*** ***************************************************************************/
+class TargetCommand {
+public:
+	//! \param window A reference to the MenuWindow that the GUI objects should be owned by
+	TargetCommand(hoa_gui::MenuWindow& window);
+
+	~TargetCommand()
+		{}
+
+	/** \brief Initializes the target list
+	*** \param target_type The type of target that the select skill selects
+	*** \param skill_list A pointer to the option box
+	**/
+	void Initialize(hoa_global::GLOBAL_TARGET target_type);
+
+	/** \brief Returns true if the selected target can be targeted
+	*** This function will return true if the selected target is enabled and false otherwise. A target
+	*** becomes disabled when the selected action no longer
+	**/
+	bool IsSelectedTargetEnabled();
+
+	/** \brief Should be called when an actor's targetable property is modified
+	*** \param actor A pointer to the actor who's targetable state has changed
+	***
+	*** This is normally called when an actor appears on the battle, is KOed, or is revived. This only
+	*** needs to be called when the TargetCommand window is initialized and active. Calling this may cause
+	*** the UpdateList to be refreshed or other changes to occur. It may result in no effect if the actor
+	*** does not correspond to the target type. For example, a character is KOed but the selected action targets enemies.
+	**/
+	void NotifyActorTargetableChange(private_battle::BattleActor* actor);
+
+	//! \brief Updates the target list selection and processes user input
+	void UpdateList();
+
+	//! \brief Processes user input when target detail information is displayed
+	void UpdateInformation();
+
+	//! \brief Draws the skill header and list
+	void DrawList();
+
+	//! \brief Draws detailed information about the selected target
+	void DrawInformation();
+
+private:
+	//! \brief The type of target that the select action takes effect on
+	hoa_global::GLOBAL_TARGET _target_type;
+
+	//! \brief A vector of the actors represented in the target list
+	std::vector<hoa_global::GlobalActor*> _actors;
+
+	//! \brief A single line of header text for the target window, contents vary depending on the target type
+	hoa_gui::OptionBox _target_header;
+
+	//! \brief A pointer to the list of targets and their properties that should appear
+	hoa_gui::OptionBox _target_list;
+
+	/** \brief A pointer to the list of target points for the player to select from
+	*** \note This member is only used when the selected action targets a specific point on the actor target
+	**/
+	hoa_gui::OptionBox _target_point_list;
+}; // class TargetCommand
 
 
 /** ****************************************************************************
@@ -436,10 +506,16 @@ private:
 	// ---------- Private methods
 
 	//! \brief Returns true if the selected action category is a skill action
-	bool _IsSkillCategorySelected() const;
+	bool _IsSkillCategorySelected() const
+		{ if (_category_options.GetSelection() == CATEGORY_SKILL) return true; else return false; }
 
 	//! \brief Returns true if the selected action category is an item action
-	bool _IsItemCategorySelected() const;
+	bool _IsItemCategorySelected() const
+		{ if (_category_options.GetSelection() == CATEGORY_ITEM) return true; else return false; }
+
+	//! \brief Returns true if the selected action category is a recover action
+	bool _IsRecoverCategorySelected() const
+		{ if (_category_options.GetSelection() == CATEGORY_RECOVER) return true; else return false; }
 
 	//! \brief Returns the type of target for the selected action
 	hoa_global::GLOBAL_TARGET _ActionTargetType();

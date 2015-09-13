@@ -495,7 +495,7 @@ void SkillCommand::UpdateList() {
 
 
 void SkillCommand::UpdateInformation() {
-
+	// TODO: display information about the selected skill
 }
 
 
@@ -506,6 +506,86 @@ void SkillCommand::DrawList() {
 
 	_skill_header.Draw();
 	_skill_list->Draw();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// TargetCommand class
+////////////////////////////////////////////////////////////////////////////////
+
+TargetCommand::TargetCommand(MenuWindow& window) :
+	_target_type(GLOBAL_TARGET_INVALID)
+{
+	_target_header.SetOwner(&window);
+	_target_header.SetPosition(HEADER_POSITION_X, HEADER_POSITION_Y);
+	_target_header.SetDimensions(HEADER_SIZE_X, HEADER_SIZE_Y, 1, 1, 1, 1);
+	_target_header.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_target_header.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_target_header.SetTextStyle(TextStyle("title22"));
+	_target_header.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	_target_header.AddOption(UTranslate("Select Target"));
+
+	_target_list.SetOwner(&window);
+	_target_list.SetPosition(LIST_POSITION_X, LIST_POSITION_Y);
+	_target_list.SetDimensions(LIST_SIZE_X, LIST_SIZE_Y, 1, 255, 1, 4);
+	_target_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_target_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_target_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_target_list.SetTextStyle(TextStyle("text20"));
+	_target_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	_target_list.SetCursorOffset(-50.0f, 25.0f);
+
+	_target_point_list.SetOwner(&window);
+	_target_point_list.SetPosition(LIST_POSITION_X, LIST_POSITION_Y);
+	_target_point_list.SetDimensions(LIST_SIZE_X, LIST_SIZE_Y, 1, 255, 1, 4);
+	_target_point_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_target_point_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_target_point_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_target_point_list.SetTextStyle(TextStyle("text20"));
+	_target_point_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	_target_point_list.SetCursorOffset(-50.0f, 25.0f);
+}
+
+
+
+void TargetCommand::Initialize(hoa_global::GLOBAL_TARGET target_type) {
+	// TODO
+}
+
+
+
+bool TargetCommand::IsSelectedTargetEnabled() {
+	// TODO
+	return true;
+}
+
+
+
+void TargetCommand::NotifyActorTargetableChange(BattleActor* actor) {
+	// TODO
+}
+
+
+
+void TargetCommand::UpdateList() {
+	// TODO
+}
+
+
+
+void TargetCommand::UpdateInformation() {
+	// TODO
+}
+
+
+
+void TargetCommand::DrawList() {
+	// TODO
+}
+
+
+
+void TargetCommand::DrawInformation() {
+	// TODO
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -528,7 +608,6 @@ CommandSupervisor::CommandSupervisor() :
 	_command_window.Show();
 
 	vector<ustring> option_text;
-	option_text.push_back(UTranslate("Recent"));
 	option_text.push_back(UTranslate("Skills"));
 	option_text.push_back(UTranslate("Item"));
 	option_text.push_back(UTranslate("Recover"));
@@ -593,23 +672,15 @@ void CommandSupervisor::Initialize(BattleCharacter* character) {
 	_category_options.SetSelection(_active_settings->GetLastCategory());
 
 	// Determine which categories should be enabled or disabled
-	_category_options.EnableOption(0, false); // TODO: "Recent" action is always disabled because this feature has not been implemented yet
 	if (_active_settings->GetSkillList()->GetNumberOptions() == 0)
-		_category_options.EnableOption(1, false);
+		_category_options.EnableOption(CATEGORY_SKILL, false);
 	else
-		_category_options.EnableOption(1, true);
+		_category_options.EnableOption(CATEGORY_SKILL, true);
 	if (_item_command.GetNumberListOptions() == 0)
-		_category_options.EnableOption(2, false);
+		_category_options.EnableOption(CATEGORY_ITEM, false);
 	else
-		_category_options.EnableOption(2, true);
-	_category_options.EnableOption(3, false); // TODO: "Recover" action is always disabled because this feature has not been implemented yet
-
-	// Warn if there are no enabled options in the category list
-	for (uint32 i = 0; i < _category_options.GetNumberOptions(); i++) {
-		if (_category_options.IsOptionEnabled(i) == true)
-			return;
-	}
-	IF_PRINT_WARNING(BATTLE_DEBUG) << "no options in category list were enabled" << endl;
+		_category_options.EnableOption(CATEGORY_ITEM, true);
+	_category_options.EnableOption(CATEGORY_RECOVER, true);
 }
 
 
@@ -681,26 +752,6 @@ void CommandSupervisor::NotifyActorDeath(BattleActor* actor) {
 
 	// TODO: update the selected target if the target is the actor who just deceased
 	// if (_selected_target.GetActor() == actor)
-}
-
-
-
-bool CommandSupervisor::_IsSkillCategorySelected() const {
-	uint32 category = _category_options.GetSelection();
-	if (category == CATEGORY_SKILL)
-		return true;
-	else
-		return false;
-}
-
-
-
-bool CommandSupervisor::_IsItemCategorySelected() const {
-	uint32 category = _category_options.GetSelection();
-	if (category == CATEGORY_ITEM)
-		return true;
-	else
-		return false;
 }
 
 
@@ -785,12 +836,9 @@ void CommandSupervisor::_ChangeState(COMMAND_STATE new_state) {
 		// Nothing to do here. The Initialize() function performs all necessary actions when entering this state.
 	}
 	else if (new_state == COMMAND_STATE_ACTION) {
-		// Construct the appropriate skill or item selection list if we're coming from the category state
+		// Construct the appropriate skill or item selection list if we're coming from the action category state
 		if (_state == COMMAND_STATE_CATEGORY) {
 			switch (_category_options.GetSelection()) {
-				case CATEGORY_RECENT:
-					// TODO: waiting for the recent actions feature to be implemented
-					break;
 				case CATEGORY_SKILL:
 					_skill_command.Initialize(GetCommandCharacter()->GetGlobalCharacter()->GetSkills(), _active_settings->GetSkillList());
 					break;
@@ -798,7 +846,8 @@ void CommandSupervisor::_ChangeState(COMMAND_STATE new_state) {
 					_item_command.Initialize(_active_settings->GetLastItem());
 					break;
 				case CATEGORY_RECOVER:
-					// TODO: implement recover feature
+					// When the Recover action category is selection, there's nothing further to do but finish the menu
+					_FinalizeCommand();
 					break;
 				default:
 					IF_PRINT_WARNING(BATTLE_DEBUG) << "invalid category selection: " << _category_options.GetSelection() << endl;
@@ -1174,12 +1223,16 @@ void CommandSupervisor::_FinalizeCommand() {
 	BattleCharacter* character = GetCommandCharacter();
 
 	_active_settings->SaveLastTarget(_selected_target);
-
 	if (_IsSkillCategorySelected() == true) {
 		new_action = new SkillAction(character, _selected_target, _selected_skill);
 	}
 	else if (_IsItemCategorySelected() == true) {
 		new_action = new ItemAction(character, _selected_target, _selected_item);
+	}
+	else if (_IsRecoverCategorySelected() == true) {
+		_selected_target.InvalidateTarget();
+		_selected_target.SetActorTarget(GLOBAL_TARGET_SELF, character);
+		new_action = new RecoverAction(character, _selected_target);
 	}
 	else {
 		IF_PRINT_WARNING(BATTLE_DEBUG) << "did not create action for character, unknown category selected: " << _category_options.GetSelection() << endl;
