@@ -165,6 +165,33 @@ private:
 	BattleItem* _item;
 }; // class ItemAction : public BattleAction
 
+
+/** ****************************************************************************
+*** \brief A battle action used by characters to essentially take no action during the turn
+***
+*** The recover action consumes no items or SP and increases the amount of SP that is
+*** regenerated during the turn. It is a unique action in that no skill is executed
+*** when the recover action takes place and the target has no meaning.
+*** ***************************************************************************/
+class RecoverAction : public BattleAction {
+public:
+	RecoverAction(BattleActor* source, BattleTarget target) :
+		BattleAction(source, target) {}
+
+	bool IsItemAction() const
+		{ return false; }
+
+	bool Execute();
+
+	hoa_utils::ustring GetName() const
+		{ return hoa_system::UTranslate("[Recover]"); }
+
+	uint32 GetWarmUpTime() const
+		{ return RECOVER_WARM_UP_TIME; }
+
+private:
+}; // class ItemAction : public BattleAction
+
 } // namespace private_battle
 
 } // namespace hoa_battle

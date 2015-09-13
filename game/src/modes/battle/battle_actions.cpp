@@ -205,6 +205,16 @@ ustring ItemAction::GetName() const {
 		return (UTranslate("Use: ") + (_item->GetItem()).GetName());
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// RecoverAction class
+////////////////////////////////////////////////////////////////////////////////
+
+bool RecoverAction::Execute() {
+	uint32 sp_regeneration = 2 * (_actor->GetActiveMaxSkillPoints() / CHARACTER_SP_REGENERATION_RATE);
+	_actor->AddSkillPoints(sp_regeneration);
+	return true;
+}
+
 } // namespace private_battle
 
 } // namespace hoa_battle

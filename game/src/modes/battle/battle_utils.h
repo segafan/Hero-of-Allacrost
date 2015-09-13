@@ -44,12 +44,12 @@ const uint32 SCREEN_HEIGHT = 12;
 
 /** \name Action Type Constants
 *** \brief Identifications for the types of actions a player's characters may perform
+*** \note These are not enums because they have to map to selection indexes within a GUI OptionBox
 **/
 //@{
-const uint32 CATEGORY_RECENT    = 0;
-const uint32 CATEGORY_SKILL     = 1;
-const uint32 CATEGORY_ITEM      = 2;
-const uint32 CATEGORY_RECOVER   = 3;
+const uint32 CATEGORY_SKILL     = 0;
+const uint32 CATEGORY_ITEM      = 1;
+const uint32 CATEGORY_RECOVER   = 2;
 //@}
 
 
@@ -76,6 +76,9 @@ const uint32 MIN_IDLE_WAIT_TIME = 7500;
 
 //! \brief Warm up time for using items (try to keep short, should be constant regardless of item used)
 const uint32 ITEM_WARM_UP_TIME = 1000;
+
+//! \brief Warm up time for selecting the "Recover" action for a character
+const uint32 RECOVER_WARM_UP_TIME = 1000;
 
 //! \brief The amount of time to take while transitioning between sprite frames for an enemy
 const uint32 ENEMY_SPRITE_TRANISITION_TIME = 1000;
