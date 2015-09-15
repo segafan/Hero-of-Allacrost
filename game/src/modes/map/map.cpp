@@ -134,8 +134,6 @@ MapMode::MapMode(string script_filename) :
 
 	// Load miscellaneous map graphics
 	vector<uint32> timings(16, 100); // holds the timing data for the new dialogue animation; 16 frames at 100ms each
-	// TODO: possible bug here. The icon is 32x32 pixels and is drawn in the coordinate system where one unit is 16px. However, the icon
-	// seems to be drawing as if it were 2x2 inside a 1024x768 coordinate system. Figure out if this should really be 2x2 or 32x32 dimensions
 	_dialogue_icon.SetDimensions(2.0f, 2.0f);
 	if (_dialogue_icon.LoadFromFrameSize("img/misc/dialogue_icon.png", timings, 32, 32) == false)
 		IF_PRINT_WARNING(MAP_DEBUG) << "failed to load the new dialogue icon image" << endl;
