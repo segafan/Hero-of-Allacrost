@@ -660,7 +660,7 @@ void VideoEngine::PopState() {
 	// Restore the coordinate_system, i.e. the GL_PROJECTION matrix
 	// NOTE: This will implicitely lead to _current_context.coordinate_system = _current_context.coordinate_system
 	// NOTE: Another option is to also push and pop the matrix of GL_PROJECTION. However, the maximum size of the
-	//       corresponding stack is only ensured to be 2. Therefore, for portrability the is not performed here.
+	//       corresponding stack is only ensured to be 2. Therefore, for portability reasons this is not done here.
 	SetCoordSys(_current_context.coordinate_system);
 
 	// Restore the modelview transformation
