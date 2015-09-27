@@ -282,7 +282,8 @@ BattleMode::BattleMode() :
 	_dialogue_supervisor(NULL),
 	_finish_supervisor(NULL),
 	_current_number_swaps(0),
-	_play_finish_music(true)
+	_play_finish_music(true),
+	_disable_battle_gui(false)
 {
 	IF_PRINT_DEBUG(BATTLE_DEBUG) << "constructor invoked" << endl;
 
@@ -382,7 +383,7 @@ void BattleMode::Update() {
 		}
 	}
 
-	// If the battle is transitioning to/from a different mode, the sequenece supervisor has control
+	// If the battle is transitioning to/from a different mode, the sequence supervisor has control
 	if (_state == BATTLE_STATE_INITIAL || _state == BATTLE_STATE_EXITING) {
 		_sequence_supervisor->Update();
 		return;
@@ -398,33 +399,36 @@ void BattleMode::Update() {
 		// for it (characters can only have commands selected during certain states). If command selection is permitted, then we begin
 		// the command supervisor.
 
+        if(_disable_battle_gui == false) {
+
 		if (InputManager->UpPress()) {
-			if  (_character_actors.size() >= 1) { // Should always evaluate to true
-				character_selection = _character_actors[0];
-			}
+		    if  (_character_actors.size() >= 1) { // Should always evaluate to true
+			character_selection = _character_actors[0];
+		    }
 		}
 
 		else if (InputManager->DownPress()) {
-			if  (_character_actors.size() >= 2) {
-				character_selection = _character_actors[1];
-			}
+		    if  (_character_actors.size() >= 2) {
+			character_selection = _character_actors[1];
+		    }
 		}
 
 		else if (InputManager->LeftPress()) {
-			if  (_character_actors.size() >= 3) {
-				character_selection = _character_actors[2];
-			}
+		    if  (_character_actors.size() >= 3) {
+			character_selection = _character_actors[2];
+		    }
 		}
 
 		else if (InputManager->RightPress()) {
-			if  (_character_actors.size() >= 4) {
-				character_selection = _character_actors[3];
-			}
+		    if  (_character_actors.size() >= 4) {
+			character_selection = _character_actors[3];
+		    }
 		}
 
 		if (character_selection != NULL) {
-			OpenCommandMenu(character_selection);
+		    OpenCommandMenu(character_selection);
 		}
+        }
 
 		// TODO: Determine whether we should play a sound if the player presses an invalid key and/or the selected character is not currently
 		// allowed to select a command.
@@ -432,6 +436,9 @@ void BattleMode::Update() {
 	// If the player is selecting a command for a character, the command supervisor has control
 	else if (_state == BATTLE_STATE_COMMAND) {
 		_command_supervisor->Update();
+	}
+	else if (_state == BATTLE_STATE_END) {
+                _sequence_supervisor->Update();
 	}
 	// If the battle is in either finish state, the finish supervisor has control
 	else if ((_state == private_battle::BATTLE_STATE_VICTORY) || (_state == private_battle::BATTLE_STATE_DEFEAT)) {
@@ -443,14 +450,20 @@ void BattleMode::Update() {
 	// command state to allow the player to enter a command for that character before resuming. We also want to make sure
 	// that the command menu is open whenever we find a character in the command state. If the command menu is not open, we
 	// forcibly open it and make the player choose a command for the character so that the battle may continue.
-	if (GlobalManager->GetBattleSetting() == GLOBAL_BATTLE_WAIT) {
-		for (uint32 i = 0; i < _character_actors.size(); i++) {
+	if(_disable_battle_gui == false) {
+
+		if (GlobalManager->GetBattleSetting() == GLOBAL_BATTLE_WAIT) {
+
+		    for (uint32 i = 0; i < _character_actors.size(); i++) {
+
 			if (_character_actors[i]->GetState() == ACTOR_STATE_COMMAND) {
-				if (_state != BATTLE_STATE_COMMAND) {
-					OpenCommandMenu(_character_actors[i]);
-				}
-				return;
+
+			    if (_state != BATTLE_STATE_COMMAND) {
+				OpenCommandMenu(_character_actors[i]);
+			    }
+			    return;
 			}
+		    }
 		}
 	}
 
@@ -626,6 +639,9 @@ void BattleMode::ChangeState(BATTLE_STATE new_state) {
 		case BATTLE_STATE_EVENT:
 			// TODO
 			break;
+                case BATTLE_STATE_END:
+                        _DisableBattleGUI();
+                        break;
 		case BATTLE_STATE_VICTORY:
 		        // Play victory music if required
 		        if (_play_finish_music) {
@@ -708,7 +724,7 @@ void BattleMode::NotifyCharacterCommandComplete(BattleCharacter* character) {
 	// Update the action text to reflect the action and target now set for the character
 	character->ChangeActionText();
 
-	// If the character was in the command state when it had its command set, the actor needs to move on the the warmup state to prepare to
+	// If the character was in the command state when it had its command set, the actor needs to move on the warmup state to prepare to
 	// execute the command. Otherwise if the character was in any other state (likely the idle state), the character should remain in that state.
 	if (character->GetState() == ACTOR_STATE_COMMAND) {
 		character->ChangeState(ACTOR_STATE_WARM_UP);
@@ -759,15 +775,9 @@ void BattleMode::NotifyActorDeath(BattleActor* actor) {
 
 	uint32 num_alive_characters = _NumberCharactersAlive();
 	uint32 num_alive_enemies = _NumberEnemiesAlive();
-	if ((num_alive_characters == 0) && (num_alive_enemies == 0)) {
-		IF_PRINT_WARNING(BATTLE_DEBUG) << "both parties were defeated; changing to defeat state" << endl;
-		ChangeState(BATTLE_STATE_DEFEAT);
-	}
-	else if (num_alive_characters == 0) {
-		ChangeState(BATTLE_STATE_DEFEAT);
-	}
-	else if (num_alive_enemies == 0) {
-		ChangeState(BATTLE_STATE_VICTORY);
+	// If either party is completely dead
+	if ((num_alive_characters == 0) || (num_alive_enemies == 0)) {
+		ChangeState(BATTLE_STATE_END);
 	}
 }
 
@@ -1055,7 +1065,7 @@ void BattleMode::_DrawSprites() {
 
 void BattleMode::_DrawGUI() {
 	_DrawBottomMenu();
-	_DrawStaminaBar();
+	_DrawActionBar();
 	_DrawIndicators();
 
 	if (_command_supervisor->GetState() != COMMAND_STATE_INVALID) {
@@ -1111,12 +1121,17 @@ void BattleMode::_DrawBottomMenu() {
 
 
 
-void BattleMode::_DrawStaminaBar() {
+void BattleMode::_DrawActionBar() {
 	bool draw_icon_selection = false; // Used to determine whether or not an icon selector graphic needs to be drawn
 	bool is_party_selected = false; // If true, an entire party of actors is selected
 	bool is_party_enemy = false; // If true, the selected party is the enemy party
 
 	BattleActor* selected_actor = NULL; // A pointer to the selected actor
+
+        // Freeze timers when battle gui is disabled
+	if(_disable_battle_gui) {
+		FreezeTimers();
+	}
 
 	// ----- (1): Determine if selector graphics should be drawn
 	if ((_state == BATTLE_STATE_COMMAND) && ((_command_supervisor->GetState() == COMMAND_STATE_ACTOR) || (_command_supervisor->GetState() == COMMAND_STATE_POINT))) {
@@ -1181,13 +1196,13 @@ void BattleMode::_DrawStaminaBar() {
 	// TODO: sort the draw positions container and correspond that to live_actors
 // 	sort(draw_positions.begin(), draw_positions.end());
 
-	// ----- (3): Draw the stamina bar
+	// ----- (3): Draw the action bar
 	const float STAMINA_BAR_POSITION_X = 970.0f, STAMINA_BAR_POSITION_Y = 128.0f; // The X and Y position of the stamina bar
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(STAMINA_BAR_POSITION_X, STAMINA_BAR_POSITION_Y); // 1010
 	_battle_media.stamina_meter.Draw();
 
-	// ----- 4): Draw all stamina icons in order along with the selector graphic
+	// ----- 4): Draw all action icons in order along with the selector graphic
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	for (uint32 i = 0; i < live_actors.size(); i++) {
 		if (live_actors[i]->IsEnemy() == false)
@@ -1219,6 +1234,10 @@ void BattleMode::_DrawIndicators() {
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		_enemy_actors[i]->DrawIndicators();
 	}
+}
+
+void BattleMode::_DisableBattleGUI() {
+	_disable_battle_gui = true;
 }
 
 } // namespace hoa_battle

@@ -484,6 +484,9 @@ public:
 	float GetSpriteHeight() const
 		{ return _global_enemy->GetBattleSpriteFrames()->at(0).GetHeight(); }
 
+        ENEMY_SPRITE_TYPE GetSpriteType()
+                { return _current_sprite; }
+
 	//! \note Enemies do not have animations so calling this function will achieve nothing
 	void ChangeSpriteAnimation(const std::string& alias)
 		{ return; }

@@ -730,23 +730,26 @@ void BattleCharacter::DrawStatus(uint32 order, bool command_active) {
 
 	// If this character can be issued a command, draw the appropriate command button to indicate this. The type of button drawn depends on
 	// whether or not the character already has an action set. Characters that can not be issued a command have no button drawn
-	if (CanSelectCommand() == true) {
-		uint32 button_index = 0;
-		if (IsActionSet() == false)
-			button_index = 1;
-		else
-			button_index = 6;
-		button_index += order;
-		BattleMode::CurrentInstance()->GetMedia().GetCharacterActionButton(button_index)->Draw();
+	// Only draw these elements if the battle gui has not been disabled
+	if (BattleMode::CurrentInstance()->IsBattleGUIDisabled() == false) {
+            if (CanSelectCommand() == true) {
+                uint32 button_index = 0;
+                if (IsActionSet() == false)
+                    button_index = 1;
+                else
+                    button_index = 6;
+                button_index += order;
+                BattleMode::CurrentInstance()->GetMedia().GetCharacterActionButton(button_index)->Draw();
+            }
+
+            // Draw the action text
+            VideoManager->MoveRelative(40.0f, 0.0f);
+            _action_selection_text.Draw();
+
+            // Draw the target text
+            VideoManager->MoveRelative(225.0f, 0.0f);
+            _target_selection_text.Draw();
 	}
-
-	// Draw the action text
-	VideoManager->MoveRelative(40.0f, 0.0f);
-	_action_selection_text.Draw();
-
-	// Draw the target text
-	VideoManager->MoveRelative(225.0f, 0.0f);
-	_target_selection_text.Draw();
 } // void BattleCharacter::DrawStatus()
 
 // /////////////////////////////////////////////////////////////////////////////

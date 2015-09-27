@@ -93,6 +93,9 @@ private:
 	//! \brief Updates state when the battle is in its exiting sequence
 	void _UpdateExitingSequence();
 
+        //! \brief Updates state when the battle is in its ending sequence
+        void _UpdateEndingSequence();
+
 	//! \brief Main draw function for the initial sequence
 	void _DrawInitialSequence();
 

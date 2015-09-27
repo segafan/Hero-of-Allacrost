@@ -74,6 +74,9 @@ void SequenceSupervisor::Update() {
 		case BATTLE_STATE_EXITING:
 			_UpdateExitingSequence();
 			break;
+                case BATTLE_STATE_END:
+                        _UpdateEndingSequence();
+                        break;
 		default:
 			IF_PRINT_WARNING(BATTLE_DEBUG) << "battle mode was not in a supported sequence state: " << _battle->_state << endl;
 			_battle->ChangeState(BATTLE_STATE_NORMAL);
@@ -267,6 +270,61 @@ void SequenceSupervisor::_UpdateExitingSequence() {
 		IF_PRINT_DEBUG(BATTLE_DEBUG) << "invalid sequence step counter: " << _sequence_step << endl;
 		_sequence_step = 0;
 	}
+}
+
+
+
+void SequenceSupervisor::_UpdateEndingSequence() {
+        // Conditions of battle
+        bool characters_done_acting = true, characters_done_dying = true, enemies_done_acting = true, enemies_done_dying = true;
+
+        // Iterate through every character and enemy to check if they are performing an action
+        // or are dying
+        for (uint32 i = 0; i < _battle->_character_actors.size(); i++) {
+
+            uint32 state = _battle->_character_actors[i]->GetState();
+
+            if(_battle->_character_actors[i]->GetState() == ACTOR_STATE_ACTING) {
+                characters_done_acting = false;
+            }
+            if(_battle->_character_actors[i]->IsAlive()) {
+                characters_done_dying = false;
+            }
+        }
+        for (uint32 i = 0; i < _battle->_enemy_actors.size(); i++) {
+            if(_battle->_enemy_actors[i]->GetState() == ACTOR_STATE_ACTING) {
+                enemies_done_acting = false;
+            }
+
+            ENEMY_SPRITE_TYPE type = _battle->_enemy_actors[i]->GetSpriteType();
+
+            if(_battle->_enemy_actors[i]->GetSpriteType() != ENEMY_SPRITE_0DEAD) {
+                enemies_done_dying = false;
+            }
+        }
+
+        // Evaluate battle conditions
+        bool won = characters_done_acting && enemies_done_dying;
+        bool lost = characters_done_dying && enemies_done_acting;
+
+        // Based on final battle condition transition to victory/defeat state
+        if(won || lost) {
+
+            uint32 num_alive_characters = _battle->_NumberCharactersAlive();
+            uint32 num_alive_enemies = _battle->_NumberEnemiesAlive();
+
+            if ((num_alive_characters == 0) && (num_alive_enemies == 0)) {
+
+                IF_PRINT_WARNING(BATTLE_DEBUG) << "both parties were defeated; changing to defeat state" << endl;
+                _battle->ChangeState(BATTLE_STATE_DEFEAT);
+            }
+            else if (num_alive_characters == 0) {
+                _battle->ChangeState(BATTLE_STATE_DEFEAT);
+            }
+            else if (num_alive_enemies == 0) {
+                _battle->ChangeState(BATTLE_STATE_VICTORY);
+            }
+        }
 }
 
 

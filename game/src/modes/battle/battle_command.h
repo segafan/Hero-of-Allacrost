@@ -412,7 +412,7 @@ public:
 
 	~CommandSupervisor();
 
-	/** \brief Builds all of the varous command menus and prepares them for use
+	/** \brief Builds all of the various command menus and prepares them for use
 	*** This should only be invoked once after the BattleMode class has initialized all of its
 	*** character actors. It will create a command menu for the list of usable items as well as
 	*** the various skill menus for each character in the party.

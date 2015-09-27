@@ -304,6 +304,9 @@ public:
 	bool IsBattleFinished() const
 		 { return ((_state == private_battle::BATTLE_STATE_VICTORY) || (_state == private_battle::BATTLE_STATE_DEFEAT)); }
 
+    bool IsBattleGUIDisabled() const
+        { return _disable_battle_gui; }
+
         //! \brief Sets whether or not to play the victory/defeat music when a battle is concluded.
         //! \param to_play the victory/defeat music or not
         void SetPlayFinishMusic(bool to_play);
@@ -460,9 +463,12 @@ private:
 	uint8 _current_number_swaps;
 
         //! \brief Whether or not to play the victory/defeat music when a battle is concluded.
-        //! \return True if victory/defeat music is to be played.
+        //! \return True if victory/defeat music is to be p7layed.
         bool _play_finish_music;
 
+        //! \brief Whether or not to disable the input gui.
+        //! \return True if input gui is to be disabled.
+        bool _disable_battle_gui;
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
 
 	//! \brief Initializes all data necessary for the battle to begin
@@ -516,10 +522,13 @@ private:
 	void _DrawBottomMenu();
 
 	//! \brief Draws the stamina bar and the icons of the actors of both parties
-	void _DrawStaminaBar();
+	void _DrawActionBar();
 
 	//! \brief Draws indicator text and graphics for each actor on the field
 	void _DrawIndicators();
+
+        //! \brief Disables the battle graphical user interface (battle command menu)
+	void _DisableBattleGUI();
 	//@}
 }; // class BattleMode : public hoa_mode_manager::GameMode
 
