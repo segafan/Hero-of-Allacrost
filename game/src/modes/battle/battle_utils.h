@@ -91,10 +91,11 @@ enum BATTLE_STATE {
 	BATTLE_STATE_NORMAL    =  1, //!< Normal state where player is watching actions play out and waiting for a turn
 	BATTLE_STATE_COMMAND   =  2, //!< Player is choosing a command for a character
 	BATTLE_STATE_EVENT     =  3, //!< A scripted event is taking place, suspending all standard action
-	BATTLE_STATE_VICTORY   =  4, //!< Battle has ended with the characters victorious
-	BATTLE_STATE_DEFEAT    =  5, //!< Battle has ended with the characters defeated
-	BATTLE_STATE_EXITING   =  6, //!< Player has closed battle windows and battle mode is fading out
-	BATTLE_STATE_TOTAL     =  7
+        BATTLE_STATE_END       =  4, //!< Battle has ended, final actions and deaths are being played out
+	BATTLE_STATE_VICTORY   =  5, //!< Battle has ended with the characters victorious
+	BATTLE_STATE_DEFEAT    =  6, //!< Battle has ended with the characters defeated
+	BATTLE_STATE_EXITING   =  7, //!< Player has closed battle windows and battle mode is fading out
+	BATTLE_STATE_TOTAL     =  8
 };
 
 
@@ -112,7 +113,7 @@ enum ACTOR_STATE {
 };
 
 
-//! \brief Used for determing the proper sprite frame to draw for an enemy baed on the degree of damage that an enemy has taken, broken up into percentiles of 25%.
+//! \brief Used for determining the proper sprite frame to draw for an enemy baed on the degree of damage that an enemy has taken, broken up into percentiles of 25%.
 enum ENEMY_SPRITE_TYPE {
 	ENEMY_SPRITE_INVALID  = -1,
 	ENEMY_SPRITE_OVER75   =  0, //!< Enemy has between 100% and 75% health
@@ -596,7 +597,7 @@ public:
 	***
 	*** Party type targets will return "All Allies" or "All Enemies". Actor type targets return the name of the character or
 	*** enemy, for example "Claudius" or "Red Spider" . Attack point type targets return the name of the character or enemy
-	*** seperated by a hyphen and followed by the point name, for example "Bat â€” Wing". Invalid targets will return "[Invalid Target]".
+	*** seperated by a hyphen and followed by the point name, for example "Bat — Wing". Invalid targets will return "[Invalid Target]".
 	**/
 	hoa_utils::ustring GetName();
 
